@@ -466,7 +466,7 @@ class CommentController extends KleinController
             ]
         ]);
 
-        $queueHandler = new AMQHandler();
+        $queueHandler = $this->getQueueHandler();
         $queueHandler->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message));
     }
 
@@ -541,8 +541,20 @@ class CommentController extends KleinController
             ]
         ]);
 
-        $queueHandler = new AMQHandler();
+        $queueHandler = $this->getQueueHandler();
         $queueHandler->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message));
+    }
+
+    /**
+     * Test seam: allows a Testable subclass to inject a queue handler backed by a
+     * stubbed transport, avoiding a real broker connection in unit tests.
+     *
+     * @return AMQHandler
+     * @throws \Stomp\Exception\ConnectionException
+     */
+    protected function getQueueHandler(): AMQHandler
+    {
+        return new AMQHandler();
     }
 
     /**

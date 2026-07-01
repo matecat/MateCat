@@ -32,7 +32,10 @@ class HeartBeat extends KleinController
     public function ping(): void
     {
         $this->getDatabase()->ping();
-        if (!touch(AppConfig::$ROOT . DIRECTORY_SEPARATOR . "touch")) {
+        $touchFile = AppConfig::$ROOT . DIRECTORY_SEPARATOR . "touch";
+        // Guard the directory before touch() so an unavailable storage path is reported as a
+        // RuntimeException rather than leaking a "No such file or directory" PHP warning.
+        if (!is_dir(AppConfig::$ROOT) || !is_writable(AppConfig::$ROOT) || !touch($touchFile)) {
             throw new RuntimeException("Storage unavailable.");
         }
 
