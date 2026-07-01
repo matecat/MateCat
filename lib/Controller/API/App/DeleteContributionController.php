@@ -109,11 +109,9 @@ class DeleteContributionController extends KleinController
             }
         }
 
-        $set_successful = true;
-        if (array_search(false, $set_code, true)) {
-            //There's an errors
-            $set_successful = false;
-        }
+        // in_array() (not array_search()) so a failed delete at index 0 is not
+        // mistaken for "not found": array_search returns the falsy index 0.
+        $set_successful = !in_array(false, $set_code, true);
 
         $this->response->json([
             'data' => ($set_successful ? "OK" : null),

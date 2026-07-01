@@ -569,13 +569,13 @@ class DeleteContributionControllerTest extends AbstractTest
 
         $testable->delete();
 
-        //NOTE: with a single tm_key, array_search(false, [false], true) returns index 0,
-        //which is falsy in the `if (array_search(...))` check at
-        //DeleteContributionController::delete() -> $set_successful stays true.
-        //This documents the actual (pre-existing) production behaviour.
+        //A single tm_key whose delete fails must report failure. This is the
+        //regression guard for the array_search->in_array fix: array_search(false,
+        //[false], true) returned the falsy index 0, so a first-key failure was
+        //wrongly reported as success. With in_array() the failure is detected.
         $this->assertIsArray($capturedPayload);
-        $this->assertTrue($capturedPayload['code']);
-        $this->assertSame('OK', $capturedPayload['data']);
+        $this->assertFalse($capturedPayload['code']);
+        $this->assertNull($capturedPayload['data']);
     }
 
     #[Test]
