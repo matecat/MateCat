@@ -9,7 +9,7 @@ const RevisionFeedback = ({qualitySummary}) => {
           <h3>
             <div
               className={
-                'ui revision-color empty circular label revision-' +
+                'color-dot revision-color revision-' +
                 qualitySummary.get('revision_number')
               }
             />

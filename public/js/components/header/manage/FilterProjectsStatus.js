@@ -5,7 +5,7 @@ import {
   DROPDOWN_MENU_ALIGN,
 } from '../../common/DropdownMenu/DropdownMenu'
 import {BUTTON_MODE, BUTTON_SIZE} from '../../common/Button/Button'
-import IconFilter from '../../icons/IconFilter'
+import IconFilter from '../../../../img/icons/IconFilter'
 
 const STATES = [
   {label: 'Active', value: 'active'},

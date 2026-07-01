@@ -68,7 +68,7 @@ const OutsourceInfo = () => {
               <div>
                 <div className="customer-photo">
                   <img
-                    className="ui circular image"
+
                     src="../../public/img/outsource-clients/testimonial-sandra-alonso.jpg"
                   />
                 </div>
@@ -90,7 +90,7 @@ const OutsourceInfo = () => {
               <div>
                 <div className="customer-photo">
                   <img
-                    className="ui circular image"
+
                     src="../../public/img/outsource-clients/testimonial-kennet.jpg"
                   />
                 </div>
@@ -112,7 +112,7 @@ const OutsourceInfo = () => {
               <div>
                 <div className="customer-photo">
                   <img
-                    className="ui circular image"
+
                     src="../../public/img/outsource-clients/testimonial-bruno-spagna.jpg"
                   />
                 </div>
@@ -133,7 +133,7 @@ const OutsourceInfo = () => {
               <div>
                 <div className="customer-photo">
                   <img
-                    className="ui circular image"
+
                     src="../../public/img/outsource-clients/testimonial-roberto-coppola.jpg"
                   />
                 </div>

@@ -4,7 +4,7 @@ import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
 import SegmentActions from '../../../../actions/SegmentActions'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 import CommonUtils from '../../../../utils/commonUtils'
-import Feedback from '../../../icons/Feedback'
+import Feedback from '../../../../../img/icons/Feedback'
 
 export const AiFeedback = ({sid, segment, isIconsBundled}) => {
   const {userInfo} = useContext(ApplicationWrapperContext)

@@ -9,7 +9,7 @@ import {
   BUTTON_TYPE,
 } from '../../../../common/Button/Button'
 import ExternalLink from '../../../../../../img/icons/ExternalLink'
-import IconClose from '../../../../icons/IconClose'
+import IconClose from '../../../../../../img/icons/IconClose'
 import Checkmark from '../../../../../../img/icons/Checkmark'
 
 export const Lara = ({

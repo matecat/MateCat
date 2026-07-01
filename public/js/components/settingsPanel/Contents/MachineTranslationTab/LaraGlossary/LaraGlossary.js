@@ -8,7 +8,7 @@ import React, {
 import PropTypes from 'prop-types'
 import {SettingsPanelTable} from '../../../SettingsPanelTable'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
-import IconAdd from '../../../../icons/IconAdd'
+import IconAdd from '../../../../../../img/icons/IconAdd'
 import {LaraGlossaryRow} from './LaraGlossaryRow'
 import {getLaraGlossaries} from '../../../../../api/getLaraGlossaries/getLaraGlossaries'
 import CatToolStore from '../../../../../stores/CatToolStore'

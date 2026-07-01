@@ -15,12 +15,12 @@ import {
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 import {Select} from '../../../common/Select'
 import {InputPercentage} from './InputPercentage'
-import IconClose from '../../../icons/IconClose'
+import IconClose from '../../../../../img/icons/IconClose'
 import Checkmark from '../../../../../img/icons/Checkmark'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {cloneDeep, isEqual} from 'lodash'
 import {v4 as uuidV4} from 'uuid'
-import IconAdd from '../../../icons/IconAdd'
+import IconAdd from '../../../../../img/icons/IconAdd'
 
 export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
   const {analysisTemplates} = useContext(SettingsPanelContext)

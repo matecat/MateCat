@@ -695,10 +695,6 @@ header .nav-bar .dropdown.select-org span.text {
   line-height: 32px;
 }
 
-.ui.user.label {
-  top: 0px !important;
-}
-
 .translate-box input:focus {
   border-color: colors.$blue300;
   background: colors.$white;
@@ -713,13 +709,6 @@ select:focus {
   outline: none;
 }
 
-.ui.selection.dropdown {
-  box-shadow: inset 0 1px 3px colors.$grey200;
-}
-
-.ui.input input {
-  box-shadow: inset 0 1px 3px colors.$grey200;
-}
 /* Header restyling */
 
 .action-submenu {

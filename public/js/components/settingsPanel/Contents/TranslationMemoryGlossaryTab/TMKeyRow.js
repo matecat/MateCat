@@ -33,7 +33,7 @@ import {deleteTmKey} from '../../../../api/deleteTmKey'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
 import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
-import IconClose from '../../../icons/IconClose'
+import IconClose from '../../../../../img/icons/IconClose'
 import {getTmKeyEnginesInfo} from '../../../../api/getTmKeyEnginesInfo/getTmKeyEnginesInfo'
 import Globe from '../../../../../img/icons/Globe'
 import {

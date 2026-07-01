@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import Icon3Dots from '../icons/Icon3Dots'
+import Icon3Dots from '../../../img/icons/Icon3Dots'
 import {exportQualityReport} from '../../api/exportQualityReport'
 import CatToolActions from '../../actions/CatToolActions'
 import ShortCutsModal from '../modals/ShortCutsModal'

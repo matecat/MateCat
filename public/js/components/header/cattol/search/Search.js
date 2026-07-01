@@ -652,12 +652,12 @@ class Search extends React.Component {
       (this.state.search.selectStatus !== '' &&
         this.state.search.selectStatus !== 'all')
     return this.props.active ? (
-      <div className="ui form">
+      <div className="search-form">
         <div className="find-wrapper">
           <div className="find-container">
             <div className="find-container-inside">
               <div className="find-list">
-                <div className="find-element ui input">
+                <div className="find-element">
                   <div className="find-in-source">
                     <input
                       type="text"
@@ -702,7 +702,7 @@ class Search extends React.Component {
                   </div>
                 </div>
                 <div className="find-element-container">
-                  <div className="find-element ui input">
+                  <div className="find-element">
                     <div className="find-in-target">
                       <input
                         ref={(ref) => (this.targetInput = ref)}
@@ -744,7 +744,7 @@ class Search extends React.Component {
                   </div>
                   {this.state.showReplaceOptionsInSearch &&
                   this.state.search.enableReplace ? (
-                    <div className="find-element ui input">
+                    <div className="find-element">
                       <div className="find-in-replace">
                         <input
                           type="text"

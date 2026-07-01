@@ -37,20 +37,6 @@ section.readonly .issues-container {
   width: 50%;
 }
 
-.editor.loaded .issues-container .border-box-issue .creation-issue-container .field .ui.dropdown {
-  border: 1px solid colors.$grey400;
-  border-radius: 2px !important;
-}
-
-.editor.loaded .issues-container .border-box-issue .creation-issue-container .field .ui.dropdown:hover {
-  border: 1px solid colors.$grey300;
-}
-
-.editor.loaded .issues-container .border-box-issue .creation-issue-container .field .ui.dropdown .text {
-  background: none;
-  font-weight: 700;
-}
-
 .editor.loaded .issues-container .border-box-issue .creation-issue-container .select-category .category {
   padding: 8px 15px 4px 17px;
 }

@@ -8,7 +8,7 @@ import moment from 'moment'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import classNames from 'classnames'
-import IconEdit from '../icons/IconEdit'
+import IconEdit from '../../../img/icons/IconEdit'
 import ReviewExtendedIssuePanel from './ReviewExtendedIssuePanel'
 import Trash from '../../../img/icons/Trash'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
@@ -274,7 +274,7 @@ export const ReviewExtendedIssue = ({
       <div className="comments-view shadow-1">
         {renderHtmlCommentLines}
         <div className="re-add-comment">
-          <form className="ui form" onSubmit={addComment}>
+          <form onSubmit={addComment}>
             <div className="field">
               <input
                 className="re-comment-input"

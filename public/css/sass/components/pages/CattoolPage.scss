@@ -1,11 +1,9 @@
 @use '../../common-main';
-@use '../../commons/icons';
-@use '../../commons/buttons';
 @use '../../commons/aria-label-tooltip';
 @use "../../common";
 @use '../../style';
 @use '../../commons/progress-mc-bar';
-@use '../../mbc-style';
+@use '../segment/SegmentComments';
 @use '../../lexiqa';
 @use '../segment/SegmentFooterTabMessages';
 @use '../header/segmentsFilter';

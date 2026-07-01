@@ -837,11 +837,6 @@ section.loaded .submenu {
     margin-left: 4px;
   }
 
-  .icon-close {
-    display: block;
-    height: 15px;
-    color: colors.$grey500;
-  }
 }
 
 .submenu li.active a {
@@ -1008,7 +1003,7 @@ section.loaded .submenu {
   background: colors.$white;
 }
 
-.loader:not(.ui) {
+.loader {
   width: 20px;
   height: 20px;
   background: url(/public/img/loading.gif) 0 0 no-repeat !important;
@@ -1199,15 +1194,6 @@ body section:not(.editor).ice-locked {
   margin-bottom: 5px;
   top: 2px;
   outline: none;
-}
-button.icon-lock.unlock-button.locked:before {
-  position: relative;
-  left: 3px;
-}
-
-button.unlock-button.unlocked.icon-unlocked3:before {
-  left: 2px;
-  position: relative;
 }
 
 section:hover .ice-locked-icon > button {
@@ -1932,10 +1918,6 @@ del.diff {
   height: 25px;
 }
 
-.split .icon-split:before {
-  position: relative;
-  top: 3px;
-}
 
 .sid .actions.disabled .split {
   cursor: no-drop !important;
@@ -2260,11 +2242,6 @@ section .segment-side-buttons {
   right: 6px;
   font-size: 0.8rem;
   color: colors.$grey400;
-}
-
-.ui.user.label {
-  margin-right: 13px;
-  /*top: 5px;*/
 }
 
 /*Editor Toggle*/

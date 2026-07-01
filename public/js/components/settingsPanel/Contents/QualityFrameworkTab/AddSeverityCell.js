@@ -1,7 +1,7 @@
 import React, {useContext} from 'react'
 import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
 import PropTypes from 'prop-types'
-import IconAdd from '../../../icons/IconAdd'
+import IconAdd from '../../../../../img/icons/IconAdd'
 import {QualityFrameworkTabContext} from './QualityFrameworkTabContext'
 
 export const AddSeverityCell = ({idCategory, severityColumn}) => {

@@ -3,7 +3,7 @@ import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
 import SegmentActions from '../../../../actions/SegmentActions'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 import CommonUtils from '../../../../utils/commonUtils'
-import Alternatives from '../../../icons/Alternatives'
+import Alternatives from '../../../../../img/icons/Alternatives'
 import {getSelectedTextWithTags} from '../../utils/DraftMatecatUtils/getSelectedTextWithTags'
 import PropTypes from 'prop-types'
 

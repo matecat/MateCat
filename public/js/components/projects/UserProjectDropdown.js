@@ -1,12 +1,13 @@
 import React, {useCallback, useContext, useState} from 'react'
 import PropTypes from 'prop-types'
 import {BUTTON_SIZE, BUTTON_TYPE, Button} from '../common/Button/Button'
-import IconAdd from '../icons/IconAdd'
+import IconAdd from '../../../img/icons/IconAdd'
 import CommonUtils from '../../utils/commonUtils'
 import {INPUT_SIZE, Input} from '../common/Input/Input'
-import IconSearch from '../icons/IconSearch'
+import IconSearch from '../../../img/icons/IconSearch'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
-import IconClose from '../icons/IconClose'
+import IconClose from '../../../img/icons/IconClose'
+import IconUser from '../../../img/icons/IconUser'
 import * as Popover from '@radix-ui/react-popover'
 
 export const UserProjectDropdown = ({
@@ -92,7 +93,7 @@ export const UserProjectDropdown = ({
           ) : (
             <>
               <span>
-                <i className="icon-user22" />
+                <IconUser />
                 Not assignee
               </span>
             </>

@@ -28,6 +28,7 @@ import CommentsStore from '../../stores/CommentsStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import ContextPreviewChannel from '../../utils/contextPreviewChannel'
+import IconSplit from '../../../img/icons/IconSplit'
 
 const ROW_MARGIN = 3
 const ROW_HEIGHT = 90
@@ -940,7 +941,7 @@ const getSegmentStructure = (segment, sideOpen) => {
         </div>
         <div className="actions">
           <button className="split" title="Click to split segment">
-            <i className="icon-split"> </i>
+            <IconSplit />
           </button>
           <p className="split-shortcut">CTRL + S</p>
         </div>

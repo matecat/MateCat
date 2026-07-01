@@ -1,7 +1,7 @@
 import React, {useRef} from 'react'
 import {Badge, BADGE_TYPE} from '../common/Badge'
-import EyeOn from '../icons/EyeOn'
-import EyeOff from '../icons/EyeOff'
+import EyeOn from '../../../img/icons/EyeOn'
+import EyeOff from '../../../img/icons/EyeOff'
 import {BUTTON_SIZE, Button} from '../common/Button/Button'
 const SegmentQRLine = ({
   showSuggestionSource = false,

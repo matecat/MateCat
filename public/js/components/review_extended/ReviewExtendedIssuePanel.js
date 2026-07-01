@@ -373,7 +373,7 @@ class ReviewExtendedIssuePanel extends React.Component {
     return (
       <div className="re-issues-box re-to-create">
         {/*<h4 className="re-issues-box-title">Error list</h4>*/}
-        {/*<div className="mbc-triangle mbc-triangle-topleft"></div>*/}
+        {/*<div className="comment-triangle comment-triangle-topleft"></div>*/}
         <div
           className="re-list errors"
           id={'re-category-list-' + this.context.segment.sid}

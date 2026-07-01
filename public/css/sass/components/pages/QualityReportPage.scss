@@ -1,9 +1,7 @@
 @use '../../common-main';
-@use '../../commons/icons';
 @use '../../commons/shadows';
 @use '../../commons/divider';
 @use '../../commons/progress-mc-bar';
-@use '../../commons/buttons';
 @use '../signin/OnBoarding';
 @use '../../common';
 @use '../segment/tagsMenu';
@@ -125,10 +123,6 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
   top: -2px;
 }
 
-header .nav-bar .header-project-container-info .header-project-info .header-team-assignee-icon .ui.top.right.pointing.dropdown > .menu {
-  margin: 7px -4px 0 0px !important;
-}
-
 .qr-wrapper {
   width: 100%;
   height: calc(100% - 60px);
@@ -155,18 +149,6 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
   position: absolute;
   width: 100%;
   z-index: -1;
-}
-
-.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .ui.table thead th {
-  background: colors.$white;
-  border: none;
-  border-bottom: 1px solid colors.$grey50;
-  border-radius: 0;
-}
-
-.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .ui.celled.table tr th, .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .ui.celled.table tr td {
-  border-left: 1px solid colors.$grey50;
-  border-radius: 0;
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container {
@@ -485,17 +467,17 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
   background: colors.$grey150;
 }
 
-.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-feedback-container .qr-feedback .qr-head .label.revision-color {
+.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-feedback-container .qr-feedback .qr-head .color-dot.revision-color {
   float: left;
   margin-right: 10px;
   margin-top: 5px;
 }
 
-.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-feedback-container .qr-feedback .qr-head .label.revision-color.revision-1 {
+.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-feedback-container .qr-feedback .qr-head .color-dot.revision-color.revision-1 {
   background: colors.$green800;
 }
 
-.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-feedback-container .qr-feedback .qr-head .label.revision-color.revision-2 {
+.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-feedback-container .qr-feedback .qr-head .color-dot.revision-color.revision-2 {
   background: colors.$purple500;
 }
 
@@ -1009,34 +991,6 @@ width: 200px;
 --sc-label-line-height: 40px;
 }
 
-.qr-reviewType-dropdown .circular.label.new-color, .filter-reviewType .circular.label.new-color {
-box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
-background: colors.$white;
-}
-
-.qr-reviewType-dropdown .circular.label.draft-color, .filter-reviewType .circular.label.draft-color {
-background: colors.$grey500;
-}
-
-.qr-reviewType-dropdown .circular.label.translated-color, .filter-reviewType .circular.label.translated-color {
-background: colors.$blue500;
-}
-
-.qr-reviewType-dropdown .circular.label.approved-color, .filter-reviewType .circular.label.approved-color {
-background: colors.$green800;
-}
-
-.qr-reviewType-dropdown .circular.label.rejected-color, .filter-reviewType .circular.label.rejected-color {
-background: colors.$orange600;
-}
-
-.qr-reviewType-dropdown .circular.label.revision-color, .filter-reviewType .circular.label.revision-color {
-background: colors.$green800;
-}
-
-.qr-reviewType-dropdown .circular.label.second-revision-color, .qr-reviewType-dropdown .circular.label.approved-2ndpass-color, .filter-reviewType .circular.label.second-revision-color, .filter-reviewType .circular.label.approved-2ndpass-color {
-background: colors.$purple500;
-}
 
 .qr-reviewType-dropdown, .filter-reviewType {
 .status-dot {
@@ -1048,6 +1002,17 @@ background: colors.$purple500;
 &.revision-color { background: colors.$green800; }
 &.second-revision-color, &.approved-2ndpass-color { background: colors.$purple500; }
 }
+}
+
+.color-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  vertical-align: middle;
+
+  &.revision-color { background: colors.$green800; }
+  &.second-revision-color { background: colors.$purple500; }
 }
 
 .qr-filter-list {
@@ -1073,26 +1038,6 @@ line-height: unset;
 background: colors.$white !important;
 }
 
-.qr-filter-list .filter-dropdown .ui.basic.button {
-font-family: 'calibri', Arial, Helvetica, sans-serif;
-font-size: 16px !important;
-padding: 10px 20px;
-border-radius: 40px;
-transition: 0.3s ease;
-box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
-max-width: 155px;
-min-width: 30px;
-display: flex;
-}
-
-.qr-filter-list .filter-dropdown .ui.basic.button .text {
-transition: 0.3s ease;
-align-items: center;
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-}
-
 .qr-filter-list .filter-dropdown .cancel-label {
 position: absolute;
 padding: 4px;
@@ -1106,58 +1051,6 @@ visibility: hidden;
 
 .qr-filter-list .filter-dropdown .cancel-label:hover {
 background-color: colors.$grey200 !important;
-}
-
-.qr-filter-list .filter-dropdown .not-filtered .ui.basic.button:hover {
-box-shadow: 0px 0px 0px 1px colors.$blue500 inset;
-color: colors.$blue500 !important;
-}
-
-.qr-filter-list .filter-dropdown .not-filtered .ui.basic.button.disabled {
-box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
-pointer-events: none;
-}
-
-.qr-filter-list .filter-dropdown .filtered .ui.basic.button {
-background-color: colors.$white !important;
-box-shadow:
-      0 0 0 colors.$grey200,
-      0 0 2px rgba(0, 0, 0, 0.12),
-      0 2px 4px rgba(0, 0, 0, 0.24) !important;
-color: colors.$black !important;
-padding: 9px 20px 9px 15px;
-}
-
-.qr-filter-list .filter-dropdown .filtered .ui.basic.button:hover {
-width: fit-content;
-}
-
-.qr-filter-list .filter-dropdown .filtered .ui.basic.button:hover .text {
-margin-right: 15px;
-}
-
-.qr-filter-list .filter-dropdown .filtered .ui.basic.button:hover .cancel-label {
-visibility: unset;
-right: 5px;
-}
-
-.qr-filter-list .filter-dropdown .active .ui.basic.button {
-background: transparent none !important;
-box-shadow:
-      0 0 0 colors.$grey200,
-      0 0 2px rgba(0, 0, 0, 0.12),
-      0 2px 4px rgba(0, 0, 0, 0.24) !important;
-color: colors.$black !important;
-padding: 9px 20px 9px 15px;
-}
-
-.qr-filter-list .filter-dropdown .active .ui.basic.button:hover {
-background-color: colors.$white !important;
-}
-
-.qr-filter-list .filter-dropdown .active .ui.basic.button:hover .cancel-label {
-visibility: unset;
-right: 5px;
 }
 
 .qr-filter-list .filter-dropdown .disabled {
@@ -1260,13 +1153,9 @@ border: 1px dashed colors.$grey200;
 padding: 15px;
 }
 
-.one.column.spinner {
+.spinner-row__inner {
 margin: 30px 15px 15px;
 z-index: 1;
-}
-
-.one.column.spinner .ui.active.inverted.dimmer {
-background: colors.$grey100;
 }
 
 .per-orange {
@@ -1297,14 +1186,6 @@ color: colors.$white !important;
 .per-gray {
 background: colors.$grey400 !important;
 color: colors.$grey500 !important;
-}
-
-.ui.popup.bottom.right.qr-score-popup {
-max-width: 350px !important;
-}
-
-.ui.popup.bottom.right.qr-score-popup code {
-font-size: 12px;
 }
 
 .tooltip--wide {

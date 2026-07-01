@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react'
 import {Input} from '../../common/Input/Input'
-import IconSearch from '../../icons/IconSearch'
+import IconSearch from '../../../../img/icons/IconSearch'
 
 const SearchInput = ({onChange}) => {
   const [searchFilter, setSearchFilter] = React.useState('')

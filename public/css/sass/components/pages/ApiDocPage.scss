@@ -672,12 +672,6 @@ blockquote {
   text-align: center;
 }
 
-.chart-container .ui.segment {
-  /*height: 500px;*/
-  border: none;
-  box-shadow: none;
-}
-
 .chart-container span {
   font-size: 18px;
 }
@@ -696,15 +690,6 @@ blockquote {
 }
 .pee-page .dropdown input {
   display: inline-block;
-}
-.filter-chart-container .ui.grid {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-}
-.pee-page .ui.styled.accordion {
-  width: 100%;
-  background: colors.$grey75;
 }
 .pee-page .accordion .title {
   text-align: right;

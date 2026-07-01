@@ -98,8 +98,8 @@ function SegmentsDetails(props) {
         )}
 
         {props.loadingMoreSegments ? (
-          <div className="ui one column grid">
-            <div className="one column spinner" style={{height: '100px'}}>
+          <div className="spinner-row">
+            <div className="spinner-row__inner" style={{height: '100px'}}>
               <SpinnerLoader
                 label="Loading more segments"
                 size={SPINNER_LOADER_SIZE.MEDIUM}

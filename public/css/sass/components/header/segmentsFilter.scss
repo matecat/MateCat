@@ -209,78 +209,7 @@ body.cattool .filter:hover {
   margin-left: 15px;
 }
 
-// --- UI buttons inside filter ---
-#header-bars-wrapper .filter-dropdown .ui.basic.button {
-  font-family: 'calibri', Arial, Helvetica, sans-serif;
-  font-size: 16px !important;
-  padding: 10px 20px;
-  border-radius: 2px;
-  box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
-}
-
-#header-bars-wrapper .filter-dropdown .ui.basic.button:hover,
-#header-bars-wrapper .filter-dropdown .ui.basic.button.active {
-  box-shadow: 0 0 0 1px colors.$blue400 inset;
-  color: colors.$blue400 !important;
-  background: colors.$white !important;
-}
-
-#header-bars-wrapper .filter-dropdown .ui.basic.button .text {
-  display: flex;
-  align-items: center;
-}
-
-#header-bars-wrapper .filter-dropdown .ui.cancel.label {
-  position: absolute;
-  padding: 4px;
-  background-color: colors.$grey200;
-  border-radius: 15px;
-  top: 8px;
-  line-height: 0px;
-  right: 0px;
-  visibility: hidden;
-}
-
-#header-bars-wrapper .filter-dropdown .ui.cancel.label:hover {
-  background-color: colors.$grey200;
-}
-
 // --- Filter status / activities / data-sample states ---
-#header-bars-wrapper .filter-dropdown .filter-status.not-filtered .ui.basic.button.disabled,
-#header-bars-wrapper .filter-dropdown .filter-activities.not-filtered .ui.basic.button.disabled,
-#header-bars-wrapper .filter-dropdown .filter-data-sample.not-filtered .ui.basic.button.disabled {
-  box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
-  pointer-events: none;
-}
-
-#header-bars-wrapper .filter-dropdown .filter-status.filtered .ui.basic.button,
-#header-bars-wrapper .filter-dropdown .filter-activities.filtered .ui.basic.button,
-#header-bars-wrapper .filter-dropdown .filter-data-sample.filtered .ui.basic.button {
-  background-color: colors.$white !important;
-  box-shadow: 0 0 0 colors.$grey200, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-  color: colors.$black !important;
-  padding: 9px 20px 9px 15px;
-}
-
-#header-bars-wrapper .filter-dropdown .filter-status.filtered .ui.basic.button:hover,
-#header-bars-wrapper .filter-dropdown .filter-activities.filtered .ui.basic.button:hover,
-#header-bars-wrapper .filter-dropdown .filter-data-sample.filtered .ui.basic.button:hover {
-  width: fit-content;
-}
-
-#header-bars-wrapper .filter-dropdown .filter-status.filtered .ui.basic.button:hover .text,
-#header-bars-wrapper .filter-dropdown .filter-activities.filtered .ui.basic.button:hover .text,
-#header-bars-wrapper .filter-dropdown .filter-data-sample.filtered .ui.basic.button:hover .text {
-  margin-right: 15px;
-}
-
-#header-bars-wrapper .filter-dropdown .filter-status.filtered .ui.basic.button:hover .ui.cancel.label,
-#header-bars-wrapper .filter-dropdown .filter-activities.filtered .ui.basic.button:hover .ui.cancel.label,
-#header-bars-wrapper .filter-dropdown .filter-data-sample.filtered .ui.basic.button:hover .ui.cancel.label {
-  visibility: unset;
-  right: 5px;
-}
-
 #header-bars-wrapper .filter-dropdown .filter-status.disabled,
 #header-bars-wrapper .filter-dropdown .filter-activities.disabled,
 #header-bars-wrapper .filter-dropdown .filter-data-sample.disabled {

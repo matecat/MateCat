@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {QualityFrameworkTabContext} from './QualityFrameworkTabContext'
 import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
-import IconClose from '../../../icons/IconClose'
+import IconClose from '../../../../../img/icons/IconClose'
 import Tooltip from '../../../common/Tooltip'
 
 export const SeveritiyRow = ({severity}) => {

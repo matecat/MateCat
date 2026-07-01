@@ -23,6 +23,7 @@ import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 import Trash from '../../../img/icons/Trash'
 import Check from '../../../img/icons/Check'
 import commonUtils from '../../utils/commonUtils'
+import IconClose from '../../../img/icons/IconClose'
 
 class SegmentCommentsContainer extends React.Component {
   static contextType = SegmentContext
@@ -197,7 +198,7 @@ class SegmentCommentsContainer extends React.Component {
             commentsHtml.push(
               <div
                 key={'thread-' + i}
-                className={'mbc-thread-wrap mbc-clearfix ' + threadClass}
+                className={'comment-thread comment-clearfix ' + threadClass}
                 data-count={count}
               >
                 {thread_wrap}
@@ -211,12 +212,12 @@ class SegmentCommentsContainer extends React.Component {
           count++
         }
         if (Number(comment.message_type) === this.types.resolve) {
-          threadClass = 'mbc-thread-wrap-resolved'
+          threadClass = 'comment-thread-resolved'
           thread_wrap.push(
-            <div className="mbc-resolved-comment" key={'comment-' + i}>
-              <span className="mbc-comment-resolved-label">
+            <div className="comment-resolved" key={'comment-' + i}>
+              <span className="comment-resolved-label">
                 {comment.is_anonymous === 0 && (
-                  <span className="mbc-comment-username mbc-comment-resolvedby">
+                  <span className="comment-username comment-resolvedby">
                     {comment.full_name}
                   </span>
                 )}
@@ -228,7 +229,7 @@ class SegmentCommentsContainer extends React.Component {
             </div>,
           )
         } else {
-          threadClass = 'mbc-thread-wrap-active'
+          threadClass = 'comment-thread-active'
           let text = nl2br(comment.message)
           text = parseCommentHtml(text)
           const formattedDate = new Date(
@@ -254,14 +255,14 @@ class SegmentCommentsContainer extends React.Component {
             ''
           )
           thread_wrap.push(
-            <div className="mbc-show-comment mbc-clearfix" key={'comment-' + i}>
+            <div className="comment-item comment-clearfix" key={'comment-' + i}>
               <div className="bc-show-comment-top">
                 {comment.is_anonymous === 1 ? (
-                  <div className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate">
+                  <div className="comment-label comment-username comment-username-label comment-truncate">
                     {comment.full_name}
                   </div>
                 ) : (
-                  <div className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate">
+                  <div className="comment-label comment-username comment-username-label comment-truncate">
                     {comment.full_name}
                     <span>
                       {' '}
@@ -275,13 +276,13 @@ class SegmentCommentsContainer extends React.Component {
                 )}
                 {deleteButton}
               </div>
-              <div className="mbc-comment-info-wrap mbc-clearfix">
-                <span className="mbc-comment-info mbc-comment-time pull-left">
+              <div className="comment-info-wrap comment-clearfix">
+                <span className="comment-info comment-time pull-left">
                   {formattedDate}
                 </span>
               </div>
               <p
-                className="mbc-comment-body"
+                className="comment-body"
                 dangerouslySetInnerHTML={{__html: text}}
               />
             </div>,
@@ -313,11 +314,11 @@ class SegmentCommentsContainer extends React.Component {
         commentsHtml.push(
           <div
             key={'thread-' + 900}
-            className={'mbc-thread-wrap mbc-clearfix ' + threadClass}
+            className={'comment-thread comment-clearfix ' + threadClass}
             data-count={count}
           >
             {thread_wrap}
-            <div className={'mbc-thread-wrap-bottom'}>{resolveButton}</div>
+            <div className={'comment-thread-footer'}>{resolveButton}</div>
           </div>,
         )
       }
@@ -341,11 +342,11 @@ class SegmentCommentsContainer extends React.Component {
 
     htmlInsert = (
       <div
-        className="mbc-thread-wrap mbc-post-comment-wrap mbc-clearfix mbc-first-input"
+        className="comment-thread comment-post-wrap comment-clearfix comment-first-input"
         ref={(container) => (this.container = container)}
       >
-        <div className="mbc-post-comment">
-          <span className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate mbc-comment-anonymous-label">
+        <div className="comment-post">
+          <span className="comment-label comment-username comment-username-label comment-truncate comment-anonymous-label">
             {!this.state.anonymousComments
               ? this.context.userInfo.user.first_name +
                 ' ' +
@@ -362,7 +363,7 @@ class SegmentCommentsContainer extends React.Component {
             onKeyDown={(e) => this.onKeyDown(e)}
             onChange={this.handleChangeMentionsInputValue}
             placeholder="Write a comment..."
-            className="mbc-comment-input mbc-comment-textarea"
+            className="comment-input comment-textarea"
             suggestionsPortalHost={document.body}
           >
             <Mention
@@ -380,7 +381,7 @@ class SegmentCommentsContainer extends React.Component {
               appendSpaceOnAdd={false}
             />
           </MentionsInput>
-          <div className="mbc-comment-bottom">
+          <div className="comment-bottom">
             <div>
               <Checkbox
                 onChange={(value) => {
@@ -405,8 +406,8 @@ class SegmentCommentsContainer extends React.Component {
             </Button>
           </div>
           {this.state.sendCommentError ? (
-            <div className="mbc-ajax-message-wrap">
-              <span className="mbc-warnings">
+            <div className="comment-ajax-wrap">
+              <span className="comment-warnings">
                 Oops, something went wrong. Please try again later.
               </span>
             </div>
@@ -418,16 +419,16 @@ class SegmentCommentsContainer extends React.Component {
     )
 
     return (
-      <div className="mbc-comment-balloon-outer">
-        <div className="mbc-comment-balloon-inner">
-          <div className="mbc-triangle mbc-open-view mbc-re-messages" />
+      <div className="comment-balloon-outer">
+        <div className="comment-balloon-inner">
+          <div className="comment-triangle comment-open-view comment-re-messages" />
           <a
-            className="re-close-balloon shadow-1"
+            className="comment-close-btn shadow-1"
             onClick={(e) => this.closeComments(e)}
           >
-            <i className="icon-cancel3 icon" />
+            <IconClose />
           </a>
-          <div className="mbc-comments-wrap" ref={(wrap) => (this.wrap = wrap)}>
+          <div className="comments-wrap" ref={(wrap) => (this.wrap = wrap)}>
             {htmlComments}
           </div>
           {htmlInsert}

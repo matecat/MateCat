@@ -188,7 +188,7 @@
       .translator-assignee {
         width: 100%;
 
-        .ui.form {
+        .assign-translator-form {
           /*width: 100%;*/
           .fields {
             margin: 0;
@@ -848,6 +848,7 @@
               height: 30px;
               border-radius: 50%;
               vertical-align: middle;
+              overflow: hidden;
             }
 
             .customer-name {

@@ -5,7 +5,8 @@ import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentStore from '../../../../stores/SegmentStore'
 import CatToolActions from '../../../../actions/CatToolActions'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
-import IconChevronLeft from '../../../icons/IconChevronLeft'
+import IconChevronLeft from '../../../../../img/icons/IconChevronLeft'
+import IconTick from '../../../../../img/icons/IconTick'
 
 class BulkSelectionBar extends React.Component {
   constructor(props) {
@@ -174,7 +175,7 @@ class BulkSelectionBar extends React.Component {
         ) : (
           <div className="bulk-activity-icons">
             <button className={buttonClass} onClick={this.onClickBulk}>
-              <i className="icon-checkmark5 icon" />{' '}
+              <IconTick />{' '}
               {this.props.isReview ? 'MARK AS APPROVED' : 'MARK AS TRANSLATED'}
             </button>
           </div>

@@ -2,6 +2,7 @@ import React, {createRef} from 'react'
 import JobProgressBar from '../common/JobProgressBar'
 import HelpCircle from '../../../img/icons/HelpCircle'
 import Tooltip, {TOOLTIP_POSITION} from '../common/Tooltip'
+import IconChevronRight from '../../../img/icons/IconChevronRight'
 
 export const ProductionSummary = ({
   qualitySummary,
@@ -70,7 +71,7 @@ export const ProductionSummary = ({
           </div>
 
           <div className="qr-to">
-            <i className="icon-chevron-right icon" />
+            <IconChevronRight />
           </div>
 
           <div className="qr-target">

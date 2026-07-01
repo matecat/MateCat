@@ -15,7 +15,7 @@ import Download from '../../../img/icons/Download'
 import QR from '../../../img/icons/QR'
 import Revise from '../../../img/icons/Revise'
 import {BUTTON_SIZE} from '../common/Button/Button'
-import FlipBackward from '../icons/FlipBackward'
+import FlipBackward from '../../../img/icons/FlipBackward'
 import PropTypes from 'prop-types'
 
 const JOB_MENU_ITEM_ID = {

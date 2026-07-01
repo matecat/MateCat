@@ -7,9 +7,9 @@ import JobProgressBar from '../common/JobProgressBar'
 import {BUTTON_MODE, BUTTON_SIZE, Button} from '../common/Button/Button'
 import {REVISE_STEP_NUMBER} from '../../constants/Constants'
 import {CookieConsent} from '../common/CookieConsent'
-import IconRedirect from '../icons/IconRedirect'
+import IconRedirect from '../../../img/icons/IconRedirect'
 import Tooltip, {TOOLTIP_POSITION} from '../common/Tooltip'
-import IconArrowRight from '../icons/IconArrowRight'
+import IconArrowRight from '../../../img/icons/IconArrowRight'
 
 export const CattoolFooter = ({
   idProject,

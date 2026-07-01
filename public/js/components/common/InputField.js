@@ -1,6 +1,7 @@
 import React, {useState, useRef, useEffect, useCallback, useMemo} from 'react'
 import PropTypes from 'prop-types'
 import {debounce} from 'lodash/function'
+import IconClose from '../../../img/icons/IconClose'
 
 const styleInput = {
   fontFamily: 'calibri, Arial, Helvetica, sans-serif',
@@ -107,7 +108,7 @@ const InputField = (props) => {
           style={styleIcon}
           onClick={resetInput}
         >
-          <i className="icon-cancel3" />
+          <IconClose />
         </div>
       ) : null}
     </div>

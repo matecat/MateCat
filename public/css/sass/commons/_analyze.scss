@@ -1,13 +1,6 @@
 @use './colors';
 @use '../commons/variables';
 
-// Inline spinner replacing Semantic UI's `.ui.active.inline.loader`
-// (semantic-ui-react / semantic.css removal).
-@keyframes inline-loader-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
 // rewrite semantic CSS
 html,
 body {

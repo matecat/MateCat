@@ -12,6 +12,7 @@ import SegmentStore from '../../stores/SegmentStore'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentContext} from '../segments/SegmentContext'
 import ModalsActions from '../../actions/ModalsActions'
+import IconClose from '../../../img/icons/IconClose'
 
 class ReviewExtendedPanel extends React.Component {
   static contextType = SegmentContext
@@ -128,7 +129,7 @@ class ReviewExtendedPanel extends React.Component {
           className="re-close-balloon re-close-err shadow-1"
           onClick={this.closePanel.bind(this)}
         >
-          <i className="icon-cancel3 icon" />
+          <IconClose />
         </a>
         <ReviewExtendedIssuesContainer
           loader={this.state.issueInCreation}

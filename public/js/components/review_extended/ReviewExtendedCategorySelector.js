@@ -5,6 +5,7 @@ import {
   DropdownMenu,
 } from '../common/DropdownMenu/DropdownMenu'
 import {BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
+import IconDown from '../../../img/icons/IconDown'
 
 const ReviewExtendedCategorySelector = ({
   sendIssue,
@@ -38,7 +39,7 @@ const ReviewExtendedCategorySelector = ({
             mode: BUTTON_MODE.OUTLINE,
             size: BUTTON_SIZE.ICON_XSMALL,
             className: 'severities-dropdown-trigger',
-            children: <i className="icon-sort-down icon" />,
+            children: <IconDown />,
           }}
           items={items}
         />
