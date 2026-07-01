@@ -362,4 +362,22 @@ class GetTagProjectionControllerTest extends AbstractTest
 
         $this->controller->call();
     }
+
+    // ─── getEngine seam (real construction, no live HTTP) ───
+
+    /**
+     * Exercises the production getEngine() seam: engineStub is null, so the Testable
+     * subclass delegates to parent::getEngine(), running the real
+     * EnginesFactory::getInstance(1, db, MyMemory::class) against the seeded test DB.
+     * Construction only loads the MyMemory engine row (id 1); no outbound HTTP fires here.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function getEngine_returns_real_mymemory_instance(): void
+    {
+        $engine = $this->invokePrivate('getEngine');
+
+        $this->assertInstanceOf(MyMemory::class, $engine);
+    }
 }

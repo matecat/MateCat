@@ -612,4 +612,27 @@ class UserKeysControllerTest extends AbstractTest
 
         $this->assertSame('abcdef1234567890', $memoryKey->tm_key->key);
     }
+
+    // ─── getTmService seam (real construction, no live HTTP) ───
+
+    /**
+     * Exercises the production getTmService() seam. TestableUserKeysController overrides it
+     * with a StubTmService, so this uses the ...WithRealValidators variant (which does NOT
+     * override getTmService) to run the real `new TMSService($this->getDatabase())` body.
+     * Constructing TMSService only loads the seeded MyMemory engine (id 1) from the test DB;
+     * the live MyMemory call happens later in checkCorrectKey(), never during construction.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function getTmService_returns_real_tms_service_instance(): void
+    {
+        $controller = new TestableUserKeysControllerWithRealValidators();
+        $reflector  = new ReflectionClass(UserKeysController::class);
+        $reflector->getProperty('database')->setValue($controller, obtainTestDatabase());
+
+        $service = $reflector->getMethod('getTmService')->invoke($controller);
+
+        $this->assertInstanceOf(TMSService::class, $service);
+    }
 }

@@ -30,10 +30,7 @@ class TestableOutsourceToController extends OutsourceToController
 
     protected function getOutsourceService(): Translated
     {
-        /** @var Translated $stub */
-        $stub = $this->outsourceServiceStub;
-
-        return $stub;
+        return $this->outsourceServiceStub ?? parent::getOutsourceService();
     }
 }
 
@@ -350,5 +347,21 @@ class OutsourceToControllerTest extends AbstractTest
         $this->expectExceptionMessage('No id project provided');
 
         $this->controller->outsource();
+    }
+
+    /**
+     * Exercises the production getOutsourceService() seam (not the stub override): with
+     * outsourceServiceStub left null the Testable subclass delegates to parent, so the real
+     * `new Translated()` body runs. The constructor only sets config/curl options — the
+     * outbound HTTP happens later in performQuote() — so this stays hermetic.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function getOutsourceService_returns_real_translated_instance(): void
+    {
+        $service = $this->reflector->getMethod('getOutsourceService')->invoke($this->controller);
+
+        $this->assertInstanceOf(Translated::class, $service);
     }
 }
