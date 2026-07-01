@@ -98,7 +98,7 @@ const OfflineUtils = {
       const notification = {
         uid: 'offline-counter',
         title:
-          '<div class="message-offline-icons"><span class="icon-power-cord"></span><span class="icon-power-cord2"></span></div>No connection available',
+          'No connection available',
         text:
           'You can still translate <span class="remainingSegments">' +
           --this.offlineCacheRemaining +

@@ -34,6 +34,9 @@ import {ApplicationWrapperContext} from '../common/ApplicationWrapper/Applicatio
 import {Shortcuts} from '../../utils/shortcuts'
 import SearchUtils from '../header/cattol/search/searchUtils'
 import {SegmentQAIcon} from './SegmentQAIcon'
+import IconUnlock from '../icons/IconUnlock'
+import IconLock from '../icons/IconLock'
+import IconSplit from '../icons/IconSplit'
 
 const SegmentComponent = ({
   segment,
@@ -682,11 +685,11 @@ const SegmentComponent = ({
             !readonly ? (
               segment.unlocked ? (
                 <div className="ice-locked-icon" onClick={lockUnlockSegment}>
-                  <button className="unlock-button unlocked icon-unlocked3" />
+                  <button className="unlock-button unlocked"><IconUnlock /></button>
                 </div>
               ) : (
                 <div className="ice-locked-icon" onClick={lockUnlockSegment}>
-                  <button className="icon-lock unlock-button locked" />
+                  <button className="unlock-button locked"><IconLock /></button>
                 </div>
               )
             ) : null
@@ -710,7 +713,7 @@ const SegmentComponent = ({
                   title={`Click to split segment (${Shortcuts.cattol.events.splitSegment.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
                   onClick={() => SegmentActions.openSplitSegment(segment.sid)}
                 >
-                  <i className="icon-split" />
+                  <IconSplit />
                 </button>
                 <p className="split-shortcut">CTRL + S</p>
               </div>
@@ -721,7 +724,7 @@ const SegmentComponent = ({
                   title="Click to close split segment"
                   onClick={() => SegmentActions.closeSplitSegment()}
                 >
-                  <i className="icon-split" />
+                  <IconSplit />
                 </button>
               </div>
             )

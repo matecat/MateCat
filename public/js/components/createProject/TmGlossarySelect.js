@@ -5,6 +5,7 @@ import {CreateProjectContext} from './CreateProjectContext'
 import {orderTmKeys} from '../settingsPanel/Contents/TranslationMemoryGlossaryTab'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import HelpCircle from '../../../img/icons/HelpCircle'
+import IconAdd from '../icons/IconAdd'
 
 export const TmGlossarySelect = () => {
   const {
@@ -88,7 +89,7 @@ export const TmGlossarySelect = () => {
                 }}
               >
                 CREATE RESOURCE
-                <span className="icon-plus3 icon"></span>
+                <IconAdd />
               </button>
             </>
           ),

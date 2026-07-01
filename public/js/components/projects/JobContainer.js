@@ -10,6 +10,7 @@ import {changeJobPassword} from '../../api/changeJobPassword'
 import CatToolActions from '../../actions/CatToolActions'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import IconDown from '../icons/IconDown'
+import IconClose from '../icons/IconClose'
 import {
   Button,
   BUTTON_MODE,
@@ -768,7 +769,7 @@ export const JobContainer = ({
               data-testid="remove-translator-button"
             >
               <div className="cancel-label">
-                <i className="icon-cancel3" />
+                <IconClose />
               </div>
             </div>
           )}

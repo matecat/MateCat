@@ -3,6 +3,7 @@ import {CompositeDecorator, Editor, EditorState} from 'draft-js'
 
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import SegmentUtils from '../../utils/segmentUtils'
+import IconSplit from '../icons/IconSplit'
 
 class SegmentPlaceholderLite extends React.Component {
   constructor(props) {
@@ -117,7 +118,7 @@ class SegmentPlaceholderLite extends React.Component {
           </div>
           <div className="actions">
             <button className="split" title="Click to split segment">
-              <i className="icon-split"> </i>
+              <IconSplit />
             </button>
             <p className="split-shortcut">CTRL + S</p>
           </div>

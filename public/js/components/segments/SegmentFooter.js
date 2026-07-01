@@ -21,6 +21,7 @@ import {SegmentContext} from './SegmentContext'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
 import IconCloseCircle from '../icons/IconCloseCircle'
+import IconWarning from '../icons/IconWarning'
 import CatToolActions from '../../actions/CatToolActions'
 import {isMacOS} from '../../utils/Utils'
 import {SegmentFooterTabLaraStyles} from './SegmentFooterTabLaraStyles'
@@ -616,7 +617,7 @@ function SegmentFooter() {
           ) : clientConnected || typeof clientConnected === 'undefined' ? (
             <span className="loader loader_on" />
           ) : (
-            <i className="icon-warning2 icon" />
+            <IconWarning />
           )}
 
           {tab.isEnableCloseButton && (

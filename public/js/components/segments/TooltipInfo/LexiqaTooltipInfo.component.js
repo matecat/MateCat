@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import {each} from 'lodash'
 
 import LXQ from '../../../utils/lxq.main'
+import IconCloseCircle from '../../icons/IconCloseCircle'
 
 class LexiqaTooltipInfo extends Component {
   ignoreError(message) {
@@ -21,7 +22,7 @@ class LexiqaTooltipInfo extends Component {
             className="tooltip-error-ignore"
             onClick={() => this.ignoreError(message)}
           >
-            <span className="icon-cancel-circle" />
+            <IconCloseCircle />
             <span className="tooltip-error-ignore-text">Ignore</span>
           </div>
         </div>,

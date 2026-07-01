@@ -13,6 +13,8 @@ import ModalsActions from '../actions/ModalsActions'
 import AlertModal from '../components/modals/AlertModal'
 import {getTmKeysUser} from '../api/getTmKeysUser'
 import SettingsIcon from '../../img/icons/SettingsIcon'
+import IconWarning from '../components/icons/IconWarning'
+import IconErrorOutline from '../components/icons/IconErrorOutline'
 import SupportedFilesModal from '../components/modals/SupportedFilesModal'
 import Footer from '../components/footer/Footer'
 import {createProject as createProjectApi} from '../api/createProject'
@@ -1056,14 +1058,14 @@ const NewProject = () => {
 
         {warnings && (
           <div className="warning-message">
-            <i className="icon-warning2 icon"> </i>
+            <IconWarning />
             <p>{warnings}</p>
           </div>
         )}
 
         {errors && (
           <div className="error-message">
-            <i className="icon-error_outline icon"> </i>
+            <IconErrorOutline />
             <p>{errors}</p>
           </div>
         )}

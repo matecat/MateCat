@@ -4,15 +4,6 @@
   text-align: left;
 }
 
-.submenu {
-  .icon-warning2 {
-    color: colors.$orange600;
-    position: absolute;
-    top: 8px;
-    right: 10px;
-  }
-}
-
 .sub-editor {
   &.concordances {
     &.extended.have-results {

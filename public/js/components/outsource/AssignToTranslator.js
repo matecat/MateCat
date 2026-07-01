@@ -63,7 +63,7 @@ const AssignToTranslator = ({job, project, closeOutsource}) => {
       '<div class="source-box" style="display: inherit;">' +
       jobData.sourceTxt +
       '</div> ' +
-      '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +
+      '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <svg width="16" height="16" viewBox="0 0 24 24" style="vertical-align:middle"><path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg> </div> ' +
       '<div class="target-box" style="display: inherit;">' +
       jobData.targetTxt +
       '</div> </div> </div></div>',
@@ -85,7 +85,7 @@ const AssignToTranslator = ({job, project, closeOutsource}) => {
       '<div class="source-box" style="display: inherit;">' +
       jobData.sourceTxt +
       '</div> ' +
-      '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +
+      '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <svg width="16" height="16" viewBox="0 0 24 24" style="vertical-align:middle"><path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg> </div> ' +
       '<div class="target-box" style="display: inherit;">' +
       jobData.targetTxt +
       '</div> </div> </div></div>',

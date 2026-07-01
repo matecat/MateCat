@@ -7,6 +7,7 @@ import {INPUT_SIZE, Input} from '../common/Input/Input'
 import IconSearch from '../icons/IconSearch'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import IconClose from '../icons/IconClose'
+import IconUser from '../icons/IconUser'
 import * as Popover from '@radix-ui/react-popover'
 
 export const UserProjectDropdown = ({
@@ -92,7 +93,7 @@ export const UserProjectDropdown = ({
           ) : (
             <>
               <span>
-                <i className="icon-user22" />
+                <IconUser />
                 Not assignee
               </span>
             </>

@@ -408,7 +408,6 @@
 
   &.tag-split {
     font-size: 14px;
-    font-family: 'icomoon';
     margin: 0 2px;
     color: colors.$blue200;
     background: transparent;
@@ -562,11 +561,6 @@
       height: 40px;
       &:hover {
         color: colors.$grey700;
-      }
-      .icon-cancel-circle:before {
-        line-height: 40px;
-        float: left;
-        font-size: 18px;
       }
       .tooltip-error-ignore-text {
         margin-left: 5px;

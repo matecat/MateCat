@@ -23,6 +23,7 @@ import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 import Trash from '../../../img/icons/Trash'
 import Check from '../../../img/icons/Check'
 import commonUtils from '../../utils/commonUtils'
+import IconClose from '../icons/IconClose'
 
 class SegmentCommentsContainer extends React.Component {
   static contextType = SegmentContext
@@ -425,7 +426,7 @@ class SegmentCommentsContainer extends React.Component {
             className="comment-close-btn shadow-1"
             onClick={(e) => this.closeComments(e)}
           >
-            <i className="icon-cancel3 icon" />
+            <IconClose />
           </a>
           <div className="comments-wrap" ref={(wrap) => (this.wrap = wrap)}>
             {htmlComments}

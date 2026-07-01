@@ -1,7 +1,6 @@
 @use '../../common-main';
 
 @use '../../commons/filter-teams';
-@use '../../commons/icons';
 @use '../../commons/team-member';
 @use '../../commons/aria-label-tooltip';
 @use '../../commons/tooltip';
@@ -205,23 +204,11 @@
     line-height: 28px !important;
     max-width: 85% !important;
     font-size: 16px !important;
-    i.icon-checkmark2.icon {
-      display: none;
-    }
   }
   .item {
-    i.icon-checkmark2.icon {
-      color: rgba(117, 117, 117, 0.7);
-      font-size: 20px;
-      position: absolute;
-      right: 7px;
-      display: none;
     }
     &.active {
       background-color: rgba(0, 0, 0, 0.03) !important;
-      i.icon-checkmark2.icon {
-        display: block;
-      }
     }
   }
   .text .multiple-tm {
@@ -233,12 +220,6 @@
   .multiple-tm-num {
     margin-top: 0 !important;
     margin-right: 4px;
-  }
-  .icon-info {
-    font-size: 19px;
-    margin-top: 1px;
-    margin-left: 5px;
-    color: rgba(117, 117, 117, 0.7);
   }
   .tm-tooltip {
     text-align: left;

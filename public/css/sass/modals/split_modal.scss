@@ -124,18 +124,6 @@
     }
   }
 
-  .splitbtn:before {
-    content: '\f065';
-    margin-right: 3px;
-    font-family: 'icomoon';
-    speak: none;
-    font-style: normal;
-    font-weight: normal;
-    font-variant: normal;
-    text-transform: none;
-    line-height: 1;
-    -webkit-font-smoothing: antialiased;
-  }
 
   .popup-split-project-title {
     display: none;
@@ -267,18 +255,6 @@
     line-height: 40px !important;
   }
 
-  .error-message p:before {
-    font-family: 'icomoon';
-    speak: none;
-    font-style: normal;
-    font-weight: normal;
-    font-variant: normal;
-    text-transform: none;
-    line-height: 1;
-    -webkit-font-smoothing: antialiased;
-    content: '\f071';
-    margin-right: 10px;
-  }
 
   .jobs h4 {
     margin: 11px 0 0 10px;
