@@ -130,6 +130,31 @@ touch "$fx/plugin/dirty.txt"; git -C "$fx/plugin" add dirty.txt
 out=$(run_script "$fx" --update)
 assert_contains "$out" "working tree not clean" "--update skips dirty submodule"
 
+# --- --sync: rebases AND leaves checkout on the branch tip ---
+fx=$(make_fixture)
+remote_master=$(git -C "$fx/plugin" rev-parse origin/master)
+out=$(run_script "$fx" --sync)
+assert_contains "$out" "now on master" "--sync reports ending on the branch"
+assert_eq "$(git -C "$fx/plugin" rev-parse master)" "$remote_master" "--sync advanced local master to origin/master"
+assert_eq "$(git -C "$fx/plugin" rev-parse HEAD)" "$remote_master" "--sync HEAD now at branch tip"
+head_ref=$(git -C "$fx/plugin" symbolic-ref -q --short HEAD || echo DETACHED)
+assert_eq "$head_ref" "master" "--sync left HEAD on master (checkout moved)"
+
+# --- --sync --dry-run: reports, mutates nothing ---
+fx=$(make_fixture)
+before_head=$(git -C "$fx/plugin" rev-parse HEAD)
+out=$(run_script "$fx" --sync --dry-run)
+assert_contains "$out" "would rebase 1 commit" "--sync --dry-run reports the rebase"
+assert_eq "$(git -C "$fx/plugin" rev-parse HEAD)" "$before_head" "--sync --dry-run left HEAD unchanged"
+
+# --- a fully-synced submodule triggers no action under --update/--sync ---
+fx=$(make_fixture)
+git -C "$fx/plugin" branch -f master origin/master   # make it already up to date
+git -C "$fx/plugin" checkout -q --detach origin/master
+out=$(run_script "$fx" --update)
+assert_contains "$out" "synced" "--update on already-synced plugin reports synced"
+[[ "$out" != *"rebased"* ]] && echo "✅ PASS: --update no-op when nothing behind" && PASS=$((PASS+1)) || { echo "❌ FAIL: --update acted when nothing behind"; FAIL=$((FAIL+1)); }
+
 echo ""
 echo "Passed: $PASS  Failed: $FAIL"
 [ "$FAIL" -eq 0 ]
