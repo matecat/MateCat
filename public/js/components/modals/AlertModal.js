@@ -14,9 +14,9 @@ class AlertModal extends React.Component {
     return (
       <div className="message-modal">
         <div className="matecat-modal-middle">
-          <div className={'ui one column grid alert_modal'}>
+          <div className={'modal-grid alert_modal'}>
             <div
-              className="column left aligned matecat-modal-body"
+              className="matecat-modal-body"
               style={{fontSize: '18px'}}
             >
               {typeof this.props.text === 'string' ? (
@@ -25,7 +25,7 @@ class AlertModal extends React.Component {
                 this.props.text
               )}
             </div>
-            <div className="column right aligned">
+            <div className="modal-grid__footer">
               <Button
                 type={BUTTON_TYPE.PRIMARY}
                 onClick={() => this.closeModal()}

@@ -29,8 +29,8 @@ export const UnlockAllSegmentsModal = () => {
   return (
     <div className="message-modal">
       <div className="matecat-modal-middle">
-        <div className={'ui one column grid'}>
-          <div className="column left aligned" style={{fontSize: '18px'}}>
+        <div className={'modal-grid'}>
+          <div className="modal-grid__body" style={{fontSize: '18px'}}>
             Would you like to unlock all 101% segments?
           </div>
           <div className="modal-buttons">
@@ -47,7 +47,7 @@ export const UnlockAllSegmentsModal = () => {
               Confirm
             </Button>
           </div>
-          <div className="column left aligned">
+          <div className="modal-grid__body">
             <input
               id="checkbox_unlock"
               type="checkbox"

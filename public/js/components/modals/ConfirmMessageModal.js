@@ -11,8 +11,8 @@ class ConfirmMessageModal extends React.Component {
     return (
       <div className="message-modal">
         <div className="matecat-modal-middle">
-          <div className={'ui one column grid ' + this.props.modalName}>
-            <div className="column left aligned" style={{fontSize: '18px'}}>
+          <div className={'modal-grid ' + this.props.modalName}>
+            <div className="modal-grid__body" style={{fontSize: '18px'}}>
               {typeof this.props.text === 'string' ? (
                 <p dangerouslySetInnerHTML={this.allowHTML(this.props.text)} />
               ) : (

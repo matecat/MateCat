@@ -208,10 +208,10 @@ const SplitJobModal = ({job, project, callback}) => {
 
   const getJobParts = () => {
     if (!jobSplttable) {
-      return <div className="ui segment" style={{height: '126px'}}></div>
+      return <div className="split-loader" style={{height: '126px'}}></div>
     } else if (!wordsArray) {
       return (
-        <div className="ui segment" style={{height: '126px'}}>
+        <div className="split-loader" style={{height: '126px'}}>
           <SpinnerLoader />
         </div>
       )

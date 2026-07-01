@@ -1648,6 +1648,16 @@
   }
 }
 
+.modal-grid {
+  display: flex;
+  flex-direction: column;
+
+  .modal-grid__footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
 .confirm-delete-resource-project-templates {
   ul {
     list-style: disc;

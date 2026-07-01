@@ -274,7 +274,7 @@ export const ReviewExtendedIssue = ({
       <div className="comments-view shadow-1">
         {renderHtmlCommentLines}
         <div className="re-add-comment">
-          <form className="ui form" onSubmit={addComment}>
+          <form onSubmit={addComment}>
             <div className="field">
               <input
                 className="re-comment-input"

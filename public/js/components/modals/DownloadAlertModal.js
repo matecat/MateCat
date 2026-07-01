@@ -15,8 +15,8 @@ export const DownloadAlertModal = ({
   return (
     <div className="message-modal">
       <div className="matecat-modal-middle">
-        <div className={'ui one column grid '}>
-          <div className="column left aligned" style={{fontSize: '18px'}}>
+        <div className={'modal-grid'}>
+          <div className="modal-grid__body" style={{fontSize: '18px'}}>
             The translation has issues (e.g. missing tags or over‑length text)
             that may cause failed downloads, missing placeholders, or lost
             formatting.

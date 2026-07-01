@@ -233,7 +233,7 @@ const AssignToTranslator = ({job, project, closeOutsource}) => {
       <div className="title">Assign Job to translator</div>
       <div className="title-url">
         <div className="translator-assignee">
-          <div className="ui form">
+          <div className="assign-translator-form">
             <div className="fields">
               <div className="field translator-email">
                 <label>Translator email</label>
@@ -247,17 +247,13 @@ const AssignToTranslator = ({job, project, closeOutsource}) => {
               </div>
               <div className="field translator-delivery ">
                 <label>Delivery date</label>
-                <div className="ui calendar">
-                  <div className="ui input">
-                    <DatePicker
-                      selected={deliveryDate}
-                      onChange={(date) => {
-                        setDeliveryDate(date)
-                        checkSendToTranslatorButton()
-                      }}
-                    />
-                  </div>
-                </div>
+                <DatePicker
+                  selected={deliveryDate}
+                  onChange={(date) => {
+                    setDeliveryDate(date)
+                    checkSendToTranslatorButton()
+                  }}
+                />
               </div>
               <div className="field translator-time">
                 <Select

@@ -1260,12 +1260,12 @@ border: 1px dashed colors.$grey200;
 padding: 15px;
 }
 
-.one.column.spinner {
+.spinner-row__inner {
 margin: 30px 15px 15px;
 z-index: 1;
 }
 
-.one.column.spinner .ui.active.inverted.dimmer {
+.spinner-row__inner .ui.active.inverted.dimmer {
 background: colors.$grey100;
 }
 
