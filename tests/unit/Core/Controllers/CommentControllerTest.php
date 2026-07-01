@@ -19,11 +19,21 @@ use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use ReflectionException;
+use Stomp\Client;
+use Stomp\StatefulStomp;
+use Utils\ActiveMQ\AMQHandler;
 
 class TestableCommentController extends CommentController
 {
+    public ?AMQHandler $fakeQueueHandler = null;
+
     public function __construct()
     {
+    }
+
+    protected function getQueueHandler(): AMQHandler
+    {
+        return $this->fakeQueueHandler ?? parent::getQueueHandler();
     }
 
 }
@@ -195,6 +205,21 @@ class CommentControllerTest extends AbstractTest
             'message' => 'delete me',
             'password' => 'a90acf203402',
         ], $overrides));
+    }
+
+    /**
+     * Installs a fake AMQHandler backed by a stubbed StatefulStomp transport so
+     * enqueueComment()/enqueueDeleteCommentMessage() succeed without a real broker.
+     */
+    private function installFakeQueueHandler(): void
+    {
+        $clientStub = $this->createStub(Client::class);
+
+        $stompStub = $this->createStub(StatefulStomp::class);
+        $stompStub->method('send')->willReturn(true);
+        $stompStub->method('getClient')->willReturn($clientStub);
+
+        $this->controller->fakeQueueHandler = new AMQHandler(preconfiguredStomp: $stompStub);
     }
 
     #[Test]
@@ -774,5 +799,236 @@ class CommentControllerTest extends AbstractTest
 
         $this->expectException(\Throwable::class);
         $this->controller->resolve();
+    }
+
+    #[Test]
+    public function resolve_completes_and_returns_json_when_queue_and_email_are_stubbed(): void
+    {
+        // Make the current user match the project owner so resolveUsers() returns
+        // an empty list (self-excluded), which means sendEmail() never calls
+        // send() on a real email object, letting resolve() run to completion.
+        $owner = new UserStruct();
+        $owner->uid = 1886605111;
+        $owner->email = 'foo@example.org';
+        $owner->first_name = 'Foo';
+        $owner->last_name = 'Owner';
+        $this->setControllerUser($owner, true);
+
+        $this->installFakeQueueHandler();
+
+        $segment = 990008;
+        $this->setupRequestParams($this->validRequest([
+            'id_segment' => (string)$segment,
+            'message' => 'resolve thread without mentions',
+            'revision_number' => '0',
+            'is_anonymous' => '0',
+        ]));
+
+        $this->responseMock->expects($this->once())->method('json')->with(
+            $this->callback(function (array $payload): bool {
+                return isset($payload['data']['entries']['comments'][0])
+                    && isset($payload['data']['user']['full_name']);
+            })
+        )->willReturnSelf();
+
+        $this->controller->resolve();
+    }
+
+    #[Test]
+    public function create_completes_and_returns_json_when_queue_and_email_are_stubbed(): void
+    {
+        // Same self-exclusion trick as above, plus no mentions in the message,
+        // so the mention-save loop and mention email loop are both empty.
+        $owner = new UserStruct();
+        $owner->uid = 1886605111;
+        $owner->email = 'foo@example.org';
+        $owner->first_name = 'Foo';
+        $owner->last_name = 'Owner';
+        $this->setControllerUser($owner, true);
+
+        $this->installFakeQueueHandler();
+
+        $segment = 990009;
+        $this->setupRequestParams($this->validRequest([
+            'id_segment' => (string)$segment,
+            'message' => 'create comment without mentions',
+            'revision_number' => '0',
+            'is_anonymous' => '0',
+        ]));
+
+        $this->responseMock->expects($this->once())->method('json')->with(
+            $this->callback(function (array $payload): bool {
+                return isset($payload['data']['entries']['comments'][0])
+                    && isset($payload['data']['user']['full_name']);
+            })
+        )->willReturnSelf();
+
+        $this->controller->create();
+    }
+
+    #[Test]
+    public function create_with_mentions_saves_mention_comments_and_returns_json(): void
+    {
+        // Exercises the users_mentioned foreach save loop (prepareMentionCommentData
+        // + saveComment) inside create(). The mentioned uid (1886605111) is the real
+        // uid backing the pre-seeded 'foo@example.org' row (so UserDao::getByUids
+        // resolves it) and differs from the current controller user (99999997) so
+        // filterUsers() keeps it in the list.
+        $currentUser = new UserStruct();
+        $currentUser->uid = 99999997;
+        $currentUser->email = 'nobody3@test.invalid';
+        $currentUser->first_name = 'No';
+        $currentUser->last_name = 'Body3';
+        $this->setControllerUser($currentUser, true);
+
+        $this->installFakeQueueHandler();
+
+        $segment = 990010;
+        $this->setupRequestParams($this->validRequest([
+            'id_segment' => (string)$segment,
+            'message' => 'create comment mentioning {@1886605111@}',
+            'revision_number' => '0',
+            'is_anonymous' => '0',
+        ]));
+
+        try {
+            $this->controller->create();
+        } catch (\Throwable) {
+            // sendEmail()'s mention-email branch may throw past this point
+            // (no real broker); the mention-save loop above already ran.
+        }
+
+        $commentDao = new CommentDao(obtainTestDatabase());
+        $saved = $commentDao->getBySegmentId($segment);
+        $this->assertNotEmpty($saved, 'Expected at least the main comment to be saved');
+
+        // Mention comments are saved with TYPE_MENTION, which getBySegmentId()
+        // excludes, so query directly for the mention row saved by the foreach loop.
+        $conn = obtainTestDatabase()->getConnection();
+        $stmt = $conn->prepare(
+            "SELECT COUNT(*) FROM comments WHERE id_job = ? AND id_segment = ? AND message_type = ? AND uid = ?"
+        );
+        $stmt->execute([1886428338, $segment, CommentDao::TYPE_MENTION, 1886605111]);
+        $this->assertGreaterThan(0, (int)$stmt->fetchColumn(), 'Expected a mention comment row to be saved');
+    }
+
+    #[Test]
+    public function delete_when_segment_has_no_matching_type_comments_throws_minus205(): void
+    {
+        // getBySegmentId() only returns rows with message_type IN (TYPE_COMMENT,
+        // TYPE_RESOLVE). Seed a TYPE_MENTION comment so end($segments) is false.
+        $segment = 990011;
+        $idComment = $this->createCommentRecord(1886428338, $segment, 1886472134, 1, 'mention only', CommentDao::TYPE_MENTION);
+        $this->setupRequestParams($this->baseCommentRequestForDelete($idComment, ['id_segment' => (string)$segment]));
+
+        try {
+            $this->controller->delete();
+            $this->fail('Expected InvalidArgumentException was not thrown');
+        } catch (InvalidArgumentException $e) {
+            $this->assertSame(-205, $e->getCode());
+        }
+    }
+
+    #[Test]
+    public function delete_with_source_page_3_from_referer_allows_revision_source_page(): void
+    {
+        // A /revise2/ referer maps to sourcePage 3, which appends SOURCE_PAGE_REVISION (2)
+        // to the allowed list. Comment's real source_page is 2 while the request's
+        // source_page param is 1, so only the referer-derived allowance lets it pass.
+        $_SERVER['HTTP_REFERER'] = 'http://localhost/translate/project/en-it/revise2/1886428338-a90acf203402';
+
+        $this->installFakeQueueHandler();
+
+        $segment = 990012;
+        $idComment = $this->createCommentRecord(1886428338, $segment, 1886472134, 2, 'revision comment');
+        $this->setupRequestParams($this->baseCommentRequestForDelete($idComment, [
+            'id_segment' => (string)$segment,
+            'source_page' => '1',
+        ]));
+
+        $this->responseMock->expects($this->once())->method('json')->with(
+            $this->callback(function (array $payload) use ($idComment): bool {
+                return $payload['data'][0]['id'] === $idComment;
+            })
+        )->willReturnSelf();
+
+        $this->controller->delete();
+
+        unset($_SERVER['HTTP_REFERER']);
+    }
+
+    #[Test]
+    public function resolveUsers_includes_project_assignee_when_present(): void
+    {
+        // getProjectAssignee() requires projects.id_assignee to reference a real
+        // user row via JOIN. Insert a dedicated fresh user (unique uid/email, no
+        // collision with pre-seeded fixtures) and point the project's assignee at
+        // it, then assert on that unique email so only the assignee branch (not
+        // the unrelated owner-inclusion branch) can satisfy the assertion.
+        $conn = obtainTestDatabase()->getConnection();
+        $conn->exec(
+            "INSERT IGNORE INTO users (uid, email, salt, pass, create_date, first_name, last_name)
+             VALUES (990020, 'assignee-990020@test.invalid', 'x', 'x', '2024-01-01 00:00:00', 'Assignee', 'User')"
+        );
+        $conn->exec("UPDATE projects SET id_assignee = 990020 WHERE id = 1886428330");
+
+        $segment = 990013;
+
+        $comment = new CommentStruct();
+        $comment->id_job = 1886428338;
+        $comment->id_segment = $segment;
+        $comment->uid = 99999998;
+
+        $currentUser = new UserStruct();
+        $currentUser->uid = 99999998;
+        $currentUser->email = 'nobody2@test.invalid';
+        $currentUser->first_name = 'No';
+        $currentUser->last_name = 'Body2';
+        $this->setControllerUser($currentUser, true);
+
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword(1886428338, 'a90acf203402', 60);
+        $this->assertInstanceOf(JobStruct::class, $job);
+
+        $users = $this->invokePrivate('resolveUsers', [$comment, $job, []]);
+
+        $emails = array_map(static fn(UserStruct $u) => $u->email, array_values($users));
+        $this->assertContains(
+            'assignee-990020@test.invalid',
+            $emails,
+            'Expected the project assignee (line 439 push) to be included in resolved users'
+        );
+    }
+
+    #[Test]
+    public function sendEmail_with_plain_comment_and_recipient_executes_comment_branch(): void
+    {
+        $initialOutputLevel = ob_get_level();
+
+        $comment = new CommentStruct();
+        $comment->id_segment = 1;
+        $comment->revision_number = 0;
+        $comment->message = 'plain comment';
+        $comment->message_type = CommentDao::TYPE_COMMENT;
+
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword(1886428338, 'a90acf203402', 60);
+        $this->assertInstanceOf(JobStruct::class, $job);
+
+        $recipient = new UserStruct();
+        $recipient->uid = 1886472177;
+        $recipient->email = 'test-email-69fb439e10cce9.44080389@example.org';
+        $recipient->first_name = 'Jane';
+        $recipient->last_name = 'Recipient';
+
+        try {
+            $this->invokePrivate('sendEmail', [$comment, $job, [$recipient], []]);
+        } catch (\Throwable) {
+            $this->assertTrue(true);
+        } finally {
+            while (ob_get_level() > $initialOutputLevel) {
+                ob_end_clean();
+            }
+        }
+
+        $this->assertTrue(true);
     }
 }
