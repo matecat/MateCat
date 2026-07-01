@@ -331,39 +331,87 @@ class TmKeyManagementAppControllerTest extends AbstractTest
     }
 
     /**
+     * The OWNER branch is reached via the job's `owner` column (the real
+     * jobs-table column holding the job owner's email), which seedJob()
+     * already sets to ownerEmail(self::BASE) — the same email as the
+     * logged-in user configured in setUp(). No extra seeding is needed to
+     * reach controller line 76 (`$this->getUser()->email == $chunk->owner`).
+     *
+     * To make this a real regression guard (not just line coverage), the job
+     * carries one tm_key owned by the logged-in user (memory_keys row seeded
+     * under a FRESH uid — see class docblock on Redis caching pitfall).
+     * UserKeysModel::getKeys() finds that key in the user's keyring and,
+     * because $jobKey->owner is true and the resolved role is OWNER, leaves
+     * it untouched (UserKeysModel.php "do Nothing" branch): the key comes
+     * back with the plaintext value and owner === true. If the lib fix were
+     * reverted to `status_owner`, the OWNER branch would not be reached (the
+     * job's status_owner column is unset/'active', not the user's email) and
+     * the role would fall through to ROLE_TRANSLATOR, so this key would come
+     * back masked with owner === false instead — pinning the fix.
+     *
      * @throws \Throwable
      */
     #[Test]
     public function getByJob_owner_returns_tm_keys_payload(): void
     {
-        // status_owner is a job STATUS column (default 'active'), not the job
-        // owner's email — CatUtils::getJobFromIdAndAnyPassword() returns it
-        // verbatim as $chunk->status_owner, and the controller compares it
-        // against the logged-in user's email to detect the OWNER role. Force
-        // it to the test user's email to reach that branch (controller line 77).
-        $this->seedConnection()->exec(
-            "UPDATE jobs SET status_owner = '" . $this->ownerEmail(self::BASE) . "' WHERE id = " . $this->jobId(self::BASE)
-        );
-
-        $this->setRequestParams([
-            'id_job' => (string) $this->jobId(self::BASE),
-            'password' => 'jobpw',
-        ]);
-
-        // user email == job status_owner → OWNER role; tm_keys is '[]' → empty sorted list
-        $this->responseMock->expects($this->once())
-            ->method('json')
-            ->with($this->callback(function (array $data): bool {
-                $this->assertArrayHasKey('tm_keys', $data);
-                $this->assertSame([], $data['tm_keys']);
-                return true;
-            }));
-
-        $this->controller->getByJob();
+        $ownerUid = self::BASE + 13;
+        $keyValue = 'ctrlownerkey' . self::BASE;
 
         $this->seedConnection()->exec(
-            "UPDATE jobs SET status_owner = 'active' WHERE id = " . $this->jobId(self::BASE)
+            'INSERT IGNORE INTO memory_keys (uid, key_value, key_name, key_tm, key_glos, creation_date) '
+            . "VALUES ($ownerUid, " . $this->seedConnection()->quote($keyValue) . ", 'CtrlOwnerKey_" . self::BASE . "', 1, 1, NOW())"
         );
+
+        try {
+            $jobTmKeys = (string) json_encode([[
+                'tm' => true, 'glos' => true, 'owner' => false,
+                'uid_transl' => null, 'uid_rev' => null,
+                'name' => 'OwnedKey', 'key' => $keyValue,
+                'r' => true, 'w' => true, 'r_transl' => true, 'w_transl' => true,
+                'r_rev' => true, 'w_rev' => true,
+            ]]);
+            $this->seedConnection()->exec(
+                'UPDATE jobs SET tm_keys = ' . $this->seedConnection()->quote($jobTmKeys)
+                . ' WHERE id = ' . $this->jobId(self::BASE)
+            );
+
+            $user = new UserStruct();
+            $user->uid = $ownerUid;
+            $user->email = $this->ownerEmail(self::BASE);
+            $user->first_name = 'Ctrl';
+            $user->last_name = 'Tester';
+            $this->setProp('user', $user);
+
+            $this->setRequestParams([
+                'id_job' => (string) $this->jobId(self::BASE),
+                'password' => 'jobpw',
+            ]);
+
+            // user email == job owner → OWNER role. The seeded key is a NON-owner
+            // key (owner:false) present in the user's keyring: as OWNER, getKeys()
+            // skips the hideKey() branch (UserKeysModel line 94 requires role !=
+            // OWNER) so the real key survives UNMASKED. If the owner-detection fix
+            // regressed to $chunk->status_owner, this user would fall through to
+            // ROLE_TRANSLATOR and the key would be hideKey()-masked — so asserting
+            // the plaintext key value below pins the fix (it fails under the bug).
+            $this->responseMock->expects($this->once())
+                ->method('json')
+                ->with($this->callback(function (array $data) use ($keyValue): bool {
+                    $this->assertArrayHasKey('tm_keys', $data);
+                    $this->assertCount(1, $data['tm_keys']);
+                    $key = $data['tm_keys'][0];
+                    $this->assertSame($keyValue, $key->key);
+                    $this->assertFalse($key->owner);
+                    return true;
+                }));
+
+            $this->controller->getByJob();
+        } finally {
+            $this->seedConnection()->exec('DELETE FROM memory_keys WHERE uid = ' . $ownerUid);
+            $this->seedConnection()->exec(
+                "UPDATE jobs SET tm_keys = '[]' WHERE id = " . $this->jobId(self::BASE)
+            );
+        }
     }
 
     /**
