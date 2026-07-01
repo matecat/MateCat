@@ -107,7 +107,7 @@ class SignupController extends AbstractStatefulKleinController
      */
     protected function renderErrorPage(): void
     {
-        $controllerInstance = new CustomPageView();
+        $controllerInstance = new CustomPageView($this->getDatabase());
         $controllerInstance->setView('410.html', [], 410);
         $controllerInstance->render();
     }
