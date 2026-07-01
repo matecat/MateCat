@@ -700,7 +700,7 @@ function CatTool() {
           }
         >
           {isUserLogged ? (
-            <article id="file" className="loading mbc-commenting-closed">
+            <article id="file" className="loading comment-closed">
               <div className="article-segments-container">
                 <SegmentsContainer
                   isReview={config.isReview}
