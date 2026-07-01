@@ -870,10 +870,17 @@ class CommentControllerTest extends AbstractTest
     public function create_with_mentions_saves_mention_comments_and_returns_json(): void
     {
         // Exercises the users_mentioned foreach save loop (prepareMentionCommentData
-        // + saveComment) inside create(). The mentioned uid (1886605111) is the real
-        // uid backing the pre-seeded 'foo@example.org' row (so UserDao::getByUids
-        // resolves it) and differs from the current controller user (99999997) so
-        // filterUsers() keeps it in the list.
+        // + saveComment) inside create(). Seed a dedicated, never-before-used mention
+        // target so UserDao::getByUids resolves it in a clean DB — a fixed/shared uid can
+        // be served stale from the DAO's Redis cache across the run. The uid differs from
+        // the current controller user (99999997) so filterUsers() keeps it in the list.
+        $mentionUid = 9_063_101;
+        $conn = obtainTestDatabase()->getConnection();
+        $conn->exec(
+            "INSERT IGNORE INTO users (uid, email, salt, pass, create_date, first_name, last_name)
+             VALUES ($mentionUid, 'mention-$mentionUid@test.invalid', 'x', 'x', '2024-01-01 00:00:00', 'Men', 'Tion')"
+        );
+
         $currentUser = new UserStruct();
         $currentUser->uid = 99999997;
         $currentUser->email = 'nobody3@test.invalid';
@@ -886,30 +893,34 @@ class CommentControllerTest extends AbstractTest
         $segment = 990010;
         $this->setupRequestParams($this->validRequest([
             'id_segment' => (string)$segment,
-            'message' => 'create comment mentioning {@1886605111@}',
+            'message' => "create comment mentioning {@{$mentionUid}@}",
             'revision_number' => '0',
             'is_anonymous' => '0',
         ]));
 
         try {
-            $this->controller->create();
-        } catch (\Throwable) {
-            // sendEmail()'s mention-email branch may throw past this point
-            // (no real broker); the mention-save loop above already ran.
+            try {
+                $this->controller->create();
+            } catch (\Throwable) {
+                // sendEmail()'s mention-email branch may throw past this point
+                // (no real broker); the mention-save loop above already ran.
+            }
+
+            $commentDao = new CommentDao(obtainTestDatabase());
+            $saved = $commentDao->getBySegmentId($segment);
+            $this->assertNotEmpty($saved, 'Expected at least the main comment to be saved');
+
+            // Mention comments are saved with TYPE_MENTION, which getBySegmentId()
+            // excludes, so query directly for the mention row saved by the foreach loop.
+            $stmt = $conn->prepare(
+                "SELECT COUNT(*) FROM comments WHERE id_job = ? AND id_segment = ? AND message_type = ? AND uid = ?"
+            );
+            $stmt->execute([1886428338, $segment, CommentDao::TYPE_MENTION, $mentionUid]);
+            $this->assertGreaterThan(0, (int)$stmt->fetchColumn(), 'Expected a mention comment row to be saved');
+        } finally {
+            $conn->exec("DELETE FROM comments WHERE id_segment = $segment");
+            $conn->exec("DELETE FROM users WHERE uid = $mentionUid");
         }
-
-        $commentDao = new CommentDao(obtainTestDatabase());
-        $saved = $commentDao->getBySegmentId($segment);
-        $this->assertNotEmpty($saved, 'Expected at least the main comment to be saved');
-
-        // Mention comments are saved with TYPE_MENTION, which getBySegmentId()
-        // excludes, so query directly for the mention row saved by the foreach loop.
-        $conn = obtainTestDatabase()->getConnection();
-        $stmt = $conn->prepare(
-            "SELECT COUNT(*) FROM comments WHERE id_job = ? AND id_segment = ? AND message_type = ? AND uid = ?"
-        );
-        $stmt->execute([1886428338, $segment, CommentDao::TYPE_MENTION, 1886605111]);
-        $this->assertGreaterThan(0, (int)$stmt->fetchColumn(), 'Expected a mention comment row to be saved');
     }
 
     #[Test]
@@ -965,38 +976,54 @@ class CommentControllerTest extends AbstractTest
         // collision with pre-seeded fixtures) and point the project's assignee at
         // it, then assert on that unique email so only the assignee branch (not
         // the unrelated owner-inclusion branch) can satisfy the assertion.
+        // getProjectAssignee() JOINs projects.id_assignee -> users. Use a dedicated fresh
+        // project id (cloned from a real row so every NOT NULL column is satisfied) instead of
+        // mutating the shared fixture project 1886428330: resolveUsers sets a 10-min DAO cache
+        // TTL keyed by id_project, so a shared id can be served a stale assignee across the run.
+        $assigneeUid  = 9_063_120;
+        $freshProject = 9_063_121;
+        $freshJob     = 9_063_122;
         $conn = obtainTestDatabase()->getConnection();
-        $conn->exec(
-            "INSERT IGNORE INTO users (uid, email, salt, pass, create_date, first_name, last_name)
-             VALUES (990020, 'assignee-990020@test.invalid', 'x', 'x', '2024-01-01 00:00:00', 'Assignee', 'User')"
-        );
-        $conn->exec("UPDATE projects SET id_assignee = 990020 WHERE id = 1886428330");
 
-        $segment = 990013;
+        try {
+            $conn->exec(
+                "INSERT IGNORE INTO users (uid, email, salt, pass, create_date, first_name, last_name)
+                 VALUES ($assigneeUid, 'assignee-$assigneeUid@test.invalid', 'x', 'x', '2024-01-01 00:00:00', 'Assignee', 'User')"
+            );
+            // Clone a real project row into a fresh id, then point its assignee at the seeded user.
+            $conn->exec("CREATE TEMPORARY TABLE _cp_proj AS SELECT * FROM projects WHERE id = 1886428330");
+            $conn->exec("UPDATE _cp_proj SET id = $freshProject, id_assignee = $assigneeUid");
+            $conn->exec("INSERT INTO projects SELECT * FROM _cp_proj");
+            $conn->exec("DROP TEMPORARY TABLE _cp_proj");
 
-        $comment = new CommentStruct();
-        $comment->id_job = 1886428338;
-        $comment->id_segment = $segment;
-        $comment->uid = 99999998;
+            $comment = new CommentStruct();
+            $comment->id_job = $freshJob;
+            $comment->id_segment = 990013;
+            $comment->uid = 99999998;
 
-        $currentUser = new UserStruct();
-        $currentUser->uid = 99999998;
-        $currentUser->email = 'nobody2@test.invalid';
-        $currentUser->first_name = 'No';
-        $currentUser->last_name = 'Body2';
-        $this->setControllerUser($currentUser, true);
+            $currentUser = new UserStruct();
+            $currentUser->uid = 99999998;
+            $currentUser->email = 'nobody2@test.invalid';
+            $currentUser->first_name = 'No';
+            $currentUser->last_name = 'Body2';
+            $this->setControllerUser($currentUser, true);
 
-        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword(1886428338, 'a90acf203402', 60);
-        $this->assertInstanceOf(JobStruct::class, $job);
+            $job = new JobStruct();
+            $job->id = $freshJob;
+            $job->id_project = $freshProject;
 
-        $users = $this->invokePrivate('resolveUsers', [$comment, $job, []]);
+            $users = $this->invokePrivate('resolveUsers', [$comment, $job, []]);
 
-        $emails = array_map(static fn(UserStruct $u) => $u->email, array_values($users));
-        $this->assertContains(
-            'assignee-990020@test.invalid',
-            $emails,
-            'Expected the project assignee (line 439 push) to be included in resolved users'
-        );
+            $emails = array_map(static fn(UserStruct $u) => $u->email, array_values($users));
+            $this->assertContains(
+                "assignee-$assigneeUid@test.invalid",
+                $emails,
+                'Expected the project assignee to be included in resolved users'
+            );
+        } finally {
+            $conn->exec("DELETE FROM projects WHERE id = $freshProject");
+            $conn->exec("DELETE FROM users WHERE uid = $assigneeUid");
+        }
     }
 
     #[Test]
