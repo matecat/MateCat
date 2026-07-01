@@ -34,14 +34,14 @@ class ProjectUrls
     /** @var array{files: array<int|string, array<string, mixed>>, jobs: array<int|string, array<string, mixed>>} */
     private array $formatted = ['files' => [], 'jobs' => []];
 
-    private ?ChunkReviewDao $chunkReviewDao;
+    private ChunkReviewDao $chunkReviewDao;
 
     /**
      * ProjectUrls constructor.
      *
      * @param ShapelessConcreteStruct[] $data
      */
-    public function __construct(array $data, ?ChunkReviewDao $chunkReviewDao = null)
+    public function __construct(array $data, ChunkReviewDao $chunkReviewDao)
     {
         $this->data = $data;
         $this->chunkReviewDao = $chunkReviewDao;
@@ -113,7 +113,6 @@ class ProjectUrls
                 'translate_url' => $this->translateUrl($record),
             ];
 
-            $this->chunkReviewDao ??= new ChunkReviewDao();
             $reviews = $this->chunkReviewDao->findChunkReviews(new JobStruct(['id' => $record['jid'], 'password' => $record['jpassword']]), 60 * 10);
 
             foreach ($reviews as $review) {

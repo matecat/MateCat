@@ -115,7 +115,7 @@ class UserKeysController extends KleinController
 
         $userMemoryKeys = $mkDao->read($memoryKeyToUpdate) ?: throw new NotFoundException("No user memory keys found");
 
-        (new TmKeyManager())->shareKey(array_values($emailList), $userMemoryKeys[0], $this->user);
+        (new TmKeyManager())->shareKey(array_values($emailList), $userMemoryKeys[0], $this->user, $this->getDatabase());
 
         $this->response->json([
             'errors' => [],
@@ -205,7 +205,7 @@ class UserKeysController extends KleinController
      */
     private function getMemoryToUpdate(string $key, ?string $description = null): MemoryKeyStruct
     {
-        $tmService = new TMSService();
+        $tmService = new TMSService($this->getDatabase());
 
         //validate the key
         $tmService->checkCorrectKey($key);
@@ -250,7 +250,7 @@ class UserKeysController extends KleinController
                 $struct = EngineStruct::getStruct();
                 $struct->class_load = $engineName;
                 $struct->type = EngineConstants::MT;
-                $engine = EnginesFactory::createTempInstance($struct);
+                $engine = EnginesFactory::createTempInstance($struct, $this->getDatabase());
 
                 // Check if the engine supports adaptive MT.
                 if ($engine->isAdaptiveMT()) {
@@ -261,7 +261,7 @@ class UserKeysController extends KleinController
 
                     // If metadata exists, attempt to delete the memory key from the engine.
                     if (!empty($ownerMmtEngineMetaData) && is_int($ownerMmtEngineMetaData->value)) {
-                        $engine = EnginesFactory::getInstance($ownerMmtEngineMetaData->value, AbstractEngine::class);
+                        $engine = EnginesFactory::getInstance($ownerMmtEngineMetaData->value, $this->getDatabase(), AbstractEngine::class);
                         $engineKey = $engine->getMemoryIfMine($memoryKey);
                         if ($engineKey) {
                             $engine->deleteMemory($engineKey);

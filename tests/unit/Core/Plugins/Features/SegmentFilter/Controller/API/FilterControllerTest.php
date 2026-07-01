@@ -68,7 +68,8 @@ class FilterControllerTest extends AbstractTest
         $this->setProp('request', new Request());
         $this->setProp('response', $this->responseMock);
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        $this->setProp('database', obtainTestDatabase());
     }
 
     protected function tearDown(): void
@@ -100,7 +101,7 @@ class FilterControllerTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("INSERT INTO projects (id, id_customer, password, name, create_date, status_analysis) VALUES (" . self::PROJECT_ID . ", '" . self::OWNER . "', 'projpw', 'FilterTestProject', NOW(), 'DONE')");
         $conn->exec("INSERT INTO files (id, id_project, filename, source_language, mime_type) VALUES (" . self::FILE_ID . ", " . self::PROJECT_ID . ", 'f.xliff', 'en-US', 'application/xliff+xml')");
         $conn->exec("INSERT INTO jobs (id, password, id_project, source, target, job_first_segment, job_last_segment, owner, tm_keys, create_date, disabled) VALUES (" . self::JOB_ID . ", '" . self::JOB_PASSWORD . "', " . self::PROJECT_ID . ", 'en-US', 'it-IT', " . self::SEGMENT_ID . ", " . self::SEGMENT_ID . ", '" . self::OWNER . "', '[]', NOW(), 0)");
@@ -110,7 +111,7 @@ class FilterControllerTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM segment_translations WHERE id_job = " . self::JOB_ID);
         $conn->exec("DELETE FROM segments WHERE id_file = " . self::FILE_ID);
         $conn->exec("DELETE FROM jobs WHERE id = " . self::JOB_ID);
@@ -144,7 +145,7 @@ class FilterControllerTest extends AbstractTest
             'request' => $request,
             'response' => $this->responseMock,
             'logger' => $this->createMock(MatecatLogger::class),
-            'featureSet' => new FeatureSet(),
+            'featureSet' => new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
             // ChunkPasswordValidator's ctor reads $controller->getParams() (not the request)
             'params' => ['id_job' => self::JOB_ID, 'password' => self::JOB_PASSWORD],
         ];

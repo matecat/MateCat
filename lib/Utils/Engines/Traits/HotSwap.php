@@ -52,7 +52,7 @@ trait HotSwap
      *
      * <code>
      *     public function afterTMAnalysisCloseProject( $project_id, $_analyzed_report ) {
-     *             $this->swapOff( $project_id );
+     *             $this->swapOff( $project_id, $this->jobDao, $this->redisHandler );
      *     }
      *</code>
      *
@@ -62,13 +62,12 @@ trait HotSwap
      * @throws Exception
      * @throws TypeError
      */
-    protected function swapOff(int $project_id, ?JobDao $jobDao = null, ?RedisHandler $redisHandler = null): void
+    protected function swapOff(int $project_id, JobDao $jobDao, RedisHandler $redisHandler): void
     {
         //There should be more than one job per project, to be generic use a foreach
-        $jobDao = $jobDao ?? new JobDao();
         $jobStructs = $jobDao->getNotDeletedByProjectId($project_id, 60);
 
-        $redisConn = ($redisHandler ?? new RedisHandler())->getConnection();
+        $redisConn = $redisHandler->getConnection();
         foreach ($jobStructs as $jobStruct) {
             $update = false;
 

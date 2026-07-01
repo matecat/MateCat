@@ -10,7 +10,6 @@
 namespace Model\TMSService;
 
 
-use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use PDO;
 use PDOException;
@@ -23,9 +22,9 @@ class TMSServiceDao
 
     private IDatabase $database;
 
-    public function __construct(?IDatabase $database = null)
+    public function __construct(IDatabase $database)
     {
-        $this->database = $database ?? Database::obtain();
+        $this->database = $database;
     }
 
     /**

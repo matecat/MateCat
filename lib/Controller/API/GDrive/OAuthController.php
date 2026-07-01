@@ -10,6 +10,7 @@ namespace Controller\API\GDrive;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Google\Service\Exception;
+use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\GDrive\GDriveUserAuthorizationModel;
 use Model\Exceptions\ValidationError;
 use ReflectionException;
@@ -63,7 +64,7 @@ EOF;
      */
     private function __handleCode(string $code): void
     {
-        $model = new GDriveUserAuthorizationModel($this->user);
+        $model = new GDriveUserAuthorizationModel($this->user, new ConnectedServiceDao($this->getDatabase()));
         $model->updateOrCreateRecordByCode($code);
         $this->refreshClientSessionIfNotApi();
     }

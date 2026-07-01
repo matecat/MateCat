@@ -54,7 +54,7 @@ class GetMyMemoryTest extends AbstractTest
     {
         parent::setUp();
 
-        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -92,7 +92,7 @@ class GetMyMemoryTest extends AbstractTest
     #[Test]
     public function test_get_segment_dutch()
     {
-        $this->engine_MyMemory = new MyMemory($this->engine_struct_param);
+        $this->engine_MyMemory = new MyMemory($this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
 
         $this->config_param_of_get['segment'] = "- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.";
 
@@ -122,7 +122,7 @@ class GetMyMemoryTest extends AbstractTest
     #[Test]
     public function test_get_segment_italian_with_id_user_initialized()
     {
-        $this->engine_MyMemory = new MyMemory($this->engine_struct_param);
+        $this->engine_MyMemory = new MyMemory($this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
 
 
         $this->config_param_of_get['segment'] = "L’Amministratore inserisce titolo, anno di produzione e codice univoco del nuovo film.";
@@ -155,7 +155,7 @@ class GetMyMemoryTest extends AbstractTest
     #[Test]
     public function test_get_segment_italian_with_wrong_source_language_and_id_user_not_in_array_coverage_purpose()
     {
-        $this->engine_MyMemory = new MyMemory($this->engine_struct_param);
+        $this->engine_MyMemory = new MyMemory($this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
 
 
         $this->config_param_of_get['segment'] = "Scelta del Piano di studio parziale per il secondo anno ripetente secondo l’Ordinamento D.M. 270/04";
@@ -211,7 +211,7 @@ TAB;
         /**
          * @var Matches
          */
-        $this->engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $this->engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
         $this->engine_MyMemory->expects($this->exactly(1))->method('_call')->with($url_mock_param)->willReturn($mock_json_return);
 
         $result = $this->engine_MyMemory->get($this->config_param_of_get);
@@ -278,7 +278,7 @@ TAB;
         /**
          * @var Matches
          */
-        $this->engine_MyMemory = $this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $this->engine_MyMemory = $this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
         $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_mock_param)->willReturn($mock_json_return);
 
         $result = $this->engine_MyMemory->get($this->config_param_of_get);
@@ -432,7 +432,7 @@ TAB;
         /**
          * @var Matches
          */
-        $this->engine_MyMemory = $this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $this->engine_MyMemory = $this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
         $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_mock_param)->willReturn($mock_json_return);
 
         /**
@@ -587,7 +587,7 @@ TAB;
         /**
          * @var Matches
          */
-        $this->engine_MyMemory = $this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $this->engine_MyMemory = $this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
         $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param)->willReturn($rawValue_error);
 
         $result = $this->engine_MyMemory->get($this->config_param_of_get);

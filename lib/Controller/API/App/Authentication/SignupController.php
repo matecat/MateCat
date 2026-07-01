@@ -16,9 +16,11 @@ use InvalidArgumentException;
 use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Response;
 use Model\Teams\InvitedUser;
+use Model\Teams\TeamDao;
 use Model\Users\Authentication\PasswordRules;
 use Model\Users\Authentication\SignupModel;
 use Model\Users\RedeemableProject;
+use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use TypeError;
 use Utils\Registry\AppConfig;
@@ -78,7 +80,7 @@ class SignupController extends AbstractStatefulKleinController
      */
     protected function createInvitedUser(): InvitedUser
     {
-        return new InvitedUser();
+        return new InvitedUser('', null, new TeamDao($this->getDatabase()), null, new UserDao($this->getDatabase()));
     }
 
     /**
@@ -89,7 +91,11 @@ class SignupController extends AbstractStatefulKleinController
      */
     protected function createRedeemableProject(UserStruct $user, array &$session): RedeemableProject
     {
-        return new RedeemableProject($user, $session);
+        return new RedeemableProject(
+            $user,
+            $session,
+            new TeamDao($this->getDatabase())
+        );
     }
 
     /**
@@ -114,12 +120,12 @@ class SignupController extends AbstractStatefulKleinController
      */
     protected function createSignupModel(array $params, array &$session): SignupModel
     {
-        return new SignupModel($params, $session);
+        return new SignupModel($params, $session, new UserDao($this->getDatabase()), new TeamDao($this->getDatabase()));
     }
 
     /**
-     * @throws ValidationError
      * @return array<string, mixed>
+     * @throws ValidationError
      */
     private function validateCreationRequest(): array
     {
@@ -128,7 +134,10 @@ class SignupController extends AbstractStatefulKleinController
             [
                 'email' => ['filter' => FILTER_SANITIZE_EMAIL, 'options' => []],
                 'password' => ['filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'options' => FILTER_FLAG_STRIP_LOW],
-                'password_confirmation' => ['filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'options' => FILTER_FLAG_STRIP_LOW],
+                'password_confirmation' => [
+                    'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                    'options' => FILTER_FLAG_STRIP_LOW
+                ],
                 'first_name' => [
                     'filter' => FILTER_CALLBACK,
                     'options' => function ($firstName) {
@@ -148,7 +157,7 @@ class SignupController extends AbstractStatefulKleinController
                         if ($wanted_url === false) {
                             return AppConfig::$HTTPHOST;
                         }
-                        $parsed     = parse_url($wanted_url);
+                        $parsed = parse_url($wanted_url);
                         $parsedHost = parse_url(AppConfig::$HTTPHOST);
                         if ($parsed === false || $parsedHost === false) {
                             return AppConfig::$HTTPHOST;
@@ -185,7 +194,11 @@ class SignupController extends AbstractStatefulKleinController
      */
     public function confirm(): void
     {
-        $token = filter_var($this->request->param('token'), FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+        $token = filter_var(
+            $this->request->param('token'),
+            FILTER_SANITIZE_SPECIAL_CHARS,
+            FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+        );
 
         $signupModel = $this->createSignupModel(['token' => $token], $_SESSION);
 
@@ -226,7 +239,12 @@ class SignupController extends AbstractStatefulKleinController
         $emailIdentifier = (string)$this->request->param('email');
 
         // rate limit on email
-        $checkRateLimitOnEmail = $this->checkAndIncrementRateLimit($this->response, $emailIdentifier, '/api/app/user', 3);
+        $checkRateLimitOnEmail = $this->checkAndIncrementRateLimit(
+            $this->response,
+            $emailIdentifier,
+            '/api/app/user',
+            3
+        );
         if ($checkRateLimitOnEmail instanceof Response) {
             $this->response = $checkRateLimitOnEmail;
 
@@ -241,7 +259,7 @@ class SignupController extends AbstractStatefulKleinController
             return;
         }
 
-        SignupModel::resendConfirmationEmail($this->request->param('email'));
+        SignupModel::resendConfirmationEmail($this->request->param('email'), new UserDao($this->getDatabase()));
         $this->response->code(200);
     }
 

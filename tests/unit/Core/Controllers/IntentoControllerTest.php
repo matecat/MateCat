@@ -136,6 +136,7 @@ class IntentoControllerTest extends AbstractTest
         $dbStub->method('getConnection')->willReturn($pdoStub);
 
         $this->setDatabaseInstance($dbStub);
+        $this->reflector->getProperty('database')->setValue($this->controller, $dbStub);
     }
 
     /**

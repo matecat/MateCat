@@ -5,7 +5,6 @@ namespace Model\Projects;
 use DomainException;
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Exceptions\NotFoundException;
@@ -147,7 +146,7 @@ class ProjectDao extends AbstractDao
      */
     public function unassignProjects(TeamStruct $team, UserStruct $user): int
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare(static::$_sql_for_project_unassignment);
         $stmt->execute([
             'id_assignee' => $user->uid,
@@ -167,7 +166,7 @@ class ProjectDao extends AbstractDao
      */
     public function massiveSelfAssignment(TeamStruct $team, UserStruct $user, TeamStruct $personalTeam): int
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare(static::$_sql_massive_self_assignment);
         $stmt->execute([
             'id_assignee' => $user->uid,
@@ -192,7 +191,7 @@ class ProjectDao extends AbstractDao
             return [];
         }
         $qMarks = str_repeat('?,', count($id_list) - 1) . '?';
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare(" SELECT * FROM projects WHERE id IN( $qMarks ) ORDER BY projects.id DESC");
 
         return $this->_fetchObjectMap($stmt, ProjectStruct::class, $id_list);
@@ -231,7 +230,7 @@ class ProjectDao extends AbstractDao
           WHERE id_project in ( $project_ids )
           GROUP BY id_project, c.service ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
 
         return $this->_fetchObjectMap($stmt, RemoteFileServiceNameStruct::class, []);
@@ -311,14 +310,12 @@ class ProjectDao extends AbstractDao
      */
     public function getJobIds(int $pid): array
     {
-        $db = Database::obtain();
-
         $query = "SELECT jobs.id
                 FROM jobs
                 WHERE jobs.id_project = :pid
                 ";
 
-        $stmt = $db->getConnection()->prepare($query);
+        $stmt = $this->database->getConnection()->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute(['pid' => $pid]);
 
@@ -335,13 +332,11 @@ class ProjectDao extends AbstractDao
      */
     public function getPasswordsMap(int $pid): array
     {
-        $db = Database::obtain();
-
         $query = "select
             j.id as id_job	,
             j.job_first_segment,
             j.job_last_segment,
-         j.password as t_password, 
+         j.password as t_password,
          r.review_password as r_password,
          r2.review_password as r2_password
          from jobs j
@@ -349,7 +344,7 @@ class ProjectDao extends AbstractDao
          left join qa_chunk_reviews r2 on r2.id_job = j.id and r2.source_page = 3 and r2.password = j.password
          where j.id_project = :pid;";
 
-        $stmt = $db->getConnection()->prepare($query);
+        $stmt = $this->database->getConnection()->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute(['pid' => $pid]);
 

@@ -48,6 +48,7 @@ class SegmentTranslationTest extends AbstractTest
 
         $this->controller = new SegmentTranslationTestController();
         $this->ctrlRef    = new ReflectionClass(KleinController::class);
+        $this->setCtrlProp('database', obtainTestDatabase());
     }
 
     protected function tearDown(): void
@@ -84,7 +85,7 @@ class SegmentTranslationTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec(
             "INSERT IGNORE INTO segment_translations
                 (id_segment, id_job, segment_hash, status, translation, translation_date, time_to_edit)
@@ -95,7 +96,7 @@ class SegmentTranslationTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec(
             "DELETE FROM segment_translations WHERE id_segment = " . self::ID_SEGMENT . " AND id_job = " . self::ID_JOB
         );

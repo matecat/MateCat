@@ -27,12 +27,19 @@ trait TransactionalTrait
     protected static bool $__transactionStarted = false;
 
     /**
+     * The database the transaction runs on. Each host returns its own injected
+     * handle so the transaction and the host's queries share one connection.
+     */
+    abstract protected function getTransactionalDatabase(): IDatabase;
+
+    /**
      * @throws \PDOException
      */
     protected function openTransaction(): void
     {
-        if (!Database::obtain()->getConnection()->inTransaction()) {
-            Database::obtain()->begin();
+        $database = $this->getTransactionalDatabase();
+        if (!$database->getConnection()->inTransaction()) {
+            $database->begin();
             static::$__transactionStarted = true;
         }
     }
@@ -43,7 +50,7 @@ trait TransactionalTrait
     protected function commitTransaction(): void
     {
         if (static::$__transactionStarted) {
-            Database::obtain()->commit();
+            $this->getTransactionalDatabase()->commit();
             static::$__transactionStarted = false;
         }
     }
@@ -54,7 +61,7 @@ trait TransactionalTrait
     protected function rollbackTransaction(): void
     {
         if (static::$__transactionStarted) {
-            Database::obtain()->rollback();
+            $this->getTransactionalDatabase()->rollback();
             static::$__transactionStarted = false;
         }
     }

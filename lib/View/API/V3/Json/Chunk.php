@@ -12,12 +12,19 @@ use DomainException;
 use Exception;
 use Matecat\Locales\LanguageDomains;
 use Matecat\Locales\Languages;
+use Model\Comments\CommentDao;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Outsource\ConfirmationDao;
+use Model\Translations\WarningDao;
+use Model\Translators\JobsTranslatorsDao;
+use Model\Users\UserDao;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\WordCount\WordCountStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
@@ -36,12 +43,12 @@ class Chunk extends \View\API\V2\Json\Chunk
     protected array $chunk_reviews = [];
     protected JobStruct $chunk;
 
-    private JobDao $jobDao;
+    protected JobDao $jobDao;
 
-    public function __construct(?JobDao $jobDao = null, ?ChunkReviewDao $chunkReviewDao = null)
+    public function __construct(IDatabase $database)
     {
-        parent::__construct($chunkReviewDao);
-        $this->jobDao = $jobDao ?? new JobDao();
+        parent::__construct($database);
+        $this->jobDao = new JobDao($database);
     }
 
     /**
@@ -55,8 +62,8 @@ class Chunk extends \View\API\V2\Json\Chunk
      */
     public function renderOne(JobStruct $chunk): array
     {
-        $project = $chunk->getProject();
-        $featureSet = $project->getFeaturesSet();
+        $project = $chunk->getProject(new ProjectDao($this->database));
+        $featureSet = FeatureSet::forProject($project, $this->database);
 
         return [
             'job' => [
@@ -79,14 +86,14 @@ class Chunk extends \View\API\V2\Json\Chunk
     public function renderItem(JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet): array
     {
         $this->chunk = $chunk;
-        $outsourceInfo = $chunk->getOutsource();
-        $tStruct = $chunk->getTranslator();
+        $outsourceInfo = $chunk->getOutsource(new ConfirmationDao($this->database));
+        $tStruct = $chunk->getTranslator(new JobsTranslatorsDao($this->database));
         $outsource = null;
         $translator = null;
         if (!empty($outsourceInfo)) {
             $outsource = (new OutsourceConfirmation($outsourceInfo))->render();
         } else {
-            $translator = (!empty($tStruct) ? (new JobTranslator($tStruct))->renderItem() : null);
+            $translator = (!empty($tStruct) ? (new JobTranslator($tStruct, new UserDao($this->database)))->renderItem() : null);
         }
 
         $jobStats = WordCountStruct::loadFromJob($chunk);
@@ -96,7 +103,7 @@ class Chunk extends \View\API\V2\Json\Chunk
         $subject_handler = LanguageDomains::getInstance();
         $subjectsHashMap = $subject_handler->getEnabledHashMap();
 
-        $warningsCount = $chunk->getWarningsCount();
+        $warningsCount = $chunk->getWarningsCount(new WarningDao($this->database));
 
         $result = [
             'id' => (int)$chunk->id,
@@ -111,9 +118,9 @@ class Chunk extends \View\API\V2\Json\Chunk
             'owner' => $chunk->owner,
             'time_to_edit' => $this->getTimeToEditArray((int)$chunk->id),
             'avg_post_editing_effort' => (float)$chunk->avg_post_editing_effort,
-            'open_threads_count' => (int)$chunk->getOpenThreadsCount(),
+            'open_threads_count' => (int)$chunk->getOpenThreadsCount(new CommentDao($this->database)),
             'created_at' => Utils::api_timestamp($chunk->create_date),
-            'pee' => $chunk->getPeeForTranslatedSegments(),
+            'pee' => $chunk->getPeeForTranslatedSegments(new JobDao($this->database)),
             'private_tm_key' => $this->getKeyList($chunk),
             'warnings_count' => $warningsCount->warnings_count,
             'warning_segments' => ($warningsCount->warning_segments ?? []),
@@ -145,7 +152,7 @@ class Chunk extends \View\API\V2\Json\Chunk
     protected function getChunkReviews(): array
     {
         if (empty($this->chunk_reviews)) {
-            $this->chunkReviewDao ??= new ChunkReviewDao();
+            $this->chunkReviewDao ??= new ChunkReviewDao($this->database);
             $this->chunk_reviews = $this->chunkReviewDao->findChunkReviews($this->chunk);
         }
 
@@ -175,7 +182,7 @@ class Chunk extends \View\API\V2\Json\Chunk
      */
     protected function renderQualitySummary(JobStruct $chunk, ProjectStruct $project, array $chunkReviewsList): array
     {
-        return (new QualitySummary($chunk, $project))->render($chunkReviewsList);
+        return (new QualitySummary($chunk, $project, $this->database ?? throw new \RuntimeException('No IDatabase available for Chunk view')))->render($chunkReviewsList);
     }
 
     /**

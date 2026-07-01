@@ -29,6 +29,8 @@ use Model\Files\FilesPartsDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
@@ -283,7 +285,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 /** @var ProjectStruct $project */
                 $project = $this->data['project'];
                 // case 1. is MT
-                $new_translation->suggestion_match = (string)($project->getMetadataValue(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) ?? 85);
+                $new_translation->suggestion_match = (string)((new ProjectMetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$project->id, ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) ?? 85);
                 $new_translation->suggestion_source = EngineConstants::MT;
             } elseif ($client_chosen_suggestion->match == InternalMatchesConstants::NO_MATCH) {
                 // case 2. no match
@@ -360,7 +362,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         /**
          * Translation is inserted here.
          */
-        (new CatUtils())->addSegmentTranslation($newTranslation, (bool)$this->isRevision());
+        (new CatUtils($this->getDatabase()))->addSegmentTranslation($newTranslation, (bool)$this->isRevision());
 
         /**
          * @see ProjectCompletion
@@ -465,7 +467,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     ): array {
         $newTotals = WordCountStruct::loadFromJob($this->data['chunk']);
 
-        $job_stats = (new CatUtils())->getFastStatsForJob($newTotals);
+        $job_stats = (new CatUtils($this->getDatabase()))->getFastStatsForJob($newTotals);
         $job_stats['analysis_complete'] = (
             $this->data['project']['status_analysis'] == ProjectStatus::STATUS_DONE or
             $this->data['project']['status_analysis'] == ProjectStatus::STATUS_NOT_TO_ANALYZE
@@ -669,7 +671,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         $this->password = (string)$password;
         $this->request_password = $received_password;
 
-        $this->sourceContainsIcu($chunk->getProject(), $chunk, $segmentString);
+        $this->sourceContainsIcu($chunk->getProject(new ProjectDao($this->getDatabase())), $chunk, $segmentString, $this->getDatabase());
 
         $data = [
             'id_job' => $id_job,
@@ -697,7 +699,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             'status' => $status,
             'split_statuses' => $split_statuses,
             'chunk' => $chunk,
-            'project' => $chunk->getProject(),
+            'project' => $chunk->getProject(new ProjectDao($this->getDatabase())),
             'id_project' => $chunk->id_project,
             'segment_contains_icu' => $this->sourceContainsIcu,
             'split_num' => null,
@@ -721,7 +723,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     {
         $id_segment = (int)$this->data['id_segment'];
 
-        if ((new SegmentDisabledService())->isDisabled($id_segment)) {
+        if ((new SegmentDisabledService(new SegmentMetadataDao($this->getDatabase())))->isDisabled($id_segment)) {
             throw new RuntimeException("Segment #" . $id_segment . " is disabled", -5);
         }
     }
@@ -756,7 +758,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      */
     protected function checkSegmentSplitData(): void
     {
-        [$__translation, $this->data['split_chunk_lengths']] = (new CatUtils())->parseSegmentSplit($this->data['translation'], '', $this->filter);
+        [$__translation, $this->data['split_chunk_lengths']] = (new CatUtils($this->getDatabase()))->parseSegmentSplit($this->data['translation'], '', $this->filter);
 
         if (is_null($__translation) || $__translation === '') {
             $this->logger->debug("Empty Translation \n\n" . var_export($this->request->paramsPost()->all(), true));
@@ -900,10 +902,11 @@ class SetTranslationController extends AbstractStatefulKleinController
     /**
      * init VersionHandler
      * @throws RuntimeException
+     * @throws Exception
      */
     private function initVersionHandler(): void
     {
-        $this->VersionsHandler = TranslationVersions::getVersionHandlerNewInstance($this->data['chunk'], $this->user, $this->data['project'], (int)$this->data['id_segment']);
+        $this->VersionsHandler = TranslationVersions::getVersionHandlerNewInstance($this->data['chunk'], $this->user, $this->data['project'], (int)$this->data['id_segment'], $this->getDatabase());
     }
 
     /**
@@ -942,7 +945,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $translation->translation_date = date("Y-m-d H:i:s");
 
             try {
-                (new CatUtils())->addSegmentTranslation($translation, (bool)$this->isRevision());
+                (new CatUtils($this->getDatabase()))->addSegmentTranslation($translation, (bool)$this->isRevision());
             } catch (Exception $e) {
                 $this->getDatabase()->rollback();
                 throw new RuntimeException($e->getMessage());

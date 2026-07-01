@@ -9,6 +9,7 @@ use DOMElement;
 use Exception;
 use InvalidArgumentException;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils as ReviewUtils;
@@ -766,7 +767,7 @@ class Utils
      * @return string
      * @throws Exception
      */
-    public static function changeMemorySuggestionSource(array $match, string $job_tm_keys, ?int $uid = null): string
+    public static function changeMemorySuggestionSource(array $match, string $job_tm_keys, IDatabase $database, ?int $uid = null): string
     {
         $sug_source = $match['created_by'];
         $key = $match['memory_key'];
@@ -780,7 +781,7 @@ class Utils
             $description = $sug_source;
         } elseif (preg_match("/[a-f0-9]{8,}/", $key)) { // md5 Key
             // This condition is for md5 keys
-            $description = self::keyNameFromUserKeyring($key, $uid);
+            $description = self::keyNameFromUserKeyring($key, $database, $uid);
 
             if (empty($description)) {
                 $description = self::getDefaultKeyDescription($key, $job_tm_keys);
@@ -797,7 +798,7 @@ class Utils
     /**
      * @throws Exception
      */
-    public static function keyNameFromUserKeyring(string $key, ?int $uid = null): ?string
+    public static function keyNameFromUserKeyring(string $key, IDatabase $database, ?int $uid = null): ?string
     {
         if ($uid === null) {
             return null;
@@ -809,7 +810,7 @@ class Utils
         $memoryKey->tm_key = new TmKeyStruct();
         $memoryKey->tm_key->key = $key;
 
-        $memoryKeyDao = new MemoryKeyDao(Database::obtain());
+        $memoryKeyDao = new MemoryKeyDao($database);
         $currentUserMemoryKey = $memoryKeyDao->setCacheTTL(3600)->read($memoryKey);
         if (count($currentUserMemoryKey) > 0) {
             $currentUserMemoryKey = $currentUserMemoryKey[0];

@@ -12,13 +12,17 @@ namespace View\API\V3\Json;
 
 use DomainException;
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
+use Model\LQA\CategoryDao;
 use Model\LQA\EntryDao;
+use Model\LQA\ModelDao;
 use Model\Projects\ProjectStruct;
 use Model\QualityReport\QualityReportDao;
 use Model\ReviseFeedback\FeedbackDAO;
+use Model\Translations\WarningDao;
 use PDOException;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\RevisionFactory;
@@ -36,17 +40,18 @@ class QualitySummary
      * @var ProjectStruct
      */
     protected ProjectStruct $project;
+    protected IDatabase $database;
 
     /**
-     * QualitySummary constructor.
-     *
      * @param JobStruct $chunk
      * @param ProjectStruct $project
+     * @param IDatabase $database
      */
-    public function __construct(JobStruct $chunk, ProjectStruct $project)
+    public function __construct(JobStruct $chunk, ProjectStruct $project, IDatabase $database)
     {
         $this->chunk = $chunk;
         $this->project = $project;
+        $this->database = $database;
     }
 
     /**
@@ -173,7 +178,7 @@ class QualitySummary
             'model_template_id' => $model_template_id ?: null,
             'is_pass' => $is_pass,
             'quality_overall' => $quality_overall,
-            'errors_count' => $jStruct->getErrorsCount(),
+            'errors_count' => $jStruct->getErrorsCount(new WarningDao($this->database)),
             'revise_issues' => $reviseIssues,
             'score' => $score,
             'categories' => $categories,
@@ -235,8 +240,8 @@ class QualitySummary
         $total_issues_weight = $chunkReviewModel->getPenaltyPoints();
         $total_reviewed_words_count = $chunkReviewModel->getReviewedWordsCount();
 
-        $model = $project->getLqaModel();
-        $categories = $model !== null ? $model->getCategoriesAndSeverities() : [];
+        $model = $project->id_qa_model !== null ? (new ModelDao($this->database))->findById($project->id_qa_model) : null;
+        $categories = $model !== null ? $model->getCategoriesAndSeverities(new CategoryDao($this->database)) : [];
 
         if ($model) {
             $passFail = ['type' => $model->pass_type, 'options' => ['limit' => $chunkReviewModel->getQALimit($model)]];
@@ -312,17 +317,17 @@ class QualitySummary
 
     protected function createQualityReportDao(): QualityReportDao
     {
-        return new QualityReportDao();
+        return new QualityReportDao($this->database);
     }
 
     protected function createFeedbackDao(): FeedbackDAO
     {
-        return new FeedbackDAO();
+        return new FeedbackDAO($this->database);
     }
 
     protected function createEntryDao(): EntryDao
     {
-        return new EntryDao();
+        return new EntryDao($this->database);
     }
 
     /**
@@ -332,7 +337,7 @@ class QualitySummary
      */
     protected function getReviewedWordsCountGroupedByFileParts(int $idJob, string $password, int $revisionNumber): array
     {
-        return (new JobDao())->getReviewedWordsCountGroupedByFileParts($idJob, $password, $revisionNumber);
+        return (new JobDao($this->database))->getReviewedWordsCountGroupedByFileParts($idJob, $password, $revisionNumber);
     }
 
     /**
@@ -340,6 +345,6 @@ class QualitySummary
      */
     protected function createRevisionFeature(ProjectStruct $project): RevisionFactory
     {
-        return RevisionFactory::initFromProject($project);
+        return RevisionFactory::initFromProject($project, $this->database);
     }
 }

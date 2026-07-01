@@ -79,7 +79,10 @@ class GetSearchControllerTest extends AbstractTest
         $logProp->setValue($this->controller, $this->createMock(MatecatLogger::class));
 
         $fsProp = $this->reflector->getProperty('featureSet');
-        $fsProp->setValue($this->controller, new FeatureSet());
+        $fsProp->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+
+        $dbProp = $this->reflector->getProperty('database');
+        $dbProp->setValue($this->controller, obtainTestDatabase());
     }
 
     protected function tearDown(): void
@@ -90,7 +93,7 @@ class GetSearchControllerTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $db = Database::obtain();
+        $db = obtainTestDatabase();
         $conn = $db->getConnection();
 
         $this->cleanTestData();
@@ -116,7 +119,7 @@ class GetSearchControllerTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $db = Database::obtain();
+        $db = obtainTestDatabase();
         $conn = $db->getConnection();
 
         $conn->exec("DELETE FROM segment_translations WHERE id_job = " . self::TEST_JOB_ID);
@@ -750,7 +753,7 @@ class GetSearchControllerTest extends AbstractTest
             null
         ]);
 
-        $updated = (new \Model\Translations\SegmentTranslationDao())->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
+        $updated = (new \Model\Translations\SegmentTranslationDao(obtainTestDatabase()))->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
         $this->assertNotNull($updated);
         $this->assertStringContainsString('universo', $updated->translation);
     }

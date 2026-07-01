@@ -75,7 +75,10 @@ class GetWarningControllerTest extends AbstractTest
         $logProp->setValue($this->controller, $this->createMock(MatecatLogger::class));
 
         $fsProp = $this->reflector->getProperty('featureSet');
-        $fsProp->setValue($this->controller, new FeatureSet());
+        $fsProp->setValue($this->controller, new FeatureSet(obtainTestDatabase()));
+
+        $dbProp = $this->reflector->getProperty('database');
+        $dbProp->setValue($this->controller, obtainTestDatabase());
     }
 
     protected function tearDown(): void
@@ -86,7 +89,7 @@ class GetWarningControllerTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $db = Database::obtain();
+        $db = obtainTestDatabase();
         $conn = $db->getConnection();
 
         $this->cleanTestData();
@@ -104,7 +107,7 @@ class GetWarningControllerTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $db = Database::obtain();
+        $db = obtainTestDatabase();
         $conn = $db->getConnection();
 
         $conn->exec("DELETE FROM segment_translations WHERE id_job = " . self::TEST_JOB_ID);

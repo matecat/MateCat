@@ -66,7 +66,7 @@ class TeamsProjectsController extends KleinController
 
         /** @var ProjectStruct[] $projectsList */
         $projectsList = $this->getProjectDao()->findByTeamId($id_team, $filter);
-        $projectsList = (new Project($projectsList))->render();
+        $projectsList = (new Project($this->getDatabase(), $projectsList))->render();
 
         $totals = $this->getProjectDao()->getTotalCountByTeamId($id_team, $filter, 60 * 5);
         $total_pages = $this->getTotalPages($step, $totals);

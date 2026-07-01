@@ -12,6 +12,7 @@ use Model\Comments\CommentStruct;
 use Model\DataAccess\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -31,7 +32,7 @@ class FakeJobStructForTeamMentions extends JobStruct
 {
     public ProjectStruct $fakeProject;
 
-    public function getProject(int $ttl = 86400): ProjectStruct
+    public function getProject(ProjectDao $dao, int $ttl = 86400): ProjectStruct
     {
         return $this->fakeProject;
     }
@@ -63,6 +64,7 @@ class CommentControllerTest extends AbstractTest
 
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
 
         $user = new UserStruct();
         $user->uid = 1886472134;
@@ -72,10 +74,10 @@ class CommentControllerTest extends AbstractTest
 
         $this->setControllerUser($user, true);
 
-        Database::obtain()->begin();
+        obtainTestDatabase()->begin();
 
         // Insert fake user matching job owner so getProjectOwner() can resolve
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec(
             "INSERT IGNORE INTO users (uid, email, salt, pass, create_date, first_name, last_name)
              VALUES (1886472050, 'foo@example.org', 'x', 'x', '2024-01-01 00:00:00', 'Test', 'Owner')"
@@ -98,9 +100,9 @@ class CommentControllerTest extends AbstractTest
 
     public function tearDown(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         if ($conn->inTransaction()) {
-            Database::obtain()->rollback();
+            obtainTestDatabase()->rollback();
         }
 
         parent::tearDown();
@@ -164,7 +166,7 @@ class CommentControllerTest extends AbstractTest
         int $messageType = 1,
         ?string $resolveDate = null
     ): int {
-        $commentDao = new CommentDao(Database::obtain());
+        $commentDao = new CommentDao(obtainTestDatabase());
         $comment = new CommentStruct();
         $comment->id_job = $idJob;
         $comment->id_segment = $idSegment;
@@ -280,7 +282,7 @@ class CommentControllerTest extends AbstractTest
     #[Test]
     public function resolveTeamMentions_without_team_marker_returns_empty(): void
     {
-        $job = (new JobDao())->getByIdAndPassword(1886428338, 'a90acf203402', 60);
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword(1886428338, 'a90acf203402', 60);
         $this->assertInstanceOf(JobStruct::class, $job);
 
         $result = $this->invokePrivate('resolveTeamMentions', [$job, 'no mentions']);
@@ -305,7 +307,7 @@ class CommentControllerTest extends AbstractTest
     #[Test]
     public function resolveTeamMentions_with_valid_team_returns_uids(): void
     {
-        $job = (new JobDao())->getByIdAndPassword(1886428342, '92c5e0ce9316', 60);
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword(1886428342, '92c5e0ce9316', 60);
         $this->assertInstanceOf(JobStruct::class, $job);
 
         $result = $this->invokePrivate('resolveTeamMentions', [$job, 'ping {@team@}']);
@@ -353,7 +355,7 @@ class CommentControllerTest extends AbstractTest
     #[Test]
     public function prepareCommentData_builds_struct_and_resolves_mentions(): void
     {
-        $job = (new JobDao())->getByIdAndPassword(1886428338, 'a90acf203402', 60);
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword(1886428338, 'a90acf203402', 60);
         $this->assertInstanceOf(JobStruct::class, $job);
 
         $request = [
@@ -551,7 +553,7 @@ class CommentControllerTest extends AbstractTest
         $comment->revision_number = 99;
         $comment->message = 'hello';
 
-        $job = (new JobDao())->getByIdAndPassword(1886428338, 'a90acf203402', 60);
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword(1886428338, 'a90acf203402', 60);
         $this->assertInstanceOf(JobStruct::class, $job);
 
         $this->responseMock->expects($this->once())->method('code')->with(404)->willReturnSelf();
@@ -568,7 +570,7 @@ class CommentControllerTest extends AbstractTest
         $comment->revision_number = 0;
         $comment->message = 'hello';
 
-        $job = (new JobDao())->getByIdAndPassword(1886428338, 'a90acf203402', 60);
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword(1886428338, 'a90acf203402', 60);
         $this->assertInstanceOf(JobStruct::class, $job);
 
         $this->responseMock->expects($this->never())->method('code');
@@ -588,7 +590,7 @@ class CommentControllerTest extends AbstractTest
         $comment->message = 'hello {@1886472135@}';
         $comment->message_type = CommentDao::TYPE_COMMENT;
 
-        $job = (new JobDao())->getByIdAndPassword(1886428338, 'a90acf203402', 60);
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword(1886428338, 'a90acf203402', 60);
         $this->assertInstanceOf(JobStruct::class, $job);
 
         $mentioned = new UserStruct();
@@ -621,7 +623,7 @@ class CommentControllerTest extends AbstractTest
         $comment->message = 'resolved thread';
         $comment->message_type = CommentDao::TYPE_RESOLVE;
 
-        $job = (new JobDao())->getByIdAndPassword(1886428338, 'a90acf203402', 60);
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword(1886428338, 'a90acf203402', 60);
         $this->assertInstanceOf(JobStruct::class, $job);
 
         $user = new UserStruct();
@@ -658,7 +660,7 @@ class CommentControllerTest extends AbstractTest
         $comment->id_segment = $segment;
         $comment->uid = 1886472134; // current user (not in DB, so won't be excluded by filterUsers)
 
-        $job = (new JobDao())->getByIdAndPassword(1886428338, 'a90acf203402', 60);
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword(1886428338, 'a90acf203402', 60);
         $this->assertInstanceOf(JobStruct::class, $job);
 
         // Exclude the owner uid from the result (simulating already-mentioned)
@@ -690,7 +692,7 @@ class CommentControllerTest extends AbstractTest
         $user->last_name = 'Body';
         $this->setControllerUser($user, true);
 
-        $job = (new JobDao())->getByIdAndPassword(1886428338, 'a90acf203402', 60);
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword(1886428338, 'a90acf203402', 60);
         $this->assertInstanceOf(JobStruct::class, $job);
 
         /** @var array<int, UserStruct> $users */

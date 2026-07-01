@@ -7,9 +7,11 @@ use Controller\API\V2\DownloadController;
 use Controller\API\V2\DownloadJobTMXController;
 use Controller\API\V2\DownloadOriginalController;
 use InvalidArgumentException;
+use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Exceptions\NotFoundException;
@@ -268,7 +270,7 @@ class DownloadControllersTest extends AbstractTest
         $request  = Request::createFromGlobals();
         $response = new Response();
 
-        $controller = new class ($request, $response) extends DownloadAnalysisReportController {
+        $controller = new class ($request, $response, null, $this->dbApp()) extends DownloadAnalysisReportController {
             protected bool $useSession = false;
 
             protected function identifyUser(?bool $useSession = true): void
@@ -337,17 +339,17 @@ class DownloadControllersTest extends AbstractTest
         // A review_password ('revpw') that does NOT match the job password makes the
         // first getByIdAndPassword() return null, driving the ChunkReviewDao fallback
         // branch (getChunk() resolves the real job). With no files_job row seeded, the
-        // subsequent file-storage lookup yields no project id, so ProjectDao::findById()
-        // is invoked with null and raises a TypeError — exercising the fallback + storage
-        // resolution path (controller lines 64,68,69,72,74) before the filesystem/exit
-        // boundary.
+        // subsequent file-storage lookup yields no files, so the controller raises a
+        // clear Exception via the missing-files guard — exercising the fallback +
+        // storage resolution path (controller lines 64,68,69) before the boundary.
         $jobId = $this->jobId(self::ORIGINAL_BASE);
         $controller = $this->createOriginalController([
             'id_job'   => (string)$jobId,
             'password' => 'revpw',
         ]);
 
-        $this->expectException(TypeError::class);
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('No files found for job');
 
         $controller->index();
     }
@@ -442,13 +444,21 @@ class DownloadControllersTest extends AbstractTest
         $prop->setValue($controller, $value);
     }
 
+    private function dbApp(): App
+    {
+        $app = new App();
+        $app->register('getDatabase', static fn() => obtainTestDatabase());
+
+        return $app;
+    }
+
     /** @throws \Throwable */
     private function createDownloadController(): DownloadController
     {
         $request = Request::createFromGlobals();
         $response = new Response();
 
-        return new class ($request, $response) extends DownloadController {
+        return new class ($request, $response, null, $this->dbApp()) extends DownloadController {
             protected bool $useSession = false;
 
             protected function identifyUser(?bool $useSession = true): void
@@ -470,7 +480,7 @@ class DownloadControllersTest extends AbstractTest
         $request = Request::createFromGlobals();
         $response = new Response();
 
-        $controller = new class ($request, $response) extends DownloadAnalysisReportController {
+        $controller = new class ($request, $response, null, $this->dbApp()) extends DownloadAnalysisReportController {
             protected bool $useSession = false;
 
             protected function registerValidators(): void
@@ -503,7 +513,7 @@ class DownloadControllersTest extends AbstractTest
         $request = Request::createFromGlobals();
         $response = new Response();
 
-        $controller = new class ($request, $response) extends DownloadOriginalController {
+        $controller = new class ($request, $response, null, $this->dbApp()) extends DownloadOriginalController {
             protected bool $useSession = false;
 
             protected function identifyUser(?bool $useSession = true): void
@@ -520,7 +530,7 @@ class DownloadControllersTest extends AbstractTest
         $user->uid = 1;
         $user->email = 'test@example.org';
         $this->setControllerProp($controller, 'user', $user);
-        $this->setControllerProp($controller, 'featureSet', new FeatureSet());
+        $this->setControllerProp($controller, 'featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 
         return $controller;
     }
@@ -537,7 +547,7 @@ class DownloadControllersTest extends AbstractTest
         $request = Request::createFromGlobals();
         $response = new Response();
 
-        $controller = new class ($request, $response) extends DownloadJobTMXController {
+        $controller = new class ($request, $response, null, $this->dbApp()) extends DownloadJobTMXController {
             protected bool $useSession = false;
 
             protected function identifyUser(?bool $useSession = true): void

@@ -8,6 +8,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
+use Model\DataAccess\Database;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\JobsWorker;
 use Utils\Registry\AppConfig;
@@ -37,7 +38,7 @@ class JobsWorkerTest extends AbstractTest
         $amq = $this->createStub(AMQHandler::class);
 
         $worker = $this->getMockBuilder(JobsWorker::class)
-            ->setConstructorArgs([$amq, $jobDao])
+            ->setConstructorArgs([$amq, obtainTestDatabase(), $jobDao])
             ->onlyMethods(['_checkDatabaseConnection', '_doLog'])
             ->getMock();
 

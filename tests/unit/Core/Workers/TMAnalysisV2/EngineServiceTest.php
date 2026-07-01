@@ -4,6 +4,7 @@
 namespace Matecat\Core\Workers\TMAnalysisV2;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineServiceInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\DefaultEngineResolver;
@@ -30,7 +31,7 @@ class EngineServiceTest extends AbstractTest
     #[Test]
     public function test_service_can_be_instantiated(): void
     {
-        $service = new EngineService(new DefaultEngineResolver());
+        $service = new EngineService(new DefaultEngineResolver(obtainTestDatabase()), obtainTestDatabase());
         $this->assertInstanceOf(EngineService::class, $service);
         $this->assertInstanceOf(EngineServiceInterface::class, $service);
     }

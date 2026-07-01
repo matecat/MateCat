@@ -5,6 +5,7 @@ namespace Controller\Abstracts;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Controller\Abstracts\Authentication\AuthenticationTrait;
 use Controller\API\Commons\Validators\Base;
+use Controller\Exceptions\MissingDatabaseException;
 use Controller\Traits\TimeLoggerTrait;
 use Exception;
 use InvalidArgumentException;
@@ -13,7 +14,6 @@ use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
 use Model\ApiKeys\ApiKeyStruct;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use ReflectionException;
@@ -129,7 +129,7 @@ abstract class KleinController implements IController
         $paramsNamed = $this->request->paramsNamed()->getIterator()->getArrayCopy();
         $this->params = $this->request->paramsPost()->getIterator()->getArrayCopy();
         $this->params = array_merge($this->params, $paramsGet, $paramsNamed, $paramsPut);
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet($this->getDatabase());
         $this->identifyUser($this->useSession);
         $this->initDependencies();
         $this->registerValidators();
@@ -140,7 +140,12 @@ abstract class KleinController implements IController
     {
         if (!isset($this->database)) {
             $injected = $this->app?->getDatabase();
-            $this->database = $injected instanceof IDatabase ? $injected : Database::obtain();
+            if (!$injected instanceof IDatabase) {
+                throw new MissingDatabaseException(
+                    'KleinController requires a database: dispatch through a Klein App exposing a "getDatabase" service, or inject $database directly.'
+                );
+            }
+            $this->database = $injected;
         }
 
         return $this->database;

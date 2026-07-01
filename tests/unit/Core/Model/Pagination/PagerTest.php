@@ -144,7 +144,7 @@ class PagerTest extends AbstractTest
     #[Group('PersistenceNeeded')]
     public function getPagination_cache_miss_then_set(): void
     {
-        $pdo = \Model\DataAccess\Database::obtain(
+        $pdo = obtainTestDatabase(
             AppConfig::$DB_SERVER,
             AppConfig::$DB_USER,
             AppConfig::$DB_PASS,
@@ -176,7 +176,7 @@ class PagerTest extends AbstractTest
     #[Group('PersistenceNeeded')]
     public function getPagination_cache_hit_returns_cached_result(): void
     {
-        $pdo = \Model\DataAccess\Database::obtain(
+        $pdo = obtainTestDatabase(
             AppConfig::$DB_SERVER,
             AppConfig::$DB_USER,
             AppConfig::$DB_PASS,

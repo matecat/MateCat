@@ -16,12 +16,6 @@ class Database implements IDatabase
 {
 
     /**
-     * Unique instance of the class (singleton design pattern)
-     * @var ?IDatabase $instance
-     */
-    protected static ?IDatabase $instance = null;
-
-    /**
      * Established connection
      * @var ?PDO $connection
      */
@@ -54,7 +48,7 @@ class Database implements IDatabase
      * @param string $password
      * @param string $database
      */
-    protected function __construct(string $server, string $user, string $password, string $database)
+    public function __construct(string $server, string $user, string $password, string $database)
     {
         // Set fields
         $this->server = $server;
@@ -63,19 +57,6 @@ class Database implements IDatabase
         $this->database = $database;
     }
 
-
-    /**
-     * @Override
-     * {@inheritdoc}
-     */
-    public static function obtain(?string $server = null, ?string $user = null, ?string $password = null, ?string $database = null): IDatabase
-    {
-        if (!self::$instance || $server !== null && $user !== null && $password !== null && $database !== null) {
-            self::$instance = new Database($server ?? '', $user ?? '', $password ?? '', $database ?? '');
-        }
-
-        return self::$instance;
-    }
 
     /**
      * Class destructor

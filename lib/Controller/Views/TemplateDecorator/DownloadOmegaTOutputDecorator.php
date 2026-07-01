@@ -47,8 +47,8 @@ class DownloadOmegaTOutputDecorator
             $this->controller->setFilename($this->controller->getFilename() . ".zip");
         }
 
-        $tmsService = new TMSService();
-        $tmsService->setOutputType('tm');
+        $tmsService = new TMSService($this->controller->getDatabase());
+        $tmsService->setOutputType(TMSService::OUTPUT_TM);
 
         $tmFile = $tmsService->exportJobAsTMX(
             $this->controller->id_job,
@@ -58,7 +58,7 @@ class DownloadOmegaTOutputDecorator
             $this->controller->getUser()->uid
         );
 
-        $tmsService->setOutputType('mt');
+        $tmsService->setOutputType(TMSService::OUTPUT_MT);
 
         $mtFile = $tmsService->exportJobAsTMX($this->controller->id_job, $this->controller->password, $this->controller->getJob()->source, $this->controller->getJob()->target);
 

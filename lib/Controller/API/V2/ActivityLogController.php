@@ -33,7 +33,7 @@ class ActivityLogController extends KleinController
         $activityLogDao = new ActivityLogDao($this->getDatabase());
         $rawContent = $activityLogDao->getAllForProject($validator->getIdProject());
 
-        $formatted = new Activity($rawContent);
+        $formatted = new Activity($rawContent, $this->featureSet);
         $this->response->json($formatted->render());
     }
 
@@ -48,7 +48,7 @@ class ActivityLogController extends KleinController
         $activityLogDao = new ActivityLogDao($this->getDatabase());
         $rawContent = $activityLogDao->getLastActionInProject($validator->getIdProject());
 
-        $formatted = new Activity($rawContent);
+        $formatted = new Activity($rawContent, $this->featureSet);
         $this->response->json(['activity' => $formatted->render()]);
     }
 
@@ -70,7 +70,7 @@ class ActivityLogController extends KleinController
             ['id_job' => $validator->getJobId()]
         );
 
-        $formatted = new Activity($rawLogContent);
+        $formatted = new Activity($rawLogContent, $this->featureSet);
         $this->response->json(['activity' => $formatted->render()]);
     }
 

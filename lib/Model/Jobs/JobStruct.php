@@ -8,7 +8,6 @@ use Exception;
 use Model\Comments\CommentDao;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Files\FileDao;
@@ -20,6 +19,7 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentStruct;
+use Model\DataAccess\IDatabase;
 use Model\TmKeyManagement\UserKeysModel;
 use Model\Translations\WarningDao;
 use Model\Translators\JobsTranslatorsDao;
@@ -117,12 +117,13 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     protected int $_sourcePage;
 
     /**
-     *
+     * @param ProjectDao $dao
      * @return array{project_id: ?int, project_name: string, job_id: ?int}
+     * @throws ReflectionException
      */
-    public function getTMProps(): array
+    public function getTMProps(ProjectDao $dao): array
     {
-        $projectData = $this->getProject();
+        $projectData = $this->getProject($dao);
 
         return [
             'project_id' => $projectData->id,
@@ -132,15 +133,13 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     }
 
     /**
-     * @param ?JobsTranslatorsDao $jTranslatorsDao
+     * @param JobsTranslatorsDao $jTranslatorsDao
      * @return ?JobsTranslatorsStruct
      * @throws TypeError
      */
-    public function getTranslator(?JobsTranslatorsDao $jTranslatorsDao = null): ?JobsTranslatorsStruct
+    public function getTranslator(JobsTranslatorsDao $jTranslatorsDao): ?JobsTranslatorsStruct
     {
-        $this->_translator = $this->cachable(__METHOD__, function () use ($jTranslatorsDao) {
-            $jTranslatorsDao ??= new JobsTranslatorsDao();
-
+        $this->_translator = $this->memoize(__METHOD__, function () use ($jTranslatorsDao) {
             return $jTranslatorsDao->setCacheTTL(60 * 60)->findByJobsStruct($this)[0] ?? null;
         });
 
@@ -148,17 +147,15 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     }
 
     /**
-     * @param ?ConfirmationDao $outsourceDao
+     * @param ConfirmationDao $outsourceDao
      * @return ConfirmationStruct|null
      * @throws DomainException
      * @throws NotFoundException
      * @throws TypeError
      */
-    public function getOutsource(?ConfirmationDao $outsourceDao = null): ?ConfirmationStruct
+    public function getOutsource(ConfirmationDao $outsourceDao): ?ConfirmationStruct
     {
-        $this->_outsource = $this->cachable(__METHOD__, function () use ($outsourceDao) {
-            $outsourceDao ??= new ConfirmationDao();
-
+        $this->_outsource = $this->memoize(__METHOD__, function () use ($outsourceDao) {
             return $outsourceDao->setCacheTTL(60 * 60)->getConfirmation($this);
         });
 
@@ -176,7 +173,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
                 throw new NotFoundException("Vendor id " . $outsource->id_vendor . " not found.");
         }
 
-        $outsourceArray = (array) $outsource;
+        $outsourceArray = (array)$outsource;
         foreach ($outsourceArray as &$value) {
             if (is_numeric($value)) {
                 if ($value == (string)(int)$value) {
@@ -198,14 +195,14 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     }
 
     /**
-     * @param ?CommentDao $dao
+     * @param CommentDao $dao
      * @throws TypeError
      */
-    public function getOpenThreadsCount(?CommentDao $dao = null): int
+    public function getOpenThreadsCount(CommentDao $dao): int
     {
-        $this->_openThreads = $this->cachable(__METHOD__, function () use ($dao) {
-            $dao ??= new CommentDao();
-            $openThreads = $dao->setCacheTTL(60 * 10)->getOpenThreadsForProjects([$this->id_project]); //ten minutes cache
+        $this->_openThreads = $this->memoize(__METHOD__, function () use ($dao) {
+            $openThreads = $dao->setCacheTTL(60 * 10)->getOpenThreadsForProjects([$this->id_project]
+            ); //ten minutes cache
             foreach ($openThreads as $openThread) {
                 if ($openThread->id_job == $this->id && $openThread->password == $this->password) {
                     return $openThread->count;
@@ -219,13 +216,12 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     }
 
     /**
-     * @param ?WarningDao $dao
+     * @param WarningDao $dao
      * @return object{warnings_count: int, warning_segments?: int[]}
      */
-    public function getWarningsCount(?WarningDao $dao = null): object
+    public function getWarningsCount(WarningDao $dao): object
     {
-        return $this->cachable(__METHOD__, function () use ($dao) {
-            $dao ??= new WarningDao();
+        return $this->memoize(__METHOD__, function () use ($dao) {
             $warningsCount = $dao->setCacheTTL(60 * 10)->getWarningsByProjectIds([$this->id_project]);
             $ret = [];
             $ret['warnings_count'] = 0;
@@ -242,16 +238,17 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
         });
     }
 
-      /**
-       * @return FileStruct[]
-       * @throws Exception
-       * @throws ReflectionException
-       * @throws RuntimeException
-       */
-      public function getFiles(): array
-     {
-         return (new FileDao())->getByJobId($this->id ?? throw new RuntimeException('Missing job id'));
-     }
+    /**
+     * @param FileDao $dao
+     * @return FileStruct[]
+     * @throws Exception
+     * @throws ReflectionException
+     * @throws RuntimeException
+     */
+    public function getFiles(FileDao $dao): array
+    {
+        return $dao->getByJobId($this->id ?? throw new RuntimeException('Missing job id'));
+    }
 
     /**
      * getProject
@@ -259,68 +256,69 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      * Returns the project struct, caching the result on the instance to avoid
      * unnecessary queries.
      *
+     * @param ProjectDao $dao
      * @param int $ttl
      *
      * @return ProjectStruct
+     * @throws ReflectionException
      */
-    public function getProject(int $ttl = 86400): ProjectStruct
+    public function getProject(ProjectDao $dao, int $ttl = 86400): ProjectStruct
     {
-        return $this->cachable(__METHOD__, function () use ($ttl) {
-            return (new ProjectDao())->findById($this->id_project, $ttl);
+        return $this->memoize(__METHOD__, function () use ($dao, $ttl) {
+            return $dao->findById($this->id_project, $ttl);
         });
     }
 
     /**
-     * @param ?JobDao $dao
+     * @param JobDao $dao
      * @return JobStruct[]
      * @throws Exception
      */
-    public function getChunks(?JobDao $dao = null): array
+    public function getChunks(JobDao $dao): array
     {
         $id = $this->id ?? throw new DomainException("Job ID must not be null");
 
-        return $this->cachable(__METHOD__, function () use ($id, $dao) {
-            $dao ??= new JobDao();
+        return $this->memoize(__METHOD__, function () use ($id, $dao) {
             return $dao->getNotDeletedById($id);
         });
     }
 
     /**
+     * @param JobDao $dao
      * @return bool
      * @throws Exception
      */
-    public function isSplitted(): bool
+    public function isSplit(JobDao $dao): bool
     {
-        return count($this->getChunks()) > 1;
+        return count($this->getChunks($dao)) > 1;
     }
 
     /**
      * @param UserStruct $user
-     * @param string     $role
+     * @param string $role
      * @param ?UserKeysModel $uKModel
      *
      * @return array<string, array<int, ClientTmKeyStruct>>
      * @throws Exception
      * @throws TypeError
      */
-    public function getClientKeys(UserStruct $user, string $role, ?UserKeysModel $uKModel = null): array
+    public function getClientKeys(UserStruct $user, string $role, IDatabase $database, ?UserKeysModel $uKModel = null): array
     {
-        $uKModel ??= new UserKeysModel($user, $role);
+        $uKModel ??= new UserKeysModel($user, $database, $role);
 
         return $uKModel->getKeys($this->tm_keys, 60 * 10);
     }
 
     /**
-     * @param ?JobDao $dao
+     * @param JobDao $dao
      * @return float|null
      * @throws ReflectionException
      * @throws DomainException
      * @throws PDOException
      * @throws Exception
      */
-    public function getPeeForTranslatedSegments(?JobDao $dao = null): ?float
+    public function getPeeForTranslatedSegments(JobDao $dao): ?float
     {
-        $dao ??= new JobDao();
         $id = $this->id ?? throw new DomainException("Job ID must not be null");
         $password = $this->password ?? throw new DomainException("Job password must not be null");
         $pee = round($dao->setCacheTTL(60 * 15)->getPeeStats($id, $password)->avg_pee ?? 0, 2);
@@ -404,14 +402,13 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     }
 
     /**
-     * @param ?SegmentDao $dao
+     * @param SegmentDao $dao
      * @return SegmentStruct[]
      * @throws PDOException
      * @throws DomainException
      */
-    public function getSegments(?SegmentDao $dao = null): array
+    public function getSegments(SegmentDao $dao): array
     {
-        $dao ??= new SegmentDao(Database::obtain());
         $id = $this->id ?? throw new DomainException("Job ID must not be null");
         $password = $this->password ?? throw new DomainException("Job password must not be null");
 
@@ -423,19 +420,17 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      * @throws ReflectionException
      * @throws Exception
      */
-    public function getQualityOverall(array $chunkReviews = [], ?CatUtils $catUtils = null): ?string
+    public function getQualityOverall(array $chunkReviews, CatUtils $catUtils): ?string
     {
-        return ($catUtils ?? new CatUtils())->getQualityOverallFromJobStruct($this, $chunkReviews);
+        return $catUtils->getQualityOverallFromJobStruct($this, $chunkReviews);
     }
 
     /**
-     * @param ?WarningDao $dao
+     * @param WarningDao $dao
      * @throws PDOException
      */
-    public function getErrorsCount(?WarningDao $dao = null): int
+    public function getErrorsCount(WarningDao $dao): int
     {
-        $dao ??= new WarningDao();
-
         return $dao->getErrorsByChunk($this);
     }
 

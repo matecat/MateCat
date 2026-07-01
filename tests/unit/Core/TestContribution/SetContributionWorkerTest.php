@@ -83,9 +83,9 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
     public function setUp(): void
     {
         parent::setUp();
-        Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $this->featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
         //$featureSet->loadFromString( "project_completion,translation_versions,qa_check_glossary,microsoft" );
 
@@ -135,7 +135,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
         /**
          * @var $_worker SetContributionWorker
          */
-        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
         $_worker->attach($this);
 
         //create a stub EnginesFactory Matches
@@ -150,7 +150,8 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
             ->with($this->anything())
             ->willReturn(
                 UpdateContributionResponse::getInstance(
-                    json_decode('{"responseData":"OK","responseStatus":200,"responseDetails":[545482283]}', true)
+                    json_decode('{"responseData":"OK","responseStatus":200,"responseDetails":[545482283]}', true),
+                    $this->featureSet
                 )
             );
 
@@ -215,7 +216,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
         /**
          * @var $_worker SetContributionWorker
          */
-        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
         $_worker->attach($this);
 
         //create a stub EnginesFactory Matches
@@ -230,7 +231,8 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
             ->with($this->anything())
             ->willReturn(
                 UpdateContributionResponse::getInstance(
-                    json_decode('{"responseData":"OK","responseStatus":200,"responseDetails":[545518095,545518096]}', true)
+                    json_decode('{"responseData":"OK","responseStatus":200,"responseDetails":[545518095,545518096]}', true),
+                    $this->featureSet
                 )
             );
 
@@ -296,7 +298,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
         /**
          * @var $_worker SetContributionWorker
          */
-        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
         $_worker->attach($this);
 
         $reflectedMethod = new ReflectionMethod($_worker, '_loadEngine');
@@ -326,7 +328,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
         /**
          * @var $_worker SetContributionWorker
          */
-        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
         $_worker->attach($this);
 
         //create a stub EnginesFactory Matches
@@ -393,7 +395,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
         /**
          * @var $_worker SetContributionWorker
          */
-        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
         $_worker->attach($this);
 
         $reflectedMethod = new ReflectionMethod($_worker, '_loadEngine');
@@ -421,11 +423,11 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
         /**
          * @var $_worker SetContributionWorker
          */
-        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
         $_worker->attach($this);
 
         //create an empty engine
-        $_worker->setEngine(EnginesFactory::getInstance(0));
+        $_worker->setEngine(EnginesFactory::getInstance(0, obtainTestDatabase()));
 
 
         $reflectedMethod = new ReflectionMethod($_worker, '_loadEngine');
@@ -443,7 +445,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
     #[Test]
     public function process_throws_end_queue_exception_for_non_queue_element(): void
     {
-        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
 
         $invalidQueueElement = new class extends AbstractElement {
         };
@@ -455,7 +457,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
     #[Test]
     public function execContribution_throws_logic_exception_when_engine_is_not_set(): void
     {
-        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
 
         $contributionMockQueueObject = $this
             ->getMockBuilder(SetContributionRequest::class)
@@ -489,7 +491,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
     #[Test]
     public function raiseReQueueException_handles_missing_engine_name(): void
     {
-        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
 
         $this->expectException(ReQueueException::class);
         $this->expectExceptionMessage('Set failed on unknown');
@@ -501,7 +503,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
     #[Test]
     public function raiseEndQueueException_handles_missing_engine_name(): void
     {
-        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
 
         $this->expectException(EndQueueException::class);
         $this->expectExceptionMessage('Update failed on unknown');
@@ -513,7 +515,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
     #[Test]
     public function set_handles_success_response_status(): void
     {
-        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
         $_worker->attach($this);
 
         $stubEngine = $this->getMockBuilder(EngineInterface::class)->getMock();
@@ -550,7 +552,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
     #[Test]
     public function set_handles_client_error_response_status_with_end_queue_exception(): void
     {
-        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
         $_worker->attach($this);
 
         $stubEngine = $this->getMockBuilder(EngineInterface::class)->getMock();
@@ -587,7 +589,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
     #[Test]
     public function set_handles_non_object_response_with_requeue_exception(): void
     {
-        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
         $_worker->attach($this);
 
         $stubEngine = $this->getMockBuilder(EngineInterface::class)->getMock();
@@ -621,7 +623,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
     #[Test]
     public function update_handles_client_error_response_status_with_end_queue_exception(): void
     {
-        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
         $_worker->attach($this);
 
         $stubEngine = $this->getMockBuilder(EngineInterface::class)->getMock();
@@ -662,7 +664,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
     #[Test]
     public function update_handles_non_object_response_with_requeue_exception(): void
     {
-        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
         $_worker->attach($this);
 
         $stubEngine = $this->getMockBuilder(EngineInterface::class)->getMock();

@@ -16,8 +16,6 @@ use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
-use Model\Jobs\MetadataDao;
-use Model\Segments\SegmentOriginalDataDao;
 use Utils\LQA\QA;
 use Utils\Tools\PostEditing;
 use View\API\V2\Json\QALocalWarning;
@@ -26,13 +24,10 @@ use View\API\V2\Json\QALocalWarning;
 class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct
 {
 
-    private ?MetadataDao $metadataDao = null;
-
     /** @param array<string, mixed> $array_params */
-    public function __construct(array $array_params = [], ?MetadataDao $metadataDao = null)
+    public function __construct(array $array_params = [])
     {
         parent::__construct($array_params);
-        $this->metadataDao = $metadataDao;
     }
 
 
@@ -184,19 +179,13 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
      * @throws Exception
      * @throws \TypeError
      */
-    public function getLocalWarning(FeatureSet $featureSet, JobStruct $chunk): array
+    public function getLocalWarning(FeatureSet $featureSet, JobStruct $chunk, MateCatFilter $Filter): array
     {
         // When the query for segments is performed, a condition is added to get NULL instead of the translation when the status is NEW
         // so that the local warning check is not displayed/needed
         if (is_null($this->translation) || $chunk->id === null || $chunk->password === null) {
             return [];
         }
-
-        $metadata = $this->metadataDao ?? new MetadataDao();
-        $dataRefMap = (!empty($this->sid)) ? (new SegmentOriginalDataDao())->getSegmentDataRefMap($this->sid) : [];
-
-        /** @var MateCatFilter $Filter */
-        $Filter = MateCatFilter::getInstance($featureSet, $chunk->source, $chunk->target, $dataRefMap, $metadata->getSubfilteringCustomHandlers($chunk->id, $chunk->password));
 
         $src_content = $Filter->fromLayer0ToLayer2($this->segment);
         $trg_content = $Filter->fromLayer0ToLayer2($this->translation);

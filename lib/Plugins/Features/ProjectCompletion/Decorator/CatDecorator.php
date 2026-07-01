@@ -10,6 +10,8 @@ use DivisionByZeroError;
 use DomainException;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
+use Model\Projects\MetadataDao;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use RuntimeException;
 use Utils\Templating\PHPTALWithAppend;
@@ -34,7 +36,10 @@ class CatDecorator extends AbstractDecorator
         ?ChunkCompletionEventDao $chunkCompletionEventDao = null
     ) {
         parent::__construct($controller, $template);
-        $this->chunkCompletionEventDao = $chunkCompletionEventDao ?? new ChunkCompletionEventDao();
+        if ($chunkCompletionEventDao === null) {
+            $chunkCompletionEventDao = new ChunkCompletionEventDao($this->controller->getDatabase());
+        }
+        $this->chunkCompletionEventDao = $chunkCompletionEventDao;
     }
 
     /**
@@ -50,7 +55,7 @@ class CatDecorator extends AbstractDecorator
         $this->arguments = $arguments;
         $job = $this->arguments->getJob();
 
-        $this->stats = (new CatUtils())->getFastStatsForJob($this->arguments->getWordCountStruct());
+        $this->stats = (new CatUtils($this->controller->getDatabase()))->getFastStatsForJob($this->arguments->getWordCountStruct());
 
         $lastCompletionEvent = $this->chunkCompletionEventDao->lastCompletionRecord($job, ['is_review' => $this->arguments->isRevision()]);
 
@@ -69,6 +74,7 @@ class CatDecorator extends AbstractDecorator
 
     /**
      * @throws DomainException
+     * @throws Exception
      */
     private function varsForUncomplete(): void
     {
@@ -89,10 +95,16 @@ class CatDecorator extends AbstractDecorator
 
     /**
      * @throws DomainException
+     * @throws Exception
      */
     private function completable(): bool
     {
-        if ($this->arguments->getJob()->getProject()->getWordCountType() != ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {
+        $project = $this->arguments->getJob()->getProject(new ProjectDao($this->controller->getDatabase()));
+        $wordCountType = (new MetadataDao($this->controller->getDatabase()))
+            ->setCacheTTL(3600)
+            ->getValue((int) $project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)
+            ?? ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value;
+        if ($wordCountType != ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {
             if ($this->arguments->isRevision()) {
                 $completable = $this->current_phase == ChunkCompletionEventDao::REVISE &&
                     ($this->stats['DRAFT'] ?? 0) == 0 &&

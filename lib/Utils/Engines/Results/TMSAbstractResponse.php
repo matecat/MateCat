@@ -42,14 +42,14 @@ abstract class TMSAbstractResponse
 
     /**
      * @param array<string, mixed>|int|null $result
-     * @param FeatureSet|null $featureSet
+     * @param FeatureSet $featureSet
      * @param array<string, mixed>|null $dataRefMap
      * @param int|null $id_project
      *
      * @return static
      * @throws \TypeError
      */
-    public static function getInstance(mixed $result, ?FeatureSet $featureSet = null, ?array $dataRefMap = [], ?int $id_project = null): static
+    public static function getInstance(mixed $result, FeatureSet $featureSet, ?array $dataRefMap = [], ?int $id_project = null): static
     {
         $class = get_called_class(); // late static binding
 
@@ -60,9 +60,7 @@ abstract class TMSAbstractResponse
             $instance->error = new ErrorResponse($result['error'] ?? $result['responseDetails']);
         }
 
-        if ($featureSet !== null) {
-            $instance->featureSet($featureSet);
-        }
+        $instance->featureSet($featureSet);
 
         return $instance;
     }

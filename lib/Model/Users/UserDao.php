@@ -138,7 +138,7 @@ class UserDao extends AbstractDao
     public function createUser(UserStruct $obj): ?UserStruct
     {
         $conn = $this->database->getConnection();
-        Database::obtain()->begin();
+        $this->database->begin();
 
         $obj->create_date = date('Y-m-d H:i:s');
         $stmt = $conn->prepare(
@@ -189,7 +189,7 @@ class UserDao extends AbstractDao
     public function updateUser(UserStruct $obj): UserStruct
     {
         $conn = $this->database->getConnection();
-        Database::obtain()->begin();
+        $this->database->begin();
 
         $stmt = $conn->prepare(
             "UPDATE users

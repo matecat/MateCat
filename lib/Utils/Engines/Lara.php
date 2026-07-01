@@ -4,6 +4,7 @@ namespace Utils\Engines;
 
 use Exception;
 use InvalidArgumentException;
+use Model\DataAccess\IDatabase;
 use Lara\AccessKey;
 use Lara\Glossary;
 use Lara\Internal\HttpClient;
@@ -12,6 +13,7 @@ use Lara\LaraException;
 use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Model\Engines\Structs\MMTStruct;
+use Model\Jobs\JobDao;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
@@ -88,9 +90,9 @@ class Lara extends AbstractEngine
      * @throws Exception
      * @throws TypeError
      */
-    public function __construct($engineRecord)
+    public function __construct($engineRecord, IDatabase $database)
     {
-        parent::__construct($engineRecord);
+        parent::__construct($engineRecord, $database);
 
         if ($this->getEngineRecord()->type != EngineConstants::MT) {
             throw new Exception(
@@ -135,7 +137,7 @@ class Lara extends AbstractEngine
         /**
          * @var MMTEngine $engine
          */
-        $engine = EnginesFactory::createTempInstance($mmtStruct);
+        $engine = EnginesFactory::createTempInstance($mmtStruct, $this->database);
         $this->mmt_GET_Fallback = $engine;
 
         if (!empty($extraParams['MMT-License'])) {
@@ -147,7 +149,7 @@ class Lara extends AbstractEngine
             /**
              * @var MMTEngine $engine
              */
-            $engine = EnginesFactory::createTempInstance($mmtStruct);
+            $engine = EnginesFactory::createTempInstance($mmtStruct, $this->database);
             $this->mmt_SET_PrivateLicense = $engine;
         }
 
@@ -243,7 +245,7 @@ class Lara extends AbstractEngine
             return new GetMemoryResponse(null);
         }
 
-        $metadataDao = new MetadataDao();
+        $metadataDao = new MetadataDao($this->database);
         $laraStyle = $_config['lara_style'] ?? null;
         $laraStyleGuidelineId = $_config['lara_style_guideline_id'] ?? null;
         $laraModel = $_config['lara_model'] ?? '';
@@ -276,10 +278,10 @@ class Lara extends AbstractEngine
                 $translateOptions->setHeaders($headers->getArrayCopy());
 
                 if (!empty($_config['id_project'])) {
-                    $laraGlossaries = $metadataDao->setCacheTTL(86400)->get($_config['id_project'], ProjectsMetadataMarshaller::LARA_GLOSSARIES->value);
+                    $laraGlossaries = $metadataDao->setCacheTTL(86400)->getValue($_config['id_project'], ProjectsMetadataMarshaller::LARA_GLOSSARIES->value);
 
                     if ($laraGlossaries !== null) {
-                        $translateOptions->setGlossaries($laraGlossaries->value);
+                        $translateOptions->setGlossaries($laraGlossaries);
                     }
                 }
 
@@ -682,17 +684,17 @@ class Lara extends AbstractEngine
     {
         try {
             // get jobs keys
-            $project = (new ProjectDao())->findById($projectRow['id']);
+            $project = (new ProjectDao($this->database))->findById($projectRow['id']);
             if ($project === null) {
                 return;
             }
 
-            $user = (new UserDao)->getByEmail($projectRow['id_customer']);
+            $user = (new UserDao($this->database))->getByEmail($projectRow['id_customer']);
             if ($user === null) {
                 return;
             }
 
-            foreach ($project->getJobs() as $job) {
+            foreach ((new JobDao($this->database))->getNotDeletedByProjectId((int) $project->id) as $job) {
                 $keyIds = [];
                 $jobKeyListRead = TmKeyManager::getJobTmKeys($job->tm_keys, 'r', 'tm', $user->uid);
                 $jobKeyListWrite = TmKeyManager::getJobTmKeys($job->tm_keys, 'w', 'tm', $user->uid);

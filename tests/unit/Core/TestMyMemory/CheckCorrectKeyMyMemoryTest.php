@@ -40,7 +40,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest
     public function test_checkCorrectKey_with_success()
     {
         $key_param = "bfb9bd80a43253670c8d";
-        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -50,7 +50,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest
          */
         $engine_struct_param = $eng[0];
 
-        $engine_MyMemory = new MyMemory($engine_struct_param);
+        $engine_MyMemory = new MyMemory($engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
 
         $engine_MyMemory->checkCorrectKey($key_param);
 
@@ -81,7 +81,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest
     public function test_checkCorrectKey_with_failure_with_fake_tmKey()
     {
         $key_param = "b2invalid2d";
-        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -91,7 +91,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest
          */
         $engine_struct_param = $eng[0];
 
-        $engine_MyMemory = new MyMemory($engine_struct_param);
+        $engine_MyMemory = new MyMemory($engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
 
         $bool_result = $engine_MyMemory->checkCorrectKey($key_param);
 
@@ -134,7 +134,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest
         ];
 
 
-        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -148,7 +148,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest
          * creation of the engine
          * @var $engine_MyMemory MockObject|MyMemory
          */
-        $engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
         $engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_mock_param)->willReturn($mock_raw_value);
 
 
@@ -201,7 +201,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest
         ]);
 
 
-        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -215,7 +215,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest
          * creation of the engine
          * @var $engine_MyMemory MockObject|MyMemory
          */
-        $engine_MyMemory = $this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $engine_MyMemory = $this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
         $engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_mock_param)->willReturn($rawValue_error);
 
         $this->expectException('Exception');

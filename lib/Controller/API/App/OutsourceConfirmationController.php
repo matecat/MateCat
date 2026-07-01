@@ -51,7 +51,7 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
         if ($jStruct === null) {
             throw new AuthorizationError("Job not found");
         }
-        $translatorModel = new TranslatorsModel($jStruct, 0);
+        $translatorModel = new TranslatorsModel($jStruct, $this->getDatabase(), 0);
         $jTranslatorStruct = $translatorModel->getTranslator();
 
         $confirmationStruct = new TranslatedConfirmationStruct($payload);

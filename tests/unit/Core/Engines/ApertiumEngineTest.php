@@ -30,7 +30,7 @@ class ApertiumEngineTest extends AbstractTest
             'client_secret' => 'test-secret',
         ];
 
-        $this->engine = new TestApertium($struct);
+        $this->engine = new TestApertium($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 
     #[Test]
@@ -172,7 +172,7 @@ class ApertiumEngineTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('is not a MT engine');
 
-        new TestApertium($struct);
+        new TestApertium($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 }
 

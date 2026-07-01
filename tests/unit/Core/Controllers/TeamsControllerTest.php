@@ -103,6 +103,7 @@ class TeamsControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
+        $this->setProp('database', obtainTestDatabase());
 
         $this->user = new UserStruct();
         $this->user->uid = $this->userId(self::BASE);
@@ -112,7 +113,7 @@ class TeamsControllerTest extends AbstractTest
         $this->setProp('user', $this->user);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
         // non-empty api_key short-circuits refreshClientSessionIfNotApi() so no
         // PHP session machinery runs during action invocation.
         $this->setProp('api_key', 'ctrltestapikey');
@@ -137,7 +138,7 @@ class TeamsControllerTest extends AbstractTest
      */
     private function cleanupUserTeams(int $uid): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $stmt = $conn->query("SELECT id FROM teams WHERE created_by = $uid");
         $teamIds = $stmt instanceof PDOStatement ? $stmt->fetchAll(PDO::FETCH_COLUMN) : [];
         foreach ($teamIds as $teamId) {
@@ -359,7 +360,7 @@ class TeamsControllerTest extends AbstractTest
     public function update_throws_when_name_is_empty(): void
     {
         $user = $this->actAsFactoryUser();
-        $team = (new TeamDao())->createUserTeam($user, [
+        $team = (new TeamDao(obtainTestDatabase()))->createUserTeam($user, [
             'type' => Teams::GENERAL,
             'name' => 'Updatable Team',
         ]);
@@ -385,7 +386,7 @@ class TeamsControllerTest extends AbstractTest
     public function update_returns_renamed_team_payload(): void
     {
         $user = $this->actAsFactoryUser();
-        $team = (new TeamDao())->createUserTeam($user, [
+        $team = (new TeamDao(obtainTestDatabase()))->createUserTeam($user, [
             'type' => Teams::GENERAL,
             'name' => 'Old Team Name',
         ]);

@@ -13,10 +13,12 @@ use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Comments\BaseCommentStruct;
 use Model\Comments\CommentDao;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
+use Model\Projects\ProjectDao;
 use Model\LQA\CategoryDao;
 use Model\LQA\CategoryStruct;
 use Model\LQA\ChunkReviewDao;
@@ -38,6 +40,8 @@ class QualityReportSegmentModel
 
     protected JobStruct $chunk;
 
+    private IDatabase $database;
+
     /** @var ChunkReviewStruct[]|null */
     protected ?array $_chunkReviews = null;
 
@@ -49,6 +53,7 @@ class QualityReportSegmentModel
 
     public function __construct(
         JobStruct $chunk,
+        IDatabase $database,
         ?ChunkReviewDao $chunkReviewDao = null,
         ?SegmentDao $segmentDao = null,
         ?QualityReportDao $qualityReportDao = null,
@@ -56,11 +61,12 @@ class QualityReportSegmentModel
         ?CommentDao $commentDao = null
     ) {
         $this->chunk = $chunk;
-        $this->chunkReviewDao = $chunkReviewDao ?? new ChunkReviewDao();
-        $this->segmentDao = $segmentDao ?? new SegmentDao();
-        $this->qualityReportDao = $qualityReportDao ?? new QualityReportDao();
-        $this->entryCommentDao = $entryCommentDao ?? new EntryCommentDao();
-        $this->commentDao = $commentDao ?? new CommentDao();
+        $this->database = $database;
+        $this->chunkReviewDao = $chunkReviewDao ?? new ChunkReviewDao($database);
+        $this->segmentDao = $segmentDao ?? new SegmentDao($database);
+        $this->qualityReportDao = $qualityReportDao ?? new QualityReportDao($database);
+        $this->entryCommentDao = $entryCommentDao ?? new EntryCommentDao($database);
+        $this->commentDao = $commentDao ?? new CommentDao($database);
     }
 
     /**
@@ -75,9 +81,9 @@ class QualityReportSegmentModel
     public function getSegmentsIdForQR($step, int $ref_segment, $where = "after", $options = [])
     {
         if (isset($options['filter']['issue_category']) && $options['filter']['issue_category'] != 'all') {
-            $idQaModel = $this->chunk->getProject()->id_qa_model;
+            $idQaModel = $this->chunk->getProject(new ProjectDao($this->database))->id_qa_model;
             if ($idQaModel !== null) {
-                $subCategories = (new CategoryDao())->findByIdModelAndIdParent(
+                $subCategories = (new CategoryDao($this->database))->findByIdModelAndIdParent(
                     $idQaModel,
                     $options['filter']['issue_category']
                 );
@@ -123,7 +129,7 @@ class QualityReportSegmentModel
      */
     protected function _commonSegmentAssignments(QualityReportSegmentStruct $seg, MateCatFilter $Filter, FeatureSet $featureSet, JobStruct $chunk, bool $isForUI = false): void
     {
-        $seg->warnings = $seg->getLocalWarning($featureSet, $chunk);
+        $seg->warnings = $seg->getLocalWarning($featureSet, $chunk, $Filter);
         $seg->pee = $seg->getPEE();
         $seg->ice_modified = $seg->isICEModified();
         $seg->secs_per_word = round($seg->getSecsPerWord());
@@ -164,7 +170,7 @@ class QualityReportSegmentModel
     protected function _assignComments(QualityReportSegmentStruct $seg, array $comments): void
     {
         foreach ($comments as $comment) {
-            $comment->templateMessage();
+            $comment->templateMessage($this->commentDao);
             if ($comment->id_segment == $seg->sid) {
                 $seg->comments[] = $comment;
             }
@@ -196,9 +202,9 @@ class QualityReportSegmentModel
 
         $data = $this->segmentDao->getSegmentsForQr($segmentIds, $chunkId, $chunkPassword);
 
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet($this->database);
 
-        $featureSet->loadForProject($this->chunk->getProject());
+        $featureSet->loadForProject($this->chunk->getProject(new ProjectDao($this->database)));
         $issue_comments = [];
 
          $issues = $this->qualityReportDao->getIssuesBySegments($segmentIds, $chunkId);
@@ -212,15 +218,15 @@ class QualityReportSegmentModel
 
         $comments = $this->commentDao->getThreadsBySegments($segmentIds, $chunkId);
 
-        $translationVersionDao = new TranslationVersionDao;
+        $translationVersionDao = new TranslationVersionDao($this->database);
         $all_events = $translationVersionDao->getAllRelevantEvents($segmentIds, $chunkId);
         $history_events = $translationVersionDao->historyEvents($segment_ids, $chunkId);
 
         $segments = [];
 
         foreach ($data as $index => $seg) {
-            $dataRefMap = (new SegmentOriginalDataDao())->getSegmentDataRefMap($seg->sid);
-            $metadataDao = new MetadataDao();
+            $dataRefMap = (new SegmentOriginalDataDao($this->database))->getSegmentDataRefMap($seg->sid);
+            $metadataDao = new MetadataDao($this->database);
 
             /** @var MateCatFilter $Filter */
             $Filter = MateCatFilter::getInstance(

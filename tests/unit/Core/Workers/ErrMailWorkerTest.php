@@ -6,6 +6,7 @@ use Matecat\TestHelpers\AbstractTest;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
+use Model\DataAccess\Database;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\ErrMailWorker;
 use Utils\TaskRunner\Commons\Params;
@@ -21,7 +22,7 @@ class ErrMailWorkerTest extends AbstractTest
         $amq = $this->createStub(AMQHandler::class);
 
         $worker = $this->getMockBuilder(ErrMailWorker::class)
-            ->setConstructorArgs([$amq])
+            ->setConstructorArgs([$amq, obtainTestDatabase()])
             ->onlyMethods(['createMailer', '_checkDatabaseConnection', '_doLog'])
             ->getMock();
 
@@ -57,7 +58,7 @@ class ErrMailWorkerTest extends AbstractTest
     public function getLoggerNameReturnsExpected(): void
     {
         $amq = $this->createStub(AMQHandler::class);
-        $worker = new ErrMailWorker($amq);
+        $worker = new ErrMailWorker($amq, obtainTestDatabase());
 
         $this->assertSame('err_mail.log', $worker->getLoggerName());
     }

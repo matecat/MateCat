@@ -3,6 +3,7 @@
 namespace Utils\Url;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
@@ -29,7 +30,7 @@ class JobUrlBuilder
      * @throws \PDOException
      * @throws Exception
      */
-    public static function createFromJobStructAndProjectName(JobStruct $job, string $projectName, array $options = []): JobUrls
+    public static function createFromJobStructAndProjectName(IDatabase $database, JobStruct $job, string $projectName, array $options = []): JobUrls
     {
         // 3. get passwords array
         $passwords = [];
@@ -40,7 +41,7 @@ class JobUrlBuilder
         ];
 
         foreach ($sourcePages as $label => $sourcePage) {
-            $passwords[$label] = (new CatUtils())->getJobPassword($job, $sourcePage);
+            $passwords[$label] = (new CatUtils($database))->getJobPassword($job, $sourcePage);
         }
 
         // 4. httpHost
@@ -84,18 +85,18 @@ class JobUrlBuilder
      * @throws ReflectionException
      * @throws \Exception
      */
-    public static function createFromJobStruct(JobStruct $job, array $options = [], ProjectStruct $project = null): ?JobUrls
+    public static function createFromJobStruct(IDatabase $database, JobStruct $job, array $options = [], ProjectStruct $project = null): ?JobUrls
     {
         // 1. if project is passed we gain a query
         if ($project == null) {
             // 2. find the correlated project, if not passed
-            $project = (new ProjectDao())->findById($job->id_project, 60 * 10);
+            $project = (new ProjectDao($database))->findById($job->id_project, 60 * 10);
         }
 
         if (!$project) {
             return null;
         }
 
-        return static::createFromJobStructAndProjectName($job, $project->name, $options);
+        return static::createFromJobStructAndProjectName($database, $job, $project->name, $options);
     }
 }

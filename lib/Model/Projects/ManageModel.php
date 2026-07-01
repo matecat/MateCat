@@ -5,7 +5,7 @@ namespace Model\Projects;
 use DateInterval;
 use DateTime;
 use Exception;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use PDO;
@@ -36,6 +36,7 @@ class ManageModel
      * @throws PDOException
      */
     protected static function _getProjects(
+        IDatabase $database,
         int $start,
         int $step,
         ?string $search_in_pname,
@@ -88,7 +89,7 @@ class ManageModel
                 LIMIT $start, $step 
             ";
 
-        $stmt = Database::obtain()->getConnection()->prepare($projectsQuery);
+        $stmt = $database->getConnection()->prepare($projectsQuery);
         $stmt->execute($data);
 
         return array_values(array_map(function ($d) {
@@ -119,6 +120,7 @@ class ManageModel
      */
     public static function getProjects(
         UserStruct $user,
+        IDatabase $database,
         int $start,
         int $step,
         ?string $search_in_pname,
@@ -132,6 +134,7 @@ class ManageModel
         ?bool $no_assignee = false
     ): array {
         $id_list = static::_getProjects(
+            $database,
             $start,
             $step,
             $search_in_pname,
@@ -145,11 +148,10 @@ class ManageModel
             $no_assignee
         );
 
-        $_projects = new ProjectDao();
-        $projects = $_projects->getByIdList($id_list);
+        $projects = (new ProjectDao($database))->getByIdList($id_list);
         /** @var array<ProjectStruct> $projects */
 
-        $projectRenderer = new Project($projects, $search_status);
+        $projectRenderer = new Project($database, $projects, $search_status);
         $projectRenderer->setUser($user);
 
         return $projectRenderer->render();
@@ -221,6 +223,7 @@ class ManageModel
      * @throws PDOException
      */
     public static function getProjectsNumber(
+        IDatabase $database,
         ?string $search_in_pname,
         ?string $search_source,
         ?string $search_target,
@@ -260,7 +263,7 @@ class ManageModel
             $query = $query . " AND " . implode(" AND ", $conditions);
         }
 
-        $stmt = Database::obtain()->getConnection()->prepare($query);
+        $stmt = $database->getConnection()->prepare($query);
         $stmt->execute($data);
 
         /** @var list<array<string, mixed>> */

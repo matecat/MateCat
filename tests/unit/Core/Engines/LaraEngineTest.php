@@ -55,7 +55,7 @@ class LaraEngineTest extends AbstractTest
             'Lara-AccessKeySecret' => 'secret',
             'MMT-License' => 'license',
         ];
-        $this->engine = new TestLara($struct);
+        $this->engine = new TestLara($struct, obtainTestDatabase());
     }
     /**
      * @throws LaraException

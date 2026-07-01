@@ -8,6 +8,7 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Files\FileStruct;
 use Model\Jobs\JobStruct;
+use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Propagation\PropagationTotalStruct;
@@ -578,7 +579,9 @@ class SegmentTranslationDao extends AbstractDao
         ProjectStruct $project,
         bool $execute_update = true
     ): array {
-        if ($project->getWordCountType() == ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {
+        $wordCountType = (new MetadataDao($this->database))->setCacheTTL(3600)->getValue((int) $project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)
+            ?? ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value;
+        if ($wordCountType == ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {
             $sum_sql = "SUM( segments.raw_word_count )";
         } else {
             $sum_sql = "SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";
