@@ -18,7 +18,7 @@ class IsJobRevisionValidatorTest extends AbstractTest
     #[Test]
     public function ValidateThrowsWhenJidMissing(): void
     {
-        $validator = new IsJobRevisionValidator();
+        $validator = new IsJobRevisionValidator($this->createStub(ChunkReviewDao::class));
         $object = ValidatorObject::fromArray(['password' => 'abc123']);
 
         $this->expectException(ValidationError::class);
@@ -30,7 +30,7 @@ class IsJobRevisionValidatorTest extends AbstractTest
     #[Test]
     public function ValidateThrowsWhenPasswordMissing(): void
     {
-        $validator = new IsJobRevisionValidator();
+        $validator = new IsJobRevisionValidator($this->createStub(ChunkReviewDao::class));
         $object = ValidatorObject::fromArray(['jid' => 123]);
 
         $this->expectException(ValidationError::class);
@@ -111,6 +111,18 @@ class IsJobRevisionValidatorTest extends AbstractTest
 
         $result = $validator->validate($object);
         $this->assertNull($result);
+    }
+
+    #[Test]
+    public function constructorRequiresInjectedDao(): void
+    {
+        $param = (new \ReflectionMethod(IsJobRevisionValidator::class, '__construct'))->getParameters()[0];
+
+        $this->assertFalse(
+            $param->isOptional(),
+            'ChunkReviewDao must be a mandatory ctor dependency (no Database::obtain() fallback)'
+        );
+        $this->assertFalse($param->allowsNull(), 'ChunkReviewDao ctor param must not be nullable');
     }
 
     private function createValidatorWithResponse(?ShapelessConcreteStruct $response): IsJobRevisionValidator

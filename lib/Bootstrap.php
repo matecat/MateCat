@@ -114,7 +114,16 @@ class Bootstrap
     private function installApplicationSingletons(): void
     {
         WorkerClient::init();
-        self::$database = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        // Composition root: build the one application DB connection as a plain instance and
+        // expose it via getDatabase() for injection downstream.
+        $server   = AppConfig::$DB_SERVER;
+        $user     = AppConfig::$DB_USER;
+        $password = AppConfig::$DB_PASS;
+        $database = AppConfig::$DB_DATABASE;
+        if ($server === null || $user === null || $password === null || $database === null) {
+            throw new RuntimeException('Database configuration is incomplete: DB_SERVER, DB_USER, DB_PASS and DB_DATABASE must be set before bootstrap.');
+        }
+        self::$database = new Database($server, $user, $password, $database);
     }
 
     public static function getDatabase(): IDatabase

@@ -46,6 +46,7 @@ class ProjectValidatorTest extends AbstractTest
         $this->controller = new ProjectValidatorTestController();
         $this->ctrlRef = new ReflectionClass(KleinController::class);
         $this->setCtrlProp('request', new Request([], [], [], ['REQUEST_URI' => '/api/v2/projects', 'REQUEST_METHOD' => 'GET']));
+        $this->setCtrlProp('database', obtainTestDatabase());
     }
 
     protected function tearDown(): void
@@ -67,7 +68,7 @@ class ProjectValidatorTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec(
             "INSERT INTO projects (id, id_customer, password, name, create_date, status_analysis) VALUES ("
             . self::PROJECT_ID . ", '" . self::EMAIL . "', 'projpw_9924000', 'CtrlTestProject9924000', NOW(), 'DONE')"
@@ -76,7 +77,7 @@ class ProjectValidatorTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM projects WHERE id = " . self::PROJECT_ID);
     }
 
@@ -185,5 +186,17 @@ class ProjectValidatorTest extends AbstractTest
         $this->expectExceptionCode(403);
 
         $validator->validate();
+    }
+
+    // ─── getProject() before validate() => RuntimeException ───
+
+    #[Test]
+    public function getProject_throws_when_called_before_validate(): void
+    {
+        $validator = $this->makeValidator();
+
+        $this->expectException(\RuntimeException::class);
+
+        $validator->getProject();
     }
 }

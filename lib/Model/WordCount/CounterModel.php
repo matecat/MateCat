@@ -13,6 +13,7 @@ namespace Model\WordCount;
 use BadMethodCallException;
 use Exception;
 use LogicException;
+use Model\DataAccess\IDatabase;
 use PDOException;
 use ReflectionClass;
 use Utils\Constants\TranslationStatus;
@@ -38,11 +39,11 @@ class CounterModel
         return $this->values;
     }
 
-    public function __construct(?WordCountStruct $oldWCount = null, ?WordCounterDao $wordCounterDao = null)
+    public function __construct(IDatabase $database, ?WordCountStruct $oldWCount = null, ?WordCounterDao $wordCounterDao = null)
     {
         $reflect = new ReflectionClass(TranslationStatus::class);
         self::$constCache = array_flip($reflect->getConstants());
-        $this->wordCounterDao = $wordCounterDao ?? new WordCounterDao();
+        $this->wordCounterDao = $wordCounterDao ?? new WordCounterDao($database);
 
         if ($oldWCount !== null) {
             $this->setOldWordCount($oldWCount);

@@ -126,7 +126,9 @@ $csp = str_replace('${x_nonce_unique_id}', $csp_nonce, $csp);
     $reflect = new ReflectionClass(CustomPageView::class);
     $instance = $reflect->newInstanceArgs();
 
-    $featureSet = new FeatureSet();
+    // The web request already ran Bootstrap::start(); read the handle from the
+    // composition root instead of re-resolving the singleton here.
+    $featureSet = new FeatureSet(Bootstrap::getDatabase());
 
     if ($instance->getUser()->email !== null) {
         $featureSet->loadFromUserEmail($instance->getUser()->email);

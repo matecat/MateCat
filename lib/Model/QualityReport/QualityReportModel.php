@@ -14,10 +14,12 @@ use DateTime;
 use DomainException;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
+use Model\Projects\ProjectDao;
 use Model\LQA\ChunkReviewStruct;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\ReviseFeedback\FeedbackDAO;
 use Model\Users\UserDao;
@@ -36,6 +38,8 @@ class QualityReportModel
      * @var JobStruct
      */
     protected JobStruct $chunk;
+
+    private IDatabase $database;
 
     /** @var array<string, mixed> */
     protected array $quality_report_structure = [];
@@ -67,14 +71,16 @@ class QualityReportModel
 
     public function __construct(
         JobStruct $chunk,
+        IDatabase $database,
         ?QualityReportDao $qualityReportDao = null,
         ?ChunkReviewDao $chunkReviewDao = null,
         ?FeedbackDAO $feedbackDao = null,
     ) {
         $this->chunk = $chunk;
-        $this->qualityReportDao = $qualityReportDao ?? new QualityReportDao();
-        $this->chunkReviewDao = $chunkReviewDao ?? new ChunkReviewDao();
-        $this->feedbackDao = $feedbackDao ?? new FeedbackDAO();
+        $this->database = $database;
+        $this->qualityReportDao = $qualityReportDao ?? new QualityReportDao($database);
+        $this->chunkReviewDao = $chunkReviewDao ?? new ChunkReviewDao($database);
+        $this->feedbackDao = $feedbackDao ?? new FeedbackDAO($database);
     }
 
     public function getChunk(): JobStruct
@@ -82,9 +88,12 @@ class QualityReportModel
         return $this->chunk;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function getProject(): ProjectStruct
     {
-        return $this->chunk->getProject();
+        return $this->chunk->getProject(new ProjectDao($this->database));
     }
 
     /**
@@ -173,7 +182,7 @@ class QualityReportModel
      */
     protected function getSegmentsForQualityReport(): array
     {
-        return (new QualityReportDao())->getSegmentsForQualityReport($this->chunk);
+        return (new QualityReportDao($this->database))->getSegmentsForQualityReport($this->chunk);
     }
 
     /**
@@ -182,7 +191,7 @@ class QualityReportModel
      */
     protected function createRevisionFactory(): RevisionFactory
     {
-        return RevisionFactory::initFromProject($this->getProject());
+        return RevisionFactory::initFromProject($this->getProject(), $this->database);
     }
 
     /**
@@ -192,7 +201,7 @@ class QualityReportModel
      */
     protected function updateChunkReview(ChunkReviewStruct $chunkReview, array $options): void
     {
-        (new ChunkReviewDao())->updateStruct($chunkReview, $options);
+        (new ChunkReviewDao($this->database))->updateStruct($chunkReview, $options);
     }
 
     /**
@@ -248,12 +257,16 @@ class QualityReportModel
         return $this->quality_report_structure;
     }
 
-    /** @return array<string, mixed>
+    /**
+     * @return array<string, mixed>
      * @throws DomainException
+     * @throws Exception
      */
     protected function getAndDecodePossiblyProjectMetadataJson(): array
     {
-        return $this->getProject()->getAllMetadataAsKeyValue();
+        $project = $this->getProject();
+
+        return (new ProjectMetadataDao($this->database))->setCacheTTL(3600)->allByProjectIdAsKeyValue((int) $project->id);
     }
 
     /**
@@ -288,14 +301,14 @@ class QualityReportModel
      */
     protected function getReviewerName(): string
     {
-        $completion_event = (new ChunkCompletionEventDao())->lastCompletionRecord(
+        $completion_event = (new ChunkCompletionEventDao($this->database))->lastCompletionRecord(
             $this->chunk,
             ['is_review' => true]
         );
         $name = '';
 
         if (!empty($completion_event) && isset($completion_event['uid'])) {
-            $userDao = new UserDao(Database::obtain());
+            $userDao = new UserDao($this->database);
             $user = $userDao->getByUid($completion_event['uid']);
             $name = $user?->fullName() ?? '';
         }

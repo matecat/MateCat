@@ -11,7 +11,7 @@ class XliffToTargetController extends BaseKleinViewController
     /**
      * @throws Exception
      */
-    public function renderView()
+    public function renderView(): never
     {
         $this->setView("xliffToTarget.html");
         $this->render();

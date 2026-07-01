@@ -2,6 +2,8 @@
 
 namespace Matecat\Core\Workers\TMAnalysisV2;
 
+use Model\DataAccess\IDatabase;
+use Model\FeaturesBase\FeatureSet;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Logger\LoggerFactory;
@@ -22,16 +24,17 @@ class FakeMTEngine extends AbstractEngine
      *
      * @param $engineRecord
      */
-    public function __construct($engineRecord)
+    public function __construct($engineRecord, IDatabase $database)
     {
         // Store the engine record directly without calling parent constructor
         // This avoids HTTP client initialization
         $this->engineRecord = $engineRecord;
         $this->className = get_class($this);
+        $this->database = $database;
 
         // Initialize minimal required properties
         $this->curl_additional_params = [];
-        $this->featureSet = null;
+        $this->featureSet = new FeatureSet($database);
         $this->logger = LoggerFactory::getLogger('FakeMTEngine');
         $this->_config = [
             'q' => null,
@@ -52,7 +55,10 @@ class FakeMTEngine extends AbstractEngine
      */
     public function get(array $_config): GetMemoryResponse
     {
-        return new FakeGetMemoryResponse(self::$cannedTranslation);
+        $response = new FakeGetMemoryResponse(self::$cannedTranslation);
+        $response->featureSet($this->featureSet);
+
+        return $response;
     }
 
     /**

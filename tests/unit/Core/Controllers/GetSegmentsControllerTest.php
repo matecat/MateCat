@@ -8,6 +8,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
+use Model\DataAccess\IDatabase;
 use Model\Files\MetadataDao as FilesMetadataDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobMetadataDao;
@@ -50,27 +51,27 @@ class TestableGetSegmentsController extends GetSegmentsController
 
     protected function createSegmentDao(): SegmentDao
     {
-        return $this->fakeSegmentDao ?? new SegmentDao();
+        return $this->fakeSegmentDao ?? new SegmentDao(obtainTestDatabase());
     }
 
     protected function createProjectMetadataDao(): ProjectMetadataDao
     {
-        return $this->fakeProjectMetadataDao ?? new ProjectMetadataDao();
+        return $this->fakeProjectMetadataDao ?? new ProjectMetadataDao(obtainTestDatabase());
     }
 
     protected function createFilesMetadataDao(): FilesMetadataDao
     {
-        return $this->fakeFilesMetadataDao ?? new FilesMetadataDao();
+        return $this->fakeFilesMetadataDao ?? new FilesMetadataDao(obtainTestDatabase());
     }
 
     protected function createJobMetadataDao(): JobMetadataDao
     {
-        return $this->fakeJobMetadataDao ?? new JobMetadataDao();
+        return $this->fakeJobMetadataDao ?? new JobMetadataDao(obtainTestDatabase());
     }
 
     protected function createSegmentMetadataDao(): SegmentMetadataDao
     {
-        return $this->fakeSegmentMetadataDao ?? new SegmentMetadataDao();
+        return $this->fakeSegmentMetadataDao ?? new SegmentMetadataDao(obtainTestDatabase());
     }
 }
 
@@ -430,11 +431,9 @@ class GetSegmentsControllerTest extends AbstractTest
         $this->controller->fakeSegmentDao = $segmentDao;
 
         $icuStruct = $this->createStub(MetadataStruct::class);
-        $icuStruct->value = null;
-
         $projectMetaDao = $this->createStub(ProjectMetadataDao::class);
         $projectMetaDao->method('setCacheTTL')->willReturn($projectMetaDao);
-        $projectMetaDao->method('get')->willReturn($icuStruct);
+        $projectMetaDao->method('getValue')->willReturn(null);
         $this->controller->fakeProjectMetadataDao = $projectMetaDao;
 
         $filesMetaDao = $this->createStub(FilesMetadataDao::class);
@@ -446,6 +445,9 @@ class GetSegmentsControllerTest extends AbstractTest
         $this->controller->fakeSegmentMetadataDao = $segmentMetaDao;
 
         $this->setFeatureSet();
+
+        $dbProp = $this->reflector->getProperty('database');
+        $dbProp->setValue($this->controller, $this->createStub(IDatabase::class));
 
         $captured = null;
         $responseMock = $this->createMock(Response::class);

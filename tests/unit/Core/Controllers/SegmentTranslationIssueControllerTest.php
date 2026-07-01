@@ -68,7 +68,7 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
     {
         parent::setUp();
 
-        Database::obtain()->begin();
+        obtainTestDatabase()->begin();
 
         $this->reflector = new ReflectionClass(TestableSegmentTranslationIssueController::class);
         $this->controller = new TestableSegmentTranslationIssueController();
@@ -82,6 +82,7 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
 
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
         $this->reflector->getProperty('logger')->setValue($this->controller, $loggerMock);
 
         $this->seedFixtures();
@@ -90,9 +91,9 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
 
     protected function tearDown(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         if ($conn->inTransaction()) {
-            Database::obtain()->rollback();
+            obtainTestDatabase()->rollback();
         }
 
         parent::tearDown();
@@ -100,7 +101,7 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
 
     private function seedFixtures(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
 
         // Users
         $conn->exec("DELETE FROM users WHERE uid IN (" . self::USER_UID . ", " . self::OWNER_UID . ", " . self::TEAM_MEMBER_UID . ", " . self::STRANGER_UID . ")");

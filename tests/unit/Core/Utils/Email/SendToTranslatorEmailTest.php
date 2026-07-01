@@ -4,6 +4,7 @@ namespace Matecat\Core\Utils\Email;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\Translators\JobsTranslatorsStruct;
+use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionMethod;
@@ -37,6 +38,12 @@ class SendToTranslatorEmailTest extends AbstractTest
         return $user;
     }
 
+    private function makeUserDao(): UserDao
+    {
+        [$dbStub] = $this->createDatabaseMock();
+        return new UserDao($dbStub);
+    }
+
     private function makeTranslator(): JobsTranslatorsStruct
     {
         $translator = new JobsTranslatorsStruct();
@@ -55,7 +62,7 @@ class SendToTranslatorEmailTest extends AbstractTest
     public function newJobEmailSendCallsDoSend(): void
     {
         $email = $this->getMockBuilder(SendToTranslatorForNewJobEmail::class)
-            ->setConstructorArgs([$this->makeUser(), $this->makeTranslator(), 'Test Project'])
+            ->setConstructorArgs([$this->makeUser(), $this->makeTranslator(), 'Test Project', $this->makeUserDao()])
             ->onlyMethods(['doSend'])
             ->getMock();
 
@@ -70,7 +77,7 @@ class SendToTranslatorEmailTest extends AbstractTest
     public function deliveryChangeEmailSendCallsDoSend(): void
     {
         $email = $this->getMockBuilder(SendToTranslatorForDeliveryChangeEmail::class)
-            ->setConstructorArgs([$this->makeUser(), $this->makeTranslator(), 'Test Project'])
+            ->setConstructorArgs([$this->makeUser(), $this->makeTranslator(), 'Test Project', $this->makeUserDao()])
             ->onlyMethods(['doSend'])
             ->getMock();
 
@@ -85,7 +92,7 @@ class SendToTranslatorEmailTest extends AbstractTest
     public function jobSplitEmailSendCallsDoSend(): void
     {
         $email = $this->getMockBuilder(SendToTranslatorForJobSplitEmail::class)
-            ->setConstructorArgs([$this->makeUser(), $this->makeTranslator(), 'Test Project'])
+            ->setConstructorArgs([$this->makeUser(), $this->makeTranslator(), 'Test Project', $this->makeUserDao()])
             ->onlyMethods(['doSend'])
             ->getMock();
 
@@ -99,7 +106,7 @@ class SendToTranslatorEmailTest extends AbstractTest
     #[Test]
     public function offsetToTimeZoneReturnsValidTimezone(): void
     {
-        $email = new SendToTranslatorForNewJobEmail($this->makeUser(), $this->makeTranslator(), 'Test');
+        $email = new SendToTranslatorForNewJobEmail($this->makeUser(), $this->makeTranslator(), 'Test', $this->makeUserDao());
         $method = new ReflectionMethod(SendToTranslatorAbstract::class, '_offsetToTimeZone');
         $result = $method->invoke($email, 1);
 
@@ -110,7 +117,7 @@ class SendToTranslatorEmailTest extends AbstractTest
     #[Test]
     public function offsetToTimeZoneReturnsUtcForUnknownOffset(): void
     {
-        $email = new SendToTranslatorForNewJobEmail($this->makeUser(), $this->makeTranslator(), 'Test');
+        $email = new SendToTranslatorForNewJobEmail($this->makeUser(), $this->makeTranslator(), 'Test', $this->makeUserDao());
         $method = new ReflectionMethod(SendToTranslatorAbstract::class, '_offsetToTimeZone');
         $result = $method->invoke($email, 99);
 
@@ -120,7 +127,7 @@ class SendToTranslatorEmailTest extends AbstractTest
     #[Test]
     public function newJobEmailSetsCorrectTitle(): void
     {
-        $email = new SendToTranslatorForNewJobEmail($this->makeUser(), $this->makeTranslator(), 'Test Project');
+        $email = new SendToTranslatorForNewJobEmail($this->makeUser(), $this->makeTranslator(), 'Test Project', $this->makeUserDao());
 
         $ref = new \ReflectionProperty($email, 'title');
         $this->assertSame('Matecat - Translation Job.', $ref->getValue($email));
@@ -129,7 +136,7 @@ class SendToTranslatorEmailTest extends AbstractTest
     #[Test]
     public function deliveryChangeEmailSetsCorrectTitle(): void
     {
-        $email = new SendToTranslatorForDeliveryChangeEmail($this->makeUser(), $this->makeTranslator(), 'Test Project');
+        $email = new SendToTranslatorForDeliveryChangeEmail($this->makeUser(), $this->makeTranslator(), 'Test Project', $this->makeUserDao());
 
         $ref = new \ReflectionProperty($email, 'title');
         $this->assertSame('Matecat - Job delivery updated.', $ref->getValue($email));

@@ -4,6 +4,7 @@ namespace Utils\Engines;
 
 use CURLFile;
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\UnknownPropertyException;
 use Model\Engines\Structs\EngineStruct;
 use Model\Engines\Structs\GoogleTranslateStruct;
@@ -66,7 +67,8 @@ abstract class AbstractEngine implements EngineInterface
     protected bool $logging = true;
     protected string $content_type = 'xml';
 
-    protected ?FeatureSet $featureSet = null;
+    protected IDatabase $database;
+    protected FeatureSet $featureSet;
     protected ?int $mt_penalty = null;
 
     const int GET_REQUEST_TIMEOUT = 10;
@@ -78,8 +80,9 @@ abstract class AbstractEngine implements EngineInterface
      * @throws Exception
      * @throws TypeError
      */
-    public function __construct(EngineStruct $engineRecord)
+    public function __construct(EngineStruct $engineRecord, IDatabase $database)
     {
+        $this->database = $database;
         $this->engineRecord = $engineRecord;
         $this->className = get_class($this);
 
@@ -92,7 +95,7 @@ abstract class AbstractEngine implements EngineInterface
             CURLOPT_SSL_VERIFYHOST => 2
         ];
 
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet($database);
         /**
          * Set the initial value to a specific log file, if not already initialized by the Executor.
          * This is useful when engines are used outside the TaskRunner context
@@ -113,11 +116,9 @@ abstract class AbstractEngine implements EngineInterface
         return $this;
     }
 
-    public function setFeatureSet(FeatureSet $fSet = null): void
+    public function setFeatureSet(FeatureSet $fSet): void
     {
-        if ($fSet != null) {
-            $this->featureSet = $fSet;
-        }
+        $this->featureSet = $fSet;
     }
 
     /**
@@ -439,7 +440,7 @@ abstract class AbstractEngine implements EngineInterface
              $newEngineStruct->extra_parameters['client_secret'] = $_config['secret_key'] ?? null;
              $newEngineStruct->others = [];
 
-            $gtEngine = EnginesFactory::createTempInstance($newEngineStruct);
+            $gtEngine = EnginesFactory::createTempInstance($newEngineStruct, $this->database);
 
             /** @var GoogleTranslate $gtEngine */
             return $gtEngine->get($_config);

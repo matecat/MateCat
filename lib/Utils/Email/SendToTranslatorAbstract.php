@@ -16,6 +16,7 @@ use DateTimeInterface;
 use DateTimeZone;
 use Exception;
 use Model\Translators\JobsTranslatorsStruct;
+use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 
@@ -25,6 +26,7 @@ abstract class SendToTranslatorAbstract extends AbstractEmail
     protected UserStruct $user;
     protected string $projectName;
     protected JobsTranslatorsStruct $translator;
+    protected UserDao $userDao;
     /** @var callable */
     protected mixed $_RoutesMethod;
 
@@ -32,10 +34,11 @@ abstract class SendToTranslatorAbstract extends AbstractEmail
      * @throws DateInvalidTimeZoneException
      * @throws Exception
      */
-    public function __construct(UserStruct $user, JobsTranslatorsStruct $translator, string $projectName)
+    public function __construct(UserStruct $user, JobsTranslatorsStruct $translator, string $projectName, UserDao $userDao)
     {
         $this->user = $user;
         $this->translator = $translator;
+        $this->userDao = $userDao;
         $this->title = "Matecat - Translation Job";
         $this->projectName = $projectName;
 
@@ -73,7 +76,7 @@ abstract class SendToTranslatorAbstract extends AbstractEmail
      */
     protected function _getTemplateVariables(): array
     {
-        $userObj = $this->translator->getUser();
+        $userObj = $this->translator->getUser($this->userDao);
         $userRecipient = $userObj !== null ? $userObj->getArrayCopy() : [];
         if (!empty($userRecipient['uid'])) {
             $userRecipient['_name'] = $userRecipient['first_name'] . " " . $userRecipient['last_name'];

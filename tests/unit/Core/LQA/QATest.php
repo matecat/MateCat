@@ -715,7 +715,7 @@ class QATest extends AbstractTest
     public function setFeatureSetReturnsSelfForChaining(): void
     {
         $qa = new QA('<g id="1">Source</g>', '<g id="1">Target</g>');
-        $featureSet = new \Model\FeaturesBase\FeatureSet();
+        $featureSet = new \Model\FeaturesBase\FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
 
         $result = $qa->setFeatureSet($featureSet);
 
@@ -726,7 +726,7 @@ class QATest extends AbstractTest
     public function setFeatureSetConfiguresAllComponents(): void
     {
         $qa = new QA('<g id="1">Source</g>', '<g id="1">Target</g>');
-        $featureSet = new \Model\FeaturesBase\FeatureSet();
+        $featureSet = new \Model\FeaturesBase\FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
 
         $qa->setFeatureSet($featureSet);
         $qa->performConsistencyCheck();

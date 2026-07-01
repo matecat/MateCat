@@ -4,6 +4,7 @@ namespace Matecat\Core\Model\ProjectCreation;
 
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
@@ -45,8 +46,9 @@ class SaveJobsMetadataTest extends AbstractTest
 
         $featureSet = $this->createStub(FeatureSet::class);
         $logger = $this->createStub(MatecatLogger::class);
+        $db = $this->createStub(IDatabase::class);
 
-        $this->service = new TestableJobCreationService($featureSet, $logger);
+        $this->service = new TestableJobCreationService($featureSet, $logger, $db);
 
         $this->projectStructure = new ProjectStructure([
             'id_project' => 999,

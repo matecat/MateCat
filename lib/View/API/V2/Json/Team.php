@@ -12,6 +12,7 @@ namespace View\API\V2\Json;
 use Exception;
 use Model\Teams\PendingInvitations;
 use Model\Teams\TeamStruct;
+use Model\Users\UserDao;
 use Predis\ClientInterface;
 use ReflectionException;
 use TypeError;
@@ -24,12 +25,16 @@ class Team
     /** @var TeamStruct[]|null */
     private ?array $data;
 
+    private UserDao $userDao;
+
     /**
+     * @param UserDao $userDao
      * @param TeamStruct[]|null $data
      */
-    public function __construct(?array $data = null)
+    public function __construct(UserDao $userDao, ?array $data = null)
     {
         $this->data = $data;
+        $this->userDao = $userDao;
     }
 
     /**
@@ -51,7 +56,7 @@ class Team
         $invitations = $this->getPendingInvitations((int)$team->id);
 
         if (!empty($members)) {
-            $memberShipFormatter = new Membership($members);
+            $memberShipFormatter = new Membership($members, $this->userDao);
             $row['members'] = $memberShipFormatter->render();
         }
 

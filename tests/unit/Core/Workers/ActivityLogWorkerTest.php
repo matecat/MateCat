@@ -7,6 +7,7 @@ use Model\ActivityLog\ActivityLogDao;
 use Model\ActivityLog\ActivityLogStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
+use Model\DataAccess\Database;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\ActivityLogWorker;
 use Utils\Registry\AppConfig;
@@ -34,7 +35,7 @@ class ActivityLogWorkerTest extends AbstractTest
     {
         $amq = $this->createStub(AMQHandler::class);
 
-        return new ActivityLogWorker($amq);
+        return new ActivityLogWorker($amq, obtainTestDatabase());
     }
 
     #[Test]
@@ -76,7 +77,7 @@ class ActivityLogWorkerTest extends AbstractTest
         $queueElement->reQueueNum = 0;
 
         $worker = $this->getMockBuilder(ActivityLogWorker::class)
-            ->setConstructorArgs([$this->createMock(AMQHandler::class)])
+            ->setConstructorArgs([$this->createMock(AMQHandler::class), obtainTestDatabase()])
             ->onlyMethods(['_writeLog', '_checkDatabaseConnection'])
             ->getMock();
 

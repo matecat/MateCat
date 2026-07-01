@@ -10,6 +10,7 @@ use Model\DataAccess\IDatabase;
 use Model\Files\FileStruct;
 use Model\Jobs\JobStruct;
 use Model\Search\ReplaceEventStruct;
+use Model\Projects\MetadataStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use PDO;
@@ -703,11 +704,23 @@ class SegmentTranslationDaoTest extends AbstractTest
         $st = $this->makeTranslationStruct();
         $job = $this->makeJobStruct();
 
+        $rawMeta = new MetadataStruct();
+        $rawMeta->key = 'word_count_type';
+        $rawMeta->value = 'raw';
+
         $project = $this->createStub(\Model\Projects\ProjectStruct::class);
-        $project->method('getWordCountType')->willReturn('raw');
+        $project->id = 1;
 
         $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willThrowException(new PDOException('Connection lost', 2006));
+        $callCount = 0;
+        $this->stmtStub->method('execute')->willReturnCallback(function () use (&$callCount) {
+            $callCount++;
+            if ($callCount > 1) {
+                throw new PDOException('Connection lost', 2006);
+            }
+            return true;
+        });
+        $this->stmtStub->method('fetchAll')->willReturn([$rawMeta]);
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessage("Error in counting total words for propagation");
@@ -721,13 +734,17 @@ class SegmentTranslationDaoTest extends AbstractTest
         $st = $this->makeTranslationStruct();
         $job = $this->makeJobStruct();
 
+        $rawMeta = new MetadataStruct();
+        $rawMeta->key = 'word_count_type';
+        $rawMeta->value = 'raw';
+
         $project = $this->createStub(\Model\Projects\ProjectStruct::class);
-        $project->method('getWordCountType')->willReturn('raw');
+        $project->id = 1;
 
         $this->stmtStub->method('setFetchMode')->willReturn(true);
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('rowCount')->willReturn(0);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
+        $this->stmtStub->method('fetchAll')->willReturnOnConsecutiveCalls([$rawMeta], []);
 
         $dao = new SegmentTranslationDao($this->dbStub);
         $result = $dao->propagateTranslation($st, $job, 100, $project);
@@ -741,12 +758,12 @@ class SegmentTranslationDaoTest extends AbstractTest
         $job = $this->makeJobStruct();
 
         $project = $this->createStub(\Model\Projects\ProjectStruct::class);
-        $project->method('getWordCountType')->willReturn('equivalent');
+        $project->id = 1;
 
         $this->stmtStub->method('setFetchMode')->willReturn(true);
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('rowCount')->willReturn(0);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
+        $this->stmtStub->method('fetchAll')->willReturnOnConsecutiveCalls([], []);
 
         $dao = new SegmentTranslationDao($this->dbStub);
         $result = $dao->propagateTranslation($st, $job, 100, $project);

@@ -34,7 +34,7 @@ class SetContributionMTWorker extends SetContributionWorker
         try {
             //Load MT Adaptive EnginesFactory
 
-            return EnginesFactory::getInstance($jobStruct->id_mt_engine, AbstractEngine::class);
+            return EnginesFactory::getInstance($jobStruct->id_mt_engine, $this->database, AbstractEngine::class);
         } catch (Exception $e) {
             throw new EndQueueException($e->getMessage(), self::ERR_NO_TM_ENGINE);
         }

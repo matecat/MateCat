@@ -20,6 +20,7 @@ namespace Matecat\Core\Controllers;
 
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\V2\ProjectCreationStatusController;
+use Model\DataAccess\Database;
 use Exception;
 use Klein\Request;
 use Klein\Response;
@@ -84,6 +85,7 @@ class ProjectCreationStatusControllerTest extends AbstractTest
         $this->controller = new TestableProjectCreationStatusController();
         $this->reflector  = new ReflectionClass(ProjectCreationStatusController::class);
 
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createStub(MatecatLogger::class));
     }
 
@@ -365,5 +367,8 @@ class ProjectCreationStatusControllerTest extends AbstractTest
         $db->method('getConnection')->willReturn($pdo);
 
         $this->setDatabaseInstance($db);
+        // Controller no longer falls back to the Database singleton via getDatabase();
+        // push the primed stub into its injected $database so ProjectDao uses it.
+        $this->reflector->getProperty('database')->setValue($this->controller, $db);
     }
 }

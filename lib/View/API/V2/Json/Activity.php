@@ -23,12 +23,15 @@ class Activity
      */
     private array $data;
 
+    private FeatureSet $featureSet;
+
     /**
      * @param ActivityLogStruct[] $data
      */
-    public function __construct(array $data = [])
+    public function __construct(array $data, FeatureSet $featureSet)
     {
         $this->data = $data;
+        $this->featureSet = $featureSet;
     }
 
     /**
@@ -39,7 +42,7 @@ class Activity
     {
         $out = [];
 
-        $featureSet = new FeatureSet();
+        $featureSet = $this->featureSet;
 
         foreach ($this->data as $record) {
             if (!$record instanceof ActivityLogStruct) {

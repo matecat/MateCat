@@ -3,6 +3,7 @@
 namespace Utils\Engines;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\Engines\Structs\SmartMATEStruct;
 use TypeError;
 use Utils\Constants\EngineConstants;
@@ -54,9 +55,9 @@ class SmartMATE extends AbstractEngine
      * @throws Exception
      * @throws TypeError
      */
-    public function __construct($engineRecord)
+    public function __construct($engineRecord, IDatabase $database)
     {
-        parent::__construct($engineRecord);
+        parent::__construct($engineRecord, $database);
         if ($this->getEngineRecord()->type != EngineConstants::MT) {
             throw new Exception("Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
         }

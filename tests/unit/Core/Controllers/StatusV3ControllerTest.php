@@ -88,13 +88,14 @@ class StatusV3ControllerTest extends AbstractTest
         parent::setUp();
 
         AppConfig::$SKIP_SQL_CACHE = true;
-        $this->createDatabaseMock();
+        [$dbStub] = $this->createDatabaseMock();
 
         $this->controller  = new TestableStatusV3Controller();
         $this->reflector   = new ReflectionClass(StatusController::class);
         $this->responseMock = $this->createMock(Response::class);
 
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
+        $this->reflector->getProperty('database')->setValue($this->controller, $dbStub);
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createMock(MatecatLogger::class));
 
         $user = new UserStruct();
@@ -102,7 +103,10 @@ class StatusV3ControllerTest extends AbstractTest
         $user->email = 'ctrltest_9056000@example.org';
         $this->reflector->getProperty('user')->setValue($this->controller, $user);
 
-        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet());
+        // AbstractStatus resolves its ProjectDao from the FeatureSet's database;
+        // give it the real seeded test DB so an unresolvable pid returns null
+        // (→ "Project not found") instead of a stub crash.
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet(obtainTestDatabase()));
     }
 
     protected function tearDown(): void
@@ -188,6 +192,8 @@ class StatusV3ControllerTest extends AbstractTest
         $dbStub = $this->createStub(IDatabase::class);
         $dbStub->method('getConnection')->willReturn($pdoStub);
         $this->setDatabaseInstance($dbStub);
+        // Controller uses its injected $database (not the singleton); point it at the primed stub.
+        $this->reflector->getProperty('database')->setValue($this->controller, $dbStub);
 
         $this->responseMock->expects($this->never())->method('json');
 

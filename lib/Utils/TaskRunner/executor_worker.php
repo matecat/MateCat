@@ -32,5 +32,9 @@ Bootstrap::start();
 /** @var non-empty-list<string> $argv */
 if (PHP_SAPI === 'cli' && isset($argv[1]) && ($__ctx = json_decode($argv[1], true)) !== null) {
     /** @noinspection PhpUnhandledExceptionInspection */
-    Executor::getInstance(Context::buildFromArray($__ctx))->main();
+    // Composition root: read the DB handle once from Bootstrap and inject it
+    // into the Executor, which threads it down to every worker it spawns.
+    $executor = Executor::getInstance(Context::buildFromArray($__ctx));
+    $executor->setDatabase(Bootstrap::getDatabase());
+    $executor->main();
 }

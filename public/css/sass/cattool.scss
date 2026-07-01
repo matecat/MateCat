@@ -103,10 +103,10 @@ body.cattool {
     left: 50%;
     transform: translateX(-50%);
     font-family: Calibri, sans-serif;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 700;
     line-height: 16px;
-    color: colors.$grey6;
+    color: colors.$black;
     pointer-events: none;
   }
   .context-preview__header-btn {
@@ -127,8 +127,7 @@ body.cattool {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 12px 4px 16px;
-    height: 26px;
+    padding: 16px 40px 16px 46px;
     background-color: colors.$white;
     border-radius: 8px 8px 0 0;
     cursor: pointer;
@@ -138,10 +137,10 @@ body.cattool {
   }
   .context-preview__tab-title {
     font-family: Calibri, sans-serif;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 700;
     line-height: 16px;
-    color: colors.$grey7;
+    color: colors.$black;
   }
   .context-preview__tab-icon {
     display: flex;

@@ -54,7 +54,7 @@ class ExtractSegmentsTest extends AbstractTest
         $this->originalFileStorageMethod = AppConfig::$FILE_STORAGE_METHOD;
         AppConfig::$FILE_STORAGE_METHOD  = 'fs';
 
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         /** @var MatecatFilter $filter */
         $filter = MateCatFilter::getInstance($this->featureSet, 'en-US', 'it-IT');
         $this->filter = $filter;

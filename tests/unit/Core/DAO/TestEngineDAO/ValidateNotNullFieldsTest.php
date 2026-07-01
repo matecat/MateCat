@@ -38,7 +38,7 @@ class ValidateNotNullFieldsTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-        $this->engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $this->engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $this->reflector = new ReflectionClass($this->engineDAO);
         $this->method = $this->reflector->getMethod("_validateNotNullFields");
 

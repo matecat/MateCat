@@ -66,7 +66,7 @@ class RequestExportTMXController extends KleinController
             throw new InvalidArgumentException("Invalid TM name provided.", -2);
         }
 
-        $tmxHandler = new TMSService();
+        $tmxHandler = new TMSService($this->getDatabase());
         $tmxHandler->setName($tm_name);
 
         return [

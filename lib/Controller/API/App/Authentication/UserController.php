@@ -10,6 +10,7 @@ use Exception;
 use Klein\Response;
 use Model\Users\Authentication\ChangePasswordModel;
 use Model\Users\Authentication\PasswordRules;
+use Model\Users\UserDao;
 use ReflectionException;
 use Stomp\Exception\ConnectionException;
 use TypeError;
@@ -88,7 +89,7 @@ class UserController extends AbstractStatefulKleinController
 
     protected function createChangePasswordModel(): ChangePasswordModel
     {
-        return new ChangePasswordModel($this->user);
+        return new ChangePasswordModel($this->user, new UserDao($this->getDatabase()));
     }
 
     protected function registerValidators(): void

@@ -9,6 +9,7 @@ use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\Concerns\LogsMessages;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
@@ -85,6 +86,7 @@ class SegmentExtractor
         private readonly FeatureSet $features,
         private readonly MetadataDao $filesMetadataDao,
         private readonly SegmentMetadataMapper $segmentMetadataMapper,
+        private readonly IDatabase $dbHandler,
         MatecatLogger $logger,
     ) {
         $this->logger = $logger;
@@ -283,7 +285,7 @@ class SegmentExtractor
             $filesPartsStruct->tag_key = 'original';
             $filesPartsStruct->tag_value = $xliff_file['attr']['original'];
 
-            $filePartsId = (new FilesPartsDao())->insert($filesPartsStruct);
+            $filePartsId = (new FilesPartsDao($this->dbHandler))->insert($filesPartsStruct);
 
             // save `custom` meta data
             $customMetadata = $xliff_file['attr']['custom'] ?? null;
@@ -331,7 +333,7 @@ class SegmentExtractor
             // mrk in the list will not be too!!!
             $show_in_cattool = 1;
 
-            $wordCount = (new CatUtils())->countSegmentRawWords($seg_source['raw-content'], $this->sourceLanguage, $this->filter);
+            $wordCount = (new CatUtils($this->dbHandler))->countSegmentRawWords($seg_source['raw-content'], $this->sourceLanguage, $this->filter);
             $wordCountEvent = new WordCountEvent($wordCount);
             $this->features->dispatch($wordCountEvent);
             $wordCount = $wordCountEvent->getWordCount();
@@ -411,7 +413,7 @@ class SegmentExtractor
     ): int {
         $show_in_cattool = 1;
 
-        $wordCount = (new CatUtils())->countSegmentRawWords($xliff_trans_unit['source']['raw-content'], $this->sourceLanguage, $this->filter);
+        $wordCount = (new CatUtils($this->dbHandler))->countSegmentRawWords($xliff_trans_unit['source']['raw-content'], $this->sourceLanguage, $this->filter);
 
         $sourceLayer0 = $this->filter->fromRawXliffToLayer0($xliff_trans_unit['source']['raw-content']);
 
@@ -935,7 +937,7 @@ class SegmentExtractor
         }
 
         // set the contribution for every key in the job belonging to the user
-        $engine = EnginesFactory::getInstance(1, MyMemory::class);
+        $engine = EnginesFactory::getInstance(1, $this->dbHandler, MyMemory::class);
         $config = $engine->getConfigStruct();
 
         foreach ($privateTmKeys as $tm_info) {

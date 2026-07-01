@@ -16,7 +16,7 @@ import {
  *   onTranslationUpdate: (numericSid: number, target: string, updatedSegments: Array) => void,
  *   targetRef: React.RefObject,
  *   showNodeWarning: (el: HTMLElement) => void,
- *   clearNodeWarning: (el: HTMLElement) => void,
+ *   clearNodeWarning: () => void,
  *   targetDir: 'ltr'|'rtl'|null,
  * }} params
  * @returns {{segments: Array, setSegments: Function, currentContextUrl: string|null, currentSid: number|null}}
@@ -84,6 +84,11 @@ const useContextPreviewMessages = ({
             const el = map.nodes[nodeIndex]
             if (!el) return
             const result = updateNodeTranslation(el, updated)
+            if (result === 'ok') {
+              el.classList.add('context-preview-translated')
+            } else if (result === 'mismatch') {
+              el.classList.remove('context-preview-translated')
+            }
             if (result === 'mismatch') {
               const sids = getSidsFromElement(el)
               const sourceSeg = updated.find(
@@ -102,7 +107,7 @@ const useContextPreviewMessages = ({
                 if (result === 'ok') el.dir = targetDir
                 else el.removeAttribute('dir')
               }
-              clearNodeWarning(el)
+              clearNodeWarning()
             }
           })
         }

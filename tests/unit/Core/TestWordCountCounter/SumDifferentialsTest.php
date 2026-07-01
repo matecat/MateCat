@@ -55,7 +55,7 @@ class SumDifferentialsTest extends AbstractTest
         $this->word_count_struct->setOldStatus("TRANSLATED");
         $this->word_count_struct->setNewStatus("REJECTED");
 
-        $this->word_counter = new CounterModel($this->word_count_struct);
+        $this->word_counter = new CounterModel(obtainTestDatabase(), $this->word_count_struct);
         $this->word_counter->setOldStatus("TRANSLATED");
         $this->word_counter->setNewStatus("REJECTED");
 
@@ -105,7 +105,7 @@ class SumDifferentialsTest extends AbstractTest
         $this->word_count_struct->setNewStatus("APPROVED");
 
 
-        $this->word_counter = new CounterModel($this->word_count_struct);
+        $this->word_counter = new CounterModel(obtainTestDatabase(), $this->word_count_struct);
         $this->word_counter->setOldStatus("NEW");
         $this->word_counter->setNewStatus("APPROVED");
 

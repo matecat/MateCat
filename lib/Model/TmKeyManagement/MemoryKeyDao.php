@@ -162,7 +162,7 @@ class MemoryKeyDao extends AbstractDao
         $arr_result = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $where_params);
 
         if ($traverse) {
-            $userDao = new UserDao(Database::obtain());
+            $userDao = new UserDao($this->database);
 
             foreach ($arr_result as $k => $row) {
                 $users = $userDao->getByUids(explode(",", $row['owner_uids']));

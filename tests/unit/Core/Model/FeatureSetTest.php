@@ -6,6 +6,7 @@ use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
+use Model\Projects\MetadataDao;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -14,7 +15,7 @@ class FeatureSetTest extends AbstractTest
     #[Test]
     public function getSortedFeatures(): void
     {
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $featureSet->loadFromString("translation_versions,project_completion");
 
         $this->assertEquals(
@@ -26,7 +27,7 @@ class FeatureSetTest extends AbstractTest
     #[Test]
     public function getFeaturesStructsReturnsLoadedFeatures(): void
     {
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class), [
             new BasicFeatureStruct(['feature_code' => 'test_featureset_stub_a']),
         ]);
 
@@ -39,7 +40,7 @@ class FeatureSetTest extends AbstractTest
     #[Test]
     public function loadProjectDependenciesFromProjectMetadataIsNoOp(): void
     {
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class), [
             new BasicFeatureStruct(['feature_code' => 'test_featureset_stub_a']),
         ]);
 
@@ -54,14 +55,18 @@ class FeatureSetTest extends AbstractTest
     #[Test]
     public function loadForProjectClearsAndReloadsFeatures(): void
     {
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class), [
             new BasicFeatureStruct(['feature_code' => 'test_featureset_stub_a']),
         ]);
 
-        $project = $this->createStub(ProjectStruct::class);
-        $project->method('getMetadataValue')->willReturn('');
+        $metadataDao = $this->createStub(MetadataDao::class);
+        $metadataDao->method('setCacheTTL')->willReturnSelf();
+        $metadataDao->method('getValue')->willReturn('');
 
-        $featureSet->loadForProject($project);
+        $project = new ProjectStruct();
+        $project->id = 1;
+
+        $featureSet->loadForProject($project, $metadataDao);
 
         $codes = $featureSet->getCodes();
         self::assertNotContains('test_featureset_stub_a', $codes);
@@ -70,12 +75,16 @@ class FeatureSetTest extends AbstractTest
     #[Test]
     public function loadForProjectLoadsMetadataFeatures(): void
     {
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
 
-        $project = $this->createStub(ProjectStruct::class);
-        $project->method('getMetadataValue')->willReturn('translation_versions');
+        $metadataDao = $this->createStub(MetadataDao::class);
+        $metadataDao->method('setCacheTTL')->willReturnSelf();
+        $metadataDao->method('getValue')->willReturn('translation_versions');
 
-        $featureSet->loadForProject($project);
+        $project = new ProjectStruct();
+        $project->id = 1;
+
+        $featureSet->loadForProject($project, $metadataDao);
 
         $codes = $featureSet->getCodes();
         self::assertContains('translation_versions', $codes);
@@ -87,7 +96,7 @@ class FeatureSetTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessageMatches('/conflicting/i');
 
-        new FeatureSet([
+        new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class), [
             new BasicFeatureStruct(['feature_code' => 'test_feature_conflict_declarer']),
             new BasicFeatureStruct(['feature_code' => 'test_featureset_stub_a']),
         ]);

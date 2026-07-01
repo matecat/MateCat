@@ -17,7 +17,9 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Model\Jobs\JobStruct;
+use Model\Users\UserDao;
 use Model\Outsource\ConfirmationDao;
+use Model\Translators\JobsTranslatorsDao;
 use Model\Translators\TranslatorsModel;
 use ReflectionException;
 use TypeError;
@@ -58,7 +60,7 @@ class JobsTranslatorsController extends KleinController
             throw new NotFoundException('No job found.');
         }
 
-        $TranslatorsModel = new TranslatorsModel($this->jStruct);
+        $TranslatorsModel = new TranslatorsModel($this->jStruct, $this->getDatabase());
         $TranslatorsModel
             ->setUserInvite($this->user)
             ->setDeliveryDate((string)($this->params['delivery_date'] ?? ''))
@@ -71,7 +73,7 @@ class JobsTranslatorsController extends KleinController
                 'job' => [
                     'id' => $this->jStruct->id,
                     'password' => $this->jStruct->password,
-                    'translator' => (new JobTranslator($tStruct))->renderItem()
+                    'translator' => (new JobTranslator($tStruct, new UserDao($this->getDatabase())))->renderItem()
                 ]
             ]
         );
@@ -106,11 +108,11 @@ class JobsTranslatorsController extends KleinController
         }
 
         //do not show outsourced translators
-        $outsourceInfo = $this->jStruct->getOutsource();
-        $tStruct = $this->jStruct->getTranslator();
+        $outsourceInfo = $this->jStruct->getOutsource(new ConfirmationDao($this->getDatabase()));
+        $tStruct = $this->jStruct->getTranslator(new JobsTranslatorsDao($this->getDatabase()));
         $translator = null;
         if (empty($outsourceInfo)) {
-            $translator = (!empty($tStruct) ? (new JobTranslator($tStruct))->renderItem() : null);
+            $translator = (!empty($tStruct) ? (new JobTranslator($tStruct, new UserDao($this->getDatabase())))->renderItem() : null);
         }
         $this->response->json(
             [

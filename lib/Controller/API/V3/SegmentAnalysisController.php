@@ -76,9 +76,9 @@ class SegmentAnalysisController extends KleinController
 
         // raise exception if the job does not exist
         $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($idJob, $password);
-        $this->project = $jobStruct->getProject();
+        $this->project = $jobStruct->getProject(new ProjectDao($this->getDatabase()));
 
-        $mt_qe_workflow_enabled = !empty($this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value));
+        $mt_qe_workflow_enabled = !empty((new MetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$this->project->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value));
         $matchClass = MatchConstantsFactory::getInstance($mt_qe_workflow_enabled);
         $this->response->json($this->getSegmentsForAJob($jobStruct, $page, $perPage, $segmentsCount, $matchClass));
     }
@@ -127,7 +127,7 @@ class SegmentAnalysisController extends KleinController
         $limit = $perPage;
         $offset = ($page - 1) * $perPage;
         $this->projectDao = new ProjectDao($this->getDatabase());
-        $this->segmentDisabledService = new SegmentDisabledService();
+        $this->segmentDisabledService = new SegmentDisabledService(new SegmentMetadataDao($this->getDatabase()));
 
         $idJob = $jobStruct->id ?? throw new RuntimeException('Job ID must not be null');
         $password = $jobStruct->password ?? throw new RuntimeException('Job password must not be null');
@@ -167,7 +167,7 @@ class SegmentAnalysisController extends KleinController
 
         $this->projectDao = new ProjectDao($this->getDatabase());
         $this->project = $this->projectDao->findByIdAndPassword($idProject, $password);
-        $mt_qe_workflow_enabled = !empty($this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value));
+        $mt_qe_workflow_enabled = !empty((new MetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$this->project->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value));
         $matchClass = MatchConstantsFactory::getInstance($mt_qe_workflow_enabled);
         $segmentsCount = $this->getSegmentTranslationsCount($this->project);
         $this->response->json($this->getSegmentsForAProject($idProject, $password, $page, $perPage, $segmentsCount, $matchClass));
@@ -178,7 +178,7 @@ class SegmentAnalysisController extends KleinController
      */
     protected function getSegmentTranslationsCount(ProjectStruct $project): int
     {
-        return (new CatUtils())->getSegmentTranslationsCount($project) ?? 0;
+        return (new CatUtils($this->getDatabase()))->getSegmentTranslationsCount($project) ?? 0;
     }
 
     /**
@@ -186,7 +186,7 @@ class SegmentAnalysisController extends KleinController
      */
     protected function countRawWords(?string $string, string $lang, ?MateCatFilter $filter): int
     {
-        return (new CatUtils())->countSegmentRawWords($string, $lang, $filter);
+        return (new CatUtils($this->getDatabase()))->countSegmentRawWords($string, $lang, $filter);
     }
 
     /**
@@ -231,7 +231,7 @@ class SegmentAnalysisController extends KleinController
         $segments = [];
         $limit = $perPage;
         $offset = ($page - 1) * $perPage;
-        $this->segmentDisabledService = new SegmentDisabledService();
+        $this->segmentDisabledService = new SegmentDisabledService(new SegmentMetadataDao($this->getDatabase()));
 
         $segmentsForAnalysis = (new SegmentDao($this->getDatabase()))->getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset);
         $projectIdFromProject = $this->project->id ?? throw new Exception('Project not found');

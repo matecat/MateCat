@@ -48,7 +48,7 @@ class AjaxUtilsController extends KleinController
             throw new InvalidArgumentException("TM key not provided.", -9);
         }
 
-        $tmxHandler = new TMSService();
+        $tmxHandler = new TMSService($this->getDatabase());
         $keyExists = $tmxHandler->checkCorrectKey($tm_key);
 
         if (!isset($keyExists) or $keyExists === false) {
@@ -68,7 +68,7 @@ class AjaxUtilsController extends KleinController
      */
     public function clearNotCompletedUploads(): void
     {
-        (new Session())->clearSession();
+        (new Session($this->getDatabase()))->clearSession();
 
         $this->response->json([
             'success' => true

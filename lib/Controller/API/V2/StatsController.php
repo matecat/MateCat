@@ -9,6 +9,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use DivisionByZeroError;
 use Exception;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use Model\WordCount\WordCountStruct;
 use RuntimeException;
 use TypeError;
@@ -32,8 +33,8 @@ class StatsController extends KleinController
     {
         $chunk = $this->chunk ?? throw new RuntimeException('Chunk not found');
         $wStruct = WordCountStruct::loadFromJob($chunk);
-        $job_stats = (new CatUtils())->getFastStatsForJob($wStruct);
-        $job_stats['analysis_complete'] = $chunk->getProject()->analysisComplete();
+        $job_stats = (new CatUtils($this->getDatabase()))->getFastStatsForJob($wStruct);
+        $job_stats['analysis_complete'] = $chunk->getProject(new ProjectDao($this->getDatabase()))->analysisComplete();
 
         $this->response->json($job_stats);
     }

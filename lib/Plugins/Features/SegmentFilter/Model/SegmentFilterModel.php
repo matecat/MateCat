@@ -33,13 +33,13 @@ class SegmentFilterModel
      *
      * @param JobStruct $chunk
      * @param FilterDefinition $filter
-     * @param SegmentFilterDao|null $segmentFilterDao
+     * @param SegmentFilterDao $segmentFilterDao
      */
-    public function __construct(JobStruct $chunk, FilterDefinition $filter, ?SegmentFilterDao $segmentFilterDao = null)
+    public function __construct(JobStruct $chunk, FilterDefinition $filter, SegmentFilterDao $segmentFilterDao)
     {
         $this->chunk = $chunk;
         $this->filter = $filter;
-        $this->segmentFilterDao = $segmentFilterDao ?? new SegmentFilterDao();
+        $this->segmentFilterDao = $segmentFilterDao;
     }
 
     /**

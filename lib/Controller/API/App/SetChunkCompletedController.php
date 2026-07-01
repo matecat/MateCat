@@ -8,8 +8,11 @@ use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
 use InvalidArgumentException;
+use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\Jobs\JobDao;
+use Model\FeaturesBase\FeatureSet;
+use Model\Projects\ProjectDao;
 use Plugins\Features\ProjectCompletion\Model\EventModel;
 use ReflectionException;
 use TypeError;
@@ -41,7 +44,14 @@ class SetChunkCompletedController extends KleinController
             'is_review' => $this->isRevision()
         ]);
 
-        $model = new EventModel($request['job'], $struct);
+        $database = $this->getDatabase();
+        $model = new EventModel(
+            $request['job'],
+            $struct,
+            new ChunkCompletionEventDao($database),
+            new ProjectDao($database),
+            new FeatureSet($database),
+        );
         $model->save();
 
         $this->response->json([

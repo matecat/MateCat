@@ -5,6 +5,7 @@ namespace Matecat\Core\Model\Segments;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\Segments\SegmentDisabledService;
+use Model\Segments\SegmentMetadataDao;
 use PDO;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
@@ -24,13 +25,13 @@ class SegmentDisabledServiceTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->database = Database::obtain(
+        $this->database = obtainTestDatabase(
             AppConfig::$DB_SERVER,
             AppConfig::$DB_USER,
             AppConfig::$DB_PASS,
             AppConfig::$DB_DATABASE
         );
-        $this->service = new SegmentDisabledService();
+        $this->service = new SegmentDisabledService(new SegmentMetadataDao($this->database));
         $this->cleanFixtures();
     }
 
@@ -67,6 +68,20 @@ class SegmentDisabledServiceTest extends AbstractTest
         return $this->database->getConnection()
             ->query("SELECT * FROM segment_metadata WHERE id_segment = $idSegment AND meta_key = '$key'")
             ->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // --- constructor contract ---
+
+    #[Test]
+    public function constructorRequiresInjectedDao(): void
+    {
+        $param = (new \ReflectionMethod(SegmentDisabledService::class, '__construct'))->getParameters()[0];
+
+        $this->assertFalse(
+            $param->isOptional(),
+            'SegmentMetadataDao must be a mandatory ctor dependency (no obtainTestDatabase() fallback)'
+        );
+        $this->assertFalse($param->allowsNull(), 'SegmentMetadataDao ctor param must not be nullable');
     }
 
     // --- isDisabled() ---

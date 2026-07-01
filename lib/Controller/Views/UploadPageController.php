@@ -28,7 +28,7 @@ class UploadPageController extends BaseKleinViewController
     /**
      * @throws Exception
      */
-    protected function renderView(): void
+    public function renderView(): never
     {
         $guid = $this->checkDriveFilesOrGetGuid();
         if (!empty($guid)) {

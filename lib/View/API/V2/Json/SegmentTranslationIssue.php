@@ -20,9 +20,9 @@ class SegmentTranslationIssue
      */
     private SplFileObject $csvHandler;
 
-    private ?EntryCommentDao $entryCommentDao;
+    private EntryCommentDao $entryCommentDao;
 
-    public function __construct(?EntryCommentDao $entryCommentDao = null)
+    public function __construct(EntryCommentDao $entryCommentDao)
     {
         $this->entryCommentDao = $entryCommentDao;
     }
@@ -34,7 +34,7 @@ class SegmentTranslationIssue
      */
     public function renderItem(IDaoStruct $record): array
     {
-        $dao = $this->entryCommentDao ?? new EntryCommentDao();
+        $dao = $this->entryCommentDao;
         /** @var EntryStruct $record */
         $comments = $dao->findByIssueId($record->id ?? throw new RuntimeException('Missing issue id'));
         $record = new EntryStruct($record->getArrayCopy());
@@ -89,7 +89,7 @@ class SegmentTranslationIssue
         $csvHandler->fputcsv($csv_fields);
 
         foreach ($data as $record) {
-            $dao = $this->entryCommentDao ?? new EntryCommentDao();
+            $dao = $this->entryCommentDao;
 
             if ($record->id === null) {
                 continue;

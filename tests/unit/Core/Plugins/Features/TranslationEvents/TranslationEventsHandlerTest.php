@@ -86,7 +86,7 @@ class TranslationEventsHandlerTest extends AbstractTest
     {
         return new TestableTranslationEventsHandler(
             $this->makeChunk(),
-            $dao,
+            $dao ?? $this->createStub(TranslationEventDao::class),
         );
     }
 

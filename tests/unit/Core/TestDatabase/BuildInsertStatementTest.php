@@ -31,7 +31,7 @@ class BuildInsertStatementTest extends AbstractTest
         $mask = [];
         $onDuplicateFields = ['name' => 'value', 'status' => 'value'];
 
-        [$sql, $dupBindValues] = Database::obtain()->buildInsertStatement($table, $attrs, $mask, false, false, $onDuplicateFields);
+        [$sql, $dupBindValues] = obtainTestDatabase()->buildInsertStatement($table, $attrs, $mask, false, false, $onDuplicateFields);
 
         $this->assertIsString($sql);
         $this->assertIsArray($dupBindValues);
@@ -56,7 +56,7 @@ class BuildInsertStatementTest extends AbstractTest
         $mask = [];
         $onDuplicateFields = ['name' => 'value', 'status' => 'inactive'];
 
-        [$sql, $dupBindValues] = Database::obtain()->buildInsertStatement($table, $attrs, $mask, false, false, $onDuplicateFields);
+        [$sql, $dupBindValues] = obtainTestDatabase()->buildInsertStatement($table, $attrs, $mask, false, false, $onDuplicateFields);
 
         $this->assertIsString($sql);
         $this->assertIsArray($dupBindValues);
@@ -82,7 +82,7 @@ class BuildInsertStatementTest extends AbstractTest
         $mask = [];
         $onDuplicateFields = ['name' => 'Jane', 'status' => 'inactive'];
 
-        [$sql, $dupBindValues] = Database::obtain()->buildInsertStatement($table, $attrs, $mask, false, false, $onDuplicateFields);
+        [$sql, $dupBindValues] = obtainTestDatabase()->buildInsertStatement($table, $attrs, $mask, false, false, $onDuplicateFields);
 
         $this->assertIsString($sql);
         $this->assertIsArray($dupBindValues);
@@ -110,7 +110,7 @@ class BuildInsertStatementTest extends AbstractTest
         $attrs = ['id' => 1, 'name' => 'John', 'status' => 'active'];
         $mask = [];
 
-        [$sql, $dupBindValues] = Database::obtain()->buildInsertStatement($table, $attrs, $mask, false, false, []);
+        [$sql, $dupBindValues] = obtainTestDatabase()->buildInsertStatement($table, $attrs, $mask, false, false, []);
 
         $this->assertIsString($sql);
         $this->assertIsArray($dupBindValues);
@@ -135,7 +135,7 @@ class BuildInsertStatementTest extends AbstractTest
         $mask = [];
         $onDuplicateFields = ['name' => 'value', 'status' => 'value'];
 
-        [$sql, $dupBindValues] = Database::obtain()->buildInsertStatement($table, $attrs, $mask, false, true, $onDuplicateFields);
+        [$sql, $dupBindValues] = obtainTestDatabase()->buildInsertStatement($table, $attrs, $mask, false, true, $onDuplicateFields);
 
         $this->assertIsString($sql);
         $this->assertIsArray($dupBindValues);
@@ -164,6 +164,6 @@ class BuildInsertStatementTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('INSERT IGNORE and ON DUPLICATE KEYS UPDATE are not allowed together.');
 
-        Database::obtain()->buildInsertStatement($table, $attrs, $mask, true, false, $onDuplicateFields);
+        obtainTestDatabase()->buildInsertStatement($table, $attrs, $mask, true, false, $onDuplicateFields);
     }
 }

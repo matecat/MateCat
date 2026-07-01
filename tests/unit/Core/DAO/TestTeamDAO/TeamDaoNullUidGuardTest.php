@@ -19,6 +19,6 @@ class TeamDaoNullUidGuardTest extends AbstractTest
 
         $this->expectException(DomainException::class);
 
-        (new TeamDao())->getPersonalByUser($user);
+        (new TeamDao(obtainTestDatabase()))->getPersonalByUser($user);
     }
 }

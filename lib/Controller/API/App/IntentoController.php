@@ -40,7 +40,7 @@ class IntentoController extends KleinController
 
         $engineDAO = new EngineDAO($this->getDatabase());
         $engineStruct = ($engineDAO->setCacheTTL(60 * 60 * 5)->read($engine)[0] ?? null) ?: throw new UnexpectedValueException('Engine ID is not valid');
-        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct);
+        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct, $this->getDatabase());
 
         $newTestCreatedMT instanceof Intento || throw new UnexpectedValueException('Engine is not of Intento type');
 

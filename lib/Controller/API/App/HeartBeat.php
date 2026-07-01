@@ -12,6 +12,7 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\WhitelistAccessValidator;
+use PDOException;
 use RuntimeException;
 use Utils\Registry\AppConfig;
 use View\API\App\Json\Ping;
@@ -24,6 +25,9 @@ class HeartBeat extends KleinController
         $this->appendValidator(new WhitelistAccessValidator($this));
     }
 
+    /**
+     * @throws PDOException
+     */
     public function ping(): void
     {
         $this->getDatabase()->ping();

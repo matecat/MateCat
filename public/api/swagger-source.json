@@ -4607,6 +4607,175 @@
         }
       }
     },
+    "/api/v3/tmx/import": {
+      "post": {
+        "tags": [
+          "TMX"
+        ],
+        "summary": "Import TMX file",
+        "description": "Upload a TMX file into a translation memory. Requires authentication.",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "tm_key",
+            "in": "formData",
+            "description": "The TM key where the TMX will be imported. If not provided, the default MyMemory key will be used.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "in": "formData",
+            "description": "The name for the TM key.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "disable_upload_limit",
+            "in": "formData",
+            "description": "Whether to disable the upload size limit.",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "The TMX file to upload.",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "TMX import started successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "uuids": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "uuid": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/api/v3/tmx/export": {
+      "post": {
+        "tags": [
+          "TMX"
+        ],
+        "summary": "Export TMX file",
+        "description": "Request the export of a TMX file. The exported file will be sent via email. Requires authentication.",
+        "parameters": [
+          {
+            "name": "tm_key",
+            "in": "formData",
+            "description": "The TM key to export.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "tm_name",
+            "in": "formData",
+            "description": "The name of the TM.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "in": "formData",
+            "description": "The email address to send the exported TMX to.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "strip_tags",
+            "in": "formData",
+            "description": "Whether to strip tags from the exported TMX.",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "id_job",
+            "in": "formData",
+            "description": "The job ID (optional context).",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "password",
+            "in": "formData",
+            "description": "The job password (optional context).",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "source",
+            "in": "formData",
+            "description": "The source language.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "target",
+            "in": "formData",
+            "description": "The target language.",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "TMX export request accepted.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "data": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
     "/api/v3/context-url/schema": {
       "get": {
         "tags": [

@@ -35,7 +35,7 @@ class ConstructorMyMemoryTest extends AbstractTest
      */
     public function setUp(): void
     {
-        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -56,7 +56,7 @@ class ConstructorMyMemoryTest extends AbstractTest
     #[Test]
     public function test___construct_of_sub_engine_of_moses()
     {
-        $myMemory = new MyMemory($this->engine_struct_param);
+        $myMemory = new MyMemory($this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
         $reflector = new ReflectionClass($myMemory);
         $property = $reflector->getProperty("engineRecord");
 
@@ -85,6 +85,6 @@ class ConstructorMyMemoryTest extends AbstractTest
     {
         $this->engine_struct_param->type = "fooo";
         $this->expectException("Exception");
-        new MyMemory($this->engine_struct_param);
+        new MyMemory($this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 }

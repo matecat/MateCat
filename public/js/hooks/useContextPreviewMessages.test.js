@@ -519,7 +519,7 @@ describe('updateTranslation message', () => {
     })
     dispatch({type: 'updateTranslation', sid: 1, target: 'Hola'})
 
-    expect(clearNodeWarning).toHaveBeenCalledWith(el)
+    expect(clearNodeWarning).toHaveBeenCalled()
   })
 
   it('calls showNodeWarning and reverts to source on mismatch', () => {

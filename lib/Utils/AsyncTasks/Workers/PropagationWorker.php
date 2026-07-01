@@ -3,7 +3,6 @@
 namespace Utils\AsyncTasks\Workers;
 
 use Exception;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
@@ -21,7 +20,6 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
 
 class PropagationWorker extends AbstractWorker
 {
-    private IDatabase $database;
     private TranslationVersionDao $translationVersionsDao;
 
     /**
@@ -29,12 +27,11 @@ class PropagationWorker extends AbstractWorker
      */
     public function __construct(
         AMQHandler $queueHandler,
-        ?IDatabase $database = null,
+        IDatabase $database,
         ?TranslationVersionDao $translationVersionsDao = null
     ) {
-        parent::__construct($queueHandler);
-        $this->database = $database ?? Database::obtain();
-        $this->translationVersionsDao = $translationVersionsDao ?? new TranslationVersionDao();
+        parent::__construct($queueHandler, $database);
+        $this->translationVersionsDao = $translationVersionsDao ?? new TranslationVersionDao($this->database);
     }
 
     /**

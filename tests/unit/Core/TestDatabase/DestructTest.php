@@ -41,7 +41,7 @@ class DestructTest extends AbstractTest
     #[Test]
     public function test___destruct()
     {
-        $instance_to_destruct = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $instance_to_destruct = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         $instance_to_destruct->connect();
 
         $reflector = new ReflectionClass($instance_to_destruct);

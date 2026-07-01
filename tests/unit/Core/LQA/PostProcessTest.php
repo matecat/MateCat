@@ -23,7 +23,7 @@ class PostProcessTest extends AbstractTest
     {
         parent::setUp();
 
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $this->featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
 
         $this->filter = MateCatFilter::getInstance($this->featureSet, 'en-EN', 'it-IT', []);
