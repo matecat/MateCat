@@ -25,7 +25,7 @@ const SEGMENTED_CONTROL_OPTIONS = [
     id: '1',
     name: (
       <>
-        <div className={'ui revision-color empty circular label'} />
+        <div className={'color-dot revision-color'} />
         Revise
       </>
     ),
@@ -34,7 +34,7 @@ const SEGMENTED_CONTROL_OPTIONS = [
     id: '2',
     name: (
       <>
-        <div className={'ui second-revision-color empty circular label'} />
+        <div className={'color-dot second-revision-color'} />
         Revise 2
       </>
     ),

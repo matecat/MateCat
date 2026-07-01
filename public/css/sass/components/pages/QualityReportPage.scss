@@ -485,17 +485,17 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
   background: colors.$grey150;
 }
 
-.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-feedback-container .qr-feedback .qr-head .label.revision-color {
+.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-feedback-container .qr-feedback .qr-head .color-dot.revision-color {
   float: left;
   margin-right: 10px;
   margin-top: 5px;
 }
 
-.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-feedback-container .qr-feedback .qr-head .label.revision-color.revision-1 {
+.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-feedback-container .qr-feedback .qr-head .color-dot.revision-color.revision-1 {
   background: colors.$green800;
 }
 
-.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-feedback-container .qr-feedback .qr-head .label.revision-color.revision-2 {
+.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-feedback-container .qr-feedback .qr-head .color-dot.revision-color.revision-2 {
   background: colors.$purple500;
 }
 
@@ -1009,34 +1009,6 @@ width: 200px;
 --sc-label-line-height: 40px;
 }
 
-.qr-reviewType-dropdown .circular.label.new-color, .filter-reviewType .circular.label.new-color {
-box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
-background: colors.$white;
-}
-
-.qr-reviewType-dropdown .circular.label.draft-color, .filter-reviewType .circular.label.draft-color {
-background: colors.$grey500;
-}
-
-.qr-reviewType-dropdown .circular.label.translated-color, .filter-reviewType .circular.label.translated-color {
-background: colors.$blue500;
-}
-
-.qr-reviewType-dropdown .circular.label.approved-color, .filter-reviewType .circular.label.approved-color {
-background: colors.$green800;
-}
-
-.qr-reviewType-dropdown .circular.label.rejected-color, .filter-reviewType .circular.label.rejected-color {
-background: colors.$orange600;
-}
-
-.qr-reviewType-dropdown .circular.label.revision-color, .filter-reviewType .circular.label.revision-color {
-background: colors.$green800;
-}
-
-.qr-reviewType-dropdown .circular.label.second-revision-color, .qr-reviewType-dropdown .circular.label.approved-2ndpass-color, .filter-reviewType .circular.label.second-revision-color, .filter-reviewType .circular.label.approved-2ndpass-color {
-background: colors.$purple500;
-}
 
 .qr-reviewType-dropdown, .filter-reviewType {
 .status-dot {
@@ -1048,6 +1020,17 @@ background: colors.$purple500;
 &.revision-color { background: colors.$green800; }
 &.second-revision-color, &.approved-2ndpass-color { background: colors.$purple500; }
 }
+}
+
+.color-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  vertical-align: middle;
+
+  &.revision-color { background: colors.$green800; }
+  &.second-revision-color { background: colors.$purple500; }
 }
 
 .qr-filter-list {

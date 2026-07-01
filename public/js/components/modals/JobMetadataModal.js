@@ -152,7 +152,7 @@ class JobMetadataModal extends React.Component {
                   )) && (
                   <div>
                     <h2>File instructions</h2>
-                    <div className="ui styled fluid accordion">
+                    <div className="file-instructions-accordion">
                       {this.createFileList()}
                     </div>
                   </div>
