@@ -2043,16 +2043,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v3.0.6",
+            "version": "v3.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "500e940162d5de36b4d9877ee26c07d4c78c258e"
+                "reference": "b0f6350954b865bc6aa377568792dea71e382b11"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/500e940162d5de36b4d9877ee26c07d4c78c258e",
-                "reference": "500e940162d5de36b4d9877ee26c07d4c78c258e",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/b0f6350954b865bc6aa377568792dea71e382b11",
+                "reference": "b0f6350954b865bc6aa377568792dea71e382b11",
                 "shasum": ""
             },
             "require": {
@@ -2103,9 +2103,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v3.0.6"
+                "source": "https://github.com/matecat/xliff-parser/tree/v3.0.7"
             },
-            "time": "2026-04-13T09:27:19+00:00"
+            "time": "2026-07-01T15:06:58+00:00"
         },
         {
             "name": "matecat/xml-dom-parser",
