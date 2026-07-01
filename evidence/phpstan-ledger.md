@@ -10,7 +10,7 @@ Any change that introduces a new PHPStan error in a ledger file MUST be fixed, n
 
 | File | Cleaned | Coverage |
 |------|---------|----------|
-| `lib/Controller/API/App/Authentication/LaraAuthController.php` | 2026-06-30 | pre-existing |
+| `lib/Controller/API/App/Authentication/LaraAuthController.php` | 2026-07-01 | 92.9% (Wave 2; ctor 2 lines need HTTP SAPI getallheaders) |
 | `lib/Controller/API/App/XliffToTargetConverterController.php` | 2026-06-30 | 100% (prepareUploadedXliff/createFilters seams) |
 | `lib/Controller/Views/OutsourceTo/AbstractController.php` | 2026-06-30 | 91.04% (refactor: setTemplateVars folded into setView; createLogger/createShopCart seams) |
 | `lib/Controller/API/Commons/Validators/ChunkPasswordValidator.php` | 2026-06-30 | 100% |
@@ -49,7 +49,16 @@ Any change that introduces a new PHPStan error in a ledger file MUST be fixed, n
 | `lib/Controller/API/App/CreateRandUserController.php` | 2026-07-01 | 100% (Wave 1; getEngine() seam → stub MyMemory) |
 | `lib/Controller/API/App/HeartBeat.php` | 2026-07-01 | 100% (Wave 1; temp heartbeat-file path) |
 | `lib/Controller/API/App/MyMemoryEntryStatusController.php` | 2026-07-01 | 100% (Wave 1; getMMEngine() private→protected seam → stub MyMemory) |
-| `lib/Controller/API/App/OutsourceToController.php` | 2026-06-30 | PHPStan-clean (@throws Exception/TypeError/InvalidArgumentException + array value type); coverage pending — Wave 2 |
+| `lib/Controller/API/App/OutsourceToController.php` | 2026-07-01 | 96.6% (Wave 2; getOutsourceService() seam → stub quote vendor) |
+| `lib/Controller/API/App/UserKeysController.php` | 2026-07-01 | 97.9% (Wave 2; getTmService() seam; line 147 dead code documented) |
+| `lib/Controller/API/App/GetTagProjectionController.php` | 2026-07-01 | 98.5% (Wave 2; getEngine() seam; 1 line = seam factory delegation) |
+| `lib/Controller/API/App/TMXFileController.php` | 2026-07-01 | 100% (Wave 2; createTMSService() seam → avoid live HTTP) |
+| `lib/Controller/API/App/TmKeyManagementController.php` | 2026-07-01 | 100% (Wave 2; distinct from V3; fixed latent status_owner test bug) |
+| `lib/Controller/API/App/GetWarningController.php` | 2026-07-01 | 100% (Wave 2; reused existing fixtures) |
+| `lib/Controller/API/App/DeleteContributionController.php` | 2026-07-01 | 100% (Wave 2; found pre-existing array_search(false) bug @:113) |
+| `lib/Controller/API/App/ContextUrlController.php` | 2026-07-01 | 100% (Wave 2; distinct from ContextUrlSchemaController) |
+| `lib/Controller/API/App/Authentication/SignupController.php` | 2026-07-01 | 94.5% (Wave 2; Redis/Klein-dispatch/dead-filter lines excluded) |
+| `lib/Controller/API/App/UpdateJobKeysController.php` | 2026-07-01 | 100% (Wave 2; documented DaoCacheTrait per-uid Redis cache pitfall) |
 | `lib/Controller/API/App/RequestExportTMXController.php` | 2026-07-01 | 100% (Wave 1; createTMSService() seam → avoid live HTTP) |
 | `lib/Controller/API/App/FetchChangeRatesController.php` | 2026-07-01 | 100% (Wave 1; getChangeRatesFetcher() seam → stub fetcher) |
 | `lib/Controller/API/App/LaraController.php` | 2026-07-01 | 100% (Wave 1) |

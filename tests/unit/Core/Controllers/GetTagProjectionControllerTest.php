@@ -16,10 +16,15 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
+use Utils\Engines\MyMemory;
+use Utils\Engines\Results\ErrorResponse;
+use Utils\Engines\Results\MyMemory\TagProjectionResponse;
 use Utils\Logger\MatecatLogger;
 
 class TestableGetTagProjectionController extends GetTagProjectionController
 {
+    public ?MyMemory $engineStub = null;
+
     public function __construct()
     {
     }
@@ -30,6 +35,11 @@ class TestableGetTagProjectionController extends GetTagProjectionController
 
     protected function registerValidators(): void
     {
+    }
+
+    protected function getEngine(): MyMemory
+    {
+        return $this->engineStub ?? parent::getEngine();
     }
 }
 
@@ -78,7 +88,7 @@ class GetTagProjectionControllerTest extends AbstractTest
         $this->reflector->getProperty('user')->setValue($this->controller, $user);
 
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createMock(MatecatLogger::class));
-        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet(obtainTestDatabase()));
         $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
     }
 
@@ -271,6 +281,84 @@ class GetTagProjectionControllerTest extends AbstractTest
         $this->setRequestParams($params);
 
         $this->expectException(NotFoundException::class);
+
+        $this->controller->call();
+    }
+
+    // ─── validateTheRequest — id_job missing branch ───
+
+    #[Test]
+    public function validateTheRequest_throws_when_id_job_missing(): void
+    {
+        $params           = $this->validParams();
+        $params['id_job'] = '';
+        $this->setRequestParams($params);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(-4);
+
+        try {
+            $this->invokePrivate('validateTheRequest');
+        } finally {
+            \Utils\Registry\AppConfig::$SEND_ERR_MAIL_REPORT = false;
+        }
+    }
+
+    // ─── registerValidators ───
+
+    #[Test]
+    public function registerValidators_appends_login_validator(): void
+    {
+        $method = new \ReflectionMethod(GetTagProjectionController::class, 'registerValidators');
+        $method->invoke($this->controller);
+
+        $validators = $this->reflector->getProperty('validators')->getValue($this->controller);
+
+        $this->assertNotEmpty($validators);
+        $this->assertInstanceOf(\Controller\API\Commons\Validators\LoginValidator::class, $validators[0]);
+    }
+
+    // ─── call() happy path (stub engine, no live HTTP) ───
+
+    #[Test]
+    public function call_returns_translation_on_success(): void
+    {
+        $this->setRequestParams($this->validParams());
+
+        $realResponse = new Response();
+        $this->reflector->getProperty('response')->setValue($this->controller, $realResponse);
+
+        $result               = new TagProjectionResponse(['data' => ['translation' => 'Ciao mondo tag']]);
+        $result->responseData = 'Ciao mondo tag';
+
+        $engineStub = $this->createStub(MyMemory::class);
+        $engineStub->method('getTagProjection')->willReturn($result);
+
+        $this->controller->engineStub = $engineStub;
+
+        $this->controller->call();
+
+        $body = json_decode((string) $realResponse->body(), true);
+
+        $this->assertSame(0, $body['code']);
+        $this->assertSame('Ciao mondo tag', $body['data']['translation']);
+    }
+
+    #[Test]
+    public function call_throws_external_service_exception_on_engine_error(): void
+    {
+        $this->setRequestParams($this->validParams());
+
+        $errorResult                 = new TagProjectionResponse(['data' => ['translation' => '']]);
+        $errorResult->error          = new ErrorResponse();
+        $errorResult->error->message = 'boom';
+
+        $engineStub = $this->createStub(MyMemory::class);
+        $engineStub->method('getTagProjection')->willReturn($errorResult);
+
+        $this->controller->engineStub = $engineStub;
+
+        $this->expectException(\Controller\API\Commons\Exceptions\ExternalServiceException::class);
 
         $this->controller->call();
     }

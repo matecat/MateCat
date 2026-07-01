@@ -3,12 +3,14 @@
 namespace Matecat\Core\Controllers;
 
 use Controller\API\App\UserKeysController;
+use Exception;
 use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
 use Model\TmKeyManagement\MemoryKeyDao;
@@ -22,6 +24,7 @@ use ReflectionException;
 use Throwable;
 use Utils\Logger\MatecatLogger;
 use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TMS\TMSService;
 
 /**
  * Real-DB suite for {@see UserKeysController}.
@@ -32,15 +35,47 @@ use Utils\TmKeyManagement\TmKeyStruct;
  *
  * Coverage note: the five public actions (delete/update/newKey/info/share) all funnel
  * through getMemoryToUpdate() -> TMSService::checkCorrectKey(), which performs a live
- * MyMemory HTTP call. That external dependency is unit-untestable, so those actions are
- * covered only up to the validateTheRequest() boundary; the testable private/protected
- * helpers (validateTheRequest, getMkDao, getKeyUsersInfo, getMemoryToUpdate boundary,
- * removeKeyFromEngines) are exercised directly via reflection.
+ * MyMemory HTTP call. To keep that external dependency out of the suite, the controller
+ * exposes a protected getTmService() seam (added alongside this test) that
+ * TestableUserKeysController overrides to return a StubTmService whose
+ * checkCorrectKey() is a deterministic no-op instead of firing a live curl call.
  */
+class StubTmService extends TMSService
+{
+    public bool $shouldThrow = false;
+
+    public function __construct(IDatabase $database)
+    {
+        parent::__construct($database);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function checkCorrectKey(string $tm_key): ?bool
+    {
+        if ($this->shouldThrow) {
+            throw new Exception("Error: The private TM key you entered ($tm_key) appears to be invalid.", -2);
+        }
+
+        return true;
+    }
+}
+
 class TestableUserKeysController extends UserKeysController
 {
+    public bool $tmServiceShouldThrow = false;
+
     public function __construct()
     {
+    }
+
+    protected function getTmService(): TMSService
+    {
+        $stub = new StubTmService($this->getDatabase());
+        $stub->shouldThrow = $this->tmServiceShouldThrow;
+
+        return $stub;
     }
 
     protected function initDependencies(): void
@@ -48,6 +83,22 @@ class TestableUserKeysController extends UserKeysController
     }
 
     protected function registerValidators(): void
+    {
+    }
+}
+
+/**
+ * Variant that keeps the real registerValidators() (unlike
+ * TestableUserKeysController, which no-ops it) so the suite can exercise
+ * that method directly without paying for the full validate() chain.
+ */
+class TestableUserKeysControllerWithRealValidators extends UserKeysController
+{
+    public function __construct()
+    {
+    }
+
+    protected function initDependencies(): void
     {
     }
 }
@@ -403,5 +454,162 @@ class UserKeysControllerTest extends AbstractTest
         $this->expectExceptionCode(-2);
 
         $this->controller->share();
+    }
+
+    // ─── public action: full happy paths via stubbed TMSService ───
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function delete_disables_seeded_key_and_returns_success(): void
+    {
+        $this->seedJobKey(self::BASE);
+        $keyValue = 'ctrltestkey' . self::BASE;
+
+        $this->setRequestParams(['key' => $keyValue]);
+
+        $this->controller->delete();
+
+        $conn = $this->seedConnection();
+        $stmt = $conn->prepare('SELECT deleted FROM memory_keys WHERE uid = :uid AND key_value = :key_value');
+        $stmt->execute(['uid' => $this->userId(self::BASE), 'key_value' => $keyValue]);
+        $deleted = $stmt->fetchColumn();
+
+        $this->assertSame('1', (string)$deleted);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function update_updates_seeded_key_description_and_returns_success(): void
+    {
+        $this->seedJobKey(self::BASE);
+        $keyValue = 'ctrltestkey' . self::BASE;
+
+        $this->setRequestParams(['key' => $keyValue, 'description' => 'Updated Glossary Name']);
+
+        $this->controller->update();
+
+        $conn = $this->seedConnection();
+        $stmt = $conn->prepare('SELECT key_name FROM memory_keys WHERE uid = :uid AND key_value = :key_value');
+        $stmt->execute(['uid' => $this->userId(self::BASE), 'key_value' => $keyValue]);
+        $keyName = $stmt->fetchColumn();
+
+        $this->assertSame('Updated Glossary Name', $keyName);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function newKey_creates_key_and_returns_success(): void
+    {
+        $newKeyValue = 'ctrltestnewkey' . self::BASE;
+
+        $this->setRequestParams(['key' => $newKeyValue, 'description' => 'Brand New Glossary']);
+
+        $this->controller->newKey();
+
+        $conn = $this->seedConnection();
+        $stmt = $conn->prepare('SELECT key_name FROM memory_keys WHERE uid = :uid AND key_value = :key_value');
+        $stmt->execute(['uid' => $this->userId(self::BASE), 'key_value' => $newKeyValue]);
+        $keyName = $stmt->fetchColumn();
+
+        $this->assertSame('Brand New Glossary', $keyName);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function info_returns_key_users_info_payload_for_seeded_key(): void
+    {
+        $this->seedJobKey(self::BASE);
+        $keyValue = 'ctrltestkey' . self::BASE;
+
+        $this->setRequestParams(['key' => $keyValue]);
+
+        // getMemoryToUpdate() -> getTmService() is stubbed; MemoryKeyDao::read() runs
+        // against the real seeded row and info() must complete without throwing.
+        $this->controller->info();
+
+        $this->addToAssertionCount(1);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function share_throws_not_found_when_no_memory_keys_exist_for_key(): void
+    {
+        $unseededKeyValue = 'ctrltestunseededkey' . self::BASE;
+
+        $this->setRequestParams(['key' => $unseededKeyValue, 'emails' => 'someone@example.org']);
+
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage('No user memory keys found');
+
+        $this->controller->share();
+    }
+
+    // ─── registerValidators ───
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function registerValidators_appends_login_validator(): void
+    {
+        $controller = new TestableUserKeysControllerWithRealValidators();
+        $reflector  = new ReflectionClass(UserKeysController::class);
+
+        $prop = $reflector->getProperty('request');
+        $prop->setValue($controller, new Request());
+
+        $method = $reflector->getMethod('registerValidators');
+        $method->invoke($controller);
+
+        $validatorsProp = $reflector->getProperty('validators');
+        $validators      = $validatorsProp->getValue($controller);
+
+        $this->assertCount(1, $validators);
+    }
+
+    // NOTE: getKeyUsersInfo()'s "populated in_users" loop body (foreach + new
+    // ClientUserFacade(...)) is NOT covered here. TmKeyStruct::__set() (line 188)
+    // unconditionally throws UnknownPropertyException for ANY undeclared property,
+    // including "in_users" itself -- verified experimentally (Closure::bind from
+    // TmKeyStruct's own scope still triggers __set and throws). MemoryKeyDao::_buildResult()
+    // constructs TmKeyStruct via the array-form constructor, which silently *skips*
+    // unknown keys (property_exists guard) rather than assigning them -- so "in_users"
+    // can never actually land on a TmKeyStruct instance in production either. This is a
+    // pre-existing dead-code path in getKeyUsersInfo() (out of scope to fix here); the
+    // reachable branches (empty input, null tm_key, tm_key with no in_users) are already
+    // covered above.
+
+    // ─── removeKeyFromEngines with an adaptive engine ───
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function removeKeyFromEngines_reaches_adaptive_branch_with_no_ownership_metadata(): void
+    {
+        $tmKey      = new TmKeyStruct();
+        $tmKey->key = 'abcdef1234567890';
+
+        $memoryKey         = new MemoryKeyStruct();
+        $memoryKey->uid    = $this->userId(self::BASE);
+        $memoryKey->tm_key = $tmKey;
+
+        // "MMT" is a real, adaptive engine (isAdaptiveMT() === true): createTempInstance
+        // succeeds, the adaptive branch is entered, and MetadataDao::get() runs a real
+        // (empty-result) lookup for this uid, so the inner deletion block is skipped and
+        // the key struct is left intact.
+        $this->invokePrivate('removeKeyFromEngines', [$memoryKey, 'MMT']);
+
+        $this->assertSame('abcdef1234567890', $memoryKey->tm_key->key);
     }
 }

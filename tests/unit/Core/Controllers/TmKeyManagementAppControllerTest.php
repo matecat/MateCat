@@ -3,6 +3,8 @@
 namespace Matecat\Core\Controllers;
 
 use Controller\API\App\TmKeyManagementController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Klein\HttpStatus;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
@@ -137,6 +139,33 @@ class TmKeyManagementAppControllerTest extends AbstractTest
         return $m->invoke($this->controller, ...$args);
     }
 
+    // ─── registerValidators (protected) ───
+
+    /**
+     * The Testable subclass overrides registerValidators() as a no-op so the
+     * other tests don't require an authenticated Klein request; exercise the
+     * real method on a raw (non-overridden) instance instead.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function registerValidators_appends_login_validator(): void
+    {
+        $real = $this->reflector->newInstanceWithoutConstructor();
+
+        $requestProp = $this->reflector->getProperty('request');
+        $requestProp->setValue($real, $this->requestStub);
+
+        $validatorsProp = $this->reflector->getProperty('validators');
+        $validatorsProp->setValue($real, []);
+
+        $method = $this->reflector->getMethod('registerValidators');
+        $method->invoke($real);
+
+        $this->assertCount(1, $validatorsProp->getValue($real));
+        $this->assertInstanceOf(LoginValidator::class, $validatorsProp->getValue($real)[0]);
+    }
+
     // ─── sortKeysInTheRightOrder (private) ───
 
     /**
@@ -229,11 +258,77 @@ class TmKeyManagementAppControllerTest extends AbstractTest
 
     // ─── getByJob (public action) ───
 
-    // NOTE: getByJob()'s not-found branch (lines 47-54) and anonymous branch
-    // (lines 58-74) both terminate with exit(), which kills the PHPUnit process
-    // in-line. They are therefore not unit-testable without a process isolation
-    // harness that intercepts exit(); see the blocker note. Only the owner /
-    // logged-in path (which returns via json() without exit) is exercised here.
+    // NOTE (corrected): the not-found branch (lines 47-53) and anonymous branch
+    // (lines 58-73) both return via response->json()/return; — the previous note
+    // claiming they terminate with exit() was stale/incorrect for the current
+    // source (verified: no exit() call exists in this method). Both are exercised
+    // below with the real IDatabase.
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function getByJob_returns_404_when_job_not_found(): void
+    {
+        $this->setRequestParams([
+            'id_job' => (string) ($this->jobId(self::BASE) + 500), // no such job seeded
+            'password' => 'jobpw',
+        ]);
+
+        $status = new HttpStatus(200);
+        $this->responseMock->method('status')->willReturn($status);
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertArrayHasKey('errors', $data);
+                $this->assertSame(['The job was not found'], $data['errors']);
+                return true;
+            }));
+
+        $this->controller->getByJob();
+
+        $this->assertSame(404, $status->getCode());
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function getByJob_anonymous_user_returns_hidden_tm_keys(): void
+    {
+        $keyValue = 'anonvisiblekey9004000ab';
+        $this->seedConnection()->exec(
+            "UPDATE jobs SET tm_keys = '[{\"key\":\"$keyValue\",\"name\":\"AnonKey\"}]' WHERE id = " . $this->jobId(self::BASE)
+        );
+
+        $this->setProp('userIsLogged', false);
+
+        $this->setRequestParams([
+            'id_job' => (string) $this->jobId(self::BASE),
+            'password' => 'jobpw',
+        ]);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data) use ($keyValue): bool {
+                $this->assertArrayHasKey('tm_keys', $data);
+                $this->assertCount(1, $data['tm_keys']);
+                $hidden = $data['tm_keys'][0];
+                // hideKey(-1) masks the key; owner/r/w flags forced by the anon branch
+                $this->assertNotSame($keyValue, $hidden->key);
+                $this->assertTrue($hidden->r);
+                $this->assertTrue($hidden->w);
+                $this->assertFalse($hidden->owner);
+                return true;
+            }));
+
+        $this->controller->getByJob();
+
+        // revert so subsequent tests in this class see the default '[]' tm_keys
+        $this->seedConnection()->exec(
+            "UPDATE jobs SET tm_keys = '[]' WHERE id = " . $this->jobId(self::BASE)
+        );
+    }
 
     /**
      * @throws \Throwable
@@ -241,12 +336,57 @@ class TmKeyManagementAppControllerTest extends AbstractTest
     #[Test]
     public function getByJob_owner_returns_tm_keys_payload(): void
     {
+        // status_owner is a job STATUS column (default 'active'), not the job
+        // owner's email — CatUtils::getJobFromIdAndAnyPassword() returns it
+        // verbatim as $chunk->status_owner, and the controller compares it
+        // against the logged-in user's email to detect the OWNER role. Force
+        // it to the test user's email to reach that branch (controller line 77).
+        $this->seedConnection()->exec(
+            "UPDATE jobs SET status_owner = '" . $this->ownerEmail(self::BASE) . "' WHERE id = " . $this->jobId(self::BASE)
+        );
+
         $this->setRequestParams([
             'id_job' => (string) $this->jobId(self::BASE),
             'password' => 'jobpw',
         ]);
 
-        // user email == job owner → OWNER role; tm_keys is '[]' → empty sorted list
+        // user email == job status_owner → OWNER role; tm_keys is '[]' → empty sorted list
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertArrayHasKey('tm_keys', $data);
+                $this->assertSame([], $data['tm_keys']);
+                return true;
+            }));
+
+        $this->controller->getByJob();
+
+        $this->seedConnection()->exec(
+            "UPDATE jobs SET status_owner = 'active' WHERE id = " . $this->jobId(self::BASE)
+        );
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function getByJob_revisor_role_returns_tm_keys_payload(): void
+    {
+        // logged-in user whose email != job status_owner; seed a chunk-review
+        // row so isRevisionFromIdJobAndPassword() resolves the R1 password to
+        // true (controller line 79, via IsJobRevisionValidator/ChunkReviewDao).
+        $this->seedChunkReview(self::BASE, 'jobpw', 'revpw');
+
+        $user = new UserStruct();
+        $user->uid = $this->userId(self::BASE);
+        $user->email = 'someone_else_9004000@example.org';
+        $this->setProp('user', $user);
+
+        $this->setRequestParams([
+            'id_job' => (string) $this->jobId(self::BASE),
+            'password' => 'revpw',
+        ]);
+
         $this->responseMock->expects($this->once())
             ->method('json')
             ->with($this->callback(function (array $data): bool {
@@ -285,14 +425,6 @@ class TmKeyManagementAppControllerTest extends AbstractTest
 
         $this->controller->getByJob();
     }
-
-    // NOTE: the not-found branch (controller lines 47-54) and the anonymous /
-    // not-logged-in branch (lines 58-74) of getByJob() both terminate with a bare
-    // exit(). exit() is NOT catchable and kills the PHPUnit worker process (silent
-    // exit 0, no JUnit/summary), so those two branches are not unit-testable in
-    // the shared single-process suite. They are a documented hard blocker. The
-    // owner (76-77) and translator (80-82) role paths, which return via json()
-    // WITHOUT exit, are covered above.
 
     // ─── getByUserAndKey (public action) ───
 

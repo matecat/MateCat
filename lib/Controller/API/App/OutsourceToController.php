@@ -34,7 +34,7 @@ class OutsourceToController extends KleinController
         $typeOfService = $request['typeOfService'];
         $jobList = $request['jobList'];
 
-        $outsourceTo = new Translated();
+        $outsourceTo = $this->getOutsourceService();
         $outsourceTo->setPid($pid)
             ->setPpassword($ppassword)
             ->setCurrency($currency)
@@ -75,6 +75,17 @@ class OutsourceToController extends KleinController
                 'confirm_urls' => $outsourceTo->getOutsourceConfirmUrl(),
             ]
         ]);
+    }
+
+    /**
+     * Testability/extension seam: isolates the external quote-service construction so tests can
+     * inject a stub returning canned quote data instead of firing a live outbound HTTP call.
+     *
+     * @throws Exception
+     */
+    protected function getOutsourceService(): Translated
+    {
+        return new Translated();
     }
 
     /**
