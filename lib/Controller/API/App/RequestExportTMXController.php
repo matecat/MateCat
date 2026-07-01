@@ -43,6 +43,17 @@ class RequestExportTMXController extends KleinController
     }
 
     /**
+     * Testability seam: overridden in tests to return a stub, avoiding the
+     * real MyMemory engine construction and its outbound HTTP calls.
+     *
+     * @throws Exception
+     */
+    protected function createTMSService(): TMSService
+    {
+        return new TMSService($this->getDatabase());
+    }
+
+    /**
      * @return array<string, mixed>
      * @throws Exception
      */
@@ -66,7 +77,7 @@ class RequestExportTMXController extends KleinController
             throw new InvalidArgumentException("Invalid TM name provided.", -2);
         }
 
-        $tmxHandler = new TMSService($this->getDatabase());
+        $tmxHandler = $this->createTMSService();
         $tmxHandler->setName($tm_name);
 
         return [

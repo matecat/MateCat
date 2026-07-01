@@ -46,11 +46,19 @@ Any change that introduces a new PHPStan error in a ledger file MUST be fixed, n
 | `lib/Controller/API/GDrive/GDriveController.php` | 2026-06-30 | 98.2% (RenderTerminatedException redirect seam; +7 tests) |
 | `lib/Controller/API/GDrive/OAuthController.php` | 2026-06-30 | 94.1% (typed __handleError+log, base-Exception import, @throws fixes; 1 line needs live Google token exchange) |
 | `lib/Controller/API/App/AIAssistantController.php` | 2026-06-30 | PHPStan-clean (json_decode null-body guard); coverage pending — Wave 3 |
-| `lib/Controller/API/App/CreateRandUserController.php` | 2026-06-30 | PHPStan-clean (EnginesFactory MyMemory::class generic resolve); coverage pending — Wave 1 |
-| `lib/Controller/API/App/HeartBeat.php` | 2026-06-30 | PHPStan-clean (@throws RuntimeException); coverage pending — Wave 1 |
-| `lib/Controller/API/App/MyMemoryEntryStatusController.php` | 2026-06-30 | PHPStan-clean (EnginesFactory MyMemory::class generic resolve); coverage pending — Wave 1 |
+| `lib/Controller/API/App/CreateRandUserController.php` | 2026-07-01 | 100% (Wave 1; getEngine() seam → stub MyMemory) |
+| `lib/Controller/API/App/HeartBeat.php` | 2026-07-01 | 100% (Wave 1; temp heartbeat-file path) |
+| `lib/Controller/API/App/MyMemoryEntryStatusController.php` | 2026-07-01 | 100% (Wave 1; getMMEngine() private→protected seam → stub MyMemory) |
 | `lib/Controller/API/App/OutsourceToController.php` | 2026-06-30 | PHPStan-clean (@throws Exception/TypeError/InvalidArgumentException + array value type); coverage pending — Wave 2 |
-| `lib/Controller/API/App/RequestExportTMXController.php` | 2026-06-30 | PHPStan-clean (nullable user fields → '' default + array value type); coverage pending — Wave 1 |
+| `lib/Controller/API/App/RequestExportTMXController.php` | 2026-07-01 | 100% (Wave 1; createTMSService() seam → avoid live HTTP) |
+| `lib/Controller/API/App/FetchChangeRatesController.php` | 2026-07-01 | 100% (Wave 1; getChangeRatesFetcher() seam → stub fetcher) |
+| `lib/Controller/API/App/LaraController.php` | 2026-07-01 | 100% (Wave 1) |
+| `lib/Controller/API/App/QualityReportControllerAPI.php` | 2026-07-01 | 100% (Wave 1; delegates to V3 segments(true)) |
+| `lib/Controller/API/App/SupportedLanguagesController.php` | 2026-07-01 | 100% (Wave 1; Languages::getInstance) |
+| `lib/Controller/API/App/TeamsInvitationsController.php` | 2026-07-01 | 100% (Wave 1; no DB seed on covered path) |
+| `lib/Controller/API/App/AjaxUtilsController.php` | 2026-07-01 | 100% (Wave 1; engine id=1 class_load swap+restore for checkTMKey) |
+| `lib/Controller/API/App/ContextUrlSchemaController.php` | 2026-07-01 | 100% (Wave 1; RuntimeException branch via AppConfig::$ROOT swap) |
+| `lib/Controller/API/App/GetVolumeAnalysisController.php` | 2026-07-01 | 100% (Wave 1; real project+job seed block 9_972_000 drives analysis() fallback) |
 | `lib/Controller/API/V3/CancelRequestController.php` | 2026-06-30 | pre-existing (≥90%) |
 | `lib/Controller/API/V3/ChunkController.php` | 2026-06-30 | pre-existing (≥90%) |
 | `lib/Controller/API/V3/CountWordController.php` | 2026-06-30 | 96.2% (filter method/limit casts; 1 dead defensive guard) |
