@@ -70,19 +70,39 @@ make_fixture() {
 }
 
 # Run check-sync.sh from inside a fixture root. Args are forwarded to the script.
-# Echoes combined stdout+stderr; sets global RC to the exit code.
+# Echoes combined stdout+stderr; caller must capture the exit code via `$?`
+# immediately after the command substitution (a global RC set inside this
+# function would be scoped to the substitution's subshell and lost).
 run_script() {
     local root="$1"; shift
-    local out
-    out=$(cd "$root" && bash "$CHECK_SYNC" "$@" 2>&1)
-    RC=$?
-    echo "$out"
+    local rc
+    (cd "$root" && bash "$CHECK_SYNC" "$@" 2>&1)
+    rc=$?
+    return "$rc"
 }
 
 # --- smoke test: fixture reports the plugin as behind ---
 fx=$(make_fixture)
-out=$(run_script "$fx")
+out=$(run_script "$fx"); RC=$?
 assert_contains "$out" "1 behind remote" "smoke: fixture plugin reported 1 behind remote"
+
+# --- mutual exclusivity ---
+fx=$(make_fixture)
+out=$(run_script "$fx" --push --update); RC=$?
+assert_eq "$RC" "1" "mutex: --push --update exits 1"
+assert_contains "$out" "mutually exclusive" "mutex: --push --update explains why"
+
+out=$(run_script "$fx" --update --sync); RC=$?
+assert_eq "$RC" "1" "mutex: --update --sync exits 1"
+
+# --- unknown flag still rejected ---
+out=$(run_script "$fx" --bogus); RC=$?
+assert_eq "$RC" "1" "unknown flag --bogus exits 1"
+assert_contains "$out" "Unknown flag" "unknown flag names itself"
+
+# --- new flags accepted (no action block yet: normal status still printed) ---
+out=$(run_script "$fx" --update --dry-run); RC=$?
+assert_eq "$RC" "0" "--update --dry-run exits 0"
 
 echo ""
 echo "Passed: $PASS  Failed: $FAIL"
