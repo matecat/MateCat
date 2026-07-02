@@ -348,7 +348,7 @@ class Lara extends AbstractEngine
                     'style' => $laraStyle,
                     'style_guideline_id' => $laraStyleGuidelineId,
                     'model' => $laraModel,
-                    'glossaries' => isset($laraGlossaries) ? implode(",", $laraGlossaries->value) : null,
+                    'glossaries' => is_array($laraGlossaries ?? null) ? implode(",", $laraGlossaries) : null,
                     'multiline' => false,
                     'translation' => $translation,
                     'score' => $score ?? null,
