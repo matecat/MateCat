@@ -47,10 +47,15 @@ import {
 
 import {transformTagsToText, removeTagsFromText, checkXliffTagsInText} from '../components/segments/utils/DraftMatecatUtils/tagUtils'
 import {checkTPEnabled, checkCurrentSegmentTPEnabled} from '../utils/tagProjectionUtils'
-// Lazy-loaded to break circular dependencies
+// Async-loaded to break circular dependency for static analysis.
 let _SegmentUtils
-const getSegmentUtils = () =>
-  _SegmentUtils || (_SegmentUtils = require('../utils/segmentUtils').default)
+import('../utils/segmentUtils').then((m) => {
+  _SegmentUtils = m.default
+})
+const getSegmentUtils = () => {
+  if (!_SegmentUtils) throw new Error('[SegmentStore] SegmentUtils not loaded yet')
+  return _SegmentUtils
+}
 
 EventEmitter.prototype.setMaxListeners(0)
 

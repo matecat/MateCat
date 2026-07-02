@@ -13,6 +13,9 @@ class CommentMentionEmail extends BaseCommentEmail
 
     protected ?string $title = "New mention on a comment";
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getTemplateVariables(): array
     {
         $vars = parent::_getTemplateVariables();

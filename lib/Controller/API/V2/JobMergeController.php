@@ -14,23 +14,27 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use Model\JobSplitMerge\JobSplitMergeManager;
 use Model\Projects\ProjectStruct;
+use TypeError;
 
 
 class JobMergeController extends KleinController
 {
 
     private ProjectStruct $project;
+    /** @var JobStruct[] */
     private array $jobList = [];
 
     /**
      * @throws NotFoundException
      * @throws Exception
+     * @throws TypeError
      */
     public function merge(): void
     {
-        $pManager = new JobSplitMergeManager($this->project);
+        $pManager = new JobSplitMergeManager($this->project, $this->getDatabase());
 
         $data = $pManager->getProjectData();
         $data->jobToMerge = (int)$this->request->param('id_job');
@@ -42,8 +46,7 @@ class JobMergeController extends KleinController
     }
 
     /**
-     * Handles the initialization process after object construction by setting up
-     * project validation and appending the necessary validators.
+     * Registers the validators required to authorize and resolve the merge request.
      *
      * This method performs the following steps:
      * - Creates a `ProjectPasswordValidator` instance to validate the project password.
@@ -56,7 +59,7 @@ class JobMergeController extends KleinController
      *
      * @return void
      */
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         // Initialize the project password validator.
         $validator = new ProjectPasswordValidator($this);
@@ -64,10 +67,10 @@ class JobMergeController extends KleinController
         // Define the success callback for the password validator.
         $validator->onSuccess(function () use ($validator) {
             // Assign the validated project to the $project property.
-            $this->project = $validator->getProject();
+            $this->project = $validator->getProject() ?? throw new NotFoundException();
 
             // Retrieve the job list associated with the project.
-            $this->jobList = JobDao::getById((int)$this->request->param('id_job'));
+            $this->jobList = (new JobDao($this->getDatabase()))->getNotDeletedById((int)$this->request->param('id_job'));
 
             // Validate the first job in the list.
             $firstChunk = $this->jobList[0] ?? null;

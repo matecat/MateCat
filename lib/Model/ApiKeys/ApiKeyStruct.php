@@ -2,11 +2,12 @@
 
 namespace Model\ApiKeys;
 
+use Exception;
 use Model\DataAccess\AbstractDaoObjectStruct;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use PDOException;
 use ReflectionException;
 
 class ApiKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct
@@ -20,19 +21,20 @@ class ApiKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct
     public string $last_update;
     public bool $enabled;
 
-    public function validSecret($secret): bool
+    public function validSecret(string $secret): bool
     {
         return $this->api_secret == $secret;
     }
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws PDOException
      */
-    public function getUser(): ?UserStruct
+    public function getUser(UserDao $userDao): ?UserStruct
     {
-        $dao = new UserDao(Database::obtain());
-        $dao->setCacheTTL(3600);
+        $userDao->setCacheTTL(3600);
 
-        return $dao->getByUid($this->uid);
+        return $userDao->getByUid($this->uid);
     }
 }

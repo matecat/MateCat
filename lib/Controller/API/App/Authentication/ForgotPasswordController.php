@@ -15,11 +15,16 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
 use Klein\Response;
+use Model\Teams\TeamDao;
 use Model\Users\Authentication\PasswordResetModel;
 use Model\Users\Authentication\PasswordRules;
 use Model\Users\Authentication\SignupModel;
+use Model\Users\UserDao;
 use Predis\PredisException;
 use ReflectionException;
+use RuntimeException;
+use Stomp\Exception\ConnectionException;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
@@ -66,15 +71,17 @@ class ForgotPasswordController extends AbstractStatefulKleinController
                 'wanted_url' => [
                     'filter' => FILTER_CALLBACK,
                     'options' => function ($wanted_url) {
-                        $wanted_url = filter_var($wanted_url, FILTER_SANITIZE_URL);
+                        $wanted_url = (string) filter_var($wanted_url, FILTER_SANITIZE_URL);
+                        $parsedWanted = parse_url($wanted_url);
+                        $parsedHost = parse_url(AppConfig::$HTTPHOST);
 
-                        return parse_url($wanted_url)['host'] != parse_url(AppConfig::$HTTPHOST)['host'] ? AppConfig::$HTTPHOST : $wanted_url;
+                        return ($parsedWanted['host'] ?? '') !== ($parsedHost['host'] ?? '') ? AppConfig::$HTTPHOST : $wanted_url;
                     }
                 ]
             ]
         );
 
-        $signupModel = new SignupModel($filtered, $_SESSION);
+        $signupModel = $this->createSignupModel($filtered, $_SESSION);
 
         $doForgotPassword = $this->doForgotPassword($signupModel);
 
@@ -104,6 +111,7 @@ class ForgotPasswordController extends AbstractStatefulKleinController
      *
      * @throws PredisException
      * @throws Exception
+     * @throws TypeError
      */
     public function authForPasswordReset(): void
     {
@@ -117,7 +125,7 @@ class ForgotPasswordController extends AbstractStatefulKleinController
         }
 
         try {
-            $reset = new PasswordResetModel($_SESSION, $this->request->param('token'));
+            $reset = $this->createPasswordResetModel($_SESSION, $this->request->param('token'));
             $reset->validateUser();
             $this->response->redirect($reset->flushWantedURL());
 
@@ -132,26 +140,53 @@ class ForgotPasswordController extends AbstractStatefulKleinController
      * Step 3
      *
      * Set the new password
+     *
      * @throws ValidationError
      * @throws ReflectionException
+     * @throws ConnectionException
+     * @throws Exception
+     * @throws TypeError
      */
     public function setNewPassword(): void
     {
-        $reset = new PasswordResetModel($_SESSION);
-        $new_password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS);
-        $password_confirmation = filter_var($this->request->param('password_confirmation'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $reset = $this->createPasswordResetModel($_SESSION);
+        $new_password = (string) filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $password_confirmation = (string) filter_var($this->request->param('password_confirmation'), FILTER_SANITIZE_SPECIAL_CHARS);
         $this->validatePasswordRequirements($new_password, $password_confirmation);
         $reset->resetPassword($new_password);
-        $this->user = $reset->getUser();
+        $this->user = $reset->getUser() ?? throw new RuntimeException('User not found after password reset');
         $this->broadcastLogout();
 
         $this->response->code(200);
     }
 
     /**
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $session
+     *
+     * @return SignupModel
+     */
+    protected function createSignupModel(array $params, array &$session): SignupModel
+    {
+        return new SignupModel($params, $session, new UserDao($this->getDatabase()), new TeamDao($this->getDatabase()));
+    }
+
+    /**
+     * @param array<string, mixed> $session
+     * @param string|null $token
+     *
+     * @return PasswordResetModel
+     * @throws TypeError
+     */
+    protected function createPasswordResetModel(array &$session, ?string $token = null): PasswordResetModel
+    {
+        return new PasswordResetModel($session, new UserDao($this->getDatabase()), $token);
+    }
+
+    /**
      * @param SignupModel $signupModel
      *
-     * @return array
+     * @return array{errors: list<string>, code: int}
      * @throws Exception
      */
     private function doForgotPassword(SignupModel $signupModel): array

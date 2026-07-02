@@ -17,9 +17,12 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Model\Jobs\JobStruct;
+use Model\Users\UserDao;
 use Model\Outsource\ConfirmationDao;
+use Model\Translators\JobsTranslatorsDao;
 use Model\Translators\TranslatorsModel;
 use ReflectionException;
+use TypeError;
 use View\API\V2\Json\JobTranslator;
 
 class JobsTranslatorsController extends KleinController
@@ -27,13 +30,14 @@ class JobsTranslatorsController extends KleinController
 
     /**
      * @var JobStruct
-     * @see JobsTranslatorsController::afterConstruct method
+     * @see JobsTranslatorsController::registerValidators method
      */
     protected JobStruct $jStruct;
 
     /**
      * @throws NotFoundException
      * @throws Exception
+     * @throws \TypeError
      */
     public function add(): void
     {
@@ -56,11 +60,11 @@ class JobsTranslatorsController extends KleinController
             throw new NotFoundException('No job found.');
         }
 
-        $TranslatorsModel = new TranslatorsModel($this->jStruct);
+        $TranslatorsModel = new TranslatorsModel($this->jStruct, $this->getDatabase());
         $TranslatorsModel
             ->setUserInvite($this->user)
-            ->setDeliveryDate($this->params['delivery_date'])
-            ->setJobOwnerTimezone($this->params['timezone'])
+            ->setDeliveryDate((string)($this->params['delivery_date'] ?? ''))
+            ->setJobOwnerTimezone((float)$this->params['timezone'])
             ->setEmail($this->params['email']);
 
         $tStruct = $TranslatorsModel->update();
@@ -69,7 +73,7 @@ class JobsTranslatorsController extends KleinController
                 'job' => [
                     'id' => $this->jStruct->id,
                     'password' => $this->jStruct->password,
-                    'translator' => (new JobTranslator($tStruct))->renderItem()
+                    'translator' => (new JobTranslator($tStruct, new UserDao($this->getDatabase())))->renderItem()
                 ]
             ]
         );
@@ -79,6 +83,8 @@ class JobsTranslatorsController extends KleinController
      * @throws ReflectionException
      * @throws \Model\Exceptions\NotFoundException
      * @throws NotFoundException
+     * @throws Exception
+     * @throws TypeError
      */
     public function get(): void
     {
@@ -90,7 +96,7 @@ class JobsTranslatorsController extends KleinController
             ]
         ]);
 
-        $confDao = new ConfirmationDao();
+        $confDao = new ConfirmationDao($this->getDatabase());
         $confirmationStruct = $confDao->setCacheTTL(60 * 60)->getConfirmation($this->jStruct);
 
         if (!empty($confirmationStruct)) {
@@ -102,11 +108,11 @@ class JobsTranslatorsController extends KleinController
         }
 
         //do not show outsourced translators
-        $outsourceInfo = $this->jStruct->getOutsource();
-        $tStruct = $this->jStruct->getTranslator();
+        $outsourceInfo = $this->jStruct->getOutsource(new ConfirmationDao($this->getDatabase()));
+        $tStruct = $this->jStruct->getTranslator(new JobsTranslatorsDao($this->getDatabase()));
         $translator = null;
         if (empty($outsourceInfo)) {
-            $translator = (!empty($tStruct) ? (new JobTranslator($tStruct))->renderItem() : null);
+            $translator = (!empty($tStruct) ? (new JobTranslator($tStruct, new UserDao($this->getDatabase())))->renderItem() : null);
         }
         $this->response->json(
             [
@@ -119,9 +125,7 @@ class JobsTranslatorsController extends KleinController
         );
     }
 
-    /**
-     */
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $validator = new JobPasswordValidator($this);

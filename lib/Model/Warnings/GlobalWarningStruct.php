@@ -7,6 +7,9 @@ use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\IDaoStruct;
 
+/**
+ * @implements ArrayAccess<string, mixed>
+ */
 class GlobalWarningStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess
 {
     use ArrayAccessTrait;

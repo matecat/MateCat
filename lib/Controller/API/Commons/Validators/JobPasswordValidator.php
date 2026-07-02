@@ -7,7 +7,8 @@ namespace Controller\API\Commons\Validators;
  */
 
 use Controller\API\Commons\Exceptions\NotFoundException;
-use Model\Jobs\ChunkDao;
+use Exception;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use ReflectionException;
 
@@ -22,6 +23,7 @@ class JobPasswordValidator extends Base
      * @return void
      * @throws NotFoundException
      * @throws ReflectionException
+     * @throws Exception
      * @throws \Model\Exceptions\NotFoundException
      */
     protected function _validate(): void
@@ -39,7 +41,7 @@ class JobPasswordValidator extends Base
 
         $postInput = (object)filter_var_array($this->controller->params, $filterArgs);
 
-        $this->jStruct = ChunkDao::getByIdAndPassword($postInput->id_job, $postInput->password);
+        $this->jStruct = (new JobDao($this->controller->getDatabase()))->getByIdAndPasswordOrFail((int)$postInput->id_job, (string)$postInput->password);
 
         $this->controller->params['id_job'] = $postInput->id_job;
         $this->controller->params['password'] = $postInput->password;

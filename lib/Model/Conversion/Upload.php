@@ -17,7 +17,7 @@ use Utils\Tools\Utils;
  * <pre>
  *   if( 'requestMethod' == 'POST' ) {
  *       $uploadInstance = new Upload();
- *       $uploadInstance->uploadFiles( $_FILES );
+ *       $uploadInstance->uploadFiles( $request->files()->all() );
  *   }
  * </pre>
  *
@@ -75,7 +75,7 @@ class Upload
     /**
      * Start loading instance
      *
-     * @param array $filesToUpload
+     * @param array<string, mixed> $filesToUpload
      * @param bool|null $disable_upload_limit
      *
      * @return UploadElement
@@ -94,7 +94,7 @@ class Upload
         }
 
         $uploadStruct = static::getUniformGlobalFilesStructure($filesToUpload);
-        foreach ($uploadStruct as $inputName => $file) {
+        foreach (get_object_vars($uploadStruct) as $inputName => $file) {
             $result->{$inputName} = $this->_uploadFile($file, $disable_upload_limit);
         }
 
@@ -105,9 +105,10 @@ class Upload
      * Normalises a raw $_FILES array (or Klein files array) into a flat UploadElement
      * regardless of whether single or multiple files were submitted per input name.
      *
-     * @param array $filesToUpload Raw files array (e.g. from $_FILES or $request->files()->all()).
+     * @param array<string, mixed> $filesToUpload Raw files array (e.g. from $_FILES or $request->files()->all()).
      *
      * @return UploadElement A flat object keyed by tmp_name (or input name for single files).
+     * @throws DomainException
      */
     public static function getUniformGlobalFilesStructure(array $filesToUpload): UploadElement
     {
@@ -121,7 +122,7 @@ class Upload
                     $_file['size'] = $file['size'][$index];
                     $_file['type'] = $file['type'][$index];
                     $_file['error'] = $file['error'][$index];
-                    $result->{$_file['tmp_name']} = $_file;
+                    $result->{(string)$_file['tmp_name']} = $_file;
                 }
             } else {
                 $result->$inputName = new UploadElement($file);
@@ -132,7 +133,7 @@ class Upload
     }
 
     /**
-     * Upload File from $_FILES
+     * Upload File from request files array
      * $RegistryKeyIndex MUST BE form name Element
      *
      * @param UploadElement $fileUp
@@ -236,7 +237,7 @@ class Upload
             $filePathInfo = pathinfo($out_filename);
 
             if ($disable_upload_limit === false) {
-                $fileMaxSize = ($filePathInfo['extension'] === 'tmx') ? AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE : AppConfig::$MAX_UPLOAD_FILE_SIZE;
+                $fileMaxSize = (($filePathInfo['extension'] ?? '') === 'tmx') ? AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE : AppConfig::$MAX_UPLOAD_FILE_SIZE;
 
                 if ($fileSize >= $fileMaxSize) {
                     $this->setObjectErrorOrThrowException(
@@ -294,6 +295,7 @@ class Upload
      * @param bool $upCount Optional. Whether to include a counter in the file name suffix. Defaults to true.
      *
      * @return string The fixed file name with the adjusted path.
+     * @throws InvalidArgumentException
      */
     public function fixFileName(string $stringName, bool $upCount = true): string
     {
@@ -306,7 +308,7 @@ class Upload
     /**
      * Checks if the number of files exceeds the maximum limit.
      *
-     * @param array $filesToUpload The array of files to upload.
+     * @param array<string, mixed> $filesToUpload The array of files to upload.
      *
      * @return bool Returns true if the number of files exceeds the maximum limit,
      * false otherwise.
@@ -328,11 +330,11 @@ class Upload
     /**
      * Check Mime For Wanted Mime accordingly to $this->setMime
      *
-     * @param object $fileUp
+     * @param UploadElement $fileUp
      *
      * @return bool
      */
-    protected function _isRightMime(object $fileUp): bool
+    protected function _isRightMime(UploadElement $fileUp): bool
     {
         //Mime White List, take them from ProjectManager.php
         foreach (AppConfig::$MIME_TYPES as $key => $value) {
@@ -347,11 +349,11 @@ class Upload
     /**
      * Checks if the file extension is allowed.
      *
-     * @param object $fileUp The uploaded file object.
+     * @param UploadElement $fileUp The uploaded file object.
      *
      * @return bool Returns true if the file extension is allowed, false otherwise.
      */
-    protected function _isRightExtension(object $fileUp): bool
+    protected function _isRightExtension(UploadElement $fileUp): bool
     {
         $acceptedExtensions = [];
         foreach (AppConfig::$SUPPORTED_FILE_TYPES as $value2) {
@@ -369,13 +371,13 @@ class Upload
     }
 
     /**
-     * @param object $fileUp
+     * @param UploadElement $fileUp
      * @param Exception $exn
      *
      * @return void
      * @throws Exception
      */
-    private function setObjectErrorOrThrowException(object $fileUp, Exception $exn): void
+    private function setObjectErrorOrThrowException(UploadElement $fileUp, Exception $exn): void
     {
         if ($this->raiseException) {
             throw $exn;

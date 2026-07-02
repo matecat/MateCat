@@ -2,13 +2,45 @@
 
 namespace Model\Projects;
 
+use DateMalformedStringException;
+use DateTime;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\Jobs\JobsMetadataMarshaller;
-use Model\Jobs\MetadataDao;
 use stdClass;
+use TypeError;
 
+/**
+ * @phpstan-type HydrationInput object{
+ *     id?: int|null,
+ *     uid?: int,
+ *     name: string,
+ *     is_default?: bool,
+ *     id_team: int,
+ *     segmentation_rule?: object|null,
+ *     pretranslate_100: bool,
+ *     pretranslate_101: bool,
+ *     tm_prioritization: bool,
+ *     dialect_strict: bool,
+ *     public_tm_penalty?: int,
+ *     get_public_matches: bool,
+ *     mt: mixed,
+ *     tm?: list<object>|null,
+ *     payable_rate_template_id: int,
+ *     qa_model_template_id: int,
+ *     filters_template_id: int,
+ *     xliff_config_template_id: int,
+ *     character_counter_count_tags: bool,
+ *     character_counter_mode: string|null,
+ *     subject: string|null,
+ *     subfiltering_handlers: mixed,
+ *     source_language: string|null,
+ *     target_language?: list<string>|null,
+ *     mt_quality_value_in_editor?: int|null,
+ *     icu_enabled?: bool,
+ * }
+ */
 class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable
 {
     public ?int $id = null;
@@ -42,11 +74,12 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     public bool $icu_enabled = false;
 
     /**
-     * @param object $decodedObject
+     * @phpstan-param HydrationInput $decodedObject
      * @param int $uid
      * @param int|null $id
      *
      * @return $this
+     * @throws TypeError
      */
     public function hydrateFromJSON(object $decodedObject, int $uid, ?int $id = null): ProjectTemplateStruct
     {
@@ -55,15 +88,15 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         $this->name = $decodedObject->name;
         $this->is_default = (isset($decodedObject->is_default)) ? $decodedObject->is_default : false;
         $this->id_team = $decodedObject->id_team;
-        $this->segmentation_rule = (!empty($decodedObject->segmentation_rule)) ? json_encode($decodedObject->segmentation_rule) : null;
+        $this->segmentation_rule = (!empty($decodedObject->segmentation_rule)) ? (json_encode($decodedObject->segmentation_rule) ?: null) : null;
         $this->pretranslate_100 = $decodedObject->pretranslate_100;
         $this->pretranslate_101 = $decodedObject->pretranslate_101;
         $this->tm_prioritization = $decodedObject->tm_prioritization;
         $this->dialect_strict = $decodedObject->dialect_strict;
         $this->public_tm_penalty = $decodedObject->public_tm_penalty ?? 0;
         $this->get_public_matches = $decodedObject->get_public_matches;
-        $this->mt = json_encode($decodedObject->mt);
-        $this->tm = (!empty($decodedObject->tm)) ? json_encode($decodedObject->tm) : null;
+        $this->mt = json_encode($decodedObject->mt) ?: null;
+        $this->tm = (!empty($decodedObject->tm)) ? (json_encode($decodedObject->tm) ?: null) : null;
         $this->payable_rate_template_id = $decodedObject->payable_rate_template_id;
         $this->qa_model_template_id = $decodedObject->qa_model_template_id;
         $this->filters_template_id = $decodedObject->filters_template_id;
@@ -71,7 +104,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         $this->character_counter_count_tags = $decodedObject->character_counter_count_tags;
         $this->character_counter_mode = $decodedObject->character_counter_mode;
         $this->subject = $decodedObject->subject;
-        $this->subfiltering_handlers = json_encode($decodedObject->subfiltering_handlers);
+        $this->subfiltering_handlers = json_encode($decodedObject->subfiltering_handlers) ?: null;
         $this->source_language = $decodedObject->source_language;
         $this->target_language = (!empty($decodedObject->target_language)) ? serialize($decodedObject->target_language) : null;
         $this->mt_quality_value_in_editor = (!empty($decodedObject->mt_quality_value_in_editor)) ? (int)$decodedObject->mt_quality_value_in_editor : null;
@@ -105,7 +138,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     }
 
     /**
-     * @return array
+     * @return list<mixed>
      */
     public function getTm(): array
     {
@@ -117,7 +150,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     }
 
     /**
-     * @return array
+     * @return list<string>
      */
     public function getTargetLanguage(): array
     {
@@ -128,6 +161,9 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         return unserialize($this->target_language);
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getSubfilteringHandlers(): ?array
     {
         if (!empty($this->subfiltering_handlers)) {
@@ -138,7 +174,8 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     }
 
     /**
-     * @inheritDoc
+     * @return array<string, mixed>
+     * @throws DateMalformedStringException
      */
     public function jsonSerialize(): array
     {
@@ -168,8 +205,8 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
             JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => $this->getSubfilteringHandlers(),
             'source_language' => $this->source_language,
             'target_language' => $this->getTargetLanguage(),
-            'created_at' => date_create($this->created_at)->format(DATE_RFC822),
-            'modified_at' => date_create($this->modified_at)->format(DATE_RFC822),
+            'created_at' => (new DateTime($this->created_at))->format(DATE_RFC822),
+            'modified_at' => $this->modified_at !== null ? (new DateTime($this->modified_at))->format(DATE_RFC822) : null,
             'icu_enabled' => $this->icu_enabled
         ];
     }

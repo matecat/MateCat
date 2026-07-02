@@ -11,22 +11,20 @@ namespace Model\DataAccess;
 
 use ArrayAccess;
 
+/**
+ * @implements ArrayAccess<string, mixed>
+ */
 class ShapelessConcreteStruct extends AbstractDaoObjectStruct implements ArrayAccess
 {
 
     use ArrayAccessTrait;
 
-    public function __set($name, $value)
+    public function __set(string $name, mixed $value): void
     {
         $this->$name = $value;
     }
 
-    /**
-     * @param $name
-     *
-     * @return mixed
-     */
-    public function __get($name)
+    public function __get(string $name): mixed
     {
         if (!property_exists($this, $name)) {
             return null;

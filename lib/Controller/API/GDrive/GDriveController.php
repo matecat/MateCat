@@ -5,6 +5,7 @@ namespace Controller\API\GDrive;
 use Aws\S3\Exception\S3Exception;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\CookieManager;
+use Controller\Exceptions\RenderTerminatedException;
 use Exception;
 use Google_Service_Exception;
 use InvalidArgumentException;
@@ -14,6 +15,7 @@ use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
+use TypeError;
 use Utils\Constants\Constants;
 use Utils\Constants\ConversionHandlerStatus;
 use Utils\Registry\AppConfig;
@@ -36,12 +38,13 @@ class GDriveController extends AbstractStatefulKleinController
     private Session $gdriveUserSession;
 
     /**
-     * @var array
+     * @var array<string, mixed>
      */
     private array $error = [];
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function open(): void
     {
@@ -61,7 +64,8 @@ class GDriveController extends AbstractStatefulKleinController
 
                 $this->filters_extraction_parameters = $filtersTemplate;
             } elseif (!empty($filtersTemplateId)) {
-                $filtersTemplate = FiltersConfigTemplateDao::getByIdAndUser($filtersTemplateId, $this->getUser()->uid);
+                $uid = $this->getUser()->uid ?? throw new TypeError('User uid is required');
+                $filtersTemplate = (new FiltersConfigTemplateDao($this->getDatabase()))->getByIdAndUser($filtersTemplateId, $uid);
 
                 if (empty($filtersTemplate)) {
                     throw new Exception("filters_extraction_parameters_template_id not valid");
@@ -167,20 +171,24 @@ class GDriveController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     private function initSessionService(): void
     {
-        $this->gdriveUserSession = new Session();
+        $this->gdriveUserSession = new Session($this->getDatabase());
     }
 
     /**
+     * @param list<string> $listOfIds
+     *
      * @throws Exception
+     * @throws TypeError
      */
     private function doImport(array $listOfIds): void
     {
         for ($i = 0; $i < count($listOfIds) && $this->isImportingSuccessful === true; $i++) {
             try {
-                $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
+                $client = (new GoogleProvider())->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
                 $this->gdriveUserSession->importFile($listOfIds[$i], $client);
             } catch (Exception $e) {
                 $this->isImportingSuccessful = false;
@@ -246,7 +254,7 @@ class GDriveController extends AbstractStatefulKleinController
 
         CookieManager::setCookie(
             self::GDRIVE_OUTCOME_COOKIE_NAME,
-            json_encode($outcome),
+            json_encode($outcome) ?: '',
             [
                 'expires' => time() + 86400,
                 'path' => '/',
@@ -271,8 +279,11 @@ class GDriveController extends AbstractStatefulKleinController
             ]
         );
 
-        header("Location: /", true, 302);
-        exit;
+        if (AppConfig::$ENV === 'testing') {
+            throw new RenderTerminatedException();
+        }
+
+        die();
     }
 
     private function doResponse(): void
@@ -290,7 +301,7 @@ class GDriveController extends AbstractStatefulKleinController
      *
      * @return string
      */
-    private function formatErrorMessage($message): string
+    private function formatErrorMessage(string $message): string
     {
         if ($message == "This file is too large to be exported.") {
             return "you are trying to upload a file bigger than 10 mb. Google Drive does not allow exports of files bigger than 10 mb. Please download the file and upload it from your computer.";
@@ -350,6 +361,7 @@ class GDriveController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function changeConversionParameters(): void
     {
@@ -363,20 +375,21 @@ class GDriveController extends AbstractStatefulKleinController
 
         try {
             $languageHandler = Languages::getInstance();
-            $newSourceLang = $languageHandler->validateLanguage($newSourceLang);
+            $newSourceLang = $languageHandler->validateLanguage($newSourceLang ?: null);
 
             if (!empty($newFiltersExtractionTemplate)) {
                 $filtersExtractionParameters = new FiltersConfigTemplateStruct();
                 $filtersExtractionParameters->hydrateFromJSON(html_entity_decode($newFiltersExtractionTemplate));
             } elseif (!empty($newFiltersExtractionTemplateId)) {
-                $filtersExtractionParameters = FiltersConfigTemplateDao::getByIdAndUser($newFiltersExtractionTemplateId, $this->getUser()->uid);
+                $uid = $this->getUser()->uid ?? throw new TypeError('User uid is required');
+                $filtersExtractionParameters = (new FiltersConfigTemplateDao($this->getDatabase()))->getByIdAndUser($newFiltersExtractionTemplateId, $uid);
 
                 if ($filtersExtractionParameters === null) {
                     throw new Exception("filters_extraction_parameters_template_id not valid");
                 }
             }
 
-            $newSegmentationRule = Constants::validateSegmentationRules($newSegmentationRule);
+            $newSegmentationRule = Constants::validateSegmentationRules($newSegmentationRule ?: null);
         } catch (Exception $e) {
             $this->isImportingSuccessful = false;
             $this->error = [
@@ -405,6 +418,7 @@ class GDriveController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function deleteImportedFile(): void
     {
@@ -414,10 +428,10 @@ class GDriveController extends AbstractStatefulKleinController
         $filtersTemplate = $this->request->param('filters_template');
 
         if ($fileId === 'all') {
-            $this->gdriveUserSession->removeAllFiles($source, $segmentationRule, $filtersTemplate);
+            $this->gdriveUserSession->removeAllFiles($this->getDatabase(), $source, $segmentationRule, $filtersTemplate);
             $success = true;
         } else {
-            $success = $this->gdriveUserSession->removeFile($fileId, $source, $segmentationRule, $filtersTemplate);
+            $success = $this->gdriveUserSession->removeFile($this->getDatabase(), $fileId, $source, $segmentationRule, $filtersTemplate);
 
             if ($success) {
                 if (!$this->gdriveUserSession->hasFiles()) {
@@ -433,8 +447,9 @@ class GDriveController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
-    protected function afterConstruct(): void
+    protected function initDependencies(): void
     {
         $this->initSessionService();
     }

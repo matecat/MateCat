@@ -2,6 +2,7 @@
 
 namespace Utils\Engines\Results\MyMemory;
 
+use TypeError;
 use Utils\Engines\Results\TMSAbstractResponse;
 
 /**
@@ -13,14 +14,16 @@ use Utils\Engines\Results\TMSAbstractResponse;
 class ExportResponse extends TMSAbstractResponse
 {
 
-    public $id;
-    public $resourceLink;
-    /**
-     * @var mixed|string
-     */
-    public $estimatedTime;
+    public mixed $id = '';
+    public string $resourceLink = '';
+    public mixed $estimatedTime = '';
 
-    public function __construct($response)
+    /**
+     * @param array<string, mixed> $response
+     *
+     * @throws TypeError
+     */
+    public function __construct(array $response)
     {
         $this->responseStatus = (int)($response['responseStatus'] ?? 200);
         $this->responseData = $response['responseData'] ?? '';

@@ -9,20 +9,29 @@
 namespace Plugins\Features\ReviewExtended;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\TransactionalTrait;
+use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\FilterRevisionChangeNotificationListEvent;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
+use Model\LQA\EntryCommentDao;
 use Model\LQA\EntryCommentStruct;
 use Model\LQA\EntryDao;
 use Model\LQA\EntryStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentStruct;
 use Model\Users\UserDao;
 use Model\WordCount\CounterModel;
+use PDOException;
 use Plugins\Features\ReviewExtended\Email\RevisionChangedNotificationEmail;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\Model\TranslationEventStruct;
 use ReflectionException;
+use RuntimeException;
+use TypeError;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
 
@@ -31,20 +40,21 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
 
     use TransactionalTrait;
 
+    protected function getTransactionalDatabase(): IDatabase
+    {
+        return $this->_database;
+    }
+
     /**
      * @var TranslationEvent
      */
     protected TranslationEvent $_event;
 
-    /**
-     * @var ?JobStruct
-     */
-    protected ?JobStruct $_chunk;
+    protected JobStruct $_chunk;
 
-    /**
-     * @var ProjectStruct
-     */
     protected ProjectStruct $_project;
+
+    protected SegmentStruct $_segment;
 
     /**
      * @var ChunkReviewStruct[]
@@ -52,12 +62,12 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
     protected array $_chunkReviews;
 
     /**
-     * @var array
+     * @var int[]
      */
     protected array $_sourcePagesWithFinalRevisions;
 
     /**
-     * @var array
+     * @var TranslationEventStruct[]
      */
     private array $_finalRevisions;
     /**
@@ -65,20 +75,39 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
      */
     private CounterModel $_jobWordCounter;
 
+    private IDatabase $_database;
+
     /**
+     * @param ChunkReviewStruct[] $chunkReviews
+     *
      * @throws ReflectionException
+     * @throws RuntimeException
+     * @throws Exception
      */
-    public function __construct(TranslationEvent $event, CounterModel $jobWordCounter, array $chunkReviews)
+    public function __construct(TranslationEvent $event, CounterModel $jobWordCounter, array $chunkReviews, IDatabase $database)
     {
+        $this->_database = $database;
         $this->_event = $event;
         $this->_chunkReviews = $chunkReviews;
-        $this->_chunk = $event->getChunk();
-        $this->_project = $this->_chunk->getProject();
+
+        $chunk = $event->getChunk();
+        if ($chunk === null) {
+            throw new RuntimeException('Chunk is required for ReviewedWordCountModel');
+        }
+        $this->_chunk = $chunk;
+        $this->_project = $this->_chunk->getProject(new ProjectDao($this->_database));
+
+        $segment = $event->getSegmentStruct();
+        if ($segment === null) {
+            throw new RuntimeException('Segment is required for ReviewedWordCountModel');
+        }
+        $this->_segment = $segment;
+
         $this->_jobWordCounter = $jobWordCounter;
 
-        $this->_finalRevisions = (new TranslationEventDao())->getAllFinalRevisionsForSegment(
-            $this->_chunk->id,
-            $this->_event->getSegmentStruct()->id
+        $this->_finalRevisions = (new TranslationEventDao($this->_database))->getAllFinalRevisionsForSegment(
+            $this->_chunk->id ?? throw new RuntimeException('Chunk id is required'),
+            $this->_segment->id
         );
 
         $this->_sourcePagesWithFinalRevisions = array_map(function (TranslationEventStruct $event) {
@@ -114,7 +143,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
     {
         // when downgrading a revision to translation, the issues must be removed (from R1, R2 or both)
         $this->flagIssuesToBeDeleted($chunkReview->source_page);
-        $chunkReview->reviewed_words_count -= $this->_event->getSegmentStruct()->raw_word_count;
+        $chunkReview->reviewed_words_count -= $this->_segment->raw_word_count;
         $chunkReview->penalty_points -= $this->getPenaltyPointsForSourcePage($chunkReview->source_page);
 
         $this->_event->setFinalRevisionToRemove($chunkReview->source_page);
@@ -129,7 +158,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
         // There is a change status to this review, we must check if is the first time it happens;
         // in that case, we must add the reviewed word count
         if (!$this->aFinalRevisionExistsForThisChunk($chunkReview)) {
-            $chunkReview->reviewed_words_count += $this->_event->getSegmentStruct()->raw_word_count;
+            $chunkReview->reviewed_words_count += $this->_segment->raw_word_count;
         } else {
             $this->_event->setFinalRevisionToRemove($chunkReview->source_page); // remove the previous final flag to allow the new one
         }
@@ -157,7 +186,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
         if ($this->_event->isChangingStatus()) {
             $this->_jobWordCounter->setOldStatus($this->_event->getOldTranslation()->status);
             $this->_jobWordCounter->setNewStatus($this->_event->getWantedTranslation()->status);
-            $this->_jobWordCounter->setUpdatedValues($this->_event->getOldTranslation()->eq_word_count, $this->_event->getSegmentStruct()->raw_word_count);
+            $this->_jobWordCounter->setUpdatedValues($this->_event->getOldTranslation()->eq_word_count ?? 0.0, $this->_segment->raw_word_count);
         }
 
         // populate structs for current segment and propagations
@@ -237,17 +266,23 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
     /**
      * Delete all issues
      *
+     * @throws PDOException
+     * @throws RuntimeException
      */
     public function deleteIssues(): void
     {
         foreach ($this->_event->getIssuesToDelete() as $issue) {
-            $issue->addComments((new EntryCommentStruct())->getEntriesById($issue->id));
-            EntryDao::deleteEntry($issue);
+            $issue->addComments((new EntryCommentStruct())->getEntriesById(
+                new EntryCommentDao($this->_database),
+                $issue->id ?? throw new RuntimeException('Issue id is required for comment retrieval')
+            ));
+            (new EntryDao($this->_database))->deleteEntry($issue);
         }
     }
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function sendNotificationEmail(): void
     {
@@ -266,21 +301,27 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
     /**
      * @param int $source_page
      *
-     * @throws ReflectionException
+     * @throws PDOException
+     * @throws RuntimeException
      */
     private function flagIssuesToBeDeleted(int $source_page): void
     {
-        $issue = EntryDao::findByIdSegmentAndSourcePage($this->_event->getSegmentStruct()->id, $this->_chunk->id, $source_page);
+        $issue = (new EntryDao($this->_database))->findByIdSegmentAndSourcePage(
+            $this->_segment->id,
+            $this->_chunk->id ?? throw new RuntimeException('Chunk id is required'),
+            $source_page
+        );
         foreach ($issue as $issueToDelete) {
             $this->_event->addIssueToDelete($issueToDelete);
         }
     }
 
     /**
-     * @param array $finalRevisions
-     * @param array $chunkReviewsWithFinalRevisions
+     * @param TranslationEventStruct[] $finalRevisions
+     * @param array<int, ChunkReviewStruct> $chunkReviewsWithFinalRevisions
      *
      * @throws Exception
+     * @throws TypeError
      */
     private function _sendNotificationEmail(array $finalRevisions, array $chunkReviewsWithFinalRevisions): void
     {
@@ -303,9 +344,9 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
         }
 
         $segmentInfo = [
-            'segment_source' => Utils::htmlentitiesToUft8WithoutDoubleEncoding($this->_event->getSegmentStruct()->segment),
-            'old_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding($this->_event->getOldTranslation()->translation),
-            'new_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding($this->_event->getWantedTranslation()->translation),
+            'segment_source' => Utils::htmlentitiesToUft8WithoutDoubleEncoding($this->_segment->segment),
+            'old_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding($this->_event->getOldTranslation()->translation ?? ''),
+            'new_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding($this->_event->getWantedTranslation()->translation ?? ''),
             'old_status' => $this->_event->getOldTranslation()->status,
             'new_status' => $this->_event->getWantedTranslation()->status,
             'issues' => $serialized_issues
@@ -316,7 +357,8 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
                 continue;
             }
 
-            $user = (new UserDao())->getByUid($finalRevision->uid);
+            $uid = $finalRevision->uid ?? throw new RuntimeException('Final revision uid is required to send notifications');
+            $user = (new UserDao($this->_database))->getByUid($uid);
             if ($user) {
                 $emails[] = [
                     'isPreviousChangeAuthor' => true,
@@ -325,7 +367,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
             }
         }
 
-        $projectOwner = (new UserDao())->getByEmail($this->_chunk->getProject()->id_customer);
+        $projectOwner = (new UserDao($this->_database))->getByEmail($this->_chunk->getProject(new ProjectDao($this->_database))->id_customer);
         if ($projectOwner) {
             $emails[] = [
                 'isPreviousChangeAuthor' => false,
@@ -333,7 +375,8 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
             ];
         }
 
-        $projectAssignee = (new UserDao())->getByUid($this->_chunk->getProject()->id_assignee);
+        $projectAssigneeId = $this->_chunk->getProject(new ProjectDao($this->_database))->id_assignee;
+        $projectAssignee = $projectAssigneeId === null ? null : (new UserDao($this->_database))->getByUid($projectAssigneeId);
         if ($projectAssignee) {
             $emails[] = [
                 'isPreviousChangeAuthor' => false,
@@ -341,27 +384,29 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
             ];
         }
 
-        $emails = $this->_chunk->getProject()->getFeaturesSet()->filter('filterRevisionChangeNotificationList', $emails);
+        $filterRevisionChangeNotificationListEvent = new FilterRevisionChangeNotificationListEvent($emails);
+        FeatureSet::forProject($this->_chunk->getProject(new ProjectDao($this->_database)), $this->_database)->dispatch($filterRevisionChangeNotificationListEvent);
+        $emails = $filterRevisionChangeNotificationListEvent->getEmails();
 
         if (!empty($revision)) {
             $url = CanonicalRoutes::revise(
-                $this->_chunk->getProject()->name,
+                $this->_chunk->getProject(new ProjectDao($this->_database))->name,
                 $revision->id_job,
-                $revision->review_password,
+                $revision->review_password ?? throw new RuntimeException('Review password is required'),
                 $this->_chunk->source,
                 $this->_chunk->target,
                 [
                     'revision_number' => ReviewUtils::sourcePageToRevisionNumber($revision->source_page),
-                    'id_segment' => $this->_event->getSegmentStruct()->id
+                    'id_segment' => $this->_segment->id
                 ]
             );
         } else {
             // handle the case when an ICE OR a pre-translated segment (no previous events) changes its status to a lower status
             // use the event chunk to generate the link.
             $url = CanonicalRoutes::translate(
-                $this->_chunk->getProject()->name,
-                $this->_chunk->id,
-                $this->_chunk->password,
+                $this->_chunk->getProject(new ProjectDao($this->_database))->name,
+                $this->_chunk->id ?? throw new RuntimeException('Chunk id is required'),
+                $this->_chunk->password ?? throw new RuntimeException('Chunk password is required'),
                 $this->_chunk->source,
                 $this->_chunk->target
             );

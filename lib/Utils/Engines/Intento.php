@@ -3,9 +3,12 @@
 namespace Utils\Engines;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\Projects\MetadataDao;
 use ReflectionException;
+use TypeError;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
@@ -22,17 +25,15 @@ class Intento extends AbstractEngine
         'target' => null
     ];
 
-    private $apiKey;
-    private $provider = [];
-    private $providerKey;
-    private $providerCategory;
+    private ?string $apiKey;
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
-    public function __construct($engineRecord)
+    public function __construct($engineRecord, IDatabase $database)
     {
-        parent::__construct($engineRecord);
+        parent::__construct($engineRecord, $database);
 
         if ($this->getEngineRecord()->type != EngineConstants::MT) {
             throw new Exception("Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
@@ -41,9 +42,6 @@ class Intento extends AbstractEngine
         $extra = $engineRecord->getExtraParamsAsArray();
 
         $this->apiKey = $extra['apikey'] ?? null;
-        $this->provider = $extra['provider'] ?? [];
-        $this->providerKey = $extra['providerkey'] ?? null;
-        $this->providerCategory = $extra['providercategory'] ?? null;
     }
 
     /**
@@ -58,15 +56,16 @@ class Intento extends AbstractEngine
         return $r[0];
     }
 
-    /**
-     * @param mixed $rawValue
-     * @param null $parameters
-     * @param null $function
-     *
-     * @return array
-     * @throws Exception
-     */
-    protected function _decode(mixed $rawValue, $parameters = null, $function = null): array
+     /**
+      * @param mixed $rawValue
+      * @param array<string, mixed> $parameters
+      * @param string|null $function
+      *
+      * @return GetMemoryResponse
+      * @throws Exception
+      * @throws TypeError
+      */
+     protected function _decode(mixed $rawValue, array $parameters = [], ?string $function = null): GetMemoryResponse
     {
         if (is_string($rawValue)) {
             $result = json_decode($rawValue, false);
@@ -122,8 +121,14 @@ class Intento extends AbstractEngine
                     ]
                 ];
             }
-        } elseif ($rawValue and array_key_exists('responseStatus', $rawValue) and array_key_exists('error', $rawValue)) {
-            $_response_error = json_decode($rawValue['error']["response"], true);
+        } elseif (
+            is_array($rawValue)
+            && array_key_exists('responseStatus', $rawValue)
+            && array_key_exists('error', $rawValue)
+        ) {
+            $errorResponse = $rawValue['error']['response'] ?? null;
+            $_response_error = is_string($errorResponse) ? json_decode($errorResponse, true) : null;
+            $_response_error = is_array($_response_error) ? $_response_error : [];
             $decoded = [
                 'error' => [
                     'code' => array_key_exists('error', $_response_error) ? array_key_exists('code', $_response_error['error']) ? -$_response_error['error']['code'] : '-1' : '-1',
@@ -139,13 +144,18 @@ class Intento extends AbstractEngine
             ];
         }
 
-        return $this->_composeMTResponseAsMatch($parameters['context']['text'], $decoded);
+        $rawSegment = is_string($parameters['context']['text'] ?? null) ? $parameters['context']['text'] : '';
+
+        return $this->_composeMTResponseAsMatch($rawSegment, $decoded);
     }
 
-    /**
-     * @throws Exception
-     */
-    public function get(array $_config)
+     /**
+      * @param array<string, mixed> $_config
+      *
+      * @throws Exception
+      * @throws TypeError
+      */
+     public function get(array $_config): GetMemoryResponse
     {
         $_config['source'] = $this->_fixLangCode($_config['source']);
         $_config['target'] = $this->_fixLangCode($_config['target']);
@@ -160,16 +170,16 @@ class Intento extends AbstractEngine
         $parameters['context']['text'] = $_config['segment'];
 
         if (isset($_config['pid'])) {
-            $metadataDao = new MetadataDao();
+            $metadataDao = new MetadataDao($this->database);
 
             // custom provider or custom routing
-            $customProvider = $metadataDao->setCacheTTL(86400)->get($_config['pid'], 'intento_provider');
-            $customRouting = $metadataDao->setCacheTTL(86400)->get($_config['pid'], 'intento_routing');
+            $customProvider = $metadataDao->setCacheTTL(86400)->getValue($_config['pid'], 'intento_provider');
+            $customRouting = $metadataDao->setCacheTTL(86400)->getValue($_config['pid'], 'intento_routing');
 
             if ($customProvider !== null) {
                 $parameters['service']['async'] = true;
-                $parameters['service']['provider'] = $customProvider->value;
-            } elseif ($customRouting !== null and $customRouting->value !== "smart_routing") {
+                $parameters['service']['provider'] = $customProvider;
+            } elseif ($customRouting !== null and $customRouting !== "smart_routing") {
                 $parameters['service']['async'] = true;
                 $parameters['service']['routing'] = "best_quality";
             }
@@ -187,15 +197,21 @@ class Intento extends AbstractEngine
 
         $this->call("translate_relative_url", $parameters, true);
 
-        return $this->result;
+        return $this->_getResultAsGetMemoryResponse();
     }
 
     /**
+     * @param array<string, mixed> $config
+     * @param array<string, mixed> $parameters
+     * @param string|null $function
+     *
+     * @return GetMemoryResponse
      * @throws Exception
+     * @throws \TypeError
      */
-    protected function _curl_async($config, $parameters = null, $function = null)
+    protected function _curl_async(array $config, array $parameters = [], ?string $function = null): GetMemoryResponse
     {
-        $id = $config['id'];
+        $id = (string)($config['id'] ?? '');
 
         if (!empty($this->apiKey)) {
             $_headers = ['apikey: ' . $this->apiKey, 'Content-Type: application/json'];
@@ -219,18 +235,27 @@ class Intento extends AbstractEngine
         return $this->_decode($rawValue, $parameters, $function);
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function set($_config): bool
     {
         //if engine does not implement SET method, exit
         return true;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function update($_config): bool
     {
         //if engine does not implement UPDATE method, exit
         return true;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function delete($_config): bool
     {
         //if engine does not implement DELETE method, exit
@@ -240,7 +265,7 @@ class Intento extends AbstractEngine
     /**
      *  Set Matecat + Intento user agent
      */
-    private function _setIntentoUserAgent()
+    private function _setIntentoUserAgent(): void
     {
         $this->curl_additional_params[CURLOPT_USERAGENT] = self::INTENTO_USER_AGENT . ' ' . AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER;
     }
@@ -250,9 +275,9 @@ class Intento extends AbstractEngine
      *
      * Get user's routing list
      *
-     * @return array
+     * @return array<string, mixed>
      */
-    public function getRoutingList()
+    public function getRoutingList(): array
     {
         if (empty($this->apiKey)) {
             return [];
@@ -282,7 +307,7 @@ class Intento extends AbstractEngine
 
             curl_setopt_array($curl, $_params);
             $response = curl_exec($curl);
-            $result = json_decode($response);
+            $result = is_string($response) ? json_decode($response) : null;
             curl_close($curl);
             $_routing = [];
 
@@ -318,9 +343,12 @@ class Intento extends AbstractEngine
      * Fixed response (NOT PER USER) a generic Intento API key is valid
      *
      * Get provider list
+     *
+     * @return array<string, mixed>
+     * @throws Exception
      * @throws ReflectionException
      */
-    public static function getProviderList()
+    public static function getProviderList(): array
     {
         $redisHandler = new RedisHandler();
         $conn = $redisHandler->getConnection();
@@ -342,7 +370,7 @@ class Intento extends AbstractEngine
         ];
         curl_setopt_array($curl, $_params);
         $response = curl_exec($curl);
-        $result = json_decode($response);
+        $result = is_string($response) ? json_decode($response) : null;
         curl_close($curl);
         $_providers = [];
 

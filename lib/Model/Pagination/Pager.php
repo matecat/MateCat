@@ -2,8 +2,11 @@
 
 namespace Model\Pagination;
 
+use DivisionByZeroError;
+use Exception;
 use Model\DataAccess\DaoCacheTrait;
 use PDO;
+use PDOException;
 use ReflectionException;
 
 /**
@@ -32,15 +35,17 @@ class Pager
      * @param int $totals
      * @param PaginationParameters $paginationParameters
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
+     * @throws Exception
+     * @throws DivisionByZeroError
      */
     public function getPagination(int $totals, PaginationParameters $paginationParameters): array
     {
         $this->setCacheTTL($paginationParameters->getTtl());
 
         $count = $totals + 1;
-        $pages = ceil($count / $paginationParameters->getPagination());
+        $pages = (int) ceil($count / $paginationParameters->getPagination());
         $prev = ($paginationParameters->getCurrent() !== 1) ? $paginationParameters->getBaseRoute() . ($paginationParameters->getCurrent() - 1) : null;
         $next = ($paginationParameters->getCurrent() < $pages) ? $paginationParameters->getBaseRoute() . ($paginationParameters->getCurrent() + 1) : null;
         $offset = ($paginationParameters->getCurrent() - 1) * $paginationParameters->getPagination();
@@ -70,6 +75,8 @@ class Pager
 
         $paginationStatement->setFetchMode(PDO::FETCH_CLASS, $paginationParameters->getFetchClass());
         $paginationStatement->execute($paginationParameters->getBindParams());
+
+        /** @var list<mixed> $result */
         $result = $paginationStatement->fetchAll();
 
         if (!empty($paginationParameters->getCacheKeyMap())) {
@@ -93,9 +100,10 @@ class Pager
 
     /**
      * @param string $query
-     * @param array|null $parameters
+     * @param array<int|string, mixed>|null $parameters
      *
      * @return int
+     * @throws PDOException
      */
     public function count(string $query, ?array $parameters = []): int
     {
@@ -107,16 +115,8 @@ class Pager
     }
 
     /**
-     * @param int $current
-     * @param int $pagination
-     * @param int $pages
-     * @param int $total
-     * @param array $items
-     *
-     * @param string|null $prev
-     * @param string|null $next
-     *
-     * @return array
+     * @param list<mixed> $items
+     * @return array<string, mixed>
      */
     protected function format(int $current, int $pagination, int $pages, int $total, array $items, ?string $prev, ?string $next): array
     {

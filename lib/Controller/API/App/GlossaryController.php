@@ -9,16 +9,17 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use DomainException;
 use Exception;
 use Matecat\Locales\Languages;
+use Model\Jobs\JobStruct;
 use Model\TmKeyManagement\UserKeysModel;
 use ReflectionException;
 use Swaggest\JsonSchema\Exception as JsonSchemaException;
 use Swaggest\JsonSchema\InvalidValue;
+use TypeError;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\GlossaryWorker;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
 use Utils\Tools\CatUtils;
-use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -31,7 +32,7 @@ class GlossaryController extends KleinController
     const string GLOSSARY_READ = 'GLOSSARY_READ';
 
     /**
-     * @return array
+     * @return array<string, bool>
      */
     private function responseOk(): array
     {
@@ -48,6 +49,7 @@ class GlossaryController extends KleinController
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
+     * @throws TypeError
      * @throws Exception
      */
     public function check(): void
@@ -83,6 +85,7 @@ class GlossaryController extends KleinController
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
+     * @throws TypeError
      * @throws Exception
      */
     public function delete(): void
@@ -109,6 +112,7 @@ class GlossaryController extends KleinController
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
+     * @throws TypeError
      * @throws Exception
      */
     public function domains(): void
@@ -133,6 +137,7 @@ class GlossaryController extends KleinController
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
+     * @throws TypeError
      * @throws Exception
      */
     public function get(): void
@@ -158,6 +163,7 @@ class GlossaryController extends KleinController
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
+     * @throws TypeError
      * @throws Exception
      */
     public function keys(): void
@@ -189,6 +195,7 @@ class GlossaryController extends KleinController
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
+     * @throws TypeError
      * @throws Exception
      */
     public function search(): void
@@ -214,6 +221,7 @@ class GlossaryController extends KleinController
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
+     * @throws TypeError
      * @throws Exception
      */
     public function set(): void
@@ -245,6 +253,7 @@ class GlossaryController extends KleinController
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
+     * @throws TypeError
      * @throws Exception
      */
     public function update(): void
@@ -267,18 +276,19 @@ class GlossaryController extends KleinController
      * This function validates the payload
      * and returns an object ready for GlossaryWorker
      *
-     * @param $jsonSchemaPath
+     * @param string $jsonSchemaPath
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws InvalidValue
      * @throws ReflectionException
      * @throws JsonSchemaException
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ValidationError
+     * @throws TypeError
      * @throws Exception
      */
-    private function createThePayloadForWorker($jsonSchemaPath): array
+    protected function createThePayloadForWorker(string $jsonSchemaPath): array
     {
         $json = $this->validateJson($this->request->body(), $jsonSchemaPath)->getValue(true);
 
@@ -301,7 +311,7 @@ class GlossaryController extends KleinController
             $this->validateLanguage($json['term']['source_language']);
         }
 
-        $job = CatUtils::getJobFromIdAndAnyPassword($json['id_job'], $json['password']);
+        $job = $this->getJobFromIdAndAnyPassword($json['id_job'], $json['password']);
 
         if ($job === null) {
             throw new DomainException('Wrong id_job/password combination');
@@ -316,13 +326,13 @@ class GlossaryController extends KleinController
         if ($this->isLoggedIn()) {
             if ($this->user->email == $job->status_owner) {
                 $userRole = Filter::OWNER;
-            } elseif (CatUtils::isRevisionFromIdJobAndPassword($json['id_job'], $json['password'])) {
+            } elseif ($this->isRevisionFromIdJobAndPassword($json['id_job'], $json['password'])) {
                 $userRole = Filter::ROLE_REVISOR;
             } else {
                 $userRole = Filter::ROLE_TRANSLATOR;
             }
 
-            $userKeys = new UserKeysModel($this->user, $userRole);
+            $userKeys = new UserKeysModel($this->user, $this->getDatabase(), $userRole);
 
             $json['userKeys'] = $userKeys->getKeys($job->tm_keys)['job_keys'];
         }
@@ -331,11 +341,28 @@ class GlossaryController extends KleinController
     }
 
     /**
-     * @param $tmKeys
-     *
-     * @return array
+     * @throws ReflectionException
+     * @throws Exception
      */
-    private function keysBelongingToJobOwner($tmKeys): array
+    protected function getJobFromIdAndAnyPassword(int $idJob, string $jobPassword): ?JobStruct
+    {
+        return (new CatUtils($this->getDatabase()))->getJobFromIdAndAnyPassword($idJob, $jobPassword);
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function isRevisionFromIdJobAndPassword(int $idJob, string $jobPassword): bool
+    {
+        return (new CatUtils($this->getDatabase()))->isRevisionFromIdJobAndPassword($idJob, $jobPassword);
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $tmKeys
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function keysBelongingToJobOwner(array $tmKeys): array
     {
         $return = [];
 
@@ -362,7 +389,7 @@ class GlossaryController extends KleinController
     }
 
     /**
-     * @param array $keys
+     * @param string[] $keys
      * @param ClientTmKeyStruct[] $userKeys
      *
      * @throws Exception
@@ -402,29 +429,35 @@ class GlossaryController extends KleinController
     }
 
     /**
-     * @param $json
-     * @param $jsonSchema
+     * @param string|null $json
+     * @param string $jsonSchema
      *
-     * @return JSONValidatorObject|null
+     * @return JSONValidatorObject
      * @throws InvalidValue
      * @throws JSONValidatorException
      * @throws JsonSchemaException
      * @throws JsonValidatorGenericException
+     * @throws Exception
      */
-    private function validateJson($json, $jsonSchema): ?ValidatorObject
+    protected function validateJson(?string $json, string $jsonSchema): JSONValidatorObject
     {
         $validatorObject = new JSONValidatorObject($json);
         $validator = new JSONValidator('glossary/' . $jsonSchema, true);
+        $result = $validator->validate($validatorObject);
 
-        return $validator->validate($validatorObject);
+        if ($result === null) {
+            throw new JsonSchemaException('Invalid JSON');
+        }
+
+        return $result;
     }
 
     /**
-     * @param $language
+     * @param string $language
      *
      * @throws ValidationError
      */
-    private function validateLanguage($language): void
+    private function validateLanguage(string $language): void
     {
         $languages = Languages::getInstance();
         if (!$languages->isValidLanguage($language)) {
@@ -435,12 +468,12 @@ class GlossaryController extends KleinController
     /**
      * Enqueue a Worker
      *
-     * @param $queue
-     * @param $params
+     * @param string $queue
+     * @param array<string, mixed> $params
      *
      * @throws Exception
      */
-    private function enqueueWorker($queue, $params): void
+    protected function enqueueWorker(string $queue, array $params): void
     {
         WorkerClient::enqueue($queue, GlossaryWorker::class, $params, ['persistent' => WorkerClient::$_HANDLER->persistent]);
     }

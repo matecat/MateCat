@@ -35,7 +35,7 @@ class MemoryKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct
      * @param             $mask  array|null
      * @param object|null $class this is not used but is required by the interface
      *
-     * @return array
+     * @return array<string, mixed>
      * @see AbstractDaoObjectStruct::toArray
      */
     public function toArray(array $mask = null, object $class = null): array

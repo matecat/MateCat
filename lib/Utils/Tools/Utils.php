@@ -9,6 +9,7 @@ use DOMElement;
 use Exception;
 use InvalidArgumentException;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils as ReviewUtils;
@@ -27,7 +28,9 @@ class Utils
 
     public static function getSourcePageFromReferer(): int
     {
-        return self::returnSourcePageAsInt(parse_url($_SERVER['HTTP_REFERER'] ?? ''));
+        $parsed = parse_url($_SERVER['HTTP_REFERER'] ?? '');
+
+        return self::returnSourcePageAsInt(is_array($parsed) ? $parsed : []);
     }
 
 
@@ -36,11 +39,13 @@ class Utils
      */
     public static function getSourcePage(): int
     {
-        return self::returnSourcePageAsInt(parse_url($_SERVER['REQUEST_URI'] ?? ''));
+        $parsed = parse_url($_SERVER['REQUEST_URI'] ?? '');
+
+        return self::returnSourcePageAsInt(is_array($parsed) ? $parsed : []);
     }
 
     /**
-     * @param array $url
+     * @param array<string, int|string> $url
      *
      * @return int
      */
@@ -52,6 +57,10 @@ class Utils
             return $sourcePage;
         }
 
+        if (!is_string($url['path'])) {
+            return $sourcePage;
+        }
+
         // this regex matches /revise /revise[2-9]
         preg_match('/revise([2-9]|\'\')?\//', $url['path'], $matches);
 
@@ -60,7 +69,7 @@ class Utils
         }
 
         if (count($matches) > 1) { // [0] => revise2/ [1] => 2
-            $sourcePage = ReviewUtils::revisionNumberToSourcePage($matches[1]);
+            $sourcePage = ReviewUtils::revisionNumberToSourcePage((int)$matches[1]);
         }
 
         return $sourcePage;
@@ -69,7 +78,7 @@ class Utils
     /**
      * @param string|null $agent
      *
-     * @return array
+     * @return array{userAgent: ?string, name: ?string, version: ?string, platform: ?string}
      */
     static public function getBrowser(?string $agent = null): array
     {
@@ -143,7 +152,12 @@ class Utils
         $known = ['Version', $ub, 'other'];
         $pattern = '#(?<browser>' . join('|', $known) . ')[/ ]+(?<version>[0-9.|a-zA-Z._]*)#i';
         if (!preg_match_all($pattern, $u_agent, $matches)) {
-            // we have no matching number, continue
+            return [
+                'userAgent' => $u_agent,
+                'name' => $browserName,
+                'version' => '?',
+                'platform' => $platform
+            ];
         }
 
         // see how many we have
@@ -162,7 +176,7 @@ class Utils
         }
 
         // check if we have a number
-        if ($version == null || $version == "") {
+        if ($version === null || $version === "") {
             $version = "?";
         }
 
@@ -256,14 +270,14 @@ class Utils
         return $transliterator->transliterate($var) ?: $var;
     }
 
-    public static function encryptPass($clear_pass, $salt): string
+    public static function encryptPass(string $clear_pass, string $salt): string
     {
         $pepperedPass = hash_hmac("sha256", $clear_pass . $salt, AppConfig::$AUTHSECRET);
 
         return password_hash($pepperedPass, PASSWORD_DEFAULT);
     }
 
-    public static function verifyPass($clear_pass, $salt, $db_hashed_pass): bool
+    public static function verifyPass(string $clear_pass, string $salt, string $db_hashed_pass): bool
     {
         $pepperedPass = hash_hmac("sha256", $clear_pass . $salt, AppConfig::$AUTHSECRET);
 
@@ -303,7 +317,7 @@ class Utils
         return $pwd;
     }
 
-    public static function mysqlTimestamp($time): string
+    public static function mysqlTimestamp(int $time): string
     {
         $date = date('Y-m-d H:i:s', $time);
         if (!$date) {
@@ -316,7 +330,7 @@ class Utils
     /**
      * @throws Exception
      */
-    public static function api_timestamp($date_string): ?string
+    public static function api_timestamp(?string $date_string): ?string
     {
         if ($date_string == null) {
             return null;
@@ -327,7 +341,7 @@ class Utils
         }
     }
 
-    public static function underscoreToCamelCase($string): string
+    public static function underscoreToCamelCase(string $string): string
     {
         return str_replace(' ', '', ucwords(str_replace('_', ' ', $string)));
     }
@@ -337,7 +351,7 @@ class Utils
      *
      * @return string
      */
-    public static function trimAndLowerCase($string): string
+    public static function trimAndLowerCase(string $string): string
     {
         return trim(strtolower($string));
     }
@@ -345,9 +359,9 @@ class Utils
     /**
      * Removes the empty elements from the end of an array
      *
-     * @param array $array
+     * @param array<int, string> $array
      *
-     * @return array
+     * @return array<int, string>
      */
     public static function removeEmptyStringFromTail(array $array): array
     {
@@ -361,10 +375,10 @@ class Utils
     }
 
     /**
-     * @param array $params
-     * @param array $required_keys
+     * @param array<string, mixed> $params
+     * @param array<int, string> $required_keys
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     public static function ensure_keys(array $params, array $required_keys): array
@@ -428,7 +442,7 @@ class Utils
             return;
         }
 
-        $mailConf = @parse_ini_file(AppConfig::$ROOT . '/inc/Error_Mail_List.ini', true);
+        $mailConf = @parse_ini_file(AppConfig::$ROOT . '/inc/Error_Mail_List.ini', true) ?: [];
 
         if (empty($subject)) {
             $subject = 'Alert from Matecat: ' . php_uname('n');
@@ -460,21 +474,18 @@ class Utils
         if (isset($trace[2]['function'])) {
             $stringDataInfo .= $trace[2]['function'] . " ";
         }
-        $stringDataInfo .= "(line:" . $trace[1]['line'] . ")";
+        $stringDataInfo .= "(line:" . ($trace[1]['line'] ?? '?') . ")";
 
         return $stringDataInfo;
     }
 
     /**
-     * Generate a valid UUID Version 4
-     *
      * @see https://digitalbunker.dev/understanding-how-uuids-are-generated/
      * @see https://www.rfc-editor.org/rfc/rfc4122.html
      *
-     * @return string|void
-     * @throws Exception
+     * @throws \Random\RandomException
      */
-    public static function uuid4()
+    public static function uuid4(): string
     {
         // Generate 16 bytes (128 bits) of random data or use the data passed into the function.
         $data = random_bytes(16);
@@ -527,7 +538,7 @@ class Utils
     /**
      * Callback function used to update the count name in the given name by replacing it with the incremented count number.
      *
-     * @param array $matches The matches array containing the count number and extension.
+     * @param array<int, string> $matches The matches array containing the count number and extension.
      *                       The count number is stored in index 1 and the extension is stored in index 2.
      *
      * @return string The updated name with the incremented count number.
@@ -554,7 +565,7 @@ class Utils
             [Utils::class, 'upCountNameCallback'],
             $name,
             1
-        );
+        ) ?? $name;
     }
 
 
@@ -749,14 +760,14 @@ class Utils
     }
 
     /**
-     * @param array $match
+     * @param array<string, mixed> $match
      * @param string $job_tm_keys
      * @param int|null $uid
      *
      * @return string
      * @throws Exception
      */
-    public static function changeMemorySuggestionSource(array $match, string $job_tm_keys, ?int $uid = null): string
+    public static function changeMemorySuggestionSource(array $match, string $job_tm_keys, IDatabase $database, ?int $uid = null): string
     {
         $sug_source = $match['created_by'];
         $key = $match['memory_key'];
@@ -770,7 +781,7 @@ class Utils
             $description = $sug_source;
         } elseif (preg_match("/[a-f0-9]{8,}/", $key)) { // md5 Key
             // This condition is for md5 keys
-            $description = self::keyNameFromUserKeyring($key, $uid);
+            $description = self::keyNameFromUserKeyring($key, $database, $uid);
 
             if (empty($description)) {
                 $description = self::getDefaultKeyDescription($key, $job_tm_keys);
@@ -787,7 +798,7 @@ class Utils
     /**
      * @throws Exception
      */
-    public static function keyNameFromUserKeyring(string $key, ?int $uid = null): ?string
+    public static function keyNameFromUserKeyring(string $key, IDatabase $database, ?int $uid = null): ?string
     {
         if ($uid === null) {
             return null;
@@ -799,11 +810,11 @@ class Utils
         $memoryKey->tm_key = new TmKeyStruct();
         $memoryKey->tm_key->key = $key;
 
-        $memoryKeyDao = new MemoryKeyDao(Database::obtain());
+        $memoryKeyDao = new MemoryKeyDao($database);
         $currentUserMemoryKey = $memoryKeyDao->setCacheTTL(3600)->read($memoryKey);
         if (count($currentUserMemoryKey) > 0) {
             $currentUserMemoryKey = $currentUserMemoryKey[0];
-            $name = trim($currentUserMemoryKey->tm_key->name);
+            $name = trim($currentUserMemoryKey->tm_key->name ?? '');
 
             if (empty($name)) {
                 $name = Constants::NO_DESCRIPTION_TM;
@@ -831,10 +842,10 @@ class Utils
 
         //search the current key
         for ($i = 0; $i < count($ownerKeys); $i++) {
-            $name = trim($ownerKeys[$i]->name);
+            $name = trim($ownerKeys[$i]->name ?? '');
 
             if ($ownerKeys[$i]->key == $key && !empty($name)) {
-                $description = $ownerKeys[$i]->name;
+                $description = $ownerKeys[$i]->name ?? Constants::NO_DESCRIPTION_TM;
             }
         }
 
@@ -912,13 +923,15 @@ class Utils
         $i = $images->length - 1;
         while ($i > -1) {
             $image = $images->item($i);
-            $src = $image->getAttribute('src');
-            $newElement = $htmlDom->createTextNode($src);
-            $image->parentNode->replaceChild($newElement, $image);
+            if ($image instanceof DOMElement && $image->parentNode !== null) {
+                $src = $image->getAttribute('src');
+                $newElement = $htmlDom->createTextNode($src);
+                $image->parentNode->replaceChild($newElement, $image);
+            }
             $i--;
         }
 
-        $html = $htmlDom->saveHtml($htmlDom->documentElement);
+        $html = $htmlDom->saveHtml($htmlDom->documentElement) ?: '';
 
         $strippedHtml = strip_tags($html);
         $strippedHtml = ltrim($strippedHtml);
@@ -931,7 +944,7 @@ class Utils
      *
      * @param string $list Comma-separated list of email addresses.
      *
-     * @return array Valid email addresses.
+     * @return array<int, string> Valid email addresses.
      *
      * @throws InvalidArgumentException If any email in the list is not valid.
      */

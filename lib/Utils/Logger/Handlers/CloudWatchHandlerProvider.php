@@ -3,6 +3,7 @@
 namespace Utils\Logger\Handlers;
 
 use Aws\CloudWatchLogs\CloudWatchLogsClient;
+use InvalidArgumentException;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\AbstractProcessingHandler;
 use PhpNexus\Cwh\Handler\CloudWatch;
@@ -21,11 +22,24 @@ class CloudWatchHandlerProvider implements ProviderInterface
 
     private static ?CloudWatchLogsClient $CLIENT = null;
 
+    public function __construct(?CloudWatchLogsClient $client = null)
+    {
+        if ($client !== null) {
+            self::$CLIENT = $client;
+        }
+    }
+
     public function getHandlerClassName(): string
     {
         return CloudWatch::class;
     }
 
+    /**
+     * @param string $name
+     * @param array<string, mixed> $configurationParams
+     * @return array<string, mixed>
+     * @throws InvalidArgumentException
+     */
     public function getHandlerParams(string $name, array $configurationParams): array
     {
         $tags = json_decode($configurationParams['tags'] ?? 'null', true);
@@ -49,8 +63,8 @@ class CloudWatchHandlerProvider implements ProviderInterface
          */
         return array_merge(
             [
-                'client' => self::getClient(),
-                'group' => 'matecat-' . (AppConfig::$ENV ?: 'local') . '-' . (explode('-', gethostname())[0] ?? 'base') . '-node',
+                'client' => $this->getClient(),
+                'group' => 'matecat-' . (AppConfig::$ENV ?: 'local') . '-' . (explode('-', gethostname() ?: '')[0] ?? 'base') . '-node',
                 'stream' => pathinfo($name, PATHINFO_FILENAME),
                 'retention' => 30,
                 'batchSize' => AppConfig::$IS_DAEMON_INSTANCE ? 1 : 10000,
@@ -63,25 +77,34 @@ class CloudWatchHandlerProvider implements ProviderInterface
         );
     }
 
-    private static function getClient(): CloudWatchLogsClient
+    /**
+     * @return array<string, mixed>
+     */
+    protected function getClientConfig(): array
     {
-        if (empty(self::$CLIENT)) {
-            // init the client
-            $awsRegion = AppConfig::$AWS_REGION ?? 'eu-central-1';
+        $awsRegion = AppConfig::$AWS_REGION ?? 'eu-central-1';
+        $config = [
+            'version' => 'latest',
+            'region' => $awsRegion,
+        ];
 
-            $config = [
-                'version' => 'latest',
-                'region' => $awsRegion,
+        if (null !== AppConfig::$AWS_ACCESS_KEY_ID && null !== AppConfig::$AWS_SECRET_KEY) {
+            $config['credentials'] = [
+                'key' => AppConfig::$AWS_ACCESS_KEY_ID,
+                'secret' => AppConfig::$AWS_SECRET_KEY,
             ];
+        }
 
-            if (null !== AppConfig::$AWS_ACCESS_KEY_ID and null !== AppConfig::$AWS_SECRET_KEY) {
-                $config['credentials'] = [
-                    'key' => AppConfig::$AWS_ACCESS_KEY_ID,
-                    'secret' => AppConfig::$AWS_SECRET_KEY,
-                ];
-            }
+        return $config;
+    }
 
-            self::$CLIENT = new CloudWatchLogsClient($config);
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function getClient(): CloudWatchLogsClient
+    {
+        if (self::$CLIENT === null) {
+            self::$CLIENT = new CloudWatchLogsClient($this->getClientConfig());
         }
 
         return self::$CLIENT;

@@ -20,7 +20,7 @@ use ReflectionException;
 class ActivityLogController extends BaseKleinViewController implements IController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new ViewLoginRedirectValidator($this));
         $this->appendValidator(
@@ -39,7 +39,12 @@ class ActivityLogController extends BaseKleinViewController implements IControll
     {
         $request = $this->validateTheRequest();
 
-        $activityLogDao = new ActivityLogDao();
+        if (!is_array($request)) {
+            $this->setView("project_not_found.html", [], 404);
+            $this->render();
+        }
+
+        $activityLogDao = new ActivityLogDao($this->getDatabase());
         $activityLogDao->epilogueString = " LIMIT 1;";
         $rawLogContent = $activityLogDao->read(
             new ActivityLogStruct(),
@@ -61,6 +66,9 @@ class ActivityLogController extends BaseKleinViewController implements IControll
         $this->render();
     }
 
+    /**
+     * @return array<string, mixed>|false|null
+     */
     protected function validateTheRequest(): false|array|null
     {
         $filterArgs = [

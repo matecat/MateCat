@@ -13,7 +13,7 @@ Bootstrap::start();
 
 require_once('UploadHandler.php');
 
-$upload_handler = new UploadHandler();
+$upload_handler = new UploadHandler(Bootstrap::getDatabase(), $_FILES);
 
 header('Pragma: no-cache');
 header('Cache-Control: no-store, no-cache, must-revalidate');
@@ -29,7 +29,7 @@ try {
             break;
         case 'HEAD':
         case 'GET':
-            if (!(new Session())->sessionHasFiles()) {
+            if (!(new Session(Bootstrap::getDatabase()))->sessionHasFiles()) {
                 $upload_handler->get();
             } else {
                 echo json_encode([]);

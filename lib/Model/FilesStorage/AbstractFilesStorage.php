@@ -2,9 +2,8 @@
 
 namespace Model\FilesStorage;
 
-use DirectoryIterator;
 use Exception;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use PDO;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
@@ -33,19 +32,20 @@ abstract class AbstractFilesStorage implements IFilesStorage
     protected string $cacheDir;
     protected string $zipDir;
 
-    protected ?MatecatLogger $logger;
+    protected MatecatLogger $logger;
+
+    protected FilesystemAdapter $filesystem;
 
     /**
-     * @param string|null $zip
+     * @param FilesystemAdapter|null $filesystem
+     *
+     * @throws \TypeError
      */
-    public function __construct(?string $zip = null)
+    public function __construct(?FilesystemAdapter $filesystem = null)
     {
+        $this->filesystem = $filesystem ?? new NativeFilesystemAdapter();
         $this->logger = LoggerFactory::getLogger('files');
-        if ($zip) {
-            $this->zipDir = $zip;
-        } else {
-            $this->zipDir = AppConfig::$ZIP_REPOSITORY;
-        }
+        $this->zipDir = AppConfig::$ZIP_REPOSITORY;
     }
 
     /**
@@ -81,7 +81,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
      * @param string $path
      * @param int $options
      *
-     * @return array|string
+     * @return array{dirname?: string, basename?: string, extension?: string, filename?: string}|string
      */
     public static function pathinfo_fix(string $path, int $options = 15): array|string
     {
@@ -129,7 +129,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
     /**
      * @param string $path
      *
-     * @return bool|string
+     * @return false|string
      */
     public function getSingleFileInPath(string $path): false|string
     {
@@ -137,7 +137,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
         $filePath = false;
         $files = [];
         try {
-            $files = new DirectoryIterator($path);
+            $files = $this->filesystem->iterateDirectory($path);
         } catch (Exception) {
             //directory does not exist
             LoggerFactory::doJsonLog("Directory $path does not exists. If you are creating a project check the source language.");
@@ -176,13 +176,14 @@ abstract class AbstractFilesStorage implements IFilesStorage
      * @param string $linkFile
      *
      * @return bool
+     * @throws \RuntimeException
      */
     public function deleteHashFromUploadDir(string $uploadDirPath, string $linkFile): bool
     {
         [$shaSum,] = explode("|", $linkFile);
         [$shaSum,] = explode("_", $shaSum); // remove the segmentation rule from hash to clean all reverse index maps
 
-        $iterator = new DirectoryIterator($uploadDirPath);
+        $iterator = $this->filesystem->iterateDirectory($uploadDirPath);
 
         foreach ($iterator as $fileInfo) {
             if ($fileInfo->isDot() || $fileInfo->isDir()) {
@@ -193,7 +194,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
             // retained because of the file name append
             if ($fileInfo->getFilename() != $linkFile &&
                 stripos($fileInfo->getFilename(), $shaSum) !== false) {
-                unlink($fileInfo->getPathname());
+                $this->filesystem->unlink($fileInfo->getPathname());
                 LoggerFactory::doJsonLog("Deleted Hash " . $fileInfo->getPathname());
 
                 return true;
@@ -207,10 +208,16 @@ abstract class AbstractFilesStorage implements IFilesStorage
      * @param string|null $create_date
      *
      * @return string
+     * @throws \InvalidArgumentException
      */
     public function getDatePath(?string $create_date = null): string
     {
-        return date_create($create_date)->format('Ymd');
+        $date = date_create($create_date ?? 'now');
+        if ($date === false) {
+            throw new \InvalidArgumentException("Invalid date string: '$create_date'");
+        }
+
+        return $date->format('Ymd');
     }
 
     /**
@@ -224,7 +231,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
      *
      * @param string $hash
      *
-     * @return array
+     * @return array{firstLevel: string, secondLevel: string, thirdLevel: string}
      */
     public static function composeCachePath(string $hash): array
     {
@@ -284,6 +291,9 @@ abstract class AbstractFilesStorage implements IFilesStorage
         $bytesWritten = 0;
 
         $fp = fopen($filePath, "c+");
+        if ($fp === false) {
+            return 0;
+        }
 
         if (flock($fp, LOCK_EX)) {
             $fileRawContent = "";
@@ -309,7 +319,8 @@ abstract class AbstractFilesStorage implements IFilesStorage
 
             $contentString = implode("\n", $content) . "\n";
 
-            $bytesWritten = fwrite($fp, $contentString);
+            $written = fwrite($fp, $contentString);
+            $bytesWritten = ($written !== false) ? $written : 0;
             fflush($fp);
             flock($fp, LOCK_UN);
             fclose($fp);
@@ -327,12 +338,14 @@ abstract class AbstractFilesStorage implements IFilesStorage
     /**
      * Used when we take the files after the translation (Download)
      *
+     * @param IDatabase $database
      * @param int $id_job
      * @param bool $getXliffPath
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
+     * @throws \PDOException
      */
-    public function getFilesForJob(int $id_job, bool $getXliffPath = true): array
+    public function getFilesForJob(IDatabase $database, int $id_job, bool $getXliffPath = true): array
     {
         $query = "SELECT 
               files_job.id_file, 
@@ -348,8 +361,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
             WHERE files_job.id_job = :id_job 
             GROUP BY files_job.id_file";
 
-        $db = Database::obtain();
-        $stmt = $db->getConnection()->prepare($query);
+        $stmt = $database->getConnection()->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute(['id_job' => $id_job]);
         $results = $stmt->fetchAll();

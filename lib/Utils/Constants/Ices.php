@@ -13,6 +13,7 @@ namespace Utils\Constants;
 class Ices
 {
 
+    /** @var list<string> */
     public static array $iceLockDisabledForTargetLangs = [];
 
 }

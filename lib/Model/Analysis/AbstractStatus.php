@@ -10,15 +10,17 @@ use Model\Conversion\ZipArchiveHandler;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\OutsourceAvailableInfoEvent;
 use Model\Files\MetadataDao as FileMetadataDao;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
-use Model\Projects\MetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
+use TypeError;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\ProjectStatus;
 use Utils\OutsourceTo\OutsourceAvailable;
@@ -50,8 +52,10 @@ abstract class AbstractStatus
     protected ?AnalysisProject $result = null;
 
     protected int $total_segments = 0;
+    /** @var array<mixed> */
     protected array $_resultSet = [];
     protected int $_others_in_queue = 0;
+    /** @var array<mixed> */
     protected array $_project_data = [];
     protected string $status_project = "";
 
@@ -69,30 +73,54 @@ abstract class AbstractStatus
      */
     protected mixed $subject;
 
+    protected AnalysisDao $analysisDao;
+    protected JobDao $jobDao;
+    protected FileMetadataDao $fileMetadataDao;
+
     /**
-     * @param array $_project_data
+     * @param array<mixed> $_project_data
      * @param FeatureSet $features
      * @param UserStruct|null $user
      *
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
-    public function __construct(array $_project_data, FeatureSet $features, ?UserStruct $user = null)
-    {
-        if (is_null($user)) { // avoid null pointer exception when calling methods on class property user
+    public function __construct(
+        array $_project_data,
+        FeatureSet $features,
+        ?UserStruct $user = null
+    ) {
+        if (is_null($user)) {
             $user = new UserStruct();
             $user->uid = -1;
         }
         $this->user = $user;
-        $this->project = ProjectDao::findById($_project_data[0]['pid'], 60 * 60);
+        $db = $features->getDatabase();
+        // Read the pid defensively: empty/malformed project data must surface as the exception
+        // below, not as "Undefined array key"/"array offset on null" PHP warnings.
+        $pid = $_project_data[0]['pid'] ?? null;
+        $project = ($pid === null) ? null : (new ProjectDao($db))->findById((int)$pid, 60 * 60);
+        if ($project === null) {
+            throw new Exception("Project not found for pid: " . (string)($pid ?? ''));
+        }
+        $this->project = $project;
         $this->_project_data = $_project_data;
         $this->featureSet = $features;
+        $this->analysisDao = new AnalysisDao($db);
+        $this->jobDao = new JobDao($db);
+        $this->fileMetadataDao = new FileMetadataDao($db);
     }
 
     /**
      * @return AnalysisProject
+     * @throws Exception
      */
     public function getResult(): AnalysisProject
     {
+        if ($this->result === null) {
+            throw new Exception("Result not initialized. Call fetchData() first.");
+        }
         return $this->result;
     }
 
@@ -100,10 +128,12 @@ abstract class AbstractStatus
      * Fetch data for the project
      *
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
     protected function _fetchProjectData(): AbstractStatus
     {
-        $this->_resultSet = AnalysisDao::getProjectStatsVolumeAnalysis($this->project->id);
+        $this->_resultSet = $this->analysisDao->getProjectStatsVolumeAnalysis((int)$this->project->id);
 
         try {
             $amqHandler = new AMQHandler();
@@ -112,7 +142,7 @@ abstract class AbstractStatus
             $segmentsBeforeMine = null;
         }
 
-        $this->_others_in_queue = ($segmentsBeforeMine > 0 ? $segmentsBeforeMine : 0);
+        $this->_others_in_queue = (int)($segmentsBeforeMine > 0 ? $segmentsBeforeMine : 0);
 
         $this->total_segments = count($this->_resultSet);
 
@@ -129,29 +159,33 @@ abstract class AbstractStatus
     /**
      * Perform the computation
      *
-     * @return $this
+     * @return static
      * @throws Exception
+     * @throws TypeError
      */
     public function fetchData(): AbstractStatus
     {
-        return $this->_fetchProjectData()->loadObjects();
+        $this->_fetchProjectData()->loadObjects();
+        return $this;
     }
 
     /**
-     * @param $targetLang
-     * @param $id_customer
-     * @param $idJob
+     * @param string $targetLang
+     * @param string $id_customer
+     * @param int $idJob
      *
      * @return bool
      * @throws AuthenticationError
-     * @throws NotFoundException
-     * @throws ValidationError
      * @throws EndQueueException
+     * @throws NotFoundException
      * @throws ReQueueException
+     * @throws ValidationError
      */
-    protected function isOutsourceEnabled($targetLang, $id_customer, $idJob): bool
+    protected function isOutsourceEnabled(string $targetLang, string $id_customer, int $idJob): bool
     {
-        $outsourceAvailableInfo = $this->featureSet->filter('outsourceAvailableInfo', $targetLang, $id_customer, $idJob);
+        $outsourceAvailableInfoEvent = new OutsourceAvailableInfoEvent($targetLang, $id_customer, $idJob);
+        $this->featureSet->dispatch($outsourceAvailableInfoEvent);
+        $outsourceAvailableInfo = $outsourceAvailableInfoEvent->getFilterable();
 
         // if any plugin does not trigger the hook
         if (!is_array($outsourceAvailableInfo) or empty($outsourceAvailableInfo)) {
@@ -167,12 +201,13 @@ abstract class AbstractStatus
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     protected function loadObjects(): AbstractStatus
     {
         $target = null;
-        $mt_qe_workflow_enabled = $this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false;
-        $matchConstantsClass = MatchConstantsFactory::getInstance($mt_qe_workflow_enabled);
+        $mt_qe_workflow_enabled = (new ProjectMetadataDao($this->featureSet->getDatabase()))->setCacheTTL(3600)->getValue((int)$this->project->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value);
+        $matchConstantsClass = MatchConstantsFactory::getInstance(is_bool($mt_qe_workflow_enabled) ? $mt_qe_workflow_enabled : null);
 
         $this->result = $project = new AnalysisProject(
             $this->_project_data[0]['pname'],
@@ -203,8 +238,8 @@ abstract class AbstractStatus
             }
 
             if (!isset($chunk) || $chunk->getPassword() != $segInfo['jpassword']) {
-                $chunkStruct = ChunkDao::getByIdAndPassword($segInfo['jid'], $segInfo['jpassword'], 60 * 10);
-                $chunk = new AnalysisChunk($chunkStruct, $this->_project_data[0]['pname'], $this->user, $matchConstantsClass);
+                $chunkStruct = $this->jobDao->getByIdAndPasswordOrFail($segInfo['jid'], $segInfo['jpassword'], 60 * 10);
+                $chunk = new AnalysisChunk($this->jobDao->getDatabaseHandler(), $chunkStruct, $this->_project_data[0]['pname'], $this->user ?? new UserStruct(), $matchConstantsClass);
                 $job->setPayableRates(json_decode($chunkStruct->payable_rates));
                 $job->setChunk($chunk);
             }
@@ -212,16 +247,16 @@ abstract class AbstractStatus
             // is outsource available?
             if ($target === null or $segInfo['target'] !== $target) {
                 $job->setOutsourceAvailable(
-                    $this->isOutsourceEnabled($segInfo['target'], $segInfo['id_customer'], $segInfo['jid'])
+                    $this->isOutsourceEnabled($segInfo['target'], (string)$segInfo['id_customer'], (int)$segInfo['jid'])
                 );
                 $target = $segInfo['target'];
             }
 
             if (!isset($file) || $file->getId() != $segInfo['id_file'] || !$chunk->hasFile($segInfo['id_file'])) {
                 $originalFile = (!empty($segInfo['tag_key']) and $segInfo['tag_key'] === 'original') ? $segInfo['tag_value'] : $segInfo['filename'];
-                $id_file_part = (!empty($segInfo['id_file_part'])) ? (int)$segInfo['id_file_part'] : null;
-                $metadata = (new FileMetadataDao())->getByJobIdProjectAndIdFile((int)$this->_project_data[0]['pid'], $segInfo['id_file'], 60 * 5);
-                $file = new AnalysisFile($segInfo['id_file'], $id_file_part, ZipArchiveHandler::getFileName($segInfo['filename']), $originalFile, $matchConstantsClass, $metadata);
+                $id_file_part = (!empty($segInfo['id_file_part'])) ? (string)$segInfo['id_file_part'] : null;
+                $metadata = $this->fileMetadataDao->getByJobIdProjectAndIdFile((int)$this->_project_data[0]['pid'], $segInfo['id_file'], 60 * 5);
+                $file = new AnalysisFile($segInfo['id_file'], $id_file_part, ZipArchiveHandler::getFileName($segInfo['filename']), $originalFile, $matchConstantsClass, $metadata ?? []);
                 $chunk->setFile($file);
             }
             // Runtime Initialization Completed
@@ -281,7 +316,7 @@ abstract class AbstractStatus
                 $project->setJob($job);
                 $job->incrementIndustry(round($_job_fallback['standard_analysis_wc']));
                 $job->incrementEquivalent(round($_job_fallback['standard_analysis_wc'] ?? 0));  //backward compatibility, some old projects may have this field set as null
-                $job->incrementRaw(round($_job_fallback['standard_analysis_wc']));
+                $job->incrementRaw((int)round($_job_fallback['standard_analysis_wc']));
 
                 $chunkStruct = new JobStruct();
                 $chunkStruct->id = $_job_fallback['jid'];
@@ -290,7 +325,7 @@ abstract class AbstractStatus
                 $chunkStruct->target = $lang_pair[1];
                 $chunkStruct->payable_rates = $_job_fallback['payable_rates'];
 
-                $chunk = new AnalysisChunk($chunkStruct, $this->_project_data[0]['pname'], $this->user, $matchConstantsClass);
+                $chunk = new AnalysisChunk($this->jobDao->getDatabaseHandler(), $chunkStruct, $this->_project_data[0]['pname'], $this->user ?? new UserStruct(), $matchConstantsClass);
                 $job->setPayableRates(json_decode($chunkStruct->payable_rates));
                 $job->setChunk($chunk);
             }

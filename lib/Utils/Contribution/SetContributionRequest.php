@@ -13,9 +13,10 @@ use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use ReflectionException;
 use Stringable;
 use Utils\Constants\TranslationStatus;
-use Utils\TaskRunner\Commons\Params;
 
 /**
  * Class SetContributionRequest
@@ -104,7 +105,7 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public bool $propagationRequest = true;
 
     /**
-     * @var array|string
+     * @var array<string, mixed>|string
      */
     public string|array $props = [];
 
@@ -147,20 +148,21 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     }
 
     /**
-     * @return array
+     * @param ProjectDao $projectDao
+     *
+     * @return array<string, mixed>
+     * @throws ReflectionException
      */
-    public function getProp(): array
+    public function getProp(ProjectDao $projectDao): array
     {
         $jobStruct = $this->getJobStruct();
         $props = $this->props;
         if (!is_array($props)) {
-            /**
-             * @var $props Params
-             */
-            $props = $props->toArray();
+            $decoded = json_decode($props, true);
+            $props = is_array($decoded) ? $decoded : [];
         }
 
-        return array_merge($jobStruct->getTMProps(), $props);
+        return array_merge($jobStruct->getTMProps($projectDao), $props);
     }
 
     /**
@@ -176,7 +178,7 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
      */
     public function __toString(): string
     {
-        return json_encode($this->toArray());
+        return json_encode($this->toArray()) ?: '{}';
     }
 
 }

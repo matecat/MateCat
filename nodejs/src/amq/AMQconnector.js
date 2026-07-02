@@ -3,161 +3,57 @@
  * @author: Domenico <ostico@gmail.com>, <domenico@translated.net>
  * Date: 11/11/2024
  */
-const stompit = require('stompit');
 const {logger} = require('../utils');
-
-module.exports.AmqConnectionManager = class {
-
-  constructor(parameters) {
-
-    const {read_queue, write_queue, connectOptions} = parameters;
-
-    // Connections Options for stompit
-    this.connectOptions = connectOptions;
-    this.read_queue = read_queue;
-    this.write_queue = write_queue;
-
-    this.connectionManager = new stompit.ConnectFailover([this.connectOptions]);
-
-    this.connectionManager.on('error', (error) => {
-      logger.error('ConnectionManager Error', error);
-    });
-
-    this.connectionManager.on('connect', () => {
-      logger.debug('Connection Manager connected');
-    });
-
-    this.channelFactory = new stompit.ChannelFactory(this.connectionManager);
-
-  }
-
-};
+const {Client} = require('@stomp/stompjs');
 
 module.exports.Reader = class {
 
-  static name = 'Reader';
-
-  constructor(queue_name, handler, channelFactory) {
+  constructor(queue_name, connectOptions, handler) {
     this.queue_name = queue_name;
     this.messageHandler = handler;
-    this.channelFactory = channelFactory;
+    this.client = new Client(connectOptions);
+
     this.subscribe = this.subscribe.bind(this);
+    this.client.onConnect = this.onConnect.bind(this);
+    this.client.onWebSocketError = this.onWebSocketError.bind(this);
+    this.client.onWebSocketClose = this.onWebSocketClose.bind(this);
+    this.client.onStompError = this.onStompError.bind(this);
 
-    this.channelFactory.channel((error, channel) => {
-        if (error) {
-          logger.error('channel factory error: ' + error.message);
-          return;
-        }
-        this.subscribe(channel);
-      }
+    this.client.activate();
+  }
+
+  onConnect(frame) {
+    logger.info('Connected details: ' + frame.body);
+    this.client.subscribe(
+        this.queue_name,
+        this.subscribe,
+        {ack: 'client-individual'},
     );
-
   }
 
-  static getClassName() {
-    return this.name;
+  onWebSocketError(event) {
+    logger.error('WebSocket error:', event);
   }
 
-  getClassName() {
-    return this.constructor.getClassName();
+  onWebSocketClose(event) {
+    logger.error('WebSocket closed. Code:', event.code);
   }
 
-  subscribe(channel) {
-    /**
-     * Start connection with the amq queue
-     */
-
-    channel.subscribe(
-      {
-        destination: this.queue_name,
-        ack: 'client-individual',
-      },
-
-      (error, message) => {
-
-        if (error) {
-          logger.error('!! Topic: !! subscribe error ' + error.message);
-          return;
-        }
-
-        message.readString('utf-8', (error, body) => {
-
-          if (error) {
-            logger.error('!! Topic: !! read message error ' + error.message);
-            return;
-          }
-
-          try {
-            const obj = JSON.parse(body);
-            logger.debug(['Topic: Received message', obj._type]);
-            this.messageHandler(obj);
-          } catch (e) {
-            logger.error('!! Topic: !! Fail parsing message', e);
-          }
-
-          channel.ack(message);
-
-        });
-
-      }
-    );
-
-  }
-};
-
-module.exports.Writer = class {
-
-  static name = 'Writer';
-
-  constructor(queue_name, channelFactory) {
-    this.queue_name = queue_name;
-    this.channelFactory = channelFactory;
-    this.send = this.send.bind(this);
-    this.connection = null;
+  onStompError(frame) {
+    logger.error('Broker reported error: ' + frame.headers['message']);
+    logger.error('Additional details: ' + frame.body);
   }
 
-  static getClassName() {
-    return this.name;
-  }
-
-  getClassName() {
-    return this.constructor.getClassName();
-  }
-
-  send(message, callback) {
-
-    this.channelFactory.channel((error, channel) => {
-
-      if (typeof channel === 'undefined') {
-        logger.error('Stompit connect error', error);
-        return;
-      }
-
-      channel.send(
-        {
-          destination: this.queue_name,
-          'content-type': 'application/json',
-          persistent: true,
-        },
-
-        JSON.stringify(message),
-
-        (error) => {
-          if (error) {
-            logger.error('Error while disconnecting: ' + error.message);
-          } else {
-
-            logger.debug('Sent message ' + message.messageType, message);
-
-            if (typeof callback === 'function') {
-              callback.call();
-            }
-          }
-        }
-      );
-
-    });
-
+  subscribe(message) {
+    try {
+      const quote = JSON.parse(message.body);
+      logger.debug('Received message from new queue', quote);
+      this.messageHandler(quote);
+      message.ack();
+    } catch (err) {
+      logger.error('Failed to process AMQ message: ' + err.message, {body: message.body});
+      message.nack();
+    }
   }
 
 };

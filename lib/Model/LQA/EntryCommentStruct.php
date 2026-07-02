@@ -16,15 +16,16 @@ class EntryCommentStruct extends AbstractDaoSilentStruct implements IDaoStruct
     public int $source_page;
 
     /**
+     * @param EntryCommentDao $dao
      * @param int $id
      * @param ?int $ttl
      *
      * @return EntryCommentStruct[]
      */
-    public function getEntriesById(int $id, ?int $ttl = 86400): mixed
+    public function getEntriesById(EntryCommentDao $dao, int $id, ?int $ttl = 86400): mixed
     {
-        return $this->cachable(__METHOD__, function () use ($id, $ttl) {
-            return (new EntryCommentDao())->findByIssueId($id);
+        return $this->memoize(__METHOD__, function () use ($dao, $id) {
+            return $dao->findByIssueId($id);
         });
     }
 }

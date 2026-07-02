@@ -9,22 +9,28 @@ use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\Concerns\LogsMessages;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\PopulatePreTranslationsEvent;
+use Model\FeaturesBase\Hook\Event\Filter\WordCountEvent;
 use Model\Files\FilesPartsDao;
 use Model\Files\FilesPartsStruct;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\S3FilesStorage;
-use Model\Segments\SegmentMetadataStruct;
+use Model\Segments\SegmentMetadataMapper;
+use Model\Segments\SegmentMetadataMarshaller;
 use Model\Segments\SegmentOriginalDataStruct;
 use Model\Segments\SegmentStruct;
 use Model\Xliff\DTO\XliffRuleInterface;
 use Model\Xliff\DTO\XliffRulesModel;
+use PDOException;
 use ReflectionException;
 use RuntimeException;
 use Throwable;
+use TypeError;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Logger\MatecatLogger;
@@ -79,6 +85,8 @@ class SegmentExtractor
         private readonly MateCatFilter $filter,
         private readonly FeatureSet $features,
         private readonly MetadataDao $filesMetadataDao,
+        private readonly SegmentMetadataMapper $segmentMetadataMapper,
+        private readonly IDatabase $dbHandler,
         MatecatLogger $logger,
     ) {
         $this->logger = $logger;
@@ -108,6 +116,7 @@ class SegmentExtractor
      * @param ProjectStructure $projectStructure
      *
      * @throws Exception
+     * @throws TypeError
      */
     public function extract(int $fid, array $file_info, ProjectStructure $projectStructure): void
     {
@@ -179,6 +188,8 @@ class SegmentExtractor
      * @return int Number of segments marked as show-in-cattool in this file element
      * @throws ReflectionException
      * @throws Exception
+     * @throws PDOException
+     * @throws TypeError
      */
     private function processXliffFile(array $xliff_file, int $fid, ProjectStructure $projectStructure): int
     {
@@ -245,6 +256,9 @@ class SegmentExtractor
      *
      * @return int|null The file-parts ID if an 'original' attribute was found, null otherwise
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
+     * @throws TypeError
      */
     private function persistXliffFileAttributes(array $xliff_file, int $fid): ?int
     {
@@ -271,7 +285,7 @@ class SegmentExtractor
             $filesPartsStruct->tag_key = 'original';
             $filesPartsStruct->tag_value = $xliff_file['attr']['original'];
 
-            $filePartsId = (new FilesPartsDao())->insert($filesPartsStruct);
+            $filePartsId = (new FilesPartsDao($this->dbHandler))->insert($filesPartsStruct);
 
             // save `custom` meta data
             $customMetadata = $xliff_file['attr']['custom'] ?? null;
@@ -319,8 +333,10 @@ class SegmentExtractor
             // mrk in the list will not be too!!!
             $show_in_cattool = 1;
 
-            $wordCount = CatUtils::segment_raw_word_count($seg_source['raw-content'], $this->sourceLanguage, $this->filter);
-            $wordCount = $this->features->filter('wordCount', $wordCount);
+            $wordCount = (new CatUtils($this->dbHandler))->countSegmentRawWords($seg_source['raw-content'], $this->sourceLanguage, $this->filter);
+            $wordCountEvent = new WordCountEvent($wordCount);
+            $this->features->dispatch($wordCountEvent);
+            $wordCount = $wordCountEvent->getWordCount();
 
             $sourceLayer0 = $this->filter->fromRawXliffToLayer0($seg_source['raw-content']);
 
@@ -397,7 +413,7 @@ class SegmentExtractor
     ): int {
         $show_in_cattool = 1;
 
-        $wordCount = CatUtils::segment_raw_word_count($xliff_trans_unit['source']['raw-content'], $this->sourceLanguage, $this->filter);
+        $wordCount = (new CatUtils($this->dbHandler))->countSegmentRawWords($xliff_trans_unit['source']['raw-content'], $this->sourceLanguage, $this->filter);
 
         $sourceLayer0 = $this->filter->fromRawXliffToLayer0($xliff_trans_unit['source']['raw-content']);
 
@@ -488,22 +504,6 @@ class SegmentExtractor
     // ── Private helpers ─────────────────────────────────────────────
 
     /**
-     * Extract the sizeRestriction value from a trans-unit's attributes.
-     *
-     * Returns the value as an int if present and > 0, null otherwise.
-     *
-     * @param array<string, mixed> $xliff_trans_unit
-     */
-    private function getSizeRestrictionValue(array $xliff_trans_unit): ?int
-    {
-        if (isset($xliff_trans_unit['attr']['sizeRestriction']) && $xliff_trans_unit['attr']['sizeRestriction'] > 0) {
-            return (int)$xliff_trans_unit['attr']['sizeRestriction'];
-        }
-
-        return null;
-    }
-
-    /**
      * Build a dataRef map from the trans-unit's original-data entries.
      *
      * @param array<string, mixed> $xliff_trans_unit
@@ -548,7 +548,9 @@ class SegmentExtractor
         ?int $position,
         ProjectStructure $projectStructure,
     ): ?array {
-        if (!$this->features->filter('populatePreTranslations', true)) {
+        $populatePreTranslationsEvent = new PopulatePreTranslationsEvent(true);
+        $this->features->dispatch($populatePreTranslationsEvent);
+        if (!$populatePreTranslationsEvent->getDefault()) {
             return null;
         }
 
@@ -686,14 +688,12 @@ class SegmentExtractor
         ?string $xliffMrkExtSuccTags = null,
         ?string $xliffExtSuccTags = null,
     ): array {
-        // --- Segment metadata (sizeRestriction) ---
-        $metadataStruct = new SegmentMetadataStruct();
-        $sizeRestriction = $this->getSizeRestrictionValue($xliff_trans_unit);
-        if ($sizeRestriction !== null) {
-            $metadataStruct->meta_key = 'sizeRestriction';
-            $metadataStruct->meta_value = (string)$sizeRestriction;
-        }
-        $projectStructure->segments_meta_data[$fid][] = $metadataStruct;
+        // --- Segment metadata (mapped from trans-unit attributes) ---
+        $metadataCollection = $this->segmentMetadataMapper->fromTransUnitAttributes($xliff_trans_unit['attr'] ?? []);
+        $projectStructure->segments_meta_data[$fid][] = $metadataCollection;
+
+        // Extract sizeRestriction meta_value for hash computation
+        $sizeRestriction = $metadataCollection->find(SegmentMetadataMarshaller::SIZE_RESTRICTION);
 
         // --- Segment original data ---
         $segmentOriginalDataStruct = (new SegmentOriginalDataStruct())->setMap($dataRefMap);
@@ -733,7 +733,7 @@ class SegmentExtractor
      *
      * @param array<string, string>|null $dataRefMap
      */
-    private function createSegmentHash(string $rawContent, ?array $dataRefMap = null, ?int $sizeRestriction = null): string
+    private function createSegmentHash(string $rawContent, ?array $dataRefMap = null, ?string $sizeRestriction = null): string
     {
         $segmentToBeHashed = $rawContent;
 
@@ -754,16 +754,13 @@ class SegmentExtractor
      *
      * @throws Exception
      */
-    private function getXliffFileContent(string $xliffFilePath): false|string
+    protected function getXliffFileContent(string $xliffFilePath): false|string
     {
         if (AbstractFilesStorage::isOnS3()) {
             $s3Client = S3FilesStorage::getStaticS3Client();
 
             if ($s3Client->hasEncoder()) {
-                $encoder = $s3Client->getEncoder();
-                if ($encoder !== null) {
-                    $xliffFilePath = $encoder->decode($xliffFilePath);
-                }
+                $xliffFilePath = $s3Client->getEncoder()->decode($xliffFilePath);
             }
 
             return $s3Client->openItem(['bucket' => S3FilesStorage::getFilesStorageBucket(), 'key' => $xliffFilePath]);
@@ -898,6 +895,10 @@ class SegmentExtractor
         /** @var XliffRulesModel $configModel */
         $configModel = $projectStructure->xliff_parameters;
 
+        if (is_array($configModel)) {
+            $configModel = XliffRulesModel::fromArray($configModel);
+        }
+
         $rule = $configModel->getMatchingRule(
             $projectStructure->current_xliff_info[$file_id]['version'],
             $state,
@@ -930,14 +931,13 @@ class SegmentExtractor
             !isset($xliff_trans_unit['alt-trans']) ||
             empty($xliff_file_attributes['source-language']) ||
             empty($xliff_file_attributes['target-language']) ||
-            empty($privateTmKeys) ||
-            $this->features->filter('doNotManageAlternativeTranslations', true, $xliff_trans_unit, $xliff_file_attributes)
+            empty($privateTmKeys)
         ) {
             return;
         }
 
         // set the contribution for every key in the job belonging to the user
-        $engine = EnginesFactory::getInstance(1, MyMemory::class);
+        $engine = EnginesFactory::getInstance(1, $this->dbHandler, MyMemory::class);
         $config = $engine->getConfigStruct();
 
         foreach ($privateTmKeys as $tm_info) {

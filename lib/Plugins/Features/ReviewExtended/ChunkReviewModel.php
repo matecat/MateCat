@@ -10,9 +10,14 @@
 namespace Plugins\Features\ReviewExtended;
 
 use Exception;
+use Model\DataAccess\IDatabase;
+use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Run\ChunkReviewUpdatedEvent;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
+use Model\LQA\ModelDao;
 use Model\LQA\ModelStruct;
 use Model\Projects\ProjectStruct;
 
@@ -37,27 +42,29 @@ class ChunkReviewModel implements IChunkReviewModel
         return $this->chunk;
     }
 
+    protected IDatabase $database;
+
     /**
-     * ChunkReviewModel constructor.
-     *
      * @param ChunkReviewStruct $chunk_review
+     * @param IDatabase $database
      */
-    public function __construct(ChunkReviewStruct $chunk_review)
+    public function __construct(ChunkReviewStruct $chunk_review, IDatabase $database)
     {
         $this->chunk_review = $chunk_review;
-        $this->chunk = $this->chunk_review->getChunk();
+        $this->chunk = $this->chunk_review->getChunk(new JobDao($database));
+        $this->database = $database;
     }
 
     /**
      * adds penalty_points and updates pass fail result
      *
-     * @param                         $penalty_points
+     * @param float $penalty_points
      *
      * @param ProjectStruct $projectStruct
      *
      * @throws Exception
      */
-    public function addPenaltyPoints($penalty_points, ProjectStruct $projectStruct): void
+    public function addPenaltyPoints(float $penalty_points, ProjectStruct $projectStruct): void
     {
         $this->updateChunkReviewCountersAndPassFail($penalty_points, 0, 0, $projectStruct);
     }
@@ -87,7 +94,7 @@ class ChunkReviewModel implements IChunkReviewModel
     {
         $data = [
             'chunkReview' => $this->chunk_review,
-            'penalty_points' => $penalty_points,
+            'penalty_points' => (int)$penalty_points,
             'reviewed_words_count' => $reviewed_word_count,
             'total_tte' => $tte,
         ];
@@ -124,22 +131,21 @@ class ChunkReviewModel implements IChunkReviewModel
      * Used only by ChunkReviewModel::[subtractPenaltyPoints, addPenaltyPoints]
      *
      * @param ProjectStruct $project
-     * @param array $data
+     * @param array{chunkReview: ChunkReviewStruct, penalty_points?: int, reviewed_words_count: int, total_tte: int} $data
      *
      * @throws Exception
      */
     protected function _updatePassFailResult(ProjectStruct $project, array $data): void
     {
-        $chunkReviewDao = new ChunkReviewDao();
-        $chunkReviewDao->passFailCountsAtomicUpdate($this->chunk_review->id, $data);
+        $chunkReviewDao = new ChunkReviewDao($this->database);
+        $chunkReviewDao->passFailCountsAtomicUpdate((int)$this->chunk_review->id, $data);
 
-        $project->getFeaturesSet()->run(
-            'chunkReviewUpdated',
+        FeatureSet::forProject($project, $this->database)->dispatch(new ChunkReviewUpdatedEvent(
             $this->chunk_review,
             1,
             $this,
             $project
-        );
+        ));
     }
 
     /**
@@ -170,18 +176,19 @@ class ChunkReviewModel implements IChunkReviewModel
         /**
          * Count penalty points based on this source_page
          */
-        $chunkReviewDao = new ChunkReviewDao();
+        $chunkReviewDao = new ChunkReviewDao($this->database);
         $this->chunk_review->penalty_points = $chunkReviewDao->getPenaltyPointsForChunk($this->chunk, $this->chunk_review->source_page);
         $this->chunk_review->reviewed_words_count = $chunkReviewDao->getReviewedWordsCountForSecondPass($this->chunk, $this->chunk_review->source_page);
         $this->chunk_review->total_tte = $chunkReviewDao->countTimeToEdit($this->chunk, $this->chunk_review->source_page);
 
-        if ($project->getLqaModel()) {
-            $this->chunk_review->is_pass = ($this->getScore() <= $this->getQALimit($project->getLqaModel()));
+        $lqaModel = $project->id_qa_model !== null ? (new ModelDao($this->database))->findById($project->id_qa_model) : null;
+        if ($lqaModel) {
+            $this->chunk_review->is_pass = ($this->getScore() <= $this->getQALimit($lqaModel));
         } else {
             $this->chunk_review->is_pass = true;
         }
 
-        $update_result = ChunkReviewDao::updateStruct($this->chunk_review, [
+        $update_result = (new ChunkReviewDao($this->database))->updateStruct($this->chunk_review, [
                 'fields' => [
                     'reviewed_words_count',
                     'is_pass',
@@ -192,13 +199,12 @@ class ChunkReviewModel implements IChunkReviewModel
         );
 
         // External call by Plugins
-        $project->getFeaturesSet()->run(
-            'chunkReviewUpdated',
+        FeatureSet::forProject($project, $this->database)->dispatch(new ChunkReviewUpdatedEvent(
             $this->chunk_review,
             $update_result,
             $this,
             $project
-        );
+        ));
     }
 
 

@@ -72,9 +72,9 @@ abstract class AbstractProvider
     /**
      * Object containing the quote result
      *
-     * @var AbstractItem[]
+     * @var array<AbstractItem|list<AbstractItem>>
      */
-    protected array $_quote_result;
+    protected array $_quote_result = [];
 
     /**
      * @var int Project ID
@@ -113,7 +113,7 @@ abstract class AbstractProvider
      *   );
      * </pre>
      *
-     * @var array List of job ids and relative passwords
+     * @var list<array<string, mixed>> List of job ids and relative passwords
      */
     protected array $jobList = [];
 
@@ -127,7 +127,7 @@ abstract class AbstractProvider
     /**
      * Get quotes Result after Provider Interrogation
      *
-     * @return AbstractItem[]
+     * @return array<AbstractItem|list<AbstractItem>>
      */
     public function getQuotesResult(): array
     {
@@ -147,7 +147,7 @@ abstract class AbstractProvider
      *   );
      * </pre>
      *
-     * @param array $jobList
+     * @param list<array<string, mixed>> $jobList
      *
      * @return $this
      */
@@ -266,6 +266,9 @@ abstract class AbstractProvider
         return $this->_outsource_login_url_ok;
     }
 
+    /**
+     * @return string[]
+     */
     public function getOutsourceConfirmUrl(): array
     {
         return $this->_outsource_url_confirm;

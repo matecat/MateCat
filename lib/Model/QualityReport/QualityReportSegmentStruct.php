@@ -8,14 +8,13 @@
 
 namespace Model\QualityReport;
 
+use DivisionByZeroError;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
-use Model\Jobs\MetadataDao;
-use Model\Segments\SegmentOriginalDataDao;
 use Utils\LQA\QA;
 use Utils\Tools\PostEditing;
 use View\API\V2\Json\QALocalWarning;
@@ -23,6 +22,12 @@ use View\API\V2\Json\QALocalWarning;
 
 class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct
 {
+
+    /** @param array<string, mixed> $array_params */
+    public function __construct(array $array_params = [])
+    {
+        parent::__construct($array_params);
+    }
 
 
     public int $sid;
@@ -63,27 +68,32 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
 
     public string $match_type;
 
+    /** @var array<string, mixed> */
     public array $warnings;
 
-    public int $pee;
+    public float $pee;
 
     public bool $ice_modified;
 
-    public int $secs_per_word;
+    public float $secs_per_word;
 
+    /** @var list<string|int> */
     public array $parsed_time_to_edit;
 
+    /** @var list<mixed> */
     public array $comments = [];
 
+    /** @var list<mixed> */
     public array $issues = [];
 
     public string $last_translation = '';
 
+    /** @var list<array{translation: string, source_page?: int, revision_number?: int|null}> */
     public array $last_revisions = [];
 
-    public int $pee_translation_revise;
+    public float $pee_translation_revise;
 
-    public int $pee_translation_suggestion;
+    public float $pee_translation_suggestion;
 
     public int $version_number;
 
@@ -91,6 +101,7 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
 
     public bool $is_pre_translated = false;
 
+    /** @var array<string, string> */
     public array $dataRefMap = [];
 
     protected string $tm_analysis_status;
@@ -103,10 +114,11 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
         return $this->tm_analysis_status;
     }
 
-    /**
-     * @return float
-     */
-    public function getSecsPerWord(): float
+     /**
+      * @return float
+      * @throws DivisionByZeroError
+      */
+     public function getSecsPerWord(): float
     {
         $val = @round(($this->time_to_edit / 1000) / $this->raw_word_count, 1);
 
@@ -124,30 +136,30 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
     }
 
     /**
-     * @return int
+     * @return float
      */
-    public function getPEE(): int
+    public function getPEE(): float
     {
         if (empty($this->translation) || empty($this->suggestion)) {
-            return 0;
+            return 0.0;
         }
 
         return PostEditing::getPee($this->suggestion, $this->translation, $this->target);
     }
 
-    public function getPEEBwtTranslationSuggestion(): int
+    public function getPEEBwtTranslationSuggestion(): float
     {
-        if (empty($this->last_translation)) {
-            return 0;
+        if (empty($this->last_translation) || empty($this->suggestion)) {
+            return 0.0;
         }
 
         return PostEditing::getPee($this->suggestion, $this->last_translation, $this->target);
     }
 
-    public function getPEEBwtTranslationRevise(): int
+    public function getPEEBwtTranslationRevise(): float
     {
-        if (empty($this->last_translation) or empty($this->last_revisions)) {
-            return 0;
+        if (empty($this->last_translation) || empty($this->last_revisions)) {
+            return 0.0;
         }
 
         $last_revision_record = end($this->last_revisions);
@@ -157,21 +169,17 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
     }
 
     /**
+     * @return array<string, mixed>
      * @throws Exception
+     * @throws \TypeError
      */
-    public function getLocalWarning(FeatureSet $featureSet, JobStruct $chunk): array
+    public function getLocalWarning(FeatureSet $featureSet, JobStruct $chunk, MateCatFilter $Filter): array
     {
         // When the query for segments is performed, a condition is added to get NULL instead of the translation when the status is NEW
         // so that the local warning check is not displayed/needed
-        if (is_null($this->translation)) {
+        if (is_null($this->translation) || $chunk->id === null || $chunk->password === null) {
             return [];
         }
-
-        $metadata = new MetadataDao();
-        $dataRefMap = (!empty($this->sid)) ? SegmentOriginalDataDao::getSegmentDataRefMap($this->sid) : [];
-
-        /** @var MateCatFilter $Filter */
-        $Filter = MateCatFilter::getInstance($featureSet, $chunk->source, $chunk->target, $dataRefMap, $metadata->getSubfilteringCustomHandlers($chunk->id, $chunk->password));
 
         $src_content = $Filter->fromLayer0ToLayer2($this->segment);
         $trg_content = $Filter->fromLayer0ToLayer2($this->translation);

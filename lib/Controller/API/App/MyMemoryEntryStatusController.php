@@ -30,7 +30,7 @@ class MyMemoryEntryStatusController extends KleinController
         }
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -41,12 +41,11 @@ class MyMemoryEntryStatusController extends KleinController
      * @return MyMemory
      * @throws Exception
      */
-    private function getMMEngine(FeatureSet $featureSet): MyMemory
+    protected function getMMEngine(FeatureSet $featureSet): MyMemory
     {
-        $_TMS = EnginesFactory::getInstance(1);
+        $_TMS = EnginesFactory::getInstance(1, $this->getDatabase(), MyMemory::class);
         $_TMS->setFeatureSet($featureSet);
 
-        /** @var MyMemory $_TMS */
         return $_TMS;
     }
 }

@@ -12,8 +12,11 @@ namespace View\API\App\Json\Analysis;
 use Exception;
 use JsonSerializable;
 use Model\Analysis\Constants\ConstantsInterface;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\Users\UserStruct;
+use TypeError;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\TmKeyManagement\Filter;
 use Utils\Url\JobUrlBuilder;
@@ -43,6 +46,8 @@ class AnalysisChunk implements JsonSerializable
      */
     protected UserStruct $user;
 
+    protected IDatabase $database;
+
     /**
      * @var int
      */
@@ -58,9 +63,11 @@ class AnalysisChunk implements JsonSerializable
 
     /**
      * @throws \RuntimeException
+     * @throws TypeError
      */
-    public function __construct(JobStruct $chunkStruct, $projectName, UserStruct $user, ConstantsInterface $matchConstantsClass)
+    public function __construct(IDatabase $database, JobStruct $chunkStruct, string $projectName, UserStruct $user, ConstantsInterface $matchConstantsClass)
     {
+        $this->database = $database;
         $this->chunkStruct = $chunkStruct;
         $this->projectName = $projectName;
         $this->user = $user;
@@ -80,7 +87,9 @@ class AnalysisChunk implements JsonSerializable
     }
 
     /**
+     * @return array{password: string|null, status: mixed, engines: array<string, array<string, mixed>|null>, memory_keys: list<array<string, string>>, urls: mixed, files: list<AnalysisFile>, summary: AnalysisJobSummary, total_raw: int, total_equivalent: int|float, total_industry: int|float}
      * @throws Exception
+     * @throws TypeError
      */
     public function jsonSerialize(): array
     {
@@ -89,7 +98,7 @@ class AnalysisChunk implements JsonSerializable
             'status' => $this->chunkStruct->status,
             'engines' => $this->getEngines(),
             'memory_keys' => $this->getMemoryKeys(),
-            'urls' => JobUrlBuilder::createFromJobStructAndProjectName($this->chunkStruct, $this->projectName)->getUrls(),
+            'urls' => JobUrlBuilder::createFromJobStructAndProjectName($this->database, $this->chunkStruct, $this->projectName)->getUrls(),
             'files' => array_values($this->files),
             'summary' => $this->summary,
             'total_raw' => $this->total_raw,
@@ -107,19 +116,19 @@ class AnalysisChunk implements JsonSerializable
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
         return $this->chunkStruct->password;
     }
 
     /**
-     * @param $id
+     * @param int|string $id
      *
      * @return bool
      */
-    public function hasFile($id): bool
+    public function hasFile(int|string $id): bool
     {
         return array_key_exists($id, $this->files);
     }
@@ -133,23 +142,19 @@ class AnalysisChunk implements JsonSerializable
     }
 
     /**
+     * @return array{tm: array<string, mixed>|null, mt: array<string, mixed>|null}
      * @throws Exception
      */
     private function getEngines(): array
     {
-        // this can happen even when fast analysis is not completed
-        if (!is_numeric($this->chunkStruct->id_tms) || !is_numeric($this->chunkStruct->id_mt_engine)) {
-            return [];
-        }
-
         try {
-            $tmEngine = EnginesFactory::getInstance($this->chunkStruct->id_tms);
+            $tmEngine = EnginesFactory::getInstance($this->chunkStruct->id_tms, $this->database, AbstractEngine::class);
         } catch (Exception) {
             $tmEngine = null;
         }
 
         try {
-            $mtEngine = EnginesFactory::getInstance($this->chunkStruct->id_mt_engine);
+            $mtEngine = EnginesFactory::getInstance($this->chunkStruct->id_mt_engine, $this->database, AbstractEngine::class);
         } catch (Exception) {
             $mtEngine = null;
         }
@@ -161,8 +166,9 @@ class AnalysisChunk implements JsonSerializable
     }
 
     /**
-     * @return array
+     * @return list<array<string, string>>
      * @throws Exception
+     * @throws TypeError
      */
     private function getMemoryKeys(): array
     {
@@ -173,10 +179,10 @@ class AnalysisChunk implements JsonSerializable
             return $tmKeys;
         }
 
-        $jobKeys = $this->chunkStruct->getClientKeys($this->user, Filter::OWNER)['job_keys'];
+        $jobKeys = $this->chunkStruct->getClientKeys($this->user, Filter::OWNER, $this->database)['job_keys'];
 
         foreach ($jobKeys as $tmKey) {
-            $tmKeys[][trim($tmKey->name)] = trim($tmKey->key);
+            $tmKeys[][trim($tmKey->name ?? '')] = trim($tmKey->key ?? '');
         }
 
         return $tmKeys;

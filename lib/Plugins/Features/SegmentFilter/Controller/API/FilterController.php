@@ -8,8 +8,10 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
+use DivisionByZeroError;
 use Exception;
 use Plugins\Features\SegmentFilter\Model\FilterDefinition;
+use Plugins\Features\SegmentFilter\Model\SegmentFilterDao;
 use Plugins\Features\SegmentFilter\Model\SegmentFilterModel;
 
 
@@ -24,12 +26,13 @@ class FilterController extends KleinController
 
     /**
      * @throws Exception
+     * @throws DivisionByZeroError
      */
     public function index(): void
     {
         $this->return404IfTheJobWasDeleted();
 
-        $model = new SegmentFilterModel($this->chunk, $this->filter);
+        $model = new SegmentFilterModel($this->chunk, $this->filter, new SegmentFilterDao($this->getDatabase()));
 
         $ids_as_array = [];
         $ids_grouping = [];
@@ -48,7 +51,7 @@ class FilterController extends KleinController
         ]);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
 

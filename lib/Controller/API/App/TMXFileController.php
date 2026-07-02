@@ -6,10 +6,11 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
-use Model\DataAccess\Database;
+use Model\Conversion\Upload;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSFile;
@@ -18,23 +19,24 @@ use Utils\TMS\TMSService;
 class TMXFileController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function import(): void
     {
         $request = $this->validateTheRequest();
-        $TMService = new TMSService();
-        $file = $TMService->uploadFile($request['disable_upload_limit']);
+        $TMService = $this->createTMSService();
+        $file = (new Upload())->uploadFiles($this->request->files()->all(), $request['disable_upload_limit']);
 
         $uuids = [];
 
-        foreach ($file as $fileInfo) {
+        foreach (get_object_vars($file) as $fileInfo) {
             if (AbstractFilesStorage::pathinfo_fix(strtolower($fileInfo->name), PATHINFO_EXTENSION) !== 'tmx') {
                 throw new Exception("Please upload a TMX.", -8);
             }
@@ -57,16 +59,16 @@ class TMXFileController extends KleinController
                 /*
                  * Update a memory key with the name of th TMX if the key name is empty
                  */
-                $mkDao = new MemoryKeyDao(Database::obtain());
+                $mkDao = new MemoryKeyDao($this->getDatabase());
                 $searchMemoryKey = new MemoryKeyStruct();
                 $key = new TmKeyStruct();
                 $key->key = $request['tm_key'];
 
-                $searchMemoryKey->uid = $this->user->uid;
+                $searchMemoryKey->uid = $this->user->uid ?? throw new TypeError('User not authenticated');
                 $searchMemoryKey->tm_key = $key;
                 $userMemoryKey = $mkDao->read($searchMemoryKey);
 
-                if (empty($userMemoryKey[0]->tm_key->name) && !empty($userMemoryKey)) {
+                if (!empty($userMemoryKey) && isset($userMemoryKey[0]->tm_key) && empty($userMemoryKey[0]->tm_key->name)) {
                     $userMemoryKey[0]->tm_key->name = $fileInfo->name;
                     $mkDao->atomicUpdate($userMemoryKey[0]);
                 }
@@ -87,8 +89,8 @@ class TMXFileController extends KleinController
     public function importStatus(): void
     {
         $uuid = filter_var($this->request->param('uuid'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
-        $TMService = new TMSService();
-        $status = $TMService->tmxUploadStatus($uuid);
+        $TMService = $this->createTMSService();
+        $status = $TMService->tmxUploadStatus($uuid !== false ? $uuid : '');
 
         $this->response->json([
             'errors' => [],
@@ -97,7 +99,18 @@ class TMXFileController extends KleinController
     }
 
     /**
-     * @return array
+     * Testability seam: overridden in tests to return a stub, avoiding the
+     * real MyMemory engine construction and its outbound HTTP calls.
+     *
+     * @throws Exception
+     */
+    protected function createTMSService(): TMSService
+    {
+        return new TMSService($this->getDatabase());
+    }
+
+    /**
+     * @return array<string, mixed>
      * @throws Exception
      */
     private function validateTheRequest(): array

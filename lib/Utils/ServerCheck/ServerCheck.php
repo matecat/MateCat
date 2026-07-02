@@ -38,16 +38,19 @@ class ServerCheck
 
     protected function checkUploadParams(): ServerCheck
     {
-        self::$uploadParams->setPostMaxSize($this->getByteValue(ini_get('post_max_size')));
-        self::$uploadParams->setUploadMaxFilesize($this->getByteValue(ini_get('upload_max_filesize')));
+        self::$uploadParams->setPostMaxSize($this->getByteValue(ini_get('post_max_size') ?: '0'));
+        self::$uploadParams->setUploadMaxFilesize($this->getByteValue(ini_get('upload_max_filesize') ?: '0'));
 
         return $this;
     }
 
-    private function getByteValue($value): int
+    private function getByteValue(string $value): int
     {
         $regexp = '/([0-9]+)([GM])?/';
         preg_match($regexp, $value, $matches);
+        if (!isset($matches[1])) {
+            return 0;
+        }
         if (isset($matches[2])) {
             switch ($matches[2]) {
                 case "M":

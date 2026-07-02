@@ -13,6 +13,7 @@ use DomainException;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
+use TypeError;
 
 class MTQEPayableRateStruct extends AbstractDaoSilentStruct implements JsonSerializable
 {
@@ -35,6 +36,8 @@ class MTQEPayableRateStruct extends AbstractDaoSilentStruct implements JsonSeria
      * @param null $uid
      *
      * @return $this
+     * @throws DomainException
+     * @throws TypeError
      */
     public function hydrateFromJSON(string $json, $uid = null): MTQEPayableRateStruct
     {
@@ -91,6 +94,7 @@ class MTQEPayableRateStruct extends AbstractDaoSilentStruct implements JsonSeria
         return $this->hydrateBreakdownsFromDataArray($rules);
     }
 
+    /** @param array<string, mixed> $params */
     public function hydrateBreakdownsFromDataArray(array $params): MTQEPayableRateStruct
     {
         $this->breakdowns = new MTQEPayableRateBreakdowns();
@@ -106,6 +110,7 @@ class MTQEPayableRateStruct extends AbstractDaoSilentStruct implements JsonSeria
     /**
      * @inheritDoc
      */
+    /** @return array<string, mixed> */
     public function jsonSerialize(): array
     {
         return $this->getArrayCopy();
@@ -113,7 +118,7 @@ class MTQEPayableRateStruct extends AbstractDaoSilentStruct implements JsonSeria
 
     public function __toString(): string
     {
-        return json_encode($this->jsonSerialize());
+        return json_encode($this->jsonSerialize()) ?: '';
     }
 
 }

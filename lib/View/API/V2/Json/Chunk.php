@@ -10,7 +10,9 @@ namespace View\API\V2\Json;
 
 use Exception;
 use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 
 class Chunk extends Job
 {
@@ -18,14 +20,15 @@ class Chunk extends Job
     /**
      * @param JobStruct $chunk
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      * @throws NotFoundException
+     * @throws \TypeError
      */
     public function renderOne(JobStruct $chunk): array
     {
-        $project = $chunk->getProject();
-        $featureSet = $project->getFeaturesSet();
+        $project = $chunk->getProject(new ProjectDao($this->database));
+        $featureSet = FeatureSet::forProject($project, $this->database);
 
         return [
             'job' => [

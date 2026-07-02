@@ -2,9 +2,11 @@
 
 namespace Controller\API\Commons\Validators;
 
+use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
+use PDOException;
 use ReflectionException;
 
 class SegmentTranslation extends Base
@@ -17,12 +19,14 @@ class SegmentTranslation extends Base
 
     /**
      * @return void
+     * @throws Exception
      * @throws NotFoundException
+     * @throws PDOException
      * @throws ReflectionException
      */
     protected function _validate(): void
     {
-        $this->translation = SegmentTranslationDao::findBySegmentAndJob($this->request->param('id_segment'), $this->request->param('id_job'));
+        $this->translation = (new SegmentTranslationDao($this->controller->getDatabase()))->findBySegmentAndJob($this->request->param('id_segment'), $this->request->param('id_job'));
         if (!$this->translation) {
             throw new NotFoundException('translation not found');
         }

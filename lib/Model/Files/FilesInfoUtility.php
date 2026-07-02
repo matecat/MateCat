@@ -2,34 +2,45 @@
 
 namespace Model\Files;
 
+use Exception;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
-use Model\Projects\ProjectStruct;
+use Model\Projects\ProjectDao;
+use PDOException;
 use ReflectionException;
+use RuntimeException;
 use View\API\V3\Json\FilesInfo;
 
 class FilesInfoUtility
 {
 
-    /**
-     * @var JobStruct
-     */
     private JobStruct $chunk;
-
-    /**
-     * @var ProjectStruct
-     */
-    private ProjectStruct $project;
+    private int $projectId;
+    private JobDao $jobDao;
+    private MetadataDao $metadataDao;
+    private FilesPartsDao $filesPartsDao;
+    private FileDao $fileDao;
 
     /**
      * FilesInfoUtility constructor.
      *
      * @param JobStruct $chunkStruct
+     * @param IDatabase $database
+     * @throws RuntimeException
+     * @throws ReflectionException
      */
-    public function __construct(JobStruct $chunkStruct)
+    public function __construct(JobStruct $chunkStruct, IDatabase $database)
     {
         $this->chunk = $chunkStruct;
-        $this->project = $chunkStruct->getProject();
+        $projectId = $chunkStruct->getProject(new ProjectDao($database))->id ?? throw new RuntimeException(
+            'Project ID must not be null'
+        );
+        $this->projectId = $projectId;
+        $this->jobDao = new JobDao($database);
+        $this->metadataDao = new MetadataDao($database);
+        $this->filesPartsDao = new FilesPartsDao($database);
+        $this->fileDao = new FileDao($database);
     }
 
     /**
@@ -37,14 +48,15 @@ class FilesInfoUtility
      *
      * @param bool $showMetadata
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getInfo(bool $showMetadata = true): array
     {
-        $fileInfo = JobDao::getFirstSegmentOfFilesInJob($this->chunk, 60 * 5);
-        $fileMetadataDao = new MetadataDao();
-        $filePartsDao = new FilesPartsDao();
+        $fileInfo = $this->jobDao->getFilesInfoInJob($this->chunk, 60 * 5);
+        $fileMetadataDao = $this->metadataDao;
+        $filePartsDao = $this->filesPartsDao;
 
         // Show metadata
         if ($showMetadata) {
@@ -53,7 +65,7 @@ class FilesInfoUtility
                 $filePartsIdArray = [];
                 $metadata = [];
 
-                foreach ($fileMetadataDao->getByJobIdProjectAndIdFile($this->project->id, $file->id_file, 60 * 5) as $metadatum) {
+                foreach ($fileMetadataDao->getByJobIdProjectAndIdFile($this->projectId, $file->id_file, 60 * 5) ?? [] as $metadatum) {
                     if ($metadatum->files_parts_id !== null) {
                         $metadata['files_parts'][(int)$metadatum->files_parts_id][$metadatum->key] = $metadatum->value;
 
@@ -104,17 +116,19 @@ class FilesInfoUtility
      * @param int $id_file
      * @param int|null $filePartsId
      *
-     * @return array|null
+     * @return array{instructions: mixed}|null
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public function getInstructions(int $id_file, ?int $filePartsId = null): ?array
     {
-        if (FileDao::isFileInProject($id_file, $this->project->id)) {
-            $metadataDao = new MetadataDao;
-            $instructions = $metadataDao->get($this->project->id, $id_file, 'instructions', $filePartsId, 60 * 5);
+        if ($this->fileDao->isFileInProject($id_file, $this->projectId)) {
+            $metadataDao = $this->metadataDao;
+            $instructions = $metadataDao->get($this->projectId, $id_file, 'instructions', $filePartsId, 60 * 5);
 
             if (!$instructions) {
-                $instructions = $metadataDao->get($this->project->id, $id_file, 'mtc:instructions', $filePartsId, 60 * 5);
+                $instructions = $metadataDao->get($this->projectId, $id_file, 'mtc:instructions', $filePartsId, 60 * 5);
             }
 
             if (!$instructions) {
@@ -133,18 +147,19 @@ class FilesInfoUtility
      *
      * @return bool
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public function setInstructions(int $id_file, string $instructions): bool
     {
-        if (FileDao::isFileInProject($id_file, $this->project->id)) {
-            $metadataDao = new MetadataDao;
-            if ($metadataDao->get($this->project->id, $id_file, 'instructions')) {
-                $metadataDao->update($this->project->id, $id_file, 'instructions', $instructions);
+        if ($this->fileDao->isFileInProject($id_file, $this->projectId)) {
+            if ($this->metadataDao->get($this->projectId, $id_file, 'instructions')) {
+                $this->metadataDao->update($this->projectId, $id_file, 'instructions', $instructions);
             } else {
-                $metadataDao->insert($this->project->id, $id_file, 'instructions', $instructions);
+                $this->metadataDao->insert($this->projectId, $id_file, 'instructions', $instructions);
             }
 
-            $metadataDao->destroyCacheByJobIdProjectAndIdFile((int)$this->project->id, $id_file);
+            $this->metadataDao->destroyCacheByJobIdProjectAndIdFile($this->projectId, $id_file);
 
             return true;
         }

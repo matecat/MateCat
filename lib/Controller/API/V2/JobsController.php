@@ -16,6 +16,7 @@ use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
@@ -33,14 +34,27 @@ class JobsController extends KleinController
      */
     private ProjectStruct $project;
 
+    protected JobDao $jobDao;
+    protected SegmentTranslationDao $segmentTranslationDao;
+
+    /**
+     * @throws NotFoundException
+     */
+    protected function return404IfTheJobWasDeleted(): void
+    {
+        if ($this->chunk->isDeleted()) {
+            throw new NotFoundException('No job found.');
+        }
+    }
 
     /**
      * @throws Exception
      * @throws NotFoundException
+     * @throws \TypeError
      */
     public function show(): void
     {
-        $format = new Chunk();
+        $format = new Chunk($this->getDatabase());
         $format->setUser($this->user);
         $format->setCalledFromApi(true);
 
@@ -101,26 +115,25 @@ class JobsController extends KleinController
      */
     protected function changeStatus(string $status): void
     {
-        (new ProjectAccessValidator($this, $this->project))->validate();
-
-        JobDao::updateJobStatus($this->chunk, $status);
-        $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob($this->chunk);
-        SegmentTranslationDao::updateLastTranslationDateByIdList($lastSegmentsList, Utils::mysqlTimestamp(time()));
+        $this->jobDao->updateJobStatus($this->chunk, $status);
+        $lastSegmentsList = $this->segmentTranslationDao->getMaxSegmentIdsFromJob($this->chunk);
+        $this->segmentTranslationDao->updateLastTranslationDateByIdList($lastSegmentsList, Utils::mysqlTimestamp(time()));
         $this->response->json(['code' => 1, 'data' => "OK", 'status' => $status]);
     }
 
     /**
-     * Perform actions after constructing an instance of the class.
-     * This method sets up the necessary validators and performs further actions.
-     *
+     * Register the validators for this controller.
      */
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $Validator = new ChunkPasswordValidator($this);
         $Validator->onSuccess(function () use ($Validator) {
             $this->chunk = $Validator->getChunk();
-            $this->project = $Validator->getChunk()->getProject(60 * 10);
+            $this->project = $Validator->getChunk()->getProject(new ProjectDao($this->getDatabase()), 60 * 10);
+            $this->jobDao = new JobDao($this->getDatabase());
+            $this->segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
+            $this->appendValidator(new ProjectAccessValidator($this, $this->project));
         });
         $this->appendValidator($Validator);
     }

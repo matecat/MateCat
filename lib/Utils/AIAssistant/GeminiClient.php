@@ -9,7 +9,7 @@ use Gemini\Enums\DataType;
 use Gemini\Enums\ResponseMimeType;
 use Utils\Registry\AppConfig;
 
-class GeminiClient implements AIClientInterface
+class GeminiClient implements AlternativeTranslationsClientInterface
 {
     private ClientContract $gemini;
 
@@ -29,7 +29,7 @@ class GeminiClient implements AIClientInterface
      * @param string $targetContextSentencesString Additional context sentences related to the target translation.
      * @param string $excerpt The specific excerpt in the target sentence to be replaced with alternatives.
      * @param string $styleInstructions The style instructions provided to guide the translation approach.
-     * @return mixed The formatted response containing alternative translations, or nothing if no alternatives can be reasonably suggested.
+     * @return list<mixed>
      */
     public function manageAlternativeTranslations(
         string $sourceLanguage,
@@ -50,7 +50,7 @@ class GeminiClient implements AIClientInterface
                 return $text;
             }
 
-            return preg_replace_callback( '/<(?:[^"\'>]|"[^"]*"|\'[^\']*\')*>/u', function ( $matches ) use ( &$tagMap ) {
+            return preg_replace_callback( '/<(?:[^"\'>]|"[^"]*"|\'[^\']*\')*>/u', function ( array $matches ) use ( &$tagMap ): string {
                 $tag = $matches[ 0 ];
                 $placeholder = array_search( $tag, $tagMap );
                 if ( $placeholder === false ) {
@@ -199,4 +199,5 @@ PROMPT;
 
         return $styleInstructionsMap[$style] ?? '';
     }
+
 }

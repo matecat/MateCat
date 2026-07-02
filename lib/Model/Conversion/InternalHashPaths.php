@@ -9,7 +9,7 @@
 
 namespace Model\Conversion;
 
-use DomainException;
+use Model\DataAccess\UnknownPropertyException;
 
 class InternalHashPaths
 {
@@ -18,7 +18,9 @@ class InternalHashPaths
     protected string $diskHash;
 
     /**
-     * @param array $array_params Associative array with keys 'cacheHash' and 'diskHash'.
+     * @param array<string, string> $array_params Associative array with keys 'cacheHash' and 'diskHash'.
+     *
+     * @throws UnknownPropertyException
      */
     public function __construct(array $array_params)
     {
@@ -64,12 +66,12 @@ class InternalHashPaths
      * @param mixed  $value
      *
      * @return void
-     * @throws DomainException
+     * @throws UnknownPropertyException
      */
     public function __set(string $name, mixed $value): void
     {
         if (!property_exists($this, $name)) {
-            throw new DomainException('Unknown property ' . $name);
+            throw new UnknownPropertyException($name);
         }
     }
 

@@ -3,7 +3,10 @@
 namespace Utils\Engines;
 
 use Exception;
+use Model\DataAccess\IDatabase;
+use TypeError;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 
 /**
  * Created by PhpStorm.
@@ -22,10 +25,11 @@ class GoogleTranslate extends AbstractEngine
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
-    public function __construct($engineRecord)
+    public function __construct($engineRecord, IDatabase $database)
     {
-        parent::__construct($engineRecord);
+        parent::__construct($engineRecord, $database);
         if ($this->getEngineRecord()->type != EngineConstants::MT) {
             throw new Exception("Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
         }
@@ -33,13 +37,14 @@ class GoogleTranslate extends AbstractEngine
 
     /**
      * @param mixed $rawValue
-     * @param array $parameters
+     * @param array<string, mixed> $parameters
      * @param null $function
      *
-     * @return array
+     * @return GetMemoryResponse
      * @throws Exception
+     * @throws TypeError
      */
-    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): GetMemoryResponse
     {
         $all_args = func_get_args();
         $all_args[1]['text'] = $all_args[1]['q'];
@@ -57,7 +62,13 @@ class GoogleTranslate extends AbstractEngine
         }
     }
 
-    public function get(array $_config)
+    /**
+     * @param array<string, mixed> $_config
+     * @throws TypeError
+     * @throws \Psr\Log\InvalidArgumentException
+     * @throws \RuntimeException
+     */
+    public function get(array $_config): GetMemoryResponse
     {
         $parameters = [];
 
@@ -75,21 +86,30 @@ class GoogleTranslate extends AbstractEngine
 
         $this->call("translate_relative_url", $parameters, true);
 
-        return $this->result;
+        return $this->_getResultAsGetMemoryResponse();
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function set($_config): bool
     {
         //if engine does not implement SET method, exit
         return true;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function update($_config): bool
     {
         //if engine does not implement UPDATE method, exit
         return true;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function delete($_config): bool
     {
         //if engine does not implement DELETE method, exit

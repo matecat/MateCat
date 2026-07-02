@@ -8,7 +8,9 @@
 
 namespace Utils\Email;
 
+use DomainException;
 use Exception;
+use InvalidArgumentException;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\MailWorker;
 use Utils\Logger\LoggerFactory;
@@ -23,7 +25,7 @@ abstract class AbstractEmail
     protected string $_template_path;
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     abstract protected function _getTemplateVariables(): array;
 
@@ -54,9 +56,9 @@ abstract class AbstractEmail
     }
 
     /**
-     *
-     * @param array $mailConf
-     *
+     * @param array<string, mixed> $mailConf
+     * @throws DomainException
+     * @throws InvalidArgumentException
      */
     protected function _enqueueEmailDelivery(array $mailConf): void
     {
@@ -79,7 +81,7 @@ abstract class AbstractEmail
         extract($this->_getTemplateVariables());
         include($this->_template_path);
 
-        return ob_get_clean();
+        return ob_get_clean() ?: '';
     }
 
     /**
@@ -93,13 +95,13 @@ abstract class AbstractEmail
         extract($this->_getLayoutVariables($messageContent));
         include($this->_layout_path);
 
-        return ob_get_clean();
+        return ob_get_clean() ?: '';
     }
 
     /**
      * @param string|null $messageBody
      *
-     * @return array
+     * @return array<string, mixed>
      */
     protected function _getLayoutVariables(?string $messageBody = null): array
     {
@@ -112,7 +114,7 @@ abstract class AbstractEmail
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     protected function _getDefaultMailConf(): array
     {
@@ -139,16 +141,18 @@ abstract class AbstractEmail
 
         $this->doSend(
             $recipient,
-            $this->title,
+            $this->title ?? 'Matecat',
             $this->_buildHTMLMessage(),
             $this->_buildTxtMessage($this->_buildMessageContent())
         );
     }
 
     /**
+     * @param array<int, string|null> $address
+     *
      * @throws Exception
      */
-    protected function doSend(array $address, string $subject, string $htmlBody, string $altBody): bool
+    protected function doSend(array $address, ?string $subject, string $htmlBody, string $altBody): bool
     {
         $mailConf = $this->_getDefaultMailConf();
 
@@ -164,21 +168,20 @@ abstract class AbstractEmail
     }
 
     /**
-     * @param $messageBody
+     * @param string $messageBody
      *
      * @return string
-     * @internal param $title
      */
-    protected function _buildTxtMessage($messageBody): string
+    protected function _buildTxtMessage(string $messageBody): string
     {
-        $messageBody = preg_replace("#<[/]*span[^>]*>#i", "", $messageBody);
-        $messageBody = preg_replace("#<[/]*strong[^>]*>#i", "", $messageBody);
-        $messageBody = preg_replace("#<[/]*(ol|ul|li)[^>]*>#i", "\t", $messageBody);
-        $messageBody = preg_replace("#<[/]*(p)[^>]*>#i", "", $messageBody);
-        $messageBody = preg_replace("#<a.*?href=[\"'](.*)[\"'][^>]*>(.*?)</a>#i", "$2 $1", $messageBody);
+        $messageBody = preg_replace("#<[/]*span[^>]*>#i", "", $messageBody) ?? '';
+        $messageBody = preg_replace("#<[/]*strong[^>]*>#i", "", $messageBody) ?? '';
+        $messageBody = preg_replace("#<[/]*(ol|ul|li)[^>]*>#i", "\t", $messageBody) ?? '';
+        $messageBody = preg_replace("#<[/]*(p)[^>]*>#i", "", $messageBody) ?? '';
+        $messageBody = preg_replace("#<a.*?href=[\"'](.*)[\"'][^>]*>(.*?)</a>#i", "$2 $1", $messageBody) ?? '';
         $messageBody = html_entity_decode($messageBody);
 
-        return preg_replace("#<br[^>]*>#i", "\r\n", $messageBody);
+        return preg_replace("#<br[^>]*>#i", "\r\n", $messageBody) ?? '';
     }
 
 }

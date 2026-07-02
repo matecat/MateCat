@@ -3,22 +3,21 @@
 namespace Model\ChunksCompletion;
 
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use PDO;
+use PDOException;
 
 class ChunkCompletionUpdateDao extends AbstractDao
 {
 
-    protected function _buildResult(array $array_result)
-    {
-    }
-
-    public function updatePassword($id_job, $password, $old_password): int
+    /**
+     * @throws PDOException
+     */
+    public function updatePassword(int $id_job, string $password, string $old_password): int
     {
         $sql = "UPDATE chunk_completion_updates SET password = :new_password
                WHERE id_job = :id_job AND password = :password ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'id_job' => $id_job,
@@ -29,15 +28,10 @@ class ChunkCompletionUpdateDao extends AbstractDao
         return $stmt->rowCount();
     }
 
-    public static function validSources()
-    {
-        return [
-            'user' => ChunkCompletionEventStruct::SOURCE_USER,
-            'merge' => ChunkCompletionEventStruct::SOURCE_MERGE
-        ];
-    }
-
-    public static function createOrUpdateFromStruct(ChunkCompletionUpdateStruct $struct): bool
+    /**
+     * @throws PDOException
+     */
+    public function createOrUpdateFromStruct(ChunkCompletionUpdateStruct $struct): bool
     {
         $sql_update = "  " .
             " last_update = CURRENT_TIMESTAMP, source = :source, uid = :uid, " .
@@ -55,7 +49,7 @@ class ChunkCompletionUpdateDao extends AbstractDao
             " ) " .
             " ON DUPLICATE KEY UPDATE $sql_update ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_CLASS, ChunkCompletionUpdateStruct::class);
 

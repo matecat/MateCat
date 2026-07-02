@@ -13,8 +13,10 @@ namespace Model\Translators;
 use Controller\Abstracts\KleinController;
 use Exception;
 use InvalidArgumentException;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\TransactionalTrait;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Outsource\ConfirmationDao;
@@ -23,6 +25,8 @@ use Model\Projects\ProjectStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
+use RuntimeException;
+use TypeError;
 use Utils\Email\SendToTranslatorForDeliveryChangeEmail;
 use Utils\Email\SendToTranslatorForJobSplitEmail;
 use Utils\Email\SendToTranslatorForNewJobEmail;
@@ -32,6 +36,11 @@ class TranslatorsModel
 {
 
     use TransactionalTrait;
+
+    protected function getTransactionalDatabase(): IDatabase
+    {
+        return $this->database;
+    }
 
     /**
      * @var ?UserStruct
@@ -49,12 +58,12 @@ class TranslatorsModel
     protected KleinController $controller;
 
     /**
-     * @var array
+     * @var array{new: ?string, update: ?string, split: ?string}
      */
     protected array $mailsToBeSent = ['new' => null, 'update' => null, 'split' => null];
 
     protected int $delivery_date;
-    protected int $job_owner_timezone = 0;
+    protected float $job_owner_timezone = 0;
     protected ?int $id_job;
     protected string $email;
     protected string $job_password;
@@ -69,10 +78,12 @@ class TranslatorsModel
      */
     protected FeatureSet $featureSet;
 
+    protected IDatabase $database;
+
     /**
      * Override the Job Password from Outside
      *
-     * @param mixed $job_password
+     * @param string $job_password
      *
      * @return $this
      */
@@ -92,13 +103,22 @@ class TranslatorsModel
      * @param string|int $delivery_date
      *
      * @return $this
+     *
+     * @throws TypeError
      */
     public function setDeliveryDate(int|string $delivery_date): TranslatorsModel
     {
         if (is_numeric($delivery_date) && (int)$delivery_date == $delivery_date) {
-            $this->delivery_date = $delivery_date;
+            $this->delivery_date = (int)$delivery_date;
         } else {
-            $this->delivery_date = strtotime($delivery_date);
+            if (!is_string($delivery_date)) {
+                throw new TypeError('delivery_date must be a numeric int or a date string');
+            }
+            $timestamp = strtotime($delivery_date);
+            if ($timestamp === false) {
+                throw new TypeError("Invalid date string: $delivery_date");
+            }
+            $this->delivery_date = $timestamp;
         }
 
         return $this;
@@ -109,9 +129,9 @@ class TranslatorsModel
      *
      * @return $this
      */
-    public function setJobOwnerTimezone(int $job_owner_timezone): TranslatorsModel
+    public function setJobOwnerTimezone(float|int $job_owner_timezone): TranslatorsModel
     {
-        $this->job_owner_timezone = $job_owner_timezone;
+        $this->job_owner_timezone = (float)$job_owner_timezone;
 
         return $this;
     }
@@ -139,37 +159,49 @@ class TranslatorsModel
      * TranslatorsModel constructor.
      *
      * @param JobStruct $jStruct
+     * @param IDatabase $database
      * @param int $project_cache_TTL
+     *
+     * @throws TypeError
+     * @throws Exception
      */
-    public function __construct(JobStruct $jStruct, int $project_cache_TTL = 60 * 60)
+    public function __construct(JobStruct $jStruct, IDatabase $database, int $project_cache_TTL = 60 * 60)
     {
         //get the job
         $this->jStruct = $jStruct;
+        $this->database = $database;
 
         $this->id_job = $jStruct->id;
-        $this->job_password = $jStruct->password;
+        $this->job_password = $jStruct->password ?? throw new TypeError('JobStruct::$password cannot be null');
 
-        $this->project = $this->jStruct->getProject($project_cache_TTL);
-        $this->featureSet = $this->project->getFeaturesSet();
+        $this->project = $this->jStruct->getProject(new ProjectDao($this->database), $project_cache_TTL);
+        $this->featureSet = FeatureSet::forProject($this->project, $this->database);
     }
 
     /**
+     * @return JobsTranslatorsStruct|null
+     *
      * @throws ReflectionException
+     * @throws Exception
      */
-    public function getTranslator(int $cache = 86400)
+    public function getTranslator(int $cache = 86400): ?JobsTranslatorsStruct
     {
-        $jTranslatorsDao = new JobsTranslatorsDao();
+        $jTranslatorsDao = new JobsTranslatorsDao($this->database);
 
-        return $this->jobTranslator = $jTranslatorsDao->setCacheTTL($cache)->findByJobsStruct($this->jStruct)[0] ?? null;
+        return $this->jobTranslator = $jTranslatorsDao->setCacheTTL($cache)->findByJobsStruct(
+            $this->jStruct
+        )[0] ?? null;
     }
 
     /**
      * @return JobsTranslatorsStruct
+     *
      * @throws Exception
+     * @throws TypeError
      */
     public function update(): JobsTranslatorsStruct
     {
-        $confDao = new ConfirmationDao();
+        $confDao = new ConfirmationDao($this->database);
         $confirmationStruct = $confDao->getConfirmation($this->jStruct);
 
         if (!empty($confirmationStruct)) {
@@ -179,13 +211,13 @@ class TranslatorsModel
         //create jobs_translator struct to call inside the dao
         $translatorStruct = new JobsTranslatorsStruct();
 
-        $translatorUser = (new UserDao())->setCacheTTL(60 * 60)->getByEmail($this->email);
+        $translatorUser = (new UserDao($this->database))->setCacheTTL(60 * 60)->getByEmail($this->email);
         if (!empty($translatorUser)) {
             //associate the translator with an existent user and create a profile if not exists
             $translatorStruct->id_translator_profile = $this->saveProfile($translatorUser);
         }
 
-        $jTranslatorsDao = new JobsTranslatorsDao();
+        $jTranslatorsDao = new JobsTranslatorsDao($this->database);
         if (empty($this->jobTranslator)) { // self::getTranslator() can be called from outside
             // retrieve with no cache
             $this->getTranslator(0);
@@ -213,11 +245,13 @@ class TranslatorsModel
         }
 
         //set the old id and password to make "ON DUPLICATE KEY UPDATE" possible
-        $translatorStruct->id_job = $this->jStruct->id;
-        $translatorStruct->job_password = $this->jStruct->password;
+        $translatorStruct->id_job = $this->jStruct->id ?? throw new TypeError('JobStruct::$id cannot be null');
+        $translatorStruct->job_password = $this->jStruct->password ?? throw new TypeError(
+            'JobStruct::$password cannot be null'
+        );
         $translatorStruct->delivery_date = Utils::mysqlTimestamp($this->delivery_date);
         $translatorStruct->job_owner_timezone = $this->job_owner_timezone;
-        $translatorStruct->added_by = $this->callingUser->uid;
+        $translatorStruct->added_by = $this->callingUser->uid ?? throw new TypeError('Calling user uid cannot be null');
         $translatorStruct->email = $this->email;
         $translatorStruct->source = $this->jStruct['source'];
         $translatorStruct->target = $this->jStruct['target'];
@@ -244,32 +278,40 @@ class TranslatorsModel
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     protected function saveProfile(UserStruct $existentUser): int
     {
         //associate the translator with an existent user and create a profile
         $profileStruct = new TranslatorProfilesStruct();
-        $profileStruct->uid_translator = $existentUser->uid;
+        $profileStruct->uid_translator = $existentUser->uid ?? throw new TypeError('UserStruct::$uid cannot be null');
         $profileStruct->is_revision = 0;
         $profileStruct->source = $this->jStruct['source'];
         $profileStruct->target = $this->jStruct['target'];
 
-        $tProfileDao = new TranslatorsProfilesDao();
+        $tProfileDao = new TranslatorsProfilesDao($this->database);
         $existentProfileStruct = $tProfileDao->getByProfile($profileStruct);
 
         if (empty($existentProfileStruct)) {
-            $profileStruct->id = $tProfileDao->insertStruct($profileStruct, [
+            $insertId = $tProfileDao->insertStruct($profileStruct, [
                 'no_nulls' => true
             ]);
+
+            if ($insertId === false) {
+                throw new RuntimeException('Failed to insert translator profile');
+            }
+
+            $profileStruct->id = $insertId;
 
             return $profileStruct->id;
         }
 
-        return $existentProfileStruct->id;
+        return $existentProfileStruct->id ?? throw new RuntimeException('Existing profile has no id');
     }
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function changeJobPassword(?string $newPassword = null): void
     {
@@ -277,18 +319,19 @@ class TranslatorsModel
             $newPassword = Utils::randomString();
         }
 
-        $oldPassword = $this->jStruct->password;
+        $oldPassword = $this->jStruct->password ?? throw new TypeError('JobStruct::$password cannot be null');
 
         $this->openTransaction();
-        $jobDao = new JobDao();
+        $jobDao = new JobDao($this->database);
         $jobDao->changePassword($this->jStruct, $newPassword);
-        $jobDao->destroyCache($this->jStruct);
-        $this->featureSet->run('job_password_changed', $this->jStruct, $oldPassword);
+        $jobDao->destroyCacheByIdAndPassword($this->jStruct);
+        $this->featureSet->dispatch(new JobPasswordChangedEvent($this->jStruct, $oldPassword));
         $this->commitTransaction();
     }
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     protected function sendEmail(): void
     {
@@ -296,7 +339,13 @@ class TranslatorsModel
             throw new InvalidArgumentException("Who invites can not be empty. Try TranslatorsModel::setUser() ");
         }
 
-        $project = ProjectDao::findByJobId($this->jStruct->id);
+        $project = (new ProjectDao($this->database))->findByJobId(
+            $this->jStruct->id ?? throw new TypeError('JobStruct::$id cannot be null')
+        );
+
+        if ($project === null) {
+            throw new RuntimeException('Project not found for job id ' . $this->jStruct->id);
+        }
 
         foreach ($this->mailsToBeSent as $type => $email) {
             if (empty($email)) {
@@ -305,15 +354,30 @@ class TranslatorsModel
 
             switch ($type) {
                 case 'new':
-                    $mailSender = new SendToTranslatorForNewJobEmail($this->callingUser, $this->jobTranslator, $project->name);
+                    $mailSender = new SendToTranslatorForNewJobEmail(
+                        $this->callingUser,
+                        $this->jobTranslator ?? throw new RuntimeException('jobTranslator not set'),
+                        $project->name,
+                        new UserDao($this->database)
+                    );
                     $mailSender->send();
                     break;
                 case 'update':
-                    $mailSender = new SendToTranslatorForDeliveryChangeEmail($this->callingUser, $this->jobTranslator, $project->name);
+                    $mailSender = new SendToTranslatorForDeliveryChangeEmail(
+                        $this->callingUser,
+                        $this->jobTranslator ?? throw new RuntimeException('jobTranslator not set'),
+                        $project->name,
+                        new UserDao($this->database)
+                    );
                     $mailSender->send();
                     break;
                 case 'split':
-                    $mailSender = new SendToTranslatorForJobSplitEmail($this->callingUser, $this->jobTranslator, $project->name);
+                    $mailSender = new SendToTranslatorForJobSplitEmail(
+                        $this->callingUser,
+                        $this->jobTranslator ?? throw new RuntimeException('jobTranslator not set'),
+                        $project->name,
+                        new UserDao($this->database)
+                    );
                     $mailSender->send();
                     break;
             }

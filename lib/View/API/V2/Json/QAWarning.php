@@ -13,6 +13,7 @@ use Utils\LQA\QA;
 class QAWarning
 {
 
+    /** @var array<string, mixed> */
     protected array $structure;
 
     const string GLOSSARY_CATEGORY = "GLOSSARY";
@@ -21,7 +22,7 @@ class QAWarning
     const string MISMATCH_CATEGORY = "MISMATCH";
     const string ICU_CATEGORY = "ICU";
 
-    protected function pushErrorSegment($error_type, $error_category, $content): void
+    protected function pushErrorSegment(string $error_type, ?int $error_category, mixed $content): void
     {
         $category = match ($error_category) {
             QA::ERR_SIZE_RESTRICTION => self::SIZE_CATEGORY,

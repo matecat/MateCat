@@ -11,6 +11,7 @@ namespace View\API\V2\Json;
 
 
 use Model\Translators\JobsTranslatorsStruct;
+use Model\Users\UserDao;
 use ReflectionException;
 
 class JobTranslator
@@ -18,14 +19,19 @@ class JobTranslator
 
 
     protected JobsTranslatorsStruct $data;
+    protected UserDao $userDao;
 
-    public function __construct(JobsTranslatorsStruct $translatorsStruct)
+    public function __construct(JobsTranslatorsStruct $translatorsStruct, UserDao $userDao)
     {
         $this->data = $translatorsStruct;
+        $this->userDao = $userDao;
     }
 
     /**
+     * @return array<string, mixed>
+     *
      * @throws ReflectionException
+     * @throws \Exception
      */
     public function renderItem(JobsTranslatorsStruct $jTranslatorsStruct = null): array
     {
@@ -45,7 +51,10 @@ class JobTranslator
         ];
 
         if (!empty($jTranslatorsStruct->id_translator_profile)) {
-            $translatorJson['user'] = User::renderItem($jTranslatorsStruct->getUser());
+            $user = $jTranslatorsStruct->getUser($this->userDao);
+            if ($user !== null) {
+                $translatorJson['user'] = User::renderItem($user);
+            }
         }
 
         return $translatorJson;

@@ -10,25 +10,32 @@
 namespace Utils\Engines\Validators;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MMT as MMTEngine;
 use Utils\Engines\MMT\MMTServiceApiException;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Validator\Contracts\AbstractValidator;
-use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
 
 class MMTEngineValidator extends AbstractValidator
 {
+
+    public function __construct(private readonly IDatabase $database)
+    {
+    }
 
     /**
      * @param EngineValidatorObject $object
      * @throws MMTServiceApiException
      * @throws Exception
      */
-    public function validate(ValidatorObject $object): ?ValidatorObject
+    public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
     {
+        $engineStruct = $object->engineStruct ?? throw new Exception('Engine struct required');
+
         /** @var MMTEngine $newTestCreatedMT */
-        $newTestCreatedMT = EnginesFactory::createTempInstance($object->engineStruct);
+        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct, $this->database);
 
         // Check the account
         $checkAccount = $newTestCreatedMT->checkAccount();

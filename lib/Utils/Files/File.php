@@ -45,12 +45,9 @@ class File
     }
 
     /**
-     * @param      $filepath
-     * @param int $options
-     *
      * @return string|string[]
      */
-    public static function info($filepath, int $options = 15): array|string
+    public static function info(string $filepath, int $options = 15): array|string
     {
         return AbstractFilesStorage::pathinfo_fix($filepath, $options);
     }

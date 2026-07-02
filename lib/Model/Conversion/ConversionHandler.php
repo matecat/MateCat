@@ -33,6 +33,7 @@ class ConversionHandler
     protected string $errDir;
     protected string $uploadTokenValue;
     protected bool $stopOnFileException = true;
+    /** @var array<int|string, mixed> */
     protected array $zipExtractionErrorFiles = [];
     public bool $zipExtractionErrorFlag = false;
     protected ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
@@ -72,6 +73,7 @@ class ConversionHandler
      * @param MatecatLogger|null                $logger         Logger (default: LoggerFactory::getLogger('conversion')).
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function __construct(
         ?AbstractFilesStorage        $filesStorage = null,
@@ -133,7 +135,7 @@ class ConversionHandler
         $fileMustBeConverted = $this->fileMustBeConverted();
 
         if ($fileMustBeConverted === false) {
-            $this->result->setSize(filesize($file_path));
+            $this->result->setSize((int)filesize($file_path));
 
             return;
         } elseif ($fileMustBeConverted === true) {
@@ -271,7 +273,7 @@ class ConversionHandler
         // The file may have been removed between makeCachePackage and here
         // (e.g. race condition with concurrent uploads on the same session).
         if (is_file($file_path)) {
-            $this->result->setSize(filesize($file_path));
+            $this->result->setSize((int)filesize($file_path));
         }
 
         if (isset($convertResult["pdfAnalysis"]) and !empty($convertResult["pdfAnalysis"])) {
@@ -375,6 +377,7 @@ class ConversionHandler
     }
 
     /**
+     * @return array<int, string>
      * @throws Exception
      */
     public function extractZipFile(): array
@@ -469,7 +472,7 @@ class ConversionHandler
     {
         $error = false;
 
-        foreach ($stdResult as $stdFileResult) {
+        foreach (get_object_vars($stdResult) as $stdFileResult) {
             if ($error) {
                 break;
             }
@@ -483,7 +486,7 @@ class ConversionHandler
     }
 
     /**
-     * @return mixed
+     * @return array<int|string, mixed>
      */
     public function getZipExtractionErrorFiles(): array
     {
@@ -585,7 +588,7 @@ class ConversionHandler
     }
 
     /**
-     * @param mixed $filters_extraction_parameters
+     * @param FiltersConfigTemplateStruct|null $filters_extraction_parameters
      */
     public function setFiltersExtractionParameters(?FiltersConfigTemplateStruct $filters_extraction_parameters = null): void
     {

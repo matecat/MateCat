@@ -4,12 +4,16 @@ namespace Model\Projects;
 
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\ValidationError;
+use Model\Jobs\JobDao;
 use Model\Teams\MembershipDao;
 use Model\Teams\MembershipStruct;
 use Model\Teams\TeamDao;
+use Model\Teams\TeamStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use PDOException;
 use ReflectionException;
 use Utils\Constants\Teams;
 use Utils\Email\ProjectAssignedEmail;
@@ -27,9 +31,12 @@ class ProjectModel
      */
     protected ProjectStruct $project_struct;
 
+    /** @var array<string, mixed> */
     protected array $willChange = [];
+    /** @var array<string, mixed> */
     protected array $changedFields = [];
 
+    /** @var list<int> */
     protected array $cacheTeamsToClean = [];
 
     /**
@@ -37,12 +44,15 @@ class ProjectModel
      */
     protected UserStruct $user;
 
-    public function __construct(ProjectStruct $project)
+    protected IDatabase $database;
+
+    public function __construct(IDatabase $database, ProjectStruct $project)
     {
+        $this->database = $database;
         $this->project_struct = $project;
     }
 
-    public function prepareUpdate(string $field, $value): void
+    public function prepareUpdate(string $field, mixed $value): void
     {
         $this->willChange[$field] = $value;
     }
@@ -74,7 +84,8 @@ class ProjectModel
         ) {
             $this->checkIdAssignee($this->willChange['id_team']);
         } elseif (isset($this->willChange['id_assignee'])) {
-            $this->checkIdAssignee($this->project_struct->id_team);
+            $id_team = $this->project_struct->id_team ?? throw new ValidationError('Project must have a team');
+            $this->checkIdAssignee($id_team);
         }
 
         if (isset($this->willChange['id_team'])) {
@@ -86,7 +97,7 @@ class ProjectModel
             $newStruct->$field = $value;
         }
 
-        $result = ProjectDao::updateStruct($newStruct, [
+        $result = (new ProjectDao($this->database))->updateStruct($newStruct, [
             'fields' => array_keys($this->willChange)
         ]);
 
@@ -115,8 +126,12 @@ class ProjectModel
             !is_null($this->changedFields['id_assignee']) &&
             $this->user->uid != $this->changedFields['id_assignee']
         ) {
-            $assignee = (new UserDao)->getByUid($this->changedFields['id_assignee']);
-            $email = new ProjectAssignedEmail($this->user, $this->project_struct, $assignee);
+            $assignee = (new UserDao($this->database))->getByUid($this->changedFields['id_assignee']);
+            if ($assignee === null) {
+                return;
+            }
+            $jobs = (new JobDao($this->database))->getNotDeletedByProjectId((int) $this->project_struct->id);
+            $email = new ProjectAssignedEmail($this->database, $this->user, $this->project_struct, $assignee, $jobs);
             $email->send();
         }
     }
@@ -132,29 +147,30 @@ class ProjectModel
     }
 
     /**
-     * @param $id_team
-     *
      * @throws ReflectionException
      * @throws ValidationError
+     * @throws Exception
      */
-    private function checkAssigneeChangeInPersonalTeam($id_team): void
+    private function checkAssigneeChangeInPersonalTeam(int $id_team): void
     {
-        $teamDao = new TeamDao();
-        $team = $teamDao->setCacheTTL(60 * 60 * 24)->findById($id_team);
+        $teamDao = new TeamDao($this->database);
+        $team = $teamDao->setCacheTTL(60 * 60 * 24)->fetchById($id_team, TeamStruct::class);
+        if ($team === null) {
+            throw new ValidationError('Team not found');
+        }
         if ($team->type == Teams::PERSONAL) {
             throw new ValidationError('Can\'t change the Assignee of a personal project.');
         }
     }
 
     /**
-     * @param $id_team
-     *
      * @throws ReflectionException
      * @throws ValidationError
+     * @throws Exception
      */
-    private function checkIdAssignee($id_team): void
+    private function checkIdAssignee(int $id_team): void
     {
-        $membershipDao = new MembershipDao();
+        $membershipDao = new MembershipDao($this->database);
         $members = $membershipDao->setCacheTTL(60)->getMemberListByTeamId($id_team);
         $id_assignee = $this->willChange['id_assignee'];
         $found = array_filter($members, function (MembershipStruct $member) use ($id_assignee) {
@@ -173,10 +189,11 @@ class ProjectModel
     /**
      * @throws AuthorizationError
      * @throws ReflectionException
+     * @throws Exception
      */
     private function checkIdTeam(): void
     {
-        $memberShip = new MembershipDao();
+        $memberShip = new MembershipDao($this->database);
 
         //choose this method (and use array_filter) instead of findTeamByIdAndUser because the results of this one are cached
         $memberList = $memberShip->setCacheTTL(60)->getMemberListByTeamId($this->willChange['id_team']);
@@ -189,13 +206,16 @@ class ProjectModel
             throw new AuthorizationError("Not Authorized", 403);
         }
 
-        $team = (new TeamDao())->setCacheTTL(60 * 60)->getPersonalByUid($this->user->uid);
+        $uid = $this->user->uid ?? throw new AuthorizationError("User UID must not be null", 403);
+        $team = (new TeamDao($this->database))->setCacheTTL(60 * 60)->getPersonalByUid($uid);
 
         // check if the destination team is personal, in such a case, set the assignee to the user UID
         if ($team->id == $this->willChange['id_team'] && $team->type == Teams::PERSONAL) {
             $this->willChange['id_assignee'] = $this->user->uid;
-            $this->cacheTeamsToClean[] = $this->willChange['id_team'];
-            $this->cacheTeamsToClean[] = $this->project_struct->id_team;
+            $this->cacheTeamsToClean[] = (int) $this->willChange['id_team'];
+            if ($this->project_struct->id_team !== null) {
+                $this->cacheTeamsToClean[] = $this->project_struct->id_team;
+            }
         }
 
         // If the project has an assignee and the destination team isn't personal,
@@ -209,34 +229,46 @@ class ProjectModel
                 $this->willChange['id_assignee'] = null; //unset the assignee
             } else {
                 //clean the cache for the new team member list of assigned projects
-                $this->cacheTeamsToClean[] = $this->willChange['id_team'];
+                $this->cacheTeamsToClean[] = (int) $this->willChange['id_team'];
             }
 
             //clean the cache for the old team member list of assigned projects
-            $this->cacheTeamsToClean[] = $this->project_struct->id_team;
+            if ($this->project_struct->id_team !== null) {
+                $this->cacheTeamsToClean[] = $this->project_struct->id_team;
+            }
         }
     }
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws PDOException
      */
     private function cleanAssigneeCaches(): void
     {
-        $teamDao = new TeamDao();
-        $this->cacheTeamsToClean = array_unique($this->cacheTeamsToClean);
+        $teamDao = new TeamDao($this->database);
+        $this->cacheTeamsToClean = array_values(array_unique($this->cacheTeamsToClean));
         foreach ($this->cacheTeamsToClean as $team_id) {
-            $teamInCacheToClean = $teamDao->setCacheTTL(60 * 60 * 24)->findById($team_id);
+            $teamInCacheToClean = $teamDao->setCacheTTL(60 * 60 * 24)->fetchById($team_id, TeamStruct::class);
+            if ($teamInCacheToClean === null) {
+                continue;
+            }
             $teamDao->destroyCacheAssignee($teamInCacheToClean);
         }
     }
 
     /**
      * @throws ReflectionException
+     * @throws PDOException
      */
     private function cleanProjectCache(): void
     {
-        $projectDao = new ProjectDao();
-        $projectDao->destroyCacheById($this->project_struct->id);
+        $id = $this->project_struct->id;
+        if ($id === null) {
+            return;
+        }
+        $projectDao = new ProjectDao($this->database);
+        $projectDao->destroyFetchByIdCache($id, ProjectStruct::class);
     }
 
 }

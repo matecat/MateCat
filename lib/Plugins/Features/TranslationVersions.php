@@ -2,6 +2,8 @@
 
 namespace Plugins\Features;
 
+use Model\DataAccess\IDatabase;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
@@ -19,16 +21,19 @@ class TranslationVersions extends BaseFeature
      * @param UserStruct $userStruct
      * @param ProjectStruct $projectStruct
      * @param int|null $id_segment
+     * @param IDatabase $database
      * @return VersionHandlerInterface
+     * @throws \RuntimeException
+     * @throws \Exception
      */
-    public static function getVersionHandlerNewInstance(JobStruct $chunkStruct, UserStruct $userStruct, ProjectStruct $projectStruct, ?int $id_segment = null): VersionHandlerInterface
+    public static function getVersionHandlerNewInstance(JobStruct $chunkStruct, UserStruct $userStruct, ProjectStruct $projectStruct, ?int $id_segment, IDatabase $database): VersionHandlerInterface
     {
-        if ($id_segment && $projectStruct->isFeatureEnabled(self::FEATURE_CODE)) {
+        if ($id_segment && FeatureSet::forProject($projectStruct, $database)->hasFeature(self::FEATURE_CODE)) {
             return new TranslationVersionsHandler(
                 $chunkStruct,
                 $id_segment,
-                $userStruct,
-                $projectStruct
+                $projectStruct,
+                $database
             );
         }
 

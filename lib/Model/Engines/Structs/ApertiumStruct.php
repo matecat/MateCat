@@ -56,13 +56,10 @@ class ApertiumStruct extends EngineStruct
      */
     public ?int $penalty = 14;
 
-    /**
-     * An empty struct
-     * @return ApertiumStruct
-     */
+    
     public static function getStruct(): static
     {
-        return new ApertiumStruct();
+        return new static();
     }
 
 }

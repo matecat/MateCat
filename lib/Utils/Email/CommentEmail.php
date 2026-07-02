@@ -7,6 +7,9 @@ class CommentEmail extends BaseCommentEmail
 
     protected ?string $title = "New comment";
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getTemplateVariables(): array
     {
         $vars = parent::_getTemplateVariables();

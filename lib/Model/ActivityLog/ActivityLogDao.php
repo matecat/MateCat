@@ -8,10 +8,11 @@
 
 namespace Model\ActivityLog;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use PDO;
+use PDOException;
 use ReflectionException;
 
 class ActivityLogDao extends AbstractDao
@@ -20,9 +21,13 @@ class ActivityLogDao extends AbstractDao
     public string $epilogueString = "";
     public string $whereConditions = " id_project = :id_project ";
 
-    public function getAllForProject($id_project): array
+    /**
+     * @return ActivityLogStruct[]
+     * @throws PDOException
+     */
+    public function getAllForProject(int $id_project): array
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $sql = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
           JOIN users on activity_log.uid = users.uid WHERE id_project = :id_project ORDER BY activity_log.event_date DESC ";
 
@@ -34,9 +39,13 @@ class ActivityLogDao extends AbstractDao
         return $stmt->fetchAll();
     }
 
-    public function getLastActionInProject($id_project): array
+    /**
+     * @return ActivityLogStruct[]
+     * @throws PDOException
+     */
+    public function getLastActionInProject(int $id_project): array
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $sql = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
           JOIN (
            SELECT MAX(id) AS id FROM activity_log WHERE id_project = :id_project GROUP BY id_job
@@ -50,9 +59,12 @@ class ActivityLogDao extends AbstractDao
         return $stmt->fetchAll();
     }
 
+    /**
+     * @throws PDOException
+     */
     public function create(ActivityLogStruct $activityStruct): int
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $jobStructToArray = $activityStruct->toArray(
             [
                 'id_job',
@@ -75,7 +87,7 @@ class ActivityLogDao extends AbstractDao
 
         $stmt->execute();
 
-        return $conn->lastInsertId();
+        return (int)$conn->lastInsertId();
     }
 
     /**
@@ -84,9 +96,10 @@ class ActivityLogDao extends AbstractDao
      * Use when counters of the job value are not important but only the metadata are needed
      *
      * @param IDaoStruct $activityQuery
-     * @param array $whereKeys
+     * @param array<string, int|string> $whereKeys
      *
      * @return IDaoStruct[]
+     * @throws Exception
      * @throws ReflectionException
      * @see      \Utils\AsyncTasks\Workers\ActivityLogWorker
      * @see      ActivityLogStruct
@@ -106,30 +119,6 @@ class ActivityLogDao extends AbstractDao
             get_class($activityQuery),
             $whereKeys
         );
-    }
-
-    /**
-     * @param array $array_result
-     *
-     * @return void
-     */
-    protected function _buildResult(array $array_result)
-    {
-    }
-
-    /**
-     * @param $activity_id
-     *
-     * @return ActivityLogStruct|null
-     */
-    public static function getByID($activity_id)
-    {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM activity_log WHERE id = ?");
-        $stmt->setFetchMode(PDO::FETCH_CLASS, ActivityLogStruct::class);
-        $stmt->execute([$activity_id]);
-
-        return $stmt->fetch();
     }
 
 }

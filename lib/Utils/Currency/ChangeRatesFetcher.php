@@ -18,7 +18,7 @@ abstract class ChangeRatesFetcher
     protected string $changeRates;
 
 
-    public abstract function fetchChangeRates();
+    abstract public function fetchChangeRates(): void;
 
 
     public function getChangeRates(): string

@@ -17,6 +17,7 @@ use Stringable;
  * Context definition for the Executors
  *
  * @package TaskRunner\Commons
+ * @phpstan-consistent-constructor
  */
 class Context implements Stringable
 {
@@ -59,7 +60,9 @@ class Context implements Stringable
     /**
      * AbstractContext constructor.
      *
-     * @param array $queueElement
+     * @param array<string, mixed> $queueElement
+     *
+     * @throws \TypeError
      */
     protected function __construct(array $queueElement)
     {
@@ -73,9 +76,11 @@ class Context implements Stringable
     /**
      * Concrete Static builder method
      *
-     * @param array $context
+     * @param array<string, mixed> $context
      *
-     * @return static
+     * @return self
+     *
+     * @throws \TypeError
      */
     public static function buildFromArray(array $context): Context
     {
@@ -89,7 +94,7 @@ class Context implements Stringable
      */
     public function __toString(): string
     {
-        return json_encode($this);
+        return json_encode($this) ?: '{}';
     }
 
 }

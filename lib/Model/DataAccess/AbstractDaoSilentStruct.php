@@ -12,7 +12,7 @@ namespace Model\DataAccess;
 abstract class AbstractDaoSilentStruct extends AbstractDaoObjectStruct
 {
 
-    public function __set($name, $value)
+    public function __set(string $name, mixed $value): void
     {
         if (property_exists($this, $name)) {
             $this->$name = $value;

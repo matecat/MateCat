@@ -9,6 +9,7 @@
 
 namespace Utils\Logger;
 
+use Monolog\Handler\AbstractProcessingHandler;
 use Throwable;
 use Utils\Logger\Handlers\CloudWatchHandlerProvider;
 use Utils\Logger\Handlers\ElasticSearchHandlerProvider;
@@ -21,6 +22,9 @@ use Utils\Registry\AppConfig;
  */
 class HandlersProviderFactory
 {
+    /**
+     * @return list<AbstractProcessingHandler>
+     */
     public static function loadWithName(string $handlerName): array
     {
         $handlers = [];
@@ -38,8 +42,10 @@ class HandlersProviderFactory
                          * @var ProviderInterface|CloudWatchHandlerProvider|ElasticSearchHandlerProvider|StreamHandlerProvider $provider
                          */
                         $handler = new ($provider->getHandlerClassName())(...$provider->getHandlerParams($handlerName, $handlerProviderConfiguration ?? []));
-                        $provider->setFormatter($handler);
-                        $handlers[] = $handler;
+                        if ($handler instanceof AbstractProcessingHandler) {
+                            $provider->setFormatter($handler);
+                            $handlers[] = $handler;
+                        }
                     } catch (Throwable) {
                     }
                 }

@@ -3,26 +3,24 @@
 namespace Model\Segments;
 
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
-use ReflectionException;
 
 class SegmentOriginalDataDao extends AbstractDao
 {
 
-    /**
+/**
      * @param int $id_segment
      * @param int $ttl
      *
      * @return SegmentOriginalDataStruct|null
-     * @throws ReflectionException
+     * @throws \ReflectionException
+     * @throws \PDOException
+     * @throws \Exception
      */
-    public static function getBySegmentId(int $id_segment, int $ttl = 86400): ?SegmentOriginalDataStruct
+    public function getBySegmentId(int $id_segment, int $ttl = 86400): ?SegmentOriginalDataStruct
     {
-        $thisDao = new self();
-        $conn = $thisDao->getDatabaseHandler();
-        $stmt = $conn->getConnection()->prepare("SELECT * FROM segment_original_data WHERE id_segment = ? ");
+        $stmt = $this->database->getConnection()->prepare("SELECT * FROM segment_original_data WHERE id_segment = ? ");
 
-        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap(
+        return $this->setCacheTTL($ttl)->_fetchObjectMap(
             $stmt,
             SegmentOriginalDataStruct::class,
             [$id_segment]
@@ -33,12 +31,14 @@ class SegmentOriginalDataDao extends AbstractDao
      * @param int $id_segment
      * @param int $ttl
      *
-     * @return array
-     * @throws ReflectionException
+     * @return array<string, mixed>
+     * @throws \ReflectionException
+     * @throws \Exception
+     * @throws \TypeError
      */
-    public static function getSegmentDataRefMap(int $id_segment, int $ttl = 86400): array
+    public function getSegmentDataRefMap(int $id_segment, int $ttl = 86400): array
     {
-        $dataRefMap = self::getBySegmentId($id_segment, $ttl);
+        $dataRefMap = $this->getBySegmentId($id_segment, $ttl);
 
         if (empty($dataRefMap)) {
             return [];
@@ -51,12 +51,12 @@ class SegmentOriginalDataDao extends AbstractDao
 
     /**
      * @param int $id_segment
-     * @param array $map
+     * @param array<string, mixed> $map
+     * @throws \PDOException
      */
-    public static function insertRecord(int $id_segment, array $map): void
+    public function insertRecord(int $id_segment, array $map): void
     {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare(
+        $stmt = $this->database->getConnection()->prepare(
             "INSERT INTO segment_original_data " .
             " ( id_segment, map  ) VALUES " .
             " ( :id_segment, :map ) "
@@ -64,8 +64,11 @@ class SegmentOriginalDataDao extends AbstractDao
 
         // remove any carriage return or extra space from the map
         $json = json_encode($map);
+        if ($json === false) {
+            $json = '{}';
+        }
         $string = str_replace(["\\n", "\\r"], '', $json);
-        $string = trim(preg_replace('/\s+/', ' ', $string));
+        $string = trim(preg_replace('/\s+/', ' ', $string) ?? $string);
 
         $stmt->execute([
             'id_segment' => $id_segment,
@@ -73,4 +76,3 @@ class SegmentOriginalDataDao extends AbstractDao
         ]);
     }
 }
-

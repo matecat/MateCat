@@ -9,7 +9,7 @@
 
 namespace Utils\AsyncTasks\Workers\Traits;
 
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use PDO;
 use PDOException;
 use RuntimeException;
@@ -19,6 +19,11 @@ trait ProjectWordCount
 {
 
     /**
+     * The per-process DB handle, supplied by the host worker/daemon.
+     */
+    abstract protected function db(): IDatabase;
+
+    /**
      * This function is heavy, use, but only if it is necessary
      *
      * (Used in TMAnalysisWorker and FastAnalysis)
@@ -26,7 +31,8 @@ trait ProjectWordCount
      * @param int $pid
      *
      * @return array<int, array<string, mixed>>
-     * @throws \RuntimeException
+     *
+     * @throws RuntimeException
      */
     protected function getProjectSegmentsTranslationSummary(int $pid): array
     {
@@ -52,7 +58,7 @@ trait ProjectWordCount
         ";
 
         try {
-            $db = Database::obtain();
+            $db = $this->db();
             //Needed to address the query to the master database if exists
             $stmt = $db->getConnection()->prepare($query);
             $stmt->setFetchMode(PDO::FETCH_ASSOC);

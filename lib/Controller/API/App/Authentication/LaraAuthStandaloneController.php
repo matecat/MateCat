@@ -12,7 +12,6 @@ use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
 use Lara\LaraException;
-use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use Utils\Engines\Lara;
@@ -31,6 +30,7 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
      * @param App|null             $app
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function __construct(
         Request $request,
@@ -50,6 +50,7 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
      *
      * @return void
      * @throws Exception
+     * @throws \TypeError
      */
     protected function initLogger(): void
     {
@@ -58,7 +59,7 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
         $this->logger = LoggerFactory::getLogger($loggerName, $loggerName);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -108,14 +109,14 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
      * Returns the EngineDAO instance used by this controller.
      *
      * Exposed as a protected seam so tests can override the DAO without
-     * touching the global Database::obtain() static dependency.
+     * touching the database connection directly.
      *
      * @return EngineDAO
      * @throws Exception
      */
     protected function getEngineDAO(): EngineDAO
     {
-        return new EngineDAO(Database::obtain());
+        return new EngineDAO($this->getDatabase());
     }
 }
 

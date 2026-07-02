@@ -23,7 +23,7 @@ class Propagation
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function render(): array
     {
