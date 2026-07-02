@@ -236,6 +236,64 @@ class GDriveUserAuthorizationModelTest extends AbstractTest
         $this->assertSame('Test User', $refName->getValue($model));
     }
 
+    #[Test]
+    public function collectProperties_throwsWhenAccessTokenIsNull(): void
+    {
+        $user = $this->createUser();
+
+        $googleClientMock = $this->getMockBuilder(Google_Client::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['fetchAccessTokenWithAuthCode', 'getAccessToken'])
+            ->getMock();
+        $googleClientMock->expects($this->once())
+            ->method('fetchAccessTokenWithAuthCode')
+            ->with('auth-code');
+        $googleClientMock->expects($this->once())
+            ->method('getAccessToken')
+            ->willReturn(null);
+
+        $model = new TestableGDriveUserAuthorizationModel(
+            $user, $this->createDaoMock(), '', '', '', ''
+        );
+
+        $ref = new ReflectionProperty(GDriveUserAuthorizationModel::class, 'googleClient');
+        $ref->setValue($model, $googleClientMock);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Unable to fetch a valid Google access token');
+
+        $model->exposedCollectProperties('auth-code');
+    }
+
+    #[Test]
+    public function collectProperties_throwsWhenAccessTokenIsEmptyArray(): void
+    {
+        $user = $this->createUser();
+
+        $googleClientMock = $this->getMockBuilder(Google_Client::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['fetchAccessTokenWithAuthCode', 'getAccessToken'])
+            ->getMock();
+        $googleClientMock->expects($this->once())
+            ->method('fetchAccessTokenWithAuthCode')
+            ->with('auth-code');
+        $googleClientMock->expects($this->once())
+            ->method('getAccessToken')
+            ->willReturn([]);
+
+        $model = new TestableGDriveUserAuthorizationModel(
+            $user, $this->createDaoMock(), '', '', '', ''
+        );
+
+        $ref = new ReflectionProperty(GDriveUserAuthorizationModel::class, 'googleClient');
+        $ref->setValue($model, $googleClientMock);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Unable to fetch a valid Google access token');
+
+        $model->exposedCollectProperties('auth-code');
+    }
+
 }
 
 /**

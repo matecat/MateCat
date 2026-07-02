@@ -4,6 +4,7 @@ namespace Controller\Views\TemplateDecorator;
 
 use Controller\Abstracts\AbstractDownloadController;
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\FilesStorage\AbstractFilesStorage;
 use ReflectionException;
 use Utils\TMS\TMSService;
@@ -28,6 +29,18 @@ class DownloadOmegaTOutputDecorator
     }
 
     /**
+     * Factory seam for the TM/MT export service, overridable in tests.
+     *
+     * @throws Exception
+     *
+     * @codeCoverageIgnore
+     */
+    protected function getTMSService(IDatabase $database): TMSService
+    {
+        return new TMSService($database);
+    }
+
+    /**
      * @return array<string, array{document_content: string, output_filename: string}>
      *
      * @throws Exception
@@ -47,7 +60,7 @@ class DownloadOmegaTOutputDecorator
             $this->controller->setFilename($this->controller->getFilename() . ".zip");
         }
 
-        $tmsService = new TMSService($this->controller->getDatabase());
+        $tmsService = $this->getTMSService($this->controller->getDatabase());
         $tmsService->setOutputType(TMSService::OUTPUT_TM);
 
         $tmFile = $tmsService->exportJobAsTMX(

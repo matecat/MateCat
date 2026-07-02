@@ -256,7 +256,7 @@ class Session
     public function getToken(): ?array
     {
         if (is_null($this->token)) {
-            if ($this->session['user'] !== null) {
+            if (($this->session['user'] ?? null) !== null) {
                 $this->token = $this->getTokenByUser($this->session['user']);
             }
         }

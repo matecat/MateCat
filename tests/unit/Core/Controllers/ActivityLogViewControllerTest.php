@@ -11,6 +11,7 @@ namespace Matecat\Core\Controllers;
  */
 
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
+use Controller\API\Commons\Validators\Base as ValidatorBase;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Controller\Exceptions\RenderTerminatedException;
 use Controller\Views\ActivityLogController;
@@ -43,12 +44,25 @@ class TestableActivityLogViewController extends ActivityLogController
     /** @var array<string, mixed> */
     public array $lastViewData = [];
     public int $lastViewCode = 200;
+    public bool $forceInvalidRequest = false;
 
     public function setView(string $template_name, array $params = [], int $code = 200): void
     {
         $this->lastTemplate = $template_name;
         $this->lastViewData = $params;
         $this->lastViewCode = $code;
+    }
+
+    /**
+     * @return array<string, mixed>|false|null
+     */
+    protected function validateTheRequest(): false|array|null
+    {
+        if ($this->forceInvalidRequest) {
+            return false;
+        }
+
+        return parent::validateTheRequest();
     }
 
     /**
@@ -225,6 +239,55 @@ class ActivityLogViewControllerTest extends AbstractTest
         } catch (RenderTerminatedException) {
             $this->assertSame('activity_log_not_found.html', $this->controller->lastTemplate);
             $this->assertSame((string) $this->projectId(self::BASE), $this->controller->lastViewData['projectID']);
+        }
+    }
+
+    // ─── renderView guard branch ───
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function renderViewSetsProjectNotFoundTemplateWhenRequestIsNotArray(): void
+    {
+        $this->controller->forceInvalidRequest = true;
+
+        try {
+            $this->controller->renderView();
+            $this->fail('Expected RenderTerminatedException');
+        } catch (RenderTerminatedException) {
+            $this->assertSame('project_not_found.html', $this->controller->lastTemplate);
+            $this->assertSame(404, $this->controller->lastViewCode);
+        }
+    }
+
+    // ─── ProjectPasswordValidator onFailure closure ───
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function projectPasswordValidatorOnFailureSetsProjectNotFoundTemplate(): void
+    {
+        $realReflector = new ReflectionClass(ActivityLogController::class);
+        $realReflector->getMethod('registerValidators')->invoke($this->controller);
+
+        /** @var list<mixed> $validators */
+        $validators = $this->reflector->getProperty('validators')->getValue($this->controller);
+        $this->assertCount(2, $validators);
+        $passwordValidator = $validators[1];
+        $this->assertInstanceOf(ProjectPasswordValidator::class, $passwordValidator);
+
+        $baseReflector = new ReflectionClass(ValidatorBase::class);
+        $callback = $baseReflector->getProperty('_failureCallback')->getValue($passwordValidator);
+        $this->assertInstanceOf(\Closure::class, $callback);
+
+        try {
+            $callback(new \Exception('forced project password validator failure'));
+            $this->fail('Expected RenderTerminatedException');
+        } catch (RenderTerminatedException) {
+            $this->assertSame('project_not_found.html', $this->controller->lastTemplate);
+            $this->assertSame(404, $this->controller->lastViewCode);
         }
     }
 
