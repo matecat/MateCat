@@ -133,6 +133,9 @@ class GDriveUserAuthorizationModel
         $gdriveClient = $this->googleClient ?? (new GoogleProvider)->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
         $gdriveClient->fetchAccessTokenWithAuthCode($code);
         $accessToken = $gdriveClient->getAccessToken();
+        if (empty($accessToken)) {
+            throw new Exception('Unable to fetch a valid Google access token for the provided authorization code');
+        }
         $this->token = is_array($accessToken)
             ? GDriveTokenHandler::accessTokenToJsonString($accessToken)
             : $accessToken;
