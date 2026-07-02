@@ -112,9 +112,13 @@ export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
           CatToolActions.addNotification({
             title: 'Glossary deleted',
             type: 'success',
-            text: `The glossary (<b>${glossary.name}</b>) has been successfully deleted`,
+            text: (
+              <>
+                The glossary (<b>{glossary.name}</b>) has been successfully
+                deleted
+              </>
+            ),
             position: 'br',
-            allowHtml: true,
             timer: 5000,
           })
           CreateProjectActions.updateProjectTemplates({

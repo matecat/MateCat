@@ -48,16 +48,6 @@ export const ProjectsContainer = ({
     UserStore.addListener(UserConstants.RENDER_TEAMS, updateTeams)
     ProjectsStore.addListener(ManageConstants.NO_MORE_PROJECTS, noMoreProjects)
 
-    setTimeout(() => {
-      const notification = {
-        title: 'Notification',
-        text: 'Lorem ipsum bla bla',
-        type: 'success',
-        autoDismiss: false,
-      }
-      CatToolActions.addNotification(notification)
-    })
-
     return () => {
       ProjectsStore.removeListener(
         ManageConstants.RENDER_PROJECTS,

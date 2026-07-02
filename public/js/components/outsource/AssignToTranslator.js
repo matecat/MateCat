@@ -46,49 +46,76 @@ const AssignToTranslator = ({job, project, closeOutsource}) => {
     }
   }, [])
 
+  const jobReference = (jobData) => (
+    <div
+      className="job-reference"
+      style={{display: 'inline-block', width: '100%', marginTop: 10}}
+    >
+      <div style={{display: 'inline-block', fontSize: 14, color: 'grey'}}>
+        ({jobData.id})
+      </div>{' '}
+      <div
+        className="source-target languages-tooltip"
+        style={{display: 'inline-block', fontWeight: 700}}
+      >
+        <div className="source-box" style={{display: 'inherit'}}>
+          {jobData.sourceTxt}
+        </div>{' '}
+        <div
+          className="in-to"
+          style={{top: 3, display: 'inherit', position: 'relative'}}
+        >
+          {' '}
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            style={{verticalAlign: 'middle'}}
+          >
+            <path
+              fill="currentColor"
+              d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
+            />
+          </svg>{' '}
+        </div>{' '}
+        <div className="target-box" style={{display: 'inherit'}}>
+          {jobData.targetTxt}
+        </div>
+      </div>
+    </div>
+  )
+
   const shareToTranslatorMailChangeNotification = (mail, jobData) => ({
-    title:
-      'Job sent with <div class="green-label" style="display: inline; background-color: #5ea400; color: white; padding: 2px 5px;">new password </div>',
-    text:
-      '<div style="margin-top: 16px;">To: <a href="mailto:' +
-      mail +
-      '">' +
-      mail +
-      '</a> ' +
-      '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
-      '<div class style="display: inline-block; font-size: 14px; color: grey;">(' +
-      jobData.id +
-      ')</div> ' +
-      '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
-      '<div class="source-box" style="display: inherit;">' +
-      jobData.sourceTxt +
-      '</div> ' +
-      '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <svg width="16" height="16" viewBox="0 0 24 24" style="vertical-align:middle"><path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg> </div> ' +
-      '<div class="target-box" style="display: inherit;">' +
-      jobData.targetTxt +
-      '</div> </div> </div></div>',
+    title: (
+      <>
+        Job sent with{' '}
+        <div
+          className="green-label"
+          style={{
+            display: 'inline',
+            backgroundColor: '#5ea400',
+            color: 'white',
+            padding: '2px 5px',
+          }}
+        >
+          new password{' '}
+        </div>
+      </>
+    ),
+    text: (
+      <div style={{marginTop: 16}}>
+        To: <a href={`mailto:${mail}`}>{mail}</a> {jobReference(jobData)}
+      </div>
+    ),
   })
 
   const shareToTranslatorNotification = (mail, jobData) => ({
     title: 'Job sent',
-    text:
-      '<div style="margin-top: 16px;">To: <a href="mailto:' +
-      mail +
-      '">' +
-      mail +
-      '</a> ' +
-      '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
-      '<div class style="display: inline-block; font-size: 14px; color: grey;">' +
-      jobData.id +
-      ' </div> ' +
-      '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
-      '<div class="source-box" style="display: inherit;">' +
-      jobData.sourceTxt +
-      '</div> ' +
-      '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <svg width="16" height="16" viewBox="0 0 24 24" style="vertical-align:middle"><path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg> </div> ' +
-      '<div class="target-box" style="display: inherit;">' +
-      jobData.targetTxt +
-      '</div> </div> </div></div>',
+    text: (
+      <div style={{marginTop: 16}}>
+        To: <a href={`mailto:${mail}`}>{mail}</a> {jobReference(jobData)}
+      </div>
+    ),
   })
 
   const shareToTranslatorDateChangeNotification = (email, oldDate, newDate) => {
@@ -96,42 +123,66 @@ const AssignToTranslator = ({job, project, closeOutsource}) => {
     oldDate = CommonUtils.getGMTDate(oldDate)
     newDate = CommonUtils.formatDate(newDate, 'yyyy-MM-d hh:mm a')
     newDate = CommonUtils.getGMTDate(newDate)
+    const dateBlock = (date, notUsed) => (
+      <div
+        className={notUsed ? 'job-delivery not-used' : 'job-delivery'}
+        title="Delivery date"
+        style={{
+          display: 'inline-block',
+          marginBottom: 10,
+          fontWeight: 700,
+          marginRight: notUsed ? undefined : 10,
+          textDecoration: notUsed ? 'line-through' : undefined,
+          position: notUsed ? 'relative' : undefined,
+        }}
+      >
+        <div
+          className="outsource-day-text"
+          style={{display: 'inline-block', marginRight: 3}}
+        >
+          {date.day}
+        </div>{' '}
+        <div
+          className="outsource-month-text"
+          style={{display: 'inline-block', marginRight: 5}}
+        >
+          {date.month}
+        </div>{' '}
+        <div className="outsource-time-text" style={{display: 'inline-block'}}>
+          {date.time}
+        </div>{' '}
+        <div
+          className="outsource-gmt-text"
+          style={{display: 'inline-block', fontWeight: 100, color: 'grey'}}
+        >
+          ({date.gmt})
+        </div>{' '}
+        {notUsed && (
+          <div
+            className="old"
+            style={{
+              width: '100%',
+              height: 1,
+              borderTop: '1px solid black',
+              top: -10,
+              position: 'relative',
+            }}
+          ></div>
+        )}
+      </div>
+    )
+
     return {
       title: 'Job delivery update',
-      text:
-        '<div style="margin-top: 16px;"><div class="job-reference" style="display: inline-block; width: 100%;"> To: ' +
-        '<div class="job-delivery" title="Delivery date" style="display: inline-block; margin-bottom: 10px; font-weight: 700; margin-right: 10px;"> ' +
-        '<div class="outsource-day-text" style="display: inline-block; margin-right: 3px;">' +
-        newDate.day +
-        '</div> ' +
-        '<div class="outsource-month-text" style="display: inline-block; margin-right: 5px;">' +
-        newDate.month +
-        '</div> ' +
-        '<div class="outsource-time-text" style="display: inline-block;">' +
-        newDate.time +
-        '</div> ' +
-        '<div class="outsource-gmt-text" style="display: inline-block; font-weight: 100;color: grey;">(' +
-        newDate.gmt +
-        ')</div> ' +
-        '</div> <div class="job-delivery not-used" title="Delivery date" style="display: inline-block; margin-bottom: 10px; font-weight: 700; text-decoration: line-through; position: relative;"> ' +
-        '<div class="outsource-day-text" style="display: inline-block; margin-right: 3px;">' +
-        oldDate.day +
-        '</div> ' +
-        '<div class="outsource-month-text" style="display: inline-block; margin-right: 5px;">' +
-        oldDate.month +
-        '</div> ' +
-        '<div class="outsource-time-text" style="display: inline-block;">' +
-        oldDate.time +
-        '</div> ' +
-        '<div class="outsource-gmt-text" style="display: inline-block; font-weight: 100; color: grey;">(' +
-        oldDate.gmt +
-        ')</div> ' +
-        '<div class="old" style="width: 100%; height: 1px; border-top: 1px solid black; top: -10px; position: relative;"></div> </div> ' +
-        '</div>Translator: <a href="mailto:' +
-        email +
-        '">' +
-        email +
-        '</a> </div></div>',
+      text: (
+        <div style={{marginTop: 16}}>
+          <div style={{display: 'inline-block', width: '100%'}}>
+            {' '}
+            To: {dateBlock(newDate, false)} {dateBlock(oldDate, true)}
+          </div>
+          Translator: <a href={`mailto:${email}`}>{email}</a>
+        </div>
+      ),
     }
   }
 
@@ -139,10 +190,14 @@ const AssignToTranslator = ({job, project, closeOutsource}) => {
     ModalsActions.onCloseModal()
     CatToolActions.addNotification({
       title: 'Problems sending the job',
-      text: 'Please try later or contact <a href="mailto:support@matecat.com">support@matecat.com</a>',
+      text: (
+        <>
+          Please try later or contact{' '}
+          <a href="mailto:support@matecat.com">support@matecat.com</a>
+        </>
+      ),
       type: 'error',
       position: 'bl',
-      allowHtml: true,
       timer: 10000,
     })
   }
@@ -177,7 +232,6 @@ const AssignToTranslator = ({job, project, closeOutsource}) => {
       text: message.text,
       type: 'success',
       position: 'bl',
-      allowHtml: true,
       timer: 10000,
     })
     ManageActions.changeJobPasswordFromOutsource(

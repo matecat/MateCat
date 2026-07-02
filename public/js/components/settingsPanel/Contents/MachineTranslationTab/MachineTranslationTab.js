@@ -190,9 +190,12 @@ export const MachineTranslationTab = () => {
         CatToolActions.addNotification({
           title: 'MT deleted',
           type: 'success',
-          text: `The MT (<b>${mtToDelete.name}</b>) has been successfully deleted`,
+          text: (
+            <>
+              The MT (<b>{mtToDelete.name}</b>) has been successfully deleted
+            </>
+          ),
           position: 'br',
-          allowHtml: true,
           timer: 5000,
         })
       })

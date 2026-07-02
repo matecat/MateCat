@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   addClassToSegment,
   removeClassToSegment,
@@ -97,16 +98,20 @@ const OfflineUtils = {
     if (this.offline) {
       const notification = {
         uid: 'offline-counter',
-        title:
-          'No connection available',
-        text:
-          'You can still translate <span class="remainingSegments">' +
-          --this.offlineCacheRemaining +
-          '</span> segments in offline mode. Do not refresh or you lose the segments!',
+        title: 'No connection available',
+        text: (
+          <>
+            You can still translate{' '}
+            <span className="remainingSegments">
+              {--this.offlineCacheRemaining}
+            </span>{' '}
+            segments in offline mode. Do not refresh or you lose the
+            segments!
+          </>
+        ),
         type: 'warning',
         position: 'bl',
         autoDismiss: false,
-        allowHtml: true,
         timer: 7000,
       }
       addNotification(notification)

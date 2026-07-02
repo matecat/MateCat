@@ -1,4 +1,4 @@
-import React, {Fragment, useContext, useEffect, useRef, useState} from 'react'
+import React, {createRef, Fragment, useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {TranslationMemoryGlossaryTabContext} from './TranslationMemoryGlossaryTabContext'
@@ -40,6 +40,7 @@ import {
   DROPDOWN_MENU_ALIGN,
   DropdownMenu,
 } from '../../../common/DropdownMenu/DropdownMenu'
+import Tooltip from '../../../common/Tooltip'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
@@ -326,10 +327,13 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         }
         const notification = {
           title: 'Resource deleted',
-          text: `The resource (<b>${row.name}</b>) has been successfully deleted`,
+          text: (
+            <>
+              The resource (<b>{row.name}</b>) has been successfully deleted
+            </>
+          ),
           type: 'success',
           position: 'br',
-          allowHtml: true,
           timer: 5000,
         }
         CatToolActions.addNotification(notification)
@@ -537,9 +541,11 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         ></input>
       </div>
       {!isMMSharedKey && <div className="tm-key-row-key">{row.key}</div>}
-      <div title={iconDetails.title} className="align-center tm-key-row-icons">
-        {iconDetails.icon}
-      </div>
+      <Tooltip content={iconDetails.title}>
+        <div ref={createRef()} className="align-center tm-key-row-icons">
+          {iconDetails.icon}
+        </div>
+      </Tooltip>
       {isOwner &&
         row.isActive &&
         isLookup &&

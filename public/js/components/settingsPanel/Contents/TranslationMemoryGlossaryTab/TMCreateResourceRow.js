@@ -175,9 +175,12 @@ export const TMCreateResourceRow = ({row}) => {
           CatToolActions.addNotification({
             title: 'Resource created ',
             type: 'success',
-            text: `Resource <b>${name}</b> created successfully`,
+            text: (
+              <>
+                Resource <b>{name}</b> created successfully
+              </>
+            ),
             position: 'br',
-            allowHtml: true,
             timer: 5000,
           })
         })

@@ -56,9 +56,12 @@ export const ShareResource = ({row, onClose, onShare}) => {
           CatToolActions.addNotification({
             title: 'Resource shared',
             type: 'success',
-            text: `The resource <b>${row.name}</b> has been shared.`,
+            text: (
+              <>
+                The resource <b>{row.name}</b> has been shared.
+              </>
+            ),
             position: 'br',
-            allowHtml: true,
             timer: 5000,
           })
           setStatus({successfull: true})
