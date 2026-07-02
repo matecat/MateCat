@@ -1,6 +1,3 @@
-includes:
-    - plugins/aligner/phpstan-baseline.neon
-
 # Custom architectural rule: Bootstrap::getDatabase() may only be called from the
 # composition-root entry points listed below; everything else must inject IDatabase.
 # Rule class autoloaded via composer autoload-dev (Matecat\PhpStan\ -> dev-tools/phpstan).
@@ -14,7 +11,6 @@ services:
                 - lib/View/fileupload/index.php
                 - lib/Utils/TaskRunner/executor_worker.php
                 - internal_scripts/tasks/tasks.php
-                - plugins/aligner/lib/Features/Aligner/Model/DualDatabase.php
                 - lib/View/templates/_APIDoc.php
 
 parameters:
@@ -34,10 +30,11 @@ parameters:
         - lib/View/APIDoc.php (?)
         - vendor
         - tests
-        - plugins/airbnb/tests
-        - plugins/translated/tests
-        - plugins/uber/tests
-        - plugins/vite/tests
+        # Plugin test suites are not analyzed (submodule-agnostic glob)
+        - plugins/*/tests/*
+        # Legacy plugin: cannot be economically cleaned; intentionally not analyzed.
+        # Its own phpstan-baseline.neon lives in the aligner submodule, unused by matecat.
+        - plugins/aligner
     universalObjectCratesClasses:
         - Model\DataAccess\ShapelessConcreteStruct
     # Flag @throws \Exception on public/protected methods when only
