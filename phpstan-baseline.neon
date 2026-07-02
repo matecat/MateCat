@@ -195,11 +195,6 @@ parameters:
 
 
 
-		-
-			message: '#^Method Controller\\API\\V2\\SupportedFilesController\:\:getFileList\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V2/SupportedFilesController.php
 
 
 

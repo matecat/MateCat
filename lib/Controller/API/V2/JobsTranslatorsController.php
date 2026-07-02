@@ -60,7 +60,7 @@ class JobsTranslatorsController extends KleinController
             throw new NotFoundException('No job found.');
         }
 
-        $TranslatorsModel = new TranslatorsModel($this->jStruct, $this->getDatabase());
+        $TranslatorsModel = $this->makeTranslatorsModel($this->jStruct);
         $TranslatorsModel
             ->setUserInvite($this->user)
             ->setDeliveryDate((string)($this->params['delivery_date'] ?? ''))
@@ -77,6 +77,18 @@ class JobsTranslatorsController extends KleinController
                 ]
             ]
         );
+    }
+
+    /**
+     * Seam: build the TranslatorsModel used by add(). Overridable in tests to
+     * avoid the real invite email dispatched by TranslatorsModel::update().
+     *
+     * @throws Exception
+     * @throws TypeError
+     */
+    protected function makeTranslatorsModel(JobStruct $chunk): TranslatorsModel
+    {
+        return new TranslatorsModel($chunk, $this->getDatabase());
     }
 
     /**

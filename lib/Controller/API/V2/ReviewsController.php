@@ -44,7 +44,7 @@ class ReviewsController extends KleinController
     public function createReview(): void
     {
         // create a new chunk revision password
-        $records = RevisionFactory::initFromProject($this->project, $this->getDatabase())->getRevisionFeature()->createQaChunkReviewRecords(
+        $records = $this->initRevisionFromProject($this->project)->getRevisionFeature()->createQaChunkReviewRecords(
             [$this->chunk],
             $this->project,
             [
@@ -70,6 +70,14 @@ class ReviewsController extends KleinController
                 ]
             ]
         );
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function initRevisionFromProject(ProjectStruct $project): RevisionFactory
+    {
+        return RevisionFactory::initFromProject($project, $this->getDatabase());
     }
 
     protected function registerValidators(): void

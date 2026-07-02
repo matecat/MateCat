@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Controllers;
 
+use Controller\API\Commons\Validators\JobPasswordValidator;
 use Controller\API\V2\ReviseTranslationIssuesController;
 use Klein\Request;
 use Klein\Response;
@@ -10,6 +11,8 @@ use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -232,5 +235,59 @@ class ReviseTranslationIssuesControllerTest extends AbstractTest
         $this->assertInstanceOf(\Controller\API\Commons\Validators\LoginValidator::class, $validators[0]);
         $this->assertInstanceOf(\Controller\API\Commons\Validators\JobPasswordValidator::class, $validators[1]);
         $this->assertInstanceOf(\Controller\API\Commons\Validators\SegmentTranslation::class, $validators[2]);
+    }
+
+    // ─── registerValidators() — JobPasswordValidator onSuccess closure ───
+
+    /**
+     * Drives the production onSuccess closure registered on the
+     * JobPasswordValidator (ReviseTranslationIssuesController lines 32-34):
+     * on successful password validation it must load the featureSet for the
+     * job's project and stash the validated job on $this->chunk.
+     *
+     * @throws \Throwable
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function jobPasswordValidator_onSuccess_closure_sets_chunk_and_loads_featureset(): void
+    {
+        // Build a REAL controller (not the Testable) so the production
+        // registerValidators() body runs and the onSuccess closure under
+        // test is actually registered on the JobPasswordValidator.
+        $real = (new ReflectionClass(ReviseTranslationIssuesController::class))
+            ->newInstanceWithoutConstructor();
+
+        $this->reflector->getProperty('request')->setValue($real, new Request());
+        $this->reflector->getProperty('database')->setValue($real, obtainTestDatabase());
+
+        $expectedProjectId = $this->projectId(self::BASE);
+
+        $featureSetMock = $this->createMock(FeatureSet::class);
+        $featureSetMock->expects($this->once())
+            ->method('loadForProject')
+            ->with($this->callback(function ($project) use ($expectedProjectId): bool {
+                return $project instanceof ProjectStruct && (int) $project->id === $expectedProjectId;
+            }));
+        $this->reflector->getProperty('featureSet')->setValue($real, $featureSetMock);
+
+        // JobPasswordValidator::_validate() reads $this->controller->params.
+        $real->params = [
+            'id_job' => (string) $this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ];
+
+        $this->reflector->getMethod('registerValidators')->invoke($real);
+
+        $validators = $this->reflector->getProperty('validators')->getValue($real);
+        $jobValidator = $validators[1];
+        $this->assertInstanceOf(JobPasswordValidator::class, $jobValidator);
+
+        // Drives _validate() (real DB lookup against the seeded job) then
+        // _executeCallbacks(), which runs the onSuccess closure under test.
+        $jobValidator->validate();
+
+        $chunk = $this->reflector->getProperty('chunk')->getValue($real);
+        $this->assertInstanceOf(JobStruct::class, $chunk);
+        $this->assertSame($this->jobId(self::BASE), $chunk->id);
     }
 }
