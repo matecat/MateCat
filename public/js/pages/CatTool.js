@@ -66,7 +66,7 @@ function CatTool() {
   useHotkeys(
     Shortcuts.cattol.events.openSettings.keystrokes[Shortcuts.shortCutsKeyType],
     () => CatToolActions.openSettingsPanel(SETTINGS_PANEL_TABS.editorSettings),
-    {enableOnContentEditable: true},
+    {enableOnContentEditable: true, enableOnFormTags: true},
   )
   const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
 
@@ -117,7 +117,7 @@ function CatTool() {
       Shortcuts.shortCutsKeyType
     ],
     () => togglePreview(),
-    {enableOnContentEditable: true},
+    {enableOnContentEditable: true, enableOnFormTags: true},
   )
 
   const openPreviewInNewWindow = useCallback(() => {
