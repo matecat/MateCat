@@ -32,6 +32,8 @@ class DownloadOmegaTOutputDecorator
      * Factory seam for the TM/MT export service, overridable in tests.
      *
      * @throws Exception
+     *
+     * @codeCoverageIgnore
      */
     protected function getTMSService(IDatabase $database): TMSService
     {
