@@ -821,7 +821,7 @@ function CatTool() {
           }}
         />
       )}
-      {isUserLogged && !isLoadingSegments && (
+      {isUserLogged && (
         <CattoolFooter
           idProject={config.id_project}
           idJob={config.id_job}
