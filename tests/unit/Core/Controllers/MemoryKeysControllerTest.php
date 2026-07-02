@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Matecat\Core\Controllers;
 
+use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\V2\MemoryKeysController;
 use InvalidArgumentException;
 use Klein\Request;
@@ -262,5 +263,23 @@ class MemoryKeysControllerTest extends AbstractTest
         $this->expectExceptionMessage('User not authenticated');
 
         $this->controller->listKeys();
+    }
+
+    // ─── registerValidators() ───
+
+    /**
+     * @throws \ReflectionException
+     */
+    #[Test]
+    public function registerValidators_appends_a_login_validator(): void
+    {
+        $this->reflector->getMethod('registerValidators')->invoke($this->controller);
+
+        $validatorsProp = $this->reflector->getProperty('validators');
+        /** @var array<object> $validators */
+        $validators = $validatorsProp->getValue($this->controller);
+
+        $this->assertCount(1, $validators);
+        $this->assertInstanceOf(LoginValidator::class, $validators[0]);
     }
 }

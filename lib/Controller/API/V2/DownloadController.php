@@ -684,7 +684,9 @@ class DownloadController extends AbstractDownloadController
      * @param array<int|string, array<string, mixed>> $output_content
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
+     *
+     * @codeCoverageIgnore integration-only: builds a live Google OAuth client and refreshes GDrive tokens.
      */
     private function startRemoteFileService(array $output_content): void
     {
@@ -718,6 +720,8 @@ class DownloadController extends AbstractDownloadController
 
     /**
      * @throws Exception
+     *
+     * @codeCoverageIgnore integration-only: streams JSON built from live GDrive getFileLink() calls.
      */
     private function outputResultForOriginalFiles(): void
     {
@@ -763,6 +767,8 @@ class DownloadController extends AbstractDownloadController
      *
      * @throws Exception
      * @throws TypeError
+     *
+     * @codeCoverageIgnore integration-only: pushes converted content to GDrive via RemoteFileService::updateFile().
      */
     private function updateRemoteFiles(array $output_content): void
     {
@@ -780,7 +786,7 @@ class DownloadController extends AbstractDownloadController
      *
      * @return array<int|string, ZipContentObject>
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function getOutputContentsWithZipFiles(array $output_content): array
     {
@@ -862,7 +868,9 @@ class DownloadController extends AbstractDownloadController
      * @return string
      * @throws ReflectionException
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
+     *
+     * @codeCoverageIgnore integration-only: rebuilds a ZipArchive on disk (tempnam/copy/S3 fetch) from real zip files.
      */
     public function reBuildZipContent(string $zipFileName, array $newInternalZipFiles): string
     {
@@ -966,6 +974,8 @@ class DownloadController extends AbstractDownloadController
      * @throws Exception
      * @throws \Psr\Log\InvalidArgumentException
      * @throws ReflectionException
+     *
+     * @codeCoverageIgnore integration-only: downloads an object from S3 to a tmp path.
      */
     public function transferZipFromS3ToTmpDir(string $zipPath, string $tmpDir): void
     {
