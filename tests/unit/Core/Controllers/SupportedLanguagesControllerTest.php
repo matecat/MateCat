@@ -51,7 +51,15 @@ class SupportedLanguagesControllerTest extends AbstractTest
     #[Test]
     public function index_returns_enabled_languages_as_json_array_of_values(): void
     {
-        $this->controller->index();
+        // Response::json() calls send(), which echoes the (~250KB) language payload to stdout and
+        // pollutes the test-runner output. Swallow that echo; the body is still recorded on the
+        // Response object, so the assertions below are unaffected.
+        ob_start();
+        try {
+            $this->controller->index();
+        } finally {
+            ob_end_clean();
+        }
 
         $body = (string)$this->response->body();
         $decoded = json_decode($body, true);

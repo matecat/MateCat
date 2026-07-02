@@ -572,6 +572,76 @@ class CreateProjectControllerTest extends AbstractTest
         $this->invokePrivate('validateXliffParameters', [null, 99999999]);
     }
 
+    // ─── inline-JSON template branches (schema-validated, no DB, no external service) ───
+
+    /**
+     * Inline qa_model JSON branch: the raw model is wrapped in {"model": …}, validated against
+     * inc/qa_model.json and hydrated into a QAModelTemplateStruct owned by the current user.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateQaModelTemplate_hydrates_struct_from_inline_json(): void
+    {
+        $model = json_decode(
+            file_get_contents(self::projectRoot() . '/tests/resources/files/json/files/uber_qa_model.json'),
+            true
+        )['model'];
+
+        // The fixture omits the optional `sort` keys that hydrateFromJSON reads; supply them so
+        // the model is fully-formed (avoids undefined-property notices during hydration).
+        foreach ($model['categories'] as $ci => &$category) {
+            $category['sort'] = $ci + 1;
+            foreach ($category['severities'] as $si => &$severity) {
+                $severity['sort'] = $si + 1;
+            }
+            unset($severity);
+        }
+        unset($category);
+
+        $struct = $this->invokePrivate('validateQaModelTemplate', [json_encode($model), null]);
+
+        $this->assertNotNull($struct);
+        $this->assertSame($this->user->uid, $struct->uid);
+    }
+
+    /**
+     * Inline filters_extraction_parameters branch: valid JSON validated against
+     * inc/validation/schema/filters_extraction_parameters.json is returned as an array.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateFiltersExtractionParameters_returns_array_from_inline_json(): void
+    {
+        $result = $this->invokePrivate('validateFiltersExtractionParameters', [json_encode(['name' => 'my-filters'])]);
+
+        $this->assertSame(['name' => 'my-filters'], $result);
+    }
+
+    /**
+     * Inline xliff_parameters branch: valid JSON validated against
+     * inc/validation/schema/xliff_parameters_rules_wrapper.json is hydrated into an
+     * XliffConfigTemplateStruct and its rules returned as an array.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateXliffParameters_returns_rules_array_from_inline_json(): void
+    {
+        $xliff = json_decode(
+            file_get_contents(self::projectRoot() . '/tests/resources/files/json/files/xliff_params.json'),
+            true
+        );
+        // hydrateFromJSON() requires an owning uid embedded in the payload.
+        $xliff['uid'] = $this->user->uid;
+
+        $result = $this->invokePrivate('validateXliffParameters', [json_encode($xliff), null]);
+
+        $this->assertIsArray($result);
+        $this->assertNotEmpty($result);
+    }
+
     // ─── setMetadataFromPostInput ───
 
     /**

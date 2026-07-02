@@ -97,9 +97,12 @@ abstract class AbstractStatus
         }
         $this->user = $user;
         $db = $features->getDatabase();
-        $project = (new ProjectDao($db))->findById((int)$_project_data[0]['pid'], 60 * 60);
+        // Read the pid defensively: empty/malformed project data must surface as the exception
+        // below, not as "Undefined array key"/"array offset on null" PHP warnings.
+        $pid = $_project_data[0]['pid'] ?? null;
+        $project = ($pid === null) ? null : (new ProjectDao($db))->findById((int)$pid, 60 * 60);
         if ($project === null) {
-            throw new Exception("Project not found for pid: " . $_project_data[0]['pid']);
+            throw new Exception("Project not found for pid: " . (string)($pid ?? ''));
         }
         $this->project = $project;
         $this->_project_data = $_project_data;

@@ -310,7 +310,7 @@ class AIAssistantController extends KleinController
      * @throws Exception
      * @throws InvalidArgumentException
      */
-    private function enqueueWorker(array $params): void
+    protected function enqueueWorker(array $params): void
     {
         WorkerClient::enqueue(self::AI_ASSISTANT_EXPLAIN_MEANING, AIAssistantWorker::class, $params, ['persistent' => WorkerClient::$_HANDLER->persistent]);
     }

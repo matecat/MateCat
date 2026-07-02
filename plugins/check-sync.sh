@@ -13,11 +13,21 @@
 #
 # Options:
 #   --push     Push local-ahead commits to the remote for each submodule that is
-#              currently on the target branch. Does NOT pull — use
-#              `git submodule update --remote` to bring submodules up to date.
+#              currently on the target branch. Does NOT pull.
+#   --update   Bring each submodule's local branch up to date with origin by
+#              rebasing it onto origin/<branch>, WITHOUT moving the working
+#              checkout: HEAD is restored to its original position afterward, so
+#              the superproject gitlink stays unchanged. Use when submodules are
+#              parked at the recorded commit but the branch ref lags the remote.
+#   --sync     Like --update, but leaves the submodule checked out ON the updated
+#              branch tip (newer code). The superproject will then see the gitlink
+#              as moved. Use when `git submodule` shows detached HEADs and you want
+#              the submodules back on their branch, up to date.
 #   --dry-run  Show what would happen without any network writes or mutations.
 #              Skips fetch and reports on cached remote-tracking state; combined
-#              with --push, prints the push it would perform.
+#              with an action flag, prints the action it would perform.
+#
+# --push, --update and --sync are mutually exclusive.
 #
 # Arguments:
 #   branch   Optional. The branch name to check (e.g., context-review, develop).
@@ -27,8 +37,9 @@
 #   bash check-sync.sh                       # check main/master alignment
 #   bash check-sync.sh context-review        # check context-review alignment
 #   bash check-sync.sh --push                # push local-ahead commits on main/master
-#   bash check-sync.sh --push develop        # push local-ahead commits on develop
-#   bash check-sync.sh --push --dry-run      # show what push would do, no changes
+#   bash check-sync.sh --update              # rebase local branches to origin, keep checkout
+#   bash check-sync.sh --sync                # rebase and move checkout onto the branch tip
+#   bash check-sync.sh --update --dry-run    # show what --update would rebase, no changes
 #
 # Output:
 #   ✅ plugin (branch) — synced (sha)
@@ -36,13 +47,59 @@
 #   ⚠️  plugin — error description
 #
 
-PUSH=false
+usage() {
+    cat <<'EOF'
+check-sync.sh — verify and align git submodule branches with their remotes.
+
+Usage:
+  bash check-sync.sh [options] [branch]
+
+Options:
+  --push       Push local-ahead commits to the remote (submodule must be on the
+               target branch). Does NOT pull.
+  --update     Rebase each submodule's local branch onto origin/<branch> WITHOUT
+               moving the checkout (HEAD restored afterward; superproject gitlink
+               unchanged).
+  --sync       Like --update, but leaves the submodule checked out on the updated
+               branch tip (superproject sees the gitlink move).
+  --dry-run    Show what would happen; no fetch, no writes, no mutations.
+  -h, --help   Show this help and exit.
+
+--push, --update and --sync are mutually exclusive.
+
+Arguments:
+  branch       Optional branch to check (e.g. develop). Defaults to per-submodule
+               auto-detection of main or master.
+
+Examples:
+  bash check-sync.sh                    # check main/master alignment
+  bash check-sync.sh develop            # check develop alignment
+  bash check-sync.sh --push             # push local-ahead commits
+  bash check-sync.sh --update           # rebase local branches, keep checkout
+  bash check-sync.sh --sync             # rebase and move checkout to branch tip
+  bash check-sync.sh --update --dry-run # preview an --update, no changes
+EOF
+}
+
+MODE=""            # "" | push | update | sync (mutually exclusive)
 DRY_RUN=false
 BRANCH=""
 
+# Set MODE, rejecting a second action flag.
+set_mode() {
+    if [ -n "$MODE" ] && [ "$MODE" != "$1" ]; then
+        echo "⚠️  --push, --update and --sync are mutually exclusive (got --$MODE and --$1)" >&2
+        exit 1
+    fi
+    MODE="$1"
+}
+
 for arg in "$@"; do
     case "$arg" in
-        --push)    PUSH=true ;;
+        -h|--help) usage; exit 0 ;;
+        --push)    set_mode push ;;
+        --update)  set_mode update ;;
+        --sync)    set_mode sync ;;
         --dry-run) DRY_RUN=true ;;
         -*)        echo "⚠️  Unknown flag: $arg" >&2; exit 1 ;;
         *)
@@ -163,7 +220,7 @@ for submodule in "${ALL_SUBMODULES[@]}"; do
         # `git submodule update`'s job. Only act when actually on the target
         # branch — pushing from a detached HEAD or a different checked-out branch
         # would be wrong.
-        if [ "$PUSH" = true ]; then
+        if [ "$MODE" = push ]; then
             current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
             if [ "$current_branch" != "$branch" ]; then
                 echo "⚠️  $submodule — currently on '$current_branch', not '$branch'; skipping push"
@@ -173,6 +230,36 @@ for submodule in "${ALL_SUBMODULES[@]}"; do
                 else
                     echo "⬆️  $submodule ($branch) — pushing ${ahead} commit(s) to origin"
                     git push origin "$branch" --quiet 2>/dev/null || echo "⚠️  $submodule — push failed (rejected or conflicts)"
+                fi
+            fi
+        fi
+
+        # --update / --sync: rebase the local branch onto origin/<branch> to catch
+        # up on "behind" commits. Both rebase; they differ only in the final HEAD:
+        #   --update restores the original checkout (superproject gitlink unchanged)
+        #   --sync    stays on the updated branch tip (checkout moves to newer code)
+        if [ "$MODE" = update ] || [ "$MODE" = sync ]; then
+            if [ "${behind:-0}" -le 0 ] 2>/dev/null; then
+                :   # nothing behind to catch up to; leave as-is
+            elif ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
+                echo "⚠️  $submodule — working tree not clean; skipping $MODE"
+            elif [ "$DRY_RUN" = true ]; then
+                echo "🔍 $submodule ($branch) — would rebase ${behind} commit(s) onto origin/$branch ($MODE)"
+            else
+                # Remember where HEAD is so --update can return to it. Prefer the
+                # symbolic branch name; fall back to the raw SHA for a detached HEAD.
+                orig_head=$(git symbolic-ref -q --short HEAD 2>/dev/null || git rev-parse HEAD 2>/dev/null)
+                if git checkout --quiet "$branch" 2>/dev/null && git rebase --quiet "origin/$branch" 2>/dev/null; then
+                    if [ "$MODE" = update ] && [ "$orig_head" != "$branch" ]; then
+                        git checkout --quiet "$orig_head" 2>/dev/null
+                        echo "🔄 $submodule ($branch) — rebased ${behind} commit(s) onto origin/$branch; HEAD restored"
+                    else
+                        echo "🔄 $submodule ($branch) — rebased ${behind} commit(s) onto origin/$branch; now on $branch"
+                    fi
+                else
+                    git rebase --abort 2>/dev/null
+                    git checkout --quiet "$orig_head" 2>/dev/null
+                    echo "⚠️  $submodule ($branch) — rebase onto origin/$branch failed (conflicts); left untouched"
                 fi
             fi
         fi
