@@ -34,7 +34,7 @@ parameters:
         - plugins/*/tests/*
         # Legacy plugin: cannot be economically cleaned; intentionally not analyzed.
         # Its own phpstan-baseline.neon lives in the aligner submodule, unused by matecat.
-        - plugins/aligner
+        - plugins/aligner (?)
     universalObjectCratesClasses:
         - Model\DataAccess\ShapelessConcreteStruct
     # Flag @throws \Exception on public/protected methods when only
