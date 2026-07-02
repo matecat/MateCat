@@ -85,7 +85,7 @@ class DownloadJobTMXController extends AbstractDownloadController
         $source = $jobData['source'];
         $target = $jobData['target'];
 
-        $tmsService = new TMSService($this->getDatabase(), $this->featureSet);
+        $tmsService = $this->getTMSService();
 
         switch ($type) {
             case 'csv':
@@ -100,6 +100,14 @@ class DownloadJobTMXController extends AbstractDownloadController
 
         $this->_saveActivity();
         $this->finalize();
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function getTMSService(): TMSService
+    {
+        return new TMSService($this->getDatabase(), $this->featureSet);
     }
 
     /**
@@ -121,6 +129,7 @@ class DownloadJobTMXController extends AbstractDownloadController
 
     /**
      * @Override
+     * @codeCoverageIgnore
      */
     public function finalize(bool $forceXliff = false): never
     {

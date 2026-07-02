@@ -57,6 +57,17 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
     private const int PROJECT_ID = 990020;
     private const string PROJECT_PASSWORD = 'pp990020';
 
+    private const int GHOST_OWNER_JOB_ID = 990011;
+    private const string GHOST_OWNER_JOB_PASSWORD = 'pw990011';
+    private const string GHOST_OWNER_REVIEW_PASSWORD = 'rp990011';
+    private const string GHOST_OWNER_EMAIL = 'ghost-990099@test.com';
+
+    private const int NO_TEAM_JOB_ID = 990012;
+    private const string NO_TEAM_JOB_PASSWORD = 'pw990012';
+    private const string NO_TEAM_REVIEW_PASSWORD = 'rp990012';
+    private const int NO_TEAM_PROJECT_ID = 990021;
+    private const string NO_TEAM_PROJECT_PASSWORD = 'pp990021';
+
     private ReflectionClass $reflector;
     private TestableSegmentTranslationIssueController $controller;
     /** @var Request&MockObject */
@@ -707,5 +718,156 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
         $this->assertCount(2, $validators);
         $this->assertInstanceOf(\Controller\API\Commons\Validators\LoginValidator::class, $validators[0]);
         $this->assertInstanceOf(\Controller\API\Commons\Validators\ChunkPasswordValidator::class, $validators[1]);
+    }
+
+    // ─── registerValidators() onSuccess closure ──────────────────
+
+    #[Test]
+    public function registerValidatorsOnSuccessClosureBuildsSegmentTranslationIssueValidator(): void
+    {
+        $conn = obtainTestDatabase()->getConnection();
+        $conn->exec("DELETE FROM segment_translations WHERE id_segment = 1 AND id_job = " . self::JOB_ID);
+        $conn->exec(
+            "INSERT INTO segment_translations (id_segment, id_job, segment_hash, translation, status, version_number, translation_date)
+             VALUES (1, " . self::JOB_ID . ", 'sti_hash_990010', 'target text', 'DRAFT', 1, NOW())"
+        );
+
+        $this->setRequestParams([
+            'id_job' => self::JOB_ID,
+            'password' => self::JOB_PASSWORD,
+            'id_segment' => 1,
+        ]);
+        $this->requestStub->method('httpMethod')->willReturn(false);
+
+        $reflector = new ReflectionClass(SegmentTranslationIssueController::class);
+        $reflector->getMethod('registerValidators')->invoke($this->controller);
+
+        $baseReflector = new ReflectionClass(\Controller\Abstracts\KleinController::class);
+        /** @var list<mixed> $validators */
+        $validators = $baseReflector->getProperty('validators')->getValue($this->controller);
+        $this->assertCount(2, $validators);
+
+        // Invoking the ChunkPasswordValidator fires its registered onSuccess closure, which
+        // builds and validates a real SegmentTranslationIssueValidator (controller lines 309-314).
+        $validators[1]->validate();
+
+        $segmentValidator = $reflector->getProperty('validator')->getValue($this->controller);
+        $this->assertInstanceOf(SegmentTranslationIssueValidator::class, $segmentValidator);
+    }
+
+    // ─── _getSegmentTranslationIssueModel() real factory ──────────
+
+    #[Test]
+    public function deleteUsesRealSegmentTranslationIssueModelFactoryWhenNotMocked(): void
+    {
+        $issue = new EntryStruct();
+        $issue->id = 990030;
+        $issue->uid = self::USER_UID;
+        $issue->id_segment = 1;
+        $issue->id_job = self::JOB_ID;
+        $issue->source_page = 1;
+        $this->setValidator($issue);
+
+        $this->setRequestParams([
+            'id_job' => self::JOB_ID,
+            'password' => self::REVIEW_PASSWORD,
+        ]);
+
+        // $this->controller->mockModel is intentionally left null so delete() calls the
+        // real, un-mocked _getSegmentTranslationIssueModel() factory body.
+        $this->responseMock->expects($this->once())->method('code')->with(200);
+
+        $this->controller->delete();
+
+        $conn = obtainTestDatabase()->getConnection();
+        $deletedAt = $conn->query('SELECT deleted_at FROM qa_entries WHERE id = 990030')->fetchColumn();
+        $this->assertNotNull($deletedAt);
+    }
+
+    // ─── checkLoggedUserPermissions() authorization edges ────────
+
+    #[Test]
+    public function checkLoggedUserPermissionsThrowsWhenJobOwnerEmailIsUnknown(): void
+    {
+        $conn = obtainTestDatabase()->getConnection();
+
+        $conn->exec("DELETE FROM qa_chunk_reviews WHERE id_job = " . self::GHOST_OWNER_JOB_ID);
+        $conn->exec("DELETE FROM jobs WHERE id = " . self::GHOST_OWNER_JOB_ID);
+        $conn->exec(
+            "INSERT INTO jobs (id, password, id_project, source, target, owner)
+             VALUES (" . self::GHOST_OWNER_JOB_ID . ", '" . self::GHOST_OWNER_JOB_PASSWORD . "', " . self::PROJECT_ID . ", 'en-US', 'it-IT', '" . self::GHOST_OWNER_EMAIL . "')"
+        );
+        $conn->exec(
+            "INSERT INTO qa_chunk_reviews (id_job, password, review_password, source_page)
+             VALUES (" . self::GHOST_OWNER_JOB_ID . ", '" . self::GHOST_OWNER_JOB_PASSWORD . "', '" . self::GHOST_OWNER_REVIEW_PASSWORD . "', 1)"
+        );
+
+        $this->setControllerUser(self::STRANGER_UID);
+
+        $issue = new EntryStruct();
+        $issue->id = 990031;
+        $issue->uid = self::USER_UID;
+        $issue->id_segment = 1;
+        $issue->id_job = self::GHOST_OWNER_JOB_ID;
+        $issue->source_page = 1;
+        $this->setValidator($issue);
+
+        $this->setRequestParams([
+            'id_job' => self::GHOST_OWNER_JOB_ID,
+            'password' => self::GHOST_OWNER_REVIEW_PASSWORD,
+        ]);
+
+        $modelMock = $this->createMock(TranslationIssueModel::class);
+        $this->controller->mockModel = $modelMock;
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionMessage('Job owner not found. Not Authorized');
+
+        $this->controller->delete();
+    }
+
+    #[Test]
+    public function checkLoggedUserPermissionsThrowsWhenProjectHasNoTeam(): void
+    {
+        $conn = obtainTestDatabase()->getConnection();
+
+        $conn->exec("DELETE FROM qa_chunk_reviews WHERE id_job = " . self::NO_TEAM_JOB_ID);
+        $conn->exec("DELETE FROM jobs WHERE id = " . self::NO_TEAM_JOB_ID);
+        $conn->exec("DELETE FROM projects WHERE id = " . self::NO_TEAM_PROJECT_ID);
+        $conn->exec(
+            "INSERT INTO projects (id, password, id_customer, name, create_date, status_analysis, id_team)
+             VALUES (" . self::NO_TEAM_PROJECT_ID . ", '" . self::NO_TEAM_PROJECT_PASSWORD . "', '" . self::OWNER_EMAIL . "', 'No Team Project', NOW(), 'DONE', NULL)"
+        );
+        $conn->exec(
+            "INSERT INTO jobs (id, password, id_project, source, target, owner)
+             VALUES (" . self::NO_TEAM_JOB_ID . ", '" . self::NO_TEAM_JOB_PASSWORD . "', " . self::NO_TEAM_PROJECT_ID . ", 'en-US', 'it-IT', '" . self::OWNER_EMAIL . "')"
+        );
+        $conn->exec(
+            "INSERT INTO qa_chunk_reviews (id_job, password, review_password, source_page)
+             VALUES (" . self::NO_TEAM_JOB_ID . ", '" . self::NO_TEAM_JOB_PASSWORD . "', '" . self::NO_TEAM_REVIEW_PASSWORD . "', 1)"
+        );
+
+        $this->setControllerUser(self::STRANGER_UID);
+
+        $issue = new EntryStruct();
+        $issue->id = 990032;
+        $issue->uid = self::USER_UID;
+        $issue->id_segment = 1;
+        $issue->id_job = self::NO_TEAM_JOB_ID;
+        $issue->source_page = 1;
+        $this->setValidator($issue);
+
+        $this->setRequestParams([
+            'id_job' => self::NO_TEAM_JOB_ID,
+            'password' => self::NO_TEAM_REVIEW_PASSWORD,
+        ]);
+
+        $modelMock = $this->createMock(TranslationIssueModel::class);
+        $this->controller->mockModel = $modelMock;
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionMessage('Team not found. Not Authorized');
+
+        $this->controller->delete();
     }
 }

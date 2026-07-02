@@ -48,7 +48,11 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     (e) => {
       SegmentActions.copySourceToTarget()
     },
-    {enableOnContentEditable: true, preventDefault: true},
+    {
+      enableOnContentEditable: true,
+      preventDefault: true,
+      enableOnFormTags: true,
+    },
   )
   useHotkeys(
     Shortcuts.cattol.events.gotoCurrent.keystrokes[Shortcuts.shortCutsKeyType],
@@ -56,35 +60,47 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       SegmentActions.scrollToCurrentSegment()
       SegmentActions.setFocusOnEditArea()
     },
-    {enableOnContentEditable: true, preventDefault: true},
+    {
+      enableOnContentEditable: true,
+      preventDefault: true,
+      enableOnFormTags: true,
+    },
   )
   useHotkeys(
     Shortcuts.cattol.events.openPrevious.keystrokes[Shortcuts.shortCutsKeyType],
     (e) => {
       SegmentActions.selectPrevSegmentDebounced()
     },
-    {enableOnContentEditable: true, preventDefault: true},
+    {
+      enableOnContentEditable: true,
+      preventDefault: true,
+      enableOnFormTags: true,
+    },
   )
   useHotkeys(
     Shortcuts.cattol.events.openNext.keystrokes[Shortcuts.shortCutsKeyType],
     (e) => {
       SegmentActions.selectNextSegmentDebounced()
     },
-    {enableOnContentEditable: true, preventDefault: true},
+    {
+      enableOnContentEditable: true,
+      preventDefault: true,
+      enableOnFormTags: true,
+    },
   )
   useHotkeys(
     'ctrl',
     () => {
       SegmentActions.openSelectedSegment()
     },
-    {keyup: true, enableOnContentEditable: true},
+    {keyup: true, enableOnContentEditable: true, enableOnFormTags: true},
   )
   useHotkeys(
     'meta',
     () => {
       SegmentActions.openSelectedSegment()
     },
-    {keyup: true, enableOnContentEditable: true},
+    {keyup: true, enableOnContentEditable: true, enableOnFormTags: true},
   )
   useHotkeys(
     Shortcuts.cattol.events.openIssuesPanel.keystrokes[
@@ -97,7 +113,11 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
         SegmentActions.scrollToSegment(segment.sid)
       }
     },
-    {enableOnContentEditable: true, preventDefault: true},
+    {
+      enableOnContentEditable: true,
+      preventDefault: true,
+      enableOnFormTags: true,
+    },
   )
   useHotkeys(
     Shortcuts.cattol.events.copyContribution1.keystrokes[
@@ -106,7 +126,11 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     (e) => {
       SegmentActions.chooseContributionOnCurrentSegment(1)
     },
-    {enableOnContentEditable: true, preventDefault: true},
+    {
+      enableOnContentEditable: true,
+      preventDefault: true,
+      enableOnFormTags: true,
+    },
   )
   useHotkeys(
     Shortcuts.cattol.events.copyContribution2.keystrokes[
@@ -115,7 +139,11 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     (e) => {
       SegmentActions.chooseContributionOnCurrentSegment(2)
     },
-    {enableOnContentEditable: true, preventDefault: true},
+    {
+      enableOnContentEditable: true,
+      preventDefault: true,
+      enableOnFormTags: true,
+    },
   )
   useHotkeys(
     Shortcuts.cattol.events.copyContribution3.keystrokes[
@@ -124,7 +152,11 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     (e) => {
       SegmentActions.chooseContributionOnCurrentSegment(3)
     },
-    {enableOnContentEditable: true, preventDefault: true},
+    {
+      enableOnContentEditable: true,
+      preventDefault: true,
+      enableOnFormTags: true,
+    },
   )
   useHotkeys(
     Shortcuts.cattol.events.splitSegment.keystrokes[Shortcuts.shortCutsKeyType],
@@ -134,7 +166,11 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
         SegmentActions.openSplitSegment(segment.sid)
       }
     },
-    {enableOnContentEditable: true, preventDefault: true},
+    {
+      enableOnContentEditable: true,
+      preventDefault: true,
+      enableOnFormTags: true,
+    },
   )
   useHotkeys(
     Shortcuts.cattol.events.openComments.keystrokes[Shortcuts.shortCutsKeyType],
@@ -144,7 +180,11 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       const current = SegmentStore.getCurrentSegmentId()
       if (current) SegmentActions.openSegmentComment(current)
     },
-    {enableOnContentEditable: true, preventDefault: true},
+    {
+      enableOnContentEditable: true,
+      preventDefault: true,
+      enableOnFormTags: true,
+    },
   )
 
   const {userInfo} = useContext(ApplicationWrapperContext)

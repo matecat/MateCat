@@ -6,6 +6,7 @@ use Controller\Abstracts\IController;
 use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
 use Matecat\TestHelpers\AbstractTest;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
+use Model\LQA\ChunkReviewStruct;
 use Model\Projects\MetadataStruct;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectsMetadataMarshaller;
@@ -107,6 +108,21 @@ class CatDecoratorTest extends AbstractTest
             $isRevision,
             $wc ?? $this->makeWordCountStruct()
         );
+    }
+
+    #[Test]
+    public function argumentsExposeTheGivenChunkReview(): void
+    {
+        $chunkReview = $this->createStub(ChunkReviewStruct::class);
+
+        $arguments = new CatDecoratorArguments(
+            $this->makeChunk(),
+            false,
+            $this->makeWordCountStruct(),
+            $chunkReview
+        );
+
+        $this->assertSame($chunkReview, $arguments->getChunkReview());
     }
 
     #[Test]

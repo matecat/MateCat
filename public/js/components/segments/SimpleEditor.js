@@ -8,6 +8,7 @@ const SimpleEditor = ({className = '', text, isRtl}) => {
       data-testid="simple-editor-test"
       className={className}
       dangerouslySetInnerHTML={{__html: htmlText}}
+      lang={config.target_rfc}
     />
   )
 }

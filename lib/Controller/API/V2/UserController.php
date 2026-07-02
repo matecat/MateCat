@@ -123,7 +123,9 @@ class UserController extends AbstractStatefulKleinController
             throw new InvalidArgumentException('`key` required', 400);
         }
 
-        if (!isset($filtered['value']) || !is_string($filtered['value'])) {
+        if (!isset($filtered['value']) ||
+            (!is_string($filtered['value']) && !is_array($filtered['value']))
+        ) {
             throw new InvalidArgumentException('`value` required', 400);
         }
 

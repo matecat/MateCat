@@ -13,7 +13,7 @@ export const SearchButton = () => {
   useHotkeys(
     Shortcuts.cattol.events.openSearch.keystrokes[Shortcuts.shortCutsKeyType],
     (e) => openSearch(e),
-    {enableOnContentEditable: true},
+    {enableOnContentEditable: true, enableOnFormTags: true},
   )
   const openSearch = (event) => {
     SearchUtils.toggleSearch(event)

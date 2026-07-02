@@ -20,7 +20,7 @@ export const CattoolFooter = ({
   target,
   isCJK,
 }) => {
-  const [stats, setStats] = React.useState()
+  const [stats, setStats] = React.useState(CatToolStore.getProgress())
   const [isShowingTooltip, setIsShowingTooltip] = useState({
     progressBar: false,
   })

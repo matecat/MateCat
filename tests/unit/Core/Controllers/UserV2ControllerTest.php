@@ -225,6 +225,39 @@ class UserV2ControllerTest extends AbstractTest
     /**
      * @throws ReflectionException
      * @throws InvalidArgumentException
+     * @throws PDOException
+     * @throws PHPUnitException
+     */
+    #[Test]
+    public function setMetadata_returns_metadata_struct_payload_on_success_with_array_value(): void
+    {
+        $this->setBody(['key' => 'preferences', 'value' => ['theme' => 'dark', 'notifications' => 'enabled']]);
+
+        $captured = [];
+        $this->responseMock->method('json')
+            ->willReturnCallback(function (mixed $data) use (&$captured) {
+                $captured[] = $data;
+                return $this->responseMock;
+            });
+
+        $this->controller->setMetadata();
+
+        $conn = $this->seedConnection();
+        $conn->exec("DELETE FROM user_metadata WHERE uid = " . $this->userId(self::BASE));
+
+        $this->assertCount(1, $captured, 'setMetadata must emit exactly one json payload');
+        $payload = $captured[0];
+        $this->assertInstanceOf(MetadataStruct::class, $payload);
+        $this->assertSame((string) $this->userId(self::BASE), (string) $payload->uid);
+        $this->assertSame('preferences', $payload->key);
+        $this->assertIsArray($payload->value);
+        $this->assertSame('dark', $payload->value['theme']);
+        $this->assertSame('enabled', $payload->value['notifications']);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     #[Test]
     public function setMetadata_throws_when_key_missing(): void
