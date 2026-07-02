@@ -29,7 +29,9 @@ describe('SegmentFooterTabMessages', () => {
     renderComponent({
       notes: [{note: 'translation_context|¶|living room description'}],
     })
-    expect(screen.getByText('living room description')).toBeInTheDocument()
+    expect(
+      screen.queryByText('living room description'),
+    ).not.toBeInTheDocument()
     expect(screen.queryByText(/translation_context/)).not.toBeInTheDocument()
   })
 

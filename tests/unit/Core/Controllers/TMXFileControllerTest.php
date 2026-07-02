@@ -20,9 +20,22 @@ use ReflectionClass;
 use ReflectionException;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
+use Utils\TMS\TMSService;
 
+/**
+ * Overrides the createTMSService() seam (added to {@see TMXFileController})
+ * so import()/importStatus() can be exercised without constructing a real
+ * TMSService — which would otherwise reach the MyMemory engine's
+ * addTmxInMyMemory()/tmxUploadStatus() -> AbstractEngine::_call() ->
+ * MultiCurlHandler, a real outbound HTTP call with no test-env guard. This
+ * mirrors the campaign's sanctioned "refactor construction behind an
+ * overridable protected seam, return a createStub" pattern used by
+ * RequestExportTMXController.
+ */
 class TestableTMXFileController extends TMXFileController
 {
+    public ?TMSService $tmsServiceStub = null;
+
     public function __construct()
     {
     }
@@ -34,6 +47,11 @@ class TestableTMXFileController extends TMXFileController
     protected function registerValidators(): void
     {
     }
+
+    protected function createTMSService(): TMSService
+    {
+        return $this->tmsServiceStub ?? parent::createTMSService();
+    }
 }
 
 /**
@@ -43,13 +61,21 @@ class TestableTMXFileController extends TMXFileController
  *   base+1 project, base+2 job, base+3 segment, base+4 file, base+6 user/uid.
  * Per-suite owner email: ctrltest_9010000@example.org.
  *
+ * The memory_keys row exercised by import()'s KeyRing-update branch must
+ * carry uid = the authenticated test user (FK-correct), so it reuses this
+ * suite's existing userId(BASE) = 9_010_006 rather than a disjoint block;
+ * cleaned up by cleanMemoryKey() alongside cleanFragments(). A second
+ * reserved ID block, 9_983_000..9_983_999, is available to this pass but
+ * unused since no independent row (not tied to the authenticated uid) is
+ * needed here.
+ *
  * The public actions import()/importStatus() both delegate to
  * Utils\TMS\TMSService, which performs external MyMemory engine HTTP calls
- * (uploadFile/addTmxInMyMemory/tmxUploadStatus -> _fileUploadStatus). Those
- * branches are not exercisable in a pure unit test without the external
- * service; they are documented as a hard blocker. The unit-testable surface
- * is the request-validation logic (validateTheRequest) plus validator
- * registration, fully covered below.
+ * (addTmxInMyMemory()/tmxUploadStatus() -> AbstractEngine::_call() ->
+ * MultiCurlHandler). Construction of TMSService is now routed through the
+ * createTMSService() seam (added to TMXFileController, mirroring
+ * RequestExportTMXController) so those calls can be stubbed in the tests
+ * below; the network call itself is never exercised.
  */
 #[AllowMockObjectsWithoutExpectations]
 class TMXFileControllerTest extends AbstractTest
@@ -57,6 +83,9 @@ class TMXFileControllerTest extends AbstractTest
     use ControllerSeedFragments;
 
     private const int BASE = 9_010_000;
+
+    /** @var list<string> Temp upload files created by a test, removed in tearDown(). */
+    private array $tempUploadFiles = [];
 
     /** @var ReflectionClass<TMXFileController> */
     private ReflectionClass $reflector;
@@ -107,6 +136,15 @@ class TMXFileControllerTest extends AbstractTest
     {
         AppConfig::$DEFAULT_TM_KEY = $this->defaultTmKeyBackup;
         $this->cleanFragments(self::BASE);
+        $this->cleanMemoryKey();
+
+        foreach ($this->tempUploadFiles as $path) {
+            if (is_file($path)) {
+                unlink($path);
+            }
+        }
+        $this->tempUploadFiles = [];
+
         parent::tearDown();
     }
 
@@ -118,6 +156,52 @@ class TMXFileControllerTest extends AbstractTest
         $serverParams      = ['REQUEST_URI' => '/api/app/tmx', 'REQUEST_METHOD' => 'POST'];
         $this->requestStub = new Request($params, [], [], $serverParams);
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
+    }
+
+    /**
+     * Builds a Klein request whose files() collection contains one real,
+     * on-disk upload file (Klein's Request::files() just wraps the raw
+     * $_FILES-shaped array, so a real temp file drives Upload::uploadFiles()
+     * through its genuine mime/extension/copy logic without any HTTP layer).
+     *
+     * @param array<string, mixed> $params
+     */
+    private function setRequestWithUploadedFile(string $fileName, string $contents, array $params = []): void
+    {
+        $tmpPath = tempnam(sys_get_temp_dir(), 'tmxctrl_');
+        if ($tmpPath === false) {
+            $this->fail('Unable to create temp upload file.');
+        }
+        file_put_contents($tmpPath, $contents);
+        $this->tempUploadFiles[] = $tmpPath;
+
+        $files = [
+            'files' => [
+                'name'     => [$fileName],
+                'type'     => ['application/xml'],
+                'tmp_name' => [$tmpPath],
+                'error'    => [0],
+                'size'     => [strlen($contents)],
+            ],
+        ];
+
+        $serverParams       = ['REQUEST_URI' => '/api/app/tmx', 'REQUEST_METHOD' => 'POST'];
+        $this->requestStub  = new Request($params, [], [], $serverParams, $files);
+        $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
+    }
+
+    private function seedMemoryKey(string $keyValue, string $keyName = ''): void
+    {
+        $uid = $this->userId(self::BASE);
+        $this->seedConnection()->exec(
+            "INSERT IGNORE INTO memory_keys (uid, key_value, key_name, key_tm, key_glos, creation_date) "
+            . "VALUES ($uid, '$keyValue', '$keyName', 1, 1, NOW())"
+        );
+    }
+
+    private function cleanMemoryKey(): void
+    {
+        $this->seedConnection()->exec("DELETE FROM memory_keys WHERE uid = " . $this->userId(self::BASE));
     }
 
     /**
@@ -266,5 +350,160 @@ class TMXFileControllerTest extends AbstractTest
         $this->expectExceptionMessage('No files received.');
 
         $this->controller->import();
+    }
+
+    /**
+     * A real, successfully-uploaded file with a non-tmx extension reaches
+     * the controller's own extension guard (import()'s first throw), via
+     * the createTMSService() seam so no TMSService is ever constructed for
+     * this branch.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function import_throws_when_uploaded_file_is_not_a_tmx(): void
+    {
+        AppConfig::$DEFAULT_TM_KEY = 'fallback-key';
+
+        $this->setRequestWithUploadedFile('notatmx.xml', '<root/>', [
+            'tm_key' => 'somekey',
+        ]);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Please upload a TMX.');
+        $this->expectExceptionCode(-8);
+
+        $this->controller->import();
+    }
+
+    /**
+     * Full success path for a non-default tm_key with an existing,
+     * name-less memory_keys row: covers the KeyRing branch that updates the
+     * key's name (import() lines guarded by `$request['tm_key'] !=
+     * AppConfig::$DEFAULT_TM_KEY` and the empty-name atomicUpdate branch).
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function import_success_updates_memory_key_name_when_previously_empty(): void
+    {
+        AppConfig::$DEFAULT_TM_KEY = 'the-default-key';
+        $this->seedMemoryKey('non-default-key');
+
+        $this->setRequestWithUploadedFile('MyMemory.tmx', '<tmx version="1.4"/>', [
+            'tm_key' => 'non-default-key',
+        ]);
+        $this->reflector->getProperty('response')->setValue($this->controller, new Response());
+
+        $tmsServiceStub = $this->createStub(TMSService::class);
+        $tmsServiceStub->method('addTmxInMyMemory')->willReturn([]);
+        $this->controller->tmsServiceStub = $tmsServiceStub;
+
+        $this->controller->import();
+
+        /** @var Response $response */
+        $response = $this->reflector->getProperty('response')->getValue($this->controller);
+        $body     = json_decode((string) $response->body(), true);
+
+        $this->assertIsArray($body);
+        $this->assertSame([], $body['errors']);
+        $this->assertSame('MyMemory.tmx', $body['data']['uuids'][0]['name']);
+
+        $stmt = $this->seedConnection()->prepare(
+            "SELECT key_name FROM memory_keys WHERE uid = :uid AND key_value = :key_value"
+        );
+        $stmt->execute(['uid' => $this->userId(self::BASE), 'key_value' => 'non-default-key']);
+        $keyName = $stmt->fetchColumn();
+
+        $this->assertSame('MyMemory.tmx', $keyName);
+    }
+
+    /**
+     * When tm_key equals the configured default, the KeyRing-update branch
+     * is skipped entirely (import() line `if ($request['tm_key'] !=
+     * AppConfig::$DEFAULT_TM_KEY)` short-circuits false) and no
+     * MemoryKeyDao is touched, yet the response is still built correctly.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function import_success_skips_memory_key_update_for_default_tm_key(): void
+    {
+        AppConfig::$DEFAULT_TM_KEY = 'the-default-key';
+
+        $this->setRequestWithUploadedFile('Default.tmx', '<tmx version="1.4"/>', [
+            'tm_key' => 'the-default-key',
+        ]);
+        $this->reflector->getProperty('response')->setValue($this->controller, new Response());
+
+        $tmsServiceStub = $this->createStub(TMSService::class);
+        $tmsServiceStub->method('addTmxInMyMemory')->willReturn([]);
+        $this->controller->tmsServiceStub = $tmsServiceStub;
+
+        $this->controller->import();
+
+        /** @var Response $response */
+        $response = $this->reflector->getProperty('response')->getValue($this->controller);
+        $body     = json_decode((string) $response->body(), true);
+
+        $this->assertIsArray($body);
+        $this->assertSame([], $body['errors']);
+        $this->assertSame('Default.tmx', $body['data']['uuids'][0]['name']);
+    }
+
+    // ─── importStatus() ───
+
+    /**
+     * Full success path via the createTMSService() seam: no real MyMemory
+     * engine construction, no outbound HTTP.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function importStatus_returns_json_response_with_status_data(): void
+    {
+        $this->setRequestParams([
+            'uuid' => 'uuid-xyz-1',
+        ]);
+        $this->reflector->getProperty('response')->setValue($this->controller, new Response());
+
+        $tmsServiceStub = $this->createStub(TMSService::class);
+        $tmsServiceStub->method('tmxUploadStatus')->willReturn(['data' => ['status' => 'DONE']]);
+        $this->controller->tmsServiceStub = $tmsServiceStub;
+
+        $this->controller->importStatus();
+
+        /** @var Response $response */
+        $response = $this->reflector->getProperty('response')->getValue($this->controller);
+        $body     = json_decode((string) $response->body(), true);
+
+        $this->assertIsArray($body);
+        $this->assertSame([], $body['errors']);
+        $this->assertSame(['status' => 'DONE'], $body['data']);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function importStatus_uses_empty_string_uuid_when_param_sanitizes_to_false(): void
+    {
+        $this->setRequestParams([
+            'uuid' => ['a', 'b'],
+        ]);
+        $this->reflector->getProperty('response')->setValue($this->controller, new Response());
+
+        $tmsServiceStub = $this->createStub(TMSService::class);
+        $tmsServiceStub->method('tmxUploadStatus')->willReturn(['data' => []]);
+        $this->controller->tmsServiceStub = $tmsServiceStub;
+
+        $this->controller->importStatus();
+
+        /** @var Response $response */
+        $response = $this->reflector->getProperty('response')->getValue($this->controller);
+        $body     = json_decode((string) $response->body(), true);
+
+        $this->assertIsArray($body);
+        $this->assertSame([], $body['data']);
     }
 }

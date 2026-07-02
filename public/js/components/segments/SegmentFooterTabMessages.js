@@ -40,8 +40,7 @@ class SegmentFooterTabMessages extends React.Component {
       let note = item.note
       const prefix = 'translation_context|¶|'
       if (note.startsWith(prefix)) {
-        note = note.slice(prefix.length)
-        if (note.trim() === '') return null
+        return null
       }
       const noteStructure = this.getNoteContentStructure(note)
       let html =

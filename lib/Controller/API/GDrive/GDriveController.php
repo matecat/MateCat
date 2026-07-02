@@ -5,6 +5,7 @@ namespace Controller\API\GDrive;
 use Aws\S3\Exception\S3Exception;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\CookieManager;
+use Controller\Exceptions\RenderTerminatedException;
 use Exception;
 use Google_Service_Exception;
 use InvalidArgumentException;
@@ -14,6 +15,7 @@ use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
+use TypeError;
 use Utils\Constants\Constants;
 use Utils\Constants\ConversionHandlerStatus;
 use Utils\Registry\AppConfig;
@@ -42,7 +44,7 @@ class GDriveController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function open(): void
     {
@@ -62,7 +64,7 @@ class GDriveController extends AbstractStatefulKleinController
 
                 $this->filters_extraction_parameters = $filtersTemplate;
             } elseif (!empty($filtersTemplateId)) {
-                $uid = $this->getUser()->uid ?? throw new \TypeError('User uid is required');
+                $uid = $this->getUser()->uid ?? throw new TypeError('User uid is required');
                 $filtersTemplate = (new FiltersConfigTemplateDao($this->getDatabase()))->getByIdAndUser($filtersTemplateId, $uid);
 
                 if (empty($filtersTemplate)) {
@@ -169,7 +171,7 @@ class GDriveController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function initSessionService(): void
     {
@@ -180,7 +182,7 @@ class GDriveController extends AbstractStatefulKleinController
      * @param list<string> $listOfIds
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function doImport(array $listOfIds): void
     {
@@ -277,8 +279,11 @@ class GDriveController extends AbstractStatefulKleinController
             ]
         );
 
-        header("Location: /", true, 302);
-        exit;
+        if (AppConfig::$ENV === 'testing') {
+            throw new RenderTerminatedException();
+        }
+
+        die();
     }
 
     private function doResponse(): void
@@ -356,7 +361,7 @@ class GDriveController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function changeConversionParameters(): void
     {
@@ -376,7 +381,7 @@ class GDriveController extends AbstractStatefulKleinController
                 $filtersExtractionParameters = new FiltersConfigTemplateStruct();
                 $filtersExtractionParameters->hydrateFromJSON(html_entity_decode($newFiltersExtractionTemplate));
             } elseif (!empty($newFiltersExtractionTemplateId)) {
-                $uid = $this->getUser()->uid ?? throw new \TypeError('User uid is required');
+                $uid = $this->getUser()->uid ?? throw new TypeError('User uid is required');
                 $filtersExtractionParameters = (new FiltersConfigTemplateDao($this->getDatabase()))->getByIdAndUser($newFiltersExtractionTemplateId, $uid);
 
                 if ($filtersExtractionParameters === null) {
@@ -413,7 +418,7 @@ class GDriveController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function deleteImportedFile(): void
     {
@@ -442,7 +447,7 @@ class GDriveController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     protected function initDependencies(): void
     {

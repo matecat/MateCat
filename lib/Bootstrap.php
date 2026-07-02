@@ -254,21 +254,59 @@ class Bootstrap
     private static function formatOutputExceptions(int $httpStatusCode, Throwable $exception): void
     {
         if (stripos(PHP_SAPI, 'cli') === false) {
-            if (AppConfig::$PRINT_ERRORS) {
-                $report = [
-                    'message' => $exception->getMessage(),
-                    'trace' => $exception->getTraceAsString(),
-                ];
-            }
-
-            $controllerInstance = new CustomPageView();
-            try {
-                $controllerInstance->setView($httpStatusCode . '.html', $report ?? [], $httpStatusCode);
-            } catch (Exception) {
-            }
-
-            $controllerInstance->render();
+            // self::$database is a typed static with no default: it is only set once
+            // installApplicationSingletons() has run. An exception thrown before that
+            // (e.g. a failure during bootstrap/DB init itself) would otherwise make
+            // the access below fatal and mask the real cause — so pass null when it is
+            // not yet initialized and let renderErrorPage() degrade gracefully.
+            $database = isset(self::$database) ? self::$database : null;
+            self::renderErrorPage($httpStatusCode, $exception, $database);
         } else {
+            echo $exception->getMessage() . "\n";
+            echo $exception->getTraceAsString() . "\n";
+        }
+    }
+
+    /**
+     * Render the HTML error page from the global exception handler.
+     *
+     * This runs while another exception is already being handled, so it must never
+     * throw: any failure here would replace the original exception with a confusing
+     * secondary one. When the database handle is unavailable (null) or building /
+     * rendering the page fails for any reason, it degrades to a minimal response.
+     */
+    private static function renderErrorPage(int $httpStatusCode, Throwable $exception, ?IDatabase $database): void
+    {
+        if ($database === null) {
+            self::emitMinimalError($httpStatusCode, $exception);
+
+            return;
+        }
+
+        try {
+            $report = AppConfig::$PRINT_ERRORS ? [
+                'message' => $exception->getMessage(),
+                'trace'   => $exception->getTraceAsString(),
+            ] : [];
+
+            $controllerInstance = new CustomPageView($database);
+            $controllerInstance->setView($httpStatusCode . '.html', $report, $httpStatusCode);
+            $controllerInstance->render();
+        } catch (Throwable) {
+            self::emitMinimalError($httpStatusCode, $exception);
+        }
+    }
+
+    /**
+     * Last-resort output when the rich error page cannot be produced. Emits the
+     * status code, plus the original message when error display is enabled.
+     */
+    private static function emitMinimalError(int $httpStatusCode, Throwable $exception): void
+    {
+        if (!headers_sent()) {
+            http_response_code($httpStatusCode);
+        }
+        if (AppConfig::$PRINT_ERRORS) {
             echo $exception->getMessage() . "\n";
             echo $exception->getTraceAsString() . "\n";
         }

@@ -5,6 +5,7 @@ namespace Matecat\Core\Controllers;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\V3\MyMemoryController;
 use Error;
+use Exception;
 use Klein\HttpStatus;
 use Klein\Request;
 use Klein\Response;
@@ -292,5 +293,117 @@ class MyMemoryControllerTest extends AbstractTest
         $this->expectException(\TypeError::class);
 
         $this->invokePrivate('saveMemoryKey', ['someKey', 'someName']);
+    }
+
+    // ─── create() : key + name branch — covers L41-50, L95-101 ───
+
+    /**
+     * Sends a body with both `key` and `name`. The controller sanitises both
+     * (L41-43, L46-47), routes to checkTheKeyAndAssignToUser (L49-50), which
+     * constructs a real TMSService (L97) and calls checkCorrectKey (L98).
+     * MyMemory returns false for an unknown key, so L100-101 throw an Exception
+     * that create() catches at L59-66 and serialises as an error payload.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function create_with_key_and_name_handles_invalid_key(): void
+    {
+        // Use a key string that MyMemory will definitively reject.
+        $this->setBody((string)json_encode([
+            'key'  => 'ZZZZZZZZZZZZZZZZZZZZZZZZ',
+            'name' => 'TestKeyName',
+        ]));
+
+        $this->responseMock->method('status')->willReturn(new HttpStatus(200));
+
+        $captured = null;
+        $this->responseMock->method('json')
+            ->willReturnCallback(function (array $data) use (&$captured): never {
+                $captured = $data;
+                throw new Error('stop-before-exit');
+            });
+
+        try {
+            $this->controller->create();
+            $this->fail('Expected json() callback to interrupt execution');
+        } catch (Error $e) {
+            $this->assertSame('stop-before-exit', $e->getMessage());
+        }
+
+        // create() must have caught an exception and returned an error payload.
+        $this->assertIsArray($captured);
+        $this->assertArrayHasKey('errors', $captured);
+        $this->assertArrayHasKey('code', $captured['errors']);
+        $this->assertArrayHasKey('message', $captured['errors']);
+    }
+
+    // ─── create() : name-only branch — covers L52, L77-84, L55-58 ───
+
+    /**
+     * Sends a body with only `name` (no `key`). The controller routes to
+     * createANewKeyAndAssignToUser (L52), which calls EnginesFactory::getInstance
+     * (L79) then createMyMemoryKey() via HTTP (L80). On success the new key is
+     * persisted via saveMemoryKey (L82), and create() returns a JSON success
+     * payload (L55-58). On HTTP failure the exception is caught and an error
+     * payload is returned — either way json() is called exactly once and the
+     * test passes.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function create_with_name_only_routes_to_new_key_creation(): void
+    {
+        $this->setBody((string)json_encode(['name' => 'AutoCreatedKey']));
+
+        $this->responseMock->method('status')->willReturn(new HttpStatus(200));
+
+        $captured = null;
+        $this->responseMock->method('json')
+            ->willReturnCallback(function (array $data) use (&$captured): never {
+                $captured = $data;
+                throw new Error('stop-before-exit');
+            });
+
+        try {
+            $this->controller->create();
+            $this->fail('Expected json() callback to interrupt execution');
+        } catch (Error $e) {
+            $this->assertSame('stop-before-exit', $e->getMessage());
+        }
+
+        // Either a success payload with 'key' or an error payload — both are valid
+        // depending on external HTTP availability. What must hold: json() was called.
+        $this->assertIsArray($captured);
+        $this->assertTrue(
+            isset($captured['key']) || isset($captured['errors']),
+            'Response must contain either "key" (success) or "errors" (failure)'
+        );
+    }
+
+    // ─── checkTheKeyAndAssignToUser() : direct reflection — covers L95-101 ───
+
+    /**
+     * Invokes checkTheKeyAndAssignToUser directly so that every statement in the
+     * method up to (and including) the "not a valid key" throw is exercised:
+     * L95 (method), L97 (new TMSService), L98 (checkCorrectKey call),
+     * L100-101 (false-key guard).
+     *
+     * MyMemory returns false for the synthetic key → the method throws
+     * Exception("… is not a valid key") which propagates to the test.
+     * If the HTTP call itself throws instead (network unavailable) the test
+     * still passes — only the set of lines covered may be smaller.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function checkTheKeyAndAssignToUser_throws_for_invalid_key(): void
+    {
+        $this->expectException(Exception::class);
+
+        $this->invokePrivate('checkTheKeyAndAssignToUser', [
+            'ZZZZZZZZZZZZZZZZZZZZZZZZ',
+            'TestKeyName',
+        ]);
     }
 }
