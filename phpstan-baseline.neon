@@ -268,23 +268,6 @@ parameters:
 
 
 
-		-
-			message: '#^Cannot access offset ''id_project'' on array\|false\|null\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: lib/Controller/Views/ContextReviewController.php
-
-		-
-			message: '#^Cannot access offset ''password'' on array\|false\|null\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: lib/Controller/Views/ContextReviewController.php
-
-		-
-			message: '#^Method Controller\\Views\\ContextReviewController\:\:validateTheRequest\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Views/ContextReviewController.php
 
 
 
