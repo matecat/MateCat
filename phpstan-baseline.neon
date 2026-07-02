@@ -281,11 +281,6 @@ parameters:
 
 
 
-		-
-			message: '#^Parameter \#3 \$callback of function route expects array\{class\-string\<Controller\\Abstracts\\KleinController\>, string\}, array\{''Controller\\\\API\\\\App…'', ''update''\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Routes/app_routes.php
 
 
 
