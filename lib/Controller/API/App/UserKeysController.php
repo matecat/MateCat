@@ -12,7 +12,9 @@ use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\ClientUserFacade;
 use Model\Users\MetadataDao;
+use Model\Users\UserStruct;
 use ReflectionException;
+use RuntimeException;
 use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\AbstractEngine;
@@ -96,7 +98,7 @@ class UserKeysController extends KleinController
         $request = $this->validateTheRequest();
         $memoryKeyToUpdate = $this->getMemoryToUpdate($request['key'], $request['description']);
         $mkDao = $this->getMkDao();
-        $userMemoryKeys = $mkDao->read($memoryKeyToUpdate);
+        $userMemoryKeys = $mkDao->read($memoryKeyToUpdate, true);
 
         $this->response->json($this->getKeyUsersInfo($userMemoryKeys));
     }
@@ -142,9 +144,11 @@ class UserKeysController extends KleinController
         $_userStructs = [];
         $tmKey = $userMemoryKeys[0]->tm_key;
         // in_users is a dynamic property set on TmKeyStruct (extends stdClass) by MemoryKeyDao::_buildResult()
-        $inUsers = ($tmKey !== null && property_exists($tmKey, 'in_users')) ? $tmKey->in_users : [];
-        foreach ($inUsers as $userStruct) {
-            $_userStructs[] = new ClientUserFacade($userStruct);
+        $inUsers = $tmKey !== null ? $tmKey->getInUsers() : [];
+        foreach ($inUsers as $user) {
+            if ($user instanceof UserStruct) {
+                $_userStructs[] = new ClientUserFacade($user);
+            }
         }
 
         return [
@@ -238,7 +242,7 @@ class UserKeysController extends KleinController
     /**
      * Removes a memory key from specified engines.
      *
-     * This method processes a list of engine names provided as a CSV string,
+     * This method processes a list of engine names provided as a CSV string
      * and attempts to remove the given memory key from each engine. If the engine
      * supports adaptive machine translation (MT), it verifies ownership of the memory
      * key before deletion.
@@ -269,7 +273,7 @@ class UserKeysController extends KleinController
                     // Retrieve metadata for the engine, ensuring it belongs to the current user.
                      $ownerMmtEngineMetaData = (new MetadataDao($this->getDatabase()))
                          ->setCacheTTL(60 * 60 * 24 * 30) // Cache TTL: 30 days.
-                         ->get($uid, $engine->getEngineRecord()->class_load ?? throw new \RuntimeException('Missing engine class_load'));
+                         ->get($uid, $engine->getEngineRecord()->class_load ?? throw new RuntimeException('Missing engine class_load'));
 
                     // If metadata exists, attempt to delete the memory key from the engine.
                     if (!empty($ownerMmtEngineMetaData) && is_int($ownerMmtEngineMetaData->value)) {
