@@ -19,7 +19,7 @@ class SupportedFilesController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array<string, list<list<array{ext: int|string, class: mixed}>>>
      */
     private function getFileList(): array
     {

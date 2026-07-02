@@ -4,11 +4,13 @@ namespace Matecat\Core\Controllers;
 
 use ArrayObject;
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\V2\SplitJobController;
 use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\Jobs\JobStruct;
 use Model\JobSplitMerge\JobSplitMergeManager;
 use Model\JobSplitMerge\SplitMergeProjectData;
@@ -49,6 +51,14 @@ class TestableSplitJobController extends SplitJobController
 
 class SplitJobControllerTest extends AbstractTest
 {
+    use ControllerSeedFragments;
+
+    /**
+     * Reserved ID block (Playbook §4): base = 9_069_000.
+     * 9069001 project, 9069002 job, 9069003 segment, 9069004 file.
+     */
+    private const int REAL_DB_BASE = 9_069_000;
+
     private TestableSplitJobController $controller;
     private ReflectionClass $reflector;
     private Request $requestStub;
@@ -456,6 +466,54 @@ class SplitJobControllerTest extends AbstractTest
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionCode(-10);
         $this->controller->check();
+    }
+
+    #[Test]
+    public function registerValidators_appends_login_validator(): void
+    {
+        $this->callPrivate('registerValidators');
+
+        $validators = $this->reflector->getProperty('validators')->getValue($this->controller);
+
+        self::assertCount(1, $validators);
+        self::assertInstanceOf(LoginValidator::class, $validators[0]);
+    }
+
+    #[Test]
+    public function getProjectData_and_getProjectJobs_return_real_seeded_state(): void
+    {
+        $base        = self::REAL_DB_BASE;
+        $owner       = $this->ownerEmail($base);
+        $projectPass = 'projpw';
+        $jobPass     = 'jobpw';
+
+        $this->cleanFragments($base);
+        $this->seedProject($base, $owner, $projectPass);
+        $this->seedFile($base);
+        $this->seedSegment($base);
+        $this->seedJob($base, $owner, $jobPass);
+
+        try {
+            $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
+
+            $projectId = $this->projectId($base);
+
+            $projectStructure = $this->callPrivate('getProjectData', $projectId, $projectPass, false);
+
+            self::assertInstanceOf(SplitMergeProjectData::class, $projectStructure['data']);
+            self::assertSame($projectId, $projectStructure['data']->idProject);
+            self::assertInstanceOf(JobSplitMergeManager::class, $projectStructure['pManager']);
+            self::assertSame('eq_word_count', $projectStructure['count_type']);
+            self::assertInstanceOf(ProjectStruct::class, $projectStructure['project']);
+            self::assertSame($projectId, (int)$projectStructure['project']->id);
+
+            $jobs = $this->callPrivate('getProjectJobs', $projectStructure['project']);
+
+            self::assertCount(1, $jobs);
+            self::assertSame($this->jobId($base), $jobs[0]->id);
+        } finally {
+            $this->cleanFragments($base);
+        }
     }
 
     /**
