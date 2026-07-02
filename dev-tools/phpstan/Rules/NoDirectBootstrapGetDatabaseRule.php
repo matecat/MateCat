@@ -78,7 +78,7 @@ final class NoDirectBootstrapGetDatabaseRule implements Rule
             RuleErrorBuilder::message(
                 'Direct call to Bootstrap::getDatabase() is not allowed here. The database connection is built once '
                 . 'at the composition root and must be injected as an IDatabase. Only entry points (router, daemons, '
-                . 'workers, CLI task bootstraps) listed in the rule allow-list may read it.'
+                . 'workers, CLI task bootstraps, APIDocs template) listed in the rule allow-list may read it.'
             )
                 ->identifier('matecat.bootstrapGetDatabase')
                 ->build(),
