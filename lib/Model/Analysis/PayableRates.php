@@ -14,6 +14,7 @@ use Matecat\Locales\Languages;
 class PayableRates
 {
 
+    /** @var array<string, int> */
     public static array $DEFAULT_PAYABLE_RATES = [
         'NO_MATCH' => 100,
         '50%-74%' => 100,
@@ -30,6 +31,7 @@ class PayableRates
         'ICE_MT' => 72,
     ];
 
+    /** @var array<string, array<string, array<string, int>>> */
     protected static array $langPair2MTpayableRates = [
         "en" => [
             "it" => [
@@ -496,7 +498,7 @@ class PayableRates
      * @param $target        string The first two chars of the target language name in RFC3066<br/>
      *                       Example: <i>en-US</i> --> <b>en</b>
      *
-     * @return array
+     * @return array<string, int>
      */
     public static function getPayableRates(string $source, string $target): array
     {
@@ -504,18 +506,18 @@ class PayableRates
     }
 
     /**
-     * @param array $breakdowns
+     * @param array<string, mixed> $breakdowns
      * @param string $source
      * @param string $target
-     * @param array|null $default
+     * @param array<string, mixed>|null $default
      *
-     * @return array
+     * @return array<string, int>
      */
     public static function resolveBreakdowns(array $breakdowns, string $source, string $target, ?array $default = null): array
     {
         $languages = Languages::getInstance();
-        $isoSource = $languages->convertLanguageToIsoCode($source);
-        $isoTarget = $languages->convertLanguageToIsoCode($target);
+        $isoSource = $languages->convertLanguageToIsoCode($source) ?? '';
+        $isoTarget = $languages->convertLanguageToIsoCode($target) ?? '';
 
         return array_merge(
             self::getBreakDown($breakdowns, $source, $target, $isoSource, $isoTarget),
@@ -523,6 +525,10 @@ class PayableRates
         ) ?: ($default ?: static::$DEFAULT_PAYABLE_RATES);
     }
 
+    /**
+     * @param array<string, mixed> $breakdowns
+     * @return array<string, int>
+     */
     protected static function getBreakDown(array $breakdowns, string $source, string $target, string $isoSource, string $isoTarget): array
     {
         if (isset($breakdowns[$source])) {

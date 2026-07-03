@@ -14,32 +14,34 @@ use Exception;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
+use RuntimeException;
+use TypeError;
 use Utils\Tools\Utils;
 
 class ChangePasswordModel
 {
 
-    /**
-     * @var UserStruct
-     */
-    private $user;
+    private UserStruct $user;
+    private UserDao $userDao;
 
-    public function __construct(UserStruct $user)
+    public function __construct(UserStruct $user, UserDao $userDao)
     {
         $this->user = $user;
+        $this->userDao = $userDao;
     }
 
     /**
-     * @param $old_password
-     * @param $new_password
-     *
      * @throws ValidationError
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
-    public function changePassword($old_password, $new_password): void
+    public function changePassword(string $old_password, string $new_password): void
     {
-        if (!Utils::verifyPass($old_password, $this->user->salt, $this->user->pass)) {
+        $salt = $this->user->salt ?? throw new RuntimeException('User salt must be set');
+        $pass = $this->user->pass ?? throw new RuntimeException('User password must be set');
+
+        if (!Utils::verifyPass($old_password, $salt, $pass)) {
             throw new ValidationError("Invalid password");
         }
 
@@ -47,7 +49,7 @@ class ChangePasswordModel
             throw new ValidationError("New password cannot be the same as your old password");
         }
 
-        $this->user->pass = Utils::encryptPass($new_password, $this->user->salt);
+        $this->user->pass = Utils::encryptPass($new_password, $salt);
 
         $fieldsToUpdate = [
             'fields' => ['pass']
@@ -59,9 +61,9 @@ class ChangePasswordModel
             $fieldsToUpdate['fields'][] = 'email_confirmed_at';
         }
 
-        UserDao::updateStruct($this->user, $fieldsToUpdate);
-        (new UserDao)->destroyCacheByEmail($this->user->email);
-        (new UserDao)->destroyCacheByUid($this->user->uid);
+        $this->userDao->updateStruct($this->user, $fieldsToUpdate);
+        $this->userDao->destroyCacheByEmail($this->user->email ?? throw new RuntimeException('User email must be set before cache invalidation'));
+        $this->userDao->destroyCacheByUid($this->user->uid ?? throw new RuntimeException('User uid must be set before cache invalidation'));
     }
 
 }

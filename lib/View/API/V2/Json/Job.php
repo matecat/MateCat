@@ -12,16 +12,27 @@ namespace View\API\V2\Json;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
+use Model\DataAccess\IDatabase;
 use Matecat\Locales\LanguageDomains;
 use Matecat\Locales\Languages;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\OutsourceAvailableInfoEvent;
+use Model\FeaturesBase\Hook\Event\Filter\ProjectUrlsEvent;
+use Model\Comments\CommentDao;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
+use Model\Outsource\ConfirmationDao;
+use Model\Translations\WarningDao;
+use Model\Translators\JobsTranslatorsDao;
 use Model\Projects\ManageModel;
 use Model\Projects\ProjectDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
+use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use Model\WordCount\WordCountStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils as ReviewUtils;
@@ -44,6 +55,11 @@ class Job
     protected ?string $status = null;
 
     /**
+     * @var ChunkReviewDao|null
+     */
+    protected ?ChunkReviewDao $chunkReviewDao = null;
+
+    /**
      * @var UserStruct
      */
     protected UserStruct $user;
@@ -52,6 +68,17 @@ class Job
      * @var bool
      */
     protected bool $called_from_api = false;
+
+    protected IDatabase $database;
+
+    /**
+     * @param IDatabase $database
+     */
+    public function __construct(IDatabase $database)
+    {
+        $this->database = $database;
+        $this->chunkReviewDao = new ChunkReviewDao($database);
+    }
 
     /**
      * @param string $status
@@ -88,7 +115,9 @@ class Job
     /**
      * @param JobStruct $jStruct
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
+     * @throws Exception
+     * @throws \TypeError
      */
     protected function getKeyList(JobStruct $jStruct): array
     {
@@ -97,33 +126,33 @@ class Job
         }
 
         if (!$this->called_from_api) {
-            $out = $jStruct->getClientKeys($this->user, Filter::OWNER)['job_keys'];
+            $out = $jStruct->getClientKeys($this->user, Filter::OWNER, $this->database)['job_keys'];
         } else {
-            $out = $jStruct->getClientKeys($this->user, Filter::ROLE_TRANSLATOR)['job_keys'];
+            $out = $jStruct->getClientKeys($this->user, Filter::ROLE_TRANSLATOR, $this->database)['job_keys'];
         }
 
         return (new JobClientKeys($out))->render();
     }
 
     /**
-     * @param                         $chunk JobStruct
-     *
+     * @param JobStruct     $chunk
      * @param ProjectStruct $project
-     * @param FeatureSet $featureSet
+     * @param FeatureSet    $featureSet
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
+     * @throws \TypeError
      */
     public function renderItem(JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet): array
     {
-        $outsourceInfo = $chunk->getOutsource();
-        $tStruct = $chunk->getTranslator();
+        $outsourceInfo = $chunk->getOutsource(new ConfirmationDao($this->database));
+        $tStruct = $chunk->getTranslator(new JobsTranslatorsDao($this->database));
         $outsource = null;
         $translator = null;
         if (!empty($outsourceInfo)) {
             $outsource = (new OutsourceConfirmation($outsourceInfo))->render();
         } else {
-            $translator = (!empty($tStruct) ? (new JobTranslator($tStruct))->renderItem() : null);
+            $translator = (!empty($tStruct) ? (new JobTranslator($tStruct, new UserDao($this->database)))->renderItem() : null);
         }
 
         $jobStats = WordCountStruct::loadFromJob($chunk);
@@ -133,13 +162,16 @@ class Job
         $subject_handler = LanguageDomains::getInstance();
         $subjectsHashMap = $subject_handler->getEnabledHashMap();
 
-        $warningsCount = $chunk->getWarningsCount();
+        $warningsCount = $chunk->getWarningsCount(new WarningDao($this->database));
 
         // Added 5 minutes cache here
-        $chunkReviews = (new ChunkReviewDao())->findChunkReviews($chunk, 60 * 5);
+        $this->chunkReviewDao ??= new ChunkReviewDao($this->database);
+        $chunkReviews = $this->chunkReviewDao->findChunkReviews($chunk, 60 * 5);
 
         // is outsource available?
-        $outsourceAvailableInfo = $featureSet->filter('outsourceAvailableInfo', $chunk->target, $chunk->getProject()->id_customer, $chunk->id);
+        $outsourceAvailableInfoEvent = new OutsourceAvailableInfoEvent($chunk->target, (string)$chunk->getProject(new ProjectDao($this->database))->id_customer, (int)$chunk->id);
+        $featureSet->dispatch($outsourceAvailableInfoEvent);
+        $outsourceAvailableInfo = $outsourceAvailableInfoEvent->getFilterable();
 
         // if any plugin doesn't trigger the hook
         if (!is_array($outsourceAvailableInfo) or empty($outsourceAvailableInfo)) {
@@ -164,18 +196,21 @@ class Job
             'subject' => $chunk->subject,
             'subject_printable' => $subjectsHashMap[$chunk->subject],
             'owner' => $chunk->owner,
-            'open_threads_count' => (int)$chunk->getOpenThreadsCount(),
-            'create_timestamp' => strtotime($chunk->create_date),
+            'open_threads_count' => (int)$chunk->getOpenThreadsCount(new CommentDao($this->database)),
+            'create_timestamp' => strtotime($chunk->create_date ?? ''),
             'created_at' => Utils::api_timestamp($chunk->create_date),
             'create_date' => $chunk->create_date,
             'formatted_create_date' => ManageModel::formatJobDate($chunk->create_date),
-            'quality_overall' => CatUtils::getQualityOverallFromJobStruct($chunk, $chunkReviews),
-            'pee' => $chunk->getPeeForTranslatedSegments(),
+            'quality_overall' => (new CatUtils($this->database))->getQualityOverallFromJobStruct($chunk, $chunkReviews),
+            'pee' => $chunk->getPeeForTranslatedSegments(new JobDao($this->database)),
             'tte' => (int)($chunk->total_time_to_edit / 1000),
             'private_tm_key' => $this->getKeyList($chunk),
             'warnings_count' => $warningsCount->warnings_count,
             'warning_segments' => ($warningsCount->warning_segments ?? []),
-            'word_count_type' => $chunk->getProject()->getWordCountType(),
+            'word_count_type' => (new ProjectMetadataDao($this->database))
+                    ->setCacheTTL(3600)
+                    ->getValue((int) $project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)
+                ?? ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value,
             'stats' => $jobStats,
             'outsource' => $outsource,
             'outsource_available' => $outsourceAvailable,
@@ -184,8 +219,8 @@ class Job
             'total_raw_wc' => $chunk->total_raw_wc,
             'standard_wc' => (float)$chunk->standard_analysis_wc,
             'quality_summary' => [
-                'quality_overall' => $chunk->getQualityOverall($chunkReviews),
-                'errors_count' => $chunk->getErrorsCount()
+                'quality_overall' => $chunk->getQualityOverall($chunkReviews, new CatUtils($this->database)),
+                'errors_count' => $chunk->getErrorsCount(new WarningDao($this->database))
             ],
 
         ];
@@ -210,6 +245,9 @@ class Job
 
 
     /**
+     * @param array<string, mixed> $result
+     *
+     * @return array<string, mixed>
      * @throws AuthenticationError
      * @throws EndQueueException
      * @throws ReQueueException
@@ -220,12 +258,16 @@ class Job
      */
     protected function fillUrls(array $result, JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet): array
     {
-        $projectData = (new ProjectDao())->setCacheTTL(60 * 60 * 24)->getProjectData($project->id, $project->password);
+        $projectData = (new ProjectDao($this->database))->setCacheTTL(60 * 60 * 24)->getProjectData((int)$project->id, $project->password);
 
-        $formatted = new ProjectUrls($projectData);
+        $formatted = new ProjectUrls($projectData, new ChunkReviewDao($this->database));
 
-        /** @var $formatted ProjectUrls */
-        $formatted = $featureSet->filter('projectUrls', $formatted);
+        $projectUrlsEvent = new ProjectUrlsEvent($formatted);
+        $featureSet->dispatch($projectUrlsEvent);
+        $formatted = $projectUrlsEvent->getFormatted();
+        if (!$formatted instanceof ProjectUrls) {
+            throw new Exception('Invalid projectUrls hook payload');
+        }
 
         $urlsObject = $formatted->render(true);
         $result['urls'] = $urlsObject['jobs'][$chunk->id]['chunks'][$chunk->password] ?? [];

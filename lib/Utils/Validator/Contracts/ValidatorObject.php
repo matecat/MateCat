@@ -2,25 +2,25 @@
 
 namespace Utils\Validator\Contracts;
 
-use ArrayAccess;
 use Model\DataAccess\ArrayAccessTrait;
 use stdClass;
 
-class ValidatorObject implements ArrayAccess
+class ValidatorObject implements ValidatorObjectInterface
 {
 
     use ArrayAccessTrait;
 
+    /** @var array<string, mixed> */
     protected array $store = [];
 
     /**
      * @param stdClass $object
      *
-     * @return ValidatorObject
+     * @return self
      */
-    public static function fromObject(stdClass $object): ValidatorObject
+    public static function fromObject(stdClass $object): self
     {
-        $that = new static();
+        $that = new self();
         foreach (get_object_vars($object) as $key => $value) {
             $that->store[$key] = $value;
         }
@@ -29,13 +29,13 @@ class ValidatorObject implements ArrayAccess
     }
 
     /**
-     * @param array $array
+     * @param array<string, mixed> $array
      *
-     * @return ValidatorObject
+     * @return self
      */
-    public static function fromArray(array $array): ValidatorObject
+    public static function fromArray(array $array): self
     {
-        $that = new static();
+        $that = new self();
         foreach ($array as $key => $value) {
             $that->store[$key] = $value;
         }

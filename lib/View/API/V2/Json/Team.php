@@ -12,22 +12,35 @@ namespace View\API\V2\Json;
 use Exception;
 use Model\Teams\PendingInvitations;
 use Model\Teams\TeamStruct;
+use Model\Users\UserDao;
+use Predis\ClientInterface;
 use ReflectionException;
+use TypeError;
 use Utils\Redis\RedisHandler;
 use Utils\Tools\Utils;
 
 class Team
 {
 
+    /** @var TeamStruct[]|null */
     private ?array $data;
 
-    public function __construct(?array $data = null)
+    private UserDao $userDao;
+
+    /**
+     * @param UserDao $userDao
+     * @param TeamStruct[]|null $data
+     */
+    public function __construct(UserDao $userDao, ?array $data = null)
     {
         $this->data = $data;
+        $this->userDao = $userDao;
     }
 
     /**
+     * @return array<string, mixed>
      * @throws Exception
+     * @throws TypeError
      */
     public function renderItem(TeamStruct $team): array
     {
@@ -40,10 +53,10 @@ class Team
         ];
 
         $members = $team->getMembers();
-        $invitations = (new PendingInvitations((new RedisHandler())->getConnection(), []))->hasPendingInvitation((int)$team->id);
+        $invitations = $this->getPendingInvitations((int)$team->id);
 
         if (!empty($members)) {
-            $memberShipFormatter = new Membership($members);
+            $memberShipFormatter = new Membership($members, $this->userDao);
             $row['members'] = $memberShipFormatter->render();
         }
 
@@ -55,26 +68,44 @@ class Team
     /**
      * @param TeamStruct[]|null $data
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     public function render(?array $data = null): array
     {
         $out = [];
 
-        if (empty($data)) {
+        if ($data === null) {
             $data = $this->data;
         }
 
-        /**
-         * @var $data TeamStruct[]
-         */
-        foreach ($data as $team) {
+        foreach ($data ?? [] as $team) {
             $out[] = $this->renderItem($team);
         }
 
         return $out;
+    }
+
+    /**
+     * @return array<string>
+     * @throws Exception
+     */
+    protected function getPendingInvitations(int $teamId): array
+    {
+        return (new PendingInvitations(
+            $this->createRedisConnection(),
+            ['team_id' => $teamId, 'email' => '']
+        ))->hasPendingInvitation($teamId);
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function createRedisConnection(): ClientInterface
+    {
+        return (new RedisHandler())->getConnection();
     }
 
 

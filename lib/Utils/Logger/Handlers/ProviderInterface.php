@@ -19,7 +19,9 @@ interface ProviderInterface
     public function getHandlerClassName(): string;
 
     /**
-     * @return array configuration params for the handler
+     * @param string $name
+     * @param array<string, mixed> $configurationParams
+     * @return array<string, mixed> configuration params for the handler
      */
     public function getHandlerParams(string $name, array $configurationParams): array;
 

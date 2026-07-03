@@ -17,13 +17,19 @@ use Utils\Constants\TranslationStatus;
 
 class ReviewUtils
 {
+    private ChunkReviewDao $chunkReviewDao;
+
+    public function __construct(ChunkReviewDao $chunkReviewDao)
+    {
+        $this->chunkReviewDao = $chunkReviewDao;
+    }
 
     /**
-     * @param $number
+     * @param int|null $number
      *
      * @return string|null
      */
-    public static function sourcePageToTranslationStatus($number = null): ?string
+    public static function sourcePageToTranslationStatus(int $number = null): ?string
     {
         $statuses = [
             SourcePages::SOURCE_PAGE_TRANSLATE => TranslationStatus::STATUS_TRANSLATED,
@@ -31,7 +37,7 @@ class ReviewUtils
             SourcePages::SOURCE_PAGE_REVISION_2 => TranslationStatus::STATUS_APPROVED2
         ];
 
-        return empty($number) ? null : $statuses[$number];
+        return empty($number) ? null : ($statuses[$number] ?? null);
     }
 
     /**
@@ -66,27 +72,26 @@ class ReviewUtils
     {
         $limit = $lqaModel->getLimit();
 
-        if (is_array($limit)) {
-            /**
-             * Limit array index equals to $source_page -2.
-             */
-            return $limit[$sourcePage - 2] ?? end($limit);
-        }
+        /**
+         * Limit array index equals to $source_page -2.
+         */
+        $value = $limit[$sourcePage - 2] ?? end($limit);
 
-        return $limit;
+        return (int)$value;
     }
 
     /**
      * @param JobStruct $chunk
      *
      * @return int[]
+     * @throws Exception
      */
-    public static function validRevisionNumbers(JobStruct $chunk): array
+    public function validRevisionNumbers(JobStruct $chunk): array
     {
-        $chunkReviews = (new ChunkReviewDao())->findChunkReviews($chunk);
+        $chunkReviews = $this->chunkReviewDao->findChunkReviews($chunk);
 
-        return array_map(function ($chunkReview) {
+        return array_values(array_filter(array_map(function ($chunkReview) {
             return self::sourcePageToRevisionNumber($chunkReview->source_page);
-        }, $chunkReviews);
+        }, $chunkReviews)));
     }
 }

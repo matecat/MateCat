@@ -8,6 +8,7 @@ use Model\Concerns\LogsMessages;
 use Model\DataAccess\IDatabase;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentMetadataMarshaller;
 use PDO;
 use PDOException;
 use PDOStatement;
@@ -49,14 +50,14 @@ class ProjectManagerModel
         $data['pretranslate_100'] = $projectStructure->pretranslate_100;
         $data['remote_ip_address'] = empty($projectStructure->user_ip) ? 'UNKNOWN' : $projectStructure->user_ip;
         $data['id_assignee'] = $idAssignee;
-        $data['instance_id'] = $projectStructure->instance_id ?? AppConfig::$INSTANCE_ID;
+        $data['instance_id'] = $projectStructure->instance_id ?: AppConfig::$INSTANCE_ID;
         $data['due_date'] = $projectStructure->due_date;
 
         $this->dbHandler->begin();
 
         try {
             $projectId = $this->dbHandler->insert('projects', $data);
-            $project = ProjectDao::findById($projectId);
+            $project = (new ProjectDao($this->dbHandler))->findById((int)$projectId);
             $this->dbHandler->commit();
         } catch (Exception $e) {
             $this->dbHandler->rollback();
@@ -96,6 +97,7 @@ class ProjectManagerModel
     /**
      * @param list<array<string, mixed>> $query_translations_values
      * @throws PDOException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     public function insertPreTranslations(array $query_translations_values): void
     {
@@ -137,6 +139,7 @@ class ProjectManagerModel
      * @param int $errorCode Code to attach to re-thrown PDOException
      *
      * @throws PDOException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function executeBulkInsert(
         string $insertTemplate,
@@ -186,6 +189,7 @@ class ProjectManagerModel
      * @param array<int|string, array<string, mixed>> $notes
      *
      * @throws PDOException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     public function bulkInsertSegmentNotesAndMetadata(array $notes): void
     {
@@ -256,21 +260,14 @@ class ProjectManagerModel
      */
     private static function isAMetadata(string $metaKey): bool
     {
-        $metaDataKeys = [
-            'id_request',
-            'id_content',
-            'id_order',
-            'id_order_group',
-            'screenshot'
-        ];
-
-        return in_array($metaKey, $metaDataKeys);
+        return SegmentMetadataMarshaller::isAllowed($metaKey);
     }
 
     /**
      * @param array<int|string, array<string, mixed>> $contextGroups
      *
      * @throws PDOException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     public function bulkInsertContextsGroups(int $idProject, array $contextGroups): void
     {

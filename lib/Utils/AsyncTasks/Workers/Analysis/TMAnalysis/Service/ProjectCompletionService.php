@@ -2,7 +2,6 @@
 
 namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 
-use Exception;
 use Model\FeaturesBase\FeatureSet;
 use RuntimeException;
 use Throwable;
@@ -101,12 +100,6 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
                 // Remove from queue AFTER commit — if the worker crashes before commit,
                 // the project stays in the queue and another worker can retry.
                 $this->redisService->removeProjectFromQueue($queueKey, $pid);
-
-                try {
-                    $featureSet->run('afterTMAnalysisCloseProject', $pid, $_analyzed_report);
-                } catch (Exception $e) {
-                    LoggerFactory::doJsonLog("Ending project_id $pid with error {$e->getMessage()} . COMPLETED.");
-                }
 
                 $this->repository->destroyAllCaches($pid, $projectPassword);
             } catch (Throwable $e) {

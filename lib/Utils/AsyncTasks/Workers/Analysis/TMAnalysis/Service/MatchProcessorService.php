@@ -2,11 +2,13 @@
 
 namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 
+use DomainException;
 use Exception;
 use Matecat\ICU\MessagePatternComparator;
 use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\MatchProcessorServiceInterface;
@@ -19,10 +21,12 @@ use Utils\LQA\PostProcess;
 class MatchProcessorService implements MatchProcessorServiceInterface
 {
     private MatchSorterInterface $matchSorter;
+    private IDatabase $database;
 
-    public function __construct(MatchSorterInterface $matchSorter)
+    public function __construct(MatchSorterInterface $matchSorter, IDatabase $database)
     {
         $this->matchSorter = $matchSorter;
+        $this->database = $database;
     }
 
     /**
@@ -37,7 +41,7 @@ class MatchProcessorService implements MatchProcessorServiceInterface
      * @param array<string, mixed>              $mtResult
      * @param array<int, array<string, mixed>>  $tmMatches
      *
-     * @return array<int, array<string, mixed>>
+     * @return list<array<string, mixed>>
      */
     public function sortMatches(array $mtResult, array $tmMatches): array
     {
@@ -55,6 +59,7 @@ class MatchProcessorService implements MatchProcessorServiceInterface
      *
      * @return array{0: ?MessagePatternComparator, 1: bool}
      *         [comparator (null when ICU is not detected), sourceContainsIcu flag]
+     * @throws DomainException
      */
     private function detectIcu(
         string $sourceLang,
@@ -115,7 +120,7 @@ class MatchProcessorService implements MatchProcessorServiceInterface
     ): array {
         $suggestion = $match['translation'] ?? '';
 
-        $metadataDao = new ProjectsMetadataDao();
+        $metadataDao = new ProjectsMetadataDao($this->database);
         $filter = MateCatFilter::getInstance(
             $featureSet,
             $source,

@@ -16,16 +16,22 @@ use Controller\API\Commons\Validators\IsOwnerInternalUserValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Klein\App;
+use RuntimeException;
 use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
 use Lara\LaraException;
 use Model\Jobs\JobStruct;
-use Model\TmKeyManagement\MemoryKeyStruct;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\Lara;
+use Utils\Engines\Lara\Headers;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\ContextList;
 use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
+use TypeError;
+use Utils\Tools\Utils;
 
 class LaraAuthController extends AbstractStatefulKleinController
 {
@@ -41,6 +47,7 @@ class LaraAuthController extends AbstractStatefulKleinController
      * @param App|null $app
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function __construct(
         Request $request,
@@ -60,6 +67,7 @@ class LaraAuthController extends AbstractStatefulKleinController
      *
      * @return void
      * @throws Exception
+     * @throws TypeError
      */
     protected function initLogger(): void
     {
@@ -68,7 +76,7 @@ class LaraAuthController extends AbstractStatefulKleinController
         $this->logger = LoggerFactory::getLogger($loggerName, $loggerName);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
 
@@ -88,6 +96,7 @@ class LaraAuthController extends AbstractStatefulKleinController
      * @param ChunkPasswordValidator $chunkValidator
      *
      * @return void
+     * @throws RuntimeException
      */
     protected function onChunkValidated(ChunkPasswordValidator $chunkValidator): void
     {
@@ -146,13 +155,14 @@ class LaraAuthController extends AbstractStatefulKleinController
         // Parse + filter the chunk TM keys, keeping only "owner" keys with read ("r") permission.
         $tm_keys = TmKeyManager::getOwnerKeys([$this->chunk->tm_keys ?? '[]'], 'r');
 
-        // Extract raw key strings
+        // Extract raw key strings, filter nulls, join into a comma-separated list.
+        // performLaraAuth() handles remapping to Lara external memory IDs internally.
         $tmKeysList = implode(
-            ',',
-            array_map(function ($tm_key) {
-                /** @var $tm_key MemoryKeyStruct */
-                return $tm_key->key;
-            }, $tm_keys)
+            ",",
+            array_filter(
+                array_map(fn(TmKeyStruct $tm_key): ?string => $tm_key->key, $tm_keys),
+                fn(?string $key): bool => $key !== null
+            )
         );
 
         $this->performLaraAuth($this->chunk->id_mt_engine, $tmKeysList);

@@ -18,7 +18,7 @@ class QAModelTemplatePassfailStruct extends AbstractDaoSilentStruct implements I
     public array $thresholds = [];
 
     /**
-     * @inheritDoc
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {

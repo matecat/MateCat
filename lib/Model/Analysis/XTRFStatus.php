@@ -16,13 +16,15 @@ class XTRFStatus extends AbstractStatus
 {
 
     /**
-     * @return array
+     * @return array<string, string|null>
+     * @throws \DivisionByZeroError
+     * @throws \DateMalformedStringException
      */
     public function getResultArray(): array
     {
         $outputContent = [];
 
-        if (!empty($this->result->getJobs())) {
+        if ($this->result !== null && !empty($this->result->getJobs())) {
             foreach ($this->result->getJobs() as $j) {
                 foreach ($j->getChunks() as $chunk) {
                     $vector = [
@@ -50,7 +52,13 @@ class XTRFStatus extends AbstractStatus
         return $outputContent;
     }
 
-    protected function formatFile(MatchContainerInterface $values, $vector): string
+    /**
+     * @param MatchContainerInterface $values
+     * @param array<string, string> $vector
+     * @throws \DivisionByZeroError
+     * @throws \DateMalformedStringException
+     */
+    protected function formatFile(MatchContainerInterface $values, array $vector): string
     {
         $_TOTAL_RAW_SUM = (
             $values->getMatch(StandardMatchTypeNamesConstants::_NEW)->getRaw() +
@@ -83,7 +91,7 @@ class XTRFStatus extends AbstractStatus
         );
 
         $fileContent = $vector['firstLine'] . PHP_EOL;
-        $fileContent .= str_pad("Date: ", 23) . date_create($vector['create_date'])->format(DATE_RFC822) . PHP_EOL;
+        $fileContent .= str_pad("Date: ", 23) . (new \DateTime($vector['create_date']))->format(DATE_RFC822) . PHP_EOL;
         $fileContent .= str_pad("Project: ", 23) . $vector['name'] . PHP_EOL;
         $fileContent .= str_pad("Language direction: ", 23) . $vector['source'] . " > " . $vector['target'] . PHP_EOL;
         $fileContent .= PHP_EOL;
@@ -96,73 +104,73 @@ class XTRFStatus extends AbstractStatus
 
         $fileContent .=
             str_pad("New words", 16) .
-            str_pad($values->getMatch(StandardMatchTypeNamesConstants::_NEW)->getRaw(), 12, " ", STR_PAD_LEFT) .
+            str_pad((string)$values->getMatch(StandardMatchTypeNamesConstants::_NEW)->getRaw(), 12, " ", STR_PAD_LEFT) .
             str_pad(number_format($values->getMatch(StandardMatchTypeNamesConstants::_NEW)->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', ''), 14, " ", STR_PAD_LEFT) .
             PHP_EOL;
 
         $fileContent .=
             str_pad("Context Matches", 16) .
-            str_pad($values->getMatch(StandardMatchTypeNamesConstants::_ICE)->getRaw(), 12, " ", STR_PAD_LEFT) .
+            str_pad((string)$values->getMatch(StandardMatchTypeNamesConstants::_ICE)->getRaw(), 12, " ", STR_PAD_LEFT) .
             str_pad(number_format($values->getMatch(StandardMatchTypeNamesConstants::_ICE)->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', ''), 14, " ", STR_PAD_LEFT) .
             PHP_EOL;
 
         $fileContent .=
             str_pad("Repetitions", 16) .
-            str_pad($values->getMatch(StandardMatchTypeNamesConstants::_REPETITIONS)->getRaw(), 12, " ", STR_PAD_LEFT) .
+            str_pad((string)$values->getMatch(StandardMatchTypeNamesConstants::_REPETITIONS)->getRaw(), 12, " ", STR_PAD_LEFT) .
             str_pad(number_format($values->getMatch(StandardMatchTypeNamesConstants::_REPETITIONS)->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', ''), 14, " ", STR_PAD_LEFT) .
             PHP_EOL;
 
         $fileContent .=
             str_pad("Format Change", 16) .
-            str_pad($values->getMatch(StandardMatchTypeNamesConstants::_NUMBERS_ONLY)->getRaw(), 12, " ", STR_PAD_LEFT) .
+            str_pad((string)$values->getMatch(StandardMatchTypeNamesConstants::_NUMBERS_ONLY)->getRaw(), 12, " ", STR_PAD_LEFT) .
             str_pad(number_format($values->getMatch(StandardMatchTypeNamesConstants::_NUMBERS_ONLY)->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', ''), 14, " ", STR_PAD_LEFT) .
             PHP_EOL;
 
         $fileContent .=
             str_pad("Internal Matches", 16) .
-            str_pad($values->getMatch(StandardMatchTypeNamesConstants::_INTERNAL)->getRaw(), 12, " ", STR_PAD_LEFT) .
+            str_pad((string)$values->getMatch(StandardMatchTypeNamesConstants::_INTERNAL)->getRaw(), 12, " ", STR_PAD_LEFT) .
             str_pad(number_format($values->getMatch(StandardMatchTypeNamesConstants::_INTERNAL)->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', ''), 14, " ", STR_PAD_LEFT) .
             PHP_EOL;
 
         $fileContent .=
             str_pad("100%", 16) .
-            str_pad($values->getMatch(StandardMatchTypeNamesConstants::_100)->getRaw(), 12, " ", STR_PAD_LEFT) .
+            str_pad((string)$values->getMatch(StandardMatchTypeNamesConstants::_100)->getRaw(), 12, " ", STR_PAD_LEFT) .
             str_pad(number_format($values->getMatch(StandardMatchTypeNamesConstants::_100)->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', ''), 14, " ", STR_PAD_LEFT) .
             PHP_EOL;
 
         $fileContent .=
             str_pad("100% Public TM", 16) .
-            str_pad($values->getMatch(StandardMatchTypeNamesConstants::_100_PUBLIC)->getRaw(), 12, " ", STR_PAD_LEFT) .
+            str_pad((string)$values->getMatch(StandardMatchTypeNamesConstants::_100_PUBLIC)->getRaw(), 12, " ", STR_PAD_LEFT) .
             str_pad(number_format($values->getMatch(StandardMatchTypeNamesConstants::_100_PUBLIC)->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', ''), 14, " ", STR_PAD_LEFT) .
             PHP_EOL;
 
         $fileContent .=
             str_pad("95% - 99%", 16) .
-            str_pad($values->getMatch(StandardMatchTypeNamesConstants::_95_99)->getRaw(), 12, " ", STR_PAD_LEFT) .
+            str_pad((string)$values->getMatch(StandardMatchTypeNamesConstants::_95_99)->getRaw(), 12, " ", STR_PAD_LEFT) .
             str_pad(number_format($values->getMatch(StandardMatchTypeNamesConstants::_95_99)->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', ''), 14, " ", STR_PAD_LEFT) .
             PHP_EOL;
 
         $fileContent .=
             str_pad("85% - 94%", 16) .
-            str_pad($values->getMatch(StandardMatchTypeNamesConstants::_85_94)->getRaw(), 12, " ", STR_PAD_LEFT) .
+            str_pad((string)$values->getMatch(StandardMatchTypeNamesConstants::_85_94)->getRaw(), 12, " ", STR_PAD_LEFT) .
             str_pad(number_format($values->getMatch(StandardMatchTypeNamesConstants::_85_94)->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', ''), 14, " ", STR_PAD_LEFT) .
             PHP_EOL;
 
         $fileContent .=
             str_pad("75% - 84%", 16) .
-            str_pad($values->getMatch(StandardMatchTypeNamesConstants::_75_84)->getRaw(), 12, " ", STR_PAD_LEFT) .
+            str_pad((string)$values->getMatch(StandardMatchTypeNamesConstants::_75_84)->getRaw(), 12, " ", STR_PAD_LEFT) .
             str_pad(number_format($values->getMatch(StandardMatchTypeNamesConstants::_75_84)->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', ''), 14, " ", STR_PAD_LEFT) .
             PHP_EOL;
 
         $fileContent .=
             str_pad("50% - 74%", 16) .
-            str_pad($values->getMatch(StandardMatchTypeNamesConstants::_50_74)->getRaw(), 12, " ", STR_PAD_LEFT) .
+            str_pad((string)$values->getMatch(StandardMatchTypeNamesConstants::_50_74)->getRaw(), 12, " ", STR_PAD_LEFT) .
             str_pad(number_format($values->getMatch(StandardMatchTypeNamesConstants::_50_74)->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', ''), 14, " ", STR_PAD_LEFT) .
             PHP_EOL;
 
         $fileContent .=
             str_pad("MT", 16) .
-            str_pad($values->getMatch(StandardMatchTypeNamesConstants::_MT)->getRaw(), 12, " ", STR_PAD_LEFT) .
+            str_pad((string)$values->getMatch(StandardMatchTypeNamesConstants::_MT)->getRaw(), 12, " ", STR_PAD_LEFT) .
             str_pad(number_format($values->getMatch(StandardMatchTypeNamesConstants::_MT)->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', ''), 14, " ", STR_PAD_LEFT) .
             PHP_EOL;
 
@@ -170,13 +178,13 @@ class XTRFStatus extends AbstractStatus
 
         $fileContent .=
             str_pad("Total Payable", 16) .
-            str_pad($TOTAL_EQUIVALENT, 12, " ", STR_PAD_LEFT) .
+            str_pad((string)$TOTAL_EQUIVALENT, 12, " ", STR_PAD_LEFT) .
             str_pad(number_format($TOTAL_EQUIVALENT / $_TOTAL_RAW_SUM * 100, 2, '.', ''), 14, " ", STR_PAD_LEFT) .
             PHP_EOL;
 
         $fileContent .=
             str_pad("Total", 16) .
-            str_pad($_TOTAL_RAW_SUM, 12, " ", STR_PAD_LEFT) .
+            str_pad((string)$_TOTAL_RAW_SUM, 12, " ", STR_PAD_LEFT) .
             str_pad(number_format(100, 2, '.', ''), 14, " ", STR_PAD_LEFT) .
             PHP_EOL;
 

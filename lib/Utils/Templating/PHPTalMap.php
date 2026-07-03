@@ -14,13 +14,20 @@ use Stringable;
  * Time: 12:39
  *
  */
+/**
+ * @implements ArrayAccess<array-key, mixed>
+ */
 class PHPTalMap implements ArrayAccess, JsonSerializable, Stringable
 {
 
     use ArrayAccessTrait;
 
+    /** @var array<array-key, mixed> */
     private array $storage = [];
 
+    /**
+     * @param array<array-key, mixed> $values
+     */
     public function __construct(array $values = [])
     {
         foreach ($values as $key => $value) {
@@ -36,11 +43,24 @@ class PHPTalMap implements ArrayAccess, JsonSerializable, Stringable
         }
     }
 
-    public function __toString(): string
+    public function __get(string $name): mixed
     {
-        return json_encode($this->storage);
+        return $this->storage[$name] ?? null;
     }
 
+    public function __set(string $name, mixed $value): void
+    {
+        $this->storage[$name] = $value;
+    }
+
+    public function __toString(): string
+    {
+        return json_encode($this->storage) ?: '{}';
+    }
+
+    /**
+     * @return array<array-key, mixed>
+     */
     public function jsonSerialize(): array
     {
         return $this->storage;

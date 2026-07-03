@@ -1,7 +1,6 @@
 @mixin linear-gradient($fallback, $params...) {
   background-color: $fallback;
   background-image: -webkit-linear-gradient($params);
-  background-image: -moz-linear-gradient($params);
   background-image: -o-linear-gradient($params);
   background-image: linear-gradient($params);
 }

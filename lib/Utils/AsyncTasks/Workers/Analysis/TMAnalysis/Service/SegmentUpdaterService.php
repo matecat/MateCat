@@ -28,7 +28,13 @@ class SegmentUpdaterService implements SegmentUpdaterServiceInterface
         return (new SegmentTranslationDao($this->db))->setAnalysisValue($tmData);
     }
 
-    public function forceSetSegmentAnalyzed(int $idSegment, int $idJob): bool
+    /**
+     * @param int $idSegment
+     * @param int $idJob
+     * @return int
+     * @throws PDOException
+     */
+    public function forceSetSegmentAnalyzed(int $idSegment, int $idJob): int
     {
         try {
             $stmt = $this->db->getConnection()->prepare(
@@ -43,14 +49,16 @@ class SegmentUpdaterService implements SegmentUpdaterServiceInterface
         } catch (PDOException $e) {
             LoggerFactory::doJsonLog($e->getMessage());
             LoggerFactory::doJsonLog("**** DB failure in forceSetSegmentAnalyzed for segment $idSegment. NOT incrementing counters.");
-            return false;
+            return 0;
         }
 
         if ($affectedRows === 0) {
-            LoggerFactory::doJsonLog("Segment $idSegment already DONE, skipping force-set side-effects.");
-            return false;
+            return (new SegmentTranslationDao($this->db))->isTranslationSkipped(
+                $idSegment,
+                $idJob
+            ) ? -1 : 0;
         }
 
-        return true;
+        return $affectedRows;
     }
 }

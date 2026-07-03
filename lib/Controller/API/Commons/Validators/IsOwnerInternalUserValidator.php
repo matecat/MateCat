@@ -13,6 +13,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Exception;
+use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 use Model\Jobs\JobStruct;
 
 class IsOwnerInternalUserValidator extends Base
@@ -34,10 +35,8 @@ class IsOwnerInternalUserValidator extends Base
      */
     public function _validate(): void
     {
-        $this->controller->getFeatureSet()->filter(
-            "isAnInternalUser",
-            $this->jobStruct->owner
-        ) ?: throw new AuthorizationError('Forbidden, Lara Think only accepts requests from internal users');
+        $event = $this->controller->getFeatureSet()->dispatch(new IsAnInternalUserEvent($this->jobStruct->owner));
+        $event->isInternal() ?: throw new AuthorizationError('Forbidden, Lara Think only accepts requests from internal users');
     }
 
 

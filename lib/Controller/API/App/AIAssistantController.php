@@ -18,6 +18,8 @@ class AIAssistantController extends KleinController
 
     /**
      * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidLanguageException
      */
     public function index(): void
     {
@@ -25,7 +27,10 @@ class AIAssistantController extends KleinController
             throw new Exception('OpenAI API key not set');
         }
 
-        $json = json_decode($this->request->body(), true);
+        $json = json_decode($this->request->body() ?? '', true);
+        if (!is_array($json)) {
+            throw new InvalidArgumentException('Invalid JSON body');
+        }
 
         // target
         if (!isset($json['target'])) {
@@ -93,6 +98,10 @@ class AIAssistantController extends KleinController
 
     /**
      * Provide a feedback on a translation
+     *
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidLanguageException
      */
     public function feedback(): void
     {
@@ -100,7 +109,10 @@ class AIAssistantController extends KleinController
             throw new Exception('OpenAI API key not set');
         }
 
-        $json = json_decode($this->request->body(), true);
+        $json = json_decode($this->request->body() ?? '', true);
+        if (!is_array($json)) {
+            throw new InvalidArgumentException('Invalid JSON body');
+        }
 
         // source
         if (!isset($json['source_language'])) {
@@ -174,6 +186,10 @@ class AIAssistantController extends KleinController
 
     /**
      * Provide alternative translations
+     *
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidLanguageException
      */
     public function alternative_translations(): void
     {
@@ -181,7 +197,10 @@ class AIAssistantController extends KleinController
             throw new Exception('Gemini API key not set');
         }
 
-        $json = json_decode($this->request->body(), true);
+        $json = json_decode($this->request->body() ?? '', true);
+        if (!is_array($json)) {
+            throw new InvalidArgumentException('Invalid JSON body');
+        }
 
         // source
         if (!isset($json['source_language'])) {
@@ -286,11 +305,12 @@ class AIAssistantController extends KleinController
     }
 
     /**
-     * @param array $params
+     * @param array<string, mixed> $params
      *
      * @throws Exception
+     * @throws InvalidArgumentException
      */
-    private function enqueueWorker(array $params): void
+    protected function enqueueWorker(array $params): void
     {
         WorkerClient::enqueue(self::AI_ASSISTANT_EXPLAIN_MEANING, AIAssistantWorker::class, $params, ['persistent' => WorkerClient::$_HANDLER->persistent]);
     }

@@ -9,8 +9,11 @@ nbproject/
 webgrind/
 _dic_cache
 .phpunit.result.cache
-/docs
-
+/docs/*
+!/docs/*.md
+!/docs/*.png
+!/docs/reviews/
+/wiki/*
 # Configuration files
 .num_processes
 inc/*.dat
@@ -44,7 +47,6 @@ package-lock.json
 
 # Development env config files
 .agignore
-.vagrant
 
 # More stuffs
 Test_Local/*
@@ -68,9 +70,6 @@ vendor
 
 phinx.yml
 
-.lastjobprocessed_jpeer
-.maxJobToProcess_jpeer
-
 mmt_fallback_key.ini
 
 inc/google_translate/mmt_fallback_credentials.json
@@ -85,3 +84,7 @@ certs
 /CallGraph
 /PHP-SQL-Parser
 /storage
+# Added by code-review-graph
+.code-review-graph/
+plugins/headroom_memory.db
+evidence/

@@ -13,6 +13,7 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
+use Model\Projects\ProjectDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use View\API\V2\Json\SegmentVersion;
 
@@ -28,9 +29,9 @@ class ChunkTranslationVersionController extends KleinController
     {
         $this->return404IfTheJobWasDeleted();
 
-        $results = TranslationVersionDao::getVersionsForChunk($this->chunk);
+        $results = (new TranslationVersionDao($this->getDatabase()))->getVersionsForChunk($this->chunk);
 
-        $this->featureSet->loadForProject($this->chunk->getProject());
+        $this->featureSet->loadForProject($this->chunk->getProject(new ProjectDao($this->getDatabase())));
 
         $formatted = new SegmentVersion($this->chunk, $results, false, $this->featureSet);
 
@@ -39,7 +40,7 @@ class ChunkTranslationVersionController extends KleinController
         ]);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $Validator = new ChunkPasswordValidator($this);

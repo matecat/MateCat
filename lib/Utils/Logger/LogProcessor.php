@@ -40,7 +40,7 @@ class LogProcessor extends IntrospectionProcessor
 
         // Add custom fields to the 'extra' section of the log record.
         $record['extra'] = [
-            'ip' => Utils::getRealIpAddr() ?? gethostbyname(gethostname()), // Retrieve the real IP address or fallback to the hostname.
+            'ip' => Utils::getRealIpAddr() ?? gethostbyname(gethostname() ?: 'unknown'), // Retrieve the real IP address or fallback to the hostname.
             "token_hash" => LoggerFactory::$uniqID, // Add a unique token hash for the log context.
             "context" => $record['extra'], // Include the original 'extra' context.
             "time" => time(), // Add the current timestamp.

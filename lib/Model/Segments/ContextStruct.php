@@ -14,6 +14,9 @@ use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\IDaoStruct;
 
+/**
+ * @implements ArrayAccess<string, mixed>
+ */
 class ContextStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess
 {
 
@@ -24,14 +27,15 @@ class ContextStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
     public int $id_segment;
     public ?int $id_file = null;
     /**
-     * @var string|array
+     * @var array<string, mixed>|string
      */
     public mixed $context_json;
 
-    public function __construct(array $array_params = [], $decode = true)
+    /** @param array<string, mixed> $array_params */
+    public function __construct(array $array_params = [], bool $decode = true)
     {
         parent::__construct($array_params);
-        if ($decode) {
+        if ($decode && is_string($this->context_json)) {
             $this->context_json = json_decode($this->context_json);
         }
     }

@@ -3,6 +3,7 @@
 namespace Plugins\Features;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\LQA\ChunkReviewStruct;
@@ -25,18 +26,19 @@ class RevisionFactory
     /**
      * @param AbstractRevisionFeature|null $revisionFeature
      *
-     * @return RevisionFactory
+     * @return self
      * @throws Exception
      */
-    public static function getInstance(AbstractRevisionFeature $revisionFeature = null): RevisionFactory
+    public static function getInstance(?AbstractRevisionFeature $revisionFeature = null): self
     {
-        if (static::$INSTANCE == null && $revisionFeature == null) {
-            throw new Exception('Revision not defined');
-        } elseif (static::$INSTANCE == null) {
-            static::$INSTANCE = new self($revisionFeature);
+        if (self::$INSTANCE === null) {
+            if ($revisionFeature === null) {
+                throw new Exception('Revision not defined');
+            }
+            self::$INSTANCE = new self($revisionFeature);
         }
 
-        return static::$INSTANCE;
+        return self::$INSTANCE;
     }
 
     protected function __construct(AbstractRevisionFeature $revisionFeature)
@@ -59,7 +61,7 @@ class RevisionFactory
      *
      * @return $this
      */
-    public function setFeatureSet(FeatureSet $featureSet): RevisionFactory
+    public function setFeatureSet(FeatureSet $featureSet): self
     {
         $this->_featureSet = $featureSet;
 
@@ -78,25 +80,28 @@ class RevisionFactory
      * This works because revision plugins are by default not forcedly injected on projects ($forceOnProject == false).
      *
      * @param ProjectStruct $project
+     * @param IDatabase $database
      *
-     * @return static
+     * @return self
      * @throws Exception
      */
-    public static function initFromProject(ProjectStruct $project): RevisionFactory
+    public static function initFromProject(ProjectStruct $project, IDatabase $database): self
     {
-        foreach ($project->getFeaturesSet()->getFeaturesStructs() as $featureStruct) {
-            $feature = $featureStruct->toNewObject();
+        $featureSet = FeatureSet::forProject($project, $database);
+
+        foreach ($featureSet->getFeaturesStructs() as $featureStruct) {
+            $feature = $featureStruct->toNewObject($database);
             if ($feature instanceof AbstractRevisionFeature) { //only one revision type can be present
-                return static::getInstance($feature)->setFeatureSet($project->getFeaturesSet());
+                return self::getInstance($feature)->setFeatureSet($featureSet);
             }
         }
 
         /**
          * This return should never happen if the review_extended plugin is loaded as mandatory (or as dependency of mandatory second_pass_review plugin)
          */
-        return static::getInstance(
+        return self::getInstance(
             new SecondPassReview(new BasicFeatureStruct(['feature_code' => ReviewExtended::FEATURE_CODE]))
-        )->setFeatureSet($project->getFeaturesSet());
+        )->setFeatureSet($featureSet);
     }
 
     /**

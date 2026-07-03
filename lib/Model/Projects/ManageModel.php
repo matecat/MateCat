@@ -5,10 +5,11 @@ namespace Model\Projects;
 use DateInterval;
 use DateTime;
 use Exception;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use PDO;
+use PDOException;
 use ReflectionException;
 use Utils\Constants\ProjectStatus;
 use View\API\V2\Json\Project;
@@ -18,23 +19,24 @@ class ManageModel
 
 
     /**
-     * @param                       $start                int
-     * @param                       $step                 int
-     * @param string|null $search_in_pname string
-     * @param string|null $search_source string
-     * @param string|null $search_target string
-     * @param string|null $search_status string
+     * @param int $start
+     * @param int $step
+     * @param string|null $search_in_pname
+     * @param string|null $search_source
+     * @param string|null $search_target
+     * @param string|null $search_status
      * @param bool|null $search_only_completed
-     * @param int|null $project_id int
-     *
+     * @param int|null $project_id
      * @param TeamStruct|null $team
-     *
      * @param UserStruct|null $assignee
-     * @param bool $no_assignee
+     * @param bool|null $no_assignee
      *
-     * @return array
+     * @return list<int>
+     *
+     * @throws PDOException
      */
     protected static function _getProjects(
+        IDatabase $database,
         int $start,
         int $step,
         ?string $search_in_pname,
@@ -87,12 +89,12 @@ class ManageModel
                 LIMIT $start, $step 
             ";
 
-        $stmt = Database::obtain()->getConnection()->prepare($projectsQuery);
+        $stmt = $database->getConnection()->prepare($projectsQuery);
         $stmt->execute($data);
 
-        return array_map(function ($d) {
-            return $d['id'];
-        }, $stmt->fetchAll(PDO::FETCH_ASSOC));
+        return array_values(array_map(function ($d) {
+            return (int) $d['id'];
+        }, $stmt->fetchAll(PDO::FETCH_ASSOC)));
     }
 
     /**
@@ -109,11 +111,16 @@ class ManageModel
      * @param UserStruct|null $assignee
      * @param bool $no_assignee
      *
-     * @return array
+     * @return list<array<string, mixed>>
+     *
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
+     * @throws \TypeError
      */
     public static function getProjects(
         UserStruct $user,
+        IDatabase $database,
         int $start,
         int $step,
         ?string $search_in_pname,
@@ -127,6 +134,7 @@ class ManageModel
         ?bool $no_assignee = false
     ): array {
         $id_list = static::_getProjects(
+            $database,
             $start,
             $step,
             $search_in_pname,
@@ -140,10 +148,10 @@ class ManageModel
             $no_assignee
         );
 
-        $_projects = new ProjectDao();
-        $projects = $_projects->getByIdList($id_list);
+        $projects = (new ProjectDao($database))->getByIdList($id_list);
+        /** @var array<ProjectStruct> $projects */
 
-        $projectRenderer = new Project($projects, $search_status);
+        $projectRenderer = new Project($database, $projects, $search_status);
         $projectRenderer->setUser($user);
 
         return $projectRenderer->render();
@@ -160,7 +168,7 @@ class ManageModel
      * @param string|null $search_status
      * @param bool $search_only_completed
      *
-     * @return array
+     * @return array{list<string>, array<string, string>}
      */
     protected static function conditionsForProjectsQuery(
         ?string $search_in_pname,
@@ -201,25 +209,28 @@ class ManageModel
     }
 
     /**
-     * @param                        $search_in_pname
-     * @param                        $search_source
-     * @param                        $search_target
-     * @param                        $search_status
-     * @param                        $search_only_completed
+     * @param string|null $search_in_pname
+     * @param string|null $search_source
+     * @param string|null $search_target
+     * @param string|null $search_status
+     * @param bool|null $search_only_completed
      * @param TeamStruct|null $team
      * @param UserStruct|null $assignee
      * @param bool $no_assignee
      *
-     * @return array
+     * @return list<array<string, mixed>>
+     *
+     * @throws PDOException
      */
     public static function getProjectsNumber(
-        $search_in_pname,
-        $search_source,
-        $search_target,
-        $search_status,
-        $search_only_completed,
-        TeamStruct $team = null,
-        UserStruct $assignee = null,
+        IDatabase $database,
+        ?string $search_in_pname,
+        ?string $search_source,
+        ?string $search_target,
+        ?string $search_status,
+        ?bool $search_only_completed,
+        ?TeamStruct $team = null,
+        ?UserStruct $assignee = null,
         bool $no_assignee = false
     ): array {
         [$conditions, $data] = static::conditionsForProjectsQuery(
@@ -252,9 +263,10 @@ class ManageModel
             $query = $query . " AND " . implode(" AND ", $conditions);
         }
 
-        $stmt = Database::obtain()->getConnection()->prepare($query);
+        $stmt = $database->getConnection()->prepare($query);
         $stmt->execute($data);
 
+        /** @var list<array<string, mixed>> */
         return $stmt->fetchAll();
     }
 
@@ -269,11 +281,11 @@ class ManageModel
      */
     public static function formatJobDate(?string $my_date = 'now'): string
     {
-        $date = new DateTime($my_date);
+        $date = new DateTime($my_date ?? 'now');
         $formattedDate = $date->format('Y M d H:i');
 
         $now = new DateTime();
-        $yesterday = $now->sub(new DateInterval('P1D'));
+        $yesterday = (clone $now)->sub(new DateInterval('P1D'));
 
         //today
         if ($now->format('Y-m-d') == $date->format('Y-m-d')) {

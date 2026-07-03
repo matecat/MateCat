@@ -13,6 +13,9 @@ use Model\Users\UserStruct;
 
 class User
 {
+    /**
+     * @return array<string, mixed>
+     */
     public static function renderItem(UserStruct $user): array
     {
         return [
@@ -24,6 +27,9 @@ class User
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function renderItemPublic(UserStruct $user): array
     {
         return [

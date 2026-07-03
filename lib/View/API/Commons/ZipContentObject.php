@@ -2,20 +2,15 @@
 
 namespace View\API\Commons;
 
-use DomainException;
 use Exception;
+use Model\DataAccess\UnknownPropertyException;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\S3FilesStorage;
 use Predis\Connection\ConnectionException;
 use ReflectionException;
 use stdClass;
+use TypeError;
 
-/**
- * Created by PhpStorm.
- * User: roberto
- * Date: 25/06/15
- * Time: 12.17
- */
 class ZipContentObject extends stdClass
 {
 
@@ -24,10 +19,12 @@ class ZipContentObject extends stdClass
     public ?string $document_content = null;
 
     /**
-     * @return string
+     * @throws ReflectionException
+     * @throws ConnectionException
      * @throws Exception
+     * @throws TypeError
      */
-    public function getContent(): string
+    public function getContent(): ?string
     {
         if (!empty($this->document_content)) {
             return $this->document_content;
@@ -48,13 +45,14 @@ class ZipContentObject extends stdClass
      * @throws ReflectionException
      * @throws ConnectionException
      * @throws Exception
+     * @throws TypeError
      */
     private function setDocumentContentFromS3(): void
     {
         $s3Client = S3FilesStorage::getStaticS3Client();
         $config = [
             'bucket' => S3FilesStorage::getFilesStorageBucket(),
-            'key' => $this->input_filename,
+            'key'    => $this->input_filename,
         ];
 
         if ($s3Client->hasItem($config)) {
@@ -66,22 +64,25 @@ class ZipContentObject extends stdClass
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     private function setDocumentContentFromFileSystem(): void
     {
-        if (is_file($this->input_filename)) {
-            $this->document_content = file_get_contents($this->input_filename);
+        if ($this->input_filename !== null && is_file($this->input_filename)) {
+            $content = file_get_contents($this->input_filename);
+            if ($content !== false) {
+                $this->document_content = $content;
+            }
         } else {
             throw new Exception("Error while retrieving input_filename content: " . $this->input_filename);
         }
     }
 
     /**
-     * @param array|ZipContentObject $_array_params
+     * @param array<string, mixed>|ZipContentObject $_array_params
      */
     public function __construct(ZipContentObject|array $_array_params = [])
     {
-        //This is a multidimensional array
         if (is_array($_array_params) and isset($_array_params[0])) {
             foreach ($_array_params as $array_params) {
                 $this->build($array_params);
@@ -92,32 +93,31 @@ class ZipContentObject extends stdClass
     }
 
     /**
-     * @param array|ZipContentObject $_array_params
-     *
-     * @return void
+     * @param array<string, mixed>|ZipContentObject $_array_params
      */
     public function build(ZipContentObject|array $_array_params = []): void
     {
-        //This is a multidimensional array
         if (is_array($_array_params) and isset($_array_params[0])) {
             foreach ($_array_params as $array_params) {
                 $this->build($array_params);
             }
         } elseif (!empty($_array_params)) {
-            //this accept instance of SELF also
-            foreach ($_array_params as $property => $value) {
+            foreach ((array) $_array_params as $property => $value) {
                 $this->$property = $value;
             }
         }
     }
 
-    public function __set($name, $value)
+    public function __set(string $name, mixed $value): void
     {
         if (!property_exists($this, $name)) {
-            throw new DomainException('Unknown property ' . $name);
+            throw new UnknownPropertyException($name);
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return (array)$this;

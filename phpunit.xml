@@ -19,7 +19,6 @@
             <directory suffix=".php">./lib</directory>
         </include>
         <exclude>
-            <file>./lib/Utils/TaskRunner/Executor.php</file>
             <file>./lib/View/fileupload/index.php</file>
             <file>./lib/View/APIDoc.php</file>
             <file>./lib/View/templates/_APIDoc.php</file>
@@ -31,14 +30,19 @@
     </coverage>
 
     <php>
-        <includePath>tests/TestHelpers</includePath>
+        <includePath>tests/unit/TestHelpers</includePath>
     </php>
     <testsuites>
         <testsuite name="Matecat Unit tests">
             <directory>tests/unit</directory>
+            <exclude>tests/unit/TestHelpers</exclude>
         </testsuite>
         <testsuite name="Plugins Unit tests">
             <directory>plugins/*/tests/unit</directory>
         </testsuite>
+        <!--
+            Real-SQL DAO tests carry #[Group('DaoRealSql')]; select them with the DaoRealSql
+            group selector (running and coverage scoping alike). No dedicated testsuite needed.
+        -->
     </testsuites>
 </phpunit>

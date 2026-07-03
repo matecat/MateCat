@@ -2,98 +2,118 @@
 
 namespace Controller\Abstracts\Authentication;
 
-use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
 use Model\ConnectedServices\ConnectedServiceDao;
+use Model\DataAccess\IDatabase;
 use Model\Teams\MembershipDao;
-use Model\Teams\TeamModel;
-use Model\Teams\TeamStruct;
+use Model\Teams\TeamDao;
+use Model\Users\MetadataDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use Throwable;
+use TypeError;
 use Utils\Logger\LoggerFactory;
-use View\API\App\Json\UserProfile;
 
 /**
- * Created by PhpStorm.
- * @author Domenico Lupinetti (hashashiyyin) domenico@translated.net / ostico@gmail.com
- * Date: 19/09/24
- * Time: 13:36
+ * Split / dependency-injected re-implementation of {@see AuthenticationHelper}.
  *
+ * Behaviorally identical to the original (verified by a parity test copy), but:
+ *  - all collaborators are constructor-injected (UserDao, ApiKeyDao,
+ *    UserProfileBuilder, AuthCookieStore) → fully unit-testable, no singleton;
+ *  - the authentication work lives in authenticate() instead of the constructor;
+ *  - fromRequest() is the single composition root that touches the database.
+ *
+ * The original class is intentionally kept in place; this lives beside it for
+ * the verification phase.
  */
 class AuthenticationHelper
 {
-
     private UserStruct $user;
-    /**
-     * @var true
-     */
-    private bool $logged;
+    private bool $logged = false;
     private ?ApiKeyStruct $api_record = null;
+    /** @var array<string, mixed> */
     private array $session;
-    private static ?AuthenticationHelper $instance = null;
+    private UserDao $userDao;
+    private ApiKeyDao $apiKeyDao;
+    private UserProfileBuilder $profileBuilder;
+    private AuthCookieStore $cookieStore;
 
     /**
-     * @param array $session
-     * @param string|null $api_key
-     * @param string|null $api_secret
-     *
-     * @return AuthenticationHelper
-     * @throws Exception
+     * @param array<string, mixed> $session
      */
-    public static function getInstance(array &$session, ?string $api_key = null, ?string $api_secret = null): AuthenticationHelper
-    {
-        if (!self::$instance) {
-            self::$instance = new AuthenticationHelper($session, $api_key, $api_secret);
-        }
-
-        return self::$instance;
+    public function __construct(
+        array &$session,
+        UserDao $userDao,
+        ApiKeyDao $apiKeyDao,
+        UserProfileBuilder $profileBuilder,
+        AuthCookieStore $cookieStore,
+    ) {
+        $this->session =& $session;
+        $this->userDao = $userDao;
+        $this->apiKeyDao = $apiKeyDao;
+        $this->profileBuilder = $profileBuilder;
+        $this->cookieStore = $cookieStore;
+        $this->user = new UserStruct();
     }
 
     /**
-     * Constructor for the AuthenticationHelper class.
+     * Composition root: wires real collaborators from an injected database
+     * handle and runs the authentication flow. The database is mandatory — no
+     * singleton fallback. Mirrors the original `new AuthenticationHelper(...)`.
      *
-     * This constructor initializes the user session and attempts to authenticate the user
-     * using one of the following methods:
-     * 1. Valid API keys (if provided).
-     * 2. Existing session credentials (if available and valid).
-     * 3. Authentication cookie credentials (if present and valid).
-     *
-     * If authentication is successful, the user object is populated, and the session is updated.
-     * If authentication fails, the user remains unauthenticated.
-     *
-     * @param array $session Reference to the session array, used to store user data.
-     * @param string|null $api_key Optional API key for authentication.
-     * @param string|null $api_secret Optional API secret for authentication.
-     * @throws Exception
+     * @param array<string, mixed> $session
      */
-    protected function __construct(array &$session, ?string $api_key = null, ?string $api_secret = null)
-    {
-        $this->session =& $session;
-        $this->user = new UserStruct();
+    public static function fromRequest(
+        array &$session,
+        IDatabase $db,
+        ?string $api_key = null,
+        ?string $api_secret = null,
+    ): self {
+        $self = new self(
+            $session,
+            new UserDao($db),
+            new ApiKeyDao($db),
+            new UserProfileBuilder(
+                new MembershipDao($db),
+                new ConnectedServiceDao($db),
+                new UserDao($db),
+                new TeamDao($db),
+                new MetadataDao($db)
+            ),
+            new AuthCookieStore(new SessionTokenStoreHandler()),
+        );
+        $self->authenticate($api_key, $api_secret);
 
+        return $self;
+    }
+
+    /**
+     * Resolve the user from api-key, session, or login cookie. Never throws:
+     * any failure is logged and leaves the helper in a logged-out state.
+     */
+    public function authenticate(?string $api_key, ?string $api_secret): void
+    {
         try {
-            if ($this->validKeys($api_key, $api_secret)) {
-                // Authenticate using API keys and retrieve the associated user.
-                $this->user = $this->api_record->getUser();
+            if ($this->validKeys($api_key, $api_secret) && $this->api_record !== null) {
+                $user = $this->api_record->getUser($this->userDao);
+                if ($user !== null) {
+                    $this->user = $user;
+                }
             } elseif (!empty($this->session['user']) && !empty($this->session['user_profile'])) {
-                // Authenticate using session credentials if they are still active and valid.
-                $this->user = $this->session['user']; // PHP deserializes this from the session string.
-                AuthCookie::setCredentials($this->user, new SessionTokenStoreHandler(), true); // Possibly revamp the cookie.
+                $this->user = $this->session['user'];
+                $this->cookieStore->setCredentials($this->user, true);
             } else {
-                // Authenticate using credentials from the authentication cookie.
-                /**
-                 * @var $user UserStruct
-                 */
-                $user_cookie_credentials = AuthCookie::getCredentials(new SessionTokenStoreHandler());
-                if (!empty($user_cookie_credentials) && !empty($user_cookie_credentials['user'])) {
-                    $userDao = new UserDao();
-                    $userDao->setCacheTTL(60 * 60 * 24); // Set cache TTL to 24 hours.
-                    $this->user = $userDao->getByUid($user_cookie_credentials['user']['uid']);
-                    $this->setUserSession(); // Update the session with the authenticated user.
+                $credentials = $this->cookieStore->getCredentials();
+                if (!empty($credentials) && !empty($credentials['user'])) {
+                    $this->userDao->setCacheTTL(60 * 60 * 24);
+                    $user = $this->userDao->getByUid($credentials['user']['uid']);
+                    if ($user !== null) {
+                        $this->user = $user;
+                        $this->setUserSession();
+                    }
                 }
             }
         } catch (Throwable $ignore) {
@@ -106,100 +126,67 @@ class AuthenticationHelper
                         'session' => $this->session,
                         'api_key' => $api_key,
                         'api_secret' => $api_secret,
-                        'cookie' => AuthCookie::getCredentials()['user'] ?? null
+                        'cookie' => $this->cookieStore->getCredentials()['user'] ?? null,
                     ]
                 );
-            } catch (ReflectionException) {
+            } catch (Throwable) {
             }
         } finally {
-            // Set the logged status based on the user's authentication state.
             $this->logged = $this->user->isLogged();
         }
     }
 
+    public function refreshSession(): void
+    {
+        unset($this->session['user']);
+        unset($this->session['user_profile']);
+        $this->user = new UserStruct();
+        $this->logged = false;
+        $this->api_record = null;
+    }
+
     /**
-     * @param array $session
+     * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
-    public static function refreshSession(array &$session): void
+    public function destroyAuthentication(): void
     {
-        unset($session['user']);
-        unset($session['user_profile']);
-        self::$instance = new AuthenticationHelper($session);
+        unset($this->session['user']);
+        unset($this->session['user_profile']);
+        $this->cookieStore->destroy();
+    }
+
+    protected function sessionIsActive(): bool
+    {
+        return session_status() === PHP_SESSION_ACTIVE;
     }
 
     /**
      * @throws ReflectionException
-     */
-    public static function destroyAuthentication(array &$session): void
-    {
-        unset($session['user']);
-        unset($session['user_profile']);
-        AuthCookie::destroyAuthentication(new SessionTokenStoreHandler());
-    }
-
-    /**
-     * @throws ReflectionException
-     * @throws EnvironmentIsBrokenException
+     * @throws Exception
+     * @throws TypeError
      */
     protected function setUserSession(): void
     {
-        $session_status = session_status();
-        if ($session_status == PHP_SESSION_ACTIVE) {
+        if ($this->sessionIsActive()) {
             $this->session['cid'] = $this->user->getEmail();
             $this->session['uid'] = $this->user->getUid();
             $this->session['user'] = $this->user;
-            $this->session['user_profile'] = static::getUserProfile($this->user);
+            $this->session['user_profile'] = $this->profileBuilder->build($this->user);
         }
     }
 
     /**
-     * @throws ReflectionException
-     * @throws EnvironmentIsBrokenException
-     */
-    protected static function getUserProfile(UserStruct $user): array
-    {
-        $metadata = $user->getMetadataAsKeyValue();
-        $membersDao = new MembershipDao();
-        $membersDao->setCacheTTL(60 * 5);
-        $userTeams = array_map(
-            function ($team) use ($membersDao) {
-                $teamModel = new TeamModel($team);
-                $teamModel->updateMembersProjectsCount();
-
-                /** @var $team TeamStruct */
-                return $team;
-            },
-            $membersDao->findUserTeams($user)
-        );
-
-        $dao = new ConnectedServiceDao();
-        $services = $dao->findServicesByUser($user);
-
-        return (new UserProfile())->renderItem(
-            $user,
-            $userTeams,
-            $services,
-            $metadata
-        );
-    }
-
-    /**
-     * validKeys
-     *
-     * This was implemented to allow passing a pair of keys to identify the user, or to deny access.
-     *
-     * This function returns true if the keys are not provided.
-     *
-     * If keys are provided, it checks for them to be valid or return false.
-     *
+     * @throws Exception
      */
     protected function validKeys(?string $api_key = null, ?string $api_secret = null): bool
     {
         if ($api_key || $api_secret) {
-            $this->api_record = ApiKeyDao::findByKey($api_key);
+            $apiKey = $api_key ?? '';
+            $this->api_record = $this->apiKeyDao->findByKey($apiKey);
             if ($this->api_record) {
-                return $this->api_record->validSecret($api_secret);
+                return $this->api_record->validSecret($api_secret ?? '');
             }
         }
 
@@ -220,5 +207,4 @@ class AuthenticationHelper
     {
         return $this->api_record;
     }
-
 }

@@ -10,6 +10,10 @@ use Exception;
 use Klein\Response;
 use Model\Users\Authentication\ChangePasswordModel;
 use Model\Users\Authentication\PasswordRules;
+use Model\Users\UserDao;
+use ReflectionException;
+use Stomp\Exception\ConnectionException;
+use TypeError;
 
 class UserController extends AbstractStatefulKleinController
 {
@@ -45,7 +49,10 @@ class UserController extends AbstractStatefulKleinController
      *
      * @return void
      * @throws ValidationError
+     * @throws ReflectionException
+     * @throws ConnectionException
      * @throws Exception
+     * @throws TypeError
      */
     public function changePasswordAsLoggedUser(): void
     {
@@ -57,13 +64,13 @@ class UserController extends AbstractStatefulKleinController
             return;
         }
 
-        $old_password = filter_var($this->request->param('old_password'), FILTER_SANITIZE_SPECIAL_CHARS);
-        $new_password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS);
-        $new_password_confirmation = filter_var($this->request->param('password_confirmation'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $old_password = (string) filter_var($this->request->param('old_password'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $new_password = (string) filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $new_password_confirmation = (string) filter_var($this->request->param('password_confirmation'), FILTER_SANITIZE_SPECIAL_CHARS);
 
         $this->validatePasswordRequirements($new_password, $new_password_confirmation);
 
-        $cpModel = new ChangePasswordModel($this->user);
+        $cpModel = $this->createChangePasswordModel();
         $cpModel->changePassword($old_password, $new_password);
 
         $this->broadcastLogout();
@@ -80,7 +87,12 @@ class UserController extends AbstractStatefulKleinController
         $this->response->code(200);
     }
 
-    protected function afterConstruct(): void
+    protected function createChangePasswordModel(): ChangePasswordModel
+    {
+        return new ChangePasswordModel($this->user, new UserDao($this->getDatabase()));
+    }
+
+    protected function registerValidators(): void
     {
         $loginValidator = new LoginValidator($this);
         $this->appendValidator($loginValidator);

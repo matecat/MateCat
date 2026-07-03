@@ -9,13 +9,12 @@ import {
 } from '../actions/notificationActions'
 import SegmentStore from '../stores/SegmentStore'
 
-// Lazy-loaded to break circular dependency with setTranslationUtil
-// Using require() instead of import so madge's ES6 detective doesn't
-// register this as a static edge. Do NOT convert back to import.
+// Async-loaded to break circular dependency for static analysis.
 let _SetTranslationUtil
-const getSetTranslationUtil = () =>
-  _SetTranslationUtil ||
-  (_SetTranslationUtil = require('../setTranslationUtil'))
+import('../setTranslationUtil').then((m) => {
+  _SetTranslationUtil = m
+})
+const getSetTranslationUtil = () => _SetTranslationUtil
 
 const OfflineUtils = {
   offline: false,

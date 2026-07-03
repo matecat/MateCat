@@ -71,6 +71,9 @@ class TmKeyService
      *
      * @param ProjectStructure $projectStructure
      * @param string|null $firstTMXFileName
+     * @throws \DomainException
+     * @throws \TypeError
+     * @throws \Psr\Log\InvalidArgumentException
      */
     public function setPrivateTMKeys(ProjectStructure $projectStructure, ?string $firstTMXFileName = ''): void
     {
@@ -259,7 +262,7 @@ class TmKeyService
                     $elapsed = time() - $startTime;
                     $this->log("Waiting for TMX \"{$file->getName()}\" — elapsed {$elapsed}s, next poll in {$pollInterval}s");
 
-                    sleep($pollInterval);
+                    $this->pollSleep($pollInterval);
                     $pollInterval = min($pollInterval * 2, self::TMX_POLL_MAX_INTERVAL);
                 } catch (Exception $e) {
                     $projectStructure->addError($e->getCode(), $e->getMessage());
@@ -274,6 +277,11 @@ class TmKeyService
             unset($projectStructure->array_files[$file->getPosition()]);
             unset($projectStructure->array_files_meta[$file->getPosition()]);
         }
+    }
+
+    protected function pollSleep(int $seconds): void
+    {
+        sleep($seconds);
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -297,16 +305,17 @@ class TmKeyService
      */
     protected function getKeyringOwnerKeys(int $uid): array
     {
-        return MemoryKeyDao::getKeyringOwnerKeysByUid($uid);
+        return (new MemoryKeyDao($this->dbHandler))->getKeyringOwnerKeysByUid($uid);
     }
 
     /**
      * Get a UserStruct by UID.
      * Protected so test subclasses can override for injection.
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function getUserByUid(int $uid): ?UserStruct
     {
-        return (new UserDao())->setCacheTTL(60 * 60)->getByUid($uid);
+        return (new UserDao($this->dbHandler))->setCacheTTL(60 * 60)->getByUid($uid);
     }
 }

@@ -23,8 +23,6 @@
       from(colors.$translatedBlue),
       to(#119ec4)
     );
-    background: -moz-linear-gradient(top, colors.$translatedBlue, #119ec4);
-    background: linear-gradient(top, colors.$translatedBlue, #119ec4);
     color: #fff;
     border: 1px solid #848689;
     text-decoration: none;
@@ -48,8 +46,6 @@
       from(#f6f6f6),
       to(#e2e3e5)
     );
-    background: -moz-linear-gradient(top, #f6f6f6, #e2e3e5);
-    background: linear-gradient(top, #f6f6f6, #e2e3e5);
     border: 1px solid #848689;
     text-decoration: none;
     border-radius: 2px;
@@ -63,8 +59,6 @@
       from(#f26522),
       to(#fb5d12)
     );
-    background: -moz-linear-gradient(top, #f26522, #fb5d12);
-    background: linear-gradient(top, #f26522, #fb5d12);
     color: #fff;
     border: 1px solid #848689;
     text-decoration: none;

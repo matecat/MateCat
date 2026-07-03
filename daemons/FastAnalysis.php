@@ -1,6 +1,12 @@
 <?php
 
-include_once realpath( getenv( "MATECAT_HOME" ) ) . "/lib/Bootstrap.php";
+$matecatHome = getenv("MATECAT_HOME");
+if ($matecatHome === false) {
+    fwrite(STDERR, "MATECAT_HOME environment variable is not set\n");
+    exit(1);
+}
+
+include_once realpath($matecatHome) . "/lib/Bootstrap.php";
 Bootstrap::start();
 
 use Utils\AsyncTasks\Workers\Analysis\FastAnalysis;
@@ -11,4 +17,8 @@ if ( AppConfig::$FAST_ANALYSIS_MEMORY_LIMIT != null ) {
 }
 
 
-FastAnalysis::getInstance( @$argv[ 1 ] )->main();
+// Composition root: read the DB handle once from Bootstrap and inject it into
+// the daemon, which threads it down to the DAOs it builds.
+$daemon = FastAnalysis::getInstance(@$argv[1]);
+$daemon->setDatabase(Bootstrap::getDatabase());
+$daemon->main();

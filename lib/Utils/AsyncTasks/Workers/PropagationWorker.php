@@ -1,22 +1,17 @@
 <?php
-/**
- * Created by PhpStorm.
- * @author Domenico Lupinetti (hashashiyyin) domenico@translated.net / ostico@gmail.com
- * Date: 21/11/24
- * Time: 17:56
- *
- */
 
 namespace Utils\AsyncTasks\Workers;
 
 use Exception;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Propagation\PropagationTotalStruct;
 use Model\Translations\SegmentTranslationStruct;
 use PDOException;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
+use ReflectionException;
+use Utils\ActiveMQ\AMQHandler;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\Params;
@@ -25,6 +20,19 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
 
 class PropagationWorker extends AbstractWorker
 {
+    private TranslationVersionDao $translationVersionsDao;
+
+    /**
+     * @throws ReflectionException
+     */
+    public function __construct(
+        AMQHandler $queueHandler,
+        IDatabase $database,
+        ?TranslationVersionDao $translationVersionsDao = null
+    ) {
+        parent::__construct($queueHandler, $database);
+        $this->translationVersionsDao = $translationVersionsDao ?? new TranslationVersionDao($this->database);
+    }
 
     /**
      * @inheritDoc
@@ -33,33 +41,28 @@ class PropagationWorker extends AbstractWorker
      */
     public function process(AbstractElement $queueElement): void
     {
-        /**
-         * @var $queueElement QueueElement
-         */
+        if (!$queueElement instanceof QueueElement) {
+            throw new EndQueueException('Invalid queue element type');
+        }
         $this->_checkForReQueueEnd($queueElement);
         $this->_checkDatabaseConnection();
 
-        /**
-         * Cast to the proper objects from payload
-         */
         $this->propagateTranslation($this->rebuildObjects($queueElement->params));
     }
 
     /**
+     * @param array<string, mixed> $structures
+     *
      * @throws Exception
      */
     protected function propagateTranslation(array $structures): void
     {
-        $translationVersionsDao = new TranslationVersionDao();
-
-        /**
-         * @var $propagationTotalStruct ?PropagationTotalStruct
-         */
         $propagationTotalStruct = $structures['propagationAnalysis'];
+        if (!$propagationTotalStruct instanceof PropagationTotalStruct) {
+            return;
+        }
 
-        /**
-         * @var $propagatorSegment SegmentTranslationStruct
-         */
+        /** @var SegmentTranslationStruct $propagatorSegment */
         $propagatorSegment = $structures['translationStructTemplate'];
 
         if (true === $structures['execute_update'] and !empty($propagationTotalStruct->getSegmentsForPropagation())) {
@@ -68,7 +71,6 @@ class PropagationWorker extends AbstractWorker
                     'id_segment' => $structures['id_segment'],
                     'id_job' => $propagatorSegment['id_job'],
                     'segment_hash' => $propagatorSegment['segment_hash'],
-                    // UPDATE ONLY THESE FIELDS
                     'translation' => $propagatorSegment['translation'],
                     'status' => $propagatorSegment['status'],
                     'translation_date' => $propagatorSegment['translation_date'],
@@ -89,27 +91,26 @@ class PropagationWorker extends AbstractWorker
                     }
 
                     $propagationSql = "
-                            UPDATE segment_translations 
-                            SET translation = :translation, 
-                                status = :status, 
-                                translation_date = :translation_date, 
+                            UPDATE segment_translations
+                            SET translation = :translation,
+                                status = :status,
+                                translation_date = :translation_date,
                                 autopropagated_from = :autopropagated_from,
                                 serialized_errors_list = :serialized_errors_list,
                                 warning = :warning
-                            WHERE id_segment != :id_segment 
-                              AND id_job = :id_job 
+                            WHERE id_segment != :id_segment
+                              AND id_job = :id_job
                               AND segment_hash = :segment_hash
                               AND id_segment IN ( " . implode(",", $propagated_ids_placeholder) . " )
                         ";
 
-                    $pdo = Database::obtain()->getConnection();
+                    $pdo = $this->database->getConnection();
                     $stmt = $pdo->prepare($propagationSql);
 
                     $stmt->execute($updateValues);
 
                     $stmt->closeCursor();
 
-                    // update related versions only if the parent translation has changed
                     if (!empty($propagationTotalStruct->getPropagatedIdsToUpdateVersion())) {
                         $filteredIds = [];
                         $segmentIdsForVersionIncrementMap = $propagationTotalStruct->getPropagatedIdsToUpdateVersion();
@@ -123,17 +124,17 @@ class PropagationWorker extends AbstractWorker
                             return false;
                         });
 
-                        $translationVersionsDao->savePropagationVersions(
+                        $this->translationVersionsDao->savePropagationVersions(
                             $propagatorSegment,
                             $structures['id_segment'],
                             $structures['job'],
-                            $segmentsToIncrementMap,
+                            array_values($segmentsToIncrementMap),
                         );
 
                         $increaseVersionSql = "
                             UPDATE segment_translations SET version_number = version_number + 1
-                            WHERE id_segment != :id_segment 
-                              AND id_job = :id_job 
+                            WHERE id_segment != :id_segment
+                              AND id_job = :id_job
                               AND segment_hash = :segment_hash
                               AND id_segment IN ( " . implode(",", $filteredIds) . " )
                         ";
@@ -167,6 +168,8 @@ class PropagationWorker extends AbstractWorker
 
     /**
      * Cast to the proper objects from payload
+     *
+     * @return array<string, mixed>
      */
     protected function rebuildObjects(Params $params): array
     {

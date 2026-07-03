@@ -11,20 +11,24 @@ use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
-use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\RewriteContributionContextsEvent;
 use Model\Files\FilesPartsDao;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Users\UserDao;
 use ReflectionException;
+use TypeError;
 use Utils\Contribution\Get;
 use Utils\Contribution\GetContributionRequest;
 use Utils\Engines\Lara;
 use Utils\Registry\AppConfig;
+use Model\Projects\ProjectDao;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\Filter;
@@ -34,7 +38,7 @@ class GetContributionController extends KleinController
 
     use APISourcePageGuesserTrait;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -43,6 +47,7 @@ class GetContributionController extends KleinController
      * @throws ReflectionException
      * @throws NotFoundException
      * @throws Exception
+     * @throws TypeError
      */
     public function get(): void
     {
@@ -52,10 +57,10 @@ class GetContributionController extends KleinController
         $id_segment = $request['id_segment'];
         $password = $request['password'];
 
-        $jobStruct = ChunkDao::getByIdAndPassword($id_job, $password);
-        $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap($id_segment);
+        $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($id_job, $password);
+        $dataRefMap = (new SegmentOriginalDataDao($this->getDatabase()))->getSegmentDataRefMap($id_segment);
 
-        $projectStruct = $jobStruct->getProject();
+        $projectStruct = $jobStruct->getProject(new ProjectDao($this->getDatabase()));
         $this->featureSet->loadForProject($projectStruct);
 
         $id_client = $request['id_client'];
@@ -69,7 +74,9 @@ class GetContributionController extends KleinController
 
         // try to get from metadata if Lara style is empty of fallback to the default
         if (empty($lara_style)) {
-            $lara_style = $projectStruct->getMetadataValue('lara_style') ?? Lara::DEFAULT_STYLE;
+            $lara_style = (new ProjectMetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$projectStruct->id, 'lara_style') ?? Lara::DEFAULT_STYLE;
+        } else {
+            $lara_style = $request['lara_style'];
         }
 
         if (empty($num_results)) {
@@ -77,40 +84,42 @@ class GetContributionController extends KleinController
         }
 
         $contributionRequest = new GetContributionRequest();
-        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
-        $subfiltering_handlers = (new MetadataDao())->getSubfilteringCustomHandlers($jobStruct->id, $jobStruct->password);
+        $jobId = $jobStruct->id ?? throw new TypeError('Job ID must not be null');
+        $jobPassword = $jobStruct->password ?? throw new TypeError('Job password must not be null');
+        $subfiltering_handlers = (new MetadataDao($this->getDatabase()))->getSubfilteringCustomHandlers($jobId, $jobPassword);
         /** @var MateCatFilter $Filter */
-        $Filter = MateCatFilter::getInstance($featureSet, $jobStruct->source, $jobStruct->target, $dataRefMap, $subfiltering_handlers);
+        $Filter = MateCatFilter::getInstance($this->featureSet, $jobStruct->source, $jobStruct->target, $dataRefMap, $subfiltering_handlers);
 
         $context_list_before = [];
         $context_list_after = [];
         if (!$concordance_search) {
-            $context_list_before = array_map(function (string $context) use ($Filter) {
+            $context_list_before = array_values(array_map(function (string $context) use ($Filter) {
                 return $Filter->fromLayer2ToLayer1($context);
-            }, $request['context_list_before']);
+            }, $request['context_list_before'] ?? []));
 
-            $context_list_after = array_map(function (string $context) use ($Filter) {
+            $context_list_after = array_values(array_map(function (string $context) use ($Filter) {
                 return $Filter->fromLayer2ToLayer1($context);
-            }, $request['context_list_after']);
+            }, $request['context_list_after'] ?? []));
 
             $this->rewriteContributionContexts($request, $Filter);
 
-            $contributionRequest->mt_evaluation =
-                (bool)$projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_EVALUATION->value) ??
+            $mtEvaluation = (new ProjectMetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_EVALUATION->value);
+            if ($mtEvaluation === null) {
                 //TODO REMOVE after a reasonable amount of time, this is for back compatibility, previously the mt_evaluation flag was on jobs metadata
-                (bool)(new MetadataDao())->get(
-                    $id_job,
+                $mtEvaluation = (new MetadataDao($this->getDatabase()))->get(
+                    $jobId,
                     $received_password,
                     ProjectsMetadataMarshaller::MT_EVALUATION->value,
                     60 * 60
-                ) ?? // for back compatibility, the mt_evaluation flag was on job metadata
-                false;
+                )?->value;
+            }
+            $contributionRequest->mt_evaluation = (bool)$mtEvaluation;
         }
 
-        $file = (new FilesPartsDao())->getBySegmentId($id_segment);
-        $owner = (new UserDao())->getProjectOwner($id_job);
+        $file = (new FilesPartsDao($this->getDatabase()))->getBySegmentId($id_segment);
+        $owner = (new UserDao($this->getDatabase()))->getProjectOwner($id_job) ?? throw new TypeError('Project owner not found');
 
-        $contributionRequest->id_file = $file->id_file ?? null;
+        $contributionRequest->id_file = $file?->id;
         $contributionRequest->id_job = $id_job;
         $contributionRequest->password = $received_password;
         $contributionRequest->dataRefMap = $dataRefMap;
@@ -134,11 +143,14 @@ class GetContributionController extends KleinController
         $contributionRequest->concordanceSearch = $concordance_search;
         $contributionRequest->fromTarget = $switch_languages;
         $contributionRequest->resultNum = $num_results;
-        $contributionRequest->crossLangTargets = $this->getCrossLanguages($cross_language);
-        $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) ?? 86;
-        $contributionRequest->mt_qe_workflow_enabled = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false;
-        $contributionRequest->mt_qe_workflow_parameters = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value)?->toArray();
-        $contributionRequest->subfiltering_handlers = $subfiltering_handlers;
+        $contributionRequest->crossLangTargets = array_values($this->getCrossLanguages($cross_language));
+        $projectMetadataDao = new ProjectMetadataDao($this->getDatabase());
+        $contributionRequest->mt_quality_value_in_editor = (int)($projectMetadataDao->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) ?? 86);
+        $contributionRequest->mt_qe_workflow_enabled = (bool)$projectMetadataDao->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value);
+
+        $mtQeParams = $projectMetadataDao->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value);
+        $contributionRequest->mt_qe_workflow_parameters = $mtQeParams instanceof MTQEWorkflowParams ? $mtQeParams->toArray() : null;
+        $contributionRequest->subfiltering_handlers = $subfiltering_handlers !== null ? array_values($subfiltering_handlers) : null;
 
         if ($this->isRevision()) {
             $contributionRequest->userRole = Filter::ROLE_REVISOR;
@@ -146,10 +158,10 @@ class GetContributionController extends KleinController
             $contributionRequest->userRole = Filter::ROLE_TRANSLATOR;
         }
 
-        $jobsMetadataDao = new MetadataDao();
-        $dialect_strict = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, JobsMetadataMarshaller::DIALECT_STRICT->value, 10 * 60);
-        $mt_evaluation = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, 'mt_evaluation', 10 * 60);
-        $public_tm_penalty = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, 10 * 60);
+        $jobsMetadataDao = new MetadataDao($this->getDatabase());
+        $dialect_strict = $jobsMetadataDao->get($jobId, $jobPassword, JobsMetadataMarshaller::DIALECT_STRICT->value, 10 * 60);
+        $mt_evaluation = $jobsMetadataDao->get($jobId, $jobPassword, 'mt_evaluation', 10 * 60);
+        $public_tm_penalty = $jobsMetadataDao->get($jobId, $jobPassword, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, 10 * 60);
 
         if ($public_tm_penalty !== null) {
             $contributionRequest->public_tm_penalty = (int)$public_tm_penalty->value;
@@ -166,7 +178,7 @@ class GetContributionController extends KleinController
             $contributionRequest->mt_evaluation = $mt_evaluation->value == 1;
         }
 
-        $tm_prioritization = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, JobsMetadataMarshaller::TM_PRIORITIZATION->value, 10 * 60);
+        $tm_prioritization = $jobsMetadataDao->get($jobId, $jobPassword, JobsMetadataMarshaller::TM_PRIORITIZATION->value, 10 * 60);
 
         if ($tm_prioritization !== null) {
             $contributionRequest->tm_prioritization = $tm_prioritization->value == 1;
@@ -184,7 +196,7 @@ class GetContributionController extends KleinController
             $contributionRequest->lara_model = $request['lara_model'];
         }
 
-        Get::contribution($contributionRequest);
+        $this->dispatchContribution($contributionRequest);
 
         $this->response->json([
             'errors' => [],
@@ -217,11 +229,22 @@ class GetContributionController extends KleinController
     }
 
     /**
-     * @return array
+     * @throws Exception
+     */
+    protected function dispatchContribution(GetContributionRequest $contributionRequest): void
+    {
+        Get::contribution($contributionRequest);
+    }
+
+    /**
+     * @return array<string, mixed>
+     *
+     * @throws InvalidArgumentException
+     * @throws TypeError
      */
     private function validateTheRequest(): array
     {
-        $id_client = filter_var($this->request->param('id_client'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $id_client = filter_var($this->request->param('id_client'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]) ?: '';
         $id_job = filter_var($this->request->param('id_job'), FILTER_SANITIZE_NUMBER_INT, ['filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR]);
         $id_segment = filter_var($this->request->param('id_segment'), FILTER_SANITIZE_NUMBER_INT);  // FILTER_SANITIZE_NUMBER_INT leaves untouched segments id with the split flag. Ex: 123-1
         $num_results = filter_var($this->request->param('num_results'), FILTER_SANITIZE_NUMBER_INT, [
@@ -236,17 +259,17 @@ class GetContributionController extends KleinController
                 'flags' => FILTER_REQUIRE_SCALAR
             ]
         );
-        $text = filter_var($this->request->param('text'), FILTER_UNSAFE_RAW);
-        $translation = filter_var($this->request->param('translation'), FILTER_UNSAFE_RAW); // in the case of Lara Think
-        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $received_password = filter_var($this->request->param('current_password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $text = (string)filter_var($this->request->param('text'), FILTER_UNSAFE_RAW);
+        $translation = (string)filter_var($this->request->param('translation'), FILTER_UNSAFE_RAW); // in the case of Lara Think
+        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]) ?: '';
+        $received_password = filter_var($this->request->param('current_password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]) ?: '';
         $concordance_search = filter_var($this->request->param('is_concordance'), FILTER_VALIDATE_BOOLEAN);
         $reasoning = filter_var($this->request->param('reasoning'), FILTER_VALIDATE_BOOLEAN);
         $switch_languages = filter_var($this->request->param('from_target'), FILTER_VALIDATE_BOOLEAN);
-        $context_before = filter_var($this->request->param('context_before'), FILTER_UNSAFE_RAW);
-        $context_after = filter_var($this->request->param('context_after'), FILTER_UNSAFE_RAW);
-        $context_list_before = filter_var($this->request->param('context_list_before'), FILTER_UNSAFE_RAW);
-        $context_list_after = filter_var($this->request->param('context_list_after'), FILTER_UNSAFE_RAW);
+        $context_before = filter_var($this->request->param('context_before'), FILTER_UNSAFE_RAW) ?: '';
+        $context_after = filter_var($this->request->param('context_after'), FILTER_UNSAFE_RAW) ?: '';
+        $context_list_before = filter_var($this->request->param('context_list_before'), FILTER_UNSAFE_RAW) ?: '';
+        $context_list_after = filter_var($this->request->param('context_list_after'), FILTER_UNSAFE_RAW) ?: '';
         $id_before = filter_var($this->request->param('id_before'), FILTER_SANITIZE_NUMBER_INT);
         $id_after = filter_var($this->request->param('id_after'), FILTER_SANITIZE_NUMBER_INT);
         $cross_language = filter_var($this->request->param('cross_language'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FORCE_ARRAY]);
@@ -292,7 +315,7 @@ class GetContributionController extends KleinController
             $lara_style = Lara::validateLaraStyle($lara_style);
         }
 
-        $this->id_job = $id_job;
+        $this->id_job = (int)$id_job;
         $this->request_password = $received_password;
 
         return [
@@ -321,7 +344,7 @@ class GetContributionController extends KleinController
     }
 
     /**
-     * @param array $request
+     * @param array<string, mixed> $request
      * @param MateCatFilter $Filter
      *
      * @throws AuthenticationError
@@ -334,10 +357,8 @@ class GetContributionController extends KleinController
      */
     private function rewriteContributionContexts(array &$request, MateCatFilter $Filter): void
     {
-        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
-
         //Get contexts
-        $segmentsList = (new SegmentDao)->setCacheTTL(60 * 60 * 24)->getContextAndSegmentByIDs(
+        $segmentsList = (new SegmentDao($this->getDatabase()))->setCacheTTL(60 * 60 * 24)->getContextAndSegmentByIDs(
             [
                 'id_before' => $request['id_before'],
                 'id_segment' => $request['id_segment'],
@@ -345,7 +366,10 @@ class GetContributionController extends KleinController
             ]
         );
 
-        $featureSet->filter('rewriteContributionContexts', $segmentsList, $request);
+        $rewriteContributionContextsEvent = new RewriteContributionContextsEvent($segmentsList, $request);
+        $this->featureSet->dispatch($rewriteContributionContextsEvent);
+        $segmentsList = $rewriteContributionContextsEvent->getSegmentsList();
+        $request = $rewriteContributionContextsEvent->getRequestData();
 
         if ($segmentsList->id_before) {
             $request['context_before'] = $Filter->fromLayer0ToLayer1($segmentsList->id_before->segment);
@@ -364,12 +388,16 @@ class GetContributionController extends KleinController
      * Remove voids
      * ("en-GB," => [0 => 'en-GB'])
      *
-     * @param $cross_language
+     * @param string|array<int|string, mixed> $cross_language
      *
-     * @return array
+     * @return list<string>
      */
-    private function getCrossLanguages($cross_language): array
+    private function getCrossLanguages(string|array $cross_language): array
     {
-        return !empty($cross_language) ? explode(",", rtrim($cross_language[0], ',')) : [];
+        if (is_array($cross_language) && !empty($cross_language)) {
+            return explode(",", rtrim((string)$cross_language[0], ','));
+        }
+
+        return [];
     }
 }

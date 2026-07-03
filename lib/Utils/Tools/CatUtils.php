@@ -2,8 +2,8 @@
 
 namespace Utils\Tools;
 
+use DivisionByZeroError;
 use Exception;
-use InvalidArgumentException;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
@@ -11,6 +11,7 @@ use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\DTO\IDto;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
@@ -20,7 +21,9 @@ use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
+use PDOException;
 use ReflectionException;
+use TypeError;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TranslationStatus;
@@ -52,15 +55,41 @@ class CatUtils
     const string nbspPlaceholderRegex = '/\#\#\$_A0\$\#\#/g';
 
     // CJK and CJ languages
+    /** @var array<string, float> */
     public static array $cjk = ['zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5];
+    /** @var array<string, float> */
     public static array $cj = ['zh' => 1.8, 'ja' => 2.5];
 
+    protected IDatabase $database;
+    protected ChunkReviewDao $chunkReviewDao;
+    protected JobDao $jobDao;
+    protected SegmentTranslationDao $segmentTranslationDao;
+    protected FeatureSet $featureSet;
+    /** @var array<string, mixed> */
+    private array $serverGlobalVars;
+
     /**
-     * @param $langCode
+     * @param IDatabase $database
+     * @param array<string, mixed>|null $serverGlobalVars
+     *
+     * @throws Exception
+     */
+    public function __construct(IDatabase $database, ?array $serverGlobalVars = null)
+    {
+        $this->database = $database;
+        $this->serverGlobalVars = $serverGlobalVars ?? $_SERVER;
+        $this->chunkReviewDao = new ChunkReviewDao($database);
+        $this->jobDao = new JobDao($database);
+        $this->segmentTranslationDao = new SegmentTranslationDao($database);
+        $this->featureSet = new FeatureSet($database);
+    }
+
+    /**
+     * @param string $langCode
      *
      * @return bool
      */
-    public static function isCJK($langCode): bool
+    public static function isCJK(string $langCode): bool
     {
         return array_key_exists(explode('-', $langCode)[0], self::$cjk);
     }
@@ -106,31 +135,25 @@ class CatUtils
     /**
      * @param int $ms
      *
-     * @return array|string[]
+     * @return array{string, string, string, int}
      */
     public static function parse_time_to_edit(int $ms): array
     {
         if ($ms <= 0) {
-            return ["00", "00", "00", "00"];
+            return ["00", "00", "00", 0];
         }
 
         $usec = $ms % 1000;
 
-        if (!is_numeric($ms)) {
-            throw new InvalidArgumentException("Wrong DataType provided: " . var_export($ms, true) . "\n Expected integer.");
-        }
+        $ms = intdiv($ms, 1000);
 
-        $ms = (int)$ms;
+        $seconds = str_pad((string)($ms % 60), 2, "0", STR_PAD_LEFT);
+        $ms = intdiv($ms, 60);
 
-        $ms = floor($ms / 1000);
+        $minutes = str_pad((string)($ms % 60), 2, "0", STR_PAD_LEFT);
+        $ms = intdiv($ms, 60);
 
-        $seconds = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
-        $ms = floor($ms / 60);
-
-        $minutes = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
-        $ms = floor($ms / 60);
-
-        $hours = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
+        $hours = str_pad((string)($ms % 60), 2, "0", STR_PAD_LEFT);
 
         return [$hours, $minutes, $seconds, $usec];
     }
@@ -143,10 +166,10 @@ class CatUtils
      *
      * @param MateCatFilter $Filter
      *
-     * @return array Returns [$reconstructed_segment, $chunk_positions] where chunk_positions is an array of cumulative character lengths
+     * @return array{string, list<int>} Returns [$reconstructed_segment, $chunk_positions] where chunk_positions is an array of cumulative character lengths
      * @throws Exception
      */
-    public static function parseSegmentSplit(string $segment, string $separateWithChar, MateCatFilter $Filter): array
+    public function parseSegmentSplit(string $segment, string $separateWithChar, MateCatFilter $Filter): array
     {
         // Split the segment by the placeholder marker (e.g., "text1##$_SPLIT$##text2" -> ["text1", "text2"])
         $split_chunks = explode(self::splitPlaceHolder, $segment);
@@ -192,26 +215,30 @@ class CatUtils
      * Create a string with placeholders in the right position based on the struct
      *
      * @param string|null $segment
-     * @param array|null $chunk_positions
+     * @param array<int, int>|null $chunk_positions
      *
      * @return ?string
      */
     public static function reApplySegmentSplit(?string $segment, ?array $chunk_positions = []): ?string
     {
+        if ($chunk_positions === null || $chunk_positions === []) {
+            return $segment;
+        }
+
         $string_chunks = [];
         $last_sum = 0;
         foreach ($chunk_positions as $pos => $value) {
             if (isset($chunk_positions[$pos + 1])) {
-                $string_chunks[] = substr($segment, $value + $last_sum, $chunk_positions[$pos + 1]);
+                $string_chunks[] = substr($segment ?? '', $value + $last_sum, $chunk_positions[$pos + 1]);
                 $last_sum += $value;
             }
         }
 
         if (empty($string_chunks)) {
             return $segment;
-        } else {
-            return implode(self::splitPlaceHolder, $string_chunks);
         }
+
+        return implode(self::splitPlaceHolder, $string_chunks);
     }
 
     /**
@@ -221,25 +248,29 @@ class CatUtils
      * @return void
      * @throws Exception
      */
-    public static function addSegmentTranslation(SegmentTranslationStruct $translation, bool $is_revision): void
+    public function addSegmentTranslation(SegmentTranslationStruct $translation, bool $is_revision): void
     {
-        SegmentTranslationDao::addTranslation($translation, $is_revision);
+        $this->segmentTranslationDao->addTranslation($translation, $is_revision);
     }
 
     /**
      * Make an estimation on performance
      *
-     * @param array $job_stats
+     * @param array<string, mixed> $job_stats
      * @param int $id_job
      *
-     * @return array
+     * @return array<string, mixed>
+     * @throws PDOException
+     * @throws DivisionByZeroError
      */
-    protected static function _performanceEstimationTime(array $job_stats, int $id_job): array
+    protected function _performanceEstimationTime(array $job_stats, int $id_job): array
     {
-        $last_10_worked_ids = SegmentTranslationDao::getLast10TranslatedSegmentIDsInLastHour($id_job);
+        $last_10_worked_ids = $this->segmentTranslationDao->getLast10TranslatedSegmentIDsInLastHour($id_job);
         if (!empty($last_10_worked_ids) and count($last_10_worked_ids) === 10) {
             // Calculating words per hour and estimated completion
-            $estimation_temp = SegmentTranslationDao::getWordsPerSecond($id_job, $last_10_worked_ids);
+            /** @var list<int> $last10WorkedIds */
+            $last10WorkedIds = array_values(array_map('intval', $last_10_worked_ids));
+            $estimation_temp = $this->segmentTranslationDao->getWordsPerSecond($id_job, $last10WorkedIds);
             $words_per_second = (!empty($estimation_temp[0]['words_per_second']) ? $estimation_temp[0]['words_per_second'] : 1); // avoid division by zero
 
             $totalWordsToDo = $job_stats['raw']['new'] + $job_stats['raw']['draft'] + ($job_stats['raw']['rejected'] ?? 0);
@@ -266,16 +297,18 @@ class CatUtils
      * @param WordCountStruct $wCount
      * @param bool $performanceEstimation
      *
-     * @return array
+     * @return array<string, mixed>
+     * @throws PDOException
+     * @throws DivisionByZeroError
      */
-    public static function getFastStatsForJob(WordCountStruct $wCount, bool $performanceEstimation = true): array
+    public function getFastStatsForJob(WordCountStruct $wCount, bool $performanceEstimation = true): array
     {
         $job_stats = $wCount->jsonSerialize();
         if (!$performanceEstimation) {
             return $job_stats;
         }
 
-        return self::_performanceEstimationTime($job_stats, $wCount->getIdJob());
+        return $this->_performanceEstimationTime($job_stats, $wCount->getIdJob());
     }
 
     /**
@@ -288,7 +321,7 @@ class CatUtils
      * @return string
      * @throws Exception
      */
-    public static function clean_raw_string_4_word_count(string $string, string $source_lang = 'en-US', MateCatFilter $Filter = null): string
+    public function clean_raw_string_4_word_count(string $string, string $source_lang = 'en-US', ?MateCatFilter $Filter = null): string
     {
         //return empty on string composed only by spaces
         //do nothing
@@ -300,7 +333,7 @@ class CatUtils
         $source_lang_two_letter = explode("-", $source_lang)[0];
 
         if ($Filter === null) {
-            $Filter = MateCatFilter::getInstance(new FeatureSet(), $source_lang);
+            $Filter = MateCatFilter::getInstance($this->featureSet, $source_lang);
         }
 
         /**
@@ -342,16 +375,16 @@ class CatUtils
             html_entity_decode($string, ENT_HTML401 | ENT_QUOTES, 'UTF-8')
         );
 
-        $string = preg_replace($linkRegexp, $link_placeholder, $string);
+        $string = preg_replace($linkRegexp, $link_placeholder, $string) ?? $string;
 
         //Refine links like "php://filter/read=string.strip_tags/resource=php://input" not available in CJK because we can't use \s identifier
-        $string = preg_replace('#[a-z]+://\S+#u', $link_placeholder, $string);
+        $string = preg_replace('#[a-z]+://\S+#u', $link_placeholder, $string) ?? $string;
 
         $string = $Filter->fromLayer0ToLayer1($string);
         $string = self::replacePlaceholders($string, $variables_placeholder);
 
         // replace all numbers with a placeholder, so they will be counted as 1 word
-        $string = preg_replace('/\b[0-9]+(?:[.,][0-9]+)*\b/', $number_placeholder, $string);
+        $string = preg_replace('/\b[0-9]+(?:[.,][0-9]+)*\b/', $number_placeholder, $string) ?? $string;
 
         /**
          * Lock Hyphenated Words and underscore composed word; count them as one word
@@ -359,7 +392,7 @@ class CatUtils
          * https://regex101.com/r/t5AG6a/3
          *
          */
-        $string = preg_replace('#(?![.\s])\p{L}+[_\p{Pd}]\p{L}+(?:[_\p{Pd}]\p{L}+)*\S+#u', $word_placeholder, $string); // W count as one
+        $string = preg_replace('#(?![.\s])\p{L}+[_\p{Pd}]\p{L}+(?:[_\p{Pd}]\p{L}+)*\S+#u', $word_placeholder, $string) ?? $string; // W count as one
 
         /**
          * Remove Unicode:
@@ -368,7 +401,7 @@ class CatUtils
          * Z -> Separator (but not spaces)
          * C -> Other
          */
-        $string = preg_replace('#[\p{P}\p{Zl}\p{Zp}\p{C}]+#u', $space_placeholder, $string);
+        $string = preg_replace('#[\p{P}\p{Zl}\p{Zp}\p{C}]+#u', $space_placeholder, $string) ?? $string;
 
         /**
          * Remove english possessive word count
@@ -378,7 +411,7 @@ class CatUtils
         }
 
         //check for a string made of spaces only, after the string was cleaned
-        $no_spaces_string = preg_replace('#[\p{Z}\p{C}]+#u', "", $string);
+        $no_spaces_string = preg_replace('#[\p{Z}\p{C}]+#u', "", $string) ?? "";
         if ($no_spaces_string == "") {
             return "";
         }
@@ -421,30 +454,30 @@ class CatUtils
     }
 
     /**
-     * Count words in a string
+     * Count words in a string (instance implementation)
      *
-     * @param string|null $string $string
+     * @param string|null $string
      * @param string $source_lang
      * @param MateCatFilter|null $filter
      *
      * @return int
      * @throws Exception
      */
-    public static function segment_raw_word_count(?string $string = null, string $source_lang = 'en-US', MateCatFilter $filter = null): int
+    public function countSegmentRawWords(?string $string = null, string $source_lang = 'en-US', ?MateCatFilter $filter = null): int
     {
-        if (empty($string) && strlen(trim($string)) === 0) {
+        if ($string === null || $string === '' || trim($string) === '') {
             return 0;
         }
 
         //first two letter of code lang
         $source_lang_two_letter = explode("-", $source_lang)[0];
 
-        $string = self::clean_raw_string_4_word_count($string, $source_lang, $filter);
+        $string = $this->clean_raw_string_4_word_count($string, $source_lang, $filter);
 
         if (array_key_exists($source_lang_two_letter, self::$cjk)) {
             $res = mb_strlen($string, 'UTF-8');
         } else {
-            $words_array = preg_split('/\s+/u', $string);
+            $words_array = preg_split('/\s+/u', $string) ?: [];
             $words_array = array_filter($words_array, function ($word) {
                 return trim($word) != "";
             });
@@ -465,7 +498,7 @@ class CatUtils
      * @param string $toEncoding
      * @param string $documentContent Reference to the string document
      *
-     * @return array( $charset, $converted )
+     * @return array{string, string|false}
      * @throws Exception
      */
     public static function convertEncoding(string $toEncoding, string $documentContent): array
@@ -475,12 +508,16 @@ class CatUtils
         $tmpOrigFName = tempnam("/tmp", mt_rand(0, 1000000000) . uniqid("", true));
         file_put_contents($tmpOrigFName, $documentContent);
 
-        $cmd = "file -i $tmpOrigFName";
+        $cmd = "file --mime $tmpOrigFName";
         LoggerFactory::doJsonLog($cmd);
 
         $file_info = shell_exec($cmd);
-        [, $charset] = explode("=", $file_info);
-        $charset = trim($charset);
+        if ($file_info === null || $file_info === false) {
+            return ['unknown', $documentContent];
+        }
+
+        $parts = explode("=", $file_info);
+        $charset = trim($parts[1] ?? 'unknown');
 
         if ($charset == 'utf-16le') {
             $charset = 'Unicode';
@@ -525,7 +562,12 @@ class CatUtils
 
     }
 
-    public static function htmlentitiesFromUnicode($str): string
+    /**
+     * @param array<int, string> $str Matches array from preg_replace_callback
+     *
+     * @return string
+     */
+    public static function htmlentitiesFromUnicode(array $str): string
     {
         return "&#" . self::fastUnicode2ord($str[1]) . ";";
     }
@@ -558,7 +600,7 @@ class CatUtils
         ];
 
         foreach ($entities as $entity) {
-            $value = self::unicode2chr($entity);
+            $value = self::unicode2chr((int)$entity);
             $str = str_replace("&#" . $entity . ";", $value, $str);
         }
 
@@ -579,7 +621,7 @@ class CatUtils
         // parse and extract CDATA
         preg_match_all('/<!\[CDATA\[((?:[^]]|](?!]>))*)]]>/', $entityDecoded, $cdataMatches);
 
-        if (isset($cdataMatches[1]) and !empty($cdataMatches[1])) {
+        if (!empty($cdataMatches[1])) {
             foreach ($cdataMatches[1] as $k => $m) {
                 $entityDecoded = str_replace($cdataMatches[0][$k], $m, $entityDecoded);
             }
@@ -595,15 +637,16 @@ class CatUtils
      *
      * @return WordCountStruct
      * @throws Exception
+     * @throws TypeError
      */
-    public static function getWStructFromJobArray(JobStruct $job, ProjectStruct $projectStruct): WordCountStruct
+    public function getWStructFromJobArray(JobStruct $job, ProjectStruct $projectStruct, ?CounterModel $counter = null): WordCountStruct
     {
         $wStruct = WordCountStruct::loadFromJob($job);
 
         // For projects created with No tm analysis enabled
         if ($wStruct->getTotal() == 0 && ($projectStruct['status_analysis'] == ProjectStatus::STATUS_DONE || $projectStruct['status_analysis'] == ProjectStatus::STATUS_NOT_TO_ANALYZE)) {
-            $wCounter = new CounterModel();
-            $wStruct = $wCounter->initializeJobWordCount($job['id'], $job['password']);
+            $counter ??= new CounterModel($this->database);
+            $wStruct = $counter->initializeJobWordCount($job['id'], $job['password']);
             LoggerFactory::doJsonLog("BackWard compatibility set Counter.");
 
             return $wStruct;
@@ -617,14 +660,15 @@ class CatUtils
      *
      * @param JobStruct $job
      *
-     * @param array $chunkReviews
+     * @param array<ChunkReviewStruct> $chunkReviews
      *
      * @return string|null
      * @throws ReflectionException
+     * @throws Exception
      */
-    public static function getQualityOverallFromJobStruct(JobStruct $job, array $chunkReviews = []): ?string
+    public function getQualityOverallFromJobStruct(JobStruct $job, array $chunkReviews = []): ?string
     {
-        $values = self::getChunkReviewStructFromJobStruct($job, $chunkReviews);
+        $values = $this->getChunkReviewStructFromJobStruct($job, $chunkReviews);
 
         if (!isset($values)) {
             return null;
@@ -645,19 +689,20 @@ class CatUtils
 
     /**
      * @param JobStruct $job
-     * @param array $chunkReviews
+     * @param array<ChunkReviewStruct> $chunkReviews
      *
      * @return ChunkReviewStruct|null
      * @throws ReflectionException
+     * @throws Exception
      */
-    public static function getChunkReviewStructFromJobStruct(JobStruct $job, array $chunkReviews = []): ?ChunkReviewStruct
+    public function getChunkReviewStructFromJobStruct(JobStruct $job, array $chunkReviews = []): ?ChunkReviewStruct
     {
-        return (!empty($chunkReviews)) ? $chunkReviews[0] : (new ChunkReviewDao())->findChunkReviews($job)[0] ?? null;
+        return (!empty($chunkReviews)) ? $chunkReviews[0] : $this->chunkReviewDao->findChunkReviews($job)[0] ?? null;
     }
 
     /**
      * @param int $sid
-     * @param        $results array The resultset from previous getNextSegment()
+     * @param array<int, array<string, mixed>> $results The resultset from previous getNextSegment()
      * @param string $status
      *
      * @return null|int
@@ -710,12 +755,12 @@ class CatUtils
      *
      * @return bool
      */
-    public static function isRevisionFromIdJobAndPassword(int $jid, string $password): bool
+    public function isRevisionFromIdJobAndPassword(int $jid, string $password, ?IsJobRevisionValidator $validator = null): bool
     {
-        $jobValidator = new IsJobRevisionValidator();
+        $validator ??= new IsJobRevisionValidator($this->chunkReviewDao);
 
         try {
-            return $jobValidator->validate(
+            return $validator->validate(
                     ValidatorObject::fromArray(
                         [
                             'jid' => $jid,
@@ -731,13 +776,17 @@ class CatUtils
     /**
      * @return bool
      */
-    public static function getIsRevisionFromRequestUri(): bool
+    public function getIsRevisionFromRequestUri(): bool
     {
-        if (!isset($_SERVER['REQUEST_URI'])) {
+        if (!isset($this->serverGlobalVars['REQUEST_URI'])) {
             return false;
         }
 
-        $_from_url = parse_url($_SERVER['REQUEST_URI']);
+        $_from_url = parse_url($this->serverGlobalVars['REQUEST_URI']);
+
+        if ($_from_url === false || !isset($_from_url['path'])) {
+            return false;
+        }
 
         return self::isARevisePath($_from_url['path']);
     }
@@ -750,15 +799,19 @@ class CatUtils
      *
      * @return bool Returns `true` if the referer path is a "revise" path, otherwise `false`.
      */
-    public static function getIsRevisionFromReferer(): bool
+    public function getIsRevisionFromReferer(): bool
     {
         // Check if the HTTP_REFERER server variable is set
-        if (!isset($_SERVER['HTTP_REFERER'])) {
+        if (!isset($this->serverGlobalVars['HTTP_REFERER'])) {
             return false;
         }
 
         // Parse the referer URL to extract its components
-        $_from_url = parse_url($_SERVER['HTTP_REFERER']);
+        $_from_url = parse_url($this->serverGlobalVars['HTTP_REFERER']);
+
+        if ($_from_url === false || !isset($_from_url['path'])) {
+            return false;
+        }
 
         // Check if the path corresponds to a "revise" operation
         return self::isARevisePath($_from_url['path']);
@@ -777,19 +830,20 @@ class CatUtils
     /**
      * Get a job from a combination of ID and ANY password (t,r1 or r2)
      *
-     * @param $jobId
-     * @param $jobPassword
+     * @param int    $jobId
+     * @param string $jobPassword
      *
      * @return null|JobStruct
      * @throws ReflectionException
+     * @throws Exception
      */
-    public static function getJobFromIdAndAnyPassword($jobId, $jobPassword): ?JobStruct
+    public function getJobFromIdAndAnyPassword(int $jobId, string $jobPassword): ?JobStruct
     {
-        $job = JobDao::getByIdAndPassword($jobId, $jobPassword);
+        $job = $this->jobDao->getByIdAndPassword($jobId, $jobPassword);
 
         if (!$job) {
-            $chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId($jobPassword, $jobId);
-            $job = $chunkReview->getChunk();
+            $chunkReview = $this->chunkReviewDao->findByReviewPasswordAndJobId($jobPassword, $jobId);
+            $job = $chunkReview?->getChunk($this->jobDao);
         }
 
         return $job;
@@ -807,14 +861,19 @@ class CatUtils
      * @param int $sourcePage
      *
      * @return string|null
+     * @throws PDOException
      */
-    public static function getJobPassword(JobStruct $job, int $sourcePage = 1): ?string
+    public function getJobPassword(JobStruct $job, int $sourcePage = 1): ?string
     {
         if ($sourcePage <= 1) {
             return $job->password;
         }
 
-        $qa = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage($job->id, $job->password, $sourcePage);
+        if ($job->id === null || $job->password === null) {
+            return null;
+        }
+
+        $qa = $this->chunkReviewDao->findByIdJobAndPasswordAndSourcePage($job->id, $job->password, $sourcePage);
 
         return $qa?->review_password;
     }
@@ -823,11 +882,11 @@ class CatUtils
      * get last character from a string
      * (excluding html tags)
      *
-     * @param $string
+     * @param string $string
      *
      * @return string
      */
-    public static function getLastCharacter($string): string
+    public static function getLastCharacter(string $string): string
     {
         return mb_substr(strip_tags($string), -1);
     }
@@ -837,32 +896,35 @@ class CatUtils
      *
      * @return int|null
      * @throws ReflectionException
+     * @throws Exception
      */
-    public static function getSegmentTranslationsCount(ProjectStruct $projectStruct): ?int
+    public function getSegmentTranslationsCount(ProjectStruct $projectStruct): ?int
     {
         $idJobs = [];
 
-        foreach ($projectStruct->getJobs() as $job) {
+        foreach ($this->jobDao->getNotDeletedByProjectId((int) $projectStruct->id) as $job) {
             $idJobs[] = $job->id;
         }
 
         $idJobs = array_unique($idJobs);
+        /** @var array<int, int> $idJobs */
+        $idJobs = array_values(array_filter($idJobs, fn ($value) => $value !== null));
 
-        return JobDao::getSegmentTranslationsCount($idJobs);
+        return $this->jobDao->getSegmentTranslationsCount($idJobs);
     }
 
     /**
      * This function is used to strip malicious content from
      * user's first_name and last_name
      *
-     * @param $string
+     * @param string $string
      *
      * @return string
      */
-    public static function stripMaliciousContentFromAName($string): string
+    public static function stripMaliciousContentFromAName(string $string): string
     {
-        $string = preg_replace('/\P{L}+/u', ' ', $string); //replace all not letters (Unicode is valid) with a space
-        $string = preg_replace('/ {2,}/u', ' ', $string); // replace all double spaces with a single space
+        $string = preg_replace('/\P{L}+/u', ' ', $string) ?? $string; //replace all not letters (Unicode is valid) with a space
+        $string = preg_replace('/ {2,}/u', ' ', $string) ?? $string; // replace all double spaces with a single space
         $string = mb_substr($string, 0, 50); // max allowed characters are 50
 
         return trim($string);
@@ -878,13 +940,15 @@ class CatUtils
      *
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
-    public static function deleteSha(string $file_path, string $source, ?string $segmentationRule = null, ?int $filtersTemplateId = 0): void
+    public function deleteSha(string $file_path, string $source, ?string $segmentationRule = null, ?int $filtersTemplateId = 0, ?FiltersConfigTemplateDao $filtersDao = null): void
     {
         $extraction_parameters = null;
 
         if ($filtersTemplateId > 0) {
-            $filtersTemplateStruct = FiltersConfigTemplateDao::getById($filtersTemplateId);
+            $filtersDao ??= new FiltersConfigTemplateDao($this->database);
+            $filtersTemplateStruct = $filtersDao->getById($filtersTemplateId);
 
             if ($filtersTemplateStruct !== null) {
                 $extraction_parameters = self::getRightExtractionParameter($file_path, $filtersTemplateStruct);
@@ -893,19 +957,21 @@ class CatUtils
 
         $segmentationRule = Constants::validateSegmentationRules($segmentationRule);
 
+        $fileSha = sha1_file($file_path);
+        if ($fileSha === false) {
+            return;
+        }
+
         $hash_name_for_disk =
-            sha1_file($file_path)
+            $fileSha
             . "_" .
             sha1(($segmentationRule ?? '') . ($extraction_parameters ? json_encode($extraction_parameters) : ''))
             . "|" .
             $source;
 
-        if (!$hash_name_for_disk) {
-            return;
-        }
-
         $path_parts = pathinfo($file_path);
-        $hash_file_path = $path_parts['dirname'] . DIRECTORY_SEPARATOR . $hash_name_for_disk;
+        $dirname = $path_parts['dirname'] ?? '.';
+        $hash_file_path = $dirname . DIRECTORY_SEPARATOR . $hash_name_for_disk;
 
         if (!file_exists($hash_file_path)) {
             return;
@@ -926,12 +992,30 @@ class CatUtils
         while (!flock($fp, LOCK_EX | LOCK_NB)) {  // acquire an exclusive lock
             $i++;
             if ($i == 40) {
+                fclose($fp);
+
                 return;
             } //exit the loop after 2 seconds, can not acquire the lock
             usleep(50000);
         }
 
-        $file_content = fread($fp, filesize($hash_file_path));
+        $fileSize = filesize($hash_file_path);
+        if ($fileSize === false || $fileSize < 1) {
+            flock($fp, LOCK_UN);
+            fclose($fp);
+            @unlink($hash_file_path);
+
+            return;
+        }
+
+        $file_content = fread($fp, $fileSize);
+        if ($file_content === false) {
+            flock($fp, LOCK_UN);
+            fclose($fp);
+
+            return;
+        }
+
         $file_content_array = explode("\n", $file_content);
 
         //remove the last line ( is an empty string )
@@ -1023,7 +1107,7 @@ class CatUtils
      */
     public static function sanitizeProjectName(string $name): string
     {
-        return preg_replace('/[^.\-_\p{L}\p{N}\s]/u', '', $name);
+        return preg_replace('/[^.\-_\p{L}\p{N}\s]/u', '', $name) ?? '';
     }
 
     /**
@@ -1037,8 +1121,8 @@ class CatUtils
      *   The file name is sanitized to ensure it meets the project name criteria.
      *
      * @param string $name The project name to validate. An empty string is treated as missing.
-     * @param array $arrFiles An array of file paths used to determine a fallback name if the project name is invalid.
-     *                         If the array contains exactly one file, its name is used as the fallback.
+     * @param array<array-key, array<string, mixed>> $arrFiles An array of file entries used to determine a fallback name if the project name is invalid.
+     *                         If the array contains exactly one file, its 'name' key is used as the fallback.
      *
      * @return string Returns the validated project name or a fallback name if the provided name is invalid or missing.
      */
@@ -1054,7 +1138,8 @@ class CatUtils
             $file = end($arrFiles); // Get the only file entry
             // Extract the filename (without extension) in a cross-platform safe way.
             // Equivalent to pathinfo($file['name'], PATHINFO_FILENAME) but using a helper with fixes.
-            $name = AbstractFilesStorage::pathinfo_fix($file['name'], PATHINFO_FILENAME);
+            $pathResult = AbstractFilesStorage::pathinfo_fix($file['name'], PATHINFO_FILENAME);
+            $name = is_string($pathResult) ? $pathResult : '';
         }
 
         // Sanitize the candidate project name (e.g., strip invalid chars, trim, etc.).

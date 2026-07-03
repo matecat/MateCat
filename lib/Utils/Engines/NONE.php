@@ -2,36 +2,44 @@
 
 namespace Utils\Engines;
 
+use TypeError;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 
-/**
- * Created by PhpStorm.
- * @author domenico domenico@translated.net / ostico@gmail.com
- * Date: 07/08/17
- * Time: 12.16
- *
- */
 class NONE extends AbstractEngine
 {
 
+    /**
+     * @param array<string, mixed> $_config
+     *
+     * @throws TypeError
+     */
     public function get(array $_config): GetMemoryResponse
     {
         return new GetMemoryResponse(['responseStatus' => 200, 'responseData' => []]);
     }
 
-    public function set($_config): GetMemoryResponse
+    /**
+     * @param mixed $_config
+     */
+    public function set($_config): bool
     {
-        return new GetMemoryResponse(['responseStatus' => 200, 'responseData' => []]);
+        return true;
     }
 
-    public function update($_config): GetMemoryResponse
+    /**
+     * @param mixed $_config
+     */
+    public function update($_config): bool
     {
-        return new GetMemoryResponse(['responseStatus' => 200, 'responseData' => []]);
+        return true;
     }
 
-    public function delete($_config): GetMemoryResponse
+    /**
+     * @param mixed $_config
+     */
+    public function delete($_config): bool
     {
-        return new GetMemoryResponse(['responseStatus' => 200, 'responseData' => []]);
+        return true;
     }
 
     protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array

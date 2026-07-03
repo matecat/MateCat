@@ -13,7 +13,10 @@ use Utils\Engines\Results\TMSAbstractResponse;
 class AuthKeyResponse extends TMSAbstractResponse
 {
 
-    public function __construct($response)
+    /**
+     * @param array<string, mixed>|int|null $response
+     */
+    public function __construct(array|int|null $response)
     {
         $this->responseData = $response ?? [];
         $this->responseStatus = 200;

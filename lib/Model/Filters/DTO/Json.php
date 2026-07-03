@@ -2,36 +2,32 @@
 
 namespace Model\Filters\DTO;
 
-use JsonSerializable;
-
-class Json implements IDto, JsonSerializable
+class Json implements IDto
 {
 
     private bool $extract_arrays = false;
     private bool $escape_forward_slashes = false;
+    /** @var list<string> */
     private array $translate_keys = [];
+    /** @var list<string> */
     private array $do_not_translate_keys = [];
+    /** @var list<string> */
     private array $context_keys = [];
+    /** @var list<string> */
     private array $character_limit = [];
 
-    /**
-     * @param bool|null $extract_arrays
-     */
     public function setExtractArrays(bool $extract_arrays): void
     {
         $this->extract_arrays = $extract_arrays;
     }
 
-    /**
-     * @param bool|null $escape_forward_slashes
-     */
     public function setEscapeForwardSlashes(bool $escape_forward_slashes): void
     {
         $this->escape_forward_slashes = $escape_forward_slashes;
     }
 
     /**
-     * @param array $translate_keys
+     * @param list<string> $translate_keys
      */
     public function setTranslateKeys(array $translate_keys): void
     {
@@ -39,7 +35,7 @@ class Json implements IDto, JsonSerializable
     }
 
     /**
-     * @param array $do_not_translate_keys
+     * @param list<string> $do_not_translate_keys
      */
     public function setDoNotTranslateKeys(array $do_not_translate_keys): void
     {
@@ -47,7 +43,7 @@ class Json implements IDto, JsonSerializable
     }
 
     /**
-     * @param array $context_keys
+     * @param list<string> $context_keys
      */
     public function setContextKeys(array $context_keys): void
     {
@@ -55,8 +51,7 @@ class Json implements IDto, JsonSerializable
     }
 
     /**
-     * @param array $character_limit
-     *
+     * @param list<string> $character_limit
      */
     public function setCharacterLimit(array $character_limit): void
     {
@@ -64,7 +59,7 @@ class Json implements IDto, JsonSerializable
     }
 
     /**
-     * @param array $data
+     * @param array<string, mixed> $data
      */
     public function fromArray(array $data): void
     {
@@ -94,7 +89,7 @@ class Json implements IDto, JsonSerializable
     }
 
     /**
-     * @inheritDoc
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {

@@ -18,5 +18,5 @@ class MetadataStruct extends AbstractDaoSilentStruct implements IDaoStruct
     public ?int $files_parts_id = null;
     public int $id_file;
     public string $key;
-    public string $value;
+    public mixed $value;
 }

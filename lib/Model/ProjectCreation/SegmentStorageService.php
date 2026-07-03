@@ -10,8 +10,12 @@ use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\AppendFieldToAnalysisObjectEvent;
+use Model\FeaturesBase\Hook\Event\Filter\CorrectTagErrorsEvent;
+use Model\FeaturesBase\Hook\Event\Filter\SanitizeOriginalDataMapEvent;
 use Model\Jobs\JobStruct;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentMetadataCollection;
 use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataDao;
@@ -79,6 +83,7 @@ class SegmentStorageService
      * @param ProjectStructure $projectStructure
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function storeSegments(string|int $fid, ProjectStructure $projectStructure): void
     {
@@ -136,6 +141,9 @@ class SegmentStorageService
      * @throws ValidationError
      * @throws EndQueueException
      * @throws ReQueueException
+     * @throws \PDOException
+     * @throws \Exception
+     * @throws \TypeError
      */
     private function prepareAndPersistSegment(
         int $position,
@@ -153,23 +161,26 @@ class SegmentStorageService
         if (!empty($originalDataMap)) {
             // We add two filters here (sanitizeOriginalDataMap and correctTagErrors)
             // to allow the correct tag handling by the plugins
-            $map = $this->features->filter('sanitizeOriginalDataMap', $originalDataMap);
+            $sanitizeEvent = new SanitizeOriginalDataMapEvent($originalDataMap);
+            $this->features->dispatch($sanitizeEvent);
+            $map = $sanitizeEvent->getOriginalDataMap();
 
             // persist an original data map if present
-            $this->insertOriginalDataRecord($id_segment, $map);
+            $this->insertOriginalDataRecord((int)$id_segment, $map);
 
-            $projectStructure->segments[$fid][$position]->segment = $this->features->filter(
-                'correctTagErrors',
+            $correctTagErrorsEvent = new CorrectTagErrorsEvent(
                 $projectStructure->segments[$fid][$position]->segment,
                 $map
             );
+            $this->features->dispatch($correctTagErrorsEvent);
+            $projectStructure->segments[$fid][$position]->segment = $correctTagErrorsEvent->getSegment();
         }
 
-        /** @var ?SegmentMetadataStruct $segmentMetadataStruct */
-        $segmentMetadataStruct = $projectStructure->segments_meta_data[$fid][$position] ?? null;
+        /** @var SegmentMetadataCollection $metadataCollection */
+        $metadataCollection = $projectStructure->segments_meta_data[$fid][$position] ?? new SegmentMetadataCollection();
 
-        if ($segmentMetadataStruct !== null) {
-            $this->saveSegmentMetadata($id_segment, $segmentMetadataStruct);
+        foreach ($metadataCollection as $segmentMetadataStruct) {
+            $this->saveSegmentMetadata((int)$id_segment, $segmentMetadataStruct);
         }
 
         if (!isset($projectStructure->file_segments_count[$fid])) {
@@ -193,7 +204,10 @@ class SegmentStorageService
          * This hook allows plugins to manipulate data analysis content, should be not allowed to change existing data
          * but only to eventually add new fields
          */
-        return $this->features->filter('appendFieldToAnalysisObject', $metadata, $projectStructure);
+        $appendFieldEvent = new AppendFieldToAnalysisObjectEvent($metadata, $projectStructure);
+        $this->features->dispatch($appendFieldEvent);
+
+        return $appendFieldEvent->getMetadata();
     }
 
     /**
@@ -288,7 +302,7 @@ class SegmentStorageService
      */
     protected function createSegmentDao(): SegmentDao
     {
-        return new SegmentDao();
+        return new SegmentDao($this->dbHandler);
     }
 
     /**
@@ -297,19 +311,21 @@ class SegmentStorageService
      *
      * @param int $id_segment
      * @param array<string, mixed> $map
+     * @throws \PDOException
      */
     protected function insertOriginalDataRecord(int $id_segment, array $map): void
     {
-        SegmentOriginalDataDao::insertRecord($id_segment, $map);
+        (new SegmentOriginalDataDao($this->dbHandler))->insertRecord($id_segment, $map);
     }
 
     /**
      * Persist a single segment metadata record.
      * Protected so test subclasses can override to capture calls.
+     * @throws \Exception
      */
     protected function persistSegmentMetadata(SegmentMetadataStruct $metadataStruct): void
     {
-        SegmentMetadataDao::save($metadataStruct);
+        (new SegmentMetadataDao($this->dbHandler))->save($metadataStruct);
     }
 
     // ── Private helpers ─────────────────────────────────────────────
@@ -324,6 +340,7 @@ class SegmentStorageService
      *
      * @param array<int, array<string, mixed>> $segmentsMetadata
      * @param ProjectStructure $projectStructure
+     * @throws \TypeError
      */
     private function linkSegmentIdsToRelatedData(array $segmentsMetadata, ProjectStructure $projectStructure): void
     {
@@ -382,6 +399,8 @@ class SegmentStorageService
 
     /**
      * Validate and persist segment metadata if the struct has valid key/value.
+     *
+     * @throws \Exception
      */
     protected function saveSegmentMetadata(int $id_segment, ?SegmentMetadataStruct $metadataStruct = null): void
     {

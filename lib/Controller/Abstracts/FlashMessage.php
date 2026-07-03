@@ -18,7 +18,7 @@ class FlashMessage
     /**
      * @throws Exception
      */
-    public static function set($key, $value, $type = self::WARNING)
+    public static function set(string $key, string $value, string $type = self::WARNING): void
     {
         if (!isset($_SESSION[self::KEY])) {
             $_SESSION[self::KEY] = [
@@ -34,7 +34,10 @@ class FlashMessage
         ];
     }
 
-    public static function flush()
+    /**
+     * @return array<string, array<int, array{key: string, value: string}>>|null
+     */
+    public static function flush(): ?array
     {
         $out = null;
         if (isset($_SESSION[self::KEY])) {

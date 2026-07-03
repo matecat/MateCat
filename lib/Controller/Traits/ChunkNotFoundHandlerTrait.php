@@ -2,10 +2,13 @@
 
 namespace Controller\Traits;
 
+use Controller\Exceptions\RenderTerminatedException;
+use Exception;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use ReflectionException;
+use Utils\Registry\AppConfig;
 
 trait ChunkNotFoundHandlerTrait
 {
@@ -16,20 +19,21 @@ trait ChunkNotFoundHandlerTrait
     protected JobStruct $chunk;
 
     /**
-     * @param $id_job
-     * @param $password
+     * @param int $id_job
+     * @param string $password
      *
      * @return ?JobStruct
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function getJob(int $id_job, string $password): ?JobStruct
     {
-        $job = JobDao::getByIdAndPassword($id_job, $password);
+        $job = (new JobDao($this->getDatabase()))->getByIdAndPassword($id_job, $password);
 
         if (null === $job) {
-            $chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId($password, $id_job);
+            $chunkReview = (new ChunkReviewDao($this->getDatabase()))->findByReviewPasswordAndJobId($password, $id_job);
             if ($chunkReview) {
-                $job = $chunkReview->getChunk();
+                $job = $chunkReview->getChunk(new JobDao($this->getDatabase()));
             }
         }
 
@@ -38,6 +42,8 @@ trait ChunkNotFoundHandlerTrait
 
     /**
      * Return 404 if chunk was deleted
+     *
+     * @throws RenderTerminatedException
      */
     protected function return404IfTheJobWasDeleted(): void
     {
@@ -49,6 +55,15 @@ trait ChunkNotFoundHandlerTrait
                     'message' => 'No job found.'
                 ]
             ]);
+
+            // Production terminates the request after the 404 has been sent.
+            // Under tests a throwable is raised instead so the PHPUnit worker
+            // survives and the branch is assertable (matches BaseKleinViewController
+            // and DownloadQRController). RenderTerminatedException is unchecked.
+            if (AppConfig::$ENV === 'testing') {
+                throw new RenderTerminatedException();
+            }
+
             exit();
         }
     }

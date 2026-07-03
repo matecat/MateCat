@@ -13,18 +13,20 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
 use Exception;
-use Model\DataAccess\Database;
 use Model\Teams\PendingInvitations;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamModel;
+use Model\Teams\TeamStruct;
+use Model\Users\UserDao;
 use ReflectionException;
+use RuntimeException;
 use Utils\Redis\RedisHandler;
 use View\API\V2\Json\Membership;
 
 class TeamMembersController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $this->appendValidator(new TeamAccessValidator($this));
@@ -33,25 +35,32 @@ class TeamMembersController extends KleinController
     /**
      * Get the team members list
      * @throws ReflectionException
+     * @throws RuntimeException
+     * @throws Exception
+     * @throws \TypeError
      */
     public function index(): void
     {
-        $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), []);
-
-        $team = (new TeamDao())->setCacheTTL(60 * 60 * 24)->findById($this->request->param('id_team'));
-        $teamModel = new TeamModel($team);
+        /** @var TeamStruct $team */
+        $team = (new TeamDao($this->getDatabase()))->setCacheTTL(60 * 60 * 24)->fetchById($this->request->param('id_team'), TeamStruct::class)
+            ?? throw new \RuntimeException('Team not found');
+        $userDao = new UserDao($this->getDatabase());
+        $teamModel = new TeamModel($team, $userDao, new TeamDao($this->getDatabase()));
         $teamModel->updateMembersProjectsCount();
 
-        $formatter = new Membership($team->getMembers());
+        $teamId = $team->id ?? throw new \RuntimeException('Team has no id');
+        $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), ['team_id' => $teamId, 'email' => '']);
+        $formatter = new Membership($team->getMembers(), $userDao);
         $this->response->json([
             'members' => $formatter->render(),
-            'pending_invitations' => $pendingInvitation->hasPendingInvitation($this->request->param('id_team'))
+            'pending_invitations' => $pendingInvitation->hasPendingInvitation($teamId)
         ]);
     }
 
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws \TypeError
      */
     public function update(): void
     {
@@ -64,49 +73,60 @@ class TeamMembersController extends KleinController
             ]
         ]);
 
-        $teamStruct = (new TeamDao())
-            ->findById($this->request->param('id_team'));
+        $teamStruct = (new TeamDao($this->getDatabase()))
+                ->fetchById($this->request->param('id_team'), TeamStruct::class)
+            ?? throw new \RuntimeException('Team not found');
 
-        $model = new TeamModel($teamStruct);
+        $userDao = new UserDao($this->getDatabase());
+        $model = new TeamModel($teamStruct, $userDao, new TeamDao($this->getDatabase()));
         $model->setUser($this->user);
-        $model->addMemberEmails($params['members']);
+        $members = array_values(array_filter(
+            is_array($params['members']) ? $params['members'] : [],
+            'is_string'
+        ));
+        $model->addMemberEmails($members);
         $full_members_list = $model->updateMembers();
 
-        $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), []);
-        $formatter = new Membership($full_members_list);
+        $teamId = $teamStruct->id ?? throw new \RuntimeException('Team has no id');
+        $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), ['team_id' => $teamId, 'email' => '']);
+        $formatter = new Membership($full_members_list, $userDao);
 
         $this->refreshClientSessionIfNotApi();
 
         $this->response->json([
             'members' => $formatter->render(),
-            'pending_invitations' => $pendingInvitation->hasPendingInvitation($teamStruct->id)
+            'pending_invitations' => $pendingInvitation->hasPendingInvitation($teamId)
         ]);
     }
 
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws \TypeError
      */
     public function delete(): void
     {
-        Database::obtain()->begin();
+        $this->getDatabase()->begin();
 
-        $teamStruct = (new TeamDao())
-            ->findById($this->request->param('id_team'));
+        $teamStruct = (new TeamDao($this->getDatabase()))
+                ->fetchById($this->request->param('id_team'), TeamStruct::class)
+            ?? throw new \RuntimeException('Team not found');
 
-        $model = new TeamModel($teamStruct);
+        $userDao = new UserDao($this->getDatabase());
+        $model = new TeamModel($teamStruct, $userDao, new TeamDao($this->getDatabase()));
         $model->removeMemberUids([$this->request->param('uid_member')]);
         $model->setUser($this->user);
         $membersList = $model->updateMembers();
 
-        $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), []);
-        $formatter = new Membership($membersList);
+        $teamId = $teamStruct->id ?? throw new \RuntimeException('Team has no id');
+        $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), ['team_id' => $teamId, 'email' => '']);
+        $formatter = new Membership($membersList, $userDao);
 
         $this->refreshClientSessionIfNotApi();
 
         $this->response->json([
             'members' => $formatter->render(),
-            'pending_invitations' => $pendingInvitation->hasPendingInvitation($teamStruct->id)
+            'pending_invitations' => $pendingInvitation->hasPendingInvitation($teamId)
         ]);
     }
 
