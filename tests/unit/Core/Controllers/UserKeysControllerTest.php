@@ -7,6 +7,7 @@ use Exception;
 use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
+use Matecat\Core\Workers\TMAnalysisV2\FakeMTEngine;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\DataAccess\Database;
@@ -16,6 +17,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\ClientUserFacade;
+use Model\Users\MetadataDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
@@ -60,6 +62,38 @@ class StubTmService extends TMSService
         }
 
         return true;
+    }
+}
+
+/**
+ * Network-free adaptive engine double used to make the is_int -> is_numeric fix in
+ * removeKeyFromEngines() observable: FakeMTEngine inherits AbstractEngine's no-op
+ * getMemoryIfMine()/deleteMemory() stubs, which produce no side effect either before
+ * or after the fix, so this records whether they were actually invoked.
+ */
+class RecordingFakeEngine extends FakeMTEngine
+{
+    public static bool $getMemoryIfMineCalled = false;
+    public static bool $deleteMemoryCalled = false;
+
+    public static function reset(): void
+    {
+        self::$getMemoryIfMineCalled = false;
+        self::$deleteMemoryCalled = false;
+    }
+
+    public function getMemoryIfMine(MemoryKeyStruct $memoryKey): ?array
+    {
+        self::$getMemoryIfMineCalled = true;
+
+        return ['key' => 'fake-engine-key-for-test'];
+    }
+
+    public function deleteMemory(array $memoryKey): array
+    {
+        self::$deleteMemoryCalled = true;
+
+        return [];
     }
 }
 
@@ -111,6 +145,9 @@ class UserKeysControllerTest extends AbstractTest
 
     private const int BASE = 9_003_000;
 
+    // Outside the base+1..+13 offsets reserved by ControllerSeedFragments.
+    private const int RECORDING_ENGINE_ID = self::BASE + 90;
+
     /** @var ReflectionClass<UserKeysController> */
     private ReflectionClass $reflector;
     private TestableUserKeysController $controller;
@@ -125,6 +162,8 @@ class UserKeysControllerTest extends AbstractTest
         parent::setUp();
 
         $this->cleanFragments(self::BASE);
+        $this->cleanExtraFragments();
+        RecordingFakeEngine::reset();
         $owner = $this->ownerEmail(self::BASE);
         $this->seedUser(self::BASE, $owner);
 
@@ -152,7 +191,63 @@ class UserKeysControllerTest extends AbstractTest
     protected function tearDown(): void
     {
         $this->cleanFragments(self::BASE);
+        $this->cleanExtraFragments();
         parent::tearDown();
+    }
+
+    /**
+     * Seeds the `engines` row backing {@see RecordingFakeEngine}, resolved via
+     * EnginesFactory::getInstance() by the numeric-string metadata value.
+     *
+     * @throws Throwable
+     */
+    private function seedRecordingEngine(): void
+    {
+        $stmt = $this->seedConnection()->prepare(
+            'INSERT IGNORE INTO engines (id, name, type, base_url, class_load, active) '
+            . 'VALUES (:id, :name, :type, :base_url, :class_load, :active)'
+        );
+        $stmt->execute([
+            'id'         => self::RECORDING_ENGINE_ID,
+            'name'       => 'CtrlTestRecordingEngine',
+            'type'       => 'MT',
+            'base_url'   => 'http://fake-recording',
+            'class_load' => RecordingFakeEngine::class,
+            'active'     => 1,
+        ]);
+    }
+
+    /**
+     * Seeds the user_metadata row that removeKeyFromEngines() reads to determine which
+     * adaptive engine instance the current user owns for the "MMT" engine class.
+     *
+     * @throws Throwable
+     */
+    private function seedOwnerMetadata(string $value): void
+    {
+        $stmt = $this->seedConnection()->prepare(
+            'INSERT IGNORE INTO user_metadata (uid, `key`, value) VALUES (:uid, :key, :value)'
+        );
+        $stmt->execute([
+            'uid'   => $this->userId(self::BASE),
+            'key'   => 'Utils\Engines\MMT',
+            'value' => $value,
+        ]);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    private function cleanExtraFragments(): void
+    {
+        $conn = $this->seedConnection();
+        $conn->exec('DELETE FROM engines WHERE id = ' . self::RECORDING_ENGINE_ID);
+        $conn->exec('DELETE FROM user_metadata WHERE uid = ' . $this->userId(self::BASE));
+
+        // MetadataDao::get() caches by (uid, key) for 30 days (see removeKeyFromEngines()); bust
+        // it on both sides of every test so no test's result leaks into a sibling test that reads
+        // the same (uid, 'Utils\Engines\MMT') pair with a different seeded value.
+        (new MetadataDao(obtainTestDatabase()))->destroyCacheKey($this->userId(self::BASE), 'Utils\Engines\MMT');
     }
 
     /**
@@ -632,6 +727,57 @@ class UserKeysControllerTest extends AbstractTest
         $this->invokePrivate('removeKeyFromEngines', [$memoryKey, 'MMT']);
 
         $this->assertSame('abcdef1234567890', $memoryKey->tm_key->key);
+    }
+
+    /**
+     * Regression for is_int -> is_numeric: user_metadata.value is a VARCHAR column, so
+     * MetadataDao always returns it as a numeric string (e.g. "9003090"), which is_int()
+     * rejected, silently skipping adaptive-engine deletion. is_numeric() lets it through.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function removeKeyFromEngines_deletes_memory_when_ownership_metadata_value_is_numeric_string(): void
+    {
+        $this->seedRecordingEngine();
+        $this->seedOwnerMetadata((string)self::RECORDING_ENGINE_ID);
+
+        $tmKey      = new TmKeyStruct();
+        $tmKey->key = 'abcdef1234567890';
+
+        $memoryKey         = new MemoryKeyStruct();
+        $memoryKey->uid    = $this->userId(self::BASE);
+        $memoryKey->tm_key = $tmKey;
+
+        $this->invokePrivate('removeKeyFromEngines', [$memoryKey, 'MMT']);
+
+        $this->assertTrue(RecordingFakeEngine::$getMemoryIfMineCalled);
+        $this->assertTrue(RecordingFakeEngine::$deleteMemoryCalled);
+    }
+
+    /**
+     * Covers the other branch of the same condition: non-numeric metadata values must
+     * still be rejected so an invalid/corrupt value can't be used as an engine id.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function removeKeyFromEngines_skips_deletion_when_ownership_metadata_value_is_not_numeric(): void
+    {
+        $this->seedRecordingEngine();
+        $this->seedOwnerMetadata('not-a-numeric-value');
+
+        $tmKey      = new TmKeyStruct();
+        $tmKey->key = 'abcdef1234567890';
+
+        $memoryKey         = new MemoryKeyStruct();
+        $memoryKey->uid    = $this->userId(self::BASE);
+        $memoryKey->tm_key = $tmKey;
+
+        $this->invokePrivate('removeKeyFromEngines', [$memoryKey, 'MMT']);
+
+        $this->assertFalse(RecordingFakeEngine::$getMemoryIfMineCalled);
+        $this->assertFalse(RecordingFakeEngine::$deleteMemoryCalled);
     }
 
     // ─── getTmService seam (real construction, no live HTTP) ───
