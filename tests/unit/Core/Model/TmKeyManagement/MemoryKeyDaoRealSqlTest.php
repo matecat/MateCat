@@ -6,6 +6,7 @@ use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\RealSqlDaoTestTrait;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Group;
 use Utils\TmKeyManagement\TmKeyStruct;
 
@@ -114,6 +115,9 @@ class MemoryKeyDaoRealSqlTest extends AbstractTest
         // owner is the only uid for this key => owner true, not shared.
         $this->assertTrue($rows[0]->tm_key->owner);
         $this->assertFalse($rows[0]->tm_key->is_shared);
+        // non-traverse read populates in_users_id (raw owner uids) and leaves in_users empty.
+        $this->assertSame([(string)$uid], $rows[0]->tm_key->getInUsersId());
+        $this->assertSame([], $rows[0]->tm_key->getInUsers());
     }
 
     public function testReadSharedKeyMarksMultipleOwners(): void
@@ -218,6 +222,15 @@ class MemoryKeyDaoRealSqlTest extends AbstractTest
         $this->assertSame($keyValue, $rows[0]->tm_key->key);
         $this->assertSame($uid, (int)$rows[0]->uid);
         $this->assertTrue($rows[0]->tm_key->owner, 'the requesting uid owns the key');
+
+        // traverse=true resolves owner uids to UserStruct[] on in_users (keyed by uid via
+        // UserDao::getByUids); in_users_id stays empty.
+        $inUsers = $rows[0]->tm_key->getInUsers();
+        $this->assertCount(1, $inUsers);
+        $this->assertArrayHasKey($uid, $inUsers);
+        $this->assertInstanceOf(UserStruct::class, $inUsers[$uid]);
+        $this->assertSame($uid, (int)$inUsers[$uid]->uid);
+        $this->assertEquals([$uid], $rows[0]->tm_key->getInUsersId());
     }
 
     // -----------------------------------------------------------------------------------------

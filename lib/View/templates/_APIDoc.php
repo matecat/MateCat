@@ -9,6 +9,7 @@ use Model\FeaturesBase\FeatureSet;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
+/** @phpstan-ignore requireOnce.fileNotFound */
 require_once '../../lib/Bootstrap.php';
 try {
     Bootstrap::start();
@@ -21,19 +22,19 @@ foreach (AppConfig::$SUPPORTED_FILE_TYPES as $key => $value) {
     $count += count($value);
 }
 
-$nr_supoported_files = $count;
+$nr_supported_files = $count;
 
 $max_file_size_in_MB = AppConfig::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
 
 $csp_nonce = Utils::uuid4();
-$csp = file_get_contents(AppConfig::$ROOT . "/" . AppConfig::$TRACKING_CODES_VIEW_PATH . "/CSP-HeaderMeta.html");
+$csp = file_get_contents(AppConfig::$ROOT . "/" . AppConfig::$TRACKING_CODES_VIEW_PATH . "/CSP-HeaderMeta.html") ?: '';
 $csp = str_replace('${x_nonce_unique_id}', $csp_nonce, $csp);
 
 $parsedHost = parse_url(AppConfig::$HTTPHOST);
 $x_self_ajax_location_hosts = AppConfig::$ENABLE_MULTI_DOMAIN_API && is_array($parsedHost) && isset($parsedHost['host'])
         ? " *.ajax." . $parsedHost['host']
-        : null;
-$csp = str_replace('${x_self_ajax_location_hosts}', $x_self_ajax_location_hosts, $csp);
+        : '';
+$csp = str_replace('${x_self_ajax_location_hosts}', $x_self_ajax_location_hosts, $csp) ?: '';
 
 ?>
 <!DOCTYPE html>
