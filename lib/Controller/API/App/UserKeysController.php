@@ -277,7 +277,7 @@ class UserKeysController extends KleinController
 
                     // If metadata exists, attempt to delete the memory key from the engine.
                     if (!empty($ownerMmtEngineMetaData) && is_numeric($ownerMmtEngineMetaData->value)) {
-                        $engine = EnginesFactory::getInstance($ownerMmtEngineMetaData->value, $this->getDatabase(), AbstractEngine::class);
+                        $engine = EnginesFactory::getInstance((int)$ownerMmtEngineMetaData->value, $this->getDatabase(), AbstractEngine::class);
                         $engineKey = $engine->getMemoryIfMine($memoryKey);
                         if ($engineKey) {
                             $engine->deleteMemory($engineKey);
