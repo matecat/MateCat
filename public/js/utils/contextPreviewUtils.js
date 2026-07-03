@@ -824,6 +824,18 @@ export const suppressClickTraps = (container) => {
   }
 }
 
+export const resolveScreenshotUrl = async (url) => {
+  if (!url || !url.toLowerCase().endsWith('.url')) return url
+
+  const response = await fetch(url)
+  const text = await response.text()
+  const match = text.match(/window\.location\.href\s*=\s*["']([^"']+)["']/)
+
+  if (!match) throw new Error(`Unable to resolve screenshot url: ${url}`)
+
+  return match[1]
+}
+
 export const extractSegmentContextFields = (segment) => {
   const meta = segment.metadata ?? []
   const find = (key) => meta.find((m) => m.meta_key === key)?.meta_value ?? null
