@@ -415,28 +415,86 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
     }
 
     #[Test]
-    public function passFailCountsAtomicUpdate_returns_early_when_no_qa_model(): void
+    public function passFailCountsAtomicUpdate_updates_counters_and_forces_pass_when_no_qa_model(): void
     {
-        // project without a qa model -> lqaModel null -> no INSERT.
+        // project without a qa model -> lqaModel null -> counters still written, is_pass forced to 1.
+        //
+        // The chunk review row is pre-created via createRecord() first, exactly like production
+        // does when a review round starts: passFailCountsAtomicUpdate's INSERT then collides on
+        // the (id_job, password, source_page) unique key and takes the ON DUPLICATE KEY UPDATE
+        // branch, which is the only branch that actually computes is_pass (it is not part of the
+        // plain INSERT column list).
         $project = $this->fixtures->makeProjectDetailed();
         $job = $this->fixtures->makeJob($project['id'], ['password' => 'pf_null', 'owner' => $this->ownerEmail]);
+
+        $created = $this->dao->createRecord([
+            'id_project'  => $project['id'],
+            'id_job'      => $job['id'],
+            'password'    => 'pf_null',
+            'source_page' => SourcePages::SOURCE_PAGE_REVISION,
+        ]);
+        $this->fixtures->trackExisting('qa_chunk_reviews', ['id' => $created->id]);
 
         $chunkReview = new ChunkReviewStruct();
         $chunkReview->id_job = $job['id'];
         $chunkReview->id_project = $project['id'];
         $chunkReview->password = 'pf_null';
-        $chunkReview->review_password = 'pf_null_rev';
+        $chunkReview->review_password = $created->review_password;
         $chunkReview->source_page = SourcePages::SOURCE_PAGE_REVISION;
 
-        $chunkReviewId = self::ASSIGNABLE_ID_FLOOR + 7001;
-        $this->dao->passFailCountsAtomicUpdate($chunkReviewId, [
+        $this->dao->passFailCountsAtomicUpdate($created->id, [
             'chunkReview'          => $chunkReview,
+            'penalty_points'       => 12,
             'reviewed_words_count' => 100,
             'total_tte'            => 500,
         ]);
 
-        // early return -> nothing written.
-        $this->assertNull($this->dao->findById($chunkReviewId));
+        $row = $this->dao->findById($created->id);
+        $this->assertInstanceOf(ChunkReviewStruct::class, $row);
+        $this->assertSame(12, (int)$row->penalty_points);
+        $this->assertSame(100, $row->reviewed_words_count);
+        $this->assertSame(500, $row->total_tte);
+        $this->assertSame(1, (int)$row->is_pass);
+    }
+
+    #[Test]
+    public function passFailCountsAtomicUpdate_updates_counters_and_forces_pass_when_qa_model_is_stale(): void
+    {
+        // id_qa_model points at a non-existent qa_models row -> ModelDao::findById returns null,
+        // same forced-pass fallback as the no-model case must apply even though the score
+        // (30 points / 100 words * 1000 = 300) would fail any real limit.
+        $project = $this->fixtures->makeProjectDetailed();
+        $staleModelId = self::ASSIGNABLE_ID_FLOOR + 999999;
+        $this->realSqlDb()->getConnection()
+            ->exec("UPDATE projects SET id_qa_model = {$staleModelId} WHERE id = {$project['id']}");
+        $job = $this->fixtures->makeJob($project['id'], ['password' => 'pf_stale', 'owner' => $this->ownerEmail]);
+
+        $created = $this->dao->createRecord([
+            'id_project'  => $project['id'],
+            'id_job'      => $job['id'],
+            'password'    => 'pf_stale',
+            'source_page' => SourcePages::SOURCE_PAGE_REVISION,
+        ]);
+        $this->fixtures->trackExisting('qa_chunk_reviews', ['id' => $created->id]);
+
+        $chunkReview = new ChunkReviewStruct();
+        $chunkReview->id_job = $job['id'];
+        $chunkReview->id_project = $project['id'];
+        $chunkReview->password = 'pf_stale';
+        $chunkReview->review_password = $created->review_password;
+        $chunkReview->source_page = SourcePages::SOURCE_PAGE_REVISION;
+
+        $this->dao->passFailCountsAtomicUpdate($created->id, [
+            'chunkReview'          => $chunkReview,
+            'penalty_points'       => 30,
+            'reviewed_words_count' => 100,
+            'total_tte'            => 500,
+        ]);
+
+        $row = $this->dao->findById($created->id);
+        $this->assertInstanceOf(ChunkReviewStruct::class, $row);
+        $this->assertSame(30, (int)$row->penalty_points);
+        $this->assertSame(1, (int)$row->is_pass);
     }
 
     #[Test]

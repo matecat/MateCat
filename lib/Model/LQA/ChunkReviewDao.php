@@ -604,10 +604,13 @@ class ChunkReviewDao extends AbstractDao
         $chunkReview = $data['chunkReview'];
         $project = $chunkReview->getChunk(new JobDao($this->database))->getProject(new ProjectDao($this->database));
         $lqaModel = $project->id_qa_model !== null ? (new ModelDao($this->database))->findById($project->id_qa_model) : null;
-        if ($lqaModel === null) {
-            return;
-        }
-        $data['force_pass_at'] = ReviewUtils::filterLQAModelLimit($lqaModel, $chunkReview->source_page);
+
+        // No QA model resolvable (unset or stale id) -> no threshold to gate against, always pass;
+        // still update penalty_points/reviewed_words_count/total_tte below (mirrors
+        // ChunkReviewModel::recountAndUpdatePassFailResult()'s is_pass = true fallback).
+        $data['force_pass_at'] = $lqaModel !== null
+            ? ReviewUtils::filterLQAModelLimit($lqaModel, $chunkReview->source_page)
+            : PHP_INT_MAX;
 
         // in MySQL a sum of a null value to an integer returns 0
         // in MySQL, division by zero returns NULL, so we have to coalesce null values from is_pass division

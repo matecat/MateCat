@@ -425,7 +425,7 @@ class ChunkReviewDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function passFailCountsAtomicUpdateReturnsEarlyWhenLqaModelIsNull(): void
+    public function passFailCountsAtomicUpdateStillUpdatesCountersWhenLqaModelIsNull(): void
     {
         $projectStub = $this->createStub(ProjectStruct::class);
         $projectStub->id_qa_model = null;
@@ -436,16 +436,23 @@ class ChunkReviewDaoTest extends AbstractTest
         $chunkReview = $this->createStub(ChunkReviewStruct::class);
         $chunkReview->method('getChunk')->willReturn($chunkStub);
         $chunkReview->source_page = 2;
+        $chunkReview->id_job = 5;
+        $chunkReview->id_project = 1;
+        $chunkReview->password = 'p';
+        $chunkReview->review_password = 'rp';
 
         $stmtMock = $this->createMock(PDOStatement::class);
         $stmtMock->queryString = '';
-        $stmtMock->expects($this->never())->method('execute');
+        $stmtMock->expects($this->once())->method('execute')->willReturn(true);
 
-        $pdoStub = $this->createStub(PDO::class);
-        $pdoStub->method('prepare')->willReturn($stmtMock);
+        $pdoMock = $this->createMock(PDO::class);
+        $pdoMock->expects($this->once())
+            ->method('prepare')
+            ->with($this->stringContains((string)PHP_INT_MAX))
+            ->willReturn($stmtMock);
 
         $dbStub = $this->createStub(IDatabase::class);
-        $dbStub->method('getConnection')->willReturn($pdoStub);
+        $dbStub->method('getConnection')->willReturn($pdoMock);
 
         $this->setDatabaseInstance($dbStub);
 
