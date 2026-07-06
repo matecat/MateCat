@@ -595,7 +595,7 @@ class ChunkReviewDao extends AbstractDao
     /**
      *
      * @param int $chunkReviewID
-     * @param array{chunkReview: ChunkReviewStruct, penalty_points?: int, reviewed_words_count: int, total_tte: int} $data
+     * @param array{chunkReview: ChunkReviewStruct, penalty_points?: float, reviewed_words_count: int, total_tte: int} $data
      *
      * @throws Exception
      */
