@@ -480,4 +480,48 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
         $this->assertInstanceOf(ChunkReviewStruct::class, $updated);
         $this->assertSame(250, $updated->reviewed_words_count); // GREATEST(200 + 50)
     }
+
+    #[Test]
+    public function passFailCountsAtomicUpdate_preserves_decimal_penalty_points(): void
+    {
+        // regression: a (int) cast on penalty_points used to truncate 0.5 -> 0 before this INSERT.
+        $modelId = $this->makeQaModel('{"limit":[15,10]}');
+        $project = $this->fixtures->makeProjectDetailed();
+        $this->realSqlDb()->getConnection()
+            ->exec("UPDATE projects SET id_qa_model = {$modelId} WHERE id = {$project['id']}");
+        $job = $this->fixtures->makeJob($project['id'], ['password' => 'pf_dec', 'owner' => $this->ownerEmail]);
+
+        $chunkReview = new ChunkReviewStruct();
+        $chunkReview->id_job = $job['id'];
+        $chunkReview->id_project = $project['id'];
+        $chunkReview->password = 'pf_dec';
+        $chunkReview->review_password = 'pf_dec_rev';
+        $chunkReview->source_page = SourcePages::SOURCE_PAGE_REVISION;
+
+        $chunkReviewId = self::ASSIGNABLE_ID_FLOOR + 7003;
+        $this->fixtures->trackExisting('qa_chunk_reviews', ['id' => $chunkReviewId]);
+
+        $this->dao->passFailCountsAtomicUpdate($chunkReviewId, [
+            'chunkReview'          => $chunkReview,
+            'penalty_points'       => 0.5,
+            'reviewed_words_count' => 100,
+            'total_tte'            => 500,
+        ]);
+
+        $row = $this->dao->findById($chunkReviewId);
+        $this->assertInstanceOf(ChunkReviewStruct::class, $row);
+        $this->assertSame(0.5, $row->penalty_points);
+
+        // a second decimal addition should accumulate, not stay truncated at 0.
+        $this->dao->passFailCountsAtomicUpdate($chunkReviewId, [
+            'chunkReview'          => $chunkReview,
+            'penalty_points'       => 0.5,
+            'reviewed_words_count' => 0,
+            'total_tte'            => 0,
+        ]);
+
+        $updated = $this->dao->findById($chunkReviewId);
+        $this->assertInstanceOf(ChunkReviewStruct::class, $updated);
+        $this->assertSame(1.0, $updated->penalty_points);
+    }
 }

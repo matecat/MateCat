@@ -527,6 +527,50 @@ class ChunkReviewDaoTest extends AbstractTest
     }
 
     #[Test]
+    public function passFailCountsAtomicUpdatePreservesDecimalPenaltyPoints(): void
+    {
+        // regression: penalty_points used to be (int)-cast upstream in ChunkReviewModel before
+        // reaching this DAO, truncating e.g. 0.5 -> 0. Assert the bound param stays a float here.
+        $lqaModel = $this->createStub(ModelStruct::class);
+        $lqaModel->method('getLimit')->willReturn([10]);
+
+        $projectStub = $this->createStub(ProjectStruct::class);
+        $projectStub->id_qa_model = 1;
+
+        $chunkStub = $this->createStub(JobStruct::class);
+        $chunkStub->method('getProject')->willReturn($projectStub);
+
+        $chunkReview = $this->createStub(ChunkReviewStruct::class);
+        $chunkReview->method('getChunk')->willReturn($chunkStub);
+        $chunkReview->source_page = 2;
+        $chunkReview->id_job = 5;
+        $chunkReview->id_project = 1;
+        $chunkReview->password = 'p';
+        $chunkReview->review_password = 'rp';
+
+        $capturedParams = null;
+        $this->stmtStub->method('execute')->willReturnCallback(function (array $params) use (&$capturedParams) {
+            if (array_key_exists('penalty_points', $params)) {
+                $capturedParams = $params;
+            }
+
+            return true;
+        });
+        $this->stmtStub->method('fetchAll')->willReturn([$lqaModel]);
+
+        $dao = new ChunkReviewDao($this->dbStub);
+        $dao->passFailCountsAtomicUpdate(101, [
+            'chunkReview'          => $chunkReview,
+            'penalty_points'       => 0.5,
+            'reviewed_words_count' => 200,
+            'total_tte'            => 1000,
+        ]);
+
+        $this->assertNotNull($capturedParams, 'execute() was never called with a penalty_points param');
+        $this->assertSame(0.5, $capturedParams['penalty_points']);
+    }
+
+    #[Test]
     public function destroyCacheForFindChunkReviewsDoesNotThrow(): void
     {
         $chunk = new JobStruct();
