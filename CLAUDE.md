@@ -59,9 +59,34 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Matecat is an enterprise-level web-based Computer-Assisted Translation (CAT) tool. PHP 8.3+ backend with a React/Vite frontend. Uses Redis for caching, MySQL for persistence, and ActiveMQ for async job processing.
 
-## Commands
+## Architecture
 
-### Tests
+### PHP Autoloading
+
+PSR-4 root is `lib/` with empty namespace prefix. Classes in `lib/Controller/API/App/FooController.php` have namespace `Controller\API\App`. Plugin classes in `plugins/*/lib/` follow the same pattern (e.g., `Features\Translated`).
+
+### Directory Structure
+
+- `lib/Controller/` — HTTP controllers. `Abstracts/` contains the base chain: `KleinController` → `BaseKleinViewController` → concrete controllers
+- `lib/Model/` — Domain models, DAOs, structs. DAOs extend `AbstractDao` with `DaoCacheTrait` for Redis caching
+- `lib/Utils/` — Engines (MT/TM integrations), async workers, LQA, subfiltering, task runner
+- `lib/Plugins/Features/` — Internal features (ReviewExtended, TranslationVersions, SegmentFilter, ProjectCompletion)
+- `plugins/` — External plugin submodules (translated, airbnb, uber, aligner, vite). Each has `lib/Features/` with a class extending `BaseFeature`
+- `lib/Model/FeaturesBase/` — Event system. `Hook/Event/Filter/` for data-transforming events, `Hook/Event/Run/` for side-effect events. `FeatureSet` dispatches events to registered features
+
+### Engine Hierarchy
+
+`AbstractEngine` → concrete engines (MyMemory, MMT, DeepL, Lara, Google, etc.) → `Results/` response classes → `EnginesFactory`. Widest inheritance tree in the codebase.
+
+### Async Workers
+
+Workers in `lib/Utils/AsyncTasks/Workers/` process queued jobs via ActiveMQ. Key workers: `TMAnalysisWorker`, `GetContributionWorker`, `SetContributionWorker`, `FastAnalysis`, `ProjectCreationWorker`. Daemon entry points in `daemons/`.
+
+### DataAccess Layer
+
+`AbstractDao` → concrete DAOs. `DaoCacheTrait` provides Redis-backed caching with XFetch early recomputation. Structs extend `AbstractDaoObjectStruct` with `ArrayAccessTrait`. `ShapelessConcreteStruct` for untyped data.
+
+## Testing
 
 ```bash
 # Full test suite (excludes tests needing external services)
@@ -77,7 +102,11 @@ vendor/bin/phpunit --filter testMethodName --no-coverage
 XDEBUG_MODE=coverage vendor/bin/phpunit tests/unit/Path/To/TestFile.php --coverage-clover /tmp/coverage.xml
 ```
 
-### Static Analysis
+- Tests mirror source structure: `lib/Utils/Foo/Bar.php` → `tests/unit/Utils/Foo/BarTest.php`
+- Plugin tests: `plugins/*/tests/`
+- Predis `Client` uses `__call` magic for Redis commands — cannot be mocked with PHPUnit `createMock()`. Extend `Client` or mock `RedisHandler` instead
+
+## Static Analysis
 
 ```bash
 # Full codebase with baseline
@@ -87,54 +116,22 @@ vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress --error-fo
 vendor/bin/phpstan analyse path/to/File.php --configuration=phpstan-no-baseline.neon --no-progress --error-format=table
 ```
 
-### Frontend
-
-```bash
-yarn watch          # Dev server with HMR
-yarn build:dev      # Development build
-yarn build:production  # Production build
-```
-
-## Architecture
-
-### PHP Autoloading
-
-PSR-4 root is `lib/` with empty namespace prefix. Classes in `lib/Controller/API/App/FooController.php` have namespace `Controller\API\App`. Plugin classes in `plugins/*/lib/` follow the same pattern (e.g., `Features\Translated`).
-
-### Directory Structure
-
-- `lib/Controller/` — HTTP controllers. `Abstracts/` contains the base chain: `KleinController` → `BaseKleinViewController` → concrete controllers
-- `lib/Model/` — Domain models, DAOs, structs. DAOs extend `AbstractDao` with `DaoCacheTrait` for Redis caching
-- `lib/Utils/` — Engines (MT/TM integrations), async workers, LQA, subfiltering, task runner
-- `lib/Plugins/Features/` — Internal features (ReviewExtended, TranslationVersions, SegmentFilter, ProjectCompletion)
-- `plugins/` — External plugin submodules (translated, airbnb, uber). Each has `lib/Features/` with a class extending `BaseFeature`
-- `lib/Model/FeaturesBase/` — Event system. `Hook/Event/Filter/` for data-transforming events, `Hook/Event/Run/` for side-effect events. `FeatureSet` dispatches events to registered features
-
-### Engine Hierarchy
-
-`AbstractEngine` → concrete engines (MyMemory, MMT, DeepL, Lara, Google, etc.) → `Results/` response classes → `EnginesFactory`. Widest inheritance tree in the codebase.
-
-### Async Workers
-
-Workers in `lib/Utils/AsyncTasks/Workers/` process queued jobs via ActiveMQ. Key workers: `TMAnalysisWorker`, `GetContributionWorker`, `SetContributionWorker`, `FastAnalysis`, `ProjectCreationWorker`. Daemon entry points in `daemons/`.
-
-### DataAccess Layer
-
-`AbstractDao` → concrete DAOs. `DaoCacheTrait` provides Redis-backed caching with XFetch early recomputation. Structs extend `AbstractDaoObjectStruct` with `ArrayAccessTrait`. `ShapelessConcreteStruct` for untyped data.
-
-## PHPStan Configuration
+### PHPStan Configuration
 
 - Level 8 with `phpstan-baseline.neon` for known errors
 - `phpstan-no-baseline.neon` exists for verifying individual files are fully clean
 - `checkTooWideThrowTypesInProtectedAndPublicMethods: true` — must use precise exception types in `@throws`
 - `missingCheckedExceptionInThrows: true` — all thrown exceptions must be declared
 - `UnknownPropertyException` is unchecked (used by struct `ArrayAccessTrait`)
+- When adding exceptions to PHPDoc, prefer `use` imports over FQCN
 
-## API Testing
-When testing or calling HTTP/API endpoints, use the bruno-mcp MCP server first.
-Workflow: list_collections → list_requests → run_collection.
-Do not use curl or direct HTTP calls when Bruno collections exist. 
-Use `dev` environment for testing.
+## Frontend
+
+```bash
+yarn watch          # Dev server with HMR
+yarn build:dev      # Development build
+yarn build:production  # Production build
+```
 
 ## Git
 
@@ -146,6 +143,25 @@ Follow the project `.github/prompts/conventional-commit.prompt.md` for commit me
 - Use `git commit -a` (lowercase), never `-A`
 - 100 character line limit
 - Imperative mood, no capitalization, no period
+
+Follow the `.github/PULL_REQUEST_TEMPLATE.md` AND the `.github/scripts/pr-readiness-check.js` when creating a Pull Request.
+
+### Creating worktrees
+
+When creating worktrees, those commands MUST be used:
+
+- `cd <project-root> && git branch --show-current`
+- `git branch <branch-name> <current-branch-name>`
+- `git worktree add ../matecat-<branch-name> <branch-name>`
+- `cp composer.phar ../matecat-<branch-name>/composer.phar`
+- `cd ../matecat-<branch-name>/ && php composer.phar install`
+- `git submodule update --init --recursive`
+
+## API Testing
+When testing or calling HTTP/API endpoints, use the bruno-mcp MCP server first.
+Workflow: list_collections → list_requests → run_collection.
+Do not use curl or direct HTTP calls when Bruno collections exist.
+Use `dev` environment for testing.
 
 ## MCP Tools: code-review-graph
 
@@ -160,21 +176,3 @@ Follow the project `.github/prompts/conventional-commit.prompt.md` for commit me
 | `query_graph`               | Tracing callers, callees, imports, tests            |
 | `semantic_search_nodes`     | Finding functions/classes by name or keyword        |
 | `get_architecture_overview` | Understanding high-level codebase structure         |
-
-## Key Conventions
-
-- When adding exceptions to PHPDoc, prefer `use` imports over FQCN
-- Tests mirror source structure: `lib/Utils/Foo/Bar.php` → `tests/unit/Utils/Foo/BarTest.php`
-- Plugin tests: `plugins/*/tests/`
-- Predis `Client` uses `__call` magic for Redis commands — cannot be mocked with PHPUnit `createMock()`. Extend `Client` or mock `RedisHandler` instead
-
-# Creating worktrees
-
-When creating worktrees, those commands MUST be used:
-
-- `cd <project-root> && git branch --show-current`
-- `git branch <branch-name> <current-branch-name>`
-- `git worktree add ../matecat-<branch-name> <branch-name>`
-- `cp composer.phar ../matecat-<branch-name>/composer.phar`
-- `cd ../matecat-<branch-name>/ && php composer.phar install`
-- `git submodule update --init --recursive`

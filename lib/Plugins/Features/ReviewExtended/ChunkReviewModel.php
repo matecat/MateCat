@@ -94,7 +94,7 @@ class ChunkReviewModel implements IChunkReviewModel
     {
         $data = [
             'chunkReview' => $this->chunk_review,
-            'penalty_points' => (int)$penalty_points,
+            'penalty_points' => $penalty_points,
             'reviewed_words_count' => $reviewed_word_count,
             'total_tte' => $tte,
         ];
@@ -131,7 +131,7 @@ class ChunkReviewModel implements IChunkReviewModel
      * Used only by ChunkReviewModel::[subtractPenaltyPoints, addPenaltyPoints]
      *
      * @param ProjectStruct $project
-     * @param array{chunkReview: ChunkReviewStruct, penalty_points?: int, reviewed_words_count: int, total_tte: int} $data
+     * @param array{chunkReview: ChunkReviewStruct, penalty_points?: float, reviewed_words_count: int, total_tte: int} $data
      *
      * @throws Exception
      */
