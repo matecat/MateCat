@@ -5,6 +5,7 @@
 html,
 body {
   height: 100%;
+  margin: 0;
 }
 
 body.analyze {
@@ -123,7 +124,6 @@ body.analyze {
             }
           }
           .not-complete {
-
           }
 
           .downloadAnalysisReport {
@@ -142,7 +142,6 @@ body.analyze {
             }
           }
         }
-
       }
 
       .word-count {
@@ -195,7 +194,6 @@ body.analyze {
           }
         }
 
-
         .updated-count {
           background-color: colors.$orange50;
         }
@@ -218,15 +216,12 @@ body.analyze {
     }
 
     .project-top {
-
       &.type-mtqe {
         .title-total-words,
         .title-matecat-words {
           width: 50% !important;
         }
       }
-
-
     }
 
     .project-top.type-standard {
@@ -241,7 +236,8 @@ body.analyze {
         border-radius: variables.$border-radius-big;
         border: 1px solid colors.$grey150;
         overflow: hidden;
-        .project-card__header, .project-card__content {
+        .project-card__header,
+        .project-card__content {
           display: flex;
           padding: 0 24px;
           align-items: center;
@@ -284,12 +280,12 @@ body.analyze {
               font-weight: 700;
             }
             svg {
-                color: colors.$grey700;
+              color: colors.$grey700;
             }
           }
           .project-card__header-id {
             font: variables.$font-style-xsmall;
-            color: colors.$grey700
+            color: colors.$grey700;
           }
         }
         .project-card__header-actions {
@@ -314,15 +310,14 @@ body.analyze {
             color: colors.$grey700;
 
             &:last-child {
-               font-weight: 700;
-               color: colors.$black;
+              font-weight: 700;
+              color: colors.$black;
             }
           }
-
         }
         @media screen and (max-width: 1300px) {
           .project-card__count > div {
-            width: 140px
+            width: 140px;
           }
           .project-card__header-info {
             width: 200px;
@@ -330,7 +325,7 @@ body.analyze {
         }
         @media screen and (max-width: 1200px) {
           .project-card__count > div {
-            width: 140px
+            width: 140px;
           }
           .project-card__header-info {
             width: 150px;

@@ -355,7 +355,7 @@ export const TMCreateResourceRow = ({row}) => {
         )}
       </div>
       <div />
-      <div className="translation-memory-glossary-tab-buttons-group">
+      <div className="translation-memory-glossary-tab-buttons-group translation-memory-glossary-tab-create-row">
         <Button
           type={BUTTON_TYPE.PRIMARY}
           size={BUTTON_SIZE.SMALL}

@@ -74,13 +74,13 @@
 .settings-panel-row-drag-handle {
   position: absolute;
   margin-left: 15px;
-  margin-top: 8px;
+  margin-top: 14px;
   cursor: move;
   border: 2px dotted colors.$grey200;
   border-top: 0;
   border-bottom: 0;
   width: 2px;
-  height: 30px;
+  height: 25px;
 }
 
 .settings-panel-row-dragging {

@@ -253,7 +253,8 @@
   }
 }
 
-.tm-key-row-options-menu-container {
+.tm-key-row-options-menu-container,
+.translation-memory-glossary-tab-buttons-group {
   display: flex;
   gap: 8px;
 }
@@ -265,10 +266,10 @@
   color: colors.$grey600;
 }
 
-.translation-memory-glossary-tab-buttons-group {
-  display: flex;
-  gap: 8px;
-  justify-content: end;
+.translation-memory-glossary-tab-create-row {
+  button[type='submit'] {
+    width: 96px;
+  }
 }
 
 .tm-key-create-resource-row-input {
@@ -287,7 +288,7 @@
 .translation-memory-glossary-tab-delete {
   display: flex;
   flex-direction: column;
-  padding: 10px 35px 10px 10px;
+  padding: 10px;
   min-height: 50px;
 
   .action-form {
@@ -456,7 +457,7 @@
     }
   }
 
-  div[class*="switch-container-outer"] {
+  div[class*='switch-container-outer'] {
     width: 150px;
   }
 }

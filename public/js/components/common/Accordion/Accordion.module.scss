@@ -6,8 +6,8 @@
 // --accordion-title-br             border-radius when collapsed
 // --accordion-title-expanded-br    border-radius when expanded
 // --accordion-title-border-top     top border (for grouped stacks)
-// --accordion-title-font-size
-// --accordion-title-font-weight
+// --accordion-title-font-size      (default: 12px)
+// --accordion-title-font-weight    (default: normal)
 // --accordion-content-bg           background of content panel
 // --accordion-content-br           border-radius of content panel
 // --accordion-content-overflow     overflow of content panel
@@ -19,11 +19,9 @@
 .title {
   --accordion-title-bg: #{colors.$grey150};
   --accordion-title-br: #{variables.$border-radius-default};
-  --accordion-title-expanded-br: #{variables.$border-radius-default} #{variables.$border-radius-default} 0 0;
+  --accordion-title-expanded-br: #{variables.$border-radius-default}
+    #{variables.$border-radius-default} 0 0;
   --accordion-title-border-top: none;
-  --accordion-title-font-size: 12px;
-  --accordion-title-font-weight: normal;
-
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -31,8 +29,8 @@
   background-color: var(--accordion-title-bg);
   border-radius: var(--accordion-title-br);
   border-top: var(--accordion-title-border-top);
-  font-size: var(--accordion-title-font-size);
-  font-weight: var(--accordion-title-font-weight);
+  font-size: var(--accordion-title-font-size, 12px);
+  font-weight: var(--accordion-title-font-weight, normal);
   cursor: pointer;
 
   > svg {
@@ -52,7 +50,8 @@
 
 .content {
   --accordion-content-bg: #{colors.$grey100};
-  --accordion-content-br: 0 0 #{variables.$border-radius-default} #{variables.$border-radius-default};
+  --accordion-content-br: 0 0 #{variables.$border-radius-default}
+    #{variables.$border-radius-default};
   --accordion-content-overflow: hidden;
 
   max-height: 0;

@@ -1,4 +1,15 @@
 @use 'commons/colors';
+
+*,
+:before,
+:after {
+  box-sizing: inherit;
+}
+
+html {
+  box-sizing: border-box;
+}
+
 html,
 body {
   height: 100%;
@@ -277,7 +288,8 @@ body svg {
 
 a {
   color: colors.$blue700;
-  &:hover, &:active {
+  &:hover,
+  &:active {
     color: colors.$blue400;
   }
 }

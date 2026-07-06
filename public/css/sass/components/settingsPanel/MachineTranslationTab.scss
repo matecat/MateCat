@@ -566,11 +566,11 @@
     margin: 0;
   }
 
-  div[class*="numeric-stepper-component"] {
+  div[class*='numeric-stepper-component'] {
     max-width: 72px;
     height: 32px;
 
-    div[class*="container-controls"] button {
+    div[class*='container-controls'] button {
       height: 16px !important;
     }
   }
@@ -656,6 +656,7 @@
 
       h3 {
         margin: 0;
+        font-size: 18px;
       }
 
       p {
