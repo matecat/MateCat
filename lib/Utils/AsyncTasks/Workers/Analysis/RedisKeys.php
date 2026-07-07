@@ -72,4 +72,13 @@ class RedisKeys
      */
     const int WORD_COUNT_SCALE = 1000;
 
+    /**
+     * Key (Redis SET) holding the ids of segments already counted as analyzed for a project.
+     * Makes the analyzed-count increment idempotent: the retry loop in
+     * applyPostCommitSideEffects can re-run the increment for the same segment without
+     * inflating PROJECT_NUM_SEGMENTS_DONE past PROJECT_TOT_SEGMENTS (which used to trigger
+     * the completion close prematurely and strand projects at FAST_OK).
+     */
+    const string PROJECT_ANALYZED_SEGMENTS_SET = 'p_analyzed_seg:';
+
 }

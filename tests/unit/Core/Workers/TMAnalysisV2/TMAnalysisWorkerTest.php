@@ -279,6 +279,98 @@ class TMAnalysisWorkerTest extends AbstractTest
     }
 
     #[Test]
+    public function process_when_doInit_gets_zero_segment_count_releases_lock_and_skips_counter_init(): void
+    {
+        // Winner branch: we acquire the init lock and run doInit(). The summary query
+        // returns a rollup with project_segments <= 0 (segment rows not visible yet), so
+        // doInit must release the init lock for retry and NEVER persist a zero total.
+        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
+        $completion = $this->createStub(ProjectCompletionServiceInterface::class);
+        $engine     = $this->createStub(EngineServiceInterface::class);
+        $processor  = $this->createStub(MatchProcessorServiceInterface::class);
+        $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
+
+        $redis->method('acquireInitLock')->willReturn(true);
+        $completion->method('getProjectSegmentsTranslationSummary')
+            ->willReturn([['project_segments' => 0, 'num_analyzed' => 0]]);
+        $this->stubMatchPipeline($engine, $processor, $redis);
+        $updater->method('setAnalysisValue')->willReturn(1);
+
+        $redis->expects($this->once())->method('releaseInitLock')->with(100);
+        $redis->expects($this->never())->method('initializeProjectCounters');
+
+        $worker = $this->buildWorker(
+            redis: $redis,
+            updater: $updater,
+            completion: $completion,
+            engine: $engine,
+            processor: $processor,
+        );
+        $worker->process($this->makeQueueElement());
+    }
+
+    #[Test]
+    public function process_when_doInit_summary_throws_releases_lock_and_swallows_exception(): void
+    {
+        // Winner branch: doInit() acquires the lock then the summary query throws. The
+        // failure must be swallowed (segment still analyzed on its own) and the lock
+        // released so init can be retried — the exception must NOT escape process().
+        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
+        $completion = $this->createStub(ProjectCompletionServiceInterface::class);
+        $engine     = $this->createStub(EngineServiceInterface::class);
+        $processor  = $this->createStub(MatchProcessorServiceInterface::class);
+        $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
+
+        $redis->method('acquireInitLock')->willReturn(true);
+        $completion->method('getProjectSegmentsTranslationSummary')
+            ->willThrowException(new \RuntimeException('summary query failed'));
+        $this->stubMatchPipeline($engine, $processor, $redis);
+        $updater->method('setAnalysisValue')->willReturn(1);
+
+        $redis->expects($this->once())->method('releaseInitLock')->with(100);
+        $redis->expects($this->never())->method('initializeProjectCounters');
+
+        $worker = $this->buildWorker(
+            redis: $redis,
+            updater: $updater,
+            completion: $completion,
+            engine: $engine,
+            processor: $processor,
+        );
+        // Must not throw.
+        $worker->process($this->makeQueueElement());
+    }
+
+    #[Test]
+    public function process_when_reinit_loser_never_acquires_lock_just_logs_and_waits(): void
+    {
+        // Loser branch: the first acquireInitLock fails, waitForInitialization returns
+        // false (winner abandoned init), so we attempt re-init — but the second
+        // acquireInitLock also fails (another loser won it). We log "init not ready" and
+        // wait again without throwing.
+        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
+        $completion = $this->createStub(ProjectCompletionServiceInterface::class);
+        $engine     = $this->createStub(EngineServiceInterface::class);
+        $processor  = $this->createStub(MatchProcessorServiceInterface::class);
+        $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
+
+        $redis->expects($this->exactly(2))->method('acquireInitLock')->willReturn(false);
+        $redis->method('waitForInitialization')->willReturn(false);
+        $this->stubMatchPipeline($engine, $processor, $redis);
+        $updater->method('setAnalysisValue')->willReturn(1);
+
+        $worker = $this->buildWorker(
+            redis: $redis,
+            updater: $updater,
+            completion: $completion,
+            engine: $engine,
+            processor: $processor,
+        );
+        // Must not throw.
+        $worker->process($this->makeQueueElement());
+    }
+
+    #[Test]
     public function process_with_empty_raw_word_count_throws_EmptyElementException(): void
     {
         $redis   = $this->createStub(AnalysisRedisServiceInterface::class);
