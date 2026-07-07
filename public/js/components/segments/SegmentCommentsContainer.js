@@ -422,12 +422,14 @@ class SegmentCommentsContainer extends React.Component {
       <div className="comment-balloon-outer">
         <div className="comment-balloon-inner">
           <div className="comment-triangle comment-open-view comment-re-messages" />
-          <a
-            className="comment-close-btn shadow-1"
+          <Button
+            type={BUTTON_TYPE.ICON}
+            size={BUTTON_SIZE.ICON_XSMALL}
+            className="comment-close-btn"
             onClick={(e) => this.closeComments(e)}
           >
-            <IconClose />
-          </a>
+            <IconClose size={10} />
+          </Button>
           <div className="comments-wrap" ref={(wrap) => (this.wrap = wrap)}>
             {htmlComments}
           </div>

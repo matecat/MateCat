@@ -59,9 +59,7 @@
     align-items: center;
   }
 }
-.comments-wrap
-  .comment-thread-resolved
-  .comment-item:not(:last-of-type) {
+.comments-wrap .comment-thread-resolved .comment-item:not(:last-of-type) {
   background-color: rgba(colors.$green300, 0.2);
   border-radius: 4px;
 }
@@ -469,31 +467,17 @@ Close icon ballon - Right panel
 */
 
 .comment-close-btn {
-  width: 24px;
-  height: 24px;
-  background: colors.$white;
-  position: absolute;
+  background: colors.$white !important;
+  position: absolute !important;
   z-index: 1;
   right: 0px;
   top: -14px;
-  border-radius: 50%;
-  color: colors.$grey600;
-  cursor: pointer;
+  border-radius: 50% !important;
+  color: colors.$grey600 !important;
 }
 
 .comment-close-btn:hover {
-  color: colors.$black;
-}
-
-.comment-close-btn i {
-  margin: 0;
-  padding: 0;
-  width: 0;
-  height: 0;
-  position: relative;
-  top: 4px;
-  left: 4px;
-  font-size: 16px;
+  color: colors.$black !important;
 }
 
 .comment-close-btn.comment-close-btn--error {
@@ -543,7 +527,7 @@ section:hover .comment-icon-btn,
   justify-content: space-between;
   align-items: center;
   padding: 8px 4px;
-  div[class*="input-checkbox"] > span {
+  div[class*='input-checkbox'] > span {
     color: colors.$grey400;
     font-size: 14px;
   }

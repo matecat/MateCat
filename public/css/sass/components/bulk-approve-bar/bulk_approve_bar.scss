@@ -1,5 +1,7 @@
-@use "../../commons/colors";
+@use '../../commons/colors';
 .bulk-approve-bar {
+  display: flex;
+  justify-content: space-between;
   position: relative;
   z-index: 2;
   background: colors.$blue50;
@@ -18,19 +20,10 @@
     vertical-align: middle;
   }
   .bulk-back-info {
+    display: flex;
+    align-items: center;
     width: 50%;
     text-align: left;
-    .bulk-back .back-bulk {
-      background: transparent;
-      padding: 0;
-      margin-left: 6px;
-      position: relative;
-      top: 2px;
-    }
-    .bulk-back .back-bulk i {
-      position: relative;
-      top: 1px;
-    }
     .bulk-info {
       padding-left: 53px;
       font-size: 18px;
@@ -39,23 +32,12 @@
     }
   }
   .bulk-activity-icons {
+    display: flex;
+    justify-content: end;
     width: 50%;
     text-align: right;
     padding-right: 6.3%;
     .approve-all-segments {
-      line-height: 18px;
-      background: transparent;
-      font-weight: 100;
-      padding: 6px 10px;
-      border-radius: 2px;
-      transition: 0.3s ease;
-      width: auto;
-      vertical-align: bottom;
-      margin-right: 0;
-      &:hover {
-        box-shadow: 0 0 0 colors.$grey200, 0 0 2px rgba(0, 0, 0, 0.12),
-          0 2px 4px rgba(0, 0, 0, 0.24) !important;
-      }
       &.translated-all-bulked {
         border: 1px solid colors.$blue500;
         color: colors.$blue500;
@@ -77,6 +59,14 @@
           line-height: 1px;
         }
       }
+    }
+  }
+  .mark-button {
+    > :first-child {
+      display: flex;
+      border-radius: 50%;
+      border: 2px colors.$blue500 solid;
+      padding: 2px;
     }
   }
   .label-filters {

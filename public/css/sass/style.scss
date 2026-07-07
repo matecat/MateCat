@@ -836,7 +836,6 @@ section.loaded .submenu {
   .number {
     margin-left: 4px;
   }
-
 }
 
 .submenu li.active a {
@@ -1183,15 +1182,14 @@ body section:not(.editor).ice-locked {
 }
 
 .ice-locked-icon > button {
-  padding: 4px;
+  padding: 4px 4px 0;
   font-size: 15px;
   background-color: transparent;
-  border: 1px solid transparent;
+  border: unset;
   border-radius: 2px;
   cursor: pointer;
   color: colors.$grey400;
   position: relative;
-  margin-bottom: 5px;
   top: 2px;
   outline: none;
 }
@@ -1201,8 +1199,7 @@ section:hover .ice-locked-icon > button {
 }
 
 .ice-locked-icon > button:hover {
-  background-color: colors.$grey400;
-  border: 1px solid colors.$grey700;
+  background-color: colors.$grey600;
   color: white !important;
 }
 
@@ -1896,7 +1893,7 @@ del.diff {
 }
 
 .split {
-  border: 1px solid colors.$grey700;
+  border: unset;
   cursor: pointer !important;
   font-size: 17px;
   background-color: colors.$grey400;
@@ -1904,11 +1901,15 @@ del.diff {
   color: colors.$white;
   margin-bottom: 0px;
   top: 2px;
-  padding: 0;
+  padding: 2px;
   width: 25px;
   height: 25px;
   outline: none;
   margin-top: 10px;
+
+  &:hover {
+    background-color: colors.$grey600 !important;
+  }
 }
 
 .split i {
@@ -1918,13 +1919,13 @@ del.diff {
   height: 25px;
 }
 
-
 .sid .actions.disabled .split {
   cursor: no-drop !important;
 }
 
 .editor.split-action .actions .split {
   background: colors.$blue500;
+  color: colors.$white !important;
 }
 
 section .toolbar {
@@ -2160,6 +2161,13 @@ section.editor .toolbar {
   width: 100% !important;
 }
 
+.splitBar {
+  display: flex;
+  justify-content: end;
+  gap: 15px;
+  align-items: center;
+}
+
 .splitBar p,
 .splitBar .splitNum {
   float: left;
@@ -2172,8 +2180,8 @@ section.editor .toolbar {
 }
 
 .splitBar .buttons {
-  gap: 16px;
-  margin-left: 16px;
+  display: flex;
+  gap: 10px;
 }
 
 .splitBar .buttons a {

@@ -355,7 +355,6 @@ const SplitJobModal = ({job, project, callback}) => {
           {!splitChecked && !showStartLoader && (
             <Button
               type={BUTTON_TYPE.PRIMARY}
-              size={BUTTON_SIZE.MEDIUM}
               onClick={checkSplitJob}
               disabled={!jobSplttable}
             >

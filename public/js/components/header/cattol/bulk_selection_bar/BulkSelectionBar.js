@@ -4,9 +4,15 @@ import SegmentActions from '../../../../actions/SegmentActions'
 import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentStore from '../../../../stores/SegmentStore'
 import CatToolActions from '../../../../actions/CatToolActions'
-import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../common/Button/Button'
 import IconChevronLeft from '../../../../../img/icons/IconChevronLeft'
 import IconTick from '../../../../../img/icons/IconTick'
+import Checkmark from '../../../../../img/icons/Checkmark'
 
 class BulkSelectionBar extends React.Component {
   constructor(props) {
@@ -148,7 +154,6 @@ class BulkSelectionBar extends React.Component {
             <Button
               mode={BUTTON_MODE.GHOST}
               size={BUTTON_SIZE.SMALL}
-              className="back-bulk"
               onClick={this.onClickBack}
             >
               <IconChevronLeft size={16} /> back
@@ -174,10 +179,17 @@ class BulkSelectionBar extends React.Component {
           </div>
         ) : (
           <div className="bulk-activity-icons">
-            <button className={buttonClass} onClick={this.onClickBulk}>
-              <IconTick />{' '}
+            <Button
+              className={`mark-button ${buttonClass}`}
+              type={BUTTON_TYPE.PRIMARY}
+              mode={BUTTON_MODE.OUTLINE}
+              onClick={this.onClickBulk}
+            >
+              <div>
+                <Checkmark size={16} />
+              </div>
               {this.props.isReview ? 'MARK AS APPROVED' : 'MARK AS TRANSLATED'}
-            </button>
+            </Button>
           </div>
         )}
       </div>

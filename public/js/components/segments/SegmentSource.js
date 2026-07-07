@@ -755,10 +755,15 @@ class SegmentSource extends React.Component {
       <div className="splitContainer">
         {editorHtml}
         <div className="splitBar">
+          {!!this.splitPoint && (
+            <div className="splitNum">
+              Split in <span className="num">{this.splitPoint}</span> segment
+              <span className="plural" />
+            </div>
+          )}
           <div className="buttons">
             <Button
               mode={BUTTON_MODE.OUTLINE}
-              size={BUTTON_SIZE.MEDIUM}
               onClick={() => SegmentActions.closeSplitSegment()}
             >
               Cancel
@@ -766,19 +771,12 @@ class SegmentSource extends React.Component {
             <Button
               type={BUTTON_TYPE.PRIMARY}
               disabled={!this.splitPoint}
-              size={BUTTON_SIZE.MEDIUM}
               onClick={() => splitSegmentNew()}
             >
               {' '}
               Confirm{' '}
             </Button>
           </div>
-          {!!this.splitPoint && (
-            <div className="splitNum pull-right">
-              Split in <span className="num">{this.splitPoint}</span> segment
-              <span className="plural" />
-            </div>
-          )}
         </div>
       </div>
     ) : (

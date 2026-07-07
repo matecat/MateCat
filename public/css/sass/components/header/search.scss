@@ -1,4 +1,4 @@
-@use "../../commons/colors";
+@use '../../commons/colors';
 
 .searchbox {
   position: relative;
@@ -154,7 +154,7 @@ button#exec-replace {
   box-sizing: border-box;
 }
 
-.search-form .find-wrapper .find-element input:not(.input--invisible), {
+.search-form .find-wrapper .find-element input:not(.input--invisible) {
   border-radius: 2px !important;
   border: 1px solid rgba(34, 36, 38, 0.15) !important;
   box-shadow: inset 0 1px 3px colors.$grey200 !important;
@@ -200,26 +200,45 @@ button#exec-replace {
   padding-bottom: 10px;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element {
   display: inline-block;
   width: 29%;
   margin-right: 10px;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element.find-dropdown-status {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element.find-dropdown-status {
   width: fit-content;
   margin-right: 0;
 }
 
 //TODO: Transform in SCSS Component for all DROPDOWN BUTTON
-.search-form .find-wrapper .find-container .find-container-inside .find-element.find-dropdown-status .find-dropdown {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element.find-dropdown-status
+  .find-dropdown {
   display: flex;
   align-items: center;
   font-weight: normal;
   height: 37px;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element.find-dropdown-status .find-dropdown .select {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element.find-dropdown-status
+  .find-dropdown
+  .select {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -227,7 +246,12 @@ button#exec-replace {
   padding: 9px 46px 9px 12px;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element.find-dropdown-status .find-dropdown.disabled {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element.find-dropdown-status
+  .find-dropdown.disabled {
   background: unset;
   opacity: 0.5 !important;
   border: none;
@@ -235,7 +259,14 @@ button#exec-replace {
   box-shadow: inherit !important;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element.find-dropdown-status .find-dropdown.disabled .active .menu.transition {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element.find-dropdown-status
+  .find-dropdown.disabled
+  .active
+  .menu.transition {
   visibility: hidden !important;
 
   &:after {
@@ -243,68 +274,160 @@ button#exec-replace {
   }
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element.find-dropdown-status .find-dropdown .circular.label.new-color {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element.find-dropdown-status
+  .find-dropdown
+  .circular.label.new-color {
   box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
   background: colors.$white;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element.find-dropdown-status .find-dropdown .circular.label.draft-color {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element.find-dropdown-status
+  .find-dropdown
+  .circular.label.draft-color {
   background: colors.$grey100;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element.find-dropdown-status .find-dropdown .circular.label.translated-color {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element.find-dropdown-status
+  .find-dropdown
+  .circular.label.translated-color {
   background: colors.$blue500;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element.find-dropdown-status .find-dropdown .circular.label.approved-color {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element.find-dropdown-status
+  .find-dropdown
+  .circular.label.approved-color {
   background: colors.$green800;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element.find-dropdown-status .find-dropdown .circular.label.approved-2ndpass-color {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element.find-dropdown-status
+  .find-dropdown
+  .circular.label.approved-2ndpass-color {
   background: colors.$purple500;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element.find-dropdown-status .find-dropdown .circular.label.rejected-color {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element.find-dropdown-status
+  .find-dropdown
+  .circular.label.rejected-color {
   background: colors.$red400;
 }
 
 .find-element.find-dropdown-status .find-dropdown {
   .status-dot {
-    &.new-color { box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset; background: colors.$white; }
-    &.draft-color { background: colors.$grey100; }
-    &.translated-color, &.post-edited-color { background: colors.$blue500; }
-    &.approved-color { background: colors.$green800; }
-    &.approved-2ndpass-color { background: colors.$purple500; }
-    &.rejected-color { background: colors.$red400; }
+    &.new-color {
+      box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
+      background: colors.$white;
+    }
+    &.draft-color {
+      background: colors.$grey100;
+    }
+    &.translated-color,
+    &.post-edited-color {
+      background: colors.$blue500;
+    }
+    &.approved-color {
+      background: colors.$green800;
+    }
+    &.approved-2ndpass-color {
+      background: colors.$purple500;
+    }
+    &.rejected-color {
+      background: colors.$red400;
+    }
   }
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element.find-clear-all {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element.find-clear-all {
   width: fit-content;
   margin-right: 0;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element .find-in-source {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element
+  .find-in-source {
   margin-bottom: 5px;
+
+  input {
+    width: 100%;
+  }
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element .find-exact-match {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element
+  .find-exact-match {
   display: flex;
   gap: 12px;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element .find-exact-match .exact-match {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element
+  .find-exact-match
+  .exact-match {
   display: flex;
   align-items: center;
   gap: 4px;
   line-height: 21px;
+
+  input[type='checkbox'] {
+    margin: 0;
+  }
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element .find-in-target {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element
+  .find-in-target {
   margin-bottom: 5px;
+
+  input {
+    width: 100%;
+  }
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element .enable-replace-check {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element
+  .enable-replace-check {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -313,17 +436,38 @@ button#exec-replace {
   &.disable {
     opacity: 0.5;
   }
+
+  input[type='checkbox'] {
+    margin: 0;
+  }
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element .find-in-replace input {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element
+  .find-in-replace
+  input {
   margin-bottom: 5px;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element .find-in-replace button {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element
+  .find-in-replace
+  button {
   padding: 5px 10px;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element .find-clear {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element
+  .find-clear {
   margin-left: 13px;
   border-left: 1px solid colors.$grey200;
   padding-left: 15px;
@@ -331,7 +475,13 @@ button#exec-replace {
   top: 9px;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element .find-clear button {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element
+  .find-clear
+  button {
   color: grey;
   text-decoration: underline;
   border: none;
@@ -343,19 +493,32 @@ button#exec-replace {
   }
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element-container {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element-container {
   display: inline-block;
   width: 29%;
   margin-left: 15px;
   margin-right: 10px;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element-container .find-element {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-element-container
+  .find-element {
   width: unset;
   display: block;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-actions {
+.search-form
+  .find-wrapper
+  .find-container
+  .find-container-inside
+  .find-actions {
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
@@ -394,14 +557,23 @@ button#exec-replace {
   border-radius: 2px;
 }
 
-.search-form .find-wrapper .find-container .search-display .search-result-buttons {
+.search-form
+  .find-wrapper
+  .find-container
+  .search-display
+  .search-result-buttons {
   display: flex;
   justify-content: center;
   gap: 8px;
   align-items: center;
 }
 
-.search-form .find-wrapper .find-container .search-display .search-result-buttons p {
+.search-form
+  .find-wrapper
+  .find-container
+  .search-display
+  .search-result-buttons
+  p {
   padding: 8px 5px;
   margin-bottom: 0;
 }
@@ -423,6 +595,7 @@ button#exec-replace {
 
 .search-form ul.dropdown__list {
   min-height: 165px;
+  max-height: unset !important;
 }
 
 .search-form li.dropdown__option {
