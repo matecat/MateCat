@@ -209,8 +209,8 @@ class CreateProjectController extends AbstractStatefulKleinController
         $payable_rate_template = filter_var($this->request->param('payable_rate_template'), FILTER_SANITIZE_SPECIAL_CHARS);
         $private_keys_list = filter_var(
             $this->request->param('private_keys_list'),
-            FILTER_SANITIZE_FULL_SPECIAL_CHARS,
-            ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES]
+            FILTER_UNSAFE_RAW,
+            ['flags' => FILTER_FLAG_STRIP_LOW]
         );
 
         // MT SETTINGS

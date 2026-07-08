@@ -234,11 +234,11 @@ class CreateProjectControllerTest extends AbstractTest
     {
         $_COOKIE['upload_token'] = '88888888-8888-8888-8888-888888888888';
         $params = $this->validRequestParams();
-        $params['private_keys_list'] = json_encode([
-            'ownergroup' => [],
-            'mine'       => [['key' => 'aaaaaaaaaaaaaaaa', 'name' => 'èèèééééççòòòòò']],
-            'anonymous'  => [],
-        ]);
+        // Built as a raw literal (not json_encode()) on purpose: PHP's json_encode() escapes
+        // non-ASCII as \uXXXX by default, which never exercises FILTER_SANITIZE_FULL_SPECIAL_CHARS'
+        // multi-byte UTF-8 corruption bug. A real browser's JSON.stringify() sends raw UTF-8 bytes,
+        // like this literal does.
+        $params['private_keys_list'] = '{"ownergroup":[],"mine":[{"key":"aaaaaaaaaaaaaaaa","name":"èèèééééççòòòòò"}],"anonymous":[]}';
         $this->setRequestParams($params);
 
         /** @var array<string, mixed> $data */
