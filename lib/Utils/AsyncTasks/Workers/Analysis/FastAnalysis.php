@@ -335,12 +335,15 @@ class FastAnalysis extends AbstractDaemon
 
             $this->_updateConfiguration();
         } catch (Exception $ex) {
-            $this->logger->debug(str_pad(" " . $ex->getMessage() . " ", 60, "*", STR_PAD_BOTH));
-            $this->logger->debug(str_pad("EXIT", 60, " ", STR_PAD_BOTH));
+            // Startup failure: log at error level (a debug line is invisible in production, so a
+            // container crash-loop was mute) and exit non-zero so the supervisor sees the failure
+            // instead of a clean exit code masking it (U5).
+            $this->logger->error(str_pad(" " . $ex->getMessage() . " ", 60, "*", STR_PAD_BOTH));
+            $this->logger->error(str_pad("EXIT", 60, " ", STR_PAD_BOTH));
             if (AppConfig::$ENV === 'testing') {
                 throw new DaemonTerminatedException();
             }
-            die();
+            exit(1);
         }
 
         $this->files_storage = FilesStorageFactory::create();
@@ -1030,13 +1033,12 @@ class FastAnalysis extends AbstractDaemon
                 }
 
                 if (($totalSegmentsToAnalyze % 200) == 0) {
-                    try {
-                        $this->_executeInsert($tuple_list, $bind_values);
-                    } catch (PDOException $e) {
-                        $this->logger->debug($e->getMessage());
-
-                        return $e->getCode() * -1;
-                    }
+                    // Let a PDOException propagate to main()'s catch (Throwable): it classifies the
+                    // failure (infra / deadlock / lock-timeout → uncounted retry) via
+                    // _isInfrastructureFailure. Swallowing it into a return code here dropped that
+                    // classification and, on a non-numeric SQLSTATE, made `getCode() * -1` raise a
+                    // TypeError inside the catch (U4).
+                    $this->_executeInsert($tuple_list, $bind_values);
                     $tuple_list = [];
                     $bind_values = [];
                 }
@@ -1050,13 +1052,8 @@ class FastAnalysis extends AbstractDaemon
         }
 
         if (($totalSegmentsToAnalyze % 200) != 0) {
-            try {
-                $this->_executeInsert($tuple_list, $bind_values);
-            } catch (PDOException $e) {
-                $this->logger->debug($e->getMessage());
-
-                return $e->getCode() * -1;
-            }
+            // PDOException propagates to main()'s catch (Throwable) for correct classification (U4).
+            $this->_executeInsert($tuple_list, $bind_values);
         }
 
         unset($tuple_list);
@@ -1064,33 +1061,30 @@ class FastAnalysis extends AbstractDaemon
         $data2 = ['fast_analysis_wc' => $total_eq_wc];
         $where = ["id" => $pid];
 
-        try {
-            $project_creation_success = $this->db()->transaction(function () use ($perform_Tms_Analysis, $pid, $data2, $where) {
-                /*
-                 * IF NO TM ANALYSIS, update the jobs global word count
-                 */
-                if (!$perform_Tms_Analysis) {
-                    $_details = $this->getProjectSegmentsTranslationSummary($pid);
+        // PDOException from the transaction propagates to main()'s catch (Throwable) for correct
+        // classification (infra / deadlock → uncounted retry) instead of being swallowed into a
+        // return code that, on a non-numeric SQLSTATE, made `getCode() * -1` raise a TypeError (U4).
+        $project_creation_success = $this->db()->transaction(function () use ($perform_Tms_Analysis, $pid, $data2, $where) {
+            /*
+             * IF NO TM ANALYSIS, update the jobs global word count
+             */
+            if (!$perform_Tms_Analysis) {
+                $_details = $this->getProjectSegmentsTranslationSummary($pid);
 
-                    $this->logger->debug("--- trying to initialize job total word count.");
+                $this->logger->debug("--- trying to initialize job total word count.");
 
-                    /** @noinspection PhpUnusedLocalVariableInspection */
-                    $query_rollup = array_pop($_details); //Don't remove, needed to remove rollup row
+                /** @noinspection PhpUnusedLocalVariableInspection */
+                $query_rollup = array_pop($_details); //Don't remove, needed to remove rollup row
 
-                    foreach ($_details as $job_info) {
-                        $counter = new CounterModel($this->db());
-                        $counter->initializeJobWordCount($job_info['id_job'], $job_info['password']);
-                    }
+                foreach ($_details as $job_info) {
+                    $counter = new CounterModel($this->db());
+                    $counter->initializeJobWordCount($job_info['id_job'], $job_info['password']);
                 }
-                /* IF NO TM ANALYSIS, upload the jobs global word count */
+            }
+            /* IF NO TM ANALYSIS, upload the jobs global word count */
 
-                return $this->db()->update('projects', $data2, $where);
-            });
-        } catch (PDOException $e) {
-            $this->logger->debug($e->getMessage());
-
-            return $e->getCode() * -1;
-        }
+            return $this->db()->update('projects', $data2, $where);
+        });
 
         $engine = EnginesFactory::getInstance($this->actual_project_row['id_mt_engine'], $this->db(), AbstractEngine::class);
         if ($engine->isAdaptiveMT()) {
