@@ -576,6 +576,24 @@ class FastAnalysisTest extends AbstractTest
     }
 
     #[Test]
+    public function rebuildQueueHandlerBuildsOnColdStartWhenNoHandlerYet(): void
+    {
+        // ctor / cold-start path: $queueHandler is an UNINITIALIZED typed property. _rebuildQueueHandler
+        // must not read it with ?-> (which fatals on an uninitialized property) — it uses isset() — and
+        // simply installs and returns the fresh handler. This is what lets the ctor route through it.
+        $probe = $this->rebuildProbe(); // queueHandler deliberately NOT seeded → uninitialized
+
+        $fresh                 = $this->createStub(AMQHandler::class);
+        $probe->newHandlerStub = $fresh;
+
+        $returned = $this->invoke($probe, '_rebuildQueueHandler');
+
+        $this->assertSame($fresh, $returned, 'returns the freshly built handler');
+        $current = (new ReflectionClass(FastAnalysis::class))->getProperty('queueHandler')->getValue($probe);
+        $this->assertSame($fresh, $current, 'installs the fresh handler');
+    }
+
+    #[Test]
     public function checkDatabaseConnectionProbesTheMasterInsideATransaction(): void
     {
         // The health probe must ride the master route (a transaction) — the same route the

@@ -95,20 +95,31 @@ class FastAnalysis extends AbstractDaemon
      * gives a fresh Client AND a fresh Connection, escaping both the stuck flag and the dead
      * socket, so the daemon recovers automatically once the broker is reachable again.
      *
+     * This is the single internal entry point for (re)building the handler — the constructor and
+     * the failure path both route through here, so _newQueueHandler() (the test seam) has exactly
+     * one caller.
+     *
+     * @return AMQHandler the freshly built handler (also stored in $this->queueHandler)
      * @throws ConnectionException
      * @throws LogInvalidArgumentException
      */
-    private function _rebuildQueueHandler(): void
+    private function _rebuildQueueHandler(): AMQHandler
     {
-        try {
-            $this->queueHandler?->close();
-        } catch (Throwable $e) {
-            // ignore: the whole point is to throw this unhealthy handler away
-            $this->logger->debug("Discarding unhealthy AMQ handler: " . $e->getMessage());
+        // isset() (not ?->) so this is safe on cold start, when $this->queueHandler is still an
+        // uninitialized typed property (the constructor routes through here too).
+        if (isset($this->queueHandler)) {
+            try {
+                $this->queueHandler->close();
+            } catch (Throwable $e) {
+                // ignore: the whole point is to throw this unhealthy handler away
+                $this->logger->debug("Discarding unhealthy AMQ handler: " . $e->getMessage());
+            }
         }
 
         $this->queueHandler = $this->_newQueueHandler();
-        $this->logger->error("AMQ handler rebuilt after a queue connection failure.");
+        $this->logger->debug("AMQ queue handler (re)built.");
+
+        return $this->queueHandler;
     }
 
     /**
@@ -317,10 +328,10 @@ class FastAnalysis extends AbstractDaemon
         LoggerFactory::setAliases(['engines'], $this->logger);
 
         try {
-            // Own a private (non-shared) connection so it can be fully rebuilt on failure and
-            // is not torn down by WorkerClient's static-connection close(). See _rebuildQueueHandler().
-            $this->queueHandler = $this->_newQueueHandler();
-            $this->requireQueueHandler()->getRedisClient()->sadd(RedisKeys::FAST_PID_SET, [$this->myProcessPid . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID]);
+            // Own a private (non-shared) connection so it can be fully rebuilt on failure and is
+            // not torn down by WorkerClient's static-connection close(). _rebuildQueueHandler() is
+            // the single (re)build entry point (safe on this cold start via its isset() guard).
+            $this->_rebuildQueueHandler()->getRedisClient()->sadd(RedisKeys::FAST_PID_SET, [$this->myProcessPid . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID]);
 
             $this->_updateConfiguration();
         } catch (Exception $ex) {
@@ -575,6 +586,12 @@ class FastAnalysis extends AbstractDaemon
      */
     protected function _fetchMyMemoryFast(int $pid): AnalyzeResponse
     {
+        // S4: reset per-project state up front. These members are reused across the daemon loop, so
+        // a throw before they are reassigned (e.g. the EnginesFactory failure below) must not leave
+        // the PREVIOUS project's segments visible to _insertFastAnalysis (cross-project contamination).
+        $this->segments       = [];
+        $this->segment_hashes = [];
+
         $myMemory = EnginesFactory::getInstance(1, $this->db(), MyMemory::class);
         if (!$myMemory instanceof MyMemory) {
             throw new Exception("Expected MyMemory engine for id=1, got " . $myMemory::class);
