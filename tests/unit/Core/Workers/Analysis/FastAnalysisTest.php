@@ -134,35 +134,6 @@ class FastAnalysisTest extends AbstractTest
         $this->invoke($daemon, '_executeInsert', ['(:a,:b,:c,:d,:e,:f)'], ['x']);
     }
 
-    #[Test]
-    public function updateProjectChangesStatusThroughTheInjectedDatabaseTransaction(): void
-    {
-        $project = new ProjectStruct();
-        $project->status_analysis = ProjectStatus::STATUS_NEW; // != DONE → status change runs
-
-        $projectDao = $this->createMock(ProjectDao::class);
-        $projectDao->method('findById')->willReturn($project);
-        $projectDao->expects($this->once())
-            ->method('changeProjectStatus')
-            ->with(7, ProjectStatus::STATUS_BUSY)
-            ->willReturn(1);
-
-        // transaction() must run on the injected db and execute the closure.
-        $injected = $this->createMock(IDatabase::class);
-        $injected->expects($this->once())
-            ->method('transaction')
-            ->willReturnCallback(fn (callable $cb) => $cb());
-
-        $poison = $this->createMock(IDatabase::class);
-        $poison->expects($this->never())->method('transaction');
-        $this->setDatabaseInstance($poison);
-
-        $daemon = $this->daemonWithDb($injected);
-        $this->setProp($daemon, 'projectDao', $projectDao); // getProjectDao() short-circuits to this
-
-        $this->invoke($daemon, '_updateProject', 7, ProjectStatus::STATUS_BUSY);
-    }
-
     /**
      * Seed a recording Redis fake behind a mocked AMQHandler so
      * requireQueueHandler()->getRedisClient() returns it. Predis\Client routes
@@ -209,25 +180,18 @@ class FastAnalysisTest extends AbstractTest
     }
 
     /**
-     * Seed a ProjectDao that expects exactly one status change to $expectedStatus,
-     * driven through a pass-through transaction on the injected database.
+     * Seed a ProjectDao that expects exactly one atomic conditional status write to
+     * $expectedStatus (the write skips itself, returning 0, if the project is already DONE).
      */
     private function daemonExpectingStatusChange(int $pid, string $expectedStatus): FastAnalysis
     {
-        $project                  = new ProjectStruct();
-        $project->status_analysis = ProjectStatus::STATUS_BUSY; // != DONE → change runs
-
         $projectDao = $this->createMock(ProjectDao::class);
-        $projectDao->method('findById')->willReturn($project);
         $projectDao->expects($this->once())
-            ->method('changeProjectStatus')
+            ->method('changeProjectStatusIfNotDone')
             ->with($pid, $expectedStatus)
             ->willReturn(1);
 
-        $injected = $this->createStub(IDatabase::class);
-        $injected->method('transaction')->willReturnCallback(fn (callable $cb) => $cb());
-
-        $daemon = $this->daemonWithDb($injected);
+        $daemon = $this->daemonWithDb($this->createStub(IDatabase::class));
         $this->setProp($daemon, 'projectDao', $projectDao);
 
         return $daemon;
@@ -641,9 +605,70 @@ class FastAnalysisTest extends AbstractTest
         $this->assertContains(['del', '_fPid:42'], $redis->calls);
     }
 
+    #[Test]
+    public function updateProjectWritesConditionallyWithoutReadingFirst(): void
+    {
+        // R3 fix: the status write must be a single atomic conditional UPDATE — no findById read
+        // beforehand (the old read-then-write left a lost-update window against a TM worker's DONE).
+        $projectDao = $this->createMock(ProjectDao::class);
+        $projectDao->expects($this->never())->method('findById');
+        $projectDao->expects($this->once())
+            ->method('changeProjectStatusIfNotDone')
+            ->with(42, ProjectStatus::STATUS_FAST_OK)
+            ->willReturn(1);
+
+        $logged = [];
+        $daemon = $this->daemonWithDb($this->createStub(IDatabase::class));
+        $this->setProp($daemon, 'projectDao', $projectDao);
+        $this->setProp($daemon, 'logger', $this->capturingLogger($logged));
+
+        $this->invoke($daemon, '_updateProject', 42, ProjectStatus::STATUS_FAST_OK);
+
+        $this->assertStringNotContainsString(
+            '0 rows',
+            implode("\n", $logged),
+            'a successful write must not log a concurrency skip'
+        );
+    }
+
+    #[Test]
+    public function updateProjectLogsConcurrencyWhenTheWriteMatchesNoRows(): void
+    {
+        // 0 affected rows = the project was already DONE (a TM worker finished first) or is gone;
+        // the daemon logs the skip so the concurrency is observable instead of silently swallowed.
+        $projectDao = $this->createStub(ProjectDao::class);
+        $projectDao->method('changeProjectStatusIfNotDone')->willReturn(0);
+
+        $logged = [];
+        $daemon = $this->daemonWithDb($this->createStub(IDatabase::class));
+        $this->setProp($daemon, 'projectDao', $projectDao);
+        $this->setProp($daemon, 'logger', $this->capturingLogger($logged));
+
+        $this->invoke($daemon, '_updateProject', 42, ProjectStatus::STATUS_FAST_OK);
+
+        $this->assertCount(1, $logged);
+        $this->assertStringContainsString('0 rows', $logged[0]);
+        $this->assertStringContainsString('42', $logged[0]);
+    }
+
+    /**
+     * A MatecatLogger stub that appends every debug() message to $sink for assertions.
+     *
+     * @param array<int, string> $sink
+     */
+    private function capturingLogger(array &$sink): MatecatLogger
+    {
+        $logger = $this->createStub(MatecatLogger::class);
+        $logger->method('debug')->willReturnCallback(function (string $message) use (&$sink) {
+            $sink[] = $message;
+        });
+
+        return $logger;
+    }
+
     /**
      * Seed the lock picker so its master-routed SELECT returns exactly one NEW project, backed by
-     * a ProjectDao whose changeProjectStatus() runs $onBusyUpdate (return a row count, or throw).
+     * a ProjectDao whose changeProjectStatusIfNotDone() runs $onBusyUpdate (return a row count, or throw).
      *
      * @param callable $onBusyUpdate invoked as the BUSY write inside _updateProject
      *
@@ -674,7 +699,7 @@ class FastAnalysisTest extends AbstractTest
 
         $projectDao = $this->createStub(ProjectDao::class);
         $projectDao->method('findById')->willReturn($project);
-        $projectDao->method('changeProjectStatus')->willReturnCallback($onBusyUpdate);
+        $projectDao->method('changeProjectStatusIfNotDone')->willReturnCallback($onBusyUpdate);
 
         $injected = $this->createStub(IDatabase::class);
         $injected->method('getConnection')->willReturn($pdo);

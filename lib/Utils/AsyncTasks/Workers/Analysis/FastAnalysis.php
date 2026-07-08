@@ -645,27 +645,24 @@ class FastAnalysis extends AbstractDaemon
     }
 
     /**
-     * @throws Throwable
+     * @throws PDOException
+     * @throws LogInvalidArgumentException
      */
     protected function _updateProject(int $pid, string $status): void
     {
-        $this->db()->transaction(function () use ($pid, $status) {
-            $project = $this->getProjectDao()->findById($pid);
-            if ($project === null) {
-                $this->logger->debug("*** Project $pid: not found. Skip update.");
-
-                return;
-            }
-
-            // avoid concurrency between fast and tm daemons ( they set DONE when complete )
-            if ($project->status_analysis != ProjectStatus::STATUS_DONE) {
-                $this->logger->debug("*** Project $pid: Changing status...");
-                $this->getProjectDao()->changeProjectStatus($pid, $status);
-                $this->logger->debug("*** Project $pid: $status");
-            } else {
-                $this->logger->debug("*** Project $pid: TM Analysis already completed. Skip update...");
-            }
-        });
+        // Atomic conditional write: never overwrite a DONE set by a concurrent TM worker. A late
+        // FAST_OK/BUSY write here would strand the project "analyzing" forever. One conditional
+        // UPDATE is routed to the master by ProxySQL (it is a write), so there is no read-then-write
+        // race and no transaction is needed — unlike the previous select-then-update, whose
+        // non-locking snapshot read left a lost-update window open under REPEATABLE READ.
+        $affected = $this->getProjectDao()->changeProjectStatusIfNotDone($pid, $status);
+        if ($affected === 0) {
+            // 0 rows = the project is already DONE (a TM worker finished first) or gone. Skipping is
+            // correct; logging keeps the concurrency observable instead of silently swallowed.
+            $this->logger->debug("*** Project $pid: status update to '$status' matched 0 rows — already DONE (a TM worker finished first) or the project is gone; skipping.");
+        } else {
+            $this->logger->debug("*** Project $pid: $status");
+        }
     }
 
     /**
