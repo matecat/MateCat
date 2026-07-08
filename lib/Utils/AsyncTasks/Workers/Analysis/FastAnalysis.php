@@ -1395,13 +1395,13 @@ HD;
         });
 
         foreach ($results as $position => $project) {
-            //acquire a lock
-            $valid = $this->requireQueueHandler()->getRedisClient()->setnx('_fPid:' . $project['id'], 1);
-            if (!$valid) {
+            // R1: acquire the lock atomically — SET key 1 NX EX 86400. A split setnx + expire could
+            // crash between the two calls, leaving _fPid:$pid with no TTL → the project locked until
+            // a manual Redis delete. SET … NX returns null when the key already exists.
+            $acquired = $this->requireQueueHandler()->getRedisClient()->set('_fPid:' . $project['id'], 1, 'EX', 60 * 60 * 24, 'NX');
+            if (!$acquired) {
                 unset($results[$position]);
             } else {
-                $this->requireQueueHandler()->getRedisClient()->expire('_fPid:' . $project['id'], 60 * 60 * 24);
-
                 try {
                     $this->_updateProject((int)$project['id'], ProjectStatus::STATUS_BUSY);
                 } catch (Throwable $e) {

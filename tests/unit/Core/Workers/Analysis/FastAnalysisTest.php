@@ -760,6 +760,37 @@ class FastAnalysisTest extends AbstractTest
         return $logger;
     }
 
+    #[Test]
+    public function lockProjectAcquiresWithASingleAtomicSetNxEx(): void
+    {
+        // R1: the lock must be taken with one atomic SET … NX EX, never setnx + a separate expire
+        // (a crash between the two would leave _fPid with no TTL → the project locked until a
+        // manual Redis delete).
+        [$daemon, $redis] = $this->daemonLockingOneProject(fn () => 1); // acquired + BUSY ok
+
+        $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+
+        $this->assertContains(['set', '_fPid:42', 1, 'EX', 86400, 'NX'], $redis->calls);
+        foreach ($redis->calls as $call) {
+            $this->assertNotSame('expire', $call[0], 'lock acquisition must not use a separate expire');
+            $this->assertNotSame('setnx', $call[0], 'lock acquisition must be an atomic SET, not setnx');
+        }
+    }
+
+    #[Test]
+    public function lockProjectSkipsProjectWhenLockAlreadyHeld(): void
+    {
+        // NX fails (another daemon already holds the lock) → SET returns null → the project is
+        // dropped from the batch and nothing is released (we never acquired it).
+        [$daemon, $redis] = $this->daemonLockingOneProject(fn () => 1);
+        $redis->setReturn = null; // NX failed
+
+        $result = $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+
+        $this->assertSame([], $result);
+        $this->assertNotContains(['del', '_fPid:42'], $redis->calls);
+    }
+
     /**
      * Seed the lock picker so its master-routed SELECT returns exactly one NEW project, backed by
      * a ProjectDao whose changeProjectStatusIfNotDone() runs $onBusyUpdate (return a row count, or throw).
@@ -802,8 +833,8 @@ class FastAnalysisTest extends AbstractTest
 
         $daemon = $this->daemonWithDb($injected);
         $this->setProp($daemon, 'projectDao', $projectDao);
-        $redis              = $this->seedQueueHandlerWithRedis($daemon);
-        $redis->setnxReturn = 1; // lock acquired
+        $redis            = $this->seedQueueHandlerWithRedis($daemon);
+        $redis->setReturn = 'OK'; // lock acquired (atomic SET NX EX)
 
         return [$daemon, $redis];
     }
@@ -821,7 +852,7 @@ class FastAnalysisFakeRedis extends PredisClient
 
     public int $incrReturn = 1;
 
-    public int $setnxReturn = 1;
+    public string|null $setReturn = 'OK';
 
     public int|string|null $getReturn = null;
 
@@ -856,11 +887,11 @@ class FastAnalysisFakeRedis extends PredisClient
         return 1;
     }
 
-    public function setnx($key, $value): int
+    public function set($key, $value, ...$options): string|null
     {
-        $this->calls[] = ['setnx', $key, $value];
+        $this->calls[] = array_merge(['set', $key, $value], $options);
 
-        return $this->setnxReturn;
+        return $this->setReturn;
     }
 }
 
