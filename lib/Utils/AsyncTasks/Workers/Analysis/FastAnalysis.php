@@ -28,6 +28,7 @@ use PDOException;
 use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
+use Stomp\Exception\ConnectionException;
 use Stomp\Transport\Message;
 use Throwable;
 use TypeError;
@@ -49,7 +50,6 @@ use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\DaemonTerminatedException;
-use Utils\Tools\Utils;
 
 /**
  * Created by PhpStorm.
@@ -129,6 +129,18 @@ class FastAnalysis extends AbstractDaemon
     const int ERR_TOO_LARGE = 128;
     const int ERR_500 = 129;
     const int ERR_EMPTY_RESPONSE = 130;
+
+    /**
+     * Max consecutive countable (non-infrastructure) fast-analysis failures for a single
+     * project before it is parked as NOT_TO_ANALYZE, so a poison project cannot loop forever.
+     */
+    const int MAX_FAST_ANALYSIS_ATTEMPTS = 5;
+
+    /** Redis key prefix for the per-project fast-analysis failed-attempt counter. */
+    const string FAILED_ATTEMPTS_KEY_PREFIX = '_fAttempts:';
+
+    /** Redis key prefix for the per-project fast-analysis processing lock. */
+    const string PROCESSING_LOCK_KEY_PREFIX = '_fPid:';
 
     /**
      * Reload Configuration every cycle
@@ -307,6 +319,10 @@ class FastAnalysis extends AbstractDaemon
 
                 $projectStruct = new ProjectStruct();
 
+                // Infrastructure failures (broker unreachable) must not count toward the
+                // per-project attempt cap, so a transient outage does not mass-park projects.
+                $insertFailureIsInfra = false;
+
                 try {
                     /**
                      * Ensure we have fresh data from the master node
@@ -326,7 +342,11 @@ class FastAnalysis extends AbstractDaemon
                     });
 
                     if ($metadataResult === null) {
-                        $this->logger->error("Unable to insert fast analysis: project not found for pid $pid");
+                        // The project row no longer exists on master (deleted mid-analysis): it
+                        // will not reappear, so skip it. There is no row to hold a BUSY status;
+                        // just drop the (now inert) processing lock left by the picker.
+                        $this->logger->error("Fast analysis skipped: project $pid no longer exists.");
+                        $this->requireQueueHandler()->getRedisClient()->del([self::PROCESSING_LOCK_KEY_PREFIX . $pid]);
                         continue;
                     }
 
@@ -366,12 +386,18 @@ class FastAnalysis extends AbstractDaemon
                     );
                 } catch (Throwable $e) {
                     $insertReportRes = -1;
+                    // A queue-connection failure is infrastructure, not a poison project.
+                    $insertFailureIsInfra = $e instanceof ConnectionException
+                        || $e->getPrevious() instanceof ConnectionException;
                     $this->logger->debug($e->getMessage() . " " . $e->getTraceAsString());
                 }
 
                 if ($insertReportRes < 0) {
-                    $this->logger->debug("InsertFastAnalysis failed....");
-                    $this->logger->debug("Try next cycle....");
+                    // Reverse the BUSY status + _fPid lock so the project is re-picked next
+                    // cycle instead of being stranded. On retry _insertFastAnalysis re-queues
+                    // only the not-yet-analyzed segments (see _getAlreadyAnalyzedSegments).
+                    $this->logger->debug("InsertFastAnalysis failed for pid $pid. Releasing for retry.");
+                    $this->_releaseFailedProject($pid, 'insert/publish failed', !$insertFailureIsInfra);
                     continue;
                 }
 
@@ -379,6 +405,8 @@ class FastAnalysis extends AbstractDaemon
                 // INSERT DATA
 
                 self::_updateProject($pid, $status);
+                // processing succeeded: clear the failed-attempt counter
+                $this->requireQueueHandler()->getRedisClient()->del([self::FAILED_ATTEMPTS_KEY_PREFIX . $pid]);
                 $fs = $this->files_storage;
                 $fs->deleteFastAnalysisFile((string)$pid);
 
@@ -511,6 +539,92 @@ class FastAnalysis extends AbstractDaemon
             } else {
                 $this->logger->debug("*** Project $pid: TM Analysis already completed. Skip update...");
             }
+        });
+    }
+
+    /**
+     * Reverse the BUSY status + processing lock taken in _getLockProjectForVolumeAnalysis
+     * so a project that failed mid-processing is not stranded forever. The picker selects
+     * only STATUS_NEW and the _fPid lock would otherwise block re-pickup for its full 24h
+     * TTL, so both must be undone here.
+     *
+     * The project is released back to NEW for a later retry. A project that keeps failing on
+     * countable (non-infrastructure) errors is parked as NOT_TO_ANALYZE once it reaches
+     * MAX_FAST_ANALYSIS_ATTEMPTS, so a poison project cannot loop forever. Infrastructure
+     * failures (e.g. the broker being unreachable) pass $countTowardCap = false and do NOT
+     * increment the counter, so a transient outage never mass-parks healthy projects.
+     *
+     * @throws Throwable
+     */
+    private function _releaseFailedProject(int $pid, string $reason, bool $countTowardCap = true): void
+    {
+        $redis       = $this->requireQueueHandler()->getRedisClient();
+        $attemptsKey = self::FAILED_ATTEMPTS_KEY_PREFIX . $pid;
+
+        if ($countTowardCap) {
+            $attempts = (int)$redis->incr($attemptsKey);
+            $redis->expire($attemptsKey, 60 * 60 * 24);
+        } else {
+            $attempts = (int)$redis->get($attemptsKey);
+        }
+
+        if ($countTowardCap && $attempts >= self::MAX_FAST_ANALYSIS_ATTEMPTS) {
+            $this->logger->error("Fast analysis pid $pid failed $attempts times ($reason). Parking as NOT_TO_ANALYZE.");
+            $this->_updateProject($pid, ProjectStatus::STATUS_NOT_TO_ANALYZE);
+            $redis->del([$attemptsKey]);
+        } else {
+            $this->logger->debug("Fast analysis pid $pid failed ($reason), attempt $attempts. Releasing to NEW for retry.");
+            $this->_updateProject($pid, ProjectStatus::STATUS_NEW);
+        }
+
+        // release the processing lock in both branches so the next cycle can re-pick it
+        $redis->del([self::PROCESSING_LOCK_KEY_PREFIX . $pid]);
+    }
+
+    /**
+     * Return the set of (segment, job) pairs to SKIP when publishing, as a lookup map keyed
+     * "id_segment:id_job". Deliberately cheap on the common path: on the first attempt nothing
+     * has been analyzed yet, so the .ser payload already is the authoritative to-do list — we
+     * publish it whole and issue NO DB query (this is exactly why the .ser exists).
+     *
+     * Only on a retry (the S1a _fAttempts counter is > 0, i.e. a previous attempt failed) do we
+     * read, from the master node, the rows the TM workers already finished. The key is
+     * "id_segment:id_job", NOT id_segment alone: the same source segment is inserted once per
+     * job and published once per job/target-language (segment_translations PK is
+     * (id_segment, id_job)), and each language must be analyzed — a per-segment skip would drop
+     * the second language.
+     *
+     * This is a retry traffic optimisation, not a correctness requirement: re-publishing is
+     * already absorbed idempotently by the TM worker (PR #4670). The DB is touched only after a
+     * failure, never on the common first-attempt path.
+     *
+     * @return array<string, true> membership map "id_segment:id_job" => true (test with isset())
+     * @throws Throwable
+     */
+    private function _getAlreadyAnalyzedSegments(int $pid): array
+    {
+        // first attempt → nothing analyzed yet → publish the whole .ser, no DB query
+        if ((int)$this->requireQueueHandler()->getRedisClient()->get(self::FAILED_ATTEMPTS_KEY_PREFIX . $pid) === 0) {
+            return [];
+        }
+
+        return $this->db()->transaction(function () use ($pid): array {
+            $stmt = $this->db()->getConnection()->prepare(
+                "SELECT st.id_segment, st.id_job
+                   FROM segment_translations st
+                   JOIN jobs j ON j.id = st.id_job
+                  WHERE j.id_project = :pid
+                    AND st.tm_analysis_status IN ('DONE', 'SKIPPED')"
+            );
+            $stmt->execute([':pid' => $pid]);
+
+            $alreadyAnalyzed = [];
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $alreadyAnalyzed[(int)$row['id_segment'] . ':' . (int)$row['id_job']] = true;
+            }
+            $stmt->closeCursor();
+
+            return $alreadyAnalyzed;
         });
     }
 
@@ -729,7 +843,6 @@ class FastAnalysis extends AbstractDaemon
             try {
                 $this->_setTotal(['pid' => $pid, 'queueInfo' => $queueInfo]);
             } catch (Exception $e) {
-                Utils::sendErrMailReport($e->getMessage() . " " . $e->getTraceAsString(), "Fast Analysis set Total values failed.");
                 $this->logger->debug($e->getMessage() . " " . $e->getTraceAsString());
                 throw $e;
             }
@@ -740,6 +853,14 @@ class FastAnalysis extends AbstractDaemon
              * Reset the indexes of the list to get the context easily
              */
             $this->segments = array_values($this->segments);
+
+            /**
+             * Idempotent publish (cheap): on the first attempt this is empty and we publish
+             * the whole .ser; only on a retry does it hold the id_segments already analyzed
+             * (read once from the TM worker's Redis set — no DB query), so a partial-publish
+             * crash does not re-queue segments that were already processed.
+             */
+            $alreadyAnalyzed = $this->_getAlreadyAnalyzedSegments((int)$pid);
 
             // Pre-fetch metadata cache — values are per (id_job, password) pair,
             // identical across all segments of the same job/language
@@ -819,6 +940,13 @@ class FastAnalysis extends AbstractDaemon
                         $queue_element[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $subfiltering_handlers;
                         $queue_element[ProjectsMetadataMarshaller::ICU_ENABLED->value] = $icu_enabled;
 
+                        // Idempotent publish: skip a (segment, job) the TM workers already
+                        // analyzed on a previous crashed attempt so it is not re-queued
+                        // (empty on the first attempt → publish everything).
+                        if (isset($alreadyAnalyzed[(int)$queue_element['id_segment'] . ':' . (int)$id_job])) {
+                            continue;
+                        }
+
                         $element = new QueueElement();
                         $element->params = new Params($queue_element);
                         $element->classLoad = TMAnalysisWorker::class;
@@ -830,7 +958,6 @@ class FastAnalysis extends AbstractDaemon
                         }
                     }
                 } catch (Exception $e) {
-                    Utils::sendErrMailReport($e->getMessage() . " " . $e->getTraceAsString(), "Fast Analysis set queue failed.");
                     $this->logger->debug($e->getMessage() . " " . $e->getTraceAsString());
                     throw $e;
                 }
@@ -882,11 +1009,14 @@ class FastAnalysis extends AbstractDaemon
      */
     protected function _getSegmentsForFastVolumeAnalysis(int $pid): array
     {
-        //with this query, we decide what segments
-        //must be inserted in the segment_translations table
-
-        //we want segments that we decided to show in cattool
-        //and segments that are NOT locked (already translated)
+        //Fallback used only when the serialized .ser payload is missing: it must reconstruct
+        //the SAME set ProjectManager writes to the .ser (see writeFastAnalysisData /
+        //SegmentStorageService::cleanSegmentsMetadata), i.e. every segment shown in cattool.
+        //It must NOT drop locked/ICE segments: the .ser includes segments later marked
+        //ICE/locked by pre-translation, and the completion gate
+        //(ProjectCompletionRepository::getProjectSegmentsTranslationSummary) counts all
+        //show_in_cattool=1 rows, so excluding them here would desync the two paths and could
+        //strand a project.
 
         $query = <<<HD
             SELECT concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) AS jsid, s.segment, 
@@ -898,11 +1028,8 @@ class FastAnalysis extends AbstractDaemon
             FROM segments AS s
             INNER JOIN files_job AS fj ON fj.id_file = s.id_file
             INNER JOIN jobs as j ON fj.id_job = j.id
-            LEFT JOIN segment_translations AS st ON st.id_segment = s.id
                 WHERE j.id_project = ?
-                AND IFNULL( st.locked, 0 ) = 0
-                AND IFNULL( st.match_type, 'NO_MATCH' ) != 'ICE'
-                AND show_in_cattool != 0
+                AND s.show_in_cattool = 1
             GROUP BY s.id
             ORDER BY s.id
 HD;
