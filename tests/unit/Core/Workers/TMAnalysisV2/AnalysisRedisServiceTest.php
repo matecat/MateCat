@@ -181,10 +181,11 @@ class AnalysisRedisServiceTest extends AbstractTest
     {
         $pid       = 42;
         $idSegment = 777;
+        $idJob     = 3;
         $eqWc      = 10;
         $stWc      = 8;
 
-        $this->service->incrementAnalyzedCount($pid, $idSegment, $eqWc, $stWc);
+        $this->service->incrementAnalyzedCount($pid, $idSegment, $idJob, $eqWc, $stWc);
 
         // The counter update must be a single atomic Lua script (idempotent under the
         // applyPostCommitSideEffects retry loop), not a bare MULTI of INCRBYs.
@@ -204,12 +205,34 @@ class AnalysisRedisServiceTest extends AbstractTest
         $this->assertSame(RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $args[3]);
         $this->assertSame(RedisKeys::PROJ_EQ_WORD_COUNT . $pid, $args[4]);
         $this->assertSame(RedisKeys::PROJ_ST_WORD_COUNT . $pid, $args[5]);
-        // ARGV: id_segment, analyzed delta, scaled eq, scaled st, ttl
-        $this->assertSame((string)$idSegment, $args[6]);
+        // ARGV: id_segment:id_job (the dedup member), analyzed delta, scaled eq, scaled st, ttl
+        $this->assertSame($idSegment . ':' . $idJob, $args[6]);
         $this->assertSame('1', $args[7]);
         $this->assertSame((string)($eqWc * RedisKeys::WORD_COUNT_SCALE), $args[8]);
         $this->assertSame((string)($stWc * RedisKeys::WORD_COUNT_SCALE), $args[9]);
         $this->assertSame('86400', $args[10]);
+    }
+
+    #[Test]
+    public function incrementAnalyzedCount_dedupesPerSegmentAndJobNotPerSegment(): void
+    {
+        // A source segment shared by N target-language jobs produces N distinct analysis units
+        // (one segment_translation row per (id_segment, id_job)), each of which must be counted.
+        // Keying the idempotency set on id_segment ALONE collapsed them to one, so the analyzed
+        // counter could never reach a total that counts per (segment, job) — multi-language
+        // projects stranded at FAST_OK. The dedup member must be "id_segment:id_job".
+        $pid       = 42;
+        $idSegment = 777;
+
+        $this->service->incrementAnalyzedCount($pid, $idSegment, 3, 10, 8);
+        $this->service->incrementAnalyzedCount($pid, $idSegment, 4, 10, 8);
+
+        $calls = $this->redisSpy->getCallsFor('eval');
+        $this->assertCount(2, $calls);
+        // same source segment, different job → two DISTINCT set members, so both increment
+        $this->assertSame('777:3', $calls[0]['args'][6]);
+        $this->assertSame('777:4', $calls[1]['args'][6]);
+        $this->assertNotSame($calls[0]['args'][6], $calls[1]['args'][6]);
     }
 
     #[Test]

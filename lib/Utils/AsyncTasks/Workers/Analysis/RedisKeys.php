@@ -73,11 +73,15 @@ class RedisKeys
     const int WORD_COUNT_SCALE = 1000;
 
     /**
-     * Key (Redis SET) holding the ids of segments already counted as analyzed for a project.
-     * Makes the analyzed-count increment idempotent: the retry loop in
-     * applyPostCommitSideEffects can re-run the increment for the same segment without
-     * inflating PROJECT_NUM_SEGMENTS_DONE past PROJECT_TOT_SEGMENTS (which used to trigger
-     * the completion close prematurely and strand projects at FAST_OK).
+     * Key (Redis SET) holding the "id_segment:id_job" pairs already counted as analyzed for a
+     * project. The member is keyed per (segment, job) — NOT per segment — because a source segment
+     * shared by several target-language jobs yields one analysis unit (one segment_translation row)
+     * per job, and PROJECT_TOT_SEGMENTS counts them all; keying on id_segment alone collapsed the
+     * per-job units into one, so num_analyzed could never reach the total and multi-language
+     * projects stranded at FAST_OK.
+     * Also makes the increment idempotent: the retry loop in applyPostCommitSideEffects can re-run
+     * the increment for the same (segment, job) without inflating PROJECT_NUM_SEGMENTS_DONE past
+     * PROJECT_TOT_SEGMENTS.
      */
     const string PROJECT_ANALYZED_SEGMENTS_SET = 'p_analyzed_seg:';
 
