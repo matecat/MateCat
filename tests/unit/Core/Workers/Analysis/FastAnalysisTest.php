@@ -791,6 +791,40 @@ class FastAnalysisTest extends AbstractTest
         $this->assertNotContains(['del', '_fPid:42'], $redis->calls);
     }
 
+    #[Test]
+    public function recoverFromUnexpectedFailureReleasesCountedForAnEscapedError(): void
+    {
+        // U3: an Error/TypeError escaping the per-project processing (e.g. a malformed MyMemory
+        // payload or metadata parse) must NOT kill the daemon; it is recovered like any other
+        // non-infrastructure failure — released to NEW and counted toward the park cap so a
+        // genuinely poison project eventually stops looping.
+        $daemon = $this->daemonExpectingStatusChange(7, ProjectStatus::STATUS_NEW);
+        $redis  = $this->seedQueueHandlerWithRedis($daemon);
+
+        $this->invoke($daemon, '_recoverFromUnexpectedFailure', 7, new \TypeError('bad payload'));
+
+        // non-infrastructure fault: the attempt counter is incremented + TTL'd, lock dropped
+        $this->assertContains('incr', $this->redisCommands($redis));
+        $this->assertContains('expire', $this->redisCommands($redis));
+        $this->assertSame([['_fPid:7']], $this->delArgs($redis));
+    }
+
+    #[Test]
+    public function recoverFromUnexpectedFailureReleasesUncountedForAnInfrastructureThrowable(): void
+    {
+        // U3 + S1a: an infrastructure Throwable (broker/DB unreachable) escaping processing is
+        // recovered without counting toward the cap, so an outage never mass-parks projects.
+        $daemon = $this->daemonExpectingStatusChange(7, ProjectStatus::STATUS_NEW);
+        $redis  = $this->seedQueueHandlerWithRedis($daemon);
+        $redis->getReturn = null; // no prior attempts recorded
+
+        $this->invoke($daemon, '_recoverFromUnexpectedFailure', 7, new ConnectionException('broker down'));
+
+        $this->assertNotContains('incr', $this->redisCommands($redis));
+        $this->assertNotContains('expire', $this->redisCommands($redis));
+        $this->assertSame([['_fPid:7']], $this->delArgs($redis));
+    }
+
     /**
      * Seed the lock picker so its master-routed SELECT returns exactly one NEW project, backed by
      * a ProjectDao whose changeProjectStatusIfNotDone() runs $onBusyUpdate (return a row count, or throw).

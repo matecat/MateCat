@@ -386,191 +386,200 @@ class FastAnalysis extends AbstractDaemon
                 $pid = (int)$this->actual_project_row['id'];
                 $this->logger->debug("Analyzing $pid, querying data...");
 
-                $perform_Tms_Analysis = true;
-                $status = ProjectStatus::STATUS_FAST_OK;
-
-                // disable TM analysis
-
-                $disable_Tms_Analysis = $this->actual_project_row['id_tms'] == 0 && $this->actual_project_row['id_mt_engine'] == 0;
-
-                if ($disable_Tms_Analysis) {
-                    /**
-                     * MyMemory disabled and MT Disabled Too
-                     * So don't perform TMS Analysis ( don't send segments in queue ), only fill segment_translation table
-                     */
-                    $perform_Tms_Analysis = false;
-                    $status = ProjectStatus::STATUS_DONE;
-
-                    $featureSet->dispatch(new TmAnalysisDisabledEvent($pid));
-
-                    $this->logger->debug('Perform Analysis FALSE');
-                }
-
                 try {
-                    $fastReport = $this->_fetchMyMemoryFast($pid);
-                    $this->logger->debug("Fast $pid result: " . count($fastReport->responseData) . " segments.");
-                } catch (Exception $e) {
-                    // All decision logic lives in _decideFetchFailureAction() (unit-tested); here we
-                    // only dispatch the returned action.
-                    switch ($this->_decideFetchFailureAction($e, $perform_Tms_Analysis)) {
-                        case self::ACTION_PARK:
-                            self::_updateProject($pid, ProjectStatus::STATUS_NOT_TO_ANALYZE);
-                            continue 2; // next project
-                        case self::ACTION_RESET:
-                            // dead ERR_EMPTY_RESPONSE path, kept to remember how to reset the status
-                            $this->logger->debug($e->getMessage());
-                            self::_updateProject($pid, ProjectStatus::STATUS_NEW);
-                            $this->requireQueueHandler()->getRedisClient()->del(['_fPid:' . $pid]);
-                            sleep(3);
-                            continue 2; // next project
-                        case self::ACTION_RETRY_COUNTED:
-                            $this->logger->error($e->getMessage() . " Releasing pid $pid for retry.");
-                            $this->_releaseFailedProject($pid, $e->getMessage());
-                            continue 2; // next project
-                        case self::ACTION_RETRY_UNCOUNTED:
-                            $this->logger->error($e->getMessage() . " Releasing pid $pid for retry (uncounted).");
-                            $this->_releaseFailedProject($pid, $e->getMessage(), false);
-                            continue 2; // next project
-                        case self::ACTION_DONE:
-                        default:
-                            // pre-translated, or a disabled project: finalize DONE
-                            $status = ProjectStatus::STATUS_DONE;
-                            break;
-                    }
-                }
+                    $perform_Tms_Analysis = true;
+                    $status = ProjectStatus::STATUS_FAST_OK;
 
-                // Past here $fastReport is set only on a 200 response; otherwise an exception already
-                // decided the terminal status (DONE) and we proceed with empty data.
-                $fastResultData = isset($fastReport) ? $fastReport->responseData : [];
+                    // disable TM analysis
 
-                unset($fastReport);
+                    $disable_Tms_Analysis = $this->actual_project_row['id_tms'] == 0 && $this->actual_project_row['id_mt_engine'] == 0;
 
-                foreach ($fastResultData as $k => $v) {
-                    if ($v['type'] == "50%-74%") {
-                        $fastResultData[$k]['type'] = "NO_MATCH";
+                    if ($disable_Tms_Analysis) {
+                        /**
+                         * MyMemory disabled and MT Disabled Too
+                         * So don't perform TMS Analysis ( don't send segments in queue ), only fill segment_translation table
+                         */
+                        $perform_Tms_Analysis = false;
+                        $status = ProjectStatus::STATUS_DONE;
+
+                        $featureSet->dispatch(new TmAnalysisDisabledEvent($pid));
+
+                        $this->logger->debug('Perform Analysis FALSE');
                     }
 
-                    $this->segments[$this->segment_hashes[$k]]['wc'] = $fastResultData[$k]['wc'];
-                    $this->segments[$this->segment_hashes[$k]]['match_type'] = strtoupper($fastResultData[$k]['type']);
-                }
-                //clean the reverse lookup array
-                $this->segment_hashes = [];
+                    try {
+                        $fastReport = $this->_fetchMyMemoryFast($pid);
+                        $this->logger->debug("Fast $pid result: " . count($fastReport->responseData) . " segments.");
+                    } catch (Exception $e) {
+                        // All decision logic lives in _decideFetchFailureAction() (unit-tested); here we
+                        // only dispatch the returned action.
+                        switch ($this->_decideFetchFailureAction($e, $perform_Tms_Analysis)) {
+                            case self::ACTION_PARK:
+                                self::_updateProject($pid, ProjectStatus::STATUS_NOT_TO_ANALYZE);
+                                continue 2; // next project
+                            case self::ACTION_RESET:
+                                // dead ERR_EMPTY_RESPONSE path, kept to remember how to reset the status
+                                $this->logger->debug($e->getMessage());
+                                self::_updateProject($pid, ProjectStatus::STATUS_NEW);
+                                $this->requireQueueHandler()->getRedisClient()->del(['_fPid:' . $pid]);
+                                sleep(3);
+                                continue 2; // next project
+                            case self::ACTION_RETRY_COUNTED:
+                                $this->logger->error($e->getMessage() . " Releasing pid $pid for retry.");
+                                $this->_releaseFailedProject($pid, $e->getMessage());
+                                continue 2; // next project
+                            case self::ACTION_RETRY_UNCOUNTED:
+                                $this->logger->error($e->getMessage() . " Releasing pid $pid for retry (uncounted).");
+                                $this->_releaseFailedProject($pid, $e->getMessage(), false);
+                                continue 2; // next project
+                            case self::ACTION_DONE:
+                            default:
+                                // pre-translated, or a disabled project: finalize DONE
+                                $status = ProjectStatus::STATUS_DONE;
+                                break;
+                        }
+                    }
 
-                // INSERT DATA
-                $this->logger->debug("Inserting segments...");
+                    // Past here $fastReport is set only on a 200 response; otherwise an exception already
+                    // decided the terminal status (DONE) and we proceed with empty data.
+                    $fastResultData = isset($fastReport) ? $fastReport->responseData : [];
 
-                $projectStruct = new ProjectStruct();
+                    unset($fastReport);
 
-                // Infrastructure/transient failures (broker or DB unreachable, deadlock, ...)
-                // must not count toward the per-project attempt cap, so an outage does not
-                // mass-park projects. A broker-connection failure additionally needs the STOMP
-                // handler rebuilt (the client zombifies); a DB failure does not.
-                $insertFailureIsInfra  = false;
-                $insertFailureIsBroker = false;
-
-                try {
-                    /**
-                     * Ensure we have fresh data from the master node
-                     */
-                    $metadataResult = $this->db()->transaction(function () use ($pid) {
-                        $projectStruct = $this->getProjectDao()->findById($pid);
-                        if ($projectStruct === null) {
-                            return null;
+                    foreach ($fastResultData as $k => $v) {
+                        if ($v['type'] == "50%-74%") {
+                            $fastResultData[$k]['type'] = "NO_MATCH";
                         }
 
-                        return [
-                            'project' => $projectStruct,
-                            'metadata' => (new ProjectMetadataDao($this->db()))
-                                ->setCacheTTL(3600)
-                                ->allByProjectIdAsKeyValue((int)$projectStruct->id),
-                        ];
-                    });
+                        $this->segments[$this->segment_hashes[$k]]['wc'] = $fastResultData[$k]['wc'];
+                        $this->segments[$this->segment_hashes[$k]]['match_type'] = strtoupper($fastResultData[$k]['type']);
+                    }
+                    //clean the reverse lookup array
+                    $this->segment_hashes = [];
 
-                    if ($metadataResult === null) {
-                        // The project row no longer exists on master (deleted mid-analysis): it
-                        // will not reappear, so skip it. There is no row to hold a BUSY status;
-                        // just drop the (now inert) processing lock left by the picker.
-                        $this->logger->error("Fast analysis skipped: project $pid no longer exists.");
-                        $this->requireQueueHandler()->getRedisClient()->del([self::PROCESSING_LOCK_KEY_PREFIX . $pid]);
+                    // INSERT DATA
+                    $this->logger->debug("Inserting segments...");
+
+                    $projectStruct = new ProjectStruct();
+
+                    // Infrastructure/transient failures (broker or DB unreachable, deadlock, ...)
+                    // must not count toward the per-project attempt cap, so an outage does not
+                    // mass-park projects. A broker-connection failure additionally needs the STOMP
+                    // handler rebuilt (the client zombifies); a DB failure does not.
+                    $insertFailureIsInfra  = false;
+                    $insertFailureIsBroker = false;
+
+                    try {
+                        /**
+                         * Ensure we have fresh data from the master node
+                         */
+                        $metadataResult = $this->db()->transaction(function () use ($pid) {
+                            $projectStruct = $this->getProjectDao()->findById($pid);
+                            if ($projectStruct === null) {
+                                return null;
+                            }
+
+                            return [
+                                'project' => $projectStruct,
+                                'metadata' => (new ProjectMetadataDao($this->db()))
+                                    ->setCacheTTL(3600)
+                                    ->allByProjectIdAsKeyValue((int)$projectStruct->id),
+                            ];
+                        });
+
+                        if ($metadataResult === null) {
+                            // The project row no longer exists on master (deleted mid-analysis): it
+                            // will not reappear, so skip it. There is no row to hold a BUSY status;
+                            // just drop the (now inert) processing lock left by the picker.
+                            $this->logger->error("Fast analysis skipped: project $pid no longer exists.");
+                            $this->requireQueueHandler()->getRedisClient()->del([self::PROCESSING_LOCK_KEY_PREFIX . $pid]);
+                            continue;
+                        }
+
+                        $projectStruct = $metadataResult['project'];
+                        $allMetadata = $metadataResult['metadata'];
+                        $projectFeaturesString = $allMetadata[ProjectsMetadataMarshaller::FEATURES_KEY->value] ?? '';
+                        $mt_evaluation = isset($allMetadata[ProjectsMetadataMarshaller::MT_EVALUATION->value])
+                            ? (bool)$allMetadata[ProjectsMetadataMarshaller::MT_EVALUATION->value]
+                            : null;
+                        $mt_qe_workflow_enabled = isset($allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value])
+                            ? (bool)$allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value]
+                            : null;
+                        $mt_qe_workflow_parameters_raw = $allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value] ?? null;
+                        $mt_qe_workflow_parameters_decoded = $mt_qe_workflow_parameters_raw !== null
+                            ? json_decode($mt_qe_workflow_parameters_raw, true)
+                            : null;
+                        $mt_qe_workflow_parameters = is_array($mt_qe_workflow_parameters_decoded)
+                            ? new MTQEWorkflowParams($mt_qe_workflow_parameters_decoded)
+                            : null;
+                        $mt_quality_value_in_editor = (int)($allMetadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] ?? 85);
+                        $subfiltering_handlers = $allMetadata[ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? [];
+                        $subfiltering_handlers = is_array($subfiltering_handlers) ? $subfiltering_handlers : [];
+                        $icu_enabled = (bool)($allMetadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] ?? false);
+
+                        $insertReportRes = $this->_insertFastAnalysis(
+                            $projectStruct,
+                            $projectFeaturesString,
+                            PayableRates::$DEFAULT_PAYABLE_RATES,
+                            $featureSet,
+                            $perform_Tms_Analysis,
+                            $mt_evaluation,
+                            $mt_qe_workflow_enabled,
+                            $mt_qe_workflow_parameters,
+                            $mt_quality_value_in_editor,
+                            $subfiltering_handlers,
+                            $icu_enabled
+                        );
+                    } catch (Throwable $e) {
+                        $insertReportRes = -1;
+                        // Transient infrastructure (broker/DB unreachable, deadlock) vs poison data
+                        // (dup key, null, syntax) — only the former is retried without counting.
+                        $insertFailureIsInfra  = $this->_isInfrastructureFailure($e);
+                        // Only a broker-connection failure zombifies the Stomp client and needs a rebuild.
+                        $insertFailureIsBroker = $this->_isBrokerFailure($e);
+                        $this->logger->debug($e->getMessage() . " " . $e->getTraceAsString());
+                    }
+
+                    if ($insertReportRes < 0) {
+                        // Reverse the BUSY status + _fPid lock so the project is re-picked next
+                        // cycle instead of being stranded. On retry _insertFastAnalysis re-queues
+                        // only the not-yet-analyzed segments (see _getAlreadyAnalyzedSegments).
+                        $this->logger->debug("InsertFastAnalysis failed for pid $pid. Releasing for retry.");
+                        // $insertFailureIsInfra indicates if the failure was caused by infrastructure issues (e.g. broker unreachable).
+                        // It is used to decide whether to increment the failure counter: infra failures don't count toward the limit.
+                        $this->_releaseFailedProject($pid, 'insert/publish failed', !$insertFailureIsInfra);
+                        // A broker-connection failure zombifies the Stomp client for the life of the
+                        // process; rebuild it (the Redis ops above use a separate connection and still
+                        // work) so this cycle's remaining projects — and the released one on its retry —
+                        // use a healthy handler instead of a permanently stuck one. A DB failure does
+                        // not touch the Stomp client, so it must not trigger a rebuild.
+                        if ($insertFailureIsBroker) {
+                            $this->_rebuildQueueHandler();
+                        }
                         continue;
                     }
 
-                    $projectStruct = $metadataResult['project'];
-                    $allMetadata = $metadataResult['metadata'];
-                    $projectFeaturesString = $allMetadata[ProjectsMetadataMarshaller::FEATURES_KEY->value] ?? '';
-                    $mt_evaluation = isset($allMetadata[ProjectsMetadataMarshaller::MT_EVALUATION->value])
-                        ? (bool)$allMetadata[ProjectsMetadataMarshaller::MT_EVALUATION->value]
-                        : null;
-                    $mt_qe_workflow_enabled = isset($allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value])
-                        ? (bool)$allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value]
-                        : null;
-                    $mt_qe_workflow_parameters_raw = $allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value] ?? null;
-                    $mt_qe_workflow_parameters_decoded = $mt_qe_workflow_parameters_raw !== null
-                        ? json_decode($mt_qe_workflow_parameters_raw, true)
-                        : null;
-                    $mt_qe_workflow_parameters = is_array($mt_qe_workflow_parameters_decoded)
-                        ? new MTQEWorkflowParams($mt_qe_workflow_parameters_decoded)
-                        : null;
-                    $mt_quality_value_in_editor = (int)($allMetadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] ?? 85);
-                    $subfiltering_handlers = $allMetadata[ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? [];
-                    $subfiltering_handlers = is_array($subfiltering_handlers) ? $subfiltering_handlers : [];
-                    $icu_enabled = (bool)($allMetadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] ?? false);
+                    $this->logger->debug("done");
+                    // INSERT DATA
 
-                    $insertReportRes = $this->_insertFastAnalysis(
-                        $projectStruct,
-                        $projectFeaturesString,
-                        PayableRates::$DEFAULT_PAYABLE_RATES,
-                        $featureSet,
-                        $perform_Tms_Analysis,
-                        $mt_evaluation,
-                        $mt_qe_workflow_enabled,
-                        $mt_qe_workflow_parameters,
-                        $mt_quality_value_in_editor,
-                        $subfiltering_handlers,
-                        $icu_enabled
-                    );
+                    self::_updateProject($pid, $status);
+                    // processing succeeded: clear the failed-attempt counter
+                    $this->requireQueueHandler()->getRedisClient()->del([self::FAILED_ATTEMPTS_KEY_PREFIX . $pid]);
+                    $fs = $this->files_storage;
+                    $fs->deleteFastAnalysisFile((string)$pid);
+
+                    (new JobDao($this->db()))->destroyCacheByProjectId($pid);
+                    (new ProjectDao($this->db()))->destroyFetchByIdCache($pid, ProjectStruct::class);
+                    $this->getProjectDao()->destroyCacheByIdAndPassword($pid, $projectStruct->password);
+                    (new AnalysisDao($this->db()))->destroyCacheByProjectId($pid);
                 } catch (Throwable $e) {
-                    $insertReportRes = -1;
-                    // Transient infrastructure (broker/DB unreachable, deadlock) vs poison data
-                    // (dup key, null, syntax) — only the former is retried without counting.
-                    $insertFailureIsInfra  = $this->_isInfrastructureFailure($e);
-                    // Only a broker-connection failure zombifies the Stomp client and needs a rebuild.
-                    $insertFailureIsBroker = $this->_isBrokerFailure($e);
-                    $this->logger->debug($e->getMessage() . " " . $e->getTraceAsString());
+                    // U3 safety net: an unexpected Error/TypeError raised anywhere while
+                    // processing this project (malformed MyMemory payload, metadata parse,
+                    // status write, cache purge, ...) must not escape and kill the daemon,
+                    // which would strand every project locked in this batch as BUSY. Recover
+                    // just this one and carry on with the next.
+                    $this->_recoverFromUnexpectedFailure($pid, $e);
                 }
-
-                if ($insertReportRes < 0) {
-                    // Reverse the BUSY status + _fPid lock so the project is re-picked next
-                    // cycle instead of being stranded. On retry _insertFastAnalysis re-queues
-                    // only the not-yet-analyzed segments (see _getAlreadyAnalyzedSegments).
-                    $this->logger->debug("InsertFastAnalysis failed for pid $pid. Releasing for retry.");
-                    // $insertFailureIsInfra indicates if the failure was caused by infrastructure issues (e.g. broker unreachable).
-                    // It is used to decide whether to increment the failure counter: infra failures don't count toward the limit.
-                    $this->_releaseFailedProject($pid, 'insert/publish failed', !$insertFailureIsInfra);
-                    // A broker-connection failure zombifies the Stomp client for the life of the
-                    // process; rebuild it (the Redis ops above use a separate connection and still
-                    // work) so this cycle's remaining projects — and the released one on its retry —
-                    // use a healthy handler instead of a permanently stuck one. A DB failure does
-                    // not touch the Stomp client, so it must not trigger a rebuild.
-                    if ($insertFailureIsBroker) {
-                        $this->_rebuildQueueHandler();
-                    }
-                    continue;
-                }
-
-                $this->logger->debug("done");
-                // INSERT DATA
-
-                self::_updateProject($pid, $status);
-                // processing succeeded: clear the failed-attempt counter
-                $this->requireQueueHandler()->getRedisClient()->del([self::FAILED_ATTEMPTS_KEY_PREFIX . $pid]);
-                $fs = $this->files_storage;
-                $fs->deleteFastAnalysisFile((string)$pid);
-
-                (new JobDao($this->db()))->destroyCacheByProjectId($pid);
-                (new ProjectDao($this->db()))->destroyFetchByIdCache($pid, ProjectStruct::class);
-                $this->getProjectDao()->destroyCacheByIdAndPassword($pid, $projectStruct->password);
-                (new AnalysisDao($this->db()))->destroyCacheByProjectId($pid);
             }
         } while ($this->RUNNING);
 
@@ -817,6 +826,34 @@ class FastAnalysis extends AbstractDaemon
 
         // release the processing lock in both branches so the next cycle can re-pick it
         $redis->del([self::PROCESSING_LOCK_KEY_PREFIX . $pid]);
+    }
+
+    /**
+     * Last-resort recovery for an *unexpected* Throwable raised while processing a single project
+     * (a malformed MyMemory payload, a metadata parse fault, a status write or cache purge blowing
+     * up, ...). Without this net an Error/TypeError would escape main()'s per-project handling,
+     * kill the daemon, and strand every project locked in the current batch as BUSY — the picker
+     * only takes NEW rows and the _fPid lock blocks re-pickup for its full 24h TTL.
+     *
+     * The project is released for a later retry; infrastructure failures do not count toward the
+     * park cap (see _releaseFailedProject), so a transient outage never mass-parks healthy projects
+     * while a genuinely poison project still parks after MAX_FAST_ANALYSIS_ATTEMPTS.
+     *
+     * @param int $pid The project being processed when the failure occurred.
+     * @param Throwable $e The unexpected failure.
+     *
+     * @return void
+     * @throws ReflectionException
+     * @throws Throwable
+     */
+    private function _recoverFromUnexpectedFailure(int $pid, Throwable $e): void
+    {
+        $this->logger->error(
+            "Unexpected failure while processing fast analysis for pid $pid: "
+            . $e->getMessage() . "\n" . $e->getTraceAsString()
+        );
+
+        $this->_releaseFailedProject($pid, $e->getMessage(), !$this->_isInfrastructureFailure($e));
     }
 
     /**
