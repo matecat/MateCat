@@ -5,6 +5,10 @@ namespace Matecat\Core\Workers\Analysis;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use Model\FeaturesBase\FeatureSet;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use PDO;
@@ -19,6 +23,7 @@ use Stomp\Exception\ConnectionException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\FastAnalysis;
 use Utils\Constants\ProjectStatus;
+use Utils\Engines\Results\MyMemory\AnalyzeResponse;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -915,6 +920,338 @@ class FastAnalysisTest extends AbstractTest
 
         return [$daemon, $redis];
     }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // main() loop coverage
+    //
+    // main() is the daemon orchestration loop: it never returns until $this->RUNNING
+    // is cleared, and its body constructs a FeatureSet, a metadata DAO and the cache
+    // purge, publishes through _insertFastAnalysis and finalizes the project status.
+    // FastAnalysisMainProbe (bottom of this file) replaces every external seam with a
+    // recording double so a full cycle can be driven with no broker/Redis/DB, and a
+    // scripted sismember() makes the loop run a controllable number of cycles and then
+    // suicide (the FAST_PID_SET membership check at the top of every cycle).
+    // ────────────────────────────────────────────────────────────────────────
+
+    /**
+     * @return array{0: FastAnalysisMainProbe, 1: FastAnalysisMainLoopRedis, 2: ProjectDao}
+     */
+    private function wireMainProbe(): array
+    {
+        $probe = (new ReflectionClass(FastAnalysisMainProbe::class))->newInstanceWithoutConstructor();
+
+        $fa = new ReflectionClass(FastAnalysis::class);
+
+        $db = $this->createStub(IDatabase::class);
+        // transaction() passes through so the metadata read and _updateProject run for real.
+        $db->method('transaction')->willReturnCallback(fn (callable $cb) => $cb());
+        $fa->getProperty('db')->setValue($probe, $db);
+
+        $fa->getProperty('logger')->setValue($probe, $this->createStub(MatecatLogger::class));
+        $fa->getProperty('myProcessPid')->setValue($probe, 4242);
+        $fa->getProperty('RUNNING')->setValue($probe, true);
+
+        $filesStorage = $this->createStub(AbstractFilesStorage::class);
+        $fa->getProperty('files_storage')->setValue($probe, $filesStorage);
+
+        $redis   = new FastAnalysisMainLoopRedis();
+        $handler = $this->createStub(AMQHandler::class);
+        $handler->method('getRedisClient')->willReturn($redis);
+        $fa->getProperty('queueHandler')->setValue($probe, $handler);
+        // rebuild seam returns a handler backed by the same recording Redis, so the loop
+        // stays controllable after a broker-failure rebuild.
+        $probe->newQueueHandlerStub = $handler;
+
+        $projectDao = $this->createStub(ProjectDao::class);
+        $projectDao->method('changeProjectStatusIfNotDone')->willReturn(1);
+        $projectDao->method('findById')->willReturnCallback(fn (int $pid) => $this->makeProjectStruct($pid));
+        $fa->getProperty('projectDao')->setValue($probe, $projectDao);
+
+        $probe->featureSetStub  = $this->createStub(FeatureSet::class);
+        $probe->metadataDaoStub = $this->makeMetadataDaoStub();
+
+        return [$probe, $redis, $projectDao];
+    }
+
+    private function makeProjectStruct(int $pid): ProjectStruct
+    {
+        $p           = new ProjectStruct();
+        $p->id       = $pid;
+        $p->password = 'pw' . $pid;
+
+        return $p;
+    }
+
+    /**
+     * @param array<string, mixed> $metadata
+     */
+    private function makeMetadataDaoStub(array $metadata = []): ProjectMetadataDao
+    {
+        $dao = $this->createStub(ProjectMetadataDao::class);
+        $dao->method('setCacheTTL')->willReturnSelf();
+        $dao->method('allByProjectIdAsKeyValue')->willReturn($metadata);
+
+        return $dao;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function projectRow(int $pid, bool $tmsEnabled = true): array
+    {
+        return ['id' => $pid, 'id_tms' => $tmsEnabled ? 1 : 0, 'id_mt_engine' => 0];
+    }
+
+    private function runMain(FastAnalysisMainProbe $probe): void
+    {
+        (new ReflectionClass(FastAnalysis::class))->getMethod('main')->invoke($probe);
+    }
+
+    #[Test]
+    public function main_suicidesWhenProcessPidNotInFastPidSet(): void
+    {
+        [$probe, $redis] = $this->wireMainProbe();
+        // The very first membership check returns false → the daemon must clear RUNNING and exit
+        // without ever querying for projects.
+        $redis->sismemberReturns = [false];
+        $probe->lockBatches      = [];
+
+        $this->runMain($probe);
+
+        $this->assertFalse($this->readRunning($probe), 'daemon should stop when its pid is not registered');
+        $this->assertSame(0, $probe->insertCallCount, 'no project should be processed on suicide');
+        $this->assertSame(['sismember'], $this->redisCommands($redis));
+    }
+
+    #[Test]
+    public function main_finalizesProjectOnSuccessfulFastAnalysis(): void
+    {
+        [$probe, $redis] = $this->wireMainProbe();
+        $redis->sismemberReturns = [true, false]; // one working cycle, then suicide
+        $probe->lockBatches      = [[$this->projectRow(1606)]];
+        $probe->fetchScript      = [new AnalyzeResponse(['data' => []])];
+        $probe->insertResults    = [0];
+
+        $this->runMain($probe);
+
+        $this->assertSame(1, $probe->insertCallCount, 'the project should be published once');
+        $this->assertSame([1606], $probe->purgedPids, 'the finalized project caches should be purged');
+        $this->assertContains('del', $this->redisCommands($redis), 'the failed-attempts key should be cleared on success');
+    }
+
+    #[Test]
+    public function main_remapsLowMatchTypesFromPopulatedFastAnalysisData(): void
+    {
+        [$probe] = $this->wireMainProbe();
+        $redis   = null;
+        $probe->lockBatches   = [[$this->projectRow(1606)]];
+        $probe->fetchScript   = [new AnalyzeResponse(['data' => [
+            0 => ['type' => '50%-74%', 'wc' => 3], // must be rewritten to NO_MATCH
+            1 => ['type' => '95%-99%', 'wc' => 2],
+        ]])];
+        $probe->insertResults = [0];
+
+        // Seed the reverse-lookup + segments map main() writes the per-segment wc/match_type into.
+        $fa = new ReflectionClass(FastAnalysis::class);
+        $fa->getProperty('segment_hashes')->setValue($probe, [0 => 'h0', 1 => 'h1']);
+        $fa->getProperty('segments')->setValue($probe, [
+            'h0' => ['jsid' => '1-1:pw'],
+            'h1' => ['jsid' => '1-2:pw'],
+        ]);
+
+        $this->runMain($probe);
+
+        $segments = $fa->getProperty('segments')->getValue($probe);
+        $this->assertSame('NO_MATCH', $segments['h0']['match_type'], '50%-74% must be remapped to NO_MATCH');
+        $this->assertSame(3, $segments['h0']['wc']);
+        $this->assertSame('95%-99%', $segments['h1']['match_type'], 'other match types are upper-cased as-is');
+        $this->assertSame(1, $probe->insertCallCount);
+    }
+
+    #[Test]
+    public function main_dispatchesEachFetchFailureAction(): void
+    {
+        [$probe, $redis, $projectDao] = $this->wireMainProbe();
+        // Four working cycles (one per continue-2 arm) then suicide. Each cycle re-picks a
+        // fresh single-project batch because every arm restarts the do-while via `continue 2`.
+        $redis->sismemberReturns = [true, true, true, true, false];
+        $probe->lockBatches      = [
+            [$this->projectRow(11)], // ERR_TOO_LARGE     → ACTION_PARK
+            [$this->projectRow(12)], // ERR_EMPTY_RESPONSE→ ACTION_RESET
+            [$this->projectRow(13)], // ERR_ANALYSIS_FAILED    → ACTION_RETRY_COUNTED
+            [$this->projectRow(14)], // ERR_ANALYSIS_TRANSIENT → ACTION_RETRY_UNCOUNTED
+        ];
+        $probe->fetchScript = [
+            new \Exception('too large', FastAnalysis::ERR_TOO_LARGE),
+            new \Exception('empty', FastAnalysis::ERR_EMPTY_RESPONSE),
+            new \Exception('failed', FastAnalysis::ERR_ANALYSIS_FAILED),
+            new \Exception('transient', FastAnalysis::ERR_ANALYSIS_TRANSIENT),
+        ];
+
+        $this->runMain($probe);
+
+        // No project reaches the publish step; every arm routes to a status write / release instead.
+        $this->assertSame(0, $probe->insertCallCount, 'a fetch failure must never reach the publish step');
+        $this->assertContains('incr', $this->redisCommands($redis), 'the counted-retry arm bumps the attempt counter');
+        $this->assertFalse($this->readRunning($probe));
+    }
+
+    #[Test]
+    public function main_finalizesDoneWhenAllSegmentsPreTranslated(): void
+    {
+        [$probe] = $this->wireMainProbe();
+        $probe->lockBatches   = [[$this->projectRow(1606)]];
+        // ERR_NO_SEGMENTS → ACTION_DONE → break → proceed to publish with empty data, finalize DONE.
+        $probe->fetchScript   = [new \Exception('all pre-translated', FastAnalysis::ERR_NO_SEGMENTS)];
+        $probe->insertResults = [0];
+
+        $this->runMain($probe);
+
+        $this->assertSame(1, $probe->insertCallCount, 'the pre-translated project is still finalized through publish');
+        $this->assertSame([1606], $probe->purgedPids);
+    }
+
+    #[Test]
+    public function main_finalizesDoneWhenTmsDisabledAndFetchFails(): void
+    {
+        [$probe] = $this->wireMainProbe();
+        $probe->lockBatches   = [[$this->projectRow(1606, tmsEnabled: false)]]; // id_tms=0 && id_mt_engine=0
+        // A transient failure on a TMS-disabled project keeps the prior DONE (ACTION_DONE).
+        $probe->fetchScript   = [new \Exception('transient', FastAnalysis::ERR_ANALYSIS_TRANSIENT)];
+        $probe->insertResults = [0];
+
+        $this->runMain($probe);
+
+        $this->assertSame(1, $probe->featureSetCallCount, 'the disabled path dispatches through the FeatureSet');
+        $this->assertSame(1, $probe->insertCallCount);
+    }
+
+    #[Test]
+    public function main_releasesProjectWhenPublishReturnsFailure(): void
+    {
+        [$probe, $redis] = $this->wireMainProbe();
+        $probe->lockBatches   = [[$this->projectRow(1606)]];
+        $probe->fetchScript   = [new AnalyzeResponse(['data' => []])];
+        $probe->insertResults = [-1]; // publish failed (not an infra failure)
+
+        $this->runMain($probe);
+
+        $this->assertSame([], $probe->purgedPids, 'a failed publish must not finalize the project');
+        $this->assertContains('incr', $this->redisCommands($redis), 'a countable failure bumps the attempt counter');
+    }
+
+    #[Test]
+    public function main_rebuildsQueueHandlerOnBrokerFailureDuringPublish(): void
+    {
+        [$probe] = $this->wireMainProbe();
+        $probe->lockBatches = [[$this->projectRow(1606)]];
+        $probe->fetchScript = [new AnalyzeResponse(['data' => []])];
+        // A broker-connection failure during publish zombifies the Stomp client → rebuild required.
+        $probe->insertThrows = new ConnectionException('broker unreachable');
+
+        $this->runMain($probe);
+
+        $this->assertSame(1, $probe->rebuildCount, 'a broker failure during publish must rebuild the AMQ handler');
+        $this->assertSame([], $probe->purgedPids);
+    }
+
+    #[Test]
+    public function main_skipsProjectDeletedMidAnalysis(): void
+    {
+        [$probe, $redis] = $this->wireMainProbe();
+
+        // findById returns null on master → the project was deleted mid-analysis and must be skipped.
+        $deletedDao = $this->createStub(ProjectDao::class);
+        $deletedDao->method('findById')->willReturn(null);
+        (new ReflectionClass(FastAnalysis::class))->getProperty('projectDao')->setValue($probe, $deletedDao);
+
+        $probe->lockBatches   = [[$this->projectRow(1606)]];
+        $probe->fetchScript   = [new AnalyzeResponse(['data' => []])];
+        $probe->insertResults = [0];
+
+        $this->runMain($probe);
+
+        $this->assertSame(0, $probe->insertCallCount, 'a deleted project must not be published');
+        $this->assertContains('del', $this->redisCommands($redis), 'the inert processing lock is dropped');
+    }
+
+    #[Test]
+    public function main_recoversFromUnexpectedThrowableWhileFinalizing(): void
+    {
+        [$probe, $redis] = $this->wireMainProbe();
+
+        // An unexpected Throwable raised in the finalize tail (here: cache-file delete) must be
+        // absorbed by the per-project safety net and the project released, not kill the daemon.
+        $throwingStorage = $this->createStub(AbstractFilesStorage::class);
+        $throwingStorage->method('deleteFastAnalysisFile')->willThrowException(new RuntimeException('disk error'));
+        (new ReflectionClass(FastAnalysis::class))->getProperty('files_storage')->setValue($probe, $throwingStorage);
+
+        $probe->lockBatches   = [[$this->projectRow(1606)]];
+        $probe->fetchScript   = [new AnalyzeResponse(['data' => []])];
+        $probe->insertResults = [0];
+
+        $this->runMain($probe);
+
+        $this->assertFalse($this->readRunning($probe), 'the daemon should have completed its cycles, not crashed');
+        $this->assertContains('incr', $this->redisCommands($redis), 'the recovered project is released for retry');
+    }
+
+    #[Test]
+    public function main_continuesAfterDatabaseConnectionFailure(): void
+    {
+        [$probe] = $this->wireMainProbe();
+        $redis = (new ReflectionClass(FastAnalysis::class))->getProperty('queueHandler')->getValue($probe);
+        $probe->dbCheckThrows = true;        // first cycle: DB probe throws → reconnect next cycle
+        $this->setRedisSismember($probe, [true, false]);
+
+        $this->runMain($probe);
+
+        $this->assertSame(0, $probe->insertCallCount, 'no project is processed while the DB is unreachable');
+        $this->assertFalse($this->readRunning($probe));
+    }
+
+    #[Test]
+    public function main_sleepsWhenNoProjectsAreAvailable(): void
+    {
+        [$probe] = $this->wireMainProbe();
+        $this->setRedisSismember($probe, [true, false]);
+        $probe->lockBatches = [[]]; // picker returns an empty batch → idle sleep, then suicide
+
+        $this->runMain($probe);
+
+        $this->assertSame(0, $probe->insertCallCount);
+        $this->assertFalse($this->readRunning($probe));
+    }
+
+    #[Test]
+    public function newFeatureSet_buildsFeatureSetFromInjectedDatabase(): void
+    {
+        $daemon = $this->daemonWithDb($this->createStub(IDatabase::class));
+
+        $this->assertInstanceOf(FeatureSet::class, $this->invoke($daemon, '_newFeatureSet'));
+    }
+
+    #[Test]
+    public function getProjectMetadataDao_buildsDaoFromInjectedDatabase(): void
+    {
+        $daemon = $this->daemonWithDb($this->createStub(IDatabase::class));
+
+        $this->assertInstanceOf(ProjectMetadataDao::class, $this->invoke($daemon, '_getProjectMetadataDao'));
+    }
+
+    private function readRunning(FastAnalysisMainProbe $probe): bool
+    {
+        return (bool)(new ReflectionClass(FastAnalysis::class))->getProperty('RUNNING')->getValue($probe);
+    }
+
+    /**
+     * @param list<bool> $script
+     */
+    private function setRedisSismember(FastAnalysisMainProbe $probe, array $script): void
+    {
+        $handler = (new ReflectionClass(FastAnalysis::class))->getProperty('queueHandler')->getValue($probe);
+        $handler->getRedisClient()->sismemberReturns = $script;
+    }
 }
 
 /**
@@ -1004,5 +1341,147 @@ class FastAnalysisRebuildProbe extends FastAnalysis
     protected function _newQueueHandler(): AMQHandler
     {
         return $this->newHandlerStub;
+    }
+}
+
+/**
+ * Recording Redis double for main(): adds the membership + shutdown commands the loop uses on
+ * top of FastAnalysisFakeRedis. sismember() is scripted so the daemon runs a controllable
+ * number of cycles and then suicides (empty script → false → RUNNING cleared).
+ */
+class FastAnalysisMainLoopRedis extends FastAnalysisFakeRedis
+{
+    /** @var list<bool> popped per sismember() call; empty ⇒ false (loop exits) */
+    public array $sismemberReturns = [true, false];
+
+    public function sismember($key, $member): int
+    {
+        $this->calls[] = ['sismember', $key, $member];
+
+        return array_shift($this->sismemberReturns) ? 1 : 0;
+    }
+
+    public function srem($key, ...$members): int
+    {
+        $this->calls[] = array_merge(['srem', $key], $members);
+
+        return 1;
+    }
+
+    // Predis\Client::disconnect() has no declared return type; keep it compatible (no ": void").
+    public function disconnect()
+    {
+        $this->calls[] = ['disconnect'];
+    }
+}
+
+/**
+ * Probe subclass that replaces every external seam main() reaches so the daemon loop can be
+ * driven end-to-end with no broker/Redis/DB. Each public knob scripts one seam; recorders
+ * (insertCallCount, purgedPids, rebuildCount, featureSetCallCount) expose what the loop did.
+ */
+class FastAnalysisMainProbe extends FastAnalysis
+{
+    public bool $dbCheckThrows = false;
+
+    /** @var list<array<int, array<string, mixed>>> one project-list per do-while cycle */
+    public array $lockBatches = [];
+
+    /** @var list<AnalyzeResponse|\Throwable> one fetch outcome per _fetchMyMemoryFast() call */
+    public array $fetchScript = [];
+
+    /** @var list<int> one return code per _insertFastAnalysis() call */
+    public array $insertResults = [];
+
+    public ?\Throwable $insertThrows = null;
+
+    public ?FeatureSet $featureSetStub = null;
+
+    public ?ProjectMetadataDao $metadataDaoStub = null;
+
+    public ?AMQHandler $newQueueHandlerStub = null;
+
+    /** @var list<int> pids whose caches were purged on finalize */
+    public array $purgedPids = [];
+
+    public int $insertCallCount = 0;
+
+    public int $featureSetCallCount = 0;
+
+    public int $rebuildCount = 0;
+
+    protected function _checkDatabaseConnection(): void
+    {
+        if ($this->dbCheckThrows) {
+            $this->dbCheckThrows = false; // only the first cycle fails; the next reconnects
+
+            throw new PDOException('simulated DB unavailable');
+        }
+    }
+
+    protected function _getLockProjectForVolumeAnalysis(int $limit = 1): array
+    {
+        return array_shift($this->lockBatches) ?? [];
+    }
+
+    protected function _newFeatureSet(): FeatureSet
+    {
+        $this->featureSetCallCount++;
+
+        return $this->featureSetStub;
+    }
+
+    protected function _getProjectMetadataDao(): ProjectMetadataDao
+    {
+        return $this->metadataDaoStub;
+    }
+
+    protected function _fetchMyMemoryFast(int $pid): AnalyzeResponse
+    {
+        $next = array_shift($this->fetchScript);
+        if ($next instanceof \Throwable) {
+            throw $next;
+        }
+
+        return $next;
+    }
+
+    protected function _insertFastAnalysis(
+        ProjectStruct       $projectStruct,
+        string              $projectFeaturesString,
+        array               $equivalentWordMapping,
+        FeatureSet          $featureSet,
+        bool                $perform_Tms_Analysis = true,
+        ?bool               $mt_evaluation = false,
+        ?bool               $mt_qe_workflow_enabled = false,
+        ?MTQEWorkflowParams $mt_qe_workflow_parameters = null,
+        ?int                $mt_quality_value_in_editor = 85,
+        ?array              $subfiltering_handlers = [],
+        bool                $icu_enabled = false
+    ): int {
+        $this->insertCallCount++;
+        if ($this->insertThrows !== null) {
+            throw $this->insertThrows;
+        }
+
+        return array_shift($this->insertResults) ?? 0;
+    }
+
+    protected function _purgeProjectCaches(int $pid, string $password): void
+    {
+        $this->purgedPids[] = $pid;
+    }
+
+    // Only reached via _rebuildQueueHandler(); counting here counts rebuilds.
+    protected function _newQueueHandler(): AMQHandler
+    {
+        $this->rebuildCount++;
+
+        return $this->newQueueHandlerStub;
+    }
+
+    public function cleanShutDown(): void
+    {
+        // no-op: skip the real broker/Redis teardown in unit tests
     }
 }

@@ -241,6 +241,41 @@ class FastAnalysis extends AbstractDaemon
         return $this->projectDao ??= new ProjectDao($this->db());
     }
 
+    /**
+     * Seam: build the FeatureSet used by a main() cycle. Extracted so the daemon
+     * loop can be unit-tested without a live DB behind the feature dispatch.
+     *
+     * @throws Exception
+     */
+    protected function _newFeatureSet(): FeatureSet
+    {
+        return new FeatureSet($this->db());
+    }
+
+    /**
+     * Seam: build the per-project metadata DAO. Extracted so the metadata
+     * transaction in main() can be driven from tests without a live DB.
+     */
+    protected function _getProjectMetadataDao(): ProjectMetadataDao
+    {
+        return new ProjectMetadataDao($this->db());
+    }
+
+    /**
+     * Seam: invalidate every cache tied to a just-finalized project. Extracted
+     * from main() so the finalize tail can be covered without touching Redis.
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    protected function _purgeProjectCaches(int $pid, string $password): void
+    {
+        (new JobDao($this->db()))->destroyCacheByProjectId($pid);
+        (new ProjectDao($this->db()))->destroyFetchByIdCache($pid, ProjectStruct::class);
+        $this->getProjectDao()->destroyCacheByIdAndPassword($pid, $password);
+        (new AnalysisDao($this->db()))->destroyCacheByProjectId($pid);
+    }
+
     const int ERR_NO_SEGMENTS = 127;
     const int ERR_TOO_LARGE = 128;
     const int ERR_500 = 129;
@@ -381,7 +416,7 @@ class FastAnalysis extends AbstractDaemon
 
             $this->logger->debug("Projects found", ['projects' => $projects_list]);
 
-            $featureSet = new FeatureSet($this->db());
+            $featureSet = $this->_newFeatureSet();
 
             foreach ($projects_list as $project_row) {
                 $this->actual_project_row = $project_row;
@@ -484,7 +519,7 @@ class FastAnalysis extends AbstractDaemon
 
                             return [
                                 'project' => $projectStruct,
-                                'metadata' => (new ProjectMetadataDao($this->db()))
+                                'metadata' => $this->_getProjectMetadataDao()
                                     ->setCacheTTL(3600)
                                     ->allByProjectIdAsKeyValue((int)$projectStruct->id),
                             ];
@@ -571,10 +606,7 @@ class FastAnalysis extends AbstractDaemon
                     $fs = $this->files_storage;
                     $fs->deleteFastAnalysisFile((string)$pid);
 
-                    (new JobDao($this->db()))->destroyCacheByProjectId($pid);
-                    (new ProjectDao($this->db()))->destroyFetchByIdCache($pid, ProjectStruct::class);
-                    $this->getProjectDao()->destroyCacheByIdAndPassword($pid, $projectStruct->password);
-                    (new AnalysisDao($this->db()))->destroyCacheByProjectId($pid);
+                    $this->_purgeProjectCaches($pid, $projectStruct->password);
                 } catch (Throwable $e) {
                     // U3 safety net: an unexpected Error/TypeError raised anywhere while
                     // processing this project (malformed MyMemory payload, metadata parse,
