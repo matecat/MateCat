@@ -234,6 +234,13 @@ class FastAnalysis extends AbstractDaemon
     const int ERR_TOO_LARGE = 128;
     const int ERR_500 = 129;
     const int ERR_EMPTY_RESPONSE = 130;
+    // A non-200 fast-analysis outcome that should be retried, not stalled at FAST_OK.
+    // TRANSIENT (0 = transport error, 503/other 5xx = overload) is an outage → retried uncounted so
+    // it does not mass-park projects; FAILED (4xx = malformed/misconfigured request) is per-project
+    // poison → counted toward the attempt cap. Fast analysis has no auth/rate-limit, so 401/403/429
+    // do not occur.
+    const int ERR_ANALYSIS_TRANSIENT = 131;
+    const int ERR_ANALYSIS_FAILED = 132;
 
     /**
      * Max consecutive countable (non-infrastructure) fast-analysis failures for a single
@@ -385,32 +392,44 @@ class FastAnalysis extends AbstractDaemon
                     $fastReport = $this->_fetchMyMemoryFast($pid);
                     $this->logger->debug("Fast $pid result: " . count($fastReport->responseData) . " segments.");
                 } catch (Exception $e) {
-                    if ($e->getCode() == self::ERR_TOO_LARGE) {
-                        self::_updateProject($pid, ProjectStatus::STATUS_NOT_TO_ANALYZE);
-                        //next project
-                        continue;
-                    } elseif ($e->getCode() == self::ERR_500) {
-                        self::_updateProject($pid, ProjectStatus::STATUS_NOT_TO_ANALYZE);
-                        //next project
-                        continue;
-                    } elseif ($e->getCode() == self::ERR_EMPTY_RESPONSE) {
-                        // NOTE: This exception code is NO MORE used ( keep the code to remember how to reset the status )
-                        $this->logger->debug($e->getMessage());
-                        self::_updateProject($pid, ProjectStatus::STATUS_NEW);
-                        $this->requireQueueHandler()->getRedisClient()->del(['_fPid:' . $pid]);
-                        sleep(3);
-                        continue;
-                    } else {
-                        $status = ProjectStatus::STATUS_DONE;
+                    switch ($e->getCode()) {
+                        case self::ERR_TOO_LARGE:
+                        case self::ERR_500:
+                            self::_updateProject($pid, ProjectStatus::STATUS_NOT_TO_ANALYZE);
+                            continue 2; // next project
+                        case self::ERR_EMPTY_RESPONSE:
+                            // NOTE: This exception code is NO MORE used ( keep the code to remember how to reset the status )
+                            $this->logger->debug($e->getMessage());
+                            self::_updateProject($pid, ProjectStatus::STATUS_NEW);
+                            $this->requireQueueHandler()->getRedisClient()->del(['_fPid:' . $pid]);
+                            sleep(3);
+                            continue 2; // next project
+                        case self::ERR_ANALYSIS_TRANSIENT:
+                        case self::ERR_ANALYSIS_FAILED:
+                            // S2: a real non-200 fast-analysis response. When analysis is enabled,
+                            // release the project for retry instead of stalling it at FAST_OK with
+                            // zeroed counts; TRANSIENT (outage) does not count toward the cap, FAILED
+                            // (malformed request) does. When analysis is disabled the scores are
+                            // irrelevant, so keep the previous behaviour and finalize DONE.
+                            if ($perform_Tms_Analysis) {
+                                $this->logger->error($e->getMessage() . " Releasing pid $pid for retry.");
+                                $this->_releaseFailedProject($pid, $e->getMessage(), $e->getCode() === self::ERR_ANALYSIS_FAILED);
+                                continue 2; // next project
+                            }
+                            $status = ProjectStatus::STATUS_DONE;
+                            break;
+                        default:
+                            // ERR_NO_SEGMENTS (all pre-translated) and any other exception keep the
+                            // previous behaviour: finalize DONE. (S3 — bogus DONE on truly-unexpected
+                            // errors — is intentionally out of scope for this change.)
+                            $status = ProjectStatus::STATUS_DONE;
+                            break;
                     }
                 }
 
-                if (isset($fastReport) && $fastReport->responseStatus == 200) {
-                    $fastResultData = $fastReport->responseData;
-                } else {
-                    $this->logger->debug("Pid $pid failed fast analysis.");
-                    $fastResultData = [];
-                }
+                // Past here $fastReport is set only on a 200 response; otherwise an exception already
+                // decided the terminal status (DONE) and we proceed with empty data.
+                $fastResultData = isset($fastReport) ? $fastReport->responseData : [];
 
                 unset($fastReport);
 
@@ -609,16 +628,47 @@ class FastAnalysis extends AbstractDaemon
 
         $result = $myMemory->fastAnalysis(array_values($fastSegmentsRequest));
 
-        if (isset($result->error->code) && $result->error->code == -28) { //curl timed out
-            throw new Exception("Matches Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE);
-        } elseif ($result->responseStatus == 504) { //Gateway time out
-            $errorMessage = $result->error->message ?? 'Gateway timeout';
-            throw new Exception("Matches Fast Analysis Failed. $errorMessage", self::ERR_TOO_LARGE);
-        } elseif ($result->responseStatus == 500 || $result->responseStatus == 502) { // server error, could depend on request
-            throw new Exception("Matches Internal Server Error. Pid: " . $pid, self::ERR_500);
-        }
+        // Single classifier: return on 200, otherwise throw a typed code so main() never has to
+        // inspect the status (and never falls through to zero-wc processing → FAST_OK stall).
+        $this->_assertFastAnalysisSucceeded((int)$result->responseStatus, $result->error->code ?? null, $pid);
 
         return $result;
+    }
+
+    /**
+     * Classify a fast-analysis response: return quietly on HTTP 200, otherwise throw a typed code.
+     * Fast analysis has no authentication and no rate limit, so 401/403/429 do not occur; the
+     * realistic non-200 set is 0 (transport error), 4xx (malformed/misconfigured request) and 5xx
+     * (server/gateway).
+     *
+     * @param int             $responseStatus HTTP status (0 when the transport failed before a response)
+     * @param int|string|null $errorCode      curl error code (negated errno), if any
+     * @param int             $pid
+     *
+     * @return void
+     * @throws Exception ERR_TOO_LARGE | ERR_500 | ERR_ANALYSIS_TRANSIENT | ERR_ANALYSIS_FAILED
+     */
+    protected function _assertFastAnalysisSucceeded(int $responseStatus, int|string|null $errorCode, int $pid): void
+    {
+        if ($responseStatus === 200) {
+            return;
+        }
+
+        if ($errorCode == -28 || $responseStatus === 504) { // curl / gateway timeout
+            throw new Exception("Fast analysis timed out (pid $pid).", self::ERR_TOO_LARGE);
+        }
+        if ($responseStatus === 500 || $responseStatus === 502) { // upstream server error
+            throw new Exception("Fast analysis server error (pid $pid, status $responseStatus).", self::ERR_500);
+        }
+
+        // 0 = transport failure (connection refused / DNS / SSL / reset), 503 / other 5xx = overload:
+        // a transient outage → retried WITHOUT counting toward the cap, so an outage does not
+        // mass-park projects. Any remaining 4xx is a malformed/misconfigured request → counted.
+        if ($responseStatus === 0 || $responseStatus >= 500) {
+            throw new Exception("Fast analysis transient failure (pid $pid, status $responseStatus).", self::ERR_ANALYSIS_TRANSIENT);
+        }
+
+        throw new Exception("Fast analysis client error (pid $pid, status $responseStatus).", self::ERR_ANALYSIS_FAILED);
     }
 
     /**

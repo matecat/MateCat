@@ -424,6 +424,46 @@ class FastAnalysisTest extends AbstractTest
     }
 
     #[Test]
+    #[DataProvider('fastAnalysisResponseStatusProvider')]
+    public function assertFastAnalysisSucceededClassifiesResponseStatus(int $responseStatus, int|string|null $errorCode, ?int $expectedThrownCode): void
+    {
+        // S2: _fetchMyMemoryFast must be the single classifier — a 200 passes, every other outcome
+        // throws a typed code so main() never falls through to zero-wc processing (FAST_OK stall).
+        $daemon = $this->daemonWithDb($this->createStub(IDatabase::class));
+
+        if ($expectedThrownCode === null) {
+            $this->expectNotToPerformAssertions(); // 200 is the only non-throwing outcome
+            $this->invoke($daemon, '_assertFastAnalysisSucceeded', $responseStatus, $errorCode, 42);
+
+            return;
+        }
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode($expectedThrownCode);
+        $this->invoke($daemon, '_assertFastAnalysisSucceeded', $responseStatus, $errorCode, 42);
+    }
+
+    /**
+     * @return array<string, array{0: int, 1: int|string|null, 2: ?int}>
+     */
+    public static function fastAnalysisResponseStatusProvider(): array
+    {
+        return [
+            '200 ok → no throw'                    => [200, null, null],
+            'curl timeout (-28) → too large'       => [0, -28, FastAnalysis::ERR_TOO_LARGE],
+            '504 gateway timeout → too large'      => [504, null, FastAnalysis::ERR_TOO_LARGE],
+            '500 server error → err_500'           => [500, null, FastAnalysis::ERR_500],
+            '502 bad gateway → err_500'            => [502, null, FastAnalysis::ERR_500],
+            '0 transport → transient'              => [0, null, FastAnalysis::ERR_ANALYSIS_TRANSIENT],
+            '0 transport (-7 refused) → transient' => [0, -7, FastAnalysis::ERR_ANALYSIS_TRANSIENT],
+            '503 overload → transient'             => [503, null, FastAnalysis::ERR_ANALYSIS_TRANSIENT],
+            '501 → transient'                      => [501, null, FastAnalysis::ERR_ANALYSIS_TRANSIENT],
+            '400 malformed → failed'               => [400, null, FastAnalysis::ERR_ANALYSIS_FAILED],
+            '404 misconfig → failed'               => [404, null, FastAnalysis::ERR_ANALYSIS_FAILED],
+        ];
+    }
+
+    #[Test]
     public function isBrokerFailureTrueOnlyForDirectOrWrappedConnectionException(): void
     {
         // The broker check (which gates the Stomp rebuild) must fire for a ConnectionException
