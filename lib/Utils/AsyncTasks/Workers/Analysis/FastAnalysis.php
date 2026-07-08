@@ -1389,7 +1389,12 @@ HD;
             throw new Exception('Need a queueInfo to track queue position');
         }
 
-        $this->requireQueueHandler()->getRedisClient()->rpush($queueInfo->redis_key, [$config['pid']]);
+        // D3: a released project re-runs _setTotal on every bounded retry (S1a), so drop any stale
+        // entry for this pid before appending — otherwise it lands in the position list once per
+        // attempt and inflates the queue-position/ETA estimate for everyone behind it.
+        $redis = $this->requireQueueHandler()->getRedisClient();
+        $redis->lrem($queueInfo->redis_key, 0, (string)$config['pid']);
+        $redis->rpush($queueInfo->redis_key, [$config['pid']]);
     }
 
     /**

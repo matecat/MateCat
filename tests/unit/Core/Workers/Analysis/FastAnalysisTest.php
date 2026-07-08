@@ -416,6 +416,31 @@ class FastAnalysisTest extends AbstractTest
         $this->assertSame('prepare', $calls[1][0]);
     }
 
+    #[Test]
+    public function setTotalRemovesStalePidBeforePushingToThePositionList(): void
+    {
+        // D3: S1a makes a released project re-run _setTotal on each bounded retry, so the pid must
+        // be LREM'd from the queue-position list before the RPUSH — otherwise it appears once per
+        // attempt and inflates the position/ETA display for every project behind it.
+        $daemon = $this->daemonWithDb($this->createStub(IDatabase::class));
+        $redis  = $this->seedQueueHandlerWithRedis($daemon);
+
+        $queueInfo            = new \stdClass();
+        $queueInfo->redis_key = 'p_queue_position';
+
+        $this->invoke($daemon, '_setTotal', ['total' => 5, 'pid' => 7, 'queueInfo' => $queueInfo]);
+
+        $ops       = array_map(static fn (array $c): string => $c[0], $redis->calls);
+        $lremIndex = array_search('lrem', $ops, true);
+        $rpushIndex = array_search('rpush', $ops, true);
+
+        $this->assertNotFalse($lremIndex, 'the stale pid must be LREM-ed before being re-pushed');
+        $this->assertNotFalse($rpushIndex);
+        $this->assertLessThan($rpushIndex, $lremIndex, 'LREM must precede RPUSH');
+        $this->assertSame(['lrem', 'p_queue_position', 0, '7'], $redis->calls[$lremIndex]);
+        $this->assertSame(['rpush', 'p_queue_position', [7]], $redis->calls[$rpushIndex]);
+    }
+
     /**
      * @return array<string, array{0: PDOException, 1: bool}>
      */
@@ -978,6 +1003,27 @@ class FastAnalysisFakeRedis extends PredisClient
         $this->calls[] = array_merge(['set', $key, $value], $options);
 
         return $this->setReturn;
+    }
+
+    public function setex($key, $seconds, $value): string
+    {
+        $this->calls[] = ['setex', $key, $seconds, $value];
+
+        return 'OK';
+    }
+
+    public function lrem($key, $count, $value): int
+    {
+        $this->calls[] = ['lrem', $key, $count, $value];
+
+        return 0;
+    }
+
+    public function rpush($key, $values): int
+    {
+        $this->calls[] = ['rpush', $key, $values];
+
+        return 1;
     }
 }
 
