@@ -14,6 +14,7 @@ use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 
@@ -117,7 +118,7 @@ class TranslationEvent
         } else {
             try {
                 $this->chunk = $this->wanted_translation->getJob(new JobDao($this->segmentDao->getDatabaseHandler())) ?? throw new RuntimeException("*** Job not found or it is deleted. JobId '{$this->wanted_translation->id_job}'");
-            } catch (Error) {
+            } catch (Throwable) {
                 throw new RuntimeException("*** Job not found or it is deleted. JobId '{$this->wanted_translation->id_job}'");
             }
         }
