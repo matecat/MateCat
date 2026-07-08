@@ -210,7 +210,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         $private_keys_list = filter_var(
             $this->request->param('private_keys_list'),
             FILTER_SANITIZE_FULL_SPECIAL_CHARS,
-            ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES]
+            ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES]
         );
 
         // MT SETTINGS
