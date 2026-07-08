@@ -459,6 +459,24 @@ class FastAnalysisTest extends AbstractTest
         $this->assertFalse($this->invoke($daemon, '_isInfrastructureFailure', new RuntimeException('boom')));
     }
 
+    #[Test]
+    public function isBrokerFailureTrueOnlyForDirectOrWrappedConnectionException(): void
+    {
+        // The broker check (which gates the Stomp rebuild) must fire for a ConnectionException
+        // thrown directly OR wrapped as a previous exception — both zombify the Stomp client —
+        // and for nothing else. It is the single source of truth also reused by
+        // _isInfrastructureFailure's first branch.
+        $daemon = $this->daemonWithDb($this->createStub(IDatabase::class));
+
+        $this->assertTrue($this->invoke($daemon, '_isBrokerFailure', new ConnectionException('broker down')));
+        $wrapped = new RuntimeException('publish failed', 0, new ConnectionException('broker down'));
+        $this->assertTrue($this->invoke($daemon, '_isBrokerFailure', $wrapped));
+
+        // a plain error and a DB error are NOT broker failures
+        $this->assertFalse($this->invoke($daemon, '_isBrokerFailure', new RuntimeException('boom')));
+        $this->assertFalse($this->invoke($daemon, '_isBrokerFailure', new PDOException('server gone')));
+    }
+
     /**
      * Build a probe subclass (via reflection, no constructor) that overrides the
      * _newQueueHandler() seam so the real broker-connecting factory is never called.
@@ -516,6 +534,160 @@ class FastAnalysisTest extends AbstractTest
         $current = (new ReflectionClass(FastAnalysis::class))->getProperty('queueHandler')->getValue($probe);
         $this->assertSame($fresh, $current);
     }
+
+    #[Test]
+    public function checkDatabaseConnectionProbesTheMasterInsideATransaction(): void
+    {
+        // The health probe must ride the master route (a transaction) — the same route the
+        // lock/update writes use. A bare ping() is a plain read a replica can answer while the
+        // master is down (false green), so the probe must run inside a transaction.
+        //
+        // A stub (no expectations) records behaviour through flags: Database::__destruct() calls
+        // close() at GC, which a stub absorbs harmlessly, whereas an expects() count would trip.
+        $db = $this->createStub(Database::class);
+
+        $txEntered = $pingedInsideTx = $closedDuringProbe = false;
+        $db->method('transaction')->willReturnCallback(function (callable $cb) use (&$txEntered) {
+            $txEntered = true;
+
+            return $cb();
+        });
+        $db->method('ping')->willReturnCallback(function () use (&$pingedInsideTx) {
+            $pingedInsideTx = true;
+
+            return true;
+        });
+        $db->method('close')->willReturnCallback(function () use (&$closedDuringProbe) {
+            $closedDuringProbe = true;
+        });
+
+        $daemon = $this->daemonWithDb($db);
+        $this->invoke($daemon, '_checkDatabaseConnection');
+
+        $this->assertTrue($txEntered, 'the probe must go through a transaction (master route)');
+        $this->assertTrue($pingedInsideTx, 'the ping must run inside the transaction callback');
+        $this->assertFalse($closedDuringProbe, 'a healthy probe must not close/reconnect');
+    }
+
+    #[Test]
+    public function checkDatabaseConnectionReconnectsWhenTheMasterProbeThrows(): void
+    {
+        // If the master probe throws (master unreachable), the connection is dropped and rebuilt
+        // so the next cycle starts from a clean handle instead of trusting a false green.
+        $db = $this->createStub(Database::class);
+
+        $closed = $reconnected = false;
+        $db->method('transaction')->willThrowException(new PDOException('master down'));
+        $db->method('close')->willReturnCallback(function () use (&$closed) {
+            $closed = true;
+        });
+        $pdo = $this->createStub(PDO::class);
+        $db->method('getConnection')->willReturnCallback(function () use (&$reconnected, $pdo) {
+            $reconnected = true;
+
+            return $pdo;
+        });
+
+        $daemon = $this->daemonWithDb($db);
+        $this->invoke($daemon, '_checkDatabaseConnection'); // must swallow and reconnect, not throw
+
+        $this->assertTrue($closed, 'a failed probe must drop the stale connection');
+        $this->assertTrue($reconnected, 'a failed probe must rebuild the connection');
+    }
+
+    #[Test]
+    public function lockProjectKeepsProjectInBatchWhenBusyUpdateSucceeds(): void
+    {
+        // Happy path: lock acquired + BUSY set → the project stays in the returned batch and its
+        // _fPid processing lock is NOT released.
+        [$daemon, $redis] = $this->daemonLockingOneProject(fn () => 1);
+
+        $result = $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+
+        $this->assertCount(1, $result);
+        $this->assertSame('42', array_values($result)[0]['id']);
+        $this->assertNotContains(['del', '_fPid:42'], $redis->calls); // lock kept
+    }
+
+    #[Test]
+    public function lockProjectReleasesAndDropsProjectWhenBusyUpdateThrows(): void
+    {
+        // Zone-B fix: a failed BUSY write must release the _fPid lock AND drop the project from the
+        // batch. Leaving it in hands main() a still-NEW, now-unlocked project → lockless analysis
+        // here plus concurrent re-pickup by another daemon (double analysis / counter pollution).
+        [$daemon, $redis] = $this->daemonLockingOneProject(
+            fn () => throw new PDOException('master write failed')
+        );
+
+        $result = $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+
+        $this->assertSame([], $result, 'the un-BUSYable project must not be returned to main()');
+        $this->assertContains(['del', '_fPid:42'], $redis->calls, 'the processing lock must be released');
+    }
+
+    #[Test]
+    public function lockProjectReleasesAndDropsProjectWhenBusyUpdateThrowsError(): void
+    {
+        // Zone-B fix (widened catch): the guard must catch \Throwable, not just \Exception. A
+        // \TypeError/\Error from the DAO path would otherwise escape → the _fPid lock is never
+        // released and the project is stranded NEW-but-locked for the full 24h TTL.
+        [$daemon, $redis] = $this->daemonLockingOneProject(
+            fn () => throw new \TypeError('unexpected type from DAO')
+        );
+
+        $result = $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+
+        $this->assertSame([], $result);
+        $this->assertContains(['del', '_fPid:42'], $redis->calls);
+    }
+
+    /**
+     * Seed the lock picker so its master-routed SELECT returns exactly one NEW project, backed by
+     * a ProjectDao whose changeProjectStatus() runs $onBusyUpdate (return a row count, or throw).
+     *
+     * @param callable $onBusyUpdate invoked as the BUSY write inside _updateProject
+     *
+     * @return array{0: FastAnalysis, 1: FastAnalysisFakeRedis}
+     */
+    private function daemonLockingOneProject(callable $onBusyUpdate): array
+    {
+        $rows = [[
+            'id'               => '42',
+            'id_tms'           => 1,
+            'id_mt_engine'     => 0,
+            'tm_keys'          => '',
+            'pretranslate_100' => 0,
+            'jid_list'         => '100',
+            'only_private_tm'  => 0,
+            'id_customer'      => 'c1',
+        ]];
+
+        $stmt = $this->createStub(PDOStatement::class);
+        $stmt->method('execute')->willReturn(true);
+        $stmt->method('fetchAll')->willReturn($rows);
+
+        $pdo = $this->createStub(PDO::class);
+        $pdo->method('prepare')->willReturn($stmt);
+
+        $project                  = new ProjectStruct();
+        $project->status_analysis = ProjectStatus::STATUS_NEW; // != DONE → the BUSY update runs
+
+        $projectDao = $this->createStub(ProjectDao::class);
+        $projectDao->method('findById')->willReturn($project);
+        $projectDao->method('changeProjectStatus')->willReturnCallback($onBusyUpdate);
+
+        $injected = $this->createStub(IDatabase::class);
+        $injected->method('getConnection')->willReturn($pdo);
+        // pass-through: both the picker SELECT and _updateProject route through transaction()
+        $injected->method('transaction')->willReturnCallback(fn (callable $cb) => $cb());
+
+        $daemon = $this->daemonWithDb($injected);
+        $this->setProp($daemon, 'projectDao', $projectDao);
+        $redis              = $this->seedQueueHandlerWithRedis($daemon);
+        $redis->setnxReturn = 1; // lock acquired
+
+        return [$daemon, $redis];
+    }
 }
 
 /**
@@ -529,6 +701,8 @@ class FastAnalysisFakeRedis extends PredisClient
     public array $calls = [];
 
     public int $incrReturn = 1;
+
+    public int $setnxReturn = 1;
 
     public int|string|null $getReturn = null;
 
@@ -561,6 +735,13 @@ class FastAnalysisFakeRedis extends PredisClient
         $this->calls[] = ['del', $keys];
 
         return 1;
+    }
+
+    public function setnx($key, $value): int
+    {
+        $this->calls[] = ['setnx', $key, $value];
+
+        return $this->setnxReturn;
     }
 }
 

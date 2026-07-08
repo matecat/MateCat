@@ -125,14 +125,26 @@ class FastAnalysis extends AbstractDaemon
      * class 08 (connection exception) plus a set of MySQL driver codes for an unreachable/gone
      * or contended server. Any other PDOException is treated as a statement error.
      */
+    /**
+     * A broker-connection failure — thrown directly or wrapped as a previous exception. This is
+     * the single detector for "the ActiveMQ broker is unreachable", which both zombifies the
+     * Stomp client (→ needs a rebuild) and counts as an infrastructure failure (→ not retried
+     * against the cap). Reused by _isInfrastructureFailure so the two never drift apart.
+     */
+    private function _isBrokerFailure(Throwable $e): bool
+    {
+        return $e instanceof ConnectionException
+            || $e->getPrevious() instanceof ConnectionException;
+    }
+
     private function _isInfrastructureFailure(Throwable $e): bool
     {
-        $previous = $e->getPrevious();
-
         // ActiveMQ broker unreachable
-        if ($e instanceof ConnectionException || $previous instanceof ConnectionException) {
+        if ($this->_isBrokerFailure($e)) {
             return true;
         }
+
+        $previous = $e->getPrevious();
 
         $pdo = null;
         if ($e instanceof PDOException) {
@@ -260,9 +272,13 @@ class FastAnalysis extends AbstractDaemon
             return;
         }
         try {
-            $db->ping();
-//            $this->_TimeStampMsg(  "--- Database connection active. " );
-        } catch (PDOException $e) {
+            // Probe inside a transaction so ProxySQL routes the health check to the master —
+            // the same route the lock/BUSY writes actually use. A bare ping() is a plain read a
+            // replica can answer while the master is down, giving a false green.
+            $db->transaction(function () use ($db) {
+                $db->ping();
+            });
+        } catch (Throwable $e) {
             $this->logger->debug($e->getMessage() . " - Trying to close and reconnect.");
             $db->close();
             //reconnect
@@ -488,8 +504,7 @@ class FastAnalysis extends AbstractDaemon
                     // (dup key, null, syntax) — only the former is retried without counting.
                     $insertFailureIsInfra  = $this->_isInfrastructureFailure($e);
                     // Only a broker-connection failure zombifies the Stomp client and needs a rebuild.
-                    $insertFailureIsBroker = $e instanceof ConnectionException
-                        || $e->getPrevious() instanceof ConnectionException;
+                    $insertFailureIsBroker = $this->_isBrokerFailure($e);
                     $this->logger->debug($e->getMessage() . " " . $e->getTraceAsString());
                 }
 
@@ -1283,8 +1298,16 @@ HD;
 
                 try {
                     $this->_updateProject((int)$project['id'], ProjectStatus::STATUS_BUSY);
-                } catch (Exception) {
+                } catch (Throwable $e) {
+                    // The BUSY write failed: release the processing lock AND drop the project
+                    // from this batch. Leaving it in $results would hand main() a project that is
+                    // still STATUS_NEW and no longer lock-protected — this process would analyze
+                    // it lockless while another daemon could re-pick it (double analysis / TM
+                    // counter pollution). Catch Throwable, not just Exception: a TypeError/Error
+                    // from the DAO path must still release the lock, never strand it for the 24h TTL.
+                    $this->logger->debug("*** Project {$project['id']}: BUSY update failed ({$e->getMessage()}). Releasing lock, skipping this cycle.");
                     $this->requireQueueHandler()->getRedisClient()->del('_fPid:' . $project['id']);
+                    unset($results[$position]);
                 }
             }
         }
