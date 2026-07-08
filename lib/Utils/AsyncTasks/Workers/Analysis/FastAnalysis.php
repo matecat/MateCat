@@ -242,6 +242,13 @@ class FastAnalysis extends AbstractDaemon
     const int ERR_ANALYSIS_TRANSIENT = 131;
     const int ERR_ANALYSIS_FAILED = 132;
 
+    // Actions returned by _decideFetchFailureAction() and dispatched by main() when a fetch throws.
+    const string ACTION_PARK = 'park';                       // NOT_TO_ANALYZE (project can't be analyzed)
+    const string ACTION_RESET = 'reset';                     // back to NEW + release lock (dead ERR_EMPTY_RESPONSE)
+    const string ACTION_RETRY_COUNTED = 'retry_counted';     // release for retry, count toward the cap
+    const string ACTION_RETRY_UNCOUNTED = 'retry_uncounted'; // release for retry, do not count (transient/infra)
+    const string ACTION_DONE = 'done';                       // finalize DONE (pre-translated, or disabled project)
+
     /**
      * Max consecutive countable (non-infrastructure) fast-analysis failures for a single
      * project before it is parked as NOT_TO_ANALYZE, so a poison project cannot loop forever.
@@ -392,36 +399,30 @@ class FastAnalysis extends AbstractDaemon
                     $fastReport = $this->_fetchMyMemoryFast($pid);
                     $this->logger->debug("Fast $pid result: " . count($fastReport->responseData) . " segments.");
                 } catch (Exception $e) {
-                    switch ($e->getCode()) {
-                        case self::ERR_TOO_LARGE:
-                        case self::ERR_500:
+                    // All decision logic lives in _decideFetchFailureAction() (unit-tested); here we
+                    // only dispatch the returned action.
+                    switch ($this->_decideFetchFailureAction($e, $perform_Tms_Analysis)) {
+                        case self::ACTION_PARK:
                             self::_updateProject($pid, ProjectStatus::STATUS_NOT_TO_ANALYZE);
                             continue 2; // next project
-                        case self::ERR_EMPTY_RESPONSE:
-                            // NOTE: This exception code is NO MORE used ( keep the code to remember how to reset the status )
+                        case self::ACTION_RESET:
+                            // dead ERR_EMPTY_RESPONSE path, kept to remember how to reset the status
                             $this->logger->debug($e->getMessage());
                             self::_updateProject($pid, ProjectStatus::STATUS_NEW);
                             $this->requireQueueHandler()->getRedisClient()->del(['_fPid:' . $pid]);
                             sleep(3);
                             continue 2; // next project
-                        case self::ERR_ANALYSIS_TRANSIENT:
-                        case self::ERR_ANALYSIS_FAILED:
-                            // S2: a real non-200 fast-analysis response. When analysis is enabled,
-                            // release the project for retry instead of stalling it at FAST_OK with
-                            // zeroed counts; TRANSIENT (outage) does not count toward the cap, FAILED
-                            // (malformed request) does. When analysis is disabled the scores are
-                            // irrelevant, so keep the previous behaviour and finalize DONE.
-                            if ($perform_Tms_Analysis) {
-                                $this->logger->error($e->getMessage() . " Releasing pid $pid for retry.");
-                                $this->_releaseFailedProject($pid, $e->getMessage(), $e->getCode() === self::ERR_ANALYSIS_FAILED);
-                                continue 2; // next project
-                            }
-                            $status = ProjectStatus::STATUS_DONE;
-                            break;
+                        case self::ACTION_RETRY_COUNTED:
+                            $this->logger->error($e->getMessage() . " Releasing pid $pid for retry.");
+                            $this->_releaseFailedProject($pid, $e->getMessage());
+                            continue 2; // next project
+                        case self::ACTION_RETRY_UNCOUNTED:
+                            $this->logger->error($e->getMessage() . " Releasing pid $pid for retry (uncounted).");
+                            $this->_releaseFailedProject($pid, $e->getMessage(), false);
+                            continue 2; // next project
+                        case self::ACTION_DONE:
                         default:
-                            // ERR_NO_SEGMENTS (all pre-translated) and any other exception keep the
-                            // previous behaviour: finalize DONE. (S3 — bogus DONE on truly-unexpected
-                            // errors — is intentionally out of scope for this change.)
+                            // pre-translated, or a disabled project: finalize DONE
                             $status = ProjectStatus::STATUS_DONE;
                             break;
                     }
@@ -669,6 +670,47 @@ class FastAnalysis extends AbstractDaemon
         }
 
         throw new Exception("Fast analysis client error (pid $pid, status $responseStatus).", self::ERR_ANALYSIS_FAILED);
+    }
+
+    /**
+     * Decide how main() must react when _fetchMyMemoryFast() throws. All fetch-failure decision
+     * logic is centralised (and unit-tested) here; main() only dispatches the returned action.
+     *
+     * @param Throwable $e                  the exception thrown by the fetch
+     * @param bool      $performTmsAnalysis whether TM/MT analysis is enabled for this project
+     *
+     * @return string one of the self::ACTION_* tokens
+     */
+    protected function _decideFetchFailureAction(Throwable $e, bool $performTmsAnalysis): string
+    {
+        switch ($e->getCode()) {
+            case self::ERR_TOO_LARGE:
+            case self::ERR_500:
+                return self::ACTION_PARK;
+
+            case self::ERR_EMPTY_RESPONSE:
+                return self::ACTION_RESET;
+
+            case self::ERR_ANALYSIS_TRANSIENT:
+                return $performTmsAnalysis ? self::ACTION_RETRY_UNCOUNTED : self::ACTION_DONE;
+
+            case self::ERR_ANALYSIS_FAILED:
+                return $performTmsAnalysis ? self::ACTION_RETRY_COUNTED : self::ACTION_DONE;
+
+            case self::ERR_NO_SEGMENTS:
+                // all segments pre-translated → nothing to analyze, legitimately DONE
+                return self::ACTION_DONE;
+
+            default:
+                // S3: a truly unexpected error (engine build, decode, library fault, …). Never fake
+                // DONE when analysis is enabled — retry instead (infra/transient uncounted, real
+                // fault counted so it eventually parks). Disabled projects keep the prior DONE.
+                if (!$performTmsAnalysis) {
+                    return self::ACTION_DONE;
+                }
+
+                return $this->_isInfrastructureFailure($e) ? self::ACTION_RETRY_UNCOUNTED : self::ACTION_RETRY_COUNTED;
+        }
     }
 
     /**

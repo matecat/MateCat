@@ -464,6 +464,42 @@ class FastAnalysisTest extends AbstractTest
     }
 
     #[Test]
+    #[DataProvider('fetchFailureActionProvider')]
+    public function decideFetchFailureActionMapsExceptionToAction(\Throwable $e, bool $performTmsAnalysis, string $expectedAction): void
+    {
+        // S3: all fetch-failure decision logic lives in this one tested method; main() only
+        // dispatches the returned action. A truly unexpected error must NEVER map to DONE when
+        // analysis is enabled (that was the bogus-DONE bug) — it maps to a retry instead.
+        $daemon = $this->daemonWithDb($this->createStub(IDatabase::class));
+
+        $this->assertSame(
+            $expectedAction,
+            $this->invoke($daemon, '_decideFetchFailureAction', $e, $performTmsAnalysis)
+        );
+    }
+
+    /**
+     * @return array<string, array{0: \Throwable, 1: bool, 2: string}>
+     */
+    public static function fetchFailureActionProvider(): array
+    {
+        return [
+            'too large → park'                        => [new \Exception('x', FastAnalysis::ERR_TOO_LARGE), true, FastAnalysis::ACTION_PARK],
+            'err500 → park'                           => [new \Exception('x', FastAnalysis::ERR_500), true, FastAnalysis::ACTION_PARK],
+            'empty response → reset'                  => [new \Exception('x', FastAnalysis::ERR_EMPTY_RESPONSE), true, FastAnalysis::ACTION_RESET],
+            'transient + enabled → retry uncounted'   => [new \Exception('x', FastAnalysis::ERR_ANALYSIS_TRANSIENT), true, FastAnalysis::ACTION_RETRY_UNCOUNTED],
+            'transient + disabled → done'             => [new \Exception('x', FastAnalysis::ERR_ANALYSIS_TRANSIENT), false, FastAnalysis::ACTION_DONE],
+            'failed + enabled → retry counted'        => [new \Exception('x', FastAnalysis::ERR_ANALYSIS_FAILED), true, FastAnalysis::ACTION_RETRY_COUNTED],
+            'failed + disabled → done'                => [new \Exception('x', FastAnalysis::ERR_ANALYSIS_FAILED), false, FastAnalysis::ACTION_DONE],
+            'no segments → done (enabled)'            => [new \Exception('x', FastAnalysis::ERR_NO_SEGMENTS), true, FastAnalysis::ACTION_DONE],
+            'no segments → done (disabled)'           => [new \Exception('x', FastAnalysis::ERR_NO_SEGMENTS), false, FastAnalysis::ACTION_DONE],
+            'unexpected + enabled → retry counted'    => [new RuntimeException('boom'), true, FastAnalysis::ACTION_RETRY_COUNTED],
+            'unexpected infra + enabled → retry unc.' => [new ConnectionException('broker down'), true, FastAnalysis::ACTION_RETRY_UNCOUNTED],
+            'unexpected + disabled → done'            => [new RuntimeException('boom'), false, FastAnalysis::ACTION_DONE],
+        ];
+    }
+
+    #[Test]
     public function isBrokerFailureTrueOnlyForDirectOrWrappedConnectionException(): void
     {
         // The broker check (which gates the Stomp rebuild) must fire for a ConnectionException
