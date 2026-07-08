@@ -693,7 +693,13 @@ class S3FilesStorage extends AbstractFilesStorage
      */
     public function getFastAnalysisData(int $id_project): array
     {
-        $analysisData = @unserialize($this->s3Client->openItem(['bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $this->getFastAnalysisFileName((string)$id_project)]));
+        // X2: the .ser blob is untrusted storage; forbid object instantiation to kill the
+        // object-injection / gadget-chain surface. The payload is a plain array, so this is
+        // transparent; a malformed blob still yields false (suppressed warning) and is handled below.
+        $analysisData = @unserialize(
+            $this->s3Client->openItem(['bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $this->getFastAnalysisFileName((string)$id_project)]),
+            ['allowed_classes' => false]
+        );
 
         if (false === $analysisData) {
             throw new UnexpectedValueException('Internal Error: Failed to retrieve analysis information from Amazon S3 bucket.', -15);

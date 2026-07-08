@@ -1146,8 +1146,9 @@ class FastAnalysis extends AbstractDaemon
                 $queue_element['context_before'] = $this->segments[$k - 1]['segment'] ?? null;
                 $queue_element['context_after'] = $this->segments[$k + 1]['segment'] ?? null;
 
-                $jsid = explode("-", $queue_element['jsid']); // 749-49:7acfb82b8168,50:47c70434fe78,51:f3f5551e9c4f
-                $passwordMap = $this->_mapJobPasswords($jsid[1]); // id_job => password (see R4 below)
+                /** @noinspection SpellCheckingInspection */
+                $jobId_segmentId = explode("-", $queue_element['jsid']); // 749-49:7acfb82b8168,50:47c70434fe78,51:f3f5551e9c4f
+                $passwordMap = $this->_mapJobPasswords($jobId_segmentId[1]); // id_job => password (see R4 below)
 
                 /**
                  * remove some unuseful fields
