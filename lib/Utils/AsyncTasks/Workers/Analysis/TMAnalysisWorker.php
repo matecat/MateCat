@@ -248,6 +248,7 @@ class TMAnalysisWorker extends AbstractWorker
             $this->applyPostCommitSideEffects(
                 (int)$params->pid,
                 (int)$params->id_segment,
+                (int)$params->id_job,
                 (string)$params->ppassword,
                 $eqWords,
                 $standardWords
@@ -307,6 +308,7 @@ class TMAnalysisWorker extends AbstractWorker
         $this->applyPostCommitSideEffects(
             (int)$queueElement->params->pid,
             (int)$queueElement->params->id_segment,
+            (int)$queueElement->params->id_job,
             (string)$queueElement->params->ppassword,
             (float)$queueElement->params->raw_word_count,
             (float)$queueElement->params->raw_word_count
@@ -485,19 +487,20 @@ class TMAnalysisWorker extends AbstractWorker
     private function applyPostCommitSideEffects(
         int $pid,
         int $idSegment,
+        int $idJob,
         string $projectPassword,
         float $eqWords,
         float $standardWords
     ): void {
         // 1. Retry loop for the critical counter increment. The increment is idempotent
-        //    per segment id, so re-running it after a Redis connection error cannot
+        //    per (segment, job), so re-running it after a Redis connection error cannot
         //    double-count (see AnalysisRedisService::incrementAnalyzedCount).
         $maxRetries = 5;
         $delayMs = 500;
 
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             try {
-                $this->redisService->incrementAnalyzedCount($pid, $idSegment, $eqWords, $standardWords);
+                $this->redisService->incrementAnalyzedCount($pid, $idSegment, $idJob, $eqWords, $standardWords);
 
                 break;
             } catch (PredisConnectionException|PredisServerException $e) {

@@ -21,4 +21,13 @@ if ( AppConfig::$FAST_ANALYSIS_MEMORY_LIMIT != null ) {
 // the daemon, which threads it down to the DAOs it builds.
 $daemon = FastAnalysis::getInstance(@$argv[1]);
 $daemon->setDatabase(Bootstrap::getDatabase());
-$daemon->main();
+
+// Top-level safety net: main() guards each project individually, but a systemic fault (broken
+// FeatureSet build, unrecoverable broker/DB state) can still escape the loop. Log it at error
+// level and exit non-zero so the process supervisor restarts the daemon instead of it dying mute.
+try {
+    $daemon->main();
+} catch (Throwable $e) {
+    error_log("[FastAnalysis] fatal, daemon exiting: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+    exit(1);
+}

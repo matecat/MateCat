@@ -247,6 +247,28 @@ class ProjectDaoRealSqlTest extends AbstractTest
         self::assertSame(ProjectStatus::STATUS_DONE, $this->dao->findById($p['id'])->status_analysis);
     }
 
+    public function testChangeProjectStatusIfNotDoneWritesWhenNotDone(): void
+    {
+        $p = $this->project(['status_analysis' => ProjectStatus::STATUS_NEW]);
+
+        $affected = $this->dao->changeProjectStatusIfNotDone($p['id'], ProjectStatus::STATUS_FAST_OK);
+
+        self::assertSame(1, $affected);
+        self::assertSame(ProjectStatus::STATUS_FAST_OK, $this->dao->findById($p['id'])->status_analysis);
+    }
+
+    public function testChangeProjectStatusIfNotDoneNeverOverwritesDone(): void
+    {
+        // The atomic guard: a concurrent TM-worker completion sets DONE; a late FAST_OK/BUSY write
+        // from the fast daemon must NOT overwrite it. 0 affected rows signals the skip.
+        $p = $this->project(['status_analysis' => ProjectStatus::STATUS_DONE]);
+
+        $affected = $this->dao->changeProjectStatusIfNotDone($p['id'], ProjectStatus::STATUS_FAST_OK);
+
+        self::assertSame(0, $affected, 'must not overwrite a DONE project');
+        self::assertSame(ProjectStatus::STATUS_DONE, $this->dao->findById($p['id'])->status_analysis);
+    }
+
     public function testUpdateAnalysisStatus(): void
     {
         $p = $this->project(['status_analysis' => ProjectStatus::STATUS_NEW]);

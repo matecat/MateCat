@@ -157,7 +157,7 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
      *
      * @throws Exception on Predis connection error
      */
-    public function incrementAnalyzedCount(int $pid, int $idSegment, float $eqWc, float $stWc): void
+    public function incrementAnalyzedCount(int $pid, int $idSegment, int $idJob, float $eqWc, float $stWc): void
     {
         static $script = <<<'LUA'
             if redis.call('SADD', KEYS[1], ARGV[1]) == 1 then
@@ -179,7 +179,7 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
             RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid,     // KEYS[2] analyzed counter
             RedisKeys::PROJ_EQ_WORD_COUNT . $pid,            // KEYS[3] equivalent word count
             RedisKeys::PROJ_ST_WORD_COUNT . $pid,            // KEYS[4] standard word count
-            (string)$idSegment,                              // ARGV[1]
+            $idSegment . ':' . $idJob,                       // ARGV[1] dedup member: one unit per (segment, job)
             '1',                                             // ARGV[2] analyzed delta
             (string)(int)($eqWc * RedisKeys::WORD_COUNT_SCALE), // ARGV[3]
             (string)(int)($stWc * RedisKeys::WORD_COUNT_SCALE), // ARGV[4]

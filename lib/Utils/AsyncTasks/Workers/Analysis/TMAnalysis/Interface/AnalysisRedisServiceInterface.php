@@ -40,7 +40,7 @@ interface AnalysisRedisServiceInterface
      */
     public function waitForInitialization(int $pid, int $maxWaitMs = 5000): bool;
 
-    public function incrementAnalyzedCount(int $pid, int $idSegment, float $eqWc, float $stWc): void;
+    public function incrementAnalyzedCount(int $pid, int $idSegment, int $idJob, float $eqWc, float $stWc): void;
 
     public function setProjectAnalyzedCountTTL(int $pid, int $ttlSeconds = 86400): void;
 
