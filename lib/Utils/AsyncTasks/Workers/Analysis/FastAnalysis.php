@@ -580,8 +580,15 @@ class FastAnalysis extends AbstractDaemon
                     // processing this project (malformed MyMemory payload, metadata parse,
                     // status write, cache purge, ...) must not escape and kill the daemon,
                     // which would strand every project locked in this batch as BUSY. Recover
-                    // just this one and carry on with the next.
-                    $this->_recoverFromUnexpectedFailure($pid, $e);
+                    // just this one and carry on with the next: release it for retry, counted
+                    // unless it is an infrastructure failure — so a transient outage never
+                    // mass-parks healthy projects, while a genuinely poison project still parks
+                    // after MAX_FAST_ANALYSIS_ATTEMPTS.
+                    $this->logger->error(
+                        "Unexpected failure while processing fast analysis for pid $pid: "
+                        . $e->getMessage() . "\n" . $e->getTraceAsString()
+                    );
+                    $this->_releaseFailedProject($pid, $e->getMessage(), !$this->_isInfrastructureFailure($e));
                 }
             }
         } while ($this->RUNNING);
@@ -829,34 +836,6 @@ class FastAnalysis extends AbstractDaemon
 
         // release the processing lock in both branches so the next cycle can re-pick it
         $redis->del([self::PROCESSING_LOCK_KEY_PREFIX . $pid]);
-    }
-
-    /**
-     * Last-resort recovery for an *unexpected* Throwable raised while processing a single project
-     * (a malformed MyMemory payload, a metadata parse fault, a status write or cache purge blowing
-     * up, ...). Without this net an Error/TypeError would escape main()'s per-project handling,
-     * kill the daemon, and strand every project locked in the current batch as BUSY — the picker
-     * only takes NEW rows and the _fPid lock blocks re-pickup for its full 24h TTL.
-     *
-     * The project is released for a later retry; infrastructure failures do not count toward the
-     * park cap (see _releaseFailedProject), so a transient outage never mass-parks healthy projects
-     * while a genuinely poison project still parks after MAX_FAST_ANALYSIS_ATTEMPTS.
-     *
-     * @param int $pid The project being processed when the failure occurred.
-     * @param Throwable $e The unexpected failure.
-     *
-     * @return void
-     * @throws ReflectionException
-     * @throws Throwable
-     */
-    private function _recoverFromUnexpectedFailure(int $pid, Throwable $e): void
-    {
-        $this->logger->error(
-            "Unexpected failure while processing fast analysis for pid $pid: "
-            . $e->getMessage() . "\n" . $e->getTraceAsString()
-        );
-
-        $this->_releaseFailedProject($pid, $e->getMessage(), !$this->_isInfrastructureFailure($e));
     }
 
     /**
