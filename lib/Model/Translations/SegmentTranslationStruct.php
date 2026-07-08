@@ -9,6 +9,7 @@ use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\IDaoStruct;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Throwable;
 use Utils\Constants\TranslationStatus;
 
 /**
@@ -70,6 +71,7 @@ class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoSt
     /**
      * @param JobDao $jobDao
      * @return JobStruct|null
+     * @throws Throwable
      */
     public function getJob(JobDao $jobDao): ?JobStruct
     {
