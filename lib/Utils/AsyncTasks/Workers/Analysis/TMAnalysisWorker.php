@@ -203,7 +203,9 @@ class TMAnalysisWorker extends AbstractWorker
             $tmData['tm_analysis_status'] = 'DONE';
             $tmData['warning'] = (int)($postProcessed['warning'] ?? 0);
             $tmData['serialized_errors_list'] = $postProcessed['serialized_errors_list'] ?? '';
-            $tmData['mt_qe'] = $bestMatch['score'] ?? null;
+            // mt_qe is a NOT NULL DEFAULT 0 column; default to 0 (no MT score) so the
+            // UPDATE never binds null and MySQL/ProxySQL cannot raise 1048.
+            $tmData['mt_qe'] = $bestMatch['score'] ?? 0;
 
             $tmData['suggestion_source'] = $bestMatch['created_by'] ?? null;
             if (!empty($tmData['suggestion_source'])) {
