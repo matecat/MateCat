@@ -76,6 +76,99 @@ class FastAnalysis extends AbstractDaemon
     }
 
     /**
+     * Factory seam for the daemon's AMQ handler. Uses a private (non-shared) connection via
+     * getNewInstanceForDaemons() so it can be fully replaced on failure and is unaffected by
+     * WorkerClient's static-connection close(). Construction is I/O-free (STOMP connects
+     * lazily on first send). Overridable in tests.
+     *
+     * @throws ConnectionException
+     */
+    protected function _newQueueHandler(): AMQHandler
+    {
+        return AMQHandler::getNewInstanceForDaemons();
+    }
+
+    /**
+     * Discard the current AMQ handler and build a fresh one. A zombified Stomp\Client can never
+     * self-heal: a single failed connect leaves Client::$isConnecting stuck true, so sendFrame()
+     * never reconnects and every send throws "Not connected to any server". A brand-new handler
+     * gives a fresh Client AND a fresh Connection, escaping both the stuck flag and the dead
+     * socket, so the daemon recovers automatically once the broker is reachable again.
+     *
+     * @throws ConnectionException
+     * @throws LogInvalidArgumentException
+     */
+    private function _rebuildQueueHandler(): void
+    {
+        try {
+            $this->queueHandler?->close();
+        } catch (Throwable $e) {
+            // ignore: the whole point is to throw this unhealthy handler away
+            $this->logger->debug("Discarding unhealthy AMQ handler: " . $e->getMessage());
+        }
+
+        $this->queueHandler = $this->_newQueueHandler();
+        $this->logger->error("AMQ handler rebuilt after a queue connection failure.");
+    }
+
+    /**
+     * Classify a failure as infrastructure/transient versus a data/statement error.
+     *
+     * Infrastructure/transient (broker unreachable, DB gone away / cannot connect, deadlock,
+     * lock-wait timeout, too many connections) should be retried WITHOUT counting toward the
+     * per-project park cap, so a transient outage never mass-parks healthy projects. A
+     * data/statement error (duplicate key, null in a NOT NULL column, syntax error, missing
+     * table) is deterministic "poison" and MUST count, so the project is eventually parked as
+     * NOT_TO_ANALYZE instead of looping forever.
+     *
+     * Differentiation uses PDOException::$errorInfo = [SQLSTATE, driverCode, message]: SQLSTATE
+     * class 08 (connection exception) plus a set of MySQL driver codes for an unreachable/gone
+     * or contended server. Any other PDOException is treated as a statement error.
+     */
+    private function _isInfrastructureFailure(Throwable $e): bool
+    {
+        $previous = $e->getPrevious();
+
+        // ActiveMQ broker unreachable
+        if ($e instanceof ConnectionException || $previous instanceof ConnectionException) {
+            return true;
+        }
+
+        $pdo = null;
+        if ($e instanceof PDOException) {
+            $pdo = $e;
+        } elseif ($previous instanceof PDOException) {
+            $pdo = $previous;
+        }
+        if ($pdo === null) {
+            return false;
+        }
+
+        $errorInfo  = $pdo->errorInfo ?? [];
+        $sqlState   = (string)($errorInfo[0] ?? $pdo->getCode());
+        $driverCode = $errorInfo[1] ?? null;
+
+        // SQLSTATE class 08 = connection exception (link failure / server unreachable)
+        if (str_starts_with($sqlState, '08')) {
+            return true;
+        }
+
+        // MySQL driver codes for an unreachable / gone / contended server — transient, retry.
+        // NOT data/statement errors (1062 dup key, 1048 null, 1064 syntax, 1146 no table, ...).
+        return in_array($driverCode, [
+            2002, // CR_CONNECTION_ERROR    — cannot connect (socket)
+            2003, // CR_CONN_HOST_ERROR     — cannot connect (host)
+            2006, // CR_SERVER_GONE_ERROR   — server gone away
+            2013, // CR_SERVER_LOST         — lost connection during query
+            2055, // CR_SERVER_LOST_EXTENDED
+            1040, // ER_CON_COUNT_ERROR     — too many connections
+            1053, // ER_SERVER_SHUTDOWN
+            1205, // ER_LOCK_WAIT_TIMEOUT   — transient contention
+            1213, // ER_LOCK_DEADLOCK       — transient contention
+        ], true);
+    }
+
+    /**
      * @var array<int|string, array<string, mixed>>
      */
     protected array $segments;
@@ -194,7 +287,9 @@ class FastAnalysis extends AbstractDaemon
         LoggerFactory::setAliases(['engines'], $this->logger);
 
         try {
-            $this->queueHandler = new AMQHandler(null, true, false);
+            // Own a private (non-shared) connection so it can be fully rebuilt on failure and
+            // is not torn down by WorkerClient's static-connection close(). See _rebuildQueueHandler().
+            $this->queueHandler = $this->_newQueueHandler();
             $this->requireQueueHandler()->getRedisClient()->sadd(RedisKeys::FAST_PID_SET, [$this->myProcessPid . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID]);
 
             $this->_updateConfiguration();
@@ -319,9 +414,12 @@ class FastAnalysis extends AbstractDaemon
 
                 $projectStruct = new ProjectStruct();
 
-                // Infrastructure failures (broker unreachable) must not count toward the
-                // per-project attempt cap, so a transient outage does not mass-park projects.
-                $insertFailureIsInfra = false;
+                // Infrastructure/transient failures (broker or DB unreachable, deadlock, ...)
+                // must not count toward the per-project attempt cap, so an outage does not
+                // mass-park projects. A broker-connection failure additionally needs the STOMP
+                // handler rebuilt (the client zombifies); a DB failure does not.
+                $insertFailureIsInfra  = false;
+                $insertFailureIsBroker = false;
 
                 try {
                     /**
@@ -386,8 +484,11 @@ class FastAnalysis extends AbstractDaemon
                     );
                 } catch (Throwable $e) {
                     $insertReportRes = -1;
-                    // A queue-connection failure is infrastructure, not a poison project.
-                    $insertFailureIsInfra = $e instanceof ConnectionException
+                    // Transient infrastructure (broker/DB unreachable, deadlock) vs poison data
+                    // (dup key, null, syntax) — only the former is retried without counting.
+                    $insertFailureIsInfra  = $this->_isInfrastructureFailure($e);
+                    // Only a broker-connection failure zombifies the Stomp client and needs a rebuild.
+                    $insertFailureIsBroker = $e instanceof ConnectionException
                         || $e->getPrevious() instanceof ConnectionException;
                     $this->logger->debug($e->getMessage() . " " . $e->getTraceAsString());
                 }
@@ -397,7 +498,17 @@ class FastAnalysis extends AbstractDaemon
                     // cycle instead of being stranded. On retry _insertFastAnalysis re-queues
                     // only the not-yet-analyzed segments (see _getAlreadyAnalyzedSegments).
                     $this->logger->debug("InsertFastAnalysis failed for pid $pid. Releasing for retry.");
+                    // $insertFailureIsInfra indicates if the failure was caused by infrastructure issues (e.g. broker unreachable).
+                    // It is used to decide whether to increment the failure counter: infra failures don't count toward the limit.
                     $this->_releaseFailedProject($pid, 'insert/publish failed', !$insertFailureIsInfra);
+                    // A broker-connection failure zombifies the Stomp client for the life of the
+                    // process; rebuild it (the Redis ops above use a separate connection and still
+                    // work) so this cycle's remaining projects — and the released one on its retry —
+                    // use a healthy handler instead of a permanently stuck one. A DB failure does
+                    // not touch the Stomp client, so it must not trigger a rebuild.
+                    if ($insertFailureIsBroker) {
+                        $this->_rebuildQueueHandler();
+                    }
                     continue;
                 }
 
@@ -554,6 +665,12 @@ class FastAnalysis extends AbstractDaemon
      * failures (e.g. the broker being unreachable) pass $countTowardCap = false and do NOT
      * increment the counter, so a transient outage never mass-parks healthy projects.
      *
+     * @param int $pid The project ID of the failed project.
+     * @param string $reason The reason for the failure.
+     * @param bool $countTowardCap Whether to increment the failure attempts counter for the project. Default is true.
+     *
+     * @return void
+     * @throws ReflectionException
      * @throws Throwable
      */
     private function _releaseFailedProject(int $pid, string $reason, bool $countTowardCap = true): void

@@ -9,9 +9,13 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use PDO;
 use PDOStatement;
+use PDOException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\Client as PredisClient;
 use ReflectionClass;
+use RuntimeException;
+use Stomp\Exception\ConnectionException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\FastAnalysis;
 use Utils\Constants\ProjectStatus;
@@ -395,6 +399,123 @@ class FastAnalysisTest extends AbstractTest
         $this->assertDoesNotMatchRegularExpression('/locked/i', $normalized, 'locked segments belong in the .ser; must not be filtered out');
         $this->assertDoesNotMatchRegularExpression('/ICE/i', $normalized, 'ICE segments belong in the .ser; must not be filtered out');
     }
+
+    /**
+     * @return array<string, array{0: PDOException, 1: bool}>
+     */
+    public static function pdoFailureClassification(): array
+    {
+        $mk = static function (string $sqlState, ?int $driverCode): PDOException {
+            $e            = new PDOException('db error');
+            $e->errorInfo = [$sqlState, $driverCode, 'driver message'];
+
+            return $e;
+        };
+
+        return [
+            // connection / transient → infrastructure (retry, do not count toward the park cap)
+            'server gone away (2006)'    => [$mk('HY000', 2006), true],
+            'lost connection (2013)'     => [$mk('HY000', 2013), true],
+            'cannot connect (2002)'      => [$mk('HY000', 2002), true],
+            'SQLSTATE class 08'          => [$mk('08S01', null), true],
+            'too many connections (1040)' => [$mk('HY000', 1040), true],
+            'deadlock (1213)'            => [$mk('40001', 1213), true],
+            'lock wait timeout (1205)'   => [$mk('HY000', 1205), true],
+            // data / statement errors → poison (count toward the cap, do NOT retry forever)
+            'duplicate key (1062)'       => [$mk('23000', 1062), false],
+            'null in NOT NULL col (1048)' => [$mk('23000', 1048), false],
+            'syntax error (1064)'        => [$mk('42000', 1064), false],
+            'table missing (1146)'       => [$mk('42S02', 1146), false],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('pdoFailureClassification')]
+    public function isInfrastructureFailureClassifiesPdoErrors(PDOException $e, bool $expected): void
+    {
+        // Differentiate "database unreachable / transient" (retry) from "statement error"
+        // (poison data) via SQLSTATE class + MySQL driver code in PDOException::$errorInfo.
+        $daemon = $this->daemonWithDb($this->createStub(IDatabase::class));
+
+        $this->assertSame($expected, $this->invoke($daemon, '_isInfrastructureFailure', $e));
+    }
+
+    #[Test]
+    public function isInfrastructureFailureTrueForStompConnectionException(): void
+    {
+        $daemon = $this->daemonWithDb($this->createStub(IDatabase::class));
+
+        $this->assertTrue($this->invoke($daemon, '_isInfrastructureFailure', new ConnectionException('broker down')));
+        // also when wrapped as a previous exception
+        $wrapped = new RuntimeException('publish failed', 0, new ConnectionException('broker down'));
+        $this->assertTrue($this->invoke($daemon, '_isInfrastructureFailure', $wrapped));
+    }
+
+    #[Test]
+    public function isInfrastructureFailureFalseForGenericError(): void
+    {
+        $daemon = $this->daemonWithDb($this->createStub(IDatabase::class));
+
+        $this->assertFalse($this->invoke($daemon, '_isInfrastructureFailure', new RuntimeException('boom')));
+    }
+
+    /**
+     * Build a probe subclass (via reflection, no constructor) that overrides the
+     * _newQueueHandler() seam so the real broker-connecting factory is never called.
+     */
+    private function rebuildProbe(): FastAnalysisRebuildProbe
+    {
+        $probe = (new ReflectionClass(FastAnalysisRebuildProbe::class))->newInstanceWithoutConstructor();
+        // seed the typed logger property (declared on FastAnalysis) so _rebuildQueueHandler can log
+        (new ReflectionClass(FastAnalysis::class))->getProperty('logger')->setValue($probe, $this->createStub(MatecatLogger::class));
+
+        return $probe;
+    }
+
+    #[Test]
+    public function rebuildQueueHandlerReplacesHandlerAndClosesOld(): void
+    {
+        // U2: a zombified Stomp client can never self-heal; rebuilding swaps in a fresh handler
+        // (fresh client + connection) and disposes the old one.
+        $probe = $this->rebuildProbe();
+
+        $old = $this->createMock(AMQHandler::class);
+        $old->expects($this->once())->method('close');
+        $this->setProp($probe, 'queueHandler', $old);
+
+        $fresh                 = $this->createStub(AMQHandler::class);
+        $probe->newHandlerStub = $fresh;
+
+        $this->invoke($probe, '_rebuildQueueHandler');
+
+        $current = (new ReflectionClass(FastAnalysis::class))->getProperty('queueHandler')->getValue($probe);
+        $this->assertSame($fresh, $current);
+    }
+
+    #[Test]
+    public function rebuildQueueHandlerSwallowsFailingCloseAndStillReplaces(): void
+    {
+        // U2: the whole point of a rebuild is to discard an unhealthy handler, so a throwing
+        // close() (dead socket) must not abort the swap.
+        $probe = $this->rebuildProbe();
+
+        // stub __destruct too, so the throwing close() fires only for the in-method call and
+        // not again when the mock is garbage-collected at shutdown
+        $old = $this->getMockBuilder(AMQHandler::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['close', '__destruct'])
+            ->getMock();
+        $old->expects($this->once())->method('close')->willThrowException(new RuntimeException('socket dead'));
+        $this->setProp($probe, 'queueHandler', $old);
+
+        $fresh                 = $this->createStub(AMQHandler::class);
+        $probe->newHandlerStub = $fresh;
+
+        $this->invoke($probe, '_rebuildQueueHandler'); // must not throw
+
+        $current = (new ReflectionClass(FastAnalysis::class))->getProperty('queueHandler')->getValue($probe);
+        $this->assertSame($fresh, $current);
+    }
 }
 
 /**
@@ -440,5 +561,19 @@ class FastAnalysisFakeRedis extends PredisClient
         $this->calls[] = ['del', $keys];
 
         return 1;
+    }
+}
+
+/**
+ * Probe subclass that overrides the _newQueueHandler() seam so _rebuildQueueHandler can be
+ * unit-tested without the real broker-connecting factory (AMQHandler::getNewInstanceForDaemons).
+ */
+class FastAnalysisRebuildProbe extends FastAnalysis
+{
+    public ?AMQHandler $newHandlerStub = null;
+
+    protected function _newQueueHandler(): AMQHandler
+    {
+        return $this->newHandlerStub;
     }
 }
