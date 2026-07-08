@@ -1147,7 +1147,7 @@ class FastAnalysis extends AbstractDaemon
                 $queue_element['context_after'] = $this->segments[$k + 1]['segment'] ?? null;
 
                 $jsid = explode("-", $queue_element['jsid']); // 749-49:7acfb82b8168,50:47c70434fe78,51:f3f5551e9c4f
-                $passwordMap = explode(",", $jsid[1]);
+                $passwordMap = $this->_mapJobPasswords($jsid[1]); // id_job => password (see R4 below)
 
                 /**
                  * remove some unuseful fields
@@ -1162,9 +1162,12 @@ class FastAnalysis extends AbstractDaemon
                     $languages_job = explode(",", $queue_element['target']);  //now target holds more than one language ex: ( 80415:fr-FR,80416:it-IT )
                     //in memory replacement avoid duplication of the segment list
                     //send in queue every element * number of languages
-                    foreach ($languages_job as $index => $_language) {
-                        [$id_job, $language] = explode(":", $_language);
-                        [, $password] = explode(":", $passwordMap[$index]);
+                    foreach ($languages_job as $_language) {
+                        [$id_job, $language] = explode(":", $_language, 2);
+                        // R4: resolve the password BY job id, not by array position. `jsid` and
+                        // `target` are two DISTINCT GROUP_CONCATs with no guaranteed matching row
+                        // order, so positional pairing could assign a job another job's password.
+                        $password = $passwordMap[$id_job];
 
                         $queue_element['password'] = $password;
                         $queue_element['target'] = $language;
@@ -1271,6 +1274,27 @@ class FastAnalysis extends AbstractDaemon
     }
 
     /**
+     * Parse the `jsid` column's "id_job:password,id_job:password,..." payload into a map keyed by
+     * job id, so the password is resolved by id rather than by array position. The `jsid` and
+     * `target` columns are two independent GROUP_CONCAT(DISTINCT ...) with no guaranteed matching
+     * row order, so pairing them positionally could hand a job another job's password (R4).
+     *
+     * @param string $jobPasswordCsv e.g. "49:passA,50:passB,51:passC"
+     *
+     * @return array<string, string> id_job => password
+     */
+    private function _mapJobPasswords(string $jobPasswordCsv): array
+    {
+        $map = [];
+        foreach (explode(",", $jobPasswordCsv) as $entry) {
+            [$idJob, $password] = explode(":", $entry, 2);
+            $map[$idJob] = $password;
+        }
+
+        return $map;
+    }
+
+    /**
      * @param int $pid
      *
      * @return array<int, array<string, mixed>>
@@ -1305,7 +1329,13 @@ HD;
 
         $db = $this->db();
         try {
-            $stmt = $db->getConnection()->prepare($query);
+            $connection = $db->getConnection();
+            // The payable_rates JSON + the password/target concats can exceed MySQL's default
+            // group_concat_max_len (1024 bytes) on multi-job / multi-language projects. A silent
+            // truncation yields invalid JSON (json_decode → null → array_map(null) TypeError) and a
+            // misparsed password/target map, so raise the session limit (64 MB) before the query (D1).
+            $connection->exec("SET SESSION group_concat_max_len = 67108864");
+            $stmt = $connection->prepare($query);
             $stmt->setFetchMode(PDO::FETCH_ASSOC);
             $stmt->execute([$pid]);
             $results = $stmt->fetchAll();

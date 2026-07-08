@@ -364,6 +364,58 @@ class FastAnalysisTest extends AbstractTest
         $this->assertDoesNotMatchRegularExpression('/ICE/i', $normalized, 'ICE segments belong in the .ser; must not be filtered out');
     }
 
+    #[Test]
+    public function mapJobPasswordsKeysPasswordByJobIdNotByPosition(): void
+    {
+        // R4: the `jsid` and `target` GROUP_CONCAT(DISTINCT ...) columns share no guaranteed row
+        // order, so the password must be resolved by job id — never by array position, which could
+        // hand a job another job's password.
+        $daemon = $this->daemonWithDb($this->createStub(IDatabase::class));
+
+        $map = $this->invoke($daemon, '_mapJobPasswords', '49:passA,50:passB,51:passC');
+
+        $this->assertSame(['49' => 'passA', '50' => 'passB', '51' => 'passC'], $map);
+        // resolving by id yields the right password regardless of the concat's emitted order
+        $this->assertSame('passB', $map['50']);
+    }
+
+    #[Test]
+    public function getSegmentsForFastVolumeAnalysisRaisesGroupConcatMaxLenBeforeQuerying(): void
+    {
+        // D1: the payable_rates JSON + password/target concats can exceed MySQL's default
+        // group_concat_max_len (1024 B) on multi-job/multi-language projects; a silent truncation
+        // yields invalid JSON (json_decode → null → array_map TypeError). Raise the session limit,
+        // and do it before the SELECT is prepared.
+        $calls = [];
+
+        $stmt = $this->createStub(PDOStatement::class);
+        $stmt->method('setFetchMode')->willReturn(true);
+        $stmt->method('execute')->willReturn(true);
+        $stmt->method('fetchAll')->willReturn([]);
+
+        $pdo = $this->createStub(PDO::class);
+        $pdo->method('exec')->willReturnCallback(function (string $sql) use (&$calls) {
+            $calls[] = ['exec', $sql];
+
+            return 0;
+        });
+        $pdo->method('prepare')->willReturnCallback(function (string $sql) use (&$calls, $stmt) {
+            $calls[] = ['prepare', $sql];
+
+            return $stmt;
+        });
+
+        $injected = $this->createStub(IDatabase::class);
+        $injected->method('getConnection')->willReturn($pdo);
+
+        $this->invoke($this->daemonWithDb($injected), '_getSegmentsForFastVolumeAnalysis', 7);
+
+        $this->assertNotEmpty($calls);
+        $this->assertSame('exec', $calls[0][0], 'group_concat_max_len must be raised before the SELECT is prepared');
+        $this->assertMatchesRegularExpression('/SET\s+SESSION\s+group_concat_max_len\s*=\s*67108864/i', $calls[0][1]);
+        $this->assertSame('prepare', $calls[1][0]);
+    }
+
     /**
      * @return array<string, array{0: PDOException, 1: bool}>
      */
