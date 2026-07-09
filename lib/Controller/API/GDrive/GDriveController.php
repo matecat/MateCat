@@ -9,6 +9,8 @@ use Controller\Exceptions\RenderTerminatedException;
 use Exception;
 use Google_Service_Exception;
 use InvalidArgumentException;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Matecat\Locales\InvalidLanguageException;
 use Matecat\Locales\Languages;
 use Model\ConnectedServices\GDrive\Session;
@@ -233,6 +235,10 @@ class GDriveController extends AbstractStatefulKleinController
         return $rawMessage;
     }
 
+    /**
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
+     */
     private function finalize(): void
     {
         if ($this->isAsyncReq) {
@@ -286,6 +292,10 @@ class GDriveController extends AbstractStatefulKleinController
         die();
     }
 
+    /**
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
+     */
     private function doResponse(): void
     {
         $this->response->json([

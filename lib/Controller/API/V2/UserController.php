@@ -8,6 +8,8 @@ use Controller\API\Commons\Validators\JSONRequestValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\Users\MetadataDao;
 use Model\Users\UserDao;
 use TypeError;
@@ -24,6 +26,8 @@ class UserController extends AbstractStatefulKleinController
     /**
      * Edit the user profile
      *
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      * @throws TypeError
      */
     public function edit(): void
@@ -89,6 +93,8 @@ class UserController extends AbstractStatefulKleinController
     /**
      * @return void
      * @throws InvalidArgumentException
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function setMetadata(): void
     {

@@ -86,6 +86,34 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('MacOSX', $result['platform']);
     }
 
+    /**
+     * Guards version extraction in getBrowser(): when the UA matches, the
+     * regex always yields at least one group, so $matches['version'][0] is
+     * always set. The value must be the parsed version string and never null
+     * (a redundant `?? null` was removed from that access).
+     */
+    #[Test]
+    public function testGetBrowserExtractsExactVersion(): void
+    {
+        $chromeAgent  = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
+        $safariAgent  = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15';
+        $firefoxAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0';
+
+        $chrome  = Utils::getBrowser($chromeAgent);
+        $safari  = Utils::getBrowser($safariAgent);
+        $firefox = Utils::getBrowser($firefoxAgent);
+
+        // Single-match branch: version comes from the sole matched group.
+        $this->assertNotNull($chrome['version']);
+        $this->assertSame('91.0.4472.124', $chrome['version']);
+        $this->assertNotNull($firefox['version']);
+        $this->assertSame('89.0', $firefox['version']);
+
+        // "Version/… Safari/…" branch: version comes from the first match.
+        $this->assertNotNull($safari['version']);
+        $this->assertSame('14.1.1', $safari['version']);
+    }
+
     #[Test]
     public function testGetBrowserDetectsMobileSafari(): void
     {

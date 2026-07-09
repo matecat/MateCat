@@ -13,6 +13,8 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Request;
 use Model\Conversion\Upload;
 use Model\Conversion\UploadElement;
@@ -231,6 +233,8 @@ class GlossaryFilesController extends KleinController
 
     /**
      * @param array<string, mixed> $data
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     protected function setSuccessResponse(int $code = 200, array $data = []): void
     {
