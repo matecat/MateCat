@@ -16,18 +16,26 @@ use Controller\Traits\RateLimiterTrait;
 use Exception;
 use Klein\Response;
 use Model\Exceptions\NotFoundException;
+use Model\Jobs\JobStruct;
 use Model\Segments\SegmentDisabledService;
 use Model\Segments\SegmentMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Teams\TeamDao;
 use Model\Translations\SegmentTranslationDao;
+use Stomp\Exception\ConnectionException;
+use Stomp\Transport\Message;
+use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\TranslationStatus;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 class CancelRequestController extends KleinController
 {
     use RateLimiterTrait;
     use ChunkNotFoundHandlerTrait;
+
+    private const string SEGMENT_DISABLED_TYPE = 'segment_disabled';
+    private const string SEGMENT_ENABLED_TYPE = 'segment_enabled';
 
     protected SegmentDisabledService $segmentDisabledService;
     protected SegmentTranslationDao $segmentTranslationDao;
@@ -62,14 +70,17 @@ class CancelRequestController extends KleinController
 
         $route = '/api/v3/jobs/' . $id_job . '/segment/enable/' . $id_segment;
 
-        $this->performChecks($id_job, $password, $id_segment, $route);
+        $job = $this->performChecks($id_job, $password, $id_segment, $route);
 
         if ($this->response->code() === 429) {
             return;
         }
 
+        assert($job !== null);
+
         if ($this->segmentDisabledService->isDisabled($id_segment)) {
             $this->segmentDisabledService->enable($id_segment);
+            $this->publishSegmentStateChange($job, $id_job, $id_segment, false);
         }
 
         $this->response->json([
@@ -94,14 +105,17 @@ class CancelRequestController extends KleinController
 
         $route = '/api/v3/jobs/' . $id_job . '/segment/disable/' . $id_segment;
 
-        $this->performChecks($id_job, $password, $id_segment, $route);
+        $job = $this->performChecks($id_job, $password, $id_segment, $route);
 
         if ($this->response->code() === 429) {
             return;
         }
 
+        assert($job !== null);
+
         if (!$this->segmentDisabledService->isDisabled($id_segment)) {
             $this->segmentDisabledService->disable($id_segment);
+            $this->publishSegmentStateChange($job, $id_job, $id_segment, true);
         }
 
         $this->response->json([
@@ -120,7 +134,7 @@ class CancelRequestController extends KleinController
      * @throws NotFoundException If the job or segment is not found.
      * @throws Exception If the user is not the owner or part of the team, or if the segment status is not "new".
      */
-    private function performChecks(int $id_job, string $password, int $id_segment, string $route): void
+    private function performChecks(int $id_job, string $password, int $id_segment, string $route): ?JobStruct
     {
         $userEmail = $this->user->email ?? "BLANK_EMAIL";
         $userIp = Utils::getRealIpAddr() ?? "127.0.0.1";
@@ -130,7 +144,7 @@ class CancelRequestController extends KleinController
             $rateLimitResponse = $this->checkAndIncrementRateLimit($this->response, $identifier, $route, 5);
             if ($rateLimitResponse instanceof Response) {
                 $this->response = $rateLimitResponse;
-                return;
+                return null;
             }
         }
 
@@ -163,6 +177,45 @@ class CancelRequestController extends KleinController
         if ($segmentTranslation->status !== TranslationStatus::STATUS_NEW) {
             throw new ConflictError('Segment is not in "new" status and cannot be disabled');
         }
+
+        return $job;
+    }
+
+    /**
+     * Publishes a segment enable/disable state change to the project-scoped Socket.IO room so
+     * every open browser tab for the project can live-patch its segment state without a
+     * page refresh.
+     *
+     * @throws ConnectionException
+     */
+    private function publishSegmentStateChange(JobStruct $job, int $id_job, int $id_segment, bool $disabled): void
+    {
+        $message = (string)json_encode([
+            '_type' => $disabled ? self::SEGMENT_DISABLED_TYPE : self::SEGMENT_ENABLED_TYPE,
+            'data'  => [
+                'id_project' => $job->id_project,
+                'payload'    => [
+                    'id_segment' => $id_segment,
+                    'id_job'     => $id_job,
+                    'id_project' => $job->id_project,
+                    'disabled'   => $disabled,
+                ],
+            ],
+        ]);
+
+        $queueHandler = $this->getQueueHandler();
+        $queueHandler->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message));
+    }
+
+    /**
+     * Test seam: allows a Testable subclass to inject a queue handler backed by a
+     * stubbed transport, avoiding a real broker connection in unit tests.
+     *
+     * @throws ConnectionException
+     */
+    protected function getQueueHandler(): AMQHandler
+    {
+        return new AMQHandler();
     }
 
 }

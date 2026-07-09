@@ -129,6 +129,7 @@ jest.mock('../utils/speech2text', () => ({
 import SegmentActions from './SegmentActions'
 import SegmentUtils from '../utils/segmentUtils'
 import ModalsActions from './ModalsActions'
+import AppDispatcher from '../stores/AppDispatcher'
 
 describe('SegmentActions.handleClickOnReadOnly', () => {
   beforeEach(() => {
@@ -217,5 +218,33 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
       }),
       'Segment disabled',
     )
+  })
+})
+
+describe('SegmentActions.updateSegmentDisabledState', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  test('dispatches SET_SEGMENT_DISABLED with disabled=true', () => {
+    SegmentActions.updateSegmentDisabledState(42, true)
+
+    expect(AppDispatcher.dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({id: 42, disabled: true}),
+    )
+  })
+
+  test('dispatches SET_SEGMENT_DISABLED with disabled=false', () => {
+    SegmentActions.updateSegmentDisabledState(42, false)
+
+    expect(AppDispatcher.dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({id: 42, disabled: false}),
+    )
+  })
+
+  test('does not dispatch when sid is falsy', () => {
+    SegmentActions.updateSegmentDisabledState(null, true)
+
+    expect(AppDispatcher.dispatch).not.toHaveBeenCalled()
   })
 })

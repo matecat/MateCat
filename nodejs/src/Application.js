@@ -62,6 +62,9 @@ const createAuthMiddleware = (authSecretKey, log) => {
           if (auth['x-jobid']) {
             socket.jobId = auth['x-jobid'].toString();
           }
+          if (auth['x-projectid']) {
+            socket.projectId = auth['x-projectid'].toString();
+          }
           next();
         },
     );
@@ -127,11 +130,15 @@ module.exports.Application = class {
       if (socket.jobId) {
         socket.join(socket.jobId);
       }
+      if (socket.projectId) {
+        socket.join(socket.projectId);
+      }
 
       this.logger.debug('JOINED USER:', {
         'user_id': socket.user_id,
         'uuid': socket.uuid,
         'jobId': socket.jobId,
+        'projectId': socket.projectId,
       });
 
       this.logger.debug({

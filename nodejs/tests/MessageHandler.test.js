@@ -83,6 +83,42 @@ describe('MessageHandler.onReceive', () => {
     expect(app.sendRoomNotifications).not.toHaveBeenCalled();
   });
 
+  test('routes segment_disabled to id_project room', () => {
+    handler.onReceive({
+      _type: 'segment_disabled',
+      data: {id_project: 55, payload: {id_segment: 7, id_job: 99, disabled: true}},
+    });
+    expect(app.sendRoomNotifications).toHaveBeenCalledWith(
+        '55', 'message', {data: {id_segment: 7, id_job: 99, disabled: true, _type: 'segment_disabled'}},
+    );
+  });
+
+  test('routes segment_enabled to id_project room', () => {
+    handler.onReceive({
+      _type: 'segment_enabled',
+      data: {id_project: 55, payload: {id_segment: 7, id_job: 99, disabled: false}},
+    });
+    expect(app.sendRoomNotifications).toHaveBeenCalledWith(
+        '55', 'message', {data: {id_segment: 7, id_job: 99, disabled: false, _type: 'segment_enabled'}},
+    );
+  });
+
+  test('returns early when segment_disabled missing id_project', () => {
+    handler.onReceive({
+      _type: 'segment_disabled',
+      data: {payload: {id_segment: 7}},
+    });
+    expect(app.sendRoomNotifications).not.toHaveBeenCalled();
+  });
+
+  test('returns early when segment_enabled missing id_project', () => {
+    handler.onReceive({
+      _type: 'segment_enabled',
+      data: {payload: {id_segment: 7}},
+    });
+    expect(app.sendRoomNotifications).not.toHaveBeenCalled();
+  });
+
   test('broadcasts GLOBAL_MESSAGES', () => {
     handler.onReceive({
       _type: 'global_messages',
