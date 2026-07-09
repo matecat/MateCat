@@ -2282,6 +2282,47 @@ class UtilsTest extends AbstractTest
         $result = Utils::getBrowser($userAgent);
         $this->assertSame($expectedName, $result['name']);
         $this->assertSame($expectedVersion, $result['version']);
+        // The raw User-Agent must always travel back with the parsed result so a
+        // misidentification is auditable from the logs (Ping / TimeLoggerTrait).
+        $this->assertSame($userAgent, $result['userAgent']);
+    }
+
+    /**
+     * getBrowser() cannot self-detect a confident misidentification: an
+     * unrecognised token silently falls through to another browser branch with a
+     * plausible name/version. The ONLY remedy for the log reader is the raw
+     * User-Agent string, which getBrowser() must return verbatim even when the
+     * parsed name is wrong.
+     *
+     * These agents are known to misidentify on the current parser:
+     *  - iPad Edge (EdgiOS) is reported as Safari because the Edge branch is
+     *    guarded by `platform != 'ipadOS'`.
+     *
+     * @return array<string, array{0: string, 1: string}>
+     */
+    public static function misidentifiedUserAgentProvider(): array
+    {
+        return [
+            // ua, name getBrowser() actually returns (the wrong one)
+            'iPad Edge reported as Safari' => [
+                'Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 EdgiOS/126.0.2592.87 Mobile/15E148 Safari/604.1',
+                'Mobile Safari',
+            ],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('misidentifiedUserAgentProvider')]
+    public function testGetBrowserPreservesRawUserAgentWhenMisidentified(string $userAgent, string $misidentifiedName): void
+    {
+        $result = Utils::getBrowser($userAgent);
+
+        // Document the misidentification: parsed name is NOT the true browser...
+        $this->assertSame($misidentifiedName, $result['name']);
+
+        // ...but the raw User-Agent is preserved verbatim, so the true browser is
+        // recoverable from the log. This is the guard the whole feature rests on.
+        $this->assertSame($userAgent, $result['userAgent']);
     }
 
 }
