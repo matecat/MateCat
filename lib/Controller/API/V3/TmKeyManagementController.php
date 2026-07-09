@@ -5,6 +5,8 @@ namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 
@@ -18,6 +20,9 @@ class TmKeyManagementController extends KleinController
 
     /**
      * Return all the keys of the user
+     *
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function getByUser(): void
     {

@@ -4,6 +4,8 @@ namespace Controller\Traits;
 
 use Controller\Exceptions\RenderTerminatedException;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
@@ -44,6 +46,8 @@ trait ChunkNotFoundHandlerTrait
      * Return 404 if chunk was deleted
      *
      * @throws RenderTerminatedException
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     protected function return404IfTheJobWasDeleted(): void
     {

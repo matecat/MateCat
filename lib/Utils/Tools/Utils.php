@@ -169,10 +169,10 @@ class Utils
             if (strtolower($matches['browser'][0]) == 'version' && strtolower($matches['browser'][1]) != 'safari') {
                 $version = $matches['version'][1] ?? null;
             } else {
-                $version = $matches['version'][0] ?? null;
+                $version = $matches['version'][0];
             }
         } else {
-            $version = $matches['version'][0] ?? null;
+            $version = $matches['version'][0];
         }
 
         // check if we have a number

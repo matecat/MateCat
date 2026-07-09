@@ -7,6 +7,7 @@ use Controller\Exceptions\RenderTerminatedException;
 use Exception;
 use InvalidArgumentException;
 use Klein\App;
+use Klein\Exceptions\LockedResponseException;
 use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Request;
 use Klein\Response;
@@ -186,6 +187,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
      *
      * @return never
      *
+     * @throws LockedResponseException
      * @throws RenderTerminatedException
      * @throws ResponseAlreadySentException
      * @throws \Psr\Log\InvalidArgumentException

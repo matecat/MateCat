@@ -6,6 +6,8 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use TypeError;
@@ -25,6 +27,8 @@ class MyMemoryController extends KleinController
      * Create a MM key and assign to the logged user
      *
      * @throws TypeError
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function create(): void
     {

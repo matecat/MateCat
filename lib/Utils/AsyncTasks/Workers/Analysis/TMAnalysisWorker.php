@@ -287,7 +287,6 @@ class TMAnalysisWorker extends AbstractWorker
 
     /**
      * @param QueueElement $queueElement
-     * @throws EmptyElementException
      * @throws Exception
      */
     protected function _forceSetSegmentAnalyzed(QueueElement $queueElement): void
