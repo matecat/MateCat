@@ -10,9 +10,11 @@ use Model\Engines\Structs\EngineStruct;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionProperty;
 use stdClass;
 use Utils\Engines\NONE;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\Logger\MatecatLogger;
 
 /**
  * Testable subclass that exposes protected AbstractEngine methods
@@ -210,6 +212,28 @@ class AbstractEngineTest extends AbstractTest
     #[Test]
     public function googleTranslateFallbackReturnsGetMemoryResponse(): void
     {
+        $result = $this->engine->exposedGoogleTranslateFallback([
+            'source'     => 'en',
+            'target'     => 'it',
+            'segment'    => 'test segment',
+            'secret_key' => 'invalid-key',
+        ]);
+
+        self::assertInstanceOf(GetMemoryResponse::class, $result);
+    }
+
+    #[Test]
+    public function googleTranslateFallbackLogsTheSwallowedException(): void
+    {
+        // Regression guard: the fallback used to swallow the exception with zero logging,
+        // making a recurring GoogleTranslate failure invisible (report §6.7 / §11 quick win).
+        $logger = $this->createMock(MatecatLogger::class);
+        $logger->expects(self::once())->method('error');
+
+        $loggerProperty = new ReflectionProperty($this->engine, 'logger');
+        $loggerProperty->setAccessible(true);
+        $loggerProperty->setValue($this->engine, $logger);
+
         $result = $this->engine->exposedGoogleTranslateFallback([
             'source'     => 'en',
             'target'     => 'it',

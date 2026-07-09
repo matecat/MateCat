@@ -444,7 +444,8 @@ abstract class AbstractEngine implements EngineInterface
 
             /** @var GoogleTranslate $gtEngine */
             return $gtEngine->get($_config);
-        } catch (Exception) {
+        } catch (Exception $e) {
+            $this->logger->error($e);
             return new GetMemoryResponse(null);
         }
     }
