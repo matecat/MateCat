@@ -129,15 +129,18 @@ class Utils
         } elseif (preg_match('/Trident/i', $u_agent) || preg_match('/IEMobile/i', $u_agent)) {
             $browserName = 'Internet Explorer Mobile';
             $ub = "IEMobile";
-        } elseif (preg_match('/Firefox/i', $u_agent)) {
+        } elseif (preg_match('/Firefox|FxiOS/i', $u_agent)) {
             $browserName = 'Mozilla Firefox';
-            $ub = "Firefox";
-        } elseif (preg_match('/Chrome/i', $u_agent) and !preg_match('/Opera|OPR/i', $u_agent)) {
+            $ub = "Firefox|FxiOS";
+        } elseif (preg_match('/SamsungBrowser/i', $u_agent)) {
+            $browserName = 'Samsung Internet';
+            $ub = "SamsungBrowser";
+        } elseif (preg_match('/Chrome|CriOS/i', $u_agent) and !preg_match('/Opera|OPR/i', $u_agent)) {
             $browserName = 'Google Chrome';
-            $ub = "Chrome";
+            $ub = "Chrome|CriOS";
         } elseif (preg_match('/Opera|OPR/i', $u_agent)) {
             $browserName = 'Opera';
-            $ub = "Opera";
+            $ub = "OPR|Opera";
         } elseif (preg_match('/Safari/i', $u_agent) || preg_match('/applewebkit.*\(.*khtml.*like.*gecko.*\).*mobile.*$/i', $u_agent)) {
             $browserName = 'Apple Safari';
             $ub = "Safari|Version";
