@@ -3,6 +3,7 @@
 namespace Controller\Abstracts;
 
 use Controller\Abstracts\Authentication\CookieManager;
+use Controller\Exceptions\RenderTerminatedException;
 use Exception;
 use Model\Files\FileDao;
 use Model\FilesStorage\AbstractFilesStorage;
@@ -174,8 +175,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
      */
     public function finalize(bool $forceXliff = false): void
     {
-        try {
-            $this->unlockToken();
+        $this->unlockToken();
 
             if (empty($this->project)) {
                 $this->project = $this->getProjectDao()->findByJobId($this->id_job)
@@ -203,15 +203,11 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
                 header("Connection: close");
                 header("Content-Length: " . strlen($this->outputContent));
                 echo $this->outputContent;
+                if (AppConfig::$ENV === 'testing') {
+                    throw new RenderTerminatedException();
+                }
                 exit;
             }
-        } catch (Exception $e) {
-            echo "<pre>";
-            print_r($e);
-            echo "\n\n\n";
-            echo "</pre>";
-            exit;
-        }
     }
 
     /**

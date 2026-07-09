@@ -185,7 +185,8 @@ class MMT extends AbstractEngine
             $response->matches = [$match];
 
             return $response;
-        } catch (Exception) {
+        } catch (Exception $e) {
+            $this->logger->error($e);
             return $this->GoogleTranslateFallback($_config);
         }
     }
@@ -404,6 +405,7 @@ class MMT extends AbstractEngine
             } catch (Exception $e) {
                 $this->logger->debug($e->getMessage());
                 $this->logger->debug($e->getTraceAsString());
+                $this->database->rollback();
             } finally {
                 unset($tmpFileObject);
                 @unlink($tmp_name);
@@ -507,8 +509,8 @@ class MMT extends AbstractEngine
             $this->result = $client->me();
 
             return $this->result;
-        } catch (Exception) {
-            throw new Exception("MMT license not valid");
+        } catch (Exception $e) {
+            throw new Exception("MMT license not valid", $e->getCode(), $e);
         }
     }
 

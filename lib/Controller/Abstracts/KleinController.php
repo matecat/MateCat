@@ -133,7 +133,6 @@ abstract class KleinController implements IController
         $this->identifyUser($this->useSession);
         $this->initDependencies();
         $this->registerValidators();
-        $this->afterConstruct();
     }
 
     public function getDatabase(): IDatabase
@@ -238,13 +237,6 @@ abstract class KleinController implements IController
      * @return void
      */
     protected function registerValidators(): void
-    {
-    }
-
-    /**
-     * @deprecated Use registerValidators() and initDependencies() instead
-     */
-    protected function afterConstruct(): void
     {
     }
 

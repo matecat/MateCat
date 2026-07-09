@@ -3,12 +3,14 @@
 namespace Matecat\Core\Controllers\Abstracts;
 
 use Controller\Abstracts\AbstractDownloadController;
+use Controller\Exceptions\RenderTerminatedException;
 use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\Projects\ProjectStruct;
+use Utils\Registry\AppConfig;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -87,6 +89,47 @@ class AbstractDownloadControllerTest extends AbstractTest
         $this->invokeProtected('setMimeType');
 
         $this->assertSame('application/octet-stream', $this->getProperty('mimeType'));
+    }
+
+    #[Test]
+    public function finalizeThrowsRenderTerminatedExceptionInTestingEnvironment(): void
+    {
+        // The render path used to be wrapped in a try/catch that print_r'd the exception and exit()'d,
+        // which leaked stack traces to clients and made finalize() untestable. It now emits the file and,
+        // under the 'testing' env, throws RenderTerminatedException instead of exit() so the path
+        // (unlockToken + header emission + body output) can be exercised here.
+        $project     = new ProjectStruct();
+        $project->id = 1;
+        $this->setProperty('project', $project);
+        $this->setProperty('_filename', 'document.xlf');
+        $this->setProperty('mimeType', 'application/xliff+xml');
+        $this->setProperty('outputContent', 'translated-file-body');
+
+        $previousEnv     = AppConfig::$ENV;
+        $originalObLevel = ob_get_level();
+        // Shield PHPUnit's own output buffer: finalize() calls ob_get_clean() on the top buffer.
+        ob_start();
+        AppConfig::$ENV = 'testing';
+
+        // finalize() emits HTTP headers; under the CLI/PHPUnit SAPI output is already sent, so
+        // header() raises "headers already sent" warnings that are irrelevant to what we assert.
+        set_error_handler(
+            static fn (int $errno, string $errstr): bool => str_contains($errstr, 'Cannot modify header information'),
+            E_WARNING
+        );
+
+        try {
+            $this->controller->finalize(true);
+            $this->fail('finalize() must throw RenderTerminatedException under the testing env');
+        } catch (RenderTerminatedException $e) {
+            $this->assertInstanceOf(RenderTerminatedException::class, $e);
+        } finally {
+            restore_error_handler();
+            AppConfig::$ENV = $previousEnv;
+            while (ob_get_level() > $originalObLevel) {
+                @ob_end_clean();
+            }
+        }
     }
 
     #[Test]
