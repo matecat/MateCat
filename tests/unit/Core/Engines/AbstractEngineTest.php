@@ -206,6 +206,46 @@ class AbstractEngineTest extends AbstractTest
     }
 
     // ---------------------------------------------------------------
+    // call() — existence check on the requested function/config key
+    // ---------------------------------------------------------------
+
+    #[Test]
+    public function callSetsBadMethodCallErrorForUnknownFunction(): void
+    {
+        $this->engine->call('totally_unknown_function');
+
+        $resultProperty = new ReflectionProperty($this->engine, 'result');
+        $resultProperty->setAccessible(true);
+        $result = $resultProperty->getValue($this->engine);
+
+        self::assertSame(-43, $result['error']['code']);
+    }
+
+    #[Test]
+    public function callDoesNotTreatAnExistingButFalsyOthersValueAsUnknownFunction(): void
+    {
+        // Regression guard for report §11.8: `call()` used to rely on `!$this->$function`
+        // (magic __get returning falsy) to decide whether the key exists, so a legitimately
+        // configured but falsy value (e.g. an empty string) was wrongly reported as a
+        // "Bad Method Call". The fix uses a real existence check (__isset) instead.
+        $struct                    = EngineStruct::getStruct();
+        $struct->class_load        = 'NONE';
+        $struct->name              = 'TestEngine';
+        $struct->base_url          = 'http://localhost:1';
+        $struct->others            = ['blank_key' => ''];
+        $struct->extra_parameters  = [];
+
+        $engine = new TestableNONE($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
+        $engine->call('blank_key');
+
+        $resultProperty = new ReflectionProperty($engine, 'result');
+        $resultProperty->setAccessible(true);
+        $result = $resultProperty->getValue($engine);
+
+        self::assertNotSame(-43, $result['error']['code'] ?? null);
+    }
+
+    // ---------------------------------------------------------------
     // GoogleTranslateFallback — exercises the protected fallback path
     // ---------------------------------------------------------------
 

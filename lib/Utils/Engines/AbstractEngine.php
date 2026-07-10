@@ -185,6 +185,13 @@ abstract class AbstractEngine implements EngineInterface
         }
     }
 
+    public function __isset(string $key): bool
+    {
+        return property_exists($this->engineRecord, $key)
+            || (is_array($this->engineRecord->others) && array_key_exists($key, $this->engineRecord->others))
+            || (is_array($this->engineRecord->extra_parameters) && array_key_exists($key, $this->engineRecord->extra_parameters));
+    }
+
     /**
      * @param string $key
      * @param mixed  $value
@@ -295,7 +302,7 @@ abstract class AbstractEngine implements EngineInterface
         }
 
         $this->error = []; // reset last error
-        if (!$this->$function) {
+        if (!isset($this->$function)) {
             $this->result = [
                 'error' => [
                     'code' => -43,
