@@ -858,11 +858,11 @@ class FastAnalysis extends AbstractDaemon
         }
 
         if ($countTowardCap && $attempts >= self::MAX_FAST_ANALYSIS_ATTEMPTS) {
-            $this->logger->error("Fast analysis pid $pid failed $attempts times ($reason). Parking as NOT_TO_ANALYZE.");
+            $this->logger->error('fast_analysis_parked', ['pid' => $pid, 'attempts' => $attempts, 'reason' => $reason]);
             $this->_updateProject($pid, ProjectStatus::STATUS_NOT_TO_ANALYZE);
             $redis->del([$attemptsKey]);
         } else {
-            $this->logger->debug("Fast analysis pid $pid failed ($reason), attempt $attempts. Releasing to NEW for retry.");
+            $this->logger->debug('fast_analysis_released_for_retry', ['pid' => $pid, 'attempts' => $attempts, 'reason' => $reason]);
             $this->_updateProject($pid, ProjectStatus::STATUS_NEW);
         }
 
