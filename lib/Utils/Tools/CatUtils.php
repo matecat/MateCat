@@ -1023,8 +1023,10 @@ class CatUtils
 
         $fileName = AbstractFilesStorage::basename_fix($file_path);
 
-        $key = array_search($fileName, $file_content_array);
-        unset($file_content_array[$key]);
+        $key = array_search($fileName, $file_content_array, true);
+        if ($key !== false) {
+            unset($file_content_array[$key]);
+        }
 
         if (!empty($file_content_array)) {
             fseek($fp, 0); //rewind
