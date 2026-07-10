@@ -207,6 +207,7 @@ class FilesControllerTest extends AbstractTest
     #[Test]
     public function getFirstAndLastSegmentFromFilePartId_returns_segment_bounds(): void
     {
+        $this->controller->setChunk($this->makeChunk());
         $segmentId = $this->segmentId(self::BASE);
 
         $this->responseMock->expects($this->once())
@@ -228,6 +229,7 @@ class FilesControllerTest extends AbstractTest
     #[Test]
     public function getFirstAndLastSegmentFromFilePartId_throws_not_found_for_unknown_part(): void
     {
+        $this->controller->setChunk($this->makeChunk());
         $this->expectException(NotFoundException::class);
         $this->expectExceptionMessage('File part id 99999999 was not found');
         $this->invokePrivate('getFirstAndLastSegmentFromFilePartId', [99999999]);
@@ -281,6 +283,7 @@ class FilesControllerTest extends AbstractTest
     #[Test]
     public function segments_dispatches_to_file_part_id_branch(): void
     {
+        $this->controller->setChunk($this->makeChunk());
         $segmentId = $this->segmentId(self::BASE);
         $this->setParams(['file_part_id' => (string) self::FILE_PART_ID]);
 

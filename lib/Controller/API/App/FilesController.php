@@ -7,6 +7,7 @@ use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Exception;
 use InvalidArgumentException;
+use Model\Files\FilesJobDao;
 use Model\Files\FilesPartsDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -54,6 +55,13 @@ class FilesController extends AbstractStatefulKleinController
      */
     private function getFirstAndLastSegmentFromFilePartId(int $filePartId): void
     {
+        // ownership gate: the file part must belong to a file assigned to the caller's
+        // authenticated chunk, otherwise a guessed file_part_id would leak other tenants' segments
+        $filesJobDao = new FilesJobDao($this->getDatabase());
+        if (!$filesJobDao->isFilePartInJob($filePartId, (int)$this->chunk->id)) {
+            throw new NotFoundException('File part id ' . $filePartId . ' was not found');
+        }
+
         $filePartsDao = new FilesPartsDao($this->getDatabase());
         $firstAndLastSegment = $filePartsDao->getFirstAndLastSegment($filePartId);
 
