@@ -7,6 +7,7 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Exception;
+use LogicException;
 use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -22,6 +23,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use ReflectionException;
+use RuntimeException;
 use Throwable;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
@@ -357,7 +359,7 @@ class FeatureSet implements EventDispatcherInterface
     public function sortFeatures(): FeatureSet
     {
         $toBeSorted = array_values($this->features);
-        $sortedFeatures = $this->quickSort($toBeSorted);
+        $sortedFeatures = $this->sortByDependency($toBeSorted);
 
         $this->clear();
         foreach ($sortedFeatures as $value) {
@@ -368,34 +370,50 @@ class FeatureSet implements EventDispatcherInterface
     }
 
     /**
-     * Warning Recursion, memory overflow if there are a lot of features ( but this is impossible )
+     * Recursively partitions features into "is a dependency of something else in
+     * this list" (must load first) vs a single anchor feature that nothing else
+     * here depends on, vs the rest — then recurses on each side. Recursion depth
+     * is bounded by the number of enabled features (at most a few dozen).
      *
      * @param BasicFeatureStruct[] $featureStructsList
      *
      * @return BasicFeatureStruct[]
-     * @throws \RuntimeException
+     * @throws RuntimeException
+     * @throws LogicException When a circular dependency is detected.
      */
-    private function quickSort(array $featureStructsList): array
+    private function sortByDependency(array $featureStructsList): array
     {
         $length = count($featureStructsList);
         if ($length < 2) {
             return $featureStructsList;
         }
 
-        $firstInList = $featureStructsList[0];
-        $ObjectFeatureFirst = $firstInList->toNewObject($this->database);
+        $depsFeatureCodes = [];
+        foreach ($featureStructsList as $feat) {
+            $ObjectFeature = $feat->toNewObject($this->database);
+            $depsFeatureCodes = array_merge($depsFeatureCodes, $ObjectFeature::getDependencies());
+        }
+        $depsFeatureCodes = array_flip($depsFeatureCodes);
 
-        $leftBucket = $rightBucket = [];
-
-        for ($i = 1; $i < $length; $i++) {
-            if (in_array($featureStructsList[$i]->feature_code, $ObjectFeatureFirst::getDependencies())) {
+        $leftBucket = $rightBucket = $centralBucket = [];
+        for ($i = 0; $i < $length; $i++) {
+            if (array_key_exists($featureStructsList[$i]->feature_code, $depsFeatureCodes)) {
                 $leftBucket[] = $featureStructsList[$i];
+            } elseif ($i == 0) {
+                $centralBucket = [$featureStructsList[$i]];
             } else {
                 $rightBucket[] = $featureStructsList[$i];
             }
         }
 
-        return array_merge($this->quickSort($leftBucket), [$firstInList], $this->quickSort($rightBucket));
+        if (count($leftBucket) === $length) {
+            throw new LogicException('Circular feature dependency detected among: ' . implode(', ', array_map(
+                static fn (BasicFeatureStruct $f): string => $f->feature_code,
+                $leftBucket
+            )));
+        }
+
+        return array_merge($this->sortByDependency($leftBucket), $centralBucket, $this->sortByDependency($rightBucket));
     }
 
     /**
