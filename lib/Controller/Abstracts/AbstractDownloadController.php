@@ -195,9 +195,10 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
                 ob_start("ob_gzhandler");  // compress page before sending
                 $this->nocache();
 
+                $safeFilename = self::sanitizeContentDispositionFilename($this->_filename);
                 header("Content-Type: $this->mimeType");
                 header(
-                    "Content-Disposition: attachment; filename=\"$this->_filename\""
+                    "Content-Disposition: attachment; filename=\"$safeFilename\""
                 ); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
                 header("Expires: 0");
                 header("Connection: close");
@@ -286,6 +287,20 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
         }
 
         return $zip_content;
+    }
+
+    /**
+     * Removes characters that could break out of the quoted Content-Disposition
+     * filename value (double quote, backslash, CR, LF, NUL) — prevents header
+     * injection / disposition-parameter smuggling via user-controlled filenames.
+     *
+     * @param string $filename
+     *
+     * @return string
+     */
+    public static function sanitizeContentDispositionFilename(string $filename): string
+    {
+        return str_replace(['"', '\\', "\r", "\n", "\0"], '', $filename);
     }
 
     /**

@@ -161,6 +161,31 @@ class AbstractDownloadControllerTest extends AbstractTest
     }
 
     #[Test]
+    #[DataProvider('contentDispositionFilenameProvider')]
+    public function sanitizeContentDispositionFilenameStripsHeaderBreakingChars(string $input, string $expected): void
+    {
+        $result = AbstractDownloadController::sanitizeContentDispositionFilename($input);
+        $this->assertSame($expected, $result);
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function contentDispositionFilenameProvider(): array
+    {
+        return [
+            'plain name untouched'     => ['report.docx', 'report.docx'],
+            'double quote stripped'    => ['a".xliff', 'a.xliff'],
+            'backslash stripped'       => ['a\\b.xliff', 'ab.xliff'],
+            'CR stripped'              => ["a\rb.xliff", 'ab.xliff'],
+            'LF stripped'              => ["a\nb.xliff", 'ab.xliff'],
+            'NUL stripped'             => ["a\0b.xliff", 'ab.xliff'],
+            'header injection attempt' => ["f.xliff\"\r\nSet-Cookie: x=1", 'f.xliffSet-Cookie: x=1'],
+            'unicode name preserved'   => ['résumé.docx', 'résumé.docx'],
+        ];
+    }
+
+    #[Test]
     public function composeZipReturnsValidZipContent(): void
     {
         $content1 = new ZipContentObject([
