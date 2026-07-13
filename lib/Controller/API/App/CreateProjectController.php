@@ -408,10 +408,6 @@ class CreateProjectController extends AbstractStatefulKleinController
             $data['xliff_parameters_template_id']
         );
         $data['project_features'] = $this->appendFeaturesToProject($data['mt_engine']);
-        $data['target_language_mt_engine_association'] = $this->generateTargetEngineAssociation(
-            $data['target_lang'],
-            $data['mt_engine']
-        );
         $data['team'] = $this->setTeam($id_team ?: null);
 
         $this->setMetadataFromPostInput($data);
@@ -769,26 +765,6 @@ class CreateProjectController extends AbstractStatefulKleinController
     }
 
     /**
-     * @param string $target_langs
-     * @param int|null $mt_engine
-     *
-     * @return array<string, int|null>
-     * @see filterCreateProjectFeatures callback
-     * @see NewController::appendFeaturesToProject()
-     * @deprecated
-     */
-    private function generateTargetEngineAssociation(string $target_langs, ?int $mt_engine): array
-    { // TODO YYY remove map association, MMT now supports all languages. Remove from ProjectManager also
-        $assoc = [];
-
-        foreach (explode(",", $target_langs) as $_matecatTarget) {
-            $assoc[$_matecatTarget] = $mt_engine;
-        }
-
-        return $assoc;
-    }
-
-    /**
      * @param string|false|null $id_team
      *
      * @return TeamStruct
@@ -860,7 +836,6 @@ class CreateProjectController extends AbstractStatefulKleinController
         $projectStructure->dialect_strict = $data['dialect_strict'];
         $projectStructure->only_private = $data['only_private'];
         $projectStructure->due_date = $data['due_date'];
-        $projectStructure->target_language_mt_engine_association = $data['target_language_mt_engine_association'];
         $projectStructure->user_ip = Utils::getRealIpAddr();
         $projectStructure->HTTP_HOST = AppConfig::$HTTPHOST;
         $projectStructure->tm_prioritization = (!empty($data['tm_prioritization'])) ? $data['tm_prioritization'] : null;

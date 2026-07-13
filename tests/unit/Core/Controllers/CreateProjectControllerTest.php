@@ -197,8 +197,6 @@ class CreateProjectControllerTest extends AbstractTest
         $this->assertSame('11111111-1111-1111-1111-111111111111', $data['upload_token']);
         $this->assertInstanceOf(TeamStruct::class, $data['team']);
         $this->assertSame($this->teamId(self::BASE), (int) $data['team']->id);
-        $this->assertArrayHasKey('target_language_mt_engine_association', $data);
-        $this->assertSame(['it-IT' => 1], $data['target_language_mt_engine_association']);
     }
 
     /**
@@ -686,20 +684,6 @@ class CreateProjectControllerTest extends AbstractTest
         $this->assertArrayHasKey('mt_quality_value_in_editor', $metadata);
         $this->assertSame(90, $metadata['mt_quality_value_in_editor']);
         $this->assertTrue($metadata['icu_enabled']);
-    }
-
-    // ─── generateTargetEngineAssociation ───
-
-    /**
-     * @throws Throwable
-     */
-    #[Test]
-    public function generateTargetEngineAssociation_maps_each_target_to_engine(): void
-    {
-        /** @var array<string, int|null> $assoc */
-        $assoc = $this->invokePrivate('generateTargetEngineAssociation', ['it-IT,fr-FR', 5]);
-
-        $this->assertSame(['it-IT' => 5, 'fr-FR' => 5], $assoc);
     }
 
     // ─── sanitizeTmKeyArr ───
