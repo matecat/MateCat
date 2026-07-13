@@ -262,7 +262,7 @@ class GDriveController extends AbstractStatefulKleinController
             time() + 86400,
             true,
             false,
-            'None'
+            'Strict'
         );
 
         // set a cookie to allow the frontend to call list endpoint

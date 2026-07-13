@@ -817,7 +817,7 @@ class GDriveControllerTest extends AbstractTest
         $this->assertCount(2, $writes);
 
         $this->assertSame(GDriveController::GDRIVE_OUTCOME_COOKIE_NAME, $writes[0]['name']);
-        $this->assertSame('None', $writes[0]['options']['samesite']);
+        $this->assertSame('Strict', $writes[0]['options']['samesite']);
         $outcome = json_decode($writes[0]['value'], true);
         $this->assertIsArray($outcome);
         $this->assertTrue($outcome['success']);
