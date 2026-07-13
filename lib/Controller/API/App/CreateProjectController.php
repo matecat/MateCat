@@ -86,33 +86,8 @@ class CreateProjectController extends AbstractStatefulKleinController
         $this->featureSet->loadFromUserEmail($this->user->email ?? '');
         $this->data = $this->validateTheRequest();
 
-        // SET SOURCE COOKIE
-        CookieManager::setCookie(
-            Constants::COOKIE_SOURCE_LANG,
-            $this->data['source_lang'],
-            [
-                'expires' => time() + (86400 * 365),
-                'path' => '/',
-                'domain' => AppConfig::$COOKIE_DOMAIN,
-                'secure' => true,
-                'httponly' => true,
-                'samesite' => 'None',
-            ]
-        );
-
-        // SET TARGET COOKIE
-        CookieManager::setCookie(
-            Constants::COOKIE_TARGET_LANG,
-            $this->data['target_lang'],
-            [
-                'expires' => time() + (86400 * 365),
-                'path' => '/',
-                'domain' => AppConfig::$COOKIE_DOMAIN,
-                'secure' => true,
-                'httponly' => true,
-                'samesite' => 'None',
-            ]
-        );
+        // SET SOURCE / TARGET LANGUAGE COOKIES (same-site, 1-year preference)
+        $this->setLanguagePreferenceCookies($this->data['source_lang'], $this->data['target_lang']);
 
         //Search in fileNames if there's a zip file. If it's present, get filenames and add them instead of the zip file.
         $fs = FilesStorageFactory::create();
@@ -154,6 +129,24 @@ class CreateProjectController extends AbstractStatefulKleinController
             ],
             'errors' => [],
         ]);
+    }
+
+    /**
+     * Cookie writer seam: overridable in tests to capture the emitted cookies.
+     */
+    protected function cookieManager(): CookieManager
+    {
+        return new CookieManager();
+    }
+
+    /**
+     * Persists the user's source/target language choice as same-site, 1-year preference cookies.
+     */
+    protected function setLanguagePreferenceCookies(string $sourceLang, string $targetLang): void
+    {
+        $cookieManager = $this->cookieManager();
+        $cookieManager->set(Constants::COOKIE_SOURCE_LANG, $sourceLang, time() + (86400 * 365));
+        $cookieManager->set(Constants::COOKIE_TARGET_LANG, $targetLang, time() + (86400 * 365));
     }
 
     /**

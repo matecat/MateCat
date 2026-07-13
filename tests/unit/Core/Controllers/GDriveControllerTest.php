@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Controllers;
 
+use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\GDrive\GDriveController;
 use Controller\Exceptions\RenderTerminatedException;
 use Exception;
@@ -35,12 +36,34 @@ use Utils\Logger\MatecatLogger;
  */
 class TestableGDriveController extends GDriveController
 {
+    /** @var list<array{name:string,value:string,options:array<string,mixed>}> */
+    public array $cookieWrites = [];
+
     public function __construct()
     {
     }
 
     protected function initDependencies(): void
     {
+    }
+
+    protected function cookieManager(): CookieManager
+    {
+        $sink = &$this->cookieWrites;
+
+        return new class($sink) extends CookieManager {
+            /** @param list<array{name:string,value:string,options:array<string,mixed>}> $sink */
+            public function __construct(private array &$sink)
+            {
+            }
+
+            protected function writeCookie(string $name, string $value, array $options): bool
+            {
+                $this->sink[] = ['name' => $name, 'value' => $value, 'options' => $options];
+
+                return true;
+            }
+        };
     }
 }
 
@@ -788,6 +811,20 @@ class GDriveControllerTest extends AbstractTest
         $this->assertIsArray($error);
         $this->assertSame(RenderTerminatedException::class, $error['class']);
         $this->assertFalse($this->getProp('isImportingSuccessful'));
+
+        // doRedirect() emits the outcome payload the frontend reads, then the file-list token.
+        $writes = $this->controller->cookieWrites;
+        $this->assertCount(2, $writes);
+
+        $this->assertSame(GDriveController::GDRIVE_OUTCOME_COOKIE_NAME, $writes[0]['name']);
+        $this->assertSame('None', $writes[0]['options']['samesite']);
+        $outcome = json_decode($writes[0]['value'], true);
+        $this->assertIsArray($outcome);
+        $this->assertTrue($outcome['success']);
+        $this->assertNull($outcome['error_class']);
+
+        $this->assertSame(GDriveController::GDRIVE_LIST_COOKIE_NAME, $writes[1]['name']);
+        $this->assertNotEmpty($writes[1]['value']);
     }
 
     // ─── open: doImport catch block (line 191) ───

@@ -17,6 +17,25 @@ class AuthCookie
 {
 
     /**
+     * Cookie writer seam. Null in production (a fresh CookieManager is used);
+     * tests inject a spy via {@see self::setCookieManager()} to observe emissions.
+     */
+    private static ?CookieManager $cookieManager = null;
+
+    /**
+     * Overrides the cookie writer (test seam). Pass null to restore the default.
+     */
+    public static function setCookieManager(?CookieManager $cookieManager): void
+    {
+        self::$cookieManager = $cookieManager;
+    }
+
+    private static function cookieManager(): CookieManager
+    {
+        return self::$cookieManager ?? new CookieManager();
+    }
+
+    /**
      * Retrieve the user data from the authentication cookie, if present and valid.
      *
      * This method extracts the payload from the authentication cookie and verifies
@@ -104,14 +123,7 @@ class AuthCookie
      */
     private static function setCookie(string $data, int $expireDate): void
     {
-        CookieManager::setCookie(AppConfig::$AUTHCOOKIENAME, $data, [
-            'expires' => $expireDate,
-            'path' => '/',
-            'domain' => AppConfig::$COOKIE_DOMAIN,
-            'secure' => true,
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ]);
+        self::cookieManager()->set(AppConfig::$AUTHCOOKIENAME, $data, $expireDate, true, true, 'Lax');
     }
 
     /**
@@ -164,15 +176,7 @@ class AuthCookie
         unset($_COOKIE[AppConfig::$AUTHCOOKIENAME]);
 
         // Set an expired cookie in the browser to effectively remove it.
-        CookieManager::setCookie(
-            AppConfig::$AUTHCOOKIENAME,
-            '',
-            [
-                'expires' => 0,
-                'path' => '/',
-                'domain' => AppConfig::$COOKIE_DOMAIN
-            ]
-        );
+        self::cookieManager()->delete(AppConfig::$AUTHCOOKIENAME);
 
         // Destroy the current session if active.
         if (session_status() === PHP_SESSION_ACTIVE) {

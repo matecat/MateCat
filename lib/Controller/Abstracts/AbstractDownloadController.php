@@ -143,17 +143,13 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
                 return;
             }
 
-            CookieManager::setCookie(
+            (new CookieManager())->set(
                 $this->downloadToken,
                 $cookieValue,
-                [
-                    'expires' => time() + 600,
-                    'path' => '/',
-                    'domain' => AppConfig::$COOKIE_DOMAIN,
-                    'secure' => true,
-                    'httponly' => false,
-                    'samesite' => 'None',
-                ]
+                time() + 600,
+                true,
+                false,
+                'None'
             );
             $this->downloadToken = null;
         }
