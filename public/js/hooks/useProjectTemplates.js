@@ -44,7 +44,7 @@ const STANDARD_TEMPLATE = {
   character_counter_mode: 'google_ads',
   dialect_strict: false,
   mt_quality_value_in_editor: null,
-  icu_enabled: false,
+  icu_enabled: true,
 }
 
 const CATTOOL_TEMPLATE = {

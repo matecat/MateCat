@@ -82,7 +82,7 @@ class ProjectTemplateStructTest extends AbstractTest
         $this->assertNull($struct->mt);
         $this->assertNull($struct->subfiltering_handlers);
         $this->assertNull($struct->mt_quality_value_in_editor);
-        $this->assertFalse($struct->icu_enabled);
+        $this->assertTrue($struct->icu_enabled);
     }
 
     #[Test]

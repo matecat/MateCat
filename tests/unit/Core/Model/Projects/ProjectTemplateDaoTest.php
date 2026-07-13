@@ -51,7 +51,7 @@ class ProjectTemplateDaoTest extends AbstractTest
                 character_counter_count_tags TINYINT(1) NOT NULL DEFAULT 0,
                 character_counter_mode VARCHAR(255) DEFAULT NULL,
                 mt_quality_value_in_editor INT(11) DEFAULT NULL,
-                icu_enabled TINYINT(1) NOT NULL DEFAULT 0,
+                icu_enabled TINYINT(1) NOT NULL DEFAULT 1,
                 tm_prioritization TINYINT(1) NOT NULL DEFAULT 0,
                 dialect_strict TINYINT(1) NOT NULL DEFAULT 0,
                 public_tm_penalty INT(11) NOT NULL DEFAULT 0,
@@ -112,6 +112,7 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->assertFalse($default->pretranslate_100);
         $this->assertTrue($default->pretranslate_101);
         $this->assertTrue($default->get_public_matches);
+        $this->assertTrue($default->icu_enabled);
         $this->assertSame('en-US', $default->source_language);
         $this->assertSame('general', $default->subject);
         $this->assertSame(['fr-FR'], $default->getTargetLanguage());
