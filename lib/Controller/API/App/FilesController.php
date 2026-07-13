@@ -114,7 +114,6 @@ class FilesController extends AbstractStatefulKleinController
 
     protected function registerValidators(): void
     {
-//        $this->appendValidator(new LoginValidator($this));
         $Validator = (new ChunkPasswordValidator($this));
         $Validator->onSuccess(function () use ($Validator) {
             $this->chunk = $Validator->getChunk();
