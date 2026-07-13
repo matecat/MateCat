@@ -137,14 +137,18 @@ yarn build:production  # Production build
 
 Do not add Co-Authored-By trailers to commit messages.
 
+Follow the `.github/PULL_REQUEST_TEMPLATE.md` AND the `.github/scripts/pr-readiness-check.js` when creating a Pull
+Request.
+
 Follow the project `.github/prompts/conventional-commit.prompt.md` for commit message formatting:
-- Format: `<emoji> <type>(<scope>): <description>`
+
+- Format: `<emoji> <type>(<scope>): <description>` (see emoji table below)
 - Show commit message first, wait for user approval before committing
 - Use `git commit -a` (lowercase), never `-A`
 - 100 character line limit
 - Imperative mood, no capitalization, no period
 
-#### Valid emoji Type Reference
+Valid emoji Type Reference
 
 | Type     | Title                    | Emoji | Description                                                                                            | Example Scopes (non-exaustive)                                |
 |----------|--------------------------|-------|--------------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
@@ -160,8 +164,6 @@ Follow the project `.github/prompts/conventional-commit.prompt.md` for commit me
 | style    | Styles                   | 💄    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) | formatting                                                    |
 | test     | Tests                    | ✅     | Adding missing tests or correcting existing tests                                                      | unit, e2e                                                     |
 | i18n     |                          | 🌐    | Internationalization                                                                                   | locale, translation                                           |
-
-Follow the `.github/PULL_REQUEST_TEMPLATE.md` AND the `.github/scripts/pr-readiness-check.js` when creating a Pull Request.
 
 ### Creating worktrees
 
