@@ -65,6 +65,15 @@ class TestableGDriveController extends GDriveController
             }
         };
     }
+
+    /**
+     * Return a bare client so the import loop runs deterministically without live
+     * OAuth config (its constructor makes no network calls).
+     */
+    protected function getGoogleClient(): \Google_Client
+    {
+        return new \Google_Client();
+    }
 }
 
 /**

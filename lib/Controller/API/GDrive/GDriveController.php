@@ -179,7 +179,7 @@ class GDriveController extends AbstractStatefulKleinController
     {
         for ($i = 0; $i < count($listOfIds) && $this->isImportingSuccessful === true; $i++) {
             try {
-                $client = (new GoogleProvider())->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
+                $client = $this->getGoogleClient();
                 $this->gdriveUserSession->importFile($listOfIds[$i], $client);
             } catch (Exception $e) {
                 $this->isImportingSuccessful = false;
@@ -243,6 +243,18 @@ class GDriveController extends AbstractStatefulKleinController
     protected function cookieManager(): CookieManager
     {
         return new CookieManager();
+    }
+
+    /**
+     * Google client factory seam: overridable in tests so the import loop can run
+     * without live OAuth configuration (GoogleProvider::getClient throws when unset).
+     *
+     * @throws Exception
+     * @throws \RuntimeException
+     */
+    protected function getGoogleClient(): \Google_Client
+    {
+        return (new GoogleProvider())->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
     }
 
     private function doRedirect(): never
