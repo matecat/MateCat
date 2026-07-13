@@ -149,7 +149,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
                 time() + 600,
                 true,
                 false,
-                'None'
+                'Strict'
             );
             $this->downloadToken = null;
         }
