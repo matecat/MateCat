@@ -14,7 +14,6 @@ module.exports = {
     '!<rootDir>/public/api/**',
     '!<rootDir>/public/**/*.min.js',
     '!**/index.js',
-    '!<rootDir>/public/js/components/icons/**',
     '!<rootDir>/public/img/icons/**',
   ],
   coverageThreshold: {
