@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.388.2",
+            "version": "3.388.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "d48fe5eabeda0cf58025636f78ac8dcd8e60a724"
+                "reference": "b89b2b0e0741900c9e25d12302ed8300fa50f22b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/d48fe5eabeda0cf58025636f78ac8dcd8e60a724",
-                "reference": "d48fe5eabeda0cf58025636f78ac8dcd8e60a724",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/b89b2b0e0741900c9e25d12302ed8300fa50f22b",
+                "reference": "b89b2b0e0741900c9e25d12302ed8300fa50f22b",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.388.2"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.388.6"
             },
-            "time": "2026-07-08T23:12:50+00:00"
+            "time": "2026-07-14T18:07:03+00:00"
         },
         {
             "name": "composer/pcre",
@@ -758,16 +758,16 @@
         },
         {
             "name": "google/apiclient-services",
-            "version": "v0.449.0",
+            "version": "v0.450.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client-services.git",
-                "reference": "7e7fbc0e503655d4e7d41b297e0def347a34e026"
+                "reference": "4e5ffe870815596a1ab07cec9a4d87a073f2bedf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/7e7fbc0e503655d4e7d41b297e0def347a34e026",
-                "reference": "7e7fbc0e503655d4e7d41b297e0def347a34e026",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/4e5ffe870815596a1ab07cec9a4d87a073f2bedf",
+                "reference": "4e5ffe870815596a1ab07cec9a4d87a073f2bedf",
                 "shasum": ""
             },
             "require": {
@@ -796,9 +796,9 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/google-api-php-client-services/issues",
-                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.449.0"
+                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.450.0"
             },
-            "time": "2026-07-01T01:48:37+00:00"
+            "time": "2026-07-13T01:20:31+00:00"
         },
         {
             "name": "google/auth",
@@ -864,22 +864,22 @@
         },
         {
             "name": "guzzlehttp/guzzle",
-            "version": "7.14.0",
+            "version": "7.14.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "aef242412e13128b5049864867bb49fc37dd39de"
+                "reference": "fa88c57803501ad0770f5cddb1e60525d49da9a1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/aef242412e13128b5049864867bb49fc37dd39de",
-                "reference": "aef242412e13128b5049864867bb49fc37dd39de",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/fa88c57803501ad0770f5cddb1e60525d49da9a1",
+                "reference": "fa88c57803501ad0770f5cddb1e60525d49da9a1",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "guzzlehttp/promises": "^2.5.1",
-                "guzzlehttp/psr7": "^2.12.4",
+                "guzzlehttp/psr7": "^2.12.5",
                 "php": "^7.2.5 || ^8.0",
                 "psr/http-client": "^1.0",
                 "symfony/deprecation-contracts": "^2.5 || ^3.0",
@@ -972,7 +972,7 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/guzzle/issues",
-                "source": "https://github.com/guzzle/guzzle/tree/7.14.0"
+                "source": "https://github.com/guzzle/guzzle/tree/7.14.2"
             },
             "funding": [
                 {
@@ -988,7 +988,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-07-08T22:54:09+00:00"
+            "time": "2026-07-14T18:15:01+00:00"
         },
         {
             "name": "guzzlehttp/promises",
@@ -1076,16 +1076,16 @@
         },
         {
             "name": "guzzlehttp/psr7",
-            "version": "2.12.4",
+            "version": "2.12.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/psr7.git",
-                "reference": "51e27f9e2b332ab3e72f4520d5ff4f3c68c3577c"
+                "reference": "9365d578a9fd1552ad6ca9c3cb530708526feb09"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/51e27f9e2b332ab3e72f4520d5ff4f3c68c3577c",
-                "reference": "51e27f9e2b332ab3e72f4520d5ff4f3c68c3577c",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/9365d578a9fd1552ad6ca9c3cb530708526feb09",
+                "reference": "9365d578a9fd1552ad6ca9c3cb530708526feb09",
                 "shasum": ""
             },
             "require": {
@@ -1175,7 +1175,7 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/psr7/issues",
-                "source": "https://github.com/guzzle/psr7/tree/2.12.4"
+                "source": "https://github.com/guzzle/psr7/tree/2.12.5"
             },
             "funding": [
                 {
@@ -1191,7 +1191,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-07-08T15:56:20+00:00"
+            "time": "2026-07-13T01:27:20+00:00"
         },
         {
             "name": "league/oauth2-client",
@@ -1800,16 +1800,16 @@
         },
         {
             "name": "matecat/klein",
-            "version": "v3.3.0",
+            "version": "v3.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/klein.php.git",
-                "reference": "3009577d7f78bc4e7e18b6e574ae33b320b3512f"
+                "reference": "261f470f848e8ae2da0400de002f01a1214828f8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/klein.php/zipball/3009577d7f78bc4e7e18b6e574ae33b320b3512f",
-                "reference": "3009577d7f78bc4e7e18b6e574ae33b320b3512f",
+                "url": "https://api.github.com/repos/matecat/klein.php/zipball/261f470f848e8ae2da0400de002f01a1214828f8",
+                "reference": "261f470f848e8ae2da0400de002f01a1214828f8",
                 "shasum": ""
             },
             "require": {
@@ -1862,9 +1862,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/klein.php/issues",
-                "source": "https://github.com/matecat/klein.php/tree/v3.3.0"
+                "source": "https://github.com/matecat/klein.php/tree/v3.3.1"
             },
-            "time": "2026-06-01T15:54:25+00:00"
+            "time": "2026-07-14T21:26:20+00:00"
         },
         {
             "name": "matecat/simple-s3",
@@ -2950,16 +2950,16 @@
         },
         {
             "name": "phpoffice/phpspreadsheet",
-            "version": "1.30.5",
+            "version": "1.30.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPOffice/PhpSpreadsheet.git",
-                "reference": "97bcabd32a64924688487dcd64aceaf158affb5c"
+                "reference": "a416375ffc8bf5b661c1bb4e6c60d8f3fddbe5ce"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/97bcabd32a64924688487dcd64aceaf158affb5c",
-                "reference": "97bcabd32a64924688487dcd64aceaf158affb5c",
+                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/a416375ffc8bf5b661c1bb4e6c60d8f3fddbe5ce",
+                "reference": "a416375ffc8bf5b661c1bb4e6c60d8f3fddbe5ce",
                 "shasum": ""
             },
             "require": {
@@ -3052,9 +3052,9 @@
             ],
             "support": {
                 "issues": "https://github.com/PHPOffice/PhpSpreadsheet/issues",
-                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.30.5"
+                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.30.6"
             },
-            "time": "2026-05-31T05:13:11+00:00"
+            "time": "2026-07-12T19:59:31+00:00"
         },
         {
             "name": "phpstan/phpstan",
@@ -5109,16 +5109,16 @@
         },
         {
             "name": "translated/lara-sdk",
-            "version": "1.8.1",
+            "version": "1.8.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/translated/lara-php.git",
-                "reference": "62a887f26ebe2e10d75bbfff899cea136ec8df77"
+                "reference": "6f36bde76d31aad7e44c69d2ed5e8ccd0ffa5c80"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/translated/lara-php/zipball/62a887f26ebe2e10d75bbfff899cea136ec8df77",
-                "reference": "62a887f26ebe2e10d75bbfff899cea136ec8df77",
+                "url": "https://api.github.com/repos/translated/lara-php/zipball/6f36bde76d31aad7e44c69d2ed5e8ccd0ffa5c80",
+                "reference": "6f36bde76d31aad7e44c69d2ed5e8ccd0ffa5c80",
                 "shasum": ""
             },
             "require": {
@@ -5153,9 +5153,9 @@
             "homepage": "https://laratranslate.com/",
             "support": {
                 "issues": "https://github.com/translated/lara-php/issues",
-                "source": "https://github.com/translated/lara-php/tree/v1.8.1"
+                "source": "https://github.com/translated/lara-php/tree/v1.8.2"
             },
-            "time": "2026-06-10T09:34:47+00:00"
+            "time": "2026-07-13T10:19:46+00:00"
         },
         {
             "name": "untt/oauth2-microsoft",

@@ -1,6 +1,8 @@
 <?php
 
+use Controller\Cors\CorsHandler;
 use Model\ConnectedServices\GDrive\Session;
+use Utils\Registry\AppConfig;
 
 error_reporting(E_ALL | E_STRICT);
 
@@ -19,7 +21,12 @@ header('Pragma: no-cache');
 header('Cache-Control: no-store, no-cache, must-revalidate');
 header('Content-Disposition: inline; filename="files.json"');
 header('X-Content-Type-Options: nosniff');
-header('Access-Control-Allow-Origin: *');
+// Reflect ONLY this instance's own app origin (credentialed), never a wildcard:
+// `*` cannot carry credentials and trusts every origin (CWE-942).
+$cors = new CorsHandler(AppConfig::$HTTPHOST, AppConfig::$ENABLE_MULTI_DOMAIN_API);
+foreach ($cors->responseHeaders($_SERVER['HTTP_ORIGIN'] ?? '') as $corsName => $corsValue) {
+    header($corsName . ': ' . $corsValue);
+}
 header('Access-Control-Allow-Methods: OPTIONS, HEAD, GET, POST, PUT, DELETE');
 header('Access-Control-Allow-Headers: X-File-Name, X-File-Type, X-File-Size');
 
