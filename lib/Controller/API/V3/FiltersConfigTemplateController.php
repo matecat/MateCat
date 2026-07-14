@@ -6,6 +6,8 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use DivisionByZeroError;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Response;
 use Model\Filters\FiltersConfigTemplateDao;
 use PDOException;
@@ -64,6 +66,8 @@ class FiltersConfigTemplateController extends KleinController
      *
      * @throws DivisionByZeroError
      * @throws TypeError
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function all(): Response
     {
@@ -94,6 +98,8 @@ class FiltersConfigTemplateController extends KleinController
      * Get a single entry
      *
      * @throws TypeError
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function get(): Response
     {
@@ -124,6 +130,8 @@ class FiltersConfigTemplateController extends KleinController
      *
      * @return Response
      * @throws TypeError
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function create(): Response
     {
@@ -233,6 +241,9 @@ class FiltersConfigTemplateController extends KleinController
 
     /**
      * Delete an entry
+     *
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function delete(): Response
     {

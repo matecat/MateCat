@@ -475,7 +475,10 @@ class FsFilesStorage extends AbstractFilesStorage
             throw new UnexpectedValueException('Internal Error: Failed to retrieve analysis information from disk.', -15);
         }
 
-        $analysisData = @unserialize($rawContent);
+        // X2: the .ser blob is untrusted storage; forbid object instantiation to kill the
+        // object-injection / gadget-chain surface. The payload is a plain array, so this is
+        // transparent; a malformed blob still yields false (suppressed warning) and is handled below.
+        $analysisData = @unserialize($rawContent, ['allowed_classes' => false]);
         if ($analysisData === false) {
             throw new UnexpectedValueException('Internal Error: Failed to retrieve analysis information from disk.', -15);
         }

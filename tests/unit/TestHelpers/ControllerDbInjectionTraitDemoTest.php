@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace Matecat\TestHelpers;
 
-use Controller\Abstracts\KleinController;
 use Controller\API\App\FetchChangeRatesController;
-use Model\DataAccess\IDatabase;
 use Exception;
+use Model\DataAccess\IDatabase;
 use PHPUnit\Event\NoPreviousThrowableException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\InvalidArgumentException;
 use PHPUnit\Framework\MockObject\Exception as MockException;
-use ReflectionClass;
 use ReflectionException;
 use TypeError;
 
@@ -27,10 +25,6 @@ class TestableFetchChangeRatesController extends FetchChangeRatesController
     public function __construct()
     {
         // intentionally empty — does NOT call parent::__construct()
-    }
-
-    protected function afterConstruct(): void
-    {
     }
 
     protected function initDependencies(): void

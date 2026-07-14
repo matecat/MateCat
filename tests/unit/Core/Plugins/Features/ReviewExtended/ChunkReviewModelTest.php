@@ -245,14 +245,58 @@ class ChunkReviewModelTest extends AbstractTest
     }
 
     #[Test]
-    public function updateChunkReviewCountersAndPassFailCastsPenaltyPointsToInt(): void
+    public function updateChunkReviewCountersAndPassFailPreservesDecimalPenaltyPoints(): void
     {
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
+        // regression: penalty_points used to be (int)-cast here, truncating 0.5 -> 0 before
+        // reaching the DAO's INSERT. A project with a null id_qa_model (like $this->nullLqaProject)
+        // makes passFailCountsAtomicUpdate return early without ever building that INSERT, so this
+        // test needs a resolvable qa model to actually reach the code path being fixed.
+        $lqaModel = new ModelStruct([
+            'pass_options' => json_encode(['limit' => [8, 5]]),
+            'pass_type'    => 'combined',
+            'label'        => 'test',
+            'create_date'  => '2024-01-01',
+            'hash'         => 'abc',
+        ]);
 
-        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
-        $model->updateChunkReviewCountersAndPassFail(7.9, 10, 500, $this->nullLqaProject);
-        $this->assertTrue(true);
+        // passFailCountsAtomicUpdate() resolves its own project via
+        // $chunkReview->getChunk()->getProject() (NOT the $projectStruct passed to
+        // updateChunkReviewCountersAndPassFail), so the qa model must be reachable from there.
+        $project = new ProjectStruct();
+        $project->id = 10;
+        $project->id_qa_model = 1;
+
+        $jobStruct = new StubJobStruct([
+            'id'       => 1,
+            'password' => 'testpw',
+        ], $project);
+
+        $chunkReviewStruct = new StubChunkReviewStruct([
+            'id'                   => 42,
+            'id_project'           => 10,
+            'id_job'               => 1,
+            'password'             => 'testpw',
+            'review_password'      => 'rev_pw',
+            'source_page'          => 2,
+            'reviewed_words_count' => 100,
+            'total_tte'            => 0,
+        ], $jobStruct);
+
+        $capturedParams = null;
+        $this->stmtStub->method('execute')->willReturnCallback(function (array $params) use (&$capturedParams) {
+            if (array_key_exists('penalty_points', $params)) {
+                $capturedParams = $params;
+            }
+
+            return true;
+        });
+        $this->stmtStub->method('fetchAll')->willReturn([$lqaModel]);
+
+        $model = new ChunkReviewModel($chunkReviewStruct, $this->dbStub);
+        $model->updateChunkReviewCountersAndPassFail(0.5, 10, 500, $project);
+
+        $this->assertNotNull($capturedParams, 'execute() was never called with a penalty_points param');
+        $this->assertSame(0.5, $capturedParams['penalty_points']);
     }
 
     #[Test]

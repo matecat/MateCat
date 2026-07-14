@@ -7,6 +7,7 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Exception;
+use LogicException;
 use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -22,6 +23,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use ReflectionException;
+use RuntimeException;
 use Throwable;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
@@ -357,7 +359,7 @@ class FeatureSet implements EventDispatcherInterface
     public function sortFeatures(): FeatureSet
     {
         $toBeSorted = array_values($this->features);
-        $sortedFeatures = $this->quickSort($toBeSorted);
+        $sortedFeatures = $this->sortByDependency($toBeSorted);
 
         $this->clear();
         foreach ($sortedFeatures as $value) {
@@ -368,34 +370,87 @@ class FeatureSet implements EventDispatcherInterface
     }
 
     /**
-     * Warning Recursion, memory overflow if there are a lot of features ( but this is impossible )
+     * Orders features so that every feature comes after all the features it
+     * depends on — including transitive dependencies (if A needs B and B needs C,
+     * the result is C, B, A). This is a "topological sort", implemented with
+     * Kahn's algorithm.
+     *
+     * The idea in plain terms:
+     *   - Model the features as a graph: each declared dependency is an edge
+     *     "dependency -> dependent".
+     *   - For each feature, count how many of its dependencies are still waiting
+     *     to be placed. That count is its "in-degree".
+     *   - A feature with in-degree 0 has nothing left to wait for, so it is safe
+     *     to place next. Place it, then tell each feature that depended on it
+     *     "one of your dependencies is now placed" by decrementing their in-degree.
+     *     Any of those that drop to 0 become safe to place in turn.
+     *   - Repeat until nothing is left. If features remain but none has in-degree
+     *     0, they depend on each other in a loop (a cycle) — unorderable, so we
+     *     throw instead of silently dropping them.
+     *
+     * Each feature's dependency list is read once from the concrete class's static
+     * getDependencies() (no object construction needed — it never touches instance
+     * state).
      *
      * @param BasicFeatureStruct[] $featureStructsList
      *
      * @return BasicFeatureStruct[]
-     * @throws \RuntimeException
+     * @throws RuntimeException
+     * @throws LogicException When a circular dependency is detected.
      */
-    private function quickSort(array $featureStructsList): array
+    private function sortByDependency(array $featureStructsList): array
     {
-        $length = count($featureStructsList);
-        if ($length < 2) {
-            return $featureStructsList;
-        }
+        // Index every feature by its code so dependency codes can be looked up
+        // directly (also dedupes if a code somehow appears twice).
+        $byCode = array_column($featureStructsList, null, 'feature_code');
 
-        $firstInList = $featureStructsList[0];
-        $ObjectFeatureFirst = $firstInList->toNewObject($this->database);
+        // Build the graph:
+        //   $dependents[X] = list of features that depend on X (the edges to follow
+        //                    once X has been placed).
+        //   $inDegree[Y]   = how many of Y's own dependencies are still unplaced
+        //                    (starts at 0 for everyone, incremented below).
+        $dependents = [];
+        $inDegree   = array_fill_keys(array_keys($byCode), 0);
 
-        $leftBucket = $rightBucket = [];
-
-        for ($i = 1; $i < $length; $i++) {
-            if (in_array($featureStructsList[$i]->feature_code, $ObjectFeatureFirst::getDependencies())) {
-                $leftBucket[] = $featureStructsList[$i];
-            } else {
-                $rightBucket[] = $featureStructsList[$i];
+        foreach ($byCode as $code => $feature) {
+            $className = $feature->getFullyQualifiedClassName();
+            foreach ($className::getDependencies() as $dependencyCode) {
+                if (!isset($byCode[$dependencyCode])) {
+                    continue; // dependency isn't loaded/enabled — nothing to wait on
+                }
+                // Record the edge dependency -> dependent, and count this
+                // dependency against the dependent's in-degree.
+                $dependents[$dependencyCode][] = $code;
+                $inDegree[$code]++;
             }
         }
 
-        return array_merge($this->quickSort($leftBucket), [$firstInList], $this->quickSort($rightBucket));
+        // Seed the work queue with every feature that has no dependencies to wait
+        // on (in-degree 0) — these can be placed immediately.
+        $queue  = array_keys($inDegree, 0, true);
+        $sorted = [];
+        while ($queue !== []) {
+            // Place the next ready feature.
+            $code     = array_shift($queue);
+            $sorted[] = $byCode[$code];
+
+            // It is now placed, so every feature depending on it loses one unmet
+            // dependency; any that reach 0 are themselves ready — enqueue them.
+            foreach ($dependents[$code] ?? [] as $dependentCode) {
+                if (--$inDegree[$dependentCode] === 0) {
+                    $queue[] = $dependentCode;
+                }
+            }
+        }
+
+        // If we couldn't place everything, the leftovers form a dependency cycle
+        // (each is still waiting on another, so none ever reached in-degree 0).
+        if (count($sorted) !== count($byCode)) {
+            $cyclic = array_diff(array_keys($byCode), array_column($sorted, 'feature_code'));
+            throw new LogicException('Circular feature dependency detected among: ' . implode(', ', $cyclic));
+        }
+
+        return $sorted;
     }
 
     /**

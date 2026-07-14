@@ -7,6 +7,7 @@ namespace Matecat\Core\Engines;
 use DomainException;
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\Engines\Structs\EngineStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
@@ -14,6 +15,7 @@ use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionMethod;
+use ReflectionProperty;
 use RuntimeException;
 use SplFileObject;
 use Utils\Constants\EngineConstants;
@@ -721,6 +723,38 @@ class MMTEngineMethodsTest extends AbstractTest
         $engine->syncMemories(['id' => $pid, 'id_customer' => 'nobody@example.invalid'], []);
 
         self::assertTrue(true);
+    }
+
+    #[Test]
+    public function syncMemoriesRollsBackWhenTransactionFails(): void
+    {
+        // Regression guard for the transaction-safety fix (§6.1): a failure between begin() and
+        // commit() must call database->rollback(). Previously the catch only logged, leaving the
+        // transaction open on the shared connection (a known innodb_lock_wait cascade trigger).
+        $pid = 920600;
+        (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_activate_context_analyzer', '1');
+
+        // Context-vector map so getContext() is non-null and the begin()/commit() block is entered.
+        $client = $this->createStub(MMTServiceApi::class);
+        $client->method('getContextVectorFromFile')->willReturn(['vectors' => ['it-IT' => '1:0.5']]);
+        $engine = $this->createEngineWithClient($client);
+
+        // DB double: reads go through the real connection, but begin() fails inside the try block,
+        // so the catch → rollback() path (the fix) is exercised. The once() expectation asserts it.
+        $faultyDb = $this->createMock(IDatabase::class);
+        $faultyDb->method('getConnection')->willReturn(obtainTestDatabase()->getConnection());
+        $faultyDb->method('begin')->willThrowException(new RuntimeException('begin failed'));
+        $faultyDb->expects(self::once())->method('rollback');
+
+        $ref = new ReflectionProperty($engine, 'database');
+        $ref->setAccessible(true);
+        $ref->setValue($engine, $faultyDb);
+
+        // syncMemories() swallows the failure after rolling back; the rollback() expectation verifies it.
+        $engine->syncMemories(
+            ['id' => $pid, 'id_customer' => 'nobody@example.invalid'],
+            [['source' => 'en-US', 'target' => '111222:it-IT', 'segment' => 'hello world']]
+        );
     }
 
     #[Test]

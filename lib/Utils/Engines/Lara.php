@@ -174,7 +174,7 @@ class Lara extends AbstractEngine
         try {
             $cached = $cache->get("lara_languages");
             if (is_string($cached)) {
-                $value = unserialize($cached);
+                $value = unserialize($cached, ['allowed_classes' => false]);
             }
         } catch (Throwable) {
         }

@@ -70,8 +70,7 @@ $klein->onHttpError(function (int $code, Klein $klein) use (&$isView) {
     }
 });
 
-$klein->onError(function (Klein $klein, $err_msg, $err_type, Throwable $exception) use (&$isView) {
-    /** @var bool $isView */
+$klein->onError(function (Klein $klein, string $err_msg, string $err_type, Throwable $exception) use (&$isView) {
     if (!$isView) {
         $klein->response()->noCache();
         $logger = LoggerFactory::getLogger('exception_handler', 'fatal_errors.txt');

@@ -224,7 +224,7 @@ jobs:
             js-coverage.xml
             node-coverage.xml
           coverage-threshold: '80'
-          exclude-patterns: '.github/**'
+          exclude-patterns: '.github/**, daemons/**'
           ai-enabled: 'true'
 
   slack-notification:

@@ -185,7 +185,8 @@ class MMT extends AbstractEngine
             $response->matches = [$match];
 
             return $response;
-        } catch (Exception) {
+        } catch (Exception $e) {
+            $this->logger->error($e);
             return $this->GoogleTranslateFallback($_config);
         }
     }
@@ -365,8 +366,8 @@ class MMT extends AbstractEngine
                 $targets[] = $target;
             }
 
-            $tmp_name = tempnam(sys_get_temp_dir(), 'mmt_cont_req-');
-            $tmpFileObject = new SplFileObject(tempnam(sys_get_temp_dir(), 'mmt_cont_req-'), 'w+');
+            $tmp_name      = tempnam(sys_get_temp_dir(), 'mmt_cont_req-');
+            $tmpFileObject = new SplFileObject($tmp_name, 'w+');
             foreach ($segments as $segment) {
                 $tmpFileObject->fwrite($segment['segment'] . "\n");
             }
@@ -404,6 +405,7 @@ class MMT extends AbstractEngine
             } catch (Exception $e) {
                 $this->logger->debug($e->getMessage());
                 $this->logger->debug($e->getTraceAsString());
+                $this->database->rollback();
             } finally {
                 unset($tmpFileObject);
                 @unlink($tmp_name);
@@ -462,36 +464,45 @@ class MMT extends AbstractEngine
      */
     protected function getContext(SplFileObject $file, string $source, array $targets): ?array
     {
-        $fileName = $file->getRealPath();
+        $fileName   = $file->getRealPath();
+        $gzFileName = "$fileName.gz";
         $file->rewind();
 
-        $fp_out = gzopen("$fileName.gz", 'wb9');
+        $fp_out = gzopen($gzFileName, 'wb9');
 
-        if (!$fp_out) {
-            $fp_out = null;
-            @unlink($fileName);
-            @unlink("$fileName.gz");
+        if ($fp_out === false) {
+            @unlink($gzFileName);
             throw new RuntimeException('IOException. Unable to create temporary file.');
         }
 
-        while (!$file->eof()) {
-            gzwrite($fp_out, $file->fgets());
+        try {
+            while (!$file->eof()) {
+                gzwrite($fp_out, $file->fgets());
+            }
+
+            gzclose($fp_out);
+            $fp_out = false; // mark closed so the finally block does not double-close
+
+            $client = $this->_getClient();
+            $result = $client->getContextVectorFromFile($source, $targets, $gzFileName, 'gzip');
+            if ($result === null || !isset($result['vectors'])) {
+                return null;
+            }
+
+            $plainContexts = [];
+            foreach ($result['vectors'] as $target => $vector) {
+                $plainContexts["$source|$target"] = $vector;
+            }
+
+            return $plainContexts;
+        } finally {
+            // guarantee the gz handle is closed (if gzwrite threw) and the temp file we
+            // created is removed on every exit path — success, null-return, or exception
+            if (is_resource($fp_out)) {
+                gzclose($fp_out);
+            }
+            @unlink($gzFileName);
         }
-
-        gzclose($fp_out);
-
-        $client = $this->_getClient();
-        $result = $client->getContextVectorFromFile($source, $targets, "$fileName.gz", 'gzip');
-        if ($result === null || !isset($result['vectors'])) {
-            return null;
-        }
-
-        $plainContexts = [];
-        foreach ($result['vectors'] as $target => $vector) {
-            $plainContexts["$source|$target"] = $vector;
-        }
-
-        return $plainContexts;
     }
 
     /**
@@ -507,8 +518,8 @@ class MMT extends AbstractEngine
             $this->result = $client->me();
 
             return $this->result;
-        } catch (Exception) {
-            throw new Exception("MMT license not valid");
+        } catch (Exception $e) {
+            throw new Exception("MMT license not valid", $e->getCode(), $e);
         }
     }
 

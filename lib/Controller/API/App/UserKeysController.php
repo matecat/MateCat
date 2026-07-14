@@ -276,8 +276,8 @@ class UserKeysController extends KleinController
                          ->get($uid, $engine->getEngineRecord()->class_load ?? throw new RuntimeException('Missing engine class_load'));
 
                     // If metadata exists, attempt to delete the memory key from the engine.
-                    if (!empty($ownerMmtEngineMetaData) && is_int($ownerMmtEngineMetaData->value)) {
-                        $engine = EnginesFactory::getInstance($ownerMmtEngineMetaData->value, $this->getDatabase(), AbstractEngine::class);
+                    if (!empty($ownerMmtEngineMetaData) && is_numeric($ownerMmtEngineMetaData->value)) {
+                        $engine = EnginesFactory::getInstance((int)$ownerMmtEngineMetaData->value, $this->getDatabase(), AbstractEngine::class);
                         $engineKey = $engine->getMemoryIfMine($memoryKey);
                         if ($engineKey) {
                             $engine->deleteMemory($engineKey);

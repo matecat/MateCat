@@ -145,7 +145,7 @@ class SignupModel
          * Check the salt before join the two accounts.
          */
         if (empty($this->user->salt)) {
-            $this->user->salt = Utils::randomString(15, true);
+            $this->user->salt = Utils::randomString(32);
         }
 
         $this->user->pass = Utils::encryptPass($this->params['password'], $this->user->salt);
@@ -162,7 +162,7 @@ class SignupModel
 
         $this->user->create_date = Utils::mysqlTimestamp(time());
         $this->user->email = $email;
-        $this->user->salt = Utils::randomString(15, true);
+        $this->user->salt = Utils::randomString(32);
         $this->user->pass = Utils::encryptPass($this->params['password'], $this->user->salt);
 
         $this->user->initAuthToken();

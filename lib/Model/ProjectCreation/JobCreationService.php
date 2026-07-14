@@ -148,7 +148,7 @@ class JobCreationService
         $job->source = (string)$projectStructure->source_language;
         $job->target = $target;
         $job->id_tms = $projectStructure->tms_engine ?? 1;
-        $job->id_mt_engine = $projectStructure->target_language_mt_engine_association[$target];
+        $job->id_mt_engine = (int)$projectStructure->mt_engine;
         $job->create_date = date('Y-m-d H:i:s');
         $job->last_update = date('Y-m-d H:i:s');
         $job->subject = $projectStructure->job_subject;

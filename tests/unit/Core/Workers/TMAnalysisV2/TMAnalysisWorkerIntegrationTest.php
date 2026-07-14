@@ -286,7 +286,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
 
         $segmentUpdater->expects($this->once())->method('setAnalysisValue')->willReturn(1);
         // With empty payable_rates, discountRate=0 → eqWords=0.0, standardWords=0.0
-        $redisService->expects($this->once())->method('incrementAnalyzedCount')->with(100, 1, 0.0, 0.0);
+        $redisService->expects($this->once())->method('incrementAnalyzedCount')->with(100, 1, 2, 0.0, 0.0);
         $projectCompletion->expects($this->once())->method('tryCloseProject')->with(
             100,
             'secret',

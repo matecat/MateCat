@@ -7,6 +7,7 @@ use Controller\Exceptions\RenderTerminatedException;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
 use InvalidArgumentException;
+use Klein\Exceptions\LockedResponseException;
 use Klein\Exceptions\ResponseAlreadySentException;
 use Model\ConnectedServices\Oauth\OauthClient;
 use Model\ConnectedServices\Oauth\ProviderUser;
@@ -108,6 +109,7 @@ class OauthResponseHandlerController extends BaseKleinViewController
      * @throws InvalidArgumentException
      * @throws RenderTerminatedException
      * @throws ResponseAlreadySentException
+     * @throws LockedResponseException
      * @throws TypeError
      */
     protected function _initRemoteUser(string $code, ?string $provider = null): void

@@ -5,6 +5,8 @@ namespace Controller\API\App;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\FeaturesBase\FeatureSet;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
@@ -14,6 +16,8 @@ class MyMemoryEntryStatusController extends KleinController
 
     /**
      * @return void
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function status(): void
     {
