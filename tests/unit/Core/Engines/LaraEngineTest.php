@@ -573,6 +573,36 @@ class LaraEngineTest extends AbstractTest
         $this->engine->setMockClient($client);
         self::assertSame([], $this->engine->getAvailableLanguages());
     }
+
+    /**
+     * @throws LaraException
+     * @throws Exception
+     */
+    #[Test]
+    public function getAvailableLanguagesLogsAndFallsBackWhenCacheReadThrows(): void
+    {
+        try {
+            (new RedisHandler())->getConnection()->setex('lara_languages', 60, serialize(['fr', 'de']));
+        } catch (Throwable) {
+            self::markTestSkipped('Redis not available for cache-path test');
+        }
+
+        // Force the cache read to throw: it must be swallowed+logged and the live client used,
+        // ignoring the cached ['fr','de'].
+        $this->engine->failCacheRead = true;
+
+        $client = $this->createMock(LaraClient::class);
+        $client->expects(self::once())
+            ->method('getLanguages')
+            ->willReturn(['en-US', 'it-IT']);
+        $this->engine->setMockClient($client);
+
+        $languages = $this->engine->getAvailableLanguages();
+
+        self::assertContains('en', $languages);
+        self::assertContains('it', $languages);
+        self::assertNotContains('fr', $languages);
+    }
     /**
      * @throws Exception
      */
@@ -1075,6 +1105,17 @@ class TestLara extends Lara
     protected function _getClient(): LaraClient
     {
         return $this->mockClient;
+    }
+
+    public bool $failCacheRead = false;
+
+    protected function readLanguagesCache(): array
+    {
+        if ($this->failCacheRead) {
+            throw new RuntimeException('simulated cache read failure');
+        }
+
+        return parent::readLanguagesCache();
     }
     /**
      * @return array<string, mixed>
