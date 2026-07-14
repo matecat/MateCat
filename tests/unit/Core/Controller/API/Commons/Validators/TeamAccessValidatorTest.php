@@ -39,6 +39,7 @@ class TeamAccessValidatorTest extends AbstractTest
     private const int B = 9_910_000;
     private const int UID = self::B;
     private const int TEAM_ID = self::B + 1;
+    private const int ATTACKER_UID = self::B + 2;
     private const string TEAM_NAME = 'CtrlTestTeam9910000';
     private const string EMAIL = 'ctrltest_9910000@example.org';
 
@@ -114,17 +115,48 @@ class TeamAccessValidatorTest extends AbstractTest
         $this->assertSame(self::TEAM_ID, $this->controller->capturedTeam->id);
     }
 
-    // ─── name-path (team_name present, != PERSONAL) ───
+    // ─── IDOR regression: team_name must NOT bypass membership (default flag = false) ───
 
     #[Test]
-    public function validates_by_team_name(): void
+    public function blocks_non_member_even_when_team_name_supplied(): void
     {
+        // Attacker: authenticated but NOT a member of TEAM_ID, injects the team_name param.
+        $attacker = new UserStruct();
+        $attacker->uid = self::ATTACKER_UID;
+        $attacker->email = 'attacker_9910000@example.org';
+        $this->setCtrlProp('user', $attacker);
+
         $this->setRequest([
             'id_team' => (string) self::TEAM_ID,
             'team_name' => base64_encode(self::TEAM_NAME),
         ]);
 
+        // No public-lookup flag → uid-membership path → no row → 401.
         $validator = new TeamAccessValidator($this->controller);
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionCode(401);
+
+        $validator->_validate();
+    }
+
+    // ─── name-path allowed ONLY with the public flag (public members endpoint) ───
+
+    #[Test]
+    public function allows_name_lookup_only_when_public_flag_enabled(): void
+    {
+        // Non-member viewer of the public members list.
+        $viewer = new UserStruct();
+        $viewer->uid = self::ATTACKER_UID;
+        $viewer->email = 'viewer_9910000@example.org';
+        $this->setCtrlProp('user', $viewer);
+
+        $this->setRequest([
+            'id_team' => (string) self::TEAM_ID,
+            'team_name' => base64_encode(self::TEAM_NAME),
+        ]);
+
+        $validator = new TeamAccessValidator($this->controller, true);
         $validator->_validate();
 
         $this->assertInstanceOf(TeamStruct::class, $validator->team);

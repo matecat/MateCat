@@ -193,5 +193,10 @@ class TeamPublicMembersControllerTest extends AbstractTest
         self::assertCount(2, $validators);
         self::assertInstanceOf(LoginValidator::class, $validators[0]);
         self::assertInstanceOf(TeamAccessValidator::class, $validators[1]);
+        // The public endpoint is the ONLY consumer allowed to resolve a team by name
+        // without membership; it must construct the validator with the public-lookup flag
+        // enabled (first ctor arg), while every other controller leaves it off (IDOR gate).
+        $args = (new \ReflectionProperty(TeamAccessValidator::class, 'args'))->getValue($validators[1]);
+        self::assertSame([true], $args);
     }
 }

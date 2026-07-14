@@ -19,7 +19,9 @@ class TeamPublicMembersController extends KleinController
     protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
-        $this->appendValidator(new TeamAccessValidator($this));
+        // Pass true to allow public, membership-free team lookup by name — this is the only
+        // endpoint permitted to do so (see TeamAccessValidator::_validate, CWE-639 IDOR gate).
+        $this->appendValidator(new TeamAccessValidator($this, true));
     }
 
     /**

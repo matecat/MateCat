@@ -26,10 +26,16 @@ class TeamAccessValidator extends Base
 
     public function _validate(): void
     {
+        // First constructor arg: when true, a matching (id_team, team_name) pair grants access
+        // WITHOUT verifying team membership. Enabled only by the public members endpoint. When
+        // absent/false every consumer is membership-gated, so the team_name request parameter
+        // cannot be used to bypass authorization (CWE-639 IDOR).
+        $allowPublicNameLookup = !empty($this->args[0]);
+
         $id_team = $this->request->param('id_team');
         $name = (!empty($this->request->param('team_name'))) ? base64_decode($this->request->param('team_name')) : null;
 
-        if ($name !== null and strtolower($name) !== Teams::PERSONAL) {
+        if ($allowPublicNameLookup and $name !== null and strtolower($name) !== Teams::PERSONAL) {
             $this->team = (new MembershipDao($this->controller->getDatabase()))->setCacheTTL(60 * 10)->findTeamByIdAndName(
                 $id_team,
                 $name
