@@ -95,6 +95,23 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
         $this->setProjectAnalyzedCountTTL($pid);
     }
 
+    /**
+     * Delete all per-project analysis counters and the idempotency set. Called on
+     * completion so a subsequent analysis of the same PID within the 24h TTL seeds fresh
+     * instead of inheriting stale counts — replacing the old reset-on-every-doInit
+     * behavior that let a mid-run re-init wipe live progress.
+     */
+    public function clearProjectCounters(int $pid): void
+    {
+        $this->redis->del(
+            RedisKeys::PROJECT_TOT_SEGMENTS . $pid,
+            RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid,
+            RedisKeys::PROJ_EQ_WORD_COUNT . $pid,
+            RedisKeys::PROJ_ST_WORD_COUNT . $pid,
+            RedisKeys::PROJECT_ANALYZED_SEGMENTS_SET . $pid
+        );
+    }
+
     public function setProjectTotalSegments(int $pid, int $total): void
     {
         $this->redis->setex(RedisKeys::PROJECT_TOT_SEGMENTS . $pid, 60 * 60 * 24, $total);

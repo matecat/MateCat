@@ -28,6 +28,8 @@ interface AnalysisRedisServiceInterface
      */
     public function initializeProjectCounters(int $pid, int $projectSegments, int $numAnalyzed): void;
 
+    public function clearProjectCounters(int $pid): void;
+
     public function setProjectTotalSegments(int $pid, int $total): void;
 
     public function getProjectTotalSegments(int $pid): ?int;

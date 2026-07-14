@@ -2,6 +2,7 @@
 
 namespace Model\FeaturesBase;
 
+use Exception;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\IDatabase;
@@ -28,10 +29,10 @@ class BasicFeatureStruct extends AbstractDaoSilentStruct implements IDaoStruct
     public string|array|null $options;
 
     /**
-     * @return string|null
+     * @return class-string<BaseFeature>
      * @throws RuntimeException
      */
-    public function getFullyQualifiedClassName(): ?string
+    public function getFullyQualifiedClassName(): string
     {
         return PluginsLoader::getPluginClass($this->feature_code);
     }
@@ -40,7 +41,7 @@ class BasicFeatureStruct extends AbstractDaoSilentStruct implements IDaoStruct
      * @param IDatabase $db Caller's handle.
      *
      * @return BaseFeature
-     * @throws RuntimeException
+     * @throws Exception
      */
     public function toNewObject(IDatabase $db): BaseFeature
     {

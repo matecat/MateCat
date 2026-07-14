@@ -247,7 +247,6 @@ class NewController extends KleinController
         $projectStructure->due_date = (empty($request['due_date']) ? null : Utils::mysqlTimestamp(
             $request['due_date']
         ));
-        $projectStructure->target_language_mt_engine_association = $request['target_language_mt_engine_association'];
         $projectStructure->instructions = $request['instructions'];
         $projectStructure->userIsLogged = true;
         $projectStructure->uid = $user->getUid();
@@ -489,7 +488,6 @@ class NewController extends KleinController
         $metadata = $this->validateMetadataParam($metadata ?: null);
         $character_counter_mode = $this->validateCharacterCounterMode($character_counter_mode ?: null);
         $project_features = $this->appendFeaturesToProject((bool)$project_completion, (int)$mt_engine);
-        $target_language_mt_engine_association = $this->generateTargetEngineAssociation($target_lang, $mt_engine);
 
         /**
          * Subfiltering configuration (as string input):
@@ -589,7 +587,6 @@ class NewController extends KleinController
             'mt_evaluation' => $mt_evaluation,
             'character_counter_count_tags' => $character_counter_count_tags,
             'character_counter_mode' => $character_counter_mode,
-            'target_language_mt_engine_association' => $target_language_mt_engine_association,
             'mt_qe_workflow_payable_rate' => $mt_qe_PayableRate ?? null,
             'legacy_icu' => $legacy_icu,
             JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => json_encode($subfiltering_handlers),
@@ -808,26 +805,6 @@ class NewController extends KleinController
         $this->featureSet->dispatch($filterCreateProjectFeaturesEvent);
 
         return $filterCreateProjectFeaturesEvent->getProjectFeatures();
-    }
-
-    /**
-     * @param string $target_langs
-     * @param int|string $mt_engine
-     *
-     * @return array<string, int|string>
-     * @see filterCreateProjectFeatures callback
-     * @see NewController::appendFeaturesToProject()
-     * @deprecated
-     */
-    private function generateTargetEngineAssociation(string $target_langs, int|string $mt_engine): array
-    { // TODO YYY remove map association, MMT now supports all languages. Remove from ProjectManager also
-        $assoc = [];
-
-        foreach (explode(",", $target_langs) as $_matecatTarget) {
-            $assoc[$_matecatTarget] = $mt_engine;
-        }
-
-        return $assoc;
     }
 
     /**

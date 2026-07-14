@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Controllers;
 
+use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\GDrive\GDriveController;
 use Controller\Exceptions\RenderTerminatedException;
 use Controller\Views\UploadPageController;
@@ -43,6 +44,28 @@ class TestableUploadPageController extends UploadPageController
     public function render(?int $code = null): never
     {
         throw new RenderTerminatedException();
+    }
+
+    /** @var list<array{name:string,value:string,options:array<string,mixed>}> */
+    public array $cookieWrites = [];
+
+    protected function cookieManager(): CookieManager
+    {
+        $sink = &$this->cookieWrites;
+
+        return new class($sink) extends CookieManager {
+            /** @param list<array{name:string,value:string,options:array<string,mixed>}> $sink */
+            public function __construct(private array &$sink)
+            {
+            }
+
+            protected function writeCookie(string $name, string $value, array $options): bool
+            {
+                $this->sink[] = ['name' => $name, 'value' => $value, 'options' => $options];
+
+                return true;
+            }
+        };
     }
 }
 
@@ -149,28 +172,6 @@ class UploadPageViewControllerTest extends AbstractTest
             '/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/',
             $result
         );
-    }
-
-    /** @throws ReflectionException */
-    #[Test]
-    public function setEmptyCookieValueIfNoHistorySetsCookieWhenNotPresent(): void
-    {
-        $this->invokePrivate('setEmptyCookieValueIfNoHistory', [Constants::COOKIE_SOURCE_LANG]);
-
-        // The helper only reaches out to CookieManager (self-guarded in CLI); reaching
-        // this point without throwing proves the branch executed.
-        $this->addToAssertionCount(1);
-    }
-
-    /** @throws ReflectionException */
-    #[Test]
-    public function setEmptyCookieValueIfNoHistorySkipsWhenCookieAlreadyPresent(): void
-    {
-        $_COOKIE[Constants::COOKIE_SOURCE_LANG] = 'en-US';
-
-        $this->invokePrivate('setEmptyCookieValueIfNoHistory', [Constants::COOKIE_SOURCE_LANG]);
-
-        $this->assertSame('en-US', $_COOKIE[Constants::COOKIE_SOURCE_LANG]);
     }
 
     /** @throws ReflectionException */
@@ -288,5 +289,32 @@ class UploadPageViewControllerTest extends AbstractTest
                 }
             }
         }
+    }
+
+    /** @throws ReflectionException */
+    #[Test]
+    public function initLanguagePreferenceCookiesSeedsBothCookiesWhenAbsent(): void
+    {
+        $this->invokePrivate('initLanguagePreferenceCookies');
+
+        $writes = $this->controller->cookieWrites;
+        $this->assertCount(2, $writes);
+
+        $this->assertSame(Constants::COOKIE_SOURCE_LANG, $writes[0]['name']);
+        $this->assertSame(Constants::COOKIE_TARGET_LANG, $writes[1]['name']);
+        $this->assertSame(Constants::EMPTY_VAL, $writes[0]['value']);
+        $this->assertSame('Strict', $writes[0]['options']['samesite']);
+    }
+
+    /** @throws ReflectionException */
+    #[Test]
+    public function initLanguagePreferenceCookiesSkipsCookiesAlreadyPresent(): void
+    {
+        $_COOKIE[Constants::COOKIE_SOURCE_LANG] = 'en-US';
+        $_COOKIE[Constants::COOKIE_TARGET_LANG] = 'it-IT';
+
+        $this->invokePrivate('initLanguagePreferenceCookies');
+
+        $this->assertCount(0, $this->controller->cookieWrites);
     }
 }

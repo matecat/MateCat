@@ -87,7 +87,10 @@ class JobsWorker extends AbstractWorker
         $jobStruct->avg_post_editing_effort = (float)$Pee_weighted;
         $jobStruct->total_time_to_edit = $total_time_to_edit;
 
-        $this->_doLog("***** Job Split " . $jobStruct->id . "-" . $jobStruct->password . " AvgPee: " . $Pee_weighted . " ***** ");
+        $keyLength = strlen($jobStruct->password ?? '');
+        $last_digits = substr($jobStruct->password ?? '', -4);
+        $hidedPassword = str_repeat("*", max(0, $keyLength - 4)) . $last_digits;
+        $this->_doLog("***** Job Split " . $jobStruct->id . "-" . $hidedPassword . " AvgPee: " . $Pee_weighted . " ***** ");
 
         $this->jobDao->updateJobWeightedPeeAndTTE($jobStruct);
     }

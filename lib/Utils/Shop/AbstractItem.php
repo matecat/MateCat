@@ -21,7 +21,7 @@ use RuntimeException;
 /**
  * @extends ArrayObject<string, mixed>
  */
-abstract class AbstractItem extends ArrayObject implements ItemInterface
+abstract class AbstractItem extends ArrayObject
 {
 
     /**

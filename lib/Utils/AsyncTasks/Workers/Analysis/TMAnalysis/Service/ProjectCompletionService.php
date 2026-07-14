@@ -182,6 +182,8 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
                 // the project stays in the queue and another worker can retry.
                 $this->redisService->removeProjectFromQueue($queueKey, $pid);
 
+                $this->redisService->clearProjectCounters($pid);
+
                 $this->repository->destroyAllCaches($pid, $projectPassword);
             } catch (Throwable $e) {
                 $this->log("**** Finalization failed for project $pid: " . $e->getMessage());

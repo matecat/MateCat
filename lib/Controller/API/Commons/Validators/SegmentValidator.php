@@ -27,13 +27,8 @@ class SegmentValidator extends Base
      */
     protected function _validate(): void
     {
-        // JobPasswordValidator is actually useless
-        // in this case since we need to check for the segment
-        // scope inside the job.
-        //
-        // if ( !$this->validator->validate()  ) {
-        //     return false;
-        // }
+        // JobPasswordValidator is intentionally not applied here: the segment
+        // scope is checked directly against the job below.
 
         // Ensure chunk is in project
         $dao = new SegmentDao($this->controller->getDatabase());

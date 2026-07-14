@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Controllers;
 
+use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\App\CreateProjectController;
 use Exception;
 use InvalidArgumentException;
@@ -19,6 +20,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
 use Throwable;
+use Utils\Constants\Constants;
 use Utils\Logger\MatecatLogger;
 use Utils\TmKeyManagement\TmKeyStruct;
 
@@ -34,6 +36,28 @@ class TestableCreateProjectControllerApi extends CreateProjectController
 
     protected function registerValidators(): void
     {
+    }
+
+    /** @var list<array{name:string,value:string,options:array<string,mixed>}> */
+    public array $cookieWrites = [];
+
+    protected function cookieManager(): CookieManager
+    {
+        $sink = &$this->cookieWrites;
+
+        return new class($sink) extends CookieManager {
+            /** @param list<array{name:string,value:string,options:array<string,mixed>}> $sink */
+            public function __construct(private array &$sink)
+            {
+            }
+
+            protected function writeCookie(string $name, string $value, array $options): bool
+            {
+                $this->sink[] = ['name' => $name, 'value' => $value, 'options' => $options];
+
+                return true;
+            }
+        };
     }
 }
 
@@ -173,8 +197,6 @@ class CreateProjectControllerTest extends AbstractTest
         $this->assertSame('11111111-1111-1111-1111-111111111111', $data['upload_token']);
         $this->assertInstanceOf(TeamStruct::class, $data['team']);
         $this->assertSame($this->teamId(self::BASE), (int) $data['team']->id);
-        $this->assertArrayHasKey('target_language_mt_engine_association', $data);
-        $this->assertSame(['it-IT' => 1], $data['target_language_mt_engine_association']);
     }
 
     /**
@@ -664,20 +686,6 @@ class CreateProjectControllerTest extends AbstractTest
         $this->assertTrue($metadata['icu_enabled']);
     }
 
-    // ─── generateTargetEngineAssociation ───
-
-    /**
-     * @throws Throwable
-     */
-    #[Test]
-    public function generateTargetEngineAssociation_maps_each_target_to_engine(): void
-    {
-        /** @var array<string, int|null> $assoc */
-        $assoc = $this->invokePrivate('generateTargetEngineAssociation', ['it-IT,fr-FR', 5]);
-
-        $this->assertSame(['it-IT' => 5, 'fr-FR' => 5], $assoc);
-    }
-
     // ─── sanitizeTmKeyArr ───
 
     /**
@@ -789,5 +797,24 @@ class CreateProjectControllerTest extends AbstractTest
         $result = $this->invokePrivate('sanitizeTmKeyArr', [['key' => 'deadbeefdeadbeef']]);
         $this->assertArrayHasKey('r', $result);
         $this->assertArrayHasKey('w', $result);
+    }
+
+    /** @throws ReflectionException */
+    #[Test]
+    public function setLanguagePreferenceCookiesEmitsSameSiteStrictPreferenceCookies(): void
+    {
+        $this->invokePrivate('setLanguagePreferenceCookies', ['en-US', 'it-IT']);
+
+        $writes = $this->controller->cookieWrites;
+        $this->assertCount(2, $writes);
+
+        $this->assertSame(Constants::COOKIE_SOURCE_LANG, $writes[0]['name']);
+        $this->assertSame('en-US', $writes[0]['value']);
+        $this->assertSame('Strict', $writes[0]['options']['samesite']);
+        $this->assertGreaterThan(time(), $writes[0]['options']['expires']);
+
+        $this->assertSame(Constants::COOKIE_TARGET_LANG, $writes[1]['name']);
+        $this->assertSame('it-IT', $writes[1]['value']);
+        $this->assertSame('Strict', $writes[1]['options']['samesite']);
     }
 }
