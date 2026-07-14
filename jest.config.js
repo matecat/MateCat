@@ -18,7 +18,7 @@ module.exports = {
     '!<rootDir>/public/img/icons/**',
   ],
   coverageThreshold: {
-    './public/js/components/footer/': { lines: 70 },
+    './public/js/components/footer/': { lines: 80 },
     './public/js/components/review/': { lines: 40 },
     './public/js/components/quality_report/': { lines: 70 },
     './public/js/globalFunctions.js': { lines: 15 },
