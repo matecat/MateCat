@@ -162,7 +162,6 @@ class BuildProjectStructureTest extends AbstractTest
             ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value                      => null,
             'get_public_matches'                    => true,
             'due_date'                              => null,
-            'target_language_mt_engine_association'  => [],
             'instructions'                          => null,
             JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => null,
             JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => null,
@@ -995,26 +994,6 @@ class BuildProjectStructureTest extends AbstractTest
     }
 
     #[Test]
-    public function newControllerSetsTargetLanguageMtEngineAssociation(): void
-    {
-        $assoc = ['fr-FR' => 3, 'de-DE' => 5];
-        $request = $this->makeNewControllerRequest([
-            'target_language_mt_engine_association' => $assoc,
-        ]);
-        $filesFound = $this->makeFilesFound();
-
-        $ps = $this->newController->buildProjectStructure(
-            $request,
-            $filesFound,
-            'tok',
-            $this->user,
-            $this->engine,
-        );
-
-        $this->assertSame($assoc, $ps->target_language_mt_engine_association);
-    }
-
-    #[Test]
     public function newControllerSetsDueDateEmptyStringToNull(): void
     {
         // empty('') is true, so due_date should be null
@@ -1211,7 +1190,6 @@ class BuildProjectStructureTest extends AbstractTest
             JobsMetadataMarshaller::DIALECT_STRICT->value       => null,
             'only_private'                          => false,
             'due_date'                              => null,
-            'target_language_mt_engine_association'  => [],
             JobsMetadataMarshaller::TM_PRIORITIZATION->value    => null,
             JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => null,
             JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => null,
@@ -1641,28 +1619,6 @@ class BuildProjectStructureTest extends AbstractTest
         );
 
         $this->assertSame('2026-12-25 00:00:00', $ps->due_date);
-    }
-
-    #[Test]
-    public function createControllerSetsTargetLanguageMtEngineAssociation(): void
-    {
-        $assoc = ['it-IT' => 2, 'es-ES' => 4];
-        $data = $this->makeCreateControllerData([
-            'target_language_mt_engine_association' => $assoc,
-        ]);
-        $filesFound = $this->makeFilesFound();
-
-        $ps = $this->createProjectController->buildProjectStructure(
-            $data,
-            [],
-            $filesFound,
-            'tok',
-            $this->user,
-            $this->engine,
-            null,
-        );
-
-        $this->assertSame($assoc, $ps->target_language_mt_engine_association);
     }
 
     #[Test]

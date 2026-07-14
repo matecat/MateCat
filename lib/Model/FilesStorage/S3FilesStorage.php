@@ -595,7 +595,7 @@ class S3FilesStorage extends AbstractFilesStorage
             ];
         }
 
-        $fileMap = unserialize($serializedFileMap);
+        $fileMap = unserialize($serializedFileMap, ['allowed_classes' => false]);
         if (!is_array($fileMap)) {
             return [
                 'conversionHashes' => $filesHashInfo,

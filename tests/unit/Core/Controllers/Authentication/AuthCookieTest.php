@@ -14,7 +14,6 @@ use RuntimeException;
 use Utils\Registry\AppConfig;
 
 #[CoversClass(AuthCookie::class)]
-#[CoversClass(CookieManager::class)]
 class AuthCookieTest extends AbstractTest
 {
     protected function setUp(): void
@@ -32,7 +31,27 @@ class AuthCookieTest extends AbstractTest
     protected function tearDown(): void
     {
         unset($_COOKIE[AppConfig::$AUTHCOOKIENAME]);
+        AuthCookie::setCookieManager(null);
         parent::tearDown();
+    }
+
+    /**
+     * A CookieManager whose low-level write is intercepted so the emitted
+     * name/value/options can be asserted without touching PHP's setcookie().
+     */
+    private function spyingCookieManager(): CookieManager
+    {
+        return new class extends CookieManager {
+            /** @var list<array{name:string,value:string,options:array<string,mixed>}> */
+            public array $writes = [];
+
+            protected function writeCookie(string $name, string $value, array $options): bool
+            {
+                $this->writes[] = ['name' => $name, 'value' => $value, 'options' => $options];
+
+                return true;
+            }
+        };
     }
 
     #[Test]
@@ -149,7 +168,20 @@ class AuthCookieTest extends AbstractTest
             ->method('setCookieLoginTokenActive')
             ->with(42, $this->isString());
 
+        $cookieManager = $this->spyingCookieManager();
+        AuthCookie::setCookieManager($cookieManager);
+
         AuthCookie::setCredentials($user, $store);
+
+        // The signed auth cookie that actually ships to the browser.
+        $this->assertCount(1, $cookieManager->writes);
+        $write = $cookieManager->writes[0];
+        $this->assertSame(AppConfig::$AUTHCOOKIENAME, $write['name']);
+        $this->assertNotEmpty($write['value']);
+        $this->assertSame('Lax', $write['options']['samesite']);
+        $this->assertTrue($write['options']['secure']);
+        $this->assertTrue($write['options']['httponly']);
+        $this->assertGreaterThan(time(), $write['options']['expires']);
     }
 
     #[Test]
@@ -182,7 +214,16 @@ class AuthCookieTest extends AbstractTest
             ->method('removeLoginCookieFromStore')
             ->with(42, '');
 
+        $cookieManager = $this->spyingCookieManager();
+        AuthCookie::setCookieManager($cookieManager);
+
         AuthCookie::setCredentials($user, $store, true);
+
+        $this->assertCount(1, $cookieManager->writes);
+        $write = $cookieManager->writes[0];
+        $this->assertSame(AppConfig::$AUTHCOOKIENAME, $write['name']);
+        $this->assertNotEmpty($write['value']);
+        $this->assertSame('Lax', $write['options']['samesite']);
     }
 
     #[Test]
@@ -190,9 +231,19 @@ class AuthCookieTest extends AbstractTest
     {
         $_COOKIE[AppConfig::$AUTHCOOKIENAME] = 'some-value';
 
+        $cookieManager = $this->spyingCookieManager();
+        AuthCookie::setCookieManager($cookieManager);
+
         AuthCookie::destroyAuthentication();
 
         $this->assertArrayNotHasKey(AppConfig::$AUTHCOOKIENAME, $_COOKIE);
+
+        // The browser-facing deletion cookie: empty value, past expiry.
+        $this->assertCount(1, $cookieManager->writes);
+        $write = $cookieManager->writes[0];
+        $this->assertSame(AppConfig::$AUTHCOOKIENAME, $write['name']);
+        $this->assertSame('', $write['value']);
+        $this->assertLessThan(time(), $write['options']['expires']);
     }
 
     #[Test]

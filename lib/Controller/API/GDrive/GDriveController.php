@@ -89,23 +89,12 @@ class GDriveController extends AbstractStatefulKleinController
             // set the upload directory name if there are files from gDrive
             if (!$this->isAsyncReq) {
                 $guid = Utils::uuid4();
-                CookieManager::setCookie(
-                    "upload_token",
-                    $guid,
-                    [
-                        'expires' => time() + 86400,
-                        'path' => '/',
-                        'domain' => AppConfig::$COOKIE_DOMAIN,
-                        'secure' => true,
-                        'httponly' => true,
-                        'samesite' => 'Strict',
-                    ]
-                );
-                $_SESSION["upload_token"] = $_COOKIE["upload_token"] = $guid;
+                (new CookieManager())->set(Constants::COOKIE_UPLOAD_TOKEN, $guid, time() + 86400);
+                $_SESSION[Constants::COOKIE_UPLOAD_TOKEN] = $_COOKIE[Constants::COOKIE_UPLOAD_TOKEN] = $guid;
                 $this->gdriveUserSession->clearFileListFromSession();
             }
 
-            $guid = $_SESSION["upload_token"] = $_COOKIE["upload_token"];
+            $guid = $_SESSION[Constants::COOKIE_UPLOAD_TOKEN] = $_COOKIE[Constants::COOKIE_UPLOAD_TOKEN];
 
             if (!Utils::isTokenValid($guid)) {
                 throw new InvalidArgumentException("Invalid Upload Token.", ConversionHandlerStatus::INVALID_TOKEN);
@@ -190,7 +179,7 @@ class GDriveController extends AbstractStatefulKleinController
     {
         for ($i = 0; $i < count($listOfIds) && $this->isImportingSuccessful === true; $i++) {
             try {
-                $client = (new GoogleProvider())->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
+                $client = $this->getGoogleClient();
                 $this->gdriveUserSession->importFile($listOfIds[$i], $client);
             } catch (Exception $e) {
                 $this->isImportingSuccessful = false;
@@ -248,6 +237,26 @@ class GDriveController extends AbstractStatefulKleinController
         }
     }
 
+    /**
+     * Cookie writer seam: overridable in tests to capture the emitted redirect cookies.
+     */
+    protected function cookieManager(): CookieManager
+    {
+        return new CookieManager();
+    }
+
+    /**
+     * Google client factory seam: overridable in tests so the import loop can run
+     * without live OAuth configuration (GoogleProvider::getClient throws when unset).
+     *
+     * @throws Exception
+     * @throws \RuntimeException
+     */
+    protected function getGoogleClient(): \Google_Client
+    {
+        return (new GoogleProvider())->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
+    }
+
     private function doRedirect(): never
     {
         // set a cookie for callback outcome to allow the frontend to show errors
@@ -258,31 +267,21 @@ class GDriveController extends AbstractStatefulKleinController
             "error_code" => $this->error['code'] ?? null,
         ];
 
-        CookieManager::setCookie(
+        $cookieManager = $this->cookieManager();
+        $cookieManager->set(
             self::GDRIVE_OUTCOME_COOKIE_NAME,
             json_encode($outcome) ?: '',
-            [
-                'expires' => time() + 86400,
-                'path' => '/',
-                'domain' => AppConfig::$COOKIE_DOMAIN,
-                'secure' => true,
-                'httponly' => false,
-                'samesite' => 'None',
-            ]
+            time() + 86400,
+            true,
+            false,
+            'Strict'
         );
 
         // set a cookie to allow the frontend to call list endpoint
-        CookieManager::setCookie(
+        $cookieManager->set(
             self::GDRIVE_LIST_COOKIE_NAME,
-            $_SESSION["upload_token"],
-            [
-                'expires' => time() + 86400,
-                'path' => '/',
-                'domain' => AppConfig::$COOKIE_DOMAIN,
-                'secure' => true,
-                'httponly' => true,
-                'samesite' => 'Strict',
-            ]
+            $_SESSION[Constants::COOKIE_UPLOAD_TOKEN],
+            time() + 86400
         );
 
         if (AppConfig::$ENV === 'testing') {
@@ -338,18 +337,7 @@ class GDriveController extends AbstractStatefulKleinController
             $this->response->json($response);
 
             // delete the cookie
-            CookieManager::setCookie(
-                self::GDRIVE_LIST_COOKIE_NAME,
-                "",
-                [
-                    'expires' => time() - 3600,
-                    'path' => '/',
-                    'domain' => AppConfig::$COOKIE_DOMAIN,
-                    'secure' => true,
-                    'httponly' => false,
-                    'samesite' => 'None',
-                ]
-            );
+            (new CookieManager())->delete(self::GDRIVE_LIST_COOKIE_NAME);
         } catch (S3Exception $e) {
             $errorCode = 400;
             $this->response->code($errorCode);

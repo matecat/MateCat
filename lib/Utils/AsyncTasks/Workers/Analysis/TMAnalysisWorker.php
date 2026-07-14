@@ -348,6 +348,17 @@ class TMAnalysisWorker extends AbstractWorker
 
     private function doInit(int $pid): void
     {
+        // Idempotency guard. A second doInit for the same run is reached when the 30s
+        // INIT_LOCK TTL expires mid-analysis (run longer than the TTL) and another worker
+        // re-acquires the lock. Re-running initializeProjectCounters would setex-overwrite
+        // the LIVE PROJECT_NUM_SEGMENTS_DONE with a lagging DB snapshot and del the dedup
+        // set, permanently dropping in-flight increments and stranding the project below
+        // PROJECT_TOT_SEGMENTS. Skip if this run already initialized — fresh runs start
+        // clean because completion clears these keys (ProjectCompletionService).
+        if ($this->redisService->getProjectTotalSegments($pid) !== null) {
+            return;
+        }
+
         try {
             $totalSegmentsData = $this->projectCompletion->getProjectSegmentsTranslationSummary($pid);
             $totalSegments = array_pop($totalSegmentsData);

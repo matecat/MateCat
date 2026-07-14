@@ -64,7 +64,7 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
 
     public function initAuthToken(): void
     {
-        $this->confirmation_token = Utils::randomString(50, true);
+        $this->confirmation_token = Utils::randomString(50);
         $this->confirmation_token_created_at = Utils::mysqlTimestamp(time());
     }
 

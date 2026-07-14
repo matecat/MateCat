@@ -100,7 +100,7 @@ class RevisionFactory
          * This return should never happen if the review_extended plugin is loaded as mandatory (or as dependency of mandatory second_pass_review plugin)
          */
         return self::getInstance(
-            new SecondPassReview(new BasicFeatureStruct(['feature_code' => ReviewExtended::FEATURE_CODE]))
+            new SecondPassReview(new BasicFeatureStruct(['feature_code' => SecondPassReview::FEATURE_CODE]))
         )->setFeatureSet($featureSet);
     }
 

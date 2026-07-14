@@ -86,33 +86,8 @@ class CreateProjectController extends AbstractStatefulKleinController
         $this->featureSet->loadFromUserEmail($this->user->email ?? '');
         $this->data = $this->validateTheRequest();
 
-        // SET SOURCE COOKIE
-        CookieManager::setCookie(
-            Constants::COOKIE_SOURCE_LANG,
-            $this->data['source_lang'],
-            [
-                'expires' => time() + (86400 * 365),
-                'path' => '/',
-                'domain' => AppConfig::$COOKIE_DOMAIN,
-                'secure' => true,
-                'httponly' => true,
-                'samesite' => 'None',
-            ]
-        );
-
-        // SET TARGET COOKIE
-        CookieManager::setCookie(
-            Constants::COOKIE_TARGET_LANG,
-            $this->data['target_lang'],
-            [
-                'expires' => time() + (86400 * 365),
-                'path' => '/',
-                'domain' => AppConfig::$COOKIE_DOMAIN,
-                'secure' => true,
-                'httponly' => true,
-                'samesite' => 'None',
-            ]
-        );
+        // SET SOURCE / TARGET LANGUAGE COOKIES (same-site, 1-year preference)
+        $this->setLanguagePreferenceCookies($this->data['source_lang'], $this->data['target_lang']);
 
         //Search in fileNames if there's a zip file. If it's present, get filenames and add them instead of the zip file.
         $fs = FilesStorageFactory::create();
@@ -154,6 +129,24 @@ class CreateProjectController extends AbstractStatefulKleinController
             ],
             'errors' => [],
         ]);
+    }
+
+    /**
+     * Cookie writer seam: overridable in tests to capture the emitted cookies.
+     */
+    protected function cookieManager(): CookieManager
+    {
+        return new CookieManager();
+    }
+
+    /**
+     * Persists the user's source/target language choice as same-site, 1-year preference cookies.
+     */
+    protected function setLanguagePreferenceCookies(string $sourceLang, string $targetLang): void
+    {
+        $cookieManager = $this->cookieManager();
+        $cookieManager->set(Constants::COOKIE_SOURCE_LANG, $sourceLang, time() + (86400 * 365));
+        $cookieManager->set(Constants::COOKIE_TARGET_LANG, $targetLang, time() + (86400 * 365));
     }
 
     /**
@@ -415,10 +408,6 @@ class CreateProjectController extends AbstractStatefulKleinController
             $data['xliff_parameters_template_id']
         );
         $data['project_features'] = $this->appendFeaturesToProject($data['mt_engine']);
-        $data['target_language_mt_engine_association'] = $this->generateTargetEngineAssociation(
-            $data['target_lang'],
-            $data['mt_engine']
-        );
         $data['team'] = $this->setTeam($id_team ?: null);
 
         $this->setMetadataFromPostInput($data);
@@ -776,26 +765,6 @@ class CreateProjectController extends AbstractStatefulKleinController
     }
 
     /**
-     * @param string $target_langs
-     * @param int|null $mt_engine
-     *
-     * @return array<string, int|null>
-     * @see filterCreateProjectFeatures callback
-     * @see NewController::appendFeaturesToProject()
-     * @deprecated
-     */
-    private function generateTargetEngineAssociation(string $target_langs, ?int $mt_engine): array
-    { // TODO YYY remove map association, MMT now supports all languages. Remove from ProjectManager also
-        $assoc = [];
-
-        foreach (explode(",", $target_langs) as $_matecatTarget) {
-            $assoc[$_matecatTarget] = $mt_engine;
-        }
-
-        return $assoc;
-    }
-
-    /**
      * @param string|false|null $id_team
      *
      * @return TeamStruct
@@ -867,7 +836,6 @@ class CreateProjectController extends AbstractStatefulKleinController
         $projectStructure->dialect_strict = $data['dialect_strict'];
         $projectStructure->only_private = $data['only_private'];
         $projectStructure->due_date = $data['due_date'];
-        $projectStructure->target_language_mt_engine_association = $data['target_language_mt_engine_association'];
         $projectStructure->user_ip = Utils::getRealIpAddr();
         $projectStructure->HTTP_HOST = AppConfig::$HTTPHOST;
         $projectStructure->tm_prioritization = (!empty($data['tm_prioritization'])) ? $data['tm_prioritization'] : null;

@@ -257,6 +257,44 @@ class FastAnalysisTest extends AbstractTest
     }
 
     #[Test]
+    public function releaseFailedProjectLogsStructuredContextWhenParkingProject(): void
+    {
+        // Regression guard for report §11.7: the park decision must be queryable by pid/attempts/
+        // reason (structured $context), not only interpolated into a free-text message.
+        $cap    = (int)(new ReflectionClass(FastAnalysis::class))->getConstant('MAX_FAST_ANALYSIS_ATTEMPTS');
+        $daemon = $this->daemonExpectingStatusChange(7, ProjectStatus::STATUS_NOT_TO_ANALYZE);
+        $redis  = $this->seedQueueHandlerWithRedis($daemon);
+        $redis->incrReturn = $cap;
+
+        $logged = [];
+        $this->setProp($daemon, 'logger', $this->capturingStructuredLogger($logged));
+
+        $this->invoke($daemon, '_releaseFailedProject', 7, 'insert/publish failed', true);
+
+        // $logged[0] is the park/retry decision itself; _updateProject() logs separately afterwards.
+        self::assertSame('error', $logged[0]['level']);
+        self::assertSame(['pid' => 7, 'attempts' => $cap, 'reason' => 'insert/publish failed'], $logged[0]['context']);
+    }
+
+    #[Test]
+    public function releaseFailedProjectLogsStructuredContextWhenReleasingForRetry(): void
+    {
+        // Same guard as above, for the retry (below-cap) branch.
+        $daemon = $this->daemonExpectingStatusChange(7, ProjectStatus::STATUS_NEW);
+        $redis  = $this->seedQueueHandlerWithRedis($daemon);
+        $redis->incrReturn = 2;
+
+        $logged = [];
+        $this->setProp($daemon, 'logger', $this->capturingStructuredLogger($logged));
+
+        $this->invoke($daemon, '_releaseFailedProject', 7, 'insert/publish failed', true);
+
+        // $logged[0] is the park/retry decision itself; _updateProject() logs separately afterwards.
+        self::assertSame('debug', $logged[0]['level']);
+        self::assertSame(['pid' => 7, 'attempts' => 2, 'reason' => 'insert/publish failed'], $logged[0]['context']);
+    }
+
+    #[Test]
     public function alreadyAnalyzedSegmentsIsEmptyAndSkipsDbOnFirstAttempt(): void
     {
         // S1b (light): on the first attempt nothing is analyzed yet, so the .ser IS the
@@ -838,6 +876,23 @@ class FastAnalysisTest extends AbstractTest
         $logger->method('debug')->willReturnCallback(function (string $message) use (&$sink) {
             $sink[] = $message;
         });
+
+        return $logger;
+    }
+
+    /**
+     * @param list<array{level: string, message: mixed, context: array<mixed>}> $sink
+     */
+    private function capturingStructuredLogger(array &$sink): MatecatLogger
+    {
+        $logger = $this->createStub(MatecatLogger::class);
+        $capture = function (string $level) use (&$sink) {
+            return function (mixed $message, array $context = []) use (&$sink, $level) {
+                $sink[] = ['level' => $level, 'message' => $message, 'context' => $context];
+            };
+        };
+        $logger->method('debug')->willReturnCallback($capture('debug'));
+        $logger->method('error')->willReturnCallback($capture('error'));
 
         return $logger;
     }

@@ -137,14 +137,33 @@ yarn build:production  # Production build
 
 Do not add Co-Authored-By trailers to commit messages.
 
+Follow the `.github/PULL_REQUEST_TEMPLATE.md` AND the `.github/scripts/pr-readiness-check.js` when creating a Pull
+Request.
+
 Follow the project `.github/prompts/conventional-commit.prompt.md` for commit message formatting:
-- Format: `<emoji> <type>(<scope>): <description>`
+
+- Format: `<emoji> <type>(<scope>): <description>` (see emoji table below)
 - Show commit message first, wait for user approval before committing
 - Use `git commit -a` (lowercase), never `-A`
 - 100 character line limit
 - Imperative mood, no capitalization, no period
 
-Follow the `.github/PULL_REQUEST_TEMPLATE.md` AND the `.github/scripts/pr-readiness-check.js` when creating a Pull Request.
+Valid emoji Type Reference
+
+| Type     | Title                    | Emoji | Description                                                                                            | Example Scopes (non-exaustive)                                |
+|----------|--------------------------|-------|--------------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
+| build    | Builds                   | 🏗️   | Changes that affect the build system or external dependencies                                          | gulp, broccoli, npm                                           |
+| chore    | Chores                   | 🔧    | Other changes that don't modify src or test files                                                      | scripts, config                                               |
+| ci       | Continuous Integrations  | 👷    | Changes to our CI configuration files and scripts                                                      | Travis, Circle, BrowserStack, SauceLabs,github actions, husky |
+| docs     | Documentation            | 📝    | Documentation only changes                                                                             | README, API                                                   |
+| feat     | Features                 | ✨     | A new feature                                                                                          | user, payment, gallery                                        |
+| fix      | Bug Fixes                | 🐛    | A bug fix                                                                                              | auth, data                                                    |
+| perf     | Performance Improvements | ⚡️    | A code change that improves performance                                                                | query, cache                                                  |
+| refactor | Code Refactoring         | ♻️    | A code change that neither fixes a bug nor adds a feature                                              | utils, helpers                                                |
+| revert   | Reverts                  | ⏪️    | Reverts a previous commit                                                                              | query, utils,                                                 |
+| style    | Styles                   | 💄    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) | formatting                                                    |
+| test     | Tests                    | ✅     | Adding missing tests or correcting existing tests                                                      | unit, e2e                                                     |
+| i18n     |                          | 🌐    | Internationalization                                                                                   | locale, translation                                           |
 
 ### Creating worktrees
 
