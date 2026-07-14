@@ -70,13 +70,11 @@ class CancelRequestController extends KleinController
 
         $route = '/api/v3/jobs/' . $id_job . '/segment/enable/' . $id_segment;
 
-        $job = $this->performChecks($id_job, $password, $id_segment, $route);
-
-        if ($this->response->code() === 429) {
+        if ($this->isRateLimited($route)) {
             return;
         }
 
-        assert($job !== null);
+        $job = $this->performChecks($id_job, $password, $id_segment);
 
         if ($this->segmentDisabledService->isDisabled($id_segment)) {
             $this->segmentDisabledService->enable($id_segment);
@@ -105,13 +103,11 @@ class CancelRequestController extends KleinController
 
         $route = '/api/v3/jobs/' . $id_job . '/segment/disable/' . $id_segment;
 
-        $job = $this->performChecks($id_job, $password, $id_segment, $route);
-
-        if ($this->response->code() === 429) {
+        if ($this->isRateLimited($route)) {
             return;
         }
 
-        assert($job !== null);
+        $job = $this->performChecks($id_job, $password, $id_segment);
 
         if (!$this->segmentDisabledService->isDisabled($id_segment)) {
             $this->segmentDisabledService->disable($id_segment);
@@ -124,43 +120,53 @@ class CancelRequestController extends KleinController
     }
 
     /**
-     * Performs several validation checks and rate limit handling for disabling a segment in a job.
+     * Atomically checks and increments the rate limit for the current user's IP and email
+     * against the given route. Sets $this->response to the 429 response on the first identifier
+     * that exceeds the limit.
      *
-     * @param int $id_job The unique identifier of the job.
-     * @param string $password The password associated with the job for authentication.
-     * @param int $id_segment The unique identifier of the segment to be validated.
-     * @param string $route The API route being accessed.
-     *
-     * @throws NotFoundException If the job or segment is not found.
-     * @throws Exception If the user is not the owner or part of the team, or if the segment status is not "new".
+     * @throws Exception
      */
-    private function performChecks(int $id_job, string $password, int $id_segment, string $route): ?JobStruct
+    private function isRateLimited(string $route): bool
     {
         $userEmail = $this->user->email ?? "BLANK_EMAIL";
         $userIp = Utils::getRealIpAddr() ?? "127.0.0.1";
 
-        // 1. atomic check + increment rate limit
         foreach ([$userIp, $userEmail] as $identifier) {
             $rateLimitResponse = $this->checkAndIncrementRateLimit($this->response, $identifier, $route, 5);
             if ($rateLimitResponse instanceof Response) {
                 $this->response = $rateLimitResponse;
-                return null;
+                return true;
             }
         }
 
-        // 2. check job id and password
+        return false;
+    }
+
+    /**
+     * Performs several validation checks for disabling/enabling a segment in a job.
+     *
+     * @param int $id_job The unique identifier of the job.
+     * @param string $password The password associated with the job for authentication.
+     * @param int $id_segment The unique identifier of the segment to be validated.
+     *
+     * @throws NotFoundException If the job or segment is not found.
+     * @throws Exception If the user is not the owner or part of the team, or if the segment status is not "new".
+     */
+    private function performChecks(int $id_job, string $password, int $id_segment): JobStruct
+    {
+        // 1. check job id and password
         $job = $this->getJob($id_job, $password);
         if (null === $job) {
             throw new NotFoundException('Job not found.');
         }
 
-        // 3. check segment translation
+        // 2. check segment translation
         $segmentTranslation = $this->segmentTranslationDao->findBySegmentAndJob($id_segment, $id_job);
         if (null === $segmentTranslation) {
             throw new NotFoundException('Segment not found');
         }
 
-        // 4. check if user is part of the team
+        // 3. check if user is part of the team
         $project = $job->getProject(new ProjectDao($this->getDatabase()));
         $team = $project->id_team !== null ? $this->teamDao->findById($project->id_team) : null;
         if (empty($team)) {
@@ -172,7 +178,7 @@ class CancelRequestController extends KleinController
             throw new Exception('User is not part of the team');
         }
 
-        // 5. check segment status
+        // 4. check segment status
         // return 409 http code if the segment is not in "new" status
         if ($segmentTranslation->status !== TranslationStatus::STATUS_NEW) {
             throw new ConflictError('Segment is not in "new" status and cannot be disabled');
