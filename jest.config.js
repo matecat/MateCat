@@ -19,7 +19,7 @@ module.exports = {
   ],
   coverageThreshold: {
     './public/js/components/footer/': { lines: 80 },
-    './public/js/components/review/': { lines: 40 },
+    './public/js/components/review/': { lines: 80 },
     './public/js/components/quality_report/': { lines: 70 },
     './public/js/globalFunctions.js': { lines: 15 },
     './public/js/components/contextPreview/': { lines: 0 },
