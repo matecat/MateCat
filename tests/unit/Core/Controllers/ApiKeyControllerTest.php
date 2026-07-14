@@ -164,8 +164,8 @@ class ApiKeyControllerTest extends AbstractTest
         $this->assertInstanceOf(ApiKeyStruct::class, $struct);
         $this->assertSame(self::TEST_UID, $struct->uid);
         $this->assertTrue($struct->enabled);
-        $this->assertSame(20, strlen($struct->api_key));
-        $this->assertSame(20, strlen($struct->api_secret));
+        $this->assertSame(26, strlen($struct->api_key));
+        $this->assertSame(26, strlen($struct->api_secret));
         $this->assertNotSame($struct->api_key, $struct->api_secret);
     }
 
@@ -243,8 +243,8 @@ class ApiKeyControllerTest extends AbstractTest
 
         $this->assertInstanceOf(ApiKeyStruct::class, $captured);
         $this->assertSame(self::TEST_UID, $captured->uid);
-        $this->assertSame(20, strlen($captured->api_key));
-        $this->assertSame(20, strlen($captured->api_secret));
+        $this->assertSame(26, strlen($captured->api_key));
+        $this->assertSame(26, strlen($captured->api_secret));
         $this->assertNotEmpty($captured->id);
     }
 

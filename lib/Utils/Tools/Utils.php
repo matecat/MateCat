@@ -288,22 +288,48 @@ class Utils
     }
 
     /**
-     * Generate a cryptographically secure random hex string using random_bytes() (CSPRNG).
+     * Generate a cryptographically secure random string using random_int() (CSPRNG).
      *
-     * Returns 2 * ceil($maxlength / 2) lowercase hex characters ([0-9a-f]) — i.e.
-     * 4 * ceil($maxlength / 2) bits of entropy. The default (12) yields 12 chars / 48 bits.
-     * Odd $maxlength rounds up by one char; $maxlength <= 0 falls back to 12 chars.
+     * Returns exactly $length characters drawn uniformly from a 62-symbol base62
+     * alphabet ([A-Za-z0-9]) — i.e. ~5.954 bits of entropy per character. The default
+     * (16) yields ~95 bits. random_int() picks each index without modulo bias.
      *
-     * @param int $maxlength Desired length in hex chars (rounded up to the next even number)
+     * A length below 16 (~82 bits at the base36 floor) is rejected unless the caller
+     * explicitly opts in via $insecure, so weak tokens can never be produced by accident.
+     *
+     * A length below 16 throws InvalidArgumentException unless $insecure is true. The tag is
+     * intentionally omitted from @throws (like random_int's RandomException below) so the
+     * fail-fast guard does not cascade a checked-exception declaration onto every caller.
+     *
+     * @param int $length Output length in characters; must be >= 16 unless $insecure is true
+     * @param bool $insecure Explicitly allow a length below 16 (weak entropy) — use only for
+     *                       non-security values (e.g. display/name suffixes)
      *
      * @return string
      */
-    public static function randomString(int $maxlength = 12): string
+    public static function randomString(int $length = 16, bool $insecure = false): string
     {
-        /** @noinspection PhpUnhandledExceptionInspection */
-        /** @phpstan-ignore missingType.checkedException */
-        $data = random_bytes(abs((int)ceil($maxlength / 2)) ?: 6);
-        return bin2hex($data);
+        if ($length < 16 && !$insecure) {
+            /** @phpstan-ignore missingType.checkedException */
+            throw new InvalidArgumentException(
+                'randomString(): a length below 16 is insecure; pass $insecure = true to request it explicitly'
+            );
+        }
+
+        if ($length <= 0) {
+            $length = 16;
+        }
+
+        $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+        $out = '';
+        for ($i = 0; $i < $length; $i++) {
+            /** @noinspection PhpUnhandledExceptionInspection */
+            /** @phpstan-ignore missingType.checkedException */
+            $out .= $alphabet[random_int(0, 61 /* strlen($alphabet) - 1 */)];
+        }
+
+        return $out;
     }
 
     public static function mysqlTimestamp(int $time): string
