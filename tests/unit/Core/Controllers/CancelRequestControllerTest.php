@@ -22,7 +22,68 @@ use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
+use Stomp\Client;
+use Stomp\StatefulStomp;
+use Stomp\Transport\Message;
+use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\TranslationStatus;
+use Utils\Registry\AppConfig;
+
+/**
+ * Test seam: allows tests to inject a queue handler backed by a stubbed transport,
+ * avoiding a real broker connection (mirrors TestableCommentController in
+ * CommentControllerTest.php).
+ */
+class TestableCancelRequestController extends CancelRequestController
+{
+    public ?AMQHandler $fakeQueueHandler = null;
+
+    protected function getQueueHandler(): AMQHandler
+    {
+        return $this->fakeQueueHandler ?? parent::getQueueHandler();
+    }
+}
+
+/**
+ * Hand-written fakes for Stomp\Client/Stomp\StatefulStomp — deliberately NOT PHPUnit
+ * mocks. PHPUnit-generated doubles for these two classes carry internal
+ * cross-references that can defer their destruction to PHP's cyclic garbage
+ * collector; when that collector finally runs, AMQHandler::__destruct() -> close()
+ * can call getClient() on a double whose configuration has already been torn down
+ * as part of the same sweep, returning null and crashing with "Call to a member
+ * function disconnect() on null". Plain subclasses with no PHPUnit-mock internals
+ * are destroyed by ordinary refcounting and don't hit this.
+ */
+class FakeStompClient extends Client
+{
+    public function disconnect($sync = false)
+    {
+        return true;
+    }
+}
+
+class FakeStatefulStomp extends StatefulStomp
+{
+    /** @var list<array{0: string, 1: Message}> */
+    public array $sentMessages = [];
+
+    public static function create(): self
+    {
+        return (new ReflectionClass(self::class))->newInstanceWithoutConstructor();
+    }
+
+    public function send($destination, Message $message)
+    {
+        $this->sentMessages[] = [$destination, $message];
+
+        return true;
+    }
+
+    public function getClient()
+    {
+        return (new ReflectionClass(FakeStompClient::class))->newInstanceWithoutConstructor();
+    }
+}
 
 #[AllowMockObjectsWithoutExpectations]
 class CancelRequestControllerTest extends AbstractTest
@@ -238,7 +299,11 @@ class CancelRequestControllerTest extends AbstractTest
         $service->method('isDisabled')->willReturn(true);
         $service->expects($this->once())->method('enable')->with(42);
 
-        $controller = $this->createActionController(segmentDisabledService: $service);
+        [$queueHandler] = $this->fakeAmqHandler();
+        $controller = $this->createActionController(
+            segmentDisabledService: $service,
+            queueHandler: $queueHandler,
+        );
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, 1],
@@ -271,12 +336,75 @@ class CancelRequestControllerTest extends AbstractTest
         $controller->enableRequest();
     }
 
+    #[Test]
+    public function enableRequestPublishesSegmentEnabledMessage(): void
+    {
+        $service = $this->createMock(SegmentDisabledService::class);
+        $service->method('isDisabled')->willReturn(true);
+
+        [$queueHandler, $stomp] = $this->fakeAmqHandler();
+
+        $controller = $this->createActionController(
+            segmentDisabledService: $service,
+            queueHandler: $queueHandler,
+        );
+
+        $this->request->method('param')->willReturnMap([
+            ['id_job', null, 1],
+            ['password', null, 'abc123'],
+            ['id_segment', null, 42],
+        ]);
+
+        $this->response->method('code')->willReturn(200);
+
+        $controller->enableRequest();
+
+        $this->assertCount(1, $stomp->sentMessages);
+        [$destination, $message] = $stomp->sentMessages[0];
+        $decoded = json_decode($message->getBody(), true);
+
+        $this->assertSame(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, $destination);
+        $this->assertSame('segment_enabled', $decoded['_type']);
+        $this->assertSame(999, $decoded['data']['id_project']);
+        $this->assertSame(42, $decoded['data']['payload']['id_segment']);
+        $this->assertSame(1, $decoded['data']['payload']['id_job']);
+        $this->assertSame(999, $decoded['data']['payload']['id_project']);
+        $this->assertFalse($decoded['data']['payload']['disabled']);
+    }
+
+    #[Test]
+    public function enableRequestDoesNotPublishWhenSegmentAlreadyEnabled(): void
+    {
+        $service = $this->createMock(SegmentDisabledService::class);
+        $service->method('isDisabled')->willReturn(false);
+
+        [$queueHandler, $stomp] = $this->fakeAmqHandler();
+
+        $controller = $this->createActionController(
+            segmentDisabledService: $service,
+            queueHandler: $queueHandler,
+        );
+
+        $this->request->method('param')->willReturnMap([
+            ['id_job', null, 1],
+            ['password', null, 'abc123'],
+            ['id_segment', null, 42],
+        ]);
+
+        $this->response->method('code')->willReturn(200);
+
+        $controller->enableRequest();
+
+        $this->assertCount(0, $stomp->sentMessages);
+    }
+
     // ─── cancelRequest tests ─────────────────────────────────────────
 
     #[Test]
     public function cancelRequestReturnsJsonWithIdSegment(): void
     {
-        $controller = $this->createActionController();
+        [$queueHandler] = $this->fakeAmqHandler();
+        $controller = $this->createActionController(queueHandler: $queueHandler);
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, 1],
@@ -319,7 +447,11 @@ class CancelRequestControllerTest extends AbstractTest
         $service->method('isDisabled')->willReturn(false);
         $service->expects($this->once())->method('disable')->with(42);
 
-        $controller = $this->createActionController(segmentDisabledService: $service);
+        [$queueHandler] = $this->fakeAmqHandler();
+        $controller = $this->createActionController(
+            segmentDisabledService: $service,
+            queueHandler: $queueHandler,
+        );
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, 1],
@@ -333,9 +465,72 @@ class CancelRequestControllerTest extends AbstractTest
     }
 
     #[Test]
+    public function cancelRequestPublishesSegmentDisabledMessage(): void
+    {
+        $service = $this->createMock(SegmentDisabledService::class);
+        $service->method('isDisabled')->willReturn(false);
+
+        [$queueHandler, $stomp] = $this->fakeAmqHandler();
+
+        $controller = $this->createActionController(
+            segmentDisabledService: $service,
+            queueHandler: $queueHandler,
+        );
+
+        $this->request->method('param')->willReturnMap([
+            ['id_job', null, 1],
+            ['password', null, 'abc123'],
+            ['id_segment', null, 42],
+        ]);
+
+        $this->response->method('code')->willReturn(200);
+
+        $controller->cancelRequest();
+
+        $this->assertCount(1, $stomp->sentMessages);
+        [$destination, $message] = $stomp->sentMessages[0];
+        $decoded = json_decode($message->getBody(), true);
+
+        $this->assertSame(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, $destination);
+        $this->assertSame('segment_disabled', $decoded['_type']);
+        $this->assertSame(999, $decoded['data']['id_project']);
+        $this->assertSame(42, $decoded['data']['payload']['id_segment']);
+        $this->assertSame(1, $decoded['data']['payload']['id_job']);
+        $this->assertSame(999, $decoded['data']['payload']['id_project']);
+        $this->assertTrue($decoded['data']['payload']['disabled']);
+    }
+
+    #[Test]
+    public function cancelRequestDoesNotPublishWhenSegmentAlreadyDisabled(): void
+    {
+        $service = $this->createMock(SegmentDisabledService::class);
+        $service->method('isDisabled')->willReturn(true);
+
+        [$queueHandler, $stomp] = $this->fakeAmqHandler();
+
+        $controller = $this->createActionController(
+            segmentDisabledService: $service,
+            queueHandler: $queueHandler,
+        );
+
+        $this->request->method('param')->willReturnMap([
+            ['id_job', null, 1],
+            ['password', null, 'abc123'],
+            ['id_segment', null, 42],
+        ]);
+
+        $this->response->method('code')->willReturn(200);
+
+        $controller->cancelRequest();
+
+        $this->assertCount(0, $stomp->sentMessages);
+    }
+
+    #[Test]
     public function cancelRequestWithDifferentSegmentId(): void
     {
-        $controller = $this->createActionController();
+        [$queueHandler] = $this->fakeAmqHandler();
+        $controller = $this->createActionController(queueHandler: $queueHandler);
 
         $this->request->method('param')->willReturnCallback(function ($key) {
             return match ($key) {
@@ -770,6 +965,7 @@ class CancelRequestControllerTest extends AbstractTest
 
     private function createActionController(
         ?SegmentDisabledService $segmentDisabledService = null,
+        ?AMQHandler $queueHandler = null,
     ): CancelRequestController {
         $teamStruct = $this->createStub(TeamStruct::class);
         $teamStruct->created_by = 123;
@@ -782,6 +978,7 @@ class CancelRequestControllerTest extends AbstractTest
 
         $jobStruct = $this->createStub(JobStruct::class);
         $jobStruct->method('getProject')->willReturn($projectStruct);
+        $jobStruct->id_project = 999;
 
         $segmentTranslation = new SegmentTranslationStruct();
         $segmentTranslation->status = TranslationStatus::STATUS_NEW;
@@ -796,7 +993,21 @@ class CancelRequestControllerTest extends AbstractTest
             user: $user,
             segmentDisabledService: $segmentDisabledService,
             teamDao: $teamDao,
+            queueHandler: $queueHandler,
         );
+    }
+
+    /**
+     * Builds a fake AMQHandler backed by FakeStatefulStomp so
+     * publishSegmentStateChange() succeeds without a real broker connection.
+     *
+     * @return array{0: AMQHandler, 1: FakeStatefulStomp}
+     */
+    private function fakeAmqHandler(): array
+    {
+        $stomp = FakeStatefulStomp::create();
+
+        return [new AMQHandler(preconfiguredStomp: $stomp), $stomp];
     }
 
     private function createControllerWithPartialMock(
@@ -807,11 +1018,14 @@ class CancelRequestControllerTest extends AbstractTest
         ?Response $rateLimitResponseEmail = null,
         ?SegmentDisabledService $segmentDisabledService = null,
         ?TeamDao $teamDao = null,
+        ?AMQHandler $queueHandler = null,
     ): CancelRequestController {
-        $controller = $this->getMockBuilder(CancelRequestController::class)
+        $controller = $this->getMockBuilder(TestableCancelRequestController::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['getJob', 'checkAndIncrementRateLimit', 'getUser'])
             ->getMock();
+
+        $controller->fakeQueueHandler = $queueHandler;
 
         $ref = new ReflectionClass(CancelRequestController::class);
 

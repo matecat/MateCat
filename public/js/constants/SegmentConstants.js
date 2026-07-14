@@ -12,6 +12,7 @@ const SegmentConstants = keyMirror({
   REMOVE_SEGMENT_CLASS: null,
   PROPAGATE_TRANSLATION: null,
   SET_SEGMENT_STATUS: null,
+  SET_SEGMENT_DISABLED: null,
   UPDATE_SEGMENTS: null,
   SET_SEGMENT_HEADER: null,
   HIDE_SEGMENT_HEADER: null,
