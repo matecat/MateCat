@@ -628,7 +628,7 @@ const SegmentActions = {
 
     const isTranslationDisabled = segment?.metadata?.some(
       ({meta_key, meta_value}) =>
-        meta_key === 'translation_disabled' && meta_value === '1',
+        meta_key === 'translation_disabled' && meta_value,
     )
 
     if (isTranslationDisabled) {

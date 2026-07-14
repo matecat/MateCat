@@ -144,10 +144,10 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
     SegmentUtils.isIceSegment.mockReturnValue(false)
   })
 
-  test('shows "Segment disabled" AlertModal when metadata has translation_disabled=1', () => {
+  test('shows "Segment disabled" AlertModal when metadata has translation_disabled=true', () => {
     const segment = {
       unlocked: true,
-      metadata: [{meta_key: 'translation_disabled', meta_value: '1'}],
+      metadata: [{meta_key: 'translation_disabled', meta_value: true}],
     }
 
     SegmentActions.handleClickOnReadOnly(segment)
@@ -189,7 +189,7 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
 
     const segment = {
       unlocked: false,
-      metadata: [{meta_key: 'translation_disabled', meta_value: '1'}],
+      metadata: [{meta_key: 'translation_disabled', meta_value: true}],
     }
 
     SegmentActions.handleClickOnReadOnly(segment)
@@ -203,10 +203,10 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
     )
   })
 
-  test('does not show disabled modal when translation_disabled is 0', () => {
+  test('does not show disabled modal when translation_disabled is false', () => {
     const segment = {
       unlocked: true,
-      metadata: [{meta_key: 'translation_disabled', meta_value: '0'}],
+      metadata: [{meta_key: 'translation_disabled', meta_value: false}],
     }
 
     SegmentActions.handleClickOnReadOnly(segment)
