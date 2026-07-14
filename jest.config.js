@@ -22,7 +22,7 @@ module.exports = {
     './public/js/components/quality_report/': { lines: 80 },
     './public/js/globalFunctions.js': { lines: 80 },
     './public/js/components/contextPreview/': { lines: 80 },
-    './public/js/components/activityLog/': { lines: 0 },
+    './public/js/components/activityLog/': { lines: 80 },
     './public/js/sse/': { lines: 0 },
     './public/js/components/xliffToTarget/': { lines: 0 },
     './public/js/setTranslationUtil.js': { lines: 5 },
