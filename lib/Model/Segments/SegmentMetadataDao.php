@@ -13,6 +13,7 @@ class SegmentMetadataDao extends AbstractDao
     const string _query_get_all = "SELECT * FROM " . self::TABLE . " WHERE id_segment = ? ";
     const string _query_get = "SELECT * FROM " . self::TABLE . " WHERE id_segment = ? and meta_key = ? ";
     const string _keymap_get_by_segment_ids = "Model\\Segments\\SegmentMetadataDao::getBySegmentIds-";
+    const string _keymap_get_all_in_range = "Model\\Segments\\SegmentMetadataDao::getAllInRange";
 
 /**
      * @throws ReflectionException
@@ -102,6 +103,7 @@ class SegmentMetadataDao extends AbstractDao
         $this->destroyGetAllCache($metadataStruct->id_segment);
         $this->destroyGetCache($metadataStruct->id_segment, $metadataStruct->meta_key);
         $this->destroyGetBySegmentIdsCache($metadataStruct->meta_key);
+        $this->destroyGetAllInRangeCache();
     }
 
     /**
@@ -127,6 +129,7 @@ class SegmentMetadataDao extends AbstractDao
         $this->destroyGetAllCache($id_segment);
         $this->destroyGetCache($id_segment, $key);
         $this->destroyGetBySegmentIdsCache($key);
+        $this->destroyGetAllInRangeCache();
     }
 
     /**
@@ -163,6 +166,15 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function destroyGetAllInRangeCache(): bool
+    {
+        return $this->_deleteCacheByKey(self::_keymap_get_all_in_range, false);
+    }
+
+    /**
      * @return array<int, SegmentMetadataCollection>
      * @throws ReflectionException
      * @throws Exception
@@ -178,7 +190,8 @@ class SegmentMetadataDao extends AbstractDao
         $results = $this->setCacheTTL($ttl)->_fetchObjectMap(
             $stmt,
             SegmentMetadataStruct::class,
-            [$startSid, $stopSid]
+            [$startSid, $stopSid],
+            self::_keymap_get_all_in_range
         );
 
         $grouped = [];
