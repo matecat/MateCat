@@ -11,7 +11,7 @@ use Model\Teams\TeamDao;
 use Model\Users\RedeemableProject;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Group;
-use Predis\Client;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 #[Group('PersistenceNeeded')]
@@ -52,8 +52,7 @@ class RedeemableProjectTest extends AbstractTest
     {
         $this->cleanFixtures();
 
-        $flusher = new Client(AppConfig::$REDIS_SERVERS);
-        $flusher->select(AppConfig::$INSTANCE_ID);
+        $flusher = (new RedisHandler())->getConnection();
         $flusher->flushdb();
 
         parent::tearDown();

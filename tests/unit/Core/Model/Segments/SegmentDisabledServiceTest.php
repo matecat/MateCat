@@ -10,6 +10,7 @@ use PDO;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 #[CoversClass(SegmentDisabledService::class)]
@@ -39,8 +40,7 @@ class SegmentDisabledServiceTest extends AbstractTest
     {
         $this->cleanFixtures();
 
-        $flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
-        $flusher->select(AppConfig::$INSTANCE_ID);
+        $flusher = (new RedisHandler())->getConnection();
         $flusher->flushdb();
 
         parent::tearDown();

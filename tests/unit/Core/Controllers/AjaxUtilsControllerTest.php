@@ -16,6 +16,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use RuntimeException;
 use Utils\Engines\MyMemory;
 use Utils\Logger\MatecatLogger;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 class TestableAjaxUtilsController extends AjaxUtilsController
@@ -213,8 +214,7 @@ class AjaxUtilsControllerTest extends AbstractTest
         // the real composition-root connection to swap+restore engine id=1.
         \TestDatabaseProvider::reset();
         $db = obtainTestDatabase();
-        $flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
-        $flusher->select(AppConfig::$INSTANCE_ID);
+        $flusher = (new RedisHandler())->getConnection();
 
         // Raw string interpolation would mangle the FQCN's backslashes (MySQL
         // treats `\` as an escape char in string literals) - bind instead.
@@ -259,8 +259,7 @@ class AjaxUtilsControllerTest extends AbstractTest
         // the real composition-root connection to swap+restore engine id=1.
         \TestDatabaseProvider::reset();
         $db = obtainTestDatabase();
-        $flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
-        $flusher->select(AppConfig::$INSTANCE_ID);
+        $flusher = (new RedisHandler())->getConnection();
 
         $swapStmt = $db->getConnection()->prepare("UPDATE `engines` SET class_load=? WHERE id=1;");
         $swapStmt->execute([FakeCheckKeyMyMemory::class]);
