@@ -158,6 +158,7 @@ Valid emoji Type Reference
 | docs     | Documentation            | 📝    | Documentation only changes                                                                             | README, API                                                   |
 | feat     | Features                 | ✨     | A new feature                                                                                          | user, payment, gallery                                        |
 | fix      | Bug Fixes                | 🐛    | A bug fix                                                                                              | auth, data                                                    |
+| security | Security Fixes           | 🔒    | A change that fixes a vulnerability or hardens against one                                             | auth, idor, xss, injection                                    |
 | perf     | Performance Improvements | ⚡️    | A code change that improves performance                                                                | query, cache                                                  |
 | refactor | Code Refactoring         | ♻️    | A code change that neither fixes a bug nor adds a feature                                              | utils, helpers                                                |
 | revert   | Reverts                  | ⏪️    | Reverts a previous commit                                                                              | query, utils,                                                 |
