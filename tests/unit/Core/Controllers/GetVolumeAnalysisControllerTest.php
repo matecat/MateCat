@@ -354,7 +354,15 @@ class GetVolumeAnalysisControllerTest extends AbstractTest
         $this->reflector->getProperty('params')->setValue($this->controller, ['id_project' => self::TEST_PROJECT_ID]);
         $this->setRequestParams(['id_project' => (string)self::TEST_PROJECT_ID, 'password' => self::TEST_PROJECT_PASSWORD]);
 
-        $response = $this->controller->analysis();
+        // analysis() calls Response::json(), which send()s the body to stdout and pollutes
+        // the test-runner output. Swallow that echo; the body is still recorded on the
+        // Response object, so the assertions below are unaffected.
+        ob_start();
+        try {
+            $response = $this->controller->analysis();
+        } finally {
+            ob_end_clean();
+        }
 
         self::assertSame(200, $response->code());
 

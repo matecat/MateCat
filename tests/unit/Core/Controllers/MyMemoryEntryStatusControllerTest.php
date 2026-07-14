@@ -107,7 +107,15 @@ class MyMemoryEntryStatusControllerTest extends AbstractTest
         $this->setProp($controller, 'database', obtainTestDatabase());
         $this->setProp($controller, 'featureSet', new FeatureSet(obtainTestDatabase()));
 
-        $controller->status();
+        // status() calls Response::json(), which send()s the body to stdout and pollutes
+        // the test-runner output. Swallow that echo; the body is still recorded on the
+        // Response object, so the assertions below are unaffected.
+        ob_start();
+        try {
+            $controller->status();
+        } finally {
+            ob_end_clean();
+        }
 
         $response = $controller->getResponse();
 
@@ -132,7 +140,15 @@ class MyMemoryEntryStatusControllerTest extends AbstractTest
         $this->setProp($controller, 'database', obtainTestDatabase());
         $this->setProp($controller, 'featureSet', new FeatureSet(obtainTestDatabase()));
 
-        $controller->status();
+        // status() calls Response::json(), which send()s the body to stdout and pollutes
+        // the test-runner output. Swallow that echo; the body is still recorded on the
+        // Response object, so the assertions below are unaffected.
+        ob_start();
+        try {
+            $controller->status();
+        } finally {
+            ob_end_clean();
+        }
 
         $response = $controller->getResponse();
 
