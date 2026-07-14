@@ -114,7 +114,7 @@ class MemoryKeyDao extends AbstractDao
                                      sum(1) AS owners_tot, 
                                      group_concat( DISTINCT m2.uid ) AS owner_uids
                              FROM " . self::TABLE . " m1
-                             LEFT JOIN " . self::TABLE . " AS m2 ON m1.key_value = m2.key_value AND m2.deleted = 0
+                             LEFT JOIN " . self::TABLE . " AS m2 ON m1.key_value = m2.key_value AND m2.deleted = 0 -- AND m1.uid != m2.uid
                              WHERE %s and m1.deleted = 0
                              GROUP BY m1.key_value
 			                 ORDER BY m1.creation_date desc";
@@ -161,17 +161,14 @@ class MemoryKeyDao extends AbstractDao
          */
         $arr_result = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $where_params);
 
-        if ($traverse) {
-            $userDao = new UserDao($this->database);
-
-            foreach ($arr_result as $k => $row) {
-                $users = $userDao->getByUids(explode(",", $row['owner_uids']));
+        $userDao = new UserDao($this->database);
+        foreach ($arr_result as $k => $row) {
+            $idList = explode(",", $row['owner_uids']);
+            if($traverse){
+                $users = $userDao->getByUids($idList);
                 $arr_result[$k]['in_users'] = $users;
             }
-        } else {
-            foreach ($arr_result as $k => $row) {
-                $arr_result[$k]['in_users'] = $row['owner_uids'];
-            }
+            $arr_result[$k]['in_users_id'] = $idList;
         }
 
         /** @var list<ShapelessConcreteStruct> $arr_result */
@@ -444,7 +441,8 @@ class MemoryKeyDao extends AbstractDao
                         'tm' => (bool)$item['tm'],
                         'glos' => (bool)$item['glos'],
                         'is_shared' => ($item['owners_tot'] > 1),
-                        'in_users' => $item['in_users'],
+                        'in_users' => $item['in_users'] ?? [],
+                        'in_users_id' => $item['in_users_id'] ?? [],
                         'owner' => in_array($item['uid'], $owner_uids),
                     ]
                 )

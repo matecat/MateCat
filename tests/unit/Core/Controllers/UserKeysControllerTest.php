@@ -15,6 +15,7 @@ use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\ClientUserFacade;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
@@ -288,9 +289,8 @@ class UserKeysControllerTest extends AbstractTest
     #[Test]
     public function getKeyUsersInfo_returns_success_with_no_in_users(): void
     {
-        // TmKeyStruct::__set rejects undeclared properties, so 'in_users' is never
-        // present on a struct built here; getKeyUsersInfo therefore iterates an
-        // empty user list and returns the empty-data success payload.
+        // in_users defaults to [] on a freshly built TmKeyStruct, so getKeyUsersInfo
+        // iterates an empty user list and returns the empty-data success payload.
         $tmKey      = new TmKeyStruct();
         $tmKey->key = 'abcdef1234567890';
 
@@ -577,17 +577,38 @@ class UserKeysControllerTest extends AbstractTest
         $this->assertCount(1, $validators);
     }
 
-    // NOTE: getKeyUsersInfo()'s "populated in_users" loop body (foreach + new
-    // ClientUserFacade(...)) is NOT covered here. TmKeyStruct::__set() (line 188)
-    // unconditionally throws UnknownPropertyException for ANY undeclared property,
-    // including "in_users" itself -- verified experimentally (Closure::bind from
-    // TmKeyStruct's own scope still triggers __set and throws). MemoryKeyDao::_buildResult()
-    // constructs TmKeyStruct via the array-form constructor, which silently *skips*
-    // unknown keys (property_exists guard) rather than assigning them -- so "in_users"
-    // can never actually land on a TmKeyStruct instance in production either. This is a
-    // pre-existing dead-code path in getKeyUsersInfo() (out of scope to fix here); the
-    // reachable branches (empty input, null tm_key, tm_key with no in_users) are already
-    // covered above.
+    /**
+     * getKeyUsersInfo()'s populated-in_users branch: in_users is now a declared
+     * TmKeyStruct property (UserStruct[]) populated by MemoryKeyDao::_buildResult()
+     * on a traverse read, so the foreach body (new ClientUserFacade(...)) is reachable.
+     * The `instanceof UserStruct` guard skips any non-UserStruct entry.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function getKeyUsersInfo_builds_facades_for_populated_in_users(): void
+    {
+        $userA = new UserStruct(['uid' => 501, 'email' => 'owner-a@example.com', 'first_name' => 'Ann', 'last_name' => 'Alpha']);
+        $userB = new UserStruct(['uid' => 502, 'email' => 'owner-b@example.com', 'first_name' => 'Bob', 'last_name' => 'Beta']);
+
+        // 'not-a-user-struct' exercises the false arm of the instanceof guard.
+        $tmKey = new TmKeyStruct([
+            'key'       => 'abcdef1234567890',
+            'is_shared' => true,
+            'in_users'  => [$userA, 'not-a-user-struct', $userB],
+        ]);
+
+        $memoryKey         = new MemoryKeyStruct();
+        $memoryKey->uid    = $this->userId(self::BASE);
+        $memoryKey->tm_key = $tmKey;
+
+        $result = $this->invokePrivate('getKeyUsersInfo', [[$memoryKey]]);
+
+        $this->assertSame([], $result['errors']);
+        $this->assertTrue($result['success']);
+        $this->assertCount(2, $result['data'], 'only the two UserStruct entries become facades');
+        $this->assertContainsOnlyInstancesOf(ClientUserFacade::class, $result['data']);
+    }
 
     // ─── removeKeyFromEngines with an adaptive engine ───
 
