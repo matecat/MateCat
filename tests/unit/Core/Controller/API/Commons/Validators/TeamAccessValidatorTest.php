@@ -115,12 +115,12 @@ class TeamAccessValidatorTest extends AbstractTest
         $this->assertSame(self::TEAM_ID, $this->controller->capturedTeam->id);
     }
 
-    // ─── IDOR regression: team_name must NOT bypass membership (default flag = false) ───
+    // ─── IDOR regression: the team_name parameter must NOT be an authorization path ───
 
     #[Test]
     public function blocks_non_member_even_when_team_name_supplied(): void
     {
-        // Attacker: authenticated but NOT a member of TEAM_ID, injects the team_name param.
+        // Attacker: authenticated but NOT a member of TEAM_ID, injects the (correct) team_name.
         $attacker = new UserStruct();
         $attacker->uid = self::ATTACKER_UID;
         $attacker->email = 'attacker_9910000@example.org';
@@ -131,7 +131,7 @@ class TeamAccessValidatorTest extends AbstractTest
             'team_name' => base64_encode(self::TEAM_NAME),
         ]);
 
-        // No public-lookup flag → uid-membership path → no row → 401.
+        // team_name is inert: access is resolved purely by membership → no row → 401.
         $validator = new TeamAccessValidator($this->controller);
 
         $this->expectException(AuthorizationError::class);
@@ -140,37 +140,14 @@ class TeamAccessValidatorTest extends AbstractTest
         $validator->_validate();
     }
 
-    // ─── name-path allowed ONLY with the public flag (public members endpoint) ───
+    // ─── the team_name parameter is ignored for members too (membership path wins) ───
 
     #[Test]
-    public function allows_name_lookup_only_when_public_flag_enabled(): void
+    public function member_is_authorized_regardless_of_team_name_param(): void
     {
-        // Non-member viewer of the public members list.
-        $viewer = new UserStruct();
-        $viewer->uid = self::ATTACKER_UID;
-        $viewer->email = 'viewer_9910000@example.org';
-        $this->setCtrlProp('user', $viewer);
-
         $this->setRequest([
             'id_team' => (string) self::TEAM_ID,
             'team_name' => base64_encode(self::TEAM_NAME),
-        ]);
-
-        $validator = new TeamAccessValidator($this->controller, true);
-        $validator->_validate();
-
-        $this->assertInstanceOf(TeamStruct::class, $validator->team);
-        $this->assertSame(self::TEAM_NAME, $validator->team->name);
-    }
-
-    // ─── PERSONAL name falls through to the user-path ───
-
-    #[Test]
-    public function personal_team_name_uses_user_path(): void
-    {
-        $this->setRequest([
-            'id_team' => (string) self::TEAM_ID,
-            'team_name' => base64_encode('personal'),
         ]);
 
         $validator = new TeamAccessValidator($this->controller);
