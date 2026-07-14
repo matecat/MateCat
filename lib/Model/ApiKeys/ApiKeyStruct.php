@@ -23,7 +23,8 @@ class ApiKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct
 
     public function validSecret(string $secret): bool
     {
-        return $this->api_secret == $secret;
+        // hash_equals for a constant-time comparison — avoids leaking the secret via timing.
+        return hash_equals($this->api_secret, $secret);
     }
 
     /**
