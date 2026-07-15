@@ -226,6 +226,7 @@ jobs:
           coverage-threshold: '80'
           exclude-patterns: '.github/**, daemons/**'
           ai-enabled: 'true'
+          ai-model: 'openai/gpt-4.1'
 
   slack-notification:
     name: Slack Notification

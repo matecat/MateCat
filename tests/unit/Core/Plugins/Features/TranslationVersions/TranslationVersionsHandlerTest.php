@@ -19,10 +19,10 @@ use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use Plugins\Features\TranslationVersions\Handlers\TranslationVersionsHandler;
-use Predis\Client;
 use RuntimeException;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 /**
@@ -132,8 +132,7 @@ class TranslationVersionsHandlerTest extends AbstractTest
     {
         $this->cleanFixtures();
 
-        $flusher = new Client(AppConfig::$REDIS_SERVERS);
-        $flusher->select(AppConfig::$INSTANCE_ID);
+        $flusher = (new RedisHandler())->getConnection();
         $flusher->flushdb();
 
         parent::tearDown();

@@ -172,6 +172,32 @@ class LoginControllerTest extends AbstractTest
         $this->assertSame(403, $this->controller->getResponse()->code());
     }
 
+    #[Test]
+    public function login_returns_403_when_xsrf_token_not_bound_to_session(): void
+    {
+        $this->rateLimiter->method('checkAndIncrement')->willReturn(null);
+
+        // validly-signed token that was never issued to THIS session (attacker-supplied)
+        $jwt = new SimpleJWT(
+            ['csrf' => Utils::uuid4()],
+            AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
+            AppConfig::$AUTHSECRET,
+            60
+        );
+
+        $headers = $this->createStub(\Klein\DataCollection\HeaderDataCollection::class);
+        $headers->method('get')->willReturn($jwt->jsonSerialize());
+
+        $this->request->method('params')->willReturn(['email' => 'test@example.com', 'password' => 'pass']);
+        $this->request->method('headers')->willReturn($headers);
+
+        $_SESSION = []; // no login_csrf was ever issued to this session
+
+        $this->controller->login();
+
+        $this->assertSame(403, $this->controller->getResponse()->code());
+    }
+
     // ─── login (user lookup) ─────────────────────────────────────────
 
     #[Test]
@@ -179,12 +205,14 @@ class LoginControllerTest extends AbstractTest
     {
         $this->rateLimiter->method('checkAndIncrement')->willReturn(null);
 
+        $csrf = Utils::uuid4();
         $jwt = new SimpleJWT(
-            ['csrf' => Utils::uuid4()],
+            ['csrf' => $csrf],
             AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
             AppConfig::$AUTHSECRET,
             60
         );
+        $_SESSION['login_csrf'] = $csrf;
 
         $headers = $this->createStub(\Klein\DataCollection\HeaderDataCollection::class);
         $headers->method('get')->willReturn($jwt->jsonSerialize());
@@ -206,12 +234,14 @@ class LoginControllerTest extends AbstractTest
     {
         $this->rateLimiter->method('checkAndIncrement')->willReturn(null);
 
+        $csrf = Utils::uuid4();
         $jwt = new SimpleJWT(
-            ['csrf' => Utils::uuid4()],
+            ['csrf' => $csrf],
             AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
             AppConfig::$AUTHSECRET,
             60
         );
+        $_SESSION['login_csrf'] = $csrf;
 
         $headers = $this->createStub(\Klein\DataCollection\HeaderDataCollection::class);
         $headers->method('get')->willReturn($jwt->jsonSerialize());
@@ -244,6 +274,7 @@ class LoginControllerTest extends AbstractTest
 
         $this->assertSame(200, $this->controller->getResponse()->code());
         $this->assertNotNull($this->controller->getResponse()->headers()->get(AppConfig::$XSRF_TOKEN));
+        $this->assertArrayHasKey('login_csrf', $_SESSION);
     }
 
     // ─── socketToken ─────────────────────────────────────────────────

@@ -136,10 +136,14 @@ class StatsV2ControllerTest extends AbstractTest
     #[Test]
     public function registerValidators_resolves_chunk_via_valid_job_and_password_request(): void
     {
-        $this->setProp('request', new Request([
+        $requestParams = [
             'id_job'   => (string)$this->jobId(self::BASE),
             'password' => self::JOB_PASSWORD,
-        ]));
+        ];
+        $this->setProp('request', new Request($requestParams));
+        // mirror prod: KleinController merges request params into $this->params, which the
+        // validator ctor reads via getParams() (the stub bypasses afterConstruct's merge)
+        $this->setProp('params', $requestParams);
 
         $this->reflector->getProperty('userIsLogged')->setValue($this->controller, true);
 

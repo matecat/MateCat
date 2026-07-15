@@ -10,6 +10,7 @@ use Model\Users\UserStruct;
 use PDO;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 /**
@@ -74,8 +75,7 @@ class CreateUserTest extends AbstractTest
     public function tearDown(): void
     {
         $this->database_instance->getConnection()->query($this->sql_delete_user);
-        $this->flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
-        $this->flusher->select(AppConfig::$INSTANCE_ID);
+        $this->flusher = (new RedisHandler())->getConnection();
         $this->flusher->flushdb();
         parent::tearDown();
     }

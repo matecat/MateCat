@@ -10,6 +10,7 @@ use Model\Engines\Structs\EngineStruct;
 use PDO;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 
@@ -59,7 +60,7 @@ class CrudEngineTest extends AbstractTest
 
         $this->engine_DAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
 
-        $this->flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
+        $this->flusher = (new RedisHandler())->getConnection();
         $this->engine_struct_param = new EngineStruct();
         $this->engine_struct_param->id = $this->engine_id;
         $this->engine_struct_param->uid = $this->user_id;

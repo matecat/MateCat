@@ -2,6 +2,8 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 /**
  * Get feedback for translation by AI (will receive response socket channel)
+ * @param {string} [idJob=config.id_job]
+ * @param {string} [password=config.password]
  * @param {string} [sourceLanguage=config.source_code]
  * @param {string} [targetLanguage=config.target_code]
  * @param {string} [idClient=config.id_client]
@@ -13,6 +15,8 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 
 export const aiFeedback = async ({
+  idJob = config.id_job,
+  password = config.password,
   sourceLanguage = config.source_code,
   targetLanguage = config.target_code,
   idClient = config.id_client,
@@ -22,6 +26,8 @@ export const aiFeedback = async ({
   style,
 }) => {
   const dataParams = {
+    id_job: idJob,
+    password: password,
     source_language: sourceLanguage,
     target_language: targetLanguage,
     id_client: idClient,

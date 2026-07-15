@@ -8,6 +8,7 @@ use PDO;
 use Predis\Client;
 use RuntimeException;
 use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
 
 /**
  * Shared harness for real-SQL DAO tests (plan dao-realsql-90.md, Wave 1 / T1).
@@ -87,7 +88,7 @@ trait RealSqlDaoTestTrait
      */
     private function resolvedDbName(): string
     {
-        return (string)\Utils\Registry\AppConfig::$DB_DATABASE;
+        return (string)AppConfig::$DB_DATABASE;
     }
 
     private function isCiEnv(): bool
@@ -101,7 +102,7 @@ trait RealSqlDaoTestTrait
      */
     private function isRecognisedTestEnv(): bool
     {
-        return \Utils\Registry\AppConfig::$ENV === 'testing' || $this->isCiEnv();
+        return AppConfig::$ENV === 'testing' || $this->isCiEnv();
     }
 
     /**
@@ -121,7 +122,7 @@ trait RealSqlDaoTestTrait
         $reason = sprintf(
             'RealSql DB write guard tripped: resolved DB "%s" is not allowlisted (^unittest_) or not a test env (ENV=%s, CI_ENV=%s).',
             $db,
-            (string)\Utils\Registry\AppConfig::$ENV,
+            (string)AppConfig::$ENV,
             $this->isCiEnv() ? '1' : '0'
         );
 
@@ -146,10 +147,10 @@ trait RealSqlDaoTestTrait
     {
         if ($this->realSqlConnection === null) {
             $this->realSqlConnection = obtainTestDatabase(
-                \Utils\Registry\AppConfig::$DB_SERVER,
-                \Utils\Registry\AppConfig::$DB_USER,
-                \Utils\Registry\AppConfig::$DB_PASS,
-                \Utils\Registry\AppConfig::$DB_DATABASE
+                AppConfig::$DB_SERVER,
+                AppConfig::$DB_USER,
+                AppConfig::$DB_PASS,
+                AppConfig::$DB_DATABASE
             );
             $this->realSqlConnection->getConnection(); // force connect
         }
@@ -192,22 +193,14 @@ trait RealSqlDaoTestTrait
     }
 
     /**
-     * Flush the DAO cache on BOTH the DAO index (DB 11 via INSTANCE_ID) AND index 0 (S-5).
-     *
-     * The DAO index is the one new tests and DAOs write. Index 0 is flushed too because 33
-     * legacy tests call raw flushdb() on DB 0; flushing both here keeps legacy + new callers
-     * covered without editing those files (the v3 explicit exception to the ADD-only rule).
-     * Also resets the static cache handle (M-4) is done separately in tearDown.
+     * Flush the DAO cache on the DAO index (DB 11 via INSTANCE_ID) — the DB that DAOs and
+     * DaoCacheTrait actually write to. DB 0 is deliberately NOT flushed: it holds the local
+     * app's session, and the DAO cache never lives there. The static cache handle (M-4) is
+     * reset separately in tearDown.
      */
     protected function flushDaoCache(): void
     {
-        // DAO index (DB 11).
         $this->daoCacheRedis()->flushdb();
-
-        // Index 0 (legacy callers). Reuse the same server; select DB 0 explicitly.
-        $servers = (string)\Utils\Registry\AppConfig::$REDIS_SERVERS;
-        $dsn = $servers . (str_contains($servers, '?') ? '&' : '?') . 'database=0';
-        (new Client($dsn))->flushdb();
     }
 
     /**
@@ -283,8 +276,8 @@ trait RealSqlDaoTestTrait
 
         // (4) reset static handles (processIsolation=false leak guard, M-4).
         AbstractDao::setCacheConnection(null);
-        if (class_exists('\\TestHelpers\\TestDatabaseProvider') && property_exists('\\TestHelpers\\TestDatabaseProvider', 'override')) {
-            TestDatabaseProvider::$override = null;
+        if (class_exists('\\TestDatabaseProvider')) {
+            \TestDatabaseProvider::reset();
         }
 
         $this->fixtures = null;
@@ -384,8 +377,8 @@ trait RealSqlDaoTestTrait
 
         // (4) reset static handles (processIsolation=false leak guard, M-4).
         AbstractDao::setCacheConnection(null);
-        if (class_exists('\\TestHelpers\\TestDatabaseProvider') && property_exists('\\TestHelpers\\TestDatabaseProvider', 'override')) {
-            TestDatabaseProvider::$override = null;
+        if (class_exists('\\TestDatabaseProvider')) {
+            \TestDatabaseProvider::reset();
         }
 
         $this->fixtures = null;

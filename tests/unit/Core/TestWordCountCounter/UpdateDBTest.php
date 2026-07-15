@@ -11,6 +11,7 @@ use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 /**
@@ -153,8 +154,7 @@ class UpdateDBTest extends AbstractTest
 
         $this->word_counter = new CounterModel(obtainTestDatabase(), $this->word_count_struct);
 
-        $this->flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
-        $this->flusher->select(AppConfig::$INSTANCE_ID);
+        $this->flusher = (new RedisHandler())->getConnection();
         $this->flusher->flushdb();
     }
 
@@ -162,7 +162,6 @@ class UpdateDBTest extends AbstractTest
     {
         $this->database_instance->getConnection()->query($this->sql_delete_job);
         $this->database_instance->getConnection()->query($this->sql_delete_first_segment);
-        $this->flusher->select(AppConfig::$INSTANCE_ID);
         $this->flusher->flushDB();
         parent::tearDown();
     }

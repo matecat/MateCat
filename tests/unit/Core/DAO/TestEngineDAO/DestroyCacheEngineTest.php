@@ -9,6 +9,7 @@ use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 /**
@@ -40,7 +41,7 @@ class DestroyCacheEngineTest extends AbstractTest
         $this->engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
 
         $this->engine_struct = new EngineStruct();
-        $this->cache = new \Predis\Client(AppConfig::$REDIS_SERVERS);
+        $this->cache = (new RedisHandler())->getConnection();
     }
 
     public function tearDown(): void
