@@ -20,6 +20,7 @@ use Model\Users\ClientUserFacade;
 use Model\Users\MetadataDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
@@ -344,10 +345,56 @@ class UserKeysControllerTest extends AbstractTest
             'description' => '<script>alert(1)</script>',
         ]);
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-3);
+        try {
+            $this->invokePrivate('validateTheRequest');
+            $this->fail('Expected InvalidArgumentException was not thrown');
+        } catch (InvalidArgumentException $e) {
+            $this->assertSame(-3, $e->getCode());
+            $this->assertStringContainsString('&lt;', $e->getMessage());
+            $this->assertStringContainsString('&gt;', $e->getMessage());
+            $this->assertStringContainsString('&amp;', $e->getMessage());
+            $this->assertStringContainsString('&quot;', $e->getMessage());
+            $this->assertStringContainsString('&#39;', $e->getMessage());
+            $this->assertStringContainsString(
+                'https://gist.github.com/mauretto78/83db58b7023a2f7bb26b252360d3692a',
+                $e->getMessage()
+            );
+        }
+    }
 
-        $this->invokePrivate('validateTheRequest');
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    #[DataProvider('forbiddenDescriptionCharacterProvider')]
+    public function validateTheRequest_throws_minus_three_for_each_forbidden_character(string $char): void
+    {
+        $this->setRequestParams([
+            'key'         => 'abcdef1234567890',
+            'description' => "Glossary {$char} name",
+        ]);
+
+        try {
+            $this->invokePrivate('validateTheRequest');
+            $this->fail('Expected InvalidArgumentException was not thrown');
+        } catch (InvalidArgumentException $e) {
+            $this->assertSame(-3, $e->getCode());
+            $this->assertStringContainsString('Resource names cannot contain', $e->getMessage());
+        }
+    }
+
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function forbiddenDescriptionCharacterProvider(): array
+    {
+        return [
+            'less-than'    => ['<'],
+            'greater-than' => ['>'],
+            'ampersand'    => ['&'],
+            'double-quote' => ['"'],
+            'single-quote' => ["'"],
+        ];
     }
 
     // ─── getMkDao ───
