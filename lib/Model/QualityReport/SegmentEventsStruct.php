@@ -26,9 +26,9 @@ class SegmentEventsStruct extends AbstractDaoObjectStruct implements IDaoStruct
      */
     protected int $id_segment;
     /**
-     * @var string
+     * @var string|null
      */
-    protected string $translation;
+    protected ?string $translation;
     /**
      * @var int
      */

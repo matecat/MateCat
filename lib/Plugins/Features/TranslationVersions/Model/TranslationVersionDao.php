@@ -250,6 +250,7 @@ class TranslationVersionDao extends AbstractDao
 
     /**
      * @param list<int> $segments_id
+     * @param int $job_id
      *
      * @return list<SegmentEventsStruct>
      * @throws PDOException
@@ -262,7 +263,7 @@ class TranslationVersionDao extends AbstractDao
 
         $query = "
             SELECT
-                stv.id_segment,
+                COALESCE(stv.id_segment, ste.id_segment) AS id_segment,
                 stv.translation,
                 ste.version_number,
                 ste.source_page
@@ -277,7 +278,7 @@ class TranslationVersionDao extends AbstractDao
                  WHERE id_segment IN ( $prepare_str_segments_id )
                    AND id_job = ?
             ) AS stv
-            JOIN (
+            RIGHT JOIN (
                    SELECT MAX(version_number) AS version_number, ste.id_segment, ste.source_page
                    FROM segment_translation_events ste
                    WHERE id_segment IN ( $prepare_str_segments_id )
@@ -370,6 +371,39 @@ class TranslationVersionDao extends AbstractDao
         ]);
 
         return $stmt->rowCount();
+    }
+
+    /**
+     * Atomically insert or update a version record, handling concurrent duplicate key writes.
+     *
+     * Uses INSERT … ON DUPLICATE KEY UPDATE so that two concurrent transactions saving the
+     * same version number do not race: the last writer wins and no exception is thrown.
+     *
+     * @throws PDOException
+     */
+    public function upsertVersion(TranslationVersionStruct $new_version): void
+    {
+        $sql = "INSERT INTO segment_translation_versions
+                    (id_job, id_segment, translation, version_number, time_to_edit, old_status, new_status)
+                VALUES
+                    (:id_job, :id_segment, :translation, :version_number, :time_to_edit, :old_status, :new_status)
+                ON DUPLICATE KEY UPDATE
+                    translation  = VALUES(translation),
+                    time_to_edit = VALUES(time_to_edit),
+                    old_status   = VALUES(old_status),
+                    new_status   = VALUES(new_status)";
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'id_job'         => $new_version->id_job,
+            'id_segment'     => $new_version->id_segment,
+            'translation'    => $new_version->translation,
+            'version_number' => $new_version->version_number,
+            'time_to_edit'   => $new_version->time_to_edit,
+            'old_status'     => $new_version->old_status,
+            'new_status'     => $new_version->new_status,
+        ]);
     }
 
     /**

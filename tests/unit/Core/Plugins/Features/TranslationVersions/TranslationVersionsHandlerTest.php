@@ -195,9 +195,6 @@ class TranslationVersionsHandlerTest extends AbstractTest
     public function saveVersionAndIncrementReturnsTrueAndIncrementsVersion(): void
     {
         $dao = $this->createStub(TranslationVersionDao::class);
-        $dao->method('getVersionNumberForTranslation')->willReturn(false);
-        $dao->method('saveVersion')->willReturn(true);
-
         $handler = $this->makeHandler($dao);
 
         $old = $this->makeTranslation('old text', TranslationStatus::STATUS_TRANSLATED, 2);
@@ -209,32 +206,33 @@ class TranslationVersionsHandlerTest extends AbstractTest
         $this->assertSame(3, $new->version_number);
     }
 
+    /**
+     * Regression: before the fix, a concurrent write that caused updateVersion() to return 0
+     * ("no rows changed" — identical translation already saved by a racing request) would
+     * suppress the version increment. upsertVersion() always succeeds and the handler always
+     * returns true when the translation text changed.
+     */
     #[Test]
-    public function saveVersionAndIncrementUpdatesExistingVersion(): void
+    public function saveVersionAndIncrementReturnsTrueEvenWhenConcurrentWriteOccurred(): void
     {
-        $existingVersion = new TranslationVersionStruct(['id' => 1]);
-        $dao = $this->createStub(TranslationVersionDao::class);
-        $dao->method('getVersionNumberForTranslation')->willReturn($existingVersion);
-        $dao->method('updateVersion')->willReturn(1);
+        $dao = $this->createMock(TranslationVersionDao::class);
+        $dao->expects($this->once())->method('upsertVersion');
 
         $handler = $this->makeHandler($dao);
 
-        $old = $this->makeTranslation('old text', TranslationStatus::STATUS_TRANSLATED, 2);
-        $new = $this->makeTranslation('new text', TranslationStatus::STATUS_TRANSLATED, 2);
+        $old = $this->makeTranslation('old text', TranslationStatus::STATUS_TRANSLATED, 1);
+        $new = $this->makeTranslation('new text', TranslationStatus::STATUS_TRANSLATED, 1);
 
         $result = $handler->saveVersionAndIncrement($new, $old);
 
         $this->assertTrue($result);
-        $this->assertSame(3, $new->version_number);
+        $this->assertSame(2, $new->version_number);
     }
 
     #[Test]
     public function saveVersionAndIncrementHandlesNullVersionNumbers(): void
     {
         $dao = $this->createStub(TranslationVersionDao::class);
-        $dao->method('getVersionNumberForTranslation')->willReturn(false);
-        $dao->method('saveVersion')->willReturn(true);
-
         $handler = $this->makeHandler($dao);
 
         $old = $this->makeTranslation('old text', TranslationStatus::STATUS_TRANSLATED, null);
