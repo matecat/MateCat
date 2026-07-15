@@ -165,9 +165,10 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
     SegmentActions.handleClickOnReadOnly(segment)
 
     expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
-      'Alert',
+      'ConfirmMessage',
       {
-        text: 'This segment has been disabled by the project owner, so it cannot be translated.',
+        text: 'This segment was disabled by the project owner and cannot be edited.',
+        successText: 'Got it',
       },
       'Segment disabled',
     )
@@ -188,9 +189,10 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
       }),
     )
     expect(ModalsActions.showModalComponent).not.toHaveBeenCalledWith(
-      'Alert',
+      'ConfirmMessage',
       expect.objectContaining({
-        text: 'This segment has been disabled by the project owner, so it cannot be translated.',
+        text: 'This segment was disabled by the project owner and cannot be edited.',
+        successText: 'Got it',
       }),
       'Segment disabled',
     )
@@ -224,9 +226,10 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
     SegmentActions.handleClickOnReadOnly(segment)
 
     expect(ModalsActions.showModalComponent).not.toHaveBeenCalledWith(
-      'Alert',
+      'ConfirmMessage',
       expect.objectContaining({
-        text: 'This segment has been disabled by the project owner, so it cannot be translated.',
+        text: 'This segment was disabled by the project owner and cannot be edited.',
+        successText: 'Got it',
       }),
       'Segment disabled',
     )
