@@ -3,6 +3,7 @@
 namespace Utils\AsyncTasks\Workers;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Predis\Client;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
@@ -37,10 +38,10 @@ class AIAssistantWorker extends AbstractWorker
      * @throws ReflectionException
      * @throws Exception
      */
-    public function __construct(AMQHandler $queueHandler, ?Client $redis = null)
+    public function __construct(AMQHandler $queueHandler, IDatabase $database)
     {
-        parent::__construct($queueHandler);
-        $this->redis = $redis ?? $queueHandler->getRedisClient();
+        parent::__construct($queueHandler, $database);
+        $this->redis = $queueHandler->getRedisClient();
     }
 
     /**

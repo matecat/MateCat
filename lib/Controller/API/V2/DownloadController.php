@@ -174,7 +174,7 @@ class DownloadController extends AbstractDownloadController
             $this->forceXliff = true;
         }
 
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet($this->getDatabase());
         $this->processDownload();
         $this->finalize($forceXliff);
     }
@@ -205,18 +205,18 @@ class DownloadController extends AbstractDownloadController
             if (empty($chunkReviewStruct)) {
                 throw new NotFoundException("Not found.");
             }
-            $jobData = $chunkReviewStruct->getChunk();
+            $jobData = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
         }
 
         $this->job = $jobData;
 
-        $this->project = $this->job->getProject();
+        $this->project = $this->job->getProject(new ProjectDao($this->getDatabase()));
 
         $this->featureSet->loadForProject($this->project);
 
         //get storage object
         $fs = FilesStorageFactory::create();
-        $files_job = $fs->getFilesForJob($this->id_job);
+        $files_job = $fs->getFilesForJob($this->getDatabase(), $this->id_job);
 
         $output_content = [];
 
@@ -293,7 +293,7 @@ class DownloadController extends AbstractDownloadController
                     if ($this->disableErrorCheck === true) {
                         $xliffReplacerCallback = new SilentXliffReplacerCallback();
                     } else {
-                        $xliffReplacerCallback = new XliffReplacerCallback($this->featureSet, $this->job->source, $jobData['target'], $this->job);
+                        $xliffReplacerCallback = new XliffReplacerCallback($this->featureSet, $this->job->source, $jobData['target'], $this->job, $this->getDatabase());
                     }
 
                     // run xliff replacer
@@ -684,7 +684,9 @@ class DownloadController extends AbstractDownloadController
      * @param array<int|string, array<string, mixed>> $output_content
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
+     *
+     * @codeCoverageIgnore integration-only: builds a live Google OAuth client and refreshes GDrive tokens.
      */
     private function startRemoteFileService(array $output_content): void
     {
@@ -718,6 +720,8 @@ class DownloadController extends AbstractDownloadController
 
     /**
      * @throws Exception
+     *
+     * @codeCoverageIgnore integration-only: streams JSON built from live GDrive getFileLink() calls.
      */
     private function outputResultForOriginalFiles(): void
     {
@@ -763,6 +767,8 @@ class DownloadController extends AbstractDownloadController
      *
      * @throws Exception
      * @throws TypeError
+     *
+     * @codeCoverageIgnore integration-only: pushes converted content to GDrive via RemoteFileService::updateFile().
      */
     private function updateRemoteFiles(array $output_content): void
     {
@@ -780,7 +786,7 @@ class DownloadController extends AbstractDownloadController
      *
      * @return array<int|string, ZipContentObject>
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function getOutputContentsWithZipFiles(array $output_content): array
     {
@@ -862,7 +868,9 @@ class DownloadController extends AbstractDownloadController
      * @return string
      * @throws ReflectionException
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
+     *
+     * @codeCoverageIgnore integration-only: rebuilds a ZipArchive on disk (tempnam/copy/S3 fetch) from real zip files.
      */
     public function reBuildZipContent(string $zipFileName, array $newInternalZipFiles): string
     {
@@ -966,6 +974,8 @@ class DownloadController extends AbstractDownloadController
      * @throws Exception
      * @throws \Psr\Log\InvalidArgumentException
      * @throws ReflectionException
+     *
+     * @codeCoverageIgnore integration-only: downloads an object from S3 to a tmp path.
      */
     public function transferZipFromS3ToTmpDir(string $zipPath, string $tmpDir): void
     {

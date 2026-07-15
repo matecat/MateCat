@@ -23,7 +23,7 @@ class MetadataDaoTest extends AbstractTest
     {
         parent::setUp();
 
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->beginTransaction();
 
         $this->testProjectId = self::BASE_TEST_PROJECT_ID + random_int(1, 999);
@@ -35,12 +35,12 @@ class MetadataDaoTest extends AbstractTest
 
         $conn->exec('DELETE FROM project_metadata WHERE id_project = ' . $this->testProjectId);
 
-        $this->dao = new MetadataDao(Database::obtain());
+        $this->dao = new MetadataDao(obtainTestDatabase());
     }
 
     protected function tearDown(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         if ($conn->inTransaction()) {
             $conn->rollBack();
         }
@@ -70,23 +70,21 @@ class MetadataDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function getReturnsNullWhenKeyDoesNotExist(): void
+    public function getValueReturnsNullWhenKeyDoesNotExist(): void
     {
-        $result = $this->dao->get($this->testProjectId, 'missing_key');
+        $result = $this->dao->getValue($this->testProjectId, 'missing_key');
 
         $this->assertNull($result);
     }
 
     #[Test]
-    public function getReturnsUnmarshalledMetadataWhenKeyExists(): void
+    public function getValueReturnsUnmarshalledValueWhenKeyExists(): void
     {
         $this->dao->set($this->testProjectId, ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value, '85');
 
-        $result = $this->dao->get($this->testProjectId, ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value);
+        $result = $this->dao->getValue($this->testProjectId, ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value);
 
-        $this->assertNotNull($result);
-        $this->assertSame(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value, $result->key);
-        $this->assertSame(85, $result->value);
+        $this->assertSame(85, $result);
     }
 
     #[Test]
@@ -95,12 +93,11 @@ class MetadataDaoTest extends AbstractTest
         $firstInsert = $this->dao->set($this->testProjectId, 'upsert_key', 'first_value');
         $update = $this->dao->set($this->testProjectId, 'upsert_key', 'second_value');
 
-        $row = $this->dao->get($this->testProjectId, 'upsert_key');
+        $value = $this->dao->getValue($this->testProjectId, 'upsert_key');
 
         $this->assertTrue($firstInsert);
         $this->assertTrue($update);
-        $this->assertNotNull($row);
-        $this->assertSame('second_value', $row->value);
+        $this->assertSame('second_value', $value);
         $this->assertCount(1, $this->dao->allByProjectId($this->testProjectId));
     }
 
@@ -114,8 +111,8 @@ class MetadataDaoTest extends AbstractTest
             'new_key' => 'fresh',
         ]);
 
-        $this->assertSame('new', $this->dao->get($this->testProjectId, 'existing_key')?->value);
-        $this->assertSame('fresh', $this->dao->get($this->testProjectId, 'new_key')?->value);
+        $this->assertSame('new', $this->dao->getValue($this->testProjectId, 'existing_key'));
+        $this->assertSame('fresh', $this->dao->getValue($this->testProjectId, 'new_key'));
     }
 
     #[Test]
@@ -128,18 +125,18 @@ class MetadataDaoTest extends AbstractTest
 
         $countAfter = count($this->dao->allByProjectId($this->testProjectId));
         $this->assertSame($countBefore, $countAfter);
-        $this->assertSame('untouched_value', $this->dao->get($this->testProjectId, 'untouched_key')?->value);
+        $this->assertSame('untouched_value', $this->dao->getValue($this->testProjectId, 'untouched_key'));
     }
 
     #[Test]
     public function deleteRemovesMetadataKey(): void
     {
         $this->dao->set($this->testProjectId, 'delete_key', 'to_remove');
-        $this->assertNotNull($this->dao->get($this->testProjectId, 'delete_key'));
+        $this->assertNotNull($this->dao->getValue($this->testProjectId, 'delete_key'));
 
         $this->dao->delete($this->testProjectId, 'delete_key');
 
-        $this->assertNull($this->dao->get($this->testProjectId, 'delete_key'));
+        $this->assertNull($this->dao->getValue($this->testProjectId, 'delete_key'));
     }
 
     #[Test]
@@ -161,7 +158,7 @@ class MetadataDaoTest extends AbstractTest
         $chunk->id = 321;
         $chunk->password = 'chunk_pwd';
 
-        $result = (new MetadataDao)->buildChunkKey('base_key', $chunk);
+        $result = (new MetadataDao(obtainTestDatabase()))->buildChunkKey('base_key', $chunk);
 
         $this->assertSame('base_key_chunk_321_chunk_pwd', $result);
     }

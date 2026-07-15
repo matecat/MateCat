@@ -24,10 +24,10 @@ class ChangePasswordModel
     private UserStruct $user;
     private UserDao $userDao;
 
-    public function __construct(UserStruct $user, ?UserDao $userDao = null)
+    public function __construct(UserStruct $user, UserDao $userDao)
     {
         $this->user = $user;
-        $this->userDao = $userDao ?? new UserDao();
+        $this->userDao = $userDao;
     }
 
     /**

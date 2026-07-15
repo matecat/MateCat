@@ -6,6 +6,8 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use DivisionByZeroError;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Response;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
@@ -47,6 +49,8 @@ class PayableRateController extends KleinController
     /**
      * @return Response
      * @throws DivisionByZeroError
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      * @throws TypeError
      */
     public function index(): Response
@@ -74,6 +78,8 @@ class PayableRateController extends KleinController
 
     /**
      * @return Response
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      * @throws TypeError
      */
     public function create(): Response
@@ -117,6 +123,8 @@ class PayableRateController extends KleinController
 
     /**
      * @return Response
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function delete(): Response
     {
@@ -144,6 +152,8 @@ class PayableRateController extends KleinController
 
     /**
      * @return Response
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      * @throws TypeError
      */
     public function edit(): Response
@@ -193,6 +203,8 @@ class PayableRateController extends KleinController
 
     /**
      * @return Response
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function view(): Response
     {
@@ -219,6 +231,8 @@ class PayableRateController extends KleinController
      * This is the Payable Rate Model JSON schema
      *
      * @return Response
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function schema(): Response
     {
@@ -229,6 +243,8 @@ class PayableRateController extends KleinController
      * Validate a Payable Rate Model template
      *
      * @return Response
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      * @throws TypeError
      */
     public function validate(): Response

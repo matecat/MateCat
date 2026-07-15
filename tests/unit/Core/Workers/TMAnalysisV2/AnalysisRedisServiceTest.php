@@ -177,30 +177,62 @@ class AnalysisRedisServiceTest extends AbstractTest
     }
 
     #[Test]
-    public function incrementAnalyzedCount_callsThreeIncrbyWithScaledValues(): void
+    public function incrementAnalyzedCount_runsIdempotentEvalWithScaledValues(): void
     {
-        $pid         = 42;
-        $numSegments = 5;
-        $eqWc        = 10;
-        $stWc        = 8;
+        $pid       = 42;
+        $idSegment = 777;
+        $idJob     = 3;
+        $eqWc      = 10;
+        $stWc      = 8;
 
-        $this->service->incrementAnalyzedCount($pid, $numSegments, $eqWc, $stWc);
+        $this->service->incrementAnalyzedCount($pid, $idSegment, $idJob, $eqWc, $stWc);
 
-        $calls = $this->redisSpy->getCallsFor('incrby');
-        $this->assertCount(3, $calls);
+        // The counter update must be a single atomic Lua script (idempotent under the
+        // applyPostCommitSideEffects retry loop), not a bare MULTI of INCRBYs.
+        $this->assertCount(0, $this->redisSpy->getCallsFor('incrby'));
 
-        $this->assertSame(
-            [RedisKeys::PROJ_EQ_WORD_COUNT . $pid, $eqWc * RedisKeys::WORD_COUNT_SCALE],
-            $calls[0]['args']
-        );
-        $this->assertSame(
-            [RedisKeys::PROJ_ST_WORD_COUNT . $pid, $stWc * RedisKeys::WORD_COUNT_SCALE],
-            $calls[1]['args']
-        );
-        $this->assertSame(
-            [RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $numSegments],
-            $calls[2]['args']
-        );
+        $calls = $this->redisSpy->getCallsFor('eval');
+        $this->assertCount(1, $calls);
+
+        $args = $calls[0]['args'];
+        // args: [script, numkeys, KEYS..., ARGV...]
+        $this->assertIsString($args[0]);
+        $this->assertStringContainsString('SADD', $args[0]);
+        $this->assertStringContainsString('SCARD', $args[0]);
+        $this->assertSame(4, $args[1]);
+        // KEYS: idempotency set, analyzed counter, eq wc, st wc
+        $this->assertSame(RedisKeys::PROJECT_ANALYZED_SEGMENTS_SET . $pid, $args[2]);
+        $this->assertSame(RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $args[3]);
+        $this->assertSame(RedisKeys::PROJ_EQ_WORD_COUNT . $pid, $args[4]);
+        $this->assertSame(RedisKeys::PROJ_ST_WORD_COUNT . $pid, $args[5]);
+        // ARGV: id_segment:id_job (the dedup member), analyzed delta, scaled eq, scaled st, ttl
+        $this->assertSame($idSegment . ':' . $idJob, $args[6]);
+        $this->assertSame('1', $args[7]);
+        $this->assertSame((string)($eqWc * RedisKeys::WORD_COUNT_SCALE), $args[8]);
+        $this->assertSame((string)($stWc * RedisKeys::WORD_COUNT_SCALE), $args[9]);
+        $this->assertSame('86400', $args[10]);
+    }
+
+    #[Test]
+    public function incrementAnalyzedCount_dedupesPerSegmentAndJobNotPerSegment(): void
+    {
+        // A source segment shared by N target-language jobs produces N distinct analysis units
+        // (one segment_translation row per (id_segment, id_job)), each of which must be counted.
+        // Keying the idempotency set on id_segment ALONE collapsed them to one, so the analyzed
+        // counter could never reach a total that counts per (segment, job) — multi-language
+        // projects stranded at FAST_OK. The dedup member must be "id_segment:id_job".
+        $pid       = 42;
+        $idSegment = 777;
+
+        $this->service->incrementAnalyzedCount($pid, $idSegment, 3, 10, 8);
+        $this->service->incrementAnalyzedCount($pid, $idSegment, 4, 10, 8);
+
+        $calls = $this->redisSpy->getCallsFor('eval');
+        $this->assertCount(2, $calls);
+        // same source segment, different job → two DISTINCT set members, so both increment
+        $this->assertSame('777:3', $calls[0]['args'][6]);
+        $this->assertSame('777:4', $calls[1]['args'][6]);
+        $this->assertNotSame($calls[0]['args'][6], $calls[1]['args'][6]);
     }
 
     #[Test]
@@ -214,7 +246,9 @@ class AnalysisRedisServiceTest extends AbstractTest
         $calls = $this->redisSpy->getCallsFor('set');
         $this->assertCount(1, $calls);
         $this->assertSame(
-            [RedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, 1, 'EX', 86400, 'NX'],
+            // Bounded TTL (300s) for crash-safety; wide margin over the finalization
+            // critical section it guards. NX preserved. Was 86400s.
+            [RedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, 1, 'EX', 300, 'NX'],
             $calls[0]['args']
         );
     }
@@ -316,7 +350,9 @@ class AnalysisRedisServiceTest extends AbstractTest
     public function waitForInitialization_returnsFalse_whenTimeout(): void
     {
         $pid = 42;
-        // Don't set either key — both stay null
+        // Winner holds the init lock but has not published the counters yet, so waiting
+        // is correct. Neither counter is set — the loser should poll until the timeout.
+        $this->redisSpy->setReturnForKey(RedisKeys::PROJECT_INIT_SEMAPHORE . $pid, '1');
 
         $start = hrtime(true);
         $result = $this->service->waitForInitialization($pid, 100);
@@ -327,15 +363,78 @@ class AnalysisRedisServiceTest extends AbstractTest
     }
 
     #[Test]
+    public function waitForInitialization_returnsFalseImmediately_whenInitLockAbandoned(): void
+    {
+        $pid = 42;
+        // No init semaphore and no counters: the winner abandoned initialization (failed
+        // doInit released the lock, or crashed and its TTL expired). The loser must bail
+        // immediately so it can re-acquire and re-init — not block for the full timeout
+        // waiting on counters that will never arrive.
+        $start = hrtime(true);
+        $result = $this->service->waitForInitialization($pid, 5000);
+        $elapsedMs = (hrtime(true) - $start) / 1_000_000;
+
+        $this->assertFalse($result);
+        $this->assertLessThan(100, $elapsedMs);
+    }
+
+    #[Test]
     public function waitForInitialization_waits_whenOnlyTotSegmentsExists(): void
     {
         $pid = 42;
-        // Only set PROJECT_TOT_SEGMENTS — PROJECT_NUM_SEGMENTS_DONE is missing (TOCTOU scenario)
+        // Winner still holds the init lock, and only PROJECT_TOT_SEGMENTS is set —
+        // PROJECT_NUM_SEGMENTS_DONE is missing (TOCTOU scenario). The loser must keep
+        // polling (not early-exit) because init is still in progress.
+        $this->redisSpy->setReturnForKey(RedisKeys::PROJECT_INIT_SEMAPHORE . $pid, '1');
         $this->redisSpy->setReturnForKey(RedisKeys::PROJECT_TOT_SEGMENTS . $pid, '50');
 
         $result = $this->service->waitForInitialization($pid, 100);
 
         // Should timeout because second key is missing
         $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function releaseInitLock_callsDelWithInitSemaphoreKey(): void
+    {
+        $pid = 42;
+
+        $this->service->releaseInitLock($pid);
+
+        $calls = $this->redisSpy->getCallsFor('del');
+        $this->assertCount(1, $calls);
+        $this->assertSame([RedisKeys::PROJECT_INIT_SEMAPHORE . $pid], $calls[0]['args']);
+    }
+
+    #[Test]
+    public function initializeProjectCounters_delsAnalyzedSegmentsSetInsideTransaction(): void
+    {
+        $pid = 42;
+
+        $this->service->initializeProjectCounters($pid, 100, 10);
+
+        // The spy runs the transaction closure against itself, so the inner commands are
+        // recorded. Each run must start with an empty idempotency set, so the closure
+        // deletes PROJECT_ANALYZED_SEGMENTS_SET before writing the counters.
+        $delCalls = $this->redisSpy->getCallsFor('del');
+        $this->assertCount(1, $delCalls);
+        $this->assertSame([RedisKeys::PROJECT_ANALYZED_SEGMENTS_SET . $pid], $delCalls[0]['args']);
+
+        // The counters are written as ABSOLUTE resets (setex, not incrby) so re-analysis of
+        // the same PID within the 24h TTL does not accumulate onto stale values. Expect four
+        // setex calls: tot_segments, eq_wc, st_wc and num_segments_done. No incrby.
+        $setexCalls = $this->redisSpy->getCallsFor('setex');
+        $this->assertCount(4, $setexCalls);
+        $this->assertSame(0, $this->redisSpy->countCallsFor('incrby'));
+
+        $setexByKey = [];
+        foreach ($setexCalls as $call) {
+            $setexByKey[$call['args'][0]] = [$call['args'][1], $call['args'][2]];
+        }
+
+        $this->assertSame([86400, 100], $setexByKey[RedisKeys::PROJECT_TOT_SEGMENTS . $pid]);
+        $this->assertSame([86400, 0], $setexByKey[RedisKeys::PROJ_EQ_WORD_COUNT . $pid]);
+        $this->assertSame([86400, 0], $setexByKey[RedisKeys::PROJ_ST_WORD_COUNT . $pid]);
+        $this->assertSame([86400, 10], $setexByKey[RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid]);
     }
 }

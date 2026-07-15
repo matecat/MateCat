@@ -20,6 +20,7 @@ use Model\Teams\MembershipDao;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamModel;
 use Model\Teams\TeamStruct;
+use Model\Users\UserDao;
 use ReflectionException;
 use Throwable;
 use Utils\Constants\Teams;
@@ -81,7 +82,8 @@ class TeamsController extends KleinController
             'type' => $params['type']
         ]);
 
-        $model = new TeamModel($teamStruct);
+        $userDao = new UserDao($this->getDatabase());
+        $model = new TeamModel($teamStruct, $userDao, new TeamDao($this->getDatabase()));
         $memberEmails = is_array($params['members']) ? $params['members'] : [];
         foreach ($memberEmails as $email) {
             if (is_string($email)) {
@@ -91,7 +93,7 @@ class TeamsController extends KleinController
         $model->setUser($this->user);
 
         $team = $model->create();
-        $formatted = new Team();
+        $formatted = new Team($userDao, null);
 
         $this->refreshClientSessionIfNotApi();
 
@@ -144,11 +146,14 @@ class TeamsController extends KleinController
         $orgId = $org->id ?? throw new \RuntimeException('Team has no id');
         $memberList = (new MembershipDao($this->getDatabase()))->getMemberListByTeamId($orgId);
 
+        $userDao = new UserDao($this->getDatabase());
         foreach ($memberList as $user) {
-            (new MembershipDao($this->getDatabase()))->destroyCacheUserTeams($user->getUser()); // clean the cache for all team users to see the changes
+            (new MembershipDao($this->getDatabase()))->destroyCacheUserTeams(
+                $user->getUser($userDao)
+            ); // clean the cache for all team users to see the changes
         }
 
-        $formatted = new Team([$org]);
+        $formatted = new Team($userDao, [$org]);
 
         $this->refreshClientSessionIfNotApi();
 
@@ -163,7 +168,7 @@ class TeamsController extends KleinController
     public function getTeamList(): void
     {
         $teamList = (new MembershipDao($this->getDatabase()))->findUserTeams($this->user);
-        $formatted = new Team($teamList);
+        $formatted = new Team(new UserDao($this->getDatabase()), $teamList);
         $this->response->json(['teams' => $formatted->render()]);
     }
 

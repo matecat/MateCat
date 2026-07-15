@@ -359,8 +359,8 @@ class AbstractFilesStorageTest extends AbstractTest
         $mockFs = $this->createStub(\Model\FilesStorage\FilesystemAdapter::class);
         $mockFs->method('iterateDirectory')->willThrowException(new \RuntimeException('not found'));
 
-        $fs = new FsFilesStorage($mockFs, $mockDb);
-        $results = $fs->getFilesForJob(1, false);
+        $fs = new FsFilesStorage($mockFs);
+        $results = $fs->getFilesForJob($mockDb, 1, false);
 
         $this->assertCount(1, $results);
         $this->assertSame('application/xml', $results[0]['mime_type']);
@@ -378,8 +378,8 @@ class AbstractFilesStorageTest extends AbstractTest
         $mockDb = $this->createStub(IDatabase::class);
         $mockDb->method('getConnection')->willReturn($mockPdo);
 
-        $fs = new FsFilesStorage(null, $mockDb);
-        $results = $fs->getFilesForJob(999, true);
+        $fs = new FsFilesStorage(null);
+        $results = $fs->getFilesForJob($mockDb, 999, true);
 
         $this->assertEmpty($results);
     }
@@ -408,8 +408,8 @@ class AbstractFilesStorageTest extends AbstractTest
         $mockFs = $this->createStub(\Model\FilesStorage\FilesystemAdapter::class);
         $mockFs->method('iterateDirectory')->willThrowException(new \RuntimeException('not found'));
 
-        $fs = new FsFilesStorage($mockFs, $mockDb);
-        $results = $fs->getFilesForJob(1, true);
+        $fs = new FsFilesStorage($mockFs);
+        $results = $fs->getFilesForJob($mockDb, 1, true);
 
         $this->assertCount(1, $results);
         $this->assertArrayHasKey('xliffFilePath', $results[0]);

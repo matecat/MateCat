@@ -6,6 +6,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Model\Conversion\Upload;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
@@ -30,8 +31,8 @@ class TMXFileController extends KleinController
     public function import(): void
     {
         $request = $this->validateTheRequest();
-        $TMService = new TMSService();
-        $file = $TMService->uploadFile($this->request->files()->all(), $request['disable_upload_limit']);
+        $TMService = $this->createTMSService();
+        $file = (new Upload())->uploadFiles($this->request->files()->all(), $request['disable_upload_limit']);
 
         $uuids = [];
 
@@ -88,13 +89,24 @@ class TMXFileController extends KleinController
     public function importStatus(): void
     {
         $uuid = filter_var($this->request->param('uuid'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
-        $TMService = new TMSService();
+        $TMService = $this->createTMSService();
         $status = $TMService->tmxUploadStatus($uuid !== false ? $uuid : '');
 
         $this->response->json([
             'errors' => [],
             'data' => $status['data'],
         ]);
+    }
+
+    /**
+     * Testability seam: overridden in tests to return a stub, avoiding the
+     * real MyMemory engine construction and its outbound HTTP calls.
+     *
+     * @throws Exception
+     */
+    protected function createTMSService(): TMSService
+    {
+        return new TMSService($this->getDatabase());
     }
 
     /**

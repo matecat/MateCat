@@ -11,6 +11,7 @@ namespace Matecat\Core\Controllers;
  */
 
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
+use Controller\API\Commons\Validators\Base as ValidatorBase;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Controller\Exceptions\RenderTerminatedException;
 use Controller\Views\ActivityLogController;
@@ -43,12 +44,25 @@ class TestableActivityLogViewController extends ActivityLogController
     /** @var array<string, mixed> */
     public array $lastViewData = [];
     public int $lastViewCode = 200;
+    public bool $forceInvalidRequest = false;
 
     public function setView(string $template_name, array $params = [], int $code = 200): void
     {
         $this->lastTemplate = $template_name;
         $this->lastViewData = $params;
         $this->lastViewCode = $code;
+    }
+
+    /**
+     * @return array<string, mixed>|false|null
+     */
+    protected function validateTheRequest(): false|array|null
+    {
+        if ($this->forceInvalidRequest) {
+            return false;
+        }
+
+        return parent::validateTheRequest();
     }
 
     /**
@@ -93,7 +107,8 @@ class ActivityLogViewControllerTest extends AbstractTest
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->createMock(Response::class));
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createMock(MatecatLogger::class));
-        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet());
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
 
         $user = new UserStruct();
         $user->uid = $this->userId(self::BASE);
@@ -131,7 +146,7 @@ class ActivityLogViewControllerTest extends AbstractTest
      */
     private function seedActivityLog(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec(
             "INSERT IGNORE INTO activity_log (ID, id_project, id_job, action, ip, uid, event_date) VALUES ("
             . self::ACTIVITY_ID . ", " . $this->projectId(self::BASE) . ", " . $this->jobId(self::BASE)
@@ -144,7 +159,7 @@ class ActivityLogViewControllerTest extends AbstractTest
      */
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM activity_log WHERE ID = " . self::ACTIVITY_ID);
         $this->cleanFragments(self::BASE);
     }
@@ -224,6 +239,55 @@ class ActivityLogViewControllerTest extends AbstractTest
         } catch (RenderTerminatedException) {
             $this->assertSame('activity_log_not_found.html', $this->controller->lastTemplate);
             $this->assertSame((string) $this->projectId(self::BASE), $this->controller->lastViewData['projectID']);
+        }
+    }
+
+    // ─── renderView guard branch ───
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function renderViewSetsProjectNotFoundTemplateWhenRequestIsNotArray(): void
+    {
+        $this->controller->forceInvalidRequest = true;
+
+        try {
+            $this->controller->renderView();
+            $this->fail('Expected RenderTerminatedException');
+        } catch (RenderTerminatedException) {
+            $this->assertSame('project_not_found.html', $this->controller->lastTemplate);
+            $this->assertSame(404, $this->controller->lastViewCode);
+        }
+    }
+
+    // ─── ProjectPasswordValidator onFailure closure ───
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function projectPasswordValidatorOnFailureSetsProjectNotFoundTemplate(): void
+    {
+        $realReflector = new ReflectionClass(ActivityLogController::class);
+        $realReflector->getMethod('registerValidators')->invoke($this->controller);
+
+        /** @var list<mixed> $validators */
+        $validators = $this->reflector->getProperty('validators')->getValue($this->controller);
+        $this->assertCount(2, $validators);
+        $passwordValidator = $validators[1];
+        $this->assertInstanceOf(ProjectPasswordValidator::class, $passwordValidator);
+
+        $baseReflector = new ReflectionClass(ValidatorBase::class);
+        $callback = $baseReflector->getProperty('_failureCallback')->getValue($passwordValidator);
+        $this->assertInstanceOf(\Closure::class, $callback);
+
+        try {
+            $callback(new \Exception('forced project password validator failure'));
+            $this->fail('Expected RenderTerminatedException');
+        } catch (RenderTerminatedException) {
+            $this->assertSame('project_not_found.html', $this->controller->lastTemplate);
+            $this->assertSame(404, $this->controller->lastViewCode);
         }
     }
 

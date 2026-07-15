@@ -53,7 +53,7 @@ class GlossaryImportTest extends AbstractTest
     {
         parent::setUp();
         $this->key_param = "a6043e606ac9b5d7ff24";
-        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -63,7 +63,7 @@ class GlossaryImportTest extends AbstractTest
          */
         $this->engine_struct_param = $eng[0];
 
-        $this->engine_MyMemory = new MyMemory($this->engine_struct_param);
+        $this->engine_MyMemory = new MyMemory($this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 
     public function tearDown(): void
@@ -183,7 +183,7 @@ class GlossaryImportTest extends AbstractTest
          * @var $this ->engine_MyMemory MyMemory
          *            mocking _call
          */
-        $this->engine_MyMemory = @$this->getMockBuilder('\Utils\Engines\MyMemory')->setConstructorArgs([$this->engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $this->engine_MyMemory = @$this->getMockBuilder('\Utils\Engines\MyMemory')->setConstructorArgs([$this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
         $this->engine_MyMemory->expects($this->once())->method('_call')->willReturn($rawValue_error);
 
 

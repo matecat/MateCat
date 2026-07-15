@@ -57,6 +57,15 @@ class ViewLoginRedirectValidatorTestController extends BaseKleinViewController
         throw new RedirectSimulatedException();
     }
 
+    public bool $signinRedirectWasCalled = false;
+
+    public function redirectToSignin(): never
+    {
+        $this->signinRedirectWasCalled = true;
+        // Sentinel instead of header()/exit so the not-logged-in branch is testable.
+        throw new SigninRedirectSimulatedException();
+    }
+
     public function index(): void {}
 }
 
@@ -67,22 +76,23 @@ class ViewLoginRedirectValidatorTestController extends BaseKleinViewController
 class RedirectSimulatedException extends \RuntimeException {}
 
 /**
+ * Sentinel for the signin-redirect (not-logged-in) branch.
+ */
+class SigninRedirectSimulatedException extends \RuntimeException {}
+
+/**
  * Tests for ViewLoginRedirectValidator.
  *
  * Reserved ID block base: 9_935_000  Owner: ctrltest_9935000@example.org
  *
  * Branch analysis
  * ───────────────
- * A) Logged in, no $_SESSION['wanted_url']  → does nothing          ✓ testable
- * B) Logged in, $_SESSION['wanted_url'] set → redirectToWantedUrl() ✓ testable via stub
- * C) NOT logged in                          → line 31 sets SESSION,
- *                                             line 32 calls header(),
- *                                             line 33 calls bare `exit`
- *    Line 33 of ViewLoginRedirectValidator.php is a bare `exit` that terminates
- *    the PHP process. It cannot be intercepted within the same process — PHPUnit
- *    itself would be killed. This branch requires subprocess isolation (proc_open
- *    or runkit) which is outside unit-test scope.
- *    Blocker: ViewLoginRedirectValidator.php line 33 — bare `exit`.
+ * A) Logged in, no $_SESSION['wanted_url']  → does nothing            ✓ testable
+ * B) Logged in, $_SESSION['wanted_url'] set → redirectToWantedUrl()   ✓ testable via stub
+ * C) NOT logged in                          → redirectToSignin()      ✓ testable via stub
+ *    The header()/exit side-effect now lives in BaseKleinViewController::redirectToSignin()
+ *    (a `never` method), mirroring redirectToWantedUrl(). The validator only delegates, so
+ *    the not-logged-in branch is exercised by overriding redirectToSignin() with a sentinel.
  */
 #[AllowMockObjectsWithoutExpectations]
 class ViewLoginRedirectValidatorTest extends AbstractTest
@@ -114,6 +124,24 @@ class ViewLoginRedirectValidatorTest extends AbstractTest
         $validator->_validate();
 
         $this->assertFalse($this->controller->redirectWasCalled);
+    }
+
+    // ─── C: not logged in — redirectToSignin() must fire ────────────────────
+
+    #[Test]
+    public function calls_redirectToSignin_when_not_logged_in(): void
+    {
+        $this->controller->loginState = false;
+
+        $validator = new ViewLoginRedirectValidator($this->controller);
+
+        $this->expectException(SigninRedirectSimulatedException::class);
+
+        try {
+            $validator->_validate();
+        } finally {
+            $this->assertTrue($this->controller->signinRedirectWasCalled);
+        }
     }
 
     // ─── B: logged in with wanted_url — redirectToWantedUrl() must fire ──────

@@ -10,7 +10,7 @@
 namespace Utils\TaskRunner\Commons;
 
 use Exception;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use PDOException;
 use SplObserver;
 use SplSubject;
@@ -67,6 +67,14 @@ abstract class AbstractWorker implements SplSubject
     protected AMQHandler $_queueHandler;
 
     /**
+     * The per-process database handle. One instance per worker process.
+     * Defaults to the process-local Database singleton; injectable for tests.
+     *
+     * @var IDatabase
+     */
+    protected IDatabase $database;
+
+    /**
      * Number of times the worker must be retried in case of error
      *
      * @var int
@@ -74,13 +82,23 @@ abstract class AbstractWorker implements SplSubject
     protected int $maxRequeueNum = 100;
 
     /**
-     * TMAnalysisWorker constructor.
+     * AbstractWorker constructor.
      *
      * @param AMQHandler $queueHandler
+     * @param IDatabase  $database Per-process DB handle, supplied by the composition root (Executor/daemon).
      */
-    public function __construct(AMQHandler $queueHandler)
+    public function __construct(AMQHandler $queueHandler, IDatabase $database)
     {
         $this->_queueHandler = $queueHandler;
+        $this->database = $database;
+    }
+
+    /**
+     * @return IDatabase the per-process database handle
+     */
+    public function getDatabaseHandler(): IDatabase
+    {
+        return $this->database;
     }
 
     /**
@@ -239,8 +257,7 @@ abstract class AbstractWorker implements SplSubject
      */
     protected function _checkDatabaseConnection(): void
     {
-        /** @var Database $db */
-        $db = Database::obtain();
+        $db = $this->database;
         try {
             $db->ping();
         } catch (PDOException $e) {

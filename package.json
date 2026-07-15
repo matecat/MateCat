@@ -1,7 +1,7 @@
 {
   "scripts": {
     "preversion": "",
-    "version": "sed -i \"s/version .*/version = \\\"v${npm_package_version}\\\"/g\" ./inc/version.ini",
+    "version": "sed -i.bak \"s/version .*/version = \\\"v${npm_package_version}\\\"/g\" \"./inc/version.ini\" && rm -f \"./inc/version.ini.bak\"",
     "postversion": "git add ./inc/version.ini && git commit --amend --no-edit && git tag -d v${npm_package_version} && git tag -a v${npm_package_version} -m'v${npm_package_version}'",
     "format": "prettier --write .",
     "lint": "eslint --ignore-path .gitignore .",
@@ -60,7 +60,7 @@
   },
   "devDependencies": {
     "@babel/core": "^8.0.0",
-    "@babel/eslint-parser": "^7.28.5",
+    "@babel/eslint-parser": "^8.0.0",
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-react": "^7.28.5",
     "@sentry/vite-plugin": "^5.2.0",
@@ -98,5 +98,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "3.5.53"
+  "version": "4.0.8"
 }

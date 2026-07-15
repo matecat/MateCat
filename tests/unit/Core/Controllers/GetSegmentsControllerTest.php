@@ -8,6 +8,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
+use Model\DataAccess\IDatabase;
 use Model\Files\MetadataDao as FilesMetadataDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobMetadataDao;
@@ -50,27 +51,27 @@ class TestableGetSegmentsController extends GetSegmentsController
 
     protected function createSegmentDao(): SegmentDao
     {
-        return $this->fakeSegmentDao ?? new SegmentDao();
+        return $this->fakeSegmentDao ?? new SegmentDao(obtainTestDatabase());
     }
 
     protected function createProjectMetadataDao(): ProjectMetadataDao
     {
-        return $this->fakeProjectMetadataDao ?? new ProjectMetadataDao();
+        return $this->fakeProjectMetadataDao ?? new ProjectMetadataDao(obtainTestDatabase());
     }
 
     protected function createFilesMetadataDao(): FilesMetadataDao
     {
-        return $this->fakeFilesMetadataDao ?? new FilesMetadataDao();
+        return $this->fakeFilesMetadataDao ?? new FilesMetadataDao(obtainTestDatabase());
     }
 
     protected function createJobMetadataDao(): JobMetadataDao
     {
-        return $this->fakeJobMetadataDao ?? new JobMetadataDao();
+        return $this->fakeJobMetadataDao ?? new JobMetadataDao(obtainTestDatabase());
     }
 
     protected function createSegmentMetadataDao(): SegmentMetadataDao
     {
-        return $this->fakeSegmentMetadataDao ?? new SegmentMetadataDao();
+        return $this->fakeSegmentMetadataDao ?? new SegmentMetadataDao(obtainTestDatabase());
     }
 }
 
@@ -430,11 +431,9 @@ class GetSegmentsControllerTest extends AbstractTest
         $this->controller->fakeSegmentDao = $segmentDao;
 
         $icuStruct = $this->createStub(MetadataStruct::class);
-        $icuStruct->value = null;
-
         $projectMetaDao = $this->createStub(ProjectMetadataDao::class);
         $projectMetaDao->method('setCacheTTL')->willReturn($projectMetaDao);
-        $projectMetaDao->method('get')->willReturn($icuStruct);
+        $projectMetaDao->method('getValue')->willReturn(null);
         $this->controller->fakeProjectMetadataDao = $projectMetaDao;
 
         $filesMetaDao = $this->createStub(FilesMetadataDao::class);
@@ -446,6 +445,9 @@ class GetSegmentsControllerTest extends AbstractTest
         $this->controller->fakeSegmentMetadataDao = $segmentMetaDao;
 
         $this->setFeatureSet();
+
+        $dbProp = $this->reflector->getProperty('database');
+        $dbProp->setValue($this->controller, $this->createStub(IDatabase::class));
 
         $captured = null;
         $responseMock = $this->createMock(Response::class);
@@ -466,6 +468,139 @@ class GetSegmentsControllerTest extends AbstractTest
         self::assertArrayHasKey('data', $captured);
         self::assertSame([], $captured['data']['files']);
         self::assertSame('after', $captured['data']['where']);
+    }
+
+    // ─── prepareNotes / getContextGroups (non-empty path) ────────────
+
+    #[Test]
+    public function prepareNotes_queries_dao_when_segments_not_empty(): void
+    {
+        $controller = new DirectGetSegmentsController();
+        $dbProp     = $this->reflector->getProperty('database');
+        $dbProp->setValue($controller, obtainTestDatabase());
+
+        $reflector = new ReflectionClass(GetSegmentsController::class);
+        $method    = $reflector->getMethod('prepareNotes');
+
+        $segments = [
+            ['sid' => 9_947_001],
+            ['sid' => 9_947_002],
+        ];
+
+        $result = $method->invoke($controller, $segments);
+
+        self::assertIsArray($result);
+    }
+
+    #[Test]
+    public function getContextGroups_queries_dao_when_segments_not_empty(): void
+    {
+        $controller = new DirectGetSegmentsController();
+        $dbProp     = $this->reflector->getProperty('database');
+        $dbProp->setValue($controller, obtainTestDatabase());
+
+        $reflector = new ReflectionClass(GetSegmentsController::class);
+        $method    = $reflector->getMethod('getContextGroups');
+
+        $segments = [
+            ['sid' => 9_947_001],
+            ['sid' => 9_947_002],
+        ];
+
+        $result = $method->invoke($controller, $segments);
+
+        self::assertIsArray($result);
+    }
+
+    // ─── DAO factory methods ─────────────────────────────────────────
+
+    #[Test]
+    public function findJob_returns_job_via_real_job_dao(): void
+    {
+        $controller = new DirectGetSegmentsController();
+        $dbProp     = $this->reflector->getProperty('database');
+        $dbProp->setValue($controller, obtainTestDatabase());
+
+        $reflector = new ReflectionClass(GetSegmentsController::class);
+        $method    = $reflector->getMethod('findJob');
+
+        $this->expectException(\Model\Exceptions\NotFoundException::class);
+        $method->invoke($controller, 9_947_003, 'nonexistent-password');
+    }
+
+    #[Test]
+    public function createSegmentDao_returns_segment_dao_instance(): void
+    {
+        $controller = new DirectGetSegmentsController();
+        $dbProp     = $this->reflector->getProperty('database');
+        $dbProp->setValue($controller, obtainTestDatabase());
+
+        $reflector = new ReflectionClass(GetSegmentsController::class);
+        $method    = $reflector->getMethod('createSegmentDao');
+
+        $result = $method->invoke($controller);
+
+        self::assertInstanceOf(SegmentDao::class, $result);
+    }
+
+    #[Test]
+    public function createProjectMetadataDao_returns_project_metadata_dao_instance(): void
+    {
+        $controller = new DirectGetSegmentsController();
+        $dbProp     = $this->reflector->getProperty('database');
+        $dbProp->setValue($controller, obtainTestDatabase());
+
+        $reflector = new ReflectionClass(GetSegmentsController::class);
+        $method    = $reflector->getMethod('createProjectMetadataDao');
+
+        $result = $method->invoke($controller);
+
+        self::assertInstanceOf(ProjectMetadataDao::class, $result);
+    }
+
+    #[Test]
+    public function createFilesMetadataDao_returns_files_metadata_dao_instance(): void
+    {
+        $controller = new DirectGetSegmentsController();
+        $dbProp     = $this->reflector->getProperty('database');
+        $dbProp->setValue($controller, obtainTestDatabase());
+
+        $reflector = new ReflectionClass(GetSegmentsController::class);
+        $method    = $reflector->getMethod('createFilesMetadataDao');
+
+        $result = $method->invoke($controller);
+
+        self::assertInstanceOf(FilesMetadataDao::class, $result);
+    }
+
+    #[Test]
+    public function createJobMetadataDao_returns_job_metadata_dao_instance(): void
+    {
+        $controller = new DirectGetSegmentsController();
+        $dbProp     = $this->reflector->getProperty('database');
+        $dbProp->setValue($controller, obtainTestDatabase());
+
+        $reflector = new ReflectionClass(GetSegmentsController::class);
+        $method    = $reflector->getMethod('createJobMetadataDao');
+
+        $result = $method->invoke($controller);
+
+        self::assertInstanceOf(JobMetadataDao::class, $result);
+    }
+
+    #[Test]
+    public function createSegmentMetadataDao_returns_segment_metadata_dao_instance(): void
+    {
+        $controller = new DirectGetSegmentsController();
+        $dbProp     = $this->reflector->getProperty('database');
+        $dbProp->setValue($controller, obtainTestDatabase());
+
+        $reflector = new ReflectionClass(GetSegmentsController::class);
+        $method    = $reflector->getMethod('createSegmentMetadataDao');
+
+        $result = $method->invoke($controller);
+
+        self::assertInstanceOf(SegmentMetadataDao::class, $result);
     }
 
     // ─── helpers ─────────────────────────────────────────────────────

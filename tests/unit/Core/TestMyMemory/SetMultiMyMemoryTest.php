@@ -20,7 +20,7 @@ class SetMultiMyMemoryTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-        $engineDAO = new EngineDAO(Database::obtain(
+        $engineDAO = new EngineDAO(obtainTestDatabase(
             AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE
         ));
         $struct = EngineStruct::getStruct();
@@ -44,7 +44,7 @@ class SetMultiMyMemoryTest extends AbstractTest
         ];
 
         $engine = $this->getMockBuilder(MyMemory::class)
-            ->setConstructorArgs([$this->engineStruct])
+            ->setConstructorArgs([$this->engineStruct, $this->createStub(\Model\DataAccess\IDatabase::class)])
             ->onlyMethods(['_call'])
             ->getMock();
 
@@ -58,7 +58,7 @@ class SetMultiMyMemoryTest extends AbstractTest
     #[Test]
     public function setMultiDoesNothingWithEmptyList(): void
     {
-        $engine = new MyMemory($this->engineStruct);
+        $engine = new MyMemory($this->engineStruct, $this->createStub(\Model\DataAccess\IDatabase::class));
         $engine->setMulti([]);
         $this->assertTrue(true);
     }
@@ -80,7 +80,7 @@ class SetMultiMyMemoryTest extends AbstractTest
         ];
 
         $engine = $this->getMockBuilder(MyMemory::class)
-            ->setConstructorArgs([$this->engineStruct])
+            ->setConstructorArgs([$this->engineStruct, $this->createStub(\Model\DataAccess\IDatabase::class)])
             ->onlyMethods(['_call'])
             ->getMock();
 

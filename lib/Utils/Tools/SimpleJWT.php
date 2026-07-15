@@ -252,7 +252,7 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
         );
 
         // Verify that the provided signature matches the recomputed one.
-        if ($data_hash != $expected_hash) {
+        if (!hash_equals($expected_hash, $data_hash)) {
             throw new DomainException("Invalid Token Signature", 1);
         }
 

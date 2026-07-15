@@ -7,6 +7,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
 use Exception;
 use Model\Teams\MembershipDao;
+use Model\Users\UserDao;
 use ReflectionException;
 use RuntimeException;
 use TypeError;
@@ -30,8 +31,10 @@ class TeamPublicMembersController extends KleinController
      */
     public function publicList(): void
     {
-        $memberships = (new MembershipDao($this->getDatabase()))->setCacheTTL(60 * 60 * 24)->getMemberListByTeamId($this->request->param('id_team'));
-        $formatter = new Membership($memberships);
+        $memberships = (new MembershipDao($this->getDatabase()))->setCacheTTL(60 * 60 * 24)->getMemberListByTeamId(
+            $this->request->param('id_team')
+        );
+        $formatter = new Membership($memberships, new UserDao($this->getDatabase()));
         $this->response->json($formatter->renderPublic());
     }
 

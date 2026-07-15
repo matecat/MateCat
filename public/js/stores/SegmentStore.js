@@ -337,6 +337,28 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     )
   },
 
+  setDisabledMetadata(sid, disabled) {
+    const index = this.getSegmentIndex(sid)
+    if (index === -1) return
+    const metaValue = disabled ? '1' : '0'
+    const metadata = this._segments.getIn([index, 'metadata']) || fromJS([])
+    const metaIndex = metadata.findIndex(
+      (entry) => entry.get('meta_key') === 'translation_disabled',
+    )
+    this._segments =
+      metaIndex === -1
+        ? this._segments.setIn(
+            [index, 'metadata'],
+            metadata.push(
+              fromJS({meta_key: 'translation_disabled', meta_value: metaValue}),
+            ),
+          )
+        : this._segments.setIn(
+            [index, 'metadata', metaIndex, 'meta_value'],
+            metaValue,
+          )
+  },
+
   setSuggestionMatch(sid, fid, perc) {
     var index = this.getSegmentIndex(sid)
     if (index === -1) return
@@ -1394,6 +1416,13 @@ AppDispatcher.register(function (action) {
     case SegmentConstants.SET_SEGMENT_STATUS:
       SegmentStore.setStatus(action.id, action.fid, action.status)
       // SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_STATUS, action.id, action.status);
+      SegmentStore.emitChange(
+        SegmentConstants.RENDER_SEGMENTS,
+        SegmentStore._segments,
+      )
+      break
+    case SegmentConstants.SET_SEGMENT_DISABLED:
+      SegmentStore.setDisabledMetadata(action.id, action.disabled)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,

@@ -2,15 +2,31 @@
 
 namespace Matecat\Core\Controllers\Abstracts;
 
+use Model\DataAccess\Database;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\Base;
+use Controller\Exceptions\MissingDatabaseException;
+use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionClass;
 use ReflectionMethod;
+
+/**
+ * Concrete neutered subclass: empty ctor so it can be built without the Klein
+ * lifecycle, leaving $database unset and $app null to exercise getDatabase()'s
+ * missing-database contract.
+ */
+class ContractTestableKleinController extends KleinController
+{
+    public function __construct()
+    {
+    }
+}
 
 #[CoversClass(KleinController::class)]
 class KleinControllerTest extends AbstractTest
@@ -65,7 +81,7 @@ class KleinControllerTest extends AbstractTest
     public function setFeatureSetUpdatesFeatureSet(): void
     {
         $controller = $this->createController();
-        $newFeatureSet = new FeatureSet();
+        $newFeatureSet = new FeatureSet(obtainTestDatabase());
 
         $result = $controller->setFeatureSet($newFeatureSet);
 
@@ -134,7 +150,9 @@ class KleinControllerTest extends AbstractTest
     {
         $request = new Request([], [], [], ['HTTP_CONTENT_TYPE' => 'text/html']);
         $response = new Response();
-        $controller = new class ($request, $response) extends KleinController {
+        $app = new App();
+        $app->register('getDatabase', static fn() => obtainTestDatabase());
+        $controller = new class ($request, $response, null, $app) extends KleinController {
             protected bool $useSession = false;
             protected function identifyUser(?bool $useSession = true): void { $this->userIsLogged = false; }
         };
@@ -149,7 +167,9 @@ class KleinControllerTest extends AbstractTest
     {
         $request = new Request([], [], [], ['HTTP_CONTENT_TYPE' => 'application/json']);
         $response = new Response();
-        $controller = new class ($request, $response) extends KleinController {
+        $app = new App();
+        $app->register('getDatabase', static fn() => obtainTestDatabase());
+        $controller = new class ($request, $response, null, $app) extends KleinController {
             protected bool $useSession = false;
             protected function identifyUser(?bool $useSession = true): void { $this->userIsLogged = false; }
         };
@@ -184,12 +204,27 @@ class KleinControllerTest extends AbstractTest
         // mock expectation on validate() being called once is the real assertion
     }
 
+    #[Test]
+    public function getDatabaseThrowsWhenNoAppAndNoInjectedDatabase(): void
+    {
+        // Neither a Klein App with a getDatabase service nor a pre-injected
+        // $database: getDatabase() must reject rather than reach for a singleton.
+        $controller = (new ReflectionClass(ContractTestableKleinController::class))
+            ->newInstanceWithoutConstructor();
+
+        $this->expectException(MissingDatabaseException::class);
+
+        $controller->getDatabase();
+    }
+
     private function createController(): KleinController
     {
         $request = Request::createFromGlobals();
         $response = new Response();
+        $app = new App();
+        $app->register('getDatabase', static fn() => obtainTestDatabase());
 
-        return new class ($request, $response) extends KleinController {
+        return new class ($request, $response, null, $app) extends KleinController {
             protected bool $useSession = false;
 
             protected function identifyUser(?bool $useSession = true): void

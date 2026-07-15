@@ -21,8 +21,6 @@ $klein->with('/api/app/user', function () {
     route('/login/token', 'GET', ['Controller\API\App\Authentication\LoginController', 'token']);
     route('/login/socket', 'GET', ['Controller\API\App\Authentication\LoginController', 'socketToken']);
 
-    route('/metadata', 'POST', ['Controller\API\App\UserMetadataController', 'update']);
-
     route('', 'POST', ['Controller\API\App\Authentication\SignupController', 'create']);
     route('/confirm/[:token]', 'GET', ['Controller\API\App\Authentication\SignupController', 'confirm']);
     route('/resend_email_confirm', 'POST', ['Controller\API\App\Authentication\SignupController', 'resendConfirmationEmail']);

@@ -6,6 +6,7 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Predis\Client;
+use ReflectionMethod;
 use Utils\Engines\Traits\HotSwap;
 use Utils\Redis\RedisHandler;
 
@@ -303,5 +304,27 @@ class HotSwapTest extends AbstractTest
 
         $this->assertSame(9, $jobStruct->id_mt_engine);
         $this->assertSame(0, $jobStruct->id_tms);
+    }
+
+    public function testSwapOffRequiresInjectedJobDao(): void
+    {
+        $param = (new ReflectionMethod(HotSwapTestClass::class, 'swapOff'))->getParameters()[1] ?? null;
+
+        $this->assertNotNull($param, 'swapOff() must accept an injected $jobDao');
+        $this->assertSame('jobDao', $param->getName());
+        $this->assertSame(JobDao::class, (string)$param->getType(), '$jobDao must be typed JobDao');
+        $this->assertFalse($param->isOptional(), '$jobDao must be mandatory');
+        $this->assertFalse($param->allowsNull(), '$jobDao must be non-nullable');
+    }
+
+    public function testSwapOffRequiresInjectedRedisHandler(): void
+    {
+        $param = (new ReflectionMethod(HotSwapTestClass::class, 'swapOff'))->getParameters()[2] ?? null;
+
+        $this->assertNotNull($param, 'swapOff() must accept an injected $redisHandler');
+        $this->assertSame('redisHandler', $param->getName());
+        $this->assertSame(RedisHandler::class, (string)$param->getType(), '$redisHandler must be typed RedisHandler');
+        $this->assertFalse($param->isOptional(), '$redisHandler must be mandatory');
+        $this->assertFalse($param->allowsNull(), '$redisHandler must be non-nullable');
     }
 }

@@ -7,6 +7,7 @@ use Exception;
 use Model\Analysis\PayableRates;
 use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Filter\FilterPayableRatesEvent;
 use Model\FeaturesBase\Hook\Event\Run\ValidateJobCreationEvent;
@@ -34,9 +35,10 @@ class JobCreationService
     public function __construct(
         private readonly FeatureSet $features,
         private readonly MatecatLogger $logger,
+        private readonly IDatabase $dbHandler,
         ?CustomPayableRateDao $customPayableRateDao = null,
     ) {
-        $this->customPayableRateDao = $customPayableRateDao ?? new CustomPayableRateDao();
+        $this->customPayableRateDao = $customPayableRateDao ?? new CustomPayableRateDao($this->dbHandler);
     }
 
     /**
@@ -146,7 +148,7 @@ class JobCreationService
         $job->source = (string)$projectStructure->source_language;
         $job->target = $target;
         $job->id_tms = $projectStructure->tms_engine ?? 1;
-        $job->id_mt_engine = $projectStructure->target_language_mt_engine_association[$target];
+        $job->id_mt_engine = (int)$projectStructure->mt_engine;
         $job->create_date = date('Y-m-d H:i:s');
         $job->last_update = date('Y-m-d H:i:s');
         $job->subject = $projectStructure->job_subject;
@@ -224,7 +226,7 @@ class JobCreationService
      */
     protected function getJobsMetadataDao(): JobsMetadataDao
     {
-        return new JobsMetadataDao();
+        return new JobsMetadataDao($this->dbHandler);
     }
 
     /**
@@ -302,7 +304,7 @@ class JobCreationService
      */
     protected function insertJob(JobStruct $job): JobStruct
     {
-        return (new JobDao())->createFromStruct($job);
+        return (new JobDao($this->dbHandler))->createFromStruct($job);
     }
 
     /**
@@ -311,7 +313,7 @@ class JobCreationService
      */
     protected function insertFilesJob(int $jobId, int $fid): void
     {
-        (new FileDao())->insertFilesJob($jobId, $fid);
+        (new FileDao($this->dbHandler))->insertFilesJob($jobId, $fid);
     }
 
     /**

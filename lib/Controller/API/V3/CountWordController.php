@@ -14,6 +14,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Matecat\Locales\Languages;
 use Matecat\SubFiltering\MateCatFilter;
+use RuntimeException;
 use Utils\LQA\SizeRestriction\SizeRestriction;
 use Utils\Tools\CatUtils;
 
@@ -51,7 +52,7 @@ class CountWordController extends KleinController
      */
     protected function getRawWordsCount(string $text, string $language): int
     {
-        return (new CatUtils())->countSegmentRawWords($text, $language);
+        return (new CatUtils($this->getDatabase()))->countSegmentRawWords($text, $language);
     }
 
     /**
@@ -60,6 +61,10 @@ class CountWordController extends KleinController
     protected function buildSizeRestriction(string $text): SizeRestriction
     {
         $filter = MateCatFilter::getInstance($this->featureSet);
+        if (!$filter instanceof MateCatFilter) {
+            throw new RuntimeException('Expected MateCatFilter instance from getInstance()');
+        }
+
         return new SizeRestriction($filter->fromLayer0ToLayer2($text), $this->featureSet);
     }
 
@@ -68,7 +73,7 @@ class CountWordController extends KleinController
      */
     public function rawWords(): void
     {
-        $this->featureSet->loadFromUserEmail($this->user->email);
+        $this->featureSet->loadFromUserEmail($this->user->email ?? '');
         $words_count = $this->getRawWordsCount($this->request->param('text'), $this->language);
         $size_restriction = $this->buildSizeRestriction($this->request->param('text'));
 
@@ -77,8 +82,8 @@ class CountWordController extends KleinController
         ];
 
         if (isset($this->request->limit) and is_numeric($this->request->limit)) {
-            $character_count['valid'] = $size_restriction->checkLimit($this->request->limit);
-            $character_count['remaining_characters'] = $size_restriction->getCharactersRemaining($this->request->limit);
+            $character_count['valid'] = $size_restriction->checkLimit((int)$this->request->limit);
+            $character_count['remaining_characters'] = $size_restriction->getCharactersRemaining((int)$this->request->limit);
         }
 
         $this->response->json([

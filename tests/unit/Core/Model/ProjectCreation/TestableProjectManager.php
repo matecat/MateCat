@@ -8,6 +8,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\BasicFeatureStruct;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
@@ -66,6 +67,8 @@ class TestableProjectManager extends ProjectManager
         $this->filter = $filter;
         $this->features = $features;
         $this->filesMetadataDao = $filesMetadataDao;
+        // Same per-process DB handle the self-obtaining DAOs used before injection.
+        $this->dbHandler = obtainTestDatabase();
 
         // Use reflection to set the private logger
         $ref = new ReflectionClass(ProjectManager::class);

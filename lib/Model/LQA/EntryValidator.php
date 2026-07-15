@@ -3,7 +3,7 @@
 namespace Model\LQA;
 
 use Exception;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\JobDao;
@@ -36,6 +36,7 @@ class EntryValidator
 
     public function __construct(
         EntryStruct $struct,
+        IDatabase $database,
         ?SegmentDao $segmentDao = null,
         ?JobDao $jobDao = null,
         ?ProjectDao $projectDao = null,
@@ -43,11 +44,11 @@ class EntryValidator
         ?CategoryDao $categoryDao = null
     ) {
         $this->struct      = $struct;
-        $this->segmentDao  = $segmentDao  ?? new SegmentDao(Database::obtain());
-        $this->jobDao      = $jobDao      ?? new JobDao();
-        $this->projectDao  = $projectDao  ?? new ProjectDao();
-        $this->modelDao    = $modelDao    ?? new ModelDao();
-        $this->categoryDao = $categoryDao ?? new CategoryDao();
+        $this->segmentDao  = $segmentDao  ?? new SegmentDao($database);
+        $this->jobDao      = $jobDao      ?? new JobDao($database);
+        $this->projectDao  = $projectDao  ?? new ProjectDao($database);
+        $this->modelDao    = $modelDao    ?? new ModelDao($database);
+        $this->categoryDao = $categoryDao ?? new CategoryDao($database);
     }
 
     /** @return array<array{0: null|string, 1: string}> */

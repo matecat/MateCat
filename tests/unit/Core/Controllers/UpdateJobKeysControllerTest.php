@@ -9,6 +9,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
@@ -45,6 +46,7 @@ class UpdateJobKeysControllerTest extends AbstractTest
 
     private const int BASE = 9_005_000;
     private const string JOB_PASSWORD = 'jobpw';
+    private const string OWNED_KEY = 'ctrltestkey9005000';
 
     /** @var ReflectionClass<UpdateJobKeysController> */
     private ReflectionClass $reflector;
@@ -73,6 +75,7 @@ class UpdateJobKeysControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
+        $this->setProp('database', obtainTestDatabase());
 
         $user            = new UserStruct();
         $user->uid       = $this->userId(self::BASE);
@@ -83,7 +86,7 @@ class UpdateJobKeysControllerTest extends AbstractTest
 
         $this->setProp('userIsLogged', true);
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
     }
 
     protected function tearDown(): void
@@ -486,5 +489,131 @@ class UpdateJobKeysControllerTest extends AbstractTest
         $this->expectExceptionCode(-1);
 
         $this->controller->update();
+    }
+
+    /**
+     * A non-owner user whose review password matches an r2-source-page
+     * qa_chunk_reviews row is a revisor: covers the isRevision()===true /
+     * Filter::ROLE_REVISOR branch (line 52) that the plain-translator test
+     * above does not reach.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function update_returns_ok_for_revisor_role(): void
+    {
+        $this->seedChunkReview(self::BASE, self::JOB_PASSWORD, 'revpw_' . self::BASE, 3);
+
+        $user             = new UserStruct();
+        $user->uid        = $this->userId(self::BASE);
+        $user->email      = 'not-the-owner_' . self::BASE . '@example.org';
+        $user->first_name = 'Rev';
+        $user->last_name  = 'Isor';
+        $this->setProp('user', $user);
+        $this->setProp('userIsLogged', true);
+
+        $this->setRequestParams([
+            'job_id'           => (string) $this->jobId(self::BASE),
+            'job_pass'         => self::JOB_PASSWORD,
+            'current_password' => 'revpw_' . self::BASE,
+            'data'             => $this->validTmKeysJson(),
+        ]);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertSame('OK', $data['data']);
+                return true;
+            }));
+
+        $this->controller->update();
+    }
+
+    /**
+     * Exercises the `mine` tm-key ownership-tagging loop (lines 116-126) and
+     * the completed-key formatting loop (line 144): the job's tm_keys column
+     * carries one key already present in the user's memory_keys keyring
+     * (survives unobfuscated -> matches a `mine` entry, isEncryptedKey()
+     * false, exact-match true) and one key absent from the keyring (masked
+     * via hideKey(-1) -> isEncryptedKey() true, short-circuits to false).
+     * Both keys pass mergeJsonKeys validation, so $totalTmKeys is non-empty.
+     *
+     * Uses a dedicated uid (BASE+13, not self::BASE's uid used by every other
+     * test in this file) because UserKeysModel::getKeys() caches its
+     * MemoryKeyDao::read() result in real Redis for 600s keyed only by uid;
+     * reusing self::BASE's uid would read back another test's already-cached
+     * (keyless) result instead of the row seeded below.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function update_tags_mine_key_ownership_and_completes_merged_keys(): void
+    {
+        $keyUid     = self::BASE + 13;
+        $ownedKey   = self::OWNED_KEY;
+        $foreignKey = 'ctrlforeignkey' . self::BASE;
+
+        $this->seedConnection()->exec(
+            'INSERT IGNORE INTO memory_keys (uid, key_value, key_name, key_tm, key_glos, creation_date) '
+            . "VALUES ($keyUid, " . $this->seedConnection()->quote($ownedKey) . ", 'CtrlTestKey_" . self::BASE . "', 1, 1, NOW())"
+        );
+
+        try {
+            $user             = new UserStruct();
+            $user->uid        = $keyUid;
+            $user->email      = $this->owner;
+            $user->first_name = 'Ctrl';
+            $user->last_name  = 'Tester';
+            $this->setProp('user', $user);
+            $this->setProp('userIsLogged', true);
+
+            $jobTmKeys = json_encode([
+                [
+                    'tm' => true, 'glos' => true, 'owner' => true,
+                    'uid_transl' => null, 'uid_rev' => null,
+                    'name' => 'Owned', 'key' => $ownedKey,
+                    'r' => true, 'w' => true, 'r_transl' => true, 'w_transl' => true,
+                    'r_rev' => true, 'w_rev' => true,
+                ],
+                [
+                    'tm' => true, 'glos' => true, 'owner' => true,
+                    'uid_transl' => null, 'uid_rev' => null,
+                    'name' => 'Foreign', 'key' => $foreignKey,
+                    'r' => true, 'w' => true, 'r_transl' => true, 'w_transl' => true,
+                    'r_rev' => true, 'w_rev' => true,
+                ],
+            ]);
+            $this->seedConnection()->exec(
+                'UPDATE jobs SET tm_keys = ' . $this->seedConnection()->quote((string) $jobTmKeys)
+                . ' WHERE id = ' . $this->jobId(self::BASE)
+            );
+
+            $data = (string) json_encode([
+                'mine' => [[
+                    'name' => 'Owned', 'key' => $ownedKey,
+                    'glos' => true, 'tm' => true, 'owner' => true,
+                    'r' => true, 'w' => true,
+                ]],
+                'ownergroup' => [],
+                'anonymous'  => [],
+            ]);
+
+            $this->setRequestParams([
+                'job_id'   => (string) $this->jobId(self::BASE),
+                'job_pass' => self::JOB_PASSWORD,
+                'data'     => $data,
+            ]);
+
+            $this->responseMock->expects($this->once())
+                ->method('json')
+                ->with($this->callback(function (array $responseData): bool {
+                    $this->assertSame('OK', $responseData['data']);
+                    return true;
+                }));
+
+            $this->controller->update();
+        } finally {
+            $this->seedConnection()->exec('DELETE FROM memory_keys WHERE uid = ' . $keyUid);
+        }
     }
 }

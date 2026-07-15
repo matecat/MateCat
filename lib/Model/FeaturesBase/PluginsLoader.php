@@ -115,15 +115,17 @@ class PluginsLoader
     /**
      * @param $code string
      *
-     * @return string|null
+     * @return class-string<BaseFeature>
      * @throws RuntimeException
      */
-    public static function getPluginClass(string $code): ?string
+    public static function getPluginClass(string $code): string
     {
         $instance = static::getInstance();
+        /** @var class-string<BaseFeature> $className */
         $className = $instance->PLUGIN_CLASSES[$code] ?? null;
         if (!$className) {
             //try default autoloading for internal plugins
+            /** @var class-string<BaseFeature> $className */
             $className = '\\Plugins\\Features\\' . Utils::underscoreToCamelCase($code);
         }
 

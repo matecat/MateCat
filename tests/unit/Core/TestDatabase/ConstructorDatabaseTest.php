@@ -7,8 +7,6 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
-use ReflectionClass;
-use Utils\Registry\AppConfig;
 
 
 /**
@@ -22,15 +20,9 @@ use Utils\Registry\AppConfig;
 class ConstructorDatabaseTest extends AbstractTest
 {
 
-    protected ReflectionClass $reflector;
-
     public function setUp(): void
     {
         parent::setUp();
-        $this->databaseInstance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
-        $this->databaseInstance->close();
-
-        $this->reflector = new ReflectionClass($this->databaseInstance);
     }
 
     public function tearDown(): void
@@ -42,15 +34,11 @@ class ConstructorDatabaseTest extends AbstractTest
      * This test checks that an Exception will be raised if the constructor is called without parameters.
      * @group  regression
      * @covers Database::__construct
-     * @throws ReflectionException
      */
     #[Test]
     public function test___construct_without_parameters()
     {
-        $property = $this->reflector->getProperty('instance');
-        $property->setValue($this->databaseInstance, null);
-
-        $instance = $this->databaseInstance->obtain();
+        $instance = new Database('', '', '', '');
 
         $this->assertInstanceOf(Database::class, $instance);
 

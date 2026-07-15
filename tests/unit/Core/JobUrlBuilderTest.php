@@ -30,7 +30,7 @@ class JobUrlBuilderTest extends AbstractTest
     {
         parent::setUp();
 
-        $this->database_instance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->database_instance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 
         $this->database_instance->getConnection()->query(
             "INSERT INTO projects
@@ -51,7 +51,7 @@ class JobUrlBuilderTest extends AbstractTest
     public function testBuildTranslationUrl()
     {
         $job = new JobStruct($this->database_instance->getConnection()->query("SELECT * FROM jobs ORDER BY id DESC LIMIT 1")->fetch());
-        $jobUrlStruct = JobUrlBuilder::createFromJobStruct($job, [
+        $jobUrlStruct = JobUrlBuilder::createFromJobStruct($this->database_instance, $job, [
             'id_segment' => 1
         ]);
 
@@ -72,7 +72,7 @@ class JobUrlBuilderTest extends AbstractTest
     public function testBuildTranslationUrlFromCredentials()
     {
         $job = new JobStruct($this->database_instance->getConnection()->query("SELECT * FROM jobs ORDER BY id DESC LIMIT 1")->fetch());
-        $jobUrlStruct = JobUrlBuilder::createFromJobStructAndProjectName($job, 'fake name', [
+        $jobUrlStruct = JobUrlBuilder::createFromJobStructAndProjectName($this->database_instance, $job, 'fake name', [
             'id_segment' => 1
         ]);
 

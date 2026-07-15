@@ -489,7 +489,7 @@ class GlossaryWorker extends AbstractWorker
     private function getEngine(FeatureSet $featureSet): MyMemory
     {
         /** @var MyMemory $engine */
-        $engine = EnginesFactory::getInstance(1, MyMemory::class);
+        $engine = EnginesFactory::getInstance(1, $this->database, MyMemory::class);
         $engine->setFeatureSet($featureSet);
 
         return $engine;
@@ -501,6 +501,6 @@ class GlossaryWorker extends AbstractWorker
      */
     protected function getMyMemoryClient(): MyMemory
     {
-        return $this->getEngine(new FeatureSet());
+        return $this->getEngine(new FeatureSet($this->database));
     }
 }

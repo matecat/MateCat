@@ -284,24 +284,6 @@ class NewControllerValidationMethodsTest extends AbstractTest
     }
 
     // ──────────────────────────────────────────────────────────────────
-    // generateTargetEngineAssociation()
-    // ──────────────────────────────────────────────────────────────────
-
-    #[Test]
-    public function generateTargetEngineAssociation_single_target(): void
-    {
-        $result = $this->invokeMethod('generateTargetEngineAssociation', ['fr-FR', 2]);
-        $this->assertSame(['fr-FR' => 2], $result);
-    }
-
-    #[Test]
-    public function generateTargetEngineAssociation_multiple_targets(): void
-    {
-        $result = $this->invokeMethod('generateTargetEngineAssociation', ['fr-FR,de-DE,it-IT', 3]);
-        $this->assertSame(['fr-FR' => 3, 'de-DE' => 3, 'it-IT' => 3], $result);
-    }
-
-    // ──────────────────────────────────────────────────────────────────
     // parseTmKeyInput()
     // ──────────────────────────────────────────────────────────────────
 

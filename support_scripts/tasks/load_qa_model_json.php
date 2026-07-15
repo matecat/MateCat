@@ -1,7 +1,6 @@
 <?php
 
 
-use Model\DataAccess\Database;
 use Model\Projects\ProjectDao;
 use Utils\Registry\AppConfig;
 
@@ -9,7 +8,7 @@ $root = realpath(dirname(__FILE__) . '/../../');
 include_once $root . "/lib/Bootstrap.php";
 Bootstrap::start();
 
-$db = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+$db = \Bootstrap::getDatabase();
 $db->debug = false;
 $db->connect();
 
@@ -28,14 +27,14 @@ if (empty($options))                               usage() ;
 if (!array_key_exists('file', $options))           usage() ;
 if (!array_key_exists('id_project', $options))     usage() ;
 
-$project = (new ProjectDao())->findById( $options['id_project']);
+$project = (new ProjectDao($db))->findById( $options['id_project']);
 
 $content = file_get_contents( $options['file']);
 $json = json_decode( $content, true );
 
-$model_record = (new Model\LQA\ModelDao())->createModelFromJsonDefinition( $json );
+$model_record = (new Model\LQA\ModelDao($db))->createModelFromJsonDefinition( $json );
 
-$dao = new \Model\Projects\ProjectDao( \Model\DataAccess\Database::obtain() );
+$dao = new \Model\Projects\ProjectDao( $db );
 $dao->updateField( $this->project, 'id_qa_model', $model_record->id );
 
 echo "done \n";

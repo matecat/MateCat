@@ -33,10 +33,10 @@ class GDriveUserAuthorizationModel
     protected string $user_remote_id;
     protected string $user_name;
 
-    protected ?ConnectedServiceDao $dao = null;
+    protected ConnectedServiceDao $dao;
     protected ?Google_Client $googleClient = null;
 
-    public function __construct(UserStruct $user, ?ConnectedServiceDao $dao = null, ?Google_Client $googleClient = null)
+    public function __construct(UserStruct $user, ConnectedServiceDao $dao, ?Google_Client $googleClient = null)
     {
         $this->user = $user;
         $this->dao = $dao;
@@ -64,8 +64,7 @@ class GDriveUserAuthorizationModel
         $this->__collectProperties($code);
 
         // We have the user info email and name, we can save it along with the gdrive token to identify it.
-        $dao = $this->dao ?? new ConnectedServiceDao();
-        $service = $dao->findUserServicesByNameAndEmail(
+        $service = $this->dao->findUserServicesByNameAndEmail(
             $this->user,
             ConnectedServiceDao::GDRIVE_SERVICE,
             $this->user_email
@@ -77,7 +76,7 @@ class GDriveUserAuthorizationModel
             $service = $this->__insertService();
         }
 
-        $dao->setDefaultService($service);
+        $this->dao->setDefaultService($service);
     }
 
     /**
@@ -88,12 +87,11 @@ class GDriveUserAuthorizationModel
      */
     private function __updateService(ConnectedServiceStruct $service): void
     {
-        $dao = $this->dao ?? new ConnectedServiceDao();
-        $dao->updateOauthToken($this->token, $service);
+        $this->dao->updateOauthToken($this->token, $service);
 
         $service->expired_at = null;
         $service->disabled_at = null;
-        $dao->updateStruct($service);
+        $this->dao->updateStruct($service);
     }
 
     /**
@@ -112,15 +110,14 @@ class GDriveUserAuthorizationModel
             'created_at' => Utils::mysqlTimestamp(time())
         ]);
         $service->setEncryptedAccessToken($this->token);
-        $dao = $this->dao ?? new ConnectedServiceDao();
 
-        $lastId = $dao->insertStruct($service);
+        $lastId = $this->dao->insertStruct($service);
 
         if ($lastId === false) {
             throw new Exception('Unable to insert connected service');
         }
 
-        return $dao->fetchById($lastId, ConnectedServiceStruct::class)
+        return $this->dao->fetchById($lastId, ConnectedServiceStruct::class)
             ?? throw new Exception('Unable to retrieve inserted connected service');
     }
 
@@ -136,6 +133,9 @@ class GDriveUserAuthorizationModel
         $gdriveClient = $this->googleClient ?? (new GoogleProvider)->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
         $gdriveClient->fetchAccessTokenWithAuthCode($code);
         $accessToken = $gdriveClient->getAccessToken();
+        if (empty($accessToken)) {
+            throw new Exception('Unable to fetch a valid Google access token for the provided authorization code');
+        }
         $this->token = is_array($accessToken)
             ? GDriveTokenHandler::accessTokenToJsonString($accessToken)
             : $accessToken;

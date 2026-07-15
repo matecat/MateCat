@@ -39,7 +39,7 @@ class MagicSetTest extends AbstractTest
         $this->engine_struct_param->name = "DeepLingoTestEngine";
         $this->engine_struct_param->others = ['alfa' => "one", 'beta' => "two"];
         $this->engine_struct_param->extra_parameters = ['gamma' => "three", 'delta' => "four"];
-        $this->engine = new NONE($this->engine_struct_param);
+        $this->engine = new NONE($this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 
     /**

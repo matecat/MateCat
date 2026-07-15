@@ -7,6 +7,8 @@ use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\InternalUserValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
 use PDOException;
@@ -51,8 +53,8 @@ class ApiKeyController extends KleinController
     {
         return new ApiKeyStruct([
             'uid' => $this->getUser()->uid,
-            'api_key' => Utils::randomString(20, true),
-            'api_secret' => Utils::randomString(20, true),
+            'api_key' => Utils::randomString(20),
+            'api_secret' => Utils::randomString(20),
             'enabled' => true
         ]);
     }
@@ -62,8 +64,10 @@ class ApiKeyController extends KleinController
      * api_secret is always hidden
      *
      * There is no need to protect this route
+     * @throws LockedResponseException
      * @throws NotFoundException
      * @throws PDOException
+     * @throws ResponseAlreadySentException
      */
     public function show(): void
     {

@@ -9,6 +9,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -75,7 +76,8 @@ class SegmentVersionControllerTest extends AbstractTest
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet(obtainTestDatabase()));
+        $this->setProp('database', obtainTestDatabase());
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace Matecat\Core\Controllers;
 
 use Controller\API\App\GetWarningController;
+use Controller\API\Commons\Validators\LoginValidator;
 use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
@@ -75,7 +76,10 @@ class GetWarningControllerTest extends AbstractTest
         $logProp->setValue($this->controller, $this->createMock(MatecatLogger::class));
 
         $fsProp = $this->reflector->getProperty('featureSet');
-        $fsProp->setValue($this->controller, new FeatureSet());
+        $fsProp->setValue($this->controller, new FeatureSet(obtainTestDatabase()));
+
+        $dbProp = $this->reflector->getProperty('database');
+        $dbProp->setValue($this->controller, obtainTestDatabase());
     }
 
     protected function tearDown(): void
@@ -86,7 +90,7 @@ class GetWarningControllerTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $db = Database::obtain();
+        $db = obtainTestDatabase();
         $conn = $db->getConnection();
 
         $this->cleanTestData();
@@ -104,7 +108,7 @@ class GetWarningControllerTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $db = Database::obtain();
+        $db = obtainTestDatabase();
         $conn = $db->getConnection();
 
         $conn->exec("DELETE FROM segment_translations WHERE id_job = " . self::TEST_JOB_ID);
@@ -402,5 +406,44 @@ class GetWarningControllerTest extends AbstractTest
             }));
 
         $this->controller->global();
+    }
+
+    // ─── registerValidators (production hook) ───
+
+    #[Test]
+    public function registerValidators_appends_login_validator(): void
+    {
+        $method = $this->reflector->getMethod('registerValidators');
+        $method->invoke($this->controller);
+
+        /** @var list<object> $validators */
+        $validators = $this->reflector->getProperty('validators')->getValue($this->controller);
+
+        $this->assertCount(1, $validators);
+        $this->assertInstanceOf(LoginValidator::class, $validators[0]);
+    }
+
+    // ─── local() public action ───
+
+    #[Test]
+    public function local_processes_plain_ascii_content_without_icu(): void
+    {
+        $this->setRequestParams([
+            'id' => (string) self::TEST_SEGMENT_ID,
+            'id_job' => (string) self::TEST_JOB_ID,
+            'src_content' => 'Hello world',
+            'trg_content' => 'Ciao mondo',
+            'password' => self::TEST_JOB_PASSWORD,
+        ]);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertArrayHasKey('data', $data);
+                $this->assertArrayHasKey('errors', $data);
+                return true;
+            }));
+
+        $this->controller->local();
     }
 }

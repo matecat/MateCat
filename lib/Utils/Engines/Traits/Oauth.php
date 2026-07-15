@@ -76,7 +76,7 @@ trait Oauth
 
         $record = clone($this->getEngineRecord());
 
-        $engineDAO = new EngineDAO(Database::obtain());
+        $engineDAO = new EngineDAO($this->database);
 
         /**
          * Use a generic EnginesFactory because the Factory Class builds the query as generic engine

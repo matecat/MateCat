@@ -40,7 +40,7 @@ class ChangeJobsStatusController extends KleinController
                 throw new NotFoundException("Job not found");
             }
 
-            $chunks = $project->getJobs();
+            $chunks = (new JobDao($this->getDatabase()))->getNotDeletedByProjectId((int) $project->id);
             $projectId = $project->id ?? throw new NotFoundException("Project not found");
 
             (new JobDao($this->getDatabase()))->updateAllJobsStatusesByProjectId((int)$projectId, $request['new_status']);

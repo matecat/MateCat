@@ -25,7 +25,7 @@ class InsertOnDuplicateKeyTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-        $this->databaseInstance = Database::obtain(
+        $this->databaseInstance = obtainTestDatabase(
             AppConfig::$DB_SERVER,
             AppConfig::$DB_USER,
             AppConfig::$DB_PASS,

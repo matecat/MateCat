@@ -19,6 +19,7 @@ use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\MockObject\MockObject;
+use Model\DataAccess\Database;
 use ReflectionClass;
 use ReflectionException;
 use TypeError;
@@ -117,6 +118,7 @@ class GlossaryControllerTest extends AbstractTest
         $this->reflector  = new ReflectionClass(GlossaryController::class);
 
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createStub(MatecatLogger::class));
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
         $this->setUser(1, true);
     }
 
@@ -395,6 +397,7 @@ class GlossaryControllerTest extends AbstractTest
         $response = $this->createStub(Response::class);
         $response->method('json')->willReturnSelf();
         $ref->getProperty('response')->setValue($controller, $response);
+        $ref->getProperty('database')->setValue($controller, obtainTestDatabase());
 
         return $controller;
     }
@@ -539,6 +542,7 @@ class GlossaryControllerTest extends AbstractTest
         // Exercise the real seam body (CatUtils::getJobFromIdAndAnyPassword).
         // A non-existent id_job/password combination resolves to null without raising.
         $controller = new TestableGlossaryController();
+        $this->reflector->getProperty('database')->setValue($controller, obtainTestDatabase());
 
         /** @var ?JobStruct $job */
         $job = $this->reflector
@@ -561,6 +565,7 @@ class GlossaryControllerTest extends AbstractTest
         // Exercise the real seam body (CatUtils::isRevisionFromIdJobAndPassword).
         // A non-existent id_job/password combination resolves to false without raising.
         $controller = new TestableGlossaryController();
+        $this->reflector->getProperty('database')->setValue($controller, obtainTestDatabase());
 
         $isRevision = $this->reflector
             ->getMethod('isRevisionFromIdJobAndPassword')
@@ -576,6 +581,7 @@ class GlossaryControllerTest extends AbstractTest
     {
         $controller = new TestableGlossaryController();
         $ref        = new ReflectionClass(GlossaryController::class);
+        $ref->getProperty('database')->setValue($controller, obtainTestDatabase());
 
         $json = '{"id_client":"c1","id_segment":1,"id_job":2,"password":"p",'
             . '"source":"hi","target":"ciao","source_language":"en-US",'

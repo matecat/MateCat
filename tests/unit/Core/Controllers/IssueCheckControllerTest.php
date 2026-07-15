@@ -148,6 +148,7 @@ class IssueCheckControllerTest extends AbstractTest
         $db->method('getConnection')->willReturn($pdo);
 
         $this->setDatabaseInstance($db);
+        $this->reflector->getProperty('database')->setValue($this->controller, $db);
     }
 
     private function makeJob(int $id, string $password, string $statusOwner = JobStatus::STATUS_ACTIVE): JobStruct

@@ -13,6 +13,7 @@ use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
+use Model\Projects\ProjectDao;
 use Plugins\Features\ReviewExtended\ChunkReviewModel;
 use Plugins\Features\ReviewExtended\TranslationIssueModel;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
@@ -48,6 +49,8 @@ class TranslationIssueModelTest extends AbstractTest
         parent::setUp();
 
         $this->chunkReviewDao = $this->createMock(ChunkReviewDao::class);
+        [$dbStub] = $this->createDatabaseMock();
+        $this->chunkReviewDao->method('getDatabaseHandler')->willReturn($dbStub);
         $this->entryDao = $this->createMock(EntryDao::class);
         $this->translationVersionDao = $this->createMock(TranslationVersionDao::class);
         $this->chunkReviewModel = $this->createMock(ChunkReviewModel::class);
@@ -74,7 +77,8 @@ class TranslationIssueModelTest extends AbstractTest
             $issue,
             $this->chunkReviewDao,
             $this->entryDao,
-            $this->translationVersionDao
+            $this->translationVersionDao,
+            $this->createMock(ProjectDao::class)
         );
 
         $model->mockChunkReviewModel = $this->chunkReviewModel;
@@ -116,7 +120,8 @@ class TranslationIssueModelTest extends AbstractTest
             $this->makeIssue(),
             $this->chunkReviewDao,
             $this->entryDao,
-            $this->translationVersionDao
+            $this->translationVersionDao,
+            $this->createMock(ProjectDao::class)
         );
     }
 

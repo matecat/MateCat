@@ -46,7 +46,7 @@ class SegmentVersionController extends KleinController
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();
 
-        $formatted = new SegmentVersion($chunk, $results);
+        $formatted = new SegmentVersion($chunk, $results, false, $this->featureSet);
 
         $this->response->json([
             'versions' => $formatted->render()
@@ -71,7 +71,7 @@ class SegmentVersionController extends KleinController
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();
 
-        $formatted = new SegmentVersion($chunk, $results);
+        $formatted = new SegmentVersion($chunk, $results, false, $this->featureSet);
 
         $this->response->json([
             'versions' => $formatted->render()

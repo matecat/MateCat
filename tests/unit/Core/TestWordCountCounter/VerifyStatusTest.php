@@ -24,7 +24,7 @@ class VerifyStatusTest extends AbstractTest
     #[Test]
     public function test__verifyStatus_without_exception_thrown()
     {
-        $word_counter = new CounterModel();
+        $word_counter = new CounterModel(obtainTestDatabase());
         $mirror_word_counter = new ReflectionClass($word_counter);
         $method__verifyStatus = $mirror_word_counter->getMethod('_verifyStatus');
 
@@ -45,7 +45,7 @@ class VerifyStatusTest extends AbstractTest
     #[Test]
     public function test__verifyStatus_with_exception_thrown_because_status_is_invalid()
     {
-        $word_counter = new CounterModel();
+        $word_counter = new CounterModel(obtainTestDatabase());
         $mirror_word_counter = new ReflectionClass($word_counter);
         $method__verifyStatus = $mirror_word_counter->getMethod('_verifyStatus');
 

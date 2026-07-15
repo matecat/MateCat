@@ -322,8 +322,8 @@ class SegmentTarget extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     const charactersCounterLimit = this.props.segment.metadata.find(
       (meta) =>
-        meta.id_segment.toString() === this.props.segment.sid &&
-        meta.meta_key === 'sizeRestriction',
+        meta.meta_key === 'sizeRestriction' &&
+        meta.id_segment.toString() === this.props.segment.sid
     )?.meta_value
 
     if (

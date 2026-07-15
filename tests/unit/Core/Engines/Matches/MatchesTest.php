@@ -3,6 +3,8 @@
 namespace Matecat\Core\Engines\Matches;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
+use Model\FeaturesBase\FeatureSet;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Engines\Results\MyMemory\Matches;
 
@@ -38,6 +40,7 @@ class MatchesTest extends AbstractTest
             'create-date' => $createDate,
         ]);
 
+        $match->featureSet(new FeatureSet($this->createStub(IDatabase::class)));
         $matches = $match->getMatches();
 
         $this->assertEquals("234", $matches['id']);
@@ -74,6 +77,7 @@ class MatchesTest extends AbstractTest
             'ICE' => 1,
         ]);
 
+        $match->featureSet(new FeatureSet($this->createStub(IDatabase::class)));
         $matches = $match->getMatches(2, [], 'en-US', 'fr-FR');
 
         $this->assertEquals("123134123", $matches['id']);
@@ -114,6 +118,7 @@ class MatchesTest extends AbstractTest
             'create-date' => $createDate,
         ]);
 
+        $match->featureSet(new FeatureSet($this->createStub(IDatabase::class)));
         $matches = $match->getMatches();
 
         $this->assertEquals("234", $matches['id']);

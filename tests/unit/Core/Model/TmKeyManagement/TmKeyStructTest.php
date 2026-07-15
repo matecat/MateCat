@@ -4,6 +4,7 @@ namespace Matecat\Core\Model\TmKeyManagement;
 
 use DomainException;
 use Matecat\TestHelpers\AbstractTest;
+use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\TmKeyManagement\TmKeyStruct;
 
@@ -114,5 +115,47 @@ class TmKeyStructTest extends AbstractTest
         $json = $struct->jsonSerialize();
 
         $this->assertSame(50, $json['penalty']);
+    }
+
+    #[Test]
+    public function getInUsersDefaultsToEmptyArray(): void
+    {
+        $struct = new TmKeyStruct();
+
+        $this->assertSame([], $struct->getInUsers());
+    }
+
+    #[Test]
+    public function getInUsersIdDefaultsToEmptyArray(): void
+    {
+        $struct = new TmKeyStruct();
+
+        $this->assertSame([], $struct->getInUsersId());
+    }
+
+    #[Test]
+    public function getInUsersReturnsUserStructsSetViaConstructor(): void
+    {
+        $userA = new UserStruct(['uid' => 11, 'email' => 'a@example.com']);
+        $userB = new UserStruct(['uid' => 22, 'email' => 'b@example.com']);
+
+        $struct = new TmKeyStruct([
+            'key'      => 'sharedkey0001',
+            'is_shared' => true,
+            'in_users' => [$userA, $userB],
+        ]);
+
+        $this->assertSame([$userA, $userB], $struct->getInUsers());
+    }
+
+    #[Test]
+    public function getInUsersIdReturnsIdsSetViaConstructor(): void
+    {
+        $struct = new TmKeyStruct([
+            'key'          => 'sharedkey0002',
+            'in_users_id'  => [11, 22, 33],
+        ]);
+
+        $this->assertSame([11, 22, 33], $struct->getInUsersId());
     }
 }

@@ -15,6 +15,7 @@ use Model\FeaturesBase\Hook\Event\Run\PostJobMergedEvent;
 use Model\FeaturesBase\Hook\Event\Run\PostJobSplittedEvent;
 use Model\FeaturesBase\Hook\Event\Run\PostProjectCreateEvent;
 use Model\FeaturesBase\Hook\Event\Run\ReviewPasswordChangedEvent;
+use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 use Model\JobSplitMerge\SplitMergeProjectData;
 use Model\ProjectCreation\ProjectStructure;
@@ -37,6 +38,10 @@ class AbstractRevisionFeatureTest extends AbstractTest
         $this->feature = new SecondPassReview(
             new BasicFeatureStruct(['feature_code' => 'second_pass_review'])
         );
+        // The feature's in-method DAOs now resolve their connection from the
+        // injected database (previously they fell back to the global singleton).
+        // Provide the same real seeded test DB so those code paths keep working.
+        $this->feature->setDatabase(obtainTestDatabase());
     }
 
     // ─────────────────────────────────────────────────────────────────

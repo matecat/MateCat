@@ -14,12 +14,16 @@
 namespace Controller\API\Commons\Validators;
 
 use Controller\Abstracts\KleinController;
+use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
+use PDOException;
 use ReflectionException;
+use RuntimeException;
+use TypeError;
 
 class ChunkPasswordValidator extends Base
 {
@@ -57,19 +61,22 @@ class ChunkPasswordValidator extends Base
 
         $postInput = (object)filter_var_array($controller->getParams(), $filterArgs);
 
-        $this->id_job = $postInput->id_job;
-        $this->password = $postInput->password;
+        $this->id_job = (int)($postInput->id_job ?? 0);
+        $this->password = (string)($postInput->password ?? '');
         $this->ttl = $ttl;
 
         if (false === empty($postInput->revision_number)) {
-            $this->revision_number = $postInput->revision_number;
+            $this->revision_number = (int)$postInput->revision_number;
         }
     }
 
     /**
      * @return void
+     * @throws Exception
      * @throws NotFoundException
+     * @throws PDOException
      * @throws ReflectionException
+     * @throws TypeError
      */
     protected function _validate(): void
     {
@@ -82,8 +89,11 @@ class ChunkPasswordValidator extends Base
     }
 
     /**
+     * @throws Exception
      * @throws NotFoundException
+     * @throws PDOException
      * @throws ReflectionException
+     * @throws TypeError
      */
     protected function getChunkFromRevisePassword(): void
     {
@@ -97,6 +107,8 @@ class ChunkPasswordValidator extends Base
     }
 
     /**
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     protected function getChunkFromTranslatePassword(): void
@@ -107,8 +119,15 @@ class ChunkPasswordValidator extends Base
         }
     }
 
+    /**
+     * @throws RuntimeException
+     */
     public function getChunk(): JobStruct
     {
+        if ($this->chunk === null) {
+            throw new RuntimeException('validate() must be called before getChunk()');
+        }
+
         return $this->chunk;
     }
 
@@ -120,7 +139,7 @@ class ChunkPasswordValidator extends Base
         return $this->id_job;
     }
 
-    public function getChunkReview(): ChunkReviewStruct
+    public function getChunkReview(): ?ChunkReviewStruct
     {
         return $this->chunkReview;
     }

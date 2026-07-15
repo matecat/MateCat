@@ -9,11 +9,14 @@ use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Exception;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectStruct;
 use PDOException;
+use Plugins\Features\AbstractRevisionFeature;
+use Plugins\Features\RevisionFactory;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -23,6 +26,8 @@ use Utils\Logger\MatecatLogger;
 
 class TestableReviewsController extends ReviewsController
 {
+    public ?RevisionFactory $revisionFactoryStub = null;
+
     public function __construct()
     {
     }
@@ -33,6 +38,11 @@ class TestableReviewsController extends ReviewsController
 
     protected function registerValidators(): void
     {
+    }
+
+    protected function initRevisionFromProject(ProjectStruct $project): RevisionFactory
+    {
+        return $this->revisionFactoryStub ?? parent::initRevisionFromProject($project);
     }
 }
 
@@ -75,8 +85,9 @@ class ReviewsControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
+        $this->setProp('database', obtainTestDatabase());
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 
         // ReviewsController::afterValidate compares against $this->project->id
         $project     = new ProjectStruct();
@@ -306,5 +317,115 @@ class ReviewsControllerTest extends AbstractTest
         $this->expectExceptionMessage('Job id / password combination is not in projects list');
 
         $this->invokePrivate('afterValidate');
+    }
+
+    // ─── createReview ───
+
+    /**
+     * Happy path: {@see ReviewsController::initRevisionFromProject} is stubbed so the heavy
+     * full-stack revision graph is bypassed; the record it yields must reference the seeded job
+     * ({@see self::BASE} id + 'jobpw' password) so the real-DB cache-destroy tail (getByIdAndPasswordOrFail
+     * + destroyCache* calls) executes against seeded rows.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws \PHPUnit\Framework\MockObject\Exception
+     */
+    #[Test]
+    public function createReview_creates_records_destroys_caches_and_returns_json(): void
+    {
+        $record                 = new ChunkReviewStruct();
+        $record->id             = self::BASE + 8;
+        $record->id_job         = $this->jobId(self::BASE);
+        $record->password       = 'jobpw';
+        $record->review_password = 'revpw';
+
+        $feature = $this->createMock(AbstractRevisionFeature::class);
+        $feature->method('createQaChunkReviewRecords')->willReturn([$record]);
+
+        $factory = $this->createMock(RevisionFactory::class);
+        $factory->method('getRevisionFeature')->willReturn($feature);
+
+        $this->controller->revisionFactoryStub = $factory;
+
+        // project->password is read by destroyCacheForProjectData (source line 57)
+        $project           = new ProjectStruct();
+        $project->id       = $this->projectId(self::BASE);
+        $project->password = 'projpw';
+        $this->setProp('project', $project);
+
+        $this->setProp('chunk', new JobStruct());
+        $this->setProp('nextSourcePage', 3);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with([
+                'chunk_review' => [
+                    'id'              => $record->id,
+                    'id_job'          => $record->id_job,
+                    'review_password' => $record->review_password,
+                ],
+            ]);
+
+        $this->controller->createReview();
+    }
+
+    // ─── registerValidators onSuccess closures ───
+
+    /**
+     * Fires the three onSuccess closures registered by {@see ReviewsController::registerValidators}
+     * (source lines 80, 83, 85). Closure #1 pulls the project off the ProjectPasswordValidator;
+     * closures #2/#3 spin up TeamProjectValidator / ProjectAccessValidator against the unseeded
+     * auth context and reject — the throw is expected, the point is executing the closure bodies.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws \PHPUnit\Framework\MockObject\Exception
+     */
+    #[Test]
+    public function registerValidators_onSuccess_closures_execute(): void
+    {
+        $controller = new TestableReviewsController();
+        $this->setPropOn($controller, 'request', $this->requestStub);
+        $this->setPropOn($controller, 'response', $this->createMock(Response::class));
+        $this->setPropOn($controller, 'database', obtainTestDatabase());
+        $this->setPropOn($controller, 'params', ['id_project' => $this->projectId(self::BASE), 'password' => 'projpw']);
+
+        $project     = new ProjectStruct();
+        $project->id = $this->projectId(self::BASE);
+        $this->setPropOn($controller, 'project', $project);
+
+        $reflector = new ReflectionClass(ReviewsController::class);
+        $reflector->getMethod('registerValidators')->invoke($controller);
+
+        /** @var array<\Controller\API\Commons\Validators\Base> $validators */
+        $validators        = $reflector->getProperty('validators')->getValue($controller);
+        $passwordValidator = $validators[0];
+
+        // make ProjectPasswordValidator::getProject() return our project so closure #1 (line 80) succeeds
+        $projectProp = (new ReflectionClass($passwordValidator))->getProperty('project');
+        $projectProp->setValue($passwordValidator, $project);
+
+        $callbacksProp = (new ReflectionClass(\Controller\API\Commons\Validators\Base::class))->getProperty('_validationCallbacks');
+        /** @var array<callable> $callbacks */
+        $callbacks = $callbacksProp->getValue($passwordValidator);
+        $this->assertCount(3, $callbacks);
+
+        // closure #1 (line 80): assigns controller->project from the validator
+        $callbacks[0]();
+        $this->assertInstanceOf(
+            ProjectStruct::class,
+            $reflector->getProperty('project')->getValue($controller)
+        );
+
+        // closures #2 (line 83) and #3 (line 85): sub-validators reject the unseeded context
+        foreach ([$callbacks[1], $callbacks[2]] as $callback) {
+            try {
+                $callback();
+            } catch (\Throwable) {
+                // expected: TeamProjectValidator / ProjectAccessValidator reject
+            }
+        }
+        $this->addToAssertionCount(1);
     }
 }

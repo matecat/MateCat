@@ -49,7 +49,7 @@ class ChunkCompletionEventDaoTest extends AbstractTest
     #[Test]
     public function validSourcesReturnsExpectedKeys(): void
     {
-        $dao = new ChunkCompletionEventDao();
+        $dao = new ChunkCompletionEventDao(obtainTestDatabase());
         $sources = $dao->validSources();
 
         $this->assertIsArray($sources);
@@ -73,7 +73,7 @@ class ChunkCompletionEventDaoTest extends AbstractTest
         $params->uid = 1;
         $params->is_review = false;
 
-        $dao = new ChunkCompletionEventDao();
+        $dao = new ChunkCompletionEventDao(obtainTestDatabase());
         $result = $dao->createFromChunk($this->makeChunk(), $params);
 
         $this->assertSame('42', $result);
@@ -85,7 +85,7 @@ class ChunkCompletionEventDaoTest extends AbstractTest
         $row = ['id_event' => 1, 'id_job' => 10, 'password' => 'pass1', 'is_review' => false, 'create_date' => '2024-01-01'];
         $this->stmtStub->method('fetch')->willReturn($row);
 
-        $dao = new ChunkCompletionEventDao();
+        $dao = new ChunkCompletionEventDao(obtainTestDatabase());
         $result = $dao->lastCompletionRecord($this->makeChunk(), ['is_review' => false]);
 
         $this->assertIsArray($result);
@@ -97,7 +97,7 @@ class ChunkCompletionEventDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetch')->willReturn(false);
 
-        $dao = new ChunkCompletionEventDao();
+        $dao = new ChunkCompletionEventDao(obtainTestDatabase());
         $result = $dao->lastCompletionRecord($this->makeChunk(), ['is_review' => true]);
 
         $this->assertIsArray($result);
@@ -112,7 +112,7 @@ class ChunkCompletionEventDaoTest extends AbstractTest
         $event = new ChunkCompletionEventStruct();
         $event->id = 5;
 
-        $dao = new ChunkCompletionEventDao();
+        $dao = new ChunkCompletionEventDao(obtainTestDatabase());
         $result = $dao->deleteEvent($event);
 
         $this->assertSame(1, $result);
@@ -125,7 +125,7 @@ class ChunkCompletionEventDaoTest extends AbstractTest
         $event->id = 1;
         $this->stmtStub->method('fetch')->willReturn($event);
 
-        $dao = new ChunkCompletionEventDao();
+        $dao = new ChunkCompletionEventDao(obtainTestDatabase());
         $result = $dao->getByIdAndChunk(1, $this->makeChunk());
 
         $this->assertInstanceOf(ChunkCompletionEventStruct::class, $result);
@@ -136,7 +136,7 @@ class ChunkCompletionEventDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetch')->willReturn(false);
 
-        $dao = new ChunkCompletionEventDao();
+        $dao = new ChunkCompletionEventDao(obtainTestDatabase());
         $result = $dao->getByIdAndChunk(999, $this->makeChunk());
 
         $this->assertFalse($result);
@@ -147,7 +147,7 @@ class ChunkCompletionEventDaoTest extends AbstractTest
     {
         $this->stmtStub->method('rowCount')->willReturn(2);
 
-        $dao = new ChunkCompletionEventDao();
+        $dao = new ChunkCompletionEventDao(obtainTestDatabase());
         $result = $dao->updatePassword(10, 'new_pass', 'old_pass');
 
         $this->assertSame(2, $result);

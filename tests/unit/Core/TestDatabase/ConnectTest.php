@@ -10,7 +10,6 @@ use PDO;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
-use ReflectionProperty;
 use Utils\Registry\AppConfig;
 
 
@@ -25,7 +24,6 @@ use Utils\Registry\AppConfig;
 class ConnectTest extends AbstractTest
 {
     protected ReflectionClass $reflector;
-    protected ReflectionProperty $property;
 
     /**
      * @var IDatabase
@@ -39,15 +37,9 @@ class ConnectTest extends AbstractTest
     {
         parent::setUp();
 
-        // get the singleton and close the connection
-        $this->databaseInstance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
-        $this->databaseInstance->close();
-
-        // reset the singleton static field instance
+        // create a fresh instance with no open connection
+        $this->databaseInstance = new Database(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         $this->reflector = new ReflectionClass($this->databaseInstance);
-        $this->property = $this->reflector->getProperty('instance');
-
-        $this->property->setValue($this->databaseInstance, null);
     }
 
     /**
@@ -81,7 +73,7 @@ class ConnectTest extends AbstractTest
         $this->checkInstanceReset();
 
         // recreate the instance
-        $instance_after_reset = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $instance_after_reset = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         $instance_after_reset->connect();
 
         $connection = $this->reflector->getProperty('connection');
@@ -104,7 +96,7 @@ class ConnectTest extends AbstractTest
         // verify that the setup method has reset the connection
         $this->checkInstanceReset();
 
-        $newDatabaseClassInstance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $newDatabaseClassInstance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         $connection = $this->reflector->getProperty('connection');
 
         $current_value = $connection->getValue($newDatabaseClassInstance);
@@ -125,7 +117,7 @@ class ConnectTest extends AbstractTest
         $this->checkInstanceReset();
 
         // ensure connection
-        $instance_after_first_reset = $this->databaseInstance->obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $instance_after_first_reset = new Database(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         $instance_after_first_reset->connect();
 
         // get the PDO internal resource
@@ -138,7 +130,7 @@ class ConnectTest extends AbstractTest
         $instance_after_first_reset->close();
 
         // get a fresh new connection
-        $instance_after_second_reset = $instance_after_first_reset->obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $instance_after_second_reset = new Database(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         $instance_after_second_reset->connect();
 
         // get the PDO internal resource

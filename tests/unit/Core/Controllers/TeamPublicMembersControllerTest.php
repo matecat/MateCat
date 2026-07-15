@@ -73,12 +73,13 @@ class TeamPublicMembersControllerTest extends AbstractTest
         parent::setUp();
 
         AppConfig::$SKIP_SQL_CACHE = true;
-        $this->createDatabaseMock();
+        [$dbStub] = $this->createDatabaseMock();
 
         $this->controller = new TestableTeamPublicMembersController();
         $this->reflector  = new ReflectionClass(TeamPublicMembersController::class);
 
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createStub(MatecatLogger::class));
+        $this->reflector->getProperty('database')->setValue($this->controller, $dbStub);
     }
 
     protected function tearDown(): void

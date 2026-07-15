@@ -795,6 +795,199 @@ class ModernMTControllerTest extends AbstractTest
         $this->controller->modifyGlossary();
     }
 
+    // ------- importGlossary() additional paths -------
+
+    #[Test]
+    public function importGlossary_throws_on_invalid_memoryId_non_numeric(): void
+    {
+        $this->stubRequestParams(['engineId' => '1']);
+
+        $filesStub = $this->createStub(\Klein\DataCollection\DataCollection::class);
+        $filesStub->method('exists')->willReturn(true);
+        $this->requestStub->method('files')->willReturn($filesStub);
+
+        // 'abc' → filter_var(FILTER_SANITIZE_NUMBER_INT) returns '' → invalid
+        $this->controller->params = ['memoryId' => 'abc'];
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Invalid `memoryId` param');
+
+        $this->controller->importGlossary();
+    }
+
+    #[Test]
+    public function importGlossary_success_path(): void
+    {
+        $this->stubRequestParams(['engineId' => '1']);
+
+        $filesStub = $this->createStub(\Klein\DataCollection\DataCollection::class);
+        $filesStub->method('exists')->willReturn(true);
+        $filesStub->method('all')->willReturn([]);
+        $this->requestStub->method('files')->willReturn($filesStub);
+
+        // Build a real CSV temp file with a valid unidirectional glossary
+        $csvFile = tempnam('/tmp', 'mmt_test_glossary_');
+        file_put_contents($csvFile, "hello,ciao\nworld,mondo\n");
+        $this->controller->fakeExtractCSVResult = $csvFile;
+
+        $glossaryElement = new UploadElement(['file_path' => $csvFile]);
+        $uploadResult = new UploadElement();
+        $uploadResult->glossary = $glossaryElement;
+
+        $uploadStub = $this->createStub(Upload::class);
+        $uploadStub->method('uploadFiles')->willReturn($uploadResult);
+        $this->controller->fakeUploadManager = $uploadStub;
+
+        $this->controller->params = ['memoryId' => '55'];
+
+        $this->mmtStub->method('importGlossary')->willReturn(['status' => 'imported']);
+
+        $this->controller->importGlossary();
+
+        self::assertSame('imported', $this->lastJsonResponse['status']);
+
+        if (file_exists($csvFile)) {
+            unlink($csvFile);
+        }
+    }
+
+    // ------- createMemory() additional paths -------
+
+    #[Test]
+    public function createMemory_throws_on_invalid_empty_name(): void
+    {
+        $this->stubRequestParams(['engineId' => '1']);
+        // name is set but empty string → filter_var returns '' → invalid
+        $this->controller->params = ['name' => ''];
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Invalid `name` param');
+
+        $this->controller->createMemory();
+    }
+
+    // ------- updateMemory() additional paths -------
+
+    #[Test]
+    public function updateMemory_throws_on_invalid_empty_name(): void
+    {
+        $this->stubRequestParams(['memoryId' => '77', 'engineId' => '1']);
+        // name is set but empty string → filter_var returns '' → invalid
+        $this->controller->params = ['name' => ''];
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Invalid `name` param');
+
+        $this->controller->updateMemory();
+    }
+
+    // ------- createMemoryAndImportGlossary() success path -------
+
+    #[Test]
+    public function createMemoryAndImportGlossary_success_path(): void
+    {
+        $this->stubRequestParams(['engineId' => '1']);
+        $this->controller->params = ['name' => 'New Glossary Memory'];
+
+        $filesStub = $this->createStub(\Klein\DataCollection\DataCollection::class);
+        $filesStub->method('exists')->willReturn(true);
+        $filesStub->method('all')->willReturn([]);
+        $this->requestStub->method('files')->willReturn($filesStub);
+
+        $this->mmtStub->method('createMemory')->willReturn(['id' => 999]);
+        $this->mmtStub->method('importGlossary')->willReturn(['status' => 'queued']);
+
+        // Build a real CSV temp file with a valid unidirectional glossary
+        $csvFile = tempnam('/tmp', 'mmt_test_create_glossary_');
+        file_put_contents($csvFile, "source,target\ntranslate,tradurre\n");
+        $this->controller->fakeExtractCSVResult = $csvFile;
+
+        $glossaryElement = new UploadElement(['file_path' => $csvFile]);
+        $uploadResult = new UploadElement();
+        $uploadResult->glossary = $glossaryElement;
+
+        $uploadStub = $this->createStub(Upload::class);
+        $uploadStub->method('uploadFiles')->willReturn($uploadResult);
+        $this->controller->fakeUploadManager = $uploadStub;
+
+        $this->controller->createMemoryAndImportGlossary();
+
+        self::assertSame('queued', $this->lastJsonResponse['status']);
+
+        if (file_exists($csvFile)) {
+            unlink($csvFile);
+        }
+    }
+
+    #[Test]
+    public function createMemoryAndImportGlossary_throws_on_empty_csv(): void
+    {
+        $this->stubRequestParams(['engineId' => '1']);
+        $this->controller->params = ['name' => 'Memory With Empty CSV'];
+
+        $filesStub = $this->createStub(\Klein\DataCollection\DataCollection::class);
+        $filesStub->method('exists')->willReturn(true);
+        $filesStub->method('all')->willReturn([]);
+        $this->requestStub->method('files')->willReturn($filesStub);
+
+        $this->mmtStub->method('createMemory')->willReturn(['id' => 998]);
+
+        $csvFile = tempnam('/tmp', 'mmt_test_empty_create_');
+        file_put_contents($csvFile, '');
+        $this->controller->fakeExtractCSVResult = $csvFile;
+
+        $glossaryElement = new UploadElement(['file_path' => $csvFile]);
+        $uploadResult = new UploadElement();
+        $uploadResult->glossary = $glossaryElement;
+
+        $uploadStub = $this->createStub(Upload::class);
+        $uploadStub->method('uploadFiles')->willReturn($uploadResult);
+        $this->controller->fakeUploadManager = $uploadStub;
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Glossary is empty');
+
+        $this->controller->createMemoryAndImportGlossary();
+
+        if (file_exists($csvFile)) {
+            unlink($csvFile);
+        }
+    }
+
+    // ------- createUploadManager() base implementation -------
+
+    #[Test]
+    public function createUploadManager_base_returns_upload_instance(): void
+    {
+        // Use a subclass that does NOT override createUploadManager so the
+        // parent (base) implementation is exercised and covered.
+        $bareController = new class extends ModernMTController {
+            public ?MMT $fakeMMTClient = null;
+
+            public function __construct()
+            {
+            }
+
+            protected function getModernMTClient(int $engineId): MMT
+            {
+                if ($this->fakeMMTClient === null) {
+                    throw new RuntimeException('fakeMMTClient not configured');
+                }
+
+                return $this->fakeMMTClient;
+            }
+
+            public function callCreateUploadManager(): Upload
+            {
+                return $this->createUploadManager();
+            }
+        };
+
+        $result = $bareController->callCreateUploadManager();
+
+        self::assertInstanceOf(Upload::class, $result);
+    }
+
     // ------- helper -------
 
     /**

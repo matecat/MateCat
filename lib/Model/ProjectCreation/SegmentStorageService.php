@@ -302,7 +302,7 @@ class SegmentStorageService
      */
     protected function createSegmentDao(): SegmentDao
     {
-        return new SegmentDao();
+        return new SegmentDao($this->dbHandler);
     }
 
     /**
@@ -315,7 +315,7 @@ class SegmentStorageService
      */
     protected function insertOriginalDataRecord(int $id_segment, array $map): void
     {
-        (new SegmentOriginalDataDao())->insertRecord($id_segment, $map);
+        (new SegmentOriginalDataDao($this->dbHandler))->insertRecord($id_segment, $map);
     }
 
     /**
@@ -325,7 +325,7 @@ class SegmentStorageService
      */
     protected function persistSegmentMetadata(SegmentMetadataStruct $metadataStruct): void
     {
-        (new SegmentMetadataDao())->save($metadataStruct);
+        (new SegmentMetadataDao($this->dbHandler))->save($metadataStruct);
     }
 
     // ── Private helpers ─────────────────────────────────────────────

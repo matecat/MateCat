@@ -12,6 +12,7 @@ use Model\Jobs\MetadataDao;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
 use RuntimeException;
+use Model\Projects\ProjectDao;
 use TypeError;
 use Utils\Constants\TranslationStatus;
 use Utils\Tools\CatUtils;
@@ -49,7 +50,7 @@ class SplitSegmentController extends KleinController
         if (!$Filter instanceof MateCatFilter) {
             throw new RuntimeException('Expected MateCatFilter instance from getInstance()');
         }
-        [, $translationStruct->source_chunk_lengths] = (new CatUtils())->parseSegmentSplit($request['segment'], '', $Filter);
+        [, $translationStruct->source_chunk_lengths] = (new CatUtils($this->getDatabase()))->parseSegmentSplit($request['segment'], '', $Filter);
 
         /* Fill the statuses with DEFAULT DRAFT VALUES */
         $pieces = (count($translationStruct->source_chunk_lengths) > 1 ? count($translationStruct->source_chunk_lengths) - 1 : 1);
@@ -105,7 +106,7 @@ class SplitSegmentController extends KleinController
         // check Job password
         $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail((int)$id_job, $password);
 
-        $this->featureSet->loadForProject($jobStruct->getProject());
+        $this->featureSet->loadForProject($jobStruct->getProject(new ProjectDao($this->getDatabase())));
 
         return [
             'id_job' => $id_job,

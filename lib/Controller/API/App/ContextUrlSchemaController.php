@@ -20,8 +20,10 @@ class ContextUrlSchemaController extends KleinController
      */
     public function schema(): Response
     {
-        $schema = file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/segment_context_url.json');
-        if ($schema === false) {
+        $path = AppConfig::$ROOT . '/inc/validation/schema/segment_context_url.json';
+        // Check readability first so a missing/unreadable schema throws cleanly instead of
+        // emitting a file_get_contents() "failed to open stream" PHP warning.
+        if (!is_readable($path) || ($schema = file_get_contents($path)) === false) {
             throw new RuntimeException('Failed to read segment_context_url.json schema');
         }
 

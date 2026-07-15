@@ -3,11 +3,13 @@
 namespace Matecat\Core\Controllers;
 
 use Controller\API\Commons\Exceptions\NotFoundException as ApiNotFoundException;
+use Controller\API\Commons\Validators\Base as ValidatorBase;
 use Controller\API\V3\TeamsProjectsController;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
@@ -36,6 +38,25 @@ class TestableTeamsProjectsV3Controller extends TeamsProjectsController
     }
 
     protected function registerValidators(): void
+    {
+    }
+
+    public function refreshClientSessionIfNotApi(): void
+    {
+    }
+}
+
+/**
+ * Variant that does NOT override registerValidators() so we can exercise
+ * lines 38-39 of TeamsProjectsController (the real appendValidator calls).
+ */
+class TestableTeamsProjectsV3ControllerWithValidators extends TeamsProjectsController
+{
+    public function __construct()
+    {
+    }
+
+    protected function initDependencies(): void
     {
     }
 
@@ -75,6 +96,7 @@ class TeamsProjectsV3ControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
+        $this->setProp('database', obtainTestDatabase());
 
         $user = new UserStruct();
         $user->uid = $this->userId(self::BASE);
@@ -84,7 +106,7 @@ class TeamsProjectsV3ControllerTest extends AbstractTest
         $this->setProp('user', $user);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet(obtainTestDatabase()));
 
         $team = new TeamStruct();
         $team->id = $this->teamId(self::BASE);
@@ -340,5 +362,83 @@ class TeamsProjectsV3ControllerTest extends AbstractTest
 
         $teamProp = $this->reflector->getProperty('team');
         $this->assertSame($team, $teamProp->getValue($this->controller));
+    }
+
+    // ─── registerValidators() ───
+
+    /**
+     * Covers lines 38-39: the real registerValidators() appends a LoginValidator
+     * and a TeamAccessValidator to $this->validators.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function registerValidators_appends_login_and_team_access_validators(): void
+    {
+        $reflector = new ReflectionClass(TeamsProjectsController::class);
+
+        $ctrl = new TestableTeamsProjectsV3ControllerWithValidators();
+
+        // Inject the minimum state that Base::__construct() needs (getRequest()).
+        $prop = $reflector->getProperty('request');
+        $prop->setValue($ctrl, $this->requestStub);
+
+        // Also inject database so the controller is fully usable.
+        $dbProp = $reflector->getProperty('database');
+        $dbProp->setValue($ctrl, obtainTestDatabase());
+
+        // Call the real registerValidators().
+        $method = $reflector->getMethod('registerValidators');
+        $method->invoke($ctrl);
+
+        // Assert two validators were appended.
+        $validatorsProp = $reflector->getProperty('validators');
+        /** @var ValidatorBase[] $validators */
+        $validators = $validatorsProp->getValue($ctrl);
+
+        $this->assertCount(2, $validators);
+        $this->assertInstanceOf(\Controller\API\Commons\Validators\LoginValidator::class, $validators[0]);
+        $this->assertInstanceOf(\Controller\API\Commons\Validators\TeamAccessValidator::class, $validators[1]);
+    }
+
+    // ─── getPaginated() — empty-team (204) branch ───
+
+    /**
+     * Covers lines 74-80: when the team has no projects, getPaginated() must
+     * respond with HTTP 204 and an empty projects array.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function getPaginated_returns_204_when_team_has_no_projects(): void
+    {
+        // Use a team ID that has no projects in the DB (the seeded team's id + a
+        // large offset that is guaranteed not to exist).
+        $emptyTeamId = $this->teamId(self::BASE) + 90_000;
+
+        $this->setRequestParams([
+            'id_team' => (string) $emptyTeamId,
+            'page'    => 1,
+            'step'    => 20,
+        ]);
+
+        $statusMock = $this->createMock(\Klein\HttpStatus::class);
+        $statusMock->expects($this->once())->method('setCode')->with(204);
+
+        $this->responseMock->expects($this->once())
+            ->method('status')
+            ->willReturn($statusMock);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertArrayHasKey('_links', $data);
+                $this->assertArrayHasKey('projects', $data);
+                $this->assertSame([], $data['projects']);
+                $this->assertSame(0, $data['_links']['totals']);
+                return true;
+            }));
+
+        $this->controller->getPaginated();
     }
 }

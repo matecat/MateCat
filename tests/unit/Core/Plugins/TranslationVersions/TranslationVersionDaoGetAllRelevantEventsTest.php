@@ -23,7 +23,7 @@ class TranslationVersionDaoGetAllRelevantEventsTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->database = Database::obtain(
+        $this->database = obtainTestDatabase(
             AppConfig::$DB_SERVER,
             AppConfig::$DB_USER,
             AppConfig::$DB_PASS,
@@ -97,7 +97,7 @@ class TranslationVersionDaoGetAllRelevantEventsTest extends AbstractTest
         // Current state: segment_translations at v3
         $this->insertCurrentTranslation(3, 'approved text');
 
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(obtainTestDatabase());
         $results = $dao->getAllRelevantEvents([self::SEGMENT_ID], self::JOB_ID);
 
         $this->assertCount(2, $results, 'Both source_page rows must be returned even when version record is missing');
@@ -118,7 +118,7 @@ class TranslationVersionDaoGetAllRelevantEventsTest extends AbstractTest
         $this->insertEvent(2, 1, 0);
         $this->insertCurrentTranslation(2, 'current text');
 
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(obtainTestDatabase());
         $results = $dao->getAllRelevantEvents([self::SEGMENT_ID], self::JOB_ID);
 
         $this->assertCount(1, $results);
@@ -144,7 +144,7 @@ class TranslationVersionDaoGetAllRelevantEventsTest extends AbstractTest
         // Current: v3
         $this->insertCurrentTranslation(3, 'approved2 text');
 
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(obtainTestDatabase());
         $results = $dao->getAllRelevantEvents([self::SEGMENT_ID], self::JOB_ID);
 
         $this->assertCount(2, $results);
@@ -169,7 +169,7 @@ class TranslationVersionDaoGetAllRelevantEventsTest extends AbstractTest
     #[Test]
     public function getAllRelevantEventsReturnsEmptyWhenNoEvents(): void
     {
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(obtainTestDatabase());
         $results = $dao->getAllRelevantEvents([self::SEGMENT_ID], self::JOB_ID);
 
         $this->assertSame([], $results);

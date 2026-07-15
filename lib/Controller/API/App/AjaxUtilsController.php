@@ -6,6 +6,8 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\ConnectedServices\GDrive\Session;
 use PDOException;
 use RuntimeException;
@@ -21,7 +23,9 @@ class AjaxUtilsController extends KleinController
     }
 
     /**
+     * @throws LockedResponseException
      * @throws PDOException
+     * @throws ResponseAlreadySentException
      */
     public function ping(): void
     {
@@ -48,7 +52,7 @@ class AjaxUtilsController extends KleinController
             throw new InvalidArgumentException("TM key not provided.", -9);
         }
 
-        $tmxHandler = new TMSService();
+        $tmxHandler = new TMSService($this->getDatabase());
         $keyExists = $tmxHandler->checkCorrectKey($tm_key);
 
         if (!isset($keyExists) or $keyExists === false) {
@@ -68,7 +72,7 @@ class AjaxUtilsController extends KleinController
      */
     public function clearNotCompletedUploads(): void
     {
-        (new Session())->clearSession();
+        (new Session($this->getDatabase()))->clearSession();
 
         $this->response->json([
             'success' => true

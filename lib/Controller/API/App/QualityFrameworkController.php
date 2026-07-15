@@ -6,6 +6,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Model\Exceptions\NotFoundException;
+use Model\LQA\CategoryDao;
 use Model\LQA\ModelDao;
 use Model\LQA\ModelStruct;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
@@ -65,7 +66,8 @@ class QualityFrameworkController extends KleinController
             throw new NotFoundException('QAModel not found');
         }
 
-        $json = $qaModel->getDecodedModel();
+        $categoryDao = new CategoryDao($this->getDatabase());
+        $json = $qaModel->getDecodedModel($categoryDao);
         $json['template_model'] = null;
 
         if ($qaModel->qa_model_template_id) {
@@ -76,7 +78,7 @@ class QualityFrameworkController extends KleinController
                 return $json;
             }
 
-            $json['template_model'] = $parentTemplate->getDecodedModel()['model'];
+            $json['template_model'] = $parentTemplate->getDecodedModel($categoryDao)['model'];
         }
 
         return $json;

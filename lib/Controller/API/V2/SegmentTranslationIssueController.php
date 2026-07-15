@@ -10,12 +10,17 @@ use Controller\API\Commons\Validators\SegmentTranslationIssueValidator;
 use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\EntryCommentDao;
+use Model\Projects\ProjectDao;
 use Model\LQA\EntryDao as EntryDao;
 use Model\LQA\EntryStruct;
+use Model\LQA\EntryValidator;
+use Model\Translations\SegmentTranslationDao;
 use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
@@ -43,7 +48,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             $this->getVersionNumber()
         );
 
-        $json = new TranslationIssueFormatter();
+        $json = new TranslationIssueFormatter(new EntryCommentDao($this->getDatabase()));
         $rendered = $json->render( $result );
 
         $this->response->json( [ 'issues' => $rendered ] );
@@ -87,7 +92,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         $this->getDatabase()->commit();
 
-        $json     = new TranslationIssueFormatter();
+        $json     = new TranslationIssueFormatter(new EntryCommentDao($this->getDatabase()));
         $rendered = $json->renderItem( $struct );
 
         $this->response->json( [ 'issue' => $rendered ] );
@@ -132,7 +137,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             throw new NotFoundException( "Job not found", 404 );
         }
 
-        $jobStruct = $chunkReviewStruct->getChunk();
+        $jobStruct = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
 
         $this->checkLoggedUserPermissions($oldStruct, $jobStruct, $this->user);
 
@@ -147,11 +152,17 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             throw new NotFoundException( "Job not found", 404 );
         }
 
-        $oldStruct->setDefaults();
+        $oldStruct->setDefaults(
+            new EntryValidator( $oldStruct, database: $this->getDatabase() ),
+            new SegmentTranslationDao( $this->getDatabase() )
+        );
 
         $newStruct     = new EntryStruct( $data );
         $newStruct->id = $data[ 'id_issue' ];
-        $newStruct->setDefaults();
+        $newStruct->setDefaults(
+            new EntryValidator( $newStruct, database: $this->getDatabase() ),
+            new SegmentTranslationDao( $this->getDatabase() )
+        );
 
         // remove old issue
         $model = $this->_getSegmentTranslationIssueModel(
@@ -187,7 +198,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $msg = "[AUDIT][ISSUE_UPDATE] issue_id={$struct->id}; segment_id={$struct->id_segment}; user={$this->user->email}; new_severity={$struct->severity}";
         $this->logger->debug($msg);
 
-        $json = new TranslationIssueFormatter();
+        $json = new TranslationIssueFormatter(new EntryCommentDao($this->getDatabase()));
         $rendered = $json->renderItem( $struct );
 
         $this->response->json( [ 'issue' => $rendered ] );
@@ -213,7 +224,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             throw new NotFoundException( "Job not found", 404 );
         }
 
-        $jobStruct = $chunkReviewStruct->getChunk();
+        $jobStruct = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
 
         $this->checkLoggedUserPermissions($issue, $jobStruct, $this->user);
 
@@ -261,7 +272,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         $dao->createComment( $data );
 
-        $json = new TranslationIssueFormatter();
+        $json = new TranslationIssueFormatter(new EntryCommentDao($this->getDatabase()));
         $rendered = $json->renderItem( $entry );
 
         $response = [ 'comment' => $rendered ];
@@ -285,7 +296,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             $issue,
             new ChunkReviewDao($this->getDatabase()),
             new EntryDao($this->getDatabase()),
-            new TranslationVersionDao($this->getDatabase())
+            new TranslationVersionDao($this->getDatabase()),
+            new ProjectDao($this->getDatabase())
         );
     }
 
@@ -294,7 +306,11 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $jobValidator = new ChunkPasswordValidator( $this );
         $jobValidator->onSuccess( function () use ( $jobValidator ) {
             //enable dynamic loading (Factory) by callback hook on revision features
-            $this->validator = ( new SegmentTranslationIssueValidator( $this ) )->setChunkReview( $jobValidator->getChunkReview() );
+            $chunkReview = $jobValidator->getChunkReview();
+            if ( $chunkReview === null ) {
+                throw new NotFoundException( 'Chunk review not found' );
+            }
+            $this->validator = ( new SegmentTranslationIssueValidator( $this ) )->setChunkReview( $chunkReview );
             $this->validator->validate();
         } );
         $this->appendValidator( $jobValidator );
@@ -328,7 +344,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             return;
         }
 
-        $team = $job->getProject()->getTeam();
+        $project = $job->getProject(new ProjectDao($this->getDatabase()));
+        $team = $project->id_team !== null ? (new TeamDao($this->getDatabase()))->findById($project->id_team) : null;
 
         if ($team === null || $team->id === null) {
             throw new AuthorizationError( "Team not found. Not Authorized", 401 );

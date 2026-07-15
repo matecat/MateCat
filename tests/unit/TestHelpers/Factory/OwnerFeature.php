@@ -18,7 +18,7 @@ class OwnerFeature extends Base
             'enabled' => true,
         ], $values);
 
-        $dao = new OwnerFeatureDao(Database::obtain());
+        $dao = new OwnerFeatureDao(obtainTestDatabase());
         $struct = new OwnerFeatureStruct($values);
 
         return $dao->create($struct);

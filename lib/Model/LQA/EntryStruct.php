@@ -36,28 +36,15 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct
     protected mixed $_comments;
     protected mixed $_diff;
 
-    private EntryValidator $validator;
-    private SegmentTranslationDao $segmentTranslationDao;
-
-    public function __construct(
-        array $array_params = [],
-        ?EntryValidator $validator = null,
-        ?SegmentTranslationDao $segmentTranslationDao = null
-    ) {
-        parent::__construct($array_params);
-        $this->validator = $validator ?? new EntryValidator($this);
-        $this->segmentTranslationDao = $segmentTranslationDao ?? new SegmentTranslationDao();
-    }
-
     /**
      * @throws ReflectionException
      * @throws ValidationError
      * @throws NotFoundException
      * @throws Exception
      */
-    public function ensureValid(): void
+    public function ensureValid(EntryValidator $validator): void
     {
-        $this->validator->ensureValid();
+        $validator->ensureValid();
     }
 
     public function addComments(mixed $comments): void
@@ -98,21 +85,21 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct
       * @throws Exception
       * @throws TypeError
       */
-     public function setDefaults(): void
+     public function setDefaults(EntryValidator $validator, SegmentTranslationDao $segmentTranslationDao): void
     {
-        $this->validator->ensureValid();
+        $validator->ensureValid();
 
         // set the translation reading the version number on the
         // segment translation
-        $translation = $this->segmentTranslationDao->findBySegmentAndJob($this->id_segment, $this->id_job);
+        $translation = $segmentTranslationDao->findBySegmentAndJob($this->id_segment, $this->id_job);
         if ($translation === null) {
             throw new NotFoundException('Segment translation not found');
         }
         $this->translation_version = $translation->version_number ?? 0;
 
-        $this->penalty_points = $this->getPenaltyPoints();
+        $this->penalty_points = $this->getPenaltyPoints($validator);
 
-        $category = $this->validator->category;
+        $category = $validator->category;
         if ($category === null) {
             throw new NotFoundException('Category not found after validation');
         }
@@ -147,11 +134,12 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct
     }
 
     /**
+     * @param EntryValidator $validator
      * @return float|null
      */
-    private function getPenaltyPoints(): ?float
+    private function getPenaltyPoints(EntryValidator $validator): ?float
     {
-        $category = $this->validator->category;
+        $category = $validator->category;
         if ($category === null) {
             return null;
         }

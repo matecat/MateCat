@@ -86,7 +86,7 @@ trait ScanDirectoryForConvertedFiles
 
         $redisKey = md5($filename . "__pdfAnalysis.json");
         $pdfAnalysis = (new RedisHandler())->getConnection()->get($redisKey);
-        $pdfAnalysis = (!empty($pdfAnalysis)) ? unserialize($pdfAnalysis) : [];
+        $pdfAnalysis = (!empty($pdfAnalysis)) ? unserialize($pdfAnalysis, ['allowed_classes' => false]) : [];
 
         $metadata = [];
         $metadata['basename'] = $info['info']['basename'];

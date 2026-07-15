@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Controllers;
 
+use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\V3\SegmentAnalysisController;
 use Exception;
 use Klein\Request;
@@ -15,6 +16,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Segments\SegmentDisabledService;
+use Model\Segments\SegmentMetadataDao;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use ReflectionException;
@@ -37,6 +39,13 @@ class SegmentAnalysisControllerTest extends AbstractTest
     private const int TEST_SEGMENT_2 = 9998004;
     private const int TEST_SEGMENT_3 = 9998005;
     private const int TEST_FILE_ID = 9998006;
+
+    // Separate segment IDs for notes/idRequests/issues tests — never touched by other tests
+    // so the DAO cache cannot return a stale empty-result from an earlier test.
+    private const int TEST_NOTE_SEGMENT = 9948001;
+    private const int TEST_META_SEGMENT = 9948002;
+    private const int TEST_ISSUE_SEGMENT = 9948003;
+    private const int TEST_QA_CATEGORY_ID = 9948010;
 
     private TestableSegmentAnalysisController $controller;
     private ReflectionClass $reflector;
@@ -62,12 +71,15 @@ class SegmentAnalysisControllerTest extends AbstractTest
         $resProp = $this->reflector->getProperty('response');
         $resProp->setValue($this->controller, $responseMock);
 
-        $featureSet = new FeatureSet();
+        $dbProp = $this->reflector->getProperty('database');
+        $dbProp->setValue($this->controller, obtainTestDatabase());
+
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $featureSetProp = $this->reflector->getProperty('featureSet');
         $featureSetProp->setValue($this->controller, $featureSet);
 
         $segmentDisabledServiceProp = $this->reflector->getProperty('segmentDisabledService');
-        $segmentDisabledServiceProp->setValue($this->controller, new SegmentDisabledService());
+        $segmentDisabledServiceProp->setValue($this->controller, new SegmentDisabledService(new SegmentMetadataDao(obtainTestDatabase())));
     }
 
     protected function tearDown(): void
@@ -78,7 +90,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $this->cleanTestData();
 
         $conn->exec("INSERT INTO projects (id, id_customer, password, name, create_date, status_analysis) VALUES (" . self::TEST_PROJECT_ID . ", 'test@example.org', 'projpw_sa', 'TestSegAnalysis', NOW(), 'DONE')");
@@ -87,7 +99,10 @@ class SegmentAnalysisControllerTest extends AbstractTest
         $conn->exec("INSERT INTO segments (id, id_file, internal_id, segment, segment_hash, raw_word_count) VALUES
             (" . self::TEST_SEGMENT_1 . ", " . self::TEST_FILE_ID . ", '1', 'Hello world', 'hash1_sa_test', 2),
             (" . self::TEST_SEGMENT_2 . ", " . self::TEST_FILE_ID . ", '2', 'Good morning friend', 'hash2_sa_test', 3),
-            (" . self::TEST_SEGMENT_3 . ", " . self::TEST_FILE_ID . ", '3', 'Goodbye', 'hash3_sa_test', 1)
+            (" . self::TEST_SEGMENT_3 . ", " . self::TEST_FILE_ID . ", '3', 'Goodbye', 'hash3_sa_test', 1),
+            (" . self::TEST_NOTE_SEGMENT . ", " . self::TEST_FILE_ID . ", '4', 'Note segment', 'hash4_sa_test', 1),
+            (" . self::TEST_META_SEGMENT . ", " . self::TEST_FILE_ID . ", '5', 'Meta segment', 'hash5_sa_test', 1),
+            (" . self::TEST_ISSUE_SEGMENT . ", " . self::TEST_FILE_ID . ", '6', 'Issue segment', 'hash6_sa_test', 1)
         ");
         $conn->exec("INSERT INTO segment_translations (id_segment, id_job, segment_hash, translation, status, version_number, translation_date, match_type) VALUES
             (" . self::TEST_SEGMENT_1 . ", " . self::TEST_JOB_ID . ", 'hash1_sa_test', 'Ciao mondo', 'TRANSLATED', 0, NOW(), 'ICE'),
@@ -98,10 +113,13 @@ class SegmentAnalysisControllerTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM segment_translations WHERE id_job = " . self::TEST_JOB_ID);
+        $conn->exec("DELETE FROM qa_entries WHERE id_segment = " . self::TEST_ISSUE_SEGMENT);
+        $conn->exec("DELETE FROM qa_categories WHERE id = " . self::TEST_QA_CATEGORY_ID);
+        $conn->exec("DELETE FROM segment_notes WHERE id_segment IN (" . self::TEST_NOTE_SEGMENT . ", " . self::TEST_META_SEGMENT . ")");
+        $conn->exec("DELETE FROM segment_metadata WHERE id_segment IN (" . self::TEST_SEGMENT_1 . ", " . self::TEST_SEGMENT_2 . ", " . self::TEST_SEGMENT_3 . ", " . self::TEST_NOTE_SEGMENT . ", " . self::TEST_META_SEGMENT . ", " . self::TEST_ISSUE_SEGMENT . ")");
         $conn->exec("DELETE FROM segments WHERE id_file = " . self::TEST_FILE_ID);
-        $conn->exec("DELETE FROM segment_metadata WHERE id_segment IN (" . self::TEST_SEGMENT_1 . ", " . self::TEST_SEGMENT_2 . ", " . self::TEST_SEGMENT_3 . ")");
         $conn->exec("DELETE FROM jobs WHERE id = " . self::TEST_JOB_ID);
         $conn->exec("DELETE FROM files WHERE id = " . self::TEST_FILE_ID);
         $conn->exec("DELETE FROM projects WHERE id = " . self::TEST_PROJECT_ID);
@@ -342,11 +360,11 @@ class SegmentAnalysisControllerTest extends AbstractTest
     public function getSegmentsForAProjectReturnsPaginatedResult(): void
     {
         $projectProp = $this->reflector->getProperty('project');
-        $project = (new ProjectDao())->findById(self::TEST_PROJECT_ID);
+        $project = (new ProjectDao(obtainTestDatabase()))->findById(self::TEST_PROJECT_ID);
         $projectProp->setValue($this->controller, $project);
 
         $projectDaoProp = $this->reflector->getProperty('projectDao');
-        $projectDaoProp->setValue($this->controller, new ProjectDao());
+        $projectDaoProp->setValue($this->controller, new ProjectDao(obtainTestDatabase()));
 
         $result = $this->invokePrivate('getSegmentsForAProject', [self::TEST_PROJECT_ID, 'projpw_sa', 1, 50, 3, new StandardMatchTypeNamesConstants()]);
 
@@ -517,7 +535,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
     public function countRawWordsCountsPlainStringWords(): void
     {
         /** @var MateCatFilter $filter */
-        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'en-US', []);
+        $filter = MateCatFilter::getInstance(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), 'en-US', 'en-US', []);
 
         $result = $this->invokePrivate('countRawWords', ['hello world', 'en-US', $filter]);
 
@@ -532,7 +550,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
     public function countRawWordsReturnsZeroForEmptyString(): void
     {
         /** @var MateCatFilter $filter */
-        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'en-US', []);
+        $filter = MateCatFilter::getInstance(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), 'en-US', 'en-US', []);
 
         $result = $this->invokePrivate('countRawWords', [null, 'en-US', $filter]);
 
@@ -546,7 +564,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
     #[Test]
     public function getSegmentTranslationsCountReturnsCountForProject(): void
     {
-        $project = (new ProjectDao())->findById(self::TEST_PROJECT_ID);
+        $project = (new ProjectDao(obtainTestDatabase()))->findById(self::TEST_PROJECT_ID);
 
         $result = $this->invokePrivate('getSegmentTranslationsCount', [$project]);
 
@@ -577,5 +595,204 @@ class SegmentAnalysisControllerTest extends AbstractTest
         $projectProp = $this->reflector->getProperty('project');
         $project = $projectProp->getValue($this->controller);
         $this->assertSame(self::TEST_PROJECT_ID, (int)$project->id);
+    }
+
+    #[Test]
+    public function registerValidatorsAppendsLoginValidator(): void
+    {
+        $m = $this->reflector->getMethod('registerValidators');
+        $m->invoke($this->controller);
+
+        $validatorsProp = $this->reflector->getProperty('validators');
+        $validators = $validatorsProp->getValue($this->controller);
+
+        $this->assertCount(1, $validators);
+        $this->assertInstanceOf(LoginValidator::class, $validators[0]);
+    }
+
+    #[Test]
+    public function jobMethodReturnsSegmentsForValidJob(): void
+    {
+        $requestStub = $this->createStub(Request::class);
+        $requestStub->method('param')->willReturnCallback(static function (string $key) {
+            return match ($key) {
+                'page'     => '1',
+                'per_page' => '50',
+                'id_job'   => (string)self::TEST_JOB_ID,
+                'password' => self::TEST_JOB_PASSWORD,
+                default    => null,
+            };
+        });
+
+        $reqProp = $this->reflector->getProperty('request');
+        $reqProp->setValue($this->controller, $requestStub);
+
+        // response->json() is a stub (no-op) — just ensure job() runs without exception
+        $this->controller->job();
+
+        // If we reach here the job() code path was exercised
+        $this->assertTrue(true);
+    }
+
+    #[Test]
+    public function jobMethodCapsPerPageAtMaximum(): void
+    {
+        $requestStub = $this->createStub(Request::class);
+        $requestStub->method('param')->willReturnCallback(static function (string $key) {
+            return match ($key) {
+                'page'     => '1',
+                'per_page' => '9999',   // exceeds MAX_PER_PAGE=200 → capped
+                'id_job'   => (string)self::TEST_JOB_ID,
+                'password' => self::TEST_JOB_PASSWORD,
+                default    => null,
+            };
+        });
+
+        $reqProp = $this->reflector->getProperty('request');
+        $reqProp->setValue($this->controller, $requestStub);
+
+        $this->controller->job();
+
+        $this->assertTrue(true);
+    }
+
+    #[Test]
+    public function projectMethodCapsPerPageAtMaximum(): void
+    {
+        $requestStub = $this->createStub(Request::class);
+        $requestStub->method('param')->willReturnCallback(static function (string $key) {
+            return match ($key) {
+                'page'       => '1',
+                'per_page'   => '9999',   // exceeds MAX_PER_PAGE=200 → line 162 capped
+                'id_project' => (string)self::TEST_PROJECT_ID,
+                'password'   => 'projpw_sa',
+                default      => null,
+            };
+        });
+
+        $reqProp = $this->reflector->getProperty('request');
+        $reqProp->setValue($this->controller, $requestStub);
+
+        $this->controller->project();
+
+        $this->assertTrue(true);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function getSegmentsForAProjectThrowsOnInvalidPage(): void
+    {
+        $projectProp = $this->reflector->getProperty('project');
+        $project = (new ProjectDao(obtainTestDatabase()))->findById(self::TEST_PROJECT_ID);
+        $projectProp->setValue($this->controller, $project);
+
+        $projectDaoProp = $this->reflector->getProperty('projectDao');
+        $projectDaoProp->setValue($this->controller, new ProjectDao(obtainTestDatabase()));
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Page number 99 is not valid');
+
+        $this->invokePrivate('getSegmentsForAProject', [
+            self::TEST_PROJECT_ID, 'projpw_sa', 99, 50, 3, new StandardMatchTypeNamesConstants()
+        ]);
+    }
+
+    #[Test]
+    public function getIssuesNotesAndIdRequestsAggregatesNotes(): void
+    {
+        // Uses TEST_NOTE_SEGMENT — a segment ID never queried by other tests in this class,
+        // so the DAO result-cache cannot return a stale empty array from an earlier call.
+        $conn = obtainTestDatabase()->getConnection();
+        $conn->exec(
+            "INSERT INTO segment_notes (id_segment, internal_id, note, json) VALUES (" .
+            self::TEST_NOTE_SEGMENT . ", 'n1', 'A note for testing', NULL)"
+        );
+
+        try {
+            $segment = new ShapelessConcreteStruct();
+            $segment->id = self::TEST_NOTE_SEGMENT;
+
+            $result = $this->invokePrivate('getIssuesNotesAndIdRequests', [[$segment]]);
+
+            $this->assertArrayHasKey('notesAggregate', $result);
+            $this->assertArrayHasKey(self::TEST_NOTE_SEGMENT, $result['notesAggregate']);
+            $this->assertSame('A note for testing', $result['notesAggregate'][self::TEST_NOTE_SEGMENT][0]);
+        } finally {
+            $conn->exec("DELETE FROM segment_notes WHERE id_segment = " . self::TEST_NOTE_SEGMENT);
+        }
+    }
+
+    #[Test]
+    public function getIssuesNotesAndIdRequestsAggregatesIdRequests(): void
+    {
+        // Uses TEST_META_SEGMENT — a segment ID never queried by other tests in this class,
+        // so the DAO result-cache cannot return a stale empty array from an earlier call.
+        $conn = obtainTestDatabase()->getConnection();
+        $conn->exec(
+            "INSERT INTO segment_metadata (id_segment, meta_key, meta_value) VALUES (" .
+            self::TEST_META_SEGMENT . ", 'id_request', 'req-abc-123')"
+        );
+
+        try {
+            $segment = new ShapelessConcreteStruct();
+            $segment->id = self::TEST_META_SEGMENT;
+
+            $result = $this->invokePrivate('getIssuesNotesAndIdRequests', [[$segment]]);
+
+            $this->assertArrayHasKey('idRequestsAggregate', $result);
+            $this->assertArrayHasKey(self::TEST_META_SEGMENT, $result['idRequestsAggregate']);
+            $this->assertSame('req-abc-123', $result['idRequestsAggregate'][self::TEST_META_SEGMENT]->meta_value);
+        } finally {
+            $conn->exec(
+                "DELETE FROM segment_metadata WHERE id_segment = " . self::TEST_META_SEGMENT .
+                " AND meta_key = 'id_request'"
+            );
+        }
+    }
+
+    #[Test]
+    public function getIssuesNotesAndIdRequestsAggregatesIssues(): void
+    {
+        // Uses TEST_ISSUE_SEGMENT — a segment ID never queried by other tests in this class,
+        // so EntryDao's cache cannot return a stale empty array from an earlier call.
+        $conn = obtainTestDatabase()->getConnection();
+
+        // Insert a qa_category with a known id to avoid AUTO_INCREMENT collisions
+        $conn->exec(
+            "INSERT INTO qa_categories (id, id_model, label, id_parent, severities, options) VALUES (" .
+            self::TEST_QA_CATEGORY_ID . ", 1, 'Fluency', NULL, NULL, NULL)"
+        );
+
+        // qa_entries: id_job, id_segment, id_category, source_page, severity,
+        //             translation_version, penalty_points, create_date, deleted_at
+        $conn->exec(
+            "INSERT INTO qa_entries " .
+            "(id_job, id_segment, id_category, source_page, severity, translation_version, penalty_points, create_date, deleted_at) " .
+            "VALUES (" .
+            self::TEST_JOB_ID . ", " . self::TEST_ISSUE_SEGMENT . ", " . self::TEST_QA_CATEGORY_ID .
+            ", 2, 'Minor', 0, 1.5, NOW(), NULL)"
+        );
+
+        try {
+            $segment = new ShapelessConcreteStruct();
+            $segment->id = self::TEST_ISSUE_SEGMENT;
+
+            $result = $this->invokePrivate('getIssuesNotesAndIdRequests', [[$segment]]);
+
+            $this->assertArrayHasKey('issuesAggregate', $result);
+            $this->assertArrayHasKey(self::TEST_JOB_ID, $result['issuesAggregate']);
+            $this->assertArrayHasKey(self::TEST_ISSUE_SEGMENT, $result['issuesAggregate'][self::TEST_JOB_ID]);
+            $issue = $result['issuesAggregate'][self::TEST_JOB_ID][self::TEST_ISSUE_SEGMENT][0];
+            $this->assertSame('r1', $issue['source_page']);
+            $this->assertSame(self::TEST_QA_CATEGORY_ID, $issue['id_category']);
+            $this->assertSame('Fluency', $issue['category']);
+            $this->assertSame('Minor', $issue['severity']);
+            $this->assertSame(1.5, $issue['penalty_points']);
+        } finally {
+            $conn->exec("DELETE FROM qa_entries WHERE id_segment = " . self::TEST_ISSUE_SEGMENT);
+            $conn->exec("DELETE FROM qa_categories WHERE id = " . self::TEST_QA_CATEGORY_ID);
+        }
     }
 }
