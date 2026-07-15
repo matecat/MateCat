@@ -3,27 +3,28 @@
 namespace Matecat\Core\Controllers;
 
 use Controller\API\App\AIAssistantController;
+use Controller\Services\RateLimiterService;
 use Exception;
-use InvalidArgumentException;
 use Klein\HttpStatus;
 use Klein\Request;
 use Klein\Response;
 use Matecat\Locales\InvalidLanguageException;
 use Matecat\TestHelpers\AbstractTest;
+use Model\Exceptions\NotFoundException;
+use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
-use ReflectionException;
 use Utils\Registry\AppConfig;
+use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 
 /**
  * Testable subclass exposing an empty constructor and neutralising the
  * ActiveMQ enqueue side-effect so the controller can run to completion in a
  * unit test without touching the external message broker.
  *
- * @see AIAssistantController::enqueueWorker() (promoted to protected as the seam)
+ * @see AIAssistantController::enqueueWorker() (protected seam)
  */
 class TestableAIAssistantController extends AIAssistantController
 {
@@ -43,10 +44,19 @@ class TestableAIAssistantController extends AIAssistantController
     }
 }
 
+/**
+ * Real-DB suite. Reserved ID block base = 9_933_000 (1000 ids reserved).
+ */
 #[Group('unit')]
 #[AllowMockObjectsWithoutExpectations]
 class AIAssistantControllerTest extends AbstractTest
 {
+    private const int B = 9_933_000;
+    private const int PROJECT_ID = self::B;
+    private const int JOB_ID = self::B + 1;
+    private const string JOB_PASSWORD = 'aicw9933000pwd';
+    private const string EMAIL = 'aictrl_9933000@example.org';
+
     private string $openAiApiKeyBackup;
     private string $geminiApiKeyBackup;
 
@@ -59,27 +69,75 @@ class AIAssistantControllerTest extends AbstractTest
         parent::setUp();
         $this->openAiApiKeyBackup = AppConfig::$OPENAI_API_KEY;
         $this->geminiApiKeyBackup = AppConfig::$GEMINI_API_KEY;
+        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
+        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
+
+        $this->cleanTestData();
+        $this->seedTestData();
 
         $this->reflector  = new ReflectionClass(AIAssistantController::class);
         $this->controller = new TestableAIAssistantController();
+
+        $this->setProp('database', obtainTestDatabase());
+        $this->setProp('response', new Response());
+
+        $user = new UserStruct();
+        $user->uid = self::B;
+        $user->email = self::EMAIL;
+        $this->setProp('user', $user);
+
+        $this->setRateLimiter(null);
     }
 
     protected function tearDown(): void
     {
         AppConfig::$OPENAI_API_KEY = $this->openAiApiKeyBackup;
         AppConfig::$GEMINI_API_KEY = $this->geminiApiKeyBackup;
+        $this->cleanTestData();
         parent::tearDown();
+    }
+
+    private function seedTestData(): void
+    {
+        $conn = obtainTestDatabase()->getConnection();
+        $conn->exec(
+            "INSERT INTO projects (id, password, id_customer, name, create_date, status_analysis)
+             VALUES (" . self::PROJECT_ID . ", 'aicwproj', '" . self::EMAIL . "', 'AICtrlProject9933000', NOW(), 'DONE')"
+        );
+        $conn->exec(
+            "INSERT INTO jobs (id, password, id_project, source, target, owner)
+             VALUES (" . self::JOB_ID . ", '" . self::JOB_PASSWORD . "', " . self::PROJECT_ID . ", 'en-US', 'it-IT', '" . self::EMAIL . "')"
+        );
+    }
+
+    private function cleanTestData(): void
+    {
+        $conn = obtainTestDatabase()->getConnection();
+        $conn->exec("DELETE FROM jobs WHERE id = " . self::JOB_ID);
+        $conn->exec("DELETE FROM projects WHERE id = " . self::PROJECT_ID);
     }
 
     private function setProp(string $name, mixed $value): void
     {
-        $prop = $this->reflector->getProperty($name);
+        $c = $this->reflector;
+        while ($c !== false && !$c->hasProperty($name)) {
+            $c = $c->getParentClass();
+        }
+        $prop = $c->getProperty($name);
         $prop->setValue($this->controller, $value);
     }
 
     /**
-     * Inject a request whose body() returns the given raw string.
+     * Inject a RateLimiterService stub. Passing a Response makes every call
+     * report the caller as rate-limited; null lets the request through.
      */
+    private function setRateLimiter(?Response $limited): void
+    {
+        $stub = $this->createStub(RateLimiterService::class);
+        $stub->method('checkAndIncrement')->willReturn($limited);
+        $this->setProp('rateLimiterService', $stub);
+    }
+
     private function injectBody(string $body): void
     {
         $request = $this->createStub(Request::class);
@@ -88,10 +146,7 @@ class AIAssistantControllerTest extends AbstractTest
     }
 
     /**
-     * Inject a Response mock that captures the emitted JSON payload and the
-     * status code, without performing any real output/send.
-     *
-     * @param array<string, mixed> $captured filled by reference with keys 'json' and 'code'
+     * @param array<string, mixed> $captured filled by reference with 'json' and 'code'
      */
     private function injectResponse(array &$captured): void
     {
@@ -119,9 +174,68 @@ class AIAssistantControllerTest extends AbstractTest
         $this->setProp('response', $response);
     }
 
-    // ---------------------------------------------------------------------
-    // index()
-    // ---------------------------------------------------------------------
+    /**
+     * @param array<string, mixed> $overrides
+     *
+     * @return array<string, mixed>
+     */
+    private function validIndexBody(array $overrides = []): array
+    {
+        return array_merge([
+            'id_client'  => 'client-1',
+            'id_segment' => 1,
+            'id_job'     => self::JOB_ID,
+            'password'   => self::JOB_PASSWORD,
+            'target'     => 'it-IT',
+            'word'       => 'ciao',
+            'phrase'     => 'ciao mondo',
+        ], $overrides);
+    }
+
+    /**
+     * @param array<string, mixed> $overrides
+     *
+     * @return array<string, mixed>
+     */
+    private function validFeedbackBody(array $overrides = []): array
+    {
+        return array_merge([
+            'source_language' => 'en-US',
+            'target_language' => 'it-IT',
+            'text'            => 'hello',
+            'translation'     => 'ciao',
+            'style'           => 'faithful',
+            'id_client'       => 'client-1',
+            'id_segment'      => 1,
+            'id_job'          => self::JOB_ID,
+            'password'        => self::JOB_PASSWORD,
+        ], $overrides);
+    }
+
+    /**
+     * @param array<string, mixed> $overrides
+     *
+     * @return array<string, mixed>
+     */
+    private function validAltBody(array $overrides = []): array
+    {
+        return array_merge([
+            'source_language'                 => 'en-US',
+            'target_language'                 => 'it-IT',
+            'source_sentence'                 => 'hello world',
+            'target_sentence'                 => 'ciao mondo',
+            'source_context_sentences_string' => 'ctx en',
+            'target_context_sentences_string' => 'ctx it',
+            'excerpt'                         => 'hello',
+            'style_instructions'             => 'faithful',
+            'id_client'                       => 'client-1',
+            'id_segment'                      => 1,
+            'id_job'                          => self::JOB_ID,
+            'password'                        => self::JOB_PASSWORD,
+        ], $overrides);
+    }
+
+    // ─── index() ─────────────────────────────────────────────────────────
 
     #[Test]
     public function indexThrowsWhenOpenAiApiKeyIsMissing(): void
@@ -136,34 +250,49 @@ class AIAssistantControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function indexThrowsForInvalidJsonBody(): void
+    public function indexShortCircuitsWhenRateLimited(): void
     {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('not-json');
+        $limited = new Response();
+        $limited->code(429);
+        $this->setRateLimiter($limited);
+        $this->injectBody(json_encode($this->validIndexBody()));
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid JSON body');
+        $this->controller->index();
+
+        $response = $this->reflector->getProperty('response')->getValue($this->controller);
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertSame(429, $response->code());
+        $this->assertEmpty($this->controller->enqueuedParams);
+    }
+
+    #[Test]
+    public function indexRejectsBodyMissingRequiredField(): void
+    {
+        $body = $this->validIndexBody();
+        unset($body['id_job']);
+        $this->injectBody(json_encode($body));
+
+        $this->expectException(JSONValidatorException::class);
 
         $this->controller->index();
     }
 
     #[Test]
-    public function indexThrowsForMissingTargetParameter(): void
+    public function indexRejectsWrongJobPassword(): void
     {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"id_segment":1,"word":"x","phrase":"y","id_client":1,"id_job":1,"password":"p"}');
+        $this->injectBody(json_encode($this->validIndexBody(['password' => 'wrong-password'])));
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `target` parameter');
+        $this->expectException(NotFoundException::class);
 
         $this->controller->index();
     }
 
     #[Test]
-    public function indexThrowsForInvalidTargetLanguage(): void
+    public function indexRejectsInvalidTargetLanguage(): void
     {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"target":"zz_invalid","id_segment":1,"word":"x","phrase":"y","id_client":1,"id_job":1,"password":"p"}');
+        $captured = [];
+        $this->injectResponse($captured);
+        $this->injectBody(json_encode($this->validIndexBody(['target' => 'not-a-lang'])));
 
         $this->expectException(InvalidLanguageException::class);
 
@@ -171,108 +300,23 @@ class AIAssistantControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function indexThrowsForMissingIdSegmentParameter(): void
+    public function indexEnqueuesExplainMeaningOnValidRequest(): void
     {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"target":"it-IT","word":"x","phrase":"y","id_client":1,"id_job":1,"password":"p"}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `id_segment` parameter');
-
-        $this->controller->index();
-    }
-
-    #[Test]
-    public function indexThrowsForMissingWordParameter(): void
-    {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"target":"it-IT","id_segment":1,"phrase":"y","id_client":1,"id_job":1,"password":"p"}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `word` parameter');
-
-        $this->controller->index();
-    }
-
-    #[Test]
-    public function indexThrowsForMissingPhraseParameter(): void
-    {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"target":"it-IT","id_segment":1,"word":"x","id_client":1,"id_job":1,"password":"p"}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `phrase` parameter');
-
-        $this->controller->index();
-    }
-
-    #[Test]
-    public function indexThrowsForMissingIdClientParameter(): void
-    {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"target":"it-IT","id_segment":1,"word":"x","phrase":"y","id_job":1,"password":"p"}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `id_client` parameter');
-
-        $this->controller->index();
-    }
-
-    #[Test]
-    public function indexThrowsForMissingIdJobParameter(): void
-    {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"target":"it-IT","id_segment":1,"word":"x","phrase":"y","id_client":1,"password":"p"}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `id_job` parameter');
-
-        $this->controller->index();
-    }
-
-    #[Test]
-    public function indexThrowsForMissingPasswordParameter(): void
-    {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"target":"it-IT","id_segment":1,"word":"x","phrase":"y","id_client":1,"id_job":1}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `password` parameter');
-
-        $this->controller->index();
-    }
-
-    /**
-     * @throws Exception
-     * @throws ReflectionException
-     */
-    #[Test]
-    public function indexEnqueuesAndRespondsOnHappyPath(): void
-    {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"target":"it-IT","id_segment":10,"word":"  hello  ","phrase":"  a phrase  ","id_client":"cid","id_job":20,"password":"pw"}');
-
         $captured = [];
         $this->injectResponse($captured);
+        $this->injectBody(json_encode($this->validIndexBody()));
 
         $this->controller->index();
 
-        self::assertCount(1, $this->controller->enqueuedParams);
+        $this->assertSame(200, $captured['code']);
+        $this->assertCount(1, $this->controller->enqueuedParams);
         $payload = $this->controller->enqueuedParams[0]['payload'];
-        self::assertSame('hello', $payload['word']);
-        self::assertSame('a phrase', $payload['phrase']);
-        self::assertSame('cid', $payload['id_client']);
-        self::assertSame(20, $payload['id_job']);
-        self::assertSame('pw', $payload['password']);
-        self::assertNotEmpty($payload['localized_target']);
-
-        self::assertSame(200, $captured['code']);
-        self::assertSame($payload, $captured['json']);
+        $this->assertSame(self::JOB_ID, $payload['id_job']);
+        $this->assertSame(self::JOB_PASSWORD, $payload['password']);
+        $this->assertArrayHasKey('localized_target', $payload);
     }
 
-    // ---------------------------------------------------------------------
-    // feedback()
-    // ---------------------------------------------------------------------
+    // ─── feedback() ──────────────────────────────────────────────────────
 
     #[Test]
     public function feedbackThrowsWhenOpenAiApiKeyIsMissing(): void
@@ -287,167 +331,45 @@ class AIAssistantControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function feedbackThrowsForInvalidJsonBody(): void
+    public function feedbackRejectsBodyMissingJobCredentials(): void
     {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('not-json');
+        $body = $this->validFeedbackBody();
+        unset($body['password']);
+        $this->injectBody(json_encode($body));
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid JSON body');
+        $this->expectException(JSONValidatorException::class);
 
         $this->controller->feedback();
     }
 
     #[Test]
-    public function feedbackThrowsForMissingSourceLanguageParameter(): void
+    public function feedbackRejectsWrongJobPassword(): void
     {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"target_language":"it-IT","text":"hello","translation":"ciao","style":"faithful","id_client":1,"id_segment":1}');
+        $this->injectBody(json_encode($this->validFeedbackBody(['password' => 'wrong-password'])));
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `source_language` parameter');
+        $this->expectException(NotFoundException::class);
 
         $this->controller->feedback();
     }
 
     #[Test]
-    public function feedbackThrowsForMissingTargetLanguageParameter(): void
+    public function feedbackEnqueuesOnValidRequest(): void
     {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"source_language":"en-US","text":"hello","translation":"ciao","style":"faithful","id_client":1,"id_segment":1}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `target_language` parameter');
-
-        $this->controller->feedback();
-    }
-
-    #[Test]
-    public function feedbackThrowsForInvalidSourceLanguage(): void
-    {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"source_language":"zz_invalid","target_language":"it-IT","text":"hello","translation":"ciao","style":"faithful","id_client":1,"id_segment":1}');
-
-        $this->expectException(InvalidLanguageException::class);
-
-        $this->controller->feedback();
-    }
-
-    #[Test]
-    public function feedbackThrowsForInvalidTargetLanguage(): void
-    {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"zz_invalid","text":"hello","translation":"ciao","style":"faithful","id_client":1,"id_segment":1}');
-
-        $this->expectException(InvalidLanguageException::class);
-
-        $this->controller->feedback();
-    }
-
-    #[Test]
-    public function feedbackThrowsForMissingTextParameter(): void
-    {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","translation":"ciao","style":"faithful","id_client":1,"id_segment":1}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `text` parameter');
-
-        $this->controller->feedback();
-    }
-
-    #[Test]
-    public function feedbackThrowsForMissingTranslationParameter(): void
-    {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","text":"hello","style":"faithful","id_client":1,"id_segment":1}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `translation` parameter');
-
-        $this->controller->feedback();
-    }
-
-    #[Test]
-    public function feedbackThrowsForMissingStyleParameter(): void
-    {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","text":"hello","translation":"ciao","id_client":1,"id_segment":1}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `style` parameter');
-
-        $this->controller->feedback();
-    }
-
-    #[Test]
-    public function feedbackThrowsForInvalidStyle(): void
-    {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","text":"hello","translation":"ciao","style":"not-a-style","id_client":1,"id_segment":1}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid Lara style.');
-
-        $this->controller->feedback();
-    }
-
-    #[Test]
-    public function feedbackThrowsForMissingIdClientParameter(): void
-    {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","text":"hello","translation":"ciao","style":"faithful","id_segment":1}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `id_client` parameter');
-
-        $this->controller->feedback();
-    }
-
-    #[Test]
-    public function feedbackThrowsForMissingIdSegmentParameter(): void
-    {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","text":"hello","translation":"ciao","style":"faithful","id_client":1}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `id_segment` parameter');
-
-        $this->controller->feedback();
-    }
-
-    /**
-     * @throws Exception
-     * @throws ReflectionException
-     */
-    #[Test]
-    public function feedbackEnqueuesAndRespondsOnHappyPath(): void
-    {
-        AppConfig::$OPENAI_API_KEY = 'test-openai-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","text":"  hi  ","translation":"  ciao  ","style":"faithful","id_client":"cid","id_segment":30}');
-
         $captured = [];
         $this->injectResponse($captured);
+        $this->injectBody(json_encode($this->validFeedbackBody()));
 
         $this->controller->feedback();
 
-        self::assertCount(1, $this->controller->enqueuedParams);
-        $payload = $this->controller->enqueuedParams[0]['payload'];
-        self::assertSame('hi', $payload['text']);
-        self::assertSame('ciao', $payload['translation']);
-        self::assertSame('faithful', $payload['style']);
-        self::assertSame('cid', $payload['id_client']);
-        self::assertSame(30, $payload['id_segment']);
-        self::assertNotEmpty($payload['localized_source']);
-        self::assertNotEmpty($payload['localized_target']);
-
-        self::assertSame(200, $captured['code']);
-        self::assertSame($payload, $captured['json']);
+        $this->assertSame(200, $captured['code']);
+        $this->assertCount(1, $this->controller->enqueuedParams);
+        $this->assertSame(
+            \Utils\AsyncTasks\Workers\AIAssistantWorker::FEEDBACK_ACTION,
+            $this->controller->enqueuedParams[0]['action']
+        );
     }
 
-    // ---------------------------------------------------------------------
-    // alternative_translations()
-    // ---------------------------------------------------------------------
+    // ─── alternative_translations() ──────────────────────────────────────
 
     #[Test]
     public function alternativeTranslationsThrowsWhenGeminiApiKeyIsMissing(): void
@@ -462,226 +384,90 @@ class AIAssistantControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function alternativeTranslationsThrowsForInvalidJsonBody(): void
+    public function alternativeTranslationsRejectsWrongJobPassword(): void
     {
-        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
-        $this->injectBody('not-json');
+        $this->injectBody(json_encode($this->validAltBody(['password' => 'wrong-password'])));
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid JSON body');
+        $this->expectException(NotFoundException::class);
 
         $this->controller->alternative_translations();
     }
 
     #[Test]
-    public function alternativeTranslationsThrowsForMissingSourceLanguageParameter(): void
+    public function alternativeTranslationsEnqueuesOnValidRequest(): void
     {
-        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
-        $this->injectBody('{"target_language":"it-IT","source_sentence":"a","target_sentence":"b","source_context_sentences_string":"ctx","target_context_sentences_string":"ctx","excerpt":"ex","style_instructions":"faithful","id_client":1,"id_segment":1,"id_job":1,"password":"p"}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `source_language` parameter');
-
-        $this->controller->alternative_translations();
-    }
-
-    #[Test]
-    public function alternativeTranslationsThrowsForMissingTargetLanguageParameter(): void
-    {
-        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
-        $this->injectBody('{"source_language":"en-US","source_sentence":"a","target_sentence":"b","source_context_sentences_string":"ctx","target_context_sentences_string":"ctx","excerpt":"ex","style_instructions":"faithful","id_client":1,"id_segment":1,"id_job":1,"password":"p"}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `target_language` parameter');
-
-        $this->controller->alternative_translations();
-    }
-
-    #[Test]
-    public function alternativeTranslationsThrowsForInvalidSourceLanguage(): void
-    {
-        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
-        $this->injectBody('{"source_language":"zz_invalid","target_language":"it-IT","source_sentence":"a","target_sentence":"b","source_context_sentences_string":"ctx","target_context_sentences_string":"ctx","excerpt":"ex","style_instructions":"faithful","id_client":1,"id_segment":1,"id_job":1,"password":"p"}');
-
-        $this->expectException(InvalidLanguageException::class);
-
-        $this->controller->alternative_translations();
-    }
-
-    #[Test]
-    public function alternativeTranslationsThrowsForInvalidTargetLanguage(): void
-    {
-        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"zz_invalid","source_sentence":"a","target_sentence":"b","source_context_sentences_string":"ctx","target_context_sentences_string":"ctx","excerpt":"ex","style_instructions":"faithful","id_client":1,"id_segment":1,"id_job":1,"password":"p"}');
-
-        $this->expectException(InvalidLanguageException::class);
-
-        $this->controller->alternative_translations();
-    }
-
-    #[Test]
-    public function alternativeTranslationsThrowsForMissingSourceSentenceParameter(): void
-    {
-        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","target_sentence":"b","source_context_sentences_string":"ctx","target_context_sentences_string":"ctx","excerpt":"ex","style_instructions":"faithful","id_client":1,"id_segment":1,"id_job":1,"password":"p"}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `source_sentence` parameter');
-
-        $this->controller->alternative_translations();
-    }
-
-    #[Test]
-    public function alternativeTranslationsThrowsForMissingTargetSentenceParameter(): void
-    {
-        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","source_sentence":"a","source_context_sentences_string":"ctx","target_context_sentences_string":"ctx","excerpt":"ex","style_instructions":"faithful","id_client":1,"id_segment":1,"id_job":1,"password":"p"}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `target_sentence` parameter');
-
-        $this->controller->alternative_translations();
-    }
-
-    #[Test]
-    public function alternativeTranslationsThrowsForMissingSourceContextParameter(): void
-    {
-        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","source_sentence":"a","target_sentence":"b","target_context_sentences_string":"ctx","excerpt":"ex","style_instructions":"faithful","id_client":1,"id_segment":1,"id_job":1,"password":"p"}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `source_context_sentences_string` parameter');
-
-        $this->controller->alternative_translations();
-    }
-
-    #[Test]
-    public function alternativeTranslationsThrowsForMissingTargetContextParameter(): void
-    {
-        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","source_sentence":"a","target_sentence":"b","source_context_sentences_string":"ctx","excerpt":"ex","style_instructions":"faithful","id_client":1,"id_segment":1,"id_job":1,"password":"p"}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `target_context_sentences_string` parameter');
-
-        $this->controller->alternative_translations();
-    }
-
-    #[Test]
-    public function alternativeTranslationsThrowsForMissingExcerptParameter(): void
-    {
-        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","source_sentence":"a","target_sentence":"b","source_context_sentences_string":"ctx","target_context_sentences_string":"ctx","style_instructions":"faithful","id_client":1,"id_segment":1,"id_job":1,"password":"p"}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `excerpt` parameter');
-
-        $this->controller->alternative_translations();
-    }
-
-    #[Test]
-    public function alternativeTranslationsThrowsForMissingStyleInstructionsParameter(): void
-    {
-        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","source_sentence":"a","target_sentence":"b","source_context_sentences_string":"ctx","target_context_sentences_string":"ctx","excerpt":"ex","id_client":1,"id_segment":1,"id_job":1,"password":"p"}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `style_instructions` parameter');
-
-        $this->controller->alternative_translations();
-    }
-
-    #[Test]
-    public function alternativeTranslationsThrowsForInvalidStyleInstructions(): void
-    {
-        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","source_sentence":"a","target_sentence":"b","source_context_sentences_string":"ctx","target_context_sentences_string":"ctx","excerpt":"ex","style_instructions":"not-a-style","id_client":1,"id_segment":1,"id_job":1,"password":"p"}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid Lara style.');
-
-        $this->controller->alternative_translations();
-    }
-
-    #[Test]
-    public function alternativeTranslationsThrowsForMissingIdClientParameter(): void
-    {
-        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","source_sentence":"a","target_sentence":"b","source_context_sentences_string":"ctx","target_context_sentences_string":"ctx","excerpt":"ex","style_instructions":"faithful","id_segment":1,"id_job":1,"password":"p"}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `id_client` parameter');
-
-        $this->controller->alternative_translations();
-    }
-
-    #[Test]
-    public function alternativeTranslationsThrowsForMissingIdSegmentParameter(): void
-    {
-        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","source_sentence":"a","target_sentence":"b","source_context_sentences_string":"ctx","target_context_sentences_string":"ctx","excerpt":"ex","style_instructions":"faithful","id_client":1,"id_job":1,"password":"p"}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `id_segment` parameter');
-
-        $this->controller->alternative_translations();
-    }
-
-    #[Test]
-    public function alternativeTranslationsThrowsForMissingIdJobParameter(): void
-    {
-        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","source_sentence":"a","target_sentence":"b","source_context_sentences_string":"ctx","target_context_sentences_string":"ctx","excerpt":"ex","style_instructions":"faithful","id_client":1,"id_segment":1,"password":"p"}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `id_job` parameter');
-
-        $this->controller->alternative_translations();
-    }
-
-    #[Test]
-    public function alternativeTranslationsThrowsForMissingPasswordParameter(): void
-    {
-        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","source_sentence":"a","target_sentence":"b","source_context_sentences_string":"ctx","target_context_sentences_string":"ctx","excerpt":"ex","style_instructions":"faithful","id_client":1,"id_segment":1,"id_job":1}');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing `password` parameter');
-
-        $this->controller->alternative_translations();
-    }
-
-    /**
-     * @throws Exception
-     * @throws ReflectionException
-     */
-    #[Test]
-    public function alternativeTranslationsEnqueuesAndRespondsOnHappyPath(): void
-    {
-        AppConfig::$GEMINI_API_KEY = 'test-gemini-key';
-        $this->injectBody('{"source_language":"en-US","target_language":"it-IT","source_sentence":"a","target_sentence":"b","source_context_sentences_string":"sctx","target_context_sentences_string":"tctx","excerpt":"ex","style_instructions":"faithful","id_client":"cid","id_segment":40,"id_job":50,"password":"pw"}');
-
         $captured = [];
         $this->injectResponse($captured);
+        $this->injectBody(json_encode($this->validAltBody()));
 
         $this->controller->alternative_translations();
 
-        self::assertCount(1, $this->controller->enqueuedParams);
+        $this->assertSame(200, $captured['code']);
+        $this->assertCount(1, $this->controller->enqueuedParams);
         $payload = $this->controller->enqueuedParams[0]['payload'];
-        self::assertSame('cid', $payload['id_client']);
-        self::assertSame(50, $payload['id_job']);
-        self::assertSame('pw', $payload['password']);
-        self::assertSame('a', $payload['source_sentence']);
-        self::assertSame('b', $payload['target_sentence']);
-        self::assertSame('sctx', $payload['source_context_sentences_string']);
-        self::assertSame('tctx', $payload['target_context_sentences_string']);
-        self::assertSame('ex', $payload['excerpt']);
-        self::assertSame('faithful', $payload['style_instructions']);
-        self::assertSame(40, $payload['id_segment']);
-        self::assertNotEmpty($payload['localized_source']);
-        self::assertNotEmpty($payload['localized_target']);
+        $this->assertSame(self::JOB_ID, $payload['id_job']);
+    }
 
-        self::assertSame(200, $captured['code']);
-        self::assertSame($payload, $captured['json']);
+    #[Test]
+    public function feedbackShortCircuitsWhenRateLimited(): void
+    {
+        $limited = new Response();
+        $limited->code(429);
+        $this->setRateLimiter($limited);
+        $this->injectBody(json_encode($this->validFeedbackBody()));
+
+        $this->controller->feedback();
+
+        $this->assertEmpty($this->controller->enqueuedParams);
+    }
+
+    #[Test]
+    public function alternativeTranslationsShortCircuitsWhenRateLimited(): void
+    {
+        $limited = new Response();
+        $limited->code(429);
+        $this->setRateLimiter($limited);
+        $this->injectBody(json_encode($this->validAltBody()));
+
+        $this->controller->alternative_translations();
+
+        $this->assertEmpty($this->controller->enqueuedParams);
+    }
+
+    #[Test]
+    public function indexRejectsEmptyBody(): void
+    {
+        $this->injectBody('');
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Missing request body');
+
+        $this->controller->index();
+    }
+
+    // ─── lifecycle wiring ────────────────────────────────────────────────
+
+    #[Test]
+    public function registerValidatorsAppendsLoginValidator(): void
+    {
+        $this->injectBody('{}'); // LoginValidator ctor reads the controller's request
+
+        $this->reflector->getMethod('registerValidators')->invoke($this->controller);
+
+        $validators = $this->reflector->getProperty('validators')->getValue($this->controller);
+        $this->assertNotEmpty($validators);
+        $this->assertInstanceOf(
+            \Controller\API\Commons\Validators\LoginValidator::class,
+            $validators[0]
+        );
+    }
+
+    #[Test]
+    public function initDependenciesCreatesRateLimiter(): void
+    {
+        $this->reflector->getMethod('initDependencies')->invoke($this->controller);
+
+        $service = $this->reflector->getProperty('rateLimiterService')->getValue($this->controller);
+        $this->assertInstanceOf(RateLimiterService::class, $service);
     }
 }
