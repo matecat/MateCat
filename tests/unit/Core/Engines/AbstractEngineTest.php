@@ -10,9 +10,11 @@ use Model\Engines\Structs\EngineStruct;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionProperty;
 use stdClass;
 use Utils\Engines\NONE;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\Logger\MatecatLogger;
 
 /**
  * Testable subclass that exposes protected AbstractEngine methods
@@ -60,7 +62,7 @@ class AbstractEngineTest extends AbstractTest
         $struct->others     = ['custom_key' => 'custom_value'];
         $struct->extra_parameters = ['param_key' => 'param_value'];
 
-        $this->engine = new TestableNONE($struct);
+        $this->engine = new TestableNONE($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 
     // ---------------------------------------------------------------
@@ -204,12 +206,74 @@ class AbstractEngineTest extends AbstractTest
     }
 
     // ---------------------------------------------------------------
+    // call() — existence check on the requested function/config key
+    // ---------------------------------------------------------------
+
+    #[Test]
+    public function callSetsBadMethodCallErrorForUnknownFunction(): void
+    {
+        $this->engine->call('totally_unknown_function');
+
+        $resultProperty = new ReflectionProperty($this->engine, 'result');
+        $resultProperty->setAccessible(true);
+        $result = $resultProperty->getValue($this->engine);
+
+        self::assertSame(-43, $result['error']['code']);
+    }
+
+    #[Test]
+    public function callDoesNotTreatAnExistingButFalsyOthersValueAsUnknownFunction(): void
+    {
+        // Regression guard for report §11.8: `call()` used to rely on `!$this->$function`
+        // (magic __get returning falsy) to decide whether the key exists, so a legitimately
+        // configured but falsy value (e.g. an empty string) was wrongly reported as a
+        // "Bad Method Call". The fix uses a real existence check (__isset) instead.
+        $struct                    = EngineStruct::getStruct();
+        $struct->class_load        = 'NONE';
+        $struct->name              = 'TestEngine';
+        $struct->base_url          = 'http://localhost:1';
+        $struct->others            = ['blank_key' => ''];
+        $struct->extra_parameters  = [];
+
+        $engine = new TestableNONE($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
+        $engine->call('blank_key');
+
+        $resultProperty = new ReflectionProperty($engine, 'result');
+        $resultProperty->setAccessible(true);
+        $result = $resultProperty->getValue($engine);
+
+        self::assertNotSame(-43, $result['error']['code'] ?? null);
+    }
+
+    // ---------------------------------------------------------------
     // GoogleTranslateFallback — exercises the protected fallback path
     // ---------------------------------------------------------------
 
     #[Test]
     public function googleTranslateFallbackReturnsGetMemoryResponse(): void
     {
+        $result = $this->engine->exposedGoogleTranslateFallback([
+            'source'     => 'en',
+            'target'     => 'it',
+            'segment'    => 'test segment',
+            'secret_key' => 'invalid-key',
+        ]);
+
+        self::assertInstanceOf(GetMemoryResponse::class, $result);
+    }
+
+    #[Test]
+    public function googleTranslateFallbackLogsTheSwallowedException(): void
+    {
+        // Regression guard: the fallback used to swallow the exception with zero logging,
+        // making a recurring GoogleTranslate failure invisible (report §6.7 / §11 quick win).
+        $logger = $this->createMock(MatecatLogger::class);
+        $logger->expects(self::once())->method('error');
+
+        $loggerProperty = new ReflectionProperty($this->engine, 'logger');
+        $loggerProperty->setAccessible(true);
+        $loggerProperty->setValue($this->engine, $logger);
+
         $result = $this->engine->exposedGoogleTranslateFallback([
             'source'     => 'en',
             'target'     => 'it',

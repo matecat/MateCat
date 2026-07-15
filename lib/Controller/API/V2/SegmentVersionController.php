@@ -19,9 +19,7 @@ class SegmentVersionController extends KleinController
 {
     use ChunkNotFoundHandlerTrait;
 
-    /**
-     */
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $this->appendValidator(new SegmentValidator($this));
@@ -38,17 +36,17 @@ class SegmentVersionController extends KleinController
      */
     public function index(): void
     {
-        $results = (new TranslationVersionDao())->getVersionsForTranslation(
+        $results = (new TranslationVersionDao($this->getDatabase()))->getVersionsForTranslation(
             $this->request->param('id_job'),
             $this->request->param('id_segment')
         );
 
-        $chunk = (new JobDao())->getByIdAndPasswordOrFail($this->params['id_job'], $this->params['password']);
+        $chunk = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($this->params['id_job'], $this->params['password']);
 
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();
 
-        $formatted = new SegmentVersion($chunk, $results);
+        $formatted = new SegmentVersion($chunk, $results, false, $this->featureSet);
 
         $this->response->json([
             'versions' => $formatted->render()
@@ -62,18 +60,18 @@ class SegmentVersionController extends KleinController
      */
     public function detail(): void
     {
-        $results = (new TranslationVersionDao())->getVersionsForTranslation(
+        $results = (new TranslationVersionDao($this->getDatabase()))->getVersionsForTranslation(
             $this->request->param('id_job'),
             $this->request->param('id_segment'),
             $this->request->param('version_number')
         );
 
-        $chunk = (new JobDao())->getByIdAndPasswordOrFail($this->params['id_job'], $this->params['password']);
+        $chunk = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($this->params['id_job'], $this->params['password']);
 
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();
 
-        $formatted = new SegmentVersion($chunk, $results);
+        $formatted = new SegmentVersion($chunk, $results, false, $this->featureSet);
 
         $this->response->json([
             'versions' => $formatted->render()

@@ -9,6 +9,7 @@ use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\Concerns\LogsMessages;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
@@ -25,9 +26,11 @@ use Model\Segments\SegmentOriginalDataStruct;
 use Model\Segments\SegmentStruct;
 use Model\Xliff\DTO\XliffRuleInterface;
 use Model\Xliff\DTO\XliffRulesModel;
+use PDOException;
 use ReflectionException;
 use RuntimeException;
 use Throwable;
+use TypeError;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Logger\MatecatLogger;
@@ -83,6 +86,7 @@ class SegmentExtractor
         private readonly FeatureSet $features,
         private readonly MetadataDao $filesMetadataDao,
         private readonly SegmentMetadataMapper $segmentMetadataMapper,
+        private readonly IDatabase $dbHandler,
         MatecatLogger $logger,
     ) {
         $this->logger = $logger;
@@ -112,7 +116,7 @@ class SegmentExtractor
      * @param ProjectStructure $projectStructure
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function extract(int $fid, array $file_info, ProjectStructure $projectStructure): void
     {
@@ -184,8 +188,8 @@ class SegmentExtractor
      * @return int Number of segments marked as show-in-cattool in this file element
      * @throws ReflectionException
      * @throws Exception
-     * @throws \PDOException
-     * @throws \TypeError
+     * @throws PDOException
+     * @throws TypeError
      */
     private function processXliffFile(array $xliff_file, int $fid, ProjectStructure $projectStructure): int
     {
@@ -252,9 +256,9 @@ class SegmentExtractor
      *
      * @return int|null The file-parts ID if an 'original' attribute was found, null otherwise
      * @throws ReflectionException
-     * @throws \PDOException
-     * @throws \Exception
-     * @throws \TypeError
+     * @throws PDOException
+     * @throws Exception
+     * @throws TypeError
      */
     private function persistXliffFileAttributes(array $xliff_file, int $fid): ?int
     {
@@ -281,7 +285,7 @@ class SegmentExtractor
             $filesPartsStruct->tag_key = 'original';
             $filesPartsStruct->tag_value = $xliff_file['attr']['original'];
 
-            $filePartsId = (new FilesPartsDao())->insert($filesPartsStruct);
+            $filePartsId = (new FilesPartsDao($this->dbHandler))->insert($filesPartsStruct);
 
             // save `custom` meta data
             $customMetadata = $xliff_file['attr']['custom'] ?? null;
@@ -329,7 +333,7 @@ class SegmentExtractor
             // mrk in the list will not be too!!!
             $show_in_cattool = 1;
 
-            $wordCount = CatUtils::segment_raw_word_count($seg_source['raw-content'], $this->sourceLanguage, $this->filter);
+            $wordCount = (new CatUtils($this->dbHandler))->countSegmentRawWords($seg_source['raw-content'], $this->sourceLanguage, $this->filter);
             $wordCountEvent = new WordCountEvent($wordCount);
             $this->features->dispatch($wordCountEvent);
             $wordCount = $wordCountEvent->getWordCount();
@@ -409,7 +413,7 @@ class SegmentExtractor
     ): int {
         $show_in_cattool = 1;
 
-        $wordCount = CatUtils::segment_raw_word_count($xliff_trans_unit['source']['raw-content'], $this->sourceLanguage, $this->filter);
+        $wordCount = (new CatUtils($this->dbHandler))->countSegmentRawWords($xliff_trans_unit['source']['raw-content'], $this->sourceLanguage, $this->filter);
 
         $sourceLayer0 = $this->filter->fromRawXliffToLayer0($xliff_trans_unit['source']['raw-content']);
 
@@ -918,7 +922,7 @@ class SegmentExtractor
      *
      * @throws Exception
      */
-    private function manageAlternativeTranslations(array $xliff_trans_unit, ?array $xliff_file_attributes): void
+    protected function manageAlternativeTranslations(array $xliff_trans_unit, ?array $xliff_file_attributes): void
     {
         $privateTmKeys = $this->config->private_tm_key;
 
@@ -927,13 +931,15 @@ class SegmentExtractor
             !isset($xliff_trans_unit['alt-trans']) ||
             empty($xliff_file_attributes['source-language']) ||
             empty($xliff_file_attributes['target-language']) ||
-            empty($privateTmKeys)
+            empty($privateTmKeys) ||
+            // feature is off by default: do not import XLIFF alt-trans into the private TM
+            AppConfig::$IMPORT_ALT_TRANS_FROM_XLIFF === false
         ) {
             return;
         }
 
         // set the contribution for every key in the job belonging to the user
-        $engine = EnginesFactory::getInstance(1, MyMemory::class);
+        $engine = $this->getPrivateTmEngine();
         $config = $engine->getConfigStruct();
 
         foreach ($privateTmKeys as $tm_info) {
@@ -949,7 +955,12 @@ class SegmentExtractor
         $configsList = [];
 
         foreach ($xliff_trans_unit['alt-trans'] as $altTrans) {
-            if (!empty($altTrans['attr']['match-quality']) && (float)$altTrans['attr']['match-quality'] < 50) {
+            // Only import an alt-trans with a usable match-quality of at least 50%.
+            // Skip when the attribute is absent — the external filters converter drops
+            // match-quality when it is 0% or non-numeric (e.g. "high"/"xhigh"), so a missing
+            // value must not be treated as a valid match — and when it is present but < 50
+            // (a bare "0" also lands here via the < 50 branch).
+            if (!isset($altTrans['attr']['match-quality']) || (float)$altTrans['attr']['match-quality'] < 50) {
                 continue;
             }
 
@@ -1004,5 +1015,16 @@ class SegmentExtractor
         if (!empty($configsList)) {
             $engine->setMulti($configsList);
         }
+    }
+
+    /**
+     * Resolve the MyMemory engine used to push alt-trans contributions to the private TM.
+     * Isolated as a seam so it can be overridden in tests.
+     *
+     * @throws Exception
+     */
+    protected function getPrivateTmEngine(): MyMemory
+    {
+        return EnginesFactory::getInstance(1, $this->dbHandler, MyMemory::class);
     }
 }

@@ -13,6 +13,7 @@ namespace Model\Translators;
 use Controller\Abstracts\KleinController;
 use Exception;
 use InvalidArgumentException;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\TransactionalTrait;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
@@ -35,6 +36,11 @@ class TranslatorsModel
 {
 
     use TransactionalTrait;
+
+    protected function getTransactionalDatabase(): IDatabase
+    {
+        return $this->database;
+    }
 
     /**
      * @var ?UserStruct
@@ -71,6 +77,8 @@ class TranslatorsModel
      * @var FeatureSet
      */
     protected FeatureSet $featureSet;
+
+    protected IDatabase $database;
 
     /**
      * Override the Job Password from Outside
@@ -151,20 +159,23 @@ class TranslatorsModel
      * TranslatorsModel constructor.
      *
      * @param JobStruct $jStruct
+     * @param IDatabase $database
      * @param int $project_cache_TTL
      *
      * @throws TypeError
+     * @throws Exception
      */
-    public function __construct(JobStruct $jStruct, int $project_cache_TTL = 60 * 60)
+    public function __construct(JobStruct $jStruct, IDatabase $database, int $project_cache_TTL = 60 * 60)
     {
         //get the job
         $this->jStruct = $jStruct;
+        $this->database = $database;
 
         $this->id_job = $jStruct->id;
         $this->job_password = $jStruct->password ?? throw new TypeError('JobStruct::$password cannot be null');
 
-        $this->project = $this->jStruct->getProject($project_cache_TTL);
-        $this->featureSet = $this->project->getFeaturesSet();
+        $this->project = $this->jStruct->getProject(new ProjectDao($this->database), $project_cache_TTL);
+        $this->featureSet = FeatureSet::forProject($this->project, $this->database);
     }
 
     /**
@@ -175,9 +186,11 @@ class TranslatorsModel
      */
     public function getTranslator(int $cache = 86400): ?JobsTranslatorsStruct
     {
-        $jTranslatorsDao = new JobsTranslatorsDao();
+        $jTranslatorsDao = new JobsTranslatorsDao($this->database);
 
-        return $this->jobTranslator = $jTranslatorsDao->setCacheTTL($cache)->findByJobsStruct($this->jStruct)[0] ?? null;
+        return $this->jobTranslator = $jTranslatorsDao->setCacheTTL($cache)->findByJobsStruct(
+            $this->jStruct
+        )[0] ?? null;
     }
 
     /**
@@ -188,7 +201,7 @@ class TranslatorsModel
      */
     public function update(): JobsTranslatorsStruct
     {
-        $confDao = new ConfirmationDao();
+        $confDao = new ConfirmationDao($this->database);
         $confirmationStruct = $confDao->getConfirmation($this->jStruct);
 
         if (!empty($confirmationStruct)) {
@@ -198,13 +211,13 @@ class TranslatorsModel
         //create jobs_translator struct to call inside the dao
         $translatorStruct = new JobsTranslatorsStruct();
 
-        $translatorUser = (new UserDao())->setCacheTTL(60 * 60)->getByEmail($this->email);
+        $translatorUser = (new UserDao($this->database))->setCacheTTL(60 * 60)->getByEmail($this->email);
         if (!empty($translatorUser)) {
             //associate the translator with an existent user and create a profile if not exists
             $translatorStruct->id_translator_profile = $this->saveProfile($translatorUser);
         }
 
-        $jTranslatorsDao = new JobsTranslatorsDao();
+        $jTranslatorsDao = new JobsTranslatorsDao($this->database);
         if (empty($this->jobTranslator)) { // self::getTranslator() can be called from outside
             // retrieve with no cache
             $this->getTranslator(0);
@@ -233,7 +246,9 @@ class TranslatorsModel
 
         //set the old id and password to make "ON DUPLICATE KEY UPDATE" possible
         $translatorStruct->id_job = $this->jStruct->id ?? throw new TypeError('JobStruct::$id cannot be null');
-        $translatorStruct->job_password = $this->jStruct->password ?? throw new TypeError('JobStruct::$password cannot be null');
+        $translatorStruct->job_password = $this->jStruct->password ?? throw new TypeError(
+            'JobStruct::$password cannot be null'
+        );
         $translatorStruct->delivery_date = Utils::mysqlTimestamp($this->delivery_date);
         $translatorStruct->job_owner_timezone = $this->job_owner_timezone;
         $translatorStruct->added_by = $this->callingUser->uid ?? throw new TypeError('Calling user uid cannot be null');
@@ -274,7 +289,7 @@ class TranslatorsModel
         $profileStruct->source = $this->jStruct['source'];
         $profileStruct->target = $this->jStruct['target'];
 
-        $tProfileDao = new TranslatorsProfilesDao();
+        $tProfileDao = new TranslatorsProfilesDao($this->database);
         $existentProfileStruct = $tProfileDao->getByProfile($profileStruct);
 
         if (empty($existentProfileStruct)) {
@@ -307,7 +322,7 @@ class TranslatorsModel
         $oldPassword = $this->jStruct->password ?? throw new TypeError('JobStruct::$password cannot be null');
 
         $this->openTransaction();
-        $jobDao = new JobDao();
+        $jobDao = new JobDao($this->database);
         $jobDao->changePassword($this->jStruct, $newPassword);
         $jobDao->destroyCacheByIdAndPassword($this->jStruct);
         $this->featureSet->dispatch(new JobPasswordChangedEvent($this->jStruct, $oldPassword));
@@ -324,7 +339,9 @@ class TranslatorsModel
             throw new InvalidArgumentException("Who invites can not be empty. Try TranslatorsModel::setUser() ");
         }
 
-        $project = (new ProjectDao())->findByJobId($this->jStruct->id ?? throw new TypeError('JobStruct::$id cannot be null'));
+        $project = (new ProjectDao($this->database))->findByJobId(
+            $this->jStruct->id ?? throw new TypeError('JobStruct::$id cannot be null')
+        );
 
         if ($project === null) {
             throw new RuntimeException('Project not found for job id ' . $this->jStruct->id);
@@ -337,15 +354,30 @@ class TranslatorsModel
 
             switch ($type) {
                 case 'new':
-                    $mailSender = new SendToTranslatorForNewJobEmail($this->callingUser, $this->jobTranslator ?? throw new RuntimeException('jobTranslator not set'), $project->name);
+                    $mailSender = new SendToTranslatorForNewJobEmail(
+                        $this->callingUser,
+                        $this->jobTranslator ?? throw new RuntimeException('jobTranslator not set'),
+                        $project->name,
+                        new UserDao($this->database)
+                    );
                     $mailSender->send();
                     break;
                 case 'update':
-                    $mailSender = new SendToTranslatorForDeliveryChangeEmail($this->callingUser, $this->jobTranslator ?? throw new RuntimeException('jobTranslator not set'), $project->name);
+                    $mailSender = new SendToTranslatorForDeliveryChangeEmail(
+                        $this->callingUser,
+                        $this->jobTranslator ?? throw new RuntimeException('jobTranslator not set'),
+                        $project->name,
+                        new UserDao($this->database)
+                    );
                     $mailSender->send();
                     break;
                 case 'split':
-                    $mailSender = new SendToTranslatorForJobSplitEmail($this->callingUser, $this->jobTranslator ?? throw new RuntimeException('jobTranslator not set'), $project->name);
+                    $mailSender = new SendToTranslatorForJobSplitEmail(
+                        $this->callingUser,
+                        $this->jobTranslator ?? throw new RuntimeException('jobTranslator not set'),
+                        $project->name,
+                        new UserDao($this->database)
+                    );
                     $mailSender->send();
                     break;
             }

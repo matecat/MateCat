@@ -7,11 +7,14 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Exception;
+use LogicException;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\FilterEvent;
 use Model\FeaturesBase\Hook\RunEvent;
 use Model\OwnerFeatures\OwnerFeatureDao;
+use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use PHPTAL;
@@ -20,6 +23,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use ReflectionException;
+use RuntimeException;
 use Throwable;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
@@ -27,22 +31,11 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
 /**
- * Class FeatureSet
+ * Manages the set of active features (plugins) for a request or task.
  *
- * Represents a set of features provided in the system. This class allows the
- * management of features, including loading, merging, filtering, and various
- * dependency-related operations for projects and users.
- *
- * Implements EventDispatcherInterface.
- *
- * NOTE: When called with no arguments (i.e. `new FeatureSet()`), the constructor
- * invokes `loadFromMandatory()` → `getAutoloadPlugins()` → `merge()`, which
- * iterates over {@see AppConfig::$AUTOLOAD_PLUGINS} and calls `toNewObject()`
- * on each {@see BasicFeatureStruct}, forcing PHP to autoload the plugin feature
- * classes. All state is stored in instance properties (`$this->features`) — there
- * is no static registry. {@see \Bootstrap::initMandatoryPlugins()} creates and
- * immediately discards a FeatureSet instance purely to trigger this early
- * autoloading of plugin classes during bootstrap.
+ * Every db-holding root (controller, worker, ProjectManager) MUST pass an
+ * IDatabase handle via the constructor so that features receive a real connection
+ * instead of relying on any hidden fallback.
  */
 class FeatureSet implements EventDispatcherInterface
 {
@@ -55,6 +48,8 @@ class FeatureSet implements EventDispatcherInterface
 
     private LoggerInterface $logger;
 
+    private IDatabase $database;
+
     /**
      * @return BasicFeatureStruct[]
      */
@@ -64,16 +59,15 @@ class FeatureSet implements EventDispatcherInterface
     }
 
     /**
-     * Initializes a new FeatureSet. If $features param is provided, FeaturesSet is populated with the given params.
-     * Otherwise, it is populated with mandatory features.
-     *
+     * @param IDatabase $database A real handle from a db-holding root.
      * @param BasicFeatureStruct[]|null $features
      *
      * @throws Exception
      */
-    public function __construct(?array $features = null)
+    public function __construct(IDatabase $database, ?array $features = null)
     {
-        $this->logger = LoggerFactory::getLogger('feature_set');
+        $this->logger   = LoggerFactory::getLogger('feature_set');
+        $this->database = $database;
 
         if (is_null($features)) {
             $this->loadFromMandatory();
@@ -84,6 +78,35 @@ class FeatureSet implements EventDispatcherInterface
             }
             $this->merge($_features);
         }
+    }
+
+    public function getDatabase(): IDatabase
+    {
+        return $this->database;
+    }
+
+    /**
+     * Build a FeatureSet loaded for a specific project.
+     *
+     * Replaces the old ProjectStruct::getFeaturesSet() with an explicit
+     * IDatabase dependency so no hidden Database::obtain() fallback is needed.
+     *
+     * @throws Exception
+     */
+    public static function forProject(ProjectStruct $project, IDatabase $database): self
+    {
+        $featureSet = new self($database);
+        $featureSet->loadForProject($project);
+
+        return $featureSet;
+    }
+
+    /**
+     * Check whether a feature code is active in this set.
+     */
+    public function hasFeature(string $feature_code): bool
+    {
+        return in_array($feature_code, $this->getCodes());
     }
 
     /**
@@ -138,9 +161,10 @@ class FeatureSet implements EventDispatcherInterface
      * @return void
      * @throws Exception
      */
-    public function loadForProject(ProjectStruct $project): void
+    public function loadForProject(ProjectStruct $project, ?MetadataDao $metadataDao = null): void
     {
-        $featureStrings = $project->getMetadataValue(ProjectsMetadataMarshaller::FEATURES_KEY->value);
+        $metadataDao ??= new MetadataDao($this->database);
+        $featureStrings = $metadataDao->setCacheTTL(3600)->getValue((int)$project->id, ProjectsMetadataMarshaller::FEATURES_KEY->value);
         $featureCodes = (!empty($featureStrings)) ? $this->splitString($featureStrings) : [];
 
         $this->clear();
@@ -191,7 +215,7 @@ class FeatureSet implements EventDispatcherInterface
      */
     public function loadFromUserEmail(string $id_customer): void
     {
-        $features = (new OwnerFeatureDao())->getByIdCustomer($id_customer);
+        $features = (new OwnerFeatureDao($this->database))->getByIdCustomer($id_customer);
         $this->clear();
         $this->_setIgnoreDependencies(false);
         $this->loadFromMandatory();
@@ -207,7 +231,7 @@ class FeatureSet implements EventDispatcherInterface
     public function loadForceableProjectFeatures(): void
     {
         $returnable = array_filter($this->getAutoloadPlugins(), function (BasicFeatureStruct $feature) {
-            $concreteClass = $feature->toNewObject();
+            $concreteClass = $feature->toNewObject($this->database);
 
             return $concreteClass->isForceableOnProject();
         });
@@ -236,10 +260,10 @@ class FeatureSet implements EventDispatcherInterface
      */
     public function loadAutoActivableOwnerFeatures(string $id_customer): void
     {
-        $features = (new OwnerFeatureDao())->getByIdCustomer($id_customer);
+        $features = (new OwnerFeatureDao($this->database))->getByIdCustomer($id_customer);
 
         $objs = array_map(function (BasicFeatureStruct $feature): BaseFeature {
-            return $feature->toNewObject();
+            return $feature->toNewObject($this->database);
         }, $features);
 
         $returnable = array_filter($objs, function (BaseFeature $obj): bool {
@@ -281,7 +305,7 @@ class FeatureSet implements EventDispatcherInterface
 
         foreach ($this->features as $feature) {
             try {
-                $obj = $feature->toNewObject();
+                $obj = $feature->toNewObject($this->database);
                 if (method_exists($obj, $hookName)) {
                     $obj->$hookName($event);
                 }
@@ -335,7 +359,7 @@ class FeatureSet implements EventDispatcherInterface
     public function sortFeatures(): FeatureSet
     {
         $toBeSorted = array_values($this->features);
-        $sortedFeatures = $this->quickSort($toBeSorted);
+        $sortedFeatures = $this->sortByDependency($toBeSorted);
 
         $this->clear();
         foreach ($sortedFeatures as $value) {
@@ -346,34 +370,87 @@ class FeatureSet implements EventDispatcherInterface
     }
 
     /**
-     * Warning Recursion, memory overflow if there are a lot of features ( but this is impossible )
+     * Orders features so that every feature comes after all the features it
+     * depends on — including transitive dependencies (if A needs B and B needs C,
+     * the result is C, B, A). This is a "topological sort", implemented with
+     * Kahn's algorithm.
+     *
+     * The idea in plain terms:
+     *   - Model the features as a graph: each declared dependency is an edge
+     *     "dependency -> dependent".
+     *   - For each feature, count how many of its dependencies are still waiting
+     *     to be placed. That count is its "in-degree".
+     *   - A feature with in-degree 0 has nothing left to wait for, so it is safe
+     *     to place next. Place it, then tell each feature that depended on it
+     *     "one of your dependencies is now placed" by decrementing their in-degree.
+     *     Any of those that drop to 0 become safe to place in turn.
+     *   - Repeat until nothing is left. If features remain but none has in-degree
+     *     0, they depend on each other in a loop (a cycle) — unorderable, so we
+     *     throw instead of silently dropping them.
+     *
+     * Each feature's dependency list is read once from the concrete class's static
+     * getDependencies() (no object construction needed — it never touches instance
+     * state).
      *
      * @param BasicFeatureStruct[] $featureStructsList
      *
      * @return BasicFeatureStruct[]
-     * @throws \RuntimeException
+     * @throws RuntimeException
+     * @throws LogicException When a circular dependency is detected.
      */
-    private function quickSort(array $featureStructsList): array
+    private function sortByDependency(array $featureStructsList): array
     {
-        $length = count($featureStructsList);
-        if ($length < 2) {
-            return $featureStructsList;
-        }
+        // Index every feature by its code so dependency codes can be looked up
+        // directly (also dedupes if a code somehow appears twice).
+        $byCode = array_column($featureStructsList, null, 'feature_code');
 
-        $firstInList = $featureStructsList[0];
-        $ObjectFeatureFirst = $firstInList->toNewObject();
+        // Build the graph:
+        //   $dependents[X] = list of features that depend on X (the edges to follow
+        //                    once X has been placed).
+        //   $inDegree[Y]   = how many of Y's own dependencies are still unplaced
+        //                    (starts at 0 for everyone, incremented below).
+        $dependents = [];
+        $inDegree   = array_fill_keys(array_keys($byCode), 0);
 
-        $leftBucket = $rightBucket = [];
-
-        for ($i = 1; $i < $length; $i++) {
-            if (in_array($featureStructsList[$i]->feature_code, $ObjectFeatureFirst::getDependencies())) {
-                $leftBucket[] = $featureStructsList[$i];
-            } else {
-                $rightBucket[] = $featureStructsList[$i];
+        foreach ($byCode as $code => $feature) {
+            $className = $feature->getFullyQualifiedClassName();
+            foreach ($className::getDependencies() as $dependencyCode) {
+                if (!isset($byCode[$dependencyCode])) {
+                    continue; // dependency isn't loaded/enabled — nothing to wait on
+                }
+                // Record the edge dependency -> dependent, and count this
+                // dependency against the dependent's in-degree.
+                $dependents[$dependencyCode][] = $code;
+                $inDegree[$code]++;
             }
         }
 
-        return array_merge($this->quickSort($leftBucket), [$firstInList], $this->quickSort($rightBucket));
+        // Seed the work queue with every feature that has no dependencies to wait
+        // on (in-degree 0) — these can be placed immediately.
+        $queue  = array_keys($inDegree, 0, true);
+        $sorted = [];
+        while ($queue !== []) {
+            // Place the next ready feature.
+            $code     = array_shift($queue);
+            $sorted[] = $byCode[$code];
+
+            // It is now placed, so every feature depending on it loses one unmet
+            // dependency; any that reach 0 are themselves ready — enqueue them.
+            foreach ($dependents[$code] ?? [] as $dependentCode) {
+                if (--$inDegree[$dependentCode] === 0) {
+                    $queue[] = $dependentCode;
+                }
+            }
+        }
+
+        // If we couldn't place everything, the leftovers form a dependency cycle
+        // (each is still waiting on another, so none ever reached in-degree 0).
+        if (count($sorted) !== count($byCode)) {
+            $cyclic = array_diff(array_keys($byCode), array_column($sorted, 'feature_code'));
+            throw new LogicException('Circular feature dependency detected among: ' . implode(', ', $cyclic));
+        }
+
+        return $sorted;
     }
 
     /**
@@ -384,7 +461,7 @@ class FeatureSet implements EventDispatcherInterface
     {
         $codes = $this->getCodes();
         foreach ($this->features as $feature) {
-            $baseFeature = $feature->toNewObject();
+            $baseFeature = $feature->toNewObject($this->database);
             $missing_dependencies = array_diff($baseFeature::getDependencies(), $codes);
 
             if (!empty($missing_dependencies)) {
@@ -414,7 +491,7 @@ class FeatureSet implements EventDispatcherInterface
 
         foreach ($new_features as $feature) {
             // flat dependency management
-            $baseFeature = $feature->toNewObject();
+            $baseFeature = $feature->toNewObject($this->database);
 
             $conflictingDeps[$feature->feature_code] = $baseFeature::getConflictingDependencies();
 

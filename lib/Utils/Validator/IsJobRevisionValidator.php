@@ -16,9 +16,9 @@ class IsJobRevisionValidator extends AbstractValidator
 {
     private ChunkReviewDao $chunkReviewDao;
 
-    public function __construct(?ChunkReviewDao $chunkReviewDao = null)
+    public function __construct(ChunkReviewDao $chunkReviewDao)
     {
-        $this->chunkReviewDao = $chunkReviewDao ?? new ChunkReviewDao();
+        $this->chunkReviewDao = $chunkReviewDao;
     }
 
     /**

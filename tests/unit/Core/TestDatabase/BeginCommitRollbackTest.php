@@ -56,7 +56,7 @@ class BeginCommitRollbackTest extends AbstractTest
             ]
         );
 
-        $this->client_1_instance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->client_1_instance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 
         $this->sql_create = "CREATE TABLE Persons( PersonID INT)";
         $this->sql_drop = "DROP TABLE Persons";

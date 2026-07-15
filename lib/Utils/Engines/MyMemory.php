@@ -4,6 +4,7 @@ namespace Utils\Engines;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -89,9 +90,9 @@ class MyMemory extends AbstractEngine
      * @throws Exception
      * @throws TypeError
      */
-    public function __construct($engineRecord)
+    public function __construct($engineRecord, IDatabase $database)
     {
-        parent::__construct($engineRecord);
+        parent::__construct($engineRecord, $database);
         if ($this->getEngineRecord()->type != EngineConstants::TM) {
             throw new Exception("Engine {$this->getEngineRecord()->id} is not a TMS engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
         }
@@ -104,6 +105,7 @@ class MyMemory extends AbstractEngine
      *
      * @return TMSAbstractResponse
      * @throws TypeError
+     * @throws Exception
      */
     protected function _decode(mixed $rawValue, array $parameters = [], ?string $function = null): TMSAbstractResponse
     {
@@ -280,10 +282,8 @@ class MyMemory extends AbstractEngine
         ); // null coalescing operator to avoid warnings, we want to propagate null when it is not set.
 
         $filterMyMemoryGetParametersEvent = new FilterMyMemoryGetParametersEvent($parameters, $_config);
-        if ($this->featureSet !== null) {
-            $this->featureSet->dispatch($filterMyMemoryGetParametersEvent);
-            $parameters = $filterMyMemoryGetParametersEvent->getParameters();
-        }
+        $this->featureSet->dispatch($filterMyMemoryGetParametersEvent);
+        $parameters = $filterMyMemoryGetParametersEvent->getParameters();
 
         $this->call("translate_relative_url", $parameters, true);
 
@@ -893,6 +893,7 @@ class MyMemory extends AbstractEngine
      *
      * @throws RuntimeException
      * @throws TypeError
+     * @throws Exception
      * @throws \Psr\Log\InvalidArgumentException
      */
     private function callAnalyzeUrl(array $segments): void

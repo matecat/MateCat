@@ -33,7 +33,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
         }, 150)
       }
     },
-    {enableOnContentEditable: true},
+    {enableOnContentEditable: true, enableOnFormTags: true},
   )
   useHotkeys(
     Shortcuts.cattol.events.translate.keystrokes[Shortcuts.shortCutsKeyType],
@@ -46,7 +46,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
         }, 150)
       }
     },
-    {enableOnContentEditable: true},
+    {enableOnContentEditable: true, enableOnFormTags: true},
   )
 
   const [progress, setProgress] = useState()

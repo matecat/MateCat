@@ -40,7 +40,7 @@ class GetInstanceTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-        $this->database_instance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->database_instance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         /**
          * user insertion
          */
@@ -81,7 +81,7 @@ class GetInstanceTest extends AbstractTest
     #[Test]
     public function test_getInstance_of_constructed_engine()
     {
-        $engine = EnginesFactory::getInstance($this->id_database);
+        $engine = EnginesFactory::getInstance($this->id_database, obtainTestDatabase());
         $this->assertTrue($engine instanceof Apertium);
     }
 
@@ -93,7 +93,7 @@ class GetInstanceTest extends AbstractTest
     #[Test]
     public function test_getInstance_of_constructed_engine_my_memory()
     {
-        $engine = EnginesFactory::getInstance(1);
+        $engine = EnginesFactory::getInstance(1, obtainTestDatabase());
         $this->assertTrue($engine instanceof MyMemory);
     }
 
@@ -105,7 +105,7 @@ class GetInstanceTest extends AbstractTest
     #[Test]
     public function test_getInstance_of_default_engine()
     {
-        $engine = EnginesFactory::getInstance(0);
+        $engine = EnginesFactory::getInstance(0, obtainTestDatabase());
         $this->assertTrue($engine instanceof NONE);
     }
 
@@ -130,7 +130,7 @@ class GetInstanceTest extends AbstractTest
     public function test_getInstance_whit_null_id()
     {
         $this->expectException(TypeError::class);
-        EnginesFactory::getInstance(null);
+        EnginesFactory::getInstance(null, obtainTestDatabase());
     }
 
     /**
@@ -142,7 +142,7 @@ class GetInstanceTest extends AbstractTest
     public function test_getInstance_with_no_mach_for_engine_id()
     {
         $this->expectException(Exception::class);
-        EnginesFactory::getInstance($this->id_database + 1);
+        EnginesFactory::getInstance($this->id_database + 1, obtainTestDatabase());
     }
 
     /**
@@ -161,7 +161,7 @@ class GetInstanceTest extends AbstractTest
         $flusher->select(AppConfig::$INSTANCE_ID);
         $flusher->flushdb();
 
-        $engine = EnginesFactory::getInstance($this->id_database);
+        $engine = EnginesFactory::getInstance($this->id_database, obtainTestDatabase());
         $this->assertTrue($engine instanceof NONE);
     }
 

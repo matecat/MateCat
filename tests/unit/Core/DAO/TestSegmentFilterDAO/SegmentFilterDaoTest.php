@@ -28,7 +28,7 @@ class SegmentFilterDaoTest extends AbstractTest
     {
         parent::setUp();
 
-        $this->database_instance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->database_instance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         $conn = $this->database_instance->getConnection();
 
         // Use a unique base to avoid collisions with parallel tests
@@ -104,7 +104,7 @@ class SegmentFilterDaoTest extends AbstractTest
     public function test_instance_findSegmentIdsBySimpleFilter_excludes_show_in_cattool_0(): void
     {
         $filter = new FilterDefinition(['status' => 'TRANSLATED']);
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $results = $dao->findSegmentIdsBySimpleFilter($this->chunk, $filter);
 
         $ids = array_map(fn($r) => (int)$r->id, $results);
@@ -120,7 +120,7 @@ class SegmentFilterDaoTest extends AbstractTest
     public function test_instance_findSegmentIdsBySimpleFilter_NEW_excludes_show_in_cattool_0(): void
     {
         $filter = new FilterDefinition(['status' => 'NEW']);
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $results = $dao->findSegmentIdsBySimpleFilter($this->chunk, $filter);
 
         $ids = array_map(fn($r) => (int)$r->id, $results);
@@ -139,7 +139,7 @@ class SegmentFilterDaoTest extends AbstractTest
             'sample' => ['type' => 'mt', 'size' => 0]
         ]);
 
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
         $ids = array_map(fn($r) => (int)$r->id, $results);
 
@@ -157,7 +157,7 @@ class SegmentFilterDaoTest extends AbstractTest
             'sample' => ['type' => 'todo', 'size' => 0]
         ]);
 
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
         $ids = array_map(fn($r) => (int)$r->id, $results);
 
@@ -175,7 +175,7 @@ class SegmentFilterDaoTest extends AbstractTest
             'sample' => ['type' => 'edit_distance_high_to_low', 'size' => 100]
         ]);
 
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
         $ids = array_map(fn($r) => (int)$r->id, $results);
 
@@ -192,7 +192,7 @@ class SegmentFilterDaoTest extends AbstractTest
             'sample' => ['type' => 'segment_length_high_to_low', 'size' => 100]
         ]);
 
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
         $ids = array_map(fn($r) => (int)$r->id, $results);
 
@@ -209,7 +209,7 @@ class SegmentFilterDaoTest extends AbstractTest
             'sample' => ['type' => 'unlocked', 'size' => 0]
         ]);
 
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
         $ids = array_map(fn($r) => (int)$r->id, $results);
 
@@ -222,7 +222,7 @@ class SegmentFilterDaoTest extends AbstractTest
 
     public function test_instance_getSqlForUnlocked_returns_valid_sql(): void
     {
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $where = ['sql' => ' AND st.status = :status ', 'data' => ['status' => 'NEW']];
 
         $sql = $dao->getSqlForUnlocked($where);
@@ -233,7 +233,7 @@ class SegmentFilterDaoTest extends AbstractTest
 
     public function test_instance_getSqlForIce_returns_valid_sql(): void
     {
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $where = ['sql' => '', 'data' => []];
 
         $sql = $dao->getSqlForIce($where);
@@ -244,7 +244,7 @@ class SegmentFilterDaoTest extends AbstractTest
 
     public function test_instance_getSqlForModifiedIce_returns_valid_sql(): void
     {
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $where = ['sql' => '', 'data' => []];
 
         $sql = $dao->getSqlForModifiedIce($where);
@@ -255,7 +255,7 @@ class SegmentFilterDaoTest extends AbstractTest
 
     public function test_instance_getSqlForToDo_returns_valid_sql(): void
     {
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $where = ['sql' => '', 'data' => []];
 
         $sql = $dao->getSqlForToDo($where);
@@ -265,7 +265,7 @@ class SegmentFilterDaoTest extends AbstractTest
 
     public function test_instance_getSqlForToDo_includes_review_condition(): void
     {
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $where = ['sql' => '', 'data' => []];
 
         $sql = $dao->getSqlForToDo($where, true);
@@ -274,7 +274,7 @@ class SegmentFilterDaoTest extends AbstractTest
 
     public function test_instance_getSqlForToDo_includes_second_pass_review_condition(): void
     {
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $where = ['sql' => '', 'data' => []];
 
         $sql = $dao->getSqlForToDo($where, false, true);
@@ -284,7 +284,7 @@ class SegmentFilterDaoTest extends AbstractTest
 
     public function test_instance_getSqlForMatchType_returns_valid_sql(): void
     {
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $where = ['sql' => '', 'data' => []];
 
         $sql = $dao->getSqlForMatchType($where);
@@ -293,7 +293,7 @@ class SegmentFilterDaoTest extends AbstractTest
 
     public function test_instance_getSqlForMatches_returns_valid_sql(): void
     {
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $where = ['sql' => '', 'data' => []];
 
         $sql = $dao->getSqlForMatches($where);
@@ -303,7 +303,7 @@ class SegmentFilterDaoTest extends AbstractTest
 
     public function test_instance_getSqlForRepetition_returns_valid_sql(): void
     {
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $where = ['sql' => '', 'data' => []];
 
         $sql = $dao->getSqlForRepetition($where);
@@ -313,7 +313,7 @@ class SegmentFilterDaoTest extends AbstractTest
 
     public function test_instance_getSqlForEditDistance_returns_valid_sql(): void
     {
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $limit = ['limit' => 10, 'count' => 100, 'sample_size' => 10];
         $where = ['sql' => '', 'data' => []];
 
@@ -327,7 +327,7 @@ class SegmentFilterDaoTest extends AbstractTest
 
     public function test_instance_getSqlForSegmentLength_returns_valid_sql(): void
     {
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $limit = ['limit' => 5, 'count' => 50, 'sample_size' => 10];
         $where = ['sql' => '', 'data' => []];
 
@@ -338,7 +338,7 @@ class SegmentFilterDaoTest extends AbstractTest
 
     public function test_instance_getSqlForRegularIntervals_returns_valid_sql(): void
     {
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $limit = ['limit' => 10, 'count' => 100, 'sample_size' => 10];
         $where = ['sql' => '', 'data' => []];
 
@@ -354,7 +354,7 @@ class SegmentFilterDaoTest extends AbstractTest
             'sample' => ['type' => 'ice', 'size' => 0]
         ]);
 
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
         $this->assertSame([], $results);
     }
@@ -366,7 +366,7 @@ class SegmentFilterDaoTest extends AbstractTest
             'sample' => ['type' => 'modified_ice', 'size' => 0]
         ]);
 
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
         $this->assertSame([], $results);
     }
@@ -378,14 +378,14 @@ class SegmentFilterDaoTest extends AbstractTest
             'sample' => ['type' => 'matches', 'size' => 0]
         ]);
 
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
         $this->assertSame([], $results);
     }
 
     public function test_instance_findSegmentIdsForSample_fuzzies_return_empty_when_no_fuzzies(): void
     {
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
 
         foreach (['fuzzies_50_74', 'fuzzies_75_84', 'fuzzies_85_94', 'fuzzies_95_99'] as $type) {
             $filter = new FilterDefinition([
@@ -405,7 +405,7 @@ class SegmentFilterDaoTest extends AbstractTest
             'sample' => ['type' => 'edit_distance_low_to_high', 'size' => 100]
         ]);
 
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
         $this->assertNotEmpty($results);
         foreach ($results as $r) {
@@ -420,7 +420,7 @@ class SegmentFilterDaoTest extends AbstractTest
             'sample' => ['type' => 'segment_length_low_to_high', 'size' => 100]
         ]);
 
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
         $this->assertNotEmpty($results);
         foreach ($results as $r) {
@@ -435,7 +435,7 @@ class SegmentFilterDaoTest extends AbstractTest
             'sample' => ['type' => 'regular_intervals', 'size' => 50]
         ]);
 
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
         $this->assertNotEmpty($results);
         foreach ($results as $r) {
@@ -450,7 +450,7 @@ class SegmentFilterDaoTest extends AbstractTest
             'sample' => ['type' => 'mt', 'size' => 0]
         ]);
 
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
         $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
         $ids = array_map(fn($r) => (int)$r->id, $results);
 
@@ -464,7 +464,7 @@ class SegmentFilterDaoTest extends AbstractTest
             'sample' => ['type' => 'invalid_type', 'size' => 0]
         ]);
 
-        $dao = new SegmentFilterDao();
+        $dao = new SegmentFilterDao(obtainTestDatabase());
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Sample type is not valid');

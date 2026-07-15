@@ -7,11 +7,12 @@ use Controller\API\Commons\Exceptions\ConflictError;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Exceptions\UnprocessableException;
 use Controller\API\Commons\Exceptions\ValidationError;
+use Klein\App;
 use Klein\Klein;
+use Matecat\Locales\InvalidLanguageException;
 use Model\Exceptions\ValidationError as Model_ValidationError;
 use Model\FeaturesBase\PluginsLoader;
 use Swaggest\JsonSchema\InvalidValue;
-use Matecat\Locales\InvalidLanguageException;
 use Utils\Logger\LoggerFactory;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
@@ -22,7 +23,9 @@ require_once './lib/Bootstrap.php';
 /** @noinspection PhpUnhandledExceptionInspection */
 Bootstrap::start();
 
-$klein  = new Klein();
+$app = new App();
+$app->register('getDatabase', fn() => Bootstrap::getDatabase());
+$klein = new Klein(app: $app);
 $isView = false;
 
 /**
@@ -36,11 +39,10 @@ function route(string $path, string $method, array $callback): void
 {
     global $klein, $isView;
     $klein->respond($method, $path, function () use ($callback, &$isView) {
-        $reflect = new ReflectionClass($callback[ 0 ]);
+        $reflect = new ReflectionClass($callback[0]);
         /** @var KleinController $instance */
         $instance = $reflect->newInstanceArgs(func_get_args());
-        $isView   = $instance->isView();
-        $instance->respond($callback[ 1 ]);
+        $instance->respond($callback[1]);
     });
 }
 
@@ -68,8 +70,7 @@ $klein->onHttpError(function (int $code, Klein $klein) use (&$isView) {
     }
 });
 
-$klein->onError(function (Klein $klein, $err_msg, $err_type, Throwable $exception) use (&$isView) {
-    /** @var bool $isView */
+$klein->onError(function (Klein $klein, string $err_msg, string $err_type, Throwable $exception) use (&$isView) {
     if (!$isView) {
         $klein->response()->noCache();
         $logger = LoggerFactory::getLogger('exception_handler', 'fatal_errors.txt');
@@ -99,13 +100,13 @@ $klein->onError(function (Klein $klein, $err_msg, $err_type, Throwable $exceptio
                 break;
             case NotFoundException::class:
             case Model\Exceptions\NotFoundException::class:
-                $logger->debug('Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ]);
+            $logger->debug('Record Not found error for URI: ' . $_SERVER['REQUEST_URI']);
                 $logger->debug((new Error($exception))->render(true));
                 $klein->response()->code(404);
                 $klein->response()->json((new Error($exception))->render());
                 break;
             case ConflictError::class:
-                $logger->debug('Conflict error for URI: ' . $_SERVER[ 'REQUEST_URI' ]);
+                $logger->debug('Conflict error for URI: ' . $_SERVER['REQUEST_URI']);
                 $logger->debug((new Error($exception))->render(true));
                 $klein->response()->code(409);
                 $klein->response()->json((new Error($exception))->render());

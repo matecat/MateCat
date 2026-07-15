@@ -4,11 +4,13 @@ namespace Matecat\Core\Controllers;
 
 use ArrayObject;
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\V2\SplitJobController;
 use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\Jobs\JobStruct;
 use Model\JobSplitMerge\JobSplitMergeManager;
 use Model\JobSplitMerge\SplitMergeProjectData;
@@ -21,11 +23,10 @@ class TestableSplitJobController extends SplitJobController
     /** @var array{data: SplitMergeProjectData, pManager: JobSplitMergeManager, count_type: string, project: ProjectStruct}|null */
     public ?array $fakeProjectData = null;
 
-    public function __construct()
-    {
-    }
+    /** @var JobStruct[]|null */
+    public ?array $fakeJobs = null;
 
-    protected function afterConstruct(): void
+    public function __construct()
     {
     }
 
@@ -37,10 +38,27 @@ class TestableSplitJobController extends SplitJobController
 
         return $this->fakeProjectData;
     }
+
+    protected function getProjectJobs(ProjectStruct $project): array
+    {
+        if ($this->fakeJobs === null) {
+            throw new \RuntimeException('fakeJobs not configured');
+        }
+
+        return $this->fakeJobs;
+    }
 }
 
 class SplitJobControllerTest extends AbstractTest
 {
+    use ControllerSeedFragments;
+
+    /**
+     * Reserved ID block (Playbook §4): base = 9_069_000.
+     * 9069001 project, 9069002 job, 9069003 segment, 9069004 file.
+     */
+    private const int REAL_DB_BASE = 9_069_000;
+
     private TestableSplitJobController $controller;
     private ReflectionClass $reflector;
     private Request $requestStub;
@@ -266,8 +284,8 @@ class SplitJobControllerTest extends AbstractTest
     {
         $job = $this->makeJobStub(99, 'jp', false);
 
-        $projectStub = $this->createStub(ProjectStruct::class);
-        $projectStub->method('getJobs')->willReturn([$job]);
+        $project = new ProjectStruct();
+        $project->id = 1;
 
         $splitResult = new ArrayObject(['chunks' => [1, 2]]);
         $data        = new SplitMergeProjectData(1);
@@ -278,11 +296,12 @@ class SplitJobControllerTest extends AbstractTest
             ->method('mergeALL')
             ->with($data, [$job]);
 
+        $this->controller->fakeJobs = [$job];
         $this->controller->fakeProjectData = [
             'data'       => $data,
             'pManager'   => $pManager,
             'count_type' => 'eq_word_count',
-            'project'    => $projectStub,
+            'project'    => $project,
         ];
 
         $this->stubRequestParams([
@@ -308,8 +327,8 @@ class SplitJobControllerTest extends AbstractTest
     {
         $job = $this->makeJobStub(99, 'jp', false);
 
-        $projectStub = $this->createStub(ProjectStruct::class);
-        $projectStub->method('getJobs')->willReturn([$job]);
+        $project = new ProjectStruct();
+        $project->id = 1;
 
         $splitResult = new ArrayObject(['chunks' => [1, 2, 3]]);
         $data        = new SplitMergeProjectData(1);
@@ -317,11 +336,12 @@ class SplitJobControllerTest extends AbstractTest
 
         $pManager = $this->createStub(JobSplitMergeManager::class);
 
+        $this->controller->fakeJobs = [$job];
         $this->controller->fakeProjectData = [
             'data'       => $data,
             'pManager'   => $pManager,
             'count_type' => 'eq_word_count',
-            'project'    => $projectStub,
+            'project'    => $project,
         ];
 
         $this->stubRequestParams([
@@ -349,8 +369,8 @@ class SplitJobControllerTest extends AbstractTest
     {
         $job = $this->makeJobStub(99, 'jp', false);
 
-        $projectStub = $this->createStub(ProjectStruct::class);
-        $projectStub->method('getJobs')->willReturn([$job]);
+        $project = new ProjectStruct();
+        $project->id = 1;
 
         $splitResult = new ArrayObject(['chunks' => [1, 2]]);
         $data        = new SplitMergeProjectData(1);
@@ -361,11 +381,12 @@ class SplitJobControllerTest extends AbstractTest
             ->method('applySplit')
             ->with($data);
 
+        $this->controller->fakeJobs = [$job];
         $this->controller->fakeProjectData = [
             'data'       => $data,
             'pManager'   => $pManager,
             'count_type' => 'eq_word_count',
-            'project'    => $projectStub,
+            'project'    => $project,
         ];
 
         $this->stubRequestParams([
@@ -390,17 +411,18 @@ class SplitJobControllerTest extends AbstractTest
     {
         $job = $this->makeJobStub(10, 'pw', false);
 
-        $projectStub = $this->createStub(ProjectStruct::class);
-        $projectStub->method('getJobs')->willReturn([$job]);
+        $project = new ProjectStruct();
+        $project->id = 1;
 
         $data     = new SplitMergeProjectData(1);
         $pManager = $this->createStub(JobSplitMergeManager::class);
 
+        $this->controller->fakeJobs = [$job];
         $this->controller->fakeProjectData = [
             'data'       => $data,
             'pManager'   => $pManager,
             'count_type' => 'eq_word_count',
-            'project'    => $projectStub,
+            'project'    => $project,
         ];
 
         $this->stubRequestParams([
@@ -419,17 +441,18 @@ class SplitJobControllerTest extends AbstractTest
     {
         $job = $this->makeJobStub(99, 'correct_pw', false);
 
-        $projectStub = $this->createStub(ProjectStruct::class);
-        $projectStub->method('getJobs')->willReturn([$job]);
+        $project = new ProjectStruct();
+        $project->id = 1;
 
         $data     = new SplitMergeProjectData(1);
         $pManager = $this->createStub(JobSplitMergeManager::class);
 
+        $this->controller->fakeJobs = [$job];
         $this->controller->fakeProjectData = [
             'data'       => $data,
             'pManager'   => $pManager,
             'count_type' => 'eq_word_count',
-            'project'    => $projectStub,
+            'project'    => $project,
         ];
 
         $this->stubRequestParams([
@@ -443,6 +466,54 @@ class SplitJobControllerTest extends AbstractTest
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionCode(-10);
         $this->controller->check();
+    }
+
+    #[Test]
+    public function registerValidators_appends_login_validator(): void
+    {
+        $this->callPrivate('registerValidators');
+
+        $validators = $this->reflector->getProperty('validators')->getValue($this->controller);
+
+        self::assertCount(1, $validators);
+        self::assertInstanceOf(LoginValidator::class, $validators[0]);
+    }
+
+    #[Test]
+    public function getProjectData_and_getProjectJobs_return_real_seeded_state(): void
+    {
+        $base        = self::REAL_DB_BASE;
+        $owner       = $this->ownerEmail($base);
+        $projectPass = 'projpw';
+        $jobPass     = 'jobpw';
+
+        $this->cleanFragments($base);
+        $this->seedProject($base, $owner, $projectPass);
+        $this->seedFile($base);
+        $this->seedSegment($base);
+        $this->seedJob($base, $owner, $jobPass);
+
+        try {
+            $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
+
+            $projectId = $this->projectId($base);
+
+            $projectStructure = $this->callPrivate('getProjectData', $projectId, $projectPass, false);
+
+            self::assertInstanceOf(SplitMergeProjectData::class, $projectStructure['data']);
+            self::assertSame($projectId, $projectStructure['data']->idProject);
+            self::assertInstanceOf(JobSplitMergeManager::class, $projectStructure['pManager']);
+            self::assertSame('eq_word_count', $projectStructure['count_type']);
+            self::assertInstanceOf(ProjectStruct::class, $projectStructure['project']);
+            self::assertSame($projectId, (int)$projectStructure['project']->id);
+
+            $jobs = $this->callPrivate('getProjectJobs', $projectStructure['project']);
+
+            self::assertCount(1, $jobs);
+            self::assertSame($this->jobId($base), $jobs[0]->id);
+        } finally {
+            $this->cleanFragments($base);
+        }
     }
 
     /**

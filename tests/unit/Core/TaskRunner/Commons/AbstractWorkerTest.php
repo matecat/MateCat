@@ -4,6 +4,7 @@ namespace Matecat\Core\TaskRunner\Commons;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use PDO;
 use PDOException;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -31,11 +32,11 @@ class AbstractWorkerTest extends AbstractTest
 
     // ─── Helpers ────────────────────────────────────────────────────────────────
 
-    private function makeWorker(): AbstractWorker
+    private function makeWorker(?IDatabase $database = null): AbstractWorker
     {
         $handler = $this->stubAmqHandler;
 
-        $worker = new class($handler) extends AbstractWorker {
+        $worker = new class($handler, $database ?? obtainTestDatabase()) extends AbstractWorker {
             public function process(AbstractElement $queueElement): void {}
 
             public function getLogMsg(): array|string
@@ -341,27 +342,22 @@ class AbstractWorkerTest extends AbstractTest
         $dbStub = $this->createStub(Database::class);
         $dbStub->method('ping')->willReturn(true);
 
-        $ref = new ReflectionClass(Database::class);
-        $ref->getProperty('instance')->setValue(null, $dbStub);
+        $this->setDatabaseInstance($dbStub);
 
-        try {
-            $worker->checkDatabaseConnection();
-            $this->assertTrue(true);
-        } finally {
-            $ref->getProperty('instance')->setValue(null, null);
-        }
+        $worker->checkDatabaseConnection();
+        $this->assertTrue(true);
     }
 
     #[Test]
     public function checkDatabaseConnection_reconnects_on_pdo_exception(): void
     {
-        $worker = $this->makeWorker();
-
         $pdoStub = $this->createStub(PDO::class);
 
         $dbStub = $this->createStub(Database::class);
         $dbStub->method('ping')->willThrowException(new PDOException('MySQL server has gone away'));
         $dbStub->method('getConnection')->willReturn($pdoStub);
+
+        $worker = $this->makeWorker($dbStub);
 
         $log = new class implements SplObserver {
             /** @var string[] */
@@ -376,14 +372,9 @@ class AbstractWorkerTest extends AbstractTest
         };
         $worker->attach($log);
 
-        $ref = new ReflectionClass(Database::class);
-        $ref->getProperty('instance')->setValue(null, $dbStub);
+        $this->setDatabaseInstance($dbStub);
 
-        try {
-            $worker->checkDatabaseConnection();
-        } finally {
-            $ref->getProperty('instance')->setValue(null, null);
-        }
+        $worker->checkDatabaseConnection();
 
         $this->assertCount(2, $log->messages);
         $this->assertStringContainsString('MySQL server has gone away', $log->messages[0]);

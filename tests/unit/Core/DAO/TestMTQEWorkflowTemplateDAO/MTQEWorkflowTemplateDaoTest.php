@@ -19,7 +19,7 @@ class MTQEWorkflowTemplateDaoTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dao = new MTQEWorkflowTemplateDao();
+        $this->dao = new MTQEWorkflowTemplateDao(obtainTestDatabase());
         $this->createdIds = [];
         $this->cleanupTestData();
     }
@@ -32,13 +32,13 @@ class MTQEWorkflowTemplateDaoTest extends AbstractTest
 
     private function cleanupTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM mt_qe_templates WHERE uid = {$this->uid}");
     }
 
     private function ensureParamsColumn(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $columns = $conn->query("SHOW COLUMNS FROM mt_qe_templates LIKE 'params'")->fetchAll();
         if (empty($columns)) {
             $conn->exec("ALTER TABLE mt_qe_templates CHANGE `rules` `params` varchar(2048) NOT NULL");
@@ -48,7 +48,7 @@ class MTQEWorkflowTemplateDaoTest extends AbstractTest
     private function insertTemplate(string $name = 'Test MTQE Template'): int
     {
         $this->ensureParamsColumn();
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $params = json_encode(['params' => ['mt_quality_value_in_editor' => 85]]);
         $now = date('Y-m-d H:i:s');
         $stmt = $conn->prepare(

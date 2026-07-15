@@ -5,6 +5,7 @@ namespace Plugins\Features;
 use Exception;
 use Klein\Klein;
 use LogicException;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
@@ -54,6 +55,18 @@ abstract class BaseFeature implements IBaseFeature
      */
     protected static array $conflictingDependencies = [];
 
+    protected IDatabase $database;
+
+    public function setDatabase(IDatabase $database): void
+    {
+        $this->database = $database;
+    }
+
+    public function getDatabase(): IDatabase
+    {
+        return $this->database;
+    }
+
     /**
      * @return array<int, string>
      */
@@ -88,16 +101,23 @@ abstract class BaseFeature implements IBaseFeature
     /**
      * Constructor method for the class.
      *
+     * @param BasicFeatureStruct $feature
      * @param array<string, mixed>|null $config
-     * @param array<string, mixed>|null $config
-     *
-     * @throws LogicException If the plugin code is not defined.
+     * @throws LogicException
      */
     public function __construct(BasicFeatureStruct $feature, ?array $config = null)
     {
-        $fCode = static::FEATURE_CODE;
-        if (empty($fCode)) {
-            throw new LogicException("Plugin code not defined.");
+        if (
+            (
+                $feature->feature_code === '' ||
+                static::FEATURE_CODE === '' ||
+                $feature->feature_code !== static::FEATURE_CODE
+            ) && !($this instanceof UnknownFeature)
+        ) {
+            throw new LogicException(
+                "Feature code missing or mismatched: struct '{$feature->feature_code}' vs "
+                . static::class . " '" . static::FEATURE_CODE . "'"
+            );
         }
         $this->feature = $feature;
         $this->configCache = $config;

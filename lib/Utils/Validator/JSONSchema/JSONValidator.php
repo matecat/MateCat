@@ -50,7 +50,9 @@ class JSONValidator extends AbstractValidator
             new Context(
                 new class implements RemoteRefProvider {
                     /**
-                     * @throws RuntimeException
+                     * @param string $url
+                     *
+                     * @throws \RuntimeException
                      */
                     public function getSchemaData($url): object
                     {

@@ -40,16 +40,16 @@ class SignupModel
     /**
      * @param array<string, mixed> $params
      * @param array<string, mixed> $session
-     * @param ?UserDao $userDao
-     * @param ?TeamDao $teamDao
+     * @param UserDao $userDao
+     * @param TeamDao $teamDao
      */
-    public function __construct(array $params, array &$session, ?UserDao $userDao = null, ?TeamDao $teamDao = null)
+    public function __construct(array $params, array &$session, UserDao $userDao, TeamDao $teamDao)
     {
         $this->params = $params;
         $this->session =& $session;
         $this->user = new UserStruct($this->params);
-        $this->userDao = $userDao ?? new UserDao();
-        $this->teamDao = $teamDao ?? new TeamDao();
+        $this->userDao = $userDao;
+        $this->teamDao = $teamDao;
     }
 
     /**
@@ -89,9 +89,9 @@ class SignupModel
             $this->__prepareNewUser();
             $this->user->uid = $this->userDao->insertStruct($this->user) ?: throw new RuntimeException('User uid must be set after signup insert');
 
-            Database::obtain()->begin();
+            $this->teamDao->getDatabaseHandler()->begin();
             $this->teamDao->createPersonalTeam($this->user);
-            Database::obtain()->commit();
+            $this->teamDao->getDatabaseHandler()->commit();
         }
 
         $this->__saveWantedUrl();
@@ -145,7 +145,7 @@ class SignupModel
          * Check the salt before join the two accounts.
          */
         if (empty($this->user->salt)) {
-            $this->user->salt = Utils::randomString(15, true);
+            $this->user->salt = Utils::randomString(32);
         }
 
         $this->user->pass = Utils::encryptPass($this->params['password'], $this->user->salt);
@@ -162,7 +162,7 @@ class SignupModel
 
         $this->user->create_date = Utils::mysqlTimestamp(time());
         $this->user->email = $email;
-        $this->user->salt = Utils::randomString(15, true);
+        $this->user->salt = Utils::randomString(32);
         $this->user->pass = Utils::encryptPass($this->params['password'], $this->user->salt);
 
         $this->user->initAuthToken();
@@ -263,12 +263,12 @@ class SignupModel
 
     /**
      * @param string $email
-     * @param ?UserDao $dao
+     * @param UserDao $dao
      *
      * @throws ReflectionException
      * @throws Exception
      */
-    public static function resendConfirmationEmail(string $email, ?UserDao $dao = null): void
+    public static function resendConfirmationEmail(string $email, UserDao $dao): void
     {
         $email = filter_var($email, FILTER_SANITIZE_EMAIL);
 
@@ -276,7 +276,6 @@ class SignupModel
             return;
         }
 
-        $dao ??= new UserDao();
         $user = $dao->getByEmail($email);
 
         if ($user) {

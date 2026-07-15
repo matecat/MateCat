@@ -12,6 +12,8 @@ use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
 use Model\Segments\SegmentOriginalDataDao;
 use ReflectionException;
+use Model\Projects\ProjectDao;
+use TypeError;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Logger\LoggerFactory;
@@ -20,7 +22,7 @@ use Utils\Tools\Utils;
 class GetTagProjectionController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -28,21 +30,19 @@ class GetTagProjectionController extends KleinController
     /**
      * @throws ReflectionException
      * @throws NotFoundException
+     * @throws TypeError
      * @throws Exception
      */
     public function call(): void
     {
         $request = $this->validateTheRequest();
-        $jobStruct = (new JobDao())->getByIdAndPasswordOrFail($request['id_job'], $request['password']);
-        $this->featureSet->loadForProject($jobStruct->getProject());
+        $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($request['id_job'], $request['password']);
+        $this->featureSet->loadForProject($jobStruct->getProject(new ProjectDao($this->getDatabase())));
 
-        /**
-         * @var $engine MyMemory
-         */
-        $engine = EnginesFactory::getInstance(1);
+        $engine = $this->getEngine();
         $engine->setFeatureSet($this->featureSet);
 
-        $dataRefMap = (new SegmentOriginalDataDao())->getSegmentDataRefMap($request['id_segment']);
+        $dataRefMap = (new SegmentOriginalDataDao($this->getDatabase()))->getSegmentDataRefMap($request['id_segment']);
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance($this->getFeatureSet(), $request['source_lang'], $request['target_lang'], $dataRefMap);
 
@@ -64,7 +64,7 @@ class GetTagProjectionController extends KleinController
                 ]
             );
 
-            throw new ExternalServiceException($result->error->message);
+            throw new ExternalServiceException($result->error->message ?? 'Unknown external service error');
         }
 
         // no errors, response ok
@@ -77,7 +77,15 @@ class GetTagProjectionController extends KleinController
     }
 
     /**
-     * @return array
+     * @throws Exception
+     */
+    protected function getEngine(): MyMemory
+    {
+        return EnginesFactory::getInstance(1, $this->getDatabase(), MyMemory::class);
+    }
+
+    /**
+     * @return array<string, mixed>
      * @throws Exception
      */
     private function validateTheRequest(): array

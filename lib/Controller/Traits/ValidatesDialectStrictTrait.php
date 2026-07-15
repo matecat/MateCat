@@ -24,7 +24,7 @@ trait ValidatesDialectStrictTrait
      * @param Languages $lang_handler
      * @param mixed $dialect_strict Raw input (typically a string from the HTTP request)
      *
-     * @return array|null Decoded associative array, or null if input is empty
+     * @return array<string, bool>|null Decoded associative array, or null if input is empty
      *
      * @throws InvalidArgumentException  If a language code is not supported
      * @throws JSONValidatorException If JSON structure is invalid

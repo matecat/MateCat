@@ -35,10 +35,19 @@ class GDriveUserAuthorizationModelTest extends AbstractTest
     }
 
     #[Test]
+    public function constructorRequiresInjectedDao(): void
+    {
+        $param = (new \ReflectionMethod(GDriveUserAuthorizationModel::class, '__construct'))->getParameters()[1];
+
+        $this->assertFalse($param->isOptional(), 'ConnectedServiceDao must be a mandatory ctor dependency (no Database::obtain() fallback)');
+        $this->assertFalse($param->allowsNull(), 'ConnectedServiceDao ctor param must not be nullable');
+    }
+
+    #[Test]
     public function constructorStoresUser(): void
     {
         $user = $this->createUser();
-        $model = new GDriveUserAuthorizationModel($user);
+        $model = new GDriveUserAuthorizationModel($user, $this->createDaoMock());
 
         $ref = new ReflectionProperty($model, 'user');
         $this->assertSame($user, $ref->getValue($model));
@@ -58,7 +67,7 @@ class GDriveUserAuthorizationModelTest extends AbstractTest
     public function constructorAcceptsOptionalGoogleClient(): void
     {
         $client = $this->createGoogleClientStub();
-        $model = new GDriveUserAuthorizationModel($this->createUser(), null, $client);
+        $model = new GDriveUserAuthorizationModel($this->createUser(), $this->createDaoMock(), $client);
 
         $ref = new ReflectionProperty($model, 'googleClient');
         $this->assertSame($client, $ref->getValue($model));
@@ -208,7 +217,7 @@ class GDriveUserAuthorizationModelTest extends AbstractTest
             ->willReturn(false);
 
         $model = new TestableGDriveUserAuthorizationModel(
-            $user, null, '', '', '', ''
+            $user, $this->createDaoMock(), '', '', '', ''
         );
 
         $ref = new ReflectionProperty(GDriveUserAuthorizationModel::class, 'googleClient');
@@ -227,6 +236,64 @@ class GDriveUserAuthorizationModelTest extends AbstractTest
         $this->assertSame('Test User', $refName->getValue($model));
     }
 
+    #[Test]
+    public function collectProperties_throwsWhenAccessTokenIsNull(): void
+    {
+        $user = $this->createUser();
+
+        $googleClientMock = $this->getMockBuilder(Google_Client::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['fetchAccessTokenWithAuthCode', 'getAccessToken'])
+            ->getMock();
+        $googleClientMock->expects($this->once())
+            ->method('fetchAccessTokenWithAuthCode')
+            ->with('auth-code');
+        $googleClientMock->expects($this->once())
+            ->method('getAccessToken')
+            ->willReturn(null);
+
+        $model = new TestableGDriveUserAuthorizationModel(
+            $user, $this->createDaoMock(), '', '', '', ''
+        );
+
+        $ref = new ReflectionProperty(GDriveUserAuthorizationModel::class, 'googleClient');
+        $ref->setValue($model, $googleClientMock);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Unable to fetch a valid Google access token');
+
+        $model->exposedCollectProperties('auth-code');
+    }
+
+    #[Test]
+    public function collectProperties_throwsWhenAccessTokenIsEmptyArray(): void
+    {
+        $user = $this->createUser();
+
+        $googleClientMock = $this->getMockBuilder(Google_Client::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['fetchAccessTokenWithAuthCode', 'getAccessToken'])
+            ->getMock();
+        $googleClientMock->expects($this->once())
+            ->method('fetchAccessTokenWithAuthCode')
+            ->with('auth-code');
+        $googleClientMock->expects($this->once())
+            ->method('getAccessToken')
+            ->willReturn([]);
+
+        $model = new TestableGDriveUserAuthorizationModel(
+            $user, $this->createDaoMock(), '', '', '', ''
+        );
+
+        $ref = new ReflectionProperty(GDriveUserAuthorizationModel::class, 'googleClient');
+        $ref->setValue($model, $googleClientMock);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Unable to fetch a valid Google access token');
+
+        $model->exposedCollectProperties('auth-code');
+    }
+
 }
 
 /**
@@ -237,7 +304,7 @@ class TestableGDriveUserAuthorizationModel extends GDriveUserAuthorizationModel
 {
     public function __construct(
         UserStruct $user,
-        ?ConnectedServiceDao $dao,
+        ConnectedServiceDao $dao,
         string $token,
         string $email,
         string $remoteId,

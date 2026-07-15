@@ -30,15 +30,13 @@ class JobsTranslatorsStruct extends AbstractDaoSilentStruct implements IDaoStruc
     public string $target;
 
     /**
-     * @return UserStruct|null
-     *
      * @throws ReflectionException
      * @throws Exception
      */
-    public function getUser(): ?UserStruct
+    public function getUser(UserDao $dao): ?UserStruct
     {
         if (!empty($this->id_translator_profile)) {
-            return (new UserDao())->setCacheTTL(60 * 60)->getByEmail($this->email);
+            return $dao->setCacheTTL(60 * 60)->getByEmail($this->email);
         }
 
         return null;

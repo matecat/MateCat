@@ -28,7 +28,7 @@ class SegmentMetadataDaoTest extends AbstractTest
     #[Test]
     public function getBySegmentIds_returns_empty_array_for_empty_ids(): void
     {
-        $dao = new SegmentMetadataDao();
+        $dao = new SegmentMetadataDao(obtainTestDatabase());
 
         $result = $dao->getBySegmentIds([], 'context-url', 0);
 

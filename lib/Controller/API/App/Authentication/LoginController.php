@@ -15,6 +15,7 @@ use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
 use Klein\Response;
+use Model\Teams\TeamDao;
 use Model\Users\RedeemableProject;
 use Model\Users\UserDao;
 use ReflectionException;
@@ -97,11 +98,15 @@ class LoginController extends AbstractStatefulKleinController
             $uid = $user->uid ?? throw new Exception('User not authenticated');
             $dao->destroyCacheByUid($uid);
 
-            $project = new RedeemableProject($user, $_SESSION);
+            $project = new RedeemableProject(
+                $user,
+                $_SESSION,
+                new TeamDao($this->getDatabase())
+            );
             $project->tryToRedeem();
 
             AuthCookie::setCredentials($user, new SessionTokenStoreHandler());
-            new AuthenticationHelper($_SESSION);
+            AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase());
 
             $this->response->code(200);
         } else {
@@ -111,7 +116,7 @@ class LoginController extends AbstractStatefulKleinController
 
     protected function createUserDao(): UserDao
     {
-        return new UserDao();
+        return new UserDao($this->getDatabase());
     }
 
     /**

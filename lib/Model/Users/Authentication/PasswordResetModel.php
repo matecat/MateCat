@@ -32,16 +32,16 @@ class PasswordResetModel
 
     /**
      * @param array<string, mixed> $session reference to global $_SESSSION var
+     * @param UserDao $userDao
      * @param string|null $token
-     * @param UserDao|null $userDao
      *
      * @throws TypeError
      */
-    public function __construct(array &$session, ?string $token = null, ?UserDao $userDao = null)
+    public function __construct(array &$session, UserDao $userDao, ?string $token = null)
     {
         $this->token = $token;
         $this->session =& $session;
-        $this->userDao = $userDao ?? new UserDao();
+        $this->userDao = $userDao;
         if (empty($token)) {
             $this->token = $session['password_reset_token'];
         }

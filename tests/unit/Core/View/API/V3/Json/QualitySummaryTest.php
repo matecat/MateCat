@@ -3,9 +3,11 @@
 namespace Matecat\Core\View\API\V3\Json;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
+use Model\Translations\WarningDao;
 use Model\LQA\EntryDao;
 use Model\Projects\ProjectStruct;
 use Model\QualityReport\QualityReportDao;
@@ -92,13 +94,14 @@ class QualitySummaryTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->chunk   = new JobStruct();
+        $this->chunk = $this->createStub(JobStruct::class);
         $this->chunk->id       = 100;
         $this->chunk->password = 'abc123';
+        $this->chunk->method('getErrorsCount')->willReturn(0);
 
         $this->project = new ProjectStruct();
 
-        $this->sut = new TestableQualitySummary($this->chunk, $this->project);
+        $this->sut = new TestableQualitySummary($this->chunk, $this->project, $this->createStub(IDatabase::class));
 
         $qrDao = $this->createStub(QualityReportDao::class);
         $qrDao->method('getReviseIssuesByChunk')->willReturn([]);

@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Model\Projects;
 
+use ArrayObject;
 use DateTime;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Jobs\JobsMetadataMarshaller;
@@ -161,6 +162,22 @@ class ProjectTemplateStructTest extends AbstractTest
         $this->expectException(TypeError::class);
 
         $struct->getTargetLanguage();
+    }
+
+    #[Test]
+    public function getTargetLanguageDoesNotInstantiateObjectsFromASerializedPayload(): void
+    {
+        // an attacker-controlled column value carrying a serialized object must NOT be
+        // rehydrated into a live instance (object-injection / gadget-chain surface)
+        $struct = new ProjectTemplateStruct();
+        $struct->target_language = serialize([new ArrayObject(['injected'])]);
+
+        $result = $struct->getTargetLanguage();
+
+        $this->assertFalse(
+            $result[0] instanceof ArrayObject,
+            'serialized objects must not be instantiated by getTargetLanguage()'
+        );
     }
 
     #[Test]

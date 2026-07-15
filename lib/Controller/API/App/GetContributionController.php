@@ -16,6 +16,7 @@ use Model\Files\FilesPartsDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Segments\SegmentDao;
@@ -27,6 +28,7 @@ use Utils\Contribution\Get;
 use Utils\Contribution\GetContributionRequest;
 use Utils\Engines\Lara;
 use Utils\Registry\AppConfig;
+use Model\Projects\ProjectDao;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\Filter;
@@ -36,7 +38,7 @@ class GetContributionController extends KleinController
 
     use APISourcePageGuesserTrait;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -55,10 +57,10 @@ class GetContributionController extends KleinController
         $id_segment = $request['id_segment'];
         $password = $request['password'];
 
-        $jobStruct = (new JobDao())->getByIdAndPasswordOrFail($id_job, $password);
-        $dataRefMap = (new SegmentOriginalDataDao())->getSegmentDataRefMap($id_segment);
+        $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($id_job, $password);
+        $dataRefMap = (new SegmentOriginalDataDao($this->getDatabase()))->getSegmentDataRefMap($id_segment);
 
-        $projectStruct = $jobStruct->getProject();
+        $projectStruct = $jobStruct->getProject(new ProjectDao($this->getDatabase()));
         $this->featureSet->loadForProject($projectStruct);
 
         $id_client = $request['id_client'];
@@ -72,7 +74,7 @@ class GetContributionController extends KleinController
 
         // try to get from metadata if Lara style is empty of fallback to the default
         if (empty($lara_style)) {
-            $lara_style = $projectStruct->getMetadataValue('lara_style') ?? Lara::DEFAULT_STYLE;
+            $lara_style = (new ProjectMetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$projectStruct->id, 'lara_style') ?? Lara::DEFAULT_STYLE;
         } else {
             $lara_style = $request['lara_style'];
         }
@@ -84,7 +86,7 @@ class GetContributionController extends KleinController
         $contributionRequest = new GetContributionRequest();
         $jobId = $jobStruct->id ?? throw new TypeError('Job ID must not be null');
         $jobPassword = $jobStruct->password ?? throw new TypeError('Job password must not be null');
-        $subfiltering_handlers = (new MetadataDao())->getSubfilteringCustomHandlers($jobId, $jobPassword);
+        $subfiltering_handlers = (new MetadataDao($this->getDatabase()))->getSubfilteringCustomHandlers($jobId, $jobPassword);
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance($this->featureSet, $jobStruct->source, $jobStruct->target, $dataRefMap, $subfiltering_handlers);
 
@@ -101,10 +103,10 @@ class GetContributionController extends KleinController
 
             $this->rewriteContributionContexts($request, $Filter);
 
-            $mtEvaluation = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_EVALUATION->value);
+            $mtEvaluation = (new ProjectMetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_EVALUATION->value);
             if ($mtEvaluation === null) {
                 //TODO REMOVE after a reasonable amount of time, this is for back compatibility, previously the mt_evaluation flag was on jobs metadata
-                $mtEvaluation = (new MetadataDao())->get(
+                $mtEvaluation = (new MetadataDao($this->getDatabase()))->get(
                     $jobId,
                     $received_password,
                     ProjectsMetadataMarshaller::MT_EVALUATION->value,
@@ -114,8 +116,8 @@ class GetContributionController extends KleinController
             $contributionRequest->mt_evaluation = (bool)$mtEvaluation;
         }
 
-        $file = (new FilesPartsDao())->getBySegmentId($id_segment);
-        $owner = (new UserDao())->getProjectOwner($id_job) ?? throw new TypeError('Project owner not found');
+        $file = (new FilesPartsDao($this->getDatabase()))->getBySegmentId($id_segment);
+        $owner = (new UserDao($this->getDatabase()))->getProjectOwner($id_job) ?? throw new TypeError('Project owner not found');
 
         $contributionRequest->id_file = $file?->id;
         $contributionRequest->id_job = $id_job;
@@ -142,10 +144,11 @@ class GetContributionController extends KleinController
         $contributionRequest->fromTarget = $switch_languages;
         $contributionRequest->resultNum = $num_results;
         $contributionRequest->crossLangTargets = array_values($this->getCrossLanguages($cross_language));
-        $contributionRequest->mt_quality_value_in_editor = (int)($projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) ?? 86);
-        $contributionRequest->mt_qe_workflow_enabled = (bool)$projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value);
+        $projectMetadataDao = new ProjectMetadataDao($this->getDatabase());
+        $contributionRequest->mt_quality_value_in_editor = (int)($projectMetadataDao->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) ?? 86);
+        $contributionRequest->mt_qe_workflow_enabled = (bool)$projectMetadataDao->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value);
 
-        $mtQeParams = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value);
+        $mtQeParams = $projectMetadataDao->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value);
         $contributionRequest->mt_qe_workflow_parameters = $mtQeParams instanceof MTQEWorkflowParams ? $mtQeParams->toArray() : null;
         $contributionRequest->subfiltering_handlers = $subfiltering_handlers !== null ? array_values($subfiltering_handlers) : null;
 
@@ -155,7 +158,7 @@ class GetContributionController extends KleinController
             $contributionRequest->userRole = Filter::ROLE_TRANSLATOR;
         }
 
-        $jobsMetadataDao = new MetadataDao();
+        $jobsMetadataDao = new MetadataDao($this->getDatabase());
         $dialect_strict = $jobsMetadataDao->get($jobId, $jobPassword, JobsMetadataMarshaller::DIALECT_STRICT->value, 10 * 60);
         $mt_evaluation = $jobsMetadataDao->get($jobId, $jobPassword, 'mt_evaluation', 10 * 60);
         $public_tm_penalty = $jobsMetadataDao->get($jobId, $jobPassword, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, 10 * 60);
@@ -355,7 +358,7 @@ class GetContributionController extends KleinController
     private function rewriteContributionContexts(array &$request, MateCatFilter $Filter): void
     {
         //Get contexts
-        $segmentsList = (new SegmentDao)->setCacheTTL(60 * 60 * 24)->getContextAndSegmentByIDs(
+        $segmentsList = (new SegmentDao($this->getDatabase()))->setCacheTTL(60 * 60 * 24)->getContextAndSegmentByIDs(
             [
                 'id_before' => $request['id_before'],
                 'id_segment' => $request['id_segment'],

@@ -780,6 +780,26 @@ class FsFilesStorageUnitTest extends AbstractTest
         $fs->getFastAnalysisData(777);
     }
 
+    #[Test]
+    public function test_getFastAnalysisData_does_not_instantiate_serialized_objects(): void
+    {
+        // X2: the .ser blob is untrusted storage; unserialize() must not build live objects
+        // (object-injection / __wakeup|__destruct gadget surface). With allowed_classes => false
+        // any serialized object degrades to __PHP_Incomplete_Class instead of the real class, while
+        // the surrounding plain array (the real payload shape) is preserved.
+        $payload = serialize(['evil' => new \ArrayObject(['x' => 1]), 'seg1' => ['words' => 10]]);
+
+        $mockFs = $this->createStub(FilesystemAdapter::class);
+        $mockFs->method('fileGetContents')->willReturn($payload);
+
+        $fs   = new FsFilesStorage($mockFs);
+        $data = $fs->getFastAnalysisData(999);
+
+        $this->assertInstanceOf(\__PHP_Incomplete_Class::class, $data['evil']);
+        $this->assertNotInstanceOf(\ArrayObject::class, $data['evil']);
+        $this->assertSame(['words' => 10], $data['seg1']);
+    }
+
     // ── linkZipToProject additional tests ──
 
     #[Test]

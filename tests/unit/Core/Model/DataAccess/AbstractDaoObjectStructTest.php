@@ -23,7 +23,7 @@ class ConcreteTestStruct extends AbstractDaoObjectStruct
 
     public function computeCachable(string $key, callable $fn): mixed
     {
-        return $this->cachable($key, $fn);
+        return $this->memoize($key, $fn);
     }
 }
 
@@ -41,7 +41,7 @@ class ArrayAccessConcreteStruct extends AbstractDaoObjectStruct implements Array
 
     public function computeCachable(string $key, callable $fn): mixed
     {
-        return $this->cachable($key, $fn);
+        return $this->memoize($key, $fn);
     }
 }
 
@@ -126,7 +126,7 @@ class AbstractDaoObjectStructTest extends AbstractTest
     #[Test]
     public function clearReturnsSameInstanceForChaining(): void
     {
-        $result = $this->struct->clear();
+        $result = $this->struct->forget();
 
         $this->assertSame($this->struct, $result);
     }
@@ -183,7 +183,7 @@ class AbstractDaoObjectStructTest extends AbstractTest
         };
 
         $this->struct->computeCachable('key', $fn);
-        $this->struct->clear();
+        $this->struct->forget();
         $this->struct->computeCachable('key', $fn);
 
         $this->assertSame(2, $callCount, 'Closure must be called again after clear()');

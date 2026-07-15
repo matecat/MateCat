@@ -3,7 +3,6 @@
 namespace Model\FilesStorage;
 
 use Exception;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use PDO;
 use Utils\Logger\LoggerFactory;
@@ -37,18 +36,14 @@ abstract class AbstractFilesStorage implements IFilesStorage
 
     protected FilesystemAdapter $filesystem;
 
-    protected IDatabase $database;
-
     /**
      * @param FilesystemAdapter|null $filesystem
-     * @param IDatabase|null $database
      *
      * @throws \TypeError
      */
-    public function __construct(?FilesystemAdapter $filesystem = null, ?IDatabase $database = null)
+    public function __construct(?FilesystemAdapter $filesystem = null)
     {
         $this->filesystem = $filesystem ?? new NativeFilesystemAdapter();
-        $this->database = $database ?? Database::obtain();
         $this->logger = LoggerFactory::getLogger('files');
         $this->zipDir = AppConfig::$ZIP_REPOSITORY;
     }
@@ -343,13 +338,14 @@ abstract class AbstractFilesStorage implements IFilesStorage
     /**
      * Used when we take the files after the translation (Download)
      *
+     * @param IDatabase $database
      * @param int $id_job
      * @param bool $getXliffPath
      *
      * @return array<int, array<string, mixed>>
      * @throws \PDOException
      */
-    public function getFilesForJob(int $id_job, bool $getXliffPath = true): array
+    public function getFilesForJob(IDatabase $database, int $id_job, bool $getXliffPath = true): array
     {
         $query = "SELECT 
               files_job.id_file, 
@@ -365,8 +361,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
             WHERE files_job.id_job = :id_job 
             GROUP BY files_job.id_file";
 
-        $db = $this->database;
-        $stmt = $db->getConnection()->prepare($query);
+        $stmt = $database->getConnection()->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute(['id_job' => $id_job]);
         $results = $stmt->fetchAll();

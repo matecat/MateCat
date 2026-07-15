@@ -33,7 +33,7 @@ export const ActionMenu = ({
       Shortcuts.shortCutsKeyType
     ],
     (e) => openShortcutsModal(e),
-    {enableOnContentEditable: true},
+    {enableOnContentEditable: true, enableOnFormTags: true},
   )
   const [isExportCsvDisabled, setIsExportCsvDisabled] = useState(false)
   const [isExportJsonDisabled, setIsExportJsonDisabled] = useState(false)

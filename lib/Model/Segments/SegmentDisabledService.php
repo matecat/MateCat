@@ -17,9 +17,9 @@ class SegmentDisabledService
 {
     private SegmentMetadataDao $segmentMetadataDao;
 
-    public function __construct(?SegmentMetadataDao $segmentMetadataDao = null)
+    public function __construct(SegmentMetadataDao $segmentMetadataDao)
     {
-        $this->segmentMetadataDao = $segmentMetadataDao ?? new SegmentMetadataDao();
+        $this->segmentMetadataDao = $segmentMetadataDao;
     }
 
     /**
@@ -68,6 +68,7 @@ class SegmentDisabledService
         $this->segmentMetadataDao->destroyGetCache($id_segment, $metadata->meta_key);
         $this->segmentMetadataDao->destroyGetAllCache($id_segment);
         $this->segmentMetadataDao->destroyGetBySegmentIdsCache($metadata->meta_key);
+        $this->segmentMetadataDao->destroyGetAllInRangeCache();
     }
 
     /**
@@ -90,5 +91,6 @@ class SegmentDisabledService
         $this->segmentMetadataDao->destroyGetCache($id_segment, $key);
         $this->segmentMetadataDao->destroyGetAllCache($id_segment);
         $this->segmentMetadataDao->destroyGetBySegmentIdsCache($key);
+        $this->segmentMetadataDao->destroyGetAllInRangeCache();
     }
 }

@@ -3,6 +3,7 @@
 namespace Utils\Engines;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\Projects\MetadataDao;
 use ReflectionException;
 use TypeError;
@@ -30,9 +31,9 @@ class Intento extends AbstractEngine
      * @throws Exception
      * @throws TypeError
      */
-    public function __construct($engineRecord)
+    public function __construct($engineRecord, IDatabase $database)
     {
-        parent::__construct($engineRecord);
+        parent::__construct($engineRecord, $database);
 
         if ($this->getEngineRecord()->type != EngineConstants::MT) {
             throw new Exception("Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
@@ -169,16 +170,16 @@ class Intento extends AbstractEngine
         $parameters['context']['text'] = $_config['segment'];
 
         if (isset($_config['pid'])) {
-            $metadataDao = new MetadataDao();
+            $metadataDao = new MetadataDao($this->database);
 
             // custom provider or custom routing
-            $customProvider = $metadataDao->setCacheTTL(86400)->get($_config['pid'], 'intento_provider');
-            $customRouting = $metadataDao->setCacheTTL(86400)->get($_config['pid'], 'intento_routing');
+            $customProvider = $metadataDao->setCacheTTL(86400)->getValue($_config['pid'], 'intento_provider');
+            $customRouting = $metadataDao->setCacheTTL(86400)->getValue($_config['pid'], 'intento_routing');
 
             if ($customProvider !== null) {
                 $parameters['service']['async'] = true;
-                $parameters['service']['provider'] = $customProvider->value;
-            } elseif ($customRouting !== null and $customRouting->value !== "smart_routing") {
+                $parameters['service']['provider'] = $customProvider;
+            } elseif ($customRouting !== null and $customRouting !== "smart_routing") {
                 $parameters['service']['async'] = true;
                 $parameters['service']['routing'] = "best_quality";
             }

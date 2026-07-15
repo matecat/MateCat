@@ -10,7 +10,6 @@ use InvalidArgumentException;
 use Model\Comments\BaseCommentStruct;
 use Model\Comments\CommentDao;
 use Model\Comments\CommentStruct;
-use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -35,7 +34,7 @@ use Utils\Url\JobUrlBuilder;
 class CommentController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -57,7 +56,7 @@ class CommentController extends KleinController
         $struct->first_segment = $request['first_seg'];
         $struct->last_segment = $request['last_seg'];
 
-        $commentDao = new CommentDao(Database::obtain());
+        $commentDao = new CommentDao($this->getDatabase());
 
         $data['entries'] = [
             'comments' => $commentDao->getCommentsForChunk($request['job'])
@@ -86,7 +85,7 @@ class CommentController extends KleinController
         $users_mentioned_id = $prepareCommandData['users_mentioned_id'];
         $users_mentioned = $prepareCommandData['users_mentioned'];
 
-        $commentDao = new CommentDao(Database::obtain());
+        $commentDao = new CommentDao($this->getDatabase());
         $new_record = $commentDao->resolveThread($comment_struct);
 
         $this->enqueueComment($new_record, $request['job']->id_project, $request['id_job'], $request['id_client']);
@@ -119,7 +118,7 @@ class CommentController extends KleinController
         $users_mentioned_id = $prepareCommandData['users_mentioned_id'];
         $users_mentioned = $prepareCommandData['users_mentioned'];
 
-        $commentDao = new CommentDao(Database::obtain());
+        $commentDao = new CommentDao($this->getDatabase());
         $new_record = $commentDao->saveComment($comment_struct);
 
         foreach ($users_mentioned as $user_mentioned) {
@@ -161,7 +160,7 @@ class CommentController extends KleinController
 
         $user = $this->user;
         $idComment = $request['id_comment'];
-        $commentDao = new CommentDao(Database::obtain());
+        $commentDao = new CommentDao($this->getDatabase());
         $comment = $commentDao->fetchById($idComment, BaseCommentStruct::class, 86400);
 
         if (null === $comment) {
@@ -257,7 +256,7 @@ class CommentController extends KleinController
         $message = filter_var($this->request->param('message'), FILTER_UNSAFE_RAW);
         $message = htmlspecialchars((string)$message);
 
-        $job = (new JobDao())->getByIdAndPassword((int)$id_job, (string)$password, 60 * 60 * 24);
+        $job = (new JobDao($this->getDatabase()))->getByIdAndPassword((int)$id_job, (string)$password, 60 * 60 * 24);
 
         if (empty($job)) {
             throw new InvalidArgumentException("wrong password", -10);
@@ -305,7 +304,7 @@ class CommentController extends KleinController
         $message = (string)$struct->message;
         $user_mentions = $this->resolveUserMentions($message);
         $user_team_mentions = $this->resolveTeamMentions($request['job'], $message);
-        $userDao = new UserDao(Database::obtain());
+        $userDao = new UserDao($this->getDatabase());
         $users_mentioned_id = array_values(array_unique(array_merge($user_mentions, $user_team_mentions)));
         $users_mentioned = $this->filterUsers($userDao->getByUids($users_mentioned_id));
 
@@ -346,7 +345,7 @@ class CommentController extends KleinController
      */
     private function resolveUserMentions(string $message): array
     {
-        return array_values(array_map('intval', (new CommentDao())->getUsersIdFromContent($message)));
+        return array_values(array_map('intval', (new CommentDao($this->getDatabase()))->getUsersIdFromContent($message)));
     }
 
     /**
@@ -362,13 +361,13 @@ class CommentController extends KleinController
         $users = [];
 
         if (str_contains($message, "{@team@}")) {
-            $project = $job->getProject();
+            $project = $job->getProject(new ProjectDao($this->getDatabase()));
 
             if ($project->id_team === null) {
                 return [];
             }
 
-            $memberships = (new MembershipDao())->setCacheTTL(60 * 60 * 24)->getMemberListByTeamId($project->id_team, false);
+            $memberships = (new MembershipDao($this->getDatabase()))->setCacheTTL(60 * 60 * 24)->getMemberListByTeamId($project->id_team, false);
 
             foreach ($memberships as $membership) {
                 if ($membership instanceof MembershipStruct && $membership->uid !== null) {
@@ -419,10 +418,10 @@ class CommentController extends KleinController
      */
     private function resolveUsers(CommentStruct $comment, JobStruct $job, array $users_mentioned_id): array
     {
-        $commentDao = new CommentDao(Database::obtain());
+        $commentDao = new CommentDao($this->getDatabase());
         $result = $commentDao->getThreadContributorUids($comment);
 
-        $userDao = new UserDao(Database::obtain());
+        $userDao = new UserDao($this->getDatabase());
         $users = $userDao->getByUids($result);
 
         if ($job->id !== null) {
@@ -467,7 +466,7 @@ class CommentController extends KleinController
             ]
         ]);
 
-        $queueHandler = new AMQHandler();
+        $queueHandler = $this->getQueueHandler();
         $queueHandler->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message));
     }
 
@@ -480,7 +479,7 @@ class CommentController extends KleinController
      */
     private function projectData(int $id_project): array
     {
-        return (new ProjectDao())->setCacheTTL(60 * 60)->getProjectData($id_project);
+        return (new ProjectDao($this->getDatabase()))->setCacheTTL(60 * 60)->getProjectData($id_project);
     }
 
     /**
@@ -542,8 +541,20 @@ class CommentController extends KleinController
             ]
         ]);
 
-        $queueHandler = new AMQHandler();
+        $queueHandler = $this->getQueueHandler();
         $queueHandler->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message));
+    }
+
+    /**
+     * Test seam: allows a Testable subclass to inject a queue handler backed by a
+     * stubbed transport, avoiding a real broker connection in unit tests.
+     *
+     * @return AMQHandler
+     * @throws \Stomp\Exception\ConnectionException
+     */
+    protected function getQueueHandler(): AMQHandler
+    {
+        return new AMQHandler();
     }
 
     /**
@@ -558,7 +569,7 @@ class CommentController extends KleinController
      */
     private function sendEmail(CommentStruct $comment, JobStruct $job, array $users, array $users_mentioned): void
     {
-        $jobUrlStruct = JobUrlBuilder::createFromJobStruct($job, [
+        $jobUrlStruct = JobUrlBuilder::createFromJobStruct($this->getDatabase(), $job, [
             'id_segment' => $comment->id_segment,
             'skip_check_segment' => true
         ]);
@@ -590,15 +601,15 @@ class CommentController extends KleinController
         $project_data = $this->projectData($job->id_project);
 
         foreach ($users_mentioned as $user_mentioned) {
-            $email = new CommentMentionEmail($user_mentioned, $comment, $url, $project_data[0], $job);
+            $email = new CommentMentionEmail($user_mentioned, $comment, $url, $project_data[0], $job, $this->getDatabase());
             $email->send();
         }
 
         foreach ($users as $user) {
             if ($comment->message_type == CommentDao::TYPE_RESOLVE) {
-                $email = new CommentResolveEmail($user, $comment, $url, $project_data[0], $job);
+                $email = new CommentResolveEmail($user, $comment, $url, $project_data[0], $job, $this->getDatabase());
             } else {
-                $email = new CommentEmail($user, $comment, $url, $project_data[0], $job);
+                $email = new CommentEmail($user, $comment, $url, $project_data[0], $job, $this->getDatabase());
             }
 
             $email->send();

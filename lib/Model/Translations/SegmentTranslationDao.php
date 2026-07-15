@@ -5,10 +5,10 @@ namespace Model\Translations;
 use DateTime;
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Files\FileStruct;
 use Model\Jobs\JobStruct;
+use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Propagation\PropagationTotalStruct;
@@ -297,19 +297,34 @@ class SegmentTranslationDao extends AbstractDao
 
         $rc = $stmt->rowCount();
         if ($rc === 0) {
-            $sql = "SELECT tm_analysis_status FROM segment_translations WHERE id_segment = :id_segment AND id_job = :id_job";
-            $stmt = $this->database->getConnection()->prepare($sql);
-            $stmt->execute([
-                'id_segment' => $data['id_segment'] ?? throw new Exception('Missing id_segment in data'),
-                'id_job' => $data['id_job'] ?? throw new Exception('Missing id_job in data'),
-            ]);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (!empty($result) && $result['tm_analysis_status'] === 'SKIPPED') {
-                return -1;
-            }
+            return $this->isTranslationSkipped(
+                (int)($data['id_segment'] ?? throw new Exception('Missing id_segment in data')),
+                (int)($data['id_job'] ?? throw new Exception('Missing id_job in data'))
+            ) ? -1 : 0;
         }
 
         return $rc;
+    }
+
+    /**
+     * @param int $id_segment
+     * @param int $id_job
+     * @return bool
+     * @throws PDOException
+     */
+    public function isTranslationSkipped(int $id_segment, int $id_job): bool
+    {
+        $sql = "SELECT tm_analysis_status FROM segment_translations WHERE id_segment = :id_segment AND id_job = :id_job AND tm_analysis_status = 'SKIPPED'";
+        $stmt = $this->database->getConnection()->prepare($sql);
+        $stmt->execute([
+            'id_segment' => $id_segment,
+            'id_job' => $id_job,
+        ]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!empty($result)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -564,7 +579,9 @@ class SegmentTranslationDao extends AbstractDao
         ProjectStruct $project,
         bool $execute_update = true
     ): array {
-        if ($project->getWordCountType() == ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {
+        $wordCountType = (new MetadataDao($this->database))->setCacheTTL(3600)->getValue((int) $project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)
+            ?? ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value;
+        if ($wordCountType == ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {
             $sum_sql = "SUM( segments.raw_word_count )";
         } else {
             $sum_sql = "SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";

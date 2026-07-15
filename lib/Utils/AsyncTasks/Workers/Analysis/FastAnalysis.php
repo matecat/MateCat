@@ -7,6 +7,7 @@ use Exception;
 use Model\Analysis\AnalysisDao;
 use Model\Analysis\PayableRates as PayableRates;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\TmAnalysisDisabledEvent;
 use Model\FilesStorage\AbstractFilesStorage;
@@ -15,6 +16,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
@@ -26,6 +28,7 @@ use PDOException;
 use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
+use Stomp\Exception\ConnectionException;
 use Stomp\Transport\Message;
 use Throwable;
 use TypeError;
@@ -46,7 +49,7 @@ use Utils\TaskRunner\Commons\AbstractDaemon;
 use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
-use Utils\Tools\Utils;
+use Utils\TaskRunner\Exceptions\DaemonTerminatedException;
 
 /**
  * Created by PhpStorm.
@@ -73,6 +76,122 @@ class FastAnalysis extends AbstractDaemon
     }
 
     /**
+     * Factory seam for the daemon's AMQ handler. Uses a private (non-shared) connection via
+     * getNewInstanceForDaemons() so it can be fully replaced on failure and is unaffected by
+     * WorkerClient's static-connection close(). Construction is I/O-free (STOMP connects
+     * lazily on first send). Overridable in tests.
+     *
+     * @throws ConnectionException
+     */
+    protected function _newQueueHandler(): AMQHandler
+    {
+        return AMQHandler::getNewInstanceForDaemons();
+    }
+
+    /**
+     * Discard the current AMQ handler and build a fresh one. A zombified Stomp\Client can never
+     * self-heal: a single failed connect leaves Client::$isConnecting stuck true, so sendFrame()
+     * never reconnects and every send throws "Not connected to any server". A brand-new handler
+     * gives a fresh Client AND a fresh Connection, escaping both the stuck flag and the dead
+     * socket, so the daemon recovers automatically once the broker is reachable again.
+     *
+     * This is the single internal entry point for (re)building the handler — the constructor and
+     * the failure path both route through here, so _newQueueHandler() (the test seam) has exactly
+     * one caller.
+     *
+     * @return AMQHandler the freshly built handler (also stored in $this->queueHandler)
+     * @throws ConnectionException
+     * @throws LogInvalidArgumentException
+     */
+    private function _rebuildQueueHandler(): AMQHandler
+    {
+        // isset() (not ?->) so this is safe on cold start, when $this->queueHandler is still an
+        // uninitialized typed property (the constructor routes through here too).
+        if (isset($this->queueHandler)) {
+            try {
+                $this->queueHandler->close();
+            } catch (Throwable $e) {
+                // ignore: the whole point is to throw this unhealthy handler away
+                $this->logger->debug("Discarding unhealthy AMQ handler: " . $e->getMessage());
+            }
+        }
+
+        $this->queueHandler = $this->_newQueueHandler();
+        $this->logger->debug("AMQ queue handler (re)built.");
+
+        return $this->queueHandler;
+    }
+
+    /**
+     * Classify a failure as infrastructure/transient versus a data/statement error.
+     *
+     * Infrastructure/transient (broker unreachable, DB gone away / cannot connect, deadlock,
+     * lock-wait timeout, too many connections) should be retried WITHOUT counting toward the
+     * per-project park cap, so a transient outage never mass-parks healthy projects. A
+     * data/statement error (duplicate key, null in a NOT NULL column, syntax error, missing
+     * table) is deterministic "poison" and MUST count, so the project is eventually parked as
+     * NOT_TO_ANALYZE instead of looping forever.
+     *
+     * Differentiation uses PDOException::$errorInfo = [SQLSTATE, driverCode, message]: SQLSTATE
+     * class 08 (connection exception) plus a set of MySQL driver codes for an unreachable/gone
+     * or contended server. Any other PDOException is treated as a statement error.
+     */
+    /**
+     * A broker-connection failure — thrown directly or wrapped as a previous exception. This is
+     * the single detector for "the ActiveMQ broker is unreachable", which both zombifies the
+     * Stomp client (→ needs a rebuild) and counts as an infrastructure failure (→ not retried
+     * against the cap). Reused by _isInfrastructureFailure so the two never drift apart.
+     */
+    private function _isBrokerFailure(Throwable $e): bool
+    {
+        return $e instanceof ConnectionException
+            || $e->getPrevious() instanceof ConnectionException;
+    }
+
+    private function _isInfrastructureFailure(Throwable $e): bool
+    {
+        // ActiveMQ broker unreachable
+        if ($this->_isBrokerFailure($e)) {
+            return true;
+        }
+
+        $previous = $e->getPrevious();
+
+        $pdo = null;
+        if ($e instanceof PDOException) {
+            $pdo = $e;
+        } elseif ($previous instanceof PDOException) {
+            $pdo = $previous;
+        }
+        if ($pdo === null) {
+            return false;
+        }
+
+        $errorInfo  = $pdo->errorInfo ?? [];
+        $sqlState   = (string)($errorInfo[0] ?? $pdo->getCode());
+        $driverCode = $errorInfo[1] ?? null;
+
+        // SQLSTATE class 08 = connection exception (link failure / server unreachable)
+        if (str_starts_with($sqlState, '08')) {
+            return true;
+        }
+
+        // MySQL driver codes for an unreachable / gone / contended server — transient, retry.
+        // NOT data/statement errors (1062 dup key, 1048 null, 1064 syntax, 1146 no table, ...).
+        return in_array($driverCode, [
+            2002, // CR_CONNECTION_ERROR    — cannot connect (socket)
+            2003, // CR_CONN_HOST_ERROR     — cannot connect (host)
+            2006, // CR_SERVER_GONE_ERROR   — server gone away
+            2013, // CR_SERVER_LOST         — lost connection during query
+            2055, // CR_SERVER_LOST_EXTENDED
+            1040, // ER_CON_COUNT_ERROR     — too many connections
+            1053, // ER_SERVER_SHUTDOWN
+            1205, // ER_LOCK_WAIT_TIMEOUT   — transient contention
+            1213, // ER_LOCK_DEADLOCK       — transient contention
+        ], true);
+    }
+
+    /**
      * @var array<int|string, array<string, mixed>>
      */
     protected array $segments;
@@ -92,17 +211,101 @@ class FastAnalysis extends AbstractDaemon
      */
     protected AbstractFilesStorage $files_storage;
 
+    private IDatabase $db;
+
+    /**
+     * The DB handle for this daemon, injected by the entry point
+     * (daemons/FastAnalysis.php) via {@see self::setDatabase()} after
+     * Bootstrap::start(), then threaded into the DAOs this daemon builds. This
+     * class never resolves the connection itself — neither Database::obtain()
+     * nor Bootstrap::getDatabase().
+     */
+    protected function db(): IDatabase
+    {
+        return $this->db;
+    }
+
+    /**
+     * Inject the per-process DB handle. Called by the daemon entry point
+     * (composition root) immediately after Bootstrap::start().
+     */
+    public function setDatabase(IDatabase $db): void
+    {
+        $this->db = $db;
+    }
+
     private ?ProjectDao $projectDao = null;
 
     private function getProjectDao(): ProjectDao
     {
-        return $this->projectDao ??= new ProjectDao();
+        return $this->projectDao ??= new ProjectDao($this->db());
+    }
+
+    /**
+     * Seam: build the FeatureSet used by a main() cycle. Extracted so the daemon
+     * loop can be unit-tested without a live DB behind the feature dispatch.
+     *
+     * @throws Exception
+     */
+    protected function _newFeatureSet(): FeatureSet
+    {
+        return new FeatureSet($this->db());
+    }
+
+    /**
+     * Seam: build the per-project metadata DAO. Extracted so the metadata
+     * transaction in main() can be driven from tests without a live DB.
+     */
+    protected function _getProjectMetadataDao(): ProjectMetadataDao
+    {
+        return new ProjectMetadataDao($this->db());
+    }
+
+    /**
+     * Seam: invalidate every cache tied to a just-finalized project. Extracted
+     * from main() so the finalize tail can be covered without touching Redis.
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    protected function _purgeProjectCaches(int $pid, string $password): void
+    {
+        (new JobDao($this->db()))->destroyCacheByProjectId($pid);
+        (new ProjectDao($this->db()))->destroyFetchByIdCache($pid, ProjectStruct::class);
+        $this->getProjectDao()->destroyCacheByIdAndPassword($pid, $password);
+        (new AnalysisDao($this->db()))->destroyCacheByProjectId($pid);
     }
 
     const int ERR_NO_SEGMENTS = 127;
     const int ERR_TOO_LARGE = 128;
     const int ERR_500 = 129;
     const int ERR_EMPTY_RESPONSE = 130;
+    // A non-200 fast-analysis outcome that should be retried, not stalled at FAST_OK.
+    // TRANSIENT (0 = transport error, 503/other 5xx = overload) is an outage → retried uncounted so
+    // it does not mass-park projects; FAILED (4xx = malformed/misconfigured request) is per-project
+    // poison → counted toward the attempt cap. Fast analysis has no auth/rate-limit, so 401/403/429
+    // do not occur.
+    const int ERR_ANALYSIS_TRANSIENT = 131;
+    const int ERR_ANALYSIS_FAILED = 132;
+
+    // Actions returned by _decideFetchFailureAction() and dispatched by main() when a fetch throws.
+    const string ACTION_PARK = 'park';                       // NOT_TO_ANALYZE (project can't be analyzed)
+    const string ACTION_RESET = 'reset';                     // back to NEW + release lock (dead ERR_EMPTY_RESPONSE)
+    const string ACTION_RETRY_COUNTED = 'retry_counted';     // release for retry, count toward the cap
+    const string ACTION_RETRY_UNCOUNTED = 'retry_uncounted'; // release for retry, do not count (transient/infra)
+    const string ACTION_DONE = 'done';                       // finalize DONE (pre-translated, or disabled project)
+
+    /**
+     * Max consecutive countable (non-infrastructure) fast-analysis failures for a single
+     * project before it is parked as NOT_TO_ANALYZE, so a poison project cannot loop forever.
+     */
+    const int MAX_FAST_ANALYSIS_ATTEMPTS = 5;
+
+    /** Redis key prefix for the per-project fast-analysis failed-attempt counter. */
+    const string FAILED_ATTEMPTS_KEY_PREFIX = '_fAttempts:';
+
+    /** Redis key prefix for the per-project fast-analysis processing lock. */
+    const string PROCESSING_LOCK_KEY_PREFIX = '_fPid:';
 
     /**
      * Reload Configuration every cycle
@@ -124,14 +327,18 @@ class FastAnalysis extends AbstractDaemon
      */
     protected function _checkDatabaseConnection(): void
     {
-        $db = Database::obtain();
+        $db = $this->db();
         if (!$db instanceof Database) {
             return;
         }
         try {
-            $db->ping();
-//            $this->_TimeStampMsg(  "--- Database connection active. " );
-        } catch (PDOException $e) {
+            // Probe inside a transaction so ProxySQL routes the health check to the master —
+            // the same route the lock/BUSY writes actually use. A bare ping() is a plain read a
+            // replica can answer while the master is down, giving a false green.
+            $db->transaction(function () use ($db) {
+                $db->ping();
+            });
+        } catch (Throwable $e) {
             $this->logger->debug($e->getMessage() . " - Trying to close and reconnect.");
             $db->close();
             //reconnect
@@ -156,14 +363,22 @@ class FastAnalysis extends AbstractDaemon
         LoggerFactory::setAliases(['engines'], $this->logger);
 
         try {
-            $this->queueHandler = new AMQHandler(null, true, false);
-            $this->requireQueueHandler()->getRedisClient()->sadd(RedisKeys::FAST_PID_SET, [$this->myProcessPid . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID]);
+            // Own a private (non-shared) connection so it can be fully rebuilt on failure and is
+            // not torn down by WorkerClient's static-connection close(). _rebuildQueueHandler() is
+            // the single (re)build entry point (safe on this cold start via its isset() guard).
+            $this->_rebuildQueueHandler()->getRedisClient()->sadd(RedisKeys::FAST_PID_SET, [$this->myProcessPid . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID]);
 
             $this->_updateConfiguration();
         } catch (Exception $ex) {
-            $this->logger->debug(str_pad(" " . $ex->getMessage() . " ", 60, "*", STR_PAD_BOTH));
-            $this->logger->debug(str_pad("EXIT", 60, " ", STR_PAD_BOTH));
-            die();
+            // Startup failure: log at error level (a debug line is invisible in production, so a
+            // container crash-loop was mute) and exit non-zero so the supervisor sees the failure
+            // instead of a clean exit code masking it (U5).
+            $this->logger->error(str_pad(" " . $ex->getMessage() . " ", 60, "*", STR_PAD_BOTH));
+            $this->logger->error(str_pad("EXIT", 60, " ", STR_PAD_BOTH));
+            if (AppConfig::$ENV === 'testing') {
+                throw new DaemonTerminatedException();
+            }
+            exit(1);
         }
 
         $this->files_storage = FilesStorageFactory::create();
@@ -201,7 +416,7 @@ class FastAnalysis extends AbstractDaemon
 
             $this->logger->debug("Projects found", ['projects' => $projects_list]);
 
-            $featureSet = new FeatureSet();
+            $featureSet = $this->_newFeatureSet();
 
             foreach ($projects_list as $project_row) {
                 $this->actual_project_row = $project_row;
@@ -209,152 +424,204 @@ class FastAnalysis extends AbstractDaemon
                 $pid = (int)$this->actual_project_row['id'];
                 $this->logger->debug("Analyzing $pid, querying data...");
 
-                $perform_Tms_Analysis = true;
-                $status = ProjectStatus::STATUS_FAST_OK;
-
-                // disable TM analysis
-
-                $disable_Tms_Analysis = $this->actual_project_row['id_tms'] == 0 && $this->actual_project_row['id_mt_engine'] == 0;
-
-                if ($disable_Tms_Analysis) {
-                    /**
-                     * MyMemory disabled and MT Disabled Too
-                     * So don't perform TMS Analysis ( don't send segments in queue ), only fill segment_translation table
-                     */
-                    $perform_Tms_Analysis = false;
-                    $status = ProjectStatus::STATUS_DONE;
-
-                    $featureSet->dispatch(new TmAnalysisDisabledEvent($pid));
-
-                    $this->logger->debug('Perform Analysis FALSE');
-                }
-
                 try {
-                    $fastReport = $this->_fetchMyMemoryFast($pid);
-                    $this->logger->debug("Fast $pid result: " . count($fastReport->responseData) . " segments.");
-                } catch (Exception $e) {
-                    if ($e->getCode() == self::ERR_TOO_LARGE) {
-                        self::_updateProject($pid, ProjectStatus::STATUS_NOT_TO_ANALYZE);
-                        //next project
-                        continue;
-                    } elseif ($e->getCode() == self::ERR_500) {
-                        self::_updateProject($pid, ProjectStatus::STATUS_NOT_TO_ANALYZE);
-                        //next project
-                        continue;
-                    } elseif ($e->getCode() == self::ERR_EMPTY_RESPONSE) {
-                        // NOTE: This exception code is NO MORE used ( keep the code to remember how to reset the status )
-                        $this->logger->debug($e->getMessage());
-                        self::_updateProject($pid, ProjectStatus::STATUS_NEW);
-                        $this->requireQueueHandler()->getRedisClient()->del(['_fPid:' . $pid]);
-                        sleep(3);
-                        continue;
-                    } else {
+                    $perform_Tms_Analysis = true;
+                    $status = ProjectStatus::STATUS_FAST_OK;
+
+                    // disable TM analysis
+
+                    $disable_Tms_Analysis = $this->actual_project_row['id_tms'] == 0 && $this->actual_project_row['id_mt_engine'] == 0;
+
+                    if ($disable_Tms_Analysis) {
+                        /**
+                         * MyMemory disabled and MT Disabled Too
+                         * So don't perform TMS Analysis ( don't send segments in queue ), only fill segment_translation table
+                         */
+                        $perform_Tms_Analysis = false;
                         $status = ProjectStatus::STATUS_DONE;
-                    }
-                }
 
-                if (isset($fastReport) && $fastReport->responseStatus == 200) {
-                    $fastResultData = $fastReport->responseData;
-                } else {
-                    $this->logger->debug("Pid $pid failed fast analysis.");
-                    $fastResultData = [];
-                }
+                        $featureSet->dispatch(new TmAnalysisDisabledEvent($pid));
 
-                unset($fastReport);
-
-                foreach ($fastResultData as $k => $v) {
-                    if ($v['type'] == "50%-74%") {
-                        $fastResultData[$k]['type'] = "NO_MATCH";
+                        $this->logger->debug('Perform Analysis FALSE');
                     }
 
-                    $this->segments[$this->segment_hashes[$k]]['wc'] = $fastResultData[$k]['wc'];
-                    $this->segments[$this->segment_hashes[$k]]['match_type'] = strtoupper($fastResultData[$k]['type']);
-                }
-                //clean the reverse lookup array
-                $this->segment_hashes = [];
+                    try {
+                        $fastReport = $this->_fetchMyMemoryFast($pid);
+                        $this->logger->debug("Fast $pid result: " . count($fastReport->responseData) . " segments.");
+                    } catch (Exception $e) {
+                        // All decision logic lives in _decideFetchFailureAction() (unit-tested); here we
+                        // only dispatch the returned action.
+                        switch ($this->_decideFetchFailureAction($e, $perform_Tms_Analysis)) {
+                            case self::ACTION_PARK:
+                                self::_updateProject($pid, ProjectStatus::STATUS_NOT_TO_ANALYZE);
+                                continue 2; // next project
+                            case self::ACTION_RESET:
+                                // dead ERR_EMPTY_RESPONSE path, kept to remember how to reset the status
+                                $this->logger->debug($e->getMessage());
+                                self::_updateProject($pid, ProjectStatus::STATUS_NEW);
+                                $this->requireQueueHandler()->getRedisClient()->del(['_fPid:' . $pid]);
+                                sleep(3);
+                                continue 2; // next project
+                            case self::ACTION_RETRY_COUNTED:
+                                $this->logger->error($e->getMessage() . " Releasing pid $pid for retry.");
+                                $this->_releaseFailedProject($pid, $e->getMessage());
+                                continue 2; // next project
+                            case self::ACTION_RETRY_UNCOUNTED:
+                                $this->logger->error($e->getMessage() . " Releasing pid $pid for retry (uncounted).");
+                                $this->_releaseFailedProject($pid, $e->getMessage(), false);
+                                continue 2; // next project
+                            case self::ACTION_DONE:
+                            default:
+                                // pre-translated, or a disabled project: finalize DONE
+                                $status = ProjectStatus::STATUS_DONE;
+                                break;
+                        }
+                    }
 
-                // INSERT DATA
-                $this->logger->debug("Inserting segments...");
+                    // Past here $fastReport is set only on a 200 response; otherwise an exception already
+                    // decided the terminal status (DONE) and we proceed with empty data.
+                    $fastResultData = isset($fastReport) ? $fastReport->responseData : [];
 
-                $projectStruct = new ProjectStruct();
+                    unset($fastReport);
 
-                try {
-                    /**
-                     * Ensure we have fresh data from the master node
-                     */
-                    $metadataResult = Database::obtain()->transaction(function () use ($pid) {
-                        $projectStruct = $this->getProjectDao()->findById($pid);
-                        if ($projectStruct === null) {
-                            return null;
+                    foreach ($fastResultData as $k => $v) {
+                        if ($v['type'] == "50%-74%") {
+                            $fastResultData[$k]['type'] = "NO_MATCH";
                         }
 
-                        return [
-                            'project' => $projectStruct,
-                            'metadata' => $projectStruct->getAllMetadataAsKeyValue(),
-                        ];
-                    });
+                        $this->segments[$this->segment_hashes[$k]]['wc'] = $fastResultData[$k]['wc'];
+                        $this->segments[$this->segment_hashes[$k]]['match_type'] = strtoupper($fastResultData[$k]['type']);
+                    }
+                    //clean the reverse lookup array
+                    $this->segment_hashes = [];
 
-                    if ($metadataResult === null) {
-                        $this->logger->error("Unable to insert fast analysis: project not found for pid $pid");
+                    // INSERT DATA
+                    $this->logger->debug("Inserting segments...");
+
+                    $projectStruct = new ProjectStruct();
+
+                    // Infrastructure/transient failures (broker or DB unreachable, deadlock, ...)
+                    // must not count toward the per-project attempt cap, so an outage does not
+                    // mass-park projects. A broker-connection failure additionally needs the STOMP
+                    // handler rebuilt (the client zombifies); a DB failure does not.
+                    $insertFailureIsInfra  = false;
+                    $insertFailureIsBroker = false;
+
+                    try {
+                        /**
+                         * Ensure we have fresh data from the master node
+                         */
+                        $metadataResult = $this->db()->transaction(function () use ($pid) {
+                            $projectStruct = $this->getProjectDao()->findById($pid);
+                            if ($projectStruct === null) {
+                                return null;
+                            }
+
+                            return [
+                                'project' => $projectStruct,
+                                'metadata' => $this->_getProjectMetadataDao()
+                                    ->setCacheTTL(3600)
+                                    ->allByProjectIdAsKeyValue((int)$projectStruct->id),
+                            ];
+                        });
+
+                        if ($metadataResult === null) {
+                            // The project row no longer exists on master (deleted mid-analysis): it
+                            // will not reappear, so skip it. There is no row to hold a BUSY status;
+                            // just drop the (now inert) processing lock left by the picker.
+                            $this->logger->error("Fast analysis skipped: project $pid no longer exists.");
+                            $this->requireQueueHandler()->getRedisClient()->del([self::PROCESSING_LOCK_KEY_PREFIX . $pid]);
+                            continue;
+                        }
+
+                        $projectStruct = $metadataResult['project'];
+                        $allMetadata = $metadataResult['metadata'];
+                        $projectFeaturesString = $allMetadata[ProjectsMetadataMarshaller::FEATURES_KEY->value] ?? '';
+                        $mt_evaluation = isset($allMetadata[ProjectsMetadataMarshaller::MT_EVALUATION->value])
+                            ? (bool)$allMetadata[ProjectsMetadataMarshaller::MT_EVALUATION->value]
+                            : null;
+                        $mt_qe_workflow_enabled = isset($allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value])
+                            ? (bool)$allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value]
+                            : null;
+                        $mt_qe_workflow_parameters_raw = $allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value] ?? null;
+                        $mt_qe_workflow_parameters_decoded = $mt_qe_workflow_parameters_raw !== null
+                            ? json_decode($mt_qe_workflow_parameters_raw, true)
+                            : null;
+                        $mt_qe_workflow_parameters = is_array($mt_qe_workflow_parameters_decoded)
+                            ? new MTQEWorkflowParams($mt_qe_workflow_parameters_decoded)
+                            : null;
+                        $mt_quality_value_in_editor = (int)($allMetadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] ?? 85);
+                        $subfiltering_handlers = $allMetadata[ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? [];
+                        $subfiltering_handlers = is_array($subfiltering_handlers) ? $subfiltering_handlers : [];
+                        $icu_enabled = (bool)($allMetadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] ?? false);
+
+                        $insertReportRes = $this->_insertFastAnalysis(
+                            $projectStruct,
+                            $projectFeaturesString,
+                            PayableRates::$DEFAULT_PAYABLE_RATES,
+                            $featureSet,
+                            $perform_Tms_Analysis,
+                            $mt_evaluation,
+                            $mt_qe_workflow_enabled,
+                            $mt_qe_workflow_parameters,
+                            $mt_quality_value_in_editor,
+                            $subfiltering_handlers,
+                            $icu_enabled
+                        );
+                    } catch (Throwable $e) {
+                        $insertReportRes = -1;
+                        // Transient infrastructure (broker/DB unreachable, deadlock) vs poison data
+                        // (dup key, null, syntax) — only the former is retried without counting.
+                        $insertFailureIsInfra  = $this->_isInfrastructureFailure($e);
+                        // Only a broker-connection failure zombifies the Stomp client and needs a rebuild.
+                        $insertFailureIsBroker = $this->_isBrokerFailure($e);
+                        $this->logger->debug($e->getMessage() . " " . $e->getTraceAsString());
+                    }
+
+                    if ($insertReportRes < 0) {
+                        // Reverse the BUSY status + _fPid lock so the project is re-picked next
+                        // cycle instead of being stranded. On retry _insertFastAnalysis re-queues
+                        // only the not-yet-analyzed segments (see _getAlreadyAnalyzedSegments).
+                        $this->logger->debug("InsertFastAnalysis failed for pid $pid. Releasing for retry.");
+                        // $insertFailureIsInfra indicates if the failure was caused by infrastructure issues (e.g. broker unreachable).
+                        // It is used to decide whether to increment the failure counter: infra failures don't count toward the limit.
+                        $this->_releaseFailedProject($pid, 'insert/publish failed', !$insertFailureIsInfra);
+                        // A broker-connection failure zombifies the Stomp client for the life of the
+                        // process; rebuild it (the Redis ops above use a separate connection and still
+                        // work) so this cycle's remaining projects — and the released one on its retry —
+                        // use a healthy handler instead of a permanently stuck one. A DB failure does
+                        // not touch the Stomp client, so it must not trigger a rebuild.
+                        if ($insertFailureIsBroker) {
+                            $this->_rebuildQueueHandler();
+                        }
                         continue;
                     }
 
-                    $projectStruct = $metadataResult['project'];
-                    $allMetadata = $metadataResult['metadata'];
-                    $projectFeaturesString = $allMetadata[ProjectsMetadataMarshaller::FEATURES_KEY->value] ?? '';
-                    $mt_evaluation = isset($allMetadata[ProjectsMetadataMarshaller::MT_EVALUATION->value])
-                        ? (bool)$allMetadata[ProjectsMetadataMarshaller::MT_EVALUATION->value]
-                        : null;
-                    $mt_qe_workflow_enabled = isset($allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value])
-                        ? (bool)$allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value]
-                        : null;
-                    $mt_qe_workflow_parameters_raw = $allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value] ?? null;
-                    $mt_qe_workflow_parameters_decoded = $mt_qe_workflow_parameters_raw !== null
-                        ? json_decode($mt_qe_workflow_parameters_raw, true)
-                        : null;
-                    $mt_qe_workflow_parameters = is_array($mt_qe_workflow_parameters_decoded)
-                        ? new MTQEWorkflowParams($mt_qe_workflow_parameters_decoded)
-                        : null;
-                    $mt_quality_value_in_editor = (int)($allMetadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] ?? 85);
-                    $subfiltering_handlers = $allMetadata[ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? [];
-                    $subfiltering_handlers = is_array($subfiltering_handlers) ? $subfiltering_handlers : [];
-                    $icu_enabled = (bool)($allMetadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] ?? false);
+                    $this->logger->debug("done");
+                    // INSERT DATA
 
-                    $insertReportRes = $this->_insertFastAnalysis(
-                        $projectStruct,
-                        $projectFeaturesString,
-                        PayableRates::$DEFAULT_PAYABLE_RATES,
-                        $featureSet,
-                        $perform_Tms_Analysis,
-                        $mt_evaluation,
-                        $mt_qe_workflow_enabled,
-                        $mt_qe_workflow_parameters,
-                        $mt_quality_value_in_editor,
-                        $subfiltering_handlers,
-                        $icu_enabled
-                    );
+                    self::_updateProject($pid, $status);
+                    // processing succeeded: clear the failed-attempt counter
+                    $this->requireQueueHandler()->getRedisClient()->del([self::FAILED_ATTEMPTS_KEY_PREFIX . $pid]);
+                    $fs = $this->files_storage;
+                    $fs->deleteFastAnalysisFile((string)$pid);
+
+                    $this->_purgeProjectCaches($pid, $projectStruct->password);
                 } catch (Throwable $e) {
-                    $insertReportRes = -1;
-                    $this->logger->debug($e->getMessage() . " " . $e->getTraceAsString());
+                    // U3 safety net: an unexpected Error/TypeError raised anywhere while
+                    // processing this project (malformed MyMemory payload, metadata parse,
+                    // status write, cache purge, ...) must not escape and kill the daemon,
+                    // which would strand every project locked in this batch as BUSY. Recover
+                    // just this one and carry on with the next: release it for retry, counted
+                    // unless it is an infrastructure failure — so a transient outage never
+                    // mass-parks healthy projects, while a genuinely poison project still parks
+                    // after MAX_FAST_ANALYSIS_ATTEMPTS.
+                    $this->logger->error(
+                        "Unexpected failure while processing fast analysis for pid $pid: "
+                        . $e->getMessage() . "\n" . $e->getTraceAsString()
+                    );
+                    $this->_releaseFailedProject($pid, $e->getMessage(), !$this->_isInfrastructureFailure($e));
                 }
-
-                if ($insertReportRes < 0) {
-                    $this->logger->debug("InsertFastAnalysis failed....");
-                    $this->logger->debug("Try next cycle....");
-                    continue;
-                }
-
-                $this->logger->debug("done");
-                // INSERT DATA
-
-                self::_updateProject($pid, $status);
-                $fs = $this->files_storage;
-                $fs->deleteFastAnalysisFile((string)$pid);
-
-                (new JobDao())->destroyCacheByProjectId($pid);
-                (new ProjectDao())->destroyFetchByIdCache($pid, ProjectStruct::class);
-                $this->getProjectDao()->destroyCacheByIdAndPassword($pid, $projectStruct->password);
-                (new AnalysisDao())->destroyCacheByProjectId($pid);
             }
         } while ($this->RUNNING);
 
@@ -370,7 +637,13 @@ class FastAnalysis extends AbstractDaemon
      */
     protected function _fetchMyMemoryFast(int $pid): AnalyzeResponse
     {
-        $myMemory = EnginesFactory::getInstance(1, MyMemory::class);
+        // S4: reset per-project state up front. These members are reused across the daemon loop, so
+        // a throw before they are reassigned (e.g. the EnginesFactory failure below) must not leave
+        // the PREVIOUS project's segments visible to _insertFastAnalysis (cross-project contamination).
+        $this->segments       = [];
+        $this->segment_hashes = [];
+
+        $myMemory = EnginesFactory::getInstance(1, $this->db(), MyMemory::class);
         if (!$myMemory instanceof MyMemory) {
             throw new Exception("Expected MyMemory engine for id=1, got " . $myMemory::class);
         }
@@ -384,7 +657,7 @@ class FastAnalysis extends AbstractDaemon
             $this->logger->debug("Error Fetching data from disk. Fallback to database.");
 
             try {
-                $this->segments = self::_getSegmentsForFastVolumeAnalysis($pid);
+                $this->segments = $this->_getSegmentsForFastVolumeAnalysis($pid);
             } catch (PDOException) {
                 throw new Exception("Error Fetching data for Project. Too large. Skip.", self::ERR_TOO_LARGE);
             }
@@ -424,16 +697,88 @@ class FastAnalysis extends AbstractDaemon
 
         $result = $myMemory->fastAnalysis(array_values($fastSegmentsRequest));
 
-        if (isset($result->error->code) && $result->error->code == -28) { //curl timed out
-            throw new Exception("Matches Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE);
-        } elseif ($result->responseStatus == 504) { //Gateway time out
-            $errorMessage = $result->error->message ?? 'Gateway timeout';
-            throw new Exception("Matches Fast Analysis Failed. $errorMessage", self::ERR_TOO_LARGE);
-        } elseif ($result->responseStatus == 500 || $result->responseStatus == 502) { // server error, could depend on request
-            throw new Exception("Matches Internal Server Error. Pid: " . $pid, self::ERR_500);
-        }
+        // Single classifier: return on 200, otherwise throw a typed code so main() never has to
+        // inspect the status (and never falls through to zero-wc processing → FAST_OK stall).
+        $this->_assertFastAnalysisSucceeded((int)$result->responseStatus, $result->error->code ?? null, $pid);
 
         return $result;
+    }
+
+    /**
+     * Classify a fast-analysis response: return quietly on HTTP 200, otherwise throw a typed code.
+     * Fast analysis has no authentication and no rate limit, so 401/403/429 do not occur; the
+     * realistic non-200 set is 0 (transport error), 4xx (malformed/misconfigured request) and 5xx
+     * (server/gateway).
+     *
+     * @param int             $responseStatus HTTP status (0 when the transport failed before a response)
+     * @param int|string|null $errorCode      curl error code (negated errno), if any
+     * @param int             $pid
+     *
+     * @return void
+     * @throws Exception ERR_TOO_LARGE | ERR_500 | ERR_ANALYSIS_TRANSIENT | ERR_ANALYSIS_FAILED
+     */
+    protected function _assertFastAnalysisSucceeded(int $responseStatus, int|string|null $errorCode, int $pid): void
+    {
+        if ($responseStatus === 200) {
+            return;
+        }
+
+        if ($errorCode == -28 || $responseStatus === 504) { // curl / gateway timeout
+            throw new Exception("Fast analysis timed out (pid $pid).", self::ERR_TOO_LARGE);
+        }
+        if ($responseStatus === 500 || $responseStatus === 502) { // upstream server error
+            throw new Exception("Fast analysis server error (pid $pid, status $responseStatus).", self::ERR_500);
+        }
+
+        // 0 = transport failure (connection refused / DNS / SSL / reset), 503 / other 5xx = overload:
+        // a transient outage → retried WITHOUT counting toward the cap, so an outage does not
+        // mass-park projects. Any remaining 4xx is a malformed/misconfigured request → counted.
+        if ($responseStatus === 0 || $responseStatus >= 500) {
+            throw new Exception("Fast analysis transient failure (pid $pid, status $responseStatus).", self::ERR_ANALYSIS_TRANSIENT);
+        }
+
+        throw new Exception("Fast analysis client error (pid $pid, status $responseStatus).", self::ERR_ANALYSIS_FAILED);
+    }
+
+    /**
+     * Decide how main() must react when _fetchMyMemoryFast() throws. All fetch-failure decision
+     * logic is centralised (and unit-tested) here; main() only dispatches the returned action.
+     *
+     * @param Throwable $e                  the exception thrown by the fetch
+     * @param bool      $performTmsAnalysis whether TM/MT analysis is enabled for this project
+     *
+     * @return string one of the self::ACTION_* tokens
+     */
+    protected function _decideFetchFailureAction(Throwable $e, bool $performTmsAnalysis): string
+    {
+        switch ($e->getCode()) {
+            case self::ERR_TOO_LARGE:
+            case self::ERR_500:
+                return self::ACTION_PARK;
+
+            case self::ERR_EMPTY_RESPONSE:
+                return self::ACTION_RESET;
+
+            case self::ERR_ANALYSIS_TRANSIENT:
+                return $performTmsAnalysis ? self::ACTION_RETRY_UNCOUNTED : self::ACTION_DONE;
+
+            case self::ERR_ANALYSIS_FAILED:
+                return $performTmsAnalysis ? self::ACTION_RETRY_COUNTED : self::ACTION_DONE;
+
+            case self::ERR_NO_SEGMENTS:
+                // all segments pre-translated → nothing to analyze, legitimately DONE
+                return self::ACTION_DONE;
+
+            default:
+                // S3: a truly unexpected error (engine build, decode, library fault, …). Never fake
+                // DONE when analysis is enabled — retry instead (infra/transient uncounted, real
+                // fault counted so it eventually parks). Disabled projects keep the prior DONE.
+                if (!$performTmsAnalysis) {
+                    return self::ACTION_DONE;
+                }
+
+                return $this->_isInfrastructureFailure($e) ? self::ACTION_RETRY_UNCOUNTED : self::ACTION_RETRY_COUNTED;
+        }
     }
 
     /**
@@ -460,26 +805,115 @@ class FastAnalysis extends AbstractDaemon
     }
 
     /**
-     * @throws Throwable
+     * @throws PDOException
+     * @throws LogInvalidArgumentException
      */
     protected function _updateProject(int $pid, string $status): void
     {
-        Database::obtain()->transaction(function () use ($pid, $status) {
-            $project = $this->getProjectDao()->findById($pid);
-            if ($project === null) {
-                $this->logger->debug("*** Project $pid: not found. Skip update.");
+        // Atomic conditional write: never overwrite a DONE set by a concurrent TM worker. A late
+        // FAST_OK/BUSY write here would strand the project "analyzing" forever. One conditional
+        // UPDATE is routed to the master by ProxySQL (it is a write), so there is no read-then-write
+        // race and no transaction is needed — unlike the previous select-then-update, whose
+        // non-locking snapshot read left a lost-update window open under REPEATABLE READ.
+        $affected = $this->getProjectDao()->changeProjectStatusIfNotDone($pid, $status);
+        if ($affected === 0) {
+            // 0 rows = the project is already DONE (a TM worker finished first) or gone. Skipping is
+            // correct; logging keeps the concurrency observable instead of silently swallowed.
+            $this->logger->debug("*** Project $pid: status update to '$status' matched 0 rows — already DONE (a TM worker finished first) or the project is gone; skipping.");
+        } else {
+            $this->logger->debug("*** Project $pid: $status");
+        }
+    }
 
-                return;
-            }
+    /**
+     * Reverse the BUSY status + processing lock taken in _getLockProjectForVolumeAnalysis
+     * so a project that failed mid-processing is not stranded forever. The picker selects
+     * only STATUS_NEW and the _fPid lock would otherwise block re-pickup for its full 24h
+     * TTL, so both must be undone here.
+     *
+     * The project is released back to NEW for a later retry. A project that keeps failing on
+     * countable (non-infrastructure) errors is parked as NOT_TO_ANALYZE once it reaches
+     * MAX_FAST_ANALYSIS_ATTEMPTS, so a poison project cannot loop forever. Infrastructure
+     * failures (e.g. the broker being unreachable) pass $countTowardCap = false and do NOT
+     * increment the counter, so a transient outage never mass-parks healthy projects.
+     *
+     * @param int $pid The project ID of the failed project.
+     * @param string $reason The reason for the failure.
+     * @param bool $countTowardCap Whether to increment the failure attempts counter for the project. Default is true.
+     *
+     * @return void
+     * @throws ReflectionException
+     * @throws Throwable
+     */
+    private function _releaseFailedProject(int $pid, string $reason, bool $countTowardCap = true): void
+    {
+        $redis       = $this->requireQueueHandler()->getRedisClient();
+        $attemptsKey = self::FAILED_ATTEMPTS_KEY_PREFIX . $pid;
 
-            // avoid concurrency between fast and tm daemons ( they set DONE when complete )
-            if ($project->status_analysis != ProjectStatus::STATUS_DONE) {
-                $this->logger->debug("*** Project $pid: Changing status...");
-                $this->getProjectDao()->changeProjectStatus($pid, $status);
-                $this->logger->debug("*** Project $pid: $status");
-            } else {
-                $this->logger->debug("*** Project $pid: TM Analysis already completed. Skip update...");
+        if ($countTowardCap) {
+            $attempts = (int)$redis->incr($attemptsKey);
+            $redis->expire($attemptsKey, 60 * 60 * 24);
+        } else {
+            $attempts = (int)$redis->get($attemptsKey);
+        }
+
+        if ($countTowardCap && $attempts >= self::MAX_FAST_ANALYSIS_ATTEMPTS) {
+            $this->logger->error('fast_analysis_parked', ['pid' => $pid, 'attempts' => $attempts, 'reason' => $reason]);
+            $this->_updateProject($pid, ProjectStatus::STATUS_NOT_TO_ANALYZE);
+            $redis->del([$attemptsKey]);
+        } else {
+            $this->logger->debug('fast_analysis_released_for_retry', ['pid' => $pid, 'attempts' => $attempts, 'reason' => $reason]);
+            $this->_updateProject($pid, ProjectStatus::STATUS_NEW);
+        }
+
+        // release the processing lock in both branches so the next cycle can re-pick it
+        $redis->del([self::PROCESSING_LOCK_KEY_PREFIX . $pid]);
+    }
+
+    /**
+     * Return the set of (segment, job) pairs to SKIP when publishing, as a lookup map keyed
+     * "id_segment:id_job". Deliberately cheap on the common path: on the first attempt nothing
+     * has been analyzed yet, so the .ser payload already is the authoritative to-do list — we
+     * publish it whole and issue NO DB query (this is exactly why the .ser exists).
+     *
+     * Only on a retry (the S1a _fAttempts counter is > 0, i.e. a previous attempt failed) do we
+     * read, from the master node, the rows the TM workers already finished. The key is
+     * "id_segment:id_job", NOT id_segment alone: the same source segment is inserted once per
+     * job and published once per job/target-language (segment_translations PK is
+     * (id_segment, id_job)), and each language must be analyzed — a per-segment skip would drop
+     * the second language.
+     *
+     * This is a retry traffic optimisation, not a correctness requirement: re-publishing is
+     * already absorbed idempotently by the TM worker (PR #4670). The DB is touched only after a
+     * failure, never on the common first-attempt path.
+     *
+     * @return array<string, true> membership map "id_segment:id_job" => true (test with isset())
+     * @throws Throwable
+     */
+    private function _getAlreadyAnalyzedSegments(int $pid): array
+    {
+        // first attempt → nothing analyzed yet → publish the whole .ser, no DB query
+        if ((int)$this->requireQueueHandler()->getRedisClient()->get(self::FAILED_ATTEMPTS_KEY_PREFIX . $pid) === 0) {
+            return [];
+        }
+
+        return $this->db()->transaction(function () use ($pid): array {
+            $stmt = $this->db()->getConnection()->prepare(
+                "SELECT st.id_segment, st.id_job
+                   FROM segment_translations st
+                   JOIN jobs j ON j.id = st.id_job
+                  WHERE j.id_project = :pid
+                    AND st.tm_analysis_status IN ('DONE', 'SKIPPED')"
+            );
+            $stmt->execute([':pid' => $pid]);
+
+            $alreadyAnalyzed = [];
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $alreadyAnalyzed[(int)$row['id_segment'] . ':' . (int)$row['id_job']] = true;
             }
+            $stmt->closeCursor();
+
+            return $alreadyAnalyzed;
         });
     }
 
@@ -492,7 +926,7 @@ class FastAnalysis extends AbstractDaemon
      */
     protected function _executeInsert(array $tuple_list, array $bind_values): void
     {
-        $db = Database::obtain();
+        $db = $this->db();
         $query_st = "INSERT INTO `segment_translations` ( 
                                       id_job, 
                                       id_segment, 
@@ -530,18 +964,19 @@ class FastAnalysis extends AbstractDaemon
      * @throws Throwable
      */
     protected function _insertFastAnalysis(
-        ProjectStruct $projectStruct,
-        string $projectFeaturesString,
-        array $equivalentWordMapping,
-        FeatureSet $featureSet,
-        bool $perform_Tms_Analysis = true,
-        ?bool $mt_evaluation = false,
-        ?bool $mt_qe_workflow_enabled = false,
+        ProjectStruct       $projectStruct,
+        string              $projectFeaturesString,
+        array               $equivalentWordMapping,
+        FeatureSet          $featureSet,
+        bool                $perform_Tms_Analysis = true,
+        ?bool               $mt_evaluation = false,
+        ?bool               $mt_qe_workflow_enabled = false,
         ?MTQEWorkflowParams $mt_qe_workflow_parameters = null,
-        ?int $mt_quality_value_in_editor = 85,
-        ?array $subfiltering_handlers = [],
-        bool $icu_enabled = false
-    ): int {
+        ?int                $mt_quality_value_in_editor = 85,
+        ?array              $subfiltering_handlers = [],
+        bool                $icu_enabled = false
+    ): int
+    {
         $pid = $projectStruct->id;
         if ($pid === null) {
             throw new RuntimeException('ProjectStruct has no ID');
@@ -609,13 +1044,12 @@ class FastAnalysis extends AbstractDaemon
                 }
 
                 if (($totalSegmentsToAnalyze % 200) == 0) {
-                    try {
-                        $this->_executeInsert($tuple_list, $bind_values);
-                    } catch (PDOException $e) {
-                        $this->logger->debug($e->getMessage());
-
-                        return $e->getCode() * -1;
-                    }
+                    // Let a PDOException propagate to main()'s catch (Throwable): it classifies the
+                    // failure (infra / deadlock / lock-timeout → uncounted retry) via
+                    // _isInfrastructureFailure. Swallowing it into a return code here dropped that
+                    // classification and, on a non-numeric SQLSTATE, made `getCode() * -1` raise a
+                    // TypeError inside the catch (U4).
+                    $this->_executeInsert($tuple_list, $bind_values);
                     $tuple_list = [];
                     $bind_values = [];
                 }
@@ -629,13 +1063,8 @@ class FastAnalysis extends AbstractDaemon
         }
 
         if (($totalSegmentsToAnalyze % 200) != 0) {
-            try {
-                $this->_executeInsert($tuple_list, $bind_values);
-            } catch (PDOException $e) {
-                $this->logger->debug($e->getMessage());
-
-                return $e->getCode() * -1;
-            }
+            // PDOException propagates to main()'s catch (Throwable) for correct classification (U4).
+            $this->_executeInsert($tuple_list, $bind_values);
         }
 
         unset($tuple_list);
@@ -643,35 +1072,32 @@ class FastAnalysis extends AbstractDaemon
         $data2 = ['fast_analysis_wc' => $total_eq_wc];
         $where = ["id" => $pid];
 
-        try {
-            $project_creation_success = Database::obtain()->transaction(function () use ($perform_Tms_Analysis, $pid, $data2, $where) {
-                /*
-                 * IF NO TM ANALYSIS, update the jobs global word count
-                 */
-                if (!$perform_Tms_Analysis) {
-                    $_details = $this->getProjectSegmentsTranslationSummary($pid);
+        // PDOException from the transaction propagates to main()'s catch (Throwable) for correct
+        // classification (infra / deadlock → uncounted retry) instead of being swallowed into a
+        // return code that, on a non-numeric SQLSTATE, made `getCode() * -1` raise a TypeError (U4).
+        $project_creation_success = $this->db()->transaction(function () use ($perform_Tms_Analysis, $pid, $data2, $where) {
+            /*
+             * IF NO TM ANALYSIS, update the jobs global word count
+             */
+            if (!$perform_Tms_Analysis) {
+                $_details = $this->getProjectSegmentsTranslationSummary($pid);
 
-                    $this->logger->debug("--- trying to initialize job total word count.");
+                $this->logger->debug("--- trying to initialize job total word count.");
 
-                    /** @noinspection PhpUnusedLocalVariableInspection */
-                    $query_rollup = array_pop($_details); //Don't remove, needed to remove rollup row
+                /** @noinspection PhpUnusedLocalVariableInspection */
+                $query_rollup = array_pop($_details); //Don't remove, needed to remove rollup row
 
-                    foreach ($_details as $job_info) {
-                        $counter = new CounterModel();
-                        $counter->initializeJobWordCount($job_info['id_job'], $job_info['password']);
-                    }
+                foreach ($_details as $job_info) {
+                    $counter = new CounterModel($this->db());
+                    $counter->initializeJobWordCount($job_info['id_job'], $job_info['password']);
                 }
-                /* IF NO TM ANALYSIS, upload the jobs global word count */
+            }
+            /* IF NO TM ANALYSIS, upload the jobs global word count */
 
-                return Database::obtain()->update('projects', $data2, $where);
-            });
-        } catch (PDOException $e) {
-            $this->logger->debug($e->getMessage());
+            return $this->db()->update('projects', $data2, $where);
+        });
 
-            return $e->getCode() * -1;
-        }
-
-        $engine = EnginesFactory::getInstance($this->actual_project_row['id_mt_engine'], AbstractEngine::class);
+        $engine = EnginesFactory::getInstance($this->actual_project_row['id_mt_engine'], $this->db(), AbstractEngine::class);
         if ($engine->isAdaptiveMT()) {
             $engine->syncMemories($this->actual_project_row, array_values($this->segments));
         }
@@ -697,7 +1123,6 @@ class FastAnalysis extends AbstractDaemon
             try {
                 $this->_setTotal(['pid' => $pid, 'queueInfo' => $queueInfo]);
             } catch (Exception $e) {
-                Utils::sendErrMailReport($e->getMessage() . " " . $e->getTraceAsString(), "Fast Analysis set Total values failed.");
                 $this->logger->debug($e->getMessage() . " " . $e->getTraceAsString());
                 throw $e;
             }
@@ -708,6 +1133,14 @@ class FastAnalysis extends AbstractDaemon
              * Reset the indexes of the list to get the context easily
              */
             $this->segments = array_values($this->segments);
+
+            /**
+             * Idempotent publish (cheap): on the first attempt this is empty and we publish
+             * the whole .ser; only on a retry does it hold the id_segments already analyzed
+             * (read once from the TM worker's Redis set — no DB query), so a partial-publish
+             * crash does not re-queue segments that were already processed.
+             */
+            $alreadyAnalyzed = $this->_getAlreadyAnalyzedSegments((int)$pid);
 
             // Pre-fetch metadata cache — values are per (id_job, password) pair,
             // identical across all segments of the same job/language
@@ -724,8 +1157,9 @@ class FastAnalysis extends AbstractDaemon
                 $queue_element['context_before'] = $this->segments[$k - 1]['segment'] ?? null;
                 $queue_element['context_after'] = $this->segments[$k + 1]['segment'] ?? null;
 
-                $jsid = explode("-", $queue_element['jsid']); // 749-49:7acfb82b8168,50:47c70434fe78,51:f3f5551e9c4f
-                $passwordMap = explode(",", $jsid[1]);
+                /** @noinspection SpellCheckingInspection */
+                $jobId_segmentId = explode("-", $queue_element['jsid']); // 749-49:7acfb82b8168,50:47c70434fe78,51:f3f5551e9c4f
+                $passwordMap = $this->_mapJobPasswords($jobId_segmentId[1]); // id_job => password (see R4 below)
 
                 /**
                  * remove some unuseful fields
@@ -740,9 +1174,12 @@ class FastAnalysis extends AbstractDaemon
                     $languages_job = explode(",", $queue_element['target']);  //now target holds more than one language ex: ( 80415:fr-FR,80416:it-IT )
                     //in memory replacement avoid duplication of the segment list
                     //send in queue every element * number of languages
-                    foreach ($languages_job as $index => $_language) {
-                        [$id_job, $language] = explode(":", $_language);
-                        [, $password] = explode(":", $passwordMap[$index]);
+                    foreach ($languages_job as $_language) {
+                        [$id_job, $language] = explode(":", $_language, 2);
+                        // R4: resolve the password BY job id, not by array position. `jsid` and
+                        // `target` are two DISTINCT GROUP_CONCATs with no guaranteed matching row
+                        // order, so positional pairing could assign a job another job's password.
+                        $password = $passwordMap[$id_job];
 
                         $queue_element['password'] = $password;
                         $queue_element['target'] = $language;
@@ -751,7 +1188,7 @@ class FastAnalysis extends AbstractDaemon
 
                         $cacheKey = "$id_job:$password";
                         if (!isset($metadataCache[$cacheKey])) {
-                            $jobsMetadataDao = new MetadataDao();
+                            $jobsMetadataDao = new MetadataDao($this->db());
                             $metadataCache[$cacheKey] = [
                                 'tm_prioritization' => $jobsMetadataDao->get((int)$id_job, $password, JobsMetadataMarshaller::TM_PRIORITIZATION->value, 10 * 60),
                                 'dialect_strict' => $jobsMetadataDao->get((int)$id_job, $password, JobsMetadataMarshaller::DIALECT_STRICT->value, 10 * 60),
@@ -787,6 +1224,13 @@ class FastAnalysis extends AbstractDaemon
                         $queue_element[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $subfiltering_handlers;
                         $queue_element[ProjectsMetadataMarshaller::ICU_ENABLED->value] = $icu_enabled;
 
+                        // Idempotent publish: skip a (segment, job) the TM workers already
+                        // analyzed on a previous crashed attempt so it is not re-queued
+                        // (empty on the first attempt → publish everything).
+                        if (isset($alreadyAnalyzed[(int)$queue_element['id_segment'] . ':' . (int)$id_job])) {
+                            continue;
+                        }
+
                         $element = new QueueElement();
                         $element->params = new Params($queue_element);
                         $element->classLoad = TMAnalysisWorker::class;
@@ -798,7 +1242,6 @@ class FastAnalysis extends AbstractDaemon
                         }
                     }
                 } catch (Exception $e) {
-                    Utils::sendErrMailReport($e->getMessage() . " " . $e->getTraceAsString(), "Fast Analysis set queue failed.");
                     $this->logger->debug($e->getMessage() . " " . $e->getTraceAsString());
                     throw $e;
                 }
@@ -843,18 +1286,42 @@ class FastAnalysis extends AbstractDaemon
     }
 
     /**
+     * Parse the `jsid` column's "id_job:password,id_job:password,..." payload into a map keyed by
+     * job id, so the password is resolved by id rather than by array position. The `jsid` and
+     * `target` columns are two independent GROUP_CONCAT(DISTINCT ...) with no guaranteed matching
+     * row order, so pairing them positionally could hand a job another job's password (R4).
+     *
+     * @param string $jobPasswordCsv e.g. "49:passA,50:passB,51:passC"
+     *
+     * @return array<string, string> id_job => password
+     */
+    private function _mapJobPasswords(string $jobPasswordCsv): array
+    {
+        $map = [];
+        foreach (explode(",", $jobPasswordCsv) as $entry) {
+            [$idJob, $password] = explode(":", $entry, 2);
+            $map[$idJob] = $password;
+        }
+
+        return $map;
+    }
+
+    /**
      * @param int $pid
      *
      * @return array<int, array<string, mixed>>
      * @throws Exception
      */
-    protected static function _getSegmentsForFastVolumeAnalysis(int $pid): array
+    protected function _getSegmentsForFastVolumeAnalysis(int $pid): array
     {
-        //with this query, we decide what segments
-        //must be inserted in the segment_translations table
-
-        //we want segments that we decided to show in cattool
-        //and segments that are NOT locked (already translated)
+        //Fallback used only when the serialized .ser payload is missing: it must reconstruct
+        //the SAME set ProjectManager writes to the .ser (see writeFastAnalysisData /
+        //SegmentStorageService::cleanSegmentsMetadata), i.e. every segment shown in cattool.
+        //It must NOT drop locked/ICE segments: the .ser includes segments later marked
+        //ICE/locked by pre-translation, and the completion gate
+        //(ProjectCompletionRepository::getProjectSegmentsTranslationSummary) counts all
+        //show_in_cattool=1 rows, so excluding them here would desync the two paths and could
+        //strand a project.
 
         $query = <<<HD
             SELECT concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) AS jsid, s.segment, 
@@ -866,18 +1333,21 @@ class FastAnalysis extends AbstractDaemon
             FROM segments AS s
             INNER JOIN files_job AS fj ON fj.id_file = s.id_file
             INNER JOIN jobs as j ON fj.id_job = j.id
-            LEFT JOIN segment_translations AS st ON st.id_segment = s.id
                 WHERE j.id_project = ?
-                AND IFNULL( st.locked, 0 ) = 0
-                AND IFNULL( st.match_type, 'NO_MATCH' ) != 'ICE'
-                AND show_in_cattool != 0
+                AND s.show_in_cattool = 1
             GROUP BY s.id
             ORDER BY s.id
 HD;
 
-        $db = Database::obtain();
+        $db = $this->db();
         try {
-            $stmt = $db->getConnection()->prepare($query);
+            $connection = $db->getConnection();
+            // The payable_rates JSON + the password/target concats can exceed MySQL's default
+            // group_concat_max_len (1024 bytes) on multi-job / multi-language projects. A silent
+            // truncation yields invalid JSON (json_decode → null → array_map(null) TypeError) and a
+            // misparsed password/target map, so raise the session limit (64 MB) before the query (D1).
+            $connection->exec("SET SESSION group_concat_max_len = 67108864");
+            $stmt = $connection->prepare($query);
             $stmt->setFetchMode(PDO::FETCH_ASSOC);
             $stmt->execute([$pid]);
             $results = $stmt->fetchAll();
@@ -907,7 +1377,8 @@ HD;
             'pid' => null,
             'queueInfo' => null
         ]
-    ): void {
+    ): void
+    {
         if (empty($config['pid'])) {
             throw new Exception('Can Not set a Total without a Queue ID.');
         }
@@ -929,7 +1400,12 @@ HD;
             throw new Exception('Need a queueInfo to track queue position');
         }
 
-        $this->requireQueueHandler()->getRedisClient()->rpush($queueInfo->redis_key, [$config['pid']]);
+        // D3: a released project re-runs _setTotal on every bounded retry (S1a), so drop any stale
+        // entry for this pid before appending — otherwise it lands in the position list once per
+        // attempt and inflates the queue-position/ETA estimate for everyone behind it.
+        $redis = $this->requireQueueHandler()->getRedisClient();
+        $redis->lrem($queueInfo->redis_key, 0, (string)$config['pid']);
+        $redis->rpush($queueInfo->redis_key, [$config['pid']]);
     }
 
     /**
@@ -946,7 +1422,7 @@ HD;
     {
         $mtEngine = null;
         try {
-            $mtEngine = EnginesFactory::getInstance($id_mt_engine, AbstractEngine::class);
+            $mtEngine = EnginesFactory::getInstance($id_mt_engine, $this->db(), AbstractEngine::class);
         } catch (Exception $e) {
             $this->logger->debug("Caught Exception: " . $e->getMessage());
         }
@@ -987,7 +1463,7 @@ HD;
             GROUP BY p.id
         ORDER BY id LIMIT " . $limit;
 
-        $db = Database::obtain();
+        $db = $this->db();
         // Needed to address the query to the master database if exists
         $results = $db->transaction(function () use ($db, $query, $bindParams) {
             $stmt = $db->getConnection()->prepare($query);
@@ -997,17 +1473,25 @@ HD;
         });
 
         foreach ($results as $position => $project) {
-            //acquire a lock
-            $valid = $this->requireQueueHandler()->getRedisClient()->setnx('_fPid:' . $project['id'], 1);
-            if (!$valid) {
+            // R1: acquire the lock atomically — SET key 1 NX EX 86400. A split setnx + expire could
+            // crash between the two calls, leaving _fPid:$pid with no TTL → the project locked until
+            // a manual Redis delete. SET … NX returns null when the key already exists.
+            $acquired = $this->requireQueueHandler()->getRedisClient()->set('_fPid:' . $project['id'], 1, 'EX', 60 * 60 * 24, 'NX');
+            if (!$acquired) {
                 unset($results[$position]);
             } else {
-                $this->requireQueueHandler()->getRedisClient()->expire('_fPid:' . $project['id'], 60 * 60 * 24);
-
                 try {
                     $this->_updateProject((int)$project['id'], ProjectStatus::STATUS_BUSY);
-                } catch (Exception) {
+                } catch (Throwable $e) {
+                    // The BUSY write failed: release the processing lock AND drop the project
+                    // from this batch. Leaving it in $results would hand main() a project that is
+                    // still STATUS_NEW and no longer lock-protected — this process would analyze
+                    // it lockless while another daemon could re-pick it (double analysis / TM
+                    // counter pollution). Catch Throwable, not just Exception: a TypeError/Error
+                    // from the DAO path must still release the lock, never strand it for the 24h TTL.
+                    $this->logger->debug("*** Project {$project['id']}: BUSY update failed ({$e->getMessage()}). Releasing lock, skipping this cycle.");
                     $this->requireQueueHandler()->getRedisClient()->del('_fPid:' . $project['id']);
+                    unset($results[$position]);
                 }
             }
         }

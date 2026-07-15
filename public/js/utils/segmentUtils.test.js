@@ -15,10 +15,10 @@ describe('segmentUtils.isReadonlySegment', () => {
     }
   })
 
-  test('returns true when metadata contains translation_disabled=1', () => {
+  test('returns true when metadata contains translation_disabled = true', () => {
     const segment = {
       readonly: false,
-      metadata: [{meta_key: 'translation_disabled', meta_value: '1'}],
+      metadata: [{meta_key: 'translation_disabled', meta_value: true}],
     }
 
     expect(segmentUtils.isReadonlySegment(segment)).toBe(true)
@@ -36,16 +36,16 @@ describe('segmentUtils.isReadonlySegment', () => {
   test('returns false when metadata does not contain translation_disabled key', () => {
     const segment = {
       readonly: false,
-      metadata: [{meta_key: 'foo', meta_value: '1'}],
+      metadata: [{meta_key: 'foo', meta_value: true}],
     }
 
     expect(segmentUtils.isReadonlySegment(segment)).toBe(false)
   })
 
-  test('returns false when translation_disabled is present but value is 0', () => {
+  test('returns false when translation_disabled is present but value is false', () => {
     const segment = {
       readonly: false,
-      metadata: [{meta_key: 'translation_disabled', meta_value: '0'}],
+      metadata: [{meta_key: 'translation_disabled', meta_value: false}],
     }
 
     expect(segmentUtils.isReadonlySegment(segment)).toBe(false)

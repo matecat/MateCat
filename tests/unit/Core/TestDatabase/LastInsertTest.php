@@ -28,7 +28,7 @@ class LastInsertTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-        $this->databaseInstance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->databaseInstance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 
         $this->sql_create = "CREATE TABLE Persons( PersonID INT )";
         $this->sql_insert_first_value = "INSERT INTO Persons VALUES (475144 )";

@@ -6,6 +6,7 @@ use ArrayObject;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
+use PDOException;
 use TypeError;
 use Model\Analysis\AnalysisDao;
 use Model\Concerns\LogsMessages;
@@ -21,6 +22,7 @@ use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
+use Model\Translators\JobsTranslatorsDao;
 use Model\Translators\TranslatorsModel;
 use Model\Users\UserDao;
 use Model\WordCount\CounterModel;
@@ -71,13 +73,13 @@ class JobSplitMergeService
      */
     protected function createJobDao(): JobDao
     {
-        return new JobDao();
+        return new JobDao($this->dbHandler);
     }
 
     protected function createJobMetadataDao(): MetadataDao
     {
         // init JobsMetadataDao
-        return new MetadataDao();
+        return new MetadataDao($this->dbHandler);
     }
 
     /**
@@ -87,12 +89,12 @@ class JobSplitMergeService
      */
     protected function getJobByIdAndPassword(int $id, string $password): ?JobStruct
     {
-        return (new JobDao())->getByIdAndPassword($id, $password);
+        return (new JobDao($this->dbHandler))->getByIdAndPassword($id, $password);
     }
 
     /**
      * Begin a database transaction using the injected handler.
-     * @throws \PDOException
+     * @throws PDOException
      */
     protected function beginTransaction(): void
     {
@@ -109,12 +111,12 @@ class JobSplitMergeService
     }
 
     /**
-     * @throws \PDOException
+     * @throws PDOException
      * @throws ReflectionException
      */
     protected function destroyAnalysisCacheByProjectId(int $projectId): void
     {
-        (new AnalysisDao())->destroyCacheByProjectId($projectId);
+        (new AnalysisDao($this->dbHandler))->destroyCacheByProjectId($projectId);
     }
 
     /**
@@ -134,16 +136,16 @@ class JobSplitMergeService
      */
     protected function updateForMerge(JobStruct $job, string $newPassword): void
     {
-        (new JobDao())->updateForMerge($job, $newPassword);
+        (new JobDao($this->dbHandler))->updateForMerge($job, $newPassword);
     }
 
     /**
      * Wrapper around static JobDao::deleteOnMerge() — overridable in tests.
-     * @throws \PDOException
+     * @throws PDOException
      */
     protected function deleteOnMerge(JobStruct $job): void
     {
-        (new JobDao())->deleteOnMerge($job);
+        (new JobDao($this->dbHandler))->deleteOnMerge($job);
     }
 
     /**
@@ -151,7 +153,7 @@ class JobSplitMergeService
      */
     protected function createCounterModel(): CounterModel
     {
-        return new CounterModel();
+        return new CounterModel($this->dbHandler);
     }
 
     /**
@@ -159,7 +161,7 @@ class JobSplitMergeService
      */
     protected function createProjectDao(): ProjectDao
     {
-        return new ProjectDao();
+        return new ProjectDao($this->dbHandler);
     }
 
     /**
@@ -167,17 +169,18 @@ class JobSplitMergeService
      */
     protected function createProjectsMetadataDao(): ProjectsMetadataDao
     {
-        return new ProjectsMetadataDao();
+        return new ProjectsMetadataDao($this->dbHandler);
     }
 
     /**
      * Create a new TranslatorsModel instance — overridable in tests.
      *
-     * @throws \TypeError
+     * @throws TypeError
+     * @throws Exception
      */
     protected function createTranslatorsModel(JobStruct $job): TranslatorsModel
     {
-        return new TranslatorsModel($job);
+        return new TranslatorsModel($job, $this->dbHandler);
     }
 
     /**
@@ -185,7 +188,7 @@ class JobSplitMergeService
      */
     protected function createUserDao(): UserDao
     {
-        return new UserDao();
+        return new UserDao($this->dbHandler);
     }
 
     /**
@@ -211,10 +214,12 @@ class JobSplitMergeService
      * Retrieve the ProjectStruct for a given job — used for cache invalidation.
      *
      * Wraps JobStruct::getProject() so tests can override without DB access.
+     *
+     * @throws ReflectionException
      */
     protected function getProjectForCacheInvalidation(JobStruct $job): ProjectStruct
     {
-        return $job->getProject(60 * 10);
+        return $job->getProject(new ProjectDao($this->dbHandler), 60 * 10);
     }
 
     // ── Public API ──────────────────────────────────────────────────
@@ -370,7 +375,7 @@ class JobSplitMergeService
      * @param int|null $uid The user ID performing the split (nullable)
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function applySplit(SplitMergeProjectData $data, ?int $uid = null): void
     {
@@ -390,7 +395,7 @@ class JobSplitMergeService
      * @param int|null $uid The user ID performing the split
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function splitJob(SplitMergeProjectData $data, ?int $uid = null): void
     {
@@ -539,7 +544,7 @@ class JobSplitMergeService
      * @param JobStruct[] $jobStructs
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function mergeALL(SplitMergeProjectData $data, array $jobStructs): void
     {
@@ -613,7 +618,7 @@ class JobSplitMergeService
 
         $this->beginTransaction();
 
-        if ($first_job->getTranslator()) {
+        if ($first_job->getTranslator(new JobsTranslatorsDao($this->dbHandler))) {
             //Update the password in the struct and in the database for the first job
             $this->updateForMerge($first_job, $this->generateRandomString());
             $this->getCart()->emptyCart();

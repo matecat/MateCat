@@ -10,6 +10,7 @@ namespace Model\TmKeyManagement;
 
 use Exception;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Users\UserStruct;
 use Utils\Logger\LoggerFactory;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
@@ -23,11 +24,14 @@ class UserKeysModel
 
     protected UserStruct $user;
 
+    protected IDatabase $database;
+
     protected string $userRole;
 
-    public function __construct(UserStruct $user, string $role = Filter::ROLE_TRANSLATOR)
+    public function __construct(UserStruct $user, IDatabase $database, string $role = Filter::ROLE_TRANSLATOR)
     {
         $this->user = $user;
+        $this->database = $database;
         $this->userRole = $role;
     }
 
@@ -45,7 +49,7 @@ class UserKeysModel
          * Take the keys of the user
          */
         try {
-            $_keyDao = new MemoryKeyDao(Database::obtain());
+            $_keyDao = new MemoryKeyDao($this->database);
             $dh = new MemoryKeyStruct(['uid' => $this->user->uid]);
             $keyList = $_keyDao->read($dh, false, $ttl);
         } catch (Exception $e) {

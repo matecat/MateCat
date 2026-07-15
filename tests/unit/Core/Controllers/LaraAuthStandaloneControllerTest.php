@@ -17,6 +17,7 @@ use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
+use Model\DataAccess\Database;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -85,6 +86,7 @@ class TestableLaraAuthStandaloneController extends LaraAuthStandaloneController
         $parentRef->getProperty('logger')->setValue($this, $logger);
         $parentRef->getProperty('user')->setValue($this, $user);
         $parentRef->getProperty('userIsLogged')->setValue($this, true);
+        $parentRef->getProperty('database')->setValue($this, obtainTestDatabase());
 
         $this->injectedRateLimiter = $rateLimiter;
     }
@@ -432,9 +434,9 @@ class LaraAuthStandaloneControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function afterConstruct_appends_a_login_validator(): void
+    public function registerValidators_appends_a_login_validator(): void
     {
-        $ref = new ReflectionMethod($this->controller, 'afterConstruct');
+        $ref = new ReflectionMethod($this->controller, 'registerValidators');
         $ref->invoke($this->controller);
 
         $validatorsProp = new ReflectionProperty(
@@ -443,7 +445,7 @@ class LaraAuthStandaloneControllerTest extends AbstractTest
         );
         $validators = $validatorsProp->getValue($this->controller);
 
-        $this->assertNotEmpty($validators, 'afterConstruct must append at least one validator.');
+        $this->assertNotEmpty($validators, 'registerValidators must append at least one validator.');
         $this->assertInstanceOf(LoginValidator::class, end($validators));
     }
 

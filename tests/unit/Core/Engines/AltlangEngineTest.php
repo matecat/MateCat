@@ -68,7 +68,7 @@ class AltlangEngineTest extends AbstractTest
         $struct->translate_relative_url = 'translate';
         $struct->extra_parameters = ['client_secret' => 'secret-for-tests'];
 
-        $this->engine = new TestAltlang($struct);
+        $this->engine = new TestAltlang($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 
     #[Test]

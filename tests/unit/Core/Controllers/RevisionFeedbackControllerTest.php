@@ -8,6 +8,7 @@ use Controller\API\V3\RevisionFeedbackController;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 use Model\ReviseFeedback\FeedbackDAO;
 use Model\ReviseFeedback\FeedbackStruct;
@@ -23,15 +24,11 @@ class TestableRevisionFeedbackController extends RevisionFeedbackController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     public ?FeedbackDAO $injectedFeedbackDao = null;
 
     protected function createFeedbackDao(): FeedbackDAO
     {
-        return $this->injectedFeedbackDao ?? new FeedbackDAO();
+        return $this->injectedFeedbackDao ?? new FeedbackDAO(obtainTestDatabase());
     }
 
 }
@@ -60,6 +57,7 @@ class RevisionFeedbackControllerTest extends AbstractTest
 
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
 
         $chunk = $this->createStub(JobStruct::class);
         $chunk->method('isDeleted')->willReturn(false);
@@ -80,7 +78,7 @@ class RevisionFeedbackControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function afterConstructAppendsLoginAndChunkPasswordValidators(): void
+    public function registerValidatorsAppendsLoginAndChunkPasswordValidators(): void
     {
         $realReflector = new ReflectionClass(RevisionFeedbackController::class);
         /** @var RevisionFeedbackController $realController */
@@ -97,7 +95,7 @@ class RevisionFeedbackControllerTest extends AbstractTest
             'revision_number' => 1,
         ]);
 
-        $realReflector->getMethod('afterConstruct')->invoke($realController);
+        $realReflector->getMethod('registerValidators')->invoke($realController);
 
         /** @var list<mixed> $validators */
         $validators = $realReflector->getProperty('validators')->getValue($realController);
@@ -132,6 +130,7 @@ class RevisionFeedbackControllerTest extends AbstractTest
 
         $realReflector->getProperty('request')->setValue($realController, $request);
         $realReflector->getProperty('response')->setValue($realController, $response);
+        $realReflector->getProperty('database')->setValue($realController, obtainTestDatabase());
 
         $method = $realReflector->getMethod('createFeedbackDao');
         /** @var FeedbackDAO $dao */

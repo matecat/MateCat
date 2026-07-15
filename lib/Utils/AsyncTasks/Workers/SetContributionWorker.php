@@ -11,6 +11,8 @@ namespace Utils\AsyncTasks\Workers;
 
 use Exception;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use ReflectionException;
 use Utils\Contribution\SetContributionRequest;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EngineInterface;
@@ -126,7 +128,7 @@ class SetContributionWorker extends AbstractWorker
     protected function _loadEngine(JobStruct $jobStruct): AbstractEngine
     {
         try {
-            $engine = EnginesFactory::getInstance($jobStruct->id_tms, AbstractEngine::class); //Load MyMemory
+            $engine = EnginesFactory::getInstance($jobStruct->id_tms, $this->database, AbstractEngine::class); //Load MyMemory
 
             return $engine;
         } catch (Exception $e) {
@@ -141,6 +143,7 @@ class SetContributionWorker extends AbstractWorker
      * @throws EndQueueException
      * @throws ReQueueException
      * @throws \LogicException
+     * @throws ReflectionException
      */
     protected function _set(array $config, SetContributionRequest $contributionStruct): void
     {
@@ -155,7 +158,7 @@ class SetContributionWorker extends AbstractWorker
         $config['set_mt'] = !(($jobStruct->id_mt_engine != 1));
 
         //get the Props
-        $config['prop'] = json_encode($contributionStruct->getProp());
+        $config['prop'] = json_encode($contributionStruct->getProp(new ProjectDao($this->database)));
 
         // set the contribution for every key in the job belonging to the user
         $res = $engine->set($config);
@@ -178,6 +181,7 @@ class SetContributionWorker extends AbstractWorker
      * @throws EndQueueException
      * @throws ReQueueException
      * @throws \LogicException
+     * @throws ReflectionException
      */
     protected function _update(array $config, SetContributionRequest $contributionStruct, int $id_mt_engine = 1): void
     {
@@ -190,7 +194,7 @@ class SetContributionWorker extends AbstractWorker
         $config['context_before'] = $contributionStruct->context_before;
         $config['prop'] = json_encode(
             array_merge(
-                $contributionStruct->getProp(),
+                $contributionStruct->getProp(new ProjectDao($this->database)),
                 (new Headers($contributionStruct->id_job . ":" . $contributionStruct->id_segment, $contributionStruct->translation_origin))->getArrayCopy()
             )
         );

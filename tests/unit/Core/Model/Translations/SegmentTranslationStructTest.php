@@ -7,6 +7,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Translations\SegmentTranslationStruct;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionMethod;
 
 class SegmentTranslationStructTest extends AbstractTest
 {
@@ -115,6 +116,17 @@ class SegmentTranslationStructTest extends AbstractTest
         $this->assertTrue(isset($struct['status']));
     }
 
+    #[Test]
+    public function getJobRequiresInjectedJobDao(): void
+    {
+        $param = (new ReflectionMethod(SegmentTranslationStruct::class, 'getJob'))->getParameters()[0] ?? null;
+
+        $this->assertNotNull($param, 'getJob() must accept an injected $jobDao');
+        $this->assertSame(JobDao::class, (string)$param->getType(), '$jobDao must be typed JobDao');
+        $this->assertFalse($param->isOptional(), '$jobDao must be mandatory');
+        $this->assertFalse($param->allowsNull(), '$jobDao must be non-nullable');
+    }
+
     // ─── getJob() / getChunk() ───
 
     #[Test]
@@ -159,5 +171,48 @@ class SegmentTranslationStructTest extends AbstractTest
         $this->assertFalse($struct->warning);
         $this->assertNull($struct->autopropagated_from);
         $this->assertNull($struct->translation);
+    }
+
+    #[Test]
+    public function getJobReturnsFirstNotDeletedJob(): void
+    {
+        $job     = new JobStruct();
+        $job->id = 4242;
+
+        $struct         = new SegmentTranslationStruct();
+        $struct->id_job = 4242;
+
+        $jobDao = $this->createStub(JobDao::class);
+        $jobDao->method('getNotDeletedById')->willReturn([$job]);
+
+        $this->assertSame($job, $struct->getJob($jobDao));
+    }
+
+    #[Test]
+    public function getJobReturnsNullWhenNoNotDeletedJobExists(): void
+    {
+        $struct         = new SegmentTranslationStruct();
+        $struct->id_job = 4242;
+
+        $jobDao = $this->createStub(JobDao::class);
+        $jobDao->method('getNotDeletedById')->willReturn([]);
+
+        $this->assertNull($struct->getJob($jobDao));
+    }
+
+    #[Test]
+    public function getJobMemoizesTheResolvedJobAcrossCalls(): void
+    {
+        $job            = new JobStruct();
+        $struct         = new SegmentTranslationStruct();
+        $struct->id_job = 4242;
+
+        // memoize() must cache the first resolution: the DAO is queried exactly once even
+        // though getJob() is called twice.
+        $jobDao = $this->createMock(JobDao::class);
+        $jobDao->expects($this->once())->method('getNotDeletedById')->willReturn([$job]);
+
+        $this->assertSame($job, $struct->getJob($jobDao));
+        $this->assertSame($job, $struct->getJob($jobDao));
     }
 }

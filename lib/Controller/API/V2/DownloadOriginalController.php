@@ -51,35 +51,31 @@ class DownloadOriginalController extends AbstractDownloadController
         $this->password = (string)($__postInput['password'] ?? '');
 
         // get Job Info, we need only a row of jobs ( split )
-        $jobData = (new JobDao())->getByIdAndPassword((int)$this->id_job, $this->password);
+        $jobData = (new JobDao($this->getDatabase()))->getByIdAndPassword((int)$this->id_job, $this->password);
 
         // if no job was found, check if the provided password is a password_review
         if (empty($jobData)) {
-            $chunkReviewStruct = (new ChunkReviewDao())->findByReviewPasswordAndJobId($this->password, (int)$this->id_job);
+            $chunkReviewStruct = (new ChunkReviewDao($this->getDatabase()))->findByReviewPasswordAndJobId($this->password, (int)$this->id_job);
             if (empty($chunkReviewStruct)) {
                 $msg = "Error : wrong password provided for download \n\n " . var_export($this->request->paramsPost()->all(), true) . "\n";
                 $this->logger->debug($msg);
                 return;
             }
-            $jobData = $chunkReviewStruct->getChunk();
-        }
-
-        // check for Password correctness
-        if (empty($jobData)) {
-            $msg = "Error : wrong password provided for download \n\n " . var_export($this->request->paramsPost()->all(), true) . "\n";
-            $this->logger->debug($msg);
-
-            return;
+            $jobData = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
         }
 
         //get storage object
         $fs = FilesStorageFactory::create();
-        $files_job = $fs->getFilesForJob($this->id_job, false);
+        $files_job = $fs->getFilesForJob($this->getDatabase(), $this->id_job, false);
+
+        if (empty($files_job)) {
+            throw new Exception("No files found for job {$this->id_job}");
+        }
 
         //take the project ID and creation date, array index zero is good, all id are equals
         $id_project = $files_job[0]['id_project'];
 
-        $this->project = (new ProjectDao())->findById($id_project) ?? throw new Exception("Project not found");
+        $this->project = (new ProjectDao($this->getDatabase()))->findById($id_project) ?? throw new Exception("Project not found");
 
         $output_content = [];
 
@@ -119,8 +115,8 @@ class DownloadOriginalController extends AbstractDownloadController
                 throw new Exception("pathinfo_fix returned non-array value");
             }
 
-            if ($pathInfo['extension'] != 'zip') {
-                $this->setFilename($pathInfo['basename'] . ".zip");
+            if (($pathInfo['extension'] ?? '') !== 'zip') {
+                $this->setFilename(($pathInfo['basename'] ?? $this->_filename) . ".zip");
             }
 
             $this->outputContent = self::composeZip($output_content, null, true); //add zip archive content here;

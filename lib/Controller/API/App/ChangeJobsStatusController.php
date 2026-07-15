@@ -16,7 +16,7 @@ use Utils\Tools\Utils;
 class ChangeJobsStatusController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -32,7 +32,7 @@ class ChangeJobsStatusController extends KleinController
 
         if ($request['res_type'] == "prj") {
             try {
-                $project = (new ProjectDao())->findByIdAndPassword($request['res_id'], $request['password']);
+                $project = (new ProjectDao($this->getDatabase()))->findByIdAndPassword((int)$request['res_id'], (string)$request['password']);
             } catch (Exception) {
                 $msg = "Error : wrong password provided for Change Project Status \n\n " . var_export($this->request->paramsPost()->all(), true) . "\n";
                 $this->logger->debug($msg);
@@ -40,12 +40,12 @@ class ChangeJobsStatusController extends KleinController
                 throw new NotFoundException("Job not found");
             }
 
-            $chunks = $project->getJobs();
+            $chunks = (new JobDao($this->getDatabase()))->getNotDeletedByProjectId((int) $project->id);
             $projectId = $project->id ?? throw new NotFoundException("Project not found");
 
-            (new JobDao())->updateAllJobsStatusesByProjectId((int)$projectId, $request['new_status']);
+            (new JobDao($this->getDatabase()))->updateAllJobsStatusesByProjectId((int)$projectId, $request['new_status']);
 
-            $segmentTranslationDao = new SegmentTranslationDao();
+            $segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
 
             foreach ($chunks as $chunk) {
                 $lastSegmentsList = $segmentTranslationDao->getMaxSegmentIdsFromJob($chunk);
@@ -53,7 +53,7 @@ class ChangeJobsStatusController extends KleinController
             }
         } else {
             try {
-                $firstChunk = (new JobDao())->getByIdAndPasswordOrFail($request['res_id'], $request['password']);
+                $firstChunk = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail((int)$request['res_id'], (string)$request['password']);
             } catch (Exception) {
                 $msg = "Error : wrong password provided for Change Job Status \n\n " . var_export($this->request->paramsPost()->all(), true) . "\n";
                 $this->logger->debug($msg);
@@ -61,8 +61,8 @@ class ChangeJobsStatusController extends KleinController
                 throw new NotFoundException("Job not found");
             }
 
-            $segmentTranslationDao = new SegmentTranslationDao();
-            (new JobDao())->updateJobStatus($firstChunk, $request['new_status']);
+            $segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
+            (new JobDao($this->getDatabase()))->updateJobStatus($firstChunk, $request['new_status']);
             $lastSegmentsList = $segmentTranslationDao->getMaxSegmentIdsFromJob($firstChunk);
             $segmentTranslationDao->updateLastTranslationDateByIdList($lastSegmentsList, Utils::mysqlTimestamp(time()));
         }
@@ -76,7 +76,7 @@ class ChangeJobsStatusController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array{pn: string|false, res_type: string|false, res_id: int|false, password: string|false, new_status: string}
      * @throws Exception
      */
     private function validateTheRequest(): array
@@ -87,7 +87,7 @@ class ChangeJobsStatusController extends KleinController
         $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
         $new_status = filter_var($this->request->param('new_status'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
 
-        if (!JobStatus::isAllowedStatus($new_status)) {
+        if ($new_status === false || !JobStatus::isAllowedStatus($new_status)) {
             throw new Exception("Invalid Status");
         }
 

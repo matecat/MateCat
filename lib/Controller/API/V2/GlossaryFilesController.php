@@ -13,9 +13,14 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Request;
+use Model\Conversion\Upload;
+use Model\Conversion\UploadElement;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
+use RuntimeException;
 use Utils\TMS\TMSFile;
 use Utils\TMS\TMSService;
 use Utils\Validator\Contracts\ValidatorObject;
@@ -29,8 +34,8 @@ class GlossaryFilesController extends KleinController
      */
     protected Request $request;
 
-    protected string $name;
-    protected string $tm_key;
+    protected ?string $name = null;
+    protected ?string $tm_key = null;
 
     /**
      * @var TMSService
@@ -38,13 +43,20 @@ class GlossaryFilesController extends KleinController
     protected TMSService $TMService;
 
     /**
-     * @var string
+     * @var string|null
      */
-    public string $downloadToken;
+    public ?string $downloadToken = null;
 
-    protected function afterConstruct(): void
+    /**
+     * @throws Exception
+     */
+    protected function initDependencies(): void
     {
-        $this->TMService = new TMSService();
+        $this->TMService = new TMSService($this->getDatabase());
+    }
+
+    protected function registerValidators(): void
+    {
         $this->appendValidator(new LoginValidator($this));
     }
 
@@ -78,9 +90,9 @@ class GlossaryFilesController extends KleinController
             $filterArgs
         );
 
-        $this->name = $postInput->name;
-        $this->tm_key = $postInput->tm_key;
-        $this->downloadToken = $postInput->downloadToken;
+        $this->name = ($postInput->name !== false) ? $postInput->name : null;
+        $this->tm_key = ($postInput->tm_key !== false) ? $postInput->tm_key : null;
+        $this->downloadToken = ($postInput->downloadToken !== false) ? $postInput->downloadToken : null;
     }
 
     /**
@@ -88,10 +100,10 @@ class GlossaryFilesController extends KleinController
      */
     public function check(): void
     {
-        $stdResult = $this->TMService->uploadFile($this->request->files()->all());
+        $stdResult = (new Upload())->uploadFiles($this->request->files()->all());
 
         // validation on request parameters has been performed by $this->validateRequest
-        if (!isset($this->tm_key) or $this->tm_key === "") {
+        if (empty($this->tm_key)) {
             throw new InvalidArgumentException("`TM key` field is mandatory");
         }
 
@@ -121,10 +133,10 @@ class GlossaryFilesController extends KleinController
      */
     public function import(): void
     {
-        $stdResult = $this->TMService->uploadFile($this->request->files()->all());
+        $stdResult = (new Upload())->uploadFiles($this->request->files()->all());
 
         // validation on request parameters has been performed by $this->validateRequest
-        if (!isset($this->tm_key) or $this->tm_key === "") {
+        if (empty($this->tm_key)) {
             throw new InvalidArgumentException("`TM key` field is mandatory");
         }
 
@@ -142,8 +154,8 @@ class GlossaryFilesController extends KleinController
 
                 $file = new TMSFile(
                     $fileInfo->file_path,
-                    $this->tm_key,
-                    $this->name
+                    $this->tm_key ?? '',
+                    $this->name ?? ''
                 );
 
                 $this->TMService->addGlossaryInMyMemory($file);
@@ -168,13 +180,10 @@ class GlossaryFilesController extends KleinController
     }
 
     /**
-     * @param $file
-     *
-     * @return GlossaryCSVValidator
      * @throws ValidationError
      * @throws Exception
      */
-    private function validateCSVFile($file): GlossaryCSVValidator
+    private function validateCSVFile(string $file): GlossaryCSVValidator
     {
         $validator = new GlossaryCSVValidator();
         $validator->validate(ValidatorObject::fromArray([
@@ -207,11 +216,13 @@ class GlossaryFilesController extends KleinController
      */
     public function download(): void
     {
-        if (!isset($this->tm_key) or $this->tm_key === "") {
+        if (empty($this->tm_key)) {
             throw new InvalidArgumentException("`TM key` field is mandatory");
         }
 
-        $result = $this->TMService->glossaryExport($this->tm_key, $this->name, $this->getUser()->getEmail(), $this->getUser()->fullName());
+        $user = $this->getUser();
+        $userEmail = $user->getEmail() ?? throw new RuntimeException('User email is required');
+        $result = $this->TMService->glossaryExport($this->tm_key, $this->name ?? '', $userEmail, $user->fullName());
 
         if (!$this->response->isLocked() && in_array($result->responseStatus, [200, 202], true)) {
             $this->setSuccessResponse($result->responseStatus, $result->responseData);
@@ -220,6 +231,11 @@ class GlossaryFilesController extends KleinController
         }
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
+     */
     protected function setSuccessResponse(int $code = 200, array $data = []): void
     {
         $this->response->code($code);
@@ -233,7 +249,7 @@ class GlossaryFilesController extends KleinController
     /**
      * @throws ValidationError
      */
-    protected function extractCSV($stdResult)
+    protected function extractCSV(UploadElement $stdResult): UploadElement
     {
         $tmpFileName = tempnam("/tmp", "MAT_EXCEL_GLOSS_");
 

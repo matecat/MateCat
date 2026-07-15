@@ -75,6 +75,31 @@ class TranslationEventTest extends AbstractTest
     }
 
     #[Test]
+    public function constructorRethrowsRuntimeExceptionWhenJobResolutionThrows(): void
+    {
+        // With no chunk injected, the constructor resolves it via wanted->getJob(new JobDao(...)).
+        // The catch there was widened from Error to Throwable: a non-Error failure while obtaining
+        // the job (here, the DB handle lookup throwing an Exception) must be caught and rethrown as
+        // a RuntimeException instead of escaping as its original type.
+        $segmentDao = $this->createStub(SegmentDao::class);
+        $segmentDao->method('getDatabaseHandler')
+            ->willThrowException(new \RuntimeException('db handle unavailable'));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Job not found or it is deleted');
+
+        new TranslationEvent(
+            $this->makeTranslation(),
+            $this->makeTranslation(),
+            null,
+            SourcePages::SOURCE_PAGE_TRANSLATE,
+            null, // no chunk → force the getJob() resolution path that owns the widened catch
+            $this->createStub(TranslationEventDao::class),
+            $segmentDao,
+        );
+    }
+
+    #[Test]
     public function getWantedTranslation(): void
     {
         $wanted = $this->makeTranslation(TranslationStatus::STATUS_APPROVED);

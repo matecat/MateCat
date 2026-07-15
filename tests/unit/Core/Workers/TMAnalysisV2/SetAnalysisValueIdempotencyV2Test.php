@@ -22,7 +22,7 @@ class SetAnalysisValueIdempotencyV2Test extends AbstractTest
     {
         parent::setUp();
 
-        $this->database = Database::obtain(
+        $this->database = obtainTestDatabase(
             AppConfig::$DB_SERVER,
             AppConfig::$DB_USER,
             AppConfig::$DB_PASS,
@@ -56,7 +56,7 @@ class SetAnalysisValueIdempotencyV2Test extends AbstractTest
     #[Test]
     public function test_segment_updater_setAnalysisValue_returns_zero_when_segment_is_already_done(): void
     {
-        $service = new SegmentUpdaterService(Database::obtain());
+        $service = new SegmentUpdaterService(obtainTestDatabase());
 
         $affected = $service->setAnalysisValue([
             'id_segment'         => self::TEST_SEGMENT_ID,

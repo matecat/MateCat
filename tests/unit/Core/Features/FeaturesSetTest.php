@@ -51,7 +51,7 @@ class FeaturesSetTest extends AbstractTest
             shuffle($codes);
             $code_string = implode(",", $codes);
 
-            $featureSet = new FeatureSet();
+            $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
             $featureSet->loadFromString($code_string);
 
             $set = array_flip(array_values($featureSet->getCodes()));

@@ -23,37 +23,39 @@ const resolveUrl = (url, baseUrl) => {
  * @param {string} baseUrl
  */
 const resolveRelativeUrls = (doc, baseUrl) => {
-  doc.querySelectorAll('[src]').forEach((el) => {
-    el.setAttribute('src', resolveUrl(el.getAttribute('src'), baseUrl))
-  })
-  doc.querySelectorAll('[href]').forEach((el) => {
-    el.setAttribute('href', resolveUrl(el.getAttribute('href'), baseUrl))
-  })
-  doc.querySelectorAll('[action]').forEach((el) => {
-    el.setAttribute('action', resolveUrl(el.getAttribute('action'), baseUrl))
-  })
-  doc.querySelectorAll('[style]').forEach((el) => {
-    const style = el.getAttribute('style')
-    if (style && style.includes('url(')) {
-      el.setAttribute(
-        'style',
-        style.replace(/url\(["']?(.*?)["']?\)/g, (_match, p1) => {
-          return `url("${resolveUrl(p1, baseUrl)}")`
-        }),
-      )
+  doc.querySelectorAll('[src],[href],[action],[style],[srcset]').forEach((el) => {
+    if (el.hasAttribute('src')) {
+      el.setAttribute('src', resolveUrl(el.getAttribute('src'), baseUrl))
     }
-  })
-  doc.querySelectorAll('[srcset]').forEach((el) => {
-    const srcset = el.getAttribute('srcset')
-    const resolved = srcset
-      .split(',')
-      .map((entry) => {
-        const parts = entry.trim().split(/\s+/)
-        parts[0] = resolveUrl(parts[0], baseUrl)
-        return parts.join(' ')
-      })
-      .join(', ')
-    el.setAttribute('srcset', resolved)
+    if (el.hasAttribute('href')) {
+      el.setAttribute('href', resolveUrl(el.getAttribute('href'), baseUrl))
+    }
+    if (el.hasAttribute('action')) {
+      el.setAttribute('action', resolveUrl(el.getAttribute('action'), baseUrl))
+    }
+    if (el.hasAttribute('style')) {
+      const style = el.getAttribute('style')
+      if (style.includes('url(')) {
+        el.setAttribute(
+          'style',
+          style.replace(/url\(["']?(.*?)["']?\)/g, (_match, p1) => {
+            return `url("${resolveUrl(p1, baseUrl)}")`
+          }),
+        )
+      }
+    }
+    if (el.hasAttribute('srcset')) {
+      const srcset = el.getAttribute('srcset')
+      const resolved = srcset
+        .split(',')
+        .map((entry) => {
+          const parts = entry.trim().split(/\s+/)
+          parts[0] = resolveUrl(parts[0], baseUrl)
+          return parts.join(' ')
+        })
+        .join(', ')
+      el.setAttribute('srcset', resolved)
+    }
   })
 }
 
@@ -75,6 +77,13 @@ const parseHtmlContent = (rawHtml, sourceUrl) => {
     headHtml += el.outerHTML
   })
   doc.querySelectorAll('script').forEach((el) => el.remove())
+
+  // Phantom overlay suppression is handled at render time by CSS rules in
+  // LivePreviewPanel.js (SHADOW_STYLES): role=dialog/alertdialog with no content
+  // get pointer-events:none + visibility:hidden, and inline position:fixed elements
+  // with no content are also suppressed. Class-based overlays are caught by
+  // suppressClickTraps() after stylesheets load. No synchronous DOM scan needed here.
+
   const bodyHtml = doc.body ? doc.body.innerHTML : rawHtml
   return headHtml + bodyHtml
 }

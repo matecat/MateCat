@@ -15,25 +15,27 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use TypeError;
 use View\API\V2\Json\MemoryKeys;
 
 class MemoryKeysController extends KleinController
 {
 
-    public function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function listKeys(): void
     {
         $keyQuery = new MemoryKeyStruct();
-        $keyQuery->uid = $this->user->uid;
+        $keyQuery->uid = $this->user->uid ?? throw new \InvalidArgumentException('User not authenticated');
 
-        $memoryKeyDao = new MemoryKeyDao();
+        $memoryKeyDao = new MemoryKeyDao($this->getDatabase());
         $keyList = $memoryKeyDao->read($keyQuery);
 
         $formatter = new MemoryKeys($keyList);

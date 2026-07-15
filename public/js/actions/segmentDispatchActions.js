@@ -12,6 +12,16 @@ export const setStatus = (sid, fid, status) => {
   }
 }
 
+export const setSegmentDisabled = (sid, disabled) => {
+  if (sid) {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SET_SEGMENT_DISABLED,
+      id: sid,
+      disabled,
+    })
+  }
+}
+
 export const setHeaderPercentage = (sid, fid, match, className, createdBy) => {
   AppDispatcher.dispatch({
     actionType: SegmentConstants.SET_SEGMENT_HEADER,

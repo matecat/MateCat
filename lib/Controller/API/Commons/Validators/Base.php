@@ -29,11 +29,11 @@ abstract class Base
     private ?Closure $_failureCallback = null;
 
     /**
-     * @var array
+     * @var mixed[]
      */
     protected array $args = [];
 
-    public function __construct(KleinController $kleinController, ...$args)
+    public function __construct(KleinController $kleinController, mixed ...$args)
     {
         $this->request = $kleinController->getRequest();
         $this->controller = $kleinController;
@@ -69,7 +69,7 @@ abstract class Base
     public function onSuccess(callable $callable = null): Base
     {
         if (is_callable($callable)) {
-            $this->_validationCallbacks[] = $callable;
+            $this->_validationCallbacks[] = $callable(...);
         } else {
             trigger_error("Invalid callback provided", E_USER_WARNING);
         }
@@ -80,7 +80,7 @@ abstract class Base
     public function onFailure(callable $callable = null): Base
     {
         if (is_callable($callable)) {
-            $this->_failureCallback = $callable;
+            $this->_failureCallback = Closure::fromCallable($callable);
         } else {
             trigger_error("Invalid callback provided", E_USER_WARNING);
         }

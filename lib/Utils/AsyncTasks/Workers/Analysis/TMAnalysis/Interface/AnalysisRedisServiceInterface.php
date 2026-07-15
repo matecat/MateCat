@@ -17,10 +17,18 @@ interface AnalysisRedisServiceInterface
     public function acquireInitLock(int $pid): bool;
 
     /**
+     * Release the init semaphore eagerly so the next worker can re-attempt init
+     * without waiting out the lock TTL. Called on failed/incomplete doInit().
+     */
+    public function releaseInitLock(int $pid): void;
+
+    /**
      * Atomically initialize all project counters in a single MULTI/EXEC transaction.
      * Writes PROJECT_TOT_SEGMENTS first, PROJECT_NUM_SEGMENTS_DONE last.
      */
     public function initializeProjectCounters(int $pid, int $projectSegments, int $numAnalyzed): void;
+
+    public function clearProjectCounters(int $pid): void;
 
     public function setProjectTotalSegments(int $pid, int $total): void;
 
@@ -34,7 +42,7 @@ interface AnalysisRedisServiceInterface
      */
     public function waitForInitialization(int $pid, int $maxWaitMs = 5000): bool;
 
-    public function incrementAnalyzedCount(int $pid, int $numSegments, float $eqWc, float $stWc): void;
+    public function incrementAnalyzedCount(int $pid, int $idSegment, int $idJob, float $eqWc, float $stWc): void;
 
     public function setProjectAnalyzedCountTTL(int $pid, int $ttlSeconds = 86400): void;
 

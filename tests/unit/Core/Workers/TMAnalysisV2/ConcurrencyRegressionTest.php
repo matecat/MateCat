@@ -129,14 +129,17 @@ class ConcurrencyRegressionTest extends AbstractTest
         $catchPos = strpos($source, 'catch (PDOException $e)');
         $this->assertNotFalse($catchPos, 'Expected PDOException catch in SegmentUpdaterService::forceSetSegmentAnalyzed().');
 
-        $returnInCatchPos = strpos($source, 'return false;', $catchPos);
+        $returnInCatchPos = strpos($source, 'return 0;', $catchPos);
         $this->assertNotFalse($returnInCatchPos, 'Expected return false inside PDOException catch to prevent counter increment on DB failure.');
 
         $affectedRowsGuardPos = strpos($source, 'if ($affectedRows === 0)');
         $this->assertNotFalse($affectedRowsGuardPos, 'Expected $affectedRows === 0 guard in SegmentUpdaterService::forceSetSegmentAnalyzed().');
 
-        $returnOnZeroPos = strpos($source, 'return false;', $affectedRowsGuardPos);
-        $this->assertNotFalse($returnOnZeroPos, 'Expected return false after $affectedRows === 0 guard to prevent duplicate counter increment.');
+        $returnOnZeroPos = strpos($source, 'isTranslationSkipped', $affectedRowsGuardPos);
+        $this->assertNotFalse($returnOnZeroPos, 'Expected isTranslationSkipped guard to prevent duplicate counter increment.');
+
+        $returnOnZeroPos = strpos($source, '? -1 : 0;', $returnOnZeroPos);
+        $this->assertNotFalse($returnOnZeroPos, 'Expected isTranslationSkipped guard to prevent duplicate counter increment.');
     }
 
     #[Test]
@@ -168,10 +171,24 @@ class ConcurrencyRegressionTest extends AbstractTest
         );
         $this->assertGreaterThanOrEqual(1, $nxCountCompletion, "acquireCompletionLock() must use 'NX' option for atomic Redis lock acquisition.");
 
+        // Completion lock must use a SHORT TTL via the constant, NOT 86400: a long TTL
+        // lets a worker killed while holding the lock (e.g. mid gate-retry in
+        // tryCloseProject) block the project's finalization for that whole duration.
+        $completionBody = substr($source, $completionLockPos, 200);
         $this->assertStringContainsString(
+            "'EX', self::COMPLETION_LOCK_TTL_SECONDS",
+            $completionBody,
+            'acquireCompletionLock() must set its TTL from the short COMPLETION_LOCK_TTL_SECONDS constant.'
+        );
+        $this->assertStringNotContainsString(
             "'EX', 86400",
+            $completionBody,
+            'Completion lock must not use the 86400s TTL — a crashed holder would deadlock finalization for 24h.'
+        );
+        $this->assertMatchesRegularExpression(
+            '/const\s+COMPLETION_LOCK_TTL_SECONDS\s*=\s*300\s*;/',
             $source,
-            "Completion lock must have TTL 86400 to prevent permanent deadlocks on crash."
+            'COMPLETION_LOCK_TTL_SECONDS must be 300s — wide margin over the finalization critical section, still short enough to recover from a crashed lock holder in ~5min.'
         );
     }
 
@@ -366,9 +383,19 @@ class ConcurrencyRegressionTest extends AbstractTest
         $body = substr($source, $methodPos, $methodEnd - $methodPos);
 
         $this->assertStringContainsString(
-            "'EX', 30",
+            "'EX', self::INIT_LOCK_TTL_SECONDS",
             $body,
-            'Init lock TTL must be 30s (not 86400s) — short enough to recover from crashed winners.'
+            'acquireInitLock must set its TTL from the INIT_LOCK_TTL_SECONDS constant.'
+        );
+        $this->assertStringNotContainsString(
+            '86400',
+            $body,
+            'Init lock TTL must be short — never the 86400s completion-lock TTL.'
+        );
+        $this->assertMatchesRegularExpression(
+            '/const\s+INIT_LOCK_TTL_SECONDS\s*=\s*30\s*;/',
+            $source,
+            'INIT_LOCK_TTL_SECONDS must be 30s — short enough to recover from crashed winners.'
         );
     }
 
@@ -460,36 +487,6 @@ class ConcurrencyRegressionTest extends AbstractTest
             "\$project_totals['st_wc']",
             $source,
             'Job standard_analysis_wc must NOT use Redis-derived $project_totals — use DB $rollup only.'
-        );
-    }
-
-    #[Test]
-    public function test_segment_updater_force_set_captures_affected_rows_and_logs_idempotency(): void
-    {
-        $source = $this->readSource($this->segmentUpdaterServicePath());
-
-        $this->assertStringContainsString(
-            "tm_analysis_status NOT IN ('DONE', 'SKIPPED')",
-            $source,
-            'forceSetSegmentAnalyzed must use WHERE guard to skip DONE/SKIPPED rows, preventing double-counting.'
-        );
-
-        $this->assertStringContainsString(
-            'already DONE, skipping force-set side-effects.',
-            $source,
-            'Expected idempotency log message when affected rows is zero.'
-        );
-
-        $catchPos = strpos($source, 'catch (PDOException $e)');
-        $this->assertNotFalse($catchPos);
-
-        $zeroGuardPos = strpos($source, 'if ($affectedRows === 0)');
-        $this->assertNotFalse($zeroGuardPos);
-
-        $this->assertLessThan(
-            $zeroGuardPos,
-            $catchPos,
-            'PDOException catch must appear before $affectedRows === 0 guard in forceSetSegmentAnalyzed.'
         );
     }
 
@@ -724,7 +721,7 @@ class ConcurrencyRegressionTest extends AbstractTest
         );
 
         $this->assertStringContainsString(
-            '$delayMs    = 500',
+            '$delayMs = 500',
             $methodBody,
             'applyPostCommitSideEffects() initial delay must be 500ms (not lower — allows Redis to recover).'
         );

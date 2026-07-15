@@ -16,6 +16,7 @@ use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
+use Model\Projects\ProjectDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use ReflectionException;
 use View\API\V2\Json\SegmentVersion;
@@ -24,14 +25,12 @@ class ReviseTranslationIssuesController extends KleinController
 {
     use ChunkNotFoundHandlerTrait;
 
-    /**
-     */
-    public function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $validator = new JobPasswordValidator($this);
         $validator->onSuccess(function () use ($validator) {
-            $this->featureSet->loadForProject($validator->getJob()->getProject());
+            $this->featureSet->loadForProject($validator->getJob()->getProject(new ProjectDao($this->getDatabase())));
             $this->chunk = $validator->getJob();
         });
         $this->appendValidator($validator);
@@ -45,12 +44,12 @@ class ReviseTranslationIssuesController extends KleinController
      */
     public function index(): void
     {
-        $records = (new TranslationVersionDao())->setCacheTTL(0)->getVersionsForRevision(
+        $records = (new TranslationVersionDao($this->getDatabase()))->setCacheTTL(0)->getVersionsForRevision(
             $this->request->param('id_job'),
             $this->request->param('id_segment')
         );
 
-        $chunk = (new JobDao())->getByIdAndPasswordOrFail($this->params['id_job'], $this->params['password']);
+        $chunk = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($this->params['id_job'], $this->params['password']);
 
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();

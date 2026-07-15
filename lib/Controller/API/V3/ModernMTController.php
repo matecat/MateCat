@@ -19,7 +19,7 @@ use Utils\Files\CSV as CSVParser;
 class ModernMTController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -369,7 +369,7 @@ class ModernMTController extends KleinController
     }
 
     /**
-     * @param array<int, array<int, string>> $csvContent
+     * @param array<int, array<int, string|null>> $csvContent
      *
      * @throws Exception
      */
@@ -414,7 +414,7 @@ class ModernMTController extends KleinController
             throw new RuntimeException('User not authenticated');
         }
 
-        return EnginesFactory::getInstanceByIdAndUser($engineId, $uid, MMT::class);
+        return EnginesFactory::getInstanceByIdAndUser($engineId, $uid, $this->getDatabase(), MMT::class);
     }
 
     /**
@@ -450,7 +450,7 @@ class ModernMTController extends KleinController
     }
 
     /**
-     * @param array<int, array<int, string>> $csv
+     * @param array<int, array<int, string|null>> $csv
      *
      * @throws Exception
      */

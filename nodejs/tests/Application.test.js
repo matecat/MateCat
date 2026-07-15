@@ -170,6 +170,45 @@ describe('createAuthMiddleware', () => {
       done();
     });
   });
+
+  test('sets projectId when x-projectid present', (done) => {
+    const token = signToken({iss: 'matecat', matecat: {uid: 1}});
+    const socket = mockSocket({
+      handshake: {
+        headers: {
+          'x-token': token,
+          'x-userid': '1',
+          'x-uuid': 'u1',
+          'x-projectid': '123',
+        },
+        auth: {},
+        address: '127.0.0.1',
+      },
+    });
+
+    middleware(socket, (err) => {
+      expect(err).toBeUndefined();
+      expect(socket.projectId).toBe('123');
+      done();
+    });
+  });
+
+  test('does not set projectId when x-projectid absent', (done) => {
+    const token = signToken({iss: 'matecat', matecat: {uid: 1}});
+    const socket = mockSocket({
+      handshake: {
+        headers: {'x-token': token, 'x-userid': '1', 'x-uuid': 'u1'},
+        auth: {},
+        address: '127.0.0.1',
+      },
+    });
+
+    middleware(socket, (err) => {
+      expect(err).toBeUndefined();
+      expect(socket.projectId).toBeUndefined();
+      done();
+    });
+  });
 });
 
 // --- Application constructor + instance method tests ---
@@ -287,6 +326,7 @@ describe('Application.start', () => {
       user_id: '42',
       uuid: 'u-abc',
       jobId: '99',
+      projectId: '123',
       clientAddress: null,
       join: jest.fn(),
       emit: jest.fn(),
@@ -297,6 +337,7 @@ describe('Application.start', () => {
 
     expect(socket.join).toHaveBeenCalledWith(['42', 'u-abc']);
     expect(socket.join).toHaveBeenCalledWith('99');
+    expect(socket.join).toHaveBeenCalledWith('123');
     expect(socket.emit).toHaveBeenCalledWith('message', expect.objectContaining({
       data: expect.objectContaining({_type: 'ack', clientId: 'u-abc'}),
     }));
@@ -320,6 +361,28 @@ describe('Application.start', () => {
     connectionHandler(socket);
     expect(socket.join).toHaveBeenCalledTimes(1);
     expect(socket.join).toHaveBeenCalledWith(['1', 'u-x']);
+  });
+
+  test('connection handler skips projectId room when absent', () => {
+    const {app, deps} = buildApp();
+    app.start();
+
+    const connectionHandler = deps._ioServer.on.mock.calls.find(c => c[0] === 'connection')[1];
+    const socket = {
+      id: 'sock-3',
+      user_id: '1',
+      uuid: 'u-y',
+      jobId: '99',
+      clientAddress: null,
+      join: jest.fn(),
+      emit: jest.fn(),
+      on: jest.fn(),
+    };
+
+    connectionHandler(socket);
+    expect(socket.join).toHaveBeenCalledTimes(2);
+    expect(socket.join).toHaveBeenCalledWith(['1', 'u-y']);
+    expect(socket.join).toHaveBeenCalledWith('99');
   });
 });
 
