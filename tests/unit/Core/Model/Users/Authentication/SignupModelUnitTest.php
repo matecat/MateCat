@@ -264,7 +264,7 @@ class SignupModelUnitTest extends AbstractTest
         $method->invoke($model);
 
         $this->assertNotEmpty($model->getUser()->salt);
-        $this->assertEquals(15, strlen($model->getUser()->salt));
+        $this->assertEquals(32, strlen($model->getUser()->salt));
     }
 
     #[Test]

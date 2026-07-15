@@ -45,7 +45,6 @@ class GetProjectsController extends KleinController
         $search_in_pname = $request['search_in_pname'];
         $source = $request['source'];
         $target = $request['target'];
-//        $status          = $request[ 'status' ];
         $only_completed = $request['onlycompleted'] ?? null;
         $id_team = $request['id_team'];
         $id_assignee = $request['id_assignee'];
@@ -149,7 +148,6 @@ class GetProjectsController extends KleinController
             'search_in_pname' => (!empty($search_in_pname)) ? $search_in_pname : null,
             'source' => (!empty($source)) ? $source : null,
             'target' => (!empty($target)) ? $target : null,
-            'status' => (!empty($status)) ? $status : null,
             'only_completed' => $only_completed,
             'id_team' => $id_team,
             'id_assignee' => (!empty($id_assignee)) ? $id_assignee : null,

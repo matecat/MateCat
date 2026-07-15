@@ -14,6 +14,8 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use DivisionByZeroError;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\Analysis\Constants\MatchConstantsFactory;
 use Model\Files\FilesInfoUtility;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
@@ -333,6 +335,8 @@ class QualityReportControllerAPI extends KleinController
 
     /**
      * @throws ReflectionException
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function general(): void
     {

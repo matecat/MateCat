@@ -616,6 +616,30 @@ class ProjectDao extends AbstractDao
     }
 
     /**
+     * Atomically set the project status unless it is already DONE, so a concurrent TM-worker
+     * completion (which sets status_analysis = DONE) is never overwritten by a late FAST_OK/BUSY
+     * write from the fast-analysis daemon. A single conditional UPDATE — no read-then-write race,
+     * unlike select-then-update which a non-locking snapshot read leaves open under REPEATABLE READ.
+     *
+     * @return int affected rows: 0 means the project was already DONE (or gone) and the write was
+     *             intentionally skipped
+     * @throws PDOException
+     */
+    public function changeProjectStatusIfNotDone(int $pid, string $status): int
+    {
+        $stmt = $this->database->getConnection()->prepare(
+            "UPDATE projects SET status_analysis = :status WHERE id = :id AND status_analysis != :done"
+        );
+        $stmt->execute([
+            'status' => $status,
+            'id'     => $pid,
+            'done'   => ProjectStatus::STATUS_DONE,
+        ]);
+
+        return $stmt->rowCount();
+    }
+
+    /**
      * @param int $pid Project ID
      *
      * @return array<int, array<string, int|string|null>>

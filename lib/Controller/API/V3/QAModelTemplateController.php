@@ -6,6 +6,8 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use DivisionByZeroError;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Response;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use RuntimeException;
@@ -77,6 +79,8 @@ class QAModelTemplateController extends KleinController
      * create new template
      *
      * @return Response
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      * @throws TypeError
      */
     public function create(): Response
@@ -118,6 +122,8 @@ class QAModelTemplateController extends KleinController
 
     /**
      * @return Response
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      * @throws TypeError
      */
     public function delete(): Response
@@ -149,6 +155,8 @@ class QAModelTemplateController extends KleinController
      * edit model
      *
      * @return Response
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      * @throws TypeError
      */
     public function edit(): Response
@@ -244,6 +252,8 @@ class QAModelTemplateController extends KleinController
      * Validate a QA Model template
      *
      * @return Response
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function validate(): Response
     {

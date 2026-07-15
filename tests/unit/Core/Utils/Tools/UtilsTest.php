@@ -5,6 +5,7 @@ namespace Matecat\Core\Utils\Tools;
 use Exception;
 use InvalidArgumentException;
 use Matecat\TestHelpers\AbstractTest;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Tools\Utils;
@@ -84,6 +85,75 @@ class UtilsTest extends AbstractTest
 
         $this->assertEquals('Apple Safari', $result['name']);
         $this->assertEquals('MacOSX', $result['platform']);
+    }
+
+    /**
+     * Guards version extraction in getBrowser(): when the UA matches, the
+     * regex always yields at least one group, so $matches['version'][0] is
+     * always set. The value must be the parsed version string and never null
+     * (a redundant `?? null` was removed from that access).
+     */
+    #[Test]
+    public function testGetBrowserExtractsExactVersion(): void
+    {
+        $chromeAgent  = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
+        $safariAgent  = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15';
+        $firefoxAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0';
+
+        $chrome  = Utils::getBrowser($chromeAgent);
+        $safari  = Utils::getBrowser($safariAgent);
+        $firefox = Utils::getBrowser($firefoxAgent);
+
+        // Single-match branch: version comes from the sole matched group.
+        $this->assertNotNull($chrome['version']);
+        $this->assertSame('91.0.4472.124', $chrome['version']);
+        $this->assertNotNull($firefox['version']);
+        $this->assertSame('89.0', $firefox['version']);
+
+        // "Version/… Safari/…" branch: version comes from the first match.
+        $this->assertNotNull($safari['version']);
+        $this->assertSame('14.1.1', $safari['version']);
+    }
+
+    /**
+     * Real-data detection gaps found by fuzzing whatismybrowser's UA database:
+     * Samsung Internet, Chrome-on-iOS (CriOS) and Firefox-on-iOS (FxiOS) were
+     * misreported as Chrome/Safari, and the Opera OPR/ version was not parsed.
+     */
+    #[Test]
+    public function testGetBrowserDetectsSamsungInternet(): void
+    {
+        $ua = 'Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/25.0 Chrome/121.0.0.0 Mobile Safari/537.36';
+        $result = Utils::getBrowser($ua);
+        $this->assertEquals('Samsung Internet', $result['name']);
+        $this->assertSame('25.0', $result['version']);
+    }
+
+    #[Test]
+    public function testGetBrowserDetectsChromeOnIos(): void
+    {
+        $ua = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/126.0.6478.54 Mobile/15E148 Safari/604.1';
+        $result = Utils::getBrowser($ua);
+        $this->assertEquals('Google Chrome', $result['name']);
+        $this->assertSame('126.0.6478.54', $result['version']);
+    }
+
+    #[Test]
+    public function testGetBrowserDetectsFirefoxOnIos(): void
+    {
+        $ua = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/127.0 Mobile/15E148 Safari/605.1.15';
+        $result = Utils::getBrowser($ua);
+        $this->assertEquals('Mozilla Firefox', $result['name']);
+        $this->assertSame('127.0', $result['version']);
+    }
+
+    #[Test]
+    public function testGetBrowserExtractsOperaOprVersion(): void
+    {
+        $ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 OPR/112.0.0.0';
+        $result = Utils::getBrowser($ua);
+        $this->assertEquals('Opera', $result['name']);
+        $this->assertSame('112.0.0.0', $result['version']);
     }
 
     #[Test]
@@ -2166,4 +2236,93 @@ class UtilsTest extends AbstractTest
 
         parent::tearDown();
     }
+
+    /**
+     * One real user agent per top browser and platform/device, asserting the
+     * detected name and version. Locks in Samsung Internet, iOS Chrome (CriOS),
+     * iOS Firefox (FxiOS) and Opera OPR/ version parsing against regressions.
+     *
+     * @return array<string, array{0: string, 1: string, 2: string}>
+     */
+    public static function realBrowserUserAgentProvider(): array
+    {
+        return [
+            'Chrome / Win' => ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36', 'Google Chrome', '126.0.0.0'],
+            'Chrome / macOS' => ['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36', 'Google Chrome', '126.0.0.0'],
+            'Chrome / Linux' => ['Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36', 'Google Chrome', '126.0.0.0'],
+            'Chrome / Android phone' => ['Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36', 'Google Chrome', '126.0.0.0'],
+            'Chrome / Android tablet' => ['Mozilla/5.0 (Linux; Android 13; SM-X710) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36', 'Google Chrome', '126.0.0.0'],
+            'Chrome / ChromeOS' => ['Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36', 'Google Chrome', '126.0.0.0'],
+            'Chrome / iOS' => ['Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/126.0.6478.54 Mobile/15E148 Safari/604.1', 'Google Chrome', '126.0.6478.54'],
+            'Safari / macOS' => ['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15', 'Apple Safari', '17.5'],
+            'Safari / iPhone' => ['Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1', 'Mobile Safari', '17.5'],
+            'Safari / iPad' => ['Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1', 'Mobile Safari', '17.5'],
+            'Edge / Win' => ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0', 'Microsoft Edge', '126.0.0.0'],
+            'Edge / macOS' => ['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0', 'Microsoft Edge', '126.0.0.0'],
+            'Edge / Android' => ['Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36 EdgA/126.0.0.0', 'Microsoft Edge', '126.0.0.0'],
+            'Edge / iOS' => ['Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 EdgiOS/126.0.2592.87 Mobile/15E148 Safari/604.1', 'Microsoft Edge', '126.0.2592.87'],
+            'Firefox / Win' => ['Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:127.0) Gecko/20100101 Firefox/127.0', 'Mozilla Firefox', '127.0'],
+            'Firefox / macOS' => ['Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:127.0) Gecko/20100101 Firefox/127.0', 'Mozilla Firefox', '127.0'],
+            'Firefox / Linux' => ['Mozilla/5.0 (X11; Linux x86_64; rv:127.0) Gecko/20100101 Firefox/127.0', 'Mozilla Firefox', '127.0'],
+            'Firefox / Android' => ['Mozilla/5.0 (Android 14; Mobile; rv:127.0) Gecko/127.0 Firefox/127.0', 'Mozilla Firefox', '127.0'],
+            'Firefox / iOS' => ['Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/127.0 Mobile/15E148 Safari/605.1.15', 'Mozilla Firefox', '127.0'],
+            'Samsung / Android phone' => ['Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/25.0 Chrome/121.0.0.0 Mobile Safari/537.36', 'Samsung Internet', '25.0'],
+            'Samsung / Android tablet' => ['Mozilla/5.0 (Linux; Android 13; SM-X910) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/23.0 Chrome/115.0.0.0 Safari/537.36', 'Samsung Internet', '23.0'],
+            'Opera / Win' => ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 OPR/112.0.0.0', 'Opera', '112.0.0.0'],
+            'Opera / macOS' => ['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 OPR/112.0.0.0', 'Opera', '112.0.0.0'],
+            'Opera / Android' => ['Mozilla/5.0 (Linux; Android 10; VOG-L29) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36 OPR/76.0.0.0', 'Opera', '76.0.0.0'],
+            'Opera / Opera Mini' => ['Opera/9.80 (Android; Opera Mini/7.5.33361/174.111; U; en) Presto/2.12.423 Version/12.16', 'Opera', '9.80'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('realBrowserUserAgentProvider')]
+    public function testGetBrowserIdentifiesRealBrowsers(string $userAgent, string $expectedName, string $expectedVersion): void
+    {
+        $result = Utils::getBrowser($userAgent);
+        $this->assertSame($expectedName, $result['name']);
+        $this->assertSame($expectedVersion, $result['version']);
+        // The raw User-Agent must always travel back with the parsed result so a
+        // misidentification is auditable from the logs (Ping / TimeLoggerTrait).
+        $this->assertSame($userAgent, $result['userAgent']);
+    }
+
+    /**
+     * getBrowser() cannot self-detect a confident misidentification: an
+     * unrecognised token silently falls through to another browser branch with a
+     * plausible name/version. The ONLY remedy for the log reader is the raw
+     * User-Agent string, which getBrowser() must return verbatim even when the
+     * parsed name is wrong.
+     *
+     * These agents are known to misidentify on the current parser:
+     *  - iPad Edge (EdgiOS) is reported as Safari because the Edge branch is
+     *    guarded by `platform != 'ipadOS'`.
+     *
+     * @return array<string, array{0: string, 1: string}>
+     */
+    public static function misidentifiedUserAgentProvider(): array
+    {
+        return [
+            // ua, name getBrowser() actually returns (the wrong one)
+            'iPad Edge reported as Safari' => [
+                'Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 EdgiOS/126.0.2592.87 Mobile/15E148 Safari/604.1',
+                'Mobile Safari',
+            ],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('misidentifiedUserAgentProvider')]
+    public function testGetBrowserPreservesRawUserAgentWhenMisidentified(string $userAgent, string $misidentifiedName): void
+    {
+        $result = Utils::getBrowser($userAgent);
+
+        // Document the misidentification: parsed name is NOT the true browser...
+        $this->assertSame($misidentifiedName, $result['name']);
+
+        // ...but the raw User-Agent is preserved verbatim, so the true browser is
+        // recoverable from the log. This is the guard the whole feature rests on.
+        $this->assertSame($userAgent, $result['userAgent']);
+    }
+
 }

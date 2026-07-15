@@ -269,4 +269,41 @@ class ProjectCompletionServiceTest extends AbstractTest
         $service = $this->makeService();
         $this->assertInstanceOf(ProjectCompletionServiceInterface::class, $service);
     }
+
+    #[Test]
+    public function test_successful_finalization_clears_project_counters_exactly_once(): void
+    {
+        // After a project finalizes (DB rollup confirms all segments DONE/SKIPPED and the
+        // transaction commits), the 5 Redis counter keys MUST be cleared so a later
+        // re-analysis of the same PID starts clean. Without this, a stale PROJECT_TOT_SEGMENTS
+        // survives its 24h TTL and both suppresses re-init (doInit's idempotency guard) and
+        // can block completion — the counter-lifecycle other half of the mid-run-reset fix.
+        $pid = 42;
+
+        $redisService = $this->createMock(AnalysisRedisServiceInterface::class);
+        $redisService->method('getProjectWordCounts')->willReturn([
+            'project_segments' => '3039',
+            'num_analyzed'     => '3039',
+            'eq_wc'            => 10.0,
+            'st_wc'            => 8.0,
+        ]);
+        $redisService->method('acquireCompletionLock')->willReturn(true);
+
+        $repository = $this->createStub(ProjectCompletionRepositoryInterface::class);
+        // Single ROLLUP totals row → array_pop() yields it; dbRemaining = 3039 - 3039 = 0 → finalize.
+        $repository->method('getProjectSegmentsTranslationSummary')->willReturn([
+            ['project_segments' => 3039, 'num_analyzed' => 3039, 'eq_wc' => 10.0, 'st_wc' => 8.0],
+        ]);
+        $repository->method('getProjectJobIds')->willReturn([]);
+
+        $redisService->expects($this->once())
+            ->method('clearProjectCounters')
+            ->with($pid);
+
+        // gateRetrySleepMicros = 0: the first DB-gate check already confirms completion, so no
+        // sleep is needed, but pass 0 defensively to keep the test fast.
+        $service = new ProjectCompletionService($redisService, $repository, null, 6, 0);
+
+        $service->tryCloseProject($pid, 'ppwd', 'queue_key', $this->createStub(FeatureSet::class));
+    }
 }

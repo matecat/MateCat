@@ -35,8 +35,7 @@ class UploadPageController extends BaseKleinViewController
             $this->initUploadDir($guid);
         }
 
-        $this->setEmptyCookieValueIfNoHistory(Constants::COOKIE_SOURCE_LANG);
-        $this->setEmptyCookieValueIfNoHistory(Constants::COOKIE_TARGET_LANG);
+        $this->initLanguagePreferenceCookies();
 
         $this->setView('upload.html', [
             'conversion_enabled' => new PHPTalBoolean(!empty(AppConfig::$FILTERS_ADDRESS)),
@@ -66,6 +65,25 @@ class UploadPageController extends BaseKleinViewController
     }
 
     /**
+     * Cookie writer seam: overridable in tests to capture the emitted cookies.
+     */
+    protected function cookieManager(): CookieManager
+    {
+        return new CookieManager();
+    }
+
+    /**
+     * Seeds the source/target language preference cookies with an empty placeholder
+     * value when the client is not already sending them.
+     */
+    protected function initLanguagePreferenceCookies(): void
+    {
+        $cookieManager = $this->cookieManager();
+        $cookieManager->setEmptyCookieValueIfMissing(Constants::COOKIE_SOURCE_LANG);
+        $cookieManager->setEmptyCookieValueIfMissing(Constants::COOKIE_TARGET_LANG);
+    }
+
+    /**
      * @throws Exception
      */
     private function checkDriveFilesOrGetGuid(): ?string
@@ -79,18 +97,7 @@ class UploadPageController extends BaseKleinViewController
             }
 
             $guid = Utils::uuid4();
-            CookieManager::setCookie(
-                "upload_token",
-                $guid,
-                [
-                    'expires' => time() + 86400,
-                    'path' => '/',
-                    'domain' => AppConfig::$COOKIE_DOMAIN,
-                    'secure' => true,
-                    'httponly' => true,
-                    'samesite' => 'Strict',
-                ]
-            );
+            (new CookieManager())->set(Constants::COOKIE_UPLOAD_TOKEN, $guid, time() + 86400);
         }
 
         return $guid;
@@ -101,24 +108,6 @@ class UploadPageController extends BaseKleinViewController
      *
      * @return void
      */
-    private function setEmptyCookieValueIfNoHistory(string $cookieName): void
-    {
-        if (!isset($_COOKIE[$cookieName])) {
-            CookieManager::setCookie(
-                $cookieName,
-                Constants::EMPTY_VAL,
-                [
-                    'expires' => time() + (86400 * 365),
-                    'path' => '/',
-                    'domain' => AppConfig::$COOKIE_DOMAIN,
-                    'secure' => true,
-                    'httponly' => true,
-                    'samesite' => 'None',
-                ]
-            );
-        }
-    }
-
     /**
      * @param string $guid
      *

@@ -158,7 +158,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
             return [];
         }
 
-        return unserialize($this->target_language);
+        return unserialize($this->target_language, ['allowed_classes' => false]);
     }
 
     /**

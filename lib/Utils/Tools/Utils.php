@@ -8,11 +8,11 @@ use DOMDocument;
 use DOMElement;
 use Exception;
 use InvalidArgumentException;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils as ReviewUtils;
+use Random\RandomException;
 use Transliterator;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ErrMailWorker;
@@ -129,15 +129,18 @@ class Utils
         } elseif (preg_match('/Trident/i', $u_agent) || preg_match('/IEMobile/i', $u_agent)) {
             $browserName = 'Internet Explorer Mobile';
             $ub = "IEMobile";
-        } elseif (preg_match('/Firefox/i', $u_agent)) {
+        } elseif (preg_match('/Firefox|FxiOS/i', $u_agent)) {
             $browserName = 'Mozilla Firefox';
-            $ub = "Firefox";
-        } elseif (preg_match('/Chrome/i', $u_agent) and !preg_match('/Opera|OPR/i', $u_agent)) {
+            $ub = "Firefox|FxiOS";
+        } elseif (preg_match('/SamsungBrowser/i', $u_agent)) {
+            $browserName = 'Samsung Internet';
+            $ub = "SamsungBrowser";
+        } elseif (preg_match('/Chrome|CriOS/i', $u_agent) and !preg_match('/Opera|OPR/i', $u_agent)) {
             $browserName = 'Google Chrome';
-            $ub = "Chrome";
+            $ub = "Chrome|CriOS";
         } elseif (preg_match('/Opera|OPR/i', $u_agent)) {
             $browserName = 'Opera';
-            $ub = "Opera";
+            $ub = "OPR|Opera";
         } elseif (preg_match('/Safari/i', $u_agent) || preg_match('/applewebkit.*\(.*khtml.*like.*gecko.*\).*mobile.*$/i', $u_agent)) {
             $browserName = 'Apple Safari';
             $ub = "Safari|Version";
@@ -169,10 +172,10 @@ class Utils
             if (strtolower($matches['browser'][0]) == 'version' && strtolower($matches['browser'][1]) != 'safari') {
                 $version = $matches['version'][1] ?? null;
             } else {
-                $version = $matches['version'][0] ?? null;
+                $version = $matches['version'][0];
             }
         } else {
-            $version = $matches['version'][0] ?? null;
+            $version = $matches['version'][0];
         }
 
         // check if we have a number
@@ -285,36 +288,22 @@ class Utils
     }
 
     /**
-     * Generate a 128bit password with real uniqueness over a single process instance
-     *   N.B. Concurrent requests can collide (Ex: fork)
+     * Generate a cryptographically secure random hex string using random_bytes() (CSPRNG).
      *
-     * Minimum Password Length of 12 Characters
+     * Returns 2 * ceil($maxlength / 2) lowercase hex characters ([0-9a-f]) — i.e.
+     * 4 * ceil($maxlength / 2) bits of entropy. The default (12) yields 12 chars / 48 bits.
+     * Odd $maxlength rounds up by one char; $maxlength <= 0 falls back to 12 chars.
      *
-     * WARNING: the obtained random string MUST NOT be used for security, @use self::uuid4 instead.
-     *
-     * @param int $maxlength
-     * @param bool $more_entropy
+     * @param int $maxlength Desired length in hex chars (rounded up to the next even number)
      *
      * @return string
      */
-    public static function randomString(int $maxlength = 12, bool $more_entropy = false): string
+    public static function randomString(int $maxlength = 12): string
     {
-        $_pwd = md5(uniqid('', true));
-
-        if ($more_entropy) {
-            $_pwd = base64_encode($_pwd); //we want more characters not only [0-9a-f]
-        }
-
-        $pwd = substr($_pwd, 0, 6) . substr($_pwd, -8, 6); //exclude last 2 char2 because they can be == sign
-
-        if ($maxlength > 12) {
-            while (strlen($pwd) < $maxlength) {
-                $pwd .= self::randomString();
-            }
-            $pwd = substr($pwd, 0, $maxlength);
-        }
-
-        return $pwd;
+        /** @noinspection PhpUnhandledExceptionInspection */
+        /** @phpstan-ignore missingType.checkedException */
+        $data = random_bytes(abs((int)ceil($maxlength / 2)) ?: 6);
+        return bin2hex($data);
     }
 
     public static function mysqlTimestamp(int $time): string
@@ -483,7 +472,7 @@ class Utils
      * @see https://digitalbunker.dev/understanding-how-uuids-are-generated/
      * @see https://www.rfc-editor.org/rfc/rfc4122.html
      *
-     * @throws \Random\RandomException
+     * @throws RandomException
      */
     public static function uuid4(): string
     {

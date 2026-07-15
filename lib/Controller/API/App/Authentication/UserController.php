@@ -7,6 +7,8 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Response;
 use Model\Users\Authentication\ChangePasswordModel;
 use Model\Users\Authentication\PasswordRules;
@@ -23,6 +25,8 @@ class UserController extends AbstractStatefulKleinController
 
     /**
      * @return void
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function show(): void
     {
@@ -80,6 +84,7 @@ class UserController extends AbstractStatefulKleinController
 
     /**
      * @return void
+     * @throws LockedResponseException
      */
     public function redeemProject(): void
     {

@@ -242,6 +242,42 @@ class SegmentMetadataDaoInstanceTest extends AbstractTest
         $this->assertIsBool($result);
     }
 
+    // ── destroyGetAllInRangeCache ───────────────────────────────────────────────
+
+    #[Test]
+    public function testDestroyGetAllInRangeCacheReturnsBool(): void
+    {
+        $result = $this->dao->destroyGetAllInRangeCache();
+
+        $this->assertIsBool($result);
+    }
+
+    #[Test]
+    public function testDestroyGetAllInRangeCacheBustsStaleCachedResult(): void
+    {
+        $ttl = 60;
+
+        // Warm the cache for a range where SEGMENT_ID_1 has no metadata yet.
+        $before = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_1, $ttl);
+        $this->assertArrayNotHasKey(self::SEGMENT_ID_1, $before);
+
+        // Insert directly, bypassing save()/upsert() (which already bust this cache), to
+        // simulate any writer unaware of getAllInRange's cache.
+        $this->database->getConnection()->prepare(
+            "INSERT INTO segment_metadata (id_segment, meta_key, meta_value) VALUES (?, ?, ?)"
+        )->execute([self::SEGMENT_ID_1, 'direct_key', 'direct_value']);
+
+        // Without busting, the stale (empty) result is still served from cache.
+        $stillStale = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_1, $ttl);
+        $this->assertArrayNotHasKey(self::SEGMENT_ID_1, $stillStale);
+
+        $this->dao->destroyGetAllInRangeCache();
+
+        $fresh = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_1, $ttl);
+        $this->assertArrayHasKey(self::SEGMENT_ID_1, $fresh);
+        $this->assertCount(1, $fresh[self::SEGMENT_ID_1]);
+    }
+
     // ── getAllInRange (renamed from staticGetAllInRange) ───────────────────────
 
     #[Test]

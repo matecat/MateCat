@@ -4,6 +4,8 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Utils\Currency\ChangeRatesFetcher;
 use Utils\Currency\TranslatedChangeRatesFetcher;
 
@@ -20,6 +22,10 @@ class FetchChangeRatesController extends KleinController
         return new TranslatedChangeRatesFetcher();
     }
 
+    /**
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
+     */
     public function fetch(): void
     {
         $changeRatesFetcher = $this->getChangeRatesFetcher();
