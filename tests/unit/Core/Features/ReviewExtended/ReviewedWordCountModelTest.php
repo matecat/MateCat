@@ -3,6 +3,7 @@
 namespace Matecat\Core\Features\ReviewExtended;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryWithCategoryStruct;
@@ -17,6 +18,16 @@ use RuntimeException;
 
 class ReviewedWordCountModelTest extends AbstractTest
 {
+    private IDatabase $dbStub;
+    private \PDOStatement $stmtStub;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        [$this->dbStub, , $this->stmtStub] = $this->createDatabaseMock();
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+    }
+
     // ─────────────────────────────────────────────────────────────────
     // Constructor null guards
     // ─────────────────────────────────────────────────────────────────
@@ -30,7 +41,7 @@ class ReviewedWordCountModelTest extends AbstractTest
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Chunk is required');
 
-        new ReviewedWordCountModel($event, $this->createStub(CounterModel::class), []);
+        new ReviewedWordCountModel($event, $this->createStub(CounterModel::class), [], $this->createStub(IDatabase::class));
     }
 
     #[Test]
@@ -47,7 +58,7 @@ class ReviewedWordCountModelTest extends AbstractTest
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Segment is required');
 
-        new ReviewedWordCountModel($event, $this->createStub(CounterModel::class), []);
+        new ReviewedWordCountModel($event, $this->createStub(CounterModel::class), [], $this->createStub(IDatabase::class));
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -393,7 +404,8 @@ class ReviewedWordCountModelTest extends AbstractTest
         $model = new ReviewedWordCountModel(
             $event,
             $counterModel ?? $this->createStub(CounterModel::class),
-            $chunkReviews
+            $chunkReviews,
+            $this->dbStub
         );
 
         if ($sourcePagesWithFinalRevisions !== null) {

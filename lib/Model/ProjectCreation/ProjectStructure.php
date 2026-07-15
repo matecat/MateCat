@@ -56,8 +56,6 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public int $pretranslate_101 = 1;
     public int $only_private = 0;
     public ?string $tm_prioritization = null;
-    /** @var array<string, int> */
-    public array $target_language_mt_engine_association = [];
     public mixed $public_tm_penalty = null;
 
     // Upload / environment

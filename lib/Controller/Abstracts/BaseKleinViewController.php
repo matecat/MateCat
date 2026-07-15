@@ -5,7 +5,9 @@ namespace Controller\Abstracts;
 use Controller\API\Commons\ViewValidators\MandatoryKeysValidator;
 use Controller\Exceptions\RenderTerminatedException;
 use Exception;
+use InvalidArgumentException;
 use Klein\App;
+use Klein\Exceptions\LockedResponseException;
 use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Request;
 use Klein\Response;
@@ -45,7 +47,21 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
     /**
      * @var integer
      */
-    protected int $httpCode;
+    protected int $httpCode = 500;
+
+    /**
+     * Routed entry point for every view controller.
+     *
+     * Concrete controllers build their view (setView) and emit it (render).
+     * May terminate the request (`never`) — a covariant-compatible return type.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function renderView(): void
+    {
+        $this->render();
+    }
 
     /**
      * @param Request $request
@@ -171,10 +187,11 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
      *
      * @return never
      *
+     * @throws LockedResponseException
      * @throws RenderTerminatedException
      * @throws ResponseAlreadySentException
      * @throws \Psr\Log\InvalidArgumentException
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function render(?int $code = null): never
     {
@@ -199,7 +216,24 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
     {
         header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . $_SESSION['wanted_url'], false);
         unset($_SESSION['wanted_url']);
-        exit;
+
+        if (AppConfig::$ENV === 'testing') {
+            throw new RenderTerminatedException();
+        }
+
+        die();
+    }
+
+    public function redirectToSignin(): never
+    {
+        $_SESSION['wanted_url'] = ltrim($_SERVER['REQUEST_URI'], '/');
+        header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . "signin", false);
+
+        if (AppConfig::$ENV === 'testing') {
+            throw new RenderTerminatedException();
+        }
+
+        die();
     }
 
 }

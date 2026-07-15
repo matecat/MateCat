@@ -89,6 +89,7 @@ class CopyAllSourceToTargetControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
+        $this->setProp('database', obtainTestDatabase());
 
         $user        = new UserStruct();
         $user->uid   = $this->userId(self::BASE);
@@ -96,7 +97,7 @@ class CopyAllSourceToTargetControllerTest extends AbstractTest
         $this->setProp('user', $user);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
     }
 
     /**
@@ -191,7 +192,7 @@ class CopyAllSourceToTargetControllerTest extends AbstractTest
      */
     private function enableTranslationVersionsFeature(): void
     {
-        (new MetadataDao())->set($this->projectId(self::BASE), 'features', 'translation_versions');
+        (new MetadataDao(obtainTestDatabase()))->set($this->projectId(self::BASE), 'features', 'translation_versions');
     }
 
     // ─── validateTheRequest ───

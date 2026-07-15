@@ -124,7 +124,7 @@ trait LaraAuthTrait
     protected function resolveLaraEngine(int $engineId): Lara
     {
         /** @var Lara $engine */
-        $engine = EnginesFactory::getInstance($engineId, Lara::class);
+        $engine = EnginesFactory::getInstance($engineId, $this->getDatabase(), Lara::class);
 
         return $engine;
     }

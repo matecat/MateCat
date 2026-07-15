@@ -46,6 +46,22 @@ const SocketListener = ({isAuthenticated, userId}) => {
     bulk_segment_status_change: (data) => {
       SegmentActions.bulkChangeStatusCallback(data.segment_ids, data.status)
     },
+    segment_disabled: (data) => {
+      SegmentActions.updateSegmentDisabledState(data.id_segment, true)
+      CatToolActions.addNotification({
+        title: 'Segment disabled',
+        text: 'A segment has been disabled by the project owner and is now read-only.',
+        type: 'warning',
+      })
+    },
+    segment_enabled: (data) => {
+      SegmentActions.updateSegmentDisabledState(data.id_segment, false)
+      CatToolActions.addNotification({
+        title: 'Segment enabled',
+        text: 'A segment has been re-enabled by the project owner and can be translated again.',
+        type: 'info',
+      })
+    },
     glossary_get: (data) => {
       if (!Array.isArray(data.terms)) {
         const trackingMessage = `Glossary GET terms is not Array: ${
@@ -232,7 +248,12 @@ const SocketListener = ({isAuthenticated, userId}) => {
 
   const {connectionState, connectionError} = useSocketLayer(
     getSource(),
-    {userId: userId?.toString(), uuidV4: uuidV4(), jobId: config.id_job},
+    {
+      userId: userId?.toString(),
+      uuidV4: uuidV4(),
+      jobId: config.id_job,
+      projectId: config.id_project,
+    },
     isAuthenticated,
     eventHandlers,
   )

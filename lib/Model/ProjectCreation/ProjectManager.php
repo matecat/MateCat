@@ -9,7 +9,6 @@ use Model\ActivityLog\ActivityLogStruct;
 use Model\Concerns\LogsMessages;
 use Model\ConnectedServices\GDrive\Session;
 use Model\Conversion\ZipArchiveHandler;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -109,21 +108,22 @@ class ProjectManager
      * ProjectManager constructor.
      *
      * @param ProjectStructure $projectStructure
+     * @param IDatabase $dbHandler
      * @throws ReflectionException
      * @throws Exception
      */
-    public function __construct(ProjectStructure $projectStructure)
+    public function __construct(ProjectStructure $projectStructure, IDatabase $dbHandler)
     {
         $this->logger = LoggerFactory::getLogger('project_manager');
 
         $this->projectStructure = $projectStructure;
 
+        $this->dbHandler = $dbHandler;
+
         //get the TMX management component from the factory
-        $this->tmxServiceWrapper = new TMSService();
+        $this->tmxServiceWrapper = new TMSService($this->dbHandler);
 
-        $this->dbHandler = Database::obtain();
-
-        $this->features = new FeatureSet($this->getRequestedFeatures());
+        $this->features = new FeatureSet($this->dbHandler, $this->getRequestedFeatures());
 
         if (!empty($this->projectStructure->id_customer)) {
             $this->features->loadAutoActivableOwnerFeatures($this->projectStructure->id_customer);
@@ -149,7 +149,7 @@ class ProjectManager
 
         $this->projectStructure->array_files_meta = $array_files_meta;
 
-        $this->filesMetadataDao = new MetadataDao();
+        $this->filesMetadataDao = new MetadataDao($this->dbHandler);
     }
 
     /**
@@ -164,6 +164,7 @@ class ProjectManager
             $this->features,
             $this->filesMetadataDao,
             new SegmentMetadataMapper(),
+            $this->dbHandler,
             $this->logger,
         );
     }
@@ -215,6 +216,7 @@ class ProjectManager
         return $this->jobCreationService ??= new JobCreationService(
             $this->features,
             $this->logger,
+            $this->dbHandler,
         );
     }
 
@@ -312,7 +314,7 @@ class ProjectManager
      */
     protected function getProjectsMetadataDao(): ProjectsMetadataDao
     {
-        return new ProjectsMetadataDao();
+        return new ProjectsMetadataDao($this->dbHandler);
     }
 
     /**
@@ -365,7 +367,7 @@ class ProjectManager
      */
     protected function getTeamDao(): TeamDao
     {
-        return new TeamDao();
+        return new TeamDao($this->dbHandler);
     }
 
     /**
@@ -420,7 +422,7 @@ class ProjectManager
     {
         if (!empty($this->projectStructure->session['uid'])) {
             $this->projectStructure->session['user'] = new UserStruct($this->projectStructure->session['user']);
-            $this->gdriveSession = Session::getInstanceForCLI($this->projectStructure->session);
+            $this->gdriveSession = Session::getInstanceForCLI($this->dbHandler, $this->projectStructure->session);
         }
     }
 
@@ -768,12 +770,12 @@ class ProjectManager
             $this->projectStructure->result['analyze_url'] = $this->getAnalyzeURL();
         }
 
-        $db = Database::obtain();
+        $db = $this->dbHandler;
         $db->begin();
 
         try {
-            (new ProjectDao())->destroyCacheForProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
-            (new ProjectDao())->setCacheTTL(60 * 60 * 24)->getProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
+            (new ProjectDao($this->dbHandler))->destroyCacheForProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
+            (new ProjectDao($this->dbHandler))->setCacheTTL(60 * 60 * 24)->getProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
 
             $this->features->dispatch(new PostProjectCreateEvent($this->projectStructure));
 

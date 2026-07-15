@@ -7,12 +7,17 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Model\FeaturesBase\FeatureCodes;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\Projects\ProjectDao;
+use Model\Segments\SegmentDao;
 use Model\Translations\SegmentTranslationDao;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use ReflectionException;
 use RuntimeException;
@@ -90,14 +95,14 @@ class CopyAllSourceToTargetController extends KleinController
         $database = $this->getDatabase();
         $database->begin();
 
-        $features = $chunk->getProject()->getFeaturesSet();
+        $features = FeatureSet::forProject($chunk->getProject(new ProjectDao($this->getDatabase())), $this->getDatabase());
 
-        $batchEventCreator = new TranslationEventsHandler($chunk);
+        $batchEventCreator = new TranslationEventsHandler($chunk, new TranslationEventDao($this->getDatabase()));
         $batchEventCreator->setFeatureSet($features);
-        $batchEventCreator->setProject($chunk->getProject());
+        $batchEventCreator->setProject($chunk->getProject(new ProjectDao($this->getDatabase())));
 
         $source_page = ReviewUtils::revisionNumberToSourcePage($revision_number);
-        $segments = $chunk->getSegments();
+        $segments = $chunk->getSegments(new SegmentDao($this->getDatabase()));
 
         $affected_rows = 0;
 
@@ -126,9 +131,9 @@ class CopyAllSourceToTargetController extends KleinController
                 throw new RuntimeException($e->getMessage(), -4);
             }
 
-            if ($chunk->getProject()->hasFeature(FeatureCodes::TRANSLATION_VERSIONS)) {
+            if ($features->hasFeature(FeatureCodes::TRANSLATION_VERSIONS)) {
                 try {
-                    $segmentTranslationEventModel = new TranslationEvent($old_translation, $new_translation, $this->user, $source_page);
+                    $segmentTranslationEventModel = new TranslationEvent($old_translation, $new_translation, $this->user, $source_page, null, new TranslationEventDao($this->getDatabase()), new SegmentDao($this->getDatabase()));
                     $batchEventCreator->addEvent($segmentTranslationEventModel);
                 } catch (Exception) {
                     $database->rollback();
@@ -139,7 +144,7 @@ class CopyAllSourceToTargetController extends KleinController
         }
 
         // save all events
-        $batchEventCreator->save(new BatchReviewProcessor());
+        $batchEventCreator->save(new BatchReviewProcessor(new ChunkReviewDao($this->getDatabase())));
 
         $data = [
             'code' => 1,

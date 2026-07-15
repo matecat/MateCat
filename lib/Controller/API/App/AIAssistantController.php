@@ -27,7 +27,7 @@ class AIAssistantController extends KleinController
             throw new Exception('OpenAI API key not set');
         }
 
-        $json = json_decode($this->request->body(), true);
+        $json = json_decode($this->request->body() ?? '', true);
         if (!is_array($json)) {
             throw new InvalidArgumentException('Invalid JSON body');
         }
@@ -109,7 +109,7 @@ class AIAssistantController extends KleinController
             throw new Exception('OpenAI API key not set');
         }
 
-        $json = json_decode($this->request->body(), true);
+        $json = json_decode($this->request->body() ?? '', true);
         if (!is_array($json)) {
             throw new InvalidArgumentException('Invalid JSON body');
         }
@@ -197,7 +197,7 @@ class AIAssistantController extends KleinController
             throw new Exception('Gemini API key not set');
         }
 
-        $json = json_decode($this->request->body(), true);
+        $json = json_decode($this->request->body() ?? '', true);
         if (!is_array($json)) {
             throw new InvalidArgumentException('Invalid JSON body');
         }
@@ -310,7 +310,7 @@ class AIAssistantController extends KleinController
      * @throws Exception
      * @throws InvalidArgumentException
      */
-    private function enqueueWorker(array $params): void
+    protected function enqueueWorker(array $params): void
     {
         WorkerClient::enqueue(self::AI_ASSISTANT_EXPLAIN_MEANING, AIAssistantWorker::class, $params, ['persistent' => WorkerClient::$_HANDLER->persistent]);
     }

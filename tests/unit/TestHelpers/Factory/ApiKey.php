@@ -22,7 +22,7 @@ class ApiKey extends Base
             'enabled' => true
         ], $values);
 
-        $dao = new ApiKeyDao(Database::obtain());
+        $dao = new ApiKeyDao(obtainTestDatabase());
         $struct = new ApiKeyStruct($values);
 
         return $dao->create($struct);

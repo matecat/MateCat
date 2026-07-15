@@ -124,7 +124,7 @@ class ProjectCreationWorker extends AbstractWorker
      */
     protected function createProjectManager(ProjectStructure $structure): ProjectManager
     {
-        return new ProjectManager($structure);
+        return new ProjectManager($structure, $this->database);
     }
 
     /**

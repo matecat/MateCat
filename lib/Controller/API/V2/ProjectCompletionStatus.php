@@ -6,15 +6,20 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Controller\API\Commons\Validators\ProjectValidator;
 use Exception;
+use Model\FeaturesBase\FeatureSet;
 use Model\Projects\ProjectStruct;
 use Plugins\Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
 use RuntimeException;
+use TypeError;
 
 class ProjectCompletionStatus extends KleinController
 {
 
     private ?ProjectStruct $project = null;
 
+    /**
+     * @throws TypeError
+     */
     protected function registerValidators(): void
     {
         $projectValidator = new ProjectValidator($this);
@@ -49,7 +54,8 @@ class ProjectCompletionStatus extends KleinController
     public function status(): void
     {
         $model = new ProjectCompletionStatusModel(
-            $this->project ?? throw new RuntimeException('Project not found')
+            $this->project ?? throw new RuntimeException('Project not found'),
+            new FeatureSet($this->getDatabase()),
         );
         $this->response->json([
             'project_status' => $model->getStatus()

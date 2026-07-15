@@ -361,7 +361,7 @@ class CommentController extends KleinController
         $users = [];
 
         if (str_contains($message, "{@team@}")) {
-            $project = $job->getProject();
+            $project = $job->getProject(new ProjectDao($this->getDatabase()));
 
             if ($project->id_team === null) {
                 return [];
@@ -466,7 +466,7 @@ class CommentController extends KleinController
             ]
         ]);
 
-        $queueHandler = new AMQHandler();
+        $queueHandler = $this->getQueueHandler();
         $queueHandler->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message));
     }
 
@@ -541,8 +541,20 @@ class CommentController extends KleinController
             ]
         ]);
 
-        $queueHandler = new AMQHandler();
+        $queueHandler = $this->getQueueHandler();
         $queueHandler->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message));
+    }
+
+    /**
+     * Test seam: allows a Testable subclass to inject a queue handler backed by a
+     * stubbed transport, avoiding a real broker connection in unit tests.
+     *
+     * @return AMQHandler
+     * @throws \Stomp\Exception\ConnectionException
+     */
+    protected function getQueueHandler(): AMQHandler
+    {
+        return new AMQHandler();
     }
 
     /**
@@ -557,7 +569,7 @@ class CommentController extends KleinController
      */
     private function sendEmail(CommentStruct $comment, JobStruct $job, array $users, array $users_mentioned): void
     {
-        $jobUrlStruct = JobUrlBuilder::createFromJobStruct($job, [
+        $jobUrlStruct = JobUrlBuilder::createFromJobStruct($this->getDatabase(), $job, [
             'id_segment' => $comment->id_segment,
             'skip_check_segment' => true
         ]);
@@ -589,15 +601,15 @@ class CommentController extends KleinController
         $project_data = $this->projectData($job->id_project);
 
         foreach ($users_mentioned as $user_mentioned) {
-            $email = new CommentMentionEmail($user_mentioned, $comment, $url, $project_data[0], $job);
+            $email = new CommentMentionEmail($user_mentioned, $comment, $url, $project_data[0], $job, $this->getDatabase());
             $email->send();
         }
 
         foreach ($users as $user) {
             if ($comment->message_type == CommentDao::TYPE_RESOLVE) {
-                $email = new CommentResolveEmail($user, $comment, $url, $project_data[0], $job);
+                $email = new CommentResolveEmail($user, $comment, $url, $project_data[0], $job, $this->getDatabase());
             } else {
-                $email = new CommentEmail($user, $comment, $url, $project_data[0], $job);
+                $email = new CommentEmail($user, $comment, $url, $project_data[0], $job, $this->getDatabase());
             }
 
             $email->send();

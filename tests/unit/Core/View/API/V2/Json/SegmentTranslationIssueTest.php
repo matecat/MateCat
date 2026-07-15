@@ -169,10 +169,9 @@ class SegmentTranslationIssueTest extends AbstractTest
         $this->view->cleanDownloadResource();
     }
 
-    public function testConstructorWithoutDaoStillWorks(): void
+    public function testConstructorWithDao(): void
     {
-        // Verifies backward-compatible construction (no args)
-        $view = new SegmentTranslationIssue();
+        $view = new SegmentTranslationIssue($this->commentStub);
         $this->assertInstanceOf(SegmentTranslationIssue::class, $view);
     }
 }

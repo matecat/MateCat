@@ -40,9 +40,9 @@ class TestableAbstractStatus extends AbstractStatus
         $this->project         = $project;
         $this->_project_data   = $_project_data;
         $this->featureSet      = $features;
-        $this->analysisDao     = $analysisDao ?? new AnalysisDao();
-        $this->jobDao          = $jobDao ?? new JobDao();
-        $this->fileMetadataDao = $fileMetadataDao ?? new FileMetadataDao();
+        $this->analysisDao     = $analysisDao ?? new AnalysisDao(obtainTestDatabase());
+        $this->jobDao          = $jobDao ?? new JobDao(obtainTestDatabase());
+        $this->fileMetadataDao = $fileMetadataDao ?? new FileMetadataDao(obtainTestDatabase());
     }
 
     public function callIsOutsourceEnabled(string $targetLang, string $id_customer, int $idJob): bool
@@ -93,7 +93,7 @@ class AbstractStatusTest extends AbstractTest
     {
         $status = new TestableAbstractStatus(
             $this->makeProjectData(),
-            new FeatureSet(),
+            new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
             $this->makeProjectStruct()
         );
 
@@ -107,7 +107,7 @@ class AbstractStatusTest extends AbstractTest
     {
         $status = new TestableAbstractStatus(
             $this->makeProjectData(),
-            new FeatureSet(),
+            new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
             $this->makeProjectStruct()
         );
 
@@ -123,7 +123,7 @@ class AbstractStatusTest extends AbstractTest
 
         $status = new TestableAbstractStatus(
             $this->makeProjectData(),
-            new FeatureSet(),
+            new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
             $this->makeProjectStruct(),
             $user
         );
@@ -136,7 +136,7 @@ class AbstractStatusTest extends AbstractTest
     {
         $status = new TestableAbstractStatus(
             $this->makeProjectData(),
-            new FeatureSet(),
+            new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
             $this->makeProjectStruct()
         );
 
@@ -151,7 +151,7 @@ class AbstractStatusTest extends AbstractTest
     {
         $status = new TestableAbstractStatus(
             $this->makeProjectData(),
-            new FeatureSet(),
+            new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
             $this->makeProjectStruct()
         );
 
@@ -181,7 +181,7 @@ class AbstractStatusTest extends AbstractTest
 
         $status = new TestableAbstractStatus(
             $projectData,
-            new FeatureSet(),
+            new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
             $this->makeProjectStruct()
         );
 
@@ -205,8 +205,11 @@ class AbstractStatusTest extends AbstractTest
         $jobStruct->target = 'it-IT';
         $jobStruct->payable_rates = '{"NO_MATCH":100,"50%-74%":100,"75%-84%":60,"85%-94%":60,"95%-99%":60,"100%":30,"100%_PUBLIC":30,"REPETITIONS":30,"INTERNAL":60,"MT":85,"ICE":0}';
 
+        [$dbStub] = $this->createDatabaseMock();
+
         $mock = $this->createStub(JobDao::class);
         $mock->method('getByIdAndPasswordOrFail')->willReturn($jobStruct);
+        $mock->method('getDatabaseHandler')->willReturn($dbStub);
 
         return $mock;
     }
@@ -261,9 +264,11 @@ class AbstractStatusTest extends AbstractTest
         ?ProjectStruct $project = null,
         ?UserStruct $user = null
     ): TestableAbstractStatus {
+        [$dbStub] = $this->createDatabaseMock();
+
         return new TestableAbstractStatus(
             $projectData ?: $this->makeProjectData(),
-            new FeatureSet(),
+            new FeatureSet($dbStub),
             $project ?? $this->makeProjectStruct(),
             $user,
             $this->makeAnalysisDaoMock($resultSet),

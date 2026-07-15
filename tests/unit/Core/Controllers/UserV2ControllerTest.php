@@ -8,6 +8,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Users\MetadataStruct;
 use Model\Users\UserStruct;
@@ -77,8 +78,9 @@ class UserV2ControllerTest extends AbstractTest
 
         $this->setProp('response', $this->responseMock);
         $this->setProp('request', new Request());
+        $this->setProp('database', obtainTestDatabase());
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 
         $user = new UserStruct();
         $user->uid = $this->userId(self::BASE);
@@ -218,6 +220,39 @@ class UserV2ControllerTest extends AbstractTest
         $this->assertSame((string) $this->userId(self::BASE), (string) $payload->uid);
         $this->assertSame('layout', $payload->key);
         $this->assertSame('horizontal', $payload->value);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
+     * @throws PDOException
+     * @throws PHPUnitException
+     */
+    #[Test]
+    public function setMetadata_returns_metadata_struct_payload_on_success_with_array_value(): void
+    {
+        $this->setBody(['key' => 'preferences', 'value' => ['theme' => 'dark', 'notifications' => 'enabled']]);
+
+        $captured = [];
+        $this->responseMock->method('json')
+            ->willReturnCallback(function (mixed $data) use (&$captured) {
+                $captured[] = $data;
+                return $this->responseMock;
+            });
+
+        $this->controller->setMetadata();
+
+        $conn = $this->seedConnection();
+        $conn->exec("DELETE FROM user_metadata WHERE uid = " . $this->userId(self::BASE));
+
+        $this->assertCount(1, $captured, 'setMetadata must emit exactly one json payload');
+        $payload = $captured[0];
+        $this->assertInstanceOf(MetadataStruct::class, $payload);
+        $this->assertSame((string) $this->userId(self::BASE), (string) $payload->uid);
+        $this->assertSame('preferences', $payload->key);
+        $this->assertIsArray($payload->value);
+        $this->assertSame('dark', $payload->value['theme']);
+        $this->assertSame('enabled', $payload->value['notifications']);
     }
 
     /**

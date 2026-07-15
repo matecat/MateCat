@@ -22,7 +22,7 @@ class NONEEngineIntegrationTest extends AbstractTest
         $struct = EngineStruct::getStruct();
         $struct->class_load = 'NONE';
 
-        $instance = EnginesFactory::createTempInstance($struct);
+        $instance = EnginesFactory::createTempInstance($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
         self::assertInstanceOf(NONE::class, $instance);
 
         /** @var NONE $instance */

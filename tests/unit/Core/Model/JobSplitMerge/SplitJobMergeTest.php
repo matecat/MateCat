@@ -12,6 +12,7 @@ use Model\FeaturesBase\Hook\Event\Run\PostJobSplittedEvent;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
+use Model\Translators\JobsTranslatorsDao;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Jobs\MetadataStruct;
 use Model\JobSplitMerge\SplitMergeProjectData;
@@ -51,6 +52,16 @@ class SplitJobMergeTest extends AbstractTest
         $this->dbHandler = $this->createMock(IDatabase::class);
         $this->features  = $this->createMock(FeatureSet::class);
         $logger          = $this->createStub(MatecatLogger::class);
+
+        // Allow JobsTranslatorsDao (used inline in mergeALL) to prepare+execute without a real DB.
+        $pdoStmt = $this->createStub(\PDOStatement::class);
+        $pdoStmt->queryString = '';
+        $pdoStmt->method('execute')->willReturn(true);
+        $pdoStmt->method('fetchAll')->willReturn([]);
+        $pdoStmt->method('fetch')->willReturn(false);
+        $pdo = $this->createStub(\PDO::class);
+        $pdo->method('prepare')->willReturn($pdoStmt);
+        $this->dbHandler->method('getConnection')->willReturn($pdo);
 
         $this->service = new TestableJobSplitMergeService($this->dbHandler, $this->features, $logger);
 

@@ -6,11 +6,10 @@ namespace Matecat\Core\Plugins\Features\ReviewExtended;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\IDatabase;
-use Model\FeaturesBase\BasicFeatureStruct;
-use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
@@ -34,7 +33,7 @@ class BatchReviewProcessorStubJobStruct extends JobStruct
         $this->projectStruct = $projectStruct;
     }
 
-    public function getProject(int $ttl = 86400): ProjectStruct
+    public function getProject(ProjectDao $dao, int $ttl = 86400): ProjectStruct
     {
         return $this->projectStruct;
     }
@@ -59,14 +58,9 @@ class BatchReviewProcessorTest extends AbstractTest
         [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock();
 
         $this->chunkReviewDaoStub = $this->createStub(ChunkReviewDao::class);
-
-        $featureSet = $this->createStub(FeatureSet::class);
-        $featureSet->method('getFeaturesStructs')->willReturn([
-            new BasicFeatureStruct(['feature_code' => 'review_extended']),
-        ]);
+        $this->chunkReviewDaoStub->method('getDatabaseHandler')->willReturn($this->dbStub);
 
         $projectStub = $this->createStub(ProjectStruct::class);
-        $projectStub->method('getFeaturesSet')->willReturn($featureSet);
         $projectStub->id = 1;
 
         $this->chunk = new BatchReviewProcessorStubJobStruct([
@@ -98,13 +92,6 @@ class BatchReviewProcessorTest extends AbstractTest
     public function constructorAcceptsInjectedDao(): void
     {
         $processor = new BatchReviewProcessor($this->chunkReviewDaoStub);
-        $this->assertInstanceOf(BatchReviewProcessor::class, $processor);
-    }
-
-    #[Test]
-    public function constructorUsesDefaultDaoWhenNoneProvided(): void
-    {
-        $processor = new BatchReviewProcessor();
         $this->assertInstanceOf(BatchReviewProcessor::class, $processor);
     }
 
@@ -183,6 +170,7 @@ class BatchReviewProcessorTest extends AbstractTest
         $createdReview->method('getChunk')->willReturn($this->chunk);
 
         $daoMock = $this->createMock(ChunkReviewDao::class);
+        $daoMock->method('getDatabaseHandler')->willReturn($this->dbStub);
         $daoMock->method('findChunkReviews')->willReturn([]);
         $daoMock->expects($this->once())
             ->method('createRecord')

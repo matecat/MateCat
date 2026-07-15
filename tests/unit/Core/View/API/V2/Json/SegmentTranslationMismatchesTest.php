@@ -15,6 +15,11 @@ use View\API\V2\Json\SegmentTranslationMismatches;
 #[CoversClass(SegmentTranslationMismatches::class)]
 class SegmentTranslationMismatchesTest extends AbstractTest
 {
+    private function featureSet(): FeatureSet
+    {
+        return new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
+    }
+
     private function makeJobStruct(int $id = 1, string $password = 'abc123'): JobStruct
     {
         $job           = new JobStruct();
@@ -38,7 +43,7 @@ class SegmentTranslationMismatchesTest extends AbstractTest
      */
     public function testConstructorAcceptsEmptyData(): void
     {
-        $view = new SegmentTranslationMismatches([], $this->makeJobStruct(), 0);
+        $view = new SegmentTranslationMismatches([], $this->makeJobStruct(), 0, $this->featureSet());
         $this->assertInstanceOf(SegmentTranslationMismatches::class, $view);
     }
 
@@ -47,7 +52,7 @@ class SegmentTranslationMismatchesTest extends AbstractTest
      */
     public function testRenderReturnsExpectedStructureForEmptyData(): void
     {
-        $view   = new SegmentTranslationMismatches([], $this->makeJobStruct(), 0, null, $this->makeMetadataDao());
+        $view   = new SegmentTranslationMismatches([], $this->makeJobStruct(), 0, $this->featureSet(), $this->makeMetadataDao());
         $result = $view->render();
 
         $this->assertArrayHasKey('editable', $result);
@@ -63,7 +68,7 @@ class SegmentTranslationMismatchesTest extends AbstractTest
      */
     public function testRenderPropagationsValue(): void
     {
-        $view   = new SegmentTranslationMismatches([], $this->makeJobStruct(), 3, null, $this->makeMetadataDao());
+        $view   = new SegmentTranslationMismatches([], $this->makeJobStruct(), 3, $this->featureSet(), $this->makeMetadataDao());
         $result = $view->render();
 
         $this->assertSame(3, $result['prop_available']);
@@ -85,7 +90,7 @@ class SegmentTranslationMismatchesTest extends AbstractTest
             ],
         ];
 
-        $view   = new SegmentTranslationMismatches($data, $this->makeJobStruct(), 0, null, $this->makeMetadataDao());
+        $view   = new SegmentTranslationMismatches($data, $this->makeJobStruct(), 0, $this->featureSet(), $this->makeMetadataDao());
         $result = $view->render();
 
         $this->assertCount(1, $result['editable']);
@@ -111,7 +116,7 @@ class SegmentTranslationMismatchesTest extends AbstractTest
             ],
         ];
 
-        $view   = new SegmentTranslationMismatches($data, $this->makeJobStruct(), 0, null, $this->makeMetadataDao());
+        $view   = new SegmentTranslationMismatches($data, $this->makeJobStruct(), 0, $this->featureSet(), $this->makeMetadataDao());
         $result = $view->render();
 
         $this->assertCount(0, $result['editable']);
@@ -144,7 +149,7 @@ class SegmentTranslationMismatchesTest extends AbstractTest
             ],
         ];
 
-        $view   = new SegmentTranslationMismatches($data, $this->makeJobStruct(), 1, null, $this->makeMetadataDao());
+        $view   = new SegmentTranslationMismatches($data, $this->makeJobStruct(), 1, $this->featureSet(), $this->makeMetadataDao());
         $result = $view->render();
 
         $this->assertCount(1, $result['editable']);
@@ -172,7 +177,7 @@ class SegmentTranslationMismatchesTest extends AbstractTest
             ],
         ];
 
-        $view = new SegmentTranslationMismatches($data, $job, 0, null, $this->makeMetadataDao());
+        $view = new SegmentTranslationMismatches($data, $job, 0, $this->featureSet(), $this->makeMetadataDao());
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('JobStruct::$id must not be null');
@@ -199,7 +204,7 @@ class SegmentTranslationMismatchesTest extends AbstractTest
             ],
         ];
 
-        $view = new SegmentTranslationMismatches($data, $job, 0, null, $this->makeMetadataDao());
+        $view = new SegmentTranslationMismatches($data, $job, 0, $this->featureSet(), $this->makeMetadataDao());
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('JobStruct::$password must not be null');
@@ -211,8 +216,8 @@ class SegmentTranslationMismatchesTest extends AbstractTest
      */
     public function testConstructorCreatesDefaultFeatureSet(): void
     {
-        // Passing null featureSet — constructor should create one internally
-        $view   = new SegmentTranslationMismatches([], $this->makeJobStruct(), 0, null, $this->makeMetadataDao());
+        // FeatureSet is now required — verify it works when explicitly passed
+        $view   = new SegmentTranslationMismatches([], $this->makeJobStruct(), 0, $this->featureSet(), $this->makeMetadataDao());
         $result = $view->render();
 
         $this->assertIsArray($result);
@@ -223,7 +228,7 @@ class SegmentTranslationMismatchesTest extends AbstractTest
      */
     public function testConstructorAcceptsExplicitFeatureSet(): void
     {
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $view       = new SegmentTranslationMismatches([], $this->makeJobStruct(), 0, $featureSet, $this->makeMetadataDao());
         $result     = $view->render();
 

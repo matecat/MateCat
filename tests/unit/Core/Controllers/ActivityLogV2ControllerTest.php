@@ -75,7 +75,8 @@ class ActivityLogV2ControllerTest extends AbstractTest
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createMock(MatecatLogger::class));
-        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet());
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
     }
 
     /**
@@ -100,7 +101,7 @@ class ActivityLogV2ControllerTest extends AbstractTest
         $this->seedJob(self::BASE, $owner, self::JOB_PASSWORD);
         $this->seedSegment(self::BASE);
 
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec(
             "INSERT IGNORE INTO activity_log (ID, id_project, id_job, action, ip, uid, event_date) VALUES ("
             . self::ACTIVITY_ID . ", " . $this->projectId(self::BASE) . ", " . $this->jobId(self::BASE)
@@ -113,7 +114,7 @@ class ActivityLogV2ControllerTest extends AbstractTest
      */
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM activity_log WHERE ID = " . self::ACTIVITY_ID);
         $this->cleanFragments(self::BASE);
     }

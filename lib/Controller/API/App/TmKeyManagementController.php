@@ -41,7 +41,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
         $idJob = $this->request->param('id_job');
         $password = $this->request->param('password');
 
-        $chunk = (new CatUtils())->getJobFromIdAndAnyPassword($idJob, $password);
+        $chunk = (new CatUtils($this->getDatabase()))->getJobFromIdAndAnyPassword($idJob, $password);
 
         if (empty($chunk)) {
             $this->response->status()->setCode(404);
@@ -73,15 +73,15 @@ class TmKeyManagementController extends AbstractStatefulKleinController
             return;
         }
 
-        if ($this->getUser()->email == $chunk->status_owner) {
+        if ($this->getUser()->email == $chunk->owner) {
             $userRole = Filter::OWNER;
-        } elseif ((new CatUtils())->isRevisionFromIdJobAndPassword($idJob, $password)) {
+        } elseif ((new CatUtils($this->getDatabase()))->isRevisionFromIdJobAndPassword($idJob, $password)) {
             $userRole = Filter::ROLE_REVISOR;
         } else {
             $userRole = Filter::ROLE_TRANSLATOR;
         }
 
-        $userKeys = new UserKeysModel($this->getUser(), $userRole);
+        $userKeys = new UserKeysModel($this->getUser(), $this->getDatabase(), $userRole);
         $keys = $userKeys->getKeys($chunk->tm_keys);
 
         $this->response->json([
@@ -181,7 +181,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
                 $struct = EngineStruct::getStruct();
                 $struct->class_load = $engineName;
                 $struct->type = EngineConstants::MT;
-                $engine = EnginesFactory::createTempInstance($struct);
+                $engine = EnginesFactory::createTempInstance($struct, $this->getDatabase());
 
                 if ($engine->isAdaptiveMT()) {
                      //retrieve OWNER EnginesFactory License
@@ -191,7 +191,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
                         if (!is_numeric($engineId)) {
                             continue;
                         }
-                        $engine = EnginesFactory::getInstance((int)$engineId, AbstractEngine::class);
+                        $engine = EnginesFactory::getInstance((int)$engineId, $this->getDatabase(), AbstractEngine::class);
                         if ($engine->getMemoryIfMine($memoryKey)) {
                             $engineType = $engine->getEngineRecord()->getEngineType();
                             if ($engineType !== null) {

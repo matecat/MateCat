@@ -141,6 +141,7 @@ import SegmentActions from './SegmentActions'
 import SegmentUtils from '../utils/segmentUtils'
 import ModalsActions from './ModalsActions'
 import CatToolStore from '../stores/CatToolStore'
+import AppDispatcher from '../stores/AppDispatcher'
 
 describe('SegmentActions.handleClickOnReadOnly', () => {
   beforeEach(() => {
@@ -155,10 +156,10 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
     SegmentUtils.isIceSegment.mockReturnValue(false)
   })
 
-  test('shows "Segment disabled" AlertModal when metadata has translation_disabled=1', () => {
+  test('shows "Segment disabled" AlertModal when metadata has translation_disabled=true', () => {
     const segment = {
       unlocked: true,
-      metadata: [{meta_key: 'translation_disabled', meta_value: '1'}],
+      metadata: [{meta_key: 'translation_disabled', meta_value: true}],
     }
 
     SegmentActions.handleClickOnReadOnly(segment)
@@ -200,7 +201,7 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
 
     const segment = {
       unlocked: false,
-      metadata: [{meta_key: 'translation_disabled', meta_value: '1'}],
+      metadata: [{meta_key: 'translation_disabled', meta_value: true}],
     }
 
     SegmentActions.handleClickOnReadOnly(segment)
@@ -214,10 +215,10 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
     )
   })
 
-  test('does not show disabled modal when translation_disabled is 0', () => {
+  test('does not show disabled modal when translation_disabled is false', () => {
     const segment = {
       unlocked: true,
-      metadata: [{meta_key: 'translation_disabled', meta_value: '0'}],
+      metadata: [{meta_key: 'translation_disabled', meta_value: false}],
     }
 
     SegmentActions.handleClickOnReadOnly(segment)
@@ -317,5 +318,33 @@ describe('SegmentActions.clickOnApprovedButton — mandatory issues gate', () =>
     })
     SegmentActions.clickOnApprovedButton(makeSegment(), false)
     expect(openIssuesSpy).not.toHaveBeenCalled()
+  })
+})
+
+describe('SegmentActions.updateSegmentDisabledState', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  test('dispatches SET_SEGMENT_DISABLED with disabled=true', () => {
+    SegmentActions.updateSegmentDisabledState(42, true)
+
+    expect(AppDispatcher.dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({id: 42, disabled: true}),
+    )
+  })
+
+  test('dispatches SET_SEGMENT_DISABLED with disabled=false', () => {
+    SegmentActions.updateSegmentDisabledState(42, false)
+
+    expect(AppDispatcher.dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({id: 42, disabled: false}),
+    )
+  })
+
+  test('does not dispatch when sid is falsy', () => {
+    SegmentActions.updateSegmentDisabledState(null, true)
+
+    expect(AppDispatcher.dispatch).not.toHaveBeenCalled()
   })
 })

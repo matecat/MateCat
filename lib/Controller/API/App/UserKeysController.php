@@ -12,7 +12,9 @@ use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\ClientUserFacade;
 use Model\Users\MetadataDao;
+use Model\Users\UserStruct;
 use ReflectionException;
+use RuntimeException;
 use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\AbstractEngine;
@@ -96,7 +98,7 @@ class UserKeysController extends KleinController
         $request = $this->validateTheRequest();
         $memoryKeyToUpdate = $this->getMemoryToUpdate($request['key'], $request['description']);
         $mkDao = $this->getMkDao();
-        $userMemoryKeys = $mkDao->read($memoryKeyToUpdate);
+        $userMemoryKeys = $mkDao->read($memoryKeyToUpdate, true);
 
         $this->response->json($this->getKeyUsersInfo($userMemoryKeys));
     }
@@ -115,7 +117,7 @@ class UserKeysController extends KleinController
 
         $userMemoryKeys = $mkDao->read($memoryKeyToUpdate) ?: throw new NotFoundException("No user memory keys found");
 
-        (new TmKeyManager())->shareKey(array_values($emailList), $userMemoryKeys[0], $this->user);
+        (new TmKeyManager())->shareKey(array_values($emailList), $userMemoryKeys[0], $this->user, $this->getDatabase());
 
         $this->response->json([
             'errors' => [],
@@ -142,9 +144,11 @@ class UserKeysController extends KleinController
         $_userStructs = [];
         $tmKey = $userMemoryKeys[0]->tm_key;
         // in_users is a dynamic property set on TmKeyStruct (extends stdClass) by MemoryKeyDao::_buildResult()
-        $inUsers = ($tmKey !== null && property_exists($tmKey, 'in_users')) ? $tmKey->in_users : [];
-        foreach ($inUsers as $userStruct) {
-            $_userStructs[] = new ClientUserFacade($userStruct);
+        $inUsers = $tmKey !== null ? $tmKey->getInUsers() : [];
+        foreach ($inUsers as $user) {
+            if ($user instanceof UserStruct) {
+                $_userStructs[] = new ClientUserFacade($user);
+            }
         }
 
         return [
@@ -196,6 +200,18 @@ class UserKeysController extends KleinController
     }
 
     /**
+     * Testability seam: overridable so tests can inject a stub TMSService
+     * and avoid firing a live MyMemory API call from checkCorrectKey().
+     *
+     * @return TMSService
+     * @throws Exception
+     */
+    protected function getTmService(): TMSService
+    {
+        return new TMSService($this->getDatabase());
+    }
+
+    /**
      * @param string $key
      * @param string|null $description
      *
@@ -205,7 +221,7 @@ class UserKeysController extends KleinController
      */
     private function getMemoryToUpdate(string $key, ?string $description = null): MemoryKeyStruct
     {
-        $tmService = new TMSService();
+        $tmService = $this->getTmService();
 
         //validate the key
         $tmService->checkCorrectKey($key);
@@ -226,7 +242,7 @@ class UserKeysController extends KleinController
     /**
      * Removes a memory key from specified engines.
      *
-     * This method processes a list of engine names provided as a CSV string,
+     * This method processes a list of engine names provided as a CSV string
      * and attempts to remove the given memory key from each engine. If the engine
      * supports adaptive machine translation (MT), it verifies ownership of the memory
      * key before deletion.
@@ -250,18 +266,18 @@ class UserKeysController extends KleinController
                 $struct = EngineStruct::getStruct();
                 $struct->class_load = $engineName;
                 $struct->type = EngineConstants::MT;
-                $engine = EnginesFactory::createTempInstance($struct);
+                $engine = EnginesFactory::createTempInstance($struct, $this->getDatabase());
 
                 // Check if the engine supports adaptive MT.
                 if ($engine->isAdaptiveMT()) {
                     // Retrieve metadata for the engine, ensuring it belongs to the current user.
                      $ownerMmtEngineMetaData = (new MetadataDao($this->getDatabase()))
                          ->setCacheTTL(60 * 60 * 24 * 30) // Cache TTL: 30 days.
-                         ->get($uid, $engine->getEngineRecord()->class_load ?? throw new \RuntimeException('Missing engine class_load'));
+                         ->get($uid, $engine->getEngineRecord()->class_load ?? throw new RuntimeException('Missing engine class_load'));
 
                     // If metadata exists, attempt to delete the memory key from the engine.
-                    if (!empty($ownerMmtEngineMetaData) && is_int($ownerMmtEngineMetaData->value)) {
-                        $engine = EnginesFactory::getInstance($ownerMmtEngineMetaData->value, AbstractEngine::class);
+                    if (!empty($ownerMmtEngineMetaData) && is_numeric($ownerMmtEngineMetaData->value)) {
+                        $engine = EnginesFactory::getInstance((int)$ownerMmtEngineMetaData->value, $this->getDatabase(), AbstractEngine::class);
                         $engineKey = $engine->getMemoryIfMine($memoryKey);
                         if ($engineKey) {
                             $engine->deleteMemory($engineKey);

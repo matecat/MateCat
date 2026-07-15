@@ -7,9 +7,11 @@ use Controller\API\V2\DownloadController;
 use Controller\API\V2\DownloadJobTMXController;
 use Controller\API\V2\DownloadOriginalController;
 use InvalidArgumentException;
+use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Exceptions\NotFoundException;
@@ -22,11 +24,14 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\WithoutErrorHandler;
 use ReflectionMethod;
 use ReflectionProperty;
+use RuntimeException;
+use SplTempFileObject;
 use Stomp\Transport\Message;
 use TypeError;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\Logger\MatecatLogger;
+use Utils\TMS\TMSService;
 
 /**
  * Shared suite for the AbstractDownloadController concrete subclasses.
@@ -55,6 +60,9 @@ class DownloadControllersTest extends AbstractTest
     private const int ORIGINAL_BASE = 9070000;
     private const int TMX_BASE       = 9070200;
     private const int ANALYSIS_BASE  = 9070400;
+    // Dedicated block for the TMX export happy-path (seeded/cleaned inside the test
+    // only, so the "unknown job" NotFound case at TMX_BASE stays unseeded/hermetic).
+    private const int TMX_EXPORT_BASE = 9071000;
 
     protected function setUp(): void
     {
@@ -268,7 +276,7 @@ class DownloadControllersTest extends AbstractTest
         $request  = Request::createFromGlobals();
         $response = new Response();
 
-        $controller = new class ($request, $response) extends DownloadAnalysisReportController {
+        $controller = new class ($request, $response, null, $this->dbApp()) extends DownloadAnalysisReportController {
             protected bool $useSession = false;
 
             protected function identifyUser(?bool $useSession = true): void
@@ -337,17 +345,17 @@ class DownloadControllersTest extends AbstractTest
         // A review_password ('revpw') that does NOT match the job password makes the
         // first getByIdAndPassword() return null, driving the ChunkReviewDao fallback
         // branch (getChunk() resolves the real job). With no files_job row seeded, the
-        // subsequent file-storage lookup yields no project id, so ProjectDao::findById()
-        // is invoked with null and raises a TypeError — exercising the fallback + storage
-        // resolution path (controller lines 64,68,69,72,74) before the filesystem/exit
-        // boundary.
+        // subsequent file-storage lookup yields no files, so the controller raises a
+        // clear Exception via the missing-files guard — exercising the fallback +
+        // storage resolution path (controller lines 64,68,69) before the boundary.
         $jobId = $this->jobId(self::ORIGINAL_BASE);
         $controller = $this->createOriginalController([
             'id_job'   => (string)$jobId,
             'password' => 'revpw',
         ]);
 
-        $this->expectException(TypeError::class);
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('No files found for job');
 
         $controller->index();
     }
@@ -433,6 +441,112 @@ class DownloadControllersTest extends AbstractTest
         }
     }
 
+    /** @throws \Throwable */
+    #[Test]
+    public function downloadJobTMXIndexReturns500JsonErrorsWhenIdAndPasswordMissing(): void
+    {
+        // No id_job / password → both validation errors accumulate and index()
+        // short-circuits to a 500 JSON error response before any DB lookup.
+        $controller = $this->createTMXController();
+
+        $controller->index();
+
+        $response = (new ReflectionProperty($controller, 'response'))->getValue($controller);
+        $this->assertSame(500, $response->status()->getCode());
+
+        $body = json_decode((string)$response->body(), true);
+        $this->assertIsArray($body);
+        $this->assertCount(2, $body);
+        $this->assertSame(-1, $body[0]['code']);
+        $this->assertSame('Job ID missing', $body[0]['message']);
+        $this->assertSame(-2, $body[1]['code']);
+        $this->assertSame('Job password missing', $body[1]['message']);
+    }
+
+    /** @throws \Throwable */
+    #[Test]
+    public function downloadJobTMXIndexExportsTmxForSeededJob(): void
+    {
+        $base = self::TMX_EXPORT_BASE;
+        $this->cleanFragments($base);
+        $this->seedProject($base, $this->ownerEmail($base));
+        $this->seedFile($base);
+        $this->seedJob($base, $this->ownerEmail($base));
+
+        try {
+            $controller = $this->createTMXControllerWithStub($this->tmsServiceStub(), [
+                'id_job'   => (string)$this->jobId($base),
+                'password' => 'jobpw',
+            ]);
+
+            try {
+                $controller->index();
+                $this->fail('finalize() sentinel was not thrown');
+            } catch (RuntimeException $e) {
+                $this->assertSame('finalize-reached', $e->getMessage());
+            }
+
+            // default switch arm → .tmx filename built from project name + job id
+            $fileName = (new ReflectionProperty(DownloadJobTMXController::class, 'fileName'))->getValue($controller);
+            $this->assertSame('CtrlTestProject_' . $base . '-' . $this->jobId($base) . '.tmx', $fileName);
+
+            $tmx = (new ReflectionProperty(DownloadJobTMXController::class, 'tmx'))->getValue($controller);
+            $this->assertInstanceOf(SplTempFileObject::class, $tmx);
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    /** @throws \Throwable */
+    #[Test]
+    public function downloadJobTMXIndexExportsCsvForSeededJobWhenTypeIsCsv(): void
+    {
+        $base = self::TMX_EXPORT_BASE;
+        $this->cleanFragments($base);
+        $this->seedProject($base, $this->ownerEmail($base));
+        $this->seedFile($base);
+        $this->seedJob($base, $this->ownerEmail($base));
+
+        try {
+            $controller = $this->createTMXControllerWithStub($this->tmsServiceStub(), [
+                'id_job'   => (string)$this->jobId($base),
+                'password' => 'jobpw',
+                'type'     => 'csv',
+            ]);
+
+            try {
+                $controller->index();
+                $this->fail('finalize() sentinel was not thrown');
+            } catch (RuntimeException $e) {
+                $this->assertSame('finalize-reached', $e->getMessage());
+            }
+
+            // 'csv' switch arm → .csv filename built from project name + job id
+            $fileName = (new ReflectionProperty(DownloadJobTMXController::class, 'fileName'))->getValue($controller);
+            $this->assertSame('CtrlTestProject_' . $base . '-' . $this->jobId($base) . '.csv', $fileName);
+
+            $tmx = (new ReflectionProperty(DownloadJobTMXController::class, 'tmx'))->getValue($controller);
+            $this->assertInstanceOf(SplTempFileObject::class, $tmx);
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    /** @throws \Throwable */
+    #[Test]
+    public function downloadJobTMXGetTMSServiceBuildsServiceFromDatabaseAndFeatureSet(): void
+    {
+        // Exercise the real factory body (not the test stub override) so the
+        // seam's `new TMSService(...)` is covered.
+        $controller = $this->createTMXController();
+        $this->setControllerProp($controller, 'featureSet', new FeatureSet(obtainTestDatabase()));
+
+        $method  = new ReflectionMethod($controller, 'getTMSService');
+        $service = $method->invoke($controller);
+
+        $this->assertInstanceOf(TMSService::class, $service);
+    }
+
     // --- Helper factories ---
 
     /** @throws \Throwable */
@@ -442,13 +556,21 @@ class DownloadControllersTest extends AbstractTest
         $prop->setValue($controller, $value);
     }
 
+    private function dbApp(): App
+    {
+        $app = new App();
+        $app->register('getDatabase', static fn() => obtainTestDatabase());
+
+        return $app;
+    }
+
     /** @throws \Throwable */
     private function createDownloadController(): DownloadController
     {
         $request = Request::createFromGlobals();
         $response = new Response();
 
-        return new class ($request, $response) extends DownloadController {
+        return new class ($request, $response, null, $this->dbApp()) extends DownloadController {
             protected bool $useSession = false;
 
             protected function identifyUser(?bool $useSession = true): void
@@ -470,7 +592,7 @@ class DownloadControllersTest extends AbstractTest
         $request = Request::createFromGlobals();
         $response = new Response();
 
-        $controller = new class ($request, $response) extends DownloadAnalysisReportController {
+        $controller = new class ($request, $response, null, $this->dbApp()) extends DownloadAnalysisReportController {
             protected bool $useSession = false;
 
             protected function registerValidators(): void
@@ -503,7 +625,7 @@ class DownloadControllersTest extends AbstractTest
         $request = Request::createFromGlobals();
         $response = new Response();
 
-        $controller = new class ($request, $response) extends DownloadOriginalController {
+        $controller = new class ($request, $response, null, $this->dbApp()) extends DownloadOriginalController {
             protected bool $useSession = false;
 
             protected function identifyUser(?bool $useSession = true): void
@@ -520,7 +642,7 @@ class DownloadControllersTest extends AbstractTest
         $user->uid = 1;
         $user->email = 'test@example.org';
         $this->setControllerProp($controller, 'user', $user);
-        $this->setControllerProp($controller, 'featureSet', new FeatureSet());
+        $this->setControllerProp($controller, 'featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 
         return $controller;
     }
@@ -537,7 +659,7 @@ class DownloadControllersTest extends AbstractTest
         $request = Request::createFromGlobals();
         $response = new Response();
 
-        $controller = new class ($request, $response) extends DownloadJobTMXController {
+        $controller = new class ($request, $response, null, $this->dbApp()) extends DownloadJobTMXController {
             protected bool $useSession = false;
 
             protected function identifyUser(?bool $useSession = true): void
@@ -556,5 +678,79 @@ class DownloadControllersTest extends AbstractTest
         $this->setControllerProp($controller, 'user', $user);
 
         return $controller;
+    }
+
+    /**
+     * A DownloadJobTMXController whose TMSService is stubbed (via getTMSService()),
+     * whose activity enqueue is a no-op, and whose finalize() throws a sentinel
+     * carrying the composed filename instead of streaming/exit-ing. This lets
+     * index() run through both switch arms up to the IO/exit boundary hermetically.
+     *
+     * @param array<string, string> $params
+     * @throws \Throwable
+     */
+    private function createTMXControllerWithStub(TMSService $tmsService, array $params = []): DownloadJobTMXController
+    {
+        foreach ($params as $key => $value) {
+            $_GET[$key] = $value;
+        }
+        $request = Request::createFromGlobals();
+        $response = new Response();
+
+        $controller = new class ($request, $response, null, $this->dbApp()) extends DownloadJobTMXController {
+            protected bool $useSession = false;
+            public TMSService $tmsServiceStub;
+
+            protected function identifyUser(?bool $useSession = true): void
+            {
+                $this->userIsLogged = false;
+            }
+
+            protected function getTMSService(): TMSService
+            {
+                return $this->tmsServiceStub;
+            }
+
+            protected function _saveActivity(): void
+            {
+                // no-op: the activity enqueue path has its own dedicated test.
+            }
+
+            public function finalize(bool $forceXliff = false): never
+            {
+                // Halt before the untestable ob_gzhandler/header/stdout/exit block.
+                // ($fileName is private on the parent, so it's asserted via reflection.)
+                throw new RuntimeException('finalize-reached');
+            }
+        };
+
+        foreach ($params as $key => $value) {
+            unset($_GET[$key]);
+        }
+
+        $controller->tmsServiceStub = $tmsService;
+
+        $user = new UserStruct();
+        $user->uid = 1;
+        $user->email = 'test@example.org';
+        $this->setControllerProp($controller, 'user', $user);
+
+        return $controller;
+    }
+
+    /**
+     * A TMSService stub whose exporters return a small in-memory TMX/CSV file.
+     */
+    private function tmsServiceStub(): TMSService
+    {
+        $file = new SplTempFileObject();
+        $file->fwrite('<tmx version="1.4"></tmx>');
+        $file->rewind();
+
+        $stub = $this->createStub(TMSService::class);
+        $stub->method('exportJobAsTMX')->willReturn($file);
+        $stub->method('exportJobAsCSV')->willReturn($file);
+
+        return $stub;
     }
 }

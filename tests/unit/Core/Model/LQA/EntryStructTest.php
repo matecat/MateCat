@@ -31,24 +31,13 @@ class EntryStructTest extends AbstractTest
     }
 
     #[Test]
-    public function constructor_accepts_injected_validator_and_dao(): void
-    {
-        $validator = $this->createStub(EntryValidator::class);
-        $dao = $this->createStub(SegmentTranslationDao::class);
-
-        $struct = new EntryStruct([], $validator, $dao);
-
-        $this->assertInstanceOf(EntryStruct::class, $struct);
-    }
-
-    #[Test]
     public function ensureValid_delegates_to_validator(): void
     {
         $validator = $this->createMock(EntryValidator::class);
         $validator->expects($this->once())->method('ensureValid');
 
-        $struct = new EntryStruct([], $validator);
-        $struct->ensureValid();
+        $struct = new EntryStruct([]);
+        $struct->ensureValid($validator);
     }
 
     #[Test]
@@ -103,9 +92,9 @@ class EntryStructTest extends AbstractTest
             'id_category' => 0,
             'severity'    => 'critical',
             'source_page' => 1,
-        ], $validator, $dao);
+        ]);
 
-        $struct->setDefaults();
+        $struct->setDefaults($validator, $dao);
 
         $this->assertSame(3, $struct->translation_version);
         $this->assertSame(42, $struct->id_category);
@@ -126,11 +115,11 @@ class EntryStructTest extends AbstractTest
             'id_category' => 0,
             'severity'    => 'minor',
             'source_page' => 1,
-        ], $validator, $dao);
+        ]);
 
         $this->expectException(NotFoundException::class);
         $this->expectExceptionMessage('Segment translation not found');
-        $struct->setDefaults();
+        $struct->setDefaults($validator, $dao);
     }
 
     #[Test]
@@ -151,11 +140,11 @@ class EntryStructTest extends AbstractTest
             'id_category' => 0,
             'severity'    => 'minor',
             'source_page' => 1,
-        ], $validator, $dao);
+        ]);
 
         $this->expectException(NotFoundException::class);
         $this->expectExceptionMessage('Category not found');
-        $struct->setDefaults();
+        $struct->setDefaults($validator, $dao);
     }
 
     #[Test]
@@ -180,11 +169,11 @@ class EntryStructTest extends AbstractTest
             'id_category' => 0,
             'severity'    => 'minor',
             'source_page' => 1,
-        ], $validator, $dao);
+        ]);
 
         $this->expectException(NotFoundException::class);
         $this->expectExceptionMessage('Category id is null');
-        $struct->setDefaults();
+        $struct->setDefaults($validator, $dao);
     }
 
     #[Test]
@@ -211,9 +200,9 @@ class EntryStructTest extends AbstractTest
             'id_category' => 0,
             'severity'    => 'nonexistent',
             'source_page' => 1,
-        ], $validator, $dao);
+        ]);
 
-        $struct->setDefaults();
+        $struct->setDefaults($validator, $dao);
 
         $this->assertNull($struct->penalty_points);
     }
@@ -304,24 +293,21 @@ class EntryStructTest extends AbstractTest
             'id_category' => 0,
             'severity'    => 'minor',
             'source_page' => 1,
-        ], $validator, $dao);
+        ]);
 
-        $struct->setDefaults();
+        $struct->setDefaults($validator, $dao);
 
         $this->assertSame(0, $struct->translation_version);
     }
 
     private function createStruct(): EntryStruct
     {
-        $validator = $this->createStub(EntryValidator::class);
-        $dao = $this->createStub(SegmentTranslationDao::class);
-
         return new EntryStruct([
             'id_segment'  => 1,
             'id_job'      => 2,
             'id_category' => 3,
             'severity'    => 'minor',
             'source_page' => 1,
-        ], $validator, $dao);
+        ]);
     }
 }

@@ -9,9 +9,11 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -74,6 +76,7 @@ class ChunkV3ControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
+        $this->setProp('database', obtainTestDatabase());
 
         $user            = new UserStruct();
         $user->uid       = $this->userId(self::BASE);
@@ -83,7 +86,7 @@ class ChunkV3ControllerTest extends AbstractTest
         $this->setProp('user', $user);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
     }
 
     protected function tearDown(): void
@@ -116,7 +119,7 @@ class ChunkV3ControllerTest extends AbstractTest
      */
     private function loadChunk(): JobStruct
     {
-        $job = (new JobDao())->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
         $this->assertInstanceOf(JobStruct::class, $job);
 
         return $job;
@@ -128,8 +131,8 @@ class ChunkV3ControllerTest extends AbstractTest
     private function injectChunkState(JobStruct $chunk): void
     {
         $this->setProp('chunk', $chunk);
-        $this->setProp('project', $chunk->getProject());
-        $this->setProp('featureSet', $chunk->getProject()->getFeaturesSet());
+        $this->setProp('project', $chunk->getProject(new ProjectDao(obtainTestDatabase())));
+        $this->setProp('featureSet', FeatureSet::forProject($chunk->getProject(new ProjectDao(obtainTestDatabase())), obtainTestDatabase()));
         $this->setProp('chunk_reviews', []);
     }
 
@@ -201,7 +204,7 @@ class ChunkV3ControllerTest extends AbstractTest
     #[Test]
     public function wrong_password_does_not_load_the_seeded_job(): void
     {
-        $job = (new JobDao())->getByIdAndPassword($this->jobId(self::BASE), 'wrong_pw_xyz');
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword($this->jobId(self::BASE), 'wrong_pw_xyz');
 
         $this->assertNull($job);
     }
@@ -226,6 +229,7 @@ class ChunkV3ControllerTest extends AbstractTest
             'password' => 'jobpw',
         ]);
         $realRef->getProperty('response')->setValue($real, $this->responseMock);
+        $realRef->getProperty('database')->setValue($real, obtainTestDatabase());
 
         $realRef->getMethod('registerValidators')->invoke($real);
 

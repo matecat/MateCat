@@ -447,4 +447,23 @@ class LaraAuthControllerTest extends AbstractTest
         $ref = new ReflectionMethod($this->controller, 'enforceReasoningOwner');
         $ref->invoke($this->controller, $validator);
     }
+
+    // ─── buildOwnerValidator() ─────────────────────────────────────────
+
+    #[Test]
+    public function buildOwnerValidator_builds_real_owner_validator_for_given_chunk(): void
+    {
+        $chunk = new JobStruct();
+        $chunk->id = 42;
+
+        // Invoke the real LaraAuthController::buildOwnerValidator(), bypassing the
+        // TestableLaraAuthController override, to cover the construction statement.
+        $ref = new ReflectionMethod(LaraAuthController::class, 'buildOwnerValidator');
+        $ownerValidator = $ref->invoke($this->controller, $chunk);
+
+        $this->assertInstanceOf(IsOwnerInternalUserValidator::class, $ownerValidator);
+
+        $jobStructProp = new ReflectionProperty(IsOwnerInternalUserValidator::class, 'jobStruct');
+        $this->assertSame($chunk, $jobStructProp->getValue($ownerValidator));
+    }
 }

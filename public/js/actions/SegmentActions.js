@@ -35,6 +35,7 @@ import {disableTPOnSegment} from './tagProjectionActions'
 import TranslationMatches from '../components/segments/utils/translationMatches'
 import {
   setStatus,
+  setSegmentDisabled,
   setHeaderPercentage,
   hideSegmentHeader,
   setSegmentPropagation,
@@ -235,6 +236,8 @@ const SegmentActions = {
   removeClassToSegment,
 
   setStatus,
+
+  setSegmentDisabled,
 
   clickOnApprovedButton: function (segment, goToNextUnapproved) {
     // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
@@ -637,7 +640,7 @@ const SegmentActions = {
 
     const isTranslationDisabled = segment?.metadata?.some(
       ({meta_key, meta_value}) =>
-        meta_key === 'translation_disabled' && meta_value === '1',
+        meta_key === 'translation_disabled' && meta_value,
     )
 
     if (isTranslationDisabled) {
@@ -1430,6 +1433,9 @@ const SegmentActions = {
       })
       setTimeout(CatToolActions.reloadSegmentFilter, 500)
     }
+  },
+  updateSegmentDisabledState: function (sid, disabled) {
+    SegmentActions.setSegmentDisabled(sid, disabled)
   },
   toggleSegmentOnBulk: function (sid, fid) {
     AppDispatcher.dispatch({

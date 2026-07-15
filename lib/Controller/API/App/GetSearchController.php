@@ -247,7 +247,7 @@ class GetSearchController extends AbstractStatefulKleinController
         $srh_driver = ('' !== AppConfig::$REPLACE_HISTORY_DRIVER) ? AppConfig::$REPLACE_HISTORY_DRIVER : 'redis';
         $srh_ttl = (0 !== AppConfig::$REPLACE_HISTORY_TTL) ? AppConfig::$REPLACE_HISTORY_TTL : 300;
 
-        return ReplaceHistoryFactory::create($job_id, $srh_driver, $srh_ttl);
+        return ReplaceHistoryFactory::create($job_id, $srh_driver, $srh_ttl, $this->getDatabase());
     }
 
     /**
@@ -271,7 +271,7 @@ class GetSearchController extends AbstractStatefulKleinController
             throw new RuntimeException("Expected MateCatFilter instance");
         }
 
-        return new SearchModel($queryParams, $filter);
+        return new SearchModel($queryParams, $filter, $this->getDatabase());
     }
 
     /**
@@ -394,7 +394,7 @@ class GetSearchController extends AbstractStatefulKleinController
             throw new NotFoundException("Project not found for job $id_job");
         }
 
-        $versionsHandler = TranslationVersions::getVersionHandlerNewInstance($chunk, $this->user, $project, $id_segment !== null ? (int)$id_segment : null);
+        $versionsHandler = TranslationVersions::getVersionHandlerNewInstance($chunk, $this->user, $project, $id_segment !== null ? (int)$id_segment : null, $this->getDatabase());
 
         // loop all segments to replace
         foreach ($search_results as $tRow) {

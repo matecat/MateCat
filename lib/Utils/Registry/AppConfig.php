@@ -224,6 +224,12 @@ class AppConfig
      */
     public static string $MYMEMORY_TM_API_KEY = 'tmanalysis@matecat.com';
 
+
+    /**
+     * Enable or disable the import of alternative translations from XLIFF files.
+     */
+    public static bool $IMPORT_ALT_TRANS_FROM_XLIFF = false;
+
     /**
      * Default key used to call the TM Server on an Import TMX panel
      * @var string

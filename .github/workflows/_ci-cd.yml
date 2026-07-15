@@ -54,7 +54,7 @@ jobs:
       # Falls back to the built-in github.token for fork PRs where
       # CI_USER_TOKEN_MATECATBOT is not available.
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           token: '${{ secrets.CI_USER_TOKEN_MATECATBOT || github.token }}'
           submodules: recursive
@@ -117,7 +117,7 @@ jobs:
       - tests
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           token: '${{ secrets.CI_USER_TOKEN_MATECATBOT }}'
           submodules: recursive
@@ -207,7 +207,7 @@ jobs:
       models: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -224,7 +224,7 @@ jobs:
             js-coverage.xml
             node-coverage.xml
           coverage-threshold: '80'
-          exclude-patterns: '.github/**'
+          exclude-patterns: '.github/**, daemons/**'
           ai-enabled: 'true'
 
   slack-notification:

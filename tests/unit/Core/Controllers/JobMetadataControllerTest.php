@@ -87,7 +87,8 @@ class JobMetadataControllerTest extends AbstractTest
         $this->reflector->getProperty('user')->setValue($this->controller, $user);
 
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createMock(MatecatLogger::class));
-        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet());
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
     }
 
     /**
@@ -141,7 +142,7 @@ class JobMetadataControllerTest extends AbstractTest
      */
     private function insertMetadata(string $key, string $value): void
     {
-        $dao = new MetadataDao(Database::obtain());
+        $dao = new MetadataDao(obtainTestDatabase());
         $dao->set($this->jobId(self::BASE), self::JOB_PASSWORD, $key, $value);
     }
 
@@ -155,7 +156,7 @@ class JobMetadataControllerTest extends AbstractTest
     {
         $this->insertMetadata('tm_prioritization', 'true');
 
-        $existing = (new MetadataDao(Database::obtain()))
+        $existing = (new MetadataDao(obtainTestDatabase()))
             ->get($this->jobId(self::BASE), self::JOB_PASSWORD, 'tm_prioritization');
         $this->assertNotNull($existing);
         $expectedId = $existing->id;
@@ -177,7 +178,7 @@ class JobMetadataControllerTest extends AbstractTest
         $this->controller->delete();
 
         // row really removed
-        $after = (new MetadataDao(Database::obtain()))
+        $after = (new MetadataDao(obtainTestDatabase()))
             ->get($this->jobId(self::BASE), self::JOB_PASSWORD, 'tm_prioritization');
         $this->assertNull($after);
     }
@@ -248,7 +249,7 @@ class JobMetadataControllerTest extends AbstractTest
         $this->controller->save();
 
         // persisted in DB
-        $stored = (new MetadataDao(Database::obtain()))
+        $stored = (new MetadataDao(obtainTestDatabase()))
             ->get($this->jobId(self::BASE), self::JOB_PASSWORD, 'tm_prioritization');
         $this->assertNotNull($stored);
     }

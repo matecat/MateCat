@@ -79,7 +79,10 @@ class GetSearchControllerTest extends AbstractTest
         $logProp->setValue($this->controller, $this->createMock(MatecatLogger::class));
 
         $fsProp = $this->reflector->getProperty('featureSet');
-        $fsProp->setValue($this->controller, new FeatureSet());
+        $fsProp->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+
+        $dbProp = $this->reflector->getProperty('database');
+        $dbProp->setValue($this->controller, obtainTestDatabase());
     }
 
     protected function tearDown(): void
@@ -90,7 +93,7 @@ class GetSearchControllerTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $db = Database::obtain();
+        $db = obtainTestDatabase();
         $conn = $db->getConnection();
 
         $this->cleanTestData();
@@ -116,7 +119,7 @@ class GetSearchControllerTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $db = Database::obtain();
+        $db = obtainTestDatabase();
         $conn = $db->getConnection();
 
         $conn->exec("DELETE FROM segment_translations WHERE id_job = " . self::TEST_JOB_ID);
@@ -512,6 +515,30 @@ class GetSearchControllerTest extends AbstractTest
     }
 
     #[Test]
+    public function doSearch_builds_query_params_from_array_with_coupled_source_and_target(): void
+    {
+        $request = [
+            'job' => self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'queryParams' => [
+                'job' => self::TEST_JOB_ID,
+                'password' => self::TEST_JOB_PASSWORD,
+                'isMatchCaseRequested' => false,
+                'isExactMatchRequested' => false,
+                'inCurrentChunkOnly' => false,
+            ],
+            'source' => 'Hello',
+            'target' => 'Ciao',
+        ];
+
+        $result = $this->invokePrivate('doSearch', [$request]);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('count', $result);
+        $this->assertArrayHasKey('sid_list', $result);
+    }
+
+    #[Test]
     public function doSearch_status_only_mode(): void
     {
         $queryParams = new SearchQueryParamsStruct([
@@ -750,9 +777,72 @@ class GetSearchControllerTest extends AbstractTest
             null
         ]);
 
-        $updated = (new \Model\Translations\SegmentTranslationDao())->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
+        $updated = (new \Model\Translations\SegmentTranslationDao(obtainTestDatabase()))->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
         $this->assertNotNull($updated);
         $this->assertStringContainsString('universo', $updated->translation);
+    }
+
+    #[Test]
+    public function updateSegments_triggers_propagation_when_translation_changes(): void
+    {
+        $queryParams = new SearchQueryParamsStruct([
+            'job' => self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'target' => 'mondo',
+            'replacement' => 'pianeta',
+            'isMatchCaseRequested' => false,
+            'isExactMatchRequested' => false,
+        ]);
+
+        // tRow translation differs from the currently-stored translation
+        // (which is still 'Ciao mondo'), so the propagation branch is entered.
+        $search_results = [
+            [
+                'id_segment' => self::TEST_SEGMENT_1,
+                'id_job' => self::TEST_JOB_ID,
+                'translation' => 'Ciao mondo modificato',
+                'status' => 'TRANSLATED',
+            ],
+        ];
+
+        $this->invokePrivate('updateSegments', [
+            $search_results,
+            self::TEST_JOB_ID,
+            self::TEST_JOB_PASSWORD,
+            $queryParams,
+            null,
+            null
+        ]);
+
+        $updated = (new \Model\Translations\SegmentTranslationDao(obtainTestDatabase()))->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
+        $this->assertNotNull($updated);
+    }
+
+    #[Test]
+    public function updateSegments_throws_not_found_when_project_is_missing(): void
+    {
+        $orphanJobId = 9_946_001;
+
+        $db = obtainTestDatabase();
+        $conn = $db->getConnection();
+        $conn->exec("DELETE FROM jobs WHERE id = " . $orphanJobId);
+        $conn->exec("INSERT INTO jobs (id, password, id_project, source, target, job_first_segment, job_last_segment, owner, tm_keys, create_date, disabled) VALUES (" . $orphanJobId . ", 'orphanpw', 9946999, 'en-US', 'it-IT', 1, 1, 'test@example.org', '[]', NOW(), 0)");
+
+        try {
+            $queryParams = new SearchQueryParamsStruct([
+                'job' => $orphanJobId,
+                'password' => 'orphanpw',
+                'isMatchCaseRequested' => false,
+                'isExactMatchRequested' => false,
+            ]);
+
+            $this->expectException(\Model\Exceptions\NotFoundException::class);
+            $this->expectExceptionMessage("Project not found for job $orphanJobId");
+
+            $this->invokePrivate('updateSegments', [[], $orphanJobId, 'orphanpw', $queryParams, null, null]);
+        } finally {
+            $conn->exec("DELETE FROM jobs WHERE id = " . $orphanJobId);
+        }
     }
 
     #[Test]

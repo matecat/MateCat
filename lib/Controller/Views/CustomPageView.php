@@ -3,8 +3,10 @@
 namespace Controller\Views;
 
 use Controller\Abstracts\BaseKleinViewController;
+use Klein\App;
 use Klein\Request;
 use Klein\Response;
+use Model\DataAccess\IDatabase;
 
 /**
  * Created by PhpStorm.
@@ -16,9 +18,11 @@ use Klein\Response;
 class CustomPageView extends BaseKleinViewController
 {
 
-    public function __construct()
+    public function __construct(IDatabase $database)
     {
-        parent::__construct(Request::createFromGlobals(), new Response());
+        $app = new App();
+        $app->register('getDatabase', fn() => $database);
+        parent::__construct(Request::createFromGlobals(), new Response(), null, $app);
     }
 
 }

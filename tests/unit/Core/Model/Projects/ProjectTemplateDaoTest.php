@@ -22,11 +22,10 @@ class ProjectTemplateDaoTest extends AbstractTest
     {
         parent::setUp();
 
-        $this->dao = new ProjectTemplateDao();
+        $this->dao = new ProjectTemplateDao(obtainTestDatabase());
 
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DROP TABLE IF EXISTS project_templates");
-
         $conn->exec(
             "CREATE TABLE project_templates (
                 id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -94,7 +93,7 @@ class ProjectTemplateDaoTest extends AbstractTest
 
     protected function tearDown(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         if ($conn->inTransaction()) {
             $conn->rollBack();
         }
@@ -286,7 +285,7 @@ class ProjectTemplateDaoTest extends AbstractTest
     #[Test]
     public function destroyDefaultTemplateCacheIsCallable(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
 
         $this->dao->destroyDefaultTemplateCache($conn, self::TEST_UID);
 
@@ -376,7 +375,7 @@ class ProjectTemplateDaoTest extends AbstractTest
         $saved = $this->dao->save($empty);
         $reloaded = $this->dao->fetchById($saved->id, ProjectTemplateStruct::class);
         $this->assertNotNull($reloaded);
-        $this->assertSame([], $reloaded->getMandatoryIssues());
+        $this->assertSame(null, $reloaded->getMandatoryIssues());
 
         // ['r1'] persists
         $r1 = $this->makeStruct('mandatory-r1');

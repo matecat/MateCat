@@ -17,6 +17,7 @@ use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
+use Model\DataAccess\Database;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -85,6 +86,7 @@ class TestableLaraAuthStandaloneController extends LaraAuthStandaloneController
         $parentRef->getProperty('logger')->setValue($this, $logger);
         $parentRef->getProperty('user')->setValue($this, $user);
         $parentRef->getProperty('userIsLogged')->setValue($this, true);
+        $parentRef->getProperty('database')->setValue($this, obtainTestDatabase());
 
         $this->injectedRateLimiter = $rateLimiter;
     }

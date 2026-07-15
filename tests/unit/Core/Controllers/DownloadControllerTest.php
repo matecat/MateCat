@@ -74,6 +74,7 @@ class DownloadControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
+        $this->setProp('database', obtainTestDatabase());
 
         $user        = new UserStruct();
         $user->uid   = $this->userId(self::BASE);
@@ -81,7 +82,7 @@ class DownloadControllerTest extends AbstractTest
         $this->setProp('user', $user);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
     }
 
     /**
@@ -343,7 +344,7 @@ class DownloadControllerTest extends AbstractTest
         // id_job set to a non-existent job → JobDao + ChunkReviewDao both empty.
         $this->setProp('id_job', 90299999);
         $this->setProp('password', 'definitely_wrong_password');
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 
         $this->expectException(NotFoundException::class);
         $this->expectExceptionMessage('Not found.');
@@ -360,10 +361,153 @@ class DownloadControllerTest extends AbstractTest
         // Existing job id, wrong password → no job row, no chunk review → NotFound.
         $this->setProp('id_job', $this->jobId(self::BASE));
         $this->setProp('password', 'wrong_pw_for_seeded_job');
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 
         $this->expectException(NotFoundException::class);
 
         $this->invokePrivate('processDownload');
+    }
+
+    // ─── downloadFile / index / forceXliff input-parse path (real-DB, NotFound boundary) ───
+
+    /**
+     * index() delegates to downloadFile(false): parses request params, builds the
+     * FeatureSet and reaches processDownload(), which throws NotFoundException for a
+     * non-existent job. Covers the whole input-parse block up to the DB boundary.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function indexParsesInputAndThrowsNotFoundForMissingJob(): void
+    {
+        $this->setProp('request', new Request([
+            'id_job'   => '90299999',
+            'password' => 'wrong_password',
+        ]));
+
+        $this->expectException(NotFoundException::class);
+        $this->controller->index();
+    }
+
+    /**
+     * forceXliff() delegates to downloadFile(true): the $forceXliff argument forces
+     * the forceXliff flag on before reaching the NotFound boundary.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function forceXliffParsesInputAndThrowsNotFoundForMissingJob(): void
+    {
+        $this->setProp('request', new Request([
+            'id_job'   => '90299999',
+            'password' => 'wrong_password',
+        ]));
+
+        $this->expectException(NotFoundException::class);
+        $this->controller->forceXliff();
+    }
+
+    /**
+     * downloadFile() with every optional input supplied exercises the truthy side of
+     * each parse assignment (filename, id_file, download_type, downloadToken,
+     * disableErrorCheck, forceXliff, original) before reaching the NotFound boundary.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function downloadFileParsesAllOptionalInputsThenThrowsNotFound(): void
+    {
+        $this->setProp('request', new Request([
+            'filename'          => 'my file.docx',
+            'id_file'           => '9029004',
+            'id_job'            => '90299999',
+            'download_type'     => 'all',
+            'password'          => 'wrong_password',
+            'downloadToken'     => 'tok-123',
+            'forceXliff'        => '1',
+            'original'          => '1',
+            'disableErrorCheck' => '1',
+        ]));
+
+        $this->expectException(NotFoundException::class);
+        $this->invokePrivate('downloadFile', [false]);
+    }
+
+    // ─── ifGlobalSightXliffRemoveTargetMarks — globalsight + UTF-16 arms ───
+
+    /**
+     * A GlobalSight-detected xliff triggers seg-source removal and mrk-tag stripping.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function ifGlobalSightXliffRemoveTargetMarksStripsMrkAndSegSourceForGlobalSight(): void
+    {
+        $content = '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<xliff version="1.2"><file original="globalsight" datatype="html" source-language="en-US">'
+            . '<body>'
+            . '<trans-unit id="1"><source>hello</source>'
+            . '<seg-source><mrk mid="0" mtype="seg">hello</mrk></seg-source>'
+            . '<target><mrk mid="0" mtype="seg">ciao</mrk></target></trans-unit>'
+            . '</body></file></xliff>';
+
+        $result = $this->controller->ifGlobalSightXliffRemoveTargetMarks($content, '/tmp/file.xlf');
+
+        // seg-source block removed and mrk open/close tags stripped, inner text kept.
+        $this->assertStringNotContainsString('<seg-source', $result);
+        $this->assertStringNotContainsString('<mrk', $result);
+        $this->assertStringNotContainsString('</mrk>', $result);
+        $this->assertStringContainsString('ciao', $result);
+    }
+
+    /**
+     * A UTF-16 encoded xliff (no ASCII "<?xml " marker in the first 100 bytes) enters
+     * the encoding-conversion arms: decode to UTF-8 for processing, then re-encode.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function ifGlobalSightXliffRemoveTargetMarksHandlesUtf16EncodedContent(): void
+    {
+        $utf8 = '<?xml version="1.0" encoding="UTF-16"?>'
+            . '<xliff version="1.2"><file original="doc" datatype="html" source-language="en-US">'
+            . '<body><trans-unit id="1"><target>ciao</target></trans-unit></body></file></xliff>';
+
+        // UTF-16LE with a little-endian BOM so `file --mime` reliably reports
+        // charset=utf-16le (a BOM-less / big-endian blob is detected as binary).
+        $utf16 = "\xFF\xFE" . mb_convert_encoding($utf8, 'UTF-16LE', 'UTF-8');
+        // Sanity: the ASCII "<?xml " marker must not survive in the UTF-16 head,
+        // otherwise the UTF-16 branch would not be taken.
+        $this->assertFalse(stripos(substr($utf16, 0, 100), '<?xml '));
+
+        $result = $this->controller->ifGlobalSightXliffRemoveTargetMarks($utf16, '/tmp/file.xlf');
+
+        // The method always returns a string; the round-trip conversion branches ran.
+        $this->assertIsString($result);
+    }
+
+    // ─── outputResultForRemoteFiles (private, echoes JSON from injected remoteFiles) ───
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function outputResultForRemoteFilesEchoesJsonUrls(): void
+    {
+        $this->setProp('remoteFiles', [
+            9029020 => ['webViewLink' => 'https://drive.example/a'],
+            9029021 => ['webViewLink' => 'https://drive.example/b'],
+        ]);
+
+        ob_start();
+        $this->invokePrivate('outputResultForRemoteFiles');
+        $output = ob_get_clean();
+
+        $decoded = json_decode((string)$output, true);
+        $this->assertIsArray($decoded);
+        $this->assertCount(2, $decoded['urls']);
+        $this->assertSame(9029020, $decoded['urls'][0]['localId']);
+        $this->assertSame('https://drive.example/a', $decoded['urls'][0]['alternateLink']);
+        $this->assertSame('https://drive.example/b', $decoded['urls'][1]['alternateLink']);
     }
 }

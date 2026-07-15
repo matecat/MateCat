@@ -15,6 +15,7 @@ use ReflectionException;
 use TypeError;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
+use Model\Projects\ProjectDao;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -52,7 +53,7 @@ class DeleteContributionController extends KleinController
 
         //check Job password
         $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($id_job, $password);
-        $this->featureSet->loadForProject($jobStruct->getProject());
+        $this->featureSet->loadForProject($jobStruct->getProject(new ProjectDao($this->getDatabase())));
 
         $tm_keys = $jobStruct['tm_keys'];
 
@@ -108,11 +109,9 @@ class DeleteContributionController extends KleinController
             }
         }
 
-        $set_successful = true;
-        if (array_search(false, $set_code, true)) {
-            //There's an errors
-            $set_successful = false;
-        }
+        // in_array() (not array_search()) so a failed delete at index 0 is not
+        // mistaken for "not found": array_search returns the falsy index 0.
+        $set_successful = !in_array(false, $set_code, true);
 
         $this->response->json([
             'data' => ($set_successful ? "OK" : null),
@@ -218,6 +217,6 @@ class DeleteContributionController extends KleinController
      */
     protected function createTmsEngine(mixed $id_tms): AbstractEngine
     {
-        return EnginesFactory::getInstance($id_tms, AbstractEngine::class);
+        return EnginesFactory::getInstance($id_tms, $this->getDatabase(), AbstractEngine::class);
     }
 }

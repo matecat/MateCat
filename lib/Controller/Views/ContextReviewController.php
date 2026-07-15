@@ -22,6 +22,11 @@ class ContextReviewController extends BaseKleinViewController implements IContro
     {
         $request = $this->validateTheRequest();
 
+        if (!is_array($request)) {
+            $this->setView('project_not_found.html', [], 404);
+            $this->render();
+        }
+
         $this->setView('context_preview.html', [
             'id_project' => $request['id_project'],
             'password' => $request['password'],
@@ -30,7 +35,7 @@ class ContextReviewController extends BaseKleinViewController implements IContro
     }
 
     /**
-     * @return false|array|null
+     * @return array<string, mixed>|false|null
      */
     protected function validateTheRequest(): false|array|null
     {

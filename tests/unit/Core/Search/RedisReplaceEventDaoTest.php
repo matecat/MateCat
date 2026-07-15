@@ -3,6 +3,7 @@
 namespace Matecat\Core\Search;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\Search\RedisReplaceEventDao;
 use Model\Search\ReplaceEventStruct;
 use Model\Translations\SegmentTranslationDao;
@@ -18,7 +19,7 @@ class RedisReplaceEventDaoTest extends AbstractTest
     {
         parent::setUp();
         $this->redis = $this->createStub(ClientInterface::class);
-        $this->dao = new RedisReplaceEventDao(null, $this->redis);
+        $this->dao = new RedisReplaceEventDao($this->createStub(IDatabase::class), $this->redis);
     }
 
     #[Test]
@@ -96,7 +97,7 @@ class RedisReplaceEventDaoTest extends AbstractTest
         $segmentDao = $this->createStub(SegmentTranslationDao::class);
         $segmentDao->method('getByJobId')->willReturn([$segmentStub]);
 
-        $dao = new RedisReplaceEventDao(null, $this->redis, $segmentDao);
+        $dao = new RedisReplaceEventDao($this->createStub(IDatabase::class), $this->redis, $segmentDao);
 
         $event = new ReplaceEventStruct();
         $event->id_job = 1;

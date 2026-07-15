@@ -44,7 +44,7 @@ class ReviewsController extends KleinController
     public function createReview(): void
     {
         // create a new chunk revision password
-        $records = RevisionFactory::initFromProject($this->project)->getRevisionFeature()->createQaChunkReviewRecords(
+        $records = $this->initRevisionFromProject($this->project)->getRevisionFeature()->createQaChunkReviewRecords(
             [$this->chunk],
             $this->project,
             [
@@ -70,6 +70,14 @@ class ReviewsController extends KleinController
                 ]
             ]
         );
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function initRevisionFromProject(ProjectStruct $project): RevisionFactory
+    {
+        return RevisionFactory::initFromProject($project, $this->getDatabase());
     }
 
     protected function registerValidators(): void
@@ -136,6 +144,6 @@ class ReviewsController extends KleinController
             throw new ValidationError("Job id / password combination is not in projects list");
         }
 
-        $this->chunk = $this->latestChunkReview->getChunk();
+        $this->chunk = $this->latestChunkReview->getChunk(new JobDao($this->getDatabase()));
     }
 }

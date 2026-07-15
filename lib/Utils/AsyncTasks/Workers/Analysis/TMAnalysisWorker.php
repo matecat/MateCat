@@ -5,7 +5,7 @@ namespace Utils\AsyncTasks\Workers\Analysis;
 use Exception;
 use Model\Analysis\AnalysisDao;
 use Model\Analysis\Constants\InternalMatchesConstants;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
@@ -32,7 +32,6 @@ use Utils\AsyncTasks\Workers\Service\MatchSorter;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
-use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
@@ -42,6 +41,7 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\NotSupportedMTException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
+use Throwable;
 
 class TMAnalysisWorker extends AbstractWorker
 {
@@ -67,28 +67,32 @@ class TMAnalysisWorker extends AbstractWorker
      */
     public function __construct(
         AMQHandler $queueHandler,
+        IDatabase $database,
         ?AnalysisRedisServiceInterface $redisService = null,
         ?SegmentUpdaterServiceInterface $segmentUpdater = null,
         ?ProjectCompletionServiceInterface $projectCompletion = null,
         ?EngineServiceInterface $engineService = null,
         ?MatchProcessorServiceInterface $matchProcessor = null,
     ) {
-        parent::__construct($queueHandler);
+        parent::__construct($queueHandler, $database);
 
         $this->redisService = $redisService ?? new AnalysisRedisService($queueHandler);
-        $this->segmentUpdater = $segmentUpdater ?? new SegmentUpdaterService(Database::obtain());
+        $this->segmentUpdater = $segmentUpdater ?? new SegmentUpdaterService($this->database);
         $this->projectCompletion = $projectCompletion ?? new ProjectCompletionService(
             $this->redisService,
             new ProjectCompletionRepository(
-                Database::obtain(),
-                new ProjectDao(),
-                new JobDao(),
-                new AnalysisDao(),
-                new CounterModel(),
-            )
+                $this->database,
+                new ProjectDao($this->database),
+                new JobDao($this->database),
+                new AnalysisDao($this->database),
+                new CounterModel($this->database),
+            ),
+            // Route completion logs to the analysis-queue log (via _doLog observer),
+            // alongside the rest of the analysis logs, instead of the global general_log.txt.
+            fn(string $message) => $this->_doLog($message)
         );
-        $this->engineService = $engineService ?? new EngineService(new DefaultEngineResolver());
-        $this->matchProcessor = $matchProcessor ?? new MatchProcessorService(new MatchSorter());
+        $this->engineService = $engineService ?? new EngineService(new DefaultEngineResolver($this->database), $this->database);
+        $this->matchProcessor = $matchProcessor ?? new MatchProcessorService(new MatchSorter(), $this->database);
     }
 
     /**
@@ -104,7 +108,7 @@ class TMAnalysisWorker extends AbstractWorker
 
         $params = $queueElement->params;
 
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet($this->database);
         $this->featureSet->loadFromString($params->features);
 
         $this->_matches = null;
@@ -199,7 +203,9 @@ class TMAnalysisWorker extends AbstractWorker
             $tmData['tm_analysis_status'] = 'DONE';
             $tmData['warning'] = (int)($postProcessed['warning'] ?? 0);
             $tmData['serialized_errors_list'] = $postProcessed['serialized_errors_list'] ?? '';
-            $tmData['mt_qe'] = $bestMatch['score'] ?? null;
+            // mt_qe is a NOT NULL DEFAULT 0 column; default to 0 (no MT score) so the
+            // UPDATE never binds null and MySQL/ProxySQL cannot raise 1048.
+            $tmData['mt_qe'] = $bestMatch['score'] ?? 0;
 
             $tmData['suggestion_source'] = $bestMatch['created_by'] ?? null;
             if (!empty($tmData['suggestion_source'])) {
@@ -235,11 +241,14 @@ class TMAnalysisWorker extends AbstractWorker
             // MySQL committed. Redis failures MUST NOT escape to the Executor.
             // If they did, the Executor would requeue the message, but on retry
             // setAnalysisValue() returns 0 (segment already DONE) → early return →
-            // counter permanently lost → project never completes.
-            // See: KNOWN_CONCURRENCY_ISSUES.md #1
+            // counter permanently lost → project never completes. Hence Redis side
+            // effects are applied post-commit and their failures are swallowed/retried
+            // in-process rather than propagated back to the queue.
             // ─────────────────────────────────────────────────────────────────────
             $this->applyPostCommitSideEffects(
                 (int)$params->pid,
+                (int)$params->id_segment,
+                (int)$params->id_job,
                 (string)$params->ppassword,
                 $eqWords,
                 $standardWords
@@ -278,7 +287,6 @@ class TMAnalysisWorker extends AbstractWorker
 
     /**
      * @param QueueElement $queueElement
-     * @throws EmptyElementException
      * @throws Exception
      */
     protected function _forceSetSegmentAnalyzed(QueueElement $queueElement): void
@@ -289,15 +297,17 @@ class TMAnalysisWorker extends AbstractWorker
         );
 
         if ($segmentSet === 0) {
-            LoggerFactory::doJsonLog("Segment {$queueElement->params->id_segment} already DONE, skipping force-set side-effects.");
+            $this->_doLog("Segment {$queueElement->params->id_segment} already DONE, skipping force-set side-effects.");
             return;
         } elseif ($segmentSet === -1) {
-            LoggerFactory::doJsonLog("Segment {$queueElement->params->id_segment} not updated (SKIPPED) pre-translation");
+            $this->_doLog("Segment {$queueElement->params->id_segment} not updated (SKIPPED) pre-translation");
         }
 
         // POINT OF NO RETURN — DB committed
         $this->applyPostCommitSideEffects(
             (int)$queueElement->params->pid,
+            (int)$queueElement->params->id_segment,
+            (int)$queueElement->params->id_job,
             (string)$queueElement->params->ppassword,
             (float)$queueElement->params->raw_word_count,
             (float)$queueElement->params->raw_word_count
@@ -316,8 +326,10 @@ class TMAnalysisWorker extends AbstractWorker
         } else {
             $ready = $this->redisService->waitForInitialization($pid);
             if (!$ready) {
-                // Winner likely crashed — init lock TTL (30s) may have expired. Re-try.
-                $this->_doLog("--- (Worker $this->_workerPid) : init timeout for PID $pid, attempting re-init");
+                // Winner abandoned init: waitForInitialization returns false as soon as the
+                // init semaphore is gone (failed doInit released it, or a crash let its TTL
+                // expire) with no counters written. Try to become the initializer ourselves.
+                $this->_doLog("--- (Worker $this->_workerPid) : init not ready for PID $pid, attempting re-init");
                 if ($this->redisService->acquireInitLock($pid)) {
                     $this->doInit($pid);
                 } else {
@@ -336,18 +348,49 @@ class TMAnalysisWorker extends AbstractWorker
 
     private function doInit(int $pid): void
     {
-        $totalSegmentsData = $this->projectCompletion->getProjectSegmentsTranslationSummary($pid);
-        $totalSegments = array_pop($totalSegmentsData);
-        assert($totalSegments !== null);
+        // Idempotency guard. A second doInit for the same run is reached when the 30s
+        // INIT_LOCK TTL expires mid-analysis (run longer than the TTL) and another worker
+        // re-acquires the lock. Re-running initializeProjectCounters would setex-overwrite
+        // the LIVE PROJECT_NUM_SEGMENTS_DONE with a lagging DB snapshot and del the dedup
+        // set, permanently dropping in-flight increments and stranding the project below
+        // PROJECT_TOT_SEGMENTS. Skip if this run already initialized — fresh runs start
+        // clean because completion clears these keys (ProjectCompletionService).
+        if ($this->redisService->getProjectTotalSegments($pid) !== null) {
+            return;
+        }
 
-        $this->_doLog($totalSegments);
+        try {
+            $totalSegmentsData = $this->projectCompletion->getProjectSegmentsTranslationSummary($pid);
+            $totalSegments = array_pop($totalSegmentsData);
 
-        $projectSegments = (int)($totalSegments['project_segments'] ?? 0);
-        $numAnalyzed = (int)($totalSegments['num_analyzed'] ?? 0);
+            $projectSegments = (int)($totalSegments['project_segments'] ?? 0);
+            $numAnalyzed = (int)($totalSegments['num_analyzed'] ?? 0);
 
-        $this->redisService->initializeProjectCounters($pid, $projectSegments, $numAnalyzed);
+            // Never persist a zero/empty total. The summary query can run before the
+            // project's segment rows are visible; writing 0 would set PROJECT_TOT_SEGMENTS
+            // with a 24h TTL and permanently block completion — tryCloseProject treats
+            // empty("0") as "count failed" and bails — while the mere presence of the key
+            // suppresses any re-init. Release the lock so the next segment retries init.
+            if ($projectSegments <= 0) {
+                $this->_doLog("--- (Worker $this->_workerPid) : segment count for PID $pid not available yet (got $projectSegments). Releasing init lock for retry.");
+                $this->redisService->releaseInitLock($pid);
 
-        $this->_doLog("--- (Worker $this->_workerPid) : found $projectSegments segments for PID $pid");
+                return;
+            }
+
+            $this->redisService->initializeProjectCounters($pid, $projectSegments, $numAnalyzed);
+
+            $this->_doLog("--- (Worker $this->_workerPid) : found $projectSegments segments for PID $pid");
+        } catch (Throwable $e) {
+            // doInit failed after acquiring the init lock. Leaving the lock held would make
+            // every other worker for this PID a loser reading NULL counters until the TTL
+            // expires. Release it so init can be retried. Swallow the error: the current
+            // segment is analyzed on its own and must not be nacked just because project
+            // init failed — a later segment will initialize the counters. Completion
+            // correctness stays gated by the DB-authoritative check in tryCloseProject.
+            $this->redisService->releaseInitLock($pid);
+            $this->_doLog("--- (Worker $this->_workerPid) : doInit failed for PID $pid: {$e->getMessage()}. Init lock released for retry.");
+        }
     }
 
     /**
@@ -399,7 +442,7 @@ class TMAnalysisWorker extends AbstractWorker
             $_config['mt_qe_config'] = new MTQEWorkflowParams(json_decode($params->mt_qe_workflow_parameters ?? '', true) ?? []);
         }
 
-        $mtEngine = EnginesFactory::getInstance((int)$params->id_mt_engine, AbstractEngine::class);
+        $mtEngine = EnginesFactory::getInstance((int)$params->id_mt_engine, $this->database, AbstractEngine::class);
         if ($mtEngine instanceof MyMemory) {
             $_config['get_mt'] = true;
             $_config['id_mt_engine'] = 0;  // Don't call MyMemory as MT separately — TMS call already includes MT via get_mt flag
@@ -445,23 +488,29 @@ class TMAnalysisWorker extends AbstractWorker
      * 3. tryCloseProject — ALWAYS RUNS after increment succeeds. Has its own
      *    internal catch-all (never throws). Idempotent via completion lock.
      *
-     * See: KNOWN_CONCURRENCY_ISSUES.md #1
+     * These side effects run AFTER the DB commit precisely because the analyzed-count
+     * increment must never be lost or replayed against an already-DONE segment (which
+     * would strand the project short of completion).
      *
      * @throws Exception only if $pid is empty (programming error in caller)
      */
     private function applyPostCommitSideEffects(
         int $pid,
+        int $idSegment,
+        int $idJob,
         string $projectPassword,
         float $eqWords,
         float $standardWords
     ): void {
-        // 1. Retry loop for the critical counter increment
+        // 1. Retry loop for the critical counter increment. The increment is idempotent
+        //    per (segment, job), so re-running it after a Redis connection error cannot
+        //    double-count (see AnalysisRedisService::incrementAnalyzedCount).
         $maxRetries = 5;
         $delayMs = 500;
 
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             try {
-                $this->redisService->incrementAnalyzedCount($pid, 1, $eqWords, $standardWords);
+                $this->redisService->incrementAnalyzedCount($pid, $idSegment, $idJob, $eqWords, $standardWords);
 
                 break;
             } catch (PredisConnectionException|PredisServerException $e) {

@@ -6,7 +6,6 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
-use Model\DataAccess\IDatabase;
 use Model\FilesStorage\Exceptions\FileSystemException;
 use UnexpectedValueException;
 use Utils\Registry\AppConfig;
@@ -30,13 +29,12 @@ class FsFilesStorage extends AbstractFilesStorage
 
     /**
      * @param FilesystemAdapter|null $filesystem
-     * @param IDatabase|null $database
      *
      * @throws \TypeError
      */
-    public function __construct(?FilesystemAdapter $filesystem = null, ?IDatabase $database = null)
+    public function __construct(?FilesystemAdapter $filesystem = null)
     {
-        parent::__construct($filesystem, $database);
+        parent::__construct($filesystem);
         $this->filesDir = AppConfig::$FILES_REPOSITORY;
         $this->cacheDir = AppConfig::$CACHE_REPOSITORY;
     }
@@ -477,7 +475,10 @@ class FsFilesStorage extends AbstractFilesStorage
             throw new UnexpectedValueException('Internal Error: Failed to retrieve analysis information from disk.', -15);
         }
 
-        $analysisData = @unserialize($rawContent);
+        // X2: the .ser blob is untrusted storage; forbid object instantiation to kill the
+        // object-injection / gadget-chain surface. The payload is a plain array, so this is
+        // transparent; a malformed blob still yields false (suppressed warning) and is handled below.
+        $analysisData = @unserialize($rawContent, ['allowed_classes' => false]);
         if ($analysisData === false) {
             throw new UnexpectedValueException('Internal Error: Failed to retrieve analysis information from disk.', -15);
         }

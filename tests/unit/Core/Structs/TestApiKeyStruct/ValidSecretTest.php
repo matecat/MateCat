@@ -35,7 +35,7 @@ class ValidSecretTest extends AbstractTest
 
     private function cleanup(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $stmt = $conn->prepare("DELETE FROM api_keys WHERE api_key = :key");
         $stmt->execute(['key' => self::TEST_API_KEY]);
     }
