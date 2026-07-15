@@ -313,7 +313,7 @@ class QualityReportSegmentModel
                     continue;
                 }
 
-                $translation = ($isForUI) ? $Filter->fromLayer0ToLayer2($event->translation) : $event->translation;
+                $translation = ($isForUI) ? $Filter->fromLayer0ToLayer2($event->translation ?? '') : ($event->translation ?? '');
 
                 if ($event->source_page == SourcePages::SOURCE_PAGE_TRANSLATE) {
                     $seg->last_translation = $translation;
