@@ -49,9 +49,12 @@ const SocketListener = ({isAuthenticated, userId}) => {
     segment_disabled: (data) => {
       SegmentActions.updateSegmentDisabledState(data.id_segment, true)
       CatToolActions.addNotification({
-        title: 'Segment disabled',
-        text: 'A segment has been disabled by the project owner and is now read-only.',
+        title: 'Segment translation disabled',
+        text: 'The project owner has disabled editing for one or more segments. They are now read-only, grayed out, and cannot be edited.',
         type: 'warning',
+        uid: 'translation_disabled',
+        timer: 15000,
+        // closeCallback: ()=>CatToolActions.updateFooterStatistics(),
       })
     },
     segment_enabled: (data) => {
@@ -60,6 +63,9 @@ const SocketListener = ({isAuthenticated, userId}) => {
         title: 'Segment enabled',
         text: 'A segment has been re-enabled by the project owner and can be translated again.',
         type: 'info',
+        uid: 'translation_enabled',
+        timer: 15000,
+        // closeCallback: () => CatToolActions.updateFooterStatistics(),
       })
     },
     glossary_get: (data) => {
