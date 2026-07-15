@@ -42,15 +42,21 @@ class OAuthSignInModel
 
     /**
      * @param array<string, mixed> $session
+     * @param string $email
+     * @param string|null $firstName
+     * @param string|null $lastName
+     * @param UserDao $userDao
+     * @param MetadataDao $metadataDao
+     * @param TeamDao $teamDao
      */
     public function __construct(
         array &$session,
         string $email,
-        ?string $firstName = null,
-        ?string $lastName = null,
-        ?UserDao $userDao = null,
-        ?MetadataDao $metadataDao = null,
-        ?TeamDao $teamDao = null
+        ?string $firstName,
+        ?string $lastName,
+        UserDao $userDao,
+        MetadataDao $metadataDao,
+        TeamDao $teamDao
     ) {
         if (empty($firstName)) {
             $firstName = "Anonymous";
@@ -67,9 +73,9 @@ class OAuthSignInModel
         ]);
 
         $this->session     =& $session;
-        $this->userDao     = $userDao ?? new UserDao();
-        $this->metadataDao = $metadataDao ?? new MetadataDao();
-        $this->teamDao     = $teamDao ?? new TeamDao();
+        $this->userDao     = $userDao;
+        $this->metadataDao = $metadataDao;
+        $this->teamDao     = $teamDao;
     }
 
     /**
@@ -190,10 +196,15 @@ class OAuthSignInModel
      * @throws Exception
      * @throws TypeError
      */
-    protected function _authenticateUser(?AuthenticationHelper $authHelper = null): void
+    protected function _authenticateUser(): void
     {
         AuthCookie::setCredentials($this->user, new SessionTokenStoreHandler());
-        $authHelper ?? new AuthenticationHelper($this->session);
+        $this->buildAuthHelper();
+    }
+
+    protected function buildAuthHelper(): AuthenticationHelper
+    {
+        return AuthenticationHelper::fromRequest($this->session, $this->teamDao->getDatabaseHandler());
     }
 
     /**
@@ -212,7 +223,11 @@ class OAuthSignInModel
 
     protected function createRedeemableProject(): RedeemableProject
     {
-        return new RedeemableProject($this->user, $this->session);
+        return new RedeemableProject(
+            $this->user,
+            $this->session,
+            $this->teamDao
+        );
     }
 
 }

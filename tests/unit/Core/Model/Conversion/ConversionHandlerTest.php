@@ -124,7 +124,7 @@ class ConversionHandlerTest extends AbstractTest
         $handler->setUploadDir($this->tmpDir);
         $handler->setErrDir($this->tmpDir . DIRECTORY_SEPARATOR . 'err');
         $handler->setUploadTokenValue('test-token-12345');
-        $handler->setFeatures(new FeatureSet());
+        $handler->setFeatures(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
         $handler->setFiltersExtractionParameters();
         $handler->setFiltersLegacyIcu();
 
@@ -283,7 +283,7 @@ class ConversionHandlerTest extends AbstractTest
     public function setFeaturesReturnsSelf(): void
     {
         $handler = $this->createHandler();
-        $features = new FeatureSet();
+        $features = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $returned = $handler->setFeatures($features);
 
         $this->assertSame($handler, $returned);

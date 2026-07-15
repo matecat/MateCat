@@ -121,7 +121,7 @@ class Matches
         $this->prop = is_string($raw) ? (json_decode($raw, true) ?: []) : (is_array($raw) ? $raw : []);
     }
 
-    public function featureSet(?FeatureSet $featureSet = null): void
+    public function featureSet(FeatureSet $featureSet): void
     {
         $this->featureSet = $featureSet;
     }
@@ -162,10 +162,12 @@ class Matches
      */
     protected function getLayer(string $string, int $layerNum, array $dataRefMap = [], ?array $subfiltering_handlers = []): string
     {
-        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
+        if ($this->featureSet === null) {
+            throw new Exception('FeatureSet not set on Matches before building layer');
+        }
 
         /** @var MateCatFilter $filter */
-        $filter = MateCatFilter::getInstance($featureSet, $this->source, $this->target, $dataRefMap, $subfiltering_handlers);
+        $filter = MateCatFilter::getInstance($this->featureSet, $this->source, $this->target, $dataRefMap, $subfiltering_handlers);
         switch ($layerNum) {
             case 0:
                 return $filter->fromLayer1ToLayer0($string);

@@ -13,6 +13,7 @@ use DivisionByZeroError;
 use DomainException;
 use Exception;
 use PDOException;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
@@ -24,6 +25,7 @@ use Utils\Url\CanonicalRoutes;
 class ProjectAssignedEmail extends AbstractEmail
 {
 
+    protected IDatabase $database;
     protected UserStruct $user;
     protected ProjectStruct $project;
     protected UserStruct $assignee;
@@ -34,15 +36,17 @@ class ProjectAssignedEmail extends AbstractEmail
     private array $jobs;
 
     /**
+     * @param JobStruct[] $jobs
      * @throws DomainException
      */
-    public function __construct(UserStruct $user, ProjectStruct $project, UserStruct $assignee)
+    public function __construct(IDatabase $database, UserStruct $user, ProjectStruct $project, UserStruct $assignee, array $jobs)
     {
+        $this->database = $database;
         $this->user = $user;
         $this->project = $project;
         $this->assignee = $assignee;
 
-        $this->jobs = $project->getJobs();
+        $this->jobs = $jobs;
 
         $this->title = "You've been assigned a project";
 
@@ -68,7 +72,7 @@ class ProjectAssignedEmail extends AbstractEmail
             $jobStats->setRejectedWords($jStruct->rejected_words);
             $jobStats->setTranslatedWords($jStruct->translated_words);
             $jobStats->setApprovedWords($jStruct->approved_words);
-            $stats = CatUtils::getFastStatsForJob($jobStats, false);
+            $stats = (new CatUtils($this->database))->getFastStatsForJob($jobStats, false);
             $words_count[] = $stats[ProjectsMetadataMarshaller::WORD_COUNT_RAW->value]['total'];
         }
 

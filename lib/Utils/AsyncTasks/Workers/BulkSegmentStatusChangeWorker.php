@@ -3,10 +3,13 @@
 namespace Utils\AsyncTasks\Workers;
 
 use Exception;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureCodes;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\Projects\ProjectDao;
+use Model\Segments\SegmentDao;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserDao;
@@ -14,6 +17,7 @@ use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use ReflectionException;
 use TypeError;
@@ -28,16 +32,14 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
     protected int $maxRequeueNum = 3;
 
     private UserDao $userDao;
-    private IDatabase $database;
 
     /**
      * @throws ReflectionException
      */
-    public function __construct(AMQHandler $queueHandler, ?UserDao $userDao = null, ?IDatabase $database = null)
+    public function __construct(AMQHandler $queueHandler, IDatabase $database, ?UserDao $userDao = null)
     {
-        parent::__construct($queueHandler);
-        $this->userDao = $userDao ?? new UserDao();
-        $this->database = $database ?? Database::obtain();
+        parent::__construct($queueHandler, $database);
+        $this->userDao = $userDao ?? new UserDao($this->database);
     }
 
     public function getLoggerName(): string
@@ -76,9 +78,12 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
         $segmentTranslationDao = new SegmentTranslationDao($this->database);
 
+        $project = $chunk->getProject(new ProjectDao($this->database));
+        $featureSet = FeatureSet::forProject($project, $this->database);
+
         $batchEventCreator = $this->createTranslationEventsHandler($chunk);
-        $batchEventCreator->setFeatureSet($chunk->getProject()->getFeaturesSet());
-        $batchEventCreator->setProject($chunk->getProject());
+        $batchEventCreator->setFeatureSet($featureSet);
+        $batchEventCreator->setProject($project);
 
         $old_translations = $segmentTranslationDao->getAllSegmentsByIdListAndJobId($params['segment_ids'], (int)$chunk->id);
 
@@ -95,7 +100,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
             $new_translations[] = $new_translation;
 
-            if ($chunk->getProject()->hasFeature(FeatureCodes::TRANSLATION_VERSIONS)) {
+            if ($featureSet->hasFeature(FeatureCodes::TRANSLATION_VERSIONS)) {
                 try {
                     $segmentTranslationEvent = $this->createTranslationEvent($old_translation, $new_translation, $user, $source_page);
                 } catch (Exception $e) {
@@ -108,7 +113,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
         $segmentTranslationDao->updateTranslationAndStatusAndDateByList($new_translations);
 
-        $batchEventCreator->save(new BatchReviewProcessor());
+        $batchEventCreator->save(new BatchReviewProcessor(new ChunkReviewDao($this->database)));
 
         $this->_doLog('completed');
 
@@ -145,7 +150,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
     protected function createTranslationEventsHandler(JobStruct $chunk): TranslationEventsHandler
     {
-        return new TranslationEventsHandler($chunk);
+        return new TranslationEventsHandler($chunk, new TranslationEventDao($this->database));
     }
 
     /**
@@ -157,7 +162,15 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
         ?UserStruct $user,
         int $sourcePage
     ): TranslationEvent {
-        return new TranslationEvent($oldTranslation, $newTranslation, $user, $sourcePage);
+        return new TranslationEvent(
+            $oldTranslation,
+            $newTranslation,
+            $user,
+            $sourcePage,
+            null,
+            new TranslationEventDao($this->database),
+            new SegmentDao($this->database)
+        );
     }
 
 }

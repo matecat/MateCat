@@ -26,7 +26,7 @@ class KeyCheckController extends KleinController
 
     private function getApiKeyDao(): ApiKeyDao
     {
-        return $this->apiKeyDao ??= new ApiKeyDao();
+        return $this->apiKeyDao ??= new ApiKeyDao($this->getDatabase());
     }
 
     /**

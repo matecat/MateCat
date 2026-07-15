@@ -3,8 +3,10 @@
 namespace Model\Files;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use PDOException;
 use ReflectionException;
 use RuntimeException;
@@ -23,30 +25,22 @@ class FilesInfoUtility
     /**
      * FilesInfoUtility constructor.
      *
-     * @param JobStruct       $chunkStruct
-     * @param JobDao|null     $jobDao
-     * @param MetadataDao|null $metadataDao
-     * @param FilesPartsDao|null $filesPartsDao
-     * @param FileDao|null    $fileDao
+     * @param JobStruct $chunkStruct
+     * @param IDatabase $database
      * @throws RuntimeException
+     * @throws ReflectionException
      */
-    public function __construct(
-        JobStruct $chunkStruct,
-        ?JobDao $jobDao = null,
-        ?MetadataDao $metadataDao = null,
-        ?FilesPartsDao $filesPartsDao = null,
-        ?FileDao $fileDao = null
-    ) {
+    public function __construct(JobStruct $chunkStruct, IDatabase $database)
+    {
         $this->chunk = $chunkStruct;
-        $projectId = $chunkStruct->getProject()->id;
-        if ($projectId === null) {
-            throw new RuntimeException('Project ID must not be null');
-        }
+        $projectId = $chunkStruct->getProject(new ProjectDao($database))->id ?? throw new RuntimeException(
+            'Project ID must not be null'
+        );
         $this->projectId = $projectId;
-        $this->jobDao = $jobDao ?? new JobDao();
-        $this->metadataDao = $metadataDao ?? new MetadataDao();
-        $this->filesPartsDao = $filesPartsDao ?? new FilesPartsDao();
-        $this->fileDao = $fileDao ?? new FileDao();
+        $this->jobDao = new JobDao($database);
+        $this->metadataDao = new MetadataDao($database);
+        $this->filesPartsDao = new FilesPartsDao($database);
+        $this->fileDao = new FileDao($database);
     }
 
     /**

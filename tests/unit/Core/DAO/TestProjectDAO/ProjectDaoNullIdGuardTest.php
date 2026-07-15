@@ -20,7 +20,7 @@ class ProjectDaoNullIdGuardTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dao = new ProjectDao();
+        $this->dao = new ProjectDao(obtainTestDatabase());
     }
 
     #[Test]

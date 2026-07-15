@@ -44,6 +44,11 @@ class TestableSignupController extends SignupController
         $this->injectedRateLimiter = $rateLimiter;
     }
 
+    public function setDatabase(\Model\DataAccess\IDatabase $database): void
+    {
+        (new ReflectionClass(KleinController::class))->getProperty('database')->setValue($this, $database);
+    }
+
     public function checkAndIncrementRateLimit(Response $response, string $identifier, string $route, int $maxRetries = 10, ?RateLimiterService $limiterService = null): ?Response
     {
         return parent::checkAndIncrementRateLimit($response, $identifier, $route, $maxRetries, $limiterService ?? $this->injectedRateLimiter);
@@ -417,5 +422,101 @@ class SignupControllerTest extends AbstractTest
         $method = new ReflectionMethod(SignupController::class, 'validateCreationRequest');
 
         return $method->invoke($this->controller);
+    }
+
+    // ─── real collaborator construction (uncovered helper bodies) ─────
+
+    #[Test]
+    public function createSignupModel_real_builds_signup_model_with_user_struct(): void
+    {
+        $this->controller->setDatabase(obtainTestDatabase());
+
+        $method = new ReflectionMethod(SignupController::class, 'createSignupModel');
+        $session = [];
+        $params = ['email' => 'realbuild@example.com'];
+
+        $signupModel = $method->invoke($this->controller, $params, $session);
+
+        $this->assertInstanceOf(SignupModel::class, $signupModel);
+        $this->assertSame($params, $signupModel->getParams());
+    }
+
+    #[Test]
+    public function createInvitedUser_real_builds_invited_user(): void
+    {
+        $this->controller->setDatabase(obtainTestDatabase());
+
+        $method = new ReflectionMethod(SignupController::class, 'createInvitedUser');
+
+        $invitedUser = $method->invoke($this->controller);
+
+        $this->assertInstanceOf(\Model\Teams\InvitedUser::class, $invitedUser);
+        $this->assertFalse($invitedUser->hasPendingInvitations());
+    }
+
+    #[Test]
+    public function createRedeemableProject_real_builds_redeemable_project(): void
+    {
+        $this->controller->setDatabase(obtainTestDatabase());
+
+        $user = new \Model\Users\UserStruct();
+        $user->uid = 1;
+        $method = new ReflectionMethod(SignupController::class, 'createRedeemableProject');
+        $session = [];
+
+        $project = $method->invoke($this->controller, $user, $session);
+
+        $this->assertInstanceOf(\Model\Users\RedeemableProject::class, $project);
+    }
+
+    // ─── validateCreationRequest wanted_url callback branches ─────────
+
+    #[Test]
+    public function validateCreationRequest_falls_back_to_httphost_when_wanted_url_unparsable(): void
+    {
+        $this->request->method('param')->willReturn([
+            'email' => 'test@example.com',
+            'password' => 'Valid!Password1',
+            'password_confirmation' => 'Valid!Password1',
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'wanted_url' => 'http://a:b:c/path',
+        ]);
+
+        $user = $this->invokeValidateCreationRequest();
+
+        $this->assertSame(\Utils\Registry\AppConfig::$HTTPHOST, $user['wanted_url']);
+    }
+
+    #[Test]
+    public function validateCreationRequest_falls_back_to_httphost_when_wanted_url_host_differs(): void
+    {
+        $this->request->method('param')->willReturn([
+            'email' => 'test@example.com',
+            'password' => 'Valid!Password1',
+            'password_confirmation' => 'Valid!Password1',
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'wanted_url' => 'https://evil-external-host.example.org/phish',
+        ]);
+
+        $user = $this->invokeValidateCreationRequest();
+
+        $this->assertSame(\Utils\Registry\AppConfig::$HTTPHOST, $user['wanted_url']);
+    }
+
+    // ─── resendConfirmationEmail success path (no rate limit hit) ─────
+
+    #[Test]
+    public function resendConfirmationEmail_completes_with_no_matching_user(): void
+    {
+        $this->controller->setDatabase(obtainTestDatabase());
+
+        $this->rateLimiter->method('checkAndIncrement')->willReturn(null);
+        $this->request->method('param')->willReturn('no-such-user-9975000@example.com');
+
+        $this->controller->resendConfirmationEmail();
+
+        $this->assertSame(200, $this->controller->getResponse()->code());
     }
 }

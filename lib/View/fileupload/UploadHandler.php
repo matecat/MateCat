@@ -2,6 +2,7 @@
 
 use Model\Conversion\MimeTypes\MimeTypes;
 use Model\Conversion\ZipArchiveHandler;
+use Model\DataAccess\IDatabase;
 use Model\FilesStorage\AbstractFilesStorage;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
@@ -26,11 +27,14 @@ class UploadHandler
 
     protected MatecatLogger $logger;
 
+    protected IDatabase $database;
+
     /**
      * @param array<string, mixed> $files
      */
-    function __construct(array $files = [])
+    function __construct(IDatabase $database, array $files = [])
     {
+        $this->database = $database;
         $this->logger = LoggerFactory::getLogger("upload_handler");
         $this->files  = $files;
 
@@ -596,7 +600,7 @@ class UploadHandler
     {
         $file_path = $this->options['upload_dir'] . $file_name;
 
-        CatUtils::deleteSha($file_path, $source, $segmentationRule, $filtersTemplate);
+        (new CatUtils($this->database))->deleteSha($file_path, $source, $segmentationRule, $filtersTemplate);
 
         $success[$file_name] = is_file($file_path) && $file_name[0] !== '.' && unlink($file_path);
 
@@ -644,7 +648,7 @@ class UploadHandler
     private function zipInternalFileDelete(string $file_name, string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): array
     {
         $file_path = $this->options['upload_dir'] . $file_name;
-        CatUtils::deleteSha($file_path, $source, $segmentationRule, $filtersTemplate);
+        (new CatUtils($this->database))->deleteSha($file_path, $source, $segmentationRule, $filtersTemplate);
 
         $out_file_name = ZipArchiveHandler::getFileName($file_name);
 

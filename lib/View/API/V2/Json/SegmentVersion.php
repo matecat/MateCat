@@ -8,6 +8,7 @@ use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
+use Model\LQA\EntryCommentDao;
 use Model\LQA\EntryStruct;
 use RuntimeException;
 
@@ -19,7 +20,7 @@ class SegmentVersion
      * @var AbstractDaoObjectStruct[]
      */
     private array $data;
-    private ?bool $with_issues;
+    private bool $with_issues;
 
     /**
      * @var JobStruct
@@ -34,21 +35,15 @@ class SegmentVersion
      * @param JobStruct $chunk
      * @param AbstractDaoObjectStruct[] $data
      * @param bool $with_issues
-     * @param FeatureSet|null $featureSet
+     * @param FeatureSet $featureSet
      * @param MetadataDao|null $metadataDao
-     * @throws Exception
      */
-    public function __construct(JobStruct $chunk, array $data, ?bool $with_issues = false, ?FeatureSet $featureSet = null, ?MetadataDao $metadataDao = null)
+    public function __construct(JobStruct $chunk, array $data, ?bool $with_issues, FeatureSet $featureSet, ?MetadataDao $metadataDao = null)
     {
         $this->data = $data;
-        $this->with_issues = $with_issues;
+        $this->with_issues = $with_issues ?? false;
         $this->chunk = $chunk;
         $this->metadataDao = $metadataDao;
-
-        if ($featureSet == null) {
-            $featureSet = new FeatureSet();
-        }
-
         $this->featureSet = $featureSet;
     }
 
@@ -77,7 +72,7 @@ class SegmentVersion
         $versionId = null;
         $version = null;
 
-        $issues_renderer = new SegmentTranslationIssue();
+        $issues_renderer = new SegmentTranslationIssue(new EntryCommentDao($this->featureSet->getDatabase()));
 
         foreach ($this->data as $record) {
             if (!is_null($versionId) && $versionId != $record->id) {
@@ -163,7 +158,7 @@ class SegmentVersion
      */
     public function renderItem(AbstractDaoObjectStruct $version): array
     {
-        $this->metadataDao ??= new MetadataDao();
+        $this->metadataDao ??= new MetadataDao($this->featureSet->getDatabase());
         $Filter = MateCatFilter::getInstance(
             $this->featureSet,
             $this->chunk->source,

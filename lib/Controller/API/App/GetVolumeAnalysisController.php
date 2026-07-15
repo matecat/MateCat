@@ -9,6 +9,7 @@ use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use InvalidArgumentException;
 use Klein\Response;
+use TypeError;
 use Model\Analysis\Status;
 use Model\Projects\ProjectDao;
 
@@ -16,8 +17,9 @@ class GetVolumeAnalysisController extends KleinController
 {
 
     /**
+     * @throws InvalidArgumentException
      */
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
 
@@ -32,10 +34,11 @@ class GetVolumeAnalysisController extends KleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function analysis(): Response
     {
-        $_project_data = (new ProjectDao())->getProjectAndJobData($this->params['id_project']);
+        $_project_data = (new ProjectDao($this->getDatabase()))->getProjectAndJobData($this->params['id_project']);
 
         $analysisStatus = new Status($_project_data, $this->featureSet, $this->user);
 
@@ -44,6 +47,7 @@ class GetVolumeAnalysisController extends KleinController
 
     /**
      * @return void
+     * @throws InvalidArgumentException
      */
     private function validateTheRequest(): void
     {

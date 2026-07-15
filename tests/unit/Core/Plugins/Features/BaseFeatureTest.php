@@ -80,7 +80,7 @@ class BaseFeatureTest extends AbstractTest
         $feature = new BasicFeatureStruct(['feature_code' => 'any_feature']);
 
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Plugin code not defined.');
+        $this->expectExceptionMessage('Feature code missing or mismatched');
 
         new InvalidFeatureCodeTestFeature($feature);
     }

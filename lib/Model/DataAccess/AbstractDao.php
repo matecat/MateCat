@@ -55,12 +55,8 @@ abstract class AbstractDao
     private const string FIND_BY_ID_SQL = "SELECT * FROM %s WHERE id = :id";
     private const string UPDATE_STRUCT_SQL = " UPDATE %s SET %s WHERE %s ";
 
-    public function __construct(?IDatabase $con = null)
+    public function __construct(IDatabase $con)
     {
-        if ($con == null) {
-            $con = Database::obtain();
-        }
-
         $this->database = $con;
         self::$auto_increment_field = [];
     }

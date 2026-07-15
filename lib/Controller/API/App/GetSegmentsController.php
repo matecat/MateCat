@@ -34,6 +34,7 @@ use PDOException;
 use ReflectionException;
 use RuntimeException;
 use Utils\LQA\ICUSourceSegmentDetector;
+use Model\Projects\ProjectDao;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\Tools\CatUtils;
@@ -44,7 +45,7 @@ class GetSegmentsController extends KleinController
     const int DEFAULT_PER_PAGE = 40;
     const int MAX_PER_PAGE = 200;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -74,7 +75,7 @@ class GetSegmentsController extends KleinController
 
         $job = $this->findJob($jid, $password);
 
-        $project = $job->getProject();
+        $project = $job->getProject(new ProjectDao($this->getDatabase()));
         $projectId = $project->id ?? throw new RuntimeException('Project ID is null');
         $jobId = $job->id ?? throw new RuntimeException('Job ID is null');
         $jobPassword = $job->password ?? throw new RuntimeException('Job password is null');
@@ -108,12 +109,12 @@ class GetSegmentsController extends KleinController
         $res = [];
 
         $projectMetadata = $this->createProjectMetadataDao();
-        $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->get($projectId, ProjectsMetadataMarshaller::ICU_ENABLED->value)->value ?? false;
+        $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->getValue($projectId, ProjectsMetadataMarshaller::ICU_ENABLED->value) ?? false;
 
-        $projectContextUrl = $projectMetadata->setCacheTTL(60 * 60 * 24)->get(
+        $projectContextUrl = $projectMetadata->setCacheTTL(60 * 60 * 24)->getValue(
             $projectId,
             ProjectsMetadataMarshaller::CONTEXT_URL->value
-        )?->value;
+        );
 
         $filesMetadataDao = $this->createFilesMetadataDao();
         $fileContextUrls = [];
@@ -315,7 +316,7 @@ class GetSegmentsController extends KleinController
             $last = end($segments);
             $stop = $last['sid'];
 
-            return (new SegmentNoteDao())->getAggregatedBySegmentIdInInterval($start, $stop);
+            return (new SegmentNoteDao($this->getDatabase()))->getAggregatedBySegmentIdInInterval($start, $stop);
         }
 
         return [];
@@ -336,7 +337,7 @@ class GetSegmentsController extends KleinController
             $last = end($segments);
             $stop = $last['sid'];
 
-            return (new ContextGroupDao())->getBySIDRange($start, $stop);
+            return (new ContextGroupDao($this->getDatabase()))->getBySIDRange($start, $stop);
         }
 
         return [];
@@ -349,31 +350,31 @@ class GetSegmentsController extends KleinController
      */
     protected function findJob(int $jid, string $password): \Model\Jobs\JobStruct
     {
-        return (new JobDao())->getByIdAndPasswordOrFail($jid, $password);
+        return (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($jid, $password);
     }
 
     protected function createSegmentDao(): SegmentDao
     {
-        return new SegmentDao();
+        return new SegmentDao($this->getDatabase());
     }
 
     protected function createProjectMetadataDao(): ProjectMetadataDao
     {
-        return new ProjectMetadataDao();
+        return new ProjectMetadataDao($this->getDatabase());
     }
 
     protected function createFilesMetadataDao(): FilesMetadataDao
     {
-        return new FilesMetadataDao();
+        return new FilesMetadataDao($this->getDatabase());
     }
 
     protected function createJobMetadataDao(): MetadataDao
     {
-        return new MetadataDao();
+        return new MetadataDao($this->getDatabase());
     }
 
     protected function createSegmentMetadataDao(): SegmentMetadataDao
     {
-        return new SegmentMetadataDao();
+        return new SegmentMetadataDao($this->getDatabase());
     }
 }

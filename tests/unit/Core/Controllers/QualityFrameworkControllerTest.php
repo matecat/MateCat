@@ -22,9 +22,6 @@ class TestableQualityFrameworkController extends QualityFrameworkController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
 }
 
 #[AllowMockObjectsWithoutExpectations]
@@ -54,7 +51,7 @@ class QualityFrameworkControllerTest extends AbstractTest
     {
         parent::setUp();
 
-        Database::obtain()->begin();
+        obtainTestDatabase()->begin();
 
         $this->reflector = new ReflectionClass(TestableQualityFrameworkController::class);
         $this->controller = $this->reflector->newInstanceWithoutConstructor();
@@ -65,6 +62,7 @@ class QualityFrameworkControllerTest extends AbstractTest
 
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
 
         $this->seedFixtures();
         $this->setControllerUser(99999, true);
@@ -72,9 +70,9 @@ class QualityFrameworkControllerTest extends AbstractTest
 
     protected function tearDown(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         if ($conn->inTransaction()) {
-            Database::obtain()->rollback();
+            obtainTestDatabase()->rollback();
         }
 
         parent::tearDown();
@@ -82,7 +80,7 @@ class QualityFrameworkControllerTest extends AbstractTest
 
     private function seedFixtures(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
 
         $conn->exec(
             "DELETE FROM projects WHERE id IN ("
@@ -153,7 +151,7 @@ class QualityFrameworkControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function afterConstructAppendsLoginValidator(): void
+    public function registerValidatorsAppendsLoginValidator(): void
     {
         $realReflector = new ReflectionClass(QualityFrameworkController::class);
         /** @var QualityFrameworkController $realController */
@@ -165,8 +163,8 @@ class QualityFrameworkControllerTest extends AbstractTest
         $realReflector->getProperty('request')->setValue($realController, $request);
         $realReflector->getProperty('response')->setValue($realController, $response);
 
-        $afterConstruct = $realReflector->getMethod('afterConstruct');
-        $afterConstruct->invoke($realController);
+        $registerValidators = $realReflector->getMethod('registerValidators');
+        $registerValidators->invoke($realController);
 
         /** @var list<mixed> $validators */
         $validators = $realReflector->getProperty('validators')->getValue($realController);

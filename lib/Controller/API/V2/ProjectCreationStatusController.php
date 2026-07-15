@@ -13,6 +13,8 @@ namespace Controller\API\V2;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\Exceptions\NotFoundException;
 use Model\Projects\ProjectDao;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
@@ -45,7 +47,7 @@ class ProjectCreationStatusController extends KleinController
         } else {
             // project is created, verify password authorization
             try {
-                (new ProjectDao())->findByIdAndPassword($idProject, $this->request->param('password'));
+                (new ProjectDao($this->getDatabase()))->findByIdAndPassword($idProject, $this->request->param('password'));
             } catch (NotFoundException) {
                 throw new AuthorizationError('Not Authorized.');
             }
@@ -60,6 +62,10 @@ class ProjectCreationStatusController extends KleinController
     }
 
 
+    /**
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
+     */
     protected function _letsWait(): void
     {
         $this->response->code(202);

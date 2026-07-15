@@ -42,7 +42,7 @@ class MyMemoryMethodsTest extends AbstractTest
         parent::setUp();
 
         $engineDAO = new EngineDAO(
-            Database::obtain(
+            obtainTestDatabase(
                 AppConfig::$DB_SERVER,
                 AppConfig::$DB_USER,
                 AppConfig::$DB_PASS,
@@ -73,7 +73,7 @@ class MyMemoryMethodsTest extends AbstractTest
     private function makeMock(string $jsonReturn): MyMemory
     {
         $mock = @$this->getMockBuilder(MyMemory::class)
-            ->setConstructorArgs([$this->engineStruct])
+            ->setConstructorArgs([$this->engineStruct, $this->createStub(\Model\DataAccess\IDatabase::class)])
             ->onlyMethods(['_call'])
             ->getMock();
 

@@ -69,11 +69,11 @@ class ContextUrlController extends KleinController
      */
     protected function initDependencies(): void
     {
-        $this->projectsMetadataDao = new ProjectsMetadataDao();
-        $this->filesMetadataDao = new FilesMetadataDao();
-        $this->segmentMetadataDao = new SegmentMetadataDao();
-        $this->fileDao = new FileDao();
-        $this->segmentDao = new SegmentDao();
+        $this->projectsMetadataDao = new ProjectsMetadataDao($this->getDatabase());
+        $this->filesMetadataDao = new FilesMetadataDao($this->getDatabase());
+        $this->segmentMetadataDao = new SegmentMetadataDao($this->getDatabase());
+        $this->fileDao = new FileDao($this->getDatabase());
+        $this->segmentDao = new SegmentDao($this->getDatabase());
         $this->rateLimiterService = new RateLimiterService();
     }
 
@@ -107,7 +107,7 @@ class ContextUrlController extends KleinController
 
         foreach ($identifiers as $identifier) {
             $response = $this->rateLimiterService->checkAndIncrement(
-                $this->response, $identifier, $route, 10
+                $this->response, $identifier, $route, 5
             );
             if ($response instanceof Response) {
                 $this->response = $response;

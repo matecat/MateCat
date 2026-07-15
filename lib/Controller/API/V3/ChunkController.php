@@ -14,8 +14,10 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\FeatureSet;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use View\API\V3\Json\Chunk;
 
@@ -35,10 +37,11 @@ class ChunkController extends KleinController
     /**
      * @throws Exception
      * @throws NotFoundException
+     * @throws \TypeError
      */
     public function show(): void
     {
-        $format = new Chunk();
+        $format = new Chunk($this->getDatabase());
         $format->setUser($this->user);
         $format->setCalledFromApi(true);
         $format->setChunkReviews($this->chunk_reviews);
@@ -48,16 +51,16 @@ class ChunkController extends KleinController
         $this->response->json($format->renderOne($this->chunk));
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
 
         $Validator = new ChunkPasswordValidator($this);
         $Validator->onSuccess(function () use ($Validator) {
             $this->chunk = $Validator->getChunk();
-            $this->project = $Validator->getChunk()->getProject();
-            $this->featureSet = $this->project->getFeaturesSet();
-            $this->chunk_reviews = (new ChunkReviewDao())->findChunkReviews($Validator->getChunk());
+            $this->project = $Validator->getChunk()->getProject(new ProjectDao($this->getDatabase()));
+            $this->featureSet = FeatureSet::forProject($this->project, $this->getDatabase());
+            $this->chunk_reviews = (new ChunkReviewDao($this->getDatabase()))->findChunkReviews($Validator->getChunk());
         });
         $this->appendValidator($Validator);
     }

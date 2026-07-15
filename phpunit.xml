@@ -40,5 +40,9 @@
         <testsuite name="Plugins Unit tests">
             <directory>plugins/*/tests/unit</directory>
         </testsuite>
+        <!--
+            Real-SQL DAO tests carry #[Group('DaoRealSql')]; select them with the DaoRealSql
+            group selector (running and coverage scoping alike). No dedicated testsuite needed.
+        -->
     </testsuites>
 </phpunit>

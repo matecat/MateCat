@@ -4,11 +4,15 @@ namespace Controller\API\V3;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
+use DivisionByZeroError;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Response;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
 use Swaggest\JsonSchema\InvalidValue;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
@@ -19,19 +23,35 @@ class PayableRateController extends KleinController
 {
     private ?CustomPayableRateDao $customPayableRateDao = null;
 
-    private function getCustomPayableRateDao(): CustomPayableRateDao
+    protected function getCustomPayableRateDao(): CustomPayableRateDao
     {
-        return $this->customPayableRateDao ??= new CustomPayableRateDao();
+        return $this->customPayableRateDao ??= new CustomPayableRateDao($this->getDatabase());
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
-        parent::afterConstruct();
         $this->appendValidator(new LoginValidator($this));
     }
 
     /**
+     * @throws Exception
+     */
+    private function getUserId(): int
+    {
+        $uid = $this->getUser()->uid;
+        if ($uid === null) {
+            throw new Exception('User not authenticated', 401);
+        }
+
+        return $uid;
+    }
+
+    /**
      * @return Response
+     * @throws DivisionByZeroError
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
+     * @throws TypeError
      */
     public function index(): Response
     {
@@ -43,7 +63,7 @@ class PayableRateController extends KleinController
                 $pagination = 200;
             }
 
-            $uid = $this->getUser()->uid;
+            $uid = $this->getUserId();
 
             return $this->response->json($this->getCustomPayableRateDao()->getAllPaginated($uid, "/api/v3/payable_rate?page=", (int)$currentPage, (int)$pagination));
         } catch (Exception $exception) {
@@ -58,6 +78,9 @@ class PayableRateController extends KleinController
 
     /**
      * @return Response
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
+     * @throws TypeError
      */
     public function create(): Response
     {
@@ -69,9 +92,12 @@ class PayableRateController extends KleinController
             }
 
             $json = $this->request->body();
+            if ($json === null) {
+                throw new Exception('Missing request body', 400);
+            }
             $this->validateJSON($json);
 
-            $struct = $this->getCustomPayableRateDao()->createFromJSON($json, $this->getUser()->uid);
+            $struct = $this->getCustomPayableRateDao()->createFromJSON($json, $this->getUserId());
 
             $this->response->code(201);
 
@@ -97,13 +123,15 @@ class PayableRateController extends KleinController
 
     /**
      * @return Response
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function delete(): Response
     {
         $id = $this->request->param('id');
 
         try {
-            $count = $this->getCustomPayableRateDao()->remove($id, $this->getUser()->uid);
+            $count = $this->getCustomPayableRateDao()->remove($id, $this->getUserId());
 
             if ($count == 0) {
                 throw new Exception('Model not found', 404);
@@ -124,6 +152,9 @@ class PayableRateController extends KleinController
 
     /**
      * @return Response
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
+     * @throws TypeError
      */
     public function edit(): Response
     {
@@ -135,12 +166,15 @@ class PayableRateController extends KleinController
 
             $id = $this->request->param('id');
 
-            $model = $this->getCustomPayableRateDao()->getByIdAndUser($id, $this->getUser()->uid);
+            $model = $this->getCustomPayableRateDao()->getByIdAndUser($id, $this->getUserId());
             if (empty($model)) {
                 throw new Exception('Model not found', 404);
             }
 
             $json = $this->request->body();
+            if ($json === null) {
+                throw new Exception('Missing request body', 400);
+            }
             $this->validateJSON($json);
 
             $struct = $this->getCustomPayableRateDao()->editFromJSON($model, $json);
@@ -169,12 +203,14 @@ class PayableRateController extends KleinController
 
     /**
      * @return Response
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function view(): Response
     {
         try {
             $id = $this->request->param('id');
-            $model = $this->getCustomPayableRateDao()->getByIdAndUser($id, $this->getUser()->uid);
+            $model = $this->getCustomPayableRateDao()->getByIdAndUser($id, $this->getUserId());
 
             if (empty($model)) {
                 throw new Exception('Model not found', 404);
@@ -195,6 +231,8 @@ class PayableRateController extends KleinController
      * This is the Payable Rate Model JSON schema
      *
      * @return Response
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function schema(): Response
     {
@@ -205,11 +243,17 @@ class PayableRateController extends KleinController
      * Validate a Payable Rate Model template
      *
      * @return Response
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
+     * @throws TypeError
      */
     public function validate(): Response
     {
         try {
             $json = $this->request->body();
+            if ($json === null) {
+                throw new Exception('Missing request body', 400);
+            }
 
             $validatorObject = new JSONValidatorObject($json);
             $validator = new JSONValidator($this->getPayableRateModelSchema());
@@ -229,7 +273,11 @@ class PayableRateController extends KleinController
             $formattedErrors = [];
 
             foreach ($errors as $error) {
-                $formattedErrors[] = $error->getFormattedError("payable_rate");
+                if ($error instanceof JSONValidatorException) {
+                    $formattedErrors[] = $error->getFormattedError("payable_rate");
+                } else {
+                    $formattedErrors[] = ['error' => $error->getMessage()];
+                }
             }
 
             return $this->response->json([
@@ -260,7 +308,7 @@ class PayableRateController extends KleinController
     {
         $this->response->status()->setCode(200);
         $this->response->json(
-            $this->getCustomPayableRateDao()->getDefaultTemplate($this->getUser()->uid)
+            $this->getCustomPayableRateDao()->getDefaultTemplate($this->getUserId())
         );
     }
 
@@ -269,6 +317,7 @@ class PayableRateController extends KleinController
      *
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
+     * @throws Exception
      */
     private static function validateJSON(string $json): void
     {

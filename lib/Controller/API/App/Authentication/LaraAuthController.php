@@ -16,6 +16,7 @@ use Controller\API\Commons\Validators\IsOwnerInternalUserValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Klein\App;
+use RuntimeException;
 use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
@@ -75,7 +76,7 @@ class LaraAuthController extends AbstractStatefulKleinController
         $this->logger = LoggerFactory::getLogger($loggerName, $loggerName);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
 
@@ -95,6 +96,7 @@ class LaraAuthController extends AbstractStatefulKleinController
      * @param ChunkPasswordValidator $chunkValidator
      *
      * @return void
+     * @throws RuntimeException
      */
     protected function onChunkValidated(ChunkPasswordValidator $chunkValidator): void
     {

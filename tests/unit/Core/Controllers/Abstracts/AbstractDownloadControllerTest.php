@@ -3,10 +3,14 @@
 namespace Matecat\Core\Controllers\Abstracts;
 
 use Controller\Abstracts\AbstractDownloadController;
+use Controller\Exceptions\RenderTerminatedException;
+use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Model\Projects\ProjectStruct;
+use Utils\Registry\AppConfig;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -29,11 +33,13 @@ class AbstractDownloadControllerTest extends AbstractTest
     {
         $request = Request::createFromGlobals();
         $response = new Response();
+        $app = new App();
+        $app->register('getDatabase', static fn() => obtainTestDatabase());
 
-        return new class ($request, $response) extends AbstractDownloadController {
+        return new class ($request, $response, null, $app) extends AbstractDownloadController {
             protected bool $useSession = false;
 
-            protected function identifyUser(?bool $useSession = true, ?\Controller\Abstracts\Authentication\AuthenticationHelper $authHelper = null): void
+            protected function identifyUser(?bool $useSession = true): void
             {
                 $this->userIsLogged = false;
             }
@@ -86,6 +92,47 @@ class AbstractDownloadControllerTest extends AbstractTest
     }
 
     #[Test]
+    public function finalizeThrowsRenderTerminatedExceptionInTestingEnvironment(): void
+    {
+        // The render path used to be wrapped in a try/catch that print_r'd the exception and exit()'d,
+        // which leaked stack traces to clients and made finalize() untestable. It now emits the file and,
+        // under the 'testing' env, throws RenderTerminatedException instead of exit() so the path
+        // (unlockToken + header emission + body output) can be exercised here.
+        $project     = new ProjectStruct();
+        $project->id = 1;
+        $this->setProperty('project', $project);
+        $this->setProperty('_filename', 'document.xlf');
+        $this->setProperty('mimeType', 'application/xliff+xml');
+        $this->setProperty('outputContent', 'translated-file-body');
+
+        $previousEnv     = AppConfig::$ENV;
+        $originalObLevel = ob_get_level();
+        // Shield PHPUnit's own output buffer: finalize() calls ob_get_clean() on the top buffer.
+        ob_start();
+        AppConfig::$ENV = 'testing';
+
+        // finalize() emits HTTP headers; under the CLI/PHPUnit SAPI output is already sent, so
+        // header() raises "headers already sent" warnings that are irrelevant to what we assert.
+        set_error_handler(
+            static fn (int $errno, string $errstr): bool => str_contains($errstr, 'Cannot modify header information'),
+            E_WARNING
+        );
+
+        try {
+            $this->controller->finalize(true);
+            $this->fail('finalize() must throw RenderTerminatedException under the testing env');
+        } catch (RenderTerminatedException $e) {
+            $this->assertInstanceOf(RenderTerminatedException::class, $e);
+        } finally {
+            restore_error_handler();
+            AppConfig::$ENV = $previousEnv;
+            while (ob_get_level() > $originalObLevel) {
+                @ob_end_clean();
+            }
+        }
+    }
+
+    #[Test]
     #[DataProvider('ocrExtensionProvider')]
     public function forceOcrExtensionConvertsImageExtensions(string $input, string $expected): void
     {
@@ -110,6 +157,31 @@ class AbstractDownloadControllerTest extends AbstractTest
             'docx stays docx' => ['file.docx', 'file.docx'],
             'txt stays txt' => ['notes.txt', 'notes.txt'],
             'xlf stays xlf' => ['trans.xlf', 'trans.xlf'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('contentDispositionFilenameProvider')]
+    public function sanitizeContentDispositionFilenameStripsHeaderBreakingChars(string $input, string $expected): void
+    {
+        $result = AbstractDownloadController::sanitizeContentDispositionFilename($input);
+        $this->assertSame($expected, $result);
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function contentDispositionFilenameProvider(): array
+    {
+        return [
+            'plain name untouched'     => ['report.docx', 'report.docx'],
+            'double quote stripped'    => ['a".xliff', 'a.xliff'],
+            'backslash stripped'       => ['a\\b.xliff', 'ab.xliff'],
+            'CR stripped'              => ["a\rb.xliff", 'ab.xliff'],
+            'LF stripped'              => ["a\nb.xliff", 'ab.xliff'],
+            'NUL stripped'             => ["a\0b.xliff", 'ab.xliff'],
+            'header injection attempt' => ["f.xliff\"\r\nSet-Cookie: x=1", 'f.xliffSet-Cookie: x=1'],
+            'unicode name preserved'   => ['résumé.docx', 'résumé.docx'],
         ];
     }
 

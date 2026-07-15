@@ -15,6 +15,7 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use DomainException;
 use Exception;
 use Klein\Response;
+use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use RuntimeException;
@@ -34,6 +35,7 @@ class InvitedUser
 
     protected ?Response $response;
     protected TeamDao $teamDao;
+    protected UserDao $userDao;
     protected RedisHandler $redisHandler;
 
     /**
@@ -48,10 +50,11 @@ class InvitedUser
      * @throws Exception
      */
     public function __construct(
-        string        $jwt = '',
-        ?Response     $response = null,
-        ?TeamDao      $teamDao = null,
-        ?RedisHandler $redisHandler = null
+        string $jwt = '',
+        ?Response $response = null,
+        ?TeamDao $teamDao = null,
+        ?RedisHandler $redisHandler = null,
+        ?UserDao $userDao = null
     ) {
         if ($jwt !== '') {
             try {
@@ -65,7 +68,8 @@ class InvitedUser
         }
 
         $this->response = $response;
-        $this->teamDao = $teamDao ?? new TeamDao();
+        $this->teamDao = $teamDao ?? throw new \InvalidArgumentException('TeamDao is required');
+        $this->userDao = $userDao ?? throw new \InvalidArgumentException('UserDao is required');
         $this->redisHandler = $redisHandler ?? new RedisHandler();
     }
 
@@ -92,7 +96,7 @@ class InvitedUser
         $teamStruct = $this->teamDao->fetchById($invitation['team_id'], TeamStruct::class)
             ?? throw new RuntimeException('Team not found');
 
-        $teamModel = new TeamModel($teamStruct);
+        $teamModel = new TeamModel($teamStruct, $this->userDao, $this->teamDao);
         $teamModel->setUser($user);
         $teamModel->addMemberEmail($invitation['email']);
         $teamModel->updateMembers();

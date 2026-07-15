@@ -9,6 +9,8 @@ use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\DTO\IDto;
 use Model\Jobs\JobStruct;
 use PDO;
+use Psr\Log\InvalidArgumentException;
+use RuntimeException;
 use Utils\Logger\LoggerFactory;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
@@ -27,8 +29,8 @@ class Filters
      *
      * @return array<int|string, array<string, mixed>>
      *
-     * @throws \Psr\Log\InvalidArgumentException
-     * @throws \RuntimeException
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
      */
     protected function sendToFilters(array $dataGroups, string $endpoint): array
     {
@@ -165,8 +167,8 @@ class Filters
      *
      * @return mixed
      *
-     * @throws \Psr\Log\InvalidArgumentException
-     * @throws \RuntimeException
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
      */
     public function sourceToXliff(
         string $filePath,
@@ -218,8 +220,8 @@ class Filters
      *
      * @return array<int|string, array<string, mixed>>
      *
-     * @throws \Psr\Log\InvalidArgumentException
-     * @throws \RuntimeException
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
      */
     public function xliffToTarget(array $xliffsData): array
     {
@@ -382,7 +384,7 @@ class Filters
      *
      * @param string $sentFile
      *
-     * @throws \Psr\Log\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function backupFailedConversion(string &$sentFile): void
     {

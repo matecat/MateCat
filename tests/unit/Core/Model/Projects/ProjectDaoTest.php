@@ -39,7 +39,7 @@ class ProjectDaoTest extends AbstractTest
     {
         parent::setUp();
 
-        $this->database = Database::obtain(
+        $this->database = obtainTestDatabase(
             AppConfig::$DB_SERVER,
             AppConfig::$DB_USER,
             AppConfig::$DB_PASS,
@@ -137,55 +137,55 @@ class ProjectDaoTest extends AbstractTest
     #[Test]
     public function updateFieldUpdatesStructAndDatabase(): void
     {
-        $dao = new ProjectDao();
-        $project = (new ProjectDao())->findById(self::PROJECT_ID_1);
+        $dao = new ProjectDao(obtainTestDatabase());
+        $project = (new ProjectDao(obtainTestDatabase()))->findById(self::PROJECT_ID_1);
 
         $this->assertInstanceOf(ProjectStruct::class, $project);
 
         $updated = $dao->updateField($project, 'name', 'Project Alpha Updated');
 
         $this->assertSame('Project Alpha Updated', $updated->name);
-        $this->assertSame('Project Alpha Updated', (new ProjectDao())->findById(self::PROJECT_ID_1)?->name);
+        $this->assertSame('Project Alpha Updated', (new ProjectDao(obtainTestDatabase()))->findById(self::PROJECT_ID_1)?->name);
     }
 
     #[Test]
     public function changePasswordUpdatesProjectPassword(): void
     {
-        $dao = new ProjectDao();
-        $project = (new ProjectDao())->findById(self::PROJECT_ID_1);
+        $dao = new ProjectDao(obtainTestDatabase());
+        $project = (new ProjectDao(obtainTestDatabase()))->findById(self::PROJECT_ID_1);
 
         $this->assertInstanceOf(ProjectStruct::class, $project);
 
         $dao->changePassword($project, 'ppass-1-new');
 
-        $reloaded = (new ProjectDao())->findByIdAndPassword(self::PROJECT_ID_1, 'ppass-1-new');
+        $reloaded = (new ProjectDao(obtainTestDatabase()))->findByIdAndPassword(self::PROJECT_ID_1, 'ppass-1-new');
         $this->assertSame('ppass-1-new', $reloaded->password);
     }
 
     #[Test]
     public function changeNameUpdatesProjectName(): void
     {
-        $dao = new ProjectDao();
-        $project = (new ProjectDao())->findById(self::PROJECT_ID_1);
+        $dao = new ProjectDao(obtainTestDatabase());
+        $project = (new ProjectDao(obtainTestDatabase()))->findById(self::PROJECT_ID_1);
 
         $this->assertInstanceOf(ProjectStruct::class, $project);
 
         $dao->changeName($project, 'Project Alpha Renamed');
 
-        $this->assertSame('Project Alpha Renamed', (new ProjectDao())->findById(self::PROJECT_ID_1)?->name);
+        $this->assertSame('Project Alpha Renamed', (new ProjectDao(obtainTestDatabase()))->findById(self::PROJECT_ID_1)?->name);
     }
 
     #[Test]
     public function findByIdReturnsExistingAndNullForMissing(): void
     {
-        $this->assertInstanceOf(ProjectStruct::class, (new ProjectDao())->findById(self::PROJECT_ID_1));
-        $this->assertNull((new ProjectDao())->findById(88889999));
+        $this->assertInstanceOf(ProjectStruct::class, (new ProjectDao(obtainTestDatabase()))->findById(self::PROJECT_ID_1));
+        $this->assertNull((new ProjectDao(obtainTestDatabase()))->findById(88889999));
     }
 
     #[Test]
     public function findByIdAndPasswordReturnsProjectForExistingPair(): void
     {
-        $project = (new ProjectDao())->findByIdAndPassword(self::PROJECT_ID_1, 'ppass-1');
+        $project = (new ProjectDao(obtainTestDatabase()))->findByIdAndPassword(self::PROJECT_ID_1, 'ppass-1');
 
         $this->assertSame(self::PROJECT_ID_1, $project->id);
         $this->assertSame('Project Alpha', $project->name);
@@ -197,56 +197,56 @@ class ProjectDaoTest extends AbstractTest
         $this->expectException(NotFoundException::class);
         $this->expectExceptionMessage('No project found.');
 
-        (new ProjectDao())->findByIdAndPassword(self::PROJECT_ID_1, 'wrong-password');
+        (new ProjectDao(obtainTestDatabase()))->findByIdAndPassword(self::PROJECT_ID_1, 'wrong-password');
     }
 
     #[Test]
     public function existsReturnsTrueForExistingAndFalseForMissing(): void
     {
-        $this->assertTrue((new ProjectDao())->exists(self::PROJECT_ID_1));
-        $this->assertFalse((new ProjectDao())->exists(88889999));
+        $this->assertTrue((new ProjectDao(obtainTestDatabase()))->exists(self::PROJECT_ID_1));
+        $this->assertFalse((new ProjectDao(obtainTestDatabase()))->exists(88889999));
     }
 
     #[Test]
     public function findByTeamIdSupportsFiltersLimitAndOffset(): void
     {
-        $all = (new ProjectDao())->findByTeamId(self::TEST_TEAM_ID);
+        $all = (new ProjectDao(obtainTestDatabase()))->findByTeamId(self::TEST_TEAM_ID);
         $this->assertCount(3, $all);
 
-        $byId = (new ProjectDao())->findByTeamId(self::TEST_TEAM_ID, ['search' => ['id' => self::PROJECT_ID_1]]);
+        $byId = (new ProjectDao(obtainTestDatabase()))->findByTeamId(self::TEST_TEAM_ID, ['search' => ['id' => self::PROJECT_ID_1]]);
         $this->assertCount(1, $byId);
         $this->assertSame(self::PROJECT_ID_1, $byId[0]->id);
 
-        $byName = (new ProjectDao())->findByTeamId(self::TEST_TEAM_ID, ['search' => ['name' => 'Project Beta']]);
+        $byName = (new ProjectDao(obtainTestDatabase()))->findByTeamId(self::TEST_TEAM_ID, ['search' => ['name' => 'Project Beta']]);
         $this->assertCount(1, $byName);
         $this->assertSame('Project Beta', $byName[0]->name);
 
-        $paged = (new ProjectDao())->findByTeamId(self::TEST_TEAM_ID, ['limit' => 1, 'offset' => 1]);
+        $paged = (new ProjectDao(obtainTestDatabase()))->findByTeamId(self::TEST_TEAM_ID, ['limit' => 1, 'offset' => 1]);
         $this->assertCount(1, $paged);
     }
 
     #[Test]
     public function getTotalCountByTeamIdReturnsExpectedCounts(): void
     {
-        $this->assertSame(3, (new ProjectDao())->getTotalCountByTeamId(self::TEST_TEAM_ID));
-        $this->assertSame(1, (new ProjectDao())->getTotalCountByTeamId(self::TEST_TEAM_ID, ['search' => ['id' => self::PROJECT_ID_2]]));
-        $this->assertSame(1, (new ProjectDao())->getTotalCountByTeamId(self::TEST_TEAM_ID, ['search' => ['name' => 'Project Alpha']]));
+        $this->assertSame(3, (new ProjectDao(obtainTestDatabase()))->getTotalCountByTeamId(self::TEST_TEAM_ID));
+        $this->assertSame(1, (new ProjectDao(obtainTestDatabase()))->getTotalCountByTeamId(self::TEST_TEAM_ID, ['search' => ['id' => self::PROJECT_ID_2]]));
+        $this->assertSame(1, (new ProjectDao(obtainTestDatabase()))->getTotalCountByTeamId(self::TEST_TEAM_ID, ['search' => ['name' => 'Project Alpha']]));
     }
 
     #[Test]
     public function findByJobIdReturnsProjectOrNull(): void
     {
-        $project = (new ProjectDao())->findByJobId(self::JOB_ID_1);
+        $project = (new ProjectDao(obtainTestDatabase()))->findByJobId(self::JOB_ID_1);
 
         $this->assertInstanceOf(ProjectStruct::class, $project);
         $this->assertSame(self::PROJECT_ID_1, $project?->id);
-        $this->assertNull((new ProjectDao())->findByJobId(88889999));
+        $this->assertNull((new ProjectDao(obtainTestDatabase()))->findByJobId(88889999));
     }
 
     #[Test]
     public function findByIdCustomerReturnsProjectsForCustomer(): void
     {
-        $projects = (new ProjectDao())->findByIdCustomer('customer-a');
+        $projects = (new ProjectDao(obtainTestDatabase()))->findByIdCustomer('customer-a');
         $ids = array_map(static fn(ProjectStruct $project): int => (int)$project->id, $projects);
 
         $this->assertContains(self::PROJECT_ID_1, $ids);
@@ -258,7 +258,7 @@ class ProjectDaoTest extends AbstractTest
     #[Test]
     public function getByIdListHandlesEmptyAndNonEmptyLists(): void
     {
-        $dao = new ProjectDao();
+        $dao = new ProjectDao(obtainTestDatabase());
 
         $this->assertSame([], $dao->getByIdList([]));
 
@@ -272,7 +272,7 @@ class ProjectDaoTest extends AbstractTest
     #[Test]
     public function getProjectAndJobDataReturnsJoinedRows(): void
     {
-        $rows = (new ProjectDao())->getProjectAndJobData(self::PROJECT_ID_1);
+        $rows = (new ProjectDao(obtainTestDatabase()))->getProjectAndJobData(self::PROJECT_ID_1);
 
         $this->assertCount(2, $rows);
         $this->assertSame((string)self::PROJECT_ID_1, (string)$rows[0]['pid']);
@@ -284,7 +284,7 @@ class ProjectDaoTest extends AbstractTest
     #[Test]
     public function getJobIdsReturnsIdsForProject(): void
     {
-        $dao = new ProjectDao();
+        $dao = new ProjectDao(obtainTestDatabase());
         $jobIds = $dao->getJobIds(self::PROJECT_ID_1);
 
         $this->assertCount(2, $jobIds);
@@ -295,7 +295,7 @@ class ProjectDaoTest extends AbstractTest
     #[Test]
     public function getPasswordsMapReturnsTranslatorAndReviewPasswordsMap(): void
     {
-        $dao = new ProjectDao();
+        $dao = new ProjectDao(obtainTestDatabase());
         $map = $dao->getPasswordsMap(self::PROJECT_ID_1);
 
         $this->assertCount(2, $map);
@@ -308,11 +308,11 @@ class ProjectDaoTest extends AbstractTest
     #[Test]
     public function updateAnalysisStatusUpdatesStatusAndWordCount(): void
     {
-        $ok = (new ProjectDao())->updateAnalysisStatus(self::PROJECT_ID_1, 'DONE', 123);
+        $ok = (new ProjectDao(obtainTestDatabase()))->updateAnalysisStatus(self::PROJECT_ID_1, 'DONE', 123);
 
         $this->assertTrue($ok);
 
-        $project = (new ProjectDao())->findById(self::PROJECT_ID_1);
+        $project = (new ProjectDao(obtainTestDatabase()))->findById(self::PROJECT_ID_1);
         $this->assertSame('DONE', $project?->status_analysis);
         $this->assertSame(123.0, (float)$project?->standard_analysis_wc);
     }
@@ -320,16 +320,16 @@ class ProjectDaoTest extends AbstractTest
     #[Test]
     public function changeProjectStatusUpdatesStatusField(): void
     {
-        $affected = (new ProjectDao())->changeProjectStatus(self::PROJECT_ID_1, 'BUSY');
+        $affected = (new ProjectDao(obtainTestDatabase()))->changeProjectStatus(self::PROJECT_ID_1, 'BUSY');
 
         $this->assertSame(1, $affected);
-        $this->assertSame('BUSY', (new ProjectDao())->findById(self::PROJECT_ID_1)?->status_analysis);
+        $this->assertSame('BUSY', (new ProjectDao(obtainTestDatabase()))->findById(self::PROJECT_ID_1)?->status_analysis);
     }
 
     #[Test]
     public function getProjectDataSupportsFilterCombinations(): void
     {
-        $dao = new ProjectDao();
+        $dao = new ProjectDao(obtainTestDatabase());
 
         $all = $dao->getProjectData(self::PROJECT_ID_1);
         $this->assertCount(2, $all);
@@ -352,23 +352,23 @@ class ProjectDaoTest extends AbstractTest
     #[Test]
     public function cacheDestroyMethodsAreCallableAndReturnBool(): void
     {
-        $dao = new ProjectDao();
+        $dao = new ProjectDao(obtainTestDatabase());
 
         $this->assertIsBool($dao->destroyFetchByIdCache(self::PROJECT_ID_1, ProjectStruct::class));
-        $this->assertIsBool((new ProjectDao())->destroyCacheByIdAndPassword(self::PROJECT_ID_1, 'ppass-1'));
+        $this->assertIsBool((new ProjectDao(obtainTestDatabase()))->destroyCacheByIdAndPassword(self::PROJECT_ID_1, 'ppass-1'));
         $this->assertIsBool($dao->destroyCacheForProjectData(self::PROJECT_ID_1));
     }
 
     #[Test]
     public function isGDriveProjectReturnsFalseWhenNoRemoteFileRowsExist(): void
     {
-        $this->assertFalse((new ProjectDao())->isGDriveProject(self::PROJECT_ID_1));
+        $this->assertFalse((new ProjectDao(obtainTestDatabase()))->isGDriveProject(self::PROJECT_ID_1));
     }
 
     #[Test]
     public function getRemoteFileServiceNameReturnsEmptyArrayWhenNoRemoteFilesAreLinked(): void
     {
-        $dao = new ProjectDao();
+        $dao = new ProjectDao(obtainTestDatabase());
         $serviceNames = $dao->getRemoteFileServiceName([self::PROJECT_ID_1, self::PROJECT_ID_2]);
 
         $this->assertSame([], $serviceNames);

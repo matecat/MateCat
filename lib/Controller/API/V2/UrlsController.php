@@ -13,7 +13,11 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use Model\FeaturesBase\Hook\Event\Filter\ProjectUrlsEvent;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use View\API\V2\Json\ProjectUrls;
 
 class UrlsController extends KleinController
@@ -29,10 +33,12 @@ class UrlsController extends KleinController
      */
     public function urls(): void
     {
-        $this->featureSet->loadForProject($this->validator->getProject());
+        $project = $this->validator->getProject() ?? throw new Exception('Project not found');
+
+        $this->featureSet->loadForProject($project);
 
         $jobCheck = 0;
-        foreach ($this->validator->getProject()->getJobs() as $job) {
+        foreach ($this->getProjectJobs($project) as $job) {
             if (!$job->isDeleted()) {
                 $jobCheck++;
             }
@@ -46,12 +52,12 @@ class UrlsController extends KleinController
                     'message' => 'No project found.'
                 ]
             ]);
-            exit();
+            return;
         }
 
-        $projectData = (new ProjectDao())->setCacheTTL(60 * 60)->getProjectData($this->validator->getProject()->id);
+        $projectData = (new ProjectDao($this->getDatabase()))->setCacheTTL(60 * 60)->getProjectData($project->id ?? throw new Exception('Project id is null'));
 
-        $formatted = new ProjectUrls($projectData);
+        $formatted = new ProjectUrls($projectData, new ChunkReviewDao($this->getDatabase()));
 
         $projectUrlsEvent = new ProjectUrlsEvent($formatted);
         $this->featureSet->dispatch($projectUrlsEvent);
@@ -60,12 +66,22 @@ class UrlsController extends KleinController
         $this->response->json(['urls' => $formatted->render()]);
     }
 
+    /**
+     * @return JobStruct[]
+     *
+     * @throws Exception
+     */
+    protected function getProjectJobs(ProjectStruct $project): array
+    {
+        return (new JobDao($this->getDatabase()))->getNotDeletedByProjectId((int) $project->id);
+    }
+
     protected function validateRequest(): void
     {
         $this->validator->validate();
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->validator = new ProjectPasswordValidator($this);
         $this->appendValidator(new LoginValidator($this));

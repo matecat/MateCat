@@ -14,8 +14,13 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use DivisionByZeroError;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\Analysis\Constants\MatchConstantsFactory;
 use Model\Files\FilesInfoUtility;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
+use Model\Projects\ProjectDao;
+use Model\Segments\SegmentDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\QualityReport\QualityReportModel;
@@ -24,6 +29,7 @@ use Model\QualityReport\QualityReportSegmentStruct;
 use PDOException;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
+use ReflectionException;
 use TypeError;
 use Utils\Registry\AppConfig;
 
@@ -41,7 +47,7 @@ class QualityReportControllerAPI extends KleinController
 
     protected function createQualityReportModel(): QualityReportModel
     {
-        return new QualityReportModel($this->chunk);
+        return new QualityReportModel($this->chunk, $this->getDatabase());
     }
 
     /**
@@ -78,9 +84,10 @@ class QualityReportControllerAPI extends KleinController
      */
     protected function renderSegments(bool $isForUI = false): void
     {
-        $this->project = $this->chunk->getProject();
+        $this->project = $this->chunk->getProject(new ProjectDao($this->getDatabase()));
 
-        $mt_qe_workflow_enabled = (bool)($this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false);
+        $projectMetadataDao = new ProjectMetadataDao($this->getDatabase());
+        $mt_qe_workflow_enabled = (bool)($projectMetadataDao->setCacheTTL(3600)->getValue((int)$this->project->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false);
         $matchConstantsClass = MatchConstantsFactory::getInstance($mt_qe_workflow_enabled);
 
         $ref_segment = (int)$this->request->param('ref_segment');
@@ -106,7 +113,7 @@ class QualityReportControllerAPI extends KleinController
             $step = self::MAX_PER_PAGE;
         }
 
-        $qrSegmentModel = new QualityReportSegmentModel($this->chunk);
+        $qrSegmentModel = new QualityReportSegmentModel($this->chunk, $this->getDatabase());
         $options = ['filter' => $filter];
         $segments_ids = $qrSegmentModel->getSegmentsIdForQR($step, $ref_segment, $where, $options);
 
@@ -115,14 +122,14 @@ class QualityReportControllerAPI extends KleinController
                 throw new Exception('Job id is null');
             }
 
-            $segmentTranslationEventDao = new TranslationEventDao();
+            $segmentTranslationEventDao = new TranslationEventDao($this->getDatabase());
             $ttlArray = $segmentTranslationEventDao->setCacheTTL(60 * 5)->getTteForSegments($segments_ids, $this->chunk->id);
             $segments = $qrSegmentModel->getSegmentsForQR(array_values($segments_ids), $isForUI);
 
-            $filesInfoUtility = new FilesInfoUtility($this->chunk);
+            $filesInfoUtility = new FilesInfoUtility($this->chunk, $this->getDatabase());
             $filesInfo = $filesInfoUtility->getInfo(false);
 
-            $mt_qe_workflow_enabled = (bool)($this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false);
+            $mt_qe_workflow_enabled = (bool)($projectMetadataDao->setCacheTTL(3600)->getValue((int)$this->project->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false);
             $segments = $this->_formatSegments($segments, $ttlArray ?? [], $filesInfo, $mt_qe_workflow_enabled);
 
             $this->response->json([
@@ -161,7 +168,7 @@ class QualityReportControllerAPI extends KleinController
         }
 
         $path = $url['path'] ?? '';
-        $total = count($this->chunk->getSegments());
+        $total = count($this->chunk->getSegments(new SegmentDao($this->getDatabase())));
         $pages = ceil($total / $step);
 
         $links = [
@@ -326,16 +333,21 @@ class QualityReportControllerAPI extends KleinController
     }
 
 
+    /**
+     * @throws ReflectionException
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
+     */
     public function general(): void
     {
-        $project = $this->chunk->getProject();
+        $project = $this->chunk->getProject(new ProjectDao($this->getDatabase()));
         $this->response->json([
             'project' => $project,
             'job' => $this->chunk,
         ]);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $Validator = new ChunkPasswordValidator($this);

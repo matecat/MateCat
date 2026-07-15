@@ -50,7 +50,7 @@ class FilesConverterTest extends AbstractTest
             uploadTokenValue: 'test-token-' . uniqid(),
             icu_enabled: false,
             segmentation_rule: null,
-            featureSet: new FeatureSet(),
+            featureSet: new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
         );
     }
 
@@ -208,7 +208,7 @@ class FilesConverterTest extends AbstractTest
             uploadTokenValue: 'test-token-' . uniqid(),
             icu_enabled: false,
             segmentation_rule: null,
-            featureSet: new \Model\FeaturesBase\FeatureSet(),
+            featureSet: new \Model\FeaturesBase\FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
         );
 
         $result = $converter->convertFiles();
@@ -246,7 +246,7 @@ class FilesConverterTest extends AbstractTest
             uploadTokenValue: 'test-token-' . uniqid(),
             icu_enabled: false,
             segmentation_rule: null,
-            featureSet: new \Model\FeaturesBase\FeatureSet(),
+            featureSet: new \Model\FeaturesBase\FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
         );
 
         $this->expectException(\DomainException::class);

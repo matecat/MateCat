@@ -11,6 +11,7 @@ class Constants
 
     const string COOKIE_SOURCE_LANG = 'sourceLang';
     const string COOKIE_TARGET_LANG = 'targetLang';
+    const string COOKIE_UPLOAD_TOKEN = 'upload_token';
 
     const string EMPTY_VAL = '_EMPTY_';
 

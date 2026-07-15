@@ -10,6 +10,7 @@ namespace Controller\API\Commons\Validators;
 
 
 use Controller\Abstracts\KleinController;
+use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
@@ -45,8 +46,8 @@ class ProjectAccessTokenValidator extends Base
 
         $postInput = (object)filter_var_array($controller->params, $filterArgs);
 
-        $this->id_project = $postInput->id_project;
-        $this->accessToken = $postInput->project_access_token;
+        $this->id_project  = (int)$postInput->id_project;
+        $this->accessToken = (string)$postInput->project_access_token;
 
         $controller->params['id_project'] = $this->id_project;
 
@@ -57,10 +58,11 @@ class ProjectAccessTokenValidator extends Base
      * @return void
      * @throws ReflectionException
      * @throws NotFoundException
+     * @throws Exception
      */
     public function _validate(): void
     {
-        $this->project = (new ProjectDao())->findById(
+        $this->project = (new ProjectDao($this->controller->getDatabase()))->findById(
             $this->id_project
         );
 

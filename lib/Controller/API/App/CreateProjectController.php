@@ -16,6 +16,7 @@ use Model\DataAccess\Database;
 use Model\FeaturesBase\Hook\Event\Filter\FilterCreateProjectFeaturesEvent;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobsMetadataMarshaller;
+use Model\LQA\CategoryDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
 use Model\PayableRates\CustomPayableRateDao;
@@ -25,6 +26,7 @@ use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use Model\Xliff\XliffConfigTemplateDao;
@@ -70,7 +72,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         return $this->data;
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -84,40 +86,15 @@ class CreateProjectController extends AbstractStatefulKleinController
         $this->featureSet->loadFromUserEmail($this->user->email ?? '');
         $this->data = $this->validateTheRequest();
 
-        // SET SOURCE COOKIE
-        CookieManager::setCookie(
-            Constants::COOKIE_SOURCE_LANG,
-            $this->data['source_lang'],
-            [
-                'expires' => time() + (86400 * 365),
-                'path' => '/',
-                'domain' => AppConfig::$COOKIE_DOMAIN,
-                'secure' => true,
-                'httponly' => true,
-                'samesite' => 'None',
-            ]
-        );
-
-        // SET TARGET COOKIE
-        CookieManager::setCookie(
-            Constants::COOKIE_TARGET_LANG,
-            $this->data['target_lang'],
-            [
-                'expires' => time() + (86400 * 365),
-                'path' => '/',
-                'domain' => AppConfig::$COOKIE_DOMAIN,
-                'secure' => true,
-                'httponly' => true,
-                'samesite' => 'None',
-            ]
-        );
+        // SET SOURCE / TARGET LANGUAGE COOKIES (same-site, 1-year preference)
+        $this->setLanguagePreferenceCookies($this->data['source_lang'], $this->data['target_lang']);
 
         //Search in fileNames if there's a zip file. If it's present, get filenames and add them instead of the zip file.
         $fs = FilesStorageFactory::create();
         $uploadDir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->data['upload_token'];
         $filesFound = $this->getFilesList($fs, $this->data['file_names_list'], $uploadDir);
 
-        $engine = EnginesFactory::getInstance($this->data['mt_engine'], AbstractEngine::class);
+        $engine = EnginesFactory::getInstance($this->data['mt_engine'], $this->getDatabase(), AbstractEngine::class);
 
         $gdriveSession = $_SESSION[Session::SESSION_KEY] ?? null;
 
@@ -131,11 +108,11 @@ class CreateProjectController extends AbstractStatefulKleinController
             $gdriveSession,
         );
 
-        $projectManager = new ProjectManager($projectStructure);
+        $projectManager = new ProjectManager($projectStructure, $this->getDatabase());
         $projectManager->setTeam($this->data['team']);
 
         //reserve a project id from the sequence
-        $projectStructure->id_project = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
+        $projectStructure->id_project = $this->getDatabase()->nextSequence(Database::SEQ_ID_PROJECT)[0];
         $projectStructure->ppassword = Utils::randomString();
 
         $fs->moveFileFromUploadSessionToQueuePath($this->data['upload_token']);
@@ -152,6 +129,24 @@ class CreateProjectController extends AbstractStatefulKleinController
             ],
             'errors' => [],
         ]);
+    }
+
+    /**
+     * Cookie writer seam: overridable in tests to capture the emitted cookies.
+     */
+    protected function cookieManager(): CookieManager
+    {
+        return new CookieManager();
+    }
+
+    /**
+     * Persists the user's source/target language choice as same-site, 1-year preference cookies.
+     */
+    protected function setLanguagePreferenceCookies(string $sourceLang, string $targetLang): void
+    {
+        $cookieManager = $this->cookieManager();
+        $cookieManager->set(Constants::COOKIE_SOURCE_LANG, $sourceLang, time() + (86400 * 365));
+        $cookieManager->set(Constants::COOKIE_TARGET_LANG, $targetLang, time() + (86400 * 365));
     }
 
     /**
@@ -413,10 +408,6 @@ class CreateProjectController extends AbstractStatefulKleinController
             $data['xliff_parameters_template_id']
         );
         $data['project_features'] = $this->appendFeaturesToProject($data['mt_engine']);
-        $data['target_language_mt_engine_association'] = $this->generateTargetEngineAssociation(
-            $data['target_lang'],
-            $data['mt_engine']
-        );
         $data['team'] = $this->setTeam($id_team ?: null);
 
         $this->setMetadataFromPostInput($data);
@@ -444,6 +435,7 @@ class CreateProjectController extends AbstractStatefulKleinController
                 $engineStruct = EnginesFactory::getInstanceByIdAndUser(
                     $mt_engine,
                     $this->user->uid ?? throw new TypeError('User not authenticated'),
+                    $this->getDatabase(),
                     AbstractEngine::class,
                 );
             } catch (Exception $exception) {
@@ -646,7 +638,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             return $QAModelTemplateStruct;
         } elseif (!empty($qa_model_template_id)) {
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $qaModelTemplate = (new QAModelTemplateDao())->get([
+            $qaModelTemplate = (new QAModelTemplateDao($this->getDatabase()))->get([
                 'id' => $qa_model_template_id,
                 'uid' => $uid
             ]);
@@ -689,7 +681,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $payableRateModelTemplate->hydrateFromJSON($json);
             $payableRateModelTemplate->uid = $userId;
         } elseif (!empty($payable_rate_template_id)) {
-            $payableRateModelTemplate = (new CustomPayableRateDao())->getByIdAndUser($payable_rate_template_id, $userId);
+            $payableRateModelTemplate = (new CustomPayableRateDao($this->getDatabase()))->getByIdAndUser($payable_rate_template_id, $userId);
             $payableRateModelTemplate?->getBreakdownsArray();
             if (null === $payableRateModelTemplate) {
                 throw new InvalidArgumentException('Payable rate model id not valid');
@@ -741,7 +733,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $xliffConfigTemplate->hydrateFromJSON($json);
             $xliff_parameters = $xliffConfigTemplate->rules?->getArrayCopy() ?? [];
         } elseif (!empty($xliff_parameters_template_id)) {
-            $xliffConfigTemplate = (new XliffConfigTemplateDao())->getByIdAndUser(
+            $xliffConfigTemplate = (new XliffConfigTemplateDao($this->getDatabase()))->getByIdAndUser(
                 $xliff_parameters_template_id,
                 $this->getUser()->uid ?? throw new TypeError('User not authenticated')
             );
@@ -773,26 +765,6 @@ class CreateProjectController extends AbstractStatefulKleinController
     }
 
     /**
-     * @param string $target_langs
-     * @param int|null $mt_engine
-     *
-     * @return array<string, int|null>
-     * @see filterCreateProjectFeatures callback
-     * @see NewController::appendFeaturesToProject()
-     * @deprecated
-     */
-    private function generateTargetEngineAssociation(string $target_langs, ?int $mt_engine): array
-    { // TODO YYY remove map association, MMT now supports all languages. Remove from ProjectManager also
-        $assoc = [];
-
-        foreach (explode(",", $target_langs) as $_matecatTarget) {
-            $assoc[$_matecatTarget] = $mt_engine;
-        }
-
-        return $assoc;
-    }
-
-    /**
      * @param string|false|null $id_team
      *
      * @return TeamStruct
@@ -801,11 +773,11 @@ class CreateProjectController extends AbstractStatefulKleinController
     private function setTeam(string|false|null $id_team = null): TeamStruct
     {
         if ($id_team === null || $id_team === false || $id_team === '') {
-            return $this->user->getPersonalTeam();
+            return $this->user->getPersonalTeam(new TeamDao($this->getDatabase()));
         }
 
         // check for the team to be allowed
-        $dao = new MembershipDao();
+        $dao = new MembershipDao($this->getDatabase());
         $team = $dao->findTeamByIdAndUser((int)$id_team, $this->user);
 
         if (!$team) {
@@ -864,7 +836,6 @@ class CreateProjectController extends AbstractStatefulKleinController
         $projectStructure->dialect_strict = $data['dialect_strict'];
         $projectStructure->only_private = $data['only_private'];
         $projectStructure->due_date = $data['due_date'];
-        $projectStructure->target_language_mt_engine_association = $data['target_language_mt_engine_association'];
         $projectStructure->user_ip = Utils::getRealIpAddr();
         $projectStructure->HTTP_HOST = AppConfig::$HTTPHOST;
         $projectStructure->tm_prioritization = (!empty($data['tm_prioritization'])) ? $data['tm_prioritization'] : null;
@@ -896,7 +867,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
         // with the qa template id
         if (!empty($data['qa_model_template'])) {
-            $projectStructure->qa_model_template = $data['qa_model_template']->getDecodedModel();
+            $projectStructure->qa_model_template = $data['qa_model_template']->getDecodedModel(new CategoryDao($this->getDatabase()));
         }
 
         if (!empty($data['payable_rate_model_template'])) {
@@ -923,7 +894,7 @@ class CreateProjectController extends AbstractStatefulKleinController
      */
     private function clearSessionFiles(): void
     {
-        $gdriveSession = new Session();
+        $gdriveSession = new Session($this->getDatabase());
         $gdriveSession->clearFileListFromSession();
     }
 

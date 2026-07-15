@@ -44,7 +44,7 @@ class QualityReportDaoTest extends AbstractTest
         $row = ['segment_id' => 1, 'file_id' => 1, 'translation' => 'test'];
         $this->stmtStub->method('fetchAll')->willReturn([$row]);
 
-        $dao = new QualityReportDao();
+        $dao = new QualityReportDao(obtainTestDatabase());
         $results = $dao->getSegmentsForQualityReport($this->makeChunk());
 
         $this->assertIsArray($results);
@@ -56,7 +56,7 @@ class QualityReportDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new QualityReportDao();
+        $dao = new QualityReportDao(obtainTestDatabase());
         $results = $dao->getSegmentsForQualityReport($this->makeChunk());
 
         $this->assertIsArray($results);
@@ -72,7 +72,7 @@ class QualityReportDaoTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $dao = new QualityReportDao();
+        $dao = new QualityReportDao(obtainTestDatabase());
         $results = $dao->getIssuesBySegments([100, 101], 10);
 
         $this->assertIsArray($results);
@@ -85,7 +85,7 @@ class QualityReportDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new QualityReportDao();
+        $dao = new QualityReportDao(obtainTestDatabase());
         $results = $dao->getIssuesBySegments([100], 10);
 
         $this->assertIsArray($results);
@@ -100,7 +100,7 @@ class QualityReportDaoTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $dao = new QualityReportDao();
+        $dao = new QualityReportDao(obtainTestDatabase());
         $results = $dao->getIssuesBySegments([50], 5);
 
         $this->assertIsArray($results);
@@ -113,7 +113,7 @@ class QualityReportDaoTest extends AbstractTest
         $row = ['avg_time_to_edit' => 5000, 'avg_edit_distance' => 15];
         $this->stmtStub->method('fetch')->willReturn($row);
 
-        $dao = new QualityReportDao();
+        $dao = new QualityReportDao(obtainTestDatabase());
         $result = $dao->getAverages($this->makeChunk());
 
         $this->assertIsArray($result);
@@ -126,7 +126,7 @@ class QualityReportDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetch')->willReturn(false);
 
-        $dao = new QualityReportDao();
+        $dao = new QualityReportDao(obtainTestDatabase());
         $result = $dao->getAverages($this->makeChunk());
 
         $this->assertFalse($result);
@@ -141,7 +141,7 @@ class QualityReportDaoTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $dao = new QualityReportDao();
+        $dao = new QualityReportDao(obtainTestDatabase());
         $results = $dao->getReviseIssuesByChunk(10, 'pass1');
 
         $this->assertIsArray($results);
@@ -154,7 +154,7 @@ class QualityReportDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new QualityReportDao();
+        $dao = new QualityReportDao(obtainTestDatabase());
         $results = $dao->getReviseIssuesByChunk(10, 'pass1');
 
         $this->assertIsArray($results);
@@ -169,7 +169,7 @@ class QualityReportDaoTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $dao = new QualityReportDao();
+        $dao = new QualityReportDao(obtainTestDatabase());
         $results = $dao->getReviseIssuesByChunk(10, 'pass1', 3);
 
         $this->assertIsArray($results);

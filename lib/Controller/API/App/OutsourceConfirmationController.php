@@ -39,7 +39,7 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
         ]);
 
         $payload = SimpleJWT::getValidatedInstanceFromString(
-            $params['payload'],
+            (string)$params['payload'],
             AppConfig::$AUTHSECRET
         )->getPayload();
 
@@ -47,8 +47,11 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
             throw new AuthorizationError("Invalid Job");
         }
 
-        $jStruct = ((new JobDao())->getByIdAndPassword((int)$params['id_job'], (string)$params['password']));
-        $translatorModel = new TranslatorsModel($jStruct, 0);
+        $jStruct = (new JobDao($this->getDatabase()))->getByIdAndPassword((int)$params['id_job'], (string)$params['password']);
+        if ($jStruct === null) {
+            throw new AuthorizationError("Job not found");
+        }
+        $translatorModel = new TranslatorsModel($jStruct, $this->getDatabase(), 0);
         $jTranslatorStruct = $translatorModel->getTranslator();
 
         $confirmationStruct = new TranslatedConfirmationStruct($payload);
@@ -59,7 +62,7 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
         }
 
         $confirmationStruct->create_date = date(DATE_ATOM, time());
-        $cDao = new ConfirmationDao();
+        $cDao = new ConfirmationDao($this->getDatabase());
         $cDao->insertStruct($confirmationStruct, ['ignore' => true, 'no_nulls' => true]);
         $cDao->destroyConfirmationCache($jStruct);
 

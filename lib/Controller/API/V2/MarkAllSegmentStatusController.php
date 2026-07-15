@@ -27,7 +27,7 @@ class MarkAllSegmentStatusController extends KleinController
     use ChunkNotFoundHandlerTrait;
 
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $chunkValidator = new ChunkPasswordValidator($this);
@@ -53,7 +53,7 @@ class MarkAllSegmentStatusController extends KleinController
         $source_page = null;
 
         if ($this->request->param('revision_number')) {
-            $validRevisions = (new ReviewUtils(new ChunkReviewDao()))->validRevisionNumbers($this->chunk);
+            $validRevisions = (new ReviewUtils(new ChunkReviewDao($this->getDatabase())))->validRevisionNumbers($this->chunk);
             if (!in_array($this->request->param('revision_number'), $validRevisions)) {
                 throw new InvalidArgumentException('Invalid revision number');
             }
@@ -65,7 +65,7 @@ class MarkAllSegmentStatusController extends KleinController
             TranslationStatus::STATUS_APPROVED,
             TranslationStatus::STATUS_APPROVED2
         ])) {
-            $unchangeable_segments = (new SegmentTranslationDao())->getUnchangeableStatus(
+            $unchangeable_segments = (new SegmentTranslationDao($this->getDatabase()))->getUnchangeableStatus(
                 $this->chunk,
                 $segments_id,
                 $status,
@@ -99,18 +99,22 @@ class MarkAllSegmentStatusController extends KleinController
         }
     }
 
-    protected function sanitizeSegmentIDs($segment_list): array
+    /**
+     * @param array<mixed> $segment_list
+     * @return array<int, int>
+     */
+    protected function sanitizeSegmentIDs(array $segment_list): array
     {
-        foreach ($segment_list as $pos => $integer) {
+        /** @var array<int, int> $filtered */
+        $filtered = [];
+        foreach ($segment_list as $integer) {
             $result = (int)$integer;
-            if (empty($result)) {
-                unset($segment_list[$pos]);
-                continue;
+            if (!empty($result)) {
+                $filtered[] = $result;
             }
-            $segment_list[$pos] = $result;
         }
 
-        return array_unique($segment_list);
+        return array_values(array_unique($filtered));
     }
 
 }

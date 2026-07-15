@@ -114,7 +114,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
         $project = $this->projectDao->fetchById($pid, ProjectStruct::class);
         assert($project !== null);
 
-        $jobs = $project->getChunks();
+        $jobs = $this->jobDao->getNotDeletedByProjectId((int) $project->id);
         $result = [];
 
         foreach ($jobs as $job) {

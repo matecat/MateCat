@@ -4,12 +4,18 @@ namespace Matecat\Core\View\API\V2\Json;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\ActivityLog\ActivityLogStruct;
+use Model\FeaturesBase\FeatureSet;
 use PHPUnit\Framework\Attributes\CoversClass;
 use View\API\V2\Json\Activity;
 
 #[CoversClass(Activity::class)]
 class ActivityTest extends AbstractTest
 {
+    private function featureSet(): FeatureSet
+    {
+        return new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
+    }
+
     private function makeStruct(int $id = 1, string $email = 'user@example.com'): ActivityLogStruct
     {
         $struct             = new ActivityLogStruct();
@@ -29,7 +35,7 @@ class ActivityTest extends AbstractTest
 
     public function testRenderEmptyReturnsEmptyArray(): void
     {
-        $view   = new Activity([]);
+        $view   = new Activity([], $this->featureSet());
         $result = $view->render();
 
         $this->assertSame([], $result);
@@ -37,7 +43,7 @@ class ActivityTest extends AbstractTest
 
     public function testRenderSkipsNonActivityLogStructElements(): void
     {
-        $view   = new Activity(['not-a-struct']);
+        $view   = new Activity(['not-a-struct'], $this->featureSet());
         $result = $view->render();
 
         $this->assertSame([], $result);
@@ -46,7 +52,7 @@ class ActivityTest extends AbstractTest
     public function testRenderReturnsExpectedKeys(): void
     {
         $struct = $this->makeStruct(5, 'a@b.com');
-        $view   = new Activity([$struct]);
+        $view   = new Activity([$struct], $this->featureSet());
         $result = $view->render();
 
         $this->assertCount(1, $result);
@@ -65,7 +71,7 @@ class ActivityTest extends AbstractTest
     public function testRenderCastsIdToInt(): void
     {
         $struct = $this->makeStruct(7);
-        $view   = new Activity([$struct]);
+        $view   = new Activity([$struct], $this->featureSet());
         $result = $view->render();
 
         $this->assertSame(7, $result[0]['id']);
@@ -77,7 +83,7 @@ class ActivityTest extends AbstractTest
     public function testRenderSetsAnonymousWhenEmailEmpty(): void
     {
         $struct        = $this->makeStruct(1, '');
-        $view          = new Activity([$struct]);
+        $view          = new Activity([$struct], $this->featureSet());
         $result        = $view->render();
 
         $this->assertSame('Anonymous', $result[0]['first_name']);
@@ -89,7 +95,7 @@ class ActivityTest extends AbstractTest
     {
         $s1   = $this->makeStruct(1);
         $s2   = $this->makeStruct(2);
-        $view = new Activity([$s1, $s2]);
+        $view = new Activity([$s1, $s2], $this->featureSet());
 
         $this->assertCount(2, $view->render());
     }

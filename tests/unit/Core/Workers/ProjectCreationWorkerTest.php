@@ -7,6 +7,7 @@ use Model\ProjectCreation\ProjectManager;
 use PDOException;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
+use Model\DataAccess\Database;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\ProjectCreationWorker;
 use Utils\Registry\AppConfig;
@@ -36,7 +37,7 @@ class ProjectCreationWorkerTest extends AbstractTest
         $amq = $this->createStub(AMQHandler::class);
 
         return $this->getMockBuilder(ProjectCreationWorker::class)
-            ->setConstructorArgs([$amq])
+            ->setConstructorArgs([$amq, obtainTestDatabase()])
             ->onlyMethods(['_checkDatabaseConnection', '_doLog', 'createProjectManager', 'publishProjectResults'])
             ->getMock();
     }
@@ -138,7 +139,7 @@ class ProjectCreationWorkerTest extends AbstractTest
         $amq = $this->createStub(AMQHandler::class);
 
         $worker = $this->getMockBuilder(ProjectCreationWorker::class)
-            ->setConstructorArgs([$amq])
+            ->setConstructorArgs([$amq, obtainTestDatabase()])
             ->onlyMethods(['_checkDatabaseConnection', '_doLog', 'publishProjectResults'])
             ->getMock();
 

@@ -10,9 +10,12 @@
 namespace Model\Conversion;
 
 use ArrayAccess;
+use ArrayIterator;
+use IteratorAggregate;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\RecursiveArrayCopy;
 use stdClass;
+use Traversable;
 
 /**
  * @property string $name
@@ -23,8 +26,9 @@ use stdClass;
  * @property string $file_path
  *
  * @implements ArrayAccess<string, mixed>
+ * @implements IteratorAggregate<string, mixed>
  */
-class UploadElement extends stdClass implements ArrayAccess
+class UploadElement extends stdClass implements ArrayAccess, IteratorAggregate
 {
     use ArrayAccessTrait;
     use RecursiveArrayCopy;
@@ -86,6 +90,14 @@ class UploadElement extends stdClass implements ArrayAccess
     public function __isset(string $name): bool
     {
         return property_exists($this, $name);
+    }
+
+    /**
+     * @return Traversable<string, mixed>
+     */
+    public function getIterator(): Traversable
+    {
+        return new ArrayIterator(get_object_vars($this));
     }
 
 }

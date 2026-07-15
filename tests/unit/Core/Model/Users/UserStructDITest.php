@@ -134,8 +134,9 @@ class UserStructDITest extends AbstractTest
     {
         $this->expectException(RuntimeException::class);
 
+        $dao = $this->createStub(MetadataDao::class);
         $user = new UserStruct();
-        $user->getMetadataAsKeyValue();
+        $user->getMetadataAsKeyValue($dao);
     }
 
     #[Test]

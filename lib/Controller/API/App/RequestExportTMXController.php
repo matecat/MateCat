@@ -11,7 +11,7 @@ use Utils\TMS\TMSService;
 class RequestExportTMXController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -29,9 +29,9 @@ class RequestExportTMXController extends KleinController
         $tmxHandler = $request['tmxHandler'];
 
         $res = $tmxHandler->requestTMXEmailDownload(
-            $this->user->email,
-            $this->user->first_name,
-            $this->user->last_name,
+            $this->user->email ?? '',
+            $this->user->first_name ?? '',
+            $this->user->last_name ?? '',
             $request['tm_key'],
             $request['strip_tags']
         );
@@ -43,7 +43,18 @@ class RequestExportTMXController extends KleinController
     }
 
     /**
-     * @return array
+     * Testability seam: overridden in tests to return a stub, avoiding the
+     * real MyMemory engine construction and its outbound HTTP calls.
+     *
+     * @throws Exception
+     */
+    protected function createTMSService(): TMSService
+    {
+        return new TMSService($this->getDatabase());
+    }
+
+    /**
+     * @return array<string, mixed>
      * @throws Exception
      */
     private function validateTheRequest(): array
@@ -66,7 +77,7 @@ class RequestExportTMXController extends KleinController
             throw new InvalidArgumentException("Invalid TM name provided.", -2);
         }
 
-        $tmxHandler = new TMSService();
+        $tmxHandler = $this->createTMSService();
         $tmxHandler->setName($tm_name);
 
         return [

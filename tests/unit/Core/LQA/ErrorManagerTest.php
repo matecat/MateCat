@@ -42,6 +42,78 @@ class ErrorManagerTest extends AbstractTest
         $this->assertEquals('INFO', ErrorManager::INFO);
     }
 
+    // ========== Characterization: collapse/default routing (guards the addError lookup-table refactor) ==========
+
+    #[Test]
+    public function addErrorTabHeadCollapsesToTabMismatchWithCanonicalMessage(): void
+    {
+        // ERR_TAB_HEAD is INFO-level and collapses to the ERR_TAB_MISMATCH outcome;
+        // its debug message must be the canonical outcome's message, not its own code's message.
+        $this->errorManager->addError(ErrorManager::ERR_TAB_HEAD);
+
+        $notices = $this->errorManager->getNotices();
+        $this->assertCount(1, $notices);
+        $this->assertEquals(ErrorManager::ERR_TAB_MISMATCH, $notices[0]->outcome);
+        $this->assertEquals(
+            $this->errorManager->getErrorMessage(ErrorManager::ERR_TAB_MISMATCH),
+            $notices[0]->debug
+        );
+    }
+
+    #[Test]
+    public function addErrorDollarMismatchCollapsesToSymbolMismatchWithCanonicalMessage(): void
+    {
+        // The whole symbol group collapses to ERR_SYMBOL_MISMATCH.
+        $this->errorManager->addError(ErrorManager::ERR_DOLLAR_MISMATCH);
+
+        $notices = $this->errorManager->getNotices();
+        $this->assertCount(1, $notices);
+        $this->assertEquals(ErrorManager::ERR_SYMBOL_MISMATCH, $notices[0]->outcome);
+        $this->assertEquals(
+            $this->errorManager->getErrorMessage(ErrorManager::ERR_SYMBOL_MISMATCH),
+            $notices[0]->debug
+        );
+    }
+
+    #[Test]
+    public function addErrorTabMismatchInputCollapsesToSymbolMismatch(): void
+    {
+        // Guards the known quirk: code 24 (ERR_TAB_MISMATCH) as INPUT reports ERR_SYMBOL_MISMATCH,
+        // whereas ERR_TAB_HEAD/TAIL report ERR_TAB_MISMATCH as their outcome.
+        $this->errorManager->addError(ErrorManager::ERR_TAB_MISMATCH);
+
+        $notices = $this->errorManager->getNotices();
+        $this->assertCount(1, $notices);
+        $this->assertEquals(ErrorManager::ERR_SYMBOL_MISMATCH, $notices[0]->outcome);
+    }
+
+    #[Test]
+    public function addErrorExBxWrongPositionIsWarningWithCanonicalMessage(): void
+    {
+        $this->errorManager->addError(ErrorManager::ERR_EX_BX_WRONG_POSITION);
+
+        $this->assertTrue($this->errorManager->thereAreWarnings());
+        $warnings = $this->errorManager->getWarnings();
+        $this->assertCount(1, $warnings);
+        $this->assertEquals(ErrorManager::ERR_EX_BX_WRONG_POSITION, $warnings[0]->outcome);
+        $this->assertEquals(
+            $this->errorManager->getErrorMessage(ErrorManager::ERR_EX_BX_WRONG_POSITION),
+            $warnings[0]->debug
+        );
+    }
+
+    #[Test]
+    public function addErrorUnknownCodeFallsBackToWarningWithOwnCode(): void
+    {
+        // Codes not explicitly routed land in WARNING with outcome == the input code.
+        $this->errorManager->addError(9999);
+
+        $this->assertFalse($this->errorManager->thereAreErrors());
+        $warnings = $this->errorManager->getWarnings();
+        $this->assertCount(1, $warnings);
+        $this->assertEquals(9999, $warnings[0]->outcome);
+    }
+
     // ========== Add Error Tests - Error Level ==========
 
     #[Test]

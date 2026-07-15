@@ -16,6 +16,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectExistsInTeamValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
 use Controller\API\Commons\Validators\TeamProjectValidator;
+use Exception;
 use Model\Exceptions\ValidationError;
 use Model\Projects\ManageModel;
 use Model\Projects\ProjectDao;
@@ -25,6 +26,7 @@ use Model\Teams\TeamStruct;
 use PDOException;
 use ReflectionException;
 use Throwable;
+use TypeError;
 use View\API\V2\Json\Project;
 
 class TeamsProjectsController extends KleinController
@@ -50,7 +52,7 @@ class TeamsProjectsController extends KleinController
 
         $acceptedFields = ['id_assignee', 'name', 'id_team'];
 
-        $projectModel = new ProjectModel($this->project);
+        $projectModel = new ProjectModel($this->getDatabase(), $this->project);
         $projectModel->setUser($this->user);
 
         foreach ($acceptedFields as $field) {
@@ -60,7 +62,7 @@ class TeamsProjectsController extends KleinController
         }
 
         $updatedStruct = $projectModel->update();
-        $formatted = new Project();
+        $formatted = new Project($this->getDatabase());
         $formatted->setUser($this->user);
 
         $this->refreshClientSessionIfNotApi();
@@ -68,9 +70,8 @@ class TeamsProjectsController extends KleinController
         $this->response->json(['project' => $formatted->renderItem($updatedStruct)]);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
-        parent::afterConstruct();
         $this->appendValidator(new LoginValidator($this));
         $this->appendValidator(new TeamAccessValidator($this));
     }
@@ -78,10 +79,12 @@ class TeamsProjectsController extends KleinController
     /**
      * @return $this
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
     protected function _appendSingleProjectTeamValidators(): TeamsProjectsController
     {
-        $this->project = (new ProjectDao())->findById($this->request->param('id_project')); //check login and auth before request the project info
+        $this->project = (new ProjectDao($this->getDatabase()))->findById($this->request->param('id_project')) ?? throw new NotFoundException(); //check login and auth before request the project info
         $this->appendValidator((new TeamProjectValidator($this))->setProject($this->project));
         $this->appendValidator((new ProjectExistsInTeamValidator($this))->setProject($this->project));
 
@@ -95,7 +98,7 @@ class TeamsProjectsController extends KleinController
     public function get(): void
     {
         $this->_appendSingleProjectTeamValidators()->validateRequest();
-        $formatted = new Project();
+        $formatted = new Project($this->getDatabase());
         $this->response->json(['project' => $formatted->renderItem($this->project)]);
     }
 
@@ -103,6 +106,8 @@ class TeamsProjectsController extends KleinController
      * @throws NotFoundException
      * @throws ReflectionException
      * @throws PDOException
+     * @throws Exception
+     * @throws TypeError
      */
     public function getByName(): void
     {
@@ -119,6 +124,7 @@ class TeamsProjectsController extends KleinController
 
         $projects = ManageModel::getProjects(
             $this->user,
+            $this->getDatabase(),
             $start,
             $step,
             $search_in_pname,

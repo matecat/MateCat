@@ -5,6 +5,11 @@ export const UseHotKeysComponent = ({
   callback,
   keyup = false,
   enableOnContentEditable = true,
+  enableOnFormTags= true
 }) => {
-  useHotkeys(shortcut, callback, {keyup, enableOnContentEditable})
+  useHotkeys(shortcut, callback, {
+    keyup,
+    enableOnContentEditable,
+    enableOnFormTags,
+  })
 }

@@ -4,7 +4,9 @@ namespace Model\Projects;
 
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\ValidationError;
+use Model\Jobs\JobDao;
 use Model\Teams\MembershipDao;
 use Model\Teams\MembershipStruct;
 use Model\Teams\TeamDao;
@@ -42,8 +44,11 @@ class ProjectModel
      */
     protected UserStruct $user;
 
-    public function __construct(ProjectStruct $project)
+    protected IDatabase $database;
+
+    public function __construct(IDatabase $database, ProjectStruct $project)
     {
+        $this->database = $database;
         $this->project_struct = $project;
     }
 
@@ -92,7 +97,7 @@ class ProjectModel
             $newStruct->$field = $value;
         }
 
-        $result = (new ProjectDao())->updateStruct($newStruct, [
+        $result = (new ProjectDao($this->database))->updateStruct($newStruct, [
             'fields' => array_keys($this->willChange)
         ]);
 
@@ -121,11 +126,12 @@ class ProjectModel
             !is_null($this->changedFields['id_assignee']) &&
             $this->user->uid != $this->changedFields['id_assignee']
         ) {
-            $assignee = (new UserDao)->getByUid($this->changedFields['id_assignee']);
+            $assignee = (new UserDao($this->database))->getByUid($this->changedFields['id_assignee']);
             if ($assignee === null) {
                 return;
             }
-            $email = new ProjectAssignedEmail($this->user, $this->project_struct, $assignee);
+            $jobs = (new JobDao($this->database))->getNotDeletedByProjectId((int) $this->project_struct->id);
+            $email = new ProjectAssignedEmail($this->database, $this->user, $this->project_struct, $assignee, $jobs);
             $email->send();
         }
     }
@@ -147,7 +153,7 @@ class ProjectModel
      */
     private function checkAssigneeChangeInPersonalTeam(int $id_team): void
     {
-        $teamDao = new TeamDao();
+        $teamDao = new TeamDao($this->database);
         $team = $teamDao->setCacheTTL(60 * 60 * 24)->fetchById($id_team, TeamStruct::class);
         if ($team === null) {
             throw new ValidationError('Team not found');
@@ -164,7 +170,7 @@ class ProjectModel
      */
     private function checkIdAssignee(int $id_team): void
     {
-        $membershipDao = new MembershipDao();
+        $membershipDao = new MembershipDao($this->database);
         $members = $membershipDao->setCacheTTL(60)->getMemberListByTeamId($id_team);
         $id_assignee = $this->willChange['id_assignee'];
         $found = array_filter($members, function (MembershipStruct $member) use ($id_assignee) {
@@ -187,7 +193,7 @@ class ProjectModel
      */
     private function checkIdTeam(): void
     {
-        $memberShip = new MembershipDao();
+        $memberShip = new MembershipDao($this->database);
 
         //choose this method (and use array_filter) instead of findTeamByIdAndUser because the results of this one are cached
         $memberList = $memberShip->setCacheTTL(60)->getMemberListByTeamId($this->willChange['id_team']);
@@ -201,7 +207,7 @@ class ProjectModel
         }
 
         $uid = $this->user->uid ?? throw new AuthorizationError("User UID must not be null", 403);
-        $team = (new TeamDao())->setCacheTTL(60 * 60)->getPersonalByUid($uid);
+        $team = (new TeamDao($this->database))->setCacheTTL(60 * 60)->getPersonalByUid($uid);
 
         // check if the destination team is personal, in such a case, set the assignee to the user UID
         if ($team->id == $this->willChange['id_team'] && $team->type == Teams::PERSONAL) {
@@ -240,7 +246,7 @@ class ProjectModel
      */
     private function cleanAssigneeCaches(): void
     {
-        $teamDao = new TeamDao();
+        $teamDao = new TeamDao($this->database);
         $this->cacheTeamsToClean = array_values(array_unique($this->cacheTeamsToClean));
         foreach ($this->cacheTeamsToClean as $team_id) {
             $teamInCacheToClean = $teamDao->setCacheTTL(60 * 60 * 24)->fetchById($team_id, TeamStruct::class);
@@ -261,7 +267,7 @@ class ProjectModel
         if ($id === null) {
             return;
         }
-        $projectDao = new ProjectDao();
+        $projectDao = new ProjectDao($this->database);
         $projectDao->destroyFetchByIdCache($id, ProjectStruct::class);
     }
 

@@ -180,7 +180,7 @@ describe('Segment readonly re-evaluation', () => {
 
   test('renders with readonly class when segment is disabled', () => {
     const segment = makeSegment({
-      metadata: [{meta_key: 'translation_disabled', meta_value: '1'}],
+      metadata: [{meta_key: 'translation_disabled', meta_value: true}],
     })
     mockIsReadonlySegment.mockReturnValue(true)
 
@@ -211,7 +211,7 @@ describe('Segment readonly re-evaluation', () => {
     expect(section.className).not.toContain('readonly')
 
     const disabledSegment = makeSegment({
-      metadata: [{meta_key: 'translation_disabled', meta_value: '1'}],
+      metadata: [{meta_key: 'translation_disabled', meta_value: true}],
     })
     mockIsReadonlySegment.mockReturnValue(true)
 

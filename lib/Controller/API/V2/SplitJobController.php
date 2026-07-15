@@ -8,6 +8,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Model\Exceptions\NotFoundException;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\JobSplitMerge\JobSplitMergeManager;
 use Model\JobSplitMerge\SplitMergeProjectData;
@@ -20,7 +21,7 @@ use TypeError;
 class SplitJobController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -42,7 +43,7 @@ class SplitJobController extends KleinController
         $pManager = $projectStructure['pManager'];
         $project = $projectStructure['project'];
 
-        $jobStructs = $this->checkMergeAccess($request['job_id'], $project->getJobs());
+        $jobStructs = $this->checkMergeAccess($request['job_id'], $this->getProjectJobs($project));
         $data->jobToMerge = $request['job_id'];
         $pManager->mergeALL($data, $jobStructs);
 
@@ -109,7 +110,7 @@ class SplitJobController extends KleinController
         $project = $projectStructure['project'];
         $count_type = $projectStructure['count_type'];
 
-        $this->checkSplitAccess($request['job_id'], $request['job_pass'], $project->getJobs());
+        $this->checkSplitAccess($request['job_id'], $request['job_pass'], $this->getProjectJobs($project));
 
         $data->jobToSplit = $request['job_id'];
         $data->jobToSplitPass = $request['job_pass'];
@@ -169,6 +170,16 @@ class SplitJobController extends KleinController
     }
 
     /**
+     * @return JobStruct[]
+     *
+     * @throws Exception
+     */
+    protected function getProjectJobs(ProjectStruct $project): array
+    {
+        return (new JobDao($this->getDatabase()))->getNotDeletedByProjectId((int) $project->id);
+    }
+
+    /**
      * @return array{data: SplitMergeProjectData, pManager: JobSplitMergeManager, count_type: string, project: ProjectStruct}
      *
      * @throws NotFoundException
@@ -178,9 +189,9 @@ class SplitJobController extends KleinController
     protected function getProjectData(int $project_id, string $project_pass, bool $split_raw_words = false): array
     {
         $count_type = $split_raw_words ? ProjectsMetadataMarshaller::SPLIT_RAW_WORD_TYPE->value : ProjectsMetadataMarshaller::SPLIT_EQUIVALENT_WORD_TYPE->value;
-        $project_struct = (new ProjectDao())->findByIdAndPassword($project_id, $project_pass, 60 * 60);
+        $project_struct = (new ProjectDao($this->getDatabase()))->findByIdAndPassword($project_id, $project_pass, 60 * 60);
 
-        $pManager = new JobSplitMergeManager($project_struct);
+        $pManager = new JobSplitMergeManager($project_struct, $this->getDatabase());
 
         $data = $pManager->getProjectData();
 

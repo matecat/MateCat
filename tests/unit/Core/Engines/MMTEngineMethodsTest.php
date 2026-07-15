@@ -7,6 +7,7 @@ namespace Matecat\Core\Engines;
 use DomainException;
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\Engines\Structs\EngineStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
@@ -14,6 +15,7 @@ use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionMethod;
+use ReflectionProperty;
 use RuntimeException;
 use SplFileObject;
 use Utils\Constants\EngineConstants;
@@ -42,7 +44,7 @@ class MMTEngineMethodsTest extends AbstractTest
 
     private function createEngineWithClient(MMTServiceApi $client): TestMMT
     {
-        $engine = new TestMMT($this->createEngineStruct());
+        $engine = new TestMMT($this->createEngineStruct(), obtainTestDatabase());
         $engine->setMockClient($client);
 
         return $engine;
@@ -182,8 +184,8 @@ class MMTEngineMethodsTest extends AbstractTest
     public function getWithGlossariesPassesGlossaryParametersToClient(): void
     {
         $pid = 910001;
-        (new ProjectsMetadataDao())->set($pid, 'mmt_glossaries', '["g1","g2"]');
-        (new ProjectsMetadataDao())->set($pid, 'mmt_ignore_glossary_case', '1');
+        (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_glossaries', '["g1","g2"]');
+        (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_ignore_glossary_case', '1');
 
         $client = $this->createMock(MMTServiceApi::class);
         $client->expects(self::once())
@@ -514,7 +516,7 @@ class MMTEngineMethodsTest extends AbstractTest
         $memoryKey = $this->createMemoryKey('k1');
 
         $engineMine = $this->getMockBuilder(MMT::class)
-            ->setConstructorArgs([$this->createEngineStruct()])
+            ->setConstructorArgs([$this->createEngineStruct(), obtainTestDatabase()])
             ->onlyMethods(['checkAccount', 'memoryExists'])
             ->getMock();
         $engineMine->expects(self::once())->method('checkAccount')->willReturn(['id' => 10]);
@@ -522,7 +524,7 @@ class MMTEngineMethodsTest extends AbstractTest
         self::assertSame(['owner' => ['user' => '10']], $engineMine->getMemoryIfMine($memoryKey));
 
         $engineNotMine = $this->getMockBuilder(MMT::class)
-            ->setConstructorArgs([$this->createEngineStruct()])
+            ->setConstructorArgs([$this->createEngineStruct(), obtainTestDatabase()])
             ->onlyMethods(['checkAccount', 'memoryExists'])
             ->getMock();
         $engineNotMine->expects(self::once())->method('checkAccount')->willReturn(['id' => 10]);
@@ -530,7 +532,7 @@ class MMTEngineMethodsTest extends AbstractTest
         self::assertNull($engineNotMine->getMemoryIfMine($memoryKey));
 
         $engineEmpty = $this->getMockBuilder(MMT::class)
-            ->setConstructorArgs([$this->createEngineStruct()])
+            ->setConstructorArgs([$this->createEngineStruct(), obtainTestDatabase()])
             ->onlyMethods(['checkAccount', 'memoryExists'])
             ->getMock();
         $engineEmpty->expects(self::once())->method('checkAccount')->willReturn(['id' => 10]);
@@ -644,8 +646,14 @@ class MMTEngineMethodsTest extends AbstractTest
     #[Test]
     public function getContextThrowsWhenGzopenFails(): void
     {
+        $path = tempnam(sys_get_temp_dir(), 'mmt-gz-');
+        self::assertIsString($path);
+        file_put_contents($path, "test\n");
+        @unlink("$path.gz");
+        mkdir("$path.gz");
+
         $engine = $this->createEngineWithClient($this->createStub(MMTServiceApi::class));
-        $file = new SplFileObject('/proc/version', 'r');
+        $file = new SplFileObject($path, 'r');
 
         $this->expectException(RuntimeException::class);
         set_error_handler(static fn (): bool => true);
@@ -653,6 +661,8 @@ class MMTEngineMethodsTest extends AbstractTest
             $this->invokeGetContext($engine, $file, 'en-US', ['it-IT']);
         } finally {
             restore_error_handler();
+            @rmdir("$path.gz");
+            @unlink($path);
         }
     }
 
@@ -660,7 +670,7 @@ class MMTEngineMethodsTest extends AbstractTest
     public function syncMemoriesReturnsEarlyWhenContextAnalyzerEnabledAndSegmentsMissingKeys(): void
     {
         $pid = 920001;
-        (new ProjectsMetadataDao())->set($pid, 'mmt_activate_context_analyzer', '1');
+        (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_activate_context_analyzer', '1');
 
         $engine = $this->createEngineWithClient($this->createStub(MMTServiceApi::class));
         $engine->syncMemories(['id' => $pid, 'id_customer' => 'nobody@example.invalid'], [['segment' => 'only-segment']]);
@@ -672,7 +682,7 @@ class MMTEngineMethodsTest extends AbstractTest
     public function syncMemoriesSkipsContextBranchWhenContextAnalyzerDisabled(): void
     {
         $pid = 920002;
-        (new ProjectsMetadataDao())->set($pid, 'mmt_activate_context_analyzer', '0');
+        (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_activate_context_analyzer', '0');
 
         $engine = $this->createEngineWithClient($this->createStub(MMTServiceApi::class));
         $engine->syncMemories(['id' => $pid, 'id_customer' => 'nobody@example.invalid'], []);
@@ -684,7 +694,7 @@ class MMTEngineMethodsTest extends AbstractTest
     public function configureContributionAnalysisBranchWithJobIdUsesIdUserKeys(): void
     {
         $jobId = 930001;
-        (new JobsMetadataDao())->set($jobId, '', 'mt_context', 'ctx:1,2,3');
+        (new JobsMetadataDao(obtainTestDatabase()))->set($jobId, '', 'mt_context', 'ctx:1,2,3');
 
         $engine = $this->createEngineWithClient($this->createStub(MMTServiceApi::class));
         $engine->setAnalysis(true);
@@ -707,12 +717,44 @@ class MMTEngineMethodsTest extends AbstractTest
     public function syncMemoriesReturnsEarlyWhenContextAnalyzerEnabledAndSegmentsEmpty(): void
     {
         $pid = 920003;
-        (new ProjectsMetadataDao())->set($pid, 'mmt_activate_context_analyzer', '1');
+        (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_activate_context_analyzer', '1');
 
         $engine = $this->createEngineWithClient($this->createStub(MMTServiceApi::class));
         $engine->syncMemories(['id' => $pid, 'id_customer' => 'nobody@example.invalid'], []);
 
         self::assertTrue(true);
+    }
+
+    #[Test]
+    public function syncMemoriesRollsBackWhenTransactionFails(): void
+    {
+        // Regression guard for the transaction-safety fix (§6.1): a failure between begin() and
+        // commit() must call database->rollback(). Previously the catch only logged, leaving the
+        // transaction open on the shared connection (a known innodb_lock_wait cascade trigger).
+        $pid = 920600;
+        (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_activate_context_analyzer', '1');
+
+        // Context-vector map so getContext() is non-null and the begin()/commit() block is entered.
+        $client = $this->createStub(MMTServiceApi::class);
+        $client->method('getContextVectorFromFile')->willReturn(['vectors' => ['it-IT' => '1:0.5']]);
+        $engine = $this->createEngineWithClient($client);
+
+        // DB double: reads go through the real connection, but begin() fails inside the try block,
+        // so the catch → rollback() path (the fix) is exercised. The once() expectation asserts it.
+        $faultyDb = $this->createMock(IDatabase::class);
+        $faultyDb->method('getConnection')->willReturn(obtainTestDatabase()->getConnection());
+        $faultyDb->method('begin')->willThrowException(new RuntimeException('begin failed'));
+        $faultyDb->expects(self::once())->method('rollback');
+
+        $ref = new ReflectionProperty($engine, 'database');
+        $ref->setAccessible(true);
+        $ref->setValue($engine, $faultyDb);
+
+        // syncMemories() swallows the failure after rolling back; the rollback() expectation verifies it.
+        $engine->syncMemories(
+            ['id' => $pid, 'id_customer' => 'nobody@example.invalid'],
+            [['source' => 'en-US', 'target' => '111222:it-IT', 'segment' => 'hello world']]
+        );
     }
 
     #[Test]
@@ -744,7 +786,7 @@ class MMTEngineMethodsTest extends AbstractTest
         $originalBuild = AppConfig::$BUILD_NUMBER;
         AppConfig::$BUILD_NUMBER = 'v1.2.3';
 
-        $engine = new MMT($this->createEngineStruct());
+        $engine = new MMT($this->createEngineStruct(), obtainTestDatabase());
         $method = new ReflectionMethod(MMT::class, '_getClient');
 
         $client = $method->invoke($engine);

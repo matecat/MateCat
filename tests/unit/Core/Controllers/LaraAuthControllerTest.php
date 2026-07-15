@@ -344,12 +344,12 @@ class LaraAuthControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function afterConstruct_appends_login_and_chunk_password_validators(): void
+    public function registerValidators_appends_login_and_chunk_password_validators(): void
     {
         // ChunkPasswordValidator reads id_job/password from controller params in its constructor.
         $this->controller->setParams(['id_job' => '1', 'password' => 'pw']);
 
-        $ref = new ReflectionMethod($this->controller, 'afterConstruct');
+        $ref = new ReflectionMethod($this->controller, 'registerValidators');
         $ref->invoke($this->controller);
 
         $validatorsProp = new ReflectionProperty(
@@ -446,5 +446,24 @@ class LaraAuthControllerTest extends AbstractTest
 
         $ref = new ReflectionMethod($this->controller, 'enforceReasoningOwner');
         $ref->invoke($this->controller, $validator);
+    }
+
+    // ─── buildOwnerValidator() ─────────────────────────────────────────
+
+    #[Test]
+    public function buildOwnerValidator_builds_real_owner_validator_for_given_chunk(): void
+    {
+        $chunk = new JobStruct();
+        $chunk->id = 42;
+
+        // Invoke the real LaraAuthController::buildOwnerValidator(), bypassing the
+        // TestableLaraAuthController override, to cover the construction statement.
+        $ref = new ReflectionMethod(LaraAuthController::class, 'buildOwnerValidator');
+        $ownerValidator = $ref->invoke($this->controller, $chunk);
+
+        $this->assertInstanceOf(IsOwnerInternalUserValidator::class, $ownerValidator);
+
+        $jobStructProp = new ReflectionProperty(IsOwnerInternalUserValidator::class, 'jobStruct');
+        $this->assertSame($chunk, $jobStructProp->getValue($ownerValidator));
     }
 }

@@ -24,10 +24,10 @@ class DownloadAnalysisReportController extends AbstractDownloadController
 
     private function getProjectDao(): ProjectDao
     {
-        return $this->projectDao ??= new ProjectDao();
+        return $this->projectDao ??= new ProjectDao($this->getDatabase());
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $this->appendValidator(new ProjectPasswordValidator($this));
@@ -41,7 +41,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController
      */
     public function download(): void
     {
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet($this->getDatabase());
         $request = $this->validateTheRequest();
         $projectId = (int)$request['id_project'];
         $_project_data = $this->getProjectDao()->getProjectAndJobData($projectId);

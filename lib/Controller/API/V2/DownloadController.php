@@ -80,7 +80,7 @@ class DownloadController extends AbstractDownloadController
 
     private function getRemoteFileDao(): RemoteFileDao
     {
-        return $this->remoteFileDao ??= new RemoteFileDao();
+        return $this->remoteFileDao ??= new RemoteFileDao($this->getDatabase());
     }
 
     /**
@@ -174,7 +174,7 @@ class DownloadController extends AbstractDownloadController
             $this->forceXliff = true;
         }
 
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet($this->getDatabase());
         $this->processDownload();
         $this->finalize($forceXliff);
     }
@@ -197,26 +197,26 @@ class DownloadController extends AbstractDownloadController
     private function processDownload(): void
     {
         // get Job Info, we need only a row of jobs (split)
-        $jobData = (new JobDao())->getByIdAndPassword($this->id_job, $this->password);
+        $jobData = (new JobDao($this->getDatabase()))->getByIdAndPassword($this->id_job, $this->password);
 
         // if no job was found, check if the provided password is a password_review
         if (empty($jobData)) {
-            $chunkReviewStruct = (new ChunkReviewDao())->findByReviewPasswordAndJobId($this->password, $this->id_job);
+            $chunkReviewStruct = (new ChunkReviewDao($this->getDatabase()))->findByReviewPasswordAndJobId($this->password, $this->id_job);
             if (empty($chunkReviewStruct)) {
                 throw new NotFoundException("Not found.");
             }
-            $jobData = $chunkReviewStruct->getChunk();
+            $jobData = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
         }
 
         $this->job = $jobData;
 
-        $this->project = $this->job->getProject();
+        $this->project = $this->job->getProject(new ProjectDao($this->getDatabase()));
 
         $this->featureSet->loadForProject($this->project);
 
         //get storage object
         $fs = FilesStorageFactory::create();
-        $files_job = $fs->getFilesForJob($this->id_job);
+        $files_job = $fs->getFilesForJob($this->getDatabase(), $this->id_job);
 
         $output_content = [];
 
@@ -228,7 +228,7 @@ class DownloadController extends AbstractDownloadController
             4) The temporary file is passed to the converter, which generates an updated version of the original file.
             5) Finally, the temporary file is deleted.
          */
-        $sDao = new SegmentDao();
+        $sDao = new SegmentDao($this->getDatabase());
 
         //File array is chunked. Each chunk will be used for a parallel conversion request.
         $files_job = array_chunk($files_job, self::FILES_CHUNK_SIZE);
@@ -293,7 +293,7 @@ class DownloadController extends AbstractDownloadController
                     if ($this->disableErrorCheck === true) {
                         $xliffReplacerCallback = new SilentXliffReplacerCallback();
                     } else {
-                        $xliffReplacerCallback = new XliffReplacerCallback($this->featureSet, $this->job->source, $jobData['target'], $this->job);
+                        $xliffReplacerCallback = new XliffReplacerCallback($this->featureSet, $this->job->source, $jobData['target'], $this->job, $this->getDatabase());
                     }
 
                     // run xliff replacer
@@ -684,7 +684,9 @@ class DownloadController extends AbstractDownloadController
      * @param array<int|string, array<string, mixed>> $output_content
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
+     *
+     * @codeCoverageIgnore integration-only: builds a live Google OAuth client and refreshes GDrive tokens.
      */
     private function startRemoteFileService(array $output_content): void
     {
@@ -697,7 +699,7 @@ class DownloadController extends AbstractDownloadController
             throw new Exception('Remote file not found');
         }
 
-        $dao = new ConnectedServiceDao();
+        $dao = new ConnectedServiceDao($this->getDatabase());
         $connectedService = $dao->fetchById($remoteFile->connected_service_id, ConnectedServiceStruct::class);
 
         if (!$connectedService || $connectedService->disabled_at) {
@@ -718,6 +720,8 @@ class DownloadController extends AbstractDownloadController
 
     /**
      * @throws Exception
+     *
+     * @codeCoverageIgnore integration-only: streams JSON built from live GDrive getFileLink() calls.
      */
     private function outputResultForOriginalFiles(): void
     {
@@ -763,6 +767,8 @@ class DownloadController extends AbstractDownloadController
      *
      * @throws Exception
      * @throws TypeError
+     *
+     * @codeCoverageIgnore integration-only: pushes converted content to GDrive via RemoteFileService::updateFile().
      */
     private function updateRemoteFiles(array $output_content): void
     {
@@ -780,7 +786,7 @@ class DownloadController extends AbstractDownloadController
      *
      * @return array<int|string, ZipContentObject>
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function getOutputContentsWithZipFiles(array $output_content): array
     {
@@ -862,11 +868,13 @@ class DownloadController extends AbstractDownloadController
      * @return string
      * @throws ReflectionException
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
+     *
+     * @codeCoverageIgnore integration-only: rebuilds a ZipArchive on disk (tempnam/copy/S3 fetch) from real zip files.
      */
     public function reBuildZipContent(string $zipFileName, array $newInternalZipFiles): string
     {
-        $project = (new ProjectDao())->findById($this->job['id_project']) ?? throw new Exception('Project not found');
+        $project = (new ProjectDao($this->getDatabase()))->findById($this->job['id_project']) ?? throw new Exception('Project not found');
 
         // this is the filesystem path
         $zipFile = (new FsFilesStorage())->getOriginalZipPath($project->create_date, $this->job['id_project'], $zipFileName);
@@ -966,6 +974,8 @@ class DownloadController extends AbstractDownloadController
      * @throws Exception
      * @throws \Psr\Log\InvalidArgumentException
      * @throws ReflectionException
+     *
+     * @codeCoverageIgnore integration-only: downloads an object from S3 to a tmp path.
      */
     public function transferZipFromS3ToTmpDir(string $zipPath, string $tmpDir): void
     {
