@@ -227,7 +227,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
         $icu_enabled = filter_var($this->request->param('icu_enabled'), FILTER_VALIDATE_BOOLEAN);
 
-        $array_keys = json_decode($private_keys_list, true);
+        $array_keys = (is_string($private_keys_list)) ? json_decode($private_keys_list, true) : [];
         $array_keys = is_array($array_keys) && isset($array_keys['ownergroup'], $array_keys['mine'], $array_keys['anonymous'])
             ? array_values(
                 array_merge(
