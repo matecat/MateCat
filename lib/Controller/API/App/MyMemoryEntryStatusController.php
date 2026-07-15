@@ -5,6 +5,8 @@ namespace Controller\API\App;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\FeaturesBase\FeatureSet;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
@@ -14,6 +16,8 @@ class MyMemoryEntryStatusController extends KleinController
 
     /**
      * @return void
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function status(): void
     {
@@ -30,7 +34,7 @@ class MyMemoryEntryStatusController extends KleinController
         }
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -41,12 +45,11 @@ class MyMemoryEntryStatusController extends KleinController
      * @return MyMemory
      * @throws Exception
      */
-    private function getMMEngine(FeatureSet $featureSet): MyMemory
+    protected function getMMEngine(FeatureSet $featureSet): MyMemory
     {
-        $_TMS = EnginesFactory::getInstance(1);
+        $_TMS = EnginesFactory::getInstance(1, $this->getDatabase(), MyMemory::class);
         $_TMS->setFeatureSet($featureSet);
 
-        /** @var MyMemory $_TMS */
         return $_TMS;
     }
 }

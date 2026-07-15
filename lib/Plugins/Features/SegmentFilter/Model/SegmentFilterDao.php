@@ -289,8 +289,8 @@ class SegmentFilterDao extends AbstractDao
 
                         {$where['sql']}
 
-                GROUP BY segment_hash, CONCAT( id_job, '-', password )
-                HAVING COUNT( segment_hash ) > 1
+                GROUP BY st.segment_hash, CONCAT( id_job, '-', password )
+                HAVING COUNT( st.segment_hash ) > 1
             ) AS REPETITIONS ON REPETITIONS.hash = segment_translations.segment_hash AND FIND_IN_SET( id_segment, REPETITIONS.id )
             GROUP BY id_segment
         ";

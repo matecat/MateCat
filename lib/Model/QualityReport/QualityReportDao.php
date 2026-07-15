@@ -9,7 +9,6 @@
 namespace Model\QualityReport;
 
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use PDO;
@@ -56,7 +55,7 @@ class QualityReportDao extends AbstractDao
         WHERE show_in_cattool
 SQL;
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
@@ -266,7 +265,7 @@ JOIN jobs j ON issues.id_job = j.id
       AND issues.deleted_at IS NULL
   ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_CLASS, ShapelessConcreteStruct::class);
 

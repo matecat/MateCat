@@ -20,6 +20,13 @@ abstract class AbstractTest extends TestCase
     protected IDatabase $databaseInstance;
     protected ReflectionMethod $reflectedMethod;
 
+    /**
+     * Tracks whether this test replaced the Database singleton with a mock/stub
+     * so tearDown() can restore the real connection and avoid leaking the mock
+     * into subsequent tests in the same process.
+     */
+    protected bool $databaseMockApplied = false;
+
     public static function projectRoot(): string
     {
         return dirname(__DIR__, 3);
@@ -33,6 +40,22 @@ abstract class AbstractTest extends TestCase
 
     protected function tearDown(): void
     {
+        if ($this->databaseMockApplied) {
+            $this->resetDatabaseMock();
+            $this->databaseMockApplied = false;
+        } else {
+            // Roll back any transaction a test left open on the shared connection.
+            // Without this, a DAO that throws inside an open tx (e.g. once the
+            // AbstractDao ctor requires a non-null IDatabase) orphans the tx on the
+            // singleton -> innodb_lock_wait cascade into the next test's setUp.
+            // rollback() is a no-op when no transaction is active; teardown cleanup
+            // must never mask the test result, so swallow any error.
+            try {
+                obtainTestDatabase()->rollback();
+            } catch (\Throwable) {
+            }
+        }
+
         parent::tearDown();
         $resultTime = microtime(true) - $this->thisTestStartingTime ?? microtime(true);
         echo " " . str_pad(get_class($this) . "::" . $this->name(), 35) . " - Did in " . round($resultTime, 6) . " seconds.\n";
@@ -53,27 +76,21 @@ abstract class AbstractTest extends TestCase
         $dbStub = $this->createStub(IDatabase::class);
         $dbStub->method('getConnection')->willReturn($pdoStub);
 
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        $prop->setValue(null, $dbStub);
+        \TestDatabaseProvider::set($dbStub);
+        $this->databaseMockApplied = true;
 
         return [$dbStub, $pdoStub, $stmtStub];
     }
 
     protected function resetDatabaseMock(): void
     {
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        $prop->setValue(null, null);
-
-        Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        \TestDatabaseProvider::reset();
     }
 
     protected function setDatabaseInstance(?IDatabase $db): void
     {
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        $prop->setValue(null, $db);
+        \TestDatabaseProvider::set($db);
+        $this->databaseMockApplied = true;
     }
 
     /**

@@ -5,15 +5,19 @@ namespace Controller\API\GDrive;
 use Aws\S3\Exception\S3Exception;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\CookieManager;
+use Controller\Exceptions\RenderTerminatedException;
 use Exception;
 use Google_Service_Exception;
 use InvalidArgumentException;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Matecat\Locales\InvalidLanguageException;
 use Matecat\Locales\Languages;
 use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
+use TypeError;
 use Utils\Constants\Constants;
 use Utils\Constants\ConversionHandlerStatus;
 use Utils\Registry\AppConfig;
@@ -42,7 +46,7 @@ class GDriveController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function open(): void
     {
@@ -62,8 +66,8 @@ class GDriveController extends AbstractStatefulKleinController
 
                 $this->filters_extraction_parameters = $filtersTemplate;
             } elseif (!empty($filtersTemplateId)) {
-                $uid = $this->getUser()->uid ?? throw new \TypeError('User uid is required');
-                $filtersTemplate = (new FiltersConfigTemplateDao())->getByIdAndUser($filtersTemplateId, $uid);
+                $uid = $this->getUser()->uid ?? throw new TypeError('User uid is required');
+                $filtersTemplate = (new FiltersConfigTemplateDao($this->getDatabase()))->getByIdAndUser($filtersTemplateId, $uid);
 
                 if (empty($filtersTemplate)) {
                     throw new Exception("filters_extraction_parameters_template_id not valid");
@@ -85,23 +89,12 @@ class GDriveController extends AbstractStatefulKleinController
             // set the upload directory name if there are files from gDrive
             if (!$this->isAsyncReq) {
                 $guid = Utils::uuid4();
-                CookieManager::setCookie(
-                    "upload_token",
-                    $guid,
-                    [
-                        'expires' => time() + 86400,
-                        'path' => '/',
-                        'domain' => AppConfig::$COOKIE_DOMAIN,
-                        'secure' => true,
-                        'httponly' => true,
-                        'samesite' => 'Strict',
-                    ]
-                );
-                $_SESSION["upload_token"] = $_COOKIE["upload_token"] = $guid;
+                (new CookieManager())->set(Constants::COOKIE_UPLOAD_TOKEN, $guid, time() + 86400);
+                $_SESSION[Constants::COOKIE_UPLOAD_TOKEN] = $_COOKIE[Constants::COOKIE_UPLOAD_TOKEN] = $guid;
                 $this->gdriveUserSession->clearFileListFromSession();
             }
 
-            $guid = $_SESSION["upload_token"] = $_COOKIE["upload_token"];
+            $guid = $_SESSION[Constants::COOKIE_UPLOAD_TOKEN] = $_COOKIE[Constants::COOKIE_UPLOAD_TOKEN];
 
             if (!Utils::isTokenValid($guid)) {
                 throw new InvalidArgumentException("Invalid Upload Token.", ConversionHandlerStatus::INVALID_TOKEN);
@@ -169,24 +162,24 @@ class GDriveController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function initSessionService(): void
     {
-        $this->gdriveUserSession = new Session();
+        $this->gdriveUserSession = new Session($this->getDatabase());
     }
 
     /**
      * @param list<string> $listOfIds
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function doImport(array $listOfIds): void
     {
         for ($i = 0; $i < count($listOfIds) && $this->isImportingSuccessful === true; $i++) {
             try {
-                $client = (new GoogleProvider())->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
+                $client = $this->getGoogleClient();
                 $this->gdriveUserSession->importFile($listOfIds[$i], $client);
             } catch (Exception $e) {
                 $this->isImportingSuccessful = false;
@@ -231,6 +224,10 @@ class GDriveController extends AbstractStatefulKleinController
         return $rawMessage;
     }
 
+    /**
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
+     */
     private function finalize(): void
     {
         if ($this->isAsyncReq) {
@@ -238,6 +235,26 @@ class GDriveController extends AbstractStatefulKleinController
         } else {
             $this->doRedirect();
         }
+    }
+
+    /**
+     * Cookie writer seam: overridable in tests to capture the emitted redirect cookies.
+     */
+    protected function cookieManager(): CookieManager
+    {
+        return new CookieManager();
+    }
+
+    /**
+     * Google client factory seam: overridable in tests so the import loop can run
+     * without live OAuth configuration (GoogleProvider::getClient throws when unset).
+     *
+     * @throws Exception
+     * @throws \RuntimeException
+     */
+    protected function getGoogleClient(): \Google_Client
+    {
+        return (new GoogleProvider())->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
     }
 
     private function doRedirect(): never
@@ -250,37 +267,34 @@ class GDriveController extends AbstractStatefulKleinController
             "error_code" => $this->error['code'] ?? null,
         ];
 
-        CookieManager::setCookie(
+        $cookieManager = $this->cookieManager();
+        $cookieManager->set(
             self::GDRIVE_OUTCOME_COOKIE_NAME,
             json_encode($outcome) ?: '',
-            [
-                'expires' => time() + 86400,
-                'path' => '/',
-                'domain' => AppConfig::$COOKIE_DOMAIN,
-                'secure' => true,
-                'httponly' => false,
-                'samesite' => 'None',
-            ]
+            time() + 86400,
+            true,
+            false,
+            'Strict'
         );
 
         // set a cookie to allow the frontend to call list endpoint
-        CookieManager::setCookie(
+        $cookieManager->set(
             self::GDRIVE_LIST_COOKIE_NAME,
-            $_SESSION["upload_token"],
-            [
-                'expires' => time() + 86400,
-                'path' => '/',
-                'domain' => AppConfig::$COOKIE_DOMAIN,
-                'secure' => true,
-                'httponly' => true,
-                'samesite' => 'Strict',
-            ]
+            $_SESSION[Constants::COOKIE_UPLOAD_TOKEN],
+            time() + 86400
         );
 
-        header("Location: /", true, 302);
-        exit;
+        if (AppConfig::$ENV === 'testing') {
+            throw new RenderTerminatedException();
+        }
+
+        die();
     }
 
+    /**
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
+     */
     private function doResponse(): void
     {
         $this->response->json([
@@ -323,18 +337,7 @@ class GDriveController extends AbstractStatefulKleinController
             $this->response->json($response);
 
             // delete the cookie
-            CookieManager::setCookie(
-                self::GDRIVE_LIST_COOKIE_NAME,
-                "",
-                [
-                    'expires' => time() - 3600,
-                    'path' => '/',
-                    'domain' => AppConfig::$COOKIE_DOMAIN,
-                    'secure' => true,
-                    'httponly' => false,
-                    'samesite' => 'None',
-                ]
-            );
+            (new CookieManager())->delete(self::GDRIVE_LIST_COOKIE_NAME);
         } catch (S3Exception $e) {
             $errorCode = 400;
             $this->response->code($errorCode);
@@ -356,7 +359,7 @@ class GDriveController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function changeConversionParameters(): void
     {
@@ -376,8 +379,8 @@ class GDriveController extends AbstractStatefulKleinController
                 $filtersExtractionParameters = new FiltersConfigTemplateStruct();
                 $filtersExtractionParameters->hydrateFromJSON(html_entity_decode($newFiltersExtractionTemplate));
             } elseif (!empty($newFiltersExtractionTemplateId)) {
-                $uid = $this->getUser()->uid ?? throw new \TypeError('User uid is required');
-                $filtersExtractionParameters = (new FiltersConfigTemplateDao())->getByIdAndUser($newFiltersExtractionTemplateId, $uid);
+                $uid = $this->getUser()->uid ?? throw new TypeError('User uid is required');
+                $filtersExtractionParameters = (new FiltersConfigTemplateDao($this->getDatabase()))->getByIdAndUser($newFiltersExtractionTemplateId, $uid);
 
                 if ($filtersExtractionParameters === null) {
                     throw new Exception("filters_extraction_parameters_template_id not valid");
@@ -413,7 +416,7 @@ class GDriveController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function deleteImportedFile(): void
     {
@@ -423,10 +426,10 @@ class GDriveController extends AbstractStatefulKleinController
         $filtersTemplate = $this->request->param('filters_template');
 
         if ($fileId === 'all') {
-            $this->gdriveUserSession->removeAllFiles($source, $segmentationRule, $filtersTemplate);
+            $this->gdriveUserSession->removeAllFiles($this->getDatabase(), $source, $segmentationRule, $filtersTemplate);
             $success = true;
         } else {
-            $success = $this->gdriveUserSession->removeFile($fileId, $source, $segmentationRule, $filtersTemplate);
+            $success = $this->gdriveUserSession->removeFile($this->getDatabase(), $fileId, $source, $segmentationRule, $filtersTemplate);
 
             if ($success) {
                 if (!$this->gdriveUserSession->hasFiles()) {
@@ -442,9 +445,9 @@ class GDriveController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
-    protected function afterConstruct(): void
+    protected function initDependencies(): void
     {
         $this->initSessionService();
     }

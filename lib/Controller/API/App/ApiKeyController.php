@@ -7,15 +7,18 @@ use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\InternalUserValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
+use PDOException;
 use Throwable;
 use Utils\Tools\Utils;
 
 class ApiKeyController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -29,7 +32,7 @@ class ApiKeyController extends KleinController
     public function create(): void
     {
         (new InternalUserValidator($this))->validate();
-        $apiKeyDao = new ApiKeyDao();
+        $apiKeyDao = new ApiKeyDao($this->getDatabase());
         $uid = $this->getUser()->uid ?? throw new NotFoundException('User not authenticated');
 
         // check if the logged user already has a key
@@ -50,8 +53,8 @@ class ApiKeyController extends KleinController
     {
         return new ApiKeyStruct([
             'uid' => $this->getUser()->uid,
-            'api_key' => Utils::randomString(20, true),
-            'api_secret' => Utils::randomString(20, true),
+            'api_key' => Utils::randomString(20),
+            'api_secret' => Utils::randomString(20),
             'enabled' => true
         ]);
     }
@@ -61,11 +64,14 @@ class ApiKeyController extends KleinController
      * api_secret is always hidden
      *
      * There is no need to protect this route
+     * @throws LockedResponseException
      * @throws NotFoundException
+     * @throws PDOException
+     * @throws ResponseAlreadySentException
      */
     public function show(): void
     {
-        $apiKeyDao = new ApiKeyDao();
+        $apiKeyDao = new ApiKeyDao($this->getDatabase());
         $uid = $this->getUser()->uid ?? throw new NotFoundException('User not authenticated');
 
         $apiKey = $apiKeyDao->getByUid($uid) ?: throw new NotFoundException('The user has not a valid API key');
@@ -85,7 +91,7 @@ class ApiKeyController extends KleinController
     public function delete(): void
     {
         (new InternalUserValidator($this))->validate();
-        $apiKeyDao = new ApiKeyDao();
+        $apiKeyDao = new ApiKeyDao($this->getDatabase());
         $uid = $this->getUser()->uid ?? throw new NotFoundException('User not authenticated');
 
         $apiKeyDao->getByUid($uid) ?: throw new NotFoundException('The user has not a valid API key');

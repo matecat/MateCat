@@ -13,6 +13,8 @@ use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use ReflectionException;
 use Stringable;
 use Utils\Constants\TranslationStatus;
 
@@ -146,9 +148,12 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     }
 
     /**
+     * @param ProjectDao $projectDao
+     *
      * @return array<string, mixed>
+     * @throws ReflectionException
      */
-    public function getProp(): array
+    public function getProp(ProjectDao $projectDao): array
     {
         $jobStruct = $this->getJobStruct();
         $props = $this->props;
@@ -157,7 +162,7 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
             $props = is_array($decoded) ? $decoded : [];
         }
 
-        return array_merge($jobStruct->getTMProps(), $props);
+        return array_merge($jobStruct->getTMProps($projectDao), $props);
     }
 
     /**

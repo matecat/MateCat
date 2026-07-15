@@ -6,34 +6,37 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Controller\API\Commons\Validators\ProjectValidator;
 use Exception;
+use Model\FeaturesBase\FeatureSet;
 use Model\Projects\ProjectStruct;
 use Plugins\Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
+use RuntimeException;
+use TypeError;
 
 class ProjectCompletionStatus extends KleinController
 {
 
-    /**
-     * @var ProjectStruct
-     */
-    private ProjectStruct $project;
+    private ?ProjectStruct $project = null;
 
-    public function afterConstruct(): void
+    /**
+     * @throws TypeError
+     */
+    protected function registerValidators(): void
     {
         $projectValidator = new ProjectValidator($this);
 
-        if ($this->request->paramsNamed()['password']) {
+        $password = filter_var($this->request->param('password'), FILTER_DEFAULT);
+        if (is_string($password) && $password !== '') {
             $projectPasswordValidator = new ProjectPasswordValidator($this);
             $projectPasswordValidator->onSuccess(function () use ($projectPasswordValidator, $projectValidator) {
-                $this->project = $projectPasswordValidator->getProject();
-                $projectValidator->setProject($this->project);
+                $project = $projectPasswordValidator->getProject() ?? throw new RuntimeException('Project not found');
+                $this->project = $project;
+                $projectValidator->setProject($project);
             });
 
             $this->appendValidator($projectPasswordValidator);
         }
 
-        if ($this->getUser()) {
-            $projectValidator->setUser($this->getUser());
-        }
+        $projectValidator->setUser($this->getUser());
 
         $projectValidator->setIdProject($this->request->param('id_project'));
         $projectValidator->setFeature('project_completion');
@@ -50,7 +53,10 @@ class ProjectCompletionStatus extends KleinController
      */
     public function status(): void
     {
-        $model = new ProjectCompletionStatusModel($this->project);
+        $model = new ProjectCompletionStatusModel(
+            $this->project ?? throw new RuntimeException('Project not found'),
+            new FeatureSet($this->getDatabase()),
+        );
         $this->response->json([
             'project_status' => $model->getStatus()
         ]);

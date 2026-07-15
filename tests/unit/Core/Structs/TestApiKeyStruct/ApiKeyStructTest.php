@@ -34,7 +34,7 @@ class ApiKeyStructTest extends AbstractTest
     }
 
     #[Test]
-    public function constructorUsesInjectedUserDao(): void
+    public function getUserUsesInjectedUserDao(): void
     {
         $user = new UserStruct();
         $user->uid = 42;
@@ -48,11 +48,10 @@ class ApiKeyStructTest extends AbstractTest
             ->willReturn($user);
 
         $struct = new ApiKeyStruct(
-            ['uid' => 42, 'api_key' => 'k', 'api_secret' => 's', 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01'],
-            $userDaoMock
+            ['uid' => 42, 'api_key' => 'k', 'api_secret' => 's', 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01']
         );
 
-        $result = $struct->getUser();
+        $result = $struct->getUser($userDaoMock);
         $this->assertSame($user, $result);
         $this->assertSame(42, $result->uid);
     }
@@ -68,11 +67,10 @@ class ApiKeyStructTest extends AbstractTest
         $userDaoMock->method('getByUid')->willReturn(null);
 
         $struct = new ApiKeyStruct(
-            ['uid' => 1, 'api_key' => 'k', 'api_secret' => 's', 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01'],
-            $userDaoMock
+            ['uid' => 1, 'api_key' => 'k', 'api_secret' => 's', 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01']
         );
 
-        $struct->getUser();
+        $struct->getUser($userDaoMock);
     }
 
     #[Test]
@@ -83,11 +81,10 @@ class ApiKeyStructTest extends AbstractTest
         $userDaoMock->method('getByUid')->with(999)->willReturn(null);
 
         $struct = new ApiKeyStruct(
-            ['uid' => 999, 'api_key' => 'k', 'api_secret' => 's', 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01'],
-            $userDaoMock
+            ['uid' => 999, 'api_key' => 'k', 'api_secret' => 's', 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01']
         );
 
-        $this->assertNull($struct->getUser());
+        $this->assertNull($struct->getUser($userDaoMock));
     }
 
     #[Test]

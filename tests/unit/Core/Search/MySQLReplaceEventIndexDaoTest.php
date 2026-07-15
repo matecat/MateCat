@@ -3,6 +3,7 @@
 namespace Matecat\Core\Search;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\Search\MySQLReplaceEventIndexDao;
 use PDO;
 use PDOStatement;
@@ -20,7 +21,7 @@ class MySQLReplaceEventIndexDaoTest extends AbstractTest
         $this->stmt = $this->createStub(PDOStatement::class);
         $this->pdo = $this->createStub(PDO::class);
         $this->pdo->method('prepare')->willReturn($this->stmt);
-        $this->dao = new MySQLReplaceEventIndexDao(null, $this->pdo);
+        $this->dao = new MySQLReplaceEventIndexDao($this->createStub(IDatabase::class), $this->pdo);
     }
 
     #[Test]

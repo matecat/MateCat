@@ -15,7 +15,7 @@ use Utils\Validator\JSONSchema\JSONValidatorObject;
 class JobMetadataController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $this->appendValidator(new ChunkPasswordValidator($this));
@@ -29,15 +29,15 @@ class JobMetadataController extends KleinController
     public function delete(): void
     {
         $params = $this->sanitizeRequestParams();
-        $dao = new MetadataDao();
+        $dao = new MetadataDao($this->getDatabase());
 
-        $struct = $dao->get($params['id_job'], $params['password'], $params['key']);
+        $struct = $dao->get((int)$params['id_job'], (string)$params['password'], (string)$params['key']);
 
         if (empty($struct)) {
             throw new NotFoundException('Metadata not found', 404);
         }
 
-        $dao->delete($params['id_job'], $params['password'], $params['key']);
+        $dao->delete((int)$params['id_job'], (string)$params['password'], (string)$params['key']);
         $this->response->json([
             'id' => $struct->id
         ]);
@@ -49,7 +49,7 @@ class JobMetadataController extends KleinController
      */
     public function save(): void
     {
-        $dao = new MetadataDao();
+        $dao = new MetadataDao($this->getDatabase());
 
         // accept only JSON
         if (!$this->isJsonRequest()) {
@@ -65,8 +65,8 @@ class JobMetadataController extends KleinController
         $return = [];
         foreach ($jsonValidatorObject->getValue(true) as $item) {
             $struct = $dao->set(
-                $params['id_job'],
-                $params['password'],
+                (int)$params['id_job'],
+                (string)$params['password'],
                 $item['key'],
                 is_array($item['value']) ? json_encode($item['value']) : $item['value'] ?? 'null'
             );
@@ -77,7 +77,7 @@ class JobMetadataController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array{id_job: string|false|null, password: string|false|null, key: string|false|null}
      */
     private function sanitizeRequestParams(): array
     {

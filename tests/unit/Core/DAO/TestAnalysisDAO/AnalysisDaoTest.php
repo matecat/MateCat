@@ -34,7 +34,7 @@ class AnalysisDaoTest extends AbstractTest
     #[Test]
     public function destroyAnalysisProjectCacheReturnsBool(): void
     {
-        $dao = new AnalysisDao();
+        $dao = new AnalysisDao(obtainTestDatabase());
         $result = $dao->destroyAnalysisProjectCache(42);
 
         $this->assertIsBool($result);
@@ -43,7 +43,7 @@ class AnalysisDaoTest extends AbstractTest
     #[Test]
     public function destroyAnalysisProjectCacheWithDifferentIds(): void
     {
-        $dao = new AnalysisDao();
+        $dao = new AnalysisDao(obtainTestDatabase());
 
         $result1 = $dao->destroyAnalysisProjectCache(1);
         $result2 = $dao->destroyAnalysisProjectCache(500);
@@ -64,7 +64,7 @@ class AnalysisDaoTest extends AbstractTest
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
         $this->stmtStub->method('closeCursor')->willReturn(true);
 
-        $dao = new AnalysisDao();
+        $dao = new AnalysisDao(obtainTestDatabase());
         $results = $dao->getProjectStatsVolumeAnalysis(42);
 
         $this->assertIsArray($results);
@@ -78,7 +78,7 @@ class AnalysisDaoTest extends AbstractTest
         $this->stmtStub->method('fetchAll')->willReturn([]);
         $this->stmtStub->method('closeCursor')->willReturn(true);
 
-        $dao = new AnalysisDao();
+        $dao = new AnalysisDao(obtainTestDatabase());
         $results = $dao->getProjectStatsVolumeAnalysis(99);
 
         $this->assertIsArray($results);
@@ -95,7 +95,7 @@ class AnalysisDaoTest extends AbstractTest
         $this->stmtStub->method('fetchAll')->willReturn([$validStruct, $invalidObject]);
         $this->stmtStub->method('closeCursor')->willReturn(true);
 
-        $dao = new AnalysisDao();
+        $dao = new AnalysisDao(obtainTestDatabase());
         $results = $dao->getProjectStatsVolumeAnalysis(10);
 
         $this->assertIsArray($results);
@@ -109,7 +109,7 @@ class AnalysisDaoTest extends AbstractTest
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
         $this->stmtStub->method('closeCursor')->willReturn(true);
 
-        $dao = new AnalysisDao();
+        $dao = new AnalysisDao(obtainTestDatabase());
         $results = $dao->getProjectStatsVolumeAnalysis(42, 3600);
 
         $this->assertIsArray($results);
@@ -119,7 +119,7 @@ class AnalysisDaoTest extends AbstractTest
     #[Test]
     public function instanceDestroyCacheByProjectIdReturnsBool(): void
     {
-        $dao = new AnalysisDao();
+        $dao = new AnalysisDao(obtainTestDatabase());
         $result = $dao->destroyCacheByProjectId(42);
 
         $this->assertIsBool($result);
@@ -128,7 +128,7 @@ class AnalysisDaoTest extends AbstractTest
     #[Test]
     public function instanceDestroyCacheByProjectIdWithDifferentIds(): void
     {
-        $dao = new AnalysisDao();
+        $dao = new AnalysisDao(obtainTestDatabase());
 
         $result1 = $dao->destroyCacheByProjectId(1);
         $result2 = $dao->destroyCacheByProjectId(999);

@@ -15,13 +15,17 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
+use Exception;
 use InvalidArgumentException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\Event\Filter\DecodeInstructionsEvent;
 use Model\Files\FilesInfoUtility;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use PDOException;
 use ReflectionException;
+use RuntimeException;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
@@ -35,38 +39,51 @@ class FileInfoController extends KleinController
      */
     protected ProjectStruct $project;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $Validator = new ChunkPasswordValidator($this);
         $Validator->onSuccess(function () use ($Validator) {
             $this->chunk = $Validator->getChunk();
-            $this->project = $Validator->getChunk()->getProject();
+            $this->project = $Validator->getChunk()->getProject(new ProjectDao($this->getDatabase()));
             $this->appendValidator(new ProjectAccessValidator($this, $this->project));
         });
         $this->appendValidator($Validator);
     }
 
     /**
+     * @throws RuntimeException
      * @throws ReflectionException
+     */
+    protected function createFilesInfoUtility(JobStruct $chunk): FilesInfoUtility
+    {
+        return new FilesInfoUtility($chunk, $this->getDatabase());
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws RuntimeException
      */
     public function getInfo(): void
     {
         $this->return404IfTheJobWasDeleted();
 
-        $filesInfoUtility = new FilesInfoUtility($this->chunk);
+        $filesInfoUtility = $this->createFilesInfoUtility($this->chunk);
         $this->response->json($filesInfoUtility->getInfo());
     }
 
     /**
      * @throws NotFoundException|ReflectionException
+     * @throws Exception
+     * @throws RuntimeException
      */
     public function getInstructions(): void
     {
         $this->return404IfTheJobWasDeleted();
 
         $id_file = $this->request->param('id_file');
-        $filesInfoUtility = new FilesInfoUtility($this->chunk);
+        $filesInfoUtility = $this->createFilesInfoUtility($this->chunk);
         $instructions = $filesInfoUtility->getInstructions($id_file);
 
         if (!$instructions) {
@@ -78,6 +95,8 @@ class FileInfoController extends KleinController
 
     /**
      * @throws NotFoundException|ReflectionException
+     * @throws Exception
+     * @throws RuntimeException
      */
     public function getInstructionsByFilePartsId(): void
     {
@@ -85,7 +104,7 @@ class FileInfoController extends KleinController
 
         $id_file = $this->request->param('id_file');
         $id_file_parts = $this->request->param('id_file_parts');
-        $filesInfoUtility = new FilesInfoUtility($this->chunk);
+        $filesInfoUtility = $this->createFilesInfoUtility($this->chunk);
         $instructions = $filesInfoUtility->getInstructions($id_file, $id_file_parts);
 
         if (!$instructions) {
@@ -104,6 +123,9 @@ class FileInfoController extends KleinController
      * @throws ReflectionException
      * @throws ValidationError
      * @throws \Model\Exceptions\NotFoundException
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
      */
     public function setInstructions(): void
     {
@@ -111,7 +133,7 @@ class FileInfoController extends KleinController
 
         $id_file = $this->request->param('id_file');
         $instructions = $this->request->param('instructions');
-        $filesInfoUtility = new FilesInfoUtility($this->chunk);
+        $filesInfoUtility = $this->createFilesInfoUtility($this->chunk);
 
         $decodeInstructionsEvent = new DecodeInstructionsEvent($instructions);
         $this->featureSet->dispatch($decodeInstructionsEvent);

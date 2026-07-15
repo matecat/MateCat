@@ -3,7 +3,6 @@
 namespace Model\ChunksCompletion;
 
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use PDO;
 use PDOException;
 
@@ -18,7 +17,7 @@ class ChunkCompletionUpdateDao extends AbstractDao
         $sql = "UPDATE chunk_completion_updates SET password = :new_password
                WHERE id_job = :id_job AND password = :password ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'id_job' => $id_job,

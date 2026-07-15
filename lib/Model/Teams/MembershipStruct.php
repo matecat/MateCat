@@ -71,14 +71,14 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct
       * @throws RuntimeException
       * @throws Exception
       */
-     public function getUser(): UserStruct
+    public function getUser(UserDao $userDao): UserStruct
     {
         if (is_null($this->user)) {
             if ($this->uid === null) {
                 throw new RuntimeException('Membership user uid must be set before loading user');
             }
 
-            $this->user = (new UserDao())->setCacheTTL(60 * 60 * 24)->getByUid($this->uid)
+            $this->user = $userDao->setCacheTTL(60 * 60 * 24)->getByUid($this->uid)
                 ?? throw new RuntimeException("User not found for uid: $this->uid");
         }
 
@@ -90,11 +90,11 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct
       * @throws ReflectionException
       * @throws Exception
       */
-     public function getTeam(): TeamStruct
+    public function getTeam(TeamDao $teamDao): TeamStruct
     {
         if (is_null($this->team)) {
             $id_team = $this->id_team ?? throw new DomainException("Membership team id must be set before loading team");
-            $this->team = (new TeamDao())->setCacheTTL(60 * 60 * 24)->fetchById($id_team, TeamStruct::class)
+            $this->team = $teamDao->setCacheTTL(60 * 60 * 24)->fetchById($id_team, TeamStruct::class)
                 ?? throw new RuntimeException("Team not found for id: $id_team");
         }
 

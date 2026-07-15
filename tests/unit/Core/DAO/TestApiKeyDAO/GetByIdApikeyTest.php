@@ -21,7 +21,7 @@ class GetByIdApikeyTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-        $this->database = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->database = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         $this->apiKeyDao = new ApiKeyDao($this->database);
 
         $sql = "INSERT INTO " . AppConfig::$DB_DATABASE . ".`api_keys` " .

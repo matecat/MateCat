@@ -725,7 +725,7 @@ class SegmentDao extends AbstractDao
      */
     public function getTranslationsMismatches(int $jid, string $jpassword, int $sid = null): array
     {
-        $jStructs = (new JobDao())->getNotDeletedById($jid, $this->cacheTTL);
+        $jStructs = (new JobDao($this->database))->getNotDeletedById($jid, $this->cacheTTL);
         $filtered = array_filter($jStructs, function ($item) use ($jpassword) {
             return $item->password == $jpassword;
         });

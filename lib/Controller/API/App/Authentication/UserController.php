@@ -7,9 +7,12 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Response;
 use Model\Users\Authentication\ChangePasswordModel;
 use Model\Users\Authentication\PasswordRules;
+use Model\Users\UserDao;
 use ReflectionException;
 use Stomp\Exception\ConnectionException;
 use TypeError;
@@ -22,6 +25,8 @@ class UserController extends AbstractStatefulKleinController
 
     /**
      * @return void
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function show(): void
     {
@@ -79,6 +84,7 @@ class UserController extends AbstractStatefulKleinController
 
     /**
      * @return void
+     * @throws LockedResponseException
      */
     public function redeemProject(): void
     {
@@ -88,10 +94,10 @@ class UserController extends AbstractStatefulKleinController
 
     protected function createChangePasswordModel(): ChangePasswordModel
     {
-        return new ChangePasswordModel($this->user);
+        return new ChangePasswordModel($this->user, new UserDao($this->getDatabase()));
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $loginValidator = new LoginValidator($this);
         $this->appendValidator($loginValidator);

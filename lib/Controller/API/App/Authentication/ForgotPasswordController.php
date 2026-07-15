@@ -15,9 +15,11 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
 use Klein\Response;
+use Model\Teams\TeamDao;
 use Model\Users\Authentication\PasswordResetModel;
 use Model\Users\Authentication\PasswordRules;
 use Model\Users\Authentication\SignupModel;
+use Model\Users\UserDao;
 use Predis\PredisException;
 use ReflectionException;
 use RuntimeException;
@@ -166,7 +168,7 @@ class ForgotPasswordController extends AbstractStatefulKleinController
      */
     protected function createSignupModel(array $params, array &$session): SignupModel
     {
-        return new SignupModel($params, $session);
+        return new SignupModel($params, $session, new UserDao($this->getDatabase()), new TeamDao($this->getDatabase()));
     }
 
     /**
@@ -178,7 +180,7 @@ class ForgotPasswordController extends AbstractStatefulKleinController
      */
     protected function createPasswordResetModel(array &$session, ?string $token = null): PasswordResetModel
     {
-        return new PasswordResetModel($session, $token);
+        return new PasswordResetModel($session, new UserDao($this->getDatabase()), $token);
     }
 
     /**

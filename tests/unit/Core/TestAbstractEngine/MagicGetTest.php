@@ -40,7 +40,7 @@ class MagicGetTest extends AbstractTest
         $this->engine_struct_param->extra_parameters = ['gamma' => "three", 'delta' => "four"];
 
 
-        $this->engine = new NONE($this->engine_struct_param);
+        $this->engine = new NONE($this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 
     /**

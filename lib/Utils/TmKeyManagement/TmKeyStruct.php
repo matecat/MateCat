@@ -5,6 +5,8 @@ namespace Utils\TmKeyManagement;
 use DomainException;
 use JsonSerializable;
 use Model\DataAccess\UnknownPropertyException;
+use Model\Users\UserStruct;
+use ReflectionException;
 use stdClass;
 
 /**
@@ -110,6 +112,26 @@ class TmKeyStruct extends stdClass implements JsonSerializable
     public bool $is_shared = false;
 
     /**
+     * UserStructs of the owners this key belongs to.
+     *
+     * This property is only set when the key is shared, meaning
+     * {@see self::$is_shared} is true.
+     *
+     * @var UserStruct[]
+     */
+    protected array $in_users = [];
+
+    /**
+     * An array to store user IDs that are included in the selection
+     *
+     * This property is only set when the key is shared, meaning
+     * {@see self::$is_shared} is true.
+     *
+     * @var int[] List of user IDs
+     */
+    protected array $in_users_id = [];
+
+    /**
      * @var int How much readable chars for hashed keys
      */
     protected int $readable_chars = 5;
@@ -125,6 +147,20 @@ class TmKeyStruct extends stdClass implements JsonSerializable
      * @var int
      */
     public int $penalty = 0;
+
+    /**
+     * @return UserStruct[]
+     */
+    public function getInUsers(): array {
+        return $this->in_users;
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getInUsersId(): array {
+        return $this->in_users_id;
+    }
 
     /**
      * When a key return back from the client we have to know if it is hashed

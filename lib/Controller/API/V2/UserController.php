@@ -8,6 +8,8 @@ use Controller\API\Commons\Validators\JSONRequestValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\Users\MetadataDao;
 use Model\Users\UserDao;
 use TypeError;
@@ -15,7 +17,7 @@ use Utils\Tools\CatUtils;
 
 class UserController extends AbstractStatefulKleinController
 {
-    public function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $this->appendValidator(new JSONRequestValidator($this));
@@ -24,6 +26,8 @@ class UserController extends AbstractStatefulKleinController
     /**
      * Edit the user profile
      *
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      * @throws TypeError
      */
     public function edit(): void
@@ -64,11 +68,11 @@ class UserController extends AbstractStatefulKleinController
             $user->last_name = $data['last_name'];
             $uid = $user->uid ?? throw new Exception('User not authenticated');
 
-            $userDao = new UserDao();
+            $userDao = new UserDao($this->getDatabase());
             $userDao->updateUser($user);
             $userDao->destroyCacheByUid($uid);
 
-            (new AuthenticationHelper($_SESSION))->refreshSession();
+            AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase())->refreshSession();
 
             $this->response->json([
                 'uid' => $user->uid,
@@ -89,6 +93,8 @@ class UserController extends AbstractStatefulKleinController
     /**
      * @return void
      * @throws InvalidArgumentException
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function setMetadata(): void
     {
@@ -123,21 +129,23 @@ class UserController extends AbstractStatefulKleinController
             throw new InvalidArgumentException('`key` required', 400);
         }
 
-        if (!isset($filtered['value']) || !is_string($filtered['value'])) {
+        if (!isset($filtered['value']) ||
+            (!is_string($filtered['value']) && !is_array($filtered['value']))
+        ) {
             throw new InvalidArgumentException('`value` required', 400);
         }
 
         $uid = $this->user->uid ?? throw new InvalidArgumentException('User not authenticated', 403);
 
         try {
-            $userMetaDao = new MetadataDao();
+            $userMetaDao = new MetadataDao($this->getDatabase());
             $metadata = $userMetaDao->set(
                 $uid,
                 $filtered['key'],
                 $filtered['value']
             );
 
-            (new AuthenticationHelper($_SESSION))->refreshSession();
+            AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase())->refreshSession();
 
             $this->response->json($metadata);
         } catch (Exception $exception) {

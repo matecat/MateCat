@@ -5,6 +5,7 @@ namespace Matecat\Core\Controllers;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\V3\ProjectTemplateController;
+use Model\DataAccess\IDatabase;
 use Exception;
 use Klein\DataCollection\HeaderDataCollection;
 use Klein\Request;
@@ -18,7 +19,9 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
+use RuntimeException;
 use TypeError;
+use Utils\Registry\AppConfig;
 
 class TestableProjectTemplateController extends ProjectTemplateController
 {
@@ -26,9 +29,6 @@ class TestableProjectTemplateController extends ProjectTemplateController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
 }
 
 #[AllowMockObjectsWithoutExpectations]
@@ -447,5 +447,125 @@ class ProjectTemplateControllerTest extends AbstractTest
             ->with($this->isInstanceOf(\stdClass::class));
 
         $this->controller->schema();
+    }
+
+    #[Test]
+    public function createReturns400WhenJsonFailsSchemaValidation(): void
+    {
+        $this->setJsonContentType();
+        // Pass JSON with an unknown property — schema has additionalProperties:false
+        $this->requestStub->method('body')->willReturn('{"name":"Test","id_team":1,"pretranslate_100":true,"get_public_matches":true,"__invalid_extra__":true}');
+
+        $this->responseMock->expects($this->once())
+            ->method('code')
+            ->with(400);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->isArray());
+
+        $this->controller->create();
+    }
+
+    #[Test]
+    public function updateReturns400WhenJsonFailsSchemaValidation(): void
+    {
+        $this->setJsonContentType();
+        $this->requestStub->method('param')->willReturn('5');
+        // Pass JSON with an unknown property — schema has additionalProperties:false
+        $this->requestStub->method('body')->willReturn('{"name":"Test","id_team":1,"pretranslate_100":true,"get_public_matches":true,"__invalid_extra__":true}');
+
+        $this->responseMock->expects($this->once())
+            ->method('code')
+            ->with(400);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->isArray());
+
+        $this->controller->update();
+    }
+
+    #[Test]
+    public function schemaThrowsRuntimeExceptionWhenSchemaFileUnreadable(): void
+    {
+        $originalRoot = AppConfig::$ROOT;
+        AppConfig::$ROOT = sys_get_temp_dir() . '/matecat-missing-schema-' . uniqid();
+
+        set_error_handler(static fn(): bool => true, E_WARNING);
+
+        try {
+            $this->expectException(RuntimeException::class);
+            $this->controller->schema();
+        } finally {
+            restore_error_handler();
+            AppConfig::$ROOT = $originalRoot;
+        }
+    }
+
+    #[Test]
+    public function schemaThrowsRuntimeExceptionWhenSecondSchemaFileUnreadable(): void
+    {
+        $originalRoot = AppConfig::$ROOT;
+
+        // Create a temp dir with only the first schema file so the second read fails
+        $tmpDir = sys_get_temp_dir() . '/matecat-partial-schema-' . uniqid();
+        mkdir($tmpDir . '/inc/validation/schema', 0755, true);
+        copy(
+            $originalRoot . '/inc/validation/schema/project_template.json',
+            $tmpDir . '/inc/validation/schema/project_template.json'
+        );
+        // Intentionally do NOT copy subfiltering_handlers.json
+
+        AppConfig::$ROOT = $tmpDir;
+        set_error_handler(static fn(): bool => true, E_WARNING);
+
+        try {
+            $this->expectException(RuntimeException::class);
+            $this->expectExceptionMessage('Failed to read subfiltering_handlers.json schema');
+            $this->controller->schema();
+        } finally {
+            restore_error_handler();
+            AppConfig::$ROOT = $originalRoot;
+            unlink($tmpDir . '/inc/validation/schema/project_template.json');
+            rmdir($tmpDir . '/inc/validation/schema');
+            rmdir($tmpDir . '/inc/validation');
+            rmdir($tmpDir . '/inc');
+            rmdir($tmpDir);
+        }
+    }
+
+    #[Test]
+    public function initDependenciesSetsDaoProperty(): void
+    {
+        $controller = new TestableProjectTemplateController();
+        $ref = new ReflectionClass(ProjectTemplateController::class);
+
+        $dbMock = $this->createMock(IDatabase::class);
+
+        // Inject a database so initDependencies can construct the DAO
+        $dbProp = $ref->getParentClass()->getProperty('database');
+        $dbProp->setValue($controller, $dbMock);
+
+        $ref->getMethod('initDependencies')->invoke($controller);
+
+        $dao = $ref->getProperty('projectTemplateDao')->getValue($controller);
+        self::assertInstanceOf(ProjectTemplateDao::class, $dao);
+    }
+
+    #[Test]
+    public function registerValidatorsRegistersLoginValidator(): void
+    {
+        $controller = new TestableProjectTemplateController();
+        $ref = new ReflectionClass(ProjectTemplateController::class);
+
+        $this->reflector->getProperty('request')->setValue($controller, $this->createStub(Request::class));
+        $this->reflector->getProperty('response')->setValue($controller, $this->createStub(Response::class));
+
+        $ref->getMethod('registerValidators')->invoke($controller);
+
+        $validatorsProp = $ref->getParentClass()->getProperty('validators');
+        $validators = $validatorsProp->getValue($controller);
+        self::assertCount(1, $validators);
     }
 }

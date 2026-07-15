@@ -66,7 +66,7 @@ class EntryCommentDao extends AbstractDao
         $lastId = (int)$conn->lastInsertId();
 
         if ($result) {
-            (new EntryDao())->updateRepliesCount($struct->id_qa_entry);
+            (new EntryDao($this->database))->updateRepliesCount($struct->id_qa_entry);
         }
         $struct->id = $lastId;
 

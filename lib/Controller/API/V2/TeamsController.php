@@ -20,6 +20,7 @@ use Model\Teams\MembershipDao;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamModel;
 use Model\Teams\TeamStruct;
+use Model\Users\UserDao;
 use ReflectionException;
 use Throwable;
 use Utils\Constants\Teams;
@@ -28,7 +29,7 @@ use View\API\V2\Json\Team;
 class TeamsController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -41,6 +42,7 @@ class TeamsController extends KleinController
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws \TypeError
      */
     public function create(): void
     {
@@ -80,14 +82,18 @@ class TeamsController extends KleinController
             'type' => $params['type']
         ]);
 
-        $model = new TeamModel($teamStruct);
-        foreach ($params['members'] as $email) {
-            $model->addMemberEmail($email);
+        $userDao = new UserDao($this->getDatabase());
+        $model = new TeamModel($teamStruct, $userDao, new TeamDao($this->getDatabase()));
+        $memberEmails = is_array($params['members']) ? $params['members'] : [];
+        foreach ($memberEmails as $email) {
+            if (is_string($email)) {
+                $model->addMemberEmail($email);
+            }
         }
         $model->setUser($this->user);
 
         $team = $model->create();
-        $formatted = new Team();
+        $formatted = new Team($userDao, null);
 
         $this->refreshClientSessionIfNotApi();
 
@@ -115,16 +121,18 @@ class TeamsController extends KleinController
             ],
         ]);
 
+        $teamId = is_int($params['id_team']) ? $params['id_team'] : throw new InvalidArgumentException("Wrong parameter: id_team is invalid", 400);
+
         $org = new TeamStruct();
-        $org->id = $params['id_team'];
+        $org->id = $teamId;
         $org->name = trim($params['name']);
 
         if (empty($org->name)) {
             throw new InvalidArgumentException("Wrong parameter: name is empty", 400);
         }
 
-        $membershipDao = new MembershipDao();
-        $org = $membershipDao->findTeamByIdAndUser($org->id, $this->user);
+        $membershipDao = new MembershipDao($this->getDatabase());
+        $org = $membershipDao->findTeamByIdAndUser($teamId, $this->user);
 
         if (empty($org)) {
             throw new AuthorizationError("Not Authorized", 401);
@@ -132,16 +140,20 @@ class TeamsController extends KleinController
 
         $org->name = trim($params['name']);
 
-        $teamDao = new TeamDao();
+        $teamDao = new TeamDao($this->getDatabase());
 
         $teamDao->updateTeamName($org);
-        $memberList = (new MembershipDao())->getMemberListByTeamId($org->id);
+        $orgId = $org->id ?? throw new \RuntimeException('Team has no id');
+        $memberList = (new MembershipDao($this->getDatabase()))->getMemberListByTeamId($orgId);
 
+        $userDao = new UserDao($this->getDatabase());
         foreach ($memberList as $user) {
-            (new MembershipDao())->destroyCacheUserTeams($user->getUser()); // clean the cache for all team users to see the changes
+            (new MembershipDao($this->getDatabase()))->destroyCacheUserTeams(
+                $user->getUser($userDao)
+            ); // clean the cache for all team users to see the changes
         }
 
-        $formatted = new Team([$org]);
+        $formatted = new Team($userDao, [$org]);
 
         $this->refreshClientSessionIfNotApi();
 
@@ -150,11 +162,13 @@ class TeamsController extends KleinController
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws \TypeError
      */
     public function getTeamList(): void
     {
-        $teamList = (new MembershipDao())->findUserTeams($this->user);
-        $formatted = new Team($teamList);
+        $teamList = (new MembershipDao($this->getDatabase()))->findUserTeams($this->user);
+        $formatted = new Team(new UserDao($this->getDatabase()), $teamList);
         $this->response->json(['teams' => $formatted->render()]);
     }
 

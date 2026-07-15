@@ -3,6 +3,7 @@
 namespace Plugins\Features;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\LQA\ChunkReviewStruct;
@@ -79,16 +80,19 @@ class RevisionFactory
      * This works because revision plugins are by default not forcedly injected on projects ($forceOnProject == false).
      *
      * @param ProjectStruct $project
+     * @param IDatabase $database
      *
      * @return self
      * @throws Exception
      */
-    public static function initFromProject(ProjectStruct $project): self
+    public static function initFromProject(ProjectStruct $project, IDatabase $database): self
     {
-        foreach ($project->getFeaturesSet()->getFeaturesStructs() as $featureStruct) {
-            $feature = $featureStruct->toNewObject();
+        $featureSet = FeatureSet::forProject($project, $database);
+
+        foreach ($featureSet->getFeaturesStructs() as $featureStruct) {
+            $feature = $featureStruct->toNewObject($database);
             if ($feature instanceof AbstractRevisionFeature) { //only one revision type can be present
-                return self::getInstance($feature)->setFeatureSet($project->getFeaturesSet());
+                return self::getInstance($feature)->setFeatureSet($featureSet);
             }
         }
 
@@ -96,8 +100,8 @@ class RevisionFactory
          * This return should never happen if the review_extended plugin is loaded as mandatory (or as dependency of mandatory second_pass_review plugin)
          */
         return self::getInstance(
-            new SecondPassReview(new BasicFeatureStruct(['feature_code' => ReviewExtended::FEATURE_CODE]))
-        )->setFeatureSet($project->getFeaturesSet());
+            new SecondPassReview(new BasicFeatureStruct(['feature_code' => SecondPassReview::FEATURE_CODE]))
+        )->setFeatureSet($featureSet);
     }
 
     /**

@@ -11,6 +11,7 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
+use RuntimeException;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
@@ -20,9 +21,6 @@ class TestableContextUrlSchemaController extends ContextUrlSchemaController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
 }
 
 class ContextUrlSchemaControllerTest extends AbstractTest
@@ -84,6 +82,22 @@ class ContextUrlSchemaControllerTest extends AbstractTest
         $this->assertArrayHasKey('properties', $schema);
         $this->assertArrayHasKey('context_url', $schema['properties']);
         $this->assertContains('context_url', $schema['required']);
+    }
+
+    #[Test]
+    public function schema_throws_runtime_exception_when_schema_file_is_unreadable(): void
+    {
+        $originalRoot = AppConfig::$ROOT;
+        AppConfig::$ROOT = '/nonexistent-path-for-test';
+
+        try {
+            $this->expectException(RuntimeException::class);
+            $this->expectExceptionMessage('Failed to read segment_context_url.json schema');
+
+            $this->controller->schema();
+        } finally {
+            AppConfig::$ROOT = $originalRoot;
+        }
     }
 
     #[Test]

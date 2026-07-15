@@ -6,22 +6,30 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\ConnectedServices\GDrive\Session;
-use Model\DataAccess\Database;
+use PDOException;
+use RuntimeException;
+use TypeError;
 use Utils\TMS\TMSService;
 
 class AjaxUtilsController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
 
+    /**
+     * @throws LockedResponseException
+     * @throws PDOException
+     * @throws ResponseAlreadySentException
+     */
     public function ping(): void
     {
-        $db = Database::obtain();
-        $stmt = $db->getConnection()->prepare("SELECT 1");
+        $stmt = $this->getDatabase()->getConnection()->prepare("SELECT 1");
         $stmt->execute();
 
         $this->response->json([
@@ -44,7 +52,7 @@ class AjaxUtilsController extends KleinController
             throw new InvalidArgumentException("TM key not provided.", -9);
         }
 
-        $tmxHandler = new TMSService();
+        $tmxHandler = new TMSService($this->getDatabase());
         $keyExists = $tmxHandler->checkCorrectKey($tm_key);
 
         if (!isset($keyExists) or $keyExists === false) {
@@ -58,10 +66,13 @@ class AjaxUtilsController extends KleinController
 
     /**
      * @return void
+     * @throws Exception
+     * @throws RuntimeException
+     * @throws TypeError
      */
     public function clearNotCompletedUploads(): void
     {
-        (new Session())->clearSession();
+        (new Session($this->getDatabase()))->clearSession();
 
         $this->response->json([
             'success' => true

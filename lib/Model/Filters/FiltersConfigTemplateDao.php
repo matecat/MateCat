@@ -14,7 +14,7 @@ use ReflectionException;
 use TypeError;
 use Utils\Tools\Utils;
 
-final class FiltersConfigTemplateDao extends AbstractDao
+class FiltersConfigTemplateDao extends AbstractDao
 {
     const string TABLE = 'filters_config_templates';
 
@@ -168,7 +168,7 @@ final class FiltersConfigTemplateDao extends AbstractDao
         $this->destroyQueryByIdAndUserCache($id, $uid);
         $this->destroyQueryPaginated($uid);
 
-        (new ProjectTemplateDao())->removeSubTemplateByIdAndUser($id, $uid, 'filters_template_id');
+        (new ProjectTemplateDao($this->database))->removeSubTemplateByIdAndUser($id, $uid, 'filters_template_id');
 
         return $stmt->rowCount();
     }

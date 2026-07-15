@@ -145,11 +145,16 @@ class ProjectCompletionRepositoryTest extends AbstractTest
     #[Test]
     public function test_get_project_job_ids_uses_find_by_id_and_maps_job_pairs(): void
     {
-        $project = $this->createStub(ProjectStruct::class);
-        $project->method('getChunks')->willReturn([
-            (object)['id' => 101, 'password' => 'a'],
-            (object)['id' => 202, 'password' => 'b'],
-        ]);
+        $project = new ProjectStruct();
+        $project->id = 9;
+
+        $job1 = new \Model\Jobs\JobStruct();
+        $job1->id = 101;
+        $job1->password = 'a';
+
+        $job2 = new \Model\Jobs\JobStruct();
+        $job2->id = 202;
+        $job2->password = 'b';
 
         $projectDao = $this->createMock(ProjectDao::class);
         $projectDao->expects($this->once())
@@ -157,7 +162,13 @@ class ProjectCompletionRepositoryTest extends AbstractTest
             ->with(9, ProjectStruct::class)
             ->willReturn($project);
 
-        $repository = $this->makeRepository(null, $projectDao);
+        $jobDao = $this->createMock(JobDao::class);
+        $jobDao->expects($this->once())
+            ->method('getNotDeletedByProjectId')
+            ->with(9)
+            ->willReturn([$job1, $job2]);
+
+        $repository = $this->makeRepository(null, $projectDao, $jobDao);
 
         $this->assertSame(
             [

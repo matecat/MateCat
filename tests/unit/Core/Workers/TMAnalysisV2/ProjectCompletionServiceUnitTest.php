@@ -90,6 +90,32 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
         $service->tryCloseProject(1, 'pass', 'queue', $this->makeFeatureSet());
     }
 
+    #[Test]
+    public function tryCloseProject_routes_logs_through_injected_logger(): void
+    {
+        // The worker injects _doLog here so completion logs land in the analysis-queue
+        // log rather than the global general_log.txt. Verify the logger is actually used.
+        $captured = [];
+        $logger = function (string $message) use (&$captured): void {
+            $captured[] = $message;
+        };
+
+        $redis = $this->createMock(AnalysisRedisServiceInterface::class);
+        $redis->method('getProjectWordCounts')->willReturn(['project_segments' => 10, 'num_analyzed' => 10]);
+        $redis->method('acquireCompletionLock')->willReturn(true);
+        $redis->expects($this->once())->method('releaseCompletionLock')->with(7);
+
+        $repo = $this->createStub(ProjectCompletionRepositoryInterface::class);
+        // Empty summary → array_pop() yields null → "empty rollup" branch logs + releases.
+        $repo->method('getProjectSegmentsTranslationSummary')->willReturn([]);
+
+        $service = new ProjectCompletionService($redis, $repo, $logger);
+        $service->tryCloseProject(7, 'pass', 'queue', $this->makeFeatureSet());
+
+        $this->assertNotEmpty($captured, 'injected logger must receive completion log output');
+        $this->assertStringContainsString('empty rollup', implode("\n", $captured));
+    }
+
     // ── Happy path ─────────────────────────────────────────────────────
 
     #[Test]
@@ -174,8 +200,87 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
         // transaction must NOT start — updateProjectAnalysisStatus is the real guard.
         $repo->expects($this->never())->method('updateProjectAnalysisStatus');
 
-        $service = new ProjectCompletionService($redis, $repo);
+        // gateRetrySleepMicros:0 → the retry loop exhausts all attempts with no real sleep.
+        $service = new ProjectCompletionService($redis, $repo, null, gateRetrySleepMicros: 0);
         $service->tryCloseProject(42, 'pass', 'queue', $this->makeFeatureSet());
+    }
+
+    #[Test]
+    public function tryCloseProject_finalizes_when_gate_confirms_completion_on_a_later_retry(): void
+    {
+        // Core-fix proof (last-segment race): the first gate read still sees segments
+        // pending (inter-worker commit skew), but a later read confirms completion. The
+        // project must FINALIZE — not release the lock and hang at FAST_OK.
+        $redis = $this->createMock(AnalysisRedisServiceInterface::class);
+        $redis->method('getProjectWordCounts')->willReturn(['project_segments' => 10, 'num_analyzed' => 10]);
+        $redis->method('acquireCompletionLock')->willReturn(true);
+        // It finalized rather than gave up, so the lock is NEVER released here.
+        $redis->expects($this->never())->method('releaseCompletionLock');
+        $redis->expects($this->once())->method('removeProjectFromQueue')->with('queue', 77);
+
+        $repo = $this->createMock(ProjectCompletionRepositoryInterface::class);
+        // Same rollup + per-job-row structure as the happy-path finalize test. First call:
+        // 2 segments still pending. Second call: all analyzed → finalize on this snapshot.
+        $repo->method('getProjectSegmentsTranslationSummary')->willReturnOnConsecutiveCalls(
+            [
+                ['id_job' => 1, 'password' => 'a', 'eq_wc' => 100, 'st_wc' => 200],
+                ['id_job' => null, 'password' => null, 'eq_wc' => 100, 'st_wc' => 200, 'project_segments' => 10, 'num_analyzed' => 8],
+            ],
+            [
+                ['id_job' => 1, 'password' => 'a', 'eq_wc' => 100, 'st_wc' => 200],
+                ['id_job' => null, 'password' => null, 'eq_wc' => 100, 'st_wc' => 200, 'project_segments' => 10, 'num_analyzed' => 10],
+            ],
+        );
+        $repo->method('getProjectJobIds')->willReturn([['id' => 1, 'password' => 'a']]);
+        $repo->expects($this->once())->method('updateProjectAnalysisStatus');
+        // beginTransaction/commit fire once per gate query (master-read wrapper) plus the
+        // completion transaction, so assert the finalize commit ran at all.
+        $repo->expects($this->atLeastOnce())->method('commit');
+
+        // gateRetrySleepMicros:0 → the one retry needed happens with no real sleep.
+        $service = new ProjectCompletionService($redis, $repo, null, gateRetrySleepMicros: 0);
+        $service->tryCloseProject(77, 'pass', 'queue', $this->makeFeatureSet());
+    }
+
+    #[Test]
+    public function tryCloseProject_releases_lock_when_gate_retries_misconfigured_below_one(): void
+    {
+        // maxGateRetries < 1 skips the gate loop entirely, so $rollup stays null. The
+        // defensive post-loop guard must release the lock and bail without finalizing.
+        $redis = $this->createMock(AnalysisRedisServiceInterface::class);
+        $redis->method('getProjectWordCounts')->willReturn(['project_segments' => 10, 'num_analyzed' => 10]);
+        $redis->method('acquireCompletionLock')->willReturn(true);
+        $redis->expects($this->once())->method('releaseCompletionLock')->with(88);
+        $redis->expects($this->never())->method('removeProjectFromQueue');
+
+        $repo = $this->createMock(ProjectCompletionRepositoryInterface::class);
+        // Loop never runs → the gate query is never issued and finalize never starts.
+        $repo->expects($this->never())->method('getProjectSegmentsTranslationSummary');
+        $repo->expects($this->never())->method('updateProjectAnalysisStatus');
+
+        $service = new ProjectCompletionService($redis, $repo, null, maxGateRetries: 0);
+        $service->tryCloseProject(88, 'pass', 'queue', $this->makeFeatureSet());
+    }
+
+    #[Test]
+    public function tryCloseProject_releases_lock_when_rollup_is_empty(): void
+    {
+        // Redis says complete → enters the locked block and acquires the completion lock.
+        // The gate query returns [] (no rows at all), so array_pop yields null → the
+        // "empty rollup" branch must release the lock and bail without finalizing.
+        $redis = $this->createMock(AnalysisRedisServiceInterface::class);
+        $redis->method('getProjectWordCounts')->willReturn(['project_segments' => 10, 'num_analyzed' => 10]);
+        $redis->method('acquireCompletionLock')->willReturn(true);
+        $redis->expects($this->once())->method('releaseCompletionLock')->with(55);
+        $redis->expects($this->never())->method('removeProjectFromQueue');
+
+        $repo = $this->createMock(ProjectCompletionRepositoryInterface::class);
+        $repo->method('getProjectSegmentsTranslationSummary')->willReturn([]);
+        // No finalize: the DONE status update must never run on an empty rollup.
+        $repo->expects($this->never())->method('updateProjectAnalysisStatus');
+
+        $service = new ProjectCompletionService($redis, $repo);
+        $service->tryCloseProject(55, 'pass', 'queue', $this->makeFeatureSet());
     }
 
     // ── Error/rollback path ────────────────────────────────────────────

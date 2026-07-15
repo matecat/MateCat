@@ -30,11 +30,11 @@ class XliffConfigTemplateDao extends AbstractDao
     private ProjectTemplateDao $projectTemplateDao;
 
     public function __construct(
-        ?IDatabase $con = null,
+        IDatabase $con,
         ?ProjectTemplateDao $projectTemplateDao = null,
     ) {
         parent::__construct($con);
-        $this->projectTemplateDao = $projectTemplateDao ?? new ProjectTemplateDao();
+        $this->projectTemplateDao = $projectTemplateDao ?? new ProjectTemplateDao($this->database);
     }
 
     /**

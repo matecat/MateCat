@@ -6,6 +6,8 @@ use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Controller\Abstracts\Authentication\AuthenticationTrait;
 use Matecat\TestHelpers\AbstractTest;
 use Model\ApiKeys\ApiKeyStruct;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\ActiveMQ\AMQHandler;
@@ -18,6 +20,7 @@ class TraitTestSubject
     use AuthenticationTrait;
 
     protected ?ApiKeyStruct $api_record = null;
+    private ?AuthenticationHelper $stubHelper = null;
 
     public function __construct()
     {
@@ -29,17 +32,29 @@ class TraitTestSubject
 
     public function callIdentifyUser(?AuthenticationHelper $authHelper = null): void
     {
-        $this->identifyUser(false, $authHelper);
+        $this->stubHelper = $authHelper;
+        $this->identifyUser(false);
     }
 
     public function callLogout(?AuthenticationHelper $authHelper = null): void
     {
-        $this->logout($authHelper);
+        $this->stubHelper = $authHelper;
+        $this->logout();
+    }
+
+    protected function buildAuthHelper(array &$session, ?string $api_key = null, ?string $api_secret = null): AuthenticationHelper
+    {
+        return $this->stubHelper ?? AuthenticationHelper::fromRequest($session, $this->getDatabase(), $api_key, $api_secret);
     }
 
     public function callBroadcastLogout(?AMQHandler $amqHandler = null): void
     {
         $this->broadcastLogout($amqHandler);
+    }
+
+    public function getDatabase(): IDatabase
+    {
+        return obtainTestDatabase();
     }
 
     public static function sessionStart(): void

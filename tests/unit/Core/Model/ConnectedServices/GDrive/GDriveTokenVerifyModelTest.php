@@ -21,13 +21,13 @@ class GDriveTokenVerifyModelTest extends AbstractTest
     public function constructorPreservesServiceReference(): void
     {
         $service = $this->createStub(ConnectedServiceStruct::class);
-        $model = new GDriveTokenVerifyModel($service);
+        $model = new GDriveTokenVerifyModel($service, $this->createStub(ConnectedServiceDao::class));
 
         $this->assertSame($service, $model->getService());
     }
 
     #[Test]
-    public function constructorAcceptsOptionalDao(): void
+    public function constructorAcceptsDao(): void
     {
         $service = $this->createStub(ConnectedServiceStruct::class);
         $dao = $this->getStubBuilder(ConnectedServiceDao::class)
@@ -46,7 +46,7 @@ class GDriveTokenVerifyModelTest extends AbstractTest
             'getDecryptedOauthAccessToken' => '{"access_token":"valid","refresh_token":"ref"}',
         ]);
 
-        $model = new GDriveTokenVerifyModel($service);
+        $model = new GDriveTokenVerifyModel($service, $this->createStub(ConnectedServiceDao::class));
 
         $gClient = $this->createStub(\Google_Client::class);
         $gClient->method('isAccessTokenExpired')

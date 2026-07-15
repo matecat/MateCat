@@ -5,6 +5,7 @@ namespace Matecat\Core\Model\ProjectCreation;
 
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Model\ProjectCreation\ProjectCreationError;
 use Model\ProjectCreation\ProjectStructure;
 use Model\ProjectCreation\SegmentExtractor;
@@ -36,7 +37,7 @@ class SegmentExtractorErrorPathsTest extends AbstractTest
                 \Utils\Logger\MatecatLogger $logger,
                 bool $returnFalse
             ) {
-                parent::__construct($config, $filter, $features, $metadataDao, $mapper, $logger);
+                parent::__construct($config, $filter, $features, $metadataDao, $mapper, obtainTestDatabase(), $logger);
                 $this->returnFalse = $returnFalse;
             }
 

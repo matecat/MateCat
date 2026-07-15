@@ -15,6 +15,7 @@ use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobDao;
 use Model\FeaturesBase\Hook\Event\Filter\FilterJobPasswordToReviewPasswordEvent;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
@@ -35,18 +36,27 @@ class ProjectCompletionStatusModel
 
     private ChunkCompletionEventDao $chunkCompletionEventDao;
     private FeatureSet $featureSet;
+    private JobDao $jobDao;
 
     /**
      * @throws Exception
      */
     public function __construct(
         ProjectStruct $project,
+        FeatureSet $featureSet,
         ?ChunkCompletionEventDao $chunkCompletionEventDao = null,
-        ?FeatureSet $featureSet = null,
+        ?JobDao $jobDao = null,
     ) {
         $this->project = $project;
-        $this->chunkCompletionEventDao = $chunkCompletionEventDao ?? new ChunkCompletionEventDao();
-        $this->featureSet = $featureSet ?? new FeatureSet();
+        if ($chunkCompletionEventDao === null) {
+            $chunkCompletionEventDao = new ChunkCompletionEventDao($featureSet->getDatabase());
+        }
+        $this->chunkCompletionEventDao = $chunkCompletionEventDao;
+        $this->featureSet = $featureSet;
+        if ($jobDao === null) {
+            $jobDao = new JobDao($featureSet->getDatabase());
+        }
+        $this->jobDao = $jobDao;
     }
 
     /**
@@ -88,7 +98,7 @@ class ProjectCompletionStatusModel
 
         $any_uncomplete = false;
 
-        foreach ($this->project->getChunks() as $chunk) {
+        foreach ($this->jobDao->getNotDeletedByProjectId((int) $this->project->id) as $chunk) {
             $translate = $this->dataForChunkStatus($chunk, false);
             $revise = $this->dataForChunkStatus($chunk, true);
 

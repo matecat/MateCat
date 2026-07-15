@@ -22,10 +22,6 @@ class TestableGetContributionController extends GetContributionController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     protected function dispatchContribution(GetContributionRequest $contributionRequest): void
     {
         $this->capturedRequest = $contributionRequest;
@@ -42,10 +38,10 @@ class GetContributionControllerTest extends AbstractTest
     {
         parent::setUp();
 
-        Database::obtain()->begin();
+        obtainTestDatabase()->begin();
 
         // Insert fake user matching job owner so getProjectOwner() can resolve
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec(
             "INSERT IGNORE INTO users (uid, email, salt, pass, create_date, first_name, last_name)
              VALUES (1886472050, 'foo@example.org', 'x', 'x', '2024-01-01 00:00:00', 'Test', 'Owner')"
@@ -63,6 +59,8 @@ class GetContributionControllerTest extends AbstractTest
         $responseProp = $this->reflector->getProperty('response');
         $responseProp->setValue($this->controller, $responseMock);
 
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
+
         $featureSet = $this->createStub(FeatureSet::class);
         $featureSetProp = $this->reflector->getProperty('featureSet');
         $featureSetProp->setValue($this->controller, $featureSet);
@@ -76,9 +74,9 @@ class GetContributionControllerTest extends AbstractTest
 
     public function tearDown(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         if ($conn->inTransaction()) {
-            Database::obtain()->rollback();
+            obtainTestDatabase()->rollback();
         }
 
         parent::tearDown();
@@ -503,8 +501,9 @@ class GetContributionControllerTest extends AbstractTest
 
         $ref->getProperty('request')->setValue($testable, $requestStub);
         $ref->getProperty('response')->setValue($testable, $responseStub);
+        $ref->getProperty('database')->setValue($testable, obtainTestDatabase());
 
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet(obtainTestDatabase());
         $ref->getProperty('featureSet')->setValue($testable, $featureSet);
 
         $user = new UserStruct();
@@ -559,8 +558,9 @@ class GetContributionControllerTest extends AbstractTest
 
         $ref->getProperty('request')->setValue($testable, $requestStub);
         $ref->getProperty('response')->setValue($testable, $responseStub);
+        $ref->getProperty('database')->setValue($testable, obtainTestDatabase());
 
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet(obtainTestDatabase());
         $ref->getProperty('featureSet')->setValue($testable, $featureSet);
 
         $user = new UserStruct();

@@ -24,10 +24,6 @@ class TestableQualityReportViewController extends QualityReportController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     public string $lastTemplate = '';
     /** @var array<string, mixed> */
     public array $lastViewData = [];
@@ -71,7 +67,7 @@ class QualityReportViewControllerTest extends AbstractTest
     {
         parent::setUp();
 
-        Database::obtain()->begin();
+        obtainTestDatabase()->begin();
         $this->seedFixtures();
 
         $this->reflector = new ReflectionClass(TestableQualityReportViewController::class);
@@ -82,15 +78,16 @@ class QualityReportViewControllerTest extends AbstractTest
 
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $response);
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
 
         $this->setControllerUser($this->buildUser(), true);
     }
 
     protected function tearDown(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         if ($conn->inTransaction()) {
-            Database::obtain()->rollback();
+            obtainTestDatabase()->rollback();
         }
 
         parent::tearDown();
@@ -98,7 +95,7 @@ class QualityReportViewControllerTest extends AbstractTest
 
     private function seedFixtures(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
 
         $conn->exec("DELETE FROM jobs WHERE id = " . self::JOB_ID_VALID);
         $conn->exec("DELETE FROM projects WHERE id = " . self::PROJECT_ID);
@@ -160,7 +157,7 @@ class QualityReportViewControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function afterConstructAppendsViewLoginRedirectValidator(): void
+    public function registerValidatorsAppendsViewLoginRedirectValidator(): void
     {
         $realReflector = new ReflectionClass(QualityReportController::class);
         /** @var QualityReportController $realController */
@@ -172,7 +169,7 @@ class QualityReportViewControllerTest extends AbstractTest
         $realReflector->getProperty('request')->setValue($realController, $request);
         $realReflector->getProperty('response')->setValue($realController, $response);
 
-        $realReflector->getMethod('afterConstruct')->invoke($realController);
+        $realReflector->getMethod('registerValidators')->invoke($realController);
 
         /** @var list<mixed> $validators */
         $validators = $realReflector->getProperty('validators')->getValue($realController);
@@ -254,7 +251,7 @@ class QualityReportViewControllerTest extends AbstractTest
     #[Test]
     public function renderViewAddsArchivedJobParamsWhenJobIsArchived(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec(
             "UPDATE jobs SET status_owner = 'archived' WHERE id = " . self::JOB_ID_VALID
         );

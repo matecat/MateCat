@@ -14,7 +14,9 @@ use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use PDOException;
 use Plugins\Features\RevisionFactory;
+use TypeError;
 
 class ReviewsController extends KleinController
 {
@@ -37,11 +39,12 @@ class ReviewsController extends KleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function createReview(): void
     {
         // create a new chunk revision password
-        $records = RevisionFactory::initFromProject($this->project)->getRevisionFeature()->createQaChunkReviewRecords(
+        $records = $this->initRevisionFromProject($this->project)->getRevisionFeature()->createQaChunkReviewRecords(
             [$this->chunk],
             $this->project,
             [
@@ -51,11 +54,11 @@ class ReviewsController extends KleinController
 
         // destroy project data cache
         $projectId = $this->project->id ?? throw new Exception('Project not found');
-        (new ProjectDao())->destroyCacheForProjectData((int)$projectId, $this->project->password);
+        (new ProjectDao($this->getDatabase()))->destroyCacheForProjectData((int)$projectId, $this->project->password);
 
         // destroy the 5 minutes chunk review cache
-        $chunk = (new JobDao())->getByIdAndPasswordOrFail($records[0]->id_job, $records[0]->password);
-        $chunkReviewDao = new ChunkReviewDao();
+        $chunk = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($records[0]->id_job, $records[0]->password);
+        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
         $chunkReviewDao->destroyCacheForFindChunkReviews($chunk);
         $chunkReviewDao->destroyCacheByProjectId((int)$projectId);
 
@@ -69,12 +72,20 @@ class ReviewsController extends KleinController
         );
     }
 
-    protected function afterConstruct(): void
+    /**
+     * @throws Exception
+     */
+    protected function initRevisionFromProject(ProjectStruct $project): RevisionFactory
+    {
+        return RevisionFactory::initFromProject($project, $this->getDatabase());
+    }
+
+    protected function registerValidators(): void
     {
         $Validator = new ProjectPasswordValidator($this);
 
         $Validator->onSuccess(function () use ($Validator) {
-            $this->project = $Validator->getProject();
+            $this->project = $Validator->getProject() ?? throw new Exception('Project not found');
         })->onSuccess(function () {
             //Add more specific validations, it's necessary to append after the first validation run because we need the project struct
             (new TeamProjectValidator($this))->setProject($this->project)->validate();
@@ -89,6 +100,7 @@ class ReviewsController extends KleinController
      * add more specific validations
      *
      * @throws ValidationError
+     * @throws PDOException
      */
     protected function afterValidate(): void
     {
@@ -109,7 +121,7 @@ class ReviewsController extends KleinController
         $password = $post['password'];
         $revision_number = 2;
 
-        $chunkReviewDao = new ChunkReviewDao();
+        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
 
         // check if the $revision_number exists
         if (false === $chunkReviewDao->exists($id_job, $password, $revision_number)) {
@@ -124,10 +136,14 @@ class ReviewsController extends KleinController
         $this->nextSourcePage = $revision_number + 1;
         $this->latestChunkReview = $chunkReviewDao->findLastReviewByJobIdPasswordAndSourcePage($id_job, $password, $revision_number);
 
-        if ($this->latestChunkReview && $this->latestChunkReview->id_project != $this->project->id) {
+        if ($this->latestChunkReview === null) {
+            throw new ValidationError("Revision link not found");
+        }
+
+        if ($this->latestChunkReview->id_project != $this->project->id) {
             throw new ValidationError("Job id / password combination is not in projects list");
         }
 
-        $this->chunk = $this->latestChunkReview->getChunk();
+        $this->chunk = $this->latestChunkReview->getChunk(new JobDao($this->getDatabase()));
     }
 }

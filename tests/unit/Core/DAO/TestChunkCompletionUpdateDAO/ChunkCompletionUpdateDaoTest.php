@@ -49,7 +49,7 @@ class ChunkCompletionUpdateDaoTest extends AbstractTest
     {
         $this->stmtStub->method('execute')->willReturn(true);
 
-        $dao = new ChunkCompletionUpdateDao();
+        $dao = new ChunkCompletionUpdateDao(obtainTestDatabase());
         $result = $dao->createOrUpdateFromStruct($this->makeStruct());
 
         $this->assertTrue($result);
@@ -60,7 +60,7 @@ class ChunkCompletionUpdateDaoTest extends AbstractTest
     {
         $this->stmtStub->method('execute')->willReturn(false);
 
-        $dao = new ChunkCompletionUpdateDao();
+        $dao = new ChunkCompletionUpdateDao(obtainTestDatabase());
         $result = $dao->createOrUpdateFromStruct($this->makeStruct());
 
         $this->assertFalse($result);
@@ -74,7 +74,7 @@ class ChunkCompletionUpdateDaoTest extends AbstractTest
         $struct = $this->makeStruct();
         $struct->is_review = true;
 
-        $dao = new ChunkCompletionUpdateDao();
+        $dao = new ChunkCompletionUpdateDao(obtainTestDatabase());
         $result = $dao->createOrUpdateFromStruct($struct);
 
         $this->assertTrue($result);
@@ -85,7 +85,7 @@ class ChunkCompletionUpdateDaoTest extends AbstractTest
     {
         $this->stmtStub->method('rowCount')->willReturn(1);
 
-        $dao = new ChunkCompletionUpdateDao();
+        $dao = new ChunkCompletionUpdateDao(obtainTestDatabase());
         $result = $dao->updatePassword(10, 'new_pass', 'old_pass');
 
         $this->assertSame(1, $result);
@@ -96,7 +96,7 @@ class ChunkCompletionUpdateDaoTest extends AbstractTest
     {
         $this->stmtStub->method('rowCount')->willReturn(0);
 
-        $dao = new ChunkCompletionUpdateDao();
+        $dao = new ChunkCompletionUpdateDao(obtainTestDatabase());
         $result = $dao->updatePassword(10, 'new_pass', 'old_pass');
 
         $this->assertSame(0, $result);

@@ -5,9 +5,11 @@ namespace Matecat\Core\Workers;
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\Projects\MetadataStruct;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserDao;
@@ -43,15 +45,14 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
         parent::tearDown();
     }
 
-    private function createChunkWithProject(bool $hasTranslationVersions = false): JobStruct
+    private function createChunkWithProject(): JobStruct
     {
         $chunk = new JobStruct();
         $chunk->id = 1;
         $chunk->password = 'abc';
 
-        $project = $this->createStub(ProjectStruct::class);
-        $project->method('getFeaturesSet')->willReturn(new FeatureSet());
-        $project->method('hasFeature')->willReturn($hasTranslationVersions);
+        $project = new ProjectStruct();
+        $project->id = 10;
 
         $ref = new \ReflectionProperty(AbstractDaoObjectStruct::class, 'cached_results');
         $ref->setValue($chunk, ['Model\Jobs\JobStruct::getProject' => $project]);
@@ -61,7 +62,6 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
 
     private function createWorker(
         ?JobStruct $chunk = null,
-        bool $hasTranslationVersions = false
     ): BulkSegmentStatusChangeWorker {
         $amq = $this->createStub(AMQHandler::class);
         $userDao = $this->createStub(UserDao::class);
@@ -70,12 +70,12 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
         $dbMock = $this->createStub(IDatabase::class);
         $dbMock->method('getConnection')->willReturn($this->pdoStub);
 
-        $chunk = $chunk ?? $this->createChunkWithProject($hasTranslationVersions);
+        $chunk = $chunk ?? $this->createChunkWithProject();
 
         $eventsHandler = $this->createStub(TranslationEventsHandler::class);
 
         $worker = $this->getMockBuilder(BulkSegmentStatusChangeWorker::class)
-            ->setConstructorArgs([$amq, $userDao, $dbMock])
+            ->setConstructorArgs([$amq, $dbMock, $userDao])
             ->onlyMethods([
                 '_checkDatabaseConnection', '_doLog', 'publishToNodeJsClients',
                 'createJobStruct', 'createTranslationEventsHandler',
@@ -106,11 +106,31 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
         return $queueElement;
     }
 
+    /**
+     * Configure the stmtStub to return a metadata row with translation_versions
+     * as the first fetchAll call (for loadForProject), then the given segment
+     * rows for subsequent calls.
+     *
+     * @param list<SegmentTranslationStruct> $segmentRows
+     */
+    private function configureStmtForTranslationVersions(array $segmentRows = []): void
+    {
+        $metadataRow = new MetadataStruct();
+        $metadataRow->key = 'features';
+        $metadataRow->value = 'translation_versions';
+        $metadataRow->id_project = 10;
+
+        $this->stmtStub->method('fetchAll')->willReturnOnConsecutiveCalls(
+            [$metadataRow],    // loadForProject metadata query
+            $segmentRows       // getAllSegmentsByIdListAndJobId
+        );
+    }
+
     #[Test]
     public function getLoggerNameReturnsExpected(): void
     {
         $amq = $this->createStub(AMQHandler::class);
-        $worker = new BulkSegmentStatusChangeWorker($amq);
+        $worker = new BulkSegmentStatusChangeWorker($amq, obtainTestDatabase());
 
         $this->assertSame('bulk_segment_status_change.log', $worker->getLoggerName());
     }
@@ -175,14 +195,14 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
         $seg->status = 'DRAFT';
         $seg->segment_hash = 'abc';
 
-        $this->stmtStub->method('fetchAll')->willReturn([$seg]);
+        $this->configureStmtForTranslationVersions([$seg]);
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('rowCount')->willReturn(1);
 
-        $chunk = $this->createChunkWithProject(true);
+        $chunk = $this->createChunkWithProject();
         $translationEvent = $this->createStub(TranslationEvent::class);
 
-        $worker = $this->createWorker($chunk, true);
+        $worker = $this->createWorker($chunk);
         $worker->method('createTranslationEvent')->willReturn($translationEvent);
 
         $worker->process($this->createQueueElement());
@@ -199,11 +219,11 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
         $seg->status = 'DRAFT';
         $seg->segment_hash = 'abc';
 
-        $this->stmtStub->method('fetchAll')->willReturn([$seg]);
+        $this->configureStmtForTranslationVersions([$seg]);
 
-        $chunk = $this->createChunkWithProject(true);
+        $chunk = $this->createChunkWithProject();
 
-        $worker = $this->createWorker($chunk, true);
+        $worker = $this->createWorker($chunk);
         $worker->method('createTranslationEvent')->willThrowException(new Exception('Job deleted'));
 
         $this->expectException(EndQueueException::class);

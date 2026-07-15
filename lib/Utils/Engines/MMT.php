@@ -5,8 +5,10 @@ namespace Utils\Engines;
 use DomainException;
 use Exception;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
@@ -66,9 +68,9 @@ class MMT extends AbstractEngine
      * @throws Exception
      * @throws TypeError
      */
-    public function __construct($engineRecord)
+    public function __construct($engineRecord, IDatabase $database)
     {
-        parent::__construct($engineRecord);
+        parent::__construct($engineRecord, $database);
 
         if ($this->getEngineRecord()->type != EngineConstants::MT) {
             throw new Exception(
@@ -122,17 +124,17 @@ class MMT extends AbstractEngine
         }
 
         $client = $this->_getClient();
-        $metadataDao = new ProjectsMetadataDao();
+        $metadataDao = new ProjectsMetadataDao($this->database);
 
         $glossaries = null;
 
         if (!empty($_config['id_project'])) {
-            $glossaries = $metadataDao->setCacheTTL(86400)->get($_config['id_project'], 'mmt_glossaries');
+            $glossaries = $metadataDao->setCacheTTL(86400)->getValue($_config['id_project'], 'mmt_glossaries');
         }
 
         if ($glossaries !== null) {
-            $mmtGlossariesArray = json_decode($glossaries->value, true);
-            $ignore_glossary_case = $metadataDao->setCacheTTL(86400)->get(
+            $mmtGlossariesArray = json_decode($glossaries, true);
+            $ignore_glossary_case = $metadataDao->setCacheTTL(86400)->getValue(
                 $_config['id_project'],
                 'mmt_ignore_glossary_case'
             );
@@ -140,7 +142,7 @@ class MMT extends AbstractEngine
             $_config['glossaries'] = implode(",", $mmtGlossariesArray);
 
             if ($ignore_glossary_case !== null) {
-                $_config['ignore_glossary_case'] = $ignore_glossary_case->value;
+                $_config['ignore_glossary_case'] = $ignore_glossary_case;
             }
         }
 
@@ -183,7 +185,8 @@ class MMT extends AbstractEngine
             $response->matches = [$match];
 
             return $response;
-        } catch (Exception) {
+        } catch (Exception $e) {
+            $this->logger->error($e);
             return $this->GoogleTranslateFallback($_config);
         }
     }
@@ -345,9 +348,9 @@ class MMT extends AbstractEngine
     {
         $pid = $projectRow['id'];
 
-        $metadataDao = new ProjectsMetadataDao();
-        $context = $metadataDao->setCacheTTL(86400)->get($pid, "mmt_activate_context_analyzer");
-        $context_analyzer = $context->value ?? $this->getEngineRecord()->getExtraParamsAsArray()['MMT-context-analyzer'];
+        $metadataDao = new ProjectsMetadataDao($this->database);
+        $context = $metadataDao->setCacheTTL(86400)->getValue($pid, "mmt_activate_context_analyzer");
+        $context_analyzer = $context ?? $this->getEngineRecord()->getExtraParamsAsArray()['MMT-context-analyzer'];
 
         if (!empty($context_analyzer)) {
             if (empty($segments) || !isset($segments[0]['source'], $segments[0]['target'])) {
@@ -363,8 +366,8 @@ class MMT extends AbstractEngine
                 $targets[] = $target;
             }
 
-            $tmp_name = tempnam(sys_get_temp_dir(), 'mmt_cont_req-');
-            $tmpFileObject = new SplFileObject(tempnam(sys_get_temp_dir(), 'mmt_cont_req-'), 'w+');
+            $tmp_name      = tempnam(sys_get_temp_dir(), 'mmt_cont_req-');
+            $tmpFileObject = new SplFileObject($tmp_name, 'w+');
             foreach ($segments as $segment) {
                 $tmpFileObject->fwrite($segment['segment'] . "\n");
             }
@@ -382,9 +385,9 @@ class MMT extends AbstractEngine
                     return;
                 }
 
-                $jMetadataDao = new MetadataDao();
+                $jMetadataDao = new MetadataDao($this->database);
 
-                Database::obtain()->begin();
+                $this->database->begin();
                 foreach ($result as $langPair => $context) {
                     $jobId = array_search($langPair, $jobLanguages, true);
                     if ($jobId === false) {
@@ -398,10 +401,11 @@ class MMT extends AbstractEngine
                         $context
                     );
                 }
-                Database::obtain()->commit();
+                $this->database->commit();
             } catch (Exception $e) {
                 $this->logger->debug($e->getMessage());
                 $this->logger->debug($e->getTraceAsString());
+                $this->database->rollback();
             } finally {
                 unset($tmpFileObject);
                 @unlink($tmp_name);
@@ -414,18 +418,18 @@ class MMT extends AbstractEngine
             // send user keys on a project basis
             // ==============================================
             //
-            $user = (new UserDao)->getByEmail($projectRow['id_customer']);
+            $user = (new UserDao($this->database))->getByEmail($projectRow['id_customer']);
             if ($user === null) {
                 return;
             }
 
             // get jobs keys
-            $project = (new ProjectDao())->findById($pid);
+            $project = (new ProjectDao($this->database))->findById($pid);
             if ($project === null) {
                 return;
             }
 
-            foreach ($project->getJobs() as $job) {
+            foreach ((new JobDao($this->database))->getNotDeletedByProjectId((int) $project->id) as $job) {
                 $memoryKeyStructs = [];
                 $jobKeyList = TmKeyManager::getJobTmKeys($job->tm_keys, 'r', 'tm', $user->uid);
 
@@ -460,36 +464,45 @@ class MMT extends AbstractEngine
      */
     protected function getContext(SplFileObject $file, string $source, array $targets): ?array
     {
-        $fileName = $file->getRealPath();
+        $fileName   = $file->getRealPath();
+        $gzFileName = "$fileName.gz";
         $file->rewind();
 
-        $fp_out = gzopen("$fileName.gz", 'wb9');
+        $fp_out = gzopen($gzFileName, 'wb9');
 
-        if (!$fp_out) {
-            $fp_out = null;
-            @unlink($fileName);
-            @unlink("$fileName.gz");
+        if ($fp_out === false) {
+            @unlink($gzFileName);
             throw new RuntimeException('IOException. Unable to create temporary file.');
         }
 
-        while (!$file->eof()) {
-            gzwrite($fp_out, $file->fgets());
+        try {
+            while (!$file->eof()) {
+                gzwrite($fp_out, $file->fgets());
+            }
+
+            gzclose($fp_out);
+            $fp_out = false; // mark closed so the finally block does not double-close
+
+            $client = $this->_getClient();
+            $result = $client->getContextVectorFromFile($source, $targets, $gzFileName, 'gzip');
+            if ($result === null || !isset($result['vectors'])) {
+                return null;
+            }
+
+            $plainContexts = [];
+            foreach ($result['vectors'] as $target => $vector) {
+                $plainContexts["$source|$target"] = $vector;
+            }
+
+            return $plainContexts;
+        } finally {
+            // guarantee the gz handle is closed (if gzwrite threw) and the temp file we
+            // created is removed on every exit path — success, null-return, or exception
+            if (is_resource($fp_out)) {
+                gzclose($fp_out);
+            }
+            @unlink($gzFileName);
         }
-
-        gzclose($fp_out);
-
-        $client = $this->_getClient();
-        $result = $client->getContextVectorFromFile($source, $targets, "$fileName.gz", 'gzip');
-        if ($result === null || !isset($result['vectors'])) {
-            return null;
-        }
-
-        $plainContexts = [];
-        foreach ($result['vectors'] as $target => $vector) {
-            $plainContexts["$source|$target"] = $vector;
-        }
-
-        return $plainContexts;
     }
 
     /**
@@ -505,8 +518,8 @@ class MMT extends AbstractEngine
             $this->result = $client->me();
 
             return $this->result;
-        } catch (Exception) {
-            throw new Exception("MMT license not valid");
+        } catch (Exception $e) {
+            throw new Exception("MMT license not valid", $e->getCode(), $e);
         }
     }
 
@@ -743,7 +756,7 @@ class MMT extends AbstractEngine
 
         // Common metadata loading
         if (!empty($id_job)) {
-            $metadataDao = new MetadataDao();
+            $metadataDao = new MetadataDao($this->database);
             $contextRs = $metadataDao->setCacheTTL($cacheTtl)->getByIdJob($id_job, 'mt_context');
 
             $mt_context = array_pop($contextRs);

@@ -38,7 +38,7 @@ class TagPositionTest extends AbstractTest
     {
         parent::setUp();
 
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $this->featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
         //$featureSet->loadFromString( "project_completion,translation_versions,qa_check_glossary,microsoft" );
 

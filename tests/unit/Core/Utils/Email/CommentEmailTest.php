@@ -7,8 +7,11 @@ use Model\Comments\CommentStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use Model\Users\UserStruct;
+use Model\DataAccess\IDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionMethod;
+use ReflectionParameter;
+use Utils\Email\BaseCommentEmail;
 use Utils\Email\CommentEmail;
 use Utils\Email\CommentMentionEmail;
 use Utils\Email\CommentResolveEmail;
@@ -25,6 +28,28 @@ class CommentEmailTest extends AbstractTest
     {
         $this->resetDatabaseMock();
         parent::tearDown();
+    }
+
+    private function dbStub(): IDatabase
+    {
+        [$dbStub] = $this->createDatabaseMock();
+
+        return $dbStub;
+    }
+
+    #[Test]
+    public function constructorRequiresInjectedDatabase(): void
+    {
+        $params = (new \ReflectionMethod(BaseCommentEmail::class, '__construct'))->getParameters();
+        $dbParam = array_values(array_filter(
+            $params,
+            static fn(ReflectionParameter $p): bool => $p->getName() === 'database'
+        ))[0] ?? null;
+
+        $this->assertNotNull($dbParam, 'BaseCommentEmail must accept an injected $database');
+        $this->assertSame(IDatabase::class, (string)$dbParam->getType(), '$database must be typed IDatabase');
+        $this->assertFalse($dbParam->isOptional(), '$database must be mandatory');
+        $this->assertFalse($dbParam->allowsNull(), '$database must be non-nullable');
     }
 
     private function makeUser(): UserStruct
@@ -73,7 +98,7 @@ class CommentEmailTest extends AbstractTest
     public function commentEmailSendCallsDoSend(): void
     {
         $email = $this->getMockBuilder(CommentEmail::class)
-            ->setConstructorArgs([$this->makeUser(), $this->makeComment(), 'https://example.com/translate', $this->makeProject(), $this->makeJob()])
+            ->setConstructorArgs([$this->makeUser(), $this->makeComment(), 'https://example.com/translate', $this->makeProject(), $this->makeJob(), $this->dbStub()])
             ->onlyMethods(['doSend'])
             ->getMock();
 
@@ -88,7 +113,7 @@ class CommentEmailTest extends AbstractTest
     public function commentMentionEmailSendCallsDoSend(): void
     {
         $email = $this->getMockBuilder(CommentMentionEmail::class)
-            ->setConstructorArgs([$this->makeUser(), $this->makeComment(), 'https://example.com/translate', $this->makeProject(), $this->makeJob()])
+            ->setConstructorArgs([$this->makeUser(), $this->makeComment(), 'https://example.com/translate', $this->makeProject(), $this->makeJob(), $this->dbStub()])
             ->onlyMethods(['doSend'])
             ->getMock();
 
@@ -103,7 +128,7 @@ class CommentEmailTest extends AbstractTest
     public function commentResolveEmailSendCallsDoSend(): void
     {
         $email = $this->getMockBuilder(CommentResolveEmail::class)
-            ->setConstructorArgs([$this->makeUser(), $this->makeComment(), 'https://example.com/translate', $this->makeProject(), $this->makeJob()])
+            ->setConstructorArgs([$this->makeUser(), $this->makeComment(), 'https://example.com/translate', $this->makeProject(), $this->makeJob(), $this->dbStub()])
             ->onlyMethods(['doSend'])
             ->getMock();
 
@@ -117,7 +142,7 @@ class CommentEmailTest extends AbstractTest
     #[Test]
     public function commentEmailGetTemplateVariablesReturnsExpectedKeys(): void
     {
-        $email = new CommentEmail($this->makeUser(), $this->makeComment(), 'https://example.com/translate', $this->makeProject(), $this->makeJob());
+        $email = new CommentEmail($this->makeUser(), $this->makeComment(), 'https://example.com/translate', $this->makeProject(), $this->makeJob(), $this->dbStub());
         $method = new ReflectionMethod(CommentEmail::class, '_getTemplateVariables');
         $vars = $method->invoke($email);
 
@@ -137,7 +162,7 @@ class CommentEmailTest extends AbstractTest
     #[Test]
     public function commentMentionEmailSetsCorrectAction(): void
     {
-        $email = new CommentMentionEmail($this->makeUser(), $this->makeComment(), 'https://example.com/translate', $this->makeProject(), $this->makeJob());
+        $email = new CommentMentionEmail($this->makeUser(), $this->makeComment(), 'https://example.com/translate', $this->makeProject(), $this->makeJob(), $this->dbStub());
         $method = new ReflectionMethod(CommentMentionEmail::class, '_getTemplateVariables');
         $vars = $method->invoke($email);
 
@@ -148,7 +173,7 @@ class CommentEmailTest extends AbstractTest
     #[Test]
     public function commentResolveEmailSetsCorrectAction(): void
     {
-        $email = new CommentResolveEmail($this->makeUser(), $this->makeComment(), 'https://example.com/translate', $this->makeProject(), $this->makeJob());
+        $email = new CommentResolveEmail($this->makeUser(), $this->makeComment(), 'https://example.com/translate', $this->makeProject(), $this->makeJob(), $this->dbStub());
         $method = new ReflectionMethod(CommentResolveEmail::class, '_getTemplateVariables');
         $vars = $method->invoke($email);
 
@@ -159,7 +184,7 @@ class CommentEmailTest extends AbstractTest
     #[Test]
     public function urlIncludesCommentSuffix(): void
     {
-        $email = new CommentEmail($this->makeUser(), $this->makeComment(), 'https://example.com/translate', $this->makeProject(), $this->makeJob());
+        $email = new CommentEmail($this->makeUser(), $this->makeComment(), 'https://example.com/translate', $this->makeProject(), $this->makeJob(), $this->dbStub());
         $method = new ReflectionMethod(CommentEmail::class, '_getTemplateVariables');
         $vars = $method->invoke($email);
 

@@ -2,12 +2,14 @@
 
 
 use Controller\Views\CustomPageView;
+use Klein\App;
 use Matecat\Locales\LanguageDomains;
 use Matecat\Locales\Languages;
 use Model\FeaturesBase\FeatureSet;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
+/** @phpstan-ignore requireOnce.fileNotFound */
 require_once '../../lib/Bootstrap.php';
 try {
     Bootstrap::start();
@@ -20,13 +22,19 @@ foreach (AppConfig::$SUPPORTED_FILE_TYPES as $key => $value) {
     $count += count($value);
 }
 
-$nr_supoported_files = $count;
+$nr_supported_files = $count;
 
 $max_file_size_in_MB = AppConfig::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
 
 $csp_nonce = Utils::uuid4();
-$csp = file_get_contents(AppConfig::$ROOT . "/" . AppConfig::$TRACKING_CODES_VIEW_PATH . "/CSP-HeaderMeta.html");
+$csp = file_get_contents(AppConfig::$ROOT . "/" . AppConfig::$TRACKING_CODES_VIEW_PATH . "/CSP-HeaderMeta.html") ?: '';
 $csp = str_replace('${x_nonce_unique_id}', $csp_nonce, $csp);
+
+$parsedHost = parse_url(AppConfig::$HTTPHOST);
+$x_self_ajax_location_hosts = AppConfig::$ENABLE_MULTI_DOMAIN_API && is_array($parsedHost) && isset($parsedHost['host'])
+        ? " *.ajax." . $parsedHost['host']
+        : '';
+$csp = str_replace('${x_self_ajax_location_hosts}', $x_self_ajax_location_hosts, $csp) ?: '';
 
 ?>
 <!DOCTYPE html>
@@ -42,14 +50,18 @@ $csp = str_replace('${x_nonce_unique_id}', $csp_nonce, $csp);
     <script nonce="<?= $csp_nonce ?>">
       /*<![CDATA[*/
       config = {};
-      config.swagger_host = '<?php echo $_SERVER['HTTP_HOST'] ?>';
+      config.swagger_host = '<?= $_SERVER['HTTP_HOST'] ?>';
       /*]]>*/
     </script>
 
     <script src='/public/api/dist/lib/jquery-3.7.1.min.js' type='text/javascript'></script>
     <script src="/public/api/dist/lib/swagger-ui-bundle.js"></script>
     <script src="/public/api/dist/lib/swagger-ui-standalone-preset.js"></script>
-    <style>
+    <style nonce="<?= $csp_nonce ?>">
+        body {
+            width: auto;
+            overflow-x: hidden;
+        }
         .markdown > h2 {
             font-size: 30px;
         }
@@ -69,12 +81,17 @@ $csp = str_replace('${x_nonce_unique_id}', $csp_nonce, $csp);
             display: -webkit-box;
             display: -ms-flexbox;
             display: flex;
+            flex-wrap: wrap;
             -webkit-box-align: center;
             -ms-flex-align: center;
             align-items: center;
             padding: 5px;
             cursor: pointer;
             border-color: #61affe;
+        }
+
+        .swagger-ui .markdown code {
+            margin-top: 9px;
         }
         table.parameters {
             table-layout: unset;
@@ -114,10 +131,10 @@ $csp = str_replace('${x_nonce_unique_id}', $csp_nonce, $csp);
 
     <?php
 
-    $reflect = new ReflectionClass(CustomPageView::class);
-    $instance = $reflect->newInstanceArgs();
-
-    $featureSet = new FeatureSet();
+    $instance = new CustomPageView(Bootstrap::getDatabase());
+    // The web request already ran Bootstrap::start(); read the handle from the
+    // composition root instead of re-resolving the singleton here.
+    $featureSet = new FeatureSet(Bootstrap::getDatabase());
 
     if ($instance->getUser()->email !== null) {
         $featureSet->loadFromUserEmail($instance->getUser()->email);
