@@ -633,9 +633,10 @@ const SegmentActions = {
 
     if (isTranslationDisabled) {
       ModalsActions.showModalComponent(
-        MODAL_KEY.ALERT,
+        MODAL_KEY.CONFIRM_MESSAGE,
         {
-          text: "This segment has been disabled by the project owner, so it cannot be translated.",
+          text: 'This segment was disabled by the project owner and cannot be edited.',
+          successText: 'Got it',
         },
         'Segment disabled',
       )
