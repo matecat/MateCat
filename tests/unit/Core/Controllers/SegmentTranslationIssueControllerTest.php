@@ -199,6 +199,10 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
         $this->requestStub->method('param')->willReturnCallback(
             static fn(string $key) => $params[$key] ?? null
         );
+        // mirror prod: KleinController merges request params into $this->params, which the
+        // validator ctor reads via getParams() (the stub bypasses afterConstruct's merge)
+        (new ReflectionClass(\Controller\Abstracts\KleinController::class))
+            ->getProperty('params')->setValue($this->controller, $params);
     }
 
     // ─── index() ─────────────────────────────────────────────────
