@@ -391,10 +391,10 @@ describe('CatTool', () => {
       expect(screen.queryByTestId('cattool-footer')).not.toBeInTheDocument()
     })
 
-    test('does not render CattoolFooter when segments are loading', async () => {
+    test('renders CattoolFooter when segments are loading', async () => {
       useSegmentsLoader.mockReturnValue({isLoading: true, result: null})
       await act(async () => renderCatTool())
-      expect(screen.queryByTestId('cattool-footer')).not.toBeInTheDocument()
+      expect(screen.getByTestId('cattool-footer')).toBeInTheDocument()
     })
   })
 
