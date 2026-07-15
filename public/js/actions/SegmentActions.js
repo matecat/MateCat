@@ -269,9 +269,11 @@ const SegmentActions = {
     const mandatoryIssues =
       CatToolStore.getJobMetadata().project.mandatory_issues
 
+    const currentRevisionKey = `r${config.revisionNumber}`
+
     const isMandatoryRevisionIssues = Array.isArray(mandatoryIssues)
-      ? mandatoryIssues.some((value) =>
-          value.match(new RegExp(`r${config.revisionNumber}`)),
+      ? mandatoryIssues.some(
+          (value) => typeof value === 'string' && value === currentRevisionKey,
         )
       : true
 

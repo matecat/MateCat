@@ -163,7 +163,6 @@ class ReviewExtendedPanel extends React.Component {
                 Note: the job owner and workspace members can disable this
                 requirement from settings.
               </i>
-              .
             </p>
           </div>
         ) : null}
