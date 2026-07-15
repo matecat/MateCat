@@ -13,7 +13,7 @@ require_once realpath(dirname(__FILE__) . '/../../../') . '/lib/Bootstrap.php';
 /** @noinspection PhpUnhandledExceptionInspection */
 Bootstrap::start();
 
-require_once('UploadHandler.php');
+require_once(realpath('./UploadHandler.php'));
 
 $upload_handler = new UploadHandler(Bootstrap::getDatabase(), $_FILES);
 
@@ -23,12 +23,16 @@ header('Content-Disposition: inline; filename="files.json"');
 header('X-Content-Type-Options: nosniff');
 // Reflect ONLY this instance's own app origin (credentialed), never a wildcard:
 // `*` cannot carry credentials and trusts every origin (CWE-942).
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $cors = new CorsHandler(AppConfig::$HTTPHOST, AppConfig::$ENABLE_MULTI_DOMAIN_API);
-foreach ($cors->responseHeaders($_SERVER['HTTP_ORIGIN'] ?? '') as $corsName => $corsValue) {
-    header($corsName . ': ' . $corsValue);
+if ($cors->isAllowed($origin)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Access-Control-Allow-Credentials: true');
+    header('Vary: Origin');
+    // Upload-specific verbs/headers (HEAD + X-File-*):
+    header('Access-Control-Allow-Methods: OPTIONS, HEAD, GET, POST, PUT, DELETE');
+    header('Access-Control-Allow-Headers: X-File-Name, X-File-Type, X-File-Size');
 }
-header('Access-Control-Allow-Methods: OPTIONS, HEAD, GET, POST, PUT, DELETE');
-header('Access-Control-Allow-Headers: X-File-Name, X-File-Type, X-File-Size');
 
 try {
     switch ($_SERVER['REQUEST_METHOD'] ?? '') {
