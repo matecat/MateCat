@@ -291,23 +291,27 @@ const AssignToTranslator = ({job, project, closeOutsource}) => {
             <div className="fields">
               <div className="field translator-email">
                 <label>Translator email</label>
-                <input
-                  type="email"
-                  placeholder="translator@email.com"
-                  defaultValue={translatorEmail}
-                  ref={emailRef}
-                  onKeyUp={checkSendToTranslatorButton}
-                />
+                <div>
+                  <input
+                    type="email"
+                    placeholder="translator@email.com"
+                    defaultValue={translatorEmail}
+                    ref={emailRef}
+                    onKeyUp={checkSendToTranslatorButton}
+                  />
+                </div>
               </div>
               <div className="field translator-delivery ">
                 <label>Delivery date</label>
-                <DatePicker
-                  selected={deliveryDate}
-                  onChange={(date) => {
-                    setDeliveryDate(date)
-                    checkSendToTranslatorButton()
-                  }}
-                />
+                <div>
+                  <DatePicker
+                    selected={deliveryDate}
+                    onChange={(date) => {
+                      setDeliveryDate(date)
+                      checkSendToTranslatorButton()
+                    }}
+                  />
+                </div>
               </div>
               <div className="field translator-time">
                 <Select
