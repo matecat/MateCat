@@ -374,24 +374,21 @@ class TranslationVersionDao extends AbstractDao
     }
 
     /**
-     * Atomically insert or update a version record, handling concurrent duplicate key writes.
+     * Inserts a new version record into the append-only version history table.
      *
-     * Uses INSERT … ON DUPLICATE KEY UPDATE so that two concurrent transactions saving the
-     * same version number do not race: the last writer wins and no exception is thrown.
+     * `segment_translation_versions` has no unique constraint on
+     * (id_job, id_segment, version_number) — only a surrogate auto-increment `id` — so this is
+     * a plain insert, not a deduplicating upsert. Concurrent saves of the same version number
+     * will produce separate rows; this method does not resolve that race.
      *
      * @throws PDOException
      */
-    public function upsertVersion(TranslationVersionStruct $new_version): void
+    public function insertVersion(TranslationVersionStruct $new_version): void
     {
         $sql = "INSERT INTO segment_translation_versions
                     (id_job, id_segment, translation, version_number, time_to_edit, old_status, new_status)
                 VALUES
-                    (:id_job, :id_segment, :translation, :version_number, :time_to_edit, :old_status, :new_status)
-                ON DUPLICATE KEY UPDATE
-                    translation  = VALUES(translation),
-                    time_to_edit = VALUES(time_to_edit),
-                    old_status   = VALUES(old_status),
-                    new_status   = VALUES(new_status)";
+                    (:id_job, :id_segment, :translation, :version_number, :time_to_edit, :old_status, :new_status)";
 
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);

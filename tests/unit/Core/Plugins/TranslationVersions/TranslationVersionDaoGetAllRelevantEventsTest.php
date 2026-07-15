@@ -58,33 +58,35 @@ class TranslationVersionDaoGetAllRelevantEventsTest extends AbstractTest
 
     private function insertVersion(int $versionNumber, string $translation): void
     {
-        $this->database->getConnection()->exec(
+        $conn = $this->database->getConnection();
+        $conn->exec(
             "INSERT INTO segment_translation_versions
                 (id_job, id_segment, translation, version_number)
              VALUES
-                (" . self::JOB_ID . ", " . self::SEGMENT_ID . ", '" . addslashes($translation) . "', $versionNumber)"
+                (" . self::JOB_ID . ", " . self::SEGMENT_ID . ", " . $conn->quote($translation) . ", $versionNumber)"
         );
     }
 
     private function insertCurrentTranslation(int $versionNumber, string $translation): void
     {
-        $this->database->getConnection()->exec(
+        $conn = $this->database->getConnection();
+        $conn->exec(
             "INSERT INTO segment_translations
                 (id_segment, id_job, segment_hash, status, translation, version_number)
              VALUES
-                (" . self::SEGMENT_ID . ", " . self::JOB_ID . ", 'hash_test', 'APPROVED', '" . addslashes($translation) . "', $versionNumber)"
+                (" . self::SEGMENT_ID . ", " . self::JOB_ID . ", 'hash_test', 'APPROVED', " . $conn->quote($translation) . ", $versionNumber)"
         );
     }
 
     /**
-     * Reproduces the production bug: events at v2 TRANSLATED and v3 APPROVED exist but v2 is
-     * missing from segment_translation_versions. With RIGHT JOIN + COALESCE, the source_page=1
-     * row must still be returned (with null translation) rather than dropped entirely.
+     * Reproduces the production bug: events at v2 and v3 exist but v2 is missing from
+     * segment_translation_versions. With RIGHT JOIN + COALESCE, the source_page=1 row must
+     * still be returned (with null translation) rather than dropped entirely.
      */
     #[Test]
     public function getAllRelevantEventsReturnsRowWhenVersionRecordMissing(): void
     {
-        // Events: v2 TRANSLATED (source_page=1), v3 APPROVED (source_page=2, final_revision=1)
+        // Events: v2 (source_page=1), v3 (source_page=2, final_revision=1)
         $this->insertEvent(2, 1, 0);
         $this->insertEvent(3, 2, 1);
 

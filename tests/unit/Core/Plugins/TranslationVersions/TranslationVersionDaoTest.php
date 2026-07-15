@@ -82,6 +82,37 @@ class TranslationVersionDaoTest extends AbstractTest
     }
 
     #[Test]
+    public function insertVersionInsertsRecord(): void
+    {
+        $dao = new TranslationVersionDao();
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'Inserted text'));
+
+        $rows = $this->database->getConnection()
+            ->query("SELECT * FROM segment_translation_versions WHERE id_job = " . self::JOB_ID . " AND id_segment = " . self::SEGMENT_ID_1)
+            ->fetchAll(\PDO::FETCH_ASSOC);
+
+        $this->assertCount(1, $rows);
+        $this->assertEquals(self::SEGMENT_ID_1, (int)$rows[0]['id_segment']);
+        $this->assertEquals(1, (int)$rows[0]['version_number']);
+        $this->assertEquals('Inserted text', $rows[0]['translation']);
+        $this->assertEquals(1500, (int)$rows[0]['time_to_edit']);
+    }
+
+    #[Test]
+    public function insertVersionDoesNotDeduplicateOnSameKey(): void
+    {
+        $dao = new TranslationVersionDao();
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'First write'));
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'Second write'));
+
+        $rows = $this->database->getConnection()
+            ->query("SELECT * FROM segment_translation_versions WHERE id_job = " . self::JOB_ID . " AND id_segment = " . self::SEGMENT_ID_1 . " AND version_number = 1")
+            ->fetchAll(\PDO::FETCH_ASSOC);
+
+        $this->assertCount(2, $rows, 'segment_translation_versions has no unique key on (id_job, id_segment, version_number), so inserting the same version twice must produce two rows, not an update');
+    }
+
+    #[Test]
     public function getVersionNumberForTranslationReturnsStruct(): void
     {
         $dao = new TranslationVersionDao();

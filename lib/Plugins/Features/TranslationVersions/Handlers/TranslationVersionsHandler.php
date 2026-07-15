@@ -152,10 +152,11 @@ class TranslationVersionsHandler implements VersionHandlerInterface
         $new_version->old_status = TranslationStatus::$DB_STATUSES_MAP[$old_translation->status];
         $new_version->new_status = TranslationStatus::$DB_STATUSES_MAP[$new_translation->status];
 
-        // Atomic upsert: handles both new inserts and the case where version 0 was already
-        // written by ReviewExtended, and prevents the race condition where two concurrent
-        // requests both try to save the same version number.
-        $this->dao->upsertVersion($new_version);
+        // Always insert unconditionally — handles both new versions and the case where
+        // version 0 was already written by ReviewExtended — instead of the previous
+        // check-then-update flow, which could return false (suppressing the increment) when
+        // a concurrent write had already persisted the same version_number.
+        $this->dao->insertVersion($new_version);
 
         return true;
     }

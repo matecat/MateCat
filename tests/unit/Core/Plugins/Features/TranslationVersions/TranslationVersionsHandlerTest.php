@@ -209,14 +209,14 @@ class TranslationVersionsHandlerTest extends AbstractTest
     /**
      * Regression: before the fix, a concurrent write that caused updateVersion() to return 0
      * ("no rows changed" — identical translation already saved by a racing request) would
-     * suppress the version increment. upsertVersion() always succeeds and the handler always
+     * suppress the version increment. insertVersion() always succeeds and the handler always
      * returns true when the translation text changed.
      */
     #[Test]
     public function saveVersionAndIncrementReturnsTrueEvenWhenConcurrentWriteOccurred(): void
     {
         $dao = $this->createMock(TranslationVersionDao::class);
-        $dao->expects($this->once())->method('upsertVersion');
+        $dao->expects($this->once())->method('insertVersion');
 
         $handler = $this->makeHandler($dao);
 

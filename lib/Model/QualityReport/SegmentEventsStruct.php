@@ -14,7 +14,7 @@ use Model\DataAccess\IDaoStruct;
 
 /**
  * @property int $id_segment
- * @property string $translation
+ * @property string|null $translation
  * @property int $version_number
  * @property int $source_page
  */
