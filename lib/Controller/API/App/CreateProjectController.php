@@ -878,7 +878,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         $projectStructure->character_counter_mode = (!empty($data['character_counter_mode'])) ? $data['character_counter_mode'] : null;
         $projectStructure->character_counter_count_tags = (!empty($data['character_counter_count_tags'])) ? $data['character_counter_count_tags'] : null;
         $projectStructure->subfiltering_handlers = $data[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value];
-        $projectStructure->mandatory_issues = $data['mandatory_issues'];
+        $projectStructure->mandatory_issues = $data['mandatory_issues'] ?? null;
 
         // GDrive session
         if ($gdriveSession !== null) {
