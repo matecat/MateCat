@@ -1184,28 +1184,6 @@ body section:not(.editor).ice-locked {
   background: colors.$grey150 !important;
 }
 
-.ice-locked-icon > button {
-  padding: 4px 4px 0;
-  font-size: 15px;
-  background-color: transparent;
-  border: unset;
-  border-radius: 2px;
-  cursor: pointer;
-  color: colors.$grey400;
-  position: relative;
-  top: 2px;
-  outline: none;
-}
-
-section:hover .ice-locked-icon > button {
-  color: colors.$grey600;
-}
-
-.ice-locked-icon > button:hover {
-  background-color: colors.$grey600;
-  color: white !important;
-}
-
 body.archived section {
   z-index: 9998;
   background: transparent;
@@ -1893,42 +1871,6 @@ del.diff {
 
 .editToolbar.visible {
   visibility: visible;
-}
-
-.split {
-  border: unset;
-  cursor: pointer !important;
-  font-size: 17px;
-  background-color: colors.$grey400;
-  border-radius: 2px;
-  color: colors.$white;
-  margin-bottom: 0px;
-  top: 2px;
-  padding: 2px;
-  width: 25px;
-  height: 25px;
-  outline: none;
-  margin-top: 10px;
-
-  &:hover {
-    background-color: colors.$grey600 !important;
-  }
-}
-
-.split i {
-  padding: 0;
-  margin: 0;
-  width: 25px;
-  height: 25px;
-}
-
-.sid .actions.disabled .split {
-  cursor: no-drop !important;
-}
-
-.editor.split-action .actions .split {
-  background: colors.$blue500;
-  color: colors.$white !important;
 }
 
 section .toolbar {
