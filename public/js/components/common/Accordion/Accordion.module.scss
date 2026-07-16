@@ -29,10 +29,9 @@
   background-color: var(--accordion-title-bg);
   border-radius: var(--accordion-title-br);
   border-top: var(--accordion-title-border-top);
-  font-size: var(--accordion-title-font-size, 12px);
+  font-size: var(--accordion-title-font-size, 16px);
   font-weight: var(--accordion-title-font-weight, normal);
   cursor: pointer;
-
   > svg {
     transition-property: transform;
     transition-duration: 0.3s;
@@ -63,4 +62,7 @@
   border-radius: var(--accordion-content-br);
   background-color: var(--accordion-content-bg);
   overflow: var(--accordion-content-overflow);
+}
+.insideContent {
+  padding: 12px 0;
 }

@@ -3,8 +3,12 @@
 .instructions-modal {
   min-height: 230px;
   max-width: 900px;
-  h2 {
-    padding-top: 16px;
+  .title {
+    display: flex;
+    gap: 8px
+  }
+  h4 {
+    margin: 20px 0;
   }
   .instructions-container {
     background-color: colors.$white;
