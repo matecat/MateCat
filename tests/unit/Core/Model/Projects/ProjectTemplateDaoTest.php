@@ -25,8 +25,9 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->dao = new ProjectTemplateDao(obtainTestDatabase());
 
         $conn = obtainTestDatabase()->getConnection();
+        $conn->exec("DROP TABLE IF EXISTS project_templates");
         $conn->exec(
-            "CREATE TABLE IF NOT EXISTS project_templates (
+            "CREATE TABLE project_templates (
                 id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
                 name VARCHAR(255) NOT NULL,
                 is_default TINYINT(1) NOT NULL DEFAULT 0,
@@ -55,6 +56,7 @@ class ProjectTemplateDaoTest extends AbstractTest
                 tm_prioritization TINYINT(1) NOT NULL DEFAULT 0,
                 dialect_strict TINYINT(1) NOT NULL DEFAULT 0,
                 public_tm_penalty INT(11) NOT NULL DEFAULT 0,
+                mandatory_issues TEXT DEFAULT NULL,
                 PRIMARY KEY (id),
                 UNIQUE KEY uid_name_idx (uid, name),
                 KEY uid_idx (uid)
@@ -117,6 +119,7 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->assertSame('general', $default->subject);
         $this->assertSame(['fr-FR'], $default->getTargetLanguage());
         $this->assertSame(1, $default->getMt()->id);
+        $this->assertSame(['r1', 'r2'], $default->getMandatoryIssues());
     }
 
     #[Test]
@@ -226,9 +229,12 @@ class ProjectTemplateDaoTest extends AbstractTest
         $created = $this->dao->createFromJSON($createPayload, $user);
         $this->assertGreaterThan(0, $created->id);
 
+        $this->assertSame(['r1'], $created->getMandatoryIssues());
+
         $editPayload = $this->makePayload('edited-json-template');
         $editPayload->pretranslate_100 = true;
         $editPayload->target_language = ['fr-FR', 'it-IT'];
+        $editPayload->mandatory_issues = ['r1', 'r2'];
 
         $this->dao->editFromJSON($created, $editPayload, $created->id, $user);
 
@@ -237,6 +243,7 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->assertStringStartsWith('edited-json-template-', $reloaded->name);
         $this->assertTrue($reloaded->pretranslate_100);
         $this->assertSame(['fr-FR', 'it-IT'], $reloaded->getTargetLanguage());
+        $this->assertSame(['r1', 'r2'], $reloaded->getMandatoryIssues());
     }
 
     #[Test]
@@ -323,6 +330,7 @@ class ProjectTemplateDaoTest extends AbstractTest
             'target_language' => ['fr-FR'],
             'mt_quality_value_in_editor' => 85,
             'icu_enabled' => false,
+            'mandatory_issues' => ['r1'],
         ];
     }
 
@@ -354,7 +362,35 @@ class ProjectTemplateDaoTest extends AbstractTest
         $struct->character_counter_mode = 'google_ads';
         $struct->mt_quality_value_in_editor = 85;
         $struct->icu_enabled = false;
+        $struct->mandatory_issues = json_encode(['r1']);
 
         return $struct;
+    }
+
+    #[Test]
+    public function mandatoryIssuesRoundTripAllVariants(): void
+    {
+        // null → empty array
+        $empty = $this->makeStruct('mandatory-empty');
+        $empty->mandatory_issues = null;
+        $saved = $this->dao->save($empty);
+        $reloaded = $this->dao->fetchById($saved->id, ProjectTemplateStruct::class);
+        $this->assertNotNull($reloaded);
+        $this->assertSame(null, $reloaded->getMandatoryIssues());
+
+        // ['r1'] persists
+        $r1 = $this->makeStruct('mandatory-r1');
+        $r1->mandatory_issues = json_encode(['r1']);
+        $saved = $this->dao->save($r1);
+        $reloaded = $this->dao->fetchById($saved->id, ProjectTemplateStruct::class);
+        $this->assertNotNull($reloaded);
+        $this->assertSame(['r1'], $reloaded->getMandatoryIssues());
+
+        // update to ['r1', 'r2']
+        $saved->mandatory_issues = json_encode(['r1', 'r2']);
+        $this->dao->update($saved);
+        $reloaded = $this->dao->fetchById($saved->id, ProjectTemplateStruct::class);
+        $this->assertNotNull($reloaded);
+        $this->assertSame(['r1', 'r2'], $reloaded->getMandatoryIssues());
     }
 }

@@ -248,7 +248,7 @@ class ProjectStructureTest extends AbstractTest
 
         // 80 public properties declared on ProjectStructure.
         // The protected $cached_results from AbstractDaoObjectStruct is excluded.
-        $this->assertSame(81, count($ps));
+        $this->assertSame(82, count($ps));
     }
 
     // ── Nested array properties ──────────────────────────────────

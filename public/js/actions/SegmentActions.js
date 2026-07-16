@@ -66,20 +66,22 @@ import {TAB} from '../constants/SegmentTabConstants'
 // Async-loaded to break circular dependency for static analysis.
 let _SegmentsFilterUtil
 let _SetTranslationUtil
-import(
-  '../components/header/cattol/segment_filter/segment_filter'
-).then((m) => {
-  _SegmentsFilterUtil = m.default
-})
+import('../components/header/cattol/segment_filter/segment_filter').then(
+  (m) => {
+    _SegmentsFilterUtil = m.default
+  },
+)
 import('../setTranslationUtil').then((m) => {
   _SetTranslationUtil = m
 })
 const getSegmentsFilterUtil = () => {
-  if (!_SegmentsFilterUtil) throw new Error('[SegmentActions] SegmentsFilterUtil not loaded yet')
+  if (!_SegmentsFilterUtil)
+    throw new Error('[SegmentActions] SegmentsFilterUtil not loaded yet')
   return _SegmentsFilterUtil
 }
 const getSetTranslationUtil = () => {
-  if (!_SetTranslationUtil) throw new Error('[SegmentActions] SetTranslationUtil not loaded yet')
+  if (!_SetTranslationUtil)
+    throw new Error('[SegmentActions] SetTranslationUtil not loaded yet')
   return _SetTranslationUtil
 }
 
@@ -264,12 +266,24 @@ const SegmentActions = {
        If is an ICE we allow to change the translation because is not possible to add an issue
      */
 
+    const mandatoryIssues =
+      CatToolStore.getJobMetadata().project.mandatory_issues
+
+    const currentRevisionKey = `r${config.revisionNumber}`
+
+    const isMandatoryRevisionIssues = Array.isArray(mandatoryIssues)
+      ? mandatoryIssues.some(
+          (value) => typeof value === 'string' && value === currentRevisionKey,
+        )
+      : true
+
     if (
       config.isReview &&
       !segment.splitted &&
       segment.modified &&
       issues.length === 0 &&
-      !segment.ice_locked
+      !segment.ice_locked &&
+      isMandatoryRevisionIssues
     ) {
       SegmentActions.openIssuesPanel({sid: segment.sid}, true)
       setTimeout(() => SegmentActions.showIssuesMessage(segment.sid, 1))

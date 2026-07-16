@@ -14,6 +14,7 @@ enum JobsMetadataMarshaller: string
     case CHARACTER_COUNTER_COUNT_TAGS = 'character_counter_count_tags';
     case CHARACTER_COUNTER_MODE       = 'character_counter_mode';
     case DIALECT_STRICT               = 'dialect_strict';
+    case MANDATORY_ISSUES             = 'mandatory_issues';
     case PUBLIC_TM_PENALTY            = 'public_tm_penalty';
     case SUBFILTERING_HANDLERS        = 'subfiltering_handlers';
     case TM_PRIORITIZATION            = 'tm_prioritization';
