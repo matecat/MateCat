@@ -26,7 +26,7 @@ module.exports = {
     './public/js/sse/': { lines: 29 },
     './public/js/components/xliffToTarget/': { lines: 72 },
     './public/js/setTranslationUtil.js': { lines: 95 },
-    './public/js/components/notificationsComponent/': { lines: 0 },
+    './public/js/components/notificationsComponent/': { lines: 80 },
     './public/js/components/onBoarding/': { lines: 5 },
     './public/js/components/createProject/': { lines: 50 },
     './public/js/components/languageSelector/': { lines: 0 },
