@@ -126,7 +126,7 @@ class JobCreationService
         $json = (string)json_encode($tmKeys);
 
         // Replace {{pid}} with project ID for new keys created with an empty name
-        return str_replace('{{pid}}', (string)$projectStructure->id_project, $json);
+        return str_replace(['{{pid}}', 'pid'], (string)$projectStructure->id_project, $json);
     }
 
     /**
