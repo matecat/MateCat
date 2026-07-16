@@ -9,7 +9,7 @@
 
 namespace Utils\AsyncTasks\Workers\Traits;
 
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use PDO;
 use PDOException;
 use RuntimeException;
@@ -19,15 +19,22 @@ trait ProjectWordCount
 {
 
     /**
+     * The per-process DB handle, supplied by the host worker/daemon.
+     */
+    abstract protected function db(): IDatabase;
+
+    /**
      * This function is heavy, use, but only if it is necessary
      *
      * (Used in TMAnalysisWorker and FastAnalysis)
      *
-     * @param $pid
+     * @param int $pid
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
+     *
+     * @throws RuntimeException
      */
-    protected function getProjectSegmentsTranslationSummary($pid): array
+    protected function getProjectSegmentsTranslationSummary(int $pid): array
     {
         //TOTAL and eq_word should be equals, BUT
         //tm Analysis can fail on some rows because of external service nature, so use TOTAL field instead of eq_word
@@ -41,7 +48,7 @@ trait ProjectWordCount
                     SUM(standard_word_count) AS st_wc,
                     SUM( IF( COALESCE( eq_word_count, 0 ) = 0, raw_word_count, eq_word_count) ) as TOTAL,
                     COUNT( s.id ) AS project_segments,
-                    0 AS num_analyzed
+                    SUM(IF(st.tm_analysis_status IN ('DONE', 'SKIPPED'), 1, 0)) AS num_analyzed
                 FROM segment_translations st
                      JOIN segments s ON s.id = id_segment
                      INNER JOIN jobs j ON j.id=st.id_job
@@ -51,7 +58,7 @@ trait ProjectWordCount
         ";
 
         try {
-            $db = Database::obtain();
+            $db = $this->db();
             //Needed to address the query to the master database if exists
             $stmt = $db->getConnection()->prepare($query);
             $stmt->setFetchMode(PDO::FETCH_ASSOC);

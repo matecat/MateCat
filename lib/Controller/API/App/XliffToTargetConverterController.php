@@ -10,23 +10,39 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
+use JsonException;
+use Klein\Exceptions\ResponseAlreadySentException;
+use LogicException;
 use Model\Conversion\Filters;
 use Model\Conversion\MimeTypes\MimeTypes;
+use Psr\Log\InvalidArgumentException;
+use RuntimeException;
 
 set_time_limit(180);
 
 class XliffToTargetConverterController extends KleinController
 {
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
+     * @throws LogicException
+     * @throws JsonException
+     * @throws ResponseAlreadySentException
+     */
     public function convert(): void
     {
-        $file_path = $_FILES['xliff']['tmp_name'] . '.xlf';
-        move_uploaded_file($_FILES['xliff']['tmp_name'], $file_path);
+        $file_path = $this->prepareUploadedXliff();
 
-        $filters = (new Filters());
+        $content = @file_get_contents($file_path);
+        if ($content === false) {
+            throw new RuntimeException('Unable to read uploaded xliff file: ' . $file_path);
+        }
+
+        $filters = $this->createFilters();
         $conversion = $filters->xliffToTarget([
             [
-                'document_content' => file_get_contents($file_path)
+                'document_content' => $content
             ]
         ]);
         $conversion = $conversion[0];
@@ -43,7 +59,7 @@ class XliffToTargetConverterController extends KleinController
                 "size" => filesize($file_path),
                 "type" => (new MimeTypes())->guessMimeType($file_path),
                 "message" => "File downloaded! Check your download folder"
-            ]);
+            ], JSON_THROW_ON_ERROR);
             $filename = $conversion['fileName'];
         } else {
             $error = true;
@@ -73,6 +89,32 @@ class XliffToTargetConverterController extends KleinController
         }
 
         $this->response->send();
+    }
+
+    /**
+     * Moves the uploaded xliff to a `.xlf` path and returns it.
+     *
+     * Protected seam so the upload mechanics can be substituted in unit tests.
+     *
+     * @return string
+     */
+    protected function prepareUploadedXliff(): string
+    {
+        $xliff     = $this->request->files()->get('xliff');
+        $file_path = $xliff['tmp_name'] . '.xlf';
+        move_uploaded_file($xliff['tmp_name'], $file_path);
+
+        return $file_path;
+    }
+
+    /**
+     * Protected seam so the conversion engine can be substituted in unit tests.
+     *
+     * @return Filters
+     */
+    protected function createFilters(): Filters
+    {
+        return new Filters();
     }
 
 }

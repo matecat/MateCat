@@ -8,18 +8,16 @@ use Throwable;
 abstract class AbstractValidator
 {
 
-    /**
-     * @return Throwable[]
-     */
+    /** @var Throwable[] */
     protected array $errors = [];
 
     /**
-     * @param ValidatorObject $object
+     * @param ValidatorObjectInterface $object
      *
-     * @return ValidatorObject|null
+     * @return ValidatorObjectInterface|null
      * @throws Exception
      */
-    abstract public function validate(ValidatorObject $object): ?ValidatorObject;
+    abstract public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface;
 
     /**
      * @return Throwable[]

@@ -11,6 +11,7 @@ class Constants
 
     const string COOKIE_SOURCE_LANG = 'sourceLang';
     const string COOKIE_TARGET_LANG = 'targetLang';
+    const string COOKIE_UPLOAD_TOKEN = 'upload_token';
 
     const string EMPTY_VAL = '_EMPTY_';
 
@@ -22,6 +23,7 @@ class Constants
     const string PUBLIC_TM = "Public TM";
     const string NO_DESCRIPTION_TM = "No description";
 
+    /** @var list<string> */
     public static array $allowed_seg_rules = [
         'standard',
         'patent',
@@ -35,7 +37,7 @@ class Constants
     public static function validateSegmentationRules(?string $segmentation_rule = ''): ?string
     {
         //normalize segmentation rule to what it's used internally
-        if ($segmentation_rule == 'standard' || $segmentation_rule == '' || $segmentation_rule == null) {
+        if ($segmentation_rule == 'standard' || $segmentation_rule == '') {
             return null;
         }
 

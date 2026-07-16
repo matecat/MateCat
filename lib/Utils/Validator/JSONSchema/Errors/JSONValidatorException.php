@@ -27,7 +27,7 @@ class JSONValidatorException extends Exception implements JsonSerializable
     /**
      * @param string $context
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function getFormattedError(string $context): array
     {
@@ -76,11 +76,14 @@ class JSONValidatorException extends Exception implements JsonSerializable
      */
     public function getSubErrors(): array
     {
-        return $this->error->subErrors ?? [];
+        return $this->error->subErrors;
     }
 
     /**
      * @inheritDoc
+     */
+    /**
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {

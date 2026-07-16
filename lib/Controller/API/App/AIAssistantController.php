@@ -3,21 +3,58 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Services\RateLimiterService;
 use Exception;
 use InvalidArgumentException;
+use Klein\Response;
 use Matecat\Locales\InvalidLanguageException;
 use Matecat\Locales\Languages;
+use Swaggest\JsonSchema\InvalidValue;
+use Throwable;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\AIAssistantWorker;
 use Utils\Engines\Lara;
 use Utils\Registry\AppConfig;
+use Utils\Tools\Utils;
+use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
+use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class AIAssistantController extends KleinController
 {
     const string AI_ASSISTANT_EXPLAIN_MEANING = 'AI_ASSISTANT_EXPLAIN_MEANING';
 
+    private const int RATE_LIMIT_MAX_RETRIES = 30;
+
+    protected RateLimiterService $rateLimiterService;
+
     /**
      * @throws Exception
+     */
+    protected function registerValidators(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function initDependencies(): void
+    {
+        $this->rateLimiterService = new RateLimiterService();
+    }
+
+    /**
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidLanguageException
+     * @throws JSONValidatorException
+     * @throws JsonValidatorGenericException
+     * @throws InvalidValue
+     * @throws Throwable
      */
     public function index(): void
     {
@@ -25,59 +62,25 @@ class AIAssistantController extends KleinController
             throw new Exception('OpenAI API key not set');
         }
 
-        $json = json_decode($this->request->body(), true);
-
-        // target
-        if (!isset($json['target'])) {
-            throw new InvalidArgumentException('Missing `target` parameter');
+        if ($this->checkRateLimit('/api/app/ai-assistant')) {
+            return;
         }
 
-        $languages = Languages::getInstance();
-        $localizedLanguage = $languages->getLocalizedLanguage($json['target']);
+        $body = $this->getValidatedBody('ai_assistant_explain_meaning.json');
 
-        if (empty($localizedLanguage)) {
-            throw new InvalidLanguageException($json['target'] . ' is not a valid language');
-        }
+        $this->authorizeJob($body);
 
-        // id_segment
-        if (!isset($json['id_segment'])) {
-            throw new InvalidArgumentException('Missing `id_segment` parameter');
-        }
-
-        // word
-        if (!isset($json['word'])) {
-            throw new InvalidArgumentException('Missing `word` parameter');
-        }
-
-        // phrase
-        if (!isset($json['phrase'])) {
-            throw new InvalidArgumentException('Missing `phrase` parameter');
-        }
-
-        // id_client
-        if (!isset($json['id_client'])) {
-            throw new InvalidArgumentException('Missing `id_client` parameter');
-        }
-
-        // id_job
-        if (!isset($json['id_job'])) {
-            throw new InvalidArgumentException('Missing `id_job` parameter');
-        }
-
-        // password
-        if (!isset($json['password'])) {
-            throw new InvalidArgumentException('Missing `password` parameter');
-        }
+        $localizedLanguage = $this->localizedLanguageOrFail($body['target']);
 
         $json = [
-            'id_client' => $json['id_client'],
-            'id_segment' => $json['id_segment'],
-            'id_job' => $json['id_job'],
-            'password' => $json['password'],
-            'target' => $json['target'],
+            'id_client' => $body['id_client'],
+            'id_segment' => $body['id_segment'],
+            'id_job' => $body['id_job'],
+            'password' => $body['password'],
+            'target' => $body['target'],
             'localized_target' => $localizedLanguage,
-            'word' => trim($json['word']),
-            'phrase' => trim($json['phrase']),
+            'word' => trim((string)$body['word']),
+            'phrase' => trim((string)$body['phrase']),
         ];
 
         $params = [
@@ -93,6 +96,14 @@ class AIAssistantController extends KleinController
 
     /**
      * Provide a feedback on a translation
+     *
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidLanguageException
+     * @throws JSONValidatorException
+     * @throws JsonValidatorGenericException
+     * @throws InvalidValue
+     * @throws Throwable
      */
     public function feedback(): void
     {
@@ -100,65 +111,27 @@ class AIAssistantController extends KleinController
             throw new Exception('OpenAI API key not set');
         }
 
-        $json = json_decode($this->request->body(), true);
-
-        // source
-        if (!isset($json['source_language'])) {
-            throw new InvalidArgumentException('Missing `source_language` parameter');
+        if ($this->checkRateLimit('/api/app/ai-assistant/feedback')) {
+            return;
         }
 
-        // target
-        if (!isset($json['target_language'])) {
-            throw new InvalidArgumentException('Missing `target_language` parameter');
-        }
+        $body = $this->getValidatedBody('ai_assistant_feedback.json');
 
-        $languages = Languages::getInstance();
-        $localizedSource = $languages->getLocalizedLanguage($json['source_language']);
-        $localizedTarget = $languages->getLocalizedLanguage($json['target_language']);
+        $this->authorizeJob($body);
 
-        if (empty($localizedSource)) {
-            throw new InvalidLanguageException($json['source_language'] . ' is not a valid language');
-        }
+        $localizedSource = $this->localizedLanguageOrFail($body['source_language']);
+        $localizedTarget = $this->localizedLanguageOrFail($body['target_language']);
 
-        if (empty($localizedTarget)) {
-            throw new InvalidLanguageException($json['target_language'] . ' is not a valid language');
-        }
-
-        // text
-        if (!isset($json['text'])) {
-            throw new InvalidArgumentException('Missing `text` parameter');
-        }
-
-        // translation
-        if (!isset($json['translation'])) {
-            throw new InvalidArgumentException('Missing `translation` parameter');
-        }
-
-        // style
-        if (!isset($json['style'])) {
-            throw new InvalidArgumentException('Missing `style` parameter');
-        }
-
-        Lara::validateLaraStyle($json['style']);
-
-        // id_client
-        if (!isset($json['id_client'])) {
-            throw new InvalidArgumentException('Missing `id_client` parameter');
-        }
-
-        // id_segment
-        if (!isset($json['id_segment'])) {
-            throw new InvalidArgumentException('Missing `id_segment` parameter');
-        }
+        Lara::validateLaraStyle($body['style']);
 
         $json = [
-            'id_client' => $json['id_client'],
+            'id_client' => $body['id_client'],
             'localized_source' => $localizedSource,
             'localized_target' => $localizedTarget,
-            'text' => trim($json['text']),
-            'translation' => trim($json['translation']),
-            'style' => trim($json['style']),
-            'id_segment' => $json['id_segment'],
+            'text' => trim((string)$body['text']),
+            'translation' => trim((string)$body['translation']),
+            'style' => trim((string)$body['style']),
+            'id_segment' => $body['id_segment'],
         ];
 
         $params = [
@@ -174,6 +147,14 @@ class AIAssistantController extends KleinController
 
     /**
      * Provide alternative translations
+     *
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidLanguageException
+     * @throws JSONValidatorException
+     * @throws JsonValidatorGenericException
+     * @throws InvalidValue
+     * @throws Throwable
      */
     public function alternative_translations(): void
     {
@@ -181,97 +162,34 @@ class AIAssistantController extends KleinController
             throw new Exception('Gemini API key not set');
         }
 
-        $json = json_decode($this->request->body(), true);
-
-        // source
-        if (!isset($json['source_language'])) {
-            throw new InvalidArgumentException('Missing `source_language` parameter');
+        if ($this->checkRateLimit('/api/app/ai-assistant/alternative-translations')) {
+            return;
         }
 
-        // target
-        if (!isset($json['target_language'])) {
-            throw new InvalidArgumentException('Missing `target_language` parameter');
-        }
+        $body = $this->getValidatedBody('ai_assistant_alternative_translations.json');
 
-        $languages = Languages::getInstance();
-        $localizedSource = $languages->getLocalizedLanguage($json['source_language']);
-        $localizedTarget = $languages->getLocalizedLanguage($json['target_language']);
+        $this->authorizeJob($body);
 
-        if (empty($localizedSource)) {
-            throw new InvalidLanguageException($json['source_language'] . ' is not a valid language');
-        }
+        $localizedSource = $this->localizedLanguageOrFail($body['source_language']);
+        $localizedTarget = $this->localizedLanguageOrFail($body['target_language']);
 
-        if (empty($localizedTarget)) {
-            throw new InvalidLanguageException($json['target_language'] . ' is not a valid language');
-        }
-
-        // source_sentence
-        if (!isset($json['source_sentence'])) {
-            throw new InvalidArgumentException('Missing `source_sentence` parameter');
-        }
-
-        // target_sentence
-        if (!isset($json['target_sentence'])) {
-            throw new InvalidArgumentException('Missing `target_sentence` parameter');
-        }
-
-        // source_context_sentences_string
-        if (!isset($json['source_context_sentences_string'])) {
-            throw new InvalidArgumentException('Missing `source_context_sentences_string` parameter');
-        }
-
-        // target_context_sentences_string
-        if (!isset($json['target_context_sentences_string'])) {
-            throw new InvalidArgumentException('Missing `target_context_sentences_string` parameter');
-        }
-
-        // context
-        if (!isset($json['excerpt'])) {
-            throw new InvalidArgumentException('Missing `excerpt` parameter');
-        }
-
-        // style
-        if (!isset($json['style_instructions'])) {
-            throw new InvalidArgumentException('Missing `style_instructions` parameter');
-        }
-
-        Lara::validateLaraStyle($json['style_instructions']);
-
-        // id_client
-        if (!isset($json['id_client'])) {
-            throw new InvalidArgumentException('Missing `id_client` parameter');
-        }
-
-        // id_segment
-        if (!isset($json['id_segment'])) {
-            throw new InvalidArgumentException('Missing `id_segment` parameter');
-        }
-
-        // id_job
-        if (!isset($json['id_job'])) {
-            throw new InvalidArgumentException('Missing `id_job` parameter');
-        }
-
-        // password
-        if (!isset($json['password'])) {
-            throw new InvalidArgumentException('Missing `password` parameter');
-        }
+        Lara::validateLaraStyle($body['style_instructions']);
 
         $json = [
-            'id_client' => $json['id_client'],
-            'id_job' => $json['id_job'],
-            'password' => $json['password'],
+            'id_client' => $body['id_client'],
+            'id_job' => $body['id_job'],
+            'password' => $body['password'],
             'localized_source' => $localizedSource,
             'localized_target' => $localizedTarget,
-            'source_language' => $json['source_language'],
-            'target_language' => $json['target_language'],
-            'source_sentence' => $json['source_sentence'],
-            'target_sentence' => $json['target_sentence'],
-            'source_context_sentences_string' => $json['source_context_sentences_string'],
-            'target_context_sentences_string' => $json['target_context_sentences_string'],
-            'excerpt' => $json['excerpt'],
-            'style_instructions' => $json['style_instructions'],
-            'id_segment' => $json['id_segment'] ?? null,
+            'source_language' => $body['source_language'],
+            'target_language' => $body['target_language'],
+            'source_sentence' => $body['source_sentence'],
+            'target_sentence' => $body['target_sentence'],
+            'source_context_sentences_string' => $body['source_context_sentences_string'],
+            'target_context_sentences_string' => $body['target_context_sentences_string'],
+            'excerpt' => $body['excerpt'],
+            'style_instructions' => $body['style_instructions'],
+            'id_segment' => $body['id_segment'] ?? null,
         ];
 
         $params = [
@@ -286,11 +204,93 @@ class AIAssistantController extends KleinController
     }
 
     /**
-     * @param array $params
+     * Validate the JSON request body against the given schema and return it as an array.
      *
+     * @return array<string, mixed>
+     *
+     * @throws InvalidArgumentException
+     * @throws JSONValidatorException
+     * @throws JsonValidatorGenericException
+     * @throws InvalidValue
      * @throws Exception
      */
-    private function enqueueWorker(array $params): void
+    protected function getValidatedBody(string $schema): array
+    {
+        $body = $this->request->body();
+        if ($body === null || $body === '') {
+            throw new InvalidArgumentException('Missing request body');
+        }
+
+        $validatorObject = new JSONValidatorObject($body);
+        $validator = new JSONValidator($schema, true);
+        $validator->validate($validatorObject);
+
+        return $validatorObject->getValue(true);
+    }
+
+    /**
+     * Authorize the caller against the job identified by the body's id_job + password.
+     * The chunk validator coerces id_job to int and resolves the job, throwing
+     * NotFoundException when the pair does not match a job the caller may access.
+     *
+     * @param array<string, mixed> $body
+     *
+     * @throws Throwable
+     */
+    protected function authorizeJob(array $body): void
+    {
+        $this->params['id_job'] = $body['id_job'];
+        $this->params['password'] = $body['password'];
+
+        (new ChunkPasswordValidator($this))->validate();
+    }
+
+    /**
+     * @throws InvalidLanguageException
+     * @throws Exception
+     */
+    protected function localizedLanguageOrFail(mixed $language): string
+    {
+        $localized = Languages::getInstance()->getLocalizedLanguage((string)$language);
+
+        if (empty($localized)) {
+            throw new InvalidLanguageException($language . ' is not a valid language');
+        }
+
+        return $localized;
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function checkRateLimit(string $route): bool
+    {
+        $identifiers = [
+            Utils::getRealIpAddr() ?? '127.0.0.1',
+            $this->getUser()->email ?? 'anonymous',
+        ];
+
+        foreach ($identifiers as $identifier) {
+            $response = $this->rateLimiterService->checkAndIncrement(
+                $this->response, $identifier, $route, self::RATE_LIMIT_MAX_RETRIES
+            );
+            if ($response instanceof Response) {
+                $this->response = $response;
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     *
+     * @throws Exception
+     * @throws InvalidArgumentException
+     */
+    protected function enqueueWorker(array $params): void
     {
         WorkerClient::enqueue(self::AI_ASSISTANT_EXPLAIN_MEANING, AIAssistantWorker::class, $params, ['persistent' => WorkerClient::$_HANDLER->persistent]);
     }

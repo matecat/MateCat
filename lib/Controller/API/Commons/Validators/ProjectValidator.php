@@ -4,10 +4,14 @@ namespace Controller\API\Commons\Validators;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
+use Exception;
+use Model\FeaturesBase\FeatureSet;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
+use RuntimeException;
+use TypeError;
 
 /**
  * @daprecated this should extend Base
@@ -44,6 +48,7 @@ class ProjectValidator extends Base
      * @param mixed $id_project
      *
      * @return $this
+     * @throws TypeError
      */
     public function setIdProject($id_project): ProjectValidator
     {
@@ -61,31 +66,37 @@ class ProjectValidator extends Base
     /**
      * @param ProjectStruct $project
      */
-    public function setProject(ProjectStruct $project)
+    public function setProject(ProjectStruct $project): void
     {
         $this->project = $project;
     }
 
+    /**
+     * @throws RuntimeException
+     */
     public function getProject(): ProjectStruct
     {
+        if ($this->project === null) {
+            throw new RuntimeException('validate() must be called before getProject()');
+        }
         return $this->project;
     }
 
-    public function setFeature($feature)
+    public function setFeature(string $feature): void
     {
         $this->feature = $feature;
     }
 
     /**
-     * @return mixed|void
      * @throws AuthenticationError
      * @throws NotFoundException
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function _validate(): void
     {
         if (!$this->project) {
-            $this->project = ProjectDao::findById($this->id_project);
+            $this->project = (new ProjectDao($this->controller->getDatabase()))->findById($this->id_project);
         }
 
         if (empty($this->project)) {
@@ -101,19 +112,31 @@ class ProjectValidator extends Base
         }
     }
 
+    /**
+     * @throws Exception
+     */
     private function validateFeatureEnabled(): bool
     {
-        return $this->feature == null || $this->project->isFeatureEnabled($this->feature);
+        if ($this->feature === null || $this->project === null) {
+            return true;
+        }
+
+        return FeatureSet::forProject($this->project, $this->controller->getDatabase())->hasFeature($this->feature);
     }
 
     /**
      * @return bool
      * @throws AuthenticationError
+     * @throws RuntimeException
      */
     private function inProjectScope(): bool
     {
         if (!$this->user) {
             throw new AuthenticationError("Invalid API key", 401);
+        }
+
+        if ($this->project === null) {
+            throw new RuntimeException('project must be set before calling inProjectScope()');
         }
 
         return $this->user->email == $this->project->id_customer;

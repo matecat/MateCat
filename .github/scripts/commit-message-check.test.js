@@ -82,8 +82,8 @@ describe('map consistency', () => {
         assert.deepEqual([...VALID_TYPES].sort(), fromMap);
     });
 
-    it('has 12 type entries', () => {
-        assert.equal(VALID_TYPES.length, 12);
+    it('has 13 type entries', () => {
+        assert.equal(VALID_TYPES.length, 13);
     });
 });
 
@@ -107,7 +107,7 @@ describe('validateCommitMessage – valid', () => {
         assert.equal(r.valid, true);
     });
 
-    it('all 12 types accepted', () => {
+    it('all 13 types accepted', () => {
         const messages = [
             ['\u{1F3D7}\uFE0F', 'build'],
             ['\u{1F527}', 'chore'],
@@ -115,6 +115,7 @@ describe('validateCommitMessage – valid', () => {
             ['\u{1F4DD}', 'docs'],
             ['\u2728', 'feat'],
             ['\u{1F41B}', 'fix'],
+            ['\u{1F512}', 'security'],
             ['\u26A1\uFE0F', 'perf'],
             ['\u267B\uFE0F', 'refactor'],
             ['\u23EA\uFE0F', 'revert'],

@@ -15,11 +15,16 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
 use Klein\Response;
+use Model\Teams\TeamDao;
 use Model\Users\Authentication\PasswordResetModel;
 use Model\Users\Authentication\PasswordRules;
 use Model\Users\Authentication\SignupModel;
+use Model\Users\UserDao;
 use Predis\PredisException;
 use ReflectionException;
+use RuntimeException;
+use Stomp\Exception\ConnectionException;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
@@ -41,8 +46,8 @@ class ForgotPasswordController extends AbstractStatefulKleinController
      */
     public function forgotPassword(): void
     {
-        $checkRateLimitEmail = $this->checkRateLimitResponse($this->response, $this->request->param('email') ?? "BLANK_EMAIL", '/api/app/user/forgot_password', 5);
-        $checkRateLimitIp = $this->checkRateLimitResponse($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/forgot_password', 5);
+        $checkRateLimitEmail = $this->checkAndIncrementRateLimit($this->response, $this->request->param('email') ?? "BLANK_EMAIL", '/api/app/user/forgot_password', 5);
+        $checkRateLimitIp = $this->checkAndIncrementRateLimit($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/forgot_password', 5);
 
         if ($checkRateLimitIp instanceof Response) {
             $this->response = $checkRateLimitIp;
@@ -66,20 +71,19 @@ class ForgotPasswordController extends AbstractStatefulKleinController
                 'wanted_url' => [
                     'filter' => FILTER_CALLBACK,
                     'options' => function ($wanted_url) {
-                        $wanted_url = filter_var($wanted_url, FILTER_SANITIZE_URL);
+                        $wanted_url = (string) filter_var($wanted_url, FILTER_SANITIZE_URL);
+                        $parsedWanted = parse_url($wanted_url);
+                        $parsedHost = parse_url(AppConfig::$HTTPHOST);
 
-                        return parse_url($wanted_url)['host'] != parse_url(AppConfig::$HTTPHOST)['host'] ? AppConfig::$HTTPHOST : $wanted_url;
+                        return ($parsedWanted['host'] ?? '') !== ($parsedHost['host'] ?? '') ? AppConfig::$HTTPHOST : $wanted_url;
                     }
                 ]
             ]
         );
 
-        $signupModel = new SignupModel($filtered, $_SESSION);
+        $signupModel = $this->createSignupModel($filtered, $_SESSION);
 
         $doForgotPassword = $this->doForgotPassword($signupModel);
-
-        $this->incrementRateLimitCounter($this->request->param('email') ?? "BLANK_EMAIL", '/api/app/user/forgot_password');
-        $this->incrementRateLimitCounter(Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/forgot_password');
 
         $this->response->code($doForgotPassword['code']);
         $this->response->json([
@@ -100,26 +104,33 @@ class ForgotPasswordController extends AbstractStatefulKleinController
      * If an error occurs during the process, it increments the rate limit counter
      * and redirects the user to the application root.
      *
+     * Rate Limiter
+     *
+     * This is the trade-off: 10+ people behind the same NAT all clicking password-reset links within a ~2 minute window would trigger rate limiting.
+     * In practice this is extremely unlikely for a password reset endpoint (unlike a login page).
+     *
      * @throws PredisException
      * @throws Exception
+     * @throws TypeError
      */
     public function authForPasswordReset(): void
     {
+        $ip = Utils::getRealIpAddr() ?? '127.0.0.1';
+        $route = '/api/app/user/password_reset';
+
+        $rateLimitResponse = $this->checkAndIncrementRateLimit($this->response, $ip, $route);
+        if ($rateLimitResponse instanceof Response) {
+            $this->response = $rateLimitResponse;
+            return;
+        }
+
         try {
-            $checkRateLimit = $this->checkRateLimitResponse($this->response, $this->request->param('token'), '/api/app/user/password_reset');
-            if ($checkRateLimit instanceof Response) {
-                $this->response = $checkRateLimit;
-
-                return;
-            }
-
-            $reset = new PasswordResetModel($_SESSION, $this->request->param('token'));
+            $reset = $this->createPasswordResetModel($_SESSION, $this->request->param('token'));
             $reset->validateUser();
             $this->response->redirect($reset->flushWantedURL());
 
             FlashMessage::set('popup', 'passwordReset', FlashMessage::SERVICE);
         } catch (ValidationError $e) {
-            $this->incrementRateLimitCounter($this->request->param('token'), '/api/app/user/password_reset');
             FlashMessage::set('passwordReset', $e->getMessage(), FlashMessage::ERROR);
             $this->response->redirect(CanonicalRoutes::appRoot());
         }
@@ -129,26 +140,53 @@ class ForgotPasswordController extends AbstractStatefulKleinController
      * Step 3
      *
      * Set the new password
+     *
      * @throws ValidationError
      * @throws ReflectionException
+     * @throws ConnectionException
+     * @throws Exception
+     * @throws TypeError
      */
     public function setNewPassword(): void
     {
-        $reset = new PasswordResetModel($_SESSION);
-        $new_password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS);
-        $password_confirmation = filter_var($this->request->param('password_confirmation'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $reset = $this->createPasswordResetModel($_SESSION);
+        $new_password = (string) filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $password_confirmation = (string) filter_var($this->request->param('password_confirmation'), FILTER_SANITIZE_SPECIAL_CHARS);
         $this->validatePasswordRequirements($new_password, $password_confirmation);
         $reset->resetPassword($new_password);
-        $this->user = $reset->getUser();
+        $this->user = $reset->getUser() ?? throw new RuntimeException('User not found after password reset');
         $this->broadcastLogout();
 
         $this->response->code(200);
     }
 
     /**
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $session
+     *
+     * @return SignupModel
+     */
+    protected function createSignupModel(array $params, array &$session): SignupModel
+    {
+        return new SignupModel($params, $session, new UserDao($this->getDatabase()), new TeamDao($this->getDatabase()));
+    }
+
+    /**
+     * @param array<string, mixed> $session
+     * @param string|null $token
+     *
+     * @return PasswordResetModel
+     * @throws TypeError
+     */
+    protected function createPasswordResetModel(array &$session, ?string $token = null): PasswordResetModel
+    {
+        return new PasswordResetModel($session, new UserDao($this->getDatabase()), $token);
+    }
+
+    /**
      * @param SignupModel $signupModel
      *
-     * @return array
+     * @return array{errors: list<string>, code: int}
      * @throws Exception
      */
     private function doForgotPassword(SignupModel $signupModel): array

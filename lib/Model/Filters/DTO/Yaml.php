@@ -3,19 +3,22 @@
 namespace Model\Filters\DTO;
 
 use DomainException;
-use JsonSerializable;
 
-class Yaml implements IDto, JsonSerializable
+class Yaml implements IDto
 {
 
+    /** @var list<string> */
     private array $translate_keys = [];
+    /** @var list<string> */
     private array $do_not_translate_keys = [];
+    /** @var list<string> */
     private array $context_keys = [];
+    /** @var list<string> */
     private array $character_limit = [];
     private ?string $inner_content_type = null;
 
     /**
-     * @param array $translate_keys
+     * @param list<string> $translate_keys
      */
     public function setTranslateKeys(array $translate_keys): void
     {
@@ -23,7 +26,7 @@ class Yaml implements IDto, JsonSerializable
     }
 
     /**
-     * @param array $do_not_translate_keys
+     * @param list<string> $do_not_translate_keys
      */
     public function setDoNotTranslateKeys(array $do_not_translate_keys): void
     {
@@ -31,7 +34,7 @@ class Yaml implements IDto, JsonSerializable
     }
 
     /**
-     * @param string|null $inner_content_type
+     * @throws DomainException
      */
     public function setInnerContentType(?string $inner_content_type): void
     {
@@ -55,7 +58,7 @@ class Yaml implements IDto, JsonSerializable
     }
 
     /**
-     * @param array $context_keys
+     * @param list<string> $context_keys
      */
     public function setContextKeys(array $context_keys): void
     {
@@ -63,7 +66,7 @@ class Yaml implements IDto, JsonSerializable
     }
 
     /**
-     * @param array $character_limit
+     * @param list<string> $character_limit
      */
     public function setCharacterLimit(array $character_limit): void
     {
@@ -71,7 +74,9 @@ class Yaml implements IDto, JsonSerializable
     }
 
     /**
-     * @param array $data
+     * @param array<string, mixed> $data
+     *
+     * @throws DomainException
      */
     public function fromArray(array $data): void
     {
@@ -97,7 +102,7 @@ class Yaml implements IDto, JsonSerializable
     }
 
     /**
-     * @inheritDoc
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {

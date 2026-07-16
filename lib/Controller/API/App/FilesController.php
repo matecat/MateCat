@@ -5,7 +5,9 @@ namespace Controller\API\App;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Exception;
 use InvalidArgumentException;
+use Model\Files\FilesJobDao;
 use Model\Files\FilesPartsDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -22,16 +24,18 @@ class FilesController extends AbstractStatefulKleinController
     /**
      * @throws ReflectionException
      * @throws NotFoundException
+     * @throws InvalidArgumentException
+     * @throws Exception
      */
     public function segments(): void
     {
         // `file_part_id` has the priority
-        if (isset($_POST['file_part_id'])) {
-            $filePartId = $_POST['file_part_id'];
+        if (isset($this->params['file_part_id'])) {
+            $filePartId = $this->params['file_part_id'];
             $this->validateInteger($filePartId);
             $this->getFirstAndLastSegmentFromFilePartId($filePartId);
-        } elseif (isset($_POST['file_id'])) {
-            $fileId = $_POST['file_id'];
+        } elseif (isset($this->params['file_id'])) {
+            $fileId = $this->params['file_id'];
             $this->validateInteger($fileId);
             $this->getFirstAndLastSegmentFromFileId($fileId);
         } else {
@@ -47,13 +51,21 @@ class FilesController extends AbstractStatefulKleinController
      *
      * @throws ReflectionException
      * @throws NotFoundException
+     * @throws Exception
      */
     private function getFirstAndLastSegmentFromFilePartId(int $filePartId): void
     {
-        $filePartsDao = new FilesPartsDao();
+        // ownership gate: the file part must belong to a file assigned to the caller's
+        // authenticated chunk, otherwise a guessed file_part_id would leak other tenants' segments
+        $filesJobDao = new FilesJobDao($this->getDatabase());
+        if (!$filesJobDao->isFilePartInJob($filePartId, (int)$this->chunk->id)) {
+            throw new NotFoundException('File part id ' . $filePartId . ' was not found');
+        }
+
+        $filePartsDao = new FilesPartsDao($this->getDatabase());
         $firstAndLastSegment = $filePartsDao->getFirstAndLastSegment($filePartId);
 
-        if (null === $firstAndLastSegment->first_segment) {
+        if ($firstAndLastSegment === null || $firstAndLastSegment->first_segment === null) {
             throw new NotFoundException('File part id ' . $filePartId . ' was not found');
         }
 
@@ -68,10 +80,11 @@ class FilesController extends AbstractStatefulKleinController
      *
      * @throws ReflectionException
      * @throws NotFoundException
+     * @throws Exception
      */
     private function getFirstAndLastSegmentFromFileId(int $fileId): void
     {
-        $fileInfo = JobDao::getFirstSegmentOfFilesInJob($this->chunk, 60 * 5);
+        $fileInfo = (new JobDao($this->getDatabase()))->getFilesInfoInJob($this->chunk, 60 * 5);
 
         if (empty($fileInfo)) {
             throw new NotFoundException('File id ' . $fileId . ' was not found');
@@ -89,6 +102,8 @@ class FilesController extends AbstractStatefulKleinController
 
     /**
      * @param mixed $value
+     *
+     * @throws InvalidArgumentException
      */
     private function validateInteger(mixed $value): void
     {
@@ -97,9 +112,8 @@ class FilesController extends AbstractStatefulKleinController
         }
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
-//        $this->appendValidator(new LoginValidator($this));
         $Validator = (new ChunkPasswordValidator($this));
         $Validator->onSuccess(function () use ($Validator) {
             $this->chunk = $Validator->getChunk();

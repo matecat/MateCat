@@ -15,6 +15,7 @@ namespace Utils\TaskRunner\Commons;
  * Vector container for contextes
  *
  * @package TaskRunner\Commons
+ * @phpstan-consistent-constructor
  */
 class ContextList
 {
@@ -29,7 +30,8 @@ class ContextList
     /**
      * QueuesList constructor.
      *
-     * @param array $queue_info
+     * @param array<string, array<string, mixed>> $queue_info
+     * @throws \TypeError
      */
     protected function __construct(array $queue_info)
     {
@@ -41,9 +43,10 @@ class ContextList
     /**
      * Static class builder
      *
-     * @param array $queue_info
+     * @param array<string, array<string, mixed>> $queue_info
      *
      * @return static
+     * @throws \TypeError
      */
     public static function get(array $queue_info = []): ContextList
     {

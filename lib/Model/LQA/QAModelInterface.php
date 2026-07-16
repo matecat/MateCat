@@ -6,9 +6,9 @@ interface QAModelInterface
 {
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
-    public function getDecodedModel(): array;
+    public function getDecodedModel(CategoryDao $dao): array;
 }
 
 

@@ -17,6 +17,7 @@ use Exception;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Level;
 use Monolog\Logger;
+use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Utils\Registry\AppConfig;
 
@@ -52,8 +53,10 @@ class MatecatLogger implements LoggerInterface
      * This method delegates the logging of a debug-level message to the `log` method,
      * passing the `Logger::DEBUG` level along with the provided message and context.
      *
-     * @param mixed $message The debug message to log. Can be a string, array, or object.
-     * @param array $context Additional context to include with the log. Defaults to an empty array.
+     * @param mixed                $message The debug message to log. Can be a string, array, or object.
+     * @param array<string, mixed> $context Additional context to include with the log. Defaults to an empty array.
+     *
+     * @throws InvalidArgumentException
      */
     public function debug(mixed $message, array $context = []): void
     {
@@ -98,10 +101,10 @@ class MatecatLogger implements LoggerInterface
     }
 
     /**
-     * @param mixed $message
-     * @param array $context
+     * @param mixed                $message
+     * @param array<string, mixed> $context
      *
-     * @return void
+     * @throws InvalidArgumentException
      */
     public function emergency(mixed $message, array $context = []): void
     {
@@ -109,10 +112,10 @@ class MatecatLogger implements LoggerInterface
     }
 
     /**
-     * @param mixed $message
-     * @param array $context
+     * @param mixed                $message
+     * @param array<string, mixed> $context
      *
-     * @return void
+     * @throws InvalidArgumentException
      */
     public function alert(mixed $message, array $context = []): void
     {
@@ -120,10 +123,10 @@ class MatecatLogger implements LoggerInterface
     }
 
     /**
-     * @param mixed $message
-     * @param array $context
+     * @param mixed                $message
+     * @param array<string, mixed> $context
      *
-     * @return void
+     * @throws InvalidArgumentException
      */
     public function critical(mixed $message, array $context = []): void
     {
@@ -131,10 +134,10 @@ class MatecatLogger implements LoggerInterface
     }
 
     /**
-     * @param mixed $message
-     * @param array $context
+     * @param mixed                $message
+     * @param array<string, mixed> $context
      *
-     * @return void
+     * @throws InvalidArgumentException
      */
     public function error(mixed $message, array $context = []): void
     {
@@ -142,10 +145,10 @@ class MatecatLogger implements LoggerInterface
     }
 
     /**
-     * @param mixed $message
-     * @param array $context
+     * @param mixed                $message
+     * @param array<string, mixed> $context
      *
-     * @return void
+     * @throws InvalidArgumentException
      */
     public function warning(mixed $message, array $context = []): void
     {
@@ -153,10 +156,10 @@ class MatecatLogger implements LoggerInterface
     }
 
     /**
-     * @param mixed $message
-     * @param array $context
+     * @param mixed                $message
+     * @param array<string, mixed> $context
      *
-     * @return void
+     * @throws InvalidArgumentException
      */
     public function notice(mixed $message, array $context = []): void
     {
@@ -164,10 +167,10 @@ class MatecatLogger implements LoggerInterface
     }
 
     /**
-     * @param mixed $message
-     * @param array $context
+     * @param mixed                $message
+     * @param array<string, mixed> $context
      *
-     * @return void
+     * @throws InvalidArgumentException
      */
     public function info(mixed $message, array $context = []): void
     {
@@ -182,10 +185,9 @@ class MatecatLogger implements LoggerInterface
      * using the Monolog logger. If an exception occurs during the logging process,
      * the log data is written to a fallback file.
      *
-     * @param mixed $level The log level (e.g., DEBUG, INFO, ERROR).
-     * @param mixed $message The message to log. Can be a string, array, or object.
-     * @param array $context Additional context to include with the log. Defaults to an empty array.
-     *
+     * @param mixed                $level   The log level (e.g., DEBUG, INFO, ERROR).
+     * @param mixed                $message The message to log. Can be a string, array, or object.
+     * @param array<string, mixed> $context Additional context to include with the log. Defaults to an empty array.
      */
     public function log(mixed $level, mixed $message, array $context = []): void
     {
@@ -213,12 +215,10 @@ class MatecatLogger implements LoggerInterface
      * and assigns a generic message "Log Entry:". Otherwise, the message is returned
      * as-is along with the context.
      *
-     * @param mixed $message The log message, which can be a string, array, or object.
-     * @param array $context Additional context to merge with the message. Defaults to an empty array.
+     * @param mixed                $message The log message, which can be a string, array, or object.
+     * @param array<string, mixed> $context Additional context to merge with the message. Defaults to an empty array.
      *
-     * @return array An array containing the formatted message and context:
-     *               - 'message': The formatted log message.
-     *               - 'context': The merged or original context.
+     * @return array{message: string|mixed, context: array<string, mixed>} An array containing the formatted message and context.
      */
     private function _formatMessage(mixed $message, array $context = []): array
     {

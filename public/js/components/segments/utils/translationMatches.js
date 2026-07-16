@@ -24,7 +24,7 @@ import {getContributions} from '../../../api/getContributions'
 import {deleteContribution} from '../../../api/deleteContribution'
 import {SEGMENTS_STATUS} from '../../../constants/Constants'
 import CatToolActions from '../../../actions/CatToolActions'
-import {laraAuth} from '../../../api/laraAuth'
+import {laraAuthJob} from '../../../api/laraAuth'
 import {laraTranslate} from '../../../api/laraTranslate'
 import CatToolStore from '../../../stores/CatToolStore'
 import {
@@ -54,10 +54,7 @@ let TranslationMatches = {
         segment: segment,
       })
 
-      modifiedTranslation(
-        segment.sid,
-        segment.translation !== '',
-      )
+      modifiedTranslation(segment.sid, segment.translation !== '')
     }
   },
 
@@ -66,11 +63,7 @@ let TranslationMatches = {
     var segmentObj = SegmentStore.getSegmentByIdToJS(sid)
     if (isUndefined(segmentObj)) return
 
-    setSegmentContributions(
-      segmentObj.sid,
-      data.matches,
-      data.errors,
-    )
+    setSegmentContributions(segmentObj.sid, data.matches, data.errors)
 
     this.useSuggestionInEditArea(sid)
 
@@ -267,15 +260,7 @@ let TranslationMatches = {
 
     const isLaraEngine = config.active_engine?.engine_type === 'Lara'
 
-    const getContributionRequest = (translation = null) => {
-      if (!translation) {
-        console.log(
-          'Call classic matches for segment:',
-          id_segment_original,
-          this.segmentsWaitingForContributions,
-        )
-      }
-
+    const getContributionRequest = ({translation = null, laraModel} = {}) => {
       return getContributions({
         idSegment: id_segment_original,
         target: currentSegment.segment,
@@ -285,6 +270,8 @@ let TranslationMatches = {
           : [],
         contextListBefore,
         contextListAfter,
+        ...(laraModel && {laraModel}),
+        reasoning: laraModel === 'think',
       })
         .then(() => {
           // Remove from waiting list
@@ -308,26 +295,47 @@ let TranslationMatches = {
     }
 
     const jobLanguages = [config.source_code, config.target_code]
+
+    const jobMetadata = CatToolStore.getJobMetadata()
+
     // Keep only languages whose base code is 'en' or 'it'.
-    let allowed =
-      jobLanguages
-        .map((x) => x.split('-')[0])
-        .filter((x) => ['en', 'it'].includes(x))
-        .filter(
-          // Remove duplicates, then check we have exactly two distinct matches.
-          (value, index, array) => array.indexOf(value) === index,
-        ).length === 2
+    // const allowedLaraThink =
+    //   jobLanguages
+    //     .map((x) => x.split('-')[0])
+    //     .filter((x) => ['en', 'it'].includes(x))
+    //     .filter(
+    //       // Remove duplicates, then check we have exactly two distinct matches.
+    //       (value, index, array) => array.indexOf(value) === index,
+    //     ).length === 2
+    const allowedLaraThink = false //Temp disable Lara Think
+
+    const laraStyleGuide =
+      jobMetadata?.project?.mt_extra?.lara_style_guideline_id
+    const allowedLaraProsa =
+      typeof laraStyleGuide === 'string' && laraStyleGuide !== ''
 
     if (
       this.segmentsWaitingForContributions.indexOf(id_segment_original) > -1
     ) {
       return Promise.resolve()
     }
-    if (isLaraEngine && allowed && !fastFetch && !callNewContributions) {
-      this.segmentsWaitingForContributions.push(id_segment_original)
-      laraAuth({idJob: config.id_job, password: config.password})
+
+    this.segmentsWaitingForContributions.push(id_segment_original)
+
+    if (
+      isLaraEngine &&
+      (allowedLaraThink || allowedLaraProsa) &&
+      !fastFetch &&
+      !callNewContributions
+    ) {
+      const laraModel = allowedLaraProsa ? 'prosa' : 'think'
+
+      laraAuthJob({
+        idJob: config.id_job,
+        password: config.password,
+        reasoning: laraModel === 'think',
+      })
         .then((response) => {
-          const jobMetadata = CatToolStore.getJobMetadata()
           const glossaries =
             jobMetadata?.project?.mt_extra?.lara_glossaries || []
           const decodedSource = decodeTagsToUnicodeChar(currentSegment.segment)
@@ -343,14 +351,20 @@ let TranslationMatches = {
             sid: id_segment_original,
             jobId: config.id_job,
             glossaries,
+            ...(allowedLaraProsa && {
+              styleguideId: laraStyleGuide,
+            }),
+            reasoning: laraModel === 'think',
+            multiline: laraModel === 'prosa',
           })
             .then((response) => {
               const translation =
                 response.translation.find((item) => item.translatable)?.text ||
                 ''
-              return getContributionRequest(
-                encodeTagsFromUnicodeChar(translation),
-              )
+              return getContributionRequest({
+                translation: encodeTagsFromUnicodeChar(translation),
+                laraModel,
+              })
             })
             .catch((e) => {
               return getContributionRequest()
@@ -360,7 +374,6 @@ let TranslationMatches = {
           return getContributionRequest()
         })
     } else {
-      this.segmentsWaitingForContributions.push(id_segment_original)
       return getContributionRequest()
     }
   },

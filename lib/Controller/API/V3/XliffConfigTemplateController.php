@@ -5,6 +5,8 @@ namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Response;
 use Model\Xliff\XliffConfigTemplateDao;
 use PDOException;
@@ -16,19 +18,27 @@ use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class XliffConfigTemplateController extends KleinController
 {
-    protected function afterConstruct(): void
+    private ?XliffConfigTemplateDao $xliffConfigTemplateDao = null;
+
+    private function getXliffConfigTemplateDao(): XliffConfigTemplateDao
     {
-        parent::afterConstruct();
+        return $this->xliffConfigTemplateDao ??= new XliffConfigTemplateDao($this->getDatabase());
+    }
+
+    protected function registerValidators(): void
+    {
         $this->appendValidator(new LoginValidator($this));
     }
 
     /**
-     * @param $json
+     * @param string $json
      *
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
+     * @throws \Swaggest\JsonSchema\Exception
+     * @throws Exception
      */
-    private function validateJSON($json): void
+    protected function validateJSON(string $json): void
     {
         $validatorObject = new JSONValidatorObject($json);
         $validator = new JSONValidator('xliff_parameters_rules_wrapper.json', true);
@@ -37,6 +47,11 @@ class XliffConfigTemplateController extends KleinController
 
     /**
      * Get all entries
+     *
+     * @throws \TypeError
+     * @throws \DivisionByZeroError
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function all(): Response
     {
@@ -48,11 +63,11 @@ class XliffConfigTemplateController extends KleinController
                 $pagination = 200;
             }
 
-            $uid = $this->getUser()->uid;
+            $uid = $this->getUser()->uid ?? throw new \TypeError('User not authenticated');
 
             $this->response->status()->setCode(200);
 
-            return $this->response->json(XliffConfigTemplateDao::getAllPaginated($uid, "/api/v3/xliff-config-template?page=", (int)$currentPage, (int)$pagination));
+            return $this->response->json($this->getXliffConfigTemplateDao()->getAllPaginated($uid, "/api/v3/xliff-config-template?page=", (int)$currentPage, (int)$pagination));
         } catch (Exception $exception) {
             $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
             $this->response->status()->setCode($code);
@@ -65,13 +80,17 @@ class XliffConfigTemplateController extends KleinController
 
     /**
      * Get a single entry
+     *
+     * @throws \TypeError
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function get(): Response
     {
         try {
             $id = (int)$this->request->param('id');
 
-            $model = XliffConfigTemplateDao::getByIdAndUser($id, $this->getUser()->uid);
+            $model = $this->getXliffConfigTemplateDao()->getByIdAndUser($id, $this->getUser()->uid ?? throw new \TypeError('User not authenticated'));
 
             if (empty($model)) {
                 throw new Exception('Model not found', 404);
@@ -94,6 +113,9 @@ class XliffConfigTemplateController extends KleinController
      * Create new entry
      *
      * @return Response
+     * @throws \TypeError
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function create(): Response
     {
@@ -105,9 +127,12 @@ class XliffConfigTemplateController extends KleinController
             }
 
             $json = $this->request->body();
+            if ($json === null) {
+                throw new Exception('Request body is empty', 400);
+            }
             $this->validateJSON($json);
 
-            $struct = XliffConfigTemplateDao::createFromJSON($json, $this->getUser()->uid);
+            $struct = $this->getXliffConfigTemplateDao()->createFromJSON($json, $this->getUser()->uid ?? throw new \TypeError('User not authenticated'));
             $this->response->code(201);
 
             return $this->response->json($struct);
@@ -149,6 +174,7 @@ class XliffConfigTemplateController extends KleinController
      *
      * @return Response
      * @throws Exception
+     * @throws \TypeError
      */
     public function update(): Response
     {
@@ -159,18 +185,21 @@ class XliffConfigTemplateController extends KleinController
             }
 
             $id = (int)$this->request->param('id');
-            $uid = $this->getUser()->uid;
+            $uid = $this->getUser()->uid ?? throw new \TypeError('User not authenticated');
 
             $json = $this->request->body();
+            if ($json === null) {
+                throw new Exception('Request body is empty', 400);
+            }
             $this->validateJSON($json);
 
-            $model = XliffConfigTemplateDao::getByIdAndUser($id, $uid);
+            $model = $this->getXliffConfigTemplateDao()->getByIdAndUser($id, $uid);
 
             if (empty($model)) {
                 throw new Exception('Model not found', 404);
             }
 
-            $struct = XliffConfigTemplateDao::editFromJSON($model, $json, $uid);
+            $struct = $this->getXliffConfigTemplateDao()->editFromJSON($model, $json, $uid);
 
             $this->response->code(200);
 
@@ -196,14 +225,18 @@ class XliffConfigTemplateController extends KleinController
 
     /**
      * Delete an entry
+     *
+     * @throws \TypeError
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function delete(): Response
     {
         try {
             $id = (int)$this->request->paramsNamed()->get('id');
-            $uid = $this->getUser()->uid;
+            $uid = $this->getUser()->uid ?? throw new \TypeError('User not authenticated');
 
-            $count = XliffConfigTemplateDao::remove($id, $uid);
+            $count = $this->getXliffConfigTemplateDao()->remove($id, $uid);
 
             if ($count == 0) {
                 throw new Exception('Model not found', 404);
@@ -224,6 +257,7 @@ class XliffConfigTemplateController extends KleinController
 
     /**
      * @return Response
+     * @throws \RuntimeException
      */
     public function schema(): Response
     {
@@ -232,11 +266,22 @@ class XliffConfigTemplateController extends KleinController
 
     /**
      * @return object
+     * @throws \RuntimeException
      */
     private function getModelSchema(): object
     {
-        $skeletonSchema = JSONValidator::getValidJSONSchema(file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json'));
-        $contentSchema = JSONValidator::getValidJSONSchema(file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json'));
+        $wrapperPath = AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json';
+        $contentPath = AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json';
+
+        $wrapperJson = file_get_contents($wrapperPath);
+        $contentJson = file_get_contents($contentPath);
+
+        if ($wrapperJson === false || $contentJson === false) {
+            throw new \RuntimeException('Failed to read JSON schema files');
+        }
+
+        $skeletonSchema = JSONValidator::getValidJSONSchema($wrapperJson);
+        $contentSchema = JSONValidator::getValidJSONSchema($contentJson);
 
         $skeletonSchema->properties->rules->properties = $contentSchema->properties;
         $skeletonSchema->definitions = $contentSchema->definitions;

@@ -1,0 +1,77 @@
+<?php
+
+namespace Model\Search;
+
+use Exception;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\IDatabase;
+use Predis\ClientInterface;
+use ReflectionException;
+use Utils\Redis\RedisHandler;
+
+class RedisReplaceEventIndexDao extends AbstractDao implements ReplaceEventIndexDaoInterface
+{
+
+    const string TABLE = 'replace_events_current_version';
+
+    private ClientInterface $redis;
+
+    private int $ttl = 10800; // 3 hours
+
+    /**
+     * @throws Exception
+     * @throws ReflectionException
+     */
+    public function __construct(IDatabase $con, ?ClientInterface $redis = null)
+    {
+        parent::__construct($con);
+
+        $this->redis = $redis ?? (new RedisHandler())->getConnection();
+    }
+
+    /**
+     * @param int $idJob
+     *
+     * @return int
+     */
+    public function getActualIndex(int $idJob): int
+    {
+        $index = $this->redis->get($this->getRedisKey($idJob));
+
+        return (null !== $index and $index > 0) ? (int)$index : 0;
+    }
+
+    /**
+     * @param int $id_job
+     * @param int $version
+     *
+     * @return int
+     */
+    public function save(int $id_job, int $version): int
+    {
+        $this->redis->set($this->getRedisKey($id_job), $version);
+        $this->redis->expire($this->getRedisKey($id_job), $this->ttl);
+
+        return 1; // Redis doesn't return the number of affected rows, so we return 1 to indicate success
+    }
+
+    /**
+     * @param int $idJob
+     *
+     * @return string
+     */
+    private function getRedisKey(int $idJob): string
+    {
+        return md5(self::TABLE . '::' . $idJob);
+    }
+
+    /**
+     * @param int $ttl
+     *
+     * @return void
+     */
+    public function setTtl(int $ttl): void
+    {
+        $this->ttl = $ttl;
+    }
+}

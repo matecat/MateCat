@@ -9,9 +9,12 @@
 namespace Utils\Email;
 
 
+use DivisionByZeroError;
+use DomainException;
 use Exception;
+use PDOException;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
-use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
@@ -22,6 +25,7 @@ use Utils\Url\CanonicalRoutes;
 class ProjectAssignedEmail extends AbstractEmail
 {
 
+    protected IDatabase $database;
     protected UserStruct $user;
     protected ProjectStruct $project;
     protected UserStruct $assignee;
@@ -31,13 +35,18 @@ class ProjectAssignedEmail extends AbstractEmail
      */
     private array $jobs;
 
-    public function __construct(UserStruct $user, ProjectStruct $project, UserStruct $assignee)
+    /**
+     * @param JobStruct[] $jobs
+     * @throws DomainException
+     */
+    public function __construct(IDatabase $database, UserStruct $user, ProjectStruct $project, UserStruct $assignee, array $jobs)
     {
+        $this->database = $database;
         $this->user = $user;
         $this->project = $project;
         $this->assignee = $assignee;
 
-        $this->jobs = $project->getJobs();
+        $this->jobs = $jobs;
 
         $this->title = "You've been assigned a project";
 
@@ -45,19 +54,25 @@ class ProjectAssignedEmail extends AbstractEmail
         $this->_setTemplate('Project/project_assigned_content.html');
     }
 
+    /**
+     * @return array<string, mixed>
+     * @throws DivisionByZeroError
+     * @throws PDOException
+     * @throws Exception
+     */
     protected function _getTemplateVariables(): array
     {
         $words_count = [];
         foreach ($this->jobs as $job) {
             $jStruct = new JobStruct($job->getArrayCopy());
             $jobStats = new WordCountStruct();
-            $jobStats->setIdJob($jStruct->id);
+            $jobStats->setIdJob((int)$jStruct->id);
             $jobStats->setJobPassword($jStruct->password);
             $jobStats->setDraftWords($jStruct->draft_words + $jStruct->new_words); // (draft_words + new_words) AS DRAFT
             $jobStats->setRejectedWords($jStruct->rejected_words);
             $jobStats->setTranslatedWords($jStruct->translated_words);
             $jobStats->setApprovedWords($jStruct->approved_words);
-            $stats = CatUtils::getFastStatsForJob($jobStats, false);
+            $stats = (new CatUtils($this->database))->getFastStatsForJob($jobStats, false);
             $words_count[] = $stats[ProjectsMetadataMarshaller::WORD_COUNT_RAW->value]['total'];
         }
 
@@ -74,6 +89,9 @@ class ProjectAssignedEmail extends AbstractEmail
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getLayoutVariables($messageBody = null): array
     {
         $vars = parent::_getLayoutVariables();

@@ -1,0 +1,84 @@
+<?php
+
+namespace Matecat\Core\Plugins\Features\SegmentFilter;
+
+use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Test;
+use Plugins\Features\SegmentFilter\Model\FilterDefinition;
+use Plugins\Features\SegmentFilter\Model\SegmentFilterDao;
+use Plugins\Features\SegmentFilter\Model\SegmentFilterModel;
+
+class SegmentFilterModelTest extends AbstractTest
+{
+    private JobStruct $chunk;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->chunk = new JobStruct();
+        $this->chunk->id = 1;
+        $this->chunk->password = 'test';
+        $this->chunk->job_first_segment = 1;
+        $this->chunk->job_last_segment = 100;
+    }
+
+    #[Test]
+    public function getSegmentListCallsFindSegmentIdsBySimpleFilterWhenNotSampled(): void
+    {
+        $filter = new FilterDefinition(['status' => 'TRANSLATED']);
+
+        $expected = [new ShapelessConcreteStruct()];
+
+        $dao = $this->createMock(SegmentFilterDao::class);
+        $dao->expects($this->once())
+            ->method('findSegmentIdsBySimpleFilter')
+            ->with($this->chunk, $filter)
+            ->willReturn($expected);
+        $dao->expects($this->never())
+            ->method('findSegmentIdsForSample');
+
+        $model = new SegmentFilterModel($this->chunk, $filter, $dao);
+        $result = $model->getSegmentList();
+
+        $this->assertSame($expected, $result);
+    }
+
+    #[Test]
+    public function getSegmentListCallsFindSegmentIdsForSampleWhenSampled(): void
+    {
+        $filter = new FilterDefinition([
+            'status' => '',
+            'sample' => ['type' => 'mt', 'size' => 0]
+        ]);
+
+        $expected = [new ShapelessConcreteStruct(), new ShapelessConcreteStruct()];
+
+        $dao = $this->createMock(SegmentFilterDao::class);
+        $dao->expects($this->once())
+            ->method('findSegmentIdsForSample')
+            ->with($this->chunk, $filter)
+            ->willReturn($expected);
+        $dao->expects($this->never())
+            ->method('findSegmentIdsBySimpleFilter');
+
+        $model = new SegmentFilterModel($this->chunk, $filter, $dao);
+        $result = $model->getSegmentList();
+
+        $this->assertSame($expected, $result);
+    }
+
+    #[Test]
+    public function constructorRequiresInjectedDao(): void
+    {
+        $params = (new \ReflectionMethod(SegmentFilterModel::class, '__construct'))->getParameters();
+        $daoParam = $params[2];
+
+        $this->assertFalse(
+            $daoParam->isOptional(),
+            'SegmentFilterDao must be a mandatory ctor dependency (no Database::obtain() fallback)'
+        );
+        $this->assertFalse($daoParam->allowsNull(), 'SegmentFilterDao ctor param must not be nullable');
+    }
+}

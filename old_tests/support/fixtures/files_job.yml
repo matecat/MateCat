@@ -1,9 +1,0 @@
-fj1:
-  id_job: @REF:jobs:job1:id
-  id_file: @REF:files:file1:id
-  assign_date: NULL
-  t_delivery_date: NULL
-  t_a_delivery_date: NULL
-  id_segment_start: NULL
-  id_segment_end: NULL
-  status_analisys: NEW

@@ -27,6 +27,8 @@ class StreamHandlerProvider implements ProviderInterface
 
     /**
      * @inheritDoc
+     * @param array<string, mixed> $configurationParams
+     * @return array<string, mixed>
      */
     public function getHandlerParams(string $name, array $configurationParams): array
     {

@@ -3,6 +3,7 @@
 namespace Controller\Abstracts;
 
 use Controller\Abstracts\Authentication\CookieManager;
+use Controller\Exceptions\RenderTerminatedException;
 use Exception;
 use Model\Files\FileDao;
 use Model\FilesStorage\AbstractFilesStorage;
@@ -11,6 +12,7 @@ use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
+use TypeError;
 use Utils\Registry\AppConfig;
 use View\API\Commons\ZipContentObject;
 use ZipArchive;
@@ -31,21 +33,28 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
 
     protected ?string $_user_provided_filename = null;
 
-    /**
-     * @var JobStruct
-     */
     protected JobStruct $job;
+
+    protected ProjectStruct $project;
+
+    private ?ProjectDao $projectDao = null;
+
+    private function getProjectDao(): ProjectDao
+    {
+        return $this->projectDao ??= new ProjectDao($this->getDatabase());
+    }
 
     /**
      * @param int $ttl
      *
      * @return JobStruct
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getJob(int $ttl = 0): JobStruct
     {
         if (empty($this->job)) {
-            $this->job = JobDao::getById($this->id_job, $ttl)[0];
+            $this->job = (new JobDao($this->getDatabase()))->getNotDeletedById($this->id_job, $ttl)[0];
         }
 
         return $this->job;
@@ -56,17 +65,24 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
      *
      * @return $this
      * @throws Exception
+     * @throws TypeError
      */
     public function setOutputContent(ZipContentObject $content): AbstractDownloadController
     {
-        $this->outputContent = $content->getContent();
+        $this->outputContent = $content->getContent() ?? '';
 
         return $this;
     }
 
-    protected function setMimeType()
+    protected function setMimeType(): void
     {
         $extension = AbstractFilesStorage::pathinfo_fix($this->_filename, PATHINFO_EXTENSION);
+
+        if (!is_string($extension)) {
+            $this->mimeType = self::$OCTET_STREAM;
+
+            return;
+        }
 
         switch (strtolower($extension)) {
             case "xlf":
@@ -104,11 +120,6 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     }
 
     /**
-     * @var ProjectStruct
-     */
-    protected ProjectStruct $project;
-
-    /**
      * @return ProjectStruct
      */
     public function getProject(): ProjectStruct
@@ -116,33 +127,35 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
         return $this->project;
     }
 
-    protected function unlockToken($tokenContent = null)
+    /**
+     * @param array<string, mixed>|null $tokenContent
+     */
+    protected function unlockToken(?array $tokenContent = null): void
     {
         if (!empty($this->downloadToken)) {
-            CookieManager::setCookie(
+            $cookieValue = json_encode(
+                empty($tokenContent)
+                    ? ["code" => 0, "message" => "Download complete."]
+                    : $tokenContent
+            );
+
+            if ($cookieValue === false) {
+                return;
+            }
+
+            (new CookieManager())->set(
                 $this->downloadToken,
-                (empty($tokenContent) ? json_encode([
-                    "code" => 0,
-                    "message" => "Download complete."
-                ]) : json_encode($tokenContent)),
-                [
-                    'expires' => time() + 600,
-                    'path' => '/',
-                    'domain' => AppConfig::$COOKIE_DOMAIN,
-                    'secure' => true,
-                    'httponly' => false,
-                    'samesite' => 'None',
-                ]
+                $cookieValue,
+                time() + 600,
+                true,
+                false,
+                'Strict'
             );
             $this->downloadToken = null;
         }
     }
 
-    /**
-     * Set No Cache headers
-     *
-     */
-    protected function nocache()
+    protected function nocache(): void
     {
         header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
         header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
@@ -152,24 +165,25 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     }
 
     /**
-     * Download the file
-     *
      * @param bool $forceXliff
+     *
+     * @throws Exception
      */
-    public function finalize(bool $forceXliff = false)
+    public function finalize(bool $forceXliff = false): void
     {
-        try {
-            $this->unlockToken();
+        $this->unlockToken();
 
             if (empty($this->project)) {
-                $this->project = ProjectDao::findByJobId($this->id_job);
+                $this->project = $this->getProjectDao()->findByJobId($this->id_job)
+                    ?? throw new Exception('Project not found for job ' . $this->id_job);
             }
 
             if (empty($this->_filename)) {
                 $this->_filename = $this->getDefaultFileName($this->project);
             }
 
-            $isGDriveProject = ProjectDao::isGDriveProject($this->project->id);
+            $projectId = $this->project->id ?? throw new Exception('Project not found');
+            $isGDriveProject = $this->getProjectDao()->isGDriveProject((int)$projectId);
 
             if (!$isGDriveProject || $forceXliff === true) {
                 ob_get_contents();
@@ -177,37 +191,32 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
                 ob_start("ob_gzhandler");  // compress page before sending
                 $this->nocache();
 
+                $safeFilename = self::sanitizeContentDispositionFilename($this->_filename);
                 header("Content-Type: $this->mimeType");
                 header(
-                    "Content-Disposition: attachment; filename=\"$this->_filename\""
+                    "Content-Disposition: attachment; filename=\"$safeFilename\""
                 ); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
                 header("Expires: 0");
                 header("Connection: close");
                 header("Content-Length: " . strlen($this->outputContent));
                 echo $this->outputContent;
+                if (AppConfig::$ENV === 'testing') {
+                    throw new RenderTerminatedException();
+                }
                 exit;
             }
-        } catch (Exception $e) {
-            echo "<pre>";
-            print_r($e);
-            echo "\n\n\n";
-            echo "</pre>";
-            exit;
-        }
     }
 
     /**
-     * If more than one file constitutes the project, then the filename is the project name.
-     * If the project is made of just one file, then the filename for download is the file name itself.
-     *
-     * @param $project ProjectStruct
+     * @param ProjectStruct $project
      *
      * @return string
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getDefaultFileName(ProjectStruct $project): string
     {
-        $files = FileDao::getByProjectId($project->id);
+        $files = (new FileDao($this->getDatabase()))->getByProjectId((int)$project->id);
 
         if (count($files) > 1) {
             return $this->project->name . ".zip";
@@ -219,11 +228,11 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     /**
      * @param ZipContentObject[] $output_content
      * @param string|null $outputFile
-     *
      * @param ?bool $isOriginalFile
      *
-     * @return string The zip binary
+     * @return string
      * @throws Exception
+     * @throws TypeError
      */
     protected static function composeZip(array $output_content, ?string $outputFile = null, ?bool $isOriginalFile = false): string
     {
@@ -261,10 +270,33 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
 
         // Close and send to users
         $zip->close();
-        $zip_content = file_get_contents($outputFile);
-        unlink($outputFile);
+
+        // ZipArchive::close() removes the file when the archive has no entries,
+        // so guard against a missing file before reading/unlinking it.
+        $zip_content = is_file($outputFile) ? file_get_contents($outputFile) : false;
+        if (is_file($outputFile)) {
+            unlink($outputFile);
+        }
+
+        if ($zip_content === false) {
+            throw new Exception('Failed to read zip file: ' . $outputFile);
+        }
 
         return $zip_content;
+    }
+
+    /**
+     * Removes characters that could break out of the quoted Content-Disposition
+     * filename value (double quote, backslash, CR, LF, NUL) — prevents header
+     * injection / disposition-parameter smuggling via user-controlled filenames.
+     *
+     * @param string $filename
+     *
+     * @return string
+     */
+    public static function sanitizeContentDispositionFilename(string $filename): string
+    {
+        return str_replace(['"', '\\', "\r", "\n", "\0"], '', $filename);
     }
 
     /**
@@ -275,6 +307,10 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     public static function forceOcrExtension(string $filename): string
     {
         $pathinfo = AbstractFilesStorage::pathinfo_fix($filename);
+
+        if (!is_array($pathinfo) || !isset($pathinfo['extension'], $pathinfo['basename'])) {
+            return $filename;
+        }
 
         switch (strtolower($pathinfo['extension'])) {
             case 'pdf':

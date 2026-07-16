@@ -11,7 +11,7 @@ use Utils\Engines\MyMemory;
 class CreateRandUserController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -21,13 +21,18 @@ class CreateRandUserController extends KleinController
      */
     public function create(): void
     {
-        /**
-         * @var $tms MyMemory
-         */
-        $tms = EnginesFactory::getInstance(1);
+        $tms = $this->getEngine();
 
         $this->response->json([
             'data' => $tms->createMyMemoryKey()
         ]);
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function getEngine(): MyMemory
+    {
+        return EnginesFactory::getInstance(1, $this->getDatabase(), MyMemory::class);
     }
 }

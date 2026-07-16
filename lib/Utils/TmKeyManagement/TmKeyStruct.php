@@ -4,6 +4,9 @@ namespace Utils\TmKeyManagement;
 
 use DomainException;
 use JsonSerializable;
+use Model\DataAccess\UnknownPropertyException;
+use Model\Users\UserStruct;
+use ReflectionException;
 use stdClass;
 
 /**
@@ -109,6 +112,26 @@ class TmKeyStruct extends stdClass implements JsonSerializable
     public bool $is_shared = false;
 
     /**
+     * UserStructs of the owners this key belongs to.
+     *
+     * This property is only set when the key is shared, meaning
+     * {@see self::$is_shared} is true.
+     *
+     * @var UserStruct[]
+     */
+    protected array $in_users = [];
+
+    /**
+     * An array to store user IDs that are included in the selection
+     *
+     * This property is only set when the key is shared, meaning
+     * {@see self::$is_shared} is true.
+     *
+     * @var int[] List of user IDs
+     */
+    protected array $in_users_id = [];
+
+    /**
      * @var int How much readable chars for hashed keys
      */
     protected int $readable_chars = 5;
@@ -126,12 +149,30 @@ class TmKeyStruct extends stdClass implements JsonSerializable
     public int $penalty = 0;
 
     /**
+     * @return UserStruct[]
+     */
+    public function getInUsers(): array {
+        return $this->in_users;
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getInUsersId(): array {
+        return $this->in_users_id;
+    }
+
+    /**
      * When a key return back from the client we have to know if it is hashed
      *
      * @return bool
      */
     public function isEncryptedKey(): bool
     {
+        if ($this->key === null) {
+            return false;
+        }
+
         return strrpos($this->key, '*') !== false;
     }
 
@@ -141,7 +182,7 @@ class TmKeyStruct extends stdClass implements JsonSerializable
     }
 
     /**
-     * @param array|TmKeyStruct|null $params An associative array with the following keys:<br/>
+     * @param array<string, mixed>|TmKeyStruct|null $params An associative array with the following keys:<br/>
      *                                                       <pre>
      *                                                       tm         : boolean - Tm key
      *                                                       glos       : boolean - Glossary key
@@ -159,10 +200,16 @@ class TmKeyStruct extends stdClass implements JsonSerializable
      *                                                       source     : string  - Source languages
      *                                                       target     : string  - Target languages
      *                                                       </pre>
+     *
+     * @throws DomainException
      */
     public function __construct(array|TmKeyStruct|null $params = null)
     {
-        if ($params != null) {
+        if ($params instanceof TmKeyStruct) {
+            $params = get_object_vars($params);
+        }
+
+        if ($params !== null) {
             foreach ($params as $property => $value) {
                 if (property_exists($this, $property)) {
                     $this->$property = $value;
@@ -171,16 +218,19 @@ class TmKeyStruct extends stdClass implements JsonSerializable
         }
     }
 
-    public function __set($name, $value)
+    /**
+     * @throws UnknownPropertyException
+     */
+    public function __set(string $name, mixed $_value): void
     {
         if (!property_exists($this, $name)) {
-            throw new DomainException('Unknown property ' . $name);
+            throw new UnknownPropertyException($name);
         }
     }
 
     /**
      * Converts the current object into an associative array
-     * @return array
+     * @return array<string, mixed>
      */
     public function toArray(): array
     {
@@ -200,6 +250,10 @@ class TmKeyStruct extends stdClass implements JsonSerializable
 
     public function getCrypt(): string
     {
+        if ($this->key === null) {
+            return '';
+        }
+
         $keyLength = strlen($this->key);
         $last_digits = substr($this->key, -$this->readable_chars);
 
@@ -208,6 +262,7 @@ class TmKeyStruct extends stdClass implements JsonSerializable
 
     /**
      * @inheritDoc
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {
@@ -226,7 +281,7 @@ class TmKeyStruct extends stdClass implements JsonSerializable
                 'w_transl' => $this->w_transl,
                 'r_rev' => $this->r_rev,
                 'w_rev' => $this->w_rev,
-                'penalty' => $this->penalty ?? 0,
+                'penalty' => $this->penalty,
                 'is_shared' => $this->is_shared,
                 'is_private' => $this->isEncryptedKey()
             ];
@@ -238,7 +293,7 @@ class TmKeyStruct extends stdClass implements JsonSerializable
             'owner' => $this->owner,
             'name' => $this->name,
             'key' => $this->key,
-            'penalty' => $this->penalty ?? 0,
+            'penalty' => $this->penalty,
             'is_shared' => $this->is_shared,
         ];
     }

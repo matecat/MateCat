@@ -15,9 +15,11 @@ use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
 use Klein\Response;
+use Model\Teams\TeamDao;
 use Model\Users\RedeemableProject;
 use Model\Users\UserDao;
 use ReflectionException;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
 use Utils\Tools\Utils;
@@ -29,6 +31,8 @@ class LoginController extends AbstractStatefulKleinController
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
     public function directLogout(): void
     {
@@ -38,6 +42,7 @@ class LoginController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function login(): void
     {
@@ -46,77 +51,95 @@ class LoginController extends AbstractStatefulKleinController
             'password' => FILTER_SANITIZE_SPECIAL_CHARS
         ]);
 
-        $checkRateLimitResponse = $this->checkRateLimitResponse($this->response, $params['email'] ?? 'BLANK_EMAIL', '/api/app/user/login', 5);
-        $checkRateLimitIp = $this->checkRateLimitResponse($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/login', 5);
+        $emailIdentifier = is_string($params['email']) && $params['email'] !== '' ? $params['email'] : 'BLANK_EMAIL';
 
-        if ($checkRateLimitResponse instanceof Response) {
-            $this->response = $checkRateLimitResponse;
+        $rateLimitEmailResponse = $this->checkAndIncrementRateLimit($this->response, $emailIdentifier, '/api/app/user/login', 5);
+        $rateLimitIpResponse = $this->checkAndIncrementRateLimit($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/login', 5);
 
-            return;
-        }
-
-        if ($checkRateLimitIp instanceof Response) {
-            $this->response = $checkRateLimitIp;
+        if ($rateLimitEmailResponse instanceof Response) {
+            $this->response = $rateLimitEmailResponse;
 
             return;
         }
 
-        // XSRF-Token
+        if ($rateLimitIpResponse instanceof Response) {
+            $this->response = $rateLimitIpResponse;
+
+            return;
+        }
+
+        // XSRF-Token (Signed Double-Submit): verify signature + expiry, then bind to the session
         $xsrfToken = $this->request->headers()->get(AppConfig::$XSRF_TOKEN);
 
-        if ($xsrfToken === null) {
-            $this->incrementRateLimitCounter($params['email'] ?? 'BLANK_EMAIL', '/api/app/user/login');
-            $this->incrementRateLimitCounter(Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/login');
+        if (!is_string($xsrfToken)) {
             $this->response->code(403);
 
             return;
         }
 
         try {
-            SimpleJWT::isValid(
-                $xsrfToken,
-                AppConfig::$AUTHSECRET
-            );
+            $jwt = SimpleJWT::getValidatedInstanceFromString($xsrfToken, AppConfig::$AUTHSECRET);
         } catch (Exception) {
-            $this->incrementRateLimitCounter($params['email'] ?? 'BLANK_EMAIL', '/api/app/user/login');
-            $this->incrementRateLimitCounter(Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/login');
             $this->response->code(403);
 
             return;
         }
 
-        $dao = new UserDao();
-        $user = $dao->getByEmail($params['email']);
+        // single-use: the token must match the csrf issued to THIS browser session (CWE-352)
+        $sessionCsrf = $_SESSION['login_csrf'] ?? null;
+        unset($_SESSION['login_csrf']);
 
-        if ($user && $user->passwordMatch($params['password']) && !is_null($user->email_confirmed_at)) {
+        $tokenCsrf = $jwt['csrf'];
+        if (!is_string($sessionCsrf) || !is_string($tokenCsrf) || !hash_equals($sessionCsrf, $tokenCsrf)) {
+            $this->response->code(403);
+
+            return;
+        }
+
+        $dao = $this->createUserDao();
+        $user = is_string($params['email']) ? $dao->getByEmail($params['email']) : null;
+
+        if ($user && is_string($params['password']) && $user->passwordMatch($params['password']) && !is_null($user->email_confirmed_at)) {
             $user->clearAuthToken();
 
             $dao->updateUser($user);
-            $dao->destroyCacheByUid($user->uid);
+            $uid = $user->uid ?? throw new Exception('User not authenticated');
+            $dao->destroyCacheByUid($uid);
 
-            $project = new RedeemableProject($user, $_SESSION);
+            $project = new RedeemableProject(
+                $user,
+                $_SESSION,
+                new TeamDao($this->getDatabase())
+            );
             $project->tryToRedeem();
 
             AuthCookie::setCredentials($user, new SessionTokenStoreHandler());
-            AuthenticationHelper::getInstance($_SESSION);
+            AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase());
 
             $this->response->code(200);
         } else {
-            $this->incrementRateLimitCounter($params['email'], '/api/app/user/login');
-            $this->incrementRateLimitCounter(Utils::getRealIpAddr(), '/api/app/user/login');
             $this->response->code(404);
         }
+    }
+
+    protected function createUserDao(): UserDao
+    {
+        return new UserDao($this->getDatabase());
     }
 
     /**
      * Signed Double-Submit Cookie
      * @throws Exception
+     * @throws TypeError
      */
     public function token(): void
     {
+        $csrf = Utils::uuid4();
+        $_SESSION['login_csrf'] = $csrf;
+
         $jwt = new SimpleJWT(
             [
-                "csrf" => Utils::uuid4()
+                "csrf" => $csrf
             ],
             AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
             AppConfig::$AUTHSECRET,
@@ -129,6 +152,7 @@ class LoginController extends AbstractStatefulKleinController
     /**
      * Signed Double-Submit Cookie
      * @throws Exception
+     * @throws TypeError
      */
     public function socketToken(): void
     {

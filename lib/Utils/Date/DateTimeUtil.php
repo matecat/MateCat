@@ -10,12 +10,12 @@ class DateTimeUtil
 {
 
     /**
-     * @param null $date
+     * @param ?string $date
      *
      * @return ?string
      * @throws Exception
      */
-    public static function formatIsoDate($date = null): ?string
+    public static function formatIsoDate(?string $date = null): ?string
     {
         if ($date !== null) {
             $date = new DateTime($date);

@@ -3,6 +3,8 @@
 
 namespace Utils\Engines\Results;
 
+use TypeError;
+
 class MTResponse
 {
 
@@ -10,6 +12,11 @@ class MTResponse
     public string $sentence_confidence;
     public mixed $error = "";
 
+    /**
+     * @param array<string, mixed> $result
+     *
+     * @throws TypeError
+     */
     public function __construct(array $result)
     {
         $this->error = new ErrorResponse();
@@ -25,6 +32,9 @@ class MTResponse
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function get_as_array(): array
     {
         if ($this->error != "") {

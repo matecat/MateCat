@@ -22,7 +22,7 @@ class JsonValidatorGenericException extends Exception implements JsonSerializabl
      */
     public function __construct(?string $error = null)
     {
-        parent::__construct($error);
+        parent::__construct($error ?? '');
         $this->error = $error;
     }
 

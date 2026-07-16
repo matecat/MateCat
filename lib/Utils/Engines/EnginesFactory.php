@@ -5,9 +5,10 @@ namespace Utils\Engines;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use DomainException;
 use Exception;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use Model\Exceptions\NotFoundException;
 
 /**
  * Created by PhpStorm.
@@ -27,32 +28,30 @@ class EnginesFactory
      * @return T
      * @throws Exception
      */
-    public static function getInstance(int $id, ?string $engineClass = null): AbstractEngine
+    public static function getInstance(int $id, IDatabase $database, ?string $engineClass = null): AbstractEngine
     {
-        if (!is_numeric($id)) {
-            throw new Exception("Missing id engineRecord", -1);
-        }
-
-        $engineDAO = new EngineDAO(Database::obtain());
+        $engineDAO = new EngineDAO($database);
         $engineStruct = EngineStruct::getStruct();
         $engineStruct->id = $id;
 
         $eng = $engineDAO->setCacheTTL(60 * 5)->read($engineStruct);
 
-        /**
-         * @var $engineRecord EngineStruct
-         */
+        /** @var EngineStruct|null $engineRecord */
         $engineRecord = $eng[0] ?? null;
 
         if (empty($engineRecord)) {
-            throw new Exception("Engine $id not found", -2);
+            throw new NotFoundException("Engine $id not found", -2);
         }
 
-        $className = self::getFullyQualifiedClassName($engineRecord->class_load);
-        $engine = new $className($engineRecord);
+        $className = self::getFullyQualifiedClassName(
+            $engineRecord->class_load ?? throw new NotFoundException("Engine $id has no class_load")
+        );
+
+        /** @var T $engine */
+        $engine = new $className($engineRecord, $database);
 
         if ($engineClass !== null and !is_a($engine, $engineClass, true)) {
-            throw new Exception("Engine Id " . $id . " is not the expected $engineClass engine instance");
+            throw new NotFoundException("Engine Id " . $id . " is not the expected $engineClass engine instance");
         }
 
         return $engine;
@@ -60,27 +59,33 @@ class EnginesFactory
 
     /**
      * @param EngineStruct $engineRecord
+     * @param IDatabase $database
      *
      * @return EngineInterface
      * @throws Exception
      */
-    public static function createTempInstance(EngineStruct $engineRecord): EngineInterface
+    public static function createTempInstance(EngineStruct $engineRecord, IDatabase $database): EngineInterface
     {
-        $className = self::getFullyQualifiedClassName($engineRecord->class_load);
+        $className = self::getFullyQualifiedClassName(
+            $engineRecord->class_load ?? throw new NotFoundException("Engine has no class_load")
+        );
         $engineRecord->class_load = $className;
 
-        return new $engineRecord->class_load($engineRecord);
+        /** @var EngineInterface $engine */
+        $engine = new $className($engineRecord, $database);
+
+        return $engine;
     }
 
     /**
-     * @throws Exception
+     * @throws NotFoundException When no matching class exists.
      */
     public static function getFullyQualifiedClassName(string $_className): string
     {
         $className = 'Utils\Engines\\' . $_className; // guess for backward compatibility
         if (!class_exists($className)) {
             if (!class_exists($_className)) {
-                throw new Exception("Engine Class $className not Found");
+                throw new NotFoundException("Engine Class $className not Found");
             }
             $className = $_className; // use the class name as is
         }
@@ -98,9 +103,9 @@ class EnginesFactory
      * @return T
      * @throws Exception
      */
-    public static function getInstanceByIdAndUser(int $engineId, int $uid, ?string $engineClass = null): AbstractEngine
+    public static function getInstanceByIdAndUser(int $engineId, int $uid, IDatabase $database, ?string $engineClass = null): AbstractEngine
     {
-        $engine = self::getInstance($engineId, $engineClass);
+        $engine = self::getInstance($engineId, $database, $engineClass);
         $engineRecord = $engine->getEngineRecord();
 
         if ($engineRecord->uid != $uid) {

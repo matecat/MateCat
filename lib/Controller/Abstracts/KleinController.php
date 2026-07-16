@@ -5,16 +5,20 @@ namespace Controller\Abstracts;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Controller\Abstracts\Authentication\AuthenticationTrait;
 use Controller\API\Commons\Validators\Base;
+use Controller\Exceptions\MissingDatabaseException;
 use Controller\Traits\TimeLoggerTrait;
 use Exception;
+use InvalidArgumentException;
 use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
 use Model\ApiKeys\ApiKeyStruct;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use ReflectionException;
 use Throwable;
+use TypeError;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
 
@@ -38,6 +42,7 @@ abstract class KleinController implements IController
     protected Response $response;
     protected ?ServiceProvider $service = null;
     protected ?App $app = null;
+    protected IDatabase $database;
 
     /**
      * @var Base[]
@@ -50,14 +55,14 @@ abstract class KleinController implements IController
     protected ?ApiKeyStruct $api_record = null;
 
     /**
-     * @var array
+     * @var array<string, mixed>
      */
     public array $params = [];
 
     /**
-     * @var ?FeatureSet
+     * @var FeatureSet
      */
-    protected ?FeatureSet $featureSet = null;
+    protected FeatureSet $featureSet;
 
     protected MatecatLogger $logger;
 
@@ -82,7 +87,7 @@ abstract class KleinController implements IController
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function getParams(): array
     {
@@ -99,11 +104,16 @@ abstract class KleinController implements IController
      * @param Response $response
      * @param ?ServiceProvider $service
      * @param ?App $app
-     *
+     * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
-    public function __construct(Request $request, Response $response, ?ServiceProvider $service = null, ?App $app = null)
-    {
+    public function __construct(
+        Request $request,
+        Response $response,
+        ?ServiceProvider $service = null,
+        ?App $app = null
+    ) {
         $this->startTimer();
         $this->timingLogFileName = 'api_calls_time.log';
 
@@ -112,16 +122,32 @@ abstract class KleinController implements IController
         $this->service = $service;
         $this->app = $app;
 
+        $this->logger = LoggerFactory::getLogger();
+
         $paramsPut = $this->getPutParams() ?: [];
         $paramsGet = $this->request->paramsGet()->getIterator()->getArrayCopy();
         $paramsNamed = $this->request->paramsNamed()->getIterator()->getArrayCopy();
         $this->params = $this->request->paramsPost()->getIterator()->getArrayCopy();
         $this->params = array_merge($this->params, $paramsGet, $paramsNamed, $paramsPut);
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet($this->getDatabase());
         $this->identifyUser($this->useSession);
-        $this->afterConstruct();
+        $this->initDependencies();
+        $this->registerValidators();
+    }
 
-        $this->logger = LoggerFactory::getLogger();
+    public function getDatabase(): IDatabase
+    {
+        if (!isset($this->database)) {
+            $injected = $this->app?->getDatabase();
+            if (!$injected instanceof IDatabase) {
+                throw new MissingDatabaseException(
+                    'KleinController requires a database: dispatch through a Klein App exposing a "getDatabase" service, or inject $database directly.'
+                );
+            }
+            $this->database = $injected;
+        }
+
+        return $this->database;
     }
 
     /**
@@ -132,7 +158,7 @@ abstract class KleinController implements IController
     {
         if (empty($this->api_key)) {
             static::sessionStart();
-            AuthenticationHelper::refreshSession($_SESSION);
+            AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase())->refreshSession();
         }
     }
 
@@ -165,9 +191,17 @@ abstract class KleinController implements IController
         return $this->request;
     }
 
-    public function getPutParams()
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function getPutParams(): ?array
     {
-        return json_decode(file_get_contents('php://input'), true);
+        $input = file_get_contents('php://input');
+        if ($input === false) {
+            return null;
+        }
+
+        return json_decode($input, true);
     }
 
     /**
@@ -190,16 +224,32 @@ abstract class KleinController implements IController
         return $this;
     }
 
-    protected function afterConstruct(): void
+    /**
+     * Override this method to inject dependencies, DB, Dao, etc.
+     * @return void
+     */
+    protected function initDependencies(): void
     {
     }
 
+    /**
+     * Override this method to register validators.
+     * @return void
+     */
+    protected function registerValidators(): void
+    {
+    }
+
+    /**
+     * @throws \Psr\Log\InvalidArgumentException
+     * @throws InvalidArgumentException
+     */
     protected function _logWithTime(): void
     {
         $this->logPageCall();
     }
 
-    protected function afterValidate()
+    protected function afterValidate(): void
     {
     }
 
@@ -212,11 +262,9 @@ abstract class KleinController implements IController
     }
 
     /**
-     * @param $id_segment
-     *
-     * @return array
+     * @return array{id_segment: string, split_num: string|null}
      */
-    protected function parseIdSegment($id_segment): array
+    protected function parseIdSegment(string $id_segment): array
     {
         $parsedSegment = explode("-", $id_segment);
 

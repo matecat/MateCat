@@ -9,9 +9,11 @@
 
 namespace Utils\LQA;
 
+use Exception;
 use Matecat\ICU\MessagePatternValidator;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
-use Model\Projects\MetadataDao as ProjectMetadataDao;
+use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 
@@ -35,18 +37,18 @@ trait ICUSourceSegmentChecker
      * @param JobStruct $chunk The job chunk containing the source data to validate.
      * @param string $sourceSegment The specific segment of the source to check for ICU patterns.
      * @return bool Returns true if the source segment contains ICU patterns, otherwise false.
+     * @throws Exception
      */
-    private function sourceContainsIcu(ProjectStruct $projectStruct, JobStruct $chunk, string $sourceSegment): bool
+    private function sourceContainsIcu(ProjectStruct $projectStruct, JobStruct $chunk, string $sourceSegment, IDatabase $database): bool
     {
         $this->icuSourcePatternValidator = new MessagePatternValidator(
             $chunk->source,
-            // Validate the ICU syntax in the segment to detect ICU patterns
             $sourceSegment,
         );
 
         $this->sourceContainsIcu = ICUSourceSegmentDetector::sourceContainsIcu(
             $this->icuSourcePatternValidator,
-            $this->icuEnabled($projectStruct)
+            $this->icuEnabled($projectStruct, $database)
         );
 
         return $this->sourceContainsIcu;
@@ -54,17 +56,16 @@ trait ICUSourceSegmentChecker
     }
 
     /**
-     * Determines if ICU is enabled for the given project.
-     *
-     * @param ProjectStruct $projectStruct The project structure containing metadata.
-     * @return bool Returns true if ICU is enabled, otherwise false.
+     * @throws Exception
      */
-    private function icuEnabled(ProjectStruct $projectStruct): bool
+    private function icuEnabled(ProjectStruct $projectStruct, IDatabase $database): bool
     {
         if ($this->icuEnabled !== null) {
             return $this->icuEnabled;
         }
-        return $this->icuEnabled = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::ICU_ENABLED->value) ?? false;
+
+        $icuEnabled = (new MetadataDao($database))->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::ICU_ENABLED->value);
+        return $this->icuEnabled = (bool)$icuEnabled;
     }
 
 }

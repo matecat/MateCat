@@ -4,33 +4,34 @@ namespace Controller\API\V3;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
-use Controller\Traits\SegmentDisabledTrait;
+use DivisionByZeroError;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\ConstantsInterface;
 use Model\Analysis\Constants\MatchConstantsFactory;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Exceptions\NotFoundException;
-use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\EntryDao;
 use Model\Projects\MetadataDao;
-use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentDisabledService;
 use Model\Segments\SegmentMetadataDao;
+use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentNoteDao;
+use PDOException;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use ReflectionException;
+use RuntimeException;
 use Utils\Tools\CatUtils;
 use Utils\Url\JobUrls;
 
 class SegmentAnalysisController extends KleinController
 {
-    use SegmentDisabledTrait;
-
     const int MAX_PER_PAGE = 200;
 
     /**
@@ -43,16 +44,22 @@ class SegmentAnalysisController extends KleinController
      */
     private ProjectDao $projectDao;
 
-    protected function afterConstruct(): void
+    /**
+     * @var SegmentDisabledService
+     */
+    private SegmentDisabledService $segmentDisabledService;
+
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
 
     /**
-     * Segment list
-     * from id job/password
      * @throws ReflectionException
      * @throws NotFoundException
+     * @throws Exception
+     * @throws PDOException
+     * @throws DivisionByZeroError
      */
     public function job(): void
     {
@@ -65,27 +72,22 @@ class SegmentAnalysisController extends KleinController
 
         $idJob = $this->request->param('id_job');
         $password = $this->request->param('password');
-        $segmentsCount = JobDao::getSegmentsCount($idJob, $password);
+        $segmentsCount = (new JobDao($this->getDatabase()))->getSegmentsCount($idJob, $password);
 
         // raise exception if the job does not exist
-        $jobStruct = ChunkDao::getByIdAndPassword($idJob, $password);
-        $this->project = $jobStruct->getProject();
+        $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($idJob, $password);
+        $this->project = $jobStruct->getProject(new ProjectDao($this->getDatabase()));
 
-        $mt_qe_workflow_enabled = $this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false;
+        $mt_qe_workflow_enabled = !empty((new MetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$this->project->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value));
         $matchClass = MatchConstantsFactory::getInstance($mt_qe_workflow_enabled);
         $this->response->json($this->getSegmentsForAJob($jobStruct, $page, $perPage, $segmentsCount, $matchClass));
     }
 
     /**
-     * @param JobStruct $jobStruct
-     * @param int $page
-     * @param int $perPage
-     * @param int $segmentsCount
-     * @param ConstantsInterface $matchClass
-     *
-     * @return array
+     * @return array{workflow_type: string, _links: array{page: int, per_page: int, total_pages: float|int, total_items: int, next_page: string|null, prev_page: string|null}, items: list<array<string, mixed>>}
      * @throws ReflectionException
      * @throws Exception
+     * @throws DivisionByZeroError
      */
     private function getSegmentsForAJob(JobStruct $jobStruct, int $page, int $perPage, int $segmentsCount, ConstantsInterface $matchClass): array
     {
@@ -115,12 +117,7 @@ class SegmentAnalysisController extends KleinController
     }
 
     /**
-     * @param JobStruct $jobStruct
-     * @param int $page
-     * @param int $perPage
-     * @param ConstantsInterface $matchConstants
-     *
-     * @return array
+     * @return list<array<string, mixed>>
      * @throws ReflectionException
      * @throws Exception
      */
@@ -129,9 +126,13 @@ class SegmentAnalysisController extends KleinController
         $segments = [];
         $limit = $perPage;
         $offset = ($page - 1) * $perPage;
-        $this->projectDao = new ProjectDao();
+        $this->projectDao = new ProjectDao($this->getDatabase());
+        $this->segmentDisabledService = new SegmentDisabledService(new SegmentMetadataDao($this->getDatabase()));
 
-        $segmentsForAnalysis = SegmentDao::getSegmentsForAnalysisFromIdJobAndPassword($jobStruct->id, $jobStruct->password, $limit, $offset);
+        $idJob = $jobStruct->id ?? throw new RuntimeException('Job ID must not be null');
+        $password = $jobStruct->password ?? throw new RuntimeException('Job password must not be null');
+
+        $segmentsForAnalysis = (new SegmentDao($this->getDatabase()))->getSegmentsForAnalysisFromIdJobAndPassword($idJob, $password, $limit, $offset);
         $projectPasswordsMap = $this->projectDao->getPasswordsMap($jobStruct->id_project);
         $issuesNotesAndIdRequests = $this->getIssuesNotesAndIdRequests($segmentsForAnalysis);
 
@@ -147,11 +148,10 @@ class SegmentAnalysisController extends KleinController
     }
 
     /**
-     * Segment list
-     * from id project/password
      * @throws ReflectionException
      * @throws NotFoundException
      * @throws Exception
+     * @throws DivisionByZeroError
      */
     public function project(): void
     {
@@ -165,24 +165,34 @@ class SegmentAnalysisController extends KleinController
         $idProject = $this->request->param('id_project');
         $password = $this->request->param('password');
 
-        $this->projectDao = new ProjectDao();
+        $this->projectDao = new ProjectDao($this->getDatabase());
         $this->project = $this->projectDao->findByIdAndPassword($idProject, $password);
-        $mt_qe_workflow_enabled = $this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false;
+        $mt_qe_workflow_enabled = !empty((new MetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$this->project->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value));
         $matchClass = MatchConstantsFactory::getInstance($mt_qe_workflow_enabled);
-        $segmentsCount = CatUtils::getSegmentTranslationsCount($this->project);
+        $segmentsCount = $this->getSegmentTranslationsCount($this->project);
         $this->response->json($this->getSegmentsForAProject($idProject, $password, $page, $perPage, $segmentsCount, $matchClass));
     }
 
     /**
-     * @param int $idProject
-     * @param string $password
-     * @param int $page
-     * @param int $perPage
-     * @param int $segmentsCount
-     * @param ConstantsInterface $matchClass
-     *
-     * @return array
      * @throws Exception
+     */
+    protected function getSegmentTranslationsCount(ProjectStruct $project): int
+    {
+        return (new CatUtils($this->getDatabase()))->getSegmentTranslationsCount($project) ?? 0;
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function countRawWords(?string $string, string $lang, ?MateCatFilter $filter): int
+    {
+        return (new CatUtils($this->getDatabase()))->countSegmentRawWords($string, $lang, $filter);
+    }
+
+    /**
+     * @return array{workflow_type: string, _links: array{page: int, per_page: int, total_pages: float|int, total_items: int, next_page: string|null, prev_page: string|null}, items: list<array<string, mixed>>}
+     * @throws Exception
+     * @throws DivisionByZeroError
      */
     private function getSegmentsForAProject(int $idProject, string $password, int $page, int $perPage, int $segmentsCount, ConstantsInterface $matchClass): array
     {
@@ -212,13 +222,7 @@ class SegmentAnalysisController extends KleinController
     }
 
     /**
-     * @param int $idProject
-     * @param string $password
-     * @param int $page
-     * @param int $perPage
-     * @param ConstantsInterface $matchConstants
-     *
-     * @return array
+     * @return list<array<string, mixed>>
      * @throws ReflectionException
      * @throws Exception
      */
@@ -227,9 +231,11 @@ class SegmentAnalysisController extends KleinController
         $segments = [];
         $limit = $perPage;
         $offset = ($page - 1) * $perPage;
+        $this->segmentDisabledService = new SegmentDisabledService(new SegmentMetadataDao($this->getDatabase()));
 
-        $segmentsForAnalysis = SegmentDao::getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset);
-        $projectPasswordsMap = $this->projectDao->getPasswordsMap($this->project->id);
+        $segmentsForAnalysis = (new SegmentDao($this->getDatabase()))->getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset);
+        $projectIdFromProject = $this->project->id ?? throw new Exception('Project not found');
+        $projectPasswordsMap = $this->projectDao->getPasswordsMap((int)$projectIdFromProject);
         $issuesNotesAndIdRequests = $this->getIssuesNotesAndIdRequests($segmentsForAnalysis);
 
         $notesAggregate = $issuesNotesAndIdRequests['notesAggregate'];
@@ -244,12 +250,13 @@ class SegmentAnalysisController extends KleinController
     }
 
     /**
-     * @param $segmentsForAnalysis
-     *
-     * @return array
+     * @param ShapelessConcreteStruct[] $segmentsForAnalysis
+     * @return array{notesAggregate: array<int, list<string|null>>, issuesAggregate: array<int, array<int, list<array<string, mixed>>>>, idRequestsAggregate: array<int, SegmentMetadataStruct>}
      * @throws ReflectionException
+     * @throws Exception
+     * @throws PDOException
      */
-    private function getIssuesNotesAndIdRequests($segmentsForAnalysis): array
+    private function getIssuesNotesAndIdRequests(array $segmentsForAnalysis): array
     {
         $segmentIds = [];
 
@@ -257,9 +264,9 @@ class SegmentAnalysisController extends KleinController
             $segmentIds[] = $segmentForAnalysis->id;
         }
 
-        $notesRecords = SegmentNoteDao::getBySegmentIds($segmentIds);
-        $issuesRecords = EntryDao::getBySegmentIds($segmentIds);
-        $idRequestRecords = SegmentMetadataDao::getBySegmentIds($segmentIds, 'id_request');
+        $notesRecords = (new SegmentNoteDao($this->getDatabase()))->getBySegmentIds($segmentIds);
+        $issuesRecords = (new EntryDao($this->getDatabase()))->getBySegmentIds($segmentIds);
+        $idRequestRecords = (new SegmentMetadataDao($this->getDatabase()))->getBySegmentIds($segmentIds, 'id_request');
 
         $notesAggregate = [];
         $issuesAggregate = [];
@@ -293,14 +300,11 @@ class SegmentAnalysisController extends KleinController
     }
 
     /**
-     * @param ShapelessConcreteStruct $segmentForAnalysis
-     * @param array $projectPasswordsMap
-     * @param array $notesAggregate
-     * @param array $issuesAggregate
-     * @param array $idRequestsAggregate
-     * @param ConstantsInterface $matchConstants
-     *
-     * @return array
+     * @param array<int, array<string, mixed>> $projectPasswordsMap
+     * @param array<int, list<string|null>> $notesAggregate
+     * @param array<int, array<int, list<array<string, mixed>>>> $issuesAggregate
+     * @param array<int, SegmentMetadataStruct> $idRequestsAggregate
+     * @return array<string, mixed>
      * @throws Exception
      */
     private function formatSegment(
@@ -327,15 +331,15 @@ class SegmentAnalysisController extends KleinController
             $issues = $issuesAggregate[$segmentForAnalysis->id_job][$segmentForAnalysis->id];
         }
 
-        /** @var MateCatFilter $filter */
-        $jobStruct = JobDao::getByIdAndPassword((int)$segmentForAnalysis->id_job, $segmentForAnalysis->job_password);
+        $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPassword((int)$segmentForAnalysis->id_job, $segmentForAnalysis->job_password)
+            ?? throw new RuntimeException('Job not found for id_job=' . $segmentForAnalysis->id_job);
 
         /**
          * Here we need to get the custom handlers from projects metadata for subfiltering,
          * because we want the static behaviour for word count in analysis, not the dynamic one
          * (that can be changed by the user in the job settings panel)
          */
-        $metadataDao = new MetadataDao();
+        $metadataDao = new MetadataDao($this->getDatabase());
         $filter = MateCatFilter::getInstance(
             $this->featureSet,
             $segmentForAnalysis->source,
@@ -343,8 +347,9 @@ class SegmentAnalysisController extends KleinController
             [],
             $metadataDao->getProjectStaticSubfilteringCustomHandlers($jobStruct->id_project)
         );
+        assert($filter instanceof MateCatFilter);
 
-        $disabled = $this->isSegmentDisabled($segmentForAnalysis->id_job, $segmentForAnalysis->id);
+        $disabled = $this->segmentDisabledService->isDisabled($segmentForAnalysis->id);
 
         return [
             'id_segment' => (int)$segmentForAnalysis->id,
@@ -358,8 +363,9 @@ class SegmentAnalysisController extends KleinController
             'target' => $segmentForAnalysis->translation,
             'source_lang' => $segmentForAnalysis->source,
             'target_lang' => $segmentForAnalysis->target,
-            'source_raw_word_count' => CatUtils::segment_raw_word_count($segmentForAnalysis->segment, $segmentForAnalysis->source, $filter),
-            'target_raw_word_count' => CatUtils::segment_raw_word_count($segmentForAnalysis->translation, $segmentForAnalysis->target, $filter),
+            'stored_source_raw_word_count' => $segmentForAnalysis->raw_word_count,
+            'source_raw_word_count' => $this->countRawWords($segmentForAnalysis->segment, $segmentForAnalysis->source, $filter),
+            'target_raw_word_count' => $this->countRawWords($segmentForAnalysis->translation, $segmentForAnalysis->target, $filter),
             'match_type' => $matchConstants::toExternalMatchTypeName($segmentForAnalysis->match_type ?? 'default'),
             'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
             'issues' => $issues,
@@ -371,10 +377,8 @@ class SegmentAnalysisController extends KleinController
     }
 
     /**
-     * @param ShapelessConcreteStruct $segmentForAnalysis
-     * @param array $projectPasswordsMap
-     *
-     * @return array
+     * @param array<int, array<string, mixed>> $projectPasswordsMap
+     * @return array<string, string>
      */
     private function getJobUrls(ShapelessConcreteStruct $segmentForAnalysis, array $projectPasswordsMap = []): array
     {
@@ -405,9 +409,7 @@ class SegmentAnalysisController extends KleinController
     }
 
     /**
-     * @param ShapelessConcreteStruct $segmentForAnalysis
-     *
-     * @return array
+     * @return array{translation_status: mixed, final_version: string|null, counts: array{r1: int|null, r2: int|null}}
      */
     private function getStatusObject(ShapelessConcreteStruct $segmentForAnalysis): array
     {
@@ -443,12 +445,7 @@ class SegmentAnalysisController extends KleinController
         ];
     }
 
-    /**
-     * @param $sourcePage
-     *
-     * @return string|null
-     */
-    private function humanReadableSourcePage($sourcePage): ?string
+    private function humanReadableSourcePage(int $sourcePage): ?string
     {
         if ($sourcePage == 1) {
             return 't';

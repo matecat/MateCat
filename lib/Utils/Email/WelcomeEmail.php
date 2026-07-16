@@ -9,6 +9,7 @@
 namespace Utils\Email;
 
 
+use Exception;
 use Model\Users\UserStruct;
 
 class WelcomeEmail extends AbstractEmail
@@ -29,6 +30,9 @@ class WelcomeEmail extends AbstractEmail
         $this->_setTemplate('Signup/welcome_content.html');
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getTemplateVariables(): array
     {
         return [
@@ -36,6 +40,9 @@ class WelcomeEmail extends AbstractEmail
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getLayoutVariables($messageBody = null): array
     {
         $vars = parent::_getLayoutVariables();
@@ -45,6 +52,9 @@ class WelcomeEmail extends AbstractEmail
         return $vars;
     }
 
+    /**
+     * @throws Exception
+     */
     public function send(): void
     {
         $recipient = [$this->user->email, $this->user->fullName()];
@@ -57,6 +67,9 @@ class WelcomeEmail extends AbstractEmail
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getDefaultMailConf(): array
     {
         $mailConf = parent::_getDefaultMailConf();

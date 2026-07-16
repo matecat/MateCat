@@ -11,7 +11,9 @@ use Model\Teams\MembershipDao;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use ReflectionException;
+use RuntimeException;
 use stdClass;
+use TypeError;
 use Utils\Tools\Utils;
 
 /**
@@ -62,7 +64,7 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
 
     public function initAuthToken(): void
     {
-        $this->confirmation_token = Utils::randomString(50, true);
+        $this->confirmation_token = Utils::randomString(50);
         $this->confirmation_token_created_at = Utils::mysqlTimestamp(time());
     }
 
@@ -83,7 +85,7 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
 
     public function shortName(): string
     {
-        return trim(mb_substr($this->first_name, 0, 1) . mb_substr($this->last_name, 0, 1));
+        return trim(mb_substr($this->first_name ?? '', 0, 1) . mb_substr($this->last_name ?? '', 0, 1));
     }
 
     public function getEmail(): ?string
@@ -115,39 +117,38 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
         return $this->last_name;
     }
 
-    /**
-     * @return TeamStruct
-     * @throws ReflectionException
-     */
-    public function getPersonalTeam(): TeamStruct
+     /**
+      * @return TeamStruct
+      * @throws ReflectionException
+      * @throws Exception
+      */
+     public function getPersonalTeam(TeamDao $teamDao): TeamStruct
     {
-        $oDao = new TeamDao();
-        $oDao->setCacheTTL(60 * 60 * 24);
+        $teamDao->setCacheTTL(60 * 60 * 24);
 
-        return $oDao->getPersonalByUser($this);
+        return $teamDao->getPersonalByUser($this);
     }
 
-    /**
-     * @return TeamStruct[]|null
-     * @throws ReflectionException
-     */
-    public function getUserTeams(): ?array
+     /**
+      * @return TeamStruct[]|null
+      * @throws ReflectionException
+      * @throws Exception
+      */
+     public function getUserTeams(MembershipDao $membershipDao): ?array
     {
-        $mDao = new MembershipDao();
-        $mDao->setCacheTTL(60 * 60 * 24);
+        $membershipDao->setCacheTTL(60 * 60 * 24);
 
-        return $mDao->findUserTeams($this);
+        return $membershipDao->findUserTeams($this);
     }
 
-    /**
-     * @param $teamId
-     *
-     * @return bool
-     * @throws ReflectionException
-     */
-    public function belongsToTeam($teamId): bool
+     /**
+      * @return bool
+      * @throws ReflectionException
+      * @throws Exception
+      */
+     public function belongsToTeam(int $teamId, MembershipDao $membershipDao): bool
     {
-        foreach ($this->getUserTeams() as $team) {
+        foreach ($this->getUserTeams($membershipDao) ?? [] as $team) {
             if ($team->id === $teamId) {
                 return true;
             }
@@ -157,15 +158,19 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
+     * @throws RuntimeException
      */
-    public function getMetadataAsKeyValue(): array
+    public function getMetadataAsKeyValue(MetadataDao $metadataDao): array
     {
-        $dao = new MetadataDao();
+        if ($this->uid === null) {
+            throw new RuntimeException('User uid must be set before reading metadata');
+        }
+
+        $dao = $metadataDao;
         $collection = $dao->getAllByUid($this->uid);
         $data = [];
 
-        /** @var MetadataStruct $record */
         foreach ($collection as $record) {
             $data[$record->key] = $record->getValue();
         }
@@ -192,13 +197,15 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
     /**
      * Returns true if password matches
      *
-     * @param $password
-     *
      * @return bool
+     * @throws RuntimeException
      */
-    public function passwordMatch($password): bool
+    public function passwordMatch(string $password): bool
     {
-        return Utils::verifyPass($password, $this->salt, $this->pass);
+        $salt = $this->salt ?? throw new RuntimeException('User salt must be set');
+        $pass = $this->pass ?? throw new RuntimeException('User password must be set');
+
+        return Utils::verifyPass($password, $salt, $pass);
     }
 
     /**
@@ -207,12 +214,15 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
      * @return null|string
      * @throws EnvironmentIsBrokenException
      * @throws Exception
+     * @throws TypeError
      */
     public function getDecryptedOauthAccessToken(): ?string
     {
-        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
+        if ($this->oauth_access_token === null) {
+            return null;
+        }
 
-        return $oauthTokenEncryption->decrypt($this->oauth_access_token);
+        return OauthTokenEncryption::getInstance()->decrypt($this->oauth_access_token);
     }
 
     /**
@@ -221,10 +231,16 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
      * @return mixed
      * @throws EnvironmentIsBrokenException
      * @throws Exception
+     * @throws TypeError
      */
     public function getDecodedOauthAccessToken(?string $field = null): mixed
     {
-        $decoded = json_decode($this->getDecryptedOauthAccessToken(), true);
+        $decrypted = $this->getDecryptedOauthAccessToken();
+        if ($decrypted === null) {
+            return null;
+        }
+
+        $decoded = json_decode($decrypted, true);
 
         if ($field) {
             if (array_key_exists($field, $decoded)) {

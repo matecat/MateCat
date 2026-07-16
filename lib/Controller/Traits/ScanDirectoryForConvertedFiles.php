@@ -13,7 +13,6 @@ use Exception;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\FilesStorage\AbstractFilesStorage;
-use ReflectionException;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
@@ -21,6 +20,11 @@ trait ScanDirectoryForConvertedFiles
 {
 
     /**
+     * @param AbstractFilesStorage $fs
+     * @param string[]             $arFiles
+     * @param string               $uploadDir
+     *
+     * @return array{arrayFiles: list<string>, arrayFilesMeta: list<array<string, mixed>>}
      * @throws Exception
      */
     protected function getFilesList(AbstractFilesStorage $fs, array $arFiles, $uploadDir): array
@@ -29,7 +33,12 @@ trait ScanDirectoryForConvertedFiles
 
         foreach ($arFiles as $__fName) {
             if ('zip' == AbstractFilesStorage::pathinfo_fix($__fName, PATHINFO_EXTENSION)) {
-                $fs->cacheZipArchive(sha1_file($uploadDir . DIRECTORY_SEPARATOR . $__fName), $uploadDir . DIRECTORY_SEPARATOR . $__fName);
+                $zipFilePath = $uploadDir . DIRECTORY_SEPARATOR . $__fName;
+                $zipFileHash = sha1_file($zipFilePath);
+                if ($zipFileHash === false) {
+                    throw new Exception("Unable to compute hash for zip archive: $zipFilePath");
+                }
+                $fs->cacheZipArchive($zipFileHash, $zipFilePath);
 
                 $linkFiles = scandir($uploadDir);
 
@@ -61,8 +70,8 @@ trait ScanDirectoryForConvertedFiles
     /**
      * @param string $filename
      *
-     * @return array
-     * @throws ReflectionException
+     * @return array<string, mixed>
+     * @throws Exception
      */
     private function getFileMetadata(string $filename): array
     {
@@ -77,7 +86,7 @@ trait ScanDirectoryForConvertedFiles
 
         $redisKey = md5($filename . "__pdfAnalysis.json");
         $pdfAnalysis = (new RedisHandler())->getConnection()->get($redisKey);
-        $pdfAnalysis = (!empty($pdfAnalysis)) ? unserialize($pdfAnalysis) : [];
+        $pdfAnalysis = (!empty($pdfAnalysis)) ? unserialize($pdfAnalysis, ['allowed_classes' => false]) : [];
 
         $metadata = [];
         $metadata['basename'] = $info['info']['basename'];

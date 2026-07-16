@@ -19,31 +19,40 @@ use Utils\Url\CanonicalRoutes;
 class ProjectUrls
 {
 
+    /** @var ShapelessConcreteStruct[] */
     protected array $data;
+
+    /** @var array<int|string, array<string, mixed>> */
     protected array $jobs = [];
+
+    /** @var array<int|string, array<string, mixed>> */
     protected array $files = [];
+
+    /** @var array<string, int> */
     protected array $chunks = [];
 
-    /*
-     * @var array
-     */
+    /** @var array{files: array<int|string, array<string, mixed>>, jobs: array<int|string, array<string, mixed>>} */
     private array $formatted = ['files' => [], 'jobs' => []];
+
+    private ChunkReviewDao $chunkReviewDao;
 
     /**
      * ProjectUrls constructor.
      *
-     * @param $data ShapelessConcreteStruct[]
+     * @param ShapelessConcreteStruct[] $data
      */
-    public function __construct(array $data)
+    public function __construct(array $data, ChunkReviewDao $chunkReviewDao)
     {
         $this->data = $data;
+        $this->chunkReviewDao = $chunkReviewDao;
     }
 
     /**
      * @param bool $keyAssoc
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
+     * @throws ReflectionException
      */
     public function render(bool $keyAssoc = false): array
     {
@@ -104,14 +113,15 @@ class ProjectUrls
                 'translate_url' => $this->translateUrl($record),
             ];
 
-            $reviews = (new ChunkReviewDao())->findChunkReviews(new JobStruct(['id' => $record['jid'], 'password' => $record['jpassword']]), 60 * 10);
+            $reviews = $this->chunkReviewDao->findChunkReviews(new JobStruct(['id' => $record['jid'], 'password' => $record['jpassword']]), 60 * 10);
 
             foreach ($reviews as $review) {
                 $revisionNumber = ReviewUtils::sourcePageToRevisionNumber($review->source_page);
+                $reviewPassword = $review->review_password ?? '';
                 $reviseUrl = CanonicalRoutes::revise(
                     $record['name'],
                     $record['jid'],
-                    $review->review_password,
+                    $reviewPassword,
                     $record['source'],
                     $record['target'],
                     ['revision_number' => $revisionNumber]
@@ -126,6 +136,9 @@ class ProjectUrls
     }
 
 
+    /**
+     * @return ShapelessConcreteStruct[]
+     */
     public function getData(): array
     {
         return $this->data;

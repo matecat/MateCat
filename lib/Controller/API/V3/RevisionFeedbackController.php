@@ -6,14 +6,22 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\ReviseFeedback\FeedbackDAO;
 use Model\ReviseFeedback\FeedbackStruct;
+use PDOException;
+use TypeError;
 
 class RevisionFeedbackController extends KleinController
 {
     use ChunkNotFoundHandlerTrait;
 
     /**
+     * @throws TypeError
+     * @throws PDOException
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function feedback(): void
     {
@@ -26,7 +34,7 @@ class RevisionFeedbackController extends KleinController
 
         $this->return404IfTheJobWasDeleted();
 
-        $rows = (new FeedbackDAO())->insertOrUpdate($feedbackStruct);
+        $rows = $this->createFeedbackDao()->insertOrUpdate($feedbackStruct);
         $status = ($rows > 0) ? 'ok' : 'ko';
 
         $this->response->json([
@@ -34,7 +42,7 @@ class RevisionFeedbackController extends KleinController
         ]);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $validator = new ChunkPasswordValidator($this);
@@ -44,5 +52,9 @@ class RevisionFeedbackController extends KleinController
 
         $this->appendValidator($validator);
     }
-}
 
+    protected function createFeedbackDao(): FeedbackDAO
+    {
+        return new FeedbackDAO($this->getDatabase());
+    }
+}

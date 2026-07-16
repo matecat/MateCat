@@ -9,8 +9,12 @@ use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\IDaoStruct;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Throwable;
 use Utils\Constants\TranslationStatus;
 
+/**
+ * @implements ArrayAccess<string, mixed>
+ */
 class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess
 {
 
@@ -65,23 +69,16 @@ class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoSt
     }
 
     /**
+     * @param JobDao $jobDao
      * @return JobStruct|null
+     * @throws Throwable
      */
-    public function getJob(): ?JobStruct
+    public function getJob(JobDao $jobDao): ?JobStruct
     {
-        return $this->cachable(__METHOD__, function () {
-            return JobDao::getById($this->id_job)[0] ?? null;
+        return $this->memoize(__METHOD__, function () use ($jobDao) {
+            return $jobDao->getNotDeletedById($this->id_job)[0] ?? null;
         });
     }
 
-    /**
-     * @return JobStruct[]|null
-     */
-    public function getChunk(): ?JobStruct
-    {
-        return $this->cachable(__METHOD__, function () {
-            return JobDao::getById($this->id_job)[0] ?? null;
-        });
-    }
 
 }

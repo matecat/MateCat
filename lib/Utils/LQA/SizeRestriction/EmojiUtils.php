@@ -3768,11 +3768,11 @@ class EmojiUtils
     ];
 
     /**
-     * @param $string
+     * @param string $string
      *
      * @return int
      */
-    public static function getMatches($string): int
+    public static function getMatches(string $string): int
     {
         $count = 0;
 
@@ -3786,11 +3786,11 @@ class EmojiUtils
     }
 
     /**
-     * @param $string
+     * @param string $string
      *
      * @return bool
      */
-    public static function isEmoji($string)
+    public static function isEmoji(string $string): bool
     {
         preg_match(self::regex(), $string, $matches);
 
@@ -3805,4 +3805,3 @@ class EmojiUtils
         return '/' . implode("|", self::EMOJI_LIST) . '/iu';
     }
 }
-

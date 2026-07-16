@@ -6,6 +6,8 @@ use DomainException;
 use Exception;
 use Model\Users\UserStruct;
 use ReflectionException;
+use RuntimeException;
+use TypeError;
 use UnexpectedValueException;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
@@ -13,6 +15,25 @@ use Utils\Tools\SimpleJWT;
 
 class AuthCookie
 {
+
+    /**
+     * Cookie writer seam. Null in production (a fresh CookieManager is used);
+     * tests inject a spy via {@see self::setCookieManager()} to observe emissions.
+     */
+    private static ?CookieManager $cookieManager = null;
+
+    /**
+     * Overrides the cookie writer (test seam). Pass null to restore the default.
+     */
+    public static function setCookieManager(?CookieManager $cookieManager): void
+    {
+        self::$cookieManager = $cookieManager;
+    }
+
+    private static function cookieManager(): CookieManager
+    {
+        return self::$cookieManager ?? new CookieManager();
+    }
 
     /**
      * Retrieve the user data from the authentication cookie, if present and valid.
@@ -23,8 +44,10 @@ class AuthCookie
      *
      * @param SessionTokenStoreHandler|null $sessionTokenStoreHandler Optional handler for managing session token rings.
      *
-     * @return ?array Returns the payload array if the cookie is valid and active, or null otherwise.
+     * @return ?array<string, mixed> Returns the payload array if the cookie is valid and active, or null otherwise.
      * @throws ReflectionException Throws an exception if there is an issue with reflection during validation.
+     * @throws Exception
+     * @throws TypeError
      */
     public static function getCredentials(?SessionTokenStoreHandler $sessionTokenStoreHandler = null): ?array
     {
@@ -58,9 +81,13 @@ class AuthCookie
      *
      * @return void
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
     public static function setCredentials(UserStruct $user, SessionTokenStoreHandler $sessionTokenStoreHandler, ?bool $isALoginCookieRevamp = false): void
     {
+        $userId = $user->uid ?? throw new RuntimeException('Cannot set credentials for a user without a UID');
+
         // Generate a new signed authentication cookie and its expiration date.
         [$new_cookie_data, $new_expire_date] = static::generateSignedAuthCookie($user);
 
@@ -74,15 +101,15 @@ class AuthCookie
             // If the payload is invalid (expired), generate a new token and set the new cookie.
             if (empty($payload) || empty($payload['user']['uid'])) {
                 // Activate the new token in the user token store (e.g., Redis).
-                $sessionTokenStoreHandler->setCookieLoginTokenActive($user->uid, $new_cookie_data);
+                $sessionTokenStoreHandler->setCookieLoginTokenActive($userId, $new_cookie_data);
                 // Remove the previous token from the token store if applicable.
-                $sessionTokenStoreHandler->removeLoginCookieFromStore($user->uid, $_COOKIE[AppConfig::$AUTHCOOKIENAME] ?? '');
+                $sessionTokenStoreHandler->removeLoginCookieFromStore($userId, $_COOKIE[AppConfig::$AUTHCOOKIENAME] ?? '');
                 // Set the new cookie in the browser.
                 self::setCookie($new_cookie_data, $new_expire_date);
             }
         } else {
             // For a new login, activate the token in the user token store.
-            $sessionTokenStoreHandler->setCookieLoginTokenActive($user->uid, $new_cookie_data);
+            $sessionTokenStoreHandler->setCookieLoginTokenActive($userId, $new_cookie_data);
             // Set the new cookie in the browser.
             self::setCookie($new_cookie_data, $new_expire_date);
         }
@@ -96,20 +123,14 @@ class AuthCookie
      */
     private static function setCookie(string $data, int $expireDate): void
     {
-        CookieManager::setCookie(AppConfig::$AUTHCOOKIENAME, $data, [
-            'expires' => $expireDate,
-            'path' => '/',
-            'domain' => AppConfig::$COOKIE_DOMAIN,
-            'secure' => true,
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ]);
+        self::cookieManager()->set(AppConfig::$AUTHCOOKIENAME, $data, $expireDate, true, true, 'Lax');
     }
 
     /**
-     * @param UserStruct $user
+     * @return array{string, int}
      *
-     * @return array
+     * @throws TypeError
+     * @throws UnexpectedValueException
      */
     protected static function generateSignedAuthCookie(UserStruct $user): array
     {
@@ -134,17 +155,12 @@ class AuthCookie
     /**
      * Destroy authentication by removing the authentication cookie and invalidating the session.
      *
-     * This method performs the following steps:
-     * - If a `SessionTokenRingHandler` is provided, it retrieves the payload from the authentication cookie
-     *   and removes the login token from the session token store.
-     * - Unsets the authentication cookie from the global `$_COOKIE` array.
-     * - Sets an expired cookie in the browser to effectively remove it.
-     * - Destroys the current session to invalidate the user's authentication.
-     *
      * @param SessionTokenStoreHandler|null $sessionTokenStoreHandler Optional handler for managing session token stores.
      *
      * @return void
-     * @throws ReflectionException Throws an exception if there is an issue during the removal process.
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
     public static function destroyAuthentication(?SessionTokenStoreHandler $sessionTokenStoreHandler = null): void
     {
@@ -160,41 +176,21 @@ class AuthCookie
         unset($_COOKIE[AppConfig::$AUTHCOOKIENAME]);
 
         // Set an expired cookie in the browser to effectively remove it.
-        CookieManager::setCookie(
-            AppConfig::$AUTHCOOKIENAME,
-            '',
-            [
-                'expires' => 0,
-                'path' => '/',
-                'domain' => AppConfig::$COOKIE_DOMAIN
-            ]
-        );
+        self::cookieManager()->delete(AppConfig::$AUTHCOOKIENAME);
 
-        // Destroy the current session.
-        session_destroy();
+        // Destroy the current session if active.
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_destroy();
+        }
     }
 
     /**
-     * Get data from auth cookie
+     * Get data from auth cookie.
      *
-     * Example:
-     *
-     * {
-     *  "metadata": {
-     *    "gplus_picture": "https://lh3.googleusercontent.com/a/xxxxxxxxxx"
-     *  },
-     *  "user": {
-     *    "email": "domenico@translated.net",
-     *    "first_name": "Domenico",
-     *    "has_password": true,
-     *    "last_name": "Lupinetti",
-     *    "uid": 166
-     *  }
-     * }
-     *
-     * @return ?array
+     * @return ?array<string, mixed>
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     private static function getData(): ?array
     {

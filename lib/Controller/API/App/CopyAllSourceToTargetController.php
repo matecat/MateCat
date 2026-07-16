@@ -6,30 +6,35 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
-use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureCodes;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\Projects\ProjectDao;
+use Model\Segments\SegmentDao;
 use Model\Translations\SegmentTranslationDao;
-use Model\WordCount\CounterModel;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use ReflectionException;
 use RuntimeException;
+use TypeError;
 use Utils\Constants\TranslationStatus;
 
 class CopyAllSourceToTargetController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function copy(): void
     {
@@ -42,7 +47,7 @@ class CopyAllSourceToTargetController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws InvalidArgumentException
      * @throws Exception
      */
@@ -61,7 +66,7 @@ class CopyAllSourceToTargetController extends KleinController
             throw new InvalidArgumentException("Empty job password", -2);
         }
 
-        $job_data = JobDao::getByIdAndPassword($id_job, $pass);
+        $job_data = (new JobDao($this->getDatabase()))->getByIdAndPassword((int)$id_job, (string)$pass);
 
         if (empty($job_data)) {
             throw new InvalidArgumentException("Wrong id_job-password couple. Job not found", -3);
@@ -79,24 +84,25 @@ class CopyAllSourceToTargetController extends KleinController
      * @param JobStruct $chunk
      * @param int $revision_number
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
+     * @throws TypeError
      * @throws Exception
      */
     private function saveEventsAndUpdateTranslations(JobStruct $chunk, int $revision_number): array
     {
         // BEGIN TRANSACTION
-        $database = Database::obtain();
+        $database = $this->getDatabase();
         $database->begin();
 
-        $features = $chunk->getProject()->getFeaturesSet();
+        $features = FeatureSet::forProject($chunk->getProject(new ProjectDao($this->getDatabase())), $this->getDatabase());
 
-        $batchEventCreator = new TranslationEventsHandler($chunk);
+        $batchEventCreator = new TranslationEventsHandler($chunk, new TranslationEventDao($this->getDatabase()));
         $batchEventCreator->setFeatureSet($features);
-        $batchEventCreator->setProject($chunk->getProject());
+        $batchEventCreator->setProject($chunk->getProject(new ProjectDao($this->getDatabase())));
 
         $source_page = ReviewUtils::revisionNumberToSourcePage($revision_number);
-        $segments = $chunk->getSegments();
+        $segments = $chunk->getSegments(new SegmentDao($this->getDatabase()));
 
         $affected_rows = 0;
 
@@ -104,7 +110,8 @@ class CopyAllSourceToTargetController extends KleinController
             $segment_id = $segment->id;
             $chunk_id = (int)$chunk->id;
 
-            $old_translation = SegmentTranslationDao::findBySegmentAndJob($segment_id, $chunk_id);
+            $segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
+            $old_translation = $segmentTranslationDao->findBySegmentAndJob($segment_id, $chunk_id);
 
             if (empty($old_translation) || ($old_translation->status !== TranslationStatus::STATUS_NEW)) {
                 //no segment found
@@ -117,16 +124,16 @@ class CopyAllSourceToTargetController extends KleinController
             $new_translation->translation_date = date("Y-m-d H:i:s");
 
             try {
-                $affected_rows += SegmentTranslationDao::updateTranslationAndStatusAndDate($new_translation);
+                $affected_rows += $segmentTranslationDao->updateTranslationAndStatusAndDate($new_translation);
             } catch (Exception $e) {
                 $database->rollback();
 
                 throw new RuntimeException($e->getMessage(), -4);
             }
 
-            if ($chunk->getProject()->hasFeature(FeatureCodes::TRANSLATION_VERSIONS)) {
+            if ($features->hasFeature(FeatureCodes::TRANSLATION_VERSIONS)) {
                 try {
-                    $segmentTranslationEventModel = new TranslationEvent($old_translation, $new_translation, $this->user, $source_page);
+                    $segmentTranslationEventModel = new TranslationEvent($old_translation, $new_translation, $this->user, $source_page, null, new TranslationEventDao($this->getDatabase()), new SegmentDao($this->getDatabase()));
                     $batchEventCreator->addEvent($segmentTranslationEventModel);
                 } catch (Exception) {
                     $database->rollback();
@@ -137,12 +144,7 @@ class CopyAllSourceToTargetController extends KleinController
         }
 
         // save all events
-        $batchEventCreator->save(new BatchReviewProcessor());
-
-        if (!empty($params['segment_ids'])) {
-            $counter = new CounterModel();
-            $counter->initializeJobWordCount($chunk->id, $chunk->password);
-        }
+        $batchEventCreator->save(new BatchReviewProcessor(new ChunkReviewDao($this->getDatabase())));
 
         $data = [
             'code' => 1,

@@ -2,30 +2,31 @@
 
 namespace View\API\V2\Json;
 
+use Model\LQA\EntryCommentStruct;
+
 class TranslationIssueComment
 {
 
-    private $data;
-
     /**
-     * @return array
+     * @return array{id: int, uid: int, id_issue: int, created_at: string, message: string, source_page: int}
      */
-    public function renderItem($record): array
+    public function renderItem(EntryCommentStruct $record): array
     {
         return [
             'id' => (int)$record->id,
             'uid' => (int)$record->uid,
             'id_issue' => (int)$record->id_qa_entry,
-            'created_at' => date('c', strtotime($record->create_date)),
+            'created_at' => date('c', strtotime($record->create_date ?? '') ?: 0),
             'message' => $record->comment,
             'source_page' => $record->source_page
         ];
     }
 
     /**
-     * @return array
+     * @param list<EntryCommentStruct> $array
+     * @return list<array{id: int, uid: int, id_issue: int, created_at: string, message: string, source_page: int}>
      */
-    public function render($array): array
+    public function render(array $array): array
     {
         $out = [];
         foreach ($array as $record) {

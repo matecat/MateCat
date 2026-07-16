@@ -7,12 +7,14 @@ use Exception;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\Filters\DTO\Dita;
+use Model\Filters\DTO\IDto;
 use Model\Filters\DTO\Json;
 use Model\Filters\DTO\MSExcel;
 use Model\Filters\DTO\MSPowerpoint;
 use Model\Filters\DTO\MSWord;
 use Model\Filters\DTO\Xml;
 use Model\Filters\DTO\Yaml;
+use TypeError;
 use Utils\Date\DateTimeUtil;
 
 class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonSerializable
@@ -187,48 +189,31 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
     }
 
     /**
-     * Instantiate and hydrate a DTO from array data, then assign it to the proper property.
-     *
-     * @param class-string $dtoClass Fully qualified DTO class name.
-     * @param array $data DTO payload.
-     *
-     * @return void
+     * @param class-string<IDto> $dtoClass
+     * @param array<string, mixed> $data
      */
     protected function hydrateDtoFromArray(string $dtoClass, array $data): void
     {
         $dto = new $dtoClass();
         $dto->fromArray($data);
 
-        switch ($dtoClass) {
-            case Json::class:
-                $this->setJson($dto);
-                break;
-            case Xml::class:
-                $this->setXml($dto);
-                break;
-            case Yaml::class:
-                $this->setYaml($dto);
-                break;
-            case MSExcel::class:
-                $this->setMsExcel($dto);
-                break;
-            case MSWord::class:
-                $this->setMsWord($dto);
-                break;
-            case MSPowerpoint::class:
-                $this->setMsPowerpoint($dto);
-                break;
-            case Dita::class:
-                $this->setDita($dto);
-                break;
-        }
+        match ($dtoClass) {
+            Json::class => $this->setJson($dto instanceof Json ? $dto : null),
+            Xml::class => $this->setXml($dto instanceof Xml ? $dto : null),
+            Yaml::class => $this->setYaml($dto instanceof Yaml ? $dto : null),
+            MSExcel::class => $this->setMsExcel($dto instanceof MSExcel ? $dto : null),
+            MSWord::class => $this->setMsWord($dto instanceof MSWord ? $dto : null),
+            MSPowerpoint::class => $this->setMsPowerpoint($dto instanceof MSPowerpoint ? $dto : null),
+            Dita::class => $this->setDita($dto instanceof Dita ? $dto : null),
+            default => null,
+        };
     }
 
     /**
      * Hydrate all known DTOs from the provided associative array.
      * Values may be arrays or JSON-encoded strings.
      *
-     * @param array $json Input data keyed by dto name.
+     * @param array<string, mixed> $json Input data keyed by dto name.
      *
      * @return void
      */
@@ -280,6 +265,8 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
      * @param int|null $uid Optional user id to use if not present in JSON.
      *
      * @return FiltersConfigTemplateStruct
+     * @throws DomainException
+     * @throws TypeError
      *
      */
     public function hydrateFromJSON(string $json, ?int $uid = null): FiltersConfigTemplateStruct

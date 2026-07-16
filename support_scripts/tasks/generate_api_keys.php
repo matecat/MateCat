@@ -3,7 +3,6 @@
 
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
-use Model\DataAccess\Database;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use Utils\Registry\AppConfig;
@@ -13,7 +12,7 @@ $root = realpath(dirname(__FILE__) . '/../../');
 include_once $root . "/lib/Bootstrap.php";
 Bootstrap::start();
 
-$db = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+$db = \Bootstrap::getDatabase();
 $db->debug = false;
 $db->connect();
 
@@ -33,16 +32,16 @@ if (array_key_exists('h', $options))          usage() ;
 if (empty($options))                          usage() ;
 if (!array_key_exists('email', $options))     usage() ; 
 
-$dao = new UserDao( Database::obtain() ) ;
+$dao = new UserDao( $db ) ;
 $result = $dao->read( new UserStruct(array( 'email' => $options['email'])));
 $user = $result[0]; 
 
-$dao = new ApiKeyDao( Database::obtain() );
+$dao = new ApiKeyDao( $db );
 
 $values = array(
   'uid' => $user->uid, 
-  'api_key' => Utils::randomString( 20, true ),
-  'api_secret' => Utils::randomString( 20, true ),
+  'api_key' => Utils::randomString( 26 ),
+  'api_secret' => Utils::randomString( 26 ),
   'enabled' => true
 );
 

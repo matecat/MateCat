@@ -46,16 +46,20 @@ class  ForgotPasswordEmail extends AbstractEmail
     }
 
     /**
+     * @return array<string, mixed>
      * @throws Exception
      */
     protected function _getTemplateVariables(): array
     {
         return [
             'user' => $this->user->toArray(),
-            'password_reset_url' => CanonicalRoutes::passwordReset($this->user->confirmation_token)
+            'password_reset_url' => CanonicalRoutes::passwordReset($this->user->confirmation_token ?? '')
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getLayoutVariables($messageBody = null): array
     {
         $vars = parent::_getLayoutVariables();
@@ -65,6 +69,9 @@ class  ForgotPasswordEmail extends AbstractEmail
     }
 
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getDefaultMailConf(): array
     {
         $mailConf = parent::_getDefaultMailConf();

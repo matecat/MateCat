@@ -1,16 +1,24 @@
-import {useContext, useEffect, useRef, useState} from 'react'
+import {useContext, useEffect, useMemo, useRef, useState} from 'react'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
 
-function useOptions() {
+function useOptions(excludedFields = []) {
   const {modifyingCurrentTemplate, currentProjectTemplate} =
     useContext(SettingsPanelContext)
 
   const {control, watch, setValue} = useForm()
 
-  const temporaryFormData = watch()
+  const valuesFormData = watch()
   const previousData = useRef()
+
+  const filteredFormData = useMemo(() => {
+    return Object.fromEntries(
+      Object.entries(valuesFormData).filter(
+        ([key]) => !excludedFields.includes(key),
+      ),
+    )
+  }, [valuesFormData, excludedFields])
 
   const [formData, setFormData] = useState()
 
@@ -18,11 +26,11 @@ function useOptions() {
   mtExtra.current = currentProjectTemplate.mt?.extra
 
   useEffect(() => {
-    if (!isEqual(temporaryFormData, previousData.current))
-      setFormData(temporaryFormData)
+    if (!isEqual(filteredFormData, previousData.current))
+      setFormData(filteredFormData)
 
-    previousData.current = temporaryFormData
-  }, [temporaryFormData])
+    previousData.current = filteredFormData
+  }, [filteredFormData])
 
   useEffect(() => {
     if (typeof formData === 'undefined') return

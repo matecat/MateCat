@@ -26,14 +26,14 @@ class CommentsController extends KleinController
     {
         $this->return404IfTheJobWasDeleted();
 
-        $comments = CommentDao::getCommentsForChunk($this->chunk, [
+        $comments = (new CommentDao($this->getDatabase()))->getCommentsForChunk($this->chunk, [
             'from_id' => $this->request->param('from_id')
         ]);
 
         $this->response->json(['comments' => $comments]);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $Validator = new ChunkPasswordValidator($this);

@@ -18,7 +18,7 @@ use Utils\Templating\PHPTALWithAppend;
  *
  * This class represents the first attempt to move some view logic from the controller.
  * A model was generally not present in controllers, so this class takes the controller
- * itself as parameter, and assigns instance variables to the view as needed.
+ * itself as a parameter and assigns instance variables to the view as needed.
  *
  */
 abstract class AbstractDecorator
@@ -26,16 +26,13 @@ abstract class AbstractDecorator
 
     protected IController $controller;
 
-    /**
-     * @var PHPTALWithAppend
-     */
     protected PHPTALWithAppend $template;
 
-    public function __construct(IController $controller, PHPTALWithAppend $template = null)
+    public function __construct(IController $controller, PHPTALWithAppend $template)
     {
         $this->controller = $controller;
         $this->template = $template;
     }
 
-    public abstract function decorate(?ArgumentInterface $arguments = null);
+    abstract public function decorate(?ArgumentInterface $arguments = null): void;
 }

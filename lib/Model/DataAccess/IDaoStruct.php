@@ -15,10 +15,18 @@ namespace Model\DataAccess;
 interface IDaoStruct
 {
 
-    public function getArrayCopy();
+    /**
+     * @return array<string, mixed>
+     */
+    public function getArrayCopy(): array;
 
-    public function count();
+    public function count(): int;
 
+    /**
+     * @param list<string>|null $mask
+     *
+     * @return array<string, mixed>
+     */
     public function toArray(array $mask = null): array;
 
 }

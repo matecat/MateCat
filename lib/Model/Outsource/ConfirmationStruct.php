@@ -20,15 +20,15 @@ abstract class ConfirmationStruct extends AbstractDaoSilentStruct implements IDa
     const int    VENDOR_ID = -1;
     const string REVIEW_ORDER_LINK = '';
 
-    public $id;
-    public $id_job;
-    public $password;
-    public $vendor_name = self::VENDOR_NAME;
-    public $id_vendor = self::VENDOR_ID;
-    public $create_date;
-    public $delivery_date;
-    public $currency = 'EUR';
-    public $price;
-    public $quote_pid;
+    public ?int $id = null;
+    public ?int $id_job = null;
+    public ?string $password = null;
+    public string $vendor_name = self::VENDOR_NAME;
+    public int $id_vendor = self::VENDOR_ID;
+    public ?string $create_date = null;
+    public ?string $delivery_date = null;
+    public string $currency = 'EUR';
+    public float $price = 0.00;
+    public ?string $quote_pid = null;
 
 }

@@ -3,74 +3,34 @@
 namespace Utils\Validator\JSONSchema;
 
 use Exception;
-use Utils\Validator\Contracts\ValidatorObject;
+use Model\DataAccess\ArrayAccessTrait;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
 
-/**
- * Class JSONValidatorObject
- *
- * Wraps a JSON string and provides lazy validation/decoding utilities for schema validators.
- * After calling getValid(), consumers can query whether the decoded payload is an array, object,
- * or a primitive value.
- *
- * Usage:
- * - Instantiate with a JSON string (and optionally associative=true to decode objects as arrays).
- * - Call getValid() to decode and validate JSON (throws on JSON errors).
- * - Call isArray(), isObject(), or isPrimitive() to inspect the decoded type.
- *
- * Notes:
- * - Decoding is memoized; further calls to getValid() return the cached result.
- * - Type-introspection methods require prior validation via getValid(), otherwise an exception is thrown.
- */
-class JSONValidatorObject extends ValidatorObject
+class JSONValidatorObject implements ValidatorObjectInterface
 {
 
-    /**
-     * Original JSON string to validate/decode.
-     * @var string
-     */
+    use ArrayAccessTrait;
+
+    /** @var array<string, mixed> */
+    protected array $store = [];
+
     protected string $json;
 
-    /**
-     * Decoded JSON value after validation (memoized).
-     * Can be an array, object, scalar, or null depending on the JSON input.
-     *
-     * @var ?mixed The decoded JSON value or NULL when the JSON is null or an empty string.
-     */
     protected mixed $decoded;
 
-    /**
-     * Whether getValid() has been called and $decoded is populated.
-     * @var bool
-     */
     protected bool $isDecoded = false;
 
-    /**
-     * JSONValidatorObject constructor.
-     *
-     * @param string $json The JSON string to be validated/decoded.
-     */
-    public function __construct(string $json)
+    public function __construct(?string $json = null)
     {
-        $this->json = $json;
+        $this->json = $json ?? '';
     }
 
     /**
-     * Decode and validate the JSON string, returning the decoded value.
-     *
-     * Behavior:
-     * - Uses json_decode with the configured associative mode.
-     * - Delegates error detection to JSON_THROW_ON_ERROR flag, which throws on JSON errors.
-     * - Memoizes the decoded result and sets type flags for later inspection.
-     *
-     * @return mixed|null The decoded JSON value (array|object|scalar|null).
-     * @throws Exception  If decoding fails or JSON is invalid.
+     * @return mixed|null
+     * @throws Exception
      */
     public function decode(): mixed
     {
-        /**
-         * If already validated, return the decoded value
-         * Memoization pattern
-         */
         if ($this->isDecoded) {
             return $this->decoded;
         }
@@ -82,10 +42,8 @@ class JSONValidatorObject extends ValidatorObject
     }
 
     /**
-     * Alias for decode();
-     *
-     * @return mixed|null The decoded JSON value (array|object|scalar|null).
-     * @throws Exception  If decoding fails or JSON is invalid.
+     * @return mixed|null
+     * @throws Exception
      */
     public function getValue(bool $associative = false): mixed
     {
@@ -103,35 +61,43 @@ class JSONValidatorObject extends ValidatorObject
     }
 
     /**
-     * Converts the given object into an associative array.
+     * @param object $object
      *
-     * This method recursively traverses the properties of the input object and converts them into an associative array.
-     * If a property is itself an object or an array, the method calls itself recursively to handle nested structures.
-     * Non-structured values (scalars) are directly added to the resulting array.
-     *
-     * @param object $object The object to be converted into an associative array.
-     *                       Numeric indexed arrays are cast to objects to ensure
-     *                       compatibility with the function signature.
-     *
-     * @return array An associative array representing the structure and data of the input object.
+     * @return array<string, mixed>
      */
     private function toArray(object $object): array
     {
         $collector = [];
-        foreach ($object as $key => $value) {
-            // Determine if the value is structured (array or object).
+        foreach ((array)$object as $key => $value) {
             $isStructured = is_array($value) || is_object($value);
 
             if ($isStructured) {
-                // Recursively convert structured values into arrays.
-                $collector[$key] = $this->toArray((object)$value); // Force cast to an object to respect the function signature.
+                $collector[$key] = $this->toArray((object)$value);
             } else {
-                // Add scalar values directly to the resulting array.
                 $collector[$key] = $value;
             }
         }
 
         return $collector;
+    }
+
+    public function __set(string $name, mixed $value): void
+    {
+        $this->store[$name] = $value;
+    }
+
+    public function __get(string $name): mixed
+    {
+        if (!array_key_exists($name, $this->store)) {
+            return null;
+        }
+
+        return $this->store[$name];
+    }
+
+    public function __isset(string $name): bool
+    {
+        return array_key_exists($name, $this->store);
     }
 
 }

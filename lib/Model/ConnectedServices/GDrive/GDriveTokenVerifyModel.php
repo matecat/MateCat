@@ -13,22 +13,26 @@ use Exception;
 use Google_Client;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\ConnectedServiceStruct;
+use TypeError;
 
 class GDriveTokenVerifyModel
 {
 
     protected ConnectedServiceStruct $service;
     protected bool $expired;
-    protected $refreshed;
+    protected bool $refreshed;
+    protected ConnectedServiceDao $dao;
 
-    public function __construct(ConnectedServiceStruct $service)
+    public function __construct(ConnectedServiceStruct $service, ConnectedServiceDao $dao)
     {
         $this->service = $service;
+        $this->dao = $dao;
     }
 
     /**
      * @throws EnvironmentIsBrokenException
      * @throws Exception
+     * @throws TypeError
      */
     public function validOrRefreshed(Google_Client $gClient): bool
     {
@@ -36,7 +40,7 @@ class GDriveTokenVerifyModel
         $this->expired = false;
         $decryptedOauthAccessToken = $this->service->getDecryptedOauthAccessToken();
 
-        if (false === $decryptedOauthAccessToken) {
+        if (null === $decryptedOauthAccessToken) {
             $this->__expireService();
 
             return false;
@@ -67,19 +71,18 @@ class GDriveTokenVerifyModel
      */
     private function __expireService(): void
     {
-        $dao = new ConnectedServiceDao();
-        $dao->setServiceExpired(time(), $this->service);
+        $this->dao->setServiceExpired(time(), $this->service);
 
         $this->expired = true;
     }
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     private function __updateToken(string $newToken): void
     {
-        $dao = new ConnectedServiceDao();
-        $this->service = $dao->updateOauthToken($newToken, $this->service);
+        $this->service = $this->dao->updateOauthToken($newToken, $this->service);
 
         $this->refreshed = true;
     }

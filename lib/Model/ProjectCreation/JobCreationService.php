@@ -2,11 +2,15 @@
 
 namespace Model\ProjectCreation;
 
+use DomainException;
 use Exception;
 use Model\Analysis\PayableRates;
 use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\FilterPayableRatesEvent;
+use Model\FeaturesBase\Hook\Event\Run\ValidateJobCreationEvent;
 use Model\Files\FileDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
@@ -14,7 +18,10 @@ use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
+use PDOException;
+use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;
 use ReflectionException;
+use TypeError;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -23,10 +30,15 @@ use View\API\Commons\Error;
 
 class JobCreationService
 {
+    private readonly CustomPayableRateDao $customPayableRateDao;
+
     public function __construct(
         private readonly FeatureSet $features,
         private readonly MatecatLogger $logger,
+        private readonly IDatabase $dbHandler,
+        ?CustomPayableRateDao $customPayableRateDao = null,
     ) {
+        $this->customPayableRateDao = $customPayableRateDao ?? new CustomPayableRateDao($this->dbHandler);
     }
 
     /**
@@ -36,6 +48,7 @@ class JobCreationService
      *
      * @return array{0: string, 1: ?CustomPayableRateStruct} [$ratesJson, $template]
      * @throws Exception
+     * @throws TypeError
      */
     private function resolvePayableRates(ProjectStructure $projectStructure, string $target): array
     {
@@ -58,7 +71,7 @@ class JobCreationService
 
         // Branch 3: payable_rate_model_id — look up from DB
         if (!empty($projectStructure->payable_rate_model_id)) {
-            $template = CustomPayableRateDao::getById($projectStructure->payable_rate_model_id);
+            $template = $this->customPayableRateDao->findById($projectStructure->payable_rate_model_id);
             if ($template === null) {
                 throw new Exception("Payable rate model not found: $projectStructure->payable_rate_model_id");
             }
@@ -70,8 +83,11 @@ class JobCreationService
         // Branch 4: default — use static PayableRates with feature filtering
         $rates = PayableRates::getPayableRates((string)$projectStructure->source_language, $target);
 
+        $filterPayableRatesEvent = new FilterPayableRatesEvent($rates, (string)$projectStructure->source_language, $target);
+        $this->features->dispatch($filterPayableRatesEvent);
+
         return [
-            (string)json_encode($this->features->filter('filterPayableRates', $rates, $projectStructure->source_language, $target)),
+            (string)json_encode($filterPayableRatesEvent->getRates()),
             null,
         ];
     }
@@ -79,6 +95,10 @@ class JobCreationService
     /**
      * Build a JSON string of TM keys from the project's private_tm_key array.
      * Replaces the {{pid}} placeholder with the actual project ID.
+     *
+     * @throws DomainException
+     * @throws LogInvalidArgumentException
+     * @throws TypeError
      */
     private function buildTmKeysJson(ProjectStructure $projectStructure): string
     {
@@ -106,7 +126,7 @@ class JobCreationService
         $json = (string)json_encode($tmKeys);
 
         // Replace {{pid}} with project ID for new keys created with an empty name
-        return str_replace('{{pid}}', (string)$projectStructure->id_project, $json);
+        return str_replace(['{{pid}}', 'pid'], (string)$projectStructure->id_project, $json);
     }
 
     /**
@@ -128,7 +148,7 @@ class JobCreationService
         $job->source = (string)$projectStructure->source_language;
         $job->target = $target;
         $job->id_tms = $projectStructure->tms_engine ?? 1;
-        $job->id_mt_engine = $projectStructure->target_language_mt_engine_association[$target];
+        $job->id_mt_engine = (int)$projectStructure->mt_engine;
         $job->create_date = date('Y-m-d H:i:s');
         $job->last_update = date('Y-m-d H:i:s');
         $job->subject = $projectStructure->job_subject;
@@ -167,6 +187,7 @@ class JobCreationService
      * Moved from ProjectManager::saveJobsMetadata().
      *
      * @throws ReflectionException
+     * @throws PDOException
      */
     private function saveJobsMetadata(JobStruct $job, ProjectStructure $projectStructure): void
     {
@@ -205,12 +226,14 @@ class JobCreationService
      */
     protected function getJobsMetadataDao(): JobsMetadataDao
     {
-        return new JobsMetadataDao();
+        return new JobsMetadataDao($this->dbHandler);
     }
 
     /**
      * Associate a payable rate model with a job if both model ID and template exist.
      * Wrapped in try-catch to preserve the original error handling behavior.
+     *
+     * @throws LogInvalidArgumentException
      */
     private function associatePayableRateModel(
         JobStruct $job,
@@ -222,7 +245,7 @@ class JobCreationService
         }
 
         try {
-            CustomPayableRateDao::assocModelToJob(
+            $this->customPayableRateDao->assocModelToJob(
                 $projectStructure->payable_rate_model_id,
                 (int)$job->id,
                 $template->version,
@@ -240,6 +263,7 @@ class JobCreationService
      * @param array<string, int> $minMaxSegmentsId
      * @return list<JobStruct>
      * @throws Exception
+     * @throws TypeError
      */
     public function createJobsForTargetLanguages(
         ProjectStructure $projectStructure,
@@ -260,7 +284,7 @@ class JobCreationService
             $tmKeysJson = $this->buildTmKeysJson($projectStructure);
             $job = $this->buildJobStruct($projectStructure, $target, $payableRates, $tmKeysJson, $minMaxSegmentsId, $filesWordCount);
 
-            $this->features->run('validateJobCreation', $job, $projectStructure);
+            $this->features->dispatch(new ValidateJobCreationEvent($job, $projectStructure));
             $job = $this->insertJob($job);
 
             $this->updateJobTracking($projectStructure, $job, $payableRates, $minMaxSegmentsId);
@@ -276,10 +300,11 @@ class JobCreationService
     /**
      * Insert a job into the database. Extracted for testability.
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function insertJob(JobStruct $job): JobStruct
     {
-        return JobDao::createFromStruct($job);
+        return (new JobDao($this->dbHandler))->createFromStruct($job);
     }
 
     /**
@@ -288,7 +313,7 @@ class JobCreationService
      */
     protected function insertFilesJob(int $jobId, int $fid): void
     {
-        FileDao::insertFilesJob($jobId, $fid);
+        (new FileDao($this->dbHandler))->insertFilesJob($jobId, $fid);
     }
 
     /**
@@ -296,6 +321,7 @@ class JobCreationService
      *
      * @param list<JobStruct> $jobs
      * @throws Exception
+     * @throws TypeError
      */
     public function linkFilesAndInsertPreTranslations(
         array $jobs,
@@ -313,6 +339,7 @@ class JobCreationService
     /**
      * Link all project files to a job and create GDrive remote copies if applicable.
      * @throws Exception
+     * @throws TypeError
      */
     private function linkFilesToJob(JobStruct $job, ProjectStructure $projectStructure, ?Session $gdriveSession): void
     {
@@ -320,7 +347,7 @@ class JobCreationService
             $this->insertFilesJob((int)$job->id, $fid);
 
             if ($gdriveSession && $gdriveSession->hasFiles()) {
-                $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . '/gdrive/oauth/response');
+                $client = (new GoogleProvider)->getClient(AppConfig::$HTTPHOST . '/gdrive/oauth/response');
                 $gdriveSession->createRemoteCopiesWhereToSaveTranslation($fid, (int)$job->id, $client);
             }
         }

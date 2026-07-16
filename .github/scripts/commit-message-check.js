@@ -9,6 +9,7 @@ const EMOJI_TYPE_MAP = {
     '\u{1F4DD}':       'docs',     // 📝
     '\u2728':          'feat',     // ✨
     '\u{1F41B}':       'fix',      // 🐛
+    '\u{1F512}':       'security', // 🔒
     '\u26A1\uFE0F':    'perf',     // ⚡️
     '\u267B\uFE0F':    'refactor', // ♻️
     '\u23EA\uFE0F':    'revert',   // ⏪️

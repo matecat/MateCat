@@ -12,17 +12,25 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
+use DivisionByZeroError;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\Analysis\Constants\MatchConstantsFactory;
 use Model\Files\FilesInfoUtility;
-use Model\Projects\MetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
+use Model\Projects\ProjectDao;
+use Model\Segments\SegmentDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\QualityReport\QualityReportModel;
 use Model\QualityReport\QualityReportSegmentModel;
 use Model\QualityReport\QualityReportSegmentStruct;
+use PDOException;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
+use ReflectionException;
+use TypeError;
 use Utils\Registry\AppConfig;
 
 class QualityReportControllerAPI extends KleinController
@@ -37,10 +45,18 @@ class QualityReportControllerAPI extends KleinController
      */
     protected ProjectStruct $project;
 
+    protected function createQualityReportModel(): QualityReportModel
+    {
+        return new QualityReportModel($this->chunk, $this->getDatabase());
+    }
+
+    /**
+     * @throws Exception
+     */
     public function show(): void
     {
         $this->return404IfTheJobWasDeleted();
-        $model = new QualityReportModel($this->chunk);
+        $model = $this->createQualityReportModel();
         $model->setDateFormat('c');
 
         $this->response->json([
@@ -50,6 +66,8 @@ class QualityReportControllerAPI extends KleinController
 
     /**
      * @throws Exception
+     * @throws DivisionByZeroError
+     * @throws TypeError
      */
     public function segments(bool $isForUI = false): void
     {
@@ -61,19 +79,22 @@ class QualityReportControllerAPI extends KleinController
      * @param bool $isForUI
      *
      * @throws Exception
+     * @throws DivisionByZeroError
+     * @throws TypeError
      */
     protected function renderSegments(bool $isForUI = false): void
     {
-        $this->project = $this->chunk->getProject();
+        $this->project = $this->chunk->getProject(new ProjectDao($this->getDatabase()));
 
-        $mt_qe_workflow_enabled = $this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false;
+        $projectMetadataDao = new ProjectMetadataDao($this->getDatabase());
+        $mt_qe_workflow_enabled = (bool)($projectMetadataDao->setCacheTTL(3600)->getValue((int)$this->project->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false);
         $matchConstantsClass = MatchConstantsFactory::getInstance($mt_qe_workflow_enabled);
 
         $ref_segment = (int)$this->request->param('ref_segment');
         $where = $this->request->param('where');
         $step = (int)$this->request->param('step');
 
-        /** @var array $filter */
+        /** @var array<string, mixed> $filter */
         $filter = $this->request->param('filter', []);
 
         if (empty($ref_segment)) {
@@ -92,20 +113,24 @@ class QualityReportControllerAPI extends KleinController
             $step = self::MAX_PER_PAGE;
         }
 
-        $qrSegmentModel = new QualityReportSegmentModel($this->chunk);
+        $qrSegmentModel = new QualityReportSegmentModel($this->chunk, $this->getDatabase());
         $options = ['filter' => $filter];
         $segments_ids = $qrSegmentModel->getSegmentsIdForQR($step, $ref_segment, $where, $options);
 
         if (count($segments_ids) > 0) {
-            $segmentTranslationEventDao = new TranslationEventDao();
-            $ttlArray = $segmentTranslationEventDao->setCacheTTL(60 * 5)->getTteForSegments($segments_ids, $this->chunk->id);
-            $segments = $qrSegmentModel->getSegmentsForQR($segments_ids, $isForUI);
+            if ($this->chunk->id === null) {
+                throw new Exception('Job id is null');
+            }
 
-            $filesInfoUtility = new FilesInfoUtility($this->chunk);
+            $segmentTranslationEventDao = new TranslationEventDao($this->getDatabase());
+            $ttlArray = $segmentTranslationEventDao->setCacheTTL(60 * 5)->getTteForSegments($segments_ids, $this->chunk->id);
+            $segments = $qrSegmentModel->getSegmentsForQR(array_values($segments_ids), $isForUI);
+
+            $filesInfoUtility = new FilesInfoUtility($this->chunk, $this->getDatabase());
             $filesInfo = $filesInfoUtility->getInfo(false);
 
-            $mt_qe_workflow_enabled = $this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false;
-            $segments = $this->_formatSegments($segments, $ttlArray, $filesInfo, $mt_qe_workflow_enabled);
+            $mt_qe_workflow_enabled = (bool)($projectMetadataDao->setCacheTTL(3600)->getValue((int)$this->project->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false);
+            $segments = $this->_formatSegments($segments, $ttlArray ?? [], $filesInfo, $mt_qe_workflow_enabled);
 
             $this->response->json([
                 'workflow_type' => $matchConstantsClass::getWorkflowType(),
@@ -118,7 +143,7 @@ class QualityReportControllerAPI extends KleinController
                     'step' => !empty($this->request->param('step')) ? $step : null,
                     'filter' => $this->request->param('filter'),
                 ],
-                '_links' => $this->_getPaginationLinks($segments_ids, $step, $filter)
+                '_links' => $this->_getPaginationLinks(array_values($segments_ids), $step, $filter)
             ]);
         } else {
             $this->response->json(['segments' => []]);
@@ -126,16 +151,24 @@ class QualityReportControllerAPI extends KleinController
     }
 
     /**
-     * @param array $segments_id
+     * @param list<int> $segments_id
      * @param int $step
-     * @param array|null $filter
+     * @param array<string, mixed>|null $filter
      *
-     * @return array
+     * @return array<string, float|int|string|null>
+     * @throws Exception
+     * @throws DivisionByZeroError
+     * @throws PDOException
      */
-    private function _getPaginationLinks(array $segments_id, int $step, array $filter = null): array
+    private function _getPaginationLinks(array $segments_id, int $step, ?array $filter = null): array
     {
         $url = parse_url($_SERVER['REQUEST_URI']);
-        $total = count($this->chunk->getSegments());
+        if ($url === false) {
+            throw new Exception('Invalid request URI');
+        }
+
+        $path = $url['path'] ?? '';
+        $total = count($this->chunk->getSegments(new SegmentDao($this->getDatabase())));
         $pages = ceil($total / $step);
 
         $links = [
@@ -151,12 +184,12 @@ class QualityReportControllerAPI extends KleinController
 
         $filter_query = http_build_query(['filter' => array_filter(empty($filter) ? [] : $filter)]);
         if ($this->chunk->job_last_segment > end($segments_id)) {
-            $links['next'] = $url['path'] . "?ref_segment=" . end($segments_id) . ($step != self::DEFAULT_PER_PAGE ? "&step=" . $step : null) . (!empty($filter_query) ? "&" . $filter_query :
+            $links['next'] = $path . "?ref_segment=" . end($segments_id) . ($step != self::DEFAULT_PER_PAGE ? "&step=" . $step : null) . (!empty($filter_query) ? "&" . $filter_query :
                     null);
         }
 
         if ($this->chunk->job_first_segment < reset($segments_id)) {
-            $links['prev'] = $url['path'] . "?ref_segment=" . (reset($segments_id) - ($step + 1)) . ($step != self::DEFAULT_PER_PAGE ? "&step=" . $step : null) . (!empty(
+            $links['prev'] = $path . "?ref_segment=" . (reset($segments_id) - ($step + 1)) . ($step != self::DEFAULT_PER_PAGE ? "&step=" . $step : null) . (!empty(
                 $filter_query
                 ) ? "&" . $filter_query : null);
         }
@@ -168,11 +201,12 @@ class QualityReportControllerAPI extends KleinController
      * Change the response JSON to remove source_page property and change it to revision number.
      *
      * @param QualityReportSegmentStruct[] $segments
-     * @param array $ttlArray
-     * @param array $filesInfo
+     * @param array<int, mixed> $ttlArray
+     * @param array<string, mixed> $filesInfo
      * @param bool $mt_qe_workflow_enabled
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
+     * @throws DivisionByZeroError
      */
     private function _formatSegments(array $segments, array $ttlArray, array $filesInfo, bool $mt_qe_workflow_enabled = false): array
     {
@@ -237,10 +271,10 @@ class QualityReportControllerAPI extends KleinController
     }
 
     /**
-     * @param array $tteArray
+     * @param array<int, mixed> $tteArray
      * @param int $sid
      *
-     * @return array
+     * @return array<string, int>
      */
     private function getTteArrayForSegment(array $tteArray, int $sid): array
     {
@@ -288,6 +322,7 @@ class QualityReportControllerAPI extends KleinController
      * @param QualityReportSegmentStruct $segment
      *
      * @return float|int
+     * @throws DivisionByZeroError
      */
     private function getSecsPerWord(QualityReportSegmentStruct $segment): float|int
     {
@@ -298,16 +333,21 @@ class QualityReportControllerAPI extends KleinController
     }
 
 
+    /**
+     * @throws ReflectionException
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
+     */
     public function general(): void
     {
-        $project = $this->chunk->getProject();
+        $project = $this->chunk->getProject(new ProjectDao($this->getDatabase()));
         $this->response->json([
             'project' => $project,
             'job' => $this->chunk,
         ]);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $Validator = new ChunkPasswordValidator($this);

@@ -12,11 +12,11 @@ class Mapper
     /**
      * Extract a string into a map of <g>, <bx> and <ex> tag(s) (including nested tags)
      *
-     * @param $string
+     * @param string $string
      *
      * @return Element[]
      */
-    public static function extract($string): array
+    public static function extract(string $string): array
     {
         $map = [];
 
@@ -28,21 +28,35 @@ class Mapper
             $html = $dom->getElementsByTagName('body');
 
             for ($i = 0; $i < $html->length; $i++) {
-                /** @var DOMElement $node */
                 $node = $html->item($i);
+                if (!$node instanceof DOMElement) {
+                    continue;
+                }
 
                 for ($k = 0; $k < $node->childNodes->length; $k++) {
                     $childNode = $node->childNodes->item($k);
+                    if ($childNode === null) {
+                        continue;
+                    }
 
                     // if the tag is wrapper in <p> a further loop is needed
                     if ($childNode->nodeName === 'p') {
                         for ($a = 0; $a < $childNode->childNodes->length; $a++) {
-                            $element = self::appendBxExGTagMapElement($childNode->childNodes->item($a));
+                            $nestedChild = $childNode->childNodes->item($a);
+                            if (!$nestedChild instanceof DOMNode) {
+                                continue;
+                            }
+
+                            $element = self::appendBxExGTagMapElement($nestedChild);
                             if ($element->name) {
                                 $map[] = $element;
                             }
                         }
                     } else {
+                        if (!$childNode instanceof DOMNode) {
+                            continue;
+                        }
+
                         $element = self::appendBxExGTagMapElement($childNode);
                         if ($element->name) {
                             $map[] = $element;
@@ -68,8 +82,8 @@ class Mapper
         if ($nodeName === 'g' or $nodeName === 'ex' or $nodeName === 'bx') {
             $element->name = $nodeName;
 
-            foreach ($node->attributes as $attribute) {
-                $element->attributes[$attribute->nodeName] = $attribute->nodeValue;
+            foreach ($node->attributes ?? [] as $attribute) {
+                $element->attributes[$attribute->nodeName] = $attribute->nodeValue ?? '';
             }
 
             $element->children = [];
@@ -77,7 +91,12 @@ class Mapper
 
         if ($nodeName === 'g') {
             for ($j = 0; $j < $node->childNodes->length; $j++) {
-                $children = self::appendBxExGTagMapElement($node->childNodes->item($j));
+                $childNode = $node->childNodes->item($j);
+                if (!$childNode instanceof DOMNode) {
+                    continue;
+                }
+
+                $children = self::appendBxExGTagMapElement($childNode);
 
                 if ($children->name) {
                     $element->children[] = $children;

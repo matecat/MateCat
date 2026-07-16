@@ -13,6 +13,9 @@ class CommentResolveEmail extends BaseCommentEmail
 
     protected ?string $title = "Thread resolved";
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getTemplateVariables(): array
     {
         $vars = parent::_getTemplateVariables();

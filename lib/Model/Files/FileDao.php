@@ -4,7 +4,7 @@ namespace Model\Files;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
+use PDOException;
 use ReflectionException;
 
 class FileDao extends AbstractDao
@@ -14,17 +14,34 @@ class FileDao extends AbstractDao
     protected static array $auto_increment_field = ['id'];
 
     /**
-     * @param     $id_job
+     * @param array<int, int> $idFiles
      *
-     * @param int $ttl
-     *
+     * @return int
+     * @throws PDOException
+     */
+    public function deleteFailedProjectFiles(array $idFiles = []): int
+    {
+        if (empty($idFiles)) {
+            return 0;
+        }
+
+        $sql = "DELETE FROM files WHERE id IN ( " . str_repeat('?,', count($idFiles) - 1) . '?' . " ) ";
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($idFiles);
+
+        return $stmt->rowCount();
+    }
+
+    /**
      * @return FileStruct[]
+     * @throws PDOException
+     * @throws Exception
      * @throws ReflectionException
      */
-    public static function getByJobId($id_job, int $ttl = 60): array
+    public function getByJobId(int $id_job, int $ttl = 60): array
     {
-        $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare(
             "SELECT * FROM files " .
             " INNER JOIN files_job ON files_job.id_file = files.id " .
@@ -32,30 +49,30 @@ class FileDao extends AbstractDao
         );
 
         /** @var FileStruct[] */
-        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, FileStruct::class, ['id_job' => $id_job]);
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, FileStruct::class, ['id_job' => $id_job]);
     }
 
     /**
-     * @param int $id_project
-     *
-     * @param int $ttl
-     *
      * @return FileStruct[]
+     * @throws PDOException
+     * @throws Exception
      * @throws ReflectionException
      */
-    public static function getByProjectId(int $id_project, int $ttl = 600): array
+    public function getByProjectId(int $id_project, int $ttl = 600): array
     {
-        $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare("SELECT * FROM files where id_project = :id_project ");
 
         /** @var FileStruct[] */
-        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, FileStruct::class, ['id_project' => $id_project]);
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, FileStruct::class, ['id_project' => $id_project]);
     }
 
-    public static function updateField($file, $field, $value): bool
+    /**
+     * @throws PDOException
+     */
+    public function updateField(FileStruct $file, string $field, string|int|float|bool|null $value): bool
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare(
             "UPDATE files SET $field = :value " .
             " WHERE id = :id "
@@ -68,14 +85,11 @@ class FileDao extends AbstractDao
     }
 
     /**
-     * @param int $id_file
-     * @param int $id_project
-     *
-     * @return int
+     * @throws PDOException
      */
-    public static function isFileInProject(int $id_file, int $id_project): int
+    public function isFileInProject(int $id_file, int $id_project): int
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare("SELECT * FROM files where id_project = :id_project and id = :id_file ");
         $stmt->execute(['id_project' => $id_project, 'id_file' => $id_file]);
 
@@ -83,53 +97,27 @@ class FileDao extends AbstractDao
     }
 
     /**
-     * @param int $id
-     * @param int|null $ttl
-     *
-     * @return FileStruct|null
+     * @throws PDOException
+     * @throws Exception
      * @throws ReflectionException
      */
-    public static function getById(int $id, ?int $ttl = 0): ?FileStruct
+    public function getById(int $id, ?int $ttl = 0): ?FileStruct
     {
-        $thisDao = new self();
+        /** @var ?FileStruct $res */
+        $res = $this->fetchById($id, FileStruct::class, $ttl);
 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM files where id = :id ");
-        $stmt->execute(['id' => $id]);
-
-        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, FileStruct::class, ['id' => $id])[0] ?? null;
-    }
-
-    /**
-     * @param array $idFiles
-     *
-     * @return int
-     */
-    public function deleteFailedProjectFiles(array $idFiles = []): int
-    {
-        if (empty($idFiles)) {
-            return 0;
-        }
-
-        $sql = "DELETE FROM files WHERE id IN ( " . str_repeat('?,', count($idFiles) - 1) . '?' . " ) ";
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->execute($idFiles);
-
-        return $stmt->rowCount();
+        return $res;
     }
 
     /**
      * @throws Exception
      */
-    public static function insertFilesJob($id_job, $id_file): void
+    public function insertFilesJob(int $id_job, int $id_file): void
     {
         $data = [];
         $data['id_job'] = (int)$id_job;
         $data['id_file'] = (int)$id_file;
 
-        $db = Database::obtain();
-        $db->insert('files_job', $data);
+        $this->database->insert('files_job', $data);
     }
-
 }

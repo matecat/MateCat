@@ -29,20 +29,26 @@ class MemoryKeys
         $this->data = $data;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function renderItem(MemoryKeyStruct $keyStruct): array
     {
         return [
-            'key' => $keyStruct->tm_key->key,
-            'name' => $keyStruct->tm_key->name
+            'key' => $keyStruct->tm_key?->key,
+            'name' => $keyStruct->tm_key?->name
         ];
     }
 
+    /**
+     * @return array<string, list<array<string, mixed>>>
+     */
     public function render(): array
     {
         $out = [];
         foreach ($this->data as $keyStruct) {
             $keyType = 'private_keys';
-            if ($keyStruct->tm_key->isShared()) {
+            if ($keyStruct->tm_key?->isShared()) {
                 $keyType = 'shared_keys';
             }
 

@@ -175,7 +175,7 @@ class FileInsertionService
 
                 // Treat "nothing inserted" as a hard failure.
                 if (count($filesStructure ?: []) === 0) {
-                    $this->logger->error('No files inserted in DB', [$_originalFileNames, $sha1_original, $cachedXliffFilePathName]);
+                    $this->logger->error('No files inserted in DB', ['files' => $_originalFileNames, 'sha1' => $sha1_original, 'xliff' => $cachedXliffFilePathName]);
                     throw new Exception('Files could not be saved in database.', ProjectCreationError::FILE_NOT_FOUND->value);
                 }
             } catch (Throwable $e) {
@@ -208,7 +208,7 @@ class FileInsertionService
     protected function validateCachedXliff(?string $cachedXliffFilePathName, array $_originalFileNames, array $linkFiles): void
     {
         if (count($_originalFileNames ?: []) === 0) {
-            $this->logger->error('No hash files found', [$linkFiles['conversionHashes']]);
+            $this->logger->error('No hash files found', ['conversionHashes' => $linkFiles['conversionHashes']]);
             throw new Exception('No hash files found', ProjectCreationError::FILE_NOT_FOUND->value);
         }
 
@@ -271,6 +271,7 @@ class FileInsertionService
      *
      * @return array<int, array<string, mixed>>
      * @throws Exception
+     * @throws \TypeError
      */
     protected function insertFiles(AbstractFilesStorage $fs, ProjectStructure $projectStructure, array $_originalFileNames, string $sha1_original, string $cachedXliffFilePathName): array
     {
@@ -303,7 +304,7 @@ class FileInsertionService
                 if ($this->gdriveSession) {
                     $gdriveFileId = $this->gdriveSession->findFileIdByName($originalFileName);
                     if ($gdriveFileId) {
-                        $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
+                        $client = (new GoogleProvider)->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
                         $this->gdriveSession->createRemoteFile($fid, $gdriveFileId, $client);
                     }
                 }

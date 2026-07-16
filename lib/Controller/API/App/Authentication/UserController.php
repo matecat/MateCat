@@ -7,9 +7,15 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Response;
 use Model\Users\Authentication\ChangePasswordModel;
 use Model\Users\Authentication\PasswordRules;
+use Model\Users\UserDao;
+use ReflectionException;
+use Stomp\Exception\ConnectionException;
+use TypeError;
 
 class UserController extends AbstractStatefulKleinController
 {
@@ -19,6 +25,8 @@ class UserController extends AbstractStatefulKleinController
 
     /**
      * @return void
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function show(): void
     {
@@ -45,37 +53,38 @@ class UserController extends AbstractStatefulKleinController
      *
      * @return void
      * @throws ValidationError
+     * @throws ReflectionException
+     * @throws ConnectionException
      * @throws Exception
+     * @throws TypeError
      */
     public function changePasswordAsLoggedUser(): void
     {
-        $checkRateLimitEmail = $this->checkRateLimitResponse($this->response, $this->user->email, '/api/app/user/password/change', 5);
+        $emailIdentifier = $this->user->email ?? 'BLANK_EMAIL';
+        $checkRateLimitEmail = $this->checkAndIncrementRateLimit($this->response, $emailIdentifier, '/api/app/user/password/change', 5);
         if ($checkRateLimitEmail instanceof Response) {
             $this->response = $checkRateLimitEmail;
 
             return;
         }
 
-        $old_password = filter_var($this->request->param('old_password'), FILTER_SANITIZE_SPECIAL_CHARS);
-        $new_password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS);
-        $new_password_confirmation = filter_var($this->request->param('password_confirmation'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $old_password = (string) filter_var($this->request->param('old_password'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $new_password = (string) filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $new_password_confirmation = (string) filter_var($this->request->param('password_confirmation'), FILTER_SANITIZE_SPECIAL_CHARS);
 
-        try {
-            $this->validatePasswordRequirements($new_password, $new_password_confirmation);
+        $this->validatePasswordRequirements($new_password, $new_password_confirmation);
 
-            $cpModel = new ChangePasswordModel($this->user);
-            $cpModel->changePassword($old_password, $new_password);
+        $cpModel = $this->createChangePasswordModel();
+        $cpModel->changePassword($old_password, $new_password);
 
-            $this->broadcastLogout();
-        } finally {
-            $this->incrementRateLimitCounter($this->user->email, '/api/app/user/password/change');
-        }
+        $this->broadcastLogout();
 
         $this->response->code(200);
     }
 
     /**
      * @return void
+     * @throws LockedResponseException
      */
     public function redeemProject(): void
     {
@@ -83,7 +92,12 @@ class UserController extends AbstractStatefulKleinController
         $this->response->code(200);
     }
 
-    protected function afterConstruct(): void
+    protected function createChangePasswordModel(): ChangePasswordModel
+    {
+        return new ChangePasswordModel($this->user, new UserDao($this->getDatabase()));
+    }
+
+    protected function registerValidators(): void
     {
         $loginValidator = new LoginValidator($this);
         $this->appendValidator($loginValidator);

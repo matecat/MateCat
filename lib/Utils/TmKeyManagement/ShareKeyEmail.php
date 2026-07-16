@@ -17,12 +17,18 @@ use Utils\Email\AbstractEmail;
 class ShareKeyEmail extends AbstractEmail
 {
 
-    protected array $userMail = [];
+    /** @var array{0: string, 1: string} */
+    protected array $userMail;
 
     protected MemoryKeyStruct $keyStruct;
 
     protected UserStruct $sender;
 
+    /**
+     * @param UserStruct $sender
+     * @param array{0: string, 1: string} $userMail
+     * @param MemoryKeyStruct $keyStruct
+     */
     public function __construct(UserStruct $sender, array $userMail, MemoryKeyStruct $keyStruct)
     {
         $this->userMail = $userMail;
@@ -50,18 +56,25 @@ class ShareKeyEmail extends AbstractEmail
         $this->_enqueueEmailDelivery($mailConf);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getTemplateVariables(): array
     {
+        $tmKey = $this->keyStruct->tm_key;
         $params = [];
         $params["senderFullName"] = $this->sender->fullName();
         $params["senderEmail"] = $this->sender->email;
-        $params["tm_key_name"] = $this->keyStruct->tm_key->name;
-        $params["tm_key_value"] = $this->keyStruct->tm_key->key;
+        $params["tm_key_name"] = $tmKey !== null ? ($tmKey->name ?? '') : '';
+        $params["tm_key_value"] = $tmKey !== null ? ($tmKey->key ?? '') : '';
         $params["addressMail"] = $this->userMail[0];
 
         return $params;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getLayoutVariables($messageBody = null): array
     {
         $vars = parent::_getLayoutVariables();

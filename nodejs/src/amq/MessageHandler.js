@@ -19,6 +19,8 @@ const CONTRIBUTIONS_TYPE = 'contribution';
 const CONCORDANCE_TYPE = 'concordance';
 const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
 const BULK_STATUS_CHANGE_TYPE = 'bulk_segment_status_change';
+const SEGMENT_DISABLED_TYPE = 'segment_disabled';
+const SEGMENT_ENABLED_TYPE = 'segment_enabled';
 
 const LOGOUT = 'logout';
 const UPGRADE = 'upgrade';
@@ -34,10 +36,14 @@ module.exports.MessageHandler = class {
 
   constructor(application) {
     this.application = application;
-    this.onReceive = this.onReceive.bind(this);
   }
 
   onReceive = (message) => {
+
+    if (!message?.data?.payload) {
+      logger.error('Malformed AMQ message: missing data.payload', {message});
+      return;
+    }
 
     let room;
     message.data.payload._type = message._type;
@@ -51,10 +57,16 @@ module.exports.MessageHandler = class {
         room = message.data.uid.toString();
         break;
       case ENGINE_QUOTA_EXCEEDED:
-        room = message.data.id_job.toString();
-        break;
       case COMMENTS_TYPE:
         room = message.data.id_job.toString();
+        break;
+      case SEGMENT_DISABLED_TYPE:
+      case SEGMENT_ENABLED_TYPE:
+        if (!message.data.id_project) {
+          logger.error('Missing id_project in AMQ message', {type: message._type, data: message.data});
+          return;
+        }
+        room = message.data.id_project.toString();
         break;
       case GLOBAL_MESSAGES:
         this.application.sendBroadcastServiceMessage(
@@ -64,6 +76,10 @@ module.exports.MessageHandler = class {
 
         return;
       default:
+        if (!message.data.id_client) {
+          logger.error('Missing id_client in AMQ message', {type: message._type, data: message.data});
+          return;
+        }
         room = message.data.id_client;
         break;
     }
@@ -83,7 +99,7 @@ module.exports.MessageHandler = class {
   }
 }
 
-module.exports.notifyUpgrade = notifyUpgrade = (application, isRebooting = true) => {
+const notifyUpgrade = (application, isRebooting = true) => {
 
   const disconnectMessage = {
     payload: {
@@ -112,3 +128,5 @@ module.exports.notifyUpgrade = notifyUpgrade = (application, isRebooting = true)
   }
 
 }
+
+module.exports.notifyUpgrade = notifyUpgrade;

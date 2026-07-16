@@ -28,16 +28,23 @@ class ContentPreprocessor
     public const string EMPTY_HTML_TAGS_PLACEHOLDER = '##$$##______EMPTY_HTML_TAG______##$$##';
 
     /**
-     * Map of ASCII control characters to their placeholder representations.
+     * Matches a single, well-formed XLIFF tag (opening, closing or self-closing).
      *
-     * Keys are hex codes (00-1F, 7F), values contain:
-     * - symbol: ASCII symbol name (e.g., 'NULL', 'SOH', 'LF')
-     * - placeHold: Placeholder string
-     * - numeral: Numeric value
+     * Only the tag names actually used by MateCat at Layer 1 are recognized
+     * (the same set protected by the subfiltering {@see \Matecat\SubFiltering\Filters\PlaceHoldXliffTags}).
+     * Any other angle-bracketed sequence is treated as literal text.
      *
-     * @var array<string, array{symbol: string, placeHold: string, numeral: int}>
+     * @var string
      */
-    protected static array $asciiPlaceHoldMap = [
+    private const string XLIFF_TAG_REGEX = '#</?(?:g|bx|ex|x|bpt|ept|sub|it|mrk|sc|ec|pc|ph)(?:\s[^>]*?)?/?>#si';
+
+    /** @var string Prefix of the temporary placeholder used to shield valid XLIFF tags while escaping stray brackets */
+    private const string XLIFF_TAG_PLACEHOLDER_PREFIX = '##$$##__QA_XLIFF_TAG_';
+
+    /** @var string Suffix of the temporary placeholder used to shield valid XLIFF tags while escaping stray brackets */
+    private const string XLIFF_TAG_PLACEHOLDER_SUFFIX = '__##$$##';
+
+    private const array ASCII_PLACE_HOLD_MAP = [
         '00' => ['symbol' => 'NULL', 'placeHold' => '##$_00$##', 'numeral' => 0x00],
         '01' => ['symbol' => 'SOH', 'placeHold' => '##$_01$##', 'numeral' => 0x01],
         '02' => ['symbol' => 'STX', 'placeHold' => '##$_02$##', 'numeral' => 0x02],
@@ -79,12 +86,12 @@ class ContentPreprocessor
 
     public static function getTabPlaceholder(): string
     {
-        return self::$asciiPlaceHoldMap['09']['placeHold'];
+        return self::ASCII_PLACE_HOLD_MAP['09']['placeHold'];
     }
 
     public static function getNewlinePlaceholder(): string
     {
-        return self::$asciiPlaceHoldMap['0A']['placeHold'];
+        return self::ASCII_PLACE_HOLD_MAP['0A']['placeHold'];
     }
 
     /**
@@ -95,7 +102,7 @@ class ContentPreprocessor
         $segment = $segment ?? '';
 
         $encoding = mb_detect_encoding($segment);
-        $segment = mb_convert_encoding($segment, 'UTF-8', $encoding ?: false);
+        $segment = mb_convert_encoding($segment, 'UTF-8', $encoding ?: 'UTF-8') ?: $segment;
 
         // Replace non-printable chars with placeholders (DOMDocument can't handle them)
         $segment = $this->replaceAscii($segment);
@@ -103,8 +110,57 @@ class ContentPreprocessor
         // Do it again for entities
         $segment = $this->replaceHexEntities($segment);
 
+        // Escape angle brackets that do not form a valid XLIFF tag so that plain-text
+        // sequences like "<Expiry date symbol>" are not misinterpreted as malformed XML
+        // (which would surface to the translator as a false-positive "Tag mismatch" error).
+        $segment = $this->escapeStrayAngleBrackets($segment);
+
         // Fill empty HTML tags with placeholder to avoid contraction by saveXML()
         return $this->fillEmptyHTMLTagsWithPlaceholder($segment);
+    }
+
+    /**
+     * Escapes angle brackets that are not part of a valid XLIFF tag.
+     *
+     * Valid XLIFF tags (see {@see self::XLIFF_TAG_REGEX}) are temporarily shielded with
+     * placeholders, every remaining literal `<`/`>` is converted to its entity
+     * (`&lt;`/`&gt;`), and the shielded tags are then restored untouched.
+     *
+     * This makes the QA DOM parsing resilient against plain-text segments that merely
+     * look like markup (e.g. `<Expiry date symbol>`): such content is loaded as text
+     * instead of failing XML parsing and being reported as a tag mismatch. Already
+     * encoded entities (`&lt;`, `&gt;`) and genuine XLIFF tags are left unchanged, so
+     * real tag errors are still detected.
+     *
+     * @param string $seg The segment to sanitize
+     * @return string The segment with stray angle brackets escaped
+     */
+    public function escapeStrayAngleBrackets(string $seg): string
+    {
+        if (!str_contains($seg, '<') && !str_contains($seg, '>')) {
+            return $seg;
+        }
+
+        $placeholders = [];
+        $index = 0;
+
+        // Shield valid XLIFF tags so the escaping step cannot touch them
+        $shielded = preg_replace_callback(
+            self::XLIFF_TAG_REGEX,
+            function (array $matches) use (&$placeholders, &$index): string {
+                $token = self::XLIFF_TAG_PLACEHOLDER_PREFIX . $index . self::XLIFF_TAG_PLACEHOLDER_SUFFIX;
+                $placeholders[$token] = $matches[0];
+                $index++;
+                return $token;
+            },
+            $seg
+        ) ?? $seg;
+
+        // Escape every remaining (stray) angle bracket
+        $shielded = str_replace(['<', '>'], ['&lt;', '&gt;'], $shielded);
+
+        // Restore the shielded XLIFF tags
+        return strtr($shielded, $placeholders);
     }
 
     /**
@@ -120,10 +176,10 @@ class ContentPreprocessor
                 $key = sprintf("%02X", ord($v));
                 $test_src = preg_replace(
                     sprintf("/(\\x{%s}{1})/u", sprintf("%02X", ord($v))),
-                    self::$asciiPlaceHoldMap[$key]['placeHold'],
+                    self::ASCII_PLACE_HOLD_MAP[$key]['placeHold'],
                     $test_src,
                     1
-                );
+                ) ?? $test_src;
             }
             $seg = $test_src;
         }
@@ -151,8 +207,8 @@ class ContentPreprocessor
                 }
 
                 $key = sprintf("%02X", hexdec($v));
-                if (array_key_exists($key, self::$asciiPlaceHoldMap)) {
-                    $test_src = preg_replace($regexp, self::$asciiPlaceHoldMap[$key]['placeHold'], $test_src);
+                if (array_key_exists($key, self::ASCII_PLACE_HOLD_MAP)) {
+                    $test_src = preg_replace($regexp, self::ASCII_PLACE_HOLD_MAP[$key]['placeHold'], $test_src) ?? $test_src;
                 }
             }
 
@@ -193,7 +249,7 @@ class ContentPreprocessor
         preg_match_all(self::$regexpPlaceHoldAscii, $content, $matches_trg);
         if (!empty($matches_trg[1])) {
             foreach ($matches_trg[1] as $v) {
-                $content = preg_replace('/##\$_(' . $v . ')\$##/u', '&#x' . $v . ';', $content, 1);
+                $content = preg_replace('/##\$_(' . $v . ')\$##/u', '&#x' . $v . ';', $content, 1) ?? $content;
             }
         }
 
@@ -202,14 +258,13 @@ class ContentPreprocessor
             '/([\xF0-\xF7]...)/s',
             [CatUtils::class, 'htmlentitiesFromUnicode'],
             $content
-        );
+        ) ?? $content;
 
         // Re-encode control special characters
-        $content = preg_replace('/\n/u', '&#10;', $content);
-        $content = preg_replace('/\r/u', '&#13;', $content);
-        $content = preg_replace('/\t/u', '&#09;', $content);
+        $content = preg_replace('/\n/u', '&#10;', $content) ?? $content;
+        $content = preg_replace('/\r/u', '&#13;', $content) ?? $content;
+        $content = preg_replace('/\t/u', '&#09;', $content) ?? $content;
         // NBSP character (U+00A0)
-        return preg_replace("/\xc2\xa0/u", '&#160;', $content);
+        return preg_replace("/\xc2\xa0/u", '&#160;', $content) ?? $content;
     }
 }
-

@@ -10,6 +10,7 @@ use Utils\Constants\Mime2Extension;
 class AppConfig
 {
 
+    /** @var list<string> */
     public static array $MANDATORY_KEYS = [
         'ENV',
         'DB_SERVER',
@@ -61,7 +62,25 @@ class AppConfig
     public static ?string $DB_USER = null;
     public static ?string $DB_PASS = null;
     public static int $INSTANCE_ID = 0;
-    public static string $REDIS_SERVERS = '';
+    /** @var string|list<string> */
+    public static string|array $REDIS_SERVERS = '';
+
+    /**
+     * Redis connection mode.
+     * Valid values: 'single', 'cluster', 'replication', 'sentinel'
+     */
+    public static string $REDIS_MODE = 'single';
+
+    /**
+     * Sentinel service name (used only when REDIS_MODE = 'sentinel').
+     */
+    public static string $REDIS_SENTINEL_SERVICE = 'mymaster';
+
+    /**
+     * Redis password applied to all connections (optional).
+     */
+    public static ?string $REDIS_PASSWORD = null;
+
     public static string $QUEUE_BROKER_ADDRESS;
     public static string $QUEUE_JMX_ADDRESS;
     public static string $QUEUE_CREDENTIALS;
@@ -205,6 +224,12 @@ class AppConfig
      */
     public static string $MYMEMORY_TM_API_KEY = 'tmanalysis@matecat.com';
 
+
+    /**
+     * Enable or disable the import of alternative translations from XLIFF files.
+     */
+    public static bool $IMPORT_ALT_TRANS_FROM_XLIFF = false;
+
     /**
      * Default key used to call the TM Server on an Import TMX panel
      * @var string
@@ -259,6 +284,7 @@ class AppConfig
      *
      * Done.
      */
+    /** @var array<string, array<string, string|null>> */
     public static array $OAUTH_CONFIG = [];
 
     /**
@@ -319,6 +345,7 @@ class AppConfig
     /**
      * Logging configuration
      */
+    /** @var array<string, array<string, mixed>> */
     public static array $MONOLOG_HANDLERS = [];
 
     public static string $REPLACE_HISTORY_DRIVER = '';
@@ -326,6 +353,12 @@ class AppConfig
 
     private static ?AppConfig $MYSELF = null;
 
+    /**
+     * @param array<string, mixed> $configuration
+     * @param array<string, mixed> $taskManagerConfiguration
+     *
+     * @throws RuntimeException
+     */
     protected function __construct(
         string $rootPath,
         string $envName,
@@ -391,7 +424,8 @@ class AppConfig
         $oauth_config_file = self::$ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini';
 
         if (file_exists($oauth_config_file)) {
-            self::$OAUTH_CONFIG = parse_ini_file($oauth_config_file, true) ?? [];
+            $parsed = parse_ini_file($oauth_config_file, true);
+            self::$OAUTH_CONFIG = $parsed !== false ? $parsed : [];
         }
 
         //auth sections
@@ -400,7 +434,7 @@ class AppConfig
         //if a secret is set in file
         if (file_exists(self::$AUTHSECRET_PATH)) {
             //fetch it
-            self::$AUTHSECRET = file_get_contents(self::$AUTHSECRET_PATH);
+            self::$AUTHSECRET = file_get_contents(self::$AUTHSECRET_PATH) ?: '';
         } else {
             //generates pass
             try {
@@ -449,6 +483,7 @@ class AppConfig
         self::$MIME_TYPES = Mime2Extension::getMimeTypes();
     }
 
+    /** @var array<string, array<string, array<int, string>>> */
     public static array $SUPPORTED_FILE_TYPES = [
         'Office' => [
             'pages' => ['', '', 'extdoc'],
@@ -548,6 +583,7 @@ class AppConfig
         ]
     ];
 
+    /** @var array<string, list<string>> */
     public static array $MIME_TYPES = [];
 
     /*
@@ -558,11 +594,12 @@ class AppConfig
      */
     public static int $MAX_FILENAME_LENGTH = 210;
 
+    /** @var list<string> */
     public static array $AUTOLOAD_PLUGINS = ["second_pass_review"];
 
     /**
      * Definitions for the asynchronous task runner
-     * @var array
+     * @var array<string, mixed>
      */
     public static array $TASK_RUNNER_CONFIG = [];
 
@@ -574,8 +611,10 @@ class AppConfig
      * @param string $rootPath
      * @param string $envName
      * @param string $matecatVersion
-     * @param array $configuration
-     * @param array $taskManagerConfiguration
+     * @param array<string, mixed> $configuration
+     * @param array<string, mixed> $taskManagerConfiguration
+     *
+     * @throws RuntimeException
      */
     public static function init(
         string $rootPath,
@@ -587,6 +626,24 @@ class AppConfig
         if (empty(self::$MYSELF)) {
             self::$MYSELF = new self($rootPath, $envName, $matecatVersion, $configuration, $taskManagerConfiguration);
         }
+    }
+
+    /**
+     * @throws RuntimeException
+     * @internal TESTING ONLY — never call in production code.
+     *
+     * Resets the singleton so that {@see init()} can be called again with
+     * different parameters. Using this outside of tests will corrupt
+     * global application state.
+     *
+     */
+    public static function resetSingleton(): void
+    {
+        if (PHP_SAPI !== 'cli' || !defined('PHPUNIT_COMPOSER_INSTALL')) {
+            throw new RuntimeException('AppConfig::resetSingleton() must only be called from PHPUnit tests.');
+        }
+
+        self::$MYSELF = null;
     }
 
     /**

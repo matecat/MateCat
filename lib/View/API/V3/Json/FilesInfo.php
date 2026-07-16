@@ -14,11 +14,11 @@ class FilesInfo
 {
 
     /**
-     * @param      $filesStructList
-     * @param null $job_first_segment
-     * @param null $job_last_segment
+     * @param mixed    $filesStructList
+     * @param int|null $job_first_segment
+     * @param int|null $job_last_segment
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function render($filesStructList, $job_first_segment = null, $job_last_segment = null): array
     {

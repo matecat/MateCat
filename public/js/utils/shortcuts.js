@@ -246,6 +246,14 @@ export const Shortcuts = {
           mac: 'ctrl+option+s',
         },
       },
+      toggleContextPreview: {
+        label: 'Toggle context preview',
+        equivalent: '',
+        keystrokes: {
+          standard: 'alt+p',
+          mac: 'option+p',
+        },
+      },
     },
   },
 }

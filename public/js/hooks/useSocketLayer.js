@@ -39,6 +39,7 @@ const useSocketLayer = (
           'x-uuid': options.uuidV4,
           'x-userid': options.userId,
           'x-jobid': options.jobId,
+          'x-projectid': options.projectId,
         })
       })
       .catch((error) => {

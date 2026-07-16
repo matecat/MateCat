@@ -12,7 +12,6 @@ namespace Controller\API\Commons\ViewValidators;
 
 use Controller\Abstracts\BaseKleinViewController;
 use Controller\API\Commons\Validators\Base;
-use Utils\Registry\AppConfig;
 
 class ViewLoginRedirectValidator extends Base
 {
@@ -28,12 +27,12 @@ class ViewLoginRedirectValidator extends Base
     public function _validate(): void
     {
         if (!$this->controller->isLoggedIn()) {
-            $_SESSION['wanted_url'] = ltrim($_SERVER['REQUEST_URI'], '/');
-            header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . "signin", false);
-            exit;
+            /** @var BaseKleinViewController $controller */
+            $controller = $this->controller;
+            $controller->redirectToSignin();
         } elseif (isset($_SESSION['wanted_url'])) {
             // handle redirect after login
-            /** @var $controller BaseKleinViewController */
+            /** @var BaseKleinViewController $controller */
             $controller = $this->controller;
             $controller->redirectToWantedUrl();
         }

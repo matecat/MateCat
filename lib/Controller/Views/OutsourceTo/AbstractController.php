@@ -9,6 +9,7 @@ use Controller\Abstracts\BaseKleinViewController;
 use Exception;
 use LogicException;
 use Model\Outsource\ConfirmationStruct;
+use TypeError;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\Shop\AbstractItem;
@@ -86,10 +87,11 @@ abstract class AbstractController extends BaseKleinViewController
     /**
      * @return void
      * @throws LogicException
+     * @throws TypeError
      */
-    protected function validateTheRequest()
+    protected function validateTheRequest(): void
     {
-        $this->logger = LoggerFactory::getLogger('outsource');
+        $this->logger = $this->createLogger();
 
         // Check if the required properties are set in the concrete class
         if (empty($this->review_order_page)) {
@@ -113,72 +115,93 @@ abstract class AbstractController extends BaseKleinViewController
             $this->dataKeyName => ['filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH],
         ];
 
-        $__getInput = filter_input_array(INPUT_GET, $filterArgs);
+        $__getInput = $this->getInputFiltered($filterArgs);
 
         $this->tokenAuth = $__getInput[$this->tokenName];
 
         $this->data_key_content = $__getInput[$this->dataKeyName];
 
-        $this->logger->debug($_GET);
-        $this->logger->debug($_SERVER['QUERY_STRING']);
+        $this->logger->debug($this->request->paramsGet()->all());
+        $this->logger->debug($this->request->server()->get('QUERY_STRING'));
     }
 
-    protected function afterConstruct(): void
+    protected function createLogger(): \Utils\Logger\MatecatLogger
+    {
+        return LoggerFactory::getLogger('outsource');
+    }
+
+    /**
+     * @throws TypeError
+     */
+    protected function createShopCart(): Cart
+    {
+        return Cart::getInstance('outsource_to_external');
+    }
+
+    /**
+     * @param array<string, array<string, int>> $filterArgs
+     * @return array<string,string>
+     */
+    protected function getInputFiltered(array $filterArgs): array
+    {
+        return filter_input_array(INPUT_GET, $filterArgs);
+    }
+
+    /**
+     * @throws LogicException
+     * @throws TypeError
+     */
+    protected function initDependencies(): void
     {
         $this->validateTheRequest();
     }
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function renderView(): void
     {
-        $this->shop_cart = Cart::getInstance('outsource_to_external');
+        $this->shop_cart = $this->createShopCart();
 
         if (!$this->shop_cart->countItems()) {
-            /**
-             * redirectFailurePage is a white page with an error for session expired
-             *
-             */
+            // redirectFailurePage is a white page with an error for session expired
             $this->setView("redirectFailurePage.html", [], 500);
         } else {
-            /**
-             * redirectSuccessPage is a white page with a form submitted by javascript
-             *
-             */
-            $this->setView("redirectSuccessPage.html");
+            // redirectSuccessPage is a white page with a form submitted by javascript
+            $this->setView("redirectSuccessPage.html", $this->buildTemplateVars());
         }
 
-        $this->setTemplateVars();
         $this->render();
     }
 
     /**
-     * Set the template vars to the redirect Page
+     * Build the template vars for the redirect success page.
      *
-     * @return void
+     * @return array<string, mixed>
      * @throws Exception
+     * @throws LogicException
+     * @throws TypeError
      */
-    public function setTemplateVars(): void
+    private function buildTemplateVars(): array
     {
-        //we need a list, not a hashmap
-        $item_list = [];
-        $confirm_tokens = [];
-
         $item = $this->shop_cart->getItem($this->data_key_content);
-        $item_list[] = $item;
+        if ($item === null) {
+            throw new LogicException('Cart item not found for key: ' . $this->data_key_content);
+        }
 
         [$id_job, $password,] = explode("-", $item['id']);
 
-        $payload = [];
-        $payload['id_vendor'] = $this->id_vendor;
-        $payload['vendor_name'] = $this->vendor_name;
-        $payload['id_job'] = (int)$id_job;
-        $payload['password'] = $password;
-        $payload['currency'] = $item['currency'];
-        $payload['price'] = $this->calculatePrice($item);
-        $payload['delivery_date'] = $this->calculateDeliveryDate($item);
-        $payload['quote_pid'] = $item['quote_pid'];
+        $payload = [
+            'id_vendor'     => $this->id_vendor,
+            'vendor_name'   => $this->vendor_name,
+            'id_job'        => (int)$id_job,
+            'password'      => $password,
+            'currency'      => $item['currency'],
+            'price'         => $this->calculatePrice($item),
+            'delivery_date' => $this->calculateDeliveryDate($item),
+            'quote_pid'     => $item['quote_pid'],
+        ];
 
         $JWT = new SimpleJWT(
             $payload,
@@ -187,15 +210,13 @@ abstract class AbstractController extends BaseKleinViewController
             60 * 20 //20 minutes to complete the order
         );
 
-        $confirm_tokens[$item['id']] = $JWT->jsonSerialize();
-
-        $this->addParamsToView([
-            'tokenAuth' => $this->tokenAuth,
-            'data' => json_encode($item_list),
-            'redirect_url' => $this->review_order_page,
-            'data_key' => $this->data_key_content,
-            'confirm_tokens' => $confirm_tokens,
-        ]);
+        return [
+            'tokenAuth'      => $this->tokenAuth,
+            'data'           => json_encode([$item]),
+            'redirect_url'   => $this->review_order_page,
+            'data_key'       => $this->data_key_content,
+            'confirm_tokens' => [$item['id'] => $JWT->jsonSerialize()],
+        ];
     }
 
     /**

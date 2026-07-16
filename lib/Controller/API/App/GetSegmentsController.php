@@ -6,6 +6,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
+use DomainException;
 use Exception;
 use InvalidArgumentException;
 use Matecat\ICU\MessagePatternValidator;
@@ -13,19 +14,29 @@ use Matecat\Locales\Languages;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\ZipArchiveHandler;
 use Model\Exceptions\ValidationError;
-use Model\Jobs\ChunkDao;
+use Model\FeaturesBase\Hook\Event\Filter\FilterGetSegmentsResultEvent;
+use Model\FeaturesBase\Hook\Event\Filter\PrepareNotesForRenderingEvent;
+use Model\Files\FilesMetadataMarshaller;
+use Model\Files\MetadataDao as FilesMetadataDao;
+use Model\Jobs\JobDao;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Segments\ContextGroupDao;
+use Model\Segments\ContextStruct;
+use Model\Segments\ContextUrlResolver;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentMetadataCollection;
 use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentNoteDao;
 use Model\Segments\SegmentUIStruct;
+use PDOException;
 use ReflectionException;
+use RuntimeException;
+use Utils\LQA\ICUSourceSegmentDetector;
+use Model\Projects\ProjectDao;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
-use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\Tools\CatUtils;
 
 class GetSegmentsController extends KleinController
@@ -34,7 +45,7 @@ class GetSegmentsController extends KleinController
     const int DEFAULT_PER_PAGE = 40;
     const int MAX_PER_PAGE = 200;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -48,6 +59,10 @@ class GetSegmentsController extends KleinController
      * @throws ReflectionException
      * @throws NotFoundException
      * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
+     * @throws DomainException
+     * @throws PDOException
      */
     public function segments(): void
     {
@@ -58,24 +73,28 @@ class GetSegmentsController extends KleinController
         $password = $request['password'];
         $where = $request['where'];
 
-        $job = ChunkDao::getByIdAndPassword($jid, $password);
+        $job = $this->findJob($jid, $password);
 
-        $project = $job->getProject();
+        $project = $job->getProject(new ProjectDao($this->getDatabase()));
+        $projectId = $project->id ?? throw new RuntimeException('Project ID is null');
+        $jobId = $job->id ?? throw new RuntimeException('Job ID is null');
+        $jobPassword = $job->password ?? throw new RuntimeException('Job password is null');
+
         $featureSet = $this->getFeatureSet();
         $featureSet->loadForProject($project);
         $lang_handler = Languages::getInstance();
 
-        $parsedIdSegment = $this->parseIDSegment($id_segment);
+        $parsedIdSegment = $this->parseIdSegment($id_segment);
 
         if ($parsedIdSegment['id_segment'] == '') {
             $parsedIdSegment['id_segment'] = 0;
         }
 
-        $sDao = new SegmentDao();
+        $sDao = $this->createSegmentDao();
         $data = $sDao->getPaginationSegments(
             $job,
             min($step, self::DEFAULT_PER_PAGE),
-            $parsedIdSegment['id_segment'],
+            (int) $parsedIdSegment['id_segment'],
             $where,
             [
                 'optional_fields' => [
@@ -89,8 +108,24 @@ class GetSegmentsController extends KleinController
         $contexts = $this->getContextGroups($data);
         $res = [];
 
-        $projectMetadata = new ProjectMetadataDao();
-        $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->get($project->id, ProjectsMetadataMarshaller::ICU_ENABLED->value)?->value ?? false;
+        $projectMetadata = $this->createProjectMetadataDao();
+        $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->getValue($projectId, ProjectsMetadataMarshaller::ICU_ENABLED->value) ?? false;
+
+        $projectContextUrl = $projectMetadata->setCacheTTL(60 * 60 * 24)->getValue(
+            $projectId,
+            ProjectsMetadataMarshaller::CONTEXT_URL->value
+        );
+
+        $filesMetadataDao = $this->createFilesMetadataDao();
+        $fileContextUrls = [];
+
+        $segmentMetadataMap = [];
+        if (!empty($data)) {
+            $start = (int)$data[0]['sid'];
+            $last = end($data);
+            $stop = (int)$last['sid'];
+            $segmentMetadataMap = $this->createSegmentMetadataDao()->getAllInRange($start, $stop);
+        }
 
         foreach ($data as $seg) {
             $id_file = $seg['id_file'];
@@ -103,6 +138,12 @@ class GetSegmentsController extends KleinController
                 $res[$id_file]['source_code'] = $job->source;
                 $res[$id_file]['target_code'] = $job->target;
                 $res[$id_file]['segments'] = [];
+
+                $fileContextUrls[$id_file] = $filesMetadataDao->setCacheTTL(60 * 60 * 24)->get(
+                    $projectId,
+                    $id_file,
+                    FilesMetadataMarshaller::CONTEXT_URL->value
+                )?->value;
             }
 
             if (isset($seg['edit_distance'])) {
@@ -131,32 +172,41 @@ class GetSegmentsController extends KleinController
                 $string_contains_icu = ICUSourceSegmentDetector::sourceContainsIcu($analyzer, $icu_enabled);
             }
 
-            /** @var MateCatFilter $Filter */
-            $jobMetadata = new MetadataDao();
+            $jobMetadata = $this->createJobMetadataDao();
             $Filter = MateCatFilter::getInstance(
                 $featureSet,
                 $job->source,
                 $job->target,
-                null !== $data_ref_map ? $data_ref_map : [],
-                $jobMetadata->getSubfilteringCustomHandlers($job->id, $job->password),
+                $data_ref_map ?? [],
+                $jobMetadata->getSubfilteringCustomHandlers($jobId, $jobPassword),
                 $string_contains_icu
             );
+
+            if (!$Filter instanceof MateCatFilter) {
+                throw new RuntimeException('Expected MateCatFilter instance');
+            }
 
             $seg['icu'] = $string_contains_icu;
 
             $seg['segment'] = $Filter->fromLayer0ToLayer1(
-                CatUtils::reApplySegmentSplit($seg['segment'], $seg['source_chunk_lengths'])
+                CatUtils::reApplySegmentSplit($seg['segment'], $seg['source_chunk_lengths']) ?? ''
             );
 
             $seg['translation'] = $Filter->fromLayer0ToLayer1(
             // When the query for segments is performed, a condition is added to get NULL instead of the translation when the status is NEW
-                CatUtils::reApplySegmentSplit($seg['translation'], $seg['target_chunk_lengths']['len']) ?? ''  // use the null coalescing operator
+                CatUtils::reApplySegmentSplit($seg['translation'], $seg['target_chunk_lengths']['len']) ?? ''
             );
 
             $seg['translation'] = $Filter->fromLayer1ToLayer2($Filter->realignIDInLayer1($seg['segment'], $seg['translation']));
             $seg['segment'] = $Filter->fromLayer1ToLayer2($seg['segment']);
 
-            $seg['metadata'] = SegmentMetadataDao::getAll($seg['sid']);
+            $segmentMetadata = $segmentMetadataMap[(int)$seg['sid']] ?? new SegmentMetadataCollection([]);
+            $seg['metadata'] = $segmentMetadata->jsonSerialize();
+            $seg['context_url'] = ContextUrlResolver::resolve(
+                $segmentMetadata,
+                $fileContextUrls[$id_file] ?? null,
+                $projectContextUrl
+            );
 
             $this->attachNotes($seg, $segment_notes);
             $this->attachContexts($seg, $contexts);
@@ -170,15 +220,19 @@ class GetSegmentsController extends KleinController
 
         $result['data']['files'] = $res;
         $result['data']['where'] = $where;
-        $result['data'] = $featureSet->filter('filterGetSegmentsResult', $result['data'], $job);
+        $filterGetSegmentsResultEvent = new FilterGetSegmentsResultEvent($result['data'], $job);
+        $featureSet->dispatch($filterGetSegmentsResultEvent);
+        $result['data'] = $filterGetSegmentsResultEvent->getData();
 
         $this->response->json($result);
     }
 
     /**
-     * @return array
+     * @return array{jid: int, id_segment: string, password: string, where: ?string, step: int}
+     *
+     * @throws InvalidArgumentException
      */
-    private function validateTheRequest(): array
+    protected function validateTheRequest(): array
     {
         $jid = filter_var($this->request->param('jid'), FILTER_SANITIZE_NUMBER_INT);
         $step = filter_var($this->request->param('step'), FILTER_SANITIZE_NUMBER_INT);
@@ -203,30 +257,34 @@ class GetSegmentsController extends KleinController
         }
 
         return [
-            'jid' => $jid,
+            'jid' => (int) $jid,
             'id_segment' => $id_segment,
             'password' => $password,
-            'where' => $where,
-            'step' => $step,
+            'where' => $where ?: null,
+            'step' => (int) $step,
         ];
     }
 
     /**
      * @param SegmentUIStruct $segment
-     * @param array $segment_notes
+     * @param array<int, list<array<string, int|string>>> $segment_notes
      *
      * @throws AuthenticationError
      * @throws EndQueueException
      * @throws ReQueueException
      * @throws ValidationError
      * @throws \Model\Exceptions\NotFoundException
+     * @throws DomainException
      */
     private function attachNotes(SegmentUIStruct &$segment, array $segment_notes): void
     {
         $notes = $segment_notes[(int)$segment['sid']] ?? null;
 
         if (is_array($notes)) {
-            $notes = $this->featureSet->filter('prepareNotesForRendering', $notes);
+            /** @var array<string, mixed> $notes */
+            $prepareNotesForRenderingEvent = new PrepareNotesForRenderingEvent($notes);
+            $this->featureSet->dispatch($prepareNotesForRenderingEvent);
+            $notes = $prepareNotesForRenderingEvent->getNotes();
         }
 
         $segment['notes'] = $notes;
@@ -234,7 +292,9 @@ class GetSegmentsController extends KleinController
 
     /**
      * @param SegmentUIStruct $segment
-     * @param array $contexts
+     * @param array<int, ContextStruct> $contexts
+     *
+     * @throws DomainException
      */
     private function attachContexts(SegmentUIStruct &$segment, array $contexts): void
     {
@@ -242,53 +302,79 @@ class GetSegmentsController extends KleinController
     }
 
     /**
-     * @param $segments
+     * @param SegmentUIStruct[] $segments
      *
-     * @return array
-     * @throws AuthenticationError
-     * @throws \Model\Exceptions\NotFoundException
-     * @throws ValidationError
-     * @throws EndQueueException
-     * @throws ReQueueException
+     * @return array<int, list<array<string, int|string>>>
+     *
+     * @throws PDOException
+     * @throws DomainException
      */
-    private function prepareNotes($segments): array
+    protected function prepareNotes(array $segments): array
     {
         if (!empty($segments[0])) {
             $start = $segments[0]['sid'];
             $last = end($segments);
             $stop = $last['sid'];
 
-            if ($this->featureSet->filter('prepareAllNotes', false)) {
-                $segment_notes = SegmentNoteDao::getAllAggregatedBySegmentIdInInterval($start, $stop);
-                foreach ($segment_notes as $k => $noteObj) {
-                    $segment_notes[$k][0]['json'] = json_decode($noteObj[0]['json'], true);
-                }
-
-                return $this->featureSet->filter('processExtractedJsonNotes', $segment_notes);
-            }
-
-            return SegmentNoteDao::getAggregatedBySegmentIdInInterval($start, $stop);
+            return (new SegmentNoteDao($this->getDatabase()))->getAggregatedBySegmentIdInInterval($start, $stop);
         }
 
         return [];
     }
 
     /**
-     * @param $segments
+     * @param SegmentUIStruct[] $segments
      *
-     * @return array
+     * @return array<int, ContextStruct>
+     *
      * @throws ReflectionException
+     * @throws Exception
      */
-    private function getContextGroups($segments): array
+    protected function getContextGroups(array $segments): array
     {
         if (!empty($segments[0])) {
             $start = $segments[0]['sid'];
             $last = end($segments);
             $stop = $last['sid'];
 
-            return (new ContextGroupDao())->getBySIDRange($start, $stop);
+            return (new ContextGroupDao($this->getDatabase()))->getBySIDRange($start, $stop);
         }
 
         return [];
+    }
+
+    /**
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws Exception
+     */
+    protected function findJob(int $jid, string $password): \Model\Jobs\JobStruct
+    {
+        return (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($jid, $password);
+    }
+
+    protected function createSegmentDao(): SegmentDao
+    {
+        return new SegmentDao($this->getDatabase());
+    }
+
+    protected function createProjectMetadataDao(): ProjectMetadataDao
+    {
+        return new ProjectMetadataDao($this->getDatabase());
+    }
+
+    protected function createFilesMetadataDao(): FilesMetadataDao
+    {
+        return new FilesMetadataDao($this->getDatabase());
+    }
+
+    protected function createJobMetadataDao(): MetadataDao
+    {
+        return new MetadataDao($this->getDatabase());
+    }
+
+    protected function createSegmentMetadataDao(): SegmentMetadataDao
+    {
+        return new SegmentMetadataDao($this->getDatabase());
     }
 }

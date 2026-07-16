@@ -10,6 +10,7 @@ namespace Controller\Abstracts;
 
 use Exception;
 use Klein\App;
+use TypeError;
 use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
@@ -26,6 +27,7 @@ abstract class AbstractStatefulKleinController extends KleinController implement
      * @param App|null $app
      *
      * @throws Exception
+     * @throws TypeError
      */
     public function __construct(Request $request, Response $response, ?ServiceProvider $service = null, ?App $app = null)
     {

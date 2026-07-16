@@ -18,6 +18,7 @@ trait SignalHandlerTrait
      * Singleton Pattern, Unique Instance of This  ( Concrete class )
      *
      * @return void
+     * @throws RuntimeException
      */
     public function installHandler(): void
     {

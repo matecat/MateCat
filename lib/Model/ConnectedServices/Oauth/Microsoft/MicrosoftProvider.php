@@ -3,12 +3,15 @@
 namespace Model\ConnectedServices\Oauth\Microsoft;
 
 use GuzzleHttp\Exception\GuzzleException;
+use InvalidArgumentException;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use Model\ConnectedServices\Oauth\AbstractProvider;
 use Model\ConnectedServices\Oauth\ProviderUser;
-use Stevenmaguire\OAuth2\Client\Provider\Microsoft;
-use Stevenmaguire\OAuth2\Client\Provider\MicrosoftResourceOwner;
+use TypeError;
+use UnexpectedValueException;
+use Unt\OAuth2\Client\Provider\MicrosoftProvider as MicProvider;
+use Unt\OAuth2\Client\Provider\MicrosoftResourceOwner;
 use Utils\Registry\AppConfig;
 
 class MicrosoftProvider extends AbstractProvider
@@ -19,14 +22,15 @@ class MicrosoftProvider extends AbstractProvider
     /**
      * @param string|null $redirectUrl
      *
-     * @return Microsoft
+     * @return MicProvider
+     * @throws InvalidArgumentException
      */
-    public static function getClient(?string $redirectUrl = null): Microsoft
+    public function getClient(?string $redirectUrl = null): MicProvider
     {
-        return new Microsoft([
-            'clientId' => AppConfig::$MICROSOFT_OAUTH_CLIENT_ID,
-            'clientSecret' => AppConfig::$MICROSOFT_OAUTH_CLIENT_SECRET,
-            'redirectUri' => $redirectUrl ?? AppConfig::$MICROSOFT_OAUTH_REDIRECT_URL,
+        return new MicProvider([
+            'clientId' => AppConfig::$MICROSOFT_OAUTH_CLIENT_ID ?? throw new InvalidArgumentException('MICROSOFT_OAUTH_CLIENT_ID not configured'),
+            'clientSecret' => AppConfig::$MICROSOFT_OAUTH_CLIENT_SECRET ?? throw new InvalidArgumentException('MICROSOFT_OAUTH_CLIENT_SECRET not configured'),
+            'redirectUri' => $redirectUrl ?? AppConfig::$MICROSOFT_OAUTH_REDIRECT_URL ?? throw new InvalidArgumentException('MICROSOFT_OAUTH_REDIRECT_URL not configured'),
         ]);
     }
 
@@ -34,15 +38,19 @@ class MicrosoftProvider extends AbstractProvider
      * @param string $csrfTokenState *
      *
      * @return string
+     * @throws InvalidArgumentException
      */
     public function getAuthorizationUrl(string $csrfTokenState): string
     {
         $options = [
             'state' => $csrfTokenState,
-            'prompt' => 'select_account'
+            'scope' => array_merge(
+                ['openid', 'profile', 'email'],
+                ['User.Read']
+            )
         ];
 
-        $microsoftClient = static::getClient($this->redirectUrl);
+        $microsoftClient = $this->getClient($this->redirectUrl);
 
         return $microsoftClient->getAuthorizationUrl($options);
     }
@@ -53,10 +61,12 @@ class MicrosoftProvider extends AbstractProvider
      * @return AccessToken
      * @throws IdentityProviderException
      * @throws GuzzleException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedValueException
      */
     public function getAccessTokenFromAuthCode(string $code): AccessToken
     {
-        $microsoftClient = static::getClient($this->redirectUrl);
+        $microsoftClient = $this->getClient($this->redirectUrl);
 
         /** @var AccessToken $token */
         $token = $microsoftClient->getAccessToken('authorization_code', [
@@ -69,22 +79,25 @@ class MicrosoftProvider extends AbstractProvider
     /**
      * @param AccessToken $token
      *
-     * @return mixed
+     * @return ProviderUser
      * @throws GuzzleException
      * @throws IdentityProviderException
+     * @throws UnexpectedValueException
+     * @throws TypeError
+     * @throws InvalidArgumentException
      */
     public function getResourceOwner(AccessToken $token): ProviderUser
     {
-        $microsoftClient = static::getClient($this->redirectUrl);
+        $microsoftClient = $this->getClient($this->redirectUrl);
         /** @var MicrosoftResourceOwner $fetched */
         $fetched = $microsoftClient->getResourceOwner($token);
 
         $user = new ProviderUser();
-        $user->email = $fetched->getEmail();
-        $user->name = $fetched->getFirstname();
-        $user->lastName = $fetched->getLastname();
+        $user->email = $fetched->getEmail() ?? throw new TypeError('Microsoft OAuth: email is required');
+        $user->name = $fetched->getGivenName() ?? $fetched->getDisplayName() ?? throw new TypeError('Microsoft OAuth: name is required');
+        $user->lastName = $fetched->getSurname();
         $user->picture = null; // profile picture is not publicly accessible
-        $user->authToken = $token;
+        $user->authToken = (string)$token;
         $user->provider = self::PROVIDER_NAME;
 
         return $user;
