@@ -321,6 +321,25 @@ class UserKeysControllerTest extends AbstractTest
     }
 
     /**
+     * Regression: FILTER_FLAG_STRIP_HIGH used to silently discard multi-byte UTF-8 bytes from
+     * the key value (an accented-only key would sanitize down to "" and hit the "Key missing"
+     * guard below). Now that STRIP_HIGH is dropped, accented characters must survive untouched.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_preserves_accented_characters_in_key(): void
+    {
+        $this->setRequestParams([
+            'key' => 'èèèééééççòòòòò',
+        ]);
+
+        $result = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame('èèèééééççòòòòò', $result['key']);
+    }
+
+    /**
      * @throws Throwable
      */
     #[Test]
@@ -660,6 +679,29 @@ class UserKeysControllerTest extends AbstractTest
         $keyName = $stmt->fetchColumn();
 
         $this->assertSame('Brand New Glossary', $keyName);
+    }
+
+    /**
+     * Full round trip of the accented-key regression: the key value must be persisted
+     * exactly as entered, not silently stripped to a truncated/empty value.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function newKey_creates_key_with_accented_characters_and_returns_success(): void
+    {
+        $newKeyValue = 'ctrltestnewkeyèéç' . self::BASE;
+
+        $this->setRequestParams(['key' => $newKeyValue, 'description' => 'Brand New Glossary']);
+
+        $this->controller->newKey();
+
+        $conn = $this->seedConnection();
+        $stmt = $conn->prepare('SELECT key_value FROM memory_keys WHERE uid = :uid AND key_value = :key_value');
+        $stmt->execute(['uid' => $this->userId(self::BASE), 'key_value' => $newKeyValue]);
+        $keyValue = $stmt->fetchColumn();
+
+        $this->assertSame($newKeyValue, $keyValue);
     }
 
     /**

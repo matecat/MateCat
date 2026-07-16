@@ -237,7 +237,7 @@ class TmKeyManager
         }
 
         if (!is_null($obj->key)) {
-            $sanitized = filter_var($obj->key, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+            $sanitized = filter_var($obj->key, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
             $obj->key = $sanitized !== false ? $sanitized : null;
         }
 
