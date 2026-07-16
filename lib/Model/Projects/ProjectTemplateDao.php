@@ -102,7 +102,7 @@ class ProjectTemplateDao extends AbstractDao
                 array_keys(HandlersSorter::getDefaultInjectedHandlers())
             )
         ) ?: null;
-        $default->icu_enabled = false;
+        $default->icu_enabled = true;
 
         return $default;
     }
