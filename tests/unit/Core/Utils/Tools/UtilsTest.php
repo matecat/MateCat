@@ -514,14 +514,14 @@ class UtilsTest extends AbstractTest
     public function testRandomStringReturnsCorrectLength(): void
     {
         $result = Utils::randomString();
-        $this->assertEquals(12, strlen($result));
+        $this->assertEquals(16, strlen($result));
     }
 
     #[Test]
     public function testRandomStringReturnsDefaultLength(): void
     {
         $result = Utils::randomString();
-        $this->assertEquals(12, strlen($result));
+        $this->assertEquals(16, strlen($result));
     }
 
     #[Test]
@@ -2323,6 +2323,52 @@ class UtilsTest extends AbstractTest
         // ...but the raw User-Agent is preserved verbatim, so the true browser is
         // recoverable from the log. This is the guard the whole feature rests on.
         $this->assertSame($userAgent, $result['userAgent']);
+    }
+
+    #[Test]
+    public function randomStringUsesBase62CharsetAndExactLength(): void
+    {
+        // $insecure lets us also exercise sub-16 lengths for the charset/length invariants.
+        for ($len = 1; $len <= 64; $len++) {
+            $s = Utils::randomString($len, true);
+            self::assertSame($len, strlen($s), "expected exact length $len");
+            self::assertMatchesRegularExpression('/^[A-Za-z0-9]+$/', $s, "base62 charset for length $len");
+        }
+    }
+
+    #[Test]
+    public function randomStringFallsBackToSixteenOnNonPositiveLength(): void
+    {
+        self::assertSame(16, strlen(Utils::randomString(0, true)));
+        self::assertSame(16, strlen(Utils::randomString(-5, true)));
+    }
+
+    #[Test]
+    public function randomStringRejectsInsecureLengthUnlessExplicit(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        Utils::randomString(15);
+    }
+
+    #[Test]
+    public function randomStringAllowsSubSixteenLengthOnlyWithInsecureFlag(): void
+    {
+        $s = Utils::randomString(8, true);
+        self::assertSame(8, strlen($s));
+        self::assertMatchesRegularExpression('/^[A-Za-z0-9]+$/', $s);
+    }
+
+    #[Test]
+    public function randomStringCoversFullAlphabetOverManySamples(): void
+    {
+        $seen = [];
+        for ($i = 0; $i < 500; $i++) {
+            foreach (str_split(Utils::randomString(62)) as $c) {
+                $seen[$c] = true;
+            }
+        }
+        // 500 * 62 draws: every base62 symbol should appear (probability of a gap ≈ 0).
+        self::assertCount(62, $seen);
     }
 
 }

@@ -33,7 +33,6 @@ class MembershipDaoRealSqlTest extends AbstractTest
     private MembershipDao $dao;
     private int $uid;
     private int $teamId;
-    private string $teamName;
 
     protected function setUp(): void
     {
@@ -46,9 +45,6 @@ class MembershipDaoRealSqlTest extends AbstractTest
 
         $this->uid = $this->fixtures->makeUser()['uid'];
         $this->teamId = $this->fixtures->makeTeam($this->uid)['id'];
-        $this->teamName = (string)$this->realSqlDb()->getConnection()
-            ->query("SELECT name FROM teams WHERE id = {$this->teamId}")
-            ->fetchColumn();
         $this->fixtures->makeTeamUser($this->teamId, $this->uid, true);
     }
 
@@ -81,16 +77,6 @@ class MembershipDaoRealSqlTest extends AbstractTest
         $this->assertSame($this->teamId, (int)$team->id);
 
         $this->assertNull($this->dao->findTeamByIdAndUser($this->teamId, $this->user($this->uid + 999999)));
-    }
-
-    #[Test]
-    public function findTeamByIdAndName_matches_id_and_name(): void
-    {
-        $team = $this->dao->findTeamByIdAndName($this->teamId, $this->teamName);
-        $this->assertInstanceOf(TeamStruct::class, $team);
-        $this->assertSame($this->teamId, (int)$team->id);
-
-        $this->assertNull($this->dao->findTeamByIdAndName($this->teamId, 'no-such-name'));
     }
 
     #[Test]

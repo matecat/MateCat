@@ -314,7 +314,15 @@ class OutsourceToControllerTest extends AbstractTest
 
         $this->controller->outsourceServiceStub = $stub;
 
-        $this->controller->outsource();
+        // outsource() calls Response::json(), which send()s the body to stdout and pollutes
+        // the test-runner output. Swallow that echo; the body is still recorded on the
+        // Response object, so the assertions below are unaffected.
+        ob_start();
+        try {
+            $this->controller->outsource();
+        } finally {
+            ob_end_clean();
+        }
 
         $response = $this->reflector->getProperty('response')->getValue($this->controller);
         self::assertInstanceOf(Response::class, $response);

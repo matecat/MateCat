@@ -1810,4 +1810,40 @@ class TmKeyManagementTest extends AbstractTest
         $this->assertTrue(Utils::array_is_list($keys));
     }
 
+    /**
+     * Regression: FILTER_FLAG_STRIP_HIGH does not strip multi-byte UTF-8, it HTML-entity-encodes
+     * it (e.g. "è" -> "&egrave;"), which the name regex then mangles into "egrave" once the
+     * punctuation is stripped. name sanitization never carried STRIP_HIGH, so it must keep
+     * passing accented characters through untouched; key sanitization had STRIP_HIGH removed
+     * for the same reason, so it must now behave the same way.
+     */
+    #[Test]
+    public function sanitize_preserves_accented_characters_in_name_and_key(): void
+    {
+        $tmKeyStruct       = new TmKeyStruct();
+        $tmKeyStruct->name = "èèèééééççòòòòò";
+        $tmKeyStruct->key  = "keyèéç993dddb1c603b4e57f69";
+
+        $result = TmKeyManager::sanitize($tmKeyStruct);
+
+        $this->assertSame("èèèééééççòòòòò", $result->name);
+        $this->assertSame("keyèéç993dddb1c603b4e57f69", $result->key);
+    }
+
+    /**
+     * Characterization guard: dropping STRIP_HIGH must not weaken the pre-existing
+     * XSS-relevant encoding that FILTER_SANITIZE_SPECIAL_CHARS performs regardless of flags.
+     */
+    #[Test]
+    public function sanitize_still_html_encodes_special_characters_in_key(): void
+    {
+        $tmKeyStruct      = new TmKeyStruct();
+        $tmKeyStruct->key = '<script>alert(1)</script>&"\'';
+
+        $result = TmKeyManager::sanitize($tmKeyStruct);
+
+        $this->assertStringNotContainsString('<script>', $result->key);
+        $this->assertStringContainsString('&#60;script&#62;', $result->key);
+    }
+
 }

@@ -1,0 +1,59 @@
+{
+    "type": "object",
+    "additionalProperties": true,
+    "required": [
+        "source_language",
+        "target_language",
+        "source_sentence",
+        "target_sentence",
+        "source_context_sentences_string",
+        "target_context_sentences_string",
+        "excerpt",
+        "style_instructions",
+        "id_client",
+        "id_segment",
+        "id_job",
+        "password"
+    ],
+    "properties": {
+        "source_language": {
+            "type": "string",
+            "minLength": 1
+        },
+        "target_language": {
+            "type": "string",
+            "minLength": 1
+        },
+        "source_sentence": {
+            "type": "string"
+        },
+        "target_sentence": {
+            "type": "string"
+        },
+        "source_context_sentences_string": {
+            "type": "string"
+        },
+        "target_context_sentences_string": {
+            "type": "string"
+        },
+        "excerpt": {
+            "type": "string"
+        },
+        "style_instructions": {
+            "type": "string"
+        },
+        "id_client": {
+            "type": ["string", "integer"]
+        },
+        "id_segment": {
+            "type": ["integer", "string"]
+        },
+        "id_job": {
+            "type": ["integer", "string"]
+        },
+        "password": {
+            "type": "string",
+            "minLength": 1
+        }
+    }
+}

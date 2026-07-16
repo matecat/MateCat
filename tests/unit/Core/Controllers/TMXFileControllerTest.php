@@ -399,7 +399,15 @@ class TMXFileControllerTest extends AbstractTest
         $tmsServiceStub->method('addTmxInMyMemory')->willReturn([]);
         $this->controller->tmsServiceStub = $tmsServiceStub;
 
-        $this->controller->import();
+        // import() calls Response::json(), which send()s the body to stdout and pollutes
+        // the test-runner output. Swallow that echo; the body is still recorded on the
+        // Response object, so the assertions below are unaffected.
+        ob_start();
+        try {
+            $this->controller->import();
+        } finally {
+            ob_end_clean();
+        }
 
         /** @var Response $response */
         $response = $this->reflector->getProperty('response')->getValue($this->controller);
@@ -440,7 +448,15 @@ class TMXFileControllerTest extends AbstractTest
         $tmsServiceStub->method('addTmxInMyMemory')->willReturn([]);
         $this->controller->tmsServiceStub = $tmsServiceStub;
 
-        $this->controller->import();
+        // import() calls Response::json(), which send()s the body to stdout and pollutes
+        // the test-runner output. Swallow that echo; the body is still recorded on the
+        // Response object, so the assertions below are unaffected.
+        ob_start();
+        try {
+            $this->controller->import();
+        } finally {
+            ob_end_clean();
+        }
 
         /** @var Response $response */
         $response = $this->reflector->getProperty('response')->getValue($this->controller);
@@ -471,7 +487,15 @@ class TMXFileControllerTest extends AbstractTest
         $tmsServiceStub->method('tmxUploadStatus')->willReturn(['data' => ['status' => 'DONE']]);
         $this->controller->tmsServiceStub = $tmsServiceStub;
 
-        $this->controller->importStatus();
+        // importStatus() calls Response::json(), which send()s the body to stdout and pollutes
+        // the test-runner output. Swallow that echo; the body is still recorded on the
+        // Response object, so the assertions below are unaffected.
+        ob_start();
+        try {
+            $this->controller->importStatus();
+        } finally {
+            ob_end_clean();
+        }
 
         /** @var Response $response */
         $response = $this->reflector->getProperty('response')->getValue($this->controller);
@@ -497,7 +521,15 @@ class TMXFileControllerTest extends AbstractTest
         $tmsServiceStub->method('tmxUploadStatus')->willReturn(['data' => []]);
         $this->controller->tmsServiceStub = $tmsServiceStub;
 
-        $this->controller->importStatus();
+        // importStatus() calls Response::json(), which send()s the body to stdout and pollutes
+        // the test-runner output. Swallow that echo; the body is still recorded on the
+        // Response object, so the assertions below are unaffected.
+        ob_start();
+        try {
+            $this->controller->importStatus();
+        } finally {
+            ob_end_clean();
+        }
 
         /** @var Response $response */
         $response = $this->reflector->getProperty('response')->getValue($this->controller);

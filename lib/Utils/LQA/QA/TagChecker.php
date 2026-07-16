@@ -357,6 +357,12 @@ class TagChecker
                 unset($src[$index]);
             }
         }
+
+        // If source has leftover attributes that target did not match, the tag attribute set differs
+        // (e.g. <ph id="1"/> in source vs <ph x="test"/> in target).
+        if (!empty($src)) {
+            $this->errorManager->addError(ErrorManager::ERR_TAG_MISMATCH);
+        }
     }
 
     /**

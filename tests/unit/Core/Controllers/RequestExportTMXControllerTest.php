@@ -263,7 +263,15 @@ class RequestExportTMXControllerTest extends AbstractTest
 
         $this->controller->tmsServiceStub = $tmsServiceStub;
 
-        $this->controller->download();
+        // download() calls Response::json(), which send()s the body to stdout and pollutes
+        // the test-runner output. Swallow that echo; the body is still recorded on the
+        // Response object, so the assertions below are unaffected.
+        ob_start();
+        try {
+            $this->controller->download();
+        } finally {
+            ob_end_clean();
+        }
 
         /** @var Response $response */
         $response = $this->reflector->getProperty('response')->getValue($this->controller);

@@ -11,7 +11,7 @@ import defaultMTOptions from '../components/settingsPanel/Contents/defaultTempla
 
 export const isStandardTemplate = ({id} = {}) => id === 0
 
-const STANDARD_TEMPLATE = {
+export const STANDARD_TEMPLATE = {
   id: 0,
   name: 'Standard',
   is_default: true,
@@ -44,7 +44,7 @@ const STANDARD_TEMPLATE = {
   character_counter_mode: 'google_ads',
   dialect_strict: false,
   mt_quality_value_in_editor: null,
-  icu_enabled: false,
+  icu_enabled: true,
 }
 
 const CATTOOL_TEMPLATE = {

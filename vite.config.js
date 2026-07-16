@@ -201,104 +201,106 @@ export default defineConfig(({mode, command}) => {
   }
 
   return {
-  plugins: [
-    jsxInJsPlugin(),
-    react({
-      include: /\.(js|jsx)$/,
-    }),
-    htmlTemplatePlugin(),
-    hasSentry && sentryVitePlugin(pluginConfig.sentryVitePlugin),
-  ],
+    plugins: [
+      jsxInJsPlugin(),
+      react({
+        include: /\.(js|jsx)$/,
+      }),
+      htmlTemplatePlugin(),
+      hasSentry && sentryVitePlugin(pluginConfig.sentryVitePlugin),
+    ],
 
-  define: {
-    'process.env._ENV': JSON.stringify(matecatConfig.ENV ?? 'development'),
-    'process.env.version': JSON.stringify(matecatConfig.BUILD_NUMBER ?? ''),
-    'process.env.MODE': JSON.stringify(mode),
-    global: 'globalThis',
-  },
+    define: {
+      'process.env._ENV': JSON.stringify(matecatConfig.ENV ?? 'development'),
+      'process.env.version': JSON.stringify(matecatConfig.BUILD_NUMBER ?? ''),
+      'process.env.MODE': JSON.stringify(mode),
+      'process.env.SENTRY_DSN': JSON.stringify(matecatConfig.SENTRY_DSN ?? ''),
+      global: 'globalThis',
+    },
 
-  resolve: {
-    extensions: ['.js', '.jsx', '.json'],
-  },
+    resolve: {
+      extensions: ['.js', '.jsx', '.json'],
+    },
 
-  base: command === 'serve' ? '/' : '/public/build/',
-  publicDir: false,
+    base: command === 'serve' ? '/' : '/public/build/',
+    publicDir: false,
 
-  build: {
-    manifest: true,
-    outDir: 'public/build',
-    emptyOutDir: true,
-    sourcemap: hasSentry ? 'hidden' : mode !== 'production',
+    build: {
+      manifest: true,
+      outDir: 'public/build',
+      emptyOutDir: true,
+      sourcemap: hasSentry ? 'hidden' : mode !== 'production',
 
-    rolldownOptions: {
-      input,
-      output: {
-        entryFileNames: '[name].[hash].js',
-        chunkFileNames: '[name].[hash].js',
-        assetFileNames: 'assets/[name].[hash].[ext]',
-        codeSplitting: {
-          groups: [
-            {
-              name: 'react-vendor',
-              test: /node_modules[\\/](react|react-dom|scheduler)/,
-              priority: 20,
-            },
-            {
-              name: 'editor-vendor',
-              test: /node_modules[\\/](draft-js|immutable)/,
-              priority: 15,
-            },
-            {
-              name: 'vendor',
-              test: /node_modules/,
-              priority: 10,
-            },
-          ],
+      rolldownOptions: {
+        input,
+        output: {
+          entryFileNames: '[name].[hash].js',
+          chunkFileNames: '[name].[hash].js',
+          assetFileNames: 'assets/[name].[hash].[ext]',
+          codeSplitting: {
+            groups: [
+              {
+                name: 'react-vendor',
+                test: /node_modules[\\/](react|react-dom|scheduler)/,
+                priority: 20,
+              },
+              {
+                name: 'editor-vendor',
+                test: /node_modules[\\/](draft-js|immutable)/,
+                priority: 15,
+              },
+              {
+                name: 'vendor',
+                test: /node_modules/,
+                priority: 10,
+              },
+            ],
+          },
         },
       },
     },
-  },
 
-  optimizeDeps: {
-    rolldownOptions: {
-      moduleTypes: {'.js': 'jsx'},
-    },
-  },
-
-  css: {
-    devSourcemap: true,
-    lightningcss: {
-      errorRecovery: true,
-    },
-    preprocessorOptions: {
-      scss: {
-        quietDeps: true,
-        loadPaths: [resolve('public/css/sass')],
+    optimizeDeps: {
+      rolldownOptions: {
+        moduleTypes: {'.js': 'jsx'},
       },
     },
-  },
 
-  server: {
-    host: '0.0.0.0',
-    port: 5173,
-    strictPort: true,
-    origin: cliHttpHost,
-    cors: true,
-    hmr: {
-      protocol: hostUrl.protocol === 'https:' ? 'wss' : 'ws',
-      host: hostUrl.hostname,
-      clientPort: parseInt(hostUrl.port) || (hostUrl.protocol === 'https:' ? 443 : 80),
-      path: '__vite_hmr',
+    css: {
+      devSourcemap: true,
+      lightningcss: {
+        errorRecovery: true,
+      },
+      preprocessorOptions: {
+        scss: {
+          quietDeps: true,
+          loadPaths: [resolve('public/css/sass')],
+        },
+      },
     },
-    watch: {
-      usePolling: true,
-      interval: 500,
-      ignored: [
-        '**/storage/**',
-        '**/node_modules/**',
-        '**/vendor/**',
-        '**/public/build/**',
-      ],
+
+    server: {
+      host: '0.0.0.0',
+      port: 5173,
+      strictPort: true,
+      origin: cliHttpHost,
+      cors: true,
+      hmr: {
+        protocol: hostUrl.protocol === 'https:' ? 'wss' : 'ws',
+        host: hostUrl.hostname,
+        clientPort:
+          parseInt(hostUrl.port) || (hostUrl.protocol === 'https:' ? 443 : 80),
+        path: '__vite_hmr',
+      },
+      watch: {
+        usePolling: true,
+        interval: 500,
+        ignored: [
+          '**/storage/**',
+          '**/node_modules/**',
+          '**/vendor/**',
+          '**/public/build/**',
+        ],
+      },
     },
-  },
-}})
+  }})

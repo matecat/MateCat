@@ -167,16 +167,15 @@ class Lara extends AbstractEngine
      */
     public function getAvailableLanguages(): array
     {
-        $cache = (new RedisHandler())->getConnection();
-
         $value = [];
 
         try {
-            $cached = $cache->get("lara_languages");
-            if (is_string($cached)) {
-                $value = unserialize($cached, ['allowed_classes' => false]);
-            }
-        } catch (Throwable) {
+            $value = $this->readLanguagesCache();
+        } catch (Throwable $t) {
+            $this->logger->warning(
+                'Lara getAvailableLanguages: cache read failed, falling back to live fetch',
+                ['exception' => $t->getMessage()]
+            );
         }
 
         if (!empty($value)) {
@@ -195,9 +194,32 @@ class Lara extends AbstractEngine
             $value = array_unique($value);
         }
 
-        $cache->setex("lara_languages", 86400, serialize($value));
+        (new RedisHandler())->getConnection()->setex("lara_languages", 86400, serialize($value));
 
         return $value;
+    }
+
+    /**
+     * Read the cached language list.
+     *
+     * Extracted as a seam so a cache read / deserialization failure can be exercised in tests.
+     *
+     * @return array<int, string>
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    protected function readLanguagesCache(): array
+    {
+        $cached = (new RedisHandler())->getConnection()->get("lara_languages");
+
+        if (is_string($cached)) {
+            $value = unserialize($cached, ['allowed_classes' => false]);
+            if (is_array($value)) {
+                return $value;
+            }
+        }
+
+        return [];
     }
 
     protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array

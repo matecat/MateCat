@@ -11,6 +11,7 @@ use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentMetadataStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 #[Group('PersistenceNeeded')]
@@ -40,8 +41,7 @@ class SegmentMetadataDaoInstanceTest extends AbstractTest
     {
         $this->deleteFixtureRows();
 
-        $flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
-        $flusher->select(AppConfig::$INSTANCE_ID);
+        $flusher = (new RedisHandler())->getConnection();
         $flusher->flushdb();
 
         parent::tearDown();
@@ -240,6 +240,42 @@ class SegmentMetadataDaoInstanceTest extends AbstractTest
         $result = $this->dao->destroyGetBySegmentIdsCache('any_key');
 
         $this->assertIsBool($result);
+    }
+
+    // ── destroyGetAllInRangeCache ───────────────────────────────────────────────
+
+    #[Test]
+    public function testDestroyGetAllInRangeCacheReturnsBool(): void
+    {
+        $result = $this->dao->destroyGetAllInRangeCache();
+
+        $this->assertIsBool($result);
+    }
+
+    #[Test]
+    public function testDestroyGetAllInRangeCacheBustsStaleCachedResult(): void
+    {
+        $ttl = 60;
+
+        // Warm the cache for a range where SEGMENT_ID_1 has no metadata yet.
+        $before = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_1, $ttl);
+        $this->assertArrayNotHasKey(self::SEGMENT_ID_1, $before);
+
+        // Insert directly, bypassing save()/upsert() (which already bust this cache), to
+        // simulate any writer unaware of getAllInRange's cache.
+        $this->database->getConnection()->prepare(
+            "INSERT INTO segment_metadata (id_segment, meta_key, meta_value) VALUES (?, ?, ?)"
+        )->execute([self::SEGMENT_ID_1, 'direct_key', 'direct_value']);
+
+        // Without busting, the stale (empty) result is still served from cache.
+        $stillStale = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_1, $ttl);
+        $this->assertArrayNotHasKey(self::SEGMENT_ID_1, $stillStale);
+
+        $this->dao->destroyGetAllInRangeCache();
+
+        $fresh = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_1, $ttl);
+        $this->assertArrayHasKey(self::SEGMENT_ID_1, $fresh);
+        $this->assertCount(1, $fresh[self::SEGMENT_ID_1]);
     }
 
     // ── getAllInRange (renamed from staticGetAllInRange) ───────────────────────

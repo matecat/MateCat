@@ -123,7 +123,15 @@ class HeartBeatTest extends AbstractTest
     {
         AppConfig::$ROOT = self::TMP_ROOT;
 
-        $this->controller->ping();
+        // ping() calls Response::json(), which send()s the body to stdout and pollutes
+        // the test-runner output. Swallow that echo; the body is still recorded on the
+        // Response object, so the assertions below are unaffected.
+        ob_start();
+        try {
+            $this->controller->ping();
+        } finally {
+            ob_end_clean();
+        }
 
         /** @var Response $response */
         $response = $this->getProp('response');
