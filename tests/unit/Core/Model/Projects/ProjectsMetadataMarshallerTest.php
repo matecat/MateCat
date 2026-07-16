@@ -26,7 +26,7 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
     #[Test]
     public function enumHasExactlyThirtyCases(): void
     {
-        $this->assertCount(32, ProjectsMetadataMarshaller::cases());
+        $this->assertCount(33, ProjectsMetadataMarshaller::cases());
     }
 
     #[Test]

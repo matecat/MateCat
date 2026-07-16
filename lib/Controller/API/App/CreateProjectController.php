@@ -226,6 +226,11 @@ class CreateProjectController extends AbstractStatefulKleinController
         $deepl_engine_type = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
 
         $icu_enabled = filter_var($this->request->param('icu_enabled'), FILTER_VALIDATE_BOOLEAN);
+        $mandatory_issues = filter_var(
+            $this->request->param('mandatory_issues'),
+            FILTER_SANITIZE_FULL_SPECIAL_CHARS,
+            ['flags' => FILTER_FLAG_NO_ENCODE_QUOTES]
+        );
 
         $array_keys = (is_string($private_keys_list)) ? json_decode($private_keys_list, true) : [];
         $array_keys = is_array($array_keys) && isset($array_keys['ownergroup'], $array_keys['mine'], $array_keys['anonymous'])
@@ -363,6 +368,7 @@ class CreateProjectController extends AbstractStatefulKleinController
                 SubfilteringOptionsValidator::validate($this->request->param(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, '[]'))
             ),
             'icu_enabled' => $icu_enabled,
+            'mandatory_issues' => null,
         ];
 
         if ($disable_tms_engine_flag) {
@@ -400,6 +406,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $data['payable_rate_template_id']
         );
         $data['dialect_strict'] = $this->validateDialectStrictParam(Languages::getInstance(), $data['dialect_strict']);
+        $data['mandatory_issues'] = $this->validateMandatoryIssues($mandatory_issues ?: null);
         $data['filters_extraction_parameters'] = $this->validateFiltersExtractionParameters(
             $data['filters_extraction_parameters']
         );
@@ -749,6 +756,35 @@ class CreateProjectController extends AbstractStatefulKleinController
     }
 
     /**
+     * @param string|null $mandatory_issues
+     *
+     * @return array<string>|null
+     * @throws InvalidArgumentException
+     */
+    private function validateMandatoryIssues(?string $mandatory_issues): ?array
+    {
+        if (empty($mandatory_issues)) {
+            return null;
+        }
+
+        $decoded = json_decode($mandatory_issues, true);
+
+        if (!is_array($decoded)) {
+            throw new InvalidArgumentException("mandatory_issues must be a valid JSON array");
+        }
+
+        foreach ($decoded as $issue) {
+            if (!is_string($issue) || !preg_match('/^r\d+$/', $issue)) {
+                throw new InvalidArgumentException(
+                    "Invalid mandatory_issues value: \"$issue\". Allowed values: r1, r2, ..."
+                );
+            }
+        }
+
+        return $decoded;
+    }
+
+    /**
      * @param int $mt_engine
      *
      * @return array<int|string, mixed>
@@ -842,6 +878,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         $projectStructure->character_counter_mode = (!empty($data['character_counter_mode'])) ? $data['character_counter_mode'] : null;
         $projectStructure->character_counter_count_tags = (!empty($data['character_counter_count_tags'])) ? $data['character_counter_count_tags'] : null;
         $projectStructure->subfiltering_handlers = $data[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value];
+        $projectStructure->mandatory_issues = $data['mandatory_issues'] ?? null;
 
         // GDrive session
         if ($gdriveSession !== null) {

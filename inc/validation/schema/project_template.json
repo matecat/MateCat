@@ -90,6 +90,13 @@
     },
     "icu_enabled": {
       "type": "boolean"
+    },
+    "mandatory_issues": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["r1", "r2"]
+      }
     }
   },
   "required": [

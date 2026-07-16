@@ -86,7 +86,6 @@ class XliffReplacerCallbackTest extends AbstractTest
             ])->getStub();
 
         $projectStructMock = $this->getStubBuilder(ProjectStruct::class)->getStub();
-        $projectStructMock->method('getMetadataValue')->willReturn(false);
 
         $jobStructMock->method('getProject')->willReturn($projectStructMock);
 
@@ -94,7 +93,7 @@ class XliffReplacerCallbackTest extends AbstractTest
         $target = '<ph x="test"/> Hola';
 
         /** @noinspection PhpParamsInspection */
-        $xliffReplacerCallback = new XliffReplacerCallback(new FeatureSet(), 'en-EN', 'es-ES', $jobStructMock);
+        $xliffReplacerCallback = new XliffReplacerCallback(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), 'en-EN', 'es-ES', $jobStructMock, obtainTestDatabase());
 
         $this->assertTrue($xliffReplacerCallback->thereAreErrors(1, $segment, $target));
     }
