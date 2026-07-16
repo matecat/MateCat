@@ -100,9 +100,13 @@ test('clicking a date column toggles desc -> asc -> unsorted and reorders the lo
 })
 
 test('sorts a plain (non-date) column using raw value comparison', () => {
+  // Input is already in ascending order ('a' then 'b'), so a correct
+  // descending sort must actually reorder it (-> '2','1'). A no-op or
+  // sign-flipped comparator would leave the input order untouched
+  // (-> '1','2'), which is what makes this fixture discriminate.
   const unordered = [
-    {id: '1', ip: 'b'},
-    {id: '2', ip: 'a'},
+    {id: '1', ip: 'a'},
+    {id: '2', ip: 'b'},
   ]
   const setActivityLog = jest.fn()
   const contextValue = {
@@ -115,7 +119,7 @@ test('sorts a plain (non-date) column using raw value comparison', () => {
   fireEvent.click(screen.getByText('User IP'))
 
   const sorted = setActivityLog.mock.calls[0][0]()
-  expect(sorted.map((log) => log.id)).toEqual(['1', '2'])
+  expect(sorted.map((log) => log.id)).toEqual(['2', '1'])
 })
 
 test('resets to unsorted when another column becomes the current sorting column', () => {
