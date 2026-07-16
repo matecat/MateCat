@@ -408,6 +408,9 @@ describe('setTranslationUtil', () => {
       expect(container.textContent).toMatch(
         /locked segments have been excluded/,
       )
+      expect(container.textContent).not.toMatch(
+        /non-locked segments have been excluded/,
+      )
     })
 
     test('notifies with the non-ice-locked message when non-ice repetitions are excluded', async () => {
