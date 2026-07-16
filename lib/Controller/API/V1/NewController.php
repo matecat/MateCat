@@ -256,7 +256,7 @@ class NewController extends KleinController
         $projectStructure->character_counter_count_tags = (!empty($request['character_counter_count_tags'])) ? $request['character_counter_count_tags'] : null;
 
         $projectStructure->subfiltering_handlers = $request[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value];
-        $projectStructure->mandatory_issues = $request['mandatory_issues'];
+        $projectStructure->mandatory_issues = $request['mandatory_issues'] ?? null;
 
         // MT Extra params
         foreach ($engine->getConfigurationParameters() as $param) {
