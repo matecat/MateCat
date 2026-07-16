@@ -152,11 +152,26 @@ class TranslationVersionsHandler implements VersionHandlerInterface
         $new_version->old_status = TranslationStatus::$DB_STATUSES_MAP[$old_translation->status];
         $new_version->new_status = TranslationStatus::$DB_STATUSES_MAP[$new_translation->status];
 
-        // Always insert unconditionally — handles both new versions and the case where
-        // version 0 was already written by ReviewExtended — instead of the previous
-        // check-then-update flow, which could return false (suppressing the increment) when
-        // a concurrent write had already persisted the same version_number.
-        $this->dao->insertVersion($new_version);
+        // segment_translation_versions has no unique constraint on (id_job, id_segment,
+        // version_number), so a blind insert can duplicate a row already written for this key —
+        // most commonly version 0, which ReviewExtended\TranslationIssueModel::saveDiff() may
+        // already have written (raw_diff set, translation NULL) before the translator ever
+        // saves. Reconcile onto that row instead of inserting a second one.
+        //
+        // Unlike the previous check-then-update flow, the return value never depends on
+        // updateVersion()'s row count: we already established above that the translation text
+        // changed, so a version was genuinely saved whether this ends up as an insert or update.
+        $existing_version = $this->dao->getVersionNumberForTranslation(
+            $new_version->id_job,
+            $new_version->id_segment,
+            $new_version->version_number
+        );
+
+        if ($existing_version) {
+            $this->dao->updateVersion($new_version);
+        } else {
+            $this->dao->insertVersion($new_version);
+        }
 
         return true;
     }

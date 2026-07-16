@@ -356,14 +356,17 @@ class TranslationVersionsHandlerTest extends AbstractTest
     }
 
     /**
-     * Regression: before the fix, a concurrent write that caused updateVersion() to return 0
+     * Regression: before this fix, a concurrent write that caused updateVersion() to return 0
      * ("no rows changed" — identical translation already saved by a racing request) would
-     * suppress the version increment. insertVersion() always inserts and the handler always
-     * returns true when the translation text changed, even when a version row for the same
-     * version_number already exists (e.g. written by a racing request).
+     * suppress the version increment. The handler now always returns true when the translation
+     * text changed, even when a version row for the same version_number already exists (e.g.
+     * written by a racing request) — but it must reconcile onto that row instead of inserting a
+     * second one, since segment_translation_versions has no unique key to deduplicate on and a
+     * duplicate row corrupts getAllRelevantEvents()'s downstream consumers (see
+     * TranslationVersionDaoGetAllRelevantEventsTest::getAllRelevantEventsReturnsOneRowWhenAnExistingVersionIsReconciled).
      */
     #[Test]
-    public function saveVersionAndIncrementInsertsNewRowEvenWhenVersionAlreadyExists(): void
+    public function saveVersionAndIncrementReconcilesRowWhenVersionAlreadyExists(): void
     {
         // Pre-seed a version row for (id_job, id_segment, version_number=2), simulating a
         // racing request that already wrote this version.
@@ -382,12 +385,49 @@ class TranslationVersionsHandlerTest extends AbstractTest
         $this->assertTrue($result);
         $this->assertSame(3, $new->version_number);
 
-        // A second row was inserted alongside the pre-existing one — insertVersion() never
-        // updates, and segment_translation_versions has no unique key to deduplicate on.
+        // The pre-existing row was updated in place, not duplicated.
         $rows = $this->fetchVersionRows();
-        $this->assertCount(2, $rows);
-        $this->assertSame('stale translation', $rows[0]['translation']);
-        $this->assertSame('old text', $rows[1]['translation']);
+        $this->assertCount(1, $rows);
+        $this->assertSame(2, (int)$rows[0]['version_number']);
+        $this->assertSame('old text', $rows[0]['translation']);
+    }
+
+    /**
+     * Regression for the exact ReviewExtended interaction Ostico flagged: a reviewer's LQA
+     * issue diff writes version 0 with translation=NULL (raw_diff set) via
+     * TranslationIssueModel::saveDiff() *before* the translator ever saves. The handler must
+     * reconcile onto that row — filling in the real translation — rather than inserting a
+     * second version-0 row alongside it.
+     */
+    #[Test]
+    public function saveVersionAndIncrementReconcilesReviewExtendedDiffRow(): void
+    {
+        // Simulates TranslationIssueModel::saveDiff() inserting a version-0 row with raw_diff
+        // set and translation left NULL, before the translator has saved anything.
+        $this->database->getConnection()->prepare(
+            "INSERT INTO segment_translation_versions (id_job, id_segment, translation, version_number, raw_diff)
+             VALUES (?, ?, NULL, 0, '[\"diff\"]')"
+        )->execute([self::JOB_ID, self::SEGMENT_ID]);
+
+        $handler = $this->makeHandler();
+
+        $old = $this->makeTranslation('draft text', TranslationStatus::STATUS_DRAFT, 0);
+        $new = $this->makeTranslation('translator text', TranslationStatus::STATUS_TRANSLATED, 0);
+
+        $result = $handler->saveVersionAndIncrement($new, $old);
+
+        $this->assertTrue($result);
+        $this->assertSame(1, $new->version_number);
+
+        // Exactly one version-0 row remains — the ReviewExtended row was updated in place, not
+        // duplicated. It now carries the archived (old) translation text. raw_diff is untouched
+        // by updateVersion() (which only writes translation/time_to_edit), so the reviewer's
+        // diff is preserved on the same row.
+        $rows = $this->fetchVersionRows();
+        $this->assertCount(1, $rows);
+        $this->assertSame(0, (int)$rows[0]['version_number']);
+        $this->assertSame('draft text', $rows[0]['translation']);
+        $this->assertSame('["diff"]', $rows[0]['raw_diff']);
     }
 
     #[Test]

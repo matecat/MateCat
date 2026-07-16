@@ -174,4 +174,53 @@ class TranslationVersionDaoGetAllRelevantEventsTest extends AbstractTest
 
         $this->assertSame([], $results);
     }
+
+    /**
+     * Regression for the duplicate-row bug: a reviewer's LQA diff writes a version-0 row with
+     * translation=NULL (raw_diff set) via TranslationIssueModel::saveDiff(). The translator's
+     * later save must reconcile onto that same row — via getVersionNumberForTranslation() +
+     * updateVersion(), as TranslationVersionsHandler::saveVersion() now does — instead of
+     * inserting a second version-0 row alongside it. getAllRelevantEvents() must then return
+     * exactly one row for source_page=1, carrying the translator's text, not two duplicate rows
+     * for the same event.
+     */
+    #[Test]
+    public function getAllRelevantEventsReturnsOneRowWhenAnExistingVersionIsReconciled(): void
+    {
+        // Event at v0, source_page=1 (TRANSLATE), not final revision.
+        $this->insertEvent(0, 1, 0);
+
+        // Simulates TranslationIssueModel::saveDiff(): a reviewer's LQA issue writes version 0
+        // with raw_diff set and translation left NULL, before the translator has saved anything.
+        $conn = $this->database->getConnection();
+        $conn->exec(
+            "INSERT INTO segment_translation_versions (id_job, id_segment, translation, version_number, raw_diff)
+             VALUES (" . self::JOB_ID . ", " . self::SEGMENT_ID . ", NULL, 0, '[\"diff\"]')"
+        );
+
+        // Simulates the fixed TranslationVersionsHandler::saveVersion(): reconcile onto the
+        // existing version-0 row instead of inserting a second one.
+        $dao = new TranslationVersionDao(obtainTestDatabase());
+        $existing = $dao->getVersionNumberForTranslation(self::JOB_ID, self::SEGMENT_ID, 0);
+        $this->assertNotFalse($existing, 'precondition: the ReviewExtended row must exist');
+        $existing->translation = 'translator text';
+        $dao->updateVersion($existing);
+
+        $this->insertCurrentTranslation(1, 'translator text');
+
+        $results = $dao->getAllRelevantEvents([self::SEGMENT_ID], self::JOB_ID);
+
+        $this->assertCount(1, $results,
+            'exactly one row must be returned for source_page=1 — no duplicate from the reconciled version-0 row');
+        $this->assertSame(1, (int)$results[0]->source_page);
+        $this->assertSame('translator text', $results[0]->translation);
+
+        // raw_diff on the underlying row is untouched by updateVersion() — the reviewer's diff
+        // survives reconciliation on the same physical row.
+        $rawDiff = $conn->query(
+            "SELECT raw_diff FROM segment_translation_versions WHERE id_job = " . self::JOB_ID .
+            " AND id_segment = " . self::SEGMENT_ID . " AND version_number = 0"
+        )->fetchColumn();
+        $this->assertSame('["diff"]', $rawDiff);
+    }
 }
