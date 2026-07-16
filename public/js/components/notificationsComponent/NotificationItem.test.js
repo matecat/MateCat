@@ -188,9 +188,15 @@ describe('NotificationItem', () => {
     ['tl', 'top'],
     ['tc', 'top'],
     ['tr', 'top'],
-  ])('applies the %s position style using the %s css property', (position) => {
-    const {container} = renderItem({position, autoDismiss: false})
-    const el = container.querySelector('.notification-item')
-    expect(el).toBeInTheDocument()
-  })
+  ])(
+    'applies the %s position style using the %s css property',
+    (position, expectedProperty) => {
+      const {container} = renderItem({position, autoDismiss: false})
+      const el = container.querySelector('.notification-item')
+      const otherProperty = expectedProperty === 'bottom' ? 'top' : 'bottom'
+
+      expect(el.style[expectedProperty]).toBe('-200px')
+      expect(el.style[otherProperty]).toBe('')
+    },
+  )
 })
