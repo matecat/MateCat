@@ -8,6 +8,7 @@ use Model\Files\MetadataDao;
 use Model\Files\MetadataStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 #[Group('PersistenceNeeded')]
@@ -43,8 +44,7 @@ class MetadataDaoTest extends AbstractTest
             'DELETE FROM file_metadata WHERE id_project = ' . self::FIXTURE_PROJECT_ID
         );
 
-        $flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
-        $flusher->select(AppConfig::$INSTANCE_ID);
+        $flusher = (new RedisHandler())->getConnection();
         $flusher->flushdb();
 
         parent::tearDown();

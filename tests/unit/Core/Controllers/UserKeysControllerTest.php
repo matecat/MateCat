@@ -20,6 +20,7 @@ use Model\Users\ClientUserFacade;
 use Model\Users\MetadataDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
@@ -320,6 +321,25 @@ class UserKeysControllerTest extends AbstractTest
     }
 
     /**
+     * Regression: FILTER_FLAG_STRIP_HIGH used to silently discard multi-byte UTF-8 bytes from
+     * the key value (an accented-only key would sanitize down to "" and hit the "Key missing"
+     * guard below). Now that STRIP_HIGH is dropped, accented characters must survive untouched.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_preserves_accented_characters_in_key(): void
+    {
+        $this->setRequestParams([
+            'key' => 'èèèééééççòòòòò',
+        ]);
+
+        $result = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame('èèèééééççòòòòò', $result['key']);
+    }
+
+    /**
      * @throws Throwable
      */
     #[Test]
@@ -344,10 +364,56 @@ class UserKeysControllerTest extends AbstractTest
             'description' => '<script>alert(1)</script>',
         ]);
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-3);
+        try {
+            $this->invokePrivate('validateTheRequest');
+            $this->fail('Expected InvalidArgumentException was not thrown');
+        } catch (InvalidArgumentException $e) {
+            $this->assertSame(-3, $e->getCode());
+            $this->assertStringContainsString('&lt;', $e->getMessage());
+            $this->assertStringContainsString('&gt;', $e->getMessage());
+            $this->assertStringContainsString('&amp;', $e->getMessage());
+            $this->assertStringContainsString('&quot;', $e->getMessage());
+            $this->assertStringContainsString('&#39;', $e->getMessage());
+            $this->assertStringContainsString(
+                'https://gist.github.com/mauretto78/83db58b7023a2f7bb26b252360d3692a',
+                $e->getMessage()
+            );
+        }
+    }
 
-        $this->invokePrivate('validateTheRequest');
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    #[DataProvider('forbiddenDescriptionCharacterProvider')]
+    public function validateTheRequest_throws_minus_three_for_each_forbidden_character(string $char): void
+    {
+        $this->setRequestParams([
+            'key'         => 'abcdef1234567890',
+            'description' => "Glossary {$char} name",
+        ]);
+
+        try {
+            $this->invokePrivate('validateTheRequest');
+            $this->fail('Expected InvalidArgumentException was not thrown');
+        } catch (InvalidArgumentException $e) {
+            $this->assertSame(-3, $e->getCode());
+            $this->assertStringContainsString('Resource names cannot contain', $e->getMessage());
+        }
+    }
+
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function forbiddenDescriptionCharacterProvider(): array
+    {
+        return [
+            'less-than'    => ['<'],
+            'greater-than' => ['>'],
+            'ampersand'    => ['&'],
+            'double-quote' => ['"'],
+            'single-quote' => ["'"],
+        ];
     }
 
     // ─── getMkDao ───
@@ -613,6 +679,29 @@ class UserKeysControllerTest extends AbstractTest
         $keyName = $stmt->fetchColumn();
 
         $this->assertSame('Brand New Glossary', $keyName);
+    }
+
+    /**
+     * Full round trip of the accented-key regression: the key value must be persisted
+     * exactly as entered, not silently stripped to a truncated/empty value.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function newKey_creates_key_with_accented_characters_and_returns_success(): void
+    {
+        $newKeyValue = 'ctrltestnewkeyèéç' . self::BASE;
+
+        $this->setRequestParams(['key' => $newKeyValue, 'description' => 'Brand New Glossary']);
+
+        $this->controller->newKey();
+
+        $conn = $this->seedConnection();
+        $stmt = $conn->prepare('SELECT key_value FROM memory_keys WHERE uid = :uid AND key_value = :key_value');
+        $stmt->execute(['uid' => $this->userId(self::BASE), 'key_value' => $newKeyValue]);
+        $keyValue = $stmt->fetchColumn();
+
+        $this->assertSame($newKeyValue, $keyValue);
     }
 
     /**

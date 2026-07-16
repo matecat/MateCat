@@ -9,6 +9,7 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 #[Group('PersistenceNeeded')]
@@ -54,8 +55,7 @@ class ProjectDaoTest extends AbstractTest
     {
         $this->deleteFixtureRows();
 
-        $flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
-        $flusher->select(AppConfig::$INSTANCE_ID);
+        $flusher = (new RedisHandler())->getConnection();
         $flusher->flushdb();
 
         parent::tearDown();

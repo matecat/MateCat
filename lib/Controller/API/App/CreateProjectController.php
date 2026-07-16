@@ -202,8 +202,8 @@ class CreateProjectController extends AbstractStatefulKleinController
         $payable_rate_template = filter_var($this->request->param('payable_rate_template'), FILTER_SANITIZE_SPECIAL_CHARS);
         $private_keys_list = filter_var(
             $this->request->param('private_keys_list'),
-            FILTER_SANITIZE_FULL_SPECIAL_CHARS,
-            ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES]
+            FILTER_UNSAFE_RAW,
+            ['flags' => FILTER_FLAG_STRIP_LOW]
         );
 
         // MT SETTINGS
@@ -232,7 +232,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             ['flags' => FILTER_FLAG_NO_ENCODE_QUOTES]
         );
 
-        $array_keys = json_decode($private_keys_list, true);
+        $array_keys = (is_string($private_keys_list)) ? json_decode($private_keys_list, true) : [];
         $array_keys = is_array($array_keys) && isset($array_keys['ownergroup'], $array_keys['mine'], $array_keys['anonymous'])
             ? array_values(
                 array_merge(

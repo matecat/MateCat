@@ -293,22 +293,7 @@ class Intento extends AbstractEngine
                 return json_decode($result, true);
             }
 
-            $_api_url = self::INTENTO_API_URL . '/routing-designer';
-            $curl = curl_init($_api_url);
-            $_params = [
-                CURLOPT_HTTPHEADER => ['apikey: ' . $this->apiKey, 'Content-Type: application/json'],
-                CURLOPT_HEADER => false,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER . ' ' . self::INTENTO_USER_AGENT,
-                CURLOPT_CONNECTTIMEOUT => 10,
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2
-            ];
-
-            curl_setopt_array($curl, $_params);
-            $response = curl_exec($curl);
-            $result = is_string($response) ? json_decode($response) : null;
-            curl_close($curl);
+            $result = self::httpGetJson(self::INTENTO_API_URL . '/routing-designer', $this->apiKey);
             $_routing = [];
 
             // needed by the UI
@@ -357,21 +342,10 @@ class Intento extends AbstractEngine
             return json_decode($result, true);
         }
 
-        $_api_url = self::INTENTO_API_URL . '/ai/text/translate?fields=auth&integrated=true&published=true';
-        $curl = curl_init($_api_url);
-        $_params = [
-            CURLOPT_HTTPHEADER => ['apikey: ' . self::INTENTO_PROVIDER_KEY, 'Content-Type: application/json'],
-            CURLOPT_HEADER => false,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_USERAGENT => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER . ' ' . self::INTENTO_USER_AGENT,
-            CURLOPT_CONNECTTIMEOUT => 10,
-            CURLOPT_SSL_VERIFYPEER => true,
-            CURLOPT_SSL_VERIFYHOST => 2
-        ];
-        curl_setopt_array($curl, $_params);
-        $response = curl_exec($curl);
-        $result = is_string($response) ? json_decode($response) : null;
-        curl_close($curl);
+        $result = self::httpGetJson(
+            self::INTENTO_API_URL . '/ai/text/translate?fields=auth&integrated=true&published=true',
+            self::INTENTO_PROVIDER_KEY
+        );
         $_providers = [];
 
         if ($result) {
@@ -386,6 +360,35 @@ class Intento extends AbstractEngine
         $conn->expire('IntentoProviders', 60 * 60 * 24);
 
         return $_providers;
+    }
+
+    /**
+     * Perform a GET against the Intento API and JSON-decode the response body.
+     *
+     * @param string $url    Full request URL
+     * @param string $apiKey Value sent in the "apikey" header
+     *
+     * @return mixed Decoded JSON (object/array), or null on an empty/non-string response
+     */
+    private static function httpGetJson(string $url, string $apiKey): mixed
+    {
+        $curl = curl_init($url);
+        $_params = [
+            CURLOPT_HTTPHEADER => ['apikey: ' . $apiKey, 'Content-Type: application/json'],
+            CURLOPT_HEADER => false,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_USERAGENT => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER . ' ' . self::INTENTO_USER_AGENT,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2
+        ];
+
+        curl_setopt_array($curl, $_params);
+        $response = curl_exec($curl);
+        $result = is_string($response) ? json_decode($response) : null;
+        curl_close($curl);
+
+        return $result;
     }
 
     /**

@@ -72,7 +72,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     public ?string $character_counter_mode = null;
     public ?string $subfiltering_handlers = null;
     public ?int $mt_quality_value_in_editor = null;
-    public bool $icu_enabled = false;
+    public bool $icu_enabled = true;
     public ?string $mandatory_issues = null;
 
     /**
@@ -110,7 +110,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         $this->source_language = $decodedObject->source_language;
         $this->target_language = (!empty($decodedObject->target_language)) ? serialize($decodedObject->target_language) : null;
         $this->mt_quality_value_in_editor = (!empty($decodedObject->mt_quality_value_in_editor)) ? (int)$decodedObject->mt_quality_value_in_editor : null;
-        $this->icu_enabled = $decodedObject->icu_enabled ?? false;
+        $this->icu_enabled = $decodedObject->icu_enabled ?? true;
         $this->mandatory_issues = (!empty($decodedObject->mandatory_issues)) ? (json_encode($decodedObject->mandatory_issues) ?: null) : null;
 
         return $this;

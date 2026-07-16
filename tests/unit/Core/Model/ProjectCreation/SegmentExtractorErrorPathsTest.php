@@ -6,10 +6,12 @@ namespace Matecat\Core\Model\ProjectCreation;
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
+use Model\ProjectCreation\ProjectCreationError;
 use Model\ProjectCreation\ProjectStructure;
 use Model\ProjectCreation\SegmentExtractor;
 use Model\Segments\SegmentMetadataMapper;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionClass;
 use RuntimeException;
 
 class SegmentExtractorErrorPathsTest extends AbstractTest
@@ -86,5 +88,27 @@ class SegmentExtractorErrorPathsTest extends AbstractTest
 
         $extractor = $this->makeExtractor($config);
         $extractor->extract(1, ['path_cached_xliff' => '/fake.xliff', 'original_filename' => 'test.xliff'], new ProjectStructure());
+    }
+
+    #[Test]
+    public function extractNotesAndContextsCollectsErrorInsteadOfThrowing(): void
+    {
+        $projectStructure = new ProjectStructure();
+        $extractor        = $this->makeExtractor();
+
+        $trans_unit = [
+            'attr'  => ['id' => 'unit-1'],
+            'notes' => array_fill(0, 11, ['raw-content' => 'a note']),
+        ];
+
+        $method = (new ReflectionClass(SegmentExtractor::class))->getMethod('extractNotesAndContexts');
+        $method->setAccessible(true);
+
+        // Must not throw: the error is recorded on the ProjectStructure instead.
+        $method->invoke($extractor, $trans_unit, 1, $projectStructure);
+
+        self::assertCount(1, $projectStructure->result['errors']);
+        self::assertSame(ProjectCreationError::TOO_MANY_NOTES->value, $projectStructure->result['errors'][0]['code']);
+        self::assertStringContainsString('maximum of 10 notes', $projectStructure->result['errors'][0]['message']);
     }
 }

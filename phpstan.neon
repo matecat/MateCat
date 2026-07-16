@@ -12,6 +12,7 @@ services:
                 - lib/Utils/TaskRunner/executor_worker.php
                 - internal_scripts/tasks/tasks.php
                 - lib/View/templates/_APIDoc.php
+                - router.php
 
 parameters:
     level: 8

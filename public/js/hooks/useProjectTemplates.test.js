@@ -1,7 +1,7 @@
 import {renderHook, act, waitFor} from '@testing-library/react'
 import projectTemplatesMock from '../../mocks/projectTemplateMock'
 import tmKeysMock from '../../mocks/tmKeysMock'
-import useProjectTemplates from './useProjectTemplates'
+import useProjectTemplates, {STANDARD_TEMPLATE} from './useProjectTemplates'
 import {mswServer} from '../../mocks/mswServer'
 import {HttpResponse, http} from 'msw'
 
@@ -156,4 +156,8 @@ test('Cattool page', async () => {
   const {currentProjectTemplate} = result.current
 
   expect(currentProjectTemplate.id).toBe(0)
+})
+
+test('STANDARD_TEMPLATE defaults icu_enabled to true', () => {
+  expect(STANDARD_TEMPLATE.icu_enabled).toBe(true)
 })

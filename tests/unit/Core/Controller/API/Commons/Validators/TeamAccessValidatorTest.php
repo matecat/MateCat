@@ -39,6 +39,7 @@ class TeamAccessValidatorTest extends AbstractTest
     private const int B = 9_910_000;
     private const int UID = self::B;
     private const int TEAM_ID = self::B + 1;
+    private const int ATTACKER_UID = self::B + 2;
     private const string TEAM_NAME = 'CtrlTestTeam9910000';
     private const string EMAIL = 'ctrltest_9910000@example.org';
 
@@ -114,31 +115,39 @@ class TeamAccessValidatorTest extends AbstractTest
         $this->assertSame(self::TEAM_ID, $this->controller->capturedTeam->id);
     }
 
-    // ─── name-path (team_name present, != PERSONAL) ───
+    // ─── IDOR regression: the team_name parameter must NOT be an authorization path ───
 
     #[Test]
-    public function validates_by_team_name(): void
+    public function blocks_non_member_even_when_team_name_supplied(): void
     {
+        // Attacker: authenticated but NOT a member of TEAM_ID, injects the (correct) team_name.
+        $attacker = new UserStruct();
+        $attacker->uid = self::ATTACKER_UID;
+        $attacker->email = 'attacker_9910000@example.org';
+        $this->setCtrlProp('user', $attacker);
+
         $this->setRequest([
             'id_team' => (string) self::TEAM_ID,
             'team_name' => base64_encode(self::TEAM_NAME),
         ]);
 
+        // team_name is inert: access is resolved purely by membership → no row → 401.
         $validator = new TeamAccessValidator($this->controller);
-        $validator->_validate();
 
-        $this->assertInstanceOf(TeamStruct::class, $validator->team);
-        $this->assertSame(self::TEAM_NAME, $validator->team->name);
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionCode(401);
+
+        $validator->_validate();
     }
 
-    // ─── PERSONAL name falls through to the user-path ───
+    // ─── the team_name parameter is ignored for members too (membership path wins) ───
 
     #[Test]
-    public function personal_team_name_uses_user_path(): void
+    public function member_is_authorized_regardless_of_team_name_param(): void
     {
         $this->setRequest([
             'id_team' => (string) self::TEAM_ID,
-            'team_name' => base64_encode('personal'),
+            'team_name' => base64_encode(self::TEAM_NAME),
         ]);
 
         $validator = new TeamAccessValidator($this->controller);

@@ -7,8 +7,8 @@ use Controller\Views\TemplateDecorator\DownloadOmegaTOutputDecorator;
 use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
+use Matecat\TestHelpers\AbstractTest;
 use Model\Users\UserStruct;
-use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use SplTempFileObject;
 use Utils\TMS\TMSService;
@@ -27,7 +27,7 @@ class TestableDownloadOmegaTOutputDecorator extends DownloadOmegaTOutputDecorato
     }
 }
 
-class DownloadOmegaTOutputDecoratorTest extends TestCase
+class DownloadOmegaTOutputDecoratorTest extends AbstractTest
 {
     private function makeTmx(string $content): SplTempFileObject
     {

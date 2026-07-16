@@ -110,7 +110,7 @@ class ProjectTemplateStructTest extends AbstractTest
         self::assertSame(55, $struct->uid);
         self::assertFalse($struct->is_default);
         self::assertSame(0, $struct->public_tm_penalty);
-        self::assertFalse($struct->icu_enabled);
+        self::assertTrue($struct->icu_enabled);
     }
 
     // ── Phase 2 — json_encode false → null ───────────────────────

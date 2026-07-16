@@ -11,6 +11,7 @@ use PDO;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 
@@ -68,7 +69,7 @@ class CreateApyKeyTest extends AbstractTest
     public function tearDown(): void
     {
         $this->database_instance->getConnection()->query($this->sql_delete_apikey);
-        $this->flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
+        $this->flusher = (new RedisHandler())->getConnection();
         $this->flusher->flushdb();
         parent::tearDown();
     }

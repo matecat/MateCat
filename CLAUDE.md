@@ -109,17 +109,16 @@ XDEBUG_MODE=coverage vendor/bin/phpunit tests/unit/Path/To/TestFile.php --covera
 ## Static Analysis
 
 ```bash
-# Full codebase with baseline
+# Full codebase
 vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress --error-format=table
 
-# Single file without baseline (must report 0 errors for clean files)
-vendor/bin/phpstan analyse path/to/File.php --configuration=phpstan-no-baseline.neon --no-progress --error-format=table
+# Single file (must report 0 errors for clean files)
+vendor/bin/phpstan analyse path/to/File.php --configuration=phpstan.neon --no-progress --error-format=table
 ```
 
 ### PHPStan Configuration
 
-- Level 8 with `phpstan-baseline.neon` for known errors
-- `phpstan-no-baseline.neon` exists for verifying individual files are fully clean
+- Level 8, no baseline — every reported error must be fixed (there is no `phpstan-baseline.neon`)
 - `checkTooWideThrowTypesInProtectedAndPublicMethods: true` — must use precise exception types in `@throws`
 - `missingCheckedExceptionInThrows: true` — all thrown exceptions must be declared
 - `UnknownPropertyException` is unchecked (used by struct `ArrayAccessTrait`)
@@ -158,6 +157,7 @@ Valid emoji Type Reference
 | docs     | Documentation            | 📝    | Documentation only changes                                                                             | README, API                                                   |
 | feat     | Features                 | ✨     | A new feature                                                                                          | user, payment, gallery                                        |
 | fix      | Bug Fixes                | 🐛    | A bug fix                                                                                              | auth, data                                                    |
+| security | Security Fixes           | 🔒    | A change that fixes a vulnerability or hardens against one                                             | auth, idor, xss, injection                                    |
 | perf     | Performance Improvements | ⚡️    | A code change that improves performance                                                                | query, cache                                                  |
 | refactor | Code Refactoring         | ♻️    | A code change that neither fixes a bug nor adds a feature                                              | utils, helpers                                                |
 | revert   | Reverts                  | ⏪️    | Reverts a previous commit                                                                              | query, utils,                                                 |

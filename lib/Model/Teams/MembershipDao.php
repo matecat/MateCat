@@ -33,12 +33,7 @@ class MembershipDao extends AbstractDao
             WHERE teams_users.uid = ? AND teams.id = ?
             ";
 
-    protected static string $_query_team_from_id_and_name = " SELECT teams.* FROM teams
-              JOIN teams_users ON teams_users.id_team = teams.id
-            WHERE teams.id = ? AND teams.name = ?
-            ";
-
-    protected static string $_query_user_teams = " 
+    protected static string $_query_user_teams = "
           SELECT teams.* FROM teams
               JOIN teams_users ON teams_users.id_team = teams.id
             WHERE teams_users.uid = :uid 
@@ -114,21 +109,6 @@ class MembershipDao extends AbstractDao
         $stmt = $this->_getStatementForQuery(self::$_query_team_from_uid_and_id);
 
         return $this->_fetchObjectMap($stmt, TeamStruct::class, [$user->uid, $id])[0] ?? null;
-    }
-
-    /**
-     * @param int $id
-     * @param string $name
-     *
-     * @return TeamStruct|null
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public function findTeamByIdAndName(int $id, string $name): ?TeamStruct
-    {
-        $stmt = $this->_getStatementForQuery(self::$_query_team_from_id_and_name);
-
-        return $this->_fetchObjectMap($stmt, TeamStruct::class, [$id, $name])[0] ?? null;
     }
 
     /**

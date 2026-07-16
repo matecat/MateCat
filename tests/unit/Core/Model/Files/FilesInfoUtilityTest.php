@@ -11,8 +11,8 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
-use Predis\Client;
 use RuntimeException;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 #[Group('PersistenceNeeded')]
@@ -44,8 +44,7 @@ class FilesInfoUtilityTest extends AbstractTest
     {
         $this->cleanFixtures();
 
-        $flusher = new Client(AppConfig::$REDIS_SERVERS);
-        $flusher->select(AppConfig::$INSTANCE_ID);
+        $flusher = (new RedisHandler())->getConnection();
         $flusher->flushdb();
 
         parent::tearDown();
