@@ -308,6 +308,19 @@ class GlossaryFilesV2ControllerTest extends AbstractTest
         $this->invoke('validateCSVFile', [$this->fixture('NV - Header vuoto.csv')]);
     }
 
+    #[Test]
+    public function validateCSVFile_validation_error_message_is_the_friendly_message_not_a_stack_trace(): void
+    {
+        try {
+            $this->invoke('validateCSVFile', [$this->fixture('NV - Header vuoto.csv')]);
+            self::fail('Expected a ValidationError to be thrown.');
+        } catch (ValidationError $e) {
+            self::assertStringContainsString('empty column header', $e->getMessage());
+            self::assertStringNotContainsString('Stack trace:', $e->getMessage());
+            self::assertInstanceOf(RuntimeException::class, $e->getPrevious());
+        }
+    }
+
     // ── extractCSV ───────────────────────────────────────────────────────
 
     #[Test]

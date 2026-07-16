@@ -191,7 +191,8 @@ class GlossaryFilesController extends KleinController
         ]));
 
         if (count($validator->getExceptions()) > 0) {
-            throw new ValidationError($validator->getExceptions()[0]);
+            $error = $validator->getExceptions()[0];
+            throw new ValidationError($error->getMessage(), $error->getCode(), $error);
         }
 
         return $validator;
