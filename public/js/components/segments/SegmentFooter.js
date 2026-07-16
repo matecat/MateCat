@@ -651,7 +651,9 @@ function SegmentFooter() {
           ) : clientConnected || typeof clientConnected === 'undefined' ? (
             <span className="loader loader_on" />
           ) : (
-            <IconWarning />
+            <span className={'notLoading'}>
+              <IconWarning size={16} />
+            </span>
           )}
 
           {tab.isEnableCloseButton && (
