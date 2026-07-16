@@ -790,6 +790,7 @@ CREATE TABLE `project_templates` (
   `public_tm_penalty` int(11) DEFAULT '0',
   `subfiltering_handlers` varchar(1024) NOT NULL DEFAULT '["markup", "twig", "double_snail", "double_square", "double_percent"]',
   `icu_enabled` tinyint(1) DEFAULT '1',
+  `mandatory_issues` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_name_idx` (`uid`,`name`),
   KEY `uid_idx` (`uid`)

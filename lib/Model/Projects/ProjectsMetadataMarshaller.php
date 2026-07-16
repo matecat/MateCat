@@ -32,6 +32,7 @@ enum ProjectsMetadataMarshaller: string
     case SPLIT_EQUIVALENT_WORD_TYPE = 'eq_word_count';
     case SPLIT_RAW_WORD_TYPE = 'raw_word_count';
     case SUBFILTERING_HANDLERS = 'subfiltering_handlers';
+    case MANDATORY_ISSUES = 'mandatory_issues';
     case XLIFF_PARAMETERS = 'xliff_parameters';
     case FILTERS_EXTRACTION_PARAMETERS = 'filters_extraction_parameters';
 

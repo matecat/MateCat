@@ -218,6 +218,14 @@ class JobCreationService
             $metadata[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $projectStructure->subfiltering_handlers;
         }
 
+        if ($projectStructure->mandatory_issues !== null) {
+            $mandatoryIssues = json_encode($projectStructure->mandatory_issues);
+
+            if($mandatoryIssues !== false){
+                $metadata[JobsMetadataMarshaller::MANDATORY_ISSUES->value] = $mandatoryIssues;
+            }
+        }
+
         $this->getJobsMetadataDao()->bulkSet((int)$job->id, (string)$job->password, $metadata);
     }
 

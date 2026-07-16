@@ -83,15 +83,6 @@ const AnalyzeMain = ({volumeAnalysis, project}) => {
               </div>
             </>
           ) : null}
-          {/*{scrollTop > 200 ? (
-            <Button
-              title="Back to top"
-              className="scroll"
-              onClick={() => scrollToTop()}
-            >
-              <i className="icon-sort-up icon"></i>
-            </Button>
-          ) : null}*/}
         </div>
       ) : (
         spinner

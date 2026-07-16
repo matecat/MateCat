@@ -8,7 +8,7 @@
 
 .outsource-container {
   display: flex;
-  padding: 8px 24px 24px 56px;
+  padding: 8px 24px 24px 24px;
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
@@ -154,7 +154,6 @@
       line-height: 16px;
     }
   }
-
   .assign-job-translator {
     background-color: colors.$white;
     display: flex;
@@ -174,8 +173,6 @@
 
     .title-url {
       padding: 10px 0;
-      width: 75%;
-      display: inline-block;
 
       .job-url {
         display: inline-block;
@@ -192,10 +189,13 @@
           /*width: 100%;*/
           .fields {
             margin: 0;
-
+            display: flex;
             .field {
               font-size: 14px;
-
+              flex-direction: column;
+              margin: 20px 0 0;
+              display: flex;
+              position: relative;
               label {
                 font-size: 14px;
                 line-height: 20px;
@@ -210,7 +210,7 @@
                 border: 1px solid colors.$grey200;
                 font-family: Calibri, Arial, Helvetica, sans-serif;
                 border-radius: variables.$border-radius-default;
-                height: 40px;
+                height: 36px;
 
                 &:focus {
                   border-color: colors.$blue300;

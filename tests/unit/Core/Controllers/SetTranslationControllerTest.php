@@ -2307,8 +2307,8 @@ class SetTranslationControllerTest extends AbstractTest
             'id_segment'              => (string)$segmentId,
             'time_to_edit'            => '1000',
             'id_translator'           => '1',
-            // Tag mismatch: target contains a tag absent from the source → QA warning.
-            'translation'             => 'Ciao <b>mondo</b>',
+            // Tag mismatch: target contains an XLIFF tag absent from the source → QA warning.
+            'translation'             => 'Ciao <ph id="1"/> mondo',
             'segment'                 => 'Hello world.',
             'version'                 => '1',
             'chosen_suggestion_index' => null,
