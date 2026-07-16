@@ -1,6 +1,6 @@
 @use 'NewProjectPage';
 @use "../../commons/reset";
-@use "../../commons/colors";
+@use "../../tokens/colors";
 
 .activity-log-content {
   display: flex;

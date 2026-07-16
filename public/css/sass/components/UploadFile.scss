@@ -1,4 +1,4 @@
-@use '../commons/colors';
+@use '../tokens/colors';
 .upload-files-container, .upload-box-not-logged, .upload-waiting-logged {
   border: 1px dashed colors.$grey200;
   min-height: 200px;
