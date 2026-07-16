@@ -338,7 +338,7 @@ class TranslationVersionsHandlerTest extends AbstractTest
     {
         $handler = $this->makeHandler();
 
-        // version_number 2 is NOT yet present -> saveVersion() INSERT path.
+        // version_number 2 is NOT yet present -> insertVersion() INSERT path.
         $old = $this->makeTranslation('old text', TranslationStatus::STATUS_TRANSLATED, 2);
         $new = $this->makeTranslation('new text', TranslationStatus::STATUS_TRANSLATED, 2);
 

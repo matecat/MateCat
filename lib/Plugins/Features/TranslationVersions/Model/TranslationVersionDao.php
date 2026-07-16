@@ -328,30 +328,6 @@ class TranslationVersionDao extends AbstractDao
     /**
      * @throws PDOException
      */
-    public function saveVersion(TranslationVersionStruct $new_version): bool
-    {
-        $sql = "INSERT INTO segment_translation_versions " .
-            " ( id_job, id_segment, translation, version_number, time_to_edit, old_status, new_status ) " .
-            " VALUES " .
-            " (:id_job, :id_segment, :translation, :version_number, :time_to_edit, :old_status, :new_status ) ";
-
-        $conn = $this->database->getConnection();
-        $stmt = $conn->prepare($sql);
-
-        return $stmt->execute([
-            'id_job' => $new_version->id_job,
-            'id_segment' => $new_version->id_segment,
-            'translation' => $new_version->translation,
-            'version_number' => $new_version->version_number,
-            'time_to_edit' => $new_version->time_to_edit,
-            'old_status' => $new_version->old_status,
-            'new_status' => $new_version->new_status,
-        ]);
-    }
-
-    /**
-     * @throws PDOException
-     */
     public function updateVersion(TranslationVersionStruct $old_translation): int
     {
         $sql = "UPDATE segment_translation_versions
