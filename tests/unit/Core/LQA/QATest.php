@@ -254,6 +254,28 @@ class QATest extends AbstractTest
     }
 
     #[Test]
+    public function performConsistencyCheckWithPseudoTagSourceReturnsNoError(): void
+    {
+        // "<Expiry date symbol>" is plain text, not an XLIFF tag: it must not
+        // produce a false-positive tag mismatch regardless of the translation.
+        $qa = new QA('<Expiry date symbol>', 'Simbolo data di scadenza');
+        $errors = $qa->performConsistencyCheck();
+
+        $this->assertFalse($qa->thereAreErrors());
+        $this->assertCount(1, $errors);
+        $this->assertEquals(QA::ERR_NONE, $errors[0]->outcome);
+    }
+
+    #[Test]
+    public function performConsistencyCheckWithPseudoTagInBothSegmentsReturnsNoError(): void
+    {
+        $qa = new QA('Value: <Expiry date symbol>', 'Valore: <Expiry date symbol>');
+        $qa->performConsistencyCheck();
+
+        $this->assertFalse($qa->thereAreErrors());
+    }
+
+    #[Test]
     public function performConsistencyCheckWithMismatchedTagIdHasErrors(): void
     {
         $qa = new QA('<g id="1">Source</g>', '<g id="2">Target</g>');

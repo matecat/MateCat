@@ -373,5 +373,77 @@ class ContentPreprocessorTest extends AbstractTest
         $this->assertStringContainsString('##$_09$##', $result);
         $this->assertStringContainsString(ContentPreprocessor::EMPTY_HTML_TAGS_PLACEHOLDER, $result);
     }
+
+    // ========== Escape Stray Angle Brackets Tests ==========
+
+    #[Test]
+    public function escapeStrayAngleBracketsEscapesPseudoTag(): void
+    {
+        // Plain text that merely looks like markup must be escaped, not treated as a tag
+        $result = $this->preprocessor->escapeStrayAngleBrackets('<Expiry date symbol>');
+        $this->assertEquals('&lt;Expiry date symbol&gt;', $result);
+    }
+
+    #[Test]
+    public function escapeStrayAngleBracketsEscapesUnknownSingleWordTag(): void
+    {
+        $result = $this->preprocessor->escapeStrayAngleBrackets('<Expiry>');
+        $this->assertEquals('&lt;Expiry&gt;', $result);
+    }
+
+    #[Test]
+    public function escapeStrayAngleBracketsEscapesLooseBrackets(): void
+    {
+        $result = $this->preprocessor->escapeStrayAngleBrackets('a < b and c > d');
+        $this->assertEquals('a &lt; b and c &gt; d', $result);
+    }
+
+    #[Test]
+    public function escapeStrayAngleBracketsPreservesValidXliffTags(): void
+    {
+        $input = '<g id="1"><x id="2"/></g>';
+        $result = $this->preprocessor->escapeStrayAngleBrackets($input);
+        $this->assertEquals($input, $result);
+    }
+
+    #[Test]
+    public function escapeStrayAngleBracketsPreservesPhTag(): void
+    {
+        $input = '<ph id="mtc_1" equiv-text="base64:eA=="/>';
+        $result = $this->preprocessor->escapeStrayAngleBrackets($input);
+        $this->assertEquals($input, $result);
+    }
+
+    #[Test]
+    public function escapeStrayAngleBracketsDoesNotDoubleEncodeEntities(): void
+    {
+        $input = 'Already &lt;encoded&gt; text';
+        $result = $this->preprocessor->escapeStrayAngleBrackets($input);
+        $this->assertEquals($input, $result);
+    }
+
+    #[Test]
+    public function escapeStrayAngleBracketsKeepsValidTagAndEscapesPseudoTag(): void
+    {
+        $input = '<g id="1"><Expiry date symbol></g>';
+        $result = $this->preprocessor->escapeStrayAngleBrackets($input);
+        $this->assertEquals('<g id="1">&lt;Expiry date symbol&gt;</g>', $result);
+    }
+
+    #[Test]
+    public function escapeStrayAngleBracketsLeavesPlainTextUntouched(): void
+    {
+        $input = 'Hello World';
+        $result = $this->preprocessor->escapeStrayAngleBrackets($input);
+        $this->assertEquals($input, $result);
+    }
+
+    #[Test]
+    public function preprocessEscapesPseudoTag(): void
+    {
+        // Full preprocess pipeline must escape stray pseudo tags as well
+        $result = $this->preprocessor->preprocess('<Expiry date symbol>');
+        $this->assertEquals('&lt;Expiry date symbol&gt;', $result);
+    }
 }
 
