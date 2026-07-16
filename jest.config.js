@@ -23,7 +23,7 @@ module.exports = {
     './public/js/globalFunctions.js': { lines: 80 },
     './public/js/components/contextPreview/': { lines: 80 },
     './public/js/components/activityLog/': { lines: 80 },
-    './public/js/sse/': { lines: 0 },
+    './public/js/sse/': { lines: 29 },
     './public/js/components/xliffToTarget/': { lines: 0 },
     './public/js/setTranslationUtil.js': { lines: 5 },
     './public/js/components/notificationsComponent/': { lines: 0 },
