@@ -14,7 +14,7 @@ import ReactDOMServer from 'react-dom/server'
 import {useHotkeys} from 'react-hotkeys-hook'
 import {Shortcuts} from '../../utils/shortcuts'
 import VirtualList from '../common/VirtualList/VirtualList'
-import RowSegment from '../common/VirtualList/Rows/RowSegment'
+import RowSegment, {ProjectBar} from '../common/VirtualList/Rows/RowSegment'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import CatToolConstants from '../../constants/CatToolConstants'
@@ -206,6 +206,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const [isSearchBarOpen, setIsSearchBarOpen] = useState(false)
   const [clientConnected, setClientConnected] = useState()
   const [clientId, setClientId] = useState()
+  const [firstRowIdVisible, setFirstRowIdVisible] = useState()
 
   const persistenceVariables = useRef({
     lastScrolled: undefined,
@@ -899,6 +900,22 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
 
   const goToFirstSegment = () => SegmentActions.scrollToSegment(firstJobSegment)
 
+  const getProjectBar = () => {
+    if (typeof firstRowIdVisible !== 'undefined') {
+      const props = getSegmentPropsBySid(firstRowIdVisible)
+
+      return (
+        <div
+          className={`sticky-project-bar ${props.sideOpen ? 'sticky-project-bar-slide-right' : ''}`}
+        >
+          <ProjectBar
+            {...{...props, listRef: listRef.current, isSticky: true}}
+          />
+        </div>
+      )
+    }
+  }
+
   return (
     <>
       <VirtualList
@@ -911,6 +928,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
         }}
         overscan={OVERSCAN}
         height={heightArea}
+        overlapHeader={getProjectBar()}
         onRender={(index) => {
           const props = getSegmentPropsBySid(essentialRows[index].id)
           return (
@@ -925,6 +943,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
                   ...(index === essentialRows.length - 1 && {
                     isLastRow: true,
                   }),
+                  scrollValue: listRef.current ? listRef.current.scrollTop : 0,
                 }}
               />
             )
@@ -936,6 +955,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
           segments.get(index).get('opened') && {zIndex: 1}
         }
         renderedRange={renderedRange}
+        setFirstRowIdVisible={setFirstRowIdVisible}
       />
       {scrollTopVisible && (
         <div
