@@ -151,7 +151,7 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
         type: 'warning',
         title: 'Warning',
         text: 'Translator/post-editor did not mark this job as complete yet. Please wait for vendor phase to complete before making any change.',
-        dismissable: false,
+        dismissable: true,
         autoDismiss: false,
       })
     }
