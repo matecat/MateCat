@@ -242,6 +242,35 @@ class CreateProjectControllerTest extends AbstractTest
     }
 
     /**
+     * Regression: private_keys_list used to be sanitized with FILTER_FLAG_STRIP_HIGH, which
+     * HTML-entity-encodes (rather than strips) multi-byte UTF-8 in the whole JSON envelope
+     * (e.g. "è" -> "&egrave;"). TmKeyManager::sanitize()'s name regex then stripped the "&"/";"
+     * punctuation but left the entity-name letters behind ("egrave"), corrupting the key name.
+     * STRIP_HIGH is now dropped from this envelope-level filter, so accented characters embedded
+     * in a key's name must survive project creation unchanged.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_preserves_accented_characters_in_private_key_name(): void
+    {
+        $_COOKIE['upload_token'] = '88888888-8888-8888-8888-888888888888';
+        $params = $this->validRequestParams();
+        // Built as a raw literal (not json_encode()) on purpose: PHP's json_encode() escapes
+        // non-ASCII as \uXXXX by default, which never exercises FILTER_SANITIZE_FULL_SPECIAL_CHARS'
+        // multi-byte UTF-8 corruption bug. A real browser's JSON.stringify() sends raw UTF-8 bytes,
+        // like this literal does.
+        $params['private_keys_list'] = '{"ownergroup":[],"mine":[{"key":"aaaaaaaaaaaaaaaa","name":"èèèééééççòòòòò"}],"anonymous":[]}';
+        $this->setRequestParams($params);
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $this->assertCount(1, $data['private_tm_key']);
+        $this->assertSame('èèèééééççòòòòò', $data['private_tm_key'][0]['name']);
+    }
+
+    /**
      * @throws Throwable
      */
     #[Test]

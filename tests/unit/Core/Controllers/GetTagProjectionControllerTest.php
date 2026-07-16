@@ -336,7 +336,15 @@ class GetTagProjectionControllerTest extends AbstractTest
 
         $this->controller->engineStub = $engineStub;
 
-        $this->controller->call();
+        // call() calls Response::json(), which send()s the body to stdout and pollutes
+        // the test-runner output. Swallow that echo; the body is still recorded on the
+        // Response object, so the assertions below are unaffected.
+        ob_start();
+        try {
+            $this->controller->call();
+        } finally {
+            ob_end_clean();
+        }
 
         $body = json_decode((string) $realResponse->body(), true);
 

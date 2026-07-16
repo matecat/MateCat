@@ -193,4 +193,23 @@ class ChunkPasswordValidatorTest extends AbstractTest
 
         $validator->validate();
     }
+
+    // ─── security regression (CWE-209): a non-numeric id_job is coerced to 0 in the ctor,
+    //     so lookups miss and throw NotFoundException instead of a PHP TypeError whose
+    //     message would disclose the validator's internal class name/namespace ───
+
+    #[Test]
+    public function non_numeric_id_job_yields_not_found_not_type_error(): void
+    {
+        $this->configureRequest([
+            'id_job' => 'Controller\\API\\Commons\\Validators',
+            'password' => self::JOB_PASSWORD,
+        ]);
+
+        $validator = new ChunkPasswordValidator($this->controller);
+
+        $this->expectException(NotFoundException::class);
+
+        $validator->validate();
+    }
 }

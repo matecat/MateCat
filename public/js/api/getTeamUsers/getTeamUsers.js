@@ -1,17 +1,24 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
-import {Base64} from 'js-base64'
 
 /**
- * Get team users list
+ * Get the team members list for the current job, for comment attribution.
  *
- * @param {Object} options
- * @param {number} options.teamId
+ * Authorized by the job password capability (unguessable) rather than a
+ * guessable team name, so team member names cannot be harvested by guessing
+ * team ids/names (CWE-639). The backend resolves job -> project -> team and
+ * returns the public projection (uid + first/last name, no email).
+ *
+ * @param {Object} [options]
+ * @param {number|string} [options.idJob=config.id_job]
+ * @param {string} [options.password=config.password]
  * @returns {Promise<object>}
  */
-export const getTeamUsers = async ({teamId, teamName}) => {
-  const teamNameBase64 = Base64.encode(teamName)
+export const getTeamUsers = async ({
+  idJob = config.id_job,
+  password = config.password,
+} = {}) => {
   const response = await fetch(
-    `${getMatecatApiDomain()}api/app/teams/${teamId}/${teamNameBase64}/members/public`,
+    `${getMatecatApiDomain()}api/app/jobs/${idJob}/${password}/team-members`,
     {
       credentials: 'include',
     },

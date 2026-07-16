@@ -231,13 +231,13 @@ class TmKeyManager
         }
 
         if (!is_null($obj->name)) {
-            $obj->name = preg_replace('/[^.\-_\p{L}\p{N}\s]+/u', '', $obj->name);
+            $obj->name = preg_replace('/[^.\-_\p{L}\p{N}\s{}]+/u', '', $obj->name);
             $sanitized = filter_var($obj->name, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
             $obj->name = $sanitized !== false ? $sanitized : null;
         }
 
         if (!is_null($obj->key)) {
-            $sanitized = filter_var($obj->key, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+            $sanitized = filter_var($obj->key, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
             $obj->key = $sanitized !== false ? $sanitized : null;
         }
 

@@ -15,6 +15,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MMT;
 use Utils\Engines\MMT\MMTServiceApi;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 /**
@@ -59,8 +60,7 @@ H;
     {
         $this->database_instance->getConnection()->query("DELETE FROM engines WHERE id=" . $this->engine_id . ";");
         $this->database_instance->getConnection()->query("DELETE FROM engines WHERE id=" . $this->not_valid_engine_id . ";");
-        $flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
-        $flusher->select(AppConfig::$INSTANCE_ID);
+        $flusher = (new RedisHandler())->getConnection();
         $flusher->flushdb();
         parent::tearDown();
     }

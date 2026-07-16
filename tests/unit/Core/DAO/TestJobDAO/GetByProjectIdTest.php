@@ -9,6 +9,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 /**
@@ -120,7 +121,7 @@ class GetByProjectIdTest extends AbstractTest
     public function tearDown(): void
     {
         $this->database_instance->getConnection()->query($this->sql_delete_job);
-        $this->flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
+        $this->flusher = (new RedisHandler())->getConnection();
         $this->flusher->flushdb();
         parent::tearDown();
     }

@@ -12,6 +12,7 @@ use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 
@@ -139,7 +140,7 @@ class GetProjectOwnerTest extends AbstractTest
     {
         $this->database_instance->getConnection()->query($this->sql_delete_job);
         $this->database_instance->getConnection()->query($this->sql_delete_user);
-        $this->flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
+        $this->flusher = (new RedisHandler())->getConnection();
         $this->flusher->flushdb();
         parent::tearDown();
     }

@@ -1,0 +1,13 @@
+{
+    "permissions": {
+        "deny": [
+            "Read(*docker/UpgradeVersion/*)",
+            "Edit(*docker/UpgradeVersion/*)",
+            "Bash(*docker/UpgradeVersion/*)",
+            "Read(*inc/config.ini.*)",
+            "Edit(*inc/config.ini.*)",
+            "Bash(*inc/config.ini.*)",
+            "Bash(* mysql *)"
+        ]
+    }
+}

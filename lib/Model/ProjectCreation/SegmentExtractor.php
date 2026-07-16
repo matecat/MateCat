@@ -161,8 +161,17 @@ class SegmentExtractor
         $_fileCounter_Show_In_Cattool = 0;
 
         // Creating the Query
+        // $internalFileIndex is the 0-based ordinal position of this <file> element within the
+        // document, used to disambiguate trans-unit ids that are only unique per-<file>, not
+        // document-wide (see SegmentExtractor::processXliffFile()). It must be a manually
+        // incremented counter rather than the array's own key: XliffParser::xliffToArray()
+        // returns $xliff['files'] as a 1-indexed array, but the XliffReplacer counts <file>
+        // elements from 0 while replaying the raw XML at download time, so the two must agree
+        // on a 0-based convention independent of the parser's internal array indexing.
+        $internalFileIndex = 0;
         foreach ($xliff['files'] as $xliff_file) {
-            $_fileCounter_Show_In_Cattool += $this->processXliffFile($xliff_file, $fid, $projectStructure);
+            $_fileCounter_Show_In_Cattool += $this->processXliffFile($xliff_file, $fid, $internalFileIndex, $projectStructure);
+            $internalFileIndex++;
         }
 
         // use generic
@@ -183,6 +192,7 @@ class SegmentExtractor
      *
      * @param array<string, mixed> $xliff_file
      * @param int $fid
+     * @param int $internalFileIndex 0-based ordinal position of this <file> element within the document
      * @param ProjectStructure $projectStructure
      *
      * @return int Number of segments marked as show-in-cattool in this file element
@@ -191,7 +201,7 @@ class SegmentExtractor
      * @throws PDOException
      * @throws TypeError
      */
-    private function processXliffFile(array $xliff_file, int $fid, ProjectStructure $projectStructure): int
+    private function processXliffFile(array $xliff_file, int $fid, int $internalFileIndex, ProjectStructure $projectStructure): int
     {
         $filePartsId = $this->persistXliffFileAttributes($xliff_file, $fid);
 
@@ -216,7 +226,13 @@ class SegmentExtractor
 
             $this->manageAlternativeTranslations($xliff_trans_unit, $xliff_file['attr']);
 
-            $trans_unit_reference = self::sanitizedUnitId($xliff_trans_unit['attr']['id'], $fid);
+            // A trans-unit id is only guaranteed unique within its own <file> element (OASIS
+            // XLIFF 1.2 §2.4), not across the whole document, so disambiguate it with the
+            // ordinal position of the enclosing <file>. This must match the key format expected
+            // by the XliffReplacer at download time (see matecat/xliff-parser).
+            $disambiguatedId = $internalFileIndex . '|' . $xliff_trans_unit['attr']['id'];
+
+            $trans_unit_reference = self::sanitizedUnitId($disambiguatedId, $fid);
 
             $dataRefMap = $this->buildDataRefMap($xliff_trans_unit);
 
@@ -225,6 +241,7 @@ class SegmentExtractor
                 $fileCounterShowInCattool += $this->processSegSourceTransUnit(
                     $xliff_trans_unit,
                     $trans_unit_reference,
+                    $disambiguatedId,
                     $dataRefMap,
                     $fid,
                     $filePartsId,
@@ -234,6 +251,7 @@ class SegmentExtractor
                 $fileCounterShowInCattool += $this->processNonSegSourceTransUnit(
                     $xliff_trans_unit,
                     $trans_unit_reference,
+                    $disambiguatedId,
                     $dataRefMap,
                     $fid,
                     $filePartsId,
@@ -305,6 +323,7 @@ class SegmentExtractor
      *
      * @param array<string, mixed> $xliff_trans_unit
      * @param string $trans_unit_reference
+     * @param string $disambiguatedId
      * @param array<string, string> $dataRefMap
      * @param int $fid
      * @param int|null $filePartsId
@@ -321,6 +340,7 @@ class SegmentExtractor
     private function processSegSourceTransUnit(
         array $xliff_trans_unit,
         string $trans_unit_reference,
+        string $disambiguatedId,
         array $dataRefMap,
         int $fid,
         ?int $filePartsId,
@@ -365,6 +385,7 @@ class SegmentExtractor
                 fid: $fid,
                 filePartsId: $filePartsId,
                 xliff_trans_unit: $xliff_trans_unit,
+                disambiguatedId: $disambiguatedId,
                 rawContent: $seg_source['raw-content'],
                 sourceLayer0: $sourceLayer0,
                 dataRefMap: $dataRefMap,
@@ -382,7 +403,7 @@ class SegmentExtractor
             $cattoolCount += $counters['show_in_cattool'];
         } // end foreach seg-source
 
-        $this->extractNotesAndContexts($xliff_trans_unit, $fid, $projectStructure);
+        $this->extractNotesAndContexts($xliff_trans_unit, $trans_unit_reference, $projectStructure);
 
         return $cattoolCount;
     }
@@ -395,6 +416,7 @@ class SegmentExtractor
      *
      * @param array<string, mixed> $xliff_trans_unit
      * @param string $trans_unit_reference
+     * @param string $disambiguatedId
      * @param array<string, string> $dataRefMap
      * @param int $fid
      * @param int|null $filePartsId
@@ -406,6 +428,7 @@ class SegmentExtractor
     private function processNonSegSourceTransUnit(
         array $xliff_trans_unit,
         string $trans_unit_reference,
+        string $disambiguatedId,
         array $dataRefMap,
         int $fid,
         ?int $filePartsId,
@@ -434,12 +457,13 @@ class SegmentExtractor
             );
         }
 
-        $this->extractNotesAndContexts($xliff_trans_unit, $fid, $projectStructure);
+        $this->extractNotesAndContexts($xliff_trans_unit, $trans_unit_reference, $projectStructure);
 
         $counters = $this->buildAndAppendSegment(
             fid: $fid,
             filePartsId: $filePartsId,
             xliff_trans_unit: $xliff_trans_unit,
+            disambiguatedId: $disambiguatedId,
             rawContent: $xliff_trans_unit['source']['raw-content'],
             sourceLayer0: $sourceLayer0,
             dataRefMap: $dataRefMap,
@@ -659,6 +683,7 @@ class SegmentExtractor
      * @param int $fid
      * @param int|null $filePartsId
      * @param array<string, mixed> $xliff_trans_unit
+     * @param string $disambiguatedId
      * @param string $rawContent
      * @param string $sourceLayer0
      * @param array<string, string> $dataRefMap
@@ -676,6 +701,7 @@ class SegmentExtractor
         int $fid,
         ?int $filePartsId,
         array $xliff_trans_unit,
+        string $disambiguatedId,
         string $rawContent,
         string $sourceLayer0,
         array $dataRefMap,
@@ -707,7 +733,7 @@ class SegmentExtractor
             'id_file' => $fid,
             'id_file_part' => $filePartsId,
             'id_project' => $this->idProject,
-            'internal_id' => $xliff_trans_unit['attr']['id'],
+            'internal_id' => $disambiguatedId,
             'xliff_mrk_id' => $xliffMrkId,
             'xliff_ext_prec_tags' => $xliffExtPrecTags,
             'xliff_mrk_ext_prec_tags' => $xliffMrkExtPrecTags,
@@ -776,18 +802,18 @@ class SegmentExtractor
      * with consistent error handling.
      *
      * @param array<string, mixed> $xliff_trans_unit
-     * @param int $fid
+     * @param string $trans_unit_reference
      * @param ProjectStructure $projectStructure
      *
      * @throws Exception
      */
-    private function extractNotesAndContexts(array $xliff_trans_unit, int $fid, ProjectStructure $projectStructure): void
+    private function extractNotesAndContexts(array $xliff_trans_unit, string $trans_unit_reference, ProjectStructure $projectStructure): void
     {
         try {
-            $this->addNotesToProjectStructure($xliff_trans_unit, $fid, $projectStructure);
-            $this->addTUnitContextsToProjectStructure($xliff_trans_unit, $fid, $projectStructure);
+            $this->addNotesToProjectStructure($xliff_trans_unit, $trans_unit_reference, $projectStructure);
+            $this->addTUnitContextsToProjectStructure($xliff_trans_unit, $trans_unit_reference, $projectStructure);
         } catch (Exception $exception) {
-            throw new Exception($exception->getMessage(), ProjectCreationError::NO_TRANSLATABLE_TEXT->value, $exception);
+            $projectStructure->addError($exception->getCode(), $exception->getMessage());
         }
     }
 
@@ -795,14 +821,14 @@ class SegmentExtractor
      * Add notes from a trans-unit to the projectStructure.
      *
      * @param array<string, mixed> $trans_unit
-     * @param int $fid
+     * @param string $trans_unit_reference
      * @param ProjectStructure $projectStructure
      *
      * @throws Exception
      */
-    private function addNotesToProjectStructure(array $trans_unit, int $fid, ProjectStructure $projectStructure): void
+    private function addNotesToProjectStructure(array $trans_unit, string $trans_unit_reference, ProjectStructure $projectStructure): void
     {
-        $internal_id = self::sanitizedUnitId($trans_unit['attr']['id'], $fid);
+        $internal_id = $trans_unit_reference;
         if (isset($trans_unit['notes'])) {
             if (count($trans_unit['notes']) > self::SEGMENT_NOTES_LIMIT) {
                 throw new Exception('File upload failed: a segment can have a maximum of ' . self::SEGMENT_NOTES_LIMIT . ' notes.', ProjectCreationError::TOO_MANY_NOTES->value);
@@ -856,12 +882,12 @@ class SegmentExtractor
      * Add context-group data from a trans-unit to the projectStructure.
      *
      * @param array<string, mixed> $trans_unit
-     * @param int $fid
+     * @param string $trans_unit_reference
      * @param ProjectStructure $projectStructure
      */
-    private function addTUnitContextsToProjectStructure(array $trans_unit, int $fid, ProjectStructure $projectStructure): void
+    private function addTUnitContextsToProjectStructure(array $trans_unit, string $trans_unit_reference, ProjectStructure $projectStructure): void
     {
-        $internal_id = self::sanitizedUnitId($trans_unit['attr']['id'], $fid);
+        $internal_id = $trans_unit_reference;
         if (isset($trans_unit['context-group'])) {
             $projectStructure->context_group[$internal_id] ??= [];
 

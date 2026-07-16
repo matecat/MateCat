@@ -449,7 +449,15 @@ class DownloadControllersTest extends AbstractTest
         // short-circuits to a 500 JSON error response before any DB lookup.
         $controller = $this->createTMXController();
 
-        $controller->index();
+        // index() calls Response::json(), which send()s the body to stdout and pollutes
+        // the test-runner output. Swallow that echo; the body is still recorded on the
+        // Response object, so the assertions below are unaffected.
+        ob_start();
+        try {
+            $controller->index();
+        } finally {
+            ob_end_clean();
+        }
 
         $response = (new ReflectionProperty($controller, 'response'))->getValue($controller);
         $this->assertSame(500, $response->status()->getCode());

@@ -199,6 +199,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
         $this->assertSame('TRANSLATED', $result['status']['translation_status']);
         $this->assertSame('r1', $result['status']['final_version']);
         $this->assertSame('analysis.xliff', $result['filename']);
+        $this->assertSame(2, $result['stored_source_raw_word_count']);
         $this->assertIsInt($result['source_raw_word_count']);
         $this->assertIsInt($result['target_raw_word_count']);
         $this->assertNotNull($result['last_edit']);

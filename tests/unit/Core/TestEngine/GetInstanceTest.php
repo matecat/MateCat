@@ -13,6 +13,7 @@ use Utils\Engines\Apertium;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Engines\NONE;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 /**
@@ -67,8 +68,7 @@ class GetInstanceTest extends AbstractTest
     {
         $this->database_instance->getConnection()->query($this->sql_delete_user);
         $this->database_instance->getConnection()->query($this->sql_delete_engine);
-        $flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
-        $flusher->select(AppConfig::$INSTANCE_ID);
+        $flusher = (new RedisHandler())->getConnection();
         $flusher->flushdb();
         parent::tearDown();
     }
@@ -157,8 +157,7 @@ class GetInstanceTest extends AbstractTest
         $sql_update_engine_class_name = "UPDATE `engines` SET class_load='YourMemory' WHERE id=" . $this->id_database . ";";
 
         $this->database_instance->getConnection()->query($sql_update_engine_class_name);
-        $flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
-        $flusher->select(AppConfig::$INSTANCE_ID);
+        $flusher = (new RedisHandler())->getConnection();
         $flusher->flushdb();
 
         $engine = EnginesFactory::getInstance($this->id_database, obtainTestDatabase());

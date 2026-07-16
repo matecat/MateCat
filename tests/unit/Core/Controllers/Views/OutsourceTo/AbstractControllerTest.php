@@ -7,8 +7,8 @@ namespace Matecat\Core\Controllers\Views\OutsourceTo;
 use Controller\Views\OutsourceTo\AbstractController;
 use Klein\Request;
 use LogicException;
+use Matecat\TestHelpers\AbstractTest;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use RuntimeException;
 use Utils\Logger\MatecatLogger;
@@ -97,7 +97,7 @@ class StubOutsourceController extends AbstractController
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-class AbstractControllerTest extends TestCase
+class AbstractControllerTest extends AbstractTest
 {
     // ─── validateTheRequest() guard throws ───────────────────────────────────
 

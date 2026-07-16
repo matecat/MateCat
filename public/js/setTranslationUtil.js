@@ -4,6 +4,10 @@ import {SEGMENTS_STATUS} from './constants/Constants'
 import {isUndefined} from 'lodash'
 import ModalsActions from './actions/ModalsActions'
 import ConfirmMessageModal from './components/modals/ConfirmMessageModal'
+import {
+  UnmodifiedFuzzyMatchModal,
+  HIDE_UNMODIFIED_FUZZY_MATCH_MODAL_STORAGE,
+} from './components/modals/UnmodifiedFuzzyMatchModal'
 import SegmentActions from './actions/SegmentActions'
 import OfflineUtils from './utils/offlineUtils'
 import SegmentStore from './stores/SegmentStore'
@@ -42,38 +46,92 @@ export const segmentTranslation = (
     }
   }
 
-  if (
-    propagateIfNeeded &&
-    segmentIsToPropagate &&
-    autoPropagateConfirmNeeded(segment)
-  ) {
-    const text =
-      'The translation you are confirming for this segment is different from the versions confirmed for other identical segments</b>. <br><br>Would you like ' +
-      'to propagate this translation to all other identical segments and replace the other versions or keep it only for this segment?'
-    const props = {
-      text: text,
-      successText: 'Only this segment',
-      successCallback: function () {
-        execChangeStatus({propagate: false, autoPropagate: false})
-        ModalsActions.onCloseModal()
-      },
-      cancelText: 'Propagate to All',
-      cancelCallback: function () {
-        execChangeStatus({propagate: true, autoPropagate: false})
-        ModalsActions.onCloseModal()
-      },
+  const proceedWithTranslation = () => {
+    if (
+      propagateIfNeeded &&
+      segmentIsToPropagate &&
+      autoPropagateConfirmNeeded(segment)
+    ) {
+      const text =
+        'The translation you are confirming for this segment is different from the versions confirmed for other identical segments</b>. <br><br>Would you like ' +
+        'to propagate this translation to all other identical segments and replace the other versions or keep it only for this segment?'
+      const props = {
+        text: text,
+        successText: 'Only this segment',
+        successCallback: function () {
+          execChangeStatus({propagate: false, autoPropagate: false})
+          ModalsActions.onCloseModal()
+        },
+        cancelText: 'Propagate to All',
+        cancelCallback: function () {
+          execChangeStatus({propagate: true, autoPropagate: false})
+          ModalsActions.onCloseModal()
+        },
+      }
+      ModalsActions.showModalComponent(
+        ConfirmMessageModal,
+        props,
+        'Confirmation required ',
+      )
+    } else {
+      execChangeStatus({
+        propagate: propagateIfNeeded && segmentIsToPropagate,
+        autoPropagate: true,
+      })
     }
-    ModalsActions.showModalComponent(
-      ConfirmMessageModal,
-      props,
-      'Confirmation required ',
-    )
-  } else {
-    execChangeStatus({
-      propagate: propagateIfNeeded && segmentIsToPropagate,
-      autoPropagate: true,
-    })
   }
+
+  // Warn the translator when a fuzzy match is being confirmed without any edit.
+  if (unmodifiedFuzzyMatchWarningNeeded(segment, status)) {
+    ModalsActions.showModalComponent(
+      UnmodifiedFuzzyMatchModal,
+      {
+        successCallback: proceedWithTranslation,
+      },
+      'Confirm fuzzy match',
+    )
+    return
+  }
+
+  proceedWithTranslation()
+}
+
+/**
+ * Determines whether to warn the translator before confirming a fuzzy TM match
+ * that has not been modified.
+ *
+ * The check works even when a segment is opened, left untouched, navigated away
+ * from, and reopened already populated: it compares the current translation with
+ * the chosen (or best) suggestion text rather than relying on transient state.
+ */
+const unmodifiedFuzzyMatchWarningNeeded = (segment, status) => {
+  if (config.isReview) return false
+
+  const confirming =
+    [
+      SEGMENTS_STATUS.TRANSLATED,
+      SEGMENTS_STATUS.APPROVED,
+      SEGMENTS_STATUS.APPROVED2,
+    ].indexOf((status || '').toUpperCase()) !== -1
+  if (!confirming) return false
+
+  if (localStorage.getItem(HIDE_UNMODIFIED_FUZZY_MATCH_MODAL_STORAGE))
+    return false
+
+  const matches = segment.contributions?.matches ?? []
+  if (!matches.length) return false
+
+  const index =
+    segment.choosenSuggestionIndex > 0 ? segment.choosenSuggestionIndex - 1 : 0
+  const match = matches[index]
+  if (!match || match.error) return false
+
+  // Fuzzy band only: exclude MT, ICE (101%) and 100% exact matches.
+  const percentage = parseInt(match.match)
+  if (isNaN(percentage) || percentage <= 0 || percentage >= 100) return false
+
+  // The user did not edit the suggestion that was copied into the edit area.
+  return !segment.modified && segment.translation === match.translation
 }
 const autoPropagateConfirmNeeded = (segment) => {
   const segmentModified = segment.modified

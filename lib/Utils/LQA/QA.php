@@ -93,6 +93,7 @@ class QA
     public const int SMART_COUNT_PLURAL_MISMATCH = ErrorManager::SMART_COUNT_PLURAL_MISMATCH;
     public const int SMART_COUNT_MISMATCH = ErrorManager::SMART_COUNT_MISMATCH;
     public const int ERR_SIZE_RESTRICTION = ErrorManager::ERR_SIZE_RESTRICTION;
+    public const int ERR_FUZZY_UNCHANGED = ErrorManager::ERR_FUZZY_UNCHANGED;
 
     public const string ERROR = ErrorManager::ERROR;
     public const string WARNING = ErrorManager::WARNING;
