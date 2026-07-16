@@ -36,7 +36,7 @@ jest.mock('../../hooks/usePortal', () =>
   ),
 )
 jest.mock('../../../img/icons/ChevronDown', () => () => null)
-jest.mock('../icons/IconClose', () => () => null)
+jest.mock('../../../img/icons/IconClose', () => () => null)
 jest.mock('../../utils/textUtils', () => ({
   __esModule: true,
   default: {isContentTextEllipsis: jest.fn(() => false)},
