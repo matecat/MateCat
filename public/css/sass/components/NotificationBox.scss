@@ -22,10 +22,13 @@
   box-shadow: 0 1px 20px rgba(colors.$grey700, 0.3);
   opacity: 0;
   @include variables.transition(0.3s ease-in-out);
-
+  text-align: left;
   > :first-child {
     display: flex;
     gap: 12px;
+  }
+  &:not(:last-child) {
+    margin-bottom: 20px;
   }
 }
 

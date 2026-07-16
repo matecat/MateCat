@@ -9,7 +9,12 @@ import CattolConstants from '../../../constants/CatToolConstants'
 import CatToolActions from '../../../actions/CatToolActions'
 import {deleteCompletionEvents} from '../../../api/deleteCompletionEvents'
 import ModalsActions from '../../../actions/ModalsActions'
-import {Button, BUTTON_MODE, BUTTON_TYPE} from '../../common/Button/Button'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../common/Button/Button'
 import Check from '../../../../img/icons/Check'
 export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
   const [markedAsComplete, setMarkedAsComplete] = useState(
@@ -219,6 +224,7 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
         <Button
           mode={markedAsComplete ? BUTTON_MODE.OUTLINE_BG : BUTTON_MODE.GHOST}
           type={markedAsComplete ? BUTTON_TYPE.SUCCESS : BUTTON_TYPE.DEFAULT}
+          size={BUTTON_SIZE.ICON_STANDARD}
           className="markAsCompleteButton"
           onClick={clickMarkAsComplete}
         >
