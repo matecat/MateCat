@@ -164,7 +164,7 @@ class UserKeysController extends KleinController
      */
     private function validateTheRequest(): array
     {
-        $key = filter_var($this->request->param('key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $key = filter_var($this->request->param('key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $emails = filter_var($this->request->param('emails'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $description = filter_var($this->request->param('description'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $remove_from = filter_var($this->request->param('remove_from'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
@@ -180,7 +180,20 @@ class UserKeysController extends KleinController
         // <details x=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:2 open ontoggle="prompt(document.cookie);">
         // in this case, an error MUST be thrown
         if ($this->request->param('description') and $this->request->param('description') !== $description) {
-            throw new InvalidArgumentException("<span>Resource names cannot contain the following characters:</span><ul><li><</li><li>\"</li><li>'</li></ul>", -3);
+            throw new InvalidArgumentException(
+                "<span>Resource names cannot contain the following characters:</span>"
+                . "<ul>"
+                . "<li>&lt; (less than)</li>"
+                . "<li>&gt; (greater than)</li>"
+                . "<li>&amp; (ampersand)</li>"
+                . "<li>&quot; (double quote)</li>"
+                . "<li>&#39; (single quote)</li>"
+                . "</ul>"
+                . "<span>Non-printable control characters are not allowed either. See the "
+                . "<a href=\"https://gist.github.com/mauretto78/83db58b7023a2f7bb26b252360d3692a\" "
+                . "target=\"_blank\" rel=\"noopener noreferrer\">full list of unsupported characters</a>.</span>",
+                -3
+            );
         }
 
         return [

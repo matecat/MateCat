@@ -73,6 +73,36 @@ class XliffReplacerCallbackTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
+    public function testSegmentsWithDifferentTagPh()
+    {
+        $jobStructMock = $this->getStubBuilder(JobStruct::class)
+            ->setConstructorArgs([
+                [
+                    'id' => '1',
+                    'password' => 'password',
+                    'source' => 'en-US',
+                    'target' => 'it-IT'
+                ]
+            ])->getStub();
+
+        $projectStructMock = $this->getStubBuilder(ProjectStruct::class)->getStub();
+        $projectStructMock->method('getMetadataValue')->willReturn(false);
+
+        $jobStructMock->method('getProject')->willReturn($projectStructMock);
+
+        $segment = '<ph id="1"/> Hello';
+        $target = '<ph x="test"/> Hola';
+
+        /** @noinspection PhpParamsInspection */
+        $xliffReplacerCallback = new XliffReplacerCallback(new FeatureSet(), 'en-EN', 'es-ES', $jobStructMock);
+
+        $this->assertTrue($xliffReplacerCallback->thereAreErrors(1, $segment, $target));
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
     public function testAMoreComplexCase()
     {
         $jobStructMock = $this->getStubBuilder(JobStruct::class)

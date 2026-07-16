@@ -141,7 +141,10 @@ class ExtractSegmentsTest extends AbstractTest
 
         /** @var SegmentStruct $seg0 */
         $seg0 = $segments[0];
-        $this->assertEquals('tu1', $seg0->internal_id);
+        // internal_id is prefixed with the 0-based ordinal of the enclosing <file> element
+        // ("0|") to disambiguate trans-unit ids that are only unique per-<file>, not
+        // document-wide (see SegmentExtractor::processXliffFile()).
+        $this->assertEquals('0|tu1', $seg0->internal_id);
     }
 
     /**
@@ -330,7 +333,7 @@ class ExtractSegmentsTest extends AbstractTest
         $ps = $this->pm->getTestProjectStructure();
 
         // The reference key is "{fid}|{tu_id}"
-        $unitRef = $fid . '|tu1';
+        $unitRef = $fid . '|0|tu1';
         $this->assertArrayHasKey($unitRef, $ps->translations);
 
         $tuplesByMrk = $ps->translations[$unitRef];
@@ -356,7 +359,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $unitRef = $fid . '|tu1';
+        $unitRef = $fid . '|0|tu1';
         $tuplesByMrk = $ps->translations[$unitRef];
 
         /** @var TranslationTuple $tuple0 */
@@ -409,7 +412,7 @@ class ExtractSegmentsTest extends AbstractTest
         $ps = $this->pm->getTestProjectStructure();
 
         // tu1 has target (state="translated"), tu2 has no target
-        $unitRef = $fid . '|tu1';
+        $unitRef = $fid . '|0|tu1';
         $this->assertArrayHasKey($unitRef, $ps->translations);
 
         $tuples = $ps->translations[$unitRef];
@@ -434,7 +437,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $unitRef = $fid . '|tu1';
+        $unitRef = $fid . '|0|tu1';
         $tuples = $ps->translations[$unitRef];
 
         /** @var TranslationTuple $tuple */
@@ -578,11 +581,14 @@ class ExtractSegmentsTest extends AbstractTest
 
         /** @var SegmentStruct $seg0 */
         $seg0 = $segments[0];
-        $this->assertEquals('tu1', $seg0->internal_id);
+        // internal_id is prefixed with the 0-based ordinal of the enclosing <file> element
+        // ("0|") to disambiguate trans-unit ids that are only unique per-<file>, not
+        // document-wide (see SegmentExtractor::processXliffFile()).
+        $this->assertEquals('0|tu1', $seg0->internal_id);
 
         /** @var SegmentStruct $seg1 */
         $seg1 = $segments[1];
-        $this->assertEquals('tu2', $seg1->internal_id);
+        $this->assertEquals('0|tu2', $seg1->internal_id);
     }
 
     // =========================================================================
@@ -624,7 +630,7 @@ class ExtractSegmentsTest extends AbstractTest
         $notes = $ps->notes;
 
         // tu1 has 2 notes. The key is "{fid}|{tu_id}"
-        $tu1Key = $fid . '|tu1';
+        $tu1Key = $fid . '|0|tu1';
         $this->assertArrayHasKey($tu1Key, $notes, "Notes key '$tu1Key' should exist");
 
         $tu1Notes = $notes[$tu1Key];
@@ -647,7 +653,7 @@ class ExtractSegmentsTest extends AbstractTest
         $ps = $this->pm->getTestProjectStructure();
         $notes = $ps->notes;
 
-        $tu1Key = $fid . '|tu1';
+        $tu1Key = $fid . '|0|tu1';
         $tu1From = $notes[$tu1Key]['from']['entries'];
 
         // First note has no 'from' → 'NO_FROM'
@@ -671,7 +677,7 @@ class ExtractSegmentsTest extends AbstractTest
         $ps = $this->pm->getTestProjectStructure();
         $contextGroup = $ps->context_group;
 
-        $tu1Key = $fid . '|tu1';
+        $tu1Key = $fid . '|0|tu1';
         $this->assertArrayHasKey($tu1Key, $contextGroup, "Context-group key '$tu1Key' should exist");
 
         $tu1Ctx = $contextGroup[$tu1Key];
@@ -703,6 +709,44 @@ class ExtractSegmentsTest extends AbstractTest
         } finally {
             unlink($tmpFile);
         }
+    }
+
+    /**
+     * A trans-unit id is only guaranteed unique within its own <file> element (OASIS XLIFF
+     * 1.2 §2.4), not across the whole document — two <file> elements are allowed to reuse the
+     * same trans-unit id. Without disambiguating by the enclosing <file>'s ordinal position,
+     * both segments would collide under the same `internal_id`, causing one file's translated
+     * content to be lost or duplicated at download time (see SegmentExtractor::extract()).
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function testDuplicateTransUnitIdAcrossFilesProducesDistinctInternalIds(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'duplicate-trans-unit-id-across-files.xliff',
+            'original_filename' => 'duplicate-trans-unit-id-across-files.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $segments = $ps->segments[$fid];
+
+        $this->assertCount(2, $segments);
+
+        /** @var SegmentStruct $seg0 */
+        $seg0 = $segments[0];
+        /** @var SegmentStruct $seg1 */
+        $seg1 = $segments[1];
+
+        // Both trans-units share the raw id "tu1", but each must be disambiguated by the
+        // 0-based ordinal of its enclosing <file> element.
+        $this->assertEquals('0|tu1', $seg0->internal_id);
+        $this->assertEquals('1|tu1', $seg1->internal_id);
+        $this->assertNotEquals($seg0->internal_id, $seg1->internal_id);
+
+        $this->assertEquals('Hello from the first file', $seg0->segment);
+        $this->assertEquals('Hello from the second file', $seg1->segment);
     }
 
     /**
@@ -902,11 +946,11 @@ class ExtractSegmentsTest extends AbstractTest
 
         /** @var SegmentStruct $seg0 */
         $seg0 = $segments[0];
-        $this->assertEquals('tu1', $seg0->internal_id);
+        $this->assertEquals('0|tu1', $seg0->internal_id);
 
         /** @var SegmentStruct $seg1 */
         $seg1 = $segments[1];
-        $this->assertEquals('tu3', $seg1->internal_id);
+        $this->assertEquals('0|tu3', $seg1->internal_id);
     }
 }
 
