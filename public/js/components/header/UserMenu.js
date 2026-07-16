@@ -35,7 +35,7 @@ export const UserMenu = () => {
         toggleButtonProps={{
           type: BUTTON_TYPE.PRIMARY,
           mode: BUTTON_MODE.GHOST,
-          size: BUTTON_SIZE.ICON_STANDARD,
+          size: BUTTON_SIZE.ICON_BIG,
           children: avatarImg ? (
             <img
               className="user-menu-popover-avatar user-menu-popover"
