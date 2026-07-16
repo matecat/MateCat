@@ -13,6 +13,12 @@ import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentContext} from '../segments/SegmentContext'
 import ModalsActions from '../../actions/ModalsActions'
 import IconClose from '../../../img/icons/IconClose'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
 
 class ReviewExtendedPanel extends React.Component {
   static contextType = SegmentContext
@@ -125,12 +131,15 @@ class ReviewExtendedPanel extends React.Component {
     return (
       <div className={'re-wrapper shadow-1 ' + thereAreIssuesClass}>
         <div className={cornerClass} />
-        <a
-          className="re-close-balloon re-close-err shadow-1"
+        <Button
+          type={BUTTON_TYPE.ICON}
+          mode={BUTTON_MODE.GHOST}
+          size={BUTTON_SIZE.ICON_XSMALL}
+          className="re-close-balloon"
           onClick={this.closePanel.bind(this)}
         >
           <IconClose />
-        </a>
+        </Button>
         <ReviewExtendedIssuesContainer
           loader={this.state.issueInCreation}
           issues={issues}
