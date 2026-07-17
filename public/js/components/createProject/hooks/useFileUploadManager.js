@@ -509,7 +509,7 @@ export function useFileUploadManager({
   // Restart conversions when key params change
   useEffect(() => {
     restartConversions()
-  }, [sourceLang, extractionParameterTemplateId, segmentationRule])
+  }, [sourceLang, extractionParameterTemplateId, segmentationRule, icuEnabled])
 
   // Restart conversions when unsaved filter params change
   useEffect(() => {
