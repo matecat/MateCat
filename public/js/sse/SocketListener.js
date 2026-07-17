@@ -251,7 +251,7 @@ const SocketListener = ({isAuthenticated, userId}) => {
 
     return {source: '//' + source, path: '/sse/channel/updates/socket.io'}
   }
-
+  
   const {connectionState, connectionError} = useSocketLayer(
     getSource(),
     {
@@ -273,6 +273,12 @@ const SocketListener = ({isAuthenticated, userId}) => {
       console.error('Connection error:', connectionError)
     }
   }, [connectionState, connectionError])
+
+  useEffect(() => {
+
+    setTimeout(() => UserActions.forceReload(), 10000)
+
+  }, [])
 
   return null // No rendering needed
 }
