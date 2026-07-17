@@ -1,30 +1,93 @@
 <?php
 
+namespace Model\Comments;
 
-class Comments_BaseCommentStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+use JsonSerializable;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+use ReflectionException;
+use RuntimeException;
 
-    public $id;
-    public $id_job;
-    public $id_segment;
-    public $create_date;
-    public $email;
-    public $full_name;
-    public $uid;
-    public $resolve_date;
-    public $source_page;
-    public $message_type;
-    public $message;
+class BaseCommentStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable
+{
 
-    public function getThreadId() {
-        return md5($this->id_job . '-' . $this->id_segment . '-' . $this->resolve_date);
+    public int $id;
+    public int $id_job;
+    public int $id_segment;
+    public string $create_date;
+    public ?string $email = null;
+    public string $full_name;
+    public ?int $uid = null;
+    public ?string $resolve_date = null;
+    public int $source_page;
+    public ?int $is_anonymous = 0;
+    public ?int $message_type = null;
+    public ?string $message = "";
+
+    public function getThreadId(): ?string
+    {
+        return $this->resolve_date ? md5($this->id_job . '-' . $this->id_segment . '-' . $this->resolve_date) : null;
     }
 
-    public function isComment() {
-        return ((int) $this->message_type == Comments_CommentDao::TYPE_COMMENT);
+    /**
+     * @throws ReflectionException
+     * @throws RuntimeException
+     * @throws \Exception
+     */
+    public function templateMessage(CommentDao $dao): void
+    {
+        $this->message = $dao->placeholdContent($this->message ?? throw new RuntimeException('Comment message must be set before templating'));
     }
 
-    public function templateMessage(){
-        $this->message = \Comments_CommentDao::placeholdContent($this->message);
+    /**
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        $createDate = date_create($this->create_date ?: 'now') ?: new \DateTime();
+        $resolvedAt = !empty($this->resolve_date) ? date_create($this->resolve_date) : null;
+
+        return [
+            'id' => $this->id,
+            'id_job' => $this->id_job,
+            'id_segment' => $this->id_segment,
+            'create_at' => date_format($createDate, DATE_ATOM),
+            'full_name' => $this->getFullName(),
+            'uid' => $this->uid,
+            'resolved_at' => $resolvedAt ? date_format($resolvedAt, DATE_ATOM) : null,
+            'is_anonymous' => $this->is_anonymous,
+            'source_page' => $this->source_page,
+            'message_type' => $this->message_type,
+            'message' => $this->message,
+            'thread_id' => $this->getThreadId(),
+            'timestamp' => strtotime($this->create_date ?: 'now'),
+        ];
+    }
+
+    /**
+     * @param bool $article
+     *
+     * @return string
+     */
+    public function getFullName(bool $article = false): string
+    {
+        if ($this->is_anonymous) {
+            $source_page = $this->source_page;
+
+            switch ($source_page) {
+                default:
+                case 1:
+                    return $article ? "the translator" : "Translator";
+
+                case 2:
+                    return $article ? "the revisor" : "Revisor";
+
+                case 3:
+                    return $article ? "the 2nd pass revisor" : "2nd pass revisor";
+            }
+        }
+
+        return $this->full_name;
     }
 
 }

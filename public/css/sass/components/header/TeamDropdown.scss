@@ -1,0 +1,94 @@
+@use '../../commons/colors';
+
+.team-dropdown {
+  position: relative;
+
+  .dropdown {
+    position: absolute;
+    visibility: hidden;
+    background-color: white;
+    margin-top: 5px;
+    padding: 5px;
+    min-width: 200px;
+    right: 0;
+    max-height: 320px;
+    overflow: auto;
+    opacity: 0;
+    transition: opacity 0.2s linear;
+    box-shadow: 0px 2px 3px 0px rgba(34, 36, 38, 0.15);
+
+    &.open {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    ul {
+      padding: 0;
+      margin: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+
+      > li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        padding: 10px;
+
+        &:hover {
+          background-color: colors.$grey9;
+
+          .container-icon-settings {
+            visibility: visible;
+            color: colors.$translatedBlue;
+          }
+        }
+
+        &.active {
+          background-color: colors.$darkBlueHover;
+          color: colors.$white;
+
+          .container-icon-settings {
+            color: colors.$white;
+          }
+        }
+
+        .container-icon-settings {
+          display: flex;
+          align-items: center;
+          visibility: hidden;
+        }
+      }
+    }
+  }
+
+  .trigger-button {
+    height: 35px !important;
+    border-radius: 20px;
+    background-color: white !important;
+
+    > svg {
+      transition: transform 0.2s ease-in-out;
+    }
+
+    &.open {
+      > svg {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .create-new-team {
+    border-bottom: 1px solid colors.$grey8;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    color: colors.$translatedBlue;
+    font-weight: bold;
+
+    > svg {
+      border: 1px solid colors.$translatedBlue;
+      border-radius: 50%;
+    }
+  }
+}

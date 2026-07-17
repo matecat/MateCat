@@ -1,127 +1,151 @@
 <?php
 
-namespace API\V2\Json  ;
+namespace View\API\V2\Json;
 
-use Features\ReviewExtended\ReviewUtils;
-use Features\SecondPassReview;
-use LQA\EntryStruct;
-use LQA\EntryCommentDao;
+use LogicException;
+use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\IDaoStruct;
+use Model\LQA\EntryCommentDao;
+use Model\LQA\EntryStruct;
+use PDOException;
+use Plugins\Features\ReviewExtended\ReviewUtils;
+use RuntimeException;
+use SplFileObject;
 
-class SegmentTranslationIssue {
-
-    private $categories ;
+class SegmentTranslationIssue
+{
 
     /**
-     * @var \SplFileObject
+     * @var SplFileObject
      */
-    private $csvHandler;
+    private SplFileObject $csvHandler;
 
-    public function __construct( ) {
+    private EntryCommentDao $entryCommentDao;
+
+    public function __construct(EntryCommentDao $entryCommentDao)
+    {
+        $this->entryCommentDao = $entryCommentDao;
     }
 
-    public function renderItem( $record ) {
+    /**
+     * @return array<string, mixed>
+     * @throws RuntimeException
+     * @throws PDOException
+     */
+    public function renderItem(IDaoStruct $record): array
+    {
+        $dao = $this->entryCommentDao;
+        /** @var EntryStruct $record */
+        $comments = $dao->findByIssueId($record->id ?? throw new RuntimeException('Missing issue id'));
+        $record = new EntryStruct($record->getArrayCopy());
+        $timestamp = strtotime($record->create_date ?? 'now');
 
-        $dao = new EntryCommentDao();
-
-        $comments = $dao->findByIssueId( $record->id );
-
-        $record = new EntryStruct( $record->getArrayCopy() );
-
-        $row = [
-                'comment'             => $record->comment,
-                'created_at'          => date( 'c', strtotime( $record->create_date ) ),
-                'id'                  => (int)$record->id,
-                'id_category'         => (int)$record->id_category,
-                'id_job'              => (int)$record->id_job,
-                'id_segment'          => (int)$record->id_segment,
-                'is_full_segment'     => $record->is_full_segment,
-                'severity'            => $record->severity,
-                'start_node'          => $record->start_node,
-                'start_offset'        => $record->start_offset,
-                'end_node'            => $record->end_node,
-                'end_offset'          => $record->end_offset,
-                'translation_version' => $record->translation_version,
-                'target_text'         => $record->target_text,
-                'penalty_points'      => $record->penalty_points,
-                'rebutted_at'         => $this->getDateValue( $record->rebutted_at ),
-                'diff'                => $record->getDiff(),
-                'comments'            => $comments,
-                'revision_number'     => ReviewUtils::sourcePageToRevisionNumber( $record->source_page )
+        return [
+            'uid' => $record->uid,
+            'comment' => $record->comment,
+            'created_at' => date('c', $timestamp !== false ? $timestamp : null),
+            'id' => $record->id,
+            'id_category' => $record->id_category,
+            'id_job' => $record->id_job,
+            'id_segment' => $record->id_segment,
+            'is_full_segment' => $record->is_full_segment,
+            'severity' => $record->severity,
+            'start_node' => $record->start_node,
+            'start_offset' => $record->start_offset,
+            'end_node' => $record->end_node,
+            'end_offset' => $record->end_offset,
+            'translation_version' => $record->translation_version,
+            'target_text' => $record->target_text,
+            'penalty_points' => $record->penalty_points,
+            'diff' => $record->getDiff(),
+            'comments' => $comments,
+            'revision_number' => ReviewUtils::sourcePageToRevisionNumber($record->source_page)
         ];
-
-        return $row;
     }
 
-    public function genCSVTmpFile( $data ) {
-        $filePath   = tempnam( "/tmp", "SegmentsIssuesComments_" );
-        $csvHandler = new \SplFileObject( $filePath, "w" );
-        $csvHandler->setCsvControl( ';' );
+    /**
+     * @param EntryStruct[] $data
+     * @throws LogicException
+     * @throws RuntimeException
+     * @throws PDOException
+     */
+    public function genCSVTmpFile(array $data): string
+    {
+        $filePath = tempnam("/tmp", "SegmentsIssuesComments_");
+        $csvHandler = new SplFileObject($filePath, "w");
+        $csvHandler->setCsvControl(';');
 
         $this->csvHandler = $csvHandler; // set the handler to allow to clean resource
 
         $csv_fields = [
-                "ID Segment",
-                "Category",
-                "Severity",
-                "Selected Text",
-                "Message",
-                "Created At",
+            "ID Segment",
+            "Category",
+            "Severity",
+            "Selected Text",
+            "Message",
+            "Created At",
         ];
 
-        $csvHandler->fputcsv( $csv_fields );
+        $csvHandler->fputcsv($csv_fields);
 
-        foreach ( $data as $record ) {
+        foreach ($data as $record) {
+            $dao = $this->entryCommentDao;
 
-            $dao = new EntryCommentDao();
-
-            $comments = $dao->findByIssueId( $record->id );
-            foreach ( $comments as $c ) {
-
-                $combined = array_combine( $csv_fields, array_fill( 0, count( $csv_fields ), '' ) );
-
-                $combined[ "ID Segment" ]    = $record->id_segment;
-                $combined[ "Category" ]      = $record->category_label;
-                $combined[ "Severity" ]      = $record->severity;
-                $combined[ "Selected Text" ] = $record->target_text;
-                $combined[ "Message" ]       = $c->comment;
-                $combined[ "Created At" ]    = $this->getDateValue( $c->create_date );
-                $csvHandler->fputcsv( $combined );
+            if ($record->id === null) {
+                continue;
             }
+            $comments = $dao->findByIssueId($record->id);
+            foreach ($comments as $c) {
+                $combined = array_combine($csv_fields, array_fill(0, count($csv_fields), ''));
 
+                $combined["ID Segment"] = $record->id_segment;
+                $combined["Category"] = $record->category_label;
+                $combined["Severity"] = $record->severity;
+                $combined["Selected Text"] = $record->target_text;
+                $combined["Message"] = $c->comment;
+                $combined["Created At"] = $this->getDateValue($c->create_date);
+                $csvHandler->fputcsv($combined);
+            }
         }
 
         return $filePath;
     }
 
-    private function decodeCategoryName( $id ) {
+    /**
+     * Render an array of records into a JSON format.
+     *
+     * @param AbstractDaoObjectStruct[] $array
+     *
+     * @return array<int, array<string, mixed>>
+     * @throws RuntimeException
+     * @throws PDOException
+     */
+    public function render(array $array): array
+    {
+        $out = [];
 
-        return null;
-    }
-
-    public function render( $array ) {
-        $out = array();
-
-        foreach($array as $record) {
-            $out[] = $this->renderItem( $record );
+        foreach ($array as $record) {
+            $out[] = $this->renderItem($record);
         }
 
         return $out;
     }
 
-    private function getDateValue( $strDate ) {
-        if( $strDate != null ) {
-            return date( 'c', strtotime( $strDate ) );
+    private function getDateValue(?string $strDate = null): ?string
+    {
+        if ($strDate != null) {
+            $timestamp = strtotime($strDate);
+            return date('c', $timestamp !== false ? $timestamp : null);
         }
 
         return null;
     }
 
-    public function cleanDownloadResource(){
-
+    public function cleanDownloadResource(): void
+    {
         $path = $this->csvHandler->getRealPath();
-        unset( $this->csvHandler );
-        @unlink( $path );
-
+        unset($this->csvHandler);
+        @unlink($path);
     }
 
 }

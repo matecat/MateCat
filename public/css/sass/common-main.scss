@@ -1,5 +1,12 @@
-@import 'commons/colors';
-@import 'popup';
-@import 'common';
-@import 'common-modals';
-@import 'notifications';
+@use 'commons/variables';
+@use 'commons/colors';
+@use 'vendor_mc/semantic/matecat_semantic';
+
+@use "commons/typography";
+@use 'commons/matecat_fonts';
+
+@use 'popup';
+@use 'common-modals';
+@use 'components/NotificationBox';
+@use 'common-components';
+@use 'commons/nav-bar';

@@ -1,5 +1,9 @@
 <?php
 
+namespace Model\Analysis;
+
+use Matecat\Locales\Languages;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -7,260 +11,481 @@
  * Time: 15.04
  *
  */
-class Analysis_PayableRates {
+class PayableRates
+{
 
-    public static $DEFAULT_PAYABLE_RATES = [
-            'NO_MATCH'    => 100,
-            '50%-74%'     => 100,
+    /** @var array<string, int> */
+    public static array $DEFAULT_PAYABLE_RATES = [
+        'NO_MATCH' => 100,
+        '50%-74%' => 100,
         //            '75%-99%'     => 60,
-            '75%-84%'     => 60,
-            '85%-94%'     => 60,
-            '95%-99%'     => 60,
-            '100%'        => 30,
-            '100%_PUBLIC' => 30,
-            'REPETITIONS' => 30,
-            'INTERNAL'    => 60,
-            'MT'          => 85
+        '75%-84%' => 60,
+        '85%-94%' => 60,
+        '95%-99%' => 60,
+        '100%' => 30,
+        '100%_PUBLIC' => 30,
+        'REPETITIONS' => 30,
+        'INTERNAL' => 60,
+        'MT' => 72,
+        'ICE' => 0,
+        'ICE_MT' => 72,
     ];
 
-    protected static $langPair2MTpayableRates = [
-            "en" => [
-                    "it" => [
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 80
-                    ],
-                    "fr" => [
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 80
-                    ],
-                    "pt" => [
-                            'NO_MATCH' => 100,
-                            '50%-74%'  => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'  => 60,
-                            '85%-94%'  => 60,
-                            '95%-99%'  => 60,
-                            '100%'     => 30,
+    /** @var array<string, array<string, array<string, int>>> */
+    protected static array $langPair2MTpayableRates = [
+        "en" => [
+            "it" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 62,
+                'ICE' => 0,
+                'ICE_MT' => 62,
+            ],
+            "de" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 67,
+                'ICE' => 0,
+                'ICE_MT' => 67,
+            ],
+            "fi" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 67,
+                'ICE' => 0,
+                'ICE_MT' => 67,
+            ],
+            "sr" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 67,
+                'ICE' => 0,
+                'ICE_MT' => 67,
+            ],
+            "ro" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 67,
+                'ICE' => 0,
+                'ICE_MT' => 67,
+            ],
+            "da" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 67,
+                'ICE' => 0,
+                'ICE_MT' => 67,
+            ],
+            "hu" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 67,
+                'ICE' => 0,
+                'ICE_MT' => 67,
+            ],
+            "id" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 67,
+                'ICE' => 0,
+                'ICE_MT' => 67,
+            ],
+            "sq" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 67,
+                'ICE' => 0,
+                'ICE_MT' => 67,
+            ],
+            "sv" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 62,
+                'ICE' => 0,
+                'ICE_MT' => 62,
+            ],
+            "is" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 67,
+                'ICE' => 0,
+                'ICE_MT' => 67,
+            ],
+            "ms" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 62,
+                'ICE' => 0,
+                'ICE_MT' => 62,
+            ],
+            "fr" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 67,
+                'ICE' => 0,
+                'ICE_MT' => 67,
+            ],
+            "pt" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
 
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 80
-                    ],
-                    "es" => [
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 80
-                    ],
-                    "nl" => [
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 80
-                    ],
-                    "pl" => [
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 90
-                    ],
-                    "uk" => [
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 90
-                    ],
-                    "hi" => [
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 90
-                    ],
-                    "fi" => [
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 90
-                    ],
-                    "tr" => [
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 90
-                    ],
-                    "ru" => [
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 90
-                    ],
-                    "zh" => [
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 90
-                    ],
-                    "ar" => [
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 90
-                    ],
-                    "ko" => [
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 90
-                    ],
-                    "lt" => [
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 90
-                    ],
-                    "ja" => [
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 90
-                    ],
-                    "he" => [
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 90
-                    ],
-                    "sr" => [
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
-                        //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
-                            '100%_PUBLIC' => 30,
-                            'REPETITIONS' => 30,
-                            'INTERNAL'    => 60,
-                            'MT'          => 90
-                    ]
-            ]
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 62,
+                'ICE' => 0,
+                'ICE_MT' => 62,
+            ],
+            "es" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 67,
+                'ICE' => 0,
+                'ICE_MT' => 67,
+            ],
+            "nl" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 60,
+                'ICE' => 0,
+                'ICE_MT' => 60,
+            ],
+            "uk" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 77,
+                'ICE' => 0,
+                'ICE_MT' => 77,
+            ],
+            "hi" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 77,
+                'ICE' => 0,
+                'ICE_MT' => 77,
+            ],
+            "tl" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 77,
+                'ICE' => 0,
+                'ICE_MT' => 77,
+            ],
+            "ru" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 77,
+                'ICE' => 0,
+                'ICE_MT' => 77,
+            ],
+            "zh" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 77,
+                'ICE' => 0,
+                'ICE_MT' => 77,
+            ],
+            "zh-HK" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 90,
+                'ICE' => 0,
+                'ICE_MT' => 90,
+            ],
+            "ko" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 77,
+                'ICE' => 0,
+                'ICE_MT' => 77,
+            ],
+            "lt" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 77,
+                'ICE' => 0,
+                'ICE_MT' => 77,
+            ],
+            "ja" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 72,
+                'ICE' => 0,
+                'ICE_MT' => 72,
+            ],
+            "ga" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 77,
+                'ICE' => 0,
+                'ICE_MT' => 77,
+            ],
+            "km" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 72,
+                'ICE' => 0,
+                'ICE_MT' => 72,
+            ],
+            "xh" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 77,
+                'ICE' => 0,
+                'ICE_MT' => 77,
+            ],
+            "th" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 77,
+                'ICE' => 0,
+                'ICE_MT' => 77,
+            ],
+            "cs" => [
+                'NO_MATCH' => 100,
+                '50%-74%' => 100,
+                //'75%-99%'     => 60,
+                '75%-84%' => 60,
+                '85%-94%' => 60,
+                '95%-99%' => 60,
+                '100%' => 30,
+                '100%_PUBLIC' => 30,
+                'REPETITIONS' => 30,
+                'INTERNAL' => 60,
+                'MT' => 77,
+                'ICE' => 0,
+                'ICE_MT' => 77,
+            ],
+        ]
     ];
 
     /**
@@ -273,49 +498,60 @@ class Analysis_PayableRates {
      * @param $target        string The first two chars of the target language name in RFC3066<br/>
      *                       Example: <i>en-US</i> --> <b>en</b>
      *
-     * @return array
+     * @return array<string, int>
      */
-    public static function getPayableRates( $source, $target ) {
-
-        $ret = static::$DEFAULT_PAYABLE_RATES;
-
-        //search source -> target pair
-        if ( isset( static::$langPair2MTpayableRates[ $source ][ $target ] ) ) {
-            $ret = static::$langPair2MTpayableRates[ $source ][ $target ];
-
-        } elseif ( isset( static::$langPair2MTpayableRates[ $target ][ $source ] ) ) { //search target -> source pair
-            $ret = static::$langPair2MTpayableRates[ $target ][ $source ];
-        }
-
-        return $ret;
-
+    public static function getPayableRates(string $source, string $target): array
+    {
+        return self::resolveBreakdowns(static::$langPair2MTpayableRates, $source, $target);
     }
-
 
     /**
-     * This function returns the dynamic payable rate given a post-editing effort
+     * @param array<string, mixed> $breakdowns
+     * @param string $source
+     * @param string $target
+     * @param array<string, mixed>|null $default
      *
-     * @param $pee float
-     *
-     * @return float
+     * @return array<string, int>
      */
-    public static function pee2payable( $pee ) {
-        $pee = floatval( $pee );
+    public static function resolveBreakdowns(array $breakdowns, string $source, string $target, ?array $default = null): array
+    {
+        $languages = Languages::getInstance();
+        $isoSource = $languages->convertLanguageToIsoCode($source) ?? '';
+        $isoTarget = $languages->convertLanguageToIsoCode($target) ?? '';
 
-        // payable = ( aX^2 + bX + c ) * 100
-        return round( ( -0.00032 * ( pow( $pee, 2 ) ) + 0.034 * $pee + 0.1 ) * 100, 1 );
+        return array_merge(
+            self::getBreakDown($breakdowns, $source, $target, $isoSource, $isoTarget),
+            self::getBreakDown($breakdowns, $target, $source, $isoTarget, $isoSource)
+        ) ?: ($default ?: static::$DEFAULT_PAYABLE_RATES);
     }
 
-    public static function proposalPee( $payable ) {
-        return min( 95, max( 75, $payable ) );
-    }
+    /**
+     * @param array<string, mixed> $breakdowns
+     * @return array<string, int>
+     */
+    protected static function getBreakDown(array $breakdowns, string $source, string $target, string $isoSource, string $isoTarget): array
+    {
+        if (isset($breakdowns[$source])) {
+            if (isset($breakdowns[$source][$target])) {
+                return $breakdowns[$source][$target];
+            }
 
-    public static function wordsSavingDiff( $actual_payable, $proposal_payable, $word_count ) {
-        return round( ( $actual_payable - $proposal_payable ) * $word_count );
-    }
+            if (isset($breakdowns[$source][$isoTarget])) {
+                return $breakdowns[$source][$isoTarget];
+            }
+        }
 
-    private static function roundUpToAny( $n, $x = 5 ) {
-        return ( round( $n ) % $x === 0 ) ? round( $n ) : round( ( $n + $x / 2 ) / $x ) * $x;
+        if (isset($breakdowns[$isoSource])) {
+            if (isset($breakdowns[$isoSource][$target])) {
+                return $breakdowns[$isoSource][$target];
+            }
+
+            if (isset($breakdowns[$isoSource][$isoTarget])) {
+                return $breakdowns[$isoSource][$isoTarget];
+            }
+        }
+
+        return [];
     }
 
 }

@@ -1,51 +1,49 @@
 <?php
 
-namespace Files ;
+namespace Model\Files;
 
-use Chunks_ChunkStruct;
-use DataAccess_AbstractDao;
-use Database;
-use Files_FileStruct;
-use PDO;
+use Exception;
+use Model\DataAccess\AbstractDao;
+use PDOException;
+use ReflectionException;
 
-class FilesJobDao extends  DataAccess_AbstractDao {
-    const TABLE = 'files_job';
+class FilesJobDao extends AbstractDao
+{
+
+    const string TABLE = 'files_job';
 
     /**
-     * @param Files_FileStruct   $file
-     * @param Chunks_ChunkStruct $chunk
+     * Verifies that a file part belongs to a file assigned to the given job (chunk).
      *
-     * @return array
+     * Used as an ownership gate against cross-job / cross-tenant access via a guessed
+     * `file_part_id` (a globally unique auto-increment).
+     *
+     * @param int $filePartId
+     * @param int $id_job
+     * @param int $ttl
+     *
+     * @return bool
+     * @throws PDOException
+     * @throws Exception
+     * @throws ReflectionException
      */
-    public function getSegmentBoundariesForChunk( Files_FileStruct $file, Chunks_ChunkStruct $chunk ) {
-        $sql = "SELECT MIN(st.id_segment) AS MIN, MAX(st.id_segment) as MAX
-          FROM files_job
-            JOIN jobs
-              ON jobs.id = files_job.id_job
-                AND files_job.id_file = :id_file
-                AND password = :password
+    public function isFilePartInJob(int $filePartId, int $id_job, int $ttl = 86400): bool
+    {
+        $conn = $this->database->getConnection();
+        $sql  = "SELECT fj.id_job, fj.id_file
+                FROM files_job fj
+                JOIN files_parts fp ON fp.id_file = fj.id_file
+                WHERE fp.id = :file_part_id
+                AND fj.id_job = :id_job
+                LIMIT 1";
 
-            JOIN segment_translations st
-              ON st.id_segment
-                BETWEEN jobs.job_first_segment AND jobs.job_last_segment
-                AND jobs.id  = :id_job
-          ";
+        $stmt = $conn->prepare($sql);
 
-        $conn = Database::obtain()->getConnection() ;
+        $result = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, FilesJobStruct::class, [
+            'file_part_id' => $filePartId,
+            'id_job'       => $id_job,
+        ]);
 
-        $stmt = $conn->prepare( $sql ) ;
-
-        $stmt->setFetchMode( PDO::FETCH_ASSOC ) ;
-
-        $stmt->execute([
-            'id_job'   => $chunk->id,
-            'password' => $chunk->password,
-            'id_file'  => $file->id
-        ]) ;
-
-        $record = $stmt->fetch() ;
-
-        return [ $record['MIN'], $record['MAX'] ] ;
+        return !empty($result);
     }
-
 }

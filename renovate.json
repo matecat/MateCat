@@ -1,0 +1,22 @@
+{
+  "labels": ["dependencies"],
+  "extends": [":semanticCommitTypeAll(🔧 chore)"],
+  "commitMessageAction": "update",
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": false,
+      "minimumReleaseAge": "20 days"
+    }
+  ],
+  "branchConcurrentLimit": 3,
+  "timezone": "Europe/Rome",
+  "schedule": [
+    "after 10pm on thursday and friday",
+    "before 5am on thursday and friday"
+  ],
+  "baseBranchPatterns": ["develop"],
+  "git-submodules": {
+    "enabled": true
+  }
+}

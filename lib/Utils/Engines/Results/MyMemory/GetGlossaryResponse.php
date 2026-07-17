@@ -1,16 +1,26 @@
 <?php
 
-class Engines_Results_MyMemory_GetGlossaryResponse extends Engines_Results_AbstractResponse {
+namespace Utils\Engines\Results\MyMemory;
 
-    public $matches = [];
+use TypeError;
+use Utils\Engines\Results\TMSAbstractResponse;
 
-    public function __construct( $response ) {
+class GetGlossaryResponse extends TMSAbstractResponse
+{
 
-        if ( !is_array( $response ) ) {
-            throw new Exception( "Invalid Response", -1 );
-        }
+    /**
+     * @var array<int, mixed>
+     */
+    public array $matches = [];
 
-        $this->matches = isset( $response[ 'matches' ] ) ? $response[ 'matches' ] : [];
+    /**
+     * @param array<string, mixed> $response
+     *
+     * @throws TypeError
+     */
+    public function __construct(array $response)
+    {
+        $this->matches = $response['matches'] ?? [];
     }
 
 }

@@ -6,146 +6,221 @@
  * Time: 19:34
  */
 
-namespace Files;
+namespace Model\Files;
 
-use DataAccess_IDaoStruct;
-use Database;
+use Exception;
+use Model\DataAccess\AbstractDao;
+use PDOException;
+use ReflectionException;
 
-class MetadataDao extends \DataAccess_AbstractDao {
+class MetadataDao extends AbstractDao
+{
 
-    const TABLE = 'file_metadata';
+    const string  TABLE = 'file_metadata';
+    const string  _query_metadata_by_project_id_file = "SELECT * FROM " . self::TABLE . " WHERE id_project = :id_project AND id_file = :id_file ";
+    const string  _query_get_by_key                  = "SELECT * FROM " . self::TABLE . " WHERE id_project = :id_project AND id_file = :id_file AND `key` = :key ";
+    const string  _query_get_by_key_and_parts        = "SELECT * FROM " . self::TABLE . " WHERE id_project = :id_project AND id_file = :id_file AND `key` = :key AND `files_parts_id` = :files_parts_id ";
 
     /**
-     * @param     $id_project
-     * @param     $id_file
+     * @param int $id_project
+     * @param int $id_file
      * @param int $ttl
      *
-     * @return DataAccess_IDaoStruct[]
+     * @return MetadataStruct[]|null
+     * @throws ReflectionException
+     * @throws Exception
      */
-    public function getByJobIdProjectAndIdFile( $id_project, $id_file, $ttl = 0 ) {
-        $stmt = $this->_getStatementForCache(
-                "SELECT * FROM " . self::TABLE . " WHERE " .
-                " id_project = :id_project " .
-                " AND id_file = :id_file "
-        );
+    public function getByJobIdProjectAndIdFile(int $id_project, int $id_file, int $ttl = 0): ?array
+    {
+        $stmt = $this->_getStatementForQuery(self::_query_metadata_by_project_id_file);
 
-        $result = $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new MetadataStruct(), [
-                'id_project' => $id_project,
-                'id_file'    => $id_file,
-        ] );
+        $list = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, [
+            'id_project' => $id_project,
+            'id_file' => $id_file,
+        ]);
 
-        return @$result;
-    }
-
-    /**
-     * @param      $id_project
-     * @param      $id_file
-     * @param      $key
-     * @param null $filePartsId
-     * @param int  $ttl
-     *
-     * @return DataAccess_IDaoStruct|MetadataStruct
-     */
-    public function get( $id_project, $id_file, $key, $filePartsId = null, $ttl = 0 ) {
-
-        $query = "SELECT * FROM " . self::TABLE . " WHERE " .
-                " id_project = :id_project " .
-                " AND id_file = :id_file " .
-                " AND `key` = :key ";
-
-        $params = [
-                'id_project' => $id_project,
-                'id_file'    => $id_file,
-                'key'        => $key
-        ];
-
-        if($filePartsId){
-            $query .= " AND `files_parts_id` = :files_parts_id";
-            $params['files_parts_id'] = $filePartsId;
+        if ($list) {
+            foreach ($list as $metaStruct) {
+                $metaStruct->value = FilesMetadataMarshaller::unMarshall($metaStruct);
+            }
         }
 
-        $stmt = $this->_getStatementForCache($query);
-
-        return @$this->setCacheTTL( $ttl )->_fetchObject( $stmt, new MetadataStruct(), $params )[ 0 ];
+        return $list;
     }
 
     /**
-     * @param      $id_project
-     * @param      $id_file
-     * @param      $key
-     * @param      $value
-     * @param null $filePartsId
-     *
-     * @return MetadataStruct
+     * @throws PDOException
+     * @throws ReflectionException
      */
-    public function insert( $id_project, $id_file, $key, $value, $filePartsId = null ) {
+    public function destroyCacheByJobIdProjectAndIdFile(int $id_project, int $id_file): bool
+    {
+        $stmt = $this->_getStatementForQuery(self::_query_metadata_by_project_id_file);
 
+        return $this->_destroyObjectCache($stmt, MetadataStruct::class, ['id_project' => $id_project, 'id_file' => $id_file,]);
+    }
+
+    /**
+     * Destroy cached result for a specific get() call.
+     *
+     * Must reconstruct the same query and params used in get() so that
+     * _destroyObjectCache computes the matching cache key.
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function destroyGetCache(int $id_project, int $id_file, string $key, ?int $filePartsId = null): bool
+    {
+        $params = [
+            'id_project' => $id_project,
+            'id_file'    => $id_file,
+            'key'        => $key,
+        ];
+
+        if ($filePartsId) {
+            $query = self::_query_get_by_key_and_parts;
+            $params['files_parts_id'] = $filePartsId;
+        } else {
+            $query = self::_query_get_by_key;
+        }
+
+        $stmt = $this->_getStatementForQuery($query);
+
+        return $this->_destroyObjectCache($stmt, MetadataStruct::class, $params);
+    }
+
+    /**
+     * @param int $id_project
+     * @param int $id_file
+     * @param string $key
+     * @param int|null $filePartsId
+     * @param int $ttl
+     *
+     * @return MetadataStruct|null
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function get(int $id_project, int $id_file, string $key, ?int $filePartsId = null, int $ttl = 0): ?MetadataStruct
+    {
+        $params = [
+            'id_project' => $id_project,
+            'id_file' => $id_file,
+            'key' => $key
+        ];
+
+        if ($filePartsId) {
+            $query = self::_query_get_by_key_and_parts;
+            $params['files_parts_id'] = $filePartsId;
+        } else {
+            $query = self::_query_get_by_key;
+        }
+
+        $stmt = $this->_getStatementForQuery($query);
+
+        $result = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, $params)[0] ?? null;
+
+        if ($result) {
+            $result->value = FilesMetadataMarshaller::unMarshall($result);
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param int $id_project
+     * @param int $id_file
+     * @param string $key
+     * @param string $value
+     * @param int|null $filePartsId
+     *
+     * @return MetadataStruct|null
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function insert(int $id_project, int $id_file, string $key, string $value, ?int $filePartsId = null): ?MetadataStruct
+    {
         $sql = "INSERT INTO file_metadata " .
-                " ( id_project, id_file, `key`, `value`, `files_parts_id` ) " .
-                " VALUES " .
-                " ( :id_project, :id_file, :key, :value, :files_parts_id ); ";
+            " ( id_project, id_file, `key`, `value`, `files_parts_id` ) " .
+            " VALUES " .
+            " ( :id_project, :id_file, :key, :value, :files_parts_id ); ";
 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
-                'id_project'     => $id_project,
-                'id_file'        => $id_file,
-                'files_parts_id' => $filePartsId,
-                'key'            => $key,
-                'value'          => $value
-        ] );
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'id_project' => $id_project,
+            'id_file' => $id_file,
+            'files_parts_id' => $filePartsId,
+            'key' => $key,
+            'value' => $value
+        ]);
 
-        return $this->get( $id_project, $id_file, $key, $filePartsId );
+        $this->destroyCacheByJobIdProjectAndIdFile($id_project, $id_file);
+        $this->destroyGetCache($id_project, $id_file, $key, $filePartsId);
+
+        return $this->get($id_project, $id_file, $key, $filePartsId);
     }
 
     /**
-     * @param      $id_project
-     * @param      $id_file
-     * @param      $key
-     * @param      $value
-     * @param null $filePartsId
+     * @param int $id_project
+     * @param int $id_file
+     * @param string $key
+     * @param string $value
+     * @param int|null $filePartsId
      *
-     * @return MetadataStruct
+     * @return MetadataStruct|null
+     * @throws ReflectionException
+     * @throws Exception
      */
-    public function update( $id_project, $id_file, $key, $value, $filePartsId = null ) {
+    public function update(int $id_project, int $id_file, string $key, string $value, ?int $filePartsId = null): ?MetadataStruct
+    {
+        $sql = "UPDATE file_metadata SET `value` = :value WHERE id_project = :id_project AND id_file = :id_file AND `key` = :key  ";
 
-        $sql = "UPDATE file_metadata SET `value` = :value WHERE id_project = :id_project AND id_file = :id_file AND `key` = :key AND `files_parts_id` = :files_parts_id ";
+        $args = [
+            'id_project' => $id_project,
+            'id_file' => $id_file,
+            'key' => $key,
+            'value' => $value
+        ];
 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
-                'id_project'     => $id_project,
-                'id_file'        => $id_file,
-                'files_parts_id' => $filePartsId,
-                'key'            => $key,
-                'value'          => $value
-        ] );
+        if (!empty($filePartsId)) {
+            $sql .= "AND `files_parts_id` = :files_parts_id";
+            $args['files_parts_id'] = $filePartsId;
+        }
 
-        return $this->get( $id_project, $id_file, $key, $filePartsId );
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+
+
+        $stmt->execute($args);
+
+        $this->destroyCacheByJobIdProjectAndIdFile($id_project, $id_file);
+        $this->destroyGetCache($id_project, $id_file, $key, $filePartsId);
+
+        return $this->get($id_project, $id_file, $key, $filePartsId);
     }
 
     /**
-     * @param       $id_project
-     * @param       $id_file
-     * @param array $metadata
-     * @param null  $filePartsId
+     * @param int $id_project
+     * @param int $id_file
+     * @param array<string, string|null> $metadata
+     * @param int|null $filePartsId
      *
-     * @return bool
+     * @return bool|null
+     * @throws ReflectionException
+     * @throws PDOException
      */
-    public function bulkInsert( $id_project, $id_file, array $metadata = [], $filePartsId = null ) {
-
+    public function bulkInsert(int $id_project, int $id_file, array $metadata = [], ?int $filePartsId = null): bool|null
+    {
         $sql = "INSERT INTO file_metadata ( id_project, id_file, `key`, `value`, `files_parts_id` ) VALUES ";
-        $bind_values   = [];
+        $bind_values = [];
 
         $index = 1;
-        foreach ($metadata as $key => $value){
-
+        foreach ($metadata as $key => $value) {
             $isLast = ($index === count($metadata));
 
-            if($value !== null and $value !== ''){
+            if ($value !== null and $value !== '') {
                 $sql .= "(?,?,?,?,?)";
 
-                if(!$isLast){
+                if (!$isLast) {
                     $sql .= ',';
                 }
 
@@ -158,11 +233,22 @@ class MetadataDao extends \DataAccess_AbstractDao {
             $index++;
         }
 
-        if(!empty($bind_values)){
-            $conn = Database::obtain()->getConnection();
-            $stmt = $conn->prepare( $sql );
+        if (!empty($bind_values)) {
+            $conn = $this->database->getConnection();
+            $stmt = $conn->prepare($sql);
 
-            return $stmt->execute( $bind_values );
+            $result = $stmt->execute($bind_values);
+
+            $this->destroyCacheByJobIdProjectAndIdFile($id_project, $id_file);
+            foreach ($metadata as $key => $value) {
+                if ($value !== null and $value !== '') {
+                    $this->destroyGetCache($id_project, $id_file, $key, $filePartsId);
+                }
+            }
+
+            return $result;
         }
+
+        return null;
     }
 }

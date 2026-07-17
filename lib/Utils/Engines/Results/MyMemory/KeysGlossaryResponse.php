@@ -1,16 +1,26 @@
 <?php
 
-class Engines_Results_MyMemory_KeysGlossaryResponse extends Engines_Results_AbstractResponse {
+namespace Utils\Engines\Results\MyMemory;
 
-    public $entries = [];
+use TypeError;
+use Utils\Engines\Results\TMSAbstractResponse;
 
-    public function __construct( $response ) {
+class KeysGlossaryResponse extends TMSAbstractResponse
+{
 
-        if ( !is_array( $response ) ) {
-            throw new Exception( "Invalid Response", -1 );
-        }
+    /**
+     * @var array<string, bool>
+     */
+    public array $entries = [];
 
-        $this->entries = isset( $response[ 'entries' ] ) ? $response[ 'entries' ] : [];
+    /**
+     * @param array<string, mixed> $response
+     *
+     * @throws TypeError
+     */
+    public function __construct(array $response)
+    {
+        $this->entries = $response['entries'] ?? [];
     }
 
     /**
@@ -18,12 +28,12 @@ class Engines_Results_MyMemory_KeysGlossaryResponse extends Engines_Results_Abst
      */
     public function hasGlossary()
     {
-        if(empty($this->entries)){
+        if (empty($this->entries)) {
             return false;
         }
 
-        foreach($this->entries as $key => $value){
-            if($value === true){
+        foreach ($this->entries as $value) {
+            if ($value === true) {
                 return true;
             }
         }

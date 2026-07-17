@@ -1,0 +1,128 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * @author hashashiyyin domenico@translated.net / ostico@gmail.com
+ * Date: 13/11/23
+ * Time: 19:12
+ *
+ */
+
+namespace View\API\App\Json\Analysis;
+
+use JsonSerializable;
+use Model\Analysis\Constants\ConstantsInterface;
+
+class AnalysisMatch implements JsonSerializable
+{
+
+    /**
+     * @var int
+     */
+    protected int $raw = 0;
+    /**
+     * @var float
+     */
+    protected float $equivalent = 0;
+
+    /**
+     * @var string
+     */
+    protected string $type;
+
+    /**
+     * @throws \RuntimeException
+     */
+    public static function forName(string $name, ConstantsInterface $matchConstantsClass): AnalysisMatch
+    {
+        return new self($name, $matchConstantsClass);
+    }
+
+    /**
+     * @param string $name
+     * @param ConstantsInterface $matchConstantsClass
+     *
+     * @throws \RuntimeException
+     */
+    protected function __construct(string $name, ConstantsInterface $matchConstantsClass)
+    {
+        $this->type = $matchConstantsClass::validate($name);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'raw' => $this->raw,
+            'equivalent' => round($this->equivalent),
+            'type' => $this->type
+        ];
+    }
+
+    public function name(): string
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param int $raw
+     *
+     * @return $this
+     */
+    public function setRaw(int $raw): AnalysisMatch
+    {
+        $this->raw = $raw;
+
+        return $this;
+    }
+
+    /**
+     * @param float $equivalent
+     *
+     * @return $this
+     */
+    public function setEquivalent(float $equivalent): AnalysisMatch
+    {
+        $this->equivalent = $equivalent;
+
+        return $this;
+    }
+
+    /**
+     * @param int $raw
+     *
+     * @return void
+     */
+    public function incrementRaw(int $raw): void
+    {
+        $this->raw += $raw;
+    }
+
+    /**
+     * @param float $equivalent
+     *
+     * @return void
+     */
+    public function incrementEquivalent(float $equivalent): void
+    {
+        $this->equivalent += $equivalent;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRaw(): int
+    {
+        return $this->raw;
+    }
+
+    /**
+     * @return float
+     */
+    public function getEquivalent(): float
+    {
+        return $this->equivalent;
+    }
+
+}

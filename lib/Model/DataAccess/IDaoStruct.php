@@ -6,11 +6,27 @@
  * Time: 17.55
  */
 
-/**
- * Interface IDaoStruct A generic interface that will be used by any DataAccess_AbstractDao extended object
- * @see DataAccess_AbstractDao
- */
+namespace Model\DataAccess;
 
-interface DataAccess_IDaoStruct {
+/**
+ * Interface IDaoStruct A generic interface that will be used by any DataAccess\AbstractDao extended object
+ * @see AbstractDao
+ */
+interface IDaoStruct
+{
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getArrayCopy(): array;
+
+    public function count(): int;
+
+    /**
+     * @param list<string>|null $mask
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(array $mask = null): array;
 
 }

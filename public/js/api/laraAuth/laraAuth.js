@@ -1,0 +1,42 @@
+import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
+
+export const laraAuthJob = async ({idJob, password, reasoning = true}) => {
+  const response = await fetch(
+    `${getMatecatApiDomain()}api/app/jobs/${idJob}/${password}/lara/auth?reasoning=${reasoning}`,
+    {
+      credentials: 'include',
+    },
+  )
+
+  if (!response.ok) {
+    if (response.headers.get('Content-Length') !== '0') {
+      const data = await response.json()
+      return Promise.reject({response, errors: data.errors[0] ?? data})
+    } else {
+      return Promise.reject({response})
+    }
+  }
+
+  const {errors, ...data} = await response.json()
+  if (errors && errors.length > 0) return Promise.reject(errors)
+  return data
+}
+
+export const laraAuth = async () => {
+  const response = await fetch(`${getMatecatApiDomain()}api/app/lara/auth`, {
+    credentials: 'include',
+  })
+
+  if (!response.ok) {
+    if (response.headers.get('Content-Length') !== '0') {
+      const data = await response.json()
+      return Promise.reject({response, errors: data.errors[0] ?? data})
+    } else {
+      return Promise.reject({response})
+    }
+  }
+
+  const {errors, ...data} = await response.json()
+  if (errors && errors.length > 0) return Promise.reject(errors)
+  return data
+}

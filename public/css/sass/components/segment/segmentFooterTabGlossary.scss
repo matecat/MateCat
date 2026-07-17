@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 .tab.glossary {
   outline: none;
 
@@ -13,18 +13,19 @@
       margin-bottom: 4px;
       font-size: 14px;
       line-height: 16px;
-      color: $grey6;
+      color: colors.$grey6;
     }
   }
   .glossary-select {
     .select-with-icon__wrapper {
       z-index: 2;
       svg {
-        color: $grey2;
+        color: colors.$grey2;
       }
     }
     .select {
       border-radius: 4px;
+      line-height: 16px;
     }
     .select__dropdown-wrapper .custom-dropdown {
       margin-top: 0;
@@ -49,7 +50,7 @@
           width: 100%;
 
           input[type='checkbox'] {
-            accent-color: $translatedBlue;
+            accent-color: colors.$translatedBlue;
           }
           label {
             white-space: nowrap;
@@ -67,14 +68,16 @@
         }
         .dropdown__option--is-no-results-found {
           background-color: unset;
-          color: $grey7;
+          color: colors.$grey7;
         }
         .dropdown__option--is-highlighted-option,
         .dropdown__option:hover {
-          background-color: $grey8;
+          background-color: colors.$grey8;
         }
         .button-create-glossary-key {
-          color: $grey6;
+          width: 100%;
+          text-align: left;
+          color: colors.$grey6;
           font-style: italic;
           font-size: 14px;
           border: none;
@@ -83,7 +86,7 @@
           padding: 0;
 
           &:hover {
-            color: $grey6;
+            color: colors.$grey6;
           }
         }
       }
@@ -96,18 +99,18 @@
     .select__dropdown-wrapper .custom-dropdown {
       .dropdown__list {
         .dropdown__option--is-active-option {
-          background-color: $grey4;
-          color: $grey6;
+          background-color: colors.$grey4;
+          color: colors.$grey6;
         }
         .dropdown__option--is-no-results-found {
           display: none;
         }
         .dropdown__option--is-highlighted-option,
         .dropdown__option:hover {
-          background-color: $grey8;
+          background-color: colors.$grey8;
         }
         .domain-option {
-          border: 1px solid $grey7;
+          border: 1px solid colors.$grey7;
           border-radius: 12px;
           padding: 0 6px 0 6px;
           white-space: nowrap;
@@ -117,7 +120,7 @@
           text-align: center;
         }
         .button-create-option {
-          color: $grey7;
+          color: colors.$grey7;
           font-style: italic;
           font-size: 12px;
           border: none;
@@ -125,7 +128,7 @@
           cursor: pointer;
 
           &:hover {
-            color: $grey6;
+            color: colors.$grey6;
           }
         }
       }
@@ -133,7 +136,7 @@
   }
   input:not([type='radio']),
   textarea {
-    border: 1px solid $grey2;
+    border: 1px solid colors.$grey2;
     border-radius: 4px;
     padding: 4px 8px;
     outline: none;
@@ -141,7 +144,7 @@
     line-height: 16px;
     &:focus,
     &:focus-visible {
-      border-color: $linkBlueTransparent;
+      border-color: colors.$linkBlueTransparent;
     }
     &.input-large {
       height: 64px;
@@ -157,7 +160,7 @@
     flex-direction: row;
     flex-wrap: nowrap;
     padding: 24px 32px;
-    border-bottom: 1px solid $grey3;
+    border-bottom: 1px solid colors.$grey3;
     justify-content: space-between;
   }
 
@@ -170,7 +173,7 @@
     padding: 4px;
 
     svg {
-      color: $grey2;
+      color: colors.$grey2;
     }
   }
 
@@ -206,32 +209,30 @@
     border-radius: 2px;
     font-size: 16px;
     line-height: 20px;
-    background: $translatedBlue;
-    background: -moz-linear-gradient(top, $translatedBlue, #119ec4);
-    background: linear-gradient(top, $translatedBlue, #119ec4);
+    background: colors.$translatedBlue;
     user-select: none;
     border: none;
     white-space: nowrap;
     cursor: pointer;
     &:hover {
-      background-color: $translatedBlueHover;
+      background-color: colors.$translatedBlueHover;
     }
   }
   .glossary__button-cancel {
-    color: $translatedBlue;
+    color: colors.$translatedBlue;
     font-weight: bold;
     text-decoration: none;
     padding: 6px 12px;
     border-radius: 2px;
     font-size: 16px;
     line-height: 20px;
-    background: $white;
+    background: colors.$white;
     user-select: none;
     border: none;
     white-space: nowrap;
     cursor: pointer;
     &:hover {
-      color: $translatedBlueHover;
+      color: colors.$translatedBlueHover;
     }
   }
   .glossary_items {
@@ -240,11 +241,11 @@
     overflow: auto;
     .glossary_item {
       padding: 24px 32px;
-      color: $grey6;
+      color: colors.$grey6;
       font: 14px/16px calibri, Arial, Helvetica, sans-serif;
       text-align: left;
       &:nth-child(even) {
-        background: $grey5;
+        background: colors.$grey5;
       }
       .glossary_item-header {
         display: flex;
@@ -253,10 +254,10 @@
         display: flex;
         flex-shrink: 0;
         > span {
-          color: $grey6;
+          color: colors.$grey6;
           font-size: 12px;
           line-height: 15px;
-          border: 1px solid $grey6;
+          border: 1px solid colors.$grey6;
           border-radius: 12px;
           padding: 0 4px;
           overflow: hidden;
@@ -304,10 +305,14 @@
         flex-shrink: 0;
 
         > span {
-          color: $grey7;
+          color: colors.$grey7;
           font-size: 10px;
           margin-left: 8px;
         }
+      }
+
+      .glossary_source_tooltip {
+        overflow: hidden;
       }
 
       .glossary_source {
@@ -318,7 +323,7 @@
         text-overflow: ellipsis;
 
         span {
-          color: $grey7;
+          color: colors.$grey7;
         }
       }
       .glossary_item-actions {
@@ -327,9 +332,9 @@
         align-items: center;
         gap: 12px;
         padding-left: 16px;
-        color: $grey7;
+        color: colors.$grey7;
         svg:hover {
-          color: $grey6;
+          color: colors.$grey6;
         }
 
         > * {
@@ -370,7 +375,7 @@
           font-weight: 700;
           font-size: 16px;
           line-height: 20px;
-          color: $black;
+          color: colors.$black;
           display: flex;
           align-items: center;
           > div {
@@ -378,7 +383,7 @@
             align-items: center;
             svg {
               cursor: pointer;
-              color: $grey7;
+              color: colors.$grey7;
             }
           }
 
@@ -392,10 +397,10 @@
           }
 
           .forbidden-badge {
-            background-color: $grey4;
+            background-color: colors.$grey4;
             font-weight: normal;
             font-size: 14px;
-            color: $grey6;
+            color: colors.$grey6;
             border-radius: 4px;
             padding: 2px 6px;
             margin-left: 10px;
@@ -495,7 +500,7 @@
       display: flex;
       gap: 0;
       justify-content: space-between;
-      color: $grey2;
+      color: colors.$grey2;
       > div {
         width: auto;
         display: flex;
@@ -535,11 +540,11 @@
   }
 
   .select--is-disabled {
-    background-color: $grey4;
+    background-color: colors.$grey4;
   }
 
   .segmented-control {
-    background-color: $grey3;
+    background-color: colors.$grey3;
     .segmented-control__cursor {
       padding: unset;
       height: 74%;

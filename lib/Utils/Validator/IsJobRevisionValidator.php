@@ -1,48 +1,62 @@
 <?php
 
-namespace Validator;
+namespace Utils\Validator;
 
-use DataAccess\ShapelessConcreteStruct;
-use LQA\ChunkReviewDao;
-use Validator\Contracts\AbstractValidator;
-use Validator\Contracts\ValidatorObject;
-use Validator\Exception\LogicException;
-use Validator\Exception\WrongParamsException;
+use Controller\API\Commons\Exceptions\ValidationError;
+use DomainException;
+use Exception;
+use RuntimeException;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\LQA\ChunkReviewDao;
+use ReflectionException;
+use Utils\Validator\Contracts\AbstractValidator;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
 
-class IsJobRevisionValidator extends AbstractValidator {
+class IsJobRevisionValidator extends AbstractValidator
+{
+    private ChunkReviewDao $chunkReviewDao;
+
+    public function __construct(ChunkReviewDao $chunkReviewDao)
+    {
+        $this->chunkReviewDao = $chunkReviewDao;
+    }
 
     /**
-     * @inheritDoc
+     * Validates the provided ValidatorObject for specific criteria, ensuring required parameters are present
+     * and verifying against the data obtained from the ChunkReviewDao.
+     *
+     * @param ValidatorObjectInterface $object
+     * @return ValidatorObjectInterface|null
+     * @throws ValidationError
+     * @throws DomainException
+     * @throws ReflectionException
+     * @throws Exception
      */
-    public function validate( ValidatorObject $object ) {
-
-        if ( !isset( $object->jid ) ) {
-            throw new WrongParamsException('Missing jid parameter');
+    public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
+    {
+        if (!isset($object['jid'])) {
+            throw new ValidationError('Missing jid parameter');
         }
 
-        if ( !isset( $object->password ) ) {
-            throw new WrongParamsException('Missing jid parameter');
+        if (!isset($object['password'])) {
+            throw new ValidationError('Missing password parameter');
         }
 
         /** @var ShapelessConcreteStruct $data */
-        $data = (new ChunkReviewDao())->isTOrR1OrR2( $object->jid, $object->password );
+        $data = $this->chunkReviewDao->isTOrR1OrR2($object['jid'], $object['password']);
 
-        if ( $data->t == 0 and $data->r1 == 0 and $data->r2 == 0 ) {
-            throw new LogicException( 'Invalid combination jid/password' );
+        if (empty($data) || ($data->t == 0 and $data->r1 == 0 and $data->r2 == 0)) {
+            throw new DomainException('Invalid combination jid/password');
         }
 
-        if ( $data->t == 1 ) {
-            $this->errors[] = 'Given job password is the T password';
-
-            return false;
+        if ($data->r1 == 1 or $data->r2 == 1) {
+            return $object;
         }
 
-        if ( $data->r1 == 1 or $data->r2 == 1 ) {
-            return true;
+        if ($data->t != 0) {
+            $this->errors[] = new RuntimeException('Given job password is the T password');
         }
 
-        $this->errors[] = 'No data recevied';
-
-        return false;
+        return null;
     }
 }

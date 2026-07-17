@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "patternProperties": {
+    "^[a-z]{2,3}(-(Cyrl|Latn)-[A-Z]{2}|-([A-Z]{2,3}|[0-9]{3}))$": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}

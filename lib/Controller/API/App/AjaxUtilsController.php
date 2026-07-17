@@ -1,0 +1,81 @@
+<?php
+
+namespace Controller\API\App;
+
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Exception;
+use InvalidArgumentException;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
+use Model\ConnectedServices\GDrive\Session;
+use PDOException;
+use RuntimeException;
+use TypeError;
+use Utils\TMS\TMSService;
+
+class AjaxUtilsController extends KleinController
+{
+
+    protected function registerValidators(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+    }
+
+    /**
+     * @throws LockedResponseException
+     * @throws PDOException
+     * @throws ResponseAlreadySentException
+     */
+    public function ping(): void
+    {
+        $stmt = $this->getDatabase()->getConnection()->prepare("SELECT 1");
+        $stmt->execute();
+
+        $this->response->json([
+            'data' => [
+                "OK",
+                time()
+            ]
+        ]);
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function checkTMKey(): void
+    {
+        $tm_key = filter_var($this->request->param('tm_key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+
+        if (empty($tm_key)) {
+            throw new InvalidArgumentException("TM key not provided.", -9);
+        }
+
+        $tmxHandler = new TMSService($this->getDatabase());
+        $keyExists = $tmxHandler->checkCorrectKey($tm_key);
+
+        if (!isset($keyExists) or $keyExists === false) {
+            throw new InvalidArgumentException("TM key is not valid.", -9);
+        }
+
+        $this->response->json([
+            'success' => true
+        ]);
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     * @throws RuntimeException
+     * @throws TypeError
+     */
+    public function clearNotCompletedUploads(): void
+    {
+        (new Session($this->getDatabase()))->clearSession();
+
+        $this->response->json([
+            'success' => true
+        ]);
+    }
+}

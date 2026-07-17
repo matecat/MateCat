@@ -1,6 +1,10 @@
 <?php
 
-use LQA\QA;
+namespace Model\EditLog;
+
+use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\IDaoStruct;
+use Utils\Tools\PostEditing;
 
 /**
  * Created by PhpStorm.
@@ -8,218 +12,79 @@ use LQA\QA;
  * Date: 05/10/15
  * Time: 11.33
  */
-class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+class EditLogSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct
+{
+
+    const int   EDIT_TIME_SLOW_CUT = 30;
+    const float EDIT_TIME_FAST_CUT = 0.25;
 
     /**
      * @var int
      */
-    public $id;
+    public int $id;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public $source;
+    public ?string $suggestion = null;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public $internal_id;
-
-    /**
-     * @var string
-     */
-    public $translation;
+    public ?string $translation = null;
 
     /**
      * @var int
      */
-    public $time_to_edit;
-
-    /**
-     * @var string
-     */
-    public $suggestion;
-
-    /**
-     * @var string
-     */
-    public $suggestions_array;
-
-    /**
-     * @var string
-     */
-    public $suggestion_source;
+    public int $raw_word_count;
 
     /**
      * @var int
      */
-    public $suggestion_match;
+    public int $time_to_edit;
 
     /**
-     * @var int
+     * @var ?string
      */
-    public $suggestion_position;
-
-    /**
-     * @var string
-     */
-    public $segment_hash;
-
-    /**
-     * @var float
-     */
-    public $mt_qe;
-
-    public $id_translator;
-
-    /**
-     * @var int
-     */
-    public $job_id;
-
-    /**
-     * @var string
-     */
-    public $job_source;
-
-    /**
-     * @var string
-     */
-    public $job_target;
-
-    /**
-     * @var int
-     */
-    public $raw_word_count;
-
-    /**
-     * @var string
-     */
-    public $proj_name;
-
-    /**
-     * @var float
-     */
-    public $secs_per_word;
-
-    /**
-     * @var string
-     */
-    public $warnings;
-
-    /**
-     * @var string
-     */
-    public $match_type;
-
-    /**
-     * @var bool
-     */
-    public $locked;
-
-    /**
-     * @var string
-     */
-    public $uid ;
-
-    /**
-     * @var string
-     */
-    public $email ;
+    public ?string $target_language = null;
 
     /**
      * @return float
+     * @throws \DivisionByZeroError
      */
-    public function getSecsPerWord() {
-        $val = @round( ( $this->time_to_edit / 1000 ) / $this->raw_word_count, 1 );
-        return ( $val != INF ? $val : 0 );
+    public function getSecsPerWord(): float
+    {
+        $val = @round(($this->time_to_edit / 1000) / $this->raw_word_count, 1);
+
+        return ($val != INF ? $val : 0);
     }
 
     /**
      * Returns true if the number of seconds per word
      * @return bool
+     * @throws \DivisionByZeroError
      */
-    public function isValidForEditLog() {
+    public function isValidForEditLog(): bool
+    {
         $secsPerWord = $this->getSecsPerWord();
 
-        return ( $secsPerWord  > EditLog_EditLogModel::EDIT_TIME_FAST_CUT ) &&
-                ( $secsPerWord  < EditLog_EditLogModel::EDIT_TIME_SLOW_CUT );
-    }
-
-    public function isValidForPeeTable(){
-
-        //Do not consider ice matches
-        if( $this->match_type == 'ICE' ) return false;
-
-        $secsPerWord = $this->getSecsPerWord();
-
-        return ( $secsPerWord  > EditLog_EditLogModel::EDIT_TIME_FAST_CUT );
+        return ($secsPerWord > self::EDIT_TIME_FAST_CUT) &&
+            ($secsPerWord < self::EDIT_TIME_SLOW_CUT);
     }
 
     /**
-     * @return array
+     * @return float
      */
-    public function getWarning() {
-        $result = array();
-
-        $QA = new QA( $this->source, $this->translation );
-        $QA->performConsistencyCheck();
-
-        if ( $QA->thereAreNotices() ) {
-            $notices = $QA->getNoticesJSON();
-            $notices = json_decode( $notices, true );
-
-            //the outer if it's here because $notices can be
-            //an empty string and json_decode will fail into null value
-            if ( !empty( $notices ) ) {
-                $result = array_merge( $result, Utils::array_column( $notices, 'debug' ) );
-            }
-
-            $tag_mismatch       = $QA->getMalformedXmlStructs();
-            $tag_order_mismatch = $QA->getTargetTagPositionError();
-            if ( count( $tag_mismatch ) > 0 ) {
-                $result[] = sprintf(
-                        "Tag Mismatch ( %d )",
-                        count( $tag_mismatch )
-                );
-            }
-            if ( count( $tag_order_mismatch ) > 0 ) {
-                $result[] = sprintf(
-                        "Tag order mismatch ( %d )",
-                        count( $tag_order_mismatch )
-                );
-            }
+    public function getPEE(): float
+    {
+        if(empty($this->suggestion) || empty($this->translation)){
+            return 0;
         }
-        $this->warnings = $result;
-    }
 
-    /**
-     * @return float|int
-     */
-    public function getPEE() {
-
-        $post_editing_effort = round(
-                ( 1 - MyMemory::TMS_MATCH(
-                                self::cleanSegmentForPee( $this->suggestion ),
-                                self::cleanSegmentForPee( $this->translation ),
-                                $this->job_target
-                        )
-                ) * 100
+        return PostEditing::getPee(
+            $this->suggestion,
+            $this->translation,
+            $this->target_language
         );
-
-        if ( $post_editing_effort < 0 ) {
-            $post_editing_effort = 0;
-        } elseif ( $post_editing_effort > 100 ) {
-            $post_editing_effort = 100;
-        }
-
-        return $post_editing_effort;
-
-    }
-
-    private static function cleanSegmentForPee( $segment ){
-        $segment = htmlspecialchars_decode( $segment, ENT_QUOTES);
-
-        return $segment;
     }
 }

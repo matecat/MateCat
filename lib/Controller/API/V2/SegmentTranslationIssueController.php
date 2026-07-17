@@ -1,207 +1,364 @@
 <?php
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-use API\App\AbstractStatefulKleinController;
-use API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
-use API\V2\Json\TranslationIssueComment;
-use API\V2\Validators\ChunkPasswordValidator;
-use Database;
-use Features\ReviewExtended\ReviewUtils;
-use Features\ReviewExtended\TranslationIssueModel;
-use Features\SecondPassReview;
-use LQA\EntryCommentDao;
-use LQA\EntryDao as EntryDao;
-use LQA\EntryStruct;
-use RevisionFactory;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\SegmentTranslationIssueValidator;
+use Exception;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\LQA\EntryCommentDao;
+use Model\Projects\ProjectDao;
+use Model\LQA\EntryDao as EntryDao;
+use Model\LQA\EntryStruct;
+use Model\LQA\EntryValidator;
+use Model\Translations\SegmentTranslationDao;
+use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
+use Plugins\Features\ReviewExtended\ReviewUtils;
+use Plugins\Features\ReviewExtended\TranslationIssueModel;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
+use RuntimeException;
+use TypeError;
+use View\API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
+use View\API\V2\Json\TranslationIssueComment;
 
 class SegmentTranslationIssueController extends AbstractStatefulKleinController {
 
     /**
-     * @var RevisionFactory
+     * @var SegmentTranslationIssueValidator
      */
-    protected $revisionFactory;
+    private SegmentTranslationIssueValidator $validator;
 
     /**
-     * @var Validators\SegmentTranslationIssueValidator
+     * @throws RuntimeException
      */
-    private $validator;
-    private $issue;
-
-    public function index() {
-        $result = EntryDao::findAllByTranslationVersion(
-                $this->validator->translation->id_segment,
-                $this->validator->translation->id_job,
-                $this->getVersionNumber()
+    public function index(): void {
+        $result = (new EntryDao($this->getDatabase()))->findAllByTranslationVersion(
+            $this->validator->translation->id_segment,
+            $this->validator->translation->id_job,
+            $this->getVersionNumber()
         );
 
-        $json     = new TranslationIssueFormatter();
+        $json = new TranslationIssueFormatter(new EntryCommentDao($this->getDatabase()));
         $rendered = $json->render( $result );
 
         $this->response->json( [ 'issues' => $rendered ] );
     }
 
-    public function create() {
+    /**
+     * @throws ValidationError
+     * @throws RuntimeException
+     * @throws Exception
+     * @throws \TypeError
+     */
+    public function create(): void {
         $data = [
-                'id_segment'          => $this->request->id_segment,
-                'id_job'              => $this->request->id_job,
-                'id_category'         => $this->request->id_category,
-                'severity'            => $this->request->severity,
-                'translation_version' => $this->validator->translation->version_number,
-                'target_text'         => $this->request->target_text,
-                'start_node'          => $this->request->start_node,
-                'start_offset'        => $this->request->start_offset,
-                'end_node'            => $this->request->end_node,
-                'end_offset'          => $this->request->end_offset,
-                'is_full_segment'     => false,
-                'comment'             => $this->request->comment,
-                'uid'                 => $this->user->uid,
-                'source_page'         => ReviewUtils::revisionNumberToSourcePage( $this->request->revision_number ),
+            'id_segment' => $this->request->param( 'id_segment' ),
+            'id_job' => $this->request->param( 'id_job' ),
+            'id_category' => $this->request->param( 'id_category' ),
+            'severity' => $this->request->param( 'severity' ),
+            'translation_version' => $this->validator->translation->version_number,
+            'target_text' => $this->request->param( 'target_text' ),
+            'start_node' => $this->request->param( 'start_node' ),
+            'start_offset' => $this->request->param( 'start_offset' ),
+            'end_node' => $this->request->param( 'end_node' ),
+            'end_offset' => $this->request->param( 'end_offset' ),
+            'is_full_segment' => false,
+            'comment' => $this->request->param( 'comment' ),
+            'uid' => $this->user->uid ?? null,
+            'source_page' => ReviewUtils::revisionNumberToSourcePage( $this->request->param( 'revision_number' ) ),
         ];
 
-        Database::obtain()->begin();
-
-        // TODO refactory validation systems and check if is needed to initialize  EntryStruct twice, here and in \Features\ReviewExtended\TranslationIssueModel line 84
+        $this->getDatabase()->begin();
 
         $struct = new EntryStruct( $data );
 
         $model = $this->_getSegmentTranslationIssueModel(
-                $this->request->id_job,
-                $this->request->password,
-                $struct
+            $this->request->param( 'id_job' ),
+            $this->request->param( 'password' ),
+            $struct
         );
-
-        if ( $this->request->diff ) {
-            $model->setDiff( $this->request->diff );
-        }
 
         $struct = $model->save();
 
-        Database::obtain()->commit();
+        $this->getDatabase()->commit();
 
-        $json     = new TranslationIssueFormatter();
+        $json     = new TranslationIssueFormatter(new EntryCommentDao($this->getDatabase()));
         $rendered = $json->renderItem( $struct );
 
         $this->response->json( [ 'issue' => $rendered ] );
     }
 
-    public function update() {
-        $issue = null;
+    /**
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function update(): void {
+        $data = [
+                'id_issue'            => $this->request->param( 'id_issue' ),
+                'id_segment'          => $this->request->param( 'id_segment' ),
+                'id_job'              => $this->request->param( 'id_job' ),
+                'id_category'         => $this->request->param( 'id_category' ),
+                'severity'            => $this->request->param( 'severity' ),
+                'translation_version' => $this->validator->translation->version_number,
+                'target_text'         => $this->request->param( 'target_text' ),
+                'start_node'          => $this->request->param( 'start_node' ),
+                'start_offset'        => $this->request->param( 'start_offset' ),
+                'end_node'            => $this->request->param( 'end_node' ),
+                'end_offset'          => $this->request->param( 'end_offset' ),
+                'is_full_segment'     => false,
+                'comment'             => $this->request->param( 'comment' ),
+                'uid'                 => $this->user->uid ?? null,
+        ];
 
-        $postParams = $this->request->paramsPost();
+        $this->getDatabase()->begin();
 
-        if ( $postParams[ 'rebutted_at' ] == null ) {
-            $entryDao = new EntryDao( Database::obtain()->getConnection() );
-            $issue    = $entryDao->updateRebutted(
-                    $this->validator->issue->id, false
-            );
+        $oldStruct = (new EntryDao($this->getDatabase()))->findById( $data[ 'id_issue' ] );
+
+        if ( $oldStruct === null ) {
+            throw new NotFoundException( "Issue not found", 404 );
         }
 
-        $json     = new TranslationIssueFormatter();
-        $rendered = $json->renderItem( $issue );
+        $data['source_page'] = $oldStruct->source_page;
+
+        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
+        $chunkReviewStruct = $chunkReviewDao->findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
+
+        if ( $chunkReviewStruct === null ) {
+            throw new NotFoundException( "Job not found", 404 );
+        }
+
+        $jobStruct = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
+
+        $this->checkLoggedUserPermissions($oldStruct, $jobStruct, $this->user);
+
+        // This is the chunk review that will be updated
+        $chunkReviewToBeUpdated = $chunkReviewDao->findByIdJobAndPasswordAndSourcePage(
+            $jobStruct->id ?? throw new RuntimeException('Missing job id'),
+            $jobStruct->password ?? throw new RuntimeException('Missing job password'),
+            $oldStruct->source_page
+        );
+
+        if ( $chunkReviewToBeUpdated === null ) {
+            throw new NotFoundException( "Job not found", 404 );
+        }
+
+        $oldStruct->setDefaults(
+            new EntryValidator( $oldStruct, database: $this->getDatabase() ),
+            new SegmentTranslationDao( $this->getDatabase() )
+        );
+
+        $newStruct     = new EntryStruct( $data );
+        $newStruct->id = $data[ 'id_issue' ];
+        $newStruct->setDefaults(
+            new EntryValidator( $newStruct, database: $this->getDatabase() ),
+            new SegmentTranslationDao( $this->getDatabase() )
+        );
+
+        // remove old issue
+        $model = $this->_getSegmentTranslationIssueModel(
+            $chunkReviewToBeUpdated->id_job,
+            $chunkReviewToBeUpdated->review_password ?? throw new RuntimeException('Missing review password'),
+            $oldStruct
+        );
+
+        $model->delete();
+
+        // create new issue
+        $model = $this->_getSegmentTranslationIssueModel(
+            $chunkReviewToBeUpdated->id_job,
+            $chunkReviewToBeUpdated->review_password ?? throw new RuntimeException('Missing review password'),
+            $newStruct
+        );
+
+        $struct = $model->save();
+
+        // move comments from old issue to new one
+        $commentDao = new EntryCommentDao($this->getDatabase());
+        $commentDao->move(
+            (int)$oldStruct->id,
+            (int)$struct->id
+        );
+
+         // update replies count
+         $entryDao = new EntryDao($this->getDatabase());
+         $entryDao->updateRepliesCount($struct->id ?? throw new RuntimeException('Missing entry id'));
+
+        $this->getDatabase()->commit();
+
+        $msg = "[AUDIT][ISSUE_UPDATE] issue_id={$struct->id}; segment_id={$struct->id_segment}; user={$this->user->email}; new_severity={$struct->severity}";
+        $this->logger->debug($msg);
+
+        $json = new TranslationIssueFormatter(new EntryCommentDao($this->getDatabase()));
+        $rendered = $json->renderItem( $struct );
 
         $this->response->json( [ 'issue' => $rendered ] );
     }
 
-    public function delete() {
+    /**
+     * @throws Exception
+     * @throws \TypeError
+     */
+    public function delete(): void {
+        $issue = $this->validator->issue ?? throw new RuntimeException('Missing issue');
 
-        Database::obtain()->begin();
+        $this->getDatabase()->begin();
         $model = $this->_getSegmentTranslationIssueModel(
-                $this->request->id_job,
-                $this->request->password,
-                $this->validator->issue
+            $this->request->param( 'id_job' ),
+            $this->request->param( 'password' ),
+            $issue
         );
+
+        $chunkReviewStruct = (new ChunkReviewDao($this->getDatabase()))->findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
+
+        if ( $chunkReviewStruct === null ) {
+            throw new NotFoundException( "Job not found", 404 );
+        }
+
+        $jobStruct = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
+
+        $this->checkLoggedUserPermissions($issue, $jobStruct, $this->user);
+
         $model->delete();
-        Database::obtain()->commit();
+        $this->getDatabase()->commit();
 
         $this->response->code( 200 );
     }
 
-    public function getComments() {
-        $dao = new EntryCommentDao();
+      /**
+       * @throws RuntimeException
+       */
+      public function getComments(): void {
+          $dao = new EntryCommentDao($this->getDatabase());
 
-        $comments = $dao->findByIssueId(
-                $this->validator->issue->id
-        );
+          $comments = $dao->findByIssueId(
+              $this->validator->issue->id ?? throw new RuntimeException('Missing issue id')
+          );
 
-        $json     = new TranslationIssueComment();
-        $rendered = $json->render( $comments );
-        $this->response->json( [ 'comments' => $rendered ] );
-    }
+         $json = new TranslationIssueComment();
+         $rendered = $json->render( $comments );
+         $this->response->json( [ 'comments' => $rendered ] );
+     }
 
-    public function createComment() {
+     /**
+      * @throws AuthorizationError
+      * @throws NotFoundException
+      * @throws RuntimeException
+      * @throws TypeError
+      */
+      public function createComment(): void {
+         $data = [
+             'comment' => $this->request->param( 'message' ),
+             'id_qa_entry' => (int)($this->validator->issue->id ?? throw new RuntimeException('Missing issue id')),
+             'source_page' => (int)($this->request->param( 'source_page' ) ?? throw new RuntimeException('Missing source_page')),
+             'uid' => (int)($this->user->uid ?? throw new RuntimeException('Missing user uid'))
+         ];
 
-        $data = [
-                'comment'     => $this->request->message,
-                'id_qa_entry' => $this->validator->issue->id,
-                'source_page' => $this->request->source_page,
-                'uid'         => ($this->user) ? $this->user->uid : null
-        ];
+         $dao = new EntryCommentDao($this->getDatabase());
+         $entry = (new EntryDao($this->getDatabase()))->findById( $this->validator->issue->id ?? throw new RuntimeException('Missing issue id') );
 
-        $dao = new EntryCommentDao();
+        if ( empty( $entry ) ) {
+            throw new NotFoundException( "Issue not found", 404 );
+        }
 
-        $result = $dao->createComment( $data );
+        $dao->createComment( $data );
 
-        $json     = new TranslationIssueFormatter();
-        $rendered = $json->renderItem( $result );
+        $json = new TranslationIssueFormatter(new EntryCommentDao($this->getDatabase()));
+        $rendered = $json->renderItem( $entry );
 
         $response = [ 'comment' => $rendered ];
 
-        $postParams = $this->request->paramsPost();
-
-        if ( $postParams[ 'rebutted' ] === 'true' ) {
-            $issue = $this->updateIssueWithRebutted();
-            if ( $issue ) {
-                $formatter           = new  TranslationIssueFormatter();
-                $response[ 'issue' ] = $formatter->renderItem( $issue );
-            }
-        }
-
         $this->response->json( $response );
-
     }
 
     /**
-     * @param $id_job
-     * @param $password
-     * @param $issue
+     * @param int $id_job
+     * @param string $password
+     * @param EntryStruct $issue
      *
-     * @return TranslationIssueModel|SecondPassReview\TranslationIssueModel
+     * @return TranslationIssueModel
+     * @throws Exception
+     * @throws \TypeError
      */
-    protected function _getSegmentTranslationIssueModel( $id_job, $password, $issue ) {
-        return $this->revisionFactory->getTranslationIssueModel( $id_job, $password, $issue );
-    }
-
-    protected function afterConstruct() {
-
-        $jobValidator = new ChunkPasswordValidator( $this );
-        $jobValidator->onSuccess( function () use ( $jobValidator ) {
-            $this->revisionFactory = RevisionFactory::initFromProject( $jobValidator->getChunk()->getProject() );
-            //enable dynamic loading ( Factory ) by callback hook on revision features
-            $this->validator = $this->revisionFactory->getTranslationIssuesValidator( $this->request )->setChunkReview( $jobValidator->getChunkReview() );
-            $this->validator->validate();
-        } );
-        $this->appendValidator( $jobValidator );
-
-    }
-
-    private function getVersionNumber() {
-        if ( null !== $this->request->param( 'version_number' ) ) {
-            return $this->request->param( 'version_number' );
-        } else {
-            return $this->validator->translation->version_number;
-        }
-    }
-
-    /**
-     * @return EntryStruct
-     */
-    private function updateIssueWithRebutted() {
-        $entryDao = new EntryDao( Database::obtain()->getConnection() );
-
-        return $entryDao->updateRebutted(
-                $this->validator->issue->id, true
+    protected function _getSegmentTranslationIssueModel( int $id_job, string $password, EntryStruct $issue ): TranslationIssueModel {
+        return new TranslationIssueModel(
+            $id_job,
+            $password,
+            $issue,
+            new ChunkReviewDao($this->getDatabase()),
+            new EntryDao($this->getDatabase()),
+            new TranslationVersionDao($this->getDatabase()),
+            new ProjectDao($this->getDatabase())
         );
     }
 
+    protected function registerValidators(): void {
+        $this->appendValidator( new LoginValidator( $this ) );
+        $jobValidator = new ChunkPasswordValidator( $this );
+        $jobValidator->onSuccess( function () use ( $jobValidator ) {
+            //enable dynamic loading (Factory) by callback hook on revision features
+            $chunkReview = $jobValidator->getChunkReview();
+            if ( $chunkReview === null ) {
+                throw new NotFoundException( 'Chunk review not found' );
+            }
+            $this->validator = ( new SegmentTranslationIssueValidator( $this ) )->setChunkReview( $chunkReview );
+            $this->validator->validate();
+        } );
+        $this->appendValidator( $jobValidator );
+    }
+
+    private function getVersionNumber(): int {
+        if ( null !== $this->request->param( 'version_number' ) ) {
+            return (int)$this->request->param( 'version_number' );
+        }
+
+        return (int)$this->validator->translation->version_number;
+    }
+
+    /**
+     * @throws AuthorizationError
+     * @throws Exception
+     */
+    private function checkLoggedUserPermissions(EntryStruct $entry, JobStruct $job, UserStruct $loggerUser): void
+    {
+        if($entry->uid === $loggerUser->uid){
+            return;
+        }
+
+        $owner = (new UserDao($this->getDatabase()))->getByEmail($job->owner);
+
+        if($owner === null){
+            throw new AuthorizationError( "Job owner not found. Not Authorized", 401 );
+        }
+
+        if($owner->uid === $loggerUser->uid){
+            return;
+        }
+
+        $project = $job->getProject(new ProjectDao($this->getDatabase()));
+        $team = $project->id_team !== null ? (new TeamDao($this->getDatabase()))->findById($project->id_team) : null;
+
+        if ($team === null || $team->id === null) {
+            throw new AuthorizationError( "Team not found. Not Authorized", 401 );
+        }
+
+        $mDao = new MembershipDao($this->getDatabase());
+
+        foreach ($mDao->getMemberListByTeamId($team->id) as $member){
+            if($member->uid === $loggerUser->uid){
+                return;
+            }
+        }
+
+        throw new AuthorizationError( "Not Authorized", 401 );
+    }
 }

@@ -1,94 +1,150 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 
-use API\V2\BaseChunkController;
-use API\V2\Exceptions\NotFoundException;
-use API\V2\KleinController;
-use Jobs\MetadataDao;
-use LQA\ChunkReviewDao;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
+use DomainException;
+use Exception;
+use Model\Files\FileDao;
+use Model\Files\MetadataDao as FileMetadataDao;
+use Model\Projects\ProjectDao;
+use Model\Jobs\JobsMetadataMarshaller;
+use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
+use Model\Projects\ProjectStruct;
+use ReflectionException;
+use RuntimeException;
+use stdClass;
+use Utils\Constants\EngineConstants;
 
-class MetaDataController extends BaseChunkController {
+class MetaDataController extends KleinController
+{
+    use ChunkNotFoundHandlerTrait;
 
-    public function index() {
+    protected function registerValidators(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+    }
 
-        $result = [];
 
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     * @throws RuntimeException
+     * @throws DomainException
+     * @throws \Exception
+     */
+    public function index(): void
+    {
         // params
-        $id_job   = $this->request->param( 'id_job' );
-        $password = $this->request->param( 'password' );
+        $id_job = (int)$this->request->param('id_job');
+        $password = (string)$this->request->param('password');
 
         // find a job
-        $job = $this->getJob( $id_job, $password );
+        $job = $this->getJob($id_job, $password);
 
-        if ( null === $job ) {
-            throw new NotFoundException( 'Job not found.' );
+        if (null === $job) {
+            throw new NotFoundException('Job not found.');
         }
 
         $this->chunk = $job;
         $this->return404IfTheJobWasDeleted();
 
-        $metadata = new \stdClass();
-        $metadata->project = $this->getProjectInfo( $job->getProject() );
-        $metadata->job = $this->getJobMetaData( $job );
-        $metadata->files = $this->getJobFilesMetaData( $job );
+        $metadata = new stdClass();
+        $metadata->project = $this->getProjectInfo($job->getProject(new ProjectDao($this->getDatabase())));
+        $metadata->job = $this->getJobMetaData($job);
+        $metadata->files = $this->getJobFilesMetaData($job);
 
-        $this->response->json( $metadata );
+        $this->response->json($metadata);
     }
 
     /**
-     * @param \Projects_ProjectStruct $project
+     * @param ProjectStruct $project
      *
-     * @return \stdClass
+     * @return stdClass
+     * @throws DomainException
+     * @throws Exception
      */
-    private function getProjectInfo( \Projects_ProjectStruct $project ) {
+    private function getProjectInfo(ProjectStruct $project): stdClass
+    {
+        $metadata = new stdClass();
+        $metadata->mt_extra = new stdClass();
 
-        $metadata = new \stdClass();
+        $myExtraKeys = [];
 
-        foreach ( $project->getMetadata() as $metadatum ) {
+        foreach (EngineConstants::getAvailableEnginesList() as $engineName) {
+            $myExtraKeys = array_merge($myExtraKeys, $engineName::getConfigurationParameters());
+        }
+
+        $myExtraKeys = array_unique($myExtraKeys);
+
+        foreach ((new ProjectMetadataDao($this->getDatabase()))->setCacheTTL(3600)->allByProjectId((int) $project->id) as $metadatum) {
             $key = $metadatum->key;
-            $metadata->$key = $metadatum->value;
+
+            if (in_array($key, $myExtraKeys)) {
+                $metadata->mt_extra->$key = $metadatum->value;
+            } else {
+                $metadata->$key = $metadatum->value;
+            }
         }
 
         return $metadata;
     }
 
     /**
-     * @param \Jobs_JobStruct $job
+     * @param JobStruct $job
      *
-     * @return \stdClass
+     * @return stdClass
+     * @throws ReflectionException
+     * @throws DomainException
+     * @throws \Exception
      */
-    private function getJobMetaData( \Jobs_JobStruct $job ) {
+    private function getJobMetaData(JobStruct $job): object
+    {
+        $metadata = new stdClass();
+        $jobMetaDataDao = new MetadataDao($this->getDatabase());
 
-        $metadata = new \stdClass();
-        $jobMetaDataDao = new MetadataDao();
+        foreach ($jobMetaDataDao->getByJobIdAndPassword(
+            $job->id ?? throw new DomainException('Job ID must not be null'),
+            $job->password ?? throw new DomainException('Job password must not be null'),
+            60 * 5
+        ) as $metadatum) {
+            $metadata->{$metadatum->key} = $metadatum->value;
+        }
 
-        foreach ( $jobMetaDataDao->getByJobIdAndPassword( $job->id, $job->password, 60 * 5 ) as $metadatum ) {
-            $key = $metadatum->key;
-            $metadata->$key = $metadatum->value;
+        if (!property_exists($metadata, JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value)) {
+            $metadata->{JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value} = [];
         }
 
         return $metadata;
     }
 
     /**
-     * @param \Jobs_JobStruct $job
+     * @param JobStruct $job
      *
-     * @return array
+     * @return array<int, stdClass>
+     * @throws ReflectionException
+     * @throws RuntimeException
+     * @throws DomainException
+     * @throws \Exception
      */
-    private function getJobFilesMetaData( \Jobs_JobStruct $job ) {
+    private function getJobFilesMetaData(JobStruct $job): array
+    {
+        $metadata = [];
+        $filesMetaDataDao = new FileMetadataDao($this->getDatabase());
+        $projectId = $job->getProject(new ProjectDao($this->getDatabase()))->id ?? throw new DomainException('Project ID must not be null');
 
-        $metadata         = [];
-        $filesMetaDataDao = new \Files\MetadataDao();
-
-        foreach ( $job->getFiles() as $file ) {
-            $metadatum = new \stdClass();
-            foreach ( $filesMetaDataDao->getByJobIdProjectAndIdFile( $job->getProject()->id, $file->id, 60 * 5 ) as $meta ) {
-                $key = $meta->key;
-                $metadatum->$key = $meta->value;
+        foreach ($job->getFiles(new FileDao($this->getDatabase())) as $file) {
+            $metadatum = new stdClass();
+            foreach ($filesMetaDataDao->getByJobIdProjectAndIdFile($projectId, $file->id, 60 * 5) ?? [] as $meta) {
+                $metadatum->{$meta->key} = $meta->value;
             }
 
-            $metadataObject = new \stdClass();
+            $metadataObject = new stdClass();
             $metadataObject->id = $file->id;
             $metadataObject->filename = $file->filename;
             $metadataObject->data = $metadatum;

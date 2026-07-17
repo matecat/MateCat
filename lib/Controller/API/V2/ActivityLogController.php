@@ -7,47 +7,76 @@
  *
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-use ActivityLog\ActivityLogDao;
-use ActivityLog\ActivityLogStruct;
-use API\V2\Json\Activity;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectPasswordValidator;
+use Model\ActivityLog\ActivityLogDao;
+use Model\ActivityLog\ActivityLogStruct;
+use ReflectionException;
+use Throwable;
+use View\API\V2\Json\Activity;
 
-class ActivityLogController extends KleinController {
+class ActivityLogController extends KleinController
+{
 
-
-    protected $rawLogContent;
-    protected $project_data;
-
-    public function lastOnProject(){
-
-        $validator = new Validators\ProjectPasswordValidator( $this );
+    /**
+     * @throws Throwable
+     */
+    public function allOnProject(): void
+    {
+        $validator = new ProjectPasswordValidator($this);
         $validator->validate();
 
-        $activityLogDao = new ActivityLogDao();
-        $rawContent = $activityLogDao->getLastActionInProject( $validator->getIdProject() ) ;
+        $activityLogDao = new ActivityLogDao($this->getDatabase());
+        $rawContent = $activityLogDao->getAllForProject($validator->getIdProject());
 
-        $formatted = new Activity( $rawContent ) ;
-        $this->response->json( array( 'activity' => $formatted->render() ) );
-
+        $formatted = new Activity($rawContent, $this->featureSet);
+        $this->response->json($formatted->render());
     }
 
-    public function lastOnJob(){
-
-        $validator = new Validators\ChunkPasswordValidator( $this );
+    /**
+     * @throws Throwable
+     */
+    public function lastOnProject(): void
+    {
+        $validator = new ProjectPasswordValidator($this);
         $validator->validate();
 
-        $activityLogDao = new ActivityLogDao();
+        $activityLogDao = new ActivityLogDao($this->getDatabase());
+        $rawContent = $activityLogDao->getLastActionInProject($validator->getIdProject());
+
+        $formatted = new Activity($rawContent, $this->featureSet);
+        $this->response->json(['activity' => $formatted->render()]);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Throwable
+     */
+    public function lastOnJob(): void
+    {
+        $validator = new ChunkPasswordValidator($this);
+        $validator->validate();
+
+        $activityLogDao = new ActivityLogDao($this->getDatabase());
         $activityLogDao->whereConditions = ' id_job = :id_job ';
         $activityLogDao->epilogueString = " ORDER BY ID DESC LIMIT 1";
-        $this->rawLogContent  = $activityLogDao->read(
-                new ActivityLogStruct(),
-                [ 'id_job' =>  $validator->getJobId() ]
+        /** @var ActivityLogStruct[] $rawLogContent */
+        $rawLogContent = $activityLogDao->read(
+            new ActivityLogStruct(),
+            ['id_job' => $validator->getJobId()]
         );
 
-        $formatted = new Activity( $this->rawLogContent ) ;
-        $this->response->json( array( 'activity' => $formatted->render() ) );
+        $formatted = new Activity($rawLogContent, $this->featureSet);
+        $this->response->json(['activity' => $formatted->render()]);
+    }
 
+    protected function registerValidators(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
     }
 
 }

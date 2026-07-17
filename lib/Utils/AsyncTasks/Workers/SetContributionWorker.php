@@ -7,220 +7,259 @@
  *
  */
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
-use Contribution\ContributionSetStruct;
-use Engine;
-use Engines_EngineInterface;
 use Exception;
-use Exceptions\ValidationError;
-use INIT;
-use Jobs_JobStruct;
-use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Commons\QueueElement;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
-use TmKeyManagement_Filter;
-use TmKeyManagement_TmKeyManagement;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use ReflectionException;
+use Utils\Contribution\SetContributionRequest;
+use Utils\Engines\AbstractEngine;
+use Utils\Engines\EngineInterface;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\Lara\Headers;
+use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\TmKeyManagement\Filter;
+use Utils\TmKeyManagement\TmKeyManager;
 
-class SetContributionWorker extends AbstractWorker {
+class SetContributionWorker extends AbstractWorker
+{
 
-    const ERR_SET_FAILED    = 4;
-    const ERR_UPDATE_FAILED = 6;
-    const ERR_NO_TM_ENGINE  = 5;
-
-    const REDIS_PROPAGATED_ID_KEY = "j:%s:s:%s";
+    const int ERR_SET_FAILED = 4;
+    const int ERR_UPDATE_FAILED = 6;
+    const int ERR_NO_TM_ENGINE = 5;
 
     /**
-     * @var Engines_EngineInterface
+     * @var ?EngineInterface
      */
-    protected $_engine;
+    protected ?EngineInterface $_engine = null;
 
     /**
      * This method is for testing purpose. Set a dependency injection
      *
-     * @param Engines_EngineInterface $_tms
+     * @param EngineInterface $_tms
      */
-    public function setEngine( $_tms ) {
+    public function setEngine(EngineInterface $_tms): void
+    {
         $this->_engine = $_tms;
+    }
+
+    private function toSetContributionRequest(QueueElement $queueElement): SetContributionRequest
+    {
+        $queueElement->params->jobStruct = new JobStruct($queueElement->params->jobStruct->toArray());
+
+        return new SetContributionRequest($queueElement->params->toArray());
     }
 
     /**
      * @param AbstractElement $queueElement
      *
-     * @return null
      * @throws EndQueueException
      * @throws ReQueueException
      * @throws Exception
-     * @throws ValidationError
      */
-    public function process( AbstractElement $queueElement ) {
+    public function process(AbstractElement $queueElement): void
+    {
+        if (!$queueElement instanceof QueueElement) {
+            throw new EndQueueException('Invalid queue element type for SetContributionWorker::process');
+        }
 
-        /**
-         * @var $queueElement QueueElement
-         */
-        $this->_checkForReQueueEnd( $queueElement );
-
-        $contributionStruct = new ContributionSetStruct( $queueElement->params->toArray() );
+        $this->_checkForReQueueEnd($queueElement);
 
         $this->_checkDatabaseConnection();
 
-        $this->_execContribution( $contributionStruct );
+        $contributionStruct = $this->toSetContributionRequest($queueElement);
 
+        $this->setEngine(
+            $this->_loadEngine($contributionStruct->getJobStruct())
+        );
+
+        $this->_execContribution($contributionStruct);
     }
 
     /**
-     * @param ContributionSetStruct $contributionStruct
+     * @param SetContributionRequest $contributionStruct
      *
+     * @throws EndQueueException
      * @throws ReQueueException
      * @throws Exception
-     * @throws ValidationError
      */
-    protected function _execContribution( ContributionSetStruct $contributionStruct ) {
-
+    protected function _execContribution(SetContributionRequest $contributionStruct): void
+    {
         $jobStruct = $contributionStruct->getJobStruct();
+        $engine = $this->requireEngine();
 
-        if ( empty( $jobStruct ) ) {
-            throw new Exception( "Job not found. Password changed?" );
+        /**
+         * @see AbstractEngine::$_isAdaptiveMT
+         */
+        if (!$engine->isAdaptiveMT() && !$engine->isTMS()) {
+            return;
         }
 
-        $this->_loadEngine( $contributionStruct );
+        $config = $engine->getConfigStruct();
+        $config['source'] = $jobStruct->source;
+        $config['target'] = $jobStruct->target;
+        $config['email'] = $contributionStruct->api_key;
 
-        $config             = $this->_engine->getConfigStruct();
-        $config[ 'source' ] = $jobStruct->source;
-        $config[ 'target' ] = $jobStruct->target;
-        $config[ 'email' ]  = $contributionStruct->api_key;
-
-        $config = array_merge( $config, $this->_extractAvailableKeysForUser( $contributionStruct, $jobStruct ) );
+        $config = array_merge($config, $this->_extractAvailableKeysForUser($contributionStruct, $jobStruct));
 
         try {
-
-            $this->_update( $config, $contributionStruct );
-            $this->_doLog( "Key UPDATE -- Job: $contributionStruct->id_job, Segment: $contributionStruct->id_segment " );
-
-        } catch ( ReQueueException $e ) {
-            $this->_doLog( $e->getMessage() );
+            $this->_update($config, $contributionStruct, $jobStruct->id_mt_engine);
+            $this->_doLog("Key UPDATE -- Job: $contributionStruct->id_job, Segment: $contributionStruct->id_segment ");
+        } catch (ReQueueException $e) {
+            $this->_doLog($e->getMessage());
             throw $e;
         }
-
     }
 
     /**
      * !Important Refresh the engine ID for each queueElement received
-     * to avoid set contributions on the wrong engine ID
+     * to avoid set contributions to the wrong engine ID
      *
-     * @param ContributionSetStruct $contributionStruct
+     * @param JobStruct $jobStruct
      *
+     * @return AbstractEngine
      * @throws Exception
-     * @throws ValidationError
      */
-    protected function _loadEngine( ContributionSetStruct $contributionStruct ) {
+    protected function _loadEngine(JobStruct $jobStruct): AbstractEngine
+    {
+        try {
+            $engine = EnginesFactory::getInstance($jobStruct->id_tms, $this->database, AbstractEngine::class); //Load MyMemory
 
-        $jobStruct = $contributionStruct->getJobStruct();
-        if ( empty( $this->_engine ) ) {
-            $this->_engine = Engine::getInstance( $jobStruct->id_tms ); //Load MyMemory
+            return $engine;
+        } catch (Exception $e) {
+            throw new EndQueueException($e->getMessage(), self::ERR_NO_TM_ENGINE);
         }
-
     }
 
     /**
-     * @param array                 $config
-     * @param ContributionSetStruct $contributionStruct
+     * @param array<string, mixed> $config
+     * @param SetContributionRequest $contributionStruct
      *
+     * @throws EndQueueException
      * @throws ReQueueException
-     * @throws ValidationError
+     * @throws \LogicException
+     * @throws ReflectionException
      */
-    protected function _set( array $config, ContributionSetStruct $contributionStruct ) {
+    protected function _set(array $config, SetContributionRequest $contributionStruct): void
+    {
+        $engine = $this->requireEngine();
+        $jobStruct = $contributionStruct->getJobStruct();
 
-        $config[ 'segment' ]        = $contributionStruct->segment;
-        $config[ 'translation' ]    = $contributionStruct->translation;
-        $config[ 'context_after' ]  = $contributionStruct->context_after;
-        $config[ 'context_before' ] = $contributionStruct->context_before;
+        $config['uid'] = $contributionStruct->uid;
+        $config['segment'] = $contributionStruct->segment;
+        $config['translation'] = $contributionStruct->translation;
+        $config['context_after'] = $contributionStruct->context_after;
+        $config['context_before'] = $contributionStruct->context_before;
+        $config['set_mt'] = !(($jobStruct->id_mt_engine != 1));
 
         //get the Props
-        $config[ 'prop' ] = json_encode( $contributionStruct->getProp() );
+        $config['prop'] = json_encode($contributionStruct->getProp(new ProjectDao($this->database)));
 
         // set the contribution for every key in the job belonging to the user
-        $res = $this->_engine->set( $config );
-        if ( !$res ) {
-            //reset the engine
-            $this->_raiseException( 'Set', $config );
-        }
+        $res = $engine->set($config);
+        $responseStatus = (is_object($res) && isset($res->responseStatus) && is_numeric($res->responseStatus)) ? (int)$res->responseStatus : null;
 
+        if ($responseStatus !== null && $responseStatus >= 200 && $responseStatus < 300) {
+            $this->_doLog("Update complete");
+        } elseif ($responseStatus !== null && $responseStatus >= 400 && $responseStatus < 500) {
+            $this->_raiseEndQueueException('Update', $config);
+        } else {
+            $this->_raiseReQueueException('Update', $config);
+        }
     }
 
     /**
-     * @param array                 $config
-     * @param ContributionSetStruct $contributionStruct
+     * @param array<string, mixed> $config
+     * @param SetContributionRequest $contributionStruct
+     * @param int $id_mt_engine
      *
+     * @throws EndQueueException
      * @throws ReQueueException
-     * @throws ValidationError
+     * @throws \LogicException
+     * @throws ReflectionException
      */
-    protected function _update( array $config, ContributionSetStruct $contributionStruct ) {
-
+    protected function _update(array $config, SetContributionRequest $contributionStruct, int $id_mt_engine = 1): void
+    {
+        $engine = $this->requireEngine();
         // update the contribution for every key in the job belonging to the user
-        $config[ 'segment' ]        = $contributionStruct->oldSegment;
-        $config[ 'translation' ]    = $contributionStruct->oldTranslation;
-        $config[ 'context_after' ]  = $contributionStruct->context_after;
-        $config[ 'context_before' ] = $contributionStruct->context_before;
-        $config[ 'prop' ]           = json_encode( $contributionStruct->getProp() );
+        $config['uid'] = $contributionStruct->uid;
+        $config['segment'] = $contributionStruct->oldSegment;
+        $config['translation'] = $contributionStruct->oldTranslation;
+        $config['context_after'] = $contributionStruct->context_after;
+        $config['context_before'] = $contributionStruct->context_before;
+        $config['prop'] = json_encode(
+            array_merge(
+                $contributionStruct->getProp(new ProjectDao($this->database)),
+                (new Headers($contributionStruct->id_job . ":" . $contributionStruct->id_segment, $contributionStruct->translation_origin))->getArrayCopy()
+            )
+        );
+        $config['set_mt'] = !(($id_mt_engine != 1));
 
-        $config[ 'newsegment' ]     = $contributionStruct->segment;
-        $config[ 'newtranslation' ] = $contributionStruct->translation;
+        $config['newsegment'] = $contributionStruct->segment;
+        $config['newtranslation'] = $contributionStruct->translation;
+        $config['spiceMatch'] = $contributionStruct->contextIsSpice;
 
-        $res = $this->_engine->update( $config );
-        if ( !$res ) {
-            //reset the engine
-            $this->_raiseException( 'Update', $config );
+        $this->_doLog("Executing Update on " . get_class($engine));
+
+        $res = $engine->update($config);
+        $responseStatus = (is_object($res) && isset($res->responseStatus) && is_numeric($res->responseStatus)) ? (int)$res->responseStatus : null;
+
+        if ($responseStatus !== null && $responseStatus >= 200 && $responseStatus < 300) {
+            $this->_doLog("Update complete");
+        } elseif ($responseStatus !== null && $responseStatus >= 400 && $responseStatus < 500) {
+            $this->_raiseEndQueueException('Update', $config);
+        } else {
+            $this->_raiseReQueueException('Update', $config);
         }
-
     }
 
     /**
-     * @param ContributionSetStruct $contributionStruct
-     * @param Jobs_JobStruct        $jobStruct
+     * @param SetContributionRequest $contributionStruct
+     * @param JobStruct $jobStruct
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
-    protected function _extractAvailableKeysForUser( ContributionSetStruct $contributionStruct, Jobs_JobStruct $jobStruct ) {
-
-        if ( $contributionStruct->fromRevision ) {
-            $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+    protected function _extractAvailableKeysForUser(SetContributionRequest $contributionStruct, JobStruct $jobStruct): array
+    {
+        if ($contributionStruct->fromRevision) {
+            $userRole = Filter::ROLE_REVISOR;
         } else {
-            $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+            $userRole = Filter::ROLE_TRANSLATOR;
         }
 
         //find all the job's TMs with write grants and make a contribution to them
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $jobStruct->tm_keys, 'w', 'tm', $contributionStruct->uid, $userRole );
+        $tm_keys = TmKeyManager::getJobTmKeys($jobStruct->tm_keys, 'w', 'tm', $contributionStruct->uid, $userRole);
 
         $config = [];
-        if ( !empty( $tm_keys ) ) {
-
-            $config[ 'keys' ] = [];
-            foreach ( $tm_keys as $i => $tm_info ) {
-                $config[ 'id_user' ][] = $tm_info->key;
+        if (!empty($tm_keys)) {
+            $config['keys'] = [];
+            foreach ($tm_keys as $tm_info) {
+                $config['id_user'][] = $tm_info->key;
             }
-
         }
 
         return $config;
-
     }
 
     /**
-     * @param       $type
-     * @param array $config
+     * @param string $type
+     * @param array<string, mixed> $config
      *
      * @throws ReQueueException
      */
-    protected function _raiseException( $type, array $config ) {
+    protected function _raiseReQueueException(string $type, array $config): never
+    {
         //reset the engine
-        $engineName    = get_class( $this->_engine );
+        $engineName = $this->_engine !== null ? get_class($this->_engine) : 'unknown';
         $this->_engine = null;
 
-        switch ( strtolower( $type ) ) {
+        switch (strtolower($type)) {
             case 'update':
                 $errNum = self::ERR_UPDATE_FAILED;
                 break;
@@ -230,7 +269,44 @@ class SetContributionWorker extends AbstractWorker {
                 break;
         }
 
-        throw new ReQueueException( "$type failed on " . $engineName . ": Values " . var_export( $config, true ), $errNum );
+        throw new ReQueueException("$type failed on " . $engineName . ": Values " . var_export($config, true), $errNum);
+    }
+
+    /**
+     * @param string $type
+     * @param array<string, mixed> $config
+     *
+     * @throws EndQueueException
+     */
+    protected function _raiseEndQueueException(string $type, array $config): never
+    {
+        //reset the engine
+        $engineName = $this->_engine !== null ? get_class($this->_engine) : 'unknown';
+        $this->_engine = null;
+
+        switch (strtolower($type)) {
+            case 'update':
+                $errNum = self::ERR_UPDATE_FAILED;
+                break;
+            case 'set':
+            default:
+                $errNum = self::ERR_SET_FAILED;
+                break;
+        }
+
+        throw new EndQueueException("$type failed on " . $engineName . ": Values " . var_export($config, true), $errNum);
+    }
+
+    /**
+     * @throws \LogicException
+     */
+    protected function requireEngine(): EngineInterface
+    {
+        if ($this->_engine === null) {
+            throw new \LogicException('TM engine is not initialized');
+        }
+
+        return $this->_engine;
     }
 
 }

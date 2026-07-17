@@ -1,3 +1,4 @@
+@use "../../commons/colors";
 section {
   .issues-container {
     display: none;
@@ -177,7 +178,7 @@ section.readonly .issues-container {
                   }
                   &.re-message {
                     i {
-                      color: $approvedGreen;
+                      color: colors.$approvedGreen;
                     }
                     &:hover {
                       i {
@@ -211,13 +212,13 @@ section.readonly .issues-container {
                 .re-comment {
                   margin-bottom: 0;
                   .re-revisor {
-                    color: $approvedGreen;
+                    color: colors.$approvedGreen;
                   }
                   .re-revisor2 {
-                    color: $approved2Green;
+                    color: colors.$approved2Green;
                   }
                   .re-translator {
-                    color: $translatedBlue;
+                    color: colors.$translatedBlue;
                   }
                   .re-selected-text {
                     color: #000;
@@ -242,8 +243,8 @@ section.readonly .issues-container {
       &.add-issue-segment {
         .category,
         .category-selected .severity {
-          border: 1px solid $approvedGreen !important;
-          box-shadow: inset 0 0 3px $approvedGreen;
+          border: 1px solid colors.$approvedGreen !important;
+          box-shadow: inset 0 0 3px colors.$approvedGreen;
         }
       }
     }

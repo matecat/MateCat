@@ -1,6 +1,8 @@
 <?php
 
 
+use migrations\AbstractMatecatMigration;
+
 class FixChunkReviewModelScore extends AbstractMatecatMigration
 {
     public $sql_up = <<<EOF

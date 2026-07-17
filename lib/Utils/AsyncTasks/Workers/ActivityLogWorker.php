@@ -1,13 +1,14 @@
 <?php
-namespace AsyncTasks\Workers;
 
-use ActivityLog\ActivityLogDao;
-use ActivityLog\ActivityLogStruct;
-use Database;
+namespace Utils\AsyncTasks\Workers;
+
+use Model\ActivityLog\ActivityLogDao;
+use Model\ActivityLog\ActivityLogStruct;
 use PDOException;
-use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Exceptions\EndQueueException;
 
 /**
  * Created by PhpStorm.
@@ -15,55 +16,35 @@ use TaskRunner\Commons\QueueElement;
  * Date: 13/06/16
  * Time: 11:49
  */
-class ActivityLogWorker extends AbstractWorker {
+class ActivityLogWorker extends AbstractWorker
+{
 
-    public function process( AbstractElement $queueElement ) {
+    /**
+     * @throws PDOException
+     * @throws EndQueueException
+     */
+    public function process(AbstractElement $queueElement): void
+    {
+        if (!$queueElement instanceof QueueElement) {
+            return;
+        }
 
-        /**
-         * @var $queueElement QueueElement
-         */
-        $this->_checkForReQueueEnd( $queueElement );
+        $this->_checkForReQueueEnd($queueElement);
 
-        $logEvent = new ActivityLogStruct( $queueElement->params->toArray() );
+        $logEvent = new ActivityLogStruct($queueElement->params->toArray());
 
         //re initialize DB if socked is closed
         $this->_checkDatabaseConnection();
 
-        $this->_writeLog( $logEvent );
-
-    }
-
-    protected function _writeLog( ActivityLogStruct $logEvent ){
-
-        $logActivityDao = new ActivityLogDao();
-        $logActivityDao->create( $logEvent );
-
+        $this->_writeLog($logEvent);
     }
 
     /**
-     * Check the connection.
-     * MySql timeout close the socket and throws Exception in the nex read/write access
-     *
-     * <code>
-     * By default, the server closes the connection after eight hours if nothing has happened.
-     * You can change the time limit by setting thewait_timeout variable when you start mysqld.
-     * @see http://dev.mysql.com/doc/refman/5.0/en/gone-away.html
-     * </code>
-     *
+     * @throws PDOException
      */
-    protected function _checkDatabaseConnection() {
-
-        $db = Database::obtain();
-        try {
-            $db->ping();
-        } catch ( PDOException $e ) {
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : {$e->getMessage()} " );
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Database connection reloaded. " );
-            $db->close();
-            //reconnect
-            $db->getConnection();
-        }
-
+    protected function _writeLog(ActivityLogStruct $logEvent, ?ActivityLogDao $dao = null): void
+    {
+        ($dao ?? new ActivityLogDao($this->database))->create($logEvent);
     }
 
 }

@@ -1,19 +1,29 @@
 <?php
+
+namespace Utils\Engines\Results\MyMemory;
+
+use TypeError;
+use Utils\Engines\Results\TMSAbstractResponse;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 04/03/15
  * Time: 11.50
  */
+class AnalyzeResponse extends TMSAbstractResponse
+{
 
-class Engines_Results_MyMemory_AnalyzeResponse extends Engines_Results_AbstractResponse{
-
-    public function __construct($response){
-
-        $this->responseStatus  = isset( $response[ 'responseStatus' ] ) ? $response[ 'responseStatus' ] : '';
-        $this->responseDetails = isset( $response[ 'responseData' ] ) ? $response[ 'responseData' ] : '';
-        $this->responseData    = isset( $response[ 'data' ] ) ? $response[ 'data' ] : '';
-
+    /**
+     * @param array<string, mixed> $response
+     *
+     * @throws TypeError
+     */
+    public function __construct(array $response)
+    {
+        $this->responseStatus = (int)($response['responseStatus'] ?? 200);
+        $this->responseDetails = $response['responseData'] ?? '';
+        $this->responseData = $response['data'] ?? '';
     }
 
 } 

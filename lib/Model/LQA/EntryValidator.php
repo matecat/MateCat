@@ -1,56 +1,158 @@
 <?php
 
-namespace LQA;
+namespace Model\LQA;
 
-use Exceptions\NotFoundException;
+use Exception;
+use Model\DataAccess\IDatabase;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\Jobs\JobDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentDao;
+use Model\Segments\SegmentStruct;
+use ReflectionException;
 
-class EntryValidator extends \DataAccess_AbstractValidator {
+class EntryValidator
+{
 
-    public $segment;
-    public $project;
-    public $chunk ;
-    public $translation ;
-    public $qa_model ;
-    public $category ;
-    public $issue ;
+    public ?SegmentStruct $segment = null;
+    public ?ProjectStruct $project = null;
+    public ?ModelStruct $qa_model = null;
+    public ?CategoryStruct $category = null;
+
+    /** @var array<array{0: null|string, 1: string}> */
+    protected array $errors = [];
+
+    protected EntryStruct $struct;
+
+    protected bool $validated = false;
+
+    private SegmentDao $segmentDao;
+    private JobDao $jobDao;
+    private ProjectDao $projectDao;
+    private ModelDao $modelDao;
+    private CategoryDao $categoryDao;
+
+    public function __construct(
+        EntryStruct $struct,
+        IDatabase $database,
+        ?SegmentDao $segmentDao = null,
+        ?JobDao $jobDao = null,
+        ?ProjectDao $projectDao = null,
+        ?ModelDao $modelDao = null,
+        ?CategoryDao $categoryDao = null
+    ) {
+        $this->struct      = $struct;
+        $this->segmentDao  = $segmentDao  ?? new SegmentDao($database);
+        $this->jobDao      = $jobDao      ?? new JobDao($database);
+        $this->projectDao  = $projectDao  ?? new ProjectDao($database);
+        $this->modelDao    = $modelDao    ?? new ModelDao($database);
+        $this->categoryDao = $categoryDao ?? new CategoryDao($database);
+    }
+
+    /** @return array<array{0: null|string, 1: string}> */
+    public function getErrors(): array
+    {
+        return $this->errors;
+    }
+
+    public function flushErrors(): void
+    {
+        $this->errors = [];
+    }
+
+    /** @return list<string> */
+    public function getErrorMessages(): array
+    {
+        return array_values(array_map(function ($item) {
+            return implode(' ', array_filter($item, fn($v) => $v !== null));
+        }, $this->errors));
+    }
+
+    public function getErrorsAsString(): string
+    {
+        return implode(', ', $this->getErrorMessages());
+    }
 
     /**
-     * @throws \Exceptions\NotFoundException
+     * @throws NotFoundException
+     * @throws ReflectionException
+     * @throws ValidationError
+     * @throws Exception
      */
+    public function ensureValid(): void
+    {
+        if (!$this->validated && !$this->isValid()) {
+            throw new ValidationError($this->getErrorsAsString());
+        }
+    }
 
-    public function validate() {
-        $dao = new \Segments_SegmentDao( \Database::obtain() );
-        $this->segment = $dao->getById( $this->struct->id_segment );
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     * @throws Exception
+     */
+    public function isValid(): bool
+    {
+        $this->flushErrors();
+        $this->validate();
+        $errors = $this->getErrors();
+        $this->validated = true;
 
-        if (!$this->segment) throw new NotFoundException('segment not found');
+        return empty($errors);
+    }
 
-        $this->job = \Jobs_JobDao::getById( $this->struct->id_job)[0];
-        $this->project = \Projects_ProjectDao::findById($this->job->id_project);
+    /**
+     * @throws NotFoundException
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function validate(): void
+    {
+        $this->segment = $this->segmentDao->fetchById($this->struct->id_segment, SegmentStruct::class);
+
+        if (!$this->segment) {
+            throw new NotFoundException('segment not found');
+        }
+
+        $jobs = $this->jobDao->getNotDeletedById($this->struct->id_job);
+        $job  = $jobs[0] ?? throw new NotFoundException('job not found');
+
+        $this->project = $this->projectDao->findById($job->id_project)
+            ?? throw new NotFoundException('project not found');
 
         $this->validateCategoryId();
         $this->validateInSegmentScope();
     }
 
-    private function validateInSegmentScope() {
-        if ( $this->struct->id ) {
-            $this->issue = \LQA\EntryDao::findById( $this->struct->id );
-
-            if ( !$this->issue ) {
-                $this->errors[] = array(null, 'issue not found');
-            }
-
-            if ( $this->issue->id_segment != $this->segment->id ) {
-                $this->errors[] = array(null, 'issue not found');
+    private function validateInSegmentScope(): void
+    {
+        if ($this->struct->id) {
+            if ($this->segment === null || $this->struct->id_segment != $this->segment->id) {
+                $this->errors[] = [null, 'issue not found'];
             }
         }
     }
 
-    private function validateCategoryId() {
-        $this->qa_model = \LQA\ModelDao::findById( $this->project->id_qa_model );
-        $this->category = \LQA\CategoryDao::findById( $this->struct->id_category );
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function validateCategoryId(): void
+    {
+        if ($this->project === null || $this->project->id_qa_model === null) {
+            $this->errors[] = [null, 'QA model id not found'];
+            return;
+        }
 
-        if ( $this->category->id_model != $this->qa_model->id ) {
-            $this->errors[] = array(null, 'QA model id mismatch');
+        $this->qa_model  = $this->modelDao->fetchById($this->project->id_qa_model, ModelStruct::class)
+            ?? throw new NotFoundException('QA model not found');
+        $this->category  = $this->categoryDao->fetchById($this->struct->id_category, CategoryStruct::class)
+            ?? throw new NotFoundException('category not found');
+
+        if ($this->category->id_model != $this->qa_model->id) {
+            $this->errors[] = [null, 'QA model id mismatch'];
         }
     }
 }

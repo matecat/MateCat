@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class ApiKeysTable extends AbstractMatecatMigration {
     public $sql_up = <<<EOF
 CREATE TABLE `api_keys` (

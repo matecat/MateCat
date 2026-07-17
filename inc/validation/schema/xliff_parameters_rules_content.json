@@ -1,0 +1,222 @@
+{
+  "type": [
+    "object"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "xliff12": {
+      "$ref": "#/definitions/xliff12Rule"
+    },
+    "xliff20": {
+      "$ref": "#/definitions/xliff20Rule"
+    }
+  },
+  "definitions": {
+    "editor": {
+      "enum": [
+        "draft",
+        "translated",
+        "approved",
+        "approved2"
+      ]
+    },
+    "states12": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "enum": [
+              "final",
+              "needs-adaptation",
+              "needs-l10n",
+              "needs-review-adaptation",
+              "needs-review-l10n",
+              "needs-review-translation",
+              "needs-translation",
+              "new",
+              "signed-off",
+              "translated",
+              "exact-match",
+              "fuzzy-match",
+              "id-match",
+              "leveraged-glossary",
+              "leveraged-inherited",
+              "leveraged-mt",
+              "leveraged-repository",
+              "leveraged-tm",
+              "mt-suggestion",
+              "rejected-grammar",
+              "rejected-inaccurate",
+              "rejected-length",
+              "rejected-spelling",
+              "tm-suggestion"
+            ]
+          },
+          {
+            "type": "string",
+            "pattern": "^x-.*"
+          }
+        ]
+      }
+    },
+    "states20": {
+      "type": [
+        "array"
+      ],
+      "items": {
+        "oneOf": [
+          {
+            "enum": [
+              "initial",
+              "translated",
+              "reviewed",
+              "final"
+            ]
+          },
+          {
+            "type": "string",
+            "pattern": "^x-.*"
+          }
+        ]
+      }
+    },
+    "match_category": {
+      "type": "string",
+      "enum": [
+        "new",
+        "tm_50_74",
+        "tm_75_84",
+        "tm_85_94",
+        "tm_95_99",
+        "tm_100",
+        "tm_100_public",
+        "ice",
+        "MT",
+        "repetitions",
+        "internal"
+      ],
+      "default": "ice",
+      "optional": true
+    },
+    "xliff12Rule": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "analysis"
+        ],
+        "properties": {
+          "analysis": {
+            "default": "new",
+            "enum": [
+              "new",
+              "pre-translated"
+            ]
+          }
+        },
+        "if": {
+          "properties": {
+            "analysis": {
+              "const": "pre-translated"
+            }
+          }
+        },
+        "then": {
+          "additionalProperties": false,
+          "required": [
+            "editor",
+            "states"
+          ],
+          "properties": {
+            "analysis": {
+              "const": "pre-translated"
+            },
+            "states": {
+              "$ref": "#/definitions/states12"
+            },
+            "editor": {
+              "$ref": "#/definitions/editor"
+            },
+            "match_category": {
+              "$ref": "#/definitions/match_category"
+            }
+          }
+        },
+        "else": {
+          "required": [
+            "states"
+          ],
+          "properties": {
+            "analysis": {
+              "const": "new"
+            },
+            "states": {
+              "$ref": "#/definitions/states12"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "xliff20Rule": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "analysis"
+        ],
+        "properties": {
+          "analysis": {
+            "default": "new",
+            "enum": [
+              "new",
+              "pre-translated"
+            ]
+          }
+        },
+        "if": {
+          "properties": {
+            "analysis": {
+              "const": "pre-translated"
+            }
+          }
+        },
+        "then": {
+          "additionalProperties": false,
+          "required": [
+            "editor",
+            "states"
+          ],
+          "properties": {
+            "analysis": {
+              "const": "pre-translated"
+            },
+            "states": {
+              "$ref": "#/definitions/states20"
+            },
+            "editor": {
+              "$ref": "#/definitions/editor"
+            },
+            "match_category": {
+              "$ref": "#/definitions/match_category"
+            }
+          }
+        },
+        "else": {
+          "required": [
+            "states"
+          ],
+          "properties": {
+            "analysis": {
+              "const": "new"
+            },
+            "states": {
+              "$ref": "#/definitions/states20"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  }
+}

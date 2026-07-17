@@ -1,7 +1,9 @@
 <?php
 
+
+
 $root = realpath( dirname( __FILE__ ) . '/../../' );
-include_once $root . "/inc/Bootstrap.php";
+include_once $root . "/lib/Bootstrap.php";
 Bootstrap::start();
 
 # Generate and insert a new enabled api keys pair for
@@ -61,7 +63,7 @@ echo $createSchemaTable;
 foreach ( $filenames as $migration => $filename ) {
     include $filename;
 
-    list( $skip, $name ) = preg_split( '/_/', $filename, 2 );
+    [ $skip, $name ] = preg_split( '/_/', $filename, 2 );
 
     $name = str_replace( '.php', '', $name );
 

@@ -6,68 +6,83 @@
  * Time: 16:50
  */
 
-namespace ConnectedServices;
+namespace Model\ConnectedServices;
 
 
-use OauthTokenEncryption;
+use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
+use Exception;
+use Model\ConnectedServices\Oauth\OauthTokenEncryption;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 
-class ConnectedServiceStruct extends \DataAccess_AbstractDaoSilentStruct   implements \DataAccess_IDaoStruct {
+class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
-    public $id ;
-    public $uid ;
-    public $service ;
-    public $email ;
-    public $name;
-
-    public $remote_id ;
-
-    public $oauth_access_token ;
-
-    public $created_at ;
-    public $updated_at ;
-
-    public $expired_at ;
-    public $disabled_at ;
-
-    public $is_default ;
+    public ?int $id = null;
+    public int $uid;
+    public string $service;
+    public string $email;
+    public string $name;
+    public ?string $remote_id = null;
+    public ?string $oauth_access_token = null;
+    public string $created_at;
+    public ?string $updated_at = null;
+    public ?string $expired_at = null;
+    public ?string $disabled_at = null;
+    public int $is_default = 1;
 
     /**
-     * Returns the decoded access token.
+     * @return string|null
+     * @throws EnvironmentIsBrokenException
+     * @throws Exception
+     * @throws \TypeError
+     */
+    public function getDecryptedOauthAccessToken(): ?string
+    {
+        if ($this->oauth_access_token === null) {
+            return null;
+        }
+
+        return OauthTokenEncryption::getInstance()->decrypt($this->oauth_access_token);
+    }
+
+    /**
+     * @param string $token
      *
-     * @return bool|string
+     * @throws EnvironmentIsBrokenException
+     * @throws Exception
+     * @throws \TypeError
      */
-    public function getDecryptedOauthAccessToken() {
-        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
-
-        return $oauthTokenEncryption->decrypt( $this->oauth_access_token );
+    public function setEncryptedAccessToken(string $token): void
+    {
+        $this->oauth_access_token = OauthTokenEncryption::getInstance()->encrypt($token);
     }
 
     /**
-     * @param $token
+     * @param string|null $field
+     *
+     * @return array<string, mixed>|null
+     * @throws Exception
+     * @throws \TypeError
      */
-    public function setEncryptedAccessToken($token) {
-        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
-        $this->oauth_access_token = $oauthTokenEncryption->encrypt( $token );
-    }
+    public function getDecodedOauthAccessToken(?string $field = null): ?array
+    {
+        $decrypted = $this->getDecryptedOauthAccessToken();
+        if ($decrypted === null) {
+            return null;
+        }
 
-    /**
-     * @param null $field
-     * @return mixed
-     * @throws \Exception
-     */
-    public function getDecodedOauthAccessToken($field=null) {
-        $decoded = json_decode( $this->getDecryptedOauthAccessToken(), TRUE );
+        $decoded = json_decode($decrypted, true);
 
-        if ( $field ) {
-            if ( array_key_exists( $field, $decoded ) ) {
-                return $decoded[ $field ] ;
-            }
-            else {
-                throw new \Exception('key not found on token: ' . $field ) ;
+        if ($field) {
+            if (array_key_exists($field, $decoded)) {
+                return $decoded[$field];
+            } else {
+                throw new Exception('key not found on token: ' . $field);
             }
         }
 
-        return $decoded  ;
+        return $decoded;
     }
 
 }

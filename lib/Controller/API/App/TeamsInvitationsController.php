@@ -7,10 +7,17 @@
  *
  */
 
-namespace API\App;
+namespace Controller\API\App;
 
 
-use Teams\InvitedUser;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Exceptions\ValidationError;
+use Exception;
+use Model\Teams\InvitedUser;
+use Model\Teams\TeamDao;
+use Model\Users\UserDao;
+use TypeError;
+use Utils\Url\CanonicalRoutes;
 
 /**
  * Endpoint to get the call from emails link in the invitation emails
@@ -18,14 +25,25 @@ use Teams\InvitedUser;
  * Class TeamsInvitationsController
  * @package API\App
  */
-class TeamsInvitationsController  extends AbstractStatefulKleinController {
+class TeamsInvitationsController extends AbstractStatefulKleinController
+{
 
-    public function collectBackInvitation(){
-
-        $invite = new InvitedUser( $this->request->jwt, $this->response );
+    /**
+     * @throws ValidationError
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function collectBackInvitation(): void
+    {
+        $invite = new InvitedUser(
+            $this->request->param('jwt'),
+            $this->response,
+            new TeamDao($this->getDatabase()),
+            null,
+            new UserDao($this->getDatabase())
+        );
         $invite->prepareUserInvitedSignUpRedirect();
-        $this->response->redirect( \Routes::appRoot() ) ;
-
+        $this->response->redirect(CanonicalRoutes::appRoot());
     }
 
 }

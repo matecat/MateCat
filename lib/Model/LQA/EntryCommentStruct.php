@@ -1,25 +1,31 @@
 <?php
 
-namespace LQA;
+namespace Model\LQA;
 
-class EntryCommentStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct {
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 
-    public $id;
-    public $uid ;
-    public $id_qa_entry ;
-    public $create_date ;
-    public $comment ;
-    public $source_page ;
+class EntryCommentStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
+
+    public ?int $id = null;
+    public int $uid;
+    public int $id_qa_entry;
+    public ?string $create_date = null;
+    public string $comment;
+    public int $source_page;
 
     /**
+     * @param EntryCommentDao $dao
      * @param int $id
-     * @param int $ttl
+     * @param ?int $ttl
      *
-     * @return mixed
+     * @return EntryCommentStruct[]
      */
-    public function getEntriesById( $id, $ttl = 86400 ) {
-        return $this->cachable( __METHOD__, $this, function () use ( $id, $ttl ){
-            return ( new EntryCommentDao() )->findByIssueId( $id );
-        } );
+    public function getEntriesById(EntryCommentDao $dao, int $id, ?int $ttl = 86400): mixed
+    {
+        return $this->memoize(__METHOD__, function () use ($dao, $id) {
+            return $dao->findByIssueId($id);
+        });
     }
 }

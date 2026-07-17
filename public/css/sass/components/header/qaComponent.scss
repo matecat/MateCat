@@ -1,3 +1,4 @@
+@use '../../commons/colors';
 /********** QA Component **********/
 .qa-wrapper {
   position: relative;
@@ -153,7 +154,6 @@
 .qa-move-down:active {
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
   background-color: #eee;
-  background-image: -webkit-linear-gradient(top, #eee, #e0e0e0);
 }
 
 .qa-arrows.qa-arrows-disabled .qa-move-up,
@@ -214,16 +214,21 @@
           padding: 10px;
           color: #000000 !important;
           font-family: calibri;
+          display: flex;
+          gap: 4px;
+          &.error svg {
+            color: colors.$red800;
+          }
+          &.warning svg {
+            color: colors.$orangeDefault;
+          }
           &:hover {
             background: #f2f4f7 !important;
           }
           &.mc-bg-gray {
             background: #f2f4f7 !important;
           }
-          i {
-            position: relative;
-            top: 2px;
-          }
+
         }
       }
       .qa-lexiqa-info {

@@ -6,16 +6,15 @@
  * Time: 17:33
  */
 
-namespace Features\ProjectCompletion;
+namespace Controller\Features\ProjectCompletion;
 
 
-use DataAccess_AbstractDaoObjectStruct;
+use Model\DataAccess\AbstractDaoObjectStruct;
 
-class CompletionEventStruct extends DataAccess_AbstractDaoObjectStruct {
-
-    public $uid ;
-    public $remote_ip_address ;
-    public $source ;
-    public $is_review ;
-
+class CompletionEventStruct extends AbstractDaoObjectStruct
+{
+    public int $uid;
+    public string $remote_ip_address = '';
+    public string $source;
+    public bool $is_review;
 }

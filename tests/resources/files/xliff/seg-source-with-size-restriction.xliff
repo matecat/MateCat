@@ -1,0 +1,20 @@
+<xliff version='1.2'
+       xmlns='urn:oasis:names:tc:xliff:document:1.2'>
+    <file original='test.txt' source-language='en-US' target-language='it-IT'
+          datatype='plaintext'>
+        <body>
+            <trans-unit id='tu1' sizeRestriction="80">
+                <source xml:lang="en-US">Hello world, how are you?</source>
+                <seg-source>
+                    <mrk mid="0" mtype="seg">Hello world,</mrk>
+                    <mrk mid="1" mtype="seg">how are you?</mrk>
+                </seg-source>
+                <target xml:lang="it-IT">
+                    <mrk mid="0" mtype="seg">Ciao mondo,</mrk>
+                    <mrk mid="1" mtype="seg">come stai?</mrk>
+                </target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
+

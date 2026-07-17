@@ -1,151 +1,253 @@
 <?php
 
+namespace Utils\Engines;
+
+use Exception;
+use Model\DataAccess\IDatabase;
+use Model\Engines\Structs\SmartMATEStruct;
+use TypeError;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\ErrorResponse;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\Engines\Traits\Oauth;
+
 /**
  * Created by PhpStorm.
- * @property string client_secret
+ * @property string|null $client_id
+ * @property string|null $client_secret
+ * @property string|null $oauth_url
+ * @property string|null $token
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 02/03/15
  * Time: 12.10
  *
  */
-class Engines_SmartMATE extends Engines_AbstractEngine {
+class SmartMATE extends AbstractEngine
+{
 
-    use \Engines\Traits\Oauth, \Engines\Traits\FormatResponse;
+    use Oauth {
+        get as private oauthGet;
+        _authenticate as private oauthAuthenticate;
+        getAuthParameters as private oauthGetAuthParameters;
+    }
 
-    protected $_auth_parameters = array(
-            'client_id'     => null,
-            'client_secret' => null,
+    /** @var array<string, mixed> */
+    protected array $_auth_parameters = [
+        'client_id' => null,
+        'client_secret' => null,
 
         /**
          * Hardcoded params, from documentation
          * @see https://mt.smartmate.co/translate
          */
-            'grant_type'    => "client_credentials",
-            'scope'         => "translate"
-    );
+        'grant_type' => "client_credentials",
+        'scope' => "translate"
+    ];
 
-    protected $_config = array(
-            'segment'     => null,
-            'translation' => null,
-            'source'      => null,
-            'target'      => null,
-    );
+    protected array $_config = [
+        'segment' => null,
+        'translation' => null,
+        'source' => null,
+        'target' => null,
+    ];
 
-    public function __construct( $engineRecord ) {
-        parent::__construct( $engineRecord );
-        if ( $this->engineRecord->type != "MT" ) {
-            throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
+    /**
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function __construct($engineRecord, IDatabase $database)
+    {
+        parent::__construct($engineRecord, $database);
+        if ($this->getEngineRecord()->type != EngineConstants::MT) {
+            throw new Exception("Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
         }
     }
 
-    protected function _fixLangCode( $lang ) {
-        $l = explode( "-", strtolower( trim( $lang ) ) );
+    protected function _fixLangCode(string $lang): string
+    {
+        $l = explode("-", strtolower(trim($lang)));
 
-        return $l[ 0 ];
+        return $l[0];
     }
 
-    protected function _formatAuthenticateError( $objResponse ) {
+    /**
+     * @return array<int, mixed>
+     */
+    protected function getAuthParameters(): array
+    {
+        return $this->oauthGetAuthParameters();
+    }
 
+    /**
+     * @throws Exception
+     * @throws TypeError
+     */
+    protected function _authenticate(): void
+    {
+        $this->oauthAuthenticate();
+    }
+
+    /**
+     * @param array<string, mixed> $objResponse
+     *
+     * @return array<string, mixed>
+     */
+    protected function _formatAuthenticateError(array $objResponse): array
+    {
         //format as a normal Translate Response and send to decoder to output the data
-        return $objResponse;
+        $errorResponse = $objResponse['error']['response'] ?? null;
+        $decodedResponse = is_string($errorResponse) ? json_decode($errorResponse) : null;
+        $objResponse['error_description'] = (is_object($decodedResponse) && isset($decodedResponse->error)) ? (string)$decodedResponse->error : '';
 
+        return $objResponse;
     }
 
-    protected function _decode( $rawValue ) {
+    /**
+     * @throws Exception
+     * @throws TypeError
+     */
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): GetMemoryResponse
+    {
+        if (is_string($rawValue)) {
+            $decoded = json_decode($rawValue, true);
+            $translation = is_array($decoded) ? (string)($decoded['translation'] ?? '') : '';
+            $decoded = [
+                'data' => [
+                    "translations" => [
+                        ['translatedText' => $translation]
+                    ]
+                ]
+            ];
 
-        $all_args = func_get_args();
-
-        if ( is_string( $rawValue ) ) {
-            $decoded = json_decode( $rawValue, true );
-            $decoded = array(
-                    'data' => array(
-                            "translations" => array(
-                                    array( 'translatedText' => $this->_resetSpecialStrings( $decoded[ "translation" ] ) )
-                            )
-                    )
-            );
+            return $this->_composeMTResponseAsMatch((string)($parameters['text'] ?? ''), $decoded);
         } else {
-
-            if ( $rawValue[ 'error' ][ 'code' ] == 0 && $rawValue[ 'responseStatus' ] >= 400 ) {
-                $rawValue[ 'error' ][ 'code' ] = -$rawValue[ 'responseStatus' ];
+            if (is_array($rawValue) && ($rawValue['error']['code'] ?? null) == 0 && ($rawValue['responseStatus'] ?? 0) >= 400) {
+                $rawValue['error']['code'] = -$rawValue['responseStatus'];
             }
 
-            $decoded = $rawValue; // already decoded in case of error
+            $this->logger->debug($rawValue);
+
+            $response = new GetMemoryResponse(null);
+            if (is_array($rawValue) && isset($rawValue['error'])) {
+                $response->responseStatus = abs((int)($rawValue['error']['code'] ?? 500));
+                $response->error = new ErrorResponse($rawValue['error']);
+            }
+
+            return $response;
         }
-
-        return $this->_composeResponseAsMatch( $all_args, $decoded );
-
     }
 
-    protected function _getEngineStruct() {
-
-        return EnginesModel_SmartMATEStruct::getStruct();
-
+    protected function _getEngineStruct(): SmartMATEStruct
+    {
+        return SmartMATEStruct::getStruct();
     }
 
-    protected function _setTokenEndLife( $expires_in_seconds = null ) {
-
-        if ( !is_null( $expires_in_seconds ) ) {
+    protected function _setTokenEndLife(?int $expires_in_seconds = null): void
+    {
+        if (!is_null($expires_in_seconds)) {
             $this->token_endlife = $expires_in_seconds;
 
             return;
         }
 
         /**
-         * Gain 2 minutes to not fallback into a recursion
+         * Gain 2 minutes to not fall back into a recursion
          *
          * @see static::get
          */
         $this->token_endlife = time() + 3480;
-
     }
 
-    protected function _checkAuthFailure() {
-        $expiration   = ( @stripos( $this->result[ 'error' ][ 'message' ], 'token is expired' ) !== false );
-        $auth_failure = $this->result[ 'error' ][ 'code' ] < 0;
+    protected function _checkAuthFailure(): bool
+    {
+        $message = (string)($this->result['error']['message']);
+        $expiration = (stripos($message, 'token is expired') !== false);
+        $auth_failure = $this->result['error']['code'] < 0;
 
-        return $expiration | $auth_failure;
+        return $expiration || $auth_failure;
     }
 
+    /**
+     * @param array<string, mixed> $_config
+     *
+     * @return GetMemoryResponse
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function get(array $_config, int $cycle = 0): GetMemoryResponse
+    {
+        return $this->oauthGet($_config, $cycle);
+    }
 
-    public function set( $_config ) {
+    /**
+     * @param mixed $_config
+     */
+    public function set($_config): bool
+    {
         // SmartMATE does not have this method
         return true;
     }
 
-    public function update( $_config ) {
+    /**
+     * @param mixed $_config
+     */
+    public function update($_config): bool
+    {
         // SmartMATE does not have this method
         return true;
     }
 
-    public function delete( $_config ) {
+    /**
+     * @param mixed $_config
+     */
+    public function delete($_config): bool
+    {
         // SmartMATE does not have this method
         return true;
     }
 
-    protected function _formatRecursionError() {
-        return $this->_composeResponseAsMatch(
-                [],
-                array(
-                        'error' => array(
-                                'code'     => -499,
-                                'message'  => "Client Closed Request",
-                                'response' => 'Maximum recursion limit reached'
-                            // Some useful info might still be contained in the response body
-                        ),
-                        'responseStatus' => 499
-                ) //return negative number
+    /**
+     * @throws Exception
+     * @throws TypeError
+     */
+    protected function _formatRecursionError(): GetMemoryResponse
+    {
+        return $this->_composeMTResponseAsMatch(
+            '',
+            [
+                'error' => [
+                    'code' => -499,
+                    'message' => "Client Closed Get",
+                    'response' => 'Maximum recursion limit reached'
+                    // Some useful info might still be contained in the response body
+                ],
+                'responseStatus' => 499
+            ] //return negative number
         );
     }
 
-    protected function _fillCallParameters( $_config ) {
-        $parameters           = array();
-        $parameters[ 'text' ] = $_config[ 'segment' ];
-        $parameters[ 'from' ] = $_config[ 'source' ];
-        $parameters[ 'to' ]   = $_config[ 'target' ];
+    /**
+     * @param array<string, mixed> $_config
+     *
+     * @return array<string, mixed>
+     */
+    protected function _fillCallParameters(array $_config): array
+    {
+        $parameters = [];
+        $parameters['text'] = $_config['segment'];
+        $parameters['from'] = $_config['source'];
+        $parameters['to'] = $_config['target'];
 
         return $parameters;
     }
 
-
+    /**
+     * @inheritDoc
+     */
+    public static function getConfigurationParameters(): array
+    {
+        return [
+            'enable_mt_analysis',
+        ];
+    }
 }

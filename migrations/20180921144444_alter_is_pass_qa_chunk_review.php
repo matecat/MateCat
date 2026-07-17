@@ -1,6 +1,8 @@
 <?php
 
 
+use migrations\AbstractMatecatMigration;
+
 class AlterIsPassQaChunkReview extends AbstractMatecatMigration {
 
     public $sql_up = <<<EOF

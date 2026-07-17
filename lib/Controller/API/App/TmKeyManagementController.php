@@ -1,65 +1,213 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use API\V2\Validators\LoginValidator;
-use CatUtils;
-use TmKeyManagement\UserKeysModel;
-use TmKeyManagement_Filter;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Exception;
+use Model\Engines\Structs\EngineStruct;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\TmKeyManagement\UserKeysModel;
+use Model\Users\MetadataDao;
+use ReflectionException;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\AbstractEngine;
+use Utils\Engines\EnginesFactory;
+use Utils\Logger\LoggerFactory;
+use Utils\TmKeyManagement\ClientTmKeyStruct;
+use Utils\TmKeyManagement\Filter;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\Tools\CatUtils;
 
-class TmKeyManagementController extends AbstractStatefulKleinController {
+class TmKeyManagementController extends AbstractStatefulKleinController
+{
+
+    protected function registerValidators(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+    }
 
     /**
      * Return all the keys of the job
      * AND the all keys of the user
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws \TypeError
      */
-    public function getByJob(){
+    public function getByJob(): void
+    {
+        $idJob = $this->request->param('id_job');
+        $password = $this->request->param('password');
 
-        $idJob = $this->request->id_job;
-        $password = $this->request->password;
+        $chunk = (new CatUtils($this->getDatabase()))->getJobFromIdAndAnyPassword($idJob, $password);
 
-        $chunk = \CatUtils::getJobFromIdAndAnyPassword($idJob, $password);
-
-        if(empty($chunk)){
-            $this->response->status()->setCode( 404 );
-            $this->response->json( [
-                    'errors' => [
-                            'The job was not found'
-                    ]
-            ] );
-            exit();
+        if (empty($chunk)) {
+            $this->response->status()->setCode(404);
+            $this->response->json([
+                'errors' => [
+                    'The job was not found'
+                ]
+            ]);
+            return;
         }
 
-        if(!$this->userIsLogged()){
-            $this->response->json( [
-                'tm_keys' => []
-            ] );
-            exit();
+        $job_keyList = json_decode($chunk->tm_keys, true);
+
+        if (!$this->isLoggedIn()) {
+            $tmKeys = [];
+
+            foreach ($job_keyList as $jobKey) {
+                $jobKey = new ClientTmKeyStruct($jobKey);
+                $jobKey->complete_format = true;
+                $jobKey->r = true;
+                $jobKey->w = true;
+                $jobKey->owner = false;
+                $tmKeys[] = $jobKey->hideKey(-1);
+            }
+
+            $this->response->json([
+                'tm_keys' => $tmKeys
+            ]);
+            return;
         }
 
-        if ( $this->isJobRevision($idJob, $password) ) {
-            $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif ( $this->user->email == $chunk->status_owner ) {
-            $userRole = TmKeyManagement_Filter::OWNER;
+        if ($this->getUser()->email == $chunk->owner) {
+            $userRole = Filter::OWNER;
+        } elseif ((new CatUtils($this->getDatabase()))->isRevisionFromIdJobAndPassword($idJob, $password)) {
+            $userRole = Filter::ROLE_REVISOR;
         } else {
-            $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+            $userRole = Filter::ROLE_TRANSLATOR;
         }
 
-        $userKeys = new UserKeysModel($this->user, $userRole ) ;
-        $keys = $userKeys->getKeys( $chunk->tm_keys );
+        $userKeys = new UserKeysModel($this->getUser(), $this->getDatabase(), $userRole);
+        $keys = $userKeys->getKeys($chunk->tm_keys);
 
-        $this->response->json( [
-            'tm_keys' => $keys['job_keys']
-        ] );
+        $this->response->json([
+            'tm_keys' => $this->sortKeysInTheRightOrder($keys['job_keys'], $job_keyList)
+        ]);
     }
 
     /**
-     * @param $idJob
-     * @param $password
+     * This function sorts the $keys array based on $job_keyList.
+     * $keys can contain shared and/or hidden keys
      *
-     * @return bool|null
+     * @param list<ClientTmKeyStruct> $keys
+     * @param list<array<string, mixed>> $jobKeyList
+     *
+     * @return list<ClientTmKeyStruct>
      */
-    private function isJobRevision($idJob, $password) {
-        return CatUtils::getIsRevisionFromIdJobAndPassword( $idJob, $password );
+    private function sortKeysInTheRightOrder(array $keys, array $jobKeyList): array
+    {
+        $sortedKeys = [];
+
+        foreach ($jobKeyList as $jobKey) {
+            $filter = array_filter($keys, function ($key) use ($jobKey) {
+                if ($jobKey['key'] === $key->key) {
+                    return true;
+                }
+
+                if ($key->key === null) {
+                    return false;
+                }
+
+                return substr($jobKey['key'], -5) === substr($key->key, -5);
+            });
+
+            if (!empty($filter)) {
+                $sortedKeys[] = array_values($filter)[0];
+            }
+            // owner a true solo se sono l'owner del job
+
+        }
+
+        if (!empty($sortedKeys)) {
+            $sortedKeys = array_map(function (ClientTmKeyStruct $jobKey) {
+                if ($jobKey->name !== null) {
+                    $jobKey->name = html_entity_decode($jobKey->name);
+                }
+
+                return $jobKey;
+            }, $sortedKeys);
+        }
+
+        return $sortedKeys;
     }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws \TypeError
+     */
+    public function getByUserAndKey(): void
+    {
+        $_keyDao = new MemoryKeyDao($this->getDatabase());
+        $dh = new MemoryKeyStruct([
+            'uid' => $this->getUser()->uid,
+            'tm_key' => new TmKeyStruct([
+                    'key' => $this->request->param('key')
+                ]
+            )
+        ]);
+
+        if (!empty($_keyDao->read($dh)[0])) {
+            $this->response->json($this->_checkForAdaptiveEngines($dh));
+
+            return;
+        }
+
+        $this->response->code(404);
+        $this->response->json([]);
+    }
+
+    /**
+     * @param MemoryKeyStruct $memoryKey
+     *
+     * @return list<string>
+     * @throws Exception
+     * @throws \TypeError
+     */
+    private function _checkForAdaptiveEngines(MemoryKeyStruct $memoryKey): array
+    {
+        // load tmx in engines with adaptivity
+        $engineList = EngineConstants::getAvailableEnginesList();
+        $uid = $this->getUser()->uid ?? throw new Exception('User not authenticated');
+
+        $response = [];
+
+        foreach ($engineList as $engineName) {
+            try {
+                $struct = EngineStruct::getStruct();
+                $struct->class_load = $engineName;
+                $struct->type = EngineConstants::MT;
+                $engine = EnginesFactory::createTempInstance($struct, $this->getDatabase());
+
+                if ($engine->isAdaptiveMT()) {
+                     //retrieve OWNER EnginesFactory License
+                     $ownerMmtEngineMetaData = (new MetadataDao($this->getDatabase()))->setCacheTTL(60 * 60 * 24 * 30)->get($uid, $engine->getEngineRecord()->class_load ?? throw new \RuntimeException('Missing engine class_load')); // engine_id
+                    if (!empty($ownerMmtEngineMetaData)) {
+                        $engineId = $ownerMmtEngineMetaData->value;
+                        if (!is_numeric($engineId)) {
+                            continue;
+                        }
+                        $engine = EnginesFactory::getInstance((int)$engineId, $this->getDatabase(), AbstractEngine::class);
+                        if ($engine->getMemoryIfMine($memoryKey)) {
+                            $engineType = $engine->getEngineRecord()->getEngineType();
+                            if ($engineType !== null) {
+                                $response[] = $engineType;
+                            }
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                if ($engineName != EngineConstants::MY_MEMORY) {
+                    LoggerFactory::getLogger('engines')->debug($e->getMessage());
+                }
+            }
+        }
+
+        return $response;
+    }
+
 }

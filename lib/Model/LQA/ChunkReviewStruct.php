@@ -1,55 +1,65 @@
 <?php
 
-namespace LQA ;
+namespace Model\LQA;
 
-use Utils;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+use Model\Exceptions\NotFoundException;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use ReflectionException;
+use Throwable;
+use Utils\Tools\Utils;
 
-class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct {
+class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
-    public $id ;
-    public $id_project ;
-    public $id_job ;
-    public $password ;
-    public $review_password ;
-    public $penalty_points ;
-    public $source_page ;
-    public $is_pass ;
-    public $force_pass_at ;
-    public $reviewed_words_count = 0;
-    public $undo_data ;
-    public $advancement_wc = 0;
-    public $total_tte = 0;
-    public $avg_pee = 0;
+    public ?int $id = null;
+    public int $id_project;
+    public int $id_job;
+    public string $password;
+    public ?string $review_password = null;
+    public ?float $penalty_points = 0;
+    public int $source_page;
+    public ?bool $is_pass = null;
+    public ?string $force_pass_at = null;
+    public int $reviewed_words_count = 0;
+    public ?string $undo_data = null;
+    public ?float $advancement_wc = 0;
+    public int $total_tte = 0;
+    public int $avg_pee = 0;
 
     /**
      * Sets default values for an empty struct
      */
-    public function setDefaults() {
-        if ( $this->review_password == null ) {
+    public function setDefaults(): void
+    {
+        if ($this->review_password == null) {
             $this->review_password = Utils::randomString();
         }
     }
+
     /**
-     * @return \Chunks_ChunkStruct
+     * @param JobDao $jobDao
+     *
+     * @return JobStruct
+     * @throws NotFoundException
+     * @throws ReflectionException
+     * @throws Throwable
      */
-    public function getChunk() {
-        $review = clone $this;
-        return $this->cachable(__FUNCTION__, $review , function($review) {
-            return \Chunks_ChunkDao::getByIdAndPassword($review->id_job, $review->password);
+    public function getChunk(JobDao $jobDao): JobStruct
+    {
+        return $this->memoize(__METHOD__, function () use ($jobDao) {
+            return $jobDao->getByIdAndPasswordOrFail($this->id_job, $this->password);
         });
     }
 
     /**
-     * @return int
+     * @return array<string, mixed>|null
      */
-    public function getReviewedPercentage() {
-        return round( ($this->reviewed_words_count /
-                ( empty( $this->getChunk()->totalWordsCount() ) ? 1 : $this->getChunk()->totalWordsCount() ) *
-        100), 2 );
-    }
-
-    public function getUndoData() {
-        return json_decode( $this->undo_data, true ) ;
+    public function getUndoData(): ?array
+    {
+        return $this->undo_data !== null ? json_decode($this->undo_data, true) : null;
     }
 
 }

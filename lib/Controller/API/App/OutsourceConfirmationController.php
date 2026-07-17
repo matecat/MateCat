@@ -7,50 +7,72 @@
  *
  */
 
-namespace API\App;
+namespace Controller\API\App;
 
 
-use API\V2\Exceptions\AuthorizationError;
-use Outsource\ConfirmationDao;
-use Outsource\TranslatedConfirmationStruct;
-use Translators\TranslatorsModel;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
+use Exception;
+use Model\Jobs\JobDao;
+use Model\Outsource\ConfirmationDao;
+use Model\Outsource\TranslatedConfirmationStruct;
+use Model\Translators\TranslatorsModel;
+use ReflectionException;
+use Utils\Registry\AppConfig;
+use Utils\Tools\SimpleJWT;
 
-class OutsourceConfirmationController extends AbstractStatefulKleinController {
+class OutsourceConfirmationController extends AbstractStatefulKleinController
+{
 
-    public function confirm() {
+    /**
+     * @throws ReflectionException
+     * @throws AuthorizationError
+     * @throws Exception
+     * @throws \TypeError
+     */
+    public function confirm(): void
+    {
+        $params = filter_var_array($this->request->params(), [
+            'id_job' => FILTER_SANITIZE_SPECIAL_CHARS,
+            'password' => FILTER_SANITIZE_SPECIAL_CHARS,
+            'payload' => FILTER_SANITIZE_SPECIAL_CHARS,
+        ]);
 
-        $params = filter_var_array( $this->request->params(), array(
-                'id_job'   => FILTER_SANITIZE_STRING,
-                'password' => FILTER_SANITIZE_STRING,
-                'payload'  => FILTER_SANITIZE_STRING,
-        ) );
+        $payload = SimpleJWT::getValidatedInstanceFromString(
+            (string)$params['payload'],
+            AppConfig::$AUTHSECRET
+        )->getPayload();
 
-        $payload = \SimpleJWT::getValidPayload( $params[ 'payload' ] );
-
-        if ( $params[ 'id_job' ] != $payload[ 'id_job' ] || $params[ 'password' ] != $payload[ 'password' ] ) {
-            throw new AuthorizationError( "Invalid Job" );
+        if ($params['id_job'] != $payload['id_job'] || $params['password'] != $payload['password']) {
+            throw new AuthorizationError("Invalid Job");
         }
 
-        $jStruct = ( \Jobs_JobDao::getByIdAndPassword( $params[ 'id_job' ], $params[ 'password' ] ) );
-        $translatorModel = new TranslatorsModel( $jStruct, 0 );
+        $jStruct = (new JobDao($this->getDatabase()))->getByIdAndPassword((int)$params['id_job'], (string)$params['password']);
+        if ($jStruct === null) {
+            throw new AuthorizationError("Job not found");
+        }
+        $translatorModel = new TranslatorsModel($jStruct, $this->getDatabase(), 0);
         $jTranslatorStruct = $translatorModel->getTranslator();
 
-        $confirmationStruct = new TranslatedConfirmationStruct( $payload );
+        $confirmationStruct = new TranslatedConfirmationStruct($payload);
 
-        if ( !empty( $jTranslatorStruct ) ) {
+        if (!empty($jTranslatorStruct)) {
             $translatorModel->changeJobPassword();
             $confirmationStruct->password = $jStruct->password;
         }
 
-        $confirmationStruct->create_date = date( DATE_ISO8601, time() );
-        $cDao = new ConfirmationDao();
-        $cDao->insertStruct( $confirmationStruct, [ 'ignore' => true, 'no_nulls' => true ] );
-        $cDao->destroyConfirmationCache( $jStruct );
+        $confirmationStruct->create_date = date(DATE_ATOM, time());
+        $cDao = new ConfirmationDao($this->getDatabase());
+        $cDao->insertStruct($confirmationStruct, ['ignore' => true, 'no_nulls' => true]);
+        $cDao->destroyConfirmationCache($jStruct);
 
         $confirmationArray = $confirmationStruct->toArray();
-        unset( $confirmationArray['id'] );
-        $this->response->json( [ 'confirm' => $confirmationArray ] );
+        unset($confirmationArray['id']);
 
+        $this->response->json([
+            'errors' => [],
+            'confirm' => $confirmationArray
+        ]);
     }
 
 }

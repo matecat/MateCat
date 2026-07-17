@@ -1,0 +1,37 @@
+<xliff version='1.2'
+       xmlns='urn:oasis:names:tc:xliff:document:1.2'>
+    <file original='hello.txt' source-language='en' target-language='fr'
+          datatype='plaintext'>
+        <body>
+            <trans-unit id='1'>
+                <source xml:lang="en-en">Hello world, what time is it ? Where are you from ?
+                    <x id="1"/>
+                </source>
+                <seg-source>
+                    <mrk mid="0" mtype="seg">Hello world,</mrk>
+                    <mrk mid="1" mtype="seg">what time is it ?</mrk>
+                    <mrk mid="2" mtype="seg">Where are you from ?
+                        <x id="1"/>
+                    </mrk>
+                </seg-source>
+                <target xml:lang="it-it">
+                    <mrk mid="0" mtype="seg">Bonjour le monde,</mrk>
+                    <mrk mid="1" mtype="seg">quelle heure il est ?</mrk>
+                    <mrk mid="2" mtype="seg">d ou etes vous ?
+                        <x id="1"/>
+                    </mrk>
+                </target>
+            </trans-unit>
+            <trans-unit id='2'>
+                <source xml:lang="en-en">I think the mistery of universe can be solved by humanity near in the future
+                    <x id="2"/>
+                </source>
+            </trans-unit>
+            <trans-unit id='3'>
+                <source xml:lang="en-en">With regard to the recent discovery of gravitational waves there are more implications than those that you can see
+                    <x id="3"/>
+                </source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

@@ -6,93 +6,132 @@
  * Time: 14:33
  */
 
-namespace Users;
+namespace Model\Users;
 
-use Jobs_JobDao;
-use Projects_ProjectDao;
-use Routes;
+use Exception;
+use Model\Jobs\JobDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use Model\Teams\TeamDao;
+use ReflectionException;
+use RuntimeException;
+use Utils\Url\CanonicalRoutes;
 
 class RedeemableProject
 {
-    /**
-     * @var \Users_UserStruct
-     */
-    protected $user ;
-    protected $session ;
+    protected UserStruct $user;
 
-    /**
-     * @var \Projects_ProjectStruct
-     */
-    protected $project ;
+    /** @var array<string, mixed> */
+    protected array $session;
 
-    public function __construct( $user, $session ) {
-        $this->user = $user ;
-        $this->session = $session ;
+    protected ?ProjectStruct $project = null;
+
+    private ProjectDao $projectDao;
+    private JobDao $jobDao;
+    private TeamDao $teamDao;
+
+    /** @param array<string, mixed> $session */
+    public function __construct(
+        UserStruct $user,
+        array &$session,
+        TeamDao $teamDao
+    ) {
+        $this->user = $user;
+        $this->session =& $session;
+        $this->teamDao = $teamDao;
+        $this->projectDao = new ProjectDao($teamDao->getDatabaseHandler());
+        $this->jobDao = new JobDao($teamDao->getDatabaseHandler());
     }
 
-    public function isPresent() {
-        return $this->__getProject() != NULL ;
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function isPresent(): bool
+    {
+        return $this->__getProject() != null;
     }
 
-    public function __getProject() {
-        if ( !isset( $this->project ) ) {
-            if ( isset( $this->session['last_created_pid'] ) ) {
-                $this->project = Projects_ProjectDao::findById( $this->session['last_created_pid'] ) ;
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function __getProject(): ?ProjectStruct
+    {
+        if (!isset($this->project)) {
+            if (isset($this->session['last_created_pid'])) {
+                $this->project = $this->projectDao->findById($this->session['last_created_pid']);
             }
         }
-        return $this->project ;
+
+        return $this->project;
     }
 
-    public function isRedeemable() {
-        return isset( $this->session['redeem_project']) && $this->session['redeem_project'] === TRUE ;
+    public function isRedeemable(): bool
+    {
+        return isset($this->session['redeem_project']) && $this->session['redeem_project'] === true;
     }
 
-    public function redeem() {
-        if ( $this->isPresent() && $this->isRedeemable() ) {
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function redeem(): void
+    {
+        if ($this->isPresent() && $this->isRedeemable()) {
+            $project = $this->project ?? throw new RuntimeException('Project must be set after isPresent() check');
+            $project->id_customer = $this->user->getEmail() ?? throw new \RuntimeException('User email must be set for project redemption');
+            $project->id_team = $this->user->getPersonalTeam($this->teamDao)->id;
+            $project->id_assignee = $this->user->getUid();
 
-            $this->project->id_customer = $this->user->getEmail() ;
-            $this->project->id_team = $this->user->getPersonalTeam()->id ;
-            $this->project->id_assignee = $this->user->getUid();
+            $this->projectDao->updateStruct($project, [
+                'fields' => ['id_team', 'id_customer', 'id_assignee']
+            ]);
 
-            Projects_ProjectDao::updateStruct( $this->project, array(
-                'fields' => array( 'id_team', 'id_customer', 'id_assignee' )
-            ) ) ;
-
-            ( new Jobs_JobDao() )->updateOwner( $this->project, $this->user );
+            $this->jobDao->updateOwner($project, $this->user);
         }
-
 
         $this->clear();
     }
 
-    public function clear() {
-        unset( $this->session['redeem_project'] );
-        unset( $this->session['last_created_pid'] );
-        unset( $_SESSION['redeem_project'] );
-        unset( $_SESSION['last_created_pid'] );
+    public function clear(): void
+    {
+        unset($this->session['redeem_project']);
+        unset($this->session['last_created_pid']);
+        unset($_SESSION['redeem_project']);
+        unset($_SESSION['last_created_pid']);
     }
 
-    public function getProject() {
-        return $this->project ;
+    public function getProject(): ?ProjectStruct
+    {
+        return $this->project;
     }
 
-    public function tryToRedeem() {
-        if ( $this->isPresent() && $this->isRedeemable() ) {
-            $this->redeem() ;
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function tryToRedeem(): void
+    {
+        if ($this->isPresent() && $this->isRedeemable()) {
+            $this->redeem();
         }
     }
 
-    public function getDestinationURL() {
-        if ( $this->isPresent() ) {
-            return Routes::analyze( array(
-                'project_name'  => $this->project->name,
-                'id_project'    => $this->project->id,
-                'password'      => $this->project->password
-            )) ;
+    /**
+     * @throws Exception
+     */
+    public function getDestinationURL(): ?string
+    {
+        if ($this->isPresent() && $this->project !== null) {
+            return CanonicalRoutes::analyze([
+                'project_name' => $this->project->name,
+                'id_project' => $this->project->id,
+                'password' => $this->project->password
+            ]);
         }
-        else {
-            return NULL ;
-        }
+
+        return null;
     }
 
 }

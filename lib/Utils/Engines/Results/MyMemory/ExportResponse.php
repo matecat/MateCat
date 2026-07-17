@@ -1,27 +1,36 @@
 <?php
 
+namespace Utils\Engines\Results\MyMemory;
+
+use TypeError;
+use Utils\Engines\Results\TMSAbstractResponse;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 03/03/15
  * Time: 12.33
  */
-class Engines_Results_MyMemory_ExportResponse extends Engines_Results_AbstractResponse {
+class ExportResponse extends TMSAbstractResponse
+{
 
-    public $id;
-    public $resourceLink;
+    public mixed $id = '';
+    public string $resourceLink = '';
+    public mixed $estimatedTime = '';
 
-    public function __construct( $response ) {
-
-        $this->responseDetails = isset( $response[ 'responseDetails' ] ) ? $response[ 'responseDetails' ] : '';
-        $this->responseStatus  = isset( $response[ 'responseStatus' ] ) ? $response[ 'responseStatus' ] : '';
-        $this->responseData    = isset( $response[ 'responseData' ] ) ? $response[ 'responseData' ] : '';
-        $this->responseData    = isset( $response[ 'responseData' ] ) ? $response[ 'responseData' ] : '';
-        $this->id              = isset( $response[ 'responseData' ][ 'id' ] ) ? $response[ 'responseData' ][ 'id' ] : '';
-        $this->resourceLink    = isset( $response[ 'resourceLink' ] ) ? $response[ 'resourceLink' ] : '';
-        $this->responseDetails = isset( $response[ 'status' ] ) ? $response[ 'status' ] : '';
-        $this->estimatedTime   = isset( $response[ 'estimated_time' ] ) ? $response[ 'estimated_time' ] : '';
-
+    /**
+     * @param array<string, mixed> $response
+     *
+     * @throws TypeError
+     */
+    public function __construct(array $response)
+    {
+        $this->responseStatus = (int)($response['responseStatus'] ?? 200);
+        $this->responseData = $response['responseData'] ?? '';
+        $this->id = $response['responseData']['id'] ?? '';
+        $this->resourceLink = $response['resourceLink'] ?? '';
+        $this->responseDetails = $response['status'] ?? '';
+        $this->estimatedTime = $response['estimated_time'] ?? '';
     }
 
 } 

@@ -1,97 +1,117 @@
 <?php
 
-use Teams\TeamStruct;
+namespace Model\OwnerFeatures;
 
-class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
+use Exception;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\IDaoStruct;
+use PDOException;
+use ReflectionException;
+use Utils\Logger\LoggerFactory;
 
-    const query_by_user_email = " SELECT * FROM owner_features INNER JOIN users ON users.uid = owner_features.uid WHERE users.email = :id_customer AND owner_features.enabled ORDER BY id ";
+class OwnerFeatureDao extends AbstractDao
+{
 
-    public function findFromUserOrTeam( Users_UserStruct $user, TeamStruct $team ) {
-       // TODO:
-    }
+    const string TABLE = 'owner_features';
 
-    public function getByTeam( TeamStruct $team ) {
-        $conn = Database::obtain()->getConnection();
-
-        $stmt = $conn->prepare( "SELECT * FROM owner_features " .
-            " WHERE owner_features.id_team = :id_team " .
-            " AND owner_features.enabled "
-        );
-        $stmt->execute( array( 'id_team' => $team->id) );
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'OwnerFeatures_OwnerFeatureStruct');
-        return $stmt->fetchAll();
-    }
+    const string query_by_user_email = " SELECT * FROM owner_features INNER JOIN users ON users.uid = owner_features.uid WHERE users.email = :id_customer AND owner_features.enabled ORDER BY id ";
+    const string query_user_id = "SELECT * FROM owner_features WHERE uid = :uid ORDER BY id";
 
     /**
-     * @param DataAccess_IDaoStruct|OwnerFeatures_OwnerFeatureStruct $obj
+     * @param OwnerFeatureStruct $obj
      *
-     * @return int
+     * @return ?OwnerFeatureStruct
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws \Exception
      */
-    public function create( DataAccess_IDaoStruct $obj ) {
+    public function create(IDaoStruct $obj): ?OwnerFeatureStruct
+    {
+        $conn = $this->database->getConnection();
 
-        $conn = Database::obtain()->getConnection();
-
-        \Database::obtain()->begin();
+        $this->database->begin();
 
         /**
-         * @var OwnerFeatures_OwnerFeatureStruct $obj
+         * @var OwnerFeatureStruct $obj
          */
         $obj->create_date = date('Y-m-d H:i:s');
         $obj->last_update = date('Y-m-d H:i:s');
 
-        $stmt = $conn->prepare( "INSERT INTO owner_features " .
+        $stmt = $conn->prepare(
+            "INSERT INTO owner_features " .
             " ( uid, feature_code, options, create_date, last_update, enabled, id_team )" .
             " VALUES " .
             " ( :uid, :feature_code, :options, :create_date, :last_update, :enabled, :id_team );"
         );
 
-        Log::doJsonLog( $obj->toArray() );
+        LoggerFactory::doJsonLog($obj->toArray());
 
-        $values = array_diff_key( $obj->toArray(), array('id' => null) );
+        $values = array_diff_key($obj->toArray(), ['id' => null]);
 
-        $stmt->execute( $values );
-        $record = $this->getById( $conn->lastInsertId() );
-        $conn->commit() ;
+        $stmt->execute($values);
+        $record = $this->fetchById((int) $conn->lastInsertId(), OwnerFeatureStruct::class);
+        $conn->commit();
 
-        return $record ;
+        return $record;
     }
 
     /**
-     * @param     $id_customer
+     * @return OwnerFeatureStruct[]
      *
-     * @param int $ttl
-     *
-     * @return DataAccess_IDaoStruct[]|OwnerFeatures_OwnerFeatureStruct[]
+     * @throws ReflectionException
+     * @throws Exception
      */
-    public static function getByIdCustomer( $id_customer, $ttl = 3600 ) {
-        $conn = Database::obtain()->getConnection();
-        $thisDao = new self();
-        $stmt = $conn->prepare( self::query_by_user_email );
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new OwnerFeatures_OwnerFeatureStruct(), [
-                'id_customer' => $id_customer
-        ] );
+    public function getByIdCustomer(string $id_customer, int $ttl = 3600): array
+    {
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare(self::query_by_user_email);
+
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, OwnerFeatureStruct::class, [
+            'id_customer' => $id_customer
+        ]);
     }
 
     /**
-     * Destroy a cached object
-     *
-     * @param $id_customer
-     *
-     * @return bool|int
+     * @throws ReflectionException
+     * @throws PDOException
      */
-    public static function destroyCacheByIdCustomer( $id_customer ){
-        $thisDao = new self();
-        $stmt = $thisDao->_getStatementForCache( self::query_by_user_email );
-        return $thisDao->_destroyObjectCache( $stmt, [ 'id_customer' => $id_customer ] );
+    public function destroyCacheByIdCustomer(string $id_customer): bool
+    {
+        $stmt = $this->_getStatementForQuery(self::query_by_user_email);
+
+        return $this->_destroyObjectCache($stmt, OwnerFeatureStruct::class, ['id_customer' => $id_customer]);
     }
 
-    public static function getById( $id ) {
-        $conn = Database::obtain()->getConnection();
+    /**
+     * @return OwnerFeatureStruct[]
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function getByUserId(?int $uid, int $ttl = 3600): array
+    {
+        if (empty($uid)) {
+            return [];
+        }
 
-        $stmt = $conn->prepare(" SELECT * FROM owner_features WHERE id = ? ");
-        $stmt->execute( array( $id ) );
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'OwnerFeatures_OwnerFeatureStruct');
-        return $stmt->fetch();
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare(self::query_user_id);
+
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, OwnerFeatureStruct::class, [
+            'uid' => $uid
+        ]);
     }
+
+    /**
+     * @throws ReflectionException
+     * @throws PDOException
+     */
+    public function destroyCacheByUserId(int $uid): bool
+    {
+        $stmt = $this->_getStatementForQuery(self::query_user_id);
+
+        return $this->_destroyObjectCache($stmt, OwnerFeatureStruct::class, ['uid' => $uid]);
+    }
+
 
 }

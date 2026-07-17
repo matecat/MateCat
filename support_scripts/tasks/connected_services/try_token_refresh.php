@@ -1,10 +1,17 @@
 <?php
 
-$root = realpath(dirname(__FILE__) . '/../../../');
-include_once $root . "/inc/Bootstrap.php";
+
+use Model\ConnectedServices\ConnectedServiceDao;
+use Model\ConnectedServices\ConnectedServiceStruct;
+use Model\ConnectedServices\GDrive\GDriveTokenVerifyModel;
+use Model\ConnectedServices\Oauth\Google\GoogleProvider;
+use Utils\Registry\AppConfig;
+
+$root = realpath( dirname( __FILE__ ) . '/../../../' );
+include_once $root . "/lib/Bootstrap.php";
 Bootstrap::start();
 
-$db = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
+$db        = \Bootstrap::getDatabase();
 $db->debug = false;
 $db->connect();
 
@@ -17,17 +24,26 @@ function usage() {
     exit;
 }
 
-$options = getopt( 'h', array( 'id_service:'));
+$options = getopt( 'h', [ 'id_service:' ] );
 
-if (array_key_exists('h', $options))          usage() ;
-if (empty($options))                          usage() ;
-if (!array_key_exists('id_service', $options))     usage() ;
+if ( array_key_exists( 'h', $options ) ) {
+    usage();
+}
+if ( empty( $options ) ) {
+    usage();
+}
+if ( !array_key_exists( 'id_service', $options ) ) {
+    usage();
+}
 
 
-$dao = new \ConnectedServices\ConnectedServiceDao() ;
-$service = $dao->findById( $options['id_service'] ) ;
+$dao     = new ConnectedServiceDao($db);
+$service = $dao->fetchById( (int)$options[ 'id_service' ], ConnectedServiceStruct::class ) ?? throw new Exception( "service not found" );
 
-$verifier = new \ConnectedServices\GDriveTokenVerifyModel($service) ;
-$verifier->validOrRefreshed() ;
-var_dump( $verifier ) ;
+//FIX
+$client = (new GoogleProvider)->getClient( AppConfig::$HTTPHOST . "/gdrive/oauth/response" );
+
+$verifier = new GDriveTokenVerifyModel( $service );
+$verifier->validOrRefreshed( $client );
+var_dump( $verifier );
 

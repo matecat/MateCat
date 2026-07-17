@@ -1,22 +1,32 @@
 <?php
 
+namespace Utils\Engines\Results\MyMemory;
+
+use TypeError;
+use Utils\Engines\Results\TMSAbstractResponse;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 02/03/15
  * Time: 19.17
  */
-class Engines_Results_MyMemory_DomainsResponse extends Engines_Results_AbstractResponse {
+class DomainsResponse extends TMSAbstractResponse
+{
 
-    public $entries = [];
+    /**
+     * @var array<string, mixed>
+     */
+    public array $entries = [];
 
-    public function __construct( $response ) {
-
-        if ( !is_array( $response ) ) {
-            throw new Exception( "Invalid Response", -1 );
-        }
-
-        $this->entries = isset( $response[ 'entries' ] ) ? $response[ 'entries' ] : [];
+    /**
+     * @param array<string, mixed> $response
+     *
+     * @throws TypeError
+     */
+    public function __construct(array $response)
+    {
+        $this->entries = $response['entries'] ?? [];
     }
 
 }

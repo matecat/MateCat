@@ -6,86 +6,92 @@
  * Time: 12:30
  */
 
-namespace Features\ReviewExtended;
+namespace Plugins\Features\ReviewExtended;
 
-use Chunks_ChunkStruct;
-use LQA\ChunkReviewDao;
-use LQA\ChunkReviewStruct;
-use LQA\ModelStruct;
+use Exception;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\LQA\ModelStruct;
+use Utils\Constants\SourcePages;
+use Utils\Constants\TranslationStatus;
 
-class ReviewUtils {
+class ReviewUtils
+{
+    private ChunkReviewDao $chunkReviewDao;
+
+    public function __construct(ChunkReviewDao $chunkReviewDao)
+    {
+        $this->chunkReviewDao = $chunkReviewDao;
+    }
 
     /**
-     * @param array $statsArray
-     * @param array $chunkReviews
+     * @param int|null $number
      *
-     * @return array
-     * @throws \Exception
+     * @return string|null
      */
-    public static function formatStats( $statsArray, $chunkReviews ) {
-        $statsArray [ 'revises' ] = [];
+    public static function sourcePageToTranslationStatus(int $number = null): ?string
+    {
+        $statuses = [
+            SourcePages::SOURCE_PAGE_TRANSLATE => TranslationStatus::STATUS_TRANSLATED,
+            SourcePages::SOURCE_PAGE_REVISION => TranslationStatus::STATUS_APPROVED,
+            SourcePages::SOURCE_PAGE_REVISION_2 => TranslationStatus::STATUS_APPROVED2
+        ];
 
-        /** @var ChunkReviewStruct $chunkReview */
-        foreach ( $chunkReviews as $chunkReview ) {
-            $statsArray[ 'revises' ][] = [
-                    'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $chunkReview->source_page ),
-                    'advancement_wc'  => (float)$chunkReview->advancement_wc
-            ];
-        }
-
-        return $statsArray;
+        return empty($number) ? null : ($statuses[$number] ?? null);
     }
 
     /**
      *
-     * @param null $number
+     * @param int|null $number
      *
      * @return int
      */
-    public static function revisionNumberToSourcePage( $number = null ) {
-        return ( !empty( $number ) ) ? $number + 1 : 1;
+    public static function revisionNumberToSourcePage(?int $number = null): int
+    {
+        return (!empty($number)) ? $number + 1 : 1;
     }
 
     /**
-     * @param int $number
+     * @param ?int $number
      *
-     * @return int|null
+     * @return ?int
      */
-    public static function sourcePageToRevisionNumber( $number ) {
-        return ( ( $number - 1 ) < 1 ) ? null : $number - 1;
+    public static function sourcePageToRevisionNumber(int $number = null): ?int
+    {
+        return (((int)$number - 1) < 1) ? null : $number - 1;
     }
 
     /**
      * @param ModelStruct $lqaModel
-     * @param string      $sourcePage
+     * @param int $sourcePage
      *
-     * @return array|mixed
-     * @throws \Exception
+     * @return int
+     * @throws Exception
      */
-    public static function filterLQAModelLimit( ModelStruct $lqaModel, $sourcePage ) {
+    public static function filterLQAModelLimit(ModelStruct $lqaModel, int $sourcePage): int
+    {
         $limit = $lqaModel->getLimit();
 
-        if ( is_array( $limit ) ) {
-            /**
-             * Limit array index equals to $source_page -2.
-             */
-            return isset( $limit[ $sourcePage - 2 ] ) ? $limit[ $sourcePage - 2 ] : end( $limit );
-        }
+        /**
+         * Limit array index equals to $source_page -2.
+         */
+        $value = $limit[$sourcePage - 2] ?? end($limit);
 
-        return $limit;
+        return (int)$value;
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param JobStruct $chunk
      *
-     * @return array
+     * @return int[]
+     * @throws Exception
      */
-    public static function validRevisionNumbers( Chunks_ChunkStruct $chunk ) {
-        $chunkReviews         = ( new ChunkReviewDao() )->findChunkReviews( $chunk );
-        $validRevisionNumbers = array_map( function ( $chunkReview ) {
-            return self::sourcePageToRevisionNumber( $chunkReview->source_page );
-        }, $chunkReviews );
+    public function validRevisionNumbers(JobStruct $chunk): array
+    {
+        $chunkReviews = $this->chunkReviewDao->findChunkReviews($chunk);
 
-        return $validRevisionNumbers;
+        return array_values(array_filter(array_map(function ($chunkReview) {
+            return self::sourcePageToRevisionNumber($chunkReview->source_page);
+        }, $chunkReviews)));
     }
 }

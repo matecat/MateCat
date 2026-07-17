@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class ReplaceEventCurrentVersion extends AbstractMatecatMigration
 {
     public $sql_up = "CREATE TABLE `replace_events_current_version` (

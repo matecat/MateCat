@@ -6,60 +6,89 @@
  * Time: 12:01
  */
 
-namespace Features\ProjectCompletion\Model ;
+namespace Plugins\Features\ProjectCompletion\Model;
 
-use Chunks_ChunkCompletionEventDao;
-use Chunks_ChunkStruct;
+use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Exception;
-use Features\ProjectCompletion\CompletionEventStruct;
-use FeatureSet;
-use Projects_ProjectDao;
+use Model\ChunksCompletion\ChunkCompletionEventDao;
+use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Run\ProjectCompletionEventSavedEvent;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use ReflectionException;
+use TypeError;
 
 
-class EventModel {
+class EventModel
+{
 
     /**
      * @var CompletionEventStruct
      */
-    protected $eventStruct ;
+    protected CompletionEventStruct $eventStruct;
     /**
-     * @var Chunks_ChunkStruct
+     * @var JobStruct
      */
-    protected $chunk ;
-    protected $chunkCompletionEventId ;
+    protected JobStruct $chunk;
+    protected ?int $chunkCompletionEventId = null;
 
+    private ChunkCompletionEventDao $chunkCompletionEventDao;
+    private ProjectDao $projectDao;
+    private FeatureSet $featureSet;
 
-
-    public function __construct( Chunks_ChunkStruct $chunk, CompletionEventStruct $eventStruct ) {
-        $this->eventStruct = $eventStruct ;
-        $this->chunk = $chunk ;
+    /**
+     * @throws Exception
+     */
+    public function __construct(
+        JobStruct $chunk,
+        CompletionEventStruct $eventStruct,
+        ChunkCompletionEventDao $chunkCompletionEventDao,
+        ProjectDao $projectDao,
+        FeatureSet $featureSet,
+    ) {
+        $this->eventStruct = $eventStruct;
+        $this->chunk = $chunk;
+        $this->chunkCompletionEventDao = $chunkCompletionEventDao;
+        $this->projectDao = $projectDao;
+        $this->featureSet = $featureSet;
     }
 
-    public function save() {
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function save(): void
+    {
         $this->_checkStatusIsValid();
 
-        $this->chunkCompletionEventId = Chunks_ChunkCompletionEventDao::createFromChunk(
-                $this->chunk, $this->eventStruct
+        $this->chunkCompletionEventId = (int)$this->chunkCompletionEventDao->createFromChunk(
+            $this->chunk,
+            $this->eventStruct
         );
 
-        $featureSet = new FeatureSet() ;
-        $featureSet->loadForProject( Projects_ProjectDao::findById($this->chunk->id_project ) );
-        $featureSet->run('project_completion_event_saved', $this->chunk, $this->eventStruct, $this->chunkCompletionEventId );
+        $project = $this->projectDao->findById($this->chunk->id_project) ?? throw new Exception('Project not found for chunk ' . $this->chunk->id_project);
+        $this->featureSet->loadForProject($project);
+        $this->featureSet->dispatch(new ProjectCompletionEventSavedEvent($this->chunk, $this->eventStruct, (int)$this->chunkCompletionEventId));
     }
 
-    public function getChunkCompletionEventId() {
-        return $this->chunkCompletionEventId ;
+    public function getChunkCompletionEventId(): ?int
+    {
+        return $this->chunkCompletionEventId;
     }
 
-    private function _checkStatusIsValid() {
-        $dao = new Chunks_ChunkCompletionEventDao();
-        $current_phase = $dao->currentPhase( $this->chunk );
+    /**
+     * @throws Exception
+     */
+    private function _checkStatusIsValid(): void
+    {
+        $current_phase = $this->chunkCompletionEventDao->currentPhase($this->chunk);
 
         if (
-                (  $this->eventStruct->is_review && $current_phase != Chunks_ChunkCompletionEventDao::REVISE ) ||
-                ( !$this->eventStruct->is_review && $current_phase != Chunks_ChunkCompletionEventDao::TRANSLATE )
+            ($this->eventStruct->is_review && $current_phase != ChunkCompletionEventDao::REVISE) ||
+            (!$this->eventStruct->is_review && $current_phase != ChunkCompletionEventDao::TRANSLATE)
         ) {
-            throw new Exception('Cannot save event, current status mismatch.') ;
+            throw new Exception('Cannot save event, current status mismatch.');
         }
     }
 }

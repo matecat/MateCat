@@ -1,0 +1,127 @@
+@use '../../commons/colors';
+
+.badge-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  border-radius: 20px;
+  padding: 0 8px;
+  height: 24px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  > svg {
+    flex-shrink: 0;
+  }
+}
+
+// Type and Mode modifiers
+.badge-black {
+  &.badge-default {
+    background-color: rgba(colors.$black, 0.5);
+    color: colors.$white;
+  }
+
+  &.badge-full {
+    background-color: rgba(colors.$black, 0.72);
+  }
+
+  &.badge-outline {
+    border: solid 1px colors.$black;
+    color: colors.$black;
+  }
+}
+
+.badge-primary {
+  &.badge-default {
+    border: solid 1px colors.$translatedBlueTransparent;
+    background-color: rgba(colors.$translatedBlueTransparent, 0.24);
+    color: colors.$translatedBlue;
+  }
+
+  &.badge-full {
+    background-color: rgba(colors.$translatedBlue, 0.72);
+    color: colors.$white;
+  }
+
+  &.badge-outline {
+    border: solid 1px colors.$translatedBlue;
+    color: colors.$translatedBlue;
+  }
+}
+
+.badge-green {
+  &.badge-default {
+    border: solid 1px colors.$approvedGreenTransparent;
+    background-color: rgba(colors.$approvedGreenTransparent, 0.24);
+    color: colors.$greenDefaultHover;
+  }
+
+  &.badge-full {
+    background-color: rgba(colors.$approvedGreen, 0.72);
+    color: colors.$white;
+  }
+
+  &.badge-outline {
+    border: solid 1px colors.$approvedGreen;
+    color: colors.$greenDefaultHover;
+  }
+}
+
+.badge-yellow {
+  &.badge-default {
+    border: solid 1px colors.$orangeDefaultTransparent;
+    background-color: rgba(colors.$orangeDefaultTransparent, 0.24);
+    color: colors.$orangeDefaultHover;
+  }
+
+  &.badge-full {
+    background-color: rgba(colors.$orangeDefault, 0.72);
+    color: colors.$white;
+  }
+
+  &.badge-outline {
+    border: solid 1px colors.$orangeDefault;
+    color: colors.$orangeDefaultHover;
+  }
+}
+
+.badge-blue {
+  &.badge-default {
+    border: solid 1px colors.$linkBlue;
+    background-color: rgba(colors.$linkBlue, 0.24);
+    color: colors.$linkBlue;
+  }
+
+  &.badge-full {
+    background-color: rgba(colors.$linkBlue, 0.72);
+    color: colors.$white;
+  }
+
+  &.badge-outline {
+    border: solid 1px colors.$linkBlue;
+    color: colors.$linkBlue;
+  }
+}
+
+.badge-red {
+  &.badge-default {
+    border: solid 1px colors.$redDefault;
+    background-color: rgba(colors.$redDefault, 0.24);
+    color: colors.$redDefault;
+  }
+
+  &.badge-full {
+    background-color: rgba(colors.$redDefault, 0.72);
+    color: colors.$white;
+  }
+
+  &.badge-outline {
+    border: solid 1px colors.$redDefault;
+    color: colors.$redDefault;
+  }
+}

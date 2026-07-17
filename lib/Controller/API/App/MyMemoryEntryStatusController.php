@@ -1,0 +1,55 @@
+<?php
+
+namespace Controller\API\App;
+
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
+use Model\FeaturesBase\FeatureSet;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\MyMemory;
+
+class MyMemoryEntryStatusController extends KleinController
+{
+
+    /**
+     * @return void
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
+     */
+    public function status(): void
+    {
+        try {
+            $uuid = $this->request->param('uuid');
+            $mmEngine = $this->getMMEngine($this->featureSet);
+            $status = $mmEngine->entryStatus($uuid);
+            $this->response->json($status);
+        } catch (Exception $exception) {
+            $this->response->status()->setCode(500);
+            $this->response->json([
+                'error' => $exception->getMessage()
+            ]);
+        }
+    }
+
+    protected function registerValidators(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+    }
+
+    /**
+     * @param FeatureSet $featureSet
+     *
+     * @return MyMemory
+     * @throws Exception
+     */
+    protected function getMMEngine(FeatureSet $featureSet): MyMemory
+    {
+        $_TMS = EnginesFactory::getInstance(1, $this->getDatabase(), MyMemory::class);
+        $_TMS->setFeatureSet($featureSet);
+
+        return $_TMS;
+    }
+}

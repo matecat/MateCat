@@ -7,75 +7,68 @@
  *
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 
-use API\V2\Exceptions\AuthorizationError;
-use API\V2\Json\CreationStatus;
-use API\V2\Json\Error;
-use API\V2\Json\WaitCreation;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use Exception;
-use Exceptions\NotFoundException;
-use ProjectQueue\Queue;
-use Projects_ProjectDao;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
+use Model\Exceptions\NotFoundException;
+use Model\Projects\ProjectDao;
+use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
+use View\API\V2\Json\CreationStatus;
+use View\API\V2\Json\WaitCreation;
 
-class ProjectCreationStatusController extends KleinController {
+class ProjectCreationStatusController extends KleinController
+{
 
-    public function get(){
+    /**
+     * @throws Exception
+     */
+    public function get(): void
+    {
+        $idProject = (int)$this->request->param('id_project');
 
         // validate id_project
-        if(!is_numeric($this->request->id_project)){
-
-            $response = [];
-            $response[] = new Exception( "ID project is not a valid integer", -1 );
-
-            $this->response->code( 400 );
-            $this->response->json( ( new Error( (object)$response ) )->render() );
-            exit();
+        if (!is_numeric($this->request->param('id_project'))) {
+            throw new Exception("ID project is not a valid integer", -1);
         }
 
-        $result = Queue::getPublishedResults( $this->request->id_project );
+        $result = ProjectQueue::getPublishedResults($idProject);
 
-        if ( empty( $result ) ) {
-
+        if (empty($result)) {
             $this->_letsWait();
-
-        } elseif ( !empty( $result ) && !empty( $result[ 'errors' ] ) ){
-
-            $response = [];
-            foreach( $result[ 'errors' ] as $error ){
-                $response[] = new Exception( $error[ 'message' ], (int)$error[ 'code' ] );
+        } elseif (!empty($result['errors'])) {
+            foreach ($result['errors'] as $error) {
+                throw new Exception($error['message'], (int)$error['code']);
             }
-
-            $this->response->code( 500 );
-            $this->response->json( ( new Error( (object)$response ) )->render() );
-
         } else {
-
-
-            // project is created, find it with password
+            // project is created, verify password authorization
             try {
-                $project = Projects_ProjectDao::findByIdAndPassword($this->request->id_project, $this->request->password ) ;
-            } catch( NotFoundException $e ) {
-                throw new AuthorizationError( 'Not Authorized.' );
+                (new ProjectDao($this->getDatabase()))->findByIdAndPassword($idProject, $this->request->param('password'));
+            } catch (NotFoundException) {
+                throw new AuthorizationError('Not Authorized.');
             }
 
-            $featureSet = $project->getFeaturesSet();
-            $result = $featureSet->filter('filterCreationStatus', $result, $project);
-
-            if ( empty( $result ) ) {
+            if (empty($result['id_project'])) {
                 $this->_letsWait();
-            }
-            else {
+            } else {
                 $result = (object)$result;
-                $this->response->json( ( new CreationStatus( (object)$result ) )->render() );
+                $this->response->json((new CreationStatus($result))->render());
             }
         }
     }
 
 
-    protected function _letsWait() {
-        $this->response->code( 202 );
-        $this->response->json( ( new WaitCreation() )->render() );
+    /**
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
+     */
+    protected function _letsWait(): void
+    {
+        $this->response->code(202);
+        $this->response->json((new WaitCreation())->render());
     }
 }

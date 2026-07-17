@@ -1,18 +1,22 @@
 <?php
 
-namespace FilesStorage;
+namespace Model\FilesStorage;
+
+use Exception;
+use Utils\Registry\AppConfig;
 
 class FilesStorageFactory
 {
     /**
      * @return AbstractFilesStorage
-     * @throws \Exception
+     * @throws Exception
+     * @throws \TypeError
      */
-    public static function create()
+    public static function create(): AbstractFilesStorage
     {
-        $storageMetohd = ( \INIT::$FILE_STORAGE_METHOD ) ? \INIT::$FILE_STORAGE_METHOD : 'fs';
+        $storageMethod = !empty(AppConfig::$FILE_STORAGE_METHOD) ? AppConfig::$FILE_STORAGE_METHOD : 'fs';
 
-        if($storageMetohd === 'fs'){
+        if ($storageMethod === 'fs') {
             return new FsFilesStorage();
         }
 

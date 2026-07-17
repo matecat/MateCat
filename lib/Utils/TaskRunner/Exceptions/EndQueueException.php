@@ -7,12 +7,15 @@
  *
  */
 
-namespace TaskRunner\Exceptions;
+namespace Utils\TaskRunner\Exceptions;
+
+use Exception;
 
 /**
  * Class EndQueueException
  * @package TaskRunner\Exceptions
  */
-class EndQueueException extends \Exception {
+class EndQueueException extends Exception
+{
 
 }

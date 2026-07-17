@@ -7,32 +7,54 @@
  *
  */
 
-namespace Features\TranslationVersions;
+namespace Plugins\Features\TranslationVersions;
 
 
-use Exception;
-use ReflectionException;
-use Translations_SegmentTranslationStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
+use Model\Translations\SegmentTranslationStruct;
+use Model\Users\UserStruct;
 
-interface VersionHandlerInterface {
-
-    /**
-     * @param Translations_SegmentTranslationStruct $propagation
-     * @param                                       $propagated_ids
-     */
-    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagation, $propagated_ids );
+interface VersionHandlerInterface
+{
 
     /**
      * Evaluates the need to save a new translation version to database.
      * If so, sets the new version number on $new_translation.
      *
-     * @param Translations_SegmentTranslationStruct $new_translation
-     * @param Translations_SegmentTranslationStruct $old_translation
+     * @param SegmentTranslationStruct $new_translation
+     * @param SegmentTranslationStruct $old_translation
      *
-     * @return mixed
+     * @return bool
      */
-    public function saveVersionAndIncrement( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation );
+    public function saveVersionAndIncrement(SegmentTranslationStruct $new_translation, SegmentTranslationStruct $old_translation): bool;
 
-    public function storeTranslationEvent( $params );
+    /**
+     * @param array{
+     *     translation: SegmentTranslationStruct,
+     *     old_translation: SegmentTranslationStruct,
+     *     propagation: array<string, mixed>,
+     *     chunk: JobStruct,
+     *     user: UserStruct,
+     *     source_page_code: int,
+     *     features: FeatureSet,
+     *     project: ProjectStruct
+     * } $params
+     *
+     * @return void
+     */
+    public function storeTranslationEvent(array $params): void;
+
+     /**
+      * @param SegmentTranslationStruct $translationStruct
+      *
+      * @return array{
+      *     totals?: array<string, mixed>,
+      *     propagated_ids?: int[],
+      *     segments_for_propagation?: array<int, mixed>
+      * }
+      */
+     public function propagateTranslation(SegmentTranslationStruct $translationStruct): array;
 
 }

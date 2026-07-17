@@ -7,7 +7,7 @@
  *
  */
 
-namespace TaskRunner\Commons;
+namespace Utils\TaskRunner\Commons;
 
 /**
  * Class ContextList
@@ -15,38 +15,42 @@ namespace TaskRunner\Commons;
  * Vector container for contextes
  *
  * @package TaskRunner\Commons
+ * @phpstan-consistent-constructor
  */
-class ContextList {
+class ContextList
+{
 
     /**
      * Variable holding contextes
      *
      * @var Context[]
      */
-    public $list = array();
+    public array $list = [];
 
     /**
      * QueuesList constructor.
      *
-     * @param array $queue_info
+     * @param array<string, array<string, mixed>> $queue_info
+     * @throws \TypeError
      */
-    protected function __construct( Array $queue_info ) {
-
-        foreach ( $queue_info as $level => $values ) {
-            $this->list[ $level ] = Context::buildFromArray( $values );
+    protected function __construct(array $queue_info)
+    {
+        foreach ($queue_info as $level => $values) {
+            $this->list[$level] = Context::buildFromArray($values);
         }
-
     }
 
     /**
      * Static class builder
      *
-     * @param array $queue_info
+     * @param array<string, array<string, mixed>> $queue_info
      *
      * @return static
+     * @throws \TypeError
      */
-    public static function get( Array $queue_info = array() ) {
-        return new static( $queue_info );
+    public static function get(array $queue_info = []): ContextList
+    {
+        return new static($queue_info);
     }
 
 }

@@ -6,17 +6,23 @@
  * Time: 14:53
  */
 
-namespace Email;
+namespace Utils\Email;
 
-class CommentResolveEmail extends BaseCommentEmail {
+class CommentResolveEmail extends BaseCommentEmail
+{
 
-    protected $title = "Thread resolved";
+    protected ?string $title = "Thread resolved";
 
-    protected function _getTemplateVariables() {
+    /**
+     * @return array<string, mixed>
+     */
+    protected function _getTemplateVariables(): array
+    {
         $vars = parent::_getTemplateVariables();
-        $var['title'] = $this->title;
+        $vars['title'] = $this->title;
         $vars['action'] = "resolved a thread that you are following on";
         $vars['id_segment'] = $this->comment->id_segment;
+
         return $vars;
     }
 

@@ -1,0 +1,13 @@
+<xliff version='1.2'
+       xmlns='urn:oasis:names:tc:xliff:document:1.2'>
+    <file original='test.txt' source-language='en-US' target-language='it-IT'
+          datatype='plaintext'>
+        <body>
+            <trans-unit id='tu1' sizeRestriction="100">
+                <source xml:lang="en-US">Character limited text</source>
+                <target xml:lang="it-IT" state="translated">Testo con limite caratteri</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
+

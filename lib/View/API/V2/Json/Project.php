@@ -7,46 +7,53 @@
  *
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
-use Chunks_ChunkStruct;
-use Constants_JobStatus;
-use Projects_ProjectStruct;
-use Utils;
+use Exception;
+use Model\Analysis\Status;
+use Model\DataAccess\IDatabase;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use Model\Projects\MetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
+use Model\Projects\ProjectStruct;
+use Model\Users\UserStruct;
+use ReflectionException;
+use Utils\Constants\JobStatus;
+use Utils\Tools\Utils;
 
-class Project {
+class Project
+{
 
     /**
-     * @var Job
+     * @var ProjectStruct[]
      */
-    protected $jRenderer;
+    protected array $data = [];
 
     /**
-     * @var Projects_ProjectStruct[]
+     * @var string|null
      */
-    protected $data = [];
-
-    /**
-     * @var string
-     */
-    protected $status;
+    protected ?string $status = null;
 
     /**
      * @var bool
      */
-    protected $called_from_api = false;
+    protected bool $called_from_api = false;
 
     /**
-     * @var \Users_UserStruct
+     * @var ?UserStruct
      */
-    protected $user;
+    protected ?UserStruct $user = null;
 
     /**
-     * @param \Users_UserStruct $user
+     * @param UserStruct $user
      *
      * @return $this
      */
-    public function setUser( $user ) {
+    public function setUser(UserStruct $user): Project
+    {
         $this->user = $user;
 
         return $this;
@@ -57,124 +64,120 @@ class Project {
      *
      * @return $this
      */
-    public function setCalledFromApi( $called_from_api ) {
-        $this->called_from_api = (bool)$called_from_api;
+    public function setCalledFromApi(bool $called_from_api): Project
+    {
+        $this->called_from_api = $called_from_api;
 
         return $this;
     }
 
-    /**
-     * Project constructor.
-     *
-     * @param Projects_ProjectStruct[] $data
-     * @param string                   $search_status
-     */
-    public function __construct( array $data = [], $search_status = null ) {
+    protected IDatabase $database;
 
+    protected MetadataDao $metadataDao;
+
+    protected ProjectDao $projectDao;
+
+    /**
+     * @param IDatabase $database
+     * @param ProjectStruct[] $data
+     * @param string|null $search_status
+     */
+    public function __construct(
+        IDatabase $database,
+        array $data = [],
+        ?string $search_status = null,
+    ) {
+        $this->database = $database;
+        $this->metadataDao = new MetadataDao($database);
+        $this->projectDao = new ProjectDao($database);
         $this->data = $data;
         $this->status = $search_status;
-        $jRendered = new Job();
-
-        if($search_status){
-            $jRendered->setStatus($search_status);
-        }
-
-        $this->jRenderer = $jRendered;
     }
 
     /**
-     * @param       $project Projects_ProjectStruct
+     * @param ProjectStruct $project
      *
-     * @return array
-     * @throws \Exception
-     * @throws \Exceptions\NotFoundException
+     * @return array<string, mixed>
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws \TypeError
      */
-    public function renderItem( Projects_ProjectStruct $project ) {
+    public function renderItem(ProjectStruct $project): array
+    {
+        $featureSet = FeatureSet::forProject($project, $this->database);
+        $jobs = (new JobDao($this->database))->getNotDeletedByProjectId((int) $project->id, 60 * 10); //cached
 
-        $featureSet = $project->getFeaturesSet();
-        $jobs       = $project->getJobs( 60 * 10 ); //cached
-
-        $jobJSONs    = [];
+        $jobJSONs = [];
         $jobStatuses = [];
-        if ( !empty( $jobs ) ) {
+        if (!empty($jobs)) {
+            $jobJSON = new Job($this->database);
 
-            /**
-             * @var $jobJSON Job
-             */
-            $jobJSON = new $this->jRenderer();
-
-            if ( !empty( $this->user ) ) {
-                $jobJSON->setUser( $this->user );
+            if (!empty($this->user)) {
+                $jobJSON->setUser($this->user);
             }
 
-            if ( !empty( $this->status ) ) {
-                $jobJSON->setStatus( $this->status );
+            if (!empty($this->status)) {
+                $jobJSON->setStatus($this->status);
             }
 
-            if ( $this->called_from_api ) {
-                $jobJSON->setCalledFromApi( true );
+            if ($this->called_from_api) {
+                $jobJSON->setCalledFromApi(true);
             }
 
-            foreach ( $jobs as $job ) {
-
+            foreach ($jobs as $job) {
                 // if status is set, then filter off the jobs by owner_status
-                if($this->status){
-                    if($job->status_owner === $this->status and !$job->wasDeleted()){
-                        /**
-                         * @var $jobJSON Job
-                         */
-                        $jobJSONs[]    = $jobJSON->renderItem( new Chunks_ChunkStruct( $job->getArrayCopy() ), $project, $featureSet );
+                if ($this->status) {
+                    if ($job->status_owner === $this->status and !$job->isDeleted()) {
+                        $jobJSONs[] = $jobJSON->renderItem(new JobStruct($job->getArrayCopy()), $project, $featureSet);
                         $jobStatuses[] = $job->status_owner;
                     }
-                } else {
-                    if(!$job->wasDeleted()){
-                        /**
-                         * @var $jobJSON Job
-                         */
-                        $jobJSONs[]    = $jobJSON->renderItem( new Chunks_ChunkStruct( $job->getArrayCopy() ), $project, $featureSet );
-                        $jobStatuses[] = $job->status_owner;
-                    }
+                } elseif (!$job->isDeleted()) {
+                    $jobJSONs[] = $jobJSON->renderItem(new JobStruct($job->getArrayCopy()), $project, $featureSet);
+                    $jobStatuses[] = $job->status_owner;
                 }
             }
-
         }
 
-        // @TODO if $jobJSONs is empty ( == no jobs) throw an exception????
+        $projectInfo = $this->metadataDao->setCacheTTL(60)->getValue((int)$project->id, 'project_info');
+        $fromApi = $this->metadataDao->setCacheTTL(60)->getValue((int)$project->id, ProjectsMetadataMarshaller::FROM_API->value);
 
-        $metadataDao = new \Projects_MetadataDao();
-        $projectInfo = $metadataDao->get((int)$project->id,'project_info');
+        $_project_data = $this->projectDao->getProjectAndJobData((int)$project->id);
+        $analysisStatus = new Status($_project_data, $featureSet, $this->user);
 
         return [
-                'id'                   => (int)$project->id,
-                'password'             => $project->password,
-                'name'                 => $project->name,
-                'id_team'              => (int)$project->id_team,
-                'id_assignee'          => (int)$project->id_assignee,
-                'create_date'          => $project->create_date,
-                'fast_analysis_wc'     => (int)$project->fast_analysis_wc,
-                'standard_analysis_wc' => (int)$project->standard_analysis_wc,
-                'tm_analysis_wc'       => $project->tm_analysis_wc,
-                'project_slug'         => Utils::friendly_slug( $project->name ),
-                'jobs'                 => $jobJSONs,
-                'features'             => implode( ",", $featureSet->getCodes() ),
-                'is_cancelled'         => ( in_array( Constants_JobStatus::STATUS_CANCELLED, $jobStatuses ) ),
-                'is_archived'          => ( in_array( Constants_JobStatus::STATUS_ARCHIVED, $jobStatuses ) ),
-                'remote_file_service'  => $project->getRemoteFileServiceName(),
-                'due_date'             => Utils::api_timestamp( $project->due_date ),
-                'project_info'         => (null !== $projectInfo) ? $projectInfo->value : null,
+            'id' => (int)$project->id,
+            'password' => $project->password,
+            'name' => $project->name,
+            'id_team' => (int)$project->id_team,
+            'id_assignee' => (int)$project->id_assignee,
+            'from_api' => ($fromApi ?? 0) == 1,
+            'analysis' => $analysisStatus->fetchData()->getResult(),
+            'create_date' => $project->create_date,
+            'fast_analysis_wc' => (int)$project->fast_analysis_wc,
+            'standard_analysis_wc' => (int)$project->standard_analysis_wc,
+            'tm_analysis_wc' => $project->tm_analysis_wc,
+            'project_slug' => Utils::friendlySlug($project->name),
+            'jobs' => $jobJSONs,
+            'features' => implode(",", $featureSet->getCodes()),
+            'is_cancelled' => (in_array(JobStatus::STATUS_CANCELLED, $jobStatuses)),
+            'is_archived' => (in_array(JobStatus::STATUS_ARCHIVED, $jobStatuses)),
+            'remote_file_service' => $this->projectDao->setCacheTTL(60 * 60 * 24 * 7)->getRemoteFileServiceName([(int) $project->id])[0] ?? null,
+            'due_date' => Utils::api_timestamp($project->due_date),
+            'project_info' => $projectInfo,
         ];
     }
 
     /**
-     * @return array
-     * @throws \Exception
-     * @throws \Exceptions\NotFoundException
+     * @return list<array<string, mixed>>
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws \TypeError
      */
-    public function render() {
-
+    public function render(): array
+    {
         $out = [];
-        foreach ( $this->data as $project ) {
-            $out[] = $this->renderItem( $project );
+        foreach ($this->data as $project) {
+            $out[] = $this->renderItem($project);
         }
 
         return $out;

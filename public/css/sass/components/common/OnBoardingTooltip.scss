@@ -1,0 +1,10 @@
+.__floater__open {
+  [aria-label]::after,[aria-label]::before {
+    display: none
+  }
+  .onboarding-tooltip {
+    ul {
+      margin: 10px;
+    }
+  }
+}

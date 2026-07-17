@@ -6,55 +6,97 @@
  * Time: 18:09
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 
-use API\V2\Exceptions\AuthenticationError;
-use API\V2\Exceptions\NotFoundException;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\Traits\RateLimiterTrait;
+use Exception;
+use Model\ApiKeys\ApiKeyDao;
+use Utils\Tools\Utils;
 
-class KeyCheckController extends KleinController {
+class KeyCheckController extends KleinController
+{
 
-    public function ping() {
-        if ( !$this->api_record ) {
-            throw new AuthenticationError() ;
-        }
+    use RateLimiterTrait;
 
-        $this->response->code(200) ;
+    private ?ApiKeyDao $apiKeyDao = null;
+
+    private function getApiKeyDao(): ApiKeyDao
+    {
+        return $this->apiKeyDao ??= new ApiKeyDao($this->getDatabase());
     }
 
-    public function getUID(){
+    /**
+     * @throws AuthenticationError
+     * @throws Exception
+     */
+    public function ping(): void
+    {
+        $checkRateLimitEmail = $this->checkAndIncrementRateLimit($this->response, $this->getUser()->email ?? "BLANK_EMAIL", '/api/v2/user/ping', 3);
+        $checkRateLimitIp = $this->checkAndIncrementRateLimit($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/v2/user/ping', 3);
 
-        if ( !$this->api_record ) {
-            throw new AuthenticationError( 'Unauthorized', 401 ) ;
+        if ($checkRateLimitEmail) {
+            $this->response = $checkRateLimitEmail;
+
+            return;
         }
 
-        list( $user_api_key, $user_api_secret ) = explode('-', $this->params[ 'user_api_key' ] ) ;
+        if ($checkRateLimitIp) {
+            $this->response = $checkRateLimitIp;
 
-        if ( $user_api_key && $user_api_secret ) {
+            return;
+        }
 
-            $api_record = \ApiKeys_ApiKeyDao::findByKey( $user_api_key );
+        if (!$this->getApiRecord()) {
+            throw new AuthenticationError();
+        }
 
-            if( $api_record && $api_record->validSecret( $user_api_secret ) ){
+        $this->response->code(200);
+    }
 
-                /*
-                    //for now the response is really simple, if more info are needed use the DAO
-                    $dao = new Users_UserDao();
-                    $dao->setCacheTTL( 3600 );
-                    $user = $dao->getByUid( $api_record->uid ) ;
-                    $userJson = [ 'user' => User::renderItem( $user ) ]:
-                */
+    /**
+     * @throws NotFoundException
+     * @throws AuthenticationError
+     * @throws Exception
+     */
+    public function getUID(): void
+    {
+        $checkRateLimitEmail = $this->checkAndIncrementRateLimit($this->response, $this->getUser()->email ?? "BLANK_EMAIL", '/api/v2/user/[:user_api_key]', 3);
+        $checkRateLimitIp = $this->checkAndIncrementRateLimit($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/v2/user/[:user_api_key]', 3);
 
-                $userJson = [ 'user' => [ 'uid' => (int)$api_record->uid ] ];
-                $this->response->json( $userJson );
+        if ($checkRateLimitEmail) {
+            $this->response = $checkRateLimitEmail;
+
+            return;
+        }
+
+        if ($checkRateLimitIp) {
+            $this->response = $checkRateLimitIp;
+
+            return;
+        }
+
+        if (!$this->getApiRecord()) {
+            throw new AuthenticationError('Unauthorized', 401);
+        }
+
+        [$user_api_key, $user_api_secret] = explode('-', $this->params['user_api_key']);
+
+        if ($user_api_key && $user_api_secret) {
+            $api_record = $this->getApiKeyDao()->findByKey($user_api_key);
+
+            if ($api_record && $api_record->validSecret($user_api_secret)) {
+                $userJson = ['user' => ['uid' => $api_record->uid]];
+                $this->response->json($userJson);
 
                 return;
-
             }
-
         }
 
-        throw new NotFoundException( "User not found.", 404 );
-
+        throw new NotFoundException("User not found.", 404);
     }
 
 }

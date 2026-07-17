@@ -1,6 +1,6 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+use migrations\AbstractMatecatMigration;
 
 class CreateTableFeedbacks extends AbstractMatecatMigration {
     public $sql_up = [ 'CREATE TABLE `revision_feedbacks` (

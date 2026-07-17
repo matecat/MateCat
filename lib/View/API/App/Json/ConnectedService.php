@@ -6,52 +6,75 @@
  * Time: 11:50
  */
 
-namespace API\App\Json;
+namespace View\API\App\Json;
 
 
-use ConnectedServices\ConnectedServiceStruct;
-use Utils;
+use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
+use Exception;
+use Model\ConnectedServices\ConnectedServiceStruct;
+use TypeError;
+use Utils\Tools\Utils;
 
-class ConnectedService {
+class ConnectedService
+{
 
     /**
      * @var ConnectedServiceStruct[]
      */
-    protected $data ;
+    protected array $data;
 
-    public function __construct( $data )
+    /**
+     * @param ConnectedServiceStruct[] $data
+     * @throws TypeError
+     */
+    public function __construct(array $data)
     {
-        $this->data = $data ;
+        $this->data = $data;
     }
 
-    public function render() {
-        $out = [] ;
-        if( !empty( $this->data ) ) {
-            foreach ( $this->data as $k => $v ) {
-                $out[] = $this->renderItem( $v );
+    /**
+     * @return array<int, array<string, mixed>>
+     * @throws EnvironmentIsBrokenException
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function render(): array
+    {
+        $out = [];
+        if (!empty($this->data)) {
+            foreach ($this->data as $v) {
+                $out[] = $this->renderItem($v);
             }
         }
-        return $out ;
+
+        return $out;
     }
 
-    public function renderItem(ConnectedServiceStruct $item) {
+    /**
+     * @return array<string, mixed>
+     * @throws EnvironmentIsBrokenException
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function renderItem(ConnectedServiceStruct $item): array
+    {
         /*
          * @var $item ConnectedServiceStruct
          */
 
-        return array(
-            'id' => (int) $item->id,
-            'uid' => (int) $item->uid,
+        return [
+            'id' => (int)$item->id,
+            'uid' => $item->uid,
             'service' => $item->service,
             'email' => $item->email,
             'name' => $item->name,
             'oauth_access_token' => $item->getDecryptedOauthAccessToken(),
-            'created_at' => Utils::api_timestamp( $item->created_at ),
-            'updated_at' => Utils::api_timestamp( $item->updated_at ),
-            'disabled_at' => Utils::api_timestamp( $item->disabled_at ),
-            'expired_at' => Utils::api_timestamp( $item->expired_at ),
+            'created_at' => Utils::api_timestamp($item->created_at),
+            'updated_at' => Utils::api_timestamp($item->updated_at),
+            'disabled_at' => Utils::api_timestamp($item->disabled_at),
+            'expired_at' => Utils::api_timestamp($item->expired_at),
             'is_default' => !!$item->is_default,
-        );
+        ];
     }
 
 }

@@ -1,17 +1,28 @@
 <?php
 
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 
-class SupportedLanguagesController extends KleinController {
+use Controller\Abstracts\KleinController;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
+use Matecat\Locales\Languages;
+
+class SupportedLanguagesController extends KleinController
+{
 
 
-    public function index() {
-        $lang_handler = \Langs_Languages::getInstance();
-        $languages_array = $lang_handler->getEnabledLanguages() ;
+    /**
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
+     */
+    public function index(): void
+    {
+        $lang_handler = Languages::getInstance();
+        $languages_array = $lang_handler->getEnabledLanguages();
         $this->response->json(
-                $languages_array
+            array_values($languages_array)
         );
     }
 

@@ -1,0 +1,117 @@
+@use "../../commons/colors";
+.home-page-section {
+  .layout-bottom {
+    height: 260px;
+    padding: 48px 0;
+    display: flex;
+    flex-direction: column;
+    background-color: colors.$darkBlue;
+    align-items: center;
+    gap: 8px;
+    h3 {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 48px;
+      color: colors.$white;
+      margin: 0;
+    }
+    span {
+      font-size: 18px;
+      line-height: 28px;
+      color: colors.$white;
+      margin-bottom: 16px;
+    }
+    button {
+      height: 56px;
+      line-height: 56px;
+    }
+  }
+}
+.layout-container {
+  position: relative;
+  z-index: 2;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  h1 {
+    font-size: 48px;
+    line-height: 56px;
+    margin: 80px auto;
+  }
+  .layout-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 48px;
+    row-gap: 64px;
+    margin-bottom: 80px;
+    .content-box {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      gap: 20px;
+      .content-box_header {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        h3 {
+          margin-top: 0;
+          font-size: 28px;
+          line-height: 32px;
+          color: #333;
+        }
+        img {
+          width: 64px;
+          height: 64px;
+        }
+      }
+      p {
+        font-size: 18px;
+        line-height: 24px;
+        color: colors.$grey6;
+      }
+    }
+  }
+}
+
+@media (max-width: 829px) {
+  .layout-container {
+    max-width: 382px;
+    .layout-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+@media (min-width: 830px) {
+  .layout-container {
+    max-width: 766px;
+    .layout-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+}
+@media (min-width: 1024px) {
+  .layout-container {
+    max-width: 928px;
+    .layout-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+}
+@media (min-width: 1280px) {
+  .layout-container {
+    max-width: 1080px;
+    .layout-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+}
+@media (min-width: 1440px) {
+  .layout-container {
+    max-width: 1280px;
+    .layout-grid {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+  }
+}

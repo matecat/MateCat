@@ -1,0 +1,93 @@
+@use '../../commons/colors';
+.header-buttons {
+  display: flex;
+  gap: 20px;
+  border-left: 1px solid rgba(255, 255, 255, 0.24);
+  padding-left: 25px;
+  grid-column: 5;
+  margin-left: 22px;
+  .header-button-signin {
+    color: colors.$white !important;
+  }
+  .header-button-signup {
+    color: colors.$darkBlue !important;
+  }
+
+}
+.user-menu-popover-avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 20px;
+}
+
+.user-menu-popover-content {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  gap: 15px;
+  min-width: 250px;
+
+  > hr {
+    margin: 0;
+    border: none;
+    height: 1px;
+    background-color: colors.$grey9;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 30px;
+  }
+
+  .user-name-and-email {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    font-size: 16px;
+    > :first-child {
+      font-size: 18px;
+      font-weight: bold;
+      color: black;
+    }
+  }
+
+  > ul {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    align-items: start;
+    list-style: none;
+
+    > li {
+      width: 100%;
+      text-align: left;
+      > button {
+        flex-grow: 1;
+        justify-content: left;
+      }
+    }
+  }
+  .item {
+    border-radius: 2px;
+    padding: 8px !important;
+    font-size: 16px !important;
+    cursor: pointer;
+    width: 100%;
+    display: block;
+    text-decoration: none;
+    color: colors.$grey6;
+    &:hover {
+      background-color: colors.$grey5 !important;
+      color: colors.$darkBlue !important;
+    }
+  }
+}

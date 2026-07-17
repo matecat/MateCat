@@ -6,62 +6,97 @@
  * Time: 17:44
  */
 
-namespace Features\ReviewExtended;
+namespace Plugins\Features\ReviewExtended;
 
-use Constants;
+use Closure;
 use Exception;
-use Features\ReviewExtended\Email\BatchReviewProcessorAlertEmail;
-use Features\ReviewExtended\Model\ChunkReviewDao;
-use Features\SecondPassReview\Model\TranslationEventDao;
-use Features\TranslationVersions\Handlers\TranslationEventsHandler;
-use Log;
-use LQA\EntryCommentStruct;
-use LQA\EntryDao;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use Model\WordCount\CounterModel;
+use Model\WordCount\WordCountStruct;
 use PDOException;
-use RevisionFactory;
-use TransactionableTrait;
+use Plugins\Features\ReviewExtended\Email\BatchReviewProcessorAlertEmail;
+use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use ReflectionException;
+use TypeError;
+use Utils\Logger\LoggerFactory;
 
-class BatchReviewProcessor {
-
-    use TransactionableTrait;
-
-    /**
-     * @var ChunkReviewTranslationEventTransition[]
-     */
-    protected $segmentTransitionPhasesModel = [];
+class BatchReviewProcessor
+{
 
     /**
-     * @var TranslationEventsHandler
+     * @var CounterModel
      */
-    protected $_translationEventsHandler;
+    private CounterModel $jobWordCounter;
+    /**
+     * @var JobStruct
+     */
+    private JobStruct $chunk;
 
-    public function __construct( TranslationEventsHandler $eventCreator ) {
-        $this->_translationEventsHandler = $eventCreator;
+    /**
+     * @var TranslationEvent[]
+     */
+    private array $prepared_events;
+
+    /** @var Closure(TranslationEvent, CounterModel, ChunkReviewStruct[]): ReviewedWordCountModel */
+    private Closure $reviewedWordCountModelFactory;
+
+    /** @var Closure(ChunkReviewStruct): ChunkReviewModel */
+    private Closure $chunkReviewModelFactory;
+
+    public function __construct(
+        private readonly ChunkReviewDao $chunkReviewDao,
+        ?Closure $reviewedWordCountModelFactory = null,
+        ?Closure $chunkReviewModelFactory = null,
+    ) {
+        $this->reviewedWordCountModelFactory = $reviewedWordCountModelFactory
+            ?? fn(TranslationEvent $event, CounterModel $counter, array $reviews) => new ReviewedWordCountModel($event, $counter, $reviews, $this->chunkReviewDao->getDatabaseHandler());
+        $this->chunkReviewModelFactory = $chunkReviewModelFactory
+            ?? fn(ChunkReviewStruct $cr) => new ChunkReviewModel($cr, $this->chunkReviewDao->getDatabaseHandler());
     }
 
     /**
-     * @throws Exception
+     * @param JobStruct $chunk
+     * @param CounterModel|null $jobWordCounter
+     *
+     * @return $this
+     * @throws TypeError
      */
-    public function process() {
+    public function setChunk(JobStruct $chunk, ?CounterModel $jobWordCounter = null): BatchReviewProcessor
+    {
+        $this->chunk = $chunk;
+        $old_wStruct = WordCountStruct::loadFromJob($chunk);
+        $this->jobWordCounter = $jobWordCounter ?? new CounterModel($this->chunkReviewDao->getDatabaseHandler(), $old_wStruct);
 
-        $chunk = $this->_translationEventsHandler->getChunk();
+        return $this;
+    }
 
-        //
-        // ----------------------------------------------
-        // Note 2020-06-24
-        // ----------------------------------------------
-        // If $chunk is null:
-        //
-        // log and exit
-        //
-        if ( null === $chunk ) {
-            Log::doJsonLog( 'This batch review processor has not a associated chunk. Exiting here...' );
+    /**
+     * @param TranslationEvent[] $prepared_events
+     *
+     * @return $this
+     */
+    public function setPreparedEvents(array $prepared_events): BatchReviewProcessor
+    {
+        $this->prepared_events = $prepared_events;
 
-            return;
-        }
+        return $this;
+    }
 
-        $project      = $chunk->getProject();
-        $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk );
+    /**
+     * @return ChunkReviewStruct[]
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws PDOException
+     * @throws TypeError
+     */
+    private function getOrCreateChunkReviews(ProjectStruct $project): array
+    {
+        $chunkReviews = $this->chunkReviewDao->findChunkReviews($this->chunk);
 
         //
         // ----------------------------------------------
@@ -72,151 +107,77 @@ class BatchReviewProcessor {
         // 1) create a chunkReview
         // 2) send an alert email
         //
-        if ( empty( $chunkReviews ) ) {
-
+        if (empty($chunkReviews)) {
             $data = [
-                    'id_project'  => $project->id,
-                    'id_job'      => $chunk->id,
-                    'password'    => $chunk->password,
-                    'source_page' => 2,
+                'id_project' => $project->id,
+                'id_job' => $this->chunk->id,
+                'password' => $this->chunk->password,
+                'source_page' => 2,
             ];
 
-            $chunkReview = ChunkReviewDao::createRecord( $data );
-            $project->getFeaturesSet()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
+            $chunkReview = $this->chunkReviewDao->createRecord($data);
+            (new ChunkReviewModel($chunkReview, $this->chunkReviewDao->getDatabaseHandler()))->recountAndUpdatePassFailResult($project);
             $chunkReviews[] = $chunkReview;
 
-            Log::doJsonLog( 'Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $chunk->id );
+            LoggerFactory::doJsonLog('Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $this->chunk->id);
 
-            $alertEmail = new BatchReviewProcessorAlertEmail( $chunk, $chunkReview );
+            $alertEmail = new BatchReviewProcessorAlertEmail($this->chunk, $chunkReview);
             $alertEmail->send();
         }
 
-        $revisionFactory = RevisionFactory::initFromProject( $project );
-
-        $this->segmentTransitionPhasesModel = [];
-        $segmentTranslationModels           = [];
-
-        foreach ( $this->_translationEventsHandler->getPersistedEvents() as $translationEvent ) {
-            $segmentTranslationModel    = $revisionFactory->getSegmentTranslationModel( $translationEvent, $chunkReviews );
-            $segmentTranslationModels[] = $segmentTranslationModel;
-
-            // here we process and count the reviewed word count and
-            $this->segmentTransitionPhasesModel[] = $segmentTranslationModel->evaluateAndGetChunkReviewTranslationEventTransition();
-        }
-
-        // uow
-        if ( $this->commit() ) {
-            // send notification emails
-            foreach ( $segmentTranslationModels as $segmentTranslationModel ) {
-                $segmentTranslationModel->sendNotificationEmail();
-            }
-        }
-
+        return $chunkReviews;
     }
 
     /**
-     * @return boolean
      * @throws Exception
+     * @throws TypeError
      */
-    public function commit() {
+    public function process(): void
+    {
+        $project = $this->chunk->getProject(new ProjectDao($this->chunkReviewDao->getDatabaseHandler()));
+        $chunkReviews = $this->getOrCreateChunkReviews($project);
 
-        try {
-            // commit the updates in a transaction
-            $this->openTransaction();
-            $this->updatePassFailAndCounts();
+        foreach ($this->prepared_events as $translationEvent) {
+            $segmentTranslationModel = ($this->reviewedWordCountModelFactory)($translationEvent, $this->jobWordCounter, $chunkReviews);
 
-            foreach ( $this->segmentTransitionPhasesModel as $model ) {
-                $this->updateFinalRevisionFlag( $model );
-                $this->deleteIssues( $model );
+            $segmentTranslationModel->evaluateChunkReviewEventTransitions();
+            $segmentTranslationModel->deleteIssues();
+            $segmentTranslationModel->sendNotificationEmail();
+
+            foreach ($segmentTranslationModel->getEvent()->getChunkReviewsPartials() as $chunkReview) {
+                $project = $chunkReview->getChunk(new JobDao($this->chunkReviewDao->getDatabaseHandler()))->getProject(new ProjectDao($this->chunkReviewDao->getDatabaseHandler()));
+                $chunkReviewModel = ($this->chunkReviewModelFactory)($chunkReview);
+                $chunkReviewModel->updateChunkReviewCountersAndPassFail($chunkReview->penalty_points ?? 0.0, $chunkReview->reviewed_words_count, $chunkReview->total_tte, $project);
             }
-
-            $this->commitTransaction();
-
-            // run chunkReviewUpdated
-            foreach ( $this->segmentTransitionPhasesModel as $model ) {
-                foreach ( $model->getChunkReviews() as $chunkReview ) {
-                    $project          = $chunkReview->getChunk()->getProject();
-                    $chunkReviewModel = new ChunkReviewModel( $chunkReview );
-                    $project->getFeaturesSet()->run( 'chunkReviewUpdated', $chunkReview, true, $chunkReviewModel, $project );
-                }
-            }
-
-        } catch ( PDOException $e ) {
-            $this->rollback();
-            Log::doJsonLog( '$thisnsition UnitOfWork transaction failed: ' . $e->getMessage() );
-
-            return false;
         }
 
-        return true;
-
+        $this->updateJobWordCounter();
     }
 
     /**
-     * Update chunk review is_pass and counters
-     *
      * @throws Exception
+     * @throws TypeError
      */
-    private function updatePassFailAndCounts() {
+    private function updateJobWordCounter(): void
+    {
+        // if empty, no segment status changes are present
+        if (!empty($this->jobWordCounter->getValues())) {
+            $newCount = $this->jobWordCounter->updateDB($this->jobWordCounter->getValues());
+            $this->chunk->draft_words = $newCount->getDraftWords();
+            $this->chunk->new_words = $newCount->getNewWords();
+            $this->chunk->translated_words = $newCount->getTranslatedWords();
+            $this->chunk->approved_words = $newCount->getApprovedWords();
+            $this->chunk->approved2_words = $newCount->getApproved2Words();
+            $this->chunk->rejected_words = $newCount->getRejectedWords();
 
-        $data = [];
-
-        // $data will contain an array of DIFF values used to update qa_chunk_review table
-        foreach ( $this->segmentTransitionPhasesModel as $model ) {
-            foreach ( $model->getChunkReviews() as $chunkReview ) {
-                $data[ $chunkReview->id ][ 'chunkReview_partials' ] = $chunkReview;
-                $data[ $chunkReview->id ][ 'penalty_points' ]       = isset( $data[ $chunkReview->id ][ 'penalty_points' ] ) ? $data[ $chunkReview->id ][ 'penalty_points' ] + $chunkReview->penalty_points : $chunkReview->penalty_points;
-                $data[ $chunkReview->id ][ 'reviewed_words_count' ] = isset( $data[ $chunkReview->id ][ 'reviewed_words_count' ] ) ? $data[ $chunkReview->id ][ 'reviewed_words_count' ] + $chunkReview->reviewed_words_count : $chunkReview->reviewed_words_count;
-                $data[ $chunkReview->id ][ 'advancement_wc' ]       = isset( $data[ $chunkReview->id ][ 'advancement_wc' ] ) ? $data[ $chunkReview->id ][ 'advancement_wc' ] + $chunkReview->advancement_wc : $chunkReview->advancement_wc;
-                $data[ $chunkReview->id ][ 'total_tte' ]            = isset( $data[ $chunkReview->id ][ 'total_tte' ] ) ? $data[ $chunkReview->id ][ 'total_tte' ] + $chunkReview->total_tte : $chunkReview->total_tte;
-            }
+            $this->chunk->draft_raw_words = (int)$newCount->getDraftRawWords();
+            $this->chunk->new_raw_words = (int)$newCount->getNewRawWords();
+            $this->chunk->translated_raw_words = (int)$newCount->getTranslatedRawWords();
+            $this->chunk->approved_raw_words = (int)$newCount->getApprovedRawWords();
+            $this->chunk->approved2_raw_words = (int)$newCount->getApproved2RawWords();
+            $this->chunk->rejected_raw_words = (int)$newCount->getRejectedRawWords();
+            // updateTodoValues for the JOB
         }
-
-        $chunkReviewDao = new ChunkReviewDao();
-
-        // just ONE UPDATE for each ChunkReview
-        foreach ( $data as $id => $datum ) {
-            $chunkReviewDao->passFailCountsAtomicUpdate( $id, $datum );
-        }
-    }
-
-    /**
-     * @param ChunkReviewTranslationEventTransition $model
-     *
-     * @throws \Exception
-     */
-    private function updateFinalRevisionFlag( ChunkReviewTranslationEventTransition $model ) {
-        $eventStruct = $model->getTranslationEvent()->getCurrentEvent();
-        $is_revision = (int)$eventStruct->source_page > Constants::SOURCE_PAGE_TRANSLATE;
-
-        if ( $is_revision ) {
-            $unsetFinalRevision = array_merge( $model->getUnsetFinalRevision(), [ $eventStruct->source_page ] );
-        }
-
-        if ( !empty( $unsetFinalRevision ) ) {
-            ( new TranslationEventDao() )->unsetFinalRevisionFlag(
-                    $model->getTranslationEvent()->getChunk()->id, [ $model->getTranslationEvent()->getSegmentStruct()->id ], $unsetFinalRevision
-            );
-        }
-
-        $eventStruct->final_revision = $is_revision;
-        TranslationEventDao::updateStruct( $eventStruct, [ 'fields' => [ 'final_revision' ] ] );
-    }
-
-    /**
-     * Delete all issues
-     *
-     * @param ChunkReviewTranslationEventTransition $model
-     */
-    private function deleteIssues( ChunkReviewTranslationEventTransition $model ) {
-        foreach ( $model->getIssuesToDelete() as $issue ) {
-            $issue->addComments( ( new EntryCommentStruct() )->getEntriesById( $issue->id ) );
-            EntryDao::deleteEntry( $issue );
-        }
-    }
-
-    public function rollback() {
-        $this->rollbackTransaction();
     }
 
 }

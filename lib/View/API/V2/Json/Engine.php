@@ -6,47 +6,42 @@
  * Time: 17:36
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 
-use EnginesModel_EngineStruct;
+use Model\Engines\Structs\EngineStruct;
 
-class Engine {
+class Engine
+{
 
-    private $data;
+    /**
+     * @var EngineStruct[]
+     */
+    private array $data;
 
-    public function __construct( $data = null ) {
+    /**
+     * @param EngineStruct[] $data
+     */
+    public function __construct(array $data = [])
+    {
         $this->data = $data;
     }
 
     /**
-     * @param EnginesModel_EngineStruct $engine
+     * @param EngineStruct[] $data
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
      */
-    public function renderItem( EnginesModel_EngineStruct $engine ) {
-        $row = [
-                'id'          => $engine->id,
-                'name'        => $engine->name,
-                'type'        => $engine->type,
-                'description' => $engine->description,
-        ];
+    public function render(array $data = []): array
+    {
+        $out = [];
 
-        return $row;
-    }
-
-    public function render( $data = null ) {
-        $out = array();
-
-        if ( empty( $data ) ) {
+        if (empty($data)) {
             $data = $this->data;
         }
 
-        /**
-         * @var $data EnginesModel_EngineStruct[]
-         */
-        foreach ( $data as $k => $engine ) {
-            $out[] = $this->renderItem( $engine );
+        foreach ($data as $engine) {
+            $out[] = $engine->arrayRepresentation();
         }
 
         return $out;

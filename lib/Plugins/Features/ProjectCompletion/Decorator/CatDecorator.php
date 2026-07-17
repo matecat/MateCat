@@ -1,101 +1,130 @@
 <?php
 
-namespace Features\ProjectCompletion\Decorator ;
-use AbstractDecorator;
-use catController;
-use Chunks_ChunkCompletionEventDao;
-use Features;
+namespace Plugins\Features\ProjectCompletion\Decorator;
 
-class CatDecorator extends AbstractDecorator {
+use Controller\Abstracts\IController;
+use Controller\Views\TemplateDecorator\AbstractDecorator;
+use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
+use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
+use DivisionByZeroError;
+use DomainException;
+use Exception;
+use Model\ChunksCompletion\ChunkCompletionEventDao;
+use Model\Projects\MetadataDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectsMetadataMarshaller;
+use RuntimeException;
+use Utils\Templating\PHPTALWithAppend;
+use Utils\Templating\PHPTalBoolean;
+use Utils\Tools\CatUtils;
 
-    /** @var  catController  */
-    protected $controller;
+class CatDecorator extends AbstractDecorator
+{
 
-    private $stats;
+    /** @var array<string, mixed> */
+    private array $stats;
 
-    private $current_phase  ;
+    private string $current_phase;
 
-    public function decorate() {
-        $job = $this->controller->getChunk();
+    private CatDecoratorArguments $arguments;
 
-        $this->stats = $this->controller->getJobStats();
-        $completed = $job->isMarkedComplete( array('is_review' => $this->controller->isRevision() ) ) ;
+    private ChunkCompletionEventDao $chunkCompletionEventDao;
 
-        $lastCompletionEvent = Chunks_ChunkCompletionEventDao::lastCompletionRecord(
-                $job, ['is_review' => $this->controller->isRevision() ]
-        );
+    public function __construct(
+        IController $controller,
+        PHPTALWithAppend $template,
+        ?ChunkCompletionEventDao $chunkCompletionEventDao = null
+    ) {
+        parent::__construct($controller, $template);
+        if ($chunkCompletionEventDao === null) {
+            $chunkCompletionEventDao = new ChunkCompletionEventDao($this->controller->getDatabase());
+        }
+        $this->chunkCompletionEventDao = $chunkCompletionEventDao;
+    }
 
-        $dao = new \Chunks_ChunkCompletionEventDao();
-        $this->current_phase = $dao->currentPhase( $this->controller->getChunk() );
+    /**
+     * @throws Exception
+     * @throws DivisionByZeroError
+     */
+    public function decorate(?ArgumentInterface $arguments = null): void
+    {
+        if (!$arguments instanceof CatDecoratorArguments) {
+            throw new RuntimeException('CatDecorator requires CatDecoratorArguments, got ' . get_debug_type($arguments));
+        }
 
-        $displayButton = true ;
-        $displayButton = $job->getProject()->getFeaturesSet()->filter('filterProjectCompletionDisplayButton', $displayButton, $this);
+        $this->arguments = $arguments;
+        $job = $this->arguments->getJob();
 
-        if ( $displayButton ) {
-            $this->template->project_completion_feature_enabled = true ;
-            $this->template->header_main_button_id  = 'markAsCompleteButton' ;
-            $this->template->job_completion_current_phase = $this->current_phase ;
+        $this->stats = (new CatUtils($this->controller->getDatabase()))->getFastStatsForJob($this->arguments->getWordCountStruct());
 
-            if ( $lastCompletionEvent ) {
-                $this->template->job_completion_last_event_id = $lastCompletionEvent['id_event'] ;
-            }
+        $lastCompletionEvent = $this->chunkCompletionEventDao->lastCompletionRecord($job, ['is_review' => $this->arguments->isRevision()]);
 
-            if ( $completed ) {
-                $this->varsForComplete();
-            }
-            else {
-                $this->varsForUncomplete();
-            }
+        $this->current_phase = $this->chunkCompletionEventDao->currentPhase($this->arguments->getJob());
+
+        $this->template->project_completion_feature_enabled = new PHPTalBoolean(true);
+        $this->template->job_completion_current_phase = $this->current_phase;
+
+        if ($lastCompletionEvent) {
+            $this->template->job_completion_last_event_id = $lastCompletionEvent['id_event'];
+            $this->varsForComplete();
+        } else {
+            $this->varsForUncomplete();
         }
     }
 
     /**
-     * @return catController
+     * @throws DomainException
+     * @throws Exception
      */
-    public function getController() {
-        return $this->controller ;
-    }
+    private function varsForUncomplete(): void
+    {
+        $this->template->job_marked_complete = new PHPTalBoolean(false);
 
-    private function varsForUncomplete() {
-        $this->template->job_marked_complete = false;
-        $this->template->header_main_button_class = 'notMarkedComplete' ;
-
-        if ( $this->completable()  ) {
-            $this->template->header_main_button_enabled = true ;
-            $this->template->mark_as_complete_button_enabled = true;
-            $this->template->header_main_button_class = " isMarkableAsComplete" ;
+        if ($this->completable()) {
+            $this->template->mark_as_complete_button_enabled = new PHPTalBoolean(true);
         } else {
-            $this->template->mark_as_complete_button_enabled = false;
-            $this->template->header_main_button_enabled = false ;
+            $this->template->mark_as_complete_button_enabled = new PHPTalBoolean(false);
         }
     }
 
-    private function varsForComplete() {
-        $this->template->job_marked_complete = true ;
-        $this->template->header_main_button_class = 'isMarkedComplete' ;
-        $this->template->header_main_button_enabled =  false ;
-        $this->template->mark_as_complete_button_enabled = false;
+    private function varsForComplete(): void
+    {
+        $this->template->job_marked_complete = new PHPTalBoolean(true);
+        $this->template->mark_as_complete_button_enabled = new PHPTalBoolean(false);
     }
 
-    private function completable() {
-
-        if ($this->controller->isRevision()) {
-            $completable = $this->current_phase == Chunks_ChunkCompletionEventDao::REVISE &&
-                    $this->stats['DRAFT'] == 0 &&
-                    ( $this->stats['APPROVED'] + $this->stats['REJECTED'] ) > 0;
+    /**
+     * @throws DomainException
+     * @throws Exception
+     */
+    private function completable(): bool
+    {
+        $project = $this->arguments->getJob()->getProject(new ProjectDao($this->controller->getDatabase()));
+        $wordCountType = (new MetadataDao($this->controller->getDatabase()))
+            ->setCacheTTL(3600)
+            ->getValue((int) $project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)
+            ?? ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value;
+        if ($wordCountType != ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {
+            if ($this->arguments->isRevision()) {
+                $completable = $this->current_phase == ChunkCompletionEventDao::REVISE &&
+                    ($this->stats['DRAFT'] ?? 0) == 0 &&
+                    (($this->stats['APPROVED'] ?? 0) + ($this->stats['REJECTED'] ?? 0)) > 0;
+            } else {
+                $completable = $this->current_phase == ChunkCompletionEventDao::TRANSLATE &&
+                    ($this->stats['DRAFT'] ?? 0) == 0 && ($this->stats['REJECTED'] ?? 0) == 0;
+            }
+        } elseif ($this->arguments->isRevision()) {
+            $completable = $this->current_phase == ChunkCompletionEventDao::REVISE &&
+                ($this->stats['raw']['draft'] ?? 0) == 0 && ($this->stats['raw']['new'] ?? 0) == 0 &&
+                (($this->stats['raw']['approved'] ?? 0) + ($this->stats['raw']['approved2'] ?? 0) + ($this->stats['raw']['rejected'] ?? 0)) > 0;
+        } else {
+            $completable = $this->current_phase == ChunkCompletionEventDao::TRANSLATE &&
+                ($this->stats['raw']['draft'] ?? 0) == 0 &&
+                ($this->stats['raw']['new'] ?? 0) == 0 &&
+                ($this->stats['raw']['rejected'] ?? 0) == 0;
         }
-        else {
-            $completable = $this->current_phase == Chunks_ChunkCompletionEventDao::TRANSLATE &&
-                    $this->stats['DRAFT'] == 0 && $this->stats['REJECTED'] == 0 ;
-        }
 
-        $completable = $this->controller->getChunk()->getProject()->getFeaturesSet()->filter('filterJobCompletable', $completable,
-                $this->controller->getChunk(),
-                $this->controller->getUser(),
-                catController::isRevision()
-        );
-
-        return $completable ;
+        return $completable;
     }
 
 }

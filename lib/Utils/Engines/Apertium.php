@@ -1,129 +1,150 @@
 <?php
 
+namespace Utils\Engines;
+
+use Exception;
+use Model\DataAccess\IDatabase;
+use TypeError;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+
 /**
  * Created by PhpStorm.
- * @property string client_secret
+ * @property string $client_secret
  * @author egomez-prompsit egomez@prompsit.com
  * Date: 29/07/15
  * Time: 12.17
  *
  */
+class Apertium extends AbstractEngine
+{
 
-class Engines_Apertium extends Engines_AbstractEngine {
+    protected array $_config = [
+        'segment' => null,
+        'source' => null,
+        'target' => null,
+        'key' => null,
+    ];
 
-    protected $_config = array(
-            'segment'     => null,
-            'source'      => null,
-            'target'      => null,
-            'key'     => null,
-    );
-
-    public function __construct($engineRecord) {
-        parent::__construct($engineRecord);
-        if ( $this->engineRecord->type != "MT" ) {
-            throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
+    /**
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function __construct($engineRecord, IDatabase $database)
+    {
+        parent::__construct($engineRecord, $database);
+        if ($this->getEngineRecord()->type != EngineConstants::MT) {
+            throw new Exception("Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
         }
     }
 
     /**
-     * @param $lang
+     * @param string $lang
      *
-     * @return mixed
-     * @throws Exception
+     * @return string
      */
-    protected function _fixLangCode( $lang ) {
+    protected function _fixLangCode(string $lang): string
+    {
         return $lang;
     }
 
     /**
-     * @param $rawValue
+     * @param mixed $rawValue
+     * @param array<string, mixed> $parameters
+     * @param null $function
      *
-     * @return array
+     * @return GetMemoryResponse
+     * @throws Exception
+     * @throws TypeError
      */
-    protected function _decode( $rawValue ){
-        $all_args =  func_get_args();
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): GetMemoryResponse
+    {
+        $original = ['text' => ''];
+        $all_args = func_get_args();
 
-        if( is_string( $rawValue ) ) {
-            $original = json_decode( $all_args[1]["data"] , true );
-            $decoded = json_decode( $rawValue, true );
-            $decoded = array(
-                    'data' => array(
-                            "translations" => array(
-                                    array( 'translatedText' =>  $this->_resetSpecialStrings( $decoded[ "text" ] ) )
-                            )
-                    )
-            );
+        if (is_string($rawValue)) {
+            $original = json_decode($all_args[1]["data"], true);
+            $decoded = json_decode($rawValue, true);
+            $decoded = [
+                'data' => [
+                    "translations" => [
+                        ['translatedText' => $decoded["text"]]
+                    ]
+                ]
+            ];
         } else {
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        $mt_result = new Engines_Results_MT( $decoded );
-
-        if ( $mt_result->error->code < 0 ) {
-            $mt_result = $mt_result->get_as_array();
-            $mt_result['error'] = (array)$mt_result['error'];
-            return $mt_result;
-        }
-
-        $mt_match_res = new Engines_Results_MyMemory_Matches(
-                $this->_preserveSpecialStrings( $original["text"]),
-                $mt_result->translatedText,
-                100 - $this->getPenalty() . "%",
-                "MT-" . $this->getName(),
-                date( "Y-m-d" )
-        );
-
-        $mt_res = $mt_match_res->getMatches();
-
-        return $mt_res;
-
+        return $this->_composeMTResponseAsMatch($original["text"], $decoded);
     }
 
-    public function get( $_config ) {
-        $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
+    /**
+     * @param array<string, mixed> $_config
+     * @throws TypeError
+     * @throws \Psr\Log\InvalidArgumentException
+     * @throws \RuntimeException
+     */
+    public function get(array $_config): GetMemoryResponse
+    {
+        $param_data = json_encode([
+            "mtsystem" => "apertium",
+            "src" => $_config['source'],
+            "trg" => $_config['target'],
+            "text" => $_config['segment']
+        ]);
 
-        $param_data = json_encode(array(
-                "mtsystem" => "apertium",
-                "src" => $_config[ 'source' ],
-                "trg" => $_config[ 'target' ],
-                "text" => $_config[ 'segment' ]
-        ));
-
-        $parameters = array();
-        if (  $this->client_secret != '' && $this->client_secret != null ) {
-            $parameters[ 'key' ] = $this->client_secret;
+        $parameters = [];
+        if ($this->client_secret != '' && $this->client_secret != null) {
+            $parameters['key'] = $this->client_secret;
         }
         $parameters['func'] = "translate";
         $parameters['data'] = $param_data;
 
-        $this->_setAdditionalCurlParams( array(
-                        CURLOPT_POST       => true,
-                        CURLOPT_RETURNTRANSFER => true
-                )
+        $this->_setAdditionalCurlParams([
+                CURLOPT_POST => true,
+                CURLOPT_RETURNTRANSFER => true
+            ]
         );
-        $this->call( "translate_relative_url", $parameters, false);
+        $this->call("translate_relative_url", $parameters, false);
 
-        return $this->result;
-
+        return $this->_getResultAsGetMemoryResponse();
     }
 
-    public function set( $_config ) {
-
+    /**
+     * @param mixed $_config
+     */
+    public function set($_config): bool
+    {
         //if engine does not implement SET method, exit
         return true;
     }
 
-    public function update( $config ) {
-
+    /**
+     * @param mixed $_config
+     */
+    public function update($_config): bool
+    {
         //if engine does not implement UPDATE method, exit
         return true;
     }
 
-    public function delete( $_config ) {
-
+    /**
+     * @param mixed $_config
+     */
+    public function delete($_config): bool
+    {
         //if engine does not implement DELETE method, exit
         return true;
-
     }
 
+    /**
+     * @inheritDoc
+     */
+    public static function getConfigurationParameters(): array
+    {
+        return [
+            'enable_mt_analysis',
+        ];
+    }
 }

@@ -1,0 +1,53 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * @author Domenico Lupinetti (hashashiyyin) domenico@translated.net / ostico@gmail.com
+ * Date: 14/11/25
+ * Time: 18:15
+ *
+ */
+
+namespace Utils\Engines\Validators;
+
+use DomainException;
+use Exception;
+use Model\DataAccess\IDatabase;
+use Utils\Engines\Altlang;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\Validators\Contracts\EngineValidatorObject;
+use Utils\Validator\Contracts\AbstractValidator;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
+
+class AltLangEngineValidator extends AbstractValidator
+{
+
+    public function __construct(private readonly IDatabase $database)
+    {
+    }
+
+    /**
+     * @param EngineValidatorObject $object
+     * @return ValidatorObjectInterface|null
+     * @throws Exception
+     * @throws \TypeError
+     */
+    public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
+    {
+        $engineStruct = $object->engineStruct ?? throw new Exception('Engine struct required');
+
+        /** @var Altlang $newTestCreatedMT */
+        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct, $this->database);
+        $config = $newTestCreatedMT->getConfigStruct();
+        $config['segment'] = "Hello World";
+        $config['source'] = "en-US";
+        $config['target'] = "en-GB";
+
+        $mt_result = $newTestCreatedMT->get($config);
+
+        if ($mt_result->error !== null) {
+            throw new DomainException($mt_result->error->message ?? 'Unknown error');
+        }
+
+        return null;
+    }
+}

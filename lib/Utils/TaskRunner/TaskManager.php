@@ -4,19 +4,25 @@
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 16/05/14
  * Time: 17.01
- * 
+ *
  */
 
-namespace TaskRunner;
+namespace Utils\TaskRunner;
 
-use AMQHandler;
 use Exception;
-use INIT;
-use Log;
-use TaskRunner\Commons\AbstractDaemon;
-use TaskRunner\Commons\Context;
-use TaskRunner\Commons\ContextList;
-use TaskRunner\Commons\RedisKeys;
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
+use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;
+use ReflectionException;
+use RuntimeException;
+use TypeError;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\Logger\LoggerFactory;
+use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Commons\AbstractDaemon;
+use Utils\TaskRunner\Commons\Context;
+use Utils\TaskRunner\Commons\NativeProcessControl;
+use Utils\TaskRunner\Commons\ProcessControlInterface;
 
 /**
  * Class Analysis_Manager
@@ -24,128 +30,103 @@ use TaskRunner\Commons\RedisKeys;
  * Generic Asynchronous Task Runner
  *
  */
-class TaskManager extends AbstractDaemon {
+class TaskManager extends AbstractDaemon
+{
 
     /**
-     * Handler of AMQ connector
+     * Key Set that holds the main process of Task Manager
      *
-     * @var \AMQHandler
+     * Every Task Manager must have its pid registered to distribute the across multiple servers
+     *
      */
-    protected $_queueHandler;
+    const string TASK_RUNNER_PID = 'task_manager_pid_set';
 
     /**
      * Number of running processes
      *
      * @var int
      */
-    protected $_runningPids     = 0;
+    protected int $_runningPids = 0;
 
     /**
-     * List of contexts loaded from configuration file
-     * @var array
-     */
-    protected $_context_definitions = array();
-
-    /**
-     * Optional context index on which the task runner works
-     *
-     * @var null
-     */
-    protected $_contextIndex;
-
-    /**
-     * Path to che configuration file
-     *
-     * @var string
-     */
-    protected $_configFile;
-
-    /**
-     * Context list definitions
-     *
-     * @var ContextList
-     */
-    protected $_queueContextList = array();
-
-    /**
-     * Deleted context ( removed from config file at runtime ) will be putted here to be removed
+     * Deleted context (removed from config file at runtime) will be putted here to be removed
      * @var Context[]
      */
-    protected $_destroyContext = array();
+    protected array $_destroyContext = [];
+
+    protected ProcessControlInterface $processControl;
 
     /**
      * Exception code, error to fork the process
      */
-    const ERR_NOT_FORK          = 1;
-
-    /**
-     * Exception code, error to increment the number of processes on the Redis key
-     */
-    const ERR_NOT_INCREMENT     = 2;
+    const int ERR_NOT_FORK = 1;
 
     /**
      * TaskManager constructor.
      *
-     * @param null $configFile
-     * @param null $contextIndex
+     * @param ?string $configFile
+     * @param ?string $contextIndex
+     *
+     * @throws Exception
+     * @throws TypeError
      */
-    protected function __construct( $configFile = null, $contextIndex = null ) {
+    protected function __construct(string $configFile = null, ?string $contextIndex = null)
+    {
+        parent::__construct($configFile, $contextIndex);
 
-        $this->_configFile   = $configFile;
-        $this->_contextIndex = $contextIndex;
-
-        parent::__construct();
+        $this->processControl = new NativeProcessControl();
 
         try {
-
-            set_time_limit(0);
-
-            $this->_queueHandler = new AMQHandler();
+            $this->queueHandler = AMQHandler::getNewInstanceForDaemons();
             $this->_updateConfiguration();
-
-        } catch ( Exception $ex ){
-
-            self::_TimeStampMsg( str_pad( " " . $ex->getMessage() . " ", 60, "*", STR_PAD_BOTH ) );
-            self::_TimeStampMsg( str_pad( "EXIT", 60, " ", STR_PAD_BOTH ) );
+        } catch (Exception $ex) {
+            $this->logger->debug(str_pad(" " . $ex->getMessage() . " ", 60, "*", STR_PAD_BOTH));
+            $this->logger->debug(str_pad("EXIT", 60, " ", STR_PAD_BOTH));
             die();
         }
-
     }
 
     /**
-     * Start execution method
+     * @throws RuntimeException
+     */
+    private function requireQueueHandler(): AMQHandler
+    {
+        return $this->queueHandler ?? throw new RuntimeException('QueueHandler not initialized');
+    }
+
+    /**
+     * Start the execution method
      *
-     * @param null $args
-     *
-     * @throws Exception
+     * @param array<mixed>|null $args
      *
      * @return void
+     * @throws Exception
+     * @throws LogInvalidArgumentException
+     * @throws TypeError
+     *
      */
-    public function main( $args = null ) {
-
+    public function main(array $args = null): void
+    {
         /*
          * Kill all managers. "There can be only one."
-         * Register My Host address ( and also overwrite the old one )
+         * Register My Host address (and also overwrite the old one)
          */
-        if ( !$this->_queueHandler->getRedisClient()->sadd( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . (int) INIT::$INSTANCE_ID ) ){
+        if (!$this->requireQueueHandler()->getRedisClient()->sadd(self::TASK_RUNNER_PID, [$this->processControl->getHostname() . ":" . AppConfig::$INSTANCE_ID])) {
             //kill all it's children
             $this->_killPids();
         }
 
         // BEGIN
         do {
-
             try {
-
-                if( !$this->_queueHandler->getRedisClient()->sismember( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . (int) INIT::$INSTANCE_ID ) ) {
-                    self::_TimeStampMsg( "(parent " . self::$tHandlerPID . " }) : ERROR OCCURRED, MY PID DISAPPEARED FROM REDIS:  PARENT EXITING !!" );
+                if (!$this->requireQueueHandler()->getRedisClient()->sismember(self::TASK_RUNNER_PID, $this->processControl->getHostname() . ":" . AppConfig::$INSTANCE_ID)) {
+                    $this->logger->debug("(parent " . $this->myProcessPid . " }) : ERROR OCCURRED, MY PID DISAPPEARED FROM REDIS:  PARENT EXITING !!");
                     self::cleanShutDown();
                     die();
                 }
-
-            } catch ( Exception $e ){
-                self::_TimeStampMsg( "(child " . self::$tHandlerPID .  ") : FATAL !! Redis Server not available. Re-instantiated the connection and re-try in next cycle" );
-                self::_TimeStampMsg( "(child " . self::$tHandlerPID .  ") : FATAL !! " . $e->getMessage() );
+            } catch (Exception $e) {
+                $this->logger->debug("(child " . $this->myProcessPid . ") : FATAL !! Redis Server not available. Re-instantiated the connection and re-try in next cycle");
+                $this->logger->debug("(child " . $this->myProcessPid . ") : FATAL !! " . $e->getMessage());
                 sleep(1);
                 continue;
             }
@@ -154,44 +135,33 @@ class TaskManager extends AbstractDaemon {
 
             $this->_updateConfiguration();
 
-            foreach ( $this->_queueContextList->list as $context_index => $context ) {
-
-//                self::_TimeStampMsg( "(parent " . self::$tHandlerPID . ") : queue " . gethostname() . ":" . $context->queue_name . " contains $context->pid_list_len processes" );
+            foreach ($this->_queueContextList->list as $context) {
+//                $this->logger->debug( "(parent " . $this->myProcessPid . ") : queue " . $this->processControl->getHostname() . ":" . $context->queue_name . " contains $context->pid_list_len processes" );
 
                 $numProcessesDiff = $context->pid_list_len - $context->max_executors;
-                $numProcessesToLaunchOrDelete = abs( $numProcessesDiff );
+                $numProcessesToLaunchOrDelete = abs($numProcessesDiff);
 
-                switch ( true ) {
-
-                    case $numProcessesDiff < 0:
-
+                if ($this->RUNNING) {
+                    if ($numProcessesDiff < 0) {
                         try {
-                            self::_TimeStampMsg( "(parent " . self::$tHandlerPID . ") : need to create $numProcessesToLaunchOrDelete processes" );
-                            $this->_forkProcesses( $numProcessesToLaunchOrDelete, $context );
-
-                        } catch ( Exception $e ) {
-                            self::_TimeStampMsg( "Exception {$e->getCode()}: " . $e->getMessage() );
+                            $this->logger->debug("(parent " . $this->myProcessPid . ") : need to create $numProcessesToLaunchOrDelete processes on " . $context->queue_name);
+                            $this->_forkProcesses($numProcessesToLaunchOrDelete, $context);
+                        } catch (Exception $e) {
+                            $this->logger->debug("Exception {$e->getCode()}: " . $e->getMessage());
                             $this->RUNNING = false;
                         }
-
-                        break;
-
-                    case $numProcessesDiff > 0:
-
-                        self::_TimeStampMsg( "(parent " . self::$tHandlerPID . ") : need to delete $numProcessesToLaunchOrDelete processes" );
-                        $this->_killPids( $context, 0, $numProcessesToLaunchOrDelete );
-                        sleep( 1 );
-
-                        break;
-
-                    default:
-                        if ( !( ( round( microtime(true), 3 ) * 1000 ) % 10 ) ) {
-                            self::_TimeStampMsg( "(parent) : PARENT MONITORING PAUSE (" . gethostname() . ":" . INIT::$INSTANCE_ID . ") sleeping ...." );
-                            usleep( 1000 );
+                    } elseif ($numProcessesDiff > 0) {
+                        $this->logger->debug("(parent " . $this->myProcessPid . ") : need to delete $numProcessesToLaunchOrDelete processes on " . $context->queue_name);
+                        $this->_killPids($context, 0, $numProcessesToLaunchOrDelete);
+                    } else {
+                        if (!((round(microtime(true), 3) * 1000) % 10)) {
+                            $this->logger->debug("(parent) : PARENT MONITORING PAUSE (" . $this->processControl->getHostname() . ":" . AppConfig::$INSTANCE_ID . ") sleeping ....");
                         }
 
-                        self::_balanceQueues();
-                        break;
+                        $this->_balanceQueues();
+                    }
+
+                    usleep(500000);
                 }
             }
 
@@ -199,12 +169,10 @@ class TaskManager extends AbstractDaemon {
             $this->_cleanContexts();
 
             //wait to free cpu
-            sleep( self::$sleepTime );
+            sleep(self::$sleepTime);
+        } while ($this->RUNNING);
 
-        } while( $this->RUNNING );
-
-        self::cleanShutDown();
-
+        $this->cleanShutDown();
     }
 
     /**
@@ -212,224 +180,204 @@ class TaskManager extends AbstractDaemon {
      *
      * Signal management for child processes termination
      *
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws LogInvalidArgumentException
      */
-    protected function _waitPid(){
-
-        //avoid zombies : parent process knows the death of one of the children
-        $dead = pcntl_waitpid( -1, $status, WNOHANG | WUNTRACED );
-        while ( $dead > 0 ) {
-
-            self::_TimeStampMsg( "(parent " . self::$tHandlerPID . ") : child $dead exited: deleting file ...." );
-            foreach ( $this->_queueContextList->list as $queue ) {
-                $_was_active = $this->_queueHandler->getRedisClient()->sismember( $queue->pid_set_name, $dead . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID );
-                if ( $_was_active ) {
-                    $this->_killPids( null, $dead );
+    protected function _waitPid(): void
+    {
+        //avoid zombies: parent process knows the death of one of the children
+        $status = 0;
+        $dead = $this->processControl->waitPid(-1, $status, WNOHANG | WUNTRACED);
+        while ($dead > 0) {
+            $this->logger->debug("(parent " . $this->myProcessPid . "): child $dead exited.");
+            foreach ($this->_queueContextList->list as $queue) {
+                $_was_active_but_unexpectedly_dead = $this->requireQueueHandler()->getRedisClient()->sismember($queue->pid_set_name, $dead . ":" . $this->processControl->getHostname() . ":" . AppConfig::$INSTANCE_ID);
+                if ($_was_active_but_unexpectedly_dead) {
+                    $this->logger->debug("(parent " . $this->myProcessPid . "): unexpectedly dead, deleting file ....");
+                    $this->_killPids(null, $dead);
+                    $this->logger->debug("(parent " . $this->myProcessPid . "): DONE");
+                } else {
+                    // Executor exited by user kill or was a normal exit (clean)
+                    $queue->pid_list_len = $this->requireQueueHandler()->getRedisClient()->scard($queue->pid_set_name) ?? 0;
                 }
             }
 
-            //avoid zombies : parent process knows the death of one of the children
-            $dead = pcntl_waitpid( -1, $status, WNOHANG | WUNTRACED );
-
-            self::_TimeStampMsg( "DONE" );
-
+            //avoid zombies: parent process knows the death of one of the children
+            $dead = $this->processControl->waitPid(-1, $status, WNOHANG | WUNTRACED);
         }
-
     }
 
     /**
      * Doing nothing for now
      */
-    protected function _balanceQueues(){
-//        self::_TimeStampMsg( "TODO. Now i do nothing." );
+    protected function _balanceQueues(): void
+    {
+//        $this->_TimeStampMsg( "To be implemented. Now i do nothing." );
 //        $this->RUNNING = false;
     }
 
     /**
      * Launch a single process over a queue and register it's pid in the right processes queue
      *
-     * @param int     $numProcesses
+     * @param int $numProcesses
      *
      * @param Context $context
      *
-     * @return int|null
      * @throws Exception
      */
-    protected function _forkProcesses( $numProcesses, Context $context ) {
-
+    protected function _forkProcesses(int $numProcesses, Context $context): void
+    {
         $processLaunched = 0;
 
-        while ( $processLaunched < $numProcesses ) {
+        while ($processLaunched < $numProcesses) {
+            $pid = $this->processControl->fork();
 
-            try {
-                $context->pid_list_len = $this->_queueHandler->getRedisClient()->incr( gethostname() . ":" . $context->queue_name );
-//                self::_TimeStampMsg( "(parent " . self::$tHandlerPID . ") : queue " . gethostname() . ":" . $context->queue_name . " counter incremented, now it contains $context->pid_list_len processes" );
-            } catch ( Exception $e ){
-                throw new Exception( "(parent " . gethostname() . ":" . INIT::$INSTANCE_ID . ") ERROR: " . $e->getMessage() . " ... EXITING.", static::ERR_NOT_INCREMENT );
-            }
-
-            $pid = pcntl_fork();
-
-            if ( $pid == -1 ) {
-
-                throw new Exception( "(parent " . gethostname() . ":" . INIT::$INSTANCE_ID . ") : ERROR OCCURRED : cannot fork. PARENT EXITING !!", static::ERR_NOT_FORK );
-
-            } elseif ( $pid ) {
-
-                // parent process continue running
+            if ($pid == -1) {
+                throw new Exception("(parent " . $this->processControl->getHostname() . ":" . AppConfig::$INSTANCE_ID . ") : ERROR OCCURRED : cannot fork. PARENT EXITING !!", static::ERR_NOT_FORK);
+            } elseif ($pid) {
+                // parent process continues running
                 $processLaunched += 1;
                 $this->_runningPids += 1;
-                $msg = str_pad( "(parent " . gethostname() . ":" . INIT::$INSTANCE_ID . " spawned 1 new child in " . gethostname() . ":" . $context->queue_name, 50, "-", STR_PAD_BOTH );
-                self::_TimeStampMsg( $msg );
-
+                $context->pid_list_len++;
+                $msg = str_pad("(parent " . $this->processControl->getHostname() . ":" . AppConfig::$INSTANCE_ID . " spawned 1 new child in " . $context->pid_set_name, 50, "-", STR_PAD_BOTH);
+                $this->logger->debug($msg);
             } else {
-
                 // child process runs from here
-                pcntl_exec( "/usr/bin/php", array( __DIR__ . DIRECTORY_SEPARATOR . "Executor.php" , json_encode( $context ) ) );
-                posix_kill( posix_getpid(), SIGINT ); //this line of code will never be executed
+                $this->processControl->exec("/usr/bin/php", [__DIR__ . DIRECTORY_SEPARATOR . "executor_worker.php", (string)json_encode($context)]);
+                $this->processControl->kill($this->processControl->getPid(), SIGTERM); //this line of code will never be executed
                 exit;
-
             }
-
         }
-
         //NO Error. Parent returning after $numProcesses process spawned
-        return 0;
 
     }
 
     /**
      * Clean shutdown process for the Manager
      *
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws LogInvalidArgumentException
      */
-    public static function cleanShutDown() {
-
+    public function cleanShutDown(): void
+    {
         //SHUTDOWN
-        static::$__INSTANCE->_killPids();
-        static::$__INSTANCE->_queueHandler->getRedisClient()->srem( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . (int) INIT::$INSTANCE_ID );
-        $msg = str_pad( " TASK RUNNER " . gethostname() . ":" . INIT::$INSTANCE_ID . " HALTED ", 50, "-", STR_PAD_BOTH );
-        self::_TimeStampMsg( $msg );
+        $msg = str_pad(" SHUTDOWN slow children." . $this->processControl->getHostname() . ":" . AppConfig::$INSTANCE_ID, 50, "-", STR_PAD_BOTH);
+        $this->logger->debug($msg);
+        $this->_killPids();
+        $this->requireQueueHandler()->getRedisClient()->srem(self::TASK_RUNNER_PID, $this->processControl->getHostname() . ":" . AppConfig::$INSTANCE_ID);
+        $msg = str_pad(" TASK RUNNER " . $this->processControl->getHostname() . ":" . AppConfig::$INSTANCE_ID . " HALTED ", 50, "-", STR_PAD_BOTH);
+        $this->logger->debug($msg);
 
-        static::$__INSTANCE->_queueHandler->getRedisClient()->disconnect();
-
+        $this->requireQueueHandler()->getRedisClient()->disconnect();
     }
 
     /**
      * Process deletion/killing
      *
      * <ul>
-     *     <li>Kill a specific Process ID from a specific Queue when $pid and $queueInfo are passed</li>
-     *     <li>Kill a specific Process ID un unknown Queue when only $pid is passed</li>
-     *     <li>Kill a certain number of processes from a queue when $num and $queueInfo are passed</li>
-     *     <li>Kill all processes from a queue when only the $queueInfo is passed</li>
-     *     <li>Kill a number of elements equally from all queues when only $num is passed</li>
-     *     <li>Kill ALL processes when no parameters are sent</li>
+     *     <li>Kill a specific Process ID from a specific Queue when $pid and $queueInfo are passed.</li>
+     *     <li>Kill a specific Process ID un unknown Queue when only $pid is passed.</li>
+     *     <li>Kill a certain number of processes from a queue when $num and $queueInfo are passed.</li>
+     *     <li>Kill all processes from a queue when only the $queueInfo is passed.</li>
+     *     <li>Kill a number of elements equally from all queues when only $num is passed.</li>
+     *     <li>Kill ALL processes when no parameters are sent.</li>
      * </ul>
      *
-     * @param Context $queueInfo
-     * @param int     $pid
-     * @param int     $num
+     * @param ?Context $queueInfo
+     * @param int $pid
+     * @param int $num
      *
-     * @throws \Predis\Connection\ConnectionException
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws LogInvalidArgumentException
      */
-    protected function _killPids( Context $queueInfo = null, $pid = 0, $num = 0 ) {
-
-        self::_TimeStampMsg( "Request to kill some processes." );
-        self::_TimeStampMsg( "Pid List: " . @var_export( $queueInfo->pid_set_name, true ) );
-        self::_TimeStampMsg( "Pid:      " . @var_export( $pid, true ) );
-        self::_TimeStampMsg( "Num:      " . @var_export( $num, true ) );
+    protected function _killPids(Context $queueInfo = null, int $pid = 0, int $num = 0): void
+    {
+        $this->logger->debug("Get to kill some processes.");
+        $this->logger->debug("Pid List: " . @var_export($queueInfo?->pid_set_name, true));
+        $this->logger->debug("Pid:      " . @var_export($pid, true));
+        $this->logger->debug("Num:      " . @var_export($num, true));
 
         $numDeleted = 0;
 
-        if ( !empty( $pid ) && !empty( $queueInfo ) ) {
+        if (!empty($pid) && !empty($queueInfo)) {
+            $this->logger->debug("Killing pid $pid from " . $queueInfo->pid_set_name);
+            $numDeleted += $this->requireQueueHandler()->getRedisClient()->srem($queueInfo->pid_set_name, $pid . ":" . $this->processControl->getHostname() . ":" . AppConfig::$INSTANCE_ID);
+            $this->processControl->kill($pid, SIGTERM);
+            $queueInfo->pid_list_len = $this->requireQueueHandler()->getRedisClient()->scard($queueInfo->pid_set_name);
+        } elseif (!empty($pid) && empty($queueInfo)) {
+            $this->logger->debug("Killing pid $pid from a not defined queue. Seek and destroy.");
 
-            self::_TimeStampMsg( "Killing pid $pid from " . $queueInfo->pid_set_name );
-            $numDeleted += $this->_queueHandler->getRedisClient()->srem( $queueInfo->pid_set_name, $pid . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID );
-            posix_kill( $pid, SIGINT );
-            $queueInfo->pid_list_len = $this->_queueHandler->getRedisClient()->decr( gethostname() . ":" . $queueInfo->queue_name );
-
-        } elseif ( !empty( $pid ) && empty( $queueInfo ) ) {
-
-            self::_TimeStampMsg( "Killing pid $pid from a not defined queue. Seek and destroy." );
-            /**
-             * @var $queue Context
-             */
-            foreach ( $this->_queueContextList->list as $queue ) {
-
-                $deleted = $this->_queueHandler->getRedisClient()->srem( $queue->pid_set_name, $pid . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID );
-                if( $deleted ){
-                    posix_kill( $pid, SIGINT );
-                    $queue->pid_list_len = $this->_queueHandler->getRedisClient()->decr( gethostname() . ":" . $queue->queue_name );
-                    self::_TimeStampMsg( "Found. Killed pid $pid from queue " . gethostname() . ":$queue->queue_name." );
+            foreach ($this->_queueContextList->list as $queue) {
+                $deleted = $this->requireQueueHandler()->getRedisClient()->srem($queue->pid_set_name, $pid . ":" . $this->processControl->getHostname() . ":" . AppConfig::$INSTANCE_ID);
+                if ($deleted) {
+                    $this->processControl->kill($pid, SIGTERM);
+                    $queue->pid_list_len = $this->requireQueueHandler()->getRedisClient()->scard($queue->pid_set_name);
+                    $this->logger->debug("Found. Killed pid $pid from queue " . $this->processControl->getHostname() . ":$queue->queue_name.");
                     $numDeleted += $deleted;
                 }
-
             }
-
-        } elseif ( !empty( $num ) && !empty( $queueInfo ) ) {
-
-            self::_TimeStampMsg( "Killing $num pid from " . $queueInfo->pid_set_name );
-            $queueBefore = $this->_queueHandler->getRedisClient()->scard( $queueInfo->pid_set_name );
-            $pNameList = $this->_queueHandler->getRedisClient()->smembers( $queueInfo->pid_set_name );
+        } elseif (!empty($num) && !empty($queueInfo)) {
+            $this->logger->debug("Killing $num pid from " . $queueInfo->pid_set_name);
+            $queueBefore = $this->requireQueueHandler()->getRedisClient()->scard($queueInfo->pid_set_name);
+            $pNameList = $this->requireQueueHandler()->getRedisClient()->smembers($queueInfo->pid_set_name);
             $i = 0;
-            foreach( $pNameList as $pidName ){
-                list( $pid, $hostName, $instanceID ) = explode( ":", $pidName );
-                if( $hostName == gethostname() ){
-                    posix_kill( $pid, SIGINT );
-                    $this->_queueHandler->getRedisClient()->srem( $queueInfo->pid_set_name, $pidName );
-                    $queueInfo->pid_list_len = $this->_queueHandler->getRedisClient()->decr( $hostName . ":" . $queueInfo->queue_name );
+            foreach ($pNameList as $pidName) {
+                /** @noinspection PhpUnusedLocalVariableInspection */
+                [$pid, $hostName, $instanceID] = explode(":", (string)$pidName);
+                if ($hostName == $this->processControl->getHostname()) {
+                    $this->processControl->kill((int)$pid, SIGTERM);
+                    $this->requireQueueHandler()->getRedisClient()->srem($queueInfo->pid_set_name, $pidName);
+                    $queueInfo->pid_list_len = $this->requireQueueHandler()->getRedisClient()->scard($queueInfo->pid_set_name);
                     $i++;
                 }
 
-                if( $i == $num ){
+                if ($i == $num) {
                     break;
                 }
-
             }
-            $queueAfter = $this->_queueHandler->getRedisClient()->scard( $queueInfo->pid_set_name );
+            $queueAfter = $this->requireQueueHandler()->getRedisClient()->scard($queueInfo->pid_set_name);
             $numDeleted = $queueBefore - $queueAfter;
-
-        } elseif ( !empty( $queueInfo ) ) {
-
-            self::_TimeStampMsg( "Killing all processes from " . $queueInfo->pid_set_name );
-            $numDeleted = $this->_queueHandler->getRedisClient()->scard( $queueInfo->pid_set_name );
-            $pNameList = $this->_queueHandler->getRedisClient()->smembers( $queueInfo->pid_set_name );
-            foreach( $pNameList as $pidName ){
-                list( $pid, $hostName, $instanceId ) = explode( ":", $pidName );
-                if( $hostName == gethostname() ){
-                    posix_kill( $pid, SIGINT );
-                    $this->_queueHandler->getRedisClient()->srem( $queueInfo->pid_set_name, $pidName );
-                    $this->_queueHandler->getRedisClient()->decr( $hostName . ":" . $queueInfo->queue_name );
+        } elseif (!empty($queueInfo)) {
+            $this->logger->debug("Killing all processes from " . $queueInfo->pid_set_name);
+            $numDeleted = $this->requireQueueHandler()->getRedisClient()->scard($queueInfo->pid_set_name);
+            $pNameList = $this->requireQueueHandler()->getRedisClient()->smembers($queueInfo->pid_set_name);
+            foreach ($pNameList as $pidName) {
+                /** @noinspection PhpUnusedLocalVariableInspection */
+                [$pid, $hostName, $instanceId] = explode(":", (string)$pidName);
+                if ($hostName == $this->processControl->getHostname()) {
+                    $this->processControl->kill((int)$pid, SIGTERM);
+                    $this->requireQueueHandler()->getRedisClient()->srem($queueInfo->pid_set_name, $pidName);
                 }
             }
 
             $queueInfo->pid_list_len = 0;
+        } elseif (!empty($num)) {
+            $this->logger->debug("Killing $num processes balancing all queues.");
 
-        } elseif ( !empty( $num ) ) {
-
-            self::_TimeStampMsg( "Killing $num processes balancing all queues." );
-
-            while ( true ) {
-
+            while (true) {
                 // if all queues are empty or they have less elements than requested $num
                 //we do not want an infinite loop
                 //so, at least one deletion per cycle
                 $deleted = false;
-                foreach ( $this->_queueContextList->list as $queue ) {
-
+                foreach ($this->_queueContextList->list as $queue) {
                     //Exit, we reached the right number, exit the while loop
-                    if( $numDeleted >= $num ){
+                    if ($numDeleted >= $num) {
                         break 2; //exit the while loop
                     }
 
                     $pidName = false;
-                    if( $queue->max_executors < $queue->pid_list_len ){
+                    if ($queue->max_executors < $queue->pid_list_len) {
                         //ok, queue can be reduced because it's upper limit exceed the max queue consumers
-                        $pidName = $this->_queueHandler->getRedisClient()->spop( $queue->pid_set_name );
-                        if ( $pidName ) {
-                            list( $pid, $hostName, $instanceId ) = explode( ":", $pidName );
-                            if( $hostName == gethostname() ){
-                                $queue->pid_list_len = $this->_queueHandler->getRedisClient()->decr( $hostName . ":" . $queue->queue_name );
-                                posix_kill( $pid, SIGINT );
+                        $pidName = $this->requireQueueHandler()->getRedisClient()->spop($queue->pid_set_name);
+                        if (is_string($pidName) && $pidName !== '') {
+                            /** @noinspection PhpUnusedLocalVariableInspection */
+                            [$pid, $hostName, $instanceId] = explode(":", $pidName);
+                            if ($hostName == $this->processControl->getHostname()) {
+                                $queue->pid_list_len = $this->requireQueueHandler()->getRedisClient()->scard($queue->pid_set_name);
+                                $this->processControl->kill((int)$pid, SIGTERM);
                             } else {
                                 $pidName = false;
                             }
@@ -441,72 +389,58 @@ class TaskManager extends AbstractDaemon {
                     $deleted = $pidName || $deleted;
 
                     $numDeleted += (int)(bool)$pidName;
-
                 }
 
                 //no more processes to kill!! Avoid infinite loop
-                if ( !$deleted ) {
+                if (!$deleted) {
                     break;
                 }
-
             }
-
-        } elseif ( empty( $queueInfo ) && empty( $pid ) && empty( $num ) ) {
-
-            self::_TimeStampMsg( "Killing ALL processes." );
-            foreach ( $this->_queueContextList->list as $queue ) {
-                $pNameList = $this->_queueHandler->getRedisClient()->smembers( $queue->pid_set_name );
-                foreach ( $pNameList as $pName ){
-                    list( $pid, $hostName, $instanceId ) = explode( ":", $pName );
-                    if( $hostName == gethostname() ){
-                        posix_kill( $pid, SIGINT );
-                        $this->_queueHandler->getRedisClient()->srem( $queue->pid_set_name, $pName );
-                        $this->_queueHandler->getRedisClient()->decr( $hostName . ":" . $queue->queue_name );
+        } else {
+            // At this point $pid, $num and $queueInfo are all empty: kill EVERYTHING.
+            // (Branches above already cover every other combination; see PHPStan analysis.)
+            $this->logger->debug("Killing ALL processes.");
+            foreach ($this->_queueContextList->list as $queue) {
+                $pNameList = $this->requireQueueHandler()->getRedisClient()->smembers($queue->pid_set_name);
+                foreach ($pNameList as $pName) {
+                    /** @noinspection PhpUnusedLocalVariableInspection */
+                    [$pid, $hostName, $instanceId] = explode(":", (string)$pName);
+                    if ($hostName == $this->processControl->getHostname()) {
+                        $this->processControl->kill((int)$pid, SIGTERM);
+                        $this->requireQueueHandler()->getRedisClient()->srem($queue->pid_set_name, $pName);
                         $numDeleted++;
                     }
                 }
                 $queue->pid_list_len = 0;
             }
-
-        } else {
-            self::_TimeStampMsg( "Parameters not valid. Killing *** NONE ***" );
         }
 
         $this->_runningPids -= $numDeleted;
 
-        self::_TimeStampMsg( "Deleted $numDeleted processes." );
-
+        $this->logger->debug("Deleted $numDeleted processes.");
     }
 
     /**
      * Reload Configuration every cycle
      *
+     * @throws Exception
+     * @throws LogInvalidArgumentException
+     * @throws \TypeError
      */
-    protected function _updateConfiguration() {
-
-        $config = @parse_ini_file( $this->_configFile, true );
-
-        if( empty( $this->_configFile ) || !isset( $config[ 'context_definitions' ] ) || empty( $config[ 'context_definitions' ] ) ){
-            throw new Exception( 'Wrong configuration file provided.' );
+    protected function _updateConfiguration(): void
+    {
+        $configuration = $this->getConfiguration();
+        $this->logger = LoggerFactory::getLogger('task_manager', $configuration->getLoggerName());
+        if (AppConfig::$DEBUG) {
+            $this->logger->pushHandler((new StreamHandler('php://stdout'))->setFormatter(new LineFormatter("[%datetime%] %channel%.%level_name%: %message% %context%\n")));
         }
 
-        Log::$fileName              = $config[ 'loggerName' ];
-        $this->_context_definitions = $config[ 'context_definitions' ];
-
-        if ( empty( $this->_contextIndex ) ) {
-            $contextList = $this->_context_definitions;
-        } else {
-            $contextList = array( $this->_context_definitions[ $this->_contextIndex ] );
-        }
-
-        if( empty( $this->_queueContextList->list ) ){
-
-            //First Execution, load build object
-            $this->_queueContextList = ContextList::get( $contextList );
+        if (empty($this->_queueContextList->list)) {
+            //First Execution, load the build object
+            $this->_queueContextList = $configuration->getContextList();
 
             //exit method
             return;
-
         }
 
         /**
@@ -520,50 +454,41 @@ class TaskManager extends AbstractDaemon {
          *</pre>
          *
          */
-        if( $diff = array_diff_key( $this->_queueContextList->list, ContextList::get( $contextList )->list ) ){
-
+        if ($diff = array_diff_key($this->_queueContextList->list, $configuration->getContextList()->list)) {
             //remove no more present contexts
-            foreach( $diff as $_key => $_cont ){
-                unset( $this->_queueContextList->list[ $_key ] );
+            foreach ($diff as $_key => $_cont) {
+                unset($this->_queueContextList->list[$_key]);
                 $this->_destroyContext[] = $_cont;
             }
-
         }
 
-        foreach( $this->_context_definitions as $contextName => $context ){
-
-            if( isset( $this->_queueContextList->list[ $contextName ] ) ){
-
+        foreach ($configuration->getContextList()->list as $contextName => $context) {
+            if (isset($this->_queueContextList->list[$contextName])) {
                 //update the max executor number for this element
-                $this->_queueContextList->list[ $contextName ]->max_executors = $context[ 'max_executors' ];
-
+                $this->_queueContextList->list[$contextName]->max_executors = $context->max_executors;
             } else {
-
                 //create a new Object execution context
-                $this->_queueContextList->list[ $contextName ] = Context::buildFromArray( $context );
-
+                $this->_queueContextList->list[$contextName] = $context;
             }
-
         }
-
     }
 
     /**
      *
      * Remove no more present contexts
-     * @throws \Predis\Connection\ConnectionException
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws LogInvalidArgumentException
      */
-    protected function _cleanContexts(){
-
+    protected function _cleanContexts(): void
+    {
         //remove no more present contexts
-        foreach( $this->_destroyContext as $_context ){
-
-            self::_TimeStampMsg( "(parent " . gethostname() . INIT::$INSTANCE_ID . ") : need to delete a context" );
-            $this->_killPids( $_context );
-
+        foreach ($this->_destroyContext as $_context) {
+            $this->logger->debug("(parent " . $this->processControl->getHostname() . AppConfig::$INSTANCE_ID . ") : need to delete a context");
+            $this->_killPids($_context);
         }
-        $this->_destroyContext = array();
-
+        $this->_destroyContext = [];
     }
 
 }

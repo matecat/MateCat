@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class AddTteToSegmentTranslationEvents extends AbstractMatecatMigration
 {
     public $sql_up = [

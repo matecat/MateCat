@@ -7,18 +7,21 @@
  *
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 
-class WaitCreation {
+class WaitCreation
+{
 
-    public function render() {
-
+    /**
+     * @return array<string, mixed>
+     */
+    public function render(): array
+    {
         return [
-                'status'       => 202,
-                'message'      => 'Project in queue. Wait.',
+            'status' => 202,
+            'message' => 'Project in queue. Wait.',
         ];
-
     }
 
 }

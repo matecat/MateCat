@@ -1,6 +1,6 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+use migrations\AbstractMatecatMigration;
 
 class CreateTableSegmentOriginalData extends AbstractMatecatMigration {
     public $sql_up = [ 'CREATE TABLE `segment_original_data` (

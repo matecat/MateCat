@@ -6,87 +6,63 @@
  * Time: 13:03
  */
 
-namespace API\V3;
+namespace Controller\API\V3;
 
-use API\V2\BaseChunkController;
-use API\V2\KleinController;
-use API\V2\Validators\ChunkPasswordValidator;
-use API\V3\Json\Chunk;
-use Chunks_ChunkStruct;
-use Constants_JobStatus;
-use Projects_ProjectStruct;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
+use Exception;
+use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\FeatureSet;
+use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use View\API\V3\Json\Chunk;
 
-class ChunkController extends BaseChunkController {
-
-    /**
-     * @var Projects_ProjectStruct
-     */
-    protected $project;
-
-    /**
-     * @var \FeatureSet
-     */
-    protected $featuresSet;
+class ChunkController extends KleinController
+{
+    use ChunkNotFoundHandlerTrait;
 
     /**
-     * @param Chunks_ChunkStruct $chunk
-     *
-     * @return $this
+     * @var ProjectStruct
      */
-    public function setChunk( $chunk ) {
-        $this->chunk = $chunk;
-
-        return $this;
-    }
+    protected ProjectStruct $project;
+    /**
+     * @var ChunkReviewStruct[]
+     */
+    private array $chunk_reviews;
 
     /**
-     * @param Projects_ProjectStruct $project
-     *
-     * @return $this
+     * @throws Exception
+     * @throws NotFoundException
+     * @throws \TypeError
      */
-    public function setProject( $project ) {
-        $this->project = $project;
-
-        return $this;
-    }
-
-    /**
-     * @param \FeatureSet $featuresSet
-     *
-     * @return $this
-     */
-    public function setFeaturesSet( $featuresSet ) {
-        $this->featuresSet = $featuresSet;
-
-        return $this;
-    }
-
-    /**
-     * @throws \Exception
-     * @throws \Exceptions\NotFoundException
-     */
-    public function show() {
-
-        $format = new Chunk();
-
-        $format->setUser( $this->user );
-        $format->setCalledFromApi( true );
+    public function show(): void
+    {
+        $format = new Chunk($this->getDatabase());
+        $format->setUser($this->user);
+        $format->setCalledFromApi(true);
+        $format->setChunkReviews($this->chunk_reviews);
 
         $this->return404IfTheJobWasDeleted();
 
-        $this->response->json( $format->renderOne($this->chunk) );
-
+        $this->response->json($format->renderOne($this->chunk));
     }
 
-    protected function afterConstruct() {
-        $Validator = new ChunkPasswordValidator( $this ) ;
-        $Validator->onSuccess( function () use ( $Validator ) {
-            $this->setChunk( $Validator->getChunk() );
-            $this->setProject( $Validator->getChunk()->getProject() );
-            $this->setFeatureSet( $this->project->getFeaturesSet() );
-        } );
+    protected function registerValidators(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
 
-        $this->appendValidator( $Validator );
+        $Validator = new ChunkPasswordValidator($this);
+        $Validator->onSuccess(function () use ($Validator) {
+            $this->chunk = $Validator->getChunk();
+            $this->project = $Validator->getChunk()->getProject(new ProjectDao($this->getDatabase()));
+            $this->featureSet = FeatureSet::forProject($this->project, $this->getDatabase());
+            $this->chunk_reviews = (new ChunkReviewDao($this->getDatabase()))->findChunkReviews($Validator->getChunk());
+        });
+        $this->appendValidator($Validator);
     }
 
 }

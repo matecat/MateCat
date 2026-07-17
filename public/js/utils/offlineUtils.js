@@ -1,0 +1,133 @@
+import {
+  addClassToSegment,
+  removeClassToSegment,
+} from '../actions/segmentClassActions'
+import {checkConnectionPing} from '../api/checkConnectionPing'
+import {
+  addNotification,
+  removeAllNotifications,
+} from '../actions/notificationActions'
+import SegmentStore from '../stores/SegmentStore'
+
+// Async-loaded to break circular dependency for static analysis.
+let _SetTranslationUtil
+import('../setTranslationUtil').then((m) => {
+  _SetTranslationUtil = m
+})
+const getSetTranslationUtil = () => _SetTranslationUtil
+
+const OfflineUtils = {
+  offline: false,
+  offlineCacheSize: 20,
+  offlineCacheRemaining: 20,
+  checkingConnection: false,
+  currentConnectionCountdown: null,
+
+  startOfflineMode: function () {
+    if (!this.offline) {
+      checkConnectionPing()
+        .then(() => {
+          this.offlineCacheRemaining = this.offlineCacheSize
+          const notification = {
+            uid: 'offline-counter',
+            title: "We're sorry, something went wrong",
+            text: 'Something went wrong while processing your request. Please try again later. If the issue persists, contact our support team for assistance.',
+            type: 'warning',
+            position: 'bl',
+            autoDismiss: false,
+            allowHtml: true,
+            timer: 7000,
+          }
+          addNotification(notification)
+        })
+        .catch(() => {
+          this.offline = true
+          this.checkingConnection = setInterval(() => {
+            this.checkConnection()
+          }, 5000)
+        })
+    }
+  },
+
+  endOfflineMode: function () {
+    if (this.offline) {
+      this.offline = false
+      const notification = {
+        uid: 'offline-back',
+        title: 'Connection is back',
+        text: 'We are saving translated segments in the database.',
+        type: 'success',
+        position: 'bl',
+        autoDismiss: true,
+        timer: 10000,
+        openCallback: () => {
+          removeAllNotifications()
+        },
+      }
+      addNotification(notification)
+
+      clearInterval(this.currentConnectionCountdown)
+      clearInterval(this.checkingConnection)
+      this.currentConnectionCountdown = null
+      this.checkingConnection = false
+    }
+  },
+  failedConnection: function () {
+    this.startOfflineMode()
+  },
+  checkConnection: function () {
+    checkConnectionPing()
+      .then(() => {
+        this.endOfflineMode()
+        getSetTranslationUtil().execSetTranslationTail()
+        //reset counter
+        this.offlineCacheRemaining = this.offlineCacheSize
+      })
+      .catch(() => {
+        /**
+         * do Nothing there are already a thread running
+         * @see OfflineUtils.startOfflineMode
+         * @see OfflineUtils.endOfflineMode
+         */
+      })
+  },
+
+  decrementOfflineCacheRemaining: function () {
+    console.log('Segmenti in coda', this.offlineCacheRemaining)
+    if (this.offline) {
+      const notification = {
+        uid: 'offline-counter',
+        title:
+          '<div class="message-offline-icons"><span class="icon-power-cord"></span><span class="icon-power-cord2"></span></div>No connection available',
+        text:
+          'You can still translate <span class="remainingSegments">' +
+          --this.offlineCacheRemaining +
+          '</span> segments in offline mode. Do not refresh or you lose the segments!',
+        type: 'warning',
+        position: 'bl',
+        autoDismiss: false,
+        allowHtml: true,
+        timer: 7000,
+      }
+      addNotification(notification)
+    }
+  },
+  incrementOfflineCacheRemaining: function () {
+    // reset counter by 1
+    this.offlineCacheRemaining += 1
+  },
+
+  changeStatusOffline: function (sid) {
+    if (SegmentStore.getSegmentById(sid)) {
+      removeClassToSegment(sid, 'status-draft')
+      removeClassToSegment(sid, 'status-approved')
+      removeClassToSegment(sid, 'status-new')
+      removeClassToSegment(sid, 'status-rejected')
+      removeClassToSegment(sid, 'status-fixed')
+      removeClassToSegment(sid, 'status-rebutted')
+      addClassToSegment(sid, 'status-translated')
+    }
+  },
+}
+
+export default OfflineUtils

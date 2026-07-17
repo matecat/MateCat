@@ -7,40 +7,53 @@
  *
  */
 
-namespace Segments;
+namespace Model\Segments;
 
 
-use DataAccess\ArrayAccessTrait;
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use ArrayAccess;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\ArrayAccessTrait;
+use Model\DataAccess\IDaoStruct;
 
-class SegmentUIStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \ArrayAccess {
+/** @implements ArrayAccess<string, mixed> */
+class SegmentUIStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess
+{
 
     use ArrayAccessTrait;
 
-    public $jid;
-    public $id_file;
-    public $id_file_part;
-    public $filename;
-    public $sid;
-    public $segment;
-    public $segment_hash;
-    public $translation;
-    public $ice_locked;
-    public $status;
-    public $time_to_edit;
-    public $parsed_time_to_edit;
-    public $warning;
-    public $source_chunk_lengths;
-    public $target_chunk_lengths;
-    public $readonly;
-    public $autopropagated_from;
-    public $repetitions_in_chunk;
-    public $revision_number;
-    public $notes;
-    public $version_number;
-    public $data_ref_map;
-    public $context_groups;
-    public $metadata;
+    public string $jid;
+    public int $id_file;
+    public ?int $id_file_part = null;
+    public string $filename;
+    public string $sid;
+    public string $segment;
+    public string $segment_hash;
+    public ?string $translation = null;
+    public bool $ice_locked;
+    public string $status;
+    public int $time_to_edit;
+    /** @var list<string|int> */
+    public array $parsed_time_to_edit = [];
+    public bool $warning = false;
+    /** @var list<int>|string */
+    public $source_chunk_lengths = '[]';
+    /** @var array{len: list<int>, statuses: list<string>}|string */
+    public $target_chunk_lengths = '[]';
+
+    public bool $readonly;
+    public int $autopropagated_from;
+    public int $repetitions_in_chunk;
+    public ?int $revision_number = null;
+    /** @var ?list<array{id: int, note: string}> */
+    public ?array $notes = null;
+    public int $version_number;
+    /** @var array<string, string>|string */
+    public $data_ref_map = '[]';
+    public ?ContextStruct $context_groups = null;
+    /** @var ?list<array{id_segment: int, meta_key: string, meta_value: mixed}> */
+    public ?array $metadata = null;
+    public ?string $context_url = null;
+    public string $internal_id;
+    public bool $icu = false;
 
 }

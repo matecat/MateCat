@@ -7,85 +7,109 @@
  *
  */
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
-use Contribution\ContributionSetStruct;
-use Engine;
 use Exception;
-use Exceptions\ValidationError;
-use Jobs_JobStruct;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
-use TmKeyManagement_TmKeyManagement;
+use LogicException;
+use Model\Jobs\JobStruct;
+use Utils\Contribution\SetContributionRequest;
+use Utils\Engines\AbstractEngine;
+use Utils\Engines\EnginesFactory;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\TmKeyManagement\TmKeyManager;
 
-class SetContributionMTWorker extends SetContributionWorker {
-
-    const REDIS_PROPAGATED_ID_KEY = "mt_j:%s:s:%s";
+class SetContributionMTWorker extends SetContributionWorker
+{
 
     /**
-     * @param ContributionSetStruct $contributionStruct
+     * @param JobStruct $jobStruct
      *
+     * @return AbstractEngine
      * @throws EndQueueException
      * @see SetContributionWorker::_loadEngine
-     *
      */
-    protected function _loadEngine( ContributionSetStruct $contributionStruct ) {
-
+    protected function _loadEngine(JobStruct $jobStruct): AbstractEngine
+    {
         try {
-            $this->_engine = Engine::getInstance( $contributionStruct->id_mt ); //Load MT Adaptive Engine
-        } catch ( Exception $e ) {
-            throw new EndQueueException( $e->getMessage(), self::ERR_NO_TM_ENGINE );
+            //Load MT Adaptive EnginesFactory
+
+            return EnginesFactory::getInstance($jobStruct->id_mt_engine, $this->database, AbstractEngine::class);
+        } catch (Exception $e) {
+            throw new EndQueueException($e->getMessage(), self::ERR_NO_TM_ENGINE);
         }
-
-    }
-
-    protected function _set( array $config, ContributionSetStruct $contributionStruct ) {
-
-        $config[ 'segment' ]     = $contributionStruct->segment;
-        $config[ 'translation' ] = $contributionStruct->translation;
-
-        // set the contribution for every key in the job belonging to the user
-        $res = $this->_engine->set( $config );
-
-        if ( !$res ) {
-            $this->_raiseException( 'set', $config );
-        }
-
     }
 
     /**
-     * @param array                 $config
-     * @param ContributionSetStruct $contributionStruct
+     * @param array<string, mixed> $config
+     * @param SetContributionRequest $contributionStruct
      *
-     * @throws ReQueueException
+     * @throws Exception
+     * @throws LogicException
      */
-    protected function _update( array $config, ContributionSetStruct $contributionStruct ) {
+    protected function _set(array $config, SetContributionRequest $contributionStruct): void
+    {
+        $engine = $this->requireEngine();
+        $jobStruct = $contributionStruct->getJobStruct();
 
-        $config[ 'segment' ]     = $contributionStruct->segment;
-        $config[ 'translation' ] = $contributionStruct->translation;
-        $config[ 'tuid' ]        = $contributionStruct->id_job . ":" . $contributionStruct->id_segment;
+        $config['segment'] = $contributionStruct->segment;
+        $config['translation'] = $contributionStruct->translation;
+        $config['session'] = $contributionStruct->getSessionId();
+        $config['uid'] = $contributionStruct->uid;
+        $config['set_mt'] = $jobStruct->id_mt_engine == 1; // negate, if mt is 1, then is mymemory, and the flag set_mt must be set to true
 
         // set the contribution for every key in the job belonging to the user
-        $res = $this->_engine->update( $config );
+        $res = $engine->set($config);
 
-        if ( !$res ) {
-            $this->_raiseException( 'update', $config );
+        if (!$res) {
+            $this->_raiseReQueueException('set', $config);
         }
-
     }
 
-    protected function _extractAvailableKeysForUser( ContributionSetStruct $contributionStruct, Jobs_JobStruct $jobStruct ) {
+    /**
+     * @param array<string, mixed> $config
+     * @param SetContributionRequest $contributionStruct
+     * @param int $id_mt_engine
+     *
+     * @throws ReQueueException
+     * @throws LogicException
+     */
+    protected function _update(array $config, SetContributionRequest $contributionStruct, int $id_mt_engine = 0): void
+    {
+        $engine = $this->requireEngine();
+        $config['segment'] = $contributionStruct->segment;
+        $config['translation'] = $contributionStruct->translation;
+        $config['tuid'] = $contributionStruct->id_job . ":" . $contributionStruct->id_segment;
+        $config['session'] = $contributionStruct->getSessionId();
+        $config['set_mt'] = $id_mt_engine == 1; // negate, if mt is 1, then is mymemory, and the flag set_mt must be set to true
+        $config['context_before'] = $contributionStruct->context_before;
+        $config['context_after'] = $contributionStruct->context_after;
+        $config['translation_origin'] = $contributionStruct->translation_origin;
+        $config['draft_translation'] = $contributionStruct->draftTranslation;
 
+        // set the contribution for every key in the job belonging to the user
+        $res = $engine->update($config);
+
+        if (!$res) {
+            $this->_raiseReQueueException('update', $config);
+        }
+    }
+
+    /**
+     * @return array<string, array<?string>>
+     * @throws Exception
+     */
+    protected function _extractAvailableKeysForUser(SetContributionRequest $contributionStruct, JobStruct $jobStruct): array
+    {
         //find all the job's TMs with write grants and make a contribution to them
-        $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $jobStruct->tm_keys ], 'w' );
+        $tm_keys = TmKeyManager::getOwnerKeys([$jobStruct->tm_keys], 'w');
 
-        $config           = [];
-        $config[ 'keys' ] = array_map( function ( $tm_key ) {
+        $config = [];
+        $config['keys'] = array_map(function ($tm_key) {
             return $tm_key->key;
-        }, $tm_keys );
+        }, $tm_keys);
 
         return $config;
-
     }
 
 }

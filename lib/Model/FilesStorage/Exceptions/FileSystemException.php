@@ -1,7 +1,8 @@
 <?php
 
-namespace FilesStorage\Exceptions;
+namespace Model\FilesStorage\Exceptions;
 
-class FileSystemException extends \Exception {
+class FileSystemException extends \Exception
+{
 
 }

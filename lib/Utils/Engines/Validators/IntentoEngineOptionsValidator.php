@@ -1,0 +1,54 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * @author Domenico Lupinetti (hashashiyyin) domenico@translated.net / ostico@gmail.com
+ * Date: 17/11/25
+ * Time: 18:12
+ *
+ */
+
+namespace Utils\Engines\Validators;
+
+use InvalidArgumentException;
+use ReflectionException;
+use Utils\Engines\Intento;
+use Utils\Engines\Validators\Contracts\EngineValidatorObject;
+use Utils\Validator\Contracts\AbstractValidator;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
+
+class IntentoEngineOptionsValidator extends AbstractValidator
+{
+    /**
+     * @param EngineValidatorObject $object
+     * @return ValidatorObjectInterface|null
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
+     */
+    public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
+    {
+        if (empty($object->engineStruct) || !$object->engineStruct instanceof Intento) {
+            return null;
+        }
+
+        $hasProvider = !empty($object->intento_provider);
+        $hasRouting = !empty($object->intento_routing);
+
+        if ($hasProvider && !$hasRouting) {
+            $availableProviders = $object->engineStruct->getProviderList();
+
+            if (!array_key_exists($object->intento_provider, $availableProviders)) {
+                throw new InvalidArgumentException("Intento provider not valid.");
+            }
+        } elseif (!$hasProvider && $hasRouting) {
+            $availableRouting = $object->engineStruct->getRoutingList();
+
+            if (!array_key_exists($object->intento_routing, $availableRouting)) {
+                throw new InvalidArgumentException("Intento routing not valid.");
+            }
+        } else {
+            throw new InvalidArgumentException("Intento provider and routing cannot be set at the same time.");
+        }
+
+        return null;
+    }
+}

@@ -1,44 +1,54 @@
 <?php
 
-class Search_ReplaceHistoryFactory {
+namespace Utils\Search;
+
+use InvalidArgumentException;
+use Model\DataAccess\IDatabase;
+use Model\Search\MySQLReplaceEventDao;
+use Model\Search\MySQLReplaceEventIndexDao;
+use Model\Search\RedisReplaceEventDao;
+use Model\Search\RedisReplaceEventIndexDao;
+use Model\Translations\SegmentTranslationDao;
+
+class ReplaceHistoryFactory
+{
 
     /**
-     * @param $id_job
-     * @param $driver
-     * @param $ttl
-     *
-     * @return Search_ReplaceHistory
-     * @throws ReflectionException
-     * @throws \Predis\Connection\ConnectionException
+     * @throws \Exception
+     * @throws InvalidArgumentException
      */
-    public static function create( $id_job, $driver, $ttl ) {
-        self::_checkDriver( $driver );
+    public static function create(int $id_job, string $driver, int $ttl, IDatabase $database): ReplaceHistory
+    {
+        self::_checkDriver($driver);
 
-        if ( $driver === 'redis' ) {
-            return new Search_ReplaceHistory(
-                    $id_job,
-                    new \Search_RedisReplaceEventDAO(),
-                    new \Search_RedisReplaceEventIndexDAO(),
-                    $ttl
+        if ($driver === 'redis') {
+            return new ReplaceHistory(
+                $id_job,
+                new RedisReplaceEventDao($database),
+                new RedisReplaceEventIndexDao($database),
+                new SegmentTranslationDao($database),
+                $ttl
             );
         }
 
-        return new Search_ReplaceHistory(
-                $id_job,
-                new \Search_MySQLReplaceEventDAO(),
-                new \Search_MySQLReplaceEventIndexDAO(),
-                $ttl
+        return new ReplaceHistory(
+            $id_job,
+            new MySQLReplaceEventDao($database),
+            new MySQLReplaceEventIndexDao($database),
+            new SegmentTranslationDao($database),
+            $ttl
         );
     }
 
     /**
-     * @param $driver
+     * @throws InvalidArgumentException
      */
-    private static function _checkDriver( $driver ) {
-        $allowed_drivers = [ 'redis', 'mysql' ];
+    private static function _checkDriver(string $driver): void
+    {
+        $allowed_drivers = ['redis', 'mysql'];
 
-        if ( !in_array( $driver, $allowed_drivers ) ) {
-            throw new \InvalidArgumentException( $driver . ' is not an allowed driver ' );
+        if (!in_array($driver, $allowed_drivers)) {
+            throw new InvalidArgumentException($driver . ' is not an allowed driver ');
         }
     }
 }

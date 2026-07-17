@@ -19,7 +19,7 @@
         },
         "categories": {
           "type": "array",
-          "maxItems": 9,
+          "maxItems": 50,
           "items": {
             "$ref": "#/definitions/category"
           }
@@ -47,10 +47,14 @@
         },
         "severities": {
           "type": "array",
-          "maxItems": 8,
+          "maxItems": 50,
           "items": {
             "$ref": "#/definitions/severity"
           }
+        },
+        "sort": {
+          "type": "integer",
+          "nullable": true
         }
       },
       "required": ["code", "label", "severities"]
@@ -65,9 +69,6 @@
           "type": "string",
           "maxLength": 3
         },
-        "dqf_id": {
-          "type": "integer"
-        },
         "penalty": {
           "type": "number",
           "format": "currency",
@@ -77,6 +78,10 @@
             "0.05",
             "19.95"
           ]
+        },
+        "sort": {
+          "type": "integer",
+          "nullable": true
         }
       },
       "required": ["code", "label", "penalty"]

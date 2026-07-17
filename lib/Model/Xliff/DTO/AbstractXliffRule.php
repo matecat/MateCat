@@ -1,0 +1,303 @@
+<?php
+
+namespace Model\Xliff\DTO;
+
+use DomainException;
+use Exception;
+use JsonSerializable;
+use LogicException;
+use Model\Analysis\Constants\StandardMatchTypeNamesConstants;
+use Utils\Constants\TranslationStatus;
+
+/**
+ * @phpstan-consistent-constructor
+ */
+abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
+{
+    /** @var list<string> */
+    protected static array $_STATE_QUALIFIERS = [];
+    /** @var list<string> */
+    protected static array $_STATES = [];
+
+    // analysis behavior
+    const string _ANALYSIS_PRE_TRANSLATED = "pre-translated";
+    const string _ANALYSIS_NEW = "new";
+
+    // editor states
+    const string _DRAFT = "draft";
+    const string _TRANSLATED = "translated";
+    const string _APPROVED = "approved";
+    const string _APPROVED2 = "approved2";
+
+    const array ALLOWED_ANALYSIS_VALUES = [
+        self::_ANALYSIS_PRE_TRANSLATED,
+        self::_ANALYSIS_NEW
+    ];
+
+    const array ALLOWED_EDITOR_VALUES = [
+        null,
+        self::_DRAFT,
+        self::_TRANSLATED,
+        self::_APPROVED,
+        self::_APPROVED2
+    ];
+
+    /**
+     * @var array{states: list<string>, state-qualifiers: list<string>}
+     */
+    protected array $states = [
+        'states' => [],
+        'state-qualifiers' => []
+    ];
+
+    /**
+     * @var string
+     */
+    protected string $analysis;
+    /**
+     * @var string
+     */
+    protected string $editor;
+    /**
+     * @var string
+     */
+    protected string $matchCategory = 'ice';
+
+     /**
+      * @param string[] $states
+      * @param string $analysis
+      * @param string|null $editor
+      * @param string|null $matchCategory
+      * @throws DomainException
+      */
+     public function __construct(array $states, string $analysis, ?string $editor = null, ?string $matchCategory = null)
+    {
+        // follow exact assignment order
+        $this->setStates($states);
+        $this->setAnalysis($analysis);
+        $this->setEditor($editor);
+        $this->setMatchCategory($matchCategory);
+    }
+
+    /**
+      * @param string[] $states
+      * @throws DomainException
+      */
+     protected function setStates(array $states): void
+    {
+        foreach ($states as $state) {
+            if (!in_array($state, array_merge(static::$_STATES, static::$_STATE_QUALIFIERS)) && empty(preg_match('/^x-.+$/', $state))) {
+                throw new DomainException("Wrong state value", 400);
+            }
+
+            if (in_array($state, static::$_STATES)) {
+                $this->states['states'][] = strtolower($state);
+                continue;
+            }
+
+            if (in_array($state, static::$_STATE_QUALIFIERS)) {
+                $this->states['state-qualifiers'][] = strtolower($state);
+            }
+        }
+    }
+
+     /**
+      * @param string $analysis
+      * @throws DomainException
+      */
+     protected function setAnalysis(string $analysis): void
+    {
+        if (!in_array($analysis, static::ALLOWED_ANALYSIS_VALUES)) {
+            throw new DomainException("Wrong analysis value", 400);
+        }
+
+        $this->analysis = strtolower($analysis);
+    }
+
+     /**
+      * @param string|null $editor
+      * @throws DomainException
+      */
+     protected function setEditor(?string $editor = null): void
+    {
+        if ($this->getAnalysis() == AbstractXliffRule::_ANALYSIS_NEW && !empty($editor)) {
+            throw new DomainException("Wrong editor value. A `new` rule can not have an assigned editor value.", 400);
+        } elseif (!in_array($editor, static::ALLOWED_EDITOR_VALUES)) {
+            throw new DomainException("Wrong editor value", 400);
+        }
+
+        $this->editor = strtolower($editor ?? '');
+    }
+
+     /**
+      * Accept null values and keep the default ICE
+      *
+      * @param string|null $matchCategory
+      *
+      * @return void
+      * @throws DomainException
+      */
+     protected function setMatchCategory(?string $matchCategory = null): void
+    {
+        if (!empty($matchCategory) && !in_array($matchCategory, StandardMatchTypeNamesConstants::forValue())) {
+            throw new DomainException("Wrong match_category value", 400);
+        } elseif ($this->getAnalysis() == AbstractXliffRule::_ANALYSIS_NEW && !empty($matchCategory)) {
+            throw new DomainException("Wrong match_category value. A `new` rule can not have an assigned match category.", 400);
+        } elseif (!empty($matchCategory)) {
+            $this->matchCategory = $matchCategory;
+        }
+    }
+
+     /**
+      * @param array{states: string[], analysis: string, editor?: string|null, match_category?: string|null} $structure
+      *
+      * @return AbstractXliffRule
+      * @throws DomainException
+      */
+     public static function fromArray(array $structure): AbstractXliffRule
+    {
+        return new static($structure['states'], $structure['analysis'], $structure['editor'] ?? null, $structure['match_category'] ?? null);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        $result = [
+            'states' => array_merge($this->states['states'], $this->states['state-qualifiers']),
+            'analysis' => $this->analysis
+        ];
+
+        if ($this->analysis == self::_ANALYSIS_PRE_TRANSLATED) {
+            if (!empty($this->editor)) {
+                $result['editor'] = $this->editor;
+            }
+
+            $result['match_category'] = $this->matchCategory;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getArrayCopy(): array
+    {
+        return $this->jsonSerialize();
+    }
+
+    /**
+     * @param string|null $type
+     *
+     * @return list<string>
+     */
+    public function getStates(?string $type = null): array
+    {
+        return match ($type) {
+            'states' => $this->states['states'],
+            'state-qualifiers' => $this->states['state-qualifiers'],
+            default => array_merge($this->states['states'], $this->states['state-qualifiers']),
+        };
+    }
+
+    /**
+     * @return string
+     */
+    protected function getAnalysis(): string
+    {
+        return $this->analysis;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getEditor(): string
+    {
+        return $this->editor;
+    }
+
+    /**
+     * @return string
+     */
+    public function asEditorStatus(): string
+    {
+        if ($this->getAnalysis() == AbstractXliffRule::_ANALYSIS_PRE_TRANSLATED) {
+            switch ($this->getEditor()) {
+                case AbstractXliffRule::_DRAFT:
+                    return TranslationStatus::STATUS_DRAFT;
+                case AbstractXliffRule::_TRANSLATED:
+                    return TranslationStatus::STATUS_TRANSLATED;
+                case AbstractXliffRule::_APPROVED:
+                    return TranslationStatus::STATUS_APPROVED;
+                case AbstractXliffRule::_APPROVED2:
+                    return TranslationStatus::STATUS_APPROVED2;
+            }
+        }
+
+        return TranslationStatus::STATUS_NEW;
+    }
+
+    /**
+     * @param string $source
+     * @param string $target
+     *
+     * @return bool
+     */
+    public function isTranslated(string $source, string $target): bool
+    {
+        if ($this->getAnalysis() == AbstractXliffRule::_ANALYSIS_NEW) {
+            return false;
+        } else {
+            // all cases
+            return true;
+        }
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function asMatchType(): string
+    {
+        if ($this->getAnalysis() == AbstractXliffRule::_ANALYSIS_NEW) {
+            throw new LogicException("Invalid call for rule. A `new` analysis rule do not have a match category.", 500);
+        }
+
+        return StandardMatchTypeNamesConstants::toInternalMatchTypeName($this->matchCategory);
+    }
+
+    /**
+     * @param int $raw_word_count
+     * @param array<string, int|float> $payable_rates
+     *
+     * @return float
+     * @throws Exception
+     */
+    public function asStandardWordCount(int $raw_word_count, array $payable_rates): float
+    {
+        if ($this->matchCategory == StandardMatchTypeNamesConstants::_MT) {
+            return $raw_word_count;
+        }
+
+        return $this->asEquivalentWordCount($raw_word_count, $payable_rates);
+    }
+
+    /**
+     * @param int $raw_word_count
+     * @param array<string, int|float> $payable_rates
+     *
+     * @return float
+     * @throws Exception
+     */
+    public function asEquivalentWordCount(int $raw_word_count, array $payable_rates): float
+    {
+        if ($this->getAnalysis() == AbstractXliffRule::_ANALYSIS_NEW) {
+            throw new LogicException("Invalid call for rule. A `new` analysis rule do not have a defined word count.", 500);
+        }
+
+        return floatval($raw_word_count / 100 * ($payable_rates[$this->asMatchType()] ?? 0));
+    }
+
+}

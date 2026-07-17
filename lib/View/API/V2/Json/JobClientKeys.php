@@ -6,46 +6,52 @@
  * Time: 12:56
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 
-use TmKeyManagement_ClientTmKeyStruct;
+use Utils\TmKeyManagement\ClientTmKeyStruct;
 
-class JobClientKeys {
+class JobClientKeys
+{
 
     /**
-     * @var TmKeyManagement_ClientTmKeyStruct[]
+     * @var ClientTmKeyStruct[]
      */
-    protected $data = [];
+    protected array $data = [];
 
     /**
      * Project constructor.
      *
-     * @param TmKeyManagement_ClientTmKeyStruct[] $data
+     * @param ClientTmKeyStruct[] $data
      */
-    public function __construct( array $data = [] ) {
-        $this->data      = $data;
-    }
-
-    public static function renderItem( TmKeyManagement_ClientTmKeyStruct $keyStruct ) {
-
-        return [
-                "key"  => $keyStruct->key,
-                "r"    => ( $keyStruct->r ),
-                "w"    => ( $keyStruct->w ),
-                "name" => $keyStruct->name
-        ];
-
+    public function __construct(array $data = [])
+    {
+        $this->data = $data;
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
-    public function render() {
+    public static function renderItem(ClientTmKeyStruct $keyStruct): array
+    {
+        return [
+            "key" => $keyStruct->key,
+            "r" => ($keyStruct->r),
+            "w" => ($keyStruct->w),
+            "name" => $keyStruct->name
+        ];
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function render(): array
+    {
         $out = [];
-        foreach ( $this->data as $keyStruct ) {
-            $out[] = $this->renderItem( $keyStruct );
+        foreach ($this->data as $keyStruct) {
+            $out[] = $this->renderItem($keyStruct);
         }
+
         return $out;
     }
 

@@ -1,20 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-const InfoIcon = ({size = 24}) => {
+const InfoIcon = ({size = 16}) => {
   return (
-    <svg
-      width={size}
-      height={size}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width={size} height={size} viewBox="0 0 22 22">
       <path
-        d="M8.029 10.667 8.022 8m-.008-2.667h-.006M1.355 8.018a6.667 6.667 0 1 1 13.333-.036 6.667 6.667 0 0 1-13.333.036Z"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        fill="currentCOlor"
+        fillRule="evenodd"
+        d="M11 2a9 9 0 1 0 0 18 9 9 0 0 0 0-18ZM0 11C0 4.925 4.925 0 11 0s11 4.925 11 11-4.925 11-11 11S0 17.075 0 11Zm10-4a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H11a1 1 0 0 1-1-1Zm1 3a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0v-4a1 1 0 0 1 1-1Z"
+        clipRule="evenodd"
       />
     </svg>
   )

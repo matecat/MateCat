@@ -7,27 +7,36 @@
  *
  */
 
-namespace Segments;
+namespace Model\Segments;
 
 use ArrayAccess;
-use DataAccess\ArrayAccessTrait;
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\ArrayAccessTrait;
+use Model\DataAccess\IDaoStruct;
 
-class ContextStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
+/**
+ * @implements ArrayAccess<string, mixed>
+ */
+class ContextStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess
+{
 
     use ArrayAccessTrait;
 
-    public $id;
-    public $id_project;
-    public $id_segment;
-    public $id_file;
-    public $context_json;
+    public ?int $id = null;
+    public int $id_project;
+    public int $id_segment;
+    public ?int $id_file = null;
+    /**
+     * @var array<string, mixed>|string
+     */
+    public mixed $context_json;
 
-    public function __construct( array $array_params = [], $decode = true ) {
-        parent::__construct( $array_params );
-        if( $decode ){
-            $this->context_json = json_decode( $this->context_json );
+    /** @param array<string, mixed> $array_params */
+    public function __construct(array $array_params = [], bool $decode = true)
+    {
+        parent::__construct($array_params);
+        if ($decode && is_string($this->context_json)) {
+            $this->context_json = json_decode($this->context_json);
         }
     }
 

@@ -1,0 +1,41 @@
+@use '../../commons/colors';
+
+.accordion-component {
+  overflow: hidden;
+}
+
+.accordion-component-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  font: 12px;
+  background-color: colors.$grey3;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &.accordion-expanded {
+    border-radius: 8px 8px 0 0;
+  }
+
+  > svg {
+    transition-property: transform;
+    transition-duration: 0.3s;
+    transition-timing-function: 'ease-in-out';
+  }
+
+  &.accordion-expanded > svg {
+    transform: rotateZ(180deg);
+  }
+}
+
+.accordion-component-content {
+  max-height: 0;
+  transition-property: max-height;
+  transition-duration: 0.3s;
+  transition-timing-function: 'ease-in-out';
+  transform-origin: top center;
+  padding: 0 24px;
+  border-radius: 0 0 8px 8px;
+  background-color: colors.$grey4;
+}

@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class AddIsOriginalToRemoteFiles extends AbstractMatecatMigration {
     public $sql_up = <<<EOF
 ALTER TABLE `remote_files` ADD COLUMN `is_original` tinyint(1) DEFAULT 0;

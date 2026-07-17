@@ -7,71 +7,92 @@
  *
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
+use Exception;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao;
+use RuntimeException;
 
-class SegmentTranslationMismatches {
+class SegmentTranslationMismatches
+{
 
-    protected $data;
-    protected $thereArePropagations;
-    protected $featureSet;
+    /** @var array<int, ShapelessConcreteStruct|array<string, mixed>> */
+    protected array $data;
+    protected int $thereArePropagations;
+    protected FeatureSet $featureSet;
+    private JobStruct $jobStruct;
+    private ?MetadataDao $metadataDao;
 
     /**
      * SegmentTranslationMismatches constructor.
-     * from query: getWarning( id_job, password )
+     * from query: getWarning(id_job, password)
      *
-     * @param                  $Translation_mismatches
-     * @param                  $thereArePropagations
-     * @param \FeatureSet|null $featureSet
-     *
-     * @throws \Exception
+     * @param array<int, ShapelessConcreteStruct|array<string, mixed>> $Translation_mismatches
+     * @param JobStruct $jobStruct
+     * @param int $thereArePropagations
+     * @param FeatureSet $featureSet
+     * @param MetadataDao|null $metadataDao
      */
-    public function __construct( $Translation_mismatches, $thereArePropagations, \FeatureSet $featureSet = null ) {
-        $this->data                 = $Translation_mismatches;
+    public function __construct(array $Translation_mismatches, JobStruct $jobStruct, int $thereArePropagations, FeatureSet $featureSet, ?MetadataDao $metadataDao = null)
+    {
+        $this->data = $Translation_mismatches;
         $this->thereArePropagations = $thereArePropagations;
-        if( $featureSet == null ){
-            $featureSet = new \FeatureSet();
-        }
         $this->featureSet = $featureSet;
+        $this->jobStruct = $jobStruct;
+        $this->metadataDao = $metadataDao;
     }
 
     /**
-     * @return array
-     * @throws \Exception
+     * @return array<string, mixed>
+     * @throws Exception
      */
-    public function render() {
-
+    public function render(): array
+    {
         $result = [
-                'editable'       => [],
-                'not_editable'   => [],
-                'prop_available' => $this->thereArePropagations
+            'editable' => [],
+            'not_editable' => [],
+            'prop_available' => $this->thereArePropagations
         ];
 
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $featureSet = $this->featureSet;
+        $metadataDao = $this->metadataDao ?? new MetadataDao($this->featureSet->getDatabase());
 
-        foreach ( $this->data as $position => $row ) {
+        $jobId = $this->jobStruct->id ?? throw new RuntimeException('JobStruct::$id must not be null');
+        $jobPassword = $this->jobStruct->password ?? throw new RuntimeException('JobStruct::$password must not be null');
 
-            $Filter = MateCatFilter::getInstance( $featureSet, $row['source'], $row['target'], [] );
+        foreach ($this->data as $row) {
+            $filter = MateCatFilter::getInstance(
+                $featureSet,
+                $row['source'],
+                $row['target'],
+                [],
+                $metadataDao->getSubfilteringCustomHandlers($jobId, $jobPassword)
+            );
 
-            if ( $row[ 'editable' ] ) {
-                $result[ 'editable' ][] = [
-                        'translation' => $Filter->fromLayer0ToLayer2( $row[ 'translation' ] ),
-                        'TOT'         => $row[ 'TOT' ],
-                        'involved_id' => explode( ",", $row[ 'involved_id' ] )
-                ];
-            } else {
-                $result[ 'not_editable' ][] = [
-                        'translation' => $Filter->fromLayer0ToLayer2( $row[ 'translation' ] ),
-                        'TOT'         => $row[ 'TOT' ],
-                        'involved_id' => explode( ",", $row[ 'involved_id' ] )
-                ];
+            if (!$filter instanceof MateCatFilter) {
+                throw new RuntimeException('Expected MateCatFilter instance from getInstance()');
             }
 
+            if ($row['editable']) {
+                $result['editable'][] = [
+                    'translation' => $filter->fromLayer0ToLayer2($row['translation']),
+                    'TOT' => $row['TOT'],
+                    'involved_id' => explode(",", $row['involved_id'])
+                ];
+            } else {
+                $result['not_editable'][] = [
+                    'translation' => $filter->fromLayer0ToLayer2($row['translation']),
+                    'TOT' => $row['TOT'],
+                    'involved_id' => explode(",", $row['involved_id'])
+                ];
+            }
         }
 
         return $result;
-
     }
 
 }

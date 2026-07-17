@@ -1,89 +1,98 @@
 <?php
-namespace AsyncTasks\Workers;
 
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Commons\QueueElement;
-use TaskRunner\Exceptions\EndQueueException;
+namespace Utils\AsyncTasks\Workers;
 
-//include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
+use Exception;
+use Model\DataAccess\IDatabase;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use PDOException;
+use ReflectionException;
+use TypeError;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\Tools\Utils;
 
-/**
- * Created by PhpStorm.
- * User: Hashashiyyin
- * Date: 13/06/16
- * Time: 11:49
- */
-class JobsWorker extends AbstractWorker {
+class JobsWorker extends AbstractWorker
+{
+    private JobDao $jobDao;
 
-    public function process( AbstractElement $queueElement ) {
-
-        /**
-         * @var $queueElement QueueElement
-         */
-        $this->_checkForReQueueEnd( $queueElement );
-
-        $jobStruct = new Jobs_JobStruct( $queueElement->params->toArray() );
-
-        //re initialize DB if socked is closed
-        $this->_checkDatabaseConnection();
-
-        $this->_recountAvgPee( $jobStruct );
-
+    /**
+     * @throws ReflectionException
+     */
+    public function __construct(AMQHandler $queueHandler, IDatabase $database, ?JobDao $jobDao = null)
+    {
+        parent::__construct($queueHandler, $database);
+        $this->jobDao = $jobDao ?? new JobDao($this->database);
     }
 
     /**
-     * Check how much times the element was re-queued and raise an Exception when the limit is reached ( 100 times )
-     *
+     * @throws EndQueueException|ReflectionException
+     * @throws PDOException
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function process(AbstractElement $queueElement): void
+    {
+        if (!$queueElement instanceof QueueElement) {
+            return;
+        }
+
+        $this->_checkForReQueueEnd($queueElement);
+
+        $jobStruct = new JobStruct($queueElement->params->toArray());
+
+        $this->_checkDatabaseConnection();
+
+        $this->_recountAvgPee($jobStruct);
+    }
+
+    /**
      * @param QueueElement $queueElement
      *
      * @throws EndQueueException
+     * @throws Exception
      */
-    protected function _checkForReQueueEnd( QueueElement $queueElement ){
-
-        /**
-         *
-         * check for loop re-queuing
-         */
-        if ( isset( $queueElement->reQueueNum ) && $queueElement->reQueueNum >= 100 ) {
-
-            $msg = "\n\n Error Set Contribution  \n\n " . var_export( $queueElement, true );
-            \Utils::sendErrMailReport( $msg );
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip." );
-            throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
-
-        } elseif ( isset( $queueElement->reQueueNum ) ) {
-//            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
+    protected function _checkForReQueueEnd(QueueElement $queueElement): void
+    {
+        if ($queueElement->reQueueNum >= 100) {
+            $msg = "\n\n Error Set Contribution  \n\n " . var_export($queueElement, true);
+            Utils::sendErrMailReport($msg);
+            $this->_doLog("--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.");
+            throw new EndQueueException("--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END);
         }
-
     }
 
-    protected function _recountAvgPee( Jobs_JobStruct $jobStruct ){
-
-        $jDao = new Jobs_JobDao();
-
-        /**
-         * @var $segments \EditLog_EditLogSegmentStruct[]
-         */
-        $segments = $jDao->getAllModifiedSegmentsForPee( $jobStruct );
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws PDOException
+     * @throws TypeError
+     */
+    protected function _recountAvgPee(JobStruct $jobStruct): void
+    {
+        $segments = $this->jobDao->getAllModifiedSegmentsForPee($jobStruct);
 
         $Pee_weighted = 0;
         $total_time_to_edit = 0;
-        foreach( $segments as $segment ){
-            $segment->job_target = $jobStruct->target; //Add language to tell to TMS_MATCH if this is a CJK
+        foreach ($segments as $segment) {
+            $segment->target_language = $jobStruct->target;
             $Pee_weighted += $segment->getPEE() * $segment->raw_word_count;
             $total_time_to_edit += $segment->time_to_edit;
         }
 
-        $jobStruct->avg_post_editing_effort = $Pee_weighted;
+        $jobStruct->avg_post_editing_effort = (float)$Pee_weighted;
         $jobStruct->total_time_to_edit = $total_time_to_edit;
 
-        $this->_doLog( "***** Job Split " . $jobStruct->id . "-" . $jobStruct->password . " AvgPee: ". $Pee_weighted . " ***** ");
+        $keyLength = strlen($jobStruct->password ?? '');
+        $last_digits = substr($jobStruct->password ?? '', -4);
+        $hidedPassword = str_repeat("*", max(0, $keyLength - 4)) . $last_digits;
+        $this->_doLog("***** Job Split " . $jobStruct->id . "-" . $hidedPassword . " AvgPee: " . $Pee_weighted . " ***** ");
 
-        $jDao->updateJobWeightedPeeAndTTE( $jobStruct );
-
+        $this->jobDao->updateJobWeightedPeeAndTTE($jobStruct);
     }
 
 }

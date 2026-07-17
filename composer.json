@@ -1,30 +1,42 @@
 {
     "require-dev": {
-        "phpunit/phpunit": "^4.8",
-        "robmorgan/phinx": "^0.4.6"
+        "phpunit/phpunit": "^12",
+        "phpmd/phpmd": "^2.15",
+        "phpstan/phpstan": "^2.1"
     },
     "require": {
-        "php": ">=5.6.40",
-        "phptal/phptal": "^1.3.0",
-        "google/apiclient": "^2.4.1",
-        "google/apiclient-services": "^0.128",
-        "klein/klein": "^2.1",
-        "matecat/simple-s3": "^1.5",
-        "matecat/whole-text-finder": "^1.0",
-        "matecat/xliff-parser": "^v1.0.104",
-        "monolog/monolog": "1.17.*",
+        "php": ">=8.3",
+        "deeplcom/deepl-php": "^1.18",
+        "defuse/php-encryption": "^2.4",
+        "elasticsearch/elasticsearch": "8.*",
+        "google/apiclient": "^2",
+        "google-gemini-php/client": "^2.7",
+        "league/oauth2-facebook": "^2.2",
+        "league/oauth2-github": "^3.1",
+        "league/oauth2-linkedin": "^5.1",
+        "matecat/cwh": "^3.1",
+        "matecat/klein": "^3.2",
+        "matecat/simple-s3": "^v2.0.0",
+        "matecat/subfiltering": "^4.1",
+        "matecat/whole-text-finder": "^2.0",
+        "matecat/xliff-parser": "~v3.0",
+        "matecat/icu-intl": "^v1",
+        "monolog/monolog": "^3",
+        "orhanerday/open-ai": "^4.7",
         "phpmailer/phpmailer": "~6.1",
-        "phpoffice/phpexcel": "~1.8.1",
-        "symfony/console": "^2.8",
-        "symfony/filesystem": "^2.8.9",
-        "defuse/php-encryption": "2.0.*",
-        "matecat/subfiltering": "^1.0",
-        "behat/transliterator": "^1.3",
-        "swaggest/json-schema": "^0.12.39",
-        "psr/log": "~1.0",
+        "phpoffice/phpspreadsheet": "~1.29",
+        "phptal/phptal": "^1.10.0",
+        "predis/predis": "^v3",
+        "psr/log": "^3.0",
+        "psr/event-dispatcher": "^1.0",
+        "untt/oauth2-microsoft": "^0.0.3",
+        "stomp-php/stomp-php": "^5.0",
+        "swaggest/json-schema": "^0.12.42",
+        "symfony/cache": "~7.3.9",
+        "symfony/console": "^5",
+        "translated/lara-sdk": "^1",
         "ext-curl": "*",
         "ext-pcntl": "*",
-        "ext-json": "*",
         "ext-libxml": "*",
         "ext-dom": "*",
         "ext-pdo": "*",
@@ -33,7 +45,32 @@
         "ext-zip": "*",
         "ext-fileinfo": "*",
         "ext-mbstring": "*",
-        "ext-zlib": "*"
-
+        "ext-zlib": "*",
+        "ext-gd": "*",
+        "ext-iconv": "*",
+        "ext-openssl": "*",
+        "ext-simplexml": "*",
+        "ext-intl": "*",
+        "ext-redis": "*"
+    },
+    "config": {
+        "use-include-path": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        },
+        "audit": {
+            "ignore": { "CVE-2026-45073": "PdoAdapter unused; MateCat uses FilesystemAdapter only" }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "": "lib/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Matecat\\": "tests/unit",
+            "Matecat\\PhpStan\\": "dev-tools/phpstan"
+        }
     }
 }

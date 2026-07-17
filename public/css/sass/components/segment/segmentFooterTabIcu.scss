@@ -1,0 +1,135 @@
+@use "../../commons/colors";
+.segment-footer-icu-container.open {
+  h3 {
+    margin: 0;
+    font-size: 16px;
+  }
+  > div {
+    display: flex;
+    justify-content: flex-start;
+    height: 100%;
+    padding: 24px;
+    gap: 60px;
+  }
+  .segment-footer-icu-plurals, .segment-footer-icu-editor {
+    width: 50%;
+  }
+  .segment-footer-icu-plurals {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .segment-footer-icu-plurals-section {
+    display: flex;
+    gap: 8px;
+    flex-direction: column;
+    justify-content: flex-start;
+    > div {
+      display: flex;
+      row-gap: 8px;
+      column-gap: 8px;
+      align-self: stretch;
+      flex-wrap: wrap;
+    }
+  }
+  .segment-footer-icu-plurals-section:nth-of-type(2) {
+    margin-top: 20px;
+  }
+  .plural-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    .category {
+      text-transform: capitalize;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .rule  {
+      color: colors.$grey7;
+      font-size: 14px;
+      width: 100%;
+      max-width: 120px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      text-align: right;
+    }
+  }
+  .plural-example {
+    width: 100%;
+    max-width: 184px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: left;
+  }
+  .segment-footer-icu-plurals-rule {
+    display: flex;
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    grid-row: 1 / span 1;
+    grid-column: 1 / span 1;
+    justify-self: stretch;
+    border-radius: 16px;
+    border: 1px solid colors.$grey3;
+    background: colors.$grey5;
+    width: 184px;
+    height: 50px;
+    justify-content: space-between;
+  }
+  .segment-footer-icu-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: flex-start;
+    align-items: flex-start;
+    label {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      div {
+        text-transform: capitalize;
+        span {
+            color: colors.$grey7;
+            font-weight: 400;
+            margin-left: 4px;
+        }
+      }
+    }
+    .segment-footer-icu-inputs {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 14px;
+    }
+    .segment-footer-icu-preview-container {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      width: 100%;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .segment-footer-icu-preview {
+      display: flex;
+      padding: 6px 16px;
+      min-height: 20px;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      align-self: stretch;
+      border-radius: 8px;
+      background: colors.$grey5;
+      align-content: flex-start;
+      text-align: left;
+      &.rtl {
+        direction: rtl;
+      }
+    }
+  }
+}

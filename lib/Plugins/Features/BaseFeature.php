@@ -1,29 +1,34 @@
 <?php
 
-namespace Features ;
-use BasicFeatureStruct;
+namespace Plugins\Features;
+
 use Exception;
-use INIT;
 use Klein\Klein;
 use LogicException;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
+use Model\DataAccess\IDatabase;
+use Model\FeaturesBase\BasicFeatureStruct;
+use Psr\Log\LoggerInterface;
 use ReflectionClass;
+use Utils\Logger\LoggerFactory;
+use Utils\Registry\AppConfig;
 
 
-abstract class BaseFeature implements IBaseFeature {
+abstract class BaseFeature implements IBaseFeature
+{
 
-    const FEATURE_CODE = null;
+    const string FEATURE_CODE = '';
 
-    protected $feature;
+    protected BasicFeatureStruct $feature;
+
+    /** @var ?array<string, mixed> */
+    protected ?array $configCache = null;
 
     /**
-     * @var Logger
+     * @var ?LoggerInterface
      */
-    private $log ;
+    protected ?LoggerInterface $log = null;
 
-    protected $logger_name ;
+    protected string $logger_name;
 
     /**
      * @var bool This property defines if the feature is automatically active when projects are created,
@@ -31,106 +36,198 @@ abstract class BaseFeature implements IBaseFeature {
      *           If this property is true, the feature is added to project's metadata `features` string.
      *           This property is only used to activate features that come from owner_features records.
      */
-    protected $autoActivateOnProject = true ;
+    protected bool $autoActivateOnProject = true;
 
     /**
      * @var bool This property defines if the feature is to be included in project features even if
      *           it's not defined in project features. This should be set to `true` when adding features
      *           that should be enabled systemwide, even on older projects.
      */
-    protected $forceOnProject = false ;
-
-    protected static $dependencies = [];
-
-    protected static $conflictingDependencies = [];
+    protected bool $forceOnProject = false;
 
     /**
-     * @return array
+     * @var array<int, string>
      */
-    public static function getConflictingDependencies() {
+    protected static array $dependencies = [];
+
+    /**
+     * @var array<int, string>
+     */
+    protected static array $conflictingDependencies = [];
+
+    protected IDatabase $database;
+
+    public function setDatabase(IDatabase $database): void
+    {
+        $this->database = $database;
+    }
+
+    public function getDatabase(): IDatabase
+    {
+        return $this->database;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function getConflictingDependencies(): array
+    {
         return static::$conflictingDependencies;
     }
 
-    public static function getConfig() {
-        $config_file_path = realpath( self::getPluginBasePath() . '/../config.ini' );
-        if ( ! file_exists( $config_file_path ) ) {
-            throw new Exception('Config file not found', 500 );
-        }
-        return parse_ini_file( $config_file_path ) ;
-    }
-
     /**
-     * Warning: passing a $projectStructure prevents the possibility to pass
-     * a persisted project in the future. TODO: this is likely to be reworked
-     * in the future.
-     *
-     * The ideal solution would be to use a ProjectStruct for both persisted and
-     * unpersisted scenarios, so to work with the same input structure every time.
-     *
-     * @param BasicFeatureStruct $feature
-     */
-    public function __construct( BasicFeatureStruct $feature ) {
-        $fCode = static::FEATURE_CODE;
-        if( empty( $fCode ) ) throw new LogicException( "Plugin code not defined." );
-        $this->feature = $feature ;
-        $this->logger_name = $this->feature->feature_code . '_plugin' ;
-    }
-
-    public function isAutoActivableOnProject() {
-        return $this->autoActivateOnProject ;
-    }
-
-    public function isForceableOnProject() {
-        return $this->forceOnProject ;
-    }
-
-    public static function getDependencies() {
-        return static::$dependencies ;
-    }
-
-    /**
-     * gets a feature specific logger
-     *
-     * @return Logger
+     * @return array<string, mixed>
      * @throws Exception
      */
-    public function getLogger() {
-        if ( $this->log == null ) {
-            $this->log = new Logger( $this->logger_name );
-            $streamHandler = new StreamHandler( $this->logFilePath(),  Logger::INFO );
-            $streamHandler->setFormatter( new LineFormatter( "%message%\n", "", true, true ) );
-            $this->log->pushHandler( $streamHandler );
+    public function getConfig(): array
+    {
+        if ($this->configCache !== null) {
+            return $this->configCache;
         }
+
+        $config_file_path = realpath($this->getPluginBasePath() . '/../config.ini');
+        if ($config_file_path === false || !file_exists($config_file_path)) {
+            throw new Exception('Config file not found', 500);
+        }
+
+        $config = @parse_ini_file($config_file_path, true);
+        if ($config === false) {
+            throw new Exception('Unable to parse config file', 500);
+        }
+
+        return $config;
+    }
+
+    /**
+     * Constructor method for the class.
+     *
+     * @param BasicFeatureStruct $feature
+     * @param array<string, mixed>|null $config
+     * @throws LogicException
+     */
+    public function __construct(BasicFeatureStruct $feature, ?array $config = null)
+    {
+        if (
+            (
+                $feature->feature_code === '' ||
+                static::FEATURE_CODE === '' ||
+                $feature->feature_code !== static::FEATURE_CODE
+            ) && !($this instanceof UnknownFeature)
+        ) {
+            throw new LogicException(
+                "Feature code missing or mismatched: struct '{$feature->feature_code}' vs "
+                . static::class . " '" . static::FEATURE_CODE . "'"
+            );
+        }
+        $this->feature = $feature;
+        $this->configCache = $config;
+        $this->logger_name = $this->feature->feature_code . '_plugin';
+    }
+
+    public function isAutoActivableOnProject(): bool
+    {
+        return $this->autoActivateOnProject;
+    }
+
+    public function isForceableOnProject(): bool
+    {
+        return $this->forceOnProject;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function getDependencies(): array
+    {
+        return static::$dependencies;
+    }
+
+    /**
+     * gets a feature-specific logger
+     *
+     * @return LoggerInterface
+     * @throws Exception
+     */
+    public function getLogger(): LoggerInterface
+    {
+        if ($this->log == null) {
+            $this->log = LoggerFactory::getLogger(self::FEATURE_CODE, $this->logger_name);
+        }
+
         return $this->log;
     }
 
-    private function logFilePath() {
-       return INIT::$LOG_REPOSITORY . '/' . $this->logger_name . '.log';
+    protected function logFilePath(): string
+    {
+        return AppConfig::$LOG_REPOSITORY . '/' . $this->logger_name . '.log';
     }
 
 
-    public static function getClassPath() {
-        $rc = new ReflectionClass(get_called_class());
-        return dirname( $rc->getFileName() ) . '/' . pathinfo($rc->getFileName(), PATHINFO_FILENAME ) ;
+    /**
+     * @throws LogicException
+     */
+    public function getClassPath(): string
+    {
+        $rc = new ReflectionClass(static::class);
+        $fileName = $rc->getFileName();
+        if ($fileName === false) {
+            throw new LogicException('Class file path not available');
+        }
+
+        return dirname($fileName) . '/' . pathinfo($fileName, PATHINFO_FILENAME);
     }
 
-    public static function getPluginBasePath() {
-        return realpath(  static::getClassPath() . '/../..' ) ;
+    /**
+     * @throws LogicException
+     */
+    public function getPluginBasePath(): false|string
+    {
+        return realpath(dirname($this->getClassPath(), 2));
     }
 
-    public static function getTemplatesPath() {
-        return static::getClassPath() . '/View' ;
+    /**
+     * @throws LogicException
+     */
+    public function getTemplatesPath(): string
+    {
+        return $this->getClassPath() . '/View';
     }
 
-    public function getFeatureStruct() {
-        return $this->feature ;
+    public function getFeatureStruct(): BasicFeatureStruct
+    {
+        return $this->feature;
     }
 
     /**
      * @param Klein $klein
      *
-     * @see \Features::loadRoutes
+     * @return void
+     * @see \Model\FeaturesBase\PluginsLoader::loadRoutes
      */
-    public static function loadRoutes( Klein $klein ){}
+    public static function loadRoutes(Klein $klein)
+    {
+    }
+
+    /**
+     *
+     * Return a list of files in build path of a plugin
+     *
+     * @return list<string>|null
+     * @throws LogicException
+     */
+    public function getBuildFiles(): ?array
+    {
+        $path = realpath($this->getPluginBasePath() . '/../static/build');
+        if ($path === false) {
+            return null;
+        }
+
+        $files = scandir($path);
+        if ($files === false) {
+            return null;
+        }
+
+        return $files;
+    }
 
 }

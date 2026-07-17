@@ -6,51 +6,41 @@
  * Time: 15:08
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
+use Exception;
+use Model\Comments\CommentDao;
 
-use API\V2\Json\SegmentComment;
-use API\V2\Validators\ChunkPasswordValidator;
-use Chunks_ChunkStruct;
-use Comments_CommentDao;
-
-class CommentsController extends BaseChunkController {
-
-    /**
-     * @var Chunks_ChunkStruct
-     */
-    protected $chunk;
+class CommentsController extends KleinController
+{
+    use ChunkNotFoundHandlerTrait;
 
     /**
-     * @param Chunks_ChunkStruct $chunk
-     *
-     * @return $this
+     * @throws Exception
      */
-    public function setChunk( $chunk ) {
-        $this->chunk = $chunk;
-
-        return $this;
-    }
-
-    public function index() {
-
+    public function index(): void
+    {
         $this->return404IfTheJobWasDeleted();
 
-        $comments = Comments_CommentDao::getCommentsForChunk( $this->chunk, array(
-            'from_id' => $this->request->param( 'from_id' )
-        ));
+        $comments = (new CommentDao($this->getDatabase()))->getCommentsForChunk($this->chunk, [
+            'from_id' => $this->request->param('from_id')
+        ]);
 
-        $formatted = new SegmentComment( $comments ) ;
-        $this->response->json( array('comments' => $formatted->render() ) ) ;
+        $this->response->json(['comments' => $comments]);
     }
 
-    protected function afterConstruct() {
-        $Validator = new ChunkPasswordValidator( $this ) ;
-        $Controller = $this;
-        $Validator->onSuccess( function () use ( $Validator, $Controller ) {
-            $Controller->setChunk( $Validator->getChunk() );
-        } );
-        $this->appendValidator( $Validator );
+    protected function registerValidators(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+        $Validator = new ChunkPasswordValidator($this);
+        $Validator->onSuccess(function () use ($Validator) {
+            $this->chunk = $Validator->getChunk();
+        });
+        $this->appendValidator($Validator);
     }
 
 }

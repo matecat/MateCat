@@ -1,111 +1,125 @@
 <?php
 
-namespace Validator;
+namespace Utils\Validator;
 
-use Exception;
-use Files\CSV;
-use INIT;
-use Utils;
-use Validator\Contracts\AbstractValidator;
-use Validator\Contracts\ValidatorObject;
+use Matecat\Locales\Languages;
+use RuntimeException;
+use Utils\Files\CSV;
+use Utils\Tools\Utils;
+use Utils\Validator\Contracts\AbstractValidator;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
 
-class GlossaryCSVValidator extends AbstractValidator {
+class GlossaryCSVValidator extends AbstractValidator
+{
 
     /**
      * @inheritDoc
      */
-    public function validate( ValidatorObject $object ) {
-
-        if ( !$object instanceof GlossaryCSVValidatorObject ) {
-            throw new Exception( 'Object given is not a valid instance of GlossaryCSVValidatorObject' );
-        }
-
-        $headers          = $this->getHeaders( $object->csv );
-        $allowedLanguages = $this->allowedLanguages();
+    public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
+    {
+        $headers = $this->getHeaders($object['csv']);
+        $languagesHandler = Languages::getInstance();
 
         // 1. Validate languages
-        if ( $this->validateLanguages( $headers, $allowedLanguages ) === false ) {
-            return false;
+        if (!$this->validateLanguages($headers, $languagesHandler)) {
+            return null;
         }
 
-        $allowedLanguagesRegex = implode( "|", $allowedLanguages );
+        $allowedLanguagesRegex = strtolower(implode("|", array_keys($languagesHandler->getEnabledLanguages())));
 
         // 2. Validate structure
-        preg_match_all( '/^(forbidden)?(domain)?(subdomain)?(definition)?(((' . $allowedLanguagesRegex . ')((notes)?(example of use)?){2,})+$)/', implode( "", $headers ), $headerMatches );
+        preg_match_all('/^(forbidden)?(domain)?(subdomain)?(definition)?(((' . $allowedLanguagesRegex . ')((notes)?(example of use)?){2,})+$)/', implode("", $headers), $headerMatches);
 
-        if ( empty( $headerMatches[ 0 ] ) ) {
+        if (empty($headerMatches[0])) {
+            $this->errors[] = new RuntimeException('The order of the headers is incorrect, please change it to the one set out in <a href="https://guides.matecat.com/glossary-file-format" target="_blank">this support article</a>.');
 
-            $this->errors[] = 'The order of the headers is incorrect, please change it to the one set out in <a href="https://guides.matecat.com/glossary-file-format" target="_blank">this support article</a>.';
-
-            return false;
+            return null;
         }
 
-        return true;
+        return $object;
     }
 
     /**
-     * @param $filePath
-     * @return array
+     * @return list<string>
      */
-    private function getHeaders( $filePath ) {
-        $headers = CSV::headers( $filePath );
-        $headers = array_map( 'Utils::trimAndLowerCase', $headers );
+    private function getHeaders(string $filePath): array
+    {
+        $headers = CSV::headers($filePath) ?? [];
+        $headers = array_map(static fn(?string $h): string => Utils::trimAndLowerCase($h ?? ''), $headers);
 
-        return Utils::popArray($headers);
+        return array_values(Utils::removeEmptyStringFromTail($headers));
     }
 
     /**
-     * @return array
+     * @param string $filePath
+     *
+     * @return int
      */
-    private function allowedLanguages() {
-        $allowedLanguages = [];
+    public function getNumberOfLanguage(string $filePath): int
+    {
+        $headers = $this->getHeaders($filePath);
+        $skipKeys = [
+            "forbidden",
+            "domain",
+            "subdomain",
+            "definition",
+            "notes",
+            "example of use"
+        ];
 
-        $file   = INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
-        $string = file_get_contents( $file );
-        $langs  = json_decode( $string, true );
+        $languages = array_diff($headers, $skipKeys);
 
-        foreach ( $langs[ 'langs' ] as $lang ) {
-            $rfc3066code = Utils::trimAndLowerCase( $lang[ 'rfc3066code' ] );
-
-            $allowedLanguages[] = $rfc3066code;
+        if (empty($languages)) {
+            return 0;
         }
 
-        return $allowedLanguages;
+        return count($languages);
     }
 
     /**
-     * @param $headers
-     * @param $allowedLanguages
+     * @param list<string> $headers
+     * @param Languages $languagesHandler
      *
      * @return bool
      */
-    private function validateLanguages( $headers, $allowedLanguages ) {
-
+    private function validateLanguages(array $headers, Languages $languagesHandler): bool
+    {
         $skipKeys = [
-                "forbidden",
-                "domain",
-                "subdomain",
-                "definition",
-                "notes",
-                "example of use"
+            "forbidden",
+            "domain",
+            "subdomain",
+            "definition",
+            "notes",
+            "example of use"
         ];
 
-        $languages = array_diff( $headers, $skipKeys );
+        $languages = array_diff($headers, $skipKeys);
 
-        if ( count( $languages ) < 2 ) {
-            $this->errors[] = 'Only one language detected, please upload a glossary with at least two languages. In case of doubts, refer to <a href="https://guides.matecat.com/glossary-file-format" target="_blank">this page</a>.';
+        if (count($languages) < 2) {
+            $this->errors[] = new RuntimeException('Only one language detected, please upload a glossary with at least two languages. In case of doubts, refer to <a href="https://guides.matecat.com/glossary-file-format" target="_blank">this page</a>.');
 
             return false;
         }
 
-        foreach ( $languages as $language ) {
-            if ( !in_array( $language, $allowedLanguages ) ) {
+        foreach ($languages as $language) {
+            if (empty($language)) {
+                $error = 'The file contains and empty column header, you can find the correct column headers <a href="https://guides.matecat.com/glossary-file-format" target="_blank">here</a>.';
+                $this->errors[] = new RuntimeException($error);
 
-                $error          = ( strpos( $language, '_' ) !== false ) ? 'The column header ' . $language . ' contains an underscore, please replace it with a dash for the file to be valid for import. Ex: it_IT -> it-iT' : $language . ' is not a valid column header, you can find the correct column headers <a href="https://guides.matecat.com/glossary-file-format" target="_blank">here</a>.';
-                $this->errors[] = $error;
+                return false;
+            }
+
+            if (!$languagesHandler->isValidLanguage($language)) {
+                $error = str_contains(
+                    $language,
+                    '_'
+                ) ? 'The column header <b>' . $language . '</b> contains an underscore, please replace it with a dash for the file to be valid for import. Ex: it_IT -> it-iT' : '<b>' . $language . '</b> is not a valid column header, you can find the correct column headers <a href="https://guides.matecat.com/glossary-file-format" target="_blank">here</a>.';
+                $this->errors[] = new RuntimeException($error);
 
                 return false;
             }
         }
+
+        return true;
     }
 }

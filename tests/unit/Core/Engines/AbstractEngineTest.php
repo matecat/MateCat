@@ -1,0 +1,286 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Matecat\Core\Engines;
+
+use CURLFile;
+use Matecat\TestHelpers\AbstractTest;
+use Model\Engines\Structs\EngineStruct;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\Test;
+use ReflectionProperty;
+use stdClass;
+use Utils\Engines\NONE;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\Logger\MatecatLogger;
+
+/**
+ * Testable subclass that exposes protected AbstractEngine methods
+ * without altering any behavior.
+ */
+class TestableNONE extends NONE
+{
+    public function exposedFixLangCode(string $lang): string
+    {
+        return $this->_fixLangCode($lang);
+    }
+
+    public function exposedGetCurlFile(string $file): CURLFile
+    {
+        return $this->getCurlFile($file);
+    }
+
+    public function exposedGoogleTranslateFallback(array $_config): GetMemoryResponse
+    {
+        return $this->GoogleTranslateFallback($_config);
+    }
+
+    public function setContentType(string $type): void
+    {
+        $this->content_type = $type;
+    }
+
+    public function setLogging(bool $logging): void
+    {
+        $this->logging = $logging;
+    }
+}
+
+class AbstractEngineTest extends AbstractTest
+{
+    private TestableNONE $engine;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $struct            = EngineStruct::getStruct();
+        $struct->class_load = 'NONE';
+        $struct->name       = 'TestEngine';
+        $struct->penalty    = 14;
+        $struct->others     = ['custom_key' => 'custom_value'];
+        $struct->extra_parameters = ['param_key' => 'param_value'];
+
+        $this->engine = new TestableNONE($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
+    }
+
+    // ---------------------------------------------------------------
+    // validateConfigurationParams
+    // ---------------------------------------------------------------
+
+    #[Test]
+    public function validateConfigurationParamsReturnsTrueWhenAllKeysKnown(): void
+    {
+        // NONE::getConfigurationParameters() returns [] —
+        // an empty stdClass has no keys to reject.
+        $extra = new stdClass();
+        self::assertTrue($this->engine->validateConfigurationParams($extra));
+    }
+
+    #[Test]
+    public function validateConfigurationParamsReturnsFalseForUnknownKey(): void
+    {
+        $extra              = new stdClass();
+        $extra->unknownKey  = 'value';
+        self::assertFalse($this->engine->validateConfigurationParams($extra));
+    }
+
+    // ---------------------------------------------------------------
+    // Stub / default-implementation methods
+    // ---------------------------------------------------------------
+
+    #[Test]
+    public function memoryExistsReturnsNull(): void
+    {
+        $key = new MemoryKeyStruct();
+        self::assertNull($this->engine->memoryExists($key));
+    }
+
+    #[Test]
+    public function deleteMemoryReturnsEmptyArray(): void
+    {
+        self::assertSame([], $this->engine->deleteMemory([]));
+    }
+
+    #[Test]
+    public function getMemoryIfMineReturnsNull(): void
+    {
+        $key = new MemoryKeyStruct();
+        self::assertNull($this->engine->getMemoryIfMine($key));
+    }
+
+    #[Test]
+    public function getQualityEstimationReturnsNull(): void
+    {
+        self::assertNull(
+            $this->engine->getQualityEstimation('en', 'it', 'hello', 'ciao')
+        );
+    }
+
+    #[Test]
+    public function importMemoryIsNoOp(): void
+    {
+        $user = new UserStruct();
+        $this->engine->importMemory('/fake/path.tmx', 'key123', $user);
+        // No exception, no side effect — just verifies the default body runs.
+        self::assertTrue(true);
+    }
+
+    #[Test]
+    public function syncMemoriesIsNoOp(): void
+    {
+        $this->engine->syncMemories(['id' => 1]);
+        self::assertTrue(true);
+    }
+
+    // ---------------------------------------------------------------
+    // _call() — happy path via file:// URL
+    // ---------------------------------------------------------------
+
+    #[Test]
+    public function callRawWithFileUrlReturnsFileContents(): void
+    {
+        $tmp = tempnam('/tmp', 'ae_test_');
+        file_put_contents($tmp, '{"status":"ok"}');
+
+        try {
+            $result = $this->engine->_call('file://' . $tmp);
+            self::assertIsString($result);
+            self::assertStringContainsString('ok', (string)$result);
+        } finally {
+            @unlink($tmp);
+        }
+    }
+
+    #[Test]
+    public function callRawWithJsonContentTypeCoversJsonLogBranch(): void
+    {
+        $tmp = tempnam('/tmp', 'ae_test_');
+        file_put_contents($tmp, '{"key":"value"}');
+
+        $this->engine->setContentType('json');
+
+        try {
+            $result = $this->engine->_call('file://' . $tmp);
+            self::assertIsString($result);
+            self::assertStringContainsString('value', (string)$result);
+        } finally {
+            @unlink($tmp);
+        }
+    }
+
+    #[Test]
+    public function callRawWithLoggingDisabledSkipsLogBlock(): void
+    {
+        $tmp = tempnam('/tmp', 'ae_test_');
+        file_put_contents($tmp, 'raw-text');
+
+        $this->engine->setLogging(false);
+
+        try {
+            $result = $this->engine->_call('file://' . $tmp);
+            self::assertSame('raw-text', $result);
+        } finally {
+            @unlink($tmp);
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // _call() — error path (connection refused)
+    // ---------------------------------------------------------------
+
+    #[Test]
+    public function callRawWithUnreachableUrlReturnsErrorJson(): void
+    {
+        $result = $this->engine->_call('http://localhost:1/fail', [
+            CURLOPT_CONNECTTIMEOUT => 1,
+            CURLOPT_TIMEOUT        => 1,
+        ]);
+
+        self::assertIsString($result);
+        $decoded = json_decode((string)$result, true);
+        self::assertIsArray($decoded);
+        self::assertArrayHasKey('error', $decoded);
+        self::assertLessThan(0, $decoded['error']['code']);
+    }
+
+    // ---------------------------------------------------------------
+    // call() — existence check on the requested function/config key
+    // ---------------------------------------------------------------
+
+    #[Test]
+    public function callSetsBadMethodCallErrorForUnknownFunction(): void
+    {
+        $this->engine->call('totally_unknown_function');
+
+        $resultProperty = new ReflectionProperty($this->engine, 'result');
+        $resultProperty->setAccessible(true);
+        $result = $resultProperty->getValue($this->engine);
+
+        self::assertSame(-43, $result['error']['code']);
+    }
+
+    #[Test]
+    public function callDoesNotTreatAnExistingButFalsyOthersValueAsUnknownFunction(): void
+    {
+        // Regression guard for report §11.8: `call()` used to rely on `!$this->$function`
+        // (magic __get returning falsy) to decide whether the key exists, so a legitimately
+        // configured but falsy value (e.g. an empty string) was wrongly reported as a
+        // "Bad Method Call". The fix uses a real existence check (__isset) instead.
+        $struct                    = EngineStruct::getStruct();
+        $struct->class_load        = 'NONE';
+        $struct->name              = 'TestEngine';
+        $struct->base_url          = 'http://localhost:1';
+        $struct->others            = ['blank_key' => ''];
+        $struct->extra_parameters  = [];
+
+        $engine = new TestableNONE($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
+        $engine->call('blank_key');
+
+        $resultProperty = new ReflectionProperty($engine, 'result');
+        $resultProperty->setAccessible(true);
+        $result = $resultProperty->getValue($engine);
+
+        self::assertNotSame(-43, $result['error']['code'] ?? null);
+    }
+
+    // ---------------------------------------------------------------
+    // GoogleTranslateFallback — exercises the protected fallback path
+    // ---------------------------------------------------------------
+
+    #[Test]
+    public function googleTranslateFallbackReturnsGetMemoryResponse(): void
+    {
+        $result = $this->engine->exposedGoogleTranslateFallback([
+            'source'     => 'en',
+            'target'     => 'it',
+            'segment'    => 'test segment',
+            'secret_key' => 'invalid-key',
+        ]);
+
+        self::assertInstanceOf(GetMemoryResponse::class, $result);
+    }
+
+    #[Test]
+    public function googleTranslateFallbackLogsTheSwallowedException(): void
+    {
+        // Regression guard: the fallback used to swallow the exception with zero logging,
+        // making a recurring GoogleTranslate failure invisible (report §6.7 / §11 quick win).
+        $logger = $this->createMock(MatecatLogger::class);
+        $logger->expects(self::once())->method('error');
+
+        $loggerProperty = new ReflectionProperty($this->engine, 'logger');
+        $loggerProperty->setAccessible(true);
+        $loggerProperty->setValue($this->engine, $logger);
+
+        $result = $this->engine->exposedGoogleTranslateFallback([
+            'source'     => 'en',
+            'target'     => 'it',
+            'segment'    => 'test segment',
+            'secret_key' => 'invalid-key',
+        ]);
+
+        self::assertInstanceOf(GetMemoryResponse::class, $result);
+    }
+}

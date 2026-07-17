@@ -1,133 +1,157 @@
 <?php
 
-class Engines_YandexTranslate extends Engines_AbstractEngine {
+namespace Utils\Engines;
 
-    protected $_config = array(
-            'segment'     => null,
-            'source'      => null,
-            'target'      => null,
-    );
+use Exception;
+use Model\DataAccess\IDatabase;
+use TypeError;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 
-    public function __construct($engineRecord) {
-        parent::__construct($engineRecord);
-        if ( $this->engineRecord->type != "MT" ) {
-            throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
+/**
+ * @property ?string $client_secret
+ */
+class YandexTranslate extends AbstractEngine
+{
+
+    protected array $_config = [
+        'segment' => null,
+        'source' => null,
+        'target' => null,
+    ];
+
+    /**
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function __construct($engineRecord, IDatabase $database)
+    {
+        parent::__construct($engineRecord, $database);
+        if ($this->getEngineRecord()->type != EngineConstants::MT) {
+            throw new Exception("Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
         }
     }
 
     /**
-     * @param $lang
+     * @param string $lang
      *
-     * @return mixed
-     * @throws Exception
+     * @return string
      */
-    protected function _fixLangCode( $lang ) {
-        $l = explode( "-", strtolower( trim( $lang ) ) );
+    protected function _fixLangCode(string $lang): string
+    {
+        $l = explode("-", strtolower(trim($lang)));
 
-        return $l[ 0 ];
+        return $l[0];
     }
 
     /**
-     * @param $rawValue
+     * @param mixed $rawValue
+     * @param array<string, mixed> $parameters
+     * @param null $function
      *
-     * @return array
+     * @return GetMemoryResponse
+     * @throws Exception
+     * @throws TypeError
      */
-    protected function _decode( $rawValue ) {
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): GetMemoryResponse
+    {
         $all_args = func_get_args();
 
-        if ( is_string( $rawValue ) ) {
-            $decoded = json_decode( $rawValue, true );
-            if ( $decoded[ "code" ] == 200 ) {
-                $decoded = array(
-                    'data' => array(
-                        'translations' => array(
-                            array( 'translatedText' => $this->_resetSpecialStrings( $decoded[ "text" ][ 0 ] ) )
-                        )
-                    )
-                );
+        if (is_string($rawValue)) {
+            $decoded = json_decode($rawValue, true);
+            if ($decoded["code"] == 200) {
+                $decoded = [
+                    'data' => [
+                        'translations' => [
+                            ['translatedText' => $decoded["text"][0]]
+                        ]
+                    ]
+                ];
             } else {
-                $decoded = array(
-                    'error' => array(
-                        'code' => $decoded[ "code" ],
-                        'message' => $decoded[ "message" ]
-                    )
-                );
+                $decoded = [
+                    'error' => [
+                        'code' => $decoded["code"],
+                        'message' => $decoded["message"]
+                    ]
+                ];
             }
         } else {
-            $resp = json_decode( $rawValue[ "error" ][ "response" ], true );
-            if ( isset( $resp[ "code" ] ) && isset( $resp[ "message" ] )) {
-                $rawValue[ "error" ][ "code" ] = $resp[ "code" ];
-                $rawValue[ "error" ][ "message" ] = $resp[ "message" ];
+            $resp = json_decode($rawValue["error"]["response"], true);
+            if (isset($resp["code"]) && isset($resp["message"])) {
+                $rawValue["error"]["code"] = $resp["code"];
+                $rawValue["error"]["message"] = $resp["message"];
             }
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        $mt_result = new Engines_Results_MT( $decoded );
-
-        if ( $mt_result->error->code < 0 ) {
-            $mt_result = $mt_result->get_as_array();
-            $mt_result['error'] = (array)$mt_result['error'];
-            return $mt_result;
-        }
-
-        $mt_match_res = new Engines_Results_MyMemory_Matches(
-                $this->_preserveSpecialStrings( $all_args[ 1 ][ "text" ] ),
-                $mt_result->translatedText,
-                100 - $this->getPenalty() . "%",
-                "MT-" . $this->getName(),
-                date( "Y-m-d" )
-        );
-
-        $mt_res = $mt_match_res->getMatches();
-
-        return $mt_res;
-
+        return $this->_composeMTResponseAsMatch($all_args[1]['text'], $decoded);
     }
 
-    public function get( $_config ) {
-        $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
-        $_config[ 'source' ]  = $this->_fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ]  = $this->_fixLangCode( $_config[ 'target' ] );
+    /**
+     * @param array<string, mixed> $_config
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function get(array $_config): GetMemoryResponse
+    {
+        $_config['source'] = $this->_fixLangCode($_config['source']);
+        $_config['target'] = $this->_fixLangCode($_config['target']);
 
-        $parameters = array();
-        if ( $this->client_secret != '' && $this->client_secret != null ) {
-            $parameters[ 'key' ] = $this->client_secret;
+        $parameters = [];
+        if ($this->client_secret != '' && $this->client_secret != null) {
+            $parameters['key'] = $this->client_secret;
         }
-        $parameters[ 'srv' ] = "matecat";
-        $parameters[ 'lang' ] = $_config[ 'source' ] . "-" . $_config[ 'target' ];
-        $parameters[ 'text' ] = $_config[ 'segment' ];
-        $parameters[ 'format' ] = "html";
+        $parameters['srv'] = "matecat";
+        $parameters['lang'] = $_config['source'] . "-" . $_config['target'];
+        $parameters['text'] = $_config['segment'];
+        $parameters['format'] = "html";
 
         $this->_setAdditionalCurlParams(
-            array(
-			    CURLOPT_POST       => true,
-			    CURLOPT_POSTFIELDS => http_build_query( $parameters )
-        	)
+            [
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => http_build_query($parameters)
+            ]
         );
 
-        $this->call( "translate_relative_url", $parameters, true );
+        $this->call("translate_relative_url", $parameters, true);
 
-        return $this->result;
-
+        return $this->_getResultAsGetMemoryResponse();
     }
 
-    public function set( $_config ) {
-
+    /**
+     * @param mixed $_config
+     */
+    public function set($_config): bool
+    {
         //if engine does not implement SET method, exit
         return true;
     }
 
-    public function update( $config ) {
-
+    /**
+     * @param mixed $_config
+     */
+    public function update($_config): bool
+    {
         //if engine does not implement UPDATE method, exit
         return true;
     }
 
-    public function delete( $_config ) {
-
+    /**
+     * @param mixed $_config
+     */
+    public function delete($_config): bool
+    {
         //if engine does not implement DELETE method, exit
         return true;
-
     }
 
+    /**
+     * @inheritDoc
+     */
+    public static function getConfigurationParameters(): array
+    {
+        return [
+            'enable_mt_analysis',
+        ];
+    }
 }

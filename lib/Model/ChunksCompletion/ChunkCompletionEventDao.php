@@ -1,0 +1,211 @@
+<?php
+
+namespace Model\ChunksCompletion;
+
+use Controller\Features\ProjectCompletion\CompletionEventStruct;
+use DateTime;
+use Exception;
+use Model\DataAccess\AbstractDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use PDO;
+use PDOException;
+use ReflectionException;
+use Utils\Tools\Utils;
+
+class ChunkCompletionEventDao extends AbstractDao
+{
+
+    const string REVISE = 'revise';
+    const string TRANSLATE = 'translate';
+
+    /**
+     * @return array<string, string>
+     */
+    public function validSources(): array
+    {
+        return [
+            'user' => ChunkCompletionEventStruct::SOURCE_USER,
+            'merge' => ChunkCompletionEventStruct::SOURCE_MERGE
+        ];
+    }
+
+    /**
+     * @throws PDOException
+     */
+    public function deleteEvent(ChunkCompletionEventStruct $event): int
+    {
+        $sql = "DELETE FROM chunk_completion_events WHERE id = :id_event ";
+        $stmt = $this->database->getConnection()->prepare($sql);
+
+        $stmt->execute(['id_event' => $event->id]);
+
+        return $stmt->rowCount();
+    }
+
+    /**
+     * @throws PDOException
+     */
+    public function getByIdAndChunk(int $id_event, JobStruct $chunk): ChunkCompletionEventStruct|false
+    {
+        $sql = "SELECT * FROM chunk_completion_events WHERE id = :id_event
+               AND id_job = :id_job AND password = :password ";
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ChunkCompletionEventStruct::class);
+
+        $stmt->execute([
+            'id_event' => $id_event,
+            'password' => $chunk->password,
+            'id_job' => $chunk->id
+        ]);
+
+        return $stmt->fetch();
+    }
+
+    /**
+     * @throws PDOException
+     */
+    public function updatePassword(int $id_job, string $password, string $old_password): int
+    {
+        $sql = "UPDATE chunk_completion_events SET password = :new_password
+               WHERE id_job = :id_job AND password = :password ";
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'id_job' => $id_job,
+            'password' => $old_password,
+            'new_password' => $password
+        ]);
+
+        return $stmt->rowCount();
+    }
+
+    /**
+     * @param JobStruct $chunk
+     * @param CompletionEventStruct $params
+     *
+     * @return string
+     * @throws PDOException
+     */
+    /**
+     * @param JobStruct $chunk
+     * @param CompletionEventStruct $params
+     *
+     * @return string
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function createFromChunk(JobStruct $chunk, CompletionEventStruct $params): string
+    {
+        $conn = $this->database->getConnection();
+
+        $stmt = $conn->prepare(
+            "INSERT INTO chunk_completion_events " .
+            " ( " .
+            " id_project, id_job, password, job_first_segment, job_last_segment, " .
+            " source, create_date, remote_ip_address, uid, is_review " .
+            " ) VALUES ( " .
+            " :id_project, :id_job, :password, :job_first_segment, :job_last_segment, " .
+            " :source, :create_date, :remote_ip_address, :uid, :is_review " .
+            " ); "
+        );
+
+        $validSources = $this->validSources();
+        $stmt->execute([
+            'id_project' => $chunk->getProject(new ProjectDao($this->database))->id,
+            'id_job' => $chunk->id,
+            'password' => $chunk->password,
+            'job_first_segment' => $chunk->job_first_segment,
+            'job_last_segment' => $chunk->job_last_segment,
+            'source' => $validSources[$params->source],
+            'create_date' => Utils::mysqlTimestamp(time()),
+            'remote_ip_address' => $params->remote_ip_address,
+            'uid' => $params->uid,
+            'is_review' => $params->is_review
+        ]);
+
+        return (string)$conn->lastInsertId();
+    }
+
+
+    /**
+     * @throws Exception
+     */
+    public function currentPhase(JobStruct $chunk): string
+    {
+        $lastTranslate = $this->lastCompletionRecord($chunk, ['is_review' => false]);
+        if ($lastTranslate) {
+            $lastRevise = $this->lastCompletionRecord($chunk, ['is_review' => true]);
+            if ($lastRevise && new DateTime($lastTranslate['create_date']) < new DateTime($lastRevise['create_date'])) {
+                return self::TRANSLATE;
+            } else {
+                return self::REVISE;
+            }
+        }
+
+        return self::TRANSLATE;
+    }
+
+    /**
+     *
+     * Returns true or false if the chunk is completed. Requires 'is_review' to be passed
+     * as a param.
+     *
+     * A chunk is completed when there is at least one completion event which is more recent
+     * than a record on updates table.
+     *
+     * chunk_completion_events stores the event of completion. A record there means the job
+     * was marked as complete.
+     *
+     * chunk_completion_updates stores the last time a job was updated and is updated with a
+     * timestamp every time an invalidating change is done to the job, like a translation.
+     *
+     * @param JobStruct $chunk JobStruct to examinate
+     * @param array{is_review?: bool} $params array of params for query: is_review
+     *
+     * @return array<string, mixed>
+     *
+     * @throws Exception
+     */
+    /**
+     * @param JobStruct $chunk
+     * @param array{is_review?: bool} $params
+     *
+     * @return array<string, mixed>
+     *
+     * @throws Exception
+     */
+    public function lastCompletionRecord(JobStruct $chunk, array $params = []): array
+    {
+        $params = Utils::ensure_keys($params, ['is_review']);
+        $is_review = $params['is_review'];
+
+        $sql = "
+            SELECT events.id AS id_event, events.id_job, events.password, events.is_review, events.create_date
+            FROM chunk_completion_events events
+            LEFT JOIN chunk_completion_updates updates on events.id_job = updates.id_job
+            AND  events.password = updates.password and events.is_review = updates.is_review
+            WHERE events.create_date IS NOT NULL
+            AND ( events.create_date > updates.last_translation_at OR updates.last_translation_at IS NULL )
+            AND events.is_review = :is_review
+            AND events.id_job = :id_job AND events.password = :password
+            ORDER BY events.create_date DESC
+            LIMIT 1
+            ";
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+                'id_job' => $chunk->id,
+                'password' => $chunk->password,
+                'is_review' => $is_review
+            ]
+        );
+
+        return $stmt->fetch() ?: [];
+    }
+
+}

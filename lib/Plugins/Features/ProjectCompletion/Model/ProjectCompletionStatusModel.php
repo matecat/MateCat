@@ -6,76 +6,137 @@
  * Time: 18:13
  */
 
-namespace Features\ProjectCompletion\Model;
+namespace Plugins\Features\ProjectCompletion\Model;
 
 
-use Chunks_ChunkCompletionEventDao;
-use Chunks_ChunkStruct;
-use Features;
-use FeatureSet;
-use Utils;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Exception;
+use Model\ChunksCompletion\ChunkCompletionEventDao;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobDao;
+use Model\FeaturesBase\Hook\Event\Filter\FilterJobPasswordToReviewPasswordEvent;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\Tools\Utils;
 
-class ProjectCompletionStatusModel {
+class ProjectCompletionStatusModel
+{
 
     /**
-     * @var \Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    protected $project ;
+    protected ProjectStruct $project;
 
-    protected $cachedStatus;
+    /** @var array<string, mixed> */
+    protected array $cachedStatus = [];
 
-    public function __construct( \Projects_ProjectStruct $project ) {
-        $this->project = $project ;
+    private ChunkCompletionEventDao $chunkCompletionEventDao;
+    private FeatureSet $featureSet;
+    private JobDao $jobDao;
+
+    /**
+     * @throws Exception
+     */
+    public function __construct(
+        ProjectStruct $project,
+        FeatureSet $featureSet,
+        ?ChunkCompletionEventDao $chunkCompletionEventDao = null,
+        ?JobDao $jobDao = null,
+    ) {
+        $this->project = $project;
+        if ($chunkCompletionEventDao === null) {
+            $chunkCompletionEventDao = new ChunkCompletionEventDao($featureSet->getDatabase());
+        }
+        $this->chunkCompletionEventDao = $chunkCompletionEventDao;
+        $this->featureSet = $featureSet;
+        if ($jobDao === null) {
+            $jobDao = new JobDao($featureSet->getDatabase());
+        }
+        $this->jobDao = $jobDao;
     }
 
-    public function getStatus() {
-        if ( is_null( $this->cachedStatus ) ) {
+    /**
+     * @return array<string, mixed>
+     *
+     * @throws NotFoundException
+     * @throws EndQueueException
+     * @throws ReQueueException
+     * @throws ValidationError
+     * @throws AuthenticationError
+     * @throws Exception
+     */
+    public function getStatus(): array
+    {
+        if (empty($this->cachedStatus)) {
             $this->cachedStatus = $this->populateStatus();
         }
-        return $this->cachedStatus ;
+
+        return $this->cachedStatus;
     }
 
-    private function populateStatus() {
-        $response = [] ;
-        $response['revise'] = [] ;
-        $response['translate'] = [] ;
+    /**
+     * @throws NotFoundException
+     * @throws ReQueueException
+     * @throws EndQueueException
+     * @throws ValidationError
+     * @throws AuthenticationError
+     * @throws Exception
+     *
+     * @return array<string, mixed>
+     */
+    private function populateStatus(): array
+    {
+        $response = [];
+        $response['revise'] = [];
+        $response['translate'] = [];
 
-        $response['id'] = $this->project->id ;
+        $response['id'] = $this->project->id;
 
         $any_uncomplete = false;
 
-        foreach( $this->project->getChunks() as $chunk ) {
+        foreach ($this->jobDao->getNotDeletedByProjectId((int) $this->project->id) as $chunk) {
+            $translate = $this->dataForChunkStatus($chunk, false);
+            $revise = $this->dataForChunkStatus($chunk, true);
 
-            $translate = $this->dataForChunkStatus($chunk, false) ;
-            $revise    = $this->dataForChunkStatus($chunk, true) ;
-
-            $featureSet = new FeatureSet();
-            $featureSet->loadForProject( $this->project );
-
-            $revise['password'] = $featureSet->filter('filter_job_password_to_review_password',
-                    $chunk->password,
-                    $chunk->id
+            $this->featureSet->loadForProject($this->project);
+            $filterJobPasswordToReviewPasswordEvent = new FilterJobPasswordToReviewPasswordEvent(
+                $chunk->password ?? throw new \RuntimeException('Chunk password is required'),
+                $chunk->id ?? throw new \RuntimeException('Chunk id is required')
             );
+            $this->featureSet->dispatch($filterJobPasswordToReviewPasswordEvent);
+            $revise['password'] = $filterJobPasswordToReviewPasswordEvent->getPassword();
 
-            $response['translate'][] = $translate ;
-            $response['revise'][]    = $revise ;
+            $response['translate'][] = $translate;
+            $response['revise'][] = $revise;
 
-            if (! ( $revise['completed'] && $translate['completed'] ) ) $any_uncomplete = true;
+            if (!($revise['completed'] && $translate['completed'])) {
+                $any_uncomplete = true;
+            }
         }
 
-        $response['completed'] = !$any_uncomplete ;
+        $response['completed'] = !$any_uncomplete;
 
-        return $response ;
+        return $response;
     }
 
-    private function dataForChunkStatus ( Chunks_ChunkStruct $chunk, $is_review ) {
-        $record = Chunks_ChunkCompletionEventDao::lastCompletionRecord( $chunk, array(
-                'is_review' => $is_review
-        ) );
+    /**
+     * @return array<string, mixed>
+     *
+     * @throws Exception
+     */
+    private function dataForChunkStatus(JobStruct $chunk, bool $is_review): array
+    {
+        $record = $this->chunkCompletionEventDao->lastCompletionRecord($chunk, [
+            'is_review' => $is_review
+        ]);
 
-        if ( $record != false ) {
+        if ($record) {
             $is_completed = true;
-            $completed_at = Utils::api_timestamp( $record['create_date'] );
+            $completed_at = Utils::api_timestamp($record['create_date']);
             $event_id = $record['id_event'];
         } else {
             $is_completed = false;
@@ -83,15 +144,14 @@ class ProjectCompletionStatusModel {
             $event_id = null;
         }
 
-        return array(
-                'id'       =>  $chunk->id,
-                'password' => $chunk->password,
-                'completed' => $is_completed,
-                'completed_at' => $completed_at,
-                'event_id' => $event_id
-        );
+        return [
+            'id' => $chunk->id,
+            'password' => $chunk->password,
+            'completed' => $is_completed,
+            'completed_at' => $completed_at,
+            'event_id' => $event_id
+        ];
     }
-
 
 
 }

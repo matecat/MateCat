@@ -7,31 +7,39 @@
  *
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 
-use API\V2\Json\MemoryKeys;
-use API\V2\Validators\LoginValidator;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Exception;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use TypeError;
+use View\API\V2\Json\MemoryKeys;
 
-class MemoryKeysController extends KleinController {
+class MemoryKeysController extends KleinController
+{
 
-    public function afterConstruct() {
-        $this->appendValidator( new LoginValidator( $this ) );
+    protected function registerValidators(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
     }
 
-    public function listKeys(){
+    /**
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function listKeys(): void
+    {
+        $keyQuery = new MemoryKeyStruct();
+        $keyQuery->uid = $this->user->uid ?? throw new \InvalidArgumentException('User not authenticated');
 
-        $keyQuery = new TmKeyManagement_MemoryKeyStruct();
-        $keyQuery->uid = $this->user->uid;
+        $memoryKeyDao = new MemoryKeyDao($this->getDatabase());
+        $keyList = $memoryKeyDao->read($keyQuery);
 
-        $memoryKeyDao = new TmKeyManagement_MemoryKeyDao();
-        $keyList = $memoryKeyDao->read( $keyQuery );
-
-        $formatter = new MemoryKeys( $keyList );
-        $this->response->json( $formatter->render() );
-
+        $formatter = new MemoryKeys($keyList);
+        $this->response->json($formatter->render());
     }
 
 }

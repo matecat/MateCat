@@ -1,0 +1,63 @@
+{
+  "type": "array",
+  "items": {
+    "anyOf": [
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "const": "character_counter_count_tags"
+          },
+          "value": {
+            "type": [
+              "boolean"
+            ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "const": "character_counter_mode"
+          },
+          "value": {
+            "enum": [
+              "google_ads",
+              "exclude_cjk",
+              "all_one"
+            ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "const": "subfiltering_handlers"
+          },
+          "value": {
+            "$ref": "subfiltering_handlers.json"
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "const": "tm_prioritization"
+          },
+          "value": {
+            "type": [
+              "boolean"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,158 @@
+@use '../../commons/colors';
+
+.register-component {
+  display: flex;
+  width: 712px;
+  /* padding: 32px 64px 32px 32px; */
+
+  .column-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 320px;
+    background: #f5f6f7;
+    border-radius: 8px;
+    padding: 64px 40px;
+
+    h2,
+    ul {
+      text-align: left;
+
+      > li {
+        display: flex;
+        gap: 10px;
+        font-size: 16px;
+        align-items: center;
+        padding: 5px 0;
+
+        &:first-child {
+          font-weight: bold;
+        }
+
+        svg {
+          flex-shrink: 0;
+          color: colors.$translatedBlue;
+        }
+      }
+    }
+  }
+
+  h2 {
+    font-size: 24px;
+    margin: 0;
+  }
+
+  .column-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 32px 70px;
+
+    h4 {
+      font-size: 16px;
+      font-weight: bold;
+      color: colors.$grey7;
+      text-align: center;
+      margin: 0;
+    }
+  }
+
+  .register-divider {
+    color: colors.$grey7;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 16px;
+    div {
+      flex-grow: 1;
+      height: 1px;
+      background-color: colors.$grey8;
+    }
+
+    span {
+      font-size: 16px;
+      font-weight: bold;
+    }
+  }
+
+  .login-social-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+  }
+
+  .register-form {
+    display: grid;
+    grid-template-columns: 48% 48%;
+    row-gap: 20px;
+    column-gap: 14px;
+
+    > :nth-last-child(-n + 5) {
+      grid-column: 2 span;
+    }
+
+    .terms-and-conditions {
+      display: flex;
+      flex-direction: column;
+
+      .input-container {
+        display: flex;
+        gap: 10px;
+
+        > span {
+          display: flex;
+          color: colors.$grey7;
+        }
+      }
+    }
+
+    .terms-and-conditions-error {
+      font-size: 12px;
+      text-align: left;
+      color: colors.$redDefault;
+    }
+  }
+
+  .footer-links-container {
+    display: flex;
+    justify-content: center;
+    font-size: 16px;
+    color: colors.$grey7;
+  }
+}
+
+.register-component-confirm-registration {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  width: 480px;
+  padding: 48px 64px 48px 64px;
+
+  h2,
+  p {
+    text-align: left;
+  }
+
+  h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+  }
+
+  p {
+    color: colors.$grey7;
+  }
+
+  .footer-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .email-sent-again {
+    text-align: center;
+    color: colors.$grey7;
+  }
+}

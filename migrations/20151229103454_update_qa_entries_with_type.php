@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class UpdateQaEntriesWithType extends AbstractMatecatMigration {
     public $sql_up = <<<EOF
 ALTER TABLE `qa_models`

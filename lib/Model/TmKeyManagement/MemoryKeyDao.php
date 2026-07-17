@@ -6,46 +6,63 @@
  * Time: 18.45
  */
 
+namespace Model\TmKeyManagement;
+
+use DomainException;
+use Exception;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDaoStruct;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Users\UserDao;
+use ReflectionException;
+use Throwable;
+use Utils\Logger\LoggerFactory;
+use Utils\TmKeyManagement\TmKeyStruct;
+
 /**
  * Class DataAccess_MemoryKeyDao<br/>
  * This class handles the communication with the corresponding table in the database using a CRUD interface
  */
-class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
+class MemoryKeyDao extends AbstractDao
+{
 
-    const TABLE = "memory_keys";
+    const string TABLE = "memory_keys";
 
-    const STRUCT_TYPE = "TmKeyManagement_MemoryKeyStruct";
+    const string STRUCT_TYPE = MemoryKeyStruct::class;
 
-    const MAX_INSERT_NUMBER = 10;
+    const int MAX_INSERT_NUMBER = 10;
 
     /**
-     * @param TmKeyManagement_MemoryKeyStruct $obj
+     * @param MemoryKeyStruct $obj
      *
-     * @return TmKeyManagement_MemoryKeyStruct|null The inserted object on success, null otherwise
+     * @return MemoryKeyStruct|null The inserted object on success, null otherwise
      * @throws Exception
      */
-    public function create( TmKeyManagement_MemoryKeyStruct $obj ) {
-        $obj = $this->sanitize( $obj );
+    public function create(MemoryKeyStruct $obj): ?MemoryKeyStruct
+    {
+        $obj = $this->sanitize($obj);
 
-        $this->_validateNotNullFields( $obj );
+        $this->_validateNotNullFields($obj);
+
+        $tmKey = $obj->tm_key ?? throw new Exception("Key value cannot be null");
 
         $query = "INSERT INTO " . self::TABLE .
-                " (uid, key_value, key_name, key_tm, key_glos, creation_date)
+            " (uid, key_value, key_name, key_tm, key_glos, creation_date)
                 VALUES ( :uid, :key_value, :key_name, :key_tm, :key_glos, NOW())";
 
-        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt = $this->database->getConnection()->prepare($query);
         $stmt->execute(
-                [
-                        "uid"       => $obj->uid,
-                        "key_value" => trim($obj->tm_key->key),
-                        "key_name"  => ( $obj->tm_key->name == null ) ? '' : trim($obj->tm_key->name),
-                        "key_tm"    => ( $obj->tm_key->tm == null ) ? 1 : $obj->tm_key->tm,
-                        "key_glos"  => ( $obj->tm_key->glos == null ) ? 1 : $obj->tm_key->glos
-                ]
+            [
+                "uid" => $obj->uid,
+                "key_value" => trim($tmKey->key ?? throw new Exception("Key value cannot be null")),
+                "key_name" => ($tmKey->name === null) ? '' : trim($tmKey->name),
+                "key_tm" => $tmKey->tm ?? true,
+                "key_glos" => $tmKey->glos ?? true
+            ]
         );
 
-        //return the inserted object on success, null otherwise
-        if ( $stmt->rowCount() > 0 ) {
+        if ($stmt->rowCount() > 0) {
             return $obj;
         }
 
@@ -53,17 +70,41 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param TmKeyManagement_MemoryKeyStruct $obj
-     * @param bool                            $traverse
+     * @param int $uid
      *
-     * @return array|void
+     * @return MemoryKeyStruct[]
+     */
+    public function getKeyringOwnerKeysByUid(int $uid): array
+    {
+        try {
+            $dh = new MemoryKeyStruct(['uid' => $uid]);
+
+            return $this->read($dh);
+        } catch (Throwable $e) {
+            try {
+                LoggerFactory::getLogger('dao')->error($e->getMessage());
+            } catch (Throwable) {
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * @param MemoryKeyStruct $obj
+     * @param bool $traverse
+     * @param int $ttl
+     *
+     * @return MemoryKeyStruct[]
+     * @throws ReflectionException
      * @throws Exception
      */
-    public function read( TmKeyManagement_MemoryKeyStruct $obj, $traverse = false ) {
-        $obj = $this->sanitize( $obj );
+    public function read(MemoryKeyStruct $obj, bool $traverse = false, int $ttl = 0): array
+    {
+        $obj = $this->sanitize($obj);
 
         $where_params = [];
-        $condition    = [];
+        $condition = [];
 
         $query = "SELECT  m1.uid, 
                                      m1.key_value, 
@@ -73,187 +114,194 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                                      sum(1) AS owners_tot, 
                                      group_concat( DISTINCT m2.uid ) AS owner_uids
                              FROM " . self::TABLE . " m1
-                             LEFT JOIN " . self::TABLE . " AS m2 ON m1.key_value = m2.key_value AND m2.deleted = 0
+                             LEFT JOIN " . self::TABLE . " AS m2 ON m1.key_value = m2.key_value AND m2.deleted = 0 -- AND m1.uid != m2.uid
                              WHERE %s and m1.deleted = 0
                              GROUP BY m1.key_value
 			                 ORDER BY m1.creation_date desc";
 
-        if ( $obj->uid !== null ) {
-            $condition[]           = "m1.uid = :uid";
-            $where_params[ 'uid' ] = $obj->uid;
-        }
+
+        $condition[] = "m1.uid = :uid";
+        $where_params['uid'] = $obj->uid;
 
         //tm_key conditions
-        if ( $obj->tm_key !== null ) {
-
-            if ( $obj->tm_key->key !== null ) {
-                $condition[]                 = "m1.key_value = :key_value";
-                $where_params[ 'key_value' ] = $obj->tm_key->key;
+        if ($obj->tm_key !== null) {
+            if ($obj->tm_key->key !== null) {
+                $condition[] = "m1.key_value = :key_value";
+                $where_params['key_value'] = $obj->tm_key->key;
             }
 
-            if ( $obj->tm_key->name !== null ) {
-                $condition[]                = "m1.key_name = :key_name";
-                $where_params[ 'key_name' ] = $obj->tm_key->name;
+            if ($obj->tm_key->name !== null) {
+                $condition[] = "m1.key_name = :key_name";
+                $where_params['key_name'] = $obj->tm_key->name;
             }
 
-            if ( $obj->tm_key->tm !== null ) {
-                $condition[]              = "m1.key_tm = :key_tm";
-                $where_params[ 'key_tm' ] = $obj->tm_key->tm;
+            if ($obj->tm_key->tm !== null) {
+                $condition[] = "m1.key_tm = :key_tm";
+                $where_params['key_tm'] = $obj->tm_key->tm;
             }
 
-            if ( $obj->tm_key->glos !== null ) {
-                $condition[]                = "m1.key_glos = :key_glos";
-                $where_params[ 'key_glos' ] = $obj->tm_key->glos;
+            if ($obj->tm_key->glos !== null) {
+                $condition[] = "m1.key_glos = :key_glos";
+                $where_params['key_glos'] = $obj->tm_key->glos;
             }
         }
 
-        if ( count( $condition ) ) {
-            $where_string = implode( " AND ", $condition );
+        if (count($condition)) {
+            $where_string = implode(" AND ", $condition);
         } else {
-            throw new Exception( "Where condition needed." );
+            throw new Exception("Where condition needed.");
         }
 
-        $query = sprintf( $query, $where_string );
+        $query = sprintf($query, $where_string);
 
-        $stmt = $this->database->getConnection()->prepare( $query );
-        $stmt->execute( $where_params );
-        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt = $this->database->getConnection()->prepare($query);
 
-        $arr_result = $stmt->fetchAll();
+        /**
+         * @var list<ShapelessConcreteStruct> $arr_result
+         */
+        $arr_result = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $where_params);
 
-        if ( $traverse ) {
-
-            $userDao = new Users_UserDao( Database::obtain() );
-
-            foreach ( $arr_result as $k => $row ) {
-                $users                          = $userDao->getByUids( explode( ",", $row[ 'owner_uids' ] ) );
-                $arr_result[ $k ][ 'in_users' ] = $users;
+        $userDao = new UserDao($this->database);
+        foreach ($arr_result as $k => $row) {
+            $idList = explode(",", $row['owner_uids']);
+            if($traverse){
+                $users = $userDao->getByUids($idList);
+                $arr_result[$k]['in_users'] = $users;
             }
-
-        } else {
-
-            foreach ( $arr_result as $k => $row ) {
-                $arr_result[ $k ][ 'in_users' ] = $row[ 'owner_uids' ];
-            }
-
+            $arr_result[$k]['in_users_id'] = $idList;
         }
 
-        return $this->_buildResult( $arr_result );
-
+        /** @var list<ShapelessConcreteStruct> $arr_result */
+        return $this->_buildResult($arr_result);
     }
 
     /**
-     * @param TmKeyManagement_MemoryKeyStruct $obj
+     * @param MemoryKeyStruct $obj
      *
-     * @return bool|void
+     * @return MemoryKeyStruct|null
      * @throws Exception
      */
-    public function atomicUpdate( TmKeyManagement_MemoryKeyStruct $obj ) {
-        $obj = $this->sanitize( $obj );
+    public function atomicUpdate(MemoryKeyStruct $obj): ?MemoryKeyStruct
+    {
+        $obj = $this->sanitize($obj);
 
-        $this->_validatePrimaryKey( $obj );
-        $this->_validateNotNullFields( $obj );
+        $this->_validatePrimaryKey($obj);
+        $this->_validateNotNullFields($obj);
 
-        $set_array        = [];
+        $tmKey = $obj->tm_key ?? throw new Exception("Invalid Key value");
+
+        $set_array = [];
         $where_conditions = [];
-        $bind_params      = [];
+        $bind_params = [];
 
         $query = "UPDATE " . self::TABLE . " SET %s WHERE %s";
 
-        $where_conditions[]   = "uid = :uid";
-        $bind_params[ 'uid' ] = $obj->uid;
+        $where_conditions[] = "uid = :uid";
+        $bind_params['uid'] = $obj->uid;
 
-        $where_conditions[]         = "key_value = :key_value";
-        $bind_params[ 'key_value' ] = $obj->tm_key->key;
+        $where_conditions[] = "key_value = :key_value";
+        $bind_params['key_value'] = $tmKey->key;
 
-        //tm_key conditions
-        if ( $obj->tm_key !== null ) {
-
-            if ( $obj->tm_key->name !== null ) {
-                $set_array[]               = "key_name = :key_name";
-                $bind_params[ 'key_name' ] = $obj->tm_key->name;
-            }
-
+        if ($tmKey->name !== null) {
+            $set_array[] = "key_name = :key_name";
+            $bind_params['key_name'] = $tmKey->name;
         }
 
-        $where_string = implode( " AND ", $where_conditions );
+        $where_string = implode(" AND ", $where_conditions);
 
-        $set_string = null;
-        if ( count( $set_array ) ) {
-            $set_string = implode( ", ", $set_array );
+        if (count($set_array)) {
+            $set_string = implode(", ", $set_array);
         } else {
-            throw new Exception( "Array given is empty. Please set at least one value." );
+            throw new Exception("Array given is empty. Please set at least one value.");
         }
 
-        $query = sprintf( $query, $set_string, $where_string );
+        $query = sprintf($query, $set_string, $where_string);
 
-        $stmt = $this->database->getConnection()->prepare( $query );
-        $stmt->execute( $bind_params );
+        $stmt = $this->database->getConnection()->prepare($query);
+        $stmt->execute($bind_params);
 
-        if ( $stmt->rowCount() ) {
+        if ($stmt->rowCount()) {
             return $obj;
         }
 
         return null;
     }
 
-    public function delete( TmKeyManagement_MemoryKeyStruct $obj ) {
-        $obj = $this->sanitize( $obj );
+    /**
+     * @throws Exception
+     */
+    public function delete(MemoryKeyStruct $obj): ?MemoryKeyStruct
+    {
+        $obj = $this->sanitize($obj);
 
-        $this->_validatePrimaryKey( $obj );
-        $this->_validateNotNullFields( $obj );
+        $this->_validatePrimaryKey($obj);
+        $this->_validateNotNullFields($obj);
+
+        $tmKey = $obj->tm_key ?? throw new Exception("Invalid Key value");
 
         $query = "DELETE FROM " . self::TABLE . " WHERE uid = :uid and key_value = :key_value";
 
-        $stmt = $this->database->getConnection()->prepare( $query );
-        $stmt->execute( [
-                'uid'       => $obj->uid,
-                'key_value' => $obj->tm_key->key
-        ] );
+        $stmt = $this->database->getConnection()->prepare($query);
+        $stmt->execute([
+            'uid' => $obj->uid,
+            'key_value' => $tmKey->key
+        ]);
 
-        if ( $stmt->rowCount() > 0 ) {
+        if ($stmt->rowCount() > 0) {
             return $obj;
         }
 
         return null;
     }
 
-    public function disable( TmKeyManagement_MemoryKeyStruct $obj ) {
-        $obj = $this->sanitize( $obj );
+    /**
+     * @throws Exception
+     */
+    public function disable(MemoryKeyStruct $obj): ?MemoryKeyStruct
+    {
+        $obj = $this->sanitize($obj);
 
-        $this->_validatePrimaryKey( $obj );
-        $this->_validateNotNullFields( $obj );
+        $this->_validatePrimaryKey($obj);
+        $this->_validateNotNullFields($obj);
+
+        $tmKey = $obj->tm_key ?? throw new Exception("Invalid Key value");
 
         $query = "UPDATE " . self::TABLE . " set deleted = 1 WHERE uid = :uid and key_value = :key_value";
 
-        $stmt = $this->database->getConnection()->prepare( $query );
-        $stmt->execute( [
-                'uid'       => $obj->uid,
-                'key_value' => $obj->tm_key->key
-        ] );
+        $stmt = $this->database->getConnection()->prepare($query);
+        $stmt->execute([
+            'uid' => $obj->uid,
+            'key_value' => $tmKey->key
+        ]);
 
-        if ( $stmt->rowCount() > 0 ) {
+        if ($stmt->rowCount() > 0) {
             return $obj;
         }
 
         return null;
     }
 
-    public function enable( TmKeyManagement_MemoryKeyStruct $obj ) {
-        $obj = $this->sanitize( $obj );
+    /**
+     * @throws Exception
+     */
+    public function enable(MemoryKeyStruct $obj): ?MemoryKeyStruct
+    {
+        $obj = $this->sanitize($obj);
 
-        $this->_validatePrimaryKey( $obj );
-        $this->_validateNotNullFields( $obj );
+        $this->_validatePrimaryKey($obj);
+        $this->_validateNotNullFields($obj);
+
+        $tmKey = $obj->tm_key ?? throw new Exception("Invalid Key value");
 
         $query = "UPDATE " . self::TABLE . " set deleted = 0 WHERE uid = :uid and key_value = :key_value";
 
-        $stmt = $this->database->getConnection()->prepare( $query );
-        $stmt->execute( [
-                'uid'       => $obj->uid,
-                'key_value' => $obj->tm_key->key
-        ] );
+        $stmt = $this->database->getConnection()->prepare($query);
+        $stmt->execute([
+            'uid' => $obj->uid,
+            'key_value' => $tmKey->key
+        ]);
 
-        if ( $stmt->rowCount() > 0 ) {
+        if ($stmt->rowCount() > 0) {
             return $obj;
         }
 
@@ -262,156 +310,145 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
 
     /**
-     * @param $obj_arr TmKeyManagement_MemoryKeyStruct[] An array of TmKeyManagement_MemoryKeyStruct objects
+     * @param MemoryKeyStruct[] $obj_arr
      *
-     * @return array|null The input array on success, null otherwise
      * @throws Exception
      */
-    public function createList( Array $obj_arr ) {
-        $obj_arr = $this->sanitizeArray( $obj_arr );
+    public function createList(array $obj_arr): void
+    {
+        $obj_arr = $this->sanitizeArray($obj_arr);
 
         $query = "INSERT INTO " . self::TABLE .
-                " ( uid, key_value, key_name, key_tm, key_glos, creation_date)
+            " ( uid, key_value, key_name, key_tm, key_glos, creation_date)
                 VALUES ";
 
         $values = [];
 
-        //chunk array using MAX_INSERT_NUMBER
-        $objects = array_chunk( $obj_arr, static::MAX_INSERT_NUMBER );
+        $objects = array_chunk($obj_arr, self::MAX_INSERT_NUMBER);
 
-        //create an insert query for each chunk
-        foreach ( $objects as $i => $chunk ) {
-
+        foreach ($objects as $chunk) {
             $insert_query = $query;
-            /**
-             * @var $chunk TmKeyManagement_MemoryKeyStruct[]
-             */
-            foreach ( $chunk as $obj ) {
+            /** @var MemoryKeyStruct[] $chunk */
+            foreach ($chunk as $obj) {
+                $this->_validateNotNullFields($obj);
+                $tmKey = $obj->tm_key ?? throw new Exception("Key value cannot be null");
                 $insert_query .= "( ?, ?, ?, ?, ?, NOW() ),";
 
-                //fill values array
-                $values[] = (int)$obj->uid;
-                $values[] = $obj->tm_key->key;
-                $values[] = ( $obj->tm_key->name == null ) ? '' : $obj->tm_key->name;
-                $values[] = ( $obj->tm_key->tm == null ) ? 1 : $obj->tm_key->tm;
-                $values[] = ( $obj->tm_key->glos == null ) ? 1 : $obj->tm_key->glos;
+                $values[] = $obj->uid;
+                $values[] = $tmKey->key ?? throw new Exception("Key value cannot be null");
+                $values[] = $tmKey->name ?? '';
+                $values[] = $tmKey->tm ?? true;
+                $values[] = $tmKey->glos ?? true;
             }
 
-            $insert_query = rtrim( $insert_query, "," );
+            $insert_query = rtrim($insert_query, ",");
 
-            $stmt = $this->database->getConnection()->prepare( $insert_query );
-            $stmt->execute( $values );
+            $stmt = $this->database->getConnection()->prepare($insert_query);
+            $stmt->execute($values);
             $values = [];
-
         }
-
-        if ( $this->database->affected_rows > 0 ) {
-            return $obj_arr;
-        }
-
-        return null;
     }
 
     /**
-     * See parent definition
+     * @param MemoryKeyStruct $input
      *
-     * @param TmKeyManagement_MemoryKeyStruct $input
-     *
-     * @return DataAccess_IDaoStruct|TmKeyManagement_MemoryKeyStruct
-     * @throws Exception
-     * @see DataAccess_AbstractDao::sanitize
-     *
-     */
-    public function sanitize( DataAccess_IDaoStruct $input ) {
-        return parent::_sanitizeInput( $input, self::STRUCT_TYPE );
-    }
-
-    /**
-     * See parent definition.
-     * @see DataAccess_AbstractDao::sanitizeArray
-     *
-     * @param array $input
-     *
-     * @return array
-     */
-    public static function sanitizeArray( array $input ) {
-        return parent::_sanitizeInputArray( $input, self::STRUCT_TYPE );
-    }
-
-    /**
-     * See in DataAccess_AbstractDao::validatePrimaryKey
-     * @see DataAccess_AbstractDao::_validatePrimaryKey
-     *
-     * @param TmKeyManagement_MemoryKeyStruct $obj
-     *
-     * @return void
+     * @return MemoryKeyStruct
      * @throws Exception
      */
-    protected function _validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
+    public function sanitize(IDaoStruct $input): MemoryKeyStruct
+    {
+        parent::_sanitizeInput($input, self::STRUCT_TYPE);
 
-        /**
-         * @var $obj TmKeyManagement_MemoryKeyStruct
-         */
-        if ( empty( $obj->uid ) ) {
-            throw new Exception( "Invalid Uid" );
-        }
-
-        if ( is_null( $obj->tm_key ) || is_null( $obj->tm_key->key ) ) {
-            throw new Exception( "Invalid Key value" );
-        }
-
+        return $input;
     }
 
     /**
-     * See in DataAccess_AbstractDao::validateNotNullFields
+     * @param MemoryKeyStruct[] $input
      *
-     * @param DataAccess_IDaoStruct $obj
-     *
-     * @return null
+     * @return MemoryKeyStruct[]
      * @throws Exception
-     * @see DataAccess_AbstractDao::_validateNotNullFields
-     *
      */
-    protected function _validateNotNullFields( DataAccess_IDaoStruct $obj ) {
-        /**
-         * @var $obj TmKeyManagement_MemoryKeyStruct
-         */
-        if ( empty( $obj->uid ) ) {
-            throw new Exception( "Uid cannot be null" );
+    public function sanitizeArray(array $input): array
+    {
+        $result = [];
+        foreach ($input as $elem) {
+            if (!$elem instanceof MemoryKeyStruct) {
+                throw new Exception("Invalid input. Expected " . self::STRUCT_TYPE, -1);
+            }
+            $result[] = $elem;
         }
 
-        if ( is_null( $obj->tm_key->key ) ) {
-            throw new Exception( "Key value cannot be null" );
+        return $result;
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function _validatePrimaryKey(IDaoStruct $obj): void
+    {
+        if (!$obj instanceof MemoryKeyStruct) {
+            throw new Exception("Expected MemoryKeyStruct");
         }
 
+        if (empty($obj->uid)) {
+            throw new Exception("Invalid Uid");
+        }
+
+        if ($obj->tm_key === null || empty($obj->tm_key->key)) {
+            throw new Exception("Invalid Key value");
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function _validateNotNullFields(IDaoStruct $obj): void
+    {
+        if (!$obj instanceof MemoryKeyStruct) {
+            throw new Exception("Expected MemoryKeyStruct");
+        }
+
+        if (empty($obj->uid)) {
+            throw new Exception("Uid cannot be null");
+        }
+
+        if ($obj->tm_key === null || $obj->tm_key->key === null) {
+            throw new Exception("Key value cannot be null");
+        }
     }
 
     /**
      * Builds an array with a result set according to the data structure it handles.
      *
-     * @param $array_result array A result array obtained by a MySql query
+     * @param list<ShapelessConcreteStruct> $array_result
      *
-     * @return TmKeyManagement_MemoryKeyStruct[] An array containing TmKeyManagement_MemoryKeyStruct objects
+     * @return list<MemoryKeyStruct>
+     *
+     * @throws DomainException
      */
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult(array $array_result): array
+    {
         $result = [];
 
-        foreach ( $array_result as $item ) {
+        foreach ($array_result as $item) {
+            $owner_uids = explode(",", $item['owner_uids']);
 
             $build_arr = [
-                    'uid'    => $item[ 'uid' ],
-                    'tm_key' => new TmKeyManagement_TmKeyStruct( [
-                                    'key'       => (string)$item[ 'key_value' ],
-                                    'name'      => (string)$item[ 'key_name' ],
-                                    'tm'        => (bool)$item[ 'tm' ],
-                                    'glos'      => (bool)$item[ 'glos' ],
-                                    'is_shared' => ( $item[ 'owners_tot' ] > 1 ),
-                                    'in_users'  => $item[ 'in_users' ]
-                            ]
-                    )
+                'uid' => $item['uid'],
+                'tm_key' => new TmKeyStruct([
+                        'key' => (string)$item['key_value'],
+                        'name' => (string)$item['key_name'],
+                        'tm' => (bool)$item['tm'],
+                        'glos' => (bool)$item['glos'],
+                        'is_shared' => ($item['owners_tot'] > 1),
+                        'in_users' => $item['in_users'] ?? [],
+                        'in_users_id' => $item['in_users_id'] ?? [],
+                        'owner' => in_array($item['uid'], $owner_uids),
+                    ]
+                )
             ];
 
-            $obj = new TmKeyManagement_MemoryKeyStruct( $build_arr );
+            $obj = new MemoryKeyStruct($build_arr);
 
             $result[] = $obj;
         }

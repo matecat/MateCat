@@ -1,74 +1,44 @@
 <?php
 
-namespace Files ;
+namespace Model\Files;
 
-use Chunks_ChunkStruct;
-use DataAccess\ShapelessConcreteStruct;
-use DataAccess_AbstractDao;
-use Database;
-use Files_FileStruct;
-use PDO;
+use Exception;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\ShapelessConcreteStruct;
+use PDOException;
+use ReflectionException;
 
-class FilesPartsDao extends  DataAccess_AbstractDao {
+class FilesPartsDao extends AbstractDao
+{
+
+    const string TABLE = 'files_parts';
 
     /**
      * @param FilesPartsStruct $filesPartsStruct
      *
      * @return int
+     * @throws PDOException
      */
-    public function insert(FilesPartsStruct $filesPartsStruct) {
+    public function insert(FilesPartsStruct $filesPartsStruct): int
+    {
         $sql = "INSERT INTO files_parts " .
-                " ( `id_file`, `tag_key`, `tag_value` ) " .
-                " VALUES " .
-                " ( :id_file, :key, :value ); ";
+            " ( `id_file`, `tag_key`, `tag_value` ) " .
+            " VALUES " .
+            " ( :id_file, :tag_key, :tag_value ); ";
 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare(  $sql );
-        $stmt->execute( array(
-                'id_file' => $filesPartsStruct->id_file,
-                'key' => $filesPartsStruct->key,
-                'value' => $filesPartsStruct->value
-        ) );
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'id_file' => $filesPartsStruct->id_file,
+            'tag_key' => $filesPartsStruct->tag_key,
+            'tag_value' => $filesPartsStruct->tag_value
+        ]);
 
-        if($stmt->rowCount() === 1){
-            return $conn->lastInsertId();
+        if ($stmt->rowCount() === 1) {
+            return (int)$conn->lastInsertId();
         }
 
         return 0;
-    }
-
-    /**
-     * @param array $ids
-     * @param int   $ttl
-     *
-     * @return \DataAccess_IDaoStruct[]
-     */
-    public function getFirstAndLastSegmentForArrayOfFilePartsIds(array $ids, $ttl = 86400)
-    {
-        $return = [];
-        $thisDao = new self();
-        $conn    = Database::obtain()->getConnection();
-        $sql = "SELECT 
-                min(s.id) as first_segment, 
-                max(s.id) as last_segment, 
-                s.id_file_part as id 
-                FROM
-                files_parts fp
-                left join segments s on fp.id_file = s.id_file
-                where fp.id IN ( " . implode(', ' , $ids ) . " )
-                and s.id_file_part IN ( " . implode(', ' , $ids ) . " )
-                group by s.id_file_part
-            ";
-
-        $stmt = $conn->prepare( $sql );
-
-        $data = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [] );
-
-        foreach ($data as $datum){
-            $return[$datum['id']] = $datum;
-        }
-
-        return $return;
     }
 
     /**
@@ -76,15 +46,17 @@ class FilesPartsDao extends  DataAccess_AbstractDao {
      * DO NOT USE THIS METHOD IN A LOOP FUNCTION
      * **********************************
      *
-     * @param     $id
+     * @param int $id
      * @param int $ttl
      *
-     * @return \DataAccess_IDaoStruct
+     * @return ShapelessConcreteStruct|null
+     * @throws PDOException
+     * @throws Exception
+     * @throws ReflectionException
      */
-    public function getFirstAndLastSegment($id, $ttl = 86400)
+    public function getFirstAndLastSegment(int $id, int $ttl = 86400): ?ShapelessConcreteStruct
     {
-        $thisDao = new self();
-        $conn    = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $sql = "SELECT 
                 min(s.id) as first_segment, 
                 max(s.id) as last_segment, 
@@ -96,39 +68,59 @@ class FilesPartsDao extends  DataAccess_AbstractDao {
                 and s.id_file_part = :id
             ";
 
-        $stmt    = $conn->prepare( $sql );
+        $stmt = $conn->prepare($sql);
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id' => $id ] )[ 0 ];
+        /** @var  ShapelessConcreteStruct $result */
+        $result = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, ['id' => $id])[0] ?? null;
+
+        return $result;
     }
 
     /**
-     * @param int $id
+     * @param int $fileId
      * @param int $ttl
      *
-     * @return \DataAccess_IDaoStruct
+     * @return FilesPartsStruct[]
+     * @throws PDOException
+     * @throws Exception
+     * @throws ReflectionException
      */
-    public function getById( $id, $ttl = 0) {
-        $thisDao = new self();
-        $conn    = Database::obtain()->getConnection();
-        $sql     = "SELECT * FROM files_parts  WHERE id = :id ";
-        $stmt    = $conn->prepare( $sql );
-
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id' => $id ] )[ 0 ];
-    }
-
-    /**
-     * @param     $fileId
-     * @param int $ttl
-     *
-     * @return \DataAccess_IDaoStruct[]
-     */
-    public function getByFileId($fileId, $ttl = 86400)
+    public function getByFileId(int $fileId, int $ttl = 86400): array
     {
-        $thisDao = new self();
-        $conn    = Database::obtain()->getConnection();
-        $sql     = "SELECT * FROM files_parts  WHERE id_file = :fileId ";
-        $stmt    = $conn->prepare( $sql );
+        $conn = $this->database->getConnection();
+        $sql = "SELECT * FROM files_parts  WHERE id_file = :fileId ";
+        $stmt = $conn->prepare($sql);
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'fileId' => $fileId ] );
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, FilesPartsStruct::class, ['fileId' => $fileId]);
+    }
+
+    /**
+     * @param int $segmentId
+     * @param int $ttl
+     *
+     * @return FilesPartsStruct|null
+     * @throws PDOException
+     * @throws Exception
+     * @throws ReflectionException
+     */
+    public function getBySegmentId(int $segmentId, int $ttl = 86400): ?FilesPartsStruct
+    {
+        $conn = $this->database->getConnection();
+        $sql = "
+            SELECT 
+                fp.id,
+                fp.id_file,
+                fp.tag_key,
+                fp.tag_value 
+            FROM segments s
+                LEFT JOIN files_parts fp ON fp.id = s.id_file_part
+             WHERE s.id = :segmentId; ";
+
+        $stmt = $conn->prepare($sql);
+
+        /** @var  FilesPartsStruct $result */
+        $result = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, FilesPartsStruct::class, ['segmentId' => $segmentId])[0] ?? null;
+
+        return $result;
     }
 }

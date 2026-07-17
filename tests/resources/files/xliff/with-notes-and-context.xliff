@@ -1,0 +1,23 @@
+<xliff version='1.2'
+       xmlns='urn:oasis:names:tc:xliff:document:1.2'>
+    <file original='test.txt' source-language='en-US' target-language='it-IT'
+          datatype='plaintext'>
+        <body>
+            <trans-unit id='tu1'>
+                <source xml:lang="en-US">Hello world</source>
+                <target xml:lang="it-IT" state="translated">Ciao mondo</target>
+                <note>This is a translator note</note>
+                <note from="developer">This is a developer note</note>
+                <context-group name="ctx1" purpose="location">
+                    <context context-type="sourcefile">test.txt</context>
+                    <context context-type="linenumber">42</context>
+                </context-group>
+            </trans-unit>
+            <trans-unit id='tu2'>
+                <source xml:lang="en-US">Second segment</source>
+                <note>Another note</note>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
+

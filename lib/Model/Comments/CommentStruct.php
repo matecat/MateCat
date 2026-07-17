@@ -1,46 +1,64 @@
 <?php
 
-class Comments_CommentStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+namespace Model\Comments;
 
-  // database fields
-  public $id;
-  public $id_job;
-  public $id_segment;
-  public $create_date;
-  public $email;
-  public $full_name;
-  public $uid;
-  public $resolve_date;
-  public $source_page;
-  public $message_type;
-  public $message;
-  public $timestamp ;
-  public $revision_number ;
+use JsonSerializable;
+use Model\DataAccess\IDaoStruct;
 
-  // returned values
-  public $formatted_date;
-  public $thread_id;
-  public $id_client ;
-  public $password ;
+/**
+ * This is NOT a database Entity, this is a utility vector to transport info.
+ */
+class CommentStruct extends BaseCommentStruct implements IDaoStruct, JsonSerializable
+{
 
-  // query parameters
-  public $first_segment;
-  public $last_segment;
+    // database fields
+    public int $id;
+    public int $id_job;
+    public int $id_segment;
+    public string $create_date;
+    public ?string $email = null;
+    public string $full_name;
+    public ?int $uid = null;
+    public ?string $resolve_date = null;
+    public int $source_page;
+    public ?int $is_anonymous = 0;
+    public ?int $message_type = null;
+    public ?string $message = "";
+    public int $timestamp;
+    public int $revision_number;
 
-  public static function getStruct() {
-    return new Comments_CommentStruct();
-  }
+    // returned values
+    public ?string $thread_id = null;
 
-  public function getFormattedDate() {
-    return strftime( '%l:%M %p %e %b %Y UTC', strtotime($this->create_date) );
-  }
+    public static function getStruct(): CommentStruct
+    {
+        return new CommentStruct();
+    }
 
-  public function getThreadId() {
-    return md5($this->id_job . '-' . $this->id_segment . '-' . $this->resolve_date);
-  }
+    public function getThreadId(): string
+    {
+        return md5($this->id_job . '-' . $this->id_segment . '-' . $this->resolve_date);
+    }
 
-  public function isComment() {
-    return ((int) $this->message_type == Comments_CommentDao::TYPE_COMMENT);
-  }
-
+    /**
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'uid' => $this->uid,
+            'id_job' => $this->id_job,
+            'id_segment' => $this->id_segment,
+            'is_anonymous' => $this->is_anonymous,
+            'full_name' => $this->getFullName(),
+            'source_page' => $this->source_page,
+            'thread_id' => $this->thread_id,
+            'message' => $this->message,
+            'message_type' => $this->message_type,
+            'create_at' => $this->create_date,
+            'resolved_at' => $this->resolve_date,
+            'timestamp' => $this->timestamp,
+        ];
+    }
 }

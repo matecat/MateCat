@@ -1,0 +1,239 @@
+<?php
+
+namespace Controller\Abstracts;
+
+use Controller\API\Commons\ViewValidators\MandatoryKeysValidator;
+use Controller\Exceptions\RenderTerminatedException;
+use Exception;
+use InvalidArgumentException;
+use Klein\App;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
+use Klein\Request;
+use Klein\Response;
+use Klein\ServiceProvider;
+use Model\ConnectedServices\Oauth\Facebook\FacebookProvider;
+use Model\ConnectedServices\Oauth\Github\GithubProvider;
+use Model\ConnectedServices\Oauth\Google\GoogleProvider;
+use Model\ConnectedServices\Oauth\LinkedIn\LinkedInProvider;
+use Model\ConnectedServices\Oauth\Microsoft\MicrosoftProvider;
+use Model\ConnectedServices\Oauth\OauthClient;
+use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
+use Model\FeaturesBase\Hook\Event\Run\DecorateViewEvent;
+use PHPTAL;
+use TypeError;
+use Utils\Registry\AppConfig;
+use Utils\Templating\PHPTalBoolean;
+use Utils\Templating\PHPTalMap;
+use Utils\Templating\PHPTALWithAppend;
+use Utils\Tools\Utils;
+
+/**
+ * Created by PhpStorm.
+ * User: fregini
+ * Date: 06/10/16
+ * Time: 10:24
+ */
+abstract class BaseKleinViewController extends AbstractStatefulKleinController implements IController
+{
+
+    protected bool $isView = true;
+
+    /**
+     * @var PHPTALWithAppend
+     */
+    protected PHPTAL $view;
+
+    /**
+     * @var integer
+     */
+    protected int $httpCode = 500;
+
+    /**
+     * Routed entry point for every view controller.
+     *
+     * Concrete controllers build their view (setView) and emit it (render).
+     * May terminate the request (`never`) — a covariant-compatible return type.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function renderView(): void
+    {
+        $this->render();
+    }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param ServiceProvider|null $service
+     * @param App|null $app
+     *
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function __construct(Request $request, Response $response, ?ServiceProvider $service = null, ?App $app = null)
+    {
+        parent::__construct($request, $response, $service, $app);
+        $this->timingLogFileName = 'view_controller_calls_time.log';
+        $this->appendValidator(new MandatoryKeysValidator($this));
+    }
+
+    /**
+     * @param string $template_name
+     * @param array<string, mixed> $params
+     * @param int $code
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function setView(string $template_name, array $params = [], int $code = 200): void
+    {
+        $templatePath = AppConfig::$TEMPLATE_ROOT . "/$template_name";
+        $this->view = new PHPTALWithAppend($templatePath);
+        $this->httpCode = $code;
+
+        $this->view->{'basepath'} = AppConfig::$BASEURL;
+        $this->view->{'hostpath'} = AppConfig::$HTTPHOST;
+        $this->view->{'build_number'} = AppConfig::$BUILD_NUMBER;
+        $this->view->{'support_mail'} = AppConfig::$SUPPORT_MAIL;
+        $this->view->{'enableMultiDomainApi'} = new PHPTalBoolean(AppConfig::$ENABLE_MULTI_DOMAIN_API);
+        $this->view->{'ajaxDomainsNumber'} = AppConfig::$AJAX_DOMAINS;
+        $this->view->{'maxFileSize'} = AppConfig::$MAX_UPLOAD_FILE_SIZE;
+        $this->view->{'maxTMXFileSize'} = AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE;
+        $this->view->{'flashMessages'} = FlashMessage::flush();
+
+        if ($this->isLoggedIn()) {
+            $this->getFeatureSet()->loadFromUserEmail($this->user->email ?? '');
+        }
+
+        $this->view->{'user_plugins'} = new PHPTalMap($this->getFeatureSet()->getCodes());
+        $this->view->{'isLoggedIn'} = new PHPTalBoolean($this->isLoggedIn());
+        $this->view->{'userMail'} = $this->getUser()->email ?? '';
+        $this->view->{'isAnInternalUser'} = new PHPTalBoolean($this->getFeatureSet()->dispatch(new IsAnInternalUserEvent($this->getUser()->email ?? ''))->isInternal());
+
+        $this->view->{'footer_js'} = [];
+        $this->view->{'config_js'} = [];
+
+        /**
+         * This is a unique ID generated at runtime.
+         * It is injected into the nonce attribute of `< script >` tags to allow browsers to safely execute the contained CSS and JavaScript.
+         */
+        $nonce = Utils::uuid4();
+        $this->view->{'x_nonce_unique_id'} = $nonce;
+
+        // init oauth clients — graceful degradation on provider init failure
+        try {
+            $this->view->{'googleAuthURL'} = (AppConfig::$GOOGLE_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GoogleProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+            $this->view->{'githubAuthUrl'} = (AppConfig::$GITHUB_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GithubProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+            $this->view->{'linkedInAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(LinkedInProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+            $this->view->{'microsoftAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(MicrosoftProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+            $this->view->{'facebookAuthUrl'} = (AppConfig::$FACEBOOK_OAUTH_CLIENT_ID) ? OauthClient::getInstance(FacebookProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+        } catch (TypeError) {
+            $this->view->{'googleAuthURL'} = "";
+            $this->view->{'githubAuthUrl'} = "";
+            $this->view->{'linkedInAuthUrl'} = "";
+            $this->view->{'microsoftAuthUrl'} = "";
+            $this->view->{'facebookAuthUrl'} = "";
+        }
+
+        $this->view->{'googleDriveEnabled'} = new PHPTalBoolean(AppConfig::isGDriveConfigured());
+        try {
+            $this->view->{'gdriveAuthURL'} = ($this->isLoggedIn() && AppConfig::isGDriveConfigured()) ? OauthClient::getInstance(
+                GoogleProvider::PROVIDER_NAME,
+                AppConfig::$HTTPHOST . "/gdrive/oauth/response"
+            )->getAuthorizationUrl($_SESSION, 'drive') : "";
+        } catch (TypeError) {
+            $this->view->{'gdriveAuthURL'} = "";
+        }
+
+        $parsedHost = parse_url(AppConfig::$HTTPHOST);
+        $this->view->{'x_self_ajax_location_hosts'} = AppConfig::$ENABLE_MULTI_DOMAIN_API && is_array($parsedHost) && isset($parsedHost['host'])
+            ? " *.ajax." . $parsedHost['host']
+            : null;
+
+        $this->addParamsToView($params);
+        $this->view->setOutputMode(PHPTAL::HTML5);
+
+        $this->getFeatureSet()->dispatch(new DecorateViewEvent($this->view, $template_name, $nonce));
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     *
+     * @throws Exception
+     */
+    public function addParamsToView(array $params): void
+    {
+        if (!isset($this->view)) {
+            throw new Exception('View not set. Method `setView` must be called before `addParams`');
+        }
+
+        foreach ($params as $key => $value) {
+            $this->view->{$key} = $value;
+        }
+    }
+
+    /**
+     * @param $httpCode integer
+     */
+    public function setCode(int $httpCode): void
+    {
+        $this->httpCode = $httpCode;
+    }
+
+    /**
+     * @param int|null $code
+     *
+     * @return never
+     *
+     * @throws LockedResponseException
+     * @throws RenderTerminatedException
+     * @throws ResponseAlreadySentException
+     * @throws \Psr\Log\InvalidArgumentException
+     * @throws InvalidArgumentException
+     */
+    public function render(?int $code = null): never
+    {
+        $this->response->noCache();
+        $this->response->code($code ?? $this->httpCode);
+
+        if (isset($this->view)) {
+            $this->response->body($this->view->execute());
+        }
+
+        $this->response->send();
+        $this->_logWithTime();
+
+        if (AppConfig::$ENV === 'testing') {
+            throw new RenderTerminatedException();
+        }
+
+        die();
+    }
+
+    public function redirectToWantedUrl(): never
+    {
+        header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . $_SESSION['wanted_url'], false);
+        unset($_SESSION['wanted_url']);
+
+        if (AppConfig::$ENV === 'testing') {
+            throw new RenderTerminatedException();
+        }
+
+        die();
+    }
+
+    public function redirectToSignin(): never
+    {
+        $_SESSION['wanted_url'] = ltrim($_SERVER['REQUEST_URI'], '/');
+        header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . "signin", false);
+
+        if (AppConfig::$ENV === 'testing') {
+            throw new RenderTerminatedException();
+        }
+
+        die();
+    }
+
+}

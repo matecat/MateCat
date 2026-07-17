@@ -1,0 +1,32 @@
+[submodule "plugins/airbnb"]
+	path = plugins/airbnb
+	url = git@github.com:matecat/airbnb_plugin.git
+[submodule "plugins/aligner"]
+	path = plugins/aligner
+	url = git@github.com:matecat/aligner_plugin.git
+[submodule "plugins/translated"]
+	path = plugins/translated
+	url = git@github.com:matecat/translated_plugin.git
+[submodule "plugins/uber"]
+	path = plugins/uber
+	url = git@github.com:matecat/uber_plugin.git
+[submodule "docker"]
+	path = docker
+	url = git@github.com:matecat/matecat_docker_build.git
+[submodule "internal_scripts"]
+	path = internal_scripts
+	url = git@github.com:matecat/internal_scripts.git
+	ignore = untracked
+[submodule "plugins/familysearch"]
+	path = plugins/familysearch
+	url = git@github.com:matecat/familysearch_plugin.git
+[submodule "plugins/roblox"]
+        path = plugins/roblox
+        url = git@github.com:matecat/roblox_plugin.git
+
+[submodule "plugins/vite"]
+	path = plugins/vite
+	url = git@github.com:matecat/vite_plugin.git
+[submodule "MateCat-docs"]
+	path = MateCat-docs
+	url = git@github.com:matecat/MateCat-docs.git

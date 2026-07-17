@@ -1,0 +1,1389 @@
+<?php
+
+namespace Controller\API\V1;
+
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ScanDirectoryForConvertedFiles;
+use Controller\Traits\ValidatesDialectStrictTrait;
+use DomainException;
+use Exception;
+use InvalidArgumentException;
+use Matecat\Locales\LanguageDomains;
+use Matecat\Locales\Languages;
+use Model\Conversion\FilesConverter;
+use Model\Conversion\Upload;
+use Model\DataAccess\Database;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\BasicFeatureStruct;
+use Model\FeaturesBase\Hook\Event\Filter\EncodeInstructionsEvent;
+use Model\FeaturesBase\Hook\Event\Filter\FilterCreateProjectFeaturesEvent;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\Filters\FiltersConfigTemplateDao;
+use Model\Filters\FiltersConfigTemplateStruct;
+use Model\Jobs\JobsMetadataMarshaller;
+use Model\LQA\CategoryDao;
+use Model\LQA\ModelDao;
+use Model\LQA\ModelStruct;
+use Model\LQA\QAModelTemplate\QAModelTemplateDao;
+use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
+use Model\MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
+use Model\MTQE\PayableRate\MTQEPayableRateTemplateDao;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\MTQE\Templates\MTQEWorkflowTemplateDao;
+use Model\PayableRates\CustomPayableRateDao;
+use Model\PayableRates\CustomPayableRateStruct;
+use Model\ProjectCreation\ProjectManager;
+use Model\ProjectCreation\ProjectStructure;
+use Model\Projects\ProjectsMetadataMarshaller;
+use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
+use Model\Teams\TeamStruct;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserStruct;
+use Model\Xliff\XliffConfigTemplateDao;
+use Plugins\Features\ProjectCompletion;
+use ReflectionException;
+use RuntimeException;
+use TypeError;
+use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
+use Utils\Constants\Constants;
+use Utils\Constants\ProjectStatus;
+use Utils\Constants\TmKeyPermissions;
+use Utils\Engines\AbstractEngine;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\Lara;
+use Utils\Engines\Validators\Contracts\EngineValidatorObject;
+use Utils\Engines\Validators\DeepLEngineOptionsValidator;
+use Utils\Engines\Validators\IntentoEngineOptionsValidator;
+use Utils\Engines\Validators\LaraGlossaryValidator;
+use Utils\Engines\Validators\MMTGlossaryValidator;
+use Utils\Registry\AppConfig;
+use Utils\Subfiltering\SubfilteringOptionsValidator;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TMS\TMSService;
+use Utils\Tools\CatUtils;
+use Utils\Tools\Utils;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
+
+class NewController extends KleinController
+{
+
+    use ScanDirectoryForConvertedFiles;
+    use ValidatesDialectStrictTrait;
+
+    const int MAX_NUM_KEYS = 15;
+
+    protected function registerValidators(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+    }
+
+    /**
+     * @throws AuthenticationError
+     * @throws ReQueueException
+     * @throws ValidationError
+     * @throws NotFoundException
+     * @throws EndQueueException
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function create(): void
+    {
+        $this->featureSet->loadFromUserEmail($this->user->email ?? '');
+        $request = $this->validateTheRequest();
+        $fs = FilesStorageFactory::create();
+        $uploadFile = new Upload();
+
+        $stdResult = $uploadFile->uploadFiles($this->request->files()->all());
+
+        $arFiles = [];
+
+        foreach (get_object_vars($stdResult) as $input_value) {
+            $arFiles[] = $input_value->name;
+        }
+
+        if (empty($arFiles)) {
+            throw new InvalidArgumentException("No files were uploaded.");
+        }
+
+        $uploadTokenValue = $uploadFile->getDirUploadToken();
+        $uploadDir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
+        $errDir = AppConfig::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
+
+        $converter = new FilesConverter(
+            $arFiles,
+            $request['source_lang'],
+            $request['target_lang'],
+            $uploadDir,
+            $errDir,
+            $uploadTokenValue,
+            $request['icu_enabled'],
+            $request['segmentation_rule'],
+            $this->featureSet,
+            $request['filters_extraction_parameters'],
+            $request['legacy_icu'],
+        );
+
+        $converter->convertFiles();
+
+        $result = $converter->getResult();
+        $errorStatus = [];
+        if ($result->hasErrors()) {
+            $errorStatus = $result->getErrors();
+        }
+
+        // Upload errors handling
+        if (!empty($errorStatus)) {
+            $this->response->code(400);
+            $this->response->json(['status' => 'KO', 'errors' => $errorStatus]);
+
+            return;
+        }
+
+        $result = $result->getData();
+
+        $filesFound = $this->getFilesList(FilesStorageFactory::create(), $arFiles, $uploadDir);
+
+        $engine = EnginesFactory::getInstance($request['mt_engine'], $this->getDatabase(), AbstractEngine::class);
+
+        $projectStructure = $this->buildProjectStructure(
+            $request,
+            $filesFound,
+            $uploadFile->getDirUploadToken(),
+            $this->user,
+            $engine,
+        );
+
+        $projectManager = new ProjectManager($projectStructure, $this->getDatabase());
+        $projectManager->setTeam($request['team']);
+
+        $fs->moveFileFromUploadSessionToQueuePath($uploadFile->getDirUploadToken());
+
+        //reserve a project id from the sequence
+        $projectStructure->id_project = $this->getDatabase()->nextSequence(Database::SEQ_ID_PROJECT)[0];
+        $projectStructure->ppassword = Utils::randomString();
+
+        // flag to mark the project "from API"
+        $projectStructure->from_api = true;
+
+        ProjectQueue::sendProject($projectStructure);
+
+        $errors = $projectStructure->result['errors'];
+
+        if (!empty($errors)) {
+            throw new RuntimeException('Project Creation Failure');
+        }
+
+        $this->response->json([
+            'status' => 'OK',
+            'message' => 'Success',
+            'id_project' => $projectStructure->id_project,
+            'project_pass' => $projectStructure->ppassword,
+            'new_keys' => $request['new_keys'],
+            'analyze_url' => $projectManager->getAnalyzeURL()
+        ]);
+    }
+
+    /**
+     * Build a {@see ProjectStructure} from a validated request array.
+     *
+     * This method performs the pure mapping from the validated request data
+     * (produced by {@see validateTheRequest()}) to a ProjectStructure DTO.
+     * Side-effecting operations (database sequence, random password, queue
+     * submission, project sanitization) are intentionally left in
+     * {@see create()}.
+     *
+     * @param array<string, mixed> $request Validated request data from validateTheRequest()
+     * @param array<string, mixed> $filesFound Output of getFilesList() with 'arrayFiles' and 'arrayFilesMeta'
+     * @param string $uploadToken Upload directory token
+     * @param UserStruct $user Authenticated user
+     * @param AbstractEngine $engine MT engine instance (for getConfigurationParameters())
+     *
+     * @return ProjectStructure
+     * @throws TypeError
+     * @throws DomainException
+     */
+    protected function buildProjectStructure(
+        array $request,
+        array $filesFound,
+        string $uploadToken,
+        UserStruct $user,
+        AbstractEngine $engine,
+    ): ProjectStructure {
+        $projectStructure = new ProjectStructure();
+
+        $projectStructure->project_name = $request['project_name'];
+        $projectStructure->job_subject = $request['subject'];
+        $projectStructure->private_tm_key = $request['private_tm_key'];
+        $projectStructure->tm_prioritization = $request['tm_prioritization'];
+        $projectStructure->uploadToken = $uploadToken;
+        $projectStructure->array_files = $filesFound['arrayFiles'];
+        $projectStructure->array_files_meta = $filesFound['arrayFilesMeta'];
+        $projectStructure->source_language = $request['source_lang'];
+        $projectStructure->target_language = explode(',', $request['target_lang']);
+        $projectStructure->mt_engine = $request['mt_engine'];
+        $projectStructure->tms_engine = $request['tms_engine'];
+        $projectStructure->status = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure->owner = $user->email ?? '';
+        $projectStructure->metadata = $request['metadata'];
+        $projectStructure->public_tm_penalty = $request['public_tm_penalty'];
+        $projectStructure->pretranslate_100 = (int)!!$request['pretranslate_100'];
+        $projectStructure->pretranslate_101 = isset($request['pretranslate_101']) ? (int)$request['pretranslate_101'] : 1;
+
+        //default gets all public matches from TM
+        $projectStructure->only_private = (int)(isset($request['get_public_matches']) && !$request['get_public_matches']);
+
+        $projectStructure->user_ip = Utils::getRealIpAddr();
+        $projectStructure->HTTP_HOST = AppConfig::$HTTPHOST;
+        $projectStructure->due_date = (empty($request['due_date']) ? null : Utils::mysqlTimestamp(
+            $request['due_date']
+        ));
+        $projectStructure->instructions = $request['instructions'];
+        $projectStructure->userIsLogged = true;
+        $projectStructure->uid = $user->getUid();
+        $projectStructure->id_customer = $user->getEmail() ?? '';
+
+        $projectStructure->character_counter_mode = (!empty($request['character_counter_mode'])) ? $request['character_counter_mode'] : null;
+        $projectStructure->character_counter_count_tags = (!empty($request['character_counter_count_tags'])) ? $request['character_counter_count_tags'] : null;
+
+        $projectStructure->subfiltering_handlers = $request[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value];
+        $projectStructure->mandatory_issues = $request['mandatory_issues'] ?? null;
+
+        // MT Extra params
+        foreach ($engine->getConfigurationParameters() as $param) {
+            if ($request[$param] !== null) {
+                $projectStructure->{$param} = $request[$param];
+            }
+        }
+
+        // with the qa template id
+        if ($request['qaModelTemplate']) {
+            $projectStructure->qa_model_template = $request['qaModelTemplate']->getDecodedModel(new CategoryDao($this->getDatabase()));
+        }
+
+        if ($request['qaModel']) {
+            $projectStructure->qa_model = $request['qaModel']->getDecodedModel(new CategoryDao($this->getDatabase()));
+        }
+
+        if ($request['mt_qe_workflow_payable_rate']) {
+            $projectStructure->mt_qe_workflow_payable_rate = $request['mt_qe_workflow_payable_rate'];
+        }
+
+        if ($request['payableRateModelTemplate']) {
+            $projectStructure->payable_rate_model_id = $request['payableRateModelTemplate']->id;
+        }
+
+        if ($request['dialect_strict']) {
+            $projectStructure->dialect_strict = $request['dialect_strict'];
+        }
+
+        if ($request['filters_extraction_parameters']) {
+            $projectStructure->filters_extraction_parameters = $request['filters_extraction_parameters']->jsonSerialize();
+        }
+
+        if ($request['xliff_parameters']) {
+            $projectStructure->xliff_parameters = $request['xliff_parameters'];
+        }
+
+        if ($request['mt_evaluation']) {
+            $projectStructure->mt_evaluation = true;
+        }
+
+        //set features override
+        $projectStructure->project_features = $request['project_features'];
+
+        return $projectStructure;
+    }
+
+    /**
+     * @return array<string, mixed>
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
+     */
+    private function validateTheRequest(): array
+    {
+        $character_counter_count_tags = filter_var($this->request->param('character_counter_count_tags'), FILTER_VALIDATE_BOOLEAN);
+        $character_counter_mode = filter_var($this->request->param('character_counter_mode'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
+        $due_date = filter_var($this->request->param('due_date'), FILTER_SANITIZE_NUMBER_INT);
+        $dialect_strict = filter_var($this->request->param('dialect_strict'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $filters_extraction_parameters = filter_var($this->request->param('filters_extraction_parameters'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_NO_ENCODE_QUOTES]);
+        $filters_extraction_parameters_template_id = filter_var($this->request->param('filters_extraction_parameters_template_id'), FILTER_SANITIZE_NUMBER_INT);
+        $get_public_matches = ($this->request->param('get_public_matches') !== null) ? filter_var(
+            $this->request->param('get_public_matches'),
+            FILTER_VALIDATE_BOOLEAN
+        ) : true; // used to set the default value of get_public_matches to 1
+        $id_qa_model = filter_var($this->request->param('id_qa_model'), FILTER_SANITIZE_NUMBER_INT);
+        $id_qa_model_template = filter_var($this->request->param('id_qa_model_template'), FILTER_SANITIZE_NUMBER_INT);
+        $id_team = filter_var($this->request->param('id_team'), FILTER_SANITIZE_NUMBER_INT, ['flags' => FILTER_REQUIRE_SCALAR]);
+        $metadata = filter_var($this->request->param('metadata'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $mt_engine = filter_var(
+            $this->request->param('mt_engine'),
+            FILTER_SANITIZE_NUMBER_INT,
+            ['filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => ['default' => 1, 'min_range' => 0]]
+        );
+        $mt_evaluation = filter_var($this->request->param('mt_evaluation'), FILTER_VALIDATE_BOOLEAN);
+
+        $mt_quality_value_in_editor = filter_var($this->request->param('mt_quality_value_in_editor'), FILTER_SANITIZE_NUMBER_INT, [
+                'filter' => FILTER_VALIDATE_INT,
+                'flags' => FILTER_REQUIRE_SCALAR,
+                'options' => [
+                    'default' => 86,
+                    'min_range' => 76,
+                    'max_range' => 102
+                ]
+            ]
+        ); // used to set the absolute value of an MT match (previously fixed to 85)
+        $legacy_icu = filter_var($this->request->param('legacy_icu'), FILTER_VALIDATE_BOOLEAN);
+        $mt_qe_workflow_enable = filter_var($this->request->param('mt_qe_workflow_enable'), FILTER_VALIDATE_BOOLEAN);
+        $mt_qe_workflow_template_id = filter_var($this->request->param('mt_qe_workflow_qe_model_id'), FILTER_SANITIZE_NUMBER_INT) ?: null; // QE workflow parameters
+
+        $mt_qe_workflow_template_raw_parameters = filter_var($this->request->param('mt_qe_workflow_template_raw_parameters'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, [
+                'flags' => FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ]
+        ) ?: null;  // QE workflow parameters in raw string JSON format
+
+        $mt_qe_workflow_payable_rate_template_id = filter_var($this->request->param('mt_qe_workflow_payable_rate_template_id'), FILTER_SANITIZE_NUMBER_INT) ?: null; // QE workflow parameters
+        $payable_rate_template_id = filter_var($this->request->param('payable_rate_template_id'), FILTER_SANITIZE_NUMBER_INT);
+        $payable_rate_template_name = filter_var($this->request->param('payable_rate_template_name'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $public_tm_penalty = filter_var($this->request->param('public_tm_penalty'), FILTER_SANITIZE_NUMBER_INT);
+        $pretranslate_100 = filter_var($this->request->param('pretranslate_100'), FILTER_VALIDATE_BOOLEAN);
+        $pretranslate_101 = filter_var($this->request->param('pretranslate_101'), FILTER_VALIDATE_BOOLEAN);
+        $private_tm_key = filter_var($this->request->param('private_tm_key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $private_tm_key_json = filter_var($this->request->param('private_tm_key_json'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES]);
+        $project_completion = filter_var($this->request->param('project_completion'), FILTER_VALIDATE_BOOLEAN);
+        $qa_model_template_id = filter_var($this->request->param('qa_model_template_id'), FILTER_SANITIZE_NUMBER_INT);
+        $segmentation_rule = filter_var($this->request->param('segmentation_rule'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $source_lang = filter_var($this->request->param('source_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $subject = filter_var($this->request->param('subject'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $target_lang = filter_var($this->request->param('target_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $tms_engine = filter_var(
+            $this->request->param('tms_engine'),
+            FILTER_VALIDATE_INT,
+            [
+                'filter' => FILTER_VALIDATE_INT,
+                'flags' => FILTER_REQUIRE_SCALAR,
+                'options' => ['default' => 1, 'min_range' => 0]
+            ]
+        );
+        $xliff_parameters = filter_var($this->request->param('xliff_parameters'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_NO_ENCODE_QUOTES]);
+        $xliff_parameters_template_id = filter_var($this->request->param('xliff_parameters_template_id'), FILTER_SANITIZE_NUMBER_INT);
+
+        // MT SETTINGS
+        $enable_mt_analysis = filter_var($this->request->param('enable_mt_analysis', 'INVALID BOOL'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true;
+
+        // The UI ask for case-sensitive matching true/false.
+        // Negate the validated boolean because the MMT default flag is ignore_glossary_case.
+        // true becomes false, false (or invalid/missing) becomes true.
+        $mmt_ignore_glossary_case = filter_var($this->request->param('mmt_ignore_glossary_case'), FILTER_VALIDATE_BOOLEAN);
+
+        $mmt_glossaries = filter_var($this->request->param('mmt_glossaries'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $mmt_activate_context_analyzer = filter_var($this->request->param('mmt_activate_context_analyzer'), FILTER_VALIDATE_BOOLEAN);
+        $intento_routing = filter_var($this->request->param('intento_routing'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $intento_provider = filter_var($this->request->param('intento_provider'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $lara_glossaries = filter_var($this->request->param('lara_glossaries'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $lara_style = filter_var($this->request->param('lara_style'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $lara_style_guideline_id = filter_var($this->request->param('lara_style_guideline_id'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $deepl_id_glossary = filter_var($this->request->param('deepl_id_glossary'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $deepl_formality = filter_var($this->request->param('deepl_formality'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $deepl_engine_type = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $icu_enabled = filter_var($this->request->param('icu_enabled'), FILTER_VALIDATE_BOOLEAN);
+        $mandatory_issues = filter_var(
+            $this->request->param('mandatory_issues'),
+            FILTER_SANITIZE_FULL_SPECIAL_CHARS,
+            ['flags' => FILTER_FLAG_NO_ENCODE_QUOTES]
+        );
+
+        $instructions = filter_var(
+            $this->request->param('instructions'),
+            FILTER_CALLBACK,
+            [
+                'flags' => FILTER_REQUIRE_ARRAY,
+                'options' => function ($value) {
+                    $value = Utils::stripTagsPreservingHrefs($value);
+                    /**
+                     * Uber plugin callback
+                     */
+                    $encodeInstructionsEvent = new EncodeInstructionsEvent($value);
+                    $this->featureSet->dispatch($encodeInstructionsEvent);
+
+                    return $encodeInstructionsEvent->getValue();
+                }
+            ]
+        ) ?: null;
+
+        if ($this->request->files()->isEmpty()) {
+            throw new InvalidArgumentException("Missing file. Not Sent.");
+        }
+
+        $lang_handler = Languages::getInstance();
+
+        if (!empty($public_tm_penalty)) {
+            $public_tm_penalty = $this->validatePublicTMPenalty((int)$public_tm_penalty);
+        }
+
+        // Build project name from input or fallback:
+        // - If empty or invalid, uses current datetime; if exactly 1 file, derives from that filename.
+        // - Accepts an array of ['name' => <filePath>] items.
+        $project_name = CatUtils::sanitizeOrFallbackProjectName(
+            $this->request->param('project_name', ''),
+            Upload::getUniformGlobalFilesStructure($this->request->files()->all())->toArray()
+        );
+
+        $source_lang = $this->validateSourceLang($lang_handler, $source_lang);
+        $target_lang = $this->validateTargetLangs($lang_handler, $target_lang);
+        [$tms_engine, $engineStruct] = $this->validateEngines($tms_engine, (int)$mt_engine);
+        $subject = $this->validateSubject($subject);
+        $segmentation_rule = Constants::validateSegmentationRules($segmentation_rule ?: null);
+        [$private_tm_user, $private_tm_pass, $private_tm_key, $new_keys, $tm_prioritization] = $this->validateTmAndKeys(
+            $private_tm_key ?: '',
+            $private_tm_key_json ?: ''
+        );
+        $team = $this->validateTeam($id_team ?: null);
+        $qaModelTemplate = $this->validateQaModelTemplate($id_qa_model_template ?: null);
+        $payableRateModelTemplate = $this->validatePayableRateTemplate(
+            $payable_rate_template_name,
+            $payable_rate_template_id
+        );
+        $qaModel = $this->validateQaModel($id_qa_model ?: null);
+        $mmt_glossaries = $this->validateMMTGlossaries($mmt_glossaries);
+
+        (new DeepLEngineOptionsValidator())->validate(
+            EngineValidatorObject::fromArray(
+                [
+                    'engineStruct' => $engineStruct,
+                    'deepl_engine_type' => $deepl_engine_type,
+                    'deepl_formality' => $deepl_formality,
+                    'deepl_id_glossary' => $deepl_id_glossary
+                ]
+            )
+        );
+
+        (new IntentoEngineOptionsValidator())->validate(
+            EngineValidatorObject::fromArray(
+                [
+                    'engineStruct' => $engineStruct,
+                    'intento_provider' => $intento_provider,
+                    'intento_routing' => $intento_routing
+                ]
+            )
+        );
+
+        // validate Lara style
+        if ($engineStruct instanceof Lara) {
+            $lara_style = (!empty($lara_style)) ? Lara::validateLaraStyle($lara_style) : Lara::DEFAULT_STYLE;
+        }
+
+        $lara_glossaries = $this->validateLaraGlossaries($lara_glossaries);
+
+        $dialect_strict = $this->validateDialectStrictParam($lang_handler, $dialect_strict);
+        $mandatory_issues = $this->validateMandatoryIssues($mandatory_issues ?: null);
+        $filters_extraction_parameters = $this->validateFiltersExtractionParameters(
+            $filters_extraction_parameters,
+            $filters_extraction_parameters_template_id
+        );
+        $xliff_parameters = $this->validateXliffParameters($xliff_parameters, $xliff_parameters_template_id);
+        $metadata = $this->validateMetadataParam($metadata ?: null);
+        $character_counter_mode = $this->validateCharacterCounterMode($character_counter_mode ?: null);
+        $project_features = $this->appendFeaturesToProject((bool)$project_completion, (int)$mt_engine);
+
+        /**
+         * Subfiltering configuration (as string input):
+         *
+         * 1. String "none" or "" (empty string) string or String "null": subfiltering is disabled
+         * 2. '[]' (JSON string empty array) or parameter omitted: default subfiltering is applied.
+         * 3. JSON-encoded options (e.g., "[\"markup\",\"twig\"]"): custom subfiltering is applied using the provided handlers.
+         *
+         * Note:
+         * - The values above are expected as strings (e.g., "[]"), not native PHP types.
+         */
+        $subfiltering_handlers = SubfilteringOptionsValidator::validate(
+            $this->request->param(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, '[]')
+        ); // string value or default '[]'
+
+        if ($mt_qe_workflow_enable) {
+            // engines restrictions
+            if ($mt_engine <= 1) {
+                throw new InvalidArgumentException("MT Engine id $mt_engine is not supported for QE Workflows");
+            }
+
+            $metadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value] = $mt_qe_workflow_enable;
+            $metadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value] = $this->validateMTQEParametersOrDefault(
+                $mt_qe_workflow_template_id ? (int)$mt_qe_workflow_template_id : null,
+                $mt_qe_workflow_template_raw_parameters
+            ); // or default
+            // does not put this in the options, we do not want to save it in the DB as metadata
+            $mt_qe_PayableRate = $this->validateMTQEPayableRateBreakdownsOrDefault(
+                $mt_qe_workflow_payable_rate_template_id ? (int)$mt_qe_workflow_payable_rate_template_id : null
+            );
+            $mt_evaluation = true; // force mt_evaluation because it is the default for mt_qe_workflows
+        }
+
+        if (!empty($project_completion)) {
+            $metadata[ProjectsMetadataMarshaller::PROJECT_COMPLETION->value] = $project_completion;
+        }
+
+        if (!empty($segmentation_rule)) {
+            $metadata[ProjectsMetadataMarshaller::SEGMENTATION_RULE->value] = $segmentation_rule;
+        }
+
+        $metadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] = $mt_quality_value_in_editor;
+
+        if ($mt_evaluation) {
+            $metadata[ProjectsMetadataMarshaller::MT_EVALUATION->value] = true;
+        }
+
+        $metadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] = $icu_enabled;
+
+        return [
+            'project_name' => $project_name,
+            'source_lang' => $source_lang,
+            'target_lang' => $target_lang,
+            'subject' => $subject,
+            'public_tm_penalty' => $public_tm_penalty,
+            'pretranslate_100' => $pretranslate_100,
+            'pretranslate_101' => $pretranslate_101,
+            'id_team' => $id_team,
+            'team' => $team,
+            'enable_mt_analysis' => $enable_mt_analysis,
+            'mmt_ignore_glossary_case' => $mmt_ignore_glossary_case ?? null,
+            'mmt_glossaries' => $mmt_glossaries ?? null,
+            'mmt_activate_context_analyzer' => $mmt_activate_context_analyzer ?? null,
+            'intento_routing' => $intento_routing ?? null,
+            'intento_provider' => $intento_provider ?? null,
+            'lara_glossaries' => $lara_glossaries ?? null,
+            'lara_style' => $lara_style ?? null,
+            'lara_style_guideline_id' => $lara_style_guideline_id,
+            'deepl_id_glossary' => $deepl_id_glossary ?? null,
+            'deepl_formality' => $deepl_formality ?? null,
+            'deepl_engine_type' => $deepl_engine_type ?? null,
+            'project_completion' => $project_completion,
+            'get_public_matches' => $get_public_matches,
+            'dialect_strict' => $dialect_strict,
+            'filters_extraction_parameters' => $filters_extraction_parameters,
+            'xliff_parameters' => $xliff_parameters,
+            'filters_extraction_parameters_template_id' => $filters_extraction_parameters_template_id,
+            'qa_model_template_id' => $qa_model_template_id,
+            'payable_rate_template_id' => $payable_rate_template_id,
+            'tms_engine' => $tms_engine,
+            'mt_engine' => $mt_engine,
+            'private_tm_key' => $private_tm_key,
+            'private_tm_user' => $private_tm_user,
+            'private_tm_pass' => $private_tm_pass,
+            'tm_prioritization' => $tm_prioritization,
+            'new_keys' => $new_keys,
+            'due_date' => $due_date,
+            'id_qa_model' => $id_qa_model,
+            'qaModel' => $qaModel,
+            'metadata' => $metadata,
+            'segmentation_rule' => $segmentation_rule,
+            'id_qa_model_template' => $id_qa_model_template,
+            'qaModelTemplate' => $qaModelTemplate,
+            'payableRateModelTemplate' => $payableRateModelTemplate,
+            'instructions' => $instructions,
+            'project_features' => $project_features,
+            'mt_evaluation' => $mt_evaluation,
+            'character_counter_count_tags' => $character_counter_count_tags,
+            'character_counter_mode' => $character_counter_mode,
+            'mt_qe_workflow_payable_rate' => $mt_qe_PayableRate ?? null,
+            'legacy_icu' => $legacy_icu,
+            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => json_encode($subfiltering_handlers),
+            'icu_enabled' => $icu_enabled,
+            'mandatory_issues' => $mandatory_issues,
+        ];
+    }
+
+    /**
+     * Expects the metadata param to be a JSON formatted string and tries to convert it
+     * in an array.
+     * JSON string is expected to be a flat key value, this is enforced padding 1 to JSON
+     * conversion depth param.
+     *
+     *
+     * @return array<string, mixed>
+     * @throws Exception
+     */
+    private function validateMetadataParam(?string $metadata = null): array
+    {
+        if (!empty($metadata)) {
+            if (strlen($metadata) > 2048) {
+                throw new InvalidArgumentException('metadata string is too long');
+            }
+
+            $metadata = html_entity_decode($metadata);
+            $validatorObject = new JSONValidatorObject($metadata);
+            $validator = new JSONValidator('project_metadata.json');
+            $validator->validate($validatorObject);
+
+            if (!$validator->isValid()) {
+                throw new InvalidArgumentException(
+                    'Invalid Metadata. ' . implode(
+                        "",
+                        array_map(
+                            function ($exception) {
+                                return $exception->getMessage();
+                            },
+                            $validator->getExceptions()
+                        )
+                    )
+                );
+            }
+
+            $depth = 2;
+            $parsedMetadata = json_decode($metadata, true, $depth);
+
+            $metadata = is_array($parsedMetadata) ? $parsedMetadata : [];
+        } else {
+            $metadata = [];
+        }
+
+        // new raw counter model
+        $metadata[ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value] = ProjectsMetadataMarshaller::WORD_COUNT_RAW->value;
+
+        return $metadata;
+    }
+
+    /**
+     * @param string|null $character_counter_mode
+     *
+     * @return string|null
+     * @throws InvalidArgumentException
+     */
+    private function validateCharacterCounterMode(?string $character_counter_mode = null): ?string
+    {
+        if (empty($character_counter_mode)) {
+            return null;
+        }
+
+        $allowedModes = [
+            'google_ads',
+            'exclude_cjk',
+            'all_one'
+        ];
+
+        if (!in_array($character_counter_mode, $allowedModes)) {
+            throw new InvalidArgumentException(
+                "Invalid character counter mode. Allowed values: [google_ads, exclude_cjk, all_one]", -23
+            );
+        }
+
+        return $character_counter_mode;
+    }
+
+    /**
+     * @param int $tms_engine
+     * @param int $mt_engine
+     *
+     * @return array<int, mixed>
+     * @throws Exception
+     * @throws TypeError
+     */
+    private function validateEngines(int $tms_engine, int $mt_engine): array
+    {
+        if ($tms_engine > 1) {
+            throw new InvalidArgumentException("Invalid TM Engine.", -21);
+        }
+
+        $engineStruct = null;
+        if ($mt_engine > 1) {
+            if (!$this->userIsLogged) {
+                throw new InvalidArgumentException("Invalid MT Engine.", -2);
+            }
+
+            try {
+                $uid = $this->user->uid ?? throw new TypeError('User not authenticated');
+                $engineStruct = EnginesFactory::getInstanceByIdAndUser($mt_engine, $uid, $this->getDatabase(), AbstractEngine::class);
+            } catch (Exception $exception) {
+                throw new InvalidArgumentException($exception->getMessage(), -2);
+            }
+        }
+
+        return [$tms_engine, $engineStruct];
+    }
+
+    /**
+     * @param string|false|null $subject
+     *
+     * @return string
+     * @throws InvalidArgumentException
+     */
+    private function validateSubject(string|false|null $subject): string
+    {
+        $langDomains = LanguageDomains::getInstance();
+        $subjectMap = $langDomains::getEnabledHashMap();
+
+        $subject = (!empty($subject)) ? $subject : 'general';
+
+        if (empty($subjectMap[$subject])) {
+            throw new InvalidArgumentException("Subject not allowed: " . $subject, -5);
+        }
+
+        return $subject;
+    }
+
+    /**
+     * @param int|null $public_tm_penalty
+     *
+     * @return int|null
+     * @throws InvalidArgumentException
+     */
+    private function validatePublicTMPenalty(?int $public_tm_penalty = null): ?int
+    {
+        if ($public_tm_penalty < 0 || $public_tm_penalty > 100) {
+            throw new InvalidArgumentException("Invalid public_tm_penalty value (must be between 0 and 100)", -6);
+        }
+
+        return $public_tm_penalty;
+    }
+
+    /**
+     * @param Languages $lang_handler
+     * @param string|false|null $source_lang
+     *
+     * @return string
+     * @throws InvalidArgumentException
+     */
+    private function validateSourceLang(Languages $lang_handler, string|false|null $source_lang): string
+    {
+        try {
+            return $lang_handler->validateLanguage($source_lang ?: null);
+        } catch (Exception) {
+            throw new InvalidArgumentException("Missing source language.", -3);
+        }
+    }
+
+    /**
+     * @param Languages $lang_handler
+     * @param string|false|null $target_lang
+     *
+     * @return string
+     * @throws InvalidArgumentException
+     */
+    private function validateTargetLangs(Languages $lang_handler, string|false|null $target_lang): string
+    {
+        $targets = explode(',', $target_lang ?: '');
+        $targets = array_map('trim', $targets);
+        $targets = array_unique($targets);
+
+        if (empty($targets)) {
+            throw new InvalidArgumentException("Missing target language.", -4);
+        }
+
+        try {
+            $normalizedTargets = array_map(
+                function ($lang) use ($lang_handler) {
+                    return $lang_handler->validateLanguage($lang);
+                },
+                $targets
+            );
+        } catch (Exception $e) {
+            throw new InvalidArgumentException($e->getMessage(), -4);
+        }
+
+        return implode(',', $normalizedTargets);
+    }
+
+    /**
+     * @param bool $project_completion
+     * @param int $mt_engine
+     *
+     * @return array<int|string, mixed>
+     * @throws Exception
+     */
+    private function appendFeaturesToProject(bool $project_completion, int $mt_engine): array
+    {
+        $projectFeatures = [];
+
+        if ($project_completion) {
+            $feature = new BasicFeatureStruct();
+            $feature->feature_code = ProjectCompletion::FEATURE_CODE;
+            $projectFeatures[$feature->feature_code] = $feature;
+        }
+
+        $filterCreateProjectFeaturesEvent = new FilterCreateProjectFeaturesEvent($projectFeatures, $this);
+        $this->featureSet->dispatch($filterCreateProjectFeaturesEvent);
+
+        return $filterCreateProjectFeaturesEvent->getProjectFeatures();
+    }
+
+    /**
+     * @param string $private_tm_key
+     * @param string $private_tm_key_json
+     *
+     * @return array<int, mixed>
+     * @throws Exception
+     * @throws \TypeError
+     */
+    protected function validateTmAndKeys(string $private_tm_key = "", string $private_tm_key_json = ""): array
+    {
+        $new_keys = [];
+        $private_tm_user = null;
+        $private_tm_pass = null;
+        $tm_prioritization = null;
+
+        try {
+            if (!empty($private_tm_key_json)) {
+                // first check if `private_tm_key_json` is a valid JSON
+                if (!json_validate($private_tm_key_json)) {
+                    throw new Exception("private_tm_key_json is not a valid JSON");
+                }
+
+                $validatorObject = new JSONValidatorObject($private_tm_key_json);
+                $validator = new JSONValidator('private_tm_key_json.json', true);
+                /** @var JSONValidatorObject $jsonObject */
+                $jsonObject = $validator->validate($validatorObject);
+
+                $tm_prioritization = $jsonObject->decode()->tm_prioritization;
+
+                $private_tm_key = array_map(
+                    function ($item) {
+                        return [
+                            'key' => $item->key,
+                            'r' => $item->read,
+                            'w' => $item->write,
+                            'penalty' => $item->penalty ?? 0,
+                        ];
+                    },
+                    $jsonObject->decode()->keys
+                );
+            } else {
+                /**
+                 * ----------------------------------
+                 * Note 2021-05-28
+                 * ----------------------------------
+                 *
+                 * We trim every space private_tm_key
+                 *  to avoid misspelling errors
+                 *
+                 */
+                $private_tm_key = preg_replace("/\s+/", "", $private_tm_key) ?? '';
+                $private_tm_key = array_map(
+                    [$this, 'parseTmKeyInput'],
+                    explode(",", $private_tm_key)
+                );
+            }
+        } catch (Exception $e) {
+            throw new InvalidArgumentException($e->getMessage(), -6);
+        }
+
+        if (count($private_tm_key) > self::MAX_NUM_KEYS) {
+            throw new Exception("Too much keys provided. Max number of keys is " . self::MAX_NUM_KEYS, -2);
+        }
+
+        $private_tm_key = array_values(array_filter($private_tm_key));
+
+        //If a TMX file has been uploaded and no key was provided, create a new key.
+        if (empty($private_tm_key)) {
+            $uniformedFileObject = Upload::getUniformGlobalFilesStructure($this->request->files()->all());
+            foreach (get_object_vars($uniformedFileObject) as $_fileinfo) {
+                $pathinfo = AbstractFilesStorage::pathinfo_fix($_fileinfo->name);
+                if (is_array($pathinfo) && ($pathinfo['extension'] ?? '') === 'tmx') {
+                    $private_tm_key[] = ['key' => 'new'];
+                    break;
+                }
+            }
+        }
+
+        //remove all empty entries
+        foreach ($private_tm_key as $__key_idx => $tm_key) {
+            //from api a key is sent and the value is 'new'
+            if ($tm_key['key'] == 'new') {
+                try {
+                    $APIKeySrv = new TMSService($this->getDatabase());
+                    $newUser = $APIKeySrv->createMyMemoryKey();
+
+                    $private_tm_user = $newUser->id;
+                    $private_tm_pass = $newUser->pass;
+
+                    $private_tm_key[$__key_idx] =
+                        [
+                            'key' => $newUser->key,
+                            'name' => 'New resource created for project {{pid}}',
+                            'penalty' => $tm_key['penalty'] ?? 0,
+                            'r' => $tm_key['r'],
+                            'w' => $tm_key['w']
+                        ];
+                    $new_keys[] = $newUser->key;
+                } catch (Exception $e) {
+                    throw new Exception($e->getMessage(), -1);
+                }
+            } //if a string is sent, transform it into a valid array
+            elseif (!empty($tm_key)) {
+                $uid = $this->user->uid;
+
+                $this_tm_key = [
+                    'key' => $tm_key['key'],
+                    'name' => null,
+                    'penalty' => $tm_key['penalty'] ?? 0,
+                    'r' => $tm_key['r'],
+                    'w' => $tm_key['w']
+                ];
+
+                /**
+                 * Get the key description/name from the user keyring
+                 */
+                if ($uid) {
+                    $mkDao = new MemoryKeyDao($this->getDatabase());
+
+                    $keyRing = $mkDao->read(
+                        (new MemoryKeyStruct([
+                            'uid' => $uid,
+                            'tm_key' => new TmKeyStruct($this_tm_key)
+                        ])
+                        )
+                    );
+
+                    if (count($keyRing) > 0) {
+                        $this_tm_key['name'] = $keyRing[0]->tm_key?->name;
+                    }
+                }
+
+                $private_tm_key[$__key_idx] = $this_tm_key;
+            }
+
+            $private_tm_key[$__key_idx] = $this->sanitizeTmKeyArr($private_tm_key[$__key_idx]);
+        }
+
+        return [
+            $private_tm_user,
+            $private_tm_pass,
+            $private_tm_key,
+            $new_keys,
+            $tm_prioritization,
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $elem
+     *
+     * @return array<string, mixed>
+     * @throws \DomainException
+     * @throws \TypeError
+     */
+    private static function sanitizeTmKeyArr(array $elem): array
+    {
+        $element = new TmKeyStruct($elem);
+        $element->complete_format = true;
+        $elem = TmKeyManager::sanitize($element);
+
+        return $elem->toArray();
+    }
+
+    /**
+     * @param string|false|null $id_team
+     *
+     * @return TeamStruct
+     *
+     * @throws Exception
+     */
+    private function validateTeam(string|false|null $id_team = null): TeamStruct
+    {
+        if (!empty($id_team)) {
+            $dao = new MembershipDao($this->getDatabase());
+            $org = $dao->findTeamByIdAndUser((int)$id_team, $this->user);
+
+            if (!$org) {
+                throw new Exception('Team and user membership does not match', -1);
+            }
+
+            return $org;
+        }
+
+        return $this->user->getPersonalTeam(new TeamDao($this->getDatabase()));
+    }
+
+    /**
+     * @param null $id_qa_model_template
+     *
+     * @return QAModelTemplateStruct|null
+     * @throws Exception
+     * @throws TypeError
+     */
+    private function validateQaModelTemplate(string|false|null $id_qa_model_template = null): ?QAModelTemplateStruct
+    {
+        if (!empty($id_qa_model_template)) {
+            $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
+            $qaModelTemplate = (new QAModelTemplateDao($this->getDatabase()))->get([
+                'id' => (int)$id_qa_model_template,
+                'uid' => $uid
+            ]);
+
+            // check if qa_model template exists
+            if (null === $qaModelTemplate) {
+                throw new InvalidArgumentException(
+                    'This QA Model template does not exists or does not belongs to the logged in user'
+                );
+            }
+
+            return $qaModelTemplate;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string|false|null $payable_rate_template_name
+     * @param string|false|null $payable_rate_template_id
+     *
+     * @return CustomPayableRateStruct|null
+     * @throws Exception
+     * @throws TypeError
+     */
+    private function validatePayableRateTemplate(
+        string|false|null $payable_rate_template_name = null,
+        string|false|null $payable_rate_template_id = null
+    ): ?CustomPayableRateStruct {
+        $payableRateModelTemplate = null;
+
+        if (!empty($payable_rate_template_name)) {
+            if (empty($payable_rate_template_id)) {
+                throw new InvalidArgumentException('`payable_rate_template_id` param is missing');
+            }
+        }
+
+        if (!empty($payable_rate_template_id)) {
+            if (empty($payable_rate_template_name)) {
+                throw new InvalidArgumentException('`payable_rate_template_name` param is missing');
+            }
+        }
+
+        if (!empty($payable_rate_template_name) and !empty($payable_rate_template_id)) {
+            $userId = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
+            $payableRateModelTemplate = (new CustomPayableRateDao($this->getDatabase()))->getByIdAndUser((int)$payable_rate_template_id, $userId);
+
+            if (null === $payableRateModelTemplate) {
+                throw new InvalidArgumentException('Payable rate model id not valid');
+            }
+
+            if ($payableRateModelTemplate->name !== $payable_rate_template_name) {
+                throw new InvalidArgumentException('Payable rate model name not matching');
+            }
+        }
+
+        return $payableRateModelTemplate;
+    }
+
+    /**
+     * Checks if id_qa_model is valid
+     *
+     * @param null $id_qa_model
+     *
+     * @return ModelStruct|null
+     * @throws Exception
+     */
+    private function validateQaModel(string|false|null $id_qa_model = null): ?ModelStruct
+    {
+        if (!empty($id_qa_model)) {
+            $qaModel = (new ModelDao($this->getDatabase()))->fetchById((int)$id_qa_model, ModelStruct::class);
+
+            // check if qa_model exists
+            if (null === $qaModel) {
+                throw new InvalidArgumentException('This QA Model does not exists');
+            }
+
+            // check featureSet
+            $qaModelLabel = strtolower($qaModel->label);
+            $featureSetCodes = $this->getFeatureSet()->getCodes();
+
+            if ($qaModelLabel !== 'default' and !in_array($qaModelLabel, $featureSetCodes)) {
+                throw new InvalidArgumentException('This QA Model does not belong to the authenticated user');
+            }
+
+            return $qaModel;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string|false|null $mmt_glossaries
+     *
+     * @return string|null
+     * @throws InvalidArgumentException
+     */
+    private function validateMMTGlossaries(string|false|null $mmt_glossaries = null): ?string
+    {
+        if (!empty($mmt_glossaries)) {
+            try {
+                $mmtGlossaries = html_entity_decode($mmt_glossaries);
+
+                (new MMTGlossaryValidator)->validate(
+                    EngineValidatorObject::fromArray([
+                        'glossaryString' => $mmtGlossaries,
+                    ])
+                );
+
+                return $mmtGlossaries;
+            } catch (Exception $exception) {
+                throw new InvalidArgumentException($exception->getMessage(), -6);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Validate `lara_glossaries` string
+     *
+     * @param string|false|null $lara_glossaries
+     *
+     * @return string|null
+     * @throws InvalidArgumentException
+     */
+    private function validateLaraGlossaries(string|false|null $lara_glossaries = null): ?string
+    {
+        if (!empty($lara_glossaries)) {
+            try {
+                $laraGlossaries = html_entity_decode($lara_glossaries);
+
+                (new LaraGlossaryValidator)->validate(
+                    EngineValidatorObject::fromArray([
+                        'glossaryString' => $laraGlossaries,
+                    ])
+                );
+
+                return $laraGlossaries;
+            } catch (Exception $exception) {
+                throw new InvalidArgumentException($exception->getMessage(), -6);
+            }
+        }
+
+        return null;
+    }
+
+
+    /**
+     * @param string|false|null $filters_extraction_parameters
+     * @param string|false|null $filters_extraction_parameters_template_id
+     *
+     * @return FiltersConfigTemplateStruct|null
+     * @throws Exception
+     * @throws TypeError
+     */
+    private function validateFiltersExtractionParameters(
+        string|false|null $filters_extraction_parameters = null,
+        string|false|null $filters_extraction_parameters_template_id = null
+    ): ?FiltersConfigTemplateStruct {
+        if (!empty($filters_extraction_parameters)) {
+            $validatorObject = new JSONValidatorObject($filters_extraction_parameters);
+            $validator = new JSONValidator('filters_extraction_parameters.json', true);
+            $validator->validate($validatorObject);
+
+            $config = new FiltersConfigTemplateStruct();
+            $config->hydrateAllDto($validatorObject->getValue(true));
+
+            return $config;
+        }
+
+        if (!empty($filters_extraction_parameters_template_id)) {
+            $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
+            $filtersTemplate = (new FiltersConfigTemplateDao($this->getDatabase()))->getByIdAndUser(
+                (int)$filters_extraction_parameters_template_id,
+                $uid
+            );
+
+            if ($filtersTemplate === null) {
+                throw new InvalidArgumentException("filters_extraction_parameters_template_id not valid");
+            }
+
+            return $filtersTemplate;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param int|null $mt_qe_workflow_template_id
+     * @param string|null $mt_qe_workflow_template_raw_parameters
+     *
+     * @return MTQEWorkflowParams
+     * @throws Exception
+     * @throws TypeError
+     */
+    private function validateMTQEParametersOrDefault(
+        ?int $mt_qe_workflow_template_id = null,
+        ?string $mt_qe_workflow_template_raw_parameters = null
+    ): MTQEWorkflowParams {
+        if (!empty($mt_qe_workflow_template_raw_parameters)) {
+            // first check if `mt_qe_workflow_template_raw_parameters` is a valid JSON
+            if (!json_validate($mt_qe_workflow_template_raw_parameters)) {
+                throw new InvalidArgumentException("mt_qe_workflow_template_raw_parameters is not a valid JSON");
+            }
+
+            $validatorObject = new JSONValidatorObject($mt_qe_workflow_template_raw_parameters);
+            $validator = new JSONValidator('mt_qe_workflow_params.json', true);
+            $jsonObject = $validator->validate($validatorObject);
+
+            /** @var JSONValidatorObject $jsonObject */
+            return new MTQEWorkflowParams((array)($jsonObject->decode()));
+        } elseif (!empty($mt_qe_workflow_template_id)) {
+            $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
+            $mtQeWorkflowTemplate = (new MTQEWorkflowTemplateDao($this->getDatabase()))->getByIdAndUser(
+                $mt_qe_workflow_template_id,
+                $uid
+            );
+
+            if ($mtQeWorkflowTemplate === null) {
+                throw new InvalidArgumentException("mt_qe_workflow_template_id not valid");
+            }
+
+            return $mtQeWorkflowTemplate->params ?? new MTQEWorkflowParams();
+        } else {
+            return new MTQEWorkflowParams();
+        }
+    }
+
+    /**
+     * @param int|null $mt_qe_workflow_payable_rate_template_id
+     *
+     * @return MTQEPayableRateBreakdowns
+     * @throws Exception
+     * @throws TypeError
+     */
+    private function validateMTQEPayableRateBreakdownsOrDefault(?int $mt_qe_workflow_payable_rate_template_id = null
+    ): MTQEPayableRateBreakdowns {
+        if (!empty($mt_qe_workflow_payable_rate_template_id)) {
+            $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
+            $mtQeWorkflowTemplate = (new MTQEPayableRateTemplateDao($this->getDatabase()))->getByIdAndUser(
+                $mt_qe_workflow_payable_rate_template_id,
+                $uid
+            );
+
+            if ($mtQeWorkflowTemplate === null) {
+                throw new InvalidArgumentException("mt_qe_workflow_payable_rate_template_id not valid");
+            }
+
+            return $mtQeWorkflowTemplate->breakdowns ?? new MTQEPayableRateBreakdowns();
+        }
+
+        return new MTQEPayableRateBreakdowns;
+    }
+
+    /**
+     * @param string|false|null $xliff_parameters
+     * @param string|false|null $xliff_parameters_template_id
+     *
+     * @return mixed
+     * @throws Exception
+     * @throws TypeError
+     */
+    private function validateXliffParameters(string|false|null $xliff_parameters = null, string|false|null $xliff_parameters_template_id = null): mixed
+    {
+        if (!empty($xliff_parameters)) {
+            // first check if `xliff_parameters` is a valid JSON
+            if (!json_validate($xliff_parameters)) {
+                throw new InvalidArgumentException("xliff_parameters is not a valid JSON");
+            }
+
+            $validatorObject = new JSONValidatorObject($xliff_parameters);
+            $validator = new JSONValidator('xliff_parameters_rules_content.json', true);
+            $validator->validate($validatorObject);
+
+            return $validatorObject->getValue(true);
+        }
+
+        if (!empty($xliff_parameters_template_id)) {
+            $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
+            $xliffConfigTemplate = (new XliffConfigTemplateDao($this->getDatabase()))->getByIdAndUser(
+                (int)$xliff_parameters_template_id,
+                $uid
+            );
+
+            if ($xliffConfigTemplate === null) {
+                throw new InvalidArgumentException("xliff_parameters_template_id not valid");
+            }
+
+            if ($xliffConfigTemplate->rules === null) {
+                throw new InvalidArgumentException("xliff_parameters_template_id has no rules");
+            }
+
+            return $xliffConfigTemplate->rules->getArrayCopy();
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string|null $mandatory_issues
+     *
+     * @return array<string>|null
+     * @throws InvalidArgumentException
+     */
+    private function validateMandatoryIssues(?string $mandatory_issues): ?array
+    {
+        if (empty($mandatory_issues)) {
+            return null;
+        }
+
+        $decoded = json_decode($mandatory_issues, true);
+
+        if (!is_array($decoded)) {
+            throw new InvalidArgumentException("mandatory_issues must be a valid JSON array");
+        }
+
+        foreach ($decoded as $issue) {
+            if (!is_string($issue) || !preg_match('/^r\d+$/', $issue)) {
+                throw new InvalidArgumentException(
+                    "Invalid mandatory_issues value: \"$issue\". Allowed values: r1, r2, ..."
+                );
+            }
+        }
+
+        return $decoded;
+    }
+
+    /**
+     * @param string $tmKeyString
+     *
+     * @return array<string, mixed>|null
+     * @throws Exception
+     */
+    private function parseTmKeyInput(string $tmKeyString): ?array
+    {
+        $tmKeyString = trim($tmKeyString);
+        $tmKeyInfo = explode(":", $tmKeyString);
+        $read = true;
+        $write = true;
+
+        $permissionString = $tmKeyInfo[1] ?? null;
+
+        //If the key is not set, return null. It will be filtered in the next lines.
+        if (empty($tmKeyInfo[0])) {
+            return null;
+        } //if permissions are set, check if they are allowed or not and eventually set permissions
+
+        //permission string check
+        switch ($permissionString) {
+            case 'r':
+                $write = false;
+                break;
+            case 'w':
+                $read = false;
+                break;
+            case 'rw':
+            case ''  :
+            case null:
+                break;
+            //permission string value is not allowed
+            default:
+                $allowed_permissions = implode(", ", TmKeyPermissions::$_accepted_grants);
+                throw new Exception("Invalid permission modifier string. Allowed: <empty>, $allowed_permissions");
+        }
+
+        return [
+            'key' => $tmKeyInfo[0],
+            'r' => $read,
+            'w' => $write,
+        ];
+    }
+
+}

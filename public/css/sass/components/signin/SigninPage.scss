@@ -1,0 +1,47 @@
+@use '../../commons/colors';
+
+.signin-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 7;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(6px);
+  .signin-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    max-width: 712px;
+  }
+}
+.signin-bg {
+  position: fixed;
+  top: 60px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: url("/public/img/signin_background_big.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.onboarding-wrapper {
+  border-radius: 16px;
+  background-color: colors.$white;
+
+  fieldset {
+    padding: 0;
+    border: none;
+  }
+
+  button.link-underline {
+    text-decoration: underline;
+  }
+}

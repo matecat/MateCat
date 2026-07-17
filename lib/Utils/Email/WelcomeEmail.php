@@ -6,65 +6,79 @@
  * Time: 15:23
  */
 
-namespace Email;
+namespace Utils\Email;
 
 
-use Users_UserStruct;
+use Exception;
+use Model\Users\UserStruct;
 
 class WelcomeEmail extends AbstractEmail
 {
 
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
-    protected $user ;
+    protected UserStruct $user;
 
-    protected $title = 'Welcome to MateCat!' ;
+    protected ?string $title = 'Welcome to Matecat! Get Started with Your First Project Today';
 
-    public function __construct( Users_UserStruct $user ) {
-        $this->user = $user ;
+    public function __construct(UserStruct $user)
+    {
+        $this->user = $user;
 
         $this->_setLayout('skeleton.html');
         $this->_setTemplate('Signup/welcome_content.html');
     }
 
-    protected function _getTemplateVariables()
+    /**
+     * @return array<string, mixed>
+     */
+    protected function _getTemplateVariables(): array
     {
-        return array(
-            'user'           => $this->user->toArray()
-        );
+        return [
+            'user' => $this->user->toArray()
+        ];
     }
 
-    protected function _getLayoutVariables($messageBody = null)
+    /**
+     * @return array<string, mixed>
+     */
+    protected function _getLayoutVariables($messageBody = null): array
     {
-        $vars = parent::_getLayoutVariables() ;
-        $vars['title'] = $this->title ;
-        $vars['closingLine'] = 'Join the Evolution!';
+        $vars = parent::_getLayoutVariables();
+        $vars['title'] = $this->title;
+        $vars['closingLine'] = 'Happy translating!';
 
-        return $vars ;
+        return $vars;
     }
 
-    public function send() {
-        $recipient  = array( $this->user->email, $this->user->fullName() );
+    /**
+     * @throws Exception
+     */
+    public function send(): void
+    {
+        $recipient = [$this->user->email, $this->user->fullName()];
 
-        $this->doSend( $recipient, $this->title,
+        $this->doSend(
+            $recipient,
+            $this->title,
             $this->_buildHTMLMessage(),
-            $this->_buildTxtMessage( $this->_buildMessageContent() )
+            $this->_buildTxtMessage($this->_buildMessageContent())
         );
-
     }
 
-    protected function _getDefaultMailConf() {
+    /**
+     * @return array<string, mixed>
+     */
+    protected function _getDefaultMailConf(): array
+    {
         $mailConf = parent::_getDefaultMailConf();
 
-        $mailConf[ 'from' ]       = 'noreply@matecat.com';
-        $mailConf[ 'sender' ]     = 'noreply@matecat.com';
-        $mailConf[ 'returnPath' ] = 'noreply@matecat.com';
+        $mailConf['from'] = 'noreply@matecat.com';
+        $mailConf['sender'] = 'noreply@matecat.com';
+        $mailConf['returnPath'] = 'noreply@matecat.com';
 
-        return $mailConf ;
+        return $mailConf;
     }
-
-
-
 
 }

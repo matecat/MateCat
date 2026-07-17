@@ -6,71 +6,96 @@
  * Time: 10:45
  */
 
-namespace Teams;
+namespace Model\Teams;
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use DomainException;
+use Exception;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+use Model\Users\MetadataStruct;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
+use ReflectionException;
+use RuntimeException;
 
-class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
-    public $id;
-    public $id_team;
-    public $uid;
-    public $is_admin;
-
-    /**
-     * @var \Users_UserStruct
-     */
-    private $user;
-
-    /**
-     * @var TeamStruct
-     */
-    private $team;
-
+    public ?int $id = null;
+    public int $id_team;
+    public ?int $uid = null; // this shouldn't be null, but it is in the database (old records)
+    public ?bool $is_admin = null; // this shouldn't be null, but this struct is used also for partial records
 
     /**
-     * @var
+     * @var UserStruct|null
      */
-    private $user_metadata = [];
+    private ?UserStruct $user = null;
+
+    /**
+     * @var TeamStruct|null
+     */
+    private ?TeamStruct $team = null;
+
+
+    /** @var list<MetadataStruct> */
+    private array $user_metadata = [];
 
     /**
      * @var int
      */
-    private $projects = 0;
+    private int $projects = 0;
 
-    public function setUser( \Users_UserStruct $user ) {
+    public function setUser(UserStruct $user): void
+    {
         $this->user = $user;
     }
 
-    public function setUserMetadata( $user_metadata ) {
-        if ( $user_metadata == null ) {
+    /** @param list<MetadataStruct> $user_metadata */
+    public function setUserMetadata(array $user_metadata): void
+    {
+        if ($user_metadata == null) {
             $user_metadata = [];
         }
         $this->user_metadata = $user_metadata;
     }
 
-    public function getUserMetadata() {
+    /** @return list<MetadataStruct> */
+    public function getUserMetadata(): array
+    {
         return $this->user_metadata;
     }
 
-    /**
-     * @return \Users_UserStruct|null
-     */
-    public function getUser() {
-        if ( is_null( $this->user ) ) {
-            $this->user = ( new \Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $this->uid );
+     /**
+      * @return UserStruct
+      * @throws ReflectionException
+      * @throws RuntimeException
+      * @throws Exception
+      */
+    public function getUser(UserDao $userDao): UserStruct
+    {
+        if (is_null($this->user)) {
+            if ($this->uid === null) {
+                throw new RuntimeException('Membership user uid must be set before loading user');
+            }
+
+            $this->user = $userDao->setCacheTTL(60 * 60 * 24)->getByUid($this->uid)
+                ?? throw new RuntimeException("User not found for uid: $this->uid");
         }
 
         return $this->user;
     }
 
-    /**
-     * @return TeamStruct
-     */
-    public function getTeam() {
-        if ( is_null( $this->team ) ) {
-            $this->team = ( new TeamDao() )->setCacheTTL( 60 * 60 * 24 )->findById( $this->id_team );
+     /**
+      * @return TeamStruct
+      * @throws ReflectionException
+      * @throws Exception
+      */
+    public function getTeam(TeamDao $teamDao): TeamStruct
+    {
+        if (is_null($this->team)) {
+            $id_team = $this->id_team ?? throw new DomainException("Membership team id must be set before loading team");
+            $this->team = $teamDao->setCacheTTL(60 * 60 * 24)->fetchById($id_team, TeamStruct::class)
+                ?? throw new RuntimeException("Team not found for id: $id_team");
         }
 
         return $this->team;
@@ -79,7 +104,8 @@ class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
     /**
      * @return int
      */
-    public function getAssignedProjects() {
+    public function getAssignedProjects(): int
+    {
         return $this->projects;
     }
 
@@ -88,7 +114,8 @@ class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
      *
      * @return $this
      */
-    public function setAssignedProjects( $projects ) {
+    public function setAssignedProjects(int $projects): MembershipStruct
+    {
         $this->projects = $projects;
 
         return $this;

@@ -1,44 +1,82 @@
 <?php
 
-namespace Validator\Contracts;
+namespace Utils\Validator\Contracts;
 
-use DataAccess\ArrayAccessTrait;
+use Model\DataAccess\ArrayAccessTrait;
+use stdClass;
 
-abstract class ValidatorObject implements \ArrayAccess {
+class ValidatorObject implements ValidatorObjectInterface
+{
 
     use ArrayAccessTrait;
 
+    /** @var array<string, mixed> */
+    protected array $store = [];
+
     /**
-     * @param \stdClass $object
+     * @param stdClass $object
+     *
+     * @return self
      */
-    public function hydrateFromObject(\stdClass $object){
-        foreach (get_object_vars($object) as $key => $value){
-            $this->$key = $value;
+    public static function fromObject(stdClass $object): self
+    {
+        $that = new self();
+        foreach (get_object_vars($object) as $key => $value) {
+            $that->store[$key] = $value;
         }
+
+        return $that;
+    }
+
+    /**
+     * @param array<string, mixed> $array
+     *
+     * @return self
+     */
+    public static function fromArray(array $array): self
+    {
+        $that = new self();
+        foreach ($array as $key => $value) {
+            $that->store[$key] = $value;
+        }
+
+        return $that;
     }
 
     /**
      * Magic setter
      *
-     * @param $name
-     * @param $value
+     * @param string $name
+     * @param mixed $value
      */
-    public function __set( $name, $value ) {
-        $this->$name = $value;
+    public function __set(string $name, mixed $value)
+    {
+        $this->store[$name] = $value;
     }
 
     /**
      * Magic getter
      *
-     * @param $name
+     * @param string $name
      *
      * @return mixed
      */
-    public function __get( $name ) {
-        if ( !property_exists( $this, $name ) ) {
+    public function __get(string $name): mixed
+    {
+        if (!array_key_exists($name, $this->store)) {
             return null;
         }
 
-        return $this->$name;
+        return $this->store[$name];
     }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function __isset(string $name): bool
+    {
+        return array_key_exists($name, $this->store);
+    }
+
 }

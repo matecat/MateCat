@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class AddSorcePageToQaEntryComments extends AbstractMatecatMigration
 {
    public $sql_up = "ALTER TABLE `qa_entry_comments` ADD COLUMN `source_page` tinyint(4)";

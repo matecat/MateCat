@@ -1,0 +1,41 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * @author hashashiyyin domenico@translated.net / ostico@gmail.com
+ * Date: 26/07/24
+ * Time: 11:59
+ *
+ */
+
+namespace Model\QualityReport;
+
+use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\IDaoStruct;
+
+/**
+ * @property int $id_segment
+ * @property string|null $translation
+ * @property int $version_number
+ * @property int $source_page
+ */
+class SegmentEventsStruct extends AbstractDaoObjectStruct implements IDaoStruct
+{
+
+    /**
+     * @var int
+     */
+    protected int $id_segment;
+    /**
+     * @var string|null
+     */
+    protected ?string $translation;
+    /**
+     * @var int
+     */
+    protected int $version_number;
+    /**
+     * @var int
+     */
+    protected int $source_page;
+
+}

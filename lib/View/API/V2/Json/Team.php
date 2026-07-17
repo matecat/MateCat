@@ -6,57 +6,106 @@
  * Time: 17:36
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 
-use Teams\PendingInvitations;
-use Teams\TeamStruct;
+use Exception;
+use Model\Teams\PendingInvitations;
+use Model\Teams\TeamStruct;
+use Model\Users\UserDao;
+use Predis\ClientInterface;
+use ReflectionException;
+use TypeError;
+use Utils\Redis\RedisHandler;
+use Utils\Tools\Utils;
 
-class Team {
+class Team
+{
 
-    private $data;
+    /** @var TeamStruct[]|null */
+    private ?array $data;
 
-    public function __construct( $data = null ) {
+    private UserDao $userDao;
+
+    /**
+     * @param UserDao $userDao
+     * @param TeamStruct[]|null $data
+     */
+    public function __construct(UserDao $userDao, ?array $data = null)
+    {
         $this->data = $data;
+        $this->userDao = $userDao;
     }
 
-    public function renderItem( TeamStruct $team ) {
+    /**
+     * @return array<string, mixed>
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function renderItem(TeamStruct $team): array
+    {
         $row = [
-                'id'         => (int)$team->id,
-                'name'       => $team->name,
-                'type'       => $team->type,
-                'created_at' => \Utils::api_timestamp( $team->created_at ),
-                'created_by' => (int)$team->created_by
+            'id' => (int)$team->id,
+            'name' => $team->name,
+            'type' => $team->type,
+            'created_at' => Utils::api_timestamp($team->created_at),
+            'created_by' => $team->created_by
         ];
 
         $members = $team->getMembers();
-        $invitations = ( new PendingInvitations( ( new \RedisHandler() )->getConnection(), [] ) )->get( (int)$team->id );
+        $invitations = $this->getPendingInvitations((int)$team->id);
 
-        if ( !empty( $members ) ) {
-            $memberShipFormatter = new Membership( $members );
-            $row[ 'members' ] = $memberShipFormatter->render();
+        if (!empty($members)) {
+            $memberShipFormatter = new Membership($members, $this->userDao);
+            $row['members'] = $memberShipFormatter->render();
         }
 
-        $row[ 'pending_invitations' ] = $invitations;
+        $row['pending_invitations'] = $invitations;
 
         return $row;
     }
 
-    public function render( $data = null ) {
-        $out = array();
+    /**
+     * @param TeamStruct[]|null $data
+     *
+     * @return array<int, array<string, mixed>>
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function render(?array $data = null): array
+    {
+        $out = [];
 
-        if ( empty( $data ) ) {
+        if ($data === null) {
             $data = $this->data;
         }
 
-        /**
-         * @var $data TeamStruct[]
-         */
-        foreach ( $data as $k => $team ) {
-            $out[] = $this->renderItem( $team );
+        foreach ($data ?? [] as $team) {
+            $out[] = $this->renderItem($team);
         }
 
         return $out;
+    }
+
+    /**
+     * @return array<string>
+     * @throws Exception
+     */
+    protected function getPendingInvitations(int $teamId): array
+    {
+        return (new PendingInvitations(
+            $this->createRedisConnection(),
+            ['team_id' => $teamId, 'email' => '']
+        ))->hasPendingInvitation($teamId);
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function createRedisConnection(): ClientInterface
+    {
+        return (new RedisHandler())->getConnection();
     }
 
 

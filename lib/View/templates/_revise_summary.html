@@ -1,0 +1,78 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Quality Report - Matecat</title>
+    <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
+    <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
+    <meta name="viewport" content="width=device-width"/>
+    <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="${basepath}public/img/meta/apple-touch-icon.png"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
+
+    <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
+        /*<![CDATA[*/
+        var config = {
+            basepath: '${basepath | string:/}',
+            id_job: ${jid},
+            password: '${password}',
+            isSourceRTL: ${source_rtl | string:false},
+            isTargetRTL: ${target_rtl | string:false},
+            searchable_statuses : ${searchable_statuses},
+            user_plugins: ${user_plugins},
+            enableMultiDomainApi: ${enableMultiDomainApi},
+            ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
+            isAnInternalUser: ${isAnInternalUser},
+            source_code: '${source_code}',
+            target_code: '${target_code}'
+        }
+        /*]]>*/
+    </script>
+
+    <script tal:condition="true:brPlaceholdEnabled" tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
+        /*<![CDATA[*/
+        config.lfPlaceholder = '${lfPlaceholder | null}';
+        config.crPlaceholder = '${crPlaceholder | null}';
+        config.crlfPlaceholder = '${crlfPlaceholder | null}';
+        config.lfPlaceholderClass = '${lfPlaceholderClass | null}';
+        config.crPlaceholderClass = '${crPlaceholderClass | null}';
+        config.crlfPlaceholderClass = '${crlfPlaceholderClass | null}';
+        config.lfPlaceholderRegex = ${lfPlaceholderRegex | null};
+        config.crPlaceholderRegex = ${crPlaceholderRegex | null};
+        config.crlfPlaceholderRegex = ${crlfPlaceholderRegex | null};
+
+        config.tabPlaceholder       = '${tabPlaceholder | null}';
+        config.tabPlaceholderClass  = '${tabPlaceholderClass | null}';
+        config.tabPlaceholderRegex  = ${tabPlaceholderRegex | null};
+
+        config.nbspPlaceholder       = '${nbspPlaceholder | null}';
+        config.nbspPlaceholderClass  = '${nbspPlaceholderClass | null}';
+        config.nbspPlaceholderRegex  = ${nbspPlaceholderRegex | null};
+        /*]]>*/
+    </script>
+
+</head>
+
+<body class="reviselog">
+
+<header>
+
+</header>
+
+
+
+<div class="qr-wrapper" id="qr-root">
+</div>
+
+<div class="notifications-wrapper"></div>
+
+<footer class="normal-foo"/>
+<div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
+
+<div metal:use-macro="templates/common.html/footer_includes" />
+
+
+
+</body>
+</html>

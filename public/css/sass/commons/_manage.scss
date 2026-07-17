@@ -1,13 +1,30 @@
-// rewrite semantic CSS
+@use 'colors';
 
+// rewrite semantic CSS
+html,
+body {
+  height: 100%;
+}
 body.manage {
-  min-width: 1024px;
+  min-width: 1200px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
-  background-color: $grey5;
-  overflow: visible;
+  background-color: colors.$grey5;
+  overflow-y: hidden;
+  overflow-x: auto;
+  font-size: 14px;
+  line-height: 1.4285em;
+}
+
+div#manage-container {
+  overflow: auto;
+  height: calc(100% - 60px);
+  position: relative;
+  scroll-behavior: smooth;
 }
 
 .ui.icon.button {
+  display: flex;
+  justify-content: center;
   padding: 0px;
   font-size: 18px;
   margin: 0px;
@@ -39,12 +56,12 @@ body.manage {
       width: 180px;
     }
     .item.submenu a {
-      padding-left: 6px;
-      color: $black;
+      color: colors.$black;
     }
 
     .item.submenu .dropdown.icon {
       top: 2px;
+      margin-left: 8px;
     }
   }
 }
@@ -63,11 +80,11 @@ body.manage {
 // Closing Shadow - Transitions for buttons
 
 .project-list {
-  padding-top: 100px;
+  padding-top: 40px;
   padding-bottom: 160px;
   .container {
     .ui.inverted.dimmer.more {
-      background-color: $grey5;
+      background-color: colors.$grey5;
     }
   }
 
@@ -75,22 +92,33 @@ body.manage {
     margin-bottom: 30px !important;
     //border: 1px solid $grey2;
     .project-title {
+      display: flex !important;
+      gap: 10px;
+      &[class*='sixteen wide'].column {
+        width: auto !important;
+      }
       padding-bottom: 0 !important;
+
+      > .label {
+        padding-top: 7px;
+      }
     }
     .ui.ribbon.label {
       z-index: 2;
-      left: -28px;
-      max-width: 535px;
+      left: -33px;
+      max-width: 540px;
       min-width: 0px;
-      line-height: 17px;
-      background-color: $grey2;
-      color: $black;
+      line-height: 16px;
+      background-color: colors.$grey2;
+      color: colors.$black;
       height: 30px;
       border-radius: 0 2px 2px 0;
       display: inline-block;
+      margin-right: -33px;
+      padding-left: 10px !important;
     }
     .project-header {
-      background-color: $grey4;
+      background-color: colors.$grey4;
       padding-bottom: 10px !important;
       //border-bottom: 1px solid #ccc;
       margin-bottom: -25px;
@@ -98,7 +126,7 @@ body.manage {
 
       .project-name {
         font-size: 17px;
-        max-width: 400px;
+        max-width: 390px;
         min-width: 30px;
         white-space: nowrap;
         overflow: hidden;
@@ -109,7 +137,7 @@ body.manage {
       .project-id {
         font-size: 14px;
         font-weight: normal;
-        margin-left: 17px;
+        margin-left: 8px;
         display: inline-block;
         vertical-align: text-bottom;
         min-width: 72px;
@@ -129,11 +157,14 @@ body.manage {
         }
       }
       .project-activity-icon {
-        padding: 2px 12px 0px !important;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: end;
         font-family: Calibri, Arial, Helvetica, sans-serif;
         position: relative;
-        top: 4px;
-
+        top: 6px;
+        padding: 2px 12px 0px !important;
         .ui.dropdown {
           text-align: center;
           border-radius: 30px;
@@ -150,7 +181,7 @@ body.manage {
           }
           &.project-personal-assignee {
             margin-right: 8px;
-            background-color: $white;
+            background-color: colors.$white;
             vertical-align: top;
             border: 1px solid #bdbdbd;
             cursor: default;
@@ -167,7 +198,7 @@ body.manage {
           }
           &.project-team {
             margin-right: 8px;
-            background-color: $white;
+            background-color: colors.$white;
             vertical-align: top;
             height: 30px;
             .text {
@@ -178,7 +209,7 @@ body.manage {
               text-overflow: ellipsis;
               border-radius: 15px;
               padding: 5px 15px;
-              color: $black;
+              color: colors.$black;
               transition: 0.3s ease;
             }
             .menu {
@@ -200,16 +231,15 @@ body.manage {
                 cursor: pointer;
 
                 &:hover {
-                  background-color: $grey3;
+                  background-color: colors.$grey3;
                 }
               }
             }
             &:hover .text {
-              background-color: $grey5 !important;
+              background-color: colors.$grey5 !important;
             }
           }
           &.project-assignee {
-            margin-right: 8px;
             background-color: #ffffff !important;
             vertical-align: top;
             /*height: 30px !important;*/
@@ -246,15 +276,15 @@ body.manage {
                 padding: 15px;
                 cursor: pointer;
                 a {
-                  color: $translatedBlue;
+                  color: colors.$translatedBlue;
                 }
                 i {
                   float: right;
                   font-size: 18px;
-                  color: $translatedBlue;
+                  color: colors.$translatedBlue;
                 }
                 &:hover {
-                  background-color: $grey3;
+                  background-color: colors.$grey3;
                 }
               }
               .scrolling {
@@ -297,10 +327,10 @@ body.manage {
               transition: 0.3s ease;
             }
             &:hover {
-              border: 1px solid $translatedBlue;
-              color: $translatedBlue;
+              border: 1px solid colors.$translatedBlue;
+              color: colors.$translatedBlue;
               .icon-user22 {
-                color: $translatedBlue;
+                color: colors.$translatedBlue;
               }
             }
             .not-assigned {
@@ -316,15 +346,15 @@ body.manage {
                 padding: 15px;
                 cursor: pointer;
                 a {
-                  color: $translatedBlue;
+                  color: colors.$translatedBlue;
                 }
                 i {
                   float: right;
                   font-size: 18px;
-                  color: $translatedBlue;
+                  color: colors.$translatedBlue;
                 }
                 &:hover {
-                  background-color: $grey3;
+                  background-color: colors.$grey3;
                 }
               }
             }
@@ -359,10 +389,14 @@ body.manage {
           }
         }
       }
+
+      .project-checkbox {
+        float: left;
+      }
     }
 
     .project-body {
-      background-color: $grey4;
+      background-color: colors.$grey4;
 
       .jobs {
         margin-top: 0px;
@@ -387,32 +421,30 @@ body.manage {
         }
         .job-body {
           .chunks {
-            .chunk-container {
-            }
             .chunk {
+              display: grid;
+              grid-template-columns:
+                auto
+                70px
+                150px 120px 106px auto auto 1fr auto auto auto;
+              align-items: center;
+              gap: 6px;
               transition: 0.3s ease;
               background-color: #ffffff;
-              padding: 8px 15px;
+              padding: 8px 10px !important;
 
-              .outsource.modal .popup {
-                box-shadow: none;
+              @media only screen and (max-width: 1200px) {
+                gap: 5px;
               }
+
               .job-id {
-                float: left;
-                min-width: 70px;
                 color: #969696;
                 font-size: 12px;
                 position: relative;
-                line-height: 28px;
-                top: 2px;
-                margin-right: 5px;
               }
               .source-target {
-                min-width: 140px;
-                float: left;
                 font-weight: bold;
                 position: relative;
-                top: 1px;
                 .source-box {
                   float: left;
                   max-width: 60px;
@@ -443,18 +475,30 @@ body.manage {
                 }
               }
               .progress-bar {
+                height: auto !important;
+                top: unset !important;
+                padding: unset !important;
+                margin: unset !important;
+                min-width: unset !important;
               }
               .tm-job,
               .activity-icon-single {
-                float: left;
                 width: 30px;
                 height: 30px;
               }
               .job-activity-icons {
-                float: left;
-                width: 30px;
-                height: 30px;
-                margin-left: 5px;
+                display: flex;
+                justify-content: center;
+                min-width: 110px;
+                gap: 5px;
+
+                button.group-activity-icon {
+                  height: 30px;
+                  width: 30px;
+                  i {
+                    width: 30px;
+                  }
+                }
                 .comments {
                 }
                 .group-activity-icons {
@@ -488,15 +532,10 @@ body.manage {
               }
               .outsource-job {
                 display: inline-block;
-                min-width: 30%;
-                padding-left: 5px;
                 .translated-outsourced {
-                  top: 1px;
-                  bottom: 6px;
-                  vertical-align: text-bottom;
-                  display: inline-block;
-                  position: relative;
-                  text-align: left;
+                  display: flex;
+                  align-items: center;
+
                   .outsource-logo-box {
                     min-width: 123px;
                     display: inherit;
@@ -516,17 +555,14 @@ body.manage {
                 }
                 .job-to-translator {
                   display: inline-block;
-                  margin-right: 5px;
-                  margin-left: 5px;
                   vertical-align: text-bottom;
                   color: #969696;
                   max-width: 150px;
+                  transition: 0.3s ease;
+                  min-width: 0px;
                   white-space: nowrap;
                   overflow: hidden;
                   text-overflow: ellipsis;
-                  line-height: 20px;
-                  margin-top: 5px;
-                  transition: 0.3s ease;
 
                   @media only screen and (max-width: 1199px) and (min-width: 992px) {
                     width: fit-content;
@@ -584,6 +620,20 @@ body.manage {
                 &:hover .translator .job-delivery {
                   display: none;
                 }
+                .outsource-delivery-container {
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                }
+                .job-delivery-date {
+                  margin-left: 5px;
+                  color: colors.$grey7;
+
+                  > :nth-child(2) {
+                    font-weight: bold;
+                    color: black;
+                  }
+                }
                 .item {
                   margin-left: 10px;
                   display: none;
@@ -623,14 +673,9 @@ body.manage {
                 }
               }
               .job-payable {
-                padding: 0 5px 0 5px !important;
-                float: left;
                 text-decoration: underline;
-                min-width: 106px;
-                line-height: 30px;
                 font-weight: 700;
                 position: relative;
-                top: 1px;
                 &:hover {
                   text-decoration: none;
                 }
@@ -646,17 +691,16 @@ body.manage {
               }
               .open-vendor {
                 font-family: Calibri, Arial, Helvetica, sans-serif;
-                padding: 6px 7px;
-                vertical-align: top;
                 font-size: 16px;
                 //border: 1px solid #7eaf3e;
                 border-radius: 2px;
-                float: right;
                 font-weight: bold;
                 box-shadow: none !important;
                 color: #7eaf3e !important;
                 &:hover {
-                  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+                  box-shadow:
+                    0 0 0 #e0e0e0,
+                    0 0 2px rgba(0, 0, 0, 0.12),
                     0 2px 4px rgba(0, 0, 0, 0.24) !important;
                 }
                 &:active {
@@ -674,33 +718,44 @@ body.manage {
                 //border: 1px solid #797979;
                 border-radius: 2px;
                 float: right;
-
-                &.buy-translation {
+                .buy-translation-button {
                   display: flex;
                   align-items: center;
+                }
+                &.buy-translation {
+                  display: flex;
+                  justify-content: end;
+                  align-items: center;
                   background: #fff;
-                  color: $black;
+                  color: colors.$black;
                   font-weight: normal;
-                  padding: 5px 8px;
                   border: none; // border: 1px solid #979797;
                   font-size: 14px;
+                  padding: 0;
                   .buy-translation-span:hover {
                     text-decoration: none;
                   }
                   .buy-translation-span {
                     text-decoration: underline;
                     font-size: 14px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                  }
+                  &.open-outsource-disabled {
+                    cursor: default;
+
+                    span {
+                      text-decoration: none;
+                      color: colors.$grey;
+                    }
                   }
                   span {
                     color: #000;
-                    font-size: 12px;
                     margin-left: 4px;
                     line-height: 1.6;
                   }
-                  img {
+                  svg {
                     margin-left: 3px;
-                    width: 20px;
-                    height: 20px;
                   }
                 }
               }
@@ -713,7 +768,9 @@ body.manage {
                 border-radius: 2px;
                 float: right;
                 &:hover {
-                  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+                  box-shadow:
+                    0 0 0 #e0e0e0,
+                    0 0 2px rgba(0, 0, 0, 0.12),
                     0 2px 4px rgba(0, 0, 0, 0.24) !important;
                 }
                 &:focus {
@@ -724,28 +781,10 @@ body.manage {
                 }
               }
               .job-menu {
-                i {
-                  vertical-align: inherit;
-                }
-                &.ui.button {
-                  background-color: transparent;
-                  border-radius: 2px;
-                  float: right;
-                  .divider {
-                    margin: 0;
-                  }
-                  .item {
-                    padding: 10px 15px !important;
-                  }
-                  &:hover {
-                    background-color: #ececec;
-                  }
-                  &:active {
-                    background-color: #e2e2e2;
-                  }
-                  &:focus {
-                    background-color: #e2e2e2;
-                  }
+                width: 28px !important;
+                height: 28px !important;
+                &:hover {
+                  background-color: rgba(colors.$grey8, 0.5) !important;
                 }
               }
 
@@ -782,13 +821,13 @@ body.manage {
     .project-footer {
       padding: 0 30px 5px !important;
       text-align: right;
-      background-color: $grey4;
+      background-color: colors.$grey4;
       .activity-log {
         margin-top: -10px;
         margin-right: -15px;
         a {
           text-decoration: underline;
-          color: $grey1;
+          color: colors.$grey1;
           font-size: 13px;
           &:hover {
             text-decoration: none;
@@ -798,7 +837,7 @@ body.manage {
       .project-due-date {
         margin-top: -10px;
         margin-left: -15px;
-        color: $grey1;
+        color: colors.$grey1;
         font-size: 13px;
       }
     }
@@ -854,73 +893,6 @@ body.manage {
   }
 }
 
-.normal-foo {
-  background-color: $grey4;
-  min-width: 992px;
-  width: 100%;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  z-index: 2;
-  .footer-body {
-    display: grid;
-    position: relative;
-    grid-column-gap: 24px;
-    grid-template-columns: 0.6fr 0.6fr 1fr;
-    align-items: center;
-    padding: 16px 64px;
-    height: 77px;
-    .info {
-      display: grid;
-      align-items: center;
-      grid-template-columns: 40px auto;
-      grid-column-gap: 8px;
-      .logo {
-        background-position: center;
-        background-size: cover;
-      }
-      .description {
-        color: $grey1;
-        font-weight: 100;
-        font-size: 12px;
-        text-align: left;
-        line-height: 14px;
-        .link {
-          color: #00aee4;
-          text-decoration: underline;
-        }
-      }
-    }
-  }
-  .side-info {
-    padding: 0 16px;
-    position: absolute;
-    display: grid;
-    align-items: center;
-    bottom: 0;
-    right: 0;
-    width: 419px;
-    height: 35px;
-    box-shadow: -2px -2px 12px 0 rgba(198, 198, 198, 0.5);
-    background-color: #ffffff;
-    .side-info-body {
-      display: grid;
-      grid-template-columns: 80px 80px 80px;
-      align-items: center;
-      .item {
-        a {
-          margin: 0;
-          padding: 0;
-          color: $grey1;
-          display: block;
-          text-decoration: underline;
-          text-align: left;
-        }
-      }
-    }
-  }
-}
-
 .modal[data-type='view'] {
   display: none;
 }
@@ -933,25 +905,32 @@ body.manage {
 
 @media only screen and (min-width: 1200px) {
   .ui.container {
-    width: 1140px;
+    width: 1140px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
   }
+  .outsource-delivery-container {
+    max-width: 210px;
+  }
 }
 
-@media only screen and (min-width: 1380px) {
+@media only screen and (min-width: 1500px) {
   .ui.container {
-    width: 1280px;
+    width: 1280px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
   }
+
+  .outsource-delivery-container {
+    max-width: unset;
+  }
 }
 
-@media only screen and (max-width: 1199px) and (min-width: 992px) {
+@media only screen and (max-width: 1360px) and (min-width: 992px) {
   .ui.container {
-    width: 991px;
+    width: 991px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -966,21 +945,13 @@ body.manage {
 
 @media only screen and (max-width: 991px) and (min-width: 768px) {
   .ui.container {
-    min-width: 991px;
+    min-width: 991px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
   }
   .project-list {
     padding-top: 50px;
-    .job-to-translator {
-      margin-right: 5px;
-      margin-left: 15px;
-      min-width: 0px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
   }
   .outsource-job {
     min-width: 20% !important;
@@ -1022,4 +993,86 @@ body.manage {
 
 .ui.dropdown .scrolling.menu {
   border-top: none;
+}
+
+.project-team-dropdown,
+.user-project-dropdown {
+  line-height: 1;
+  border-radius: 15px !important;
+  box-shadow:
+    0 0 0 #e0e0e0,
+    0 0 2px rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.24) !important;
+}
+
+.project-menu-dropdown {
+  border-radius: 50% !important;
+  width: 28px !important;
+  height: 28px !important;
+  background-color: rgba(colors.$grey8, 0.5) !important;
+
+  &:hover {
+    background-color: rgba(colors.$grey8, 1) !important;
+  }
+}
+
+.project-activity-icon button.project-team-dropdown {
+  height: 30px;
+  font-size: 14px;
+  color: #000;
+  padding: 5px 15px;
+  background-color: #fff;
+}
+
+.user-project-dropdown-container button.user-project-dropdown {
+  height: 30px !important;
+  color: #000 !important;
+  font-size: 14px;
+}
+
+.project-container-button-edit-name {
+  width: 30px !important;
+  height: 30px !important;
+  line-height: 30px !important;
+}
+
+.project-container-form-edit-name {
+  display: inline-block;
+
+  fieldset {
+    border: unset;
+    margin: 0;
+    padding: 0;
+  }
+
+  input[type='text'] {
+    height: 28px;
+    min-width: 250px;
+    max-width: 400px;
+
+    &:active,
+    &:focus {
+      box-shadow: unset;
+      border: 1px solid colors.$grey1;
+    }
+  }
+}
+
+.project-title-editing-name-mode {
+  > .label {
+    padding-top: 1px !important;
+    padding-right: 1px !important;
+  }
+
+  .project-checkbox {
+    margin-top: 6px;
+  }
+}
+
+ul {
+  padding: 0;
+}
+
+.project-container-checkbox-hidden {
+  opacity: 0;
 }

@@ -1,141 +1,147 @@
 <?php
 
-namespace Features\TranslationVersions\Model;
+namespace Plugins\Features\TranslationVersions\Model;
 
-use Chunks_ChunkStruct;
-use DataAccess\ShapelessConcreteStruct;
-use DataAccess_AbstractDao;
-use DataAccess_IDaoStruct;
-use Database;
+use Exception;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Jobs\JobStruct;
+use Model\QualityReport\SegmentEventsStruct;
+use Model\Translations\SegmentTranslationStruct;
 use PDO;
-use Translations_SegmentTranslationStruct;
-use Utils;
+use PDOException;
+use Utils\Tools\Utils;
 
-class TranslationVersionDao extends DataAccess_AbstractDao {
+class TranslationVersionDao extends AbstractDao
+{
 
-    const TABLE = 'segment_translation_versions';
+    const string TABLE = 'segment_translation_versions';
 
-    protected static $primary_keys = [ 'id_job', 'id_segment', 'version_number' ];
-
-    protected function _buildResult( $array_result ) {
-    }
+    protected static array $primary_keys = ['id_job', 'id_segment', 'version_number'];
 
     /**
-     * @param $id_job
-     *
-     * @return array
+     * @return list<TranslationVersionStruct>
+     * @throws PDOException
      */
-    public static function getVersionsForJob( $id_job ) {
+    public function getVersionsForJob(int $id_job): array
+    {
         $sql = "SELECT * FROM segment_translation_versions " .
-                " WHERE id_job = :id_job " .
-                " ORDER BY creation_date DESC ";
+            " WHERE id_job = :id_job " .
+            " ORDER BY creation_date DESC ";
 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
 
         $stmt->execute(
-                [ 'id_job' => $id_job ]
+            ['id_job' => $id_job]
         );
 
         $stmt->setFetchMode(
-                PDO::FETCH_CLASS,
-                TranslationVersionStruct::class
+            PDO::FETCH_CLASS,
+            TranslationVersionStruct::class
         );
 
-        return $stmt->fetchAll();
-    }
-
-    public static function getVersionsForChunk( Chunks_ChunkStruct $chunk ) {
-        $sql = "SELECT * FROM segment_translation_versions " .
-                " WHERE id_job = :id_job " .
-                " ORDER BY creation_date DESC ";
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-
-        $stmt->execute(
-                [ 'id_job' => $chunk->id ]
-        );
-
-        $stmt->setFetchMode(
-                PDO::FETCH_CLASS,
-                TranslationVersionStruct::class
-        );
-
+        /** @var list<TranslationVersionStruct> */
         return $stmt->fetchAll();
     }
 
     /**
-     * @param $id_job
-     * @param $id_segment
-     * @param $version_number
-     *
-     * @return null|TranslationVersionStruct
+     * @return list<TranslationVersionStruct>
+     * @throws PDOException
      */
-    public function getVersionNumberForTranslation( $id_job, $id_segment, $version_number ) {
+    public function getVersionsForChunk(JobStruct $chunk): array
+    {
         $sql = "SELECT * FROM segment_translation_versions " .
-                " WHERE id_job = :id_job AND id_segment = :id_segment " .
-                " AND version_number = :version_number ;";
+            " WHERE id_job = :id_job " .
+            " ORDER BY creation_date DESC ";
 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
 
-        $stmt->execute( [
-                'id_job'         => $id_job,
-                'id_segment'     => $id_segment,
-                'version_number' => $version_number
-        ] );
-
-        $stmt->setFetchMode(
-                PDO::FETCH_CLASS,
-                TranslationVersionStruct::class
+        $stmt->execute(
+            ['id_job' => $chunk->id]
         );
 
-        return $stmt->fetch();
+        $stmt->setFetchMode(
+            PDO::FETCH_CLASS,
+            TranslationVersionStruct::class
+        );
+
+        /** @var list<TranslationVersionStruct> */
+        return $stmt->fetchAll();
     }
 
     /**
-     * @param      $id_job
-     * @param      $id_segment
-     *
-     * @param null $version_number
-     *
-     * @return TranslationVersionStruct[]
+     * @return list<TranslationVersionStruct>
+     * @throws PDOException
      */
-    public static function getVersionsForTranslation( $id_job, $id_segment, $version_number = null ) {
+    public function getVersionsForTranslation(int $id_job, int $id_segment, ?int $version_number = null): array
+    {
         $sql = "SELECT * FROM segment_translation_versions " .
-                " WHERE id_job = :id_job AND id_segment = :id_segment ";
-        $params = [ 'id_job' => $id_job, 'id_segment' => $id_segment ];
+            " WHERE id_job = :id_job AND id_segment = :id_segment ";
+        $params = ['id_job' => $id_job, 'id_segment' => $id_segment];
 
-        if($version_number !== null){
+        if ($version_number !== null) {
             $sql .= ' AND version_number = :version_number';
             $params['version_number'] = $version_number;
         }
 
         $sql .= " ORDER BY creation_date DESC ";
 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
 
         $stmt->execute($params);
 
         $stmt->setFetchMode(
-                PDO::FETCH_CLASS,
-                TranslationVersionStruct::class
+            PDO::FETCH_CLASS,
+            TranslationVersionStruct::class
         );
 
+        /** @var list<TranslationVersionStruct> */
         return $stmt->fetchAll();
     }
 
+    /**
+     * @return TranslationVersionStruct|false
+     * @throws PDOException
+     */
+    public function getVersionNumberForTranslation(int $id_job, int $id_segment, int $version_number): TranslationVersionStruct|false
+    {
+        $sql = "SELECT * FROM segment_translation_versions " .
+            " WHERE id_job = :id_job AND id_segment = :id_segment " .
+            " AND version_number = :version_number ;";
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+
+        $stmt->execute([
+            'id_job' => $id_job,
+            'id_segment' => $id_segment,
+            'version_number' => $version_number
+        ]);
+
+        $stmt->setFetchMode(
+            PDO::FETCH_CLASS,
+            TranslationVersionStruct::class
+        );
+
+        return $stmt->fetch();
+    }
 
     /**
-     * @param $id_job
-     * @param $id_segment
+     * Fetches translation versions combined with QA entries for the revision view.
      *
-     * @return DataAccess_IDaoStruct[]
+     * Note: parameters are intentionally typed as int|string because callers
+     * may pass request params directly (string) or struct properties (int).
+     *
+     * @return list<AbstractDaoObjectStruct>
+     * @throws PDOException
+     * @throws Exception
      */
-    public function getVersionsForRevision( $id_job, $id_segment ) {
-
+    public function getVersionsForRevision(int|string $id_job, int|string $id_segment): array
+    {
         $sql = "SELECT * FROM (
 
     -- Query for data from current version
@@ -152,6 +158,7 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
     st.time_to_edit,
     stv.raw_diff,
 
+    qa.uid as qa_uid,
     qa.id as qa_id,
     qa.comment as qa_comment,
     qa.create_date as qa_create_date,
@@ -167,7 +174,6 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
     qa.translation_version as qa_translation_version,
     qa.target_text as qa_target_text,
     qa.penalty_points as qa_penalty_points,
-    qa.rebutted_at as qa_rebutted_at,
     qa.source_page as qa_source_page
 
     FROM segment_translations st LEFT JOIN qa_entries qa
@@ -197,6 +203,7 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
     stv.time_to_edit,
     stv.raw_diff,
 
+     qa.uid as qa_uid,
      qa.id as qa_id,
      qa.comment as qa_comment,
      qa.create_date as qa_create_date ,
@@ -212,7 +219,6 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
      qa.translation_version as qa_translation_version,
      qa.target_text as qa_target_text,
      qa.penalty_points as qa_penalty_points,
-     qa.rebutted_at as qa_rebutted_at,
      qa.source_page as qa_source_page
 
     FROM segment_translation_versions stv 
@@ -232,271 +238,195 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
     ORDER BY version_number DESC
     ";
 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
 
-        return $this->_fetchObject( $stmt,
-                ( new ShapelessConcreteStruct() ),
-                [ 'id_job' => $id_job, 'id_segment' => $id_segment ]
+        return $this->_fetchObjectMap(
+            $stmt,
+            ShapelessConcreteStruct::class,
+            ['id_job' => $id_job, 'id_segment' => $id_segment]
         );
-
     }
 
     /**
-     * @param      $segments_id
-     * @param      $job_id
-     * @param null $source_page
+     * @param list<int> $segments_id
+     * @param int $job_id
      *
-     * @return array
+     * @return list<SegmentEventsStruct>
+     * @throws PDOException
      */
-    public function getLastRevisionsBySegmentsAndSourcePage( $segments_id, $job_id, $source_page ) {
+    public function getAllRelevantEvents(array $segments_id, int $job_id): array
+    {
+        $db = $this->database->getConnection();
 
-        $db = Database::obtain()->getConnection();
+        $prepare_str_segments_id = implode(', ', array_fill(0, count($segments_id), '?'));
 
-        $prepare_str_segments_id = str_repeat( ' ?, ', count( $segments_id ) - 1 ) . " ?";
+        $query = "
+            SELECT
+                COALESCE(stv.id_segment, ste.id_segment) AS id_segment,
+                stv.translation,
+                ste.version_number,
+                ste.source_page
+            FROM (
+                 SELECT id_segment, translation, version_number, id_job
+                 FROM segment_translation_versions
+                 WHERE id_segment IN ( $prepare_str_segments_id )
+                   AND id_job = ?
+                 UNION
+                 SELECT id_segment, translation, version_number, id_job
+                 FROM segment_translations
+                 WHERE id_segment IN ( $prepare_str_segments_id )
+                   AND id_job = ?
+            ) AS stv
+            RIGHT JOIN (
+                   SELECT MAX(version_number) AS version_number, ste.id_segment, ste.source_page
+                   FROM segment_translation_events ste
+                   WHERE id_segment IN ( $prepare_str_segments_id )
+                     AND ste.id_job = ?
+                     AND IF( source_page > 1 , final_revision = 1 , source_page = 1 )
+                   GROUP BY id_segment, ste.source_page
+            ) AS ste ON stv.version_number = ste.version_number AND stv.id_segment = ste.id_segment;
+";
 
-        $query = "SELECT 
+        $stmt = $db->prepare($query);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, SegmentEventsStruct::class);
+        $stmt->execute(array_merge($segments_id, [$job_id], $segments_id, [$job_id], $segments_id, [$job_id]));
 
-    stv.id_segment,
-    stv.translation,
-    ste.version_number
-
-    FROM
-        (
-            SELECT id_segment, translation, version_number, id_job
-            FROM segment_translation_versions
-            WHERE id_segment IN (
-                $prepare_str_segments_id
-            )
-            AND id_job = ?
-            UNION
-            SELECT id_segment, translation, version_number, id_job
-            FROM segment_translations
-            WHERE id_segment IN (
-                $prepare_str_segments_id
-            )
-            AND id_job = ?
-        ) stv
-    JOIN
-        (
-                SELECT
-                    MAX(version_number) AS version_number, ste.id_segment
-                FROM
-                    segment_translation_events ste
-
-                WHERE id_segment IN (
-                    $prepare_str_segments_id
-                )
-                AND ste.id_job = ?
-                AND ste.source_page = ?
-
-                GROUP BY id_segment
-
-        ) AS ste ON stv.version_number = ste.version_number AND stv.id_segment = ste.id_segment";
-
-        $stmt = $db->prepare( $query );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
-        $stmt->execute( array_merge( $segments_id, [ $job_id ], $segments_id, [ $job_id ], $segments_id, [ $job_id ], [ $source_page ] ) );
-
-        $results = $stmt->fetchAll();
-
-        return $results;
-
-
+        /** @var list<SegmentEventsStruct> */
+        return $stmt->fetchAll();
     }
 
-    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagation, $id_segment, Chunks_ChunkStruct $job_data, $propagated_ids ) {
+    /**
+     * Saves version records for propagated translations.
+     *
+     * @param SegmentTranslationStruct $propagatorSegment The segment that initiated propagation
+     * @param int $id_segment The source segment ID
+     * @param JobStruct $job_data The job struct (accessed via ArrayAccess)
+     * @param list<SegmentTranslationStruct> $segmentsToUpdate Segments that were propagated
+     *
+     * @throws PDOException
+     * @throws Exception
+     */
+    public function savePropagationVersions(SegmentTranslationStruct $propagatorSegment, int $id_segment, JobStruct $job_data, array $segmentsToUpdate): void
+    {
+        $chunked_segments_list = array_chunk($segmentsToUpdate, 20, true);
 
-        $status_condition           = '';
-        $propagated_ids_placeholder = [];
+        foreach ($chunked_segments_list as $segments) {
+            $where_options = [
+                'id_job' => $job_data['id'],
+                'id_segment' => $id_segment,
+                'propagated_segments' => array_values($segments) /* reset the keys */,
+                'autopropagated_from' => $propagatorSegment['autopropagated_from']
+            ];
 
-        for ( $i = 1; $i <= count( $propagated_ids ); $i++ ) {
-            $propagated_ids_placeholder[] = ':propagated_id_' . $i;
+            $this->insertVersionRecords([
+                'where_options' => $where_options,
+            ]);
         }
-
-        $propagated_ids_placeholder = implode( ',', $propagated_ids_placeholder );
-
-        $where_condition = " WHERE " .
-                " id_job = :id_job AND " .
-                " segment_hash = :segment_hash AND " .
-                " id_segment != :id_segment AND " .
-                " id_segment IN (" . $propagated_ids_placeholder . ") ";
-
-        $where_options = [
-                'id_job'         => $job_data[ 'id' ],
-                'id_segment'     => $id_segment,
-                'propagated_ids' => $propagated_ids,
-                'segment_hash'   => $propagation->segment_hash,
-
-        ];
-
-        $this->insertVersionRecords( [
-                'status_condition' => $status_condition,
-                'where_condition'  => $where_condition,
-                'where_options'    => $where_options,
-                'propagation'      => $propagation,
-        ] );
-
-        $this->upCountVersionNumberOnPropagatedTranslations( [
-                'status_condition' => $status_condition,
-                'where_condition'  => $where_condition,
-                'where_options'    => $where_options
-        ] );
     }
 
-    public function saveVersion( TranslationVersionStruct $new_version ) {
-        $sql = "INSERT INTO segment_translation_versions " .
-                " ( id_job, id_segment, translation, version_number, time_to_edit, old_status, new_status ) " .
-                " VALUES " .
-                " (:id_job, :id_segment, :translation, :version_number, :time_to_edit, :old_status, :new_status ) ";
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-
-        return $stmt->execute( [
-                'id_job'         => $new_version->id_job,
-                'id_segment'     => $new_version->id_segment,
-                'translation'    => $new_version->translation,
-                'version_number' => $new_version->version_number,
-                'time_to_edit'   => $new_version->time_to_edit,
-                'old_status'     => $new_version->old_status,
-                'new_status'     => $new_version->new_status,
-        ] );
-    }
-
-    public function updateVersion( TranslationVersionStruct $old_translation ) {
+    /**
+     * @throws PDOException
+     */
+    public function updateVersion(TranslationVersionStruct $old_translation): int
+    {
         $sql = "UPDATE segment_translation_versions
                 SET translation = :translation, time_to_edit = :time_to_edit
                 WHERE id_job = :id_job AND id_segment = :id_segment
                 AND version_number = :version_number ";
 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
 
-        $stmt->execute( [
-                'id_job'         => $old_translation->id_job,
-                'id_segment'     => $old_translation->id_segment,
-                'translation'    => $old_translation->translation,
-                'version_number' => $old_translation->version_number,
-                'time_to_edit'   => $old_translation->time_to_edit
-        ] );
+        $stmt->execute([
+            'id_job' => $old_translation->id_job,
+            'id_segment' => $old_translation->id_segment,
+            'translation' => $old_translation->translation,
+            'version_number' => $old_translation->version_number,
+            'time_to_edit' => $old_translation->time_to_edit
+        ]);
 
         return $stmt->rowCount();
     }
 
-    private function insertVersionRecords( $params ) {
-        $params = Utils::ensure_keys( $params, [
-                'status_condition', 'where_condition', 'where_options'
-        ] );
+    /**
+     * Inserts a new version record into the append-only version history table.
+     *
+     * `segment_translation_versions` has no unique constraint on
+     * (id_job, id_segment, version_number) — only a surrogate auto-increment `id` — so this is
+     * a plain insert, not a deduplicating upsert. Concurrent saves of the same version number
+     * will produce separate rows; this method does not resolve that race.
+     *
+     * @throws PDOException
+     */
+    public function insertVersion(TranslationVersionStruct $new_version): void
+    {
+        $sql = "INSERT INTO segment_translation_versions
+                    (id_job, id_segment, translation, version_number, time_to_edit, old_status, new_status)
+                VALUES
+                    (:id_job, :id_segment, :translation, :version_number, :time_to_edit, :old_status, :new_status)";
 
-        $where_condition  = $params[ 'where_condition' ];
-        $status_condition = $params[ 'status_condition' ];
-        $where_options    = $params[ 'where_options' ];
-        $propagation      = $params[ 'propagation' ]; // TODO: check this, bug suspect
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'id_job'         => $new_version->id_job,
+            'id_segment'     => $new_version->id_segment,
+            'translation'    => $new_version->translation,
+            'version_number' => $new_version->version_number,
+            'time_to_edit'   => $new_version->time_to_edit,
+            'old_status'     => $new_version->old_status,
+            'new_status'     => $new_version->new_status,
+        ]);
+    }
 
-        $select_sql =
-                " SELECT id_job, id_segment, translation, version_number, :propagated_from " .
-                " FROM segment_translations " .
-                " $where_condition " .
-                " $status_condition ";
+    /**
+     * @param array{where_options: array{id_job: mixed, id_segment: int, propagated_segments: list<SegmentTranslationStruct>, autopropagated_from: mixed}} $params
+     *
+     * @throws PDOException
+     * @throws Exception
+     */
+    private function insertVersionRecords(array $params): void
+    {
+        $params = Utils::ensure_keys($params, ['where_options']);
 
-        $select_ids_map = [];
-        foreach ( $where_options[ 'propagated_ids' ] as $key => $propagated_id ) {
-            $select_ids_map[ 'propagated_id_' . ( $key + 1 ) ] = $propagated_id;
-        }
+        $where_options = $params['where_options'];
 
-        unset( $where_options[ 'propagated_ids' ] );
+        $insert_value_list = [];
 
-        $select_options = array_merge(
-                $where_options,
-                [ 'propagated_from' => $propagation[ 'autopropagated_from' ] ],
-                $select_ids_map
-        );
-
-        $conn = Database::obtain()->getConnection();
-
-        $select = $conn->prepare( $select_sql );
-        $select->execute( $select_options );
-
-        $propagated_segments = $select->fetchAll();
-
-        $insert_value_map = [];
-
-        foreach ( $propagated_segments as $propagated_segment ) {
-            $insert_value_map[] = [
-                    $propagated_segment[ 'id_job' ],
-                    $propagated_segment[ 'id_segment' ],
-                    $propagated_segment[ 'translation' ],
-                    $propagated_segment[ 'version_number' ],
+        foreach ($where_options['propagated_segments'] as $propagated_segment) {
+            $insert_value_list[] = [
+                $propagated_segment['id_job'],
+                $propagated_segment['id_segment'],
+                $propagated_segment['translation'],
+                $propagated_segment['version_number'],
             ];
         }
 
-        $chunk_size = 200;
-        $chunks     = array_chunk( $insert_value_map, $chunk_size, true );
+        $insert_sql = "INSERT INTO segment_translation_versions " .
+            " ( " .
+            " id_job, id_segment, translation, version_number, propagated_from " .
+            " ) VALUES ";
 
-        for ( $k = 0; $k < count( $chunks ); $k++ ) {
+        $insert_placeholders = [];
+        $insert_values = [];
 
-            $insert_sql = "INSERT INTO segment_translation_versions " .
-                    " ( " .
-                    " id_job, id_segment, translation, version_number, propagated_from " .
-                    " ) VALUES ";
+        foreach ($insert_value_list as $key => $_insert_values) {
+            $insert_placeholders[] = "(:id_job_" . $key . ", :id_segment_" . $key . ", :translation_" . $key . ", :version_number_" . $key . ", :propagated_from_" . $key . ")";
 
-            $insert_placeholders = [];
-            $insert_values       = [];
-
-            foreach ( $chunks[ $k ] as $key => $chunk ) {
-                $insert_placeholders[] = "(:id_job_" . $key . ", :id_segment_" . $key . ", :translation_" . $key . ", :version_number_" . $key . ", :propagated_from_" . $key . ")";
-
-                $current_value                              = $insert_value_map[ ( $key ) ];
-                $insert_values[ 'id_job_' . $key ]          = $current_value[ 0 ];
-                $insert_values[ 'id_segment_' . $key ]      = $current_value[ 1 ];
-                $insert_values[ 'translation_' . $key ]     = $current_value[ 2 ];
-                $insert_values[ 'version_number_' . $key ]  = $current_value[ 3 ];
-                $insert_values[ 'propagated_from_' . $key ] = $propagation[ 'autopropagated_from' ];
-            }
-
-            $insert_sql .= implode( ',', $insert_placeholders );
-
-            $select = $conn->prepare( $insert_sql );
-            $select->execute( $insert_values );
-        }
-    }
-
-    private function upCountVersionNumberOnPropagatedTranslations( $params ) {
-        $params = Utils::ensure_keys( $params, [
-                'status_condition', 'where_condition', 'where_options'
-        ] );
-
-        $where_condition  = $params[ 'where_condition' ];
-        $status_condition = $params[ 'status_condition' ];
-        $where_options    = $params[ 'where_options' ];
-
-        /**
-         * Update segment_translations to change the version number
-         * for the future changes using the same filter we used for the
-         * insert.
-         * This is done because we don't want to modify the update SQL
-         * in queries.php which is invoked with logic which is not
-         * necessarily related to the versioning feature.
-         */
-
-        $update_sql = "UPDATE segment_translations " .
-                " SET version_number = version_number + 1  " .
-                " $where_condition " .
-                " $status_condition ";
-
-        $update_options                   = [];
-        $update_options[ 'id_job' ]       = $where_options[ 'id_job' ];
-        $update_options[ 'id_segment' ]   = $where_options[ 'id_segment' ];
-        $update_options[ 'segment_hash' ] = $where_options[ 'segment_hash' ];
-
-        for ( $i = 1; $i <= count( $where_options[ 'propagated_ids' ] ); $i++ ) {
-            $update_options[ 'propagated_id_' . $i ] = $where_options[ 'propagated_ids' ][ ( $i - 1 ) ];
+            $current_value = $_insert_values;
+            $insert_values['id_job_' . $key] = $current_value[0];
+            $insert_values['id_segment_' . $key] = $current_value[1];
+            $insert_values['translation_' . $key] = $current_value[2];
+            $insert_values['version_number_' . $key] = $current_value[3];
+            $insert_values['propagated_from_' . $key] = $where_options['autopropagated_from'];
         }
 
-        $conn   = Database::obtain()->getConnection();
-        $update = $conn->prepare( $update_sql );
-        $update->execute( $update_options );
+        $insert_sql .= implode(',', $insert_placeholders);
+
+        $conn = $this->database->getConnection();
+        $insert = $conn->prepare($insert_sql);
+        $insert->execute($insert_values);
+        $insert->closeCursor();
     }
 
 }

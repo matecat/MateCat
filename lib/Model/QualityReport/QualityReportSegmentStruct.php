@@ -6,166 +6,191 @@
  * Time: 12:46
  */
 
-use API\V2\Json\QALocalWarning;
-use LQA\QA;
+namespace Model\QualityReport;
+
+use DivisionByZeroError;
+use Exception;
+use Matecat\SubFiltering\MateCatFilter;
+use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\IDaoStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Utils\LQA\QA;
+use Utils\Tools\PostEditing;
+use View\API\V2\Json\QALocalWarning;
 
 
-class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct
+{
+
+    /** @param array<string, mixed> $array_params */
+    public function __construct(array $array_params = [])
+    {
+        parent::__construct($array_params);
+    }
 
 
-    public $sid;
+    public int $sid;
 
-    public $target;
+    public string $target;
 
-    public $segment;
+    public string $segment;
 
-    public $segment_hash;
+    public ?string $segment_hash = null;
 
-    public $raw_word_count;
+    public int $raw_word_count;
 
-    public $translation;
+    public ?string $translation = null;
 
-    public $version;
+    public ?int $version; //unix timestamp of the last translation
 
-    public $ice_locked;
+    public bool $ice_locked;
 
-    public $status;
+    public string $status;
 
-    public $time_to_edit;
+    public int $time_to_edit;
 
-    public $filename;
+    public string $filename;
 
-    public $id_file;
+    public int $id_file;
 
-    public $warning;
+    public bool $warning;
 
-    public $suggestion_match;
+    public ?int $suggestion_match;
 
-    public $suggestion_source;
+    public ?string $suggestion_source;
 
-    public $suggestion;
+    public ?string $suggestion;
 
-    public $edit_distance;
+    public ?int $edit_distance;
 
-    public $locked;
+    public bool $locked;
 
-    public $match_type;
+    public string $match_type;
 
-    public $warnings;
+    /** @var array<string, mixed> */
+    public array $warnings;
 
-    public $pee;
+    public float $pee;
 
-    public $ice_modified;
+    public bool $ice_modified;
 
-    public $secs_per_word;
+    public float $secs_per_word;
 
-    public $parsed_time_to_edit;
+    /** @var list<string|int> */
+    public array $parsed_time_to_edit;
 
-    public $comments = [];
+    /** @var list<mixed> */
+    public array $comments = [];
 
-    public $issues = [];
+    /** @var list<mixed> */
+    public array $issues = [];
 
-    public $last_translation;
+    public string $last_translation = '';
 
-    public $last_revisions;
+    /** @var list<array{translation: string, source_page?: int, revision_number?: int|null}> */
+    public array $last_revisions = [];
 
-    public $pee_translation_revise;
+    public float $pee_translation_revise;
 
-    public $pee_translation_suggestion;
+    public float $pee_translation_suggestion;
 
-    public $version_number;
+    public int $version_number;
 
-    public $source_page ;
+    public ?int $source_page;
 
-    public $is_pre_translated = false;
+    public bool $is_pre_translated = false;
 
-    public $dataRefMap = [];
+    /** @var array<string, string> */
+    public array $dataRefMap = [];
+
+    protected string $tm_analysis_status;
+
+    /**
+     * @return string
+     */
+    public function getTmAnalysisStatus(): string
+    {
+        return $this->tm_analysis_status;
+    }
+
+     /**
+      * @return float
+      * @throws DivisionByZeroError
+      */
+     public function getSecsPerWord(): float
+    {
+        $val = @round(($this->time_to_edit / 1000) / $this->raw_word_count, 1);
+
+        return ($val != INF ? $val : 0.0);
+    }
+
+    public function isICEModified(): bool
+    {
+        return ($this->version_number != 0 && $this->isICE());
+    }
+
+    public function isICE(): bool
+    {
+        return ($this->match_type == 'ICE' && $this->locked);
+    }
 
     /**
      * @return float
      */
-    public function getSecsPerWord() {
-        $val = @round( ( $this->time_to_edit / 1000 ) / $this->raw_word_count, 1 );
-        return ( $val != INF ? $val : 0 );
+    public function getPEE(): float
+    {
+        if (empty($this->translation) || empty($this->suggestion)) {
+            return 0.0;
+        }
+
+        return PostEditing::getPee($this->suggestion, $this->translation, $this->target);
     }
 
-    public function isICEModified(){
-        return ( $this->getPEE() != 0 && $this->isICE() );
+    public function getPEEBwtTranslationSuggestion(): float
+    {
+        if (empty($this->last_translation) || empty($this->suggestion)) {
+            return 0.0;
+        }
+
+        return PostEditing::getPee($this->suggestion, $this->last_translation, $this->target);
     }
 
-    public function isICE(){
-        return ( $this->match_type == 'ICE' && $this->locked );
+    public function getPEEBwtTranslationRevise(): float
+    {
+        if (empty($this->last_translation) || empty($this->last_revisions)) {
+            return 0.0;
+        }
+
+        $last_revision_record = end($this->last_revisions);
+        $last_revision = $last_revision_record['translation'];
+
+        return PostEditing::getPee($this->last_translation, $last_revision, $this->target);
     }
 
     /**
-     * @return float|int
+     * @return array<string, mixed>
+     * @throws Exception
+     * @throws \TypeError
      */
-    public function getPEE() {
-        if(empty($this->translation) || empty($this->suggestion) ){
-            return 0;
-        }
-        return self::calculatePEE($this->suggestion, $this->translation, $this->target);
-    }
-
-    public function getPEEBwtTranslationSuggestion() {
-        if(empty($this->last_translation)){
-            return 0;
+    public function getLocalWarning(FeatureSet $featureSet, JobStruct $chunk, MateCatFilter $Filter): array
+    {
+        // When the query for segments is performed, a condition is added to get NULL instead of the translation when the status is NEW
+        // so that the local warning check is not displayed/needed
+        if (is_null($this->translation) || $chunk->id === null || $chunk->password === null) {
+            return [];
         }
 
-        return self::calculatePEE($this->suggestion, $this->last_translation, $this->target);
-    }
+        $src_content = $Filter->fromLayer0ToLayer2($this->segment);
+        $trg_content = $Filter->fromLayer0ToLayer2($this->translation);
 
-    public function getPEEBwtTranslationRevise() {
-        if(empty($this->last_translation) OR empty($this->last_revisions)){
-            return 0;
-        }
-
-        // TODO refactor
-        $last_revision_record = end( $this->last_revisions);
-        $last_revision = $last_revision_record['translation'];
-
-        return self::calculatePEE($this->last_translation, $last_revision, $this->target);
-    }
-
-    static function calculatePEE($str_1, $str_2, $target){
-        $post_editing_effort = round(
-                ( 1 - \MyMemory::TMS_MATCH(
-                                self::cleanSegmentForPee( $str_1 ),
-                                self::cleanSegmentForPee( $str_2 ),
-                                $target
-                        )
-                ) * 100
-        );
-
-        if ( $post_editing_effort < 0 ) {
-            $post_editing_effort = 0;
-        } elseif ( $post_editing_effort > 100 ) {
-            $post_editing_effort = 100;
-        }
-
-        return $post_editing_effort;
-        
-    }
-
-
-
-    private static function cleanSegmentForPee( $segment ){
-        $segment = htmlspecialchars_decode( $segment, ENT_QUOTES);
-
-        return $segment;
-    }
-
-    public function getLocalWarning(FeatureSet $featureSet, Chunks_ChunkStruct $chunk){
-
-        $QA = new QA( $this->segment, $this->translation );
+        $QA = new QA($src_content, $trg_content);
         $QA->setSourceSegLang($chunk->source);
         $QA->setTargetSegLang($chunk->target);
         $QA->setChunk($chunk);
         $QA->setFeatureSet($featureSet);
         $QA->performConsistencyCheck();
 
-        $local_warning = new QALocalWarning($QA, $this->sid);
-
-        return $local_warning->render();
+        return (new QALocalWarning($QA, $this->sid, $chunk->id_project, $Filter))->render();
     }
 }

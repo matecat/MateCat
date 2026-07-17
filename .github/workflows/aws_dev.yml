@@ -1,0 +1,22 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Develop: test on every PR/push to develop, deploy only on push to develop
+# ─────────────────────────────────────────────────────────────────────────────
+name: "CI/CD: Develop (Freddy)"
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+    types: [ opened, synchronize, reopened, labeled, unlabeled ]
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+  models: read
+jobs:
+  ci-cd:
+    uses: ./.github/workflows/_ci-cd.yml
+    with:
+      deploy_environment: develop
+      should_deploy: ${{ github.event_name == 'push' }}
+    secrets: inherit

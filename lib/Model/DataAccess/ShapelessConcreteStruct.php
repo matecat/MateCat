@@ -7,35 +7,35 @@
  *
  */
 
-namespace DataAccess;
+namespace Model\DataAccess;
 
 use ArrayAccess;
-use DataAccess_AbstractDaoObjectStruct;
 
-class ShapelessConcreteStruct extends DataAccess_AbstractDaoObjectStruct implements ArrayAccess {
+/**
+ * @implements ArrayAccess<string, mixed>
+ */
+class ShapelessConcreteStruct extends AbstractDaoObjectStruct implements ArrayAccess
+{
 
     use ArrayAccessTrait;
 
-    protected function tryValidator() {}
-
-    public function __set( $name, $value ) {
+    public function __set(string $name, mixed $value): void
+    {
         $this->$name = $value;
     }
 
-    /**
-     * @param $name
-     *
-     * @return mixed
-     */
-    public function __get( $name ) {
-        if ( !property_exists( $this, $name ) ) {
+    public function __get(string $name): mixed
+    {
+        if (!property_exists($this, $name)) {
             return null;
         }
+
         return $this->$name;
     }
 
-    public function getArrayCopy() {
-        return (array)$this;
+    public function getArrayCopy(): array
+    {
+        return $this->toArray();
     }
 
 }

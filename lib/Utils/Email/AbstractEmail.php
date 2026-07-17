@@ -6,151 +6,182 @@
  * Time: 17:06
  */
 
-namespace Email;
+namespace Utils\Email;
 
-use AMQHandler;
-use INIT;
-use Log;
-use WorkerClient;
+use DomainException;
+use Exception;
+use InvalidArgumentException;
+use Utils\ActiveMQ\WorkerClient;
+use Utils\AsyncTasks\Workers\MailWorker;
+use Utils\Logger\LoggerFactory;
+use Utils\Registry\AppConfig;
 
-abstract class AbstractEmail {
+abstract class AbstractEmail
+{
 
-    protected $title;
+    protected ?string $title = null;
 
-    protected $_layout_path;
-    protected $_template_path;
-
-    /**
-     * @return array
-     */
-    abstract protected function _getTemplateVariables();
-
+    protected string $_layout_path;
+    protected string $_template_path;
 
     /**
-     * @return mixed
+     * @return array<string, mixed>
      */
-    abstract function send();
+    abstract protected function _getTemplateVariables(): array;
 
-    protected function _setLayout( $layout ) {
-        $this->_layout_path = INIT::$TEMPLATE_ROOT . '/Emails/' . $layout;
+
+    /**
+     * @return void
+     */
+    abstract function send(): void;
+
+    protected function _setLayout(string $layout): void
+    {
+        $this->_layout_path = AppConfig::$TEMPLATE_ROOT . '/Emails/' . $layout;
     }
 
-    protected function _setLayoutByPath( $path ) {
-        $this->_layout_path = $path ;
+    protected function _setLayoutByPath(string $path): void
+    {
+        $this->_layout_path = $path;
     }
 
-    protected function _setTemplate( $template ) {
-        $this->_template_path = INIT::$TEMPLATE_ROOT . '/Emails/' . $template;
+    protected function _setTemplate(string $template): void
+    {
+        $this->_template_path = AppConfig::$TEMPLATE_ROOT . '/Emails/' . $template;
     }
 
-    protected function _setTemplateByPath( $path ) {
+    protected function _setTemplateByPath(string $path): void
+    {
         $this->_template_path = $path;
     }
 
     /**
-     * TODO: implement some kind of hook to improve testability
-     *
-     * @param $mailConf
+     * @param array<string, mixed> $mailConf
+     * @throws DomainException
+     * @throws InvalidArgumentException
      */
-    protected function _enqueueEmailDelivery( $mailConf ) {
-        WorkerClient::init( new AMQHandler() );
+    protected function _enqueueEmailDelivery(array $mailConf): void
+    {
         WorkerClient::enqueue(
-                'MAIL',
-                '\AsyncTasks\Workers\MailWorker',
-                $mailConf,
-                [ 'persistent' => WorkerClient::$_HANDLER->persistent ]
+            'MAIL',
+            MailWorker::class,
+            $mailConf,
+            ['persistent' => WorkerClient::$_HANDLER->persistent]
         );
 
-        Log::doJsonLog( 'Message has been sent' );
+        LoggerFactory::doJsonLog('Message has been sent');
     }
 
-    protected function _buildMessageContent() {
+    /**
+     * @return string
+     */
+    protected function _buildMessageContent(): string
+    {
         ob_start();
-        extract( $this->_getTemplateVariables(), EXTR_OVERWRITE );
-        include( $this->_template_path );
+        extract($this->_getTemplateVariables());
+        include($this->_template_path);
 
-        return ob_get_clean();
+        return ob_get_clean() ?: '';
     }
 
-    protected function _buildHTMLMessage( $messageContent = null ) {
+    /**
+     * @param string|null $messageContent
+     *
+     * @return string
+     */
+    protected function _buildHTMLMessage(?string $messageContent = null): string
+    {
         ob_start();
-        extract( $this->_getLayoutVariables( $messageContent ), EXTR_OVERWRITE );
-        include( $this->_layout_path );
+        extract($this->_getLayoutVariables($messageContent));
+        include($this->_layout_path);
 
-        return ob_get_clean();
+        return ob_get_clean() ?: '';
     }
 
-    protected function _getLayoutVariables( $messageBody = null ) {
-
-        if ( isset( $this->title ) ) {
-            $title = $this->title;
-        } else {
-            $title = 'MateCat';
-        }
-
+    /**
+     * @param string|null $messageBody
+     *
+     * @return array<string, mixed>
+     */
+    protected function _getLayoutVariables(?string $messageBody = null): array
+    {
         return [
-                'title'       => $title,
-                'messageBody' => ( !empty( $messageBody ) ? $messageBody : $this->_buildMessageContent() ),
-                'closingLine' => "Kind regards, ",
-                'showTitle'   => false
+            'title' => $this->title ?? 'Matecat',
+            'messageBody' => (!empty($messageBody) ? $messageBody : $this->_buildMessageContent()),
+            'closingLine' => "Kind regards, ",
+            'showTitle' => false
         ];
     }
 
-    protected function _getDefaultMailConf() {
-
+    /**
+     * @return array<string, mixed>
+     */
+    protected function _getDefaultMailConf(): array
+    {
         $mailConf = [];
 
-        $mailConf[ 'Host' ]     = INIT::$SMTP_HOST;
-        $mailConf[ 'port' ]     = INIT::$SMTP_PORT;
-        $mailConf[ 'sender' ]   = INIT::$SMTP_SENDER;
-        $mailConf[ 'hostname' ] = INIT::$SMTP_HOSTNAME;
+        $mailConf['Host'] = AppConfig::$SMTP_HOST;
+        $mailConf['port'] = AppConfig::$SMTP_PORT;
+        $mailConf['sender'] = AppConfig::$SMTP_SENDER;
+        $mailConf['hostname'] = AppConfig::$SMTP_HOSTNAME;
 
-        $mailConf[ 'from' ]       = INIT::$SMTP_SENDER;
-        $mailConf[ 'fromName' ]   = INIT::$MAILER_FROM_NAME;
-        $mailConf[ 'returnPath' ] = INIT::$MAILER_RETURN_PATH;
+        $mailConf['from'] = AppConfig::$SMTP_SENDER;
+        $mailConf['fromName'] = AppConfig::$MAILER_FROM_NAME;
+        $mailConf['returnPath'] = AppConfig::$MAILER_RETURN_PATH;
 
         return $mailConf;
-
     }
 
-    protected function sendTo( $address, $name ) {
-        $recipient = [ $address, $name ];
+    /**
+     * @throws Exception
+     */
+    protected function sendTo(string $address, string $name): void
+    {
+        $recipient = [$address, $name];
 
-        $this->doSend( $recipient, $this->title,
-                $this->_buildHTMLMessage(),
-                $this->_buildTxtMessage( $this->_buildMessageContent() )
+        $this->doSend(
+            $recipient,
+            $this->title ?? 'Matecat',
+            $this->_buildHTMLMessage(),
+            $this->_buildTxtMessage($this->_buildMessageContent())
         );
     }
 
-    protected function doSend( $address, $subject, $htmlBody, $altBody ) {
+    /**
+     * @param array<int, string|null> $address
+     *
+     * @throws Exception
+     */
+    protected function doSend(array $address, ?string $subject, string $htmlBody, string $altBody): bool
+    {
         $mailConf = $this->_getDefaultMailConf();
 
-        $mailConf[ 'address' ] = $address;
-        $mailConf[ 'subject' ] = $subject;
+        $mailConf['address'] = $address;
+        $mailConf['subject'] = $subject;
 
-        $mailConf[ 'htmlBody' ] = $htmlBody;
-        $mailConf[ 'altBody' ]  = $altBody;
+        $mailConf['htmlBody'] = $htmlBody;
+        $mailConf['altBody'] = $altBody;
 
-        $this->_enqueueEmailDelivery( $mailConf );
+        $this->_enqueueEmailDelivery($mailConf);
 
         return true;
     }
 
     /**
-     * @param $messageBody
+     * @param string $messageBody
      *
      * @return string
-     * @internal param $title
      */
-    protected function _buildTxtMessage( $messageBody ) {
-        $messageBody = preg_replace( "#<[/]*span[^>]*>#i", "", $messageBody );
-        $messageBody = preg_replace( "#<[/]*strong[^>]*>#i", "", $messageBody );
-        $messageBody = preg_replace( "#<[/]*(ol|ul|li)[^>]*>#i", "\t", $messageBody );
-        $messageBody = preg_replace( "#<[/]*(p)[^>]*>#i", "", $messageBody );
-        $messageBody = preg_replace( "#<a.*?href=[\"'](.*)[\"'][^>]*>(.*?)</a>#i", "$2 $1", $messageBody );
-        $messageBody = html_entity_decode( $messageBody );
+    protected function _buildTxtMessage(string $messageBody): string
+    {
+        $messageBody = preg_replace("#<[/]*span[^>]*>#i", "", $messageBody) ?? '';
+        $messageBody = preg_replace("#<[/]*strong[^>]*>#i", "", $messageBody) ?? '';
+        $messageBody = preg_replace("#<[/]*(ol|ul|li)[^>]*>#i", "\t", $messageBody) ?? '';
+        $messageBody = preg_replace("#<[/]*(p)[^>]*>#i", "", $messageBody) ?? '';
+        $messageBody = preg_replace("#<a.*?href=[\"'](.*)[\"'][^>]*>(.*?)</a>#i", "$2 $1", $messageBody) ?? '';
+        $messageBody = html_entity_decode($messageBody);
 
-        return preg_replace( "#<br[^>]*>#i", "\r\n", $messageBody );
+        return preg_replace("#<br[^>]*>#i", "\r\n", $messageBody) ?? '';
     }
 
 }

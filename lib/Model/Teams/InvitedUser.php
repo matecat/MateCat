@@ -7,60 +7,122 @@
  *
  */
 
-namespace Teams;
+namespace Model\Teams;
 
 
-use API\V2\Exceptions\ValidationError;
-use FlashMessage;
+use Controller\Abstracts\FlashMessage;
+use Controller\API\Commons\Exceptions\ValidationError;
+use DomainException;
+use Exception;
 use Klein\Response;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
+use ReflectionException;
+use RuntimeException;
+use TypeError;
+use UnexpectedValueException;
+use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
+use Utils\Tools\SimpleJWT;
 
-class InvitedUser {
+class InvitedUser
+{
 
     /**
-     * @var string
+     * @var array<string, mixed>
      */
-    protected $jwt;
+    protected array $jwt = [];
 
-    protected $response;
+    protected ?Response $response;
+    protected TeamDao $teamDao;
+    protected UserDao $userDao;
+    protected RedisHandler $redisHandler;
 
-    public function __construct( $jwt, Response $response ) {
-
-        try {
-            $this->jwt = \SimpleJWT::getValidPayload( $jwt );
-        } catch ( \DomainException $e ) {
-            throw new ValidationError( $e->getMessage(), $e->getCode(), $e );
+    /**
+     * @param string $jwt
+     * @param Response|null $response
+     * @param TeamDao|null $teamDao
+     * @param RedisHandler|null $redisHandler
+     *
+     * @throws ValidationError
+     * @throws TypeError
+     * @throws UnexpectedValueException
+     * @throws Exception
+     */
+    public function __construct(
+        string $jwt = '',
+        ?Response $response = null,
+        ?TeamDao $teamDao = null,
+        ?RedisHandler $redisHandler = null,
+        ?UserDao $userDao = null
+    ) {
+        if ($jwt !== '') {
+            try {
+                $this->jwt = SimpleJWT::getValidatedInstanceFromString(
+                    $jwt,
+                    AppConfig::$AUTHSECRET
+                )->getPayload();
+            } catch (DomainException $e) {
+                throw new ValidationError($e->getMessage(), $e->getCode(), $e);
+            }
         }
 
         $this->response = $response;
-
+        $this->teamDao = $teamDao ?? throw new \InvalidArgumentException('TeamDao is required');
+        $this->userDao = $userDao ?? throw new \InvalidArgumentException('UserDao is required');
+        $this->redisHandler = $redisHandler ?? new RedisHandler();
     }
 
-    public function prepareUserInvitedSignUpRedirect() {
-
-        $_SESSION[ 'invited_to_team' ] = $this->jwt;
-        FlashMessage::set( 'popup', 'signup', FlashMessage::SERVICE );
-        FlashMessage::set( 'signup_email', $this->jwt[ 'email' ], FlashMessage::SERVICE );
-
+    /**
+     * @throws Exception
+     */
+    public function prepareUserInvitedSignUpRedirect(): void
+    {
+        $_SESSION['invited_to_team'] = $this->jwt;
+        FlashMessage::set('popup', 'signup', FlashMessage::SERVICE);
+        FlashMessage::set('signup_email', $this->jwt['email'], FlashMessage::SERVICE);
     }
 
-    public static function completeTeamSignUp( $user, $invitation ){
+    /**
+     * @param UserStruct $user
+     * @param array{team_id: int, email: string} $invitation
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function completeTeamSignUp(UserStruct $user, array $invitation): void
+    {
+        $teamStruct = $this->teamDao->fetchById($invitation['team_id'], TeamStruct::class)
+            ?? throw new RuntimeException('Team not found');
 
-        $teamStruct = ( new TeamDao )->findById( $invitation[ 'team_id' ] );
-
-        $teamModel = new \TeamModel( $teamStruct );
-        $teamModel->setUser( $user );
-        $teamModel->addMemberEmail( $invitation[ 'email' ] );
+        $teamModel = new TeamModel($teamStruct, $this->userDao, $this->teamDao);
+        $teamModel->setUser($user);
+        $teamModel->addMemberEmail($invitation['email']);
         $teamModel->updateMembers();
 
-        $pendingInvitation = new PendingInvitations( ( new \RedisHandler() )->getConnection(), $invitation );
+        $pendingInvitation = new PendingInvitations($this->redisHandler->getConnection(), $invitation);
         $pendingInvitation->remove();
 
-        unset( $_SESSION[ 'invited_to_team' ] );
-
+        unset($_SESSION['invited_to_team']);
     }
 
-    public static function hasPendingInvitations(){
-        return isset( $_SESSION[ 'invited_to_team' ] ) && !empty( $_SESSION[ 'invited_to_team' ][ 'team_id' ] );
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function hasPendingInvitations(): bool
+    {
+        if (!isset($_SESSION['invited_to_team']) || empty($_SESSION['invited_to_team']['team_id'])) {
+            return false;
+        }
+
+        $pendingInvitation = new PendingInvitations($this->redisHandler->getConnection(), $_SESSION['invited_to_team']);
+        if (!$pendingInvitation->hasPendingInvitation($_SESSION['invited_to_team']['team_id'])) {
+            return false;
+        }
+
+        return true;
     }
 
 }

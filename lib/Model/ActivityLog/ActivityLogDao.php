@@ -6,61 +6,88 @@
  * Time: 17:59
  */
 
-namespace ActivityLog;
+namespace Model\ActivityLog;
 
-use DataAccess_AbstractDao;
-use DataAccess_IDaoStruct;
-use Database;
 use Exception;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\IDaoStruct;
 use PDO;
-use PDOStatement;
+use PDOException;
+use ReflectionException;
 
-class ActivityLogDao extends DataAccess_AbstractDao {
+class ActivityLogDao extends AbstractDao
+{
 
-    public $epilogueString = "";
-    public $whereConditions = " id_project = :id_project ";
+    public string $epilogueString = "";
+    public string $whereConditions = " id_project = :id_project ";
 
-    public function getLastActionInProject( $id_project) {
-        $conn = Database::obtain()->getConnection();
+    /**
+     * @return ActivityLogStruct[]
+     * @throws PDOException
+     */
+    public function getAllForProject(int $id_project): array
+    {
+        $conn = $this->database->getConnection();
+        $sql = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
+          JOIN users on activity_log.uid = users.uid WHERE id_project = :id_project ORDER BY activity_log.event_date DESC ";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ActivityLogStruct::class);
+
+        $stmt->execute(['id_project' => $id_project]);
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @return ActivityLogStruct[]
+     * @throws PDOException
+     */
+    public function getLastActionInProject(int $id_project): array
+    {
+        $conn = $this->database->getConnection();
         $sql = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
           JOIN (
            SELECT MAX(id) AS id FROM activity_log WHERE id_project = :id_project GROUP BY id_job
-          ) t ON t.id = activity_log.id JOIN users on activity_log.uid = users.uid ORDER BY activity_log.event_date DESC " ;
+          ) t ON t.id = activity_log.id JOIN users on activity_log.uid = users.uid ORDER BY activity_log.event_date DESC ";
 
-        $stmt = $conn->prepare( $sql ) ;
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, '\ActivityLog\ActivityLogStruct' );
+        $stmt = $conn->prepare($sql);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ActivityLogStruct::class);
 
-        $stmt->execute( array( 'id_project' =>  $id_project ) ) ;
-        return $stmt->fetchAll() ;
+        $stmt->execute(['id_project' => $id_project]);
+
+        return $stmt->fetchAll();
     }
 
-    public function create( ActivityLogStruct $activityStruct ) {
-
-        $conn = Database::obtain()->getConnection();
+    /**
+     * @throws PDOException
+     */
+    public function create(ActivityLogStruct $activityStruct): int
+    {
+        $conn = $this->database->getConnection();
         $jobStructToArray = $activityStruct->toArray(
-                array(
-                        'id_job',
-                        'id_project',
-                        'uid',
-                        'action',
-                        'ip',
-                        'event_date',
-                        'memory_key'
-                )
+            [
+                'id_job',
+                'id_project',
+                'uid',
+                'action',
+                'ip',
+                'event_date',
+                'memory_key'
+            ]
         );
-        $columns = array_keys( $jobStructToArray );
-        $values = array_values( $jobStructToArray );
+        $columns = array_keys($jobStructToArray);
+        $values = array_values($jobStructToArray);
 
-        $stmt = $conn->prepare( 'INSERT INTO `activity_log` ( ' . implode( ',', $columns ) . ' ) VALUES ( ' . implode( ',' , array_fill( 0, count( $values ), '?' ) ) . ' )' );
+        $stmt = $conn->prepare('INSERT INTO `activity_log` ( ' . implode(',', $columns) . ' ) VALUES ( ' . implode(',', array_fill(0, count($values), '?')) . ' )');
 
-        foreach( $values as $k => $v ){
-            $stmt->bindValue( $k +1, $v ); //Columns/Parameters are 1-based
+        foreach ($values as $k => $v) {
+            $stmt->bindValue($k + 1, $v); //Columns/Parameters are 1-based
         }
 
         $stmt->execute();
 
-        return $conn->lastInsertId();
-        
+        return (int)$conn->lastInsertId();
     }
 
     /**
@@ -68,81 +95,30 @@ class ActivityLogDao extends DataAccess_AbstractDao {
      *
      * Use when counters of the job value are not important but only the metadata are needed
      *
-     * XXX: Be careful, used by the ActivityLogStruct
+     * @param IDaoStruct $activityQuery
+     * @param array<string, int|string> $whereKeys
      *
-     * @see      \AsyncTasks\Workers\ActivityLogWorker
-     * @see      \ActivityLog\ActivityLogStruct
-     *
-     * @param DataAccess_IDaoStruct $activityQuery
-     * @param array $whereKeys
-     *
-     * @return DataAccess_IDaoStruct[]
-     */
-    public function read( DataAccess_IDaoStruct $activityQuery, $whereKeys = [ 'id_project' => 0 ] ) {
-
-        $stmt = $this->_getStatementForCache();
-
-        return $this->_fetchObject( $stmt,
-                $activityQuery,
-                $whereKeys
-        );
-
-    }
-
-    /**
-     *
-     * @return PDOStatement
-     */
-    protected function _getStatementForCache( $query = null ) {
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare(
-                "SELECT * FROM activity_log " .
-                " LEFT JOIN users USING( uid ) " .
-                " WHERE " .
-                $this->whereConditions . " " .
-                $this->epilogueString
-        );
-
-        return $stmt;
-    }
-
-    /**
-     * @param array $array_result
-     *
-     * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]|void
-     */
-    protected function _buildResult( $array_result ){}
-
-    /**
-     * Destroy a cached object
-     *
-     * @param ActivityLogStruct $activityQuery
-     *
-     * @return bool
+     * @return IDaoStruct[]
      * @throws Exception
+     * @throws ReflectionException
+     * @see      \Utils\AsyncTasks\Workers\ActivityLogWorker
+     * @see      ActivityLogStruct
      */
-    public function destroyCache( ActivityLogStruct $activityQuery ){
-        /*
-        * build the query
-        */
-        $stmt = $this->_getStatementForCache();
-        return $this->_destroyObjectCache( $stmt,
-                array(
-                        'id_project' => $activityQuery->id_project
-                )
+    public function read(IDaoStruct $activityQuery, array $whereKeys = ['id_project' => 0]): array
+    {
+        $stmt = $this->_getStatementForQuery(
+            "SELECT * FROM activity_log " .
+            " LEFT JOIN users USING( uid ) " .
+            " WHERE " .
+            $this->whereConditions . " " .
+            $this->epilogueString
         );
-    }
 
-    public static function getByID( $activity_id ){
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM activity_log WHERE id = ?");
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ActivityLogStruct' );
-        $stmt->execute( array( $activity_id ) );
-
-        return $stmt->fetch();
-
+        return $this->_fetchObjectMap(
+            $stmt,
+            get_class($activityQuery),
+            $whereKeys
+        );
     }
 
 }

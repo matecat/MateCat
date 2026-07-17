@@ -1,0 +1,178 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Domenico <ostico@gmail.com>, <domenico@translated.net>
+ * Date: 19/09/2024
+ * Time: 09:38
+ */
+
+namespace Controller\API\App\Authentication;
+
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\Abstracts\Authentication\AuthCookie;
+use Controller\Abstracts\Authentication\AuthenticationHelper;
+use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
+use Controller\Traits\RateLimiterTrait;
+use Exception;
+use Klein\Response;
+use Model\Teams\TeamDao;
+use Model\Users\RedeemableProject;
+use Model\Users\UserDao;
+use ReflectionException;
+use TypeError;
+use Utils\Registry\AppConfig;
+use Utils\Tools\SimpleJWT;
+use Utils\Tools\Utils;
+
+class LoginController extends AbstractStatefulKleinController
+{
+
+    use RateLimiterTrait;
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function directLogout(): void
+    {
+        $this->logout();
+        $this->response->code(200);
+    }
+
+    /**
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function login(): void
+    {
+        $params = filter_var_array($this->request->params(), [
+            'email' => FILTER_SANITIZE_EMAIL,
+            'password' => FILTER_SANITIZE_SPECIAL_CHARS
+        ]);
+
+        $emailIdentifier = is_string($params['email']) && $params['email'] !== '' ? $params['email'] : 'BLANK_EMAIL';
+
+        $rateLimitEmailResponse = $this->checkAndIncrementRateLimit($this->response, $emailIdentifier, '/api/app/user/login', 5);
+        $rateLimitIpResponse = $this->checkAndIncrementRateLimit($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/login', 5);
+
+        if ($rateLimitEmailResponse instanceof Response) {
+            $this->response = $rateLimitEmailResponse;
+
+            return;
+        }
+
+        if ($rateLimitIpResponse instanceof Response) {
+            $this->response = $rateLimitIpResponse;
+
+            return;
+        }
+
+        // XSRF-Token (Signed Double-Submit): verify signature + expiry, then bind to the session
+        $xsrfToken = $this->request->headers()->get(AppConfig::$XSRF_TOKEN);
+
+        if (!is_string($xsrfToken)) {
+            $this->response->code(403);
+
+            return;
+        }
+
+        try {
+            $jwt = SimpleJWT::getValidatedInstanceFromString($xsrfToken, AppConfig::$AUTHSECRET);
+        } catch (Exception) {
+            $this->response->code(403);
+
+            return;
+        }
+
+        // single-use: the token must match the csrf issued to THIS browser session (CWE-352)
+        $sessionCsrf = $_SESSION['login_csrf'] ?? null;
+        unset($_SESSION['login_csrf']);
+
+        $tokenCsrf = $jwt['csrf'];
+        if (!is_string($sessionCsrf) || !is_string($tokenCsrf) || !hash_equals($sessionCsrf, $tokenCsrf)) {
+            $this->response->code(403);
+
+            return;
+        }
+
+        $dao = $this->createUserDao();
+        $user = is_string($params['email']) ? $dao->getByEmail($params['email']) : null;
+
+        if ($user && is_string($params['password']) && $user->passwordMatch($params['password']) && !is_null($user->email_confirmed_at)) {
+            $user->clearAuthToken();
+
+            $dao->updateUser($user);
+            $uid = $user->uid ?? throw new Exception('User not authenticated');
+            $dao->destroyCacheByUid($uid);
+
+            $project = new RedeemableProject(
+                $user,
+                $_SESSION,
+                new TeamDao($this->getDatabase())
+            );
+            $project->tryToRedeem();
+
+            AuthCookie::setCredentials($user, new SessionTokenStoreHandler());
+            AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase());
+
+            $this->response->code(200);
+        } else {
+            $this->response->code(404);
+        }
+    }
+
+    protected function createUserDao(): UserDao
+    {
+        return new UserDao($this->getDatabase());
+    }
+
+    /**
+     * Signed Double-Submit Cookie
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function token(): void
+    {
+        $csrf = Utils::uuid4();
+        $_SESSION['login_csrf'] = $csrf;
+
+        $jwt = new SimpleJWT(
+            [
+                "csrf" => $csrf
+            ],
+            AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
+            AppConfig::$AUTHSECRET,
+            60
+        );
+        $this->response->header(AppConfig::$XSRF_TOKEN, $jwt->jsonSerialize());
+        $this->response->code(200);
+    }
+
+    /**
+     * Signed Double-Submit Cookie
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function socketToken(): void
+    {
+        if (empty($_SESSION['user'])) {
+            $this->response->code(406);
+
+            return;
+        }
+
+        $jwt = new SimpleJWT(
+            [
+                "uid" => $_SESSION['user']->uid
+            ],
+            AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
+            AppConfig::$AUTHSECRET,
+            60
+        );
+
+        $this->response->header(AppConfig::$XSRF_TOKEN, $jwt->jsonSerialize());
+        $this->response->code(200);
+    }
+
+}

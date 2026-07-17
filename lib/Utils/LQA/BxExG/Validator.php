@@ -1,24 +1,26 @@
 <?php
 
-namespace LQA\BxExG;
+namespace Utils\LQA\BxExG;
 
-use LQA\QA;
+use Utils\LQA\QA;
 
-class Validator {
+class Validator
+{
 
     /**
      * To get array map of QA
      *
      * @var QA
      */
-    private $qa;
+    private QA $qa;
 
     /**
      * Validator constructor.
      *
      * @param QA $qa
      */
-    public function __construct( QA $qa ) {
+    public function __construct(QA $qa)
+    {
         $this->qa = $qa;
     }
 
@@ -29,23 +31,23 @@ class Validator {
      * - ERR_EX_BX_COUNT_MISMATCH:  [ERROR]    when there is a tag count mismatch between source and target
      * - ERR_EX_BX_WRONG_POSITION:  [WARNING]  when there is nested <bx> or <ex> inside a <g> in source and NOT in target or any other mismatch error
      *
-     * @return array
+     * @return array<int>
      */
-    public function validate() {
-
+    public function validate(): array
+    {
         $qa = $this->qa;
 
         // compare source and target tags maps
-        $sourceMap = Mapper::extract( $qa->getSourceSeg() );
-        $targetMap = Mapper::extract( $qa->getTargetSeg() );
+        $sourceMap = Mapper::extract($qa->getSourceSeg());
+        $targetMap = Mapper::extract($qa->getTargetSeg());
 
         // if no <bx> or <ex> are found in source and target no errors are returned
-        if(!$this->doesAMapHaveOneBxOrEx($sourceMap) and !$this->doesAMapHaveOneBxOrEx($targetMap)){
+        if (!$this->doesAMapHaveOneBxOrEx($sourceMap) and !$this->doesAMapHaveOneBxOrEx($targetMap)) {
             return [];
         }
 
         // if maps are equal return empty errors array
-        if ( $sourceMap == $targetMap ) {
+        if ($sourceMap == $targetMap) {
             return [];
         }
 
@@ -54,36 +56,32 @@ class Validator {
         $sourceTagCount = 0;
         $targetTagCount = 0;
 
-        /** @var $element Element */
-        foreach ( $sourceMap as $i => $element ) {
-
+        foreach ($sourceMap as $i => $element) {
             // for later (check for ERR_EX_BX_COUNT_MISMATCH)
             $sourceTagCount += $element->getTotalTagsCount();
 
             // loop target map to find corresponding <g> element
-            /** @var $targetElement Element */
-            foreach ( $targetMap as $index => $targetElement ) {
-                if ( $element->correspondsTo( $targetElement ) and $element->isG() ) {
+            foreach ($targetMap as $targetElement) {
+                if ($element->correspondsTo($targetElement) and $element->isG()) {
                     // check for ERR_EX_BX_NESTED_IN_G
-                    if ( !$element->hasNestedBxOrEx() and $targetElement->hasNestedBxOrEx() ) {
+                    if (!$element->hasNestedBxOrEx() and $targetElement->hasNestedBxOrEx()) {
                         $errors[] = $qa::ERR_EX_BX_NESTED_IN_G;
                     }
                 }
             }
         }
 
-        /** @var $element Element */
-        foreach ( $targetMap as $index => $element ) {
+        foreach ($targetMap as $element) {
             $targetTagCount += $element->getTotalTagsCount();
         }
 
         // check for ERR_EX_BX_COUNT_MISMATCH
-        if ( $sourceTagCount !== $targetTagCount ) {
+        if ($sourceTagCount !== $targetTagCount) {
             $errors[] = $qa::ERR_EX_BX_COUNT_MISMATCH;
         }
 
         // return a generic ERR_EX_BX_WRONG_POSITION if there is no ERR_EX_BX_NESTED_IN_G or ERR_EX_BX_COUNT_MISMATCH errors
-        if ( !in_array( $qa::ERR_EX_BX_COUNT_MISMATCH, $errors ) and !in_array( $qa::ERR_EX_BX_NESTED_IN_G, $errors ) ) {
+        if (!in_array($qa::ERR_EX_BX_COUNT_MISMATCH, $errors) and !in_array($qa::ERR_EX_BX_NESTED_IN_G, $errors)) {
             $errors[] = $qa::ERR_EX_BX_WRONG_POSITION;
         }
 
@@ -91,19 +89,19 @@ class Validator {
     }
 
     /**
-     * @param array $map
+     * @param array<Element> $map
      *
      * @return bool
      */
-    private function doesAMapHaveOneBxOrEx(array $map = [])
+    private function doesAMapHaveOneBxOrEx(array $map = []): bool
     {
-        if (empty($map)){
+        if (empty($map)) {
             return false;
         }
 
         /** @var Element $element */
-        foreach ($map as $element){
-            if($element->isExOrBx() or $element->hasNestedBxOrEx()){
+        foreach ($map as $element) {
+            if ($element->isExOrBx() or $element->hasNestedBxOrEx()) {
                 return true;
             }
         }

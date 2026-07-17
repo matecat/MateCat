@@ -6,71 +6,110 @@
  * Time: 15:01
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 
-use Teams\MembershipStruct;
+use Exception;
+use Model\Teams\MembershipStruct;
+use Model\Users\UserDao;
+use ReflectionException;
+use RuntimeException;
 
-class Membership {
+class Membership
+{
 
-    protected $data;
+    /**
+     * @var MembershipStruct[]
+     */
+    protected array $data;
 
-    public function __construct( $data ) {
+    protected UserDao $userDao;
+
+    /**
+     * @param MembershipStruct[] $data
+     * @param UserDao $userDao
+     *
+     * @throws \TypeError
+     */
+    public function __construct($data, UserDao $userDao)
+    {
         $this->data = $data;
+        $this->userDao = $userDao;
     }
 
-    public function renderItem( MembershipStruct $membership ) {
-        $out = array(
-                'id'      => (int)$membership->id,
-                'id_team' => (int)$membership->id_team,
-        );
+    /**
+     * @return array<string, mixed>
+     *
+     * @throws Exception
+     * @throws ReflectionException
+     * @throws RuntimeException
+     */
+    public function renderItem(MembershipStruct $membership): array
+    {
+        $out = [
+            'id' => $membership->id ?? 0,
+            'id_team' => $membership->id_team,
+        ];
 
-        if ( !is_null( $membership->getUser() ) ) {
-            $out[ 'user' ] = User::renderItem( $membership->getUser() );
+        $out['user'] = User::renderItem($membership->getUser($this->userDao));
+
+        $metadata = UserMetadata::renderMetadataCollection($membership->getUserMetadata());
+        if (!empty($metadata)) {
+            $out['user_metadata'] = array_filter($metadata);
         }
 
-        $metadata = UserMetadata::renderMetadataCollection( $membership->getUserMetadata() );
-        if ( !empty( $metadata ) ) {
-            $out[ 'user_metadata' ] = array_filter( $metadata );
-        }
-
-        $out[ 'projects' ] = (int)$membership->getAssignedProjects();
+        $out['projects'] = $membership->getAssignedProjects();
 
         return $out;
     }
 
-    public function render() {
+    /**
+     * @return list<array<string, mixed>>
+     *
+     * @throws Exception
+     * @throws ReflectionException
+     * @throws RuntimeException
+     */
+    public function render(): array
+    {
         $out = [];
-        foreach ( $this->data as $membership ) {
-            $out[] = $this->renderItem( $membership );
+        foreach ($this->data as $membership) {
+            $out[] = $this->renderItem($membership);
         }
 
         return $out;
     }
 
-    public function renderPublic() {
+    /**
+     * @return list<array<string, mixed>>
+     *
+     * @throws Exception
+     * @throws ReflectionException
+     * @throws RuntimeException
+     */
+    public function renderPublic(): array
+    {
         $out = [];
-        foreach ( $this->data as $membership ) {
-            $render = $this->renderItemPublic( $membership );
-            if($render){
+        foreach ($this->data as $membership) {
+            $render = $this->renderItemPublic($membership);
+            if ($render) {
                 $out[] = $render;
             }
-
         }
 
         return $out;
     }
 
-    public function renderItemPublic( MembershipStruct $membership ) {
-
-        if ( !is_null( $membership->getUser() ) ) {
-            return User::renderItemPublic( $membership->getUser() );
-        }
-        else{
-            return false;
-        }
-
-
+    /**
+     * @return array<string, mixed>|false
+     *
+     * @throws Exception
+     * @throws ReflectionException
+     * @throws RuntimeException
+     */
+    public function renderItemPublic(MembershipStruct $membership): false|array
+    {
+        return User::renderItemPublic($membership->getUser($this->userDao));
     }
 
 

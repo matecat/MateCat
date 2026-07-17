@@ -1,0 +1,353 @@
+jest.mock('../stores/AppDispatcher', () => ({
+  dispatch: jest.fn(),
+  register: jest.fn(),
+}))
+
+jest.mock('../stores/SegmentStore', () => ({
+  getCurrentSegmentId: jest.fn(),
+  getSegmentByIdToJS: jest.fn(),
+  consecutiveCopySourceNum: [],
+}))
+
+jest.mock('../stores/CatToolStore', () => ({
+  getJobMetadata: jest.fn(),
+}))
+
+jest.mock('../utils/segmentUtils', () => ({
+  isIceSegment: jest.fn(() => false),
+  isReadonlySegment: jest.fn(),
+  removeUnlockedSegment: jest.fn(),
+}))
+
+jest.mock('./CatToolActions', () => ({
+  addNotification: jest.fn(),
+  onRender: jest.fn(),
+}))
+
+jest.mock('./ModalsActions', () => ({
+  showModalComponent: jest.fn(),
+}))
+
+jest.mock('../components/modals/AlertModal', () => 'AlertModal')
+jest.mock('../components/modals/CopySourceModal', () => ({
+  COPY_SOURCE_COOKIE: 'copy_source',
+  __esModule: true,
+  default: 'CopySourceModal',
+}))
+jest.mock('../components/modals/ConfirmMessageModal', () => 'ConfirmMessageModal')
+
+jest.mock('../utils/offlineUtils', () => ({
+  startOfflineMode: jest.fn(),
+  failedConnection: jest.fn(),
+}))
+
+jest.mock('../utils/textUtils', () => ({
+  __esModule: true,
+  default: {justSelecting: jest.fn(() => false)},
+}))
+
+jest.mock('../utils/commonUtils', () => ({
+  __esModule: true,
+  default: {dispatchCustomEvent: jest.fn()},
+}))
+
+jest.mock('../components/segments/utils/translationMatches', () => ({
+  __esModule: true,
+  default: {},
+}))
+
+jest.mock('../components/segments/utils/DraftMatecatUtils', () => ({
+  __esModule: true,
+  default: {},
+}))
+
+jest.mock('../components/header/cattol/segment_filter/segment_filter', () => ({
+  __esModule: true,
+  default: {},
+}))
+
+jest.mock('../constants/SegmentConstants', () => ({}))
+jest.mock('../constants/EditAreaConstants', () => ({}))
+jest.mock('../constants/CatToolConstants', () => ({}))
+jest.mock('../constants/Constants', () => ({
+  REVISE_STEP_NUMBER: {},
+  SEGMENTS_STATUS: {},
+}))
+
+jest.mock('../components/segments/SegmentFooter', () => ({
+  TAB: {},
+}))
+
+jest.mock('../api/getGlossaryForSegment', () => ({
+  getGlossaryForSegment: jest.fn(),
+}))
+jest.mock('../api/getGlossaryMatch', () => ({getGlossaryMatch: jest.fn()}))
+jest.mock('../api/deleteGlossaryItem', () => ({deleteGlossaryItem: jest.fn()}))
+jest.mock('../api/addGlossaryItem', () => ({addGlossaryItem: jest.fn()}))
+jest.mock('../api/updateGlossaryItem', () => ({updateGlossaryItem: jest.fn()}))
+jest.mock('../api/approveSegments', () => ({approveSegments: jest.fn()}))
+jest.mock('../api/translateSegments', () => ({translateSegments: jest.fn()}))
+jest.mock('../api/splitSegment', () => ({splitSegment: jest.fn()}))
+jest.mock('../api/copyAllSourceToTarget', () => ({
+  copyAllSourceToTarget: jest.fn(),
+}))
+jest.mock('../api/getLocalWarnings', () => ({getLocalWarnings: jest.fn()}))
+jest.mock('../api/getGlossaryCheck', () => ({getGlossaryCheck: jest.fn()}))
+jest.mock('../api/deleteSegmentIssue', () => ({
+  deleteSegmentIssue: jest.fn(),
+}))
+jest.mock('../api/getSegmentsIssues', () => ({getSegmentsIssues: jest.fn()}))
+jest.mock('../api/getSegmentVersionsIssues', () => ({
+  getSegmentVersionsIssues: jest.fn(),
+}))
+jest.mock('../api/sendSegmentVersionIssueComment', () => ({
+  sendSegmentVersionIssueComment: jest.fn(),
+}))
+jest.mock('../api/getTagProjection', () => ({getTagProjection: jest.fn()}))
+jest.mock('../api/setCurrentSegment', () => ({setCurrentSegment: jest.fn()}))
+jest.mock('../api/getTranslationMismatches', () => ({
+  getTranslationMismatches: jest.fn(),
+}))
+
+jest.mock('react', () => ({createElement: jest.fn()}))
+jest.mock('jquery', () => jest.fn(() => ({find: jest.fn()})))
+jest.mock('lodash', () => ({
+  each: jest.fn(),
+  forEach: jest.fn(),
+  isUndefined: (v) => typeof v === 'undefined',
+}))
+jest.mock('lodash/function', () => ({
+  debounce: (fn) => fn,
+}))
+jest.mock('immutable', () => ({fromJS: jest.fn()}))
+jest.mock('lodash/array', () => ({union: jest.fn()}))
+
+jest.mock('../utils/speech2text', () => ({
+  __esModule: true,
+  default: {enabled: jest.fn(() => false)},
+}))
+
+jest.mock('./segmentClassActions', () => ({
+  addClassToSegment: jest.fn(),
+  removeClassToSegment: jest.fn(),
+}))
+
+jest.mock('../setTranslationUtil', () => ({
+  segmentTranslation: jest.fn(),
+  translationIsToSaveBeforeClose: jest.fn(() => false),
+}))
+
+import SegmentActions from './SegmentActions'
+import SegmentUtils from '../utils/segmentUtils'
+import ModalsActions from './ModalsActions'
+import CatToolStore from '../stores/CatToolStore'
+import AppDispatcher from '../stores/AppDispatcher'
+
+describe('SegmentActions.handleClickOnReadOnly', () => {
+  beforeEach(() => {
+    global.config = {
+      id_job: 2,
+      project_completion_feature_enabled: false,
+      isReview: false,
+      job_completion_current_phase: 'translate',
+    }
+
+    jest.clearAllMocks()
+    SegmentUtils.isIceSegment.mockReturnValue(false)
+  })
+
+  test('shows "Segment disabled" AlertModal when metadata has translation_disabled=true', () => {
+    const segment = {
+      unlocked: true,
+      metadata: [{meta_key: 'translation_disabled', meta_value: true}],
+    }
+
+    SegmentActions.handleClickOnReadOnly(segment)
+
+    expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
+      'ConfirmMessage',
+      {
+        text: 'This segment was disabled by the project owner and cannot be edited.',
+        successText: 'Got it',
+      },
+      'Segment disabled',
+    )
+  })
+
+  test('shows generic readonly AlertModal when segment is not disabled and not ICE-locked', () => {
+    const segment = {
+      unlocked: true,
+      metadata: [],
+    }
+
+    SegmentActions.handleClickOnReadOnly(segment)
+
+    expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
+      'Alert',
+      expect.objectContaining({
+        text: expect.any(String),
+      }),
+    )
+    expect(ModalsActions.showModalComponent).not.toHaveBeenCalledWith(
+      'ConfirmMessage',
+      expect.objectContaining({
+        text: 'This segment was disabled by the project owner and cannot be edited.',
+        successText: 'Got it',
+      }),
+      'Segment disabled',
+    )
+  })
+
+  test('shows ICE match modal when segment is ICE-locked', () => {
+    SegmentUtils.isIceSegment.mockReturnValue(true)
+
+    const segment = {
+      unlocked: false,
+      metadata: [{meta_key: 'translation_disabled', meta_value: true}],
+    }
+
+    SegmentActions.handleClickOnReadOnly(segment)
+
+    expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
+      'Alert',
+      expect.objectContaining({
+        text: expect.stringContaining('Segment is locked'),
+      }),
+      'Ice Matches',
+    )
+  })
+
+  test('does not show disabled modal when translation_disabled is false', () => {
+    const segment = {
+      unlocked: true,
+      metadata: [{meta_key: 'translation_disabled', meta_value: false}],
+    }
+
+    SegmentActions.handleClickOnReadOnly(segment)
+
+    expect(ModalsActions.showModalComponent).not.toHaveBeenCalledWith(
+      'ConfirmMessage',
+      expect.objectContaining({
+        text: 'This segment was disabled by the project owner and cannot be edited.',
+        successText: 'Got it',
+      }),
+      'Segment disabled',
+    )
+  })
+})
+
+describe('SegmentActions.clickOnApprovedButton — mandatory issues gate', () => {
+  let openIssuesSpy
+  let showIssuesMessageSpy
+
+  beforeAll(async () => {
+    await Promise.resolve()
+  })
+
+  beforeEach(() => {
+    global.config = {
+      isReview: true,
+      revisionNumber: 1,
+    }
+    jest.useFakeTimers()
+    jest.clearAllMocks()
+    openIssuesSpy = jest
+      .spyOn(SegmentActions, 'openIssuesPanel')
+      .mockReturnValue()
+    showIssuesMessageSpy = jest
+      .spyOn(SegmentActions, 'showIssuesMessage')
+      .mockReturnValue()
+  })
+
+  afterEach(() => {
+    openIssuesSpy.mockRestore()
+    showIssuesMessageSpy.mockRestore()
+    jest.useRealTimers()
+  })
+
+  const makeSegment = () => ({
+    sid: '1-1',
+    modified: true,
+    splitted: false,
+    ice_locked: false,
+    versions: [],
+  })
+
+  test('opens issues panel when mandatory_issues is undefined (non-array defaults to required)', () => {
+    CatToolStore.getJobMetadata.mockReturnValue({
+      project: {mandatory_issues: undefined},
+    })
+    SegmentActions.clickOnApprovedButton(makeSegment(), false)
+    expect(openIssuesSpy).toHaveBeenCalledWith({sid: '1-1'}, true)
+  })
+
+  test('opens issues panel when current revision is in mandatory_issues array', () => {
+    CatToolStore.getJobMetadata.mockReturnValue({
+      project: {mandatory_issues: ['r1', 'r2']},
+    })
+    SegmentActions.clickOnApprovedButton(makeSegment(), false)
+    expect(openIssuesSpy).toHaveBeenCalledWith({sid: '1-1'}, true)
+  })
+
+  test('skips issues panel when current revision is absent from mandatory_issues', () => {
+    CatToolStore.getJobMetadata.mockReturnValue({
+      project: {mandatory_issues: ['r2']},
+    })
+    SegmentActions.clickOnApprovedButton(makeSegment(), false)
+    expect(openIssuesSpy).not.toHaveBeenCalled()
+  })
+
+  test('skips issues panel when mandatory_issues is empty (none required)', () => {
+    CatToolStore.getJobMetadata.mockReturnValue({
+      project: {mandatory_issues: []},
+    })
+    SegmentActions.clickOnApprovedButton(makeSegment(), false)
+    expect(openIssuesSpy).not.toHaveBeenCalled()
+  })
+
+  test('opens issues panel for revision 2 when r2 is in mandatory_issues', () => {
+    global.config.revisionNumber = 2
+    CatToolStore.getJobMetadata.mockReturnValue({
+      project: {mandatory_issues: ['r1', 'r2']},
+    })
+    SegmentActions.clickOnApprovedButton(makeSegment(), false)
+    expect(openIssuesSpy).toHaveBeenCalledWith({sid: '1-1'}, true)
+  })
+
+  test('skips issues panel for revision 2 when only r1 is in mandatory_issues', () => {
+    global.config.revisionNumber = 2
+    CatToolStore.getJobMetadata.mockReturnValue({
+      project: {mandatory_issues: ['r1']},
+    })
+    SegmentActions.clickOnApprovedButton(makeSegment(), false)
+    expect(openIssuesSpy).not.toHaveBeenCalled()
+  })
+})
+
+describe('SegmentActions.updateSegmentDisabledState', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  test('dispatches SET_SEGMENT_DISABLED with disabled=true', () => {
+    SegmentActions.updateSegmentDisabledState(42, true)
+
+    expect(AppDispatcher.dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({id: 42, disabled: true}),
+    )
+  })
+
+  test('dispatches SET_SEGMENT_DISABLED with disabled=false', () => {
+    SegmentActions.updateSegmentDisabledState(42, false)
+
+    expect(AppDispatcher.dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({id: 42, disabled: false}),
+    )
+  })
+
+  test('does not dispatch when sid is falsy', () => {
+    SegmentActions.updateSegmentDisabledState(null, true)
+
+    expect(AppDispatcher.dispatch).not.toHaveBeenCalled()
+  })
+})

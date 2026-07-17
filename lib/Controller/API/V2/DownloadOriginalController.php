@@ -1,0 +1,142 @@
+<?php
+
+namespace Controller\API\V2;
+
+use Controller\Abstracts\AbstractDownloadController;
+use Exception;
+use Model\ActivityLog\Activity;
+use Model\ActivityLog\ActivityLogStruct;
+use Model\Conversion\ZipArchiveHandler;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\Jobs\JobDao;
+use Model\LQA\ChunkReviewDao;
+use Model\Projects\ProjectDao;
+use TypeError;
+use Utils\Tools\Utils;
+use View\API\Commons\ZipContentObject;
+
+set_time_limit(180);
+
+class DownloadOriginalController extends AbstractDownloadController
+{
+
+    /**
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function index(): void
+    {
+        $filterArgs = [
+            'filename' => [
+                'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                'flags' => FILTER_FLAG_STRIP_LOW
+            ],
+            'id_file' => ['filter' => FILTER_SANITIZE_NUMBER_INT],
+            'id_job' => ['filter' => FILTER_SANITIZE_NUMBER_INT],
+            'download_type' => [
+                'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ],
+            'password' => [
+                'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ]
+        ];
+
+        $__postInput = filter_var_array($this->request->params(), $filterArgs);
+
+        $this->_user_provided_filename = $__postInput['filename'] ?: null;
+        $this->id_job = (int)($__postInput['id_job'] ?? 0);
+        $this->password = (string)($__postInput['password'] ?? '');
+
+        // get Job Info, we need only a row of jobs ( split )
+        $jobData = (new JobDao($this->getDatabase()))->getByIdAndPassword((int)$this->id_job, $this->password);
+
+        // if no job was found, check if the provided password is a password_review
+        if (empty($jobData)) {
+            $chunkReviewStruct = (new ChunkReviewDao($this->getDatabase()))->findByReviewPasswordAndJobId($this->password, (int)$this->id_job);
+            if (empty($chunkReviewStruct)) {
+                $msg = "Error : wrong password provided for download \n\n " . var_export($this->request->paramsPost()->all(), true) . "\n";
+                $this->logger->debug($msg);
+                return;
+            }
+            $jobData = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
+        }
+
+        //get storage object
+        $fs = FilesStorageFactory::create();
+        $files_job = $fs->getFilesForJob($this->getDatabase(), $this->id_job, false);
+
+        if (empty($files_job)) {
+            throw new Exception("No files found for job {$this->id_job}");
+        }
+
+        //take the project ID and creation date, array index zero is good, all id are equals
+        $id_project = $files_job[0]['id_project'];
+
+        $this->project = (new ProjectDao($this->getDatabase()))->findById($id_project) ?? throw new Exception("Project not found");
+
+        $output_content = [];
+
+        foreach ($files_job as $file) {
+            $id_file = $file['id_file'];
+
+            $zipPathInfo = ZipArchiveHandler::zipPathInfo($file['filename']);
+
+            if (is_array($zipPathInfo)) {
+                $output_content[$id_file]['output_filename'] = $zipPathInfo['zipfilename'];
+                $output_content[$id_file]['input_filename'] = $fs->getOriginalZipPath($this->project->create_date, $id_project, $zipPathInfo['zipfilename']);
+            } else {
+                $output_content[$id_file]['output_filename'] = $file['filename'];
+                $output_content[$id_file]['input_filename'] = $file['originalFilePath'];
+            }
+        }
+
+        /*
+         * get Unique file zip because there are more than one file in the zip
+         * array_unique compares items using a string comparison.
+         *
+         * From the docs:
+         * Note: Two elements are considered equal if and only if (string) $elem1 === (string) $elem2.
+         * In words: when the string representation is the same. The first element will be used.
+         */
+        $output_content = array_map('unserialize', array_unique(array_map('serialize', $output_content)));
+
+        foreach ($output_content as $key => $iFile) {
+            $output_content[$key] = new ZipContentObject($iFile);
+        }
+
+        if (count($output_content) > 1) {
+            $this->setFilename($this->getDefaultFileName($this->project));
+            $pathInfo = AbstractFilesStorage::pathinfo_fix($this->_filename);
+
+            if (!is_array($pathInfo)) {
+                throw new Exception("pathinfo_fix returned non-array value");
+            }
+
+            if (($pathInfo['extension'] ?? '') !== 'zip') {
+                $this->setFilename(($pathInfo['basename'] ?? $this->_filename) . ".zip");
+            }
+
+            $this->outputContent = self::composeZip($output_content, null, true); //add zip archive content here;
+            $this->setMimeType();
+        } elseif (count($output_content) == 1) {
+            $oContent = array_pop($output_content);
+            $this->setFilename($oContent->output_filename);
+            $this->setOutputContent($oContent);
+            $this->setMimeType();
+        }
+
+        $activity = new ActivityLogStruct();
+        $activity->id_job = $this->id_job;
+        $activity->id_project = $id_project;
+        $activity->action = ActivityLogStruct::DOWNLOAD_ORIGINAL;
+        $activity->ip = Utils::getRealIpAddr();
+        $activity->uid = $this->user->uid;
+        $activity->event_date = date('Y-m-d H:i:s');
+        Activity::save($activity);
+
+        $this->finalize();
+    }
+}

@@ -7,44 +7,49 @@
  *
  */
 
-namespace Teams;
+namespace Model\Teams;
 
 
-use Predis\Client;
+use Predis\ClientInterface;
 
-class PendingInvitations {
+class PendingInvitations
+{
 
-    const REDIS_INVITATIONS_SET = 'teams_invites:%u';
+    const string REDIS_INVITATIONS_SET = 'teams_invites:%u';
+
+    protected ClientInterface $redisClient;
+
+    /** @var array{team_id: int, email: string} */
+    protected array $payload;
 
     /**
-     * @var Client
+     * @param ClientInterface $redis
+     * @param array{team_id: int, email: string} $payload
      */
-    protected $redisClient;
-
-    protected $payload;
-
-    public function __construct( Client $redis, $payload ) {
+    public function __construct(ClientInterface $redis, array $payload)
+    {
         $this->redisClient = $redis;
-        $this->payload     = $payload;
+        $this->payload = $payload;
     }
 
-    public function set(){
-
-        $this->redisClient->sadd( sprintf( self::REDIS_INVITATIONS_SET, $this->payload[ 'team_id' ] ), $this->payload[ 'email' ] );
-        $this->redisClient->expire( sprintf( self::REDIS_INVITATIONS_SET, $this->payload[ 'team_id' ] ), 60 * 60 * 24 * 3 ); //3 days renew
-
-    }
-
-    public function remove(){
-
-        return $this->redisClient->srem( sprintf( self::REDIS_INVITATIONS_SET, $this->payload[ 'team_id' ] ), $this->payload[ 'email' ] );
+    public function set(): void
+    {
+        $this->redisClient->sadd(sprintf(self::REDIS_INVITATIONS_SET, $this->payload['team_id']), [$this->payload['email']]);
+        $this->redisClient->expire(sprintf(self::REDIS_INVITATIONS_SET, $this->payload['team_id']), 60 * 60 * 24 * 3); //3-day renew
 
     }
 
-    public function get( $id_team ){
+    public function remove(): int
+    {
+        return $this->redisClient->srem(sprintf(self::REDIS_INVITATIONS_SET, $this->payload['team_id']), $this->payload['email']);
+    }
 
-        return $this->redisClient->smembers( sprintf( self::REDIS_INVITATIONS_SET, $id_team ) );
-
+    /**
+     * @return array<string>
+     */
+    public function hasPendingInvitation(int $id_team): array
+    {
+        return $this->redisClient->smembers(sprintf(self::REDIS_INVITATIONS_SET, $id_team));
     }
 
 }

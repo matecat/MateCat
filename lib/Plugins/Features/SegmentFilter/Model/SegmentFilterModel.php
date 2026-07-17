@@ -6,52 +6,55 @@
  * Time: 11:08 AM
  */
 
-namespace Features\SegmentFilter\Model;
+namespace Plugins\Features\SegmentFilter\Model;
 
-class SegmentFilterModel {
+use DivisionByZeroError;
+use Exception;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Jobs\JobStruct;
+use ReflectionException;
+
+class SegmentFilterModel
+{
 
     /**
-     * @var \Chunks_ChunkStruct
+     * @var JobStruct
      */
-    private $chunk;
+    private JobStruct $chunk;
 
     /**
      * @var FilterDefinition
      */
-    private $filter;
+    private FilterDefinition $filter;
+    private SegmentFilterDao $segmentFilterDao;
 
     /**
      * SegmentFilterModel constructor.
      *
-     * @param \Chunks_ChunkStruct $chunk
-     * @param FilterDefinition    $filter
-     *
-     * @throws \API\V2\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @param JobStruct $chunk
+     * @param FilterDefinition $filter
+     * @param SegmentFilterDao $segmentFilterDao
      */
-    public function __construct( \Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
-        $this->chunk  = $chunk;
+    public function __construct(JobStruct $chunk, FilterDefinition $filter, SegmentFilterDao $segmentFilterDao)
+    {
+        $this->chunk = $chunk;
         $this->filter = $filter;
-        $this->chunk->getProject()->getFeaturesSet()->filter('filterSegmentFilter', $filter, $chunk) ;
+        $this->segmentFilterDao = $segmentFilterDao;
     }
 
     /**
-     * @return null|\Translations_SegmentTranslationStruct[]
-     * @throws \Exception
+     * @return ShapelessConcreteStruct[]
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws DivisionByZeroError
      */
-    public function getSegmentList() {
-        $result = null;
-
-        if ( $this->filter->isSampled() ) {
-            $result = SegmentFilterDao::findSegmentIdsForSample( $this->chunk, $this->filter );
-        } else {
-            $result = SegmentFilterDao::findSegmentIdsBySimpleFilter( $this->chunk, $this->filter );
+    public function getSegmentList(): array
+    {
+        if ($this->filter->isSampled()) {
+            return $this->segmentFilterDao->findSegmentIdsForSample($this->chunk, $this->filter);
         }
 
-        return $result;
+        return $this->segmentFilterDao->findSegmentIdsBySimpleFilter($this->chunk, $this->filter);
     }
 
 }

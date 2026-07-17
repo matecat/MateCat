@@ -1,0 +1,120 @@
+<?php
+
+namespace Controller\API\App;
+
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Exception;
+use InvalidArgumentException;
+use Matecat\SubFiltering\MateCatFilter;
+use Model\Jobs\JobDao;
+use Model\Jobs\MetadataDao;
+use Model\TranslationsSplit\SegmentSplitStruct;
+use Model\TranslationsSplit\SplitDAO;
+use RuntimeException;
+use Model\Projects\ProjectDao;
+use TypeError;
+use Utils\Constants\TranslationStatus;
+use Utils\Tools\CatUtils;
+
+class SplitSegmentController extends KleinController
+{
+
+    protected function registerValidators(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+    }
+
+    /**
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function split(): void
+    {
+        $request = $this->validateTheRequest();
+
+        $translationStruct = SegmentSplitStruct::getStruct();
+        $translationStruct->id_segment = (int)$request['id_segment'];
+        $translationStruct->id_job = (int)$request['id_job'];
+
+        $featureSet = $this->getFeatureSet();
+
+        $metadata = new MetadataDao($this->getDatabase());
+        $Filter = MateCatFilter::getInstance(
+            $featureSet,
+            $request['jobStruct']->source,
+            $request['jobStruct']->target,
+            [],
+            $metadata->getSubfilteringCustomHandlers((int)$request['jobStruct']->id, (string)$request['jobStruct']->password)
+        );
+        if (!$Filter instanceof MateCatFilter) {
+            throw new RuntimeException('Expected MateCatFilter instance from getInstance()');
+        }
+        [, $translationStruct->source_chunk_lengths] = (new CatUtils($this->getDatabase()))->parseSegmentSplit($request['segment'], '', $Filter);
+
+        /* Fill the statuses with DEFAULT DRAFT VALUES */
+        $pieces = (count($translationStruct->source_chunk_lengths) > 1 ? count($translationStruct->source_chunk_lengths) - 1 : 1);
+        $translationStruct->target_chunk_lengths = [
+            'len' => [0],
+            'statuses' => array_fill(0, $pieces, TranslationStatus::STATUS_DRAFT)
+        ];
+
+        $translationDao = new SplitDAO($this->getDatabase());
+        $result = $translationDao->atomicUpdate($translationStruct);
+
+        if (!$result) {
+            $this->logger->debug("Failed while splitting/merging segment.");
+            $this->logger->debug($translationStruct);
+            throw new RuntimeException("Failed while splitting/merging segment.");
+        }
+
+        $this->response->json([
+            'data' => 'OK',
+            'errors' => [],
+        ]);
+    }
+
+    /**
+     * @return array{id_job: string|false, id_segment: string|false, job_pass: string|false, segment: mixed, target: mixed, jobStruct: \Model\Jobs\JobStruct}
+     * @throws Exception
+     */
+    private function validateTheRequest(): array
+    {
+        $id_job = filter_var($this->request->param('id_job'), FILTER_SANITIZE_NUMBER_INT);
+        $id_segment = filter_var($this->request->param('id_segment'), FILTER_SANITIZE_NUMBER_INT);
+        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $segment = filter_var($this->request->param('segment'), FILTER_UNSAFE_RAW);
+        $target = filter_var($this->request->param('target'), FILTER_UNSAFE_RAW);
+
+        if (empty($id_job)) {
+            throw new InvalidArgumentException("Missing id job", -3);
+        }
+
+        if (empty($id_segment)) {
+            throw new InvalidArgumentException("Missing id segment", -4);
+        }
+
+        if (empty($password)) {
+            throw new InvalidArgumentException("Missing job password", -5);
+        }
+
+        // this checks that the json is valid, but not its content
+        if (is_null($segment)) {
+            throw new InvalidArgumentException("Invalid source_chunk_lengths json", -6);
+        }
+
+        // check Job password
+        $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail((int)$id_job, $password);
+
+        $this->featureSet->loadForProject($jobStruct->getProject(new ProjectDao($this->getDatabase())));
+
+        return [
+            'id_job' => $id_job,
+            'id_segment' => $id_segment,
+            'job_pass' => $password,
+            'segment' => $segment,
+            'target' => $target,
+            'jobStruct' => $jobStruct,
+        ];
+    }
+}

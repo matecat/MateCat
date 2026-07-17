@@ -1,0 +1,120 @@
+<?php
+
+namespace Utils\Engines\Results\MyMemory;
+
+use Exception;
+use Model\FeaturesBase\FeatureSet;
+use TypeError;
+use Utils\Engines\Results\TMSAbstractResponse;
+
+class GetMemoryResponse extends TMSAbstractResponse
+{
+    /**
+     * @var Matches[]
+     */
+    public array $matches = [];
+
+    public function featureSet(FeatureSet $featureSet): void
+    {
+        parent::featureSet($featureSet);
+        foreach ($this->matches as $match) {
+            $match->featureSet($featureSet);
+        }
+    }
+
+    /**
+     * @param array<string, mixed>|int|null $result
+     *
+     * @throws TypeError
+     */
+    public function __construct(array|int|null $result)
+    {
+        if (!is_array($result)) {
+            return;
+        }
+
+        $this->responseData = $result['responseData'] ?? '';
+        $this->responseDetails = $result['responseDetails'] ?? '';
+        $this->responseStatus = (int)($result['responseStatus'] ?? 200);
+        $this->mtLangSupported = $result['mtLangSupported'] ?? true;
+
+        if (!empty($result) and array_key_exists('matches', $result)) {
+            $matches = $result['matches'];
+            if (is_array($matches) and !empty($matches)) {
+                foreach ($matches as $match) {
+                    $this->matches[] = $this->buildMyMemoryMatch($match);
+                }
+            }
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $match
+     *
+     * @return Matches
+     * @throws TypeError
+     */
+    private function buildMyMemoryMatch(array $match): Matches
+    {
+        if ($match['last-update-date'] == "0000-00-00 00:00:00") {
+            $match['last-update-date'] = "1970-01-01 00:00:00";
+        }
+
+        if (!empty($match['last-update-date']) and $match['last-update-date'] != '0000-00-00') {
+            $match['last-update-date'] = date("Y-m-d", strtotime($match['last-update-date']));
+        }
+
+        $match['create-date'] = (isset($match['create-date']) and $match['create-date'] !== "0000-00-00 00:00:00") ? date("Y-m-d H:i:s", strtotime($match['create-date'])) : $match['last-update-date'];
+
+        $match['match'] = $match['match'] * 100;
+        $match['match'] = $match['match'] . "%";
+
+        return new Matches([
+            'id' => $match['id'] ?? '0',
+            'raw_segment' => $match['segment'] ?? '',
+            'raw_translation' => $match['translation'] ?? '',
+            'match' => $match['match'],
+            'created-by' => $match['created-by'] ?? "Anonymous",
+            'create-date' => $match['create-date'] ?? '1970-01-01 00:00:00',
+            'prop' => $match['prop'] ?? [],
+            'quality' => $match['quality'] ?? 0,
+            'usage-count' => $match['usage-count'] ?? 0,
+            'subject' => $match['subject'] ?? '',
+            'reference' => $match['reference'] ?? '',
+            'last-updated-by' => $match['last-updated-by'] ?? '',
+            'last-update-date' => $match['last-update-date'] ?? '1970-01-01 00:00:00',
+            'tm_properties' => $match['tm_properties'],
+            'key' => $match['key'] ?? '',
+            'ICE' => $match['ICE'] ?? false,
+            'source_note' => $match['source_note'] ?? null,
+            'target_note' => $match['target_note'] ?? '',
+            'penalty' => $match['penalty'] ?? null,
+        ]);
+    }
+
+    /**
+     * Get matches as array
+     *
+     * @param int $layerNum
+     * @param array<string, mixed> $dataRefMap
+     * @param string|null $source
+     * @param string|null $target
+     * @param array<string, mixed>|null $subfiltering_handlers
+     *
+     * @return array<int, array<string, mixed>>
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function get_matches_as_array(int $layerNum = 2, array $dataRefMap = [], ?string $source = null, ?string $target = null, ?array $subfiltering_handlers = []): array
+    {
+        $matchesArray = [];
+
+        foreach ($this->matches as $match) {
+            $item = $match->getMatches($layerNum, $dataRefMap, $source, $target, $subfiltering_handlers);
+            $matchesArray[] = $item;
+        }
+
+        return $matchesArray;
+    }
+
+}

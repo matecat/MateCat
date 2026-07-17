@@ -1,3 +1,5 @@
+.*
+!/.gitignore
 # IDE stuffs
 .settings
 .idea
@@ -6,16 +8,24 @@
 nbproject/
 webgrind/
 _dic_cache
-
+.phpunit.result.cache
+/docs/*
+!/docs/*.md
+!/docs/*.png
+!/docs/reviews/
+/wiki/*
 # Configuration files
 .num_processes
 inc/*.dat
 inc/oauth_config.ini
+/inc/oauth_config.*.ini
+
 inc/Error_Mail_List.ini
 inc/config.ini
 inc/config.ini*
 inc/config.test.ini
 inc/config.development.ini
+
 inc/.globalmessage.ini
 inc/oauth-token-key.txt
 .passwd.ini
@@ -37,16 +47,14 @@ package-lock.json
 
 # Development env config files
 .agignore
-.vagrant
 
 # More stuffs
 Test_Local/*
 unitTest/xhGui/
 unitTest/coverage/*
-internal_scripts
 local_storage
 test_storage
-lib/Utils/fileupload/thumbnails/*
+lib/View/fileupload/thumbnails/*
 tmp/
 
 task_manager_config.ini
@@ -61,14 +69,22 @@ vendor
 .env
 
 phinx.yml
-plugins/*
-.lastjobprocessed_jpeer
-.maxJobToProcess_jpeer
-
-inc/dqf/dqf_test_secret.ini
 
 mmt_fallback_key.ini
 
 inc/google_translate/mmt_fallback_credentials.json
 .DS_Store
 certs
+/public/build/
+/public/buildResources/
+/lib/View/*.html
+/lib/View/APIDoc.php
+/.phpunit.result.cache
+/.phpunit.cache
+/CallGraph
+/PHP-SQL-Parser
+/storage
+# Added by code-review-graph
+.code-review-graph/
+plugins/headroom_memory.db
+evidence/

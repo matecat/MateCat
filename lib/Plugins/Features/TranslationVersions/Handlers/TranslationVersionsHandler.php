@@ -1,85 +1,85 @@
 <?php
 
-namespace Features\TranslationVersions\Handlers;
+namespace Plugins\Features\TranslationVersions\Handlers;
 
-use Chunks_ChunkStruct;
-use Constants_TranslationStatus;
 use Exception;
-use Exceptions\ControllerReturnException;
-use Exceptions\ValidationError;
-use Features;
-use Features\TranslationVersions\Model\TranslationEvent;
-use Features\TranslationVersions\Model\TranslationVersionDao;
-use Features\TranslationVersions\Model\TranslationVersionStruct;
-use Features\TranslationVersions\VersionHandlerInterface;
-use FeatureSet;
-use Jobs_JobDao;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
-use ReflectionException;
-use Translations_SegmentTranslationStruct;
-use Users_UserStruct;
+use Model\DataAccess\IDatabase;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentDao;
+use Model\Translations\SegmentTranslationDao;
+use Model\Translations\SegmentTranslationStruct;
+use Model\Users\UserStruct;
+use Plugins\Features\ReviewExtended\BatchReviewProcessor;
+use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
+use Plugins\Features\TranslationEvents\TranslationEventsHandler;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
+use Plugins\Features\TranslationVersions\VersionHandlerInterface;
+use RuntimeException;
+use Utils\Constants\TranslationStatus;
 
 /**
  * Class TranslationVersionsHandler
  *
  */
-class TranslationVersionsHandler implements VersionHandlerInterface {
+class TranslationVersionsHandler implements VersionHandlerInterface
+{
 
     /**
      * @var TranslationVersionDao
      */
-    private $dao;
+    private TranslationVersionDao $dao;
+
+    /**
+     * @var JobStruct
+     */
+    private JobStruct $chunkStruct;
 
     /**
      * @var int
      */
-    private $id_job;
+    private int $id_segment;
 
-    /**
-     * @var Chunks_ChunkStruct
-     */
-    private $chunkStruct;
+    private ProjectStruct $projectStruct;
 
-    /**
-     * @var int
-     */
-    private $id_segment;
-
-    /**
-     * @var int
-     */
-    private $uid;
+    private SegmentTranslationDao $segmentTranslationDao;
+    private JobDao $jobDao;
+    private ProjectDao $projectDao;
+    private IDatabase $database;
 
     /**
      * TranslationVersionsHandler constructor.
      *
-     * @param Chunks_ChunkStruct     $chunkStruct
-     * @param                        $id_segment
-     * @param Users_UserStruct       $userStruct
-     * @param Projects_ProjectStruct $projectStruct
+     * @param JobStruct $chunkStruct
+     * @param int|null $id_segment
+     * @param ProjectStruct $projectStruct
+     * @param IDatabase $database
+     *
+     * @throws RuntimeException
      */
-    public function __construct( Chunks_ChunkStruct $chunkStruct, $id_segment, Users_UserStruct $userStruct, Projects_ProjectStruct $projectStruct ) {
-
+    public function __construct(
+        JobStruct $chunkStruct,
+        ?int $id_segment,
+        ProjectStruct $projectStruct,
+        IDatabase $database,
+    ) {
+        if ($chunkStruct->id === null) {
+            throw new RuntimeException('Job id is required');
+        }
         $this->chunkStruct = $chunkStruct;
-        $this->id_job      = $chunkStruct->id;
-        $this->id_segment  = $id_segment;
-        $this->uid         = $userStruct->uid;
-        $this->dao         = new TranslationVersionDao();
-
-    }
-
-    /**
-     * @param Translations_SegmentTranslationStruct $propagation
-     * @param                                       $propagated_ids
-     */
-    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagation, $propagated_ids ) {
-        $this->dao->savePropagationVersions(
-                $propagation,
-                $this->id_segment,
-                $this->chunkStruct,
-                $propagated_ids
-        );
+        $this->id_segment = $id_segment ?? throw new RuntimeException('Segment id is required');
+        $this->projectStruct = $projectStruct;
+        $this->database = $database;
+        $this->dao = new TranslationVersionDao($database);
+        $this->segmentTranslationDao = new SegmentTranslationDao($database);
+        $this->jobDao = new JobDao($database);
+        $this->projectDao = new ProjectDao($database);
     }
 
     /**
@@ -87,173 +87,209 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
      *
      * If returns true it means that a new version of the parent segment was persisted
      *
-     * @param Translations_SegmentTranslationStruct $new_translation
-     * @param Translations_SegmentTranslationStruct $old_translation
+     * @param SegmentTranslationStruct $new_translation
+     * @param SegmentTranslationStruct $old_translation
      *
-     * @return false|int
-     * @throws ReflectionException
+     * @return bool
+     * @throws \TypeError
+     * @throws \PDOException
      */
-    public function saveVersionAndIncrement( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation ) {
+    public function saveVersionAndIncrement(SegmentTranslationStruct $new_translation, SegmentTranslationStruct $old_translation): bool
+    {
+        $version_saved = $this->saveVersion($new_translation, $old_translation);
 
-        $version_saved = $this->saveVersion( $new_translation, $old_translation );
-
-        if ( $version_saved ) {
+        if ($version_saved) {
             $new_translation->version_number = $old_translation->version_number + 1;
         } else {
-            $new_translation->version_number = $old_translation->version_number;
-        }
-
-        if ( $new_translation->version_number == null ) {
-            $new_translation->version_number = 0;
+            $new_translation->version_number = $old_translation->version_number ?? 0;
         }
 
         return $version_saved;
     }
 
     /**
-     * Evaluates the need to save a new translation version to database.
-     * If so, sets the new version number on $new_translation.
+     * @throws Exception
+     */
+    public function propagateTranslation(SegmentTranslationStruct $translationStruct): array
+    {
+        return $this->segmentTranslationDao->propagateTranslation(
+            $translationStruct,
+            $this->chunkStruct,
+            $this->id_segment,
+            $this->projectStruct,
+        );
+    }
+
+    /**
+     * Evaluates the need to save a new translation version to the database.
      *
-     * @param Translations_SegmentTranslationStruct $new_translation
-     * @param Translations_SegmentTranslationStruct $old_translation
+     * @param SegmentTranslationStruct $new_translation
+     * @param SegmentTranslationStruct $old_translation
      *
-     * @return bool|int
-     * @throws ReflectionException
+     * @return bool
+     * @throws \TypeError
+     * @throws \PDOException
      */
     private function saveVersion(
-            Translations_SegmentTranslationStruct $new_translation,
-            Translations_SegmentTranslationStruct $old_translation
-    ) {
-
-        if (
-                empty( $old_translation ) ||
-                \Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation )
-        ) {
+        SegmentTranslationStruct $new_translation,
+        SegmentTranslationStruct $old_translation
+    ): bool {
+        if ($new_translation->translation == ($old_translation->translation ?? '')) {
             return false;
         }
 
-        // From now on, translations are treated as arrays and get attributes attached
-        // just to be passed to version save. Create two arrays for the purpose.
-        $new_version = new TranslationVersionStruct( $old_translation->toArray() );
-
-        // TODO: this is to be reviewed
-        $new_version->is_review  = ( $old_translation->status == Constants_TranslationStatus::STATUS_APPROVED ) ? 1 : 0;
-        $new_version->old_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $old_translation->status ];
-        $new_version->new_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $new_translation->status ];
-
-        /**
-         * In some cases, version 0 may already be there among saved_versions, because
-         * an issue for ReviewExtended has been saved on version 0.
-         *
-         * In any other case we expect the version record NOT to be there when we reach this point.
-         *
-         * @param TranslationVersionStruct $version
-         *
-         * @return bool|int
-         *
-         */
-        $version_record = $this->dao->getVersionNumberForTranslation(
-                $this->id_job,
-                $this->id_segment,
-                $new_version->version_number
-        );
-
-        if ( $version_record ) {
-            return $this->dao->updateVersion( $new_version );
+        // avoid version_number null error
+        if ($new_translation->version_number === null) {
+            $new_translation->version_number = 0;
         }
 
-        return $this->dao->saveVersion( $new_version );
+        // avoid version_number null error
+        if ($old_translation->version_number === null) {
+            $old_translation->version_number = 0;
+        }
+
+        $new_version = new TranslationVersionStruct($old_translation->toArray());
+        $new_version->old_status = TranslationStatus::$DB_STATUSES_MAP[$old_translation->status];
+        $new_version->new_status = TranslationStatus::$DB_STATUSES_MAP[$new_translation->status];
+
+        // segment_translation_versions has no unique constraint on (id_job, id_segment,
+        // version_number), so a blind insert can duplicate a row already written for this key —
+        // most commonly version 0, which ReviewExtended\TranslationIssueModel::saveDiff() may
+        // already have written (raw_diff set, translation NULL) before the translator ever
+        // saves. Reconcile onto that row instead of inserting a second one.
+        //
+        // Unlike the previous check-then-update flow, the return value never depends on
+        // updateVersion()'s row count: we already established above that the translation text
+        // changed, so a version was genuinely saved whether this ends up as an insert or update.
+        $existing_version = $this->dao->getVersionNumberForTranslation(
+            $new_version->id_job,
+            $new_version->id_segment,
+            $new_version->version_number
+        );
+
+        if ($existing_version) {
+            $this->dao->updateVersion($new_version);
+        } else {
+            $this->dao->insertVersion($new_version);
+        }
+
+        return true;
     }
 
 
     /**
-     * @throws ControllerReturnException
+     * @throws Exception
+     * @throws \TypeError
      */
-    public function storeTranslationEvent( $params ) {
-
+    public function storeTranslationEvent(array $params): void
+    {
         // evaluate if the record is to be created, either the
-        // status changed or the translation changed
-        $user = $params[ 'user' ];
+        // status changed, or the translation changed
+        $user = $params['user'];
 
-        /** @var Translations_SegmentTranslationStruct $translation */
-        $translation = $params[ 'translation' ];
+        /** @var SegmentTranslationStruct $translation */
+        $translation = $params['translation'];
 
-        /** @var Translations_SegmentTranslationStruct $old_translation */
-        $old_translation = $params[ 'old_translation' ];
+        /** @var SegmentTranslationStruct $old_translation */
+        $old_translation = $params['old_translation'];
 
-        $source_page_code = $params[ 'source_page_code' ];
+        $source_page_code = $params['source_page_code'];
 
-        /** @var Chunks_ChunkStruct $chunk */
-        $chunk = $params[ 'chunk' ];
+        /** @var JobStruct $chunk */
+        $chunk = $params['chunk'];
 
         /** @var FeatureSet $features */
-        $features = $params[ 'features' ];
+        $features = $params['features'];
 
-        /** @var Projects_ProjectStruct $project */
-        $project = $params[ 'project' ];
+        /** @var ProjectStruct $project */
+        $project = $params['project'];
 
-        $sourceEvent = new TranslationEvent(
-                $old_translation,
-                $translation,
-                $user,
-                $source_page_code
+        $sourceEvent = $this->createTranslationEvent(
+            $old_translation,
+            $translation,
+            $user,
+            $source_page_code,
+            $chunk,
         );
 
-        $translationEventsHandler = new TranslationEventsHandler( $chunk );
-        $translationEventsHandler->setFeatureSet( $features );
-        $translationEventsHandler->addEvent( $sourceEvent );
-        $translationEventsHandler->setProject( $project );
+        $translationEventsHandler = $this->createTranslationEventsHandler($chunk);
+        $translationEventsHandler->setFeatureSet($features);
+        $translationEventsHandler->addEvent($sourceEvent);
+        $translationEventsHandler->setProject($project);
 
         // If propagated segments exist, start cycle here
         // There is no logic here, the version_number is simply got from $segmentTranslationBeforeChange and saved as is in translation events
-        if ( isset( $params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ] ) and false === empty( $params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ] ) ) {
+        if (isset($params['propagation']['segments_for_propagation']['propagated']) and !empty($params['propagation']['segments_for_propagation']['propagated'])) {
+            $segments_for_propagation = $params['propagation']['segments_for_propagation']['propagated'];
+            $segmentTranslations = [];
 
-            $segments_for_propagation = $params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ];
-            $segmentTranslations      = [];
-
-            if ( false === empty( $segments_for_propagation[ 'not_ice' ] ) ) {
-                $segmentTranslations = array_merge( $segmentTranslations, $segments_for_propagation[ 'not_ice' ][ 'object' ] );
+            if (!empty($segments_for_propagation['not_ice'])) {
+                $segmentTranslations = array_merge($segmentTranslations, $segments_for_propagation['not_ice']['object']);
             }
 
-            if ( false === empty( $segments_for_propagation[ 'ice' ] ) ) {
-                $segmentTranslations = array_merge( $segmentTranslations, $segments_for_propagation[ 'ice' ][ 'object' ] );
+            if (!empty($segments_for_propagation['ice'])) {
+                $segmentTranslations = array_merge($segmentTranslations, $segments_for_propagation['ice']['object']);
             }
 
-            foreach ( $segmentTranslations as $segmentTranslationBeforeChange ) {
+            foreach ($segmentTranslations as $segmentTranslationBeforeChange) {
+                /** @var SegmentTranslationStruct $propagatedSegmentAfterChange */
+                $propagatedSegmentAfterChange = clone $segmentTranslationBeforeChange;
+                $propagatedSegmentAfterChange->translation = $translation->translation;
+                $propagatedSegmentAfterChange->status = $translation->status;
+                $propagatedSegmentAfterChange->autopropagated_from = $translation->id_segment; // nullable
+                $propagatedSegmentAfterChange->time_to_edit = 0;
 
-                /** @var Translations_SegmentTranslationStruct $propagatedSegmentAfterChange */
-                $propagatedSegmentAfterChange                      = clone $segmentTranslationBeforeChange;
-                $propagatedSegmentAfterChange->translation         = $translation->translation;
-                $propagatedSegmentAfterChange->status              = $translation->status;
-                $propagatedSegmentAfterChange->autopropagated_from = $translation->id_segment;
-                $propagatedSegmentAfterChange->time_to_edit        = 0;
-
-                $propagatedEvent = new TranslationEvent(
-                        $segmentTranslationBeforeChange,
-                        $propagatedSegmentAfterChange,
-                        $user,
-                        $source_page_code
+                $propagatedEvent = $this->createTranslationEvent(
+                    $segmentTranslationBeforeChange,
+                    $propagatedSegmentAfterChange,
+                    $user,
+                    $source_page_code,
+                    $chunk,
                 );
 
-                $propagatedEvent->setPropagationSource( false );
-                $translationEventsHandler->addEvent( $propagatedEvent );
+                $propagatedEvent->setPropagationSource(false);
+                $translationEventsHandler->addEvent($propagatedEvent);
             }
         }
 
         try {
-            $translationEventsHandler->save();
-            // $event->setChunkReviewsList( $chunkReviews ) ;
-            ( new Jobs_JobDao() )->destroyCacheByProjectId( $chunk->id_project );
-            Projects_ProjectDao::destroyCacheById( $chunk->id_project );
-        } catch ( Exception $e ) {
-            $params[ 'controller_result' ][ 'errors' ] [] = [
-                    'code'    => -2000,
-                    'message' => $e->getMessage()
-            ];
-            throw new ControllerReturnException( $e->getMessage(), -2000 );
+            $translationEventsHandler->save($this->createBatchReviewProcessor());
+            $this->jobDao->destroyCacheByProjectId($chunk->id_project);
+            $this->projectDao->destroyFetchByIdCache($chunk->id_project, ProjectStruct::class);
+        } catch (Exception $e) {
+            throw new RuntimeException($e->getMessage(), -2000, $e);
         }
+    }
 
+    /**
+     * @throws RuntimeException
+     */
+    protected function createTranslationEvent(
+        SegmentTranslationStruct $old_translation,
+        SegmentTranslationStruct $translation,
+        ?UserStruct $user,
+        int $source_page_code,
+        JobStruct $chunk,
+    ): TranslationEvent {
+        return new TranslationEvent(
+            $old_translation,
+            $translation,
+            $user,
+            $source_page_code,
+            $chunk,
+            new TranslationEventDao($this->database),
+            new SegmentDao($this->database),
+        );
+    }
 
+    protected function createTranslationEventsHandler(JobStruct $chunk): TranslationEventsHandler
+    {
+        return new TranslationEventsHandler($chunk, new TranslationEventDao($this->database));
+    }
+
+    protected function createBatchReviewProcessor(): BatchReviewProcessor
+    {
+        return new BatchReviewProcessor(new ChunkReviewDao($this->database));
     }
 
 }

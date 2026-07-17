@@ -1,6 +1,8 @@
 <?php
 
 
+use migrations\AbstractMatecatMigration;
+
 class SecondPassReview extends AbstractMatecatMigration {
 
     public $sql_up = [

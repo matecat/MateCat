@@ -6,74 +6,110 @@
  * Time: 18:02
  */
 
-namespace Email;
+namespace Utils\Email;
 
-use Teams\MembershipStruct;
-use Users_UserStruct;
+use Exception;
+use Model\Teams\MembershipStruct;
+use Model\Teams\TeamDao;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
+use ReflectionException;
+use RuntimeException;
+use Utils\Url\CanonicalRoutes;
 
-class MembershipCreatedEmail extends AbstractEmail {
+class MembershipCreatedEmail extends AbstractEmail
+{
 
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
-    protected $user;
+    protected UserStruct $user;
 
     /**
      * @var MembershipStruct
      */
-    protected $membership;
+    protected MembershipStruct $membership;
 
-    protected $title;
+    protected ?string $title;
 
     /**
-     * @var  Users_UserStruct
+     * @var  UserStruct
      */
-    protected $sender;
+    protected UserStruct $sender;
+
+    protected TeamDao $teamDao;
 
     /**
      * MembershipCreatedEmail constructor.
      *
-     * @param Users_UserStruct $sender
-     * @param MembershipStruct  $membership
+     * @param UserStruct $sender
+     * @param MembershipStruct $membership
+     * @param UserDao $userDao
+     * @param TeamDao $teamDao
+     *
+     * @throws Exception
+     * @throws ReflectionException
+     * @throws RuntimeException
      */
-    public function __construct( Users_UserStruct $sender, MembershipStruct $membership ) {
-        $this->user = $membership->getUser();
-        $this->_setlayout( 'skeleton.html' );
-        $this->_settemplate( 'Team/membership_created_content.html' );
+    public function __construct(UserStruct $sender, MembershipStruct $membership, UserDao $userDao, TeamDao $teamDao)
+    {
+        $this->user = $membership->getUser($userDao);
+        $this->_setlayout('skeleton.html');
+        $this->_settemplate('Team/membership_created_content.html');
         $this->membership = $membership;
+        $this->teamDao = $teamDao;
 
         $this->sender = $sender;
-        $this->title  = "You've been added to team " . $this->membership->getTeam()->name;
+        $this->title = "You've been added to team " . $this->membership->getTeam($teamDao)->name;
     }
 
-    public function send() {
-        $recipient = array( $this->user->email, $this->user->fullName() );
+    /**
+     * @throws Exception
+     */
+    public function send(): void
+    {
+        $recipient = [$this->user->email, $this->user->fullName()];
 
-        $this->doSend( $recipient, $this->title,
-                $this->_buildHTMLMessage(),
-                $this->_buildTxtMessage( $this->_buildMessageContent() )
+        $this->doSend(
+            $recipient,
+            $this->title ?? '',
+            $this->_buildHTMLMessage(),
+            $this->_buildTxtMessage($this->_buildMessageContent())
         );
     }
 
-    public function _getDefaultMailConf() {
+    /**
+     * @return array<string, mixed>
+     */
+    public function _getDefaultMailConf(): array
+    {
         return parent::_getDefaultMailConf();
     }
 
-    public function _getLayoutVariables($messageBody = null) {
-        $vars            = parent::_getLayoutVariables();
-        $vars[ 'title' ] = $this->title;
+    /**
+     * @return array<string, mixed>
+     */
+    public function _getLayoutVariables($messageBody = null): array
+    {
+        $vars = parent::_getLayoutVariables();
+        $vars['title'] = $this->title;
 
         return $vars;
     }
 
-    public function _getTemplateVariables() {
-
-        return array(
-                'user'      => $this->user->toArray(),
-                'sender'    => $this->sender->toArray(),
-                'team'      => $this->membership->getTeam()->toArray(),
-                'manageUrl' => \Routes::manage()
-        );
+    /**
+     * @return array<string, mixed>
+     *
+     * @throws Exception
+     */
+    public function _getTemplateVariables(): array
+    {
+        return [
+            'user' => $this->user->toArray(),
+            'sender' => $this->sender->toArray(),
+            'team' => $this->membership->getTeam($this->teamDao)->toArray(),
+            'manageUrl' => CanonicalRoutes::manage()
+        ];
     }
 
 }

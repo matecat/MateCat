@@ -1,8 +1,9 @@
 <?php
 
-namespace FilesStorage;
+namespace Model\FilesStorage;
 
-use FileStorage\Exceptions\FileSystemException;
+use Exception;
+use Model\FilesStorage\Exceptions\FileSystemException;
 
 /**
  * Interface IFilesStorage
@@ -16,7 +17,8 @@ use FileStorage\Exceptions\FileSystemException;
  *
  * @package FilesStorage
  */
-interface IFilesStorage {
+interface IFilesStorage
+{
 
     /**
      **********************************************************************************************
@@ -37,40 +39,40 @@ interface IFilesStorage {
      *          |_work
      *          |_xliff file
      *
-     * @param      $hash
-     * @param      $lang
-     * @param bool $originalPath
-     * @param      $xliffPath
+     * @param string $hash
+     * @param string $lang
+     * @param ?string $originalPath
+     * @param string $xliffPath
      *
-     * @return mixed
+     * @return bool
      * @throws FileSystemException
      */
-    public function makeCachePackage( $hash, $lang, $originalPath = false, $xliffPath );
+    public function makeCachePackage(string $hash, string $lang, ?string $originalPath, string $xliffPath): bool;
 
     /**
      * Rebuild the filename that will be taken from disk in the cache directory
      *
-     * @param $hash
-     * @param $lang
+     * @param string $hash
+     * @param string $lang
      *
-     * @return mixed
+     * @return false|string
      */
-    public function getOriginalFromCache( $hash, $lang );
+    public function getOriginalFromCache(string $hash, string $lang): false|string;
 
     /**
-     * @param $hash
-     * @param $lang
+     * @param string $hash
+     * @param string $lang
      *
-     * @return mixed
+     * @return false|string
      */
-    public function getXliffFromCache( $hash, $lang );
+    public function getXliffFromCache(string $hash, string $lang): false|string;
 
     /**
-     * @param $dirToScan
+     * @param string $dirToScan
      *
-     * @return mixed
+     * @return array{conversionHashes: array<string, mixed>, zipHashes: list<string>}
      */
-    public function getHashesFromDir( $dirToScan );
+    public function getHashesFromDir(string $dirToScan): array;
 
     /**
      **********************************************************************************************
@@ -79,7 +81,7 @@ interface IFilesStorage {
      */
 
     /**
-     * Creates the files folder.
+     * Creates the file's folder.
      * Directory structure:
      *
      * files
@@ -89,31 +91,32 @@ interface IFilesStorage {
      *          |_package
      *          |_work
      *
-     * @param      $dateHashPath
-     * @param      $lang
-     * @param      $idFile
-     * @param null $newFileName
+     * @param string $dateHashPath
+     * @param string $lang
+     * @param string $idFile
+     * @param string|null $newFileName
      *
-     * @return mixed
+     * @return bool
      */
-    public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null );
+    public function moveFromCacheToFileDir(string $dateHashPath, string $lang, string $idFile, ?string $newFileName = null): bool;
 
     /**
      * Rebuild the filename that will be taken from disk in files directory
      *
-     * @param $id
+     * @param string $id
+     * @param string $dateHashPath
      *
-     * @return bool|string
+     * @return false|string
      */
-    public function getOriginalFromFileDir( $id, $dateHashPath );
+    public function getOriginalFromFileDir(string $id, string $dateHashPath): false|string;
 
     /**
-     * @param $id
-     * @param $dateHashPath
+     * @param string $id
+     * @param string $dateHashPath
      *
-     * @return mixed
+     * @return false|string
      */
-    public function getXliffFromFileDir( $id, $dateHashPath );
+    public function getXliffFromFileDir(string $id, string $dateHashPath): false|string;
 
     /**
      **********************************************************************************************
@@ -124,11 +127,22 @@ interface IFilesStorage {
     /**
      * Moves the files from upload session folder to queue path
      *
-     * @param $uploadSession
+     * @param string $uploadSession
      *
-     * @return mixed
+     * @return void
      */
-    public static function moveFileFromUploadSessionToQueuePath( $uploadSession );
+    public function moveFileFromUploadSessionToQueuePath(string $uploadSession): void;
+
+    /**
+     * Deletes the queue directory (and any associated converted-files directory).
+     *
+     * @param string $uploadDir
+     *
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function deleteQueue(string $uploadDir): void;
 
     /**
      **********************************************************************************************
@@ -139,30 +153,34 @@ interface IFilesStorage {
     /**
      * Stores a serialized file to fast analysis storage
      *
-     * @param       $id_project
-     * @param array $segments_metadata
+     * @param string $id_project
+     * @param array<string|int, mixed> $segments_metadata
      *
-     * @return mixed
+     * @return void
+     * @throws \UnexpectedValueException
+     * @throws \ReflectionException
      */
-    public static function storeFastAnalysisFile( $id_project, Array $segments_metadata = [] );
+    public function storeFastAnalysisFile(string $id_project, array $segments_metadata = []): void;
 
     /**
      * Gets a serialized file from fast analysis storage
      *
-     * @param $id_project
+     * @param int $id_project
      *
-     * @return mixed
+     * @return array<string|int, mixed>
+     * @throws \UnexpectedValueException
+     * @throws \ReflectionException
      */
-    public static function getFastAnalysisData( $id_project );
+    public function getFastAnalysisData(int $id_project): array;
 
     /**
      * Deletes a serialized file from fast analysis storage
      *
-     * @param $id_project
+     * @param string $id_project
      *
-     * @return mixed
+     * @return bool
      */
-    public static function deleteFastAnalysisFile( $id_project );
+    public function deleteFastAnalysisFile(string $id_project): bool;
 
     /**
      **********************************************************************************************
@@ -173,38 +191,38 @@ interface IFilesStorage {
     /**
      * Make a temporary cache copy for the original zip file
      *
-     * @param $hash
-     * @param $zipPath
+     * @param string $hash
+     * @param string $zipPath
      *
      * @return bool
      */
-    public function cacheZipArchive( $hash, $zipPath );
+    public function cacheZipArchive(string $hash, string $zipPath): bool;
 
     /**
-     * @param $create_date
-     * @param $zipHash
-     * @param $projectID
+     * @param string $create_date
+     * @param string $zipHash
+     * @param string $projectID
      *
-     * @return mixed
+     * @return bool
      */
-    public function linkZipToProject( $create_date, $zipHash, $projectID );
+    public function linkZipToProject(string $create_date, string $zipHash, string $projectID): bool;
 
     /**
-     * @param $projectDate
-     * @param $projectID
-     * @param $zipName
-     *
-     * @return string
-     */
-    public function getOriginalZipPath( $projectDate, $projectID, $zipName );
-
-    /**
-     * @param $projectDate
-     * @param $projectID
+     * @param string $projectDate
+     * @param string $projectID
+     * @param string $zipName
      *
      * @return string
      */
-    public function getOriginalZipDir( $projectDate, $projectID );
+    public function getOriginalZipPath(string $projectDate, string $projectID, string $zipName): string;
+
+    /**
+     * @param string $projectDate
+     * @param string $projectID
+     *
+     * @return string
+     */
+    public function getOriginalZipDir(string $projectDate, string $projectID): string;
 
     /**
      **********************************************************************************************
@@ -217,29 +235,8 @@ interface IFilesStorage {
      * @param string $destination
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
-    public function transferFiles($source, $destination);
+    public function transferFiles(string $source, string $destination): bool;
 
-    /**
-     **********************************************************************************************
-     * 7. BLACKLIST FILE
-     **********************************************************************************************
-     */
-
-    /**
-     * @param /** $filePath
-     *
-     * @return mixed
-     */
-    public function deleteBlacklistFile($filePath);
-
-    /**
-     * @param string              $filePath
-     * @param \Chunks_ChunkStruct $chunkStruct
-     * @param                     $uid
-     *
-     * @return mixed
-     */
-    public function saveBlacklistFile($filePath, \Chunks_ChunkStruct $chunkStruct, $uid);
 }

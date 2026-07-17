@@ -1,0 +1,277 @@
+<?php
+
+namespace Controller\Abstracts;
+
+use Controller\Abstracts\Authentication\AuthenticationHelper;
+use Controller\Abstracts\Authentication\AuthenticationTrait;
+use Controller\API\Commons\Validators\Base;
+use Controller\Exceptions\MissingDatabaseException;
+use Controller\Traits\TimeLoggerTrait;
+use Exception;
+use InvalidArgumentException;
+use Klein\App;
+use Klein\Request;
+use Klein\Response;
+use Klein\ServiceProvider;
+use Model\ApiKeys\ApiKeyStruct;
+use Model\DataAccess\IDatabase;
+use Model\FeaturesBase\FeatureSet;
+use ReflectionException;
+use Throwable;
+use TypeError;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
+
+abstract class KleinController implements IController
+{
+
+    use TimeLoggerTrait;
+    use AuthenticationTrait;
+
+    protected bool $useSession = false;
+    protected bool $isView = false;
+
+    /**
+     * @var Request
+     */
+    protected Request $request;
+
+    /**
+     * @var Response
+     */
+    protected Response $response;
+    protected ?ServiceProvider $service = null;
+    protected ?App $app = null;
+    protected IDatabase $database;
+
+    /**
+     * @var Base[]
+     */
+    protected array $validators = [];
+
+    /**
+     * @var ApiKeyStruct|null
+     */
+    protected ?ApiKeyStruct $api_record = null;
+
+    /**
+     * @var array<string, mixed>
+     */
+    public array $params = [];
+
+    /**
+     * @var FeatureSet
+     */
+    protected FeatureSet $featureSet;
+
+    protected MatecatLogger $logger;
+
+    /**
+     * @return FeatureSet
+     */
+    public function getFeatureSet(): FeatureSet
+    {
+        return $this->featureSet;
+    }
+
+    /**
+     * @param FeatureSet $featureSet
+     *
+     * @return $this
+     */
+    public function setFeatureSet(FeatureSet $featureSet): KleinController
+    {
+        $this->featureSet = $featureSet;
+
+        return $this;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getParams(): array
+    {
+        return $this->params;
+    }
+
+    public function isView(): bool
+    {
+        return $this->isView;
+    }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param ?ServiceProvider $service
+     * @param ?App $app
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function __construct(
+        Request $request,
+        Response $response,
+        ?ServiceProvider $service = null,
+        ?App $app = null
+    ) {
+        $this->startTimer();
+        $this->timingLogFileName = 'api_calls_time.log';
+
+        $this->request = $request;
+        $this->response = $response;
+        $this->service = $service;
+        $this->app = $app;
+
+        $this->logger = LoggerFactory::getLogger();
+
+        $paramsPut = $this->getPutParams() ?: [];
+        $paramsGet = $this->request->paramsGet()->getIterator()->getArrayCopy();
+        $paramsNamed = $this->request->paramsNamed()->getIterator()->getArrayCopy();
+        $this->params = $this->request->paramsPost()->getIterator()->getArrayCopy();
+        $this->params = array_merge($this->params, $paramsGet, $paramsNamed, $paramsPut);
+        $this->featureSet = new FeatureSet($this->getDatabase());
+        $this->identifyUser($this->useSession);
+        $this->initDependencies();
+        $this->registerValidators();
+    }
+
+    public function getDatabase(): IDatabase
+    {
+        if (!isset($this->database)) {
+            $injected = $this->app?->getDatabase();
+            if (!$injected instanceof IDatabase) {
+                throw new MissingDatabaseException(
+                    'KleinController requires a database: dispatch through a Klein App exposing a "getDatabase" service, or inject $database directly.'
+                );
+            }
+            $this->database = $injected;
+        }
+
+        return $this->database;
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function refreshClientSessionIfNotApi(): void
+    {
+        if (empty($this->api_key)) {
+            static::sessionStart();
+            AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase())->refreshSession();
+        }
+    }
+
+    /**
+     * @throws Exception|Throwable
+     */
+    public function performValidations(): void
+    {
+        $this->validateRequest();
+    }
+
+    /**
+     * @param string $method
+     *
+     * @throws Exception|Throwable
+     */
+    public function respond(string $method): void
+    {
+        $this->performValidations();
+
+        if (!$this->response->isLocked()) {
+            $this->$method();
+        }
+
+        $this->_logWithTime();
+    }
+
+    public function getRequest(): Request
+    {
+        return $this->request;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function getPutParams(): ?array
+    {
+        $input = file_get_contents('php://input');
+        if ($input === false) {
+            return null;
+        }
+
+        return json_decode($input, true);
+    }
+
+    /**
+     * @throws Exception
+     * @throws Throwable
+     */
+    protected function validateRequest(): void
+    {
+        foreach ($this->validators as $validator) {
+            $validator->validate();
+        }
+        $this->validators = [];
+        $this->afterValidate();
+    }
+
+    protected function appendValidator(Base $validator): KleinController
+    {
+        $this->validators[] = $validator;
+
+        return $this;
+    }
+
+    /**
+     * Override this method to inject dependencies, DB, Dao, etc.
+     * @return void
+     */
+    protected function initDependencies(): void
+    {
+    }
+
+    /**
+     * Override this method to register validators.
+     * @return void
+     */
+    protected function registerValidators(): void
+    {
+    }
+
+    /**
+     * @throws \Psr\Log\InvalidArgumentException
+     * @throws InvalidArgumentException
+     */
+    protected function _logWithTime(): void
+    {
+        $this->logPageCall();
+    }
+
+    protected function afterValidate(): void
+    {
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isJsonRequest(): bool
+    {
+        return str_starts_with($this->request->headers()->get('Content-Type'), 'application/json');
+    }
+
+    /**
+     * @return array{id_segment: string, split_num: string|null}
+     */
+    protected function parseIdSegment(string $id_segment): array
+    {
+        $parsedSegment = explode("-", $id_segment);
+
+        return [
+            'id_segment' => $parsedSegment[0],
+            'split_num' => $parsedSegment[1] ?? null,
+        ];
+    }
+
+}

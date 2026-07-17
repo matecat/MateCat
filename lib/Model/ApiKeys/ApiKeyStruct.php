@@ -1,23 +1,41 @@
 <?php
 
-class ApiKeys_ApiKeyStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+namespace Model\ApiKeys;
 
-    public $id;
-    public $uid;
-    public $api_key;
-    public $api_secret;
-    public $create_date;
-    public $last_update;
-    public $enabled;
+use Exception;
+use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\IDaoStruct;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
+use PDOException;
+use ReflectionException;
 
-    public function validSecret( $secret ) {
-        return $this->api_secret == $secret;
+class ApiKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct
+{
+
+    public ?int $id = null;
+    public int $uid;
+    public string $api_key;
+    public string $api_secret;
+    public string $create_date;
+    public string $last_update;
+    public bool $enabled;
+
+    public function validSecret(string $secret): bool
+    {
+        // hash_equals for a constant-time comparison — avoids leaking the secret via timing.
+        return hash_equals($this->api_secret, $secret);
     }
 
-    public function getUser() {
-        $dao = new Users_UserDao( Database::obtain() );
-        $dao->setCacheTTL( 3600 );
-        $user = $dao->getByUid( $this->uid );
-        return $user;
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws PDOException
+     */
+    public function getUser(UserDao $userDao): ?UserStruct
+    {
+        $userDao->setCacheTTL(3600);
+
+        return $userDao->getByUid($this->uid);
     }
 }

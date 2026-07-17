@@ -1,0 +1,154 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * @author hashashiyyin domenico@translated.net / ostico@gmail.com
+ * Date: 13/11/23
+ * Time: 19:11
+ *
+ */
+
+namespace View\API\App\Json\Analysis;
+
+use JsonSerializable;
+use Model\Analysis\Constants\ConstantsInterface;
+
+class AnalysisFile implements MatchContainerInterface, JsonSerializable
+{
+
+    /**
+     * @var int
+     */
+    protected int $id;
+    /**
+     * @var string
+     */
+    protected string $name = "";
+
+    /**
+     * @var AnalysisMatch[]
+     */
+    protected array $matches = [];
+    /**
+     * @var string
+     */
+    protected string $original_name;
+    /**
+     * @var string|null
+     */
+    protected ?string $id_file_part;
+
+    /**
+     * @var int
+     */
+    protected int $total_raw = 0;
+
+    /**
+     * @var float
+     */
+    protected float $total_equivalent = 0;
+
+    /**
+     * @var AnalysisFileMetadata[]
+     */
+    protected array $metadata = [];
+
+    /**
+     * @param int|string           $id
+     * @param string|null          $id_file_part
+     * @param string               $name
+     * @param string               $original_name
+     * @param ConstantsInterface   $matchConstantsClass
+     * @param array<\Model\Files\MetadataStruct|object> $metadata
+     *
+     * @throws \TypeError
+     * @throws \RuntimeException
+     */
+    public function __construct($id, $id_file_part, $name, $original_name, ConstantsInterface $matchConstantsClass, array $metadata = [])
+    {
+        $this->id = (int)$id;
+        $this->id_file_part = $id_file_part;
+        $this->name = $name;
+        $this->original_name = $original_name;
+
+        foreach ($matchConstantsClass::forValue() as $matchType) {
+            $this->matches[$matchType] = AnalysisMatch::forName($matchType, $matchConstantsClass);
+        }
+
+        foreach ($metadata as $metadatum) {
+            if (isset($metadatum->key) and isset($metadatum->value)) {
+                $key   = is_string($metadatum->key) ? $metadatum->key : (string)$metadatum->key;
+                $value = is_string($metadatum->value)
+                    ? $metadatum->value
+                    : (is_scalar($metadatum->value)
+                        ? (string)$metadatum->value
+                        : (json_encode($metadatum->value) ?: ''));
+
+                $this->metadata[] = new AnalysisFileMetadata($key, $value);
+            }
+        }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'id_file_part' => $this->id_file_part,
+            'name' => $this->name,
+            'original_name' => $this->original_name,
+            'total_raw' => $this->total_raw,
+            'total_equivalent' => round($this->total_equivalent),
+            'matches' => array_values($this->matches),
+            'metadata' => $this->metadata
+        ];
+    }
+
+    /**
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param string $matchName
+     *
+     * @return AnalysisMatch
+     */
+    public function getMatch(string $matchName): AnalysisMatch
+    {
+        return $this->matches[$matchName];
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param int $raw
+     *
+     * @return void
+     */
+    public function incrementRaw(int $raw): void
+    {
+        $this->total_raw += $raw;
+    }
+
+    /**
+     * @param float $equivalent
+     *
+     * @return void
+     */
+    public function incrementEquivalent(float $equivalent): void
+    {
+        $this->total_equivalent += $equivalent;
+    }
+
+}

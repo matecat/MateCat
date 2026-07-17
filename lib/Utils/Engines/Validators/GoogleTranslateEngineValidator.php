@@ -1,0 +1,50 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * @author Domenico Lupinetti (hashashiyyin) domenico@translated.net / ostico@gmail.com
+ * Date: 14/11/25
+ * Time: 17:23
+ *
+ */
+
+namespace Utils\Engines\Validators;
+
+use DomainException;
+use Exception;
+use Model\DataAccess\IDatabase;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\Validators\Contracts\EngineValidatorObject;
+use Utils\Validator\Contracts\AbstractValidator;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
+
+class GoogleTranslateEngineValidator extends AbstractValidator
+{
+
+    public function __construct(private readonly IDatabase $database)
+    {
+    }
+
+    /**
+     * @param EngineValidatorObject $object
+     * @return ValidatorObjectInterface|null
+     * @throws Exception
+     */
+    public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
+    {
+        $engineStruct = $object->engineStruct ?? throw new Exception('Engine struct required');
+        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct, $this->database);
+        $config = $newTestCreatedMT->getConfigStruct();
+        $config['segment'] = "Hello World";
+        $config['source'] = "en-US";
+        $config['target'] = "fr-FR";
+        $config['key'] = $newTestCreatedMT->getEngineRecord()->getExtraParamsAsArray()['client_secret'] ?? null;
+
+        $mt_result = $newTestCreatedMT->get($config);
+
+        if ($mt_result->error !== null) {
+            throw new DomainException($mt_result->error->message ?? 'Unknown error');
+        }
+        return null;
+    }
+
+}

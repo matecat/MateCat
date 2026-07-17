@@ -97,9 +97,19 @@
   float: left;
   margin-bottom: 30px;
 }
+.share-popup-container-top {
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+  gap: 70px;
+  button {
+    border: none !important;
+    height: 32px;
+    width: 120px;
+  }
+}
 
 input.share-popup-container-input-email {
-  margin-top: 5px;
   float: left;
   margin-left: 0px;
   width: 344px;

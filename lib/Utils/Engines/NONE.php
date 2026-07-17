@@ -1,31 +1,54 @@
 <?php
-/**
- * Created by PhpStorm.
- * @author domenico domenico@translated.net / ostico@gmail.com
- * Date: 07/08/17
- * Time: 12.16
- *
- */
 
+namespace Utils\Engines;
 
-class Engines_NONE  extends Engines_AbstractEngine {
+use TypeError;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 
-    public function get( $_config ) {
+class NONE extends AbstractEngine
+{
+
+    /**
+     * @param array<string, mixed> $_config
+     *
+     * @throws TypeError
+     */
+    public function get(array $_config): GetMemoryResponse
+    {
+        return new GetMemoryResponse(['responseStatus' => 200, 'responseData' => []]);
+    }
+
+    /**
+     * @param mixed $_config
+     */
+    public function set($_config): bool
+    {
+        return true;
+    }
+
+    /**
+     * @param mixed $_config
+     */
+    public function update($_config): bool
+    {
+        return true;
+    }
+
+    /**
+     * @param mixed $_config
+     */
+    public function delete($_config): bool
+    {
+        return true;
+    }
+
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
+    {
         return [];
     }
 
-    public function set( $_config ) {
-        return [ 'responseStatus' => 200, 'responseData' => [] ];
+    public static function getConfigurationParameters(): array
+    {
+        return [];
     }
-
-    public function update( $_config ) {
-        return [ 'responseStatus' => 200, 'responseData' => [] ];
-    }
-
-    public function delete( $_config ) {
-        return [ 'responseStatus' => 200, 'responseData' => [] ];
-    }
-
-    protected function _decode( $rawValue ) {}
-
 }

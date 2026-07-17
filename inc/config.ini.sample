@@ -1,5 +1,5 @@
 ; MateCat configuration File
-; more configurations in INIT.php
+; more configurations in Utils\Registry\AppConfig.php
 
 
 ;These two parameter are meant to check for a wrong configuration of the filesystems either
@@ -25,10 +25,9 @@ DB_PASS = "matecat_user"
 
 REDIS_SERVERS = "tcp://localhost:6379?database=0"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
-QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
 QUEUE_CREDENTIALS = "admin:admin"
-SSE_BASE_URL = "localhost/sse"          ;no trailing slash here
+SOCKET_BASE_URL = "localhost/sse"          ;no trailing slash here
 STORAGE_DIR = "/home/matecat/cattool/local_storage"         ;provide an absolute path
 
 SMTP_HOST = 'localhost'
@@ -57,14 +56,15 @@ AWS_STORAGE_BASE_BUCKET = "xxxxxxxxxxxxxx"
 AWS_CACHING = true
 AWS_SSL_VERIFY = true
 
-DQF_ENABLED = yes
-DQF_BASE_URL = 'https://dqf-api.stag.taus.net/'
-DQF_API_KEY = api-key
-DQF_ID_PREFIX = devinstance
-DQF_ENCRYPTION_KEY = encryption-key
-DQF_ENCRYPTION_IV = encryption-iv
-DQF_GENERIC_USERNAME = "matecatGeneric@taus.net"
-DQF_GENERIC_PASSWORD = "generic-user-password"
+MMT_DEFAULT_LICENSE = "xxxxxxxxxxxxxx"
+
+GEMINI_API_KEY = 'xxxxxxxxxxxxxxxxxxxxx';
+GEMINI_API_MODEL = 'gemini-2.5-flash-lite';
+GEMINI_TIMEOUT = 30
+
+OPENAI_API_KEY = "xxxxxxxxxxxxxxxxxxxxx"
+OPEN_AI_MODEL = "gpt-3.5-turbo"
+OPEN_AI_TIMEOUT = 30
 
 ; Segments partition rule, leave unset to write to `segments` table.
 ; Format of configuration string is: "{id_project}:{table_name};...".
@@ -84,10 +84,9 @@ DB_PASS = "matecat_user"
 
 REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
-QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
 QUEUE_CREDENTIALS = "admin:admin"
-SSE_BASE_URL = "localhost/sse"          ;no trailing slash here
+SOCKET_BASE_URL = "localhost/sse"          ;no trailing slash here
 STORAGE_DIR = "/home/matecat/cattool/local_storage"         ;provide an absolute path
 
 SMTP_HOST = 'localhost'
@@ -129,10 +128,9 @@ DB_PASS = "matecat01"
 
 REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
-QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
 QUEUE_CREDENTIALS = "admin:admin"
-SSE_BASE_URL      = "localhost/sse"          ;no trailing slash here
+SOCKET_BASE_URL      = "localhost/sse"          ;no trailing slash here
 STORAGE_DIR = "/home/matecat/cattool/storage"         ;provide an absolute path
 
 SMTP_HOST = 'localhost'

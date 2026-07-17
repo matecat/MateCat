@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class AddDueDateToProjects extends AbstractMatecatMigration
 {
 	public $sql_up = " ALTER TABLE projects ADD COLUMN due_date DATETIME DEFAULT NULL, ALGORITHM=INPLACE,LOCK=NONE;" ;

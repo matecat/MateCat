@@ -1,81 +1,103 @@
 <?php
 
-class ApiKeys_ApiKeyDao extends DataAccess_AbstractDao {
+namespace Model\ApiKeys;
+
+use Exception;
+use Model\DataAccess\AbstractDao;
+use PDO;
+use PDOException;
+use ReflectionException;
+use RuntimeException;
+
+class ApiKeyDao extends AbstractDao
+{
+
+    const string TABLE = 'api_keys';
 
     /**
-     * @param       $key
-     * @param array $options
+     * @param string $key
      *
-     * @return ApiKeys_ApiKeyStruct
+     * @return ApiKeyStruct|null
+     * @throws PDOException
      */
-    static function findByKey( $key, $options = [] ) {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM api_keys WHERE enabled AND api_key = :key " );
-        $stmt->execute( [ 'key' => $key ] );
+    public function findByKey(string $key): ?ApiKeyStruct
+    {
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare("SELECT * FROM api_keys WHERE enabled AND api_key = :key ");
+        $stmt->execute(['key' => $key]);
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ApiKeys_ApiKeyStruct' );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ApiKeyStruct::class);
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
     }
 
-    public function create( $obj ) {
+    /**
+     * @param ApiKeyStruct $obj
+     *
+     * @return ApiKeyStruct
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws RuntimeException
+     * @throws Exception
+     */
+    public function create(ApiKeyStruct $obj): ApiKeyStruct
+    {
         $conn = $this->database->getConnection();
 
-        $obj->create_date = date( 'Y-m-d H:i:s' );
-        $obj->last_update = date( 'Y-m-d H:i:s' );
+        $obj->create_date = date('Y-m-d H:i:s');
+        $obj->last_update = date('Y-m-d H:i:s');
 
-        $stmt = $conn->prepare( "INSERT INTO api_keys " .
-                " ( uid, api_key, api_secret, create_date, last_update, enabled ) " .
-                " VALUES " .
-                " ( :uid, :api_key, :api_secret, :create_date, :last_update, :enabled ) "
+        $stmt = $conn->prepare(
+            "INSERT INTO api_keys " .
+            " ( uid, api_key, api_secret, create_date, last_update, enabled ) " .
+            " VALUES " .
+            " ( :uid, :api_key, :api_secret, :create_date, :last_update, :enabled ) "
         );
 
-        $values = array_diff_key( $obj->toArray(), [ 'id' => null ] );
+        $values = array_diff_key($obj->toArray(), ['id' => null]);
 
         $this->database->begin();
-        $stmt->execute( $values );
-        $result = $this->getById( $conn->lastInsertId() );
+        $stmt->execute($values);
+        $result = $this->fetchById((int)$conn->lastInsertId(), ApiKeyStruct::class);
         $this->database->commit();
 
-        return $result[ 0 ];
+        return $result ?? throw new RuntimeException('Failed to retrieve created API key');
     }
 
     /**
-     * @param $id
+     * @param int $uid
      *
-     * @return ApiKeys_ApiKeyStruct[]
+     * @return ApiKeyStruct|null
+     * @throws PDOException
      */
-    public function getById( $id ) {
+    public function getByUid(int $uid): ?ApiKeyStruct
+    {
         $conn = $this->database->getConnection();
+        $stmt = $conn->prepare("SELECT * FROM api_keys WHERE enabled AND uid = :uid ");
+        $stmt->execute(['uid' => $uid]);
 
-        $stmt = $conn->prepare( " SELECT * FROM api_keys WHERE id = ? " );
-        $stmt->execute( [ $id ] );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ApiKeyStruct::class);
 
-        return $stmt->fetchAll( PDO::FETCH_CLASS, 'ApiKeys_ApiKeyStruct' );
+        return $stmt->fetch() ?: null;
     }
 
     /**
-     * @param $uid
+     * @param int $uid
      *
-     * @return ApiKeys_ApiKeyStruct
+     * @return int
+     * @throws PDOException
      */
-    public function getByUid( $uid ) {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM api_keys WHERE enabled AND uid = :uid " );
-        $stmt->execute( [ 'uid' => $uid ] );
-
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ApiKeys_ApiKeyStruct' );
-
-        return $stmt->fetch();
-    }
-
-    public function deleteByUid($uid) {
-
+    public function deleteByUid(int $uid): int
+    {
         $apiKey = $this->getByUid($uid);
 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "DELETE FROM api_keys WHERE id = :id " );
-        $stmt->execute( [ 'id' => $apiKey->id ] );
+        if ($apiKey === null) {
+            return 0;
+        }
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare("DELETE FROM api_keys WHERE id = :id ");
+        $stmt->execute(['id' => $apiKey->id]);
 
         return $stmt->rowCount();
     }
