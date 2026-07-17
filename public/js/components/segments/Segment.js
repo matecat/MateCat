@@ -37,6 +37,12 @@ import {SegmentQAIcon} from './SegmentQAIcon'
 import IconUnlock from '../../../img/icons/IconUnlock'
 import IconLock from '../../../img/icons/IconLock'
 import IconSplit from '../../../img/icons/IconSplit'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
 
 const SegmentComponent = ({
   segment,
@@ -684,12 +690,26 @@ const SegmentComponent = ({
           {showLockIcon ? (
             !readonly ? (
               segment.unlocked ? (
-                <div className="ice-locked-icon" onClick={lockUnlockSegment}>
-                  <button className="unlock-button unlocked"><IconUnlock /></button>
+                <div className="ice-locked-icon">
+                  <Button
+                    type={BUTTON_TYPE.ICON}
+                    mode={BUTTON_MODE.GHOST}
+                    size={BUTTON_SIZE.ICON_STANDARD}
+                    onClick={lockUnlockSegment}
+                  >
+                    <IconUnlock />
+                  </Button>
                 </div>
               ) : (
-                <div className="ice-locked-icon" onClick={lockUnlockSegment}>
-                  <button className="unlock-button locked"><IconLock /></button>
+                <div className="ice-locked-icon">
+                  <Button
+                    type={BUTTON_TYPE.ICON}
+                    mode={BUTTON_MODE.GHOST}
+                    size={BUTTON_SIZE.ICON_STANDARD}
+                    onClick={lockUnlockSegment}
+                  >
+                    <IconLock />
+                  </Button>
                 </div>
               )
             ) : null
@@ -708,24 +728,28 @@ const SegmentComponent = ({
           segment.opened ? (
             !segment.openSplit ? (
               <div className="actions">
-                <button
-                  className="split"
-                  title={`Click to split segment (${Shortcuts.cattol.events.splitSegment.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
+                <Button
+                  type={BUTTON_TYPE.ICON}
+                  mode={BUTTON_MODE.GHOST}
+                  size={BUTTON_SIZE.ICON_STANDARD}
+                  tooltip={`Click to split segment (${Shortcuts.cattol.events.splitSegment.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
                   onClick={() => SegmentActions.openSplitSegment(segment.sid)}
                 >
                   <IconSplit />
-                </button>
+                </Button>
                 <p className="split-shortcut">CTRL + S</p>
               </div>
             ) : (
               <div className="actions">
-                <button
-                  className="split cancel"
-                  title="Click to close split segment"
+                <Button
+                  type={BUTTON_TYPE.ICON}
+                  mode={BUTTON_MODE.GHOST}
+                  size={BUTTON_SIZE.ICON_STANDARD}
+                  tooltip="Click to close split segment"
                   onClick={() => SegmentActions.closeSplitSegment()}
                 >
                   <IconSplit />
-                </button>
+                </Button>
               </div>
             )
           ) : null}

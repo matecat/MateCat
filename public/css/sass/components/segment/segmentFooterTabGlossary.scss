@@ -1,4 +1,4 @@
-@use '../../commons/colors';
+@use '../../tokens/colors';
 @use '../../commons/variables';
 
 .tab.glossary {
@@ -613,6 +613,7 @@ span {
 
 .tab.glossary .search-type {
   margin-left: 14px;
+  width: 150px;
 }
 
 .tab.glossary .search_term_reset_button {

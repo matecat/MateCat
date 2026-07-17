@@ -1,6 +1,6 @@
 @use '../commons/divider';
 @use '../commons/shadows';
-@use '../commons/colors';
+@use '../tokens/colors';
 @use '../commons/variables';
 h1,
 h2,
@@ -195,7 +195,7 @@ input {
 
 .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .re-severities-buttons button,
 .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .re-severities-buttons button {
-  padding: 7px 10px;
+  padding: 4px 8px;
   background-color: colors.$grey50;
 }
 
@@ -304,7 +304,10 @@ article {
   min-width: 25px;
   text-align: center;
 }
-
+.re-close-balloon {
+  position: absolute !important;
+  right: 0;
+}
 .re-open-view.re-issues {
   top: 0px;
   border-top: 12px solid colors.$white;

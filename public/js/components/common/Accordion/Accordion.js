@@ -69,10 +69,12 @@ export const Accordion = ({
         data-expanded={expanded || undefined}
         onClick={handleClick}
       >
-        {title} <ChevronDown size={10} />
+        {title} <ChevronDown size={24} />
       </div>
       <div ref={panelRef} className={styles.content}>
-        <div ref={contentRef}>{isRenderingContent && children}</div>
+        <div ref={contentRef} className={styles.insideContent}>
+          {isRenderingContent && children}
+        </div>
       </div>
     </div>
   )

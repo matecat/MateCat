@@ -6,7 +6,7 @@ const RevisionFeedback = ({qualitySummary}) => {
     <div className="qr-feedback-container shadow-2">
       <div className="qr-feedback">
         <div className="qr-head">
-          <h3>
+          <h4>
             <div
               className={
                 'color-dot revision-color revision-' +
@@ -14,7 +14,7 @@ const RevisionFeedback = ({qualitySummary}) => {
               }
             />
             Revision feedback
-          </h3>
+          </h4>
         </div>
         <p>{qualitySummary.get('feedback')}</p>
       </div>

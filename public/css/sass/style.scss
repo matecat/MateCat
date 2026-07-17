@@ -10,7 +10,7 @@
 // See CSS-ARCHITECTURE.md for the migration guide.
 // ============================================================================
 
-@use 'commons/colors';
+@use 'tokens/colors';
 @use 'commons/variables';
 body {
   transition: padding-top 200ms ease-out;
@@ -733,206 +733,6 @@ ul.suggestion-item.graysmall:last-child {
   }
 }
 
-/*submenu*/
-.submenu {
-  background: colors.$white;
-  text-align: left;
-  width: 100%;
-}
-
-.submenu:after {
-  content: '.';
-  display: block;
-  height: 0;
-  clear: both;
-  visibility: hidden;
-}
-
-section.loaded .submenu {
-  display: block;
-  border-bottom-left-radius: variables.$border-radius-default;
-  border-bottom-right-radius: variables.$border-radius-default;
-  overflow: hidden;
-
-  &:has(.active) {
-    border-bottom-left-radius: unset;
-    border-bottom-right-radius: unset;
-  }
-}
-
-.loaded {
-  overflow: visible !important;
-}
-
-.submenu li {
-  float: left;
-  position: relative;
-  width: auto !important;
-  background: colors.$grey100;
-  z-index: 1;
-  border-bottom: 1px solid colors.$grey150;
-  cursor: pointer;
-  user-select: none;
-
-  &:last-child {
-    border-top-right-radius: variables.$border-radius-default;
-
-    > a {
-      border-top-right-radius: variables.$border-radius-default;
-    }
-  }
-}
-
-.submenu li.active {
-  border-bottom: 1px solid white;
-  background-color: colors.$white;
-}
-
-.submenu a {
-  -webkit-transition: all 100ms ease-in;
-  -moz-transition: all 100ms ease-in;
-  padding: 5px 20px;
-  display: block;
-  color: colors.$grey500;
-  font-size: 16px;
-  float: left;
-  text-decoration: none;
-  border-right: 2px solid colors.$grey150;
-  border-top: 2px solid colors.$grey150;
-}
-
-.submenu .notification:hover {
-  border: 0;
-}
-
-.submenu a:hover {
-  background: colors.$grey50;
-  color: colors.$grey500;
-  -moz-box-shadow: none;
-  //position: relative;
-  -webkit-box-shadow: none;
-}
-
-.submenu .on {
-  background: colors.$white;
-  color: colors.$black;
-  font-size: 14px;
-  text-shadow: none;
-}
-
-.tab-switcher.loading-tab a {
-  color: colors.$grey400;
-  padding-right: 36px;
-}
-
-.loading-tab .loader.loader_on {
-  left: unset;
-  right: 12px;
-  top: 6px;
-}
-
-.submenu li a {
-  outline: none;
-  display: flex;
-  align-items: center;
-
-  .number {
-    margin-left: 4px;
-  }
-}
-
-.submenu li.active a {
-  //background: #fff !important;
-  outline: none;
-  color: colors.$black;
-}
-
-.submenu li.modified a {
-  color: red;
-}
-
-.sub-editor {
-  display: none;
-  float: left;
-  width: 100%;
-  background: colors.$white;
-}
-
-.sub-editor.open {
-  display: block;
-}
-
-.sub-editor.matches .overflow {
-  min-height: 50px;
-  max-height: 424px;
-  overflow-y: auto;
-}
-.sub-editor.matches .overflow span.loader {
-  bottom: 20px;
-}
-
-.addtmx-tr .open-popup-addtm-tr {
-  height: 13px;
-  width: 140px;
-  position: absolute;
-  bottom: -24px;
-  right: 0px;
-  border-radius: 0 0 0 2px;
-  color: colors.$white;
-  padding: 3px 10px 7px 4px;
-  font-size: 12px;
-  background: colors.$blue500;
-  box-shadow: 0px 2px 4px 0px colors.$grey600;
-  z-index: 2;
-}
-
-.sub-editor.concordances .results {
-  float: left;
-  width: 100%;
-}
-
-.concordances .more {
-  display: inline-block;
-  text-decoration: none;
-  color: colors.$white;
-  padding: 0 10px;
-  background: colors.$grey400;
-  font-size: 14px;
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
-  min-width: 40px;
-  line-height: 20px;
-  position: relative;
-  top: 2px;
-  cursor: pointer;
-}
-
-.sub-editor .cc-search {
-  background: none;
-  clear: both;
-}
-
-.sub-editor .cc-search.loading {
-  background: url(/public/img/loading.gif) 50% 22px no-repeat;
-  float: left;
-  width: 100%;
-  background-size: 20px 20px;
-}
-
-.sub-editor .cc-search.loading {
-  background-position-x: 49.8%;
-}
-
-.footer-message {
-  margin-left: 20px;
-  background: colors.$orange200 !important;
-  padding: 2px 10px;
-}
-
-.sub-editor .cc-search .search-target {
-  width: 44.2%;
-}
-
 .preview {
   font-family: Cambria, Arial, Helvetica, sans-serif !important;
   height: 300px;
@@ -1182,28 +982,6 @@ section.ice-locked:not(.segment-selected) .text {
 
 body section:not(.editor).ice-locked {
   background: colors.$grey150 !important;
-}
-
-.ice-locked-icon > button {
-  padding: 4px 4px 0;
-  font-size: 15px;
-  background-color: transparent;
-  border: unset;
-  border-radius: 2px;
-  cursor: pointer;
-  color: colors.$grey400;
-  position: relative;
-  top: 2px;
-  outline: none;
-}
-
-section:hover .ice-locked-icon > button {
-  color: colors.$grey600;
-}
-
-.ice-locked-icon > button:hover {
-  background-color: colors.$grey600;
-  color: white !important;
 }
 
 body.archived section {
@@ -1893,42 +1671,6 @@ del.diff {
 
 .editToolbar.visible {
   visibility: visible;
-}
-
-.split {
-  border: unset;
-  cursor: pointer !important;
-  font-size: 17px;
-  background-color: colors.$grey400;
-  border-radius: 2px;
-  color: colors.$white;
-  margin-bottom: 0px;
-  top: 2px;
-  padding: 2px;
-  width: 25px;
-  height: 25px;
-  outline: none;
-  margin-top: 10px;
-
-  &:hover {
-    background-color: colors.$grey600 !important;
-  }
-}
-
-.split i {
-  padding: 0;
-  margin: 0;
-  width: 25px;
-  height: 25px;
-}
-
-.sid .actions.disabled .split {
-  cursor: no-drop !important;
-}
-
-.editor.split-action .actions .split {
-  background: colors.$blue500;
-  color: colors.$white !important;
 }
 
 section .toolbar {

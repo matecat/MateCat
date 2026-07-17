@@ -12,7 +12,7 @@ import IconEdit from '../../../img/icons/IconEdit'
 import ReviewExtendedIssuePanel from './ReviewExtendedIssuePanel'
 import Trash from '../../../img/icons/Trash'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
-import {Button, BUTTON_MODE} from '../common/Button/Button'
+import {Button, BUTTON_MODE, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import CommentsSquareIconFilled from '../../../img/icons/CommentsSquareIconFilled'
 import CommentsSquareIcon from '../../../img/icons/CommentsSquareIcon'
 
@@ -313,6 +313,8 @@ export const ReviewExtendedIssue = ({
               <div className="icon-buttons">
                 <Button
                   mode={BUTTON_MODE.OUTLINE}
+                  type={BUTTON_TYPE.ICON}
+                  size={BUTTON_SIZE.ICON_SMALL}
                   onClick={setCommentViewCallback}
                   title="Comments"
                 >
@@ -328,6 +330,8 @@ export const ReviewExtendedIssue = ({
                     <>
                       <Button
                         mode={BUTTON_MODE.OUTLINE}
+                        type={BUTTON_TYPE.ICON}
+                        size={BUTTON_SIZE.ICON_SMALL}
                         onClick={editIssue}
                         title="Edit issue card"
                         active={issueEditing?.id === issue.id}
@@ -336,6 +340,8 @@ export const ReviewExtendedIssue = ({
                       </Button>
                       <Button
                         mode={BUTTON_MODE.OUTLINE}
+                        type={BUTTON_TYPE.ICON}
+                        size={BUTTON_SIZE.ICON_SMALL}
                         onClick={deleteIssue}
                         title="Delete issue card"
                       >

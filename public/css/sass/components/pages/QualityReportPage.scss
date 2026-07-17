@@ -10,7 +10,7 @@
 @use '../header/header';
 @use '../header/ActionMenu';
 @use '../../style';
-@use '../../commons/colors';
+@use '../../tokens/colors';
 @use '../../commons/variables';
 
 $color-red: #fb2a0d;
@@ -471,7 +471,7 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-feedback-container .qr-feedback .qr-head .color-dot.revision-color {
   float: left;
   margin-right: 10px;
-  margin-top: 5px;
+  margin-top: 10px;
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-feedback-container .qr-feedback .qr-head .color-dot.revision-color.revision-1 {

@@ -1,4 +1,4 @@
-@use './colors';
+@use '../tokens/colors';
 #powerTip {
   cursor: default;
   background-color: colors.$white;

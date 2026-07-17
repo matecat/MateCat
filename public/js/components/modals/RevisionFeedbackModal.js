@@ -77,7 +77,7 @@ class RevisionFeedbackModal extends React.Component {
           <div className="matecat-modal-textarea">
             <textarea
               value={this.state.feedback}
-              style={{width: '100%', height: '100px', resize: 'none'}}
+              style={{width: '100%', height: '100px', resize: 'none', padding: 4}}
               placeholder="Leave your feedback here"
               onChange={this.onChange}
             />

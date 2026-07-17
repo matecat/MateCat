@@ -93,12 +93,10 @@ export const FilesMenu = ({projectName}) => {
       ...files.map((file) => ({
         label: (
           <>
-            <div>
               {CommonUtils.getFileIcon(
                 file.file_name.split('.')[file.file_name.split('.').length - 1],
               )}
               <span className="file-name">{file.file_name}</span>
-            </div>
             {currentFile === file.id && <Check size={20} />}
           </>
         ),

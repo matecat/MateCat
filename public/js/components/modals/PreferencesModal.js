@@ -153,7 +153,7 @@ const PreferencesModal = (props) => {
   const getApiKeyHtml = () => {
     return (
       <div data-testid="preferences-modal">
-        <h2>API Key</h2>
+        <h4>API Key</h4>
         {credentials ? (
           confirmDelete ? (
             <div className={'user-api'}>
@@ -360,7 +360,7 @@ const PreferencesModal = (props) => {
   if (config.googleDriveEnabled) {
     googleDrive = (
       <div>
-        <h2>Google Drive</h2>
+        <h4>Google Drive</h4>
         <div className="user-gdrive">
           <Switch
             name="onoffswitch"
