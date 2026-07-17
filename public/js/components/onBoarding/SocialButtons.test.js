@@ -37,6 +37,8 @@ describe('SocialButtons', () => {
     const socialLogin = jest.fn()
     renderWithContext(socialLogin)
     fireEvent.click(screen.getAllByAltText('Google login')[0])
-    expect(socialLogin).toHaveBeenCalled()
+    expect(socialLogin).toHaveBeenCalledWith(
+      'https://accounts.google.com/o/oauth2/auth',
+    )
   })
 })
