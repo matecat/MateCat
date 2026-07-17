@@ -407,16 +407,6 @@ class MultiCurlHandler
     }
 
     /**
-     * @param string $tokenHash
-     *
-     * @return int
-     */
-    public function getStatusCode(string $tokenHash): int
-    {
-        return (int)$this->multi_curl_info[$tokenHash]['http_code'];
-    }
-
-    /**
      * @return array<string, mixed>
      */
     public function getError(string $tokenHash): array
