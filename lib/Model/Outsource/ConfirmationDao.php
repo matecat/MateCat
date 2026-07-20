@@ -11,7 +11,6 @@ namespace Model\Outsource;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 use PDO;
 use PDOException;
@@ -38,7 +37,7 @@ class ConfirmationDao extends AbstractDao
      */
     public function updatePassword(int $jid, string $old_password, string $new_password): int
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(self::$_query_update_job_password);
         $stmt->bindValue(':id_job', $jid, PDO::PARAM_INT);

@@ -11,6 +11,7 @@ use Controller\API\Commons\Exceptions\ConflictError;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Exceptions\BootstrapTerminatedException;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
@@ -467,5 +468,108 @@ class BootstrapTest extends AbstractTest
             'line' => 1,
         ]);
         $this->assertTrue(true);
+    }
+
+    // --- renderErrorPage tests (finding #1: exception handler must never mask the original) ---
+
+    private static function invokeRenderErrorPage(int $code, Throwable $exception, ?IDatabase $database): string
+    {
+        $ref = new ReflectionMethod(Bootstrap::class, 'renderErrorPage');
+        ob_start();
+        try {
+            $ref->invoke(null, $code, $exception, $database);
+        } catch (Throwable $t) {
+            ob_end_clean();
+            throw $t;
+        }
+
+        return ob_get_clean();
+    }
+
+    #[Test]
+    public function renderErrorPage_degrades_to_minimal_output_when_database_is_null(): void
+    {
+        // When an exception fires before installApplicationSingletons() assigns
+        // self::$database, the handler has no IDatabase to build CustomPageView.
+        // It must degrade instead of dereferencing the uninitialized typed static
+        // (which would fatal and mask the original exception).
+        $oldPrint = AppConfig::$PRINT_ERRORS;
+        AppConfig::$PRINT_ERRORS = true;
+
+        try {
+            $output = self::invokeRenderErrorPage(500, new RuntimeException('original boom 42'), null);
+        } finally {
+            AppConfig::$PRINT_ERRORS = $oldPrint;
+        }
+
+        $this->assertStringContainsString('original boom 42', $output);
+        // The stack trace is emitted too when error display is on.
+        $this->assertStringContainsString('#0', $output);
+    }
+
+    #[Test]
+    public function renderErrorPage_leaks_no_detail_when_database_null_and_print_errors_off(): void
+    {
+        $oldPrint = AppConfig::$PRINT_ERRORS;
+        AppConfig::$PRINT_ERRORS = false;
+
+        try {
+            $output = self::invokeRenderErrorPage(503, new RuntimeException('secret detail should not leak'), null);
+        } finally {
+            AppConfig::$PRINT_ERRORS = $oldPrint;
+        }
+
+        $this->assertStringNotContainsString('secret detail should not leak', $output);
+    }
+
+    #[Test]
+    public function renderErrorPage_swallows_render_failure_without_masking_original(): void
+    {
+        // Status 599 has no matching HTML template, so building/rendering the
+        // CustomPageView throws. renderErrorPage must swallow that Throwable and
+        // degrade, never letting it escape to mask the original exception.
+        $oldPrint = AppConfig::$PRINT_ERRORS;
+        AppConfig::$PRINT_ERRORS = true;
+
+        // Rendering the view calls session_start(), which warns "headers already
+        // sent" under the phpunit CLI SAPI. Swallow only that warning so it does not
+        // pollute the run; any other warning still surfaces.
+        set_error_handler(
+            static fn(int $errno, string $errstr): bool => str_contains($errstr, 'session_start'),
+            E_WARNING
+        );
+
+        try {
+            $output = self::invokeRenderErrorPage(599, new RuntimeException('original cause 99'), $this->createStub(IDatabase::class));
+        } finally {
+            restore_error_handler();
+            AppConfig::$PRINT_ERRORS = $oldPrint;
+        }
+
+        $this->assertStringContainsString('original cause 99', $output);
+    }
+
+    #[Test]
+    public function renderErrorPage_uses_empty_report_when_errors_off(): void
+    {
+        // With a non-null database the try-block runs and evaluates the report:
+        // PRINT_ERRORS off takes the empty-report branch. Status 599 has no
+        // template so rendering throws and is swallowed — output stays empty.
+        $oldPrint = AppConfig::$PRINT_ERRORS;
+        AppConfig::$PRINT_ERRORS = false;
+
+        set_error_handler(
+            static fn(int $errno, string $errstr): bool => str_contains($errstr, 'session_start'),
+            E_WARNING
+        );
+
+        try {
+            $output = self::invokeRenderErrorPage(599, new RuntimeException('boom'), $this->createStub(IDatabase::class));
+        } finally {
+            restore_error_handler();
+            AppConfig::$PRINT_ERRORS = $oldPrint;
+        }
+
+        $this->assertSame('', $output);
     }
 }

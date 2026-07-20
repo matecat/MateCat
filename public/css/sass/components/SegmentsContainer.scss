@@ -1,4 +1,4 @@
-@use "../commons/colors";
+@use '../commons/colors';
 .virtual-list {
   width: 100%;
   height: 100%;
@@ -76,4 +76,88 @@
   > div
   > :first-child:not(.editor) {
   border-top-color: colors.$grey3;
+}
+
+.sticky-project-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  width: 100%;
+  padding-left: 5%;
+  background-color: colors.$grey5;
+
+  &.sticky-project-bar-compressed {
+    padding-top: 10px;
+  }
+
+  &.sticky-project-bar-slide-right {
+    width: 70%;
+    padding-right: 2px;
+  }
+
+  .projectbar {
+    padding-left: 0;
+    width: auto;
+  }
+
+  .projectbar-compressed {
+    padding-top: 10px;
+  }
+
+  .sticky-project-bar-change-file-animation {
+    animation: changeFileAnimation 0.2s;
+  }
+
+  .sticky-project-bar-change-file-animation-reverse {
+    animation-direction: reverse;
+  }
+
+  .sticky-project-bar-blink {
+    animation: blinkBackground 1s;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+  }
+
+  .sticky-project-bar-blink-wordcounter {
+    animation: blinkBackground 1s;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+  }
+
+  @keyframes changeFileAnimation {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    49% {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+
+    50% {
+      transform: translateY(20px);
+    }
+
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes blinkBackground {
+    0% {
+      background-color: transparent;
+    }
+
+    50% {
+      background-color: rgba(42, 140, 252, 0.25);
+    }
+
+    100% {
+      background-color: transparent;
+    }
+  }
 }

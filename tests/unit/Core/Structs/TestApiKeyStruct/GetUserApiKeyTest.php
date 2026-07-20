@@ -7,6 +7,7 @@ use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\Factory\ApiKey;
 use Matecat\TestHelpers\Factory\User;
 use Model\DataAccess\Database;
+use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use stdClass;
@@ -42,7 +43,7 @@ class GetUserApiKeyTest extends AbstractTest
 
     private function cleanup(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $stmt = $conn->prepare("DELETE FROM api_keys WHERE api_key = :key");
         $stmt->execute(['key' => self::TEST_API_KEY]);
     }
@@ -50,7 +51,7 @@ class GetUserApiKeyTest extends AbstractTest
     #[Test]
     public function test_getUser_success()
     {
-        $user = $this->test_data->api_key->getUser();
+        $user = $this->test_data->api_key->getUser(new UserDao(obtainTestDatabase()));
         $this->assertTrue($user instanceof UserStruct);
         $this->assertEquals("{$this->test_data->user->uid}", $user->uid);
         $this->assertEquals("{$this->test_data->user->email}", $user->email);
@@ -66,6 +67,6 @@ class GetUserApiKeyTest extends AbstractTest
     public function test_getUser_failure()
     {
         $this->test_data->api_key->uid += 1000;
-        $this->assertNull($this->test_data->api_key->getUser());
+        $this->assertNull($this->test_data->api_key->getUser(new UserDao(obtainTestDatabase())));
     }
 }

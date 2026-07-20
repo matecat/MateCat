@@ -191,6 +191,6 @@ class DeepLGlossaryController extends KleinController
      */
     protected function resolveDeepLEngine(int $engineId, int $uid): DeepL
     {
-        return EnginesFactory::getInstanceByIdAndUser($engineId, $uid, DeepL::class);
+        return EnginesFactory::getInstanceByIdAndUser($engineId, $uid, $this->getDatabase(), DeepL::class);
     }
 }

@@ -5,6 +5,7 @@ namespace Matecat\Core\Controllers;
 use Controller\API\V1\NewController;
 use Exception;
 use InvalidArgumentException;
+use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
@@ -76,7 +77,7 @@ class NewControllerTest extends AbstractTest
         /**
          * engine insertion
          */
-        $this->database_instance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->database_instance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         $sql_engine = "INSERT INTO " . AppConfig::$DB_DATABASE . ".engines (
                 name, 
                 type, 
@@ -126,7 +127,9 @@ class NewControllerTest extends AbstractTest
      */
     public function createMocks(): void
     {
-        $this->controller = new NewController($this->requestMock, $this->responseMock, null, null);
+        $app = new App();
+        $app->register('getDatabase', static fn() => obtainTestDatabase());
+        $this->controller = new NewController($this->requestMock, $this->responseMock, null, $app);
         $reflector = new ReflectionClass($this->controller);
         $this->method = $reflector->getMethod('validateTheRequest');
 
@@ -359,6 +362,56 @@ class NewControllerTest extends AbstractTest
     }
 
     /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function testValidateTheRequestWithNewPrivateTmKey(): void
+    {
+        $user = $this->createMock(UserStruct::class);
+        $user->expects($this->once())->method('getPersonalTeam')->willReturn(new TeamStruct());
+        $user->expects($this->once())->method('getEmail')->willReturn("test-email@translated.com");
+
+        $this->requestMock = new Request(
+            [],
+            [
+                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'google_ads',
+                'due_date' => '20251231',
+                'source_lang' => 'en',
+                'target_lang' => 'fr,de',
+                'mt_engine' => 1,
+                'tms_engine' => 1,
+                'private_tm_key' => 'new',
+            ],
+            [],
+            [],
+            [
+                'file[]' => [
+                    'name' => 'foo.docx',
+                    'tmp_name' => '/tmp/xdwlky',
+                ]
+            ]
+        );
+
+        $this->createMocks();
+
+        $reflector = new ReflectionProperty($this->controller, 'user');
+        $reflector->setValue($this->controller, $user);
+
+        $validateParameters = $this->method->invoke($this->controller);
+
+        $this->assertIsArray($validateParameters);
+        $this->assertArrayHasKey('private_tm_key', $validateParameters);
+
+        $tmKeys = $validateParameters['private_tm_key'];
+        $this->assertCount(1, $tmKeys);
+        $this->assertEquals('New resource created for project {{pid}}', $tmKeys[0]['name']);
+        $this->assertEquals('1', $tmKeys[0]['r']);
+        $this->assertEquals('1', $tmKeys[0]['w']);
+    }
+
+    /**
      * Build a validated request array via validateTheRequest() so that
      * buildProjectStructure() can be driven with realistic, fully-populated data.
      *
@@ -406,7 +459,10 @@ class NewControllerTest extends AbstractTest
         $userProp = new ReflectionProperty($controller, 'user');
         $userProp->setValue($controller, $user);
         $fsProp = new ReflectionProperty($controller, 'featureSet');
-        $fsProp->setValue($controller, new FeatureSet());
+        $fsProp->setValue($controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        $dbProp = (new ReflectionClass(\Controller\Abstracts\KleinController::class))->getProperty('database');
+        $dbProp->setAccessible(true);
+        $dbProp->setValue($controller, $this->createStub(\Model\DataAccess\IDatabase::class));
 
         $validateMethod = (new ReflectionClass(NewController::class))->getMethod('validateTheRequest');
         /** @var array<string, mixed> $validated */

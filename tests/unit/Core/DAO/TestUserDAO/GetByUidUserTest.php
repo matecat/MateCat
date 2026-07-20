@@ -9,6 +9,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 /**
@@ -42,7 +43,7 @@ class GetByUidUserTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-        $this->database_instance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->database_instance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         $this->user_Dao = new UserDao($this->database_instance);
 
         /**
@@ -59,7 +60,7 @@ class GetByUidUserTest extends AbstractTest
     public function tearDown(): void
     {
         $this->database_instance->getConnection()->query($this->sql_delete_user);
-        $this->flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
+        $this->flusher = (new RedisHandler())->getConnection();
         $this->flusher->flushdb();
         parent::tearDown();
     }

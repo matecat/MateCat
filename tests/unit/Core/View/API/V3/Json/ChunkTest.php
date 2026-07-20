@@ -3,6 +3,7 @@
 namespace Matecat\Core\View\API\V3\Json;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
@@ -18,6 +19,14 @@ use View\API\V3\Json\Chunk;
 #[CoversClass(Chunk::class)]
 class ChunkTest extends AbstractTest
 {
+    private IDatabase $dbStub;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        [$this->dbStub, ,] = $this->createDatabaseMock();
+    }
+
     private function invokePopulateRevisePasswords(ChunkReviewStruct $review, array $result): array
     {
         $method = new ReflectionMethod(Chunk::class, 'populateRevisePasswords');
@@ -74,9 +83,39 @@ class ChunkTest extends AbstractTest
         return $chunk;
     }
 
+    private function createChunkWithDao(?JobDao $jobDao = null, ?ChunkReviewDao $chunkReviewDao = null): Chunk
+    {
+        $chunk = new Chunk($this->dbStub);
+        if ($jobDao !== null) {
+            $ref = new \ReflectionProperty(Chunk::class, 'jobDao');
+            $ref->setValue($chunk, $jobDao);
+        }
+        if ($chunkReviewDao !== null) {
+            $ref = new \ReflectionProperty(Chunk::class, 'chunkReviewDao');
+            $ref->setValue($chunk, $chunkReviewDao);
+        }
+
+        return $chunk;
+    }
+
+    private function createJobDaoStub(): JobDao
+    {
+        $jobDao = $this->createStub(JobDao::class);
+        $jobDao->method('getDatabaseHandler')->willReturn($this->dbStub);
+
+        return $jobDao;
+    }
+
     private function createTestableChunk(JobDao $jobDao, ChunkReviewDao $chunkReviewDao): Chunk
     {
-        return new class ($jobDao, $chunkReviewDao) extends Chunk {
+        return new class ($this->dbStub, $jobDao, $chunkReviewDao) extends Chunk {
+            public function __construct(IDatabase $database, JobDao $jobDao, ChunkReviewDao $chunkReviewDao)
+            {
+                parent::__construct($database);
+                $this->jobDao = $jobDao;
+                $this->chunkReviewDao = $chunkReviewDao;
+            }
+
             protected function fillUrls(array $result, JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet): array
             {
                 $result['urls'] = [];
@@ -148,7 +187,7 @@ class ChunkTest extends AbstractTest
         $chunkReviewDao = $this->createMock(ChunkReviewDao::class);
         $chunkReviewDao->expects($this->never())->method('findChunkReviews');
 
-        $chunk = new Chunk(chunkReviewDao: $chunkReviewDao);
+        $chunk = $this->createChunkWithDao(chunkReviewDao: $chunkReviewDao);
 
         $review1             = new ChunkReviewStruct();
         $review1->id         = 1;
@@ -180,7 +219,7 @@ class ChunkTest extends AbstractTest
             ->with($jobStruct)
             ->willReturn([$review]);
 
-        $chunk = new Chunk(chunkReviewDao: $chunkReviewDao);
+        $chunk = $this->createChunkWithDao(chunkReviewDao: $chunkReviewDao);
 
         $reflProp = new \ReflectionProperty(Chunk::class, 'chunk');
         $reflProp->setValue($chunk, $jobStruct);
@@ -197,7 +236,7 @@ class ChunkTest extends AbstractTest
     #[Test]
     public function getTimeToEditArrayReturnsSummedValues(): void
     {
-        $jobDao = $this->createStub(JobDao::class);
+        $jobDao = $this->createJobDaoStub();
         $jobDao->method('getTimeToEdit')
             ->willReturnMap([
                 [100, 1, $this->makeTteStruct(1000)],
@@ -205,7 +244,7 @@ class ChunkTest extends AbstractTest
                 [100, 3, $this->makeTteStruct(500)],
             ]);
 
-        $chunk = new Chunk(jobDao: $jobDao);
+        $chunk = $this->createChunkWithDao(jobDao: $jobDao);
         $method = new ReflectionMethod(Chunk::class, 'getTimeToEditArray');
         $result = $method->invoke($chunk, 100);
 
@@ -215,7 +254,7 @@ class ChunkTest extends AbstractTest
     #[Test]
     public function getTimeToEditArrayHandlesZeroValues(): void
     {
-        $jobDao = $this->createStub(JobDao::class);
+        $jobDao = $this->createJobDaoStub();
         $jobDao->method('getTimeToEdit')
             ->willReturnMap([
                 [100, 1, $this->makeTteStruct(0)],
@@ -223,7 +262,7 @@ class ChunkTest extends AbstractTest
                 [100, 3, $this->makeTteStruct(0)],
             ]);
 
-        $chunk = new Chunk(jobDao: $jobDao);
+        $chunk = $this->createChunkWithDao(jobDao: $jobDao);
         $method = new ReflectionMethod(Chunk::class, 'getTimeToEditArray');
         $result = $method->invoke($chunk, 100);
 
@@ -235,7 +274,7 @@ class ChunkTest extends AbstractTest
     #[Test]
     public function renderItemBuildsCompleteResultArray(): void
     {
-        $jobDao = $this->createStub(JobDao::class);
+        $jobDao = $this->createJobDaoStub();
         $jobDao->method('getTimeToEdit')
             ->willReturnMap([
                 [100, 1, $this->makeTteStruct(1000)],
@@ -285,7 +324,7 @@ class ChunkTest extends AbstractTest
     #[Test]
     public function renderItemPopulatesRevisePasswordsFromReviews(): void
     {
-        $jobDao = $this->createStub(JobDao::class);
+        $jobDao = $this->createJobDaoStub();
         $jobDao->method('getTimeToEdit')->willReturn($this->makeTteStruct(0));
 
         $chunkReviewDao = $this->createStub(ChunkReviewDao::class);
@@ -318,7 +357,7 @@ class ChunkTest extends AbstractTest
     #[Test]
     public function renderItemIncludesQualitySummary(): void
     {
-        $jobDao = $this->createStub(JobDao::class);
+        $jobDao = $this->createJobDaoStub();
         $jobDao->method('getTimeToEdit')->willReturn($this->makeTteStruct(0));
 
         $chunkReviewDao = $this->createStub(ChunkReviewDao::class);
@@ -338,7 +377,7 @@ class ChunkTest extends AbstractTest
     #[Test]
     public function renderItemWithEmptyReviewsProducesNoRevisePasswords(): void
     {
-        $jobDao = $this->createStub(JobDao::class);
+        $jobDao = $this->createJobDaoStub();
         $jobDao->method('getTimeToEdit')->willReturn($this->makeTteStruct(0));
 
         $chunkReviewDao = $this->createStub(ChunkReviewDao::class);
@@ -357,7 +396,7 @@ class ChunkTest extends AbstractTest
     #[Test]
     public function renderItemIncludesWordCountStats(): void
     {
-        $jobDao = $this->createStub(JobDao::class);
+        $jobDao = $this->createJobDaoStub();
         $jobDao->method('getTimeToEdit')->willReturn($this->makeTteStruct(0));
 
         $chunkReviewDao = $this->createStub(ChunkReviewDao::class);

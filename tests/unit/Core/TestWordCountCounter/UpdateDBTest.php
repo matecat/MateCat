@@ -11,6 +11,7 @@ use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 /**
@@ -63,7 +64,7 @@ class UpdateDBTest extends AbstractTest
         $this->second_half_of_number = "11";
         $sum_of_numbers = number_format((int)$this->first_half_of_number + (int)$this->second_half_of_number, 2);
         $this->number_of_words_changed = "{$sum_of_numbers}";
-        $this->database_instance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->database_instance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 
         /**
          * job initialization
@@ -151,10 +152,9 @@ class UpdateDBTest extends AbstractTest
         $this->word_count_struct->setNewStatus("TRANSLATED");
 
 
-        $this->word_counter = new CounterModel($this->word_count_struct);
+        $this->word_counter = new CounterModel(obtainTestDatabase(), $this->word_count_struct);
 
-        $this->flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
-        $this->flusher->select(AppConfig::$INSTANCE_ID);
+        $this->flusher = (new RedisHandler())->getConnection();
         $this->flusher->flushdb();
     }
 
@@ -162,7 +162,6 @@ class UpdateDBTest extends AbstractTest
     {
         $this->database_instance->getConnection()->query($this->sql_delete_job);
         $this->database_instance->getConnection()->query($this->sql_delete_first_segment);
-        $this->flusher->select(AppConfig::$INSTANCE_ID);
         $this->flusher->flushDB();
         parent::tearDown();
     }

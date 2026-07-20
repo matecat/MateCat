@@ -7,6 +7,7 @@ use Matecat\TestHelpers\AbstractTest;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
+use Model\DataAccess\Database;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AIAssistant\AlternativeTranslationsClientInterface;
 use Utils\AIAssistant\ContextExplainerClientInterface;
@@ -45,6 +46,7 @@ class AIAssistantWorkerTest extends AbstractTest
         ?ContextExplainerClientInterface $explainer = null,
     ): AIAssistantWorker {
         $amq = $this->createStub(AMQHandler::class);
+        $amq->method('getRedisClient')->willReturn($this->redisMock);
 
         $methods = ['_checkDatabaseConnection', '_doLog', 'publishToNodeJsClients'];
         if ($altTransClient) {
@@ -58,7 +60,7 @@ class AIAssistantWorkerTest extends AbstractTest
         }
 
         $worker = $this->getMockBuilder(AIAssistantWorker::class)
-            ->setConstructorArgs([$amq, $this->redisMock])
+            ->setConstructorArgs([$amq, obtainTestDatabase()])
             ->onlyMethods($methods)
             ->getMock();
 

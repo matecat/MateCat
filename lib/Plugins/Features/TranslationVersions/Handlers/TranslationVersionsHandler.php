@@ -3,16 +3,20 @@
 namespace Plugins\Features\TranslationVersions\Handlers;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentDao;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
@@ -33,11 +37,6 @@ class TranslationVersionsHandler implements VersionHandlerInterface
     private TranslationVersionDao $dao;
 
     /**
-     * @var int
-     */
-    private int $id_job;
-
-    /**
      * @var JobStruct
      */
     private JobStruct $chunkStruct;
@@ -52,6 +51,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface
     private SegmentTranslationDao $segmentTranslationDao;
     private JobDao $jobDao;
     private ProjectDao $projectDao;
+    private IDatabase $database;
 
     /**
      * TranslationVersionsHandler constructor.
@@ -59,10 +59,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface
      * @param JobStruct $chunkStruct
      * @param int|null $id_segment
      * @param ProjectStruct $projectStruct
-     * @param TranslationVersionDao|null $translationVersionDao
-     * @param SegmentTranslationDao|null $segmentTranslationDao
-     * @param JobDao|null $jobDao
-     * @param ProjectDao|null $projectDao
+     * @param IDatabase $database
      *
      * @throws RuntimeException
      */
@@ -70,19 +67,19 @@ class TranslationVersionsHandler implements VersionHandlerInterface
         JobStruct $chunkStruct,
         ?int $id_segment,
         ProjectStruct $projectStruct,
-        ?TranslationVersionDao $translationVersionDao = null,
-        ?SegmentTranslationDao $segmentTranslationDao = null,
-        ?JobDao $jobDao = null,
-        ?ProjectDao $projectDao = null,
+        IDatabase $database,
     ) {
+        if ($chunkStruct->id === null) {
+            throw new RuntimeException('Job id is required');
+        }
         $this->chunkStruct = $chunkStruct;
-        $this->id_job = $chunkStruct->id ?? throw new RuntimeException('Job id is required');
         $this->id_segment = $id_segment ?? throw new RuntimeException('Segment id is required');
-        $this->dao = $translationVersionDao ?? new TranslationVersionDao();
         $this->projectStruct = $projectStruct;
-        $this->segmentTranslationDao = $segmentTranslationDao ?? new SegmentTranslationDao();
-        $this->jobDao = $jobDao ?? new JobDao();
-        $this->projectDao = $projectDao ?? new ProjectDao();
+        $this->database = $database;
+        $this->dao = new TranslationVersionDao($database);
+        $this->segmentTranslationDao = new SegmentTranslationDao($database);
+        $this->jobDao = new JobDao($database);
+        $this->projectDao = new ProjectDao($database);
     }
 
     /**
@@ -151,34 +148,32 @@ class TranslationVersionsHandler implements VersionHandlerInterface
             $old_translation->version_number = 0;
         }
 
-        // From now on, translations are treated as arrays and get attributes attached
-        // just to be passed to version save. Create two arrays for the purpose.
         $new_version = new TranslationVersionStruct($old_translation->toArray());
         $new_version->old_status = TranslationStatus::$DB_STATUSES_MAP[$old_translation->status];
         $new_version->new_status = TranslationStatus::$DB_STATUSES_MAP[$new_translation->status];
 
-        /**
-         * In some cases, version 0 may already be there among saved_versions, because
-         * an issue for ReviewExtended has been saved on version 0.
-         *
-         * In any other case, we expect the version record NOT to be there when we reach this point.
-         *
-         * @param TranslationVersionStruct $version
-         *
-         * @return bool|int
-         *
-         */
-        $version_record = $this->dao->getVersionNumberForTranslation(
-            $this->id_job,
-            $this->id_segment,
+        // segment_translation_versions has no unique constraint on (id_job, id_segment,
+        // version_number), so a blind insert can duplicate a row already written for this key —
+        // most commonly version 0, which ReviewExtended\TranslationIssueModel::saveDiff() may
+        // already have written (raw_diff set, translation NULL) before the translator ever
+        // saves. Reconcile onto that row instead of inserting a second one.
+        //
+        // Unlike the previous check-then-update flow, the return value never depends on
+        // updateVersion()'s row count: we already established above that the translation text
+        // changed, so a version was genuinely saved whether this ends up as an insert or update.
+        $existing_version = $this->dao->getVersionNumberForTranslation(
+            $new_version->id_job,
+            $new_version->id_segment,
             $new_version->version_number
         );
 
-        if ($version_record) {
-            return (bool)$this->dao->updateVersion($new_version);
+        if ($existing_version) {
+            $this->dao->updateVersion($new_version);
+        } else {
+            $this->dao->insertVersion($new_version);
         }
 
-        return $this->dao->saveVersion($new_version);
+        return true;
     }
 
 
@@ -282,17 +277,19 @@ class TranslationVersionsHandler implements VersionHandlerInterface
             $user,
             $source_page_code,
             $chunk,
+            new TranslationEventDao($this->database),
+            new SegmentDao($this->database),
         );
     }
 
     protected function createTranslationEventsHandler(JobStruct $chunk): TranslationEventsHandler
     {
-        return new TranslationEventsHandler($chunk);
+        return new TranslationEventsHandler($chunk, new TranslationEventDao($this->database));
     }
 
     protected function createBatchReviewProcessor(): BatchReviewProcessor
     {
-        return new BatchReviewProcessor();
+        return new BatchReviewProcessor(new ChunkReviewDao($this->database));
     }
 
 }

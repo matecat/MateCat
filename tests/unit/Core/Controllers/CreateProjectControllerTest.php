@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Controllers;
 
+use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\App\CreateProjectController;
 use Exception;
 use InvalidArgumentException;
@@ -19,6 +20,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
 use Throwable;
+use Utils\Constants\Constants;
 use Utils\Logger\MatecatLogger;
 use Utils\TmKeyManagement\TmKeyStruct;
 
@@ -34,6 +36,28 @@ class TestableCreateProjectControllerApi extends CreateProjectController
 
     protected function registerValidators(): void
     {
+    }
+
+    /** @var list<array{name:string,value:string,options:array<string,mixed>}> */
+    public array $cookieWrites = [];
+
+    protected function cookieManager(): CookieManager
+    {
+        $sink = &$this->cookieWrites;
+
+        return new class($sink) extends CookieManager {
+            /** @param list<array{name:string,value:string,options:array<string,mixed>}> $sink */
+            public function __construct(private array &$sink)
+            {
+            }
+
+            protected function writeCookie(string $name, string $value, array $options): bool
+            {
+                $this->sink[] = ['name' => $name, 'value' => $value, 'options' => $options];
+
+                return true;
+            }
+        };
     }
 }
 
@@ -78,6 +102,7 @@ class CreateProjectControllerTest extends AbstractTest
 
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
 
         $this->user            = new UserStruct();
         $this->user->uid       = $this->userId(self::BASE);
@@ -87,7 +112,7 @@ class CreateProjectControllerTest extends AbstractTest
 
         $this->reflector->getProperty('user')->setValue($this->controller, $this->user);
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createMock(MatecatLogger::class));
-        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet());
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
     }
 
     protected function tearDown(): void
@@ -172,8 +197,6 @@ class CreateProjectControllerTest extends AbstractTest
         $this->assertSame('11111111-1111-1111-1111-111111111111', $data['upload_token']);
         $this->assertInstanceOf(TeamStruct::class, $data['team']);
         $this->assertSame($this->teamId(self::BASE), (int) $data['team']->id);
-        $this->assertArrayHasKey('target_language_mt_engine_association', $data);
-        $this->assertSame(['it-IT' => 1], $data['target_language_mt_engine_association']);
     }
 
     /**
@@ -216,6 +239,35 @@ class CreateProjectControllerTest extends AbstractTest
         $this->assertCount(2, $data['private_tm_key']);
         $this->assertSame('[1,2]', $data['mmt_glossaries']);
         $this->assertSame('["g1"]', $data['lara_glossaries']);
+    }
+
+    /**
+     * Regression: private_keys_list used to be sanitized with FILTER_FLAG_STRIP_HIGH, which
+     * HTML-entity-encodes (rather than strips) multi-byte UTF-8 in the whole JSON envelope
+     * (e.g. "è" -> "&egrave;"). TmKeyManager::sanitize()'s name regex then stripped the "&"/";"
+     * punctuation but left the entity-name letters behind ("egrave"), corrupting the key name.
+     * STRIP_HIGH is now dropped from this envelope-level filter, so accented characters embedded
+     * in a key's name must survive project creation unchanged.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_preserves_accented_characters_in_private_key_name(): void
+    {
+        $_COOKIE['upload_token'] = '88888888-8888-8888-8888-888888888888';
+        $params = $this->validRequestParams();
+        // Built as a raw literal (not json_encode()) on purpose: PHP's json_encode() escapes
+        // non-ASCII as \uXXXX by default, which never exercises FILTER_SANITIZE_FULL_SPECIAL_CHARS'
+        // multi-byte UTF-8 corruption bug. A real browser's JSON.stringify() sends raw UTF-8 bytes,
+        // like this literal does.
+        $params['private_keys_list'] = '{"ownergroup":[],"mine":[{"key":"aaaaaaaaaaaaaaaa","name":"èèèééééççòòòòò"}],"anonymous":[]}';
+        $this->setRequestParams($params);
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $this->assertCount(1, $data['private_tm_key']);
+        $this->assertSame('èèèééééççòòòòò', $data['private_tm_key'][0]['name']);
     }
 
     /**
@@ -571,6 +623,76 @@ class CreateProjectControllerTest extends AbstractTest
         $this->invokePrivate('validateXliffParameters', [null, 99999999]);
     }
 
+    // ─── inline-JSON template branches (schema-validated, no DB, no external service) ───
+
+    /**
+     * Inline qa_model JSON branch: the raw model is wrapped in {"model": …}, validated against
+     * inc/qa_model.json and hydrated into a QAModelTemplateStruct owned by the current user.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateQaModelTemplate_hydrates_struct_from_inline_json(): void
+    {
+        $model = json_decode(
+            file_get_contents(self::projectRoot() . '/tests/resources/files/json/files/uber_qa_model.json'),
+            true
+        )['model'];
+
+        // The fixture omits the optional `sort` keys that hydrateFromJSON reads; supply them so
+        // the model is fully-formed (avoids undefined-property notices during hydration).
+        foreach ($model['categories'] as $ci => &$category) {
+            $category['sort'] = $ci + 1;
+            foreach ($category['severities'] as $si => &$severity) {
+                $severity['sort'] = $si + 1;
+            }
+            unset($severity);
+        }
+        unset($category);
+
+        $struct = $this->invokePrivate('validateQaModelTemplate', [json_encode($model), null]);
+
+        $this->assertNotNull($struct);
+        $this->assertSame($this->user->uid, $struct->uid);
+    }
+
+    /**
+     * Inline filters_extraction_parameters branch: valid JSON validated against
+     * inc/validation/schema/filters_extraction_parameters.json is returned as an array.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateFiltersExtractionParameters_returns_array_from_inline_json(): void
+    {
+        $result = $this->invokePrivate('validateFiltersExtractionParameters', [json_encode(['name' => 'my-filters'])]);
+
+        $this->assertSame(['name' => 'my-filters'], $result);
+    }
+
+    /**
+     * Inline xliff_parameters branch: valid JSON validated against
+     * inc/validation/schema/xliff_parameters_rules_wrapper.json is hydrated into an
+     * XliffConfigTemplateStruct and its rules returned as an array.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateXliffParameters_returns_rules_array_from_inline_json(): void
+    {
+        $xliff = json_decode(
+            file_get_contents(self::projectRoot() . '/tests/resources/files/json/files/xliff_params.json'),
+            true
+        );
+        // hydrateFromJSON() requires an owning uid embedded in the payload.
+        $xliff['uid'] = $this->user->uid;
+
+        $result = $this->invokePrivate('validateXliffParameters', [json_encode($xliff), null]);
+
+        $this->assertIsArray($result);
+        $this->assertNotEmpty($result);
+    }
+
     // ─── setMetadataFromPostInput ───
 
     /**
@@ -591,20 +713,6 @@ class CreateProjectControllerTest extends AbstractTest
         $this->assertArrayHasKey('mt_quality_value_in_editor', $metadata);
         $this->assertSame(90, $metadata['mt_quality_value_in_editor']);
         $this->assertTrue($metadata['icu_enabled']);
-    }
-
-    // ─── generateTargetEngineAssociation ───
-
-    /**
-     * @throws Throwable
-     */
-    #[Test]
-    public function generateTargetEngineAssociation_maps_each_target_to_engine(): void
-    {
-        /** @var array<string, int|null> $assoc */
-        $assoc = $this->invokePrivate('generateTargetEngineAssociation', ['it-IT,fr-FR', 5]);
-
-        $this->assertSame(['it-IT' => 5, 'fr-FR' => 5], $assoc);
     }
 
     // ─── sanitizeTmKeyArr ───
@@ -718,5 +826,24 @@ class CreateProjectControllerTest extends AbstractTest
         $result = $this->invokePrivate('sanitizeTmKeyArr', [['key' => 'deadbeefdeadbeef']]);
         $this->assertArrayHasKey('r', $result);
         $this->assertArrayHasKey('w', $result);
+    }
+
+    /** @throws ReflectionException */
+    #[Test]
+    public function setLanguagePreferenceCookiesEmitsSameSiteStrictPreferenceCookies(): void
+    {
+        $this->invokePrivate('setLanguagePreferenceCookies', ['en-US', 'it-IT']);
+
+        $writes = $this->controller->cookieWrites;
+        $this->assertCount(2, $writes);
+
+        $this->assertSame(Constants::COOKIE_SOURCE_LANG, $writes[0]['name']);
+        $this->assertSame('en-US', $writes[0]['value']);
+        $this->assertSame('Strict', $writes[0]['options']['samesite']);
+        $this->assertGreaterThan(time(), $writes[0]['options']['expires']);
+
+        $this->assertSame(Constants::COOKIE_TARGET_LANG, $writes[1]['name']);
+        $this->assertSame('it-IT', $writes[1]['value']);
+        $this->assertSame('Strict', $writes[1]['options']['samesite']);
     }
 }

@@ -56,8 +56,6 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public int $pretranslate_101 = 1;
     public int $only_private = 0;
     public ?string $tm_prioritization = null;
-    /** @var array<string, int> */
-    public array $target_language_mt_engine_association = [];
     public mixed $public_tm_penalty = null;
 
     // Upload / environment
@@ -69,6 +67,8 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public ?bool $from_api = null;
     /** @var array<string, bool>|null */
     public ?array $dialect_strict = null;
+    /** @var list<string>|null */
+    public ?array $mandatory_issues = null;
     public ?string $character_counter_mode = null;
     public ?bool $character_counter_count_tags = null;
 

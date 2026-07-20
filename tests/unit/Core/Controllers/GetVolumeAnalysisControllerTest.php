@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Matecat\Core\Controllers;
 
 /**
- * Mock-seam unit test (Playbook §2).
- * ID block base 9020000 (reserved; this suite uses no real-DB seeding).
- * Per-suite owner identifier (unused — no DB rows seeded): ctrltest_9020000@example.org
+ * Real-DB unit test (Playbook harness).
+ * ID block: 9_972_000..9_972_999 (registry-reserved for this file).
  */
 
 use Controller\API\App\GetVolumeAnalysisController;
@@ -18,6 +17,8 @@ use Exception;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Model\FeaturesBase\FeatureSet;
+use Model\Users\UserStruct;
 use PHPUnit\Event\NoPreviousThrowableException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Exception as PHPUnitException;
@@ -58,6 +59,11 @@ class ValidatorTestableGetVolumeAnalysisController extends GetVolumeAnalysisCont
 
 class GetVolumeAnalysisControllerTest extends AbstractTest
 {
+    private const int TEST_PROJECT_ID = 9972000;
+    private const int TEST_JOB_ID = 9972001;
+    private const string TEST_PROJECT_PASSWORD = 'volanalysis_pw';
+    private const string TEST_JOB_PASSWORD = 'volanalysis_job_pw';
+
     /** @var ReflectionClass<GetVolumeAnalysisController> */
     private ReflectionClass $reflector;
     private TestableGetVolumeAnalysisController $controller;
@@ -75,20 +81,50 @@ class GetVolumeAnalysisControllerTest extends AbstractTest
         parent::setUp();
 
         AppConfig::$SKIP_SQL_CACHE = true;
-        $this->createDatabaseMock();
+
+        $database = obtainTestDatabase();
 
         $this->controller = new TestableGetVolumeAnalysisController();
         $this->reflector  = new ReflectionClass(GetVolumeAnalysisController::class);
 
+        $this->reflector->getProperty('database')->setValue($this->controller, $database);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->createStub(Response::class));
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createStub(MatecatLogger::class));
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet($database));
+
+        $user      = new UserStruct();
+        $user->uid = -1;
+        $this->reflector->getProperty('user')->setValue($this->controller, $user);
+        $this->reflector->getProperty('userIsLogged')->setValue($this->controller, true);
     }
 
     protected function tearDown(): void
     {
-        $this->resetDatabaseMock();
+        $this->cleanTestData();
         AppConfig::$SKIP_SQL_CACHE = false;
         parent::tearDown();
+    }
+
+    private function seedTestData(): void
+    {
+        $conn = obtainTestDatabase()->getConnection();
+        $this->cleanTestData();
+
+        $conn->exec(
+            "INSERT INTO projects (id, id_customer, password, name, create_date, status_analysis) VALUES (" .
+            self::TEST_PROJECT_ID . ", 'test@example.org', '" . self::TEST_PROJECT_PASSWORD . "', 'TestVolAnalysis', NOW(), 'DONE')"
+        );
+        $conn->exec(
+            "INSERT INTO jobs (id, password, id_project, source, target, job_first_segment, job_last_segment, owner, tm_keys, create_date, disabled) VALUES (" .
+            self::TEST_JOB_ID . ", '" . self::TEST_JOB_PASSWORD . "', " . self::TEST_PROJECT_ID . ", 'en-US', 'it-IT', 1, 1, 'test@example.org', '[]', NOW(), 0)"
+        );
+    }
+
+    private function cleanTestData(): void
+    {
+        $conn = obtainTestDatabase()->getConnection();
+        $conn->exec("DELETE FROM jobs WHERE id = " . self::TEST_JOB_ID);
+        $conn->exec("DELETE FROM projects WHERE id = " . self::TEST_PROJECT_ID);
     }
 
     /**
@@ -178,7 +214,7 @@ class GetVolumeAnalysisControllerTest extends AbstractTest
         self::assertNull($result);
     }
 
-    // ── registerValidators ─────────────────────────────────────────────────
+    // ── registerValidators ───────────────────────────────────────────────
 
     /**
      * @throws ReflectionException
@@ -274,7 +310,7 @@ class GetVolumeAnalysisControllerTest extends AbstractTest
         $ref->getProperty('params')->setValue($controller, $params);
     }
 
-    // ── analysis (failure branch — Status not unit-injectable) ──────────────
+    // ── analysis (failure branch — project not found) ───────────────────
 
     /**
      * @throws ReflectionException
@@ -287,13 +323,50 @@ class GetVolumeAnalysisControllerTest extends AbstractTest
     #[Test]
     public function analysis_throws_when_project_data_empty(): void
     {
-        // Mock seam returns an empty result set for getProjectAndJobData, so the
-        // internally-constructed Status cannot resolve the project pid.
-        $this->reflector->getProperty('params')->setValue($this->controller, ['id_project' => 9020001]);
-        $this->setRequestParams(['id_project' => '9020001', 'password' => 'secret']);
+        // id_project has no matching rows in the real test DB, so
+        // getProjectAndJobData() returns [] and the internally-constructed
+        // Status cannot resolve the project pid.
+        $this->reflector->getProperty('params')->setValue($this->controller, ['id_project' => 9972099]);
+        $this->setRequestParams(['id_project' => '9972099', 'password' => 'secret']);
 
         $this->expectException(Throwable::class);
 
         $this->controller->analysis();
+    }
+
+    // ── analysis (happy path — real project+job, no segments) ───────────
+
+    /**
+     * @throws ReflectionException
+     * @throws MockObjectException
+     * @throws PHPUnitInvalidArgumentException
+     * @throws NoPreviousThrowableException
+     * @throws Exception
+     * @throws TypeError
+     */
+    #[Test]
+    public function analysis_returns_json_response_for_project_with_no_segments(): void
+    {
+        $this->seedTestData();
+
+        $realResponse = new Response();
+        $this->reflector->getProperty('response')->setValue($this->controller, $realResponse);
+        $this->reflector->getProperty('params')->setValue($this->controller, ['id_project' => self::TEST_PROJECT_ID]);
+        $this->setRequestParams(['id_project' => (string)self::TEST_PROJECT_ID, 'password' => self::TEST_PROJECT_PASSWORD]);
+
+        // analysis() calls Response::json(), which send()s the body to stdout and pollutes
+        // the test-runner output. Swallow that echo; the body is still recorded on the
+        // Response object, so the assertions below are unaffected.
+        ob_start();
+        try {
+            $response = $this->controller->analysis();
+        } finally {
+            ob_end_clean();
+        }
+
+        self::assertSame(200, $response->code());
+
+        $body = json_decode((string)$response->body(), true);
+        self::assertIsArray($body);
     }
 }

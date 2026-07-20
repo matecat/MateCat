@@ -72,7 +72,6 @@ export const Select = ({
   const [isDropdownVisible, setDropdownVisibility] = useState(false)
   const [isDropdownReversed, setDropdownReversed] = useState(false)
   const [selectedLabel, setSelectedLabel] = useState('')
-  const [portalCoords, setPortalCoords] = useState()
 
   const Portal = usePortal(document.body)
 
@@ -111,7 +110,6 @@ export const Select = ({
 
     setDropdownVisibility(false)
     setDropdownReversed(false)
-    setPortalCoords()
     onCloseSelect?.()
   }
   const toggleDropdown = () => {
@@ -129,8 +127,7 @@ export const Select = ({
       isDropdownVisible &&
       multipleSelect !== 'modal' &&
       wrapperRef.current &&
-      dropDownRef.current &&
-      (!isPortalDropdown || (isPortalDropdown && portalCoords))
+      dropDownRef.current
     ) {
       const {getListRef, setListMaxHeight} = dropDownRef.current
       const listNode = getListRef()
@@ -183,28 +180,47 @@ export const Select = ({
     maxHeightDroplist,
     checkSpaceToReverse,
     isPortalDropdown,
-    portalCoords,
   ])
+
+  useEffect(() => {
+    if (!open || !isPortalDropdown) return
+
+    let rafId
+
+    const updatePosition = () => {
+      const rect = wrapperRef.current?.getBoundingClientRect()
+
+      if (rect && wrapperDropDownRef.current) {
+        const x = rect.x + window.scrollX
+        const y = rect.y + window.scrollY
+
+        wrapperDropDownRef.current.style.transform = `translate(${!isDropdownReversed ? x : x}px,${!isDropdownReversed ? y + rect.height : y}px)`
+        wrapperDropDownRef.current.style.width = `${rect.width}px`
+      }
+    }
+
+    const handleScroll = () => {
+      cancelAnimationFrame(rafId)
+
+      rafId = requestAnimationFrame(() => {
+        updatePosition()
+      })
+    }
+
+    updatePosition()
+
+    window.addEventListener('scroll', handleScroll, true)
+    window.addEventListener('resize', handleScroll)
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll, true)
+      window.removeEventListener('resize', handleScroll)
+    }
+  }, [isDropdownVisible, isPortalDropdown, isDropdownReversed])
 
   useEffect(() => {
     setSelectedLabel(renderSelection())
   }, [renderSelection])
-
-  useLayoutEffect(() => {
-    if (isDropdownVisible && isPortalDropdown) {
-      const getPortalCoords = () => {
-        const {x, y, width, height} = wrapperRef.current.getBoundingClientRect()
-        setPortalCoords({x, y, width, height})
-      }
-      window.addEventListener('resize', getPortalCoords)
-
-      getPortalCoords()
-
-      return () => {
-        window.removeEventListener('resize', getPortalCoords)
-      }
-    }
-  }, [isDropdownVisible, isPortalDropdown])
 
   const checkIfShouldHideDropdown = useCallback(
     (event) => {
@@ -284,12 +300,6 @@ export const Select = ({
       } ${isDropdownReversed ? 'select__dropdown--is-reversed' : ''} ${
         dropdownClassName ? dropdownClassName : ''
       } ${isPortalDropdown ? 'select-with-label__wrapper-is-portal' : ''}`}
-      {...(portalCoords && {
-        style: {
-          transform: `translate(${portalCoords.x}px,${!isDropdownReversed ? portalCoords.y + portalCoords.height : portalCoords.y}px)`,
-          width: `${portalCoords.width}px`,
-        },
-      })}
     >
       <Dropdown
         {...{

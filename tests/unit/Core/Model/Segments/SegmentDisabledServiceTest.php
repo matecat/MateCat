@@ -5,10 +5,13 @@ namespace Matecat\Core\Model\Segments;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\Segments\SegmentDisabledService;
+use Model\Segments\SegmentMetadataDao;
+use Model\Segments\SegmentMetadataMarshaller;
 use PDO;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 #[CoversClass(SegmentDisabledService::class)]
@@ -24,13 +27,13 @@ class SegmentDisabledServiceTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->database = Database::obtain(
+        $this->database = obtainTestDatabase(
             AppConfig::$DB_SERVER,
             AppConfig::$DB_USER,
             AppConfig::$DB_PASS,
             AppConfig::$DB_DATABASE
         );
-        $this->service = new SegmentDisabledService();
+        $this->service = new SegmentDisabledService(new SegmentMetadataDao($this->database));
         $this->cleanFixtures();
     }
 
@@ -38,8 +41,7 @@ class SegmentDisabledServiceTest extends AbstractTest
     {
         $this->cleanFixtures();
 
-        $flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
-        $flusher->select(AppConfig::$INSTANCE_ID);
+        $flusher = (new RedisHandler())->getConnection();
         $flusher->flushdb();
 
         parent::tearDown();
@@ -67,6 +69,20 @@ class SegmentDisabledServiceTest extends AbstractTest
         return $this->database->getConnection()
             ->query("SELECT * FROM segment_metadata WHERE id_segment = $idSegment AND meta_key = '$key'")
             ->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // --- constructor contract ---
+
+    #[Test]
+    public function constructorRequiresInjectedDao(): void
+    {
+        $param = (new \ReflectionMethod(SegmentDisabledService::class, '__construct'))->getParameters()[0];
+
+        $this->assertFalse(
+            $param->isOptional(),
+            'SegmentMetadataDao must be a mandatory ctor dependency (no obtainTestDatabase() fallback)'
+        );
+        $this->assertFalse($param->allowsNull(), 'SegmentMetadataDao ctor param must not be nullable');
     }
 
     // --- isDisabled() ---
@@ -171,5 +187,52 @@ class SegmentDisabledServiceTest extends AbstractTest
 
         $this->assertFalse($this->service->isDisabled(self::TEST_SEGMENT_ID));
         $this->assertTrue($this->service->isDisabled(self::TEST_SEGMENT_ID_2));
+    }
+
+    // --- getAllInRange cache invalidation (regression) ---
+
+    #[Test]
+    public function disableBustsStaleGetAllInRangeCacheSoFreshCallReflectsDisabledState(): void
+    {
+        $dao = new SegmentMetadataDao($this->database);
+        $ttl = 60;
+
+        // Warm getAllInRange's cache for the range while the segment is not yet disabled,
+        // simulating an earlier get-segments page load / editor scroll.
+        $before = $dao->getAllInRange(self::TEST_SEGMENT_ID, self::TEST_SEGMENT_ID, $ttl);
+        $this->assertArrayNotHasKey(self::TEST_SEGMENT_ID, $before);
+
+        $this->service->disable(self::TEST_SEGMENT_ID);
+
+        // A fresh getAllInRange call, as get-segments would make on refresh, must see the
+        // disabled flag instead of the stale pre-disable cached (empty) result.
+        $after = $dao->getAllInRange(self::TEST_SEGMENT_ID, self::TEST_SEGMENT_ID, $ttl);
+
+        $this->assertArrayHasKey(self::TEST_SEGMENT_ID, $after);
+        $this->assertSame(
+            '1',
+            $after[self::TEST_SEGMENT_ID]->find(SegmentMetadataMarshaller::TRANSLATION_DISABLED)
+        );
+    }
+
+    #[Test]
+    public function enableBustsStaleGetAllInRangeCacheSoFreshCallNoLongerShowsDisabled(): void
+    {
+        $dao = new SegmentMetadataDao($this->database);
+        $ttl = 60;
+
+        $this->insertDisabledFlag(self::TEST_SEGMENT_ID);
+
+        // Warm getAllInRange's cache while the segment IS disabled.
+        $before = $dao->getAllInRange(self::TEST_SEGMENT_ID, self::TEST_SEGMENT_ID, $ttl);
+        $this->assertSame(
+            '1',
+            $before[self::TEST_SEGMENT_ID]->find(SegmentMetadataMarshaller::TRANSLATION_DISABLED)
+        );
+
+        $this->service->enable(self::TEST_SEGMENT_ID);
+
+        $after = $dao->getAllInRange(self::TEST_SEGMENT_ID, self::TEST_SEGMENT_ID, $ttl);
+        $this->assertArrayNotHasKey(self::TEST_SEGMENT_ID, $after);
     }
 }

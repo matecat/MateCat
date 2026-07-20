@@ -8,10 +8,10 @@ use Matecat\SubFiltering\MateCatFilter;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Comments\BaseCommentStruct;
 use Model\Comments\CommentDao;
+use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
-use Model\Jobs\MetadataDao;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\EntryCommentDao;
 use Model\Projects\ProjectStruct;
@@ -42,8 +42,7 @@ class QualityReportSegmentModelTest extends AbstractTest
 
     private function createSegment(array $overrides = []): QualityReportSegmentStruct
     {
-        $metadataDao = $this->createStub(MetadataDao::class);
-        $segment = new QualityReportSegmentStruct([], $metadataDao);
+        $segment = new QualityReportSegmentStruct([]);
 
         $segment->sid = 10;
         $segment->target = 'it-IT';
@@ -92,7 +91,7 @@ class QualityReportSegmentModelTest extends AbstractTest
     public function ConstructStoresChunk(): void
     {
         $chunk = $this->createChunk();
-        $model = new TestableQualityReportSegmentModel($chunk, null);
+        $model = new TestableQualityReportSegmentModel($chunk, obtainTestDatabase(), null);
 
         $property = new ReflectionProperty(QualityReportSegmentModel::class, 'chunk');
 
@@ -102,7 +101,7 @@ class QualityReportSegmentModelTest extends AbstractTest
     #[Test]
     public function ParentGetSegmentsForQRReturnsEmptyWhenChunkCredentialsMissing(): void
     {
-        $model = new QualityReportSegmentModel($this->createChunk(null, null), null);
+        $model = new QualityReportSegmentModel($this->createChunk(null, null), obtainTestDatabase(), null);
 
         $this->assertSame([], $model->getSegmentsForQR([1, 2, 3]));
     }
@@ -116,7 +115,7 @@ class QualityReportSegmentModelTest extends AbstractTest
         $chunk->expects($this->once())->method('getProject');
         $chunk->method('getProject')->willThrowException(new RuntimeException('stop-before-dao'));
 
-        $model = new QualityReportSegmentModel($chunk, null);
+        $model = new QualityReportSegmentModel($chunk, obtainTestDatabase(), null);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('stop-before-dao');
@@ -131,7 +130,7 @@ class QualityReportSegmentModelTest extends AbstractTest
     #[Test]
     public function GetChunkReviewsReturnsCachedValueWithoutDaoCall(): void
     {
-        $model = new QualityReportSegmentModel($this->createChunk(), null);
+        $model = new QualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
 
         $chunkReview = new \stdClass();
         $chunkReview->source_page = 2;
@@ -160,7 +159,7 @@ class QualityReportSegmentModelTest extends AbstractTest
             ->with($this->isInstanceOf(JobStruct::class))
             ->willReturn([$chunkReview]);
 
-        $model = new QualityReportSegmentModel($this->createChunk(), $mockChunkReviewDao);
+        $model = new QualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), $mockChunkReviewDao);
 
         $method = new ReflectionMethod(QualityReportSegmentModel::class, '_getChunkReviews');
         
@@ -173,7 +172,7 @@ class QualityReportSegmentModelTest extends AbstractTest
     #[Test]
     public function AssignIssuesAddsOnlyMatchingSegmentAndAttachesCommentsAndRevisionNumber(): void
     {
-        $model = new TestableQualityReportSegmentModel($this->createChunk(), null);
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
         $segment = $this->createSegment(['sid' => 10]);
 
         $matchingIssue = new ShapelessConcreteStruct();
@@ -201,7 +200,7 @@ class QualityReportSegmentModelTest extends AbstractTest
     #[Test]
     public function AssignCommentsCallsTemplateMessageAndAddsOnlyMatchingSegment(): void
     {
-        $model = new TestableQualityReportSegmentModel($this->createChunk(), null);
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
         $segment = $this->createSegment(['sid' => 10]);
 
         $matchingComment = $this->getMockBuilder(BaseCommentStruct::class)
@@ -225,7 +224,7 @@ class QualityReportSegmentModelTest extends AbstractTest
     #[Test]
     public function CommonSegmentAssignmentsForUiPopulatesComputedFieldsAndTransformsText(): void
     {
-        $model = new TestableQualityReportSegmentModel($this->createChunk(), null);
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
         $segment = $this->createSegment([
             'segment' => 'plain segment',
             'translation' => null,
@@ -254,7 +253,7 @@ class QualityReportSegmentModelTest extends AbstractTest
     #[Test]
     public function PopulateLastTranslationAndRevisionForPreTranslatedApprovedSegment(): void
     {
-        $model = new TestableQualityReportSegmentModel($this->createChunk(), null);
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
         $segment = $this->createSegment([
             'sid' => 10,
             'status' => TranslationStatus::STATUS_APPROVED,
@@ -286,7 +285,7 @@ class QualityReportSegmentModelTest extends AbstractTest
     #[Test]
     public function PopulateLastTranslationAndRevisionFromEventsForNonInitialStatus(): void
     {
-        $model = new TestableQualityReportSegmentModel($this->createChunk(), null);
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
         $segment = $this->createSegment([
             'sid' => 10,
             'status' => TranslationStatus::STATUS_TRANSLATED,
@@ -316,7 +315,7 @@ class QualityReportSegmentModelTest extends AbstractTest
     #[Test]
     public function PopulateLastTranslationAndRevisionForPreTranslatedApproved2Segment(): void
     {
-        $model = new TestableQualityReportSegmentModel($this->createChunk(), null);
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
         $segment = $this->createSegment([
             'sid' => 11,
             'status' => TranslationStatus::STATUS_APPROVED2,
@@ -342,7 +341,7 @@ class QualityReportSegmentModelTest extends AbstractTest
     #[Test]
     public function PopulateLastTranslationAndRevisionForPreTranslatedTranslatedSegment(): void
     {
-        $model = new TestableQualityReportSegmentModel($this->createChunk(), null);
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
         $segment = $this->createSegment([
             'sid' => 12,
             'status' => TranslationStatus::STATUS_TRANSLATED,
@@ -367,7 +366,7 @@ class QualityReportSegmentModelTest extends AbstractTest
     #[Test]
     public function PopulateLastTranslationAndRevisionForPreTranslatedUnknownStatusFallsBackToFalse(): void
     {
-        $model = new TestableQualityReportSegmentModel($this->createChunk(), null);
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
         $segment = $this->createSegment([
             'sid' => 13,
             'status' => 'UNKNOWN_STATUS',
@@ -392,7 +391,7 @@ class QualityReportSegmentModelTest extends AbstractTest
     #[Test]
     public function IsSegmentEventInArrayReturnsTrueWhenMatchExistsAndFalseOtherwise(): void
     {
-        $model = new TestableQualityReportSegmentModel($this->createChunk(), null);
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
         $events = [
             $this->createEvent(10, SourcePages::SOURCE_PAGE_TRANSLATE, 't1'),
             $this->createEvent(20, SourcePages::SOURCE_PAGE_REVISION, 't2'),
@@ -405,7 +404,7 @@ class QualityReportSegmentModelTest extends AbstractTest
     #[Test]
     public function FilterEventReturnsMatchingEventOrNull(): void
     {
-        $model = new TestableQualityReportSegmentModel($this->createChunk(), null);
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
         $match = $this->createEvent(10, SourcePages::SOURCE_PAGE_REVISION, 'rev');
         $events = [
             $this->createEvent(10, SourcePages::SOURCE_PAGE_TRANSLATE, 'translate'),
@@ -425,6 +424,7 @@ class QualityReportSegmentModelTest extends AbstractTest
 
         $model = new QualityReportSegmentModel(
             $this->createChunk(),
+            obtainTestDatabase(),
             null,
             $segmentDao
         );
@@ -442,6 +442,7 @@ class QualityReportSegmentModelTest extends AbstractTest
 
         $model = new QualityReportSegmentModel(
             $this->createChunk(),
+            obtainTestDatabase(),
             null,
             $segmentDao
         );
@@ -459,6 +460,7 @@ class QualityReportSegmentModelTest extends AbstractTest
 
         $model = new QualityReportSegmentModel(
             $this->createChunk(),
+            obtainTestDatabase(),
             null,
             $segmentDao
         );
@@ -482,6 +484,7 @@ class QualityReportSegmentModelTest extends AbstractTest
 
         $model = new QualityReportSegmentModel(
             $this->createChunk(),
+            obtainTestDatabase(),
             $mockChunkReviewDao,
             $segmentDao
         );
@@ -510,6 +513,7 @@ class QualityReportSegmentModelTest extends AbstractTest
 
         $model = new QualityReportSegmentModel(
             $this->createChunk(),
+            obtainTestDatabase(),
             $mockChunkReviewDao,
             $segmentDao
         );
@@ -556,6 +560,7 @@ class QualityReportSegmentModelTest extends AbstractTest
 
         $model = new QualityReportSegmentModel(
             $this->createChunkWithProject(),
+            obtainTestDatabase(),
             null,
             $segmentDao,
             $qualityReportDao,
@@ -591,6 +596,7 @@ class QualityReportSegmentModelTest extends AbstractTest
 
         $model = new QualityReportSegmentModel(
             $this->createChunkWithProject(),
+            obtainTestDatabase(),
             null,
             $segmentDao,
             $qualityReportDao,
@@ -612,6 +618,7 @@ class QualityReportSegmentModelTest extends AbstractTest
 
         $model = new QualityReportSegmentModel(
             $this->createChunk(),
+            obtainTestDatabase(),
             null,
             $segmentDao
         );
@@ -633,6 +640,7 @@ class QualityReportSegmentModelTest extends AbstractTest
 
         $model = new QualityReportSegmentModel(
             $this->createChunk(),
+            obtainTestDatabase(),
             null,
             $segmentDao
         );

@@ -35,6 +35,7 @@ import {disableTPOnSegment} from './tagProjectionActions'
 import TranslationMatches from '../components/segments/utils/translationMatches'
 import {
   setStatus,
+  setSegmentDisabled,
   setHeaderPercentage,
   hideSegmentHeader,
   setSegmentPropagation,
@@ -65,20 +66,22 @@ import {TAB} from '../constants/SegmentTabConstants'
 // Async-loaded to break circular dependency for static analysis.
 let _SegmentsFilterUtil
 let _SetTranslationUtil
-import(
-  '../components/header/cattol/segment_filter/segment_filter'
-).then((m) => {
-  _SegmentsFilterUtil = m.default
-})
+import('../components/header/cattol/segment_filter/segment_filter').then(
+  (m) => {
+    _SegmentsFilterUtil = m.default
+  },
+)
 import('../setTranslationUtil').then((m) => {
   _SetTranslationUtil = m
 })
 const getSegmentsFilterUtil = () => {
-  if (!_SegmentsFilterUtil) throw new Error('[SegmentActions] SegmentsFilterUtil not loaded yet')
+  if (!_SegmentsFilterUtil)
+    throw new Error('[SegmentActions] SegmentsFilterUtil not loaded yet')
   return _SegmentsFilterUtil
 }
 const getSetTranslationUtil = () => {
-  if (!_SetTranslationUtil) throw new Error('[SegmentActions] SetTranslationUtil not loaded yet')
+  if (!_SetTranslationUtil)
+    throw new Error('[SegmentActions] SetTranslationUtil not loaded yet')
   return _SetTranslationUtil
 }
 
@@ -234,6 +237,8 @@ const SegmentActions = {
 
   setStatus,
 
+  setSegmentDisabled,
+
   clickOnApprovedButton: function (segment, goToNextUnapproved) {
     // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
     // because of the event is triggered even on download button
@@ -261,12 +266,24 @@ const SegmentActions = {
        If is an ICE we allow to change the translation because is not possible to add an issue
      */
 
+    const mandatoryIssues =
+      CatToolStore.getJobMetadata().project.mandatory_issues
+
+    const currentRevisionKey = `r${config.revisionNumber}`
+
+    const isMandatoryRevisionIssues = Array.isArray(mandatoryIssues)
+      ? mandatoryIssues.some(
+          (value) => typeof value === 'string' && value === currentRevisionKey,
+        )
+      : true
+
     if (
       config.isReview &&
       !segment.splitted &&
       segment.modified &&
       issues.length === 0 &&
-      !segment.ice_locked
+      !segment.ice_locked &&
+      isMandatoryRevisionIssues
     ) {
       SegmentActions.openIssuesPanel({sid: segment.sid}, true)
       setTimeout(() => SegmentActions.showIssuesMessage(segment.sid, 1))
@@ -625,14 +642,15 @@ const SegmentActions = {
 
     const isTranslationDisabled = segment?.metadata?.some(
       ({meta_key, meta_value}) =>
-        meta_key === 'translation_disabled' && meta_value === '1',
+        meta_key === 'translation_disabled' && meta_value,
     )
 
     if (isTranslationDisabled) {
       ModalsActions.showModalComponent(
-        MODAL_KEY.ALERT,
+        MODAL_KEY.CONFIRM_MESSAGE,
         {
-          text: "This segment has been disabled by the project owner, so it cannot be translated.",
+          text: 'This segment was disabled by the project owner and cannot be edited.',
+          successText: 'Got it',
         },
         'Segment disabled',
       )
@@ -1418,6 +1436,9 @@ const SegmentActions = {
       })
       setTimeout(CatToolActions.reloadSegmentFilter, 500)
     }
+  },
+  updateSegmentDisabledState: function (sid, disabled) {
+    SegmentActions.setSegmentDisabled(sid, disabled)
   },
   toggleSegmentOnBulk: function (sid, fid) {
     AppDispatcher.dispatch({

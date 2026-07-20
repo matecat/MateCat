@@ -21,13 +21,18 @@ class CreateRandUserController extends KleinController
      */
     public function create(): void
     {
-        /**
-         * @var $tms MyMemory
-         */
-        $tms = EnginesFactory::getInstance(1);
+        $tms = $this->getEngine();
 
         $this->response->json([
             'data' => $tms->createMyMemoryKey()
         ]);
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function getEngine(): MyMemory
+    {
+        return EnginesFactory::getInstance(1, $this->getDatabase(), MyMemory::class);
     }
 }

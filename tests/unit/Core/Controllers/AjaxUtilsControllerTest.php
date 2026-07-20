@@ -14,7 +14,9 @@ use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use RuntimeException;
+use Utils\Engines\MyMemory;
 use Utils\Logger\MatecatLogger;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 class TestableAjaxUtilsController extends AjaxUtilsController
@@ -29,6 +31,32 @@ class TestableAjaxUtilsController extends AjaxUtilsController
 
     protected function registerValidators(): void
     {
+    }
+}
+
+/**
+ * Test double for the MyMemory engine (id=1, hardcoded inside
+ * {@see \Utils\TMS\TMSService::__construct}). Bypasses
+ * {@see MyMemory::__construct}'s HTTP-touching parent init (mirrors the
+ * established {@see \Matecat\Core\Workers\TMAnalysisV2\FakeTMEngine} pattern)
+ * and overrides {@see MyMemory::checkCorrectKey()} so
+ * {@see AjaxUtilsController::checkTMKey()}'s success/failure branches are
+ * exercised with no live network call.
+ */
+class FakeCheckKeyMyMemory extends MyMemory
+{
+    public static ?bool $fakeKeyCheckResult = true;
+
+    public function __construct(mixed $engineRecord, \Model\DataAccess\IDatabase $database)
+    {
+        // Intentionally skip AbstractEngine/MyMemory parent construction:
+        // it would require a live HTTP-capable curl handler setup.
+        unset($engineRecord, $database);
+    }
+
+    public function checkCorrectKey(string $apiKey): ?bool
+    {
+        return self::$fakeKeyCheckResult;
     }
 }
 
@@ -64,7 +92,7 @@ class AjaxUtilsControllerTest extends AbstractTest
 
         // ID block base 9018000: mock-seam suite, no DB rows seeded. The stubbed
         // PDOStatement returned by createDatabaseMock answers execute() by default.
-        $this->createDatabaseMock();
+        [$dbStub] = $this->createDatabaseMock();
 
         $this->controller = new TestableAjaxUtilsController();
         $this->reflector  = new \ReflectionClass(AjaxUtilsController::class);
@@ -73,6 +101,7 @@ class AjaxUtilsControllerTest extends AbstractTest
         $this->setProp('response', $this->responseMock);
         $this->setProp('request', new Request());
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
+        $this->setProp('database', $dbStub);
     }
 
     protected function tearDown(): void
@@ -164,6 +193,92 @@ class AjaxUtilsControllerTest extends AbstractTest
         $this->expectExceptionMessage('TM key not provided.');
 
         $this->controller->checkTMKey();
+    }
+
+    /**
+     * checkTMKey() success branch: TMSService's ctor hardcodes engine id=1
+     * (the real MyMemory engine seeded in the test fixture). We temporarily
+     * repoint its `class_load` at {@see FakeCheckKeyMyMemory} — same
+     * swap-and-restore technique already used by
+     * GetInstanceTest::test_getInstance_with_no_mach_for_engine_class_name —
+     * so EnginesFactory::getInstance(1, ...) builds a controllable double
+     * instead of firing a live MyMemory HTTP call. Restored + Redis-flushed
+     * in `finally` since engine id=1 is shared global fixture data.
+     *
+     * @throws \Exception
+     */
+    #[Test]
+    public function checkTMKey_returns_success_when_key_is_valid(): void
+    {
+        // setUp() installed a DB stub via createDatabaseMock(); these tests need
+        // the real composition-root connection to swap+restore engine id=1.
+        \TestDatabaseProvider::reset();
+        $db = obtainTestDatabase();
+        $flusher = (new RedisHandler())->getConnection();
+
+        // Raw string interpolation would mangle the FQCN's backslashes (MySQL
+        // treats `\` as an escape char in string literals) - bind instead.
+        $swapStmt = $db->getConnection()->prepare("UPDATE `engines` SET class_load=? WHERE id=1;");
+        $swapStmt->execute([FakeCheckKeyMyMemory::class]);
+        $flusher->flushdb();
+        FakeCheckKeyMyMemory::$fakeKeyCheckResult = true;
+
+        try {
+            $this->setRequestParams(['tm_key' => 'a-valid-tm-key']);
+            $this->setProp('database', $db);
+
+            $captured = null;
+            $this->responseMock->expects($this->once())
+                ->method('json')
+                ->with($this->callback(function (array $data) use (&$captured): bool {
+                    $captured = $data;
+                    return true;
+                }));
+
+            $this->controller->checkTMKey();
+
+            $this->assertIsArray($captured);
+            $this->assertArrayHasKey('success', $captured);
+            $this->assertTrue($captured['success']);
+        } finally {
+            $swapStmt->execute(['MyMemory']);
+            $flusher->flushdb();
+        }
+    }
+
+    /**
+     * checkTMKey() failure branch when the underlying engine reports the key
+     * as invalid (`checkCorrectKey()` returns false) — same swap technique.
+     *
+     * @throws \Exception
+     */
+    #[Test]
+    public function checkTMKey_throws_when_key_is_rejected_by_engine(): void
+    {
+        // setUp() installed a DB stub via createDatabaseMock(); these tests need
+        // the real composition-root connection to swap+restore engine id=1.
+        \TestDatabaseProvider::reset();
+        $db = obtainTestDatabase();
+        $flusher = (new RedisHandler())->getConnection();
+
+        $swapStmt = $db->getConnection()->prepare("UPDATE `engines` SET class_load=? WHERE id=1;");
+        $swapStmt->execute([FakeCheckKeyMyMemory::class]);
+        $flusher->flushdb();
+        FakeCheckKeyMyMemory::$fakeKeyCheckResult = false;
+
+        try {
+            $this->setRequestParams(['tm_key' => 'a-rejected-tm-key']);
+            $this->setProp('database', $db);
+
+            $this->expectException(InvalidArgumentException::class);
+            $this->expectExceptionCode(-9);
+            $this->expectExceptionMessage('TM key is not valid.');
+
+            $this->controller->checkTMKey();
+        } finally {
+            $swapStmt->execute(['MyMemory']);
+            $flusher->flushdb();
+        }
     }
 
     // ─── clearNotCompletedUploads() ───

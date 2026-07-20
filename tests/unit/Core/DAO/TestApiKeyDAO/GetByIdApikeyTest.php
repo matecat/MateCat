@@ -9,6 +9,7 @@ use Model\ApiKeys\ApiKeyStruct;
 use Model\DataAccess\Database;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 #[Group('PersistenceNeeded')]
@@ -21,7 +22,7 @@ class GetByIdApikeyTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-        $this->database = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->database = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         $this->apiKeyDao = new ApiKeyDao($this->database);
 
         $sql = "INSERT INTO " . AppConfig::$DB_DATABASE . ".`api_keys` " .
@@ -38,7 +39,7 @@ class GetByIdApikeyTest extends AbstractTest
         $this->database->getConnection()->query(
             "DELETE FROM " . AppConfig::$DB_DATABASE . ".`api_keys` WHERE id = " . $this->apikeyId
         );
-        (new \Predis\Client(AppConfig::$REDIS_SERVERS))->flushdb();
+        (new RedisHandler())->getConnection()->flushdb();
         parent::tearDown();
     }
 

@@ -11,6 +11,7 @@ namespace Utils\Engines\Validators;
 
 use DomainException;
 use Exception;
+use Model\DataAccess\IDatabase;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Validator\Contracts\AbstractValidator;
@@ -18,6 +19,10 @@ use Utils\Validator\Contracts\ValidatorObjectInterface;
 
 class GoogleTranslateEngineValidator extends AbstractValidator
 {
+
+    public function __construct(private readonly IDatabase $database)
+    {
+    }
 
     /**
      * @param EngineValidatorObject $object
@@ -27,7 +32,7 @@ class GoogleTranslateEngineValidator extends AbstractValidator
     public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
     {
         $engineStruct = $object->engineStruct ?? throw new Exception('Engine struct required');
-        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct);
+        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct, $this->database);
         $config = $newTestCreatedMT->getConfigStruct();
         $config['segment'] = "Hello World";
         $config['source'] = "en-US";

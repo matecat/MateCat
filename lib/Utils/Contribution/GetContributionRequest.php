@@ -179,7 +179,7 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public function getTMEngine(FeatureSet $featureSet): AbstractEngine
     {
         if ($this->tmEngine == null) {
-            $this->tmEngine = EnginesFactory::getInstance($this->getJobStruct()->id_tms, AbstractEngine::class);
+            $this->tmEngine = EnginesFactory::getInstance($this->getJobStruct()->id_tms, $featureSet->getDatabase(), AbstractEngine::class);
             $this->tmEngine->setFeatureSet($featureSet);
         }
 
@@ -195,7 +195,7 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public function getMTEngine(FeatureSet $featureSet): AbstractEngine
     {
         if ($this->mt_engine == null) {
-            $this->mt_engine = EnginesFactory::getInstance($this->getJobStruct()->id_mt_engine, AbstractEngine::class);
+            $this->mt_engine = EnginesFactory::getInstance($this->getJobStruct()->id_mt_engine, $featureSet->getDatabase(), AbstractEngine::class);
             $this->mt_engine->setFeatureSet($featureSet);
         }
 

@@ -6,6 +6,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
 use Model\FeaturesBase\Hook\Event\Run\ReviewPasswordChangedEvent;
 use Model\Jobs\JobDao;
@@ -14,6 +15,7 @@ use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
 use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Utils\Tools\CatUtils;
@@ -105,20 +107,21 @@ class ChangePasswordController extends KleinController
 
             if ($revision_number) { // change job revision password
 
-                $jStruct = (new CatUtils())->getJobFromIdAndAnyPassword($id, $actual_pwd);
+                $jStruct = (new CatUtils($this->getDatabase()))->getJobFromIdAndAnyPassword($id, $actual_pwd);
 
                 if ($jStruct === null) {
                     throw new Exception('Job not found');
                 }
 
-                $this->checkUserPermissions($jStruct->getProject(), $user);
+                $pDao = new ProjectDao($this->getDatabase());
+                $this->checkUserPermissions($jStruct->getProject($pDao), $user);
 
                 $source_page = ReviewUtils::revisionNumberToSourcePage($revision_number);
                 $dao = new ChunkReviewDao($this->getDatabase());
                 $dao->updateReviewPassword($id, $actual_pwd, $new_password, $source_page);
                 $dao->destroyCacheForJobIdReviewPasswordAndSourcePage($id, $actual_pwd, $source_page);
-                $jStruct->getProject()
-                    ->getFeaturesSet()->dispatch(new ReviewPasswordChangedEvent($id, $actual_pwd, $new_password, $revision_number));
+                FeatureSet::forProject($jStruct->getProject($pDao), $this->getDatabase())
+                    ->dispatch(new ReviewPasswordChangedEvent($id, $actual_pwd, $new_password, $revision_number));
 
             } else { // change job password
                 $jDao = new JobDao($this->getDatabase());
@@ -128,11 +131,12 @@ class ChangePasswordController extends KleinController
                     throw new Exception('Job not found');
                 }
 
-                $this->checkUserPermissions($jStruct->getProject(), $user);
+                $pDao = new ProjectDao($this->getDatabase());
+                $this->checkUserPermissions($jStruct->getProject($pDao), $user);
 
                 $jDao->changePassword($jStruct, $new_password);
-                $jStruct->getProject()
-                    ->getFeaturesSet()->dispatch(new JobPasswordChangedEvent($jStruct, $actual_pwd));
+                FeatureSet::forProject($jStruct->getProject($pDao), $this->getDatabase())
+                    ->dispatch(new JobPasswordChangedEvent($jStruct, $actual_pwd));
             }
 
             // invalidate ChunkReviewDao cache for the job
@@ -141,9 +145,9 @@ class ChangePasswordController extends KleinController
 
             // invalidate cache for ProjectData
             $pDao = new ProjectDao($this->getDatabase());
-            $projectId = $jStruct->getProject()->id ?? throw new Exception('Project not found');
-            $pDao->destroyCacheForProjectData((int)$projectId, $jStruct->getProject()->password);
-            $pDao->destroyFetchByIdCache($jStruct->getProject()->id, ProjectStruct::class);
+            $projectId = $jStruct->getProject($pDao)->id ?? throw new Exception('Project not found');
+            $pDao->destroyCacheForProjectData((int)$projectId, $jStruct->getProject($pDao)->password);
+            $pDao->destroyFetchByIdCache($jStruct->getProject($pDao)->id, ProjectStruct::class);
 
             $this->getDatabase()->commit();
         }
@@ -160,7 +164,7 @@ class ChangePasswordController extends KleinController
     private function checkUserPermissions(ProjectStruct $project, UserStruct $user): void
     {
         // check if user is belongs to the project team
-        $team = $project->getTeam();
+        $team = $project->id_team !== null ? (new TeamDao($this->getDatabase()))->findById($project->id_team) : null;
         if ($team === null) {
             throw new Exception('Project has no team', 403);
         }

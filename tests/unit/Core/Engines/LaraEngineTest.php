@@ -33,6 +33,8 @@ use Utils\Engines\Lara\LaraClient;
 use Utils\Engines\MMT;
 use Utils\Engines\MMT\MMTServiceApiException;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Model\Projects\MetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Utils\Redis\RedisHandler;
 use Utils\TmKeyManagement\TmKeyStruct;
 
@@ -55,7 +57,7 @@ class LaraEngineTest extends AbstractTest
             'Lara-AccessKeySecret' => 'secret',
             'MMT-License' => 'license',
         ];
-        $this->engine = new TestLara($struct);
+        $this->engine = new TestLara($struct, obtainTestDatabase());
     }
     /**
      * @throws LaraException
@@ -86,6 +88,67 @@ class LaraEngineTest extends AbstractTest
         self::assertCount(1, $response->matches);
         self::assertSame('translated segment', $response->matches[0]->raw_translation);
         self::assertSame('ext_my_k1,ext_my_k2', $httpClient->capturedHeaders[Headers::LARA_MEMORIES_IDS] ?? null);
+    }
+    /**
+     * Regression test for the Lara "glossaries" implode() crash.
+     *
+     * MetadataDao::getValue() returns the ALREADY-unmarshalled LARA_GLOSSARIES value.
+     * For that key the marshaller decodes it to a string[] array (not a MetadataStruct),
+     * so the debug-log line in get() must implode the array itself. Because that debug
+     * array is built unconditionally (regardless of log level), the previous
+     * `implode(",", $laraGlossaries->value)` dereferenced ->value on a plain array and
+     * raised an Error/TypeError, aborting EVERY Lara get() contribution for any project
+     * that had lara_glossaries metadata set. This test drives get() with a project whose
+     * lara_glossaries metadata is a real JSON array and asserts it completes normally.
+     *
+     * @throws LaraException
+     * @throws Exception
+     */
+    #[Test]
+    public function getWithProjectLaraGlossariesMetadataDoesNotThrowBuildingDebugLog(): void
+    {
+        $idProject  = 1;
+        $glossaryKey = ProjectsMetadataMarshaller::LARA_GLOSSARIES->value;
+
+        // Seed real project_metadata: LARA_GLOSSARIES is persisted as a JSON array string
+        // and getValue() unmarshalls it back into a string[] array.
+        $metadataDao = new MetadataDao(obtainTestDatabase());
+        $metadataDao->delete($idProject, $glossaryKey);
+        $metadataDao->set($idProject, $glossaryKey, json_encode(['mem_abc', 'mem_def']));
+
+        // Contract lock (the exact assumption line 351 of Lara::get() depends on):
+        // the value get() reads back is a string[] array, NOT a struct nor a string.
+        self::assertSame(['mem_abc', 'mem_def'], $metadataDao->getValue($idProject, $glossaryKey));
+
+        $httpClient = new TestHttpClient();
+        $client = $this->createMock(LaraClient::class);
+        $client->method('getHttpClient')->willReturn($httpClient);
+        $client->expects(self::once())
+            ->method('translate')
+            ->willReturn(new TextResult('application/xliff+xml', 'en-US', [
+                new TextBlock('glossary translation', true),
+            ]));
+        $this->engine->setMockClient($client);
+
+        try {
+            $response = $this->engine->get([
+                'segment' => 'source segment',
+                'source' => 'en-US',
+                'target' => 'it-IT',
+                'keys' => ['k1'],
+                'id_project' => $idProject,
+                'context_list_before' => [],
+                'context_list_after' => [],
+            ]);
+        } finally {
+            // Keep project 1 metadata clean so sibling suites are unaffected.
+            $metadataDao->delete($idProject, $glossaryKey);
+        }
+
+        self::assertInstanceOf(GetMemoryResponse::class, $response);
+        self::assertSame(200, $response->responseStatus);
+        self::assertCount(1, $response->matches);
+        self::assertSame('glossary translation', $response->matches[0]->raw_translation);
     }
     /**
      * @throws LaraException
@@ -509,6 +572,36 @@ class LaraEngineTest extends AbstractTest
             ->willReturn([]);
         $this->engine->setMockClient($client);
         self::assertSame([], $this->engine->getAvailableLanguages());
+    }
+
+    /**
+     * @throws LaraException
+     * @throws Exception
+     */
+    #[Test]
+    public function getAvailableLanguagesLogsAndFallsBackWhenCacheReadThrows(): void
+    {
+        try {
+            (new RedisHandler())->getConnection()->setex('lara_languages', 60, serialize(['fr', 'de']));
+        } catch (Throwable) {
+            self::markTestSkipped('Redis not available for cache-path test');
+        }
+
+        // Force the cache read to throw: it must be swallowed+logged and the live client used,
+        // ignoring the cached ['fr','de'].
+        $this->engine->failCacheRead = true;
+
+        $client = $this->createMock(LaraClient::class);
+        $client->expects(self::once())
+            ->method('getLanguages')
+            ->willReturn(['en-US', 'it-IT']);
+        $this->engine->setMockClient($client);
+
+        $languages = $this->engine->getAvailableLanguages();
+
+        self::assertContains('en', $languages);
+        self::assertContains('it', $languages);
+        self::assertNotContains('fr', $languages);
     }
     /**
      * @throws Exception
@@ -1012,6 +1105,17 @@ class TestLara extends Lara
     protected function _getClient(): LaraClient
     {
         return $this->mockClient;
+    }
+
+    public bool $failCacheRead = false;
+
+    protected function readLanguagesCache(): array
+    {
+        if ($this->failCacheRead) {
+            throw new RuntimeException('simulated cache read failure');
+        }
+
+        return parent::readLanguagesCache();
     }
     /**
      * @return array<string, mixed>

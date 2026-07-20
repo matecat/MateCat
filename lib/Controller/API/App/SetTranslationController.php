@@ -29,6 +29,8 @@ use Model\Files\FilesPartsDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
@@ -283,7 +285,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 /** @var ProjectStruct $project */
                 $project = $this->data['project'];
                 // case 1. is MT
-                $new_translation->suggestion_match = (string)($project->getMetadataValue(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) ?? 85);
+                $new_translation->suggestion_match = (string)((new ProjectMetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$project->id, ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) ?? 85);
                 $new_translation->suggestion_source = EngineConstants::MT;
             } elseif ($client_chosen_suggestion->match == InternalMatchesConstants::NO_MATCH) {
                 // case 2. no match
@@ -297,10 +299,59 @@ class SetTranslationController extends AbstractStatefulKleinController
 
         $new_translation->time_to_edit = (int)$this->data['time_to_edit'];
 
+        // Warn (and persist a QA warning, like a tag order mismatch) when a fuzzy TM match
+        // is confirmed verbatim, i.e. without any modification by the translator.
+        if ($this->isUnmodifiedFuzzyMatchConfirmation($new_translation)) {
+            $check->addError(QA::ERR_FUZZY_UNCHANGED);
+            $new_translation->serialized_errors_list = $check->getWarningsJSON();
+            $new_translation->warning = $check->thereAreWarnings();
+        }
+
         return [
             'new' => $new_translation,
             'old' => $old_translation,
         ];
+    }
+
+    /**
+     * Detects whether the confirmation is a fuzzy TM match accepted without any edit.
+     *
+     * The check is intentionally based on the persisted suggestion so that it also works
+     * when a segment is opened, left untouched, and confirmed later (even after being
+     * navigated away from and reopened already populated).
+     *
+     * @param SegmentTranslationStruct $newTranslation The translation being persisted
+     *
+     * @return bool True when a fuzzy TM match is being confirmed verbatim
+     */
+    private function isUnmodifiedFuzzyMatchConfirmation(SegmentTranslationStruct $newTranslation): bool
+    {
+        // Only when confirming, never for draft/new auto-saves.
+        if (!in_array($newTranslation->status, [
+            TranslationStatus::STATUS_TRANSLATED,
+            TranslationStatus::STATUS_APPROVED,
+            TranslationStatus::STATUS_APPROVED2,
+        ], true)) {
+            return false;
+        }
+
+        // Only TM suggestions are relevant (excludes MT and "no match").
+        if ($newTranslation->suggestion_source !== EngineConstants::TM) {
+            return false;
+        }
+
+        // Only fuzzy bands: exclude 100% exact and ICE (>= 100) matches and unknown values.
+        $match = (int)$newTranslation->suggestion_match;
+        if ($match <= 0 || $match >= 100) {
+            return false;
+        }
+
+        if (empty($newTranslation->suggestion)) {
+            return false;
+        }
+
+        // The translation was confirmed exactly as the suggestion (no edit performed).
+        return trim((string)$newTranslation->translation) === trim((string)$newTranslation->suggestion);
     }
 
     /**
@@ -360,7 +411,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         /**
          * Translation is inserted here.
          */
-        (new CatUtils())->addSegmentTranslation($newTranslation, (bool)$this->isRevision());
+        (new CatUtils($this->getDatabase()))->addSegmentTranslation($newTranslation, (bool)$this->isRevision());
 
         /**
          * @see ProjectCompletion
@@ -465,7 +516,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     ): array {
         $newTotals = WordCountStruct::loadFromJob($this->data['chunk']);
 
-        $job_stats = (new CatUtils())->getFastStatsForJob($newTotals);
+        $job_stats = (new CatUtils($this->getDatabase()))->getFastStatsForJob($newTotals);
         $job_stats['analysis_complete'] = (
             $this->data['project']['status_analysis'] == ProjectStatus::STATUS_DONE or
             $this->data['project']['status_analysis'] == ProjectStatus::STATUS_NOT_TO_ANALYZE
@@ -619,7 +670,14 @@ class SetTranslationController extends AbstractStatefulKleinController
             FILTER_UNSAFE_RAW,
             ['flags' => FILTER_NULL_ON_FAILURE]
         );
-        $suggestion_array = (is_string($suggestion_array) && $suggestion_array !== '' && json_decode($suggestion_array) === null) ? null : $suggestion_array;
+        if (is_string($suggestion_array) && $suggestion_array !== '') {
+            $decoded = json_decode($suggestion_array);
+            // Re-encode without JSON_UNESCAPED_UNICODE: 4-byte UTF-8 chars (emojis) become
+            // \uXXXX sequences, making the string safe for MySQL utf8 connections.
+            $suggestion_array = ($decoded !== null) ? json_encode($decoded, JSON_UNESCAPED_SLASHES) : null;
+        } else {
+            $suggestion_array = null;
+        }
         $status = filter_var($this->request->param('status'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $splitStatuses = filter_var($this->request->param('splitStatuses'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $context_before = (string)filter_var($this->request->param('context_before'), FILTER_UNSAFE_RAW);
@@ -669,7 +727,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         $this->password = (string)$password;
         $this->request_password = $received_password;
 
-        $this->sourceContainsIcu($chunk->getProject(), $chunk, $segmentString);
+        $this->sourceContainsIcu($chunk->getProject(new ProjectDao($this->getDatabase())), $chunk, $segmentString, $this->getDatabase());
 
         $data = [
             'id_job' => $id_job,
@@ -697,7 +755,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             'status' => $status,
             'split_statuses' => $split_statuses,
             'chunk' => $chunk,
-            'project' => $chunk->getProject(),
+            'project' => $chunk->getProject(new ProjectDao($this->getDatabase())),
             'id_project' => $chunk->id_project,
             'segment_contains_icu' => $this->sourceContainsIcu,
             'split_num' => null,
@@ -721,7 +779,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     {
         $id_segment = (int)$this->data['id_segment'];
 
-        if ((new SegmentDisabledService())->isDisabled($id_segment)) {
+        if ((new SegmentDisabledService(new SegmentMetadataDao($this->getDatabase())))->isDisabled($id_segment)) {
             throw new RuntimeException("Segment #" . $id_segment . " is disabled", -5);
         }
     }
@@ -756,7 +814,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      */
     protected function checkSegmentSplitData(): void
     {
-        [$__translation, $this->data['split_chunk_lengths']] = (new CatUtils())->parseSegmentSplit($this->data['translation'], '', $this->filter);
+        [$__translation, $this->data['split_chunk_lengths']] = (new CatUtils($this->getDatabase()))->parseSegmentSplit($this->data['translation'], '', $this->filter);
 
         if (is_null($__translation) || $__translation === '') {
             $this->logger->debug("Empty Translation \n\n" . var_export($this->request->paramsPost()->all(), true));
@@ -900,10 +958,11 @@ class SetTranslationController extends AbstractStatefulKleinController
     /**
      * init VersionHandler
      * @throws RuntimeException
+     * @throws Exception
      */
     private function initVersionHandler(): void
     {
-        $this->VersionsHandler = TranslationVersions::getVersionHandlerNewInstance($this->data['chunk'], $this->user, $this->data['project'], (int)$this->data['id_segment']);
+        $this->VersionsHandler = TranslationVersions::getVersionHandlerNewInstance($this->data['chunk'], $this->user, $this->data['project'], (int)$this->data['id_segment'], $this->getDatabase());
     }
 
     /**
@@ -942,7 +1001,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $translation->translation_date = date("Y-m-d H:i:s");
 
             try {
-                (new CatUtils())->addSegmentTranslation($translation, (bool)$this->isRevision());
+                (new CatUtils($this->getDatabase()))->addSegmentTranslation($translation, (bool)$this->isRevision());
             } catch (Exception $e) {
                 $this->getDatabase()->rollback();
                 throw new RuntimeException($e->getMessage());

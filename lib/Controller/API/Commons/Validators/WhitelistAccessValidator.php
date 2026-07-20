@@ -29,8 +29,10 @@ class WhitelistAccessValidator extends Base
             "/^93\.43\.95\.1(?:29|3[0-4])/",
         ];
 
-        if (preg_replace($ipWhiteList, 'ALLOW', Utils::getRealIpAddr()) !== 'ALLOW') {
-            throw new DomainException("Invalid Get: not authorized domain: " . Utils::getRealIpAddr(), 403);
+        $realIpAddr = (string)Utils::getRealIpAddr();
+
+        if (preg_replace($ipWhiteList, 'ALLOW', $realIpAddr) !== 'ALLOW') {
+            throw new DomainException("Invalid Get: not authorized domain: " . $realIpAddr, 403);
         }
     }
 

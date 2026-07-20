@@ -3,6 +3,7 @@
 namespace Matecat\Core\View\API\V2\Json;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
@@ -14,30 +15,30 @@ use View\API\V2\Json\Job;
 #[CoversClass(Job::class)]
 class JobTest extends AbstractTest
 {
-    public function testInstantiationSucceeds(): void
+    private IDatabase $dbStub;
+
+    protected function setUp(): void
     {
-        $view = new Job();
-        $this->assertInstanceOf(Job::class, $view);
+        parent::setUp();
+        [$this->dbStub] = $this->createDatabaseMock();
     }
 
-    public function testInstantiationWithChunkReviewDao(): void
+    public function testInstantiationSucceeds(): void
     {
-        $dao  = $this->createStub(ChunkReviewDao::class);
-        $view = new Job($dao);
+        $view = new Job($this->dbStub);
         $this->assertInstanceOf(Job::class, $view);
     }
 
     public function testSetStatusReturnVoid(): void
     {
-        $view = new Job();
+        $view = new Job($this->dbStub);
         $view->setStatus('active');
-        // No exception = pass
         $this->assertTrue(true);
     }
 
     public function testSetUserReturnsSelf(): void
     {
-        $view = new Job();
+        $view = new Job($this->dbStub);
         $user = new UserStruct();
         $ret  = $view->setUser($user);
         $this->assertSame($view, $ret);
@@ -45,7 +46,7 @@ class JobTest extends AbstractTest
 
     public function testSetCalledFromApiReturnsSelf(): void
     {
-        $view = new Job();
+        $view = new Job($this->dbStub);
         $ret  = $view->setCalledFromApi(true);
         $this->assertSame($view, $ret);
     }
@@ -93,9 +94,17 @@ class JobTest extends AbstractTest
         return $chunk;
     }
 
-    private function makeViewWithMockedFillUrls(?ChunkReviewDao $dao = null): Job
+    private function makeViewWithMockedFillUrls(IDatabase $database, ?ChunkReviewDao $chunkReviewDao = null): Job
     {
-        return new class ($dao) extends Job {
+        return new class ($database, $chunkReviewDao) extends Job {
+            public function __construct(IDatabase $database, ?ChunkReviewDao $dao)
+            {
+                parent::__construct($database);
+                if ($dao !== null) {
+                    $this->chunkReviewDao = $dao;
+                }
+            }
+
             protected function fillUrls(array $result, JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet): array
             {
                 $result['urls'] = [];
@@ -112,8 +121,9 @@ class JobTest extends AbstractTest
         $featureSet     = $this->createStub(FeatureSet::class);
         $chunkReviewDao = $this->createStub(ChunkReviewDao::class);
         $chunkReviewDao->method('findChunkReviews')->willReturn([]);
+        [$dbStub] = $this->createDatabaseMock();
 
-        $view   = $this->makeViewWithMockedFillUrls($chunkReviewDao);
+        $view   = $this->makeViewWithMockedFillUrls($dbStub, $chunkReviewDao);
         $result = $view->renderItem($chunk, $project, $featureSet);
 
         $this->assertIsArray($result);
@@ -137,8 +147,9 @@ class JobTest extends AbstractTest
         $featureSet     = $this->createStub(FeatureSet::class);
         $chunkReviewDao = $this->createStub(ChunkReviewDao::class);
         $chunkReviewDao->method('findChunkReviews')->willReturn([]);
+        [$dbStub] = $this->createDatabaseMock();
 
-        $view   = $this->makeViewWithMockedFillUrls($chunkReviewDao);
+        $view   = $this->makeViewWithMockedFillUrls($dbStub, $chunkReviewDao);
         $result = $view->renderItem($chunk, $project, $featureSet);
 
         $this->assertIsArray($result);
@@ -159,8 +170,9 @@ class JobTest extends AbstractTest
 
         $chunkReviewDao = $this->createStub(ChunkReviewDao::class);
         $chunkReviewDao->method('findChunkReviews')->willReturn([$chunkReview]);
+        [$dbStub] = $this->createDatabaseMock();
 
-        $view   = $this->makeViewWithMockedFillUrls($chunkReviewDao);
+        $view   = $this->makeViewWithMockedFillUrls($dbStub, $chunkReviewDao);
         $result = $view->renderItem($chunk, $project, $featureSet);
 
         $this->assertArrayHasKey('revise_passwords', $result);

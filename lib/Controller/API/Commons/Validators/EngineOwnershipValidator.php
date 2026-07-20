@@ -4,6 +4,7 @@ namespace Controller\API\Commons\Validators;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
+use Exception;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 
@@ -35,7 +36,7 @@ class EngineOwnershipValidator extends Base
 
     /**
      * @throws AuthorizationError
-     * @throws \Exception
+     * @throws Exception
      */
     protected function _validate(): void
     {
@@ -45,7 +46,7 @@ class EngineOwnershipValidator extends Base
         }
 
         /** @var T $engine */
-        $engine = EnginesFactory::getInstanceByIdAndUser($this->engineId, $user->uid, $this->engineClass);
+        $engine = EnginesFactory::getInstanceByIdAndUser($this->engineId, $user->uid, $this->controller->getDatabase(), $this->engineClass);
         $this->engine = $engine;
     }
 

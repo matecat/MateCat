@@ -62,7 +62,7 @@ class ProjectTemplateDao extends AbstractDao
     public function getDefaultTemplate(int $uid): ProjectTemplateStruct
     {
         $defaultProject = $this->getTheDefaultProject($uid);
-        $team = (new TeamDao())->getPersonalByUid($uid);
+        $team = (new TeamDao($this->database))->getPersonalByUid($uid);
 
         $default = new ProjectTemplateStruct();
         $default->id = 0;
@@ -91,6 +91,8 @@ class ProjectTemplateDao extends AbstractDao
             "id" => "standard"
         ]) ?: null;
 
+        $default->mandatory_issues = json_encode(["r1", "r2"]) ?: null;
+
         // MT
         $default->mt = json_encode($this->getUserDefaultMt()) ?: null;
 
@@ -102,7 +104,7 @@ class ProjectTemplateDao extends AbstractDao
                 array_keys(HandlersSorter::getDefaultInjectedHandlers())
             )
         ) ?: null;
-        $default->icu_enabled = false;
+        $default->icu_enabled = true;
 
         return $default;
     }
@@ -170,7 +172,7 @@ class ProjectTemplateDao extends AbstractDao
     private function checkValues(ProjectTemplateStruct $projectTemplateStruct, UserStruct $user): void
     {
         // check id_team
-        $team = (new MembershipDao())->setCacheTTL(60 * 5)->findTeamByIdAndUser(
+        $team = (new MembershipDao($this->database))->setCacheTTL(60 * 5)->findTeamByIdAndUser(
             $projectTemplateStruct->id_team,
             $user
         );
@@ -210,7 +212,7 @@ class ProjectTemplateDao extends AbstractDao
 
         // check xliff_config_template_id
         if ($projectTemplateStruct->xliff_config_template_id > 0) {
-            $xliffConfigModel = (new XliffConfigTemplateDao())->getByIdAndUser($projectTemplateStruct->xliff_config_template_id, $projectTemplateStruct->uid);
+            $xliffConfigModel = (new XliffConfigTemplateDao($this->database))->getByIdAndUser($projectTemplateStruct->xliff_config_template_id, $projectTemplateStruct->uid);
 
             if (empty($xliffConfigModel)) {
                 throw new Exception("Not existing Xliff template.", 404);
@@ -219,7 +221,7 @@ class ProjectTemplateDao extends AbstractDao
 
         // check filters_template_id
         if ($projectTemplateStruct->filters_template_id > 0) {
-            $filtersConfigModel = (new FiltersConfigTemplateDao())->getByIdAndUser($projectTemplateStruct->filters_template_id, $projectTemplateStruct->uid);
+            $filtersConfigModel = (new FiltersConfigTemplateDao($this->database))->getByIdAndUser($projectTemplateStruct->filters_template_id, $projectTemplateStruct->uid);
 
             if (empty($filtersConfigModel)) {
                 throw new Exception("Not existing Filters config template.", 404);
@@ -228,7 +230,7 @@ class ProjectTemplateDao extends AbstractDao
 
         // check qa_id
         if ($projectTemplateStruct->qa_model_template_id > 0) {
-            $qaModel = (new QAModelTemplateDao())->getQaModelTemplateByIdAndUid([
+            $qaModel = (new QAModelTemplateDao($this->database))->getQaModelTemplateByIdAndUid([
                 'id' => $projectTemplateStruct->qa_model_template_id,
                 'uid' => $projectTemplateStruct->uid
             ]);
@@ -240,7 +242,7 @@ class ProjectTemplateDao extends AbstractDao
 
         // check pr_id
         if ($projectTemplateStruct->payable_rate_template_id > 0) {
-            $payableRateModel = (new CustomPayableRateDao())->getByIdAndUser($projectTemplateStruct->payable_rate_template_id, $projectTemplateStruct->uid);
+            $payableRateModel = (new CustomPayableRateDao($this->database))->getByIdAndUser($projectTemplateStruct->payable_rate_template_id, $projectTemplateStruct->uid);
 
             if (empty($payableRateModel)) {
                 throw new Exception("Not existing payable rate template.", 404);
@@ -252,7 +254,7 @@ class ProjectTemplateDao extends AbstractDao
             $mt = $projectTemplateStruct->getMt();
 
             if (isset($mt->id)) {
-                $engine = EnginesFactory::getInstance($mt->id, AbstractEngine::class);
+                $engine = EnginesFactory::getInstance($mt->id, $this->database, AbstractEngine::class);
 
                 $engineRecord = $engine->getEngineRecord();
 
@@ -269,7 +271,7 @@ class ProjectTemplateDao extends AbstractDao
         // check tm
         if ($projectTemplateStruct->tm !== null) {
             $tmKeys = $projectTemplateStruct->getTm();
-            $mkDao = new MemoryKeyDao();
+            $mkDao = new MemoryKeyDao($this->database);
 
             foreach ($tmKeys as $tmKey) {
                 $tmKeyJson = json_encode($tmKey);
@@ -402,7 +404,8 @@ class ProjectTemplateDao extends AbstractDao
                     `mt_quality_value_in_editor`,
                     `subfiltering_handlers`,
                     `created_at`,
-                    `icu_enabled`
+                    `icu_enabled`,
+                    `mandatory_issues`
                 ) VALUES (
                     :name,
                     :is_default,
@@ -429,7 +432,8 @@ class ProjectTemplateDao extends AbstractDao
                     :mt_quality_value_in_editor,
                     :subfiltering_handlers,
                     :now,
-                    :icu_enabled
+                    :icu_enabled,
+                    :mandatory_issues
                 ); ";
 
         $now = (new DateTime())->format('Y-m-d H:i:s');
@@ -462,7 +466,8 @@ class ProjectTemplateDao extends AbstractDao
             "character_counter_count_tags" => $projectTemplateStruct->character_counter_count_tags,
             "character_counter_mode" => $projectTemplateStruct->character_counter_mode,
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
-            'icu_enabled' => $projectTemplateStruct->icu_enabled
+            'icu_enabled' => $projectTemplateStruct->icu_enabled,
+            'mandatory_issues' => $projectTemplateStruct->mandatory_issues,
         ]);
 
         $projectTemplateStruct->id = (int)$conn->lastInsertId();
@@ -516,7 +521,8 @@ class ProjectTemplateDao extends AbstractDao
             `character_counter_mode` = :character_counter_mode,
             `mt_quality_value_in_editor` = :mt_quality_value_in_editor,
             `modified_at` = :now,
-            `icu_enabled` = :icu_enabled
+            `icu_enabled` = :icu_enabled,
+            `mandatory_issues` = :mandatory_issues
          WHERE id = :id;";
 
         $conn = $this->database->getConnection();
@@ -548,7 +554,8 @@ class ProjectTemplateDao extends AbstractDao
             "source_language" => $projectTemplateStruct->source_language,
             "target_language" => $projectTemplateStruct->target_language,
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
-            'icu_enabled' => $projectTemplateStruct->icu_enabled
+            'icu_enabled' => $projectTemplateStruct->icu_enabled,
+            'mandatory_issues' => $projectTemplateStruct->mandatory_issues,
         ]);
 
         $this->destroyFetchByIdCache($id, ProjectTemplateStruct::class);

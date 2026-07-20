@@ -3,8 +3,11 @@
 
 namespace Matecat\Core\Model;
 
+use DomainException;
+use Exception;
 use Matecat\Locales\Languages;
 use Matecat\TestHelpers\AbstractTest;
+use Model\Analysis\PayableRates;
 use Model\PayableRates\CustomPayableRateStruct;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -119,5 +122,154 @@ class CustomPayableRateStructTest extends AbstractTest
             $errorMessage = 'Error for language combination ' . $languageCombo[0] . '<->' . $languageCombo[1] . '. Exp. ' . $languageCombo[2] . ', got ' . $payableRate['ICE_MT'] ?? "null";
             $this->assertEquals($languageCombo[2], $payableRate['ICE_MT'], $errorMessage);
         }
+    }
+
+    /** @return array<string,mixed> */
+    private function validBreakdowns(): array
+    {
+        return ['default' => PayableRates::$DEFAULT_PAYABLE_RATES];
+    }
+
+    private function structWithBreakdowns(): CustomPayableRateStruct
+    {
+        $s = new CustomPayableRateStruct();
+        $s->id = 5;
+        $s->uid = 7;
+        $s->version = 1;
+        $s->name = 'rate';
+        $s->breakdowns = $this->validBreakdowns();
+
+        return $s;
+    }
+
+    #[Test]
+    public function breakdownsToJson_serialises_the_breakdowns(): void
+    {
+        $json = $this->structWithBreakdowns()->breakdownsToJson();
+
+        $decoded = json_decode($json, true);
+        $this->assertIsArray($decoded);
+        $this->assertArrayHasKey('default', $decoded);
+    }
+
+    #[Test]
+    public function getBreakdownsArray_backfills_missing_ICE_MT_from_MT(): void
+    {
+        $s = new CustomPayableRateStruct();
+        $s->breakdowns = json_encode([
+            'default' => PayableRates::$DEFAULT_PAYABLE_RATES,
+            'en-US'   => ['fr-FR' => ['MT' => 42]], // no ICE_MT -> must be backfilled to MT
+        ]);
+
+        $breakdowns = $s->getBreakdownsArray();
+
+        $this->assertSame(42, $breakdowns['en-US']['fr-FR']['ICE_MT']);
+        $this->assertSame(42, $breakdowns['en-US']['fr-FR']['MT']);
+    }
+
+    #[Test]
+    public function hydrateFromJSON_populates_name_breakdowns_and_version(): void
+    {
+        $s = new CustomPayableRateStruct();
+        $s->hydrateFromJSON((string)json_encode([
+            'payable_rate_template_name' => 'hydrated',
+            'version'                    => 3,
+            'breakdowns'                 => [
+                'default' => PayableRates::$DEFAULT_PAYABLE_RATES,
+                // a real source->target node so validateBreakdowns iterates the inner loop too
+                'en-US'   => ['fr-FR' => ['MT' => 80]],
+            ],
+        ]));
+
+        $this->assertSame('hydrated', $s->name);
+        $this->assertSame(3, $s->version);
+        $this->assertArrayHasKey('default', (array)$s->breakdowns);
+    }
+
+    #[Test]
+    public function hydrateFromJSON_throws_on_invalid_payload(): void
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionCode(403);
+
+        (new CustomPayableRateStruct())->hydrateFromJSON((string)json_encode(['foo' => 'bar']));
+    }
+
+    #[Test]
+    public function hydrateFromJSON_throws_when_default_node_missing(): void
+    {
+        $this->expectException(DomainException::class);
+
+        (new CustomPayableRateStruct())->hydrateFromJSON((string)json_encode([
+            'payable_rate_template_name' => 'no-default',
+            'breakdowns'                 => ['en-US' => ['fr-FR' => ['MT' => 80]]],
+        ]));
+    }
+
+    #[Test]
+    public function hydrateFromJSON_throws_when_breakdowns_too_large(): void
+    {
+        $big = ['default' => PayableRates::$DEFAULT_PAYABLE_RATES];
+        // pad past MAX_BREAKDOWN_SIZE (64kb) with junk language nodes
+        for ($i = 0; $i < 4000; $i++) {
+            $big["lang-$i"] = ['target' => ['MT' => 80]];
+        }
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionCode(400);
+
+        (new CustomPayableRateStruct())->hydrateFromJSON((string)json_encode([
+            'payable_rate_template_name' => 'too-big',
+            'breakdowns'                 => $big,
+        ]));
+    }
+
+    #[Test]
+    public function hydrateFromJSON_throws_on_unsupported_language(): void
+    {
+        $this->expectException(DomainException::class);
+
+        (new CustomPayableRateStruct())->hydrateFromJSON((string)json_encode([
+            'payable_rate_template_name' => 'bad-lang',
+            'breakdowns'                 => [
+                'default'     => PayableRates::$DEFAULT_PAYABLE_RATES,
+                'not-a-lang!' => ['fr-FR' => ['MT' => 80]],
+            ],
+        ]));
+    }
+
+    #[Test]
+    public function getPayableRates_throws_on_unsupported_language(): void
+    {
+        $this->expectException(DomainException::class);
+
+        $this->structWithBreakdowns()->getPayableRates('not-a-lang!', 'fr-FR');
+    }
+
+    #[Test]
+    public function jsonSerialize_exposes_public_shape_with_formatted_dates(): void
+    {
+        $s = $this->structWithBreakdowns();
+        $s->created_at = '2024-01-02 03:04:05';
+        $s->modified_at = '2024-02-03 04:05:06';
+
+        $out = $s->jsonSerialize();
+
+        $this->assertSame(5, $out['id']);
+        $this->assertSame(7, $out['uid']);
+        $this->assertSame(1, $out['version']);
+        $this->assertSame('rate', $out['payable_rate_template_name']);
+        $this->assertArrayHasKey('default', $out['breakdowns']);
+        $this->assertNotNull($out['createdAt']);
+        $this->assertNotNull($out['modifiedAt']);
+    }
+
+    #[Test]
+    public function jsonSerialize_returns_null_dates_when_unset(): void
+    {
+        $out = $this->structWithBreakdowns()->jsonSerialize();
+
+        $this->assertNull($out['createdAt']);
+        $this->assertNull($out['modifiedAt']);
     }
 }

@@ -4,6 +4,7 @@ namespace Matecat\Core\Model\ProjectCreation;
 
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
@@ -21,13 +22,15 @@ class JobCreationServiceTest extends AbstractTest
     private JobCreationService $service;
     private FeatureSet $featureSet;
     private MatecatLogger $logger;
+    private IDatabase $db;
 
     public function setUp(): void
     {
         parent::setUp();
         $this->featureSet = $this->createStub(FeatureSet::class);
         $this->logger = $this->createStub(MatecatLogger::class);
-        $this->service = new JobCreationService($this->featureSet, $this->logger);
+        $this->db = $this->createStub(IDatabase::class);
+        $this->service = new JobCreationService($this->featureSet, $this->logger, $this->db);
     }
 
     /**
@@ -239,7 +242,7 @@ class JobCreationServiceTest extends AbstractTest
             'id_project' => 42,
             'source_language' => 'en-US',
             'tms_engine' => 1,
-            'target_language_mt_engine_association' => ['it-IT' => 2],
+            'mt_engine' => 2,
             'job_subject' => 'general',
             'owner' => 'owner@example.com',
             'only_private' => false,
@@ -279,7 +282,7 @@ class JobCreationServiceTest extends AbstractTest
             'id_project' => 1,
             'source_language' => 'en-US',
             'tms_engine' => null,
-            'target_language_mt_engine_association' => ['it-IT' => 1],
+            'mt_engine' => 1,
             'job_subject' => 'general',
             'owner' => 'test@test.com',
             'only_private' => false,
@@ -425,7 +428,7 @@ class JobCreationServiceTest extends AbstractTest
         $dao = $this->createStub(CustomPayableRateDao::class);
         $dao->method('findById')->willReturn($template);
 
-        $service = new JobCreationService($this->featureSet, $this->logger, $dao);
+        $service = new JobCreationService($this->featureSet, $this->logger, $this->db, $dao);
 
         $ps = $this->makeProjectStructure([
             'mt_qe_workflow_payable_rate' => null,
@@ -450,7 +453,7 @@ class JobCreationServiceTest extends AbstractTest
         $dao = $this->createStub(CustomPayableRateDao::class);
         $dao->method('findById')->willReturn(null);
 
-        $service = new JobCreationService($this->featureSet, $this->logger, $dao);
+        $service = new JobCreationService($this->featureSet, $this->logger, $this->db, $dao);
 
         $ps = $this->makeProjectStructure([
             'mt_qe_workflow_payable_rate' => null,
@@ -480,7 +483,7 @@ class JobCreationServiceTest extends AbstractTest
         $metadataDao->expects($this->once())->method('bulkSet')
             ->with(42, 'pass123', $this->isArray());
 
-        $testable = new TestableJobCreationService($this->featureSet, $this->logger);
+        $testable = new TestableJobCreationService($this->featureSet, $this->logger, $this->db);
         $testable->setJobsMetadataDao($metadataDao);
 
         $job = new JobStruct();
@@ -512,7 +515,7 @@ class JobCreationServiceTest extends AbstractTest
                 return !array_key_exists('subfiltering_handlers', $metadata);
             }));
 
-        $testable = new TestableJobCreationService($this->featureSet, $this->logger);
+        $testable = new TestableJobCreationService($this->featureSet, $this->logger, $this->db);
         $testable->setJobsMetadataDao($metadataDao);
 
         $job = new JobStruct();
@@ -545,7 +548,7 @@ class JobCreationServiceTest extends AbstractTest
         $dao->expects($this->once())->method('assocModelToJob')
             ->with(99, 42, 2, 'test_model');
 
-        $service = new JobCreationService($this->featureSet, $this->logger, $dao);
+        $service = new JobCreationService($this->featureSet, $this->logger, $this->db, $dao);
 
         $ps = $this->makeProjectStructure(['payable_rate_model_id' => 99]);
         $job = new JobStruct();
@@ -572,7 +575,7 @@ class JobCreationServiceTest extends AbstractTest
         $logger = $this->createMock(MatecatLogger::class);
         $logger->expects($this->once())->method('error');
 
-        $service = new JobCreationService($this->featureSet, $logger, $dao);
+        $service = new JobCreationService($this->featureSet, $logger, $this->db, $dao);
 
         $ps = $this->makeProjectStructure(['payable_rate_model_id' => 99]);
         $job = new JobStruct();

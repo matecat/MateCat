@@ -60,7 +60,7 @@ class TMSServiceTest extends AbstractTest
         $outputTypeProp->setValue($this->service, 'translation');
 
         $featureSetProp = $ref->getProperty('featureSet');
-        $featureSetProp->setValue($this->service, new FeatureSet());
+        $featureSetProp->setValue($this->service, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 
         $nameProp = $ref->getProperty('name');
         $nameProp->setValue($this->service, '');

@@ -59,7 +59,7 @@ class GetUpdatedValueTest extends AbstractTest
         $word_count_struct->setOldStatus("TRANSLATED");
         $word_count_struct->setNewStatus("TRANSLATED");
 
-        $this->word_counter = new CounterModel($this->word_count_struct);
+        $this->word_counter = new CounterModel(obtainTestDatabase(), $this->word_count_struct);
         $this->word_counter->setOldStatus("TRANSLATED");
         $this->word_counter->setNewStatus("TRANSLATED");
 
@@ -100,7 +100,7 @@ class GetUpdatedValueTest extends AbstractTest
         $word_count_struct->setOldStatus("TRANSLATED");
         $word_count_struct->setNewStatus("REJECTED");
 
-        $this->word_counter = new CounterModel($this->word_count_struct);
+        $this->word_counter = new CounterModel(obtainTestDatabase(), $this->word_count_struct);
         $this->word_counter->setOldStatus("TRANSLATED");
         $this->word_counter->setNewStatus("REJECTED");
 
@@ -142,7 +142,7 @@ class GetUpdatedValueTest extends AbstractTest
         $this->word_count_struct->setOldStatus("DRAFT");
         $this->word_count_struct->setNewStatus("APPROVED");
 
-        $this->word_counter = new CounterModel($this->word_count_struct);
+        $this->word_counter = new CounterModel(obtainTestDatabase(), $this->word_count_struct);
         $this->word_counter->setOldStatus("DRAFT");
         $this->word_counter->setNewStatus("APPROVED");
 
@@ -168,7 +168,7 @@ class GetUpdatedValueTest extends AbstractTest
     #[Test]
     public function test_getUpdateValue_with_null_argument()
     {
-        $this->word_counter = new CounterModel();
+        $this->word_counter = new CounterModel(obtainTestDatabase());
         $this->expectException(LogicException::class);
         $this->word_counter->getUpdatedValues(15, 0);
     }

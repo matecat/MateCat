@@ -5,12 +5,18 @@ namespace Controller\API\V2;
 
 
 use Controller\Abstracts\KleinController;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Utils\Registry\AppConfig;
 
 class SupportedFilesController extends KleinController
 {
 
 
+    /**
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
+     */
     public function index(): void
     {
         $this->response->json(
@@ -19,7 +25,7 @@ class SupportedFilesController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array<string, list<list<array{ext: int|string, class: mixed}>>>
      */
     private function getFileList(): array
     {

@@ -9,8 +9,6 @@
 
 global $klein;
 
-route('/api/app/teams/[i:id_team]/[:team_name]/members/public', 'GET', ['\Controller\API\App\TeamPublicMembersController', 'publicList']);
-
 // Authentication
 $klein->with('/api/app/user', function () {
     route('', 'GET', ['Controller\API\App\Authentication\UserController', 'show']);
@@ -20,8 +18,6 @@ $klein->with('/api/app/user', function () {
     route('/logout', 'POST', ['Controller\API\App\Authentication\LoginController', 'directLogout']);
     route('/login/token', 'GET', ['Controller\API\App\Authentication\LoginController', 'token']);
     route('/login/socket', 'GET', ['Controller\API\App\Authentication\LoginController', 'socketToken']);
-
-    route('/metadata', 'POST', ['Controller\API\App\UserMetadataController', 'update']);
 
     route('', 'POST', ['Controller\API\App\Authentication\SignupController', 'create']);
     route('/confirm/[:token]', 'GET', ['Controller\API\App\Authentication\SignupController', 'confirm']);
@@ -64,6 +60,10 @@ $klein->with('/api/app/jobs/[:id_job]/[:password]', function () {
 
     // LARA AUTH
     route('/lara/auth', 'GET', ['\Controller\API\App\Authentication\LaraAuthController', 'auth']);
+
+    // Team members (public projection, for comment attribution) — authorized by the job
+    // password capability, replacing the guessable team-name lookup (CWE-639).
+    route('/team-members', 'GET', ['\Controller\API\App\JobTeamMembersController', 'members']);
 });
 
 // PROJECTS

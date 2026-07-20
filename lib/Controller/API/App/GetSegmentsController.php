@@ -34,6 +34,7 @@ use PDOException;
 use ReflectionException;
 use RuntimeException;
 use Utils\LQA\ICUSourceSegmentDetector;
+use Model\Projects\ProjectDao;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\Tools\CatUtils;
@@ -74,7 +75,7 @@ class GetSegmentsController extends KleinController
 
         $job = $this->findJob($jid, $password);
 
-        $project = $job->getProject();
+        $project = $job->getProject(new ProjectDao($this->getDatabase()));
         $projectId = $project->id ?? throw new RuntimeException('Project ID is null');
         $jobId = $job->id ?? throw new RuntimeException('Job ID is null');
         $jobPassword = $job->password ?? throw new RuntimeException('Job password is null');
@@ -108,12 +109,12 @@ class GetSegmentsController extends KleinController
         $res = [];
 
         $projectMetadata = $this->createProjectMetadataDao();
-        $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->get($projectId, ProjectsMetadataMarshaller::ICU_ENABLED->value)->value ?? false;
+        $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->getValue($projectId, ProjectsMetadataMarshaller::ICU_ENABLED->value) ?? false;
 
-        $projectContextUrl = $projectMetadata->setCacheTTL(60 * 60 * 24)->get(
+        $projectContextUrl = $projectMetadata->setCacheTTL(60 * 60 * 24)->getValue(
             $projectId,
             ProjectsMetadataMarshaller::CONTEXT_URL->value
-        )?->value;
+        );
 
         $filesMetadataDao = $this->createFilesMetadataDao();
         $fileContextUrls = [];

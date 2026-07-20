@@ -6,22 +6,39 @@ namespace Matecat\Core\Plugins\Features;
 
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\LQA\ChunkReviewStruct;
+use Model\Projects\MetadataStruct;
 use Model\Projects\ProjectStruct;
+use PDO;
+use PDOStatement;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Stub;
 use Plugins\Features\AbstractRevisionFeature;
 use Plugins\Features\ReviewExtended;
 use Plugins\Features\ReviewExtended\ChunkReviewModel;
 use Plugins\Features\RevisionFactory;
 use Plugins\Features\SecondPassReview;
+use Utils\Registry\AppConfig;
 
 class RevisionFactoryTest extends AbstractTest
 {
+    private IDatabase&Stub $dbStub;
+    private PDO&Stub $pdoStub;
+    private PDOStatement&Stub $stmtStub;
+    private static bool $originalSkipCache;
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        self::$originalSkipCache = AppConfig::$SKIP_SQL_CACHE;
+        AppConfig::$SKIP_SQL_CACHE = true;
+
+        [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock();
+
         $reflection = new \ReflectionProperty(RevisionFactory::class, 'INSTANCE');
         $reflection->setValue(null, null);
     }
@@ -30,6 +47,8 @@ class RevisionFactoryTest extends AbstractTest
     {
         $reflection = new \ReflectionProperty(RevisionFactory::class, 'INSTANCE');
         $reflection->setValue(null, null);
+        $this->resetDatabaseMock();
+        AppConfig::$SKIP_SQL_CACHE = self::$originalSkipCache;
         parent::tearDown();
     }
 
@@ -111,19 +130,17 @@ class RevisionFactoryTest extends AbstractTest
     #[Test]
     public function InitFromProjectWithRevisionFeature(): void
     {
-        $revision = new SecondPassReview(
-            new BasicFeatureStruct(['feature_code' => ReviewExtended::FEATURE_CODE])
-        );
+        $metadataRow = new MetadataStruct();
+        $metadataRow->key = 'features';
+        $metadataRow->value = 'review_extended';
+        $metadataRow->id_project = 1;
 
-        $featureSet = $this->createStub(FeatureSet::class);
-        $featureSet->method('getFeaturesStructs')->willReturn([
-            new BasicFeatureStruct(['feature_code' => ReviewExtended::FEATURE_CODE]),
-        ]);
+        $this->stmtStub->method('fetchAll')->willReturn([$metadataRow]);
 
         $project = $this->createStub(ProjectStruct::class);
-        $project->method('getFeaturesSet')->willReturn($featureSet);
+        $project->id = 1;
 
-        $factory = RevisionFactory::initFromProject($project);
+        $factory = RevisionFactory::initFromProject($project, $this->dbStub);
 
         $this->assertInstanceOf(RevisionFactory::class, $factory);
         $this->assertInstanceOf(AbstractRevisionFeature::class, $factory->getRevisionFeature());
@@ -132,13 +149,12 @@ class RevisionFactoryTest extends AbstractTest
     #[Test]
     public function InitFromProjectFallsBackToSecondPassReview(): void
     {
-        $featureSet = $this->createStub(FeatureSet::class);
-        $featureSet->method('getFeaturesStructs')->willReturn([]);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
 
         $project = $this->createStub(ProjectStruct::class);
-        $project->method('getFeaturesSet')->willReturn($featureSet);
+        $project->id = 1;
 
-        $factory = RevisionFactory::initFromProject($project);
+        $factory = RevisionFactory::initFromProject($project, $this->dbStub);
 
         $this->assertInstanceOf(RevisionFactory::class, $factory);
         $this->assertInstanceOf(SecondPassReview::class, $factory->getRevisionFeature());

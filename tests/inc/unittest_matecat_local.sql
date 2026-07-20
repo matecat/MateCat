@@ -617,7 +617,7 @@ CREATE TABLE `mt_qe_templates` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
   `uid` bigint(20) NOT NULL,
-  `rules` varchar(2048) NOT NULL,
+  `params` varchar(2048) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
@@ -789,7 +789,8 @@ CREATE TABLE `project_templates` (
   `mt_quality_value_in_editor` int(11) DEFAULT NULL,
   `public_tm_penalty` int(11) DEFAULT '0',
   `subfiltering_handlers` varchar(1024) NOT NULL DEFAULT '["markup", "twig", "double_snail", "double_square", "double_percent"]',
-  `icu_enabled` tinyint(1) DEFAULT '0',
+  `icu_enabled` tinyint(1) DEFAULT '1',
+  `mandatory_issues` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_name_idx` (`uid`,`name`),
   KEY `uid_idx` (`uid`)

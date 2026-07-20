@@ -5,6 +5,7 @@ namespace Utils\TmKeyManagement;
 use DomainException;
 use Exception;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
@@ -230,13 +231,13 @@ class TmKeyManager
         }
 
         if (!is_null($obj->name)) {
-            $obj->name = preg_replace('/[^.\-_\p{L}\p{N}\s]+/u', '', $obj->name);
+            $obj->name = preg_replace('/[^.\-_\p{L}\p{N}\s{}]+/u', '', $obj->name);
             $sanitized = filter_var($obj->name, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
             $obj->name = $sanitized !== false ? $sanitized : null;
         }
 
         if (!is_null($obj->key)) {
-            $sanitized = filter_var($obj->key, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+            $sanitized = filter_var($obj->key, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
             $obj->key = $sanitized !== false ? $sanitized : null;
         }
 
@@ -304,7 +305,7 @@ class TmKeyManager
      * @see TmKeyStruct
      *
      */
-    public static function mergeJsonKeys(string $Json_clientKeys, string $Json_jobKeys, string $userRole = Filter::ROLE_TRANSLATOR, ?int $uid = null): array
+    public static function mergeJsonKeys(string $Json_clientKeys, string $Json_jobKeys, IDatabase $database, string $userRole = Filter::ROLE_TRANSLATOR, ?int $uid = null): array
     {
         //we put the already present job keys so they can be checked against the client keys when cycle advances
         //( jobs has more elements than the client objects )
@@ -489,7 +490,7 @@ class TmKeyManager
                         /*
                          * Take the keys of the user
                          */
-                        $_keyDao = new MemoryKeyDao(Database::obtain());
+                        $_keyDao = new MemoryKeyDao($database);
                         $dh = new MemoryKeyStruct([
                             'uid' => $uid,
                             'tm_key' => new TmKeyStruct([
@@ -583,14 +584,15 @@ class TmKeyManager
      * @param list<string> $emailList
      * @param MemoryKeyStruct $memoryKeyToUpdate
      * @param UserStruct $user
+     * @param IDatabase $database
      *
      * @throws Exception
      * @throws \TypeError
      */
-    public function shareKey(array $emailList, MemoryKeyStruct $memoryKeyToUpdate, UserStruct $user): void
+    public function shareKey(array $emailList, MemoryKeyStruct $memoryKeyToUpdate, UserStruct $user, IDatabase $database): void
     {
-        $mkDao = new MemoryKeyDao();
-        $userDao = new UserDao();
+        $mkDao = new MemoryKeyDao($database);
+        $userDao = new UserDao($database);
 
         foreach ($emailList as $email) {
             $userQuery = UserStruct::getStruct();

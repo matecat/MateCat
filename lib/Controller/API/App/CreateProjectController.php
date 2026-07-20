@@ -16,6 +16,7 @@ use Model\DataAccess\Database;
 use Model\FeaturesBase\Hook\Event\Filter\FilterCreateProjectFeaturesEvent;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobsMetadataMarshaller;
+use Model\LQA\CategoryDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
 use Model\PayableRates\CustomPayableRateDao;
@@ -25,6 +26,7 @@ use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use Model\Xliff\XliffConfigTemplateDao;
@@ -84,40 +86,15 @@ class CreateProjectController extends AbstractStatefulKleinController
         $this->featureSet->loadFromUserEmail($this->user->email ?? '');
         $this->data = $this->validateTheRequest();
 
-        // SET SOURCE COOKIE
-        CookieManager::setCookie(
-            Constants::COOKIE_SOURCE_LANG,
-            $this->data['source_lang'],
-            [
-                'expires' => time() + (86400 * 365),
-                'path' => '/',
-                'domain' => AppConfig::$COOKIE_DOMAIN,
-                'secure' => true,
-                'httponly' => true,
-                'samesite' => 'None',
-            ]
-        );
-
-        // SET TARGET COOKIE
-        CookieManager::setCookie(
-            Constants::COOKIE_TARGET_LANG,
-            $this->data['target_lang'],
-            [
-                'expires' => time() + (86400 * 365),
-                'path' => '/',
-                'domain' => AppConfig::$COOKIE_DOMAIN,
-                'secure' => true,
-                'httponly' => true,
-                'samesite' => 'None',
-            ]
-        );
+        // SET SOURCE / TARGET LANGUAGE COOKIES (same-site, 1-year preference)
+        $this->setLanguagePreferenceCookies($this->data['source_lang'], $this->data['target_lang']);
 
         //Search in fileNames if there's a zip file. If it's present, get filenames and add them instead of the zip file.
         $fs = FilesStorageFactory::create();
         $uploadDir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->data['upload_token'];
         $filesFound = $this->getFilesList($fs, $this->data['file_names_list'], $uploadDir);
 
-        $engine = EnginesFactory::getInstance($this->data['mt_engine'], AbstractEngine::class);
+        $engine = EnginesFactory::getInstance($this->data['mt_engine'], $this->getDatabase(), AbstractEngine::class);
 
         $gdriveSession = $_SESSION[Session::SESSION_KEY] ?? null;
 
@@ -131,7 +108,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $gdriveSession,
         );
 
-        $projectManager = new ProjectManager($projectStructure);
+        $projectManager = new ProjectManager($projectStructure, $this->getDatabase());
         $projectManager->setTeam($this->data['team']);
 
         //reserve a project id from the sequence
@@ -152,6 +129,24 @@ class CreateProjectController extends AbstractStatefulKleinController
             ],
             'errors' => [],
         ]);
+    }
+
+    /**
+     * Cookie writer seam: overridable in tests to capture the emitted cookies.
+     */
+    protected function cookieManager(): CookieManager
+    {
+        return new CookieManager();
+    }
+
+    /**
+     * Persists the user's source/target language choice as same-site, 1-year preference cookies.
+     */
+    protected function setLanguagePreferenceCookies(string $sourceLang, string $targetLang): void
+    {
+        $cookieManager = $this->cookieManager();
+        $cookieManager->set(Constants::COOKIE_SOURCE_LANG, $sourceLang, time() + (86400 * 365));
+        $cookieManager->set(Constants::COOKIE_TARGET_LANG, $targetLang, time() + (86400 * 365));
     }
 
     /**
@@ -207,8 +202,8 @@ class CreateProjectController extends AbstractStatefulKleinController
         $payable_rate_template = filter_var($this->request->param('payable_rate_template'), FILTER_SANITIZE_SPECIAL_CHARS);
         $private_keys_list = filter_var(
             $this->request->param('private_keys_list'),
-            FILTER_SANITIZE_FULL_SPECIAL_CHARS,
-            ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES]
+            FILTER_UNSAFE_RAW,
+            ['flags' => FILTER_FLAG_STRIP_LOW]
         );
 
         // MT SETTINGS
@@ -231,8 +226,13 @@ class CreateProjectController extends AbstractStatefulKleinController
         $deepl_engine_type = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
 
         $icu_enabled = filter_var($this->request->param('icu_enabled'), FILTER_VALIDATE_BOOLEAN);
+        $mandatory_issues = filter_var(
+            $this->request->param('mandatory_issues'),
+            FILTER_SANITIZE_FULL_SPECIAL_CHARS,
+            ['flags' => FILTER_FLAG_NO_ENCODE_QUOTES]
+        );
 
-        $array_keys = json_decode($private_keys_list, true);
+        $array_keys = (is_string($private_keys_list)) ? json_decode($private_keys_list, true) : [];
         $array_keys = is_array($array_keys) && isset($array_keys['ownergroup'], $array_keys['mine'], $array_keys['anonymous'])
             ? array_values(
                 array_merge(
@@ -368,6 +368,7 @@ class CreateProjectController extends AbstractStatefulKleinController
                 SubfilteringOptionsValidator::validate($this->request->param(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, '[]'))
             ),
             'icu_enabled' => $icu_enabled,
+            'mandatory_issues' => null,
         ];
 
         if ($disable_tms_engine_flag) {
@@ -405,6 +406,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $data['payable_rate_template_id']
         );
         $data['dialect_strict'] = $this->validateDialectStrictParam(Languages::getInstance(), $data['dialect_strict']);
+        $data['mandatory_issues'] = $this->validateMandatoryIssues($mandatory_issues ?: null);
         $data['filters_extraction_parameters'] = $this->validateFiltersExtractionParameters(
             $data['filters_extraction_parameters']
         );
@@ -413,10 +415,6 @@ class CreateProjectController extends AbstractStatefulKleinController
             $data['xliff_parameters_template_id']
         );
         $data['project_features'] = $this->appendFeaturesToProject($data['mt_engine']);
-        $data['target_language_mt_engine_association'] = $this->generateTargetEngineAssociation(
-            $data['target_lang'],
-            $data['mt_engine']
-        );
         $data['team'] = $this->setTeam($id_team ?: null);
 
         $this->setMetadataFromPostInput($data);
@@ -444,6 +442,7 @@ class CreateProjectController extends AbstractStatefulKleinController
                 $engineStruct = EnginesFactory::getInstanceByIdAndUser(
                     $mt_engine,
                     $this->user->uid ?? throw new TypeError('User not authenticated'),
+                    $this->getDatabase(),
                     AbstractEngine::class,
                 );
             } catch (Exception $exception) {
@@ -757,6 +756,35 @@ class CreateProjectController extends AbstractStatefulKleinController
     }
 
     /**
+     * @param string|null $mandatory_issues
+     *
+     * @return array<string>|null
+     * @throws InvalidArgumentException
+     */
+    private function validateMandatoryIssues(?string $mandatory_issues): ?array
+    {
+        if (empty($mandatory_issues)) {
+            return null;
+        }
+
+        $decoded = json_decode($mandatory_issues, true);
+
+        if (!is_array($decoded)) {
+            throw new InvalidArgumentException("mandatory_issues must be a valid JSON array");
+        }
+
+        foreach ($decoded as $issue) {
+            if (!is_string($issue) || !preg_match('/^r\d+$/', $issue)) {
+                throw new InvalidArgumentException(
+                    "Invalid mandatory_issues value: \"$issue\". Allowed values: r1, r2, ..."
+                );
+            }
+        }
+
+        return $decoded;
+    }
+
+    /**
      * @param int $mt_engine
      *
      * @return array<int|string, mixed>
@@ -773,26 +801,6 @@ class CreateProjectController extends AbstractStatefulKleinController
     }
 
     /**
-     * @param string $target_langs
-     * @param int|null $mt_engine
-     *
-     * @return array<string, int|null>
-     * @see filterCreateProjectFeatures callback
-     * @see NewController::appendFeaturesToProject()
-     * @deprecated
-     */
-    private function generateTargetEngineAssociation(string $target_langs, ?int $mt_engine): array
-    { // TODO YYY remove map association, MMT now supports all languages. Remove from ProjectManager also
-        $assoc = [];
-
-        foreach (explode(",", $target_langs) as $_matecatTarget) {
-            $assoc[$_matecatTarget] = $mt_engine;
-        }
-
-        return $assoc;
-    }
-
-    /**
      * @param string|false|null $id_team
      *
      * @return TeamStruct
@@ -801,7 +809,7 @@ class CreateProjectController extends AbstractStatefulKleinController
     private function setTeam(string|false|null $id_team = null): TeamStruct
     {
         if ($id_team === null || $id_team === false || $id_team === '') {
-            return $this->user->getPersonalTeam();
+            return $this->user->getPersonalTeam(new TeamDao($this->getDatabase()));
         }
 
         // check for the team to be allowed
@@ -864,13 +872,13 @@ class CreateProjectController extends AbstractStatefulKleinController
         $projectStructure->dialect_strict = $data['dialect_strict'];
         $projectStructure->only_private = $data['only_private'];
         $projectStructure->due_date = $data['due_date'];
-        $projectStructure->target_language_mt_engine_association = $data['target_language_mt_engine_association'];
         $projectStructure->user_ip = Utils::getRealIpAddr();
         $projectStructure->HTTP_HOST = AppConfig::$HTTPHOST;
         $projectStructure->tm_prioritization = (!empty($data['tm_prioritization'])) ? $data['tm_prioritization'] : null;
         $projectStructure->character_counter_mode = (!empty($data['character_counter_mode'])) ? $data['character_counter_mode'] : null;
         $projectStructure->character_counter_count_tags = (!empty($data['character_counter_count_tags'])) ? $data['character_counter_count_tags'] : null;
         $projectStructure->subfiltering_handlers = $data[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value];
+        $projectStructure->mandatory_issues = $data['mandatory_issues'] ?? null;
 
         // GDrive session
         if ($gdriveSession !== null) {
@@ -896,7 +904,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
         // with the qa template id
         if (!empty($data['qa_model_template'])) {
-            $projectStructure->qa_model_template = $data['qa_model_template']->getDecodedModel();
+            $projectStructure->qa_model_template = $data['qa_model_template']->getDecodedModel(new CategoryDao($this->getDatabase()));
         }
 
         if (!empty($data['payable_rate_model_template'])) {
@@ -923,7 +931,7 @@ class CreateProjectController extends AbstractStatefulKleinController
      */
     private function clearSessionFiles(): void
     {
-        $gdriveSession = new Session();
+        $gdriveSession = new Session($this->getDatabase());
         $gdriveSession->clearFileListFromSession();
     }
 

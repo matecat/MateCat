@@ -13,7 +13,10 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Request;
+use Model\Conversion\Upload;
 use Model\Conversion\UploadElement;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
@@ -49,7 +52,7 @@ class GlossaryFilesController extends KleinController
      */
     protected function initDependencies(): void
     {
-        $this->TMService = new TMSService();
+        $this->TMService = new TMSService($this->getDatabase());
     }
 
     protected function registerValidators(): void
@@ -97,7 +100,7 @@ class GlossaryFilesController extends KleinController
      */
     public function check(): void
     {
-        $stdResult = $this->TMService->uploadFile($this->request->files()->all());
+        $stdResult = (new Upload())->uploadFiles($this->request->files()->all());
 
         // validation on request parameters has been performed by $this->validateRequest
         if (empty($this->tm_key)) {
@@ -130,7 +133,7 @@ class GlossaryFilesController extends KleinController
      */
     public function import(): void
     {
-        $stdResult = $this->TMService->uploadFile($this->request->files()->all());
+        $stdResult = (new Upload())->uploadFiles($this->request->files()->all());
 
         // validation on request parameters has been performed by $this->validateRequest
         if (empty($this->tm_key)) {
@@ -188,7 +191,8 @@ class GlossaryFilesController extends KleinController
         ]));
 
         if (count($validator->getExceptions()) > 0) {
-            throw new ValidationError($validator->getExceptions()[0]);
+            $error = $validator->getExceptions()[0];
+            throw new ValidationError($error->getMessage(), $error->getCode(), $error);
         }
 
         return $validator;
@@ -230,6 +234,8 @@ class GlossaryFilesController extends KleinController
 
     /**
      * @param array<string, mixed> $data
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     protected function setSuccessResponse(int $code = 200, array $data = []): void
     {

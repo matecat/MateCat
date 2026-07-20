@@ -9,6 +9,7 @@ use Model\OwnerFeatures\OwnerFeatureDao;
 use Model\OwnerFeatures\OwnerFeatureStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 #[Group('PersistenceNeeded')]
@@ -23,15 +24,14 @@ class OwnerFeatureDaoTest extends AbstractTest
     {
         parent::setUp();
 
-        $this->database = Database::obtain(
+        $this->database = obtainTestDatabase(
             AppConfig::$DB_SERVER,
             AppConfig::$DB_USER,
             AppConfig::$DB_PASS,
             AppConfig::$DB_DATABASE
         );
 
-        $this->flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
-        $this->flusher->select(AppConfig::$INSTANCE_ID);
+        $this->flusher = (new RedisHandler())->getConnection();
         $this->flusher->flushdb();
 
         $this->database->getConnection()->exec(

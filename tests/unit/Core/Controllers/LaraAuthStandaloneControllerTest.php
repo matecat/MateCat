@@ -17,6 +17,7 @@ use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
+use Model\DataAccess\Database;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -85,6 +86,7 @@ class TestableLaraAuthStandaloneController extends LaraAuthStandaloneController
         $parentRef->getProperty('logger')->setValue($this, $logger);
         $parentRef->getProperty('user')->setValue($this, $user);
         $parentRef->getProperty('userIsLogged')->setValue($this, true);
+        $parentRef->getProperty('database')->setValue($this, obtainTestDatabase());
 
         $this->injectedRateLimiter = $rateLimiter;
     }
@@ -269,7 +271,15 @@ class LaraAuthStandaloneControllerTest extends AbstractTest
                 $controller->getResponse()->json(['token' => 'mocked-standalone-token']);
             });
 
-        $controller->auth();
+        // auth() calls Response::json(), which send()s the body to stdout and pollutes
+        // the test-runner output. Swallow that echo; the body is still recorded on the
+        // Response object, so the assertions below are unaffected.
+        ob_start();
+        try {
+            $controller->auth();
+        } finally {
+            ob_end_clean();
+        }
 
         $this->assertEquals(200, $controller->getResponse()->code());
     }
@@ -381,7 +391,15 @@ class LaraAuthStandaloneControllerTest extends AbstractTest
         $this->controller->mockLaraEngine = $engine;
 
         $ref = new ReflectionMethod($this->controller, 'performLaraAuth');
-        $ref->invoke($this->controller, 7, '');
+        // performLaraAuth() calls Response::json(), which send()s the body to stdout and
+        // pollutes the test-runner output. Swallow that echo; the body is still recorded on
+        // the Response object, so the assertions below are unaffected.
+        ob_start();
+        try {
+            $ref->invoke($this->controller, 7, '');
+        } finally {
+            ob_end_clean();
+        }
 
         $this->assertSame(200, $this->controller->getResponse()->code());
         $this->assertArrayNotHasKey(
@@ -407,7 +425,15 @@ class LaraAuthStandaloneControllerTest extends AbstractTest
         $this->controller->mockLaraEngine = $engine;
 
         $ref = new ReflectionMethod($this->controller, 'performLaraAuth');
-        $ref->invoke($this->controller, 7, 'k1,k2');
+        // performLaraAuth() calls Response::json(), which send()s the body to stdout and
+        // pollutes the test-runner output. Swallow that echo; the body is still recorded on
+        // the Response object, so the assertions below are unaffected.
+        ob_start();
+        try {
+            $ref->invoke($this->controller, 7, 'k1,k2');
+        } finally {
+            ob_end_clean();
+        }
 
         $this->assertSame(200, $this->controller->getResponse()->code());
         $this->assertArrayHasKey(Headers::LARA_MEMORIES_IDS, $client->extraHeaders);

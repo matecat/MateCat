@@ -83,6 +83,7 @@ class JobMergeControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
+        $this->setProp('database', obtainTestDatabase());
 
         $user        = new UserStruct();
         $user->uid   = 1;
@@ -90,7 +91,7 @@ class JobMergeControllerTest extends AbstractTest
         $this->setProp('user', $user);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
     }
 
     /**
@@ -273,7 +274,7 @@ class JobMergeControllerTest extends AbstractTest
     #[Test]
     public function merge_returns_success_payload_and_sets_http_200(): void
     {
-        $project = (new \Model\Projects\ProjectDao())->findByIdAndPassword(
+        $project = (new \Model\Projects\ProjectDao(obtainTestDatabase()))->findByIdAndPassword(
             $this->projectId(self::BASE),
             self::PROJECT_PASSWORD
         );

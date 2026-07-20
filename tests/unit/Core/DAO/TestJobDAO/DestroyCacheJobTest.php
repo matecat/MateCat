@@ -9,6 +9,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 /**
@@ -103,9 +104,9 @@ class DestroyCacheJobTest extends AbstractTest
             ]
         );
 
-        $this->database_instance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->database_instance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         $this->job_Dao = new JobDao($this->database_instance);
-        $this->cache = new \Predis\Client(AppConfig::$REDIS_SERVERS);
+        $this->cache = (new RedisHandler())->getConnection();
     }
 
     public function tearDown(): void

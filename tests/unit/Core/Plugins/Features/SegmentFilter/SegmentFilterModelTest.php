@@ -70,14 +70,15 @@ class SegmentFilterModelTest extends AbstractTest
     }
 
     #[Test]
-    public function constructorDefaultsDaoWhenNotProvided(): void
+    public function constructorRequiresInjectedDao(): void
     {
-        $filter = new FilterDefinition(['status' => 'NEW']);
-        $model = new SegmentFilterModel($this->chunk, $filter);
+        $params = (new \ReflectionMethod(SegmentFilterModel::class, '__construct'))->getParameters();
+        $daoParam = $params[2];
 
-        $reflection = new \ReflectionClass($model);
-        $prop = $reflection->getProperty('segmentFilterDao');
-
-        $this->assertInstanceOf(SegmentFilterDao::class, $prop->getValue($model));
+        $this->assertFalse(
+            $daoParam->isOptional(),
+            'SegmentFilterDao must be a mandatory ctor dependency (no Database::obtain() fallback)'
+        );
+        $this->assertFalse($daoParam->allowsNull(), 'SegmentFilterDao ctor param must not be nullable');
     }
 }

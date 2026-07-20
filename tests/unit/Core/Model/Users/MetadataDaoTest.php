@@ -10,6 +10,7 @@ use Model\Users\MetadataDao;
 use Model\Users\MetadataStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 #[Group('PersistenceNeeded')]
@@ -24,13 +25,13 @@ class MetadataDaoTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->database = Database::obtain(
+        $this->database = obtainTestDatabase(
             AppConfig::$DB_SERVER,
             AppConfig::$DB_USER,
             AppConfig::$DB_PASS,
             AppConfig::$DB_DATABASE
         );
-        $this->dao = new MetadataDao();
+        $this->dao = new MetadataDao(obtainTestDatabase());
         $this->deleteFixtureRows();
     }
 
@@ -38,8 +39,7 @@ class MetadataDaoTest extends AbstractTest
     {
         $this->deleteFixtureRows();
 
-        $flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
-        $flusher->select(AppConfig::$INSTANCE_ID);
+        $flusher = (new RedisHandler())->getConnection();
         $flusher->flushdb();
 
         parent::tearDown();

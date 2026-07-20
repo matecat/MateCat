@@ -22,7 +22,7 @@ class RedisReplaceEventIndexDao extends AbstractDao implements ReplaceEventIndex
      * @throws Exception
      * @throws ReflectionException
      */
-    public function __construct(?IDatabase $con = null, ?ClientInterface $redis = null)
+    public function __construct(IDatabase $con, ?ClientInterface $redis = null)
     {
         parent::__construct($con);
 

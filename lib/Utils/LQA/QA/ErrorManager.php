@@ -77,6 +77,9 @@ class ErrorManager
     public const int SMART_COUNT_MISMATCH = 2001;
     public const int ERR_SIZE_RESTRICTION = 3000;
 
+    /** @var int Fuzzy TM match confirmed without any modification */
+    public const int ERR_FUZZY_UNCHANGED = 4000;
+
     public const string ERROR = 'ERROR';
     public const string WARNING = 'WARNING';
     public const string INFO = 'INFO';
@@ -128,6 +131,7 @@ class ErrorManager
         2000 => 'Smart count plural forms mismatch',
         2001 => '%smartcount tag count mismatch',
         3000 => 'Characters limit exceeded',
+        4000 => 'Fuzzy match confirmed without changes',
     ];
 
     /** @var array<int, string|null> */
@@ -135,6 +139,7 @@ class ErrorManager
         29 => "Should be < g ... > ... < /g >",
         1000 => "Press 'alt + t' shortcut to add tags or delete extra tags.",
         3000 => 'Maximum characters limit exceeded.',
+        4000 => 'A fuzzy TM match was confirmed without any edit. Please review it before confirming.',
     ];
 
     /** @var array{ERROR: list<ErrObject>, WARNING: list<ErrObject>, INFO: list<ErrObject>} */
@@ -178,188 +183,84 @@ class ErrorManager
     }
 
     /**
-     * Add an error to the exception list based on error code
+     * Routes an input error code to a [severity bucket, canonical outcome code] pair.
+     *
+     * Grouped codes intentionally collapse onto a shared outcome (e.g. every symbol code reports
+     * ERR_SYMBOL_MISMATCH, and ERR_COUNT/ERR_SOURCE/ERR_TARGET report ERR_TAG_MISMATCH). Codes that
+     * are absent from this table fall back to [WARNING, <the code itself>] (see {@see self::addError()}).
+     *
+     * @var array<int, array{0: self::ERROR|self::WARNING|self::INFO, 1: int}>
+     */
+    private const array ERROR_ROUTING = [
+        // --- ERROR ---
+        self::ERR_COUNT                     => [self::ERROR, self::ERR_TAG_MISMATCH],
+        self::ERR_SOURCE                    => [self::ERROR, self::ERR_TAG_MISMATCH],
+        self::ERR_TARGET                    => [self::ERROR, self::ERR_TAG_MISMATCH],
+        self::ERR_TAG_MISMATCH              => [self::ERROR, self::ERR_TAG_MISMATCH],
+        self::ERR_TAG_ID                    => [self::ERROR, self::ERR_TAG_ID],
+        self::ERR_EX_BX_COUNT_MISMATCH      => [self::ERROR, self::ERR_EX_BX_COUNT_MISMATCH],
+        self::ERR_EX_BX_NESTED_IN_G         => [self::ERROR, self::ERR_EX_BX_NESTED_IN_G],
+        self::ERR_UNCLOSED_X_TAG            => [self::ERROR, self::ERR_UNCLOSED_X_TAG],
+        self::ERR_UNCLOSED_G_TAG            => [self::ERROR, self::ERR_UNCLOSED_G_TAG],
+        self::SMART_COUNT_PLURAL_MISMATCH   => [self::ERROR, self::SMART_COUNT_PLURAL_MISMATCH],
+        self::SMART_COUNT_MISMATCH          => [self::ERROR, self::SMART_COUNT_MISMATCH],
+        self::ERR_SIZE_RESTRICTION          => [self::ERROR, self::ERR_SIZE_RESTRICTION],
+        self::ERR_ICU_VALIDATION            => [self::ERROR, self::ERR_ICU_VALIDATION],
+
+        // --- WARNING ---
+        self::ERR_EX_BX_WRONG_POSITION      => [self::WARNING, self::ERR_EX_BX_WRONG_POSITION],
+
+        // --- INFO ---
+        self::ERR_WS_HEAD                   => [self::INFO, self::ERR_SPACE_MISMATCH_TEXT],
+        self::ERR_WS_TAIL                   => [self::INFO, self::ERR_SPACE_MISMATCH_TEXT],
+        self::ERR_TAB_HEAD                  => [self::INFO, self::ERR_TAB_MISMATCH],
+        self::ERR_TAB_TAIL                  => [self::INFO, self::ERR_TAB_MISMATCH],
+        self::ERR_BOUNDARY_HEAD             => [self::INFO, self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH],
+        // NB: emitted only for non-CJ source languages; the CJ guard lives in addError().
+        self::ERR_BOUNDARY_TAIL             => [self::INFO, self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH],
+        self::ERR_SPACE_MISMATCH_AFTER_TAG  => [self::INFO, self::ERR_SPACE_MISMATCH_AFTER_TAG],
+        self::ERR_SPACE_MISMATCH_BEFORE_TAG => [self::INFO, self::ERR_SPACE_MISMATCH_BEFORE_TAG],
+        self::ERR_BOUNDARY_HEAD_TEXT        => [self::INFO, self::ERR_SPACE_MISMATCH],
+        self::ERR_DOLLAR_MISMATCH           => [self::INFO, self::ERR_SYMBOL_MISMATCH],
+        self::ERR_AMPERSAND_MISMATCH        => [self::INFO, self::ERR_SYMBOL_MISMATCH],
+        self::ERR_AT_MISMATCH               => [self::INFO, self::ERR_SYMBOL_MISMATCH],
+        self::ERR_HASH_MISMATCH             => [self::INFO, self::ERR_SYMBOL_MISMATCH],
+        self::ERR_POUNDSIGN_MISMATCH        => [self::INFO, self::ERR_SYMBOL_MISMATCH],
+        self::ERR_EUROSIGN_MISMATCH         => [self::INFO, self::ERR_SYMBOL_MISMATCH],
+        self::ERR_PERCENT_MISMATCH          => [self::INFO, self::ERR_SYMBOL_MISMATCH],
+        self::ERR_EQUALSIGN_MISMATCH        => [self::INFO, self::ERR_SYMBOL_MISMATCH],
+        self::ERR_TAB_MISMATCH              => [self::INFO, self::ERR_SYMBOL_MISMATCH],
+        self::ERR_STARSIGN_MISMATCH         => [self::INFO, self::ERR_SYMBOL_MISMATCH],
+        self::ERR_SPECIAL_ENTITY_MISMATCH   => [self::INFO, self::ERR_SYMBOL_MISMATCH],
+        self::ERR_SYMBOL_MISMATCH           => [self::INFO, self::ERR_SYMBOL_MISMATCH],
+        self::ERR_NEWLINE_MISMATCH          => [self::INFO, self::ERR_NEWLINE_MISMATCH],
+    ];
+
+    /**
+     * Add an error to the exception list based on its error code.
+     *
+     * The code is mapped to a [severity bucket, canonical outcome] pair via {@see self::ERROR_ROUTING};
+     * unlisted codes fall back to [WARNING, <the code itself>]. Two codes are special-cased: ERR_NONE is
+     * a no-op, and ERR_BOUNDARY_TAIL is suppressed for CJ (Chinese/Japanese) source languages.
      */
     public function addError(int $errCode): void
     {
-        switch ($errCode) {
-            case self::ERR_NONE:
-                return;
-
-            case self::ERR_COUNT:
-            case self::ERR_SOURCE:
-            case self::ERR_TARGET:
-            case self::ERR_TAG_MISMATCH:
-                $this->exceptionList[self::ERROR][] = ErrObject::get([
-                    'outcome' => self::ERR_TAG_MISMATCH,
-                    'debug' => $this->errorMap[self::ERR_TAG_MISMATCH],
-                    'tip' => $this->getTipValue(self::ERR_TAG_MISMATCH)
-                ]);
-                break;
-
-            case self::ERR_TAG_ID:
-                $this->exceptionList[self::ERROR][] = ErrObject::get([
-                    'outcome' => self::ERR_TAG_ID,
-                    'debug' => $this->errorMap[self::ERR_TAG_ID],
-                    'tip' => $this->getTipValue(self::ERR_TAG_ID)
-                ]);
-                break;
-
-            case self::ERR_EX_BX_COUNT_MISMATCH:
-                $this->exceptionList[self::ERROR][] = ErrObject::get([
-                    'outcome' => self::ERR_EX_BX_COUNT_MISMATCH,
-                    'debug' => $this->errorMap[self::ERR_EX_BX_COUNT_MISMATCH],
-                    'tip' => $this->getTipValue(self::ERR_EX_BX_COUNT_MISMATCH)
-                ]);
-                break;
-
-            case self::ERR_EX_BX_NESTED_IN_G:
-                $this->exceptionList[self::ERROR][] = ErrObject::get([
-                    'outcome' => self::ERR_EX_BX_NESTED_IN_G,
-                    'debug' => $this->errorMap[self::ERR_EX_BX_NESTED_IN_G],
-                    'tip' => $this->getTipValue(self::ERR_EX_BX_NESTED_IN_G)
-                ]);
-                break;
-
-            case self::ERR_EX_BX_WRONG_POSITION:
-                $this->exceptionList[self::WARNING][] = ErrObject::get([
-                    'outcome' => self::ERR_EX_BX_WRONG_POSITION,
-                    'debug' => $this->errorMap[self::ERR_EX_BX_WRONG_POSITION],
-                    'tip' => $this->getTipValue(self::ERR_EX_BX_WRONG_POSITION)
-                ]);
-                break;
-
-            case self::ERR_UNCLOSED_X_TAG:
-            case self::ERR_UNCLOSED_G_TAG:
-            case self::SMART_COUNT_PLURAL_MISMATCH:
-                $this->exceptionList[self::ERROR][] = ErrObject::get([
-                    'outcome' => $errCode,
-                    'debug' => $this->errorMap[$errCode],
-                    'tip' => $this->getTipValue($errCode)
-                ]);
-                break;
-
-            case self::SMART_COUNT_MISMATCH:
-                $this->exceptionList[self::ERROR][] = ErrObject::get([
-                    'outcome' => $errCode,
-                    'debug' => $this->errorMap[self::SMART_COUNT_MISMATCH],
-                    'tip' => $this->getTipValue(self::SMART_COUNT_MISMATCH)
-                ]);
-                break;
-
-            case self::ERR_SIZE_RESTRICTION:
-                $this->exceptionList[self::ERROR][] = ErrObject::get([
-                    'outcome' => $errCode,
-                    'debug' => $this->errorMap[self::ERR_SIZE_RESTRICTION],
-                    'tip' => $this->getTipValue(self::ERR_SIZE_RESTRICTION)
-                ]);
-                break;
-
-            case self::ERR_ICU_VALIDATION:
-                $this->exceptionList[self::ERROR][] = ErrObject::get([
-                    'outcome' => $errCode,
-                    'debug' => $this->errorMap[self::ERR_ICU_VALIDATION],
-                    'tip' => $this->getTipValue(self::ERR_ICU_VALIDATION)
-                ]);
-                break;
-
-            case self::ERR_WS_HEAD:
-            case self::ERR_WS_TAIL:
-                $this->exceptionList[self::INFO][] = ErrObject::get([
-                    'outcome' => self::ERR_SPACE_MISMATCH_TEXT,
-                    'debug' => $this->errorMap[self::ERR_SPACE_MISMATCH_TEXT],
-                    'tip' => $this->getTipValue(self::ERR_SPACE_MISMATCH_TEXT)
-                ]);
-                break;
-
-            case self::ERR_TAB_HEAD:
-            case self::ERR_TAB_TAIL:
-                $this->exceptionList[self::INFO][] = ErrObject::get([
-                    'outcome' => self::ERR_TAB_MISMATCH,
-                    'debug' => $this->errorMap[self::ERR_TAB_MISMATCH],
-                    'tip' => $this->getTipValue(self::ERR_TAB_MISMATCH)
-                ]);
-                break;
-
-            case self::ERR_BOUNDARY_HEAD:
-                $this->exceptionList[self::INFO][] = ErrObject::get([
-                    'outcome' => self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH,
-                    'debug' => $this->errorMap[self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH],
-                    'tip' => $this->getTipValue(self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH)
-                ]);
-                break;
-
-            case self::ERR_BOUNDARY_TAIL:
-                // if source target is CJ we won't add a trailing space mismatch error
-                if (false === CatUtils::isCJ($this->sourceSegLang)) {
-                    $this->exceptionList[self::INFO][] = ErrObject::get([
-                        'outcome' => self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH,
-                        'debug' => $this->errorMap[self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH],
-                        'tip' => $this->getTipValue(self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH)
-                    ]);
-                }
-                break;
-
-            case self::ERR_SPACE_MISMATCH_AFTER_TAG:
-                $this->exceptionList[self::INFO][] = ErrObject::get([
-                    'outcome' => self::ERR_SPACE_MISMATCH_AFTER_TAG,
-                    'debug' => $this->errorMap[self::ERR_SPACE_MISMATCH_AFTER_TAG],
-                    'tip' => $this->getTipValue(self::ERR_SPACE_MISMATCH_AFTER_TAG)
-                ]);
-                break;
-
-            case self::ERR_SPACE_MISMATCH_BEFORE_TAG:
-                $this->exceptionList[self::INFO][] = ErrObject::get([
-                    'outcome' => self::ERR_SPACE_MISMATCH_BEFORE_TAG,
-                    'debug' => $this->errorMap[self::ERR_SPACE_MISMATCH_BEFORE_TAG],
-                    'tip' => $this->getTipValue(self::ERR_SPACE_MISMATCH_BEFORE_TAG)
-                ]);
-                break;
-
-            case self::ERR_BOUNDARY_HEAD_TEXT:
-                $this->exceptionList[self::INFO][] = ErrObject::get([
-                    'outcome' => self::ERR_SPACE_MISMATCH,
-                    'debug' => $this->errorMap[self::ERR_SPACE_MISMATCH],
-                    'tip' => $this->getTipValue(self::ERR_SPACE_MISMATCH)
-                ]);
-                break;
-
-            case self::ERR_DOLLAR_MISMATCH:
-            case self::ERR_AMPERSAND_MISMATCH:
-            case self::ERR_AT_MISMATCH:
-            case self::ERR_HASH_MISMATCH:
-            case self::ERR_POUNDSIGN_MISMATCH:
-            case self::ERR_EUROSIGN_MISMATCH:
-            case self::ERR_PERCENT_MISMATCH:
-            case self::ERR_EQUALSIGN_MISMATCH:
-            case self::ERR_TAB_MISMATCH:
-            case self::ERR_STARSIGN_MISMATCH:
-            case self::ERR_SPECIAL_ENTITY_MISMATCH:
-            case self::ERR_SYMBOL_MISMATCH:
-                $this->exceptionList[self::INFO][] = ErrObject::get([
-                    'outcome' => self::ERR_SYMBOL_MISMATCH,
-                    'debug' => $this->errorMap[self::ERR_SYMBOL_MISMATCH],
-                    'tip' => $this->getTipValue(self::ERR_SYMBOL_MISMATCH)
-                ]);
-                break;
-
-            case self::ERR_NEWLINE_MISMATCH:
-                $this->exceptionList[self::INFO][] = ErrObject::get([
-                    'outcome' => self::ERR_NEWLINE_MISMATCH,
-                    'debug' => $this->errorMap[self::ERR_NEWLINE_MISMATCH],
-                    'tip' => $this->getTipValue(self::ERR_NEWLINE_MISMATCH)
-                ]);
-                break;
-
-            case self::ERR_TAG_ORDER:
-            default:
-                $this->exceptionList[self::WARNING][] = ErrObject::get([
-                    'outcome' => $errCode,
-                    'debug' => $this->errorMap[$errCode],
-                    'tip' => $this->getTipValue($errCode)
-                ]);
-                break;
+        if ($errCode === self::ERR_NONE) {
+            return;
         }
+
+        // If the source segment is CJ we don't add a trailing-space mismatch error.
+        if ($errCode === self::ERR_BOUNDARY_TAIL && false !== CatUtils::isCJ($this->sourceSegLang)) {
+            return;
+        }
+
+        [$level, $outcome] = self::ERROR_ROUTING[$errCode] ?? [self::WARNING, $errCode];
+
+        $this->exceptionList[$level][] = ErrObject::get([
+            'outcome' => $outcome,
+            'debug'   => $this->errorMap[$outcome] ?? null,
+            'tip'     => $this->getTipValue($outcome)
+        ]);
     }
 
     protected function hasErrorsAtLevel(string $level): bool

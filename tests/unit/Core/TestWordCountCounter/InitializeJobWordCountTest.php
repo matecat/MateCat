@@ -27,7 +27,7 @@ class InitializeJobWordCountTest extends AbstractTest
      */
     function test_initializeJobWordCount()
     {
-        $wordCounterMock = $this->getMockBuilder(WordCounterDao::class)->getMock();
+        $wordCounterMock = $this->getMockBuilder(WordCounterDao::class)->disableOriginalConstructor()->getMock();
         $wordCounterMock
             ->expects($this->once())
             ->method('getStatsForJob')
@@ -64,7 +64,7 @@ class InitializeJobWordCountTest extends AbstractTest
             ->with($this->isInstanceOf(WordCountStruct::class))
             ->willReturn(1);
 
-        $wordCount = new CounterModel();
+        $wordCount = new CounterModel(obtainTestDatabase());
         $result = $wordCount->initializeJobWordCount(1, 'a_password', $wordCounterMock);
 
         $inspector = new InvocationInspector($spy);

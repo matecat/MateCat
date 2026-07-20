@@ -47,6 +47,7 @@ class ChunkPasswordValidatorTest extends AbstractTest
 
         $this->controller = new ChunkPasswordValidatorTestController();
         $this->ctrlRef = new ReflectionClass(KleinController::class);
+        $this->setCtrlProp('database', obtainTestDatabase());
     }
 
     protected function tearDown(): void
@@ -79,7 +80,7 @@ class ChunkPasswordValidatorTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec(
             "INSERT INTO projects (id, password, id_customer, name, create_date, status_analysis)
              VALUES (" . self::PROJECT_ID . ", 'cpwproj', '" . self::EMAIL . "', 'CtrlTestProject9932000', NOW(), 'DONE')"
@@ -96,7 +97,7 @@ class ChunkPasswordValidatorTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM qa_chunk_reviews WHERE id_job = " . self::JOB_ID);
         $conn->exec("DELETE FROM jobs WHERE id = " . self::JOB_ID);
         $conn->exec("DELETE FROM projects WHERE id = " . self::PROJECT_ID);
@@ -160,6 +161,22 @@ class ChunkPasswordValidatorTest extends AbstractTest
         $this->assertInstanceOf(ChunkReviewStruct::class, $validator->getChunkReview());
     }
 
+    // ─── getChunk() before validate() throws RuntimeException ───
+
+    #[Test]
+    public function getChunk_throws_when_called_before_validate(): void
+    {
+        $this->configureRequest([
+            'id_job' => (string) self::JOB_ID,
+            'password' => self::JOB_PASSWORD,
+        ]);
+
+        $validator = new ChunkPasswordValidator($this->controller);
+
+        $this->expectException(\RuntimeException::class);
+        $validator->getChunk();
+    }
+
     // ─── neither translate nor review password matches => NotFoundException ───
 
     #[Test]
@@ -168,6 +185,25 @@ class ChunkPasswordValidatorTest extends AbstractTest
         $this->configureRequest([
             'id_job' => (string) self::JOB_ID,
             'password' => 'wrong-password-xyz',
+        ]);
+
+        $validator = new ChunkPasswordValidator($this->controller);
+
+        $this->expectException(NotFoundException::class);
+
+        $validator->validate();
+    }
+
+    // ─── security regression (CWE-209): a non-numeric id_job is coerced to 0 in the ctor,
+    //     so lookups miss and throw NotFoundException instead of a PHP TypeError whose
+    //     message would disclose the validator's internal class name/namespace ───
+
+    #[Test]
+    public function non_numeric_id_job_yields_not_found_not_type_error(): void
+    {
+        $this->configureRequest([
+            'id_job' => 'Controller\\API\\Commons\\Validators',
+            'password' => self::JOB_PASSWORD,
         ]);
 
         $validator = new ChunkPasswordValidator($this->controller);

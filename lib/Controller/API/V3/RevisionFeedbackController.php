@@ -6,6 +6,8 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\ReviseFeedback\FeedbackDAO;
 use Model\ReviseFeedback\FeedbackStruct;
 use PDOException;
@@ -18,6 +20,8 @@ class RevisionFeedbackController extends KleinController
     /**
      * @throws TypeError
      * @throws PDOException
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function feedback(): void
     {

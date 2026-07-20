@@ -122,7 +122,7 @@ class TmKeyService
                 // assign TMX name to the key
 
                 // NOTE 2025-05-08: Replace {{pid}} with project ID for new keys created with an empty name
-                $newTmKey->name = (!empty($_tmKey['name']) ? (string)str_replace("{{pid}}", (string)$projectStructure->id_project, $_tmKey['name']) : $firstTMXFileName);
+                $newTmKey->name = (!empty($_tmKey['name']) ? (string)str_replace(["{{pid}}", "pid"], (string)$projectStructure->id_project, $_tmKey['name']) : $firstTMXFileName);
 
                 $newMemoryKey->tm_key = $newTmKey;
                 $newMemoryKey->uid = $projectStructure->uid;
@@ -305,7 +305,7 @@ class TmKeyService
      */
     protected function getKeyringOwnerKeys(int $uid): array
     {
-        return (new MemoryKeyDao())->getKeyringOwnerKeysByUid($uid);
+        return (new MemoryKeyDao($this->dbHandler))->getKeyringOwnerKeysByUid($uid);
     }
 
     /**
@@ -316,6 +316,6 @@ class TmKeyService
      */
     protected function getUserByUid(int $uid): ?UserStruct
     {
-        return (new UserDao())->setCacheTTL(60 * 60)->getByUid($uid);
+        return (new UserDao($this->dbHandler))->setCacheTTL(60 * 60)->getByUid($uid);
     }
 }

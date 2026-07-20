@@ -4,8 +4,11 @@ namespace Model\LQA;
 
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
+use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use ReflectionException;
+use Throwable;
 use Utils\Tools\Utils;
 
 class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct
@@ -37,12 +40,17 @@ class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct
     }
 
     /**
+     * @param JobDao $jobDao
+     *
      * @return JobStruct
+     * @throws NotFoundException
+     * @throws ReflectionException
+     * @throws Throwable
      */
-    public function getChunk(): JobStruct
+    public function getChunk(JobDao $jobDao): JobStruct
     {
-        return $this->cachable(__METHOD__, function () {
-            return (new JobDao())->getByIdAndPasswordOrFail($this->id_job, $this->password);
+        return $this->memoize(__METHOD__, function () use ($jobDao) {
+            return $jobDao->getByIdAndPasswordOrFail($this->id_job, $this->password);
         });
     }
 

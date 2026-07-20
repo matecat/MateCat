@@ -10,18 +10,6 @@ use Throwable;
 interface IDatabase
 {
 
-    /**
-     * Obtain an instance of the database
-     *
-     * @param string|null $server
-     * @param string|null $user
-     * @param string|null $password
-     * @param string|null $database
-     *
-     * @return IDatabase
-     */
-    public static function obtain(?string $server = null, ?string $user = null, ?string $password = null, ?string $database = null): IDatabase;
-
 
     /**
      * Connect and select database
@@ -29,6 +17,13 @@ interface IDatabase
      * @throws PDOException
      */
     public function connect(): void;
+
+    /**
+     * Verify the connection is alive (e.g. SELECT 1).
+     *
+     * @throws PDOException
+     */
+    public function ping(): bool;
 
     /**
      * Close the connection

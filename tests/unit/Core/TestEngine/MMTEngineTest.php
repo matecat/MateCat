@@ -15,6 +15,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MMT;
 use Utils\Engines\MMT\MMTServiceApi;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 /**
@@ -36,7 +37,7 @@ class MMTEngineTest extends AbstractTest
     {
         parent::setUp();
 
-        $this->database_instance = Database::obtain();
+        $this->database_instance = obtainTestDatabase();
 
         /**
          * engine insertion
@@ -59,8 +60,7 @@ H;
     {
         $this->database_instance->getConnection()->query("DELETE FROM engines WHERE id=" . $this->engine_id . ";");
         $this->database_instance->getConnection()->query("DELETE FROM engines WHERE id=" . $this->not_valid_engine_id . ";");
-        $flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
-        $flusher->select(AppConfig::$INSTANCE_ID);
+        $flusher = (new RedisHandler())->getConnection();
         $flusher->flushdb();
         parent::tearDown();
     }
@@ -74,7 +74,7 @@ H;
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage("Engine $this->not_valid_engine_id is not a MT engine, found TM -> MMT");
-        EnginesFactory::getInstance($this->not_valid_engine_id);
+        EnginesFactory::getInstance($this->not_valid_engine_id, obtainTestDatabase());
     }
 
     /**
@@ -90,7 +90,7 @@ H;
         $mmtClient->expects($invocation = $this->once())->method('updateMemoryContent');
 
         $mmtEngine = @$this->getMockBuilder(MMT::class)
-            ->setConstructorArgs([new EngineStruct($record)])
+            ->setConstructorArgs([new EngineStruct($record), $this->createStub(\Model\DataAccess\IDatabase::class)])
             ->onlyMethods(['_getClient'])->getMock();
 
         $mmtEngine->expects($this->once())

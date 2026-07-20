@@ -25,19 +25,23 @@ class ReplaceHistory
      */
     private ReplaceEventIndexDaoInterface $replaceEventIndexDAO;
 
+    private SegmentTranslationDao $segmentTranslationDao;
+
     /**
      * ReplaceHistory constructor.
      *
      * @param int $idJob
      * @param ReplaceEventDAOInterface $replaceEventDAO
      * @param ReplaceEventIndexDaoInterface $replaceEventIndexDAO
+     * @param SegmentTranslationDao $segmentTranslationDao
      * @param int $ttl
      */
-    public function __construct(int $idJob, ReplaceEventDAOInterface $replaceEventDAO, ReplaceEventIndexDaoInterface $replaceEventIndexDAO, int $ttl = 0)
+    public function __construct(int $idJob, ReplaceEventDAOInterface $replaceEventDAO, ReplaceEventIndexDaoInterface $replaceEventIndexDAO, SegmentTranslationDao $segmentTranslationDao, int $ttl = 0)
     {
         $this->idJob = $idJob;
         $this->replaceEventDAO = $replaceEventDAO;
         $this->replaceEventIndexDAO = $replaceEventIndexDAO;
+        $this->segmentTranslationDao = $segmentTranslationDao;
 
         if ($ttl) {
             $this->replaceEventDAO->setTtl($ttl);
@@ -101,7 +105,7 @@ class ReplaceHistory
         $events = $this->get($versionToMove);
 
         if (count($events) > 0) {
-            $replacedEvents = (new SegmentTranslationDao())->rebuildFromReplaceEvents($events);
+            $replacedEvents = $this->segmentTranslationDao->rebuildFromReplaceEvents($events);
 
             $this->replaceEventIndexDAO->save($this->idJob, $versionToMove);
 

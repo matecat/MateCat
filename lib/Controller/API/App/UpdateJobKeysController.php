@@ -108,7 +108,7 @@ class UpdateJobKeysController extends KleinController
          *
          */
         $tm_keys = json_decode($request['tm_keys'], true);
-        $clientKeys = $request['jobData']->getClientKeys($this->user, $userRole);
+        $clientKeys = $request['jobData']->getClientKeys($this->user, $userRole, $this->getDatabase());
 
         /*
          * sanitize owner role key type
@@ -130,7 +130,7 @@ class UpdateJobKeysController extends KleinController
         $tm_keys = json_encode($tm_keys);
 
 
-        $totalTmKeys = TmKeyManager::mergeJsonKeys((string)$tm_keys, $request['jobData']['tm_keys'], $userRole, $this->user->uid);
+        $totalTmKeys = TmKeyManager::mergeJsonKeys((string)$tm_keys, $request['jobData']['tm_keys'], $this->getDatabase(), $userRole, $this->user->uid);
 
         $this->logger->debug('Before: ' . $request['jobData']['tm_keys']);
         $this->logger->debug('After: ' . json_encode($totalTmKeys));

@@ -4,9 +4,11 @@
 namespace Matecat\Core\Model\Teams;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Model\Teams\InvitedUser;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
+use Model\Users\UserDao;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionProperty;
 use Utils\Redis\RedisHandler;
@@ -25,6 +27,18 @@ class InvitedUserTest extends AbstractTest
         );
 
         return (string)$jwt;
+    }
+
+    private function makeTeamDaoStub(): TeamDao
+    {
+        $stub = $this->createStub(TeamDao::class);
+        $stub->method('getDatabaseHandler')->willReturn(obtainTestDatabase());
+        return $stub;
+    }
+
+    private function makeUserDaoStub(): UserDao
+    {
+        return $this->createStub(UserDao::class);
     }
 
     private function makeRedisHandlerStub(array $smembersResult = []): RedisHandler
@@ -59,7 +73,7 @@ class InvitedUserTest extends AbstractTest
         $jwt = $this->makeValidJwt();
         $response = $this->createStub(\Klein\Response::class);
 
-        $user = new InvitedUser($jwt, $response);
+        $user = new InvitedUser($jwt, $response, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub());
 
         $ref = new ReflectionProperty($user, 'jwt');
         $payload = $ref->getValue($user);
@@ -71,7 +85,7 @@ class InvitedUserTest extends AbstractTest
     #[Test]
     public function constructorWithEmptyJwtSkipsValidation(): void
     {
-        $user = new InvitedUser();
+        $user = new InvitedUser('', null, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub());
 
         $ref = new ReflectionProperty($user, 'jwt');
         $this->assertSame([], $ref->getValue($user));
@@ -83,7 +97,13 @@ class InvitedUserTest extends AbstractTest
         $this->expectException(ValidationError::class);
 
         $response = $this->createStub(\Klein\Response::class);
-        new InvitedUser('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20ifQ.invalidsignature', $response);
+        new InvitedUser(
+            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20ifQ.invalidsignature',
+            $response,
+            $this->makeTeamDaoStub(),
+            null,
+            $this->makeUserDaoStub()
+        );
     }
 
     #[Test]
@@ -92,7 +112,7 @@ class InvitedUserTest extends AbstractTest
         $this->expectException(\UnexpectedValueException::class);
 
         $response = $this->createStub(\Klein\Response::class);
-        new InvitedUser('not-a-jwt', $response);
+        new InvitedUser('not-a-jwt', $response, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub());
     }
 
     #[Test]
@@ -102,7 +122,7 @@ class InvitedUserTest extends AbstractTest
         $response = $this->createStub(\Klein\Response::class);
 
         $_SESSION = [];
-        $user = new InvitedUser($jwt, $response);
+        $user = new InvitedUser($jwt, $response, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub());
         $user->prepareUserInvitedSignUpRedirect();
 
         $this->assertArrayHasKey('invited_to_team', $_SESSION);
@@ -113,7 +133,13 @@ class InvitedUserTest extends AbstractTest
     public function hasPendingInvitationsReturnsFalseWhenNoSession(): void
     {
         $_SESSION = [];
-        $user = new InvitedUser('', null, null, $this->makeRedisHandlerStub());
+        $user = new InvitedUser(
+            '',
+            null,
+            $this->makeTeamDaoStub(),
+            $this->makeRedisHandlerStub(),
+            $this->makeUserDaoStub()
+        );
         $this->assertFalse($user->hasPendingInvitations());
     }
 
@@ -121,7 +147,13 @@ class InvitedUserTest extends AbstractTest
     public function hasPendingInvitationsReturnsFalseWhenNoTeamId(): void
     {
         $_SESSION = ['invited_to_team' => ['email' => 'a@b.com']];
-        $user = new InvitedUser('', null, null, $this->makeRedisHandlerStub());
+        $user = new InvitedUser(
+            '',
+            null,
+            $this->makeTeamDaoStub(),
+            $this->makeRedisHandlerStub(),
+            $this->makeUserDaoStub()
+        );
         $this->assertFalse($user->hasPendingInvitations());
     }
 
@@ -129,7 +161,13 @@ class InvitedUserTest extends AbstractTest
     public function hasPendingInvitationsReturnsTrueWhenMembersExist(): void
     {
         $_SESSION = ['invited_to_team' => ['team_id' => 5, 'email' => 'a@b.com']];
-        $user = new InvitedUser('', null, null, $this->makeRedisHandlerStub(['a@b.com']));
+        $user = new InvitedUser(
+            '',
+            null,
+            $this->makeTeamDaoStub(),
+            $this->makeRedisHandlerStub(['a@b.com']),
+            $this->makeUserDaoStub()
+        );
         $this->assertTrue($user->hasPendingInvitations());
     }
 
@@ -137,7 +175,13 @@ class InvitedUserTest extends AbstractTest
     public function hasPendingInvitationsReturnsFalseWhenNoMembers(): void
     {
         $_SESSION = ['invited_to_team' => ['team_id' => 5, 'email' => 'a@b.com']];
-        $user = new InvitedUser('', null, null, $this->makeRedisHandlerStub([]));
+        $user = new InvitedUser(
+            '',
+            null,
+            $this->makeTeamDaoStub(),
+            $this->makeRedisHandlerStub([]),
+            $this->makeUserDaoStub()
+        );
         $this->assertFalse($user->hasPendingInvitations());
     }
 
@@ -151,10 +195,11 @@ class InvitedUserTest extends AbstractTest
 
         $teamDao = $this->createStub(TeamDao::class);
         $teamDao->method('fetchById')->willReturn($teamStruct);
+        $teamDao->method('getDatabaseHandler')->willReturn(obtainTestDatabase());
 
         $_SESSION = ['invited_to_team' => ['team_id' => 5, 'email' => 'member@example.com']];
 
-        $user = new InvitedUser('', null, $teamDao, $this->makeRedisHandlerStub());
+        $user = new InvitedUser('', null, $teamDao, $this->makeRedisHandlerStub(), $this->makeUserDaoStub());
 
         $userStruct = new \Model\Users\UserStruct();
         $userStruct->uid = 1;
@@ -174,7 +219,7 @@ class InvitedUserTest extends AbstractTest
         $teamDao = $this->createStub(TeamDao::class);
         $teamDao->method('fetchById')->willReturn(null);
 
-        $user = new InvitedUser('', null, $teamDao, $this->makeRedisHandlerStub());
+        $user = new InvitedUser('', null, $teamDao, $this->makeRedisHandlerStub(), $this->makeUserDaoStub());
 
         $userStruct = new \Model\Users\UserStruct();
         $userStruct->uid = 1;

@@ -1222,7 +1222,7 @@ class TmKeyManagementTest extends AbstractTest
     public function testMergeJsonKeys_invalidClientJson()
     {
         try {
-            TmKeyManager::mergeJsonKeys(self::$invalidClientJson, self::$validServerJson);
+            TmKeyManager::mergeJsonKeys(self::$invalidClientJson, self::$validServerJson, obtainTestDatabase());
         } catch (Exception $e) {
             $this->assertTrue($e->getCode() > 0);
         }
@@ -1232,7 +1232,7 @@ class TmKeyManagementTest extends AbstractTest
     public function testMergeJsonKeys_invalidServerJson()
     {
         try {
-            TmKeyManager::mergeJsonKeys(self::$validClientJson, self::$invalidServerJson);
+            TmKeyManager::mergeJsonKeys(self::$validClientJson, self::$invalidServerJson, obtainTestDatabase());
         } catch (Exception $e) {
             $this->assertTrue($e->getCode() > 0);
         }
@@ -1247,6 +1247,7 @@ class TmKeyManagementTest extends AbstractTest
         $resultMerge = TmKeyManager::mergeJsonKeys(
             self::$client_json_ABC_DEF,
             self::$srv_json_ABC,
+            obtainTestDatabase(),
             Filter::ROLE_TRANSLATOR,
             123
         );
@@ -1304,6 +1305,7 @@ class TmKeyManagementTest extends AbstractTest
         $resultMerge = TmKeyManager::mergeJsonKeys(
             self::$client_json_GHI,
             self::$srv_json_GHI,
+            obtainTestDatabase(),
         );
 
         /*
@@ -1341,7 +1343,8 @@ class TmKeyManagementTest extends AbstractTest
         TmKeyManager::mergeJsonKeys(
             self::$client_json_INVALID_GHI,
             self::$srv_json_GHI
-        );
+        ,
+            obtainTestDatabase());
     }
 
     #[Test]
@@ -1352,6 +1355,7 @@ class TmKeyManagementTest extends AbstractTest
         TmKeyManager::mergeJsonKeys(
             self::$client_json_GHI,
             self::$srv_json_GHI,
+            obtainTestDatabase(),
             'invalid role!',
             123
         );
@@ -1365,6 +1369,7 @@ class TmKeyManagementTest extends AbstractTest
         TmKeyManager::mergeJsonKeys(
             self::$client_json_GHI,
             self::$srv_json_GHI,
+            obtainTestDatabase(),
             Filter::OWNER
         );
     }
@@ -1378,6 +1383,7 @@ class TmKeyManagementTest extends AbstractTest
         $resultMerge = TmKeyManager::mergeJsonKeys(
             '[]',
             self::$srv_json_GHI,
+            obtainTestDatabase(),
             Filter::OWNER,
             123
         );
@@ -1394,6 +1400,7 @@ class TmKeyManagementTest extends AbstractTest
         $resultMerge = TmKeyManager::mergeJsonKeys(
             self::$client_json_GHI,
             self::$srv_json_GHI,
+            obtainTestDatabase(),
             Filter::OWNER,
             123
         );
@@ -1433,7 +1440,8 @@ class TmKeyManagementTest extends AbstractTest
         $resultMerge = TmKeyManager::mergeJsonKeys(
             self::$client_json_GHI_DEF,
             self::$srv_json_GHI
-        );
+        ,
+            obtainTestDatabase());
 
         $this->assertCount(2, $resultMerge);
 
@@ -1471,6 +1479,7 @@ class TmKeyManagementTest extends AbstractTest
         $resultMerge = TmKeyManager::mergeJsonKeys(
             self::$client_json_ABC,
             self::$srv_json_ABC,
+            obtainTestDatabase(),
             Filter::ROLE_TRANSLATOR,
             123
         );
@@ -1514,6 +1523,7 @@ class TmKeyManagementTest extends AbstractTest
         $resultMerge = TmKeyManager::mergeJsonKeys(
             self::$client_json_DEF,
             self::$srv_json_ABC,
+            obtainTestDatabase(),
             Filter::ROLE_TRANSLATOR,
             123
         );
@@ -1533,7 +1543,8 @@ class TmKeyManagementTest extends AbstractTest
         TmKeyManager::mergeJsonKeys(
             self::$client_json_ABC_GHI_JKL,
             self::$srv_json_ABC_GHI_DEF
-        );
+        ,
+            obtainTestDatabase());
     }
 
     /**
@@ -1543,7 +1554,7 @@ class TmKeyManagementTest extends AbstractTest
     #[Test]
     public function testMergeJsonKeys_validInput_clientABCGHIJKL_serverABCGHIDEF()
     {
-        $db = Database::obtain();
+        $db = obtainTestDatabase();
         $db->getConnection()->query("TRUNCATE TABLE memory_keys");
 
         //this should not to be, because a client can not send not hashed keys
@@ -1551,11 +1562,12 @@ class TmKeyManagementTest extends AbstractTest
         $resultMerge = TmKeyManager::mergeJsonKeys(
             self::$client_json_ABC_GHI_JKL,
             self::$srv_json_ABC_GHI_DEF,
+            obtainTestDatabase(),
             Filter::ROLE_TRANSLATOR,
             123
         );
 
-        $MemoryDao = new MemoryKeyDao(Database::obtain());
+        $MemoryDao = new MemoryKeyDao(obtainTestDatabase());
         $dh = new MemoryKeyStruct([
             'uid' => 123
         ]);
@@ -1667,6 +1679,7 @@ class TmKeyManagementTest extends AbstractTest
         $resultMerge = TmKeyManager::mergeJsonKeys(
             $client_json,
             $server_json,
+            obtainTestDatabase(),
             Filter::ROLE_TRANSLATOR,
             123
         );
@@ -1756,6 +1769,7 @@ class TmKeyManagementTest extends AbstractTest
         TmKeyManager::mergeJsonKeys(
             $client_json,
             $server_json,
+            obtainTestDatabase(),
             Filter::ROLE_TRANSLATOR,
             123
         );
@@ -1794,6 +1808,42 @@ class TmKeyManagementTest extends AbstractTest
         $keys = TmKeyManager::getOwnerKeys([$jobKeys], 'w');
 
         $this->assertTrue(Utils::array_is_list($keys));
+    }
+
+    /**
+     * Regression: FILTER_FLAG_STRIP_HIGH does not strip multi-byte UTF-8, it HTML-entity-encodes
+     * it (e.g. "è" -> "&egrave;"), which the name regex then mangles into "egrave" once the
+     * punctuation is stripped. name sanitization never carried STRIP_HIGH, so it must keep
+     * passing accented characters through untouched; key sanitization had STRIP_HIGH removed
+     * for the same reason, so it must now behave the same way.
+     */
+    #[Test]
+    public function sanitize_preserves_accented_characters_in_name_and_key(): void
+    {
+        $tmKeyStruct       = new TmKeyStruct();
+        $tmKeyStruct->name = "èèèééééççòòòòò";
+        $tmKeyStruct->key  = "keyèéç993dddb1c603b4e57f69";
+
+        $result = TmKeyManager::sanitize($tmKeyStruct);
+
+        $this->assertSame("èèèééééççòòòòò", $result->name);
+        $this->assertSame("keyèéç993dddb1c603b4e57f69", $result->key);
+    }
+
+    /**
+     * Characterization guard: dropping STRIP_HIGH must not weaken the pre-existing
+     * XSS-relevant encoding that FILTER_SANITIZE_SPECIAL_CHARS performs regardless of flags.
+     */
+    #[Test]
+    public function sanitize_still_html_encodes_special_characters_in_key(): void
+    {
+        $tmKeyStruct      = new TmKeyStruct();
+        $tmKeyStruct->key = '<script>alert(1)</script>&"\'';
+
+        $result = TmKeyManager::sanitize($tmKeyStruct);
+
+        $this->assertStringNotContainsString('<script>', $result->key);
+        $this->assertStringContainsString('&#60;script&#62;', $result->key);
     }
 
 }

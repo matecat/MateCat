@@ -6,6 +6,7 @@ namespace Matecat\Core\Controllers;
 
 use Controller\API\App\ContextUrlController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Controller\Services\RateLimiterService;
 use InvalidArgumentException;
 use Klein\Request;
@@ -51,6 +52,17 @@ class ValidatorTestableContextUrlController extends ContextUrlController
     }
 
     protected function initDependencies(): void
+    {
+    }
+}
+
+class InitDependenciesTestableContextUrlController extends ContextUrlController
+{
+    public function __construct()
+    {
+    }
+
+    protected function registerValidators(): void
     {
     }
 }
@@ -499,6 +511,82 @@ class ContextUrlControllerTest extends AbstractTest
 
         $validators = $ref->getProperty('validators')->getValue($controller);
         $this->assertCount(2, $validators);
+    }
+
+    #[Test]
+    public function initDependencies_initializes_all_real_dependencies(): void
+    {
+        $controller = new InitDependenciesTestableContextUrlController();
+        $ref = new ReflectionClass(ContextUrlController::class);
+        $ref->getProperty('database')->setValue($controller, obtainTestDatabase());
+
+        $method = $ref->getMethod('initDependencies');
+        $method->invoke($controller);
+
+        $this->assertInstanceOf(ProjectsMetadataDao::class, $ref->getProperty('projectsMetadataDao')->getValue($controller));
+        $this->assertInstanceOf(FilesMetadataDao::class, $ref->getProperty('filesMetadataDao')->getValue($controller));
+        $this->assertInstanceOf(SegmentMetadataDao::class, $ref->getProperty('segmentMetadataDao')->getValue($controller));
+        $this->assertInstanceOf(FileDao::class, $ref->getProperty('fileDao')->getValue($controller));
+        $this->assertInstanceOf(SegmentDao::class, $ref->getProperty('segmentDao')->getValue($controller));
+        $this->assertInstanceOf(RateLimiterService::class, $ref->getProperty('rateLimiterService')->getValue($controller));
+    }
+
+    #[Test]
+    public function registerValidators_projectPasswordValidator_onSuccess_throws_when_project_not_found(): void
+    {
+        $controller = new ValidatorTestableContextUrlController();
+        $ref = new ReflectionClass(ContextUrlController::class);
+
+        $ref->getProperty('request')->setValue($controller, $this->createStub(Request::class));
+        $ref->getProperty('response')->setValue($controller, $this->createStub(Response::class));
+        $ref->getProperty('params')->setValue($controller, ['id_project' => '42', 'password' => 'abc123']);
+
+        $method = $ref->getMethod('registerValidators');
+        $method->invoke($controller);
+
+        $validators = $ref->getProperty('validators')->getValue($controller);
+        /** @var ProjectPasswordValidator $passwordValidator */
+        $passwordValidator = $validators[1];
+
+        $validatorRef = new ReflectionClass(ProjectPasswordValidator::class);
+        $callbacks = $validatorRef->getProperty('_validationCallbacks')->getValue($passwordValidator);
+
+        $this->expectException(NotFoundException::class);
+
+        // getProject() returns null by default (never set via _validate()).
+        ($callbacks[0])();
+    }
+
+    #[Test]
+    public function registerValidators_projectPasswordValidator_onSuccess_sets_project_and_runs_access_validator(): void
+    {
+        $controller = new ValidatorTestableContextUrlController();
+        $ref = new ReflectionClass(ContextUrlController::class);
+
+        $ref->getProperty('request')->setValue($controller, $this->createStub(Request::class));
+        $ref->getProperty('response')->setValue($controller, $this->createStub(Response::class));
+        $ref->getProperty('params')->setValue($controller, ['id_project' => '42', 'password' => 'abc123']);
+        $ref->getProperty('userIsLogged')->setValue($controller, false);
+
+        $method = $ref->getMethod('registerValidators');
+        $method->invoke($controller);
+
+        $validators = $ref->getProperty('validators')->getValue($controller);
+        /** @var ProjectPasswordValidator $passwordValidator */
+        $passwordValidator = $validators[1];
+
+        $validatorRef = new ReflectionClass(ProjectPasswordValidator::class);
+        $validatorRef->getProperty('project')->setValue($passwordValidator, $this->project);
+        $callbacks = $validatorRef->getProperty('_validationCallbacks')->getValue($passwordValidator);
+
+        // First callback assigns the project onto the controller (no throw).
+        ($callbacks[0])();
+        $this->assertSame($this->project, $ref->getProperty('project')->getValue($controller));
+
+        // Second callback builds a ProjectAccessValidator and calls validate();
+        // userIsLogged=false makes it fail fast (401) before touching the DB.
+        $this->expectException(AuthorizationError::class);
+        ($callbacks[1])();
     }
 
 }

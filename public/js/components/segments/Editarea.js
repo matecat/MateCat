@@ -7,6 +7,7 @@ import {
   getDefaultKeyBinding,
   KeyBindingUtil,
   CompositeDecorator,
+  SelectionState,
 } from 'draft-js'
 import {remove, cloneDeep, findIndex, size, isEqual} from 'lodash'
 import {debounce} from 'lodash/function'
@@ -23,6 +24,7 @@ import TagBox from './utils/DraftMatecatUtils/TagMenu/TagBox'
 import insertTag from './utils/DraftMatecatUtils/TagMenu/insertTag'
 import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissingTag'
 import LexiqaUtils from '../../utils/lxq.main'
+import transformLexiqaPoints from './utils/DraftMatecatUtils/transformLexiqaPoints'
 import updateOffsetBasedOnEditorState from './utils/DraftMatecatUtils/updateOffsetBasedOnEditorState'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
@@ -254,6 +256,7 @@ class Editarea extends React.Component {
         sid,
         false,
         this.getUpdatedSegmentInfo,
+        this.replaceWordAt,
       )
       remove(
         this.decoratorsStructure,
@@ -698,6 +701,27 @@ class Editarea extends React.Component {
     }
   }
 
+  replaceWordAt = ({newWord, start, end}) => {
+    const startIndex = start
+    const endIndex = end
+    const selection = this.state.editorState.getSelection().merge({
+      anchorOffset: startIndex,
+      focusOffset: endIndex,
+    })
+    const contentState = Modifier.replaceText(
+      this.state.editorState.getCurrentContent(),
+      selection,
+      newWord,
+    )
+    const updatedState = EditorState.push(this.state.editorState, contentState)
+    this.setState({editorState: updatedState}, () => {
+      // Reactivate decorators
+      this.updateTranslationDebounced()
+      // Stop composition mode
+      this.onCompositionStopDebounced()
+    })
+  }
+
   render() {
     const {
       editorState,
@@ -726,7 +750,7 @@ class Editarea extends React.Component {
     let readonly = false
 
     if (this.props.segment) {
-      lang = config.target_rfc.toLowerCase().split('-')[0]
+      lang = config.target_rfc
       readonly =
         this.context.readonly ||
         this.context.locked ||
@@ -756,7 +780,7 @@ class Editarea extends React.Component {
         onDrop={onDragEnd}
         onFocus={onFocus}
         onKeyUp={onKeyUpEvent}
-        lang={lang}
+        lang={config.target_rfc}
         spellCheck={true}
       >
         <Editor

@@ -41,7 +41,7 @@ class CreateTempInstanceTest extends AbstractTest
         $this->engine_struct_param->class_load = "DeepL";
 
 
-        $engine = EnginesFactory::createTempInstance($this->engine_struct_param);
+        $engine = EnginesFactory::createTempInstance($this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
         $this->assertTrue($engine instanceof DeepL);
     }
 }

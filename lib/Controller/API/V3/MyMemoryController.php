@@ -6,8 +6,11 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use TypeError;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\TmKeyManagement\TmKeyStruct;
@@ -23,7 +26,9 @@ class MyMemoryController extends KleinController
     /**
      * Create a MM key and assign to the logged user
      *
-     * @throws \TypeError
+     * @throws TypeError
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function create(): void
     {
@@ -71,11 +76,11 @@ class MyMemoryController extends KleinController
      *
      * @return mixed
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function createANewKeyAndAssignToUser(string $name): mixed
     {
-        $tms = EnginesFactory::getInstance(1, MyMemory::class);
+        $tms = EnginesFactory::getInstance(1, $this->getDatabase(), MyMemory::class);
         $newKey = $tms->createMyMemoryKey();
 
         $this->saveMemoryKey($newKey->key, $name);
@@ -89,11 +94,11 @@ class MyMemoryController extends KleinController
      *
      * @return string
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function checkTheKeyAndAssignToUser(string $key, string $name): string
     {
-        $tmxHandler = new TMSService();
+        $tmxHandler = new TMSService($this->getDatabase());
         $keyExists = $tmxHandler->checkCorrectKey($key);
 
         if ($keyExists === false) {
@@ -110,7 +115,7 @@ class MyMemoryController extends KleinController
      * @param string $name
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function saveMemoryKey(string $key, string $name): void
     {
@@ -123,7 +128,7 @@ class MyMemoryController extends KleinController
         $mkDao = new MemoryKeyDao($this->getDatabase());
 
         $newMemoryKey = new MemoryKeyStruct();
-        $newMemoryKey->uid = $this->user->uid ?? throw new \TypeError('User UID must not be null');
+        $newMemoryKey->uid = $this->user->uid ?? throw new TypeError('User UID must not be null');
         $newMemoryKey->tm_key = $tmKeyStruct;
 
         try {

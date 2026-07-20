@@ -8,10 +8,11 @@ use DOMDocument;
 use DOMElement;
 use Exception;
 use InvalidArgumentException;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils as ReviewUtils;
+use Random\RandomException;
 use Transliterator;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ErrMailWorker;
@@ -128,15 +129,18 @@ class Utils
         } elseif (preg_match('/Trident/i', $u_agent) || preg_match('/IEMobile/i', $u_agent)) {
             $browserName = 'Internet Explorer Mobile';
             $ub = "IEMobile";
-        } elseif (preg_match('/Firefox/i', $u_agent)) {
+        } elseif (preg_match('/Firefox|FxiOS/i', $u_agent)) {
             $browserName = 'Mozilla Firefox';
-            $ub = "Firefox";
-        } elseif (preg_match('/Chrome/i', $u_agent) and !preg_match('/Opera|OPR/i', $u_agent)) {
+            $ub = "Firefox|FxiOS";
+        } elseif (preg_match('/SamsungBrowser/i', $u_agent)) {
+            $browserName = 'Samsung Internet';
+            $ub = "SamsungBrowser";
+        } elseif (preg_match('/Chrome|CriOS/i', $u_agent) and !preg_match('/Opera|OPR/i', $u_agent)) {
             $browserName = 'Google Chrome';
-            $ub = "Chrome";
+            $ub = "Chrome|CriOS";
         } elseif (preg_match('/Opera|OPR/i', $u_agent)) {
             $browserName = 'Opera';
-            $ub = "Opera";
+            $ub = "OPR|Opera";
         } elseif (preg_match('/Safari/i', $u_agent) || preg_match('/applewebkit.*\(.*khtml.*like.*gecko.*\).*mobile.*$/i', $u_agent)) {
             $browserName = 'Apple Safari';
             $ub = "Safari|Version";
@@ -168,10 +172,10 @@ class Utils
             if (strtolower($matches['browser'][0]) == 'version' && strtolower($matches['browser'][1]) != 'safari') {
                 $version = $matches['version'][1] ?? null;
             } else {
-                $version = $matches['version'][0] ?? null;
+                $version = $matches['version'][0];
             }
         } else {
-            $version = $matches['version'][0] ?? null;
+            $version = $matches['version'][0];
         }
 
         // check if we have a number
@@ -284,36 +288,48 @@ class Utils
     }
 
     /**
-     * Generate a 128bit password with real uniqueness over a single process instance
-     *   N.B. Concurrent requests can collide (Ex: fork)
+     * Generate a cryptographically secure random string using random_int() (CSPRNG).
      *
-     * Minimum Password Length of 12 Characters
+     * Returns exactly $length characters drawn uniformly from a 62-symbol base62
+     * alphabet ([A-Za-z0-9]) — i.e. ~5.954 bits of entropy per character. The default
+     * (16) yields ~95 bits. random_int() picks each index without modulo bias.
      *
-     * WARNING: the obtained random string MUST NOT be used for security, @use self::uuid4 instead.
+     * A length below 16 (~82 bits at the base36 floor) is rejected unless the caller
+     * explicitly opts in via $insecure, so weak tokens can never be produced by accident.
      *
-     * @param int $maxlength
-     * @param bool $more_entropy
+     * A length below 16 throws InvalidArgumentException unless $insecure is true. The tag is
+     * intentionally omitted from @throws (like random_int's RandomException below) so the
+     * fail-fast guard does not cascade a checked-exception declaration onto every caller.
+     *
+     * @param int $length Output length in characters; must be >= 16 unless $insecure is true
+     * @param bool $insecure Explicitly allow a length below 16 (weak entropy) — use only for
+     *                       non-security values (e.g. display/name suffixes)
      *
      * @return string
      */
-    public static function randomString(int $maxlength = 12, bool $more_entropy = false): string
+    public static function randomString(int $length = 16, bool $insecure = false): string
     {
-        $_pwd = md5(uniqid('', true));
-
-        if ($more_entropy) {
-            $_pwd = base64_encode($_pwd); //we want more characters not only [0-9a-f]
+        if ($length < 16 && !$insecure) {
+            /** @phpstan-ignore missingType.checkedException */
+            throw new InvalidArgumentException(
+                'randomString(): a length below 16 is insecure; pass $insecure = true to request it explicitly'
+            );
         }
 
-        $pwd = substr($_pwd, 0, 6) . substr($_pwd, -8, 6); //exclude last 2 char2 because they can be == sign
-
-        if ($maxlength > 12) {
-            while (strlen($pwd) < $maxlength) {
-                $pwd .= self::randomString();
-            }
-            $pwd = substr($pwd, 0, $maxlength);
+        if ($length <= 0) {
+            $length = 16;
         }
 
-        return $pwd;
+        $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+        $out = '';
+        for ($i = 0; $i < $length; $i++) {
+            /** @noinspection PhpUnhandledExceptionInspection */
+            /** @phpstan-ignore missingType.checkedException */
+            $out .= $alphabet[random_int(0, 61 /* strlen($alphabet) - 1 */)];
+        }
+
+        return $out;
     }
 
     public static function mysqlTimestamp(int $time): string
@@ -482,7 +498,7 @@ class Utils
      * @see https://digitalbunker.dev/understanding-how-uuids-are-generated/
      * @see https://www.rfc-editor.org/rfc/rfc4122.html
      *
-     * @throws \Random\RandomException
+     * @throws RandomException
      */
     public static function uuid4(): string
     {
@@ -766,7 +782,7 @@ class Utils
      * @return string
      * @throws Exception
      */
-    public static function changeMemorySuggestionSource(array $match, string $job_tm_keys, ?int $uid = null): string
+    public static function changeMemorySuggestionSource(array $match, string $job_tm_keys, IDatabase $database, ?int $uid = null): string
     {
         $sug_source = $match['created_by'];
         $key = $match['memory_key'];
@@ -780,7 +796,7 @@ class Utils
             $description = $sug_source;
         } elseif (preg_match("/[a-f0-9]{8,}/", $key)) { // md5 Key
             // This condition is for md5 keys
-            $description = self::keyNameFromUserKeyring($key, $uid);
+            $description = self::keyNameFromUserKeyring($key, $database, $uid);
 
             if (empty($description)) {
                 $description = self::getDefaultKeyDescription($key, $job_tm_keys);
@@ -797,7 +813,7 @@ class Utils
     /**
      * @throws Exception
      */
-    public static function keyNameFromUserKeyring(string $key, ?int $uid = null): ?string
+    public static function keyNameFromUserKeyring(string $key, IDatabase $database, ?int $uid = null): ?string
     {
         if ($uid === null) {
             return null;
@@ -809,7 +825,7 @@ class Utils
         $memoryKey->tm_key = new TmKeyStruct();
         $memoryKey->tm_key->key = $key;
 
-        $memoryKeyDao = new MemoryKeyDao(Database::obtain());
+        $memoryKeyDao = new MemoryKeyDao($database);
         $currentUserMemoryKey = $memoryKeyDao->setCacheTTL(3600)->read($memoryKey);
         if (count($currentUserMemoryKey) > 0) {
             $currentUserMemoryKey = $currentUserMemoryKey[0];

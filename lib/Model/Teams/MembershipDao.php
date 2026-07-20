@@ -10,7 +10,6 @@ namespace Model\Teams;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use Model\Users\MetadataDao;
 use Model\Users\UserDao;
@@ -34,12 +33,7 @@ class MembershipDao extends AbstractDao
             WHERE teams_users.uid = ? AND teams.id = ?
             ";
 
-    protected static string $_query_team_from_id_and_name = " SELECT teams.* FROM teams
-              JOIN teams_users ON teams_users.id_team = teams.id
-            WHERE teams.id = ? AND teams.name = ?
-            ";
-
-    protected static string $_query_user_teams = " 
+    protected static string $_query_user_teams = "
           SELECT teams.* FROM teams
               JOIN teams_users ON teams_users.id_team = teams.id
             WHERE teams_users.uid = :uid 
@@ -118,21 +112,6 @@ class MembershipDao extends AbstractDao
     }
 
     /**
-     * @param int $id
-     * @param string $name
-     *
-     * @return TeamStruct|null
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public function findTeamByIdAndName(int $id, string $name): ?TeamStruct
-    {
-        $stmt = $this->_getStatementForQuery(self::$_query_team_from_id_and_name);
-
-        return $this->_fetchObjectMap($stmt, TeamStruct::class, [$id, $name])[0] ?? null;
-    }
-
-    /**
      * Cache deletion for @param int $id
      *
      * @param UserStruct $user
@@ -179,8 +158,8 @@ class MembershipDao extends AbstractDao
 
             $memberUIDs = array_values(array_filter($membersUIDs, fn($v) => $v !== null));
 
-            $users = (new UserDao())->setCacheTTL(60 * 60 * 24)->getByUids($memberUIDs);
-            $metadata = (new MetadataDao())->setCacheTTL(60 * 60 * 24)->getAllByUidList($memberUIDs);
+            $users = (new UserDao($this->database))->setCacheTTL(60 * 60 * 24)->getByUids($memberUIDs);
+            $metadata = (new MetadataDao($this->database))->setCacheTTL(60 * 60 * 24)->getAllByUidList($memberUIDs);
 
             foreach ($members as $member) {
                 if ($member->uid !== null && isset($users[$member->uid])) {
@@ -230,9 +209,9 @@ class MembershipDao extends AbstractDao
      */
     public function deleteUserFromTeam(int $uid, int $teamId): ?UserStruct
     {
-        $user = (new UserDao())->setCacheTTL(3600)->getByUid($uid);
+        $user = (new UserDao($this->database))->setCacheTTL(3600)->getByUid($uid);
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare(self::$_delete_member);
         $stmt->execute([
             'uid' => $uid,
@@ -264,7 +243,7 @@ class MembershipDao extends AbstractDao
      */
     public function createList(array $obj_arr): array
     {
-        if (!Database::obtain()->getConnection()->inTransaction()) {
+        if (!$this->database->getConnection()->inTransaction()) {
             throw new Exception('this method requires to be wrapped in a transaction');
         }
 
@@ -284,7 +263,7 @@ class MembershipDao extends AbstractDao
         $members = $obj_arr['members'];
         $teamStruct = $obj_arr['team'];
 
-        $users = (new UserDao)->getByEmails($members);
+        $users = (new UserDao($this->database))->getByEmails($members);
 
         if (empty($users)) {
             return [];

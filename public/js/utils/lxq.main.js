@@ -630,6 +630,17 @@ const LXQ = {
         })
       }
     })
+    if (!isSource) {
+      const {suggestions, start, end} = range
+      $.each(suggestions, function (i, suggest) {
+        messages.push({
+          msg: suggest,
+          start: start,
+          end: end,
+          type: 'suggestion',
+        })
+      })
+    }
     return messages
   },
   ignoreError: (errorid) => {

@@ -5,6 +5,8 @@ namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
+use Klein\Exceptions\LockedResponseException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Response;
 use Model\Xliff\XliffConfigTemplateDao;
 use PDOException;
@@ -48,6 +50,8 @@ class XliffConfigTemplateController extends KleinController
      *
      * @throws \TypeError
      * @throws \DivisionByZeroError
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function all(): Response
     {
@@ -78,6 +82,8 @@ class XliffConfigTemplateController extends KleinController
      * Get a single entry
      *
      * @throws \TypeError
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function get(): Response
     {
@@ -108,6 +114,8 @@ class XliffConfigTemplateController extends KleinController
      *
      * @return Response
      * @throws \TypeError
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function create(): Response
     {
@@ -219,6 +227,8 @@ class XliffConfigTemplateController extends KleinController
      * Delete an entry
      *
      * @throws \TypeError
+     * @throws LockedResponseException
+     * @throws ResponseAlreadySentException
      */
     public function delete(): Response
     {

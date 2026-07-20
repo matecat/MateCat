@@ -23,9 +23,9 @@ class JobsMetadataMarshallerTest extends AbstractTest
     // =========================================================================
 
     #[Test]
-    public function enumHasExactlySixCases(): void
+    public function enumHasExactlySevenCases(): void
     {
-        $this->assertCount(6, JobsMetadataMarshaller::cases());
+        $this->assertCount(7, JobsMetadataMarshaller::cases());
     }
 
     #[Test]

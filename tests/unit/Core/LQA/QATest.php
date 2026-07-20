@@ -254,6 +254,28 @@ class QATest extends AbstractTest
     }
 
     #[Test]
+    public function performConsistencyCheckWithPseudoTagSourceReturnsNoError(): void
+    {
+        // "<Expiry date symbol>" is plain text, not an XLIFF tag: it must not
+        // produce a false-positive tag mismatch regardless of the translation.
+        $qa = new QA('<Expiry date symbol>', 'Simbolo data di scadenza');
+        $errors = $qa->performConsistencyCheck();
+
+        $this->assertFalse($qa->thereAreErrors());
+        $this->assertCount(1, $errors);
+        $this->assertEquals(QA::ERR_NONE, $errors[0]->outcome);
+    }
+
+    #[Test]
+    public function performConsistencyCheckWithPseudoTagInBothSegmentsReturnsNoError(): void
+    {
+        $qa = new QA('Value: <Expiry date symbol>', 'Valore: <Expiry date symbol>');
+        $qa->performConsistencyCheck();
+
+        $this->assertFalse($qa->thereAreErrors());
+    }
+
+    #[Test]
     public function performConsistencyCheckWithMismatchedTagIdHasErrors(): void
     {
         $qa = new QA('<g id="1">Source</g>', '<g id="2">Target</g>');
@@ -715,7 +737,7 @@ class QATest extends AbstractTest
     public function setFeatureSetReturnsSelfForChaining(): void
     {
         $qa = new QA('<g id="1">Source</g>', '<g id="1">Target</g>');
-        $featureSet = new \Model\FeaturesBase\FeatureSet();
+        $featureSet = new \Model\FeaturesBase\FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
 
         $result = $qa->setFeatureSet($featureSet);
 
@@ -726,7 +748,7 @@ class QATest extends AbstractTest
     public function setFeatureSetConfiguresAllComponents(): void
     {
         $qa = new QA('<g id="1">Source</g>', '<g id="1">Target</g>');
-        $featureSet = new \Model\FeaturesBase\FeatureSet();
+        $featureSet = new \Model\FeaturesBase\FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
 
         $qa->setFeatureSet($featureSet);
         $qa->performConsistencyCheck();
@@ -959,6 +981,7 @@ class QATest extends AbstractTest
         $this->assertEquals(ErrorManager::ERR_TAG_ORDER, QA::ERR_TAG_ORDER);
         $this->assertEquals(ErrorManager::ERR_WS_HEAD, QA::ERR_WS_HEAD);
         $this->assertEquals(ErrorManager::ERR_SIZE_RESTRICTION, QA::ERR_SIZE_RESTRICTION);
+        $this->assertEquals(ErrorManager::ERR_FUZZY_UNCHANGED, QA::ERR_FUZZY_UNCHANGED);
     }
 
     #[Test]
