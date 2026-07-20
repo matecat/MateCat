@@ -924,6 +924,551 @@ class TestFixtureBuilder
         );
     }
 
+    // ---------------------------------------------------------------------------------------
+    // jobs (additional chunk-password row) — a job "id" is shared across N chunk rows that
+    // differ only by password + a disjoint job_first_segment/job_last_segment sub-range
+    // (matecat-project-job-language-chunk-model). makeJob() creates the FIRST chunk row via
+    // AUTO_INCREMENT; this creates every ADDITIONAL chunk row for that SAME id with an explicit
+    // id value (the `jobs` table has no PRIMARY KEY / UNIQUE(id), only non-unique KEY `id`, so
+    // re-using an id across rows is schema-legal). Tracked by the (id,password) pair so cleanup
+    // only removes the rows this builder inserted.
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @param array<string,int|string|null> $overrides
+     * @return array{id:int,password:string,id_project:int,job_first_segment:int,job_last_segment:int}
+     */
+    public function makeJobChunk(int $idJob, int $idProject, string $password, int $firstSegment, int $lastSegment, array $overrides = []): array
+    {
+        $values = [
+            'id'                => $idJob,
+            'password'          => $password,
+            'id_project'        => $idProject,
+            'job_first_segment' => $firstSegment,
+            'job_last_segment'  => $lastSegment,
+            'tm_keys'           => (string)($overrides['tm_keys'] ?? '[]'),
+            'create_date'       => $this->now(),
+            'disabled'          => 0,
+            'source'            => (string)($overrides['source'] ?? 'en-US'),
+            'target'            => (string)($overrides['target'] ?? 'it-IT'),
+        ];
+        if (isset($overrides['owner'])) {
+            $values['owner'] = (string)$overrides['owner'];
+        }
+        $this->insertAssignable('jobs', $values, ['id' => $idJob, 'password' => $password]);
+
+        return [
+            'id'                => $idJob,
+            'password'          => $password,
+            'id_project'        => $idProject,
+            'job_first_segment' => $firstSegment,
+            'job_last_segment'  => $lastSegment,
+        ];
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // notifications (assignable PK `id` — NOT AUTO_INCREMENT; keyed by id_comment)
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @param array<string,int|string|null> $overrides
+     * @return array{id:int,id_comment:int}
+     */
+    public function makeNotification(int $idComment, array $overrides = []): array
+    {
+        $id = (int)($overrides['id'] ?? $this->nextAssignableId());
+        $idTranslator = (string)($overrides['id_translator'] ?? ('rsq_translator_' . bin2hex(random_bytes(4))));
+        $status = (string)($overrides['status'] ?? 'UNREAD');
+        $this->insertAssignable(
+            'notifications',
+            ['id' => $id, 'id_comment' => $idComment, 'id_translator' => $idTranslator, 'status' => $status],
+            ['id' => $id]
+        );
+
+        return ['id' => $id, 'id_comment' => $idComment];
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // qa_archived_reports (AUTO_INCREMENT id)
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @param array<string,int|string|null> $overrides
+     * @return array{id:int}
+     */
+    public function makeQaArchivedReport(int $idProject, int $idJob, string $password, int $firstSegment, int $lastSegment, int $createdBy, array $overrides = []): array
+    {
+        $id = $this->insertAi('qa_archived_reports', 'id', [
+            'created_by'        => $createdBy,
+            'id_project'        => $idProject,
+            'id_job'            => $idJob,
+            'password'          => $password,
+            'job_first_segment' => $firstSegment,
+            'job_last_segment'  => $lastSegment,
+            'create_date'       => $this->now(),
+            'quality_report'    => (string)($overrides['quality_report'] ?? '{}'),
+            'version'           => (int)($overrides['version'] ?? 0),
+        ]);
+
+        return ['id' => $id];
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // chunk_completion_events (AUTO_INCREMENT id)
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @param array<string,int|string|null> $overrides
+     * @return array{id:int}
+     */
+    public function makeChunkCompletionEvent(int $idProject, int $idJob, string $password, int $firstSegment, int $lastSegment, array $overrides = []): array
+    {
+        $values = [
+            'id_project'         => $idProject,
+            'id_job'             => $idJob,
+            'job_first_segment'  => $firstSegment,
+            'job_last_segment'   => $lastSegment,
+            'password'           => $password,
+            'source'             => (string)($overrides['source'] ?? 'en-US'),
+            'create_date'        => $this->now(),
+            'remote_ip_address'  => (string)($overrides['remote_ip_address'] ?? '127.0.0.1'),
+            'is_review'          => (int)($overrides['is_review'] ?? 0),
+        ];
+        if (array_key_exists('uid', $overrides)) {
+            $values['uid'] = $overrides['uid'];
+        }
+        $id = $this->insertAi('chunk_completion_events', 'id', $values);
+
+        return ['id' => $id];
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // chunk_completion_updates (AUTO_INCREMENT id)
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @param array<string,int|string|null> $overrides
+     * @return array{id:int}
+     */
+    public function makeChunkCompletionUpdate(int $idProject, int $idJob, string $password, int $firstSegment, int $lastSegment, array $overrides = []): array
+    {
+        $values = [
+            'id_project'         => $idProject,
+            'id_job'             => $idJob,
+            'job_first_segment'  => $firstSegment,
+            'job_last_segment'   => $lastSegment,
+            'password'           => $password,
+            'source'             => (string)($overrides['source'] ?? 'en-US'),
+            'create_date'        => $this->now(),
+            'is_review'          => (int)($overrides['is_review'] ?? 0),
+            'remote_ip_address'  => (string)($overrides['remote_ip_address'] ?? '127.0.0.1'),
+        ];
+        if (array_key_exists('uid', $overrides)) {
+            $values['uid'] = $overrides['uid'];
+        }
+        $id = $this->insertAi('chunk_completion_updates', 'id', $values);
+
+        return ['id' => $id];
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // segment_revisions (assignable composite PK id_job,id_segment)
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @param array<string,int|string|null> $overrides
+     */
+    public function makeSegmentRevision(int $idJob, int $idSegment, array $overrides = []): void
+    {
+        $values = [
+            'id_job'          => $idJob,
+            'id_segment'      => $idSegment,
+            'err_typing'      => (string)($overrides['err_typing'] ?? ''),
+            'err_translation' => (string)($overrides['err_translation'] ?? ''),
+            'err_terminology' => (string)($overrides['err_terminology'] ?? ''),
+            'err_language'    => (string)($overrides['err_language'] ?? ''),
+            'err_style'       => (string)($overrides['err_style'] ?? ''),
+        ];
+        if (array_key_exists('original_translation', $overrides)) {
+            $values['original_translation'] = $overrides['original_translation'];
+        }
+        $this->insertAssignable('segment_revisions', $values, ['id_job' => $idJob, 'id_segment' => $idSegment]);
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // jobs_translators (assignable composite PK id_job,job_password)
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @param array<string,int|string|null> $overrides
+     */
+    public function makeJobsTranslator(int $idJob, string $jobPassword, int $addedBy, string $email, string $source = 'en-US', string $target = 'it-IT', array $overrides = []): void
+    {
+        $values = [
+            'id_job'                => $idJob,
+            'job_password'          => $jobPassword,
+            'id_translator_profile' => $overrides['id_translator_profile'] ?? null,
+            'added_by'              => $addedBy,
+            'email'                 => $email,
+            'source'                => $source,
+            'target'                => $target,
+        ];
+        $this->insertAssignable('jobs_translators', $values, ['id_job' => $idJob, 'job_password' => $jobPassword]);
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // jobs_stats (assignable composite PK id_job,password,fuzzy_band)
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @param array<string,int|string|null> $overrides
+     */
+    public function makeJobsStat(int $idJob, string $password, string $fuzzyBand = 'NO_MATCH', string $source = 'en-US', string $target = 'it-IT', array $overrides = []): void
+    {
+        $values = [
+            'id_job'     => $idJob,
+            'password'   => $password,
+            'fuzzy_band' => $fuzzyBand,
+            'source'     => $source,
+            'target'     => $target,
+        ];
+        if (array_key_exists('total_time_to_edit', $overrides)) {
+            $values['total_time_to_edit'] = $overrides['total_time_to_edit'];
+        }
+        if (array_key_exists('avg_post_editing_effort', $overrides)) {
+            $values['avg_post_editing_effort'] = $overrides['avg_post_editing_effort'];
+        }
+        if (array_key_exists('total_raw_wc', $overrides)) {
+            $values['total_raw_wc'] = $overrides['total_raw_wc'];
+        }
+        $this->insertAssignable('jobs_stats', $values, ['id_job' => $idJob, 'password' => $password, 'fuzzy_band' => $fuzzyBand]);
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // blacklist_files (AUTO_INCREMENT id)
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @param array<string,int|string|null> $overrides
+     * @return array{id:int}
+     */
+    public function makeBlacklistFile(int $idJob, string $password, int $uid, array $overrides = []): array
+    {
+        $id = $this->insertAi('blacklist_files', 'id', [
+            'id_job'    => $idJob,
+            'password'  => $password,
+            'file_path' => (string)($overrides['file_path'] ?? '/tmp/rsq'),
+            'file_name' => (string)($overrides['file_name'] ?? ('rsq_' . bin2hex(random_bytes(4)) . '.txt')),
+            'target'    => (string)($overrides['target'] ?? 'it-IT'),
+            'uid'       => $uid,
+        ]);
+
+        return ['id' => $id];
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // outsource_confirmation (AUTO_INCREMENT id)
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @param array<string,int|string|null> $overrides
+     * @return array{id:int}
+     */
+    public function makeOutsourceConfirmation(int $idJob, string $password, array $overrides = []): array
+    {
+        $values = [
+            'id_job'        => $idJob,
+            'password'      => $password,
+            'delivery_date' => (string)($overrides['delivery_date'] ?? $this->now()),
+        ];
+        foreach (['id_vendor', 'vendor_name', 'currency', 'price', 'quote_pid'] as $col) {
+            if (array_key_exists($col, $overrides)) {
+                $values[$col] = $overrides[$col];
+            }
+        }
+        $id = $this->insertAi('outsource_confirmation', 'id', $values);
+
+        return ['id' => $id];
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // revision_feedbacks (AUTO_INCREMENT id)
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @return array{id:int}
+     */
+    public function makeRevisionFeedback(int $idJob, string $password, int $revisionNumber = 1, string $feedback = 'rsq feedback'): array
+    {
+        $id = $this->insertAi('revision_feedbacks', 'id', [
+            'id_job'          => $idJob,
+            'password'        => $password,
+            'revision_number' => $revisionNumber,
+            'feedback'        => $feedback,
+        ]);
+
+        return ['id' => $id];
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // context_groups (AUTO_INCREMENT id; PRIMARY KEY (id,id_project) — id alone is still
+    // globally unique, InnoDB auto_increment is table-wide regardless of composite PK) —
+    // project-scoped, NOT per-job (schema has no id_job column).
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @param array<string,int|string|null> $overrides
+     * @return array{id:int}
+     */
+    public function makeContextGroup(int $idProject, array $overrides = []): array
+    {
+        $id = $this->insertAi('context_groups', 'id', [
+            'id_project'   => $idProject,
+            'id_segment'   => $overrides['id_segment'] ?? null,
+            'id_file'      => $overrides['id_file'] ?? null,
+            'context_json' => (string)($overrides['context_json'] ?? '{}'),
+        ]);
+
+        return ['id' => $id];
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // project_metadata (AUTO_INCREMENT id) — project-scoped, NOT per-job.
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @return array{id:int}
+     */
+    public function makeProjectMetadata(int $idProject, string $key, string $value): array
+    {
+        $id = $this->insertAi('project_metadata', 'id', [
+            'id_project' => $idProject,
+            'key'        => $key,
+            'value'      => $value,
+        ]);
+
+        return ['id' => $id];
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // file_references (AUTO_INCREMENT id) — project/file-scoped, NOT per-job.
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @param array<string,int|string|null> $overrides
+     * @return array{id:int}
+     */
+    public function makeFileReference(int $idProject, int $idFile, array $overrides = []): array
+    {
+        $values = [
+            'id_project'    => $idProject,
+            'id_file'       => $idFile,
+            'part_filename' => (string)($overrides['part_filename'] ?? ('rsq_part_' . bin2hex(random_bytes(4)) . '.xml')),
+        ];
+        if (array_key_exists('serialized_reference_meta', $overrides)) {
+            $values['serialized_reference_meta'] = $overrides['serialized_reference_meta'];
+        }
+        $id = $this->insertAi('file_references', 'id', $values);
+
+        return ['id' => $id];
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // segment_metadata (NO PRIMARY KEY; assignable, unique on id_segment,meta_key) —
+    // segment-scoped, shared across every job/language translating that segment.
+    // ---------------------------------------------------------------------------------------
+
+    public function makeSegmentMetadata(int $idSegment, string $metaKey, string $metaValue): void
+    {
+        $this->insertAssignable(
+            'segment_metadata',
+            ['id_segment' => $idSegment, 'meta_key' => $metaKey, 'meta_value' => $metaValue],
+            ['id_segment' => $idSegment, 'meta_key' => $metaKey]
+        );
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // segment_notes (AUTO_INCREMENT id) — segment-scoped, shared across jobs/languages.
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @param array<string,int|string|null> $overrides
+     * @return array{id:int}
+     */
+    public function makeSegmentNote(int $idSegment, string $internalId, array $overrides = []): array
+    {
+        $id = $this->insertAi('segment_notes', 'id', [
+            'id_segment'  => $idSegment,
+            'internal_id' => $internalId,
+            'note'        => $overrides['note'] ?? 'rsq note',
+            'json'        => $overrides['json'] ?? null,
+        ]);
+
+        return ['id' => $id];
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // segment_original_data (AUTO_INCREMENT id) — segment-scoped, shared across jobs/languages.
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @return array{id:int}
+     */
+    public function makeSegmentOriginalData(int $idSegment, string $map = '[]'): array
+    {
+        $id = $this->insertAi('segment_original_data', 'id', [
+            'id_segment' => $idSegment,
+            'map'        => $map,
+        ]);
+
+        return ['id' => $id];
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // makeEraseFixture — full cascade-erasure project graph (plan database-clean-task.md, T4).
+    //
+    // Topology (matecat-project-job-language-chunk-model): ONE shared project + ONE shared
+    // file + a SHARED set of source segments (source content is identical regardless of target
+    // language). Per language, ONE distinct jobs.id, split into $chunksPerLanguage chunk rows
+    // that share that SAME id but differ by password and cover a DISJOINT sub-range of the
+    // shared segment ids (see makeJobChunk()). Every dependent table added for T4 is seeded at
+    // the scope its own schema dictates:
+    //   - project-scoped (no id_job column): context_groups, project_metadata, file_references
+    //   - segment-scoped (no id_job column): segment_metadata, segment_notes,
+    //     segment_original_data
+    //   - job-scoped, shared across a job's chunks (no password column): segment_translation(s),
+    //     segment_translation_versions, segment_translations_splits, segment_revisions,
+    //     job_custom_payable_rates, qa_entries/qa_entry_comments, segment_translation_events,
+    //     comments (+ a notifications row keyed to the comment)
+    //   - job+password (per-chunk) scoped: job_metadata, qa_chunk_reviews,
+    //     chunk_completion_events, chunk_completion_updates, qa_archived_reports,
+    //     jobs_translators, jobs_stats, blacklist_files, outsource_confirmation,
+    //     revision_feedbacks
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @return array{
+     *   id_project:int,
+     *   id_file:int,
+     *   segment_ids:list<int>,
+     *   segment_first:int,
+     *   segment_last:int,
+     *   jobs:list<array{id_job:int,target:string,chunks:list<array{password:string,first:int,last:int}>}>
+     * }
+     */
+    public function makeEraseFixture(int $languages, int $chunksPerLanguage): array
+    {
+        if ($languages < 1 || $chunksPerLanguage < 1) {
+            throw new RuntimeException('makeEraseFixture requires $languages >= 1 and $chunksPerLanguage >= 1');
+        }
+
+        $project = $this->makeProject();
+        $idProject = $project['id'];
+
+        $file = $this->makeFile($idProject);
+        $idFile = $file['id'];
+
+        // Shared source segments: $chunksPerLanguage disjoint sub-ranges of 2 segments each,
+        // reused by every language's job (source content is language-independent).
+        $segmentsPerChunk = 2;
+        $segmentIds = [];
+        for ($i = 0; $i < $chunksPerLanguage * $segmentsPerChunk; $i++) {
+            $segment = $this->makeSegment($idFile);
+            $segmentIds[] = $segment['id'];
+            $this->makeSegmentMetadata($segment['id'], 'rsq_meta_key_' . $i, 'rsq_meta_value_' . $i);
+            $this->makeSegmentNote($segment['id'], 'rsq_internal_' . $i);
+            $this->makeSegmentOriginalData($segment['id']);
+        }
+
+        $chunkRanges = [];
+        for ($c = 0; $c < $chunksPerLanguage; $c++) {
+            $chunkRanges[$c] = [
+                $segmentIds[$c * $segmentsPerChunk],
+                $segmentIds[$c * $segmentsPerChunk + $segmentsPerChunk - 1],
+            ];
+        }
+
+        // Project-scoped dependents: shared across all languages, seeded once.
+        // id_segment is pinned to the first shared segment so the erase command's project-shared
+        // context_groups delete (WHERE id_project = :p AND id_segment BETWEEN segFirst AND segLast)
+        // reaches this row — a NULL id_segment would never match the range window.
+        $this->makeContextGroup($idProject, ['id_file' => $idFile, 'id_segment' => $segmentIds[0]]);
+        $this->makeProjectMetadata($idProject, 'rsq_project_key', 'rsq_project_value');
+        $this->makeFileReference($idProject, $idFile);
+
+        $jobs = [];
+        for ($l = 0; $l < $languages; $l++) {
+            $targetLang = sprintf('xx-%02d', $l);
+
+            // First chunk creates the job row (captures the AUTO_INCREMENT id).
+            $job = $this->makeJob($idProject, [
+                'job_first_segment' => $chunkRanges[0][0],
+                'job_last_segment'  => $chunkRanges[0][1],
+                'source'            => 'en-US',
+                'target'            => $targetLang,
+                'owner'             => 'rsq_owner_' . $l . '@example.test',
+            ]);
+            $idJob = $job['id'];
+
+            $this->makeFilesJob($idJob, $idFile);
+            $this->makeJobCustomPayableRate($idJob);
+
+            $chunks = [];
+            for ($c = 0; $c < $chunksPerLanguage; $c++) {
+                [$first, $last] = $chunkRanges[$c];
+                if ($c === 0) {
+                    $password = $job['password'];
+                } else {
+                    $password = substr(bin2hex(random_bytes(8)), 0, 12);
+                    $this->makeJobChunk($idJob, $idProject, $password, $first, $last, [
+                        'source' => 'en-US',
+                        'target' => $targetLang,
+                    ]);
+                }
+                $chunks[] = ['password' => $password, 'first' => $first, 'last' => $last];
+
+                // Job+password (per-chunk) scoped dependents.
+                $this->makeJobMetadata($idJob, $password, 'rsq_job_meta_key', 'rsq_job_meta_value');
+                $this->makeQaChunkReview($idProject, $idJob, $password);
+                $this->makeChunkCompletionEvent($idProject, $idJob, $password, $first, $last);
+                $this->makeChunkCompletionUpdate($idProject, $idJob, $password, $first, $last);
+                $this->makeQaArchivedReport($idProject, $idJob, $password, $first, $last, 1);
+                $this->makeJobsTranslator($idJob, $password, 1, 'rsq_translator_' . $l . '_' . $c . '@example.test', 'en-US', $targetLang);
+                $this->makeJobsStat($idJob, $password, 'NO_MATCH', 'en-US', $targetLang);
+                $this->makeBlacklistFile($idJob, $password, 1);
+                $this->makeOutsourceConfirmation($idJob, $password);
+                $this->makeRevisionFeedback($idJob, $password);
+            }
+
+            // Job-scoped dependents shared across the job's chunks (no password column) — one
+            // row per shared segment.
+            foreach ($segmentIds as $idSegment) {
+                $this->makeSegmentTranslation($idSegment, $idJob);
+                $this->makeSegmentTranslationVersion($idSegment, $idJob, 0);
+                $this->makeSegmentTranslationsSplit($idSegment, $idJob);
+                $this->makeSegmentRevision($idJob, $idSegment);
+            }
+
+            $category = $this->makeQaCategory('RsqEraseCat');
+            $entry = $this->makeQaEntry($segmentIds[0], $idJob, $category['id']);
+            $this->makeQaEntryComment($entry['id']);
+            $this->makeSegmentTranslationEvent($idJob, $segmentIds[0]);
+            $comment = $this->makeComment($idJob, $segmentIds[0]);
+            $this->makeNotification($comment['id']);
+
+            $jobs[] = ['id_job' => $idJob, 'target' => $targetLang, 'chunks' => $chunks];
+        }
+
+        return [
+            'id_project'    => $idProject,
+            'id_file'       => $idFile,
+            'segment_ids'   => $segmentIds,
+            'segment_first' => $segmentIds[0],
+            'segment_last'  => $segmentIds[count($segmentIds) - 1],
+            'jobs'          => $jobs,
+        ];
+    }
+
     /**
      * Seed-safe id-list DELETE cleanup (C-1, M-1, M-2). Deletes only builder-inserted /
      * explicitly-tracked rows, in reverse insertion order, on the per-test connection. NO

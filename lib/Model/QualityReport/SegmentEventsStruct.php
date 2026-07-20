@@ -14,7 +14,7 @@ use Model\DataAccess\IDaoStruct;
 
 /**
  * @property int $id_segment
- * @property string $translation
+ * @property string|null $translation
  * @property int $version_number
  * @property int $source_page
  */
@@ -25,9 +25,9 @@ class SegmentEventsStruct extends AbstractDaoObjectStruct implements IDaoStruct
      */
     protected int $id_segment;
     /**
-     * @var string
+     * @var string|null
      */
-    protected string $translation;
+    protected ?string $translation;
     /**
      * @var int
      */

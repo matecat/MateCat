@@ -33,6 +33,13 @@ parameters:
         - tests
         # Plugin test suites are not analyzed (submodule-agnostic glob)
         - plugins/*/tests/*
+        # internal_scripts task test suites are analyzed by the submodule's own phpstan.neon
+        # (bare level 8, no strict @throws checks). The root config's strict throw checks
+        # would flag every PHPUnit assertion, so exclude them here.
+        - internal_scripts/*/tests/* (?)
+        # Submodule vendor is gitignored (absent on CI); exclude so a local composer install
+        # inside the submodule doesn't flood the root scan with third-party errors.
+        - internal_scripts/*/vendor/* (?)
         # Legacy plugin: cannot be economically cleaned; intentionally not analyzed.
         # Its own phpstan-baseline.neon lives in the aligner submodule, unused by matecat.
         - plugins/aligner (?)

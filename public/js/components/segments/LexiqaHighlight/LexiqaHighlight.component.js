@@ -42,7 +42,10 @@ class LexiqaHighlight extends Component {
             segmentOpened &&
             warning &&
             warning.messages && (
-              <LexiqaTooltipInfo messages={warning.messages} />
+              <LexiqaTooltipInfo
+                messages={warning.messages}
+                onReplaceWord={this.props.replaceWordAt}
+              />
             )
           }
           isInteractiveContent={true}

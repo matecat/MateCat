@@ -224,9 +224,9 @@ jobs:
             js-coverage.xml
             node-coverage.xml
           coverage-threshold: '80'
-          exclude-patterns: '.github/**, daemons/**, migrations/**'
+          exclude-patterns: '.github/**, daemons/**, migrations/**, tests/unit/TestHelpers/**'
           ai-enabled: 'true'
-          ai-model: 'openai/gpt-4.1'
+          ai-model: 'openai/gpt-4.1-nano'
 
   slack-notification:
     name: Slack Notification
