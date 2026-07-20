@@ -28,7 +28,7 @@ module.exports = {
     './public/js/setTranslationUtil.js': { lines: 95 },
     './public/js/components/notificationsComponent/': { lines: 80 },
     './public/js/components/onBoarding/': { lines: 80 },
-    './public/js/components/createProject/': { lines: 50 },
+    './public/js/components/createProject/': { lines: 80 },
     './public/js/components/languageSelector/': { lines: 0 },
     './public/js/components/outsource/': { lines: 5 },
     './public/js/components/projects/': { lines: 45 },
