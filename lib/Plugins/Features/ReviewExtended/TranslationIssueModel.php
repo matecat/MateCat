@@ -24,6 +24,7 @@ use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
 use Throwable;
 use TypeError;
+use Utils\LQA\ChunkReviewJobLock;
 use Utils\Tools\Utils;
 
 class TranslationIssueModel
@@ -113,28 +114,32 @@ class TranslationIssueModel
      */
     public function editFrom(EntryStruct $oldStruct): EntryStruct
     {
-        $this->setDefaultIssueValues();
+        $chunkJobId = $this->chunk->id ?? throw new Exception('Missing chunk job id');
 
-        if (!empty($this->diff)) {
-            $this->saveDiff();
-        }
+        return ChunkReviewJobLock::run($chunkJobId, function () use ($oldStruct) {
+            $this->setDefaultIssueValues();
 
-        $this->issue->ensureStartAndStopPositionAreOrdered();
-        $this->applyIssueDefaults();
-        $this->entryDao->modifyEntry($this->issue);
+            if (!empty($this->diff)) {
+                $this->saveDiff();
+            }
 
-        // update score
-        $penaltyPointDiff = $this->issue->penalty_points - $oldStruct->penalty_points;
+            $this->issue->ensureStartAndStopPositionAreOrdered();
+            $this->applyIssueDefaults();
+            $this->entryDao->modifyEntry($this->issue);
 
-        $chunk_review_model = $this->createChunkReviewModel($this->chunk_review);
+            // update score
+            $penaltyPointDiff = $this->issue->penalty_points - $oldStruct->penalty_points;
 
-        if($penaltyPointDiff < 0){
-            $chunk_review_model->subtractPenaltyPoints(-$penaltyPointDiff, $this->project);
-        } elseif($penaltyPointDiff > 0){
-            $chunk_review_model->addPenaltyPoints($penaltyPointDiff, $this->project);
-        }
+            $chunk_review_model = $this->createChunkReviewModel($this->chunk_review);
 
-        return $this->issue;
+            if($penaltyPointDiff < 0){
+                $chunk_review_model->subtractPenaltyPoints(-$penaltyPointDiff, $this->project);
+            } elseif($penaltyPointDiff > 0){
+                $chunk_review_model->addPenaltyPoints($penaltyPointDiff, $this->project);
+            }
+
+            return $this->issue;
+        });
     }
 
 
@@ -148,20 +153,24 @@ class TranslationIssueModel
      */
     public function save(): EntryStruct
     {
-        $this->setDefaultIssueValues();
+        $chunkJobId = $this->chunk->id ?? throw new Exception('Missing chunk job id');
 
-        if (!empty($this->diff)) {
-            $this->saveDiff();
-        }
+        return ChunkReviewJobLock::run($chunkJobId, function () {
+            $this->setDefaultIssueValues();
 
-        $this->issue->ensureStartAndStopPositionAreOrdered();
-        $this->applyIssueDefaults();
-        $this->entryDao->createEntry($this->issue);
+            if (!empty($this->diff)) {
+                $this->saveDiff();
+            }
 
-        $chunk_review_model = $this->createChunkReviewModel($this->chunk_review);
-        $chunk_review_model->addPenaltyPoints($this->issue->penalty_points ?? 0.0, $this->project);
+            $this->issue->ensureStartAndStopPositionAreOrdered();
+            $this->applyIssueDefaults();
+            $this->entryDao->createEntry($this->issue);
 
-        return $this->issue;
+            $chunk_review_model = $this->createChunkReviewModel($this->chunk_review);
+            $chunk_review_model->addPenaltyPoints($this->issue->penalty_points ?? 0.0, $this->project);
+
+            return $this->issue;
+        });
     }
 
     /**
@@ -232,44 +241,31 @@ class TranslationIssueModel
      */
     public function delete(): void
     {
-        $this->entryDao->deleteEntry($this->issue);
-
-        //
-        // ---------------------------------------------------
-        // Note 2020-06-24
-        // ---------------------------------------------------
-        //
-        // $this->chunkReview may not refer to the chunk review associated to issue source page
-        //
         $chunkJobId = $this->chunk->id ?? throw new Exception('Missing chunk job id');
-        $chunkPassword = $this->chunk->password ?? throw new Exception('Missing chunk password');
-        $chunkReview = $this->chunkReviewDao->findByIdJobAndPasswordAndSourcePage($chunkJobId, $chunkPassword, $this->issue->source_page);
 
-        if ($chunkReview === null) {
-            throw new Exception('ChunkReview not found for delete operation');
-        }
-        $chunk_review_model = $this->createChunkReviewModel($chunkReview);
-        $this->subtractPenaltyPoints($chunk_review_model);
+        ChunkReviewJobLock::run($chunkJobId, function () use ($chunkJobId) {
+            $this->entryDao->deleteEntry($this->issue);
+
+            //
+            // ---------------------------------------------------
+            // Note 2020-06-24
+            // ---------------------------------------------------
+            //
+            // $this->chunkReview may not refer to the chunk review associated to issue source page
+            //
+            $chunkPassword = $this->chunk->password ?? throw new Exception('Missing chunk password');
+            $chunkReview = $this->chunkReviewDao->findByIdJobAndPasswordAndSourcePage($chunkJobId, $chunkPassword, $this->issue->source_page);
+
+            if ($chunkReview === null) {
+                throw new Exception('ChunkReview not found for delete operation');
+            }
+            $chunk_review_model = $this->createChunkReviewModel($chunkReview);
+            $chunk_review_model->subtractPenaltyPoints($this->issue->penalty_points ?? 0.0, $this->project);
+        });
     }
 
     protected function createChunkReviewModel(ChunkReviewStruct $chunkReview): ChunkReviewModel
     {
         return new ChunkReviewModel($chunkReview, $this->chunkReviewDao->getDatabaseHandler());
-    }
-
-    /**
-     * Check if penalty points are >= 0
-     * to avoid to persist negative values
-     *
-     * @param ChunkReviewModel $chunk_review_model
-     *
-     * @throws Exception
-     */
-    protected function subtractPenaltyPoints(ChunkReviewModel $chunk_review_model): void
-    {
-        $penaltyPoints = $this->issue->penalty_points ?? 0.0;
-        if (($chunk_review_model->getPenaltyPoints() - $penaltyPoints) >= 0) {
-            $chunk_review_model->subtractPenaltyPoints($penaltyPoints, $this->project);
-        }
     }
 }

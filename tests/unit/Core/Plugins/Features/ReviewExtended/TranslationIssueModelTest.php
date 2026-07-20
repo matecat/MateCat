@@ -321,8 +321,6 @@ class TranslationIssueModelTest extends AbstractTest
     {
         $issue = $this->makeIssue(['source_page' => 2, 'penalty_points' => 5.0]);
 
-        $this->chunkReviewModel->method('getPenaltyPoints')->willReturn(10.0);
-
         $this->entryDao->expects($this->once())
             ->method('deleteEntry')
             ->with($issue);
@@ -341,18 +339,20 @@ class TranslationIssueModelTest extends AbstractTest
     }
 
     #[Test]
-    public function deleteSkipsSubtractWhenPenaltyWouldGoNegative(): void
+    public function deleteCallsSubtractEvenWhenPenaltyWouldExceedCurrentTotal(): void
     {
+        // The chunk review's current total (10.0) is lower than this issue's own penalty
+        // (15.0). The DAO's atomic SQL update clamps at zero on its own (GREATEST(...,0)),
+        // so the model must always subtract rather than pre-checking and skipping.
         $issue = $this->makeIssue(['source_page' => 2, 'penalty_points' => 15.0]);
-
-        $this->chunkReviewModel->method('getPenaltyPoints')->willReturn(10.0);
 
         $this->chunkReviewDao
             ->method('findByIdJobAndPasswordAndSourcePage')
             ->willReturn($this->chunkReview);
 
-        $this->chunkReviewModel->expects($this->never())
-            ->method('subtractPenaltyPoints');
+        $this->chunkReviewModel->expects($this->once())
+            ->method('subtractPenaltyPoints')
+            ->with(15.0, $this->project);
 
         $model = $this->makeModel($issue);
         $model->delete();

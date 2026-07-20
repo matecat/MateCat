@@ -314,6 +314,62 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
     }
 
     #[Test]
+    public function findPenaltyPointsMismatches_flags_only_the_drifted_source_page(): void
+    {
+        // The shared fixture already drifted: REVISION's qa_chunk_reviews.penalty_points is the
+        // struct default (0) while its qa_entries sum to 5; REVISION_2 has no entries, so 0 == 0.
+        $mismatches = $this->dao->findPenaltyPointsMismatches();
+
+        $revisionMismatch = null;
+        foreach ($mismatches as $row) {
+            if ($row['id_job'] === $this->idJob && $row['source_page'] === SourcePages::SOURCE_PAGE_REVISION) {
+                $revisionMismatch = $row;
+            }
+            $this->assertFalse(
+                $row['id_job'] === $this->idJob && $row['source_page'] === SourcePages::SOURCE_PAGE_REVISION_2,
+                'REVISION_2 has no qa_entries and recorded 0, so it must not be reported as a mismatch'
+            );
+        }
+
+        $this->assertNotNull($revisionMismatch, 'Expected the seeded REVISION drift to be reported');
+        $this->assertSame(0.0, (float)$revisionMismatch['recorded_penalty_points']);
+        $this->assertSame(5.0, (float)$revisionMismatch['actual_penalty_points']);
+        $this->assertSame($this->jobPassword, $revisionMismatch['password']);
+    }
+
+    #[Test]
+    public function findPenaltyPointsMismatches_excludes_a_row_once_it_matches(): void
+    {
+        $job = $this->fixtures->makeJob($this->idProject, [
+            'password' => 'match_pwd',
+            'job_first_segment' => $this->idSegment,
+            'job_last_segment' => $this->idSegment,
+        ]);
+        $this->fixtures->makeQaChunkReview($this->idProject, $job['id'], 'match_pwd', [
+            'source_page' => SourcePages::SOURCE_PAGE_REVISION,
+        ]);
+        $this->realSqlDb()->getConnection()->exec(
+            "UPDATE qa_chunk_reviews SET penalty_points = 0 WHERE id_job = {$job['id']}"
+        );
+
+        foreach ($this->dao->findPenaltyPointsMismatches() as $row) {
+            $this->assertNotSame($job['id'], $row['id_job'], 'a row with no drift must not be reported');
+        }
+    }
+
+    #[Test]
+    public function findPenaltyPointsMismatches_respects_the_min_job_id_filter(): void
+    {
+        $allMismatches = $this->dao->findPenaltyPointsMismatches();
+        $this->assertNotEmpty($allMismatches, 'sanity check: the shared fixture drift must be present');
+
+        $filtered = $this->dao->findPenaltyPointsMismatches($this->idJob);
+        foreach ($filtered as $row) {
+            $this->assertGreaterThan($this->idJob, $row['id_job']);
+        }
+    }
+
+    #[Test]
     public function countTimeToEdit_sum_and_zero_when_no_rows(): void
     {
         $this->assertSame(
@@ -415,9 +471,9 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
     }
 
     #[Test]
-    public function passFailCountsAtomicUpdate_returns_early_when_no_qa_model(): void
+    public function passFailCountsAtomicUpdate_writes_counters_but_skips_is_pass_when_no_qa_model(): void
     {
-        // project without a qa model -> lqaModel null -> no INSERT.
+        // project without a qa model -> lqaModel null -> counters still write, is_pass stays NULL.
         $project = $this->fixtures->makeProjectDetailed();
         $job = $this->fixtures->makeJob($project['id'], ['password' => 'pf_null', 'owner' => $this->ownerEmail]);
 
@@ -429,14 +485,21 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
         $chunkReview->source_page = SourcePages::SOURCE_PAGE_REVISION;
 
         $chunkReviewId = self::ASSIGNABLE_ID_FLOOR + 7001;
+        $this->fixtures->trackExisting('qa_chunk_reviews', ['id' => $chunkReviewId]);
+
         $this->dao->passFailCountsAtomicUpdate($chunkReviewId, [
             'chunkReview'          => $chunkReview,
+            'penalty_points'       => 5,
             'reviewed_words_count' => 100,
             'total_tte'            => 500,
         ]);
 
-        // early return -> nothing written.
-        $this->assertNull($this->dao->findById($chunkReviewId));
+        $row = $this->dao->findById($chunkReviewId);
+        $this->assertInstanceOf(ChunkReviewStruct::class, $row);
+        $this->assertSame(5.0, $row->penalty_points);
+        $this->assertSame(100, $row->reviewed_words_count);
+        $this->assertSame(500, $row->total_tte);
+        $this->assertNull($row->is_pass);
     }
 
     #[Test]
