@@ -136,6 +136,12 @@ yarn build:production  # Production build
 
 Do not add Co-Authored-By trailers to commit messages.
 
+Do not add any reference to AI or AI tooling anywhere — commit messages, PR titles/bodies, code,
+comments, or docs. This includes footers/signatures (`🤖 Generated with Claude Code`, `Co-Authored-By`
+AI trailers), "generated/assisted by" lines, and tool names. The ONLY exception: when the user
+explicitly requests it, place it solely in the section designated for that purpose and follow that
+section's rules (for example, the PR template's AI Disclosure section).
+
 Follow the `.github/PULL_REQUEST_TEMPLATE.md` AND the `.github/scripts/pr-readiness-check.js` when creating a Pull
 Request.
 

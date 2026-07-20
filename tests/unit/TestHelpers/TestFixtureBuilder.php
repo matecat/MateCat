@@ -201,6 +201,9 @@ class TestFixtureBuilder
         if (isset($overrides['id_assignee'])) {
             $values['id_assignee'] = (int)$overrides['id_assignee'];
         }
+        if (isset($overrides['remote_ip_address'])) {
+            $values['remote_ip_address'] = (string)$overrides['remote_ip_address'];
+        }
         $id = $this->insertAi('projects', 'id', $values);
 
         return ['id' => $id];
@@ -233,6 +236,9 @@ class TestFixtureBuilder
         if (isset($overrides['owner'])) {
             $values['owner'] = (string)$overrides['owner'];
         }
+        if (isset($overrides['id_translator'])) {
+            $values['id_translator'] = (string)$overrides['id_translator'];
+        }
         $id = $this->insertAi('jobs', 'id', $values);
 
         return [
@@ -242,6 +248,52 @@ class TestFixtureBuilder
             'job_first_segment' => $first,
             'job_last_segment'  => $last,
         ];
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // activity_log (AUTO_INCREMENT ID; composite PK (ID, event_date)) — added for
+    // UserGDPRAnonymizeTask real-SQL tests. Additive: no existing signature changes.
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @param array<string,int|string|null> $overrides
+     * @return array{ID:int,uid:int,ip:string}
+     */
+    public function makeActivityLog(int $uid, string $ip, array $overrides = []): array
+    {
+        $values = [
+            'action' => (int)($overrides['action'] ?? 1),
+            'ip'     => $ip,
+            'uid'    => $uid,
+        ];
+        if (array_key_exists('id_project', $overrides)) {
+            $values['id_project'] = $overrides['id_project'];
+        }
+        if (array_key_exists('id_job', $overrides)) {
+            $values['id_job'] = $overrides['id_job'];
+        }
+        $id = $this->insertAi('activity_log', 'ID', $values);
+
+        return ['ID' => $id, 'uid' => $uid, 'ip' => $ip];
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // user_metadata (AUTO_INCREMENT id; UNIQUE(uid, key)) — added for UserGDPRAnonymizeTask
+    // real-SQL tests. Additive: no existing signature changes.
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * @return array{id:int,uid:int,key:string,value:string}
+     */
+    public function makeUserMetadata(int $uid, string $key, string $value): array
+    {
+        $id = $this->insertAi('user_metadata', 'id', [
+            'uid'   => $uid,
+            'key'   => $key,
+            'value' => $value,
+        ]);
+
+        return ['id' => $id, 'uid' => $uid, 'key' => $key, 'value' => $value];
     }
 
     // ---------------------------------------------------------------------------------------
