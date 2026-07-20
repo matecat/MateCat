@@ -99,7 +99,7 @@ export const ShareResource = ({row, onClose, onShare}) => {
 
   const openShareTmModal = () => {
     const props = {
-      description: row.description,
+      description: row.name,
       tmKey: row.key,
       user: userInfo.user,
       users: sharedUsers,
