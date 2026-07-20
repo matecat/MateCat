@@ -425,7 +425,7 @@ class ChunkReviewDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function passFailCountsAtomicUpdateReturnsEarlyWhenLqaModelIsNull(): void
+    public function passFailCountsAtomicUpdateSkipsIsPassClauseWhenLqaModelIsNull(): void
     {
         $projectStub = $this->createStub(ProjectStruct::class);
         $projectStub->id_qa_model = null;
@@ -436,16 +436,23 @@ class ChunkReviewDaoTest extends AbstractTest
         $chunkReview = $this->createStub(ChunkReviewStruct::class);
         $chunkReview->method('getChunk')->willReturn($chunkStub);
         $chunkReview->source_page = 2;
+        $chunkReview->id_job = 5;
+        $chunkReview->id_project = 1;
+        $chunkReview->password = 'p';
+        $chunkReview->review_password = 'rp';
 
         $stmtMock = $this->createMock(PDOStatement::class);
         $stmtMock->queryString = '';
-        $stmtMock->expects($this->never())->method('execute');
+        $stmtMock->expects($this->once())->method('execute')->willReturn(true);
 
-        $pdoStub = $this->createStub(PDO::class);
-        $pdoStub->method('prepare')->willReturn($stmtMock);
+        $pdoMock = $this->createMock(PDO::class);
+        $pdoMock->expects($this->once())
+            ->method('prepare')
+            ->with($this->logicalNot($this->stringContains('is_pass')))
+            ->willReturn($stmtMock);
 
         $dbStub = $this->createStub(IDatabase::class);
-        $dbStub->method('getConnection')->willReturn($pdoStub);
+        $dbStub->method('getConnection')->willReturn($pdoMock);
 
         $this->setDatabaseInstance($dbStub);
 
@@ -588,6 +595,69 @@ class ChunkReviewDaoTest extends AbstractTest
         $dao = new ChunkReviewDao($this->dbStub);
         $result = $dao->destroyCacheForJobIdReviewPasswordAndSourcePage(10, 'rev', 2);
         $this->assertIsBool($result);
+    }
+
+    #[Test]
+    public function destroyCachesForBustsFindByProjectIdAndReviewPasswordCaches(): void
+    {
+        $chunkReview = new ChunkReviewStruct();
+        $chunkReview->id_job = 42;
+        $chunkReview->id_project = 7;
+        $chunkReview->password = 'chunk_pw';
+        $chunkReview->review_password = 'rev_pw';
+        $chunkReview->source_page = 2;
+
+        $dao = $this->getMockBuilder(ChunkReviewDao::class)
+            ->setConstructorArgs([$this->dbStub])
+            ->onlyMethods([
+                'destroyCacheForFindChunkReviews',
+                'destroyCacheByProjectId',
+                'destroyCacheForJobIdReviewPasswordAndSourcePage',
+            ])
+            ->getMock();
+
+        $dao->expects($this->once())
+            ->method('destroyCacheForFindChunkReviews')
+            ->with($this->callback(fn(JobStruct $chunk) => $chunk->id === 42 && $chunk->password === 'chunk_pw'))
+            ->willReturn(true);
+
+        $dao->expects($this->once())
+            ->method('destroyCacheByProjectId')
+            ->with(7)
+            ->willReturn(true);
+
+        $dao->expects($this->once())
+            ->method('destroyCacheForJobIdReviewPasswordAndSourcePage')
+            ->with(42, 'rev_pw', 2)
+            ->willReturn(true);
+
+        $dao->destroyCachesFor($chunkReview);
+    }
+
+    #[Test]
+    public function destroyCachesForSkipsReviewPasswordCacheWhenNull(): void
+    {
+        $chunkReview = new ChunkReviewStruct();
+        $chunkReview->id_job = 42;
+        $chunkReview->id_project = 7;
+        $chunkReview->password = 'chunk_pw';
+        $chunkReview->review_password = null;
+        $chunkReview->source_page = 2;
+
+        $dao = $this->getMockBuilder(ChunkReviewDao::class)
+            ->setConstructorArgs([$this->dbStub])
+            ->onlyMethods([
+                'destroyCacheForFindChunkReviews',
+                'destroyCacheByProjectId',
+                'destroyCacheForJobIdReviewPasswordAndSourcePage',
+            ])
+            ->getMock();
+
+        $dao->method('destroyCacheForFindChunkReviews')->willReturn(true);
+        $dao->method('destroyCacheByProjectId')->willReturn(true);
+        $dao->expects($this->never())->method('destroyCacheForJobIdReviewPasswordAndSourcePage');
+
+        $dao->destroyCachesFor($chunkReview);
     }
 
     // ──────────────────────────────────────────────────────────────

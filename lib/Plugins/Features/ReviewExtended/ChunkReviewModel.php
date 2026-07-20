@@ -139,6 +139,7 @@ class ChunkReviewModel implements IChunkReviewModel
     {
         $chunkReviewDao = new ChunkReviewDao($this->database);
         $chunkReviewDao->passFailCountsAtomicUpdate((int)$this->chunk_review->id, $data);
+        $chunkReviewDao->destroyCachesFor($this->chunk_review);
 
         FeatureSet::forProject($project, $this->database)->dispatch(new ChunkReviewUpdatedEvent(
             $this->chunk_review,
@@ -188,7 +189,8 @@ class ChunkReviewModel implements IChunkReviewModel
             $this->chunk_review->is_pass = true;
         }
 
-        $update_result = (new ChunkReviewDao($this->database))->updateStruct($this->chunk_review, [
+        $chunkReviewDao = new ChunkReviewDao($this->database);
+        $update_result = $chunkReviewDao->updateStruct($this->chunk_review, [
                 'fields' => [
                     'reviewed_words_count',
                     'is_pass',
@@ -197,6 +199,7 @@ class ChunkReviewModel implements IChunkReviewModel
                 ]
             ]
         );
+        $chunkReviewDao->destroyCachesFor($this->chunk_review);
 
         // External call by Plugins
         FeatureSet::forProject($project, $this->database)->dispatch(new ChunkReviewUpdatedEvent(

@@ -1,0 +1,29 @@
+<p>
+    Hi, you receive this alert from the QA chunk review penalty points consistency check.
+</p>
+<p>
+    <?= count($mismatches) ?> qa_chunk_reviews row(s) have a recorded penalty_points value that
+    does not match the live sum of qa_entries.penalty_points for the same job/source_page.
+</p>
+<table border="1" cellpadding="4" cellspacing="0">
+    <tr>
+        <th>chunk_review id</th>
+        <th>id_job</th>
+        <th>source_page</th>
+        <th>recorded</th>
+        <th>actual</th>
+    </tr>
+    <?php foreach ($mismatches as $row): ?>
+    <tr>
+        <td><?= $row['id'] ?></td>
+        <td><?= $row['id_job'] ?></td>
+        <td><?= $row['source_page'] ?></td>
+        <td><?= $row['recorded_penalty_points'] ?></td>
+        <td><?= $row['actual_penalty_points'] ?></td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+<p>
+    Run <code>revision:recount-drifted --dry-run</code> to review, or without <code>--dry-run</code>
+    to repair, via <code>internal_scripts/tasks/CommandLineTasks/SecondPassReview/FixChunkReviewPenaltyPointsDrift.php</code>.
+</p>

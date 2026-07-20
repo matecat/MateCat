@@ -201,7 +201,9 @@ class QualityReportModel
      */
     protected function updateChunkReview(ChunkReviewStruct $chunkReview, array $options): void
     {
-        (new ChunkReviewDao($this->database))->updateStruct($chunkReview, $options);
+        $chunkReviewDao = new ChunkReviewDao($this->database);
+        $chunkReviewDao->updateStruct($chunkReview, $options);
+        $chunkReviewDao->destroyCachesFor($chunkReview);
     }
 
     /**

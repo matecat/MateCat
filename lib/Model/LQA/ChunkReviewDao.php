@@ -171,6 +171,48 @@ class ChunkReviewDao extends AbstractDao
     }
 
     /**
+     * Finds qa_chunk_reviews rows whose recorded penalty_points has drifted away from the true
+     * live sum of qa_entries.penalty_points (non-deleted, same job/source_page). Used by the
+     * standing consistency check and the batch repair CLI task — both need the same identity
+     * (id, id_job, password, source_page) plus the recorded vs. actual values for reporting.
+     *
+     * @return array<int, array{id:int,id_job:int,password:string,source_page:int,recorded_penalty_points:float,actual_penalty_points:float}>
+     * @throws PDOException
+     */
+    public function findPenaltyPointsMismatches(?int $minJobId = null): array
+    {
+        $sql = "SELECT
+                r.id,
+                r.id_job,
+                r.password,
+                r.source_page,
+                COALESCE(r.penalty_points, 0) AS recorded_penalty_points,
+                COALESCE(SUM(e.penalty_points), 0) AS actual_penalty_points
+            FROM qa_chunk_reviews r
+            JOIN jobs j ON j.id = r.id_job AND j.password = r.password
+            LEFT JOIN qa_entries e
+                ON e.id_job = j.id
+                AND e.id_segment >= j.job_first_segment
+                AND e.id_segment <= j.job_last_segment
+                AND e.source_page = r.source_page
+                AND e.deleted_at IS NULL
+            " . ($minJobId !== null ? "WHERE r.id_job > :min_job_id " : "") . "
+            GROUP BY r.id
+            HAVING ROUND(actual_penalty_points, 2) != ROUND(recorded_penalty_points, 2)
+            ORDER BY r.id_job, r.source_page
+        ";
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($minJobId !== null ? ['min_job_id' => $minJobId] : []);
+
+        /** @var array<int, array{id:int,id_job:int,password:string,source_page:int,recorded_penalty_points:float,actual_penalty_points:float}> $rows */
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $rows;
+    }
+
+    /**
      * @throws PDOException
      */
     public function countTimeToEdit(JobStruct $chunk, int $source_page): int
@@ -494,6 +536,32 @@ class ChunkReviewDao extends AbstractDao
         ]);
     }
 
+    /**
+     * Invalidates every Redis-cached read that can serve a stale penalty_points/is_pass/
+     * counters value for this chunk review. None of the counter/pass-fail write paths
+     * (passFailCountsAtomicUpdate, or updateStruct as used by recountAndUpdatePassFailResult/
+     * resetScore/alterChunkReviewStruct) bust these caches on their own, so callers that mutate
+     * a chunk review's counters must call this afterward.
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function destroyCachesFor(ChunkReviewStruct $chunkReview): void
+    {
+        $chunk = new JobStruct(['id' => $chunkReview->id_job, 'password' => $chunkReview->password]);
+
+        $this->destroyCacheForFindChunkReviews($chunk);
+        $this->destroyCacheByProjectId($chunkReview->id_project);
+
+        if ($chunkReview->review_password !== null) {
+            $this->destroyCacheForJobIdReviewPasswordAndSourcePage(
+                $chunkReview->id_job,
+                $chunkReview->review_password,
+                $chunkReview->source_page
+            );
+        }
+    }
+
 
     /**
      * @param int $id_job
@@ -604,16 +672,25 @@ class ChunkReviewDao extends AbstractDao
         $chunkReview = $data['chunkReview'];
         $project = $chunkReview->getChunk(new JobDao($this->database))->getProject(new ProjectDao($this->database));
         $lqaModel = $project->id_qa_model !== null ? (new ModelDao($this->database))->findById($project->id_qa_model) : null;
-        if ($lqaModel === null) {
-            return;
-        }
-        $data['force_pass_at'] = ReviewUtils::filterLQAModelLimit($lqaModel, $chunkReview->source_page);
 
         // in MySQL a sum of a null value to an integer returns 0
-        // in MySQL, division by zero returns NULL, so we have to coalesce null values from is_pass division
-        $sql = "INSERT INTO 
-            qa_chunk_reviews ( id, id_job, id_project, password, review_password, penalty_points, reviewed_words_count, total_tte ) 
-        VALUES( 
+        $setClauses = [
+            "penalty_points = GREATEST( COALESCE( penalty_points, 0 ) + COALESCE( VALUES( penalty_points ), 0 ), 0 )",
+            "reviewed_words_count = GREATEST( reviewed_words_count + VALUES( reviewed_words_count ), 0 )",
+            "total_tte = GREATEST( total_tte + VALUES( total_tte ), 0 )",
+        ];
+
+        // is_pass needs a project LQA model to resolve force_pass_at; without one, the counters
+        // above still get updated but is_pass is left untouched (NULL by schema default).
+        if ($lqaModel !== null) {
+            $forcePassAt = ReviewUtils::filterLQAModelLimit($lqaModel, $chunkReview->source_page);
+            // in MySQL, division by zero returns NULL, so we have to coalesce null values from is_pass division
+            $setClauses[] = "is_pass = IF( COALESCE( penalty_points / reviewed_words_count * 1000, 0 ) <= {$forcePassAt}, 1, 0 )";
+        }
+
+        $sql = "INSERT INTO
+            qa_chunk_reviews ( id, id_job, id_project, password, review_password, penalty_points, reviewed_words_count, total_tte )
+        VALUES(
             :id,
             :id_job,
             :id_project,
@@ -623,16 +700,7 @@ class ChunkReviewDao extends AbstractDao
             :reviewed_words_count,
             :total_tte
         ) ON DUPLICATE KEY UPDATE
-        penalty_points = GREATEST( COALESCE( penalty_points, 0 ) + COALESCE( VALUES( penalty_points ), 0 ), 0 ),
-        reviewed_words_count = GREATEST( reviewed_words_count + VALUES( reviewed_words_count ), 0 ),
-        total_tte = GREATEST( total_tte + VALUES( total_tte ), 0 ),        
-        is_pass = IF( 
-				COALESCE(
-					penalty_points
-					/ reviewed_words_count * 1000 
-					, 0
-				) <= {$data[ 'force_pass_at' ]}, 1, 0
-		);";
+        " . implode(",\n        ", $setClauses) . ";";
 
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);

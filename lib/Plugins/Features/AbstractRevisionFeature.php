@@ -40,6 +40,7 @@ use RuntimeException;
 use TypeError;
 use Utils\Constants\SourcePages;
 use Utils\Logger\LoggerFactory;
+use Utils\LQA\ChunkReviewJobLock;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -251,40 +252,43 @@ abstract class AbstractRevisionFeature extends BaseFeature
          */
 
         $id_job = $projectStructure->jobToSplit ?? throw new RuntimeException('Job id is required when splitting a job');
-        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
-        $previousRevisionRecords = $chunkReviewDao->findByIdJob($id_job);
-        $project = $this->getProjectDao()->findById($projectStructure->idProject, 86400)
-            ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
 
-        $chunkReviewDao->deleteByJobId($id_job);
+        ChunkReviewJobLock::run($id_job, function () use ($id_job, $projectStructure) {
+            $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
+            $previousRevisionRecords = $chunkReviewDao->findByIdJob($id_job);
+            $project = $this->getProjectDao()->findById($projectStructure->idProject, 86400)
+                ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
 
-        $jobDao = new JobDao($this->getDatabase());
-        $chunksStructArray = $jobDao->getNotDeletedById($id_job);
+            $chunkReviewDao->deleteByJobId($id_job);
 
-        $reviews = [];
-        foreach ($previousRevisionRecords as $review) {
-            // check if $review belongs to a deleted job
-            $chunk = $jobDao->getByIdAndPassword($review->id_job, $review->password);
+            $jobDao = new JobDao($this->getDatabase());
+            $chunksStructArray = $jobDao->getNotDeletedById($id_job);
 
-            if ($chunk !== null && !$chunk->isDeleted()) {
-                $reviews = array_merge(
-                    $reviews,
-                    $this->createQaChunkReviewRecords(
-                        $chunksStructArray,
-                        $project,
-                        [
-                            'first_record_password' => $review->review_password,
-                            'source_page' => $review->source_page
-                        ]
-                    )
-                );
+            $reviews = [];
+            foreach ($previousRevisionRecords as $review) {
+                // check if $review belongs to a deleted job
+                $chunk = $jobDao->getByIdAndPassword($review->id_job, $review->password);
+
+                if ($chunk !== null && !$chunk->isDeleted()) {
+                    $reviews = array_merge(
+                        $reviews,
+                        $this->createQaChunkReviewRecords(
+                            $chunksStructArray,
+                            $project,
+                            [
+                                'first_record_password' => $review->review_password,
+                                'source_page' => $review->source_page
+                            ]
+                        )
+                    );
+                }
             }
-        }
 
-        foreach ($reviews as $review) {
-            $model = new ChunkReviewModel($review, $this->getDatabase());
-            $model->recountAndUpdatePassFailResult($project);
-        }
+            foreach ($reviews as $review) {
+                $model = new ChunkReviewModel($review, $this->getDatabase());
+                $model->recountAndUpdatePassFailResult($project);
+            }
+        }, 10);
     }
 
     /**
@@ -299,44 +303,47 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $projectStructure = $event->data;
 
         $id_job = $projectStructure->jobToMerge ?? throw new RuntimeException('Job id is required when merging jobs');
-        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
-        $old_reviews = $chunkReviewDao->findByIdJob($id_job);
-        $project = $this->getProjectDao()->findById($projectStructure->idProject, 86400)
-            ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
 
-        $reviewGroupedData = [];
+        ChunkReviewJobLock::run($id_job, function () use ($id_job, $projectStructure) {
+            $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
+            $old_reviews = $chunkReviewDao->findByIdJob($id_job);
+            $project = $this->getProjectDao()->findById($projectStructure->idProject, 86400)
+                ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
 
-        foreach ($old_reviews as $review) {
-            if (!isset($reviewGroupedData[$review->source_page])) {
-                $reviewGroupedData[$review->source_page] = [
-                    'first_record_password' => $review->review_password
-                ];
+            $reviewGroupedData = [];
+
+            foreach ($old_reviews as $review) {
+                if (!isset($reviewGroupedData[$review->source_page])) {
+                    $reviewGroupedData[$review->source_page] = [
+                        'first_record_password' => $review->review_password
+                    ];
+                }
             }
-        }
 
-        $chunkReviewDao->deleteByJobId($id_job);
+            $chunkReviewDao->deleteByJobId($id_job);
 
-        $chunksStructArray = (new JobDao($this->getDatabase()))->getNotDeletedById($id_job);
+            $chunksStructArray = (new JobDao($this->getDatabase()))->getNotDeletedById($id_job);
 
-        $reviews = [];
-        foreach ($reviewGroupedData as $source_page => $data) {
-            $reviews = array_merge(
-                $reviews,
-                $this->createQaChunkReviewRecords(
-                    $chunksStructArray,
-                    $project,
-                    [
-                        'first_record_password' => $data['first_record_password'],
-                        'source_page' => $source_page
-                    ]
-                )
-            );
-        }
+            $reviews = [];
+            foreach ($reviewGroupedData as $source_page => $data) {
+                $reviews = array_merge(
+                    $reviews,
+                    $this->createQaChunkReviewRecords(
+                        $chunksStructArray,
+                        $project,
+                        [
+                            'first_record_password' => $data['first_record_password'],
+                            'source_page' => $source_page
+                        ]
+                    )
+                );
+            }
 
-        foreach ($reviews as $review) {
-            $model = new ChunkReviewModel($review, $this->getDatabase());
-            $model->recountAndUpdatePassFailResult($project);
-        }
+            foreach ($reviews as $review) {
+                $model = new ChunkReviewModel($review, $this->getDatabase());
+                $model->recountAndUpdatePassFailResult($project);
+            }
+        }, 10);
     }
 
     /**
@@ -376,7 +383,8 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $review->reviewed_words_count = $undo_data['reviewed_words_count'];
         $review->undo_data = null;
 
-        (new ChunkReviewDao($this->getDatabase()))->updateStruct($review, [
+        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
+        $chunkReviewDao->updateStruct($review, [
             'fields' => [
                 'is_pass',
                 'penalty_points',
@@ -384,6 +392,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
                 'undo_data'
             ]
         ]);
+        $chunkReviewDao->destroyCachesFor($review);
 
         LoggerFactory::doJsonLog("CompletionEventController deleting event: " . var_export($struct->getArrayCopy(), true));
     }
