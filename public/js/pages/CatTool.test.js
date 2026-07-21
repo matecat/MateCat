@@ -422,6 +422,7 @@ describe('CatTool', () => {
         character_counter_count_tags: false,
         character_counter_mode: null,
         subfiltering_handlers: [],
+        mandatory_issues,
       },
       project: {
         mandatory_issues,
