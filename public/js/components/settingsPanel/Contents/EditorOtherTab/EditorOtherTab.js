@@ -3,6 +3,7 @@ import {CharacterCounterRules} from '../OtherTab/CharacterCounterRules'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {updateJobMetadata} from '../../../../api/updateJobMetadata'
 import {Tagging} from '../OtherTab/Tagging'
+import {MandatoryIssues} from '../OtherTab/MandatoryIssues'
 
 export const EditorOtherTab = () => {
   const {currentProjectTemplate, tmKeys} = useContext(SettingsPanelContext)
@@ -18,13 +19,16 @@ export const EditorOtherTab = () => {
         previousCurrentProjectTemplate.current.characterCounterMode !==
           currentProjectTemplate?.characterCounterMode ||
         previousCurrentProjectTemplate.current.subfilteringHandlers !==
-          currentProjectTemplate?.subfilteringHandlers)
+          currentProjectTemplate?.subfilteringHandlers ||
+        previousCurrentProjectTemplate.current.mandatoryIssues !==
+          currentProjectTemplate?.mandatoryIssues)
     ) {
       updateJobMetadata({
         characterCounterCountTags:
           currentProjectTemplate.characterCounterCountTags,
         characterCounterMode: currentProjectTemplate.characterCounterMode,
         subfilteringHandlers: currentProjectTemplate.subfilteringHandlers,
+        mandatoryIssues: currentProjectTemplate.mandatoryIssues,
       })
     }
 
@@ -33,11 +37,13 @@ export const EditorOtherTab = () => {
         currentProjectTemplate?.characterCounterCountTags,
       characterCounterMode: currentProjectTemplate?.characterCounterMode,
       subfilteringHandlers: currentProjectTemplate?.subfilteringHandlers,
+      mandatoryIssues: currentProjectTemplate?.mandatoryIssues,
     }
   }, [
     currentProjectTemplate?.characterCounterCountTags,
     currentProjectTemplate?.characterCounterMode,
     currentProjectTemplate?.subfilteringHandlers,
+    currentProjectTemplate?.mandatoryIssues,
     tmKeys,
   ])
 
@@ -46,6 +52,7 @@ export const EditorOtherTab = () => {
       <div className="settings-panel-contentwrapper-tab-subcategories">
         <h2>General settings</h2>
         <Tagging />
+        <MandatoryIssues />
       </div>
       <div className="settings-panel-contentwrapper-tab-subcategories">
         <h2>Character counter settings</h2>
