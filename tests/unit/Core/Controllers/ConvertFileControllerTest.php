@@ -253,6 +253,30 @@ class ConvertFileControllerTest extends AbstractTest
     }
 
     #[Test]
+    public function validateTheRequest_icu_enabled_defaults_to_true_when_missing(): void
+    {
+        $params = $this->validParams();
+        unset($params['icu_enabled']);
+        $this->setRequestParams($params);
+
+        $result = $this->invokePrivate('validateTheRequest');
+
+        $this->assertTrue($result['icu_enabled']);
+    }
+
+    #[Test]
+    public function validateTheRequest_icu_enabled_stays_false_when_explicitly_disabled(): void
+    {
+        $params                = $this->validParams();
+        $params['icu_enabled'] = '0';
+        $this->setRequestParams($params);
+
+        $result = $this->invokePrivate('validateTheRequest');
+
+        $this->assertFalse($result['icu_enabled']);
+    }
+
+    #[Test]
     public function validateTheRequest_segmentation_rule_paragraph_is_preserved(): void
     {
         $params                      = $this->validParams();
