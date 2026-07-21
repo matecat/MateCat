@@ -6,8 +6,78 @@ import {fromJS} from 'immutable'
 import {JobContainer} from './JobContainer'
 import ProjectsStore from '../../stores/ProjectsStore'
 import ManageConstants from '../../constants/ManageConstants'
+import ManageActions from '../../actions/ManageActions'
+import ModalsActions from '../../actions/ModalsActions'
+import CatToolActions from '../../actions/CatToolActions'
+import {changeJobPassword} from '../../api/changeJobPassword'
+import CommonUtils from '../../utils/commonUtils'
 
-window.config = {enable_outsource: 1}
+jest.mock('../../actions/ManageActions')
+jest.mock('../../actions/ModalsActions')
+jest.mock('../../actions/CatToolActions')
+jest.mock('../../api/changeJobPassword')
+jest.mock('../outsource/OutsourceContainer', () => ({
+  __esModule: true,
+  default: (props) => (
+    <div data-testid="outsource-container-mock">
+      <button data-testid="outsource-close" onClick={props.onClickOutside}>
+        close
+      </button>
+    </div>
+  ),
+}))
+// JobMenu is covered by its own JobMenu.test.js and relies on a Radix
+// dropdown/submenu that is unreliable to drive with userEvent in jsdom
+// (see the pre-existing `test.skip` in JobMenu.test.js). It is replaced
+// here with a thin stub that exposes every callback prop as a button so
+// JobContainer's own handlers (archive/cancel/delete/split/merge/change
+// password/download) can be exercised deterministically.
+jest.mock('./JobMenu', () => ({
+  __esModule: true,
+  default: (props) => (
+    <div data-testid="job-menu-button">
+      <button data-testid="menu-archive" onClick={props.archiveJobFn}>
+        archive
+      </button>
+      <button data-testid="menu-activate" onClick={props.activateJobFn}>
+        activate
+      </button>
+      <button data-testid="menu-cancel" onClick={props.cancelJobFn}>
+        cancel
+      </button>
+      <button data-testid="menu-delete" onClick={props.deleteJobFn}>
+        delete
+      </button>
+      <button data-testid="menu-split" onClick={props.openSplitModalFn}>
+        split
+      </button>
+      <button data-testid="menu-merge" onClick={props.openMergeModalFn}>
+        merge
+      </button>
+      <button
+        data-testid="menu-change-password"
+        onClick={() => props.changePasswordFn()}
+      >
+        change-password
+      </button>
+      <button
+        data-testid="menu-change-password-1"
+        onClick={() => props.changePasswordFn(1)}
+      >
+        change-password-1
+      </button>
+      <div data-testid="menu-download-label">{props.downloadLabel?.label}</div>
+      <button
+        data-testid="menu-download-action"
+        onClick={() => props.downloadLabel?.action()}
+      >
+        download
+      </button>
+    </div>
+  ),
+}))
+
+window.config = {enable_outsource: 1, splitEnabled: 1}
 
 const fakeProjectsData = {
   jobWithoutActivity: {
@@ -979,4 +1049,363 @@ xtest('Check Open link', () => {
     props.jobsLength,
   )
   expect(openElement).toBe(correctUrl)
+})
+
+const cloneData = (data) => JSON.parse(JSON.stringify(data))
+
+const buildFakeProperties = (data, extraProps = {}) => {
+  const project = fromJS(data)
+  const jobs = project.get('jobs')
+  const job = jobs.first()
+
+  return {
+    project,
+    jobs,
+    job,
+    props: {
+      index: 0,
+      isChunk: false,
+      isChunkOutsourced: false,
+      job,
+      project,
+      isChecked: false,
+      onCheckedJob: () => {},
+      downloadTranslationFn: () => {},
+      ...extraProps,
+    },
+  }
+}
+
+describe('Extended interactions (menu actions, outsource, notifications)', () => {
+  beforeEach(() => {
+    window.open = jest.fn()
+    changeJobPassword.mockResolvedValue({
+      new_pwd: 'newpwd',
+      old_pwd: 'oldpwd',
+      id: '90',
+    })
+    jest
+      .spyOn(CommonUtils, 'dispatchAnalyticsEvents')
+      .mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks()
+    jest.restoreAllMocks()
+  })
+
+  test('Split: opens the split modal with job/project and the reload callback', async () => {
+    const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
+    render(<JobContainer {...props} downloadTranslationFn={jest.fn()} />)
+
+    await userEvent.click(screen.getByTestId('menu-split'))
+
+    expect(ModalsActions.openSplitJobModal).toHaveBeenCalledWith(
+      props.job,
+      props.project,
+      ManageActions.reloadProjects,
+    )
+  })
+
+  test('Merge: opens the merge modal with plain JS job/project', async () => {
+    const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
+    render(<JobContainer {...props} downloadTranslationFn={jest.fn()} />)
+
+    await userEvent.click(screen.getByTestId('menu-merge'))
+
+    expect(ModalsActions.openMergeModal).toHaveBeenCalledWith(
+      props.project.toJS(),
+      props.job.toJS(),
+      ManageActions.reloadProjects,
+    )
+  })
+
+  test('Archive and cancel: dispatch the status change and a notification', async () => {
+    const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
+    render(<JobContainer {...props} downloadTranslationFn={jest.fn()} />)
+
+    await userEvent.click(screen.getByTestId('menu-archive'))
+    expect(ManageActions.changeJobStatus).toHaveBeenCalledWith(
+      props.project,
+      props.job,
+      'archive',
+    )
+    expect(CatToolActions.addNotification).toHaveBeenCalledWith(
+      expect.objectContaining({title: 'Jobs archived'}),
+    )
+
+    await userEvent.click(screen.getByTestId('menu-cancel'))
+    expect(ManageActions.changeJobStatus).toHaveBeenCalledWith(
+      props.project,
+      props.job,
+      'cancel',
+    )
+    expect(CatToolActions.addNotification).toHaveBeenCalledWith(
+      expect.objectContaining({title: 'Jobs canceled'}),
+    )
+  })
+
+  test('Unarchive: reactivates an archived job', async () => {
+    const data = cloneData(fakeProjectsData.jobWithoutActivity.data)
+    data.jobs[0].status = 'archived'
+    const {props} = buildFakeProperties(data, {
+      downloadTranslationFn: jest.fn(),
+    })
+
+    render(<JobContainer {...props} />)
+
+    await userEvent.click(screen.getByTestId('menu-activate'))
+
+    expect(ManageActions.changeJobStatus).toHaveBeenCalledWith(
+      props.project,
+      props.job,
+      'active',
+    )
+  })
+
+  test('Delete permanently: confirmation modal success/cancel callbacks', async () => {
+    const data = cloneData(fakeProjectsData.jobWithoutActivity.data)
+    data.jobs[0].status = 'cancelled'
+    const {props} = buildFakeProperties(data, {
+      downloadTranslationFn: jest.fn(),
+    })
+
+    render(<JobContainer {...props} />)
+
+    await userEvent.click(screen.getByTestId('menu-delete'))
+
+    expect(ModalsActions.showModalComponent).toHaveBeenCalledTimes(1)
+    const [, modalProps, title] = ModalsActions.showModalComponent.mock.calls[0]
+    expect(title).toBe('Confirmation required')
+
+    modalProps.cancelCallback()
+    modalProps.successCallback()
+
+    expect(ManageActions.changeJobStatus).toHaveBeenCalledWith(
+      props.project,
+      props.job,
+      'delete',
+    )
+    expect(CatToolActions.addNotification).toHaveBeenCalledWith(
+      expect.objectContaining({title: 'Jobs deleted permanently'}),
+    )
+  })
+
+  test('Change password (Translate): notifies and undo restores the previous password', async () => {
+    const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
+    render(<JobContainer {...props} downloadTranslationFn={jest.fn()} />)
+
+    await userEvent.click(screen.getByTestId('menu-change-password'))
+
+    await waitFor(() =>
+      expect(CatToolActions.addNotification).toHaveBeenCalledWith(
+        expect.objectContaining({title: 'Translate password changed'}),
+      ),
+    )
+    expect(ManageActions.changeJobPassword).toHaveBeenCalledTimes(1)
+    expect(changeJobPassword).toHaveBeenCalledTimes(1)
+
+    const notification = CatToolActions.addNotification.mock.calls.find(
+      ([call]) => call.title === 'Translate password changed',
+    )[0]
+
+    render(notification.text)
+    await userEvent.click(screen.getByText('Undo'))
+
+    await waitFor(() =>
+      expect(CatToolActions.removeNotification).toHaveBeenCalledWith(
+        notification,
+      ),
+    )
+    await waitFor(() => expect(changeJobPassword).toHaveBeenCalledTimes(2))
+    await waitFor(() =>
+      expect(CatToolActions.addNotification).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: 'The previous password has been restored.',
+        }),
+      ),
+    )
+    expect(ManageActions.changeJobPassword).toHaveBeenCalledTimes(2)
+  })
+
+  test('Change password (Revise): oldPassword is taken from revise_passwords', async () => {
+    const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
+    render(<JobContainer {...props} downloadTranslationFn={jest.fn()} />)
+
+    await userEvent.click(screen.getByTestId('menu-change-password-1'))
+
+    await waitFor(() =>
+      expect(CatToolActions.addNotification).toHaveBeenCalledWith(
+        expect.objectContaining({title: 'Revise password changed'}),
+      ),
+    )
+  })
+
+  test('Download menu item: dispatches analytics and calls downloadTranslationFn', async () => {
+    const downloadTranslationFn = jest.fn()
+    const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
+    render(
+      <JobContainer {...props} downloadTranslationFn={downloadTranslationFn} />,
+    )
+
+    await userEvent.click(screen.getByTestId('menu-download-action'))
+
+    expect(downloadTranslationFn).toHaveBeenCalledTimes(1)
+    const [projectArg, jobArg, urlArg] = downloadTranslationFn.mock.calls[0]
+    expect(projectArg).toEqual(props.project.toJS())
+    expect(jobArg).toEqual(props.job.toJS())
+    expect(urlArg).toContain('?action=warnings')
+  })
+
+  test('Assign: opens the outsource box, then closes it', async () => {
+    const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
+    render(<JobContainer {...props} downloadTranslationFn={jest.fn()} />)
+
+    await userEvent.click(screen.getByText('Assign'))
+    expect(screen.getByTestId('outsource-container-mock')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByTestId('outsource-close'))
+    expect(
+      screen.queryByTestId('outsource-container-mock'),
+    ).not.toBeInTheDocument()
+  })
+
+  test('Buy translation button: opens the outsource box (and dispatches analytics on re-open)', async () => {
+    const data = cloneData(fakeProjectsData.jobWithoutActivity.data)
+    data.jobs[0].outsource_available = true
+    const {props} = buildFakeProperties(data, {
+      downloadTranslationFn: jest.fn(),
+    })
+
+    render(<JobContainer {...props} />)
+
+    await userEvent.click(screen.getByTestId('buy-translation-button'))
+    expect(screen.getByTestId('outsource-container-mock')).toBeInTheDocument()
+
+    // clicking again while already open: outsource_available is true and
+    // showingOutsource is already defined, exercising the analytics branch
+    await userEvent.click(screen.getByTestId('buy-translation-button'))
+    expect(screen.getByTestId('outsource-container-mock')).toBeInTheDocument()
+    expect(CommonUtils.dispatchAnalyticsEvents).toHaveBeenCalledWith({
+      event: 'outsource_request',
+    })
+
+    await userEvent.click(screen.getByTestId('outsource-close'))
+    expect(
+      screen.queryByTestId('outsource-container-mock'),
+    ).not.toBeInTheDocument()
+  })
+
+  test('Remove translator: notifies and undo restores the previous password', async () => {
+    const {props} = getFakeProperties(fakeProjectsData.jobTranslatedOutsourced)
+    render(<JobContainer {...props} downloadTranslationFn={jest.fn()} />)
+
+    await userEvent.click(screen.getByTestId('remove-translator-button'))
+
+    await waitFor(() =>
+      expect(CatToolActions.addNotification).toHaveBeenCalledWith(
+        expect.objectContaining({title: 'Job unassigned'}),
+      ),
+    )
+
+    const notification = CatToolActions.addNotification.mock.calls.find(
+      ([call]) => call.title === 'Job unassigned',
+    )[0]
+
+    render(notification.text)
+    await userEvent.click(screen.getByText('Undo'))
+
+    await waitFor(() =>
+      expect(CatToolActions.removeNotification).toHaveBeenCalledWith(
+        notification,
+      ),
+    )
+    await waitFor(() => expect(changeJobPassword).toHaveBeenCalledTimes(2))
+    expect(ManageActions.changeJobPassword).toHaveBeenCalledTimes(2)
+  })
+
+  test('Outsource delivery email: clicking it opens the outsource box', async () => {
+    const {props, job} = getFakeProperties(
+      fakeProjectsData.jobTranslatedOutsourced,
+    )
+    render(<JobContainer {...props} downloadTranslationFn={jest.fn()} />)
+
+    await userEvent.click(screen.getByText(job.get('translator').get('email')))
+
+    expect(screen.getByTestId('outsource-container-mock')).toBeInTheDocument()
+  })
+
+  test('Outsourced-to-Translated job: shows the logo, delivery date and View status button', async () => {
+    const data = cloneData(fakeProjectsData.jobWithoutActivity.data)
+    data.jobs[0].outsource = {
+      id_vendor: '1',
+      quote_review_link: 'https://example.com/quote',
+      delivery_timestamp: 1700000000,
+    }
+    data.jobs[0].translator = null
+    const {props} = buildFakeProperties(data, {
+      downloadTranslationFn: jest.fn(),
+    })
+
+    render(<JobContainer {...props} />)
+
+    expect(
+      screen.getByTitle('Outsourced to translated.net'),
+    ).toBeInTheDocument()
+
+    // outsource_available is falsy here, so this exercises the "contact us"
+    // fallback branch of openOutsourceModal
+    await userEvent.click(screen.getByText('View status'))
+
+    expect(window.open).toHaveBeenCalledWith(
+      'https://translated.com/contact-us',
+      '_blank',
+    )
+  })
+
+  test('Quality issues: QR, warnings and comments icons open the expected URLs', async () => {
+    const data = cloneData(fakeProjectsData.jobWithoutActivity.data)
+    data.jobs[0].quality_summary.quality_overall = 'poor'
+    data.jobs[0].warnings_count = 2
+    data.jobs[0].open_threads_count = 2
+    const {props} = buildFakeProperties(data, {
+      downloadTranslationFn: jest.fn(),
+    })
+
+    render(<JobContainer {...props} />)
+
+    const container = screen.getByTestId('job-activity-icons')
+    const buttons = container.querySelectorAll('button')
+    expect(buttons.length).toBe(3)
+
+    await userEvent.click(buttons[0])
+    await userEvent.click(buttons[1])
+    await userEvent.click(buttons[2])
+
+    expect(window.open).toHaveBeenCalledTimes(3)
+  })
+
+  test('Words button: opens the analyze URL', async () => {
+    const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
+    render(<JobContainer {...props} downloadTranslationFn={jest.fn()} />)
+
+    await userEvent.click(screen.getByTestId('words-button'))
+
+    expect(window.open).toHaveBeenCalledWith(
+      expect.stringContaining('/analyze/'),
+      '_blank',
+    )
+  })
+
+  test('Open button: opens the translate URL', async () => {
+    const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
+    render(<JobContainer {...props} downloadTranslationFn={jest.fn()} />)
+
+    await userEvent.click(screen.getByText('Open'))
+
+    expect(window.open).toHaveBeenCalledWith(
+      expect.stringContaining('/translate/'),
+      '_blank',
+    )
+  })
 })
