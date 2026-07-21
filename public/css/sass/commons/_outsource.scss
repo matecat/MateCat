@@ -57,10 +57,10 @@
   }
 
   .select {
-    padding: 9px 46px 9px 12px;
+    padding: 5px 46px 9px 12px;
     border-radius: variables.$border-radius-default;
     color: colors.$black;
-    background: rgba(colors.$grey600, 0.07);
+    background: colors.$black100
   }
 
   .dropdown__list {
@@ -72,7 +72,7 @@
   }
 
   .select-with-icon__wrapper {
-    height: 40px;
+    height: 32px;
   }
 
   .select__dropdown-wrapper {
@@ -173,7 +173,7 @@
 
     .title-url {
       padding: 10px 0;
-
+      width: 100%;
       .job-url {
         display: inline-block;
 
@@ -190,16 +190,34 @@
           .fields {
             margin: 0;
             display: flex;
+            align-items: flex-end;
+            gap: 16px;
+            align-self: stretch;
             .field {
               font-size: 14px;
               flex-direction: column;
-              margin: 20px 0 0;
               display: flex;
               position: relative;
+              gap: 8px;
+              width: 160px;
+              &.translator-email {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                flex: 1 0 0;
+              }
+              &.translator-delivery h2{
+                line-height: normal;
+              }
+              .select-with-label__wrapper {
+                gap: 8px;
+                label {
+                  margin-bottom: 0;
+                }
+              }
               label {
                 font-size: 14px;
                 line-height: 20px;
-                margin-bottom: 8px;
                 font-weight: 400;
               }
 
@@ -210,8 +228,9 @@
                 border: 1px solid colors.$grey200;
                 font-family: Calibri, Arial, Helvetica, sans-serif;
                 border-radius: variables.$border-radius-default;
-                height: 36px;
-
+                height: 32px;
+                background-color: colors.$black100;
+                padding: 6px 12px;
                 &:focus {
                   border-color: colors.$blue300;
                 }
@@ -223,6 +242,7 @@
 
               &.send-job-box {
                 align-content: flex-end;
+                align-self: flex-end;
               }
 
               &.translator-time {
@@ -244,7 +264,6 @@
               &.gmt {
                 position: relative;
                 width: 160px;
-                margin-right: 29px;
               }
             }
           }
@@ -332,7 +351,9 @@
     text-align: center;
     -webkit-transform: translateX(-50%) translateY(-50%);
     transform: translateX(-50%) translateY(-50%);
-
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     img {
       width: 40px;
     }

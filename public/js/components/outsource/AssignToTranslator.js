@@ -9,7 +9,7 @@ import CatToolActions from '../../actions/CatToolActions'
 import ManageActions from '../../actions/ManageActions'
 import 'react-datepicker/dist/react-datepicker.css'
 import {Select} from '../common/Select'
-import {Button, BUTTON_TYPE} from '../common/Button/Button'
+import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import {timeOptions} from './outsourceConstants'
 const AssignToTranslator = ({job, project, closeOutsource}) => {
   const getInitialTime = () => {
@@ -291,13 +291,14 @@ const AssignToTranslator = ({job, project, closeOutsource}) => {
             <div className="fields">
               <div className="field translator-email">
                 <label>Translator email</label>
-                <div>
+                <div style={{width: '100%'}}>
                   <input
                     type="email"
                     placeholder="translator@email.com"
                     defaultValue={translatorEmail}
                     ref={emailRef}
                     onKeyUp={checkSendToTranslatorButton}
+                    style={{width: '100%'}}
                   />
                 </div>
               </div>
@@ -336,6 +337,7 @@ const AssignToTranslator = ({job, project, closeOutsource}) => {
               <div className="field send-job-box">
                 <Button
                   type={BUTTON_TYPE.PRIMARY}
+                  size={BUTTON_SIZE.SMALL}
                   onClick={shareJob}
                   disabled={isSendDisabled}
                 >
