@@ -28,6 +28,16 @@ describe('transformTagsToHtml - pc-carrying ph tags', () => {
     )
   })
 
+  test('a closing pc tag shows only the number (no content)', () => {
+    const result = transformTagsToHtml(pcClose)
+    expect(result).toBe(
+      '<span contenteditable="false" class="tag small tag-selfclosed tag-ph tag-pc-close">' +
+        '<span class="index-counter">1</span>' +
+        '</span>',
+    )
+    expect(result).not.toContain('data-text')
+  })
+
   test('open and close of a pair share the same number, distinct roles', () => {
     const result = transformTagsToHtml(pcOpen + 'inner' + pcClose)
     expect(result).toContain('tag-pc-open')
@@ -38,6 +48,8 @@ describe('transformTagsToHtml - pc-carrying ph tags', () => {
       '<span class="index-counter">1</span>',
       '<span class="index-counter">1</span>',
     ])
+    // the open shows its content, the close does not
+    expect(result.match(/data-text="true"/g)).toHaveLength(1)
   })
 
   test('two sequential pairs are numbered 1 and 2', () => {

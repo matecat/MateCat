@@ -36,9 +36,9 @@ jest.mock('../../common/Tooltip', () => ({
   ),
 }))
 
-const mockContentState = (entityName, index, placeholder = 'test') => ({
+const mockContentState = (entityName, index, placeholder = 'test', pcRole) => ({
   getEntity: () => ({
-    data: {name: entityName, index, placeholder},
+    data: {name: entityName, index, placeholder, pcRole},
   }),
 })
 
@@ -262,6 +262,45 @@ describe('TagEntityLite', () => {
         <span>{'<p>'}</span>
       </TagEntityLite>,
     )
+    expect(container.querySelector('[data-testid="tooltip-wrapper"]')).toBeNull()
+  })
+
+  test('opening pc tag shows content and tooltip when not compressed', () => {
+    const {container} = render(
+      <TagEntityLite
+        entityKey="1"
+        contentState={mockContentState('ph', 0, 'test', 'open')}
+        offsetkey="1-0-0"
+        isRTL={false}
+      >
+        <span>content</span>
+      </TagEntityLite>,
+    )
+    expect(container.querySelector('.tag-text-lite')).toBeTruthy()
+    expect(
+      container.querySelector('.tag').classList.contains('tag-pc-open'),
+    ).toBe(true)
+    expect(
+      container.querySelector('[data-testid="tooltip-wrapper"]'),
+    ).toBeTruthy()
+  })
+
+  test('closing pc tag shows only the number, no content and no tooltip', () => {
+    const {container} = render(
+      <TagEntityLite
+        entityKey="1"
+        contentState={mockContentState('ph', 0, 'test', 'close')}
+        offsetkey="1-0-0"
+        isRTL={false}
+      >
+        <span>content</span>
+      </TagEntityLite>,
+    )
+    expect(container.querySelector('.index-counter').textContent).toBe('1')
+    expect(container.querySelector('.tag-text-lite')).toBeNull()
+    expect(
+      container.querySelector('.tag').classList.contains('tag-pc-close'),
+    ).toBe(true)
     expect(container.querySelector('[data-testid="tooltip-wrapper"]')).toBeNull()
   })
 })

@@ -76,7 +76,7 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
                   '</span>'
                 )
               }
-              return (
+              const openSpan =
                 '<span contenteditable="false" class="tag small ' +
                 (isRtl && styleRTL ? styleRTL : style) +
                 ' tag-pc-' +
@@ -84,11 +84,13 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
                 '">' +
                 '<span class="index-counter">' +
                 (pc.index + 1) +
-                '</span>' +
-                '<span data-text="true">' +
-                tagText +
-                '</span>' +
                 '</span>'
+              // A closing pc tag shows only its number (no equiv-text content).
+              if (pc.role === 'close') {
+                return openSpan + '</span>'
+              }
+              return (
+                openSpan + '<span data-text="true">' + tagText + '</span></span>'
               )
             }
             return (

@@ -54,12 +54,15 @@ export const TagEntityLite = ({
   const isCompressedPh = isPhTag && phTagsCompressed && index >= 0
   const pcRoleClass = isPhTag && pcRole ? ` tag-pc-${pcRole}` : ''
 
+  const isPcClose = isPhTag && pcRole === 'close'
+
   const getChildrenContent = () => {
     if (isPhTag && index >= 0) {
+      // A closing pc tag always shows only its number.
       return (
         <>
           <span className="index-counter">{index + 1}</span>
-          {!phTagsCompressed && (
+          {!phTagsCompressed && !isPcClose && (
             <span className="tag-text-lite">{children}</span>
           )}
         </>
@@ -84,7 +87,7 @@ export const TagEntityLite = ({
     </span>
   )
 
-  if (isPhTag && placeholder) {
+  if (isPhTag && placeholder && !isPcClose) {
     return (
       <Tooltip
         stylePointerElement={{display: 'inline-block', position: 'relative'}}

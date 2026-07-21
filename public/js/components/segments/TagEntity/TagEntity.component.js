@@ -214,15 +214,18 @@ class TagEntity extends Component {
     )
   }
 
-  getChildrenContent(index, entityName) {
+  getChildrenContent(index, entityName, pcRole) {
     const {phTagsCompressed} = this.state
     const isPhTag = entityName === 'ph'
 
     if (isPhTag && index >= 0) {
+      // A closing pc tag always shows only its number (never the equiv-text /
+      // closing content). An opening tag shows its content unless compressed.
+      const isPcClose = pcRole === 'close'
       return (
         <>
           <span className="index-counter">{index + 1}</span>
-          {!phTagsCompressed && this.props.children}
+          {!phTagsCompressed && !isPcClose && this.props.children}
         </>
       )
     }
@@ -264,8 +267,11 @@ class TagEntity extends Component {
     const isCompressedPh = entityName === 'ph' && phTagsCompressed && index >= 0
     const pcRoleClass =
       entityName === 'ph' && pcRole ? ` tag-pc-${pcRole}` : ''
+    // A closing pc tag shows only its number, so it never needs a content tooltip.
+    const isPcClose = entityName === 'ph' && pcRole === 'close'
     const showTooltip =
-      (shouldTooltipOnHover && tooltipAvailable) || isCompressedPh
+      ((shouldTooltipOnHover && tooltipAvailable) || isCompressedPh) &&
+      !isPcClose
 
     return (
       <Tooltip
@@ -306,10 +312,10 @@ class TagEntity extends Component {
             {searchParams.active && markSearch(decoratedText, searchParams)}
             {searchParams.active ? (
               <span style={{display: 'none'}}>
-                {this.getChildrenContent(index, entityName)}
+                {this.getChildrenContent(index, entityName, pcRole)}
               </span>
             ) : (
-              this.getChildrenContent(index, entityName)
+              this.getChildrenContent(index, entityName, pcRole)
             )}
           </span>
         </div>
