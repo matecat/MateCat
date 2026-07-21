@@ -6,12 +6,12 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Klein\Request;
 use Matecat\TestHelpers\AbstractTest;
-use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
+use RuntimeException;
 
 /**
  * Minimal controller exposing the seams ChunkPasswordValidator touches:
@@ -156,7 +156,7 @@ class ChunkPasswordValidatorTest extends AbstractTest
         $chunk = $validator->getChunk();
         $this->assertInstanceOf(JobStruct::class, $chunk);
         $this->assertSame(self::JOB_ID, $chunk->id);
-        $this->assertTrue($chunk->getIsReview());
+        $this->assertTrue($chunk->isReview());
         $this->assertFalse($chunk->isSecondPassReview());
         $this->assertInstanceOf(ChunkReviewStruct::class, $validator->getChunkReview());
     }
@@ -173,7 +173,7 @@ class ChunkPasswordValidatorTest extends AbstractTest
 
         $validator = new ChunkPasswordValidator($this->controller);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $validator->getChunk();
     }
 
