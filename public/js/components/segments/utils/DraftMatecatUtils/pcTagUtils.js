@@ -21,8 +21,7 @@ export const PC_CTYPES = {
 }
 
 const CTYPE_RE = /\bctype="([^"]+)"/
-const ID_RE = /\bid="(-?\w+)"/
-
+const ID_RE = /\bid="([^"]*)"/
 /**
  * Classify a `ph` tag from its raw encoded text.
  * @param {string} encodedText e.g. `<ph id="source1_1" ctype="x-pc_open_data_ref" .../>`

@@ -14,8 +14,15 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   firstLoad: true,
   languages: [],
   // pc-carrying ph tags are collapsed by default; only an explicit opt-out persists
-  phTagsCompressed:
-    localStorage.getItem('phTagsCompressed-' + config.userMail) !== 'false',
+  phTagsCompressed: (() => {
+    try {
+      return (
+        localStorage.getItem('phTagsCompressed-' + config.userMail) !== 'false'
+      )
+    } catch (e) {
+      return true
+    }
+  })(),
   searchResults: {
     searchResults: [], // Array
     occurrencesList: [],
@@ -302,14 +309,18 @@ AppDispatcher.register(function (action) {
       break
     case CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED:
       CatToolStore.phTagsCompressed = !CatToolStore.phTagsCompressed
-      localStorage.setItem(
-        'phTagsCompressed-' + config.userMail,
-        CatToolStore.phTagsCompressed,
-      )
-      document.body.classList.toggle(
-        'ph-tags-compressed',
-        CatToolStore.phTagsCompressed,
-      )
+      try {
+        localStorage.setItem(
+          'phTagsCompressed-' + config.userMail,
+          CatToolStore.phTagsCompressed,
+        )
+      } catch (e) {}
+      if (document?.body) {
+        document.body.classList.toggle(
+          'ph-tags-compressed',
+          CatToolStore.phTagsCompressed,
+        )
+      }
       CatToolStore.emitChange(
         CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
         CatToolStore.phTagsCompressed,

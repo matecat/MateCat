@@ -46,7 +46,9 @@ const checkForMissingTags = (sourceTagMap, targetTagMap) => {
         if (nameSourceTag === 'ph') {
           return (
             nameTargetTag === 'ph' &&
-            decodedTextSourceTag === decodedTextTargetTag
+            ((decodedTextSourceTag &&
+              decodedTextSourceTag === decodedTextTargetTag) ||
+              (idSourceTag && idTargetTag === idSourceTag))
           )
         }
         return idTargetTag === idSourceTag && nameSourceTag === nameTargetTag
