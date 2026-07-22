@@ -93,8 +93,8 @@ describe('OnBoarding', () => {
   test('opens a popup window and dispatches an analytics event on social login', () => {
     const focus = jest.fn()
     window.open = jest.fn(() => ({focus, closed: false}))
-    render(<OnBoarding />)
-    fireEvent.click(screen.getAllByAltText('Google login')[0])
+    const {container} = render(<OnBoarding />)
+    fireEvent.click(container.querySelector('.login-social-buttons button'))
     expect(CommonUtils.dispatchAnalyticsEvents).toHaveBeenCalledWith({
       event: 'open_register',
       type: 'social',
@@ -119,8 +119,8 @@ describe('OnBoarding', () => {
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
     let closed = false
     window.open = jest.fn(() => ({focus: jest.fn(), get closed() { return closed }}))
-    render(<OnBoarding />)
-    fireEvent.click(screen.getAllByAltText('Google login')[0])
+    const {container} = render(<OnBoarding />)
+    fireEvent.click(container.querySelector('.login-social-buttons button'))
     closed = true
     jest.advanceTimersByTime(600)
     expect(consoleError).toHaveBeenCalledWith(
