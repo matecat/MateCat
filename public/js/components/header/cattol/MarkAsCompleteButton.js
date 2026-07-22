@@ -9,8 +9,14 @@ import CattolConstants from '../../../constants/CatToolConstants'
 import CatToolActions from '../../../actions/CatToolActions'
 import {deleteCompletionEvents} from '../../../api/deleteCompletionEvents'
 import ModalsActions from '../../../actions/ModalsActions'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../common/Button/Button'
+import Check from '../../../../img/icons/Check'
 export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
-  const button = useRef()
   const [markedAsComplete, setMarkedAsComplete] = useState(
     config.job_marked_complete,
   )
@@ -61,24 +67,32 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
 
   const showTranslateWarningMessage = () => {
     // if (!lastCompletionEventId) return
-    let message =
-      'All segments are in <b>read-only mode</b> because this job is under review.'
-
-    if (config.chunk_completion_undoable && config.last_completion_event_id) {
-      message =
-        message +
-        '<p class=\'warning-call-to\'><a href="javascript:void(0);" id="showTranslateWarningMessageUndoLink" >Re-Open Job</a></p>'
-    }
+    const showUndo =
+      config.chunk_completion_undoable && config.last_completion_event_id
 
     CatToolActions.addNotification({
       uid: 'translate-warning',
       autoDismiss: false,
       dismissable: true,
       position: 'tc',
-      text: message,
+      text: (
+        <>
+          All segments are in <b>read-only mode</b> because this job is under
+          review.
+          {showUndo && (
+            <p className="warning-call-to">
+              <a
+                href="javascript:void(0);"
+                id="showTranslateWarningMessageUndoLink"
+              >
+                Re-Open Job
+              </a>
+            </p>
+          )}
+        </>
+      ),
       title: 'Warning',
       type: 'warning',
-      allowHtml: true,
     })
   }
 
@@ -137,7 +151,7 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
         type: 'warning',
         title: 'Warning',
         text: 'Translator/post-editor did not mark this job as complete yet. Please wait for vendor phase to complete before making any change.',
-        dismissable: false,
+        dismissable: true,
         autoDismiss: false,
       })
     }
@@ -207,19 +221,15 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
     <>
       {/*Mark as complete*/}
       {featureEnabled && (
-        <button
-          ref={button}
-          className={`action-submenu ui floating dropdown ${
-            markedAsComplete
-              ? 'isMarkedComplete'
-              : buttonEnabled
-                ? 'isMarkableAsComplete'
-                : 'notMarkedComplete'
-          }`}
-          id="markAsCompleteButton"
-          disabled={!buttonEnabled}
+        <Button
+          mode={markedAsComplete ? BUTTON_MODE.OUTLINE_BG : BUTTON_MODE.GHOST}
+          type={markedAsComplete ? BUTTON_TYPE.SUCCESS : BUTTON_TYPE.DEFAULT}
+          size={BUTTON_SIZE.ICON_STANDARD}
+          className="markAsCompleteButton"
           onClick={clickMarkAsComplete}
-        />
+        >
+          <Check size={24} />
+        </Button>
       )}
     </>
   )

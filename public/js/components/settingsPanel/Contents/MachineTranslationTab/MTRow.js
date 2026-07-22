@@ -2,6 +2,8 @@ import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import InfoIcon from '../../../../../img/icons/InfoIcon'
+import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
+import Trash from '../../../../../img/icons/Trash'
 
 export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
@@ -28,7 +30,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             target="_blank"
             rel="noreferrer"
           >
-            <InfoIcon />
+            <InfoIcon size={16} />
           </a>
         )}
         {row.engine_type === 'MMT' && (
@@ -37,7 +39,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             target="_blank"
             rel="noreferrer"
           >
-            <InfoIcon />
+            <InfoIcon size={16} />
           </a>
         )}
         {row.engine_type === 'DeepL' && (
@@ -46,7 +48,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             target="_blank"
             rel="noreferrer"
           >
-            <InfoIcon />
+            <InfoIcon size={16} />
           </a>
         )}
         {row.engine_type === 'Lara' && (
@@ -55,7 +57,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             target="_blank"
             rel="noreferrer"
           >
-            <InfoIcon />
+            <InfoIcon size={16} />
           </a>
         )}
         {row.engine_type === 'Intento' && (
@@ -64,7 +66,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             target="_blank"
             rel="noreferrer"
           >
-            <InfoIcon />
+            <InfoIcon size={16} />
           </a>
         )}
       </div>
@@ -80,13 +82,14 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
       ></div>
       {!row.default && !config.is_cattool && (
         <div>
-          <button
-            className="grey-button"
-            data-testid="delete-mt"
+          <Button
+            className="settings-panel-grey-button"
+            size={BUTTON_SIZE.SMALL}
+            testId="delete-mt"
             onClick={deleteMT}
           >
-            Delete
-          </button>
+            <Trash size={16} /> Delete
+          </Button>
         </div>
       )}
     </>

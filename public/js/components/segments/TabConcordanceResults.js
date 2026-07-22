@@ -12,7 +12,7 @@ import Cookies from 'js-cookie'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import ApplicationStore from '../../stores/ApplicationStore'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
-import IconDown from '../icons/IconDown'
+import IconDown from '../../../img/icons/IconDown'
 
 export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
   const [results, setResults] = useState(undefined)

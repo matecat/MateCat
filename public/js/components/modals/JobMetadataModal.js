@@ -52,17 +52,11 @@ class JobMetadataModal extends React.Component {
 
       const title = (
         <div className="title">
-          <span
-            title={file.file_name}
-            className={
-              'fileFormat ' +
-              CommonUtils.getIconClass(
-                file.file_name.split('.')[file.file_name.split('.').length - 1],
-              )
-            }
-          >
-            {file.file_name}
-          </span>
+          {CommonUtils.getFileIcon(
+            file.file_name.split('.')[file.file_name.split('.').length - 1],
+          )}
+
+          <div>{file.file_name}</div>
         </div>
       )
 
@@ -141,7 +135,7 @@ class JobMetadataModal extends React.Component {
             <div className="matecat-modal-text">
               {this.props.projectInfo && (
                 <div>
-                  <h2>Project instructions</h2>
+                  <h4>Project instructions</h4>
                   <div className="instructions-container">
                     <p
                       dangerouslySetInnerHTML={{
@@ -157,8 +151,8 @@ class JobMetadataModal extends React.Component {
                     this.isMtcReferenceValued(file),
                   )) && (
                   <div>
-                    <h2>File instructions</h2>
-                    <div className="ui styled fluid accordion">
+                    <h4>File instructions</h4>
+                    <div className="file-instructions-accordion">
                       {this.createFileList()}
                     </div>
                   </div>

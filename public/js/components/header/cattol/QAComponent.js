@@ -6,6 +6,15 @@ import SegmentStore from '../../../stores/SegmentStore'
 import SegmentConstants from '../../../constants/SegmentConstants'
 import SegmentQA from '../../../../img/icons/SegmentQA'
 import AlertIcon from '../../../../img/icons/AlertIcon'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../common/Button/Button'
+import InfoIcon from '../../../../img/icons/InfoIcon'
+import ChevronLeft from '../../../../img/icons/ChevronLeft'
+import ChevronRight from '../../../../img/icons/ChevronRight'
 
 class QAComponent extends React.Component {
   constructor(props) {
@@ -133,9 +142,11 @@ class QAComponent extends React.Component {
                   ? ' mc-bg-gray'
                   : ''
               error.push(
-                <button
+                <Button
                   key={index}
-                  className={'ui button qa-issue error' + activeClass}
+                  type={BUTTON_TYPE.CRITICAL}
+                  mode={BUTTON_MODE.OUTLINE}
+                  className={activeClass}
                   onClick={this.setCurrentNavigationElements.bind(
                     this,
                     this.state.warnings.ERROR.Categories[key],
@@ -143,10 +154,10 @@ class QAComponent extends React.Component {
                     key,
                   )}
                 >
-                  <SegmentQA />
+                  <SegmentQA size={20} />
                   {this.state.labels[key] ? this.state.labels[key] : key} errors
                   <b> ({this.state.warnings.ERROR.Categories[key].length})</b>
-                </button>,
+                </Button>,
               )
             } else {
               let activeClass =
@@ -155,9 +166,11 @@ class QAComponent extends React.Component {
                   ? ' mc-bg-gray'
                   : ''
               error.push(
-                <button
+                <Button
                   key={index}
-                  className={'ui button qa-issue error' + activeClass}
+                  type={BUTTON_TYPE.CRITICAL}
+                  mode={BUTTON_MODE.OUTLINE}
+                  className={activeClass}
                   onClick={this.setCurrentNavigationElements.bind(
                     this,
                     this.state.warnings.ERROR.Categories[key],
@@ -165,10 +178,10 @@ class QAComponent extends React.Component {
                     key,
                   )}
                 >
-                  <SegmentQA />
+                  <SegmentQA size={20} />
                   {this.state.labels[key] ? this.state.labels[key] : key}
                   <b> ({this.state.warnings.ERROR.Categories[key].length})</b>
-                </button>,
+                </Button>,
               )
             }
           }
@@ -185,9 +198,11 @@ class QAComponent extends React.Component {
                   : ''
               if (key === 'TAGS') {
                 warning.push(
-                  <button
+                  <Button
                     key={index}
-                    className={'ui button qa-issue warning' + activeClass}
+                    type={BUTTON_TYPE.WARNING}
+                    mode={BUTTON_MODE.OUTLINE}
+                    className={activeClass}
                     onClick={this.setCurrentNavigationElements.bind(
                       this,
                       this.state.warnings.WARNING.Categories[key],
@@ -195,7 +210,7 @@ class QAComponent extends React.Component {
                       key,
                     )}
                   >
-                    <AlertIcon size={18} />
+                    <AlertIcon size={20} />
                     {this.state.labels[key] ? this.state.labels[key] : key}{' '}
                     warnings
                     <b>
@@ -203,13 +218,15 @@ class QAComponent extends React.Component {
                       ({this.state.warnings.WARNING.Categories[key].length}
                       ){' '}
                     </b>
-                  </button>,
+                  </Button>,
                 )
               } else if (key !== 'MISMATCH') {
                 warning.push(
-                  <button
+                  <Button
                     key={index}
-                    className={'ui button qa-issue warning' + activeClass}
+                    type={BUTTON_TYPE.WARNING}
+                    mode={BUTTON_MODE.OUTLINE}
+                    className={activeClass}
                     onClick={this.setCurrentNavigationElements.bind(
                       this,
                       this.state.warnings.WARNING.Categories[key],
@@ -217,20 +234,22 @@ class QAComponent extends React.Component {
                       key,
                     )}
                   >
-                    <AlertIcon size={18} />
+                    <AlertIcon size={20} />
                     {this.state.labels[key] ? this.state.labels[key] : key}
                     <b>
                       {' '}
                       ({this.state.warnings.WARNING.Categories[key].length}
                       ){' '}
                     </b>
-                  </button>,
+                  </Button>,
                 )
               } else {
                 mismatch = (
-                  <button
+                  <Button
                     key={index}
-                    className={'ui button qa-issue warning' + activeClass}
+                    type={BUTTON_TYPE.WARNING}
+                    mode={BUTTON_MODE.OUTLINE}
+                    className={activeClass}
                     onClick={this.setCurrentNavigationElements.bind(
                       this,
                       this.state.warnings.WARNING.Categories[key],
@@ -238,14 +257,14 @@ class QAComponent extends React.Component {
                       key,
                     )}
                   >
-                    <AlertIcon size={18} />
+                    <AlertIcon size={20} />
                     {this.state.labels[key] ? this.state.labels[key] : key}
                     <b>
                       {' '}
                       ({this.state.warnings.WARNING.Categories[key].length}
                       ){' '}
                     </b>
-                  </button>
+                  </Button>
                 )
               }
             }
@@ -261,9 +280,11 @@ class QAComponent extends React.Component {
                 ? ' mc-bg-gray'
                 : ''
             info.push(
-              <button
+              <Button
                 key={index}
-                className={'ui button qa-issue' + activeClass}
+                className={activeClass}
+                type={BUTTON_TYPE.INFO}
+                mode={BUTTON_MODE.OUTLINE}
                 onClick={this.setCurrentNavigationElements.bind(
                   this,
                   this.state.warnings.INFO.Categories[key],
@@ -271,16 +292,17 @@ class QAComponent extends React.Component {
                   key,
                 )}
               >
+                <InfoIcon size={20} />
                 {this.state.labels[key] ? this.state.labels[key] : key}{' '}
                 <b> ({this.state.warnings.INFO.Categories[key].length})</b>
-              </button>,
+              </Button>,
             )
           }
         })
       }
     }
     let segmentsWithActive =
-      error.length > 0 || warning.length > 0 || info.length > 0 ? true : false
+      error.length > 0 || warning.length > 0 || info.length > 0
     return this.props.active && this.state.totalWarnings > 0 ? (
       <div className="qa-wrapper">
         <div className="qa-container">
@@ -292,7 +314,7 @@ class QAComponent extends React.Component {
                 </div>
               ) : null}
               {segmentsWithActive ? (
-                <div className="ui basic tiny buttons">
+                <div>
                   {error}
                   {warning}
                   {info}
@@ -334,7 +356,7 @@ class QAComponent extends React.Component {
               ) : null}
               {mismatch ? (
                 <div className="qa-mismatch">
-                  <div className="ui basic tiny buttons">{mismatch}</div>
+                  <div>{mismatch}</div>
                 </div>
               ) : null}
             </div>
@@ -342,24 +364,24 @@ class QAComponent extends React.Component {
               <div className="qa-issues-navigator">
                 <div className="qa-actions">
                   <div className={'qa-arrows qa-arrows-enabled'}>
-                    <button
-                      className="qa-move-up ui basic button"
-                      /*disabled={this.state.navigationIndex - 1 < 0}*/
+                    <Button
+                      size={BUTTON_SIZE.ICON_STANDARD}
+                      mode={BUTTON_MODE.OUTLINE}
                       onClick={this.scrollToSegment.bind(this, -1)}
                     >
-                      <i className="icon-chevron-left" />
-                    </button>
+                      <ChevronLeft />
+                    </Button>
                     <div className="info-navigation-issues">
                       <b>{this.state.navigationIndex + 1} </b> /{' '}
                       {this.state.navigationList.length} {/*Segments*/}
                     </div>
-                    <button
-                      className="qa-move-down ui basic button"
-                      /*disabled={this.state.navigationIndex + 1 >= this.state.navigationList.length}*/
+                    <Button
                       onClick={this.scrollToSegment.bind(this, 1)}
+                      mode={BUTTON_MODE.OUTLINE}
+                      size={BUTTON_SIZE.ICON_STANDARD}
                     >
-                      <i className="icon-chevron-right" />
-                    </button>
+                      <ChevronRight />
+                    </Button>
                   </div>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import styles from './Badge.module.scss'
 
 export const BADGE_TYPE = {
   BLACK: 'black',
@@ -8,6 +9,9 @@ export const BADGE_TYPE = {
   YELLOW: 'yellow',
   BLUE: 'blue',
   RED: 'red',
+  PURPLE: 'purple',
+  ORANGE: 'orange',
+  GREY: 'grey',
 }
 export const BADGE_MODE = {
   DEFAULT: 'default',
@@ -24,7 +28,7 @@ export const Badge = ({
 }) => {
   return (
     <span
-      className={`badge-container badge-${type} badge-${mode} ${className}`}
+      className={[styles['badge-container'], styles[`badge-${type}`], styles[`badge-${mode}`], className].filter(Boolean).join(' ')}
       title={tooltip}
     >
       {children}

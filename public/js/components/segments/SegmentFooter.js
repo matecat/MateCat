@@ -20,7 +20,8 @@ import SegmentFooterTabMessages from './SegmentFooterTabMessages'
 import {SegmentContext} from './SegmentContext'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
-import IconCloseCircle from '../icons/IconCloseCircle'
+import IconCloseCircle from '../../../img/icons/IconCloseCircle'
+import IconWarning from '../../../img/icons/IconWarning'
 import CatToolActions from '../../actions/CatToolActions'
 import {isMacOS} from '../../utils/Utils'
 import {SegmentFooterTabLaraStyles} from './SegmentFooterTabLaraStyles'
@@ -100,6 +101,13 @@ const TAB_ITEMS = {
     code: 'icu',
     tabClass: 'icu-validator',
     isLoading: false,
+  },
+  [TAB.AI_ALTERNATIVES]: {
+    label: 'Ai alternatives',
+    code: 'aialternatives',
+    tabClass: 'ai-alternatives',
+    isLoading: false,
+    isEnableCloseButton: true,
   },
 }
 const DELAY_MESSAGE = 7000
@@ -643,7 +651,9 @@ function SegmentFooter() {
           ) : clientConnected || typeof clientConnected === 'undefined' ? (
             <span className="loader loader_on" />
           ) : (
-            <i className="icon-warning2 icon" />
+            <span className={'notLoading'}>
+              <IconWarning size={16} />
+            </span>
           )}
 
           {tab.isEnableCloseButton && (

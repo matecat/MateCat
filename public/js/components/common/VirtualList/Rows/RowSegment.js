@@ -210,12 +210,11 @@ export const ProjectBar = ({segment, files, sideOpen, isSticky, listRef}) => {
         <div
           className={`projectbar-filename ${isFileChange ? 'sticky-project-bar-blink' : ''}`}
         >
-          <span
-            title={currentSegment.filename}
-            className={'fileFormat ' + CommonUtils.getIconClass(fileType)}
-          >
-            {file.file_name}
-          </span>
+
+            {CommonUtils.getFileIcon(fileType[0])}
+            <span className="fileFormat" title={segment.filename}>
+                {file.file_name}
+            </span>
         </div>
       ) : null}
       {file && file.weighted_words > 0 ? (

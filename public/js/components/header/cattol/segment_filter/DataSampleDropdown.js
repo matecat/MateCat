@@ -7,7 +7,7 @@ import {
   BUTTON_TYPE,
 } from '../../../common/Button/Button'
 import ChevronDown from '../../../../../img/icons/ChevronDown'
-import IconClose from '../../../icons/IconClose'
+import IconClose from '../../../../../img/icons/IconClose'
 
 export const DataSampleDropdown = ({
   onChange,

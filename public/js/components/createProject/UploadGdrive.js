@@ -3,12 +3,13 @@ import CommonUtils from '../../utils/commonUtils'
 import {getPrintableFileSize} from './UploadFileUtils'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import {DeleteIcon} from '../segments/SegmentFooterTabGlossary/GlossaryConstants'
-import IconClose from '../icons/IconClose'
+import IconClose from '../../../img/icons/IconClose'
 import {usePrevious} from '../../hooks/usePrevious'
 import {CreateProjectContext} from './CreateProjectContext'
 import DriveIcon from '../../../img/icons/DriveIcon'
 import {useGDrivePicker} from './hooks/useGDrivePicker'
 import {useGDriveFiles} from './hooks/useGDriveFiles'
+import {SpinnerLoader} from '../common/SpinnerLoader'
 
 export const UploadGdrive = () => {
   const {
@@ -96,9 +97,7 @@ export const UploadGdrive = () => {
 function LoadingOverlay() {
   return (
     <div className="modal-gdrive">
-      <div className="ui active inverted dimmer">
-        <div className="ui massive text loader">Uploading Files</div>
-      </div>
+      <SpinnerLoader label="Uploading Files" />
     </div>
   )
 }
@@ -109,7 +108,7 @@ function GDriveFileList({files, onDelete}) {
       {files.map((f, idx) => (
         <div key={idx} className="file-item">
           <div className="file-item-name">
-            <span className={`file-icon ${CommonUtils.getIconClass(f.ext)}`} />
+            {CommonUtils.getFileIcon(f.ext)}
             {f.name}
           </div>
           <div>{getPrintableFileSize(f.size)}</div>

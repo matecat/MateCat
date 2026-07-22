@@ -14,7 +14,7 @@ const modalElement = document.createElement('div')
 modalElement.id = 'modal'
 document.body.appendChild(modalElement)
 const mountPoint = createRoot(modalElement)
-afterAll(() => mountPoint.unmount())
+afterAll(() => act(() => mountPoint.unmount()))
 
 window.config = {
   isLoggedIn: 1,

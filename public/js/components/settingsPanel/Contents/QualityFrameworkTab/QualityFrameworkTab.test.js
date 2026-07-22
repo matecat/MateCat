@@ -26,6 +26,16 @@ global.config = {
   isLoggedIn: 1,
 }
 
+class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+beforeAll(() => {
+  window.ResizeObserver = ResizeObserver
+  return (window.open = jest.fn())
+})
+
 const wrapperElement = document.createElement('div')
 const WrapperComponent = (contextProps) => {
   const ref = useRef()
@@ -271,7 +281,7 @@ test('Category rename', async () => {
   refresh()
 
   const categoryRow = within(screen.getByTestId('qf-category-row-2'))
-  const menuButtonShowItems = categoryRow.getByTestId('menu-button-show-items')
+  const menuButtonShowItems = categoryRow.getByTestId('qf-category-menu')
   expect(menuButtonShowItems).toBeInTheDocument()
 
   await user.click(menuButtonShowItems)
@@ -328,7 +338,7 @@ test('Category moveup and movedown', async () => {
   refresh()
 
   let categoryRow = within(screen.getByTestId('qf-category-row-2'))
-  let menuButtonShowItems = categoryRow.getByTestId('menu-button-show-items')
+  let menuButtonShowItems = categoryRow.getByTestId('qf-category-menu')
   expect(menuButtonShowItems).toBeInTheDocument()
 
   await user.click(menuButtonShowItems)
@@ -347,12 +357,15 @@ test('Category moveup and movedown', async () => {
   ).toBe('Style (readability, consistent style and tone)')
 
   categoryRow = within(screen.getByTestId('qf-category-row-2'))
-  menuButtonShowItems = categoryRow.getByTestId('menu-button-show-items')
+  menuButtonShowItems = categoryRow.getByTestId('qf-category-menu')
 
   // movedown
   await user.click(menuButtonShowItems)
 
-  expect(screen.getByTestId('menu-button-moveup')).toBeDisabled()
+  expect(screen.getByTestId('menu-button-moveup')).toHaveAttribute(
+    'aria-disabled',
+    'true',
+  )
 
   const moveDownButton = screen.getByTestId('menu-button-movedown')
   await user.click(moveDownButton)
@@ -390,7 +403,7 @@ test('Category delete', async () => {
   refresh()
 
   const categoryRow = within(screen.getByTestId('qf-category-row-2'))
-  const menuButtonShowItems = categoryRow.getByTestId('menu-button-show-items')
+  const menuButtonShowItems = categoryRow.getByTestId('qf-category-menu')
   expect(menuButtonShowItems).toBeInTheDocument()
 
   await user.click(menuButtonShowItems)
@@ -512,9 +525,7 @@ test('Severity column rename', async () => {
 
   const severityColumn = within(screen.getByTestId('qf-severity-column-1'))
 
-  const menuButtonShowItems = severityColumn.getByTestId(
-    'menu-button-show-items',
-  )
+  const menuButtonShowItems = severityColumn.getByTestId('qf-severity-menu')
   expect(menuButtonShowItems).toBeInTheDocument()
 
   await user.click(menuButtonShowItems)
@@ -562,7 +573,7 @@ test('Severity column move left and right', async () => {
   refresh()
 
   let severityColumn = within(screen.getByTestId('qf-severity-column-1'))
-  let menuButtonShowItems = severityColumn.getByTestId('menu-button-show-items')
+  let menuButtonShowItems = severityColumn.getByTestId('qf-severity-menu')
   expect(menuButtonShowItems).toBeInTheDocument()
 
   await user.click(menuButtonShowItems)
@@ -578,10 +589,13 @@ test('Severity column move left and right', async () => {
   expect(severities[1].label).toBe('Neutral')
 
   severityColumn = within(screen.getByTestId('qf-severity-column-0'))
-  menuButtonShowItems = severityColumn.getByTestId('menu-button-show-items')
+  menuButtonShowItems = severityColumn.getByTestId('qf-severity-menu')
   await user.click(menuButtonShowItems)
 
-  expect(screen.getByTestId('menu-button-moveleft')).toBeDisabled()
+  expect(screen.getByTestId('menu-button-moveleft')).toHaveAttribute(
+    'aria-disabled',
+    'true',
+  )
 
   const moveRightButton = screen.getByTestId('menu-button-moveright')
 
@@ -618,9 +632,7 @@ test('Severity delete', async () => {
   refresh()
 
   const severityColumn = within(screen.getByTestId('qf-severity-column-1'))
-  const menuButtonShowItems = severityColumn.getByTestId(
-    'menu-button-show-items',
-  )
+  const menuButtonShowItems = severityColumn.getByTestId('qf-severity-menu')
   expect(menuButtonShowItems).toBeInTheDocument()
 
   await user.click(menuButtonShowItems)

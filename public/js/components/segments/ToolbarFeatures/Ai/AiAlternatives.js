@@ -3,10 +3,11 @@ import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
 import SegmentActions from '../../../../actions/SegmentActions'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 import CommonUtils from '../../../../utils/commonUtils'
-import Alternatives from '../../../icons/Alternatives'
+import Alternatives from '../../../../../img/icons/Alternatives'
 import {getSelectedTextWithTags} from '../../utils/DraftMatecatUtils/getSelectedTextWithTags'
+import PropTypes from 'prop-types'
 
-export const AiAlternatives = ({sid, editArea}) => {
+export const AiAlternatives = ({sid, editArea, isIconsBundled}) => {
   const {userInfo} = useContext(ApplicationWrapperContext)
 
   const selectedText = useMemo(() => {
@@ -31,7 +32,7 @@ export const AiAlternatives = ({sid, editArea}) => {
       segmentId: sid,
       selectedText,
     }
-    CommonUtils.dispatchTrackingEvents('AiAlternatives', message)
+    CommonUtils.dispatchTrackingEvents('LaraStyle', message)
   }
 
   const isDisabled =
@@ -40,9 +41,9 @@ export const AiAlternatives = ({sid, editArea}) => {
   return (
     !config.isReview && (
       <Button
-        className="segment-target-toolbar-icon"
-        size={BUTTON_SIZE.ICON_SMALL}
-        mode={BUTTON_MODE.OUTLINE}
+        className={`last-ai-feature-button ${isIconsBundled ? 'segment-target-toolbar-icon-bundled' : ''}`}
+        size={isIconsBundled ? BUTTON_SIZE.SMALL : BUTTON_SIZE.ICON_SMALL}
+        mode={isIconsBundled ? BUTTON_MODE.GHOST : BUTTON_MODE.OUTLINE}
         title={
           isDisabled
             ? 'Alternative translations by Lara - Highlight parts of the target text to enable'
@@ -51,8 +52,15 @@ export const AiAlternatives = ({sid, editArea}) => {
         onClick={openTab}
         disabled={isDisabled}
       >
-        <Alternatives size={16} />
+        <Alternatives size={isIconsBundled ? 18 : 16} />
+        {isIconsBundled && 'Ai alternatives'}
       </Button>
     )
   )
+}
+
+AiAlternatives.propTypes = {
+  sid: PropTypes.string.isRequired,
+  editArea: PropTypes.object.isRequired,
+  isIconsBundled: PropTypes.bool,
 }

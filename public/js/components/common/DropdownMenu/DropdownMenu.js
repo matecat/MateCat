@@ -6,6 +6,7 @@ import * as Popover from '@radix-ui/react-popover'
 import PropTypes from 'prop-types'
 
 import {Button, BUTTON_MODE, BUTTON_SIZE, BUTTON_TYPE} from '../Button/Button'
+import styles from './DropdownMenu.module.scss'
 
 import ChevronDown from '../../../../img/icons/ChevronDown'
 import Check from '../../../../img/icons/Check'
@@ -42,7 +43,7 @@ export const DropdownMenu = ({
   const defaultToggleButtonProps = {
     type: BUTTON_TYPE.DEFAULT,
     mode: BUTTON_MODE.GHOST,
-    size: BUTTON_SIZE.ICON_SMALL,
+    size: BUTTON_SIZE.ICON_XSMALL,
     children: <DotsHorizontal />,
     ...toggleButtonProps,
     className: `${toggleButtonProps.className || ''} ${className}`,
@@ -65,7 +66,7 @@ export const DropdownMenu = ({
       return (
         <RadixDropdownMenu.Separator
           key={`${level}-${index}`}
-          className="dropdownmenu-separator"
+          className={styles['dropdownmenu-separator']}
         />
       )
     } else if (item.onChange) {
@@ -84,7 +85,7 @@ export const DropdownMenu = ({
       return (
         <RadixDropdownMenu.RadioItem
           key={`${level}-${index}`}
-          className={`dropdownmenu-item selectable ${item.type ? item.type : ''}`}
+          className={[styles['dropdownmenu-item'], styles.selectable, item.type && styles[item.type]].filter(Boolean).join(' ')}
           onMouseDown={preventBubbling}
           onClick={preventBubbling}
           value={item.value}
@@ -93,7 +94,7 @@ export const DropdownMenu = ({
           aria-label={item.tooltip}
         >
           {item.label}
-          <RadixDropdownMenu.ItemIndicator className="dropdownmenu-indicator">
+          <RadixDropdownMenu.ItemIndicator className={styles['dropdownmenu-indicator']}>
             <Check size={16} />
           </RadixDropdownMenu.ItemIndicator>
         </RadixDropdownMenu.RadioItem>
@@ -103,19 +104,19 @@ export const DropdownMenu = ({
       return (
         <RadixDropdownMenu.Sub key={`${level}-${index}`}>
           <RadixDropdownMenu.SubTrigger
-            className={`dropdownmenu-item subTrigger`}
+            className={[styles['dropdownmenu-item'], styles.subTrigger].join(' ')}
             onMouseDown={preventBubbling}
             onClick={preventBubbling}
             data-testid={item.testId}
             aria-label={item.tooltip}
           >
             {item.label}
-            <span className="dropdownmenu-subIcon">
+            <span className={styles['dropdownmenu-subIcon']}>
               <ChevronDown size={10} />
             </span>
           </RadixDropdownMenu.SubTrigger>
           <RadixDropdownMenu.Portal container={portalTarget ?? document.body}>
-            <RadixDropdownMenu.SubContent className="dropdownmenu subDropdown">
+            <RadixDropdownMenu.SubContent className={[styles.dropdownmenu, styles.subDropdown].join(' ')}>
               {item.items.map((item, i) => renderItem(item, i, `2-${index}`))}
             </RadixDropdownMenu.SubContent>
           </RadixDropdownMenu.Portal>
@@ -125,16 +126,14 @@ export const DropdownMenu = ({
       return (
         <div
           key={`${level}-${index}`}
-          className={`dropdownmenu-item ${item.type ? item.type : ''} ${
-            item.selected ? 'selected' : ''
-          }`}
+          className={[styles['dropdownmenu-item'], item.type && styles[item.type], item.selected && styles.selected].filter(Boolean).join(' ')}
           onMouseDown={preventBubbling}
           onClick={(e) => {
             if (item.disabled) {
               e.preventDefault()
               e.stopPropagation()
             } else {
-              item.onClick()
+              item.onClick(e)
             }
             setOpen(false)
           }}
@@ -150,9 +149,7 @@ export const DropdownMenu = ({
       return (
         <RadixDropdownMenu.Item
           key={`${level}-${index}`}
-          className={`dropdownmenu-item ${item.type ? item.type : ''} ${
-            item.selected ? 'selected' : ''
-          }`}
+          className={[styles['dropdownmenu-item'], item.type && styles[item.type], item.selected && styles.selected].filter(Boolean).join(' ')}
           onMouseDown={preventBubbling}
           onClick={preventBubbling}
           onSelect={item.onClick}
@@ -177,10 +174,10 @@ export const DropdownMenu = ({
           <RadixDropdownMenu.Content
             sideOffset={sideOffset}
             align={align}
-            className={`dropdownmenu ${dropdownClassName}`}
+            className={[styles.dropdownmenu, dropdownClassName].filter(Boolean).join(' ')}
           >
             {items.map(renderItem)}
-            <RadixDropdownMenu.Arrow className="dropdownMenuArrow" />
+            <RadixDropdownMenu.Arrow className={styles.dropdownMenuArrow} />
           </RadixDropdownMenu.Content>
         </RadixDropdownMenu.Portal>
       </RadixDropdownMenu.Root>
@@ -196,12 +193,12 @@ export const DropdownMenu = ({
         <Popover.Portal container={portalTarget ?? document.body}>
           <Popover.Content
             sideOffset={sideOffset}
-            className={`dropdownmenu dropdownmenu-popover ${dropdownClassName}`}
+            className={[styles.dropdownmenu, styles['dropdownmenu-popover'], dropdownClassName].filter(Boolean).join(' ')}
             onOpenAutoFocus={(e) => e.preventDefault()}
             onCloseAutoFocus={(e) => e.preventDefault()}
           >
             {items.map(renderItem)}
-            <Popover.Arrow className="dropdownMenuArrow" />
+            <Popover.Arrow className={styles.dropdownMenuArrow} />
           </Popover.Content>
         </Popover.Portal>
       </div>

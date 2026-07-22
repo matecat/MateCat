@@ -49,8 +49,8 @@ import FatalErrorModal from '../components/modals/FatalErrorModal'
 import ContextPreviewChannel from '../utils/contextPreviewChannel'
 import {extractSegmentContextFields} from '../utils/contextPreviewUtils'
 import useResizable from '../hooks/useResizable'
-import IconRedirect from '../components/icons/IconRedirect'
-import IconDown from '../components/icons/IconDown'
+import IconRedirect from '../../img/icons/IconRedirect'
+import IconDown from '../../img/icons/IconDown'
 import {
   Button,
   BUTTON_MODE,
@@ -676,7 +676,6 @@ function CatTool() {
         projectName={config.project_name}
         projectCompletionEnabled={config.project_completion_feature_enabled}
         secondRevisionsCount={config.secondRevisionsCount}
-        overallQualityClass={config.overall_quality_class}
         qualityReportHref={config.quality_report_href}
         allowLinkToAnalysis={config.allow_link_to_analysis}
         analysisEnabled={config.analysis_enabled}
@@ -704,7 +703,7 @@ function CatTool() {
           }
         >
           {isUserLogged ? (
-            <article id="file" className="loading mbc-commenting-closed">
+            <article id="file" className="loading comment-closed">
               <div className="article-segments-container">
                 <SegmentsContainer
                   isReview={config.isReview}

@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import styles from './Switch.module.scss'
 
 const Switch = ({
   name,
@@ -19,8 +20,8 @@ const Switch = ({
   }
 
   return (
-    <div className="switch-container-outer" onClick={onClick}>
-      <label className={`switch-container ${className}`}>
+    <div className={styles['switch-container-outer']} onClick={onClick}>
+      <label className={[styles['switch-container'], className].filter(Boolean).join(' ')}>
         <input
           type="checkbox"
           name={name}
@@ -35,11 +36,11 @@ const Switch = ({
       </label>
       {showText ? (
         disabled && disabledText ? (
-          <span className="switch-container-disabled">{disabledText}</span>
+          <span className={styles['switch-container-disabled']}>{disabledText}</span>
         ) : active && activeText ? (
-          <span className="switch-container-active">{activeText}</span>
+          <span className={styles['switch-container-active']}>{activeText}</span>
         ) : !active && inactiveText ? (
-          <span className="switch-container-inactive">{inactiveText}</span>
+          <span className={styles['switch-container-inactive']}>{inactiveText}</span>
         ) : null
       ) : null}
     </div>

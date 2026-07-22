@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {QualityFrameworkTabContext} from './QualityFrameworkTabContext'
 import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
-import IconClose from '../../../icons/IconClose'
+import IconClose from '../../../../../img/icons/IconClose'
 import Tooltip from '../../../common/Tooltip'
 
 export const SeveritiyRow = ({severity}) => {
@@ -118,13 +118,12 @@ export const SeveritiyRow = ({severity}) => {
           onFocus={selectAll}
           onBlur={onBlur}
         />
-        <Tooltip
-          stylePointerElement={{position: 'absolute'}}
-          content="Remove severity"
-        >
+        <Tooltip content="Remove severity">
           <Button
             ref={removeSeverityRef}
-            size={BUTTON_SIZE.ICON_SMALL}
+            l
+            className="quaity-framework-remove-severity-button"
+            size={BUTTON_SIZE.ICON_XSMALL}
             onClick={removeSeverity}
           >
             <IconClose size={9} />

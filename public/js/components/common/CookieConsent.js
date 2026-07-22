@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import Cookies from 'js-cookie'
+import styles from './CookieConsent.module.scss'
 
 const COOKIE_NAME = 'cookiebanner-accepted'
 const COOKIE_TTL_DAYS = 365
@@ -28,8 +29,8 @@ export const CookieConsent = () => {
   setTimeout(consent, 20000)
 
   return visible ? (
-    <div className="cookiebanner">
-      <div className="cookiebanner-close" onClick={() => consent()}>
+    <div className={styles.cookiebanner}>
+      <div className={styles['cookiebanner-close']} onClick={() => consent()}>
         ✖
       </div>
       <span>

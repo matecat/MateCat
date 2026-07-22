@@ -1,5 +1,6 @@
 .*
 !/.gitignore
+!/.stylelintrc.json
 # IDE stuffs
 .settings
 .idea

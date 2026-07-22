@@ -2,7 +2,8 @@ import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Button, BUTTON_SIZE} from '../Button/Button'
 import {debounce} from 'lodash'
-import IconDown from '../../icons/IconDown'
+import IconDown from '../../../../img/icons/IconDown'
+import styles from './NumericStepper.module.scss'
 
 export const NumericStepper = ({
   value,
@@ -61,7 +62,7 @@ export const NumericStepper = ({
   const debounceSelectAll = debounce((event) => event.target.select(), 100)
 
   return (
-    <div className="numeric-stepper-component">
+    <div className={styles['numeric-stepper-component']}>
       <input
         ref={ref}
         type="string"
@@ -76,16 +77,16 @@ export const NumericStepper = ({
         onBlur={handlerBlur}
         onKeyUp={({key}) => key === 'Enter' && ref.current.blur()}
       />
-      <div className="container-controls">
+      <div className={styles['container-controls']}>
         <Button
-          size={BUTTON_SIZE.ICON_SMALL}
+          size={BUTTON_SIZE.ICON_XSMALL}
           disabled={disabled}
           onClick={increase}
         >
           <IconDown size={16} />
         </Button>
         <Button
-          size={BUTTON_SIZE.ICON_SMALL}
+          size={BUTTON_SIZE.ICON_XSMALL}
           disabled={disabled}
           onClick={decrease}
         >

@@ -9,6 +9,12 @@ import ModalsActions from '../../../../actions/ModalsActions'
 import ShareTmModal from '../../../modals/ShareTmModal'
 import CatToolActions from '../../../../actions/CatToolActions'
 import UserStore from '../../../../stores/UserStore'
+import {
+  Button,
+  BUTTON_HTML_TYPE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../common/Button/Button'
 
 export const ShareResource = ({row, onClose, onShare}) => {
   const [emails, setEmails] = useState('')
@@ -50,9 +56,12 @@ export const ShareResource = ({row, onClose, onShare}) => {
           CatToolActions.addNotification({
             title: 'Resource shared',
             type: 'success',
-            text: `The resource <b>${row.name}</b> has been shared.`,
+            text: (
+              <>
+                The resource <b>{row.name}</b> has been shared.
+              </>
+            ),
             position: 'br',
-            allowHtml: true,
             timer: 5000,
           })
           setStatus({successfull: true})
@@ -90,7 +99,7 @@ export const ShareResource = ({row, onClose, onShare}) => {
 
   const openShareTmModal = () => {
     const props = {
-      description: row.description,
+      description: row.name,
       tmKey: row.key,
       user: userInfo.user,
       users: sharedUsers,
@@ -149,21 +158,23 @@ export const ShareResource = ({row, onClose, onShare}) => {
           />
         </div>
         <div className="translation-memory-glossary-tab-buttons-group align-center">
-          <button
-            type="submit"
-            className="ui primary button settings-panel-button-icon confirm-button"
+          <Button
+            type={BUTTON_TYPE.PRIMARY}
+            size={BUTTON_SIZE.SMALL}
+            htmlType={BUTTON_HTML_TYPE.SUBMIT}
             disabled={isFormDisabled || isErrorExport}
           >
             Share
-          </button>
+          </Button>
 
-          <button
-            type="reset"
-            className="ui button orange close-button"
+          <Button
+            type={BUTTON_TYPE.WARNING}
+            size={BUTTON_SIZE.ICON_SMALL}
+            htmlType={BUTTON_HTML_TYPE.RESET}
             disabled={isFormDisabled}
           >
             <Close size={18} />
-          </button>
+          </Button>
         </div>
       </form>
     </div>

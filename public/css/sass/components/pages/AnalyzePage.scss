@@ -1,11 +1,10 @@
 @use "../../common-main";
+@use '../../commons/reset';
 @use '../../commons/filter-teams';
-@use '../../commons/icons';
 @use '../../commons/shadows';
 @use '../../commons/project';
 @use '../../commons/divider';
 @use '../../commons/progress-mc-bar';
-@use '../../commons/buttons';
 @use '../signin/OnBoarding';
 
 @use '../../modals/split_modal';
@@ -16,10 +15,4 @@
 @use '../../commons/analyze';
 @use '../../commons/outsource';
 @use '../../commons/date-picker-translator';
-@use '../common/CookieConsent';
-@use '../common/Tooltip';
-@use '../common/Button';
-@use '../common/LabelWithTooltip';
-@use '../common/Switch';
-@use '../common/Accordion';
 @use '../Analyze/JobAnalyze';

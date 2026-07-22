@@ -30,6 +30,7 @@ const fakeProjectsData = {
       editingLogUrl: '/editlog/90-Y2Q3OTNjE5ZG629',
       qAReportUrl: '/revise-summary/90-Y2Q3OTNjE5ZG629',
       reviseUrl: '/revise/test/en-US-la-XN/90-0-a192d66ec1f5#58',
+      downloadLabel: {label: 'Draft'},
     },
   },
   jobSplitted: {
@@ -118,7 +119,7 @@ const getFakeProperties = (fakeProperties) => {
       getDownloadLabel: {
         label: (
           <>
-            <i className="icon-eye icon" /> Draft
+            Draft
           </>
         ),
         action: () => {},
@@ -244,7 +245,7 @@ test('Check items href link', async () => {
 
 test('Splitted job: check Merge item', async () => {
   const {props} = getFakeProperties(fakeProjectsData.jobSplitted)
-  render(<JobMenu {...props} />)
+  render(<JobMenu {...{...props, isJobChunks: true}} />)
   await userEvent.click(screen.getByTestId('job-menu-button'))
 
   expect(screen.getByText('Merge')).toBeInTheDocument()

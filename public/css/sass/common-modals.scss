@@ -1,29 +1,7 @@
 @use 'modals/instructionsModal';
 @use 'modals/tmShareModal';
 @use 'modals/PreferenceModal';
-@use 'commons/colors';
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-}
-
-h2 {
-  font-size: 22px;
-}
-
-a {
-  font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-}
-
-::-webkit-input-placeholder {
-  /* Chrome/Opera/Safari */
-  font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-}
+@use 'tokens/colors';
 
 /***********************/
 /***** Login Footer ****/
@@ -34,11 +12,11 @@ a {
   text-decoration: underline;
   float: left;
   cursor: pointer;
-  color: colors.$linkBlue;
+  color: colors.$blue700;
 
   &:hover {
     text-decoration: none;
-    color: colors.$linkBlueHover;
+    color: colors.$blue400;
   }
 }
 
@@ -69,7 +47,7 @@ a {
 .forgot-password {
   cursor: pointer;
   text-decoration: underline;
-  color: colors.$linkBlue;
+  color: colors.$blue700;
 }
 
 .dqf-modal input[type='text'],
@@ -77,34 +55,32 @@ a {
 .login-container-left input,
 .register-form-container input[type='text'],
 .register-form-container input[type='password'],
-.forgot-password-modal input,
-.reset-password-modal input,
 .user-info-form input {
   margin-top: 5px;
   font-size: 14px;
   width: 100%;
   padding: 0.7em 0.6em;
   display: inline-block;
-  border: 1px solid #ccc;
-  box-shadow: inset 0 1px 3px #ddd;
+  border: 1px solid colors.$grey200;
+  box-shadow: inset 0 1px 3px colors.$grey200;
   border-radius: 4px;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   font-size: 15px;
-  color: #333;
+  color: colors.$grey1300;
 }
 
 .dqf-modal input[disabled] {
-  color: #999;
+  color: colors.$grey400;
   cursor: not-allowed;
-  background: colors.$grey2;
+  background: colors.$grey300;
 }
 
 .user-info-form input {
   margin-top: 5px;
   width: 100%;
-  color: #000;
+  color: colors.$black;
 }
 
 .login-button,
@@ -125,35 +101,10 @@ a {
   width: 245px;
 }
 
-.forgot-password-modal,
-.reset-password-modal {
-  width: 100%;
-  margin: 0 auto;
-  padding: 20px 0;
-}
-
-.forgot-password-modal {
-  background: url(/public/img/matecat_watch-left-border.png) no-repeat -34px
-    136px;
-  background-size: 23%;
-  /*width: 385px;*/
-  padding: 25px 96px;
-  text-align: right;
-}
-
-.forgot-password-modal p {
-  text-align: left;
-}
-
-.reset-password-modal {
-  padding: 5% 10%;
-  width: 80%;
-}
-
 .preference-modal-message {
-  box-shadow: 0 2px 2px #e2e2e2;
+  box-shadow: 0 2px 2px colors.$grey100;
   border-radius: 2px;
-  border: 1px solid #ccc;
+  border: 1px solid colors.$grey200;
   line-height: 20px;
   padding: 10px 15px;
   background: rgb(195, 224, 195);
@@ -193,107 +144,121 @@ a {
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgb(0, 0, 0);
+  background-color: colors.$black;
   background-color: rgba(0, 0, 0, 0.4);
 
-  p {
-    line-height: 25px;
-  }
+}
 
-  .matecat-modal-header {
-    text-align: left;
-    min-height: 50px;
-    border-radius: 4px 4px 0 0;
-    overflow: visible;
-    max-height: inherit;
-    font-size: 23px;
-    background: #002b5c;
-    padding: 7px 10px 7px 24px;
-    background-size: 35px;
-    color: #fff;
-    margin: 0 !important;
-    display: grid;
-    grid-template-columns: 40px 1fr 24px;
-    position: relative;
-    grid-column-gap: 16px;
-    align-items: center;
+.matecat-modal p,
+.matecat-modal-overlay p {
+  line-height: 25px;
+}
 
-    h2 {
-      margin: 0 !important;
-      line-height: 30px;
-      font-size: 24px;
-      width: auto !important;
-      float: none !important;
-      font-family: Calibri, Arial, Helvetica, sans-serif;
-      font-weight: normal;
-    }
-  }
+.matecat-modal .matecat-modal-header,
+.matecat-modal-overlay .matecat-modal-header {
+  text-align: left;
+  min-height: 50px;
+  border-radius: 16px 16px 0 0;
+  overflow: visible;
+  max-height: inherit;
+  font-size: 23px;
+  background: colors.$blue900;
+  padding: 7px 10px 7px 24px;
+  background-size: 35px;
+  color: colors.$white;
+  margin: 0 !important;
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  position: relative;
+  grid-column-gap: 8px;
+  align-items: center;
+}
 
-  .modal-logo {
-    background-size: inherit;
-    background: url(/public/img/logo_matecat_small_white.svg) no-repeat;
-    background-position-y: center;
-    background-size: contain;
-    width: 35px;
-    height: 35px;
-  }
+.matecat-modal .matecat-modal-header h2,
+.matecat-modal-overlay .matecat-modal-header h2 {
+  margin: 0 !important;
+  line-height: 30px;
+  font-size: 24px;
+  width: auto !important;
+  float: none !important;
+  font-family: Calibri, Arial, Helvetica, sans-serif;
+  font-weight: normal;
+}
 
-  /* Modal Body */
-  .matecat-modal-body {
-    min-height: 50px;
-    height: 100%;
-    /*color: #000;*/
-    background-color: colors.$grey5;
-    border-radius: 0 0 4px 4px;
-    margin: 0 auto;
-    overflow: hidden;
-    text-align: left;
+.matecat-modal .modal-logo,
+.matecat-modal-overlay .modal-logo {
+  background-size: inherit;
+  background: url(/public/img/logo_matecat_small_white.svg) no-repeat;
+  background-position-y: center;
+  background-size: contain;
+  width: 35px;
+  height: 35px;
+}
 
-    h1 {
-      text-align: center;
-    }
-  }
+/* Modal Body */
+.matecat-modal .matecat-modal-body,
+.matecat-modal-overlay .matecat-modal-body {
+  min-height: 50px;
+  height: 100%;
+  /*color: #000;*/
+  background-color: colors.$grey50;
+  border-radius: 0 0 16px 16px;
+  margin: 0 auto;
+  overflow: hidden;
+  text-align: left;
+}
 
-  /* Modal Footer */
-  .matecat-modal-footer {
-    padding: 2px 16px;
-    color: black;
-    text-align: left;
-    min-height: 30px;
-  }
+.matecat-modal .matecat-modal-body h1,
+.matecat-modal-overlay .matecat-modal-body h1 {
+  text-align: center;
+}
 
-  /* Modal Content */
-  .matecat-modal-content {
-    margin: auto;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 60%;
-    border-radius: 4px;
-    -webkit-animation-name: animatetop;
-    -webkit-animation-duration: 0.4s;
-    animation-name: animatetop;
-    animation-duration: 0.4s;
-    text-align: center;
-    max-width: 640px;
-    min-width: 400px;
-    z-index: 2;
-    .half-form-left {
-      margin-right: 4%;
-    }
+/* Modal Footer */
+.matecat-modal .matecat-modal-footer,
+.matecat-modal-overlay .matecat-modal-footer {
+  padding: 2px 16px;
+  color: colors.$black;
+  text-align: left;
+  min-height: 30px;
+}
 
-    .half-form {
-      width: 48%;
-      float: left;
-    }
-  }
-  .matecat-modal-background {
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    position: relative;
-  }
+/* Modal Content */
+.matecat-modal .matecat-modal-content,
+.matecat-modal-overlay .matecat-modal-content {
+  margin: auto;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  border-radius: 4px;
+  -webkit-animation-name: animatetop;
+  -webkit-animation-duration: 0.4s;
+  animation-name: animatetop;
+  animation-duration: 0.4s;
+  text-align: center;
+  max-width: 640px;
+  min-width: 400px;
+  z-index: 2;
+}
+
+.matecat-modal .matecat-modal-content .half-form-left,
+.matecat-modal-overlay .matecat-modal-content .half-form-left {
+  margin-right: 4%;
+}
+
+.matecat-modal .matecat-modal-content .half-form,
+.matecat-modal-overlay .matecat-modal-content .half-form {
+  width: 48%;
+  float: left;
+}
+
+.matecat-modal .matecat-modal-background,
+.matecat-modal-overlay .matecat-modal-background {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  position: relative;
 }
 
 .matecat-modal-overlay {
@@ -303,71 +268,62 @@ a {
   left: 6px;
   bottom: 48px;
   top: unset;
-  width: 325px;
-  height: 342px;
+  width: 380px;
+  height: 380px;
   overflow: auto;
   background-color: unset;
 
-  .modal-logo {
-    width: 34px;
-  }
+}
 
-  .matecat-modal-content {
-    width: 320px;
-    min-width: unset;
-    box-shadow:
-      0 0 0 #e0e0e0,
-      0 0 2px rgba(0, 0, 0, 0.12),
-      0 2px 4px rgba(0, 0, 0, 0.24) !important;
-  }
+.matecat-modal-overlay .modal-logo {
+  width: 34px;
+}
 
-  .matecat-modal-header {
-    text-align: left;
-    min-height: 32px;
-    border-radius: 4px 4px 0 0;
-    overflow: visible;
-    max-height: inherit;
-    background: #002b5c;
-    padding: 6px 10px 3px 24px;
-    background-size: 31px;
-    color: #fff;
-    margin: 0 !important;
-    display: grid;
-    grid-template-columns: 35px 1fr 24px;
-    position: relative;
-    grid-column-gap: 16px;
+.matecat-modal-overlay .matecat-modal-content {
+  width: 340px;
+  min-width: unset;
+  box-shadow:
+    0 0 0 colors.$grey200,
+    0 0 2px rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.24) !important;
+}
 
-    h2 {
-      font-size: 21px;
-    }
-  }
+.matecat-modal-overlay .matecat-modal-header {
+  text-align: left;
+  min-height: 32px;
+  border-radius: 4px 4px 0 0;
+  overflow: visible;
+  max-height: inherit;
+  background: colors.$blue900;
+  padding: 6px 10px 3px 24px;
+  background-size: 31px;
+  color: colors.$white;
+  margin: 0 !important;
+  display: grid;
+  grid-template-columns: 35px 1fr 40px;
+  position: relative;
+  grid-column-gap: 8px;
+}
 
-  .matecat-modal-body {
-    h1 {
-      font-size: 1.7rem;
-    }
+.matecat-modal-overlay .matecat-modal-header h2 {
+  font-size: 21px;
+}
 
-    .matecat-modal-textarea {
-      padding: 0;
-    }
+.matecat-modal-overlay .matecat-modal-body h1 {
+  font-size: 1.7rem;
+}
 
-    .matecat-modal-middle {
-      padding: 0 20px;
-    }
+.matecat-modal-overlay .matecat-modal-body .matecat-modal-textarea {
+  padding: 0;
+}
 
-    .matecat-modal-top,
-    .matecat-modal-bottom {
-      padding: 15px 17px;
-    }
+.matecat-modal-overlay .matecat-modal-body .matecat-modal-middle {
+  padding: 0 20px;
+}
 
-    .ui.button {
-      font-size: 15px;
-    }
-
-    .ui.button.cancel-button {
-      //margin-right: 45px;
-    }
-  }
+.matecat-modal-overlay .matecat-modal-body .matecat-modal-top,
+.matecat-modal-overlay .matecat-modal-body .matecat-modal-bottom {
+  padding: 15px 20px;
 }
 
 .user-link {
@@ -381,21 +337,6 @@ a {
   gap: 16px;
 }
 
-/* The Close Button */
-.close-matecat-modal {
-  color: #fff;
-  float: right;
-  font-size: 20px;
-  font-weight: bold;
-}
-
-.close-matecat-modal:hover,
-.close-matecat-modal:focus {
-  color: red;
-  text-decoration: none;
-  cursor: pointer;
-}
-
 /* buttons */
 
 .matecat-modal-content .disabled,
@@ -405,7 +346,7 @@ a {
   cursor: default;
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
-  border: 1px solid #666;
+  border: 1px solid colors.$grey700;
 }
 
 .matecat-modal-content .disabled,
@@ -414,232 +355,36 @@ a {
   cursor: default;
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
-  background: #d6d6d6;
-}
-
-.x-popup,
-.x-popup2 {
-  font-family: 'icomoon';
-  speak: none;
-  font-style: normal;
-  font-weight: normal;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 1;
-  /* Better Font Rendering =========== */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  &:hover {
-    color: colors.$darkBlueTransparent;
-  }
-}
-
-.x-popup:before,
-.x-popup2:before {
-  content: '\f057';
+  background: colors.$grey200;
 }
 
 .matecat-modal-content,
 .matecat-modal-overlay-content {
   font-size: 16px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
+}
 
-  .matecat-modal-middle,
-  .matecat-modal-bottom,
-  .matecat-modal-top {
-    padding: 25px;
+.matecat-modal-content .matecat-modal-middle,
+.matecat-modal-content .matecat-modal-bottom,
+.matecat-modal-content .matecat-modal-top,
+.matecat-modal-overlay-content .matecat-modal-middle,
+.matecat-modal-overlay-content .matecat-modal-bottom,
+.matecat-modal-overlay-content .matecat-modal-top {
+  padding: 25px;
+}
 
-    .ui.members-list {
-      min-height: 45px;
+.matecat-modal-content .check-conditions,
+.matecat-modal-overlay-content .check-conditions {
+  margin-left: 5px;
+}
 
-      .ui.divided.list {
-        top: 0px;
-        left: 0px;
-        bottom: 0px;
-        right: 0px;
-
-        overflow-y: auto;
-        max-height: 210px;
-        position: relative !important;
-        padding: 0;
-
-        .item {
-          border-top: none !important;
-        }
-      }
-
-      ::-webkit-scrollbar {
-        width: 10px;
-      }
-
-      /* Track */
-      ::-webkit-scrollbar-track {
-        -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-        -webkit-border-radius: 10px;
-        border-radius: 10px;
-      }
-
-      /* Handle */
-      ::-webkit-scrollbar-thumb {
-        -webkit-border-radius: 10px;
-        border-radius: 10px;
-        background: #a7a5a5;
-        -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
-      }
-
-      ::-webkit-scrollbar-thumb:window-inactive {
-        background: #a7a5a5;
-      }
-
-      &.team {
-        .item {
-          padding: 5px 5px 5px 0;
-
-          &:hover {
-            .mini.ui.button.right.floated {
-              display: inherit;
-            }
-
-            .content.pending-msg {
-              display: none;
-            }
-          }
-
-          .image {
-            width: 40px !important;
-            max-width: 40px;
-            height: 40px;
-            background-color: colors.$grey2;
-            border-radius: 50%;
-            vertical-align: middle;
-            text-align: center;
-            font-size: 17px;
-          }
-
-          .content.user {
-            font-weight: bold;
-            width: 340px;
-
-            &.invited {
-              font-weight: 100;
-            }
-          }
-
-          .content.email-user-invited {
-            font-weight: 100;
-            font-size: 14px;
-            color: colors.$grey1;
-          }
-
-          .content.pending-msg {
-            font-weight: 100;
-            font-size: 14px;
-            color: colors.$grey1;
-            white-space: nowrap;
-          }
-
-          .mini.ui.button.right.floated {
-            margin-top: 6px;
-            border: 1px solid #797979;
-            display: inherit;
-            border-radius: 2px;
-            font-family:
-              'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-            font-size: 14px;
-            padding: 6px 15px;
-            background-color: #f6f6f6;
-            white-space: nowrap;
-
-            &:hover {
-              box-shadow:
-                0 0 0 #e0e0e0,
-                0 0 2px rgba(0, 0, 0, 0.12),
-                0 2px 4px rgba(0, 0, 0, 0.24) !important;
-            }
-
-            &:focus {
-              box-shadow: none !important;
-            }
-
-            &:active {
-              box-shadow: none !important;
-            }
-          }
-
-          .mini.ui.primary.button {
-            border: 1px solid #797979;
-            border-radius: 2px;
-            font-family:
-              'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-            font-size: 14px;
-            padding: 6px 15px;
-            font-family:
-              'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-
-            i {
-              opacity: 1;
-            }
-          }
-
-          .ui.primary.button {
-            border: 1px solid #797979;
-            border-radius: 2px;
-            font-family:
-              'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-          }
-
-          .mini.ui.icon.button {
-            width: 30px;
-            height: 30px;
-            line-height: 20px;
-            text-align: center;
-            vertical-align: bottom;
-            border: 1px solid #797979;
-            border-radius: 2px;
-          }
-        }
-
-        .pending-invitation {
-          display: flex;
-          align-items: center;
-
-          .email {
-            padding-left: 0.5em;
-          }
-
-          .mini.ui.button.right.floated {
-            margin-top: 0;
-          }
-
-          > :last-child {
-            display: flex;
-            align-items: center;
-            margin-left: auto;
-          }
-        }
-      }
-    }
-  }
-
-  .matecat-modal-text {
-    padding: 10px 10px;
-    font-size: 17px;
-  }
-
-  .matecat-modal-textarea {
-    padding: 10px 10px;
-    resize: none;
-
-    textarea {
-      padding: 10px;
-      border: 1px solid grey;
-      border-radius: 4px;
-    }
-  }
-
-  .check-conditions {
-    margin-left: 5px;
-  }
+.matecat-modal-content .buttons-container,
+.matecat-modal-overlay-content .buttons-container {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+  width: 100%;
+  padding: 20px;
 }
 
 .pull-left {
@@ -650,43 +395,11 @@ a {
   float: right !important;
 }
 
-.create-team-modal,
-.modify-team-modal,
-.shortcuts-modal {
-  .create-team {
-    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-    padding: 11px 22px;
-    vertical-align: top;
-    font-size: 18px;
-    margin-right: 0px;
-    border-radius: 2px;
-
-    &.primary.button {
-      border-radius: 2px;
-    }
-  }
-}
-
-.modify-team-modal {
-}
-
-.ui.fluid.input > input {
-  font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-  box-shadow: inset 0 1px 3px #ddd;
-  font-size: 15px;
-}
-
-.ui.multiple.search.dropdown {
-  width: 100%;
-  box-shadow: inset 0 1px 3px #ddd;
-  font-size: 15px;
-}
-
 .btn-cancel.outsource-cancel-date {
   height: 16px;
 
   &:hover {
-    color: #333333;
+    color: colors.$grey1300;
   }
 }
 
@@ -708,7 +421,7 @@ a {
   .divider-line {
     height: 2px;
     width: 40%;
-    background-color: #c5c5c5;
+    background-color: colors.$grey200;
     margin-top: 10px;
     display: block;
     float: left;
@@ -717,375 +430,397 @@ a {
   span {
     float: left;
     width: 20%;
-    color: #656565;
+    color: colors.$grey700;
   }
 }
 
-.matecat-modal-content {
-  .message-modal {
-    padding: 25px 0;
-  }
-  .matecat-modal-buttons {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-    padding: 20px;
-    width: 100%;
-  }
+.matecat-modal-content .message-modal {
+  padding: 25px 0;
+}
 
-  .matecat-modal-middle {
-    padding: 0 25px;
+.matecat-modal-content .modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  gap: 16px;
+}
 
-    .ui.primary.button,
-    .ui.red.button {
-      font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-      border: 1px solid #797979;
-      border-radius: 2px;
-    }
-  }
+.matecat-modal-content .matecat-modal-middle {
+  padding: 0 25px;
+}
 
-  .create-team-modal {
-    .ui.members-list {
-      .ui.divided.list {
-        .item:first-child {
-        }
-      }
+.matecat-modal-content .modify-team-modal .no-result {
+  font-size: 14px;
+  color: colors.$grey700;
+  padding: 7px;
+}
 
-      .ui.divided.list.disabled {
-        border: none;
-        background-color: white;
-      }
-    }
-  }
+.matecat-modal-content .change-team-modal {
+  height: 305px;
+}
 
-  .modify-team-modal {
-    .matecat-modal-top {
-      .ui.fluid.input {
-        i {
-          display: none;
-        }
+.matecat-modal-content .change-team-modal .matecat-modal-top .move-ribbon {
+  background: colors.$grey100;
+  padding: 8px 15px;
+  border-radius: 4px;
+}
 
-        &:hover {
-          i {
-            display: inherit;
-          }
-        }
-      }
+.matecat-modal-content .change-team-modal .matecat-modal-top .move-ribbon .project-name {
+  font-weight: 600;
+}
 
-      .ui.icon.input > input:focus ~ i.icon {
-        opacity: 1;
-        display: inherit;
-      }
-    }
+.matecat-modal-content .change-team-modal .matecat-modal-top .move-ribbon .project-id {
+  float: right;
+}
 
-    .ui.members-list {
-      //min-height: 180px;
-      min-height: initial !important;
+.matecat-modal-content .change-team-modal .button {
+  font-size: 18px;
+  padding: 11px 22px;
+}
 
-      .ui.divided.list {
-        height: 210px;
+.matecat-modal-content .change-team-modal .dropdown .menu {
+  max-height: 85px !important;
+}
 
-        .item:first-child {
-          //border-top: none !important;
-        }
-      }
-    }
+.matecat-modal-content .change-team-modal .dropdown ::-webkit-scrollbar {
+  width: 10px;
+}
 
-    .no-result {
-      font-size: 14px;
-      color: #666666;
-      padding: 7px;
-    }
-  }
+/* Track */
+.matecat-modal-content .change-team-modal .dropdown ::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+}
 
-  .change-team-modal {
-    height: 305px;
+/* Handle */
+.matecat-modal-content .change-team-modal .dropdown ::-webkit-scrollbar-thumb {
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+  background: colors.$grey400;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+}
 
-    .matecat-modal-top {
-      .move-ribbon {
-        background: #e8e8e8;
-        padding: 8px 15px;
-        border-radius: 4px;
+.matecat-modal-content .change-team-modal .dropdown ::-webkit-scrollbar-thumb:window-inactive {
+  background: colors.$grey400;
+}
 
-        .project-name {
-          font-weight: 600;
-        }
-
-        .project-id {
-          float: right;
-        }
-      }
-    }
-
-    .button {
-      font-size: 18px;
-      padding: 11px 22px;
-    }
-
-    .dropdown {
-      .menu {
-        max-height: 85px !important;
-      }
-
-      ::-webkit-scrollbar {
-        width: 10px;
-      }
-
-      /* Track */
-      ::-webkit-scrollbar-track {
-        -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-        -webkit-border-radius: 10px;
-        border-radius: 10px;
-      }
-
-      /* Handle */
-      ::-webkit-scrollbar-thumb {
-        -webkit-border-radius: 10px;
-        border-radius: 10px;
-        background: #a7a5a5;
-        -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
-      }
-
-      ::-webkit-scrollbar-thumb:window-inactive {
-        background: #a7a5a5;
-      }
-
-      .default.text {
-        color: #000;
-      }
-    }
-  }
+.matecat-modal-content .change-team-modal .dropdown .default.text {
+  color: colors.$black;
 }
 
 .dropdown > .menu {
-  z-index: 100000000;
+  z-index: var(--z-dropdown);
 }
 
-.shortcuts-modal {
-  .matecat-modal-top {
-    padding: 15px 25px;
-  }
+.shortcuts-modal .matecat-modal-top {
+  padding: 15px 25px;
+}
 
-  .matecat-modal-middle {
-    padding: 10px 15px;
-    max-height: 530px;
-    overflow: auto;
+.shortcuts-modal .matecat-modal-middle {
+  padding: 10px 15px;
+  max-height: 530px;
+  overflow: auto;
+}
 
-    .shortcut-list {
-      &:not(:first-of-type) {
-        padding-top: 10px;
-      }
+.shortcuts-modal .matecat-modal-middle .shortcut-list:not(:first-of-type) {
+  padding-top: 10px;
+}
 
-      h2 {
-        padding-left: 10px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #dee7e8;
-      }
+.shortcuts-modal .matecat-modal-middle .shortcut-list h2 {
+  padding-left: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid colors.$grey100;
+}
 
-      .shortcut-item-list {
-        .shortcut-item {
-          padding: 7px 0 7px 10px;
-          margin: 3px 0;
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item {
+  padding: 7px 0 7px 10px;
+  margin: 3px 0;
+}
 
-          &:first-child {
-            margin-top: 10px;
-          }
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item:first-child {
+  margin-top: 10px;
+}
 
-          &:hover {
-            background: #f1f1f1;
-          }
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item:hover {
+  background: colors.$grey75;
+}
 
-          .shortcut-title,
-          .shortcut-keys {
-            display: inline-block;
-            width: 50%;
-          }
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item
+  .shortcut-title,
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item
+  .shortcut-keys {
+  display: inline-block;
+  width: 50%;
+}
 
-          .shortcut-keys {
-            .shortcuts {
-              text-align: right;
-              color: #03bdee;
-            }
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item
+  .shortcut-keys
+  .shortcuts {
+  text-align: right;
+  color: colors.$blue200;
+}
 
-            .mac,
-            .standard {
-              .keys {
-                content: '';
-                font-family: 'Courier New';
-                display: inline-block;
-                margin-left: 5px;
-                margin-right: 5px;
-                background: #909798;
-                padding: 0 5px;
-                line-height: 20px;
-                font-size: 12px;
-                color: white;
-                border-radius: 2px;
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item
+  .shortcut-keys
+  .mac
+  .keys,
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item
+  .shortcut-keys
+  .standard
+  .keys {
+  content: '';
+  font-family: 'Courier New';
+  display: inline-block;
+  margin-left: 5px;
+  margin-right: 5px;
+  background: colors.$grey400;
+  padding: 0 5px;
+  line-height: 20px;
+  font-size: 12px;
+  color: colors.$white;
+  border-radius: 2px;
+}
 
-                &:first-child {
-                  margin-left: 0px !important;
-                }
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item
+  .shortcut-keys
+  .mac
+  .keys:first-child,
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item
+  .shortcut-keys
+  .standard
+  .keys:first-child {
+  margin-left: 0px !important;
+}
 
-                &.ctrl:after {
-                  content: 'Ctrl';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.ctrl:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.ctrl:after {
+  content: 'Ctrl';
+}
 
-                &.Meta:after {
-                  content: 'Cmd';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.Meta:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.Meta:after {
+  content: 'Cmd';
+}
 
-                &.shift:after {
-                  content: 'Shift';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.shift:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.shift:after {
+  content: 'Shift';
+}
 
-                &.return:after {
-                  content: 'Enter';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.return:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.return:after {
+  content: 'Enter';
+}
 
-                &.meta:after {
-                  content: 'Cmd';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.meta:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.meta:after {
+  content: 'Cmd';
+}
 
-                &.alt:after {
-                  content: 'Alt';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.alt:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.alt:after {
+  content: 'Alt';
+}
 
-                &.option:after {
-                  content: 'Option';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.option:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.option:after {
+  content: 'Option';
+}
 
-                &.\31 :after {
-                  content: '1';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.\31 :after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.\31 :after {
+  content: '1';
+}
 
-                &.\32 :after {
-                  content: '2';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.\32 :after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.\32 :after {
+  content: '2';
+}
 
-                &.\33 :after {
-                  content: '3';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.\33 :after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.\33 :after {
+  content: '3';
+}
 
-                &.a:after {
-                  content: 'A';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.a:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.a:after {
+  content: 'A';
+}
 
-                &.c:after {
-                  content: 'C';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.c:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.c:after {
+  content: 'C';
+}
 
-                &.h:after {
-                  content: 'H';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.h:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.h:after {
+  content: 'H';
+}
 
-                &.i:after {
-                  content: 'I';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.i:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.i:after {
+  content: 'I';
+}
 
-                &.l:after {
-                  content: 'L';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.l:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.l:after {
+  content: 'L';
+}
 
-                &.n:after {
-                  content: 'N';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.n:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.n:after {
+  content: 'N';
+}
 
-                &.p:after {
-                  content: 'P';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.p:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.p:after {
+  content: 'P';
+}
 
-                &.z:after {
-                  content: 'Z';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.z:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.z:after {
+  content: 'Z';
+}
 
-                &.f:after {
-                  content: 'F';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.f:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.f:after {
+  content: 'F';
+}
 
-                &.k:after {
-                  content: 'K';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.k:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.k:after {
+  content: 'K';
+}
 
-                &.y:after {
-                  content: 'Y';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.y:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.y:after {
+  content: 'Y';
+}
 
-                &.s:after {
-                  content: 'S';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.s:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.s:after {
+  content: 'S';
+}
 
-                &.t:after {
-                  content: 'T';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.t:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.t:after {
+  content: 'T';
+}
 
-                &.q:after {
-                  content: 'Q';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.q:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.q:after {
+  content: 'Q';
+}
 
-                &.up:after {
-                  content: 'Arrow up';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.up:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.up:after {
+  content: 'Arrow up';
+}
 
-                &.right:after {
-                  content: 'Arrow right';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.right:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.right:after {
+  content: 'Arrow right';
+}
 
-                &.left:after {
-                  content: 'Arrow left';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.left:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.left:after {
+  content: 'Arrow left';
+}
 
-                &.down:after {
-                  content: 'Arrow down';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.down:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.down:after {
+  content: 'Arrow down';
+}
 
-                &.pagedown:after {
-                  content: 'Page Down';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.pagedown:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.pagedown:after {
+  content: 'Page Down';
+}
 
-                &.pageup:after {
-                  content: 'Page Up';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.pageup:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.pageup:after {
+  content: 'Page Up';
+}
 
-                &.previous:after {
-                  content: '<';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.previous:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.previous:after {
+  content: '<';
+}
 
-                &.next:after {
-                  content: '>';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.next:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.next:after {
+  content: '>';
+}
 
-                &.home:after {
-                  content: 'Home';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.home:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.home:after {
+  content: 'Home';
+}
 
-                &.arrows:after {
-                  content: 'Arrows';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.arrows:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.arrows:after {
+  content: 'Arrows';
+}
 
-                &.arrows-enter:after {
-                  content: 'Arrows/Enter';
-                }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.arrows-enter:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.arrows-enter:after {
+  content: 'Arrows/Enter';
+}
 
-                &.space:after {
-                  content: 'Space';
-                }
-                &.bracketLeft:after {
-                  content: '[';
-                }
-                &.bracketRight:after {
-                  content: ']';
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.space:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.space:after {
+  content: 'Space';
+}
 
-  .matecat-modal-bottom {
-    padding: 15px 25px;
-  }
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.bracketLeft:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.bracketLeft:after {
+  content: '[';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.bracketRight:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.bracketRight:after {
+  content: ']';
+}
+
+.shortcuts-modal .matecat-modal-bottom {
+  padding: 15px 25px;
 }
 
 .copy-source-modal {
@@ -1097,7 +832,7 @@ a {
 
   .buttons-popup-container {
     padding: 25px 0 30px;
-    border-bottom: 1px solid #f2f4f7;
+    border-bottom: 1px solid colors.$grey50;
     display: flex;
     gap: 20px;
     align-items: center;
@@ -1178,6 +913,16 @@ a {
     p {
       line-height: 25px;
     }
+  }
+}
+
+.modal-grid {
+  display: flex;
+  flex-direction: column;
+
+  .modal-grid__footer {
+    display: flex;
+    justify-content: flex-end;
   }
 }
 

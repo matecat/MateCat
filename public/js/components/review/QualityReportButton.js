@@ -1,13 +1,22 @@
 import React, {useEffect, useState, useRef} from 'react'
-import classnames from 'classnames'
 
-import {IconQR} from '../icons/IconQR'
 import CatToolStore from '../../stores/CatToolStore'
 import CattoolConstants from '../../constants/CatToolConstants'
 import CatToolActions from '../../actions/CatToolActions'
 import {reloadQualityReport} from '../../api/reloadQualityReport'
 import CommonUtils from '../../utils/commonUtils'
 import {REVISE_STEP_NUMBER} from '../../constants/Constants'
+import QualityReportIcon from '../../../img/icons/QualityReportIcon'
+import {
+  DROPDOWN_MENU_TRIGGER_MODE,
+  DropdownMenu,
+} from '../common/DropdownMenu/DropdownMenu'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
 
 /**
  * @NOTE because the state of this component is manipulated
@@ -19,22 +28,18 @@ export const QualityReportButton = ({
   revisionNumber,
   secondRevisionsCount,
   qualityReportHref,
-  overallQualityClass,
 }) => {
   const [is_pass, setIsPass] = useState()
-  // const [score, setScore] = useState()
-  const [vote, setVote] = useState()
   const [progress, setProgress] = useState()
   const [feedback, setFeedback] = useState()
+  const [revisionStarted, setRevisionStarted] = useState(false)
   const revision_number = revisionNumber ? revisionNumber : '1'
   const qrParam = secondRevisionsCount
     ? '?revision_type=' + revision_number
     : ''
   const quality_report_href = useRef(qualityReportHref + qrParam)
 
-  const openFeedbackModal = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
+  const openFeedbackModal = () => {
     CatToolActions.openFeedbackModal(feedback, revisionNumber)
   }
 
@@ -44,15 +49,12 @@ export const QualityReportButton = ({
       const review = qr.chunk.reviews.find(function (value) {
         return value.revision_number === revNumber
       })
-      let newVote = ''
       if (review) {
-        if (review.is_pass != null && isReview) {
-          newVote = review.is_pass ? 'excellent' : 'fail'
-        }
         setIsPass(review.is_pass)
-        setVote(newVote)
-        // setScore(review.score)
         setFeedback(review.feedback)
+        setRevisionStarted(true)
+      } else {
+        setRevisionStarted(false)
       }
       CatToolActions.updateQualityReport(qr)
     }
@@ -99,57 +101,68 @@ export const QualityReportButton = ({
     }
   }, [])
 
-  return (
-    <div
-      className={'action-submenu ui floating'}
-      id="quality-report-button"
-      title="Quality Report"
-    >
-      <div
-        id="quality-report"
-        className={
-          progress && isReview && (revisionNumber === 1 || revisionNumber === 2)
-            ? 'ui simple pointing top center floating dropdown'
-            : ''
-        }
-        data-vote={vote}
-        data-testid="report-button"
-        onClick={() => {
+  return progress &&
+    isReview &&
+    (revisionNumber === 1 || revisionNumber === 2) ? (
+    <DropdownMenu
+      triggerMode={DROPDOWN_MENU_TRIGGER_MODE.HOVER}
+      data-testid="report-button"
+      toggleButtonProps={{
+        children: (
+          <>
+            <QualityReportIcon size={24} />
+            {!feedback && progress && (
+              <div className="button-badge button-badge-warning" />
+            )}
+          </>
+        ),
+        size: BUTTON_SIZE.ICON_STANDARD,
+        mode:
+          is_pass || revisionStarted
+            ? BUTTON_MODE.OUTLINE_BG
+            : BUTTON_MODE.GHOST,
+        type: is_pass
+          ? BUTTON_TYPE.SUCCESS
+          : revisionStarted
+            ? BUTTON_TYPE.CRITICAL
+            : BUTTON_TYPE.ICON,
+        onClick: () => {
           window.open(quality_report_href.current, '_blank')
-        }}
-      >
-        <IconQR width={30} height={30} />
-
-        {isReview && !feedback && progress && (
-          <div className="feedback-alert" />
-        )}
-
-        <div className="dropdown-menu-overlay" />
-        {progress &&
-        isReview &&
-        (revisionNumber === 1 || revisionNumber === 2) ? (
-          <ul className="menu" id="qualityReportMenu">
-            <li className="item">
-              <a
-                title="Open QR"
-                onClick={(event) => {
-                  event.stopPropagation()
-                  window.open(quality_report_href.current, '_blank')
-                }}
-              >
-                Open QR
-              </a>
-            </li>
-            <li className="item">
-              <a title="Revision Feedback" onClick={openFeedbackModal}>
-                {!feedback
-                  ? `Write feedback (R${revisionNumber})`
-                  : `Edit feedback (R${revisionNumber})`}
-              </a>
-            </li>
-          </ul>
-        ) : null}
-      </div>
-    </div>
+        },
+      }}
+      items={[
+        {
+          label: 'Open QR',
+          onClick: (e) => {
+            e.stopPropagation()
+            window.open(quality_report_href.current, '_blank')
+          },
+        },
+        {
+          label: !feedback
+            ? `Write feedback (R${revisionNumber})`
+            : `Edit feedback (R${revisionNumber})`,
+          onClick: openFeedbackModal,
+        },
+      ]}
+    />
+  ) : (
+    <Button
+      type={
+        is_pass
+          ? BUTTON_TYPE.SUCCESS
+          : revisionStarted && is_pass === false
+            ? BUTTON_TYPE.CRITICAL
+            : BUTTON_TYPE.ICON
+      }
+      mode={
+        is_pass && revisionStarted ? BUTTON_MODE.OUTLINE_BG : BUTTON_MODE.GHOST
+      }
+      size={BUTTON_SIZE.ICON_STANDARD}
+      onClick={() => window.open(quality_report_href.current, '_blank')}
+      data-testid="report-button"
+    >
+      <QualityReportIcon size={24} />
+    </Button>
   )
 }

@@ -1,23 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {TOOLTIP_POSITION} from '../Tooltip'
-
-const mergeClassNames = (...args) => {
-  return (
-    Array.prototype.slice
-      // eslint-disable-next-line no-undef
-      .call(args)
-      .reduce(
-        (classList, arg) =>
-          typeof arg === 'string' || Array.isArray(arg)
-            ? classList.concat(arg)
-            : classList,
-        [],
-      )
-      .filter(Boolean)
-      .join(' ')
-  )
-}
+import classnames from 'classnames'
+import styles from './Button.module.scss'
 
 export const BUTTON_TYPE = {
   DEFAULT: 'default',
@@ -26,19 +11,24 @@ export const BUTTON_TYPE = {
   SUCCESS: 'success',
   WARNING: 'warning',
   CRITICAL: 'critical',
+  PURPLE: 'purple',
+  ICON: 'icon',
 }
 export const BUTTON_MODE = {
   BASIC: 'basic',
   OUTLINE: 'outline',
   GHOST: 'ghost',
   LINK: 'link',
+  OUTLINE_BG: 'outlineBg',
 }
 export const BUTTON_SIZE = {
   SMALL: 'small',
   STANDARD: 'standard',
   MEDIUM: 'medium',
   BIG: 'big',
+  ICON_XSMALL: 'iconXSmall',
   ICON_SMALL: 'iconSmall',
+  ICON_MEDIUM: 'iconMedium',
   ICON_STANDARD: 'iconStandard',
   ICON_BIG: 'iconBig',
   LINK_SMALL: 'linkSmall',
@@ -74,15 +64,14 @@ export const Button = React.forwardRef(
     },
     ref,
   ) => {
-    const defaultClassName = `button-component-container ${type} ${mode} ${size}`
-    const fullWidthClassName = fullWidth ? 'fullWidth' : ''
-    const activeClassName = active ? 'button--active' : ''
-    const waitingClassName = waiting ? 'waiting' : ''
-    const buttonClassName = mergeClassNames(
-      defaultClassName,
-      fullWidthClassName,
-      activeClassName,
-      waitingClassName,
+    const buttonClassName = classnames(
+      styles['button-component-container'],
+      styles[type],
+      styles[mode],
+      typeof size === 'string' && styles[size],
+      fullWidth && styles.fullWidth,
+      active && styles['button--active'],
+      waiting && styles.waiting,
       className,
     )
     const style = {}
@@ -114,9 +103,9 @@ export const Button = React.forwardRef(
             {/* <Spinner
                         className={styles.spinner}
                         size={
-                            size === BUTTON_SIZE.ICON_SMALL
+                            size === BUTTON_SIZE.ICON_XSMALL
                                 ? 16
-                                : size === BUTTON_SIZE.BIG || size === BUTTON_SIZE.ICON_BIG
+                                : size === BUTTON_SIZE.BIG || size === BUTTON_SIZE.ICON_MEDIUM
                                   ? 24
                                   : 20
                         }

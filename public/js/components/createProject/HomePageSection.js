@@ -3,7 +3,7 @@ import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 export const HomePageSection = () => {
   return (
     <section className="home-page-section">
-      <div className={'layout-container'}>
+      <div className={'layout__container'}>
         <h1>Why Choose Us</h1>
         <div className={'layout-grid'}>
           <div className="content-box">

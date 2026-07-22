@@ -1,6 +1,6 @@
 @use '../commons/divider';
 @use '../commons/shadows';
-@use '../commons/colors';
+@use '../tokens/colors';
 @use '../commons/variables';
 h1,
 h2,
@@ -17,345 +17,403 @@ input {
   position: absolute;
   top: 65px;
   width: 100%;
-  .re-wrapper {
-    height: 100%;
-    position: relative;
-    .re-warning-not-added-issue {
-      p {
-        background: variables.$notification-error;
-        color: #fff;
-        padding: 5px 10px;
-        a {
-          color: #fff;
-          font-weight: bolder;
-          cursor: pointer;
-          &:hover {
-            color: #fff;
-            text-decoration: underline;
-          }
-        }
-      }
-    }
-    .re-warning-selected-text-issue {
-      p {
-        background: #ffeb3b;
-        color: #000;
-        padding: 5px 10px;
-      }
-    }
-    .re-issues-box {
-      .re-issues-box-title {
-      }
-      .re-list {
-        overflow-y: auto;
-        max-height: 500px;
+}
 
-        &.no-scroll {
-          overflow-y: hidden;
-        }
-        .re-item-head {
-          border-bottom: 1px solid #f2f4f7;
-          padding-top: 10px;
-          margin-right: 1px;
-          font-size: 16px;
-          font-weight: bold;
-          padding-bottom: 3px;
-        }
-        &.issues {
-          .re-item-head {
-            margin-top: 3px;
-            padding-bottom: 5px;
-          }
-        }
-        .re-item {
-          &:hover,
-          &.active {
-            background: colors.$grey5 !important;
-          }
-          .re-item-box {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-            padding: 5px 5px 5px 7px;
-          }
-          .re-issue {
-            .issue-head {
-              max-width: 85%;
-              min-width: 30px;
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              display: flex;
-              font-size: 14px;
-              .re-category-issue-head {
-                overflow: hidden;
-                text-overflow: ellipsis;
-                margin-right: 3px;
-              }
-            }
-            .issue-activity-icon {
-              .icon-buttons {
-                display: flex;
-              }
-            }
-          }
-          .re-error {
-            padding: 0 10px;
-            height: 100%;
-            min-height: 45px;
-            min-width: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            .error-name {
-            }
-          }
-          .comments-view {
-            .re-add-comment {
-              padding: 10px;
-              .re-comment-input {
-                border-radius: 20px !important;
-              }
-            }
-            .re-comment-list {
-              .re-comment {
-                background: #fff;
-                padding: 5px 10px;
-                margin-bottom: 0;
-                .re-revisor {
-                  color: colors.$approvedGreen;
-                }
-                .re-revisor2 {
-                  color: colors.$approved2Green;
-                }
-                .re-translator {
-                  color: colors.$translatedBlue;
-                }
-                .re-comment-date {
-                  color: lightslategray;
-                }
-                .re-selected-text {
-                  color: #000;
-                }
-              }
-              .re-highlighted {
-                padding: 10px;
-                border-bottom: 1px solid #797979;
-              }
+.review-balloon-container .re-wrapper {
+  height: 100%;
+  position: relative;
+}
 
-              span.re-selected-text {
-                margin-right: 5px;
-              }
-            }
-          }
-          .re-severities-buttons {
-            display: none;
-          }
-          &.severity-buttons:hover,
-          &.active {
-            .re-severities-buttons {
-              display: flex;
-              button {
-                padding: 7px 10px;
-                background-color: #f2f4f7;
-                @media only screen and (max-width: 1450px) {
-                  padding: 7px 7px;
-                }
-                @media only screen and (max-width: 1260px) {
-                  padding: 7px 5px;
-                }
-                @media only screen and (max-width: 1140px) {
-                  padding: 7px 3px;
-                }
+.review-balloon-container .re-wrapper .re-warning-not-added-issue p {
+  background: variables.$notification-error;
+  color: colors.$white;
+  padding: 5px 10px;
+}
 
-                &:hover,
-                &.active {
-                  background-color: #cacbcd;
-                }
-              }
-            }
-            .error-name {
-              padding-right: 10px;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-            }
-            @media only screen and (max-width: 1260px) {
-              .error-name {
-                max-width: 55% !important;
-              }
-            }
-            @media only screen and (max-width: 1024px) {
-              .error-name {
-                max-width: 53% !important;
-              }
-            }
-          }
-        }
-      }
-      &.re-issues-box-empty {
-        display: none;
-      }
-    }
-    .re-item.issue-comments-open {
-      transition: 0.3s ease;
-      background: #f2f4f7;
-    }
-    .re-created {
-      background: colors.$grey3;
-      padding: 10px 10px 10px;
-      margin-bottom: 0;
-      .issues {
-        .re-item-issue-value {
-          background: #ffffff;
-        }
-      }
-    }
-    .re-to-create {
-      background: #ffffff;
-      .errors {
-        max-height: 450px;
-        .re-category-item {
-        }
-      }
-    }
+.review-balloon-container .re-wrapper .re-warning-not-added-issue p a {
+  color: colors.$white;
+  font-weight: bolder;
+  cursor: pointer;
+
+  &:hover {
+    color: colors.$white;
+    text-decoration: underline;
   }
 }
+
+.review-balloon-container .re-wrapper .re-warning-selected-text-issue p {
+  background: colors.$orange200;
+  color: colors.$black;
+  padding: 5px 10px;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list {
+  overflow-y: auto;
+  max-height: 500px;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list.no-scroll {
+  overflow-y: hidden;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item-head {
+  border-bottom: 1px solid colors.$grey50;
+  padding-top: 10px;
+  margin-right: 1px;
+  font-size: 16px;
+  font-weight: bold;
+  padding-bottom: 3px;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list.issues .re-item-head {
+  margin-top: 3px;
+  padding-bottom: 5px;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item {
+  &:hover,
+  &.active {
+    background: colors.$grey50 !important;
+  }
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-item-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  padding: 5px 5px 5px 7px;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-issue .issue-head {
+  max-width: 85%;
+  min-width: 30px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  font-size: 14px;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-issue .issue-head .re-category-issue-head {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 3px;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-issue .issue-activity-icon .icon-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-error {
+  padding: 0 10px;
+  height: 100%;
+  min-height: 45px;
+  min-width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-add-comment {
+  padding: 10px;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-add-comment .re-comment-input {
+  border-radius: 20px !important;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-comment-list .re-comment {
+  background: colors.$white;
+  padding: 5px 10px;
+  margin-bottom: 0;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-comment-list .re-comment .re-revisor {
+  color: colors.$green800;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-comment-list .re-comment .re-revisor2 {
+  color: colors.$purple500;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-comment-list .re-comment .re-translator {
+  color: colors.$blue500;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-comment-list .re-comment .re-comment-date {
+  color: lightslategray;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-comment-list .re-comment .re-selected-text {
+  color: colors.$black;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-comment-list .re-highlighted {
+  padding: 10px;
+  border-bottom: 1px solid colors.$grey600;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-comment-list span.re-selected-text {
+  margin-right: 5px;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-severities-buttons button {
+  cursor: pointer;
+  font-size: 12px;
+  border: 1px solid rgba(34, 36, 38, 0.15);
+  border-right: none;
+  border-radius: 0;
+  background: colors.$white;
+  color: rgba(0, 0, 0, 0.6);
+  outline: none;
+  font-weight: bold;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-severities-buttons button:first-child {
+  border-radius: 4px 0 0 4px;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-severities-buttons button:last-child {
+  border-right: 1px solid rgba(34, 36, 38, 0.15);
+  border-radius: 0 4px 4px 0;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-severities-buttons button:only-child {
+  border-radius: 3px;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-severities-buttons {
+  display: none;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .re-severities-buttons,
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .re-severities-buttons {
+  display: flex;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .re-severities-buttons button,
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .re-severities-buttons button {
+  padding: 4px 8px;
+  background-color: colors.$grey50;
+}
+
+@media only screen and (max-width: 1450px) {
+  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .re-severities-buttons button,
+  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .re-severities-buttons button {
+    padding: 7px 7px;
+  }
+}
+
+@media only screen and (max-width: 1260px) {
+  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .re-severities-buttons button,
+  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .re-severities-buttons button {
+    padding: 7px 5px;
+  }
+}
+
+@media only screen and (max-width: 1140px) {
+  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .re-severities-buttons button,
+  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .re-severities-buttons button {
+    padding: 7px 3px;
+  }
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .re-severities-buttons button:hover,
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .re-severities-buttons button.active,
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .re-severities-buttons button:hover,
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .re-severities-buttons button.active {
+  background-color: colors.$grey200;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .error-name,
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .error-name {
+  padding-right: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media only screen and (max-width: 1260px) {
+  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .error-name,
+  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .error-name {
+    max-width: 55% !important;
+  }
+}
+
+@media only screen and (max-width: 1024px) {
+  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .error-name,
+  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .error-name {
+    max-width: 53% !important;
+  }
+}
+
+.review-balloon-container .re-wrapper .re-issues-box.re-issues-box-empty {
+  display: none;
+}
+
+.review-balloon-container .re-wrapper .re-item.issue-comments-open {
+  transition: 0.3s ease;
+  background: colors.$grey50;
+}
+
+.review-balloon-container .re-wrapper .re-created {
+  background: colors.$grey150;
+  padding: 10px 10px 10px;
+  margin-bottom: 0;
+}
+
+.review-balloon-container .re-wrapper .re-created .issues .re-item-issue-value {
+  background: colors.$white;
+}
+
+.review-balloon-container .re-wrapper .re-to-create {
+  background: colors.$white;
+}
+
+.review-balloon-container .re-wrapper .re-to-create .errors {
+  max-height: 450px;
+}
+
 article {
   &.comment-opened-0 {
     margin-top: 270px;
   }
+
   &.comment-opened-1 {
     margin-top: 180px;
   }
+
   &.comment-opened-2 {
     margin-top: 120px;
   }
+
   &.comment-opened-empty-0 {
     margin-top: 110px;
   }
 }
 
 .re-abb-issue {
-  background: #e5e9f1;
+  background: colors.$grey100;
   padding: 0 4px;
   margin-right: 5px;
-  color: black;
+  color: colors.$black;
   width: fit-content;
   height: fit-content;
   min-width: 25px;
   text-align: center;
 }
-
+.re-close-balloon {
+  position: absolute !important;
+  right: 0;
+}
 .re-open-view.re-issues {
   top: 0px;
-  border-top: 12px solid #fff;
+  border-top: 12px solid colors.$white;
   border-left: 14px solid transparent;
   filter: drop-shadow(-1px 0px 1px rgba(0, 0, 0, 0.2));
   margin-left: -14px;
   position: absolute;
+
   &.error {
     border-top: 12px solid variables.$notification-error;
   }
+
   &.warning {
-    border-top: 12px solid #ffeb3b;
+    border-top: 12px solid colors.$orange200;
   }
 }
 
 .re-wrapper.thereAreIssues .re-open-view.re-issues {
   top: -1px;
-  border-top: 12px solid colors.$grey3;
+  border-top: 12px solid colors.$grey150;
 }
 
-section {
-  &.editAreaLocked.opened {
-    .outersource .copy {
-      display: none;
-    }
-    .segment-text-area-container {
-      position: relative !important;
-      width: 100% !important;
-      float: right !important;
-      .textarea-container {
-        padding: 0 5px;
-        font-size: 18px;
-        margin: 3px 0 2px;
-      }
-    }
-    .buttons {
-      .left {
-        float: left;
-      }
+section.editAreaLocked.opened .outersource .copy {
+  display: none;
+}
 
-      .right {
-        float: right;
-      }
-    }
-  }
-  &.editAreaLocked .errorTaggingArea {
-    line-height: 27px;
-    padding: 4px 0 0 0;
-  }
-  .errorTaggingArea,
-  .editableTarget,
-  .trackChanges {
-    font-family: 'calibri', Arial, Helvetica, sans-serif;
-    padding: 3px;
-    line-height: 27px;
-    padding: 4px 0 0 0;
-  }
+section.editAreaLocked.opened .segment-text-area-container {
+  position: relative !important;
+  width: 100% !important;
+  float: right !important;
+}
 
-  .errorTaggingArea {
-    .highlight {
-      background-color: #7eb30c;
-    }
-  }
+section.editAreaLocked.opened .segment-text-area-container .textarea-container {
+  padding: 0 5px;
+  font-size: 18px;
+  margin: 3px 0 2px;
+}
 
-  .errorTaggingArea::selection {
-    background-color: #ffeb3b;
-  }
+section.editAreaLocked.opened .buttons .left {
+  float: left;
+}
 
-  .translation-issues-button {
-    cursor: pointer;
-    position: relative;
-  }
+section.editAreaLocked.opened .buttons .right {
+  float: right;
+}
 
-  .revise-button {
-    position: relative;
-    background-color: colors.$black100;
-    display: flex;
-    padding: 3px;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-    align-self: stretch;
-    cursor: pointer;
-    border-radius: 8px;
-    width: 18px;
-    height: 18px;
-    margin-left: 8px;
-  }
+section.editAreaLocked .errorTaggingArea {
+  line-height: 27px;
+  padding: 4px 0 0 0;
+}
 
-  .translation-issues-button .revise-button {
-    display: block;
-    position: relative;
-    &.no-object {
-      display: none;
-    }
-  }
+section .errorTaggingArea,
+section .editableTarget,
+section .trackChanges {
+  font-family: 'calibri', Arial, Helvetica, sans-serif;
+  padding: 3px;
+  line-height: 27px;
+  padding: 4px 0 0 0;
+}
 
-  &:hover .translation-issues-button .revise-button,
-  .translation-issues-button:hover .revise-button,
-  .segment-side-buttons:hover
-    .translation-issues-button
-    .revise-button.no-object {
-    display: block !important;
-  }
+section .errorTaggingArea .highlight {
+  background-color: colors.$green700;
+}
 
-  .revise-button-2 {
-    background: colors.$approved2Green;
+section .errorTaggingArea::selection {
+  background-color: colors.$orange200;
+}
+
+section .translation-issues-button {
+  cursor: pointer;
+  position: relative;
+}
+
+section .revise-button {
+  position: relative;
+  background-color: colors.$black100;
+  display: flex;
+  padding: 3px;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  align-self: stretch;
+  cursor: pointer;
+  border-radius: variables.$border-radius-default;
+  width: 18px;
+  height: 18px;
+  margin-left: 8px;
+}
+
+section .translation-issues-button .revise-button {
+  display: block;
+  position: relative;
+
+  &.no-object {
+    display: none;
   }
+}
+
+section:hover .translation-issues-button .revise-button,
+section .translation-issues-button:hover .revise-button,
+section .segment-side-buttons:hover .translation-issues-button .revise-button.no-object {
+  display: block !important;
+}
+
+section .revise-button-2 {
+  background: colors.$purple500;
 }
 
 .undo-issue-deleted {
@@ -363,7 +421,7 @@ section {
 }
 
 .editing-highlight {
-  background-color: colors.$grey5 !important;
+  background-color: colors.$grey50 !important;
 }
 
 .editing-backward-container {
@@ -375,59 +433,58 @@ section {
 
 .issue-panel-edit-mode {
   padding: 10px;
-
-  .re-issues-box {
-    border: 2px solid white;
-  }
 }
+
+.issue-panel-edit-mode .re-issues-box {
+  border: 2px solid colors.$white;
+}
+
 //*******************************************************/
 
 //Download Button
 .downloadtr-button.approved-2ndpass {
-  background: colors.$approved2Green;
-  color: #fff !important;
+  background: colors.$purple500;
+  color: colors.$white !important;
 }
 
 .severities-dropdown-trigger {
   width: 24px !important;
   height: 30px !important;
+}
 
-  > * {
-    margin: 0 !important;
+.severities-dropdown-trigger > * {
+  margin: 0 !important;
+}
+
+.review-extended-issues-tab-group .tabs-container {
+  display: flex;
+  position: absolute;
+  top: 10px;
+  z-index: 1;
+}
+
+.review-extended-issues-tab-group .tab {
+  display: flex;
+  align-items: center;
+  height: 42px;
+  font-size: 14px;
+  color: colors.$black;
+  padding: 0 15px;
+  cursor: pointer;
+
+  &.active {
+    background-color: colors.$white;
+    border-radius: 4px 4px 0 0;
+    border-bottom: unset;
+    font-weight: bold;
+  }
+
+  &.disabled {
+    opacity: 0.6;
+    pointer-events: none;
   }
 }
 
-.review-extended-issues-tab-group {
-  .tabs-container {
-    display: flex;
-    position: absolute;
-    top: 10px;
-    z-index: 1;
-  }
-
-  .tab {
-    display: flex;
-    align-items: center;
-    height: 42px;
-    font-size: 14px;
-    color: black;
-    padding: 0 15px;
-    cursor: pointer;
-
-    &.active {
-      background-color: white;
-      border-radius: 4px 4px 0 0;
-      border-bottom: unset;
-      font-weight: bold;
-    }
-
-    &.disabled {
-      opacity: 0.6;
-      pointer-events: none;
-    }
-  }
-
-  .tab-content {
-    margin-top: 41px;
-  }
+.review-extended-issues-tab-group .tab-content {
+  margin-top: 41px;
 }

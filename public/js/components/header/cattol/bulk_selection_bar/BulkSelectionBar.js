@@ -4,6 +4,15 @@ import SegmentActions from '../../../../actions/SegmentActions'
 import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentStore from '../../../../stores/SegmentStore'
 import CatToolActions from '../../../../actions/CatToolActions'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../common/Button/Button'
+import IconChevronLeft from '../../../../../img/icons/IconChevronLeft'
+import IconTick from '../../../../../img/icons/IconTick'
+import Checkmark from '../../../../../img/icons/Checkmark'
 
 class BulkSelectionBar extends React.Component {
   constructor(props) {
@@ -130,7 +139,7 @@ class BulkSelectionBar extends React.Component {
 
   render() {
     let buttonClass = classnames({
-      'ui button approve-all-segments': true,
+      'approve-all-segments': true,
       'translated-all-bulked': !this.props.isReview,
       'approved-all-bulked': this.props.isReview,
       'approved-2nd-pass':
@@ -142,10 +151,13 @@ class BulkSelectionBar extends React.Component {
       <div className="bulk-approve-bar">
         <div className="bulk-back-info">
           <div className="bulk-back">
-            <button className="ui button back-bulk" onClick={this.onClickBack}>
-              {' '}
-              <i className="icon-arrow-left2 icon" /> back
-            </button>
+            <Button
+              mode={BUTTON_MODE.GHOST}
+              size={BUTTON_SIZE.SMALL}
+              onClick={this.onClickBack}
+            >
+              <IconChevronLeft size={16} /> back
+            </Button>
           </div>
           {this.state.count === 1 ? (
             <div className="bulk-info">
@@ -167,10 +179,17 @@ class BulkSelectionBar extends React.Component {
           </div>
         ) : (
           <div className="bulk-activity-icons">
-            <button className={buttonClass} onClick={this.onClickBulk}>
-              <i className="icon-checkmark5 icon" />{' '}
+            <Button
+              className={`mark-button ${buttonClass}`}
+              type={BUTTON_TYPE.PRIMARY}
+              mode={BUTTON_MODE.OUTLINE}
+              onClick={this.onClickBulk}
+            >
+              <div>
+                <Checkmark size={16} />
+              </div>
               {this.props.isReview ? 'MARK AS APPROVED' : 'MARK AS TRANSLATED'}
-            </button>
+            </Button>
           </div>
         )}
       </div>

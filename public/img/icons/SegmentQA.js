@@ -3,19 +3,19 @@ import PropTypes from 'prop-types'
 
 const SegmentQA = ({size = 18}) => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none">
-      <g clipPath="url(#a)">
-        <path
-          fill="currentColor"
-          fillRule="evenodd"
-          d="M3.726 4.787a6.75 6.75 0 0 0 9.487 9.487L3.726 4.787Zm1.06-1.06 9.488 9.486a6.75 6.75 0 0 0-9.487-9.487ZM.75 9a8.25 8.25 0 1 1 16.5 0A8.25 8.25 0 0 1 .75 9Z"
-        />
-      </g>
-      <defs>
-        <clipPath id="a">
-          <path fill="currentColor" d="M0 0h18v18H0z" />
-        </clipPath>
-      </defs>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 22 22"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M3.9681 5.38231C2.73647 6.92199 2 8.87499 2 11C2 15.9706 6.02944 20 11 20C13.125 20 15.078 19.2635 16.6177 18.0319L3.9681 5.38231ZM5.38231 3.9681L18.0319 16.6177C19.2635 15.078 20 13.125 20 11C20 6.02944 15.9706 2 11 2C8.87499 2 6.92199 2.73647 5.38231 3.9681ZM0 11C0 4.92487 4.92487 0 11 0C17.0751 0 22 4.92487 22 11C22 17.0751 17.0751 22 11 22C4.92487 22 0 17.0751 0 11Z"
+        fill="currentColor"
+      />
     </svg>
   )
 }

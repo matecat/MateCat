@@ -1,10 +1,7 @@
-@use '../commons/colors';
-
+@use '../tokens/colors';
+@use '../commons/variables';
 .sub-head {
   color: white;
-  .ui.container.equal.width.grid {
-    width: 1335px !important;
-  }
   .projects-state {
     width: 40px !important;
   }
@@ -30,9 +27,9 @@
   .search-state-filters {
     input.search-projects {
       height: 40px;
-      border-radius: 2px;
-      background-color: #fff;
-      color: #002b5c;
+      border-radius: variables.$border-radius-default;
+      background-color: colors.$white;
+      color: colors.$blue900;
       transition: 0.2s ease-in;
       font-size: 14px;
       max-width: 320px;
@@ -40,75 +37,14 @@
       padding: 12px 16px;
       box-shadow: none;
       border: none;
-      opacity: 0.4;
       &::placeholder {
-        color: #002b5c;
+        color: colors.$blue900;
       }
 
       &:focus {
         border: none !important;
-        opacity: 1;
         & + .dropdown {
-          background-color: #ffffff;
-        }
-      }
-    }
-    .ui.dropdown {
-      background-color: #fff;
-      border-left: 1px solid #002b5c;
-      /*transition: 0.2s ease-in;*/
-      color: #002b5c;
-      font-weight: 500;
-      padding: 2px 16px 2px 8px;
-      line-height: 1.21;
-      border-radius: 0px 2px 2px 0px;
-      font-size: 1em;
-      min-width: 110px;
-      display: grid;
-      grid-template-columns: 36px auto;
-      align-items: center;
-      opacity: 0.4;
-      &:hover,
-      &:active,
-      &:focus {
-        opacity: 1;
-      }
-      .text {
-        svg {
-          display: none;
-        }
-      }
-      .menu {
-        min-width: 144px;
-        padding: 8px 8px 12px 8px;
-        border-radius: 2px;
-        border: solid 1px #cdd4de;
-        right: 0 !important;
-        left: auto !important;
-        box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.2);
-
-        &::after {
-          left: 50% !important;
-        }
-
-        .item {
-          border-radius: 2px;
-          color: #002b5c;
-          font-size: 15px;
-          padding: 8px !important;
-          font-weight: normal;
-          display: grid;
-          grid-template-columns: auto 16px;
-          align-items: center;
-          margin: 4px 0 0 0;
-
-          &:hover {
-            background-color: rgba(0, 0, 0, 0.03);
-          }
-          &.selected {
-            background-color: #002b5c;
-            color: #ffffff !important;
-          }
+          background-color: colors.$white;
         }
       }
     }
@@ -117,21 +53,15 @@
 
 .filter-project-status-dropdown-trigger {
   gap: 0 !important;
-  border-radius: 0 !important;
-  opacity: 0.4;
-  margin-left: 1px;
-
-  &:hover,
-  &[data-state='open'] {
-    opacity: 1;
-  }
+  border-radius: 0 variables.$border-radius-default
+    variables.$border-radius-default 0 !important;
 }
 .filter-project-status-dropdown {
   min-width: 140px;
 
   .dropdownmenu-item {
     &:not([data-disabled]).selected {
-      background-color: #00254f !important;
+      background-color: colors.$blue950 !important;
       color: white !important;
     }
   }

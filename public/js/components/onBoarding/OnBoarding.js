@@ -5,7 +5,7 @@ import Register from './Register'
 import PasswordReset from './PasswordReset'
 import ForgotPassword from './ForgotPassword'
 import {BUTTON_MODE, BUTTON_SIZE, Button} from '../common/Button/Button'
-import IconClose from '../icons/IconClose'
+import IconClose from '../../../img/icons/IconClose'
 import ChevronDown from '../../../img/icons/ChevronDown'
 import ModalsActions from '../../actions/ModalsActions'
 import CommonUtils from '../../utils/commonUtils'
@@ -74,7 +74,7 @@ const OnBoarding = ({
             {isCloseButtonEnabled && (
               <Button
                 className="button-close"
-                size={BUTTON_SIZE.ICON_SMALL}
+                size={BUTTON_SIZE.ICON_XSMALL}
                 onClick={closeHandler}
               >
                 <IconClose size={10} />

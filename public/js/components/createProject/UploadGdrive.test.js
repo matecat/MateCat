@@ -38,7 +38,7 @@ jest.mock('../../stores/UserStore', () => ({
   updateConnectedService: jest.fn(),
 }))
 jest.mock('../../utils/commonUtils', () => ({
-  getIconClass: jest.fn(() => 'extdoc'),
+  getFileIcon: jest.fn(() => 'extdoc'),
   dispatchCustomEvent: jest.fn(),
 }))
 jest.mock('../../../img/icons/DriveIcon', () => {

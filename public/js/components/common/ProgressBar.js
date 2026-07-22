@@ -1,6 +1,7 @@
 import React, {useRef, useState, useEffect} from 'react'
 
 import PropTypes from 'prop-types'
+import styles from './ProgressBar.module.scss'
 
 export const PROGRESS_BAR_TYPE = {
   DEFAULT: 'default',
@@ -33,9 +34,7 @@ export const ProgressBar = ({
 
   const [internalProgress, setInternalProgress] = useState(progress)
   const progressWidth = Math.min((internalProgress * 100) / total, 100)
-  const barClassName = `progress-bar-container ${type} ${size} ${label ? 'withLabel' : ''} ${
-    showWarning ? 'warning' : ''
-  } ${progressWidth === 100 ? 'complete' : ''} ${className}`
+  const barClassName = [styles['progress-bar-container'], styles[type], styles[size], label && styles.withLabel, showWarning && styles.warning, progressWidth === 100 && styles.complete, className].filter(Boolean).join(' ')
 
   // EFFECTS
   useEffect(() => {
@@ -53,10 +52,10 @@ export const ProgressBar = ({
       data-testid="progress-bar"
     >
       {label && (
-        <div className="label">
+        <div className={styles.label}>
           {label}
           {showProgress && (
-            <div className="labelProgress">
+            <div className={styles.labelProgress}>
               {progressType === PROGRESS_BAR_PROGRESS.PERCENT ? (
                 `${Math.floor(progressWidth)}%`
               ) : progress === 0 ? (
@@ -76,15 +75,15 @@ export const ProgressBar = ({
       showProgress &&
       progressType !== PROGRESS_BAR_PROGRESS.PERCENT &&
       progress === 0 ? null : (
-        <div className={`progress-wrapper ${size}`}>
+        <div className={[styles['progress-wrapper'], styles[size]].join(' ')}>
           <div
-            className={`progress ${size}`}
+            className={[styles.progress, styles[size]].join(' ')}
             style={{width: `${progressWidth}%`}}
           ></div>
         </div>
       )}
       {!label && showProgress && (
-        <div className="labelProgress">
+        <div className={styles.labelProgress}>
           {progressType === PROGRESS_BAR_PROGRESS.PERCENT ? (
             `${Math.floor(progressWidth)}%`
           ) : progress === 0 ? (

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import {useEffect} from 'react'
 import {SettingsPanelTable} from '../../../SettingsPanelTable'
-import IconAdd from '../../../../icons/IconAdd'
+import IconAdd from '../../../../../../img/icons/IconAdd'
 import {getDeepLGlosssaries} from '../../../../../api/getDeepLGlosssaries/getDeepLGlosssaries'
 import {DeepLGlossaryRow} from './DeepLGlossaryRow'
 import {DeepLGlossaryCreateRow} from './DeepLGlossaryCreateRow'
@@ -17,6 +17,7 @@ import ModalsActions from '../../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
 import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
 import {DeepLGlossaryNoneRow} from './DeepLGlossaryNoneRow'
+import {Button, BUTTON_TYPE} from '../../../../common/Button/Button'
 import {DEEPL_GLOSSARY_CREATE_ROW_ID} from './DeepLGlossaryConstants'
 
 const COLUMNS_TABLE = [
@@ -73,9 +74,13 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
           CatToolActions.addNotification({
             title: 'Glossary deleted',
             type: 'success',
-            text: `The glossary (<b>${glossary.name}</b>) has been successfully deleted`,
+            text: (
+              <>
+                The glossary (<b>{glossary.name}</b>) has been successfully
+                deleted
+              </>
+            ),
             position: 'br',
-            allowHtml: true,
             timer: 5000,
           })
           CreateProjectActions.updateProjectTemplates({
@@ -312,44 +317,49 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
   )
 
   return (
-    <div className="mt-glossary">
-      {haveRecords && (
-        <SettingsPanelTable
-          columns={COLUMNS_TABLE}
-          rows={rows}
-          className="mt-glossary-table"
-        />
+    <>
+      {(!isCattoolPage || (isCattoolPage && haveRecords)) && (
+        <h2>Glossaries</h2>
       )}
+      <div className="mt-glossary">
+        {haveRecords && (
+          <SettingsPanelTable
+            columns={COLUMNS_TABLE}
+            rows={rows}
+            className="mt-glossary-table"
+          />
+        )}
 
-      {!isCattoolPage &&
-        (haveRecords ? (
-          <div className="main-buttons-container">
-            {!shouldHideNewButton && (
-              <button
-                className="ui primary button settings-panel-button-icon confirm-button create-glossary-button"
+        {!isCattoolPage &&
+          (haveRecords ? (
+            <div className="main-buttons-container">
+              {!shouldHideNewButton && (
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
+                  onClick={addGlossary}
+                  title="Add glossary"
+                >
+                  <IconAdd size={18} />
+                  New glossary
+                </Button>
+              )}
+            </div>
+          ) : Array.isArray(rows) ? (
+            <div className="empty-list-mode">
+              <p>Start using DeepL's glossary feature</p>
+              <Button
+                className="settings-panel-grey-button"
                 onClick={addGlossary}
-                title="Add glossary"
               >
                 <IconAdd size={18} />
                 New glossary
-              </button>
-            )}
-          </div>
-        ) : Array.isArray(rows) ? (
-          <div className="empty-list-mode">
-            <p>Start using DeepL's glossary feature</p>
-            <button
-              className="grey-button create-glossary-button"
-              onClick={addGlossary}
-            >
-              <IconAdd size={18} />
-              New glossary
-            </button>
-          </div>
-        ) : (
-          <p className="loading-list-mode">Loading...</p>
-        ))}
-    </div>
+              </Button>
+            </div>
+          ) : (
+            <p className="loading-list-mode">Loading...</p>
+          ))}
+      </div>
+    </>
   )
 }
 

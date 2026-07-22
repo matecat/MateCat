@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {Button} from './Button/Button'
-import Copy from '../icons/Copy'
+import Copy from '../../../img/icons/Copy'
 import Check from '../../../img/icons/Check'
 
 export const ButtonCopy = (props) => {

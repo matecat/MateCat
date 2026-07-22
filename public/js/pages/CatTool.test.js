@@ -222,8 +222,8 @@ jest.mock('../sse/SocketListener', () => () => (
   <div data-testid="socket-listener" />
 ))
 jest.mock('../components/modals/FatalErrorModal', () => 'FatalErrorModal')
-jest.mock('../components/icons/IconRedirect', () => () => null)
-jest.mock('../components/icons/IconDown', () => () => null)
+jest.mock('../../img/icons/IconRedirect', () => () => null)
+jest.mock('../../img/icons/IconDown', () => () => null)
 jest.mock('../components/common/Button/Button', () => ({
   BUTTON_MODE: {GHOST: 'ghost'},
   BUTTON_SIZE: {SMALL: 'small'},

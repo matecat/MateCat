@@ -17,7 +17,7 @@ import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import {NUM_CONTRIBUTION_RESULTS} from '../../constants/Constants'
 import Tooltip from '../common/Tooltip'
-import IconDown from '../icons/IconDown'
+import IconDown from '../../../img/icons/IconDown'
 
 const MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED = 3
 

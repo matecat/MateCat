@@ -4,8 +4,8 @@ import {SubTemplateSelect} from './SubTemplateSelect'
 import {SubTemplateNameInput} from './SubTemplateNameInput'
 import {SubTemplateMoreMenu} from './SubTemplateMoreMenu'
 import {SubTemplateCreateUpdateControl} from './SubTemplateCreateUpdateControl'
-import {IconSaveChanges} from '../../../icons/IconSaveChanges'
-import {IconSave} from '../../../icons/IconSave'
+import {IconSaveChanges} from '../../../../../img/icons/IconSaveChanges'
+import {IconSave} from '../../../../../img/icons/IconSave'
 import {BUTTON_MODE, BUTTON_SIZE, Button} from '../../../common/Button/Button'
 import {flushSync} from 'react-dom'
 import CatToolActions from '../../../../actions/CatToolActions'
@@ -27,7 +27,6 @@ export const SubTemplates = ({
   updateApi,
   deleteApi,
   saveErrorCallback,
-  portalTarget,
 }) => {
   const [templateModifier, setTemplateModifier] = useState()
   const [templateName, setTemplateName] = useState('')
@@ -281,9 +280,7 @@ export const SubTemplates = ({
                   Save as new
                 </Button>
               )}
-              {!isStandardTemplateBool && (
-                <SubTemplateMoreMenu {...{portalTarget}} />
-              )}
+              {!isStandardTemplateBool && <SubTemplateMoreMenu />}
             </>
           ) : (
             <SubTemplateCreateUpdateControl />

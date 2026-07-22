@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 import ReviseLockIcon from '../../../img/icons/ReviseLockIcon'
@@ -12,12 +12,14 @@ import LowerCaseIcon from '../../../img/icons/LowerCaseIcon'
 import CapitalizeIcon from '../../../img/icons/CapitalizeIcon'
 import {Shortcuts} from '../../utils/shortcuts'
 import RemoveTagsIcon from '../../../img/icons/RemoveTagsIcon'
-import IconDown from '../icons/IconDown'
+import IconDown from '../../../img/icons/IconDown'
 import {LaraStyles} from './ToolbarFeatures/Ai/LaraStyles'
 import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 import AddTagsIcon from '../../../img/icons/AddTagsIcon'
 import {AiAlternatives} from './ToolbarFeatures/Ai/AiAlternatives'
 import {AiFeedback} from './ToolbarFeatures/Ai/AiFeedback'
+import Star from '../../../img/icons/Star'
+import useResizeObserver from '../../hooks/useResizeObserver'
 
 export const SegmentTargetToolbar = ({
   sid,
@@ -33,6 +35,14 @@ export const SegmentTargetToolbar = ({
   addMissingSourceTagsToTarget,
 }) => {
   const [isIconsBundled, setIsIconsBundled] = useState(false)
+
+  const ref = useRef()
+
+  const {width} = useResizeObserver({current: ref?.current?.parentNode})
+
+  useEffect(() => {
+    setIsIconsBundled(width <= 400)
+  }, [width])
 
   const getIconButton = (props) => {
     const {children, key, ...rest} = props
@@ -55,11 +65,33 @@ export const SegmentTargetToolbar = ({
       ? [
           {
             group: 0,
-            component: <LaraStyles key="larastyle" sid={sid} segment={segment} />,
+            component: (
+              <LaraStyles
+                {...{key: 'larastyle', sid, segment, isIconsBundled}}
+              />
+            ),
           },
           {
             group: 0,
-            component: <AiFeedback key="aifeedback" sid={sid} segment={segment} />,
+            component: (
+              <AiFeedback
+                {...{key: 'aifeedback', sid, segment, isIconsBundled}}
+              />
+            ),
+          },
+          {
+            group: 0,
+            component: (
+              <AiAlternatives
+                {...{
+                  key: 'aialternatives',
+                  sid,
+                  segment,
+                  editArea,
+                  isIconsBundled,
+                }}
+              />
+            ),
           },
           {
             group: 0,
@@ -155,8 +187,8 @@ export const SegmentTargetToolbar = ({
                 key="formatmenu"
                 triggerMode={DROPDOWN_MENU_TRIGGER_MODE.HOVER}
                 toggleButtonProps={{
-                  className: 'segment-target-toolbar-dropdown-trigger',
                   mode: BUTTON_MODE.OUTLINE,
+                  size: BUTTON_SIZE.SMALL,
                   children: (
                     <>
                       Tt
@@ -200,7 +232,7 @@ export const SegmentTargetToolbar = ({
       : []),
   ]
 
-  const buttons = items /* items.reduce((acc, cur, index, arr) => {
+  const buttons = items.reduce((acc, cur, index, arr) => {
     if (
       typeof cur.group === 'number' &&
       acc.find(
@@ -212,18 +244,26 @@ export const SegmentTargetToolbar = ({
 
     if (typeof cur.group === 'number' && isIconsBundled && !cur.dropdownGroup) {
       const groups = arr.filter(({group}) => group === cur.group)
+
       return [
         ...acc,
         {
           group: cur.group,
           dropdownGroup: (
             <DropdownMenu
+              triggerMode={DROPDOWN_MENU_TRIGGER_MODE.HOVER}
               toggleButtonProps={{
-                children: <DotsHorizontal size={18} />,
+                size: BUTTON_SIZE.SMALL,
+                mode: BUTTON_MODE.OUTLINE,
+                children: (
+                  <>
+                    <Star size={16} />
+                    <IconDown size={16} />
+                  </>
+                ),
               }}
-              items={groups.map(({label, onClick}) => ({
-                label,
-                onClick,
+              items={groups.map(({component}) => ({
+                label: component,
               }))}
             />
           ),
@@ -232,10 +272,10 @@ export const SegmentTargetToolbar = ({
     } else {
       return [...acc, cur]
     }
-  }, []) */
+  }, [])
 
   return (
-    <div className="segment-target-toolbar">
+    <div ref={ref} className="segment-target-toolbar">
       {buttons.map((button, index) => {
         if (button.dropdownGroup) return <React.Fragment key={`group-${index}`}>{button.dropdownGroup}</React.Fragment>
         return <React.Fragment key={`btn-${index}`}>{button.component}</React.Fragment>

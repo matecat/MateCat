@@ -1,0 +1,225 @@
+// ============================================================================
+// Design Tokens — Colors
+// ============================================================================
+// Canonical color token layer using CSS Custom Properties.
+// SCSS variable aliases are provided below for backward compatibility.
+//
+// Three-layer model:
+//   1. Primitive palette (raw values, no semantic meaning)
+//   2. Semantic aliases (meaning over value)
+//   3. Component-level tokens (defined in component files, not here)
+//
+// Usage in new code:   color: var(--color-approved);
+// Usage in legacy:     color: colors.$approvedGreen;  (still works unchanged)
+// ============================================================================
+
+// --- 1. Primitive Palette ---------------------------------------------------
+
+:root {
+  // White / Black
+  --color-white: #fff;
+  --color-black: #000;
+  --color-black-100: rgba(26, 26, 41, 0.07);
+
+  // Grey scale (lightest → darkest)
+  --color-grey-50: #f5f6f7;
+  --color-grey-75: #f3f3f3;
+  --color-grey-100: #eaebee;
+  --color-grey-150: #d9e0e8;
+  --color-grey-200: #d7d8db;
+  --color-grey-300: #aebdcd;
+  --color-grey-400: #9e9e9e;
+  --color-grey-500: #788190;
+  --color-grey-600: #6f6f6f;
+  --color-grey-700: #666666;
+  --color-grey-800: #84848c;
+  --color-grey-1300: #29292d;
+
+  // Orange scale (lightest → darkest)
+  --color-orange-50: #fffed8;
+  --color-orange-100: #fee47a;
+  --color-orange-200: #ffcc01;
+  --color-orange-300: #ebbf47;
+  --color-orange-400: #efbf00;
+  --color-orange-500: #ffaa8e;
+  --color-orange-600: #ff8734;
+  --color-orange-700: #f2711c;
+  --color-orange-800: #df681a;
+  --color-orange-900: #e9511f;
+
+  // Red scale (lightest → darkest)
+  --color-red-100: #ffc8ca;
+  --color-red-400: #ef4740;
+  --color-red-500: #e02020;
+  --color-red-600: #d31d1d;
+
+  // Blue scale (lightest → darkest)
+  --color-blue-50: #e4f2fb;
+  --color-blue-200: #63c3e3;
+  --color-blue-300: #86aacd;
+  --color-blue-400: #2a8cfc;
+  --color-blue-500: #0099cc;
+  --color-blue-600: #0889b3;
+  --color-blue-700: #4184c4;
+  --color-blue-800: #3174b4;
+  --color-blue-900: #002b5a;
+  --color-blue-950: #00254f;
+
+  // Purple scale (lightest → darkest)
+  --color-purple-200: #b58dd2;
+  --color-purple-500: #9352c1;
+  --color-purple-1000: #7e22ce;
+
+  // Green scale (lightest → darkest)
+  --color-green-50: #d1e0d1;
+  --color-green-200: #80d5af;
+  --color-green-300: #7cc576;
+  --color-green-400: #4ade80;
+  --color-green-500: #1fbd1f;
+  --color-green-600: #1c9f64;
+  --color-green-700: #1ba61b;
+  --color-green-800: #22c55e;
+  --color-green-1000: #15803d;
+
+  // --- 2. Semantic Aliases --------------------------------------------------
+
+  // Translation status
+  --color-translated: var(--color-blue-500);
+  --color-translated-hover: var(--color-blue-600);
+  --color-translated-transparent: var(--color-blue-200);
+  --color-translated-bg: var(--color-blue-50);
+
+  --color-approved: var(--color-green-800);
+  --color-approved-hover: var(--color-green-600);
+  --color-approved-transparent: var(--color-green-200);
+  --color-approved-bg: var(--color-green-50);
+
+  --color-approved2: var(--color-purple-500);
+  --color-approved2-hover: var(--color-purple-1000);
+  --color-approved2-transparent: var(--color-purple-200);
+
+  --color-rejected: var(--color-red-500);
+  --color-rejected-hover: var(--color-red-600);
+  --color-rejected-transparent: var(--color-red-100);
+
+  --color-rebutted: var(--color-orange-600);
+  --color-rebutted-transparent: var(--color-orange-500);
+
+  --color-warning: var(--color-orange-700);
+  --color-warning-hover: var(--color-orange-800);
+
+  // Links
+  --color-link: var(--color-blue-700);
+  --color-link-hover: var(--color-blue-800);
+  --color-link-transparent: var(--color-blue-300);
+
+  // Dark / brand
+  --color-dark: var(--color-blue-900);
+  --color-dark-hover: var(--color-blue-950);
+
+  // Neutral defaults
+  --color-green-default: var(--color-green-500);
+  --color-green-default-hover: var(--color-green-700);
+  --color-green-default-transparent: var(--color-green-300);
+}
+
+// --- SCSS Variable Aliases (backward compatibility) -------------------------
+// Existing code using `colors.$approvedGreen` continues to compile unchanged.
+// These map 1:1 to the legacy _colors.scss variables.
+
+$white: white;
+
+$black: #000;
+$black100: rgba(#1a1a29, 0.07);
+
+// Grey scale
+$grey50: #f5f6f7;
+$grey75: #f3f3f3;
+$grey100: #eaebee;
+$grey150: #d9e0e8;
+$grey200: #d7d8db;
+$grey300: #aebdcd;
+$grey400: #9e9e9e;
+$grey500: #788190;
+$grey600: #6f6f6f;
+$grey700: #666666;
+$grey800: #84848c;
+$grey1300: #29292d;
+
+// Orange scale
+$orange50: #fffed8;
+$orange100: #fee47a;
+$orange200: #ffcc01;
+$orange300: #ebbf47;
+$orange400: #efbf00;
+$orange500: #ffaa8e;
+$orange600: #ff8734;
+$orange700: #f2711c;
+$orange800: #df681a;
+$orange900: #e9511f;
+
+// Red scale
+$red100: #ffc8ca;
+$red400: #ef4740;
+$red500: #e02020;
+$red600: #d31d1d;
+
+// Blue scale
+$blue50: #e4f2fb;
+$blue200: #63c3e3;
+$blue300: #86aacd;
+$blue400: #2a8cfc;
+$blue500: #0099cc;
+$blue600: #0889b3;
+$blue700: #4184c4;
+$blue800: #3174b4;
+$blue900: #002b5a;
+$blue950: #00254f;
+
+// Purple scale
+$purple200: #b58dd2;
+$purple500: #9352c1;
+$purple1000: #7e22ce;
+
+// Green scale
+$green50: #d1e0d1;
+$green200: #80d5af;
+$green300: #7cc576;
+$green400: #4ade80;
+$green500: #1fbd1f;
+$green600: #1c9f64;
+$green700: #1ba61b;
+$green800: #22c55e;
+$green1000: #15803d;
+
+// Semantic aliases (legacy variable names)
+$transparentBlue: $blue50;
+$translatedBlueTransparent: $blue200;
+$linkBlueTransparent: $blue300;
+$translatedBlue: $blue500;
+$translatedBlueHover: $blue600;
+$linkBlue: $blue700;
+$linkBlueHover: $blue800;
+$darkBlue: $blue900;
+$darkBlueHover: $blue950;
+
+$greenDefaultTransparent2: $green50;
+$approvedGreenTransparent: $green200;
+$greenDefaultTransparent: $green300;
+$approvedGreen: $green800;
+$greenDefault: $green500;
+$approvedGreenHover: $green600;
+$greenDefaultHover: $green700;
+
+$approved2GreenTransparent: $purple200;
+$approved2Green: $purple500;
+$approved2GreenHover: $purple1000;
+
+$warning: $orange700;
+$warningHover: $orange800;
+$rebuttedRedTransparent: $orange500;
+$rebuttedRed: $orange600;
+
+$redDefaultTransparent: $red100;
+$redDefault: $red500;
+$redDefaultHover: $red600;
