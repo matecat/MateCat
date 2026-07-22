@@ -22,7 +22,7 @@ class QAComponent extends React.Component {
         lexiqa: 'Lexiqa',
         GLOSSARY: 'Glossary',
         MISMATCH: 'T. Conflicts',
-        FUZZY: 'Fuzzy Match'
+        FUZZY: 'Unedited fuzzy matches'
       },
       totalWarnings: 0,
       warnings: {
