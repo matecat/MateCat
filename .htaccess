@@ -21,13 +21,9 @@ RewriteRule $ / [R=307,L]
 RewriteRule ^fileupload/$ lib/View/fileupload/index.php [QSA,L]
 RewriteRule ^api/docs$ lib/View/APIDoc.php [L]
 
-# Exempt context-preview from frame-ancestors CSP (env survives rewrite as REDIRECT_CONTEXT_PREVIEW)
-RewriteCond %{REQUEST_URI} ^/context-preview/
-RewriteRule ^ - [E=CONTEXT_PREVIEW:1]
-
 # Route all through the router
 RewriteRule ^$ router.php [QSA,L]
-RewriteRule !.(css|fonts|gif|jpe?g?|png|ico|js|svg|woff|ttf|map|json)$ router.php [QSA,L]
+RewriteRule !\.(css|fonts|gif|jpe?g|png|ico|js|svg|woff|ttf|map|json)$ router.php [QSA,L]
 
 RedirectMatch 404 ^/\.git
 RedirectMatch 404 ^/vendor
@@ -66,8 +62,7 @@ SetEnvIfNoCase Request_URI \.(?:css|js|map)$ !no-gzip
     Header always append X-Frame-Options SAMEORIGIN
     Header always append X-Content-Type-Options nosniff
     Header always append X-XSS-Protection "1; mode=block"
-    Header always set Content-Security-Policy "frame-ancestors 'none';"
-    Header always unset Content-Security-Policy env=REDIRECT_CONTEXT_PREVIEW
+    Header always set Content-Security-Policy "frame-ancestors 'self';"
 </IfModule>
 
 php_value display_errors 0

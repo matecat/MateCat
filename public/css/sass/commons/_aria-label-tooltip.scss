@@ -1,7 +1,7 @@
 @use '../tokens/colors';
 
 // Tooltips
-[aria-label] {
+[aria-label]:not(.react-datepicker__navigation) {
   position: relative;
 }
 

@@ -291,6 +291,11 @@
   padding: 10px;
   min-height: 50px;
 
+  .message-share-tmx-email {
+    font-weight: bold;
+    cursor: pointer;
+  }
+
   .action-form {
     display: flex;
     justify-content: space-between;

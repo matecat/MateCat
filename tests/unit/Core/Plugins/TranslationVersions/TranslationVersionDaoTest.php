@@ -63,12 +63,10 @@ class TranslationVersionDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function saveVersionInsertsRecord(): void
+    public function insertVersionInsertsRecord(): void
     {
         $dao = new TranslationVersionDao(obtainTestDatabase());
-        $result = $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1));
-
-        $this->assertTrue($result);
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'Inserted text'));
 
         $rows = $this->database->getConnection()
             ->query("SELECT * FROM segment_translation_versions WHERE id_job = " . self::JOB_ID . " AND id_segment = " . self::SEGMENT_ID_1)
@@ -77,15 +75,29 @@ class TranslationVersionDaoTest extends AbstractTest
         $this->assertCount(1, $rows);
         $this->assertEquals(self::SEGMENT_ID_1, (int)$rows[0]['id_segment']);
         $this->assertEquals(1, (int)$rows[0]['version_number']);
-        $this->assertEquals('Test translation', $rows[0]['translation']);
+        $this->assertEquals('Inserted text', $rows[0]['translation']);
         $this->assertEquals(1500, (int)$rows[0]['time_to_edit']);
+    }
+
+    #[Test]
+    public function insertVersionDoesNotDeduplicateOnSameKey(): void
+    {
+        $dao = new TranslationVersionDao(obtainTestDatabase());
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'First write'));
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'Second write'));
+
+        $rows = $this->database->getConnection()
+            ->query("SELECT * FROM segment_translation_versions WHERE id_job = " . self::JOB_ID . " AND id_segment = " . self::SEGMENT_ID_1 . " AND version_number = 1")
+            ->fetchAll(\PDO::FETCH_ASSOC);
+
+        $this->assertCount(2, $rows, 'segment_translation_versions has no unique key on (id_job, id_segment, version_number), so inserting the same version twice must produce two rows, not an update');
     }
 
     #[Test]
     public function getVersionNumberForTranslationReturnsStruct(): void
     {
         $dao = new TranslationVersionDao(obtainTestDatabase());
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 3, 'Specific'));
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_1, 3, 'Specific'));
 
         $result = $dao->getVersionNumberForTranslation(self::JOB_ID, self::SEGMENT_ID_1, 3);
 
@@ -108,7 +120,7 @@ class TranslationVersionDaoTest extends AbstractTest
     public function updateVersionModifiesExistingRecord(): void
     {
         $dao = new TranslationVersionDao(obtainTestDatabase());
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'Original'));
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'Original'));
 
         $updated = new TranslationVersionStruct();
         $updated->id_job = self::JOB_ID;
@@ -143,9 +155,9 @@ class TranslationVersionDaoTest extends AbstractTest
     public function instanceGetVersionsForJobReturnsAllVersions(): void
     {
         $dao = new TranslationVersionDao(obtainTestDatabase());
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'First'));
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'Second'));
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_2, 1, 'Other segment'));
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'First'));
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'Second'));
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_2, 1, 'Other segment'));
 
         $results = $dao->getVersionsForJob(self::JOB_ID);
 
@@ -167,8 +179,8 @@ class TranslationVersionDaoTest extends AbstractTest
     public function instanceGetVersionsForChunkReturnsAllVersions(): void
     {
         $dao = new TranslationVersionDao(obtainTestDatabase());
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'First'));
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_2, 1, 'Second'));
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'First'));
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_2, 1, 'Second'));
 
         $chunk = new JobStruct();
         $chunk->id = self::JOB_ID;
@@ -196,9 +208,9 @@ class TranslationVersionDaoTest extends AbstractTest
     public function instanceGetVersionsForTranslationFiltersCorrectly(): void
     {
         $dao = new TranslationVersionDao(obtainTestDatabase());
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'V1'));
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'V2'));
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_2, 1, 'Other'));
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'V1'));
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'V2'));
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_2, 1, 'Other'));
 
         $results = $dao->getVersionsForTranslation(self::JOB_ID, self::SEGMENT_ID_1);
 
@@ -212,8 +224,8 @@ class TranslationVersionDaoTest extends AbstractTest
     public function instanceGetVersionsForTranslationFiltersByVersionNumber(): void
     {
         $dao = new TranslationVersionDao(obtainTestDatabase());
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'V1'));
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'V2'));
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'V1'));
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'V2'));
 
         $results = $dao->getVersionsForTranslation(self::JOB_ID, self::SEGMENT_ID_1, 2);
 
@@ -223,7 +235,7 @@ class TranslationVersionDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function saveVersionPreservesNullableFields(): void
+    public function insertVersionPreservesNullableFields(): void
     {
         $struct = new TranslationVersionStruct();
         $struct->id_job = self::JOB_ID;
@@ -235,9 +247,7 @@ class TranslationVersionDaoTest extends AbstractTest
         $struct->new_status = 4;
 
         $dao = new TranslationVersionDao(obtainTestDatabase());
-        $result = $dao->saveVersion($struct);
-
-        $this->assertTrue($result);
+        $dao->insertVersion($struct);
 
         $fetched = $dao->getVersionNumberForTranslation(self::JOB_ID, self::SEGMENT_ID_1, 1);
         $this->assertNull($fetched->translation);
@@ -318,8 +328,8 @@ class TranslationVersionDaoTest extends AbstractTest
     public function getVersionsForRevisionReturnsVersionRecords(): void
     {
         $dao = new TranslationVersionDao(obtainTestDatabase());
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'Version 1'));
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'Version 2'));
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'Version 1'));
+        $dao->insertVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'Version 2'));
 
         $results = $dao->getVersionsForRevision(self::JOB_ID, self::SEGMENT_ID_1);
 
