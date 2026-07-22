@@ -1015,6 +1015,146 @@ class SetTranslationControllerTest extends AbstractTest
         $method->invoke($controller, 'Should fail', '', $this->makeQAStub());
     }
 
+    /**
+     * thereAreWarnings() is called twice by buildNewTranslation(): once before the fuzzy-unchanged
+     * check runs, once after (only if the fuzzy branch fires and calls addError()). Consecutive
+     * return values simulate that state transition without needing a real QA instance.
+     */
+    private function makeFuzzyAwareQAStub(bool $warningsBeforeFuzzyCheck, bool $warningsAfterFuzzyCheck, string $warningsJson): QA
+    {
+        $qa = $this->createStub(QA::class);
+        $qa->method('thereAreWarnings')->willReturnOnConsecutiveCalls($warningsBeforeFuzzyCheck, $warningsAfterFuzzyCheck);
+        $qa->method('getWarningsJSON')->willReturn($warningsJson);
+
+        return $qa;
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function buildNewTranslationSetsFuzzyWarningWhenUnmodifiedFuzzyMatchConfirmed(): void
+    {
+        // makeDefaultOldTranslation() already yields a fuzzy-band TM suggestion (75%, 'Old suggestion').
+        $old = $this->makeDefaultOldTranslation();
+        $controller = $this->createTestableController($old);
+
+        $this->setProperty($controller, [
+            'suggestion_array' => null,
+            'chosen_suggestion_index' => null,
+            'id_segment' => '42',
+            'id_job' => '100',
+            'status' => TranslationStatus::STATUS_TRANSLATED,
+            'segment' => $this->makeDefaultSegment(),
+            'time_to_edit' => 1000,
+        ]);
+
+        $fuzzyWarningJson = json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Fuzzy match confirmed without changes']]);
+        $qa = $this->makeFuzzyAwareQAStub(false, true, $fuzzyWarningJson);
+
+        $method = (new ReflectionClass(SetTranslationController::class))->getMethod('buildNewTranslation');
+        $result = $method->invoke($controller, 'Old suggestion', '[]', $qa);
+
+        $new = $result['new'];
+        self::assertTrue($new->warning, 'Unmodified fuzzy match confirmation must set warning to true');
+        self::assertSame($fuzzyWarningJson, $new->serialized_errors_list, 'serialized_errors_list must be refreshed with the fuzzy warning');
+
+        $decoded = json_decode($new->serialized_errors_list, true);
+        self::assertSame(QA::ERR_FUZZY_UNCHANGED, $decoded[0]['outcome']);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function buildNewTranslationSkipsFuzzyWarningWhenTranslationEdited(): void
+    {
+        $old = $this->makeDefaultOldTranslation();
+        $controller = $this->createTestableController($old);
+
+        $this->setProperty($controller, [
+            'suggestion_array' => null,
+            'chosen_suggestion_index' => null,
+            'id_segment' => '42',
+            'id_job' => '100',
+            'status' => TranslationStatus::STATUS_TRANSLATED,
+            'segment' => $this->makeDefaultSegment(),
+            'time_to_edit' => 1000,
+        ]);
+
+        $fuzzyWarningJson = json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Fuzzy match confirmed without changes']]);
+        $qa = $this->makeFuzzyAwareQAStub(false, true, $fuzzyWarningJson);
+
+        $method = (new ReflectionClass(SetTranslationController::class))->getMethod('buildNewTranslation');
+        $result = $method->invoke($controller, 'An edited translation', '[]', $qa);
+
+        $new = $result['new'];
+        self::assertFalse($new->warning, 'Edited translation must not trigger the fuzzy-unchanged warning');
+        self::assertSame('[]', $new->serialized_errors_list, 'serialized_errors_list must be left untouched');
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function buildNewTranslationSkipsFuzzyWarningForExactMatch(): void
+    {
+        $old = $this->makeDefaultOldTranslation();
+        $old->suggestion_match = '100';
+        $controller = $this->createTestableController($old);
+
+        $this->setProperty($controller, [
+            'suggestion_array' => null,
+            'chosen_suggestion_index' => null,
+            'id_segment' => '42',
+            'id_job' => '100',
+            'status' => TranslationStatus::STATUS_TRANSLATED,
+            'segment' => $this->makeDefaultSegment(),
+            'time_to_edit' => 1000,
+        ]);
+
+        $fuzzyWarningJson = json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Fuzzy match confirmed without changes']]);
+        $qa = $this->makeFuzzyAwareQAStub(false, true, $fuzzyWarningJson);
+
+        $method = (new ReflectionClass(SetTranslationController::class))->getMethod('buildNewTranslation');
+        $result = $method->invoke($controller, 'Old suggestion', '[]', $qa);
+
+        $new = $result['new'];
+        self::assertFalse($new->warning, 'Exact/ICE match confirmation must not trigger the fuzzy-unchanged warning');
+        self::assertSame('[]', $new->serialized_errors_list, 'serialized_errors_list must be left untouched');
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function buildNewTranslationSkipsFuzzyWarningForNonTMSource(): void
+    {
+        $old = $this->makeDefaultOldTranslation();
+        $old->suggestion_source = EngineConstants::MT;
+        $controller = $this->createTestableController($old);
+
+        $this->setProperty($controller, [
+            'suggestion_array' => null,
+            'chosen_suggestion_index' => null,
+            'id_segment' => '42',
+            'id_job' => '100',
+            'status' => TranslationStatus::STATUS_TRANSLATED,
+            'segment' => $this->makeDefaultSegment(),
+            'time_to_edit' => 1000,
+        ]);
+
+        $fuzzyWarningJson = json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Fuzzy match confirmed without changes']]);
+        $qa = $this->makeFuzzyAwareQAStub(false, true, $fuzzyWarningJson);
+
+        $method = (new ReflectionClass(SetTranslationController::class))->getMethod('buildNewTranslation');
+        $result = $method->invoke($controller, 'Old suggestion', '[]', $qa);
+
+        $new = $result['new'];
+        self::assertFalse($new->warning, 'Non-TM suggestion source must not trigger the fuzzy-unchanged warning');
+        self::assertSame('[]', $new->serialized_errors_list, 'serialized_errors_list must be left untouched');
+    }
+
     // ──────────────────────────────────────────────────────────────
     // SECTION 6: Additional private/protected methods coverage
     // ──────────────────────────────────────────────────────────────

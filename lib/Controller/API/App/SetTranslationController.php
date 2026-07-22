@@ -301,7 +301,13 @@ class SetTranslationController extends AbstractStatefulKleinController
 
         // Warn (and persist a QA warning, like a tag order mismatch) when a fuzzy TM match
         // is confirmed verbatim, i.e. without any modification by the translator.
-        if ($this->isUnmodifiedFuzzyMatchConfirmation($new_translation)) {
+        if (QA::isUnmodifiedFuzzyMatchConfirmation(
+            $new_translation->status,
+            $new_translation->suggestion_source,
+            $new_translation->suggestion_match,
+            $new_translation->suggestion,
+            $new_translation->translation
+        )) {
             $check->addError(QA::ERR_FUZZY_UNCHANGED);
             $new_translation->serialized_errors_list = $check->getWarningsJSON();
             $new_translation->warning = $check->thereAreWarnings();
@@ -311,47 +317,6 @@ class SetTranslationController extends AbstractStatefulKleinController
             'new' => $new_translation,
             'old' => $old_translation,
         ];
-    }
-
-    /**
-     * Detects whether the confirmation is a fuzzy TM match accepted without any edit.
-     *
-     * The check is intentionally based on the persisted suggestion so that it also works
-     * when a segment is opened, left untouched, and confirmed later (even after being
-     * navigated away from and reopened already populated).
-     *
-     * @param SegmentTranslationStruct $newTranslation The translation being persisted
-     *
-     * @return bool True when a fuzzy TM match is being confirmed verbatim
-     */
-    private function isUnmodifiedFuzzyMatchConfirmation(SegmentTranslationStruct $newTranslation): bool
-    {
-        // Only when confirming, never for draft/new auto-saves.
-        if (!in_array($newTranslation->status, [
-            TranslationStatus::STATUS_TRANSLATED,
-            TranslationStatus::STATUS_APPROVED,
-            TranslationStatus::STATUS_APPROVED2,
-        ], true)) {
-            return false;
-        }
-
-        // Only TM suggestions are relevant (excludes MT and "no match").
-        if ($newTranslation->suggestion_source !== EngineConstants::TM) {
-            return false;
-        }
-
-        // Only fuzzy bands: exclude 100% exact and ICE (>= 100) matches and unknown values.
-        $match = (int)$newTranslation->suggestion_match;
-        if ($match <= 0 || $match >= 100) {
-            return false;
-        }
-
-        if (empty($newTranslation->suggestion)) {
-            return false;
-        }
-
-        // The translation was confirmed exactly as the suggestion (no edit performed).
-        return trim((string)$newTranslation->translation) === trim((string)$newTranslation->suggestion);
     }
 
     /**

@@ -21,6 +21,7 @@ use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentMetadataMarshaller;
 use Model\Segments\SegmentOriginalDataDao;
+use Model\Translations\SegmentTranslationDao;
 use Model\Translations\WarningDao;
 use Utils\LQA\ICUSourceSegmentChecker;
 use Utils\LQA\QA;
@@ -115,6 +116,7 @@ class GetWarningController extends KleinController
         $trg_content = $request['trg_content'];
         $password = $request['password'];
         $characters_counter = $request['characters_counter'];
+        $segment_status = $request['segment_status'];
 
         $chunk = $this->getChunkAndLoadProjectFeatures($id_job, $password);
         $featureSet = $this->getFeatureSet();
@@ -166,6 +168,21 @@ class GetWarningController extends KleinController
         }
 
         $QA->performConsistencyCheck();
+
+        // Surface the same fuzzy-unchanged warning here as set-translation persists, based on
+        // the currently persisted suggestion for this segment (covers live typing checks and
+        // segments reopened after being confirmed).
+        $oldTranslation = (new SegmentTranslationDao($this->getDatabase()))->findBySegmentAndJob($id, (int) $id_job);
+
+        if ($oldTranslation !== null && QA::isUnmodifiedFuzzyMatchConfirmation(
+            $segment_status,
+            $oldTranslation->suggestion_source,
+            $oldTranslation->suggestion_match,
+            $oldTranslation->suggestion,
+            $Filter->fromLayer1ToLayer0($trg_content)
+        )) {
+            $QA->addError(QA::ERR_FUZZY_UNCHANGED);
+        }
 
         $result = array_merge(
             [

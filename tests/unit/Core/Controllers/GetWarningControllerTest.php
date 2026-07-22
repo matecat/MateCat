@@ -19,6 +19,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
 use Utils\Logger\MatecatLogger;
+use Utils\LQA\QA;
 
 class TestableGetWarningController extends GetWarningController
 {
@@ -441,6 +442,68 @@ class GetWarningControllerTest extends AbstractTest
             ->with($this->callback(function (array $data): bool {
                 $this->assertArrayHasKey('data', $data);
                 $this->assertArrayHasKey('errors', $data);
+                return true;
+            }));
+
+        $this->controller->local();
+    }
+
+    #[Test]
+    public function local_includes_fuzzy_category_when_unmodified_fuzzy_match_confirmed(): void
+    {
+        $conn = obtainTestDatabase()->getConnection();
+        $conn->exec(
+            "UPDATE segment_translations SET suggestion = 'Ciao mondo', suggestion_source = 'TM', suggestion_match = 75 " .
+            "WHERE id_segment = " . self::TEST_SEGMENT_ID . " AND id_job = " . self::TEST_JOB_ID
+        );
+
+        $this->setRequestParams([
+            'id' => (string) self::TEST_SEGMENT_ID,
+            'id_job' => (string) self::TEST_JOB_ID,
+            'src_content' => 'Hello world',
+            'trg_content' => 'Ciao mondo',
+            'password' => self::TEST_JOB_PASSWORD,
+            'segment_status' => 'TRANSLATED',
+        ]);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $categories = $data['details']['issues_info']['WARNING']['Categories']->getArrayCopy();
+
+                $this->assertArrayHasKey('FUZZY', $categories);
+                $this->assertCount(1, $categories['FUZZY']);
+                $this->assertSame(QA::ERR_FUZZY_UNCHANGED, $categories['FUZZY'][0]->outcome);
+
+                return true;
+            }));
+
+        $this->controller->local();
+    }
+
+    #[Test]
+    public function local_does_not_include_fuzzy_category_for_non_tm_suggestion(): void
+    {
+        $conn = obtainTestDatabase()->getConnection();
+        $conn->exec(
+            "UPDATE segment_translations SET suggestion = 'Ciao mondo', suggestion_source = 'MT', suggestion_match = 75 " .
+            "WHERE id_segment = " . self::TEST_SEGMENT_ID . " AND id_job = " . self::TEST_JOB_ID
+        );
+
+        $this->setRequestParams([
+            'id' => (string) self::TEST_SEGMENT_ID,
+            'id_job' => (string) self::TEST_JOB_ID,
+            'src_content' => 'Hello world',
+            'trg_content' => 'Ciao mondo',
+            'password' => self::TEST_JOB_PASSWORD,
+            'segment_status' => 'TRANSLATED',
+        ]);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertNull($data['details']);
+
                 return true;
             }));
 
