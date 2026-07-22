@@ -904,7 +904,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     if (typeof firstRowIdVisible !== 'undefined') {
       const props = getSegmentPropsBySid(firstRowIdVisible)
 
-      return (
+      return props && (
         <div
           className={`sticky-project-bar ${props.sideOpen ? 'sticky-project-bar-slide-right' : ''}`}
         >
