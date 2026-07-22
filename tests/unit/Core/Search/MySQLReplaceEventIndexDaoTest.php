@@ -27,7 +27,7 @@ class MySQLReplaceEventIndexDaoTest extends AbstractTest
     #[Test]
     public function getActualIndexReturnsVersion(): void
     {
-        $this->stmt->method('fetch')->willReturn([['v' => '3']]);
+        $this->stmt->method('fetch')->willReturn(['v' => '3']);
 
         $this->assertSame(3, $this->dao->getActualIndex(1));
     }
@@ -35,7 +35,8 @@ class MySQLReplaceEventIndexDaoTest extends AbstractTest
     #[Test]
     public function getActualIndexReturnsZeroWhenNoRows(): void
     {
-        $this->stmt->method('fetch')->willReturn([['v' => '0']]);
+        // fetch() returns false when the job has no stored cursor row yet.
+        $this->stmt->method('fetch')->willReturn(false);
 
         $this->assertSame(0, $this->dao->getActualIndex(1));
     }
@@ -43,7 +44,7 @@ class MySQLReplaceEventIndexDaoTest extends AbstractTest
     #[Test]
     public function saveInsertPathWhenIndexIsZero(): void
     {
-        $this->stmt->method('fetch')->willReturn([['v' => '0']]);
+        $this->stmt->method('fetch')->willReturn(false);
         $this->stmt->method('rowCount')->willReturn(1);
 
         $result = $this->dao->save(1, 5);
@@ -53,7 +54,7 @@ class MySQLReplaceEventIndexDaoTest extends AbstractTest
     #[Test]
     public function saveUpdatePathWhenIndexNonZero(): void
     {
-        $this->stmt->method('fetch')->willReturn([['v' => '3']]);
+        $this->stmt->method('fetch')->willReturn(['v' => '3']);
         $this->stmt->method('rowCount')->willReturn(1);
 
         $result = $this->dao->save(1, 5);

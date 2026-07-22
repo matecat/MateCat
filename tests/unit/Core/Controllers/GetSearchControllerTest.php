@@ -3,12 +3,16 @@
 namespace Matecat\Core\Controllers;
 
 use Controller\API\App\GetSearchController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
 use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Search\SearchQueryParamsStruct;
 use Model\Users\UserStruct;
@@ -18,6 +22,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
 use RuntimeException;
+use Utils\Constants\SourcePages;
 use Utils\Logger\MatecatLogger;
 use Utils\Search\ReplaceHistory;
 
@@ -27,6 +32,23 @@ class TestableGetSearchController extends GetSearchController
     {
     }
 
+}
+
+/**
+ * Records dispatched events while preserving the real FeatureSet behaviour (empty feature list here),
+ * so tests can assert which events the controller emits.
+ */
+class SpyFeatureSet extends FeatureSet
+{
+    /** @var object[] */
+    public array $dispatched = [];
+
+    public function dispatch(object $event): object
+    {
+        $this->dispatched[] = $event;
+
+        return parent::dispatch($event);
+    }
 }
 
 #[AllowMockObjectsWithoutExpectations]
@@ -83,6 +105,25 @@ class GetSearchControllerTest extends AbstractTest
 
         $dbProp = $this->reflector->getProperty('database');
         $dbProp->setValue($this->controller, obtainTestDatabase());
+
+        // In production the ChunkPasswordValidator loads $this->chunk before the action runs; the test
+        // bypasses the validator chain, so seed the same fully-hydrated chunk (translate source_page)
+        // that the controller methods (validateTheRequest / doSearch / updateSegments) rely on.
+        $this->seedChunk();
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    private function seedChunk(?JobStruct $chunk = null): void
+    {
+        if ($chunk === null) {
+            $chunk = (new JobDao(obtainTestDatabase()))->getByIdAndPassword(self::TEST_JOB_ID, self::TEST_JOB_PASSWORD);
+            $chunk->setSourcePage(SourcePages::SOURCE_PAGE_TRANSLATE);
+        }
+
+        $chunkProp = $this->reflector->getProperty('chunk');
+        $chunkProp->setValue($this->controller, $chunk);
     }
 
     protected function tearDown(): void
@@ -147,6 +188,52 @@ class GetSearchControllerTest extends AbstractTest
         $reqProp->setValue($this->controller, $this->requestStub);
     }
 
+    // ─── registerValidators ───
+
+    #[Test]
+    public function registerValidators_appends_login_and_chunk_password_validators(): void
+    {
+        $controller = $this->reflector->newInstanceWithoutConstructor();
+        $this->reflector->getProperty('request')->setValue($controller, new Request());
+
+        $this->reflector->getMethod('registerValidators')->invoke($controller);
+
+        /** @var array<int, object> $validators */
+        $validators = $this->reflector->getProperty('validators')->getValue($controller);
+
+        $this->assertCount(2, $validators);
+        $this->assertInstanceOf(LoginValidator::class, $validators[0]);
+        $this->assertInstanceOf(ChunkPasswordValidator::class, $validators[1]);
+    }
+
+    #[Test]
+    public function registerValidators_onSuccess_stores_the_validated_chunk(): void
+    {
+        $controller = $this->reflector->newInstanceWithoutConstructor();
+        $this->reflector->getProperty('request')->setValue($controller, new Request());
+        $this->reflector->getMethod('registerValidators')->invoke($controller);
+
+        /** @var array<int, object> $validators */
+        $validators = $this->reflector->getProperty('validators')->getValue($controller);
+        $chunkValidator = $validators[1];
+        $this->assertInstanceOf(ChunkPasswordValidator::class, $chunkValidator);
+
+        $chunk = new JobStruct();
+        $chunk->id = self::TEST_JOB_ID;
+        $chunk->password = self::TEST_JOB_PASSWORD;
+        (new ReflectionClass(ChunkPasswordValidator::class))
+            ->getProperty('chunk')
+            ->setValue($chunkValidator, $chunk);
+
+        // Run the stored onSuccess callback: it copies the validated chunk onto the controller.
+        (new ReflectionClass(\Controller\API\Commons\Validators\Base::class))
+            ->getMethod('_executeCallbacks')
+            ->invoke($chunkValidator);
+
+        $stored = $this->reflector->getProperty('chunk')->getValue($controller);
+        $this->assertSame($chunk, $stored);
+    }
+
     // ─── validateTheRequest ───
 
     #[Test]
@@ -163,7 +250,7 @@ class GetSearchControllerTest extends AbstractTest
     #[Test]
     public function validateTheRequest_throws_on_missing_password(): void
     {
-        $this->setRequestParams(['job' => '123']);
+        $this->setRequestParams(['id_job' => '123']);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionCode(-3);
@@ -175,8 +262,8 @@ class GetSearchControllerTest extends AbstractTest
     public function validateTheRequest_returns_expected_structure(): void
     {
         $this->setRequestParams([
-            'job' => '999',
-            'password' => 'mypass',
+            'id_job' => (string)self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
             'token' => 'tok123',
             'source' => 'hello',
             'target' => 'ciao',
@@ -191,9 +278,10 @@ class GetSearchControllerTest extends AbstractTest
         $result = $this->invokePrivate('validateTheRequest');
 
         $this->assertIsArray($result);
-        $this->assertSame(999, $result['job']);
+        $this->assertSame(self::TEST_JOB_ID, $result['job']);
         $this->assertInstanceOf(SearchQueryParamsStruct::class, $result['queryParams']);
-        $this->assertSame(999, $result['queryParams']->job);
+        // queryParams->job is taken from the validated chunk, not the raw request param.
+        $this->assertSame(self::TEST_JOB_ID, $result['queryParams']->job);
         $this->assertTrue($result['isMatchCaseRequested']);
         $this->assertFalse($result['isExactMatchRequested']);
         $this->assertTrue($result['inCurrentChunkOnly']);
@@ -203,8 +291,8 @@ class GetSearchControllerTest extends AbstractTest
     public function validateTheRequest_defaults_status_to_all_for_invalid(): void
     {
         $this->setRequestParams([
-            'job' => '100',
-            'password' => 'pw',
+            'id_job' => (string)self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
             'status' => 'invalid_status',
         ]);
 
@@ -220,25 +308,14 @@ class GetSearchControllerTest extends AbstractTest
 
         foreach ($validStatuses as $status) {
             $this->setRequestParams([
-                'job' => '100',
-                'password' => 'pw',
+                'id_job' => (string)self::TEST_JOB_ID,
+                'password' => self::TEST_JOB_PASSWORD,
                 'status' => $status,
             ]);
 
             $result = $this->invokePrivate('validateTheRequest');
             $this->assertSame($status, $result['status'], "Status '$status' should be preserved");
         }
-    }
-
-    // ─── getJobData ───
-
-    #[Test]
-    public function getJobData_returns_job_struct(): void
-    {
-        $job = $this->invokePrivate('getJobData', [self::TEST_JOB_ID, self::TEST_JOB_PASSWORD]);
-
-        $this->assertInstanceOf(JobStruct::class, $job);
-        $this->assertSame(self::TEST_JOB_ID, $job->id);
     }
 
     // ─── getReplaceHistory ───
@@ -252,49 +329,63 @@ class GetSearchControllerTest extends AbstractTest
     }
 
     // ─── getNewStatus ───
+    // A replace-all is an automated, unseen change, so the editor must re-review it: the status is
+    // demoted one quality tier. On the translate page (revisionNumber === null) everything drops to
+    // DRAFT; on a revision page APPROVED2 -> APPROVED, APPROVED -> TRANSLATED, anything else -> DRAFT.
 
     #[Test]
-    public function getNewStatus_returns_translated_when_no_revision_number(): void
+    public function getNewStatus_returns_draft_when_no_revision_number(): void
     {
         $translation = new \Model\Translations\SegmentTranslationStruct();
         $translation->status = 'APPROVED';
 
         $result = $this->invokePrivate('getNewStatus', [$translation, null]);
 
-        $this->assertSame('TRANSLATED', $result);
+        $this->assertSame('DRAFT', $result);
     }
 
     #[Test]
-    public function getNewStatus_returns_translated_when_status_is_translated(): void
+    public function getNewStatus_demotes_translated_to_draft_on_revision(): void
     {
         $translation = new \Model\Translations\SegmentTranslationStruct();
         $translation->status = 'TRANSLATED';
 
         $result = $this->invokePrivate('getNewStatus', [$translation, 1]);
 
-        $this->assertSame('TRANSLATED', $result);
+        $this->assertSame('DRAFT', $result);
     }
 
     #[Test]
-    public function getNewStatus_returns_approved_when_revision_number_set_and_not_translated(): void
+    public function getNewStatus_demotes_approved_to_translated_on_revision(): void
     {
         $translation = new \Model\Translations\SegmentTranslationStruct();
         $translation->status = 'APPROVED';
 
         $result = $this->invokePrivate('getNewStatus', [$translation, 1]);
 
+        $this->assertSame('TRANSLATED', $result);
+    }
+
+    #[Test]
+    public function getNewStatus_demotes_approved2_to_approved_on_revision(): void
+    {
+        $translation = new \Model\Translations\SegmentTranslationStruct();
+        $translation->status = 'APPROVED2';
+
+        $result = $this->invokePrivate('getNewStatus', [$translation, 2]);
+
         $this->assertSame('APPROVED', $result);
     }
 
     #[Test]
-    public function getNewStatus_returns_approved_for_rejected_status_with_revision(): void
+    public function getNewStatus_demotes_rejected_to_draft_on_revision(): void
     {
         $translation = new \Model\Translations\SegmentTranslationStruct();
         $translation->status = 'REJECTED';
 
         $result = $this->invokePrivate('getNewStatus', [$translation, 2]);
 
-        $this->assertSame('APPROVED', $result);
+        $this->assertSame('DRAFT', $result);
     }
 
     // ─── getReplacedSegmentTranslation ───
@@ -419,6 +510,13 @@ class GetSearchControllerTest extends AbstractTest
     #[Test]
     public function doSearch_throws_runtime_exception_on_internal_error(): void
     {
+        // Force getSearchModel() to throw by giving the controller a chunk with a null id; doSearch
+        // must wrap it into the generic RuntimeException.
+        $badChunk = new JobStruct();
+        $badChunk->id = null;
+        $badChunk->password = null;
+        $this->seedChunk($badChunk);
+
         $request = [
             'job' => 99999999,
             'password' => 'nonexistent',
@@ -565,19 +663,7 @@ class GetSearchControllerTest extends AbstractTest
         $this->assertArrayHasKey('sid_list', $result);
     }
 
-    // ─── getSegmentForRedoReplaceAll / getSegmentForUndoReplaceAll ───
-
-    #[Test]
-    public function getSegmentForRedoReplaceAll_returns_empty_array_when_no_events(): void
-    {
-        $srh = $this->createMock(ReplaceHistory::class);
-        $srh->method('getCursor')->willReturn(0);
-        $srh->method('get')->willReturn([]);
-
-        $result = $this->invokePrivate('getSegmentForRedoReplaceAll', [$srh]);
-
-        $this->assertSame([], $result);
-    }
+    // ─── getSegmentForUndoReplaceAll ───
 
     #[Test]
     public function getSegmentForUndoReplaceAll_returns_empty_array_when_no_events(): void
@@ -592,71 +678,46 @@ class GetSearchControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function getSegmentForUndoReplaceAll_uses_cursor_minus_one_for_cursor_above_one(): void
+    public function getSegmentForUndoReplaceAll_reverts_current_version_with_before_text_and_status(): void
     {
+        // Undo reverts the CURRENT version (cursor), restoring the pre-replacement text and the status
+        // captured in the event.
         $event = new \Model\Search\ReplaceEventStruct();
         $event->id_segment = 100;
         $event->id_job = 200;
+        $event->translation_before_replacement = 'original text';
         $event->translation_after_replacement = 'replaced text';
         $event->status = 'TRANSLATED';
 
         $srh = $this->createMock(ReplaceHistory::class);
         $srh->method('getCursor')->willReturn(3);
-        $srh->expects($this->once())->method('get')->with(2)->willReturn([$event]);
+        $srh->expects($this->once())->method('get')->with(3)->willReturn([$event]);
 
         $result = $this->invokePrivate('getSegmentForUndoReplaceAll', [$srh]);
 
         $this->assertCount(1, $result);
         $this->assertSame(100, $result[0]['id_segment']);
         $this->assertSame(200, $result[0]['id_job']);
-        $this->assertSame('replaced text', $result[0]['translation']);
+        $this->assertSame('original text', $result[0]['translation']);
+        $this->assertSame('TRANSLATED', $result[0]['status']);
     }
 
     #[Test]
-    public function getSegmentForUndoReplaceAll_uses_cursor_1_when_cursor_is_1(): void
+    public function getSegmentForUndoReplaceAll_returns_empty_when_cursor_is_zero(): void
     {
-        $event = new \Model\Search\ReplaceEventStruct();
-        $event->id_segment = 10;
-        $event->id_job = 20;
-        $event->translation_after_replacement = 'after';
-        $event->status = 'TRANSLATED';
-
         $srh = $this->createMock(ReplaceHistory::class);
-        $srh->method('getCursor')->willReturn(1);
-        $srh->expects($this->once())->method('get')->with(1)->willReturn([$event]);
+        $srh->method('getCursor')->willReturn(0);
+        $srh->expects($this->never())->method('get');
 
         $result = $this->invokePrivate('getSegmentForUndoReplaceAll', [$srh]);
 
-        $this->assertCount(1, $result);
-        $this->assertSame(10, $result[0]['id_segment']);
-    }
-
-    #[Test]
-    public function getSegmentForRedoReplaceAll_maps_events_correctly(): void
-    {
-        $event = new \Model\Search\ReplaceEventStruct();
-        $event->id_segment = 50;
-        $event->id_job = 60;
-        $event->translation_before_replacement = 'before text';
-        $event->status = 'APPROVED';
-
-        $srh = $this->createMock(ReplaceHistory::class);
-        $srh->method('getCursor')->willReturn(1);
-        $srh->expects($this->once())->method('get')->with(2)->willReturn([$event]);
-
-        $result = $this->invokePrivate('getSegmentForRedoReplaceAll', [$srh]);
-
-        $this->assertCount(1, $result);
-        $this->assertSame(50, $result[0]['id_segment']);
-        $this->assertSame(60, $result[0]['id_job']);
-        $this->assertSame('before text', $result[0]['translation']);
-        $this->assertSame('APPROVED', $result[0]['status']);
+        $this->assertSame([], $result);
     }
 
     // ─── saveReplacementEvent ───
 
     #[Test]
-    public function saveReplacementEvent_calls_srh_save_and_update_index(): void
+    public function saveReplacementEvent_saves_event_without_advancing_the_index(): void
     {
         $queryParams = new SearchQueryParamsStruct([
             'job' => 100,
@@ -674,9 +735,11 @@ class GetSearchControllerTest extends AbstractTest
             'status' => 'TRANSLATED',
         ];
 
+        // saveReplacementEvent only persists the event. The undo-cursor advance is done once by
+        // replaceAll() after the whole batch loop, so the replace-all lands as one history version.
         $srh = $this->createMock(ReplaceHistory::class);
         $srh->expects($this->once())->method('save');
-        $srh->expects($this->once())->method('updateIndex')->with('3');
+        $srh->expects($this->never())->method('updateIndex');
 
         $this->invokePrivate('saveReplacementEvent', ['3', $tRow, $srh, $queryParams]);
     }
@@ -687,7 +750,7 @@ class GetSearchControllerTest extends AbstractTest
     public function search_returns_json_response_with_results(): void
     {
         $this->setRequestParams([
-            'job' => (string)self::TEST_JOB_ID,
+            'id_job' => (string)self::TEST_JOB_ID,
             'password' => self::TEST_JOB_PASSWORD,
             'source' => '',
             'target' => 'Ciao',
@@ -724,7 +787,7 @@ class GetSearchControllerTest extends AbstractTest
     public function search_with_no_match_returns_zero(): void
     {
         $this->setRequestParams([
-            'job' => (string)self::TEST_JOB_ID,
+            'id_job' => (string)self::TEST_JOB_ID,
             'password' => self::TEST_JOB_PASSWORD,
             'source' => '',
             'target' => 'nonexistent_unique_xyz_99',
@@ -768,15 +831,9 @@ class GetSearchControllerTest extends AbstractTest
             ],
         ];
 
-        $this->invokePrivate('updateSegments', [
-            $search_results,
-            self::TEST_JOB_ID,
-            self::TEST_JOB_PASSWORD,
-            $queryParams,
-            null,
-            null
-        ]);
+        $committed = $this->invokePrivate('updateSegments', [$search_results, self::TEST_JOB_ID, $queryParams]);
 
+        $this->assertCount(1, $committed);
         $updated = (new \Model\Translations\SegmentTranslationDao(obtainTestDatabase()))->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
         $this->assertNotNull($updated);
         $this->assertStringContainsString('universo', $updated->translation);
@@ -805,14 +862,7 @@ class GetSearchControllerTest extends AbstractTest
             ],
         ];
 
-        $this->invokePrivate('updateSegments', [
-            $search_results,
-            self::TEST_JOB_ID,
-            self::TEST_JOB_PASSWORD,
-            $queryParams,
-            null,
-            null
-        ]);
+        $this->invokePrivate('updateSegments', [$search_results, self::TEST_JOB_ID, $queryParams]);
 
         $updated = (new \Model\Translations\SegmentTranslationDao(obtainTestDatabase()))->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
         $this->assertNotNull($updated);
@@ -839,7 +889,7 @@ class GetSearchControllerTest extends AbstractTest
             $this->expectException(\Model\Exceptions\NotFoundException::class);
             $this->expectExceptionMessage("Project not found for job $orphanJobId");
 
-            $this->invokePrivate('updateSegments', [[], $orphanJobId, 'orphanpw', $queryParams, null, null]);
+            $this->invokePrivate('updateSegments', [[], $orphanJobId, $queryParams]);
         } finally {
             $conn->exec("DELETE FROM jobs WHERE id = " . $orphanJobId);
         }
@@ -861,9 +911,9 @@ class GetSearchControllerTest extends AbstractTest
             ['id_segment' => 888888888, 'id_job' => self::TEST_JOB_ID, 'translation' => 'text', 'status' => 'TRANSLATED'],
         ];
 
-        $this->invokePrivate('updateSegments', [$search_results, self::TEST_JOB_ID, self::TEST_JOB_PASSWORD, $queryParams, null, null]);
+        $committed = $this->invokePrivate('updateSegments', [$search_results, self::TEST_JOB_ID, $queryParams]);
 
-        $this->assertTrue(true);
+        $this->assertSame([], $committed);
     }
 
     #[Test]
@@ -878,41 +928,79 @@ class GetSearchControllerTest extends AbstractTest
             'isExactMatchRequested' => false,
         ]);
 
-        $this->invokePrivate('updateSegments', [[], self::TEST_JOB_ID, self::TEST_JOB_PASSWORD, $queryParams, null, null]);
+        $committed = $this->invokePrivate('updateSegments', [[], self::TEST_JOB_ID, $queryParams]);
 
-        $this->assertTrue(true);
+        $this->assertSame([], $committed);
     }
-
-    // ─── redoReplaceAll / undoReplaceAll ───
 
     #[Test]
-    public function redoReplaceAll_with_empty_history_returns_success(): void
+    public function updateSegments_dispatches_post_add_segment_translation_event_once_per_batch(): void
     {
-        $this->setRequestParams([
-            'job' => (string)self::TEST_JOB_ID,
+        // ProjectCompletion listens to PostAddSegmentTranslationEvent to refresh chunk completion.
+        // Replace-all must emit it (once per chunk) just like the single-segment save path.
+        $spy = new SpyFeatureSet($this->createStub(IDatabase::class));
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, $spy);
+
+        $queryParams = new SearchQueryParamsStruct([
+            'job' => self::TEST_JOB_ID,
             'password' => self::TEST_JOB_PASSWORD,
-            'source' => '',
-            'target' => 'Ciao',
-            'token' => 'tok',
-            'status' => 'all',
-            'replace' => 'replacement',
-            'matchcase' => '0',
-            'exactmatch' => '0',
-            'inCurrentChunkOnly' => '0',
+            'target' => 'mondo',
+            'replacement' => 'universo',
+            'isMatchCaseRequested' => false,
+            'isExactMatchRequested' => false,
         ]);
 
-        $this->responseMock->expects($this->once())
-            ->method('json')
-            ->with(['success' => true]);
+        $search_results = [
+            ['id_segment' => self::TEST_SEGMENT_1, 'id_job' => self::TEST_JOB_ID, 'translation' => 'Ciao mondo', 'status' => 'TRANSLATED'],
+        ];
 
-        $this->controller->redoReplaceAll();
+        $committed = $this->invokePrivate('updateSegments', [$search_results, self::TEST_JOB_ID, $queryParams]);
+        $this->assertCount(1, $committed);
+
+        $postAdd = array_values(array_filter(
+            $spy->dispatched,
+            static fn(object $e): bool => $e instanceof PostAddSegmentTranslationEvent
+        ));
+
+        $this->assertCount(1, $postAdd, 'exactly one PostAddSegmentTranslationEvent per replace batch');
+        $context = $postAdd[0]->context;
+        $this->assertSame(self::TEST_JOB_ID, $context['chunk']->id);
+        $this->assertFalse($context['is_review'], 'translate-page chunk => is_review false');
+        $this->assertSame(1, $context['logged_user']->uid);
     }
+
+    #[Test]
+    public function updateSegments_does_not_dispatch_post_add_event_when_nothing_committed(): void
+    {
+        $spy = new SpyFeatureSet($this->createStub(IDatabase::class));
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, $spy);
+
+        $queryParams = new SearchQueryParamsStruct([
+            'job' => self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'target' => 'test',
+            'replacement' => 'replaced',
+            'isMatchCaseRequested' => false,
+            'isExactMatchRequested' => false,
+        ]);
+
+        $this->invokePrivate('updateSegments', [[], self::TEST_JOB_ID, $queryParams]);
+
+        $postAdd = array_filter(
+            $spy->dispatched,
+            static fn(object $e): bool => $e instanceof PostAddSegmentTranslationEvent
+        );
+
+        $this->assertCount(0, $postAdd, 'no completion event when no segment was committed');
+    }
+
+    // ─── undoReplaceAll ───
 
     #[Test]
     public function undoReplaceAll_with_empty_history_returns_success(): void
     {
         $this->setRequestParams([
-            'job' => (string)self::TEST_JOB_ID,
+            'id_job' => (string)self::TEST_JOB_ID,
             'password' => self::TEST_JOB_PASSWORD,
             'source' => '',
             'target' => 'Ciao',
@@ -937,7 +1025,7 @@ class GetSearchControllerTest extends AbstractTest
     public function replaceAll_with_no_matching_segments_returns_empty(): void
     {
         $this->setRequestParams([
-            'job' => (string)self::TEST_JOB_ID,
+            'id_job' => (string)self::TEST_JOB_ID,
             'password' => self::TEST_JOB_PASSWORD,
             'source' => '',
             'target' => 'nonexistent_unique_xyz_99',

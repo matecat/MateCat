@@ -11,6 +11,7 @@ use InvalidArgumentException;
 use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
 use Model\FeaturesBase\Hook\Event\Run\SetTranslationCommittedEvent;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
@@ -92,7 +93,18 @@ class GetSearchController extends AbstractStatefulKleinController
         $request['queryParams']['replacement'] = $request['replace'];
 
         // update segment translations
-        $this->updateSegments($search_results, (int)$this->chunk->id, $request['queryParams']);
+        $committed = $this->updateSegments($search_results, (int)$this->chunk->id, $request['queryParams']);
+
+        // Persist the replace history for the committed segments only. The whole batch shares one
+        // version so a single undo reverts it atomically; the cursor advances once, after the batch.
+        if (!empty($committed)) {
+            $srh = $this->getReplaceHistory((int)$this->chunk->id);
+            $replace_version = (string)($srh->getCursor() + 1);
+            foreach ($committed as $tRow) {
+                $this->saveReplacementEvent($replace_version, $tRow, $srh, $request['queryParams']);
+            }
+            $srh->updateIndex((int)$replace_version);
+        }
 
         $this->response->json([
             "errors" => [],
@@ -103,27 +115,6 @@ class GetSearchController extends AbstractStatefulKleinController
         ]);
     }
 
-    // not is use
-
-    /**
-     * @throws TypeError
-     * @throws Exception
-     */
-    public function redoReplaceAll(): void
-    {
-        $request = $this->validateTheRequest();
-        $shr = $this->getReplaceHistory((int)$this->chunk->id);
-        $search_results = $this->getSegmentForRedoReplaceAll($shr);
-        $this->updateSegments($search_results, (int)$this->chunk->id, $request['queryParams']);
-        $shr->redo();
-
-        $this->response->json([
-            'success' => true
-        ]);
-    }
-
-    // not is use
-
     /**
      * @throws TypeError
      * @throws Exception
@@ -133,7 +124,7 @@ class GetSearchController extends AbstractStatefulKleinController
         $request = $this->validateTheRequest();
         $shr = $this->getReplaceHistory((int)$this->chunk->id);
         $search_results = $this->getSegmentForUndoReplaceAll($shr);
-        $this->updateSegments($search_results, (int)$this->chunk->id, $request['queryParams']);
+        $this->updateSegments($search_results, (int)$this->chunk->id, $request['queryParams'], true);
         $shr->undo();
 
         $this->response->json([
@@ -268,48 +259,24 @@ class GetSearchController extends AbstractStatefulKleinController
     /**
      * @return array<int, array{id_segment: int, id_job: int, translation: string|null, status: string}>
      */
-    private function getSegmentForRedoReplaceAll(ReplaceHistory $srh): array
-    {
-        $results = [];
-
-        $versionToMove = $srh->getCursor() + 1;
-        $events = $srh->get($versionToMove);
-
-        foreach ($events as $event) {
-            $results[] = [
-                'id_segment' => $event->id_segment,
-                'id_job' => $event->id_job,
-                'translation' => $event->translation_before_replacement,
-                'status' => $event->status,
-            ];
-        }
-
-        return $results;
-    }
-
-    /**
-     * @return array<int, array{id_segment: int, id_job: int, translation: string|null, status: string}>
-     */
     private function getSegmentForUndoReplaceAll(ReplaceHistory $srh): array
     {
         $results = [];
         $cursor = $srh->getCursor();
 
         if ($cursor === 0) {
-            $versionToMove = 0;
-        } elseif ($cursor === 1) {
-            $versionToMove = 1;
-        } else {
-            $versionToMove = $cursor - 1;
+            return $results; // nothing applied yet, nothing to undo
         }
 
-        $events = $srh->get($versionToMove);
+        // Undo reverts the CURRENT version: restore each segment's pre-replacement text and the status
+        // it had before that replace (both captured in the replace event when it was applied).
+        $events = $srh->get($cursor);
 
         foreach ($events as $event) {
             $results[] = [
                 'id_segment' => $event->id_segment,
                 'id_job' => $event->id_job,
-                'translation' => $event->translation_after_replacement,
+                'translation' => $event->translation_before_replacement,
                 'status' => $event->status,
             ];
         }
@@ -366,14 +333,32 @@ class GetSearchController extends AbstractStatefulKleinController
     }
 
     /**
+     * Applies the translation change to each segment and returns the rows that were committed
+     * (segments whose translation/segment could not be loaded are skipped). Replace-history writing
+     * is intentionally NOT done here — it belongs to the forward replaceAll() path only, so undo/redo
+     * (which also call this method) do not advance the replace cursor or emit replace events.
+     *
+     * When $isHistoryReplay is true (undo/redo), each row already carries the FINAL text and status to
+     * persist (the historical values from the replace event), so no find-and-replace or status ladder is
+     * applied — the segment is restored exactly. Because the reviewed-word/advancement/pass-fail counters
+     * are driven purely by the status transition, restoring the historical status also moves the counters
+     * back correctly. When false (forward replace), the replacement text is computed from $queryParams and
+     * the status from the review ladder.
+     *
      * @param array<int, array<string, mixed>> $search_results
      *
+     * @return array<int, array<string, mixed>> committed rows (subset of $search_results)
      * @throws NotFoundException
      * @throws ReflectionException
      * @throws TypeError
      * @throws Exception
      */
-    private function updateSegments(array $search_results, int $id_job, SearchQueryParamsStruct $queryParams): void
+    private function updateSegments(
+        array $search_results,
+        int $id_job,
+        SearchQueryParamsStruct $queryParams,
+        bool $isHistoryReplay = false
+    ): array
     {
         $db = $this->getDatabase();
 
@@ -385,6 +370,7 @@ class GetSearchController extends AbstractStatefulKleinController
         }
 
         // loop all segments to replace
+        $committed = [];
         foreach ($search_results as $tRow) {
             // start the transaction
             $db->begin();
@@ -405,15 +391,23 @@ class GetSearchController extends AbstractStatefulKleinController
                 'propagated_ids' => []
             ];
 
-            $filter = MateCatFilter::getInstance($this->getFeatureSet(), $this->chunk->source, $this->chunk->target);
-            $replacedTranslation = $filter->fromLayer1ToLayer0($this->getReplacedSegmentTranslation((string)($tRow['translation'] ?? ''), $queryParams));
-            $replacedTranslation = Utils::stripBOM($replacedTranslation);
+            if ($isHistoryReplay) {
+                // Undo/redo: the row already holds the exact historical text to restore.
+                $replacedTranslation = Utils::stripBOM((string)($tRow['translation'] ?? ''));
+            } else {
+                $filter = MateCatFilter::getInstance($this->getFeatureSet(), $this->chunk->source, $this->chunk->target);
+                $replacedTranslation = $filter->fromLayer1ToLayer0($this->getReplacedSegmentTranslation((string)($tRow['translation'] ?? ''), $queryParams));
+                $replacedTranslation = Utils::stripBOM($replacedTranslation);
+            }
 
             // Setup $new_translation
             $new_translation = new SegmentTranslationStruct();
             $new_translation->id_segment = $tRow['id_segment'];
             $new_translation->id_job = $id_job;
-            $new_translation->status = $this->getNewStatus($old_translation, $revisionNumber);
+            // Undo/redo restore the exact historical status; forward applies the review ladder. Because
+            // all reviewed-word/advancement/pass-fail counters are driven purely by the status
+            // transition, restoring the historical status moves the counters back correctly too.
+            $new_translation->status = $isHistoryReplay ? (string)$tRow['status'] : $this->getNewStatus($old_translation, $revisionNumber);
             $new_translation->time_to_edit = $old_translation->time_to_edit;
             $new_translation->segment_hash = $segment->segment_hash;
             $new_translation->translation = $replacedTranslation;
@@ -446,13 +440,8 @@ class GetSearchController extends AbstractStatefulKleinController
                     'project' => $project
                 ]);
 
-                // and save replace events
-                $srh = $this->getReplaceHistory($id_job);
-                $replace_version = (string)($srh->getCursor() + 1);
-
-                $this->saveReplacementEvent($replace_version, $tRow, $srh, $queryParams);
-
                 $db->commit();
+                $committed[] = $tRow;
             } catch (Exception $e) {
                 $this->logger->debug("Lock: Transaction Aborted. " . $e->getMessage());
                 $db->rollback();
@@ -477,6 +466,20 @@ class GetSearchController extends AbstractStatefulKleinController
                 throw new RuntimeException("Exception in setTranslationCommitted callback");
             }
         }
+
+        // Refresh chunk completion once for the whole batch (mirrors SetTranslationController): the
+        // per-segment SetTranslationCommittedEvent above does not update ProjectCompletion's
+        // chunk_completion tracking — PostAddSegmentTranslationEvent does. Only emit it when at least
+        // one segment was committed. Applies to undo/redo replays too, which also change statuses.
+        if (!empty($committed)) {
+            $this->featureSet->dispatch(new PostAddSegmentTranslationEvent([
+                'chunk' => $this->chunk,
+                'is_review' => $this->chunk->isReview(),
+                'logged_user' => $this->user,
+            ]));
+        }
+
+        return $committed;
     }
 
     /**
@@ -490,10 +493,10 @@ class GetSearchController extends AbstractStatefulKleinController
             return TranslationStatus::STATUS_DRAFT;
         }
 
-        // On a revision page the replace is a review action: the segment moves to the approval
-        // status of that revision level. Returning STATUS_TRANSLATED here would collide with the
-        // revision source_page and make TranslationEventsHandler::prepareEventStruct() throw
-        // ('Setting translated state from revision is not allowed'), which silently drops the event.
+        // A replace-all is an automated, unseen change, so the current editor must re-review it:
+        // demote the segment one quality tier so each touched segment re-enters that level's to-do
+        // queue. APPROVED2 (R2) -> APPROVED, APPROVED (R1) -> TRANSLATED, anything else -> DRAFT;
+        // on the translate page ($revisionNumber === null, handled above) everything drops to DRAFT.
         return match ($translationStruct->status) {
             TranslationStatus::STATUS_APPROVED => TranslationStatus::STATUS_TRANSLATED,
             TranslationStatus::STATUS_APPROVED2 => TranslationStatus::STATUS_APPROVED,
@@ -543,7 +546,8 @@ class GetSearchController extends AbstractStatefulKleinController
         $event->status = $tRow['status'];
 
         $srh->save($event);
-        $srh->updateIndex((int)$replace_version);
+        // NOTE: the undo-cursor advance moved to updateSegments(), once after the batch loop, so
+        // the whole replace-all lands atomically in history. See updateSegments().
 
         $this->logger->debug('Replacement event for segment #' . $tRow['id_segment'] . ' correctly saved.');
     }

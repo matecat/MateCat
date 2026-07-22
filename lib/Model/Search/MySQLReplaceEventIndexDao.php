@@ -35,7 +35,9 @@ class MySQLReplaceEventIndexDao extends AbstractDao implements ReplaceEventIndex
             ':id_job' => $idJob,
         ]);
 
-        return (int)$stmt->fetch()[0]['v'];
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        return is_array($row) ? (int)($row['v'] ?? 0) : 0;
     }
 
     /**

@@ -200,6 +200,9 @@ jobs:
     if: >-
       github.event_name == 'pull_request' &&
       !contains(github.event.pull_request.labels.*.name, 'test-guard-exception')
+    concurrency:
+      group: matecat-${{ github.ref }}
+      cancel-in-progress: true
     permissions:
       contents: read
       pull-requests: write

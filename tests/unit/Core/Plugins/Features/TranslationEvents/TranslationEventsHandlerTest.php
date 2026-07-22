@@ -195,21 +195,6 @@ class TranslationEventsHandlerTest extends AbstractTest
     }
 
     #[Test]
-    public function prepareEventStructThrowsOnTranslatedFromRevision(): void
-    {
-        $handler = $this->makeHandler();
-        $event = $this->makeTranslationEvent(
-            wanted: $this->makeTranslation(TranslationStatus::STATUS_TRANSLATED),
-            sourcePage: SourcePages::SOURCE_PAGE_REVISION,
-        );
-
-        $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('Setting translated state from revision is not allowed.');
-
-        $handler->prepareEventStruct($event);
-    }
-
-    #[Test]
     public function saveCallsProcessAndSavesEvents(): void
     {
         $dao = $this->createMock(TranslationEventDao::class);

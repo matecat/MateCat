@@ -24,6 +24,7 @@ use PDOException;
 use ReflectionException;
 use RuntimeException;
 use TypeError;
+use Utils\Constants\SourcePages;
 
 class ChunkPasswordValidator extends Base
 {
@@ -110,11 +111,15 @@ class ChunkPasswordValidator extends Base
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
+     * @throws TypeError
      */
     protected function getChunkFromTranslatePassword(): void
     {
         $this->chunk = (new JobDao($this->controller->getDatabase()))->getByIdAndPassword($this->id_job, $this->password, $this->ttl);
         if (!empty($this->chunk)) {
+            // Mirror the revise path: stamp the translate source_page so getSourcePage() yields a
+            // valid SOURCE_PAGE_TRANSLATE (1) instead of the uninitialized 0 default.
+            $this->chunk->setSourcePage(SourcePages::SOURCE_PAGE_TRANSLATE);
             $this->chunkReview = (new ChunkReviewDao($this->controller->getDatabase()))->findChunkReviews($this->chunk, $this->ttl)[0] ?? null;
         }
     }
