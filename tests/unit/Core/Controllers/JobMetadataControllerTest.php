@@ -300,6 +300,104 @@ class JobMetadataControllerTest extends AbstractTest
         $this->controller->save();
     }
 
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function save_persists_full_payload_including_mandatory_issues(): void
+    {
+        $body = (string)json_encode([
+            ['key' => 'character_counter_count_tags', 'value' => false],
+            ['key' => 'character_counter_mode', 'value' => 'google_ads'],
+            ['key' => 'subfiltering_handlers', 'value' => []],
+            ['key' => 'mandatory_issues', 'value' => ['r1', 'r2']],
+        ]);
+
+        $this->setRequest([
+            'id_job' => (string)$this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ], $body, true);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertCount(4, $data);
+                return true;
+            }));
+
+        $this->controller->save();
+
+        $stored = (new MetadataDao(obtainTestDatabase()))
+            ->get($this->jobId(self::BASE), self::JOB_PASSWORD, 'mandatory_issues');
+        $this->assertNotNull($stored);
+        $this->assertSame('["r1","r2"]', $stored->value);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function save_persists_empty_mandatory_issues_as_json_array(): void
+    {
+        $body = (string)json_encode([
+            ['key' => 'mandatory_issues', 'value' => []],
+        ]);
+
+        $this->setRequest([
+            'id_job' => (string)$this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ], $body, true);
+
+        $this->responseMock->expects($this->once())->method('json');
+
+        $this->controller->save();
+
+        $stored = (new MetadataDao(obtainTestDatabase()))
+            ->get($this->jobId(self::BASE), self::JOB_PASSWORD, 'mandatory_issues');
+        $this->assertNotNull($stored);
+        $this->assertSame('[]', $stored->value);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function save_throws_validation_exception_for_mandatory_issues_with_unknown_value(): void
+    {
+        $body = (string)json_encode([
+            ['key' => 'mandatory_issues', 'value' => ['not_a_valid_issue']],
+        ]);
+
+        $this->setRequest([
+            'id_job' => (string)$this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ], $body, true);
+
+        $this->expectException(JSONValidatorException::class);
+
+        $this->controller->save();
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function save_throws_validation_exception_for_mandatory_issues_with_additional_property(): void
+    {
+        $body = (string)json_encode([
+            ['key' => 'mandatory_issues', 'value' => ['r1'], 'unexpected' => 'x'],
+        ]);
+
+        $this->setRequest([
+            'id_job' => (string)$this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ], $body, true);
+
+        $this->expectException(JSONValidatorException::class);
+
+        $this->controller->save();
+    }
+
     // ─── sanitizeRequestParams() ───
 
     /**

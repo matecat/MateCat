@@ -111,7 +111,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         $this->target_language = (!empty($decodedObject->target_language)) ? serialize($decodedObject->target_language) : null;
         $this->mt_quality_value_in_editor = (!empty($decodedObject->mt_quality_value_in_editor)) ? (int)$decodedObject->mt_quality_value_in_editor : null;
         $this->icu_enabled = $decodedObject->icu_enabled ?? true;
-        $this->mandatory_issues = (!empty($decodedObject->mandatory_issues)) ? (json_encode($decodedObject->mandatory_issues) ?: null) : null;
+        $this->mandatory_issues = (($decodedObject->mandatory_issues ?? null) !== null) ? (json_encode($decodedObject->mandatory_issues) ?: null) : null;
 
         return $this;
     }
