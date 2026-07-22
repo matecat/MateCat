@@ -1,3 +1,149 @@
+import {renderHook, waitFor} from '@testing-library/react'
+import useContextDocument from './useContextDocument'
+
+// ============================================================================
+// Hook-level tests exercising the real module (for line coverage). The
+// helper-function tests further below operate on copies of the internals
+// and are kept as-is for focused unit coverage of the parsing algorithm.
+// ============================================================================
+
+describe('useContextDocument (hook)', () => {
+  beforeEach(() => {
+    global.fetch = jest.fn()
+  })
+
+  afterEach(() => {
+    delete global.fetch
+  })
+
+  test('returns empty/idle state when url is null', () => {
+    const {result} = renderHook(() => useContextDocument(null))
+    expect(result.current.htmlContent).toBe('')
+    expect(result.current.loading).toBe(false)
+    expect(result.current.error).toBe(null)
+  })
+
+  test('fetches, parses and caches the document on success', async () => {
+    const html =
+      '<html><head>' +
+      '<style>body{color:red}</style>' +
+      '<link rel="stylesheet" href="theme.css" />' +
+      '</head>' +
+      '<body>' +
+      '<img src="a.png" />' +
+      '<a href="page.html">link</a>' +
+      '<form action="submit.php"></form>' +
+      '<div style="background: url(bg.png)">x</div>' +
+      '<img srcset="small.png 1x, large.png 2x" />' +
+      '</body></html>'
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      text: () => Promise.resolve(html),
+    })
+
+    const {result} = renderHook(() =>
+      useContextDocument('https://example.com/doc.html'),
+    )
+    expect(result.current.loading).toBe(true)
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.error).toBe(null)
+    expect(result.current.htmlContent).toContain(
+      '<style>body{color:red}</style>',
+    )
+    expect(result.current.htmlContent).toContain(
+      'https://example.com/theme.css',
+    )
+    expect(result.current.htmlContent).toContain('https://example.com/a.png')
+    expect(result.current.htmlContent).toContain(
+      'https://example.com/page.html',
+    )
+    expect(result.current.htmlContent).toContain(
+      'https://example.com/submit.php',
+    )
+    expect(result.current.htmlContent).toContain('https://example.com/bg.png')
+    expect(result.current.htmlContent).toContain(
+      'https://example.com/small.png 1x',
+    )
+    expect(global.fetch).toHaveBeenCalledWith('https://example.com/doc.html')
+
+    // Second render with the same url should hit the module-level cache
+    // instead of calling fetch again.
+    global.fetch.mockClear()
+    const {result: cachedResult} = renderHook(() =>
+      useContextDocument('https://example.com/doc.html'),
+    )
+    expect(cachedResult.current.loading).toBe(false)
+    expect(cachedResult.current.htmlContent).toBe(result.current.htmlContent)
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  test('leaves a relative URL unresolved when the source URL is not a valid base', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      text: () => Promise.resolve('<body><img src="a.png" /></body>'),
+    })
+    const {result} = renderHook(() => useContextDocument('not-a-valid-url'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    // resolveUrl's try/catch falls back to returning the original (relative)
+    // value when `new URL()` cannot resolve it against an invalid base.
+    expect(result.current.htmlContent).toContain('src="a.png"')
+  })
+
+  test('sets an error when the response is not ok', async () => {
+    global.fetch.mockResolvedValueOnce({ok: false, status: 500})
+    const {result} = renderHook(() =>
+      useContextDocument('https://example.com/missing.html'),
+    )
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.error).toBe('Failed to fetch document (500)')
+  })
+
+  test('sets an error when fetch rejects', async () => {
+    global.fetch.mockRejectedValueOnce(new Error('network down'))
+    const {result} = renderHook(() =>
+      useContextDocument('https://example.com/offline.html'),
+    )
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.error).toBe('network down')
+  })
+
+  test('re-fetches when the url changes and does not update state after unmount', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      text: () => Promise.resolve('<body>first</body>'),
+    })
+    const {result, rerender, unmount} = renderHook(
+      (url) => useContextDocument(url),
+      {initialProps: 'https://example.com/first.html'},
+    )
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.htmlContent).toContain('first')
+
+    let resolveSecond
+    global.fetch.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveSecond = () =>
+            resolve({
+              ok: true,
+              text: () => Promise.resolve('<body>second</body>'),
+            })
+        }),
+    )
+    rerender('https://example.com/second.html')
+    expect(result.current.loading).toBe(true)
+
+    // Unmount while the second fetch is still in flight; the cancellation
+    // flag must prevent any state update from firing after unmount.
+    unmount()
+    await resolveSecond()
+    // No assertions on `result.current` after unmount (RTL warns/throws on
+    // stale reads) -- reaching here without an "update on unmounted
+    // component" throw/console error is the behavior under test.
+  })
+})
+
 // ============================================================================
 // Helper functions copied from useContextDocument.js for testing
 // These mirror the implementation and are tested in isolation
@@ -150,7 +296,9 @@ describe('resolveRelativeUrls', () => {
     expect(img.getAttribute('src')).toBe('https://example.com/docs/image.png')
 
     const script = doc.querySelector('script')
-    expect(script.getAttribute('src')).toBe('https://example.com/docs/script.js')
+    expect(script.getAttribute('src')).toBe(
+      'https://example.com/docs/script.js',
+    )
   })
 
   test('resolves href attributes', () => {
@@ -209,8 +357,7 @@ describe('resolveRelativeUrls', () => {
   })
 
   test('resolves srcset attributes', () => {
-    const html =
-      '<img srcset="small.png 1x, large.png 2x, huge.png 3x" />'
+    const html = '<img srcset="small.png 1x, large.png 2x, huge.png 3x" />'
     const parser = new DOMParser()
     const doc = parser.parseFromString(html, 'text/html')
 
@@ -224,8 +371,7 @@ describe('resolveRelativeUrls', () => {
   })
 
   test('preserves data: and hash URLs', () => {
-    const html =
-      '<img src="data:image/png;base64,abc" /><a href="#anchor"></a>'
+    const html = '<img src="data:image/png;base64,abc" /><a href="#anchor"></a>'
     const parser = new DOMParser()
     const doc = parser.parseFromString(html, 'text/html')
 
