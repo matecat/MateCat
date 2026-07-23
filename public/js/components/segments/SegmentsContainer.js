@@ -203,7 +203,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const [files, setFiles] = useState(CatToolStore.getJobFilesInfo())
   const [addedComment, setAddedComment] = useState(undefined)
   const [scrollTopVisible, setScrollTopVisible] = useState(undefined)
-  const [isSearchBarOpen, setIsSearchBarOpen] = useState(false)
   const [clientConnected, setClientConnected] = useState()
   const [clientId, setClientId] = useState()
   const [firstRowIdVisible, setFirstRowIdVisible] = useState()
@@ -515,9 +514,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     const closeSide = () => setIsSideOpen(false)
     const storeJobInfo = (files) => setFiles(files)
     const onAddComment = (sid) => setAddedComment({sid})
-    const toggleSearchBar = (container) =>
-      container === 'search' && setIsSearchBarOpen((prevState) => !prevState)
-    const closeSubHeader = () => setIsSearchBarOpen(false)
 
     const sseConnection = (clientId) => {
       setClientConnected(!!clientId)
@@ -546,8 +542,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     SegmentStore.addListener(SegmentConstants.CLOSE_SIDE, closeSide)
     CatToolStore.addListener(CatToolConstants.STORE_FILES_INFO, storeJobInfo)
     CommentsStore.addListener(CommentsConstants.ADD_COMMENT, onAddComment)
-    CatToolStore.addListener(CatToolConstants.TOGGLE_CONTAINER, toggleSearchBar)
-    CatToolStore.addListener(CatToolConstants.CLOSE_SUBHEADER, closeSubHeader)
     CatToolStore.addListener(CatToolConstants.CLIENT_CONNECT, sseConnection)
 
     document.addEventListener('mousedown', mousedownHandler)
@@ -576,14 +570,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
         storeJobInfo,
       )
       CommentsStore.removeListener(CommentsConstants.ADD_COMMENT, onAddComment)
-      CatToolStore.removeListener(
-        CatToolConstants.TOGGLE_CONTAINER,
-        toggleSearchBar,
-      )
-      CatToolStore.removeListener(
-        CatToolConstants.CLOSE_SUBHEADER,
-        closeSubHeader,
-      )
       CatToolStore.removeListener(
         CatToolConstants.CLIENT_CONNECT,
         sseConnection,
@@ -841,15 +827,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       }
       return 0
     }
-    // padding top when search bar is open
-    const paddingTopSearchBarOpened = isSearchBarOpen
-      ? SEARCH_BAR_OPENED_PADDING_TOP
-      : 0
-    // set inline style
-    listRef.current.firstChild.style.marginTop = `${
-      getPadding() + paddingTopSearchBarOpened
-    }px`
-  }, [isSideOpen, segments, addedComment, isSearchBarOpen])
+  }, [isSideOpen, segments, addedComment])
 
   // reset scrollTo
   useEffect(() => {
