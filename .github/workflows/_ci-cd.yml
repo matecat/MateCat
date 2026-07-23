@@ -229,7 +229,7 @@ jobs:
           coverage-threshold: '80'
           exclude-patterns: '.github/**, daemons/**, migrations/**, tests/unit/TestHelpers/**'
           ai-enabled: 'true'
-          ai-model: 'openai/gpt-4.1-nano'
+          ai-model: 'openai/o3-mini'
 
   slack-notification:
     name: Slack Notification
