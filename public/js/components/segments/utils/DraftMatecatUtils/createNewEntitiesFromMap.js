@@ -1,6 +1,7 @@
 import matchTag from './matchTag'
 import {Modifier, SelectionState, ContentState} from 'draft-js'
 import {decodeHtmlEntities} from './tagUtils'
+import {createPcNumberer} from './pcTagUtils'
 
 /**
  *
@@ -31,18 +32,26 @@ const createNewEntitiesFromMap = (
   const shouldCompareWithSourceTagMap = sourceTagMap?.length && tagRange.length
 
   const tagRangeWithIndexes = shouldCompareWithSourceTagMap
-    ? tagRange.map((tag) => {
-        const tagSource = sourceTagMap.find(({data}) => data.id === tag.data.id)
-        return {
-          ...tag,
-          data: {
-            ...tag.data,
-            ...(tagSource?.data?.index !== undefined && {
-              index: tagSource.data.index,
-            }),
-          },
-        }
-      })
+    ? addIncrementalIndex(
+        tagRange.map((tag) => {
+          // Only match by id when the tag has a non-empty id
+          // (XLIFF2 ph tags have empty ids — matching on "" would
+          // incorrectly pair all of them with the first source tag)
+          const tagSource = tag.data.id
+            ? sourceTagMap.find(({data}) => data.id === tag.data.id)
+            : undefined
+          return {
+            ...tag,
+            data: {
+              ...tag.data,
+              ...(tagSource?.data?.index !== undefined && {
+                index: tagSource.data.index,
+                pcRole: tagSource.data.pcRole,
+              }),
+            },
+          }
+        }),
+      )
     : addIncrementalIndex(tagRange)
 
   // Executre replace with placeholder and adapt offsets
@@ -151,32 +160,25 @@ const createNewEntitiesFromMap = (
   }
 }
 
-const addIncrementalIndex = (tagRange) =>
-  tagRange.reduce((acc, cur) => {
-    const {decodedText, encodedText} = cur.data
-    const reversed = [...acc].reverse()
-    const lastIndex =
-      reversed.find(({data}) => data.decodedText === decodedText)?.data
-        ?.index ?? -1
-
-    const haveMultipleMatches =
-      tagRange.filter(({data}) => data.decodedText === cur.data.decodedText)
-        .length > 1
-
-    return [
-      ...acc,
-      {
-        ...cur,
-        data: {
-          ...cur.data,
-          ...(isXliff2(encodedText) &&
-            haveMultipleMatches && {index: lastIndex + 1}),
-        },
+// Numbers ONLY the ph tags that carry an XLIFF pc tag. Open and close of a pair
+// get the same 0-based index (rendered as index + 1); a `pcRole` of 'open'/'close'
+// drives the CSS. Non-pc ph tags are left untouched (no index => not compactable).
+// Any `index`/`pcRole` already present (inherited from the source tag map) is honoured.
+const addIncrementalIndex = (tagRange) => {
+  const numberer = createPcNumberer()
+  return tagRange.map((cur) => {
+    if (cur.data.name !== 'ph') return cur
+    const result = numberer(cur.data.encodedText, cur.data.index)
+    if (!result) return cur
+    return {
+      ...cur,
+      data: {
+        ...cur.data,
+        index: result.index,
+        pcRole: result.role,
       },
-    ]
-  }, [])
-
-const isXliff2 = (encodedText) =>
-  /\bph\b/.test(encodedText) && !/id=\"mtc_/.test(encodedText) //eslint-disable-line
+    }
+  })
+}
 
 export default createNewEntitiesFromMap

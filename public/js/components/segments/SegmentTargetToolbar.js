@@ -18,6 +18,8 @@ import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 import AddTagsIcon from '../../../img/icons/AddTagsIcon'
 import {AiAlternatives} from './ToolbarFeatures/Ai/AiAlternatives'
 import {AiFeedback} from './ToolbarFeatures/Ai/AiFeedback'
+import {TagsCompressButton} from './TagsCompressButton'
+import {hasCompressiblePhTags} from './utils/DraftMatecatUtils/pcTagUtils'
 
 export const SegmentTargetToolbar = ({
   sid,
@@ -144,6 +146,14 @@ export const SegmentTargetToolbar = ({
                 })}
               </>
             ),
+          },
+        ]
+      : []),
+    ...(hasCompressiblePhTags(segment?.segment) ||
+    hasCompressiblePhTags(segment?.translation)
+      ? [
+          {
+            component: <TagsCompressButton key="tagscompress" />,
           },
         ]
       : []),

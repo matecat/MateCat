@@ -6,7 +6,8 @@ const TagSuggestion = React.forwardRef((props, ref) => {
     props.suggestion.data.name,
     config.isTargetRTL,
   ).join(' ')
-  const {index} = props.suggestion.data
+  const {index, pcRole} = props.suggestion.data
+  const pcRoleClass = pcRole ? ` tag-pc-${pcRole}` : ''
   return (
     <div
       className={`tag-menu-suggestion ${props.isFocused ? `active` : ''}`}
@@ -21,7 +22,7 @@ const TagSuggestion = React.forwardRef((props, ref) => {
       <div className={'tag-menu-suggestion-item'}>
         {props.suggestion ? (
           <div className={'tag-container'}>
-            <div className={`tag ${tagStyle} tag-placeholder`}>
+            <div className={`tag ${tagStyle} tag-placeholder${pcRoleClass}`}>
               <span>{props.suggestion.data.placeholder}</span>
               {index >= 0 && <span className="index-counter">{index + 1}</span>}
             </div>

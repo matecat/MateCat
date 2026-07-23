@@ -18,7 +18,7 @@ test('Test input string', () => {
     'test <g id="1">tag</g> ph con &lt; &gt; &amp;lt; <g id="2"></g> &amp;gt; <ph id="mtc_1" ctype="x-html" equiv-text="base64:Jmx0O3AmZ3Q7"/> <ph id="mtc_2" ctype="x-html" equiv-text="base64:Jmx0O3N0cm9uZyZndDs="/> <ph id="mtc_3" ctype="x-html" equiv-text="base64:Jmx0Oy9zdHJvbmcmZ3Q7"/>pippoL&apos; placeholder &nbsp; elle-même'
 
   const result =
-    "test ​1​tag​1​ ph con < > &lt; ​2​​2​ &gt; <p> <strong> </strong>pippoL' placeholder   elle-même"
+    "test \u200B1\u200Btag\u200B1\u200B ph con < > &lt; \u200B2\u200B\u200B2\u200B &gt; <p> <strong> </strong>pippoL' placeholder \u00A0 elle-m\u00EAme"
   render(<SimpleEditor text={text} />)
 
   expect(screen.getByTestId('simple-editor-test').textContent).toEqual(result)
