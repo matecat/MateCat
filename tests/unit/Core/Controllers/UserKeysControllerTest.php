@@ -374,9 +374,10 @@ class UserKeysControllerTest extends AbstractTest
             $this->assertStringContainsString('&amp;', $e->getMessage());
             $this->assertStringContainsString('&quot;', $e->getMessage());
             $this->assertStringContainsString('&#39;', $e->getMessage());
-            $this->assertStringContainsString(
-                'https://gist.github.com/mauretto78/83db58b7023a2f7bb26b252360d3692a',
-                $e->getMessage()
+            $this->assertStringNotContainsString(
+                'gist.github.com',
+                $e->getMessage(),
+                'the gist link about non-printable characters was intentionally dropped from the message'
             );
         }
     }

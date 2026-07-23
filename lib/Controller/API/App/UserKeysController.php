@@ -188,10 +188,7 @@ class UserKeysController extends KleinController
                 . "<li>&amp; (ampersand)</li>"
                 . "<li>&quot; (double quote)</li>"
                 . "<li>&#39; (single quote)</li>"
-                . "</ul>"
-                . "<span>Non-printable control characters are not allowed either. See the "
-                . "<a href=\"https://gist.github.com/mauretto78/83db58b7023a2f7bb26b252360d3692a\" "
-                . "target=\"_blank\" rel=\"noopener noreferrer\">full list of unsupported characters</a>.</span>",
+                . "</ul>",
                 -3
             );
         }
