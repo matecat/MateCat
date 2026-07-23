@@ -67,6 +67,17 @@ class QAWarningTest extends AbstractTest
         $this->assertArrayHasKey(QAWarning::ICU_CATEGORY, $structure[QA::INFO]['Categories']);
     }
 
+    public function testPushErrorSegmentFuzzyCategory(): void
+    {
+        $warning = $this->makeConcreteWarning();
+        $warning->init();
+        $warning->callPushErrorSegment(QA::WARNING, QA::ERR_FUZZY_UNCHANGED, 'seg6');
+
+        $structure = $warning->getStructure();
+        $this->assertArrayHasKey(QAWarning::FUZZY_CATEGORY, $structure[QA::WARNING]['Categories']);
+        $this->assertContains('seg6', $structure[QA::WARNING]['Categories'][QAWarning::FUZZY_CATEGORY]);
+    }
+
     public function testPushErrorSegmentDefaultsToTagsCategory(): void
     {
         $warning = $this->makeConcreteWarning();

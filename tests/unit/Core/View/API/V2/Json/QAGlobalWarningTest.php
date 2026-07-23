@@ -59,6 +59,21 @@ class QAGlobalWarningTest extends AbstractTest
         $this->assertEmpty($result['details'][QA::WARNING]['Categories']);
     }
 
+    public function testRenderFuzzyUnchangedWarningBucketedUnderFuzzyCategory(): void
+    {
+        $struct = $this->makeGlobalWarningStruct(
+            json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Fuzzy match confirmed without changes']]),
+            '42'
+        );
+
+        $qa     = new QAGlobalWarning([$struct], []);
+        $result = $qa->render();
+
+        $this->assertArrayHasKey('FUZZY', $result['details'][QA::WARNING]['Categories']);
+        $this->assertContains('42', $result['details'][QA::WARNING]['Categories']['FUZZY']);
+        $this->assertArrayNotHasKey('TAGS', $result['details'][QA::WARNING]['Categories']);
+    }
+
     public function testRenderTranslationMismatchesAppendedToWarning(): void
     {
         $qa     = new QAGlobalWarning([], [['first_of_my_job' => 'mismatch_seg_10']]);
