@@ -9,6 +9,7 @@ use Model\Comments\CommentDao;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\IDaoStruct;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Files\FileDao;
 use Model\Files\FileStruct;
@@ -19,7 +20,6 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentStruct;
-use Model\DataAccess\IDatabase;
 use Model\TmKeyManagement\UserKeysModel;
 use Model\Translations\WarningDao;
 use Model\Translators\JobsTranslatorsDao;
@@ -114,7 +114,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     protected bool $is_review = false;
 
 
-    protected int $_sourcePage;
+    protected int $_sourcePage = 0;
 
     /**
      * @param ProjectDao $dao
@@ -378,9 +378,17 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     }
 
     /**
+     * @return int
+     */
+    public function getSourcePage(): int
+    {
+        return $this->_sourcePage;
+    }
+
+    /**
      * @return bool
      */
-    public function getIsReview(): bool
+    public function isReview(): bool
     {
         return $this->is_review;
     }

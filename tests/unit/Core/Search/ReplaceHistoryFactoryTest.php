@@ -39,4 +39,20 @@ class ReplaceHistoryFactoryTest extends AbstractTest
         $history = ReplaceHistoryFactory::create(1, 'redis', 0, $this->createStub(IDatabase::class));
         $this->assertInstanceOf(\Utils\Search\ReplaceHistory::class, $history);
     }
+
+    #[Test]
+    public function createdReplaceHistoryDoesNotDependOnSegmentTranslationDao(): void
+    {
+        // The dead redo path was removed, so ReplaceHistory (and thus the factory) no longer needs a
+        // SegmentTranslationDao. Guard the constructor shape against the dependency creeping back in.
+        $constructor = (new \ReflectionClass(\Utils\Search\ReplaceHistory::class))->getConstructor();
+        $this->assertNotNull($constructor);
+
+        $paramNames = array_map(
+            static fn(\ReflectionParameter $p): string => $p->getName(),
+            $constructor->getParameters()
+        );
+
+        $this->assertSame(['idJob', 'replaceEventDAO', 'replaceEventIndexDAO', 'ttl'], $paramNames);
+    }
 }

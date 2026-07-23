@@ -200,6 +200,9 @@ jobs:
     if: >-
       github.event_name == 'pull_request' &&
       !contains(github.event.pull_request.labels.*.name, 'test-guard-exception')
+    concurrency:
+      group: matecat-${{ github.ref }}
+      cancel-in-progress: true
     permissions:
       contents: read
       pull-requests: write
@@ -224,9 +227,16 @@ jobs:
             js-coverage.xml
             node-coverage.xml
           coverage-threshold: '80'
-          exclude-patterns: '.github/**, daemons/**, migrations/**, tests/unit/TestHelpers/**'
+          extra-exclude-patterns: '.github/**, daemons/**, migrations/**, tests/unit/TestHelpers/**'
           ai-enabled: 'true'
-          ai-model: 'openai/gpt-4.1-nano'
+          ai-model: 'openai/gpt-4.1-mini'
+          test-patterns: |
+            {
+              "php-unit":  {"src_pattern": "lib/**/*.php", "test_template": "tests/**/{name}Test.php"},
+              "php-unitX": {"src_pattern": "lib/**/*.php", "test_template": "tests/**/{name}UnitTest.php"},
+              "php-integ": {"src_pattern": "lib/**/*.php", "test_template": "tests/**/{name}IntegrationTest.php"},
+              "php-sql":   {"src_pattern": "lib/**/*.php", "test_template": "tests/**/{name}RealSqlTest.php"}
+            }
 
   slack-notification:
     name: Slack Notification

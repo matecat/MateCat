@@ -195,18 +195,23 @@ class TranslationEventsHandlerTest extends AbstractTest
     }
 
     #[Test]
-    public function prepareEventStructThrowsOnTranslatedFromRevision(): void
+    public function prepareEventStructAllowsTranslatedFromRevision(): void
     {
+        // Guard 2 ("Setting translated state from revision is not allowed") was removed by design
+        // (CWE-863 remediation): a TRANSLATED status coming from a revision page is now allowed and
+        // must NOT throw. Only the symmetric guard 1 (revised-from-translate) remains.
         $handler = $this->makeHandler();
         $event = $this->makeTranslationEvent(
             wanted: $this->makeTranslation(TranslationStatus::STATUS_TRANSLATED),
             sourcePage: SourcePages::SOURCE_PAGE_REVISION,
         );
 
-        $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('Setting translated state from revision is not allowed.');
-
         $handler->prepareEventStruct($event);
+
+        $this->assertTrue($event->isPrepared());
+        $struct = $event->getTranslationEventStruct();
+        $this->assertSame(TranslationStatus::STATUS_TRANSLATED, $struct->status);
+        $this->assertSame(SourcePages::SOURCE_PAGE_REVISION, $struct->source_page);
     }
 
     #[Test]

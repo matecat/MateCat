@@ -78,7 +78,7 @@ class SegmentFilterDao extends AbstractDao
             'repetitions' => $this->getSqlForRepetition($where),
             'matches' => $this->getSqlForMatches($where),
             'mt', 'fuzzies_50_74', 'fuzzies_75_84', 'fuzzies_85_94', 'fuzzies_95_99' => $this->getSqlForMatchType($where),
-            'todo' => $this->getSqlForToDo($where, $chunk->getIsReview(), $chunk->isSecondPassReview()),
+            'todo' => $this->getSqlForToDo($where, $chunk->isReview(), $chunk->isSecondPassReview()),
             default => throw new Exception('Sample type is not valid: ' . $filter->sampleType()),
         };
 
@@ -431,7 +431,7 @@ class SegmentFilterDao extends AbstractDao
                         'status_draft' => TranslationStatus::STATUS_DRAFT
                     ]);
 
-                    if ($chunk->getIsReview()) {
+                    if ($chunk->isReview()) {
                         $data = array_merge($data, [
                             'status_translated' => TranslationStatus::STATUS_TRANSLATED,
                         ]);

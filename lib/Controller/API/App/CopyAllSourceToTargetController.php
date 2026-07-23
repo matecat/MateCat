@@ -3,19 +3,18 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
+use DomainException;
 use Exception;
-use InvalidArgumentException;
 use Model\FeaturesBase\FeatureCodes;
 use Model\FeaturesBase\FeatureSet;
-use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Segments\SegmentDao;
 use Model\Translations\SegmentTranslationDao;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
-use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
@@ -26,10 +25,19 @@ use Utils\Constants\TranslationStatus;
 
 class CopyAllSourceToTargetController extends KleinController
 {
+    private JobStruct $chunk;
 
     protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
+        $Validator = new ChunkPasswordValidator($this);
+        $Validator->onSuccess(function () use ($Validator) {
+            $this->chunk = $Validator->getChunk();
+            if ($this->chunk->isReview()) {
+                throw new DomainException('The source cannot be fully copied to the target while in the revision phase.');
+            }
+        });
+        $this->appendValidator($Validator);
     }
 
     /**
@@ -38,58 +46,19 @@ class CopyAllSourceToTargetController extends KleinController
      */
     public function copy(): void
     {
-        $request = $this->validateTheRequest();
-        $revision_number = $request['revision_number'];
-        $job_data = $request['job_data'];
-
-        $data = $this->saveEventsAndUpdateTranslations($job_data, (int)$revision_number);
+        $data = $this->saveEventsAndUpdateTranslations($this->chunk);
         $this->response->json($data);
     }
 
     /**
-     * @return array<string, mixed>
-     * @throws InvalidArgumentException
-     * @throws Exception
-     */
-    private function validateTheRequest(): array
-    {
-        $pass = filter_var($this->request->param('pass'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-        $id_job = filter_var($this->request->param('id_job'), FILTER_SANITIZE_NUMBER_INT);
-        $revision_number = filter_var($this->request->param('revision_number'), FILTER_SANITIZE_NUMBER_INT);
-
-        $this->logger->debug("Requested massive copy-source-to-target for job $id_job.");
-
-        if (empty($id_job)) {
-            throw new InvalidArgumentException("Empty id job", -1);
-        }
-        if (empty($pass)) {
-            throw new InvalidArgumentException("Empty job password", -2);
-        }
-
-        $job_data = (new JobDao($this->getDatabase()))->getByIdAndPassword((int)$id_job, (string)$pass);
-
-        if (empty($job_data)) {
-            throw new InvalidArgumentException("Wrong id_job-password couple. Job not found", -3);
-        }
-
-        return [
-            'id_job' => $id_job,
-            'pass' => $pass,
-            'revision_number' => $revision_number,
-            'job_data' => $job_data,
-        ];
-    }
-
-    /**
      * @param JobStruct $chunk
-     * @param int $revision_number
      *
      * @return array<string, mixed>
      * @throws ReflectionException
      * @throws TypeError
      * @throws Exception
      */
-    private function saveEventsAndUpdateTranslations(JobStruct $chunk, int $revision_number): array
+    private function saveEventsAndUpdateTranslations(JobStruct $chunk): array
     {
         // BEGIN TRANSACTION
         $database = $this->getDatabase();
@@ -100,8 +69,6 @@ class CopyAllSourceToTargetController extends KleinController
         $batchEventCreator = new TranslationEventsHandler($chunk, new TranslationEventDao($this->getDatabase()));
         $batchEventCreator->setFeatureSet($features);
         $batchEventCreator->setProject($chunk->getProject(new ProjectDao($this->getDatabase())));
-
-        $source_page = ReviewUtils::revisionNumberToSourcePage($revision_number);
         $segments = $chunk->getSegments(new SegmentDao($this->getDatabase()));
 
         $affected_rows = 0;
@@ -133,7 +100,15 @@ class CopyAllSourceToTargetController extends KleinController
 
             if ($features->hasFeature(FeatureCodes::TRANSLATION_VERSIONS)) {
                 try {
-                    $segmentTranslationEventModel = new TranslationEvent($old_translation, $new_translation, $this->user, $source_page, null, new TranslationEventDao($this->getDatabase()), new SegmentDao($this->getDatabase()));
+                    $segmentTranslationEventModel = new TranslationEvent(
+                        $old_translation,
+                        $new_translation,
+                        $this->user,
+                        $this->chunk->getSourcePage(),
+                        null,
+                        new TranslationEventDao($this->getDatabase()),
+                        new SegmentDao($this->getDatabase())
+                    );
                     $batchEventCreator->addEvent($segmentTranslationEventModel);
                 } catch (Exception) {
                     $database->rollback();
