@@ -489,19 +489,35 @@ class GetSearchController extends AbstractStatefulKleinController
      */
     private function getNewStatus(SegmentTranslationStruct $translationStruct, ?int $revisionNumber = null): string
     {
-        if (!isset($revisionNumber)) {
-            return TranslationStatus::STATUS_DRAFT;
-        }
+        // A replace-all is an automated, unseen change, so the current editor must re-review it: the
+        // touched segment is demoted to one tier BELOW the actor's review level, and never higher than
+        // the segment's own current tier (a replace can only demote, never promote). The actor is
+        // identified by $revisionNumber: null = translator, 1 = R1, 2 = R2.
+        //
+        //   ceiling (one tier below the actor):
+        //     translator -> DRAFT, R1 -> TRANSLATED, R2 -> APPROVED
+        //   result = min(currentTier, ceilingTier), mapped back to a status:
+        //     translator:  APPROVED2/APPROVED/TRANSLATED -> DRAFT
+        //     R1:          APPROVED2/APPROVED/TRANSLATED -> TRANSLATED
+        //     R2:          APPROVED2 -> APPROVED, APPROVED stays APPROVED, TRANSLATED stays TRANSLATED
+        $tierOfStatus = [
+            TranslationStatus::STATUS_NEW        => 0,
+            TranslationStatus::STATUS_DRAFT      => 0,
+            TranslationStatus::STATUS_REJECTED   => 0,
+            TranslationStatus::STATUS_TRANSLATED => 1,
+            TranslationStatus::STATUS_APPROVED   => 2,
+            TranslationStatus::STATUS_APPROVED2  => 3,
+        ];
+        $statusOfTier = [
+            0 => TranslationStatus::STATUS_DRAFT,
+            1 => TranslationStatus::STATUS_TRANSLATED,
+            2 => TranslationStatus::STATUS_APPROVED,
+        ];
 
-        // A replace-all is an automated, unseen change, so the current editor must re-review it:
-        // demote the segment one quality tier so each touched segment re-enters that level's to-do
-        // queue. APPROVED2 (R2) -> APPROVED, APPROVED (R1) -> TRANSLATED, anything else -> DRAFT;
-        // on the translate page ($revisionNumber === null, handled above) everything drops to DRAFT.
-        return match ($translationStruct->status) {
-            TranslationStatus::STATUS_APPROVED => TranslationStatus::STATUS_TRANSLATED,
-            TranslationStatus::STATUS_APPROVED2 => TranslationStatus::STATUS_APPROVED,
-            default => TranslationStatus::STATUS_DRAFT
-        };
+        $ceilingTier = max(0, min(2, $revisionNumber ?? 0));
+        $currentTier = $tierOfStatus[$translationStruct->status] ?? 0;
+
+        return $statusOfTier[min($currentTier, $ceilingTier)];
     }
 
     /**

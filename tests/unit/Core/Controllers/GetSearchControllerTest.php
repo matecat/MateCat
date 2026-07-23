@@ -329,63 +329,52 @@ class GetSearchControllerTest extends AbstractTest
     }
 
     // ─── getNewStatus ───
-    // A replace-all is an automated, unseen change, so the editor must re-review it: the status is
-    // demoted one quality tier. On the translate page (revisionNumber === null) everything drops to
-    // DRAFT; on a revision page APPROVED2 -> APPROVED, APPROVED -> TRANSLATED, anything else -> DRAFT.
+    // A replace-all is an automated, unseen change, so the editor must re-review it. The touched
+    // segment is demoted to one tier below the actor's review level, and the result is never higher
+    // than that ceiling nor higher than the segment's current tier (a replace never promotes):
+    //   - Translator (revisionNumber null): ceiling DRAFT   -> APPROVED2/APPROVED/TRANSLATED all -> DRAFT
+    //   - R1 (revisionNumber 1):            ceiling TRANSLATED -> APPROVED2/APPROVED/TRANSLATED all -> TRANSLATED
+    //   - R2 (revisionNumber 2):            ceiling APPROVED   -> APPROVED2 -> APPROVED, APPROVED stays,
+    //                                                            TRANSLATED stays TRANSLATED
 
-    #[Test]
-    public function getNewStatus_returns_draft_when_no_revision_number(): void
+    /**
+     * @return array<string, array{string, ?int, string}>
+     */
+    public static function newStatusMatrixProvider(): array
     {
-        $translation = new \Model\Translations\SegmentTranslationStruct();
-        $translation->status = 'APPROVED';
-
-        $result = $this->invokePrivate('getNewStatus', [$translation, null]);
-
-        $this->assertSame('DRAFT', $result);
+        return [
+            // translator: everything collapses to DRAFT
+            'translator on approved2'  => ['APPROVED2', null, 'DRAFT'],
+            'translator on approved'   => ['APPROVED', null, 'DRAFT'],
+            'translator on translated' => ['TRANSLATED', null, 'DRAFT'],
+            'translator on rejected'   => ['REJECTED', null, 'DRAFT'],
+            'translator on draft'      => ['DRAFT', null, 'DRAFT'],
+            // R1: ceiling is TRANSLATED, never promotes below it
+            'r1 on approved2'  => ['APPROVED2', 1, 'TRANSLATED'],
+            'r1 on approved'   => ['APPROVED', 1, 'TRANSLATED'],
+            'r1 on translated' => ['TRANSLATED', 1, 'TRANSLATED'],
+            'r1 on draft'      => ['DRAFT', 1, 'DRAFT'],
+            // R2: ceiling is APPROVED, never promotes below it
+            'r2 on approved2'  => ['APPROVED2', 2, 'APPROVED'],
+            'r2 on approved'   => ['APPROVED', 2, 'APPROVED'],
+            'r2 on translated' => ['TRANSLATED', 2, 'TRANSLATED'],
+            'r2 on draft'      => ['DRAFT', 2, 'DRAFT'],
+        ];
     }
 
     #[Test]
-    public function getNewStatus_demotes_translated_to_draft_on_revision(): void
-    {
+    #[\PHPUnit\Framework\Attributes\DataProvider('newStatusMatrixProvider')]
+    public function getNewStatus_demotes_by_actor_revision_level(
+        string $currentStatus,
+        ?int $revisionNumber,
+        string $expected
+    ): void {
         $translation = new \Model\Translations\SegmentTranslationStruct();
-        $translation->status = 'TRANSLATED';
+        $translation->status = $currentStatus;
 
-        $result = $this->invokePrivate('getNewStatus', [$translation, 1]);
+        $result = $this->invokePrivate('getNewStatus', [$translation, $revisionNumber]);
 
-        $this->assertSame('DRAFT', $result);
-    }
-
-    #[Test]
-    public function getNewStatus_demotes_approved_to_translated_on_revision(): void
-    {
-        $translation = new \Model\Translations\SegmentTranslationStruct();
-        $translation->status = 'APPROVED';
-
-        $result = $this->invokePrivate('getNewStatus', [$translation, 1]);
-
-        $this->assertSame('TRANSLATED', $result);
-    }
-
-    #[Test]
-    public function getNewStatus_demotes_approved2_to_approved_on_revision(): void
-    {
-        $translation = new \Model\Translations\SegmentTranslationStruct();
-        $translation->status = 'APPROVED2';
-
-        $result = $this->invokePrivate('getNewStatus', [$translation, 2]);
-
-        $this->assertSame('APPROVED', $result);
-    }
-
-    #[Test]
-    public function getNewStatus_demotes_rejected_to_draft_on_revision(): void
-    {
-        $translation = new \Model\Translations\SegmentTranslationStruct();
-        $translation->status = 'REJECTED';
-
-        $result = $this->invokePrivate('getNewStatus', [$translation, 2]);
-
-        $this->assertSame('DRAFT', $result);
+        $this->assertSame($expected, $result);
     }
 
     // ─── getReplacedSegmentTranslation ───
