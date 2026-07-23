@@ -396,7 +396,10 @@ class NewController extends KleinController
         $deepl_id_glossary = filter_var($this->request->param('deepl_id_glossary'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_formality = filter_var($this->request->param('deepl_formality'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_engine_type = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $icu_enabled = filter_var($this->request->param('icu_enabled'), FILTER_VALIDATE_BOOLEAN);
+        $icu_enabled = ($this->request->param('icu_enabled') !== null) ? filter_var(
+            $this->request->param('icu_enabled'),
+            FILTER_VALIDATE_BOOLEAN
+        ) : true; // icu_enabled true by default
         $mandatory_issues = filter_var(
             $this->request->param('mandatory_issues'),
             FILTER_SANITIZE_FULL_SPECIAL_CHARS,
