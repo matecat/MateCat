@@ -374,9 +374,10 @@ class UserKeysControllerTest extends AbstractTest
             $this->assertStringContainsString('&amp;', $e->getMessage());
             $this->assertStringContainsString('&quot;', $e->getMessage());
             $this->assertStringContainsString('&#39;', $e->getMessage());
-            $this->assertStringContainsString(
-                'https://gist.github.com/mauretto78/83db58b7023a2f7bb26b252360d3692a',
-                $e->getMessage()
+            $this->assertStringNotContainsString(
+                'gist.github.com',
+                $e->getMessage(),
+                'the gist link was intentionally dropped from the message'
             );
         }
     }
@@ -398,7 +399,7 @@ class UserKeysControllerTest extends AbstractTest
             $this->fail('Expected InvalidArgumentException was not thrown');
         } catch (InvalidArgumentException $e) {
             $this->assertSame(-3, $e->getCode());
-            $this->assertStringContainsString('Resource names cannot contain', $e->getMessage());
+            $this->assertStringContainsString('Resource names can only contain', $e->getMessage());
         }
     }
 
@@ -408,12 +409,57 @@ class UserKeysControllerTest extends AbstractTest
     public static function forbiddenDescriptionCharacterProvider(): array
     {
         return [
-            'less-than'    => ['<'],
-            'greater-than' => ['>'],
-            'ampersand'    => ['&'],
-            'double-quote' => ['"'],
-            'single-quote' => ["'"],
+            'less-than'      => ['<'],
+            'greater-than'   => ['>'],
+            'ampersand'      => ['&'],
+            'double-quote'   => ['"'],
+            'single-quote'   => ["'"],
+            'pound-sign'     => ['£'],
+            'dollar-sign'    => ['$'],
         ];
+    }
+
+    /**
+     * Regression: the job-assignment sanitizer (TmKeyManager::sanitize()) strips symbols
+     * like £/$ that this endpoint used to let through untouched, producing a name that
+     * silently changed once the key was assigned to a job. Saving must now be rejected
+     * up front instead, using the same allow-list as job assignment.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_throws_minus_three_for_symbols_stripped_by_job_assignment(): void
+    {
+        $this->setRequestParams([
+            'key'         => 'abcdef1234567890',
+            'description' => 'èòà£££$$$',
+        ]);
+
+        try {
+            $this->invokePrivate('validateTheRequest');
+            $this->fail('Expected InvalidArgumentException was not thrown');
+        } catch (InvalidArgumentException $e) {
+            $this->assertSame(-3, $e->getCode());
+        }
+    }
+
+    /**
+     * Accented letters are allowed by TmKeyManager::sanitizeName()'s \p{L} class, so a
+     * description made only of accented letters must be accepted unchanged.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_accepts_accented_only_description(): void
+    {
+        $this->setRequestParams([
+            'key'         => 'abcdef1234567890',
+            'description' => 'èòà',
+        ]);
+
+        $result = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame('èòà', $result['description']);
     }
 
     // ─── getMkDao ───
@@ -702,6 +748,27 @@ class UserKeysControllerTest extends AbstractTest
         $keyValue = $stmt->fetchColumn();
 
         $this->assertSame($newKeyValue, $keyValue);
+    }
+
+    /**
+     * Regression: previously this name was saved verbatim here and only trimmed down to
+     * "èòà" later when assigned to a job, so the two components disagreed on the name.
+     * newKey() must now reject it up front instead of persisting a value that would
+     * later mismatch.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function newKey_rejects_name_containing_symbols_job_assignment_would_strip(): void
+    {
+        $newKeyValue = 'ctrltestsymbolkey' . self::BASE;
+
+        $this->setRequestParams(['key' => $newKeyValue, 'description' => 'èòà£££$$$']);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(-3);
+
+        $this->controller->newKey();
     }
 
     /**

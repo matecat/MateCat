@@ -197,6 +197,29 @@ class TmKeyManager
     }
 
     /**
+     * Sanitizes a TM key/resource name, allow-listing letters, numbers,
+     * whitespace, `. - _` and `{}` (the latter needed for the `{{pid}}`
+     * placeholder). This is the single canonical rule for TM/glossary resource
+     * names and MUST be applied at every point a name is persisted, not only
+     * when a key is assigned to a job.
+     *
+     * @param string|null $name
+     *
+     * @return string|null
+     */
+    public static function sanitizeName(?string $name): ?string
+    {
+        if (is_null($name)) {
+            return null;
+        }
+
+        $name      = preg_replace('/[^.\-_\p{L}\p{N}\s{}]+/u', '', $name);
+        $sanitized = filter_var($name, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+
+        return $sanitized !== false ? $sanitized : null;
+    }
+
+    /**
      * This method sanitize fields received with struct
      *
      * @param TmKeyStruct $obj
@@ -231,9 +254,7 @@ class TmKeyManager
         }
 
         if (!is_null($obj->name)) {
-            $obj->name = preg_replace('/[^.\-_\p{L}\p{N}\s{}]+/u', '', $obj->name);
-            $sanitized = filter_var($obj->name, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-            $obj->name = $sanitized !== false ? $sanitized : null;
+            $obj->name = self::sanitizeName($obj->name);
         }
 
         if (!is_null($obj->key)) {

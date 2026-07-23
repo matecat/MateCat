@@ -25,15 +25,44 @@ class TmKeyManagerTest extends AbstractTest
     {
         $obj = new TmKeyStruct();
         $obj->name = 'Resource with <script>alert(1)</script> and {{pid}}';
-        
+
         TmKeyManager::sanitize($obj);
-        
-        // < and > are removed or encoded by filter_var depending on implementation, 
+
+        // < and > are removed or encoded by filter_var depending on implementation,
         // but preg_replace should strip them if they are not in the allowed list.
         // In the updated code: [^.\-_\p{L}\p{N}\s{}]+
         // <, >, (, ) are NOT in the allowed list.
-        
+
         $this->assertStringContainsString('{{pid}}', $obj->name);
         $this->assertStringNotContainsString('<script>', $obj->name);
+    }
+
+    /**
+     * sanitizeName() is the shared, canonical name filter that must now also gate the
+     * "save a new TM key" endpoint, so that both save and job-assignment agree on the
+     * stored value. \p{L} preserves Unicode letters like accented characters, while
+     * currency/other symbols are stripped.
+     */
+    #[Test]
+    public function testSanitizeNamePreservesAccentedLettersAndStripsSymbols()
+    {
+        $this->assertSame('èòà', TmKeyManager::sanitizeName('èòà£££$$$'));
+    }
+
+    #[Test]
+    public function testSanitizeNameReturnsNullForNull()
+    {
+        $this->assertNull(TmKeyManager::sanitizeName(null));
+    }
+
+    #[Test]
+    public function testSanitizeUsesSanitizeNameForNameField()
+    {
+        $obj = new TmKeyStruct();
+        $obj->name = 'èòà£££$$$';
+
+        TmKeyManager::sanitize($obj);
+
+        $this->assertSame('èòà', $obj->name);
     }
 }

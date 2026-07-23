@@ -12,6 +12,7 @@ use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use TypeError;
 use Utils\Registry\AppConfig;
+use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSFile;
 use Utils\TMS\TMSService;
@@ -69,7 +70,7 @@ class TMXFileController extends KleinController
                 $userMemoryKey = $mkDao->read($searchMemoryKey);
 
                 if (!empty($userMemoryKey) && isset($userMemoryKey[0]->tm_key) && empty($userMemoryKey[0]->tm_key->name)) {
-                    $userMemoryKey[0]->tm_key->name = $fileInfo->name;
+                    $userMemoryKey[0]->tm_key->name = TmKeyManager::sanitizeName($fileInfo->name);
                     $mkDao->atomicUpdate($userMemoryKey[0]);
                 }
             }

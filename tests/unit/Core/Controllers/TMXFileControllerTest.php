@@ -467,6 +467,46 @@ class TMXFileControllerTest extends AbstractTest
         $this->assertSame('Default.tmx', $body['data']['uuids'][0]['name']);
     }
 
+    /**
+     * Regression: import() used to write the raw uploaded filename straight into
+     * memory_keys.key_name with zero sanitization. A filename containing symbols
+     * that TmKeyManager::sanitizeName() would strip elsewhere (e.g. on job
+     * assignment) must now be sanitized the same way here too, closing the one
+     * path that persisted fully unsanitized client input.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function import_success_sanitizes_uploaded_filename_before_storing_as_key_name(): void
+    {
+        AppConfig::$DEFAULT_TM_KEY = 'the-default-key';
+        $this->seedMemoryKey('non-default-key-symbols');
+
+        $this->setRequestWithUploadedFile('èòà£££$$$.tmx', '<tmx version="1.4"/>', [
+            'tm_key' => 'non-default-key-symbols',
+        ]);
+        $this->reflector->getProperty('response')->setValue($this->controller, new Response());
+
+        $tmsServiceStub = $this->createStub(TMSService::class);
+        $tmsServiceStub->method('addTmxInMyMemory')->willReturn([]);
+        $this->controller->tmsServiceStub = $tmsServiceStub;
+
+        ob_start();
+        try {
+            $this->controller->import();
+        } finally {
+            ob_end_clean();
+        }
+
+        $stmt = $this->seedConnection()->prepare(
+            "SELECT key_name FROM memory_keys WHERE uid = :uid AND key_value = :key_value"
+        );
+        $stmt->execute(['uid' => $this->userId(self::BASE), 'key_value' => 'non-default-key-symbols']);
+        $keyName = $stmt->fetchColumn();
+
+        $this->assertSame('èòà.tmx', $keyName);
+    }
+
     // ─── importStatus() ───
 
     /**
