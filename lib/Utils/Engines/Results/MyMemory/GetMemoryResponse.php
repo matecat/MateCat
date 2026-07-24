@@ -83,12 +83,14 @@ class GetMemoryResponse extends TMSAbstractResponse
             'reference' => $match['reference'] ?? '',
             'last-updated-by' => $match['last-updated-by'] ?? '',
             'last-update-date' => $match['last-update-date'] ?? '1970-01-01 00:00:00',
-            'tm_properties' => $match['tm_properties'],
+            'tm_properties' => $match['tm_properties'] ?? null,
             'key' => $match['key'] ?? '',
             'ICE' => $match['ICE'] ?? false,
             'source_note' => $match['source_note'] ?? null,
             'target_note' => $match['target_note'] ?? '',
             'penalty' => $match['penalty'] ?? null,
+            'source' => $match['source'] ?? null,
+            'target' => $match['target'] ?? null,
         ]);
     }
 
