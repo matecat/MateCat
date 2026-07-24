@@ -341,7 +341,7 @@ class Filters
             LoggerFactory::getLogger("conversion")->debug("Unable to log the conversion: " . $ex->getMessage());
         }
 
-        if ($response['successful'] !== true) {
+        if (($response['successful'] ?? false) !== true) {
             if (AppConfig::$FILTERS_EMAIL_FAILURES) {
                 Utils::sendErrMailReport("Matecat: conversion failed.\n\n" . print_r($info, true));
             }
