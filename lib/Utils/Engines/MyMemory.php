@@ -179,8 +179,8 @@ class MyMemory extends AbstractEngine
                         $decoded['matches'][$pos]['segment']     = $match['segment'] ?? '';
                         $decoded['matches'][$pos]['translation'] = $match['translation'] ?? '';
                         $decoded['matches'][$pos]['target_note'] = $match['target_note'] ?? '';
-                        $decoded['matches'][$pos]['source']      = $this->_config['source'] ?? $match['source'] ?? '';
-                        $decoded['matches'][$pos]['target']      = $this->_config['target'] ?? $match['target'] ?? '';
+                        $decoded['matches'][$pos]['source']      = $match['source'] ?? $this->_config['source'] ?? '';
+                        $decoded['matches'][$pos]['target']      = $match['target'] ?? $this->_config['target'] ?? '';
                     }
                 }
 
