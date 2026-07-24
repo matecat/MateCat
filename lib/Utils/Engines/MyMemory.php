@@ -176,9 +176,11 @@ class MyMemory extends AbstractEngine
 
                 if (!empty($decoded['matches'])) {
                     foreach ($decoded['matches'] as $pos => $match) {
-                        $decoded['matches'][$pos]['segment'] = $match['segment'];
-                        $decoded['matches'][$pos]['translation'] = $match['translation'];
+                        $decoded['matches'][$pos]['segment']     = $match['segment'] ?? '';
+                        $decoded['matches'][$pos]['translation'] = $match['translation'] ?? '';
                         $decoded['matches'][$pos]['target_note'] = $match['target_note'] ?? '';
+                        $decoded['matches'][$pos]['source']      = $this->_config['source'] ?? $match['source'] ?? '';
+                        $decoded['matches'][$pos]['target']      = $this->_config['target'] ?? $match['target'] ?? '';
                     }
                 }
 
