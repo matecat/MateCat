@@ -1,4 +1,4 @@
-import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
+import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain';
 
 /**
  * Search term into segments
@@ -18,7 +18,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const searchTermIntoSegments = async ({
   idJob = config.id_job,
-  password = config.password,
+  password = config.currentPassword,
   token,
   source,
   target,
@@ -30,7 +30,7 @@ export const searchTermIntoSegments = async ({
   revisionNumber,
 }) => {
   const paramsData = {
-    job: idJob,
+    id_job: idJob,
     password,
     token,
     source,
