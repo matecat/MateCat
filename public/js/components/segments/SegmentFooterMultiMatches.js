@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {createRef} from 'react'
 import {fromJS} from 'immutable'
 import {isUndefined} from 'lodash'
 import $ from 'jquery'
@@ -109,22 +109,30 @@ class SegmentFooterMultiMatches extends React.Component {
   getMatchInfo(match) {
     return (
       <ul className="graysmall-details">
-        <li className={'percent ' + match.percentClass}>{match.percentText}</li>
-        <li>{match.suggestion_info}</li>
         <li className="graydesc">
           Source:
-          <span className="bold" style={{fontSize: '14px'}}>
-            {' '}
-            {match.cb}
-          </span>
+          <span className="bold"> {match.cb}</span>
         </li>
-        <li className="graydesc">
+        <li>{match.suggestion_info}</li>
+        <li
+          ref={createRef()}
+          className={`percent  ${
+            match.source !== config.source_rfc
+              ? 'per-yellow-variant'
+              : 'per-green'
+          }`}
+        >
+          {match.source} {'>'} {match.target}{' '}
+          {match.source !== config.source_rfc ? '(-1%)' : ''}
+        </li>
+        <li className={'percent ' + match.percentClass}>{match.percentText}</li>
+        {/*<li className="graydesc">
           Target:
           <span className="bold" style={{fontSize: '14px'}}>
             {' '}
             {match.target}
           </span>
-        </li>
+        </li>*/}
       </ul>
     )
   }

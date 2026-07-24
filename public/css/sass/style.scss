@@ -1730,7 +1730,8 @@ body.archived section .status-container a.status:hover {
   }
 }
 .graysmall .graysmall-details {
-  display: block;
+  display: flex;
+  justify-content: flex-end;
   width: 100%; /*To be tested*/
   position: absolute;
   bottom: 0;
@@ -1738,15 +1739,18 @@ body.archived section .status-container a.status:hover {
   margin-top: 10px;
   margin-right: 15px;
   z-index: 0;
+  gap: 4px;
 }
 
 .graysmall-details li {
   float: right;
   width: auto !important;
-  font-size: 11px;
+  font-size: 10px;
+  line-height: 10px;
   margin: 0 0px;
-  padding: 2px 5px 0px 5px;
+  padding: 2px 4px;
   border-bottom: none;
+  border-radius: 1px;
 }
 
 .graysmall:hover {
@@ -1925,7 +1929,14 @@ section.opened.editor .status {
   background: colors.$orangeDefault !important;
   color: #333 !important;
 }
-
+.per-yellow-variant {
+  background: colors.$orange600 !important;
+  color: colors.$white !important;
+}
+.per-grey {
+  background: #B6B8BB !important;
+  color: colors.$white !important;
+}
 .per-red {
   background: colors.$redDefault !important;
   color: #fff !important;
@@ -1949,7 +1960,7 @@ section.opened.editor .status {
 .graysmall-details .per-blue,
 .graysmall-details .per-orange,
 .graysmall-details .per-green {
-  width: 35px !important;
+  min-width: 35px !important;
   text-align: center;
   display: block !important;
 }

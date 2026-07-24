@@ -50,6 +50,7 @@ class SegmentFooterTabMatches extends React.Component {
       item.segment = this.segment
       item.translation = this.translation
       item.target = this.target
+      item.source = this.source
       if (
         'sentence_confidence' in this &&
         this.sentence_confidence !== '' &&
@@ -169,9 +170,44 @@ class SegmentFooterTabMatches extends React.Component {
 
   getMatchInfo(match) {
     const penaltyPercRef = createRef()
-
+    console.log(
+      match,
+      match.source,
+      match.target,
+      config.target_rfc,
+      config.source_rfc,
+    )
     return (
       <ul className="graysmall-details">
+        <li className="graydesc graydesc-sourcekey">
+          Source:
+          <span className="bold" title={match.cb}>
+            {' '}
+            {match.cb}
+          </span>
+        </li>
+        <li>{match.suggestion_info}</li>
+        {(match.target !== config.target_rfc ||
+          match.source !== config.source_rfc) && (
+          <Tooltip
+            content={
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <span>Language variations results will have a penalty</span>
+              </div>
+            }
+          >
+            <li ref={createRef()} className={`percent per-yellow-variant`}>
+              {match.source} {'>'} {match.target} (-1%)
+            </li>
+          </Tooltip>
+        )}
+        <li className={'percent ' + match.percentClass}>{match.percentText}</li>
+
         {match.penalty > 0 && (
           <Tooltip
             content={
@@ -197,20 +233,12 @@ class SegmentFooterTabMatches extends React.Component {
             </li>
           </Tooltip>
         )}
-        <li className={'percent ' + match.percentClass}>{match.percentText}</li>
-        <li>{match.suggestion_info}</li>
-        <li className={'graydesc'}>
+
+        {/*<li className={'graydesc'}>
           <span className={'bold'} style={{fontSize: '14px'}}>
             {ApplicationStore.getLanguageNameFromLocale(match.target)}
           </span>
-        </li>
-        <li className="graydesc graydesc-sourcekey">
-          Source:
-          <span className="bold" style={{fontSize: '14px'}} title={match.cb}>
-            {' '}
-            {match.cb}
-          </span>
-        </li>
+        </li>*/}
 
         {this.getMatchInfoMetadata(match)}
       </ul>
