@@ -874,10 +874,11 @@ class MyMemory extends AbstractEngine
       * @throws Exception
       * @throws TypeError
       */
-     public function fastAnalysis(array $segs_array): AnalyzeResponse
-     {
+    public function fastAnalysis(array $segs_array): AnalyzeResponse
+    {
         $this->_setAdditionalCurlParams([
-                CURLOPT_TIMEOUT => 300
+                CURLOPT_TIMEOUT => 300,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1
             ]
         );
 

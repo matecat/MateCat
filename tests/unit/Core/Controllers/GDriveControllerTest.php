@@ -886,6 +886,10 @@ class GDriveControllerTest extends AbstractTest
         $db     = obtainTestDatabase();
         $conn   = $db->getConnection();
 
+        // Auto-clean any row orphaned by a previously interrupted run before re-seeding, so the
+        // fixed id can never collide (these rows are committed via a raw connection, outside the
+        // transaction AbstractTest rolls back, so a failed run's trailing DELETE may be skipped).
+        $conn->exec("DELETE FROM filters_config_templates WHERE id = 9960001");
         $conn->exec(
             "INSERT INTO filters_config_templates (id, uid, name, created_at) " .
             "VALUES (9960001, {$uid}, 'ctrl-test-tpl', NOW())"
@@ -931,6 +935,8 @@ class GDriveControllerTest extends AbstractTest
         $db   = obtainTestDatabase();
         $conn = $db->getConnection();
 
+        // Auto-clean any orphaned row before re-seeding (see note in the sibling test): idempotent.
+        $conn->exec("DELETE FROM filters_config_templates WHERE id = 9960002");
         $conn->exec(
             "INSERT INTO filters_config_templates (id, uid, name, created_at) " .
             "VALUES (9960002, {$uid}, 'ctrl-test-tpl2', NOW())"
