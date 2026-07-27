@@ -357,63 +357,46 @@ class UserKeysControllerTest extends AbstractTest
      * @throws Throwable
      */
     #[Test]
-    public function validateTheRequest_throws_minus_three_on_xss_description(): void
+    public function validateTheRequest_escapes_html_special_chars_in_description(): void
     {
         $this->setRequestParams([
             'key'         => 'abcdef1234567890',
             'description' => '<script>alert(1)</script>',
         ]);
 
-        try {
-            $this->invokePrivate('validateTheRequest');
-            $this->fail('Expected InvalidArgumentException was not thrown');
-        } catch (InvalidArgumentException $e) {
-            $this->assertSame(-3, $e->getCode());
-            $this->assertStringContainsString('&lt;', $e->getMessage());
-            $this->assertStringContainsString('&gt;', $e->getMessage());
-            $this->assertStringContainsString('&amp;', $e->getMessage());
-            $this->assertStringContainsString('&quot;', $e->getMessage());
-            $this->assertStringContainsString('&#39;', $e->getMessage());
-            $this->assertStringNotContainsString(
-                'gist.github.com',
-                $e->getMessage(),
-                'the gist link about non-printable characters was intentionally dropped from the message'
-            );
-        }
+        $result = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame('&lt;script&gt;alert(1)&lt;/script&gt;', $result['description']);
     }
 
     /**
      * @throws Throwable
      */
     #[Test]
-    #[DataProvider('forbiddenDescriptionCharacterProvider')]
-    public function validateTheRequest_throws_minus_three_for_each_forbidden_character(string $char): void
+    #[DataProvider('htmlSpecialDescriptionCharacterProvider')]
+    public function validateTheRequest_escapes_each_html_special_character(string $char, string $escaped): void
     {
         $this->setRequestParams([
             'key'         => 'abcdef1234567890',
             'description' => "Glossary {$char} name",
         ]);
 
-        try {
-            $this->invokePrivate('validateTheRequest');
-            $this->fail('Expected InvalidArgumentException was not thrown');
-        } catch (InvalidArgumentException $e) {
-            $this->assertSame(-3, $e->getCode());
-            $this->assertStringContainsString('Resource names cannot contain', $e->getMessage());
-        }
+        $result = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame("Glossary {$escaped} name", $result['description']);
     }
 
     /**
-     * @return array<string, array{0: string}>
+     * @return array<string, array{0: string, 1: string}>
      */
-    public static function forbiddenDescriptionCharacterProvider(): array
+    public static function htmlSpecialDescriptionCharacterProvider(): array
     {
         return [
-            'less-than'    => ['<'],
-            'greater-than' => ['>'],
-            'ampersand'    => ['&'],
-            'double-quote' => ['"'],
-            'single-quote' => ["'"],
+            'less-than'    => ['<', '&lt;'],
+            'greater-than' => ['>', '&gt;'],
+            'ampersand'    => ['&', '&amp;'],
+            'double-quote' => ['"', '&quot;'],
+            'single-quote' => ["'", '&#039;'],
         ];
     }
 

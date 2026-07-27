@@ -25,15 +25,13 @@ class TmKeyManagerTest extends AbstractTest
     {
         $obj = new TmKeyStruct();
         $obj->name = 'Resource with <script>alert(1)</script> and {{pid}}';
-        
+
         TmKeyManager::sanitize($obj);
-        
-        // < and > are removed or encoded by filter_var depending on implementation, 
-        // but preg_replace should strip them if they are not in the allowed list.
-        // In the updated code: [^.\-_\p{L}\p{N}\s{}]+
-        // <, >, (, ) are NOT in the allowed list.
-        
-        $this->assertStringContainsString('{{pid}}', $obj->name);
-        $this->assertStringNotContainsString('<script>', $obj->name);
+
+        // htmlspecialchars encodes <, >, &, ", ' instead of stripping them,
+        // so the {{pid}} placeholder is left untouched (braces aren't escaped)
+        // while the script tag becomes harmless encoded text.
+
+        $this->assertSame('Resource with &lt;script&gt;alert(1)&lt;/script&gt; and {{pid}}', $obj->name);
     }
 }
