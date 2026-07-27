@@ -20,6 +20,7 @@ import {
   removeAllNotifications,
 } from './notificationActions'
 import OfflineUtils from '../utils/offlineUtils'
+import TEXT_UTILS from '../utils/textUtils'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
@@ -160,7 +161,11 @@ let CatToolActions = {
           getDomainsList({
             keys: filteredKeys.map(({key}) => key),
           })
-          const keys = filteredKeys.map((item) => ({...item, id: item.key}))
+          const keys = filteredKeys.map((item) => ({
+            ...item,
+            id: item.key,
+            name: TEXT_UTILS.decodeHtml(item.name),
+          }))
           AppDispatcher.dispatch({
             actionType: CatToolConstants.UPDATE_TM_KEYS,
             keys,

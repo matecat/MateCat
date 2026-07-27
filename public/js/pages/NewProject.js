@@ -64,6 +64,7 @@ import {ANALYSIS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/Analysi
 import {FILTERS_PARAMS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/FiltersParams/FiltersParams'
 import {XLIFF_SETTINGS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/XliffSettings/XliffSettings'
 import {DEEPL_GLOSSARY_ROW_NONE} from '../components/settingsPanel/Contents/MachineTranslationTab/DeepLGlossary/DeepLGlossary'
+import TEXT_UTILS from '../utils/textUtils'
 
 const SELECT_HEIGHT = 324
 
@@ -436,6 +437,7 @@ const NewProject = () => {
           ...tm_keys.map((key) => ({
             ...key,
             id: key.key,
+            name: TEXT_UTILS.decodeHtml(key.name),
             ...(isMatchingKeyFromQuery &&
               key.key === tmKeyFromQueryString && {
                 isActive: true,

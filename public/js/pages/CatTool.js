@@ -56,6 +56,7 @@ import {
   BUTTON_MODE,
   BUTTON_SIZE,
 } from '../components/common/Button/Button'
+import TEXT_UTILS from '../utils/textUtils'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -240,6 +241,7 @@ function CatTool() {
           return {
             ...key,
             id: key.key,
+            name: TEXT_UTILS.decodeHtml(key.name),
             isActive: Boolean(key.r || key.w),
             isLocked: !key.owner,
           }
