@@ -4,4 +4,5 @@ import 'whatwg-fetch'
 // global.jQuery = $
 global.config = {
   id_job: 2,
+  userMail: 'jest-user@example.com',
 }
