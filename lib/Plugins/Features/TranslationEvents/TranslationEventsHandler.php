@@ -19,6 +19,7 @@ use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\Model\TranslationEventStruct;
+use ReflectionException;
 use TypeError;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
@@ -138,13 +139,6 @@ class TranslationEventsHandler
             throw new ValidationError('Setting revised state from translation is not allowed.', -2000);
         }
 
-        if (
-            in_array($event->getWantedTranslation()['status'], TranslationStatus::$TRANSLATION_STATUSES) &&
-            $event->getSourcePage() >= SourcePages::SOURCE_PAGE_REVISION
-        ) {
-            throw new ValidationError('Setting translated state from revision is not allowed.', -2000);
-        }
-
         $eventStruct = new TranslationEventStruct();
         $eventStruct->id_job = $event->getWantedTranslation()['id_job'];
         $eventStruct->id_segment = $event->getWantedTranslation()['id_segment'];
@@ -184,7 +178,7 @@ class TranslationEventsHandler
 
     /**
      * @throws Exception
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function removeOldFinalRevisionFlag(TranslationEvent $event): void
     {

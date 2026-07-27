@@ -3,12 +3,13 @@
 namespace Matecat\Core\Plugins\Features\SegmentFilter\Controller\API;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -17,6 +18,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use Plugins\Features\SegmentFilter\Controller\API\FilterController;
 use Plugins\Features\SegmentFilter\Model\FilterDefinition;
 use ReflectionClass;
+use ReflectionProperty;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -68,7 +70,7 @@ class FilterControllerTest extends AbstractTest
         $this->setProp('request', new Request());
         $this->setProp('response', $this->responseMock);
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        $this->setProp('featureSet', new FeatureSet($this->createStub(IDatabase::class)));
         $this->setProp('database', obtainTestDatabase());
     }
 
@@ -84,7 +86,7 @@ class FilterControllerTest extends AbstractTest
         $prop->setValue($this->controller, $value);
     }
 
-    private function findProp(string $name): \ReflectionProperty
+    private function findProp(string $name): ReflectionProperty
     {
         $c = $this->reflector;
         while ($c !== false) {
@@ -145,7 +147,7 @@ class FilterControllerTest extends AbstractTest
             'request' => $request,
             'response' => $this->responseMock,
             'logger' => $this->createMock(MatecatLogger::class),
-            'featureSet' => new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
+            'featureSet' => new FeatureSet($this->createStub(IDatabase::class)),
             // ChunkPasswordValidator's ctor reads $controller->getParams() (not the request)
             'params' => ['id_job' => self::JOB_ID, 'password' => self::JOB_PASSWORD],
         ];
@@ -155,7 +157,7 @@ class FilterControllerTest extends AbstractTest
 
         $ref->getMethod('registerValidators')->invoke($ctrl);
 
-        $vProp = new \ReflectionProperty(KleinController::class, 'validators');
+        $vProp = new ReflectionProperty(KleinController::class, 'validators');
         $vProp->setAccessible(true);
         $validators = $vProp->getValue($ctrl);
 
@@ -171,7 +173,7 @@ class FilterControllerTest extends AbstractTest
         return [$ctrl, $chunkValidator, $callbacks[0]];
     }
 
-    private function propOf(ReflectionClass $ref, string $name): \ReflectionProperty
+    private function propOf(ReflectionClass $ref, string $name): ReflectionProperty
     {
         $c = $ref;
         while ($c !== false) {
@@ -204,7 +206,7 @@ class FilterControllerTest extends AbstractTest
     {
         [$ctrl, $chunkValidator] = $this->buildRealControllerWithRegisteredValidators($this->requestWithFilter(['status' => 'TRANSLATED']));
 
-        $vProp = new \ReflectionProperty(KleinController::class, 'validators');
+        $vProp = new ReflectionProperty(KleinController::class, 'validators');
         $vProp->setAccessible(true);
         $validators = $vProp->getValue($ctrl);
 
@@ -221,7 +223,7 @@ class FilterControllerTest extends AbstractTest
     {
         [, , $closure] = $this->buildRealControllerWithRegisteredValidators($this->requestWithFilter(null));
 
-        $this->expectException(\Controller\API\Commons\Exceptions\ValidationError::class);
+        $this->expectException(ValidationError::class);
         $this->expectExceptionMessage('Filter is null');
 
         $closure();
@@ -233,7 +235,7 @@ class FilterControllerTest extends AbstractTest
         // empty status + not sampled => FilterDefinition::isValid() === false
         [, , $closure] = $this->buildRealControllerWithRegisteredValidators($this->requestWithFilter(['status' => '']));
 
-        $this->expectException(\Controller\API\Commons\Exceptions\ValidationError::class);
+        $this->expectException(ValidationError::class);
         $this->expectExceptionMessage('Filter is invalid');
 
         $closure();
@@ -254,7 +256,7 @@ class FilterControllerTest extends AbstractTest
 
         $this->assertInstanceOf(FilterDefinition::class, $filter);
         $this->assertInstanceOf(JobStruct::class, $chunk);
-        $this->assertTrue($chunk->getIsReview());
+        $this->assertTrue($chunk->isReview());
     }
 
     // ─── index() ───

@@ -206,7 +206,6 @@ route('/api/app/disable-engine', 'POST', ['Controller\API\App\EngineController',
 route('/api/app/get-contribution', 'POST', ['Controller\API\App\GetContributionController', 'get']);
 route('/api/app/search', 'POST', ['Controller\API\App\GetSearchController', 'search']);
 route('/api/app/replace-all', 'POST', ['Controller\API\App\GetSearchController', 'replaceAll']);
-route('/api/app/redo-replace-all', 'POST', ['Controller\API\App\GetSearchController', 'redoReplaceAll']);
 route('/api/app/undo-replace-all', 'POST', ['Controller\API\App\GetSearchController', 'undoReplaceAll']);
 route('/api/app/update-job-keys', 'POST', ['Controller\API\App\UpdateJobKeysController', 'update']);
 route('/api/app/set-translation', 'POST', ['Controller\API\App\SetTranslationController', 'translate']);
