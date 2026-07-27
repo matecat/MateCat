@@ -284,7 +284,7 @@ class ErrorManagerTest extends AbstractTest
 
         $warnings = $this->errorManager->getWarnings();
         $this->assertEquals(ErrorManager::ERR_FUZZY_UNCHANGED, $warnings[0]->outcome);
-        $this->assertEquals('Fuzzy match confirmed without changes', $warnings[0]->debug);
+        $this->assertEquals('Unedited fuzzy match confirmed', $warnings[0]->debug);
     }
 
     #[Test]

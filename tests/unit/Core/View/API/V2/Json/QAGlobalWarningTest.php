@@ -62,7 +62,7 @@ class QAGlobalWarningTest extends AbstractTest
     public function testRenderFuzzyUnchangedWarningBucketedUnderFuzzyCategory(): void
     {
         $struct = $this->makeGlobalWarningStruct(
-            json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Fuzzy match confirmed without changes']]),
+            json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Unedited fuzzy match confirmed']]),
             '42'
         );
 
