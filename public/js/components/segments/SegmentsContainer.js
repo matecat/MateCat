@@ -882,14 +882,38 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     if (typeof firstRowIdVisible !== 'undefined') {
       const props = getSegmentPropsBySid(firstRowIdVisible)
 
-      return props && (
-        <div
-          className={`sticky-project-bar ${props.sideOpen ? 'sticky-project-bar-slide-right' : ''}`}
-        >
-          <ProjectBar
-            {...{...props, listRef: listRef.current, isSticky: true}}
-          />
-        </div>
+      const index = rows.findIndex(({id}) =>
+        scrollToSid?.toString().indexOf('-') === -1
+          ? parseInt(id) === parseInt(scrollToSid)
+          : id === scrollToSid,
+      )
+
+      let isOnScreen = false
+      if (index !== -1 && listRef.current) {
+        const rowTop = rows
+          .slice(0, index)
+          .reduce((sum, row) => sum + row.height, 0)
+        const rowBottom = rowTop + rows[index].height
+        const scrollTop = listRef.current.scrollTop
+        const viewportBottom = scrollTop + listRef.current.clientHeight
+        isOnScreen = rowBottom > scrollTop && rowTop < viewportBottom
+      }
+
+      return (
+        props && (
+          <div
+            className={`sticky-project-bar ${props.sideOpen ? 'sticky-project-bar-slide-right' : ''}`}
+          >
+            <ProjectBar
+              {...{
+                ...props,
+                listRef: listRef.current,
+                isSticky: true,
+                isBlinking: scrollToSid && !isOnScreen,
+              }}
+            />
+          </div>
+        )
       )
     }
   }
