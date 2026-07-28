@@ -12,9 +12,11 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
+use Model\FeaturesBase\Hook\Event\Run\SetTranslationCommittedEvent;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Search\SearchQueryParamsStruct;
+use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
@@ -51,6 +53,24 @@ class SpyFeatureSet extends FeatureSet
     }
 }
 
+/**
+ * Fails on one event class, so tests can drive the controller's dispatch-failure branches. Anything else
+ * keeps the real (empty feature list) behaviour.
+ */
+class FailingFeatureSet extends FeatureSet
+{
+    public string $failOn = '';
+
+    public function dispatch(object $event): object
+    {
+        if ($this->failOn !== '' && $event instanceof $this->failOn) {
+            throw new RuntimeException('feature handler blew up');
+        }
+
+        return parent::dispatch($event);
+    }
+}
+
 #[AllowMockObjectsWithoutExpectations]
 class GetSearchControllerTest extends AbstractTest
 {
@@ -61,6 +81,9 @@ class GetSearchControllerTest extends AbstractTest
     private const int TEST_SEGMENT_2 = 9999004;
     private const int TEST_SEGMENT_3 = 9999005;
     private const int TEST_FILE_ID = 9999006;
+    // Seeded only by the test that needs a segment without a translation row; cleanTestData() removes it
+    // along with the others, since it deletes the segments by file.
+    private const int TEST_SEGMENT_WITHOUT_TRANSLATION = 9999007;
 
     private ReflectionClass $reflector;
     private TestableGetSearchController $controller;
@@ -318,6 +341,45 @@ class GetSearchControllerTest extends AbstractTest
         }
     }
 
+    // includeLocked is the one flag whose default is "on", and FILTER_VALIDATE_BOOLEAN reads a missing or
+    // empty value as false rather than null, so the fallback is easy to lose. These cases pin it.
+    #[Test]
+    #[\PHPUnit\Framework\Attributes\DataProvider('includeLockedParamProvider')]
+    public function validateTheRequest_reads_the_include_locked_flag(?string $param, bool $expected): void
+    {
+        $params = [
+            'id_job' => (string)self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+        ];
+
+        if ($param !== null) {
+            $params['includeLocked'] = $param;
+        }
+
+        $this->setRequestParams($params);
+
+        $result = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame($expected, $result['queryParams']['includeLocked']);
+    }
+
+    /**
+     * @return array<string, array{0: ?string, 1: bool}>
+     */
+    public static function includeLockedParamProvider(): array
+    {
+        return [
+            'absent'  => [null, true],
+            'empty'   => ['', true],
+            'garbage' => ['maybe', true],
+            'one'     => ['1', true],
+            'true'    => ['true', true],
+            'zero'    => ['0', false],
+            'false'   => ['false', false],
+            'off'     => ['off', false],
+        ];
+    }
+
     // ─── getReplaceHistory ───
 
     #[Test]
@@ -330,12 +392,12 @@ class GetSearchControllerTest extends AbstractTest
 
     // ─── getNewStatus ───
     // A replace-all is an automated, unseen change, so the editor must re-review it. The touched
-    // segment is demoted to one tier below the actor's review level, and the result is never higher
-    // than that ceiling nor higher than the segment's current tier (a replace never promotes):
-    //   - Translator (revisionNumber null): ceiling DRAFT   -> APPROVED2/APPROVED/TRANSLATED all -> DRAFT
-    //   - R1 (revisionNumber 1):            ceiling TRANSLATED -> APPROVED2/APPROVED/TRANSLATED all -> TRANSLATED
-    //   - R2 (revisionNumber 2):            ceiling APPROVED   -> APPROVED2 -> APPROVED, APPROVED stays,
-    //                                                            TRANSLATED stays TRANSLATED
+    // segment is demoted, and the result is never higher than the actor's ceiling nor higher than the
+    // segment's current tier (a replace never promotes). Every reviewer, whichever pass, hands the
+    // segment back to the revision queue as TRANSLATED:
+    //   - Translator (revisionNumber null): ceiling DRAFT      -> APPROVED2/APPROVED/TRANSLATED -> DRAFT
+    //   - R1 (revisionNumber 1):            ceiling TRANSLATED -> APPROVED2/APPROVED/TRANSLATED -> TRANSLATED
+    //   - R2 (revisionNumber 2):            ceiling TRANSLATED -> APPROVED2/APPROVED/TRANSLATED -> TRANSLATED
 
     /**
      * @return array<string, array{string, ?int, string}>
@@ -354,10 +416,11 @@ class GetSearchControllerTest extends AbstractTest
             'r1 on approved'   => ['APPROVED', 1, 'TRANSLATED'],
             'r1 on translated' => ['TRANSLATED', 1, 'TRANSLATED'],
             'r1 on draft'      => ['DRAFT', 1, 'DRAFT'],
-            // R2: ceiling is APPROVED, never promotes below it
-            'r2 on approved2'  => ['APPROVED2', 2, 'APPROVED'],
-            'r2 on approved'   => ['APPROVED', 2, 'APPROVED'],
+            // R2: same ceiling as R1, TRANSLATED, so an approved segment goes back to the revision queue
+            'r2 on approved2'  => ['APPROVED2', 2, 'TRANSLATED'],
+            'r2 on approved'   => ['APPROVED', 2, 'TRANSLATED'],
             'r2 on translated' => ['TRANSLATED', 2, 'TRANSLATED'],
+            'r2 on rejected'   => ['REJECTED', 2, 'DRAFT'],
             'r2 on draft'      => ['DRAFT', 2, 'DRAFT'],
         ];
     }
@@ -718,11 +781,12 @@ class GetSearchControllerTest extends AbstractTest
             'isExactMatchRequested' => false,
         ]);
 
-        $tRow = [
+        $oldTranslation = new SegmentTranslationStruct([
             'id_segment' => 55,
+            'id_job' => 100,
             'translation' => 'say hello',
             'status' => 'TRANSLATED',
-        ];
+        ]);
 
         // saveReplacementEvent only persists the event. The undo-cursor advance is done once by
         // replaceAll() after the whole batch loop, so the replace-all lands as one history version.
@@ -730,7 +794,7 @@ class GetSearchControllerTest extends AbstractTest
         $srh->expects($this->once())->method('save');
         $srh->expects($this->never())->method('updateIndex');
 
-        $this->invokePrivate('saveReplacementEvent', ['3', $tRow, $srh, $queryParams]);
+        $this->invokePrivate('saveReplacementEvent', ['3', $oldTranslation, $srh, $queryParams]);
     }
 
     // ─── search() public action ───
@@ -812,12 +876,12 @@ class GetSearchControllerTest extends AbstractTest
         ]);
 
         $search_results = [
-            [
+            new SegmentTranslationStruct([
                 'id_segment' => self::TEST_SEGMENT_1,
                 'id_job' => self::TEST_JOB_ID,
                 'translation' => 'Ciao mondo',
                 'status' => 'TRANSLATED',
-            ],
+            ]),
         ];
 
         $committed = $this->invokePrivate('updateSegments', [$search_results, self::TEST_JOB_ID, $queryParams]);
@@ -843,12 +907,12 @@ class GetSearchControllerTest extends AbstractTest
         // tRow translation differs from the currently-stored translation
         // (which is still 'Ciao mondo'), so the propagation branch is entered.
         $search_results = [
-            [
+            new SegmentTranslationStruct([
                 'id_segment' => self::TEST_SEGMENT_1,
                 'id_job' => self::TEST_JOB_ID,
                 'translation' => 'Ciao mondo modificato',
                 'status' => 'TRANSLATED',
-            ],
+            ]),
         ];
 
         $this->invokePrivate('updateSegments', [$search_results, self::TEST_JOB_ID, $queryParams]);
@@ -885,7 +949,148 @@ class GetSearchControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function updateSegments_skips_when_old_translation_is_null(): void
+    public function replaceAll_skips_search_hits_without_a_translation_row(): void
+    {
+        $conn = obtainTestDatabase()->getConnection();
+
+        // The source query reads the segments table with a LEFT JOIN on the translations, so a segment
+        // carrying no translation row still comes back as a hit and replaceAll() has to skip it. That
+        // query also needs the files_job row, which the shared fixture does not seed.
+        $conn->exec("INSERT INTO files_job (id_file, id_job) VALUES (" . self::TEST_FILE_ID . ", " . self::TEST_JOB_ID . ")");
+        $conn->exec("INSERT INTO segments (id, id_file, internal_id, segment, segment_hash, raw_word_count, show_in_cattool) VALUES (" . self::TEST_SEGMENT_WITHOUT_TRANSLATION . ", " . self::TEST_FILE_ID . ", '4', 'Hello world again', 'hash4_test_search', 3, 1)");
+
+        $this->setRequestParams([
+            'id_job' => (string)self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'source' => 'Hello',
+            'target' => '',
+            'replace' => 'Salve',
+            'token' => 'tok',
+            'status' => 'all',
+            'matchcase' => '0',
+            'exactmatch' => '0',
+            'inCurrentChunkOnly' => '0',
+        ]);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertContains((string)self::TEST_SEGMENT_WITHOUT_TRANSLATION, $data['segments']);
+                return true;
+            }));
+
+        try {
+            $this->controller->replaceAll();
+
+            // Skipped, not created: the controller must not invent a translation row for it.
+            $count = $conn->query("SELECT COUNT(*) FROM segment_translations WHERE id_segment = " . self::TEST_SEGMENT_WITHOUT_TRANSLATION)->fetchColumn();
+            $this->assertSame(0, (int)$count);
+        } finally {
+            $conn->exec("DELETE FROM files_job WHERE id_job = " . self::TEST_JOB_ID);
+        }
+    }
+
+    #[Test]
+    public function updateSegments_wraps_a_write_failure_into_a_runtime_exception(): void
+    {
+        $queryParams = new SearchQueryParamsStruct([
+            'job' => self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'target' => 'mondo',
+            'replacement' => 'universo',
+            'isMatchCaseRequested' => false,
+            'isExactMatchRequested' => false,
+        ]);
+
+        // A replay writes the historical status verbatim, so an over-long one does not fit the column.
+        // The server default may or may not be strict, so the session says so explicitly: the point of
+        // the test is the branch that rolls the segment back and re-throws, not MySQL's configuration.
+        $search_results = [
+            new SegmentTranslationStruct([
+                'id_segment' => self::TEST_SEGMENT_1,
+                'id_job' => self::TEST_JOB_ID,
+                'translation' => 'Ciao mondo',
+                'status' => str_repeat('LONG_STATUS_', 6),
+            ]),
+        ];
+
+        $conn = obtainTestDatabase()->getConnection();
+        $previousSqlMode = (string)$conn->query('SELECT @@SESSION.sql_mode')->fetchColumn();
+        $conn->exec("SET SESSION sql_mode = 'STRICT_ALL_TABLES'");
+
+        try {
+            $this->expectException(RuntimeException::class);
+            $this->expectExceptionMessage('A fatal error occurred during saving of segments');
+
+            $this->invokePrivate('updateSegments', [$search_results, self::TEST_JOB_ID, $queryParams, true]);
+        } finally {
+            $conn->exec("SET SESSION sql_mode = " . $conn->quote($previousSqlMode));
+        }
+    }
+
+    #[Test]
+    public function updateSegments_wraps_a_set_translation_committed_failure_into_a_runtime_exception(): void
+    {
+        $featureSet = new FailingFeatureSet($this->createStub(IDatabase::class));
+        $featureSet->failOn = SetTranslationCommittedEvent::class;
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, $featureSet);
+
+        $queryParams = new SearchQueryParamsStruct([
+            'job' => self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'target' => 'mondo',
+            'replacement' => 'universo',
+            'isMatchCaseRequested' => false,
+            'isExactMatchRequested' => false,
+        ]);
+
+        // The segment is already written and committed at this point: only the post-commit notification
+        // fails, and the controller turns it into a RuntimeException of its own.
+        $search_results = [
+            new SegmentTranslationStruct([
+                'id_segment' => self::TEST_SEGMENT_1,
+                'id_job' => self::TEST_JOB_ID,
+                'translation' => 'Ciao mondo',
+                'status' => 'TRANSLATED',
+            ]),
+        ];
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Exception in setTranslationCommitted callback');
+
+        $this->invokePrivate('updateSegments', [$search_results, self::TEST_JOB_ID, $queryParams, true]);
+    }
+
+    #[Test]
+    public function undoSegments_skips_rows_whose_translation_row_is_gone(): void
+    {
+        $queryParams = new SearchQueryParamsStruct([
+            'job' => self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'target' => 'mondo',
+            'replacement' => 'universo',
+            'isMatchCaseRequested' => false,
+            'isExactMatchRequested' => false,
+        ]);
+
+        // A replace event can outlive its segment (a job cleanup, a re-import): there is nothing to
+        // hydrate from, so the row is dropped instead of restoring a half-built struct.
+        $this->invokePrivate('undoSegments', [
+            [['id_segment' => 888888888, 'id_job' => self::TEST_JOB_ID, 'translation' => 'gone', 'status' => 'TRANSLATED']],
+            self::TEST_JOB_ID,
+            $queryParams,
+            true,
+        ]);
+
+        $untouched = (new \Model\Translations\SegmentTranslationDao(obtainTestDatabase()))->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
+        $this->assertNotNull($untouched);
+        $this->assertSame('Ciao mondo', $untouched->translation);
+    }
+
+    #[Test]
+    // The rows handed over are already SegmentTranslationStruct instances, so the row itself is never
+    // missing: what can be absent is the segment behind it, looked up while building the new translation.
+    public function updateSegments_skips_when_the_segment_is_missing(): void
     {
         $queryParams = new SearchQueryParamsStruct([
             'job' => self::TEST_JOB_ID,
@@ -897,7 +1102,7 @@ class GetSearchControllerTest extends AbstractTest
         ]);
 
         $search_results = [
-            ['id_segment' => 888888888, 'id_job' => self::TEST_JOB_ID, 'translation' => 'text', 'status' => 'TRANSLATED'],
+            new SegmentTranslationStruct(['id_segment' => 888888888, 'id_job' => self::TEST_JOB_ID, 'translation' => 'text', 'status' => 'TRANSLATED']),
         ];
 
         $committed = $this->invokePrivate('updateSegments', [$search_results, self::TEST_JOB_ID, $queryParams]);
@@ -940,7 +1145,7 @@ class GetSearchControllerTest extends AbstractTest
         ]);
 
         $search_results = [
-            ['id_segment' => self::TEST_SEGMENT_1, 'id_job' => self::TEST_JOB_ID, 'translation' => 'Ciao mondo', 'status' => 'TRANSLATED'],
+            new SegmentTranslationStruct(['id_segment' => self::TEST_SEGMENT_1, 'id_job' => self::TEST_JOB_ID, 'translation' => 'Ciao mondo', 'status' => 'TRANSLATED']),
         ];
 
         $committed = $this->invokePrivate('updateSegments', [$search_results, self::TEST_JOB_ID, $queryParams]);
