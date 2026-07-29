@@ -2,12 +2,13 @@ import React, {useRef} from 'react'
 import ModalsActions from '../../actions/ModalsActions'
 
 export const HIDE_UNMODIFIED_FUZZY_MATCH_MODAL_STORAGE =
-  'unmodified-fuzzy-match-modal' + config.id_job
+  'unmodified-fuzzy-match-modal' + config.id_job + '-' + config.userMail
 
 /**
  * Warns the translator when a fuzzy TM match is about to be confirmed without
  * any modification. A "don't show again" checkbox persists the choice for the
- * current job (same pattern used for the ICE unlock and copy-source modals).
+ * current job and user (same pattern used for the ICE unlock and copy-source
+ * modals, scoped per user like JobMetadata's instructions popup).
  */
 export const UnmodifiedFuzzyMatchModal = ({
   successCallback,
@@ -38,9 +39,9 @@ export const UnmodifiedFuzzyMatchModal = ({
       <div className="matecat-modal-middle">
         <div className={'ui one column grid'}>
           <div className="column left aligned" style={{fontSize: '18px'}}>
-            You are about to confirm a fuzzy match without making any changes.
-            Fuzzy matches are not exact and usually need to be reviewed and
-            edited. Are you sure you want to confirm it as is?
+            You are confirming a fuzzy match without making any changes.
+            Fuzzy matches usually need to be edited due to differences in the
+            source text. Are you sure you want to proceed?
           </div>
           <div className="column right aligned">
             <div className="ui button cancel-button" onClick={onCancel}>
@@ -50,7 +51,7 @@ export const UnmodifiedFuzzyMatchModal = ({
               className="ui primary button right floated"
               onClick={onConfirm}
             >
-              Confirm
+              Confirm anyway
             </div>
           </div>
           <div className="column left aligned">
@@ -60,7 +61,7 @@ export const UnmodifiedFuzzyMatchModal = ({
               ref={checkbox}
             />
             <label htmlFor="checkbox_unmodified_fuzzy">
-              {` Don't show this dialog again for the current job`}
+              {` Don't show this again for this job`}
             </label>
           </div>
         </div>
