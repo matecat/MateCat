@@ -100,4 +100,37 @@ class ChangePasswordModelTest extends AbstractTest
         $model = new ChangePasswordModel($user, $dao);
         $model->changePassword('old', 'new');
     }
+
+    #[Test]
+    public function changePasswordInvalidatesAnOutstandingResetToken(): void
+    {
+        $user = $this->makeUser('old-pass');
+        $user->confirmation_token = 'a-reset-link-already-in-the-mailbox';
+        $user->confirmation_token_created_at = '2026-01-01 00:00:00';
+
+        $captured = [];
+        $dao = $this->createStub(UserDao::class);
+        $dao->method('updateStruct')->willReturnCallback(
+            function (UserStruct $struct, array $fieldsToUpdate) use (&$captured): int {
+                $captured = $fieldsToUpdate;
+
+                return 1;
+            }
+        );
+        $dao->method('destroyCacheByEmail')->willReturn(true);
+        $dao->method('destroyCacheByUid')->willReturn(true);
+
+        (new ChangePasswordModel($user, $dao))->changePassword('old-pass', 'new-pass');
+
+        // Changing the password has to retire any reset link already issued for the account. If the
+        // token survives, whoever holds that link can set a third password for the rest of the
+        // token's lifetime and silently undo the change the user just made.
+        self::assertNull($user->confirmation_token);
+        self::assertNull($user->confirmation_token_created_at);
+
+        // Nulling the struct is not enough on its own: the fields have to be in the update list, or
+        // the row keeps the old token and the change never reaches the database.
+        self::assertContains('confirmation_token', $captured['fields']);
+        self::assertContains('confirmation_token_created_at', $captured['fields']);
+    }
 }
