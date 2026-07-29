@@ -11,13 +11,13 @@ namespace Model\Search;
 
 use Exception;
 use Matecat\Finder\WholeTextFinder;
-use TypeError;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\DataAccess\Database;
+use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\IDatabase;
 use PDO;
 use PDOException;
 use stdClass;
+use TypeError;
 use Utils\Logger\LoggerFactory;
 
 class SearchModel
@@ -102,12 +102,12 @@ class SearchModel
             $searchTerm = ((false === empty($this->queryParams->source)) ? $this->queryParams->source : $this->queryParams->target) ?? '';
 
             foreach ($results as $occurrence) {
-                if($occurrence['text'] !== null){
+                if ($occurrence['text'] !== null) {
                     $matches = $this->find((string)$occurrence['text'], $searchTerm);
                     $matchesCount = count($matches);
 
                     if ($this->hasMatches($matches)) {
-                        $vector[ 'sid_list' ][] = strval($occurrence[ 'id' ]);
+                        $vector['sid_list'][] = strval($occurrence['id']);
                         $vector['count'] = $vector['count'] + $matchesCount;
                     }
                 }
@@ -143,7 +143,7 @@ class SearchModel
             }
         } else {
             foreach ($results as $occurrence) {
-                $vector[ 'sid_list' ][] = strval($occurrence[ 'id' ]);
+                $vector['sid_list'][] = strval($occurrence['id']);
             }
         }
 
@@ -196,7 +196,9 @@ class SearchModel
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             LoggerFactory::doJsonLog($e->getMessage());
-            throw new Exception($e->getMessage(), $e->getCode() * -1, $e);
+            // A PDOException carries the SQLSTATE as its code, which is a string such as '42S02': cast it
+            // before negating it, or PHP warns about the non-numeric value it has to coerce on its own.
+            throw new Exception($e->getMessage(), -abs((int)$e->getCode()), $e);
         }
 
         return $results;
@@ -238,7 +240,6 @@ class SearchModel
         } else {
             $this->queryParams->exactMatch->Space_Left = $this->queryParams->exactMatch->Space_Right = ""; // we want to search for all occurrences in a string: the word mod will take two matches: "mod" and "mod modifier"
         }
-
     }
 
     /**
@@ -252,6 +253,7 @@ class SearchModel
         $this->_loadParams();
         $params = ['job' => $this->queryParams->job];
         $password_where = '';
+        $search_in_ices = '';
         if ($inCurrentChunkOnly) {
             $password_where = ' AND st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment AND j.password = :password';
             $params['password'] = $this->queryParams->password;
@@ -259,6 +261,10 @@ class SearchModel
 
         if ($this->queryParams->status != 'all') {
             $params['status'] = $this->queryParams->status;
+        }
+
+        if ($this->queryParams->includeLocked === false) {
+            $search_in_ices = " AND match_type != '" . InternalMatchesConstants::TM_ICE . "' ";
         }
 
         $sql = "
@@ -270,6 +276,7 @@ class SearchModel
 			{$password_where}
 			AND st.status != 'NEW'
 			{$this->queryParams->where_status}
+			{$search_in_ices}
 			GROUP BY st.id_segment";
 
         return [$sql, $params];
@@ -286,6 +293,7 @@ class SearchModel
         $this->_loadParams();
         $params = ['job' => $this->queryParams->job];
         $password_where = '';
+        $search_in_ices = '';
         if ($inCurrentChunkOnly) {
             $password_where = ' AND s.id BETWEEN j.job_first_segment AND j.job_last_segment AND j.password = :password';
             $params['password'] = $this->queryParams->password;
@@ -293,6 +301,10 @@ class SearchModel
 
         if ($this->queryParams->status != 'all') {
             $params['status'] = $this->queryParams->status;
+        }
+
+        if ($this->queryParams->includeLocked === false) {
+            $search_in_ices = " AND match_type != '" . InternalMatchesConstants::TM_ICE . "' ";
         }
 
         $sql = "
@@ -306,6 +318,7 @@ class SearchModel
 			{$password_where}
 			AND show_in_cattool = 1
 			{$this->queryParams->where_status}
+			{$search_in_ices}
 			GROUP BY s.id";
 
         return [$sql, $params];
@@ -319,9 +332,14 @@ class SearchModel
     {
         $this->_loadParams();
         $params = ['job' => $this->queryParams->job];
+        $search_in_ices = '';
 
         if ($this->queryParams->status != 'all') {
             $params['status'] = $this->queryParams->status;
+        }
+
+        if ($this->queryParams->includeLocked === false) {
+            $search_in_ices = " AND match_type != '" . InternalMatchesConstants::TM_ICE . "' ";
         }
 
         $sql = "
@@ -329,6 +347,7 @@ class SearchModel
 			FROM segment_translations as st
 			WHERE st.id_job = :job
 		    {$this->queryParams->where_status}
+		    {$search_in_ices}
 		";
 
         return [$sql, $params];
