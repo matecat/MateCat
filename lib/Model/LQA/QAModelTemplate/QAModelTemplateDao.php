@@ -76,9 +76,14 @@ class QAModelTemplateDao extends AbstractDao
         $conn->beginTransaction();
 
         try {
-            $stmt = $conn->prepare("UPDATE qa_model_templates SET deleted_at = :now WHERE id = :id AND `deleted_at` IS NULL;");
+            // Scoping this one statement by uid protects the whole cascade: when it matches nothing the
+            // method returns early, below, before any of the child tables are touched. The children are
+            // reached by id_template and carry no uid of their own, so the parent is the only place the
+            // ownership check can live.
+            $stmt = $conn->prepare("UPDATE qa_model_templates SET deleted_at = :now WHERE id = :id AND uid = :uid AND `deleted_at` IS NULL;");
             $stmt->execute([
                 'id' => $id,
+                'uid' => $uid,
                 'now' => (new DateTime())->format('Y-m-d H:i:s')
             ]);
 

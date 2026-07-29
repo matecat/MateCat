@@ -263,6 +263,22 @@ class ProjectTemplateDaoRealSqlTest extends AbstractTest
         self::assertNull($this->dao->getByIdAndUser($struct->id, $this->uid));
     }
 
+    public function testRemoveIgnoresTemplateOwnedByAnotherUser(): void
+    {
+        $struct = $this->dao->save($this->newStruct('foreign owner'));
+        $this->trackTemplate($struct->id);
+
+        $affected = $this->dao->remove($struct->id, $this->uid + 999999);
+
+        // The row must survive, and the count is read with raw SQL on purpose: remove() invalidates the
+        // cache keys of the uid it is handed, so a cached read of the owner's key would survive a delete
+        // that really happened and let this pass for the wrong reason.
+        self::assertSame(0, $affected);
+        $stmt = $this->realSqlDb()->getConnection()->prepare("SELECT COUNT(*) FROM project_templates WHERE id = :id");
+        $stmt->execute(['id' => $struct->id]);
+        self::assertSame(1, (int)$stmt->fetchColumn());
+    }
+
     // ---- removeSubTemplateByIdAndUser ------------------------------------------------------------
 
     public function testRemoveSubTemplateZeroesField(): void
