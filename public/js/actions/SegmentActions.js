@@ -266,8 +266,7 @@ const SegmentActions = {
        If is an ICE we allow to change the translation because is not possible to add an issue
      */
 
-    const mandatoryIssues =
-      CatToolStore.getJobMetadata().project.mandatory_issues
+    const mandatoryIssues = CatToolStore.getJobMetadata().job.mandatory_issues
 
     const currentRevisionKey = `r${config.revisionNumber}`
 

@@ -100,10 +100,6 @@ readonly class ProjectMetadataService
             $options[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $projectStructure->subfiltering_handlers;
         }
 
-        if ($projectStructure->mandatory_issues !== null) {
-            $options[ProjectsMetadataMarshaller::MANDATORY_ISSUES->value] = json_encode($projectStructure->mandatory_issues);
-        }
-
         /**
          * Storage-layer key guard (defense-in-depth).
          *

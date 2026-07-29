@@ -4,6 +4,8 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {updateJobMetadata} from '../../../../api/updateJobMetadata'
 import {Tagging} from '../OtherTab/Tagging'
 import {MandatoryIssues} from '../OtherTab/MandatoryIssues'
+import CatToolStore from '../../../../stores/CatToolStore'
+import CatToolConstants from '../../../../constants/CatToolConstants'
 
 export const EditorOtherTab = () => {
   const {currentProjectTemplate, tmKeys} = useContext(SettingsPanelContext)
@@ -29,6 +31,25 @@ export const EditorOtherTab = () => {
         characterCounterMode: currentProjectTemplate.characterCounterMode,
         subfilteringHandlers: currentProjectTemplate.subfilteringHandlers,
         mandatoryIssues: currentProjectTemplate.mandatoryIssues,
+      }).then(() => {
+        const jobMetadata = CatToolStore.getJobMetadata()
+        if (!jobMetadata) return
+
+        const updatedJobMetadata = {
+          ...jobMetadata,
+          job: {
+            ...jobMetadata.job,
+            character_counter_count_tags:
+              currentProjectTemplate.characterCounterCountTags,
+            character_counter_mode: currentProjectTemplate.characterCounterMode,
+            subfiltering_handlers: currentProjectTemplate.subfilteringHandlers,
+            mandatory_issues: currentProjectTemplate.mandatoryIssues,
+          },
+        }
+        CatToolStore.setJobMetadata(updatedJobMetadata)
+        CatToolStore.emitChange(CatToolConstants.GET_JOB_METADATA, {
+          jobMetadata: updatedJobMetadata,
+        })
       })
     }
 
