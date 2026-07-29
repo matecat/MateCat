@@ -336,6 +336,70 @@ class ForgotPasswordControllerTest extends AbstractTest
     }
 
     #[Test]
+    public function setNewPassword_hands_the_password_to_the_model_unescaped(): void
+    {
+        $this->request->method('param')->willReturnCallback(function (string $key) {
+            return match ($key) {
+                'password' => 'Valid&Pass<word>1',
+                'password_confirmation' => 'Valid&Pass<word>1',
+                default => null,
+            };
+        });
+
+        $user = new UserStruct();
+        $user->uid = 1;
+        $user->email = 'test@example.com';
+
+        // The value that reaches resetPassword() is the value that gets hashed, so it has to be the
+        // one the user typed. Escaping it here would store a hash of a string the user can never type
+        // again at the login form once that form stops escaping too.
+        $resetModel = $this->createMock(PasswordResetModel::class);
+        $resetModel->expects($this->once())
+            ->method('resetPassword')
+            ->with('Valid&Pass<word>1');
+        $resetModel->method('getUser')->willReturn($user);
+
+        $this->controller->mockPasswordResetModel = $resetModel;
+
+        $this->controller->setNewPassword();
+
+        $this->assertSame(200, $this->controller->getResponse()->code());
+    }
+
+    #[Test]
+    public function setNewPassword_rejects_a_password_containing_a_control_character(): void
+    {
+        $this->request->method('param')->willReturnCallback(function (string $key) {
+            return match ($key) {
+                'password' => "Valid!Pass\tword1",
+                'password_confirmation' => "Valid!Pass\tword1",
+                default => null,
+            };
+        });
+
+        $user = new UserStruct();
+        $user->uid = 1;
+        $user->email = 'test@example.com';
+
+        $resetModel = $this->createStub(PasswordResetModel::class);
+        $resetModel->method('getUser')->willReturn($user);
+
+        $this->controller->mockPasswordResetModel = $resetModel;
+
+        // The message has to name the problem: the generic illegal-character wording leaves the user
+        // guessing which of their characters was refused.
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('control characters');
+
+        try {
+            $this->controller->setNewPassword();
+        } finally {
+            // Rejected before anything is written, so no session is torn down either.
+            $this->assertFalse($this->controller->broadcastLogoutCalled);
+        }
+    }
+
+    #[Test]
     public function setNewPassword_throws_when_passwords_dont_match(): void
     {
         $this->request->method('param')->willReturnCallback(function (string $key) {

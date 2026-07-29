@@ -174,4 +174,27 @@ class PasswordResetModelTest extends AbstractTest
 
         $this->assertNull($model->getUser());
     }
+
+    #[Test]
+    public function resetPasswordThrowsWhenTokenExpired(): void
+    {
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('Auth token expired');
+
+        $user = $this->makeUserWithToken();
+        $user->confirmation_token_created_at = date('Y-m-d H:i:s', strtotime('31 minutes ago'));
+        $oldPass = $user->pass;
+
+        // validateUser() guards the link click, but the form submission that follows reads the token
+        // back out of the session and lands here. Without its own check, this method would accept a
+        // token of any age as long as the session outlived the 30 minute window.
+        $session = ['password_reset_token' => 'valid-token'];
+        $model = new PasswordResetModel($session, $this->makeMockDao($user), null);
+
+        try {
+            $model->resetPassword('new-pass');
+        } finally {
+            $this->assertSame($oldPass, $user->pass);
+        }
+    }
 }
