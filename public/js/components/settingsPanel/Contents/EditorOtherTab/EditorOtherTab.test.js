@@ -1,11 +1,23 @@
 import React from 'react'
-import {render, screen, within} from '@testing-library/react'
+import {act, render, screen, within} from '@testing-library/react'
 import {EditorOtherTab} from './EditorOtherTab'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {updateJobMetadata} from '../../../../api/updateJobMetadata'
+import CatToolStore from '../../../../stores/CatToolStore'
+import CatToolActions from '../../../../actions/CatToolActions'
 
 jest.mock('../../../../api/updateJobMetadata', () => ({
   updateJobMetadata: jest.fn(() => Promise.resolve({})),
+}))
+
+jest.mock('../../../../stores/CatToolStore', () => ({
+  getJobMetadata: jest.fn(),
+  setJobMetadata: jest.fn(),
+  emitChange: jest.fn(),
+}))
+
+jest.mock('../../../../actions/CatToolActions', () => ({
+  addNotification: jest.fn(),
 }))
 
 jest.mock('../OtherTab/Tagging', () => ({
@@ -87,7 +99,9 @@ describe('EditorOtherTab', () => {
       })
 
       test('renders Tagging', () => {
-        expect(within(generalSection).getByTestId('tagging')).toBeInTheDocument()
+        expect(
+          within(generalSection).getByTestId('tagging'),
+        ).toBeInTheDocument()
       })
 
       test('renders MandatoryIssues', () => {
@@ -160,7 +174,10 @@ describe('EditorOtherTab', () => {
 
     test('calls updateJobMetadata when characterCounterMode changes', () => {
       const {rerender} = renderComponent()
-      reRenderComponent(rerender, {...baseTemplate, characterCounterMode: 'words'})
+      reRenderComponent(rerender, {
+        ...baseTemplate,
+        characterCounterMode: 'words',
+      })
       expect(updateJobMetadata).toHaveBeenCalledTimes(1)
       expect(updateJobMetadata).toHaveBeenCalledWith(
         expect.objectContaining({characterCounterMode: 'words'}),
@@ -169,7 +186,10 @@ describe('EditorOtherTab', () => {
 
     test('calls updateJobMetadata when characterCounterCountTags changes', () => {
       const {rerender} = renderComponent()
-      reRenderComponent(rerender, {...baseTemplate, characterCounterCountTags: true})
+      reRenderComponent(rerender, {
+        ...baseTemplate,
+        characterCounterCountTags: true,
+      })
       expect(updateJobMetadata).toHaveBeenCalledTimes(1)
       expect(updateJobMetadata).toHaveBeenCalledWith(
         expect.objectContaining({characterCounterCountTags: true}),
@@ -179,7 +199,10 @@ describe('EditorOtherTab', () => {
     test('calls updateJobMetadata when subfilteringHandlers changes', () => {
       const {rerender} = renderComponent()
       const handlers = {handler: 'test'}
-      reRenderComponent(rerender, {...baseTemplate, subfilteringHandlers: handlers})
+      reRenderComponent(rerender, {
+        ...baseTemplate,
+        subfilteringHandlers: handlers,
+      })
       expect(updateJobMetadata).toHaveBeenCalledTimes(1)
       expect(updateJobMetadata).toHaveBeenCalledWith(
         expect.objectContaining({subfilteringHandlers: handlers}),
@@ -219,6 +242,64 @@ describe('EditorOtherTab', () => {
       reRenderComponent(rerender, changedTemplate)
       reRenderComponent(rerender, changedTemplate)
       expect(updateJobMetadata).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('store update after a successful save', () => {
+    test('publishes the saved values so the editor stops using the previous settings', async () => {
+      CatToolStore.getJobMetadata.mockReturnValue({
+        job: {mandatory_issues: ['r1', 'r2']},
+        project: {},
+      })
+      const {rerender} = renderComponent()
+      reRenderComponent(rerender, {...baseTemplate, mandatoryIssues: ['r2']})
+
+      await act(async () => {})
+
+      expect(CatToolStore.setJobMetadata).toHaveBeenCalledWith(
+        expect.objectContaining({
+          job: expect.objectContaining({mandatory_issues: ['r2']}),
+        }),
+      )
+      expect(CatToolStore.emitChange).toHaveBeenCalled()
+    })
+
+    test('still publishes when the initial metadata request has not resolved yet', async () => {
+      CatToolStore.getJobMetadata.mockReturnValue(undefined)
+      const {rerender} = renderComponent()
+      reRenderComponent(rerender, {...baseTemplate, mandatoryIssues: ['r2']})
+
+      await act(async () => {})
+
+      expect(CatToolStore.setJobMetadata).toHaveBeenCalledWith(
+        expect.objectContaining({
+          job: expect.objectContaining({mandatory_issues: ['r2']}),
+        }),
+      )
+    })
+  })
+
+  describe('when the save fails', () => {
+    test('notifies the user instead of failing silently', async () => {
+      updateJobMetadata.mockRejectedValueOnce({status: 400})
+      const {rerender} = renderComponent()
+      reRenderComponent(rerender, {...baseTemplate, mandatoryIssues: ['r2']})
+
+      await act(async () => {})
+
+      expect(CatToolActions.addNotification).toHaveBeenCalledWith(
+        expect.objectContaining({type: 'error'}),
+      )
+    })
+
+    test('does not publish the unsaved value to the store', async () => {
+      updateJobMetadata.mockRejectedValueOnce({status: 400})
+      const {rerender} = renderComponent()
+      reRenderComponent(rerender, {...baseTemplate, mandatoryIssues: ['r2']})
+
+      await act(async () => {})
+
+      expect(CatToolStore.setJobMetadata).not.toHaveBeenCalled()
     })
   })
 })

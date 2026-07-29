@@ -27,21 +27,27 @@ jest.mock('../utils/offlineUtils', () => ({
 }))
 
 // API imports (only those actually imported by CatToolActions.js)
-jest.mock('../api/getJobStatistics', () => ({ getJobStatistics: jest.fn() }))
+jest.mock('../api/getJobStatistics', () => ({getJobStatistics: jest.fn()}))
 jest.mock('../api/sendRevisionFeedback', () => ({
   sendRevisionFeedback: jest.fn(),
 }))
-jest.mock('../api/getTmKeysJob', () => ({ getTmKeysJob: jest.fn() }))
-jest.mock('../api/getDomainsList', () => ({ getDomainsList: jest.fn() }))
+jest.mock('../api/getTmKeysJob', () => ({getTmKeysJob: jest.fn()}))
+jest.mock('../api/getDomainsList', () => ({getDomainsList: jest.fn()}))
 jest.mock('../api/checkJobKeysHaveGlossary', () => ({
   checkJobKeysHaveGlossary: jest.fn(),
 }))
-jest.mock('../api/getJobMetadata', () => ({ getJobMetadata: jest.fn() }))
-jest.mock('../api/getGlobalWarnings', () => ({ getGlobalWarnings: jest.fn() }))
+jest.mock('../api/getJobMetadata', () => ({getJobMetadata: jest.fn()}))
+jest.mock('../api/getGlobalWarnings', () => ({getGlobalWarnings: jest.fn()}))
 
 jest.mock('../components/modals/AlertModal', () => 'AlertModal')
-jest.mock('../components/modals/RevisionFeedbackModal', () => 'RevisionFeedbackModal')
-jest.mock('../components/modals/ConfirmMessageModal', () => 'ConfirmMessageModal')
+jest.mock(
+  '../components/modals/RevisionFeedbackModal',
+  () => 'RevisionFeedbackModal',
+)
+jest.mock(
+  '../components/modals/ConfirmMessageModal',
+  () => 'ConfirmMessageModal',
+)
 
 jest.mock('../constants/ModalKeys', () => ({
   MODAL_KEY: {ALERT: 'Alert', COPY_SOURCE: 'CopySource'},
@@ -49,6 +55,12 @@ jest.mock('../constants/ModalKeys', () => ({
 }))
 jest.mock('../constants/CatToolConstants', () => ({
   SET_FIRST_LOAD: 'SET_FIRST_LOAD',
+  GET_JOB_METADATA: 'GET_JOB_METADATA',
+}))
+jest.mock('./notificationActions', () => ({
+  addNotification: jest.fn(),
+  removeNotification: jest.fn(),
+  removeAllNotifications: jest.fn(),
 }))
 jest.mock('lodash', () => ({
   isUndefined: (v) => typeof v === 'undefined',
@@ -56,6 +68,10 @@ jest.mock('lodash', () => ({
 
 import CatToolActions from './CatToolActions'
 import ModalsActions from './ModalsActions'
+import AppDispatcher from '../stores/AppDispatcher'
+import CatToolStore from '../stores/CatToolStore'
+import {getJobMetadata} from '../api/getJobMetadata'
+import {addNotification} from './notificationActions'
 
 describe('CatToolActions.processErrors', () => {
   beforeEach(() => {
@@ -121,5 +137,74 @@ describe('CatToolActions.processErrors', () => {
       }),
       'Error',
     )
+  })
+})
+
+describe('CatToolActions.getJobMetadata', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    delete CatToolStore.jobMetadata
+  })
+
+  test('dispatches the fetched metadata and stores it', async () => {
+    const jobMetadata = {job: {mandatory_issues: ['r2']}, project: {}}
+    getJobMetadata.mockResolvedValue(jobMetadata)
+
+    CatToolActions.getJobMetadata({idJob: 1, password: 'pwd'})
+    await Promise.resolve()
+
+    expect(AppDispatcher.dispatch).toHaveBeenCalledWith({
+      actionType: 'GET_JOB_METADATA',
+      jobMetadata,
+    })
+    expect(CatToolStore.jobMetadata).toBe(jobMetadata)
+  })
+
+  test('notifies the user when the request fails instead of failing silently', async () => {
+    getJobMetadata.mockRejectedValue(new Error('boom'))
+
+    CatToolActions.getJobMetadata({idJob: 1, password: 'pwd'})
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(addNotification).toHaveBeenCalledWith(
+      expect.objectContaining({type: 'error'}),
+    )
+    expect(CatToolStore.jobMetadata).toBeUndefined()
+  })
+
+  test('does not overwrite a settings change that landed while the request was in flight', async () => {
+    let resolveRequest
+    getJobMetadata.mockReturnValue(
+      new Promise((resolve) => {
+        resolveRequest = resolve
+      }),
+    )
+
+    CatToolActions.getJobMetadata({idJob: 1, password: 'pwd'})
+
+    // A save completes before the initial fetch resolves.
+    const newer = {job: {mandatory_issues: ['r2']}}
+    CatToolStore.jobMetadata = newer
+
+    resolveRequest({job: {mandatory_issues: ['r1', 'r2']}})
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(AppDispatcher.dispatch).not.toHaveBeenCalled()
+    expect(CatToolStore.jobMetadata).toBe(newer)
+  })
+
+  test('replays the cached metadata when it is already loaded', () => {
+    const cached = {job: {mandatory_issues: []}}
+    CatToolStore.jobMetadata = cached
+
+    CatToolActions.getJobMetadata({idJob: 1, password: 'pwd'})
+
+    expect(getJobMetadata).not.toHaveBeenCalled()
+    expect(AppDispatcher.dispatch).toHaveBeenCalledWith({
+      actionType: 'GET_JOB_METADATA',
+      jobMetadata: cached,
+    })
   })
 })
