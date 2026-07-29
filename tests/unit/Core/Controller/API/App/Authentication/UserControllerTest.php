@@ -259,4 +259,58 @@ class UserControllerTest extends AbstractTest
         $this->assertNotEmpty($validators);
         $this->assertInstanceOf(LoginValidator::class, end($validators));
     }
+
+    #[Test]
+    public function changePassword_hands_both_passwords_to_the_model_unescaped(): void
+    {
+        $this->rateLimiter->method('checkAndIncrement')->willReturn(null);
+
+        $this->request->method('param')->willReturnCallback(function (string $key) {
+            return match ($key) {
+                'old_password' => 'Old&Pass<word>1',
+                'password' => 'New&Pass<word>1',
+                'password_confirmation' => 'New&Pass<word>1',
+                default => null,
+            };
+        });
+
+        // Both values matter here: the old one is verified against the stored hash and the new one
+        // replaces it, so escaping either would break a password containing one of these characters
+        // in a different way.
+        $cpModel = $this->createMock(ChangePasswordModel::class);
+        $cpModel->expects($this->once())
+            ->method('changePassword')
+            ->with('Old&Pass<word>1', 'New&Pass<word>1');
+
+        $this->controller->mockChangePasswordModel = $cpModel;
+
+        $this->controller->changePasswordAsLoggedUser();
+
+        $this->assertSame(200, $this->controller->getResponse()->code());
+    }
+
+    #[Test]
+    public function changePassword_rejects_a_password_containing_a_control_character(): void
+    {
+        $this->rateLimiter->method('checkAndIncrement')->willReturn(null);
+
+        $this->request->method('param')->willReturnCallback(function (string $key) {
+            return match ($key) {
+                'old_password' => 'OldPass!123xx',
+                'password' => "NewValid!Pass\n1",
+                'password_confirmation' => "NewValid!Pass\n1",
+                default => null,
+            };
+        });
+
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('control characters');
+
+        try {
+            $this->controller->changePasswordAsLoggedUser();
+        } finally {
+            // Refused before the password is written, so existing sessions are left alone.
+            $this->assertFalse($this->controller->broadcastLogoutCalled);
+        }
+    }
 }

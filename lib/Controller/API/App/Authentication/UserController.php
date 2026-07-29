@@ -68,9 +68,13 @@ class UserController extends AbstractStatefulKleinController
             return;
         }
 
-        $old_password = (string) filter_var($this->request->param('old_password'), FILTER_SANITIZE_SPECIAL_CHARS);
-        $new_password = (string) filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS);
-        $new_password_confirmation = (string) filter_var($this->request->param('password_confirmation'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $this->rejectControlCharacters($this->request->param('password'));
+        $this->rejectControlCharacters($this->request->param('password_confirmation'));
+        // All three unescaped on purpose: the old one is verified against the stored hash and the new
+        // one replaces it, so both must be exactly what the user typed.
+        $old_password = (string)$this->request->param('old_password');
+        $new_password = (string)$this->request->param('password');
+        $new_password_confirmation = (string)$this->request->param('password_confirmation');
 
         $this->validatePasswordRequirements($new_password, $new_password_confirmation);
 

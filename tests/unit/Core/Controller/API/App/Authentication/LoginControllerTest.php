@@ -6,6 +6,7 @@ namespace Matecat\Core\Controller\API\App\Authentication;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\App\Authentication\LoginController;
+use Controller\Exceptions\MissingDatabaseException;
 use Controller\Services\RateLimiterService;
 use Klein\Request;
 use Klein\Response;
@@ -227,6 +228,57 @@ class LoginControllerTest extends AbstractTest
         $this->controller->login();
 
         $this->assertSame(404, $this->controller->getResponse()->code());
+    }
+
+    #[Test]
+    public function login_accepts_a_password_containing_html_special_characters(): void
+    {
+        $this->rateLimiter->method('checkAndIncrement')->willReturn(null);
+
+        $csrf = Utils::uuid4();
+        $jwt = new SimpleJWT(
+            ['csrf' => $csrf],
+            AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
+            AppConfig::$AUTHSECRET,
+            60
+        );
+        $_SESSION['login_csrf'] = $csrf;
+
+        $headers = $this->createStub(\Klein\DataCollection\HeaderDataCollection::class);
+        $headers->method('get')->willReturn($jwt->jsonSerialize());
+
+        $this->request->method('params')->willReturn([
+            'email' => 'test@example.com',
+            'password' => 'Valid&Pass<word>1',
+        ]);
+        $this->request->method('headers')->willReturn($headers);
+
+        $user = new UserStruct();
+        $user->uid = 1;
+        $user->email = 'test@example.com';
+        $user->salt = 'test-salt';
+        // Hashed from the raw password, which is what the signup and reset paths now store.
+        $user->pass = Utils::encryptPass('Valid&Pass<word>1', 'test-salt');
+        $user->email_confirmed_at = date('Y-m-d H:i:s');
+
+        $dao = $this->createStub(UserDao::class);
+        $dao->method('getByEmail')->willReturn($user);
+        $this->controller->mockUserDao = $dao;
+
+        try {
+            $this->controller->login();
+        } catch (MissingDatabaseException) {
+            // The rejection branch sets 404 and returns without ever touching the database, so
+            // reaching the database dependency is itself proof that the password matched. Driving the
+            // rest of the authenticated branch would need cookie emission and a live schema, which is
+            // not what this test is about.
+            $this->addToAssertionCount(1);
+        }
+
+        // This is the pairing that has to hold: whatever the write paths hash, this path must compare
+        // byte for byte. A 404 here means login altered the submitted password and no longer agrees
+        // with how it was stored.
+        $this->assertNotSame(404, $this->controller->getResponse()->code());
     }
 
     #[Test]

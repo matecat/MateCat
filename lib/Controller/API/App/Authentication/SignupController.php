@@ -129,14 +129,23 @@ class SignupController extends AbstractStatefulKleinController
      */
     private function validateCreationRequest(): array
     {
+        $rawUser = (array)$this->request->param('user');
+
+        // Before anything is sanitised, while the value still looks like what the client typed.
+        $this->rejectControlCharacters($rawUser['password'] ?? '');
+        $this->rejectControlCharacters($rawUser['password_confirmation'] ?? '');
+
         $user = filter_var_array(
-            (array)$this->request->param('user'),
+            $rawUser,
             [
                 'email' => ['filter' => FILTER_SANITIZE_EMAIL, 'options' => []],
-                'password' => ['filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'options' => FILTER_FLAG_STRIP_LOW],
+                // Deliberately unfiltered: the password is hashed, never rendered, so escaping it only
+                // removes " & ' < > from the characters a user may choose. FILTER_UNSAFE_RAW is the
+                // pass-through, needed only because filter_var_array wants a filter for every key.
+                'password' => ['filter' => FILTER_UNSAFE_RAW, 'options' => []],
                 'password_confirmation' => [
-                    'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
-                    'options' => FILTER_FLAG_STRIP_LOW
+                    'filter' => FILTER_UNSAFE_RAW,
+                    'options' => []
                 ],
                 'first_name' => [
                     'filter' => FILTER_CALLBACK,

@@ -48,7 +48,9 @@ class LoginController extends AbstractStatefulKleinController
     {
         $params = filter_var_array($this->request->params(), [
             'email' => FILTER_SANITIZE_EMAIL,
-            'password' => FILTER_SANITIZE_SPECIAL_CHARS
+            // Compared against a stored hash byte for byte, so it has to arrive exactly as typed. This
+            // must stay in step with how the signup and reset paths store it.
+            'password' => FILTER_UNSAFE_RAW
         ]);
 
         $emailIdentifier = is_string($params['email']) && $params['email'] !== '' ? $params['email'] : 'BLANK_EMAIL';
