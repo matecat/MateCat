@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Controllers;
 
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\V2\ActivityLogController;
 use Klein\Request;
 use Klein\Response;
@@ -10,6 +11,7 @@ use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
+use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -50,6 +52,12 @@ class ActivityLogV2ControllerTest extends AbstractTest
     private const string JOB_PASSWORD = 'actlogpw';
     private const int ACTIVITY_ID = 9_041_900;
 
+    /** A logged-in user who is not a member of the project's team. */
+    private const int OUTSIDER_UID = 9_041_950;
+
+    /** A project owned by no team, to prove a null id_team is refused rather than trusted. */
+    private const int NO_TEAM_PROJECT_ID = 9_041_960;
+
     /** @var ReflectionClass<ActivityLogController> */
     private ReflectionClass $reflector;
     private TestableActivityLogV2Controller $controller;
@@ -77,6 +85,11 @@ class ActivityLogV2ControllerTest extends AbstractTest
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createMock(MatecatLogger::class));
         $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
         $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
+
+        // Production runs LoginValidator before the action, so the user is always identified by the
+        // time these methods execute. The test controller no-ops registerValidators(), so the tests
+        // set the user explicitly to reproduce that precondition for the team-membership check.
+        $this->setControllerUser($this->userId(self::BASE));
     }
 
     /**
@@ -96,6 +109,8 @@ class ActivityLogV2ControllerTest extends AbstractTest
         $owner = $this->ownerEmail(self::BASE);
 
         $this->seedUser(self::BASE);
+        $this->seedTeam(self::BASE);
+        $this->seedMembership(self::BASE);
         $this->seedProject(self::BASE, $owner);
         $this->seedFile(self::BASE);
         $this->seedJob(self::BASE, $owner, self::JOB_PASSWORD);
@@ -107,6 +122,14 @@ class ActivityLogV2ControllerTest extends AbstractTest
             . self::ACTIVITY_ID . ", " . $this->projectId(self::BASE) . ", " . $this->jobId(self::BASE)
             . ", 14, '127.0.0.1', " . $this->userId(self::BASE) . ", NOW())"
         );
+
+        // A project deliberately owned by no team, so the "null id_team" branch is exercised: a
+        // project without a team has nobody to be a member of and must be refused. No log row is
+        // needed — the team guard refuses before the log is ever read.
+        $conn->exec(
+            "INSERT IGNORE INTO projects (id, id_customer, password, name, create_date, status_analysis, id_team) "
+            . "VALUES (" . self::NO_TEAM_PROJECT_ID . ", '$owner', 'projpw', 'CtrlNoTeamProject', NOW(), 'DONE', NULL)"
+        );
     }
 
     /**
@@ -116,6 +139,7 @@ class ActivityLogV2ControllerTest extends AbstractTest
     {
         $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM activity_log WHERE ID = " . self::ACTIVITY_ID);
+        $conn->exec("DELETE FROM projects WHERE id = " . self::NO_TEAM_PROJECT_ID);
         $this->cleanFragments(self::BASE);
     }
 
@@ -132,6 +156,18 @@ class ActivityLogV2ControllerTest extends AbstractTest
         $this->requestStub = new Request($params, [], [], $serverParams);
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('params')->setValue($this->controller, $params);
+    }
+
+    /**
+     * Stand in for the user LoginValidator would have identified in production.
+     *
+     * @throws ReflectionException
+     */
+    private function setControllerUser(int $uid): void
+    {
+        $user = new UserStruct();
+        $user->uid = $uid;
+        $this->reflector->getProperty('user')->setValue($this->controller, $user);
     }
 
     // ─── allOnProject ───
@@ -198,6 +234,52 @@ class ActivityLogV2ControllerTest extends AbstractTest
         $this->controller->allOnProject();
     }
 
+    /**
+     * The project id + password only prove the caller followed a shared link. The log lists the name,
+     * email and IP of everyone who worked on the project, so a logged-in user who is not a member of
+     * the owning team must be refused even with the correct password.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function allOnProject_denies_a_non_member(): void
+    {
+        $this->setControllerUser(self::OUTSIDER_UID);
+        $this->setRequestParams([
+            'id_project' => (string) $this->projectId(self::BASE),
+            'password'   => 'projpw',
+        ]);
+
+        $this->responseMock->expects($this->never())->method('json');
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionCode(401);
+
+        $this->controller->allOnProject();
+    }
+
+    /**
+     * A project with no team has nobody to be a member of, so the null id_team is refused rather than
+     * handed to the membership lookup.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function allOnProject_denies_a_project_with_no_team(): void
+    {
+        $this->setRequestParams([
+            'id_project' => (string) self::NO_TEAM_PROJECT_ID,
+            'password'   => 'projpw',
+        ]);
+
+        $this->responseMock->expects($this->never())->method('json');
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionCode(401);
+
+        $this->controller->allOnProject();
+    }
+
     // ─── lastOnProject ───
 
     /**
@@ -244,7 +326,27 @@ class ActivityLogV2ControllerTest extends AbstractTest
         $this->controller->lastOnProject();
     }
 
-    // ─── lastOnJob ───
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function lastOnProject_denies_a_non_member(): void
+    {
+        $this->setControllerUser(self::OUTSIDER_UID);
+        $this->setRequestParams([
+            'id_project' => (string) $this->projectId(self::BASE),
+            'password'   => 'projpw',
+        ]);
+
+        $this->responseMock->expects($this->never())->method('json');
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionCode(401);
+
+        $this->controller->lastOnProject();
+    }
+
+    // ─── lastOnJob (job password capability — team membership intentionally not required) ───
 
     /**
      * @throws Throwable
