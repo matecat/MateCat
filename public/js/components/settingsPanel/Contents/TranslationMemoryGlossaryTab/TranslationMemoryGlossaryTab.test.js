@@ -571,3 +571,23 @@ test('Modal delete tmkeys used in other templates', async () => {
     'The memory key you are about to delete is used in the following project creation template(s):',
   )
 })
+
+test('Key names containing markup render as plain text', async () => {
+  const xssName = '<img src=x onerror="window.__xss=1"> R&D'
+  const {projectTemplates, ...rest} = contextMockValues({
+    tmKeysMockArray: tmKeysMock.tm_keys
+      .filter(({key}) => key === '74b6c82408a028b6f020')
+      .map((key) => ({...key, name: xssName})),
+  })
+  const contextValues = {
+    ...rest,
+    projectTemplates,
+    currentProjectTemplate: projectTemplates[0],
+  }
+
+  render(<WrapperComponent {...contextValues} />)
+
+  expect(screen.queryByRole('img')).toBeNull()
+  expect(screen.getByDisplayValue(xssName)).toBeInTheDocument()
+  expect(window.__xss).toBeUndefined()
+})

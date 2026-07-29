@@ -384,7 +384,6 @@ export const ProjectsBulkActions = ({
           text: `The selected jobs have been successfully ${id === JOBS_ACTIONS.ARCHIVE.id ? 'archived' : id === JOBS_ACTIONS.UNARCHIVE.id ? 'unarchived' : id === JOBS_ACTIONS.CANCEL.id ? 'canceled' : id === JOBS_ACTIONS.RESUME.id ? 'resumed' : 'deleted permanently'}.`,
           type: 'warning',
           position: 'bl',
-          allowHtml: true,
           timer: 10000,
         })
         break
@@ -410,7 +409,6 @@ export const ProjectsBulkActions = ({
           text: 'The Revise 2 links for the selected jobs have been generated successfully.',
           type: 'warning',
           position: 'bl',
-          allowHtml: true,
           timer: 10000,
         })
         break
@@ -449,7 +447,6 @@ export const ProjectsBulkActions = ({
                 : 'The Translate passwords for the selected jobs have been changed successfully',
               type: 'warning',
               position: 'bl',
-              allowHtml: true,
               timer: 10000,
             }
             CatToolActions.addNotification(notification)
@@ -459,7 +456,6 @@ export const ProjectsBulkActions = ({
               text: 'Some jobs failed',
               type: 'error',
               position: 'bl',
-              allowHtml: true,
               timer: 10000,
             }
             CatToolActions.addNotification(errorNotification)

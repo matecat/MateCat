@@ -87,7 +87,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         type: 'error',
         text: 'You can activate up to 10 resources per project.',
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       setIsLookup(false)
@@ -179,7 +178,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         type: 'error',
         text: 'This name is already in use, please choose a different one',
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
 
@@ -214,7 +212,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
               type: 'error',
               text: errMessage,
               position: 'br',
-              allowHtml: true,
               timer: 5000,
             })
             setTmKeys((prevState) =>
@@ -238,7 +235,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           type: 'error',
           text: 'Resource name cannot be empty. Please provide a valid name.',
           position: 'br',
-          allowHtml: true,
           timer: 5000,
         })
         setTmKeys((prevState) =>
@@ -324,10 +320,13 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         }
         const notification = {
           title: 'Resource deleted',
-          text: `The resource (<b>${row.name}</b>) has been successfully deleted`,
+          text: (
+            <>
+              The resource (<b>{row.name}</b>) has been successfully deleted
+            </>
+          ),
           type: 'success',
           position: 'br',
-          allowHtml: true,
           timer: 5000,
         }
         CatToolActions.addNotification(notification)
@@ -338,7 +337,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           type: 'error',
           text: 'There was an error saving your data. Please retry!',
           position: 'br',
-          allowHtml: true,
           timer: 5000,
         })
         onExpandRow({row, shouldExpand: false})

@@ -354,50 +354,104 @@ class UserKeysControllerTest extends AbstractTest
     }
 
     /**
+     * Descriptions are stored raw: HTML-escaping happens at each output sink,
+     * never at the input boundary.
+     *
      * @throws Throwable
      */
     #[Test]
-    public function validateTheRequest_escapes_html_special_chars_in_description(): void
+    #[DataProvider('rawDescriptionProvider')]
+    public function validateTheRequest_stores_description_byte_identical(string $description): void
     {
         $this->setRequestParams([
             'key'         => 'abcdef1234567890',
-            'description' => '<script>alert(1)</script>',
+            'description' => $description,
         ]);
 
         $result = $this->invokePrivate('validateTheRequest');
 
-        $this->assertSame('&lt;script&gt;alert(1)&lt;/script&gt;', $result['description']);
+        $this->assertSame($description, $result['description']);
     }
 
     /**
-     * @throws Throwable
+     * @return array<string, array{0: string}>
      */
-    #[Test]
-    #[DataProvider('htmlSpecialDescriptionCharacterProvider')]
-    public function validateTheRequest_escapes_each_html_special_character(string $char, string $escaped): void
-    {
-        $this->setRequestParams([
-            'key'         => 'abcdef1234567890',
-            'description' => "Glossary {$char} name",
-        ]);
-
-        $result = $this->invokePrivate('validateTheRequest');
-
-        $this->assertSame("Glossary {$escaped} name", $result['description']);
-    }
-
-    /**
-     * @return array<string, array{0: string, 1: string}>
-     */
-    public static function htmlSpecialDescriptionCharacterProvider(): array
+    public static function rawDescriptionProvider(): array
     {
         return [
-            'less-than'    => ['<', '&lt;'],
-            'greater-than' => ['>', '&gt;'],
-            'ampersand'    => ['&', '&amp;'],
-            'double-quote' => ['"', '&quot;'],
-            'single-quote' => ["'", '&#039;'],
+            'script tag'   => ['<script>alert(1)</script>'],
+            'ampersand'    => ['R&D — Client (2024)'],
+            'double-quote' => ['The "official" glossary'],
+            'single-quote' => ["L'été"],
+            'accents'      => ['Memoria è rotta'],
+            'emoji'        => ['Fruit glossary 🍎'],
         ];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_never_stores_html_entities(): void
+    {
+        $this->setRequestParams([
+            'key'         => 'abcdef1234567890',
+            'description' => '<b>R&D</b> "quoted"',
+        ]);
+
+        $result = $this->invokePrivate('validateTheRequest');
+
+        $this->assertDoesNotMatchRegularExpression('/&(lt|gt|amp|quot|#0?39);/', $result['description']);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_throws_minus_three_on_invalid_utf8_description(): void
+    {
+        $this->setRequestParams([
+            'key'         => 'abcdef1234567890',
+            'description' => "Memoria \xC3 rotta",
+        ]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(-3);
+
+        $this->invokePrivate('validateTheRequest');
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_throws_minus_three_on_array_description(): void
+    {
+        $this->setRequestParams([
+            'key'         => 'abcdef1234567890',
+            'description' => ['x'],
+        ]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(-3);
+
+        $this->invokePrivate('validateTheRequest');
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_strips_control_and_invisible_characters(): void
+    {
+        $this->setRequestParams([
+            'key'         => 'abcdef1234567890',
+            'description' => "a\x00b\x1bc\nd\u{200B}\u{202E}e",
+        ]);
+
+        $result = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame('abcde', $result['description']);
     }
 
     // ─── getMkDao ───

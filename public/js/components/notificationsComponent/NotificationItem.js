@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import React, {useState, useRef, useEffect} from 'react'
+import TEXT_UTILS from '../../utils/textUtils'
 
 const NotificationItem = ({
   uid,
@@ -66,9 +67,10 @@ const NotificationItem = ({
     }
   }, [remove])
 
-  const allowHTML = (string) => {
-    return {__html: string}
-  }
+  // allowHtml is reserved for operator-authored broadcasts (SSE global
+  // messages): the markup is sanitized before injection. Any notification
+  // interpolating user data must pass a ReactNode as text instead.
+  const allowHTML = (string) => TEXT_UTILS.sanitizedHTML(string)
 
   const getCssPropertyByPosition = () => {
     let css = {}
@@ -154,7 +156,7 @@ const NotificationItem = ({
 
 NotificationItem.propTypes = {
   position: PropTypes.string,
-  title: PropTypes.string.isRequired,
+  title: PropTypes.node.isRequired,
   text: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
   type: PropTypes.string,
   autoDismiss: PropTypes.bool,

@@ -174,10 +174,10 @@ class UserKeysController extends KleinController
             throw new InvalidArgumentException("Key missing", -2);
         }
 
-        // Prevent XSS attack by escaping HTML-relevant characters instead of rejecting the request
-        if (!empty($description)) {
-            $description = htmlspecialchars((string)$description, ENT_QUOTES, 'UTF-8');
-        }
+        // Names are stored raw: TmKeyManager::validateName() enforces semantics
+        // (string type, valid UTF-8, no invisible characters) and rejects bad
+        // input with code -3; HTML/XML escaping happens at each output sink.
+        $description = TmKeyManager::validateName($description);
 
         return [
             'key' => $key,

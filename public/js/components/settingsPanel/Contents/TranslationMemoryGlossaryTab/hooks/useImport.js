@@ -73,7 +73,6 @@ function useImport({type, row, onClose}) {
               type: 'error',
               text: message,
               position: 'br',
-              allowHtml: true,
               timer: 5000,
             })
           })
@@ -176,7 +175,6 @@ function useImport({type, row, onClose}) {
       type: 'error',
       text: error?.errors?.[0]?.message ?? 'Error',
       position: 'br',
-      allowHtml: true,
       timer: 5000,
     })
     setStatus([{errors: error.errors}])

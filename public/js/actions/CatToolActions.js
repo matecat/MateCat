@@ -20,7 +20,6 @@ import {
   removeAllNotifications,
 } from './notificationActions'
 import OfflineUtils from '../utils/offlineUtils'
-import TEXT_UTILS from '../utils/textUtils'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
@@ -161,11 +160,7 @@ let CatToolActions = {
           getDomainsList({
             keys: filteredKeys.map(({key}) => key),
           })
-          const keys = filteredKeys.map((item) => ({
-            ...item,
-            id: item.key,
-            name: TEXT_UTILS.decodeHtml(item.name),
-          }))
+          const keys = filteredKeys.map((item) => ({...item, id: item.key}))
           AppDispatcher.dispatch({
             actionType: CatToolConstants.UPDATE_TM_KEYS,
             keys,
@@ -214,7 +209,9 @@ let CatToolActions = {
    *                      tc (top center), br (bottom right), bl (bottom left), bc (bottom center)
    * closeCallback    (Function) A callback function that will be called when the notification is about to be removed.
    * openCallback     (Function) A callback function that will be called when the notification is successfully added.
-   * allowHtml:       (Boolean, Default false) Set to true if the text contains HTML, like buttons
+   * allowHtml:       (Boolean, Default false) Reserved for operator-authored broadcasts (SSE global messages).
+   *                      The HTML is sanitized before rendering. For anything interpolating user data,
+   *                      pass a ReactNode as text instead.
    * autoDismiss:     (Boolean, Default true) Set if notification is dismissible by the user.
    *
    */

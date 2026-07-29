@@ -245,15 +245,17 @@ class TmKeyManagementAppControllerTest extends AbstractTest
      * @throws \Throwable
      */
     #[Test]
-    public function sortKeysInTheRightOrder_html_decodes_matched_key_name(): void
+    public function sortKeysInTheRightOrder_keeps_matched_key_name_untouched(): void
     {
+        // names are stored raw, so the read path must not decode (or otherwise
+        // rewrite) them: a literal "&amp;" typed by the user stays "&amp;"
         $key = new ClientTmKeyStruct(['key' => 'ddddddddddd44444', 'name' => 'Foo &amp; Bar']);
         $jobKeyList = [['key' => 'ddddddddddd44444']];
 
         $result = $this->invokePrivate('sortKeysInTheRightOrder', [[$key], $jobKeyList]);
 
         $this->assertCount(1, $result);
-        $this->assertSame('Foo & Bar', $result[0]->name);
+        $this->assertSame('Foo &amp; Bar', $result[0]->name);
     }
 
     // ─── getByJob (public action) ───

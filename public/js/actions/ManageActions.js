@@ -197,7 +197,6 @@ let ManageActions = {
       text: 'Something went wrong, the project has been assigned to another member or moved to another team.',
       type: 'warning',
       position: 'bl',
-      allowHtml: true,
       autoDismiss: false,
     }
     CatToolActions.addNotification(notification)
@@ -234,7 +233,6 @@ let ManageActions = {
             name,
           type: 'success',
           position: 'bl',
-          allowHtml: true,
           timer: 3000,
         }
         CatToolActions.addNotification(notification)
@@ -283,7 +281,6 @@ let ManageActions = {
             text: `The selected projects have been successfully assigned to ${user.first_name} ${user.last_name}.`,
             type: 'warning',
             position: 'bl',
-            allowHtml: true,
             timer: 10000,
           }
           CatToolActions.addNotification(notification)
@@ -293,7 +290,6 @@ let ManageActions = {
             text: 'Some projects failed',
             type: 'error',
             position: 'bl',
-            allowHtml: true,
             timer: 10000,
           }
           CatToolActions.addNotification(errorNotification)
@@ -366,7 +362,6 @@ let ManageActions = {
               ' Team',
             type: 'success',
             position: 'bl',
-            allowHtml: true,
             timer: 3000,
           }
           CatToolActions.addNotification(notification)
@@ -457,7 +452,6 @@ let ManageActions = {
             text: `The selected projects have been successfully moved to the ${team.name} team.`,
             type: 'warning',
             position: 'bl',
-            allowHtml: true,
             timer: 10000,
           }
           CatToolActions.addNotification(notification)
@@ -467,7 +461,6 @@ let ManageActions = {
             text: 'Some projects failed',
             type: 'error',
             position: 'bl',
-            allowHtml: true,
             timer: 10000,
           }
           CatToolActions.addNotification(errorNotification)

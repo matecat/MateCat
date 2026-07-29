@@ -10,7 +10,9 @@
  * position:        (String, Default "bl") Position of the notification. Available: tr (top right), tl (top left),
  *                      tc (top center), br (bottom right), bl (bottom left), bc (bottom center)
  * autoDismiss:     (Boolean, Default true) Set if notification is dismissible by the user.
- * allowHtml:       (Boolean, Default false) Set to true if the text contains HTML, like buttons
+ * allowHtml:       (Boolean, Default false) Reserved for operator-authored broadcasts (SSE global messages).
+ *                      The HTML is sanitized before rendering. For anything interpolating user data,
+ *                      pass a ReactNode as text instead.
  * closeCallback    (Function) A callback function that will be called when the notification is about to be removed.
  * openCallback     (Function) A callback function that will be called when the notification is successfully added.
  * dismissable      (Boolean, Default true) If show or not the button to close the notification

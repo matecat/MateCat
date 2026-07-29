@@ -40,7 +40,6 @@ function useExport({type, row, onClose}) {
           type: 'error',
           text: errorsObject.message,
           position: 'br',
-          allowHtml: true,
           timer: 5000,
         })
         setStatus({errors: errorsObject})

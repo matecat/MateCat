@@ -151,21 +151,58 @@ class JobContainer extends React.Component {
       this.oldPassword,
       revision_number,
     ).then(function (data) {
+      let translator = self.props.job.get('translator')
+      const undoChangePassword = function () {
+        CatToolActions.removeNotification(notification)
+        changeJobPassword(
+          self.props.job.toJS(),
+          data.new_pwd,
+          revision_number,
+          1,
+          self.oldPassword,
+        ).then(function (data) {
+          const restoreNotification = {
+            title: 'Change job password',
+            text: 'The previous password has been restored.',
+            type: 'warning',
+            position: 'bl',
+            timer: 7000,
+          }
+          CatToolActions.addNotification(restoreNotification)
+          ManageActions.changeJobPassword(
+            self.props.project,
+            self.props.job,
+            data.new_pwd,
+            data.old_pwd,
+            revision_number,
+            translator,
+          )
+        })
+      }
       const notification = {
         uid: 'change-password',
         title: revision_number
           ? `${revision_number === 1 ? 'Revise' : 'Revise 2'} password changed`
           : 'Translate password changed',
-        text: revision_number
-          ? `The ${revision_number === 1 ? 'Revise' : 'Revise 2'} password has been changed. <a class="undo-password">Undo</a>`
-          : 'The Translate password has been changed. <a class="undo-password">Undo</a>',
+        text: (
+          <>
+            The{' '}
+            {revision_number
+              ? revision_number === 1
+                ? 'Revise'
+                : 'Revise 2'
+              : 'Translate'}{' '}
+            password has been changed.{' '}
+            <a className="undo-password" onClick={undoChangePassword}>
+              Undo
+            </a>
+          </>
+        ),
         type: 'warning',
         position: 'bl',
-        allowHtml: true,
         timer: 10000,
       }
       CatToolActions.addNotification(notification)
-      let translator = self.props.job.get('translator')
       ManageActions.changeJobPassword(
         self.props.project,
         self.props.job,
@@ -173,36 +210,6 @@ class JobContainer extends React.Component {
         data.old_pwd,
         revision_number,
       )
-      setTimeout(function () {
-        $('.undo-password').off('click')
-        $('.undo-password').on('click', function () {
-          CatToolActions.removeNotification(notification)
-          changeJobPassword(
-            self.props.job.toJS(),
-            data.new_pwd,
-            revision_number,
-            1,
-            self.oldPassword,
-          ).then(function (data) {
-            const restoreNotification = {
-              title: 'Change job password',
-              text: 'The previous password has been restored.',
-              type: 'warning',
-              position: 'bl',
-              timer: 7000,
-            }
-            CatToolActions.addNotification(restoreNotification)
-            ManageActions.changeJobPassword(
-              self.props.project,
-              self.props.job,
-              data.new_pwd,
-              data.old_pwd,
-              revision_number,
-              translator,
-            )
-          })
-        })
-      }, 500)
     })
   }
 
@@ -211,17 +218,51 @@ class JobContainer extends React.Component {
     this.oldPassword = this.props.job.get('password')
     changeJobPassword(this.props.job.toJS(), this.oldPassword).then(
       function (data) {
+        let translator = self.props.job.get('translator')
+        const undoRemoveTranslator = function () {
+          CatToolActions.removeNotification(notification)
+          changeJobPassword(
+            self.props.job.toJS(),
+            data.new_pwd,
+            null,
+            1,
+            self.oldPassword,
+          ).then(function (data) {
+            const passwordNotification = {
+              uid: 'change-password',
+              title: 'Change job password',
+              text: 'The previous password has been restored.',
+              type: 'warning',
+              position: 'bl',
+              timer: 7000,
+            }
+            CatToolActions.addNotification(passwordNotification)
+            ManageActions.changeJobPassword(
+              self.props.project,
+              self.props.job,
+              data.new_pwd,
+              data.old_pwd,
+              null,
+              translator,
+            )
+          })
+        }
         const notification = {
           uid: 'remove-translator',
           title: 'Job unassigned',
-          text: 'The translator has been removed and the password changed. <a class="undo-password">Undo</a>',
+          text: (
+            <>
+              The translator has been removed and the password changed.{' '}
+              <a className="undo-password" onClick={undoRemoveTranslator}>
+                Undo
+              </a>
+            </>
+          ),
           type: 'warning',
           position: 'bl',
-          allowHtml: true,
           timer: 10000,
         }
         CatToolActions.addNotification(notification)
-        let translator = self.props.job.get('translator')
         ManageActions.changeJobPassword(
           self.props.project,
           self.props.job,
@@ -230,37 +271,6 @@ class JobContainer extends React.Component {
           null,
           null,
         )
-        setTimeout(function () {
-          $('.undo-password').off('click')
-          $('.undo-password').on('click', function () {
-            CatToolActions.removeNotification(notification)
-            changeJobPassword(
-              self.props.job.toJS(),
-              data.new_pwd,
-              null,
-              1,
-              self.oldPassword,
-            ).then(function (data) {
-              const passwordNotification = {
-                uid: 'change-password',
-                title: 'Change job password',
-                text: 'The previous password has been restored.',
-                type: 'warning',
-                position: 'bl',
-                timer: 7000,
-              }
-              CatToolActions.addNotification(passwordNotification)
-              ManageActions.changeJobPassword(
-                self.props.project,
-                self.props.job,
-                data.new_pwd,
-                data.old_pwd,
-                null,
-                translator,
-              )
-            })
-          })
-        }, 500)
       },
     )
   }
@@ -273,7 +283,6 @@ class JobContainer extends React.Component {
         text: `The selected jobs has been successfully archived.`,
         type: 'warning',
         position: 'bl',
-        allowHtml: true,
         timer: 10000,
       })
     }
@@ -287,7 +296,6 @@ class JobContainer extends React.Component {
         text: `The selected jobs has been successfully canceled.`,
         type: 'warning',
         position: 'bl',
-        allowHtml: true,
         timer: 10000,
       })
     }
@@ -301,7 +309,6 @@ class JobContainer extends React.Component {
         text: `The selected jobs has been successfully unarchived.`,
         type: 'warning',
         position: 'bl',
-        allowHtml: true,
         timer: 10000,
       })
     }
@@ -325,7 +332,6 @@ class JobContainer extends React.Component {
             text: `The selected jobs has been successfully deleted permanently.`,
             type: 'warning',
             position: 'bl',
-            allowHtml: true,
             timer: 10000,
           })
         }

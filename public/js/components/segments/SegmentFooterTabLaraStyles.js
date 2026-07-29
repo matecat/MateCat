@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
+import TEXT_UTILS from '../../utils/textUtils'
 import SegmentConstants from '../../constants/SegmentConstants'
 import {
   decodePlaceholdersToPlainText,
@@ -171,9 +172,7 @@ export const SegmentFooterTabLaraStyles = ({
       })
   }
 
-  const allowHTML = (string) => {
-    return {__html: string}
-  }
+  const allowHTML = (string) => TEXT_UTILS.sanitizedHTML(string)
 
   return (
     <div

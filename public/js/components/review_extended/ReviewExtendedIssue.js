@@ -75,15 +75,32 @@ export const ReviewExtendedIssue = ({
     if (issue.id === issueEditing?.id) setIssueEditing(undefined)
 
     CatToolActions.removeAllNotifications()
+    const undoDeleteIssue = function () {
+      setVisible(true)
+      changeVisibility(issue.id, true)
+      CatToolActions.removeAllNotifications()
+      const restoreNotification = {
+        title: 'Issue deleted',
+        text: 'The issue has been restored.',
+        type: 'warning',
+        position: 'bl',
+        timer: 5000,
+      }
+      CatToolActions.addNotification(restoreNotification)
+      window.onbeforeunload = null
+    }
     const notification = {
       title: 'Issue deleted',
-      text:
-        'The selected issue has been deleted. <a class="undo-issue-deleted undo-issue-deleted-' +
-        issue.id +
-        '">Undo</a>',
+      text: (
+        <>
+          The selected issue has been deleted.{' '}
+          <a className="undo-issue-deleted" onClick={undoDeleteIssue}>
+            Undo
+          </a>
+        </>
+      ),
       type: 'warning',
       position: 'bl',
-      allowHtml: true,
       timer: 10000,
       closeCallback: function () {
         SegmentActions.deleteIssue(issue, sid)
@@ -93,24 +110,6 @@ export const ReviewExtendedIssue = ({
     window.onbeforeunload = function () {
       SegmentActions.deleteIssue(issue, sid)
     }
-    setTimeout(function () {
-      const $button = $('.undo-issue-deleted-' + issue.id)
-      $button.off('click')
-      $button.on('click', function () {
-        setVisible(true)
-        changeVisibility(issue.id, true)
-        CatToolActions.removeAllNotifications()
-        const notification = {
-          title: 'Issue deleted',
-          text: 'The issue has been restored.',
-          type: 'warning',
-          position: 'bl',
-          timer: 5000,
-        }
-        CatToolActions.addNotification(notification)
-        window.onbeforeunload = null
-      })
-    }, 500)
   }
 
   const setCommentViewCallback = (event) => {
