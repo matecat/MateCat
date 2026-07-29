@@ -12,6 +12,9 @@ import SegmentStore from '../../stores/SegmentStore'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentContext} from '../segments/SegmentContext'
 import ModalsActions from '../../actions/ModalsActions'
+import CatToolStore from '../../stores/CatToolStore'
+import CatToolConstants from '../../constants/CatToolConstants'
+import {isIssueMandatoryForCurrentRevision} from '../../utils/mandatoryIssuesUtils'
 
 class ReviewExtendedPanel extends React.Component {
   static contextType = SegmentContext
@@ -31,6 +34,20 @@ class ReviewExtendedPanel extends React.Component {
       showAddIssueMessage: false,
       showAddIssueToSelectedTextMessage: false,
       issueEditing: undefined,
+    }
+    // Keep stable references: the store removes listeners by identity, so binding inline on
+    // mount would leave the subscription behind forever.
+    this.onShowIssuesMessage = this.showIssuesMessage.bind(this)
+    this.onJobMetadataChange = this.clearStaleIssueRequirement.bind(this)
+  }
+
+  /**
+   * The requirement can be switched off from the settings panel while this panel is open, so
+   * drop a warning that no longer applies instead of leaving it on screen.
+   */
+  clearStaleIssueRequirement() {
+    if (!isIssueMandatoryForCurrentRevision()) {
+      this.setState({showAddIssueMessage: false})
     }
   }
 
@@ -61,6 +78,9 @@ class ReviewExtendedPanel extends React.Component {
   }
 
   showIssuesMessage(sid, type) {
+    // The event is broadcast to every mounted panel, so ignore the ones aimed elsewhere.
+    if (sid !== this.props.segment.sid) return
+
     switch (type) {
       case this.addIssueToApproveMessageType:
         this.setState({
@@ -99,14 +119,22 @@ class ReviewExtendedPanel extends React.Component {
     // this.props.setParentLoader(false);
     SegmentStore.addListener(
       SegmentConstants.SHOW_ISSUE_MESSAGE,
-      this.showIssuesMessage.bind(this),
+      this.onShowIssuesMessage,
+    )
+    CatToolStore.addListener(
+      CatToolConstants.GET_JOB_METADATA,
+      this.onJobMetadataChange,
     )
   }
 
   componentWillUnmount() {
     SegmentStore.removeListener(
       SegmentConstants.SHOW_ISSUE_MESSAGE,
-      this.showIssuesMessage,
+      this.onShowIssuesMessage,
+    )
+    CatToolStore.removeListener(
+      CatToolConstants.GET_JOB_METADATA,
+      this.onJobMetadataChange,
     )
   }
 
@@ -116,8 +144,10 @@ class ReviewExtendedPanel extends React.Component {
   render() {
     let issues = this.getAllIssues()
     let thereAreIssuesClass = issues.length > 0 ? 'thereAreIssues' : ''
+    const showAddIssueMessage =
+      this.state.showAddIssueMessage && isIssueMandatoryForCurrentRevision()
     let cornerClass = classnames({
-      error: this.state.showAddIssueMessage,
+      error: showAddIssueMessage,
       warning: this.state.showAddIssueToSelectedTextMessage,
       're-open-view re-issues': true,
     })
@@ -139,7 +169,7 @@ class ReviewExtendedPanel extends React.Component {
           selection={this.props.selectionObj}
           segmentVersion={this.state.versionNumber}
         />
-        {this.state.showAddIssueMessage ? (
+        {showAddIssueMessage ? (
           <div className="re-warning-not-added-issue">
             <p>
               You must add an issue from the list below before approving this

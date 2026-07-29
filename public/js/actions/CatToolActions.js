@@ -260,13 +260,26 @@ let CatToolActions = {
   },
   getJobMetadata: ({idJob, password}) => {
     if (!CatToolStore.jobMetadata) {
-      getJobMetadata(idJob, password).then((jobMetadata) => {
-        AppDispatcher.dispatch({
-          actionType: CatToolConstants.GET_JOB_METADATA,
-          jobMetadata,
+      getJobMetadata(idJob, password)
+        .then((jobMetadata) => {
+          // A settings change may have landed while this request was in flight; that value is
+          // newer than the response, so it must not be overwritten.
+          if (CatToolStore.jobMetadata) return
+
+          AppDispatcher.dispatch({
+            actionType: CatToolConstants.GET_JOB_METADATA,
+            jobMetadata,
+          })
+          CatToolStore.jobMetadata = jobMetadata
         })
-        CatToolStore.jobMetadata = jobMetadata
-      })
+        .catch(() => {
+          addNotification({
+            title: 'Error loading job settings',
+            type: 'error',
+            text: 'Some editor settings could not be loaded. Reload the page to try again.',
+            position: 'br',
+          })
+        })
     } else {
       AppDispatcher.dispatch({
         actionType: CatToolConstants.GET_JOB_METADATA,

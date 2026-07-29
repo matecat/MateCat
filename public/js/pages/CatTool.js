@@ -264,10 +264,14 @@ function CatTool() {
       if (config.active_engine && config.active_engine.id) {
         const activeMT = config.active_engine
         if (activeMT) {
-          modifyingCurrentTemplate(() => ({
+          // Build on the template as it stands now, not on the snapshot captured before the
+          // engines request: settings loaded meanwhile would otherwise be discarded.
+          modifyingCurrentTemplate((currentTemplate) => ({
             ...prevTemplate,
+            ...currentTemplate,
             mt: {
               ...prevTemplate.mt,
+              ...currentTemplate.mt,
               id: activeMT.id,
             },
           }))

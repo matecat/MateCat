@@ -3,6 +3,8 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 import {Select} from '../../../common/Select'
 
+const ALL_REVISION_ROUNDS = ['r1', 'r2']
+
 const OPTIONS = [
   {
     id: 'r1,r2',
@@ -28,12 +30,25 @@ export const MandatoryIssues = () => {
 
   const {SELECT_HEIGHT} = useContext(CreateProjectContext)
 
-  const mandatoryIssue = currentProjectTemplate.mandatoryIssues ?? []
+  // A job with no stored value requires an issue in every round, so show that rather than
+  // "None" — an empty array is the one and only way to express "no round requires an issue".
+  const mandatoryIssue = Array.isArray(currentProjectTemplate.mandatoryIssues)
+    ? currentProjectTemplate.mandatoryIssues
+    : ALL_REVISION_ROUNDS
+
   const setMandatoryIssue = (value) =>
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
       mandatoryIssues: value === 'none' ? [] : value.split(','),
     }))
+
+  const activeOptionId =
+    mandatoryIssue.length === 0
+      ? 'none'
+      : // Match regardless of the stored order, which the backend does not constrain.
+        ALL_REVISION_ROUNDS.filter((round) =>
+          mandatoryIssue.includes(round),
+        ).join(',')
 
   return (
     <div className="options-box">
@@ -52,11 +67,7 @@ export const MandatoryIssues = () => {
           dropdownClassName="select-dropdown__wrapper-portal"
           maxHeightDroplist={SELECT_HEIGHT}
           options={OPTIONS}
-          activeOption={OPTIONS.find(
-            ({id}) =>
-              id ===
-              (mandatoryIssue.length === 0 ? 'none' : mandatoryIssue.join(',')),
-          )}
+          activeOption={OPTIONS.find(({id}) => id === activeOptionId)}
           checkSpaceToReverse={true}
           onSelect={(option) => setMandatoryIssue(option.id)}
         />

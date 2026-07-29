@@ -5,6 +5,7 @@ import {updateJobMetadata} from '../../../../api/updateJobMetadata'
 import {Tagging} from '../OtherTab/Tagging'
 import {MandatoryIssues} from '../OtherTab/MandatoryIssues'
 import CatToolStore from '../../../../stores/CatToolStore'
+import CatToolActions from '../../../../actions/CatToolActions'
 import CatToolConstants from '../../../../constants/CatToolConstants'
 
 export const EditorOtherTab = () => {
@@ -31,26 +32,43 @@ export const EditorOtherTab = () => {
         characterCounterMode: currentProjectTemplate.characterCounterMode,
         subfilteringHandlers: currentProjectTemplate.subfilteringHandlers,
         mandatoryIssues: currentProjectTemplate.mandatoryIssues,
-      }).then(() => {
-        const jobMetadata = CatToolStore.getJobMetadata()
-        if (!jobMetadata) return
-
-        const updatedJobMetadata = {
-          ...jobMetadata,
-          job: {
-            ...jobMetadata.job,
-            character_counter_count_tags:
-              currentProjectTemplate.characterCounterCountTags,
-            character_counter_mode: currentProjectTemplate.characterCounterMode,
-            subfiltering_handlers: currentProjectTemplate.subfilteringHandlers,
-            mandatory_issues: currentProjectTemplate.mandatoryIssues,
-          },
-        }
-        CatToolStore.setJobMetadata(updatedJobMetadata)
-        CatToolStore.emitChange(CatToolConstants.GET_JOB_METADATA, {
-          jobMetadata: updatedJobMetadata,
-        })
       })
+        .then(() => {
+          // Fall back to an empty shape rather than bailing out: the initial metadata request
+          // may still be in flight, and dropping the update here would leave the editor acting
+          // on the pre-change settings until a reload.
+          const jobMetadata = CatToolStore.getJobMetadata() ?? {
+            job: {},
+            project: {},
+            files: [],
+          }
+
+          const updatedJobMetadata = {
+            ...jobMetadata,
+            job: {
+              ...jobMetadata.job,
+              character_counter_count_tags:
+                currentProjectTemplate.characterCounterCountTags,
+              character_counter_mode:
+                currentProjectTemplate.characterCounterMode,
+              subfiltering_handlers:
+                currentProjectTemplate.subfilteringHandlers,
+              mandatory_issues: currentProjectTemplate.mandatoryIssues,
+            },
+          }
+          CatToolStore.setJobMetadata(updatedJobMetadata)
+          CatToolStore.emitChange(CatToolConstants.GET_JOB_METADATA, {
+            jobMetadata: updatedJobMetadata,
+          })
+        })
+        .catch(() => {
+          CatToolActions.addNotification({
+            title: 'Error saving settings',
+            type: 'error',
+            text: 'Your editor settings could not be saved. Please retry!',
+            position: 'br',
+          })
+        })
     }
 
     previousCurrentProjectTemplate.current = {

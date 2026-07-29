@@ -110,4 +110,23 @@ describe('MandatoryIssues', () => {
     expect(result.otherField).toBe('preserved')
     expect(result.mandatoryIssues).toEqual(['r2'])
   })
+
+  describe('when the job has no stored value', () => {
+    // A missing value means every round requires an issue, so showing "None" would tell the
+    // owner the opposite of what the editor actually enforces.
+    test('shows "R1 + R2" when mandatoryIssues is undefined', () => {
+      renderMandatoryIssues(undefined)
+      expect(screen.getByTestId('active-option').textContent).toBe('R1 + R2')
+    })
+
+    test('shows "R1 + R2" when mandatoryIssues is null', () => {
+      renderMandatoryIssues(null)
+      expect(screen.getByTestId('active-option').textContent).toBe('R1 + R2')
+    })
+  })
+
+  test('matches an option regardless of the stored round order', () => {
+    renderMandatoryIssues(['r2', 'r1'])
+    expect(screen.getByTestId('active-option').textContent).toBe('R1 + R2')
+  })
 })

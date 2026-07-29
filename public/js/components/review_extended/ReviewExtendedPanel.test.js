@@ -7,6 +7,9 @@ import SegmentActions from '../../actions/SegmentActions'
 import SegmentUtils from '../../utils/segmentUtils'
 import ModalsActions from '../../actions/ModalsActions'
 import SegmentConstants from '../../constants/SegmentConstants'
+import CatToolStore from '../../stores/CatToolStore'
+import CatToolConstants from '../../constants/CatToolConstants'
+import {isIssueMandatoryForCurrentRevision} from '../../utils/mandatoryIssuesUtils'
 
 jest.mock('./ReviewExtendedIssuesContainer', () => () => (
   <div data-testid="issues-container" />
@@ -41,6 +44,21 @@ jest.mock('../../stores/SegmentStore', () => {
   store.setMaxListeners(0)
   return store
 })
+
+jest.mock('../../stores/CatToolStore', () => {
+  const {EventEmitter} = require('events')
+  const store = new EventEmitter()
+  store.setMaxListeners(0)
+  return store
+})
+
+jest.mock('../../constants/CatToolConstants', () => ({
+  GET_JOB_METADATA: 'GET_JOB_METADATA',
+}))
+
+jest.mock('../../utils/mandatoryIssuesUtils', () => ({
+  isIssueMandatoryForCurrentRevision: jest.fn(() => true),
+}))
 
 jest.mock('../../actions/SegmentActions', () => ({
   closeSegmentIssuePanel: jest.fn(),
@@ -81,10 +99,12 @@ describe('ReviewExtendedPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     SegmentUtils.isIceSegment.mockReturnValue(false)
+    isIssueMandatoryForCurrentRevision.mockReturnValue(true)
   })
 
   afterEach(() => {
     SegmentStore.removeAllListeners()
+    CatToolStore.removeAllListeners()
   })
 
   describe('wrapper class', () => {
@@ -103,7 +123,9 @@ describe('ReviewExtendedPanel', () => {
           ],
         }),
       })
-      expect(container.querySelector('.re-wrapper')).toHaveClass('thereAreIssues')
+      expect(container.querySelector('.re-wrapper')).toHaveClass(
+        'thereAreIssues',
+      )
     })
   })
 
@@ -116,7 +138,9 @@ describe('ReviewExtendedPanel', () => {
     test('calls closeSegmentIssuePanel with segment sid on click', () => {
       const {container} = renderPanel()
       fireEvent.click(container.querySelector('.re-close-balloon'))
-      expect(SegmentActions.closeSegmentIssuePanel).toHaveBeenCalledWith('seg-1')
+      expect(SegmentActions.closeSegmentIssuePanel).toHaveBeenCalledWith(
+        'seg-1',
+      )
     })
   })
 
@@ -237,6 +261,70 @@ describe('ReviewExtendedPanel', () => {
       expect(
         screen.getByText(/select an issue from the list below/i),
       ).toBeInTheDocument()
+    })
+  })
+
+  describe('event targeting and cleanup', () => {
+    test('ignores an approve-warning aimed at a different segment', () => {
+      renderPanel()
+      act(() => {
+        SegmentStore.emit(SegmentConstants.SHOW_ISSUE_MESSAGE, 'seg-2', 1)
+      })
+      expect(
+        screen.queryByText(/you must add an issue/i),
+      ).not.toBeInTheDocument()
+    })
+
+    test('removes its store listeners on unmount', () => {
+      const {unmount} = renderPanel()
+      expect(
+        SegmentStore.listenerCount(SegmentConstants.SHOW_ISSUE_MESSAGE),
+      ).toBe(1)
+      expect(
+        CatToolStore.listenerCount(CatToolConstants.GET_JOB_METADATA),
+      ).toBe(1)
+
+      unmount()
+
+      expect(
+        SegmentStore.listenerCount(SegmentConstants.SHOW_ISSUE_MESSAGE),
+      ).toBe(0)
+      expect(
+        CatToolStore.listenerCount(CatToolConstants.GET_JOB_METADATA),
+      ).toBe(0)
+    })
+  })
+
+  describe('when the mandatory-issue requirement is lifted', () => {
+    test('clears an already visible approve-warning on a job metadata change', () => {
+      renderPanel()
+      act(() => {
+        SegmentStore.emit(SegmentConstants.SHOW_ISSUE_MESSAGE, 'seg-1', 1)
+      })
+      expect(
+        screen.getByText(/you must add an issue from the list below/i),
+      ).toBeInTheDocument()
+
+      isIssueMandatoryForCurrentRevision.mockReturnValue(false)
+      act(() => {
+        CatToolStore.emit(CatToolConstants.GET_JOB_METADATA, {})
+      })
+
+      expect(
+        screen.queryByText(/you must add an issue/i),
+      ).not.toBeInTheDocument()
+    })
+
+    test('does not render the approve-warning even if the flag is still set', () => {
+      isIssueMandatoryForCurrentRevision.mockReturnValue(false)
+      const {container} = renderPanel()
+      act(() => {
+        SegmentStore.emit(SegmentConstants.SHOW_ISSUE_MESSAGE, 'seg-1', 1)
+      })
+      expect(
+        screen.queryByText(/you must add an issue/i),
+      ).not.toBeInTheDocument()
+      expect(container.querySelector('.error')).not.toBeInTheDocument()
     })
   })
 

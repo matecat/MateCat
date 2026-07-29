@@ -27,6 +27,7 @@ import {sendSegmentVersionIssueComment} from '../api/sendSegmentVersionIssueComm
 import {getTagProjection} from '../api/getTagProjection'
 import {setCurrentSegment} from '../api/setCurrentSegment'
 import {setLastSegmentFromLocalStorage} from '../utils/segmentLocalStorage'
+import {isIssueMandatoryForCurrentRevision} from '../utils/mandatoryIssuesUtils'
 import {addNotification} from './notificationActions'
 import {updateGlobalWarnings} from './warningActions'
 import {addClassToSegment, removeClassToSegment} from './segmentClassActions'
@@ -266,15 +267,7 @@ const SegmentActions = {
        If is an ICE we allow to change the translation because is not possible to add an issue
      */
 
-    const mandatoryIssues = CatToolStore.getJobMetadata().job.mandatory_issues
-
-    const currentRevisionKey = `r${config.revisionNumber}`
-
-    const isMandatoryRevisionIssues = Array.isArray(mandatoryIssues)
-      ? mandatoryIssues.some(
-          (value) => typeof value === 'string' && value === currentRevisionKey,
-        )
-      : true
+    const isMandatoryRevisionIssues = isIssueMandatoryForCurrentRevision()
 
     if (
       config.isReview &&
