@@ -22,6 +22,8 @@ class PHPTalMap implements ArrayAccess, JsonSerializable, Stringable
 
     use ArrayAccessTrait;
 
+    private const int JSON_FLAGS = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
+
     /** @var array<array-key, mixed> */
     private array $storage = [];
 
@@ -55,7 +57,12 @@ class PHPTalMap implements ArrayAccess, JsonSerializable, Stringable
 
     public function __toString(): string
     {
-        return json_encode($this->storage) ?: '{}';
+        // PHPTAL emits interpolations inside a <script> element verbatim, so the
+        // encoded map has to be safe on its own: without JSON_HEX_TAG a value
+        // containing "</script>" would close the element and turn the rest of the
+        // page into markup. The remaining flags keep the literal from breaking out
+        // of a surrounding quote. See PHPTalString for the single-value case.
+        return json_encode($this->storage, self::JSON_FLAGS) ?: '{}';
     }
 
     /**

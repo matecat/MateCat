@@ -43,7 +43,7 @@ class MembershipDeletedEmail extends AbstractEmail
     {
         $this->user = $removed_user;
         $this->sender = $sender;
-        $this->title = "You've been removed from team " . $team->name;
+        $this->title = "You've been removed from team " . $this->headerSafe($team->name);
         $this->team = $team;
 
         $this->_setLayout('skeleton.html');

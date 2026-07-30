@@ -14,6 +14,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
+use Controller\Traits\TeamInvitationRateLimitTrait;
 use Exception;
 use InvalidArgumentException;
 use Model\Teams\MembershipDao;
@@ -28,6 +29,71 @@ use View\API\V2\Json\Team;
 
 class TeamsController extends KleinController
 {
+
+    use TeamInvitationRateLimitTrait;
+
+    private const int NAME_MAX_LENGTH = 100;
+
+    /**
+     * Normalise a team name on the way in.
+     *
+     * The name is no longer entity-encoded before it is stored, so the two things that
+     * encoding used to take care of have to be done explicitly. Control and format
+     * characters are removed: a name is a single line of text, and CR/LF in particular would
+     * otherwise travel into the Subject header of the membership emails. Runs of whitespace
+     * collapse so a name cannot be padded out to look like separate lines.
+     *
+     * Everything else is preserved verbatim; making the value safe for a given output is
+     * that output's job.
+     */
+    private function sanitizeTeamName(?string $raw): string
+    {
+        $name = preg_replace('/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]+/u', ' ', $raw ?? '') ?? '';
+        $name = preg_replace('/\s+/u', ' ', $name) ?? $name;
+
+        return trim($name);
+    }
+
+    /**
+     * Reject a team name that reads as a link.
+     *
+     * The name is quoted back in the invitation email MateCat sends, on the team owner's
+     * behalf, to any address that owner types in. Mail clients auto-link bare URLs and
+     * bare hostnames, so a name like "verify at example.com" needs no markup to become a
+     * clickable link in a message carrying MateCat's domain and signature. Holding names
+     * to plain text keeps that transactional email from carrying someone else's URL.
+     *
+     * @throws InvalidArgumentException
+     */
+    private function assertNameIsPlainText(string $name): void
+    {
+        if (mb_strlen($name) > self::NAME_MAX_LENGTH) {
+            throw new InvalidArgumentException(
+                "Wrong parameter: name must be at most " . self::NAME_MAX_LENGTH . " characters",
+                400
+            );
+        }
+
+        // Check what the reader will end up seeing, not what was typed. The email templates
+        // escape with double_encode: false so that names stored before names were kept as
+        // typed still render correctly, which means entity text passes through to the
+        // recipient and is turned back into characters by the mail client's HTML parser.
+        // Without decoding first, "evil&#46;com" would satisfy the rules below and still
+        // arrive as a clickable "evil.com".
+        $decoded = html_entity_decode($name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // a scheme ("https://", "javascript:") or a "www." prefix
+        $hasUrlPrefix = preg_match('~[a-z][a-z0-9+.-]*://|\bwww\.~i', $decoded) === 1;
+        // a bare hostname: one or more dot-separated labels ending in a letters-only TLD
+        $hasHostname = preg_match('~(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}~i', $decoded) === 1;
+
+        if ($hasUrlPrefix || $hasHostname) {
+            throw new InvalidArgumentException(
+                "Wrong parameter: name cannot contain a URL or a domain name",
+                400
+            );
+        }
+    }
 
     protected function registerValidators(): void
     {
@@ -49,9 +115,12 @@ class TeamsController extends KleinController
         $params = $this->request->paramsPost()->getIterator()->getArrayCopy();
 
         $params = filter_var_array($params, [
+            // The name is stored as the user typed it and escaped by each output instead.
+            // Encoding it here put entity text in the column, which a JavaScript string or a
+            // JSON response can never decode back, so names containing & < > displayed wrong
+            // everywhere. sanitizeTeamName() below does the part that must happen on the way in.
             'name' => [
-                'filter' => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
-                'flags' => FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_BACKTICK
+                'filter' => FILTER_UNSAFE_RAW
             ],
             'type' => [
                 'filter' => FILTER_SANITIZE_SPECIAL_CHARS
@@ -62,11 +131,13 @@ class TeamsController extends KleinController
             ]
         ]);
 
-        $params['name'] = trim($params['name']);
+        $params['name'] = $this->sanitizeTeamName(is_string($params['name']) ? $params['name'] : null);
 
         if (empty($params['name'])) {
             throw new InvalidArgumentException("Wrong parameter: name is empty", 400);
         }
+
+        $this->assertNameIsPlainText($params['name']);
 
         if (empty($params['type'])) {
             throw new InvalidArgumentException("Wrong parameter: type is empty", 400);
@@ -92,6 +163,11 @@ class TeamsController extends KleinController
         }
         $model->setUser($this->user);
 
+        // creating a team also invites every member passed with it
+        if ($this->isOverInvitationRateLimit($this->response, $this->user, '/api/v2/teams')) {
+            return;
+        }
+
         $team = $model->create();
         $formatted = new Team($userDao, null);
 
@@ -112,9 +188,12 @@ class TeamsController extends KleinController
 
         // sanitize params
         $params = filter_var_array($this->params, [
+            // The name is stored as the user typed it and escaped by each output instead.
+            // Encoding it here put entity text in the column, which a JavaScript string or a
+            // JSON response can never decode back, so names containing & < > displayed wrong
+            // everywhere. sanitizeTeamName() below does the part that must happen on the way in.
             'name' => [
-                'filter' => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
-                'flags' => FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_BACKTICK
+                'filter' => FILTER_UNSAFE_RAW
             ],
             'id_team' => [
                 'filter' => FILTER_VALIDATE_INT
@@ -125,11 +204,14 @@ class TeamsController extends KleinController
 
         $org = new TeamStruct();
         $org->id = $teamId;
-        $org->name = trim($params['name']);
+        $name = $this->sanitizeTeamName(is_string($params['name']) ? $params['name'] : null);
+        $org->name = $name;
 
         if (empty($org->name)) {
             throw new InvalidArgumentException("Wrong parameter: name is empty", 400);
         }
+
+        $this->assertNameIsPlainText($org->name);
 
         $membershipDao = new MembershipDao($this->getDatabase());
         $org = $membershipDao->findTeamByIdAndUser($teamId, $this->user);
@@ -138,7 +220,7 @@ class TeamsController extends KleinController
             throw new AuthorizationError("Not Authorized", 401);
         }
 
-        $org->name = trim($params['name']);
+        $org->name = $name;
 
         $teamDao = new TeamDao($this->getDatabase());
 
