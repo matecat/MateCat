@@ -197,4 +197,45 @@ class PasswordResetModelTest extends AbstractTest
             $this->assertSame($oldPass, $user->pass);
         }
     }
+
+    /**
+     * Accounts created through an external provider are inserted without a salt, and this used to be
+     * the one flow that could give them a password — except it aborted on the missing salt, so the
+     * owner had no way back in at all. Mint one instead.
+     */
+    #[Test]
+    public function resetPasswordMintsASaltWhenTheAccountHasNone(): void
+    {
+        foreach ([null, ''] as $missingSalt) {
+            $user = $this->makeUserWithToken();
+            $user->salt = $missingSalt;
+            $user->pass = null;
+
+            $session = [];
+            $model = new PasswordResetModel($session, $this->makeMockDao($user), 'valid-token');
+            $model->resetPassword('new-pass');
+
+            $this->assertSame(32, strlen((string)$user->salt));
+            $this->assertTrue(
+                Utils::verifyPass('new-pass', $user->salt, (string)$user->pass),
+                'the new password must verify against the freshly minted salt'
+            );
+        }
+    }
+
+    /**
+     * A salt that is already present is what the stored hash was built with, so it has to survive.
+     */
+    #[Test]
+    public function resetPasswordKeepsAnExistingSalt(): void
+    {
+        $user = $this->makeUserWithToken();
+
+        $session = [];
+        $model = new PasswordResetModel($session, $this->makeMockDao($user), 'valid-token');
+        $model->resetPassword('new-pass');
+
+        $this->assertSame('test-salt', $user->salt);
+        $this->assertTrue(Utils::verifyPass('new-pass', 'test-salt', (string)$user->pass));
+    }
 }

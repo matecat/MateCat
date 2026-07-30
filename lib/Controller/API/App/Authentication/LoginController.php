@@ -102,6 +102,11 @@ class LoginController extends AbstractStatefulKleinController
         $user = is_string($params['email']) ? $dao->getByEmail($params['email']) : null;
 
         if ($user && is_string($params['password']) && $user->passwordMatch($params['password']) && !is_null($user->email_confirmed_at)) {
+            // The password has just been verified, so this is one of the only two moments the
+            // plaintext is in hand. Accounts stored with an empty salt get one now, silently — the
+            // updateUser() below writes every column, so it costs no extra query.
+            $user->rotateEmptySalt($params['password']);
+
             $user->clearAuthToken();
 
             $dao->updateUser($user);

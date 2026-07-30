@@ -8,7 +8,6 @@ use Model\Users\Authentication\ChangePasswordModel;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
-use RuntimeException;
 use Utils\Tools\Utils;
 
 class ChangePasswordModelTest extends AbstractTest
@@ -86,11 +85,15 @@ class ChangePasswordModelTest extends AbstractTest
         $this->assertNotNull($user->email_confirmed_at);
     }
 
+    /**
+     * A provider-only account has no password to change. That is a rejected attempt, not a broken row,
+     * so it is answered the same way a wrong old password is.
+     */
     #[Test]
-    public function changePasswordThrowsWhenSaltNull(): void
+    public function changePasswordRejectsAnAccountWithNoPassword(): void
     {
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('User salt must be set');
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('Invalid password');
 
         $user = new UserStruct();
         $user->uid = 1;
@@ -99,6 +102,65 @@ class ChangePasswordModelTest extends AbstractTest
 
         $model = new ChangePasswordModel($user, $dao);
         $model->changePassword('old', 'new');
+    }
+
+    /**
+     * An empty salt leaves the global pepper as the only per-account variation, so it must not survive
+     * a password rewrite. Verification still has to run against the empty value the stored hash was
+     * built with.
+     */
+    #[Test]
+    public function changePasswordRotatesAnEmptySalt(): void
+    {
+        $user = $this->makeUser();
+        $user->salt = '';
+        $user->pass = Utils::encryptPass('old-pass', '');
+
+        $model = new ChangePasswordModel($user, $this->makeMockDao());
+        $model->changePassword('old-pass', 'new-pass');
+
+        $this->assertSame(32, strlen((string)$user->salt));
+        $this->assertTrue(Utils::verifyPass('new-pass', $user->salt, (string)$user->pass));
+    }
+
+    #[Test]
+    public function changePasswordKeepsANonEmptySalt(): void
+    {
+        $user = $this->makeUser();
+
+        $model = new ChangePasswordModel($user, $this->makeMockDao());
+        $model->changePassword('old-pass', 'new-pass');
+
+        $this->assertSame('test-salt', $user->salt);
+        $this->assertTrue(Utils::verifyPass('new-pass', 'test-salt', (string)$user->pass));
+    }
+
+    /**
+     * The rewritten salt is worthless if it is not persisted alongside the password.
+     */
+    #[Test]
+    public function changePasswordPersistsTheSaltColumn(): void
+    {
+        $user = $this->makeUser();
+        $user->salt = '';
+        $user->pass = Utils::encryptPass('old-pass', '');
+
+        $captured = [];
+        $dao = $this->createMock(UserDao::class);
+        $dao->method('destroyCacheByEmail')->willReturn(true);
+        $dao->method('destroyCacheByUid')->willReturn(true);
+        $dao->expects($this->once())
+            ->method('updateStruct')
+            ->willReturnCallback(function ($struct, $options) use (&$captured) {
+                $captured = $options['fields'];
+
+                return 1;
+            });
+
+        (new ChangePasswordModel($user, $dao))->changePassword('old-pass', 'new-pass');
+
+        $this->assertContains('salt', $captured);
+        $this->assertContains('pass', $captured);
     }
 
     #[Test]

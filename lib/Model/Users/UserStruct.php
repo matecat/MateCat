@@ -46,14 +46,23 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
     }
 
     /**
+     * Identity only: a uid and an email are what identify an account.
+     *
+     * A first and last name were once required here too, which locked out every account holding blank
+     * ones — legacy rows and provider signups among them. The login call answered 200 and set the
+     * cookie, then each authenticated request that followed was rejected as anonymous, so the browser
+     * bounced back to the login form and the account looked broken from the outside.
+     *
+     * A display name is profile data, and profile data does not decide whether someone is
+     * authenticated. Do not add the name fields back: {@see UserStructTest::isLoggedIgnoresBlankNames}
+     * guards this, because tests that populate every field or none at all cannot tell the two
+     * behaviours apart.
+     *
      * @return bool
      */
     public function isLogged(): bool
     {
-        return !empty($this->uid) &&
-            !empty($this->email) &&
-            !empty($this->first_name) &&
-            !empty($this->last_name);
+        return !empty($this->uid) && !empty($this->email);
     }
 
     public function clearAuthToken(): void
@@ -197,15 +206,50 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
     /**
      * Returns true if password matches
      *
+     * An account created through an external provider has neither salt nor password: both columns
+     * stay NULL because there has never been a password to store. That is an ordinary state rather
+     * than a broken row, so it reads as "this password does not match" — every caller has to be able
+     * to treat the answer as a plain yes or no, indistinguishable from a wrong password.
+     *
+     * An empty salt is left alone: those accounts do have a password, hashed against that empty
+     * value, and it still has to verify.
+     *
      * @return bool
-     * @throws RuntimeException
      */
     public function passwordMatch(string $password): bool
     {
-        $salt = $this->salt ?? throw new RuntimeException('User salt must be set');
-        $pass = $this->pass ?? throw new RuntimeException('User password must be set');
+        if ($this->salt === null || $this->pass === null) {
+            return false;
+        }
 
-        return Utils::verifyPass($password, $salt, $pass);
+        return Utils::verifyPass($password, $this->salt, $this->pass);
+    }
+
+    /**
+     * Re-hashes an already verified password against a freshly minted salt, when the stored one is
+     * empty.
+     *
+     * An empty salt means the hash was built over the password and nothing else, leaving the global
+     * pepper as the only per-account variation — the point of a per-user salt is lost. Repairing it
+     * needs the plaintext, which the application only holds while a login or password change is being
+     * processed, so those are the only moments the row can be corrected without asking the owner for
+     * anything.
+     *
+     * Callers must have verified $verifiedPassword first, and must persist salt and pass afterwards.
+     * Returns true when the struct was modified.
+     *
+     * @return bool
+     */
+    public function rotateEmptySalt(string $verifiedPassword): bool
+    {
+        if ($this->salt !== '') {
+            return false;
+        }
+
+        $this->salt = Utils::randomString(32);
+        $this->pass = Utils::encryptPass($verifiedPassword, $this->salt);
+
+        return true;
     }
 
     /**

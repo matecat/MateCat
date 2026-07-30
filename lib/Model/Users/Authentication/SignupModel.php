@@ -4,7 +4,6 @@ namespace Model\Users\Authentication;
 
 use Controller\API\Commons\Exceptions\ValidationError;
 use Exception;
-use Model\DataAccess\Database;
 use Model\Teams\TeamDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
@@ -12,6 +11,7 @@ use ReflectionException;
 use RuntimeException;
 use TypeError;
 use Utils\Email\ForgotPasswordEmail;
+use Utils\Email\SetPasswordRequestEmail;
 use Utils\Email\SignupEmail;
 use Utils\Email\WelcomeEmail;
 use Utils\Tools\Utils;
@@ -75,33 +75,53 @@ class SignupModel
      */
     public function processSignup(): void
     {
-        if ($this->__userAlreadyExists() && !$this->__userAlreadyExistsAndIsActive()) {
-            $this->__updatePersistedUser();
-            $this->userDao->updateStruct($this->user, [
-                'fields' => [
-                    'salt',
-                    'pass',
-                    'confirmation_token',
-                    'confirmation_token_created_at'
-                ]
-            ]);
-        } else {
+        $this->__saveWantedUrl();
+
+        if (!$this->__userAlreadyExists()) {
             $this->__prepareNewUser();
             $this->user->uid = $this->userDao->insertStruct($this->user) ?: throw new RuntimeException('User uid must be set after signup insert');
 
             $this->teamDao->getDatabaseHandler()->begin();
             $this->teamDao->createPersonalTeam($this->user);
             $this->teamDao->getDatabaseHandler()->commit();
-        }
 
-        $this->__saveWantedUrl();
-
-        // send a confirmation email only if
-        // the user is not active (with a user/password pair)
-        // AND do not own an active Oauth login
-        if (!$this->__userAlreadyExistsAndIsActive()) {
             $this->__sendConfirmationRequestEmail();
+
+            return;
         }
+
+        // The address is taken. Credentials belong to whoever controls the mailbox, so nothing
+        // submitted here is stored against an account that already exists: issue a token and let the
+        // recipient choose the password on the reset form.
+        //
+        // Taken and free addresses are answered identically, so the endpoint reveals nothing about
+        // which addresses are registered.
+        $this->__sendPasswordSetupRequestEmail();
+    }
+
+    /**
+     * Mails a set-password link to the address on file. Only the token columns are written; no
+     * password supplied by the caller is persisted anywhere.
+     *
+     * @throws Exception
+     */
+    private function __sendPasswordSetupRequestEmail(): void
+    {
+        $this->user->initAuthToken();
+
+        $this->userDao->updateStruct($this->user, [
+            'fields' => [
+                'confirmation_token',
+                'confirmation_token_created_at'
+            ]
+        ]);
+
+        $this->createSetPasswordRequestEmail()->send();
+    }
+
+    protected function createSetPasswordRequestEmail(): SetPasswordRequestEmail
+    {
+        return new SetPasswordRequestEmail($this->user);
     }
 
     /**
@@ -136,21 +156,6 @@ class SignupModel
         unset($this->session['wanted_url']);
 
         return $url;
-    }
-
-    private function __updatePersistedUser(): void
-    {
-        /*
-         * salt is empty when a user exists, and it's first login happened through external service providers (OAuth)
-         * Check the salt before join the two accounts.
-         */
-        if (empty($this->user->salt)) {
-            $this->user->salt = Utils::randomString(32);
-        }
-
-        $this->user->pass = Utils::encryptPass($this->params['password'], $this->user->salt);
-
-        $this->user->initAuthToken();
     }
 
     /**
@@ -188,20 +193,6 @@ class SignupModel
         }
 
         return isset($this->user->uid);
-    }
-
-    /**
-     * Check if a user already exists
-     * AND
-     * is active (with a user/password pair)
-     * OR do not own an active Oauth login
-     *
-     *
-     * @return bool
-     */
-    private function __userAlreadyExistsAndIsActive(): bool
-    {
-        return (isset($this->user->uid) && (!empty($this->user->email_confirmed_at) || !empty($this->user->oauth_access_token)));
     }
 
     /**
@@ -296,9 +287,9 @@ class SignupModel
         $user->email_confirmed_at = Utils::mysqlTimestamp(time());
         $user->clearAuthToken();
 
-         $this->userDao->updateStruct($user, ['fields' => ['confirmation_token', 'email_confirmed_at']]);
-         $this->userDao->destroyCacheByEmail($user->email ?? throw new RuntimeException('Missing user email'));
-         $this->userDao->destroyCacheByUid($user->uid ?? throw new RuntimeException('Missing user uid'));
+        $this->userDao->updateStruct($user, ['fields' => ['confirmation_token', 'email_confirmed_at']]);
+        $this->userDao->destroyCacheByEmail($user->email ?? throw new RuntimeException('Missing user email'));
+        $this->userDao->destroyCacheByUid($user->uid ?? throw new RuntimeException('Missing user uid'));
 
         return $user;
     }

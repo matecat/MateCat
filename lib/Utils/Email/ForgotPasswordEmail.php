@@ -21,7 +21,7 @@ class  ForgotPasswordEmail extends AbstractEmail
     /**
      * @var UserStruct
      */
-    private UserStruct $user;
+    protected UserStruct $user;
 
     public function __construct(UserStruct $user)
     {

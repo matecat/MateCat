@@ -127,14 +127,22 @@ class PasswordResetModel
 
         unset($this->session['password_reset_token']);
 
-        $salt = $user->salt ?? throw new RuntimeException('User salt must be set');
-        $user->pass = Utils::encryptPass($new_password, $salt);
+        // Accounts created through an external provider never got a salt — the OAuth insert leaves the
+        // column unset — and a NULL there used to abort this method, locking the owner out of the one
+        // flow that could give them a password at all. An empty string is no better: it hashes, but
+        // unsalted. Mint one now and persist it with the new password.
+        if (empty($user->salt)) {
+            $user->salt = Utils::randomString(32);
+        }
+
+        $user->pass = Utils::encryptPass($new_password, $user->salt);
 
         // reset token
         $user->clearAuthToken();
 
         $fieldsToUpdate = [
             'fields' => [
+                'salt',
                 'pass',
                 'confirmation_token',
                 'confirmation_token_created_at'

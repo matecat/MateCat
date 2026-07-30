@@ -12,10 +12,30 @@ use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
+use Utils\Email\SetPasswordRequestEmail;
 
 #[Group('unit')]
 class SignupModelUnitTest extends AbstractTest
 {
+
+    /** @var list<int> */
+    private array $createdUids = [];
+
+    protected function tearDown(): void
+    {
+        if ($this->createdUids !== []) {
+            $statement = obtainTestDatabase()->getConnection()->prepare("DELETE FROM users WHERE uid = ?");
+
+            foreach ($this->createdUids as $uid) {
+                $statement->execute([$uid]);
+            }
+
+            $this->createdUids = [];
+        }
+
+        parent::tearDown();
+    }
+
     #[Test]
     public function testConstructPopulatesParams()
     {
@@ -185,46 +205,6 @@ class SignupModelUnitTest extends AbstractTest
     }
 
     #[Test]
-    public function testUserAlreadyExistsAndIsActiveReturnsFalseWhenUidNotSet()
-    {
-        $session = [];
-        $model = new SignupModel(['email' => 'test@example.com'], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
-
-        $ref = new ReflectionClass($model);
-        $method = $ref->getMethod('__userAlreadyExistsAndIsActive');
-
-        $this->assertFalse($method->invoke($model));
-    }
-
-    #[Test]
-    public function testUserAlreadyExistsAndIsActiveReturnsTrueWhenEmailConfirmed()
-    {
-        $session = [];
-        $model = new SignupModel(['email' => 'test@example.com'], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
-        $model->getUser()->uid = 123;
-        $model->getUser()->email_confirmed_at = '2024-01-01 00:00:00';
-
-        $ref = new ReflectionClass($model);
-        $method = $ref->getMethod('__userAlreadyExistsAndIsActive');
-
-        $this->assertTrue($method->invoke($model));
-    }
-
-    #[Test]
-    public function testUserAlreadyExistsAndIsActiveReturnsTrueWhenHasOauthToken()
-    {
-        $session = [];
-        $model = new SignupModel(['email' => 'test@example.com'], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
-        $model->getUser()->uid = 123;
-        $model->getUser()->oauth_access_token = 'token123';
-
-        $ref = new ReflectionClass($model);
-        $method = $ref->getMethod('__userAlreadyExistsAndIsActive');
-
-        $this->assertTrue($method->invoke($model));
-    }
-
-    #[Test]
     public function testPrepareNewUserThrowsRuntimeExceptionWhenEmailIsNull()
     {
         $session = [];
@@ -252,33 +232,92 @@ class SignupModelUnitTest extends AbstractTest
         $this->assertSame('/projects/123', $session['wanted_url']);
     }
 
+    /**
+     * A signup request is unauthenticated, so submitting one for an address that already holds an
+     * account must leave that row's credentials exactly as they were. Accounts created through an
+     * external provider are the case to watch, since they carry no `email_confirmed_at`.
+     */
     #[Test]
-    public function testUpdatePersistedUserGeneratesSaltWhenEmpty()
+    #[Group('PersistenceNeeded')]
+    public function testSignupOnAnExistingOauthAccountLeavesCredentialsUntouched()
     {
+        $email = 'oauth-signup-guard-' . bin2hex(random_bytes(4)) . '@example.org';
+        $uid = $this->insertOauthOnlyUser($email);
+
         $session = [];
-        $model = new SignupModel(['email' => 'test@example.com', 'password' => 'secret123'], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
-        $model->getUser()->salt = '';
+        $model = new SignupModelWithoutMailer(
+            ['email' => $email, 'password' => 'Attacker!Pass1', 'wanted_url' => '/'],
+            $session,
+            new UserDao(obtainTestDatabase()),
+            new TeamDao(obtainTestDatabase())
+        );
+        $model->processSignup();
 
-        $ref = new ReflectionClass($model);
-        $method = $ref->getMethod('__updatePersistedUser');
-        $method->invoke($model);
+        $row = $this->fetchCredentialColumns($uid);
 
-        $this->assertNotEmpty($model->getUser()->salt);
-        $this->assertEquals(32, strlen($model->getUser()->salt));
+        $this->assertNull($row['salt'], 'signup must not write a salt onto an existing account');
+        $this->assertNull($row['pass'], 'signup must not write a password onto an existing account');
     }
 
+    /**
+     * The address is taken, so the only safe move is to hand the mailbox a token and let whoever
+     * receives it choose the password on the reset form.
+     */
     #[Test]
-    public function testUpdatePersistedUserKeepsExistingSalt()
+    #[Group('PersistenceNeeded')]
+    public function testSignupOnAnExistingOauthAccountIssuesASetPasswordToken()
     {
+        $email = 'oauth-signup-token-' . bin2hex(random_bytes(4)) . '@example.org';
+        $uid = $this->insertOauthOnlyUser($email);
+
         $session = [];
-        $model = new SignupModel(['email' => 'test@example.com', 'password' => 'secret123'], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
-        $model->getUser()->salt = 'existing_salt_v';
+        $model = new SignupModelWithoutMailer(
+            ['email' => $email, 'password' => 'Attacker!Pass1', 'wanted_url' => '/'],
+            $session,
+            new UserDao(obtainTestDatabase()),
+            new TeamDao(obtainTestDatabase())
+        );
+        $model->processSignup();
 
-        $ref = new ReflectionClass($model);
-        $method = $ref->getMethod('__updatePersistedUser');
-        $method->invoke($model);
+        $row = $this->fetchCredentialColumns($uid);
 
-        $this->assertSame('existing_salt_v', $model->getUser()->salt);
+        $this->assertNotEmpty($row['confirmation_token']);
+        $this->assertNotEmpty($row['confirmation_token_created_at']);
+        $this->assertSame(1, $model->setPasswordMailsSent, 'the mailbox owner must be told a password was requested');
+    }
+
+    /**
+     * Replica of OAuthSignInModel::_createNewUser(): first name, last name and email only, so salt
+     * and pass are left NULL by the insert.
+     */
+    private function insertOauthOnlyUser(string $email): int
+    {
+        $user = new UserStruct(['first_name' => 'Oauth', 'last_name' => 'User', 'email' => $email]);
+        $user->oauth_access_token = 'TEST_ENCRYPTED_TOKEN';
+        $user->create_date = \Utils\Tools\Utils::mysqlTimestamp(time());
+
+        $uid = (new UserDao(obtainTestDatabase()))->insertStruct($user);
+        $this->assertNotFalse($uid);
+
+        $this->createdUids[] = (int)$uid;
+
+        return (int)$uid;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function fetchCredentialColumns(int $uid): array
+    {
+        $dao = new UserDao(obtainTestDatabase());
+        $dao->destroyCacheByUid($uid);
+
+        $statement = obtainTestDatabase()->getConnection()->prepare(
+            "SELECT salt, pass, confirmation_token, confirmation_token_created_at FROM users WHERE uid = ?"
+        );
+        $statement->execute([$uid]);
+
+        return $statement->fetch(\PDO::FETCH_ASSOC);
     }
 
     #[Test]
@@ -402,4 +441,33 @@ class SignupModelUnitTest extends AbstractTest
         $this->assertSame('/path', $session['wanted_url']);
         $this->assertSame('value', $session['existing']);
     }
+}
+
+/**
+ * Counts set-password mails instead of handing them to the real mailer, so the persistence
+ * assertions can run without SMTP.
+ */
+class SignupModelWithoutMailer extends SignupModel
+{
+
+    public int $setPasswordMailsSent = 0;
+
+    protected function createSetPasswordRequestEmail(): SetPasswordRequestEmail
+    {
+        $this->setPasswordMailsSent++;
+
+        $email = $this->createStubEmail();
+
+        return $email;
+    }
+
+    private function createStubEmail(): SetPasswordRequestEmail
+    {
+        return new class ($this->getUser()) extends SetPasswordRequestEmail {
+            public function send(): void
+            {
+            }
+        };
+    }
+
 }
