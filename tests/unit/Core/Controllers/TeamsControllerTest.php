@@ -279,6 +279,13 @@ class TeamsControllerTest extends AbstractTest
             'hostname inside a pretext' => ['Verify your account at evil-login.co now'],
             'uppercase' => ['HTTPS://EVIL.COM'],
             'subdomain' => ['login.microsoftonline.com'],
+            // The email templates escape with double_encode: false, so entity text reaches the
+            // recipient and their mail client turns it back into a dot. The rule has to be
+            // applied to what the reader sees, not to what was typed.
+            'dot smuggled as a decimal entity' => ['evil&#46;com'],
+            'dot smuggled as a hex entity' => ['evil&#x2E;com'],
+            'dot smuggled as a named entity' => ['evil&period;com'],
+            'scheme smuggled as an entity' => ['https&#58;//evil.com'],
         ];
     }
 

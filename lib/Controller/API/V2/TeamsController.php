@@ -74,10 +74,18 @@ class TeamsController extends KleinController
             );
         }
 
+        // Check what the reader will end up seeing, not what was typed. The email templates
+        // escape with double_encode: false so that names stored before names were kept as
+        // typed still render correctly, which means entity text passes through to the
+        // recipient and is turned back into characters by the mail client's HTML parser.
+        // Without decoding first, "evil&#46;com" would satisfy the rules below and still
+        // arrive as a clickable "evil.com".
+        $decoded = html_entity_decode($name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
         // a scheme ("https://", "javascript:") or a "www." prefix
-        $hasUrlPrefix = preg_match('~[a-z][a-z0-9+.-]*://|\bwww\.~i', $name) === 1;
+        $hasUrlPrefix = preg_match('~[a-z][a-z0-9+.-]*://|\bwww\.~i', $decoded) === 1;
         // a bare hostname: one or more dot-separated labels ending in a letters-only TLD
-        $hasHostname = preg_match('~(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}~i', $name) === 1;
+        $hasHostname = preg_match('~(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}~i', $decoded) === 1;
 
         if ($hasUrlPrefix || $hasHostname) {
             throw new InvalidArgumentException(
