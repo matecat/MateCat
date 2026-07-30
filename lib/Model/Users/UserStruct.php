@@ -25,6 +25,16 @@ use Utils\Tools\Utils;
 class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
 
+    /**
+     * Length of the random part, sized so that a two-character scope marker plus the secret exactly
+     * fills varchar(50).
+     *
+     * 48 base62 characters is roughly 286 bits. There is no headroom left in the column: a longer
+     * marker without a matching reduction here would be truncated on write, silently, and every
+     * lookup would miss from then on.
+     */
+    private const int AUTH_TOKEN_RANDOM_LENGTH = 48;
+
     public ?int $uid = null;
     public ?string $email = null;
     public ?string $create_date = null;
@@ -71,10 +81,69 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
         $this->confirmation_token_created_at = null;
     }
 
-    public function initAuthToken(): void
+    /**
+     * Mints a token for one flow. The scope marker is stored with it, so it cannot be spent elsewhere.
+     */
+    public function initAuthToken(AuthTokenScope $scope): void
     {
-        $this->confirmation_token = Utils::randomString(50);
+        $this->confirmation_token = $scope->marker() . Utils::randomString(self::AUTH_TOKEN_RANDOM_LENGTH);
         $this->confirmation_token_created_at = Utils::mysqlTimestamp(time());
+    }
+
+    /**
+     * The token as it travels in a link: the scope marker belongs in the database, not in the URL.
+     *
+     * Each flow prepends its own marker before looking a token up, which is what makes presenting one
+     * to the wrong endpoint miss. Callers therefore never need to know a marker exists.
+     *
+     * A token carrying no recognised marker is returned unchanged — those were issued before scoping
+     * and may still be in flight.
+     */
+    public function authTokenForUrl(): string
+    {
+        $token = $this->confirmation_token ?? '';
+
+        foreach (AuthTokenScope::cases() as $scope) {
+            if (str_starts_with($token, $scope->marker())) {
+                return substr($token, strlen($scope->marker()));
+            }
+        }
+
+        return $token;
+    }
+
+    /**
+     * Keeps the current auth token when it is still usable, and mints one otherwise.
+     *
+     * {@see initAuthToken()} replaces the token unconditionally, which means a caller who only knows
+     * an address can retire a link already sitting in that mailbox simply by asking for another one.
+     * Handing back the token that is already in flight removes that: a repeated request re-sends the
+     * same link instead of replacing it.
+     *
+     * The timestamp is deliberately left alone on reuse. Refreshing it would let repeated requests
+     * slide the expiry forward without limit, which defeats the point of having a lifetime.
+     *
+     * Only a token of the same scope is reused. A pending token belonging to the other flow is
+     * replaced, because one column holds one token — so cross-flow churn remains possible, and cannot
+     * be removed without a second slot to keep both in. Same-flow requests, which are the ones an
+     * anonymous caller can trigger repeatedly, no longer churn.
+     *
+     * @return bool true when a new token was minted, false when the existing one was kept
+     */
+    public function initAuthTokenIfStale(AuthTokenScope $scope): bool
+    {
+        if (
+            $this->confirmation_token !== null
+            && str_starts_with($this->confirmation_token, $scope->marker())
+            && $this->confirmation_token_created_at !== null
+            && strtotime($this->confirmation_token_created_at) >= time() - $scope->ttlSeconds()
+        ) {
+            return false;
+        }
+
+        $this->initAuthToken($scope);
+
+        return true;
     }
 
     public static function getStruct(): UserStruct

@@ -5,6 +5,7 @@ namespace Model\Users\Authentication;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Exception;
 use Model\Teams\TeamDao;
+use Model\Users\AuthTokenScope;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
@@ -107,14 +108,16 @@ class SignupModel
      */
     private function __sendPasswordSetupRequestEmail(): void
     {
-        $this->user->initAuthToken();
-
-        $this->userDao->updateStruct($this->user, [
-            'fields' => [
-                'confirmation_token',
-                'confirmation_token_created_at'
-            ]
-        ]);
+        // A link already in flight is left as it is, so repeated requests re-send it rather than
+        // retiring it — see UserStruct::initAuthTokenIfStale().
+        if ($this->user->initAuthTokenIfStale(AuthTokenScope::PasswordReset)) {
+            $this->userDao->updateStruct($this->user, [
+                'fields' => [
+                    'confirmation_token',
+                    'confirmation_token_created_at'
+                ]
+            ]);
+        }
 
         $this->createSetPasswordRequestEmail()->send();
     }
@@ -170,7 +173,7 @@ class SignupModel
         $this->user->salt = Utils::randomString(32);
         $this->user->pass = Utils::encryptPass($this->params['password'], $this->user->salt);
 
-        $this->user->initAuthToken();
+        $this->user->initAuthToken(AuthTokenScope::SignupConfirmation);
     }
 
     /**
@@ -202,7 +205,10 @@ class SignupModel
      */
     public function confirm(): UserStruct
     {
-        $user = $this->userDao->getByConfirmationToken($this->params['token']);
+        $user = $this->userDao->getByScopedConfirmationToken(
+            $this->params['token'],
+            AuthTokenScope::SignupConfirmation
+        );
 
         if (!$user) {
             throw new ValidationError('Confirmation token not found');
@@ -212,7 +218,7 @@ class SignupModel
             throw new ValidationError('Confirmation token is invalid, please contact support.');
         }
 
-        if (strtotime($user->confirmation_token_created_at) < strtotime('3 days ago')) {
+        if (strtotime($user->confirmation_token_created_at) < time() - AuthTokenScope::SignupConfirmation->ttlSeconds()) {
             throw new ValidationError('Confirmation token is too old, please contact support.');
         }
 
@@ -239,9 +245,11 @@ class SignupModel
         $user = $this->userDao->getByEmail($this->params['email']);
 
         if ($user) {
-            $user->initAuthToken();
-
-            $this->userDao->updateStruct($user, ['fields' => ['confirmation_token', 'confirmation_token_created_at']]);
+            // Anyone can ask for a reset by naming an address, so a link already in flight has to
+            // survive the request — see UserStruct::initAuthTokenIfStale().
+            if ($user->initAuthTokenIfStale(AuthTokenScope::PasswordReset)) {
+                $this->userDao->updateStruct($user, ['fields' => ['confirmation_token', 'confirmation_token_created_at']]);
+            }
 
             $delivery = new ForgotPasswordEmail($user);
             $delivery->send();

@@ -10,6 +10,7 @@ namespace Model\Users\Authentication;
 
 use Controller\API\Commons\Exceptions\ValidationError;
 use Exception;
+use Model\Users\AuthTokenScope;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use RuntimeException;
@@ -65,7 +66,10 @@ class PasswordResetModel
      protected function getUserFromResetToken(): ?UserStruct
      {
          if (!isset($this->user)) {
-             $this->user = $this->userDao->getByConfirmationToken($this->token ?? throw new RuntimeException('Missing reset token'));
+             $this->user = $this->userDao->getByScopedConfirmationToken(
+                 $this->token ?? throw new RuntimeException('Missing reset token'),
+                 AuthTokenScope::PasswordReset
+             );
          }
 
          return $this->user;
@@ -85,7 +89,9 @@ class PasswordResetModel
 
         $this->discardExpiredToken($user);
 
-        $this->session['password_reset_token'] = $user->confirmation_token;
+        // The unmarked value, matching what the link carried: the form submission that follows reads
+        // this back and hands it to the same scoped lookup.
+        $this->session['password_reset_token'] = $user->authTokenForUrl();
     }
 
     /**
@@ -96,7 +102,7 @@ class PasswordResetModel
      */
     private function discardExpiredToken(UserStruct $user): void
     {
-        if (strtotime($user->confirmation_token_created_at ?? '') >= strtotime('30 minutes ago')) {
+        if (strtotime($user->confirmation_token_created_at ?? '') >= time() - AuthTokenScope::PasswordReset->ttlSeconds()) {
             return;
         }
 

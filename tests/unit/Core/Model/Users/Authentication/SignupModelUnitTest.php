@@ -7,6 +7,7 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\Teams\TeamDao;
 use Model\Users\Authentication\SignupModel;
+use Model\Users\AuthTokenScope;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Group;
@@ -131,7 +132,7 @@ class SignupModelUnitTest extends AbstractTest
     public function testResendConfirmationEmailCallsDaoWithValidEmail()
     {
         $user = new UserStruct(['email' => 'test@example.com', 'confirmation_token' => 'tok123']);
-        $user->initAuthToken();
+        $user->initAuthToken(AuthTokenScope::PasswordReset);
 
         $dao = $this->createMock(UserDao::class);
         $dao->expects($this->once())
@@ -287,6 +288,40 @@ class SignupModelUnitTest extends AbstractTest
     }
 
     /**
+     * Repeated signups against a taken address must not retire the link already sitting in that
+     * mailbox: minting a fresh token every time would let anyone break a reset the owner is part-way
+     * through, just by naming their address.
+     */
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function testSignupOnAnExistingAccountKeepsATokenThatIsStillFresh()
+    {
+        $email = 'oauth-signup-churn-' . bin2hex(random_bytes(4)) . '@example.org';
+        $uid = $this->insertOauthOnlyUser($email);
+
+        // a link the owner is already holding
+        $dao = new UserDao(obtainTestDatabase());
+        $existing = $dao->getByUid($uid);
+        $existing->initAuthToken(AuthTokenScope::PasswordReset);
+        $dao->updateStruct($existing, ['fields' => ['confirmation_token', 'confirmation_token_created_at']]);
+        $issuedToken = $existing->confirmation_token;
+
+        $session = [];
+        $model = new SignupModelWithoutMailer(
+            ['email' => $email, 'password' => 'Whatever!Pass1', 'wanted_url' => '/'],
+            $session,
+            new UserDao(obtainTestDatabase()),
+            new TeamDao(obtainTestDatabase())
+        );
+        $model->processSignup();
+
+        $row = $this->fetchCredentialColumns($uid);
+
+        $this->assertSame($issuedToken, $row['confirmation_token'], 'the in-flight link must still work');
+        $this->assertSame(1, $model->setPasswordMailsSent, 'and the same link is sent again');
+    }
+
+    /**
      * Replica of OAuthSignInModel::_createNewUser(): first name, last name and email only, so salt
      * and pass are left NULL by the insert.
      */
@@ -324,7 +359,7 @@ class SignupModelUnitTest extends AbstractTest
     public function testConfirmThrowsWhenTokenNotFound()
     {
         $dao = $this->createMock(UserDao::class);
-        $dao->method('getByConfirmationToken')
+        $dao->method('getByScopedConfirmationToken')
             ->with('bad_token')
             ->willReturn(null);
 
@@ -348,7 +383,7 @@ class SignupModelUnitTest extends AbstractTest
         ]);
 
         $dao = $this->createMock(UserDao::class);
-        $dao->method('getByConfirmationToken')
+        $dao->method('getByScopedConfirmationToken')
             ->with('abc123')
             ->willReturn($user);
 
@@ -374,7 +409,7 @@ class SignupModelUnitTest extends AbstractTest
         $user->uid = 1;
 
         $dao = $this->createMock(UserDao::class);
-        $dao->method('getByConfirmationToken')
+        $dao->method('getByScopedConfirmationToken')
             ->with('abc123')
             ->willReturn($user);
         $dao->method('updateStruct')->willReturn(1);

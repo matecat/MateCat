@@ -4,6 +4,7 @@
 namespace Matecat\Core\Model\Users;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\Users\AuthTokenScope;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Tools\Utils;
@@ -159,11 +160,11 @@ class UserStructTest extends AbstractTest
     {
         $user = new UserStruct();
 
-        $user->initAuthToken();
+        $user->initAuthToken(AuthTokenScope::PasswordReset);
 
         $this->assertNotNull($user->confirmation_token);
         $this->assertNotNull($user->confirmation_token_created_at);
-        $this->assertSame(50, strlen($user->confirmation_token));
+        $this->assertSame(50, strlen($user->confirmation_token), 'marker plus secret must fill varchar(50) exactly');
     }
 
     /**
@@ -246,6 +247,128 @@ class UserStructTest extends AbstractTest
         $this->assertFalse($user->rotateEmptySalt('correct-horse'));
         $this->assertNull($user->salt);
         $this->assertNull($user->pass);
+    }
+
+    /**
+     * A link already in flight has to survive another request for one, otherwise naming an address is
+     * enough to retire whatever is sitting in that mailbox.
+     */
+    #[Test]
+    public function initAuthTokenIfStaleKeepsATokenInsideItsWindow(): void
+    {
+        $user = new UserStruct();
+        $user->initAuthToken(AuthTokenScope::PasswordReset);
+        $token = $user->confirmation_token;
+        $createdAt = $user->confirmation_token_created_at;
+
+        $this->assertFalse($user->initAuthTokenIfStale(AuthTokenScope::PasswordReset));
+        $this->assertSame($token, $user->confirmation_token);
+        $this->assertSame(
+            $createdAt,
+            $user->confirmation_token_created_at,
+            'reuse must not slide the expiry forward, or repeated requests keep a token alive for ever'
+        );
+    }
+
+    #[Test]
+    public function initAuthTokenIfStaleMintsOnceTheWindowHasPassed(): void
+    {
+        $user = new UserStruct();
+        $user->initAuthToken(AuthTokenScope::PasswordReset);
+        $token = $user->confirmation_token;
+        $user->confirmation_token_created_at = date(
+            'Y-m-d H:i:s',
+            time() - AuthTokenScope::PasswordReset->ttlSeconds() - 60
+        );
+
+        $this->assertTrue($user->initAuthTokenIfStale(AuthTokenScope::PasswordReset));
+        $this->assertNotSame($token, $user->confirmation_token);
+        $this->assertSame(50, strlen((string)$user->confirmation_token));
+    }
+
+    #[Test]
+    public function initAuthTokenIfStaleMintsWhenThereIsNoTokenYet(): void
+    {
+        $user = new UserStruct();
+
+        $this->assertTrue($user->initAuthTokenIfStale(AuthTokenScope::PasswordReset));
+        $this->assertNotEmpty($user->confirmation_token);
+    }
+
+    /**
+     * The whole point of the marker: a token minted for one flow must not be reusable as the other
+     * flow's token. A pending confirmation is replaced rather than handed to the reset flow, because
+     * one column holds one token.
+     */
+    #[Test]
+    public function initAuthTokenIfStaleWillNotReuseTheOtherFlowsToken(): void
+    {
+        $user = new UserStruct();
+        $user->initAuthToken(AuthTokenScope::SignupConfirmation);
+        $confirmToken = $user->confirmation_token;
+
+        $this->assertTrue($user->initAuthTokenIfStale(AuthTokenScope::PasswordReset));
+        $this->assertNotSame($confirmToken, $user->confirmation_token);
+        $this->assertStringStartsWith(AuthTokenScope::PasswordReset->marker(), (string)$user->confirmation_token);
+    }
+
+    /**
+     * The marker is stored but never travels in the link, so each flow can prepend its own and have a
+     * mismatch miss.
+     */
+    #[Test]
+    public function authTokenForUrlStripsTheScopeMarker(): void
+    {
+        $user = new UserStruct();
+        $user->initAuthToken(AuthTokenScope::PasswordReset);
+
+        $raw = $user->authTokenForUrl();
+
+        $this->assertSame(48, strlen($raw));
+        $this->assertStringStartsNotWith(AuthTokenScope::PasswordReset->marker(), $raw);
+        $this->assertSame(AuthTokenScope::PasswordReset->marker() . $raw, $user->confirmation_token);
+    }
+
+    /**
+     * Tokens issued before scoping carry no marker and may still be in flight, so they have to pass
+     * through untouched.
+     */
+    #[Test]
+    public function authTokenForUrlLeavesAnUnmarkedLegacyTokenAlone(): void
+    {
+        $user = new UserStruct();
+        $user->confirmation_token = 'legacy-token-with-no-marker';
+
+        $this->assertSame('legacy-token-with-no-marker', $user->authTokenForUrl());
+    }
+
+    /**
+     * Each flow's lifetime must apply only to its own tokens, which is what the marker buys.
+     */
+    #[Test]
+    public function eachScopeCarriesItsOwnLifetime(): void
+    {
+        $this->assertSame(1800, AuthTokenScope::PasswordReset->ttlSeconds());
+        $this->assertSame(259200, AuthTokenScope::SignupConfirmation->ttlSeconds());
+        $this->assertNotSame(
+            AuthTokenScope::PasswordReset->marker(),
+            AuthTokenScope::SignupConfirmation->marker()
+        );
+    }
+
+    /**
+     * A token with no timestamp cannot be shown to be fresh, so it must not be treated as such.
+     */
+    #[Test]
+    public function initAuthTokenIfStaleMintsWhenTheTimestampIsMissing(): void
+    {
+        $user = new UserStruct();
+        $user->confirmation_token = 'a-token-with-no-timestamp';
+        $user->confirmation_token_created_at = null;
+
+        $this->assertTrue($user->initAuthTokenIfStale(AuthTokenScope::PasswordReset));
+        $this->assertNotSame('a-token-with-no-timestamp', $user->confirmation_token);
+        $this->assertNotNull($user->confirmation_token_created_at);
     }
 
     #[Test]

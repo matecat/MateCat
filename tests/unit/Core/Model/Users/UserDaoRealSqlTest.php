@@ -4,6 +4,7 @@ namespace Matecat\Core\Model\Users;
 
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\RealSqlDaoTestTrait;
+use Model\Users\AuthTokenScope;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Group;
@@ -39,6 +40,56 @@ class UserDaoRealSqlTest extends AbstractTest
     {
         $this->finishRealSql();
         parent::tearDown();
+    }
+
+    /**
+     * The scoped lookup is what confines a token to the flow that minted it. A confirmation token
+     * offered to the reset flow has to find nothing at all — that is what stopped a "confirm your
+     * account" link doubling as a "set any password" link.
+     */
+    public function testScopedConfirmationTokenLookupRejectsAnotherFlowsToken(): void
+    {
+        $struct = new UserStruct();
+        $struct->email = 'rsq_scope_' . bin2hex(random_bytes(6)) . '@example.test';
+        $struct->first_name = 'Scoped';
+        $struct->last_name = 'Token';
+        $struct->create_date = date('Y-m-d H:i:s');
+        $struct->initAuthToken(AuthTokenScope::SignupConfirmation);
+
+        $uid = $this->dao->insertStruct($struct);
+        $this->fixtures->trackExisting('users', ['uid' => (int)$uid]);
+
+        $raw = $struct->authTokenForUrl();
+
+        $this->assertNotNull(
+            $this->dao->getByScopedConfirmationToken($raw, AuthTokenScope::SignupConfirmation),
+            'the flow that minted the token must find it'
+        );
+        $this->assertNull(
+            $this->dao->getByScopedConfirmationToken($raw, AuthTokenScope::PasswordReset),
+            'the other flow must not find it at all'
+        );
+    }
+
+    /**
+     * Tokens stored before scoping carry no marker. They stay usable until they age out, so the
+     * fallback has to keep finding them.
+     */
+    public function testScopedConfirmationTokenLookupStillFindsUnmarkedLegacyTokens(): void
+    {
+        $legacy = 'legacy_' . bin2hex(random_bytes(16));
+
+        $struct = new UserStruct();
+        $struct->email = 'rsq_legacy_' . bin2hex(random_bytes(6)) . '@example.test';
+        $struct->first_name = 'Legacy';
+        $struct->last_name = 'Token';
+        $struct->create_date = date('Y-m-d H:i:s');
+        $struct->confirmation_token = $legacy;
+
+        $uid = $this->dao->insertStruct($struct);
+        $this->fixtures->trackExisting('users', ['uid' => (int)$uid]);
+
+        $this->assertNotNull($this->dao->getByScopedConfirmationToken($legacy, AuthTokenScope::PasswordReset));
     }
 
     public function testCreateUserPersistsAndRoundTrips(): void
