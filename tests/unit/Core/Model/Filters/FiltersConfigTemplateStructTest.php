@@ -252,6 +252,126 @@ class FiltersConfigTemplateStructTest extends AbstractTest
         $this->assertArrayHasKey('created_at', $result);
         $this->assertArrayHasKey('modified_at', $result);
     }
+
+    #[Test]
+    public function hydrateAllDto_hydrates_json_inner_content_type(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->hydrateAllDto([
+            'json' => ['inner_content_type' => 'text/html'],
+        ]);
+
+        $json = $struct->getJson();
+        $this->assertInstanceOf(Json::class, $json);
+        $this->assertSame('text/html', $json->jsonSerialize()['inner_content_type']);
+    }
+
+    #[Test]
+    public function hydrateAllDto_hydrates_json_inner_content_type_from_json_string(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->hydrateAllDto([
+            'json' => '{"inner_content_type":"text/html"}',
+        ]);
+
+        $json = $struct->getJson();
+        $this->assertInstanceOf(Json::class, $json);
+        $this->assertSame('text/html', $json->jsonSerialize()['inner_content_type']);
+    }
+
+    /**
+     * Omitting the parameter is how the caller asks for the extracted text to be treated as plain text.
+     */
+    #[Test]
+    public function hydrateAllDto_json_inner_content_type_defaults_to_null(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->hydrateAllDto([
+            'json' => [],
+        ]);
+
+        $json = $struct->getJson();
+        $this->assertInstanceOf(Json::class, $json);
+        $this->assertNull($json->jsonSerialize()['inner_content_type']);
+    }
+
+    /**
+     * An explicit null is allowed by the JSON schema and is skipped by the isset() guard in
+     * Json::fromArray(), leaving the plain text default in place.
+     */
+    #[Test]
+    public function hydrateAllDto_json_accepts_explicit_null_inner_content_type(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->hydrateAllDto([
+            'json' => ['inner_content_type' => null],
+        ]);
+
+        $json = $struct->getJson();
+        $this->assertInstanceOf(Json::class, $json);
+        $this->assertNull($json->jsonSerialize()['inner_content_type']);
+    }
+
+    #[Test]
+    public function hydrateAllDto_throws_on_invalid_json_inner_content_type(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('JSON Inner content type not valid');
+        $struct->hydrateAllDto([
+            'json' => ['inner_content_type' => 'text/plain'],
+        ]);
+    }
+
+    /**
+     * text/html is the only value the JSON filter accepts, unlike the wider YAML allow-list.
+     */
+    #[Test]
+    public function hydrateAllDto_throws_on_yaml_only_json_inner_content_type(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+
+        $this->expectException(DomainException::class);
+        $struct->hydrateAllDto([
+            'json' => ['inner_content_type' => 'text/markdown'],
+        ]);
+    }
+
+    #[Test]
+    public function hydrateFromJSON_hydrates_json_inner_content_type(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->hydrateFromJSON(json_encode([
+            'name' => 'test',
+            'uid'  => 1,
+            'json' => [
+                'extract_arrays'     => true,
+                'inner_content_type' => 'text/html',
+            ],
+        ]));
+
+        $json = $struct->getJson();
+        $this->assertInstanceOf(Json::class, $json);
+        $this->assertSame('text/html', $json->jsonSerialize()['inner_content_type']);
+    }
+
+    #[Test]
+    public function jsonSerialize_exposes_json_inner_content_type(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->hydrateFromJSON(json_encode([
+            'name' => 'test',
+            'uid'  => 1,
+            'json' => ['inner_content_type' => 'text/html'],
+            'yaml' => ['inner_content_type' => 'text/markdown'],
+        ]));
+
+        $serialized = json_decode(json_encode($struct->jsonSerialize()), true);
+
+        $this->assertSame('text/html', $serialized['json']['inner_content_type']);
+        $this->assertSame('text/markdown', $serialized['yaml']['inner_content_type']);
+    }
 }
 
 class TestableFiltersConfigTemplateStruct extends FiltersConfigTemplateStruct

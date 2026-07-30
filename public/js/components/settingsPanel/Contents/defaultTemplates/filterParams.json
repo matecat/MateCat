@@ -18,7 +18,8 @@
     "escape_forward_slashes": false,
     "translate_keys": [],
     "context_keys": [],
-    "character_limit": []
+    "character_limit": [],
+    "inner_content_type": null
   },
   "ms_word": {
     "extract_doc_properties": false,
