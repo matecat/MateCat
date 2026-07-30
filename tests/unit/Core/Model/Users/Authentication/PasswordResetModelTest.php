@@ -29,7 +29,7 @@ class PasswordResetModelTest extends AbstractTest
     private function makeMockDao(?UserStruct $user = null): UserDao
     {
         $dao = $this->createStub(UserDao::class);
-        $dao->method('getByConfirmationToken')->willReturn($user);
+        $dao->method('getByScopedConfirmationToken')->willReturn($user);
         $dao->method('updateStruct')->willReturn(1);
         $dao->method('destroyCacheByEmail')->willReturn(true);
         $dao->method('destroyCacheByUid')->willReturn(true);

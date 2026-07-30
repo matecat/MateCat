@@ -112,6 +112,33 @@ class UserDao extends AbstractDao
     }
 
     /**
+     * Finds the account holding $rawToken for one flow only.
+     *
+     * Tokens are stored with a scope marker, and links carry only the random part, so each flow
+     * prepends its own marker here. Presenting a token to the wrong endpoint therefore matches
+     * nothing — which is what stops one flow's link being spent on another, and keeps each flow's
+     * lifetime governing only its own tokens.
+     *
+     * The unmarked fallback exists for tokens issued before scoping. Those are still cross-usable,
+     * exactly as they were when they were minted, and stop being accepted once the last of them ages
+     * out of the confirmation window. Remove it then.
+     *
+     * @param string $rawToken the value taken from the link, without a marker
+     * @param AuthTokenScope $scope the flow the caller is serving
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function getByScopedConfirmationToken(string $rawToken, AuthTokenScope $scope): ?UserStruct
+    {
+        return $this->getByConfirmationToken($scope->marker() . $rawToken)
+            ?? $this->getByConfirmationToken($rawToken);
+    }
+
+    /**
+     * Matches a stored token exactly, marker included. Prefer {@see getByScopedConfirmationToken()},
+     * which is what confines a token to the flow that minted it.
+     *
      * @param string $token
      *
      * @return ?UserStruct
