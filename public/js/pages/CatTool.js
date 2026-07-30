@@ -649,9 +649,9 @@ function CatTool() {
           },
         },
         icuEnabled: !!jobMetadata.project.icu_enabled ?? false,
-        ...(Array.isArray(jobMetadata.job.mandatory_issues) && {
-          mandatoryIssues: jobMetadata.job.mandatory_issues,
-        }),
+        mandatoryIssues: Array.isArray(jobMetadata.job.mandatory_issues)
+          ? jobMetadata.job.mandatory_issues
+          : ['r1', 'r2'],
       }))
     }
   }, [
