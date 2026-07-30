@@ -5,11 +5,14 @@ import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
 import {FiltersParamsContext} from './FiltersParamsContext'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
+import {Select} from '../../../../common/Select'
 
 const SEGMENTED_CONTROL_OPTIONS = [
   {id: 'translate_keys', name: 'Translatable'},
   {id: 'do_not_translate_keys', name: 'Non-translatable'},
 ]
+
+const INNER_CONTENT_TYPE_OPTIONS = [{id: 'text/html', name: 'HTML'}]
 
 export const Json = () => {
   const {
@@ -228,6 +231,32 @@ export const Json = () => {
               value={value}
               onChange={onChange}
               placeholder={''}
+            />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
+          <h3>Translatable text content type</h3>
+          <p>
+            Select the content type of the translatable text to optimize
+            segmentation and tags.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="inner_content_type"
+          render={({field: {onChange, value, name}}) => (
+            <Select
+              name={name}
+              placeholder="Select inner content type"
+              options={INNER_CONTENT_TYPE_OPTIONS}
+              activeOption={INNER_CONTENT_TYPE_OPTIONS?.find(
+                ({id}) => id === value,
+              )}
+              onSelect={(option) => onChange(option.id)}
+              maxHeightDroplist={260}
             />
           )}
         />
