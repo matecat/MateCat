@@ -8,12 +8,14 @@ import {EMAIL_PATTERN} from '../../constants/Constants'
 import ManageActions from '../../actions/ManageActions'
 import ModalsActions from '../../actions/ModalsActions'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import {getApiErrorMessage} from '../../utils/getApiErrorMessage'
 
 export const CreateTeam = () => {
   const {userInfo} = useContext(ApplicationWrapperContext)
 
   const [teamName, setTeamName] = useState('')
   const [emailsCollection, setEmailsCollection] = useState([])
+  const [nameError, setNameError] = useState(null)
 
   const onChangeAddMembers = useCallback(
     (emails) => setEmailsCollection(emails),
@@ -21,8 +23,13 @@ export const CreateTeam = () => {
   )
 
   const sendCreate = () => {
+    setNameError(null)
+    // The modal used to close before the request settled, so a name the server refuses — it
+    // rejects names that read as a link — looked like a successful creation. Close only on
+    // success, and keep the reason next to the field otherwise.
     ManageActions.createTeam(teamName, emailsCollection)
-    ModalsActions.onCloseModal()
+      .then(() => ModalsActions.onCloseModal())
+      .catch((rejection) => setNameError(getApiErrorMessage(rejection)))
   }
 
   const {user, metadata} = userInfo
@@ -54,8 +61,16 @@ export const CreateTeam = () => {
             placeholder="Team name"
             type="text"
             value={teamName}
-            onChange={(e) => setTeamName(e.currentTarget.value)}
+            onChange={(e) => {
+              setNameError(null)
+              setTeamName(e.currentTarget.value)
+            }}
           />
+          {nameError && (
+            <p className="team-name-error" role="alert">
+              {nameError}
+            </p>
+          )}
         </div>
       </div>
       <div>
