@@ -48,6 +48,7 @@ use Utils\Engines\Intento;
 use Utils\Registry\AppConfig;
 use Utils\Templating\PHPTalBoolean;
 use Utils\Templating\PHPTalMap;
+use Utils\Templating\PHPTalString;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 
@@ -236,7 +237,10 @@ class CattoolController extends BaseKleinViewController
             'tag_projection_languages' => new PHPTalMap(LexiQaAndTagProjectionLanguages::$tagProjectionAllowedLanguages),
             'targetIsCJK' => new PHPTalBoolean(CatUtils::isCJK($chunkStruct->target)),
             'target_code' => $chunkStruct->target,
-            'team_name' => $jobOwnership['team']->name ?? '',
+            // The team name is user supplied and lands inside an inline <script>, where
+            // PHPTAL emits interpolations verbatim. PHPTalString renders it as its own
+            // quoted JSON literal so it cannot close the literal or the script element.
+            'team_name' => new PHPTalString($jobOwnership['team']->name ?? ''),
             'tms_enabled' => new PHPTalBoolean((bool)$chunkStruct->id_tms),
             'translation_engines_intento_providers' => new PHPTalMap(Intento::getProviderList()),
             'translation_matches_enabled' => new PHPTalBoolean(true),

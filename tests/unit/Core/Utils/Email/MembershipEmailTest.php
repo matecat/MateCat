@@ -40,6 +40,84 @@ class MembershipEmailTest extends AbstractTest
         return $sender;
     }
 
+    /**
+     * Team names are stored as typed, so a name carrying CR/LF must not be able to continue
+     * the Subject header into one of its own.
+     */
+    public function testMembershipCreatedEmailSubjectCannotCarryLineBreaks(): void
+    {
+        $membership = $this->makeMembershipWithTeam();
+        $team = new TeamStruct();
+        $team->id = 10;
+        $team->name = "Evil\r\nBcc: victim";
+        (new ReflectionProperty(MembershipStruct::class, 'team'))->setValue($membership, $team);
+
+        $email = new MembershipCreatedEmail(
+            $this->makeSender(),
+            $membership,
+            $this->makeUserDao(),
+            $this->makeTeamDao()
+        );
+
+        $title = (new ReflectionProperty($email, 'title'))->getValue($email);
+        $this->assertIsString($title);
+        $this->assertStringNotContainsString("\r", $title);
+        $this->assertStringNotContainsString("\n", $title);
+        $this->assertStringContainsString('Evil Bcc: victim', $title);
+    }
+
+    public function testMembershipDeletedEmailSubjectCannotCarryLineBreaks(): void
+    {
+        $email = new MembershipDeletedEmail(
+            $this->makeSender(),
+            $this->makeUser(),
+            $this->makeTeam("Evil\nBcc: victim")
+        );
+
+        $title = (new ReflectionProperty($email, 'title'))->getValue($email);
+        $this->assertIsString($title);
+        $this->assertStringNotContainsString("\n", $title);
+    }
+
+    /**
+     * The shared email layout prints the subject as the document title, the preheader and the
+     * <h1>. The subject of a membership email contains the team name, which is now stored as
+     * typed, so the layout has to escape it.
+     */
+    public function testTheLayoutEscapesATeamNameCarriedInTheTitle(): void
+    {
+        $email = new MembershipDeletedEmail(
+            $this->makeSender(),
+            $this->makeUser(),
+            $this->makeTeam('<img src=x onerror=alert(1)>')
+        );
+
+        $method = new ReflectionMethod($email, '_buildHTMLMessage');
+        $html = (string)$method->invoke($email, '<p>body</p>');
+
+        $this->assertStringNotContainsString('<img src=x', $html);
+        $this->assertStringContainsString('&lt;img src=x onerror=alert(1)&gt;', $html);
+    }
+
+    /**
+     * A name that is still entity-encoded from before names were stored as typed must not be
+     * encoded a second time, or the reader sees "&amp;lt;".
+     */
+    public function testTheLayoutDoesNotDoubleEncodeALegacyEncodedTeamName(): void
+    {
+        $email = new MembershipDeletedEmail(
+            $this->makeSender(),
+            $this->makeUser(),
+            $this->makeTeam('A &amp; B')
+        );
+
+        $method = new ReflectionMethod($email, '_buildHTMLMessage');
+        $html = (string)$method->invoke($email, '<p>body</p>');
+
+        $this->assertStringContainsString('A &amp; B', $html);
+        $this->assertStringNotContainsString('&amp;amp;', $html);
+    }
+
     private function makeMembershipWithTeam(): MembershipStruct
     {
         $struct = new MembershipStruct();

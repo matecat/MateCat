@@ -75,6 +75,20 @@ abstract class AbstractEmail
     /**
      * @return string
      */
+    /**
+     * Make a value safe to place in a mail header.
+     *
+     * Team names are stored as the user typed them, so a name carrying CR or LF could
+     * otherwise continue the Subject header into one of its own. PHPMailer strips line breaks
+     * from headers as well, but a header context should not depend on a library internal.
+     */
+    protected function headerSafe(?string $value): string
+    {
+        $collapsed = preg_replace('/\s+/u', ' ', str_replace(["\r", "\n"], ' ', $value ?? ''));
+
+        return trim($collapsed ?? '');
+    }
+
     protected function _buildMessageContent(): string
     {
         ob_start();

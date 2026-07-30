@@ -12,6 +12,7 @@ namespace Controller\API\V2;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
+use Controller\Traits\TeamInvitationRateLimitTrait;
 use Exception;
 use Model\Teams\PendingInvitations;
 use Model\Teams\TeamDao;
@@ -25,6 +26,8 @@ use View\API\V2\Json\Membership;
 
 class TeamMembersController extends KleinController
 {
+
+    use TeamInvitationRateLimitTrait;
 
     protected function registerValidators(): void
     {
@@ -84,6 +87,10 @@ class TeamMembersController extends KleinController
             is_array($params['members']) ? $params['members'] : [],
             'is_string'
         ));
+        if ($this->isOverInvitationRateLimit($this->response, $this->user, '/api/v2/teams/members')) {
+            return;
+        }
+
         $model->addMemberEmails($members);
         $full_members_list = $model->updateMembers();
 
