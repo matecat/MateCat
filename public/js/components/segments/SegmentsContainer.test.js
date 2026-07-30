@@ -77,8 +77,6 @@ jest.mock('../../constants/SegmentConstants', () => ({
 
 jest.mock('../../constants/CatToolConstants', () => ({
   STORE_FILES_INFO: 'STORE_FILES_INFO',
-  TOGGLE_CONTAINER: 'TOGGLE_CONTAINER',
-  CLOSE_SUBHEADER: 'CLOSE_SUBHEADER',
   CLIENT_CONNECT: 'CLIENT_CONNECT',
 }))
 
@@ -333,14 +331,6 @@ describe('SegmentsContainer', () => {
         expect.any(Function),
       )
       expect(CatToolStore.addListener).toHaveBeenCalledWith(
-        CatToolConstants.TOGGLE_CONTAINER,
-        expect.any(Function),
-      )
-      expect(CatToolStore.addListener).toHaveBeenCalledWith(
-        CatToolConstants.CLOSE_SUBHEADER,
-        expect.any(Function),
-      )
-      expect(CatToolStore.addListener).toHaveBeenCalledWith(
         CatToolConstants.CLIENT_CONNECT,
         expect.any(Function),
       )
@@ -405,40 +395,6 @@ describe('SegmentsContainer', () => {
       act(() => {
         mockCatToolStoreListeners[CatToolConstants.CLIENT_CONNECT](null)
       })
-    })
-  })
-
-  describe('TOGGLE_CONTAINER event', () => {
-    test('toggles search bar open when container is "search"', () => {
-      renderComponent()
-      act(() => {
-        mockCatToolStoreListeners[CatToolConstants.TOGGLE_CONTAINER]('search')
-      })
-      act(() => {
-        mockCatToolStoreListeners[CatToolConstants.TOGGLE_CONTAINER]('search')
-      })
-      // No crash
-    })
-
-    test('does not toggle search bar when container is not "search"', () => {
-      renderComponent()
-      act(() => {
-        mockCatToolStoreListeners[CatToolConstants.TOGGLE_CONTAINER]('other')
-      })
-      // No crash, state unchanged
-    })
-  })
-
-  describe('CLOSE_SUBHEADER event', () => {
-    test('closes search bar', () => {
-      renderComponent()
-      act(() => {
-        mockCatToolStoreListeners[CatToolConstants.TOGGLE_CONTAINER]('search')
-      })
-      act(() => {
-        mockCatToolStoreListeners[CatToolConstants.CLOSE_SUBHEADER]()
-      })
-      // No crash
     })
   })
 
