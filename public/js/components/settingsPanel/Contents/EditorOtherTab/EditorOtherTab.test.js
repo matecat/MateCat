@@ -5,7 +5,7 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {updateJobMetadata} from '../../../../api/updateJobMetadata'
 
 jest.mock('../../../../api/updateJobMetadata', () => ({
-  updateJobMetadata: jest.fn(),
+  updateJobMetadata: jest.fn(() => Promise.resolve({})),
 }))
 
 jest.mock('../OtherTab/Tagging', () => ({

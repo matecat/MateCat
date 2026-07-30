@@ -1049,7 +1049,7 @@ class SetTranslationControllerTest extends AbstractTest
             'time_to_edit' => 1000,
         ]);
 
-        $fuzzyWarningJson = json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Fuzzy match confirmed without changes']]);
+        $fuzzyWarningJson = json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Unedited fuzzy match confirmed']]);
         $qa = $this->makeFuzzyAwareQAStub(false, true, $fuzzyWarningJson);
 
         $method = (new ReflectionClass(SetTranslationController::class))->getMethod('buildNewTranslation');
@@ -1082,7 +1082,7 @@ class SetTranslationControllerTest extends AbstractTest
             'time_to_edit' => 1000,
         ]);
 
-        $fuzzyWarningJson = json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Fuzzy match confirmed without changes']]);
+        $fuzzyWarningJson = json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Unedited fuzzy match confirmed']]);
         $qa = $this->makeFuzzyAwareQAStub(false, true, $fuzzyWarningJson);
 
         $method = (new ReflectionClass(SetTranslationController::class))->getMethod('buildNewTranslation');
@@ -1113,7 +1113,7 @@ class SetTranslationControllerTest extends AbstractTest
             'time_to_edit' => 1000,
         ]);
 
-        $fuzzyWarningJson = json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Fuzzy match confirmed without changes']]);
+        $fuzzyWarningJson = json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Unedited fuzzy match confirmed']]);
         $qa = $this->makeFuzzyAwareQAStub(false, true, $fuzzyWarningJson);
 
         $method = (new ReflectionClass(SetTranslationController::class))->getMethod('buildNewTranslation');
@@ -1144,7 +1144,7 @@ class SetTranslationControllerTest extends AbstractTest
             'time_to_edit' => 1000,
         ]);
 
-        $fuzzyWarningJson = json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Fuzzy match confirmed without changes']]);
+        $fuzzyWarningJson = json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Unedited fuzzy match confirmed']]);
         $qa = $this->makeFuzzyAwareQAStub(false, true, $fuzzyWarningJson);
 
         $method = (new ReflectionClass(SetTranslationController::class))->getMethod('buildNewTranslation');

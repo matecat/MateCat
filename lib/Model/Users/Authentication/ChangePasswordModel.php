@@ -51,8 +51,13 @@ class ChangePasswordModel
 
         $this->user->pass = Utils::encryptPass($new_password, $salt);
 
+        // Retire any reset link already issued for this account. A token stays valid for 30 minutes
+        // from the moment it was created, so without this a link sitting in the user's mailbox
+        // outlives the password change and can be used to set a third password.
+        $this->user->clearAuthToken();
+
         $fieldsToUpdate = [
-            'fields' => ['pass']
+            'fields' => ['pass', 'confirmation_token', 'confirmation_token_created_at']
         ];
 
         // update email_confirmed_at only if it's null

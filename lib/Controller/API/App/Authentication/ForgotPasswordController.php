@@ -150,8 +150,11 @@ class ForgotPasswordController extends AbstractStatefulKleinController
     public function setNewPassword(): void
     {
         $reset = $this->createPasswordResetModel($_SESSION);
-        $new_password = (string) filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS);
-        $password_confirmation = (string) filter_var($this->request->param('password_confirmation'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $this->rejectControlCharacters($this->request->param('password'));
+        $this->rejectControlCharacters($this->request->param('password_confirmation'));
+        // Unescaped on purpose: this value is hashed, and the login form compares against that hash.
+        $new_password = (string)$this->request->param('password');
+        $password_confirmation = (string)$this->request->param('password_confirmation');
         $this->validatePasswordRequirements($new_password, $password_confirmation);
         $reset->resetPassword($new_password);
         $this->user = $reset->getUser() ?? throw new RuntimeException('User not found after password reset');

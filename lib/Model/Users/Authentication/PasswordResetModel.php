@@ -81,18 +81,29 @@ class PasswordResetModel
     {
         $this->getUserFromResetToken();
 
-        if (!$this->user) {
-            throw new ValidationError('Invalid authentication token');
+        $user = $this->user ?? throw new ValidationError('Invalid authentication token');
+
+        $this->discardExpiredToken($user);
+
+        $this->session['password_reset_token'] = $user->confirmation_token;
+    }
+
+    /**
+     * Clears the token and refuses to go on once it is older than its lifetime.
+     *
+     * @throws ValidationError if the token has expired
+     * @throws Exception if an error occurs
+     */
+    private function discardExpiredToken(UserStruct $user): void
+    {
+        if (strtotime($user->confirmation_token_created_at ?? '') >= strtotime('30 minutes ago')) {
+            return;
         }
 
-        if (strtotime($this->user->confirmation_token_created_at ?? '') < strtotime('30 minutes ago')) {
-            $this->user->clearAuthToken();
-            $this->userDao->updateStruct($this->user, ['fields' => ['confirmation_token']]);
+        $user->clearAuthToken();
+        $this->userDao->updateStruct($user, ['fields' => ['confirmation_token']]);
 
-            throw new ValidationError('Auth token expired, repeat the operation.');
-        }
-
-        $this->session['password_reset_token'] = $this->user->confirmation_token;
+        throw new ValidationError('Auth token expired, repeat the operation.');
     }
 
     /**
@@ -107,17 +118,20 @@ class PasswordResetModel
     {
         $this->getUserFromResetToken();
 
-        if (!$this->user) {
-            throw new ValidationError('Invalid authentication token');
-        }
+        $user = $this->user ?? throw new ValidationError('Invalid authentication token');
+
+        // validateUser() checks the age when the link is opened, but the form submission that follows
+        // reads the token back out of the session and arrives here instead. Age has to be checked
+        // again, or a token stays usable for as long as the session lives.
+        $this->discardExpiredToken($user);
 
         unset($this->session['password_reset_token']);
 
-        $salt = $this->user->salt ?? throw new RuntimeException('User salt must be set');
-        $this->user->pass = Utils::encryptPass($new_password, $salt);
+        $salt = $user->salt ?? throw new RuntimeException('User salt must be set');
+        $user->pass = Utils::encryptPass($new_password, $salt);
 
         // reset token
-        $this->user->clearAuthToken();
+        $user->clearAuthToken();
 
         $fieldsToUpdate = [
             'fields' => [
@@ -128,14 +142,14 @@ class PasswordResetModel
         ];
 
         // update email_confirmed_at only if it's null
-        if (null === $this->user->email_confirmed_at) {
-            $this->user->email_confirmed_at = date('Y-m-d H:i:s');
+        if (null === $user->email_confirmed_at) {
+            $user->email_confirmed_at = date('Y-m-d H:i:s');
             $fieldsToUpdate['fields'][] = 'email_confirmed_at';
         }
 
-        $this->userDao->updateStruct($this->user, $fieldsToUpdate);
-        $this->userDao->destroyCacheByEmail($this->user->email ?? throw new RuntimeException('User email must be set before cache invalidation'));
-        $this->userDao->destroyCacheByUid($this->user->uid ?? throw new RuntimeException('User uid must be set before cache invalidation'));
+        $this->userDao->updateStruct($user, $fieldsToUpdate);
+        $this->userDao->destroyCacheByEmail($user->email ?? throw new RuntimeException('User email must be set before cache invalidation'));
+        $this->userDao->destroyCacheByUid($user->uid ?? throw new RuntimeException('User uid must be set before cache invalidation'));
     }
 
     /**

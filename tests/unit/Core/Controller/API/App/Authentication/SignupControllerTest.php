@@ -519,4 +519,103 @@ class SignupControllerTest extends AbstractTest
 
         $this->assertSame(200, $this->controller->getResponse()->code());
     }
+
+    // ─── control characters in the password ───────────────────────────
+
+    #[Test]
+    public function validateCreationRequest_throws_when_password_contains_a_control_character(): void
+    {
+        $this->request->method('param')->willReturn([
+            'email' => 'test@example.com',
+            'password' => "Valid!Pass\tword1",
+            'password_confirmation' => "Valid!Pass\tword1",
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'wanted_url' => 'https://example.com',
+        ]);
+
+        // A tab reaches validation encoded as &#9; by the sanitising filter, so the generic illegal
+        // character rule already rejects it, but only as a side effect of that encoding and with a
+        // message that never says what was wrong. The rule has to be explicit about it.
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('control characters');
+        $this->invokeValidateCreationRequest();
+    }
+
+    #[Test]
+    public function validateCreationRequest_throws_when_password_contains_a_null_byte(): void
+    {
+        $this->request->method('param')->willReturn([
+            'email' => 'test@example.com',
+            'password' => "Valid!Password1\0",
+            'password_confirmation' => "Valid!Password1\0",
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'wanted_url' => 'https://example.com',
+        ]);
+
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('control characters');
+        $this->invokeValidateCreationRequest();
+    }
+
+    #[Test]
+    public function validateCreationRequest_accepts_a_password_of_printable_characters(): void
+    {
+        $this->request->method('param')->willReturn([
+            'email' => 'test@example.com',
+            'password' => 'Valid!Password1',
+            'password_confirmation' => 'Valid!Password1',
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'wanted_url' => 'https://example.com',
+        ]);
+
+        // The guard must not narrow what a legitimate user may choose: every printable character is
+        // still acceptable, and the value must survive validation unaltered.
+        $user = $this->invokeValidateCreationRequest();
+
+        $this->assertSame('Valid!Password1', $user['password']);
+    }
+
+    #[Test]
+    public function validateCreationRequest_accepts_a_password_containing_html_special_characters(): void
+    {
+        $this->request->method('param')->willReturn([
+            'email' => 'test@example.com',
+            'password' => 'Valid&Pass<word>1',
+            'password_confirmation' => 'Valid&Pass<word>1',
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'wanted_url' => 'https://example.com',
+        ]);
+
+        // These five characters are the ones the sanitising filter rewrites, and the special-character
+        // rule has always advertised them as valid choices. A password is compared against a hash and
+        // never rendered, so escaping it only shrinks the usable character set and has to reach the
+        // hash exactly as the user typed it.
+        $user = $this->invokeValidateCreationRequest();
+
+        $this->assertSame('Valid&Pass<word>1', $user['password']);
+    }
+
+    #[Test]
+    public function validateCreationRequest_measures_the_minimum_length_in_characters_not_bytes(): void
+    {
+        $this->request->method('param')->willReturn([
+            'email' => 'test@example.com',
+            'password' => '密碼密!碼碼碼',
+            'password_confirmation' => '密碼密!碼碼碼',
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'wanted_url' => 'https://example.com',
+        ]);
+
+        // Seven characters, nineteen bytes. Measured in bytes this clears a twelve character minimum
+        // while being far shorter than the rule intends, and the shortfall grows with every non-Latin
+        // alphabet.
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('at least 12 characters');
+        $this->invokeValidateCreationRequest();
+    }
 }

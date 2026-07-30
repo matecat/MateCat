@@ -170,4 +170,42 @@ class TeamAccessValidatorTest extends AbstractTest
 
         $validator->_validate();
     }
+
+    // ─── setIdTeam: for routes that carry no id_team parameter ─────────
+
+    #[Test]
+    public function setIdTeam_checks_the_supplied_team_and_ignores_the_request(): void
+    {
+        // Some routes address a job, not a team, and derive the team from projects.id_team on the
+        // server. The supplied value has to win over anything the request happens to carry.
+        $this->setRequest(['id_team' => '99999999']);
+
+        $validator = new TeamAccessValidator($this->controller);
+        $validator->setIdTeam(self::TEAM_ID);
+        $validator->_validate();
+
+        $this->assertInstanceOf(TeamStruct::class, $validator->team);
+        $this->assertSame(self::TEAM_ID, $validator->team->id);
+    }
+
+    #[Test]
+    public function setIdTeam_names_the_team_but_does_not_grant_access(): void
+    {
+        // The whole point of the setter: it selects which team is checked, never whether the caller
+        // passes. A non-member must still be refused even when the team is handed over directly.
+        $attacker = new UserStruct();
+        $attacker->uid = self::ATTACKER_UID;
+        $attacker->email = 'attacker_9910000@example.org';
+        $this->setCtrlProp('user', $attacker);
+
+        $this->setRequest([]);
+
+        $validator = new TeamAccessValidator($this->controller);
+        $validator->setIdTeam(self::TEAM_ID);
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionCode(401);
+
+        $validator->_validate();
+    }
 }

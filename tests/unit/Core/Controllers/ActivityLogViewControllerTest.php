@@ -13,6 +13,7 @@ namespace Matecat\Core\Controllers;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Controller\API\Commons\Validators\Base as ValidatorBase;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
+use Controller\API\Commons\Validators\TeamAccessValidator;
 use Controller\Exceptions\RenderTerminatedException;
 use Controller\Views\ActivityLogController;
 use Klein\DataCollection\DataCollection;
@@ -22,6 +23,7 @@ use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
+use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
@@ -83,6 +85,12 @@ class ActivityLogViewControllerTest extends AbstractTest
     private const int ACTIVITY_ID = 9063020;
     private const string PROJECT_PASSWORD = 'projpw';
 
+    /** A logged-in user who is not a member of the project's team. */
+    private const int OUTSIDER_UID = 9063050;
+
+    /** A project owned by no team, to prove a null id_team is refused rather than trusted. */
+    private const int NO_TEAM_PROJECT_ID = 9063060;
+
     /** @var ReflectionClass<TestableActivityLogViewController> */
     private ReflectionClass $reflector;
     private TestableActivityLogViewController $controller;
@@ -135,6 +143,8 @@ class ActivityLogViewControllerTest extends AbstractTest
         $owner = $this->ownerEmail(self::BASE);
 
         $this->seedUser(self::BASE);
+        $this->seedTeam(self::BASE);
+        $this->seedMembership(self::BASE);
         $this->seedProject(self::BASE, $owner, self::PROJECT_PASSWORD);
         $this->seedFile(self::BASE);
         $this->seedJob(self::BASE, $owner);
@@ -157,10 +167,23 @@ class ActivityLogViewControllerTest extends AbstractTest
     /**
      * @throws \PDOException
      */
+    private function seedNoTeamProject(): void
+    {
+        $owner = $this->ownerEmail(self::BASE);
+        obtainTestDatabase()->getConnection()->exec(
+            "INSERT IGNORE INTO projects (id, id_customer, password, name, create_date, status_analysis, id_team) "
+            . "VALUES (" . self::NO_TEAM_PROJECT_ID . ", '$owner', '" . self::PROJECT_PASSWORD . "', 'CtrlNoTeamProject', NOW(), 'DONE', NULL)"
+        );
+    }
+
+    /**
+     * @throws \PDOException
+     */
     private function cleanTestData(): void
     {
         $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM activity_log WHERE ID = " . self::ACTIVITY_ID);
+        $conn->exec("DELETE FROM projects WHERE id = " . self::NO_TEAM_PROJECT_ID);
         $this->cleanFragments(self::BASE);
     }
 
@@ -174,6 +197,33 @@ class ActivityLogViewControllerTest extends AbstractTest
         $paramsNamed = $this->createStub(DataCollection::class);
         $paramsNamed->method('all')->willReturn($params);
         $this->requestStub->method('paramsNamed')->willReturn($paramsNamed);
+    }
+
+    /**
+     * Populate the real validator chain on the controller and return it.
+     *
+     * @return list<mixed>
+     * @throws \Throwable
+     */
+    private function buildRealValidators(): array
+    {
+        $realReflector = new ReflectionClass(ActivityLogController::class);
+        $realReflector->getMethod('registerValidators')->invoke($this->controller);
+
+        /** @var list<mixed> $validators */
+        $validators = $this->reflector->getProperty('validators')->getValue($this->controller);
+
+        return $validators;
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    private function setControllerUser(int $uid): void
+    {
+        $user = new UserStruct();
+        $user->uid = $uid;
+        $this->reflector->getProperty('user')->setValue($this->controller, $user);
     }
 
     // ─── validateTheRequest ───
@@ -269,12 +319,8 @@ class ActivityLogViewControllerTest extends AbstractTest
     #[Test]
     public function projectPasswordValidatorOnFailureSetsProjectNotFoundTemplate(): void
     {
-        $realReflector = new ReflectionClass(ActivityLogController::class);
-        $realReflector->getMethod('registerValidators')->invoke($this->controller);
-
-        /** @var list<mixed> $validators */
-        $validators = $this->reflector->getProperty('validators')->getValue($this->controller);
-        $this->assertCount(2, $validators);
+        $validators = $this->buildRealValidators();
+        $this->assertCount(3, $validators);
         $passwordValidator = $validators[1];
         $this->assertInstanceOf(ProjectPasswordValidator::class, $passwordValidator);
 
@@ -291,13 +337,121 @@ class ActivityLogViewControllerTest extends AbstractTest
         }
     }
 
+    // ─── TeamAccessValidator onFailure closure ───
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function teamAccessValidatorOnFailureSetsProjectNotFoundTemplate(): void
+    {
+        $validators = $this->buildRealValidators();
+        $this->assertCount(3, $validators);
+        $teamValidator = $validators[2];
+        $this->assertInstanceOf(TeamAccessValidator::class, $teamValidator);
+
+        $baseReflector = new ReflectionClass(ValidatorBase::class);
+        $callback = $baseReflector->getProperty('_failureCallback')->getValue($teamValidator);
+        $this->assertInstanceOf(\Closure::class, $callback);
+
+        try {
+            $callback(new \Exception('forced team access validator failure'));
+            $this->fail('Expected RenderTerminatedException');
+        } catch (RenderTerminatedException) {
+            $this->assertSame('project_not_found.html', $this->controller->lastTemplate);
+            $this->assertSame(404, $this->controller->lastViewCode);
+        }
+    }
+
+    // ─── real validator pipeline: team membership enforcement ───
+
+    /**
+     * A member of the project's team passes: the password validator resolves the project, its
+     * onSuccess seeds the team, and the team validator confirms membership without rendering.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function realPipelineResolvesTeamForAProjectTeamMember(): void
+    {
+        $this->controller->params = [
+            'id_project' => (string) $this->projectId(self::BASE),
+            'password' => self::PROJECT_PASSWORD,
+        ];
+
+        $validators = $this->buildRealValidators();
+        $teamValidator = $validators[2];
+        $this->assertInstanceOf(TeamAccessValidator::class, $teamValidator);
+
+        $validators[1]->validate();
+        $validators[2]->validate();
+
+        $this->assertInstanceOf(TeamStruct::class, $teamValidator->team);
+        $this->assertSame($this->teamId(self::BASE), $teamValidator->team->id);
+    }
+
+    /**
+     * A logged-in user outside the owning team is refused with the non-disclosing 404, even with the
+     * correct project password.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function realPipelineBlocksNonTeamMember(): void
+    {
+        $this->setControllerUser(self::OUTSIDER_UID);
+        $this->controller->params = [
+            'id_project' => (string) $this->projectId(self::BASE),
+            'password' => self::PROJECT_PASSWORD,
+        ];
+
+        $validators = $this->buildRealValidators();
+
+        $validators[1]->validate();
+
+        try {
+            $validators[2]->validate();
+            $this->fail('Expected RenderTerminatedException');
+        } catch (RenderTerminatedException) {
+            $this->assertSame('project_not_found.html', $this->controller->lastTemplate);
+            $this->assertSame(404, $this->controller->lastViewCode);
+        }
+    }
+
+    /**
+     * A project with no team has nobody to be a member of, so the onSuccess seeding refuses the null
+     * id_team rather than passing it to the membership lookup.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function realPipelineBlocksProjectWithoutTeam(): void
+    {
+        $this->seedNoTeamProject();
+
+        $this->controller->params = [
+            'id_project' => (string) self::NO_TEAM_PROJECT_ID,
+            'password' => self::PROJECT_PASSWORD,
+        ];
+
+        $validators = $this->buildRealValidators();
+
+        try {
+            $validators[1]->validate();
+            $this->fail('Expected RenderTerminatedException');
+        } catch (RenderTerminatedException) {
+            $this->assertSame('project_not_found.html', $this->controller->lastTemplate);
+            $this->assertSame(404, $this->controller->lastViewCode);
+        }
+    }
+
     // ─── registerValidators (production hook) ───
 
     /**
      * @throws \Throwable
      */
     #[Test]
-    public function registerValidatorsAppendsViewLoginRedirectAndProjectPasswordValidators(): void
+    public function registerValidatorsAppendsLoginProjectPasswordAndTeamAccessValidators(): void
     {
         $realReflector = new ReflectionClass(ActivityLogController::class);
         /** @var ActivityLogController $realController */
@@ -311,8 +465,9 @@ class ActivityLogViewControllerTest extends AbstractTest
 
         /** @var list<mixed> $validators */
         $validators = $realReflector->getProperty('validators')->getValue($realController);
-        $this->assertCount(2, $validators);
+        $this->assertCount(3, $validators);
         $this->assertInstanceOf(ViewLoginRedirectValidator::class, $validators[0]);
         $this->assertInstanceOf(ProjectPasswordValidator::class, $validators[1]);
+        $this->assertInstanceOf(TeamAccessValidator::class, $validators[2]);
     }
 }
