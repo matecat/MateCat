@@ -48,7 +48,7 @@ class Yaml implements IDto
             'text/x-markdown',
         ];
 
-        if (!in_array($inner_content_type, $mimeTypes)) {
+        if ($inner_content_type !== null && !in_array($inner_content_type, $mimeTypes)) {
             throw new DomainException(
                 "YAML Inner content type not valid. Allowed values: ['text/html', 'text/xml', 'application/xml', 'text/csv', 'application/json', 'text/markdown', 'text/x-markdown']"
             );

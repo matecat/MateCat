@@ -1640,6 +1640,45 @@ class CatUtilsTest extends AbstractTest
         $this->assertInstanceOf(Json::class, $result);
     }
 
+    /**
+     * The JSON extraction parameters must reach the converter with inner_content_type intact,
+     * so the extracted text is interpreted as HTML instead of plain text.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function testGetRightExtractionParameterJsonCarriesInnerContentType(): void
+    {
+        $json = new Json();
+        $json->setInnerContentType('text/html');
+
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->json = $json;
+
+        $result = $this->invokeGetRightExtractionParameter('file.json', $struct);
+
+        $this->assertInstanceOf(Json::class, $result);
+        $this->assertSame('text/html', $result->jsonSerialize()['inner_content_type']);
+    }
+
+    /**
+     * CatUtils::deleteSha() discriminates cached conversions by sha1(json_encode($extractionParams)),
+     * so toggling inner_content_type must produce a different hash and force a re-conversion.
+     */
+    #[Test]
+    public function testJsonInnerContentTypeChangesExtractionParameterHash(): void
+    {
+        $plainText = new Json();
+
+        $html = new Json();
+        $html->setInnerContentType('text/html');
+
+        $this->assertNotSame(
+            sha1(json_encode($plainText)),
+            sha1(json_encode($html))
+        );
+    }
+
     #[Test]
     public function testGetRightExtractionParameterXml(): void
     {
