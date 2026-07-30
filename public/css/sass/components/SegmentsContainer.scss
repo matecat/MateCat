@@ -135,13 +135,15 @@
 }
 
 .project-bar-blink {
-  animation: blinkBackground 1s;
+  animation: blinkBackground 1.2s;
+  animation-iteration-count: 3;
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
 }
 
 .project-bar-blink-wordcounter {
-  animation: blinkBackground 1s;
+  animation: blinkBackground 1.2s;
+  animation-iteration-count: 3;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border-top-right-radius: 8px;
@@ -154,7 +156,7 @@
   }
 
   50% {
-    background-color: rgba(42, 140, 252, 0.25);
+    background-color: rgba(42, 140, 252, 0.4);
   }
 
   100% {

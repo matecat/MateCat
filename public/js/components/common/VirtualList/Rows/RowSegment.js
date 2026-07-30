@@ -202,13 +202,17 @@ export const ProjectBar = ({
   }, [isSticky, listRef])
 
   useEffect(() => {
+    let tmOut
+
     if (isSticky) {
-      if (isBlinking) isBlikingRef.current = true
-      if (isFileChange && isBlikingRef.current) {
-        setIsBlinkingState(true)
-        isBlikingRef.current = false
+      if (isBlinking) {
+        isBlikingRef.current = true
+        setTimeout(() => (isBlikingRef.current = false), 300)
       }
+      if (isFileChange && isBlikingRef.current) setIsBlinkingState(true)
     }
+
+    return () => clearTimeout(tmOut)
   }, [isSticky, isBlinking, isFileChange])
 
   const previousScrollTopRef = useRef(0)
