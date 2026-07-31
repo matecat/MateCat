@@ -208,8 +208,6 @@ export const ProjectBar = ({
           () => setIsBlinkingState(false),
           BLINK_ANIMATION_DURATION,
         )
-      } else {
-        setIsBlinkingState(false)
       }
     }
 
