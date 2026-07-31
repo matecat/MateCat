@@ -3,6 +3,7 @@
 namespace Controller\API\App\Authentication;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\RateLimiterTrait;
@@ -98,7 +99,7 @@ class UserController extends AbstractStatefulKleinController
 
     protected function createChangePasswordModel(): ChangePasswordModel
     {
-        return new ChangePasswordModel($this->user, new UserDao($this->getDatabase()));
+        return new ChangePasswordModel($this->user, new UserDao($this->getDatabase()), new SessionTokenStoreHandler());
     }
 
     protected function registerValidators(): void

@@ -2,6 +2,7 @@
 
 
 namespace Matecat\Core\Model\Users\Authentication;
+use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Users\Authentication\ChangePasswordModel;
@@ -24,6 +25,16 @@ class ChangePasswordModelTest extends AbstractTest
         return $user;
     }
 
+    /**
+     * A stub rather than a mock: these cases do not assert on revocation, and a mock with no
+     * configured expectations is a PHPUnit notice. The revocation assertions live in their own
+     * case below, which builds a mock explicitly.
+     */
+    private function makeTokenStore(): SessionTokenStoreHandler
+    {
+        return $this->createStub(SessionTokenStoreHandler::class);
+    }
+
     private function makeMockDao(): UserDao
     {
         $dao = $this->createStub(UserDao::class);
@@ -35,12 +46,43 @@ class ChangePasswordModelTest extends AbstractTest
     }
 
     #[Test]
+    public function changePasswordRevokesEveryLoginTokenForTheUser(): void
+    {
+        $user  = $this->makeUser();
+        $store = $this->createMock(SessionTokenStoreHandler::class);
+
+        // Other devices are still holding cookies minted under the old password, so the change has
+        // to retire all of them — not merely the one presented by the device making the change,
+        // which is all broadcastLogout() removes.
+        $store->expects($this->once())
+            ->method('revokeAllLoginTokens')
+            ->with($user->uid);
+
+        (new ChangePasswordModel($user, $this->makeMockDao(), $store))
+            ->changePassword('old-pass', 'new-secure-pass!');
+    }
+
+    #[Test]
+    public function aRejectedPasswordChangeRevokesNothing(): void
+    {
+        $store = $this->createMock(SessionTokenStoreHandler::class);
+        $store->expects($this->never())->method('revokeAllLoginTokens');
+
+        $this->expectException(ValidationError::class);
+
+        // Revocation has to sit behind the old-password check. A wrong guess must not be able to
+        // log every one of the account's devices out.
+        (new ChangePasswordModel($this->makeUser(), $this->makeMockDao(), $store))
+            ->changePassword('wrong-pass', 'new-secure-pass!');
+    }
+
+    #[Test]
     public function changePasswordSucceeds(): void
     {
         $user = $this->makeUser('old-pass');
         $dao = $this->makeMockDao();
 
-        $model = new ChangePasswordModel($user, $dao);
+        $model = new ChangePasswordModel($user, $dao, $this->makeTokenStore());
         $model->changePassword('old-pass', 'new-pass-123!');
 
         $this->assertTrue(Utils::verifyPass('new-pass-123!', $user->salt, $user->pass));
@@ -55,7 +97,7 @@ class ChangePasswordModelTest extends AbstractTest
         $user = $this->makeUser('old-pass');
         $dao = $this->makeMockDao();
 
-        $model = new ChangePasswordModel($user, $dao);
+        $model = new ChangePasswordModel($user, $dao, $this->makeTokenStore());
         $model->changePassword('wrong-pass', 'new-pass-123!');
     }
 
@@ -68,7 +110,7 @@ class ChangePasswordModelTest extends AbstractTest
         $user = $this->makeUser('old-pass');
         $dao = $this->makeMockDao();
 
-        $model = new ChangePasswordModel($user, $dao);
+        $model = new ChangePasswordModel($user, $dao, $this->makeTokenStore());
         $model->changePassword('old-pass', 'old-pass');
     }
 
@@ -79,7 +121,7 @@ class ChangePasswordModelTest extends AbstractTest
         $user->email_confirmed_at = null;
         $dao = $this->makeMockDao();
 
-        $model = new ChangePasswordModel($user, $dao);
+        $model = new ChangePasswordModel($user, $dao, $this->makeTokenStore());
         $model->changePassword('old-pass', 'new-pass-123!');
 
         $this->assertNotNull($user->email_confirmed_at);
@@ -100,7 +142,7 @@ class ChangePasswordModelTest extends AbstractTest
         $user->email = 'a@b.com';
         $dao = $this->makeMockDao();
 
-        $model = new ChangePasswordModel($user, $dao);
+        $model = new ChangePasswordModel($user, $dao, $this->makeTokenStore());
         $model->changePassword('old', 'new');
     }
 
@@ -116,7 +158,7 @@ class ChangePasswordModelTest extends AbstractTest
         $user->salt = '';
         $user->pass = Utils::encryptPass('old-pass', '');
 
-        $model = new ChangePasswordModel($user, $this->makeMockDao());
+        $model = new ChangePasswordModel($user, $this->makeMockDao(), $this->makeTokenStore());
         $model->changePassword('old-pass', 'new-pass');
 
         $this->assertSame(32, strlen((string)$user->salt));
@@ -128,7 +170,7 @@ class ChangePasswordModelTest extends AbstractTest
     {
         $user = $this->makeUser();
 
-        $model = new ChangePasswordModel($user, $this->makeMockDao());
+        $model = new ChangePasswordModel($user, $this->makeMockDao(), $this->makeTokenStore());
         $model->changePassword('old-pass', 'new-pass');
 
         $this->assertSame('test-salt', $user->salt);
@@ -157,7 +199,7 @@ class ChangePasswordModelTest extends AbstractTest
                 return 1;
             });
 
-        (new ChangePasswordModel($user, $dao))->changePassword('old-pass', 'new-pass');
+        (new ChangePasswordModel($user, $dao, $this->makeTokenStore()))->changePassword('old-pass', 'new-pass');
 
         $this->assertContains('salt', $captured);
         $this->assertContains('pass', $captured);
@@ -182,7 +224,7 @@ class ChangePasswordModelTest extends AbstractTest
         $dao->method('destroyCacheByEmail')->willReturn(true);
         $dao->method('destroyCacheByUid')->willReturn(true);
 
-        (new ChangePasswordModel($user, $dao))->changePassword('old-pass', 'new-pass');
+        (new ChangePasswordModel($user, $dao, $this->makeTokenStore()))->changePassword('old-pass', 'new-pass');
 
         // Changing the password has to retire any reset link already issued for the account. If the
         // token survives, whoever holds that link can set a third password for the rest of the

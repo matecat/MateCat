@@ -119,6 +119,65 @@ class SessionTokenStoreHandlerTest extends AbstractTest
         $this->assertContains('hdel', $methodsCalled);
     }
 
+    #[Test]
+    public function revokeAllLoginTokensDeletesEveryTokenAndThenTheMap(): void
+    {
+        $deleted = [];
+        $redis   = $this->createStub(Client::class);
+        $redis->method('__call')
+            ->willReturnCallback(function (string $method, array $args) use (&$deleted) {
+                if ($method === 'hkeys') {
+                    $this->assertSame('active_user_login_tokens:123', $args[0]);
+
+                    return [md5('cookie-one'), md5('cookie-two')];
+                }
+
+                if ($method === 'del') {
+                    $deleted[] = $args[0];
+
+                    return 1;
+                }
+
+                return null;
+            });
+
+        SessionTokenStoreHandler::setCacheConnection($redis);
+        (new SessionTokenStoreHandler())->revokeAllLoginTokens(123);
+
+        // Both the reverse keys and the map itself, so no dangling pointer survives.
+        $this->assertSame(
+            [[md5('cookie-one'), md5('cookie-two')], 'active_user_login_tokens:123'],
+            $deleted
+        );
+    }
+
+    #[Test]
+    public function revokeAllLoginTokensStillDropsTheMapWhenItHoldsNoTokens(): void
+    {
+        $deleted = [];
+        $redis   = $this->createStub(Client::class);
+        $redis->method('__call')
+            ->willReturnCallback(function (string $method, array $args) use (&$deleted) {
+                if ($method === 'hkeys') {
+                    return [];
+                }
+
+                if ($method === 'del') {
+                    $deleted[] = $args[0];
+
+                    return 1;
+                }
+
+                return null;
+            });
+
+        SessionTokenStoreHandler::setCacheConnection($redis);
+        (new SessionTokenStoreHandler())->revokeAllLoginTokens(123);
+
+        // An empty map must not produce a del([]) — Redis rejects DEL with no keys.
+        $this->assertSame(['active_user_login_tokens:123'], $deleted);
+    }
+
     protected function tearDown(): void
     {
         SessionTokenStoreHandler::setCacheConnection(null);
