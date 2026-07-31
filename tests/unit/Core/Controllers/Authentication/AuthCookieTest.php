@@ -33,7 +33,6 @@ class AuthCookieTest extends AbstractTest
     protected function tearDown(): void
     {
         unset($_COOKIE[AppConfig::$AUTHCOOKIENAME]);
-        AuthCookie::setCookieManager(null);
         parent::tearDown();
     }
 
@@ -56,10 +55,36 @@ class AuthCookieTest extends AbstractTest
         };
     }
 
+    /**
+     * A ring that accepts whatever token it is shown.
+     *
+     * getCredentials() now always consults the ring. The previous static API took an *optional*
+     * handler and skipped the check entirely when given none, so a test could get a payload back
+     * without any ring at all — which is precisely the bypass this refactor removes. Tests that
+     * want a successful read have to say so explicitly now.
+     */
+    private function acceptingTokenStore(): SessionTokenStoreHandler
+    {
+        $store = $this->createStub(SessionTokenStoreHandler::class);
+        $store->method('isLoginCookieStillActive')->willReturn(true);
+
+        return $store;
+    }
+
+    private function authCookie(
+        ?SessionTokenStoreHandler $tokenStore = null,
+        ?CookieManager $cookieManager = null,
+    ): AuthCookie {
+        return new AuthCookie(
+            $tokenStore ?? $this->acceptingTokenStore(),
+            $cookieManager ?? $this->spyingCookieManager()
+        );
+    }
+
     #[Test]
     public function getCredentialsReturnsNullWhenNoCookieExists(): void
     {
-        $result = AuthCookie::getCredentials();
+        $result = $this->authCookie()->getCredentials();
 
         $this->assertNull($result);
     }
@@ -69,9 +94,34 @@ class AuthCookieTest extends AbstractTest
     {
         $_COOKIE[AppConfig::$AUTHCOOKIENAME] = 'invalid-jwt-value';
 
-        $result = AuthCookie::getCredentials();
+        $result = $this->authCookie()->getCredentials();
 
         $this->assertNull($result);
+    }
+
+    /**
+     * An unparseable cookie is dropped locally and the ring is left alone.
+     *
+     * This pins the half of the recursion fix that the count assertion in
+     * {@see anUnparseableCookieIsClearedWithoutRecursing} cannot see. Both halves of the cycle had
+     * to be broken — getData() clearing directly rather than through destroyAuthentication(), and
+     * destroyAuthentication() reading through readPayload() rather than getData() — so undoing
+     * either one alone leaves the tests green. Routing this path back through
+     * destroyAuthentication() would reach for the ring, which is what is asserted against here.
+     */
+    #[Test]
+    public function anUnparseableCookieIsDroppedWithoutTouchingTheRing(): void
+    {
+        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = 'not-a-jwt';
+
+        $store = $this->createMock(SessionTokenStoreHandler::class);
+        $store->expects($this->never())->method('removeLoginCookieFromStore');
+        $store->expects($this->never())->method('retireLoginToken');
+
+        $cookieManager = $this->spyingCookieManager();
+
+        $this->assertNull($this->authCookie($store, $cookieManager)->getCredentials());
+        $this->assertCount(1, $cookieManager->writes);
     }
 
     #[Test]
@@ -79,19 +129,19 @@ class AuthCookieTest extends AbstractTest
     {
         $_COOKIE[AppConfig::$AUTHCOOKIENAME] = '';
 
-        $result = AuthCookie::getCredentials();
+        $result = $this->authCookie()->getCredentials();
 
         $this->assertNull($result);
     }
 
     #[Test]
-    public function getCredentialsReturnsPayloadForValidCookie(): void
+    public function getCredentialsReturnsPayloadForValidCookieTheRingAccepts(): void
     {
         $user = $this->createAuthenticatedUser();
         $cookie = $this->generateTestCookie($user);
         $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $cookie;
 
-        $result = AuthCookie::getCredentials();
+        $result = $this->authCookie()->getCredentials();
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('user', $result);
@@ -110,26 +160,11 @@ class AuthCookieTest extends AbstractTest
         $store->method('isLoginCookieStillActive')
             ->willReturn(false);
 
-        $result = AuthCookie::getCredentials($store);
+        // A revoked user still holds a perfectly valid, unexpired cookie. The ring is what stops
+        // them, so this must be null even though the signature verifies.
+        $result = $this->authCookie($store)->getCredentials();
 
         $this->assertNull($result);
-    }
-
-    #[Test]
-    public function getCredentialsReturnsPayloadWhenTokenIsInStore(): void
-    {
-        $user = $this->createAuthenticatedUser();
-        $cookie = $this->generateTestCookie($user);
-        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $cookie;
-
-        $store = $this->createStub(SessionTokenStoreHandler::class);
-        $store->method('isLoginCookieStillActive')
-            ->willReturn(true);
-
-        $result = AuthCookie::getCredentials($store);
-
-        $this->assertIsArray($result);
-        $this->assertSame(42, $result['user']['uid']);
     }
 
     #[Test]
@@ -138,7 +173,7 @@ class AuthCookieTest extends AbstractTest
         $user = $this->createAuthenticatedUser();
         $method = new ReflectionMethod(AuthCookie::class, 'generateSignedAuthCookie');
 
-        $result = $method->invoke(null, $user);
+        $result = $method->invoke($this->authCookie(), $user);
 
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
@@ -152,12 +187,11 @@ class AuthCookieTest extends AbstractTest
     {
         $user = new UserStruct();
         $user->uid = null;
-        $store = $this->createStub(SessionTokenStoreHandler::class);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Cannot set credentials for a user without a UID');
 
-        AuthCookie::setCredentials($user, $store);
+        $this->authCookie()->setCredentials($user);
     }
 
     #[Test]
@@ -171,9 +205,8 @@ class AuthCookieTest extends AbstractTest
             ->with(42, $this->isString());
 
         $cookieManager = $this->spyingCookieManager();
-        AuthCookie::setCookieManager($cookieManager);
 
-        AuthCookie::setCredentials($user, $store);
+        $this->authCookie($store, $cookieManager)->setCredentials($user);
 
         // The signed auth cookie that actually ships to the browser.
         $this->assertCount(1, $cookieManager->writes);
@@ -192,9 +225,8 @@ class AuthCookieTest extends AbstractTest
         $_COOKIE[AppConfig::$AUTHCOOKIENAME] = 'some-value';
 
         $cookieManager = $this->spyingCookieManager();
-        AuthCookie::setCookieManager($cookieManager);
 
-        AuthCookie::destroyAuthentication();
+        $this->authCookie(null, $cookieManager)->destroyAuthentication();
 
         $this->assertArrayNotHasKey(AppConfig::$AUTHCOOKIENAME, $_COOKIE);
 
@@ -218,7 +250,28 @@ class AuthCookieTest extends AbstractTest
             ->method('removeLoginCookieFromStore')
             ->with(42, $cookie);
 
-        AuthCookie::destroyAuthentication($store);
+        $this->authCookie($store)->destroyAuthentication();
+    }
+
+    #[Test]
+    public function anUnparseableCookieIsClearedWithoutRecursing(): void
+    {
+        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = 'not-a-jwt';
+
+        $cookieManager = $this->spyingCookieManager();
+
+        // getData() clears the cookie when it cannot parse, and destroyAuthentication() calls
+        // getData(). While the ring handler was an optional per-call argument, getData() passed
+        // none and the ring branch was skipped, which is what kept this from recursing. With the
+        // handler bound in the constructor the clearing step has to be separate, or this call
+        // re-enters destroyAuthentication() until the stack blows.
+        $this->authCookie(null, $cookieManager)->destroyAuthentication();
+
+        $this->assertArrayNotHasKey(AppConfig::$AUTHCOOKIENAME, $_COOKIE);
+
+        // Exactly one deletion. Reading through getData() instead of readPayload() would clear
+        // once inside the parse failure and once here, so the count is what pins the split.
+        $this->assertCount(1, $cookieManager->writes);
     }
 
     private function createAuthenticatedUser(): UserStruct
@@ -236,7 +289,7 @@ class AuthCookieTest extends AbstractTest
     private function generateTestCookie(UserStruct $user): string
     {
         $method = new ReflectionMethod(AuthCookie::class, 'generateSignedAuthCookie');
-        [$cookieData] = $method->invoke(null, $user);
+        [$cookieData] = $method->invoke($this->authCookie(), $user);
 
         return $cookieData;
     }
@@ -295,14 +348,13 @@ class AuthCookieTest extends AbstractTest
         $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $old;
 
         $spy = $this->spyingCookieManager();
-        AuthCookie::setCookieManager($spy);
 
         $handler = $this->createMock(SessionTokenStoreHandler::class);
         $handler->expects($this->once())
             ->method('setCookieLoginTokenActive')
             ->with(42, $this->isString());
 
-        AuthCookie::renewIfStale($user, $handler);
+        $this->authCookie($handler, $spy)->renewIfStale($user);
 
         $this->assertCount(1, $spy->writes);
         $this->assertNotSame($old, $spy->writes[0]['value']);
@@ -320,13 +372,12 @@ class AuthCookieTest extends AbstractTest
         $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $this->agedCookieValue($user, 60);
 
         $spy = $this->spyingCookieManager();
-        AuthCookie::setCookieManager($spy);
 
         $handler = $this->createMock(SessionTokenStoreHandler::class);
         $handler->expects($this->never())->method('setCookieLoginTokenActive');
         $handler->expects($this->never())->method('retireLoginToken');
 
-        AuthCookie::renewIfStale($user, $handler);
+        $this->authCookie($handler, $spy)->renewIfStale($user);
 
         $this->assertSame([], $spy->writes);
     }
@@ -340,9 +391,8 @@ class AuthCookieTest extends AbstractTest
         $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $old;
 
         $spy = $this->spyingCookieManager();
-        AuthCookie::setCookieManager($spy);
 
-        AuthCookie::renewIfStale($user, $this->createStub(SessionTokenStoreHandler::class));
+        $this->authCookie($this->createStub(SessionTokenStoreHandler::class), $spy)->renewIfStale($user);
 
         $payload = SimpleJWT::getValidatedInstanceFromString(
             $spy->writes[0]['value'],
@@ -357,12 +407,11 @@ class AuthCookieTest extends AbstractTest
     #[Test]
     public function renewalRetiresTheGrandparentAndNeverTheParent(): void
     {
-        $user       = $this->renewableUser();
+        $user        = $this->renewableUser();
         $grandparent = md5('the-token-from-two-renewals-ago');
-        $old        = $this->agedCookieValue($user, 60 * 60 * 48, ['prev' => $grandparent]);
+        $old         = $this->agedCookieValue($user, 60 * 60 * 48, ['prev' => $grandparent]);
 
         $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $old;
-        AuthCookie::setCookieManager($this->spyingCookieManager());
 
         // The parent is what the browser is holding at this instant, so in-flight requests are
         // carrying it; retiring it here is the logout storm this design exists to avoid. The
@@ -372,7 +421,7 @@ class AuthCookieTest extends AbstractTest
             ->method('retireLoginToken')
             ->with(42, $grandparent);
 
-        AuthCookie::renewIfStale($user, $handler);
+        $this->authCookie($handler)->renewIfStale($user);
     }
 
     #[Test]
@@ -385,13 +434,12 @@ class AuthCookieTest extends AbstractTest
         $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $this->agedCookieValue($user, 60 * 60 * 48);
 
         $spy = $this->spyingCookieManager();
-        AuthCookie::setCookieManager($spy);
 
         $handler = $this->createMock(SessionTokenStoreHandler::class);
         $handler->expects($this->once())->method('setCookieLoginTokenActive');
         $handler->expects($this->never())->method('retireLoginToken');
 
-        AuthCookie::renewIfStale($user, $handler);
+        $this->authCookie($handler, $spy)->renewIfStale($user);
 
         $this->assertCount(1, $spy->writes);
     }
@@ -407,9 +455,8 @@ class AuthCookieTest extends AbstractTest
         foreach ([1, 2] as $ignored) {
             $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $old;
             $spy = $this->spyingCookieManager();
-            AuthCookie::setCookieManager($spy);
 
-            AuthCookie::renewIfStale($user, $this->createStub(SessionTokenStoreHandler::class));
+            $this->authCookie($this->createStub(SessionTokenStoreHandler::class), $spy)->renewIfStale($user);
 
             $issued[] = $spy->writes[0]['value'];
         }
@@ -427,7 +474,6 @@ class AuthCookieTest extends AbstractTest
         $superseded = md5('the-token-this-one-replaced');
 
         $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $this->agedCookieValue($user, 60, ['prev' => $superseded]);
-        AuthCookie::setCookieManager($this->spyingCookieManager());
 
         // Renewal deliberately leaves the parent live for in-flight requests. Without this the
         // browser stops holding it at logout but a captured copy keeps passing
@@ -438,6 +484,6 @@ class AuthCookieTest extends AbstractTest
             ->method('retireLoginToken')
             ->with(42, $superseded);
 
-        AuthCookie::destroyAuthentication($handler);
+        $this->authCookie($handler)->destroyAuthentication();
     }
 }

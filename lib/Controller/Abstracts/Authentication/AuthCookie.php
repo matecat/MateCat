@@ -13,6 +13,17 @@ use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
 
+/**
+ * Reads, issues, renews and destroys the login cookie, keeping it in step with the user's token ring.
+ *
+ * The token ring is bound once, in the constructor, rather than passed to each call. That is what
+ * makes it impossible to ask for credentials *without* checking revocation: the previous static API
+ * took an optional handler, and passing null validated a cookie's signature while silently skipping
+ * the ring.
+ *
+ * Note this class still reads and writes $_COOKIE directly and calls session_destroy(). Being an
+ * instance makes it injectable into its consumers; it does not make it free of superglobals.
+ */
 class AuthCookie
 {
 
@@ -26,51 +37,42 @@ class AuthCookie
      */
     private const int RENEW_AFTER_SECONDS = 86400;
 
-    /**
-     * Cookie writer seam. Null in production (a fresh CookieManager is used);
-     * tests inject a spy via {@see self::setCookieManager()} to observe emissions.
-     */
-    private static ?CookieManager $cookieManager = null;
+    private readonly CookieManager $cookieManager;
 
     /**
-     * Overrides the cookie writer (test seam). Pass null to restore the default.
+     * @param SessionTokenStoreHandler $tokenStore The user's token ring.
+     * @param CookieManager|null $cookieManager Cookie writer; tests pass a spy to observe emissions.
      */
-    public static function setCookieManager(?CookieManager $cookieManager): void
-    {
-        self::$cookieManager = $cookieManager;
-    }
-
-    private static function cookieManager(): CookieManager
-    {
-        return self::$cookieManager ?? new CookieManager();
+    public function __construct(
+        private readonly SessionTokenStoreHandler $tokenStore,
+        ?CookieManager $cookieManager = null,
+    ) {
+        $this->cookieManager = $cookieManager ?? new CookieManager();
     }
 
     /**
-     * Retrieve the user data from the authentication cookie, if present and valid.
+     * Retrieve the user data from the authentication cookie, if present, valid and still accepted.
      *
-     * This method extracts the payload from the authentication cookie and verifies
-     * its validity. If a `SessionTokenRingHandler` is provided, it also checks
-     * whether the login cookie is still active in the session token ring.
+     * Both conditions are mandatory: the JWT must verify, and the token must still be in the ring.
+     * A revoked user holds a perfectly valid cookie, so the ring check is what logs them out.
      *
-     * @param SessionTokenStoreHandler|null $sessionTokenStoreHandler Optional handler for managing session token rings.
-     *
-     * @return ?array<string, mixed> Returns the payload array if the cookie is valid and active, or null otherwise.
+     * @return ?array<string, mixed> The payload if the cookie is valid and active, null otherwise.
      * @throws ReflectionException Throws an exception if there is an issue with reflection during validation.
      * @throws Exception
      * @throws TypeError
      */
-    public static function getCredentials(?SessionTokenStoreHandler $sessionTokenStoreHandler = null): ?array
+    public function getCredentials(): ?array
     {
         // Retrieve the payload data from the authentication cookie.
-        $payload = self::getData();
+        $payload = $this->getData();
 
         // Return null if the payload is empty or does not contain a valid user ID.
         if (empty($payload) || empty($payload['user']['uid'])) {
             return null;
         }
 
-        // If a session token ring handler is provided, check if the login cookie is still active.
-        if ($sessionTokenStoreHandler !== null && !$sessionTokenStoreHandler->isLoginCookieStillActive($payload['user']['uid'], self::getCookieRawValue())) {
+        // Is this exact token still one the server accepts?
+        if (!$this->tokenStore->isLoginCookieStillActive($payload['user']['uid'], $this->getCookieRawValue())) {
             return null;
         }
 
@@ -82,33 +84,28 @@ class AuthCookie
      * Issues a login cookie for a user who has just authenticated.
      *
      * Mints a signed cookie, adds it to the user's token ring so it will pass
-     * {@see isLoginCookieStillActive()}, and sends it to the browser. Called by the three login
-     * paths only — password login, signup confirmation and OAuth.
+     * {@see SessionTokenStoreHandler::isLoginCookieStillActive()}, and sends it to the browser.
+     * Called by the three login paths only — password login, signup confirmation and OAuth.
      *
-     * Keeping an existing cookie alive is {@see renewIfStale()}'s job, not this one. This method
-     * used to carry a second "revamp" mode that re-issued a token once the old one had already
-     * expired; the only caller was the session branch of AuthenticationHelper::authenticate(), and
-     * once the token ring became the sole authority an expired cookie resolves to no user at all,
-     * so re-issuing after expiry cannot work. Renewal now happens before expiry instead.
+     * Keeping an existing cookie alive is {@see renewIfStale()}'s job, not this one.
      *
      * @param UserStruct $user The user object containing user details.
-     * @param SessionTokenStoreHandler $sessionTokenStoreHandler Handler for managing session token rings.
      *
      * @return void
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
      */
-    public static function setCredentials(UserStruct $user, SessionTokenStoreHandler $sessionTokenStoreHandler): void
+    public function setCredentials(UserStruct $user): void
     {
         $userId = $user->uid ?? throw new RuntimeException('Cannot set credentials for a user without a UID');
 
         // Generate a new signed authentication cookie and its expiration date.
-        [$new_cookie_data, $new_expire_date] = static::generateSignedAuthCookie($user);
+        [$new_cookie_data, $new_expire_date] = $this->generateSignedAuthCookie($user);
 
         // Activate the token in the user token store, then hand the cookie to the browser.
-        $sessionTokenStoreHandler->setCookieLoginTokenActive($userId, $new_cookie_data);
-        self::setCookie($new_cookie_data, $new_expire_date);
+        $this->tokenStore->setCookieLoginTokenActive($userId, $new_cookie_data);
+        $this->setCookie($new_cookie_data, $new_expire_date);
     }
 
     /**
@@ -122,9 +119,9 @@ class AuthCookie
      * @throws Exception
      * @throws TypeError
      */
-    public static function renewIfStale(UserStruct $user, SessionTokenStoreHandler $sessionTokenStoreHandler): void
+    public function renewIfStale(UserStruct $user): void
     {
-        $currentCookie = self::getCookieRawValue();
+        $currentCookie = $this->getCookieRawValue();
 
         if ($currentCookie === '') {
             return;
@@ -151,14 +148,14 @@ class AuthCookie
 
         $grandparentFieldName = $jwt->getPayload()['prev'] ?? null;
 
-        [$new_cookie_data, $new_expire_date] = static::generateSignedAuthCookie($user, md5($currentCookie));
+        [$new_cookie_data, $new_expire_date] = $this->generateSignedAuthCookie($user, md5($currentCookie));
 
         // Mint and publish before retiring anything, so a concurrent request always finds at least
         // one live token in the ring. Two renewals landing in the same second converge on one
         // field rather than multiplying: SimpleJWT stamps iat from time(), never sets jti and adds
         // no randomness, so the payload is byte-identical and the HSET is idempotent.
-        $sessionTokenStoreHandler->setCookieLoginTokenActive($userId, $new_cookie_data);
-        self::setCookie($new_cookie_data, $new_expire_date);
+        $this->tokenStore->setCookieLoginTokenActive($userId, $new_cookie_data);
+        $this->setCookie($new_cookie_data, $new_expire_date);
 
         // Later reads in this same request must see the token that was just issued, or they would
         // validate a value the browser is no longer going to send.
@@ -170,12 +167,12 @@ class AuthCookie
         // long, which makes this race-free with no grace period to tune — that is the entire
         // reason for carrying an extra generation.
         if (is_string($grandparentFieldName)) {
-            $sessionTokenStoreHandler->retireLoginToken($userId, $grandparentFieldName);
+            $this->tokenStore->retireLoginToken($userId, $grandparentFieldName);
         }
 
         // Collect fields left behind by devices that stopped renewing. Runs here rather than on the
         // hot path: this is once per renewal interval per device, not once per request.
-        $sessionTokenStoreHandler->pruneExpiredLoginTokens($userId, static function (string $token): bool {
+        $this->tokenStore->pruneExpiredLoginTokens($userId, static function (string $token): bool {
             try {
                 SimpleJWT::getValidatedInstanceFromString($token, AppConfig::$AUTHSECRET);
             } catch (UnexpectedValueException $e) {
@@ -198,9 +195,9 @@ class AuthCookie
      * @param string $data
      * @param int $expireDate
      */
-    private static function setCookie(string $data, int $expireDate): void
+    private function setCookie(string $data, int $expireDate): void
     {
-        self::cookieManager()->set(AppConfig::$AUTHCOOKIENAME, $data, $expireDate, true, true, 'Lax');
+        $this->cookieManager->set(AppConfig::$AUTHCOOKIENAME, $data, $expireDate, true, true, 'Lax');
     }
 
     /**
@@ -209,7 +206,7 @@ class AuthCookie
      * @throws TypeError
      * @throws UnexpectedValueException
      */
-    protected static function generateSignedAuthCookie(UserStruct $user, ?string $previousFieldName = null): array
+    protected function generateSignedAuthCookie(UserStruct $user, ?string $previousFieldName = null): array
     {
         $claims = [
             'user' => [
@@ -240,41 +237,62 @@ class AuthCookie
     }
 
     /**
-     * Destroy authentication by removing the authentication cookie and invalidating the session.
-     *
-     * @param SessionTokenStoreHandler|null $sessionTokenStoreHandler Optional handler for managing session token stores.
+     * Destroy authentication: retire the token pair from the ring, drop the cookie, end the session.
      *
      * @return void
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
      */
-    public static function destroyAuthentication(?SessionTokenStoreHandler $sessionTokenStoreHandler = null): void
+    public function destroyAuthentication(): void
     {
-        if (!empty($sessionTokenStoreHandler)) {
-            // Retrieve the payload data from the authentication cookie.
-            $payload = self::getData();
-            $userId = (int)($payload['user']['uid'] ?? 0);
-
-            // Remove the login cookie from the session token store if a valid payload exists.
-            $sessionTokenStoreHandler->removeLoginCookieFromStore($userId, $_COOKIE[AppConfig::$AUTHCOOKIENAME] ?? '');
-
-            // Retire the superseded token as well. Renewal deliberately leaves the parent live for
-            // in-flight requests, so without this a logout would leave a token that still passes
-            // isLoginCookieStillActive() for up to a full renewal interval — the browser no longer
-            // has it, but anyone who captured it would.
-            $previousFieldName = $payload['prev'] ?? null;
-
-            if ($userId !== 0 && is_string($previousFieldName)) {
-                $sessionTokenStoreHandler->retireLoginToken($userId, $previousFieldName);
-            }
+        // Read the payload without clearing: this method clears at the end, and going through
+        // getData() would both clear twice and, because the handler is bound rather than passed,
+        // re-enter this method.
+        try {
+            $payload = $this->readPayload();
+        } catch (DomainException|UnexpectedValueException) {
+            // Nothing identifiable to retire from the ring. The cookie and session still go.
+            $payload = null;
         }
 
+        $userId = (int)($payload['user']['uid'] ?? 0);
+
+        // Remove the login cookie from the session token store if a valid payload exists.
+        $this->tokenStore->removeLoginCookieFromStore($userId, $_COOKIE[AppConfig::$AUTHCOOKIENAME] ?? '');
+
+        // Retire the superseded token as well. Renewal deliberately leaves the parent live for
+        // in-flight requests, so without this a logout would leave a token that still passes
+        // isLoginCookieStillActive() for up to a full renewal interval — the browser no longer
+        // has it, but anyone who captured it would.
+        $previousFieldName = $payload['prev'] ?? null;
+
+        if ($userId !== 0 && is_string($previousFieldName)) {
+            $this->tokenStore->retireLoginToken($userId, $previousFieldName);
+        }
+
+        $this->clearCookieAndSession();
+    }
+
+    /**
+     * Drops the browser cookie and the PHP session, touching the ring not at all.
+     *
+     * Separate from {@see destroyAuthentication()} to break a recursion that the constructor-bound
+     * handler would otherwise create: getData() calls this when a cookie fails to parse, and
+     * destroyAuthentication() calls getData(). While the handler was an optional per-call argument,
+     * getData() passed none and the ring branch was skipped; now that the handler is always present
+     * that same path would re-enter destroyAuthentication() forever.
+     *
+     * Keeping the ring untouched here also preserves the previous behaviour exactly: an unparseable
+     * cookie has never had its ring entry cleaned up, and this refactor does not change that.
+     */
+    private function clearCookieAndSession(): void
+    {
         // Unset the authentication cookie from the global $_COOKIE array.
         unset($_COOKIE[AppConfig::$AUTHCOOKIENAME]);
 
         // Set an expired cookie in the browser to effectively remove it.
-        self::cookieManager()->delete(AppConfig::$AUTHCOOKIENAME);
+        $this->cookieManager->delete(AppConfig::$AUTHCOOKIENAME);
 
         // Destroy the current session if active.
         if (session_status() === PHP_SESSION_ACTIVE) {
@@ -283,34 +301,51 @@ class AuthCookie
     }
 
     /**
-     * Get data from auth cookie.
+     * Get data from auth cookie, discarding the cookie if it cannot be read.
      *
      * @return ?array<string, mixed>
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
      */
-    private static function getData(): ?array
+    private function getData(): ?array
     {
-        if (isset($_COOKIE[AppConfig::$AUTHCOOKIENAME]) and !empty($_COOKIE[AppConfig::$AUTHCOOKIENAME])) {
-            try {
-                return SimpleJWT::getValidatedInstanceFromString(
-                    $_COOKIE[AppConfig::$AUTHCOOKIENAME],
-                    AppConfig::$AUTHSECRET
-                )->getPayload();
-            } catch (DomainException|UnexpectedValueException $e) {
-                LoggerFactory::getLogger('login_exceptions')->debug($e->getMessage() . " " . $_COOKIE[AppConfig::$AUTHCOOKIENAME]);
-                self::destroyAuthentication();
-            }
-        }
+        try {
+            return $this->readPayload();
+        } catch (DomainException|UnexpectedValueException $e) {
+            LoggerFactory::getLogger('login_exceptions')->debug($e->getMessage() . " " . $this->getCookieRawValue());
+            $this->clearCookieAndSession();
 
-        return null;
+            return null;
+        }
     }
 
-    private static function getCookieRawValue(): string
+    /**
+     * Parses the cookie and leaves it exactly as it found it.
+     *
+     * Split from {@see getData()} so a caller that is going to clear the cookie anyway does not
+     * clear it twice — {@see destroyAuthentication()} needs the payload to know which tokens to
+     * retire, but owns the clearing itself.
+     *
+     * @return ?array<string, mixed>
+     * @throws DomainException If the signature does not verify.
+     * @throws UnexpectedValueException If the token is malformed or expired.
+     * @throws TypeError
+     */
+    private function readPayload(): ?array
+    {
+        $raw = $this->getCookieRawValue();
+
+        if ($raw === '') {
+            return null;
+        }
+
+        return SimpleJWT::getValidatedInstanceFromString($raw, AppConfig::$AUTHSECRET)->getPayload();
+    }
+
+    private function getCookieRawValue(): string
     {
         return $_COOKIE[AppConfig::$AUTHCOOKIENAME] ?? '';
     }
 
 }
-

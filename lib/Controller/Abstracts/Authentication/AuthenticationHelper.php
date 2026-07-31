@@ -18,11 +18,10 @@ use TypeError;
 use Utils\Logger\LoggerFactory;
 
 /**
- * Split / dependency-injected re-implementation of {@see AuthenticationHelper}.
+ * Resolves the identity behind a request: api key, or login cookie validated against the token ring.
  *
- * Behaviorally identical to the original (verified by a parity test copy), but:
- *  - all collaborators are constructor-injected (UserDao, ApiKeyDao,
- *    UserProfileBuilder, AuthCookieStore) → fully unit-testable, no singleton;
+ *  - all collaborators are constructor-injected (UserDao, ApiKeyDao, UserProfileBuilder,
+ *    AuthCookie) → fully unit-testable, no singleton;
  *  - the authentication work lives in authenticate() instead of the constructor;
  *  - fromRequest() is the single composition root that touches the database.
  */
@@ -36,7 +35,7 @@ class AuthenticationHelper
     private UserDao $userDao;
     private ApiKeyDao $apiKeyDao;
     private UserProfileBuilder $profileBuilder;
-    private AuthCookieStore $cookieStore;
+    private AuthCookie $authCookie;
 
     /**
      * @param array<string, mixed> $session
@@ -46,13 +45,13 @@ class AuthenticationHelper
         UserDao $userDao,
         ApiKeyDao $apiKeyDao,
         UserProfileBuilder $profileBuilder,
-        AuthCookieStore $cookieStore,
+        AuthCookie $authCookie,
     ) {
         $this->session =& $session;
         $this->userDao = $userDao;
         $this->apiKeyDao = $apiKeyDao;
         $this->profileBuilder = $profileBuilder;
-        $this->cookieStore = $cookieStore;
+        $this->authCookie = $authCookie;
         $this->user = new UserStruct();
     }
 
@@ -80,7 +79,7 @@ class AuthenticationHelper
                 new TeamDao($db),
                 new MetadataDao($db)
             ),
-            new AuthCookieStore(new SessionTokenStoreHandler()),
+            new AuthCookie(new SessionTokenStoreHandler()),
         );
         $self->authenticate($api_key, $api_secret);
 
@@ -105,7 +104,7 @@ class AuthenticationHelper
                 // everywhere at once. The PHP session used to be consulted first and never
                 // consulted the ring, which is what let a revoked user keep working until their
                 // session died of idleness.
-                $credentials = $this->cookieStore->getCredentials();
+                $credentials = $this->authCookie->getCredentials();
                 if (!empty($credentials) && !empty($credentials['user'])) {
                     $uid        = (int)$credentials['user']['uid'];
                     $cachedUser = $this->cachedSessionUser($uid);
@@ -126,7 +125,7 @@ class AuthenticationHelper
                     // authoritative an expired JWT resolves to no uid at all, so renewal has to
                     // happen before expiry or everyone is signed out hard at the cookie duration.
                     if ($this->user->uid !== null) {
-                        $this->cookieStore->renewIfStale($this->user);
+                        $this->authCookie->renewIfStale($this->user);
                     }
                 }
             }
@@ -140,7 +139,7 @@ class AuthenticationHelper
                         'session' => $this->session,
                         'api_key' => $api_key,
                         'api_secret' => $api_secret,
-                        'cookie' => $this->cookieStore->getCredentials()['user'] ?? null,
+                        'cookie' => $this->authCookie->getCredentials()['user'] ?? null,
                     ]
                 );
             } catch (Throwable) {
@@ -184,7 +183,7 @@ class AuthenticationHelper
     {
         unset($this->session['user']);
         unset($this->session['user_profile']);
-        $this->cookieStore->destroy();
+        $this->authCookie->destroyAuthentication();
     }
 
     protected function sessionIsActive(): bool

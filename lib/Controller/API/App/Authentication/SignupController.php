@@ -70,7 +70,7 @@ class SignupController extends AbstractStatefulKleinController
      */
     protected function authenticateConfirmedUser(UserStruct $user): void
     {
-        AuthCookie::setCredentials($user, new SessionTokenStoreHandler());
+        (new AuthCookie(new SessionTokenStoreHandler()))->setCredentials($user);
         AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase());
     }
 

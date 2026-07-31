@@ -2,7 +2,7 @@
 
 namespace Matecat\Core\Controllers\Authentication;
 
-use Controller\Abstracts\Authentication\AuthCookieStore;
+use Controller\Abstracts\Authentication\AuthCookie;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Controller\Abstracts\Authentication\UserProfileBuilder;
 use Matecat\TestHelpers\AbstractTest;
@@ -33,7 +33,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     private UserDao&MockObject $userDaoMock;
 
     private UserProfileBuilder&MockObject $profileBuilderMock;
-    private AuthCookieStore&MockObject $cookieStoreMock;
+    private AuthCookie&MockObject $authCookieMock;
 
     protected function setUp(): void
     {
@@ -41,7 +41,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->apiKeyDaoMock      = $this->createMock(ApiKeyDao::class);
         $this->userDaoMock        = $this->createMock(UserDao::class);
         $this->profileBuilderMock = $this->createMock(UserProfileBuilder::class);
-        $this->cookieStoreMock    = $this->createMock(AuthCookieStore::class);
+        $this->authCookieMock    = $this->createMock(AuthCookie::class);
     }
 
     private function createHelper(array &$session, ?string $apiKey = null, ?string $apiSecret = null): TestableAuthenticationHelper
@@ -51,7 +51,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
             $this->userDaoMock,
             $this->apiKeyDaoMock,
             $this->profileBuilderMock,
-            $this->cookieStoreMock,
+            $this->authCookieMock,
             $apiKey,
             $apiSecret
         );
@@ -242,7 +242,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         // This test used to pass on session data alone. That was the defect: session state was an
         // authorization decision, so revoking the token ring did not log anyone out. The session
         // is now only a cache, and it takes a cookie the ring still accepts to reach it.
-        $this->cookieStoreMock->method('getCredentials')
+        $this->authCookieMock->method('getCredentials')
             ->willReturn(['user' => ['uid' => 99]]);
 
         $helper = $this->createHelper($session);
@@ -260,7 +260,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $user->email = 'cookie@example.com';
 
         $this->userDaoMock->method('getByUid')->with(5)->willReturn($user);
-        $this->cookieStoreMock->method('getCredentials')->willReturn(['user' => ['uid' => 5]]);
+        $this->authCookieMock->method('getCredentials')->willReturn(['user' => ['uid' => 5]]);
         $this->profileBuilderMock->method('build')->willReturn(['profile' => true]);
 
         $session = [];
@@ -283,7 +283,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $user->email = 'cookie@example.com';
 
         $this->userDaoMock->method('getByUid')->with(5)->willReturn($user);
-        $this->cookieStoreMock->method('getCredentials')->willReturn(['user' => ['uid' => 5]]);
+        $this->authCookieMock->method('getCredentials')->willReturn(['user' => ['uid' => 5]]);
 
         $session = [];
         $helper  = $this->createHelper($session);
@@ -311,7 +311,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         // The cookie is mandatory now, even with a fully populated session: the token ring is the
         // only authority, so a request that cannot present a live cookie is not authenticated no
         // matter what the session holds.
-        $this->cookieStoreMock->method('getCredentials')
+        $this->authCookieMock->method('getCredentials')
             ->willReturn(['user' => ['uid' => 7]]);
 
         $helper = $this->createHelper($session);
@@ -344,7 +344,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         // token, so getCredentials() yields nothing, while their PHP session is still sitting
         // there fully populated. Before this change that session alone authenticated them and
         // revocation did not take effect until the session died of idleness.
-        $this->cookieStoreMock->method('getCredentials')->willReturn(null);
+        $this->authCookieMock->method('getCredentials')->willReturn(null);
 
         // The session must not be consulted for identity at all, so no user is ever loaded.
         $this->userDaoMock->expects($this->never())->method('getByUid');
@@ -367,7 +367,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
             'user_profile' => ['uid' => 7, 'email' => 'in@example.com'],
         ];
 
-        $this->cookieStoreMock->method('getCredentials')
+        $this->authCookieMock->method('getCredentials')
             ->willReturn(['user' => ['uid' => 7]]);
 
         // The point of keeping the session: it spares the profile rebuild. If the lookup ran the
@@ -400,7 +400,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         // branches were mutually exclusive before, so a session holding one user could never be
         // reached by a cookie proving a different one. Serving the cached profile on uid mismatch
         // would hand user 7's teams and services to user 99.
-        $this->cookieStoreMock->method('getCredentials')
+        $this->authCookieMock->method('getCredentials')
             ->willReturn(['user' => ['uid' => 99]]);
 
         $this->userDaoMock->expects($this->once())
@@ -441,7 +441,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     {
         $session = [];
         $helper  = new AuthenticationHelper(
-            $session, $this->userDaoMock, $this->apiKeyDaoMock, $this->profileBuilderMock, $this->cookieStoreMock
+            $session, $this->userDaoMock, $this->apiKeyDaoMock, $this->profileBuilderMock, $this->authCookieMock
         );
 
         $method = new \ReflectionMethod(AuthenticationHelper::class, 'regenerateSessionId');
@@ -470,7 +470,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $oldId             = session_id();
 
         $helper = new AuthenticationHelper(
-            $_SESSION, $this->userDaoMock, $this->apiKeyDaoMock, $this->profileBuilderMock, $this->cookieStoreMock
+            $_SESSION, $this->userDaoMock, $this->apiKeyDaoMock, $this->profileBuilderMock, $this->authCookieMock
         );
 
         $method = new \ReflectionMethod(AuthenticationHelper::class, 'regenerateSessionId');
@@ -503,11 +503,11 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $user      = new UserStruct();
         $user->uid = 8;
         $this->userDaoMock->method('getByUid')->willReturn($user);
-        $this->cookieStoreMock->method('getCredentials')->willReturn(['user' => ['uid' => 8]]);
+        $this->authCookieMock->method('getCredentials')->willReturn(['user' => ['uid' => 8]]);
 
         $session = [];
         $helper  = new AuthenticationHelper(
-            $session, $this->userDaoMock, $this->apiKeyDaoMock, $this->profileBuilderMock, $this->cookieStoreMock
+            $session, $this->userDaoMock, $this->apiKeyDaoMock, $this->profileBuilderMock, $this->authCookieMock
         );
         $helper->authenticate(null, null);
 
@@ -520,7 +520,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         // Outer flow throws (findByKey), then the logger payload itself throws
         // (getCredentials) → the inner catch must swallow it; stays logged-out.
         $this->apiKeyDaoMock->method('findByKey')->willThrowException(new \RuntimeException('db down'));
-        $this->cookieStoreMock->method('getCredentials')->willThrowException(new \RuntimeException('cookie boom'));
+        $this->authCookieMock->method('getCredentials')->willThrowException(new \RuntimeException('cookie boom'));
 
         $session = [];
         $helper  = $this->createHelper($session, 'k1', 's1');
@@ -609,11 +609,11 @@ class TestableAuthenticationHelper extends AuthenticationHelper
         UserDao $userDao,
         ApiKeyDao $apiKeyDao,
         UserProfileBuilder $profileBuilder,
-        AuthCookieStore $cookieStore,
+        AuthCookie $authCookie,
         ?string $api_key = null,
         ?string $api_secret = null,
     ): self {
-        $self = new self($session, $userDao, $apiKeyDao, $profileBuilder, $cookieStore);
+        $self = new self($session, $userDao, $apiKeyDao, $profileBuilder, $authCookie);
         $self->authenticate($api_key, $api_secret);
 
         return $self;
