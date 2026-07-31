@@ -190,8 +190,68 @@ class SessionTokenStoreHandlerTest extends AbstractTest
         $this->assertSame([], $touched);
     }
 
+    /**
+     * retireLoginToken() is the primitive under both prev-chain retirement and logout cleanup, and
+     * every caller test mocks it — so nothing verified what it actually sends to Redis. Dropping the
+     * DEL, or aiming the HDEL at the wrong key, would leave all of those callers green.
+     */
     #[Test]
-    public function revokeAllLoginTokensDeletesEveryTokenAndTheMapInOneCall(): void
+    public function retireLoginTokenDropsTheFieldAndItsReverseKey(): void
+    {
+        $fieldName = md5('a-superseded-cookie');
+
+        $calls = [];
+
+        $redis = $this->createStub(Client::class);
+        $redis->method('__call')->willReturnCallback(function ($method, $args) use (&$calls) {
+            $calls[] = [$method, $args];
+
+            return 1;
+        });
+
+        $handler = new SessionTokenStoreHandler();
+        $handler->setCacheConnection($redis);
+
+        $handler->retireLoginToken(123, $fieldName);
+
+        // The field lives in the uid-keyed map; the reverse key is a top-level key that happens to
+        // carry the same name. Both, or the token stays reachable by one route or the other.
+        $this->assertSame(
+            [
+                ['hdel', ['active_user_login_tokens:123', [$fieldName]]],
+                ['del', [$fieldName]],
+            ],
+            $calls
+        );
+    }
+
+    /**
+     * A cookie minted before `prev` existed carries no predecessor, and the renewal path hands that
+     * absence straight through. Reaching Redis with an empty name would HDEL nothing and DEL the
+     * empty key, so the guard is what keeps legacy cookies from renewing into a wasted round trip.
+     */
+    #[Test]
+    public function retireLoginTokenIgnoresAnEmptyFieldName(): void
+    {
+        $calls = [];
+
+        $redis = $this->createStub(Client::class);
+        $redis->method('__call')->willReturnCallback(function ($method, $args) use (&$calls) {
+            $calls[] = [$method, $args];
+
+            return 1;
+        });
+
+        $handler = new SessionTokenStoreHandler();
+        $handler->setCacheConnection($redis);
+
+        $handler->retireLoginToken(123, '');
+
+        $this->assertSame([], $calls);
+    }
+
+    #[Test]
+    public function revokeAllLoginTokensDeletesEveryReverseKeyThenTheMap(): void
     {
         $deleted = [];
         $redis   = $this->createStub(Client::class);
@@ -215,12 +275,22 @@ class SessionTokenStoreHandlerTest extends AbstractTest
         SessionTokenStoreHandler::setCacheConnection($redis);
         (new SessionTokenStoreHandler())->revokeAllLoginTokens(123);
 
-        // Reverse keys and the map go together in a single DEL, so there is no window where the map
-        // is gone while its reverse keys still name it.
+        // One key per DEL, never a multi-key DEL: the reverse keys and the map hash to different
+        // slots, and Predis rejects a cross-slot DEL under REDIS_MODE=cluster. A regression here
+        // would throw from a password change *after* the password was stored, leaving the tokens it
+        // exists to revoke alive. Each recorded argument being a plain string is that guarantee.
+        //
+        // Order matters as much as the count: reverse keys first, map last. A stale reverse key
+        // holds the map's name and that name is reused on the next login, so dropping the map first
+        // would leave pointers aimed at a live map.
         $this->assertSame(
-            [[md5('cookie-one'), md5('cookie-two'), 'active_user_login_tokens:123']],
+            [md5('cookie-one'), md5('cookie-two'), 'active_user_login_tokens:123'],
             $deleted
         );
+
+        foreach ($deleted as $key) {
+            $this->assertIsString($key);
+        }
     }
 
     #[Test]
@@ -246,10 +316,10 @@ class SessionTokenStoreHandlerTest extends AbstractTest
         SessionTokenStoreHandler::setCacheConnection($redis);
         (new SessionTokenStoreHandler())->revokeAllLoginTokens(123);
 
-        // A map with no tokens still costs exactly one DEL, carrying the map alone. Redis rejects
-        // DEL with no keys, and the single-call form makes that unreachable by construction rather
-        // than by a guard: the argument always holds the map name.
-        $this->assertSame([['active_user_login_tokens:123']], $deleted);
+        // No tokens means the loop body never runs, leaving exactly the map's own DEL. The empty
+        // argument list that Redis rejects is unreachable by construction rather than by a guard,
+        // because the map's DEL sits outside the loop.
+        $this->assertSame(['active_user_login_tokens:123'], $deleted);
     }
 
     protected function tearDown(): void

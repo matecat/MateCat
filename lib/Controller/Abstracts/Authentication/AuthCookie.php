@@ -34,6 +34,8 @@ class AuthCookie
      * {@see AppConfig::$AUTHCOOKIEDURATION} so a user returning within that window stays signed in
      * forever, while a captured token stops working after about two of these intervals, because
      * the renewal two generations later retires it.
+     *
+     * An upper bound, not the literal threshold — see {@see renewAfterSeconds()}.
      */
     private const int RENEW_AFTER_SECONDS = 86400;
 
@@ -140,7 +142,7 @@ class AuthCookie
         // so it returns iat + exp. Pre-existing bug, avoided rather than relied on.
         $issuedAt = $jwt['iat'] ?? null;
 
-        if (!is_int($issuedAt) || (time() - $issuedAt) <= self::RENEW_AFTER_SECONDS) {
+        if (!is_int($issuedAt) || (time() - $issuedAt) <= $this->renewAfterSeconds()) {
             return;
         }
 
@@ -187,6 +189,23 @@ class AuthCookie
 
             return false;
         });
+    }
+
+    /**
+     * How old a cookie must be before it is re-issued.
+     *
+     * {@see self::RENEW_AFTER_SECONDS} on its own would be wrong for any cookie lifetime shorter
+     * than a day: renewal only ever happens to a token that still validates, so a threshold at or
+     * past the expiry means renewal never fires and every user is hard-logged-out once per
+     * lifetime — remember-me silently stops working. Halving the lifetime keeps a full renewal
+     * interval of headroom before expiry.
+     *
+     * At the shipped {@see AppConfig::$AUTHCOOKIEDURATION} of 7 days this returns
+     * RENEW_AFTER_SECONDS unchanged; the bound only takes over below a 2-day lifetime.
+     */
+    private function renewAfterSeconds(): int
+    {
+        return min(self::RENEW_AFTER_SECONDS, intdiv(AppConfig::$AUTHCOOKIEDURATION, 2));
     }
 
     /**

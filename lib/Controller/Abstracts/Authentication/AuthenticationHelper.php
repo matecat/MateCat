@@ -136,10 +136,18 @@ class AuthenticationHelper
                     [
                         $ignore,
                         $ignore->getTraceAsString(),
-                        'session' => $this->session,
+                        // Keys only. The session holds the UserStruct, whose `pass` is the password
+                        // hash, so dumping the whole array wrote credentials into login_exceptions.
+                        // Which keys were present is what these logs are actually read for.
+                        'session_keys' => array_keys($this->session),
+                        // The key is the public identifier and stays. The secret is the shared
+                        // secret and never belongs in a log; whether one was sent is the useful bit.
                         'api_key' => $api_key,
-                        'api_secret' => $api_secret,
-                        'cookie' => $this->authCookie->getCredentials()['user'] ?? null,
+                        'api_secret_present' => !empty($api_secret),
+                        // Reuse what the try block already read. Calling getCredentials() again here
+                        // would re-verify the JWT and hit the token ring a second time just to log,
+                        // and it may not have been reached before the throw — hence the ?? null.
+                        'cookie' => $credentials['user'] ?? null,
                     ]
                 );
             } catch (Throwable) {

@@ -364,6 +364,40 @@ class AuthCookieTest extends AbstractTest
         $this->assertSame($spy->writes[0]['value'], $_COOKIE[AppConfig::$AUTHCOOKIENAME]);
     }
 
+    /**
+     * The renewal threshold cannot sit past the expiry.
+     *
+     * Renewal only ever happens to a token that still validates, so a fixed one-day threshold under
+     * a sub-day cookie lifetime means renewal never fires at all and every user is hard-logged-out
+     * once per lifetime — remember-me quietly stops working. A 1-hour lifetime has to renew at 30
+     * minutes, not at 24 hours.
+     */
+    #[Test]
+    public function theRenewalThresholdIsBoundedByTheCookieLifetime(): void
+    {
+        $originalDuration = AppConfig::$AUTHCOOKIEDURATION;
+
+        try {
+            $user = $this->createAuthenticatedUser();
+
+            AppConfig::$AUTHCOOKIEDURATION = 60 * 60;
+
+            // Past half the lifetime, so due for renewal, but still inside it, so still valid.
+            $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $this->agedCookieValue($user, 60 * 40);
+
+            $spy = $this->spyingCookieManager();
+
+            $handler = $this->createMock(SessionTokenStoreHandler::class);
+            $handler->expects($this->once())->method('setCookieLoginTokenActive');
+
+            $this->authCookie($handler, $spy)->renewIfStale($user);
+
+            $this->assertCount(1, $spy->writes);
+        } finally {
+            AppConfig::$AUTHCOOKIEDURATION = $originalDuration;
+        }
+    }
+
     #[Test]
     public function aCookieYoungerThanTheRenewalIntervalIsLeftAlone(): void
     {

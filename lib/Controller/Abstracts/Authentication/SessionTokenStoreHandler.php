@@ -192,14 +192,26 @@ class SessionTokenStoreHandler
         /** @var list<string> $tokens */
         $tokens = $redis->hkeys($key);
 
-        // One DEL for the reverse keys and the map together. It always carries at least $key, so
-        // the empty-argument case that DEL rejects cannot arise, and there is no window in which
-        // the map is gone while its reverse keys still point at the name.
+        // One key per DEL, deliberately. A single multi-key DEL would be fewer round trips, but the
+        // reverse keys are named by md5 while the map is named by uid, so they land in different
+        // hash slots — and under REDIS_MODE=cluster Predis refuses a DEL whose keys span slots
+        // ("Cannot use 'DEL' with redis-cluster.", RedisCluster::getConnection()). That exception
+        // would surface from a password change *after* the new password was already stored, leaving
+        // the old tokens live: the exact gap this method exists to close. Single-key DELs route to
+        // one node each and behave identically in every REDIS_MODE. DaoCacheTrait does the same for
+        // this same map/reverse-key pair.
         //
-        // Deliberately not a loop over retireLoginToken(): that would cost two round trips per
-        // token, and every HDEL would be wasted work since the whole map is deleted here anyway.
-        // The shared primitive is for single-token removal; this is the bulk path.
-        $redis->del([...$tokens, $key]);
+        // Reverse keys go first and the map last. A stale reverse key still holds the map's name,
+        // and that name is reused on the next login, so dropping the map first would aim dangling
+        // pointers at a live map. The reverse order leaves only absent pointers, which is harmless.
+        //
+        // Not a loop over retireLoginToken(): its HDEL would be wasted work, since the whole map is
+        // deleted here anyway. That primitive is for single-token removal; this is the bulk path.
+        foreach ($tokens as $token) {
+            $redis->del($token);
+        }
+
+        $redis->del($key);
     }
 
     /**
