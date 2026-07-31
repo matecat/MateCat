@@ -13,6 +13,8 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -265,6 +267,133 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->assertSame(['profile' => true], $session['user_profile']);
     }
 
+    // ─── Session fixation: the id is rotated on the anonymous → authenticated hop ──────────
+
+    #[Test]
+    public function cookiePathRotatesTheSessionIdExactlyOnce(): void
+    {
+        $user        = new UserStruct();
+        $user->uid   = 5;
+        $user->email = 'cookie@example.com';
+
+        $this->userDaoMock->method('getByUid')->with(5)->willReturn($user);
+        $this->cookieStoreMock->method('getCredentials')->willReturn(['user' => ['uid' => 5]]);
+
+        $session = [];
+        $helper  = $this->createHelper($session);
+
+        $this->assertTrue($helper->isLogged());
+
+        // Every login path — password, signup confirmation, OAuth — establishes the cookie and
+        // then rebuilds the helper, landing here. An id known before the login must not still be
+        // valid after it.
+        $this->assertSame(1, $helper->regeneratedSessionIds);
+    }
+
+    #[Test]
+    public function alreadyAuthenticatedSessionDoesNotRotateTheSessionId(): void
+    {
+        $user        = new UserStruct();
+        $user->uid   = 7;
+        $user->email = 'in@example.com';
+
+        $session = [
+            'user'         => $user,
+            'user_profile' => ['uid' => 7, 'email' => 'in@example.com'],
+        ];
+
+        $helper = $this->createHelper($session);
+
+        // isLogged() proves the session branch really was taken — without it a silent failure
+        // into the catch block would also report zero rotations and the test would prove nothing.
+        $this->assertTrue($helper->isLogged());
+
+        // This is the hot path: it runs on every authenticated request. Rotating here would churn
+        // the id continuously and race parallel requests, and it buys nothing — the privilege
+        // transition already happened.
+        $this->assertSame(0, $helper->regeneratedSessionIds);
+    }
+
+    #[Test]
+    public function apiKeyAuthenticationDoesNotRotateTheSessionId(): void
+    {
+        $user        = new UserStruct();
+        $user->uid   = 42;
+        $user->email = 'api@example.com';
+        $this->userDaoMock->method('getByUid')->with(42)->willReturn($user);
+
+        $apiRecord = new ApiKeyStruct(
+            ['api_key' => 'k1', 'api_secret' => 's1', 'uid' => 42, 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01']
+        );
+        $this->apiKeyDaoMock->method('findByKey')->with('k1')->willReturn($apiRecord);
+
+        $session = [];
+        $helper  = $this->createHelper($session, 'k1', 's1');
+
+        // API-key callers carry no session at all, so there is nothing to rotate.
+        $this->assertTrue($helper->isLogged());
+        $this->assertSame(0, $helper->regeneratedSessionIds);
+    }
+
+    #[Test]
+    public function regenerateSessionIdIsANoOpWithoutAnActiveSession(): void
+    {
+        $session = [];
+        $helper  = new AuthenticationHelper(
+            $session, $this->userDaoMock, $this->apiKeyDaoMock, $this->profileBuilderMock, $this->cookieStoreMock
+        );
+
+        $method = new \ReflectionMethod(AuthenticationHelper::class, 'regenerateSessionId');
+        $method->invoke($helper);
+
+        // The real implementation guards on session_status() so it stays silent under PHPUnit,
+        // where no session is running. Without that guard PHP emits a warning here.
+        $this->assertSame(PHP_SESSION_NONE, session_status());
+    }
+
+    #[Test]
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function regenerateSessionIdRotatesARealSessionAndDropsTheOldEntry(): void
+    {
+        // No other test can reach the real session_regenerate_id() call. By the time the suite is
+        // running PHPUnit has written output, and PHP then refuses to start a session at all
+        // ("Session cannot be started after headers have already been sent"), so the guard in
+        // regenerateSessionId() always returns early. A separate process has produced no output
+        // yet, which makes the real call reachable exactly here. use_cookies is off so nothing
+        // attempts to emit a Set-Cookie header.
+        session_start(['use_cookies' => false, 'cache_limiter' => '']);
+        $this->assertSame(PHP_SESSION_ACTIVE, session_status(), 'precondition: a real session must be running');
+
+        $_SESSION['probe'] = 'carried-over';
+        $oldId             = session_id();
+
+        $helper = new AuthenticationHelper(
+            $_SESSION, $this->userDaoMock, $this->apiKeyDaoMock, $this->profileBuilderMock, $this->cookieStoreMock
+        );
+
+        $method = new \ReflectionMethod(AuthenticationHelper::class, 'regenerateSessionId');
+        $method->invoke($helper);
+
+        $newId = session_id();
+        $this->assertNotSame($oldId, $newId, 'the session id must change once the session is authenticated');
+        $this->assertSame('carried-over', $_SESSION['probe'], 'session data must survive the rotation');
+
+        // The delete_old_session argument is load-bearing: without it the previous id remains
+        // replayable and the rotation is cosmetic. Assert the old entry is really gone rather than
+        // trusting the argument. Skipped rather than silently passing under another save handler,
+        // where the on-disk layout below would not apply.
+        if (ini_get('session.save_handler') !== 'files') {
+            $this->markTestSkipped('old-entry removal is asserted against the files save handler only');
+        }
+
+        $savePath = session_save_path() ?: sys_get_temp_dir();
+        session_write_close();
+
+        $this->assertFileExists($savePath . '/sess_' . $newId, 'precondition: the new entry must be on disk');
+        $this->assertFileDoesNotExist($savePath . '/sess_' . $oldId, 'the old session entry must be deleted');
+    }
+
     #[Test]
     public function realSessionGuardIsEvaluatedOnCookiePath(): void
     {
@@ -372,6 +501,8 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
 
 class TestableAuthenticationHelper extends AuthenticationHelper
 {
+    public int $regeneratedSessionIds = 0;
+
     public static function create(
         array &$session,
         UserDao $userDao,
@@ -395,5 +526,10 @@ class TestableAuthenticationHelper extends AuthenticationHelper
     protected function sessionIsActive(): bool
     {
         return true;
+    }
+
+    protected function regenerateSessionId(): void
+    {
+        $this->regeneratedSessionIds++;
     }
 }
