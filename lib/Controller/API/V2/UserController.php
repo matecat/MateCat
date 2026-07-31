@@ -72,7 +72,10 @@ class UserController extends AbstractStatefulKleinController
             $userDao->updateUser($user);
             $userDao->destroyCacheByUid($uid);
 
-            AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase())->refreshSession();
+            // The cached user row in the session belongs to the name that just changed. Re-read it
+            // from the DAO cache the bust above emptied, rather than running a second full
+            // authentication pass to rebuild what this request already knows.
+            AuthenticationHelper::refreshSessionUser($_SESSION, $userDao);
 
             $this->response->json([
                 'uid' => $user->uid,
@@ -144,8 +147,6 @@ class UserController extends AbstractStatefulKleinController
                 $filtered['key'],
                 $filtered['value']
             );
-
-            AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase())->refreshSession();
 
             $this->response->json($metadata);
         } catch (Exception $exception) {

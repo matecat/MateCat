@@ -74,7 +74,6 @@ EOF;
     {
         $model = new GDriveUserAuthorizationModel($this->user, new ConnectedServiceDao($this->getDatabase()));
         $model->updateOrCreateRecordByCode($code);
-        $this->refreshClientSessionIfNotApi();
     }
 
 }

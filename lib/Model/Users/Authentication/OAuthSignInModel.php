@@ -130,6 +130,7 @@ class OAuthSignInModel
     }
 
     /**
+     * @throws Exception
      * @throws ReflectionException
      * @throws RuntimeException
      */
@@ -147,6 +148,7 @@ class OAuthSignInModel
     }
 
     /**
+     * @throws Exception
      * @throws ReflectionException
      * @throws RuntimeException
      */

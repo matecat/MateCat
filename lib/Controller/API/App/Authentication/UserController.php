@@ -4,9 +4,12 @@ namespace Controller\API\App\Authentication;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
+use Controller\Abstracts\Authentication\UserProfileBuilder;
+use Controller\Abstracts\Authentication\UserStateStore;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\RateLimiterTrait;
+use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
 use Klein\Exceptions\LockedResponseException;
 use Klein\Exceptions\ResponseAlreadySentException;
@@ -15,8 +18,10 @@ use Model\Users\Authentication\ChangePasswordModel;
 use Model\Users\Authentication\PasswordRules;
 use Model\Users\UserDao;
 use ReflectionException;
+use RuntimeException;
 use Stomp\Exception\ConnectionException;
 use TypeError;
+use Utils\Redis\RedisHandler;
 
 class UserController extends AbstractStatefulKleinController
 {
@@ -28,13 +33,65 @@ class UserController extends AbstractStatefulKleinController
      * @return void
      * @throws LockedResponseException
      * @throws ResponseAlreadySentException
+     * @throws EnvironmentIsBrokenException
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
     public function show(): void
     {
-        if (empty($_SESSION['user_profile'])) {
+        // Session-scoped on purpose. /api/app/* is the surface the UI calls with a session; every
+        // other API is stateless. An api-key request reaches here with an empty session, because
+        // the api-key branch of authenticate() sets the user without ever calling setUserSession(),
+        // so it still gets a 401. session['user'] is written by setUserSession() and by nothing
+        // else — exactly what session['user_profile'] was before it moved to UserStateStore — so
+        // the population of callers that get 401 is unchanged.
+        if (empty($_SESSION['user'])) {
             $this->response->code(401);
+            $this->response->json(['error' => 'Invalid login.']);
+
+            return;
         }
-        $this->response->json($_SESSION['user_profile'] ?? ['error' => 'Invalid login.']);
+
+        $this->response->json($this->userProfile());
+    }
+
+    /**
+     * The user-profile payload, read from the uid-keyed store and built on a miss.
+     *
+     * This is the only place the profile is built. It used to be built by setUserSession() on every
+     * request that missed the session cache, which put a fan-out of one query per member per team
+     * on the authenticated path for requests that never looked at the result.
+     *
+     * @return array<string, mixed>
+     *
+     * @throws EnvironmentIsBrokenException
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
+     */
+    private function userProfile(): array
+    {
+        $uid = $this->user->getUid() ?? throw new RuntimeException('Authenticated user has no uid');
+        $store = new UserStateStore();
+
+        $cached = $store->getProfile($uid);
+
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        // Measured and handed to the store so the XFetch envelope carries the real cost of this
+        // build rather than the trait's 0.05s fallback.
+        $startedAt = microtime(true);
+        $profile = UserProfileBuilder::fromDatabase(
+            $this->getDatabase(),
+            (new RedisHandler())->getConnection()
+        )->build($this->user);
+
+        $store->setProfile($uid, $profile, microtime(true) - $startedAt);
+
+        return $profile;
     }
 
     /**

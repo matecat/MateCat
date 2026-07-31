@@ -22,9 +22,11 @@ use Model\Teams\TeamDao;
 use Model\Teams\TeamModel;
 use Model\Teams\TeamStruct;
 use Model\Users\UserDao;
+use Predis\ClientInterface;
 use ReflectionException;
 use Throwable;
 use Utils\Constants\Teams;
+use Utils\Redis\RedisHandler;
 use View\API\V2\Json\Team;
 
 class TeamsController extends KleinController
@@ -33,6 +35,19 @@ class TeamsController extends KleinController
     use TeamInvitationRateLimitTrait;
 
     private const int NAME_MAX_LENGTH = 100;
+
+    private ?ClientInterface $redis = null;
+
+    /**
+     * One Redis connection for the whole request, shared by every team rendered in it. Team::render()
+     * needs a connection for the pending-invitation lookup, and it used to open its own per team.
+     *
+     * @throws Exception
+     */
+    private function redisConnection(): ClientInterface
+    {
+        return $this->redis ??= (new RedisHandler())->getConnection();
+    }
 
     /**
      * Normalise a team name on the way in.
@@ -169,9 +184,7 @@ class TeamsController extends KleinController
         }
 
         $team = $model->create();
-        $formatted = new Team($userDao, null);
-
-        $this->refreshClientSessionIfNotApi();
+        $formatted = new Team($userDao, $this->redisConnection());
 
         $this->response->json(['team' => $formatted->renderItem($team)]);
     }
@@ -235,9 +248,7 @@ class TeamsController extends KleinController
             ); // clean the cache for all team users to see the changes
         }
 
-        $formatted = new Team($userDao, [$org]);
-
-        $this->refreshClientSessionIfNotApi();
+        $formatted = new Team($userDao, $this->redisConnection(), [$org]);
 
         $this->response->json(['team' => $formatted->render()]);
     }
@@ -250,7 +261,7 @@ class TeamsController extends KleinController
     public function getTeamList(): void
     {
         $teamList = (new MembershipDao($this->getDatabase()))->findUserTeams($this->user);
-        $formatted = new Team(new UserDao($this->getDatabase()), $teamList);
+        $formatted = new Team(new UserDao($this->getDatabase()), $this->redisConnection(), $teamList);
         $this->response->json(['teams' => $formatted->render()]);
     }
 

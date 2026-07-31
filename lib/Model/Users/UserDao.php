@@ -6,6 +6,7 @@ use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
+use Model\DataAccess\InvalidatesUserProfileCache;
 use PDO;
 use PDOException;
 use ReflectionException;
@@ -19,6 +20,8 @@ use TypeError;
  */
 class UserDao extends AbstractDao
 {
+
+    use InvalidatesUserProfileCache;
 
     const string TABLE = "users";
     const string STRUCT_TYPE = UserStruct::class;
@@ -45,14 +48,22 @@ class UserDao extends AbstractDao
      *
      * @return int
      * @throws PDOException
+     * @throws Exception
      */
     public function delete(UserStruct $userStruct): int
     {
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare(" DELETE FROM users WHERE uid = ?");
         $stmt->execute([$userStruct->uid]);
+        $deleted = $stmt->rowCount();
 
-        return $stmt->rowCount();
+        if ($deleted > 0) {
+            // Gated on the row count rather than on the struct: a deleted row proves the uid it
+            // matched was a real one, so there is nothing to narrow here.
+            $this->invalidateUserProfileCache((int)$userStruct->uid);
+        }
+
+        return $deleted;
     }
 
     /**
@@ -202,6 +213,8 @@ class UserDao extends AbstractDao
             throw new Exception('Unable to reload updated user');
         }
 
+        $this->invalidateUserProfileCache((int)$id);
+
         return $record;
     }
 
@@ -253,6 +266,8 @@ class UserDao extends AbstractDao
         if (!$record instanceof UserStruct) {
             throw new Exception('Unable to reload updated user');
         }
+
+        $this->invalidateUserProfileCache((int)$obj->uid);
 
         return $record;
     }

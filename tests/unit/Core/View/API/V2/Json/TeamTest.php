@@ -8,6 +8,8 @@ use Model\Teams\MembershipStruct;
 use Model\Teams\TeamStruct;
 use Model\Users\UserDao;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Predis\Client;
+use Predis\ClientInterface;
 use Utils\Constants\Teams;
 use View\API\V2\Json\Team;
 
@@ -29,13 +31,78 @@ class TeamTest extends AbstractTest
     private function makeTestableTeam(?array $data = null): Team
     {
         $userDao = new UserDao(obtainTestDatabase());
-        return new class ($userDao, $data) extends Team {
+
+        return new class ($userDao, $this->recordingRedis(), $data) extends Team {
             /** @return array<string> */
             protected function getPendingInvitations(int $teamId): array
             {
                 return [];
             }
         };
+    }
+
+    /**
+     * A Predis client that records every command it is asked to run.
+     *
+     * Predis routes every command through Client::__call, so a stub of that one method is the only
+     * way to fake it — createMock() cannot see smembers() because it does not exist as a method.
+     *
+     * @param array<string> $members what smembers() answers with
+     * @param list<array{0: string, 1: array<mixed>}> $calls filled in with the recorded commands
+     */
+    private function recordingRedis(array $members = [], array &$calls = []): ClientInterface
+    {
+        $client = $this->createStub(Client::class);
+        $client->method('__call')->willReturnCallback(
+            function (string $command, array $arguments) use ($members, &$calls) {
+                $calls[] = [$command, $arguments];
+
+                return $command === 'smembers' ? $members : null;
+            }
+        );
+
+        return $client;
+    }
+
+    public function testPendingInvitationsAreReadThroughTheInjectedClient(): void
+    {
+        $calls  = [];
+        $client = $this->recordingRedis(['invited@example.com'], $calls);
+
+        // The real getPendingInvitations(), not the stubbed-out one: this is the test that the
+        // injected client is what the render actually reaches for.
+        $view = new Team(new UserDao(obtainTestDatabase()), $client);
+
+        $result = $view->renderItem($this->makeTeam(5));
+
+        $this->assertSame(['invited@example.com'], $result['pending_invitations']);
+        $this->assertSame([['smembers', ['teams_invites:5']]], $calls);
+    }
+
+    public function testRenderingManyTeamsReusesTheOneInjectedClient(): void
+    {
+        $calls  = [];
+        $client = $this->recordingRedis([], $calls);
+
+        $view = new Team(new UserDao(obtainTestDatabase()), $client, [
+            $this->makeTeam(1),
+            $this->makeTeam(2),
+            $this->makeTeam(3),
+        ]);
+
+        $view->render();
+
+        // The reason this PR injects the client at all: getPendingInvitations() used to do
+        // `new RedisHandler()` per team, and RedisHandler::getConnection() is per-instance, so a
+        // user in N teams opened N connections on every profile build. One client, N commands.
+        $this->assertSame(
+            [
+                ['smembers', ['teams_invites:1']],
+                ['smembers', ['teams_invites:2']],
+                ['smembers', ['teams_invites:3']],
+            ],
+            $calls
+        );
     }
 
     public function testConstructorAcceptsNullData(): void

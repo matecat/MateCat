@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Matecat\Core\Controller\API\App\Authentication;
 
+use Controller\Abstracts\Authentication\UserStateStore;
 use Controller\Abstracts\KleinController;
 use Controller\API\App\Authentication\UserController;
 use Controller\API\Commons\Exceptions\ValidationError;
@@ -12,14 +13,18 @@ use Controller\Services\RateLimiterService;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
+use Model\DataAccess\XFetchEnvelope;
 use Model\Users\Authentication\ChangePasswordModel;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
+use Predis\Client;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
 use Utils\Logger\MatecatLogger;
+use Utils\Registry\AppConfig;
 
 class TestableUserController extends UserController
 {
@@ -36,6 +41,7 @@ class TestableUserController extends UserController
         Response            $response,
         UserStruct          $user,
         ?RateLimiterService $rateLimiter = null,
+        ?IDatabase          $database = null,
     ): void {
         $ref = new ReflectionClass(KleinController::class);
         $ref->getProperty('request')->setValue($this, $request);
@@ -43,6 +49,10 @@ class TestableUserController extends UserController
         $ref->getProperty('user')->setValue($this, $user);
         $ref->getProperty('userIsLogged')->setValue($this, true);
         $ref->getProperty('logger')->setValue($this, $this->createStubLogger());
+
+        if ($database !== null) {
+            $ref->getProperty('database')->setValue($this, $database);
+        }
 
         $this->injectedRateLimiter = $rateLimiter;
     }
@@ -85,6 +95,9 @@ class UserControllerTest extends AbstractTest
     private RateLimiterService $rateLimiter;
     private UserStruct $user;
 
+    /** @var list<array{0: string, 1: array<int, mixed>}> */
+    private array $calls = [];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -100,12 +113,57 @@ class UserControllerTest extends AbstractTest
 
         $this->controller = new TestableUserController();
         $this->controller->initWith($this->request, $this->response, $this->user, $this->rateLimiter);
+        $this->calls = [];
+    }
+
+    protected function tearDown(): void
+    {
+        UserStateStore::setCacheConnection(null);
+        parent::tearDown();
+    }
+
+    /**
+     * A Redis stub that records every command and answers hget from the given field map. Predis
+     * dispatches through Client::__call, so that one method is the whole fake.
+     *
+     * @param array<string, string> $hashFields field name (already md5-ed) => raw stored string
+     */
+    private function redisStub(array $hashFields = []): Client
+    {
+        $redis = $this->createStub(Client::class);
+        $redis->method('__call')
+            ->willReturnCallback(function (string $method, array $args) use ($hashFields) {
+                $this->calls[] = [$method, $args];
+
+                if ($method === 'hget') {
+                    return $hashFields[$args[1]] ?? null;
+                }
+
+                return $method === 'hdel' || $method === 'del' ? 1 : null;
+            });
+
+        return $redis;
+    }
+
+    /**
+     * @return list<array<int, mixed>> the argument lists of every recorded call to $method
+     */
+    private function callsTo(string $method): array
+    {
+        $out = [];
+        foreach ($this->calls as [$called, $args]) {
+            if ($called === $method) {
+                $out[] = $args;
+            }
+        }
+
+        return $out;
     }
 
     // ─── show ────────────────────────────────────────────────────────
 
     #[Test]
-    public function show_returns_401_when_no_session_profile(): void
+    public function show_returns_401_when_the_session_has_no_user(): void
     {
         $_SESSION = [];
         $request = new Request();
@@ -118,10 +176,20 @@ class UserControllerTest extends AbstractTest
         $this->assertSame(401, $controller->getResponse()->code());
     }
 
+    /**
+     * The guard's real population, and the reason it is a `must` rather than a tidy-up: the api-key
+     * branch of authenticate() sets the user and never calls setUserSession(), so an api-key caller
+     * arrives here authenticated — LoginValidator passes — with an empty session. /api/app/* is the
+     * UI's session-backed surface; a stateless caller has no business reading a session-scoped
+     * profile. This had no coverage before.
+     */
     #[Test]
-    public function show_returns_user_profile_from_session(): void
+    public function show_returns_401_for_an_api_key_caller_carrying_no_session(): void
     {
-        $_SESSION = ['user_profile' => ['email' => 'test@example.com', 'name' => 'Test']];
+        $_SESSION = [];
+
+        // What the api-key branch leaves behind: a logged-in user, no session keys at all.
+        $this->assertTrue($this->controller->isLoggedIn());
 
         ob_start();
         try {
@@ -130,9 +198,107 @@ class UserControllerTest extends AbstractTest
         }
         $output = ob_get_clean();
 
-        $decoded = json_decode($output, true);
-        $this->assertSame('test@example.com', $decoded['email']);
-        $this->assertSame('Test', $decoded['name']);
+        $this->assertSame(401, $this->controller->getResponse()->code());
+        $this->assertSame('Invalid login.', json_decode($output, true)['error']);
+    }
+
+    #[Test]
+    public function show_returns_the_cached_profile_without_rebuilding_it(): void
+    {
+        $_SESSION = ['user' => $this->user];
+
+        $payload = [
+            'user' => ['uid' => 1, 'email' => 'test@example.com'],
+            'connected_services' => [],
+            'teams' => [],
+            'metadata' => null,
+        ];
+
+        UserStateStore::setCacheConnection($this->redisStub([
+            md5('user_profile:1') => serialize(new XFetchEnvelope([$payload], microtime(true), 1.0)),
+        ]));
+
+        ob_start();
+        try {
+            $this->controller->show();
+        } catch (\Klein\Exceptions\ResponseAlreadySentException) {
+        }
+        $output = ob_get_clean();
+
+        $this->assertSame($payload, json_decode($output, true));
+
+        // No write means the build did not run. Without this the test would pass just as happily on
+        // a rebuild that happened to produce the same payload.
+        $this->assertSame([], $this->callsTo('hset'));
+    }
+
+    #[Test]
+    public function show_builds_the_profile_and_stores_it_on_a_miss(): void
+    {
+        $_SESSION = ['user' => $this->user];
+
+        // An empty hash: every hget misses, so this is the cold path.
+        UserStateStore::setCacheConnection($this->redisStub());
+
+        $controller = new TestableUserController();
+        $controller->initWith(new Request(), new Response(), $this->user, null, obtainTestDatabase());
+
+        ob_start();
+        try {
+            $controller->show();
+        } catch (\Klein\Exceptions\ResponseAlreadySentException) {
+        }
+        $decoded = json_decode(ob_get_clean(), true);
+
+        // The payload shape the frontend consumes, asserted as a shape rather than as a 200: a
+        // response that dropped 'teams' would still be a 200.
+        $this->assertSame(
+            ['user', 'connected_services', 'teams', 'metadata'],
+            array_keys($decoded)
+        );
+        $this->assertSame(1, $decoded['user']['uid']);
+
+        // Built once, then cached for the next call — this is the whole point of moving it out of
+        // the session rather than deleting the cache.
+        $hset = $this->callsTo('hset');
+        $this->assertCount(1, $hset);
+        $this->assertSame('user_state:1', $hset[0][0]);
+        $this->assertSame(md5('user_profile:1'), $hset[0][1]);
+    }
+
+    /**
+     * The store honours the kill switch because it is a cache, unlike SessionTokenStoreHandler,
+     * which assigns cacheTTL directly so a token is stored whatever the switch says.
+     */
+    #[Test]
+    public function show_builds_live_and_stores_nothing_when_sql_cache_is_skipped(): void
+    {
+        $_SESSION = ['user' => $this->user];
+
+        $previous = AppConfig::$SKIP_SQL_CACHE;
+        AppConfig::$SKIP_SQL_CACHE = true;
+
+        UserStateStore::setCacheConnection($this->redisStub());
+
+        $controller = new TestableUserController();
+        $controller->initWith(new Request(), new Response(), $this->user, null, obtainTestDatabase());
+
+        try {
+            ob_start();
+            try {
+                $controller->show();
+            } catch (\Klein\Exceptions\ResponseAlreadySentException) {
+            }
+            $decoded = json_decode(ob_get_clean(), true);
+        } finally {
+            AppConfig::$SKIP_SQL_CACHE = $previous;
+        }
+
+        $this->assertSame(
+            ['user', 'connected_services', 'teams', 'metadata'],
+            array_keys($decoded)
+        );
+        $this->assertSame([], $this->callsTo('hset'));
     }
 
     #[Test]

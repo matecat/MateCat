@@ -5,11 +5,7 @@ namespace Controller\Abstracts\Authentication;
 use Exception;
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
-use Model\ConnectedServices\ConnectedServiceDao;
 use Model\DataAccess\IDatabase;
-use Model\Teams\MembershipDao;
-use Model\Teams\TeamDao;
-use Model\Users\MetadataDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
@@ -20,8 +16,8 @@ use Utils\Logger\LoggerFactory;
 /**
  * Resolves the identity behind a request: api key, or login cookie validated against the token ring.
  *
- *  - all collaborators are constructor-injected (UserDao, ApiKeyDao, UserProfileBuilder,
- *    AuthCookie) → fully unit-testable, no singleton;
+ *  - all collaborators are constructor-injected (UserDao, ApiKeyDao, AuthCookie) → fully
+ *    unit-testable, no singleton;
  *  - the authentication work lives in authenticate() instead of the constructor;
  *  - fromRequest() is the single composition root that touches the database.
  */
@@ -34,7 +30,6 @@ class AuthenticationHelper
     private array $session;
     private UserDao $userDao;
     private ApiKeyDao $apiKeyDao;
-    private UserProfileBuilder $profileBuilder;
     private AuthCookie $authCookie;
 
     /**
@@ -44,13 +39,11 @@ class AuthenticationHelper
         array &$session,
         UserDao $userDao,
         ApiKeyDao $apiKeyDao,
-        UserProfileBuilder $profileBuilder,
         AuthCookie $authCookie,
     ) {
         $this->session =& $session;
         $this->userDao = $userDao;
         $this->apiKeyDao = $apiKeyDao;
-        $this->profileBuilder = $profileBuilder;
         $this->authCookie = $authCookie;
         $this->user = new UserStruct();
     }
@@ -72,13 +65,6 @@ class AuthenticationHelper
             $session,
             new UserDao($db),
             new ApiKeyDao($db),
-            new UserProfileBuilder(
-                new MembershipDao($db),
-                new ConnectedServiceDao($db),
-                new UserDao($db),
-                new TeamDao($db),
-                new MetadataDao($db)
-            ),
             new AuthCookie(new SessionTokenStoreHandler()),
         );
         $self->authenticate($api_key, $api_secret);
@@ -158,28 +144,59 @@ class AuthenticationHelper
     }
 
     /**
-     * The session is a cache for the expensive profile build, never an authorization decision.
-     * It is usable only when it belongs to the uid the login cookie just proved: a session
-     * holding user A together with a cookie for user B must not serve A's profile to B.
+     * The session is a cache for the user row, never an authorization decision. It is usable only
+     * when it belongs to the uid the login cookie just proved: a session holding user A together
+     * with a cookie for user B must not serve A's user to B.
+     *
+     * The profile payload used to be cached here too, and its presence was part of this check. It
+     * now lives in {@see UserStateStore}, keyed by uid, so this guards the UserStruct alone.
      */
     private function cachedSessionUser(int $uid): ?UserStruct
     {
         $cachedUser = $this->session['user'] ?? null;
 
-        if (!$cachedUser instanceof UserStruct || empty($this->session['user_profile'])) {
+        if (!$cachedUser instanceof UserStruct) {
             return null;
         }
 
         return (int)$cachedUser->uid === $uid ? $cachedUser : null;
     }
 
-    public function refreshSession(): void
+    /**
+     * Refresh the session's cached user from the uid the session already proved.
+     *
+     * This is not an authentication pass, and that is the point of it existing: the callers that
+     * need it had been calling {@see fromRequest()}, which validates the cookie against the token
+     * ring, re-reads the user and re-stamps the session, only to have the caller discard part of
+     * what it just built. Nothing here re-decides identity — the uid comes from the session, and a
+     * caller that has no session user gets a no-op.
+     *
+     * Callers that just wrote the users row must invalidate its cache first
+     * ({@see UserDao::destroyCacheByUid()}), or this re-reads the copy they superseded.
+     *
+     * @param array<string, mixed> $session
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public static function refreshSessionUser(array &$session, UserDao $userDao): void
     {
-        unset($this->session['user']);
-        unset($this->session['user_profile']);
-        $this->user = new UserStruct();
-        $this->logged = false;
-        $this->api_record = null;
+        $uid = $session['uid'] ?? null;
+
+        if (empty($uid)) {
+            return;
+        }
+
+        $userDao->setCacheTTL(60 * 60 * 24);
+        $user = $userDao->getByUid((int)$uid);
+
+        if ($user === null) {
+            unset($session['user']);
+
+            return;
+        }
+
+        $session['user'] = $user;
     }
 
     /**
@@ -190,7 +207,6 @@ class AuthenticationHelper
     public function destroyAuthentication(): void
     {
         unset($this->session['user']);
-        unset($this->session['user_profile']);
         $this->authCookie->destroyAuthentication();
     }
 
@@ -233,7 +249,6 @@ class AuthenticationHelper
             $this->session['cid'] = $this->user->getEmail();
             $this->session['uid'] = $this->user->getUid();
             $this->session['user'] = $this->user;
-            $this->session['user_profile'] = $this->profileBuilder->build($this->user);
         }
     }
 

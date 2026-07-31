@@ -16,6 +16,7 @@ use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
+use Predis\Client;
 
 #[AllowMockObjectsWithoutExpectations]
 #[CoversClass(UserProfileBuilder::class)]
@@ -40,7 +41,26 @@ class UserProfileBuilderTest extends AbstractTest
         $teamDao->method('getDatabaseHandler')->willReturn(obtainTestDatabase());
         $metadataDao = $this->createStub(MetadataDao::class);
         $metadataDao->method('getAllByUid')->willReturn([]);
-        $this->builder = new UserProfileBuilder($this->membershipDao, $this->connectedServiceDao, $userDao, $teamDao, $metadataDao);
+        $this->builder = new UserProfileBuilder(
+            $this->membershipDao,
+            $this->connectedServiceDao,
+            $userDao,
+            $teamDao,
+            $metadataDao,
+            $this->redisStub()
+        );
+    }
+
+    /**
+     * Predis dispatches every command through Client::__call, so that single method is the whole
+     * fake. smembers() must answer with an array: PendingInvitations declares an array return.
+     */
+    private function redisStub(): Client
+    {
+        $client = $this->createStub(Client::class);
+        $client->method('__call')->willReturn([]);
+
+        return $client;
     }
 
     private function makeUser(): UserStruct

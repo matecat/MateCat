@@ -336,6 +336,7 @@ class ProjectManager
     /**
      * @throws AuthenticationError
      * @throws EndQueueException
+     * @throws Exception
      * @throws NotFoundException
      * @throws \PDOException
      * @throws ReQueueException
@@ -438,6 +439,7 @@ class ProjectManager
      * @throws ReQueueException
      * @throws ReflectionException
      * @throws ValidationError
+     * @throws Exception
      */
     private function validateBeforeCreation(): void
     {

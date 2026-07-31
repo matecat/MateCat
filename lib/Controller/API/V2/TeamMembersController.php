@@ -98,8 +98,6 @@ class TeamMembersController extends KleinController
         $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), ['team_id' => $teamId, 'email' => '']);
         $formatter = new Membership($full_members_list, $userDao);
 
-        $this->refreshClientSessionIfNotApi();
-
         $this->response->json([
             'members' => $formatter->render(),
             'pending_invitations' => $pendingInvitation->hasPendingInvitation($teamId)
@@ -128,8 +126,6 @@ class TeamMembersController extends KleinController
         $teamId = $teamStruct->id ?? throw new \RuntimeException('Team has no id');
         $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), ['team_id' => $teamId, 'email' => '']);
         $formatter = new Membership($membersList, $userDao);
-
-        $this->refreshClientSessionIfNotApi();
 
         $this->response->json([
             'members' => $formatter->render(),
