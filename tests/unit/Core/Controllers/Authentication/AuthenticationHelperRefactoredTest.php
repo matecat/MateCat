@@ -13,6 +13,8 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -347,6 +349,49 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         // The real implementation guards on session_status() so it stays silent under PHPUnit,
         // where no session is running. Without that guard PHP emits a warning here.
         $this->assertSame(PHP_SESSION_NONE, session_status());
+    }
+
+    #[Test]
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function regenerateSessionIdRotatesARealSessionAndDropsTheOldEntry(): void
+    {
+        // No other test can reach the real session_regenerate_id() call. By the time the suite is
+        // running PHPUnit has written output, and PHP then refuses to start a session at all
+        // ("Session cannot be started after headers have already been sent"), so the guard in
+        // regenerateSessionId() always returns early. A separate process has produced no output
+        // yet, which makes the real call reachable exactly here. use_cookies is off so nothing
+        // attempts to emit a Set-Cookie header.
+        session_start(['use_cookies' => false, 'cache_limiter' => '']);
+        $this->assertSame(PHP_SESSION_ACTIVE, session_status(), 'precondition: a real session must be running');
+
+        $_SESSION['probe'] = 'carried-over';
+        $oldId             = session_id();
+
+        $helper = new AuthenticationHelper(
+            $_SESSION, $this->userDaoMock, $this->apiKeyDaoMock, $this->profileBuilderMock, $this->cookieStoreMock
+        );
+
+        $method = new \ReflectionMethod(AuthenticationHelper::class, 'regenerateSessionId');
+        $method->invoke($helper);
+
+        $newId = session_id();
+        $this->assertNotSame($oldId, $newId, 'the session id must change once the session is authenticated');
+        $this->assertSame('carried-over', $_SESSION['probe'], 'session data must survive the rotation');
+
+        // The delete_old_session argument is load-bearing: without it the previous id remains
+        // replayable and the rotation is cosmetic. Assert the old entry is really gone rather than
+        // trusting the argument. Skipped rather than silently passing under another save handler,
+        // where the on-disk layout below would not apply.
+        if (ini_get('session.save_handler') !== 'files') {
+            $this->markTestSkipped('old-entry removal is asserted against the files save handler only');
+        }
+
+        $savePath = session_save_path() ?: sys_get_temp_dir();
+        session_write_close();
+
+        $this->assertFileExists($savePath . '/sess_' . $newId, 'precondition: the new entry must be on disk');
+        $this->assertFileDoesNotExist($savePath . '/sess_' . $oldId, 'the old session entry must be deleted');
     }
 
     #[Test]
