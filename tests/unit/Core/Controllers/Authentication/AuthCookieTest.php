@@ -10,8 +10,10 @@ use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionMethod;
+use ReflectionProperty;
 use RuntimeException;
 use Utils\Registry\AppConfig;
+use Utils\Tools\SimpleJWT;
 
 #[CoversClass(AuthCookie::class)]
 class AuthCookieTest extends AbstractTest
@@ -185,48 +187,6 @@ class AuthCookieTest extends AbstractTest
     }
 
     #[Test]
-    public function setCredentialsRevampDoesNotRotateWhenTokenStillValid(): void
-    {
-        $user = $this->createAuthenticatedUser();
-        $cookie = $this->generateTestCookie($user);
-        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $cookie;
-
-        $store = $this->createMock(SessionTokenStoreHandler::class);
-        // Should NOT be called because existing token is still valid
-        $store->expects($this->never())
-            ->method('setCookieLoginTokenActive');
-
-        AuthCookie::setCredentials($user, $store, true);
-    }
-
-    #[Test]
-    public function setCredentialsRevampRotatesWhenTokenExpired(): void
-    {
-        $user = $this->createAuthenticatedUser();
-        // No valid cookie in $_COOKIE → payload will be empty
-        unset($_COOKIE[AppConfig::$AUTHCOOKIENAME]);
-
-        $store = $this->createMock(SessionTokenStoreHandler::class);
-        $store->expects($this->once())
-            ->method('setCookieLoginTokenActive')
-            ->with(42, $this->isString());
-        $store->expects($this->once())
-            ->method('removeLoginCookieFromStore')
-            ->with(42, '');
-
-        $cookieManager = $this->spyingCookieManager();
-        AuthCookie::setCookieManager($cookieManager);
-
-        AuthCookie::setCredentials($user, $store, true);
-
-        $this->assertCount(1, $cookieManager->writes);
-        $write = $cookieManager->writes[0];
-        $this->assertSame(AppConfig::$AUTHCOOKIENAME, $write['name']);
-        $this->assertNotEmpty($write['value']);
-        $this->assertSame('Lax', $write['options']['samesite']);
-    }
-
-    #[Test]
     public function destroyAuthenticationRemovesCookie(): void
     {
         $_COOKIE[AppConfig::$AUTHCOOKIENAME] = 'some-value';
@@ -279,5 +239,205 @@ class AuthCookieTest extends AbstractTest
         [$cookieData] = $method->invoke(null, $user);
 
         return $cookieData;
+    }
+
+    // ─── Sliding renewal and prev-chaining ────────────────────────────────────
+
+    /**
+     * Mints a cookie value that is genuinely $ageSeconds old.
+     *
+     * SimpleJWT captures time() in its constructor and sign() re-reads that captured value for
+     * both iat and exp, so moving the captured clock is the only way to age a token without
+     * re-implementing the signature in the test.
+     *
+     * @param array<string, mixed> $extraClaims
+     */
+    private function agedCookieValue(UserStruct $user, int $ageSeconds, array $extraClaims = []): string
+    {
+        $jwt = new SimpleJWT(
+            array_merge([
+                'user' => [
+                    'email' => $user->email,
+                    'first_name' => $user->first_name,
+                    'has_password' => !is_null($user->pass),
+                    'last_name' => $user->last_name,
+                    'uid' => (int)$user->uid,
+                ],
+            ], $extraClaims),
+            AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
+            AppConfig::$AUTHSECRET,
+            AppConfig::$AUTHCOOKIEDURATION
+        );
+
+        (new ReflectionProperty(SimpleJWT::class, 'now'))->setValue($jwt, time() - $ageSeconds);
+
+        return $jwt->jsonSerialize();
+    }
+
+    private function renewableUser(): UserStruct
+    {
+        $user = $this->createAuthenticatedUser();
+        $user->uid = 42;
+
+        // The renewal window has to fit inside the cookie lifetime, or an aged token is simply
+        // expired and gets rejected before renewal is ever considered.
+        AppConfig::$AUTHCOOKIEDURATION = 60 * 60 * 24 * 7;
+
+        return $user;
+    }
+
+    #[Test]
+    public function aCookieOlderThanTheRenewalIntervalIsReissued(): void
+    {
+        $user = $this->renewableUser();
+        $old  = $this->agedCookieValue($user, 60 * 60 * 48);
+
+        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $old;
+
+        $spy = $this->spyingCookieManager();
+        AuthCookie::setCookieManager($spy);
+
+        $handler = $this->createMock(SessionTokenStoreHandler::class);
+        $handler->expects($this->once())
+            ->method('setCookieLoginTokenActive')
+            ->with(42, $this->isString());
+
+        AuthCookie::renewIfStale($user, $handler);
+
+        $this->assertCount(1, $spy->writes);
+        $this->assertNotSame($old, $spy->writes[0]['value']);
+
+        // Later reads in this same request must see the token just issued, not the one the browser
+        // is about to stop sending.
+        $this->assertSame($spy->writes[0]['value'], $_COOKIE[AppConfig::$AUTHCOOKIENAME]);
+    }
+
+    #[Test]
+    public function aCookieYoungerThanTheRenewalIntervalIsLeftAlone(): void
+    {
+        $user = $this->renewableUser();
+
+        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $this->agedCookieValue($user, 60);
+
+        $spy = $this->spyingCookieManager();
+        AuthCookie::setCookieManager($spy);
+
+        $handler = $this->createMock(SessionTokenStoreHandler::class);
+        $handler->expects($this->never())->method('setCookieLoginTokenActive');
+        $handler->expects($this->never())->method('retireLoginToken');
+
+        AuthCookie::renewIfStale($user, $handler);
+
+        $this->assertSame([], $spy->writes);
+    }
+
+    #[Test]
+    public function theReissuedCookieNamesTheSupersededTokenAsItsPrev(): void
+    {
+        $user = $this->renewableUser();
+        $old  = $this->agedCookieValue($user, 60 * 60 * 48);
+
+        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $old;
+
+        $spy = $this->spyingCookieManager();
+        AuthCookie::setCookieManager($spy);
+
+        AuthCookie::renewIfStale($user, $this->createStub(SessionTokenStoreHandler::class));
+
+        $payload = SimpleJWT::getValidatedInstanceFromString(
+            $spy->writes[0]['value'],
+            AppConfig::$AUTHSECRET
+        )->getPayload();
+
+        // The ring stores each token under md5(cookieValue), so prev is already the field name of
+        // the token being superseded — nothing extra is hashed or stored to make the chain work.
+        $this->assertSame(md5($old), $payload['prev']);
+    }
+
+    #[Test]
+    public function renewalRetiresTheGrandparentAndNeverTheParent(): void
+    {
+        $user       = $this->renewableUser();
+        $grandparent = md5('the-token-from-two-renewals-ago');
+        $old        = $this->agedCookieValue($user, 60 * 60 * 48, ['prev' => $grandparent]);
+
+        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $old;
+        AuthCookie::setCookieManager($this->spyingCookieManager());
+
+        // The parent is what the browser is holding at this instant, so in-flight requests are
+        // carrying it; retiring it here is the logout storm this design exists to avoid. The
+        // grandparent is a full renewal interval old and no request lives that long.
+        $handler = $this->createMock(SessionTokenStoreHandler::class);
+        $handler->expects($this->once())
+            ->method('retireLoginToken')
+            ->with(42, $grandparent);
+
+        AuthCookie::renewIfStale($user, $handler);
+    }
+
+    #[Test]
+    public function aLegacyCookieWithoutPrevRenewsAndRetiresNothing(): void
+    {
+        $user = $this->renewableUser();
+
+        // Cookies already in browsers when this ships carry no prev claim. They must renew
+        // normally rather than being rejected or triggering a bogus retirement.
+        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $this->agedCookieValue($user, 60 * 60 * 48);
+
+        $spy = $this->spyingCookieManager();
+        AuthCookie::setCookieManager($spy);
+
+        $handler = $this->createMock(SessionTokenStoreHandler::class);
+        $handler->expects($this->once())->method('setCookieLoginTokenActive');
+        $handler->expects($this->never())->method('retireLoginToken');
+
+        AuthCookie::renewIfStale($user, $handler);
+
+        $this->assertCount(1, $spy->writes);
+    }
+
+    #[Test]
+    public function twoRenewalsInTheSameSecondConvergeOnOneToken(): void
+    {
+        $user = $this->renewableUser();
+        $old  = $this->agedCookieValue($user, 60 * 60 * 48);
+
+        $issued = [];
+
+        foreach ([1, 2] as $ignored) {
+            $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $old;
+            $spy = $this->spyingCookieManager();
+            AuthCookie::setCookieManager($spy);
+
+            AuthCookie::renewIfStale($user, $this->createStub(SessionTokenStoreHandler::class));
+
+            $issued[] = $spy->writes[0]['value'];
+        }
+
+        // Parallel requests both see the same current cookie, and SimpleJWT stamps iat from time()
+        // with no jti and no randomness. Identical payloads mean the HSET is idempotent, so the
+        // ring gains one field rather than one per racing request.
+        $this->assertSame($issued[0], $issued[1]);
+    }
+
+    #[Test]
+    public function logoutRetiresTheSupersededTokenAsWell(): void
+    {
+        $user       = $this->renewableUser();
+        $superseded = md5('the-token-this-one-replaced');
+
+        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $this->agedCookieValue($user, 60, ['prev' => $superseded]);
+        AuthCookie::setCookieManager($this->spyingCookieManager());
+
+        // Renewal deliberately leaves the parent live for in-flight requests. Without this the
+        // browser stops holding it at logout but a captured copy keeps passing
+        // isLoginCookieStillActive() for a full renewal interval.
+        $handler = $this->createMock(SessionTokenStoreHandler::class);
+        $handler->expects($this->once())->method('removeLoginCookieFromStore');
+        $handler->expects($this->once())
+            ->method('retireLoginToken')
+            ->with(42, $superseded);
+
+        AuthCookie::destroyAuthentication($handler);
     }
 }

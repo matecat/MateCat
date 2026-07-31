@@ -225,10 +225,10 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->assertNull($helper->getUser()->uid);
     }
 
-    // ─── Constructor (authenticate): session auth path ────────────────────
+    // ─── Constructor (authenticate): session as profile cache ─────────────
 
     #[Test]
-    public function constructorWithSessionDataSetsUser(): void
+    public function constructorWithSessionDataSetsUserWhenTheCookieAgrees(): void
     {
         $user        = new UserStruct();
         $user->uid   = 99;
@@ -238,6 +238,12 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
             'user'         => $user,
             'user_profile' => ['uid' => 99, 'email' => 'session@example.com'],
         ];
+
+        // This test used to pass on session data alone. That was the defect: session state was an
+        // authorization decision, so revoking the token ring did not log anyone out. The session
+        // is now only a cache, and it takes a cookie the ring still accepts to reach it.
+        $this->cookieStoreMock->method('getCredentials')
+            ->willReturn(['user' => ['uid' => 99]]);
 
         $helper = $this->createHelper($session);
 
@@ -302,16 +308,111 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
             'user_profile' => ['uid' => 7, 'email' => 'in@example.com'],
         ];
 
+        // The cookie is mandatory now, even with a fully populated session: the token ring is the
+        // only authority, so a request that cannot present a live cookie is not authenticated no
+        // matter what the session holds.
+        $this->cookieStoreMock->method('getCredentials')
+            ->willReturn(['user' => ['uid' => 7]]);
+
         $helper = $this->createHelper($session);
 
-        // isLogged() proves the session branch really was taken — without it a silent failure
-        // into the catch block would also report zero rotations and the test would prove nothing.
+        // isLogged() proves the session cache really was used — without it a silent failure into
+        // the catch block would also report zero rotations and the test would prove nothing.
         $this->assertTrue($helper->isLogged());
 
         // This is the hot path: it runs on every authenticated request. Rotating here would churn
         // the id continuously and race parallel requests, and it buys nothing — the privilege
         // transition already happened.
         $this->assertSame(0, $helper->regeneratedSessionIds);
+    }
+
+    // ─── Ring is the sole authority ───────────────────────────────────────────
+
+    #[Test]
+    public function aPopulatedSessionWithoutALiveCookieIsNotAuthenticated(): void
+    {
+        $user        = new UserStruct();
+        $user->uid   = 7;
+        $user->email = 'in@example.com';
+
+        $session = [
+            'user'         => $user,
+            'user_profile' => ['uid' => 7, 'email' => 'in@example.com'],
+        ];
+
+        // What a revoked user looks like on their next request: the ring no longer holds their
+        // token, so getCredentials() yields nothing, while their PHP session is still sitting
+        // there fully populated. Before this change that session alone authenticated them and
+        // revocation did not take effect until the session died of idleness.
+        $this->cookieStoreMock->method('getCredentials')->willReturn(null);
+
+        // The session must not be consulted for identity at all, so no user is ever loaded.
+        $this->userDaoMock->expects($this->never())->method('getByUid');
+
+        $helper = $this->createHelper($session);
+
+        $this->assertFalse($helper->isLogged());
+        $this->assertNull($helper->getUser()->uid);
+    }
+
+    #[Test]
+    public function aMatchingSessionIsUsedAsTheProfileCacheAndSkipsTheUserLookup(): void
+    {
+        $user        = new UserStruct();
+        $user->uid   = 7;
+        $user->email = 'in@example.com';
+
+        $session = [
+            'user'         => $user,
+            'user_profile' => ['uid' => 7, 'email' => 'in@example.com'],
+        ];
+
+        $this->cookieStoreMock->method('getCredentials')
+            ->willReturn(['user' => ['uid' => 7]]);
+
+        // The point of keeping the session: it spares the profile rebuild. If the lookup ran the
+        // cache would be doing nothing for us.
+        $this->userDaoMock->expects($this->never())->method('getByUid');
+
+        $helper = $this->createHelper($session);
+
+        $this->assertTrue($helper->isLogged());
+        $this->assertSame(7, $helper->getUser()->uid);
+    }
+
+    #[Test]
+    public function aSessionBelongingToAnotherUserIsNeverServedToTheCookieHolder(): void
+    {
+        $sessionUser        = new UserStruct();
+        $sessionUser->uid   = 7;
+        $sessionUser->email = 'in@example.com';
+
+        $cookieUser        = new UserStruct();
+        $cookieUser->uid   = 99;
+        $cookieUser->email = 'other@example.com';
+
+        $session = [
+            'user'         => $sessionUser,
+            'user_profile' => ['uid' => 7, 'email' => 'in@example.com'],
+        ];
+
+        // A hazard this restructure introduces and has to close in the same change: the two
+        // branches were mutually exclusive before, so a session holding one user could never be
+        // reached by a cookie proving a different one. Serving the cached profile on uid mismatch
+        // would hand user 7's teams and services to user 99.
+        $this->cookieStoreMock->method('getCredentials')
+            ->willReturn(['user' => ['uid' => 99]]);
+
+        $this->userDaoMock->expects($this->once())
+            ->method('getByUid')
+            ->with(99)
+            ->willReturn($cookieUser);
+
+        $helper = $this->createHelper($session);
+
+        $this->assertTrue($helper->isLogged());
+        $this->assertSame(99, $helper->getUser()->uid);
+        $this->assertSame(99, $session['user']->uid);
     }
 
     #[Test]

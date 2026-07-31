@@ -120,7 +120,78 @@ class SessionTokenStoreHandlerTest extends AbstractTest
     }
 
     #[Test]
-    public function revokeAllLoginTokensDeletesEveryTokenAndThenTheMap(): void
+    public function pruneDropsExpiredTokensAndLeavesLiveOnesAlone(): void
+    {
+        $expiredField = md5('expired-cookie');
+        $liveField    = md5('live-cookie');
+
+        $touched = [];
+
+        $redis = $this->createStub(Client::class);
+        $redis->method('__call')
+            ->willReturnCallback(
+                function (string $method, array $args) use (&$touched, $expiredField, $liveField) {
+                    if ($method === 'hgetall') {
+                        // _setInCacheMap() stores a serialized single-element list per field.
+                        return [
+                            $expiredField => serialize(['expired-cookie']),
+                            $liveField => serialize(['live-cookie']),
+                        ];
+                    }
+
+                    $touched[] = [$method, $args[1] ?? $args[0]];
+
+                    return 1;
+                }
+            );
+
+        SessionTokenStoreHandler::setCacheConnection($redis);
+
+        (new SessionTokenStoreHandler())->pruneExpiredLoginTokens(
+            36,
+            static fn(string $token): bool => $token === 'expired-cookie'
+        );
+
+        // Field name and reverse-key name are the same md5, so a dropped token costs one hdel plus
+        // one del — and the live token must be touched by neither.
+        $this->assertSame(
+            [['hdel', [$expiredField]], ['del', $expiredField]],
+            $touched
+        );
+    }
+
+    #[Test]
+    public function pruneKeepsAnyStoredValueItCannotRead(): void
+    {
+        $touched = [];
+
+        $redis = $this->createStub(Client::class);
+        $redis->method('__call')
+            ->willReturnCallback(function (string $method) use (&$touched) {
+                if ($method === 'hgetall') {
+                    // Not the shape _setInCacheMap() writes, so the token cannot be recovered.
+                    return ['some-field' => serialize('not a single-element list')];
+                }
+
+                $touched[] = $method;
+
+                return 1;
+            });
+
+        SessionTokenStoreHandler::setCacheConnection($redis);
+
+        (new SessionTokenStoreHandler())->pruneExpiredLoginTokens(
+            36,
+            // Would condemn everything if it were ever consulted. It must not be: an unreadable
+            // value is kept, because a slightly larger hash beats logging someone out.
+            static fn(string $token): bool => true
+        );
+
+        $this->assertSame([], $touched);
+    }
+
+    #[Test]
+    public function revokeAllLoginTokensDeletesEveryTokenAndTheMapInOneCall(): void
     {
         $deleted = [];
         $redis   = $this->createStub(Client::class);
@@ -144,9 +215,10 @@ class SessionTokenStoreHandlerTest extends AbstractTest
         SessionTokenStoreHandler::setCacheConnection($redis);
         (new SessionTokenStoreHandler())->revokeAllLoginTokens(123);
 
-        // Both the reverse keys and the map itself, so no dangling pointer survives.
+        // Reverse keys and the map go together in a single DEL, so there is no window where the map
+        // is gone while its reverse keys still name it.
         $this->assertSame(
-            [[md5('cookie-one'), md5('cookie-two')], 'active_user_login_tokens:123'],
+            [[md5('cookie-one'), md5('cookie-two'), 'active_user_login_tokens:123']],
             $deleted
         );
     }
@@ -174,8 +246,10 @@ class SessionTokenStoreHandlerTest extends AbstractTest
         SessionTokenStoreHandler::setCacheConnection($redis);
         (new SessionTokenStoreHandler())->revokeAllLoginTokens(123);
 
-        // An empty map must not produce a del([]) — Redis rejects DEL with no keys.
-        $this->assertSame(['active_user_login_tokens:123'], $deleted);
+        // A map with no tokens still costs exactly one DEL, carrying the map alone. Redis rejects
+        // DEL with no keys, and the single-call form makes that unreachable by construction rather
+        // than by a guard: the argument always holds the map name.
+        $this->assertSame([['active_user_login_tokens:123']], $deleted);
     }
 
     protected function tearDown(): void

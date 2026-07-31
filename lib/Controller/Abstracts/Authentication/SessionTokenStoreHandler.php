@@ -14,7 +14,9 @@ namespace Controller\Abstracts\Authentication;
 
 use Exception;
 use Model\DataAccess\DaoCacheTrait;
+use Predis\Client;
 use ReflectionException;
+use RuntimeException;
 use Utils\Logger\LoggerFactory;
 
 class SessionTokenStoreHandler
@@ -38,6 +40,35 @@ class SessionTokenStoreHandler
         // Session tokens are written explicitly (not computed from queries),
         // so probabilistic early expiration has no semantic meaning here.
         $this->xFetchEnabled = false;
+    }
+
+    /**
+     * The Redis key of the per-user token ring.
+     */
+    private function mapKey(int $userId): string
+    {
+        return sprintf(self::ACTIVE_USER_LOGIN_TOKENS_MAP, $userId);
+    }
+
+    /**
+     * The Redis connection, guaranteed non-null.
+     *
+     * {@see DaoCacheTrait::_cacheSetConnection()} either sets a connection or rethrows, so the null
+     * case is unreachable — but the property it fills is nullable, so something has to narrow it.
+     * Doing that here, once, keeps every caller free of a dead null branch.
+     *
+     * This raises rather than returning null on purpose: a caller that silently did nothing would
+     * be the worst outcome, since these operations revoke access. In practice the throw comes from
+     * _cacheSetConnection() one line earlier, so this is not a new failure mode.
+     *
+     * @throws ReflectionException If there is an issue with the cache operation.
+     * @throws Exception
+     */
+    private function connection(): Client
+    {
+        $this->_cacheSetConnection();
+
+        return self::$cache_con ?? throw new RuntimeException('Redis connection unavailable');
     }
 
     /**
@@ -78,7 +109,7 @@ class SessionTokenStoreHandler
      */
     public function setCookieLoginTokenActive(int $userId, string $loginCookieValue): void
     {
-        $key = sprintf(self::ACTIVE_USER_LOGIN_TOKENS_MAP, $userId);
+        $key = $this->mapKey($userId);
         $this->_cacheSetConnection();
         $this->_setInCacheMap($key, $loginCookieValue, [$loginCookieValue]);
     }
@@ -101,7 +132,7 @@ class SessionTokenStoreHandler
      */
     public function isLoginCookieStillActive(int $userId, string $loginCookieValue): bool
     {
-        return $this->_getFromCacheMap(sprintf(self::ACTIVE_USER_LOGIN_TOKENS_MAP, $userId), $loginCookieValue) !== null;
+        return $this->_getFromCacheMap($this->mapKey($userId), $loginCookieValue) !== null;
     }
 
     /**
@@ -124,8 +155,10 @@ class SessionTokenStoreHandler
             return;
         }
 
-        $key = sprintf(self::ACTIVE_USER_LOGIN_TOKENS_MAP, $userId);
-        $this->_removeObjectCacheMapElement($key, $loginCookieValue);
+        // Ring field names are md5 of the cookie value, so this is retireLoginToken() with the
+        // hashing done on the caller's behalf. Keeping one implementation of the two-key delete is
+        // what stops the map field and its reverse key from drifting apart.
+        $this->retireLoginToken($userId, md5($loginCookieValue));
     }
 
     /**
@@ -135,8 +168,9 @@ class SessionTokenStoreHandler
      * pass {@see isLoginCookieStillActive()} again. Called when the account's credentials change
      * and every device has to authenticate afresh.
      *
-     * This does not end sessions that are already running: the session branch of
-     * AuthenticationHelper::authenticate() never consults this map.
+     * Since {@see AuthenticationHelper::authenticate()} revalidates against this map on every
+     * request, dropping it ends running sessions too: the next request from any device finds no
+     * live token and is anonymous, whatever its PHP session still holds.
      *
      * @param int $userId The unique identifier of the user.
      *
@@ -146,15 +180,9 @@ class SessionTokenStoreHandler
      */
     public function revokeAllLoginTokens(int $userId): void
     {
-        $this->_cacheSetConnection();
+        $redis = $this->connection();
 
-        // _cacheSetConnection() either sets a connection or rethrows, so this is unreachable at
-        // runtime. It stays because the property is nullable and the calls below are not.
-        if (self::$cache_con === null) {
-            return;
-        }
-
-        $key = sprintf(self::ACTIVE_USER_LOGIN_TOKENS_MAP, $userId);
+        $key = $this->mapKey($userId);
 
         // _setInCacheMap() writes each token twice: as a field of the map, and as a standalone
         // reverse-pointer key under the same md5 name. Field names are therefore also reverse-key
@@ -162,13 +190,93 @@ class SessionTokenStoreHandler
         // stale one still holds the map's name — and that name is reused on the next login, so
         // leaving them behind aims a dangling pointer at a live map.
         /** @var list<string> $tokens */
-        $tokens = self::$cache_con->hkeys($key);
+        $tokens = $redis->hkeys($key);
 
-        if (!empty($tokens)) {
-            self::$cache_con->del($tokens);
+        // One DEL for the reverse keys and the map together. It always carries at least $key, so
+        // the empty-argument case that DEL rejects cannot arise, and there is no window in which
+        // the map is gone while its reverse keys still point at the name.
+        //
+        // Deliberately not a loop over retireLoginToken(): that would cost two round trips per
+        // token, and every HDEL would be wasted work since the whole map is deleted here anyway.
+        // The shared primitive is for single-token removal; this is the bulk path.
+        $redis->del([...$tokens, $key]);
+    }
+
+    /**
+     * Retires a single login token addressed by its ring field name.
+     *
+     * This is the one place that knows a token occupies two Redis keys — the map field and the
+     * reverse key of the same name — so every single-token removal goes through here.
+     *
+     * It takes the hash rather than the cookie value because its callers already hold one: the
+     * `prev` claim of a renewed cookie stores the superseded token's field name, which *is* that
+     * md5. Hashing it again would address a field that does not exist. {@see
+     * removeLoginCookieFromStore()} is the adapter for callers holding a raw cookie value instead.
+     *
+     * @param int $userId The unique identifier of the user.
+     * @param string $fieldName The ring field name (an md5 of the superseded cookie value).
+     *
+     * @return void
+     * @throws ReflectionException If there is an issue with the cache operation.
+     * @throws Exception
+     */
+    public function retireLoginToken(int $userId, string $fieldName): void
+    {
+        if (empty($fieldName)) {
+            return;
         }
 
-        self::$cache_con->del($key);
+        $redis = $this->connection();
+
+        $key = $this->mapKey($userId);
+
+        // Field name and reverse-key name are the same string, so both have to go.
+        $redis->hdel($key, [$fieldName]);
+        $redis->del($fieldName);
+    }
+
+    /**
+     * Drops tokens the caller judges expired.
+     *
+     * Redis here is 7.1.0, so there is no HEXPIRE (7.4+) and hash fields carry no individual TTL.
+     * Worse, {@see DaoCacheTrait::_setInCacheMap()} refreshes the *whole map's* TTL on every write,
+     * so for a user who keeps logging in nothing in the map ever expires on its own. Renewal
+     * retires the grandparent and keeps the steady state at roughly two fields per device, which
+     * leaves exactly one leak this closes: fields belonging to devices that stopped coming back.
+     * Those hold expired tokens, so they cannot authenticate — this is hygiene, not a hole.
+     *
+     * The expiry judgement is the caller's because JWT parsing needs the auth secret, which this
+     * class has no business knowing. Anything the predicate cannot judge is kept: a slightly
+     * larger hash beats logging someone out over an unreadable value.
+     *
+     * @param int $userId The unique identifier of the user.
+     * @param callable(string): bool $isExpired Receives a stored cookie value, returns true to drop it.
+     *
+     * @return void
+     * @throws ReflectionException If there is an issue with the cache operation.
+     * @throws Exception
+     */
+    public function pruneExpiredLoginTokens(int $userId, callable $isExpired): void
+    {
+        $redis = $this->connection();
+
+        /** @var array<string, string> $fields */
+        $fields = $redis->hgetall($this->mapKey($userId));
+
+        foreach ($fields as $fieldName => $storedValue) {
+            // _setInCacheMap() wraps values in an XFetchEnvelope or not depending on $xFetchEnabled
+            // at write time, so go through the trait's unwrap rather than assuming the bare shape.
+            // This class disables xFetch, but values written under a different setting can outlive
+            // that decision in Redis.
+            $unserialized = $this->_unwrapCacheMapValue(unserialize($storedValue));
+            $token = is_array($unserialized) ? ($unserialized[0] ?? null) : null;
+
+            if (!is_string($token) || !$isExpired($token)) {
+                continue;
+            }
+
+            $this->retireLoginToken($userId, $fieldName);
+        }
     }
 
 }

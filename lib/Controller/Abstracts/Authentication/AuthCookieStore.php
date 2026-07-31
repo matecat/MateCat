@@ -35,9 +35,9 @@ class AuthCookieStore
      * @throws Exception
      * @throws TypeError
      */
-    public function setCredentials(UserStruct $user, bool $isLoginCookieRevamp = false): void
+    public function renewIfStale(UserStruct $user): void
     {
-        AuthCookie::setCredentials($user, $this->tokenStore, $isLoginCookieRevamp);
+        AuthCookie::renewIfStale($user, $this->tokenStore);
     }
 
     /**

@@ -25,9 +25,6 @@ use Utils\Logger\LoggerFactory;
  *    UserProfileBuilder, AuthCookieStore) → fully unit-testable, no singleton;
  *  - the authentication work lives in authenticate() instead of the constructor;
  *  - fromRequest() is the single composition root that touches the database.
- *
- * The original class is intentionally kept in place; this lives beside it for
- * the verification phase.
  */
 class AuthenticationHelper
 {
@@ -102,17 +99,34 @@ class AuthenticationHelper
                 if ($user !== null) {
                     $this->user = $user;
                 }
-            } elseif (!empty($this->session['user']) && !empty($this->session['user_profile'])) {
-                $this->user = $this->session['user'];
-                $this->cookieStore->setCredentials($this->user, true);
             } else {
+                // The token ring is the only authority: every request revalidates the login
+                // cookie against it, so DEL active_user_login_tokens:<uid> logs the user out
+                // everywhere at once. The PHP session used to be consulted first and never
+                // consulted the ring, which is what let a revoked user keep working until their
+                // session died of idleness.
                 $credentials = $this->cookieStore->getCredentials();
                 if (!empty($credentials) && !empty($credentials['user'])) {
-                    $this->userDao->setCacheTTL(60 * 60 * 24);
-                    $user = $this->userDao->getByUid($credentials['user']['uid']);
-                    if ($user !== null) {
-                        $this->user = $user;
-                        $this->setUserSession();
+                    $uid        = (int)$credentials['user']['uid'];
+                    $cachedUser = $this->cachedSessionUser($uid);
+
+                    if ($cachedUser !== null) {
+                        $this->user = $cachedUser;
+                    } else {
+                        $this->userDao->setCacheTTL(60 * 60 * 24);
+                        $user = $this->userDao->getByUid($uid);
+                        if ($user !== null) {
+                            $this->user = $user;
+                            $this->setUserSession();
+                        }
+                    }
+
+                    // Slide the cookie forward while the user is active. This replaces the
+                    // post-expiry revamp the session branch used to perform: with the ring
+                    // authoritative an expired JWT resolves to no uid at all, so renewal has to
+                    // happen before expiry or everyone is signed out hard at the cookie duration.
+                    if ($this->user->uid !== null) {
+                        $this->cookieStore->renewIfStale($this->user);
                     }
                 }
             }
@@ -134,6 +148,22 @@ class AuthenticationHelper
         } finally {
             $this->logged = $this->user->isLogged();
         }
+    }
+
+    /**
+     * The session is a cache for the expensive profile build, never an authorization decision.
+     * It is usable only when it belongs to the uid the login cookie just proved: a session
+     * holding user A together with a cookie for user B must not serve A's profile to B.
+     */
+    private function cachedSessionUser(int $uid): ?UserStruct
+    {
+        $cachedUser = $this->session['user'] ?? null;
+
+        if (!$cachedUser instanceof UserStruct || empty($this->session['user_profile'])) {
+            return null;
+        }
+
+        return (int)$cachedUser->uid === $uid ? $cachedUser : null;
     }
 
     public function refreshSession(): void
