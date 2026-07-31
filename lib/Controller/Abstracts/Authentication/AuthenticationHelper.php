@@ -163,6 +163,23 @@ class AuthenticationHelper
     }
 
     /**
+     * Rotate the session id, discarding the old server-side entry so the previous id cannot be
+     * replayed. Called when the session becomes authenticated; see {@see setUserSession()}.
+     *
+     * The active-session check deliberately reads session_status() rather than going through
+     * {@see sessionIsActive()}: subclasses override that seam to exercise the session writes
+     * without a real session, and calling session_regenerate_id() without one raises a warning.
+     */
+    protected function regenerateSessionId(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE || headers_sent()) {
+            return;
+        }
+
+        session_regenerate_id(true);
+    }
+
+    /**
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
@@ -170,6 +187,12 @@ class AuthenticationHelper
     protected function setUserSession(): void
     {
         if ($this->sessionIsActive()) {
+            // This is the transition from anonymous to authenticated, and the only place it
+            // happens: every login path (password, signup confirmation, OAuth) reaches it through
+            // fromRequest(). The id must not survive the transition, or anyone who learned it
+            // beforehand would be holding an authenticated session.
+            $this->regenerateSessionId();
+
             $this->session['cid'] = $this->user->getEmail();
             $this->session['uid'] = $this->user->getUid();
             $this->session['user'] = $this->user;
