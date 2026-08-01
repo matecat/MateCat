@@ -14,6 +14,38 @@ services:
                 - lib/View/templates/_APIDoc.php
                 - router.php
 
+    -
+        class: Matecat\PhpStan\Rules\NoDirectSessionSuperglobalRule
+        tags:
+            - phpstan.rules.rule
+        arguments:
+            allowedFiles:
+                # The adapter. This is the only entry that is meant to survive.
+                - lib/Utils/Session/PhpSessionStore.php
+                # Not yet converted. Each conversion deletes one line here; when the list is
+                # empty the superglobal has one reader and one writer in the whole tree.
+                - lib/Controller/API/App/Authentication/ForgotPasswordController.php
+                - lib/Controller/API/App/Authentication/LoginController.php
+                - lib/Controller/API/App/Authentication/SignupController.php
+                - lib/Controller/API/App/Authentication/UserController.php
+                - lib/Controller/API/App/CreateProjectController.php
+                - lib/Controller/API/Commons/ViewValidators/ViewLoginRedirectValidator.php
+                - lib/Controller/API/GDrive/GDriveController.php
+                - lib/Controller/API/GDrive/OAuthController.php
+                - lib/Controller/API/V2/UserController.php
+                - lib/Controller/Abstracts/Authentication/AuthenticationTrait.php
+                - lib/Controller/Abstracts/BaseKleinViewController.php
+                - lib/Controller/Abstracts/FlashMessage.php
+                - lib/Controller/Views/OauthResponseHandlerController.php
+                - lib/Controller/Views/SignInController.php
+                - lib/Model/ConnectedServices/GDrive/Session.php
+                - lib/Model/Teams/InvitedUser.php
+                - lib/Model/Users/RedeemableProject.php
+                - lib/Utils/Shop/Cart.php
+                - plugins/aligner/lib/Features/Aligner.php
+                - plugins/translated/lib/Features/Translated.php
+                - plugins/translated/tests/unit/TranslatedEventHandlersTest.php
+
 parameters:
     level: 8
     paths:
