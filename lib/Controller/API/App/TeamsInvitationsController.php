@@ -40,7 +40,8 @@ class TeamsInvitationsController extends AbstractStatefulKleinController
             $this->response,
             new TeamDao($this->getDatabase()),
             null,
-            new UserDao($this->getDatabase())
+            new UserDao($this->getDatabase()),
+            $this->sessionStore()
         );
         $invite->prepareUserInvitedSignUpRedirect();
         $this->response->redirect(CanonicalRoutes::appRoot());
