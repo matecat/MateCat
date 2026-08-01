@@ -27,11 +27,61 @@ class UserStateStore
      * Key pattern for the per-user state hash. The `%d` placeholder is replaced with the user UID,
      * mirroring {@see SessionTokenStoreHandler::ACTIVE_USER_LOGIN_TOKENS_MAP}: one hash per user,
      * never a single shared hash holding every user's state.
+     *
+     * **What this hash holds.** Computed, cacheable state *about* one user, one field per datum —
+     * currently only the rendered profile ({@see self::USER_PROFILE_FIELD}). It is a cache: every
+     * field must be reconstructible from the database, because any field can vanish at any moment
+     * (24h TTL, an explicit invalidation, or a `flushdb` from an unrelated test). Nothing may treat a
+     * hit here as proof of anything.
+     *
+     * **What it must never hold, and why each is excluded.**
+     *
+     * - *Anything credential-bearing* — password hash, salt, `confirmation_token`. `UserStruct`
+     *   declares all three, so serialising a whole user row into any long-lived store puts secrets at
+     *   rest with a lifetime nobody purges on password change. That is the defect being walked back,
+     *   not a shape to reproduce under a new key name.
+     * - *The users row itself.* {@see \Model\Users\UserDao::getByUid()} is already a uid-keyed Redis
+     *   cache with its own TTL and an explicit `destroyCacheByUid()`. A second copy here would be a
+     *   cache of a cache with independent invalidation, i.e. two sources of truth that drift.
+     * - *Authorization decisions.* Identity is resolved from the login-token ring on every request.
+     *   If a field here could authorise, `DEL user_state:<uid>` would become a security operation and
+     *   this class would need the ring's guarantees.
+     * - *Login tokens.* They live in the ring's own map, for the reasons in the class docblock above.
+     *
+     * **Lifetime is per hash, not per field.** {@see DaoCacheTrait::_setInCacheMap()} re-`EXPIRE`s the
+     * whole hash on every write, so writing any one field refreshes the clock of all the others — an
+     * active user's fields never self-collect. The per-field age bound is `XFetchEnvelope.storedAt`
+     * inside the stored value, so that is what to read if a hard staleness ceiling is ever needed.
+     * Freshness comes from invalidation at the DAO write boundaries; this TTL only collects the state
+     * of users who stop returning.
      */
     private const string USER_STATE_MAP = 'user_state:%d';
 
     /**
      * Field pattern for the cached user-profile payload.
+     *
+     * **What this field holds.** The fully rendered response body of `GET /api/app/user` — the array
+     * built by {@see UserProfileBuilder::build()} and shaped by {@see \View\API\App\Json\UserProfile}:
+     * the user, their connected services, their teams (each with its full member list) and their
+     * metadata. It is the *rendered payload*, not the domain objects it was rendered from, so a reader
+     * needs no DAOs to serve it.
+     *
+     * **Why it is worth caching at all**, given the underlying DAO reads are themselves cached: the
+     * payload fans out per member. `Membership::renderItem()` resolves a user for every member of
+     * every team, through a `UserDao` that carries no TTL — so those are live queries, one per member,
+     * not cache hits. Add a Redis round trip per team for pending invitations and a manager in several
+     * large teams costs hundreds of queries per call, at one to two calls per page load.
+     *
+     * **Storage shape.** Wrapped in a single-element list, as the trait's contract requires, inside an
+     * XFetch envelope carrying the measured build cost — see {@see self::setProfile()} for why that
+     * measurement has to be passed in rather than left to the trait's fallback.
+     *
+     * **Staleness is bounded by invalidation, not by the TTL.** Every DAO write that can change any
+     * part of this payload drops the field: the users row, user metadata, connected services, team
+     * membership, team renames and per-team project counts. One known gap is recorded rather than
+     * fixed — a renamed user stays stale inside *other* members' cached team lists for up to 24h,
+     * because those names come from a `getByUids()` `IN (...)` query that `destroyCacheByUid()` does
+     * not bust.
      */
     private const string USER_PROFILE_FIELD = 'user_profile:%d';
 
