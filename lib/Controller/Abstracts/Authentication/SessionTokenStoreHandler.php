@@ -128,4 +128,47 @@ class SessionTokenStoreHandler
         $this->_removeObjectCacheMapElement($key, $loginCookieValue);
     }
 
+    /**
+     * Revokes every login token issued to a user.
+     *
+     * Drops the whole per-user token map, so no authentication cookie minted before this call can
+     * pass {@see isLoginCookieStillActive()} again. Called when the account's credentials change
+     * and every device has to authenticate afresh.
+     *
+     * This does not end sessions that are already running: the session branch of
+     * AuthenticationHelper::authenticate() never consults this map.
+     *
+     * @param int $userId The unique identifier of the user.
+     *
+     * @return void
+     * @throws ReflectionException If there is an issue with the cache operation.
+     * @throws Exception
+     */
+    public function revokeAllLoginTokens(int $userId): void
+    {
+        $this->_cacheSetConnection();
+
+        // _cacheSetConnection() either sets a connection or rethrows, so this is unreachable at
+        // runtime. It stays because the property is nullable and the calls below are not.
+        if (self::$cache_con === null) {
+            return;
+        }
+
+        $key = sprintf(self::ACTIVE_USER_LOGIN_TOKENS_MAP, $userId);
+
+        // _setInCacheMap() writes each token twice: as a field of the map, and as a standalone
+        // reverse-pointer key under the same md5 name. Field names are therefore also reverse-key
+        // names, so one HKEYS yields both sets. The reverse keys do expire on their own, but a
+        // stale one still holds the map's name — and that name is reused on the next login, so
+        // leaving them behind aims a dangling pointer at a live map.
+        /** @var list<string> $tokens */
+        $tokens = self::$cache_con->hkeys($key);
+
+        if (!empty($tokens)) {
+            self::$cache_con->del($tokens);
+        }
+
+        self::$cache_con->del($key);
+    }
+
 }

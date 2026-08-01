@@ -8,6 +8,7 @@
 
 namespace Model\Users\Authentication;
 
+use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Exception;
 use Model\Users\AuthTokenScope;
@@ -30,19 +31,22 @@ class PasswordResetModel
     /** @var array<string, mixed> */
     protected array $session;
     protected UserDao $userDao;
+    protected SessionTokenStoreHandler $tokenStore;
 
     /**
      * @param array<string, mixed> $session reference to global $_SESSSION var
      * @param UserDao $userDao
+     * @param SessionTokenStoreHandler $tokenStore
      * @param string|null $token
      *
      * @throws TypeError
      */
-    public function __construct(array &$session, UserDao $userDao, ?string $token = null)
+    public function __construct(array &$session, UserDao $userDao, SessionTokenStoreHandler $tokenStore, ?string $token = null)
     {
         $this->token = $token;
         $this->session =& $session;
         $this->userDao = $userDao;
+        $this->tokenStore = $tokenStore;
         if (empty($token)) {
             $this->token = $session['password_reset_token'];
         }
@@ -163,7 +167,14 @@ class PasswordResetModel
 
         $this->userDao->updateStruct($user, $fieldsToUpdate);
         $this->userDao->destroyCacheByEmail($user->email ?? throw new RuntimeException('User email must be set before cache invalidation'));
-        $this->userDao->destroyCacheByUid($user->uid ?? throw new RuntimeException('User uid must be set before cache invalidation'));
+
+        $uid = $user->uid ?? throw new RuntimeException('User uid must be set before cache invalidation');
+        $this->userDao->destroyCacheByUid($uid);
+
+        // Until now this flow revoked nothing at all: the user arrives without an authentication
+        // cookie, so removeLoginCookieFromStore() was handed an empty value and returned early.
+        // Anyone holding a stolen cookie kept working straight through the reset.
+        $this->tokenStore->revokeAllLoginTokens($uid);
     }
 
     /**

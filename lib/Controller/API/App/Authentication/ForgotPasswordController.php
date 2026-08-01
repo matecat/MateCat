@@ -10,6 +10,7 @@
 namespace Controller\API\App\Authentication;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
 use Controller\Abstracts\FlashMessage;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Traits\RateLimiterTrait;
@@ -183,7 +184,7 @@ class ForgotPasswordController extends AbstractStatefulKleinController
      */
     protected function createPasswordResetModel(array &$session, ?string $token = null): PasswordResetModel
     {
-        return new PasswordResetModel($session, new UserDao($this->getDatabase()), $token);
+        return new PasswordResetModel($session, new UserDao($this->getDatabase()), new SessionTokenStoreHandler(), $token);
     }
 
     /**
