@@ -227,7 +227,10 @@ jobs:
             js-coverage.xml
             node-coverage.xml
           coverage-threshold: '80'
-          extra-exclude-patterns: '.github/**, daemons/**, migrations/**, tests/unit/TestHelpers/**'
+          # dev-tools/** holds the custom PHPStan rules. phpunit.xml whitelists ./lib only, so
+          # nothing under it can ever reach the clover report and Layer 1 reads it as "not in
+          # coverage report" — a verdict no amount of testing could change.
+          extra-exclude-patterns: '.github/**, daemons/**, dev-tools/**, migrations/**, tests/unit/TestHelpers/**'
           ai-enabled: 'true'
           # test-guard v2: GitHub Models was retired 2026-07-30 and Layer 3 now
           # calls any OpenAI-compatible endpoint, so it needs a provider key.
