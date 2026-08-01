@@ -3,6 +3,7 @@
 namespace Matecat\Core\Controllers;
 
 use ArrayObject;
+use Controller\API\App\SplitJobController as AppSplitJobController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\V2\SplitJobController;
@@ -18,6 +19,7 @@ use Model\JobSplitMerge\SplitMergeProjectData;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
+use ReflectionMethod;
 
 class TestableSplitJobController extends SplitJobController
 {
@@ -562,5 +564,38 @@ class SplitJobControllerTest extends AbstractTest
         $job->method('isDeleted')->willReturn($deleted);
 
         return $job;
+    }
+
+    // ─── the App subclass ────────────────────────────────────────────
+
+    /**
+     * The App subclass exists so the routes serving the UI can reach a real session, and handing that
+     * store to the cart is its only behaviour. Covered from this file rather than one of its own
+     * because it is a single override on the class these tests already exercise.
+     */
+    #[Test]
+    public function app_subclass_hands_its_own_session_store_to_the_cart(): void
+    {
+        $controller = (new ReflectionClass(AppSplitJobController::class))->newInstanceWithoutConstructor();
+        $store      = $this->injectSessionStore($controller);
+
+        $method = new ReflectionMethod($controller, 'outsourceCartStore');
+
+        self::assertSame($store, $method->invoke($controller));
+    }
+
+    /**
+     * The other half of the pair, and the reason the override is not redundant: the v2/v3 controller is
+     * stateless, so its store refuses every operation and constructing a Cart over it would throw.
+     * Returning null is what keeps the cart invalidation inert on the api-key routes.
+     */
+    #[Test]
+    public function stateless_controller_reports_no_cart_store(): void
+    {
+        $controller = new TestableSplitJobController();
+
+        $method = new ReflectionMethod($controller, 'outsourceCartStore');
+
+        self::assertNull($method->invoke($controller));
     }
 }
