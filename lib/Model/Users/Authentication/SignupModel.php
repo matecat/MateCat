@@ -16,6 +16,7 @@ use Utils\Email\SetPasswordRequestEmail;
 use Utils\Email\SignupEmail;
 use Utils\Email\WelcomeEmail;
 use Utils\Tools\Utils;
+use Utils\Session\SessionStore;
 use Utils\Url\CanonicalRoutes;
 
 class SignupModel
@@ -31,8 +32,7 @@ class SignupModel
 
     protected ?string $error = null;
 
-    /** @var array<string, mixed> */
-    private array $session;
+    private SessionStore $session;
 
     protected UserDao $userDao;
 
@@ -40,14 +40,13 @@ class SignupModel
 
     /**
      * @param array<string, mixed> $params
-     * @param array<string, mixed> $session
      * @param UserDao $userDao
      * @param TeamDao $teamDao
      */
-    public function __construct(array $params, array &$session, UserDao $userDao, TeamDao $teamDao)
+    public function __construct(array $params, SessionStore $session, UserDao $userDao, TeamDao $teamDao)
     {
         $this->params = $params;
-        $this->session =& $session;
+        $this->session = $session;
         $this->user = new UserStruct($this->params);
         $this->userDao = $userDao;
         $this->teamDao = $teamDao;
@@ -146,7 +145,7 @@ class SignupModel
 
     private function __saveWantedUrl(): void
     {
-        $this->session['wanted_url'] = $this->params['wanted_url'];
+        $this->session->set('wanted_url', $this->params['wanted_url']);
     }
 
     /**
@@ -155,8 +154,8 @@ class SignupModel
      */
     public function flushWantedURL(): string
     {
-        $url = $this->session['wanted_url'] ?? CanonicalRoutes::appRoot();
-        unset($this->session['wanted_url']);
+        $url = $this->session->get('wanted_url') ?? CanonicalRoutes::appRoot();
+        $this->session->remove('wanted_url');
 
         return $url;
     }

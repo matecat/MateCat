@@ -29,13 +29,16 @@ class OAuthController extends AbstractStatefulKleinController
      */
     public function response(): void
     {
-        if (empty($this->request->param('state')) || $_SESSION['googledrive-' . AppConfig::$XSRF_TOKEN] !== $this->request->param('state')) {
+        if (empty($this->request->param('state')) || $this->sessionStore()->get('googledrive-' . AppConfig::$XSRF_TOKEN) !== $this->request->param('state')) {
             $this->response->code(401);
 
             return;
         }
 
-        unset($_SESSION['google-drive-' . AppConfig::$XSRF_TOKEN]);
+        // Was 'google-drive-' — a different key from the 'googledrive-' one validated above (the url is
+        // minted with provider 'google' plus the 'drive' suffix), so the state was never consumed and
+        // stayed valid for the whole session instead of being single-use.
+        $this->sessionStore()->remove('googledrive-' . AppConfig::$XSRF_TOKEN);
 
         $code = $this->request->param('code');
         $error = $this->request->param('error');

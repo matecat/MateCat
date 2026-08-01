@@ -25,6 +25,7 @@ use ReflectionMethod;
 use ReflectionProperty;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
+use Utils\Session\ArraySessionStore;
 
 class TestableUserController extends UserController
 {
@@ -94,6 +95,7 @@ class UserControllerTest extends AbstractTest
     private Response $response;
     private RateLimiterService $rateLimiter;
     private UserStruct $user;
+    private ArraySessionStore $sessionStore;
 
     /** @var list<array{0: string, 1: array<int, mixed>}> */
     private array $calls = [];
@@ -101,7 +103,6 @@ class UserControllerTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $_SESSION = [];
 
         $this->request = $this->createStub(Request::class);
         $this->response = new Response();
@@ -113,6 +114,11 @@ class UserControllerTest extends AbstractTest
 
         $this->controller = new TestableUserController();
         $this->controller->initWith($this->request, $this->response, $this->user, $this->rateLimiter);
+
+        // The double skips the constructor that builds the store, and show() decides between the
+        // profile and a 401 by reading it. A fresh store per case replaces resetting $_SESSION.
+        $this->sessionStore = $this->injectSessionStore($this->controller);
+
         $this->calls = [];
     }
 
@@ -165,10 +171,10 @@ class UserControllerTest extends AbstractTest
     #[Test]
     public function show_returns_401_when_the_session_has_no_user(): void
     {
-        $_SESSION = [];
         $request = new Request();
         $response = new Response();
         $controller = new TestableUserController();
+        $this->injectSessionStore($controller, $this->sessionStore);
         $controller->initWith($request, $response, $this->user);
 
         $controller->show();
@@ -186,7 +192,6 @@ class UserControllerTest extends AbstractTest
     #[Test]
     public function show_returns_401_for_an_api_key_caller_carrying_no_session(): void
     {
-        $_SESSION = [];
 
         // What the api-key branch leaves behind: a logged-in user, no session keys at all.
         $this->assertTrue($this->controller->isLoggedIn());
@@ -205,7 +210,7 @@ class UserControllerTest extends AbstractTest
     #[Test]
     public function show_returns_the_cached_profile_without_rebuilding_it(): void
     {
-        $_SESSION = ['user' => $this->user];
+        $this->sessionStore->set('user', $this->user);
 
         $payload = [
             'user' => ['uid' => 1, 'email' => 'test@example.com'],
@@ -235,12 +240,13 @@ class UserControllerTest extends AbstractTest
     #[Test]
     public function show_builds_the_profile_and_stores_it_on_a_miss(): void
     {
-        $_SESSION = ['user' => $this->user];
+        $this->sessionStore->set('user', $this->user);
 
         // An empty hash: every hget misses, so this is the cold path.
         UserStateStore::setCacheConnection($this->redisStub());
 
         $controller = new TestableUserController();
+        $this->injectSessionStore($controller, $this->sessionStore);
         $controller->initWith(new Request(), new Response(), $this->user, null, obtainTestDatabase());
 
         ob_start();
@@ -273,7 +279,7 @@ class UserControllerTest extends AbstractTest
     #[Test]
     public function show_builds_live_and_stores_nothing_when_sql_cache_is_skipped(): void
     {
-        $_SESSION = ['user' => $this->user];
+        $this->sessionStore->set('user', $this->user);
 
         $previous = AppConfig::$SKIP_SQL_CACHE;
         AppConfig::$SKIP_SQL_CACHE = true;
@@ -281,6 +287,7 @@ class UserControllerTest extends AbstractTest
         UserStateStore::setCacheConnection($this->redisStub());
 
         $controller = new TestableUserController();
+        $this->injectSessionStore($controller, $this->sessionStore);
         $controller->initWith(new Request(), new Response(), $this->user, null, obtainTestDatabase());
 
         try {
@@ -304,7 +311,6 @@ class UserControllerTest extends AbstractTest
     #[Test]
     public function show_returns_error_json_when_session_empty(): void
     {
-        $_SESSION = [];
 
         ob_start();
         try {
@@ -322,10 +328,9 @@ class UserControllerTest extends AbstractTest
     #[Test]
     public function redeemProject_sets_session_flag(): void
     {
-        $_SESSION = [];
         $this->controller->redeemProject();
 
-        $this->assertTrue($_SESSION['redeem_project']);
+        $this->assertTrue($this->sessionStore->all()['redeem_project']);
         $this->assertSame(200, $this->controller->getResponse()->code());
     }
 

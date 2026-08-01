@@ -21,6 +21,7 @@ use ReflectionClass;
 use ReflectionException;
 use Utils\Constants\Constants;
 use Utils\Logger\MatecatLogger;
+use Utils\Session\ArraySessionStore;
 
 /**
  * GDriveController test (Wave 4, N=24, real-DB pattern).
@@ -227,9 +228,8 @@ class GDriveControllerTest extends AbstractTest
     private Request $requestStub;
     private Response&MockObject $responseMock;
     private \Model\DataAccess\IDatabase $dbStub;
+    private ArraySessionStore $sessionStore;
 
-    /** @var array<string, mixed> */
-    private array $sessionBackup = [];
     /** @var array<string, mixed> */
     private array $cookieBackup = [];
 
@@ -242,7 +242,6 @@ class GDriveControllerTest extends AbstractTest
 
         $this->cleanTestData();
 
-        $this->sessionBackup = is_array($GLOBALS['_SESSION'] ?? null) ? $GLOBALS['_SESSION'] : [];
         $this->cookieBackup  = is_array($GLOBALS['_COOKIE'] ?? null) ? $GLOBALS['_COOKIE'] : [];
 
         $this->controller = new TestableGDriveController();
@@ -253,6 +252,10 @@ class GDriveControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
+
+        // Stateful controller built without its constructor; injectSession() seeds this same store, so
+        // the controller and GDrive\Session read one set of keys. Replaces the $_SESSION backup too.
+        $this->sessionStore = $this->injectSessionStore($this->controller);
 
         $user = new UserStruct();
         $user->uid        = self::BASE + 6;
@@ -269,7 +272,6 @@ class GDriveControllerTest extends AbstractTest
 
     protected function tearDown(): void
     {
-        $_SESSION = $this->sessionBackup;
         $_COOKIE  = $this->cookieBackup;
 
         $this->cleanTestData();
@@ -326,10 +328,19 @@ class GDriveControllerTest extends AbstractTest
      *
      * @throws Exception
      */
+    /**
+     * Seeds the controller's own store rather than building a second one: the controller reads the
+     * upload token and file list through sessionStore(), and GDrive\Session reads the same keys through
+     * the store it is handed, so the two must be one object or a test seeds state the controller
+     * cannot see.
+     */
     private function injectSession(array $sessionData): Session
     {
-        $local   = $sessionData;
-        $session = new Session($this->dbStub, $local);
+        foreach ($sessionData as $key => $value) {
+            $this->sessionStore->set($key, $value);
+        }
+
+        $session = new Session($this->dbStub, $this->sessionStore);
         $this->setProp('gdriveUserSession', $session);
 
         return $session;
@@ -538,7 +549,7 @@ class GDriveControllerTest extends AbstractTest
     #[Test]
     public function changeConversionParameters_catches_invalid_language_and_returns_without_json(): void
     {
-        $_SESSION[Constants::SESSION_ACTUAL_SOURCE_LANG] = 'en-US';
+        $this->sessionStore->set(Constants::SESSION_ACTUAL_SOURCE_LANG, 'en-US');
         $sessionData = ['uid' => self::BASE + 6];
         $this->injectSession($sessionData);
 
@@ -567,7 +578,7 @@ class GDriveControllerTest extends AbstractTest
             Session::SESSION_KEY                 => [Session::FILE_LIST => []],
             Constants::SESSION_ACTUAL_SOURCE_LANG => 'en-US',
         ];
-        $_SESSION[Constants::SESSION_ACTUAL_SOURCE_LANG] = 'en-US';
+        $this->sessionStore->set(Constants::SESSION_ACTUAL_SOURCE_LANG, 'en-US');
         $this->injectSession($sessionData);
 
         $this->setRequestParams([
@@ -587,7 +598,7 @@ class GDriveControllerTest extends AbstractTest
         $this->controller->changeConversionParameters();
 
         $this->assertSame(['success' => true], $captured);
-        $this->assertSame('it-IT', $_SESSION[Constants::SESSION_ACTUAL_SOURCE_LANG]);
+        $this->assertSame('it-IT', $this->sessionStore->all()[Constants::SESSION_ACTUAL_SOURCE_LANG]);
     }
 
     // ─── open ───
@@ -617,7 +628,8 @@ class GDriveControllerTest extends AbstractTest
     public function open_invalid_upload_token_sets_error(): void
     {
         $sessionData = ['uid' => self::BASE + 6, 'upload_token' => 'not-a-uuid'];
-        $_SESSION['upload_token'] = $_COOKIE['upload_token'] = 'not-a-uuid';
+        $_COOKIE['upload_token'] = 'not-a-uuid';
+        $this->sessionStore->set('upload_token', $_COOKIE['upload_token']);
         $this->injectSession($sessionData);
 
         $this->setRequestParams([
@@ -645,7 +657,8 @@ class GDriveControllerTest extends AbstractTest
             'upload_token'       => $guid,
             Session::SESSION_KEY => [Session::FILE_LIST => []],
         ];
-        $_SESSION['upload_token'] = $_COOKIE['upload_token'] = $guid;
+        $_COOKIE['upload_token'] = $guid;
+        $this->sessionStore->set('upload_token', $_COOKIE['upload_token']);
         $this->injectSession($sessionData);
 
         $this->setRequestParams([
@@ -678,7 +691,8 @@ class GDriveControllerTest extends AbstractTest
             'upload_token'       => $guid,
             Session::SESSION_KEY => [Session::FILE_LIST => []],
         ];
-        $_SESSION['upload_token'] = $_COOKIE['upload_token'] = $guid;
+        $_COOKIE['upload_token'] = $guid;
+        $this->sessionStore->set('upload_token', $_COOKIE['upload_token']);
         $this->injectSession($sessionData);
 
         $template = json_encode(['name' => 'CtrlTpl', 'uid' => self::BASE + 6]);
@@ -845,7 +859,8 @@ class GDriveControllerTest extends AbstractTest
         // sets isImportingSuccessful=false; open() outer catch re-catches and
         // also sets false — either way the error array is populated.
         $guid        = '22222222-3333-4444-5555-666666666666';
-        $_SESSION['upload_token'] = $_COOKIE['upload_token'] = $guid;
+        $_COOKIE['upload_token'] = $guid;
+        $this->sessionStore->set('upload_token', $_COOKIE['upload_token']);
 
         $session = new ThrowingImportGDriveSession();
         $session->setConversionParamsForTest($guid);
@@ -896,7 +911,8 @@ class GDriveControllerTest extends AbstractTest
         );
 
         $guid = '33333333-4444-5555-6666-777777777777';
-        $_SESSION['upload_token'] = $_COOKIE['upload_token'] = $guid;
+        $_COOKIE['upload_token'] = $guid;
+        $this->sessionStore->set('upload_token', $_COOKIE['upload_token']);
 
         $this->setProp('gdriveUserSession', new NoOpImportGDriveSession());
 
@@ -942,7 +958,7 @@ class GDriveControllerTest extends AbstractTest
             "VALUES (9960002, {$uid}, 'ctrl-test-tpl2', NOW())"
         );
 
-        $_SESSION[Constants::SESSION_ACTUAL_SOURCE_LANG] = 'en-US';
+        $this->sessionStore->set(Constants::SESSION_ACTUAL_SOURCE_LANG, 'en-US');
 
         $sessionData = [
             'uid'                                => $uid,
@@ -982,7 +998,7 @@ class GDriveControllerTest extends AbstractTest
     {
         // ReConvertFalseGDriveSession always returns false from reConvert(),
         // exercising the else branch at lines 408-410 that restores originalSourceLang.
-        $_SESSION[Constants::SESSION_ACTUAL_SOURCE_LANG] = 'en-US';
+        $this->sessionStore->set(Constants::SESSION_ACTUAL_SOURCE_LANG, 'en-US');
 
         $this->setProp('gdriveUserSession', new ReConvertFalseGDriveSession());
 
@@ -1004,7 +1020,7 @@ class GDriveControllerTest extends AbstractTest
 
         // reConvert returns false → success=false; SESSION_ACTUAL_SOURCE_LANG is restored.
         $this->assertSame(['success' => false], $captured);
-        $this->assertSame('en-US', $_SESSION[Constants::SESSION_ACTUAL_SOURCE_LANG]);
+        $this->assertSame('en-US', $this->sessionStore->all()[Constants::SESSION_ACTUAL_SOURCE_LANG]);
     }
 
     // ─── deleteImportedFile: removeFile succeeds + hasFiles false → clearSession (lines 435-437) ───
@@ -1049,6 +1065,10 @@ class GDriveControllerTest extends AbstractTest
 
         $ref->getProperty('database')->setValue($plain, obtainTestDatabase());
         $ref->getProperty('logger')->setValue($plain, $this->createStub(MatecatLogger::class));
+
+        // initSessionService() hands the controller's store to GDrive\Session, which reads 'uid' from
+        // it, so this plain instance needs one of its own.
+        $this->injectSessionStore($plain);
 
         $ref->getMethod('initDependencies')->invoke($plain);
 

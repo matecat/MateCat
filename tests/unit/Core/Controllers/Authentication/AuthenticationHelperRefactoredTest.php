@@ -2,6 +2,9 @@
 
 namespace Matecat\Core\Controllers\Authentication;
 
+use Utils\Session\ArraySessionStore;
+use Utils\Session\PhpSessionStore;
+use Utils\Session\SessionStore;
 use Controller\Abstracts\Authentication\AuthCookie;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Matecat\TestHelpers\AbstractTest;
@@ -41,7 +44,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->authCookieMock    = $this->createMock(AuthCookie::class);
     }
 
-    private function createHelper(array &$session, ?string $apiKey = null, ?string $apiSecret = null): TestableAuthenticationHelper
+    private function createHelper(SessionStore $session, ?string $apiKey = null, ?string $apiSecret = null): TestableAuthenticationHelper
     {
         return TestableAuthenticationHelper::create(
             $session,
@@ -58,7 +61,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     #[Test]
     public function loggedIsFalseByDefault(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = $this->createHelper($session);
 
         $this->assertFalse($helper->isLogged());
@@ -67,7 +70,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     #[Test]
     public function getUserReturnsUserStruct(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = $this->createHelper($session);
 
         $this->assertInstanceOf(UserStruct::class, $helper->getUser());
@@ -76,7 +79,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     #[Test]
     public function getApiRecordReturnsNullByDefault(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = $this->createHelper($session);
 
         $this->assertNull($helper->getApiRecord());
@@ -87,7 +90,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     #[Test]
     public function validKeysReturnsFalseWhenBothNull(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = $this->createHelper($session);
 
         $this->assertFalse($helper->validKeys(null, null));
@@ -96,7 +99,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     #[Test]
     public function validKeysReturnsFalseWhenKeyIsEmptyString(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = $this->createHelper($session);
 
         $this->assertFalse($helper->validKeys('', ''));
@@ -105,7 +108,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     #[Test]
     public function validKeysSetsApiRecordWhenKeyFound(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = $this->createHelper($session);
 
         $apiRecord = new ApiKeyStruct(['api_key' => 'k1', 'api_secret' => 's1', 'uid' => 1, 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01']);
@@ -122,7 +125,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     #[Test]
     public function validKeysReturnsFalseWhenSecretMismatch(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = $this->createHelper($session);
 
         $apiRecord = new ApiKeyStruct(['api_key' => 'k1', 'api_secret' => 'correct', 'uid' => 1, 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01']);
@@ -139,7 +142,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     #[Test]
     public function validKeysReturnsFalseWhenKeyNotFound(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = $this->createHelper($session);
 
         $this->apiKeyDaoMock->method('findByKey')->willReturn(null);
@@ -151,7 +154,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     #[Test]
     public function validKeysUsesEmptyStringWhenApiKeyIsNull(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = $this->createHelper($session);
 
         $this->apiKeyDaoMock->expects($this->once())
@@ -180,7 +183,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         );
         $this->apiKeyDaoMock->method('findByKey')->with('k1')->willReturn($apiRecord);
 
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = $this->createHelper($session, 'k1', 's1');
 
         $this->assertTrue($helper->isLogged());
@@ -199,7 +202,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         );
         $this->apiKeyDaoMock->method('findByKey')->with('k1')->willReturn($apiRecord);
 
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = $this->createHelper($session, 'k1', 's1');
 
         $this->assertFalse($helper->isLogged());
@@ -214,7 +217,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         );
         $this->apiKeyDaoMock->method('findByKey')->with('k1')->willReturn($apiRecord);
 
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = $this->createHelper($session, 'k1', 'wrong_secret');
 
         $this->assertFalse($helper->isLogged());
@@ -230,7 +233,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $user->uid   = 99;
         $user->email = 'session@example.com';
 
-        $session = ['user' => $user];
+        $session = new ArraySessionStore(['user' => $user]);
 
         // This test used to pass on session data alone. That was the defect: session state was an
         // authorization decision, so revoking the token ring did not log anyone out. The session
@@ -255,18 +258,18 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->userDaoMock->method('getByUid')->with(5)->willReturn($user);
         $this->authCookieMock->method('getCredentials')->willReturn(['user' => ['uid' => 5]]);
 
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = $this->createHelper($session); // no api key, empty session → cookie branch
 
         // TestableAuthenticationHelperRefactored forces sessionIsActive() = true,
         // so setUserSession() populates the injected session array.
         $this->assertSame(5, $helper->getUser()->uid);
-        $this->assertSame(5, $session['uid']);
+        $this->assertSame(5, $session->get('uid'));
 
         // The profile is no longer built on the authenticated path at all: it is what made a
         // session-cache miss pay ~100 queries plus a Redis connection per team on an ordinary
         // request. GET /api/app/user builds it now, and UserStateStore caches it by uid.
-        $this->assertArrayNotHasKey('user_profile', $session);
+        $this->assertFalse($session->has('user_profile'));
     }
 
     // ─── Session fixation: the id is rotated on the anonymous → authenticated hop ──────────
@@ -281,7 +284,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->userDaoMock->method('getByUid')->with(5)->willReturn($user);
         $this->authCookieMock->method('getCredentials')->willReturn(['user' => ['uid' => 5]]);
 
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = $this->createHelper($session);
 
         $this->assertTrue($helper->isLogged());
@@ -299,7 +302,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $user->uid   = 7;
         $user->email = 'in@example.com';
 
-        $session = ['user' => $user];
+        $session = new ArraySessionStore(['user' => $user]);
 
         // The cookie is mandatory now, even with a fully populated session: the token ring is the
         // only authority, so a request that cannot present a live cookie is not authenticated no
@@ -328,7 +331,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $user->uid   = 7;
         $user->email = 'in@example.com';
 
-        $session = ['user' => $user];
+        $session = new ArraySessionStore(['user' => $user]);
 
         // What a revoked user looks like on their next request: the ring no longer holds their
         // token, so getCredentials() yields nothing, while their PHP session is still sitting
@@ -352,7 +355,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $user->uid   = 7;
         $user->email = 'in@example.com';
 
-        $session = ['user' => $user];
+        $session = new ArraySessionStore(['user' => $user]);
 
         $this->authCookieMock->method('getCredentials')
             ->willReturn(['user' => ['uid' => 7]]);
@@ -378,7 +381,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $cookieUser->uid   = 99;
         $cookieUser->email = 'other@example.com';
 
-        $session = ['user' => $sessionUser];
+        $session = new ArraySessionStore(['user' => $sessionUser]);
 
         // A hazard this restructure introduces and has to close in the same change: the two
         // branches were mutually exclusive before, so a session holding one user could never be
@@ -396,7 +399,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
 
         $this->assertTrue($helper->isLogged());
         $this->assertSame(99, $helper->getUser()->uid);
-        $this->assertSame(99, $session['user']->uid);
+        $this->assertSame(99, $session->get('user')->uid);
     }
 
     #[Test]
@@ -412,7 +415,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         );
         $this->apiKeyDaoMock->method('findByKey')->with('k1')->willReturn($apiRecord);
 
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = $this->createHelper($session, 'k1', 's1');
 
         // API-key callers carry no session at all, so there is nothing to rotate.
@@ -423,7 +426,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     #[Test]
     public function regenerateSessionIdIsANoOpWithoutAnActiveSession(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = new AuthenticationHelper(
             $session, $this->userDaoMock, $this->apiKeyDaoMock, $this->authCookieMock
         );
@@ -454,7 +457,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $oldId             = session_id();
 
         $helper = new AuthenticationHelper(
-            $_SESSION, $this->userDaoMock, $this->apiKeyDaoMock, $this->authCookieMock
+            new PhpSessionStore(), $this->userDaoMock, $this->apiKeyDaoMock, $this->authCookieMock
         );
 
         $method = new \ReflectionMethod(AuthenticationHelper::class, 'regenerateSessionId');
@@ -489,7 +492,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->userDaoMock->method('getByUid')->willReturn($user);
         $this->authCookieMock->method('getCredentials')->willReturn(['user' => ['uid' => 8]]);
 
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = new AuthenticationHelper(
             $session, $this->userDaoMock, $this->apiKeyDaoMock, $this->authCookieMock
         );
@@ -506,7 +509,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->apiKeyDaoMock->method('findByKey')->willThrowException(new \RuntimeException('db down'));
         $this->authCookieMock->method('getCredentials')->willThrowException(new \RuntimeException('cookie boom'));
 
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = $this->createHelper($session, 'k1', 's1');
 
         $this->assertFalse($helper->isLogged());
@@ -520,7 +523,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->apiKeyDaoMock->method('findByKey')
             ->willThrowException(new \RuntimeException('DB down'));
 
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = $this->createHelper($session, 'some_key', 'some_secret');
 
         $this->assertFalse($helper->isLogged());
@@ -532,7 +535,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     #[Test]
     public function fromRequestBuildsLoggedOutHelperForEmptySession(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $helper  = AuthenticationHelper::fromRequest($session, obtainTestDatabase());
 
         $this->assertFalse($helper->isLogged());
@@ -568,11 +571,11 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
             ->with(99)
             ->willReturn($stored);
 
-        $session = ['uid' => 99, 'user' => $stale];
+        $session = new ArraySessionStore(['uid' => 99, 'user' => $stale]);
 
         AuthenticationHelper::refreshSessionUser($session, $this->userDaoMock);
 
-        $this->assertSame('renamed@example.com', $session['user']->email);
+        $this->assertSame('renamed@example.com', $session->get('user')->email);
     }
 
     #[Test]
@@ -580,12 +583,12 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     {
         $this->userDaoMock->method('getByUid')->willReturn(null);
 
-        $session = ['uid' => 99, 'user' => new UserStruct()];
+        $session = new ArraySessionStore(['uid' => 99, 'user' => new UserStruct()]);
 
         AuthenticationHelper::refreshSessionUser($session, $this->userDaoMock);
 
         // A deleted user must not be left behind as a stale cached struct.
-        $this->assertArrayNotHasKey('user', $session);
+        $this->assertFalse($session->has('user'));
     }
 
     #[Test]
@@ -594,11 +597,11 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         // No uid means nothing was ever proved, so there is nothing to refresh and no query to run.
         $this->userDaoMock->expects($this->never())->method('getByUid');
 
-        $session = [];
+        $session = new ArraySessionStore();
 
         AuthenticationHelper::refreshSessionUser($session, $this->userDaoMock);
 
-        $this->assertSame([], $session);
+        $this->assertSame([], $session->keys());
     }
 
     #[Test]
@@ -612,15 +615,15 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         // authentication, and with it re-stamp the session and renew the cookie. The cookie is not
         // even reachable from here — a static call with a UserDao cannot consult the ring — and the
         // rest of the session must come back byte-identical.
-        $session = ['uid' => 99, 'cid' => 'client-1', 'wanted_url' => '/manage'];
+        $session = new ArraySessionStore(['uid' => 99, 'cid' => 'client-1', 'wanted_url' => '/manage']);
 
         AuthenticationHelper::refreshSessionUser($session, $this->userDaoMock);
 
-        $this->assertSame(99, $session['uid']);
-        $this->assertSame('client-1', $session['cid']);
-        $this->assertSame('/manage', $session['wanted_url']);
-        $this->assertSame($stored, $session['user']);
-        $this->assertSame(['uid', 'cid', 'wanted_url', 'user'], array_keys($session));
+        $this->assertSame(99, $session->get('uid'));
+        $this->assertSame('client-1', $session->get('cid'));
+        $this->assertSame('/manage', $session->get('wanted_url'));
+        $this->assertSame($stored, $session->get('user'));
+        $this->assertSame(['uid', 'cid', 'wanted_url', 'user'], $session->keys());
     }
 
     // ─── destroyAuthentication (instance method) ─────────────────────────
@@ -629,7 +632,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     public function destroyAuthenticationClearsSessionVarsOnInstance(): void
     {
         $user    = new UserStruct();
-        $session = ['user' => $user];
+        $session = new ArraySessionStore(['user' => $user]);
         $helper = $this->createHelper($session);
 
         try {
@@ -638,7 +641,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
             // cookie store may throw in test environment without active session
         }
 
-        $this->assertArrayNotHasKey('user', $session);
+        $this->assertFalse($session->has('user'));
     }
 }
 
@@ -647,7 +650,7 @@ class TestableAuthenticationHelper extends AuthenticationHelper
     public int $regeneratedSessionIds = 0;
 
     public static function create(
-        array &$session,
+        SessionStore $session,
         UserDao $userDao,
         ApiKeyDao $apiKeyDao,
         AuthCookie $authCookie,

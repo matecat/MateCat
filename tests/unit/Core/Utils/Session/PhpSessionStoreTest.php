@@ -113,6 +113,29 @@ class PhpSessionStoreTest extends AbstractTest
         $this->assertSame(['b' => 2], $_SESSION);
     }
 
+    #[Test]
+    public function keysNamesTheSuperglobalsKeysWithoutTheirValues(): void
+    {
+        $_SESSION = ['user' => 'a-password-hash', 'login_csrf' => 'token'];
+
+        $this->assertSame(['user', 'login_csrf'], $this->store->keys());
+    }
+
+    /**
+     * A stateless request never starts a session, so the superglobal is genuinely undefined rather
+     * than empty. keys() has to survive that without a warning, because its caller is a logger
+     * running inside a catch block.
+     */
+    #[Test]
+    public function keysIsEmptyWhenTheSuperglobalWasNeverInitialised(): void
+    {
+        unset($_SESSION);
+
+        $this->assertSame([], $this->store->keys());
+
+        $_SESSION = [];
+    }
+
     /**
      * session_destroy() alone leaves the live array populated for the rest of the request, so clearing
      * it is part of the contract rather than a nicety. With no active session the guard skips the

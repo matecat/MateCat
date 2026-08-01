@@ -12,6 +12,7 @@ use Model\Jobs\JobStruct;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Utils\Logger\LoggerFactory;
+use Utils\Session\SessionStore;
 
 /**
  * Top-level manager for job split and merge operations.
@@ -22,7 +23,7 @@ use Utils\Logger\LoggerFactory;
  * storage, segment extraction, TMS, MateCatFilter, etc.).
  *
  * Usage:
- *   $manager = new JobSplitMergeManager($projectStruct);
+ *   $manager = new JobSplitMergeManager($projectStruct, $database, $sessionStore);
  *   $data = $manager->getProjectData();
  *   $manager->getSplitData($data, 3);
  *   $manager->applySplit($data);
@@ -42,10 +43,18 @@ class JobSplitMergeManager
     protected ?JobSplitMergeService $jobSplitMergeService = null;
 
     /**
+     * Backs the outsource quote cart the service invalidates on split and merge. Threaded through
+     * rather than reached statically so a stateless caller cannot silently invalidate nothing.
+     */
+    protected ?SessionStore $session;
+
+    /**
      * @throws Exception
      */
-    public function __construct(ProjectStruct $project, IDatabase $database)
+    public function __construct(ProjectStruct $project, IDatabase $database, ?SessionStore $session)
     {
+        $this->session = $session;
+
         $this->logger  = LoggerFactory::getLogger('job_split_merge_manager');
         $this->project = $project;
 
@@ -124,6 +133,7 @@ class JobSplitMergeManager
                 $this->features->getDatabase(),
                 $this->features,
                 $this->logger,
+                $this->session,
             );
         }
 

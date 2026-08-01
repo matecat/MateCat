@@ -24,6 +24,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use TypeError;
 use Utils\Registry\AppConfig;
+use Utils\Session\SessionStore;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 
@@ -59,7 +60,7 @@ class SignupController extends AbstractStatefulKleinController
             return;
         }
 
-        $signup = $this->createSignupModel($user, $_SESSION);
+        $signup = $this->createSignupModel($user, $this->sessionStore());
         $signup->processSignup();
         $this->response->code(200);
     }
@@ -71,7 +72,7 @@ class SignupController extends AbstractStatefulKleinController
     protected function authenticateConfirmedUser(UserStruct $user): void
     {
         (new AuthCookie(new SessionTokenStoreHandler()))->setCredentials($user);
-        AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase());
+        AuthenticationHelper::fromRequest($this->sessionStore(), $this->getDatabase());
     }
 
     /**
@@ -80,16 +81,22 @@ class SignupController extends AbstractStatefulKleinController
      */
     protected function createInvitedUser(): InvitedUser
     {
-        return new InvitedUser('', null, new TeamDao($this->getDatabase()), null, new UserDao($this->getDatabase()));
+        return new InvitedUser(
+            '',
+            null,
+            new TeamDao($this->getDatabase()),
+            null,
+            new UserDao($this->getDatabase()),
+            $this->sessionStore()
+        );
     }
 
     /**
      * @param UserStruct $user
-     * @param array<string, mixed> $session
      *
      * @return RedeemableProject
      */
-    protected function createRedeemableProject(UserStruct $user, array &$session): RedeemableProject
+    protected function createRedeemableProject(UserStruct $user, SessionStore $session): RedeemableProject
     {
         return new RedeemableProject(
             $user,
@@ -114,11 +121,10 @@ class SignupController extends AbstractStatefulKleinController
 
     /**
      * @param array<string, mixed> $params
-     * @param array<string, mixed> $session
      *
      * @return SignupModel
      */
-    protected function createSignupModel(array $params, array &$session): SignupModel
+    protected function createSignupModel(array $params, SessionStore $session): SignupModel
     {
         return new SignupModel($params, $session, new UserDao($this->getDatabase()), new TeamDao($this->getDatabase()));
     }
@@ -209,7 +215,7 @@ class SignupController extends AbstractStatefulKleinController
             FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
         );
 
-        $signupModel = $this->createSignupModel(['token' => $token], $_SESSION);
+        $signupModel = $this->createSignupModel(['token' => $token], $this->sessionStore());
 
         try {
             $user = $signupModel->confirm();
@@ -218,10 +224,10 @@ class SignupController extends AbstractStatefulKleinController
 
             $invitedUser = $this->createInvitedUser();
             if ($invitedUser->hasPendingInvitations()) {
-                $invitedUser->completeTeamSignUp($user, $_SESSION['invited_to_team']);
+                $invitedUser->completeTeamSignUp($user);
             }
 
-            $project = $this->createRedeemableProject($user, $_SESSION);
+            $project = $this->createRedeemableProject($user, $this->sessionStore());
             $project->tryToRedeem();
 
             if ($project->getDestinationURL()) {
@@ -230,9 +236,9 @@ class SignupController extends AbstractStatefulKleinController
                 $this->response->redirect($signupModel->flushWantedURL());
             }
 
-            FlashMessage::set('popup', 'profile', FlashMessage::SERVICE);
+            (new FlashMessage($this->sessionStore()))->set('popup', 'profile', FlashMessage::SERVICE);
         } catch (Exception $e) {
-            FlashMessage::set('confirmToken', $e->getMessage(), FlashMessage::ERROR);
+            (new FlashMessage($this->sessionStore()))->set('confirmToken', $e->getMessage(), FlashMessage::ERROR);
 
             $this->renderErrorPage();
         }

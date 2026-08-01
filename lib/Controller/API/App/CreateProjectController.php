@@ -931,13 +931,13 @@ class CreateProjectController extends AbstractStatefulKleinController
      */
     private function clearSessionFiles(): void
     {
-        $gdriveSession = new Session($this->getDatabase());
+        $gdriveSession = new Session($this->getDatabase(), $this->sessionStore());
         $gdriveSession->clearFileListFromSession();
     }
 
     private function assignLastCreatedPid(int $pid): void
     {
-        $_SESSION['redeem_project'] = false;
-        $_SESSION['last_created_pid'] = $pid;
+        $this->sessionStore()->set('redeem_project', false);
+        $this->sessionStore()->set('last_created_pid', $pid);
     }
 }

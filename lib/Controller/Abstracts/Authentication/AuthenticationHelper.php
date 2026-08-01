@@ -12,6 +12,7 @@ use ReflectionException;
 use Throwable;
 use TypeError;
 use Utils\Logger\LoggerFactory;
+use Utils\Session\SessionStore;
 
 /**
  * Resolves the identity behind a request: api key, or login cookie validated against the token ring.
@@ -26,22 +27,18 @@ class AuthenticationHelper
     private UserStruct $user;
     private bool $logged = false;
     private ?ApiKeyStruct $api_record = null;
-    /** @var array<string, mixed> */
-    private array $session;
+    private SessionStore $session;
     private UserDao $userDao;
     private ApiKeyDao $apiKeyDao;
     private AuthCookie $authCookie;
 
-    /**
-     * @param array<string, mixed> $session
-     */
     public function __construct(
-        array &$session,
+        SessionStore $session,
         UserDao $userDao,
         ApiKeyDao $apiKeyDao,
         AuthCookie $authCookie,
     ) {
-        $this->session =& $session;
+        $this->session = $session;
         $this->userDao = $userDao;
         $this->apiKeyDao = $apiKeyDao;
         $this->authCookie = $authCookie;
@@ -52,11 +49,9 @@ class AuthenticationHelper
      * Composition root: wires real collaborators from an injected database
      * handle and runs the authentication flow. The database is mandatory — no
      * singleton fallback. Mirrors the original `new AuthenticationHelper(...)`.
-     *
-     * @param array<string, mixed> $session
      */
     public static function fromRequest(
-        array &$session,
+        SessionStore $session,
         IDatabase $db,
         ?string $api_key = null,
         ?string $api_secret = null,
@@ -125,7 +120,7 @@ class AuthenticationHelper
                         // Keys only. The session holds the UserStruct, whose `pass` is the password
                         // hash, so dumping the whole array wrote credentials into login_exceptions.
                         // Which keys were present is what these logs are actually read for.
-                        'session_keys' => array_keys($this->session),
+                        'session_keys' => $this->session->keys(),
                         // The key is the public identifier and stays. The secret is the shared
                         // secret and never belongs in a log; whether one was sent is the useful bit.
                         'api_key' => $api_key,
@@ -153,7 +148,7 @@ class AuthenticationHelper
      */
     private function cachedSessionUser(int $uid): ?UserStruct
     {
-        $cachedUser = $this->session['user'] ?? null;
+        $cachedUser = $this->session->get('user');
 
         if (!$cachedUser instanceof UserStruct) {
             return null;
@@ -174,14 +169,12 @@ class AuthenticationHelper
      * Callers that just wrote the users row must invalidate its cache first
      * ({@see UserDao::destroyCacheByUid()}), or this re-reads the copy they superseded.
      *
-     * @param array<string, mixed> $session
-     *
      * @throws ReflectionException
      * @throws Exception
      */
-    public static function refreshSessionUser(array &$session, UserDao $userDao): void
+    public static function refreshSessionUser(SessionStore $session, UserDao $userDao): void
     {
-        $uid = $session['uid'] ?? null;
+        $uid = $session->get('uid');
 
         if (empty($uid)) {
             return;
@@ -191,12 +184,12 @@ class AuthenticationHelper
         $user = $userDao->getByUid((int)$uid);
 
         if ($user === null) {
-            unset($session['user']);
+            $session->remove('user');
 
             return;
         }
 
-        $session['user'] = $user;
+        $session->set('user', $user);
     }
 
     /**
@@ -206,7 +199,7 @@ class AuthenticationHelper
      */
     public function destroyAuthentication(): void
     {
-        unset($this->session['user']);
+        $this->session->remove('user');
         $this->authCookie->destroyAuthentication();
     }
 
@@ -246,9 +239,9 @@ class AuthenticationHelper
             // beforehand would be holding an authenticated session.
             $this->regenerateSessionId();
 
-            $this->session['cid'] = $this->user->getEmail();
-            $this->session['uid'] = $this->user->getUid();
-            $this->session['user'] = $this->user;
+            $this->session->set('cid', $this->user->getEmail());
+            $this->session->set('uid', $this->user->getUid());
+            $this->session->set('user', $this->user);
         }
     }
 

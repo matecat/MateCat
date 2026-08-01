@@ -2,6 +2,8 @@
 
 
 namespace Matecat\Core\Model\Teams;
+
+use Utils\Session\ArraySessionStore;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
@@ -73,7 +75,7 @@ class InvitedUserTest extends AbstractTest
         $jwt = $this->makeValidJwt();
         $response = $this->createStub(\Klein\Response::class);
 
-        $user = new InvitedUser($jwt, $response, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub());
+        $user = new InvitedUser($jwt, $response, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub(), new ArraySessionStore());
 
         $ref = new ReflectionProperty($user, 'jwt');
         $payload = $ref->getValue($user);
@@ -85,7 +87,7 @@ class InvitedUserTest extends AbstractTest
     #[Test]
     public function constructorWithEmptyJwtSkipsValidation(): void
     {
-        $user = new InvitedUser('', null, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub());
+        $user = new InvitedUser('', null, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub(), new ArraySessionStore());
 
         $ref = new ReflectionProperty($user, 'jwt');
         $this->assertSame([], $ref->getValue($user));
@@ -102,7 +104,8 @@ class InvitedUserTest extends AbstractTest
             $response,
             $this->makeTeamDaoStub(),
             null,
-            $this->makeUserDaoStub()
+            $this->makeUserDaoStub(),
+            new ArraySessionStore()
         );
     }
 
@@ -112,7 +115,7 @@ class InvitedUserTest extends AbstractTest
         $this->expectException(\UnexpectedValueException::class);
 
         $response = $this->createStub(\Klein\Response::class);
-        new InvitedUser('not-a-jwt', $response, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub());
+        new InvitedUser('not-a-jwt', $response, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub(), new ArraySessionStore());
     }
 
     #[Test]
@@ -121,12 +124,12 @@ class InvitedUserTest extends AbstractTest
         $jwt = $this->makeValidJwt();
         $response = $this->createStub(\Klein\Response::class);
 
-        $_SESSION = [];
-        $user = new InvitedUser($jwt, $response, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub());
+        $session = new ArraySessionStore();
+        $user = new InvitedUser($jwt, $response, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub(), $session);
         $user->prepareUserInvitedSignUpRedirect();
 
-        $this->assertArrayHasKey('invited_to_team', $_SESSION);
-        $this->assertSame('invited@example.com', $_SESSION['invited_to_team']['email']);
+        $this->assertTrue($session->has('invited_to_team'));
+        $this->assertSame('invited@example.com', $session->get('invited_to_team')['email']);
     }
 
     #[Test]
@@ -138,7 +141,8 @@ class InvitedUserTest extends AbstractTest
             null,
             $this->makeTeamDaoStub(),
             $this->makeRedisHandlerStub(),
-            $this->makeUserDaoStub()
+            $this->makeUserDaoStub(),
+            new ArraySessionStore()
         );
         $this->assertFalse($user->hasPendingInvitations());
     }
@@ -152,7 +156,8 @@ class InvitedUserTest extends AbstractTest
             null,
             $this->makeTeamDaoStub(),
             $this->makeRedisHandlerStub(),
-            $this->makeUserDaoStub()
+            $this->makeUserDaoStub(),
+            new ArraySessionStore()
         );
         $this->assertFalse($user->hasPendingInvitations());
     }
@@ -160,13 +165,13 @@ class InvitedUserTest extends AbstractTest
     #[Test]
     public function hasPendingInvitationsReturnsTrueWhenMembersExist(): void
     {
-        $_SESSION = ['invited_to_team' => ['team_id' => 5, 'email' => 'a@b.com']];
         $user = new InvitedUser(
             '',
             null,
             $this->makeTeamDaoStub(),
             $this->makeRedisHandlerStub(['a@b.com']),
-            $this->makeUserDaoStub()
+            $this->makeUserDaoStub(),
+            new ArraySessionStore(['invited_to_team' => ['team_id' => 5, 'email' => 'a@b.com']])
         );
         $this->assertTrue($user->hasPendingInvitations());
     }
@@ -180,7 +185,8 @@ class InvitedUserTest extends AbstractTest
             null,
             $this->makeTeamDaoStub(),
             $this->makeRedisHandlerStub([]),
-            $this->makeUserDaoStub()
+            $this->makeUserDaoStub(),
+            new ArraySessionStore()
         );
         $this->assertFalse($user->hasPendingInvitations());
     }
@@ -197,17 +203,17 @@ class InvitedUserTest extends AbstractTest
         $teamDao->method('fetchById')->willReturn($teamStruct);
         $teamDao->method('getDatabaseHandler')->willReturn(obtainTestDatabase());
 
-        $_SESSION = ['invited_to_team' => ['team_id' => 5, 'email' => 'member@example.com']];
+        $session = new ArraySessionStore(['invited_to_team' => ['team_id' => 5, 'email' => 'member@example.com']]);
 
-        $user = new InvitedUser('', null, $teamDao, $this->makeRedisHandlerStub(), $this->makeUserDaoStub());
+        $user = new InvitedUser('', null, $teamDao, $this->makeRedisHandlerStub(), $this->makeUserDaoStub(), $session);
 
         $userStruct = new \Model\Users\UserStruct();
         $userStruct->uid = 1;
         $userStruct->email = 'member@example.com';
 
-        $user->completeTeamSignUp($userStruct, ['team_id' => 5, 'email' => 'member@example.com']);
+        $user->completeTeamSignUp($userStruct);
 
-        $this->assertArrayNotHasKey('invited_to_team', $_SESSION);
+        $this->assertFalse($session->has('invited_to_team'));
     }
 
     #[Test]
@@ -219,11 +225,12 @@ class InvitedUserTest extends AbstractTest
         $teamDao = $this->createStub(TeamDao::class);
         $teamDao->method('fetchById')->willReturn(null);
 
-        $user = new InvitedUser('', null, $teamDao, $this->makeRedisHandlerStub(), $this->makeUserDaoStub());
+        $session = new ArraySessionStore(['invited_to_team' => ['team_id' => 999, 'email' => 'a@b.com']]);
+        $user = new InvitedUser('', null, $teamDao, $this->makeRedisHandlerStub(), $this->makeUserDaoStub(), $session);
 
         $userStruct = new \Model\Users\UserStruct();
         $userStruct->uid = 1;
 
-        $user->completeTeamSignUp($userStruct, ['team_id' => 999, 'email' => 'a@b.com']);
+        $user->completeTeamSignUp($userStruct);
     }
 }

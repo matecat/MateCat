@@ -11,6 +11,7 @@ use Model\ConnectedServices\Oauth\Microsoft\MicrosoftProvider;
 use Model\ConnectedServices\Oauth\OauthClient;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Registry\AppConfig;
+use Utils\Session\ArraySessionStore;
 
 class OauthClientTest extends AbstractTest
 {
@@ -126,8 +127,8 @@ class OauthClientTest extends AbstractTest
     #[Test]
     public function getAuthorizationUrlGeneratesUrl(): void
     {
-        $client = OauthClient::getInstance('github');
-        $session = [];
+        $client  = OauthClient::getInstance('github');
+        $session = new ArraySessionStore();
 
         $url = $client->getAuthorizationUrl($session);
 
@@ -138,27 +139,27 @@ class OauthClientTest extends AbstractTest
     #[Test]
     public function getAuthorizationUrlStoresXsrfTokenInSession(): void
     {
-        $client = OauthClient::getInstance('github');
-        $session = [];
+        $client  = OauthClient::getInstance('github');
+        $session = new ArraySessionStore();
 
         $client->getAuthorizationUrl($session);
 
-        $this->assertNotEmpty($session);
-        $keys = array_keys($session);
+        $this->assertNotEmpty($session->all());
+        $keys = $session->keys();
         $this->assertStringContainsString('xsrf-key', $keys[0]);
     }
 
     #[Test]
     public function getAuthorizationUrlReusesExistingXsrfToken(): void
     {
-        $client = OauthClient::getInstance('github');
-        $session = [];
+        $client  = OauthClient::getInstance('github');
+        $session = new ArraySessionStore();
 
         $client->getAuthorizationUrl($session);
-        $tokenAfterFirst = array_values($session)[0];
+        $tokenAfterFirst = array_values($session->all())[0];
 
         $client->getAuthorizationUrl($session);
-        $tokenAfterSecond = array_values($session)[0];
+        $tokenAfterSecond = array_values($session->all())[0];
 
         $this->assertSame($tokenAfterFirst, $tokenAfterSecond);
     }

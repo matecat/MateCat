@@ -85,6 +85,11 @@ parameters:
             - 'Model\DataAccess\UnknownPropertyException'
             - 'Controller\Exceptions\RenderTerminatedException'
             - 'Controller\Exceptions\MissingDatabaseException'
+            # A stateless controller touching session state is a programming error, not a runtime
+            # condition, so it is deliberately an \Error. Declaring it checked would push a @throws
+            # onto every method that merely holds a SessionStore, which is the whole call graph —
+            # and callers must not be encouraged to catch it. Enforcement works by surfacing.
+            - 'Utils\Session\StatelessSessionViolation'
         check:
             # Report when code throws an exception that has no
             # matching @throws tag in the method's PHPDoc

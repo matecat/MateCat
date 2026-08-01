@@ -17,7 +17,28 @@ use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
 use TypeError;
+use Utils\Session\SessionStore;
 
+/**
+ * Stateless: serves the v2 and v3 api-key routes, which have no session and no outsource quote cart.
+ *
+ * The UI's three endpoints are served by Controller\API\App\SplitJobController, which subclasses this
+ * one and adds only statefulness. That split exists because splitting or merging a job invalidates the
+ * cached outsource quote, and that cart lives in the session:
+ *
+ *  - the 2015 predecessor of this controller opened its own session in its constructor under an
+ *    explicit `//SESSION ENABLED` comment — the spelling of `$useSession = true` at the time — so
+ *    JobSplitMergeService's cart invalidation would take effect
+ *  - the migration to KleinController, which defaults $useSession to false, silently dropped it, and
+ *    the emptyCart()/deleteCart() calls have operated on a throwaway array ever since, leaving a
+ *    split job's cached quote stale for the life of the user's session
+ *
+ * Restoring it on this class would have opened a session on every api-key call for nothing. The App
+ * subclass restores it only where a session genuinely exists, matching the App-stateful/V3-stateless
+ * pairing already used by TmKeyManagementController.
+ *
+ * @see \Controller\API\App\SplitJobController
+ */
 class SplitJobController extends KleinController
 {
 
@@ -27,6 +48,26 @@ class SplitJobController extends KleinController
     }
 
     /**
+     * The store backing the outsource quote cart, or null when there is no session to hold one.
+     *
+     * Null here rather than sessionStore(): this class is stateless, so its store refuses every
+     * operation, and constructing a Cart over it would throw. The App subclass overrides this with the
+     * real store. Expressed as an override rather than a runtime check on $useSession so that which
+     * routes invalidate the cart stays readable from the class, not from a conditional.
+     */
+    protected function outsourceCartStore(): ?SessionStore
+    {
+        return null;
+    }
+
+    /**
+     * Merge every chunk of a job back into one.
+     *
+     * Serves the UI, v2 and v3. The retired JobMergeController used to serve v2 and v3 with an
+     * identical merge, differing only in how it reached the same ProjectDao::findByIdAndPassword check
+     * — through ProjectPasswordValidator instead of getProjectData(). Its response shape is kept below
+     * so retiring it changed nothing for the api-key callers.
+     *
      * @throws Exception
      * @throws \TypeError
      */
@@ -47,8 +88,10 @@ class SplitJobController extends KleinController
         $data->jobToMerge = $request['job_id'];
         $pManager->mergeALL($data, $jobStructs);
 
+        // Not ['data' => $data->splitResult] like check() and apply(): splitResult is only ever
+        // populated by getSplitData(), which the merge path never calls, so that key was always null.
         $this->response->json([
-            "data" => $data->splitResult
+            "success" => true
         ]);
     }
 
@@ -191,7 +234,7 @@ class SplitJobController extends KleinController
         $count_type = $split_raw_words ? ProjectsMetadataMarshaller::SPLIT_RAW_WORD_TYPE->value : ProjectsMetadataMarshaller::SPLIT_EQUIVALENT_WORD_TYPE->value;
         $project_struct = (new ProjectDao($this->getDatabase()))->findByIdAndPassword($project_id, $project_pass, 60 * 60);
 
-        $pManager = new JobSplitMergeManager($project_struct, $this->getDatabase());
+        $pManager = new JobSplitMergeManager($project_struct, $this->getDatabase(), $this->outsourceCartStore());
 
         $data = $pManager->getProjectData();
 
@@ -208,11 +251,19 @@ class SplitJobController extends KleinController
      * @param JobStruct[] $jobList
      *
      * @return JobStruct[]
-     * @throws Exception
+     *
+     * @throws NotFoundException
      */
     private function checkMergeAccess(int $jid, array $jobList): array
     {
-        return $this->filterJobsById($jid, $jobList);
+        try {
+            return $this->filterJobsById($jid, $jobList);
+        } catch (AuthenticationError $e) {
+            // 404, not the 401 filterJobsById raises for the split endpoints: a job id that is not in
+            // this project is a missing record, and the caller is authenticated. This is also the status
+            // the retired JobMergeController returned here, so its api-key callers see no change.
+            throw new NotFoundException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**

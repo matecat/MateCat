@@ -185,9 +185,9 @@ route('/api/app/comment/get-range', 'POST', ['Controller\API\App\CommentControll
 route('/api/app/copy-all-source-to-target', 'POST', ['Controller\API\App\CopyAllSourceToTargetController', 'copy']);
 route('/api/app/get-global-warning', 'POST', ['Controller\API\App\GetWarningController', 'global']);
 route('/api/app/get-local-warning', 'POST', ['Controller\API\App\GetWarningController', 'local']);
-route('/api/app/split-job-apply', 'POST', ['Controller\API\V2\SplitJobController', 'apply']); // Same API as public V2
-route('/api/app/split-job-check', 'POST', ['Controller\API\V2\SplitJobController', 'check']); // Same API as public V2
-route('/api/app/split-job-merge', 'POST', ['Controller\API\V2\SplitJobController', 'merge']); // Same API as public V2
+route('/api/app/split-job-apply', 'POST', ['Controller\API\App\SplitJobController', 'apply']); // Same API as public V2, stateful for the outsource cart
+route('/api/app/split-job-check', 'POST', ['Controller\API\App\SplitJobController', 'check']); // Same API as public V2, stateful for the outsource cart
+route('/api/app/split-job-merge', 'POST', ['Controller\API\App\SplitJobController', 'merge']); // Same API as public V2, stateful for the outsource cart
 route('/api/app/user-keys-delete', 'POST', ['Controller\API\App\UserKeysController', 'delete']);
 route('/api/app/user-keys-update', 'POST', ['Controller\API\App\UserKeysController', 'update']);
 route('/api/app/user-keys-new-key', 'POST', ['Controller\API\App\UserKeysController', 'newKey']);

@@ -22,6 +22,7 @@ use ReflectionException;
 use Throwable;
 use Utils\Constants\Constants;
 use Utils\Logger\MatecatLogger;
+use Utils\Session\ArraySessionStore;
 use Utils\TmKeyManagement\TmKeyStruct;
 
 class TestableCreateProjectControllerApi extends CreateProjectController
@@ -82,6 +83,7 @@ class CreateProjectControllerTest extends AbstractTest
     private Request $requestStub;
     private Response&MockObject $responseMock;
     private UserStruct $user;
+    private ArraySessionStore $sessionStore;
 
     /**
      * @throws Throwable
@@ -103,6 +105,9 @@ class CreateProjectControllerTest extends AbstractTest
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
         $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
+
+        // CreateProjectController is stateful; the double skips the constructor that builds its store.
+        $this->sessionStore = $this->injectSessionStore($this->controller);
 
         $this->user            = new UserStruct();
         $this->user->uid       = $this->userId(self::BASE);
@@ -796,8 +801,8 @@ class CreateProjectControllerTest extends AbstractTest
     {
         $this->invokePrivate('assignLastCreatedPid', [12345]);
 
-        $this->assertFalse($_SESSION['redeem_project']);
-        $this->assertSame(12345, $_SESSION['last_created_pid']);
+        $this->assertFalse($this->sessionStore->all()['redeem_project']);
+        $this->assertSame(12345, $this->sessionStore->all()['last_created_pid']);
     }
 
     /**

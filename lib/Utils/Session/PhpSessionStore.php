@@ -39,6 +39,17 @@ class PhpSessionStore implements SessionStore
     }
 
     /**
+     * @return list<string>
+     */
+    public function keys(): array
+    {
+        /** @var array<string, mixed> $session */
+        $session = $_SESSION ?? [];
+
+        return array_map('strval', array_keys($session));
+    }
+
+    /**
      * `true` deletes the old id's storage rather than orphaning it, so a stolen pre-rotation id
      * cannot be resumed.
      */

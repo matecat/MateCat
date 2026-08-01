@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Matecat\Core\Controller\API\App\Authentication;
 
+use Utils\Session\ArraySessionStore;
+use Utils\Session\SessionStore;
+
 use Controller\Abstracts\KleinController;
 use Controller\API\App\Authentication\ForgotPasswordController;
 use Controller\API\Commons\Exceptions\ValidationError;
@@ -49,12 +52,12 @@ class TestableForgotPasswordController extends ForgotPasswordController
         return parent::checkAndIncrementRateLimit($response, $identifier, $route, $maxRetries, $limiterService ?? $this->injectedRateLimiter);
     }
 
-    protected function createSignupModel(array $params, array &$session): SignupModel
+    protected function createSignupModel(array $params, SessionStore $session): SignupModel
     {
         return $this->mockSignupModel ?? parent::createSignupModel($params, $session);
     }
 
-    protected function createPasswordResetModel(array &$session, ?string $token = null): PasswordResetModel
+    protected function createPasswordResetModel(SessionStore $session, ?string $token = null): PasswordResetModel
     {
         return $this->mockPasswordResetModel ?? parent::createPasswordResetModel($session, $token);
     }
@@ -90,11 +93,11 @@ class ForgotPasswordControllerTest extends AbstractTest
     private Request|MockObject $request;
     private Response $response;
     private RateLimiterService $rateLimiter;
+    private ArraySessionStore $sessionStore;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $_SESSION = [];
 
         $this->request = $this->createStub(Request::class);
         $this->response = new Response();
@@ -102,6 +105,10 @@ class ForgotPasswordControllerTest extends AbstractTest
 
         $this->controller = new TestableForgotPasswordController();
         $this->controller->initWith($this->request, $this->response, $this->rateLimiter);
+
+        // The double skips the constructor that builds the store, so sessionStore() would return the
+        // one that refuses every operation. A fresh store per case also replaces resetting $_SESSION.
+        $this->sessionStore = $this->injectSessionStore($this->controller);
     }
 
     // ─── doForgotPassword (private, via reflection) ──────────────────

@@ -18,6 +18,7 @@ use Klein\Response;
 use Model\Teams\TeamDao;
 use Model\Users\RedeemableProject;
 use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use ReflectionException;
 use TypeError;
 use Utils\Registry\AppConfig;
@@ -88,8 +89,8 @@ class LoginController extends AbstractStatefulKleinController
         }
 
         // single-use: the token must match the csrf issued to THIS browser session (CWE-352)
-        $sessionCsrf = $_SESSION['login_csrf'] ?? null;
-        unset($_SESSION['login_csrf']);
+        $sessionCsrf = $this->sessionStore()->get('login_csrf');
+        $this->sessionStore()->remove('login_csrf');
 
         $tokenCsrf = $jwt['csrf'];
         if (!is_string($sessionCsrf) || !is_string($tokenCsrf) || !hash_equals($sessionCsrf, $tokenCsrf)) {
@@ -115,13 +116,13 @@ class LoginController extends AbstractStatefulKleinController
 
             $project = new RedeemableProject(
                 $user,
-                $_SESSION,
+                $this->sessionStore(),
                 new TeamDao($this->getDatabase())
             );
             $project->tryToRedeem();
 
             (new AuthCookie(new SessionTokenStoreHandler()))->setCredentials($user);
-            AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase());
+            AuthenticationHelper::fromRequest($this->sessionStore(), $this->getDatabase());
 
             $this->response->code(200);
         } else {
@@ -142,7 +143,7 @@ class LoginController extends AbstractStatefulKleinController
     public function token(): void
     {
         $csrf = Utils::uuid4();
-        $_SESSION['login_csrf'] = $csrf;
+        $this->sessionStore()->set('login_csrf', $csrf);
 
         $jwt = new SimpleJWT(
             [
@@ -163,7 +164,9 @@ class LoginController extends AbstractStatefulKleinController
      */
     public function socketToken(): void
     {
-        if (empty($_SESSION['user'])) {
+        $sessionUser = $this->sessionStore()->get('user');
+
+        if (!$sessionUser instanceof UserStruct) {
             $this->response->code(406);
 
             return;
@@ -171,7 +174,7 @@ class LoginController extends AbstractStatefulKleinController
 
         $jwt = new SimpleJWT(
             [
-                "uid" => $_SESSION['user']->uid
+                "uid" => $sessionUser->uid
             ],
             AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
             AppConfig::$AUTHSECRET,

@@ -2,6 +2,9 @@
 
 namespace Matecat\Core\Model\Users;
 
+use Utils\Session\ArraySessionStore;
+use Utils\Session\SessionStore;
+
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
@@ -134,7 +137,7 @@ class RedeemableProjectTest extends AbstractTest
     /**
      * @param array<string, mixed> $session
      */
-    private function make(array &$session, ?UserStruct $user = null): RedeemableProject
+    private function make(SessionStore $session, ?UserStruct $user = null): RedeemableProject
     {
         return new RedeemableProject($user ?? $this->stubUser(), $session, $this->teamDao);
     }
@@ -179,7 +182,7 @@ class RedeemableProjectTest extends AbstractTest
 
     public function testIsRedeemableReturnsFalseByDefault(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $rp = $this->make($session);
 
         $this->assertFalse($rp->isRedeemable());
@@ -187,7 +190,7 @@ class RedeemableProjectTest extends AbstractTest
 
     public function testIsRedeemableReturnsTrueWhenSessionFlagSet(): void
     {
-        $session = ['redeem_project' => true];
+        $session = new ArraySessionStore(['redeem_project' => true]);
         $rp = $this->make($session);
 
         $this->assertTrue($rp->isRedeemable());
@@ -195,7 +198,7 @@ class RedeemableProjectTest extends AbstractTest
 
     public function testIsRedeemableReturnsFalseWhenFlagNotTrue(): void
     {
-        $session = ['redeem_project' => 'yes'];
+        $session = new ArraySessionStore(['redeem_project' => 'yes']);
         $rp = $this->make($session);
 
         $this->assertFalse($rp->isRedeemable());
@@ -205,21 +208,21 @@ class RedeemableProjectTest extends AbstractTest
 
     public function testClearRemovesSessionKeys(): void
     {
-        $session = ['redeem_project' => true, 'last_created_pid' => 1, 'other' => 'kept'];
+        $session = new ArraySessionStore(['redeem_project' => true, 'last_created_pid' => 1, 'other' => 'kept']);
         $rp = $this->make($session);
 
         $rp->clear();
 
-        $this->assertArrayNotHasKey('redeem_project', $session);
-        $this->assertArrayNotHasKey('last_created_pid', $session);
-        $this->assertArrayHasKey('other', $session);
+        $this->assertFalse($session->has('redeem_project'));
+        $this->assertFalse($session->has('last_created_pid'));
+        $this->assertTrue($session->has('other'));
     }
 
     // --- isPresent() ---
 
     public function testIsPresentReturnsFalseWhenNoSessionPid(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $rp = $this->make($session);
 
         // No 'last_created_pid' -> never queries the DB.
@@ -229,7 +232,7 @@ class RedeemableProjectTest extends AbstractTest
     public function testIsPresentReturnsFalseWhenProjectNotFound(): void
     {
         // Point the session at an id that does not exist in the projects table.
-        $session = ['last_created_pid' => 9999999];
+        $session = new ArraySessionStore(['last_created_pid' => 9999999]);
         $rp = $this->make($session);
 
         $this->assertFalse($rp->isPresent());
@@ -240,7 +243,7 @@ class RedeemableProjectTest extends AbstractTest
     {
         $this->seedProject();
 
-        $session = ['last_created_pid' => self::PROJECT_ID];
+        $session = new ArraySessionStore(['last_created_pid' => self::PROJECT_ID]);
         $rp = $this->make($session);
 
         $this->assertTrue($rp->isPresent());
@@ -250,7 +253,7 @@ class RedeemableProjectTest extends AbstractTest
     {
         $this->seedProject();
 
-        $session = ['last_created_pid' => self::PROJECT_ID];
+        $session = new ArraySessionStore(['last_created_pid' => self::PROJECT_ID]);
         $rp = $this->make($session);
 
         $rp->isPresent();
@@ -262,7 +265,7 @@ class RedeemableProjectTest extends AbstractTest
 
     public function testGetProjectReturnsNullInitially(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $rp = $this->make($session);
 
         $this->assertNull($rp->getProject());
@@ -275,7 +278,7 @@ class RedeemableProjectTest extends AbstractTest
         $this->seedProject();
         $this->seedJob();
 
-        $session = ['last_created_pid' => self::PROJECT_ID, 'redeem_project' => true];
+        $session = new ArraySessionStore(['last_created_pid' => self::PROJECT_ID, 'redeem_project' => true]);
         $rp = $this->make($session, $this->realUser());
 
         $rp->redeem();
@@ -296,8 +299,8 @@ class RedeemableProjectTest extends AbstractTest
         $this->assertSame(self::USER_EMAIL, $this->refetchJobOwner());
 
         // Session keys cleared by redeem().
-        $this->assertArrayNotHasKey('redeem_project', $session);
-        $this->assertArrayNotHasKey('last_created_pid', $session);
+        $this->assertFalse($session->has('redeem_project'));
+        $this->assertFalse($session->has('last_created_pid'));
     }
 
     public function testTryToRedeemWritesWhenEligible(): void
@@ -305,7 +308,7 @@ class RedeemableProjectTest extends AbstractTest
         $this->seedProject();
         $this->seedJob();
 
-        $session = ['last_created_pid' => self::PROJECT_ID, 'redeem_project' => true];
+        $session = new ArraySessionStore(['last_created_pid' => self::PROJECT_ID, 'redeem_project' => true]);
         $rp = $this->make($session, $this->realUser());
 
         $rp->tryToRedeem();
@@ -320,7 +323,7 @@ class RedeemableProjectTest extends AbstractTest
     {
         // No project row, session redeemable but pointing at a missing pid.
         $this->seedJob();
-        $session = ['redeem_project' => true, 'last_created_pid' => 9999999];
+        $session = new ArraySessionStore(['redeem_project' => true, 'last_created_pid' => 9999999]);
         $rp = $this->make($session, $this->realUser());
 
         $rp->redeem();
@@ -328,7 +331,7 @@ class RedeemableProjectTest extends AbstractTest
         // Job owner must NOT have been rewritten.
         $this->assertSame('old-owner@matecat.com', $this->refetchJobOwner());
         // Session still cleared.
-        $this->assertArrayNotHasKey('redeem_project', $session);
+        $this->assertFalse($session->has('redeem_project'));
     }
 
     public function testRedeemSkipsWhenNotRedeemable(): void
@@ -337,7 +340,7 @@ class RedeemableProjectTest extends AbstractTest
         $this->seedJob();
 
         // Present but redeem flag absent.
-        $session = ['last_created_pid' => self::PROJECT_ID];
+        $session = new ArraySessionStore(['last_created_pid' => self::PROJECT_ID]);
         $rp = $this->make($session, $this->realUser());
 
         $rp->redeem();
@@ -354,7 +357,7 @@ class RedeemableProjectTest extends AbstractTest
         $this->seedProject();
         $this->seedJob();
 
-        $session = [];
+        $session = new ArraySessionStore();
         $rp = $this->make($session, $this->realUser());
 
         $rp->tryToRedeem();
@@ -367,7 +370,7 @@ class RedeemableProjectTest extends AbstractTest
 
     public function testGetDestinationURLReturnsNullWhenNotPresent(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $rp = $this->make($session);
 
         $this->assertNull($rp->getDestinationURL());
@@ -377,7 +380,7 @@ class RedeemableProjectTest extends AbstractTest
     {
         $this->seedProject();
 
-        $session = ['last_created_pid' => self::PROJECT_ID];
+        $session = new ArraySessionStore(['last_created_pid' => self::PROJECT_ID]);
         $rp = $this->make($session);
 
         $url = $rp->getDestinationURL();
@@ -393,7 +396,7 @@ class RedeemableProjectTest extends AbstractTest
     {
         $this->seedProject();
 
-        $session = ['last_created_pid' => self::PROJECT_ID];
+        $session = new ArraySessionStore(['last_created_pid' => self::PROJECT_ID]);
         $rp = $this->make($session);
 
         $rp->isPresent();

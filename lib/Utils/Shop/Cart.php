@@ -8,10 +8,10 @@ namespace Utils\Shop;
 
 use LogicException;
 use RuntimeException;
-use TypeError;
+use Utils\Session\SessionStore;
 
 /**
- * Generic Cart Container / Manager attached to the session
+ * Generic Cart Container / Manager backed by an injected SessionStore
  *
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 15/04/14
@@ -20,13 +20,6 @@ use TypeError;
  */
 class Cart
 {
-
-    /**
-     * Singleton Pool container
-     *
-     * @var Cart[]
-     */
-    protected static array $_instance = [];
 
     /**
      * The cart content storage
@@ -42,37 +35,37 @@ class Cart
      */
     protected string $cartName;
 
-    /**
-     * Retrieve an instance of Cart identified by $cartName in a pool with singleton pattern
-     *
-     * @param String $cartName
-     *
-     * @return Cart
-     * @throws TypeError
-     */
-    public static function getInstance(string $cartName): Cart
-    {
-        if (!array_key_exists($cartName, self::$_instance)) {
-            self::$_instance[$cartName] = new Cart($cartName);
-        }
-
-        return self::$_instance[$cartName];
-    }
+    protected SessionStore $session;
 
     /**
-     * Create a new instance of cart identified by $cartName
-     * That instance is automatically attached to session vars
+     * Create a cart identified by $cartName, backed by the given session store.
+     *
+     * The cart is read from the store once here and written back by persist() on every mutation. It
+     * used to alias the superglobal — `$this->cart =& $_SESSION[$cartName]` — so mutations persisted
+     * implicitly; a SessionStore has no references, so the writes are now explicit. A caller that
+     * mutates and does not re-read through a second instance sees no difference.
+     *
+     * The singleton pool this class used to keep is gone with it. Callers that need one identity per
+     * cart name within a request hold the instance themselves, which also stops a per-user cart from
+     * living in static state.
      *
      * @param string $cartName
-     * @throws TypeError
+     * @param SessionStore $session
      */
-    protected function __construct(string $cartName)
+    public function __construct(string $cartName, SessionStore $session)
     {
         $this->cartName = $cartName;
-        if (!isset ($_SESSION[$this->cartName])) {
-            $_SESSION[$this->cartName] = [];
-        }
-        $this->cart =& $_SESSION[$this->cartName];
+        $this->session  = $session;
+
+        $stored = $session->get($cartName);
+        // Nothing written through this class can be a non-array, but the store is untyped and a session
+        // outlives any single deploy, so anything else is treated as an empty cart rather than fatal.
+        $this->cart = is_array($stored) ? $stored : [];
+    }
+
+    private function persist(): void
+    {
+        $this->session->set($this->cartName, $this->cart);
     }
 
     /**
@@ -110,6 +103,8 @@ class Cart
         if ($Add) {
             $this->cart[$item_id] = $item->getStorage();
         }
+
+        $this->persist();
     }
 
     /**
@@ -164,6 +159,8 @@ class Cart
                 unset ($this->cart[$key]);
             }
         }
+
+        $this->persist();
     }
 
 
@@ -174,6 +171,7 @@ class Cart
     public function emptyCart(): void
     {
         array_splice($this->cart, 0);
+        $this->persist();
     }
 
     /**
@@ -182,9 +180,11 @@ class Cart
      */
     public function deleteCart(): void
     {
-        unset ($this->cart);
-        unset ($_SESSION[$this->cartName]);
-        unset(self::$_instance[$this->cartName]);
+        // Assigned, not unset: $cart is a typed property, so unsetting it turns every later read on
+        // this instance into a fatal "must not be accessed before initialization" rather than an
+        // empty cart. The old code could unset because the instance left the singleton pool with it.
+        $this->cart = [];
+        $this->session->remove($this->cartName);
     }
 
     /**
@@ -200,22 +200,6 @@ class Cart
         }
 
         return $_cart;
-    }
-
-    /**
-     * Check if cart exists by it's name
-     *
-     * @param string $cart_name
-     *
-     * @return bool
-     */
-    public static function issetCart(string $cart_name): bool
-    {
-        if (empty($_SESSION[$cart_name])) {
-            return false;
-        }
-
-        return true;
     }
 
 }

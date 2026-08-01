@@ -17,6 +17,7 @@ use Model\Users\UserStruct;
 use RuntimeException;
 use TypeError;
 use Utils\Tools\Utils;
+use Utils\Session\SessionStore;
 use Utils\Url\CanonicalRoutes;
 
 
@@ -28,27 +29,25 @@ class PasswordResetModel
      * @var ?UserStruct
      */
     protected ?UserStruct $user = null;
-    /** @var array<string, mixed> */
-    protected array $session;
+    protected SessionStore $session;
     protected UserDao $userDao;
     protected SessionTokenStoreHandler $tokenStore;
 
     /**
-     * @param array<string, mixed> $session reference to global $_SESSSION var
      * @param UserDao $userDao
      * @param SessionTokenStoreHandler $tokenStore
      * @param string|null $token
      *
      * @throws TypeError
      */
-    public function __construct(array &$session, UserDao $userDao, SessionTokenStoreHandler $tokenStore, ?string $token = null)
+    public function __construct(SessionStore $session, UserDao $userDao, SessionTokenStoreHandler $tokenStore, ?string $token = null)
     {
         $this->token = $token;
-        $this->session =& $session;
+        $this->session = $session;
         $this->userDao = $userDao;
         $this->tokenStore = $tokenStore;
         if (empty($token)) {
-            $this->token = $session['password_reset_token'];
+            $this->token = $session->get('password_reset_token');
         }
     }
 
@@ -95,7 +94,7 @@ class PasswordResetModel
 
         // The unmarked value, matching what the link carried: the form submission that follows reads
         // this back and hands it to the same scoped lookup.
-        $this->session['password_reset_token'] = $user->authTokenForUrl();
+        $this->session->set('password_reset_token', $user->authTokenForUrl());
     }
 
     /**
@@ -135,7 +134,7 @@ class PasswordResetModel
         // again, or a token stays usable for as long as the session lives.
         $this->discardExpiredToken($user);
 
-        unset($this->session['password_reset_token']);
+        $this->session->remove('password_reset_token');
 
         // Accounts created through an external provider never got a salt — the OAuth insert leaves the
         // column unset — and a NULL there used to abort this method, locking the owner out of the one
@@ -183,8 +182,8 @@ class PasswordResetModel
      */
     public function flushWantedURL(): string
     {
-        $url = $this->session['wanted_url'] ?? CanonicalRoutes::appRoot();
-        unset($this->session['wanted_url']);
+        $url = $this->session->get('wanted_url') ?? CanonicalRoutes::appRoot();
+        $this->session->remove('wanted_url');
 
         return $url;
     }

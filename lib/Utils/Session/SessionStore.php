@@ -37,6 +37,17 @@ interface SessionStore
     public function remove(string $key): void;
 
     /**
+     * The names of the keys currently stored, never their values.
+     *
+     * Exists for diagnostics that must record *which* keys were present without recording what was
+     * in them. The login-exception logger is the motivating caller: it used to dump the session
+     * itself, which serialised the password hash and the api secret into the log (CWE-532).
+     *
+     * @return list<string>
+     */
+    public function keys(): array;
+
+    /**
      * Rotate the storage id, keeping the contents. This is the session-fixation defence, so it
      * belongs on a true anonymous-to-authenticated transition and nowhere else.
      */

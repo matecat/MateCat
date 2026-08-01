@@ -43,6 +43,14 @@ class ArraySessionStore implements SessionStore
         unset($this->data[$key]);
     }
 
+    /**
+     * @return list<string>
+     */
+    public function keys(): array
+    {
+        return array_map('strval', array_keys($this->data));
+    }
+
     public function regenerateId(): void
     {
         // No id to rotate, so record that it was asked for: rotation is a security-relevant action

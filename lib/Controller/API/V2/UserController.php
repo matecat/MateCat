@@ -75,7 +75,7 @@ class UserController extends AbstractStatefulKleinController
             // The cached user row in the session belongs to the name that just changed. Re-read it
             // from the DAO cache the bust above emptied, rather than running a second full
             // authentication pass to rebuild what this request already knows.
-            AuthenticationHelper::refreshSessionUser($_SESSION, $userDao);
+            AuthenticationHelper::refreshSessionUser($this->sessionStore(), $userDao);
 
             $this->response->json([
                 'uid' => $user->uid,

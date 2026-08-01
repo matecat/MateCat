@@ -46,7 +46,7 @@ class UserController extends AbstractStatefulKleinController
         // so it still gets a 401. session['user'] is written by setUserSession() and by nothing
         // else — exactly what session['user_profile'] was before it moved to UserStateStore — so
         // the population of callers that get 401 is unchanged.
-        if (empty($_SESSION['user'])) {
+        if (empty($this->sessionStore()->get('user'))) {
             $this->response->code(401);
             $this->response->json(['error' => 'Invalid login.']);
 
@@ -150,7 +150,7 @@ class UserController extends AbstractStatefulKleinController
      */
     public function redeemProject(): void
     {
-        $_SESSION['redeem_project'] = true;
+        $this->sessionStore()->set('redeem_project', true);
         $this->response->code(200);
     }
 

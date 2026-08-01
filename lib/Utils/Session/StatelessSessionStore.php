@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Utils\Session;
 
-use LogicException;
 
 /**
  * The store injected into controllers declared stateless. Every method throws.
@@ -17,13 +16,12 @@ use LogicException;
  * store. The convention failed silently for as long as it existed.
  *
  * A throwing store converts that class of mistake from "works in production, quietly opens a session
- * on an API endpoint" into a `LogicException` on the first call, in the first test that exercises the
+ * on an API endpoint" into a `StatelessSessionViolation` on the first call, in the first test that exercises the
  * path. The failure mode is loud and local, which is the whole trade.
  */
 class StatelessSessionStore implements SessionStore
 {
     /**
-     * @throws LogicException always — this controller is declared stateless
      */
     public function get(string $key): mixed
     {
@@ -31,7 +29,6 @@ class StatelessSessionStore implements SessionStore
     }
 
     /**
-     * @throws LogicException always — this controller is declared stateless
      */
     public function set(string $key, mixed $value): void
     {
@@ -39,7 +36,6 @@ class StatelessSessionStore implements SessionStore
     }
 
     /**
-     * @throws LogicException always — this controller is declared stateless
      */
     public function has(string $key): bool
     {
@@ -47,7 +43,6 @@ class StatelessSessionStore implements SessionStore
     }
 
     /**
-     * @throws LogicException always — this controller is declared stateless
      */
     public function remove(string $key): void
     {
@@ -55,7 +50,26 @@ class StatelessSessionStore implements SessionStore
     }
 
     /**
-     * @throws LogicException always — this controller is declared stateless
+     * The one method here that does not throw, and the reason is worth keeping.
+     *
+     * `keys()` answers "which keys are present", and for a stateless controller "none" is both the
+     * truthful answer and a complete one — an empty list names nothing and so cannot be used to read
+     * state the other methods refuse to hand over.
+     *
+     * Throwing would be actively harmful. The motivating caller is the `login_exceptions` logger in
+     * `AuthenticationHelper`, which runs inside a `catch (Throwable)` that is itself wrapped in a
+     * swallowing `try`/`catch`. A throw from here would take the entire log line down with it, on
+     * precisely the api-key requests where a failed authentication is hardest to diagnose from
+     * outside.
+     *
+     * @return list<string>
+     */
+    public function keys(): array
+    {
+        return [];
+    }
+
+    /**
      */
     public function regenerateId(): void
     {
@@ -63,7 +77,6 @@ class StatelessSessionStore implements SessionStore
     }
 
     /**
-     * @throws LogicException always — this controller is declared stateless
      */
     public function destroy(): void
     {
@@ -74,9 +87,9 @@ class StatelessSessionStore implements SessionStore
      * Names the key as well as the operation: the useful question when this fires is not "which
      * method" but "what was this endpoint trying to read", which points straight at the fix.
      */
-    private function refuse(string $operation, ?string $key = null): LogicException
+    private function refuse(string $operation, ?string $key = null): StatelessSessionViolation
     {
-        return new LogicException(sprintf(
+        return new StatelessSessionViolation(sprintf(
             'This controller is declared stateless, so session %s(%s) is not available. Either read the '
             . 'value from the request or from a uid-keyed store, or declare the controller stateful.',
             $operation,

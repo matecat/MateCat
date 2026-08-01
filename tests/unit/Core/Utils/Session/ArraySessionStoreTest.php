@@ -114,4 +114,41 @@ class ArraySessionStoreTest extends AbstractTest
 
         $this->assertFalse($second->has('leak'));
     }
+
+    #[Test]
+    public function keysNamesEveryStoredKey(): void
+    {
+        $store = new ArraySessionStore();
+        $store->set('login_csrf', 'token');
+        $store->set('wanted_url', '/dashboard');
+
+        $this->assertSame(['login_csrf', 'wanted_url'], $store->keys());
+    }
+
+    /**
+     * The whole point of keys() is that it names keys without exposing what is in them — it is the
+     * CWE-532 replacement for dumping the session into the login-exception log.
+     */
+    #[Test]
+    public function keysNeverExposesAValue(): void
+    {
+        $store = new ArraySessionStore(['user' => 'a-password-hash']);
+
+        $this->assertSame(['user'], $store->keys());
+    }
+
+    #[Test]
+    public function keysIsEmptyOnAFreshStore(): void
+    {
+        $this->assertSame([], (new ArraySessionStore())->keys());
+    }
+
+    #[Test]
+    public function keysForgetsARemovedKey(): void
+    {
+        $store = new ArraySessionStore(['gone' => 1]);
+        $store->remove('gone');
+
+        $this->assertSame([], $store->keys());
+    }
 }

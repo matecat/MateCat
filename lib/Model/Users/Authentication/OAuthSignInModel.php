@@ -18,6 +18,7 @@ use ReflectionException;
 use RuntimeException;
 use TypeError;
 use Utils\Email\WelcomeEmail;
+use Utils\Session\SessionStore;
 use Utils\Tools\Utils;
 
 /**
@@ -33,15 +34,13 @@ class OAuthSignInModel
     protected ?string $profilePictureUrl = null;
     protected string $provider;
 
-    /** @var array<string, mixed> */
-    protected array $session;
+    protected SessionStore $session;
 
     private UserDao $userDao;
     private MetadataDao $metadataDao;
     private TeamDao $teamDao;
 
     /**
-     * @param array<string, mixed> $session
      * @param string $email
      * @param string|null $firstName
      * @param string|null $lastName
@@ -50,7 +49,7 @@ class OAuthSignInModel
      * @param TeamDao $teamDao
      */
     public function __construct(
-        array &$session,
+        SessionStore $session,
         string $email,
         ?string $firstName,
         ?string $lastName,
@@ -72,7 +71,7 @@ class OAuthSignInModel
             'email' => $email
         ]);
 
-        $this->session     =& $session;
+        $this->session     = $session;
         $this->userDao     = $userDao;
         $this->metadataDao = $metadataDao;
         $this->teamDao     = $teamDao;
@@ -215,7 +214,7 @@ class OAuthSignInModel
     protected function _welcomeNewUser(): void
     {
         $this->createWelcomeEmail()->send();
-        FlashMessage::set('popup', 'profile', FlashMessage::SERVICE);
+        (new FlashMessage($this->session))->set('popup', 'profile', FlashMessage::SERVICE);
     }
 
     protected function createWelcomeEmail(): WelcomeEmail

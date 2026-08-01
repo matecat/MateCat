@@ -135,7 +135,7 @@ abstract class AbstractController extends BaseKleinViewController
      */
     protected function createShopCart(): Cart
     {
-        return Cart::getInstance('outsource_to_external');
+        return new Cart('outsource_to_external', $this->sessionStore());
     }
 
     /**

@@ -18,6 +18,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
+use Utils\Session\ArraySessionStore;
 use Utils\Tools\SimpleJWT;
 use Utils\Tools\Utils;
 
@@ -80,11 +81,11 @@ class LoginControllerTest extends AbstractTest
     private Request|MockObject $request;
     private Response $response;
     private RateLimiterService $rateLimiter;
+    private ArraySessionStore $sessionStore;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $_SESSION = [];
 
         $this->request = $this->createStub(Request::class);
         $this->response = new Response();
@@ -92,6 +93,10 @@ class LoginControllerTest extends AbstractTest
 
         $this->controller = new TestableLoginController();
         $this->controller->initWith($this->request, $this->response, $this->rateLimiter);
+
+        // The double skips the constructor that builds the store. Per test case, so the login_csrf a
+        // test issues cannot be seen by the next one — which is the whole point of the 403 test below.
+        $this->sessionStore = $this->injectSessionStore($this->controller);
     }
 
     // ─── directLogout ────────────────────────────────────────────────
@@ -192,7 +197,7 @@ class LoginControllerTest extends AbstractTest
         $this->request->method('params')->willReturn(['email' => 'test@example.com', 'password' => 'pass']);
         $this->request->method('headers')->willReturn($headers);
 
-        $_SESSION = []; // no login_csrf was ever issued to this session
+        // The store starts empty, so no login_csrf was ever issued to this session.
 
         $this->controller->login();
 
@@ -213,7 +218,7 @@ class LoginControllerTest extends AbstractTest
             AppConfig::$AUTHSECRET,
             60
         );
-        $_SESSION['login_csrf'] = $csrf;
+        $this->sessionStore->set('login_csrf', $csrf);
 
         $headers = $this->createStub(\Klein\DataCollection\HeaderDataCollection::class);
         $headers->method('get')->willReturn($jwt->jsonSerialize());
@@ -242,7 +247,7 @@ class LoginControllerTest extends AbstractTest
             AppConfig::$AUTHSECRET,
             60
         );
-        $_SESSION['login_csrf'] = $csrf;
+        $this->sessionStore->set('login_csrf', $csrf);
 
         $headers = $this->createStub(\Klein\DataCollection\HeaderDataCollection::class);
         $headers->method('get')->willReturn($jwt->jsonSerialize());
@@ -293,7 +298,7 @@ class LoginControllerTest extends AbstractTest
             AppConfig::$AUTHSECRET,
             60
         );
-        $_SESSION['login_csrf'] = $csrf;
+        $this->sessionStore->set('login_csrf', $csrf);
 
         $headers = $this->createStub(\Klein\DataCollection\HeaderDataCollection::class);
         $headers->method('get')->willReturn($jwt->jsonSerialize());
@@ -326,7 +331,7 @@ class LoginControllerTest extends AbstractTest
 
         $this->assertSame(200, $this->controller->getResponse()->code());
         $this->assertNotNull($this->controller->getResponse()->headers()->get(AppConfig::$XSRF_TOKEN));
-        $this->assertArrayHasKey('login_csrf', $_SESSION);
+        $this->assertArrayHasKey('login_csrf', $this->sessionStore->all());
     }
 
     // ─── socketToken ─────────────────────────────────────────────────
@@ -334,7 +339,6 @@ class LoginControllerTest extends AbstractTest
     #[Test]
     public function socketToken_returns_406_when_no_session_user(): void
     {
-        $_SESSION = [];
         $this->controller->socketToken();
 
         $this->assertSame(406, $this->controller->getResponse()->code());
@@ -345,7 +349,7 @@ class LoginControllerTest extends AbstractTest
     {
         $user = new UserStruct();
         $user->uid = 42;
-        $_SESSION = ['user' => $user];
+        $this->sessionStore->set('user', $user);
 
         $this->controller->socketToken();
 
