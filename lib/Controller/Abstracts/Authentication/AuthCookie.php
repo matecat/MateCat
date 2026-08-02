@@ -159,10 +159,6 @@ class AuthCookie
         $this->tokenStore->setCookieLoginTokenActive($userId, $new_cookie_data);
         $this->setCookie($new_cookie_data, $new_expire_date);
 
-        // Later reads in this same request must see the token that was just issued, or they would
-        // validate a value the browser is no longer going to send.
-        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $new_cookie_data;
-
         // Retire the grandparent, never the parent. At this instant the browser still holds the
         // parent, so in-flight requests are carrying it and retiring it would log them out
         // mid-page-load. The grandparent is a full renewal interval old and no request lives that
@@ -214,9 +210,27 @@ class AuthCookie
      * @param string $data
      * @param int $expireDate
      */
+    /**
+     * Issue the auth cookie, and keep $_COOKIE in step with it.
+     *
+     * The second half is not incidental. `setcookie()` only queues a Set-Cookie header, so $_COOKIE
+     * still holds whatever arrived with the request; anything reading the cookie later in this same
+     * request would resolve the *previous* occupant of the browser rather than the identity just
+     * issued. That is a live hazard, because LoginController::login() runs
+     * AuthenticationHelper::fromRequest() immediately after issuing the cookie: on an account switch
+     * with no logout in between, it authenticated the old user, stamped their uid into the session,
+     * and let renewIfStale() re-issue their cookie — two Set-Cookie headers for one name, last one
+     * wins, so the browser stayed in the old account.
+     *
+     * It lives here rather than at the two call sites because both need it and one of them silently
+     * did not have it. A future third caller cannot forget what the emitter itself does. The delete
+     * path is already symmetric: {@see CookieManager::delete()} unsets $_COOKIE for the same reason.
+     */
     private function setCookie(string $data, int $expireDate): void
     {
         $this->cookieManager->set(AppConfig::$AUTHCOOKIENAME, $data, $expireDate, true, true, 'Lax');
+
+        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $data;
     }
 
     /**

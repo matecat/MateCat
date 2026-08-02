@@ -219,6 +219,47 @@ class AuthCookieTest extends AbstractTest
         $this->assertGreaterThan(time(), $write['options']['expires']);
     }
 
+    /**
+     * setcookie() only queues a Set-Cookie header; it never populates $_COOKIE. So without this,
+     * anything reading the cookie later in the same request sees whatever arrived with the request
+     * instead of the token just issued. renewIfStale() has always done this; setCredentials() did not.
+     */
+    #[Test]
+    public function setCredentialsMakesTheNewTokenVisibleToLaterReadsInTheSameRequest(): void
+    {
+        $user          = $this->createAuthenticatedUser();
+        $cookieManager = $this->spyingCookieManager();
+
+        $this->authCookie(null, $cookieManager)->setCredentials($user);
+
+        $this->assertSame(
+            $cookieManager->writes[0]['value'],
+            $_COOKIE[AppConfig::$AUTHCOOKIENAME] ?? null
+        );
+    }
+
+    /**
+     * The security case behind the test above. LoginController::login() calls setCredentials() and then
+     * AuthenticationHelper::fromRequest(), which resolves identity from $_COOKIE. On a browser that
+     * still holds a live cookie for another user — an account switch without logging out first, or a
+     * planted cookie — a stale $_COOKIE meant that second step authenticated the *previous* user,
+     * stamped their uid into the session, and could renew their cookie over the one just issued. Two
+     * Set-Cookie headers for one name, last one wins, so the browser kept the wrong account.
+     */
+    #[Test]
+    public function loggingInReplacesAPreviousUsersCookieRatherThanLeavingItInPlace(): void
+    {
+        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = 'previous-users-live-cookie';
+
+        $user          = $this->createAuthenticatedUser();
+        $cookieManager = $this->spyingCookieManager();
+
+        $this->authCookie(null, $cookieManager)->setCredentials($user);
+
+        $this->assertNotSame('previous-users-live-cookie', $_COOKIE[AppConfig::$AUTHCOOKIENAME]);
+        $this->assertSame($cookieManager->writes[0]['value'], $_COOKIE[AppConfig::$AUTHCOOKIENAME]);
+    }
+
     #[Test]
     public function destroyAuthenticationRemovesCookie(): void
     {
