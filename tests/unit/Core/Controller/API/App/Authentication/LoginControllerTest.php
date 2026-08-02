@@ -60,6 +60,23 @@ class TestableLoginController extends LoginController
         $this->logoutCalled = true;
     }
 
+    /**
+     * Stand in for identifyUser(), which the double's empty constructor skips. Both properties are
+     * set on every call, including the not-authenticated one: they are declared without defaults, so
+     * reading either before identifyUser() has run is an Error rather than a falsy value. Production
+     * cannot reach that state — KleinController's constructor always runs identifyUser() — so the
+     * harness has to supply what production guarantees instead of leaving it to a lucky short-circuit.
+     */
+    public function markAuthenticated(bool $logged, ?int $uid = null): void
+    {
+        $user      = new UserStruct();
+        $user->uid = $uid;
+
+        $ref = new ReflectionClass(KleinController::class);
+        $ref->getProperty('user')->setValue($this, $user);
+        $ref->getProperty('userIsLogged')->setValue($this, $logged);
+    }
+
     public function getResponse(): Response
     {
         return (new ReflectionClass(KleinController::class))->getProperty('response')->getValue($this);
@@ -337,23 +354,66 @@ class LoginControllerTest extends AbstractTest
     // ─── socketToken ─────────────────────────────────────────────────
 
     #[Test]
-    public function socketToken_returns_406_when_the_session_is_not_authenticated(): void
+    public function socketToken_returns_406_when_the_request_is_not_authenticated(): void
     {
+        $this->controller->markAuthenticated(false);
+
+        $this->controller->socketToken();
+
+        $this->assertSame(406, $this->controller->getResponse()->code());
+    }
+
+    /**
+     * The revocation case, and the reason this route gained a login gate. The session still carries
+     * the uid setUserSession() stamped, because authenticate() never removes it when the ring
+     * refuses the cookie — so on the session alone this request is indistinguishable from a live
+     * one, and used to be answered with a signed token naming the revoked account.
+     */
+    #[Test]
+    public function socketToken_refuses_a_session_whose_login_token_is_no_longer_in_the_ring(): void
+    {
+        $this->sessionStore->set('uid', 42);
+        $this->controller->markAuthenticated(false);
+
+        $this->controller->socketToken();
+
+        $this->assertSame(406, $this->controller->getResponse()->code());
+        $this->assertNull($this->controller->getResponse()->headers()->get(AppConfig::$XSRF_TOKEN));
+    }
+
+    /**
+     * An api-key caller is authenticated but has no session: authenticate() answers it before
+     * setUserSession() is reached. It was refused before this gate existed and must still be — this
+     * route belongs to the session-backed UI, not to the stateless API.
+     */
+    #[Test]
+    public function socketToken_refuses_an_authenticated_caller_that_has_no_session_uid(): void
+    {
+        $this->controller->markAuthenticated(true, 42);
+
         $this->controller->socketToken();
 
         $this->assertSame(406, $this->controller->getResponse()->code());
     }
 
     #[Test]
-    public function socketToken_returns_200_with_token_when_the_session_is_authenticated(): void
+    public function socketToken_returns_200_with_a_token_naming_the_ring_authenticated_uid(): void
     {
         // `uid` is what setUserSession() writes to mark a session authenticated; the UserStruct this
         // used to seed was deleted from the session for carrying the password hash.
         $this->sessionStore->set('uid', 42);
+        $this->controller->markAuthenticated(true, 42);
 
         $this->controller->socketToken();
 
         $this->assertSame(200, $this->controller->getResponse()->code());
-        $this->assertNotNull($this->controller->getResponse()->headers()->get(AppConfig::$XSRF_TOKEN));
+
+        $token = $this->controller->getResponse()->headers()->get(AppConfig::$XSRF_TOKEN);
+        $this->assertIsString($token);
+
+        // The identity actually shipped, not merely that something was shipped: the uid is read from
+        // the ring-proven user, so a token can never name an account this request did not prove.
+        $jwt = SimpleJWT::getValidatedInstanceFromString($token, AppConfig::$AUTHSECRET);
+        $this->assertSame(42, $jwt['uid']);
     }
 }

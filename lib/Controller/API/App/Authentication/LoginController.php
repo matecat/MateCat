@@ -163,19 +163,27 @@ class LoginController extends AbstractStatefulKleinController
      */
     public function socketToken(): void
     {
-        // Session-backed callers only, as before: this route carries no LoginValidator, and the
-        // UserStruct this used to read was written by setUserSession() alone. `uid` is written on
-        // exactly the same condition, so the set of requests answered 406 is unchanged — an api-key
-        // caller still gets one.
+        // Two conditions, and both are load-bearing.
         //
-        // Reading the uid from the session rather than from $this->user, even though the two now
-        // always agree: setUserSession() rewrites this key from the ring-proven identity on every
-        // authenticated request, so it is no longer a cache that can lag. Going through $this->user
-        // instead would make this depend on identifyUser() having populated a non-nullable typed
-        // property, which is a second precondition to hold for no gain.
-        $uid = $this->sessionStore()->get('uid');
+        // isLoggedIn() is the ring-proven one: it is false unless this request presented a cookie
+        // whose token is still live in active_user_login_tokens:<uid>. Without it this route minted
+        // an identity from the session alone, and authenticate() does not clear session['uid'] when
+        // the ring rejects — only destroyAuthentication() does. So a user whose tokens had been
+        // revoked elsewhere (logout on another device, password change, password reset) went on
+        // being handed freshly signed socket credentials for their own uid until the session died
+        // of idleness, which for anyone still making requests is never. This route carries no
+        // LoginValidator, so nothing else was checking.
+        //
+        // The session uid is still required, so the set of requests answered 406 does not grow: an
+        // api-key caller passes isLoggedIn() but never reaches setUserSession(), so it holds no
+        // session uid and is refused exactly as before. This route is the UI's, not the stateless
+        // API's.
+        //
+        // The minted uid is read from the ring-proven identity rather than from the session, so the
+        // token cannot name an account the ring did not just authenticate on this request.
+        $uid = $this->isLoggedIn() ? $this->user->uid : null;
 
-        if ($uid === null) {
+        if ($uid === null || $this->sessionStore()->get('uid') === null) {
             $this->response->code(406);
 
             return;
