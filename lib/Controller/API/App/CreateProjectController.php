@@ -96,7 +96,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
         $engine = EnginesFactory::getInstance($this->data['mt_engine'], $this->getDatabase(), AbstractEngine::class);
 
-        $gdriveSession = $_SESSION[Session::SESSION_KEY] ?? null;
+        $gdriveSession = $this->gdriveSessionData();
 
         $projectStructure = $this->buildProjectStructure(
             $this->data,
@@ -137,6 +137,25 @@ class CreateProjectController extends AbstractStatefulKleinController
     protected function cookieManager(): CookieManager
     {
         return new CookieManager();
+    }
+
+    /**
+     * The GDrive upload session, or null when this project is not a Drive import.
+     *
+     * Extracted from create() to be the test seam for this read. create() reaches for seven
+     * unseamed statics before and after it, so while the read was inlined there no test could
+     * reach it — which is how it stayed the last direct $_SESSION access in lib without anything
+     * pinning it.
+     *
+     * Returns mixed rather than ?array on purpose: SessionStore::get() is mixed, the previous
+     * `$_SESSION[Session::SESSION_KEY] ?? null` was equally mixed, and buildProjectStructure()
+     * already declares the parameter as ?array. Narrowing here would silently turn a corrupt
+     * session value into "no Drive session" instead of the TypeError it raises today, which is a
+     * behaviour change this conversion is not entitled to make.
+     */
+    protected function gdriveSessionData(): mixed
+    {
+        return $this->sessionStore()->get(Session::SESSION_KEY);
     }
 
     /**
@@ -838,7 +857,7 @@ class CreateProjectController extends AbstractStatefulKleinController
      * @param string $uploadToken Upload directory token
      * @param UserStruct $user Authenticated user
      * @param AbstractEngine $engine MT engine instance (for getConfigurationParameters())
-     * @param array<string, mixed>|null $gdriveSession GDrive session data from $_SESSION, or null
+     * @param array<string, mixed>|null $gdriveSession GDrive session data read through the session store, or null
      *
      * @return ProjectStructure
      * @throws TypeError

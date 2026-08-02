@@ -22,27 +22,16 @@ services:
             allowedFiles:
                 # The adapter. This is the only entry that is meant to survive.
                 - lib/Utils/Session/PhpSessionStore.php
-                # Not yet converted. Each conversion deletes one line here; when the list is
-                # empty the superglobal has one reader and one writer in the whole tree.
-                - lib/Controller/API/App/Authentication/ForgotPasswordController.php
-                - lib/Controller/API/App/Authentication/LoginController.php
-                - lib/Controller/API/App/Authentication/SignupController.php
-                - lib/Controller/API/App/Authentication/UserController.php
-                - lib/Controller/API/App/CreateProjectController.php
-                - lib/Controller/API/Commons/ViewValidators/ViewLoginRedirectValidator.php
-                - lib/Controller/API/GDrive/GDriveController.php
-                - lib/Controller/API/GDrive/OAuthController.php
-                - lib/Controller/API/V2/UserController.php
-                - lib/Controller/Abstracts/Authentication/AuthenticationTrait.php
-                - lib/Controller/Abstracts/BaseKleinViewController.php
-                - lib/Controller/Abstracts/FlashMessage.php
-                - lib/Controller/Views/OauthResponseHandlerController.php
-                - lib/Controller/Views/SignInController.php
-                - lib/Model/ConnectedServices/GDrive/Session.php
-                - lib/Model/Teams/InvitedUser.php
-                - lib/Model/Users/RedeemableProject.php
-                - lib/Utils/Shop/Cart.php
-                - plugins/aligner/lib/Features/Aligner.php
+                # The list is now empty of pending work: the adapter above is the single reader and
+                # writer of $_SESSION in every analysed path, which is the end state this rule was
+                # written to reach.
+                #
+                # plugins/aligner/lib/Features/Aligner.php used to be listed here and has been
+                # dropped as dead configuration, on two independent counts: `plugins/aligner` is in
+                # excludePaths below so the rule never analyses it, and the file no longer names the
+                # superglobal at all. The only $_SESSION left anywhere under plugins/aligner/lib is
+                # prose in a ConfigsController docblock, which is not a Variable node and so was
+                # never a violation.
 
 parameters:
     level: 8

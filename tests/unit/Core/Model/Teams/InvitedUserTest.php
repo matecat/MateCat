@@ -135,7 +135,6 @@ class InvitedUserTest extends AbstractTest
     #[Test]
     public function hasPendingInvitationsReturnsFalseWhenNoSession(): void
     {
-        $_SESSION = [];
         $user = new InvitedUser(
             '',
             null,
@@ -147,17 +146,22 @@ class InvitedUserTest extends AbstractTest
         $this->assertFalse($user->hasPendingInvitations());
     }
 
+    /**
+     * The invitation is present but carries no team_id, which is the condition under test. It has to
+     * be seeded into the injected store: this case used to write it to $_SESSION while handing the
+     * subject an empty ArraySessionStore, so it never got past the no-session check above and was
+     * really a duplicate of it.
+     */
     #[Test]
     public function hasPendingInvitationsReturnsFalseWhenNoTeamId(): void
     {
-        $_SESSION = ['invited_to_team' => ['email' => 'a@b.com']];
         $user = new InvitedUser(
             '',
             null,
             $this->makeTeamDaoStub(),
             $this->makeRedisHandlerStub(),
             $this->makeUserDaoStub(),
-            new ArraySessionStore()
+            new ArraySessionStore(['invited_to_team' => ['email' => 'a@b.com']])
         );
         $this->assertFalse($user->hasPendingInvitations());
     }
@@ -176,17 +180,22 @@ class InvitedUserTest extends AbstractTest
         $this->assertTrue($user->hasPendingInvitations());
     }
 
+    /**
+     * A complete invitation whose team has no pending members — so the false comes from the empty
+     * member list, not from a missing session. Same fix as the no-team_id case: with the data in
+     * $_SESSION and an empty store, the member lookup was never reached and makeRedisHandlerStub([])
+     * was never the reason this returned false.
+     */
     #[Test]
     public function hasPendingInvitationsReturnsFalseWhenNoMembers(): void
     {
-        $_SESSION = ['invited_to_team' => ['team_id' => 5, 'email' => 'a@b.com']];
         $user = new InvitedUser(
             '',
             null,
             $this->makeTeamDaoStub(),
             $this->makeRedisHandlerStub([]),
             $this->makeUserDaoStub(),
-            new ArraySessionStore()
+            new ArraySessionStore(['invited_to_team' => ['team_id' => 5, 'email' => 'a@b.com']])
         );
         $this->assertFalse($user->hasPendingInvitations());
     }
