@@ -518,7 +518,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             'segment' => $this->data['segment'],
             'user' => $this->user,
             'source_page_code' => ReviewUtils::revisionNumberToSourcePage($this->data['revisionNumber'])
-        ]));
+        ], $this->user));
 
         return $result;
     }

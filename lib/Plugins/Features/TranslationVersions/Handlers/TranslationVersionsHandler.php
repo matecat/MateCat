@@ -185,7 +185,15 @@ class TranslationVersionsHandler implements VersionHandlerInterface
     {
         // evaluate if the record is to be created, either the
         // status changed, or the translation changed
-        $user = $params['user'];
+        //
+        // Both production callers (SetTranslationController, GetSearchController) hand over their own
+        // $this->user, so a missing actor here is a wiring bug in a new caller, not a runtime state.
+        // Checked rather than assumed because the batch processor below attributes chunk-review
+        // updates to it, and an unattributed update is indistinguishable from user 0.
+        $user = $params['user'] ?? null;
+        if (!$user instanceof UserStruct) {
+            throw new Exception("storeTranslationEvent requires the acting user in \$params['user']");
+        }
 
         /** @var SegmentTranslationStruct $translation */
         $translation = $params['translation'];
@@ -253,7 +261,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface
         }
 
         try {
-            $translationEventsHandler->save($this->createBatchReviewProcessor());
+            $translationEventsHandler->save($this->createBatchReviewProcessor($user));
             $this->jobDao->destroyCacheByProjectId($chunk->id_project);
             $this->projectDao->destroyFetchByIdCache($chunk->id_project, ProjectStruct::class);
         } catch (Exception $e) {
@@ -287,9 +295,9 @@ class TranslationVersionsHandler implements VersionHandlerInterface
         return new TranslationEventsHandler($chunk, new TranslationEventDao($this->database));
     }
 
-    protected function createBatchReviewProcessor(): BatchReviewProcessor
+    protected function createBatchReviewProcessor(UserStruct $actingUser): BatchReviewProcessor
     {
-        return new BatchReviewProcessor(new ChunkReviewDao($this->database));
+        return new BatchReviewProcessor(new ChunkReviewDao($this->database), $actingUser);
     }
 
 }

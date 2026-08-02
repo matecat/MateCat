@@ -25,6 +25,7 @@ use Model\Projects\ProjectStruct;
 use Model\Translators\JobsTranslatorsDao;
 use Model\Translators\TranslatorsModel;
 use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use Model\WordCount\CounterModel;
 use ReflectionException;
 use RuntimeException;
@@ -386,17 +387,18 @@ class JobSplitMergeService
     /**
      * Apply a new structure of the job: empty cart, begin transaction, split, commit.
      *
-     * @param int|null $uid The user ID performing the split (nullable)
+     * @param UserStruct $actingUser The user performing the split
+     * @param int|null $uid The user ID used to re-invite the job translator (nullable)
      *
      * @throws Exception
      * @throws TypeError
      */
-    public function applySplit(SplitMergeProjectData $data, ?int $uid = null): void
+    public function applySplit(SplitMergeProjectData $data, UserStruct $actingUser, ?int $uid = null): void
     {
         $this->getCart()?->emptyCart();
 
         $this->beginTransaction();
-        $this->splitJob($data, $uid);
+        $this->splitJob($data, $actingUser, $uid);
         $this->dbHandler->commit();
     }
 
@@ -406,12 +408,13 @@ class JobSplitMergeService
      * first/last segments of every chunk, last opened segment as the first segment of the new job,
      * and the timestamp of creation.
      *
-     * @param int|null $uid The user ID performing the split
+     * @param UserStruct $actingUser The user performing the split
+     * @param int|null $uid The user ID used to re-invite the job translator
      *
      * @throws Exception
      * @throws TypeError
      */
-    public function splitJob(SplitMergeProjectData $data, ?int $uid = null): void
+    public function splitJob(SplitMergeProjectData $data, UserStruct $actingUser, ?int $uid = null): void
     {
         // init JobDao
         $jobDao = $this->createJobDao();
@@ -549,7 +552,7 @@ class JobSplitMergeService
 
         $this->getCart()?->deleteCart();
 
-        $this->features->dispatch(new PostJobSplittedEvent($data));
+        $this->features->dispatch(new PostJobSplittedEvent($data, $actingUser));
     }
 
     /**
@@ -560,7 +563,7 @@ class JobSplitMergeService
      * @throws Exception
      * @throws TypeError
      */
-    public function mergeALL(SplitMergeProjectData $data, array $jobStructs): void
+    public function mergeALL(SplitMergeProjectData $data, array $jobStructs, UserStruct $actingUser): void
     {
         $jobsMetadataDao = $this->createJobMetadataDao();
 
@@ -646,7 +649,7 @@ class JobSplitMergeService
         $wCountManager->initializeJobWordCount((int)$first_job['id'], (string)$first_job['password']);
 
         $chunk = new JobStruct($first_job->toArray());
-        $this->features->dispatch(new PostJobMergedEvent($data, $chunk));
+        $this->features->dispatch(new PostJobMergedEvent($data, $chunk, $actingUser));
 
         $jobDao = $this->createJobDao();
 

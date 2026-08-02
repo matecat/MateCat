@@ -20,6 +20,7 @@ use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use ReflectionMethod;
+use Model\Users\UserStruct;
 
 class TestableSplitJobController extends SplitJobController
 {
@@ -518,6 +519,8 @@ class SplitJobControllerTest extends AbstractTest
 
         try {
             $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
+            // getProjectData() builds a JobSplitMergeManager, which now requires the acting user.
+            $this->reflector->getProperty('user')->setValue($this->controller, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
             $projectId = $this->projectId($base);
 

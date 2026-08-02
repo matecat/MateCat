@@ -43,8 +43,6 @@ services:
                 - lib/Model/Users/RedeemableProject.php
                 - lib/Utils/Shop/Cart.php
                 - plugins/aligner/lib/Features/Aligner.php
-                - plugins/translated/lib/Features/Translated.php
-                - plugins/translated/tests/unit/TranslatedEventHandlersTest.php
 
 parameters:
     level: 8

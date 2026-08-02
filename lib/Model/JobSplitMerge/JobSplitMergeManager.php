@@ -12,6 +12,7 @@ use Model\Jobs\JobStruct;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Utils\Logger\LoggerFactory;
+use Model\Users\UserStruct;
 use Utils\Session\SessionStore;
 
 /**
@@ -23,7 +24,7 @@ use Utils\Session\SessionStore;
  * storage, segment extraction, TMS, MateCatFilter, etc.).
  *
  * Usage:
- *   $manager = new JobSplitMergeManager($projectStruct, $database, $sessionStore);
+ *   $manager = new JobSplitMergeManager($projectStruct, $database, $sessionStore, $actingUser);
  *   $data = $manager->getProjectData();
  *   $manager->getSplitData($data, 3);
  *   $manager->applySplit($data);
@@ -49,9 +50,15 @@ class JobSplitMergeManager
     protected ?SessionStore $session;
 
     /**
+     * @param UserStruct $actingUser Who is running the split or merge. Carried onto the
+     *                               PostJobSplitted / PostJobMerged events so listeners attribute
+     *                               the resulting chunk-review updates without reading the session.
+     *                               Distinct from SplitMergeProjectData::$uid, which also drives
+     *                               translator re-invitation and is left untouched here.
+     *
      * @throws Exception
      */
-    public function __construct(ProjectStruct $project, IDatabase $database, ?SessionStore $session)
+    public function __construct(ProjectStruct $project, IDatabase $database, ?SessionStore $session, private readonly UserStruct $actingUser)
     {
         $this->session = $session;
 
@@ -105,7 +112,7 @@ class JobSplitMergeManager
      */
     public function applySplit(SplitMergeProjectData $data): void
     {
-        $this->getJobSplitMergeService()->applySplit($data, $data->uid);
+        $this->getJobSplitMergeService()->applySplit($data, $this->actingUser, $data->uid);
     }
 
     /**
@@ -120,7 +127,7 @@ class JobSplitMergeManager
      */
     public function mergeALL(SplitMergeProjectData $data, array $jobStructs): void
     {
-        $this->getJobSplitMergeService()->mergeALL($data, $jobStructs);
+        $this->getJobSplitMergeService()->mergeALL($data, $jobStructs, $this->actingUser);
     }
 
     /**
