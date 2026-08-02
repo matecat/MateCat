@@ -505,6 +505,12 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->authCookieMock->method('getCredentials')
             ->willReturn(['user' => ['uid' => 99]]);
 
+        // Marked as a login, because that is the only way a takeover is accepted at all now. Without
+        // it this shape is refused, which is a different property with its own case; what this one
+        // pins is where the *user* comes from — getByUid is asked for the cookie's 99, never the
+        // session's 7.
+        $this->authCookieMock->method('issuedCredentialsThisRequest')->willReturn(true);
+
         $this->userDaoMock->expects($this->once())
             ->method('getByUid')
             ->with(99)
@@ -618,6 +624,9 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->userDaoMock->method('getByUid')->with(42)->willReturn($arriving);
         $this->authCookieMock->method('getCredentials')->willReturn(['user' => ['uid' => 42]]);
 
+        // A login, not a planted cookie: this process minted the credentials being read.
+        $this->authCookieMock->method('issuedCredentialsThisRequest')->willReturn(true);
+
         $session = new ArraySessionStore([
             'uid'            => 7,
             'redeem_project' => 'a-project-belonging-to-user-7',
@@ -665,6 +674,61 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
 
         // Still rotated: anonymous to authenticated is the fixation transition.
         $this->assertSame(1, $session->regenerationCount());
+    }
+
+    /**
+     * The planted cookie. Identical on the wire to the legitimate switch above — a session naming one
+     * user, a valid cookie naming another, no logout between — and told apart only by the fact that
+     * this process did not mint it. Accepting it silently is what lets the victim carry on working
+     * inside the attacker's account, uploading their files into it.
+     */
+    #[Test]
+    public function anIdentitySwitchThisProcessDidNotPerformIsRefused(): void
+    {
+        $planted        = new UserStruct();
+        $planted->uid   = 42;
+        $planted->email = 'attacker@example.com';
+
+        $this->userDaoMock->method('getByUid')->with(42)->willReturn($planted);
+        $this->authCookieMock->method('getCredentials')->willReturn(['user' => ['uid' => 42]]);
+        $this->authCookieMock->method('issuedCredentialsThisRequest')->willReturn(false);
+
+        // Required, not incidental: destroying the session alone leaves the next request with no uid
+        // to compare against, so it would accept the same cookie one request later.
+        $this->authCookieMock->expects($this->once())->method('dropCookie');
+
+        $session = new ArraySessionStore(['uid' => 7, 'cart' => ['victim-items']]);
+
+        $helper = $this->createHelper($session);
+
+        $this->assertFalse($helper->isLogged(), 'the planted identity must not authenticate');
+        $this->assertNull($helper->getUser()->uid);
+        $this->assertSame([], $session->all(), 'the session naming the previous user must go');
+    }
+
+    /**
+     * The same shape, accepted, because the credentials were issued here. This is the account switch
+     * with no logout in between that the login paths perform, so it must keep working.
+     */
+    #[Test]
+    public function anIdentitySwitchThisProcessPerformedIsAccepted(): void
+    {
+        $arriving        = new UserStruct();
+        $arriving->uid   = 42;
+        $arriving->email = 'arriving@example.com';
+
+        $this->userDaoMock->method('getByUid')->with(42)->willReturn($arriving);
+        $this->authCookieMock->method('getCredentials')->willReturn(['user' => ['uid' => 42]]);
+        $this->authCookieMock->method('issuedCredentialsThisRequest')->willReturn(true);
+
+        $this->authCookieMock->expects($this->never())->method('dropCookie');
+
+        $session = new ArraySessionStore(['uid' => 7]);
+
+        $helper = $this->createHelper($session);
+
+        $this->assertTrue($helper->isLogged());
+        $this->assertSame(42, $session->get('uid'));
     }
 
     // ─── destroyAuthentication (instance method) ─────────────────────────

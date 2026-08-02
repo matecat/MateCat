@@ -263,6 +263,23 @@ class AuthenticationHelper
             // The consequence on a genuine account switch is that those pending actions are dropped and
             // have to be started again. That is the intended reading rather than a cost: redeeming the
             // previous user's project into the arriving user's account is the same leak in another form.
+            // Before any of that: is this switch something we did, or something done to this browser?
+            //
+            // A session naming user V receiving a valid cookie naming user A, with no logout between,
+            // has two causes that are identical on the wire. A logs in over V — legitimate, and the
+            // flow this codebase actively supports. Or A's cookie was planted in V's browser, which a
+            // host inside COOKIE_DOMAIN can do, and then V goes on working inside A's account: their
+            // next upload becomes A's project, and A reads it from their own dashboard. Accepting the
+            // switch silently is what makes that pay.
+            //
+            // The discriminator is who minted the cookie. A login mints it server-side in this same
+            // request; a planted one only arrives. So refuse the identity we did not issue.
+            if ($identityChanged && $previousUid !== null && !$this->authCookie->issuedCredentialsThisRequest()) {
+                $this->refuseUnrequestedIdentitySwitch();
+
+                return;
+            }
+
             if ($identityChanged && $previousUid !== null) {
                 $this->session->clear();
             }
@@ -273,6 +290,40 @@ class AuthenticationHelper
 
             $this->session->set('uid', $authenticatedUid);
         }
+    }
+
+    /**
+     * Answer an identity switch this process did not perform by refusing it outright.
+     *
+     * Three things, and each is required:
+     *
+     *  - The resolved user is discarded, so the `finally` in {@see authenticate()} reports
+     *    `logged = false` and the request continues as anonymous. It also leaves `user->uid` null,
+     *    which is what keeps renewIfStale() from sliding the planted cookie forward.
+     *  - The cookie is dropped. Destroying the session alone would fix nothing: the next request finds
+     *    no `uid`, so `previousUid` is null, the rule above does not fire, and the browser is quietly
+     *    authenticated as the planted identity one request later.
+     *  - The session goes, because it still names the previous user and nothing here can tell whether
+     *    what it holds was theirs.
+     *
+     * The ring is deliberately untouched — see {@see AuthCookie::dropCookie()}. A false positive must
+     * cost one re-login in one browser, not sign a real account out everywhere.
+     *
+     * Known false positive, accepted: two tabs, the second logging into another account, while a
+     * request from the first is in flight. That request carries the new cookie against the old session
+     * uid and is refused, costing one re-login. It needs a sub-request race to happen at all.
+     *
+     * Known limit, also accepted: if the planted cookie was scoped to a domain this application does
+     * not write — something above COOKIE_DOMAIN — then dropping it cannot remove it, and the browser
+     * presents it again on every request. The result is a user who cannot log in rather than a user
+     * silently working in somebody else's account. Fail-closed and visible beats silent and paying.
+     */
+    private function refuseUnrequestedIdentitySwitch(): void
+    {
+        $this->user = new UserStruct();
+
+        $this->authCookie->dropCookie();
+        $this->session->destroy();
     }
 
     /**

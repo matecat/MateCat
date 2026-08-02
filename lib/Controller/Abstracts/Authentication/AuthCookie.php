@@ -56,6 +56,20 @@ class AuthCookie
     private readonly CookieManager $cookieManager;
 
     /**
+     * Whether this process issued a login cookie while serving the current request.
+     *
+     * Static, and that is not laziness: the three login paths each build their own AuthCookie, and
+     * AuthenticationHelper::fromRequest() builds another one to read the result, so an instance field
+     * would be invisible to the reader. What has to be answered is a property of the *request* — "did
+     * we mint the cookie we are now reading, or did the browser hand it to us?" — and under PHP-FPM a
+     * static is exactly request-scoped.
+     *
+     * A test process serves many notional requests in one PHP lifetime, so tests reset it through
+     * {@see forgetIssuedCredentials()}.
+     */
+    private static bool $issuedCredentialsThisRequest = false;
+
+    /**
      * @param SessionTokenStoreHandler $tokenStore The user's token ring.
      * @param CookieManager|null $cookieManager Cookie writer; tests pass a spy to observe emissions.
      */
@@ -123,6 +137,44 @@ class AuthCookie
         // Activate the token in the user token store, then hand the cookie to the browser.
         $this->tokenStore->setCookieLoginTokenActive($userId, $new_cookie_data);
         $this->setCookie($new_cookie_data, $new_expire_date);
+
+        // Recorded so a later reader in this same request can tell an identity we just established
+        // from one the browser presented. {@see AuthenticationHelper::setUserSession()} is the reader.
+        self::$issuedCredentialsThisRequest = true;
+    }
+
+    /**
+     * Did this process issue a login cookie while serving this request?
+     *
+     * A login mints the cookie here, server-side. A cookie that merely arrived cannot set this. That
+     * difference is the only thing separating a legitimate account switch from an identity planted in
+     * somebody's browser, because on the wire the two are identical: a session naming one user and a
+     * valid cookie naming another, with no logout in between.
+     */
+    public function issuedCredentialsThisRequest(): bool
+    {
+        return self::$issuedCredentialsThisRequest;
+    }
+
+    /**
+     * Reset the request-scoped marker. For tests, which serve many requests in one PHP lifetime.
+     */
+    public static function forgetIssuedCredentials(): void
+    {
+        self::$issuedCredentialsThisRequest = false;
+    }
+
+    /**
+     * Drop the browser cookie without touching the token ring.
+     *
+     * For a caller that has decided the presented cookie must stop being used *here* while leaving it
+     * valid elsewhere. Deliberately not {@see destroyAuthentication()}: retiring the token would sign
+     * that account out on every device, so any false positive in the caller's judgement would become a
+     * global logout for a real user instead of one re-login in one browser.
+     */
+    public function dropCookie(): void
+    {
+        $this->clearCookie();
     }
 
     /**

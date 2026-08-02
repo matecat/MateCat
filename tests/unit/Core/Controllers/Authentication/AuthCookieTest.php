@@ -32,6 +32,10 @@ class AuthCookieTest extends AbstractTest
 
     protected function tearDown(): void
     {
+        // Request-scoped in production, process-scoped here: one test issuing credentials must not
+        // leave the next one looking like it did.
+        AuthCookie::forgetIssuedCredentials();
+
         unset($_COOKIE[AppConfig::$AUTHCOOKIENAME]);
         parent::tearDown();
     }
@@ -258,6 +262,32 @@ class AuthCookieTest extends AbstractTest
 
         $this->assertNotSame('previous-users-live-cookie', $_COOKIE[AppConfig::$AUTHCOOKIENAME]);
         $this->assertSame($cookieManager->writes[0]['value'], $_COOKIE[AppConfig::$AUTHCOOKIENAME]);
+    }
+
+    /**
+     * The signal AuthenticationHelper uses to tell a login from a planted cookie, and the reason it is
+     * held statically: the login paths build their own AuthCookie and fromRequest() builds another one
+     * to read the result, so the answer has to survive the instance that produced it.
+     */
+    #[Test]
+    public function issuingCredentialsIsRecordedForTheRestOfTheRequestAcrossInstances(): void
+    {
+        $this->assertFalse($this->authCookie()->issuedCredentialsThisRequest());
+
+        $this->authCookie()->setCredentials($this->createAuthenticatedUser());
+
+        // A different instance, standing in for the one AuthenticationHelper builds.
+        $this->assertTrue($this->authCookie()->issuedCredentialsThisRequest());
+    }
+
+    #[Test]
+    public function readingAnArrivingCookieDoesNotLookLikeIssuingOne(): void
+    {
+        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $this->generateTestCookie($this->createAuthenticatedUser());
+
+        $this->authCookie()->getCredentials();
+
+        $this->assertFalse($this->authCookie()->issuedCredentialsThisRequest());
     }
 
     #[Test]
