@@ -228,26 +228,42 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->assertNull($helper->getUser()->uid);
     }
 
-    // ─── Constructor (authenticate): session as profile cache ─────────────
+    // ─── Authenticating stores no credentials in the session ──────────────
 
+    /**
+     * The session used to hold the whole UserStruct, which declares `pass`, `salt` and
+     * `confirmation_token` — so authenticating serialised the password hash, the salt and the
+     * confirmation token into the session's Redis database, kept them for the session's idle lifetime
+     * and did not purge them when the password changed.
+     *
+     * Asserting on the stored *values*, not just on the absence of the `user` key: a future change
+     * that puts the struct back under another name, or that stores the hash as a scalar field, has to
+     * fail this. `uid` is the one thing that may be there, and it is not a credential.
+     */
     #[Test]
-    public function constructorWithSessionDataSetsUserWhenTheCookieAgrees(): void
+    public function authenticatingStoresTheUidAndNoCredentialMaterial(): void
     {
-        $user        = new UserStruct();
-        $user->uid   = 99;
-        $user->email = 'session@example.com';
+        $user                     = new UserStruct();
+        $user->uid                = 99;
+        $user->email              = 'session@example.com';
+        $user->pass               = 'the-password-hash';
+        $user->salt               = 'the-salt';
+        $user->confirmation_token = 'the-confirmation-token';
 
-        $session = new ArraySessionStore(['user' => $user]);
+        $this->userDaoMock->method('getByUid')->with(99)->willReturn($user);
+        $this->authCookieMock->method('getCredentials')->willReturn(['user' => ['uid' => 99]]);
 
-        // This test used to pass on session data alone. That was the defect: session state was an
-        // authorization decision, so revoking the token ring did not log anyone out. The session
-        // is now only a cache, and it takes a cookie the ring still accepts to reach it.
-        $this->authCookieMock->method('getCredentials')
-            ->willReturn(['user' => ['uid' => 99]]);
-
-        $helper = $this->createHelper($session);
+        $session = new ArraySessionStore();
+        $helper  = $this->createHelper($session);
 
         $this->assertSame(99, $helper->getUser()->uid);
+        $this->assertSame(['uid'], $session->keys());
+
+        $stored = json_encode($session->all());
+        $this->assertIsString($stored);
+        $this->assertStringNotContainsString('the-password-hash', $stored);
+        $this->assertStringNotContainsString('the-salt', $stored);
+        $this->assertStringNotContainsString('the-confirmation-token', $stored);
     }
 
     // ─── Constructor (authenticate): cookie auth path ─────────────────────
@@ -306,18 +322,22 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $user->uid   = 7;
         $user->email = 'in@example.com';
 
-        $session = new ArraySessionStore(['user' => $user]);
+        // A session that already records this uid is one that authenticated on an earlier request.
+        // That used to be expressed by seeding the cached UserStruct, which is gone; the uid is what
+        // marks the session authenticated now.
+        $session = new ArraySessionStore(['uid' => 7]);
 
         // The cookie is mandatory now, even with a fully populated session: the token ring is the
         // only authority, so a request that cannot present a live cookie is not authenticated no
         // matter what the session holds.
+        $this->userDaoMock->method('getByUid')->with(7)->willReturn($user);
         $this->authCookieMock->method('getCredentials')
             ->willReturn(['user' => ['uid' => 7]]);
 
         $helper = $this->createHelper($session);
 
-        // isLogged() proves the session cache really was used — without it a silent failure into
-        // the catch block would also report zero rotations and the test would prove nothing.
+        // isLogged() guards against a silent failure into the catch block, which would also report
+        // zero rotations and make the assertion below prove nothing.
         $this->assertTrue($helper->isLogged());
 
         // This is the hot path: it runs on every authenticated request. Rotating here would churn
@@ -330,11 +350,14 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
      * Every /api/v2 and /api/v3 route is served by a plain KleinController, which is stateless and so
      * is handed a StatelessSessionStore — a store whose get() throws by design.
      *
-     * On this path the session is only ever a cache for the user row, so "there is no session" is a
-     * cache miss, not an error. Without the guard, cachedSessionUser() threw on the first line of the
-     * cookie branch, authenticate()'s catch (Throwable) swallowed it, $this->user was never assigned,
-     * and a perfectly valid login cookie produced 401 Invalid Login on every browser-issued v2/v3
-     * call. Observed on dev against GET /api/v2/teams/:id/members.
+     * The cookie branch must therefore never read the session to resolve identity. It once did — it
+     * consulted a session-cached user row first — so on this path the very first line of the branch
+     * threw, authenticate()'s catch (Throwable) swallowed it, $this->user was never assigned, and a
+     * perfectly valid login cookie produced 401 Invalid Login on every browser-issued v2/v3 call.
+     * Observed on dev against GET /api/v2/teams/:id/members.
+     *
+     * The session write in setUserSession() is not a second version of that hazard: it is gated on
+     * sessionIsActive(), and a stateless controller never starts a session, so it is not reached.
      *
      * Asserting the uid, not just isLogged(): the point is that the cookie's identity survives the
      * absent session, and an assertion on the flag alone would also pass if some later change resolved
@@ -428,21 +451,37 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->assertNull($helper->getUser()->uid);
     }
 
+    /**
+     * The inverse of the assertion this used to make. A matching session used to short-circuit the
+     * lookup, which is what made the session a cache of the users row — and therefore of the password
+     * hash. The read now happens on every authenticated request, and that is load-bearing rather than
+     * incidental: it is why a rename, a disabled account or a revoked user takes effect on the next
+     * request instead of surviving as long as the session does.
+     *
+     * The cost is one Redis read, not a query: getByUid() goes through the DAO's own uid-keyed cache
+     * with the TTL asserted here.
+     */
     #[Test]
-    public function aMatchingSessionIsUsedAsTheProfileCacheAndSkipsTheUserLookup(): void
+    public function theUserIsResolvedFromTheDaoOnEveryRequestEvenWithAnAuthenticatedSession(): void
     {
         $user        = new UserStruct();
         $user->uid   = 7;
         $user->email = 'in@example.com';
 
-        $session = new ArraySessionStore(['user' => $user]);
+        $session = new ArraySessionStore(['uid' => 7]);
 
         $this->authCookieMock->method('getCredentials')
             ->willReturn(['user' => ['uid' => 7]]);
 
-        // The point of keeping the session: it spares the profile rebuild. If the lookup ran the
-        // cache would be doing nothing for us.
-        $this->userDaoMock->expects($this->never())->method('getByUid');
+        $this->userDaoMock->expects($this->once())
+            ->method('setCacheTTL')
+            ->with(60 * 60 * 24)
+            ->willReturnSelf();
+
+        $this->userDaoMock->expects($this->once())
+            ->method('getByUid')
+            ->with(7)
+            ->willReturn($user);
 
         $helper = $this->createHelper($session);
 
@@ -450,23 +489,22 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->assertSame(7, $helper->getUser()->uid);
     }
 
+    /**
+     * Identity comes from the cookie, never from the session. This used to be enforced by an explicit
+     * uid-equality guard over the session's cached struct; with that struct deleted the property holds
+     * by construction, and is pinned here so a future reintroduction of a session-sourced user has to
+     * fail rather than quietly serve one user's row to another.
+     */
     #[Test]
     public function aSessionBelongingToAnotherUserIsNeverServedToTheCookieHolder(): void
     {
-        $sessionUser        = new UserStruct();
-        $sessionUser->uid   = 7;
-        $sessionUser->email = 'in@example.com';
-
         $cookieUser        = new UserStruct();
         $cookieUser->uid   = 99;
         $cookieUser->email = 'other@example.com';
 
-        $session = new ArraySessionStore(['user' => $sessionUser]);
+        // A session left recording uid 7 while the cookie proves 99.
+        $session = new ArraySessionStore(['uid' => 7]);
 
-        // A hazard this restructure introduces and has to close in the same change: the two
-        // branches were mutually exclusive before, so a session holding one user could never be
-        // reached by a cookie proving a different one. Serving the cached profile on uid mismatch
-        // would hand user 7's teams and services to user 99.
         $this->authCookieMock->method('getCredentials')
             ->willReturn(['user' => ['uid' => 99]]);
 
@@ -479,7 +517,11 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
 
         $this->assertTrue($helper->isLogged());
         $this->assertSame(99, $helper->getUser()->uid);
-        $this->assertSame(99, $session->get('user')->uid);
+
+        // The session is re-stamped to the uid the cookie proved, and rotated on the way, because this
+        // is a different user taking over the session rather than the same one continuing.
+        $this->assertSame(99, $session->get('uid'));
+        $this->assertSame(1, $helper->regeneratedSessionIds);
     }
 
     #[Test]
@@ -623,96 +665,12 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->assertNull($helper->getApiRecord());
     }
 
-    // ─── refreshSessionUser (static, not an authentication pass) ──────────
-    //
-    // Replaces refreshSession(), which unset the session keys so the *next* request would rebuild
-    // them through a second full fromRequest() pass — ring check, getByUid, profile build and cookie
-    // renewal — only to throw the result away. This re-reads the one key that is still cached in the
-    // session, from the DAO cache, with the uid the session already proved.
-
-    #[Test]
-    public function refreshSessionUserRepopulatesTheUserFromTheDaoCache(): void
-    {
-        $stored        = new UserStruct();
-        $stored->uid   = 99;
-        $stored->email = 'renamed@example.com';
-
-        $stale        = new UserStruct();
-        $stale->uid   = 99;
-        $stale->email = 'old@example.com';
-
-        $this->userDaoMock->expects($this->once())
-            ->method('setCacheTTL')
-            ->with(60 * 60 * 24)
-            ->willReturnSelf();
-
-        $this->userDaoMock->expects($this->once())
-            ->method('getByUid')
-            ->with(99)
-            ->willReturn($stored);
-
-        $session = new ArraySessionStore(['uid' => 99, 'user' => $stale]);
-
-        AuthenticationHelper::refreshSessionUser($session, $this->userDaoMock);
-
-        $this->assertSame('renamed@example.com', $session->get('user')->email);
-    }
-
-    #[Test]
-    public function refreshSessionUserDropsTheUserWhenTheUidNoLongerResolves(): void
-    {
-        $this->userDaoMock->method('getByUid')->willReturn(null);
-
-        $session = new ArraySessionStore(['uid' => 99, 'user' => new UserStruct()]);
-
-        AuthenticationHelper::refreshSessionUser($session, $this->userDaoMock);
-
-        // A deleted user must not be left behind as a stale cached struct.
-        $this->assertFalse($session->has('user'));
-    }
-
-    #[Test]
-    public function refreshSessionUserIsANoOpWithoutAUidInSession(): void
-    {
-        // No uid means nothing was ever proved, so there is nothing to refresh and no query to run.
-        $this->userDaoMock->expects($this->never())->method('getByUid');
-
-        $session = new ArraySessionStore();
-
-        AuthenticationHelper::refreshSessionUser($session, $this->userDaoMock);
-
-        $this->assertSame([], $session->keys());
-    }
-
-    #[Test]
-    public function refreshSessionUserTouchesNothingButTheUserKey(): void
-    {
-        $stored      = new UserStruct();
-        $stored->uid = 99;
-        $this->userDaoMock->method('getByUid')->willReturn($stored);
-
-        // What the old refreshSession() + fromRequest() pair did that this must not: re-run
-        // authentication, and with it re-stamp the session and renew the cookie. The cookie is not
-        // even reachable from here — a static call with a UserDao cannot consult the ring — and the
-        // rest of the session must come back byte-identical.
-        $session = new ArraySessionStore(['uid' => 99, 'cid' => 'client-1', 'wanted_url' => '/manage']);
-
-        AuthenticationHelper::refreshSessionUser($session, $this->userDaoMock);
-
-        $this->assertSame(99, $session->get('uid'));
-        $this->assertSame('client-1', $session->get('cid'));
-        $this->assertSame('/manage', $session->get('wanted_url'));
-        $this->assertSame($stored, $session->get('user'));
-        $this->assertSame(['uid', 'cid', 'wanted_url', 'user'], $session->keys());
-    }
-
     // ─── destroyAuthentication (instance method) ─────────────────────────
 
     #[Test]
     public function destroyAuthenticationClearsSessionVarsOnInstance(): void
     {
-        $user    = new UserStruct();
-        $session = new ArraySessionStore(['user' => $user]);
+        $session = new ArraySessionStore(['uid' => 7]);
         $helper = $this->createHelper($session);
 
         try {
@@ -721,7 +679,8 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
             // cookie store may throw in test environment without active session
         }
 
-        $this->assertFalse($session->has('user'));
+        // `uid` is what marks the session authenticated, so it is what logging out has to clear.
+        $this->assertFalse($session->has('uid'));
     }
 }
 

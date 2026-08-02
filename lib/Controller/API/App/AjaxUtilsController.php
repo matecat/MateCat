@@ -83,6 +83,8 @@ class AjaxUtilsController extends AbstractStatefulKleinController
      */
     public function clearNotCompletedUploads(): void
     {
+        // No acting user passed: clearSession() only drops the gdrive subtree, and this runs in a
+        // daemon context where identifyUser() never populated one.
         (new Session($this->getDatabase(), $this->sessionStore()))->clearSession();
 
         $this->response->json([

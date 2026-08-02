@@ -43,10 +43,16 @@ class UserController extends AbstractStatefulKleinController
         // Session-scoped on purpose. /api/app/* is the surface the UI calls with a session; every
         // other API is stateless. An api-key request reaches here with an empty session, because
         // the api-key branch of authenticate() sets the user without ever calling setUserSession(),
-        // so it still gets a 401. session['user'] is written by setUserSession() and by nothing
-        // else — exactly what session['user_profile'] was before it moved to UserStateStore — so
-        // the population of callers that get 401 is unchanged.
-        if (empty($this->sessionStore()->get('user'))) {
+        // so it still gets a 401.
+        //
+        // Guarded on `uid` rather than on the api record. Both look like they identify an api-key
+        // caller, but they are not the same set: a request presenting a valid key with a *wrong*
+        // secret leaves the api record populated and still falls through to the cookie branch, so
+        // keying off the record would 401 a session that authenticated perfectly well. `uid` is
+        // written by setUserSession() and by nothing else — exactly as session['user'] was before it
+        // was deleted for holding the password hash — so the population of callers that get 401 here
+        // is unchanged.
+        if (!$this->sessionStore()->has('uid')) {
             $this->response->code(401);
             $this->response->json(['error' => 'Invalid login.']);
 

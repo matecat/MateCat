@@ -337,7 +337,7 @@ class LoginControllerTest extends AbstractTest
     // ─── socketToken ─────────────────────────────────────────────────
 
     #[Test]
-    public function socketToken_returns_406_when_no_session_user(): void
+    public function socketToken_returns_406_when_the_session_is_not_authenticated(): void
     {
         $this->controller->socketToken();
 
@@ -345,11 +345,11 @@ class LoginControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function socketToken_returns_200_with_token_when_session_user_exists(): void
+    public function socketToken_returns_200_with_token_when_the_session_is_authenticated(): void
     {
-        $user = new UserStruct();
-        $user->uid = 42;
-        $this->sessionStore->set('user', $user);
+        // `uid` is what setUserSession() writes to mark a session authenticated; the UserStruct this
+        // used to seed was deleted from the session for carrying the password hash.
+        $this->sessionStore->set('uid', 42);
 
         $this->controller->socketToken();
 

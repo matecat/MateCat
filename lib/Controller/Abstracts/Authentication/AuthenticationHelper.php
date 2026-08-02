@@ -88,18 +88,24 @@ class AuthenticationHelper
                 // session died of idleness.
                 $credentials = $this->authCookie->getCredentials();
                 if (!empty($credentials) && !empty($credentials['user'])) {
-                    $uid        = (int)$credentials['user']['uid'];
-                    $cachedUser = $this->cachedSessionUser($uid);
+                    $uid = (int)$credentials['user']['uid'];
 
-                    if ($cachedUser !== null) {
-                        $this->user = $cachedUser;
-                    } else {
-                        $this->userDao->setCacheTTL(60 * 60 * 24);
-                        $user = $this->userDao->getByUid($uid);
-                        if ($user !== null) {
-                            $this->user = $user;
-                            $this->setUserSession();
-                        }
+                    // Resolved from the uid the ring just proved, on every request. There used to be a
+                    // session-cached copy of this UserStruct consulted first, which is what put the
+                    // password hash, salt and confirmation token into the session's Redis database for
+                    // the session's idle lifetime. Dropping it costs nothing: getByUid() is itself a
+                    // uid-keyed Redis cache with the TTL set right below, so this is the same single
+                    // Redis read the session lookup was, against a store that is invalidated when the
+                    // users row changes.
+                    //
+                    // The uid-equality guard that used to sit here went with it. It existed because a
+                    // session holding user A alongside a cookie for user B would have served A's cached
+                    // struct to B; with no cached struct there is nothing to mismatch.
+                    $this->userDao->setCacheTTL(60 * 60 * 24);
+                    $user = $this->userDao->getByUid($uid);
+                    if ($user !== null) {
+                        $this->user = $user;
+                        $this->setUserSession();
                     }
 
                     // Slide the cookie forward while the user is active. This replaces the
@@ -166,77 +172,13 @@ class AuthenticationHelper
     }
 
     /**
-     * The session is a cache for the user row, never an authorization decision. It is usable only
-     * when it belongs to the uid the login cookie just proved: a session holding user A together
-     * with a cookie for user B must not serve A's user to B.
-     *
-     * The profile payload used to be cached here too, and its presence was part of this check. It
-     * now lives in {@see UserStateStore}, keyed by uid, so this guards the UserStruct alone.
-     */
-    private function cachedSessionUser(int $uid): ?UserStruct
-    {
-        // A stateless controller — every /api/v2 and /api/v3 route — holds a StatelessSessionStore,
-        // whose get() throws by design. Here the session is only a cache, so no session is a miss and
-        // not an error, and the catch (Throwable) around the caller turned that throw into a silent
-        // 401 on every cookie-authenticated request to those routes. Guarded on the same condition
-        // that already gates the write in setUserSession(), so the cache is read exactly where it can
-        // also be written.
-        if (!$this->sessionIsActive()) {
-            return null;
-        }
-
-        $cachedUser = $this->session->get('user');
-
-        if (!$cachedUser instanceof UserStruct) {
-            return null;
-        }
-
-        return (int)$cachedUser->uid === $uid ? $cachedUser : null;
-    }
-
-    /**
-     * Refresh the session's cached user from the uid the session already proved.
-     *
-     * This is not an authentication pass, and that is the point of it existing: the callers that
-     * need it had been calling {@see fromRequest()}, which validates the cookie against the token
-     * ring, re-reads the user and re-stamps the session, only to have the caller discard part of
-     * what it just built. Nothing here re-decides identity — the uid comes from the session, and a
-     * caller that has no session user gets a no-op.
-     *
-     * Callers that just wrote the users row must invalidate its cache first
-     * ({@see UserDao::destroyCacheByUid()}), or this re-reads the copy they superseded.
-     *
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public static function refreshSessionUser(SessionStore $session, UserDao $userDao): void
-    {
-        $uid = $session->get('uid');
-
-        if (empty($uid)) {
-            return;
-        }
-
-        $userDao->setCacheTTL(60 * 60 * 24);
-        $user = $userDao->getByUid((int)$uid);
-
-        if ($user === null) {
-            $session->remove('user');
-
-            return;
-        }
-
-        $session->set('user', $user);
-    }
-
-    /**
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
      */
     public function destroyAuthentication(): void
     {
-        $this->session->remove('user');
+        $this->session->remove('uid');
         $this->authCookie->destroyAuthentication();
     }
 
@@ -263,6 +205,24 @@ class AuthenticationHelper
     }
 
     /**
+     * Record which user this session belongs to, and rotate the id while doing it.
+     *
+     * The uid is all that is written. Two things used to be written alongside it and are not:
+     *
+     *  - `user`, the whole {@see UserStruct}. That struct declares `pass`, `salt` and
+     *    `confirmation_token`, so storing it serialised the password hash, the salt and the
+     *    confirmation token into the session's Redis database, where they sat for the session's idle
+     *    lifetime and were not purged when the password changed. Readers now take the user from the
+     *    request's own authenticated identity, or from {@see UserDao::getByUid()} — already a
+     *    uid-keyed Redis cache, and one that credentials-at-rest aside is invalidated on write.
+     *  - `cid`, the email. It had no reader left anywhere in the tree once the translated plugin
+     *    started taking the acting user from the event it handles.
+     *
+     * The uid stays, and is not a candidate for moving to {@see UserStateStore}: that store is keyed
+     * `user_state:<uid>`, so the uid has to be readable *before* it can be used to find anything
+     * there. It is not a credential — an integer the token ring re-proves on every request — and it
+     * is what tells this session whose it is.
+     *
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
@@ -270,15 +230,20 @@ class AuthenticationHelper
     protected function setUserSession(): void
     {
         if ($this->sessionIsActive()) {
-            // This is the transition from anonymous to authenticated, and the only place it
-            // happens: every login path (password, signup confirmation, OAuth) reaches it through
-            // fromRequest(). The id must not survive the transition, or anyone who learned it
-            // beforehand would be holding an authenticated session.
-            $this->regenerateSessionId();
+            // Rotate only on the actual anonymous → authenticated transition: every login path
+            // (password, signup confirmation, OAuth) reaches it through fromRequest(), and an id
+            // known before the login must not still be valid after it.
+            //
+            // The explicit comparison matters now that this method runs on *every* authenticated
+            // request. It used to be reached only on a session-cache miss, so the transition test was
+            // implicit in getting here at all; with the cache gone, rotating unconditionally would
+            // churn the id on every request and race parallel ones — for nothing, since the
+            // privilege transition already happened.
+            if ((int)$this->session->get('uid') !== (int)$this->user->getUid()) {
+                $this->regenerateSessionId();
+            }
 
-            $this->session->set('cid', $this->user->getEmail());
             $this->session->set('uid', $this->user->getUid());
-            $this->session->set('user', $this->user);
         }
     }
 

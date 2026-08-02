@@ -3,7 +3,6 @@
 namespace Controller\API\V2;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
-use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Controller\API\Commons\Validators\JSONRequestValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
@@ -70,12 +69,10 @@ class UserController extends AbstractStatefulKleinController
 
             $userDao = new UserDao($this->getDatabase());
             $userDao->updateUser($user);
+            // The bust is the whole invalidation now: the session no longer caches the user row, so
+            // there is nothing left here to re-stamp after a rename. The next request resolves the
+            // user through getByUid(), which reads the entry this just emptied.
             $userDao->destroyCacheByUid($uid);
-
-            // The cached user row in the session belongs to the name that just changed. Re-read it
-            // from the DAO cache the bust above emptied, rather than running a second full
-            // authentication pass to rebuild what this request already knows.
-            AuthenticationHelper::refreshSessionUser($this->sessionStore(), $userDao);
 
             $this->response->json([
                 'uid' => $user->uid,

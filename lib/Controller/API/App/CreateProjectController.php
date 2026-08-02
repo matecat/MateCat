@@ -950,6 +950,7 @@ class CreateProjectController extends AbstractStatefulKleinController
      */
     private function clearSessionFiles(): void
     {
+        // No acting user passed: clearFileListFromSession() consumes none.
         $gdriveSession = new Session($this->getDatabase(), $this->sessionStore());
         $gdriveSession->clearFileListFromSession();
     }

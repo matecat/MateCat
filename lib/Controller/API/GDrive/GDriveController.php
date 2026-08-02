@@ -168,7 +168,7 @@ class GDriveController extends AbstractStatefulKleinController
      */
     private function initSessionService(): void
     {
-        $this->gdriveUserSession = new Session($this->getDatabase(), $this->sessionStore());
+        $this->gdriveUserSession = new Session($this->getDatabase(), $this->sessionStore(), null, null, $this->user);
     }
 
     /**

@@ -92,8 +92,8 @@ class UserV2ControllerTest extends AbstractTest
         $user->create_date = '2020-01-01 00:00:00';
         $this->setProp('user', $user);
 
-        // The session the request already proved. Seeding the uid is what makes refreshSessionUser()
-        // reachable; an ArraySessionStore replaces the $_SESSION reset this used to need.
+        // The session the request already proved. It holds the uid and nothing else now; an
+        // ArraySessionStore replaces the $_SESSION reset this used to need.
         $this->setProp('sessionStore', new ArraySessionStore(['uid' => $user->uid]));
     }
 

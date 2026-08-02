@@ -60,6 +60,11 @@ class Session
     protected string $target_lang;
     protected ?string $seg_rule = null;
     protected SessionStore $session;
+
+    /**
+     * The acting user, or null when the caller has none. See the constructor's `$user` parameter.
+     */
+    protected ?UserStruct $user = null;
     /**
      * The GDrive subtree, held as a working copy. It used to be a live reference into
      * `$_SESSION[self::SESSION_KEY]`, so every mutation wrote through implicitly; now each mutation
@@ -109,12 +114,22 @@ class Session
      * @param IDatabase $database
      * @param ConnectedServiceDao|null $dao
      * @param AbstractFilesStorage|null $filesStorage
+     * @param UserStruct|null $user The acting user, for the operations that need one.
+     *
+     *        Read from `$_SESSION['user']` until that key was deleted for holding the password hash.
+     *        Nullable, and appended rather than placed next to `$session`, because the callers split
+     *        cleanly: the three that reach a user-dependent operation
+     *        ({@see getToken()}, {@see grantFileAccessByUrl()}, {@see doConversion()}) have an
+     *        authenticated user to hand, while {@see \lib\View\fileupload} only asks
+     *        {@see sessionHasFiles()} and has none to give. Passing null reproduces exactly what an
+     *        absent session user did before.
      * @throws Exception
      * @throws \TypeError
      */
-    public function __construct(IDatabase $database, ?SessionStore $session = null, ?ConnectedServiceDao $dao = null, ?AbstractFilesStorage $filesStorage = null)
+    public function __construct(IDatabase $database, ?SessionStore $session = null, ?ConnectedServiceDao $dao = null, ?AbstractFilesStorage $filesStorage = null, ?UserStruct $user = null)
     {
         $this->database = $database;
+        $this->user = $user;
 
         // Defaulting to the php session preserves the old `$source = &$_SESSION` fallback.
         $this->session = $session ?? new PhpSessionStore();
@@ -150,20 +165,21 @@ class Session
      *
      * @param IDatabase $database
      * @param array<string, mixed> $session
+     * @param UserStruct|null $user The acting user; see the constructor's `$user` parameter.
      *
      * @return Session
      * @throws RuntimeException
      * @throws Exception
      * @throws \TypeError
      */
-    public static function getInstanceForCLI(IDatabase $database, array $session): Session
+    public static function getInstanceForCLI(IDatabase $database, array $session, ?UserStruct $user = null): Session
     {
         if (PHP_SAPI != 'cli') {
             throw new RuntimeException("This method MUST be called by CLI.");
         }
 
         // A CLI run has no php session, so the array it was handed becomes an in-memory store.
-        return new self($database, new ArraySessionStore($session));
+        return new self($database, new ArraySessionStore($session), null, null, $user);
     }
 
     /**
@@ -275,10 +291,8 @@ class Session
     public function getToken(): ?array
     {
         if (is_null($this->token)) {
-            $sessionUser = $this->session->get('user');
-
-            if ($sessionUser instanceof UserStruct) {
-                $this->token = $this->getTokenByUser($sessionUser);
+            if ($this->user !== null) {
+                $this->token = $this->getTokenByUser($this->user);
             }
         }
 
@@ -638,7 +652,7 @@ class Session
      */
     public function grantFileAccessByUrl(string $googleFileId, Google_Client $gClient): Google_Service_Drive_Permission
     {
-        if (!$this->session->get('user')) {
+        if ($this->user === null) {
             throw new Exception('Cannot proceed without a User');
         }
 
@@ -756,8 +770,7 @@ class Session
             DIRECTORY_SEPARATOR . $uploadTokenValue;
 
         $this->featureSet = $this->createFeatureSet();
-        $sessionUser = $this->session->get('user');
-        $email = $sessionUser instanceof UserStruct ? $sessionUser->email : null;
+        $email = $this->user?->email;
         $this->featureSet->loadFromUserEmail(is_string($email) ? $email : '');
 
         $converter = $this->createFilesConverter(

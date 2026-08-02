@@ -1070,6 +1070,11 @@ class GDriveControllerTest extends AbstractTest
         // it, so this plain instance needs one of its own.
         $this->injectSessionStore($plain);
 
+        // It also hands over the acting user, now that GDrive\Session takes one instead of reading the
+        // UserStruct back out of the session. The property is a non-nullable typed one, so a plain
+        // instance that never ran identifyUser() has to be given it here.
+        $ref->getProperty('user')->setValue($plain, new UserStruct());
+
         $ref->getMethod('initDependencies')->invoke($plain);
 
         $this->assertInstanceOf(Session::class, $ref->getProperty('gdriveUserSession')->getValue($plain));

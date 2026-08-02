@@ -18,7 +18,6 @@ use Klein\Response;
 use Model\Teams\TeamDao;
 use Model\Users\RedeemableProject;
 use Model\Users\UserDao;
-use Model\Users\UserStruct;
 use ReflectionException;
 use TypeError;
 use Utils\Registry\AppConfig;
@@ -164,9 +163,19 @@ class LoginController extends AbstractStatefulKleinController
      */
     public function socketToken(): void
     {
-        $sessionUser = $this->sessionStore()->get('user');
+        // Session-backed callers only, as before: this route carries no LoginValidator, and the
+        // UserStruct this used to read was written by setUserSession() alone. `uid` is written on
+        // exactly the same condition, so the set of requests answered 406 is unchanged — an api-key
+        // caller still gets one.
+        //
+        // Reading the uid from the session rather than from $this->user, even though the two now
+        // always agree: setUserSession() rewrites this key from the ring-proven identity on every
+        // authenticated request, so it is no longer a cache that can lag. Going through $this->user
+        // instead would make this depend on identifyUser() having populated a non-nullable typed
+        // property, which is a second precondition to hold for no gain.
+        $uid = $this->sessionStore()->get('uid');
 
-        if (!$sessionUser instanceof UserStruct) {
+        if ($uid === null) {
             $this->response->code(406);
 
             return;
@@ -174,7 +183,7 @@ class LoginController extends AbstractStatefulKleinController
 
         $jwt = new SimpleJWT(
             [
-                "uid" => $sessionUser->uid
+                "uid" => $uid
             ],
             AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
             AppConfig::$AUTHSECRET,

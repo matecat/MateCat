@@ -169,7 +169,7 @@ class UserControllerTest extends AbstractTest
     // ─── show ────────────────────────────────────────────────────────
 
     #[Test]
-    public function show_returns_401_when_the_session_has_no_user(): void
+    public function show_returns_401_when_the_session_is_not_authenticated(): void
     {
         $request = new Request();
         $response = new Response();
@@ -210,7 +210,7 @@ class UserControllerTest extends AbstractTest
     #[Test]
     public function show_returns_the_cached_profile_without_rebuilding_it(): void
     {
-        $this->sessionStore->set('user', $this->user);
+        $this->sessionStore->set('uid', 1);
 
         $payload = [
             'user' => ['uid' => 1, 'email' => 'test@example.com'],
@@ -240,7 +240,7 @@ class UserControllerTest extends AbstractTest
     #[Test]
     public function show_builds_the_profile_and_stores_it_on_a_miss(): void
     {
-        $this->sessionStore->set('user', $this->user);
+        $this->sessionStore->set('uid', 1);
 
         // An empty hash: every hget misses, so this is the cold path.
         UserStateStore::setCacheConnection($this->redisStub());
@@ -279,7 +279,7 @@ class UserControllerTest extends AbstractTest
     #[Test]
     public function show_builds_live_and_stores_nothing_when_sql_cache_is_skipped(): void
     {
-        $this->sessionStore->set('user', $this->user);
+        $this->sessionStore->set('uid', 1);
 
         $previous = AppConfig::$SKIP_SQL_CACHE;
         AppConfig::$SKIP_SQL_CACHE = true;
