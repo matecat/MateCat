@@ -5,7 +5,9 @@ namespace Matecat\Core\Controllers\Authentication;
 use Utils\Session\ArraySessionStore;
 use Utils\Session\PhpSessionStore;
 use Utils\Session\SessionStore;
+use RuntimeException;
 use Utils\Session\StatelessSessionStore;
+use Utils\Session\StatelessSessionViolation;
 use Controller\Abstracts\Authentication\AuthCookie;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Matecat\TestHelpers\AbstractTest;
@@ -352,6 +354,52 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
 
         $this->assertTrue($helper->isLogged());
         $this->assertSame(36, (int)$helper->getUser()->uid);
+    }
+
+    /**
+     * A store that refuses reads paired with a session that reports active is a wiring mistake, not a
+     * runtime state, and StatelessSessionStore raises StatelessSessionViolation to say exactly which
+     * operation and key were refused. It is deliberately an unchecked \Error so that it surfaces —
+     * phpstan.neon says as much: "Enforcement works by surfacing."
+     *
+     * It did not surface. The blanket catch (Throwable) absorbed it and reported "not authenticated"
+     * instead, which is how a programming mistake reached production disguised as 401 Invalid Login on
+     * every cookie-authenticated /api/v2 and /api/v3 request. A bug must not be able to impersonate a
+     * failed login.
+     */
+    #[Test]
+    public function aSessionWiringBugSurfacesInsteadOfImpersonatingAFailedLogin(): void
+    {
+        $user        = new UserStruct();
+        $user->uid   = 5;
+        $user->email = 'cookie@example.com';
+
+        $this->userDaoMock->method('getByUid')->willReturn($user);
+        $this->authCookieMock->method('getCredentials')->willReturn(['user' => ['uid' => 5]]);
+
+        $this->expectException(StatelessSessionViolation::class);
+
+        // sessionActive defaults to true, which together with a refusing store is the wiring bug.
+        $this->createHelper(new StatelessSessionStore());
+    }
+
+    /**
+     * The other half of the split, and the reason it is a split rather than a bare re-throw.
+     *
+     * An \Exception here is a runtime condition, not a bug: the ring check reaches Redis, so an
+     * unreachable Redis throws on every authenticated request. Degrading to logged-out is the right
+     * answer for that — re-throwing would turn one unavailable dependency into a site-wide 500. This
+     * pins the soft path so a later widening of the re-throw cannot quietly take it away.
+     */
+    #[Test]
+    public function anInfrastructureFailureStillDegradesToLoggedOut(): void
+    {
+        $this->authCookieMock->method('getCredentials')
+            ->willThrowException(new RuntimeException('redis unreachable'));
+
+        $helper = $this->createHelper(new ArraySessionStore());
+
+        $this->assertFalse($helper->isLogged());
     }
 
     // ─── Ring is the sole authority ───────────────────────────────────────────

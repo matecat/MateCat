@@ -13,6 +13,7 @@ use Throwable;
 use TypeError;
 use Utils\Logger\LoggerFactory;
 use Utils\Session\SessionStore;
+use Utils\Session\StatelessSessionViolation;
 
 /**
  * Resolves the identity behind a request: api key, or login cookie validated against the token ring.
@@ -132,6 +133,32 @@ class AuthenticationHelper
                     ]
                 );
             } catch (Throwable) {
+            }
+
+            // A session violation is a bug, not a rejected credential, so it is the one thing here
+            // that must not be swallowed.
+            //
+            // StatelessSessionViolation is raised when a controller declared stateless reaches for
+            // session state. It is deliberately an unchecked \Error so that it surfaces — phpstan.neon
+            // says exactly that: "Enforcement works by surfacing." This catch absorbed it into "not
+            // authenticated" instead, so every cookie-authenticated /api/v2 and /api/v3 request
+            // answered 401 Invalid Login while holding a perfectly valid token. A programming mistake
+            // must not be able to impersonate a failed login.
+            //
+            // Everything else still degrades to logged-out, deliberately. An \Exception here is a
+            // runtime condition, and the ring check reaches Redis: re-throwing those would turn one
+            // unavailable dependency into a site-wide 500 rather than a signed-out user.
+            //
+            // Narrowed to this class rather than to \Error in general because \Error is checked by
+            // PHPStan, so re-throwing it demands a @throws on authenticate() and then on fromRequest(),
+            // identifyUser() and every controller beneath them. Widening this would mean adding \Error
+            // to the uncheckedExceptionClasses list, which is a repo-wide policy change and not one to
+            // make in passing. The consequence is honest and worth knowing: a TypeError on this path
+            // still degrades to logged-out.
+            //
+            // Logged before re-throwing either way, because that log line is the diagnostic.
+            if ($ignore instanceof StatelessSessionViolation) {
+                throw $ignore;
             }
         } finally {
             $this->logged = $this->user->isLogged();
