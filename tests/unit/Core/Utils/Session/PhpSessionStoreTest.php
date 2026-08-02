@@ -203,6 +203,32 @@ class PhpSessionStoreTest extends AbstractTest
     }
 
     /**
+     * The distinction between clear() and destroy(), which is the entire reason clear() exists: it
+     * empties the data and leaves the session running, so a caller can write into it immediately
+     * afterwards. destroy() ends the session, after which a write neither rotates nor persists —
+     * which is why handing a browser to a different user cannot be done with destroy().
+     */
+    #[Test]
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function clearEmptiesTheDataAndLeavesTheSessionUsable(): void
+    {
+        session_start();
+
+        $_SESSION['cart'] = ['previous-users-items'];
+
+        $store = new PhpSessionStore();
+        $store->clear();
+
+        $this->assertSame([], $_SESSION);
+        $this->assertSame(PHP_SESSION_ACTIVE, session_status(), 'the session must survive a clear');
+
+        // The write that destroy() would have made impossible.
+        $store->set('uid', 42);
+        $this->assertSame(42, $store->get('uid'));
+    }
+
+    /**
      * The `delete_old_session` argument to session_regenerate_id() is load-bearing: without it the
      * previous id keeps its server-side entry and stays replayable, which makes the rotation
      * cosmetic. Asserted against the stored entry rather than by trusting the argument.

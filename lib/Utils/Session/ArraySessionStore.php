@@ -58,6 +58,11 @@ class ArraySessionStore implements SessionStore
         $this->regenerations++;
     }
 
+    public function clear(): void
+    {
+        $this->data = [];
+    }
+
     public function destroy(): void
     {
         $this->data = [];

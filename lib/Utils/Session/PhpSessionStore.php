@@ -68,6 +68,14 @@ class PhpSessionStore implements SessionStore
     }
 
     /**
+     * Empties the superglobal and leaves the session running, so the caller can write into it.
+     */
+    public function clear(): void
+    {
+        $_SESSION = [];
+    }
+
+    /**
      * Clears the array as well as destroying the storage: `session_destroy()` alone leaves the live
      * `$_SESSION` array populated for the remainder of the request.
      */

@@ -243,11 +243,35 @@ class AuthenticationHelper
             // the two conditions that make rotating safe — an active session, and a response that has
             // not started. This class used to carry a copy of those guards, leaving
             // PhpSessionStore::regenerateId() with no callers at all.
-            if ((int)$this->session->get('uid') !== (int)$this->user->getUid()) {
+            $previousUid = $this->session->get('uid');
+            $authenticatedUid = $this->user->getUid();
+            $identityChanged = (int)$previousUid !== (int)$authenticatedUid;
+
+            // A different user is taking over a session that still belongs to somebody else, so drop
+            // its contents before stamping the new identity on it. Rotating the id alone relabels the
+            // session and keeps the data — session_regenerate_id() preserves contents by design — which
+            // left the arriving user holding the previous one's cart, GDrive OAuth tokens, redeemable
+            // project and flash messages. Two ways in: a login over a live session with no logout in
+            // between, and a cookie that stopped authenticating while its session was still alive.
+            //
+            // Only when the session already names *someone*. An anonymous session becoming
+            // authenticated must keep what it is carrying, because the login flows depend on it —
+            // SignupController::confirm() reads invited_to_team, redeem_project and wanted_url out of
+            // the session *after* this runs, and the ordinary case for all three is a visitor who was
+            // anonymous when they started. Clearing there would break team signup and project redeem.
+            //
+            // The consequence on a genuine account switch is that those pending actions are dropped and
+            // have to be started again. That is the intended reading rather than a cost: redeeming the
+            // previous user's project into the arriving user's account is the same leak in another form.
+            if ($identityChanged && $previousUid !== null) {
+                $this->session->clear();
+            }
+
+            if ($identityChanged) {
                 $this->session->regenerateId();
             }
 
-            $this->session->set('uid', $this->user->getUid());
+            $this->session->set('uid', $authenticatedUid);
         }
     }
 

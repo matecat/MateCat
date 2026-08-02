@@ -71,6 +71,13 @@ class StatelessSessionStoreTest extends AbstractTest
     }
 
     #[Test]
+    public function clearRefuses(): void
+    {
+        $this->expectException(StatelessSessionViolation::class);
+        $this->store->clear();
+    }
+
+    #[Test]
     public function destroyRefuses(): void
     {
         $this->expectException(StatelessSessionViolation::class);

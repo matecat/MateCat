@@ -63,6 +63,15 @@ class ArraySessionStoreTest extends AbstractTest
     }
 
     #[Test]
+    public function clearDiscardsTheContents(): void
+    {
+        $store = new ArraySessionStore(['a' => 1, 'b' => 2]);
+        $store->clear();
+
+        $this->assertSame([], $store->all());
+    }
+
+    #[Test]
     public function destroyClearsEverything(): void
     {
         $store = new ArraySessionStore(['a' => 1, 'b' => 2]);

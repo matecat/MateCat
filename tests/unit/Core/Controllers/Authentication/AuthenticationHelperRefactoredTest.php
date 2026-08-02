@@ -603,6 +603,70 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->assertNull($helper->getApiRecord());
     }
 
+    /**
+     * A different user taking over a session that still names somebody else. Rotating the id alone
+     * relabels it and keeps the contents — session_regenerate_id() preserves them by design — so the
+     * arriving user used to inherit the previous one's cart, redeemable project and GDrive tokens.
+     */
+    #[Test]
+    public function aSessionBelongingToAnotherUserIsClearedBeforeTheNewIdentityIsStamped(): void
+    {
+        $arriving        = new UserStruct();
+        $arriving->uid   = 42;
+        $arriving->email = 'arriving@example.com';
+
+        $this->userDaoMock->method('getByUid')->with(42)->willReturn($arriving);
+        $this->authCookieMock->method('getCredentials')->willReturn(['user' => ['uid' => 42]]);
+
+        $session = new ArraySessionStore([
+            'uid'            => 7,
+            'redeem_project' => 'a-project-belonging-to-user-7',
+            'cart'           => ['user-7-items'],
+        ]);
+
+        $helper = $this->createHelper($session);
+
+        // isLogged() guards against a silent failure into the catch block, which would also leave the
+        // session empty and make the assertions below prove nothing.
+        $this->assertTrue($helper->isLogged());
+
+        $this->assertSame(42, $session->get('uid'));
+        $this->assertFalse($session->has('redeem_project'));
+        $this->assertFalse($session->has('cart'));
+    }
+
+    /**
+     * The case that must NOT clear, and the reason the rule is guarded on the session already naming
+     * someone. SignupController::confirm() reads invited_to_team, redeem_project and wanted_url out of
+     * the session *after* authentication runs, and the ordinary visitor was anonymous when they
+     * started — clearing here would break team signup and project redeem.
+     */
+    #[Test]
+    public function anAnonymousSessionKeepsWhatItCarriesWhenItBecomesAuthenticated(): void
+    {
+        $arriving        = new UserStruct();
+        $arriving->uid   = 42;
+        $arriving->email = 'arriving@example.com';
+
+        $this->userDaoMock->method('getByUid')->with(42)->willReturn($arriving);
+        $this->authCookieMock->method('getCredentials')->willReturn(['user' => ['uid' => 42]]);
+
+        $session = new ArraySessionStore([
+            'invited_to_team' => ['team_id' => 5, 'email' => 'invited@example.com'],
+            'wanted_url'      => '/the-page-they-asked-for',
+        ]);
+
+        $helper = $this->createHelper($session);
+
+        $this->assertTrue($helper->isLogged());
+        $this->assertSame(42, $session->get('uid'));
+        $this->assertSame(['team_id' => 5, 'email' => 'invited@example.com'], $session->get('invited_to_team'));
+        $this->assertSame('/the-page-they-asked-for', $session->get('wanted_url'));
+
+        // Still rotated: anonymous to authenticated is the fixation transition.
+        $this->assertSame(1, $session->regenerationCount());
+    }
+
     // ─── destroyAuthentication (instance method) ─────────────────────────
 
     #[Test]

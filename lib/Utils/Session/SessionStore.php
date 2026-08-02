@@ -54,6 +54,16 @@ interface SessionStore
     public function regenerateId(): void;
 
     /**
+     * Drop the contents but keep the storage usable for the rest of this request.
+     *
+     * The difference from {@see destroy()} is the whole reason this exists: destroying ends the
+     * session, after which a write neither rotates nor persists. A caller that has to hand the same
+     * browser to a different user needs the data gone *and* the storage still working, because it is
+     * about to write the new identity into it.
+     */
+    public function clear(): void;
+
+    /**
      * Discard everything for this device.
      */
     public function destroy(): void;

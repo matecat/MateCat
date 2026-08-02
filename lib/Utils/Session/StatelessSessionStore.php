@@ -78,6 +78,11 @@ class StatelessSessionStore implements SessionStore
 
     /**
      */
+    public function clear(): void
+    {
+        throw $this->refuse(__FUNCTION__);
+    }
+
     public function destroy(): void
     {
         throw $this->refuse(__FUNCTION__);
