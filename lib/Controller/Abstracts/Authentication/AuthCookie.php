@@ -102,12 +102,61 @@ class AuthCookie
     {
         $userId = $user->uid ?? throw new RuntimeException('Cannot set credentials for a user without a UID');
 
-        // Generate a new signed authentication cookie and its expiration date.
-        [$new_cookie_data, $new_expire_date] = $this->generateSignedAuthCookie($user);
+        // Generate a new signed authentication cookie and its expiration date, naming any live
+        // cookie this login replaces as its predecessor.
+        [$new_cookie_data, $new_expire_date] = $this->generateSignedAuthCookie($user, $this->supersededFieldName($userId));
 
         // Activate the token in the user token store, then hand the cookie to the browser.
         $this->tokenStore->setCookieLoginTokenActive($userId, $new_cookie_data);
         $this->setCookie($new_cookie_data, $new_expire_date);
+    }
+
+    /**
+     * The ring field name of a live cookie this login is about to replace, or null when there is
+     * nothing to inherit.
+     *
+     * A login landing on a browser that already holds a cookie used to abandon that token: the
+     * browser leaves with the replacement, so no later request can ever carry the old chain, and
+     * nothing renews it — the field simply sat in the ring until its own expiry, a full
+     * {@see AppConfig::$AUTHCOOKIEDURATION} during which a captured copy still authenticated.
+     * Naming it as the new cookie's predecessor hands it to the ordinary grandparent rule in
+     * {@see renewIfStale()}, so the first renewal retires it: about one renewal interval instead of
+     * a whole cookie lifetime. It is not retired here for the same reason renewal never retires the
+     * parent — requests already in flight from other tabs are still carrying it.
+     *
+     * Restricted to the same uid on purpose. A field name only means anything inside
+     * `active_user_login_tokens:<uid>`, and `prev` is retired from the ring of whoever the *new*
+     * cookie belongs to, so carrying another account's field name across a login switch would ask
+     * one user's ring to retire a token it does not own and drop a reverse key belonging to that
+     * other account's live chain. A switch therefore leaves the previous occupant's token to expire
+     * on its own, exactly as before this change.
+     *
+     * The ring is deliberately not consulted: a token that was already revoked is not made any more
+     * alive by being named as a predecessor, so the round trip would buy nothing on the login path.
+     *
+     * @throws TypeError
+     */
+    private function supersededFieldName(int $userId): ?string
+    {
+        $currentCookie = $this->getCookieRawValue();
+
+        if ($currentCookie === '') {
+            return null;
+        }
+
+        try {
+            $payload = $this->readPayload();
+        } catch (DomainException|UnexpectedValueException) {
+            // Unreadable, tampered with or already expired. Nothing worth naming, and nothing that
+            // could still authenticate anyone either.
+            return null;
+        }
+
+        if ((int)($payload['user']['uid'] ?? 0) !== $userId) {
+            return null;
+        }
+
+        return md5($currentCookie);
     }
 
     /**

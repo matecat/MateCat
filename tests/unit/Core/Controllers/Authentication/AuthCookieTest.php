@@ -261,6 +261,72 @@ class AuthCookieTest extends AbstractTest
     }
 
     #[Test]
+    public function loggingInNamesAReplacedCookieOfTheSameAccountAsItsPredecessor(): void
+    {
+        $user = $this->createAuthenticatedUser();
+
+        $replaced                            = $this->generateTestCookie($user);
+        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $replaced;
+
+        $cookieManager = $this->spyingCookieManager();
+        $this->authCookie(null, $cookieManager)->setCredentials($user);
+
+        // Without this the replaced token had nothing left to retire it: the browser leaves holding
+        // the new cookie, so no request can ever renew the old chain, and the field sat in the ring
+        // until its own expiry.
+        $this->assertSame(md5($replaced), $this->prevClaimOf($cookieManager->writes[0]['value']));
+    }
+
+    /**
+     * A field name only means anything inside its own user's ring, and `prev` is retired from the
+     * ring of whoever the new cookie belongs to — so inheriting one across an account switch would
+     * ask user B's ring to retire user A's token and drop a reverse key from A's live chain.
+     */
+    #[Test]
+    public function loggingInDoesNotInheritAPredecessorFromADifferentAccount(): void
+    {
+        $previousOccupant      = $this->createAuthenticatedUser();
+        $previousOccupant->uid = 7;
+
+        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $this->generateTestCookie($previousOccupant);
+
+        $cookieManager = $this->spyingCookieManager();
+        $this->authCookie(null, $cookieManager)->setCredentials($this->createAuthenticatedUser());
+
+        $this->assertNull($this->prevClaimOf($cookieManager->writes[0]['value']));
+    }
+
+    #[Test]
+    public function aFirstLoginMintsNoPredecessor(): void
+    {
+        $cookieManager = $this->spyingCookieManager();
+        $this->authCookie(null, $cookieManager)->setCredentials($this->createAuthenticatedUser());
+
+        $this->assertNull($this->prevClaimOf($cookieManager->writes[0]['value']));
+    }
+
+    #[Test]
+    public function anUnreadableCookieIsNotNamedAsAPredecessor(): void
+    {
+        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = 'not-a-jwt';
+
+        $cookieManager = $this->spyingCookieManager();
+        $this->authCookie(null, $cookieManager)->setCredentials($this->createAuthenticatedUser());
+
+        $this->assertNull($this->prevClaimOf($cookieManager->writes[0]['value']));
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function prevClaimOf(string $cookieValue): ?string
+    {
+        $prev = SimpleJWT::getValidatedInstanceFromString($cookieValue, AppConfig::$AUTHSECRET)->getPayload()['prev'] ?? null;
+
+        return is_string($prev) ? $prev : null;
+    }
+
+    #[Test]
     public function destroyAuthenticationRemovesCookie(): void
     {
         $_COOKIE[AppConfig::$AUTHCOOKIENAME] = 'some-value';
