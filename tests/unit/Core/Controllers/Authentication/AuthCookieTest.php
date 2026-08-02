@@ -457,6 +457,8 @@ class AuthCookieTest extends AbstractTest
         $spy = $this->spyingCookieManager();
 
         $handler = $this->createMock(SessionTokenStoreHandler::class);
+        // Renewal now re-checks the ring after minting, so a stub that says nothing says "revoked".
+        $handler->method('isLoginCookieStillActive')->willReturn(true);
         $handler->expects($this->once())
             ->method('setCookieLoginTokenActive')
             ->with(42, $this->isString());
@@ -495,6 +497,8 @@ class AuthCookieTest extends AbstractTest
             $spy = $this->spyingCookieManager();
 
             $handler = $this->createMock(SessionTokenStoreHandler::class);
+            // Renewal now re-checks the ring after minting, so a stub that says nothing says "revoked".
+            $handler->method('isLoginCookieStillActive')->willReturn(true);
             $handler->expects($this->once())->method('setCookieLoginTokenActive');
 
             $this->authCookie($handler, $spy)->renewIfStale($user);
@@ -533,7 +537,7 @@ class AuthCookieTest extends AbstractTest
 
         $spy = $this->spyingCookieManager();
 
-        $this->authCookie($this->createStub(SessionTokenStoreHandler::class), $spy)->renewIfStale($user);
+        $this->authCookie(null, $spy)->renewIfStale($user);
 
         $payload = SimpleJWT::getValidatedInstanceFromString(
             $spy->writes[0]['value'],
@@ -558,6 +562,8 @@ class AuthCookieTest extends AbstractTest
         // carrying it; retiring it here is the logout storm this design exists to avoid. The
         // grandparent is a full renewal interval old and no request lives that long.
         $handler = $this->createMock(SessionTokenStoreHandler::class);
+        // Renewal now re-checks the ring after minting, so a stub that says nothing says "revoked".
+        $handler->method('isLoginCookieStillActive')->willReturn(true);
         $handler->expects($this->once())
             ->method('retireLoginToken')
             ->with(42, $grandparent);
@@ -577,12 +583,53 @@ class AuthCookieTest extends AbstractTest
         $spy = $this->spyingCookieManager();
 
         $handler = $this->createMock(SessionTokenStoreHandler::class);
+        // Renewal now re-checks the ring after minting, so a stub that says nothing says "revoked".
+        $handler->method('isLoginCookieStillActive')->willReturn(true);
         $handler->expects($this->once())->method('setCookieLoginTokenActive');
         $handler->expects($this->never())->method('retireLoginToken');
 
         $this->authCookie($handler, $spy)->renewIfStale($user);
 
         $this->assertCount(1, $spy->writes);
+    }
+
+    #[Test]
+    public function aRenewalRevokedMidRequestWithdrawsTheMintAndIssuesNoCookie(): void
+    {
+        $user = $this->renewableUser();
+        $old  = $this->agedCookieValue($user, 60 * 60 * 48);
+
+        $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $old;
+
+        $minted  = null;
+        $handler = $this->createMock(SessionTokenStoreHandler::class);
+
+        $handler->method('setCookieLoginTokenActive')
+            ->willReturnCallback(static function (int $userId, string $token) use (&$minted): void {
+                $minted = $token;
+            });
+
+        // Revoked between the ring check that authorised this request, back at getCredentials(), and
+        // the write above. Without the re-check that HSET recreates the map the revocation deleted,
+        // with a token minted *after* the user was revoked.
+        $handler->method('isLoginCookieStillActive')->willReturn(false);
+
+        $handler->expects($this->once())
+            ->method('retireLoginToken')
+            ->with(42, $this->callback(static function (string $fieldName) use (&$minted): bool {
+                return is_string($minted) && $fieldName === md5($minted);
+            }));
+
+        // Reached only after the renewal commits, so a withdrawn one must not get that far.
+        $handler->expects($this->never())->method('pruneExpiredLoginTokens');
+
+        $spy = $this->spyingCookieManager();
+        $this->authCookie($handler, $spy)->renewIfStale($user);
+
+        // Nothing is handed to the browser, and the request keeps carrying the cookie it arrived
+        // with — which the ring no longer accepts, so the next request is signed out.
+        $this->assertSame([], $spy->writes);
+        $this->assertSame($old, $_COOKIE[AppConfig::$AUTHCOOKIENAME]);
     }
 
     #[Test]
@@ -597,7 +644,7 @@ class AuthCookieTest extends AbstractTest
             $_COOKIE[AppConfig::$AUTHCOOKIENAME] = $old;
             $spy = $this->spyingCookieManager();
 
-            $this->authCookie($this->createStub(SessionTokenStoreHandler::class), $spy)->renewIfStale($user);
+            $this->authCookie(null, $spy)->renewIfStale($user);
 
             $issued[] = $spy->writes[0]['value'];
         }

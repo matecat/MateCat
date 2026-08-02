@@ -220,6 +220,32 @@ class AuthCookie
         // field rather than multiplying: SimpleJWT stamps iat from time(), never sets jti and adds
         // no randomness, so the payload is byte-identical and the HSET is idempotent.
         $this->tokenStore->setCookieLoginTokenActive($userId, $new_cookie_data);
+
+        // Then confirm the token being renewed is *still* in the ring, and undo the mint if it is not.
+        //
+        // This closes a resurrection race. Revocation — a password change, a reset, a logout
+        // elsewhere — deletes the user's whole map. The ring check that authorised this request ran
+        // much earlier, at getCredentials(), so a revocation landing anywhere between then and the
+        // write above used to be silently undone: the HSET recreates the map with a freshly minted,
+        // perfectly valid token, and the user stays signed in on a credential issued *after* they
+        // were revoked. That is the one failure that makes "DEL the map is complete revocation"
+        // untrue.
+        //
+        // Re-reading after the write rather than before is what makes this cover every ordering.
+        // Revocation before the mint, or between the mint and this check, both leave the parent
+        // absent and the mint is withdrawn; revocation after this check deletes the map including
+        // what was just written. The residual window is between the two statements below rather than
+        // the length of a request, and the surviving hole is a process death inside it.
+        //
+        // Not atomic, deliberately. A Lua script would be, but it would have to reproduce the exact
+        // stored encoding that DaoCacheTrait writes, and getting that wrong logs out every live
+        // session on deploy. That belongs with removing the trait from this handler, not here.
+        if (!$this->tokenStore->isLoginCookieStillActive($userId, $currentCookie)) {
+            $this->tokenStore->retireLoginToken($userId, md5($new_cookie_data));
+
+            return;
+        }
+
         $this->setCookie($new_cookie_data, $new_expire_date);
 
         // Retire the grandparent, never the parent. At this instant the browser still holds the
