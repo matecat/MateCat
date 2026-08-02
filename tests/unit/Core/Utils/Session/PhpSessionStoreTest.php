@@ -201,4 +201,42 @@ class PhpSessionStoreTest extends AbstractTest
         $this->assertSame([], $_SESSION);
         $this->assertSame(PHP_SESSION_NONE, session_status());
     }
+
+    /**
+     * The `delete_old_session` argument to session_regenerate_id() is load-bearing: without it the
+     * previous id keeps its server-side entry and stays replayable, which makes the rotation
+     * cosmetic. Asserted against the stored entry rather than by trusting the argument.
+     *
+     * Separate from the test above so each covers one thing: this one has to close the session to
+     * see what reached the store, which would leave nothing for destroy() to act on.
+     */
+    #[Test]
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function rotationDeletesTheOldSessionEntry(): void
+    {
+        // Skipped rather than silently passing under another save handler, where the on-disk layout
+        // asserted below would not apply.
+        if (ini_get('session.save_handler') !== 'files') {
+            $this->markTestSkipped('old-entry removal is asserted against the files save handler only');
+        }
+
+        session_start();
+
+        $this->assertSame(PHP_SESSION_ACTIVE, session_status());
+
+        $store    = new PhpSessionStore();
+        $oldId    = session_id();
+        $savePath = session_save_path() ?: sys_get_temp_dir();
+
+        $store->regenerateId();
+
+        $newId = session_id();
+        $this->assertNotSame($oldId, $newId, 'precondition: the id must have rotated');
+
+        session_write_close();
+
+        $this->assertFileExists($savePath . '/sess_' . $newId, 'precondition: the new entry must be on disk');
+        $this->assertFileDoesNotExist($savePath . '/sess_' . $oldId, 'the old session entry must be deleted');
+    }
 }

@@ -52,12 +52,19 @@ class PhpSessionStore implements SessionStore
     /**
      * `true` deletes the old id's storage rather than orphaning it, so a stolen pre-rotation id
      * cannot be resumed.
+     *
+     * Both guards are required, and the second is the less obvious one: rotating emits a Set-Cookie
+     * header, so once the response has begun `session_regenerate_id()` raises a warning and does
+     * nothing. Returning quietly keeps a caller that rotates late from turning a missed rotation into
+     * a visible error, and there is nothing it could do about it at that point anyway.
      */
     public function regenerateId(): void
     {
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_regenerate_id(true);
+        if (session_status() !== PHP_SESSION_ACTIVE || headers_sent()) {
+            return;
         }
+
+        session_regenerate_id(true);
     }
 
     /**

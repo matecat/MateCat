@@ -3,7 +3,6 @@
 namespace Matecat\Core\Controllers\Authentication;
 
 use Utils\Session\ArraySessionStore;
-use Utils\Session\PhpSessionStore;
 use Utils\Session\SessionStore;
 use RuntimeException;
 use Utils\Session\StatelessSessionStore;
@@ -18,8 +17,6 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\PreserveGlobalState;
-use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -312,7 +309,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         // Every login path — password, signup confirmation, OAuth — establishes the cookie and
         // then rebuilds the helper, landing here. An id known before the login must not still be
         // valid after it.
-        $this->assertSame(1, $helper->regeneratedSessionIds);
+        $this->assertSame(1, $session->regenerationCount());
     }
 
     #[Test]
@@ -343,7 +340,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         // This is the hot path: it runs on every authenticated request. Rotating here would churn
         // the id continuously and race parallel requests, and it buys nothing — the privilege
         // transition already happened.
-        $this->assertSame(0, $helper->regeneratedSessionIds);
+        $this->assertSame(0, $session->regenerationCount());
     }
 
     /**
@@ -521,7 +518,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         // The session is re-stamped to the uid the cookie proved, and rotated on the way, because this
         // is a different user taking over the session rather than the same one continuing.
         $this->assertSame(99, $session->get('uid'));
-        $this->assertSame(1, $helper->regeneratedSessionIds);
+        $this->assertSame(1, $session->regenerationCount());
     }
 
     #[Test]
@@ -542,66 +539,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
 
         // API-key callers carry no session at all, so there is nothing to rotate.
         $this->assertTrue($helper->isLogged());
-        $this->assertSame(0, $helper->regeneratedSessionIds);
-    }
-
-    #[Test]
-    public function regenerateSessionIdIsANoOpWithoutAnActiveSession(): void
-    {
-        $session = new ArraySessionStore();
-        $helper  = new AuthenticationHelper(
-            $session, $this->userDaoMock, $this->apiKeyDaoMock, $this->authCookieMock
-        );
-
-        $method = new \ReflectionMethod(AuthenticationHelper::class, 'regenerateSessionId');
-        $method->invoke($helper);
-
-        // The real implementation guards on session_status() so it stays silent under PHPUnit,
-        // where no session is running. Without that guard PHP emits a warning here.
-        $this->assertSame(PHP_SESSION_NONE, session_status());
-    }
-
-    #[Test]
-    #[RunInSeparateProcess]
-    #[PreserveGlobalState(false)]
-    public function regenerateSessionIdRotatesARealSessionAndDropsTheOldEntry(): void
-    {
-        // No other test can reach the real session_regenerate_id() call. By the time the suite is
-        // running PHPUnit has written output, and PHP then refuses to start a session at all
-        // ("Session cannot be started after headers have already been sent"), so the guard in
-        // regenerateSessionId() always returns early. A separate process has produced no output
-        // yet, which makes the real call reachable exactly here. use_cookies is off so nothing
-        // attempts to emit a Set-Cookie header.
-        session_start(['use_cookies' => false, 'cache_limiter' => '']);
-        $this->assertSame(PHP_SESSION_ACTIVE, session_status(), 'precondition: a real session must be running');
-
-        $_SESSION['probe'] = 'carried-over';
-        $oldId             = session_id();
-
-        $helper = new AuthenticationHelper(
-            new PhpSessionStore(), $this->userDaoMock, $this->apiKeyDaoMock, $this->authCookieMock
-        );
-
-        $method = new \ReflectionMethod(AuthenticationHelper::class, 'regenerateSessionId');
-        $method->invoke($helper);
-
-        $newId = session_id();
-        $this->assertNotSame($oldId, $newId, 'the session id must change once the session is authenticated');
-        $this->assertSame('carried-over', $_SESSION['probe'], 'session data must survive the rotation');
-
-        // The delete_old_session argument is load-bearing: without it the previous id remains
-        // replayable and the rotation is cosmetic. Assert the old entry is really gone rather than
-        // trusting the argument. Skipped rather than silently passing under another save handler,
-        // where the on-disk layout below would not apply.
-        if (ini_get('session.save_handler') !== 'files') {
-            $this->markTestSkipped('old-entry removal is asserted against the files save handler only');
-        }
-
-        $savePath = session_save_path() ?: sys_get_temp_dir();
-        session_write_close();
-
-        $this->assertFileExists($savePath . '/sess_' . $newId, 'precondition: the new entry must be on disk');
-        $this->assertFileDoesNotExist($savePath . '/sess_' . $oldId, 'the old session entry must be deleted');
+        $this->assertSame(0, $session->regenerationCount());
     }
 
     #[Test]
@@ -708,8 +646,6 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
 
 class TestableAuthenticationHelper extends AuthenticationHelper
 {
-    public int $regeneratedSessionIds = 0;
-
     /**
      * Defaults to true, which is what every stateful case wants. A stateless controller is the
      * opposite case and has to be able to say so: there, no PHP session is ever started, and the
@@ -743,10 +679,5 @@ class TestableAuthenticationHelper extends AuthenticationHelper
     protected function sessionIsActive(): bool
     {
         return $this->sessionActive;
-    }
-
-    protected function regenerateSessionId(): void
-    {
-        $this->regeneratedSessionIds++;
     }
 }

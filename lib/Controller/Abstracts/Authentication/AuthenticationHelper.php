@@ -198,23 +198,6 @@ class AuthenticationHelper
     }
 
     /**
-     * Rotate the session id, discarding the old server-side entry so the previous id cannot be
-     * replayed. Called when the session becomes authenticated; see {@see setUserSession()}.
-     *
-     * The active-session check deliberately reads session_status() rather than going through
-     * {@see sessionIsActive()}: subclasses override that seam to exercise the session writes
-     * without a real session, and calling session_regenerate_id() without one raises a warning.
-     */
-    protected function regenerateSessionId(): void
-    {
-        if (session_status() !== PHP_SESSION_ACTIVE || headers_sent()) {
-            return;
-        }
-
-        session_regenerate_id(true);
-    }
-
-    /**
      * Record which user this session belongs to, and rotate the id while doing it.
      *
      * The uid is all that is written. Two things used to be written alongside it and are not:
@@ -249,8 +232,12 @@ class AuthenticationHelper
             // implicit in getting here at all; with the cache gone, rotating unconditionally would
             // churn the id on every request and race parallel ones — for nothing, since the
             // privilege transition already happened.
+            // Rotation goes through the store, which is what owns the session lifecycle and therefore
+            // the two conditions that make rotating safe — an active session, and a response that has
+            // not started. This class used to carry a copy of those guards, leaving
+            // PhpSessionStore::regenerateId() with no callers at all.
             if ((int)$this->session->get('uid') !== (int)$this->user->getUid()) {
-                $this->regenerateSessionId();
+                $this->session->regenerateId();
             }
 
             $this->session->set('uid', $this->user->getUid());
