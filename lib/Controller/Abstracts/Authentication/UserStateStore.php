@@ -67,10 +67,19 @@ class UserStateStore
      * needs no DAOs to serve it.
      *
      * **Why it is worth caching at all**, given the underlying DAO reads are themselves cached: the
-     * payload fans out per member. `Membership::renderItem()` resolves a user for every member of
-     * every team, through a `UserDao` that carries no TTL — so those are live queries, one per member,
-     * not cache hits. Add a Redis round trip per team for pending invitations and a manager in several
-     * large teams costs hundreds of queries per call, at one to two calls per page load.
+     * cost is round trips, not queries. The payload fans out per member — `Membership::renderItem()`
+     * resolves a user for every member of every team — and each of those resolutions is a separate
+     * sequential Redis read, because {@see \Model\Teams\MembershipStruct::getUser()} does set a 24h
+     * TTL on the DAO it is handed. Add a Redis round trip per team for pending invitations, plus the
+     * two reads that genuinely are uncached SQL ({@see \Model\Users\MetadataDao::getAllByUid()}
+     * and {@see \Model\ConnectedServices\ConnectedServiceDao::findServicesByUser()}), and a manager
+     * in several large teams pays a latency linear in their total membership — of the order of a
+     * hundred sequential round trips — at one to two calls per page load.
+     *
+     * An earlier revision of this docblock justified the store by claiming those per-member reads go
+     * through a TTL-less DAO and are therefore live SQL. That was wrong, and it mattered: it named a
+     * cost an order of magnitude larger than the real one. The store is still worth its keep on the
+     * round-trip count above, which is the honest reason.
      *
      * **Storage shape.** Wrapped in a single-element list, as the trait's contract requires, inside an
      * XFetch envelope carrying the measured build cost — see {@see self::setProfile()} for why that

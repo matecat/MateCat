@@ -32,8 +32,21 @@ class AuthCookie
      *
      * Decouples remember-me from exposure: the cookie still lives
      * {@see AppConfig::$AUTHCOOKIEDURATION} so a user returning within that window stays signed in
-     * forever, while a captured token stops working after about two of these intervals, because
-     * the renewal two generations later retires it.
+     * forever, while a token that stops being renewed is retired two generations later — about two
+     * of these intervals rather than a full cookie lifetime.
+     *
+     * Two limits on that, because renewal is driven by traffic and the ring cannot tell who is
+     * holding a token:
+     *
+     *  - A user who stops visiting triggers no renewal, so nothing retires their token early and it
+     *    survives to {@see AppConfig::$AUTHCOOKIEDURATION}. Unavoidable while remember-me requires
+     *    the cookie to outlive that idle period.
+     *  - A captured token that the attacker keeps *using* renews itself: their requests advance the
+     *    chain and they are issued fresh cookies indefinitely, while the token the victim's browser
+     *    still holds becomes the grandparent and is retired — so the mechanism can end up signing
+     *    the victim out and leaving the attacker in. Shortening this interval does not help; closing
+     *    it needs reuse detection, where presenting an already-retired token revokes the whole ring.
+     *    Recorded as follow-up work, not implemented here.
      *
      * An upper bound, not the literal threshold — see {@see renewAfterSeconds()}.
      */
