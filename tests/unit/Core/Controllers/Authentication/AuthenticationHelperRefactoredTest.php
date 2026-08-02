@@ -671,16 +671,38 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     public function destroyAuthenticationClearsSessionVarsOnInstance(): void
     {
         $session = new ArraySessionStore(['uid' => 7]);
-        $helper = $this->createHelper($session);
+        $helper  = $this->createHelper($session);
 
-        try {
-            $helper->destroyAuthentication();
-        } catch (\Throwable) {
-            // cookie store may throw in test environment without active session
-        }
+        $helper->destroyAuthentication();
 
         // `uid` is what marks the session authenticated, so it is what logging out has to clear.
         $this->assertFalse($session->has('uid'));
+    }
+
+    /**
+     * The ordering guarantee, and the reason revocation runs first. It is the only step that can
+     * fail, because it reaches Redis; clearing the session marker before it meant a failure left the
+     * request looking signed out while the cookie and its ring token still authenticated the next
+     * one. Now a failed logout leaves the user plainly still logged in, and it says so.
+     */
+    #[Test]
+    public function aFailedRevocationLeavesTheSessionMarkerRatherThanHalfLoggingOut(): void
+    {
+        $session = new ArraySessionStore(['uid' => 7]);
+        $helper  = $this->createHelper($session);
+
+        // Armed after construction on purpose: createHelper() runs authenticate(), which must be
+        // allowed to complete normally so this exercises the logout and nothing else.
+        $this->authCookieMock->method('destroyAuthentication')
+            ->willThrowException(new RuntimeException('token ring unreachable'));
+
+        $this->expectException(RuntimeException::class);
+
+        try {
+            $helper->destroyAuthentication();
+        } finally {
+            $this->assertTrue($session->has('uid'));
+        }
     }
 }
 

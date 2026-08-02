@@ -172,14 +172,24 @@ class AuthenticationHelper
     }
 
     /**
+     * Log out: retire the tokens and drop the cookie first, clear the session marker last.
+     *
+     * The order is the whole content of this method. Revocation is what actually ends the login —
+     * identity is decided by the ring, never by the session — and it is also the only step that can
+     * fail, because it reaches Redis. Clearing the session first meant a throw there left the worst
+     * possible pair of states: no `uid`, so the app treats the request as signed out, while the
+     * cookie is still in the browser and its token still in the ring, so the very next request
+     * authenticates normally. Doing the authoritative work first makes a failed logout leave the
+     * user plainly still logged in, which is a state the app can represent and the user can retry.
+     *
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
      */
     public function destroyAuthentication(): void
     {
-        $this->session->remove('uid');
         $this->authCookie->destroyAuthentication();
+        $this->session->remove('uid');
     }
 
     protected function sessionIsActive(): bool
