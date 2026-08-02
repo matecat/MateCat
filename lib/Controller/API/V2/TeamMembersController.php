@@ -56,7 +56,7 @@ class TeamMembersController extends KleinController
         $formatter = new Membership($team->getMembers(), $userDao);
         $this->response->json([
             'members' => $formatter->render(),
-            'pending_invitations' => $pendingInvitation->hasPendingInvitation($teamId)
+            'pending_invitations' => $pendingInvitation->listPendingInvitations($teamId)
         ]);
     }
 
@@ -100,7 +100,7 @@ class TeamMembersController extends KleinController
 
         $this->response->json([
             'members' => $formatter->render(),
-            'pending_invitations' => $pendingInvitation->hasPendingInvitation($teamId)
+            'pending_invitations' => $pendingInvitation->listPendingInvitations($teamId)
         ]);
     }
 
@@ -129,7 +129,7 @@ class TeamMembersController extends KleinController
 
         $this->response->json([
             'members' => $formatter->render(),
-            'pending_invitations' => $pendingInvitation->hasPendingInvitation($teamId)
+            'pending_invitations' => $pendingInvitation->listPendingInvitations($teamId)
         ]);
     }
 

@@ -135,9 +135,10 @@ class InvitedUser
 
         $pendingInvitation = new PendingInvitations($this->redisHandler->getConnection(), $invitation);
 
-        // hasPendingInvitation() returns the redis set members, not a bool — keep the emptiness
-        // check rather than returning it, which would widen this method's return type.
-        return !empty($pendingInvitation->hasPendingInvitation($invitation['team_id']));
+        // Asks whether *this* invitation is pending, not whether the team has any. The set-emptiness
+        // test this replaces meant withdrawing one person's invitation did nothing while any other
+        // invitation to the same team was open: their link still passed here.
+        return $pendingInvitation->isPending();
     }
 
     /**

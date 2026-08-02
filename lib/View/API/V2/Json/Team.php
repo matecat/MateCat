@@ -102,7 +102,7 @@ class Team
         return (new PendingInvitations(
             $this->redis,
             ['team_id' => $teamId, 'email' => '']
-        ))->hasPendingInvitation($teamId);
+        ))->listPendingInvitations($teamId);
     }
 
 }

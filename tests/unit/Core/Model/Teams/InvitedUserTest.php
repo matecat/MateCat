@@ -58,6 +58,9 @@ class InvitedUserTest extends AbstractTest
                 return match ($method) {
                     'sadd' => 1, 'expire' => true, 'srem' => 1,
                     'smembers' => $this->smembersResult,
+                    // From the same seed, so a test cannot arrange a set and a membership answer
+                    // that contradict each other.
+                    'sismember' => in_array($arguments[1], $this->smembersResult, true) ? 1 : 0,
                     default => null,
                 };
             }
@@ -197,6 +200,26 @@ class InvitedUserTest extends AbstractTest
             $this->makeUserDaoStub(),
             new ArraySessionStore(['invited_to_team' => ['team_id' => 5, 'email' => 'a@b.com']])
         );
+        $this->assertFalse($user->hasPendingInvitations());
+    }
+
+    /**
+     * The withdrawn invitation. Somebody else's invitation to the same team is still open, so the
+     * team's set is not empty — which used to be the whole test, and meant removing this address from
+     * the set did nothing: their signup link kept working for as long as any other invitation stood.
+     */
+    #[Test]
+    public function hasPendingInvitationsIsFalseWhenOnlyAnotherAddressIsStillInvited(): void
+    {
+        $user = new InvitedUser(
+            '',
+            null,
+            $this->makeTeamDaoStub(),
+            $this->makeRedisHandlerStub(['someone.else@example.com']),
+            $this->makeUserDaoStub(),
+            new ArraySessionStore(['invited_to_team' => ['team_id' => 5, 'email' => 'a@b.com']])
+        );
+
         $this->assertFalse($user->hasPendingInvitations());
     }
 
