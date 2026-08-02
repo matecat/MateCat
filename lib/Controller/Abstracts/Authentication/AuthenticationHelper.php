@@ -148,6 +148,16 @@ class AuthenticationHelper
      */
     private function cachedSessionUser(int $uid): ?UserStruct
     {
+        // A stateless controller — every /api/v2 and /api/v3 route — holds a StatelessSessionStore,
+        // whose get() throws by design. Here the session is only a cache, so no session is a miss and
+        // not an error, and the catch (Throwable) around the caller turned that throw into a silent
+        // 401 on every cookie-authenticated request to those routes. Guarded on the same condition
+        // that already gates the write in setUserSession(), so the cache is read exactly where it can
+        // also be written.
+        if (!$this->sessionIsActive()) {
+            return null;
+        }
+
         $cachedUser = $this->session->get('user');
 
         if (!$cachedUser instanceof UserStruct) {

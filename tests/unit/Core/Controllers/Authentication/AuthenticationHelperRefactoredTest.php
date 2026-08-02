@@ -5,6 +5,7 @@ namespace Matecat\Core\Controllers\Authentication;
 use Utils\Session\ArraySessionStore;
 use Utils\Session\PhpSessionStore;
 use Utils\Session\SessionStore;
+use Utils\Session\StatelessSessionStore;
 use Controller\Abstracts\Authentication\AuthCookie;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Matecat\TestHelpers\AbstractTest;
@@ -44,7 +45,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->authCookieMock    = $this->createMock(AuthCookie::class);
     }
 
-    private function createHelper(SessionStore $session, ?string $apiKey = null, ?string $apiSecret = null): TestableAuthenticationHelper
+    private function createHelper(SessionStore $session, ?string $apiKey = null, ?string $apiSecret = null, bool $sessionActive = true): TestableAuthenticationHelper
     {
         return TestableAuthenticationHelper::create(
             $session,
@@ -52,7 +53,8 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
             $this->apiKeyDaoMock,
             $this->authCookieMock,
             $apiKey,
-            $apiSecret
+            $apiSecret,
+            $sessionActive
         );
     }
 
@@ -320,6 +322,36 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         // the id continuously and race parallel requests, and it buys nothing — the privilege
         // transition already happened.
         $this->assertSame(0, $helper->regeneratedSessionIds);
+    }
+
+    /**
+     * Every /api/v2 and /api/v3 route is served by a plain KleinController, which is stateless and so
+     * is handed a StatelessSessionStore — a store whose get() throws by design.
+     *
+     * On this path the session is only ever a cache for the user row, so "there is no session" is a
+     * cache miss, not an error. Without the guard, cachedSessionUser() threw on the first line of the
+     * cookie branch, authenticate()'s catch (Throwable) swallowed it, $this->user was never assigned,
+     * and a perfectly valid login cookie produced 401 Invalid Login on every browser-issued v2/v3
+     * call. Observed on dev against GET /api/v2/teams/:id/members.
+     *
+     * Asserting the uid, not just isLogged(): the point is that the cookie's identity survives the
+     * absent session, and an assertion on the flag alone would also pass if some later change resolved
+     * a different user.
+     */
+    #[Test]
+    public function aCookieStillAuthenticatesWhenTheControllerIsStatelessAndItsSessionRefusesReads(): void
+    {
+        $user        = new UserStruct();
+        $user->uid   = 36;
+        $user->email = 'stateless@example.com';
+
+        $this->userDaoMock->method('getByUid')->with(36)->willReturn($user);
+        $this->authCookieMock->method('getCredentials')->willReturn(['user' => ['uid' => 36]]);
+
+        $helper = $this->createHelper(new StatelessSessionStore(), sessionActive: false);
+
+        $this->assertTrue($helper->isLogged());
+        $this->assertSame(36, (int)$helper->getUser()->uid);
     }
 
     // ─── Ring is the sole authority ───────────────────────────────────────────
@@ -649,6 +681,13 @@ class TestableAuthenticationHelper extends AuthenticationHelper
 {
     public int $regeneratedSessionIds = 0;
 
+    /**
+     * Defaults to true, which is what every stateful case wants. A stateless controller is the
+     * opposite case and has to be able to say so: there, no PHP session is ever started, and the
+     * store it holds refuses reads.
+     */
+    public bool $sessionActive = true;
+
     public static function create(
         SessionStore $session,
         UserDao $userDao,
@@ -656,8 +695,12 @@ class TestableAuthenticationHelper extends AuthenticationHelper
         AuthCookie $authCookie,
         ?string $api_key = null,
         ?string $api_secret = null,
+        bool $sessionActive = true,
     ): self {
         $self = new self($session, $userDao, $apiKeyDao, $authCookie);
+        // Before authenticate(), not after: the cookie branch consults the session cache, so the
+        // flag has to be in place for the run under test rather than for a later assertion.
+        $self->sessionActive = $sessionActive;
         $self->authenticate($api_key, $api_secret);
 
         return $self;
@@ -670,7 +713,7 @@ class TestableAuthenticationHelper extends AuthenticationHelper
 
     protected function sessionIsActive(): bool
     {
-        return true;
+        return $this->sessionActive;
     }
 
     protected function regenerateSessionId(): void
