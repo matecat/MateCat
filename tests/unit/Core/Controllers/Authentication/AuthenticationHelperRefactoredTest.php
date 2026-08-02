@@ -608,13 +608,15 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     #[Test]
     public function destroyAuthenticationClearsSessionVarsOnInstance(): void
     {
-        $session = new ArraySessionStore(['uid' => 7]);
+        // Not just `uid`: a signed-out browser must not keep the previous user's flash messages,
+        // GDrive tokens or cart either, so logging out ends the whole session.
+        $session = new ArraySessionStore(['uid' => 7, 'redeem_project' => 'abc', 'cart' => ['x']]);
         $helper  = $this->createHelper($session);
 
         $helper->destroyAuthentication();
 
-        // `uid` is what marks the session authenticated, so it is what logging out has to clear.
         $this->assertFalse($session->has('uid'));
+        $this->assertSame([], $session->all());
     }
 
     /**

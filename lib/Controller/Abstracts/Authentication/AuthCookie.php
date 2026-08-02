@@ -21,8 +21,9 @@ use Utils\Tools\SimpleJWT;
  * took an optional handler, and passing null validated a cookie's signature while silently skipping
  * the ring.
  *
- * Note this class still reads and writes $_COOKIE directly and calls session_destroy(). Being an
- * instance makes it injectable into its consumers; it does not make it free of superglobals.
+ * Note this class still reads and writes $_COOKIE directly. Being an instance makes it injectable
+ * into its consumers; it does not make it free of superglobals. It no longer touches the PHP session
+ * at all — that belongs to the session store.
  */
 class AuthCookie
 {
@@ -366,11 +367,11 @@ class AuthCookie
             $this->tokenStore->retireLoginToken($userId, $previousFieldName);
         }
 
-        $this->clearCookieAndSession();
+        $this->clearCookie();
     }
 
     /**
-     * Drops the browser cookie and the PHP session, touching the ring not at all.
+     * Drops the browser cookie, touching neither the ring nor the session.
      *
      * Separate from {@see destroyAuthentication()} to break a recursion that the constructor-bound
      * handler would otherwise create: getData() calls this when a cookie fails to parse, and
@@ -380,19 +381,22 @@ class AuthCookie
      *
      * Keeping the ring untouched here also preserves the previous behaviour exactly: an unparseable
      * cookie has never had its ring entry cleaned up, and this refactor does not change that.
+     *
+     * Ending the PHP session used to happen here too, and no longer does — that belongs to whoever
+     * owns the session, which is {@see AuthenticationHelper::destroyAuthentication()} through its
+     * injected store. The consequence worth naming: a cookie that fails to parse now drops the
+     * cookie and leaves the session alone. The request is anonymous either way, because identity is
+     * decided by the ring and an unparseable cookie yields no uid, so nothing is authorised that was
+     * not authorised before; what changes is that unrelated session data survives a corrupt or
+     * secret-rotated cookie instead of being wiped by a side effect of reading it.
      */
-    private function clearCookieAndSession(): void
+    private function clearCookie(): void
     {
         // Unset the authentication cookie from the global $_COOKIE array.
         unset($_COOKIE[AppConfig::$AUTHCOOKIENAME]);
 
         // Set an expired cookie in the browser to effectively remove it.
         $this->cookieManager->delete(AppConfig::$AUTHCOOKIENAME);
-
-        // Destroy the current session if active.
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_destroy();
-        }
     }
 
     /**
@@ -409,7 +413,7 @@ class AuthCookie
             return $this->readPayload();
         } catch (DomainException|UnexpectedValueException $e) {
             LoggerFactory::getLogger('login_exceptions')->debug($e->getMessage() . " " . $this->getCookieRawValue());
-            $this->clearCookieAndSession();
+            $this->clearCookie();
 
             return null;
         }

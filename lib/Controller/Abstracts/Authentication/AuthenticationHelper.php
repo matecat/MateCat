@@ -172,15 +172,22 @@ class AuthenticationHelper
     }
 
     /**
-     * Log out: retire the tokens and drop the cookie first, clear the session marker last.
+     * Log out: retire the tokens and drop the cookie first, end the session last.
      *
-     * The order is the whole content of this method. Revocation is what actually ends the login —
+     * The order is half the content of this method. Revocation is what actually ends the login —
      * identity is decided by the ring, never by the session — and it is also the only step that can
-     * fail, because it reaches Redis. Clearing the session first meant a throw there left the worst
+     * fail, because it reaches Redis. Ending the session first meant a throw there left the worst
      * possible pair of states: no `uid`, so the app treats the request as signed out, while the
      * cookie is still in the browser and its token still in the ring, so the very next request
      * authenticates normally. Doing the authoritative work first makes a failed logout leave the
      * user plainly still logged in, which is a state the app can represent and the user can retry.
+     *
+     * The other half is that the whole session goes, not just the `uid` marker. Logging out should
+     * not leave a signed-out browser holding the previous user's flash messages, GDrive tokens or
+     * cart, and this is the one place that knows a logout is happening. {@see AuthCookie} used to
+     * call session_destroy() itself from inside its cookie-clearing helper, which both put the
+     * session's lifecycle in the hands of a cookie class and tied it to a second path — a cookie that
+     * merely failed to parse. That path no longer ends the session.
      *
      * @throws ReflectionException
      * @throws Exception
@@ -189,7 +196,7 @@ class AuthenticationHelper
     public function destroyAuthentication(): void
     {
         $this->authCookie->destroyAuthentication();
-        $this->session->remove('uid');
+        $this->session->destroy();
     }
 
     protected function sessionIsActive(): bool
