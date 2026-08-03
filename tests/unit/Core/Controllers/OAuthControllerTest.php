@@ -17,6 +17,7 @@ use ReflectionClass;
 use ReflectionException;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
+use Utils\Session\ArraySessionStore;
 
 /**
  * Testable subclass: empty constructor bypasses Klein DI wiring so properties
@@ -60,9 +61,8 @@ class OAuthControllerTest extends AbstractTest
     private IDatabase $dbStub;
 
     /** @var array<string, mixed> */
-    private array $sessionBackup = [];
-    /** @var array<string, mixed> */
     private array $cookieBackup = [];
+    private ArraySessionStore $sessionStore;
 
     /**
      * @throws ReflectionException
@@ -71,7 +71,6 @@ class OAuthControllerTest extends AbstractTest
     {
         parent::setUp();
 
-        $this->sessionBackup = is_array($GLOBALS['_SESSION'] ?? null) ? $GLOBALS['_SESSION'] : [];
         $this->cookieBackup  = is_array($GLOBALS['_COOKIE'] ?? null) ? $GLOBALS['_COOKIE'] : [];
 
         $this->controller = new TestableOAuthController();
@@ -82,6 +81,10 @@ class OAuthControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
+
+        // No $_SESSION backup/restore any more: the store is built per test case, so the provider
+        // state tokens these tests write cannot leak into another test the way the superglobal could.
+        $this->sessionStore = $this->injectSessionStore($this->controller);
 
         $user             = new UserStruct();
         $user->uid        = self::BASE + 6;
@@ -98,7 +101,6 @@ class OAuthControllerTest extends AbstractTest
 
     protected function tearDown(): void
     {
-        $_SESSION = $this->sessionBackup;
         $_COOKIE  = $this->cookieBackup;
 
         parent::tearDown();
@@ -127,7 +129,7 @@ class OAuthControllerTest extends AbstractTest
     #[Test]
     public function response_returns_401_when_state_param_is_empty(): void
     {
-        $_SESSION['googledrive-' . AppConfig::$XSRF_TOKEN] = 'valid-token';
+        $this->sessionStore->set('googledrive-' . AppConfig::$XSRF_TOKEN, 'valid-token');
 
         $this->setRequestParams([]);
 
@@ -147,7 +149,7 @@ class OAuthControllerTest extends AbstractTest
     #[Test]
     public function response_returns_401_when_state_does_not_match_session(): void
     {
-        $_SESSION['googledrive-' . AppConfig::$XSRF_TOKEN] = 'correct-token';
+        $this->sessionStore->set('googledrive-' . AppConfig::$XSRF_TOKEN, 'correct-token');
 
         $this->setRequestParams(['state' => 'wrong-token']);
 
@@ -175,7 +177,7 @@ class OAuthControllerTest extends AbstractTest
     public function response_with_valid_state_and_code_enters_handleCode_and_throws(): void
     {
         $token = 'my-xsrf-token-abc';
-        $_SESSION['googledrive-' . AppConfig::$XSRF_TOKEN] = $token;
+        $this->sessionStore->set('googledrive-' . AppConfig::$XSRF_TOKEN, $token);
 
         $this->setRequestParams([
             'state' => $token,
@@ -194,7 +196,7 @@ class OAuthControllerTest extends AbstractTest
     public function response_with_valid_state_and_error_calls_logger_and_sets_body(): void
     {
         $token = 'my-xsrf-token-xyz';
-        $_SESSION['googledrive-' . AppConfig::$XSRF_TOKEN] = $token;
+        $this->sessionStore->set('googledrive-' . AppConfig::$XSRF_TOKEN, $token);
 
         $this->setRequestParams([
             'state' => $token,
@@ -222,7 +224,7 @@ class OAuthControllerTest extends AbstractTest
     public function response_with_valid_state_and_no_code_or_error_sets_window_close_body(): void
     {
         $token = 'my-xsrf-token-nop';
-        $_SESSION['googledrive-' . AppConfig::$XSRF_TOKEN] = $token;
+        $this->sessionStore->set('googledrive-' . AppConfig::$XSRF_TOKEN, $token);
 
         // No 'code', no 'error' params
         $this->setRequestParams(['state' => $token]);

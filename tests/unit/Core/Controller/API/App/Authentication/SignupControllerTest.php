@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Matecat\Core\Controller\API\App\Authentication;
 
+use Utils\Session\ArraySessionStore;
+use Utils\Session\SessionStore;
+
 use Controller\Abstracts\KleinController;
 use Controller\API\App\Authentication\SignupController;
 use Controller\API\Commons\Exceptions\ValidationError;
@@ -54,7 +57,7 @@ class TestableSignupController extends SignupController
         return parent::checkAndIncrementRateLimit($response, $identifier, $route, $maxRetries, $limiterService ?? $this->injectedRateLimiter);
     }
 
-    protected function createSignupModel(array $params, array &$session): SignupModel
+    protected function createSignupModel(array $params, SessionStore $session): SignupModel
     {
         return $this->mockSignupModel ?? parent::createSignupModel($params, $session);
     }
@@ -69,7 +72,7 @@ class TestableSignupController extends SignupController
         return $this->mockInvitedUser ?? parent::createInvitedUser();
     }
 
-    protected function createRedeemableProject(\Model\Users\UserStruct $user, array &$session): \Model\Users\RedeemableProject
+    protected function createRedeemableProject(\Model\Users\UserStruct $user, SessionStore $session): \Model\Users\RedeemableProject
     {
         return $this->mockRedeemableProject ?? parent::createRedeemableProject($user, $session);
     }
@@ -100,11 +103,11 @@ class SignupControllerTest extends AbstractTest
     private Request|MockObject $request;
     private Response $response;
     private RateLimiterService $rateLimiter;
+    private ArraySessionStore $sessionStore;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $_SESSION = [];
 
         $this->request = $this->createStub(Request::class);
         $this->response = new Response();
@@ -112,6 +115,10 @@ class SignupControllerTest extends AbstractTest
 
         $this->controller = new TestableSignupController();
         $this->controller->initWith($this->request, $this->response, $this->rateLimiter);
+
+        // The double skips the constructor that builds the store; a fresh one per case also replaces
+        // resetting $_SESSION here.
+        $this->sessionStore = $this->injectSessionStore($this->controller);
     }
 
     // ─── validateCreationRequest (private, via reflection) ───────────
@@ -372,7 +379,7 @@ class SignupControllerTest extends AbstractTest
         $project->method('getDestinationURL')->willReturn(null);
         $this->controller->mockRedeemableProject = $project;
 
-        $_SESSION['invited_to_team'] = ['team_id' => 42];
+        $this->sessionStore->set('invited_to_team', ['team_id' => 42]);
         $this->request->method('param')->willReturn('valid-token');
 
         $this->controller->confirm();
@@ -432,7 +439,7 @@ class SignupControllerTest extends AbstractTest
         $this->controller->setDatabase(obtainTestDatabase());
 
         $method = new ReflectionMethod(SignupController::class, 'createSignupModel');
-        $session = [];
+        $session = new ArraySessionStore();
         $params = ['email' => 'realbuild@example.com'];
 
         $signupModel = $method->invoke($this->controller, $params, $session);
@@ -462,7 +469,7 @@ class SignupControllerTest extends AbstractTest
         $user = new \Model\Users\UserStruct();
         $user->uid = 1;
         $method = new ReflectionMethod(SignupController::class, 'createRedeemableProject');
-        $session = [];
+        $session = new ArraySessionStore();
 
         $project = $method->invoke($this->controller, $user, $session);
 

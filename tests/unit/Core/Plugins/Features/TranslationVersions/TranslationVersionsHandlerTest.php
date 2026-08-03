@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Plugins\Features\TranslationVersions;
 
+use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
@@ -81,9 +82,9 @@ class TestableTranslationVersionsHandler extends TranslationVersionsHandler
         return $this->eventsHandlerOverride ?? parent::createTranslationEventsHandler($chunk);
     }
 
-    protected function createBatchReviewProcessor(): BatchReviewProcessor
+    protected function createBatchReviewProcessor(UserStruct $actingUser): BatchReviewProcessor
     {
-        return $this->batchReviewProcessorOverride ?? parent::createBatchReviewProcessor();
+        return $this->batchReviewProcessorOverride ?? parent::createBatchReviewProcessor($actingUser);
     }
 }
 
@@ -507,7 +508,7 @@ class TranslationVersionsHandlerTest extends AbstractTest
         $handler->setBatchReviewProcessorOverride($this->createStub(BatchReviewProcessor::class));
 
         $handler->storeTranslationEvent([
-            'user'             => null,
+            'user'             => new UserStruct(['uid' => 987, 'email' => 'actor@example.org']),
             'translation'      => $this->makeTranslation('new text', TranslationStatus::STATUS_TRANSLATED),
             'old_translation'  => $this->makeTranslation('old text', TranslationStatus::STATUS_TRANSLATED),
             'source_page_code' => SourcePages::SOURCE_PAGE_TRANSLATE,
@@ -517,6 +518,29 @@ class TranslationVersionsHandlerTest extends AbstractTest
         ]);
 
         $this->assertCount(1, $eventsHandler->getEvents());
+    }
+
+    /**
+     * Both production callers pass their own $this->user, so an absent actor is a wiring bug in a
+     * new caller. Fails loudly rather than attributing the batch's chunk-review updates to nobody.
+     */
+    #[Test]
+    public function storeTranslationEventRejectsAMissingActingUser(): void
+    {
+        $handler = $this->makeHandler();
+        $handler->setBatchReviewProcessorOverride($this->createStub(BatchReviewProcessor::class));
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("storeTranslationEvent requires the acting user in \$params['user']");
+
+        $handler->storeTranslationEvent([
+            'translation'      => $this->makeTranslation('new text', TranslationStatus::STATUS_TRANSLATED),
+            'old_translation'  => $this->makeTranslation('old text', TranslationStatus::STATUS_TRANSLATED),
+            'source_page_code' => SourcePages::SOURCE_PAGE_TRANSLATE,
+            'chunk'            => $this->makeChunk(),
+            'features'         => $this->createStub(FeatureSet::class),
+            'project'          => $this->makeProject(),
+        ]);
     }
 
     #[Test]
@@ -569,7 +593,7 @@ class TranslationVersionsHandlerTest extends AbstractTest
         $notIceSegment = $this->makeTranslation('not ice text', TranslationStatus::STATUS_TRANSLATED);
 
         $handler->storeTranslationEvent([
-            'user'             => null,
+            'user'             => new UserStruct(['uid' => 987, 'email' => 'actor@example.org']),
             'translation'      => $this->makeTranslation('new text', TranslationStatus::STATUS_TRANSLATED),
             'old_translation'  => $this->makeTranslation('old text', TranslationStatus::STATUS_TRANSLATED),
             'source_page_code' => SourcePages::SOURCE_PAGE_TRANSLATE,
@@ -606,7 +630,7 @@ class TranslationVersionsHandlerTest extends AbstractTest
         $this->expectExceptionCode(-2000);
 
         $handler->storeTranslationEvent([
-            'user'             => null,
+            'user'             => new UserStruct(['uid' => 987, 'email' => 'actor@example.org']),
             'translation'      => $this->makeTranslation('new', TranslationStatus::STATUS_TRANSLATED),
             'old_translation'  => $this->makeTranslation('old', TranslationStatus::STATUS_TRANSLATED),
             'source_page_code' => SourcePages::SOURCE_PAGE_TRANSLATE,

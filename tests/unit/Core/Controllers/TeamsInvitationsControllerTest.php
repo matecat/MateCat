@@ -16,6 +16,7 @@ use ReflectionClass;
 use ReflectionException;
 use TypeError;
 use Utils\Registry\AppConfig;
+use Utils\Session\ArraySessionStore;
 use Utils\Tools\SimpleJWT;
 use Utils\Url\CanonicalRoutes;
 
@@ -41,6 +42,7 @@ class TeamsInvitationsControllerTest extends AbstractTest
     private ReflectionClass $reflector;
     private TestableTeamsInvitationsController $controller;
     private Response&MockObject $responseMock;
+    private ArraySessionStore $sessionStore;
 
     /**
      * @throws ReflectionException
@@ -52,8 +54,6 @@ class TeamsInvitationsControllerTest extends AbstractTest
     {
         parent::setUp();
 
-        $_SESSION = [];
-
         $this->controller = new TestableTeamsInvitationsController();
         $this->reflector  = new ReflectionClass(TeamsInvitationsController::class);
 
@@ -61,6 +61,8 @@ class TeamsInvitationsControllerTest extends AbstractTest
 
         $this->setProp('response', $this->responseMock);
         $this->setProp('database', obtainTestDatabase());
+
+        $this->sessionStore = $this->injectSessionStore($this->controller);
     }
 
     /**
@@ -116,20 +118,20 @@ class TeamsInvitationsControllerTest extends AbstractTest
 
         $this->controller->collectBackInvitation();
 
-        $this->assertSame(['email' => 'invited@example.org'], $_SESSION['invited_to_team']);
+        $this->assertSame(['email' => 'invited@example.org'], $this->sessionStore->all()['invited_to_team']);
         $this->assertSame(
             [
                 'key'   => 'popup',
                 'value' => 'signup',
             ],
-            $_SESSION['flashMessages']['service'][0]
+            $this->sessionStore->all()['flashMessages']['service'][0]
         );
         $this->assertSame(
             [
                 'key'   => 'signup_email',
                 'value' => 'invited@example.org',
             ],
-            $_SESSION['flashMessages']['service'][1]
+            $this->sessionStore->all()['flashMessages']['service'][1]
         );
     }
 

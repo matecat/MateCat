@@ -27,6 +27,7 @@ use RuntimeException;
 use Stomp\Exception\ConnectionException;
 use TypeError;
 use Utils\Registry\AppConfig;
+use Utils\Session\SessionStore;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
 
@@ -82,7 +83,7 @@ class ForgotPasswordController extends AbstractStatefulKleinController
             ]
         );
 
-        $signupModel = $this->createSignupModel($filtered, $_SESSION);
+        $signupModel = $this->createSignupModel($filtered, $this->sessionStore());
 
         $doForgotPassword = $this->doForgotPassword($signupModel);
 
@@ -126,13 +127,13 @@ class ForgotPasswordController extends AbstractStatefulKleinController
         }
 
         try {
-            $reset = $this->createPasswordResetModel($_SESSION, $this->request->param('token'));
+            $reset = $this->createPasswordResetModel($this->sessionStore(), $this->request->param('token'));
             $reset->validateUser();
             $this->response->redirect($reset->flushWantedURL());
 
-            FlashMessage::set('popup', 'passwordReset', FlashMessage::SERVICE);
+            (new FlashMessage($this->sessionStore()))->set('popup', 'passwordReset', FlashMessage::SERVICE);
         } catch (ValidationError $e) {
-            FlashMessage::set('passwordReset', $e->getMessage(), FlashMessage::ERROR);
+            (new FlashMessage($this->sessionStore()))->set('passwordReset', $e->getMessage(), FlashMessage::ERROR);
             $this->response->redirect(CanonicalRoutes::appRoot());
         }
     }
@@ -150,7 +151,7 @@ class ForgotPasswordController extends AbstractStatefulKleinController
      */
     public function setNewPassword(): void
     {
-        $reset = $this->createPasswordResetModel($_SESSION);
+        $reset = $this->createPasswordResetModel($this->sessionStore());
         $this->rejectControlCharacters($this->request->param('password'));
         $this->rejectControlCharacters($this->request->param('password_confirmation'));
         // Unescaped on purpose: this value is hashed, and the login form compares against that hash.
@@ -166,23 +167,20 @@ class ForgotPasswordController extends AbstractStatefulKleinController
 
     /**
      * @param array<string, mixed> $params
-     * @param array<string, mixed> $session
-     *
      * @return SignupModel
      */
-    protected function createSignupModel(array $params, array &$session): SignupModel
+    protected function createSignupModel(array $params, SessionStore $session): SignupModel
     {
         return new SignupModel($params, $session, new UserDao($this->getDatabase()), new TeamDao($this->getDatabase()));
     }
 
     /**
-     * @param array<string, mixed> $session
      * @param string|null $token
      *
      * @return PasswordResetModel
      * @throws TypeError
      */
-    protected function createPasswordResetModel(array &$session, ?string $token = null): PasswordResetModel
+    protected function createPasswordResetModel(SessionStore $session, ?string $token = null): PasswordResetModel
     {
         return new PasswordResetModel($session, new UserDao($this->getDatabase()), new SessionTokenStoreHandler(), $token);
     }

@@ -11,6 +11,7 @@ namespace Plugins\Features\ReviewExtended;
 use Model\Jobs\JobStruct;
 use Model\LQA\ModelStruct;
 use Model\Projects\ProjectStruct;
+use Model\Users\UserStruct;
 
 interface IChunkReviewModel
 {
@@ -28,7 +29,7 @@ interface IChunkReviewModel
      *
      * @return void
      */
-    public function addPenaltyPoints(float $penalty_points, ProjectStruct $projectStruct): void;
+    public function addPenaltyPoints(float $penalty_points, ProjectStruct $projectStruct, UserStruct $actingUser): void;
 
     /**
      * subtract penalty_points and updates pass fail result
@@ -38,7 +39,7 @@ interface IChunkReviewModel
      *
      * @return void
      */
-    public function subtractPenaltyPoints(float $penalty_points, ProjectStruct $projectStruct): void;
+    public function subtractPenaltyPoints(float $penalty_points, ProjectStruct $projectStruct, UserStruct $actingUser): void;
 
     /**
      * Returns the calculated score
@@ -59,5 +60,5 @@ interface IChunkReviewModel
      *
      * @return void
      */
-    public function recountAndUpdatePassFailResult(ProjectStruct $project): void;
+    public function recountAndUpdatePassFailResult(ProjectStruct $project, UserStruct $actingUser): void;
 }

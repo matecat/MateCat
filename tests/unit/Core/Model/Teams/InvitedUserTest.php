@@ -2,6 +2,8 @@
 
 
 namespace Matecat\Core\Model\Teams;
+
+use Utils\Session\ArraySessionStore;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
@@ -56,6 +58,9 @@ class InvitedUserTest extends AbstractTest
                 return match ($method) {
                     'sadd' => 1, 'expire' => true, 'srem' => 1,
                     'smembers' => $this->smembersResult,
+                    // From the same seed, so a test cannot arrange a set and a membership answer
+                    // that contradict each other.
+                    'sismember' => in_array($arguments[1], $this->smembersResult, true) ? 1 : 0,
                     default => null,
                 };
             }
@@ -73,7 +78,7 @@ class InvitedUserTest extends AbstractTest
         $jwt = $this->makeValidJwt();
         $response = $this->createStub(\Klein\Response::class);
 
-        $user = new InvitedUser($jwt, $response, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub());
+        $user = new InvitedUser($jwt, $response, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub(), new ArraySessionStore());
 
         $ref = new ReflectionProperty($user, 'jwt');
         $payload = $ref->getValue($user);
@@ -85,7 +90,7 @@ class InvitedUserTest extends AbstractTest
     #[Test]
     public function constructorWithEmptyJwtSkipsValidation(): void
     {
-        $user = new InvitedUser('', null, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub());
+        $user = new InvitedUser('', null, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub(), new ArraySessionStore());
 
         $ref = new ReflectionProperty($user, 'jwt');
         $this->assertSame([], $ref->getValue($user));
@@ -102,7 +107,8 @@ class InvitedUserTest extends AbstractTest
             $response,
             $this->makeTeamDaoStub(),
             null,
-            $this->makeUserDaoStub()
+            $this->makeUserDaoStub(),
+            new ArraySessionStore()
         );
     }
 
@@ -112,7 +118,7 @@ class InvitedUserTest extends AbstractTest
         $this->expectException(\UnexpectedValueException::class);
 
         $response = $this->createStub(\Klein\Response::class);
-        new InvitedUser('not-a-jwt', $response, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub());
+        new InvitedUser('not-a-jwt', $response, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub(), new ArraySessionStore());
     }
 
     #[Test]
@@ -121,38 +127,44 @@ class InvitedUserTest extends AbstractTest
         $jwt = $this->makeValidJwt();
         $response = $this->createStub(\Klein\Response::class);
 
-        $_SESSION = [];
-        $user = new InvitedUser($jwt, $response, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub());
+        $session = new ArraySessionStore();
+        $user = new InvitedUser($jwt, $response, $this->makeTeamDaoStub(), null, $this->makeUserDaoStub(), $session);
         $user->prepareUserInvitedSignUpRedirect();
 
-        $this->assertArrayHasKey('invited_to_team', $_SESSION);
-        $this->assertSame('invited@example.com', $_SESSION['invited_to_team']['email']);
+        $this->assertTrue($session->has('invited_to_team'));
+        $this->assertSame('invited@example.com', $session->get('invited_to_team')['email']);
     }
 
     #[Test]
     public function hasPendingInvitationsReturnsFalseWhenNoSession(): void
     {
-        $_SESSION = [];
         $user = new InvitedUser(
             '',
             null,
             $this->makeTeamDaoStub(),
             $this->makeRedisHandlerStub(),
-            $this->makeUserDaoStub()
+            $this->makeUserDaoStub(),
+            new ArraySessionStore()
         );
         $this->assertFalse($user->hasPendingInvitations());
     }
 
+    /**
+     * The invitation is present but carries no team_id, which is the condition under test. It has to
+     * be seeded into the injected store: this case used to write it to $_SESSION while handing the
+     * subject an empty ArraySessionStore, so it never got past the no-session check above and was
+     * really a duplicate of it.
+     */
     #[Test]
     public function hasPendingInvitationsReturnsFalseWhenNoTeamId(): void
     {
-        $_SESSION = ['invited_to_team' => ['email' => 'a@b.com']];
         $user = new InvitedUser(
             '',
             null,
             $this->makeTeamDaoStub(),
             $this->makeRedisHandlerStub(),
-            $this->makeUserDaoStub()
+            $this->makeUserDaoStub(),
+            new ArraySessionStore(['invited_to_team' => ['email' => 'a@b.com']])
         );
         $this->assertFalse($user->hasPendingInvitations());
     }
@@ -160,28 +172,54 @@ class InvitedUserTest extends AbstractTest
     #[Test]
     public function hasPendingInvitationsReturnsTrueWhenMembersExist(): void
     {
-        $_SESSION = ['invited_to_team' => ['team_id' => 5, 'email' => 'a@b.com']];
         $user = new InvitedUser(
             '',
             null,
             $this->makeTeamDaoStub(),
             $this->makeRedisHandlerStub(['a@b.com']),
-            $this->makeUserDaoStub()
+            $this->makeUserDaoStub(),
+            new ArraySessionStore(['invited_to_team' => ['team_id' => 5, 'email' => 'a@b.com']])
         );
         $this->assertTrue($user->hasPendingInvitations());
     }
 
+    /**
+     * A complete invitation whose team has no pending members — so the false comes from the empty
+     * member list, not from a missing session. Same fix as the no-team_id case: with the data in
+     * $_SESSION and an empty store, the member lookup was never reached and makeRedisHandlerStub([])
+     * was never the reason this returned false.
+     */
     #[Test]
     public function hasPendingInvitationsReturnsFalseWhenNoMembers(): void
     {
-        $_SESSION = ['invited_to_team' => ['team_id' => 5, 'email' => 'a@b.com']];
         $user = new InvitedUser(
             '',
             null,
             $this->makeTeamDaoStub(),
             $this->makeRedisHandlerStub([]),
-            $this->makeUserDaoStub()
+            $this->makeUserDaoStub(),
+            new ArraySessionStore(['invited_to_team' => ['team_id' => 5, 'email' => 'a@b.com']])
         );
+        $this->assertFalse($user->hasPendingInvitations());
+    }
+
+    /**
+     * The withdrawn invitation. Somebody else's invitation to the same team is still open, so the
+     * team's set is not empty — which used to be the whole test, and meant removing this address from
+     * the set did nothing: their signup link kept working for as long as any other invitation stood.
+     */
+    #[Test]
+    public function hasPendingInvitationsIsFalseWhenOnlyAnotherAddressIsStillInvited(): void
+    {
+        $user = new InvitedUser(
+            '',
+            null,
+            $this->makeTeamDaoStub(),
+            $this->makeRedisHandlerStub(['someone.else@example.com']),
+            $this->makeUserDaoStub(),
+            new ArraySessionStore(['invited_to_team' => ['team_id' => 5, 'email' => 'a@b.com']])
+        );
+
         $this->assertFalse($user->hasPendingInvitations());
     }
 
@@ -197,17 +235,17 @@ class InvitedUserTest extends AbstractTest
         $teamDao->method('fetchById')->willReturn($teamStruct);
         $teamDao->method('getDatabaseHandler')->willReturn(obtainTestDatabase());
 
-        $_SESSION = ['invited_to_team' => ['team_id' => 5, 'email' => 'member@example.com']];
+        $session = new ArraySessionStore(['invited_to_team' => ['team_id' => 5, 'email' => 'member@example.com']]);
 
-        $user = new InvitedUser('', null, $teamDao, $this->makeRedisHandlerStub(), $this->makeUserDaoStub());
+        $user = new InvitedUser('', null, $teamDao, $this->makeRedisHandlerStub(), $this->makeUserDaoStub(), $session);
 
         $userStruct = new \Model\Users\UserStruct();
         $userStruct->uid = 1;
         $userStruct->email = 'member@example.com';
 
-        $user->completeTeamSignUp($userStruct, ['team_id' => 5, 'email' => 'member@example.com']);
+        $user->completeTeamSignUp($userStruct);
 
-        $this->assertArrayNotHasKey('invited_to_team', $_SESSION);
+        $this->assertFalse($session->has('invited_to_team'));
     }
 
     #[Test]
@@ -219,11 +257,12 @@ class InvitedUserTest extends AbstractTest
         $teamDao = $this->createStub(TeamDao::class);
         $teamDao->method('fetchById')->willReturn(null);
 
-        $user = new InvitedUser('', null, $teamDao, $this->makeRedisHandlerStub(), $this->makeUserDaoStub());
+        $session = new ArraySessionStore(['invited_to_team' => ['team_id' => 999, 'email' => 'a@b.com']]);
+        $user = new InvitedUser('', null, $teamDao, $this->makeRedisHandlerStub(), $this->makeUserDaoStub(), $session);
 
         $userStruct = new \Model\Users\UserStruct();
         $userStruct->uid = 1;
 
-        $user->completeTeamSignUp($userStruct, ['team_id' => 999, 'email' => 'a@b.com']);
+        $user->completeTeamSignUp($userStruct);
     }
 }

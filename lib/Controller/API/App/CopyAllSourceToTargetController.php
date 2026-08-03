@@ -119,7 +119,7 @@ class CopyAllSourceToTargetController extends KleinController
         }
 
         // save all events
-        $batchEventCreator->save(new BatchReviewProcessor(new ChunkReviewDao($this->getDatabase())));
+        $batchEventCreator->save(new BatchReviewProcessor(new ChunkReviewDao($this->getDatabase()), $this->user));
 
         $data = [
             'code' => 1,

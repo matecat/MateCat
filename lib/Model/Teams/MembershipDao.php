@@ -11,6 +11,7 @@ namespace Model\Teams;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
+use Model\DataAccess\InvalidatesUserProfileCache;
 use Model\Users\MetadataDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
@@ -19,6 +20,8 @@ use ReflectionException;
 
 class MembershipDao extends AbstractDao
 {
+
+    use InvalidatesUserProfileCache;
 
     const string TABLE = "teams_users";
     const string STRUCT_TYPE = MembershipStruct::class;
@@ -78,11 +81,19 @@ class MembershipDao extends AbstractDao
      * @return bool
      * @throws ReflectionException
      * @throws PDOException
+     * @throws Exception
      * @see MembershipDao::findUserTeams
      *
      */
     public function destroyCacheUserTeams(UserStruct $user): bool
     {
+        // The one deliberate exception to hooking writes only. Team-shaped changes do not all touch
+        // a membership row — a rename touches only the team — and this is the established fan-out
+        // point for them: it is already called internally on membership insert and delete, and
+        // TeamsController already loops it over every member of a renamed team. Hooking here
+        // inherits that whole fan-out instead of duplicating it.
+        $this->invalidateUserProfileCache((int)$user->uid);
+
         $stmt = $this->_getStatementForQuery(self::$_query_user_teams);
 
         return $this->_destroyObjectCache(
@@ -184,18 +195,33 @@ class MembershipDao extends AbstractDao
      * @return bool
      * @throws PDOException
      * @throws ReflectionException  @see MembershipDao::getMemberListByTeamId()
+     * @throws Exception
      */
     public function destroyCacheForListByTeamId(int $id_team): bool
     {
         $stmt = $this->_getStatementForQuery(self::$_query_member_list);
 
-        return $this->_destroyObjectCache(
+        $destroyed = $this->_destroyObjectCache(
             $stmt,
             MembershipStruct::class,
             [
                 'id_team' => $id_team,
             ]
         );
+
+        // Every member of this team carries the whole member list inside their own cached profile, so
+        // a membership change invalidates all of them and not only the member who moved.
+        // destroyCacheUserTeams() covers the member whose row changed; this covers the others, which
+        // is what the two deleted TeamMembersController invalidation calls used to do for whoever was
+        // making the change. Read after the bust above, and through a DAO with the default TTL of 0,
+        // so this is the post-change list from a live query rather than the copy just evicted.
+        foreach ((new self($this->database))->getMemberListByTeamId($id_team, false) as $member) {
+            if ($member->uid !== null) {
+                $this->invalidateUserProfileCache($member->uid);
+            }
+        }
+
+        return $destroyed;
     }
 
     /**

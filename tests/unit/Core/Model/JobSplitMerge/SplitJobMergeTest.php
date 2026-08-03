@@ -27,6 +27,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use Utils\Logger\MatecatLogger;
 use Utils\Shop\Cart;
+use Model\Users\UserStruct;
 
 /**
  * Step 12 — Tests for JobSplitMergeService::splitJob() and mergeALL()
@@ -187,7 +188,7 @@ class SplitJobMergeTest extends AbstractTest
             ->method('updateStdWcAndTotalWc')
             ->with(100, 250, 300);
 
-        $this->service->splitJob($ps);
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
     }
 
     /**
@@ -200,7 +201,7 @@ class SplitJobMergeTest extends AbstractTest
         $chunks = $this->makeTwoChunks();
         $ps = $this->makeSplitProjectStructure($chunks);
 
-        $this->service->splitJob($ps);
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         // Should have 2 entries in job_list and job_pass
         $this->assertCount(2, $ps->jobList);
@@ -231,7 +232,7 @@ class SplitJobMergeTest extends AbstractTest
                 return $this->createMock(PDOStatement::class);
             });
 
-        $this->service->splitJob($ps);
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         // First chunk retains original password
         $this->assertEquals('origpass', $stmtArgs[0]->password);
@@ -260,7 +261,7 @@ class SplitJobMergeTest extends AbstractTest
         $this->expectExceptionCode(-8);
         $this->expectExceptionMessage('Failed to insert job chunk');
 
-        $this->service->splitJob($ps);
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
     }
 
     /**
@@ -276,7 +277,7 @@ class SplitJobMergeTest extends AbstractTest
         $this->counterModelMock->expects($this->exactly(2))
             ->method('initializeJobWordCount');
 
-        $this->service->splitJob($ps);
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
     }
 
     /**
@@ -289,7 +290,7 @@ class SplitJobMergeTest extends AbstractTest
         $chunks = $this->makeTwoChunks();
         $ps = $this->makeSplitProjectStructure($chunks);
 
-        $this->service->splitJob($ps);
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         $enqueued = $this->service->getEnqueuedWorkers();
         $this->assertCount(2, $enqueued);
@@ -311,7 +312,7 @@ class SplitJobMergeTest extends AbstractTest
             ->method('destroyCacheByProjectId')
             ->with(999);
 
-        $this->service->splitJob($ps);
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         $this->assertTrue($this->service->wasDestroyAnalysisCacheCalled());
         $this->assertEquals(999, $this->service->getDestroyAnalysisCacheProjectId());
@@ -329,7 +330,7 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->cartMock->expects($this->once())->method('deleteCart');
 
-        $this->service->splitJob($ps);
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
     }
 
     /**
@@ -346,7 +347,7 @@ class SplitJobMergeTest extends AbstractTest
             ->with($this->isInstanceOf(PostJobSplittedEvent::class))
             ->willReturnArgument(0);
 
-        $this->service->splitJob($ps);
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
     }
 
     /**
@@ -359,7 +360,7 @@ class SplitJobMergeTest extends AbstractTest
         $chunks = $this->makeTwoChunks();
         $ps = $this->makeSplitProjectStructure($chunks);
 
-        $this->service->splitJob($ps);
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         $segments = $ps->jobSegments;
 
@@ -397,7 +398,7 @@ class SplitJobMergeTest extends AbstractTest
                 $callOrder[] = 'emptyCart';
             });
 
-        $this->service->applySplit($ps);
+        $this->service->applySplit($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         $this->assertTrue($this->service->wasBeginTransactionCalled());
     }
@@ -414,7 +415,7 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->dbHandler->expects($this->once())->method('commit');
 
-        $this->service->applySplit($ps);
+        $this->service->applySplit($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
     }
 
     // ────────────────────────────────────────────────────────────────
@@ -483,7 +484,7 @@ class SplitJobMergeTest extends AbstractTest
         $ps = new SplitMergeProjectData(999);
 
         // Capture the job passed to updateForMerge
-        $this->service->mergeALL($ps, $chunks);
+        $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         // After merge, first_job should have full segment range
         $this->assertEquals(1, $chunks[0]['job_first_segment']);
@@ -505,7 +506,7 @@ class SplitJobMergeTest extends AbstractTest
             ->method('updateStdWcAndTotalWc')
             ->with(100, 500, 600);
 
-        $this->service->mergeALL($ps, $chunks);
+        $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
     }
 
     /**
@@ -518,7 +519,7 @@ class SplitJobMergeTest extends AbstractTest
         $chunks = $this->makeJobChunksForMerge();
         $ps = new SplitMergeProjectData(999);
 
-        $this->service->mergeALL($ps, $chunks);
+        $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         // 50+25 = 75, 1800+1200 = 3000
         $this->assertEquals(75, $chunks[0]['avg_post_editing_effort']);
@@ -535,7 +536,7 @@ class SplitJobMergeTest extends AbstractTest
         $chunks = $this->makeJobChunksForMerge();
         $ps = new SplitMergeProjectData(999);
 
-        $this->service->mergeALL($ps, $chunks);
+        $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         $calls = $this->service->getUpdateForMergeCalls();
         $this->assertCount(1, $calls);
@@ -552,7 +553,7 @@ class SplitJobMergeTest extends AbstractTest
         $chunks = $this->makeJobChunksForMerge();
         $ps = new SplitMergeProjectData(999);
 
-        $this->service->mergeALL($ps, $chunks);
+        $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         $deletes = $this->service->getDeleteOnMergeCalls();
         $this->assertCount(1, $deletes);
@@ -573,7 +574,7 @@ class SplitJobMergeTest extends AbstractTest
             ->method('initializeJobWordCount')
             ->with(100, 'pass1');
 
-        $this->service->mergeALL($ps, $chunks);
+        $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
     }
 
     /**
@@ -590,7 +591,7 @@ class SplitJobMergeTest extends AbstractTest
             ->with($this->isInstanceOf(PostJobMergedEvent::class))
             ->willReturnArgument(0);
 
-        $this->service->mergeALL($ps, $chunks);
+        $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
     }
 
     /**
@@ -607,7 +608,7 @@ class SplitJobMergeTest extends AbstractTest
             ->method('destroyCacheByProjectId')
             ->with(999);
 
-        $this->service->mergeALL($ps, $chunks);
+        $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         $this->assertTrue($this->service->wasDestroyAnalysisCacheCalled());
         $this->assertEquals(999, $this->service->getDestroyAnalysisCacheProjectId());
@@ -635,7 +636,7 @@ class SplitJobMergeTest extends AbstractTest
         $chunks = $this->makeJobChunksForMerge();
         $ps = new SplitMergeProjectData(999);
 
-        $this->service->mergeALL($ps, $chunks);
+        $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
     }
 
     /**
@@ -661,7 +662,7 @@ class SplitJobMergeTest extends AbstractTest
         $ps = new SplitMergeProjectData(999);
 
         // Should NOT throw — the error is caught and logged
-        $this->service->mergeALL($ps, $chunks);
+        $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         // tm_keys should NOT have been updated (remains original)
         $this->assertEquals('[{"key":"abc123","r":true,"w":true}]', $chunks[0]['tm_keys']);
@@ -721,7 +722,7 @@ class SplitJobMergeTest extends AbstractTest
                 return true;
             });
 
-        $this->service->splitJob($ps);
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         // 2 chunks × 3 keys = 6 set() calls
         $this->assertCount(6, $setCalls, 'Expected 6 set() calls (2 chunks × 3 keys)');
@@ -772,7 +773,7 @@ class SplitJobMergeTest extends AbstractTest
         // destroyCacheByJobAndPasswordAndKey should never be called
         $this->jobsMetadataDaoMock->expects($this->never())->method('destroyCacheByJobAndPasswordAndKey');
 
-        $this->service->splitJob($ps);
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
     }
 
     /**
@@ -811,7 +812,7 @@ class SplitJobMergeTest extends AbstractTest
                 return true;
             });
 
-        $this->service->mergeALL($ps, $chunks);
+        $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         // Only chunk2 (pass2) metadata should be deleted — 3 keys
         $this->assertCount(3, $deleteCalls, 'Expected 3 delete() calls (1 non-first chunk × 3 keys)');
@@ -896,7 +897,7 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->jobsMetadataDaoMock->method('destroyCacheByJobAndPasswordAndKey')->willReturn(true);
 
-        $this->service->mergeALL($ps, $chunks);
+        $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         // 2 non-first chunks × 3 keys = 6 delete() calls
         $this->assertCount(6, $deleteCalls, 'Expected 6 delete() calls (2 non-first chunks × 3 keys)');

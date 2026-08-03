@@ -336,6 +336,7 @@ class ProjectManager
     /**
      * @throws AuthenticationError
      * @throws EndQueueException
+     * @throws Exception
      * @throws NotFoundException
      * @throws \PDOException
      * @throws ReQueueException
@@ -421,8 +422,14 @@ class ProjectManager
     private function initGdriveSession(): void
     {
         if (!empty($this->projectStructure->session['uid'])) {
-            $this->projectStructure->session['user'] = new UserStruct($this->projectStructure->session['user']);
-            $this->gdriveSession = Session::getInstanceForCLI($this->dbHandler, $this->projectStructure->session);
+            // Rehydrated from the queue payload, which crossed the queue as json and so arrives as an
+            // array. Passed to the Session explicitly now rather than left for it to find under the
+            // 'user' key: that key is gone from the php session, and this array is a different thing
+            // that merely shares its shape — the project-creation payload, not a live session.
+            $actingUser = new UserStruct($this->projectStructure->session['user']);
+
+            $this->projectStructure->session['user'] = $actingUser;
+            $this->gdriveSession = Session::getInstanceForCLI($this->dbHandler, $this->projectStructure->session, $actingUser);
         }
     }
 
@@ -438,6 +445,7 @@ class ProjectManager
      * @throws ReQueueException
      * @throws ReflectionException
      * @throws ValidationError
+     * @throws Exception
      */
     private function validateBeforeCreation(): void
     {

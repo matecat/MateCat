@@ -18,6 +18,7 @@ use Utils\Engines\MyMemory;
 use Utils\Logger\MatecatLogger;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
+use Utils\Session\ArraySessionStore;
 
 class TestableAjaxUtilsController extends AjaxUtilsController
 {
@@ -77,6 +78,7 @@ class AjaxUtilsControllerTest extends AbstractTest
     private \ReflectionClass $reflector;
     private TestableAjaxUtilsController $controller;
     private Response&MockObject $responseMock;
+    private ArraySessionStore $sessionStore;
 
     /**
      * @throws \ReflectionException
@@ -102,6 +104,11 @@ class AjaxUtilsControllerTest extends AbstractTest
         $this->setProp('request', new Request());
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('database', $dbStub);
+
+        // AjaxUtilsController is stateful, but the double skips the constructor that would build its
+        // store, so sessionStore() would fall back to the one that refuses every operation.
+        $this->sessionStore = new ArraySessionStore();
+        $this->setProp('sessionStore', $this->sessionStore);
     }
 
     protected function tearDown(): void
@@ -297,8 +304,6 @@ class AjaxUtilsControllerTest extends AbstractTest
     {
         $previousDaemon = AppConfig::$IS_DAEMON_INSTANCE;
         AppConfig::$IS_DAEMON_INSTANCE = false;
-        $previousSession = $_SESSION ?? null;
-        $_SESSION = [];
 
         try {
             $captured = null;
@@ -316,11 +321,6 @@ class AjaxUtilsControllerTest extends AbstractTest
             $this->assertTrue($captured['success']);
         } finally {
             AppConfig::$IS_DAEMON_INSTANCE = $previousDaemon;
-            if ($previousSession === null) {
-                unset($_SESSION);
-            } else {
-                $_SESSION = $previousSession;
-            }
         }
     }
 
@@ -335,19 +335,12 @@ class AjaxUtilsControllerTest extends AbstractTest
     {
         $previousDaemon = AppConfig::$IS_DAEMON_INSTANCE;
         AppConfig::$IS_DAEMON_INSTANCE = true;
-        $previousSession = $_SESSION ?? null;
-        $_SESSION = [];
 
         try {
             $this->expectException(RuntimeException::class);
             $this->controller->clearNotCompletedUploads();
         } finally {
             AppConfig::$IS_DAEMON_INSTANCE = $previousDaemon;
-            if ($previousSession === null) {
-                unset($_SESSION);
-            } else {
-                $_SESSION = $previousSession;
-            }
         }
     }
 

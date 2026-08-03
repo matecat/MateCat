@@ -22,6 +22,8 @@ use ReflectionException;
 use Throwable;
 use Utils\Constants\Constants;
 use Utils\Logger\MatecatLogger;
+use Model\ConnectedServices\GDrive\Session;
+use Utils\Session\ArraySessionStore;
 use Utils\TmKeyManagement\TmKeyStruct;
 
 class TestableCreateProjectControllerApi extends CreateProjectController
@@ -82,6 +84,7 @@ class CreateProjectControllerTest extends AbstractTest
     private Request $requestStub;
     private Response&MockObject $responseMock;
     private UserStruct $user;
+    private ArraySessionStore $sessionStore;
 
     /**
      * @throws Throwable
@@ -103,6 +106,9 @@ class CreateProjectControllerTest extends AbstractTest
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
         $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
+
+        // CreateProjectController is stateful; the double skips the constructor that builds its store.
+        $this->sessionStore = $this->injectSessionStore($this->controller);
 
         $this->user            = new UserStruct();
         $this->user->uid       = $this->userId(self::BASE);
@@ -796,8 +802,8 @@ class CreateProjectControllerTest extends AbstractTest
     {
         $this->invokePrivate('assignLastCreatedPid', [12345]);
 
-        $this->assertFalse($_SESSION['redeem_project']);
-        $this->assertSame(12345, $_SESSION['last_created_pid']);
+        $this->assertFalse($this->sessionStore->all()['redeem_project']);
+        $this->assertSame(12345, $this->sessionStore->all()['last_created_pid']);
     }
 
     /**
@@ -845,5 +851,32 @@ class CreateProjectControllerTest extends AbstractTest
         $this->assertSame(Constants::COOKIE_TARGET_LANG, $writes[1]['name']);
         $this->assertSame('it-IT', $writes[1]['value']);
         $this->assertSame('Strict', $writes[1]['options']['samesite']);
+    }
+
+    // ─── GDrive session read (the session-store seam) ───
+
+    /**
+     * This was the last direct $_SESSION read left in lib. It now goes through the injected store,
+     * and the assertion is on the value arriving from *that* store rather than on the superglobal —
+     * which is what lets the key group change backing store without editing this call site.
+     */
+    #[Test]
+    public function gdriveSessionData_reads_the_drive_session_through_the_injected_store(): void
+    {
+        $driveSession = ['access_token' => 'tok', 'files' => ['a.docx']];
+        $this->sessionStore->set(Session::SESSION_KEY, $driveSession);
+
+        $this->assertSame($driveSession, $this->invokePrivate('gdriveSessionData'));
+    }
+
+    /**
+     * The overwhelmingly common case: a normal upload is not a Drive import, so the key is absent.
+     * Null rather than a throw or a warning is what buildProjectStructure()'s ?array expects, and it
+     * is what the old `$_SESSION[Session::SESSION_KEY] ?? null` returned.
+     */
+    #[Test]
+    public function gdriveSessionData_is_null_when_this_is_not_a_drive_import(): void
+    {
+        $this->assertNull($this->invokePrivate('gdriveSessionData'));
     }
 }

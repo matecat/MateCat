@@ -37,6 +37,9 @@ use Model\DataAccess\IDatabase;
 use Utils\Constants\Constants;
 use Utils\Constants\ConversionHandlerStatus;
 use Utils\Registry\AppConfig;
+use Utils\Session\ArraySessionStore;
+use Utils\Session\PhpSessionStore;
+use Utils\Session\SessionStore;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 
@@ -56,9 +59,20 @@ class Session
     protected string $source_lang;
     protected string $target_lang;
     protected ?string $seg_rule = null;
-    /** @var array<string, mixed> */
-    protected array $session = [];
-    /** @var array<string, mixed> */
+    protected SessionStore $session;
+
+    /**
+     * The acting user, or null when the caller has none. See the constructor's `$user` parameter.
+     */
+    protected ?UserStruct $user = null;
+    /**
+     * The GDrive subtree, held as a working copy. It used to be a live reference into
+     * `$_SESSION[self::SESSION_KEY]`, so every mutation wrote through implicitly; now each mutation
+     * is followed by persistGDriveSession(). Keeping a copy rather than reading the subtree back on
+     * every access preserves the old read semantics exactly.
+     *
+     * @var array<string, mixed>
+     */
     protected array $gDriveSession = [];
     protected ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
     protected ?Google_Service_Drive $service = null;
@@ -95,38 +109,55 @@ class Session
      *
      * Session constructor.
      *
-     * @param array<string, mixed>|null $sessionData Optional session data (for testing).
+     * @param SessionStore|null $session Defaults to the php session store.
      *                                               If null, uses $_SESSION superglobal.
      * @param IDatabase $database
      * @param ConnectedServiceDao|null $dao
      * @param AbstractFilesStorage|null $filesStorage
+     * @param UserStruct|null $user The acting user, for the operations that need one.
+     *
+     *        Read from `$_SESSION['user']` until that key was deleted for holding the password hash.
+     *        Nullable, and appended rather than placed next to `$session`, because the callers split
+     *        cleanly: the three that reach a user-dependent operation
+     *        ({@see getToken()}, {@see grantFileAccessByUrl()}, {@see doConversion()}) have an
+     *        authenticated user to hand, while {@see \lib\View\fileupload} only asks
+     *        {@see sessionHasFiles()} and has none to give. Passing null reproduces exactly what an
+     *        absent session user did before.
      * @throws Exception
      * @throws \TypeError
      */
-    public function __construct(IDatabase $database, ?array &$sessionData = null, ?ConnectedServiceDao $dao = null, ?AbstractFilesStorage $filesStorage = null)
+    public function __construct(IDatabase $database, ?SessionStore $session = null, ?ConnectedServiceDao $dao = null, ?AbstractFilesStorage $filesStorage = null, ?UserStruct $user = null)
     {
         $this->database = $database;
+        $this->user = $user;
 
-        // Use the provided session data or fall back to the $_SESSION superglobal
-        if ($sessionData !== null) {
-            $source = &$sessionData;
-        } else {
-            $source = &$_SESSION;
-        }
+        // Defaulting to the php session preserves the old `$source = &$_SESSION` fallback.
+        $this->session = $session ?? new PhpSessionStore();
 
-        if (!isset($source['uid'])) {
+        if (!$this->session->has('uid')) {
             return;
         }
 
-        $this->session = &$source;
+        $subtree = $this->session->get(self::SESSION_KEY);
 
-        if (!isset($source[self::SESSION_KEY]) || !is_array($source[self::SESSION_KEY])) {
-            $source[self::SESSION_KEY] = [];
+        if (!is_array($subtree)) {
+            $subtree = [];
+            $this->session->set(self::SESSION_KEY, $subtree);
         }
 
-        $this->gDriveSession = &$source[self::SESSION_KEY];
+        $this->gDriveSession = $subtree;
         $this->files_storage = $filesStorage ?? FilesStorageFactory::create();
         $this->dao = $dao;
+    }
+
+    /**
+     * Write the working copy back. Called after every mutation of $gDriveSession, which is what the
+     * old by-reference binding did for free — and the single thing that must not be forgotten when
+     * adding a new mutation here.
+     */
+    private function persistGDriveSession(): void
+    {
+        $this->session->set(self::SESSION_KEY, $this->gDriveSession);
     }
 
     /**
@@ -134,19 +165,21 @@ class Session
      *
      * @param IDatabase $database
      * @param array<string, mixed> $session
+     * @param UserStruct|null $user The acting user; see the constructor's `$user` parameter.
      *
      * @return Session
      * @throws RuntimeException
      * @throws Exception
      * @throws \TypeError
      */
-    public static function getInstanceForCLI(IDatabase $database, array $session): Session
+    public static function getInstanceForCLI(IDatabase $database, array $session, ?UserStruct $user = null): Session
     {
         if (PHP_SAPI != 'cli') {
             throw new RuntimeException("This method MUST be called by CLI.");
         }
 
-        return new self($database, $session);
+        // A CLI run has no php session, so the array it was handed becomes an in-memory store.
+        return new self($database, new ArraySessionStore($session), null, null, $user);
     }
 
     /**
@@ -159,7 +192,7 @@ class Session
      */
     public function reConvert(string $newSourceLang, ?string $newSegmentationRule = null, ?FiltersConfigTemplateStruct $filtersExtractionParameters = null): bool
     {
-        $this->setConversionParams($this->session["upload_token"], $newSourceLang, 'en-US', $newSegmentationRule, $filtersExtractionParameters);
+        $this->setConversionParams($this->session->get("upload_token"), $newSourceLang, 'en-US', $newSegmentationRule, $filtersExtractionParameters);
 
         $fileList = $this->gDriveSession[self::FILE_LIST];
 
@@ -172,6 +205,7 @@ class Session
                 }
 
                 $this->gDriveSession[self::FILE_LIST][$fileId][self::FILE_HASH] = $generatedSha;
+                $this->persistGDriveSession();
             } catch (Exception) {
                 return false;
             }
@@ -225,6 +259,7 @@ class Session
                     ];
                 } else {
                     unset($this->gDriveSession[self::FILE_LIST][$fileId]);
+                    $this->persistGDriveSession();
                 }
             }
         }
@@ -245,7 +280,7 @@ class Session
             throw new RuntimeException("This method MUST NOT be called from the CLI.");
         }
         unset($this->gDriveSession[self::FILE_LIST]);
-        unset($_SESSION[self::SESSION_KEY][self::FILE_LIST]);
+        $this->persistGDriveSession();
     }
 
     /**
@@ -256,8 +291,8 @@ class Session
     public function getToken(): ?array
     {
         if (is_null($this->token)) {
-            if (($this->session['user'] ?? null) !== null) {
-                $this->token = $this->getTokenByUser($this->session['user']);
+            if ($this->user !== null) {
+                $this->token = $this->getTokenByUser($this->user);
             }
         }
 
@@ -299,6 +334,8 @@ class Session
             self::FILE_HASH => $fileHash,
             self::CONNNECTED_SERVICE_ID => $this->serviceStruct->id ?? throw new Exception('Service struct not set'),
         ];
+
+        $this->persistGDriveSession();
     }
 
     /**
@@ -389,6 +426,7 @@ class Session
     public function clearFileListFromSession(): void
     {
         unset($this->gDriveSession[self::FILE_LIST]);
+        $this->persistGDriveSession();
     }
 
     /**
@@ -422,7 +460,7 @@ class Session
                 $this->deleteDirectory($pathCache);
             }
 
-            $tempUploadedFileDir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session['upload_token'];
+            $tempUploadedFileDir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session->get('upload_token');
 
             /** @var DirectoryIterator $item */
             foreach (
@@ -441,6 +479,7 @@ class Session
             }
 
             unset($this->gDriveSession[self::FILE_LIST] [$fileId]);
+            $this->persistGDriveSession();
 
             $success = true;
         }
@@ -465,6 +504,7 @@ class Session
         }
 
         unset($this->gDriveSession[self::FILE_LIST]);
+        $this->persistGDriveSession();
     }
 
     /**
@@ -494,7 +534,7 @@ class Session
      */
     private function getCacheFileDir(array $file): string
     {
-        $sourceLang = $this->session[Constants::SESSION_ACTUAL_SOURCE_LANG];
+        $sourceLang = $this->session->get(Constants::SESSION_ACTUAL_SOURCE_LANG);
 
         $fileHash = $file[self::FILE_HASH]['cacheHash'];
 
@@ -612,7 +652,7 @@ class Session
      */
     public function grantFileAccessByUrl(string $googleFileId, Google_Client $gClient): Google_Service_Drive_Permission
     {
-        if (!$this->session['user']) {
+        if ($this->user === null) {
             throw new Exception('Cannot proceed without a User');
         }
 
@@ -730,7 +770,8 @@ class Session
             DIRECTORY_SEPARATOR . $uploadTokenValue;
 
         $this->featureSet = $this->createFeatureSet();
-        $this->featureSet->loadFromUserEmail($this->session['user']->email);
+        $email = $this->user?->email;
+        $this->featureSet->loadFromUserEmail(is_string($email) ? $email : '');
 
         $converter = $this->createFilesConverter(
             [$file_name],

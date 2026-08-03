@@ -151,6 +151,19 @@ trait DaoCacheTrait
     }
 
     /**
+     * Strips the {@see XFetchEnvelope} wrapper from a stored cache-map value, if it has one.
+     *
+     * A value is written either bare or wrapped, decided by $xFetchEnabled at *write* time
+     * ({@see _setInCacheMap()}). Readers therefore cannot assume either shape — not even readers on
+     * a class that disables xFetch, because the flag can be turned on while values written under the
+     * old setting are still in Redis. Every reader of a stored value must go through here.
+     */
+    protected function _unwrapCacheMapValue(mixed $unserialized): mixed
+    {
+        return $unserialized instanceof XFetchEnvelope ? $unserialized->value : $unserialized;
+    }
+
+    /**
      * @param string $keyMap
      * @param string $query A query
      *
@@ -189,9 +202,9 @@ trait DaoCacheTrait
                 $this->_logCache("GETMAP_XFETCH_RECOMPUTE: " . $keyMap, $key, null, $query);
                 return null;
             }
-
-            $unserialized = $unserialized->value;
         }
+
+        $unserialized = $this->_unwrapCacheMapValue($unserialized);
 
         $this->_logCache("GETMAP: " . $keyMap, $key, $unserialized, $query);
 

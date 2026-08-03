@@ -39,10 +39,6 @@ class TestableQAModelTemplateController extends QAModelTemplateController
     protected function registerValidators(): void
     {
     }
-
-    public function refreshClientSessionIfNotApi(): void
-    {
-    }
 }
 
 /**
@@ -61,10 +57,6 @@ class TestableQAModelTemplateControllerBrokenSchema extends QAModelTemplateContr
     }
 
     protected function registerValidators(): void
-    {
-    }
-
-    public function refreshClientSessionIfNotApi(): void
     {
     }
 

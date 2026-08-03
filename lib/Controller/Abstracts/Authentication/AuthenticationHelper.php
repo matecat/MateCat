@@ -5,57 +5,44 @@ namespace Controller\Abstracts\Authentication;
 use Exception;
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
-use Model\ConnectedServices\ConnectedServiceDao;
 use Model\DataAccess\IDatabase;
-use Model\Teams\MembershipDao;
-use Model\Teams\TeamDao;
-use Model\Users\MetadataDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use Throwable;
 use TypeError;
 use Utils\Logger\LoggerFactory;
+use Utils\Session\SessionStore;
+use Utils\Session\StatelessSessionViolation;
 
 /**
- * Split / dependency-injected re-implementation of {@see AuthenticationHelper}.
+ * Resolves the identity behind a request: api key, or login cookie validated against the token ring.
  *
- * Behaviorally identical to the original (verified by a parity test copy), but:
- *  - all collaborators are constructor-injected (UserDao, ApiKeyDao,
- *    UserProfileBuilder, AuthCookieStore) → fully unit-testable, no singleton;
+ *  - all collaborators are constructor-injected (UserDao, ApiKeyDao, AuthCookie) → fully
+ *    unit-testable, no singleton;
  *  - the authentication work lives in authenticate() instead of the constructor;
  *  - fromRequest() is the single composition root that touches the database.
- *
- * The original class is intentionally kept in place; this lives beside it for
- * the verification phase.
  */
 class AuthenticationHelper
 {
     private UserStruct $user;
     private bool $logged = false;
     private ?ApiKeyStruct $api_record = null;
-    /** @var array<string, mixed> */
-    private array $session;
+    private SessionStore $session;
     private UserDao $userDao;
     private ApiKeyDao $apiKeyDao;
-    private UserProfileBuilder $profileBuilder;
-    private AuthCookieStore $cookieStore;
+    private AuthCookie $authCookie;
 
-    /**
-     * @param array<string, mixed> $session
-     */
     public function __construct(
-        array &$session,
+        SessionStore $session,
         UserDao $userDao,
         ApiKeyDao $apiKeyDao,
-        UserProfileBuilder $profileBuilder,
-        AuthCookieStore $cookieStore,
+        AuthCookie $authCookie,
     ) {
-        $this->session =& $session;
+        $this->session = $session;
         $this->userDao = $userDao;
         $this->apiKeyDao = $apiKeyDao;
-        $this->profileBuilder = $profileBuilder;
-        $this->cookieStore = $cookieStore;
+        $this->authCookie = $authCookie;
         $this->user = new UserStruct();
     }
 
@@ -63,11 +50,9 @@ class AuthenticationHelper
      * Composition root: wires real collaborators from an injected database
      * handle and runs the authentication flow. The database is mandatory — no
      * singleton fallback. Mirrors the original `new AuthenticationHelper(...)`.
-     *
-     * @param array<string, mixed> $session
      */
     public static function fromRequest(
-        array &$session,
+        SessionStore $session,
         IDatabase $db,
         ?string $api_key = null,
         ?string $api_secret = null,
@@ -76,14 +61,7 @@ class AuthenticationHelper
             $session,
             new UserDao($db),
             new ApiKeyDao($db),
-            new UserProfileBuilder(
-                new MembershipDao($db),
-                new ConnectedServiceDao($db),
-                new UserDao($db),
-                new TeamDao($db),
-                new MetadataDao($db)
-            ),
-            new AuthCookieStore(new SessionTokenStoreHandler()),
+            new AuthCookie(new SessionTokenStoreHandler()),
         );
         $self->authenticate($api_key, $api_secret);
 
@@ -102,17 +80,40 @@ class AuthenticationHelper
                 if ($user !== null) {
                     $this->user = $user;
                 }
-            } elseif (!empty($this->session['user']) && !empty($this->session['user_profile'])) {
-                $this->user = $this->session['user'];
-                $this->cookieStore->setCredentials($this->user, true);
             } else {
-                $credentials = $this->cookieStore->getCredentials();
+                // The token ring is the only authority: every request revalidates the login
+                // cookie against it, so DEL active_user_login_tokens:<uid> logs the user out
+                // everywhere at once. The PHP session used to be consulted first and never
+                // consulted the ring, which is what let a revoked user keep working until their
+                // session died of idleness.
+                $credentials = $this->authCookie->getCredentials();
                 if (!empty($credentials) && !empty($credentials['user'])) {
+                    $uid = (int)$credentials['user']['uid'];
+
+                    // Resolved from the uid the ring just proved, on every request. There used to be a
+                    // session-cached copy of this UserStruct consulted first, which is what put the
+                    // password hash, salt and confirmation token into the session's Redis database for
+                    // the session's idle lifetime. Dropping it costs nothing: getByUid() is itself a
+                    // uid-keyed Redis cache with the TTL set right below, so this is the same single
+                    // Redis read the session lookup was, against a store that is invalidated when the
+                    // users row changes.
+                    //
+                    // The uid-equality guard that used to sit here went with it. It existed because a
+                    // session holding user A alongside a cookie for user B would have served A's cached
+                    // struct to B; with no cached struct there is nothing to mismatch.
                     $this->userDao->setCacheTTL(60 * 60 * 24);
-                    $user = $this->userDao->getByUid($credentials['user']['uid']);
+                    $user = $this->userDao->getByUid($uid);
                     if ($user !== null) {
                         $this->user = $user;
                         $this->setUserSession();
+                    }
+
+                    // Slide the cookie forward while the user is active. This replaces the
+                    // post-expiry revamp the session branch used to perform: with the ring
+                    // authoritative an expired JWT resolves to no uid at all, so renewal has to
+                    // happen before expiry or everyone is signed out hard at the cookie duration.
+                    if ($this->user->uid !== null) {
+                        $this->authCookie->renewIfStale($this->user);
                     }
                 }
             }
@@ -123,38 +124,79 @@ class AuthenticationHelper
                     [
                         $ignore,
                         $ignore->getTraceAsString(),
-                        'session' => $this->session,
+                        // Keys only. The session holds the UserStruct, whose `pass` is the password
+                        // hash, so dumping the whole array wrote credentials into login_exceptions.
+                        // Which keys were present is what these logs are actually read for.
+                        'session_keys' => $this->session->keys(),
+                        // The key is the public identifier and stays. The secret is the shared
+                        // secret and never belongs in a log; whether one was sent is the useful bit.
                         'api_key' => $api_key,
-                        'api_secret' => $api_secret,
-                        'cookie' => $this->cookieStore->getCredentials()['user'] ?? null,
+                        'api_secret_present' => !empty($api_secret),
+                        // Reuse what the try block already read. Calling getCredentials() again here
+                        // would re-verify the JWT and hit the token ring a second time just to log,
+                        // and it may not have been reached before the throw — hence the ?? null.
+                        'cookie' => $credentials['user'] ?? null,
                     ]
                 );
             } catch (Throwable) {
+            }
+
+            // A session violation is a bug, not a rejected credential, so it is the one thing here
+            // that must not be swallowed.
+            //
+            // StatelessSessionViolation is raised when a controller declared stateless reaches for
+            // session state. It is deliberately an unchecked \Error so that it surfaces — phpstan.neon
+            // says exactly that: "Enforcement works by surfacing." This catch absorbed it into "not
+            // authenticated" instead, so every cookie-authenticated /api/v2 and /api/v3 request
+            // answered 401 Invalid Login while holding a perfectly valid token. A programming mistake
+            // must not be able to impersonate a failed login.
+            //
+            // Everything else still degrades to logged-out, deliberately. An \Exception here is a
+            // runtime condition, and the ring check reaches Redis: re-throwing those would turn one
+            // unavailable dependency into a site-wide 500 rather than a signed-out user.
+            //
+            // Narrowed to this class rather than to \Error in general because \Error is checked by
+            // PHPStan, so re-throwing it demands a @throws on authenticate() and then on fromRequest(),
+            // identifyUser() and every controller beneath them. Widening this would mean adding \Error
+            // to the uncheckedExceptionClasses list, which is a repo-wide policy change and not one to
+            // make in passing. The consequence is honest and worth knowing: a TypeError on this path
+            // still degrades to logged-out.
+            //
+            // Logged before re-throwing either way, because that log line is the diagnostic.
+            if ($ignore instanceof StatelessSessionViolation) {
+                throw $ignore;
             }
         } finally {
             $this->logged = $this->user->isLogged();
         }
     }
 
-    public function refreshSession(): void
-    {
-        unset($this->session['user']);
-        unset($this->session['user_profile']);
-        $this->user = new UserStruct();
-        $this->logged = false;
-        $this->api_record = null;
-    }
-
     /**
+     * Log out: retire the tokens and drop the cookie first, end the session last.
+     *
+     * The order is half the content of this method. Revocation is what actually ends the login —
+     * identity is decided by the ring, never by the session — and it is also the only step that can
+     * fail, because it reaches Redis. Ending the session first meant a throw there left the worst
+     * possible pair of states: no `uid`, so the app treats the request as signed out, while the
+     * cookie is still in the browser and its token still in the ring, so the very next request
+     * authenticates normally. Doing the authoritative work first makes a failed logout leave the
+     * user plainly still logged in, which is a state the app can represent and the user can retry.
+     *
+     * The other half is that the whole session goes, not just the `uid` marker. Logging out should
+     * not leave a signed-out browser holding the previous user's flash messages, GDrive tokens or
+     * cart, and this is the one place that knows a logout is happening. {@see AuthCookie} used to
+     * call session_destroy() itself from inside its cookie-clearing helper, which both put the
+     * session's lifecycle in the hands of a cookie class and tied it to a second path — a cookie that
+     * merely failed to parse. That path no longer ends the session.
+     *
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
      */
     public function destroyAuthentication(): void
     {
-        unset($this->session['user']);
-        unset($this->session['user_profile']);
-        $this->cookieStore->destroy();
+        $this->authCookie->destroyAuthentication();
+        $this->session->destroy();
     }
 
     protected function sessionIsActive(): bool
@@ -163,23 +205,24 @@ class AuthenticationHelper
     }
 
     /**
-     * Rotate the session id, discarding the old server-side entry so the previous id cannot be
-     * replayed. Called when the session becomes authenticated; see {@see setUserSession()}.
+     * Record which user this session belongs to, and rotate the id while doing it.
      *
-     * The active-session check deliberately reads session_status() rather than going through
-     * {@see sessionIsActive()}: subclasses override that seam to exercise the session writes
-     * without a real session, and calling session_regenerate_id() without one raises a warning.
-     */
-    protected function regenerateSessionId(): void
-    {
-        if (session_status() !== PHP_SESSION_ACTIVE || headers_sent()) {
-            return;
-        }
-
-        session_regenerate_id(true);
-    }
-
-    /**
+     * The uid is all that is written. Two things used to be written alongside it and are not:
+     *
+     *  - `user`, the whole {@see UserStruct}. That struct declares `pass`, `salt` and
+     *    `confirmation_token`, so storing it serialised the password hash, the salt and the
+     *    confirmation token into the session's Redis database, where they sat for the session's idle
+     *    lifetime and were not purged when the password changed. Readers now take the user from the
+     *    request's own authenticated identity, or from {@see UserDao::getByUid()} — already a
+     *    uid-keyed Redis cache, and one that credentials-at-rest aside is invalidated on write.
+     *  - `cid`, the email. It had no reader left anywhere in the tree once the translated plugin
+     *    started taking the acting user from the event it handles.
+     *
+     * The uid stays, and is not a candidate for moving to {@see UserStateStore}: that store is keyed
+     * `user_state:<uid>`, so the uid has to be readable *before* it can be used to find anything
+     * there. It is not a credential — an integer the token ring re-proves on every request — and it
+     * is what tells this session whose it is.
+     *
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
@@ -187,17 +230,100 @@ class AuthenticationHelper
     protected function setUserSession(): void
     {
         if ($this->sessionIsActive()) {
-            // This is the transition from anonymous to authenticated, and the only place it
-            // happens: every login path (password, signup confirmation, OAuth) reaches it through
-            // fromRequest(). The id must not survive the transition, or anyone who learned it
-            // beforehand would be holding an authenticated session.
-            $this->regenerateSessionId();
+            // Rotate only on the actual anonymous → authenticated transition: every login path
+            // (password, signup confirmation, OAuth) reaches it through fromRequest(), and an id
+            // known before the login must not still be valid after it.
+            //
+            // The explicit comparison matters now that this method runs on *every* authenticated
+            // request. It used to be reached only on a session-cache miss, so the transition test was
+            // implicit in getting here at all; with the cache gone, rotating unconditionally would
+            // churn the id on every request and race parallel ones — for nothing, since the
+            // privilege transition already happened.
+            // Rotation goes through the store, which is what owns the session lifecycle and therefore
+            // the two conditions that make rotating safe — an active session, and a response that has
+            // not started. This class used to carry a copy of those guards, leaving
+            // PhpSessionStore::regenerateId() with no callers at all.
+            $previousUid = $this->session->get('uid');
+            $authenticatedUid = $this->user->getUid();
+            $identityChanged = (int)$previousUid !== (int)$authenticatedUid;
 
-            $this->session['cid'] = $this->user->getEmail();
-            $this->session['uid'] = $this->user->getUid();
-            $this->session['user'] = $this->user;
-            $this->session['user_profile'] = $this->profileBuilder->build($this->user);
+            // A different user is taking over a session that still belongs to somebody else, so drop
+            // its contents before stamping the new identity on it. Rotating the id alone relabels the
+            // session and keeps the data — session_regenerate_id() preserves contents by design — which
+            // left the arriving user holding the previous one's cart, GDrive OAuth tokens, redeemable
+            // project and flash messages. Two ways in: a login over a live session with no logout in
+            // between, and a cookie that stopped authenticating while its session was still alive.
+            //
+            // Only when the session already names *someone*. An anonymous session becoming
+            // authenticated must keep what it is carrying, because the login flows depend on it —
+            // SignupController::confirm() reads invited_to_team, redeem_project and wanted_url out of
+            // the session *after* this runs, and the ordinary case for all three is a visitor who was
+            // anonymous when they started. Clearing there would break team signup and project redeem.
+            //
+            // The consequence on a genuine account switch is that those pending actions are dropped and
+            // have to be started again. That is the intended reading rather than a cost: redeeming the
+            // previous user's project into the arriving user's account is the same leak in another form.
+            // Before any of that: is this switch something we did, or something done to this browser?
+            //
+            // A session naming user V receiving a valid cookie naming user A, with no logout between,
+            // has two causes that are identical on the wire. A logs in over V — legitimate, and the
+            // flow this codebase actively supports. Or A's cookie was planted in V's browser, which a
+            // host inside COOKIE_DOMAIN can do, and then V goes on working inside A's account: their
+            // next upload becomes A's project, and A reads it from their own dashboard. Accepting the
+            // switch silently is what makes that pay.
+            //
+            // The discriminator is who minted the cookie. A login mints it server-side in this same
+            // request; a planted one only arrives. So refuse the identity we did not issue.
+            if ($identityChanged && $previousUid !== null && !$this->authCookie->issuedCredentialsThisRequest()) {
+                $this->refuseUnrequestedIdentitySwitch();
+
+                return;
+            }
+
+            if ($identityChanged && $previousUid !== null) {
+                $this->session->clear();
+            }
+
+            if ($identityChanged) {
+                $this->session->regenerateId();
+            }
+
+            $this->session->set('uid', $authenticatedUid);
         }
+    }
+
+    /**
+     * Answer an identity switch this process did not perform by refusing it outright.
+     *
+     * Three things, and each is required:
+     *
+     *  - The resolved user is discarded, so the `finally` in {@see authenticate()} reports
+     *    `logged = false` and the request continues as anonymous. It also leaves `user->uid` null,
+     *    which is what keeps renewIfStale() from sliding the planted cookie forward.
+     *  - The cookie is dropped. Destroying the session alone would fix nothing: the next request finds
+     *    no `uid`, so `previousUid` is null, the rule above does not fire, and the browser is quietly
+     *    authenticated as the planted identity one request later.
+     *  - The session goes, because it still names the previous user and nothing here can tell whether
+     *    what it holds was theirs.
+     *
+     * The ring is deliberately untouched — see {@see AuthCookie::dropCookie()}. A false positive must
+     * cost one re-login in one browser, not sign a real account out everywhere.
+     *
+     * Known false positive, accepted: two tabs, the second logging into another account, while a
+     * request from the first is in flight. That request carries the new cookie against the old session
+     * uid and is refused, costing one re-login. It needs a sub-request race to happen at all.
+     *
+     * Known limit, also accepted: if the planted cookie was scoped to a domain this application does
+     * not write — something above COOKIE_DOMAIN — then dropping it cannot remove it, and the browser
+     * presents it again on every request. The result is a user who cannot log in rather than a user
+     * silently working in somebody else's account. Fail-closed and visible beats silent and paying.
+     */
+    private function refuseUnrequestedIdentitySwitch(): void
+    {
+        $this->user = new UserStruct();
+
+        $this->authCookie->dropCookie();
+        $this->session->destroy();
     }
 
     /**

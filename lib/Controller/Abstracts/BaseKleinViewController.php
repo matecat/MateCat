@@ -101,7 +101,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->view->{'ajaxDomainsNumber'} = AppConfig::$AJAX_DOMAINS;
         $this->view->{'maxFileSize'} = AppConfig::$MAX_UPLOAD_FILE_SIZE;
         $this->view->{'maxTMXFileSize'} = AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE;
-        $this->view->{'flashMessages'} = FlashMessage::flush();
+        $this->view->{'flashMessages'} = (new FlashMessage($this->sessionStore()))->flush();
 
         if ($this->isLoggedIn()) {
             $this->getFeatureSet()->loadFromUserEmail($this->user->email ?? '');
@@ -124,11 +124,11 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
 
         // init oauth clients — graceful degradation on provider init failure
         try {
-            $this->view->{'googleAuthURL'} = (AppConfig::$GOOGLE_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GoogleProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
-            $this->view->{'githubAuthUrl'} = (AppConfig::$GITHUB_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GithubProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
-            $this->view->{'linkedInAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(LinkedInProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
-            $this->view->{'microsoftAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(MicrosoftProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
-            $this->view->{'facebookAuthUrl'} = (AppConfig::$FACEBOOK_OAUTH_CLIENT_ID) ? OauthClient::getInstance(FacebookProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+            $this->view->{'googleAuthURL'} = (AppConfig::$GOOGLE_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GoogleProvider::PROVIDER_NAME)->getAuthorizationUrl($this->sessionStore()) : "";
+            $this->view->{'githubAuthUrl'} = (AppConfig::$GITHUB_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GithubProvider::PROVIDER_NAME)->getAuthorizationUrl($this->sessionStore()) : "";
+            $this->view->{'linkedInAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(LinkedInProvider::PROVIDER_NAME)->getAuthorizationUrl($this->sessionStore()) : "";
+            $this->view->{'microsoftAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(MicrosoftProvider::PROVIDER_NAME)->getAuthorizationUrl($this->sessionStore()) : "";
+            $this->view->{'facebookAuthUrl'} = (AppConfig::$FACEBOOK_OAUTH_CLIENT_ID) ? OauthClient::getInstance(FacebookProvider::PROVIDER_NAME)->getAuthorizationUrl($this->sessionStore()) : "";
         } catch (TypeError) {
             $this->view->{'googleAuthURL'} = "";
             $this->view->{'githubAuthUrl'} = "";
@@ -142,7 +142,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
             $this->view->{'gdriveAuthURL'} = ($this->isLoggedIn() && AppConfig::isGDriveConfigured()) ? OauthClient::getInstance(
                 GoogleProvider::PROVIDER_NAME,
                 AppConfig::$HTTPHOST . "/gdrive/oauth/response"
-            )->getAuthorizationUrl($_SESSION, 'drive') : "";
+            )->getAuthorizationUrl($this->sessionStore(), 'drive') : "";
         } catch (TypeError) {
             $this->view->{'gdriveAuthURL'} = "";
         }
@@ -212,10 +212,22 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         die();
     }
 
+    /**
+     * Whether a post-login destination was recorded. Public so ViewLoginRedirectValidator can ask
+     * without the store leaking out of the controller.
+     */
+    public function hasWantedUrl(): bool
+    {
+        return $this->sessionStore()->has('wanted_url');
+    }
+
     public function redirectToWantedUrl(): never
     {
-        header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . $_SESSION['wanted_url'], false);
-        unset($_SESSION['wanted_url']);
+        $wantedUrl = $this->sessionStore()->get('wanted_url');
+        $wantedUrl = is_string($wantedUrl) ? $wantedUrl : '';
+        $this->sessionStore()->remove('wanted_url');
+
+        header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . $wantedUrl, false);
 
         if (AppConfig::$ENV === 'testing') {
             throw new RenderTerminatedException();
@@ -226,7 +238,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
 
     public function redirectToSignin(): never
     {
-        $_SESSION['wanted_url'] = ltrim($_SERVER['REQUEST_URI'], '/');
+        $this->sessionStore()->set('wanted_url', ltrim($_SERVER['REQUEST_URI'], '/'));
         header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . "signin", false);
 
         if (AppConfig::$ENV === 'testing') {

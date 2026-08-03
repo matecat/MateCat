@@ -18,6 +18,7 @@ use Plugins\Features\ReviewExtended\ChunkReviewModel;
 use Plugins\Features\ReviewExtended\TranslationIssueModel;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
+use Model\Users\UserStruct;
 
 class TestableTranslationIssueModel extends TranslationIssueModel
 {
@@ -78,7 +79,8 @@ class TranslationIssueModelTest extends AbstractTest
             $this->chunkReviewDao,
             $this->entryDao,
             $this->translationVersionDao,
-            $this->createMock(ProjectDao::class)
+            $this->createMock(ProjectDao::class),
+            new UserStruct(['uid' => 987, 'email' => 'actor@example.org'])
         );
 
         $model->mockChunkReviewModel = $this->chunkReviewModel;
@@ -121,7 +123,8 @@ class TranslationIssueModelTest extends AbstractTest
             $this->chunkReviewDao,
             $this->entryDao,
             $this->translationVersionDao,
-            $this->createMock(ProjectDao::class)
+            $this->createMock(ProjectDao::class),
+            new UserStruct(['uid' => 987, 'email' => 'actor@example.org'])
         );
     }
 

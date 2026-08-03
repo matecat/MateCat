@@ -2,6 +2,8 @@
 
 
 namespace Matecat\Core\Model\Users\Authentication;
+
+use Utils\Session\ArraySessionStore;
 use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Matecat\TestHelpers\AbstractTest;
@@ -51,7 +53,7 @@ class PasswordResetModelTest extends AbstractTest
     #[Test]
     public function constructorSetsTokenFromParam(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $dao = $this->makeMockDao();
         $model = new PasswordResetModel($session, $dao, $this->makeTokenStore(), 'my-token');
 
@@ -62,7 +64,7 @@ class PasswordResetModelTest extends AbstractTest
     #[Test]
     public function constructorFallsBackToSessionToken(): void
     {
-        $session = ['password_reset_token' => 'session-token'];
+        $session = new ArraySessionStore(['password_reset_token' => 'session-token']);
         $dao = $this->makeMockDao();
         $model = new PasswordResetModel($session, $dao, $this->makeTokenStore(), null);
 
@@ -76,7 +78,7 @@ class PasswordResetModelTest extends AbstractTest
         $this->expectException(ValidationError::class);
         $this->expectExceptionMessage('Invalid authentication token');
 
-        $session = [];
+        $session = new ArraySessionStore();
         $dao = $this->makeMockDao(null);
         $model = new PasswordResetModel($session, $dao, $this->makeTokenStore(), 'bad-token');
         $model->validateUser();
@@ -91,7 +93,7 @@ class PasswordResetModelTest extends AbstractTest
         $user = $this->makeUserWithToken();
         $user->confirmation_token_created_at = date('Y-m-d H:i:s', strtotime('2 hours ago'));
 
-        $session = [];
+        $session = new ArraySessionStore();
         $dao = $this->makeMockDao($user);
         $model = new PasswordResetModel($session, $dao, $this->makeTokenStore(), 'valid-token');
         $model->validateUser();
@@ -102,12 +104,12 @@ class PasswordResetModelTest extends AbstractTest
     {
         $user = $this->makeUserWithToken();
 
-        $session = [];
+        $session = new ArraySessionStore();
         $dao = $this->makeMockDao($user);
         $model = new PasswordResetModel($session, $dao, $this->makeTokenStore(), 'valid-token');
         $model->validateUser();
 
-        $this->assertSame('valid-token', $session['password_reset_token']);
+        $this->assertSame('valid-token', $session->get('password_reset_token'));
     }
 
     #[Test]
@@ -123,7 +125,7 @@ class PasswordResetModelTest extends AbstractTest
             ->method('revokeAllLoginTokens')
             ->with($user->uid);
 
-        $session = [];
+        $session = new ArraySessionStore();
         (new PasswordResetModel($session, $this->makeMockDao($user), $store, 'valid-token'))
             ->resetPassword('new-secure-pass!');
     }
@@ -134,7 +136,7 @@ class PasswordResetModelTest extends AbstractTest
         $store = $this->createMock(SessionTokenStoreHandler::class);
         $store->expects($this->never())->method('revokeAllLoginTokens');
 
-        $session = [];
+        $session = new ArraySessionStore();
         $model   = new PasswordResetModel($session, $this->makeMockDao(), $store, 'wrong-token');
 
         // An unusable token must not be able to log the account's devices out.
@@ -148,7 +150,7 @@ class PasswordResetModelTest extends AbstractTest
         $user = $this->makeUserWithToken();
         $oldPass = $user->pass;
 
-        $session = [];
+        $session = new ArraySessionStore();
         $dao = $this->makeMockDao($user);
         $model = new PasswordResetModel($session, $dao, $this->makeTokenStore(), 'valid-token');
         $model->resetPassword('new-secure-pass!');
@@ -163,7 +165,7 @@ class PasswordResetModelTest extends AbstractTest
         $this->expectException(ValidationError::class);
         $this->expectExceptionMessage('Invalid authentication token');
 
-        $session = [];
+        $session = new ArraySessionStore();
         $dao = $this->makeMockDao(null);
         $model = new PasswordResetModel($session, $dao, $this->makeTokenStore(), 'bad-token');
         $model->resetPassword('new-pass!');
@@ -175,7 +177,7 @@ class PasswordResetModelTest extends AbstractTest
         $user = $this->makeUserWithToken();
         $user->email_confirmed_at = null;
 
-        $session = [];
+        $session = new ArraySessionStore();
         $dao = $this->makeMockDao($user);
         $model = new PasswordResetModel($session, $dao, $this->makeTokenStore(), 'valid-token');
         $model->resetPassword('new-pass!');
@@ -186,20 +188,20 @@ class PasswordResetModelTest extends AbstractTest
     #[Test]
     public function flushWantedUrlReturnsAndClearsSession(): void
     {
-        $session = ['wanted_url' => 'https://example.com/target'];
+        $session = new ArraySessionStore(['wanted_url' => 'https://example.com/target']);
         $dao = $this->makeMockDao();
         $model = new PasswordResetModel($session, $dao, $this->makeTokenStore(), 'token');
 
         $url = $model->flushWantedURL();
 
         $this->assertSame('https://example.com/target', $url);
-        $this->assertArrayNotHasKey('wanted_url', $session);
+        $this->assertFalse($session->has('wanted_url'));
     }
 
     #[Test]
     public function flushWantedUrlReturnsDefaultWhenNotSet(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $dao = $this->makeMockDao();
         $model = new PasswordResetModel($session, $dao, $this->makeTokenStore(), 'token');
 
@@ -211,7 +213,7 @@ class PasswordResetModelTest extends AbstractTest
     #[Test]
     public function getUserReturnsNull(): void
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $dao = $this->makeMockDao();
         $model = new PasswordResetModel($session, $dao, $this->makeTokenStore(), 'token');
 
@@ -231,7 +233,7 @@ class PasswordResetModelTest extends AbstractTest
         // validateUser() guards the link click, but the form submission that follows reads the token
         // back out of the session and lands here. Without its own check, this method would accept a
         // token of any age as long as the session outlived the 30 minute window.
-        $session = ['password_reset_token' => 'valid-token'];
+        $session = new ArraySessionStore(['password_reset_token' => 'valid-token']);
         $model = new PasswordResetModel($session, $this->makeMockDao($user), $this->makeTokenStore(), null);
 
         try {
@@ -254,7 +256,7 @@ class PasswordResetModelTest extends AbstractTest
             $user->salt = $missingSalt;
             $user->pass = null;
 
-            $session = [];
+            $session = new ArraySessionStore();
             $model = new PasswordResetModel($session, $this->makeMockDao($user), $this->makeTokenStore(), 'valid-token');
             $model->resetPassword('new-pass');
 
@@ -274,7 +276,7 @@ class PasswordResetModelTest extends AbstractTest
     {
         $user = $this->makeUserWithToken();
 
-        $session = [];
+        $session = new ArraySessionStore();
         $model = new PasswordResetModel($session, $this->makeMockDao($user), $this->makeTokenStore(), 'valid-token');
         $model->resetPassword('new-pass');
 

@@ -88,8 +88,8 @@ class LoginController extends AbstractStatefulKleinController
         }
 
         // single-use: the token must match the csrf issued to THIS browser session (CWE-352)
-        $sessionCsrf = $_SESSION['login_csrf'] ?? null;
-        unset($_SESSION['login_csrf']);
+        $sessionCsrf = $this->sessionStore()->get('login_csrf');
+        $this->sessionStore()->remove('login_csrf');
 
         $tokenCsrf = $jwt['csrf'];
         if (!is_string($sessionCsrf) || !is_string($tokenCsrf) || !hash_equals($sessionCsrf, $tokenCsrf)) {
@@ -115,13 +115,13 @@ class LoginController extends AbstractStatefulKleinController
 
             $project = new RedeemableProject(
                 $user,
-                $_SESSION,
+                $this->sessionStore(),
                 new TeamDao($this->getDatabase())
             );
             $project->tryToRedeem();
 
-            AuthCookie::setCredentials($user, new SessionTokenStoreHandler());
-            AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase());
+            (new AuthCookie(new SessionTokenStoreHandler()))->setCredentials($user);
+            AuthenticationHelper::fromRequest($this->sessionStore(), $this->getDatabase());
 
             $this->response->code(200);
         } else {
@@ -142,7 +142,7 @@ class LoginController extends AbstractStatefulKleinController
     public function token(): void
     {
         $csrf = Utils::uuid4();
-        $_SESSION['login_csrf'] = $csrf;
+        $this->sessionStore()->set('login_csrf', $csrf);
 
         $jwt = new SimpleJWT(
             [
@@ -163,7 +163,27 @@ class LoginController extends AbstractStatefulKleinController
      */
     public function socketToken(): void
     {
-        if (empty($_SESSION['user'])) {
+        // Two conditions, and both are load-bearing.
+        //
+        // isLoggedIn() is the ring-proven one: it is false unless this request presented a cookie
+        // whose token is still live in active_user_login_tokens:<uid>. Without it this route minted
+        // an identity from the session alone, and authenticate() does not clear session['uid'] when
+        // the ring rejects — only destroyAuthentication() does. So a user whose tokens had been
+        // revoked elsewhere (logout on another device, password change, password reset) went on
+        // being handed freshly signed socket credentials for their own uid until the session died
+        // of idleness, which for anyone still making requests is never. This route carries no
+        // LoginValidator, so nothing else was checking.
+        //
+        // The session uid is still required, so the set of requests answered 406 does not grow: an
+        // api-key caller passes isLoggedIn() but never reaches setUserSession(), so it holds no
+        // session uid and is refused exactly as before. This route is the UI's, not the stateless
+        // API's.
+        //
+        // The minted uid is read from the ring-proven identity rather than from the session, so the
+        // token cannot name an account the ring did not just authenticate on this request.
+        $uid = $this->isLoggedIn() ? $this->user->uid : null;
+
+        if ($uid === null || $this->sessionStore()->get('uid') === null) {
             $this->response->code(406);
 
             return;
@@ -171,7 +191,7 @@ class LoginController extends AbstractStatefulKleinController
 
         $jwt = new SimpleJWT(
             [
-                "uid" => $_SESSION['user']->uid
+                "uid" => $uid
             ],
             AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
             AppConfig::$AUTHSECRET,

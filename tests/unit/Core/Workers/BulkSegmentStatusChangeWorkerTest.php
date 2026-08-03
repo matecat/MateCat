@@ -62,10 +62,11 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
 
     private function createWorker(
         ?JobStruct $chunk = null,
+        bool $userResolves = true,
     ): BulkSegmentStatusChangeWorker {
         $amq = $this->createStub(AMQHandler::class);
         $userDao = $this->createStub(UserDao::class);
-        $userDao->method('getByUid')->willReturn(new UserStruct());
+        $userDao->method('getByUid')->willReturn($userResolves ? new UserStruct() : null);
 
         $dbMock = $this->createStub(IDatabase::class);
         $dbMock->method('getConnection')->willReturn($this->pdoStub);
@@ -208,6 +209,21 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
         $worker->process($this->createQueueElement());
 
         $this->assertTrue(true);
+    }
+
+    /**
+     * Every chunk-review update the batch performs is booked to this user, so the message fails
+     * rather than going out unattributed. Before the actor was threaded, a vanished user surfaced
+     * downstream as uid 0, indistinguishable from a legitimate update.
+     */
+    #[Test]
+    public function processThrowsEndQueueWhenTheEnqueuingUserNoLongerExists(): void
+    {
+        $worker = $this->createWorker(userResolves: false);
+
+        $this->expectException(EndQueueException::class);
+        $this->expectExceptionMessage('Cannot resolve the user 5 that enqueued this bulk status change');
+        $worker->process($this->createQueueElement());
     }
 
     #[Test]

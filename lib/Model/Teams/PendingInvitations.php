@@ -45,9 +45,37 @@ class PendingInvitations
     }
 
     /**
+     * Is *this* invitation — this team and this email — still pending?
+     *
+     * Distinct from {@see listPendingInvitations()} on purpose, and the distinction is the point.
+     * Deciding whether one invitation may be acted on by reading the whole set and testing it for
+     * emptiness answers a different question: "does anybody at all have an open invitation to this
+     * team?" Under that test, withdrawing one person's invitation had no effect for as long as any
+     * other invitation to the same team stayed open — their link kept working. This asks about the
+     * member.
+     *
+     * The comparison is exact, and safe to be: the same _getInvitedEmails() loop that sends the
+     * invitation email mints the link's JWT and adds the address here, in one request, so the string
+     * in the token and the string in the set are the same bytes.
+     */
+    public function isPending(): bool
+    {
+        return (bool)$this->redisClient->sismember(
+            sprintf(self::REDIS_INVITATIONS_SET, $this->payload['team_id']),
+            $this->payload['email']
+        );
+    }
+
+    /**
+     * Every address with an open invitation to a team, for display.
+     *
+     * Named for what it returns. It was called hasPendingInvitation(), which reads as a question about
+     * one invitation and answers with a set — and that is exactly how it came to be used as an
+     * authorisation check.
+     *
      * @return array<string>
      */
-    public function hasPendingInvitation(int $id_team): array
+    public function listPendingInvitations(int $id_team): array
     {
         return $this->redisClient->smembers(sprintf(self::REDIS_INVITATIONS_SET, $id_team));
     }

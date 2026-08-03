@@ -3,6 +3,7 @@
 namespace Matecat\Core\Controllers;
 
 use ArrayObject;
+use Controller\API\App\SplitJobController as AppSplitJobController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\V2\SplitJobController;
@@ -11,12 +12,15 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobStruct;
 use Model\JobSplitMerge\JobSplitMergeManager;
 use Model\JobSplitMerge\SplitMergeProjectData;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
+use ReflectionMethod;
+use Model\Users\UserStruct;
 
 class TestableSplitJobController extends SplitJobController
 {
@@ -232,6 +236,20 @@ class SplitJobControllerTest extends AbstractTest
         self::assertSame($job, $result[0]);
     }
 
+    /**
+     * The conversion itself, isolated: filterJobsById() raises AuthenticationError (401) for the split
+     * endpoints, and checkMergeAccess() must turn that into a 404 for merge. Without this the retired
+     * JobMergeController's 404 would have silently become a 401 for its api-key callers.
+     */
+    #[Test]
+    public function checkMergeAccess_converts_access_error_into_not_found(): void
+    {
+        $job = $this->makeJobStub(5, 'pw', false);
+
+        $this->expectException(NotFoundException::class);
+        $this->callPrivate('checkMergeAccess', 4321, [$job]);
+    }
+
     #[Test]
     public function checkSplitAccess_passes_with_correct_password(): void
     {
@@ -287,9 +305,10 @@ class SplitJobControllerTest extends AbstractTest
         $project = new ProjectStruct();
         $project->id = 1;
 
-        $splitResult = new ArrayObject(['chunks' => [1, 2]]);
+        // splitResult is seeded here only to prove merge() ignores it: nothing on the merge path sets
+        // it, so echoing it back — as this endpoint used to — could only ever emit null.
         $data        = new SplitMergeProjectData(1);
-        $data->splitResult = $splitResult;
+        $data->splitResult = new ArrayObject(['chunks' => [1, 2]]);
 
         $pManager = $this->createMock(JobSplitMergeManager::class);
         $pManager->expects(self::once())
@@ -314,7 +333,7 @@ class SplitJobControllerTest extends AbstractTest
         $this->responseMock = $this->createMock(Response::class);
         $this->responseMock->expects(self::once())
             ->method('json')
-            ->with(['data' => $splitResult]);
+            ->with(['success' => true]);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
 
         $this->controller->merge();
@@ -406,6 +425,11 @@ class SplitJobControllerTest extends AbstractTest
         $this->controller->apply();
     }
 
+    /**
+     * 404, not the 401 the split endpoints raise for the same condition. checkMergeAccess() converts
+     * it deliberately, so that retiring JobMergeController — which answered 404 here through its
+     * ProjectPasswordValidator — left the status unchanged for this route's api-key callers.
+     */
     #[Test]
     public function merge_throws_when_job_not_found(): void
     {
@@ -432,7 +456,7 @@ class SplitJobControllerTest extends AbstractTest
             'job_pass'     => 'pw',
         ]);
 
-        $this->expectException(AuthenticationError::class);
+        $this->expectException(NotFoundException::class);
         $this->controller->merge();
     }
 
@@ -495,6 +519,8 @@ class SplitJobControllerTest extends AbstractTest
 
         try {
             $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
+            // getProjectData() builds a JobSplitMergeManager, which now requires the acting user.
+            $this->reflector->getProperty('user')->setValue($this->controller, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
             $projectId = $this->projectId($base);
 
@@ -541,5 +567,38 @@ class SplitJobControllerTest extends AbstractTest
         $job->method('isDeleted')->willReturn($deleted);
 
         return $job;
+    }
+
+    // ─── the App subclass ────────────────────────────────────────────
+
+    /**
+     * The App subclass exists so the routes serving the UI can reach a real session, and handing that
+     * store to the cart is its only behaviour. Covered from this file rather than one of its own
+     * because it is a single override on the class these tests already exercise.
+     */
+    #[Test]
+    public function app_subclass_hands_its_own_session_store_to_the_cart(): void
+    {
+        $controller = (new ReflectionClass(AppSplitJobController::class))->newInstanceWithoutConstructor();
+        $store      = $this->injectSessionStore($controller);
+
+        $method = new ReflectionMethod($controller, 'outsourceCartStore');
+
+        self::assertSame($store, $method->invoke($controller));
+    }
+
+    /**
+     * The other half of the pair, and the reason the override is not redundant: the v2/v3 controller is
+     * stateless, so its store refuses every operation and constructing a Cart over it would throw.
+     * Returning null is what keeps the cart invalidation inert on the api-key routes.
+     */
+    #[Test]
+    public function stateless_controller_reports_no_cart_store(): void
+    {
+        $controller = new TestableSplitJobController();
+
+        $method = new ReflectionMethod($controller, 'outsourceCartStore');
+
+        self::assertNull($method->invoke($controller));
     }
 }

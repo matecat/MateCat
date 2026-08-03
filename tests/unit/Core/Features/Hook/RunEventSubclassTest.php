@@ -32,6 +32,7 @@ use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
+use Model\Users\UserStruct;
 
 class RunEventSubclassTest extends AbstractTest
 {
@@ -118,9 +119,11 @@ class RunEventSubclassTest extends AbstractTest
     public function postJobSplittedEventExposesData(): void
     {
         $data = new SplitMergeProjectData(1, 'customer_1');
-        $event = new PostJobSplittedEvent($data);
+        $actingUser = new UserStruct(['uid' => 987, 'email' => 'actor@example.org']);
+        $event = new PostJobSplittedEvent($data, $actingUser);
 
         self::assertSame($data, $event->data);
+        self::assertSame($actingUser, $event->actingUser);
     }
 
     #[Test]
@@ -174,12 +177,15 @@ class RunEventSubclassTest extends AbstractTest
         $updateResult = ['affected_rows' => 1];
         $model = new \stdClass();
 
-        $event = new ChunkReviewUpdatedEvent($chunkReview, $updateResult, $model, $project);
+        $actingUser = new UserStruct(['uid' => 987, 'email' => 'actor@example.org']);
+
+        $event = new ChunkReviewUpdatedEvent($chunkReview, $updateResult, $model, $project, $actingUser);
 
         self::assertSame($chunkReview, $event->chunkReview);
         self::assertSame($updateResult, $event->updateResult);
         self::assertSame($model, $event->model);
         self::assertSame($project, $event->project);
+        self::assertSame($actingUser, $event->actingUser);
     }
 
     #[Test]
@@ -239,19 +245,23 @@ class RunEventSubclassTest extends AbstractTest
         $data = new SplitMergeProjectData(3, 'cust');
         $chunk = new JobStruct();
         $chunk->id = 8;
-        $event = new PostJobMergedEvent($data, $chunk);
+        $actingUser = new UserStruct(['uid' => 987, 'email' => 'actor@example.org']);
+        $event = new PostJobMergedEvent($data, $chunk, $actingUser);
 
         self::assertSame($data, $event->data);
         self::assertSame($chunk, $event->chunk);
+        self::assertSame($actingUser, $event->actingUser);
     }
 
     #[Test]
     public function setTranslationCommittedEventExposesContext(): void
     {
         $context = ['id_job' => 1, 'password' => 'pwd'];
-        $event = new SetTranslationCommittedEvent($context);
+        $actingUser = new UserStruct(['uid' => 987, 'email' => 'actor@example.org']);
+        $event = new SetTranslationCommittedEvent($context, $actingUser);
 
         self::assertSame($context, $event->context);
+        self::assertSame($actingUser, $event->actingUser);
     }
 
     #[Test]

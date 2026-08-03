@@ -468,7 +468,7 @@ class GetSearchController extends AbstractStatefulKleinController
                     'segment' => $segment,
                     'user' => $this->user,
                     'source_page_code' => $this->chunk->getSourcePage()
-                ]));
+                ], $this->user));
             } catch (Exception $e) {
                 $this->logger->debug("Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString());
 
