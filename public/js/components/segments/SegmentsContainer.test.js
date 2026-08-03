@@ -10,6 +10,15 @@ import CommentsConstants from '../../constants/CommentsConstants'
 import SegmentActions from '../../actions/SegmentActions'
 import SegmentsContainer from './SegmentsContainer'
 
+global.ResizeObserver = class ResizeObserver {
+  constructor(cb) {
+    this.cb = cb
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 // --- Mocks ---
 
 jest.mock('react-hotkeys-hook', () => ({
@@ -73,6 +82,7 @@ jest.mock('../../constants/SegmentConstants', () => ({
   SCROLL_TO_SELECTED_SEGMENT: 'SCROLL_TO_SELECTED_SEGMENT',
   OPEN_SIDE: 'OPEN_SIDE',
   CLOSE_SIDE: 'CLOSE_SIDE',
+  OPEN_SEGMENT: 'OPEN_SEGMENT',
 }))
 
 jest.mock('../../constants/CatToolConstants', () => ({
@@ -322,6 +332,10 @@ describe('SegmentsContainer', () => {
         SegmentConstants.CLOSE_SIDE,
         expect.any(Function),
       )
+      expect(SegmentStore.addListener).toHaveBeenCalledWith(
+        SegmentConstants.OPEN_SEGMENT,
+        expect.any(Function),
+      )
     })
 
     test('registers all CatToolStore listeners on mount', () => {
@@ -355,10 +369,39 @@ describe('SegmentsContainer', () => {
         SegmentConstants.SCROLL_TO_SEGMENT,
         expect.any(Function),
       )
+      expect(SegmentStore.removeListener).toHaveBeenCalledWith(
+        SegmentConstants.OPEN_SEGMENT,
+        expect.any(Function),
+      )
       expect(CatToolStore.removeListener).toHaveBeenCalledWith(
         CatToolConstants.CLIENT_CONNECT,
         expect.any(Function),
       )
+    })
+  })
+
+  describe('OPEN_SEGMENT event (sticky project bar blink signal)', () => {
+    test('does not crash when fired with no rows/segments loaded', () => {
+      renderComponent()
+      expect(() => {
+        act(() => {
+          mockSegmentStoreListeners[SegmentConstants.OPEN_SEGMENT]('1')
+        })
+      }).not.toThrow()
+    })
+
+    test('does not crash when fired after segments are rendered', () => {
+      renderComponent()
+      act(() => {
+        mockSegmentStoreListeners[SegmentConstants.RENDER_SEGMENTS](
+          makeSegments(['1', '2', '3']),
+        )
+      })
+      expect(() => {
+        act(() => {
+          mockSegmentStoreListeners[SegmentConstants.OPEN_SEGMENT]('2')
+        })
+      }).not.toThrow()
     })
   })
 

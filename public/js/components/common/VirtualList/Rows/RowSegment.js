@@ -8,6 +8,8 @@ import CatToolStore from '../../../../stores/CatToolStore'
 import ModalsActions from '../../../../actions/ModalsActions'
 import SegmentUtils from '../../../../utils/segmentUtils'
 
+const BLINK_ANIMATION_DURATION = 3600
+
 const LinkIcon = () => {
   return (
     <svg
@@ -99,14 +101,13 @@ export const ProjectBar = ({
   sideOpen,
   listRef,
   isSticky,
-  isBlinking,
+  isSegmentOpenedNotRendered,
 }) => {
   const [isFileChange, setIsFileChange] = useState(false)
   const [isBlinkingState, setIsBlinkingState] = useState(false)
 
   const ref = useRef()
   const previousFileIdRef = useRef()
-  const isBlikingRef = useRef()
 
   const openInstructionsModal = (id_file) => {
     const props = {
@@ -151,7 +152,6 @@ export const ProjectBar = ({
     const container = ref.current
     const filenameElement = ref.current.firstChild
     const wordcounterElement = ref.current.children[1]
-
     if (
       isSticky &&
       idFileSegment !== previousFileIdRef.current &&
@@ -172,10 +172,7 @@ export const ProjectBar = ({
 
     previousFileIdRef.current = idFileSegment
 
-    return () => {
-      clearTimeout(tmOutReset)
-      setIsBlinkingState(false)
-    }
+    return () => clearTimeout(tmOutReset)
   }, [isSticky, idFileSegment])
 
   useEffect(() => {
@@ -202,18 +199,20 @@ export const ProjectBar = ({
   }, [isSticky, listRef])
 
   useEffect(() => {
-    let tmOut
+    let tmOutBlink
 
-    if (isSticky) {
-      if (isBlinking) {
-        isBlikingRef.current = true
-        setTimeout(() => (isBlikingRef.current = false), 300)
+    if (isSticky && typeof isSegmentOpenedNotRendered === 'symbol') {
+      if (isSegmentOpenedNotRendered.description === 'true') {
+        setIsBlinkingState(true)
+        tmOutBlink = setTimeout(
+          () => setIsBlinkingState(false),
+          BLINK_ANIMATION_DURATION,
+        )
       }
-      if (isFileChange && isBlikingRef.current) setIsBlinkingState(true)
     }
 
-    return () => clearTimeout(tmOut)
-  }, [isSticky, isBlinking, isFileChange])
+    return () => clearTimeout(tmOutBlink)
+  }, [isSticky, isSegmentOpenedNotRendered])
 
   const previousScrollTopRef = useRef(0)
   const isScrollingReverseRef = useRef(false)

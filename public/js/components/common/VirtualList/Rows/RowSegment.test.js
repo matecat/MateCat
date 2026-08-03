@@ -191,6 +191,116 @@ describe('ProjectBar', () => {
     })
   })
 
+  describe('blink animation (isSegmentOpenedNotRendered)', () => {
+    const BLINK_ANIMATION_DURATION = 3600
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it('does not blink by default (no isSegmentOpenedNotRendered prop)', () => {
+      const {container} = render(
+        <ProjectBar {...defaultProjectBarProps} isSticky={true} />,
+      )
+      expect(
+        container.querySelector('.projectbar-filename'),
+      ).not.toHaveClass('project-bar-blink')
+    })
+
+    it('blinks when isSegmentOpenedNotRendered describes "true"', () => {
+      const {container} = render(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={true}
+          isSegmentOpenedNotRendered={Symbol(true)}
+        />,
+      )
+      expect(container.querySelector('.projectbar-filename')).toHaveClass(
+        'project-bar-blink',
+      )
+    })
+
+    it('does not blink when isSegmentOpenedNotRendered describes "false"', () => {
+      const {container} = render(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={true}
+          isSegmentOpenedNotRendered={Symbol(false)}
+        />,
+      )
+      expect(
+        container.querySelector('.projectbar-filename'),
+      ).not.toHaveClass('project-bar-blink')
+    })
+
+    it('does not blink when not sticky, even if the signal says true', () => {
+      const {container} = render(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={false}
+          isSegmentOpenedNotRendered={Symbol(true)}
+        />,
+      )
+      expect(
+        container.querySelector('.projectbar-filename'),
+      ).not.toHaveClass('project-bar-blink')
+    })
+
+    it('clears the blink automatically after the animation duration, even without an animationend event', () => {
+      jest.useFakeTimers()
+      const {container} = render(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={true}
+          isSegmentOpenedNotRendered={Symbol(true)}
+        />,
+      )
+      expect(container.querySelector('.projectbar-filename')).toHaveClass(
+        'project-bar-blink',
+      )
+
+      act(() => {
+        jest.advanceTimersByTime(BLINK_ANIMATION_DURATION)
+      })
+
+      expect(
+        container.querySelector('.projectbar-filename'),
+      ).not.toHaveClass('project-bar-blink')
+    })
+
+    it('re-triggers the blink when a new Symbol signal describes "true" again', () => {
+      jest.useFakeTimers()
+      const {container, rerender} = render(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={true}
+          isSegmentOpenedNotRendered={Symbol(true)}
+        />,
+      )
+
+      act(() => {
+        jest.advanceTimersByTime(BLINK_ANIMATION_DURATION)
+      })
+      expect(
+        container.querySelector('.projectbar-filename'),
+      ).not.toHaveClass('project-bar-blink')
+
+      act(() => {
+        rerender(
+          <ProjectBar
+            {...defaultProjectBarProps}
+            isSticky={true}
+            isSegmentOpenedNotRendered={Symbol(true)}
+          />,
+        )
+      })
+
+      expect(container.querySelector('.projectbar-filename')).toHaveClass(
+        'project-bar-blink',
+      )
+    })
+  })
+
   describe('scroll direction tracking', () => {
     it('detects forward scroll', () => {
       const listRef = createMockListRef(0)
