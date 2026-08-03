@@ -943,6 +943,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
             listRef: listRef.current,
             isSticky: true,
             isSegmentOpenedNotRendered,
+            previousOpenedFileIdRef,
           }}
         />
       </div>

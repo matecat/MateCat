@@ -102,6 +102,7 @@ export const ProjectBar = ({
   listRef,
   isSticky,
   isSegmentOpenedNotRendered,
+  previousOpenedFileIdRef,
 }) => {
   const [isFileChange, setIsFileChange] = useState(false)
   const [isBlinkingState, setIsBlinkingState] = useState(false)
@@ -221,6 +222,8 @@ export const ProjectBar = ({
       listRef?.scrollTop < previousScrollTopRef.current
   }
   previousScrollTopRef.current = listRef?.scrollTop
+
+  if (isSticky) previousOpenedFileIdRef.current = currentSegment.id_file
 
   return (
     <div
