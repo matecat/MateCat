@@ -264,7 +264,7 @@ class SearchModel
         }
 
         if ($this->queryParams->includeLocked === false) {
-            $search_in_ices = " AND match_type != '" . InternalMatchesConstants::TM_ICE . "' ";
+            $search_in_ices = " AND COALESCE(st.match_type,'') != '" . InternalMatchesConstants::TM_ICE . "' ";
         }
 
         $sql = "
@@ -304,7 +304,7 @@ class SearchModel
         }
 
         if ($this->queryParams->includeLocked === false) {
-            $search_in_ices = " AND match_type != '" . InternalMatchesConstants::TM_ICE . "' ";
+            $search_in_ices = " AND COALESCE(st.match_type,'') != '" . InternalMatchesConstants::TM_ICE . "' ";
         }
 
         $sql = "
