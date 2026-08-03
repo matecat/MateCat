@@ -17,6 +17,7 @@ use Model\FeaturesBase\Hook\Event\Run\SetTranslationCommittedEvent;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\Projects\ProjectDao;
+use Model\Propagation\PropagationResult;
 use Model\Search\ReplaceEventStruct;
 use Model\Search\SearchModel;
 use Model\Search\SearchQueryParamsStruct;
@@ -26,6 +27,7 @@ use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationVersions;
+use Plugins\Features\TranslationVersions\StoreTranslationEventParams;
 use ReflectionException;
 use RuntimeException;
 use TypeError;
@@ -395,10 +397,13 @@ class GetSearchController extends AbstractStatefulKleinController
                 continue;
             }
 
-            // Propagation
-            $propagationTotal = [
-                'propagated_ids' => []
-            ];
+            // Replace-all never propagates: each matched segment is written on its own, so there is
+            // no repetition set to fan out to. The empty result is what the two consumers below
+            // require — `storeTranslationEvent()` types `propagation` as non-nullable, and
+            // `SetTranslationCommittedEvent`'s `propagated_ids` is read unguarded by
+            // `plugins/translated/lib/Features/Translated.php:479` on its way into a Kafka payload,
+            // where an empty list is the truthful value and null would be a third state.
+            $propagationTotal = PropagationResult::empty();
 
             if ($isHistoryReplay) {
                 // Undo/redo: the row already holds the exact historical text to restore.
@@ -438,16 +443,16 @@ class GetSearchController extends AbstractStatefulKleinController
                 $segmentTranslationDao->updateTranslationAndStatusAndDate($new_translation);
 
                 // preSetTranslationCommitted
-                $versionsHandler->storeTranslationEvent([
-                    'translation' => $new_translation,
-                    'old_translation' => $old_translation,
-                    'propagation' => $propagationTotal,
-                    'chunk' => $this->chunk,
-                    'user' => $this->user,
-                    'source_page_code' => $this->chunk->getSourcePage(),
-                    'features' => $this->featureSet,
-                    'project' => $project
-                ]);
+                $versionsHandler->storeTranslationEvent(new StoreTranslationEventParams(
+                    $new_translation,
+                    $old_translation,
+                    $propagationTotal,
+                    $this->chunk,
+                    $this->user,
+                    $this->chunk->getSourcePage(),
+                    $this->featureSet,
+                    $project
+                ));
 
                 $db->commit();
                 $committed[] = $old_translation;
@@ -463,7 +468,7 @@ class GetSearchController extends AbstractStatefulKleinController
                 $this->featureSet->dispatch(new SetTranslationCommittedEvent([
                     'translation' => $new_translation,
                     'old_translation' => $old_translation,
-                    'propagated_ids' => $propagationTotal['propagated_ids'],
+                    'propagated_ids' => $propagationTotal->propagatedIds,
                     'chunk' => $this->chunk,
                     'segment' => $segment,
                     'user' => $this->user,

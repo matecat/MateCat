@@ -33,6 +33,7 @@ use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
+use Model\Propagation\PropagationResult;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentDisabledService;
 use Model\Segments\SegmentMetadataDao;
@@ -47,6 +48,7 @@ use Model\WordCount\WordCountStruct;
 use PDOException;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationVersions;
+use Plugins\Features\TranslationVersions\StoreTranslationEventParams;
 use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 use ReflectionException;
 use RuntimeException;
@@ -328,7 +330,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @param string $errJson Serialized QA warnings (or empty string)
      * @param QA $check The QA checker instance
      *
-     * @return array<string, mixed>
+     * @return PropagationResult
      * @throws Exception
      * @throws TypeError
      * @throws DivisionByZeroError
@@ -339,7 +341,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         string $translation,
         string $errJson,
         QA $check
-    ): array {
+    ): PropagationResult {
         /**
          * Update Time to Edit and
          *
@@ -387,11 +389,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             'logged_user' => $this->user
         ]));
 
-        $propagationTotal = [
-            'totals' => [],
-            'propagated_ids' => [],
-            'segments_for_propagation' => []
-        ];
+        $propagationTotal = PropagationResult::empty();
 
         if ($this->data['propagate'] && in_array($this->data['status'], [
                 TranslationStatus::STATUS_TRANSLATED,
@@ -438,16 +436,16 @@ class SetTranslationController extends AbstractStatefulKleinController
          * This is also the init handler of all R1/R2 handling and Qr score calculation by
          * by TranslationEventsHandler and BatchReviewProcessor
          */
-        $versionsHandler->storeTranslationEvent([
-            'translation' => $newTranslation,
-            'old_translation' => $oldTranslation,
-            'propagation' => $propagationTotal,
-            'chunk' => $this->chunk,
-            'user' => $this->user,
-            'source_page_code' => ReviewUtils::revisionNumberToSourcePage($this->data['revisionNumber']),
-            'features' => $this->featureSet,
-            'project' => $this->data['project']
-        ]);
+        $versionsHandler->storeTranslationEvent(new StoreTranslationEventParams(
+            $newTranslation,
+            $oldTranslation,
+            $propagationTotal,
+            $this->chunk,
+            $this->user,
+            ReviewUtils::revisionNumberToSourcePage($this->data['revisionNumber']),
+            $this->featureSet,
+            $this->data['project']
+        ));
 
         return $propagationTotal;
     }
@@ -460,7 +458,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      *
      * @param SegmentTranslationStruct $newTranslation
      * @param SegmentTranslationStruct $oldTranslation
-     * @param array<string, mixed> $propagationTotal
+     * @param PropagationResult $propagationTotal
      * @param QA $check
      *
      * @return array<string, mixed>
@@ -476,7 +474,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     private function buildResult(
         SegmentTranslationStruct $newTranslation,
         SegmentTranslationStruct $oldTranslation,
-        array $propagationTotal,
+        PropagationResult $propagationTotal,
         QA $check
     ): array {
         $newTotals = WordCountStruct::loadFromJob($this->data['chunk']);
@@ -513,7 +511,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         $this->getFeatureSet()->dispatch(new SetTranslationCommittedEvent([
             'translation' => $newTranslation,
             'old_translation' => $oldTranslation,
-            'propagated_ids' => $propagationTotal['segments_for_propagation']['propagated_ids'] ?? null,
+            'propagated_ids' => $propagationTotal->propagatedIds,
             'chunk' => $this->data['chunk'],
             'segment' => $this->data['segment'],
             'user' => $this->user,
@@ -529,7 +527,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      *
      * @param SegmentTranslationStruct $newTranslation
      * @param SegmentTranslationStruct $oldTranslation
-     * @param array<string, mixed> $propagationTotal
+     * @param PropagationResult $propagationTotal
      * @param array<string, mixed> $result Passed by reference — adds 'propagation' key
      *
      * @return void
@@ -545,7 +543,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     private function finalizeTranslation(
         SegmentTranslationStruct $newTranslation,
         SegmentTranslationStruct $oldTranslation,
-        array $propagationTotal,
+        PropagationResult $propagationTotal,
         array &$result
     ): void {
         //EVERY time a user changes a row in his job when the job is completed,

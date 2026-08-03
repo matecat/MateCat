@@ -2,6 +2,7 @@
 
 namespace View\API\V2\Json;
 
+use Model\Propagation\PropagationResult;
 use Model\Propagation\PropagationTotalStruct;
 
 class Propagation
@@ -22,15 +23,8 @@ class Propagation
         $this->propagation_PropagationTotalStruct = $propagation_PropagationTotalStruct;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    public function render(): array
+    public function render(): PropagationResult
     {
-        return [
-            'totals' => $this->propagation_PropagationTotalStruct->getTotals(),
-            'propagated_ids' => $this->propagation_PropagationTotalStruct->getPropagatedIds(),
-            'segments_for_propagation' => $this->propagation_PropagationTotalStruct->getSegmentsForPropagation(),
-        ];
+        return PropagationResult::fromTotalStruct($this->propagation_PropagationTotalStruct);
     }
 }

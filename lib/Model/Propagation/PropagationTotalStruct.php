@@ -72,7 +72,6 @@ class PropagationTotalStruct extends AbstractDaoSilentStruct implements IDaoStru
     {
         if (false === in_array($id_segment, $this->propagated_ids)) {
             $this->propagated_ids[] = $id_segment;
-            $this->segments_for_propagation['propagated_ids'][] = $id_segment;
         }
     }
 

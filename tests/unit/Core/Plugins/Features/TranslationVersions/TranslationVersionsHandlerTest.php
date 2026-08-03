@@ -9,6 +9,7 @@ use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
+use Model\Propagation\PropagationResult;
 use Model\Segments\SegmentDao;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
@@ -20,6 +21,7 @@ use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use Plugins\Features\TranslationVersions\Handlers\TranslationVersionsHandler;
+use Plugins\Features\TranslationVersions\StoreTranslationEventParams;
 use RuntimeException;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
@@ -228,6 +230,24 @@ class TranslationVersionsHandlerTest extends AbstractTest
         $project->id = self::PROJECT_ID;
 
         return $project;
+    }
+
+    /**
+     * The eight arguments `storeTranslationEvent()` needs. Only `propagation` varies between the
+     * cases below, so it is the only parameter.
+     */
+    private function makeParams(?PropagationResult $propagation = null): StoreTranslationEventParams
+    {
+        return new StoreTranslationEventParams(
+            $this->makeTranslation('new text', TranslationStatus::STATUS_TRANSLATED),
+            $this->makeTranslation('old text', TranslationStatus::STATUS_TRANSLATED),
+            $propagation ?? PropagationResult::empty(),
+            $this->makeChunk(),
+            new UserStruct(['uid' => 987, 'email' => 'actor@example.org']),
+            SourcePages::SOURCE_PAGE_TRANSLATE,
+            $this->createStub(FeatureSet::class),
+            $this->makeProject()
+        );
     }
 
     private function makeTranslation(
@@ -487,10 +507,10 @@ class TranslationVersionsHandlerTest extends AbstractTest
         $result = $handler->propagateTranslation($this->makeTranslation('ciao mondo'));
 
         // The real propagation query executed and PropagationApi::render() shaped the result.
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('totals', $result);
-        $this->assertArrayHasKey('propagated_ids', $result);
-        $this->assertArrayHasKey('segments_for_propagation', $result);
+        // The three values are properties now, so their presence is guaranteed by the type; what
+        // is worth asserting is that the handler hands back the view's object unchanged.
+        $this->assertInstanceOf(PropagationResult::class, $result);
+        $this->assertSame(['propagated', 'not_propagated'], array_keys($result->segmentsForPropagation));
     }
 
     // --- storeTranslationEvent() fan-out (event-side seams, no real version SQL) ---
@@ -507,41 +527,20 @@ class TranslationVersionsHandlerTest extends AbstractTest
         $handler->setEventsHandlerOverride($eventsHandler);
         $handler->setBatchReviewProcessorOverride($this->createStub(BatchReviewProcessor::class));
 
-        $handler->storeTranslationEvent([
-            'user'             => new UserStruct(['uid' => 987, 'email' => 'actor@example.org']),
-            'translation'      => $this->makeTranslation('new text', TranslationStatus::STATUS_TRANSLATED),
-            'old_translation'  => $this->makeTranslation('old text', TranslationStatus::STATUS_TRANSLATED),
-            'source_page_code' => SourcePages::SOURCE_PAGE_TRANSLATE,
-            'chunk'            => $this->makeChunk(),
-            'features'         => $this->createStub(FeatureSet::class),
-            'project'          => $this->makeProject(),
-        ]);
+        $handler->storeTranslationEvent($this->makeParams());
 
         $this->assertCount(1, $eventsHandler->getEvents());
     }
 
     /**
-     * Both production callers pass their own $this->user, so an absent actor is a wiring bug in a
-     * new caller. Fails loudly rather than attributing the batch's chunk-review updates to nobody.
+     * There is no longer a `storeTranslationEventRejectsAMissingActingUser` case here. It asserted
+     * the handler's own `storeTranslationEvent requires the acting user in $params['user']` throw,
+     * which existed because the eight-key array could arrive without one. `user` is a required
+     * constructor argument on `StoreTranslationEventParams` now, so a call with no actor cannot be
+     * written — the guard is enforced by the type, and
+     * `StoreTranslationEventParamsTest::everyConstructorParameterIsRequiredAndNonNullable` is what
+     * keeps it that way.
      */
-    #[Test]
-    public function storeTranslationEventRejectsAMissingActingUser(): void
-    {
-        $handler = $this->makeHandler();
-        $handler->setBatchReviewProcessorOverride($this->createStub(BatchReviewProcessor::class));
-
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage("storeTranslationEvent requires the acting user in \$params['user']");
-
-        $handler->storeTranslationEvent([
-            'translation'      => $this->makeTranslation('new text', TranslationStatus::STATUS_TRANSLATED),
-            'old_translation'  => $this->makeTranslation('old text', TranslationStatus::STATUS_TRANSLATED),
-            'source_page_code' => SourcePages::SOURCE_PAGE_TRANSLATE,
-            'chunk'            => $this->makeChunk(),
-            'features'         => $this->createStub(FeatureSet::class),
-            'project'          => $this->makeProject(),
-        ]);
-    }
 
     #[Test]
     public function storeTranslationEventWithPropagation(): void
@@ -557,22 +556,11 @@ class TranslationVersionsHandlerTest extends AbstractTest
 
         $propagatedSegment = $this->makeTranslation('propagated text', TranslationStatus::STATUS_TRANSLATED);
 
-        $handler->storeTranslationEvent([
-            'user'             => new UserStruct(['uid' => 42]),
-            'translation'      => $this->makeTranslation('new text', TranslationStatus::STATUS_TRANSLATED),
-            'old_translation'  => $this->makeTranslation('old text', TranslationStatus::STATUS_TRANSLATED),
-            'source_page_code' => SourcePages::SOURCE_PAGE_TRANSLATE,
-            'chunk'            => $this->makeChunk(),
-            'features'         => $this->createStub(FeatureSet::class),
-            'project'          => $this->makeProject(),
-            'propagation'      => [
-                'segments_for_propagation' => [
-                    'propagated' => [
-                        'not_ice' => ['object' => [$propagatedSegment]],
-                    ],
-                ],
+        $handler->storeTranslationEvent($this->makeParams(new PropagationResult([], [], [
+            'propagated' => [
+                'not_ice' => ['object' => [$propagatedSegment]],
             ],
-        ]);
+        ])));
 
         $this->assertCount(2, $eventsHandler->getEvents());
     }
@@ -592,23 +580,12 @@ class TranslationVersionsHandlerTest extends AbstractTest
         $iceSegment    = $this->makeTranslation('ice text', TranslationStatus::STATUS_TRANSLATED);
         $notIceSegment = $this->makeTranslation('not ice text', TranslationStatus::STATUS_TRANSLATED);
 
-        $handler->storeTranslationEvent([
-            'user'             => new UserStruct(['uid' => 987, 'email' => 'actor@example.org']),
-            'translation'      => $this->makeTranslation('new text', TranslationStatus::STATUS_TRANSLATED),
-            'old_translation'  => $this->makeTranslation('old text', TranslationStatus::STATUS_TRANSLATED),
-            'source_page_code' => SourcePages::SOURCE_PAGE_TRANSLATE,
-            'chunk'            => $this->makeChunk(),
-            'features'         => $this->createStub(FeatureSet::class),
-            'project'          => $this->makeProject(),
-            'propagation'      => [
-                'segments_for_propagation' => [
-                    'propagated' => [
-                        'not_ice' => ['object' => [$notIceSegment]],
-                        'ice'     => ['object' => [$iceSegment]],
-                    ],
-                ],
+        $handler->storeTranslationEvent($this->makeParams(new PropagationResult([], [], [
+            'propagated' => [
+                'not_ice' => ['object' => [$notIceSegment]],
+                'ice'     => ['object' => [$iceSegment]],
             ],
-        ]);
+        ])));
 
         $this->assertCount(3, $eventsHandler->getEvents());
     }
@@ -629,14 +606,6 @@ class TranslationVersionsHandlerTest extends AbstractTest
         $this->expectExceptionMessage('DB error');
         $this->expectExceptionCode(-2000);
 
-        $handler->storeTranslationEvent([
-            'user'             => new UserStruct(['uid' => 987, 'email' => 'actor@example.org']),
-            'translation'      => $this->makeTranslation('new', TranslationStatus::STATUS_TRANSLATED),
-            'old_translation'  => $this->makeTranslation('old', TranslationStatus::STATUS_TRANSLATED),
-            'source_page_code' => SourcePages::SOURCE_PAGE_TRANSLATE,
-            'chunk'            => $this->makeChunk(),
-            'features'         => $this->createStub(FeatureSet::class),
-            'project'          => $this->makeProject(),
-        ]);
+        $handler->storeTranslationEvent($this->makeParams());
     }
 }
