@@ -42,6 +42,7 @@ const defaultProjectBarProps = {
   sideOpen: false,
   isSticky: false,
   listRef: null,
+  previousOpenedFileIdRef: {current: undefined},
 }
 
 const createMockListRef = (scrollTop = 0) => {
@@ -344,6 +345,55 @@ describe('ProjectBar', () => {
         />,
       )
       expect(listRef.scrollTop).toBe(50)
+    })
+  })
+
+  describe('previousOpenedFileIdRef syncing (isSticky=true)', () => {
+    it('sets the ref to the rendered segment file id when sticky', () => {
+      const previousOpenedFileIdRef = {current: undefined}
+      render(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={true}
+          previousOpenedFileIdRef={previousOpenedFileIdRef}
+        />,
+      )
+      expect(previousOpenedFileIdRef.current).toBe(mockSegment.id_file)
+    })
+
+    it('updates the ref again when the sticky bar re-renders for a different file', () => {
+      const previousOpenedFileIdRef = {current: undefined}
+      const segmentFile2 = {...mockSegment, id_file: 2}
+      const {rerender} = render(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={true}
+          previousOpenedFileIdRef={previousOpenedFileIdRef}
+        />,
+      )
+      expect(previousOpenedFileIdRef.current).toBe(1)
+
+      rerender(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={true}
+          segment={segmentFile2}
+          previousOpenedFileIdRef={previousOpenedFileIdRef}
+        />,
+      )
+      expect(previousOpenedFileIdRef.current).toBe(2)
+    })
+
+    it('does not touch the ref when not sticky', () => {
+      const previousOpenedFileIdRef = {current: 'unchanged'}
+      render(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={false}
+          previousOpenedFileIdRef={previousOpenedFileIdRef}
+        />,
+      )
+      expect(previousOpenedFileIdRef.current).toBe('unchanged')
     })
   })
 })
