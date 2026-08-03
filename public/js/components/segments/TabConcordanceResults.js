@@ -4,6 +4,7 @@ import React, {
   useImperativeHandle,
   useState,
   forwardRef,
+  createRef,
 } from 'react'
 import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
@@ -143,15 +144,26 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
           </span>
         </li>
         <ul className="graysmall-details">
-          <li>{item.last_update_date}</li>
-          <li className="graydesc">
-            <span className="bold">
-              {ApplicationStore.getLanguageNameFromLocale(item.target)}
-            </span>
-          </li>
           <li className="graydesc">
             Source: <span className={'bold'}>{item.created_by}</span>
           </li>
+          <li>{item.last_update_date}</li>
+          <li
+            ref={createRef()}
+            className={`percent ${
+              item.target !== config.target_rfc ||
+              item.source !== config.source_rfc
+                ? 'per-yellow-variant'
+                : 'per-green'
+            } `}
+          >
+            {item.source} {'>'} {item.target}
+          </li>
+          {/*<li className="graydesc">
+            <span className="bold">
+              {ApplicationStore.getLanguageNameFromLocale(item.target)}
+            </span>
+          </li>*/}
         </ul>
       </ul>
     )

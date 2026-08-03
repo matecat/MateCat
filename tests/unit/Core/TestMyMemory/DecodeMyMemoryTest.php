@@ -301,5 +301,83 @@ LAB;
         $this->assertEquals("", $property->getValue($actual_result));
     }
 
+    /**
+     * Proves that the source/target language codes returned by MyMemory on the match
+     * itself take precedence over the ones held in $this->_config: the config values
+     * are only a fallback for when MyMemory omits them from the match.
+     * @group   regression
+     * @covers  MyMemory::_decode
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function test__decode_prefers_match_source_and_target_over_config_values()
+    {
+        $reflector = new ReflectionClass($this->myMemory);
+        $configProperty = $reflector->getProperty('_config');
+        $configProperty->setValue($this->myMemory, array_merge(
+            $configProperty->getValue($this->myMemory),
+            ['source' => 'fr-FR', 'target' => 'de-DE']
+        ));
+
+        $json_input = <<<LAB
+{"responseData":{"translatedText":null,"match":null},"responseDetails":"","responseStatus":200,"matches":[{"id":"1","segment":"Hello world","translation":"Ciao mondo","quality":"70","reference":"","usage-count":1,"subject":"All","created-by":"MyMemory","last-updated-by":"MyMemory","create-date":"2016-05-02 17:15:11","last-update-date":"2016-05-02 17:15:11","tm_properties":"","match":0.95,"source":"en-US","target":"it-IT"}]}
+LAB;
+
+        $array_params = [
+            'q' => 'Hello world',
+            'langpair' => 'en-US|it-IT',
+            'de' => 'demo@matecat.com',
+            'mt' => null,
+            'numres' => 100,
+        ];
+
+        /**
+         * @var $actual_result GetMemoryResponse
+         */
+        $actual_result = $this->method->invoke($this->myMemory, $json_input, $array_params, 'gloss_get_relative_url');
+        $array = $actual_result->get_matches_as_array(1);
+
+        $this->assertSame('en-US', $array[0]['source'], 'match source must win over config source');
+        $this->assertSame('it-IT', $array[0]['target'], 'match target must win over config target');
+    }
+
+    /**
+     * Proves that when MyMemory omits source/target from the match, the values
+     * configured on the engine ($this->_config) are used as a fallback.
+     * @group   regression
+     * @covers  MyMemory::_decode
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function test__decode_falls_back_to_config_source_and_target_when_match_omits_them()
+    {
+        $reflector = new ReflectionClass($this->myMemory);
+        $configProperty = $reflector->getProperty('_config');
+        $configProperty->setValue($this->myMemory, array_merge(
+            $configProperty->getValue($this->myMemory),
+            ['source' => 'fr-FR', 'target' => 'de-DE']
+        ));
+
+        $json_input = <<<LAB
+{"responseData":{"translatedText":null,"match":null},"responseDetails":"","responseStatus":200,"matches":[{"id":"1","segment":"Hello world","translation":"Ciao mondo","quality":"70","reference":"","usage-count":1,"subject":"All","created-by":"MyMemory","last-updated-by":"MyMemory","create-date":"2016-05-02 17:15:11","last-update-date":"2016-05-02 17:15:11","tm_properties":"","match":0.95}]}
+LAB;
+
+        $array_params = [
+            'q' => 'Hello world',
+            'langpair' => 'fr-FR|de-DE',
+            'de' => 'demo@matecat.com',
+            'mt' => null,
+            'numres' => 100,
+        ];
+
+        /**
+         * @var $actual_result GetMemoryResponse
+         */
+        $actual_result = $this->method->invoke($this->myMemory, $json_input, $array_params, 'gloss_get_relative_url');
+        $array = $actual_result->get_matches_as_array(1);
+
+        $this->assertSame('fr-FR', $array[0]['source'], 'config source must be used as fallback');
+        $this->assertSame('de-DE', $array[0]['target'], 'config target must be used as fallback');
+    }
 
 }
