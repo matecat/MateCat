@@ -602,13 +602,24 @@ const SegmentActions = {
       !config.isReview &&
       config.job_completion_current_phase == 'revise'
     if (projectCompletionCheck) {
-      let message =
-        'All segments are in <b>read-only mode</b> because this job is under review.'
+      let message = (
+        <>
+          All segments are in <b>read-only mode</b> because this job is under
+          review.
+        </>
+      )
 
       if (config.chunk_completion_undoable && config.last_completion_event_id) {
-        message =
-          message +
-          '<p class=\'warning-call-to\'><a href="javascript:void(0);" id="showTranslateWarningMessageUndoLink" >Re-Open Job</a></p>'
+        message = (
+          <>
+            {message}
+            <p className="warning-call-to">
+              <a href="#" id="showTranslateWarningMessageUndoLink">
+                Re-Open Job
+              </a>
+            </p>
+          </>
+        )
       }
 
       addNotification({
@@ -619,7 +630,6 @@ const SegmentActions = {
         text: message,
         title: 'Warning',
         type: 'warning',
-        allowHtml: true,
       })
     }
     if (TextUtils.justSelecting('readonly')) return

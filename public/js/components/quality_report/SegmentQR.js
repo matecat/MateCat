@@ -327,7 +327,7 @@ class SegmentQR extends React.Component {
     return text
   }
   allowHTML(string) {
-    return {__html: string}
+    return TextUtils.sanitizedHTML(string)
   }
   componentDidUpdate(prevProps) {
     if (prevProps.revisionToShow !== this.props.revisionToShow) {

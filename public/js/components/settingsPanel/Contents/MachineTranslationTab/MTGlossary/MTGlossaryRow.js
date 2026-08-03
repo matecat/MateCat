@@ -51,7 +51,6 @@ export const MTGlossaryRow = ({
         type: 'success',
         text: `Glossary file ${file.name} imported successfully`,
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       setIsWaitingResult(false)
@@ -62,7 +61,6 @@ export const MTGlossaryRow = ({
         type: 'error',
         text: `Glossary file ${file.name} import error`,
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       setIsWaitingResult(false)

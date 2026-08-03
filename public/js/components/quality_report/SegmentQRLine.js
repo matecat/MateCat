@@ -1,4 +1,5 @@
 import React, {useRef} from 'react'
+import TEXT_UTILS from '../../utils/textUtils'
 const SegmentQRLine = ({
   showSuggestionSource = false,
   segment,
@@ -16,9 +17,7 @@ const SegmentQRLine = ({
   rev,
 }) => {
   const textRef = useRef()
-  const allowHTML = (string) => {
-    return {__html: string}
-  }
+  const allowHTML = (string) => TEXT_UTILS.sanitizedHTML(string)
   const getTimeToEdit = (tte) => {
     let str_pad_left = function (string, pad, length) {
       return (new Array(length + 1).join(pad) + string).slice(-length)

@@ -457,6 +457,7 @@ class CreateProjectController extends AbstractStatefulKleinController
      * @return array<string, mixed>
      * @throws \DomainException
      * @throws \TypeError
+     * @throws InvalidArgumentException
      */
     private static function sanitizeTmKeyArr(array $elem): array
     {

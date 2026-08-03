@@ -82,7 +82,6 @@ class AssignToTranslator extends React.Component {
       text: message.text,
       type: 'success',
       position: 'bl',
-      allowHtml: true,
       timer: 10000,
     }
     CatToolActions.addNotification(notification)
@@ -101,49 +100,97 @@ class AssignToTranslator extends React.Component {
   }
   shareToTranslatorMailChangeNotification(mail, job) {
     return {
-      title:
-        'Job sent with <div class="green-label" style="display: inline; background-color: #5ea400; color: white; padding: 2px 5px;">new password </div>',
-      text:
-        '<div style="margin-top: 16px;">To: <a href="mailto:' +
-        mail +
-        '">' +
-        mail +
-        '</a> ' +
-        '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
-        '<div class style="display: inline-block; font-size: 14px; color: grey;">(' +
-        job.id +
-        ')</div> ' +
-        '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
-        '<div class="source-box" style="display: inherit;">' +
-        job.sourceTxt +
-        '</div> ' +
-        '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +
-        '<div class="target-box" style="display: inherit;">' +
-        job.targetTxt +
-        '</div> </div> </div></div>',
+      title: (
+        <>
+          Job sent with{' '}
+          <div
+            className="green-label"
+            style={{
+              display: 'inline',
+              backgroundColor: '#5ea400',
+              color: 'white',
+              padding: '2px 5px',
+            }}
+          >
+            new password{' '}
+          </div>
+        </>
+      ),
+      text: (
+        <div style={{marginTop: '16px'}}>
+          To: <a href={`mailto:${mail}`}>{mail}</a>{' '}
+          <div
+            className="job-reference"
+            style={{display: 'inline-block', width: '100%', marginTop: '10px'}}
+          >
+            {' '}
+            <div
+              style={{display: 'inline-block', fontSize: '14px', color: 'grey'}}
+            >
+              ({job.id})
+            </div>{' '}
+            <div
+              className="source-target languages-tooltip"
+              style={{display: 'inline-block', fontWeight: 700}}
+            >
+              {' '}
+              <div className="source-box" style={{display: 'inherit'}}>
+                {job.sourceTxt}
+              </div>{' '}
+              <div
+                className="in-to"
+                style={{top: '3px', display: 'inherit', position: 'relative'}}
+              >
+                {' '}
+                <i className="icon-chevron-right icon"></i>{' '}
+              </div>{' '}
+              <div className="target-box" style={{display: 'inherit'}}>
+                {job.targetTxt}
+              </div>{' '}
+            </div>{' '}
+          </div>
+        </div>
+      ),
     }
   }
   shareToTranslatorNotification(mail, job) {
     return {
       title: 'Job sent',
-      text:
-        '<div style="margin-top: 16px;">To: <a href="mailto:' +
-        mail +
-        '">' +
-        mail +
-        '</a> ' +
-        '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
-        '<div class style="display: inline-block; font-size: 14px; color: grey;">' +
-        job.id +
-        ' </div> ' +
-        '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
-        '<div class="source-box" style="display: inherit;">' +
-        job.sourceTxt +
-        '</div> ' +
-        '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +
-        '<div class="target-box" style="display: inherit;">' +
-        job.targetTxt +
-        '</div> </div> </div></div>',
+      text: (
+        <div style={{marginTop: '16px'}}>
+          To: <a href={`mailto:${mail}`}>{mail}</a>{' '}
+          <div
+            className="job-reference"
+            style={{display: 'inline-block', width: '100%', marginTop: '10px'}}
+          >
+            {' '}
+            <div
+              style={{display: 'inline-block', fontSize: '14px', color: 'grey'}}
+            >
+              {job.id}{' '}
+            </div>{' '}
+            <div
+              className="source-target languages-tooltip"
+              style={{display: 'inline-block', fontWeight: 700}}
+            >
+              {' '}
+              <div className="source-box" style={{display: 'inherit'}}>
+                {job.sourceTxt}
+              </div>{' '}
+              <div
+                className="in-to"
+                style={{top: '3px', display: 'inherit', position: 'relative'}}
+              >
+                {' '}
+                <i className="icon-chevron-right icon"></i>{' '}
+              </div>{' '}
+              <div className="target-box" style={{display: 'inherit'}}>
+                {job.targetTxt}
+              </div>{' '}
+            </div>{' '}
+          </div>
+        </div>
+      ),
     }
   }
   shareToTranslatorDateChangeNotification(email, oldDate, newDate) {
@@ -151,52 +198,83 @@ class AssignToTranslator extends React.Component {
     oldDate = CommonUtils.getGMTDate(oldDate)
     newDate = CommonUtils.formatDate(newDate, 'yyyy-MM-d hh:mm a')
     newDate = CommonUtils.getGMTDate(newDate)
+    const dateBlock = (date, notUsed) => (
+      <div
+        className={`job-delivery${notUsed ? ' not-used' : ''}`}
+        title="Delivery date"
+        style={{
+          display: 'inline-block',
+          marginBottom: '10px',
+          fontWeight: 700,
+          ...(notUsed
+            ? {textDecoration: 'line-through', position: 'relative'}
+            : {marginRight: '10px'}),
+        }}
+      >
+        {' '}
+        <div
+          className="outsource-day-text"
+          style={{display: 'inline-block', marginRight: '3px'}}
+        >
+          {date.day}
+        </div>{' '}
+        <div
+          className="outsource-month-text"
+          style={{display: 'inline-block', marginRight: '5px'}}
+        >
+          {date.month}
+        </div>{' '}
+        <div className="outsource-time-text" style={{display: 'inline-block'}}>
+          {date.time}
+        </div>{' '}
+        <div
+          className="outsource-gmt-text"
+          style={{display: 'inline-block', fontWeight: 100, color: 'grey'}}
+        >
+          ({date.gmt})
+        </div>{' '}
+        {notUsed && (
+          <div
+            className="old"
+            style={{
+              width: '100%',
+              height: '1px',
+              borderTop: '1px solid black',
+              top: '-10px',
+              position: 'relative',
+            }}
+          ></div>
+        )}
+      </div>
+    )
     return {
       title: 'Job delivery update',
-      text:
-        '<div style="margin-top: 16px;"><div class="job-reference" style="display: inline-block; width: 100%;"> To: ' +
-        '<div class="job-delivery" title="Delivery date" style="display: inline-block; margin-bottom: 10px; font-weight: 700; margin-right: 10px;"> ' +
-        '<div class="outsource-day-text" style="display: inline-block; margin-right: 3px;">' +
-        newDate.day +
-        '</div> ' +
-        '<div class="outsource-month-text" style="display: inline-block; margin-right: 5px;">' +
-        newDate.month +
-        '</div> ' +
-        '<div class="outsource-time-text" style="display: inline-block;">' +
-        newDate.time +
-        '</div> ' +
-        '<div class="outsource-gmt-text" style="display: inline-block; font-weight: 100;color: grey;">(' +
-        newDate.gmt +
-        ')</div> ' +
-        '</div> <div class="job-delivery not-used" title="Delivery date" style="display: inline-block; margin-bottom: 10px; font-weight: 700; text-decoration: line-through; position: relative;"> ' +
-        '<div class="outsource-day-text" style="display: inline-block; margin-right: 3px;">' +
-        oldDate.day +
-        '</div> ' +
-        '<div class="outsource-month-text" style="display: inline-block; margin-right: 5px;">' +
-        oldDate.month +
-        '</div> ' +
-        '<div class="outsource-time-text" style="display: inline-block;">' +
-        oldDate.time +
-        '</div> ' +
-        '<div class="outsource-gmt-text" style="display: inline-block; font-weight: 100; color: grey;">(' +
-        oldDate.gmt +
-        ')</div> ' +
-        '<div class="old" style="width: 100%; height: 1px; border-top: 1px solid black; top: -10px; position: relative;"></div> </div> ' +
-        '</div>Translator: <a href="mailto:' +
-        email +
-        '">' +
-        email +
-        '</a> </div></div>',
+      text: (
+        <div style={{marginTop: '16px'}}>
+          <div
+            className="job-reference"
+            style={{display: 'inline-block', width: '100%'}}
+          >
+            {' '}
+            To: {dateBlock(newDate, false)} {dateBlock(oldDate, true)}
+            Translator: <a href={`mailto:${email}`}>{email}</a>{' '}
+          </div>
+        </div>
+      ),
     }
   }
   showShareTranslatorError() {
     ModalsActions.onCloseModal()
     const notification = {
       title: 'Problems sending the job',
-      text: 'Please try later or contact <a href="mailto:support@matecat.com">support@matecat.com</a>',
+      text: (
+        <>
+          Please try later or contact{' '}
+          <a href="mailto:support@matecat.com">support@matecat.com</a>
+        </>
+      ),
       type: 'error',
       position: 'bl',
-      allowHtml: true,
       timer: 10000,
     }
     CatToolActions.addNotification(notification)

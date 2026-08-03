@@ -971,6 +971,7 @@ class NewController extends KleinController
      * @return array<string, mixed>
      * @throws \DomainException
      * @throws \TypeError
+     * @throws InvalidArgumentException
      */
     private static function sanitizeTmKeyArr(array $elem): array
     {

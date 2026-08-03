@@ -4,7 +4,9 @@ namespace Utils\TmKeyManagement;
 
 use DomainException;
 use Exception;
+use InvalidArgumentException;
 use Model\DataAccess\Database;
+use Normalizer;
 use Model\DataAccess\IDatabase;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
@@ -197,6 +199,47 @@ class TmKeyManager
     }
 
     /**
+     * Validates and normalizes a user-provided resource name.
+     *
+     * Names are stored raw: no HTML escaping happens here, encoding for a
+     * specific destination (HTML, XML, email template) is the output layer's
+     * job. This method only enforces semantics: a name must be a UTF-8 string
+     * without invisible characters.
+     *
+     * @param mixed $name
+     *
+     * @return string|null
+     *
+     * @throws InvalidArgumentException
+     */
+    public static function validateName(mixed $name): ?string
+    {
+        if (is_null($name)) {
+            return null;
+        }
+
+        if (!is_string($name)) {
+            throw new InvalidArgumentException("Resource name must be a string", -3);
+        }
+
+        if (!mb_check_encoding($name, 'UTF-8')) {
+            throw new InvalidArgumentException("Resource name is not valid UTF-8", -3);
+        }
+
+        // Cc covers NUL/ESC/newlines, Cf covers zero-width and bidi overrides
+        // used to spoof how a name reads. U+200D (ZWJ) is excluded so emoji
+        // sequences survive.
+        $name = preg_replace('/(?![\x{200D}])[\p{Cc}\p{Cf}]/u', '', $name) ?? '';
+        $name = Normalizer::normalize(trim($name), Normalizer::FORM_C);
+
+        if ($name === false) {
+            throw new InvalidArgumentException("Resource name is not valid UTF-8", -3);
+        }
+
+        return mb_substr($name, 0, 255);
+    }
+
+    /**
      * This method sanitize fields received with struct
      *
      * @param TmKeyStruct $obj
@@ -205,6 +248,7 @@ class TmKeyManager
      *
      * @throws \TypeError
      * @throws DomainException
+     * @throws InvalidArgumentException
      */
     public static function sanitize(TmKeyStruct $obj): TmKeyStruct
     {
@@ -230,11 +274,7 @@ class TmKeyManager
             $obj->uid_rev = $sanitized !== false ? (int)$sanitized : null;
         }
 
-        if (!is_null($obj->name)) {
-            $obj->name = preg_replace('/[^.\-_\p{L}\p{N}\s{}]+/u', '', $obj->name);
-            $sanitized = filter_var($obj->name, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-            $obj->name = $sanitized !== false ? $sanitized : null;
-        }
+        $obj->name = self::validateName($obj->name);
 
         if (!is_null($obj->key)) {
             $sanitized = filter_var($obj->key, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);

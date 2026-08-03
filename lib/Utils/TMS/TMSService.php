@@ -574,7 +574,7 @@ class TMSService
 
         $suggestionsArray = json_decode($row['suggestions_array'], true);
         $suggestionOrigin = Utils::changeMemorySuggestionSource($suggestionsArray[0], $row['tm_keys'], $this->database, $uid);
-        $tmOrigin = '<prop type="x-MateCAT-suggestion-origin">' . $suggestionOrigin . "</prop>";
+        $tmOrigin = '<prop type="x-MateCAT-suggestion-origin">' . htmlspecialchars($suggestionOrigin, ENT_QUOTES | ENT_XML1, 'UTF-8') . "</prop>";
         if (preg_match("/[a-f0-9]{8,}/", $suggestionsArray[0]['memory_key'])) {
             $tmOrigin .= "\n        <prop type=\"x-MateCAT-suggestion-private-key\">" . $suggestionsArray[0]['memory_key'] . "</prop>";
         }

@@ -52,7 +52,6 @@ class ShareTmModal extends React.Component {
             type: 'success',
             text: `The resource has been shared.`,
             position: 'br',
-            allowHtml: true,
             timer: 5000,
           })
           callback.call()

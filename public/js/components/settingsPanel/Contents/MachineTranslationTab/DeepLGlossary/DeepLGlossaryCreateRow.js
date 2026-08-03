@@ -68,7 +68,6 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
         type: 'error',
         text: !name ? 'Name mandatory' : 'File mandatory',
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       return false
@@ -89,7 +88,6 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
       type: 'success',
       text: 'Glossary created successfully',
       position: 'br',
-      allowHtml: true,
       timer: 5000,
     })
     setIsWaitingResult(false)
@@ -100,7 +98,6 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
       type: 'error',
       text: 'Error creating glossary',
       position: 'br',
-      allowHtml: true,
       timer: 5000,
     })
     setIsWaitingResult(false)

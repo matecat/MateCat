@@ -39,7 +39,6 @@ let SegmentFilterUtils = {
         text: text,
         title: title,
         type: 'warning',
-        allowHtml: true,
       })
     })()
   },

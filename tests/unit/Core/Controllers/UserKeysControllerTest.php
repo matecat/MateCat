@@ -354,67 +354,104 @@ class UserKeysControllerTest extends AbstractTest
     }
 
     /**
+     * Descriptions are stored raw: HTML-escaping happens at each output sink,
+     * never at the input boundary.
+     *
      * @throws Throwable
      */
     #[Test]
-    public function validateTheRequest_throws_minus_three_on_xss_description(): void
+    #[DataProvider('rawDescriptionProvider')]
+    public function validateTheRequest_stores_description_byte_identical(string $description): void
     {
         $this->setRequestParams([
             'key'         => 'abcdef1234567890',
-            'description' => '<script>alert(1)</script>',
+            'description' => $description,
         ]);
 
-        try {
-            $this->invokePrivate('validateTheRequest');
-            $this->fail('Expected InvalidArgumentException was not thrown');
-        } catch (InvalidArgumentException $e) {
-            $this->assertSame(-3, $e->getCode());
-            $this->assertStringContainsString('&lt;', $e->getMessage());
-            $this->assertStringContainsString('&gt;', $e->getMessage());
-            $this->assertStringContainsString('&amp;', $e->getMessage());
-            $this->assertStringContainsString('&quot;', $e->getMessage());
-            $this->assertStringContainsString('&#39;', $e->getMessage());
-            $this->assertStringNotContainsString(
-                'gist.github.com',
-                $e->getMessage(),
-                'the gist link about non-printable characters was intentionally dropped from the message'
-            );
-        }
-    }
+        $result = $this->invokePrivate('validateTheRequest');
 
-    /**
-     * @throws Throwable
-     */
-    #[Test]
-    #[DataProvider('forbiddenDescriptionCharacterProvider')]
-    public function validateTheRequest_throws_minus_three_for_each_forbidden_character(string $char): void
-    {
-        $this->setRequestParams([
-            'key'         => 'abcdef1234567890',
-            'description' => "Glossary {$char} name",
-        ]);
-
-        try {
-            $this->invokePrivate('validateTheRequest');
-            $this->fail('Expected InvalidArgumentException was not thrown');
-        } catch (InvalidArgumentException $e) {
-            $this->assertSame(-3, $e->getCode());
-            $this->assertStringContainsString('Resource names cannot contain', $e->getMessage());
-        }
+        $this->assertSame($description, $result['description']);
     }
 
     /**
      * @return array<string, array{0: string}>
      */
-    public static function forbiddenDescriptionCharacterProvider(): array
+    public static function rawDescriptionProvider(): array
     {
         return [
-            'less-than'    => ['<'],
-            'greater-than' => ['>'],
-            'ampersand'    => ['&'],
-            'double-quote' => ['"'],
-            'single-quote' => ["'"],
+            'script tag'   => ['<script>alert(1)</script>'],
+            'ampersand'    => ['R&D — Client (2024)'],
+            'double-quote' => ['The "official" glossary'],
+            'single-quote' => ["L'été"],
+            'accents'      => ['Memoria è rotta'],
+            'emoji'        => ['Fruit glossary 🍎'],
         ];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_never_stores_html_entities(): void
+    {
+        $this->setRequestParams([
+            'key'         => 'abcdef1234567890',
+            'description' => '<b>R&D</b> "quoted"',
+        ]);
+
+        $result = $this->invokePrivate('validateTheRequest');
+
+        $this->assertDoesNotMatchRegularExpression('/&(lt|gt|amp|quot|#0?39);/', $result['description']);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_throws_minus_three_on_invalid_utf8_description(): void
+    {
+        $this->setRequestParams([
+            'key'         => 'abcdef1234567890',
+            'description' => "Memoria \xC3 rotta",
+        ]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(-3);
+
+        $this->invokePrivate('validateTheRequest');
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_throws_minus_three_on_array_description(): void
+    {
+        $this->setRequestParams([
+            'key'         => 'abcdef1234567890',
+            'description' => ['x'],
+        ]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(-3);
+
+        $this->invokePrivate('validateTheRequest');
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_strips_control_and_invisible_characters(): void
+    {
+        $this->setRequestParams([
+            'key'         => 'abcdef1234567890',
+            'description' => "a\x00b\x1bc\nd\u{200B}\u{202E}e",
+        ]);
+
+        $result = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame('abcde', $result['description']);
     }
 
     // ─── getMkDao ───

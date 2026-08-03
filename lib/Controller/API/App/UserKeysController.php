@@ -166,7 +166,7 @@ class UserKeysController extends KleinController
     {
         $key = filter_var($this->request->param('key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $emails = filter_var($this->request->param('emails'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-        $description = filter_var($this->request->param('description'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $description = $this->request->param('description');
         $remove_from = filter_var($this->request->param('remove_from'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
 
         // check for eventual errors on the input passed
@@ -174,24 +174,10 @@ class UserKeysController extends KleinController
             throw new InvalidArgumentException("Key missing", -2);
         }
 
-        // Prevent XSS attack
-        // ===========================
-        // POC. Try to add this string in the input:
-        // <details x=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:2 open ontoggle="prompt(document.cookie);">
-        // in this case, an error MUST be thrown
-        if ($this->request->param('description') and $this->request->param('description') !== $description) {
-            throw new InvalidArgumentException(
-                "<span>Resource names cannot contain the following characters:</span>"
-                . "<ul>"
-                . "<li>&lt; (less than)</li>"
-                . "<li>&gt; (greater than)</li>"
-                . "<li>&amp; (ampersand)</li>"
-                . "<li>&quot; (double quote)</li>"
-                . "<li>&#39; (single quote)</li>"
-                . "</ul>",
-                -3
-            );
-        }
+        // Names are stored raw: TmKeyManager::validateName() enforces semantics
+        // (string type, valid UTF-8, no invisible characters) and rejects bad
+        // input with code -3; HTML/XML escaping happens at each output sink.
+        $description = TmKeyManager::validateName($description);
 
         return [
             'key' => $key,

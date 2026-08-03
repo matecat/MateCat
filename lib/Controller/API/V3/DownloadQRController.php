@@ -396,7 +396,7 @@ class DownloadQRController extends KleinController
             $xml .= '<id_file>' . $datum[10] . '</id_file>';
             $xml .= '<warning>' . $datum[11] . '</warning>';
             $xml .= '<suggestion_match>' . $datum[12] . '</suggestion_match>';
-            $xml .= '<suggestion_source>' . $datum[13] . '</suggestion_source>';
+            $xml .= '<suggestion_source>' . htmlspecialchars($datum[13] ?? '', ENT_QUOTES | ENT_XML1, 'UTF-8') . '</suggestion_source>';
             $xml .= '<suggestion>' . $datum[14] . '</suggestion>';
             $xml .= '<edit_distance>' . $datum[15] . '</edit_distance>';
             $xml .= '<locked>' . $datum[16] . '</locked>';

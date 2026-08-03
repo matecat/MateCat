@@ -1,4 +1,5 @@
 import {isUndefined} from 'lodash'
+import DOMPurify from 'dompurify'
 import $ from 'jquery'
 import {regexWordDelimiter} from '../components/segments/utils/DraftMatecatUtils/textConstants'
 import CommonUtils from './commonUtils'
@@ -7,6 +8,15 @@ import {tagSignatures} from '../components/segments/utils/DraftMatecatUtils/tagM
 
 const TEXT_UTILS = {
   diffMatchPatch: new diff_match_patch(),
+  /**
+   * The only sanctioned way to feed a string into dangerouslySetInnerHTML:
+   * the markup is sanitized with DOMPurify before being injected.
+   */
+  sanitizedHTML: (html) => ({
+    // contenteditable="false" is part of the tag-pill markup emitted by
+    // transformTagsToHtml and is safe to keep
+    __html: DOMPurify.sanitize(html, {ADD_ATTR: ['contenteditable']}),
+  }),
   getDiffHtml: function (source, target) {
     let dmp = new diff_match_patch()
     /*
