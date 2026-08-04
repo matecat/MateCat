@@ -26,17 +26,18 @@ use Model\Users\UserStruct;
  * `plugins/translated/lib/Features/Translated.php:479` relies on, reading it unguarded into a Kafka
  * payload.
  */
-final class StoreTranslationEventParams
+final readonly class StoreTranslationEventParams
 {
     public function __construct(
-        public readonly SegmentTranslationStruct $translation,
-        public readonly SegmentTranslationStruct $oldTranslation,
-        public readonly PropagationResult $propagation,
-        public readonly JobStruct $chunk,
-        public readonly UserStruct $user,
-        public readonly int $sourcePageCode,
-        public readonly FeatureSet $features,
-        public readonly ProjectStruct $project,
+        public SegmentTranslationStruct $translation,
+        public SegmentTranslationStruct $oldTranslation,
+        public PropagationResult $propagation,
+        public JobStruct $chunk,
+        public UserStruct $user,
+        public int $sourcePageCode,
+        public FeatureSet $features,
+        public ProjectStruct $project,
+        public bool $isAReplaceAllEvent = false
     ) {
     }
 }

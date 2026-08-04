@@ -79,7 +79,7 @@ class StoreTranslationEventParamsTest extends AbstractTest
         $constructor = (new ReflectionClass(StoreTranslationEventParams::class))->getConstructor();
 
         $this->assertNotNull($constructor);
-        $this->assertSame(8, $constructor->getNumberOfParameters());
+        $this->assertSame(9, $constructor->getNumberOfParameters());
         $this->assertSame(8, $constructor->getNumberOfRequiredParameters());
 
         foreach ($constructor->getParameters() as $parameter) {
