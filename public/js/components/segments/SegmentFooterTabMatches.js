@@ -169,13 +169,6 @@ class SegmentFooterTabMatches extends React.Component {
 
   getMatchInfo(match) {
     const penaltyPercRef = createRef()
-    console.log(
-      match,
-      match.source,
-      match.target,
-      config.target_rfc,
-      config.source_rfc,
-    )
     return (
       <ul className="graysmall-details">
         <li className="graydesc graydesc-sourcekey">
