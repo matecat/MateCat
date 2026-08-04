@@ -26,6 +26,7 @@ export const replaceAllIntoSegments = async ({
   matchcase,
   exactmatch,
   replace,
+  includeLocked,
   revisionNumber = config.revisionNumber,
 }) => {
   const paramsData = {
@@ -40,6 +41,7 @@ export const replaceAllIntoSegments = async ({
     replace,
     inCurrentChunkOnly: true, // replace is fixed in context of current chunk
     revision_number: revisionNumber,
+    includeLocked,
   }
   const formData = new FormData()
 

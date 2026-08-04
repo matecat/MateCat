@@ -11,6 +11,7 @@ export const MODAL_KEY = {
   REVISION_FEEDBACK: 'RevisionFeedback',
   COPY_SOURCE: 'CopySource',
   UNLOCK_ALL_SEGMENTS: 'UnlockAllSegments',
+  REPLACE_ALL: 'ReplaceAll',
 }
 
 export const COPY_SOURCE_COOKIE = 'source_copied_to_target'
