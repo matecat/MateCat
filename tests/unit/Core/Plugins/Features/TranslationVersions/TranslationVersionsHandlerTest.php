@@ -67,6 +67,7 @@ class TestableTranslationVersionsHandler extends TranslationVersionsHandler
         $user,
         int $source_page_code,
         JobStruct $chunk,
+        bool $isAReplaceAllEvent = false
     ): TranslationEvent {
         return new TranslationEvent(
             $old_translation,
@@ -587,7 +588,19 @@ class TranslationVersionsHandlerTest extends AbstractTest
             ],
         ])));
 
-        $this->assertCount(3, $eventsHandler->getEvents());
+        $events = $eventsHandler->getEvents();
+        $this->assertCount(3, $events);
+
+        // The source event is the one the user edited: it accrues time to edit and notifies on its own.
+        [$sourceEvent, $notIceEvent, $iceEvent] = $events;
+        $this->assertFalse($sourceEvent->isAPropagatedEvent());
+        $this->assertTrue($sourceEvent->shouldIncreaseTte());
+
+        // Both copies are marked, so neither accrues time to edit nor raises a second notification.
+        foreach ([$notIceEvent, $iceEvent] as $propagatedEvent) {
+            $this->assertTrue($propagatedEvent->isAPropagatedEvent());
+            $this->assertFalse($propagatedEvent->shouldIncreaseTte());
+        }
     }
 
     #[Test]

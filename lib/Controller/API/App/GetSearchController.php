@@ -451,7 +451,8 @@ class GetSearchController extends AbstractStatefulKleinController
                     $this->user,
                     $this->chunk->getSourcePage(),
                     $this->featureSet,
-                    $project
+                    $project,
+                    isAReplaceAllEvent: true
                 ));
 
                 $db->commit();

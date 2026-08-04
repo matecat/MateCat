@@ -50,6 +50,7 @@ class TranslationEventTest extends AbstractTest
         ?UserStruct $user = null,
         int $sourcePage = SourcePages::SOURCE_PAGE_TRANSLATE,
         ?TranslationEventStruct $previousEvent = null,
+        bool $isAReplaceAllEvent = false,
     ): TranslationEvent {
         $eventDao = $this->createStub(TranslationEventDao::class);
         $eventDao->method('getLatestEventForSegment')->willReturn($previousEvent);
@@ -62,6 +63,7 @@ class TranslationEventTest extends AbstractTest
             $this->makeChunk(),
             $eventDao,
             $this->createStub(SegmentDao::class),
+            $isAReplaceAllEvent,
         );
     }
 
@@ -328,20 +330,48 @@ class TranslationEventTest extends AbstractTest
     }
 
     #[Test]
-    public function propagationSourceDefaultsTrue(): void
+    public function shouldIncreaseTteDefaultsTrue(): void
     {
         $event = $this->makeEvent();
 
-        $this->assertTrue($event->isPropagationSource());
+        $this->assertTrue($event->shouldIncreaseTte());
     }
 
     #[Test]
-    public function setPropagationSource(): void
+    public function aReplaceAllEventAccruesNoTteButIsStillNotAPropagatedEvent(): void
+    {
+        $event = $this->makeEvent(isAReplaceAllEvent: true);
+        $event->setShouldIncreaseTte(false);
+
+        $this->assertTrue($event->isAReplaceAllEvent());
+
+        $this->assertFalse($event->shouldIncreaseTte(), 'nobody typed a replace-all, so it accrues no TTE');
+        $this->assertFalse(
+            $event->isAPropagatedEvent(),
+            'a replace-all has no originating segment, so it is not a copy of one either — it must still notify'
+        );
+    }
+
+    #[Test]
+    public function markAsPropagatedTurnsOffBothTteAndTheNotification(): void
     {
         $event = $this->makeEvent();
-        $event->setPropagationSource(false);
+        $this->assertTrue($event->shouldIncreaseTte());
+        $this->assertFalse($event->isAPropagatedEvent());
 
-        $this->assertFalse($event->isPropagationSource());
+        $event->markAsPropagated();
+
+        $this->assertTrue($event->isAPropagatedEvent());
+        $this->assertFalse($event->shouldIncreaseTte(), 'a propagated copy must not accrue the origin TTE twice');
+    }
+
+    #[Test]
+    public function setShouldIncreaseTteTurnsTheFlagOff(): void
+    {
+        $event = $this->makeEvent();
+        $event->setShouldIncreaseTte(false);
+
+        $this->assertFalse($event->shouldIncreaseTte());
     }
 
     #[Test]

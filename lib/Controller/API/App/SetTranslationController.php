@@ -444,7 +444,8 @@ class SetTranslationController extends AbstractStatefulKleinController
             $this->user,
             ReviewUtils::revisionNumberToSourcePage($this->data['revisionNumber']),
             $this->featureSet,
-            $this->data['project']
+            $this->data['project'],
+            isAReplaceAllEvent: false
         ));
 
         return $propagationTotal;

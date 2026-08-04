@@ -203,6 +203,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface
             $params->user,
             $params->sourcePageCode,
             $chunk,
+            $params->isAReplaceAllEvent
         );
 
         $translationEventsHandler = $this->createTranslationEventsHandler($chunk);
@@ -237,10 +238,11 @@ class TranslationVersionsHandler implements VersionHandlerInterface
                     $propagatedSegmentAfterChange,
                     $params->user,
                     $params->sourcePageCode,
-                    $chunk,
+                    $chunk
+                // last parameter is false; a propagation event can never be a replaceAll event
                 );
 
-                $propagatedEvent->setPropagationSource(false);
+                $propagatedEvent->markAsPropagated();
                 $translationEventsHandler->addEvent($propagatedEvent);
             }
         }
@@ -267,8 +269,9 @@ class TranslationVersionsHandler implements VersionHandlerInterface
         UserStruct $user,
         int $source_page_code,
         JobStruct $chunk,
+        bool $isAReplaceAllEvent = false
     ): TranslationEvent {
-        return new TranslationEvent(
+        $translationEvent = new TranslationEvent(
             $old_translation,
             $translation,
             $user,
@@ -276,7 +279,13 @@ class TranslationVersionsHandler implements VersionHandlerInterface
             $chunk,
             new TranslationEventDao($this->database),
             new SegmentDao($this->database),
+            $isAReplaceAllEvent
         );
+        if ($isAReplaceAllEvent) {
+            $translationEvent->setShouldIncreaseTte(false);
+        }
+
+        return $translationEvent;
     }
 
     protected function createTranslationEventsHandler(JobStruct $chunk): TranslationEventsHandler

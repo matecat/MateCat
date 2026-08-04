@@ -146,7 +146,9 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
         $chunkReview->reviewed_words_count -= $this->_segment->raw_word_count;
         $chunkReview->penalty_points -= $this->getPenaltyPointsForSourcePage($chunkReview->source_page);
 
-        $this->_event->setFinalRevisionToRemove($chunkReview->source_page);
+        if (!$this->_event->isAReplaceAllEvent()) {
+            $this->_event->setFinalRevisionToRemove($chunkReview->source_page);
+        }
         $this->_event->setChunkReviewForPassFailUpdate($chunkReview);
     }
 
@@ -272,10 +274,12 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
     public function deleteIssues(): void
     {
         foreach ($this->_event->getIssuesToDelete() as $issue) {
-            $issue->addComments((new EntryCommentStruct())->getEntriesById(
-                new EntryCommentDao($this->_database),
-                $issue->id ?? throw new RuntimeException('Issue id is required for comment retrieval')
-            ));
+            $issue->addComments(
+                (new EntryCommentStruct())->getEntriesById(
+                    new EntryCommentDao($this->_database),
+                    $issue->id ?? throw new RuntimeException('Issue id is required for comment retrieval')
+                )
+            );
             (new EntryDao($this->_database))->deleteEntry($issue);
         }
     }
@@ -286,7 +290,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
      */
     public function sendNotificationEmail(): void
     {
-        if ($this->_event->isPropagationSource() && $this->_event->isLowerTransition()) {
+        if (!$this->_event->isAPropagatedEvent() && $this->_event->isLowerTransition()) {
             $chunkReviewsWithFinalRevisions = [];
             foreach ($this->_chunkReviews as $chunkReview) {
                 if (in_array($chunkReview->source_page, $this->_sourcePagesWithFinalRevisions)) {
