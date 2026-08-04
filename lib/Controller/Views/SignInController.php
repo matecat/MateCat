@@ -16,7 +16,7 @@ class SignInController extends BaseKleinViewController
      */
     public function renderView(): never
     {
-        if ($this->isLoggedIn() && isset($_SESSION['wanted_url'])) {
+        if ($this->isLoggedIn() && $this->sessionStore()->has('wanted_url')) {
             $this->redirectToWantedUrl();
         }
 

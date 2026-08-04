@@ -93,7 +93,10 @@ class ConvertFileController extends KleinController
         $source_lang = filter_var($this->request->param('source_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $target_lang = filter_var($this->request->param('target_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $segmentation_rule = filter_var($this->request->param('segmentation_rule'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-        $icu_enabled = filter_var($this->request->param('icu_enabled'), FILTER_VALIDATE_BOOLEAN);
+        $icu_enabled = ($this->request->param('icu_enabled') !== null) ? filter_var(
+            $this->request->param('icu_enabled'),
+            FILTER_VALIDATE_BOOLEAN
+        ) : true; // icu_enabled true by default
         $filters_extraction_parameters_template = filter_var(
             $this->request->param('filters_extraction_parameters_template'),
             FILTER_SANITIZE_SPECIAL_CHARS,

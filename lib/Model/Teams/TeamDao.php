@@ -11,6 +11,7 @@ namespace Model\Teams;
 use DomainException;
 use Exception;
 use Model\DataAccess\AbstractDao;
+use Model\DataAccess\InvalidatesUserProfileCache;
 use Model\Users\UserStruct;
 use PDO;
 use PDOException;
@@ -21,6 +22,8 @@ use Utils\Tools\Utils;
 
 class TeamDao extends AbstractDao
 {
+
+    use InvalidatesUserProfileCache;
 
     const string TABLE = "teams";
     const string STRUCT_TYPE = TeamStruct::class;
@@ -162,18 +165,32 @@ class TeamDao extends AbstractDao
      * @return bool
      * @throws ReflectionException
      * @throws PDOException
+     * @throws Exception
      */
     public function destroyCacheAssignee(TeamStruct $team): bool
     {
         $stmt = $this->_getStatementForQuery(self::$_query_get_assignee_with_projects);
 
-        return $this->_destroyObjectCache(
+        $destroyed = $this->_destroyObjectCache(
             $stmt,
             MembershipStruct::class,
             [
                 'id_team' => $team->id,
             ]
         );
+
+        // The per-member project counts this query feeds are rendered into every member's profile
+        // (Membership::renderItem()'s `projects`), so moving or reassigning a project makes all of
+        // them stale. ProjectModel already calls this for both the old and the new team, so hooking
+        // here inherits that fan-out instead of duplicating it — the same reasoning as
+        // MembershipDao::destroyCacheUserTeams().
+        foreach ((new MembershipDao($this->database))->getMemberListByTeamId((int)$team->id, false) as $member) {
+            if ($member->uid !== null) {
+                $this->invalidateUserProfileCache($member->uid);
+            }
+        }
+
+        return $destroyed;
     }
 
     /**

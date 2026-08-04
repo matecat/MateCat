@@ -68,6 +68,56 @@ class TeamModelTest extends AbstractTest
         $this->assertSame(['a@example.org'], $ref->getValue($model));
     }
 
+    /**
+     * Each queued address is an email MateCat sends on the caller's behalf, so one request
+     * cannot queue an unbounded number of them. Nothing bounded this before, which made the
+     * invitation flow usable as a bulk delivery channel.
+     */
+    public function test_addMemberEmail_refuses_more_than_the_maximum(): void
+    {
+        $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
+
+        for ($i = 0; $i < TeamModel::MAX_MEMBER_EMAILS; $i++) {
+            $model->addMemberEmail("member$i@example.org");
+        }
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(400);
+        $this->expectExceptionMessage('no more than ' . TeamModel::MAX_MEMBER_EMAILS . ' members can be added at once');
+
+        $model->addMemberEmail('one-too-many@example.org');
+    }
+
+    public function test_addMemberEmail_accepts_exactly_the_maximum(): void
+    {
+        $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
+
+        for ($i = 0; $i < TeamModel::MAX_MEMBER_EMAILS; $i++) {
+            $model->addMemberEmail("member$i@example.org");
+        }
+
+        $ref = new ReflectionProperty($model, 'member_emails');
+        $this->assertCount(TeamModel::MAX_MEMBER_EMAILS, $ref->getValue($model));
+    }
+
+    public function test_addMemberEmails_refuses_a_batch_over_the_maximum(): void
+    {
+        $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
+
+        $batch = [];
+        for ($i = 0; $i <= TeamModel::MAX_MEMBER_EMAILS; $i++) {
+            $batch[] = "member$i@example.org";
+        }
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(400);
+
+        $model->addMemberEmails($batch);
+    }
+
     public function test_addMemberEmails_appends_multiple(): void
     {
         $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);

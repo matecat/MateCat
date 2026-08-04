@@ -131,7 +131,7 @@ class ErrorManager
         2000 => 'Smart count plural forms mismatch',
         2001 => '%smartcount tag count mismatch',
         3000 => 'Characters limit exceeded',
-        4000 => 'Fuzzy match confirmed without changes',
+        4000 => 'Unedited fuzzy match confirmed',
     ];
 
     /** @var array<int, string|null> */
@@ -139,7 +139,7 @@ class ErrorManager
         29 => "Should be < g ... > ... < /g >",
         1000 => "Press 'alt + t' shortcut to add tags or delete extra tags.",
         3000 => 'Maximum characters limit exceeded.',
-        4000 => 'A fuzzy TM match was confirmed without any edit. Please review it before confirming.',
+        4000 => 'This segment was confirmed without making any changes, despite being a fuzzy match.',
     ];
 
     /** @var array{ERROR: list<ErrObject>, WARNING: list<ErrObject>, INFO: list<ErrObject>} */

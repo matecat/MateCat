@@ -40,10 +40,6 @@ class TestableTeamsProjectsV3Controller extends TeamsProjectsController
     protected function registerValidators(): void
     {
     }
-
-    public function refreshClientSessionIfNotApi(): void
-    {
-    }
 }
 
 /**
@@ -57,10 +53,6 @@ class TestableTeamsProjectsV3ControllerWithValidators extends TeamsProjectsContr
     }
 
     protected function initDependencies(): void
-    {
-    }
-
-    public function refreshClientSessionIfNotApi(): void
     {
     }
 }

@@ -22,6 +22,20 @@ class TeamAccessValidator extends Base
      */
     public ?TeamStruct $team = null;
 
+    private ?int $idTeam = null;
+
+    /**
+     * Names the team to check when the route carries no id_team parameter, for instance when the team
+     * is taken from the project a job belongs to.
+     *
+     * This says only *which* team is checked, never *whether* access is granted: membership below
+     * remains the sole authorization. Pass a value derived on the server, never a request parameter,
+     * or the CWE-639 hole described below reopens.
+     */
+    public function setIdTeam(int $idTeam): void
+    {
+        $this->idTeam = $idTeam;
+    }
 
     public function _validate(): void
     {
@@ -29,7 +43,7 @@ class TeamAccessValidator extends Base
         // requesting user's membership; the team_name request parameter is NOT an authorization
         // path (a name-based lookup would let any user read/act on any team — CWE-639 IDOR).
         $this->team = (new MembershipDao($this->controller->getDatabase()))->setCacheTTL(60 * 10)->findTeamByIdAndUser(
-            $this->request->param('id_team'),
+            $this->idTeam ?? $this->request->param('id_team'),
             $this->controller->getUser()
         );
 

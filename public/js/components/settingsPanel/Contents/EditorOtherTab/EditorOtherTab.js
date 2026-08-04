@@ -3,6 +3,9 @@ import {CharacterCounterRules} from '../OtherTab/CharacterCounterRules'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {updateJobMetadata} from '../../../../api/updateJobMetadata'
 import {Tagging} from '../OtherTab/Tagging'
+import {MandatoryIssues} from '../OtherTab/MandatoryIssues'
+import CatToolStore from '../../../../stores/CatToolStore'
+import CatToolConstants from '../../../../constants/CatToolConstants'
 
 export const EditorOtherTab = () => {
   const {currentProjectTemplate, tmKeys} = useContext(SettingsPanelContext)
@@ -18,13 +21,35 @@ export const EditorOtherTab = () => {
         previousCurrentProjectTemplate.current.characterCounterMode !==
           currentProjectTemplate?.characterCounterMode ||
         previousCurrentProjectTemplate.current.subfilteringHandlers !==
-          currentProjectTemplate?.subfilteringHandlers)
+          currentProjectTemplate?.subfilteringHandlers ||
+        previousCurrentProjectTemplate.current.mandatoryIssues !==
+          currentProjectTemplate?.mandatoryIssues)
     ) {
       updateJobMetadata({
         characterCounterCountTags:
           currentProjectTemplate.characterCounterCountTags,
         characterCounterMode: currentProjectTemplate.characterCounterMode,
         subfilteringHandlers: currentProjectTemplate.subfilteringHandlers,
+        mandatoryIssues: currentProjectTemplate.mandatoryIssues,
+      }).then(() => {
+        const jobMetadata = CatToolStore.getJobMetadata()
+        if (!jobMetadata) return
+
+        const updatedJobMetadata = {
+          ...jobMetadata,
+          job: {
+            ...jobMetadata.job,
+            character_counter_count_tags:
+              currentProjectTemplate.characterCounterCountTags,
+            character_counter_mode: currentProjectTemplate.characterCounterMode,
+            subfiltering_handlers: currentProjectTemplate.subfilteringHandlers,
+            mandatory_issues: currentProjectTemplate.mandatoryIssues,
+          },
+        }
+        CatToolStore.setJobMetadata(updatedJobMetadata)
+        CatToolStore.emitChange(CatToolConstants.GET_JOB_METADATA, {
+          jobMetadata: updatedJobMetadata,
+        })
       })
     }
 
@@ -33,11 +58,13 @@ export const EditorOtherTab = () => {
         currentProjectTemplate?.characterCounterCountTags,
       characterCounterMode: currentProjectTemplate?.characterCounterMode,
       subfilteringHandlers: currentProjectTemplate?.subfilteringHandlers,
+      mandatoryIssues: currentProjectTemplate?.mandatoryIssues,
     }
   }, [
     currentProjectTemplate?.characterCounterCountTags,
     currentProjectTemplate?.characterCounterMode,
     currentProjectTemplate?.subfilteringHandlers,
+    currentProjectTemplate?.mandatoryIssues,
     tmKeys,
   ])
 
@@ -46,6 +73,7 @@ export const EditorOtherTab = () => {
       <div className="settings-panel-contentwrapper-tab-subcategories">
         <h2>General settings</h2>
         <Tagging />
+        <MandatoryIssues />
       </div>
       <div className="settings-panel-contentwrapper-tab-subcategories">
         <h2>Character counter settings</h2>

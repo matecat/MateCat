@@ -203,10 +203,10 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const [files, setFiles] = useState(CatToolStore.getJobFilesInfo())
   const [addedComment, setAddedComment] = useState(undefined)
   const [scrollTopVisible, setScrollTopVisible] = useState(undefined)
-  const [isSearchBarOpen, setIsSearchBarOpen] = useState(false)
   const [clientConnected, setClientConnected] = useState()
   const [clientId, setClientId] = useState()
   const [firstRowIdVisible, setFirstRowIdVisible] = useState()
+  const [isSegmentOpenedNotRendered, setIsSegmentOpenedNotRendered] = useState()
 
   const persistenceVariables = useRef({
     lastScrolled: undefined,
@@ -219,6 +219,8 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const rowsRenderedHeight = useRef(new Map())
   const cachedRowsHeightMap = useRef(new Map())
   const cachedSegmentsToJS = useRef(new Map())
+  const previousOpenedFileIdRef = useRef()
+  const lastProjectBarPropsRef = useRef()
   const {guess_tags: guessTagActive, dictation: speechToTextActive} =
     userInfo?.metadata ?? {}
 
@@ -471,11 +473,16 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     recalcHeight()
     window.addEventListener('resize', recalcHeight)
 
-    const wrapperEl = document.getElementById('context-preview-wrapper')
+    const elements = [
+      document.getElementById('context-preview-wrapper'),
+      document.querySelector('header'),
+    ].filter(Boolean)
+
     let observer
-    if (wrapperEl) {
+
+    if (elements.length) {
       observer = new ResizeObserver(recalcHeight)
-      observer.observe(wrapperEl)
+      elements.forEach((el) => observer.observe(el))
     }
 
     return () => {
@@ -515,9 +522,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     const closeSide = () => setIsSideOpen(false)
     const storeJobInfo = (files) => setFiles(files)
     const onAddComment = (sid) => setAddedComment({sid})
-    const toggleSearchBar = (container) =>
-      container === 'search' && setIsSearchBarOpen((prevState) => !prevState)
-    const closeSubHeader = () => setIsSearchBarOpen(false)
 
     const sseConnection = (clientId) => {
       setClientConnected(!!clientId)
@@ -546,8 +550,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     SegmentStore.addListener(SegmentConstants.CLOSE_SIDE, closeSide)
     CatToolStore.addListener(CatToolConstants.STORE_FILES_INFO, storeJobInfo)
     CommentsStore.addListener(CommentsConstants.ADD_COMMENT, onAddComment)
-    CatToolStore.addListener(CatToolConstants.TOGGLE_CONTAINER, toggleSearchBar)
-    CatToolStore.addListener(CatToolConstants.CLOSE_SUBHEADER, closeSubHeader)
     CatToolStore.addListener(CatToolConstants.CLIENT_CONNECT, sseConnection)
 
     document.addEventListener('mousedown', mousedownHandler)
@@ -576,14 +578,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
         storeJobInfo,
       )
       CommentsStore.removeListener(CommentsConstants.ADD_COMMENT, onAddComment)
-      CatToolStore.removeListener(
-        CatToolConstants.TOGGLE_CONTAINER,
-        toggleSearchBar,
-      )
-      CatToolStore.removeListener(
-        CatToolConstants.CLOSE_SUBHEADER,
-        closeSubHeader,
-      )
       CatToolStore.removeListener(
         CatToolConstants.CLIENT_CONNECT,
         sseConnection,
@@ -841,15 +835,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       }
       return 0
     }
-    // padding top when search bar is open
-    const paddingTopSearchBarOpened = isSearchBarOpen
-      ? SEARCH_BAR_OPENED_PADDING_TOP
-      : 0
-    // set inline style
-    listRef.current.firstChild.style.marginTop = `${
-      getPadding() + paddingTopSearchBarOpened
-    }px`
-  }, [isSideOpen, segments, addedComment, isSearchBarOpen])
+  }, [isSideOpen, segments, addedComment])
 
   // reset scrollTo
   useEffect(() => {
@@ -898,22 +884,70 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     }
   }
 
+  useEffect(() => {
+    const openSegment = (sid) => {
+      const index = essentialRows.findIndex(({id}) =>
+        sid?.toString().indexOf('-') === -1
+          ? parseInt(id) === parseInt(sid)
+          : id === sid,
+      )
+
+      let isOnScreen = false
+      if (index !== -1 && listRef.current) {
+        const rowTop = essentialRows
+          .slice(0, index)
+          .reduce((sum, row) => sum + row.height, 0)
+        const rowBottom = rowTop + essentialRows[index].height
+        const scrollTop = listRef.current.scrollTop
+        const viewportBottom = scrollTop + listRef.current.clientHeight
+        isOnScreen = rowBottom > scrollTop && rowTop < viewportBottom
+      }
+
+      const {segment} = cachedSegmentsToJS.current.get(sid) ?? {}
+      const fileId = segment
+        ? SegmentUtils.getSegmentFileId(segment)
+        : undefined
+      const isFileChanged =
+        typeof previousOpenedFileIdRef.current === 'number' &&
+        fileId !== previousOpenedFileIdRef.current
+      previousOpenedFileIdRef.current = fileId
+
+      setIsSegmentOpenedNotRendered(Symbol(!isOnScreen && isFileChanged))
+    }
+
+    SegmentStore.addListener(SegmentConstants.OPEN_SEGMENT, openSegment)
+
+    return () =>
+      SegmentStore.removeListener(SegmentConstants.OPEN_SEGMENT, openSegment)
+  }, [essentialRows])
+
   const goToFirstSegment = () => SegmentActions.scrollToSegment(firstJobSegment)
 
   const getProjectBar = () => {
-    if (typeof firstRowIdVisible !== 'undefined') {
-      const props = getSegmentPropsBySid(firstRowIdVisible)
+    const props =
+      (typeof firstRowIdVisible !== 'undefined' &&
+        getSegmentPropsBySid(firstRowIdVisible)) ||
+      lastProjectBarPropsRef.current
 
-      return (
-        <div
-          className={`sticky-project-bar ${props.sideOpen ? 'sticky-project-bar-slide-right' : ''}`}
-        >
-          <ProjectBar
-            {...{...props, listRef: listRef.current, isSticky: true}}
-          />
-        </div>
-      )
-    }
+    if (!props) return
+
+    lastProjectBarPropsRef.current = props
+
+    return (
+      <div
+        className={`sticky-project-bar ${props.sideOpen ? 'sticky-project-bar-slide-right' : ''}`}
+      >
+        <ProjectBar
+          {...{
+            ...props,
+            listRef: listRef.current,
+            isSticky: true,
+            isSegmentOpenedNotRendered,
+            previousOpenedFileIdRef,
+          }}
+        />
+      </div>
+    )
   }
 
   return (

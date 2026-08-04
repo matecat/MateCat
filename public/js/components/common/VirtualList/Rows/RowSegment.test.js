@@ -42,6 +42,7 @@ const defaultProjectBarProps = {
   sideOpen: false,
   isSticky: false,
   listRef: null,
+  previousOpenedFileIdRef: {current: undefined},
 }
 
 const createMockListRef = (scrollTop = 0) => {
@@ -191,6 +192,116 @@ describe('ProjectBar', () => {
     })
   })
 
+  describe('blink animation (isSegmentOpenedNotRendered)', () => {
+    const BLINK_ANIMATION_DURATION = 3600
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it('does not blink by default (no isSegmentOpenedNotRendered prop)', () => {
+      const {container} = render(
+        <ProjectBar {...defaultProjectBarProps} isSticky={true} />,
+      )
+      expect(
+        container.querySelector('.projectbar-filename'),
+      ).not.toHaveClass('project-bar-blink')
+    })
+
+    it('blinks when isSegmentOpenedNotRendered describes "true"', () => {
+      const {container} = render(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={true}
+          isSegmentOpenedNotRendered={Symbol(true)}
+        />,
+      )
+      expect(container.querySelector('.projectbar-filename')).toHaveClass(
+        'project-bar-blink',
+      )
+    })
+
+    it('does not blink when isSegmentOpenedNotRendered describes "false"', () => {
+      const {container} = render(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={true}
+          isSegmentOpenedNotRendered={Symbol(false)}
+        />,
+      )
+      expect(
+        container.querySelector('.projectbar-filename'),
+      ).not.toHaveClass('project-bar-blink')
+    })
+
+    it('does not blink when not sticky, even if the signal says true', () => {
+      const {container} = render(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={false}
+          isSegmentOpenedNotRendered={Symbol(true)}
+        />,
+      )
+      expect(
+        container.querySelector('.projectbar-filename'),
+      ).not.toHaveClass('project-bar-blink')
+    })
+
+    it('clears the blink automatically after the animation duration, even without an animationend event', () => {
+      jest.useFakeTimers()
+      const {container} = render(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={true}
+          isSegmentOpenedNotRendered={Symbol(true)}
+        />,
+      )
+      expect(container.querySelector('.projectbar-filename')).toHaveClass(
+        'project-bar-blink',
+      )
+
+      act(() => {
+        jest.advanceTimersByTime(BLINK_ANIMATION_DURATION)
+      })
+
+      expect(
+        container.querySelector('.projectbar-filename'),
+      ).not.toHaveClass('project-bar-blink')
+    })
+
+    it('re-triggers the blink when a new Symbol signal describes "true" again', () => {
+      jest.useFakeTimers()
+      const {container, rerender} = render(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={true}
+          isSegmentOpenedNotRendered={Symbol(true)}
+        />,
+      )
+
+      act(() => {
+        jest.advanceTimersByTime(BLINK_ANIMATION_DURATION)
+      })
+      expect(
+        container.querySelector('.projectbar-filename'),
+      ).not.toHaveClass('project-bar-blink')
+
+      act(() => {
+        rerender(
+          <ProjectBar
+            {...defaultProjectBarProps}
+            isSticky={true}
+            isSegmentOpenedNotRendered={Symbol(true)}
+          />,
+        )
+      })
+
+      expect(container.querySelector('.projectbar-filename')).toHaveClass(
+        'project-bar-blink',
+      )
+    })
+  })
+
   describe('scroll direction tracking', () => {
     it('detects forward scroll', () => {
       const listRef = createMockListRef(0)
@@ -234,6 +345,55 @@ describe('ProjectBar', () => {
         />,
       )
       expect(listRef.scrollTop).toBe(50)
+    })
+  })
+
+  describe('previousOpenedFileIdRef syncing (isSticky=true)', () => {
+    it('sets the ref to the rendered segment file id when sticky', () => {
+      const previousOpenedFileIdRef = {current: undefined}
+      render(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={true}
+          previousOpenedFileIdRef={previousOpenedFileIdRef}
+        />,
+      )
+      expect(previousOpenedFileIdRef.current).toBe(mockSegment.id_file)
+    })
+
+    it('updates the ref again when the sticky bar re-renders for a different file', () => {
+      const previousOpenedFileIdRef = {current: undefined}
+      const segmentFile2 = {...mockSegment, id_file: 2}
+      const {rerender} = render(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={true}
+          previousOpenedFileIdRef={previousOpenedFileIdRef}
+        />,
+      )
+      expect(previousOpenedFileIdRef.current).toBe(1)
+
+      rerender(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={true}
+          segment={segmentFile2}
+          previousOpenedFileIdRef={previousOpenedFileIdRef}
+        />,
+      )
+      expect(previousOpenedFileIdRef.current).toBe(2)
+    })
+
+    it('does not touch the ref when not sticky', () => {
+      const previousOpenedFileIdRef = {current: 'unchanged'}
+      render(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={false}
+          previousOpenedFileIdRef={previousOpenedFileIdRef}
+        />,
+      )
+      expect(previousOpenedFileIdRef.current).toBe('unchanged')
     })
   })
 })

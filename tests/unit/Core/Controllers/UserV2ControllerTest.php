@@ -2,6 +2,8 @@
 
 namespace Matecat\Core\Controllers;
 
+use Utils\Session\ArraySessionStore;
+
 use Controller\API\V2\UserController;
 use InvalidArgumentException;
 use Klein\Request;
@@ -90,7 +92,9 @@ class UserV2ControllerTest extends AbstractTest
         $user->create_date = '2020-01-01 00:00:00';
         $this->setProp('user', $user);
 
-        $_SESSION = [];
+        // The session the request already proved. It holds the uid and nothing else now; an
+        // ArraySessionStore replaces the $_SESSION reset this used to need.
+        $this->setProp('sessionStore', new ArraySessionStore(['uid' => $user->uid]));
     }
 
     protected function tearDown(): void

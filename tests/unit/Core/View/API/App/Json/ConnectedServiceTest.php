@@ -95,4 +95,66 @@ class ConnectedServiceTest extends AbstractTest
 
         $this->assertFalse($result['is_default']);
     }
+
+    /**
+     * The provider returns one blob holding several credentials; only one of them has a client-side
+     * consumer. This pins the narrowing, and it is the test that fails if the view goes back to
+     * returning the stored value verbatim.
+     */
+    public function testTheRefreshAndIdTokensAreNeverSentToTheClient(): void
+    {
+        $struct = $this->makeStruct();
+        $struct->setEncryptedAccessToken((string)json_encode([
+            'access_token'  => 'ya29.the-short-lived-one',
+            'expires_in'    => 3599,
+            'refresh_token' => '1//the-long-lived-one',
+            'scope'         => 'https://www.googleapis.com/auth/drive',
+            'token_type'    => 'Bearer',
+            'id_token'      => 'eyJ.identity.assertion',
+        ]));
+
+        $rendered = (new ConnectedService([]))->renderItem($struct);
+
+        // Assert against the serialised field, because that is literally what reaches the browser.
+        $this->assertStringNotContainsString('refresh_token', (string)$rendered['oauth_access_token']);
+        $this->assertStringNotContainsString('1//the-long-lived-one', (string)$rendered['oauth_access_token']);
+        $this->assertStringNotContainsString('id_token', (string)$rendered['oauth_access_token']);
+        $this->assertStringNotContainsString('eyJ.identity.assertion', (string)$rendered['oauth_access_token']);
+    }
+
+    /**
+     * The Picker parses this field and reads .access_token, so the narrowing must not break it.
+     */
+    public function testTheAccessTokenStillReachesThePickerInTheShapeItParses(): void
+    {
+        $struct = $this->makeStruct();
+        $struct->setEncryptedAccessToken((string)json_encode([
+            'access_token'  => 'ya29.the-short-lived-one',
+            'refresh_token' => '1//the-long-lived-one',
+        ]));
+
+        $rendered = (new ConnectedService([]))->renderItem($struct);
+        $decoded  = json_decode((string)$rendered['oauth_access_token'], true);
+
+        $this->assertIsArray($decoded);
+        $this->assertSame('ya29.the-short-lived-one', $decoded['access_token']);
+        $this->assertSame(['access_token'], array_keys($decoded));
+    }
+
+    public function testAServiceWithNoStoredTokenRendersNull(): void
+    {
+        $this->assertNull((new ConnectedService([]))->renderItem($this->makeStruct())['oauth_access_token']);
+    }
+
+    /**
+     * A stored value that is not the JSON object we expect is dropped rather than forwarded: if we
+     * cannot tell which part of it is the access token, none of it is safe to hand over.
+     */
+    public function testAnUnparseableStoredTokenIsDroppedRatherThanForwarded(): void
+    {
+        $struct = $this->makeStruct();
+        $struct->setEncryptedAccessToken('not-json-at-all');
+
+        $this->assertNull((new ConnectedService([]))->renderItem($struct)['oauth_access_token']);
+    }
 }

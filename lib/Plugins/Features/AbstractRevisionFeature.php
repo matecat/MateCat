@@ -283,7 +283,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
         foreach ($reviews as $review) {
             $model = new ChunkReviewModel($review, $this->getDatabase());
-            $model->recountAndUpdatePassFailResult($project);
+            $model->recountAndUpdatePassFailResult($project, $event->actingUser);
         }
     }
 
@@ -335,7 +335,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
         foreach ($reviews as $review) {
             $model = new ChunkReviewModel($review, $this->getDatabase());
-            $model->recountAndUpdatePassFailResult($project);
+            $model->recountAndUpdatePassFailResult($project, $event->actingUser);
         }
     }
 

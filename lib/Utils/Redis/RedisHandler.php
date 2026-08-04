@@ -46,8 +46,12 @@ use Utils\Tools\Utils;
  *     REDIS_SERVERS = "tcp://master:6379,tcp://slave1:6380,tcp://slave2:6381"
  *
  *     Predis option: ['replication' => 'predis']
- *     The first server is the master; subsequent servers are read-only replicas.
- *     Predis routes read commands (GET, HGET, etc.) to slaves and write commands
+ *     The master MUST be named with "?role=master" on its own DSN. Position means nothing:
+ *     Predis assigns the master role only from that parameter and has no positional
+ *     default, so a set that names none serves every read from a randomly chosen replica
+ *     and fails every write with "No master server available for replication".
+ *     Servers without the parameter are treated as read-only replicas.
+ *     Predis then routes read commands (GET, HGET, etc.) to replicas and write commands
  *     (SET, DEL, etc.) to the master automatically.
  *     No automatic failover — if the master goes down, manual intervention is needed.
  *
@@ -128,12 +132,17 @@ class RedisHandler
     /**
      * Build a Predis Client based on AppConfig settings.
      *
-     * @throws InvalidArgumentException When REDIS_MODE is not a recognized value.
+     * @throws InvalidArgumentException When REDIS_MODE is not a recognized value, or when
+     *                                 replication mode names no master.
      */
     private function getClient(): Client
     {
         $servers = $this->resolveServers();
         $mode    = AppConfig::$REDIS_MODE;
+
+        if ($mode === 'replication') {
+            $this->assertReplicationSetNamesAMaster($servers);
+        }
 
         /** @var array<string, mixed> $options */
         $options = [];
@@ -157,6 +166,53 @@ class RedisHandler
                 "Unknown REDIS_MODE: '$mode'. Valid values: single, cluster, replication, sentinel"
             ),
         };
+    }
+
+    /**
+     * Refuse a replication set that names no master, instead of letting the first write discover it.
+     *
+     * Predis does not infer the master from position — the documentation above used to say it did.
+     * The role is assigned only from an explicit `role=master` parameter on the DSN, with no
+     * positional fallback, so a set without one sends every read to a randomly picked replica and
+     * throws `No master server available for replication` on the first write.
+     *
+     * Failing at connection time rather than at that write is the point. This class is what the DAO
+     * cache and the login token ring connect through, and authenticate() catches Throwable so a
+     * request degrades to signed-out rather than erroring: a misconfigured replication set would
+     * therefore not present as a configuration problem at all, it would present as every user being
+     * logged out while writes failed silently underneath. Naming the missing parameter cannot be
+     * mistaken for anything else.
+     *
+     * This can only reject a configuration that is already broken. A replication set whose DSNs
+     * carry the parameter passes unchanged, and one that does not cannot complete a write today.
+     *
+     * @param list<string> $servers
+     *
+     * @throws InvalidArgumentException
+     */
+    private function assertReplicationSetNamesAMaster(array $servers): void
+    {
+        foreach ($servers as $dsn) {
+            $query = parse_url($dsn, PHP_URL_QUERY);
+
+            if (!is_string($query)) {
+                continue;
+            }
+
+            parse_str($query, $parameters);
+
+            if (($parameters['role'] ?? null) === 'master') {
+                return;
+            }
+        }
+
+        throw new InvalidArgumentException(
+            'REDIS_MODE = "replication" requires the master to be named in REDIS_SERVERS with '
+            . '"?role=master", for example '
+            . '"tcp://master:6379?role=master,tcp://replica:6380". Predis has no positional '
+            . 'default: without it every read goes to a random replica and every write fails with '
+            . '"No master server available for replication".'
+        );
     }
 
     /**

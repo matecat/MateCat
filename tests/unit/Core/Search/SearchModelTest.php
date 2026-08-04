@@ -253,6 +253,162 @@ class SearchModelTest extends AbstractTest
         $this->assertSame(0, $result['count']);
     }
 
+    // ─── includeLocked ───
+    //
+    // includeLocked is true by default, so the queries stay as they always were. When it is false the ICE
+    // segments drop out of the result set, which is what keeps a replace-all from touching them.
+
+    #[Test]
+    public function testSearchInSourceExcludesIcesWhenLockedAreExcluded(): void
+    {
+        $this->_assertIceIsExcludedWhenLockedAreExcluded(function (bool $includeLocked): array {
+            return $this->_searchInSource('Hello', $includeLocked);
+        });
+    }
+
+    #[Test]
+    public function testSearchInTargetExcludesIcesWhenLockedAreExcluded(): void
+    {
+        $this->_assertIceIsExcludedWhenLockedAreExcluded(function (bool $includeLocked): array {
+            return $this->_searchInTarget('Ciao', $includeLocked);
+        });
+    }
+
+    #[Test]
+    public function testSearchStatusOnlyExcludesIcesWhenLockedAreExcluded(): void
+    {
+        $this->_assertIceIsExcludedWhenLockedAreExcluded(function (bool $includeLocked): array {
+            return $this->_searchStatusOnly($includeLocked);
+        });
+    }
+
+    #[Test]
+    public function testGetQueryWrapsDatabaseFailuresIntoAnException(): void
+    {
+        $queryParamsStruct = new SearchQueryParamsStruct();
+        $queryParamsStruct->job = $this->jobId;
+        $queryParamsStruct->password = $this->jobPwd;
+        $queryParamsStruct->status = 'all';
+        $queryParamsStruct->isExactMatchRequested = false;
+        $queryParamsStruct->isMatchCaseRequested = false;
+
+        $searchModel = $this->_buildSearchModel($queryParamsStruct);
+
+        $method = new \ReflectionMethod(SearchModel::class, '_getQuery');
+        $method->setAccessible(true);
+
+        $this->expectException(\Exception::class);
+
+        $method->invoke($searchModel, 'SELECT id FROM a_table_that_does_not_exist_in_matecat', []);
+    }
+
+    /**
+     * Runs the given search twice: once as it normally happens, then again with the locked segments
+     * excluded, after turning one of the segments the first run returned into an ICE. That segment, and
+     * only that one, has to disappear from the second result set.
+     *
+     * @param callable(bool): array{sid_list: list<string>, count: int} $search
+     *
+     * @throws Exception
+     */
+    private function _assertIceIsExcludedWhenLockedAreExcluded(callable $search): void
+    {
+        $withLocked = $search(true);
+        $this->assertNotEmpty($withLocked['sid_list'], 'the fixture must return at least one segment');
+
+        $iceSegmentId = (int)$withLocked['sid_list'][0];
+        $conn = obtainTestDatabase()->getConnection();
+
+        $read = $conn->prepare("SELECT match_type FROM segment_translations WHERE id_job = :job AND id_segment = :id");
+        $read->execute(['job' => $this->jobId, 'id' => $iceSegmentId]);
+        $previousMatchType = $read->fetchColumn();
+
+        $write = $conn->prepare("UPDATE segment_translations SET match_type = :match_type WHERE id_job = :job AND id_segment = :id");
+        $write->execute(['match_type' => 'ICE', 'job' => $this->jobId, 'id' => $iceSegmentId]);
+
+        try {
+            $withoutLocked = $search(false);
+
+            $this->assertNotContains((string)$iceSegmentId, $withoutLocked['sid_list']);
+            $this->assertSame(count($withLocked['sid_list']) - 1, count($withoutLocked['sid_list']));
+        } finally {
+            $write->execute([
+                'match_type' => $previousMatchType === false ? null : $previousMatchType,
+                'job' => $this->jobId,
+                'id' => $iceSegmentId,
+            ]);
+        }
+    }
+
+    /**
+     * @return array{sid_list: list<string>, count: int}
+     * @throws Exception
+     */
+    private function _searchInSource(string $term, bool $includeLocked): array
+    {
+        $queryParamsStruct = new SearchQueryParamsStruct();
+        $queryParamsStruct->job = $this->jobId;
+        $queryParamsStruct->password = $this->jobPwd;
+        $queryParamsStruct->status = 'all';
+        $queryParamsStruct->isExactMatchRequested = false;
+        $queryParamsStruct->isMatchCaseRequested = false;
+        $queryParamsStruct->includeLocked = $includeLocked;
+        $queryParamsStruct['key'] = 'source';
+        $queryParamsStruct['src'] = $term;
+
+        return $this->_buildSearchModel($queryParamsStruct)->search(false);
+    }
+
+    /**
+     * @return array{sid_list: list<string>, count: int}
+     * @throws Exception
+     */
+    private function _searchInTarget(string $term, bool $includeLocked): array
+    {
+        $queryParamsStruct = new SearchQueryParamsStruct();
+        $queryParamsStruct->job = $this->jobId;
+        $queryParamsStruct->password = $this->jobPwd;
+        $queryParamsStruct->status = 'all';
+        $queryParamsStruct->isExactMatchRequested = false;
+        $queryParamsStruct->isMatchCaseRequested = false;
+        $queryParamsStruct->includeLocked = $includeLocked;
+        $queryParamsStruct['key'] = 'target';
+        $queryParamsStruct['trg'] = $term;
+
+        return $this->_buildSearchModel($queryParamsStruct)->search(false);
+    }
+
+    /**
+     * @return array{sid_list: list<string>, count: int}
+     * @throws Exception
+     */
+    private function _searchStatusOnly(bool $includeLocked): array
+    {
+        $queryParamsStruct = new SearchQueryParamsStruct();
+        $queryParamsStruct->job = $this->jobId;
+        $queryParamsStruct->password = $this->jobPwd;
+        $queryParamsStruct->status = 'TRANSLATED';
+        $queryParamsStruct->isExactMatchRequested = false;
+        $queryParamsStruct->isMatchCaseRequested = false;
+        $queryParamsStruct->includeLocked = $includeLocked;
+        $queryParamsStruct['key'] = 'status_only';
+
+        return $this->_buildSearchModel($queryParamsStruct)->search(false);
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function _buildSearchModel(SearchQueryParamsStruct $queryParamsStruct): SearchModel
+    {
+        $jobData = (new JobDao(obtainTestDatabase()))->getByIdAndPassword($this->jobId, $this->jobPwd);
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
+        $featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
+        $filters = MateCatFilter::getInstance($featureSet, $jobData->source, $jobData->target, []);
+
+        return new SearchModel($queryParamsStruct, $filters, obtainTestDatabase());
+    }
+
     private function _searchWithStatus(string $status): array
     {
         $queryParamsStruct = new SearchQueryParamsStruct();

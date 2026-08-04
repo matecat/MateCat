@@ -62,7 +62,7 @@ const TAB_ITEMS = {
     isLoading: false,
   },
   [TAB.MULTIMATCHES]: {
-    label: 'Crosslanguage Matches',
+    label: 'Cross-language Matches',
     code: 'cl',
     tabClass: 'cross-matches',
     isLoading: false,

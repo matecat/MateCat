@@ -9,6 +9,7 @@ use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use ReflectionException;
 use RuntimeException;
+use Utils\Session\ArraySessionStore;
 
 /**
  * Sentinel exception thrown by the stub instead of exercising the real
@@ -48,6 +49,7 @@ class SignInViewControllerTest extends AbstractTest
 {
     private ReflectionClass $reflector;
     private TestableSignInController $controller;
+    private ArraySessionStore $sessionStore;
 
     /** @throws ReflectionException */
     protected function setUp(): void
@@ -57,13 +59,9 @@ class SignInViewControllerTest extends AbstractTest
         $this->reflector = new ReflectionClass(TestableSignInController::class);
         $this->controller = $this->reflector->newInstanceWithoutConstructor();
 
-        unset($_SESSION['wanted_url']);
-    }
-
-    protected function tearDown(): void
-    {
-        unset($_SESSION['wanted_url']);
-        parent::tearDown();
+        // A store per test case, so nothing has to be unset here or in tearDown: the wanted_url the
+        // old version cleared out of $_SESSION could outlive a test and decide the next one.
+        $this->sessionStore = $this->injectSessionStore($this->controller);
     }
 
     /** @throws ReflectionException */
@@ -77,7 +75,7 @@ class SignInViewControllerTest extends AbstractTest
     public function renderViewRedirectsToWantedUrlWhenLoggedInAndWantedUrlIsSet(): void
     {
         $this->setLoggedIn(true);
-        $_SESSION['wanted_url'] = 'some/previous/page';
+        $this->sessionStore->set('wanted_url', 'some/previous/page');
 
         try {
             $this->controller->renderView();
@@ -108,7 +106,6 @@ class SignInViewControllerTest extends AbstractTest
     public function renderViewSetsSigninTemplateWhenLoggedInButNoWantedUrl(): void
     {
         $this->setLoggedIn(true);
-        unset($_SESSION['wanted_url']);
 
         try {
             $this->controller->renderView();

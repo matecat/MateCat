@@ -11,6 +11,13 @@
     align-items: center;
     justify-content: space-between;
 
+    .team-name-error {
+      margin: 8px 0 0;
+      color: colors.$redDefault;
+      font-size: 12px;
+      line-height: 16px;
+    }
+
     .container-input {
       display: flex;
       gap: 5px;

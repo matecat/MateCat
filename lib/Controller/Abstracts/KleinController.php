@@ -151,18 +151,6 @@ abstract class KleinController implements IController
     }
 
     /**
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public function refreshClientSessionIfNotApi(): void
-    {
-        if (empty($this->api_key)) {
-            static::sessionStart();
-            AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase())->refreshSession();
-        }
-    }
-
-    /**
      * @throws Exception|Throwable
      */
     public function performValidations(): void

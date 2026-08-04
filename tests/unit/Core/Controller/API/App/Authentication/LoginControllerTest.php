@@ -6,6 +6,7 @@ namespace Matecat\Core\Controller\API\App\Authentication;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\App\Authentication\LoginController;
+use Controller\Exceptions\MissingDatabaseException;
 use Controller\Services\RateLimiterService;
 use Klein\Request;
 use Klein\Response;
@@ -17,6 +18,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
+use Utils\Session\ArraySessionStore;
 use Utils\Tools\SimpleJWT;
 use Utils\Tools\Utils;
 
@@ -58,6 +60,23 @@ class TestableLoginController extends LoginController
         $this->logoutCalled = true;
     }
 
+    /**
+     * Stand in for identifyUser(), which the double's empty constructor skips. Both properties are
+     * set on every call, including the not-authenticated one: they are declared without defaults, so
+     * reading either before identifyUser() has run is an Error rather than a falsy value. Production
+     * cannot reach that state — KleinController's constructor always runs identifyUser() — so the
+     * harness has to supply what production guarantees instead of leaving it to a lucky short-circuit.
+     */
+    public function markAuthenticated(bool $logged, ?int $uid = null): void
+    {
+        $user      = new UserStruct();
+        $user->uid = $uid;
+
+        $ref = new ReflectionClass(KleinController::class);
+        $ref->getProperty('user')->setValue($this, $user);
+        $ref->getProperty('userIsLogged')->setValue($this, $logged);
+    }
+
     public function getResponse(): Response
     {
         return (new ReflectionClass(KleinController::class))->getProperty('response')->getValue($this);
@@ -79,11 +98,11 @@ class LoginControllerTest extends AbstractTest
     private Request|MockObject $request;
     private Response $response;
     private RateLimiterService $rateLimiter;
+    private ArraySessionStore $sessionStore;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $_SESSION = [];
 
         $this->request = $this->createStub(Request::class);
         $this->response = new Response();
@@ -91,6 +110,10 @@ class LoginControllerTest extends AbstractTest
 
         $this->controller = new TestableLoginController();
         $this->controller->initWith($this->request, $this->response, $this->rateLimiter);
+
+        // The double skips the constructor that builds the store. Per test case, so the login_csrf a
+        // test issues cannot be seen by the next one — which is the whole point of the 403 test below.
+        $this->sessionStore = $this->injectSessionStore($this->controller);
     }
 
     // ─── directLogout ────────────────────────────────────────────────
@@ -191,7 +214,7 @@ class LoginControllerTest extends AbstractTest
         $this->request->method('params')->willReturn(['email' => 'test@example.com', 'password' => 'pass']);
         $this->request->method('headers')->willReturn($headers);
 
-        $_SESSION = []; // no login_csrf was ever issued to this session
+        // The store starts empty, so no login_csrf was ever issued to this session.
 
         $this->controller->login();
 
@@ -212,7 +235,7 @@ class LoginControllerTest extends AbstractTest
             AppConfig::$AUTHSECRET,
             60
         );
-        $_SESSION['login_csrf'] = $csrf;
+        $this->sessionStore->set('login_csrf', $csrf);
 
         $headers = $this->createStub(\Klein\DataCollection\HeaderDataCollection::class);
         $headers->method('get')->willReturn($jwt->jsonSerialize());
@@ -230,6 +253,57 @@ class LoginControllerTest extends AbstractTest
     }
 
     #[Test]
+    public function login_accepts_a_password_containing_html_special_characters(): void
+    {
+        $this->rateLimiter->method('checkAndIncrement')->willReturn(null);
+
+        $csrf = Utils::uuid4();
+        $jwt = new SimpleJWT(
+            ['csrf' => $csrf],
+            AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
+            AppConfig::$AUTHSECRET,
+            60
+        );
+        $this->sessionStore->set('login_csrf', $csrf);
+
+        $headers = $this->createStub(\Klein\DataCollection\HeaderDataCollection::class);
+        $headers->method('get')->willReturn($jwt->jsonSerialize());
+
+        $this->request->method('params')->willReturn([
+            'email' => 'test@example.com',
+            'password' => 'Valid&Pass<word>1',
+        ]);
+        $this->request->method('headers')->willReturn($headers);
+
+        $user = new UserStruct();
+        $user->uid = 1;
+        $user->email = 'test@example.com';
+        $user->salt = 'test-salt';
+        // Hashed from the raw password, which is what the signup and reset paths now store.
+        $user->pass = Utils::encryptPass('Valid&Pass<word>1', 'test-salt');
+        $user->email_confirmed_at = date('Y-m-d H:i:s');
+
+        $dao = $this->createStub(UserDao::class);
+        $dao->method('getByEmail')->willReturn($user);
+        $this->controller->mockUserDao = $dao;
+
+        try {
+            $this->controller->login();
+        } catch (MissingDatabaseException) {
+            // The rejection branch sets 404 and returns without ever touching the database, so
+            // reaching the database dependency is itself proof that the password matched. Driving the
+            // rest of the authenticated branch would need cookie emission and a live schema, which is
+            // not what this test is about.
+            $this->addToAssertionCount(1);
+        }
+
+        // This is the pairing that has to hold: whatever the write paths hash, this path must compare
+        // byte for byte. A 404 here means login altered the submitted password and no longer agrees
+        // with how it was stored.
+        $this->assertNotSame(404, $this->controller->getResponse()->code());
+    }
+
+    #[Test]
     public function login_returns_404_when_password_wrong(): void
     {
         $this->rateLimiter->method('checkAndIncrement')->willReturn(null);
@@ -241,7 +315,7 @@ class LoginControllerTest extends AbstractTest
             AppConfig::$AUTHSECRET,
             60
         );
-        $_SESSION['login_csrf'] = $csrf;
+        $this->sessionStore->set('login_csrf', $csrf);
 
         $headers = $this->createStub(\Klein\DataCollection\HeaderDataCollection::class);
         $headers->method('get')->willReturn($jwt->jsonSerialize());
@@ -274,30 +348,72 @@ class LoginControllerTest extends AbstractTest
 
         $this->assertSame(200, $this->controller->getResponse()->code());
         $this->assertNotNull($this->controller->getResponse()->headers()->get(AppConfig::$XSRF_TOKEN));
-        $this->assertArrayHasKey('login_csrf', $_SESSION);
+        $this->assertArrayHasKey('login_csrf', $this->sessionStore->all());
     }
 
     // ─── socketToken ─────────────────────────────────────────────────
 
     #[Test]
-    public function socketToken_returns_406_when_no_session_user(): void
+    public function socketToken_returns_406_when_the_request_is_not_authenticated(): void
     {
-        $_SESSION = [];
+        $this->controller->markAuthenticated(false);
+
+        $this->controller->socketToken();
+
+        $this->assertSame(406, $this->controller->getResponse()->code());
+    }
+
+    /**
+     * The revocation case, and the reason this route gained a login gate. The session still carries
+     * the uid setUserSession() stamped, because authenticate() never removes it when the ring
+     * refuses the cookie — so on the session alone this request is indistinguishable from a live
+     * one, and used to be answered with a signed token naming the revoked account.
+     */
+    #[Test]
+    public function socketToken_refuses_a_session_whose_login_token_is_no_longer_in_the_ring(): void
+    {
+        $this->sessionStore->set('uid', 42);
+        $this->controller->markAuthenticated(false);
+
+        $this->controller->socketToken();
+
+        $this->assertSame(406, $this->controller->getResponse()->code());
+        $this->assertNull($this->controller->getResponse()->headers()->get(AppConfig::$XSRF_TOKEN));
+    }
+
+    /**
+     * An api-key caller is authenticated but has no session: authenticate() answers it before
+     * setUserSession() is reached. It was refused before this gate existed and must still be — this
+     * route belongs to the session-backed UI, not to the stateless API.
+     */
+    #[Test]
+    public function socketToken_refuses_an_authenticated_caller_that_has_no_session_uid(): void
+    {
+        $this->controller->markAuthenticated(true, 42);
+
         $this->controller->socketToken();
 
         $this->assertSame(406, $this->controller->getResponse()->code());
     }
 
     #[Test]
-    public function socketToken_returns_200_with_token_when_session_user_exists(): void
+    public function socketToken_returns_200_with_a_token_naming_the_ring_authenticated_uid(): void
     {
-        $user = new UserStruct();
-        $user->uid = 42;
-        $_SESSION = ['user' => $user];
+        // `uid` is what setUserSession() writes to mark a session authenticated; the UserStruct this
+        // used to seed was deleted from the session for carrying the password hash.
+        $this->sessionStore->set('uid', 42);
+        $this->controller->markAuthenticated(true, 42);
 
         $this->controller->socketToken();
 
         $this->assertSame(200, $this->controller->getResponse()->code());
-        $this->assertNotNull($this->controller->getResponse()->headers()->get(AppConfig::$XSRF_TOKEN));
+
+        $token = $this->controller->getResponse()->headers()->get(AppConfig::$XSRF_TOKEN);
+        $this->assertIsString($token);
+
+        // The identity actually shipped, not merely that something was shipped: the uid is read from
+        // the ring-proven user, so a token can never name an account this request did not prove.
+        $jwt = SimpleJWT::getValidatedInstanceFromString($token, AppConfig::$AUTHSECRET);
+        $this->assertSame(42, $jwt['uid']);
     }
 }

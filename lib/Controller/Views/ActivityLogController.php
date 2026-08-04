@@ -5,6 +5,7 @@ namespace Controller\Views;
 use Controller\Abstracts\BaseKleinViewController;
 use Controller\Abstracts\IController;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
+use Controller\API\Commons\Validators\TeamAccessValidator;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
 use Model\ActivityLog\ActivityLogDao;
@@ -23,12 +24,44 @@ class ActivityLogController extends BaseKleinViewController implements IControll
     protected function registerValidators(): void
     {
         $this->appendValidator(new ViewLoginRedirectValidator($this));
-        $this->appendValidator(
-            (new ProjectPasswordValidator($this))->onFailure(function () {
+
+        // The project id and password only prove the caller followed a shared link. The activity log
+        // lists the name, email and IP of everyone who worked on the project, so viewing it is
+        // restricted to the team that owns the project — the same rule the project menu applies when
+        // it offers "View Project Logs" only to that team.
+        $teamValidator = new TeamAccessValidator($this);
+
+        // Construct first, then attach the callbacks: a closure captures `use` variables by value at
+        // creation time, so $projectValidator must already be assigned before onSuccess() references it.
+        $projectValidator = new ProjectPasswordValidator($this);
+        $projectValidator
+            ->onSuccess(function () use ($projectValidator, $teamValidator) {
+                // The password validator has just resolved the project, so the owning team is taken
+                // from it rather than read again.
+                $project = $projectValidator->getProject();
+                if ($project === null || $project->id_team === null) {
+                    // A project with no team has nobody to be a member of; refuse without disclosing
+                    // whether the project exists, matching the wrong-password branch below.
+                    $this->setView("project_not_found.html", [], 404);
+                    $this->render();
+                }
+
+                $teamValidator->setIdTeam($project->id_team);
+            })
+            ->onFailure(function () {
                 $this->setView("project_not_found.html", [], 404);
                 $this->render();
-            })
-        );
+            });
+
+        $teamValidator->onFailure(function () {
+            $this->setView("project_not_found.html", [], 404);
+            $this->render();
+        });
+
+        // Registration order is execution order: the password validator resolves the project and
+        // seeds the team above, then the team validator confirms membership.
+        $this->appendValidator($projectValidator);
+        $this->appendValidator($teamValidator);
     }
 
     /**

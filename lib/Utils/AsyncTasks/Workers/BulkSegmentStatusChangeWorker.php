@@ -71,7 +71,15 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
         $chunk = $this->createJobStruct($params['chunk']);
         $status = $params['destination_status'];
         $client_id = $params['client_id'];
+        // The enqueuing controller is authenticated, so the row exists at publish time; it can only
+        // be gone if the account was deleted while the message sat in the queue. Fail the message
+        // instead of carrying on unattributed — every chunk-review update below is booked to this
+        // user, and a null actor used to surface downstream as user 0.
         $user = $this->userDao->getByUid($params['id_user']);
+        if ($user === null) {
+            throw new EndQueueException('Cannot resolve the user ' . $params['id_user'] . ' that enqueued this bulk status change', -1);
+        }
+
         $source_page = ReviewUtils::revisionNumberToSourcePage($params['revision_number']);
 
         $this->database->begin();
@@ -113,7 +121,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
         $segmentTranslationDao->updateTranslationAndStatusAndDateByList($new_translations);
 
-        $batchEventCreator->save(new BatchReviewProcessor(new ChunkReviewDao($this->database)));
+        $batchEventCreator->save(new BatchReviewProcessor(new ChunkReviewDao($this->database), $user));
 
         $this->_doLog('completed');
 

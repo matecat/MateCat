@@ -2,7 +2,6 @@
 
 namespace Utils\OutsourceTo;
 
-use Controller\Abstracts\Authentication\SessionStarter;
 use Exception;
 use LogicException;
 use Matecat\Locales\LanguageDomains;
@@ -16,6 +15,7 @@ use TypeError;
 use Utils\Logger\LoggerFactory;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
+use Utils\Session\SessionStore;
 use Utils\Shop\Cart;
 use Utils\Shop\ItemHTSQuoteJob;
 
@@ -115,8 +115,6 @@ use Utils\Shop\ItemHTSQuoteJob;
 class Translated extends AbstractProvider
 {
 
-    use SessionStarter;
-
     private string $fixedDelivery;
     private string $typeOfService;
 
@@ -125,6 +123,26 @@ class Translated extends AbstractProvider
 
     private static string $OUTSOURCE_URL_CONFIRM = '';
 
+    private SessionStore $session;
+
+    /**
+     * Carts held per name for the life of this object, replacing Cart's static singleton pool.
+     *
+     * Identity within a request is load-bearing: __addCartElementToCart() calls delItem() then
+     * addItem() and both must act on one in-memory copy, and the itemExists()/getItem() checks read
+     * back what earlier calls in the same request wrote. Two independently constructed carts would each
+     * load their own copy from the store and the second write would drop the first. Holding them here
+     * rather than statically also keeps per-user data out of static state.
+     *
+     * @var array<string, Cart>
+     */
+    private array $carts = [];
+
+    private function cart(string $cartName): Cart
+    {
+        return $this->carts[$cartName] ??= new Cart($cartName, $this->session);
+    }
+
     /**
      * Class constructor
      *
@@ -132,15 +150,18 @@ class Translated extends AbstractProvider
      * default localization values (currency and timezone)
      * and default connection parameters for curls
      *
+     * @param SessionStore $session backs the quote carts; this class no longer opens a session of its
+     *                              own, the controller is declared stateful and supplies the store
+     *
      * @throws Exception
      * @see AbstractProvider::$_outsource_login_url_ko
      * @see AbstractProvider::$_outsource_login_url_ok
      */
-    public function __construct()
+    public function __construct(SessionStore $session)
     {
         parent::__construct();
 
-        static::sessionStart();
+        $this->session = $session;
 
         $this->currency = "EUR";
 
@@ -261,7 +282,7 @@ class Translated extends AbstractProvider
          */
         foreach ($this->jobList as $job) {
             // Is there in the cache anything that tells this job has already been outsourced?
-            if (Cart::getInstance('outsource_to_external_cache')->itemExists($job['jid'] . "-" . $job['jpassword'] . "-outsourced")) {
+            if ($this->cart('outsource_to_external_cache')->itemExists($job['jid'] . "-" . $job['jpassword'] . "-outsourced")) {
                 // if so, then update the job localization info (currency and timezone), according to user preferences
                 $this->__updateCartElements($job['jid'] . "-" . $job['jpassword'] . "-outsourced", $this->currency, $this->timezone);
                 continue;
@@ -356,12 +377,12 @@ class Translated extends AbstractProvider
             // NOTE:    this "if" is necessary to not process again a job already outsourced.
             //          A possible alternative is to unset from the $this->jobList array all the jobs detected as
             //          outsourced during Translated::__processOutsourcedJobs function
-            if (Cart::getInstance('outsource_to_external_cache')->itemExists($job['jid'] . "-" . $job['jpassword'] . "-outsourced")) {
+            if ($this->cart('outsource_to_external_cache')->itemExists($job['jid'] . "-" . $job['jpassword'] . "-outsourced")) {
                 continue;
             }
 
             // in case we have a quote in the cache, we are done with this job anyway
-            if (Cart::getInstance('outsource_to_external_cache')->itemExists($job['jid'] . "-" . $job['jpassword'] . "-" . $this->fixedDelivery)) {
+            if ($this->cart('outsource_to_external_cache')->itemExists($job['jid'] . "-" . $job['jpassword'] . "-" . $this->fixedDelivery)) {
                 // update the job localization info (currency and timezone), according to user preferences
                 $this->__updateCartElements($job['jid'] . "-" . $job['jpassword'] . "-" . $this->fixedDelivery, $this->currency, $this->timezone, $this->typeOfService);
                 continue;
@@ -632,7 +653,7 @@ class Translated extends AbstractProvider
      */
     private function __updateCartElements(string $cartId, string $newCurrency, string $newTimezone, ?string $newTypeOfService = null): void
     {
-        $cartElem = Cart::getInstance('outsource_to_external_cache')->getItem($cartId);
+        $cartElem = $this->cart('outsource_to_external_cache')->getItem($cartId);
 
         if (!$cartElem instanceof ItemHTSQuoteJob) {
             throw new RuntimeException("Cart item not found: $cartId");
@@ -715,8 +736,8 @@ class Translated extends AbstractProvider
             $idToUse = $cartElem["id"];
         }
 
-        Cart::getInstance($cartName)->delItem($idToUse);
-        Cart::getInstance($cartName)->addItem($cartElem);
+        $this->cart($cartName)->delItem($idToUse);
+        $this->cart($cartName)->addItem($cartElem);
     }
 
 

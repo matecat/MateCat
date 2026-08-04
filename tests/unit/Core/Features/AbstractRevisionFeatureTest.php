@@ -27,6 +27,7 @@ use Plugins\Features\ReviewExtended;
 use Plugins\Features\SecondPassReview;
 use ReflectionMethod;
 use RuntimeException;
+use Model\Users\UserStruct;
 
 class AbstractRevisionFeatureTest extends AbstractTest
 {
@@ -422,7 +423,7 @@ class AbstractRevisionFeatureTest extends AbstractTest
     public function postJobSplitted_throwsRuntimeException_whenJobToSplitIsNull(): void
     {
         $data = new SplitMergeProjectData(1);
-        $event = new PostJobSplittedEvent($data);
+        $event = new PostJobSplittedEvent($data, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Job id is required when splitting a job');
@@ -438,7 +439,7 @@ class AbstractRevisionFeatureTest extends AbstractTest
     {
         $data = new SplitMergeProjectData(1);
         $chunk = new JobStruct();
-        $event = new PostJobMergedEvent($data, $chunk);
+        $event = new PostJobMergedEvent($data, $chunk, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Job id is required when merging jobs');
@@ -512,7 +513,7 @@ class AbstractRevisionFeatureTest extends AbstractTest
     {
         $data = new SplitMergeProjectData(99999);
         $data->jobToSplit = 99999;
-        $event = new PostJobSplittedEvent($data);
+        $event = new PostJobSplittedEvent($data, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Project not found');
@@ -529,7 +530,7 @@ class AbstractRevisionFeatureTest extends AbstractTest
         $data = new SplitMergeProjectData(99999);
         $data->jobToMerge = 99999;
         $chunk = new JobStruct();
-        $event = new PostJobMergedEvent($data, $chunk);
+        $event = new PostJobMergedEvent($data, $chunk, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Project not found');

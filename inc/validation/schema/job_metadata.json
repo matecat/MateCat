@@ -49,6 +49,21 @@
         "additionalProperties": false,
         "properties": {
           "key": {
+            "const": "mandatory_issues"
+          },
+          "value": {
+            "type": "array",
+            "items": {
+              "enum": ["r1", "r2"]
+            }
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
             "const": "tm_prioritization"
           },
           "value": {

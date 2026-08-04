@@ -12,6 +12,9 @@ use Stomp\Transport\Message;
 use TypeError;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Registry\AppConfig;
+use Utils\Session\PhpSessionStore;
+use Utils\Session\SessionStore;
+use Utils\Session\StatelessSessionStore;
 
 /**
  * Created by PhpStorm.
@@ -44,13 +47,54 @@ trait AuthenticationTrait
 
 
     /**
-     * Build the authentication helper. Overridable seam for tests.
-     *
-     * @param array<string, mixed> $session
+     * The session store for this request. Set by identifyUser(), which is what decides whether this
+     * controller is stateful at all.
      */
-    protected function buildAuthHelper(array &$session, ?string $api_key = null, ?string $api_secret = null): AuthenticationHelper
+    protected SessionStore $sessionStore;
+
+    /**
+     * The store, defaulting to the refusing one when identifyUser() has not run.
+     *
+     * A typed property left uninitialised fails with `Cannot access uninitialized non-nullable
+     * property`, which says nothing about the cause. Defaulting to StatelessSessionStore turns the
+     * same mistake into the accurate message — this controller never established a session — and
+     * keeps the invariant: no session state without identifyUser() having decided there is one.
+     */
+    protected function sessionStore(): SessionStore
+    {
+        return $this->sessionStore ??= new StatelessSessionStore();
+    }
+
+    /**
+     * Build the authentication helper. Overridable seam for tests.
+     */
+    protected function buildAuthHelper(SessionStore $session, ?string $api_key = null, ?string $api_secret = null): AuthenticationHelper
     {
         return AuthenticationHelper::fromRequest($session, $this->getDatabase(), $api_key, $api_secret);
+    }
+
+    /**
+     * Resolve the store for this request, and with it the stateful/stateless boundary.
+     *
+     * This used to be an empty local array for a stateless controller, which made "stateless" a
+     * convention nothing enforced: the array absorbed writes and silently discarded them, and
+     * nothing stopped the controller reading `$_SESSION` directly anyway. A store whose every
+     * mutator throws turns that into an invariant the runtime holds.
+     *
+     * Overridable seam for tests.
+     *
+     * @throws Exception from sessionStart()
+     */
+    protected function buildSessionStore(bool $useSession): SessionStore
+    {
+        if (!$useSession) {
+            return new StatelessSessionStore();
+        }
+
+        //Warning, sessions enabled, disable them after check, $_SESSION is in read-only mode after disabled
+        static::sessionStart();
+
+        return new PhpSessionStore();
     }
 
     /**
@@ -59,16 +103,11 @@ trait AuthenticationTrait
      */
     protected function identifyUser(?bool $useSession = true): void
     {
-        $_session = [];
-        if ($useSession) {
-            //Warning, sessions enabled, disable them after check, $_SESSION is in read-only mode after disabled
-            static::sessionStart();
-            $_session =& $_SESSION;
-        }
+        $this->sessionStore = $this->buildSessionStore((bool)$useSession);
 
         $this->setAuthKeysIfExists();
 
-        $auth = $this->buildAuthHelper($_session, $this->api_key, $this->api_secret);
+        $auth = $this->buildAuthHelper($this->sessionStore, $this->api_key, $this->api_secret);
         $this->user = $auth->getUser();
         $this->userIsLogged = $auth->isLogged();
         $this->api_record = $auth->getApiRecord();
@@ -141,7 +180,7 @@ trait AuthenticationTrait
      */
     public function logout(): void
     {
-        $this->buildAuthHelper($_SESSION)->destroyAuthentication();
+        $this->buildAuthHelper($this->sessionStore())->destroyAuthentication();
     }
 
     public function getApiRecord(): ?ApiKeyStruct

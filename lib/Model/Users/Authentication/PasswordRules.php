@@ -15,6 +15,33 @@ trait PasswordRules
 {
 
     /**
+     * Rejects control characters in a password.
+     *
+     * Passwords reach the rules unescaped: they are compared against a hash and never rendered, so
+     * escaping them would only shrink the usable character set. That leaves control characters as the
+     * one category worth refusing outright, since they cannot be typed back reliably and travel
+     * invisibly through copy and paste.
+     *
+     * @param mixed $password the raw request value, which is not necessarily a string
+     *
+     * @throws ValidationError
+     */
+    public function rejectControlCharacters(mixed $password): void
+    {
+        if (!is_string($password)) {
+            return;
+        }
+
+        // Byte-wise on purpose: without the u modifier every byte of a multibyte character is above
+        // 0x7F, so a legitimate accented or non-Latin password cannot match this range by accident.
+        if (preg_match('/[\x00-\x1F\x7F]/', $password) === 1) {
+            throw new ValidationError(
+                'The password cannot contain control characters, such as tabs, line breaks or null bytes'
+            );
+        }
+    }
+
+    /**
      * @throws ValidationError
      */
     public function validatePasswordRequirements(string $password, string $password_confirmation): void
@@ -23,11 +50,7 @@ trait PasswordRules
             throw new ValidationError('The password must be a maximum of 50 characters long');
         }
 
-        if (filter_var($password, FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW) != $password) {
-            throw new ValidationError('The password contains illegal characters');
-        }
-
-        if (strlen($password) < 12) {
+        if (mb_strlen($password) < 12) {
             throw new ValidationError('Password must be at least 12 characters');
         }
 

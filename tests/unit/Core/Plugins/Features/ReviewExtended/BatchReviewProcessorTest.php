@@ -22,6 +22,7 @@ use Plugins\Features\ReviewExtended\ChunkReviewModel;
 use Plugins\Features\ReviewExtended\ReviewedWordCountModel;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Utils\Registry\AppConfig;
+use Model\Users\UserStruct;
 
 class BatchReviewProcessorStubJobStruct extends JobStruct
 {
@@ -91,14 +92,14 @@ class BatchReviewProcessorTest extends AbstractTest
     #[Test]
     public function constructorAcceptsInjectedDao(): void
     {
-        $processor = new BatchReviewProcessor($this->chunkReviewDaoStub);
+        $processor = new BatchReviewProcessor($this->chunkReviewDaoStub, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
         $this->assertInstanceOf(BatchReviewProcessor::class, $processor);
     }
 
     #[Test]
     public function setChunkReturnsSelf(): void
     {
-        $processor = new BatchReviewProcessor($this->chunkReviewDaoStub);
+        $processor = new BatchReviewProcessor($this->chunkReviewDaoStub, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
         $result = $processor->setChunk($this->chunk);
         $this->assertSame($processor, $result);
     }
@@ -106,7 +107,7 @@ class BatchReviewProcessorTest extends AbstractTest
     #[Test]
     public function setPreparedEventsReturnsSelf(): void
     {
-        $processor = new BatchReviewProcessor($this->chunkReviewDaoStub);
+        $processor = new BatchReviewProcessor($this->chunkReviewDaoStub, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
         $result = $processor->setPreparedEvents([]);
         $this->assertSame($processor, $result);
     }
@@ -122,7 +123,7 @@ class BatchReviewProcessorTest extends AbstractTest
 
         $this->chunkReviewDaoStub->method('findChunkReviews')->willReturn([$existingReview]);
 
-        $processor = new BatchReviewProcessor($this->chunkReviewDaoStub);
+        $processor = new BatchReviewProcessor($this->chunkReviewDaoStub, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
         $processor->setChunk($this->chunk);
         $processor->setPreparedEvents([]);
         $processor->process();
@@ -149,7 +150,7 @@ class BatchReviewProcessorTest extends AbstractTest
         $this->stmtStub->method('fetchAll')->willReturn([]);
         $this->stmtStub->method('setFetchMode')->willReturn(true);
 
-        $processor = new BatchReviewProcessor($this->chunkReviewDaoStub);
+        $processor = new BatchReviewProcessor($this->chunkReviewDaoStub, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
         $processor->setChunk($this->chunk);
         $processor->setPreparedEvents([]);
         $processor->process();
@@ -186,7 +187,7 @@ class BatchReviewProcessorTest extends AbstractTest
         $this->stmtStub->method('fetchAll')->willReturn([]);
         $this->stmtStub->method('setFetchMode')->willReturn(true);
 
-        $processor = new BatchReviewProcessor($daoMock);
+        $processor = new BatchReviewProcessor($daoMock, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
         $processor->setChunk($this->chunk);
         $processor->setPreparedEvents([]);
         $processor->process();
@@ -204,6 +205,7 @@ class BatchReviewProcessorTest extends AbstractTest
 
         $processor = new BatchReviewProcessor(
             chunkReviewDao: $this->chunkReviewDaoStub,
+            actingUser: new UserStruct(['uid' => 987, 'email' => 'actor@example.org']),
             reviewedWordCountModelFactory: $rwcFactory,
             chunkReviewModelFactory: $crmFactory,
         );
@@ -216,7 +218,7 @@ class BatchReviewProcessorTest extends AbstractTest
         $counterModel = $this->createStub(CounterModel::class);
         $counterModel->method('getValues')->willReturn([]);
 
-        $processor = new BatchReviewProcessor($this->chunkReviewDaoStub);
+        $processor = new BatchReviewProcessor($this->chunkReviewDaoStub, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
         $result = $processor->setChunk($this->chunk, $counterModel);
 
         $this->assertSame($processor, $result);
@@ -249,6 +251,7 @@ class BatchReviewProcessorTest extends AbstractTest
 
         $processor = new BatchReviewProcessor(
             chunkReviewDao: $this->chunkReviewDaoStub,
+            actingUser: new UserStruct(['uid' => 987, 'email' => 'actor@example.org']),
             reviewedWordCountModelFactory: $rwcFactory,
         );
         $processor->setChunk($this->chunk, $counterModel);
@@ -279,15 +282,18 @@ class BatchReviewProcessorTest extends AbstractTest
         $rwcStub = $this->createStub(ReviewedWordCountModel::class);
         $rwcStub->method('getEvent')->willReturn($eventStub);
 
+        $actingUser = new UserStruct(['uid' => 987, 'email' => 'actor@example.org']);
+
         $crmMock = $this->createMock(ChunkReviewModel::class);
         $crmMock->expects($this->once())->method('updateChunkReviewCountersAndPassFail')
-            ->with(5.0, 200, 1000, $this->isInstanceOf(ProjectStruct::class));
+            ->with(5.0, 200, 1000, $this->isInstanceOf(ProjectStruct::class), $actingUser);
 
         $counterModel = $this->createStub(CounterModel::class);
         $counterModel->method('getValues')->willReturn([]);
 
         $processor = new BatchReviewProcessor(
             chunkReviewDao: $this->chunkReviewDaoStub,
+            actingUser: $actingUser,
             reviewedWordCountModelFactory: fn() => $rwcStub,
             chunkReviewModelFactory: fn() => $crmMock,
         );
@@ -324,6 +330,7 @@ class BatchReviewProcessorTest extends AbstractTest
 
         $processor = new BatchReviewProcessor(
             chunkReviewDao: $this->chunkReviewDaoStub,
+            actingUser: new UserStruct(['uid' => 987, 'email' => 'actor@example.org']),
             reviewedWordCountModelFactory: fn() => $this->createStub(ReviewedWordCountModel::class),
         );
         $processor->setChunk($this->chunk, $counterModel);

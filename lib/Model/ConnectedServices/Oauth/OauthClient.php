@@ -17,6 +17,7 @@ use Model\ConnectedServices\Oauth\LinkedIn\LinkedInProvider;
 use Model\ConnectedServices\Oauth\Microsoft\MicrosoftProvider;
 use TypeError;
 use Utils\Registry\AppConfig;
+use Utils\Session\SessionStore;
 use Utils\Tools\Utils;
 
 class OauthClient
@@ -90,20 +91,25 @@ class OauthClient
     }
 
     /**
-     * @param string|null $suffixKey
-     * @param array<string, mixed>|null $_session
+     * Mint (or reuse) this provider's anti-CSRF `state` and build the authorization url around it.
      *
-     * @return string
+     * The store is mandatory, which it was not before: the old signature defaulted to
+     * `?array &$_session = []`, so a caller that omitted it wrote the token into a throwaway array
+     * that died with the call. The url still carried a `state`, but nothing was left anywhere to
+     * compare the callback's `state` against — an anti-CSRF token nobody can verify. Requiring the
+     * store makes that call unwritable.
+     *
      * @throws Exception
      */
-    public function getAuthorizationUrl(?array &$_session = [], ?string $suffixKey = ''): string
+    public function getAuthorizationUrl(SessionStore $session, ?string $suffixKey = ''): string
     {
-        $session =& $_session;
-        if (!isset($session[$this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN])) {
-            $session[$this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN] = Utils::uuid4();
+        $stateKey = $this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN;
+
+        if (!$session->has($stateKey)) {
+            $session->set($stateKey, Utils::uuid4());
         }
 
-        return $this->provider->getAuthorizationUrl($session[$this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN]);
+        return $this->provider->getAuthorizationUrl($session->get($stateKey));
     }
 
 }

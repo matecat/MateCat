@@ -200,11 +200,14 @@ jobs:
     if: >-
       github.event_name == 'pull_request' &&
       !contains(github.event.pull_request.labels.*.name, 'test-guard-exception')
+    concurrency:
+      group: matecat-${{ github.ref }}
+      cancel-in-progress: true
     permissions:
       contents: read
       pull-requests: write
       checks: write
-      models: read
+      # No `models: read` — it only ever gated GitHub Models, retired 2026-07-30.
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -217,16 +220,44 @@ jobs:
           name: coverage-report
 
       - name: Test Guard
-        uses: ostico/test-guard@v1
+        uses: ostico/test-guard@v2
         with:
           coverage-file: |
             php-coverage.xml
             js-coverage.xml
             node-coverage.xml
           coverage-threshold: '80'
-          exclude-patterns: '.github/**, daemons/**, migrations/**, tests/unit/TestHelpers/**'
+          # dev-tools/** holds the custom PHPStan rules. phpunit.xml whitelists ./lib only, so
+          # nothing under it can ever reach the clover report and Layer 1 reads it as "not in
+          # coverage report" — a verdict no amount of testing could change.
+          extra-exclude-patterns: '.github/**, daemons/**, dev-tools/**, migrations/**, tests/unit/TestHelpers/**'
           ai-enabled: 'true'
-          ai-model: 'openai/gpt-4.1-nano'
+          # test-guard v2: GitHub Models was retired 2026-07-30 and Layer 3 now
+          # calls any OpenAI-compatible endpoint, so it needs a provider key.
+          # Without ai-api-key the AI phase is skipped and the gate silently
+          # falls back to Layer 1 + Layer 2.
+          ai-api-key: ${{ secrets.GEMINI_API_KEY }}
+          # Trailing slash is required — without it the compat layer 404s.
+          ai-base-url: 'https://generativelanguage.googleapis.com/v1beta/openai/'
+          # Unprefixed: the `openai/` form was a GitHub Models publisher prefix.
+          ai-model: 'gemini-3.1-flash-lite'
+          # Gemini 3.x cannot disable thinking; minimal is the floor, and low
+          # keeps the code-reasoning quality its benchmark scores are based on.
+          ai-reasoning-effort: 'low'
+          # Gemini 3.x recommends its default of 1.0 and warns that lowering
+          # temperature causes looping and degraded reasoning.
+          ai-temperature: '1.0'
+          # The 8000 default was sized for GitHub Models' retired 8K input cap.
+          # Gemini has a 1M context, and at 8000 a large test diff gets shed —
+          # which makes the model warn about code it was never shown.
+          ai-max-input-tokens: '32000'
+          test-patterns: |
+            {
+              "php-unit":  {"src_pattern": "lib/**/*.php", "test_template": "tests/**/{name}Test.php"},
+              "php-unitX": {"src_pattern": "lib/**/*.php", "test_template": "tests/**/{name}UnitTest.php"},
+              "php-integ": {"src_pattern": "lib/**/*.php", "test_template": "tests/**/{name}IntegrationTest.php"},
+              "php-sql":   {"src_pattern": "lib/**/*.php", "test_template": "tests/**/{name}RealSqlTest.php"}
+            }
 
   slack-notification:
     name: Slack Notification

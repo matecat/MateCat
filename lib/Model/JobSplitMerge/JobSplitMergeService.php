@@ -25,6 +25,7 @@ use Model\Projects\ProjectStruct;
 use Model\Translators\JobsTranslatorsDao;
 use Model\Translators\TranslatorsModel;
 use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use Model\WordCount\CounterModel;
 use ReflectionException;
 use RuntimeException;
@@ -32,6 +33,7 @@ use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\JobsWorker;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
+use Utils\Session\SessionStore;
 use Utils\Shop\Cart;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\Tools\Utils;
@@ -56,14 +58,18 @@ class JobSplitMergeService
     private IDatabase $dbHandler;
     private FeatureSet $features;
 
+    private ?SessionStore $session;
+
     public function __construct(
         IDatabase $dbHandler,
         FeatureSet $features,
         MatecatLogger $logger,
+        ?SessionStore $session,
     ) {
         $this->dbHandler = $dbHandler;
         $this->features = $features;
         $this->logger = $logger;
+        $this->session = $session;
     }
 
     // ── Factory methods (overridable in tests) ──────────────────────
@@ -102,12 +108,21 @@ class JobSplitMergeService
     }
 
     /**
-     * Wrapper around Cart static access — overridable in tests.
-     * @throws TypeError
+     * The cached outsource quote, which splitting or merging a job invalidates.
+     *
+     * Overridable in tests. These invalidations became effective again only once the UI's routes were
+     * served by the stateful Controller\API\App\SplitJobController: with no session open the cart loaded
+     * an empty array, cleared it and persisted nothing, so a split left the user's cached quote stale.
+     * See Controller\API\V2\SplitJobController's class docblock for the history.
      */
-    protected function getCart(): Cart
+    protected function getCart(): ?Cart
     {
-        return Cart::getInstance('outsource_to_external_cache');
+        // Null when the caller has no session: the v2/v3 api-key routes have no per-browser cart, so
+        // there is nothing to invalidate. Returning null rather than constructing a Cart over a
+        // refusing store keeps that an explicit skip instead of an exception on a working endpoint.
+        return $this->session === null
+            ? null
+            : new Cart('outsource_to_external_cache', $this->session);
     }
 
     /**
@@ -372,17 +387,18 @@ class JobSplitMergeService
     /**
      * Apply a new structure of the job: empty cart, begin transaction, split, commit.
      *
-     * @param int|null $uid The user ID performing the split (nullable)
+     * @param UserStruct $actingUser The user performing the split
+     * @param int|null $uid The user ID used to re-invite the job translator (nullable)
      *
      * @throws Exception
      * @throws TypeError
      */
-    public function applySplit(SplitMergeProjectData $data, ?int $uid = null): void
+    public function applySplit(SplitMergeProjectData $data, UserStruct $actingUser, ?int $uid = null): void
     {
-        $this->getCart()->emptyCart();
+        $this->getCart()?->emptyCart();
 
         $this->beginTransaction();
-        $this->splitJob($data, $uid);
+        $this->splitJob($data, $actingUser, $uid);
         $this->dbHandler->commit();
     }
 
@@ -392,12 +408,13 @@ class JobSplitMergeService
      * first/last segments of every chunk, last opened segment as the first segment of the new job,
      * and the timestamp of creation.
      *
-     * @param int|null $uid The user ID performing the split
+     * @param UserStruct $actingUser The user performing the split
+     * @param int|null $uid The user ID used to re-invite the job translator
      *
      * @throws Exception
      * @throws TypeError
      */
-    public function splitJob(SplitMergeProjectData $data, ?int $uid = null): void
+    public function splitJob(SplitMergeProjectData $data, UserStruct $actingUser, ?int $uid = null): void
     {
         // init JobDao
         $jobDao = $this->createJobDao();
@@ -533,9 +550,9 @@ class JobSplitMergeService
          $this->createProjectDao()->destroyCacheForProjectData($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
         $this->destroyAnalysisCacheByProjectId($data->idProject);
 
-        $this->getCart()->deleteCart();
+        $this->getCart()?->deleteCart();
 
-        $this->features->dispatch(new PostJobSplittedEvent($data));
+        $this->features->dispatch(new PostJobSplittedEvent($data, $actingUser));
     }
 
     /**
@@ -546,7 +563,7 @@ class JobSplitMergeService
      * @throws Exception
      * @throws TypeError
      */
-    public function mergeALL(SplitMergeProjectData $data, array $jobStructs): void
+    public function mergeALL(SplitMergeProjectData $data, array $jobStructs, UserStruct $actingUser): void
     {
         $jobsMetadataDao = $this->createJobMetadataDao();
 
@@ -621,7 +638,7 @@ class JobSplitMergeService
         if ($first_job->getTranslator(new JobsTranslatorsDao($this->dbHandler))) {
             //Update the password in the struct and in the database for the first job
             $this->updateForMerge($first_job, $this->generateRandomString());
-            $this->getCart()->emptyCart();
+            $this->getCart()?->emptyCart();
         } else {
             $this->updateForMerge($first_job, '');
         }
@@ -632,7 +649,7 @@ class JobSplitMergeService
         $wCountManager->initializeJobWordCount((int)$first_job['id'], (string)$first_job['password']);
 
         $chunk = new JobStruct($first_job->toArray());
-        $this->features->dispatch(new PostJobMergedEvent($data, $chunk));
+        $this->features->dispatch(new PostJobMergedEvent($data, $chunk, $actingUser));
 
         $jobDao = $this->createJobDao();
 

@@ -16,6 +16,7 @@ use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Users\UserStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
 use PDOException;
@@ -48,8 +49,15 @@ class BatchReviewProcessor
     /** @var Closure(ChunkReviewStruct): ChunkReviewModel */
     private Closure $chunkReviewModelFactory;
 
+    /**
+     * @param UserStruct $actingUser Whoever triggered this batch. Required: every construction site
+     *                               is either an authenticated controller or a worker that resolved
+     *                               the user who enqueued the job, and the chunk-review updates this
+     *                               class performs are attributed to them.
+     */
     public function __construct(
         private readonly ChunkReviewDao $chunkReviewDao,
+        private readonly UserStruct $actingUser,
         ?Closure $reviewedWordCountModelFactory = null,
         ?Closure $chunkReviewModelFactory = null,
     ) {
@@ -116,7 +124,7 @@ class BatchReviewProcessor
             ];
 
             $chunkReview = $this->chunkReviewDao->createRecord($data);
-            (new ChunkReviewModel($chunkReview, $this->chunkReviewDao->getDatabaseHandler()))->recountAndUpdatePassFailResult($project);
+            (new ChunkReviewModel($chunkReview, $this->chunkReviewDao->getDatabaseHandler()))->recountAndUpdatePassFailResult($project, $this->actingUser);
             $chunkReviews[] = $chunkReview;
 
             LoggerFactory::doJsonLog('Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $this->chunk->id);
@@ -147,7 +155,7 @@ class BatchReviewProcessor
             foreach ($segmentTranslationModel->getEvent()->getChunkReviewsPartials() as $chunkReview) {
                 $project = $chunkReview->getChunk(new JobDao($this->chunkReviewDao->getDatabaseHandler()))->getProject(new ProjectDao($this->chunkReviewDao->getDatabaseHandler()));
                 $chunkReviewModel = ($this->chunkReviewModelFactory)($chunkReview);
-                $chunkReviewModel->updateChunkReviewCountersAndPassFail($chunkReview->penalty_points ?? 0.0, $chunkReview->reviewed_words_count, $chunkReview->total_tte, $project);
+                $chunkReviewModel->updateChunkReviewCountersAndPassFail($chunkReview->penalty_points ?? 0.0, $chunkReview->reviewed_words_count, $chunkReview->total_tte, $project, $this->actingUser);
             }
         }
 

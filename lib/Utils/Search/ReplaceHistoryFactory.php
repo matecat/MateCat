@@ -8,7 +8,6 @@ use Model\Search\MySQLReplaceEventDao;
 use Model\Search\MySQLReplaceEventIndexDao;
 use Model\Search\RedisReplaceEventDao;
 use Model\Search\RedisReplaceEventIndexDao;
-use Model\Translations\SegmentTranslationDao;
 
 class ReplaceHistoryFactory
 {
@@ -26,7 +25,6 @@ class ReplaceHistoryFactory
                 $id_job,
                 new RedisReplaceEventDao($database),
                 new RedisReplaceEventIndexDao($database),
-                new SegmentTranslationDao($database),
                 $ttl
             );
         }
@@ -35,7 +33,6 @@ class ReplaceHistoryFactory
             $id_job,
             new MySQLReplaceEventDao($database),
             new MySQLReplaceEventIndexDao($database),
-            new SegmentTranslationDao($database),
             $ttl
         );
     }

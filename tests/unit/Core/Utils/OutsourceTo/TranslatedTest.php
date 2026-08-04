@@ -8,11 +8,35 @@ use ReflectionMethod;
 use ReflectionProperty;
 use RuntimeException;
 use Utils\OutsourceTo\Translated;
+use Utils\Session\ArraySessionStore;
 use Utils\Shop\Cart;
 use Utils\Shop\ItemHTSQuoteJob;
 
 class TranslatedTest extends AbstractTest
 {
+    /**
+     * The store every cart in a test case shares — both the ones built here and the ones Translated
+     * builds internally. Static because createTranslatedStub() is called statically throughout.
+     */
+    private static ArraySessionStore $store;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        self::$store = new ArraySessionStore();
+    }
+
+    /**
+     * A cart over the same store Translated writes through. Carts are no longer pooled by name, so
+     * this is a different object from the one Translated holds — they agree because every mutation
+     * persists to the store and every construction reads back from it.
+     */
+    private static function cart(string $cartName): Cart
+    {
+        return new Cart($cartName, self::$store);
+    }
+
     /**
      * @param object             $object
      * @param string             $methodName
@@ -25,21 +49,22 @@ class TranslatedTest extends AbstractTest
         return (new ReflectionMethod($object, $methodName))->invoke($object, ...$parameters);
     }
 
+    /**
+     * $session is a typed property with no default, so a constructor-less instance leaves it
+     * uninitialized and the first cart read fatals. Seeded here with the same store cart() uses.
+     */
     private static function createTranslatedStub(): Translated
     {
-        return (new ReflectionClass(Translated::class))->newInstanceWithoutConstructor();
+        $translated = (new ReflectionClass(Translated::class))->newInstanceWithoutConstructor();
+
+        (new ReflectionProperty($translated, 'session'))->setValue($translated, self::$store);
+
+        return $translated;
     }
 
     private function setProperty(object $obj, string $name, mixed $value): void
     {
         (new ReflectionProperty($obj, $name))->setValue($obj, $value);
-    }
-
-    private function ensureSession(): void
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
     }
 
     private function buildVolAnalysis(array $jobs = [], string $name = 'Test'): array
@@ -362,11 +387,7 @@ class TranslatedTest extends AbstractTest
 
     public function testAddCartElementToCartAddsAndDeletes(): void
     {
-        $this->ensureSession();
         $translated = self::createTranslatedStub();
-
-        $cart = Cart::getInstance('test_add_cart');
-        $cart->emptyCart();
 
         $item = new ItemHTSQuoteJob();
         $item['id'] = '100-abc-0';
@@ -374,24 +395,23 @@ class TranslatedTest extends AbstractTest
         $item['price'] = 20;
 
         self::invokeMethod($translated, '__addCartElementToCart', [$item, 'test_add_cart', false]);
-        self::assertTrue($cart->itemExists('100-abc-0'));
+
+        // A cart built after the call, not before: Translated writes through its own instance, and a
+        // Cart holds its items in memory, so an instance created earlier would never see the write.
+        self::assertTrue(self::cart('test_add_cart')->itemExists('100-abc-0'));
     }
 
     public function testAddCartElementToCartDeletesOnPartialMatch(): void
     {
-        $this->ensureSession();
         $translated = self::createTranslatedStub();
-
-        $cart = Cart::getInstance('test_partial');
-        $cart->emptyCart();
 
         $old = new ItemHTSQuoteJob();
         $old['id'] = '100-abc-111';
         $old['quantity'] = 1;
         $old['price'] = 10;
-        $cart->addItem($old);
+        self::cart('test_partial')->addItem($old);
 
-        self::assertTrue($cart->itemExists('100-abc-111'));
+        self::assertTrue(self::cart('test_partial')->itemExists('100-abc-111'));
 
         $new = new ItemHTSQuoteJob();
         $new['id'] = '100-abc-outsourced';
@@ -400,13 +420,13 @@ class TranslatedTest extends AbstractTest
 
         self::invokeMethod($translated, '__addCartElementToCart', [$new, 'test_partial', true]);
 
+        $cart = self::cart('test_partial');
         self::assertFalse($cart->itemExists('100-abc-111'));
         self::assertTrue($cart->itemExists('100-abc-outsourced'));
     }
 
     public function testAddCartElementToCartThrowsOnInvalidIdFormat(): void
     {
-        $this->ensureSession();
         $translated = self::createTranslatedStub();
 
         $item = new ItemHTSQuoteJob();
@@ -422,12 +442,11 @@ class TranslatedTest extends AbstractTest
 
     public function testAddCartElementPopulatesBothCartsAndQuoteResult(): void
     {
-        $this->ensureSession();
         $translated = self::createTranslatedStub();
         $this->setProperty($translated, '_quote_result', []);
 
-        Cart::getInstance('outsource_to_external')->emptyCart();
-        Cart::getInstance('outsource_to_external_cache')->emptyCart();
+        self::cart('outsource_to_external')->emptyCart();
+        self::cart('outsource_to_external_cache')->emptyCart();
 
         $item = new ItemHTSQuoteJob();
         $item['id'] = '77-zz-0';
@@ -436,8 +455,8 @@ class TranslatedTest extends AbstractTest
 
         self::invokeMethod($translated, '__addCartElement', [$item, false]);
 
-        self::assertTrue(Cart::getInstance('outsource_to_external')->itemExists('77-zz-0'));
-        self::assertTrue(Cart::getInstance('outsource_to_external_cache')->itemExists('77-zz-0'));
+        self::assertTrue(self::cart('outsource_to_external')->itemExists('77-zz-0'));
+        self::assertTrue(self::cart('outsource_to_external_cache')->itemExists('77-zz-0'));
 
         $quoteResult = (new ReflectionProperty($translated, '_quote_result'))->getValue($translated);
         self::assertCount(1, $quoteResult);
@@ -448,9 +467,8 @@ class TranslatedTest extends AbstractTest
 
     public function testUpdateCartElementsThrowsWhenCartItemIsNull(): void
     {
-        $this->ensureSession();
         $translated = self::createTranslatedStub();
-        Cart::getInstance('outsource_to_external_cache')->emptyCart();
+        self::cart('outsource_to_external_cache')->emptyCart();
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Cart item not found');
@@ -460,12 +478,11 @@ class TranslatedTest extends AbstractTest
 
     public function testUpdateCartElementsUpdatesCurrencyAndTimezone(): void
     {
-        $this->ensureSession();
         $translated = self::createTranslatedStub();
         $this->setProperty($translated, '_quote_result', []);
 
-        Cart::getInstance('outsource_to_external')->emptyCart();
-        Cart::getInstance('outsource_to_external_cache')->emptyCart();
+        self::cart('outsource_to_external')->emptyCart();
+        self::cart('outsource_to_external_cache')->emptyCart();
 
         $item = new ItemHTSQuoteJob();
         $item['id'] = '55-xx-0';
@@ -474,11 +491,11 @@ class TranslatedTest extends AbstractTest
         $item['currency'] = 'EUR';
         $item['timezone'] = '0';
         $item['typeOfService'] = 'professional';
-        Cart::getInstance('outsource_to_external_cache')->addItem($item);
+        self::cart('outsource_to_external_cache')->addItem($item);
 
         self::invokeMethod($translated, '__updateCartElements', ['55-xx-0', 'USD', '5', 'premium']);
 
-        $updated = Cart::getInstance('outsource_to_external_cache')->getItem('55-xx-0');
+        $updated = self::cart('outsource_to_external_cache')->getItem('55-xx-0');
         self::assertNotNull($updated);
         self::assertSame('USD', $updated['currency']);
         self::assertSame('5', $updated['timezone']);
@@ -492,7 +509,7 @@ class TranslatedTest extends AbstractTest
         \Utils\Registry\AppConfig::$BASEURL = '/';
         \Utils\Registry\AppConfig::$BUILD_NUMBER = '42';
 
-        $translated = new Translated();
+        $translated = new Translated(self::$store);
 
         self::assertSame('https://test.matecat.com/webhooks/outsource/success', $translated->getOutsourceLoginUrlOk());
         self::assertSame('https://test.matecat.com/webhooks/outsource/failure', $translated->getOutsourceLoginUrlKo());
@@ -511,7 +528,7 @@ class TranslatedTest extends AbstractTest
         \Utils\Registry\AppConfig::$BASEURL = '/';
         \Utils\Registry\AppConfig::$BUILD_NUMBER = '1';
 
-        $translated = new Translated();
+        $translated = new Translated(self::$store);
         $this->setProperty($translated, 'jobList', [['jid' => 1, 'jpassword' => 'p']]);
         $this->setProperty($translated, 'pid', 999);
 
@@ -528,7 +545,7 @@ class TranslatedTest extends AbstractTest
         \Utils\Registry\AppConfig::$BASEURL = '/';
         \Utils\Registry\AppConfig::$BUILD_NUMBER = '1';
 
-        $translated = new Translated();
+        $translated = new Translated(self::$store);
         $this->setProperty($translated, 'jobList', []);
         $this->setProperty($translated, 'currency', 'EUR');
         $this->setProperty($translated, 'timezone', '0');
@@ -545,7 +562,7 @@ class TranslatedTest extends AbstractTest
         \Utils\Registry\AppConfig::$BASEURL = '/';
         \Utils\Registry\AppConfig::$BUILD_NUMBER = '1';
 
-        $translated = new Translated();
+        $translated = new Translated(self::$store);
         $this->setProperty($translated, 'jobList', []);
         $this->setProperty($translated, 'fixedDelivery', '0');
 
@@ -561,7 +578,7 @@ class TranslatedTest extends AbstractTest
         \Utils\Registry\AppConfig::$BASEURL = '/';
         \Utils\Registry\AppConfig::$BUILD_NUMBER = '1';
 
-        $translated = new Translated();
+        $translated = new Translated(self::$store);
         $this->setProperty($translated, 'currency', 'EUR');
         $this->setProperty($translated, 'timezone', '0');
         $this->setProperty($translated, 'jobList', [['jid' => 10, 'jpassword' => 'pw']]);
@@ -574,7 +591,7 @@ class TranslatedTest extends AbstractTest
         $cachedItem['currency'] = 'EUR';
         $cachedItem['timezone'] = '0';
         $cachedItem['typeOfService'] = 'professional';
-        Cart::getInstance('outsource_to_external_cache')->addItem($cachedItem);
+        self::cart('outsource_to_external_cache')->addItem($cachedItem);
 
         self::invokeMethod($translated, '__processOutsourcedJobs', [
             'general',
@@ -583,7 +600,7 @@ class TranslatedTest extends AbstractTest
             ]),
         ]);
 
-        self::assertTrue(Cart::getInstance('outsource_to_external_cache')->itemExists('10-pw-outsourced'));
+        self::assertTrue(self::cart('outsource_to_external_cache')->itemExists('10-pw-outsourced'));
     }
 
     #[\PHPUnit\Framework\Attributes\RunInSeparateProcess]
@@ -593,7 +610,7 @@ class TranslatedTest extends AbstractTest
         \Utils\Registry\AppConfig::$BASEURL = '/';
         \Utils\Registry\AppConfig::$BUILD_NUMBER = '1';
 
-        $translated = new Translated();
+        $translated = new Translated(self::$store);
         $this->setProperty($translated, 'fixedDelivery', '0');
         $this->setProperty($translated, 'typeOfService', 'professional');
         $this->setProperty($translated, 'currency', 'EUR');
@@ -608,7 +625,7 @@ class TranslatedTest extends AbstractTest
         $cachedItem['currency'] = 'EUR';
         $cachedItem['timezone'] = '0';
         $cachedItem['typeOfService'] = 'professional';
-        Cart::getInstance('outsource_to_external_cache')->addItem($cachedItem);
+        self::cart('outsource_to_external_cache')->addItem($cachedItem);
 
         self::invokeMethod($translated, '__processNormalJobs', [
             'general',
@@ -617,7 +634,7 @@ class TranslatedTest extends AbstractTest
             ]),
         ]);
 
-        self::assertTrue(Cart::getInstance('outsource_to_external_cache')->itemExists('20-pw2-outsourced'));
+        self::assertTrue(self::cart('outsource_to_external_cache')->itemExists('20-pw2-outsourced'));
     }
 
     #[\PHPUnit\Framework\Attributes\RunInSeparateProcess]
@@ -627,7 +644,7 @@ class TranslatedTest extends AbstractTest
         \Utils\Registry\AppConfig::$BASEURL = '/';
         \Utils\Registry\AppConfig::$BUILD_NUMBER = '1';
 
-        $translated = new Translated();
+        $translated = new Translated(self::$store);
         $this->setProperty($translated, 'fixedDelivery', '555');
         $this->setProperty($translated, 'typeOfService', 'professional');
         $this->setProperty($translated, 'currency', 'GBP');
@@ -642,7 +659,7 @@ class TranslatedTest extends AbstractTest
         $cachedQuote['currency'] = 'EUR';
         $cachedQuote['timezone'] = '0';
         $cachedQuote['typeOfService'] = 'professional';
-        Cart::getInstance('outsource_to_external_cache')->addItem($cachedQuote);
+        self::cart('outsource_to_external_cache')->addItem($cachedQuote);
 
         self::invokeMethod($translated, '__processNormalJobs', [
             'general',
@@ -651,7 +668,7 @@ class TranslatedTest extends AbstractTest
             ]),
         ]);
 
-        $updated = Cart::getInstance('outsource_to_external_cache')->getItem('30-pw3-555');
+        $updated = self::cart('outsource_to_external_cache')->getItem('30-pw3-555');
         self::assertNotNull($updated);
         self::assertSame('GBP', $updated['currency']);
         self::assertSame('3', $updated['timezone']);
@@ -664,7 +681,7 @@ class TranslatedTest extends AbstractTest
         \Utils\Registry\AppConfig::$BASEURL = '/';
         \Utils\Registry\AppConfig::$BUILD_NUMBER = '1';
 
-        $translated = new Translated();
+        $translated = new Translated(self::$store);
         $this->setProperty($translated, 'fixedDelivery', '0');
         $this->setProperty($translated, 'typeOfService', 'professional');
         $this->setProperty($translated, 'currency', 'EUR');
@@ -690,7 +707,7 @@ class TranslatedTest extends AbstractTest
         \Utils\Registry\AppConfig::$BASEURL = '/';
         \Utils\Registry\AppConfig::$BUILD_NUMBER = '1';
 
-        $translated = new Translated();
+        $translated = new Translated(self::$store);
         $this->setProperty($translated, 'currency', 'EUR');
         $this->setProperty($translated, 'timezone', '0');
         $this->setProperty($translated, 'pid', 1);
@@ -704,6 +721,6 @@ class TranslatedTest extends AbstractTest
             ]),
         ]);
 
-        self::assertFalse(Cart::getInstance('outsource_to_external_cache')->itemExists('88-pw-outsourced'));
+        self::assertFalse(self::cart('outsource_to_external_cache')->itemExists('88-pw-outsourced'));
     }
 }
