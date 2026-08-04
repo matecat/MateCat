@@ -145,7 +145,7 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
         </li>
         <ul className="graysmall-details">
           <li className="graydesc">
-            Source: <span className={'bold'}>{item.created_by}</span>
+            Origin: <span className={'bold'}>{item.created_by}</span>
           </li>
           <li>{item.last_update_date}</li>
           <Tooltip

@@ -110,7 +110,7 @@ class SegmentFooterMultiMatches extends React.Component {
     return (
       <ul className="graysmall-details">
         <li className="graydesc">
-          Source:
+          Origin:
           <span className="bold"> {match.cb}</span>
         </li>
         <li>{match.suggestion_info}</li>

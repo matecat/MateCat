@@ -179,7 +179,7 @@ class SegmentFooterTabMatches extends React.Component {
     return (
       <ul className="graysmall-details">
         <li className="graydesc graydesc-sourcekey">
-          Source:
+          Origin:
           <span className="bold" title={match.cb}>
             {' '}
             {match.cb}
