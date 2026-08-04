@@ -274,12 +274,10 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
     public function deleteIssues(): void
     {
         foreach ($this->_event->getIssuesToDelete() as $issue) {
-            $issue->addComments(
-                (new EntryCommentStruct())->getEntriesById(
-                    new EntryCommentDao($this->_database),
-                    $issue->id ?? throw new RuntimeException('Issue id is required for comment retrieval')
-                )
-            );
+            $issue->addComments((new EntryCommentStruct())->getEntriesById(
+                new EntryCommentDao($this->_database),
+                $issue->id ?? throw new RuntimeException('Issue id is required for comment retrieval')
+            ));
             (new EntryDao($this->_database))->deleteEntry($issue);
         }
     }

@@ -311,6 +311,30 @@ class ReviewedWordCountModelTest extends AbstractTest
      * final revision in place: the replacement is applied across many segments at once, and removing
      * the final revision for each of them would strip revisions the reviewer never revisited.
      */
+    /**
+     * The counterpart of the replace-all case below: an ordinary lower transition still retires the
+     * previous final revision, which is what makes room for the new one.
+     */
+    #[Test]
+    public function evaluateChunkReviewEventTransitions_lowerTransitionRemovesTheFinalRevision(): void
+    {
+        $event = $this->createMock(TranslationEvent::class);
+        $event->method('isAReplaceAllEvent')->willReturn(false);
+        $event->expects($this->once())->method('setFinalRevisionToRemove')->with(2);
+        $event->expects($this->once())->method('setChunkReviewForPassFailUpdate');
+        $event->method('getIssuesToDelete')->willReturn([]);
+
+        $model = $this->buildModel(
+            isChangingStatus: true,
+            isLowerTransition: true,
+            currentEventOnChunk: false,
+            event: $event,
+            sourcePagesWithFinalRevisions: [2],
+        );
+
+        $model->evaluateChunkReviewEventTransitions();
+    }
+
     #[Test]
     public function evaluateChunkReviewEventTransitions_lowerTransitionOnAReplaceAllKeepsTheFinalRevision(): void
     {
