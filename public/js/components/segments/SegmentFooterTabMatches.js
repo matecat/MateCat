@@ -12,7 +12,6 @@ import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
 import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
-import ApplicationStore from '../../stores/ApplicationStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import {NUM_CONTRIBUTION_RESULTS} from '../../constants/Constants'
@@ -197,7 +196,9 @@ class SegmentFooterTabMatches extends React.Component {
                   flexDirection: 'column',
                 }}
               >
-                <span>Language variations results will have a penalty</span>
+                <span>
+                  Different language pair than the job (1% penalty applied)
+                </span>
               </div>
             }
           >
