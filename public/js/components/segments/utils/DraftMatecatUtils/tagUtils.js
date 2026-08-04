@@ -33,10 +33,12 @@ const restoreTempTags = (tags, text) =>
 import {isUndefined} from 'lodash'
 import getEntities from './getEntities'
 import matchTagStructure from './matchTag'
+import {createPcNumberer} from './pcTagUtils'
 
 export const transformTagsToHtml = (text, isRtl = 0) => {
   isRtl = !!isRtl
   if (text) {
+    const numberPc = createPcNumberer()
     try {
       for (let key in tagSignatures) {
         const {
@@ -47,6 +49,7 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
           regex,
           styleRTL,
           selfClosing,
+          type,
         } = tagSignatures[key]
         if (placeholderRegex) {
           let globalRegex = new RegExp(
@@ -59,6 +62,37 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
               : selfClosing
                 ? text
                 : match
+            if (type === 'ph') {
+              // Only ph tags that carry an XLIFF pc tag are numbered/compressible.
+              // Open and close of a pair share the same number; tag-pc-{role}
+              // drives the open/close styling. Other ph tags render plain.
+              const pc = numberPc(match)
+              if (!pc) {
+                return (
+                  '<span contenteditable="false" class="tag small ' +
+                  (isRtl && styleRTL ? styleRTL : style) +
+                  '">' +
+                  tagText +
+                  '</span>'
+                )
+              }
+              const openSpan =
+                '<span contenteditable="false" class="tag small ' +
+                (isRtl && styleRTL ? styleRTL : style) +
+                ' tag-pc-' +
+                pc.role +
+                '">' +
+                '<span class="index-counter">' +
+                (pc.index + 1) +
+                '</span>'
+              // A closing pc tag shows only its number (no equiv-text content).
+              if (pc.role === 'close') {
+                return openSpan + '</span>'
+              }
+              return (
+                openSpan + '<span data-text="true">' + tagText + '</span></span>'
+              )
+            }
             return (
               '<span contenteditable="false" class="tag small ' +
               (isRtl && styleRTL ? styleRTL : style) +

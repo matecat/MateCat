@@ -13,6 +13,7 @@ const Switch = ({
   activeText = 'Active',
   disabledText = 'Unavailable',
   inactiveText = 'Inactive',
+  tabIndex,
 }) => {
   const handleChange = (e) => {
     onChange(e.target.checked)
@@ -29,6 +30,7 @@ const Switch = ({
           aria-checked={active}
           disabled={disabled}
           data-testid={testId}
+          tabIndex={tabIndex}
         />
 
         <span></span>
@@ -57,6 +59,7 @@ Switch.propTypes = {
   activeText: PropTypes.string,
   disabledText: PropTypes.string,
   inactiveText: PropTypes.string,
+  tabIndex: PropTypes.number,
 }
 
 export default Switch

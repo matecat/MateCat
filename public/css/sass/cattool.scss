@@ -96,7 +96,7 @@ body.cattool {
     padding: 4px 16px;
     flex-shrink: 0;
     user-select: none;
-    background-color: colors.$grey5
+    background-color: colors.$grey5;
   }
   .context-preview__header-title {
     position: absolute;
@@ -281,9 +281,42 @@ body.cattool {
 
 .segment-target-toolbar-dropdown-trigger {
   height: 32px !important;
-  padding: 0 16px !important;
   font-weight: bold;
   font-size: 14px !important;
+}
+
+.tags-switch {
+  height: 16px;
+  width: 28px;
+  // The menu row owns the toggle action. Without this the label-wrapped
+  // checkbox delivers a second click to the Radix item, toggling twice.
+  pointer-events: none;
+  span::before {
+    width: 12px;
+    height: 12px;
+    bottom: 2px;
+    left: 2px;
+  }
+  input:checked + span::before {
+    transform: translateX(12px);
+  }
+}
+
+.segment-target-toolbar-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.segment-target-toolbar-menu-toggle-wrapper {
+  width: 100%;
+}
+
+.segment-target-toolbar-menu-toggle {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .lara-styles-dropdown {
