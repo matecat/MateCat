@@ -29,6 +29,7 @@ use Model\Files\FilesPartsDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
+use Model\LQA\ChunkReviewDao;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
@@ -56,6 +57,7 @@ use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\JobStatus;
 use Utils\Constants\ProjectStatus;
+use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 use Utils\Contribution\Set;
 use Utils\Contribution\SetContributionRequest;
@@ -92,7 +94,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      *  context_after: string,
      *  id_before: string|null,
      *  id_after: string|null,
-     *  revisionNumber: int|null,
+     *  sourcePage: int,
      *  guess_tag_used: bool|null,
      *  characters_counter: string|null,
      *  propagate: bool|null,
@@ -442,7 +444,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $propagationTotal,
             $this->chunk,
             $this->user,
-            ReviewUtils::revisionNumberToSourcePage($this->data['revisionNumber']),
+            $this->data['sourcePage'],
             $this->featureSet,
             $this->data['project'],
             isAReplaceAllEvent: false
@@ -516,7 +518,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             'chunk' => $this->data['chunk'],
             'segment' => $this->data['segment'],
             'user' => $this->user,
-            'source_page_code' => ReviewUtils::revisionNumberToSourcePage($this->data['revisionNumber'])
+            'source_page_code' => $this->data['sourcePage']
         ], $this->user));
 
         return $result;
@@ -595,7 +597,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      *   context_after: string,
      *   id_before: string|null,
      *   id_after: string|null,
-     *   revisionNumber: int|null,
+     *   sourcePage: int,
      *   guess_tag_used: bool|null,
      *   characters_counter: string|null,
      *   propagate: bool|null,
@@ -648,7 +650,9 @@ class SetTranslationController extends AbstractStatefulKleinController
         $context_after = (string)filter_var($this->request->param('context_after'), FILTER_UNSAFE_RAW);
         $id_before = filter_var($this->request->param('id_before'), FILTER_SANITIZE_NUMBER_INT);
         $id_after = filter_var($this->request->param('id_after'), FILTER_SANITIZE_NUMBER_INT);
-        $revisionNumber = filter_var($this->request->param('revision_number'), FILTER_SANITIZE_NUMBER_INT);
+        $revisionNumberParam = filter_var($this->request->param('revision_number'), FILTER_SANITIZE_NUMBER_INT);
+        // An absent or zero revision_number names no revision phase, exactly as in ChunkPasswordValidator.
+        $revisionNumber = !empty($revisionNumberParam) ? (int)$revisionNumberParam : null;
         $guess_tag_used = filter_var($this->request->param('guess_tag_used'), FILTER_VALIDATE_BOOLEAN);
         $characters_counter = filter_var($this->request->param('characters_counter'), FILTER_SANITIZE_NUMBER_INT);
 
@@ -691,6 +695,26 @@ class SetTranslationController extends AbstractStatefulKleinController
         $this->password = (string)$password;
         $this->request_password = $received_password;
 
+        /*
+         * The revision phase is derived from the password this request authenticated with, never from
+         * the revision_number parameter: that value is handed to the page by the server and echoed
+         * back by the client, so on its own it proves nothing about which phase the caller holds a
+         * credential for.
+         *
+         * The translate password needs no lookup, which is the common case; only a password that is
+         * not the job's own is matched against the chunk review passwords. A password matching
+         * nothing resolves to the translate phase, the least privileged answer.
+         */
+        $sourcePage = SourcePages::SOURCE_PAGE_TRANSLATE;
+        if ($received_password !== '' && $received_password !== (string)$password) {
+            $sourcePage = (new ReviewUtils(new ChunkReviewDao($this->getDatabase())))
+                ->sourcePageFromIdJobAndPassword((int)$id_job, $received_password);
+        }
+
+        if ($revisionNumber !== null && $revisionNumber !== ReviewUtils::sourcePageToRevisionNumber($sourcePage)) {
+            throw new InvalidArgumentException('Invalid revision number');
+        }
+
         $this->sourceContainsIcu($chunk->getProject(new ProjectDao($this->getDatabase())), $chunk, $segmentString, $this->getDatabase());
 
         $data = [
@@ -711,7 +735,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             'context_after' => $context_after,
             'id_before' => $id_before ?: null,
             'id_after' => $id_after ?: null,
-            'revisionNumber' => ($revisionNumber !== false && $revisionNumber !== '') ? (int)$revisionNumber : null,
+            'sourcePage' => $sourcePage,
             'guess_tag_used' => $guess_tag_used,
             'characters_counter' => $characters_counter ?: null,
             'propagate' => $propagate,

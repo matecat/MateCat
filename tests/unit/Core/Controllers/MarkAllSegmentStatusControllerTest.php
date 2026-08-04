@@ -13,10 +13,15 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use Plugins\Features\ReviewExtended\ReviewUtils;
+use Stomp\Transport\Message;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\ActiveMQ\WorkerClient;
+use Utils\Constants\SourcePages;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -155,6 +160,9 @@ class MarkAllSegmentStatusControllerTest extends AbstractTest
         $chunk->target = 'it-IT';
         $chunk->job_first_segment = $this->segmentId(self::BASE);
         $chunk->job_last_segment = self::BASE + 30;
+        // ChunkPasswordValidator stamps the phase it resolved the password to; the translate
+        // password is what this fixture presents, so mirror the stamp it would leave.
+        $chunk->setSourcePage(SourcePages::SOURCE_PAGE_TRANSLATE);
 
         return $chunk;
     }
@@ -339,13 +347,39 @@ class MarkAllSegmentStatusControllerTest extends AbstractTest
     }
 
     /**
+     * A revision_number is only allowed to agree with the phase the presented password resolved
+     * to. Here the chunk was reached with the translate password, so claiming to be the first
+     * reviewer must be refused instead of taken at face value.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function changeSegmentsStatus_rejects_a_revision_number_the_password_does_not_prove(): void
+    {
+        $this->setRequestParams([
+            'segments_id' => [$this->segmentId(self::BASE)],
+            'status' => 'approved',
+            'revision_number' => '1',
+        ]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid revision number');
+
+        $this->controller->changeSegmentsStatus();
+    }
+
+    /**
      * @throws \Throwable
      */
     #[Test]
     public function changeSegmentsStatus_accepts_valid_revision_number_and_enqueues(): void
     {
-        // qa_chunk_reviews seeded with source_page=2 → valid revision number 1.
+        // The chunk carries the phase ChunkPasswordValidator resolved the review password to,
+        // so revision number 1 is the value the credential itself proves.
         $segId = $this->segmentId(self::BASE);
+        $chunk = $this->buildChunk();
+        $chunk->setSourcePage(SourcePages::SOURCE_PAGE_REVISION);
+        $this->setProp('chunk', $chunk);
 
         $this->setRequestParams([
             'segments_id' => [$segId],
@@ -366,5 +400,59 @@ class MarkAllSegmentStatusControllerTest extends AbstractTest
             }));
 
         $this->controller->changeSegmentsStatus();
+    }
+
+    /**
+     * The worker writes segment_translation_events.source_page from what it is handed, so the value
+     * that leaves this controller must be the one derived from the credential — not a parameter the
+     * client chose, and not absent just because the client sent nothing.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function changeSegmentsStatus_enqueuesTheRevisionNumberDerivedFromTheCredential(): void
+    {
+        $chunk = $this->buildChunk();
+        $chunk->setSourcePage(SourcePages::SOURCE_PAGE_REVISION_2);
+        $this->setProp('chunk', $chunk);
+
+        $this->setRequestParams([
+            'segments_id' => [$this->segmentId(self::BASE)],
+            'status' => 'approved',
+        ]);
+
+        $savedHandler = WorkerClient::$_HANDLER;
+        $savedQueues = WorkerClient::$_QUEUES;
+
+        $captured = null;
+        $handlerMock = $this->createMock(AMQHandler::class);
+        $handlerMock->expects($this->once())
+            ->method('publishToQueues')
+            ->with(
+                $this->anything(),
+                $this->callback(function (Message $message) use (&$captured): bool {
+                    $captured = (string)$message->getBody();
+
+                    return true;
+                })
+            );
+
+        WorkerClient::$_HANDLER = $handlerMock;
+        WorkerClient::$_QUEUES = $savedQueues;
+
+        try {
+            $this->responseMock->method('json');
+            $this->controller->changeSegmentsStatus();
+        } finally {
+            WorkerClient::$_HANDLER = $savedHandler;
+            WorkerClient::$_QUEUES = $savedQueues;
+        }
+
+        $this->assertIsString($captured);
+        $payload = json_decode($captured, true);
+        $this->assertSame(
+            ReviewUtils::sourcePageToRevisionNumber(SourcePages::SOURCE_PAGE_REVISION_2),
+            $payload['params']['revision_number']
+        );
     }
 }

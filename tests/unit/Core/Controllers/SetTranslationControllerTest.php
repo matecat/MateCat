@@ -31,6 +31,7 @@ use RuntimeException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\Constants\EngineConstants;
+use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 use Utils\Logger\LoggerFactory;
 use Utils\LQA\QA;
@@ -1398,7 +1399,7 @@ class SetTranslationControllerTest extends AbstractTest
             'project' => ['status_analysis' => 'DONE'],
             'id_segment' => '42',
             'segment' => new SegmentStruct(),
-            'revisionNumber' => 0,
+            'sourcePage' => SourcePages::SOURCE_PAGE_TRANSLATE,
         ]);
 
         $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
@@ -1470,7 +1471,7 @@ class SetTranslationControllerTest extends AbstractTest
             'project' => ['status_analysis' => 'DONE'],
             'id_segment' => '42',
             'segment' => new SegmentStruct(),
-            'revisionNumber' => 0,
+            'sourcePage' => SourcePages::SOURCE_PAGE_TRANSLATE,
         ]);
 
         $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
@@ -1530,7 +1531,7 @@ class SetTranslationControllerTest extends AbstractTest
             'project' => ['status_analysis' => 'DONE'],
             'id_segment' => '52',
             'segment' => new SegmentStruct(),
-            'revisionNumber' => 0,
+            'sourcePage' => SourcePages::SOURCE_PAGE_TRANSLATE,
         ]);
 
         $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
@@ -2036,6 +2037,89 @@ class SetTranslationControllerTest extends AbstractTest
         self::assertInstanceOf(SegmentStruct::class, $data['segment']);
     }
 
+    /**
+     * The phase a write is recorded in comes from the password the request presented, so a reviewer
+     * password resolves to that reviewer's phase. Before this the phase was whatever the client put
+     * in revision_number, which the page had handed it and any caller could change.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function validateTheRequestDerivesTheSourcePageFromTheReviewPassword(): void
+    {
+        $projectId = 886011;
+        $jobId = 886012;
+        $jobPassword = 'pw886012';
+        $segmentId = 886013;
+        $fileId = 886014;
+        $reviewPassword = 'rev886012';
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Hello review', 2);
+        $this->seedChunkReviewRow(886015, $projectId, $jobId, $jobPassword, $reviewPassword, SourcePages::SOURCE_PAGE_REVISION);
+
+        $controller = $this->buildControllerForRevisionPhaseRequest($jobId, $jobPassword, $segmentId, $reviewPassword, '1');
+
+        $data = $this->getAccessibleMethod('validateTheRequest')->invoke($controller);
+
+        self::assertSame(SourcePages::SOURCE_PAGE_REVISION, $data['sourcePage']);
+    }
+
+    /**
+     * The same request without the reviewer's password proves only the translate phase, so the
+     * declared revision number is refused rather than believed.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function validateTheRequestRejectsARevisionNumberTheCredentialDoesNotProve(): void
+    {
+        $projectId = 886021;
+        $jobId = 886022;
+        $jobPassword = 'pw886022';
+        $segmentId = 886023;
+        $fileId = 886024;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Hello review', 2);
+        $this->seedChunkReviewRow(886025, $projectId, $jobId, $jobPassword, 'rev886022', SourcePages::SOURCE_PAGE_REVISION);
+
+        $controller = $this->buildControllerForRevisionPhaseRequest($jobId, $jobPassword, $segmentId, $jobPassword, '1');
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid revision number');
+
+        $this->getAccessibleMethod('validateTheRequest')->invoke($controller);
+    }
+
+    private function seedChunkReviewRow(int $id, int $projectId, int $jobId, string $password, string $reviewPassword, int $sourcePage): void
+    {
+        obtainTestDatabase()->getConnection()->exec(
+            "INSERT IGNORE INTO qa_chunk_reviews (id, id_project, id_job, password, review_password, source_page) "
+            . "VALUES ($id, $projectId, $jobId, '$password', '$reviewPassword', $sourcePage)"
+        );
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    private function buildControllerForRevisionPhaseRequest(int $jobId, string $jobPassword, int $segmentId, string $currentPassword, string $revisionNumber): SetTranslationController
+    {
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
+        $this->setNamedProperty($controller, 'request', new Request([], [
+            'id_job' => (string)$jobId,
+            'password' => $jobPassword,
+            'current_password' => $currentPassword,
+            'id_segment' => (string)$segmentId,
+            'time_to_edit' => '1500',
+            'id_translator' => '123',
+            'translation' => 'Nuova traduzione',
+            'segment' => 'Hello review',
+            'status' => 'approved',
+            'revision_number' => $revisionNumber,
+            'propagate' => '1',
+        ], [], [], [], null));
+
+        return $controller;
+    }
+
     #[Test]
     public function prepareTranslationReturnsPreparedPayloadForValidRequest(): void
     {
@@ -2147,7 +2231,7 @@ class SetTranslationControllerTest extends AbstractTest
             'split_num' => null,
             'split_chunk_lengths' => null,
             'project' => $project,
-            'revisionNumber' => 0,
+            'sourcePage' => SourcePages::SOURCE_PAGE_TRANSLATE,
             'chunk' => $chunk,
             'segment' => $segmentDao->fetchById($segmentId, \Model\Segments\SegmentStruct::class),
         ]);
@@ -2254,7 +2338,7 @@ class SetTranslationControllerTest extends AbstractTest
             'split_num' => null,
             'split_chunk_lengths' => null,
             'project' => $project,
-            'revisionNumber' => 0,
+            'sourcePage' => SourcePages::SOURCE_PAGE_TRANSLATE,
             'chunk' => $chunk,
             'segment' => $segmentDao->fetchById($segmentId, \Model\Segments\SegmentStruct::class),
         ]);
@@ -2378,7 +2462,7 @@ class SetTranslationControllerTest extends AbstractTest
             'project' => ['status_analysis' => 'DONE'],
             'id_segment' => '77',
             'segment' => new SegmentStruct(),
-            'revisionNumber' => 0,
+            'sourcePage' => SourcePages::SOURCE_PAGE_TRANSLATE,
         ]);
         $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
         $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
@@ -2717,7 +2801,7 @@ class SetTranslationControllerTest extends AbstractTest
             'split_num'           => '1',
             'split_chunk_lengths' => [5],
             'project'             => $project,
-            'revisionNumber'      => 0,
+            'sourcePage'          => SourcePages::SOURCE_PAGE_TRANSLATE,
             'chunk'               => $chunk,
             'segment'             => $segmentDao->fetchById($segmentId, SegmentStruct::class),
         ]);

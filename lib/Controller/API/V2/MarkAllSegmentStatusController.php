@@ -14,11 +14,11 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use InvalidArgumentException;
-use Model\LQA\ChunkReviewDao;
 use Model\Translations\SegmentTranslationDao;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\BulkSegmentStatusChangeWorker;
+use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 
 
@@ -50,14 +50,18 @@ class MarkAllSegmentStatusController extends KleinController
 
         $segments_id = $this->sanitizeSegmentIDs($this->request->param('segments_id'));
         $status = strtoupper($this->request->param('status'));
-        $source_page = null;
 
-        if ($this->request->param('revision_number')) {
-            $validRevisions = (new ReviewUtils(new ChunkReviewDao($this->getDatabase())))->validRevisionNumbers($this->chunk);
-            if (!in_array($this->request->param('revision_number'), $validRevisions)) {
-                throw new InvalidArgumentException('Invalid revision number');
-            }
-            $source_page = ReviewUtils::revisionNumberToSourcePage($this->request->param('revision_number'));
+        /*
+         * The revision phase comes from the password this request authenticated with, which
+         * ChunkPasswordValidator has already stamped onto the chunk. A revision_number sent by the
+         * client is only allowed to agree with it: on its own it proves nothing about which phase
+         * the caller may act in.
+         */
+        $source_page = $this->chunk->getSourcePage() ?: SourcePages::SOURCE_PAGE_TRANSLATE;
+        $revision_number = ReviewUtils::sourcePageToRevisionNumber($source_page);
+
+        if ($this->request->param('revision_number') && (int)$this->request->param('revision_number') !== $revision_number) {
+            throw new InvalidArgumentException('Invalid revision number');
         }
 
         if (in_array($status, [
@@ -85,7 +89,7 @@ class MarkAllSegmentStatusController extends KleinController
                             'destination_status' => $status,
                             'id_user' => ($this->isLoggedIn() ? $this->getUser()->uid : null),
                             'is_review' => ($status == TranslationStatus::STATUS_APPROVED),
-                            'revision_number' => $this->request->param('revision_number')
+                            'revision_number' => $revision_number
                         ], ['persistent' => true]
                     );
                 } catch (Exception $e) {

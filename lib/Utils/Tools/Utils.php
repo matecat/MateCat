@@ -65,11 +65,16 @@ class Utils
         preg_match('/revise([2-9]|\'\')?\//', $url['path'], $matches);
 
         if (count($matches) === 1) { // [0] => revise/
-            $sourcePage = ReviewUtils::revisionNumberToSourcePage(SourcePages::SOURCE_PAGE_TRANSLATE);
+            $sourcePage = SourcePages::SOURCE_PAGE_REVISION;
         }
 
         if (count($matches) > 1) { // [0] => revise2/ [1] => 2
-            $sourcePage = ReviewUtils::revisionNumberToSourcePage((int)$matches[1]);
+            try {
+                $sourcePage = ReviewUtils::revisionNumberToSourcePage((int)$matches[1]);
+            } catch (InvalidArgumentException) {
+                // The regex also accepts revise3..revise9, which name no phase this instance has:
+                // a URL is not allowed to invent one, so keep the translate default.
+            }
         }
 
         return $sourcePage;

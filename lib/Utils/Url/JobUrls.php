@@ -2,7 +2,7 @@
 
 namespace Utils\Url;
 
-use Plugins\Features\ReviewExtended\ReviewUtils;
+use Utils\Constants\SourcePages;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -100,20 +100,20 @@ class JobUrls
         // loop passwords array
         foreach ($this->passwords as $label => $password) {
             if ($password and $this->isLabelAllowed($label)) {
+                // The label already names the phase, so map straight to it: going through a revision
+                // number would mean handling the "no such phase" error of a value built right here.
                 switch ($label) {
                     default:
                     case self::LABEL_T:
-                        $revisionNumber = null;
+                        $sourcePage = SourcePages::SOURCE_PAGE_TRANSLATE;
                         break;
                     case self::LABEL_R1:
-                        $revisionNumber = 1;
+                        $sourcePage = SourcePages::SOURCE_PAGE_REVISION;
                         break;
                     case self::LABEL_R2:
-                        $revisionNumber = 2;
+                        $sourcePage = SourcePages::SOURCE_PAGE_REVISION_2;
                         break;
                 }
-
-                $sourcePage = ReviewUtils::revisionNumberToSourcePage($revisionNumber);
 
                 $url = $this->httpHost($httpHost);
                 $url .= DIRECTORY_SEPARATOR;
