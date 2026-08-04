@@ -1265,7 +1265,30 @@ test('Searching result', async () => {
   expect(projects.first().get('name')).toBe('tesla.docx')
 })
 
-test.skip('Click on archived status', async () => {
+test('Filtering by selected member via ref', async () => {
+  executeMswServer(apiGetProjects.result)
+
+  const {props} = getFakeProperties(fakeFilterData.teamWithId_1)
+  const ref = React.createRef()
+  render(<FilterProjects {...props} ref={ref} />)
+
+  const member = fakeFilterData.teamWithId_1.data.members[0]
+
+  addOnceListenerStoreFilterProjects(() => getProjectsRequest({}))
+
+  act(() => {
+    ref.current.handleSetCurrentUser(member)
+  })
+
+  expect(ref.current.currentUser).toBe(member)
+
+  const projects = await projectsListPromise()
+
+  expect(projects.size).toBe(1)
+  expect(projects.first().get('name')).toBe('tesla.docx')
+})
+
+test('Click on archived status', async () => {
   executeMswServer(apiGetProjects.archived)
 
   const {props} = getFakeProperties(fakeFilterData.teamWithId_1)
@@ -1274,7 +1297,13 @@ test.skip('Click on archived status', async () => {
   const status = 'archived'
   addOnceListenerStoreFilterProjects(() => getProjectsRequest({status}))
 
-  await userEvent.click(screen.getByTestId('item-archived'))
+  await userEvent.click(screen.getByTestId('status-filter-trigger'))
+
+  const itemArchived = screen.getByTestId('item-archived')
+
+  await waitFor(() => expect(itemArchived).toBeInTheDocument())
+
+  await userEvent.click(itemArchived)
 
   const projects = await projectsListPromise()
 
@@ -1283,7 +1312,7 @@ test.skip('Click on archived status', async () => {
   expect(projects.first().get('is_archived')).toBeTruthy()
 })
 
-test.skip('Click on cancelled status', async () => {
+test('Click on cancelled status', async () => {
   executeMswServer(apiGetProjects.cancelled)
 
   const {props} = getFakeProperties(fakeFilterData.teamWithId_1)

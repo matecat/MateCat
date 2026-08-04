@@ -41,7 +41,7 @@ module.exports = {
     './public/js/pages/': {lines: 80},
     './public/js/utils/': {lines: 80},
     './public/js/stores/': {lines: 80},
-    './public/js/components/header/': {lines: 10},
+    './public/js/components/header/': {lines: 80},
     './public/js/api/': {lines: 15},
     './public/js/components/settingsPanel/': {lines: 45},
     './public/js/components/segments/': {lines: 20},
