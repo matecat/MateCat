@@ -10,11 +10,8 @@
 namespace Plugins\Features\TranslationVersions;
 
 
-use Model\FeaturesBase\FeatureSet;
-use Model\Jobs\JobStruct;
-use Model\Projects\ProjectStruct;
+use Model\Propagation\PropagationResult;
 use Model\Translations\SegmentTranslationStruct;
-use Model\Users\UserStruct;
 
 interface VersionHandlerInterface
 {
@@ -30,31 +27,15 @@ interface VersionHandlerInterface
      */
     public function saveVersionAndIncrement(SegmentTranslationStruct $new_translation, SegmentTranslationStruct $old_translation): bool;
 
-    /**
-     * @param array{
-     *     translation: SegmentTranslationStruct,
-     *     old_translation: SegmentTranslationStruct,
-     *     propagation: array<string, mixed>,
-     *     chunk: JobStruct,
-     *     user: UserStruct,
-     *     source_page_code: int,
-     *     features: FeatureSet,
-     *     project: ProjectStruct
-     * } $params
-     *
-     * @return void
-     */
-    public function storeTranslationEvent(array $params): void;
+    public function storeTranslationEvent(StoreTranslationEventParams $params): void;
 
      /**
       * @param SegmentTranslationStruct $translationStruct
       *
-      * @return array{
-      *     totals?: array<string, mixed>,
-      *     propagated_ids?: int[],
-      *     segments_for_propagation?: array<int, mixed>
-      * }
+      * @return PropagationResult Always an object. An implementation that propagates nothing returns
+      *                           `PropagationResult::empty()` rather than an array missing every key,
+      *                           so callers never guard on presence.
       */
-     public function propagateTranslation(SegmentTranslationStruct $translationStruct): array;
+     public function propagateTranslation(SegmentTranslationStruct $translationStruct): PropagationResult;
 
 }

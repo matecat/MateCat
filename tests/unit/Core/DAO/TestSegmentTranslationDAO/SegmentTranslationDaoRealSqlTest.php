@@ -10,6 +10,7 @@ use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Files\FileStruct;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
+use Model\Propagation\PropagationResult;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use PDO;
@@ -859,7 +860,11 @@ class SegmentTranslationDaoRealSqlTest extends AbstractTest
             false // execute_update=false so even if enqueue is called it won't fire
         );
 
-        $this->assertIsArray($result);
+        // The test name promises an empty propagation, so assert it. `assertIsArray()` never did:
+        // it passed for any array, including a fully populated one.
+        $this->assertInstanceOf(PropagationResult::class, $result);
+        $this->assertSame([], $result->totals);
+        $this->assertSame([], $result->propagatedIds);
     }
 
     #[Test]
@@ -889,7 +894,8 @@ class SegmentTranslationDaoRealSqlTest extends AbstractTest
             false
         );
 
-        $this->assertIsArray($result);
+        $this->assertInstanceOf(PropagationResult::class, $result);
+        $this->assertSame([], $result->propagatedIds);
     }
 
     #[Test]

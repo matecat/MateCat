@@ -11,6 +11,7 @@ use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
+use Model\Propagation\PropagationResult;
 use Model\Propagation\PropagationTotalStruct;
 use PDO;
 use PDOException;
@@ -568,7 +569,7 @@ class SegmentTranslationDao extends AbstractDao
      * @param ProjectStruct $project
      * @param bool $execute_update
      *
-     * @return array<string, mixed>
+     * @return PropagationResult
      * @throws Exception
      */
     public function propagateTranslation(
@@ -577,7 +578,7 @@ class SegmentTranslationDao extends AbstractDao
         int $_idSegment,
         ProjectStruct $project,
         bool $execute_update = true
-    ): array {
+    ): PropagationResult {
         $wordCountType = (new MetadataDao($this->database))->setCacheTTL(3600)->getValue((int) $project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)
             ?? ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value;
         if ($wordCountType == ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {

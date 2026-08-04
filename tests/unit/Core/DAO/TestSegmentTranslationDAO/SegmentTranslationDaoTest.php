@@ -10,6 +10,7 @@ use Model\DataAccess\IDatabase;
 use Model\Files\FileStruct;
 use Model\Jobs\JobStruct;
 use Model\Projects\MetadataStruct;
+use Model\Propagation\PropagationResult;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use PDO;
@@ -677,7 +678,11 @@ class SegmentTranslationDaoTest extends AbstractTest
         $dao = new SegmentTranslationDao($this->dbStub);
         $result = $dao->propagateTranslation($st, $job, 100, $project);
 
-        $this->assertIsArray($result);
+        // No twin rows, so the DAO falls back to a fresh struct: an empty result rather than an
+        // array with every key missing.
+        $this->assertInstanceOf(PropagationResult::class, $result);
+        $this->assertSame([], $result->totals);
+        $this->assertSame([], $result->propagatedIds);
     }
 
     public function testInstancePropagateTranslationWithEquivalentWordCount(): void
@@ -696,6 +701,10 @@ class SegmentTranslationDaoTest extends AbstractTest
         $dao = new SegmentTranslationDao($this->dbStub);
         $result = $dao->propagateTranslation($st, $job, 100, $project);
 
-        $this->assertIsArray($result);
+        // No twin rows, so the DAO falls back to a fresh struct: an empty result rather than an
+        // array with every key missing.
+        $this->assertInstanceOf(PropagationResult::class, $result);
+        $this->assertSame([], $result->totals);
+        $this->assertSame([], $result->propagatedIds);
     }
 }

@@ -167,35 +167,56 @@ class ReviewedWordCountModelTest extends AbstractTest
     // sendNotificationEmail
     // ─────────────────────────────────────────────────────────────────
 
+    /**
+     * A propagated event is one of the copies of a translation the user applied elsewhere: the segment
+     * they actually edited already raised its own notification, so this one must not raise a second.
+     * The assertion is on the short circuit itself — the gate must not even ask about the transition.
+     */
     #[Test]
-    public function sendNotificationEmail_skipsWhenNotPropagationSource(): void
+    public function sendNotificationEmail_skipsWhenTheEventIsAPropagatedOne(): void
     {
-        $model = $this->buildModel(isPropagationSource: false);
+        $event = $this->createMock(TranslationEvent::class);
+        $event->expects($this->never())->method('isLowerTransition');
+
+        $model = $this->buildModel(isAPropagatedEvent: true, event: $event);
 
         $model->sendNotificationEmail();
-        $this->assertTrue(true);
     }
 
     #[Test]
     public function sendNotificationEmail_skipsWhenNotLowerTransition(): void
     {
-        $model = $this->buildModel(isPropagationSource: true, isLowerTransition: false);
+        $event = $this->createMock(TranslationEvent::class);
+        $event->expects($this->once())->method('isLowerTransition')->willReturn(false);
+        // getUser() is the first thing the mail body does, so never-calling it proves it never ran.
+        $event->expects($this->never())->method('getUser');
+
+        $model = $this->buildModel(event: $event);
 
         $model->sendNotificationEmail();
-        $this->assertTrue(true);
     }
 
+    /**
+     * A replace-all has no originating segment — it is applied to every matching segment in the job with
+     * nothing open in the editor — so nothing else notifies on its behalf. It accrues no time to edit,
+     * but a downgrade it causes must still reach the translator who set the previous status.
+     */
     #[Test]
-    public function sendNotificationEmail_buildsChunkReviewsWithFinalRevisions(): void
+    public function sendNotificationEmail_notifiesOnAReplaceAllLowerTransition(): void
     {
+        $event = $this->createMock(TranslationEvent::class);
+        $event->expects($this->once())->method('isLowerTransition')->willReturn(true);
+        $event->expects($this->once())->method('getUser')->willReturn(null);
+        $event->method('isAReplaceAllEvent')->willReturn(true);
+        $event->method('shouldIncreaseTte')->willReturn(false);
+
         $model = $this->buildModel(
-            isPropagationSource: true,
-            isLowerTransition: true,
+            isAPropagatedEvent: false,
+            event: $event,
             sourcePagesWithFinalRevisions: [2],
         );
 
         $model->sendNotificationEmail();
-        $this->assertTrue(true);
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -285,6 +306,55 @@ class ReviewedWordCountModelTest extends AbstractTest
         $model->evaluateChunkReviewEventTransitions();
     }
 
+    /**
+     * A replace-all edit decrements the counters like any other lower transition, but must leave the
+     * final revision in place: the replacement is applied across many segments at once, and removing
+     * the final revision for each of them would strip revisions the reviewer never revisited.
+     */
+    /**
+     * The counterpart of the replace-all case below: an ordinary lower transition still retires the
+     * previous final revision, which is what makes room for the new one.
+     */
+    #[Test]
+    public function evaluateChunkReviewEventTransitions_lowerTransitionRemovesTheFinalRevision(): void
+    {
+        $event = $this->createMock(TranslationEvent::class);
+        $event->method('isAReplaceAllEvent')->willReturn(false);
+        $event->expects($this->once())->method('setFinalRevisionToRemove')->with(2);
+        $event->expects($this->once())->method('setChunkReviewForPassFailUpdate');
+        $event->method('getIssuesToDelete')->willReturn([]);
+
+        $model = $this->buildModel(
+            isChangingStatus: true,
+            isLowerTransition: true,
+            currentEventOnChunk: false,
+            event: $event,
+            sourcePagesWithFinalRevisions: [2],
+        );
+
+        $model->evaluateChunkReviewEventTransitions();
+    }
+
+    #[Test]
+    public function evaluateChunkReviewEventTransitions_lowerTransitionOnAReplaceAllKeepsTheFinalRevision(): void
+    {
+        $event = $this->createMock(TranslationEvent::class);
+        $event->method('isAReplaceAllEvent')->willReturn(true);
+        $event->expects($this->never())->method('setFinalRevisionToRemove');
+        $event->expects($this->once())->method('setChunkReviewForPassFailUpdate');
+        $event->method('getIssuesToDelete')->willReturn([]);
+
+        $model = $this->buildModel(
+            isChangingStatus: true,
+            isLowerTransition: true,
+            currentEventOnChunk: false,
+            event: $event,
+            sourcePagesWithFinalRevisions: [2],
+        );
+
+        $model->evaluateChunkReviewEventTransitions();
+    }
+
     #[Test]
     public function evaluateChunkReviewEventTransitions_withEmptyChunkReviewsDoesNothing(): void
     {
@@ -331,7 +401,8 @@ class ReviewedWordCountModelTest extends AbstractTest
         bool $isIce = false,
         bool $isUnModifiedIce = false,
         bool $currentEventOnChunk = false,
-        bool $isPropagationSource = false,
+        bool $shouldIncreaseTte = false,
+        bool $isAPropagatedEvent = false,
         ?TranslationEvent $event = null,
         ?CounterModel $counterModel = null,
         ?SegmentTranslationStruct $wantedTranslation = null,
@@ -386,7 +457,8 @@ class ReviewedWordCountModelTest extends AbstractTest
         $event->method('isIce')->willReturn($isIce);
         $event->method('isUnModifiedIce')->willReturn($isUnModifiedIce);
         $event->method('currentEventIsOnThisChunk')->willReturn($currentEventOnChunk);
-        $event->method('isPropagationSource')->willReturn($isPropagationSource);
+        $event->method('shouldIncreaseTte')->willReturn($shouldIncreaseTte);
+        $event->method('isAPropagatedEvent')->willReturn($isAPropagatedEvent);
         $event->method('getPreviousEventSourcePage')->willReturn(2);
         $event->method('getUser')->willReturn(null);
 

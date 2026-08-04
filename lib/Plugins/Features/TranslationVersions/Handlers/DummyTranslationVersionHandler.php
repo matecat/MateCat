@@ -10,11 +10,9 @@
 namespace Plugins\Features\TranslationVersions\Handlers;
 
 
-use Model\FeaturesBase\FeatureSet;
-use Model\Jobs\JobStruct;
-use Model\Projects\ProjectStruct;
+use Model\Propagation\PropagationResult;
 use Model\Translations\SegmentTranslationStruct;
-use Model\Users\UserStruct;
+use Plugins\Features\TranslationVersions\StoreTranslationEventParams;
 use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 
 class DummyTranslationVersionHandler implements VersionHandlerInterface
@@ -36,32 +34,17 @@ class DummyTranslationVersionHandler implements VersionHandlerInterface
         return false;
     }
 
-    /**
-     * @param array{
-     *     translation: SegmentTranslationStruct,
-     *     old_translation: SegmentTranslationStruct,
-     *     propagation: array<string, mixed>,
-     *     chunk: JobStruct,
-     *     user: UserStruct,
-     *     source_page_code: int,
-     *     features: FeatureSet,
-     *     project: ProjectStruct
-     * } $params
-     */
-    public function storeTranslationEvent(array $params): void
+    public function storeTranslationEvent(StoreTranslationEventParams $params): void
     {
     }
 
     /**
-     * @return array{
-     *     totals?: array<string, mixed>,
-     *     propagated_ids?: int[],
-     *     segments_for_propagation?: array<int, mixed>
-     * }
+     * This handler propagates nothing, so it returns the empty result rather than an empty array.
+     * The distinction is the point of the type: callers read `propagatedIds` unconditionally.
      */
-    public function propagateTranslation(SegmentTranslationStruct $translationStruct): array
+    public function propagateTranslation(SegmentTranslationStruct $translationStruct): PropagationResult
     {
-        return [];
+        return PropagationResult::empty();
     }
 
 }

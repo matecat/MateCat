@@ -283,6 +283,30 @@ class SearchModelTest extends AbstractTest
     }
 
     #[Test]
+    public function testSearchInSourceKeepsSegmentsWithoutAMatchTypeWhenLockedAreExcluded(): void
+    {
+        $this->_assertANullMatchTypeIsNotTreatedAsAnIce(function (bool $includeLocked): array {
+            return $this->_searchInSource('Hello', $includeLocked);
+        });
+    }
+
+    #[Test]
+    public function testSearchInTargetKeepsSegmentsWithoutAMatchTypeWhenLockedAreExcluded(): void
+    {
+        $this->_assertANullMatchTypeIsNotTreatedAsAnIce(function (bool $includeLocked): array {
+            return $this->_searchInTarget('Ciao', $includeLocked);
+        });
+    }
+
+    #[Test]
+    public function testSearchStatusOnlyKeepsSegmentsWithoutAMatchTypeWhenLockedAreExcluded(): void
+    {
+        $this->_assertANullMatchTypeIsNotTreatedAsAnIce(function (bool $includeLocked): array {
+            return $this->_searchStatusOnly($includeLocked);
+        });
+    }
+
+    #[Test]
     public function testGetQueryWrapsDatabaseFailuresIntoAnException(): void
     {
         $queryParamsStruct = new SearchQueryParamsStruct();
@@ -336,6 +360,45 @@ class SearchModelTest extends AbstractTest
                 'match_type' => $previousMatchType === false ? null : $previousMatchType,
                 'job' => $this->jobId,
                 'id' => $iceSegmentId,
+            ]);
+        }
+    }
+
+    /**
+     * A NULL `match_type` is not an ICE and must survive the exclusion.
+     *
+     * `segment_translations.match_type` is nullable, so `match_type != 'ICE'` evaluates to NULL — not
+     * true — for those rows, and SQL drops them from the result set. The fixture's rows all carry a
+     * concrete match type, which is why {@see _assertIceIsExcludedWhenLockedAreExcluded} cannot catch
+     * this: it needs a row that is neither an ICE nor comparable to one.
+     *
+     * @throws Exception
+     */
+    private function _assertANullMatchTypeIsNotTreatedAsAnIce(callable $search): void
+    {
+        $withLocked = $search(true);
+        $this->assertNotEmpty($withLocked['sid_list'], 'the fixture must return at least one segment');
+
+        $nullMatchTypeSegmentId = (int)$withLocked['sid_list'][0];
+        $conn = obtainTestDatabase()->getConnection();
+
+        $read = $conn->prepare("SELECT match_type FROM segment_translations WHERE id_job = :job AND id_segment = :id");
+        $read->execute(['job' => $this->jobId, 'id' => $nullMatchTypeSegmentId]);
+        $previousMatchType = $read->fetchColumn();
+
+        $write = $conn->prepare("UPDATE segment_translations SET match_type = :match_type WHERE id_job = :job AND id_segment = :id");
+        $write->execute(['match_type' => null, 'job' => $this->jobId, 'id' => $nullMatchTypeSegmentId]);
+
+        try {
+            $withoutLocked = $search(false);
+
+            $this->assertContains((string)$nullMatchTypeSegmentId, $withoutLocked['sid_list']);
+            $this->assertSame(count($withLocked['sid_list']), count($withoutLocked['sid_list']));
+        } finally {
+            $write->execute([
+                'match_type' => $previousMatchType === false ? null : $previousMatchType,
+                'job' => $this->jobId,
+                'id' => $nullMatchTypeSegmentId,
             ]);
         }
     }

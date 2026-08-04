@@ -147,8 +147,10 @@ class TranslationEventsHandler
         $eventStruct->version_number = $event->getWantedTranslation()['version_number'] ?? 0;
         $eventStruct->source_page = $event->getSourcePage();
 
-        if ($event->isPropagationSource()) {
+        if ($event->shouldIncreaseTte()) {
             $eventStruct->time_to_edit = $event->getWantedTranslation()['time_to_edit'];
+        } else {
+            $eventStruct->time_to_edit = 0;
         }
 
         $eventStruct->setTimestamp('create_date', time());
