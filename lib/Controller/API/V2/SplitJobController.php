@@ -4,7 +4,9 @@ namespace Controller\API\V2;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Exception;
 use InvalidArgumentException;
 use Model\Exceptions\NotFoundException;
@@ -16,6 +18,7 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
+use Throwable;
 use TypeError;
 use Utils\Session\SessionStore;
 
@@ -68,13 +71,13 @@ class SplitJobController extends KleinController
      * — through ProjectPasswordValidator instead of getProjectData(). Its response shape is kept below
      * so retiring it changed nothing for the api-key callers.
      *
-     * @throws Exception
+     * @throws Throwable
      * @throws \TypeError
      */
     public function merge(): void
     {
         $request = $this->validateTheRequest();
-        $projectStructure = $this->getProjectData(
+        $projectStructure = $this->loadProjectForRestructure(
             $request['project_id'],
             $request['project_pass'],
             $request['split_raw_words']
@@ -96,7 +99,7 @@ class SplitJobController extends KleinController
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      */
     public function check(): void
     {
@@ -114,7 +117,7 @@ class SplitJobController extends KleinController
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      * @throws TypeError
      */
     public function apply(): void
@@ -138,11 +141,11 @@ class SplitJobController extends KleinController
      *
      * @return array{0: JobSplitMergeManager, 1: SplitMergeProjectData}
      *
-     * @throws Exception
+     * @throws Throwable
      */
     private function checkSplit(array $request): array
     {
-        $projectStructure = $this->getProjectData(
+        $projectStructure = $this->loadProjectForRestructure(
             $request['project_id'],
             $request['project_pass'],
             $request['split_raw_words']
@@ -220,6 +223,58 @@ class SplitJobController extends KleinController
     protected function getProjectJobs(ProjectStruct $project): array
     {
         return (new JobDao($this->getDatabase()))->getNotDeletedByProjectId((int) $project->id);
+    }
+
+    /**
+     * Resolve the project a restructure is about, and refuse a caller who has no standing over it.
+     *
+     * Every route on this controller goes through here rather than calling getProjectData() directly, so
+     * that there is one place the authorization can be read from and no fourth action can be added past
+     * it. getProjectData() stays the data seam the tests replace; the check is deliberately outside it.
+     *
+     * @return array{data: SplitMergeProjectData, pManager: JobSplitMergeManager, count_type: string, project: ProjectStruct}
+     *
+     * @throws Throwable
+     */
+    private function loadProjectForRestructure(int $project_id, string $project_pass, bool $split_raw_words = false): array
+    {
+        $projectStructure = $this->getProjectData($project_id, $project_pass, $split_raw_words);
+        $this->enforceRestructureAccess($projectStructure['project']);
+
+        return $projectStructure;
+    }
+
+    /**
+     * The project's owner or a member of its team, and nobody else.
+     *
+     * Until this check the project password was the whole authorization: LoginValidator asked only that
+     * the caller be *somebody*, and ProjectDao::findByIdAndPassword asked only that the pair match. A
+     * translator or reviewer removed from the team, holding a manage URL from when they were in it, kept
+     * the ability to split, merge and re-split every job in the project — as did any authenticated
+     * identity that came by an id and password some other way. The password proves knowledge of the
+     * project, not standing over it.
+     *
+     * The owner is allowed explicitly rather than left to the membership lookup, because a project
+     * outlives its owner's membership of the team it sits in: it can be moved to another team, or the
+     * owner can be removed from the one it is in. On the development dataset that is 1 project of 1205,
+     * plus 9 more carrying no team at all — membership alone would take those away from the person who
+     * created them, which would be a regression and not a fix.
+     *
+     * Compared strictly, and only when the owner is non-empty: a project created by an unauthenticated
+     * caller carries id_customer = '' (CreateProjectController), and an empty owner must match nobody.
+     *
+     * @throws AuthorizationError
+     * @throws Throwable
+     */
+    protected function enforceRestructureAccess(ProjectStruct $project): void
+    {
+        $ownerEmail = $project->id_customer;
+
+        if ($ownerEmail !== '' && $ownerEmail === $this->getUser()->email) {
+            return;
+        }
+
+        (new ProjectAccessValidator($this, $project))->validate();
     }
 
     /**
