@@ -243,8 +243,11 @@ class CreateProjectController extends AbstractStatefulKleinController
         $deepl_id_glossary = filter_var($this->request->param('deepl_id_glossary'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_formality = filter_var($this->request->param('deepl_formality'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_engine_type = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $segmentation_rule = filter_var($this->request->param('segmentation_rule'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $segmentation_rule = Constants::validateSegmentationRules($segmentation_rule ?: null);
 
         $icu_enabled = filter_var($this->request->param('icu_enabled'), FILTER_VALIDATE_BOOLEAN);
+
         $mandatory_issues = filter_var(
             $this->request->param('mandatory_issues'),
             FILTER_SANITIZE_FULL_SPECIAL_CHARS,
@@ -436,6 +439,10 @@ class CreateProjectController extends AbstractStatefulKleinController
         $data['project_features'] = $this->appendFeaturesToProject($data['mt_engine']);
         $data['team'] = $this->setTeam($id_team ?: null);
 
+        if (!empty($segmentation_rule)) {
+            $data[ProjectsMetadataMarshaller::SEGMENTATION_RULE->value] = $segmentation_rule;
+        }
+
         $this->setMetadataFromPostInput($data);
 
         return $data;
@@ -496,11 +503,17 @@ class CreateProjectController extends AbstractStatefulKleinController
         // new raw counter model
         $options = [ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value => ProjectsMetadataMarshaller::WORD_COUNT_RAW->value];
 
-        if (isset($data['mt_quality_value_in_editor'])) {
-            $options[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] = $data['mt_quality_value_in_editor'];
+        if (isset($data[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value])) {
+            $options[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] = $data[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value];
         }
 
-        $options[ProjectsMetadataMarshaller::ICU_ENABLED->value] = $data['icu_enabled'];
+        // 'standard' and '' are normalized to null by Constants::validateSegmentationRules(), so only
+        // 'patent' and 'paragraph' ever reach the metadata. Lara reads this key to enable multiline.
+        if (!empty($data[ProjectsMetadataMarshaller::SEGMENTATION_RULE->value])) {
+            $options[ProjectsMetadataMarshaller::SEGMENTATION_RULE->value] = $data[ProjectsMetadataMarshaller::SEGMENTATION_RULE->value];
+        }
+
+        $options[ProjectsMetadataMarshaller::ICU_ENABLED->value] = $data[ProjectsMetadataMarshaller::ICU_ENABLED->value];
 
         $this->metadata = $options;
     }
