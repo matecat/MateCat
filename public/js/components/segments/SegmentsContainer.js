@@ -381,6 +381,11 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     setScrollTopVisible(scrollValue > 400)
   }, [essentialRows])
 
+  const findFirstVisibleRow = useCallback(
+    (item, scrollOffset) => item.end > scrollOffset + 30,
+    [],
+  )
+
   // segments details - ex. div collection type ecc.
   const segmentsDetails = useMemo(() => {
     const getCollectionType = (segment) => {
@@ -990,6 +995,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
         }
         renderedRange={renderedRange}
         setFirstRowIdVisible={setFirstRowIdVisible}
+        findFirstVisibleRow={findFirstVisibleRow}
       />
       {scrollTopVisible && (
         <div
