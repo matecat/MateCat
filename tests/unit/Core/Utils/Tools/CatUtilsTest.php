@@ -753,31 +753,6 @@ class CatUtilsTest extends AbstractTest
     }
 
     // -------------------------------------------------------------------------
-    // getIsRevisionFromReferer
-    // -------------------------------------------------------------------------
-
-    #[Test]
-    public function testGetIsRevisionFromRefererNotSetReturnsFalseL(): void
-    {
-        $cat = new CatUtils($this->dbStub, []);
-        $this->assertFalse($cat->getIsRevisionFromReferer());
-    }
-
-    #[Test]
-    public function testGetIsRevisionFromRefererWithRevisePathReturnsTrueL(): void
-    {
-        $cat = new CatUtils($this->dbStub, ['HTTP_REFERER' => 'http://example.com/revise/1/abc/2']);
-        $this->assertTrue($cat->getIsRevisionFromReferer());
-    }
-
-    #[Test]
-    public function testGetIsRevisionFromRefererWithTranslatePathReturnsFalseL(): void
-    {
-        $cat = new CatUtils($this->dbStub, ['HTTP_REFERER' => 'http://example.com/translate/1/abc/2']);
-        $this->assertFalse($cat->getIsRevisionFromReferer());
-    }
-
-    // -------------------------------------------------------------------------
     // segment_raw_word_count
     // -------------------------------------------------------------------------
 
@@ -1176,17 +1151,6 @@ class CatUtilsTest extends AbstractTest
         // 'http://host' → parse_url returns ['scheme'=>'http','host'=>'host'] — no 'path' key
         $cat = new CatUtils($this->dbStub, ['REQUEST_URI' => 'http://host']);
         $this->assertFalse($cat->getIsRevisionFromRequestUri());
-    }
-
-    /**
-     * getIsRevisionFromReferer with URL that has no 'path' component
-     * Covers line 788 (return false when !isset($_from_url['path']))
-     */
-    #[Test]
-    public function testGetIsRevisionFromRefererWithUrlWithoutPathL(): void
-    {
-        $cat = new CatUtils($this->dbStub, ['HTTP_REFERER' => 'http://host']);
-        $this->assertFalse($cat->getIsRevisionFromReferer());
     }
 
     /**

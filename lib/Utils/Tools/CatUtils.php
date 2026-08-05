@@ -848,32 +848,6 @@ class CatUtils
     }
 
     /**
-     * Determines if the current request originates from a "revise" path based on the HTTP referer.
-     *
-     * This function checks the `HTTP_REFERER` server variable to parse the URL and
-     * determine if the path corresponds to a "revise" operation.
-     *
-     * @return bool Returns `true` if the referer path is a "revise" path, otherwise `false`.
-     */
-    public function getIsRevisionFromReferer(): bool
-    {
-        // Check if the HTTP_REFERER server variable is set
-        if (!isset($this->serverGlobalVars['HTTP_REFERER'])) {
-            return false;
-        }
-
-        // Parse the referer URL to extract its components
-        $_from_url = parse_url($this->serverGlobalVars['HTTP_REFERER']);
-
-        if ($_from_url === false || !isset($_from_url['path'])) {
-            return false;
-        }
-
-        // Check if the path corresponds to a "revise" operation
-        return self::isARevisePath($_from_url['path']);
-    }
-
-    /**
      * @param string $path
      *
      * @return bool

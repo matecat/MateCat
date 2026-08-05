@@ -14,6 +14,7 @@ use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
 use Model\FeaturesBase\Hook\Event\Run\SetTranslationCommittedEvent;
+use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
@@ -1174,7 +1175,6 @@ class SetTranslationControllerTest extends AbstractTest
         $this->setNamedProperty($controller, 'chunk', $chunk);
         $this->setNamedProperty($controller, 'id_job', 111111);
         $this->setNamedProperty($controller, 'password', 'pw');
-        $this->setNamedProperty($controller, 'request_password', 'pw');
         $this->setNamedProperty($controller, 'segment', null);
 
         $method = $this->getAccessibleMethod('updateJobPEE');
@@ -1210,7 +1210,6 @@ class SetTranslationControllerTest extends AbstractTest
         $this->setNamedProperty($controller, 'segment', $segment);
         $this->setNamedProperty($controller, 'id_job', $jobId);
         $this->setNamedProperty($controller, 'password', $jobPassword);
-        $this->setNamedProperty($controller, 'request_password', $jobPassword);
 
         $method = $this->getAccessibleMethod('updateJobPEE');
         $method->invoke(
@@ -1226,47 +1225,39 @@ class SetTranslationControllerTest extends AbstractTest
     #[Test]
     public function updateJobPEEDoesNotAddTimeToEditInRevisionMode(): void
     {
-        $originalReferer = $_SERVER['HTTP_REFERER'] ?? null;
-        $_SERVER['HTTP_REFERER'] = 'http://localhost/revise/123';
+        $projectId = 883001;
+        $jobId = 883002;
+        $jobPassword = 'pw883002';
+        $segmentId = 883003;
+        $fileId = 883004;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Short', 100);
 
-        try {
-            $projectId = 883001;
-            $jobId = 883002;
-            $jobPassword = 'pw883002';
-            $segmentId = 883003;
-            $fileId = 883004;
-            $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Short', 100);
+        $controller = $this->createControllerWithoutConstructor();
+        $chunk = new \Model\Jobs\JobStruct();
+        $chunk->total_time_to_edit = 200;
+        $chunk->avg_post_editing_effort = 0;
+        $chunk->target = 'it-IT';
+        $this->setNamedProperty($controller, 'chunk', $chunk);
 
-            $controller = $this->createControllerWithoutConstructor();
-            $chunk = new \Model\Jobs\JobStruct();
-            $chunk->total_time_to_edit = 200;
-            $chunk->avg_post_editing_effort = 0;
-            $chunk->target = 'it-IT';
-            $this->setNamedProperty($controller, 'chunk', $chunk);
+        // The revision phase is derived from the credential-resolved source_page stamped on the
+        // chunk, never from the request Referer; a revise phase must not accrue time-to-edit.
+        $this->setNamedProperty($controller, 'data', ['sourcePage' => SourcePages::SOURCE_PAGE_REVISION]);
 
-            $segment = new SegmentStruct();
-            $segment->raw_word_count = 100;
-            $this->setNamedProperty($controller, 'segment', $segment);
-            $this->setNamedProperty($controller, 'id_job', $jobId);
-            $this->setNamedProperty($controller, 'password', $jobPassword);
-            $this->setNamedProperty($controller, 'request_password', $jobPassword);
+        $segment = new SegmentStruct();
+        $segment->raw_word_count = 100;
+        $this->setNamedProperty($controller, 'segment', $segment);
+        $this->setNamedProperty($controller, 'id_job', $jobId);
+        $this->setNamedProperty($controller, 'password', $jobPassword);
 
-            $method = $this->getAccessibleMethod('updateJobPEE');
-            $method->invoke(
-                $controller,
-                ['suggestion' => '', 'translation' => '', 'time_to_edit' => 1],
-                ['translation' => '', 'time_to_edit' => 50]
-            );
+        $method = $this->getAccessibleMethod('updateJobPEE');
+        $method->invoke(
+            $controller,
+            ['suggestion' => '', 'translation' => '', 'time_to_edit' => 1],
+            ['translation' => '', 'time_to_edit' => 50]
+        );
 
-            $row = obtainTestDatabase()->getConnection()->query("SELECT total_time_to_edit FROM jobs WHERE id = {$jobId}")->fetch();
-            self::assertSame('200', (string)$row['total_time_to_edit']);
-        } finally {
-            if ($originalReferer === null) {
-                unset($_SERVER['HTTP_REFERER']);
-            } else {
-                $_SERVER['HTTP_REFERER'] = $originalReferer;
-            }
-        }
+        $row = obtainTestDatabase()->getConnection()->query("SELECT total_time_to_edit FROM jobs WHERE id = {$jobId}")->fetch();
+        self::assertSame('200', (string)$row['total_time_to_edit']);
     }
 
     #[Test]
@@ -1291,7 +1282,6 @@ class SetTranslationControllerTest extends AbstractTest
         $this->setNamedProperty($controller, 'segment', $segment);
         $this->setNamedProperty($controller, 'id_job', $jobId);
         $this->setNamedProperty($controller, 'password', $jobPassword);
-        $this->setNamedProperty($controller, 'request_password', $jobPassword);
 
         $method = $this->getAccessibleMethod('updateJobPEE');
         $method->invoke(
@@ -1327,7 +1317,6 @@ class SetTranslationControllerTest extends AbstractTest
         $this->setNamedProperty($controller, 'segment', $segment);
         $this->setNamedProperty($controller, 'id_job', $jobId);
         $this->setNamedProperty($controller, 'password', $jobPassword);
-        $this->setNamedProperty($controller, 'request_password', $jobPassword);
 
         $method = $this->getAccessibleMethod('updateJobPEE');
         $method->invoke(
@@ -1362,7 +1351,6 @@ class SetTranslationControllerTest extends AbstractTest
         $this->setNamedProperty($controller, 'segment', $segment);
         $this->setNamedProperty($controller, 'id_job', $jobId);
         $this->setNamedProperty($controller, 'password', $jobPassword);
-        $this->setNamedProperty($controller, 'request_password', $jobPassword);
 
         $method = $this->getAccessibleMethod('updateJobPEE');
         $method->invoke(
@@ -1714,20 +1702,6 @@ class SetTranslationControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function validateTheRequestThrowsWhenPasswordIsMissing(): void
-    {
-        $controller = $this->createControllerWithoutConstructor();
-        $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
-        $this->setNamedProperty($controller, 'request', new Request([], ['id_job' => '1', 'password' => null, 'id_segment' => '1'], [], [], [], null));
-
-        $method = $this->getAccessibleMethod('validateTheRequest');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing password');
-        $method->invoke($controller);
-    }
-
-    #[Test]
     public function validateTheRequestThrowsWhenIdSegmentIsMissing(): void
     {
         $controller = $this->createControllerWithoutConstructor();
@@ -1759,6 +1733,8 @@ class SetTranslationControllerTest extends AbstractTest
             'password' => $jobPassword,
             'id_segment' => (string)$segmentId,
         ], [], [], [], null));
+
+        $this->seedChunkOnController($controller, $jobId, $jobPassword, SourcePages::SOURCE_PAGE_TRANSLATE);
 
         $method = $this->getAccessibleMethod('validateTheRequest');
 
@@ -2025,6 +2001,8 @@ class SetTranslationControllerTest extends AbstractTest
             'propagate' => '1',
         ], [], [], [], null));
 
+        $this->seedChunkOnController($controller, $jobId, $jobPassword, SourcePages::SOURCE_PAGE_TRANSLATE);
+
         $method = $this->getAccessibleMethod('validateTheRequest');
         $data = $method->invoke($controller);
 
@@ -2056,36 +2034,11 @@ class SetTranslationControllerTest extends AbstractTest
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Hello review', 2);
         $this->seedChunkReviewRow(886015, $projectId, $jobId, $jobPassword, $reviewPassword, SourcePages::SOURCE_PAGE_REVISION);
 
-        $controller = $this->buildControllerForRevisionPhaseRequest($jobId, $jobPassword, $segmentId, $reviewPassword, '1');
+        $controller = $this->buildControllerForRevisionPhaseRequest($jobId, $jobPassword, $segmentId, SourcePages::SOURCE_PAGE_REVISION);
 
         $data = $this->getAccessibleMethod('validateTheRequest')->invoke($controller);
 
         self::assertSame(SourcePages::SOURCE_PAGE_REVISION, $data['sourcePage']);
-    }
-
-    /**
-     * The same request without the reviewer's password proves only the translate phase, so the
-     * declared revision number is refused rather than believed.
-     *
-     * @throws \Throwable
-     */
-    #[Test]
-    public function validateTheRequestRejectsARevisionNumberTheCredentialDoesNotProve(): void
-    {
-        $projectId = 886021;
-        $jobId = 886022;
-        $jobPassword = 'pw886022';
-        $segmentId = 886023;
-        $fileId = 886024;
-        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Hello review', 2);
-        $this->seedChunkReviewRow(886025, $projectId, $jobId, $jobPassword, 'rev886022', SourcePages::SOURCE_PAGE_REVISION);
-
-        $controller = $this->buildControllerForRevisionPhaseRequest($jobId, $jobPassword, $segmentId, $jobPassword, '1');
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid revision number');
-
-        $this->getAccessibleMethod('validateTheRequest')->invoke($controller);
     }
 
     private function seedChunkReviewRow(int $id, int $projectId, int $jobId, string $password, string $reviewPassword, int $sourcePage): void
@@ -2099,25 +2052,37 @@ class SetTranslationControllerTest extends AbstractTest
     /**
      * @throws ReflectionException
      */
-    private function buildControllerForRevisionPhaseRequest(int $jobId, string $jobPassword, int $segmentId, string $currentPassword, string $revisionNumber): SetTranslationController
+    private function buildControllerForRevisionPhaseRequest(int $jobId, string $jobPassword, int $segmentId, int $sourcePage): SetTranslationController
     {
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
         $this->setNamedProperty($controller, 'request', new Request([], [
             'id_job' => (string)$jobId,
             'password' => $jobPassword,
-            'current_password' => $currentPassword,
             'id_segment' => (string)$segmentId,
             'time_to_edit' => '1500',
             'id_translator' => '123',
             'translation' => 'Nuova traduzione',
             'segment' => 'Hello review',
             'status' => 'approved',
-            'revision_number' => $revisionNumber,
             'propagate' => '1',
         ], [], [], [], null));
 
+        $this->seedChunkOnController($controller, $jobId, $jobPassword, $sourcePage);
+
         return $controller;
+    }
+
+    /**
+     * Seed the chunk that ChunkPasswordValidator resolves in production, stamped with the phase's
+     * source_page, so validateTheRequest has its non-nullable JobStruct without the validator chain.
+     */
+    private function seedChunkOnController(SetTranslationController $controller, int $jobId, string $jobPassword, int $sourcePage): void
+    {
+        $chunk = (new JobDao(obtainTestDatabase()))->getByIdAndPassword($jobId, $jobPassword);
+        self::assertNotNull($chunk);
+        $chunk->setSourcePage($sourcePage);
+        $this->setNamedProperty($controller, 'chunk', $chunk);
     }
 
     #[Test]
@@ -2166,6 +2131,8 @@ class SetTranslationControllerTest extends AbstractTest
             'propagate' => '0',
         ], [], [], [], null));
 
+        $this->seedChunkOnController($controller, $jobId, $jobPassword, SourcePages::SOURCE_PAGE_TRANSLATE);
+
         $method = $this->getAccessibleMethod('prepareTranslation');
         $prepared = $method->invoke($controller);
 
@@ -2196,7 +2163,6 @@ class SetTranslationControllerTest extends AbstractTest
         $this->setNamedProperty($controller, 'segment', $segmentDao->fetchById($segmentId, \Model\Segments\SegmentStruct::class));
         $this->setNamedProperty($controller, 'id_job', $jobId);
         $this->setNamedProperty($controller, 'password', $jobPassword);
-        $this->setNamedProperty($controller, 'request_password', $jobPassword);
         $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
 
         $versionsHandler = new class implements \Plugins\Features\TranslationVersions\VersionHandlerInterface {
@@ -2291,7 +2257,6 @@ class SetTranslationControllerTest extends AbstractTest
         $this->setNamedProperty($controller, 'segment', $segmentDao->fetchById($segmentId, \Model\Segments\SegmentStruct::class));
         $this->setNamedProperty($controller, 'id_job', $jobId);
         $this->setNamedProperty($controller, 'password', $jobPassword);
-        $this->setNamedProperty($controller, 'request_password', $jobPassword);
         $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
 
         // One list of propagated ids, at the top level — the struct used to duplicate it into
@@ -2511,11 +2476,16 @@ class SetTranslationControllerTest extends AbstractTest
         $validators = $validatorsProp->getValue($controller);
 
         self::assertIsArray($validators);
-        self::assertCount(1, $validators, 'registerValidators() must append exactly one validator');
+        self::assertCount(2, $validators, 'registerValidators() must append the login and chunk-password validators');
         self::assertInstanceOf(
             \Controller\API\Commons\Validators\LoginValidator::class,
             $validators[0],
-            'The appended validator must be a LoginValidator'
+            'The first appended validator must be a LoginValidator'
+        );
+        self::assertInstanceOf(
+            \Controller\API\Commons\Validators\ChunkPasswordValidator::class,
+            $validators[1],
+            'The second appended validator must be a ChunkPasswordValidator'
         );
     }
 
@@ -2627,6 +2597,8 @@ class SetTranslationControllerTest extends AbstractTest
             'propagate'               => '0',
         ], [], [], [], null));
 
+        $this->seedChunkOnController($controller, $jobId, $jobPassword, SourcePages::SOURCE_PAGE_TRANSLATE);
+
         $method = $this->getAccessibleMethod('prepareTranslation');
         $prepared = $method->invoke($controller);
 
@@ -2670,8 +2642,7 @@ class SetTranslationControllerTest extends AbstractTest
             $controller = $this->createControllerWithoutConstructor();
             $this->setNamedProperty($controller, 'segment', $segment);
             $this->setNamedProperty($controller, 'id_job', $jobId);
-            $this->setNamedProperty($controller, 'request_password', $jobPassword);
-            $this->setProperty($controller, [
+                $this->setProperty($controller, [
                 'id_segment' => (string)$segmentId,
                 'id_job'     => (string)$jobId,
             ]);
@@ -2771,7 +2742,6 @@ class SetTranslationControllerTest extends AbstractTest
         $this->setNamedProperty($controller, 'segment', $segmentDao->fetchById($segmentId, SegmentStruct::class));
         $this->setNamedProperty($controller, 'id_job', $jobId);
         $this->setNamedProperty($controller, 'password', $jobPassword);
-        $this->setNamedProperty($controller, 'request_password', $jobPassword);
         $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
 
         $versionsHandler = new class implements \Plugins\Features\TranslationVersions\VersionHandlerInterface {
@@ -2887,8 +2857,7 @@ class SetTranslationControllerTest extends AbstractTest
             $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
             $this->setNamedProperty($controller, 'featureSet', new FeatureSet(obtainTestDatabase()));
             $this->setNamedProperty($controller, 'id_job', $jobId);
-            $this->setNamedProperty($controller, 'request_password', $jobPassword);
-
+    
             $this->setProperty($controller, [
                 'status'         => TranslationStatus::STATUS_TRANSLATED,
                 'id_job'         => (string)$jobId,
@@ -2959,6 +2928,8 @@ class SetTranslationControllerTest extends AbstractTest
             'suggestion_array' => $jsonWithEmoji,
         ], [], [], [], null));
 
+        $this->seedChunkOnController($controller, $jobId, $jobPassword, SourcePages::SOURCE_PAGE_TRANSLATE);
+
         $method = $this->getAccessibleMethod('validateTheRequest');
         $data = $method->invoke($controller);
 
@@ -3006,6 +2977,8 @@ class SetTranslationControllerTest extends AbstractTest
             'status'           => 'translated',
             'suggestion_array' => $brokenJson,
         ], [], [], [], null));
+
+        $this->seedChunkOnController($controller, $jobId, $jobPassword, SourcePages::SOURCE_PAGE_TRANSLATE);
 
         $method = $this->getAccessibleMethod('validateTheRequest');
         $data = $method->invoke($controller);
