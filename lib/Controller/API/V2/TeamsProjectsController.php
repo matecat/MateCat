@@ -65,8 +65,6 @@ class TeamsProjectsController extends KleinController
         $formatted = new Project($this->getDatabase());
         $formatted->setUser($this->user);
 
-        $this->refreshClientSessionIfNotApi();
-
         $this->response->json(['project' => $formatted->renderItem($updatedStruct)]);
     }
 

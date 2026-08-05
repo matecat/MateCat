@@ -22,6 +22,8 @@ class QAWarning
     const string MISMATCH_CATEGORY = "MISMATCH";
     const string ICU_CATEGORY = "ICU";
 
+    const string FUZZY_CATEGORY = "FUZZY";
+
     protected function pushErrorSegment(string $error_type, ?int $error_category, mixed $content): void
     {
         $category = match ($error_category) {
@@ -36,6 +38,7 @@ class QAWarning
             QA::ERR_SYMBOL_MISMATCH,
             QA::ERR_NEWLINE_MISMATCH => self::MISMATCH_CATEGORY,
             QA::ERR_ICU_VALIDATION => self::ICU_CATEGORY,
+            QA::ERR_FUZZY_UNCHANGED => self::FUZZY_CATEGORY,
             default => self::TAGS_CATEGORY,
         };
 

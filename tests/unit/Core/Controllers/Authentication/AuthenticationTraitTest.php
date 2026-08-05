@@ -11,6 +11,7 @@ use Model\DataAccess\IDatabase;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\Session\SessionStore;
 
 /**
  * Concrete class using AuthenticationTrait without overriding its methods.
@@ -42,7 +43,7 @@ class TraitTestSubject
         $this->logout();
     }
 
-    protected function buildAuthHelper(array &$session, ?string $api_key = null, ?string $api_secret = null): AuthenticationHelper
+    protected function buildAuthHelper(SessionStore $session, ?string $api_key = null, ?string $api_secret = null): AuthenticationHelper
     {
         return $this->stubHelper ?? AuthenticationHelper::fromRequest($session, $this->getDatabase(), $api_key, $api_secret);
     }
@@ -130,8 +131,6 @@ class AuthenticationTraitTest extends AbstractTest
     #[Test]
     public function logoutCallsDestroyAuthenticationOnInjectedHelper(): void
     {
-        $_SESSION ??= [];
-
         $helper = $this->createMock(AuthenticationHelper::class);
         $helper->expects($this->once())->method('destroyAuthentication');
 
@@ -143,8 +142,6 @@ class AuthenticationTraitTest extends AbstractTest
     #[Test]
     public function broadcastLogoutPublishesToQueueWithInjectedHandler(): void
     {
-        $_SESSION ??= [];
-
         $user      = new UserStruct();
         $user->uid = 99;
 

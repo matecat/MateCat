@@ -584,6 +584,49 @@ class SimpleJWTTest extends AbstractTest
     }
 
     /**
+     * An empty secret used to turn the validating entry point into a non-validating one: it skipped
+     * isValid() altogether, so a token signed with any key at all — or none — was accepted. Every
+     * caller passes AppConfig::$AUTHSECRET, so a blank one made login cookies and XSRF tokens
+     * forgeable by anyone who can base64-encode a payload.
+     */
+    #[Test]
+    public function testValidationRefusesAnEmptySecretRatherThanSkippingTheCheck(): void
+    {
+        $forged = (new SimpleJWT(['uid' => 42], 'my.custom.namespace', 'not-the-servers-key', 3600))->encode();
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('empty secret key');
+
+        SimpleJWT::getValidatedInstanceFromString($forged, '');
+    }
+
+    /**
+     * The same empty secret also skipped the expiry check, so nothing ever looked expired — which
+     * matters to callers that collect tokens by reading for the expiry signal.
+     */
+    #[Test]
+    public function testValidationRefusesAnEmptySecretEvenForAnExpiredToken(): void
+    {
+        $expired = (new SimpleJWT(['uid' => 42], 'my.custom.namespace', $this->secretKey, -3600))->encode();
+
+        $this->expectException(DomainException::class);
+
+        SimpleJWT::getValidatedInstanceFromString($expired, '');
+    }
+
+    /**
+     * Parsing without verifying stays available under its own name, which is the reason refusing
+     * above costs nothing: a caller that means it can say so.
+     */
+    #[Test]
+    public function testParsingWithoutValidationIsStillAvailableForAForeignlySignedToken(): void
+    {
+        $forged = (new SimpleJWT(['uid' => 42], 'my.custom.namespace', 'not-the-servers-key', 3600))->encode();
+
+        $this->assertSame(42, SimpleJWT::getNotValidatedInstanceFromString($forged)['uid']);
+    }
+
+    /**
      * @throws ReflectionException
      */
     #[Test]

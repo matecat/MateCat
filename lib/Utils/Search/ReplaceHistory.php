@@ -5,7 +5,7 @@ namespace Utils\Search;
 use Model\Search\ReplaceEventDAOInterface;
 use Model\Search\ReplaceEventIndexDaoInterface;
 use Model\Search\ReplaceEventStruct;
-use Model\Translations\SegmentTranslationDao;
+use PDOException;
 
 class ReplaceHistory
 {
@@ -25,23 +25,19 @@ class ReplaceHistory
      */
     private ReplaceEventIndexDaoInterface $replaceEventIndexDAO;
 
-    private SegmentTranslationDao $segmentTranslationDao;
-
     /**
      * ReplaceHistory constructor.
      *
      * @param int $idJob
      * @param ReplaceEventDAOInterface $replaceEventDAO
      * @param ReplaceEventIndexDaoInterface $replaceEventIndexDAO
-     * @param SegmentTranslationDao $segmentTranslationDao
      * @param int $ttl
      */
-    public function __construct(int $idJob, ReplaceEventDAOInterface $replaceEventDAO, ReplaceEventIndexDaoInterface $replaceEventIndexDAO, SegmentTranslationDao $segmentTranslationDao, int $ttl = 0)
+    public function __construct(int $idJob, ReplaceEventDAOInterface $replaceEventDAO, ReplaceEventIndexDaoInterface $replaceEventIndexDAO, int $ttl = 0)
     {
         $this->idJob = $idJob;
         $this->replaceEventDAO = $replaceEventDAO;
         $this->replaceEventIndexDAO = $replaceEventIndexDAO;
-        $this->segmentTranslationDao = $segmentTranslationDao;
 
         if ($ttl) {
             $this->replaceEventDAO->setTtl($ttl);
@@ -68,16 +64,6 @@ class ReplaceHistory
     }
 
     /**
-     * @throws \PDOException
-     */
-    public function redo(): int
-    {
-        $versionToMove = $this->getCursor() + 1;
-
-        return $this->_moveToVersion($versionToMove);
-    }
-
-    /**
      * @param ReplaceEventStruct $eventStruct
      *
      * @return int
@@ -88,31 +74,24 @@ class ReplaceHistory
     }
 
     /**
-     * @throws \PDOException
+     * Undo steps the cursor back one version. The pre-replacement text + status of the current version
+     * are restored by GetSearchController::updateSegments (the single text/audit writer), so undo only
+     * moves the cursor here.
+     *
+     * @throws PDOException
      */
     public function undo(): int
     {
-        $versionToMove = $this->getCursor() - 1;
+        $versionToRevert = $this->getCursor();
+        $events = $this->get($versionToRevert);
 
-        return $this->_moveToVersion($versionToMove);
-    }
-
-    /**
-     * @throws \PDOException
-     */
-    private function _moveToVersion(int $versionToMove): int
-    {
-        $events = $this->get($versionToMove);
-
-        if (count($events) > 0) {
-            $replacedEvents = $this->segmentTranslationDao->rebuildFromReplaceEvents($events);
-
-            $this->replaceEventIndexDAO->save($this->idJob, $versionToMove);
-
-            return $replacedEvents;
+        if (count($events) === 0) {
+            return 0;
         }
 
-        return 0;
+        $this->replaceEventIndexDAO->save($this->idJob, $versionToRevert - 1);
+
+        return count($events);
     }
 
     public function updateIndex(int $versionToMove): void

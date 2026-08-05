@@ -60,7 +60,7 @@ class MembershipCreatedEmail extends AbstractEmail
         $this->teamDao = $teamDao;
 
         $this->sender = $sender;
-        $this->title = "You've been added to team " . $this->membership->getTeam($teamDao)->name;
+        $this->title = "You've been added to team " . $this->headerSafe($this->membership->getTeam($teamDao)->name);
     }
 
     /**

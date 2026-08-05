@@ -160,6 +160,24 @@ class SaveMetadataTest extends AbstractTest
     }
 
     // =========================================================================
+    // MANDATORY_ISSUES — no longer persisted at project level (dead write removed)
+    // =========================================================================
+
+    #[Test]
+    public function testMandatoryIssuesIsNotPersistedAtProjectLevel(): void
+    {
+        $this->projectStructure->mandatory_issues = ['r1', 'r2'];
+
+        $this->service->save($this->projectStructure, $this->features);
+
+        $calls = $this->findDaoCallsByKey('mandatory_issues');
+        self::assertEmpty(
+            $calls,
+            'mandatory_issues must not be persisted in project_metadata; only the job-level copy is live'
+        );
+    }
+
+    // =========================================================================
     // FROM_API flag
     // =========================================================================
 

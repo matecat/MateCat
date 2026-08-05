@@ -2,7 +2,7 @@
 
 namespace Controller\API\App;
 
-use Controller\Abstracts\KleinController;
+use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
@@ -10,7 +10,17 @@ use ReflectionException;
 use TypeError;
 use Utils\OutsourceTo\Translated;
 
-class OutsourceToController extends KleinController
+/**
+ * Stateful by declaration because it is stateful in fact: the outsource quote cart lives in the
+ * session and is read back on a later request by Controller\Views\OutsourceTo\AbstractController.
+ *
+ * This used to extend KleinController — declared stateless — and got its session as a side effect of
+ * constructing Utils\OutsourceTo\Translated, whose constructor called sessionStart(). That made a
+ * stateless endpoint issue a PHPSESSID cookie from a constructor, and put the session outside the
+ * store abstraction where nothing could see it. The session is now opened by the framework, for a
+ * controller that admits it needs one.
+ */
+class OutsourceToController extends AbstractStatefulKleinController
 {
 
     protected function registerValidators(): void
@@ -85,7 +95,7 @@ class OutsourceToController extends KleinController
      */
     protected function getOutsourceService(): Translated
     {
-        return new Translated();
+        return new Translated($this->sessionStore());
     }
 
     /**

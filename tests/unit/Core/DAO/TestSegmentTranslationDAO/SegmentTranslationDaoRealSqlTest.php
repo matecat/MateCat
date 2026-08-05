@@ -10,7 +10,7 @@ use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Files\FileStruct;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
-use Model\Search\ReplaceEventStruct;
+use Model\Propagation\PropagationResult;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use PDO;
@@ -860,7 +860,11 @@ class SegmentTranslationDaoRealSqlTest extends AbstractTest
             false // execute_update=false so even if enqueue is called it won't fire
         );
 
-        $this->assertIsArray($result);
+        // The test name promises an empty propagation, so assert it. `assertIsArray()` never did:
+        // it passed for any array, including a fully populated one.
+        $this->assertInstanceOf(PropagationResult::class, $result);
+        $this->assertSame([], $result->totals);
+        $this->assertSame([], $result->propagatedIds);
     }
 
     #[Test]
@@ -890,7 +894,8 @@ class SegmentTranslationDaoRealSqlTest extends AbstractTest
             false
         );
 
-        $this->assertIsArray($result);
+        $this->assertInstanceOf(PropagationResult::class, $result);
+        $this->assertSame([], $result->propagatedIds);
     }
 
     #[Test]
@@ -1006,37 +1011,6 @@ class SegmentTranslationDaoRealSqlTest extends AbstractTest
         // NULL-words_per_second aggregate row).
         $result = $this->dao->getWordsPerSecond($this->idJob, [self::ASSIGNABLE_ID_FLOOR + 900_001]);
         $this->assertIsArray($result);
-    }
-
-    // =========================================================================
-    // rebuildFromReplaceEvents — success path and error-rollback path
-    // =========================================================================
-
-    #[Test]
-    public function rebuildFromReplaceEvents_updates_translation_and_returns_count(): void
-    {
-        $this->insertTranslation($this->segIds[0], TranslationStatus::STATUS_TRANSLATED, [
-            'translation' => 'before replacement',
-        ]);
-
-        $event                              = new ReplaceEventStruct();
-        $event->id_job                      = $this->idJob;
-        $event->id_segment                  = $this->segIds[0];
-        $event->translation_after_replacement = 'after replacement';
-        $event->replace_version             = '1';
-        $event->job_password                = $this->password;
-        $event->target                      = 'it-IT';
-        $event->status                      = TranslationStatus::STATUS_TRANSLATED;
-        $event->replacement                 = 'before→after';
-
-        $affected = $this->dao->rebuildFromReplaceEvents([$event]);
-
-        $this->assertSame(1, $affected);
-
-        $val = $this->realSqlDb->getConnection()
-            ->query("SELECT translation FROM segment_translations WHERE id_segment = {$this->segIds[0]} AND id_job = {$this->idJob}")
-            ->fetchColumn();
-        $this->assertSame('after replacement', $val);
     }
 
     // =========================================================================

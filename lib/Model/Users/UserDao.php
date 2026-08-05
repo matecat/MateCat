@@ -6,6 +6,7 @@ use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
+use Model\DataAccess\InvalidatesUserProfileCache;
 use PDO;
 use PDOException;
 use ReflectionException;
@@ -19,6 +20,8 @@ use TypeError;
  */
 class UserDao extends AbstractDao
 {
+
+    use InvalidatesUserProfileCache;
 
     const string TABLE = "users";
     const string STRUCT_TYPE = UserStruct::class;
@@ -45,14 +48,22 @@ class UserDao extends AbstractDao
      *
      * @return int
      * @throws PDOException
+     * @throws Exception
      */
     public function delete(UserStruct $userStruct): int
     {
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare(" DELETE FROM users WHERE uid = ?");
         $stmt->execute([$userStruct->uid]);
+        $deleted = $stmt->rowCount();
 
-        return $stmt->rowCount();
+        if ($deleted > 0) {
+            // Gated on the row count rather than on the struct: a deleted row proves the uid it
+            // matched was a real one, so there is nothing to narrow here.
+            $this->invalidateUserProfileCache((int)$userStruct->uid);
+        }
+
+        return $deleted;
     }
 
     /**
@@ -112,6 +123,33 @@ class UserDao extends AbstractDao
     }
 
     /**
+     * Finds the account holding $rawToken for one flow only.
+     *
+     * Tokens are stored with a scope marker, and links carry only the random part, so each flow
+     * prepends its own marker here. Presenting a token to the wrong endpoint therefore matches
+     * nothing — which is what stops one flow's link being spent on another, and keeps each flow's
+     * lifetime governing only its own tokens.
+     *
+     * The unmarked fallback exists for tokens issued before scoping. Those are still cross-usable,
+     * exactly as they were when they were minted, and stop being accepted once the last of them ages
+     * out of the confirmation window. Remove it then.
+     *
+     * @param string $rawToken the value taken from the link, without a marker
+     * @param AuthTokenScope $scope the flow the caller is serving
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function getByScopedConfirmationToken(string $rawToken, AuthTokenScope $scope): ?UserStruct
+    {
+        return $this->getByConfirmationToken($scope->marker() . $rawToken)
+            ?? $this->getByConfirmationToken($rawToken);
+    }
+
+    /**
+     * Matches a stored token exactly, marker included. Prefer {@see getByScopedConfirmationToken()},
+     * which is what confines a token to the flow that minted it.
+     *
      * @param string $token
      *
      * @return ?UserStruct
@@ -175,6 +213,8 @@ class UserDao extends AbstractDao
             throw new Exception('Unable to reload updated user');
         }
 
+        $this->invalidateUserProfileCache((int)$id);
+
         return $record;
     }
 
@@ -226,6 +266,8 @@ class UserDao extends AbstractDao
         if (!$record instanceof UserStruct) {
             throw new Exception('Unable to reload updated user');
         }
+
+        $this->invalidateUserProfileCache((int)$obj->uid);
 
         return $record;
     }

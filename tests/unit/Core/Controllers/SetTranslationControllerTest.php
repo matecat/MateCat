@@ -17,7 +17,9 @@ use Model\FeaturesBase\Hook\Event\Run\SetTranslationCommittedEvent;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
+use Model\Propagation\PropagationResult;
 use Model\Segments\SegmentStruct;
+use Plugins\Features\TranslationVersions\StoreTranslationEventParams;
 use Model\Translations\SegmentTranslationStruct;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
@@ -257,9 +259,9 @@ class SetTranslationControllerTest extends AbstractTest
         $method = $reflection->getMethod('persistTranslation');
         self::assertTrue($method->isPrivate(), 'persistTranslation() must be private');
         self::assertSame(
-            'array',
+            PropagationResult::class,
             (string) $method->getReturnType(),
-            'persistTranslation() must return array'
+            'persistTranslation() must return a PropagationResult'
         );
 
         $params = $method->getParameters();
@@ -1015,6 +1017,146 @@ class SetTranslationControllerTest extends AbstractTest
         $method->invoke($controller, 'Should fail', '', $this->makeQAStub());
     }
 
+    /**
+     * thereAreWarnings() is called twice by buildNewTranslation(): once before the fuzzy-unchanged
+     * check runs, once after (only if the fuzzy branch fires and calls addError()). Consecutive
+     * return values simulate that state transition without needing a real QA instance.
+     */
+    private function makeFuzzyAwareQAStub(bool $warningsBeforeFuzzyCheck, bool $warningsAfterFuzzyCheck, string $warningsJson): QA
+    {
+        $qa = $this->createStub(QA::class);
+        $qa->method('thereAreWarnings')->willReturnOnConsecutiveCalls($warningsBeforeFuzzyCheck, $warningsAfterFuzzyCheck);
+        $qa->method('getWarningsJSON')->willReturn($warningsJson);
+
+        return $qa;
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function buildNewTranslationSetsFuzzyWarningWhenUnmodifiedFuzzyMatchConfirmed(): void
+    {
+        // makeDefaultOldTranslation() already yields a fuzzy-band TM suggestion (75%, 'Old suggestion').
+        $old = $this->makeDefaultOldTranslation();
+        $controller = $this->createTestableController($old);
+
+        $this->setProperty($controller, [
+            'suggestion_array' => null,
+            'chosen_suggestion_index' => null,
+            'id_segment' => '42',
+            'id_job' => '100',
+            'status' => TranslationStatus::STATUS_TRANSLATED,
+            'segment' => $this->makeDefaultSegment(),
+            'time_to_edit' => 1000,
+        ]);
+
+        $fuzzyWarningJson = json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Unedited fuzzy match confirmed']]);
+        $qa = $this->makeFuzzyAwareQAStub(false, true, $fuzzyWarningJson);
+
+        $method = (new ReflectionClass(SetTranslationController::class))->getMethod('buildNewTranslation');
+        $result = $method->invoke($controller, 'Old suggestion', '[]', $qa);
+
+        $new = $result['new'];
+        self::assertTrue($new->warning, 'Unmodified fuzzy match confirmation must set warning to true');
+        self::assertSame($fuzzyWarningJson, $new->serialized_errors_list, 'serialized_errors_list must be refreshed with the fuzzy warning');
+
+        $decoded = json_decode($new->serialized_errors_list, true);
+        self::assertSame(QA::ERR_FUZZY_UNCHANGED, $decoded[0]['outcome']);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function buildNewTranslationSkipsFuzzyWarningWhenTranslationEdited(): void
+    {
+        $old = $this->makeDefaultOldTranslation();
+        $controller = $this->createTestableController($old);
+
+        $this->setProperty($controller, [
+            'suggestion_array' => null,
+            'chosen_suggestion_index' => null,
+            'id_segment' => '42',
+            'id_job' => '100',
+            'status' => TranslationStatus::STATUS_TRANSLATED,
+            'segment' => $this->makeDefaultSegment(),
+            'time_to_edit' => 1000,
+        ]);
+
+        $fuzzyWarningJson = json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Unedited fuzzy match confirmed']]);
+        $qa = $this->makeFuzzyAwareQAStub(false, true, $fuzzyWarningJson);
+
+        $method = (new ReflectionClass(SetTranslationController::class))->getMethod('buildNewTranslation');
+        $result = $method->invoke($controller, 'An edited translation', '[]', $qa);
+
+        $new = $result['new'];
+        self::assertFalse($new->warning, 'Edited translation must not trigger the fuzzy-unchanged warning');
+        self::assertSame('[]', $new->serialized_errors_list, 'serialized_errors_list must be left untouched');
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function buildNewTranslationSkipsFuzzyWarningForExactMatch(): void
+    {
+        $old = $this->makeDefaultOldTranslation();
+        $old->suggestion_match = '100';
+        $controller = $this->createTestableController($old);
+
+        $this->setProperty($controller, [
+            'suggestion_array' => null,
+            'chosen_suggestion_index' => null,
+            'id_segment' => '42',
+            'id_job' => '100',
+            'status' => TranslationStatus::STATUS_TRANSLATED,
+            'segment' => $this->makeDefaultSegment(),
+            'time_to_edit' => 1000,
+        ]);
+
+        $fuzzyWarningJson = json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Unedited fuzzy match confirmed']]);
+        $qa = $this->makeFuzzyAwareQAStub(false, true, $fuzzyWarningJson);
+
+        $method = (new ReflectionClass(SetTranslationController::class))->getMethod('buildNewTranslation');
+        $result = $method->invoke($controller, 'Old suggestion', '[]', $qa);
+
+        $new = $result['new'];
+        self::assertFalse($new->warning, 'Exact/ICE match confirmation must not trigger the fuzzy-unchanged warning');
+        self::assertSame('[]', $new->serialized_errors_list, 'serialized_errors_list must be left untouched');
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function buildNewTranslationSkipsFuzzyWarningForNonTMSource(): void
+    {
+        $old = $this->makeDefaultOldTranslation();
+        $old->suggestion_source = EngineConstants::MT;
+        $controller = $this->createTestableController($old);
+
+        $this->setProperty($controller, [
+            'suggestion_array' => null,
+            'chosen_suggestion_index' => null,
+            'id_segment' => '42',
+            'id_job' => '100',
+            'status' => TranslationStatus::STATUS_TRANSLATED,
+            'segment' => $this->makeDefaultSegment(),
+            'time_to_edit' => 1000,
+        ]);
+
+        $fuzzyWarningJson = json_encode([['outcome' => QA::ERR_FUZZY_UNCHANGED, 'debug' => 'Unedited fuzzy match confirmed']]);
+        $qa = $this->makeFuzzyAwareQAStub(false, true, $fuzzyWarningJson);
+
+        $method = (new ReflectionClass(SetTranslationController::class))->getMethod('buildNewTranslation');
+        $result = $method->invoke($controller, 'Old suggestion', '[]', $qa);
+
+        $new = $result['new'];
+        self::assertFalse($new->warning, 'Non-TM suggestion source must not trigger the fuzzy-unchanged warning');
+        self::assertSame('[]', $new->serialized_errors_list, 'serialized_errors_list must be left untouched');
+    }
+
     // ──────────────────────────────────────────────────────────────
     // SECTION 6: Additional private/protected methods coverage
     // ──────────────────────────────────────────────────────────────
@@ -1283,7 +1425,7 @@ class SetTranslationControllerTest extends AbstractTest
         $qa->method('getWarnings')->willReturn([(object)['outcome' => 1]]);
 
         $method = $this->getAccessibleMethod('buildResult');
-        $result = $method->invoke($controller, $newTranslation, $oldTranslation, [], $qa);
+        $result = $method->invoke($controller, $newTranslation, $oldTranslation, PropagationResult::empty(), $qa);
 
         self::assertSame(1, $result['code']);
         self::assertSame('OK', $result['data']);
@@ -1292,6 +1434,81 @@ class SetTranslationControllerTest extends AbstractTest
         self::assertSame(42, $result['translation']['sid']);
         self::assertSame(TranslationStatus::STATUS_TRANSLATED, $result['translation']['status']);
         self::assertArrayHasKey(ProjectsMetadataMarshaller::WORD_COUNT_RAW->value, $result['stats']);
+    }
+
+    /**
+     * `SetTranslationCommittedEvent` carries the propagated ids straight off the result object.
+     *
+     * This is the read that moved. It used to be
+     * `$propagationTotal['segments_for_propagation']['propagated_ids'] ?? null`, reaching for the
+     * duplicate copy the struct wrote alongside the real list — the only reader of that copy in the
+     * tree. It now reads `propagatedIds`, the same value the editor and `GetSearchController` use.
+     * `plugins/translated/lib/Features/Translated.php:479` indexes this key unguarded on its way to
+     * a Kafka payload, so it has to be a list and never null.
+     */
+    #[Test]
+    public function buildResultPassesTheTopLevelPropagatedIdsToTheCommittedEvent(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+
+        $chunk = new \Model\Jobs\JobStruct();
+        $chunk->id = 9101;
+        $chunk->password = 'pw9101';
+        $chunk->new_words = 1;
+        $chunk->draft_words = 2;
+        $chunk->translated_words = 3;
+        $chunk->approved_words = 4;
+        $chunk->approved2_words = 5;
+        $chunk->new_raw_words = 1;
+        $chunk->draft_raw_words = 2;
+        $chunk->translated_raw_words = 3;
+        $chunk->approved_raw_words = 4;
+        $chunk->approved2_raw_words = 5;
+
+        $this->setProperty($controller, [
+            'chunk' => $chunk,
+            'project' => ['status_analysis' => 'DONE'],
+            'id_segment' => '42',
+            'segment' => new SegmentStruct(),
+            'revisionNumber' => 0,
+        ]);
+
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
+
+        $captured = null;
+        $featureSet = $this->createStub(FeatureSet::class);
+        $featureSet
+            ->method('dispatch')
+            ->willReturnCallback(function ($event) use (&$captured) {
+                if ($event instanceof SetTranslationCommittedEvent) {
+                    $captured = $event;
+                }
+
+                return $event;
+            });
+        $this->setNamedProperty($controller, 'featureSet', $featureSet);
+
+        $newTranslation = new SegmentTranslationStruct();
+        $newTranslation->id_segment = 42;
+        $newTranslation->status = TranslationStatus::STATUS_TRANSLATED;
+        $newTranslation->translation = 'ciao';
+        $newTranslation->translation_date = '2025-01-01 00:00:00';
+        $newTranslation->version_number = 7;
+
+        $oldTranslation = new SegmentTranslationStruct();
+        $oldTranslation->status = TranslationStatus::STATUS_DRAFT;
+
+        $qa = $this->createStub(QA::class);
+        $qa->method('getWarnings')->willReturn([(object)['outcome' => 1]]);
+
+        $propagation = new PropagationResult([], ['777', '888'], []);
+
+        $method = $this->getAccessibleMethod('buildResult');
+        $method->invoke($controller, $newTranslation, $oldTranslation, $propagation, $qa);
+
+        self::assertInstanceOf(SetTranslationCommittedEvent::class, $captured);
+        self::assertSame(['777', '888'], $captured->context['propagated_ids']);
     }
 
     #[Test]
@@ -1334,7 +1551,7 @@ class SetTranslationControllerTest extends AbstractTest
         $qa->method('getWarnings')->willReturn([(object)['outcome' => 0]]);
 
         $method = $this->getAccessibleMethod('buildResult');
-        $result = $method->invoke($controller, $newTranslation, $oldTranslation, [], $qa);
+        $result = $method->invoke($controller, $newTranslation, $oldTranslation, PropagationResult::empty(), $qa);
 
         self::assertSame(0, $result['warning']['id']);
     }
@@ -1355,7 +1572,7 @@ class SetTranslationControllerTest extends AbstractTest
 
         $new = new SegmentTranslationStruct();
         $old = new SegmentTranslationStruct();
-        $propagation = ['segments_for_propagation' => ['propagated_ids' => []]];
+        $propagation = PropagationResult::empty();
         $result = [
             'stats' => [
                 ProjectsMetadataMarshaller::WORD_COUNT_RAW->value => ['draft' => 1, 'new' => 0],
@@ -1904,13 +2121,13 @@ class SetTranslationControllerTest extends AbstractTest
                 return true;
             }
 
-            public function storeTranslationEvent(array $params): void
+            public function storeTranslationEvent(StoreTranslationEventParams $params): void
             {
             }
 
-            public function propagateTranslation(SegmentTranslationStruct $translationStruct): array
+            public function propagateTranslation(SegmentTranslationStruct $translationStruct): PropagationResult
             {
-                return [];
+                return PropagationResult::empty();
             }
         };
         $this->setNamedProperty($controller, 'VersionsHandler', $versionsHandler);
@@ -1964,11 +2181,7 @@ class SetTranslationControllerTest extends AbstractTest
         $method = $this->getAccessibleMethod('persistTranslation');
         $result = $method->invoke($controller, $new, $old, 'nuova', '', $qa);
 
-        self::assertSame([
-            'totals' => [],
-            'propagated_ids' => [],
-            'segments_for_propagation' => [],
-        ], $result);
+        self::assertEquals(PropagationResult::empty(), $result);
 
         $stored = (new \Model\Translations\SegmentTranslationDao(obtainTestDatabase()))->findBySegmentAndJob($segmentId, $jobId);
         self::assertInstanceOf(SegmentTranslationStruct::class, $stored);
@@ -1997,14 +2210,19 @@ class SetTranslationControllerTest extends AbstractTest
         $this->setNamedProperty($controller, 'request_password', $jobPassword);
         $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
 
-        $expectedPropagation = [
-            'totals' => ['translated' => 1],
-            'propagated_ids' => [100, 101],
-            'segments_for_propagation' => ['propagated_ids' => [100, 101]],
-        ];
+        // One list of propagated ids, at the top level — the struct used to duplicate it into
+        // `segments_for_propagation['propagated_ids']`. This test only checks that
+        // `persistTranslation()` returns the handler's object untouched; that the surviving list is
+        // the one read downstream is pinned by
+        // `buildResultPassesTheTopLevelPropagatedIdsToTheCommittedEvent`.
+        $expectedPropagation = new PropagationResult(
+            ['total' => 1],
+            ['100', '101'],
+            []
+        );
 
         $versionsHandler = new class($expectedPropagation) implements \Plugins\Features\TranslationVersions\VersionHandlerInterface {
-            public function __construct(private array $propagation)
+            public function __construct(private PropagationResult $propagation)
             {
             }
 
@@ -2013,11 +2231,11 @@ class SetTranslationControllerTest extends AbstractTest
                 return true;
             }
 
-            public function storeTranslationEvent(array $params): void
+            public function storeTranslationEvent(StoreTranslationEventParams $params): void
             {
             }
 
-            public function propagateTranslation(SegmentTranslationStruct $translationStruct): array
+            public function propagateTranslation(SegmentTranslationStruct $translationStruct): PropagationResult
             {
                 return $this->propagation;
             }
@@ -2180,7 +2398,7 @@ class SetTranslationControllerTest extends AbstractTest
 
         $before = time();
         $method = $this->getAccessibleMethod('buildResult');
-        $result = $method->invoke($controller, $newTranslation, $oldTranslation, [], $qa);
+        $result = $method->invoke($controller, $newTranslation, $oldTranslation, PropagationResult::empty(), $qa);
         $after = time();
 
         self::assertGreaterThanOrEqual($before, $result['version']);
@@ -2427,7 +2645,7 @@ class SetTranslationControllerTest extends AbstractTest
 
         $new = new SegmentTranslationStruct();
         $old = new SegmentTranslationStruct();
-        $propagation = ['totals' => [], 'propagated_ids' => [], 'segments_for_propagation' => []];
+        $propagation = PropagationResult::empty();
         $result = [
             'stats' => [
                 ProjectsMetadataMarshaller::WORD_COUNT_RAW->value => ['draft' => 0, 'new' => 0],
@@ -2478,13 +2696,13 @@ class SetTranslationControllerTest extends AbstractTest
                 return true;
             }
 
-            public function storeTranslationEvent(array $params): void
+            public function storeTranslationEvent(StoreTranslationEventParams $params): void
             {
             }
 
-            public function propagateTranslation(SegmentTranslationStruct $translationStruct): array
+            public function propagateTranslation(SegmentTranslationStruct $translationStruct): PropagationResult
             {
-                return [];
+                return PropagationResult::empty();
             }
         };
         $this->setNamedProperty($controller, 'VersionsHandler', $versionsHandler);
@@ -2533,7 +2751,7 @@ class SetTranslationControllerTest extends AbstractTest
         $method = $this->getAccessibleMethod('persistTranslation');
         $result = $method->invoke($controller, $new, $old, 'nuova', '', $qa);
 
-        self::assertArrayHasKey('totals', $result);
+        self::assertInstanceOf(PropagationResult::class, $result);
 
         $splitRow = obtainTestDatabase()->getConnection()
             ->query("SELECT id_segment FROM segment_translations_splits WHERE id_segment = {$segmentId} AND id_job = {$jobId}")

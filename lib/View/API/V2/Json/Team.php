@@ -16,7 +16,6 @@ use Model\Users\UserDao;
 use Predis\ClientInterface;
 use ReflectionException;
 use TypeError;
-use Utils\Redis\RedisHandler;
 use Utils\Tools\Utils;
 
 class Team
@@ -27,14 +26,20 @@ class Team
 
     private UserDao $userDao;
 
+    private ClientInterface $redis;
+
     /**
      * @param UserDao $userDao
+     * @param ClientInterface $redis One connection for the whole render. Previously each rendered
+     *        team opened its own, since RedisHandler::getConnection() is per-instance — so a user in
+     *        N teams cost N connections per payload.
      * @param TeamStruct[]|null $data
      */
-    public function __construct(UserDao $userDao, ?array $data = null)
+    public function __construct(UserDao $userDao, ClientInterface $redis, ?array $data = null)
     {
         $this->data = $data;
         $this->userDao = $userDao;
+        $this->redis = $redis;
     }
 
     /**
@@ -95,18 +100,9 @@ class Team
     protected function getPendingInvitations(int $teamId): array
     {
         return (new PendingInvitations(
-            $this->createRedisConnection(),
+            $this->redis,
             ['team_id' => $teamId, 'email' => '']
-        ))->hasPendingInvitation($teamId);
+        ))->listPendingInvitations($teamId);
     }
-
-    /**
-     * @throws Exception
-     */
-    protected function createRedisConnection(): ClientInterface
-    {
-        return (new RedisHandler())->getConnection();
-    }
-
 
 }

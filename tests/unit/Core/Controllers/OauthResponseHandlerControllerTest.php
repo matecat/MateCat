@@ -2,6 +2,8 @@
 
 namespace Matecat\Core\Controllers;
 
+use Utils\Session\ArraySessionStore;
+
 use Controller\Exceptions\RenderTerminatedException;
 use Controller\Views\OauthResponseHandlerController;
 use Klein\Request;
@@ -34,7 +36,10 @@ class OauthResponseHandlerControllerTestController extends OauthResponseHandlerC
 
     public function __construct()
     {
-        // Intentionally empty — skip Klein/PHPTAL bootstrap
+        // Intentionally empty — skip Klein/PHPTAL bootstrap. The store still has to be provided:
+        // skipping the constructor also skips identifyUser(), which is what normally sets it, and
+        // the real _processSuccessfulOAuth() below reaches session state through RedeemableProject.
+        $this->sessionStore = new ArraySessionStore();
     }
 
     public function render(?int $code = null): never
@@ -79,7 +84,10 @@ class OauthResponseHandlerControllerRealProcessTestController extends OauthRespo
 
     public function __construct()
     {
-        // Intentionally empty — skip Klein/PHPTAL bootstrap
+        // Intentionally empty — skip Klein/PHPTAL bootstrap. The store still has to be provided:
+        // skipping the constructor also skips identifyUser(), which is what normally sets it, and
+        // the real _processSuccessfulOAuth() below reaches session state through RedeemableProject.
+        $this->sessionStore = new ArraySessionStore();
     }
 
     public function render(?int $code = null): never
@@ -123,7 +131,10 @@ class OauthResponseHandlerControllerRealMethodTestController extends OauthRespon
 
     public function __construct()
     {
-        // Intentionally empty — skip Klein/PHPTAL bootstrap
+        // Intentionally empty — skip Klein/PHPTAL bootstrap. The store still has to be provided:
+        // skipping the constructor also skips identifyUser(), which is what normally sets it, and
+        // the real _processSuccessfulOAuth() below reaches session state through RedeemableProject.
+        $this->sessionStore = new ArraySessionStore();
     }
 
     public function render(?int $code = null): never
@@ -152,19 +163,22 @@ class OauthResponseHandlerControllerRealMethodTestController extends OauthRespon
 class OauthResponseHandlerControllerTest extends AbstractTest
 {
     private string $savedXsrftoken;
+    private ArraySessionStore $sessionStore;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->savedXsrftoken = AppConfig::$XSRF_TOKEN;
         AppConfig::$XSRF_TOKEN = 'Xsrf-Token';
-        $_SESSION = [];
+
+        // Replaces resetting $_SESSION in both setUp and tearDown: a store built here cannot outlive
+        // the test case, so there is nothing to clear.
+        $this->sessionStore = new ArraySessionStore();
     }
 
     protected function tearDown(): void
     {
         AppConfig::$XSRF_TOKEN = $this->savedXsrftoken;
-        $_SESSION = [];
 
         // Reset singletons that may have been mocked by tests in this class.
         // OauthTokenEncryption::$instance and OauthClient::$instance are
@@ -193,7 +207,7 @@ class OauthResponseHandlerControllerTest extends AbstractTest
             'provider' => 'google',
             'state' => '',
         ]);
-        $_SESSION['google-Xsrf-Token'] = 'valid_state';
+        $this->sessionStore->set('google-Xsrf-Token', 'valid_state');
 
         try {
             $controller->renderView();
@@ -215,7 +229,7 @@ class OauthResponseHandlerControllerTest extends AbstractTest
             'provider' => 'google',
             'state' => 'client_state',
         ]);
-        $_SESSION['google-Xsrf-Token'] = 'different_state';
+        $this->sessionStore->set('google-Xsrf-Token', 'different_state');
 
         try {
             $controller->renderView();
@@ -237,7 +251,7 @@ class OauthResponseHandlerControllerTest extends AbstractTest
             'provider' => 'google',
             'state' => 'client_state',
         ]);
-        $_SESSION['google-Xsrf-Token'] = 'wrong_value';
+        $this->sessionStore->set('google-Xsrf-Token', 'wrong_value');
 
         try {
             $controller->renderView();
@@ -259,7 +273,7 @@ class OauthResponseHandlerControllerTest extends AbstractTest
             'provider' => 'google',
             'state' => 'valid_state',
         ]);
-        $_SESSION['google-Xsrf-Token'] = 'valid_state';
+        $this->sessionStore->set('google-Xsrf-Token', 'valid_state');
 
         try {
             $controller->renderView();
@@ -282,7 +296,7 @@ class OauthResponseHandlerControllerTest extends AbstractTest
             'state' => 'valid_state',
             'code' => 'auth_code_123',
         ]);
-        $_SESSION['google-Xsrf-Token'] = 'valid_state';
+        $this->sessionStore->set('google-Xsrf-Token', 'valid_state');
 
         try {
             $controller->renderView();
@@ -306,7 +320,7 @@ class OauthResponseHandlerControllerTest extends AbstractTest
             'state' => 'valid_state',
             'code' => 'auth_code_123',
         ]);
-        $_SESSION['-Xsrf-Token'] = 'valid_state';
+        $this->sessionStore->set('-Xsrf-Token', 'valid_state');
 
         try {
             $controller->renderView();
@@ -327,12 +341,13 @@ class OauthResponseHandlerControllerTest extends AbstractTest
     public function processSuccessfulOAuth_runs_with_mocked_db(): void
     {
         $controller = new OauthResponseHandlerControllerRealProcessTestController();
+        $this->injectSessionStore($controller, $this->sessionStore);
         $this->setRequestParams($controller, [
             'provider' => 'google',
             'state' => 'valid_state',
             'code' => 'auth_code_123',
         ]);
-        $_SESSION['google-Xsrf-Token'] = 'valid_state';
+        $this->sessionStore->set('google-Xsrf-Token', 'valid_state');
 
         // Inject database mock via reflection
         $ref = new ReflectionClass(\Controller\Abstracts\KleinController::class);
@@ -386,6 +401,7 @@ class OauthResponseHandlerControllerTest extends AbstractTest
     public function initDependencies_sets_view_with_wanted_url(): void
     {
         $controller = new OauthResponseHandlerControllerRealMethodTestController();
+        $this->injectSessionStore($controller, $this->sessionStore);
         $ctrlRef = new ReflectionClass(OauthResponseHandlerController::class);
 
         // isLoggedIn → userIsLogged
@@ -404,7 +420,7 @@ class OauthResponseHandlerControllerTest extends AbstractTest
         $userProp->setAccessible(true);
         $userProp->setValue($controller, new UserStruct());
 
-        $_SESSION['wanted_url'] = '/translate/123';
+        $this->sessionStore->set('wanted_url', '/translate/123');
 
         $method = $ctrlRef->getMethod('initDependencies');
         $method->setAccessible(true);
@@ -449,6 +465,7 @@ class OauthResponseHandlerControllerTest extends AbstractTest
         $instanceProp->setValue(null, $mockClient);
 
         $controller = new OauthResponseHandlerControllerRealMethodTestController();
+        $this->injectSessionStore($controller, $this->sessionStore);
         $method = (new ReflectionClass(OauthResponseHandlerController::class))
             ->getMethod('_initRemoteUser');
         $method->setAccessible(true);
@@ -467,12 +484,13 @@ class OauthResponseHandlerControllerTest extends AbstractTest
     public function initRemoteUser_catch_block_renders_error_when_oauth_fails(): void
     {
         $controller = new OauthResponseHandlerControllerRealMethodTestController();
+        $this->injectSessionStore($controller, $this->sessionStore);
         $this->setRequestParams($controller, [
             'provider' => 'test',
             'state' => 'valid_state',
             'code' => 'auth_code',
         ]);
-        $_SESSION['test-Xsrf-Token'] = 'valid_state';
+        $this->sessionStore->set('test-Xsrf-Token', 'valid_state');
 
         try {
             $controller->renderView();
@@ -490,6 +508,10 @@ class OauthResponseHandlerControllerTest extends AbstractTest
     {
         $controller = new OauthResponseHandlerControllerTestController();
         $this->setRequestParams($controller, []);
+
+        // Every stub in this class shares the one store, so a test can seed the provider's state token
+        // before calling renderView() and the controller reads back the same value.
+        $this->injectSessionStore($controller, $this->sessionStore);
 
         return $controller;
     }

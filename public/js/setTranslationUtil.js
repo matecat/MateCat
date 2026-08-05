@@ -88,7 +88,7 @@ export const segmentTranslation = (
       {
         successCallback: proceedWithTranslation,
       },
-      'Confirm fuzzy match',
+      'Confirm unedited fuzzy match?',
     )
     return
   }

@@ -45,7 +45,7 @@ class OauthResponseHandlerController extends BaseKleinViewController
             'error' => ['filter' => FILTER_SANITIZE_SPECIAL_CHARS]
         ]);
 
-        if (empty($params['state']) || $_SESSION[$params['provider'] . '-' . AppConfig::$XSRF_TOKEN] !== $params['state']) {
+        if (empty($params['state']) || $this->sessionStore()->get($params['provider'] . '-' . AppConfig::$XSRF_TOKEN) !== $params['state']) {
             $this->render(401);
         }
 
@@ -62,7 +62,7 @@ class OauthResponseHandlerController extends BaseKleinViewController
      */
     protected function initDependencies(): void
     {
-        $this->setView('oauth_response_handler.html', ['wanted_url' => $_SESSION['wanted_url'] ?? null]); //https://dev.matecat.com/translate/205-txt/en-GB-it-IT/25-8a4ee829fb52
+        $this->setView('oauth_response_handler.html', ['wanted_url' => $this->sessionStore()->get('wanted_url')]); //https://dev.matecat.com/translate/205-txt/en-GB-it-IT/25-8a4ee829fb52
     }
 
     /**
@@ -83,7 +83,7 @@ class OauthResponseHandlerController extends BaseKleinViewController
         $this->_initRemoteUser($code, $provider);
 
         $model = new OAuthSignInModel(
-            $_SESSION,
+            $this->sessionStore(),
             $this->remoteUser->email,
             $this->remoteUser->name,
             $this->remoteUser->lastName,

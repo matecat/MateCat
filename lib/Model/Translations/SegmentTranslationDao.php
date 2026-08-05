@@ -11,8 +11,8 @@ use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
+use Model\Propagation\PropagationResult;
 use Model\Propagation\PropagationTotalStruct;
-use Model\Search\ReplaceEventStruct;
 use PDO;
 use PDOException;
 use ReflectionException;
@@ -569,7 +569,7 @@ class SegmentTranslationDao extends AbstractDao
      * @param ProjectStruct $project
      * @param bool $execute_update
      *
-     * @return array<string, mixed>
+     * @return PropagationResult
      * @throws Exception
      */
     public function propagateTranslation(
@@ -578,7 +578,7 @@ class SegmentTranslationDao extends AbstractDao
         int $_idSegment,
         ProjectStruct $project,
         bool $execute_update = true
-    ): array {
+    ): PropagationResult {
         $wordCountType = (new MetadataDao($this->database))->setCacheTTL(3600)->getValue((int) $project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)
             ?? ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value;
         if ($wordCountType == ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {
@@ -769,45 +769,6 @@ class SegmentTranslationDao extends AbstractDao
         $stmt->execute(array_merge([$id_job], $estimation_seg_ids));
 
         return $stmt->fetchAll();
-    }
-
-    /**
-     * @param array<int, ReplaceEventStruct> $events
-     *
-     * @return int
-     * @throws PDOException
-     */
-    public function rebuildFromReplaceEvents(array $events): int
-    {
-        $conn = $this->database->getConnection();
-        $affected_rows = 0;
-
-        $conn->beginTransaction();
-
-        /** @var ReplaceEventStruct $result */
-        foreach ($events as $result) {
-            try {
-                $query = "UPDATE segment_translations SET translation = :translation WHERE id_job=:id_job AND id_segment=:id_segment";
-                $stmt = $conn->prepare($query);
-
-                $params = [
-                    ':id_job' => $result->id_job,
-                    ':id_segment' => $result->id_segment,
-                    ':translation' => $result->translation_after_replacement
-                ];
-
-                $stmt->execute($params);
-
-                $affected_rows++;
-            } catch (Exception) {
-                $conn->rollBack();
-                $affected_rows = 0;
-            }
-        }
-
-        $conn->commit();
-
-        return $affected_rows;
     }
 
     /**

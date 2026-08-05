@@ -160,12 +160,12 @@ class TranslationEventsHandlerTest extends AbstractTest
         $event = $this->makeTranslationEvent(
             wanted: $this->makeTranslation(TranslationStatus::STATUS_TRANSLATED, 500),
         );
-        $event->setPropagationSource(false);
+        $event->setShouldIncreaseTte(false);
 
         $handler->prepareEventStruct($event);
 
         $struct = $event->getTranslationEventStruct();
-        $this->assertFalse(isset($struct->time_to_edit));
+        $this->assertEquals(0, $struct->time_to_edit);
     }
 
     #[Test]
@@ -195,18 +195,23 @@ class TranslationEventsHandlerTest extends AbstractTest
     }
 
     #[Test]
-    public function prepareEventStructThrowsOnTranslatedFromRevision(): void
+    public function prepareEventStructAllowsTranslatedFromRevision(): void
     {
+        // Guard 2 ("Setting translated state from revision is not allowed") was removed by design
+        // (CWE-863 remediation): a TRANSLATED status coming from a revision page is now allowed and
+        // must NOT throw. Only the symmetric guard 1 (revised-from-translate) remains.
         $handler = $this->makeHandler();
         $event = $this->makeTranslationEvent(
             wanted: $this->makeTranslation(TranslationStatus::STATUS_TRANSLATED),
             sourcePage: SourcePages::SOURCE_PAGE_REVISION,
         );
 
-        $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('Setting translated state from revision is not allowed.');
-
         $handler->prepareEventStruct($event);
+
+        $this->assertTrue($event->isPrepared());
+        $struct = $event->getTranslationEventStruct();
+        $this->assertSame(TranslationStatus::STATUS_TRANSLATED, $struct->status);
+        $this->assertSame(SourcePages::SOURCE_PAGE_REVISION, $struct->source_page);
     }
 
     #[Test]
@@ -238,9 +243,11 @@ class TranslationEventsHandlerTest extends AbstractTest
         $dao = $this->createMock(TranslationEventDao::class);
         $dao->expects($this->once())
             ->method('insertStruct')
-            ->with($this->callback(function (TranslationEventStruct $struct) {
-                return $struct->final_revision === 0;
-            }))
+            ->with(
+                $this->callback(function (TranslationEventStruct $struct) {
+                    return $struct->final_revision === 0;
+                })
+            )
             ->willReturn(1);
 
         $handler = $this->makeHandler($dao);
@@ -260,9 +267,11 @@ class TranslationEventsHandlerTest extends AbstractTest
         $dao = $this->createMock(TranslationEventDao::class);
         $dao->expects($this->once())
             ->method('insertStruct')
-            ->with($this->callback(function (TranslationEventStruct $struct) {
-                return $struct->final_revision === 1;
-            }))
+            ->with(
+                $this->callback(function (TranslationEventStruct $struct) {
+                    return $struct->final_revision === 1;
+                })
+            )
             ->willReturn(1);
 
         $handler = $this->makeHandler($dao);
@@ -282,9 +291,11 @@ class TranslationEventsHandlerTest extends AbstractTest
         $dao = $this->createMock(TranslationEventDao::class);
         $dao->expects($this->once())
             ->method('insertStruct')
-            ->with($this->callback(function (TranslationEventStruct $struct) {
-                return $struct->final_revision === 0;
-            }))
+            ->with(
+                $this->callback(function (TranslationEventStruct $struct) {
+                    return $struct->final_revision === 0;
+                })
+            )
             ->willReturn(1);
 
         $handler = $this->makeHandler($dao);

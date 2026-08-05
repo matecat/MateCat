@@ -4,13 +4,14 @@ import React, {
   useImperativeHandle,
   useState,
   forwardRef,
+  createRef,
 } from 'react'
 import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import Cookies from 'js-cookie'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
-import ApplicationStore from '../../stores/ApplicationStore'
+import Tooltip from '../common/Tooltip'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import IconDown from '../../../img/icons/IconDown'
 
@@ -143,15 +144,44 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
           </span>
         </li>
         <ul className="graysmall-details">
-          <li>{item.last_update_date}</li>
           <li className="graydesc">
+            Origin: <span className={'bold'}>{item.created_by}</span>
+          </li>
+          <li>{item.last_update_date}</li>
+          <Tooltip
+            content={
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <span>
+                  {item.target !== config.target_rfc ||
+                  item.source !== config.source_rfc
+                    ? 'Different language pair than the job'
+                    : 'Same language pair as the job'}
+                </span>
+              </div>
+            }
+          >
+            <li
+              ref={createRef()}
+              className={`percent ${
+                item.target !== config.target_rfc ||
+                item.source !== config.source_rfc
+                  ? 'per-yellow-variant'
+                  : 'per-green'
+              } `}
+            >
+                {item.source} {'>'} {item.target}
+            </li>
+          </Tooltip>
+          {/*<li className="graydesc">
             <span className="bold">
               {ApplicationStore.getLanguageNameFromLocale(item.target)}
             </span>
-          </li>
-          <li className="graydesc">
-            Source: <span className={'bold'}>{item.created_by}</span>
-          </li>
+          </li>*/}
         </ul>
       </ul>
     )

@@ -15,6 +15,7 @@ use Model\Translators\TranslatorsModel;
 use Model\Users\UserDao;
 use Model\WordCount\CounterModel;
 use Utils\Logger\MatecatLogger;
+use Utils\Session\SessionStore;
 use Utils\Shop\Cart;
 
 /**
@@ -54,12 +55,18 @@ class TestableJobSplitMergeService extends JobSplitMergeService
     private bool $ownerKeysThrows = false;
     private ?ProjectStruct $projectForCacheOverride = null;
 
+    /**
+     * $session defaults to null — no session, so getCart() yields null and the outsource-cart
+     * invalidations are skipped. That is the v2/v3 api-key shape, and the right default for the tests
+     * here, none of which exercise the cart. Tests that do care inject one with setCart().
+     */
     public function __construct(
-        IDatabase     $dbHandler,
-        FeatureSet    $features,
-        MatecatLogger $logger,
+        IDatabase      $dbHandler,
+        FeatureSet     $features,
+        MatecatLogger  $logger,
+        ?SessionStore  $session = null,
     ) {
-        parent::__construct($dbHandler, $features, $logger);
+        parent::__construct($dbHandler, $features, $logger, $session);
     }
 
     // ── JobDao ──
@@ -105,7 +112,7 @@ class TestableJobSplitMergeService extends JobSplitMergeService
         $this->cartOverride = $cart;
     }
 
-    protected function getCart(): Cart
+    protected function getCart(): ?Cart
     {
         return $this->cartOverride ?? parent::getCart();
     }

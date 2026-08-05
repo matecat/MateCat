@@ -152,7 +152,12 @@ export const DropdownMenu = ({
           className={[styles['dropdownmenu-item'], item.type && styles[item.type], item.selected && styles.selected].filter(Boolean).join(' ')}
           onMouseDown={preventBubbling}
           onClick={preventBubbling}
-          onSelect={item.onClick}
+          onSelect={(event) => {
+            // Radix closes the menu after a select unless the event is
+            // default-prevented: items toggling a state keep the menu open.
+            if (item.keepOpen) event.preventDefault()
+            item.onClick?.(event)
+          }}
           disabled={item.disabled}
           data-testid={item.testId}
           aria-label={item.tooltip}
@@ -214,6 +219,8 @@ const itemShape = {
   disabled: PropTypes.bool,
   testId: PropTypes.string,
   tooltip: PropTypes.string,
+  selected: PropTypes.bool,
+  keepOpen: PropTypes.bool,
 }
 const radioItemShape = {
   type: PropTypes.oneOf([...Object.values(DROPDOWN_MENU_ITEM_TYPE)]),

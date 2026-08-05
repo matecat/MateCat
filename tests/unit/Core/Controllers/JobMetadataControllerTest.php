@@ -3,6 +3,7 @@
 namespace Matecat\Core\Controllers;
 
 use Controller\API\App\JobMetadataController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Exception;
 use Klein\Request;
@@ -11,6 +12,7 @@ use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -35,6 +37,30 @@ class TestableJobMetadataController extends JobMetadataController
 
     protected function registerValidators(): void
     {
+    }
+}
+
+/**
+ * Keeps the real registerValidators(), because for this endpoint the authorization lives in the
+ * validator chain rather than in the action body.
+ */
+class ValidatingJobMetadataController extends JobMetadataController
+{
+    public function __construct()
+    {
+    }
+
+    protected function initDependencies(): void
+    {
+    }
+
+    public function runValidators(): void
+    {
+        // registerValidators() is normally called by the base constructor, which this double skips, so
+        // it has to be invoked here or the chain would be empty and every assertion would pass for the
+        // wrong reason.
+        $this->registerValidators();
+        $this->validateRequest();
     }
 }
 
@@ -109,6 +135,12 @@ class JobMetadataControllerTest extends AbstractTest
         $this->seedProject(self::BASE, $this->owner);
         $this->seedFile(self::BASE);
         $this->seedJob(self::BASE, $this->owner, self::JOB_PASSWORD);
+
+        // seedProject points the project at teamId(BASE); the team, the user and the membership row
+        // have to exist for the team authorization on this endpoint to be exercised for real.
+        $this->seedTeam(self::BASE);
+        $this->seedUser(self::BASE, $this->owner);
+        $this->seedMembership(self::BASE);
     }
 
     /**
@@ -420,5 +452,81 @@ class JobMetadataControllerTest extends AbstractTest
         $this->assertArrayHasKey('password', $result);
         $this->assertArrayHasKey('key', $result);
         $this->assertSame('tm_prioritization', $result['key']);
+    }
+
+    // ─── team authorization on the validator chain ────────────────────
+
+    /**
+     * A controller carrying the real validator chain, authenticated as $uid and addressing the seeded
+     * job with its correct password. Everything an ordinary share-link holder would have.
+     */
+    private function validatingController(int $uid): ValidatingJobMetadataController
+    {
+        $controller = new ValidatingJobMetadataController();
+        $ref = new ReflectionClass(JobMetadataController::class);
+
+        $user = new UserStruct();
+        $user->uid = $uid;
+        $user->email = $this->owner;
+
+        $ref->getProperty('database')->setValue($controller, obtainTestDatabase());
+        $ref->getProperty('request')->setValue($controller, new Request());
+        $ref->getProperty('response')->setValue($controller, new Response());
+        $ref->getProperty('user')->setValue($controller, $user);
+        $ref->getProperty('userIsLogged')->setValue($controller, true);
+        $ref->getProperty('params')->setValue($controller, [
+            'id_job' => (string)$this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ]);
+
+        return $controller;
+    }
+
+    #[Test]
+    public function validators_allow_a_member_of_the_project_team(): void
+    {
+        $this->validatingController($this->userId(self::BASE))->runValidators();
+
+        // Getting here means the chain resolved the job, read projects.id_team from it and matched the
+        // caller's membership.
+        $this->addToAssertionCount(1);
+    }
+
+    #[Test]
+    public function validators_reject_a_job_link_holder_outside_the_project_team(): void
+    {
+        // The job id and password are entirely valid: this is exactly what someone handed a share link
+        // possesses. It is not enough, because these settings change how the job behaves for everybody
+        // working on it, and the editor only offers them to the owning team.
+        $this->expectException(AuthorizationError::class);
+
+        $this->validatingController($this->userId(self::BASE) + 999999)->runValidators();
+    }
+
+    #[Test]
+    public function resolveTeamId_rejects_a_project_with_no_team(): void
+    {
+        // A dedicated project id inside the reserved block, never read by another test: findById caches
+        // for a day and offers no invalidation for that key, so mutating the shared project would be
+        // invisible here and the assertion would pass for the wrong reason.
+        $orphanProjectId = self::BASE + 900;
+        $this->seedConnection()->exec(
+            "INSERT IGNORE INTO projects (id, id_customer, password, name, create_date, status_analysis, id_team) "
+            . "VALUES ($orphanProjectId, '{$this->owner}', 'projpw', 'CtrlTestOrphan', NOW(), 'DONE', NULL)"
+        );
+
+        $chunk = new JobStruct();
+        $chunk->id = $this->jobId(self::BASE);
+        $chunk->id_project = $orphanProjectId;
+
+        try {
+            // Must deny rather than hand a null to a team lookup that is typed to take an int.
+            $this->expectException(AuthorizationError::class);
+
+            $m = $this->reflector->getMethod('resolveTeamId');
+            $m->invoke($this->controller, $chunk);
+        } finally {
+            $this->seedConnection()->exec("DELETE FROM projects WHERE id = $orphanProjectId");
+        }
     }
 }

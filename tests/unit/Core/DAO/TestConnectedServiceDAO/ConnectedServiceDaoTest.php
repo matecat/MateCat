@@ -43,6 +43,9 @@ class ConnectedServiceDaoTest extends AbstractTest
     public function updateOauthTokenUpdatesFieldsAndReturnsStruct(): void
     {
         $service = $this->createMock(ConnectedServiceStruct::class);
+        // uid is declared `public int` with no default, so a mock leaves it uninitialized. The
+        // update itself keys on id, but the profile-cache hook needs the owner.
+        $service->uid = 10;
         $service->expects($this->once())
             ->method('setEncryptedAccessToken')
             ->with('new-token');

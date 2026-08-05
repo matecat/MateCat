@@ -297,7 +297,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             new ChunkReviewDao($this->getDatabase()),
             new EntryDao($this->getDatabase()),
             new TranslationVersionDao($this->getDatabase()),
-            new ProjectDao($this->getDatabase())
+            new ProjectDao($this->getDatabase()),
+            $this->user
         );
     }
 

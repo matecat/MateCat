@@ -51,7 +51,11 @@ class TranslationEvent
      */
     protected TranslationEventStruct $translation_event_struct;
 
-    protected bool $_isPropagationSource = true;
+    protected bool $_shouldIncreaseTte = true;
+
+    protected bool $_isAPropagatedEvent = false;
+
+    protected bool $isAReplaceAllEvent = false;
 
     /**
      * @var JobStruct
@@ -94,7 +98,7 @@ class TranslationEvent
      * @param JobStruct|null $chunk
      * @param TranslationEventDao $translationEventDao
      * @param SegmentDao $segmentDao
-     *
+     * @param bool $isAReplaceAllEvent
      * @throws RuntimeException
      */
     public function __construct(
@@ -105,6 +109,7 @@ class TranslationEvent
         ?JobStruct $chunk,
         TranslationEventDao $translationEventDao,
         SegmentDao $segmentDao,
+        bool $isAReplaceAllEvent = false
     ) {
         $this->old_translation = $old_translation;
         $this->wanted_translation = $translation;
@@ -112,6 +117,7 @@ class TranslationEvent
         $this->source_page = $source_page_code;
         $this->translationEventDao = $translationEventDao;
         $this->segmentDao = $segmentDao;
+        $this->isAReplaceAllEvent = $isAReplaceAllEvent;
 
         if ($chunk !== null) {
             $this->chunk = $chunk;
@@ -347,9 +353,38 @@ class TranslationEvent
     /**
      * @return bool
      */
-    public function isPropagationSource(): bool
+    public function shouldIncreaseTte(): bool
     {
-        return $this->_isPropagationSource;
+        return $this->_shouldIncreaseTte;
+    }
+
+    /**
+     * A propagated event is one of the identical segments a translation was applied to, as opposed to the
+     * segment the user actually edited. It is not the same thing as a replace-all event: a replace-all has
+     * no originating segment at all, since it is applied to every matching segment in the job without one
+     * being open in the editor.
+     *
+     * Kept separate from {@see self::shouldIncreaseTte()} on purpose. Both are false for a propagated
+     * event, but a replace-all must not accrue time to edit — nobody typed it — while still being a change
+     * worth notifying about. One flag cannot say both.
+     *
+     * @return bool
+     */
+    public function isAPropagatedEvent(): bool
+    {
+        return $this->_isAPropagatedEvent;
+    }
+
+    /**
+     * Marks this event as one of a propagation's copies: it accrues no time to edit, and it must not raise
+     * a second notification for a change the originating segment already reported.
+     *
+     * @return void
+     */
+    public function markAsPropagated(): void
+    {
+        $this->_isAPropagatedEvent = true;
+        $this->_shouldIncreaseTte  = false;
     }
 
     /**
@@ -357,9 +392,9 @@ class TranslationEvent
      *
      * @return void
      */
-    public function setPropagationSource(bool $value): void
+    public function setShouldIncreaseTte(bool $value): void
     {
-        $this->_isPropagationSource = $value;
+        $this->_shouldIncreaseTte = $value;
     }
 
     /**
@@ -436,6 +471,14 @@ class TranslationEvent
         if (false === isset($this->issues_to_delete[$issue->id])) {
             $this->issues_to_delete[$issue->id] = $issue;
         }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAReplaceAllEvent(): bool
+    {
+        return $this->isAReplaceAllEvent;
     }
 
 }

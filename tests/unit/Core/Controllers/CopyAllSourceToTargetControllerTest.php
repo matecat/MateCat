@@ -3,14 +3,17 @@
 namespace Matecat\Core\Controllers;
 
 use Controller\API\App\CopyAllSourceToTargetController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
+use DomainException;
 use Exception;
-use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao;
 use Model\Users\UserStruct;
 use PDOException;
@@ -18,13 +21,13 @@ use PHPUnit\Event\NoPreviousThrowableException;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Exception as PHPUnitException;
-use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\InvalidArgumentException as PHPUnitInvalidArgumentException;
 use PHPUnit\Framework\MockObject\Exception as MockObjectException;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
 use TypeError;
+use Utils\Constants\SourcePages;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -98,6 +101,10 @@ class CopyAllSourceToTargetControllerTest extends AbstractTest
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+
+        // In production the ChunkPasswordValidator loads $this->chunk before copy() runs; the
+        // TestableController skips the validator chain, so seed the same chunk (translate source_page).
+        $this->seedChunk();
     }
 
     /**
@@ -140,6 +147,16 @@ class CopyAllSourceToTargetControllerTest extends AbstractTest
     }
 
     /**
+     * @throws ReflectionException
+     */
+    private function seedChunk(): void
+    {
+        $chunk = (new JobDao(obtainTestDatabase()))->getByIdAndPassword($this->jobId(self::BASE), self::JOB_PASSWORD);
+        $chunk->setSourcePage(SourcePages::SOURCE_PAGE_TRANSLATE);
+        $this->setProp('chunk', $chunk);
+    }
+
+    /**
      * @param array<string, string> $params
      *
      * @throws ReflectionException
@@ -149,16 +166,6 @@ class CopyAllSourceToTargetControllerTest extends AbstractTest
         $serverParams       = ['REQUEST_URI' => '/api/app/copyAllSource2Target', 'REQUEST_METHOD' => 'POST'];
         $this->requestStub  = new Request($params, [], [], $serverParams);
         $this->setProp('request', $this->requestStub);
-    }
-
-    /**
-     * @param array<int, mixed> $args
-     *
-     * @throws ReflectionException
-     */
-    private function invokePrivate(string $method, array $args = []): mixed
-    {
-        return $this->reflector->getMethod($method)->invoke($this->controller, ...$args);
     }
 
     /**
@@ -195,76 +202,6 @@ class CopyAllSourceToTargetControllerTest extends AbstractTest
         (new MetadataDao(obtainTestDatabase()))->set($this->projectId(self::BASE), 'features', 'translation_versions');
     }
 
-    // ─── validateTheRequest ───
-
-    /**
-     * @throws ReflectionException
-     */
-    #[Test]
-    public function validateTheRequest_throws_when_id_job_is_empty(): void
-    {
-        $this->setRequestParams(['pass' => self::JOB_PASSWORD]);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-1);
-
-        $this->invokePrivate('validateTheRequest');
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    #[Test]
-    public function validateTheRequest_throws_when_pass_is_empty(): void
-    {
-        $this->setRequestParams(['id_job' => (string) $this->jobId(self::BASE)]);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-2);
-
-        $this->invokePrivate('validateTheRequest');
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    #[Test]
-    public function validateTheRequest_throws_when_job_password_couple_not_found(): void
-    {
-        $this->setRequestParams([
-            'id_job' => (string) $this->jobId(self::BASE),
-            'pass'   => 'wrong_password_xyz',
-        ]);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-3);
-
-        $this->invokePrivate('validateTheRequest');
-    }
-
-    /**
-     * @throws ReflectionException
-     * @throws PHPUnitException
-     * @throws ExpectationFailedException
-     */
-    #[Test]
-    public function validateTheRequest_returns_expected_structure_for_valid_couple(): void
-    {
-        $this->setRequestParams([
-            'id_job'          => (string) $this->jobId(self::BASE),
-            'pass'            => self::JOB_PASSWORD,
-            'revision_number' => '1',
-        ]);
-
-        $result = $this->invokePrivate('validateTheRequest');
-
-        $this->assertIsArray($result);
-        $this->assertSame((string) $this->jobId(self::BASE), $result['id_job']);
-        $this->assertSame(self::JOB_PASSWORD, $result['pass']);
-        $this->assertSame('1', $result['revision_number']);
-        $this->assertSame($this->jobId(self::BASE), (int) $result['job_data']->id);
-    }
-
     // ─── copy() public action ───
 
     /**
@@ -275,12 +212,6 @@ class CopyAllSourceToTargetControllerTest extends AbstractTest
     #[Test]
     public function copy_promotes_new_segment_and_reports_modified_count(): void
     {
-        $this->setRequestParams([
-            'id_job'          => (string) $this->jobId(self::BASE),
-            'pass'            => self::JOB_PASSWORD,
-            'revision_number' => '1',
-        ]);
-
         $this->responseMock->expects($this->once())
             ->method('json')
             ->with($this->callback(function (array $data): bool {
@@ -309,12 +240,6 @@ class CopyAllSourceToTargetControllerTest extends AbstractTest
             . $this->jobId(self::BASE)
         );
 
-        $this->setRequestParams([
-            'id_job'          => (string) $this->jobId(self::BASE),
-            'pass'            => self::JOB_PASSWORD,
-            'revision_number' => '1',
-        ]);
-
         $this->responseMock->expects($this->once())
             ->method('json')
             ->with($this->callback(function (array $data): bool {
@@ -336,12 +261,6 @@ class CopyAllSourceToTargetControllerTest extends AbstractTest
     {
         $this->enableTranslationVersionsFeature();
 
-        $this->setRequestParams([
-            'id_job'          => (string) $this->jobId(self::BASE),
-            'pass'            => self::JOB_PASSWORD,
-            'revision_number' => '1',
-        ]);
-
         $this->responseMock->expects($this->once())
             ->method('json')
             ->with($this->callback(function (array $data): bool {
@@ -353,45 +272,103 @@ class CopyAllSourceToTargetControllerTest extends AbstractTest
         $this->controller->copy();
     }
 
+    // ─── registerValidators ───
+
     /**
      * @throws ReflectionException
      * @throws PHPUnitException
      */
     #[Test]
-    public function registerValidators_appends_the_login_validator(): void
+    public function registerValidators_appends_login_and_chunk_password_validators(): void
     {
         $controller = $this->reflector->newInstanceWithoutConstructor();
 
-        $reqProp = $this->reflector->getProperty('request');
-        $reqProp->setValue($controller, new Request());
+        $this->reflector->getProperty('request')->setValue($controller, new Request());
 
-        $method = $this->reflector->getMethod('registerValidators');
-        $method->invoke($controller);
+        $this->reflector->getMethod('registerValidators')->invoke($controller);
 
         /** @var array<int, object> $validators */
         $validators = $this->reflector->getProperty('validators')->getValue($controller);
 
-        $this->assertCount(1, $validators);
+        $this->assertCount(2, $validators);
         $this->assertInstanceOf(LoginValidator::class, $validators[0]);
+        $this->assertInstanceOf(ChunkPasswordValidator::class, $validators[1]);
+    }
+
+    /**
+     * The ChunkPasswordValidator onSuccess callback rejects a chunk opened with a REVIEW password:
+     * copying source→target is not allowed during the revision phase.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function registerValidators_onSuccess_rejects_review_chunk(): void
+    {
+        $chunkValidator = $this->buildChunkPasswordValidatorWithChunk($isReview = true);
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('The source cannot be fully copied to the target while in the revision phase.');
+
+        $this->executeValidatorCallbacks($chunkValidator);
+    }
+
+    /**
+     * For a translate-password chunk the same callback stores the chunk on the controller and does
+     * not throw.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function registerValidators_onSuccess_stores_chunk_for_translate_password(): void
+    {
+        $chunkValidator = $this->buildChunkPasswordValidatorWithChunk($isReview = false);
+
+        $this->executeValidatorCallbacks($chunkValidator);
+
+        $chunk = $this->reflector->getProperty('chunk')->getValue($this->registeredController);
+        $this->assertInstanceOf(JobStruct::class, $chunk);
+        $this->assertFalse($chunk->isReview());
+    }
+
+    private ?CopyAllSourceToTargetController $registeredController = null;
+
+    /**
+     * Runs the real registerValidators() on a fresh controller and returns its ChunkPasswordValidator
+     * with a stubbed chunk (review or translate), so the onSuccess closure can be exercised in isolation.
+     *
+     * @throws ReflectionException
+     */
+    private function buildChunkPasswordValidatorWithChunk(bool $isReview): ChunkPasswordValidator
+    {
+        $controller = $this->reflector->newInstanceWithoutConstructor();
+        $this->reflector->getProperty('request')->setValue($controller, new Request());
+        $this->reflector->getMethod('registerValidators')->invoke($controller);
+        $this->registeredController = $controller;
+
+        /** @var array<int, object> $validators */
+        $validators     = $this->reflector->getProperty('validators')->getValue($controller);
+        $chunkValidator = $validators[1];
+        $this->assertInstanceOf(ChunkPasswordValidator::class, $chunkValidator);
+
+        $chunk           = new JobStruct();
+        $chunk->id       = $this->jobId(self::BASE);
+        $chunk->password = self::JOB_PASSWORD;
+        $chunk->setIsReview($isReview);
+
+        (new ReflectionClass(ChunkPasswordValidator::class))
+            ->getProperty('chunk')
+            ->setValue($chunkValidator, $chunk);
+
+        return $chunkValidator;
     }
 
     /**
      * @throws ReflectionException
-     * @throws Exception
-     * @throws TypeError
      */
-    #[Test]
-    public function copy_throws_when_job_not_found(): void
+    private function executeValidatorCallbacks(ChunkPasswordValidator $validator): void
     {
-        $this->setRequestParams([
-            'id_job'          => (string) $this->jobId(self::BASE),
-            'pass'            => 'definitely_wrong_pass',
-            'revision_number' => '1',
-        ]);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-3);
-
-        $this->controller->copy();
+        (new ReflectionClass(\Controller\API\Commons\Validators\Base::class))
+            ->getMethod('_executeCallbacks')
+            ->invoke($validator);
     }
 }

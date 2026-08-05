@@ -21,6 +21,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
 use Utils\Logger\MatecatLogger;
+use Utils\Session\ArraySessionStore;
 
 /**
  * Real-DB view-controller suite for {@see CattoolController} (Playbook §3).
@@ -49,6 +50,8 @@ class CattoolViewControllerTest extends AbstractTest
 
     private ReflectionClass $reflector;
     private TestableCattoolController $controller;
+    private ArraySessionStore $sessionStore;
+    private ?string $previousRequestUri = null;
     private Request $requestStub;
     private Response&MockObject $responseMock;
 
@@ -74,11 +77,21 @@ class CattoolViewControllerTest extends AbstractTest
         $this->controller = new TestableCattoolController();
         $this->reflector = new ReflectionClass(CattoolController::class);
 
+        // The render path reaches TimeLoggerTrait::logPageCall(), which reads $_SERVER['REQUEST_URI']
+        // directly rather than $this->request, so seeding the Request would not satisfy it. Unset
+        // under the CLI, hence the warning these tests hit once they get past the session store.
+        $this->previousRequestUri = $_SERVER['REQUEST_URI'] ?? null;
+        $_SERVER['REQUEST_URI']   = '/translate/test';
+
         $this->requestStub = new Request();
         $this->responseMock = $this->createMock(Response::class);
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
+
+        // Stateful view controller; the double skips the constructor that builds its store, and the
+        // view path reads flash messages out of it.
+        $this->sessionStore = $this->injectSessionStore($this->controller);
 
         $user = new UserStruct();
         $user->uid = $this->userId(self::BASE);
@@ -95,6 +108,12 @@ class CattoolViewControllerTest extends AbstractTest
 
     protected function tearDown(): void
     {
+        if ($this->previousRequestUri === null) {
+            unset($_SERVER['REQUEST_URI']);
+        } else {
+            $_SERVER['REQUEST_URI'] = $this->previousRequestUri;
+        }
+
         $this->cleanFragments(self::BASE);
         parent::tearDown();
     }

@@ -12,20 +12,19 @@ import SearchUtils from './searchUtils'
 import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
-import ConfirmMessageModal from '../../../modals/ConfirmMessageModal'
 import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
 import CommonUtils from '../../../../utils/commonUtils'
 import {
   REVISE_STEP_NUMBER,
-  SEGMENTS_STATUS,
 } from '../../../../constants/Constants'
 import {Select} from '../../../common/Select'
 import {segmentTranslation} from '../../../../setTranslationUtil'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
 import ChevronLeft from '../../../../../img/icons/ChevronLeft'
 import ChevronRight from '../../../../../img/icons/ChevronRight'
+import {MODAL_KEY} from '../../../../constants/ModalKeys'
 
 class Search extends React.Component {
   constructor(props) {
@@ -244,48 +243,12 @@ class Search extends React.Component {
   handleReplaceAllClick(event) {
     event.preventDefault()
     let props = {
-      modalName: 'confirmReplace',
-      text: 'Do you really want to replace this text in all search results?',
-      successText: 'Continue',
-      successCallback: () => {
-        SearchUtils.execReplaceAll(this.state.search)
-          .then(() => {
-            const currentId = SegmentStore.getCurrentSegmentId()
-            SegmentActions.removeAllSegments()
-            CatToolActions.onRender({
-              firstLoad: false,
-              segmentToOpen: currentId,
-            })
-          })
-          .catch((errors) => {
-            ModalsActions.showModalComponent(
-              AlertModal,
-              {
-                text: errors?.length
-                  ? errors[0].message
-                  : 'We got an error, please contact support',
-              },
-              'Replace All Alert',
-            )
-          })
-        ModalsActions.onCloseModal()
-        CatToolActions.storeSearchResults({
-          total: 0,
-          searchResults: [],
-          occurrencesList: [],
-          searchResultsDictionary: {},
-          featuredSearchResult: null,
-        })
-      },
-      cancelText: 'Cancel',
-      cancelCallback: function () {
-        ModalsActions.onCloseModal()
-      },
+      search: this.state.search,
     }
     ModalsActions.showModalComponent(
-      ConfirmMessageModal,
+      MODAL_KEY.REPLACE_ALL,
       props,
-      'Confirmation required',
+      'Replace text in all results',
     )
   }
 

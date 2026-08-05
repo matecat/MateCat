@@ -14,6 +14,25 @@ services:
                 - lib/View/templates/_APIDoc.php
                 - router.php
 
+    -
+        class: Matecat\PhpStan\Rules\NoDirectSessionSuperglobalRule
+        tags:
+            - phpstan.rules.rule
+        arguments:
+            allowedFiles:
+                # The adapter. This is the only entry that is meant to survive.
+                - lib/Utils/Session/PhpSessionStore.php
+                # The list is now empty of pending work: the adapter above is the single reader and
+                # writer of $_SESSION in every analysed path, which is the end state this rule was
+                # written to reach.
+                #
+                # plugins/aligner/lib/Features/Aligner.php used to be listed here and has been
+                # dropped as dead configuration, on two independent counts: `plugins/aligner` is in
+                # excludePaths below so the rule never analyses it, and the file no longer names the
+                # superglobal at all. The only $_SESSION left anywhere under plugins/aligner/lib is
+                # prose in a ConfigsController docblock, which is not a Variable node and so was
+                # never a violation.
+
 parameters:
     level: 8
     paths:
@@ -53,6 +72,11 @@ parameters:
             - 'Model\DataAccess\UnknownPropertyException'
             - 'Controller\Exceptions\RenderTerminatedException'
             - 'Controller\Exceptions\MissingDatabaseException'
+            # A stateless controller touching session state is a programming error, not a runtime
+            # condition, so it is deliberately an \Error. Declaring it checked would push a @throws
+            # onto every method that merely holds a SessionStore, which is the whole call graph —
+            # and callers must not be encouraged to catch it. Enforcement works by surfacing.
+            - 'Utils\Session\StatelessSessionViolation'
         check:
             # Report when code throws an exception that has no
             # matching @throws tag in the method's PHPDoc

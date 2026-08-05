@@ -99,7 +99,7 @@ class ConversionHandlerTest extends AbstractTest
 
         $filtersAdapter = $this->createStub(Filters::class);
         $filtersAdapter->method('sourceToXliff')->willReturn(
-            $filterResponse ?? ['successful' => 0, 'errorMessage' => 'Not configured'],
+            $filterResponse ?? ['successful' => false, 'errorMessage' => 'Not configured'],
         );
 
         $redisClient = $this->createStub(Client::class);
@@ -440,7 +440,7 @@ class ConversionHandlerTest extends AbstractTest
         $handler = $this->createHandler(
             fileName: 'test.pdf',
             ocrWarning: true,
-            filterResponse: ['successful' => 1, 'xliff' => '<xliff/>'],
+            filterResponse: ['successful' => true, 'xliff' => '<xliff/>'],
         );
 
         $handler->processConversion();
@@ -463,7 +463,7 @@ class ConversionHandlerTest extends AbstractTest
         $this->createTempFile('test.docx', 'fake docx');
 
         $handler = $this->createHandler(
-            filterResponse: ['successful' => 1, 'xliff' => '<xliff/>'],
+            filterResponse: ['successful' => true, 'xliff' => '<xliff/>'],
         );
 
         $handler->processConversion();
@@ -489,7 +489,7 @@ class ConversionHandlerTest extends AbstractTest
         $pdfData = ['pages' => 5, 'words' => 1000];
         $handler = $this->createHandler(
             fileName: 'test.pdf',
-            filterResponse: ['successful' => 1, 'xliff' => '<xliff/>', 'pdfAnalysis' => $pdfData],
+            filterResponse: ['successful' => true, 'xliff' => '<xliff/>', 'pdfAnalysis' => $pdfData],
         );
 
         $handler->processConversion();
@@ -517,11 +517,11 @@ class ConversionHandlerTest extends AbstractTest
                 // Verify only the first language is passed
                 $this->assertEquals('it-IT', $target);
 
-                return ['successful' => 1, 'xliff' => '<xliff/>'];
+                return ['successful' => true, 'xliff' => '<xliff/>'];
             });
 
         $handler = $this->createHandler(
-            filterResponse: ['successful' => 1, 'xliff' => '<xliff/>'],
+            filterResponse: ['successful' => true, 'xliff' => '<xliff/>'],
         );
         $handler->setTargetLang('it-IT,fr-FR,de-DE');
 
@@ -544,7 +544,7 @@ class ConversionHandlerTest extends AbstractTest
         $this->createTempFile('test.docx', 'fake docx');
 
         $handler = $this->createHandler(
-            filterResponse: ['successful' => 0, 'errorMessage' => 'A plain error message'],
+            filterResponse: ['successful' => false, 'errorMessage' => 'A plain error message'],
         );
 
         $handler->processConversion();
@@ -570,7 +570,7 @@ class ConversionHandlerTest extends AbstractTest
         $fs->method('makeCachePackage')->willReturn(false);
 
         $handler = $this->createHandler(
-            filterResponse: ['successful' => 1, 'xliff' => '<xliff/>'],
+            filterResponse: ['successful' => true, 'xliff' => '<xliff/>'],
             fsStub: $fs,
         );
 
@@ -597,7 +597,7 @@ class ConversionHandlerTest extends AbstractTest
         $fs->method('makeCachePackage')->willThrowException(new FileSystemException('Disk full'));
 
         $handler = $this->createHandler(
-            filterResponse: ['successful' => 1, 'xliff' => '<xliff/>'],
+            filterResponse: ['successful' => true, 'xliff' => '<xliff/>'],
             fsStub: $fs,
         );
 
@@ -624,7 +624,7 @@ class ConversionHandlerTest extends AbstractTest
         $fs->method('makeCachePackage')->willThrowException(new Exception('S3 timeout'));
 
         $handler = $this->createHandler(
-            filterResponse: ['successful' => 1, 'xliff' => '<xliff/>'],
+            filterResponse: ['successful' => true, 'xliff' => '<xliff/>'],
             fsStub: $fs,
         );
 
@@ -670,7 +670,7 @@ class ConversionHandlerTest extends AbstractTest
         $fs->expects($this->never())->method('linkSessionToCacheForOriginalFiles');
 
         $handler = $this->createHandler(
-            filterResponse: ['successful' => 1, 'xliff' => '<xliff/>'],
+            filterResponse: ['successful' => true, 'xliff' => '<xliff/>'],
             fsStub: $fs,
         );
 
@@ -704,7 +704,7 @@ class ConversionHandlerTest extends AbstractTest
             $this->createTempFile('test.docx', 'fake docx');
 
             $handler = $this->createHandler(
-                filterResponse: ['successful' => 0, 'errorMessage' => $input],
+                filterResponse: ['successful' => false, 'errorMessage' => $input],
             );
 
             $handler->processConversion();

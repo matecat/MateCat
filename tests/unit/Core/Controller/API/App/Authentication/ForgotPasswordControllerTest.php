@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Matecat\Core\Controller\API\App\Authentication;
 
+use Utils\Session\ArraySessionStore;
+use Utils\Session\SessionStore;
+
 use Controller\Abstracts\KleinController;
 use Controller\API\App\Authentication\ForgotPasswordController;
 use Controller\API\Commons\Exceptions\ValidationError;
@@ -49,12 +52,12 @@ class TestableForgotPasswordController extends ForgotPasswordController
         return parent::checkAndIncrementRateLimit($response, $identifier, $route, $maxRetries, $limiterService ?? $this->injectedRateLimiter);
     }
 
-    protected function createSignupModel(array $params, array &$session): SignupModel
+    protected function createSignupModel(array $params, SessionStore $session): SignupModel
     {
         return $this->mockSignupModel ?? parent::createSignupModel($params, $session);
     }
 
-    protected function createPasswordResetModel(array &$session, ?string $token = null): PasswordResetModel
+    protected function createPasswordResetModel(SessionStore $session, ?string $token = null): PasswordResetModel
     {
         return $this->mockPasswordResetModel ?? parent::createPasswordResetModel($session, $token);
     }
@@ -90,11 +93,11 @@ class ForgotPasswordControllerTest extends AbstractTest
     private Request|MockObject $request;
     private Response $response;
     private RateLimiterService $rateLimiter;
+    private ArraySessionStore $sessionStore;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $_SESSION = [];
 
         $this->request = $this->createStub(Request::class);
         $this->response = new Response();
@@ -102,6 +105,10 @@ class ForgotPasswordControllerTest extends AbstractTest
 
         $this->controller = new TestableForgotPasswordController();
         $this->controller->initWith($this->request, $this->response, $this->rateLimiter);
+
+        // The double skips the constructor that builds the store, so sessionStore() would return the
+        // one that refuses every operation. A fresh store per case also replaces resetting $_SESSION.
+        $this->sessionStore = $this->injectSessionStore($this->controller);
     }
 
     // ─── doForgotPassword (private, via reflection) ──────────────────
@@ -333,6 +340,70 @@ class ForgotPasswordControllerTest extends AbstractTest
 
         $this->assertTrue($this->controller->broadcastLogoutCalled);
         $this->assertSame(200, $this->controller->getResponse()->code());
+    }
+
+    #[Test]
+    public function setNewPassword_hands_the_password_to_the_model_unescaped(): void
+    {
+        $this->request->method('param')->willReturnCallback(function (string $key) {
+            return match ($key) {
+                'password' => 'Valid&Pass<word>1',
+                'password_confirmation' => 'Valid&Pass<word>1',
+                default => null,
+            };
+        });
+
+        $user = new UserStruct();
+        $user->uid = 1;
+        $user->email = 'test@example.com';
+
+        // The value that reaches resetPassword() is the value that gets hashed, so it has to be the
+        // one the user typed. Escaping it here would store a hash of a string the user can never type
+        // again at the login form once that form stops escaping too.
+        $resetModel = $this->createMock(PasswordResetModel::class);
+        $resetModel->expects($this->once())
+            ->method('resetPassword')
+            ->with('Valid&Pass<word>1');
+        $resetModel->method('getUser')->willReturn($user);
+
+        $this->controller->mockPasswordResetModel = $resetModel;
+
+        $this->controller->setNewPassword();
+
+        $this->assertSame(200, $this->controller->getResponse()->code());
+    }
+
+    #[Test]
+    public function setNewPassword_rejects_a_password_containing_a_control_character(): void
+    {
+        $this->request->method('param')->willReturnCallback(function (string $key) {
+            return match ($key) {
+                'password' => "Valid!Pass\tword1",
+                'password_confirmation' => "Valid!Pass\tword1",
+                default => null,
+            };
+        });
+
+        $user = new UserStruct();
+        $user->uid = 1;
+        $user->email = 'test@example.com';
+
+        $resetModel = $this->createStub(PasswordResetModel::class);
+        $resetModel->method('getUser')->willReturn($user);
+
+        $this->controller->mockPasswordResetModel = $resetModel;
+
+        // The message has to name the problem: the generic illegal-character wording leaves the user
+        // guessing which of their characters was refused.
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('control characters');
+
+        try {
+            $this->controller->setNewPassword();
+        } finally {
+            // Rejected before anything is written, so no session is torn down either.
+            $this->assertFalse($this->controller->broadcastLogoutCalled);
+        }
     }
 
     #[Test]

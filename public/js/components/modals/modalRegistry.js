@@ -11,6 +11,7 @@ import AlertModal from './AlertModal'
 import RevisionFeedbackModal from './RevisionFeedbackModal'
 import CopySourceModal from './CopySourceModal'
 import {UnlockAllSegmentsModal} from './UnlockAllSegmentsModal'
+import {ReplaceAllModal} from './ReplaceAllModal'
 
 const modalRegistry = {
   [MODAL_KEY.CONFIRM_MESSAGE]: ConfirmMessageModal,
@@ -25,6 +26,7 @@ const modalRegistry = {
   [MODAL_KEY.REVISION_FEEDBACK]: RevisionFeedbackModal,
   [MODAL_KEY.COPY_SOURCE]: CopySourceModal,
   [MODAL_KEY.UNLOCK_ALL_SEGMENTS]: UnlockAllSegmentsModal,
+  [MODAL_KEY.REPLACE_ALL]: ReplaceAllModal,
 }
 
 export const resolveModal = (componentOrKey) => {

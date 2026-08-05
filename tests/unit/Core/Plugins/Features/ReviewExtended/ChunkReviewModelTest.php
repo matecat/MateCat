@@ -16,6 +16,7 @@ use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Test;
 use Plugins\Features\ReviewExtended\ChunkReviewModel;
 use Utils\Registry\AppConfig;
+use Model\Users\UserStruct;
 
 /**
  * JobStruct subclass that overrides getProject() to avoid DB calls.
@@ -229,7 +230,7 @@ class ChunkReviewModelTest extends AbstractTest
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
         $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
-        $model->addPenaltyPoints(3.7, $this->nullLqaProject);
+        $model->addPenaltyPoints(3.7, $this->nullLqaProject, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
         $this->assertTrue(true);
     }
 
@@ -240,7 +241,7 @@ class ChunkReviewModelTest extends AbstractTest
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
         $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
-        $model->subtractPenaltyPoints(2.5, $this->nullLqaProject);
+        $model->subtractPenaltyPoints(2.5, $this->nullLqaProject, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
         $this->assertTrue(true);
     }
 
@@ -293,7 +294,7 @@ class ChunkReviewModelTest extends AbstractTest
         $this->stmtStub->method('fetchAll')->willReturn([$lqaModel]);
 
         $model = new ChunkReviewModel($chunkReviewStruct, $this->dbStub);
-        $model->updateChunkReviewCountersAndPassFail(0.5, 10, 500, $project);
+        $model->updateChunkReviewCountersAndPassFail(0.5, 10, 500, $project, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         $this->assertNotNull($capturedParams, 'execute() was never called with a penalty_points param');
         $this->assertSame(0.5, $capturedParams['penalty_points']);
@@ -314,7 +315,7 @@ class ChunkReviewModelTest extends AbstractTest
         // The dispatch call will go through FeatureSet::forProject which loads from DB.
         // With empty fetchAll, no features are loaded beyond mandatory ones, so
         // the dispatch will silently succeed (no listeners for ChunkReviewUpdatedEvent).
-        $model->updateChunkReviewCountersAndPassFail(1.0, 5, 100, $project);
+        $model->updateChunkReviewCountersAndPassFail(1.0, 5, 100, $project, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
         $this->assertTrue(true);
     }
 
@@ -331,7 +332,7 @@ class ChunkReviewModelTest extends AbstractTest
         $this->stmtStub->method('fetch')->willReturn([0 => null]);
 
         $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
-        $model->recountAndUpdatePassFailResult($this->nullLqaProject);
+        $model->recountAndUpdatePassFailResult($this->nullLqaProject, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         $this->assertTrue($this->chunkReviewStruct->is_pass);
     }
@@ -358,7 +359,7 @@ class ChunkReviewModelTest extends AbstractTest
         $project->id_qa_model = 1;
 
         $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
-        $model->recountAndUpdatePassFailResult($project);
+        $model->recountAndUpdatePassFailResult($project, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         $this->assertTrue($this->chunkReviewStruct->is_pass);
     }

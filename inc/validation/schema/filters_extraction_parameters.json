@@ -25,6 +25,14 @@
           "nullable": true,
           "default": false
         },
+        "inner_content_type": {
+          "type": ["null", "string"],
+          "enum": [
+            null,
+            "text/html"
+          ],
+          "nullable": true
+        },
         "translate_keys": {
           "type": "array",
           "nullable": true

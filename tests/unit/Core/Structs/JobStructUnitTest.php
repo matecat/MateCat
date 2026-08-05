@@ -61,7 +61,7 @@ class JobStructUnitTest extends AbstractTest
 
         $result = $struct->setIsReview(true);
 
-        $this->assertTrue($struct->getIsReview());
+        $this->assertTrue($struct->isReview());
         $this->assertSame($struct, $result);
     }
 
@@ -73,7 +73,7 @@ class JobStructUnitTest extends AbstractTest
 
         $struct->setIsReview(false);
 
-        $this->assertFalse($struct->getIsReview());
+        $this->assertFalse($struct->isReview());
     }
 
     #[Test]
@@ -81,7 +81,7 @@ class JobStructUnitTest extends AbstractTest
     {
         $struct = $this->createStruct();
 
-        $this->assertFalse($struct->getIsReview());
+        $this->assertFalse($struct->isReview());
     }
 
     #[Test]

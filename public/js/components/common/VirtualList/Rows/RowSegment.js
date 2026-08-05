@@ -8,6 +8,8 @@ import CatToolStore from '../../../../stores/CatToolStore'
 import ModalsActions from '../../../../actions/ModalsActions'
 import SegmentUtils from '../../../../utils/segmentUtils'
 
+const BLINK_ANIMATION_DURATION = 3600
+
 const LinkIcon = () => {
   return (
     <svg
@@ -93,8 +95,17 @@ RowSegment.propTypes = {
 
 export default RowSegment
 
-export const ProjectBar = ({segment, files, sideOpen, isSticky, listRef}) => {
+export const ProjectBar = ({
+  segment,
+  files,
+  sideOpen,
+  listRef,
+  isSticky,
+  isSegmentOpenedNotRendered,
+  previousOpenedFileIdRef,
+}) => {
   const [isFileChange, setIsFileChange] = useState(false)
+  const [isBlinkingState, setIsBlinkingState] = useState(false)
 
   const ref = useRef()
   const previousFileIdRef = useRef()
@@ -138,36 +149,31 @@ export const ProjectBar = ({segment, files, sideOpen, isSticky, listRef}) => {
 
   useEffect(() => {
     let tmOutReset
-    const stopFileChangeAnim = () => setIsFileChange(false)
+
+    const container = ref.current
     const filenameElement = ref.current.firstChild
     const wordcounterElement = ref.current.children[1]
-
     if (
       isSticky &&
       idFileSegment !== previousFileIdRef.current &&
       typeof previousFileIdRef.current === 'number'
     ) {
-      ref.current.style.animation = 'none'
+      container.style.animation = 'none'
       if (filenameElement) filenameElement.style.animation = 'none'
       if (wordcounterElement) wordcounterElement.style.animation = 'none'
 
       tmOutReset = setTimeout(() => {
-        ref.current.style.animation = ''
+        container.style.animation = ''
         if (filenameElement) filenameElement.style.animation = ''
         if (wordcounterElement) wordcounterElement.style.animation = ''
       }, 0)
 
-      filenameElement?.addEventListener('animationend', stopFileChangeAnim)
       setIsFileChange(true)
     }
 
     previousFileIdRef.current = idFileSegment
 
-    return () => {
-      clearTimeout(tmOutReset)
-      filenameElement?.removeEventListener('animationend', stopFileChangeAnim)
-      stopFileChangeAnim()
-    }
+    return () => clearTimeout(tmOutReset)
   }, [isSticky, idFileSegment])
 
   useEffect(() => {
@@ -179,7 +185,7 @@ export const ProjectBar = ({segment, files, sideOpen, isSticky, listRef}) => {
         if (newPaddingTop > 10)
           ref.current.style.paddingTop = `${newPaddingTop}px`
       } else {
-        ref.current.style.paddingTop = '14px'
+        ref.current.style.paddingTop = '10px'
       }
     }
 
@@ -193,6 +199,22 @@ export const ProjectBar = ({segment, files, sideOpen, isSticky, listRef}) => {
     return () => listRef?.removeEventListener('scroll', onScroll)
   }, [isSticky, listRef])
 
+  useEffect(() => {
+    let tmOutBlink
+
+    if (isSticky && typeof isSegmentOpenedNotRendered === 'symbol') {
+      if (isSegmentOpenedNotRendered.description === 'true') {
+        setIsBlinkingState(true)
+        tmOutBlink = setTimeout(
+          () => setIsBlinkingState(false),
+          BLINK_ANIMATION_DURATION,
+        )
+      }
+    }
+
+    return () => clearTimeout(tmOutBlink)
+  }, [isSticky, isSegmentOpenedNotRendered])
+
   const previousScrollTopRef = useRef(0)
   const isScrollingReverseRef = useRef(false)
   if (isSticky && listRef?.scrollTop !== previousScrollTopRef.current) {
@@ -201,14 +223,18 @@ export const ProjectBar = ({segment, files, sideOpen, isSticky, listRef}) => {
   }
   previousScrollTopRef.current = listRef?.scrollTop
 
+  if (isSticky) previousOpenedFileIdRef.current = currentSegment.id_file
+
   return (
     <div
       ref={ref}
       className={`projectbar ${isFileChange ? `sticky-project-bar-change-file-animation ${isScrollingReverseRef.current ? 'sticky-project-bar-change-file-animation-reverse' : ''}` : ''} ${classes}`}
+      onAnimationEnd={() => setIsFileChange(false)}
     >
-      {file ? (
+      {file && (
         <div
-          className={`projectbar-filename ${isFileChange ? 'sticky-project-bar-blink' : ''}`}
+          className={`projectbar-filename ${isBlinkingState ? 'project-bar-blink' : ''}`}
+          onAnimationEnd={() => setIsBlinkingState(false)}
         >
 
             {CommonUtils.getFileIcon(fileType[0])}
@@ -216,10 +242,10 @@ export const ProjectBar = ({segment, files, sideOpen, isSticky, listRef}) => {
                 {file.file_name}
             </span>
         </div>
-      ) : null}
+      )}
       {file && file.weighted_words > 0 ? (
         <div
-          className={`projectbar-wordcounter ${isFileChange ? 'sticky-project-bar-blink sticky-project-bar-blink-wordcounter' : ''}`}
+          className={`projectbar-wordcounter ${isBlinkingState ? 'project-bar-blink project-bar-blink-wordcounter' : ''}`}
         >
           <span>
             Payable Words: <strong>{file.weighted_words}</strong>

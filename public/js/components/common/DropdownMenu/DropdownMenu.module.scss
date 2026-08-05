@@ -61,20 +61,26 @@
     position: relative;
     padding-right: 40px;
   }
-  &.critical:not([data-disabled]) {
-    color: colors.$red500;
-
-    &:hover {
-      background-color: rgba(colors.$red600, 0.24);
-      color: colors.$red500;
-    }
-  }
   &:not([data-disabled]):hover,
   &[data-highlighted]:not([data-disabled]),
-  &:not([data-disabled]).selected,
   &[data-state='checked']:not([data-disabled]) {
     background-color: colors.$grey50 !important;
     color: colors.$blue900 !important;
+  }
+  &:not([data-disabled]).selected {
+    background-color: colors.$selectedBlueTransparent !important;
+    color: colors.$darkBlue !important;
+  }
+  // Declared after the generic hover/highlight rules, which use !important:
+  // without matching !important here a hovered critical item turns dark blue.
+  &.critical:not([data-disabled]) {
+    color: colors.$redDefault !important;
+
+    &:hover,
+    &[data-highlighted] {
+      background-color: rgba(colors.$redDefaultHover, 0.24) !important;
+      color: colors.$redDefault !important;
+    }
   }
   &[data-disabled],
   &[data-disabled]:hover {

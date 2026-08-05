@@ -71,4 +71,5 @@ class SearchQueryParamsStruct extends ShapelessConcreteStruct
      */
     public ?stdClass $exactMatch = null;
 
+    public bool $includeLocked = true;
 }

@@ -138,9 +138,9 @@ Do not add Co-Authored-By trailers to commit messages.
 
 Do not add any reference to AI or AI tooling anywhere — commit messages, PR titles/bodies, code,
 comments, or docs. This includes footers/signatures (`🤖 Generated with Claude Code`, `Co-Authored-By`
-AI trailers), "generated/assisted by" lines, and tool names. The ONLY exception: when the user
-explicitly requests it, place it solely in the section designated for that purpose and follow that
-section's rules (for example, the PR template's AI Disclosure section).
+AI trailers), "generated/assisted by" lines, and tool names.
+
+ONLY place references to AI it in the section designated for that purpose in the PR template's AI Disclosure section.
 
 Follow the `.github/PULL_REQUEST_TEMPLATE.md` AND the `.github/scripts/pr-readiness-check.js` when creating a Pull
 Request.
@@ -188,16 +188,41 @@ Workflow: list_collections → list_requests → run_collection.
 Do not use curl or direct HTTP calls when Bruno collections exist.
 Use `dev` environment for testing.
 
+<!-- code-review-graph MCP tools -->
 ## MCP Tools: code-review-graph
 
-**This project has a knowledge graph. Use code-review-graph MCP tools BEFORE Grep/Glob/Read to explore the codebase.** The graph is faster and gives structural context (callers, dependents, test coverage).
+**IMPORTANT: This project has a knowledge graph. ALWAYS use the
+code-review-graph MCP tools BEFORE using Grep/Glob/Read to explore
+the codebase.** The graph is faster, cheaper (fewer tokens), and gives
+you structural context (callers, dependents, test coverage) that file
+scanning cannot.
 
-| Tool                        | Use when                                            |
-|-----------------------------|-----------------------------------------------------|
-| `detect_changes`            | Reviewing code changes — risk-scored analysis       |
-| `get_review_context`        | Need source snippets for review — token-efficient   |
-| `get_impact_radius`         | Understanding blast radius of a change              |
-| `get_affected_flows`        | Finding which execution paths are impacted          |
-| `query_graph`               | Tracing callers, callees, imports, tests            |
-| `semantic_search_nodes`     | Finding functions/classes by name or keyword        |
-| `get_architecture_overview` | Understanding high-level codebase structure         |
+### When to use graph tools FIRST
+
+- **Exploring code**: `semantic_search_nodes_tool` or `query_graph_tool` instead of Grep
+- **Understanding impact**: `get_impact_radius_tool` instead of manually tracing imports
+- **Code review**: `detect_changes_tool` + `get_review_context_tool` instead of reading entire files
+- **Finding relationships**: `query_graph_tool` with callers_of/callees_of/imports_of/tests_for
+- **Architecture questions**: `get_architecture_overview_tool` + `list_communities_tool`
+
+Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
+
+### Key Tools
+
+| Tool | Use when |
+| ------ | ---------- |
+| `detect_changes_tool` | Reviewing code changes — gives risk-scored analysis |
+| `get_review_context_tool` | Need source snippets for review — token-efficient |
+| `get_impact_radius_tool` | Understanding blast radius of a change |
+| `get_affected_flows_tool` | Finding which execution paths are impacted |
+| `query_graph_tool` | Tracing callers, callees, imports, tests, dependencies |
+| `semantic_search_nodes_tool` | Finding functions/classes by name or keyword |
+| `get_architecture_overview_tool` | Understanding high-level codebase structure |
+| `refactor_tool` | Planning renames, finding dead code |
+
+### Workflow
+
+1. The graph auto-updates on file changes (via hooks).
+2. Use `detect_changes_tool` for code review.
+3. Use `get_affected_flows_tool` to understand impact.
+4. Use `query_graph_tool` pattern="tests_for" to check coverage.

@@ -9,6 +9,7 @@
 
 namespace Model\Users\Authentication;
 
+use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Exception;
 use Model\Users\UserDao;
@@ -23,11 +24,13 @@ class ChangePasswordModel
 
     private UserStruct $user;
     private UserDao $userDao;
+    private SessionTokenStoreHandler $tokenStore;
 
-    public function __construct(UserStruct $user, UserDao $userDao)
+    public function __construct(UserStruct $user, UserDao $userDao, SessionTokenStoreHandler $tokenStore)
     {
         $this->user = $user;
         $this->userDao = $userDao;
+        $this->tokenStore = $tokenStore;
     }
 
     /**
@@ -38,10 +41,14 @@ class ChangePasswordModel
      */
     public function changePassword(string $old_password, string $new_password): void
     {
-        $salt = $this->user->salt ?? throw new RuntimeException('User salt must be set');
-        $pass = $this->user->pass ?? throw new RuntimeException('User password must be set');
+        // An account created through an external provider has neither salt nor password, so there is
+        // no old password for this call to check. That is a rejected attempt rather than a broken row,
+        // and it has to be answered the same way a wrong password is.
+        if ($this->user->salt === null || $this->user->pass === null) {
+            throw new ValidationError("Invalid password");
+        }
 
-        if (!Utils::verifyPass($old_password, $salt, $pass)) {
+        if (!Utils::verifyPass($old_password, $this->user->salt, $this->user->pass)) {
             throw new ValidationError("Invalid password");
         }
 
@@ -49,10 +56,22 @@ class ChangePasswordModel
             throw new ValidationError("New password cannot be the same as your old password");
         }
 
-        $this->user->pass = Utils::encryptPass($new_password, $salt);
+        // Verification had to use the salt the stored hash was built with, but an empty one must not
+        // survive a rewrite: it leaves the global pepper as the only per-account variation. The
+        // password is being replaced anyway, so mint a real salt while we are here.
+        if ($this->user->salt === '') {
+            $this->user->salt = Utils::randomString(32);
+        }
+
+        $this->user->pass = Utils::encryptPass($new_password, $this->user->salt);
+
+        // Retire any reset link already issued for this account. A token stays valid for 30 minutes
+        // from the moment it was created, so without this a link sitting in the user's mailbox
+        // outlives the password change and can be used to set a third password.
+        $this->user->clearAuthToken();
 
         $fieldsToUpdate = [
-            'fields' => ['pass']
+            'fields' => ['salt', 'pass', 'confirmation_token', 'confirmation_token_created_at']
         ];
 
         // update email_confirmed_at only if it's null
@@ -63,7 +82,14 @@ class ChangePasswordModel
 
         $this->userDao->updateStruct($this->user, $fieldsToUpdate);
         $this->userDao->destroyCacheByEmail($this->user->email ?? throw new RuntimeException('User email must be set before cache invalidation'));
-        $this->userDao->destroyCacheByUid($this->user->uid ?? throw new RuntimeException('User uid must be set before cache invalidation'));
+
+        $uid = $this->user->uid ?? throw new RuntimeException('User uid must be set before cache invalidation');
+        $this->userDao->destroyCacheByUid($uid);
+
+        // Every other device is still holding a login cookie that the old password minted, so the
+        // change has to retire them. The acting device is logged out separately by the controller's
+        // broadcastLogout(), which only ever removes the cookie it was presented with.
+        $this->tokenStore->revokeAllLoginTokens($uid);
     }
 
 }

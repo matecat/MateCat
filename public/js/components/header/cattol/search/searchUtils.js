@@ -360,7 +360,7 @@ let SearchUtils = {
    * Executes the replace all for segments if all the params are ok
    * @returns {boolean}
    */
-  execReplaceAll: function (params) {
+  execReplaceAll: function (params, includeLocked) {
     // $('.search-display .numbers').text('No segments found');
     // this.applySearch();
 
@@ -429,6 +429,7 @@ let SearchUtils = {
       matchcase: p['match-case'],
       exactmatch: p['exact-match'],
       replace,
+      includeLocked,
     })
   },
 

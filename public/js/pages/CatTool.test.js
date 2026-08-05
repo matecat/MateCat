@@ -459,7 +459,7 @@ describe('CatTool', () => {
       expect(result.mandatoryIssues).toEqual(['r1', 'r2'])
     })
 
-    test('does not add mandatoryIssues when mandatory_issues is not an array', async () => {
+    test('defaults mandatoryIssues to r1/r2 when mandatory_issues is not an array', async () => {
       await act(async () => renderCatTool())
       await act(async () => {
         emitJobMetadata(makeJobMetadata(null))
@@ -467,9 +467,20 @@ describe('CatTool', () => {
 
       const updater = getLastTemplateUpdater()
       expect(updater).not.toBeNull()
-      // Empty prevTemplate: if mandatory_issues is null the key must not appear
       const result = updater({})
-      expect('mandatoryIssues' in result).toBe(false)
+      expect(result.mandatoryIssues).toEqual(['r1', 'r2'])
+    })
+
+    test('defaults mandatoryIssues to r1/r2 when mandatory_issues is undefined', async () => {
+      await act(async () => renderCatTool())
+      await act(async () => {
+        emitJobMetadata(makeJobMetadata(undefined))
+      })
+
+      const updater = getLastTemplateUpdater()
+      expect(updater).not.toBeNull()
+      const result = updater({})
+      expect(result.mandatoryIssues).toEqual(['r1', 'r2'])
     })
 
     test('spreads empty array when mandatory_issues is []', async () => {

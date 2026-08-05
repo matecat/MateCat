@@ -619,8 +619,11 @@ class ProjectTemplateDao extends AbstractDao
     public function remove(int $id, int $uid): int
     {
         $conn = $this->database->getConnection();
-        $stmt = $conn->prepare("DELETE FROM " . self::TABLE . " WHERE id = :id ");
-        $stmt->execute(['id' => $id]);
+        // The uid is the ownership boundary, so it belongs in the statement and not only in the cache
+        // keys below: ids are a global auto_increment sequence, and without it any authenticated user
+        // could delete another user's template by guessing one.
+        $stmt = $conn->prepare("DELETE FROM " . self::TABLE . " WHERE id = :id AND uid = :uid ");
+        $stmt->execute(['id' => $id, 'uid' => $uid]);
 
         $this->destroyFetchByIdCache($id, ProjectTemplateStruct::class);
         $this->destroyQueryByIdAndUserCache($conn, $id, $uid);

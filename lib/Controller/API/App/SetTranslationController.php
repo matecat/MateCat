@@ -33,6 +33,7 @@ use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
+use Model\Propagation\PropagationResult;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentDisabledService;
 use Model\Segments\SegmentMetadataDao;
@@ -47,6 +48,7 @@ use Model\WordCount\WordCountStruct;
 use PDOException;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationVersions;
+use Plugins\Features\TranslationVersions\StoreTranslationEventParams;
 use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 use ReflectionException;
 use RuntimeException;
@@ -301,7 +303,13 @@ class SetTranslationController extends AbstractStatefulKleinController
 
         // Warn (and persist a QA warning, like a tag order mismatch) when a fuzzy TM match
         // is confirmed verbatim, i.e. without any modification by the translator.
-        if ($this->isUnmodifiedFuzzyMatchConfirmation($new_translation)) {
+        if (QA::isUnmodifiedFuzzyMatchConfirmation(
+            $new_translation->status,
+            $new_translation->suggestion_source,
+            $new_translation->suggestion_match,
+            $new_translation->suggestion,
+            $new_translation->translation
+        )) {
             $check->addError(QA::ERR_FUZZY_UNCHANGED);
             $new_translation->serialized_errors_list = $check->getWarningsJSON();
             $new_translation->warning = $check->thereAreWarnings();
@@ -314,47 +322,6 @@ class SetTranslationController extends AbstractStatefulKleinController
     }
 
     /**
-     * Detects whether the confirmation is a fuzzy TM match accepted without any edit.
-     *
-     * The check is intentionally based on the persisted suggestion so that it also works
-     * when a segment is opened, left untouched, and confirmed later (even after being
-     * navigated away from and reopened already populated).
-     *
-     * @param SegmentTranslationStruct $newTranslation The translation being persisted
-     *
-     * @return bool True when a fuzzy TM match is being confirmed verbatim
-     */
-    private function isUnmodifiedFuzzyMatchConfirmation(SegmentTranslationStruct $newTranslation): bool
-    {
-        // Only when confirming, never for draft/new auto-saves.
-        if (!in_array($newTranslation->status, [
-            TranslationStatus::STATUS_TRANSLATED,
-            TranslationStatus::STATUS_APPROVED,
-            TranslationStatus::STATUS_APPROVED2,
-        ], true)) {
-            return false;
-        }
-
-        // Only TM suggestions are relevant (excludes MT and "no match").
-        if ($newTranslation->suggestion_source !== EngineConstants::TM) {
-            return false;
-        }
-
-        // Only fuzzy bands: exclude 100% exact and ICE (>= 100) matches and unknown values.
-        $match = (int)$newTranslation->suggestion_match;
-        if ($match <= 0 || $match >= 100) {
-            return false;
-        }
-
-        if (empty($newTranslation->suggestion)) {
-            return false;
-        }
-
-        // The translation was confirmed exactly as the suggestion (no edit performed).
-        return trim((string)$newTranslation->translation) === trim((string)$newTranslation->suggestion);
-    }
-
-    /**
      * Phase 7-15: Persist translation, handle propagation, splits, and version events.
      *
      * @param SegmentTranslationStruct $newTranslation The new translation struct
@@ -363,7 +330,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @param string $errJson Serialized QA warnings (or empty string)
      * @param QA $check The QA checker instance
      *
-     * @return array<string, mixed>
+     * @return PropagationResult
      * @throws Exception
      * @throws TypeError
      * @throws DivisionByZeroError
@@ -374,7 +341,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         string $translation,
         string $errJson,
         QA $check
-    ): array {
+    ): PropagationResult {
         /**
          * Update Time to Edit and
          *
@@ -422,11 +389,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             'logged_user' => $this->user
         ]));
 
-        $propagationTotal = [
-            'totals' => [],
-            'propagated_ids' => [],
-            'segments_for_propagation' => []
-        ];
+        $propagationTotal = PropagationResult::empty();
 
         if ($this->data['propagate'] && in_array($this->data['status'], [
                 TranslationStatus::STATUS_TRANSLATED,
@@ -473,16 +436,17 @@ class SetTranslationController extends AbstractStatefulKleinController
          * This is also the init handler of all R1/R2 handling and Qr score calculation by
          * by TranslationEventsHandler and BatchReviewProcessor
          */
-        $versionsHandler->storeTranslationEvent([
-            'translation' => $newTranslation,
-            'old_translation' => $oldTranslation,
-            'propagation' => $propagationTotal,
-            'chunk' => $this->chunk,
-            'user' => $this->user,
-            'source_page_code' => ReviewUtils::revisionNumberToSourcePage($this->data['revisionNumber']),
-            'features' => $this->featureSet,
-            'project' => $this->data['project']
-        ]);
+        $versionsHandler->storeTranslationEvent(new StoreTranslationEventParams(
+            $newTranslation,
+            $oldTranslation,
+            $propagationTotal,
+            $this->chunk,
+            $this->user,
+            ReviewUtils::revisionNumberToSourcePage($this->data['revisionNumber']),
+            $this->featureSet,
+            $this->data['project'],
+            isAReplaceAllEvent: false
+        ));
 
         return $propagationTotal;
     }
@@ -495,7 +459,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      *
      * @param SegmentTranslationStruct $newTranslation
      * @param SegmentTranslationStruct $oldTranslation
-     * @param array<string, mixed> $propagationTotal
+     * @param PropagationResult $propagationTotal
      * @param QA $check
      *
      * @return array<string, mixed>
@@ -511,7 +475,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     private function buildResult(
         SegmentTranslationStruct $newTranslation,
         SegmentTranslationStruct $oldTranslation,
-        array $propagationTotal,
+        PropagationResult $propagationTotal,
         QA $check
     ): array {
         $newTotals = WordCountStruct::loadFromJob($this->data['chunk']);
@@ -548,12 +512,12 @@ class SetTranslationController extends AbstractStatefulKleinController
         $this->getFeatureSet()->dispatch(new SetTranslationCommittedEvent([
             'translation' => $newTranslation,
             'old_translation' => $oldTranslation,
-            'propagated_ids' => $propagationTotal['segments_for_propagation']['propagated_ids'] ?? null,
+            'propagated_ids' => $propagationTotal->propagatedIds,
             'chunk' => $this->data['chunk'],
             'segment' => $this->data['segment'],
             'user' => $this->user,
             'source_page_code' => ReviewUtils::revisionNumberToSourcePage($this->data['revisionNumber'])
-        ]));
+        ], $this->user));
 
         return $result;
     }
@@ -564,7 +528,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      *
      * @param SegmentTranslationStruct $newTranslation
      * @param SegmentTranslationStruct $oldTranslation
-     * @param array<string, mixed> $propagationTotal
+     * @param PropagationResult $propagationTotal
      * @param array<string, mixed> $result Passed by reference — adds 'propagation' key
      *
      * @return void
@@ -580,7 +544,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     private function finalizeTranslation(
         SegmentTranslationStruct $newTranslation,
         SegmentTranslationStruct $oldTranslation,
-        array $propagationTotal,
+        PropagationResult $propagationTotal,
         array &$result
     ): void {
         //EVERY time a user changes a row in his job when the job is completed,

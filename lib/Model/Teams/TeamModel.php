@@ -22,6 +22,12 @@ use Utils\Redis\RedisHandler;
 class TeamModel
 {
 
+    /**
+     * Upper bound on the addresses a single invitation request may queue.
+     * Well above any real team roster, far below a usable mailing volume.
+     */
+    public const int MAX_MEMBER_EMAILS = 50;
+
     /** @var list<string> */
     protected array $member_emails = [];
 
@@ -68,8 +74,23 @@ class TeamModel
         return $this->teamDao->getDatabaseHandler();
     }
 
+    /**
+     * Every added address becomes an email MateCat sends on this user's behalf, so the
+     * number one request can queue is bounded. Nothing in the invitation flow limited it
+     * before, which let a single call fan out an unbounded number of messages carrying
+     * attacker-chosen text to attacker-chosen recipients.
+     *
+     * @throws InvalidArgumentException
+     */
     public function addMemberEmail(string $email): void
     {
+        if (count($this->member_emails) >= self::MAX_MEMBER_EMAILS) {
+            throw new InvalidArgumentException(
+                "Wrong parameter: no more than " . self::MAX_MEMBER_EMAILS . " members can be added at once",
+                400
+            );
+        }
+
         $this->member_emails[] = $email;
     }
 
@@ -80,6 +101,8 @@ class TeamModel
 
     /**
      * @param list<string> $emails
+     *
+     * @throws InvalidArgumentException
      */
     public function addMemberEmails(array $emails): void
     {

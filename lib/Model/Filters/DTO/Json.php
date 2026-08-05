@@ -2,6 +2,8 @@
 
 namespace Model\Filters\DTO;
 
+use DomainException;
+
 class Json implements IDto
 {
 
@@ -16,6 +18,8 @@ class Json implements IDto
     /** @var list<string> */
     private array $character_limit = [];
 
+    private ?string $inner_content_type = null;
+
     public function setExtractArrays(bool $extract_arrays): void
     {
         $this->extract_arrays = $extract_arrays;
@@ -24,6 +28,24 @@ class Json implements IDto
     public function setEscapeForwardSlashes(bool $escape_forward_slashes): void
     {
         $this->escape_forward_slashes = $escape_forward_slashes;
+    }
+
+    /**
+     * @throws DomainException
+     */
+    public function setInnerContentType(?string $inner_content_type): void
+    {
+        $mimeTypes = [
+            'text/html'
+        ];
+
+        if ($inner_content_type !== null && !in_array($inner_content_type, $mimeTypes)) {
+            throw new DomainException(
+                "JSON Inner content type not valid. Allowed values: ['text/html']"
+            );
+        }
+
+        $this->inner_content_type = $inner_content_type;
     }
 
     /**
@@ -60,6 +82,8 @@ class Json implements IDto
 
     /**
      * @param array<string, mixed> $data
+     *
+     * @throws DomainException
      */
     public function fromArray(array $data): void
     {
@@ -77,6 +101,10 @@ class Json implements IDto
 
         if (isset($data['do_not_translate_keys'])) {
             $this->setDoNotTranslateKeys($data['do_not_translate_keys']);
+        }
+
+        if (isset($data['inner_content_type'])) {
+            $this->setInnerContentType($data['inner_content_type']);
         }
 
         if (isset($data['context_keys'])) {
@@ -104,6 +132,7 @@ class Json implements IDto
             unset($format['translate_keys']);
         }
 
+        $format['inner_content_type'] = $this->inner_content_type;
         $format['context_keys'] = $this->context_keys;
         $format['character_limit'] = $this->character_limit;
 

@@ -69,6 +69,9 @@ class PendingInvitationsTest extends AbstractTest
                     'expire' => true,
                     'srem' => 1,
                     'smembers' => $this->smembersResult,
+                    // Answered from the same seeded set, so a test cannot arrange a set and a
+                    // membership answer that disagree.
+                    'sismember' => in_array($arguments[1], $this->smembersResult, true) ? 1 : 0,
                     default => null,
                 };
             }
@@ -98,23 +101,47 @@ class PendingInvitationsTest extends AbstractTest
     }
 
     #[Test]
-    public function hasPendingInvitationReturnsMembers(): void
+    public function listPendingInvitationsReturnsMembers(): void
     {
         $redis = $this->makeRedisStub(['user@example.com']);
         $pending = new PendingInvitations($redis, ['team_id' => 5, 'email' => 'user@example.com']);
-        $result = $pending->hasPendingInvitation(5);
+        $result = $pending->listPendingInvitations(5);
 
         $this->assertSame(['user@example.com'], $result);
     }
 
     #[Test]
-    public function hasPendingInvitationReturnsEmptyForNoInvitations(): void
+    public function listPendingInvitationsReturnsEmptyForNoInvitations(): void
     {
         $redis = $this->makeRedisStub([]);
         $pending = new PendingInvitations($redis, ['team_id' => 5, 'email' => 'user@example.com']);
-        $result = $pending->hasPendingInvitation(5);
+        $result = $pending->listPendingInvitations(5);
 
         $this->assertSame([], $result);
+    }
+
+    #[Test]
+    public function isPendingIsTrueForAnAddressInTheSet(): void
+    {
+        $redis   = $this->makeRedisStub(['user@example.com']);
+        $pending = new PendingInvitations($redis, ['team_id' => 5, 'email' => 'user@example.com']);
+
+        $this->assertTrue($pending->isPending());
+    }
+
+    /**
+     * The case the old emptiness test could not tell apart. Somebody else's invitation to the same
+     * team is still open, so the set is not empty — and that used to be enough to accept this one,
+     * which is why withdrawing a single invitation had no effect on its link.
+     */
+    #[Test]
+    public function isPendingIsFalseWhenOnlySomebodyElsesInvitationIsOpen(): void
+    {
+        $redis   = $this->makeRedisStub(['someone.else@example.com']);
+        $pending = new PendingInvitations($redis, ['team_id' => 5, 'email' => 'user@example.com']);
+
+        $this->assertFalse($pending->isPending());
+        $this->assertNotSame([], $pending->listPendingInvitations(5));
     }
 
     private function assertStringContains(string $needle, string $haystack): void
