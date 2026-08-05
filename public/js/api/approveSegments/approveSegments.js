@@ -11,7 +11,7 @@ import {
  *
  * @param {Array} segments
  * @param {string} [idJob=config.id_job]
- * @param {string} [password=config.password]
+ * @param {string} [password=config.currentPassword]
  * @param {string} [idClient=config.id_client]
  * @param {number} [revisionNumber=config.revisionNumber]
  * @returns {Promise<object>}
@@ -19,7 +19,7 @@ import {
 export const approveSegments = async (
   segments,
   idJob = config.id_job,
-  password = config.password,
+  password = config.currentPassword,
   revisionNumber = config.revisionNumber,
 ) => {
   const dataParams = flattenObject({
