@@ -21,8 +21,14 @@ const noCtype = '<ph id="mtc_9" equiv-text="base64:LLL"/>'
 
 describe('classifyPcPhTag', () => {
   test('classifies non-dataRef open/close', () => {
-    expect(classifyPcPhTag(open1)).toMatchObject({role: 'open', hasDataRef: false})
-    expect(classifyPcPhTag(close1)).toMatchObject({role: 'close', hasDataRef: false})
+    expect(classifyPcPhTag(open1)).toMatchObject({
+      role: 'open',
+      hasDataRef: false,
+    })
+    expect(classifyPcPhTag(close1)).toMatchObject({
+      role: 'close',
+      hasDataRef: false,
+    })
   })
 
   test('classifies dataRef open/close and derives base id', () => {
