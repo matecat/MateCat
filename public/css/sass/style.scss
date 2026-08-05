@@ -610,7 +610,7 @@ section {
   position: relative;
   float: left;
   width: 88%;
-  margin-left: 5%;
+  margin-left: 4.5%;
   min-width: 700px;
   //height: 100%;
   /*-webkit-transition: all 100ms ease-in;*/
@@ -1934,7 +1934,7 @@ section.opened.editor .status {
   color: colors.$white !important;
 }
 .per-grey {
-  background: #B6B8BB !important;
+  background: #b6b8bb !important;
   color: colors.$white !important;
 }
 .per-red {
@@ -2147,6 +2147,10 @@ section.opened.editor .status {
   }
   section.slide-right .sid {
     left: -8%;
+  }
+
+  .projectbar {
+    padding-left: 6%;
   }
 }
 
