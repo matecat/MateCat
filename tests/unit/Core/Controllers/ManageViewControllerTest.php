@@ -165,8 +165,12 @@ class ManageViewControllerTest extends AbstractTest
             } catch (RenderTerminatedException) {
                 $this->assertSame('manage.html', $this->controller->lastTemplate);
                 $this->assertSame('//signin.translated.net/', $this->controller->lastViewData['outsource_service_login']);
-                $this->assertInstanceOf(PHPTalBoolean::class, $this->controller->lastViewData['split_enabled']);
-                $this->assertSame('true', (string)$this->controller->lastViewData['split_enabled']);
+                // The dashboard renders no project context, so it can only say the split affordance
+                // exists — never whether this caller may click it. That answer is split_enabled, and it
+                // belongs to the analyze page, which has a project to authorize against.
+                $this->assertInstanceOf(PHPTalBoolean::class, $this->controller->lastViewData['split_feature_available']);
+                $this->assertSame('true', (string)$this->controller->lastViewData['split_feature_available']);
+                $this->assertArrayNotHasKey('split_enabled', $this->controller->lastViewData);
                 $this->assertInstanceOf(PHPTalBoolean::class, $this->controller->lastViewData['enable_outsource']);
                 $this->assertSame('true', (string)$this->controller->lastViewData['enable_outsource']);
             }

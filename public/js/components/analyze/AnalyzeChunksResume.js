@@ -437,14 +437,20 @@ class AnalyzeChunksResume extends React.Component {
                     <div
                       className={`activity-button  ${config.jobAnalysis ? 'disable-outsource' : ''}`}
                     >
-                      {!config.jobAnalysis && config.splitEnabled ? (
+                      {!config.jobAnalysis && config.splitFeatureAvailable ? (
                         <div
                           className={
-                            'split ui blue basic button ' + buttonsClass + ' '
+                            'split ui blue basic button ' +
+                            buttonsClass +
+                            ' ' +
+                            (config.splitEnabled ? '' : 'disabled ')
                           }
-                          onClick={this.openSplitModal(
-                            jobsAnalysis[indexJob].id,
-                          )}
+                          onClick={
+                            config.splitEnabled
+                              ? this.openSplitModal(jobsAnalysis[indexJob].id)
+                              : undefined
+                          }
+                          aria-disabled={!config.splitEnabled}
                         >
                           <Split size={18} />
                           Split
