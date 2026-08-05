@@ -59,7 +59,7 @@ class TestableManageViewController extends ManageController
 }
 
 #[AllowMockObjectsWithoutExpectations]
-class ManageViewControllerTest extends AbstractTest
+class ManageControllerTest extends AbstractTest
 {
     use ControllerSeedFragments;
 

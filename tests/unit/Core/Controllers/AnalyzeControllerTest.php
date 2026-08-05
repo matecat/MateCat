@@ -78,7 +78,7 @@ class TestableAnalyzeViewController extends AnalyzeController
 }
 
 #[AllowMockObjectsWithoutExpectations]
-class AnalyzeViewControllerTest extends AbstractTest
+class AnalyzeControllerTest extends AbstractTest
 {
     use ControllerSeedFragments;
 
