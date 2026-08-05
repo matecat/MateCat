@@ -49,6 +49,7 @@ jest.mock('../../utils/shortcuts', () => ({
 const mockSegmentStoreListeners = {}
 const mockCatToolStoreListeners = {}
 const mockCommentsStoreListeners = {}
+let mockCapturedFindFirstVisibleRow
 
 jest.mock('../../stores/SegmentStore', () => ({
   addListener: jest.fn((event, cb) => {
@@ -158,9 +159,12 @@ jest.mock('../common/VirtualList/VirtualList', () => {
         renderedRange,
         header,
         items = [],
+        findFirstVisibleRow,
       },
       ref,
     ) => {
+      mockCapturedFindFirstVisibleRow = findFirstVisibleRow
+
       React.useEffect(() => {
         if (setFirstRowIdVisible) setFirstRowIdVisible(items[0]?.id)
         if (renderedRange) renderedRange([0, items.length - 1])
@@ -257,6 +261,7 @@ afterEach(() => {
 describe('SegmentsContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockCapturedFindFirstVisibleRow = undefined
     // Re-register listeners after clearAllMocks resets the mock implementations
     SegmentStore.addListener.mockImplementation((event, cb) => {
       mockSegmentStoreListeners[event] = cb
@@ -274,6 +279,13 @@ describe('SegmentsContainer', () => {
     test('renders the VirtualList', () => {
       const {getByTestId} = renderComponent()
       expect(getByTestId('virtual-list')).toBeInTheDocument()
+    })
+
+    test('passes a findFirstVisibleRow that requires a 30px scroll offset', () => {
+      renderComponent()
+      expect(typeof mockCapturedFindFirstVisibleRow).toBe('function')
+      expect(mockCapturedFindFirstVisibleRow({end: 50}, 10)).toBe(true)
+      expect(mockCapturedFindFirstVisibleRow({end: 30}, 10)).toBe(false)
     })
 
     test('does not render scroll-to-top button initially', () => {
