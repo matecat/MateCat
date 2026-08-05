@@ -20,6 +20,9 @@ import Split from '../../../img/icons/Split'
 import Merge from '../../../img/icons/Merge'
 import HelpCircle from '../../../img/icons/HelpCircle'
 
+const SPLIT_NOT_ALLOWED_HINT =
+  'Only the project owner or a member of its team can split a job'
+
 class AnalyzeChunksResume extends React.Component {
   constructor(props) {
     super(props)
@@ -32,6 +35,18 @@ class AnalyzeChunksResume extends React.Component {
     }
 
     this.jobLinkRef = {}
+    this.splitButtonRef = {}
+  }
+
+  // Tooltip positions itself from children.ref.current.getBoundingClientRect(), so the child it wraps
+  // has to carry a ref object or the tooltip silently lands at the top-left of the page. One per job,
+  // following the jobLinkRef idiom above.
+  getSplitButtonRef = (idJob) => {
+    if (!this.splitButtonRef[idJob]) {
+      this.splitButtonRef[idJob] = React.createRef()
+    }
+
+    return this.splitButtonRef[idJob]
   }
 
   showDetails = (idJob) => (evt) => {
@@ -437,24 +452,41 @@ class AnalyzeChunksResume extends React.Component {
                     <div
                       className={`activity-button  ${config.jobAnalysis ? 'disable-outsource' : ''}`}
                     >
-                      {!config.jobAnalysis && config.splitFeatureAvailable ? (
+                      {!config.jobAnalysis &&
+                      config.splitFeatureAvailable &&
+                      config.splitEnabled ? (
                         <div
                           className={
-                            'split ui blue basic button ' +
-                            buttonsClass +
-                            ' ' +
-                            (config.splitEnabled ? '' : 'disabled ')
+                            'split ui blue basic button ' + buttonsClass + ' '
                           }
-                          onClick={
-                            config.splitEnabled
-                              ? this.openSplitModal(jobsAnalysis[indexJob].id)
-                              : undefined
-                          }
-                          aria-disabled={!config.splitEnabled}
+                          onClick={this.openSplitModal(
+                            jobsAnalysis[indexJob].id,
+                          )}
                         >
                           <Split size={18} />
                           Split
                         </div>
+                      ) : !config.jobAnalysis &&
+                        config.splitFeatureAvailable ? (
+                        <Tooltip
+                          content={SPLIT_NOT_ALLOWED_HINT}
+                          stylePointerElement={{display: 'inline-flex'}}
+                        >
+                          <div
+                            ref={this.getSplitButtonRef(
+                              jobsAnalysis[indexJob].id,
+                            )}
+                            className={
+                              'split ui blue basic button split-not-allowed ' +
+                              buttonsClass +
+                              ' '
+                            }
+                            aria-disabled={true}
+                          >
+                            <Split size={18} />
+                            Split
+                          </div>
+                        </Tooltip>
                       ) : null}
                       {/*{this.getOpenButton(job.toJS(), jobsAnalysis[indexJob].id)}*/}
                       {this.getDirectOpenButton(chunkAnalysis)}

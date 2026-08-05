@@ -20,7 +20,9 @@ const chunk = {
   password: 'a5b852c4fe52',
   total_equivalent: 100,
   total_raw_wc: 100,
-  urls: {t: 'https://dev.matecat.com/translate/Test/en-US-la-XN/90-a5b852c4fe52'},
+  urls: {
+    t: 'https://dev.matecat.com/translate/Test/en-US-la-XN/90-a5b852c4fe52',
+  },
 }
 
 const jobsAnalysis = [
@@ -94,11 +96,27 @@ describe('AnalyzeChunksResume split button', () => {
 
     const button = splitButton()
     expect(button).toBeInTheDocument()
-    expect(button).toHaveClass('disabled')
+    expect(button).toHaveClass('split-not-allowed')
     expect(button).toHaveAttribute('aria-disabled', 'true')
 
-    await userEvent.click(button, {pointerEventsCheck: 0})
+    await userEvent.click(button)
 
     expect(ModalsActions.openSplitJobModal).not.toHaveBeenCalled()
+  })
+
+  // The refused button must say why, and it can only do that while it still receives pointer events —
+  // hence the modifier class rather than semantic's `disabled`, which sets pointer-events: none.
+  test('explains on hover why the caller may not split', async () => {
+    global.config.splitEnabled = false
+
+    renderComponent()
+
+    await userEvent.hover(splitButton())
+
+    expect(
+      await screen.findByText(
+        'Only the project owner or a member of its team can split a job',
+      ),
+    ).toBeInTheDocument()
   })
 })
