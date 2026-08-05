@@ -11,8 +11,6 @@ namespace Plugins\Features\ReviewExtended;
 use Exception;
 use Model\DataAccess\IDatabase;
 use Model\DataAccess\TransactionalTrait;
-use Model\FeaturesBase\FeatureSet;
-use Model\FeaturesBase\Hook\Event\Filter\FilterRevisionChangeNotificationListEvent;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryCommentDao;
@@ -385,10 +383,6 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
                 'recipient' => $projectAssignee,
             ];
         }
-
-        $filterRevisionChangeNotificationListEvent = new FilterRevisionChangeNotificationListEvent($emails);
-        FeatureSet::forProject($this->_chunk->getProject(new ProjectDao($this->_database)), $this->_database)->dispatch($filterRevisionChangeNotificationListEvent);
-        $emails = $filterRevisionChangeNotificationListEvent->getEmails();
 
         if (!empty($revision)) {
             $url = CanonicalRoutes::revise(

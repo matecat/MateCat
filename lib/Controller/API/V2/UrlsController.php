@@ -12,7 +12,6 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
-use Model\FeaturesBase\Hook\Event\Filter\ProjectUrlsEvent;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
@@ -58,10 +57,6 @@ class UrlsController extends KleinController
         $projectData = (new ProjectDao($this->getDatabase()))->setCacheTTL(60 * 60)->getProjectData($project->id ?? throw new Exception('Project id is null'));
 
         $formatted = new ProjectUrls($projectData, new ChunkReviewDao($this->getDatabase()));
-
-        $projectUrlsEvent = new ProjectUrlsEvent($formatted);
-        $this->featureSet->dispatch($projectUrlsEvent);
-        $formatted = $projectUrlsEvent->getFormatted();
 
         $this->response->json(['urls' => $formatted->render()]);
     }

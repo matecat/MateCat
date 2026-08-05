@@ -6,7 +6,6 @@ namespace Matecat\Core\Features\Hook;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\ActivityLog\ActivityLogStruct;
-use Model\FeaturesBase\Hook\Event\Filter\AnalysisBeforeMTGetContributionEvent;
 use Model\FeaturesBase\Hook\Event\Filter\AppendFieldToAnalysisObjectEvent;
 use Model\FeaturesBase\Hook\Event\Filter\AppendInitialTemplateVarsEvent;
 use Model\FeaturesBase\Hook\Event\Filter\CharacterLengthCountEvent;
@@ -23,14 +22,12 @@ use Model\FeaturesBase\Hook\Event\Filter\FilterGetSegmentsResultEvent;
 use Model\FeaturesBase\Hook\Event\Filter\FilterJobPasswordToReviewPasswordEvent;
 use Model\FeaturesBase\Hook\Event\Filter\FilterMyMemoryGetParametersEvent;
 use Model\FeaturesBase\Hook\Event\Filter\FilterPayableRatesEvent;
-use Model\FeaturesBase\Hook\Event\Filter\FilterRevisionChangeNotificationListEvent;
 use Model\FeaturesBase\Hook\Event\Filter\HandleJsonNotesBeforeInsertEvent;
 use Model\FeaturesBase\Hook\Event\Filter\InjectExcludedTagsInQaEvent;
 use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 use Model\FeaturesBase\Hook\Event\Filter\OutsourceAvailableInfoEvent;
 use Model\FeaturesBase\Hook\Event\Filter\PopulatePreTranslationsEvent;
 use Model\FeaturesBase\Hook\Event\Filter\PrepareNotesForRenderingEvent;
-use Model\FeaturesBase\Hook\Event\Filter\ProjectUrlsEvent;
 use Model\FeaturesBase\Hook\Event\Filter\RewriteContributionContextsEvent;
 use Model\FeaturesBase\Hook\Event\Filter\SanitizeOriginalDataMapEvent;
 use Model\FeaturesBase\Hook\Event\Filter\WordCountEvent;
@@ -64,7 +61,6 @@ class FilterEventSubclassTest extends AbstractTest
     public static function hookNameProvider(): array
     {
         return [
-            'AnalysisBeforeMTGetContribution' => [AnalysisBeforeMTGetContributionEvent::class, 'analysisBeforeMTGetContribution'],
             'AppendFieldToAnalysisObject' => [AppendFieldToAnalysisObjectEvent::class, 'appendFieldToAnalysisObject'],
             'AppendInitialTemplateVars' => [AppendInitialTemplateVarsEvent::class, 'appendInitialTemplateVars'],
             'CharacterLengthCount' => [CharacterLengthCountEvent::class, 'characterLengthCount'],
@@ -81,31 +77,16 @@ class FilterEventSubclassTest extends AbstractTest
             'FilterJobPasswordToReviewPassword' => [FilterJobPasswordToReviewPasswordEvent::class, 'filterJobPasswordToReviewPassword'],
             'FilterMyMemoryGetParameters' => [FilterMyMemoryGetParametersEvent::class, 'filterMyMemoryGetParameters'],
             'FilterPayableRates' => [FilterPayableRatesEvent::class, 'filterPayableRates'],
-            'FilterRevisionChangeNotificationList' => [FilterRevisionChangeNotificationListEvent::class, 'filterRevisionChangeNotificationList'],
             'HandleJsonNotesBeforeInsert' => [HandleJsonNotesBeforeInsertEvent::class, 'handleJsonNotesBeforeInsert'],
             'InjectExcludedTagsInQa' => [InjectExcludedTagsInQaEvent::class, 'injectExcludedTagsInQa'],
             'IsAnInternalUser' => [IsAnInternalUserEvent::class, 'isAnInternalUser'],
             'OutsourceAvailableInfo' => [OutsourceAvailableInfoEvent::class, 'outsourceAvailableInfo'],
             'PopulatePreTranslations' => [PopulatePreTranslationsEvent::class, 'populatePreTranslations'],
             'PrepareNotesForRendering' => [PrepareNotesForRenderingEvent::class, 'prepareNotesForRendering'],
-            'ProjectUrls' => [ProjectUrlsEvent::class, 'projectUrls'],
             'RewriteContributionContexts' => [RewriteContributionContextsEvent::class, 'rewriteContributionContexts'],
             'SanitizeOriginalDataMap' => [SanitizeOriginalDataMapEvent::class, 'sanitizeOriginalDataMap'],
             'WordCount' => [WordCountEvent::class, 'wordCount'],
         ];
-    }
-
-    #[Test]
-    public function filterRevisionChangeNotificationListEventGetSetEmails(): void
-    {
-        $emails = ['a@test.com', 'b@test.com'];
-        $event = new FilterRevisionChangeNotificationListEvent($emails);
-
-        self::assertSame($emails, $event->getEmails());
-
-        $updated = ['c@test.com'];
-        $event->setEmails($updated);
-        self::assertSame($updated, $event->getEmails());
     }
 
     #[Test]
@@ -333,18 +314,6 @@ class FilterEventSubclassTest extends AbstractTest
     }
 
     #[Test]
-    public function projectUrlsEventGetSet(): void
-    {
-        $formatted = ['translate_url' => 'http://example.com'];
-        $event = new ProjectUrlsEvent($formatted);
-
-        self::assertSame($formatted, $event->getFormatted());
-
-        $event->setFormatted(null);
-        self::assertNull($event->getFormatted());
-    }
-
-    #[Test]
     public function filterGetSegmentsResultEventGettersAndSetter(): void
     {
         $chunk = new JobStruct();
@@ -371,22 +340,6 @@ class FilterEventSubclassTest extends AbstractTest
 
         $event->setParameters(['de' => 'it-IT']);
         self::assertSame(['de' => 'it-IT'], $event->getParameters());
-    }
-
-    #[Test]
-    public function analysisBeforeMTGetContributionEventGettersAndSetter(): void
-    {
-        $config = ['timeout' => 30];
-        $mtEngine = new \stdClass();
-        $queueElement = new \stdClass();
-        $event = new AnalysisBeforeMTGetContributionEvent($config, $mtEngine, $queueElement);
-
-        self::assertSame($config, $event->getConfig());
-        self::assertSame($mtEngine, $event->getMtEngine());
-        self::assertSame($queueElement, $event->getQueueElement());
-
-        $event->setConfig(['timeout' => 60]);
-        self::assertSame(['timeout' => 60], $event->getConfig());
     }
 
     #[Test]
