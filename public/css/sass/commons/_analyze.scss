@@ -561,6 +561,15 @@ body.analyze {
             align-items: center;
             justify-content: space-evenly;
           }
+
+          // Greys the split button out for a caller the split endpoints would refuse, while leaving it
+          // hoverable so the Tooltip explaining why still fires. Semantic's own `disabled` class cannot
+          // be used here: it sets `pointer-events: none !important`, which takes the hover away with
+          // the click. Same reasoning as .open-outsource-disabled above.
+          .split.split-not-allowed {
+            cursor: default !important;
+            opacity: 0.45;
+          }
           .split,
           .merge {
             font-family: Calibri, Arial, Helvetica, sans-serif;

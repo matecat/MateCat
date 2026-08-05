@@ -59,7 +59,7 @@ class ContextUrlController extends KleinController
                 })
                 ->onSuccess(function () {
                     $project = $this->getValidatedProject();
-                    (new ProjectAccessValidator($this, $project))->validate();
+                    (new ProjectAccessValidator($this, $project, $this->getUser()))->validate();
                 })
         );
     }

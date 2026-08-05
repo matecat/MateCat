@@ -152,7 +152,7 @@ class JobMenu extends React.Component {
           ]
         : []),
       ...(!this.props.isChunkOutsourced &&
-      config.splitEnabled &&
+      config.splitFeatureAvailable &&
       !this.props.isChunk
         ? [
             {
@@ -168,7 +168,7 @@ class JobMenu extends React.Component {
             },
           ]
         : !this.props.isChunkOutsourced &&
-            config.splitEnabled &&
+            config.splitFeatureAvailable &&
             this.props.isChunk
           ? [
               {

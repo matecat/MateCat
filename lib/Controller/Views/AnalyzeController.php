@@ -11,14 +11,17 @@ namespace Controller\Views;
 
 use Controller\Abstracts\BaseKleinViewController;
 use Controller\Abstracts\IController;
+use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Analysis\Status;
 use Model\FeaturesBase\Hook\Event\Filter\AppendInitialTemplateVarsEvent;
+use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
+use Throwable;
 use Utils\AsyncTasks\Workers\Analysis\Health;
 use Utils\Registry\AppConfig;
 use Utils\Templating\PHPTalBoolean;
@@ -133,6 +136,29 @@ class AnalyzeController extends BaseKleinViewController implements IController
         $appendInitialTemplateVarsEvent = new AppendInitialTemplateVarsEvent($this->featureSet->getCodes());
         $this->featureSet->dispatch($appendInitialTemplateVarsEvent);
 
+        // Two separate questions reach the page, and conflating them is what the naming avoids:
+        // split_feature_available says the split affordance exists in this UI at all, while split_enabled
+        // is the button state — whether this caller may click it.
+        //
+        // Grey out the split button for a caller the split endpoints would refuse. This mirrors
+        // SplitJobController's authorization exactly — same internal-user exemption, same validator — and
+        // that is the point: a button offering an action the API answers 403 to is its own bug report.
+        // The mirror is not the enforcement, only its reflection; the endpoints check independently, so
+        // getting this wrong shows the wrong button rather than granting anything.
+        //
+        // Failure is swallowed on purpose. The question asked is "would the API allow this?", and every
+        // way of answering no — not the owner, not in the team, or the lookup itself failing — resolves
+        // to hiding the button. A page that renders without the button beats a page that does not render.
+        $split_enabled = true;
+        $event = $this->getFeatureSet()->dispatch(new IsAnInternalUserEvent($this->getUser()->email ?? ''));
+        if (!$event->isInternal()) {
+            try {
+                (new ProjectAccessValidator($this, $projectStruct, $this->getUser()))->validate();
+            } catch (Throwable) {
+                $split_enabled = false;
+            }
+        }
+
         $this->addParamsToView([
             'pid' => $projectStruct->id,
             'project_status' => $projectStruct->status_analysis,
@@ -143,7 +169,8 @@ class AnalyzeController extends BaseKleinViewController implements IController
             'num_segments_analyzed' => $model->getSummary()->getSegmentsAnalyzed(),
             'daemon_misconfiguration' => new PHPTalBoolean(Health::thereIsAMisconfiguration()),
             'json_jobs' => json_encode($model),
-            'split_enabled' => new PHPTalBoolean(true),
+            'split_enabled' => new PHPTalBoolean($split_enabled),
+            'split_feature_available' => new PHPTalBoolean(true),
             'enable_outsource' => new PHPTalBoolean(AppConfig::$ENABLE_OUTSOURCE),
         ]);
 
