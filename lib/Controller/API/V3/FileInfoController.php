@@ -46,7 +46,7 @@ class FileInfoController extends KleinController
         $Validator->onSuccess(function () use ($Validator) {
             $this->chunk = $Validator->getChunk();
             $this->project = $Validator->getChunk()->getProject(new ProjectDao($this->getDatabase()));
-            $this->appendValidator(new ProjectAccessValidator($this, $this->project));
+            $this->appendValidator(new ProjectAccessValidator($this, $this->project, $this->getUser()));
         });
         $this->appendValidator($Validator);
     }

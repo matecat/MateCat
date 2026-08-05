@@ -147,7 +147,7 @@ class ProjectsController extends KleinController
      */
     protected function changeStatus(string $status): void
     {
-        (new ProjectAccessValidator($this, $this->project))->validate();
+        (new ProjectAccessValidator($this, $this->project, $this->getUser()))->validate();
 
         $chunks = (new JobDao($this->getDatabase()))->getNotDeletedByProjectId((int) $this->project->id);
 

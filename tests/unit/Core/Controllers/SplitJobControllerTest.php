@@ -14,6 +14,8 @@ use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 use Model\Jobs\JobStruct;
 use Model\JobSplitMerge\JobSplitMergeManager;
 use Model\JobSplitMerge\SplitMergeProjectData;
@@ -84,6 +86,69 @@ class SplitJobControllerTest extends AbstractTest
 
         $resProp = $this->reflector->getProperty('response');
         $resProp->setValue($this->controller, $this->responseMock);
+
+        // The controller resolves the internal-user exemption through the feature set, and
+        // TestableSplitJobController skips the constructor that would build one. Left unset, every route
+        // dies on the uninitialised typed property before reaching its own subject. This default leaves
+        // the event as dispatched, so isInternal() keeps its false default and the authorization runs.
+        $this->controller->setFeatureSet($this->featureSetLeavingEventUntouched());
+    }
+
+    /**
+     * A feature set with no listener for the event: dispatch() hands the event straight back.
+     */
+    private function featureSetLeavingEventUntouched(): FeatureSet
+    {
+        $featureSet = $this->createStub(FeatureSet::class);
+        $featureSet->method('dispatch')->willReturnArgument(0);
+
+        return $featureSet;
+    }
+
+    /**
+     * A feature set standing in for the Translated plugin's isAnInternalUser listener, which marks the
+     * event rather than throwing. $seenEmail captures what the controller asked about.
+     */
+    private function featureSetMarkingInternal(?string &$seenEmail = null): FeatureSet
+    {
+        $featureSet = $this->createStub(FeatureSet::class);
+        $featureSet->method('dispatch')->willReturnCallback(
+            function (object $event) use (&$seenEmail): object {
+                if ($event instanceof IsAnInternalUserEvent) {
+                    $seenEmail = $event->getEmail();
+                    $event->setIsInternal(true);
+                }
+
+                return $event;
+            }
+        );
+
+        return $featureSet;
+    }
+
+    /**
+     * A feature set answering the way the Translated plugin's matcher does — a valid address on a known
+     * internal domain, nothing else. Used where the point is which address the controller offers, rather
+     * than what a listener does with it; the domain list itself is the plugin's own test to keep.
+     */
+    private function featureSetAnsweringDomains(?string &$seenEmail = null): FeatureSet
+    {
+        $featureSet = $this->createStub(FeatureSet::class);
+        $featureSet->method('dispatch')->willReturnCallback(
+            function (object $event) use (&$seenEmail): object {
+                if ($event instanceof IsAnInternalUserEvent) {
+                    $seenEmail = $event->getEmail();
+                    $email = filter_var($event->getEmail(), FILTER_VALIDATE_EMAIL);
+                    $event->setIsInternal(
+                        $email !== false && str_ends_with($email, '@translated.net')
+                    );
+                }
+
+                return $event;
+            }
+        );
+
+        return $featureSet;
     }
 
     #[Test]
@@ -675,6 +740,161 @@ class SplitJobControllerTest extends AbstractTest
             $this->expectException(AuthorizationError::class);
             $this->callPrivate('enforceRestructureAccess', $project);
         } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    // ─── the internal-user exemption ─────────────────────────────────
+
+    /**
+     * Translated's own staff restructure customer projects they neither own nor share a team with, which
+     * is support work, not an IDOR. The exemption is resolved through the feature set: the plugin decides
+     * who is internal, the controller only reads the answer back off the dispatched event.
+     *
+     * One test per route even though loadProjectForRestructure() is the single choke point, because that
+     * is the property being pinned — a later route that authorizes on its own would pass the merge case
+     * and fail here.
+     */
+    #[Test]
+    public function merge_letsAnInternalUserRestructureWithoutOwnershipOrMembership(): void
+    {
+        $base = self::REAL_DB_BASE + 800;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+            $this->controller->setFeatureSet($this->featureSetMarkingInternal());
+
+            $this->controller->merge();
+
+            self::assertNotSame(
+                $this->controller->fakeProjectData['project']->id_customer,
+                $this->controller->getUser()->email,
+                'the caller must not be the owner, or the exemption is not what let the merge through'
+            );
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    #[Test]
+    public function check_letsAnInternalUserRestructureWithoutOwnershipOrMembership(): void
+    {
+        $base = self::REAL_DB_BASE + 900;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+            $this->controller->setFeatureSet($this->featureSetMarkingInternal());
+
+            $this->controller->check();
+
+            self::assertNotSame(
+                $this->controller->fakeProjectData['project']->id_customer,
+                $this->controller->getUser()->email
+            );
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    #[Test]
+    public function apply_letsAnInternalUserRestructureWithoutOwnershipOrMembership(): void
+    {
+        $base = self::REAL_DB_BASE + 1000;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+            $this->controller->setFeatureSet($this->featureSetMarkingInternal());
+
+            $this->controller->apply();
+
+            self::assertNotSame(
+                $this->controller->fakeProjectData['project']->id_customer,
+                $this->controller->getUser()->email
+            );
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    /**
+     * The exemption must widen by CALLER, never by project. Asking about the project's id_customer would
+     * let any identity holding the id and password restructure a project that happens to be owned by an
+     * internal address — the opposite of the intent, and reachable by picking a target rather than by
+     * holding a credential.
+     */
+    #[Test]
+    public function theInternalUserQuestionIsAskedAboutTheCallerAndNotTheProjectOwner(): void
+    {
+        $base = self::REAL_DB_BASE + 1100;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+
+            $askedAbout = null;
+            $this->controller->setFeatureSet($this->featureSetMarkingInternal($askedAbout));
+
+            $this->controller->merge();
+
+            self::assertSame($this->controller->getUser()->email, $askedAbout);
+            self::assertNotSame($this->controller->fakeProjectData['project']->id_customer, $askedAbout);
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    /**
+     * Fail closed when nothing answers the event. isInternal() defaults to false and dispatch() never
+     * throws, so a feature set carrying no listener — the Translated plugin not autoloaded, an event
+     * renamed, a handler removed — leaves the owner-or-member check in force rather than skipping it.
+     * The refuse tests above rely on this same default, which is what makes them meaningful.
+     */
+    #[Test]
+    public function theCheckStandsWhenNoFeatureAnswersTheInternalUserEvent(): void
+    {
+        $base = self::REAL_DB_BASE + 1200;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+            $this->controller->setFeatureSet($this->featureSetLeavingEventUntouched());
+
+            $this->expectException(AuthorizationError::class);
+            $this->controller->merge();
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    /**
+     * An anonymous identity is not internal. The plugin's matcher runs the address through
+     * FILTER_VALIDATE_EMAIL, so '' fails it, but the controller must not be the thing that relies on
+     * that: it passes '' rather than skipping the dispatch, and the check stays in force.
+     */
+    #[Test]
+    public function anEmptyCallerEmailIsNotTreatedAsInternal(): void
+    {
+        $base = self::REAL_DB_BASE + 1300;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+
+            $this->reflector->getProperty('user')->setValue(
+                $this->controller,
+                new UserStruct(['uid' => $this->userId($base), 'email' => ''])
+            );
+
+            $askedAbout = 'not asked';
+            $this->controller->setFeatureSet($this->featureSetAnsweringDomains($askedAbout));
+
+            $this->expectException(AuthorizationError::class);
+            $this->controller->merge();
+        } finally {
+            self::assertSame('', $askedAbout, 'the dispatch must happen even with no address to offer');
             $this->cleanFragments($base);
         }
     }
