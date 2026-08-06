@@ -130,9 +130,18 @@ class UserDao extends AbstractDao
      * nothing — which is what stops one flow's link being spent on another, and keeps each flow's
      * lifetime governing only its own tokens.
      *
-     * The unmarked fallback exists for tokens issued before scoping. Those are still cross-usable,
-     * exactly as they were when they were minted, and stop being accepted once the last of them ages
-     * out of the confirmation window. Remove it then.
+     * The stored value is a digest, so the presented token is hashed before the lookup and the raw
+     * value never reaches a query.
+     *
+     * Two fallbacks cover tokens minted by earlier versions and still inside their window. The
+     * marked-but-unhashed one is guarded on the length of a real secret: without that guard, a
+     * stored digest lifted from the table could be presented as though it were the raw token and
+     * would match its own row, which is exactly the replay this hashing exists to prevent. The
+     * unmarked one predates scoping, so it refuses anything carrying a marker at all: a stored value
+     * copied out of the column marker and all would otherwise match itself here, by the plainest
+     * route of the three. Tokens of that era were base62 and never held an underscore, so nothing
+     * legitimate is turned away. Both fallbacks stop matching once the last pre-hashing token ages
+     * out of the window.
      *
      * @param string $rawToken the value taken from the link, without a marker
      * @param AuthTokenScope $scope the flow the caller is serving
@@ -142,8 +151,23 @@ class UserDao extends AbstractDao
      */
     public function getByScopedConfirmationToken(string $rawToken, AuthTokenScope $scope): ?UserStruct
     {
-        return $this->getByConfirmationToken($scope->marker() . $rawToken)
-            ?? $this->getByConfirmationToken($rawToken);
+        $found = $this->getByConfirmationToken($scope->storedForm($rawToken));
+
+        if ($found === null && strlen($rawToken) === UserStruct::AUTH_TOKEN_RANDOM_LENGTH) {
+            $found = $this->getByConfirmationToken($scope->marker() . $rawToken);
+        }
+
+        if ($found !== null) {
+            return $found;
+        }
+
+        foreach (AuthTokenScope::cases() as $case) {
+            if (str_starts_with($rawToken, $case->marker())) {
+                return null;
+            }
+        }
+
+        return $this->getByConfirmationToken($rawToken);
     }
 
     /**

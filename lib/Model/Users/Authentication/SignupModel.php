@@ -107,16 +107,16 @@ class SignupModel
      */
     private function __sendPasswordSetupRequestEmail(): void
     {
-        // A link already in flight is left as it is, so repeated requests re-send it rather than
-        // retiring it — see UserStruct::initAuthTokenIfStale().
-        if ($this->user->initAuthTokenIfStale(AuthTokenScope::PasswordReset)) {
-            $this->userDao->updateStruct($this->user, [
-                'fields' => [
-                    'confirmation_token',
-                    'confirmation_token_created_at'
-                ]
-            ]);
-        }
+        // Every request mints, because a stored digest cannot be turned back into a link. A request
+        // repeated inside the window keeps the original expiry — see UserStruct::initAuthTokenIfStale().
+        $this->user->initAuthTokenIfStale(AuthTokenScope::PasswordReset);
+
+        $this->userDao->updateStruct($this->user, [
+            'fields' => [
+                'confirmation_token',
+                'confirmation_token_created_at'
+            ]
+        ]);
 
         $this->createSetPasswordRequestEmail()->send();
     }
@@ -244,11 +244,11 @@ class SignupModel
         $user = $this->userDao->getByEmail($this->params['email']);
 
         if ($user) {
-            // Anyone can ask for a reset by naming an address, so a link already in flight has to
-            // survive the request — see UserStruct::initAuthTokenIfStale().
-            if ($user->initAuthTokenIfStale(AuthTokenScope::PasswordReset)) {
-                $this->userDao->updateStruct($user, ['fields' => ['confirmation_token', 'confirmation_token_created_at']]);
-            }
+            // Anyone can ask for a reset by naming an address. The link in flight cannot survive the
+            // request now that only a digest is stored, but the expiry it was issued with does — see
+            // UserStruct::initAuthTokenIfStale().
+            $user->initAuthTokenIfStale(AuthTokenScope::PasswordReset);
+            $this->userDao->updateStruct($user, ['fields' => ['confirmation_token', 'confirmation_token_created_at']]);
 
             $delivery = new ForgotPasswordEmail($user);
             $delivery->send();
@@ -277,9 +277,27 @@ class SignupModel
         $user = $dao->getByEmail($email);
 
         if ($user) {
-            $delivery = new SignupEmail($user);
-            $delivery->send();
+            // The row holds a digest, so the link sent at signup cannot be reproduced from it: this
+            // mints one. A confirmation still inside its three days keeps its original deadline, so
+            // asking repeatedly cannot extend it.
+            $user->initAuthTokenIfStale(AuthTokenScope::SignupConfirmation);
+            $dao->updateStruct($user, [
+                'fields' => [
+                    'confirmation_token',
+                    'confirmation_token_created_at'
+                ]
+            ]);
+
+            static::createSignupEmail($user)->send();
         }
+    }
+
+    /**
+     * Seam: the only thing standing between this static entry point and a real message going out.
+     */
+    protected static function createSignupEmail(UserStruct $user): SignupEmail
+    {
+        return new SignupEmail($user);
     }
 
     /**

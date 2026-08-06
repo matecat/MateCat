@@ -32,7 +32,7 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
      * two-character scope marker plus this secret, so the length is a security choice rather than
      * something the column forces.
      */
-    private const int AUTH_TOKEN_RANDOM_LENGTH = 48;
+    public const int AUTH_TOKEN_RANDOM_LENGTH = 48;
 
     public ?int $uid = null;
     public ?string $email = null;
@@ -74,18 +74,31 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
         return !empty($this->uid) && !empty($this->email);
     }
 
+    /**
+     * The raw secret of the token minted during this request, kept only in memory.
+     *
+     * The database holds a digest, which cannot be reversed, so the value that travels in the link
+     * has to be carried here between minting it and building the URL. It is deliberately not a
+     * column: it must never be written, and a struct hydrated from a row has none.
+     */
+    private ?string $rawAuthToken = null;
+
     public function clearAuthToken(): void
     {
         $this->confirmation_token = null;
         $this->confirmation_token_created_at = null;
+        $this->rawAuthToken = null;
     }
 
     /**
      * Mints a token for one flow. The scope marker is stored with it, so it cannot be spent elsewhere.
+     *
+     * What lands in the column is the marker plus a digest of the secret, never the secret itself.
      */
     public function initAuthToken(AuthTokenScope $scope): void
     {
-        $this->confirmation_token = $scope->marker() . Utils::randomString(self::AUTH_TOKEN_RANDOM_LENGTH);
+        $this->rawAuthToken                  = Utils::randomString(self::AUTH_TOKEN_RANDOM_LENGTH);
+        $this->confirmation_token            = $scope->storedForm($this->rawAuthToken);
         $this->confirmation_token_created_at = Utils::mysqlTimestamp(time());
     }
 
@@ -100,11 +113,19 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
      */
     public function authTokenForUrl(): string
     {
+        if ($this->rawAuthToken !== null) {
+            return $this->rawAuthToken;
+        }
+
         $token = $this->confirmation_token ?? '';
 
         foreach (AuthTokenScope::cases() as $scope) {
             if (str_starts_with($token, $scope->marker())) {
-                return substr($token, strlen($scope->marker()));
+                $secret = substr($token, strlen($scope->marker()));
+
+                // Only a token stored before hashing can still travel from the column, because its
+                // secret is there in clear. A digest is not a link, so there is nothing to send.
+                return strlen($secret) === self::AUTH_TOKEN_RANDOM_LENGTH ? $secret : '';
             }
         }
 
@@ -112,37 +133,35 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
     }
 
     /**
-     * Keeps the current auth token when it is still usable, and mints one otherwise.
+     * Mints an auth token, without letting a repeated request move the deadline.
      *
-     * {@see initAuthToken()} replaces the token unconditionally, which means a caller who only knows
-     * an address can retire a link already sitting in that mailbox simply by asking for another one.
-     * Handing back the token that is already in flight removes that: a repeated request re-sends the
-     * same link instead of replacing it.
+     * This used to hand back the token already in flight, so that a caller who only knows an address
+     * could not retire a link sitting in that mailbox by asking for another one. Storing a digest
+     * ends that: the secret of an issued link is unrecoverable by design, so there is nothing to hand
+     * back and every request mints. The previously sent link stops working — it is replaced by one
+     * delivered to the same mailbox.
      *
-     * The timestamp is deliberately left alone on reuse. Refreshing it would let repeated requests
-     * slide the expiry forward without limit, which defeats the point of having a lifetime.
+     * What the reuse was really protecting survives. A same-scope token still inside its lifetime
+     * keeps its original issue time, so repeated requests cannot slide the expiry forward without
+     * limit, which was the reason the timestamp was left alone on reuse.
      *
-     * Only a token of the same scope is reused. A pending token belonging to the other flow is
-     * replaced, because one column holds one token — so cross-flow churn remains possible, and cannot
-     * be removed without a second slot to keep both in. Same-flow requests, which are the ones an
-     * anonymous caller can trigger repeatedly, no longer churn.
-     *
-     * @return bool true when a new token was minted, false when the existing one was kept
+     * Scope is still what decides: a pending token belonging to the other flow is replaced outright,
+     * because one column holds one token.
      */
-    public function initAuthTokenIfStale(AuthTokenScope $scope): bool
+    public function initAuthTokenIfStale(AuthTokenScope $scope): void
     {
-        if (
-            $this->confirmation_token !== null
+        $issuedAt = $this->confirmation_token_created_at;
+
+        $stillWithinLifetime = $this->confirmation_token !== null
             && str_starts_with($this->confirmation_token, $scope->marker())
-            && $this->confirmation_token_created_at !== null
-            && strtotime($this->confirmation_token_created_at) >= time() - $scope->ttlSeconds()
-        ) {
-            return false;
-        }
+            && $issuedAt !== null
+            && strtotime($issuedAt) >= time() - $scope->ttlSeconds();
 
         $this->initAuthToken($scope);
 
-        return true;
+        if ($stillWithinLifetime) {
+            $this->confirmation_token_created_at = $issuedAt;
+        }
     }
 
     public static function getStruct(): UserStruct

@@ -8,6 +8,7 @@ use Model\Users\AuthTokenScope;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Group;
+use Utils\Tools\Utils;
 
 /**
  * Real-SQL coverage for UserDao (plan dao-realsql-90.md, Wave 1 shallow pilot — single-table
@@ -90,6 +91,68 @@ class UserDaoRealSqlTest extends AbstractTest
         $this->fixtures->trackExisting('users', ['uid' => (int)$uid]);
 
         $this->assertNotNull($this->dao->getByScopedConfirmationToken($legacy, AuthTokenScope::PasswordReset));
+    }
+
+    /**
+     * The whole point of storing a digest is that reading the table gives no usable link. Someone
+     * holding a stored value must not be able to spend it by presenting it as the token — which is
+     * exactly what the transitional pre-hashing fallback would allow if it accepted any length,
+     * because it looks the value up as marker plus whatever arrived.
+     */
+    public function testScopedConfirmationTokenLookupRejectsTheStoredDigestItself(): void
+    {
+        $struct = new UserStruct();
+        $struct->email = 'rsq_digest_' . bin2hex(random_bytes(6)) . '@example.test';
+        $struct->first_name = 'Digest';
+        $struct->last_name = 'Replay';
+        $struct->create_date = date('Y-m-d H:i:s');
+        $struct->initAuthToken(AuthTokenScope::PasswordReset);
+
+        $uid = $this->dao->insertStruct($struct);
+        $this->fixtures->trackExisting('users', ['uid' => (int)$uid]);
+
+        $stored = (string)$struct->confirmation_token;
+        $digest = substr($stored, strlen(AuthTokenScope::PasswordReset->marker()));
+
+        $this->assertNull(
+            $this->dao->getByScopedConfirmationToken($digest, AuthTokenScope::PasswordReset),
+            'the digest read out of the column is not a token'
+        );
+        $this->assertNull(
+            $this->dao->getByScopedConfirmationToken($stored, AuthTokenScope::PasswordReset),
+            'and neither is the stored value with its marker'
+        );
+        $this->assertNotNull(
+            $this->dao->getByScopedConfirmationToken($struct->authTokenForUrl(), AuthTokenScope::PasswordReset),
+            'only the secret that was mailed finds the row'
+        );
+    }
+
+    /**
+     * Links minted before hashing hold the secret in clear behind their marker, so they have to keep
+     * resolving until they age out.
+     */
+    public function testScopedConfirmationTokenLookupStillFindsAPreHashingMarkedToken(): void
+    {
+        $secret = Utils::randomString(UserStruct::AUTH_TOKEN_RANDOM_LENGTH);
+
+        $struct = new UserStruct();
+        $struct->email = 'rsq_premarker_' . bin2hex(random_bytes(6)) . '@example.test';
+        $struct->first_name = 'PreHash';
+        $struct->last_name = 'Token';
+        $struct->create_date = date('Y-m-d H:i:s');
+        $struct->confirmation_token = AuthTokenScope::PasswordReset->marker() . $secret;
+
+        $uid = $this->dao->insertStruct($struct);
+        $this->fixtures->trackExisting('users', ['uid' => (int)$uid]);
+
+        $this->assertNotNull(
+            $this->dao->getByScopedConfirmationToken($secret, AuthTokenScope::PasswordReset)
+        );
+        $this->assertNull(
+            $this->dao->getByScopedConfirmationToken($secret, AuthTokenScope::SignupConfirmation),
+            'scoping still holds for the tokens the fallback covers'
+        );
     }
 
     public function testCreateUserPersistsAndRoundTrips(): void
