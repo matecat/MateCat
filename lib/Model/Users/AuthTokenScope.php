@@ -27,8 +27,8 @@ enum AuthTokenScope: string
     /**
      * The marker prepended to the stored token.
      *
-     * Two characters, because the column is varchar(50) and the random part is sized to fill whatever
-     * is left. A longer marker buys a shorter secret, so lengthening one is not free.
+     * Two characters. The column is varchar(255) and a stored token is this marker plus a
+     * 48-character secret, so a longer marker no longer has to be paid for with a shorter secret.
      */
     public function marker(): string
     {

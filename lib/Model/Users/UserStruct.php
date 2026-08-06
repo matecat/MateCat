@@ -26,12 +26,11 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
 
     /**
-     * Length of the random part, sized so that a two-character scope marker plus the secret exactly
-     * fills varchar(50).
+     * Length of the random part of an auth token, in characters.
      *
-     * 48 base62 characters is roughly 286 bits. There is no headroom left in the column: a longer
-     * marker without a matching reduction here would be truncated on write, silently, and every
-     * lookup would miss from then on.
+     * 48 base62 characters is roughly 286 bits. The column is varchar(255) and a stored token is a
+     * two-character scope marker plus this secret, so the length is a security choice rather than
+     * something the column forces.
      */
     private const int AUTH_TOKEN_RANDOM_LENGTH = 48;
 
