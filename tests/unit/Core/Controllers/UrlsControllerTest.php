@@ -12,7 +12,6 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
-use Model\FeaturesBase\Hook\Event\Filter\ProjectUrlsEvent;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -74,9 +73,8 @@ class TestableUrlsController extends UrlsController
  * Per-suite owner identity: ctrltest_9042000@example.org (registry consistency only —
  * no real-DB rows are seeded; the DB singleton is stubbed via createDatabaseMock()).
  *
- * urls()'s happy path drives the project/job loop, the empty {@see ProjectUrls} render
- * (the stubbed PDOStatement returns no project_data rows) and the ProjectUrlsEvent
- * dispatch through a stubbed FeatureSet. The 404 branch (lines 43-52) terminates with
+ * urls()'s happy path drives the project/job loop and the empty {@see ProjectUrls} render
+ * (the stubbed PDOStatement returns no project_data rows). The 404 branch (lines 43-52) terminates with
  * exit() and is therefore not unit-testable in-process (documented blocker).
  */
 #[AllowMockObjectsWithoutExpectations]
@@ -177,8 +175,8 @@ class UrlsControllerTest extends AbstractTest
      */
     private function injectNeuteredFeatureSet(): void
     {
-        // dispatch() must echo the event back so urls() reads the unchanged ProjectUrls;
-        // loadForProject() is a no-op so no project metadata / feature loading occurs.
+        // dispatch() echoes any event back unchanged; loadForProject() is a no-op so no
+        // project metadata / feature loading occurs.
         $featureSet = $this->createMock(FeatureSet::class);
         $featureSet->method('dispatch')->willReturnArgument(0);
         $this->setProp('featureSet', $featureSet);
@@ -220,62 +218,6 @@ class UrlsControllerTest extends AbstractTest
             $this->assertArrayHasKey('urls', $captured);
             // getProjectData() returned no rows (stubbed PDO) -> empty render shape.
             $this->assertSame(['files' => [], 'jobs' => []], $captured['urls']);
-        } finally {
-            AppConfig::$SKIP_SQL_CACHE = $previousSkip;
-        }
-    }
-
-    /**
-     * The event-dispatch seam must be honoured: a feature that rewrites the formatted
-     * payload through the ProjectUrlsEvent is reflected in the emitted JSON.
-     *
-     * @throws \ReflectionException
-     * @throws \PHPUnit\Framework\MockObject\Exception
-     * @throws Exception
-     * @throws \Throwable
-     */
-    #[Test]
-    public function urls_emits_payload_rewritten_by_dispatched_event(): void
-    {
-        $previousSkip = AppConfig::$SKIP_SQL_CACHE;
-        AppConfig::$SKIP_SQL_CACHE = true;
-
-        try {
-            $activeJob = new JobStruct(['id' => self::BASE + 2, 'status_owner' => JobStatus::STATUS_ACTIVE]);
-            $project   = $this->seedProjectStruct(self::BASE + 1);
-
-            $this->controller->fakeJobs = [$activeJob];
-            $this->injectValidatorWithProject($project);
-
-            // FeatureSet rewrites the formatted object to a stub whose render() is sentinel data.
-            $rewritten = new class {
-                /** @return array<string, string> */
-                public function render(): array
-                {
-                    return ['files' => 'SENTINEL'];
-                }
-            };
-            $featureSet = $this->createMock(FeatureSet::class);
-            $featureSet->method('dispatch')->willReturnCallback(
-                function (ProjectUrlsEvent $event) use ($rewritten): ProjectUrlsEvent {
-                    $event->setFormatted($rewritten);
-                    return $event;
-                }
-            );
-            $this->setProp('featureSet', $featureSet);
-
-            $captured = null;
-            $this->responseMock->expects($this->once())
-                ->method('json')
-                ->with($this->callback(function (array $data) use (&$captured): bool {
-                    $captured = $data;
-                    return true;
-                }));
-
-            $this->controller->urls();
-
-            $this->assertIsArray($captured);
-            $this->assertSame(['files' => 'SENTINEL'], $captured['urls']);
         } finally {
             AppConfig::$SKIP_SQL_CACHE = $previousSkip;
         }

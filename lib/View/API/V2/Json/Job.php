@@ -19,7 +19,6 @@ use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Filter\OutsourceAvailableInfoEvent;
-use Model\FeaturesBase\Hook\Event\Filter\ProjectUrlsEvent;
 use Model\Comments\CommentDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -240,7 +239,7 @@ class Job
             }
         }
 
-        return $this->fillUrls($result, $chunk, $project, $featureSet);
+        return $this->fillUrls($result, $chunk, $project);
     }
 
 
@@ -256,18 +255,11 @@ class Job
      * @throws NotFoundException
      * @throws Exception
      */
-    protected function fillUrls(array $result, JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet): array
+    protected function fillUrls(array $result, JobStruct $chunk, ProjectStruct $project): array
     {
         $projectData = (new ProjectDao($this->database))->setCacheTTL(60 * 60 * 24)->getProjectData((int)$project->id, $project->password);
 
         $formatted = new ProjectUrls($projectData, new ChunkReviewDao($this->database));
-
-        $projectUrlsEvent = new ProjectUrlsEvent($formatted);
-        $featureSet->dispatch($projectUrlsEvent);
-        $formatted = $projectUrlsEvent->getFormatted();
-        if (!$formatted instanceof ProjectUrls) {
-            throw new Exception('Invalid projectUrls hook payload');
-        }
 
         $urlsObject = $formatted->render(true);
         $result['urls'] = $urlsObject['jobs'][$chunk->id]['chunks'][$chunk->password] ?? [];

@@ -141,7 +141,7 @@ class Chunk extends \View\API\V2\Json\Chunk
             $result = static::populateRevisePasswords($chunkReview, $result);
         }
 
-        return $this->fillUrls($result, $chunk, $project, $featureSet);
+        return $this->fillUrls($result, $chunk, $project);
     }
 
     /**

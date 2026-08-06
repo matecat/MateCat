@@ -6,7 +6,6 @@ use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
-use Model\FeaturesBase\Hook\Event\Filter\AnalysisBeforeMTGetContributionEvent;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use TypeError;
@@ -119,10 +118,6 @@ class EngineService implements EngineServiceInterface
             if (!isset($engineConfig['job_id'])) {
                 $engineConfig['job_id'] = $queueElement->params->id_job;
             }
-
-            $analysisEvent = new AnalysisBeforeMTGetContributionEvent($engineConfig, $mtEngine, $queueElement);
-            $featureSet->dispatch($analysisEvent);
-            $engineConfig = $analysisEvent->getConfig();
 
             $engineResponse = $mtEngine->get($engineConfig);
 

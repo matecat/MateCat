@@ -208,26 +208,4 @@ abstract class BaseFeature implements IBaseFeature
     {
     }
 
-    /**
-     *
-     * Return a list of files in build path of a plugin
-     *
-     * @return list<string>|null
-     * @throws LogicException
-     */
-    public function getBuildFiles(): ?array
-    {
-        $path = realpath($this->getPluginBasePath() . '/../static/build');
-        if ($path === false) {
-            return null;
-        }
-
-        $files = scandir($path);
-        if ($files === false) {
-            return null;
-        }
-
-        return $files;
-    }
-
 }
