@@ -62,7 +62,13 @@ class PasswordResetModel
     /**
      * Retrieves the user associated with the reset token.
      *
+     * Arriving without a token is something the caller is free to get wrong — a stale form, a
+     * session that never passed through the link — so it is refused as a bad request. A
+     * RuntimeException would fall to the default arm of Bootstrap::exceptionHandler() and answer
+     * 500 for it.
+     *
      * @return ?UserStruct The user associated with the reset token, or null if not found.
+     * @throws ValidationError If the request carries no reset token at all.
      * @throws Exception If an error occurs while retrieving the user.
      *
      */
@@ -70,7 +76,7 @@ class PasswordResetModel
      {
          if (!isset($this->user)) {
              $this->user = $this->userDao->getByScopedConfirmationToken(
-                 $this->token ?? throw new RuntimeException('Missing reset token'),
+                 $this->token ?? throw new ValidationError('Missing reset token'),
                  AuthTokenScope::PasswordReset
              );
          }
