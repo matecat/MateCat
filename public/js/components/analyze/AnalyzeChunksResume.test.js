@@ -37,18 +37,41 @@ const jobsAnalysis = [
   },
 ]
 
-const renderComponent = () =>
+// A job that was already split: two chunks under one id, which is the only branch that renders Merge.
+const secondChunk = {...chunk, password: 'b6c963d5gf63'}
+
+const splitProject = project.setIn(
+  ['jobs'],
+  fromJS([
+    {id: JOB_ID, password: chunk.password},
+    {id: JOB_ID, password: secondChunk.password},
+  ]),
+)
+
+const splitJobsAnalysis = [{...jobsAnalysis[0], chunks: [chunk, secondChunk]}]
+
+const renderComponent = ({
+  projectProp = project,
+  jobsAnalysisProp = jobsAnalysis,
+} = {}) =>
   render(
     <AnalyzeChunksResume
-      project={project}
-      jobsAnalysis={jobsAnalysis}
+      project={projectProp}
+      jobsAnalysis={jobsAnalysisProp}
       status="DONE"
       showAnalysis={true}
       openAnalysisReport={() => {}}
     />,
   )
 
+const renderSplitJob = () =>
+  renderComponent({
+    projectProp: splitProject,
+    jobsAnalysisProp: splitJobsAnalysis,
+  })
+
 const splitButton = () => screen.queryByText('Split')?.closest('.split.button')
+const mergeButton = () => screen.queryByText('Merge')?.closest('.merge.button')
 
 describe('AnalyzeChunksResume split button', () => {
   beforeEach(() => {
@@ -116,6 +139,68 @@ describe('AnalyzeChunksResume split button', () => {
     expect(
       await screen.findByText(
         'Only the project owner or a member of its team can split a job',
+      ),
+    ).toBeInTheDocument()
+  })
+})
+
+// Merge is the other half of the same restructure permission: SplitJobController::merge() runs the same
+// enforceRestructureAccess() as apply(), so a caller who may not split may not merge either. These
+// mirror the split cases above rather than sharing them, because the two buttons live in different
+// render branches — merge only exists for a job that already has more than one chunk.
+describe('AnalyzeChunksResume merge button', () => {
+  beforeEach(() => {
+    global.config = {
+      basepath: 'http://localhost/',
+      enableMultiDomainApi: false,
+      jobAnalysis: false,
+      splitFeatureAvailable: true,
+      splitEnabled: true,
+    }
+    jest.spyOn(ModalsActions, 'openMergeModal').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  test('is clickable when the caller may merge', async () => {
+    renderSplitJob()
+
+    const button = mergeButton()
+    expect(button).toBeInTheDocument()
+    expect(button).not.toHaveClass('merge-not-allowed')
+
+    await userEvent.click(button)
+
+    expect(ModalsActions.openMergeModal).toHaveBeenCalledTimes(1)
+  })
+
+  test('stays visible but inert when the caller may not merge', async () => {
+    global.config.splitEnabled = false
+
+    renderSplitJob()
+
+    const button = mergeButton()
+    expect(button).toBeInTheDocument()
+    expect(button).toHaveClass('merge-not-allowed')
+    expect(button).toHaveAttribute('aria-disabled', 'true')
+
+    await userEvent.click(button)
+
+    expect(ModalsActions.openMergeModal).not.toHaveBeenCalled()
+  })
+
+  test('explains on hover why the caller may not merge', async () => {
+    global.config.splitEnabled = false
+
+    renderSplitJob()
+
+    await userEvent.hover(mergeButton())
+
+    expect(
+      await screen.findByText(
+        'Only the project owner or a member of its team can merge a job',
       ),
     ).toBeInTheDocument()
   })
