@@ -366,6 +366,11 @@ class JobsControllerTest extends AbstractTest
 
         $this->reflector->getProperty('database')->setValue($real, obtainTestDatabase());
 
+        // The onSuccess closure below builds a ProjectAccessValidator with the acting user, and $user is
+        // a typed property with no default. LoginValidator — appended before this closure runs — always
+        // initializes it in the pipeline; invoking the closure directly has to stand in for that.
+        $this->reflector->getProperty('user')->setValue($real, new UserStruct());
+
         $paramsProp = $this->reflector->getProperty('params');
         $paramsProp->setValue($real, $params);
 

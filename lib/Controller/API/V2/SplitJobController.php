@@ -10,6 +10,7 @@ use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Exception;
 use InvalidArgumentException;
 use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\JobSplitMerge\JobSplitMergeManager;
@@ -222,7 +223,7 @@ class SplitJobController extends KleinController
      */
     protected function getProjectJobs(ProjectStruct $project): array
     {
-        return (new JobDao($this->getDatabase()))->getNotDeletedByProjectId((int) $project->id);
+        return (new JobDao($this->getDatabase()))->getNotDeletedByProjectId((int)$project->id);
     }
 
     /**
@@ -239,7 +240,19 @@ class SplitJobController extends KleinController
     private function loadProjectForRestructure(int $project_id, string $project_pass, bool $split_raw_words = false): array
     {
         $projectStructure = $this->getProjectData($project_id, $project_pass, $split_raw_words);
-        $this->enforceRestructureAccess($projectStructure['project']);
+
+        // Translated's own staff are exempt from the owner-or-member rule: they restructure customer
+        // projects they neither own nor share a team with, which is support work rather than an IDOR.
+        // Who counts as internal is the Translated plugin's answer, not this controller's — the event is
+        // a filter, so the plugin marks it and we read the mark back. Nothing here throws: dispatch()
+        // never does, isInternal() defaults to false, and so a feature set with no listener for this
+        // event — the plugin not autoloaded, the handler removed — leaves the check in force. Fail closed
+        // is the only acceptable default: reading this the other way round would silently drop the
+        // authorization for every caller.
+        $event = $this->getFeatureSet()->dispatch(new IsAnInternalUserEvent($this->getUser()->email ?? ''));
+        if (!$event->isInternal()) {
+            $this->enforceRestructureAccess($projectStructure['project']);
+        }
 
         return $projectStructure;
     }
@@ -254,27 +267,20 @@ class SplitJobController extends KleinController
      * identity that came by an id and password some other way. The password proves knowledge of the
      * project, not standing over it.
      *
-     * The owner is allowed explicitly rather than left to the membership lookup, because a project
-     * outlives its owner's membership of the team it sits in: it can be moved to another team, or the
-     * owner can be removed from the one it is in. On the development dataset that is 1 project of 1205,
-     * plus 9 more carrying no team at all — membership alone would take those away from the person who
-     * created them, which would be a regression and not a fix.
+     * Owner-or-member is the whole rule, and it lives in ProjectAccessValidator rather than here: the
+     * owner short-circuit is not a property of restructuring, it is a property of standing over a
+     * project, so every caller of that validator wants it. See the validator for why the owner cannot be
+     * left to the membership lookup.
      *
-     * Compared strictly, and only when the owner is non-empty: a project created by an unauthenticated
-     * caller carries id_customer = '' (CreateProjectController), and an empty owner must match nobody.
+     * What stays here is the choke point: one method the three routes pass through, named after what it
+     * enforces, so the check cannot be lost by a fourth action added later.
      *
      * @throws AuthorizationError
      * @throws Throwable
      */
     protected function enforceRestructureAccess(ProjectStruct $project): void
     {
-        $ownerEmail = $project->id_customer;
-
-        if ($ownerEmail !== '' && $ownerEmail === $this->getUser()->email) {
-            return;
-        }
-
-        (new ProjectAccessValidator($this, $project))->validate();
+        (new ProjectAccessValidator($this, $project, $this->getUser()))->validate();
     }
 
     /**
@@ -287,7 +293,7 @@ class SplitJobController extends KleinController
     protected function getProjectData(int $project_id, string $project_pass, bool $split_raw_words = false): array
     {
         $count_type = $split_raw_words ? ProjectsMetadataMarshaller::SPLIT_RAW_WORD_TYPE->value : ProjectsMetadataMarshaller::SPLIT_EQUIVALENT_WORD_TYPE->value;
-        $project_struct = (new ProjectDao($this->getDatabase()))->findByIdAndPassword($project_id, $project_pass, 60 * 60);
+        $project_struct = (new ProjectDao($this->getDatabase()))->findByIdAndPassword($project_id, $project_pass);
 
         $pManager = new JobSplitMergeManager($project_struct, $this->getDatabase(), $this->outsourceCartStore(), $this->user);
 

@@ -20,6 +20,11 @@ import Split from '../../../img/icons/Split'
 import Merge from '../../../img/icons/Merge'
 import HelpCircle from '../../../img/icons/HelpCircle'
 
+const SPLIT_NOT_ALLOWED_HINT =
+  'Only the project owner or a member of its team can split a job'
+const MERGE_NOT_ALLOWED_HINT =
+  'Only the project owner or a member of its team can merge a job'
+
 class AnalyzeChunksResume extends React.Component {
   constructor(props) {
     super(props)
@@ -32,6 +37,19 @@ class AnalyzeChunksResume extends React.Component {
     }
 
     this.jobLinkRef = {}
+    this.refusedButtonRef = {}
+  }
+
+  // Tooltip positions itself from children.ref.current.getBoundingClientRect(), so the child it wraps
+  // has to carry a ref object or the tooltip silently lands at the top-left of the page. One per job,
+  // following the jobLinkRef idiom above. Split and merge share the map because a job renders one or
+  // the other, never both: merge belongs to the multi-chunk branch, split to the single-chunk one.
+  getRefusedButtonRef = (idJob) => {
+    if (!this.refusedButtonRef[idJob]) {
+      this.refusedButtonRef[idJob] = React.createRef()
+    }
+
+    return this.refusedButtonRef[idJob]
   }
 
   showDetails = (idJob) => (evt) => {
@@ -322,13 +340,36 @@ class AnalyzeChunksResume extends React.Component {
                   </div>
 
                   <div className="activity-icons splitted">
-                    <div
-                      className="merge ui blue basic button"
-                      onClick={this.openMergeModal(jobsAnalysis[indexJob].id)}
-                    >
-                      <Merge size={18} />
-                      Merge
-                    </div>
+                    {/* Merge is the same restructure operation as split and goes through the same
+                        authorization — SplitJobController::merge() reaches enforceRestructureAccess()
+                        exactly as apply() does — so it answers to the same flag. Leaving it live while
+                        split is greyed out offers the caller the half of the pair the API also
+                        refuses. */}
+                    {config.splitEnabled ? (
+                      <div
+                        className="merge ui blue basic button"
+                        onClick={this.openMergeModal(jobsAnalysis[indexJob].id)}
+                      >
+                        <Merge size={18} />
+                        Merge
+                      </div>
+                    ) : (
+                      <Tooltip
+                        content={MERGE_NOT_ALLOWED_HINT}
+                        stylePointerElement={{display: 'inline-flex'}}
+                      >
+                        <div
+                          ref={this.getRefusedButtonRef(
+                            jobsAnalysis[indexJob].id,
+                          )}
+                          className="merge ui blue basic button merge-not-allowed"
+                          aria-disabled={true}
+                        >
+                          <Merge size={18} />
+                          Merge
+                        </div>
+                      </Tooltip>
+                    )}
                   </div>
                 </div>
                 {chunksHtml}
@@ -437,7 +478,9 @@ class AnalyzeChunksResume extends React.Component {
                     <div
                       className={`activity-button  ${config.jobAnalysis ? 'disable-outsource' : ''}`}
                     >
-                      {!config.jobAnalysis && config.splitEnabled ? (
+                      {!config.jobAnalysis &&
+                      config.splitFeatureAvailable &&
+                      config.splitEnabled ? (
                         <div
                           className={
                             'split ui blue basic button ' + buttonsClass + ' '
@@ -449,6 +492,27 @@ class AnalyzeChunksResume extends React.Component {
                           <Split size={18} />
                           Split
                         </div>
+                      ) : !config.jobAnalysis &&
+                        config.splitFeatureAvailable ? (
+                        <Tooltip
+                          content={SPLIT_NOT_ALLOWED_HINT}
+                          stylePointerElement={{display: 'inline-flex'}}
+                        >
+                          <div
+                            ref={this.getRefusedButtonRef(
+                              jobsAnalysis[indexJob].id,
+                            )}
+                            className={
+                              'split ui blue basic button split-not-allowed ' +
+                              buttonsClass +
+                              ' '
+                            }
+                            aria-disabled={true}
+                          >
+                            <Split size={18} />
+                            Split
+                          </div>
+                        </Tooltip>
                       ) : null}
                       {/*{this.getOpenButton(job.toJS(), jobsAnalysis[indexJob].id)}*/}
                       {this.getDirectOpenButton(chunkAnalysis)}

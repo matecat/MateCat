@@ -1,6 +1,7 @@
 import React, {Component, createRef} from 'react'
 import {debounce, find} from 'lodash'
 import {tagSignatures, getTooltipTag} from '../utils/DraftMatecatUtils/tagModel'
+import {classifyPcPhTag} from '../utils/DraftMatecatUtils/pcTagUtils'
 import SegmentStore from '../../../stores/SegmentStore'
 import CatToolStore from '../../../stores/CatToolStore'
 import SegmentConstants from '../../../constants/SegmentConstants'
@@ -265,8 +266,7 @@ class TagEntity extends Component {
 
     const {phTagsCompressed} = this.state
     const isCompressedPh = entityName === 'ph' && phTagsCompressed && index >= 0
-    const pcRoleClass =
-      entityName === 'ph' && pcRole ? ` tag-pc-${pcRole}` : ''
+    const pcRoleClass = entityName === 'ph' && pcRole ? ` tag-pc-${pcRole}` : ''
     // A closing pc tag shows only its number, so it never needs a content tooltip.
     const isPcClose = entityName === 'ph' && pcRole === 'close'
     const showTooltip =
@@ -450,15 +450,33 @@ class TagEntity extends Component {
   highlightOnWarnings = () => {
     const {getUpdatedSegmentInfo, contentState, entityKey, isTarget} =
       this.props
-    const {tagMismatch, segmentOpened} = getUpdatedSegmentInfo()
+    const {tagMismatch, segmentOpened, missingTagsInTarget} =
+      getUpdatedSegmentInfo()
     const {data: entityData} = contentState.getEntity(entityKey) || {}
 
-    if (!segmentOpened || !tagMismatch) return
+    if (!segmentOpened) return
+    const {encodedText} = entityData
+
+    // pc (compressible) tags: the QA endpoint can't tell missing closing tags
+    // apart (every one converts to the same generic `</pc>` markup), so
+    // matching by reported string content doesn't work here. missingTagsInTarget
+    // is computed client-side by tag identity/numbering instead (see
+    // checkForMissingTag.js) and is exact, since its entries are the source's
+    // own tag objects.
+    if (classifyPcPhTag(encodedText)) {
+      if (isTarget) return ''
+      const isMissingInTarget = (missingTagsInTarget || []).some(
+        (tag) => tag?.data?.encodedText === encodedText,
+      )
+      return isMissingInTarget ? 'tag-mismatch-error' : ''
+    }
+
+    if (!tagMismatch) return
     let tagWarningStyle = ''
     if (tagMismatch.target && tagMismatch.target.length > 0 && isTarget) {
       // Todo: Check tag type and tag id instead of string
       tagMismatch.target.forEach((tagString) => {
-        if (entityData.encodedText === tagString) {
+        if (encodedText === tagString) {
           tagWarningStyle = 'tag-mismatch-error'
         }
       })
@@ -468,13 +486,13 @@ class TagEntity extends Component {
       !isTarget
     ) {
       tagMismatch.source.forEach((tagString) => {
-        if (entityData.encodedText === tagString) {
+        if (encodedText === tagString) {
           tagWarningStyle = 'tag-mismatch-error'
         }
       })
     } else if (tagMismatch.order && isTarget) {
       tagMismatch.order.forEach((tagString) => {
-        if (entityData.encodedText === tagString) {
+        if (encodedText === tagString) {
           tagWarningStyle = 'tag-mismatch-warning'
         }
       })

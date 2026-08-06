@@ -1,4 +1,29 @@
 import {getErrorCheckTag} from '../tagModel'
+import {classifyPcPhTag, createPcNumberer} from '../pcTagUtils'
+
+const isPcTag = (tag) => !!classifyPcPhTag(tag?.data?.encodedText)
+
+// pc (compressible) tags can't be matched by raw content/id like other tags:
+// every closing pc tag encodes to the same generic markup (XLIFF's `</pc>` has
+// no id), so two different missing closing tags are indistinguishable by
+// content alone. Match by identity instead — the dataRef base id when present,
+// otherwise the document-order pairing index (the same numbering shown as the
+// tag's "1", "2"... label) — combined with open/close role.
+const buildPcKeyedEntries = (tagMap) => {
+  const numberer = createPcNumberer()
+  return [...tagMap]
+    .sort((a, b) => a.offset - b.offset)
+    .map((tag) => {
+      const classified = classifyPcPhTag(tag?.data?.encodedText)
+      if (!classified) return null
+      const numbered = numberer(tag.data.encodedText)
+      const key = classified.hasDataRef
+        ? `d:${classified.baseId}:${classified.role}`
+        : `s:${numbered?.index}:${classified.role}`
+      return {tag, key}
+    })
+    .filter(Boolean)
+}
 
 const checkForMissingTags = (sourceTagMap, targetTagMap) => {
   if (!sourceTagMap) {
@@ -16,6 +41,21 @@ const checkForMissingTags = (sourceTagMap, targetTagMap) => {
         return getErrorCheckTag().includes(tag.data.name)
       })
     : []
+
+  const srcPcEntries = buildPcKeyedEntries(filteredSourceTagMap.filter(isPcTag))
+  const trgPcKeys = new Set(
+    buildPcKeyedEntries(filteredTargetTagMap.filter(isPcTag)).map(
+      (entry) => entry.key,
+    ),
+  )
+  const missingPcTags = srcPcEntries
+    .filter((entry) => !trgPcKeys.has(entry.key))
+    .map((entry) => entry.tag)
+
+  // pc tags are matched above; keep them out of the generic id/decodedText
+  // comparison below so they don't get (mis)matched a second time there.
+  const nonPcSourceTagMap = filteredSourceTagMap.filter((tag) => !isPcTag(tag))
+  const nonPcTargetTagMap = filteredTargetTagMap.filter((tag) => !isPcTag(tag))
 
   // Remove IDs, so tags without openTagId or closeTagId will be recognised when inserted while typing
   /*filteredSourceTagMap = filteredSourceTagMap.map( tagInSource => {
@@ -57,10 +97,10 @@ const checkForMissingTags = (sourceTagMap, targetTagMap) => {
       arr2Copy.splice(idxToRemove, 1)
     })
   }
-  let missingTagInTarget = arraySubtract(
-    filteredSourceTagMap,
-    filteredTargetTagMap,
-  )
+  let missingTagInTarget = [
+    ...arraySubtract(nonPcSourceTagMap, nonPcTargetTagMap),
+    ...missingPcTags,
+  ]
 
   // Sort tag by offset
   missingTagInTarget.sort((a, b) => {

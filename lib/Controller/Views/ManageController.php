@@ -35,7 +35,8 @@ class ManageController extends BaseKleinViewController implements IController
     {
         $this->setView("manage.html", [
             'outsource_service_login' => $this->_outsource_login_API,
-            'split_enabled' => new PHPTalBoolean(true),
+            'split_feature_available' => new PHPTalBoolean(true),
+            'split_feature_enabled' => new PHPTalBoolean(true),
             'enable_outsource' => new PHPTalBoolean(true)
         ]);
 
