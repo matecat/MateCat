@@ -24,6 +24,8 @@
     <?php endforeach; ?>
 </table>
 <p>
-    Run <code>revision:recount-drifted --dry-run</code> to review, or without <code>--dry-run</code>
-    to repair, via <code>internal_scripts/tasks/CommandLineTasks/SecondPassReview/FixChunkReviewPenaltyPointsDrift.php</code>.
+    Run <code>revision:recount-drifted &lt;uid&gt;</code> to review — that is the dry run and writes
+    nothing — then add <code>--live</code> to repair. <code>&lt;uid&gt;</code> is the operator the
+    repair is attributed to. Defined in
+    <code>internal_scripts/tasks/CommandLineTasks/SecondPassReview/FixChunkReviewPenaltyPointsDrift.php</code>.
 </p>

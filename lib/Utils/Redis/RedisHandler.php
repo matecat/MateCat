@@ -257,6 +257,21 @@ class RedisHandler
     }
 
     /**
+     * Advisory lock. Currently unused — do not adopt for anything that needs a correctness
+     * guarantee without fixing the two defects below first:
+     *
+     * 1. The TTL is the *wait budget*, not a lease: the key expires $wait_time_seconds after
+     *    acquisition regardless of how long the critical section actually takes, so work that
+     *    outlives the wait continues with the lock already gone and nothing reports it.
+     * 2. Acquisition is not atomic. `setnx` and `expire` are separate round trips; a process that
+     *    dies between them leaves the key with no TTL at all, and unlock() only deletes on an
+     *    identifier match that no later process can produce (the identifier embeds a per-instance
+     *    uuid4). That strands the lock permanently.
+     *
+     * For serializing database writes prefer SELECT ... FOR UPDATE inside the transaction that
+     * already exists — see ChunkReviewDao::lockByJobId(). It releases at commit rather than on a
+     * timer and has no fail-open path.
+     *
      * @throws Exception
      */
     public function tryLock(string $key, int $wait_time_seconds = 10): void

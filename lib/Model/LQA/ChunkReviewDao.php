@@ -13,6 +13,7 @@ use PDO;
 use PDOException;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use ReflectionException;
+use RuntimeException;
 use TypeError;
 use Utils\Constants\SourcePages;
 
@@ -138,10 +139,10 @@ class ChunkReviewDao extends AbstractDao
      *
      * @param int|null $source_page
      *
-     * @return int
+     * @return float
      * @throws PDOException
      */
-    public function getPenaltyPointsForChunk(JobStruct $chunk, ?int $source_page = null): int
+    public function getPenaltyPointsForChunk(JobStruct $chunk, ?int $source_page = null): float
     {
         if (is_null($source_page)) {
             $source_page = SourcePages::SOURCE_PAGE_REVISION;
@@ -167,7 +168,10 @@ class ChunkReviewDao extends AbstractDao
 
         $count = $stmt->fetch() ?: [];
 
-        return $count[0] ?? 0;
+        // penalty_points is double(20,2) and PDO hands the SUM back as a string; an int return
+        // type would silently truncate "7.50" to 7 and the recount would then write that
+        // truncated value back as an absolute, corrupting a previously correct row.
+        return (float)($count[0] ?? 0);
     }
 
     /**
@@ -661,6 +665,43 @@ class ChunkReviewDao extends AbstractDao
     }
 
     /**
+     * Serializes every writer of a job's qa_chunk_reviews rows by taking InnoDB row locks on them,
+     * held until the surrounding transaction commits or rolls back.
+     *
+     * This replaces the previous Redis advisory lock (ChunkReviewJobLock), which released in a
+     * `finally` block while the caller's transaction was still open — so a second process could
+     * enter the critical section, read state that did not include the uncommitted change, and write
+     * an absolute value over it. Locking the rows themselves ties the release to the commit, covers
+     * every writer automatically, and has no fail-open path.
+     *
+     * Deliberately locks by id_job rather than by row id: split/merge deletes all of a job's rows
+     * and recreates them, so there is no stable row to lock. Under REPEATABLE READ the id_job index
+     * range also gap-locks, which blocks concurrent inserts into the same job — including the
+     * recreate window — not just updates to rows that already exist.
+     *
+     * @throws PDOException
+     * @throws RuntimeException if called outside a transaction, where FOR UPDATE would acquire the
+     *                          locks and drop them again immediately, silently protecting nothing.
+     */
+    public function lockByJobId(int $id_job): void
+    {
+        $conn = $this->database->getConnection();
+
+        if (!$conn->inTransaction()) {
+            throw new RuntimeException(
+                'ChunkReviewDao::lockByJobId requires an open transaction: outside one, autocommit '
+                . 'releases the FOR UPDATE locks as soon as the statement returns.'
+            );
+        }
+
+        // ORDER BY id so concurrent callers walk the rows in the same order and cannot deadlock
+        // by grabbing the same set from opposite ends.
+        $stmt = $conn->prepare("SELECT id FROM qa_chunk_reviews WHERE id_job = :id_job ORDER BY id FOR UPDATE");
+        $stmt->execute(['id_job' => $id_job]);
+        $stmt->fetchAll();
+    }
+
+    /**
      *
      * @param int $chunkReviewID
      * @param array{chunkReview: ChunkReviewStruct, penalty_points?: float, reviewed_words_count: int, total_tte: int} $data
@@ -673,11 +714,17 @@ class ChunkReviewDao extends AbstractDao
         $project = $chunkReview->getChunk(new JobDao($this->database))->getProject(new ProjectDao($this->database));
         $lqaModel = $project->id_qa_model !== null ? (new ModelDao($this->database))->findById($project->id_qa_model) : null;
 
+        // The deltas are bound a second time, under their own :*_delta names, rather than read back
+        // with VALUES(). VALUES(col) yields "the value that would have been inserted" — which is the
+        // *clamped* expression in the VALUES list below — so a decrement would come back as
+        // GREATEST(-3, 0) = 0 and silently never apply. The insert branch needs the clamp (a
+        // subtract must not create a negative row); the update branch needs the raw signed delta.
+        //
         // in MySQL a sum of a null value to an integer returns 0
         $setClauses = [
-            "penalty_points = GREATEST( COALESCE( penalty_points, 0 ) + COALESCE( VALUES( penalty_points ), 0 ), 0 )",
-            "reviewed_words_count = GREATEST( reviewed_words_count + VALUES( reviewed_words_count ), 0 )",
-            "total_tte = GREATEST( total_tte + VALUES( total_tte ), 0 )",
+            "penalty_points = GREATEST( COALESCE( penalty_points, 0 ) + COALESCE( :penalty_points_delta, 0 ), 0 )",
+            "reviewed_words_count = GREATEST( reviewed_words_count + :reviewed_words_count_delta, 0 )",
+            "total_tte = GREATEST( total_tte + :total_tte_delta, 0 )",
         ];
 
         // is_pass needs a project LQA model to resolve force_pass_at; without one, the counters
@@ -696,23 +743,29 @@ class ChunkReviewDao extends AbstractDao
             :id_project,
             :password,
             :review_password,
-            :penalty_points,
-            :reviewed_words_count,
-            :total_tte
+            GREATEST( :penalty_points, 0 ),
+            GREATEST( :reviewed_words_count, 0 ),
+            GREATEST( :total_tte, 0 )
         ) ON DUPLICATE KEY UPDATE
         " . implode(",\n        ", $setClauses) . ";";
 
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
+        $penaltyPoints = empty($data['penalty_points']) ? 0 : $data['penalty_points'];
+
         $stmt->execute([
             'id' => $chunkReviewID,
             'id_job' => $chunkReview->id_job,
             'id_project' => $chunkReview->id_project,
             'review_password' => $chunkReview->review_password,
             'password' => $chunkReview->password,
-            'penalty_points' => empty($data['penalty_points']) ? 0 : $data['penalty_points'],
+            'penalty_points' => $penaltyPoints,
             'reviewed_words_count' => $data['reviewed_words_count'],
             'total_tte' => $data['total_tte'],
+            // same values again, unclamped, for the ON DUPLICATE KEY UPDATE deltas
+            'penalty_points_delta' => $penaltyPoints,
+            'reviewed_words_count_delta' => $data['reviewed_words_count'],
+            'total_tte_delta' => $data['total_tte'],
         ]);
     }
 

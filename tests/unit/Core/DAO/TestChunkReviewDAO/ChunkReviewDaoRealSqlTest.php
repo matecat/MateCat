@@ -9,9 +9,12 @@ use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use PDO;
+use PDOException;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use RuntimeException;
 use Utils\Constants\SourcePages;
+use Utils\Registry\AppConfig;
 use Utils\Constants\TranslationStatus;
 
 /**
@@ -301,11 +304,11 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
     public function getPenaltyPointsForChunk_default_revision_and_empty_other_page(): void
     {
         // null source_page defaults to REVISION (2) where the seeded qa_entry lives.
-        $this->assertSame(5, $this->dao->getPenaltyPointsForChunk($this->chunk($this->idJob, $this->jobPassword)));
+        $this->assertSame(5.0, $this->dao->getPenaltyPointsForChunk($this->chunk($this->idJob, $this->jobPassword)));
 
         // REVISION_2 has no entries -> SUM(null) -> 0.
         $this->assertSame(
-            0,
+            0.0,
             $this->dao->getPenaltyPointsForChunk(
                 $this->chunk($this->idJob, $this->jobPassword),
                 SourcePages::SOURCE_PAGE_REVISION_2
@@ -335,6 +338,45 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
         $this->assertSame(0.0, (float)$revisionMismatch['recorded_penalty_points']);
         $this->assertSame(5.0, (float)$revisionMismatch['actual_penalty_points']);
         $this->assertSame($this->jobPassword, $revisionMismatch['password']);
+    }
+
+    /**
+     * Regression: the recount and the detector must agree on fractional penalties.
+     *
+     * getPenaltyPointsForChunk() used to return int, so a true sum of 5.50 was recomputed as 5.
+     * recountAndUpdatePassFailResult() writes that value as an absolute, while the detector
+     * compares ROUND(actual, 2) != ROUND(recorded, 2) — so the repair wrote 5, the detector
+     * immediately re-flagged the same row, and revision:recount-drifted could never converge.
+     */
+    #[Test]
+    public function fractional_penalties_recount_and_detector_agree(): void
+    {
+        $category = $this->fixtures->makeQaCategory();
+        foreach ([1, 2] as $ignored) {
+            $entry = $this->fixtures->makeQaEntry($this->idSegment, $this->idJob, $category['id'], [
+                'source_page' => SourcePages::SOURCE_PAGE_REVISION,
+            ]);
+            $this->realSqlDb()->getConnection()
+                ->exec("UPDATE qa_entries SET penalty_points = 2.75 WHERE id = {$entry['id']}");
+        }
+
+        // Seeded fixture contributes 5, plus the two 2.75 entries above.
+        $recomputed = $this->dao->getPenaltyPointsForChunk($this->chunk($this->idJob, $this->jobPassword));
+        $this->assertSame(10.5, $recomputed, 'the fractional part must survive the recompute');
+
+        // Write it back the way recountAndUpdatePassFailResult() does — as an absolute value.
+        $this->realSqlDb()->getConnection()->exec(
+            "UPDATE qa_chunk_reviews SET penalty_points = {$recomputed}
+             WHERE id_job = {$this->idJob} AND source_page = " . SourcePages::SOURCE_PAGE_REVISION
+        );
+
+        foreach ($this->dao->findPenaltyPointsMismatches() as $row) {
+            $this->assertFalse(
+                $row['id_job'] === $this->idJob && $row['source_page'] === SourcePages::SOURCE_PAGE_REVISION,
+                'after recomputing, the detector must consider the row settled — it reported '
+                . $row['recorded_penalty_points'] . ' vs ' . $row['actual_penalty_points']
+            );
+        }
     }
 
     #[Test]
@@ -500,6 +542,147 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
         $this->assertSame(100, $row->reviewed_words_count);
         $this->assertSame(500, $row->total_tte);
         $this->assertNull($row->is_pass);
+    }
+
+    /**
+     * lockByJobId refuses to run outside a transaction. This is the one property that made the
+     * previous Redis lock useless: it released in a `finally` while the caller's transaction was
+     * still open. FOR UPDATE under autocommit fails the same way — the locks are taken and dropped
+     * before the caller does its work — so the guard has to be loud rather than silent.
+     */
+    #[Test]
+    public function lockByJobId_refuses_to_run_outside_a_transaction(): void
+    {
+        $conn = $this->realSqlDb()->getConnection();
+        $this->assertFalse($conn->inTransaction(), 'precondition: no ambient transaction');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('requires an open transaction');
+        $this->dao->lockByJobId($this->idJob);
+    }
+
+    /**
+     * Inside a transaction the lock is acquired against the real rows and, critically, is still
+     * held after the statement returns — that is what ties release to commit instead of to a TTL.
+     */
+    #[Test]
+    public function lockByJobId_holds_the_rows_until_commit(): void
+    {
+        $conn = $this->realSqlDb()->getConnection();
+        $conn->beginTransaction();
+
+        try {
+            $this->dao->lockByJobId($this->idJob);
+            $this->assertTrue($conn->inTransaction(), 'the lock must not end the transaction');
+
+            // A second connection must not be able to grab the same rows while we hold them.
+            // NOWAIT makes the contention immediate and deterministic instead of timing-dependent
+            // (no sleeps, so this cannot flake on loaded CI). The 4-arg form yields a genuinely
+            // separate handle rather than the per-test one.
+            $other = obtainTestDatabase(
+                AppConfig::$DB_SERVER,
+                AppConfig::$DB_USER,
+                AppConfig::$DB_PASS,
+                AppConfig::$DB_DATABASE
+            )->getConnection();
+            $other->beginTransaction();
+
+            try {
+                $stmt = $other->prepare(
+                    "SELECT id FROM qa_chunk_reviews WHERE id_job = :id_job FOR UPDATE NOWAIT"
+                );
+                $stmt->execute(['id_job' => $this->idJob]);
+                $stmt->fetchAll();
+                $this->fail('the second connection acquired locks we are still holding');
+            } catch (PDOException $e) {
+                // ER_LOCK_NOWAIT (3572) — proof the rows are genuinely locked by this transaction.
+                $this->assertStringContainsString('NOWAIT', $e->getMessage());
+            } finally {
+                $other->rollBack();
+            }
+        } finally {
+            $conn->rollBack();
+        }
+    }
+
+    /**
+     * The INSERT branch is reachable for a subtract via the deleteByJobId + recreate window in
+     * split/merge. Without a clamp in the VALUES list it would create a row with negative
+     * penalty_points.
+     */
+    #[Test]
+    public function passFailCountsAtomicUpdate_clamps_a_negative_delta_on_insert(): void
+    {
+        $project = $this->fixtures->makeProjectDetailed();
+        $job = $this->fixtures->makeJob($project['id'], ['password' => 'pf_neg', 'owner' => $this->ownerEmail]);
+
+        $chunkReview = new ChunkReviewStruct();
+        $chunkReview->id_job = $job['id'];
+        $chunkReview->id_project = $project['id'];
+        $chunkReview->password = 'pf_neg';
+        $chunkReview->review_password = 'pf_neg_rev';
+        $chunkReview->source_page = SourcePages::SOURCE_PAGE_REVISION;
+
+        $chunkReviewId = self::ASSIGNABLE_ID_FLOOR + 7101;
+        $this->fixtures->trackExisting('qa_chunk_reviews', ['id' => $chunkReviewId]);
+
+        // no row yet -> INSERT branch, with a subtract
+        $this->dao->passFailCountsAtomicUpdate($chunkReviewId, [
+            'chunkReview'          => $chunkReview,
+            'penalty_points'       => -3.5,
+            'reviewed_words_count' => -10,
+            'total_tte'            => -20,
+        ]);
+
+        $row = $this->dao->findById($chunkReviewId);
+        $this->assertInstanceOf(ChunkReviewStruct::class, $row);
+        $this->assertSame(0.0, $row->penalty_points, 'insert must not persist negative penalty_points');
+        $this->assertSame(0, $row->reviewed_words_count);
+        $this->assertSame(0, $row->total_tte);
+    }
+
+    /**
+     * Regression guard for the insert clamp: the ON DUPLICATE KEY UPDATE deltas must stay signed.
+     * Reading them back with VALUES(penalty_points) would return the clamped GREATEST(-3, 0) = 0
+     * from the VALUES list, so every decrement would silently become a no-op.
+     */
+    #[Test]
+    public function passFailCountsAtomicUpdate_still_applies_a_negative_delta_on_update(): void
+    {
+        $project = $this->fixtures->makeProjectDetailed();
+        $job = $this->fixtures->makeJob($project['id'], ['password' => 'pf_dec', 'owner' => $this->ownerEmail]);
+
+        $chunkReview = new ChunkReviewStruct();
+        $chunkReview->id_job = $job['id'];
+        $chunkReview->id_project = $project['id'];
+        $chunkReview->password = 'pf_dec';
+        $chunkReview->review_password = 'pf_dec_rev';
+        $chunkReview->source_page = SourcePages::SOURCE_PAGE_REVISION;
+
+        $chunkReviewId = self::ASSIGNABLE_ID_FLOOR + 7102;
+        $this->fixtures->trackExisting('qa_chunk_reviews', ['id' => $chunkReviewId]);
+
+        // first call inserts 10.50 / 100 / 500
+        $this->dao->passFailCountsAtomicUpdate($chunkReviewId, [
+            'chunkReview'          => $chunkReview,
+            'penalty_points'       => 10.5,
+            'reviewed_words_count' => 100,
+            'total_tte'            => 500,
+        ]);
+
+        // second call hits ON DUPLICATE KEY UPDATE with a subtract
+        $this->dao->passFailCountsAtomicUpdate($chunkReviewId, [
+            'chunkReview'          => $chunkReview,
+            'penalty_points'       => -3.5,
+            'reviewed_words_count' => -10,
+            'total_tte'            => -20,
+        ]);
+
+        $row = $this->dao->findById($chunkReviewId);
+        $this->assertInstanceOf(ChunkReviewStruct::class, $row);
+        $this->assertSame(7.0, $row->penalty_points, 'the decrement must actually apply');
+        $this->assertSame(90, $row->reviewed_words_count);
+        $this->assertSame(480, $row->total_tte);
     }
 
     #[Test]

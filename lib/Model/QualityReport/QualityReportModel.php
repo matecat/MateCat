@@ -146,6 +146,11 @@ class QualityReportModel
      */
     public function resetScore(int $event_id): void
     {
+        // Absolute write, and undo_data snapshots the values it reads — so the read and the write
+        // have to be one unit. Lock before reading, or a delta landing in between is both lost from
+        // the row and absent from the undo snapshot, making the reset unrecoverable.
+        (new ChunkReviewDao($this->database))->lockByJobId((int)$this->chunk->id);
+
         $chunkReview = $this->getChunkReview();
         $chunkReview->undo_data = json_encode([
             'reset_by_event_id' => $event_id,

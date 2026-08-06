@@ -142,6 +142,13 @@ class ChunkReviewModel implements IChunkReviewModel
     protected function _updatePassFailResult(ProjectStruct $project, array $data, UserStruct $actingUser): void
     {
         $chunkReviewDao = new ChunkReviewDao($this->database);
+
+        // The delta itself is applied by a single self-referential statement under the row lock, so
+        // it cannot lose an update to another delta. The lock is still taken here to serialize
+        // against the *absolute* writers (recountAndUpdatePassFailResult, resetScore,
+        // alterChunkReviewStruct), which read then write and would otherwise overwrite this delta.
+        $chunkReviewDao->lockByJobId((int)$this->chunk_review->id_job);
+
         $chunkReviewDao->passFailCountsAtomicUpdate((int)$this->chunk_review->id, $data);
         $chunkReviewDao->destroyCachesFor($this->chunk_review);
 
@@ -179,10 +186,18 @@ class ChunkReviewModel implements IChunkReviewModel
      */
     public function recountAndUpdatePassFailResult(ProjectStruct $project, UserStruct $actingUser): void
     {
+        $chunkReviewDao = new ChunkReviewDao($this->database);
+
+        // This method is a read-modify-write that ends in an *absolute* value, so it must not
+        // interleave with a concurrent delta: taking the row locks before the aggregate reads below
+        // means a delta either lands before the sums are taken (and is included in them) or waits
+        // until this transaction commits. Locking here rather than at each call site covers every
+        // caller of the recount — BatchReviewProcessor, split/merge, and the repair CLI alike.
+        $chunkReviewDao->lockByJobId((int)$this->chunk_review->id_job);
+
         /**
          * Count penalty points based on this source_page
          */
-        $chunkReviewDao = new ChunkReviewDao($this->database);
         $this->chunk_review->penalty_points = $chunkReviewDao->getPenaltyPointsForChunk($this->chunk, $this->chunk_review->source_page);
         $this->chunk_review->reviewed_words_count = $chunkReviewDao->getReviewedWordsCountForSecondPass($this->chunk, $this->chunk_review->source_page);
         $this->chunk_review->total_tte = $chunkReviewDao->countTimeToEdit($this->chunk, $this->chunk_review->source_page);

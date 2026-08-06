@@ -40,7 +40,6 @@ use RuntimeException;
 use TypeError;
 use Utils\Constants\SourcePages;
 use Utils\Logger\LoggerFactory;
-use Utils\LQA\ChunkReviewJobLock;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -253,42 +252,47 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
         $id_job = $projectStructure->jobToSplit ?? throw new RuntimeException('Job id is required when splitting a job');
 
-        ChunkReviewJobLock::run($id_job, function () use ($id_job, $projectStructure, $event) {
-            $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
-            $previousRevisionRecords = $chunkReviewDao->findByIdJob($id_job);
-            $project = $this->getProjectDao()->findById($projectStructure->idProject, 86400)
-                ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
+        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
 
-            $chunkReviewDao->deleteByJobId($id_job);
+        // Dispatched inside JobSplitMergeService::applySplit's transaction (begin -> splitJob ->
+        // commit), so these row locks are held for the whole delete+recreate+recount and released
+        // only at commit. The id_job index range is gap-locked too, which is what keeps another
+        // writer out of the window where the rows have been deleted but not yet recreated.
+        $chunkReviewDao->lockByJobId($id_job);
 
-            $jobDao = new JobDao($this->getDatabase());
-            $chunksStructArray = $jobDao->getNotDeletedById($id_job);
+        $previousRevisionRecords = $chunkReviewDao->findByIdJob($id_job);
+        $project = $this->getProjectDao()->findById($projectStructure->idProject, 86400)
+            ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
 
-            $reviews = [];
-            foreach ($previousRevisionRecords as $review) {
-                // check if $review belongs to a deleted job
-                $chunk = $jobDao->getByIdAndPassword($review->id_job, $review->password);
+        $chunkReviewDao->deleteByJobId($id_job);
 
-                if ($chunk !== null && !$chunk->isDeleted()) {
-                    $reviews = array_merge(
-                        $reviews,
-                        $this->createQaChunkReviewRecords(
-                            $chunksStructArray,
-                            $project,
-                            [
-                                'first_record_password' => $review->review_password,
-                                'source_page' => $review->source_page
-                            ]
-                        )
-                    );
-                }
+        $jobDao = new JobDao($this->getDatabase());
+        $chunksStructArray = $jobDao->getNotDeletedById($id_job);
+
+        $reviews = [];
+        foreach ($previousRevisionRecords as $review) {
+            // check if $review belongs to a deleted job
+            $chunk = $jobDao->getByIdAndPassword($review->id_job, $review->password);
+
+            if ($chunk !== null && !$chunk->isDeleted()) {
+                $reviews = array_merge(
+                    $reviews,
+                    $this->createQaChunkReviewRecords(
+                        $chunksStructArray,
+                        $project,
+                        [
+                            'first_record_password' => $review->review_password,
+                            'source_page' => $review->source_page
+                        ]
+                    )
+                );
             }
+        }
 
-            foreach ($reviews as $review) {
-                $model = new ChunkReviewModel($review, $this->getDatabase());
-                $model->recountAndUpdatePassFailResult($project, $event->actingUser);
-            }
-        }, 10);
+        foreach ($reviews as $review) {
+            $model = new ChunkReviewModel($review, $this->getDatabase());
+            $model->recountAndUpdatePassFailResult($project, $event->actingUser);
+        }
     }
 
     /**
@@ -304,46 +308,50 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
         $id_job = $projectStructure->jobToMerge ?? throw new RuntimeException('Job id is required when merging jobs');
 
-        ChunkReviewJobLock::run($id_job, function () use ($id_job, $projectStructure, $event) {
-            $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
-            $old_reviews = $chunkReviewDao->findByIdJob($id_job);
-            $project = $this->getProjectDao()->findById($projectStructure->idProject, 86400)
-                ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
+        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
 
-            $reviewGroupedData = [];
+        // Dispatched inside JobSplitMergeService::mergeALL's transaction, so the locks below span
+        // the delete+recreate+recount and release at commit. See postJobSplitted for why the gap
+        // lock on the id_job range matters here.
+        $chunkReviewDao->lockByJobId($id_job);
 
-            foreach ($old_reviews as $review) {
-                if (!isset($reviewGroupedData[$review->source_page])) {
-                    $reviewGroupedData[$review->source_page] = [
-                        'first_record_password' => $review->review_password
-                    ];
-                }
+        $old_reviews = $chunkReviewDao->findByIdJob($id_job);
+        $project = $this->getProjectDao()->findById($projectStructure->idProject, 86400)
+            ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
+
+        $reviewGroupedData = [];
+
+        foreach ($old_reviews as $review) {
+            if (!isset($reviewGroupedData[$review->source_page])) {
+                $reviewGroupedData[$review->source_page] = [
+                    'first_record_password' => $review->review_password
+                ];
             }
+        }
 
-            $chunkReviewDao->deleteByJobId($id_job);
+        $chunkReviewDao->deleteByJobId($id_job);
 
-            $chunksStructArray = (new JobDao($this->getDatabase()))->getNotDeletedById($id_job);
+        $chunksStructArray = (new JobDao($this->getDatabase()))->getNotDeletedById($id_job);
 
-            $reviews = [];
-            foreach ($reviewGroupedData as $source_page => $data) {
-                $reviews = array_merge(
-                    $reviews,
-                    $this->createQaChunkReviewRecords(
-                        $chunksStructArray,
-                        $project,
-                        [
-                            'first_record_password' => $data['first_record_password'],
-                            'source_page' => $source_page
-                        ]
-                    )
-                );
-            }
+        $reviews = [];
+        foreach ($reviewGroupedData as $source_page => $data) {
+            $reviews = array_merge(
+                $reviews,
+                $this->createQaChunkReviewRecords(
+                    $chunksStructArray,
+                    $project,
+                    [
+                        'first_record_password' => $data['first_record_password'],
+                        'source_page' => $source_page
+                    ]
+                )
+            );
+        }
 
-            foreach ($reviews as $review) {
-                $model = new ChunkReviewModel($review, $this->getDatabase());
-                $model->recountAndUpdatePassFailResult($project, $event->actingUser);
-            }
-        }, 10);
+        foreach ($reviews as $review) {
+            $model = new ChunkReviewModel($review, $this->getDatabase());
+            $model->recountAndUpdatePassFailResult($project, $event->actingUser);
+        }
     }
 
     /**
@@ -367,6 +375,11 @@ abstract class AbstractRevisionFeature extends BaseFeature
     public function alterChunkReviewStruct(AlterChunkReviewStructEvent $event): void
     {
         $struct = $event->event;
+
+        // Restores absolute values from undo_data, so it is a read-modify-write like resetScore:
+        // lock the job's rows before reading the review back.
+        (new ChunkReviewDao($this->getDatabase()))->lockByJobId((int)$struct->id_job);
+
         $review = (new ChunkReviewDao($this->getDatabase()))->findChunkReviews(new JobStruct(['id' => $struct->id_job, 'password' => $struct->password]))[0]
             ?? throw new ValidationError('chunk review not found');
 

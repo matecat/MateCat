@@ -94,6 +94,11 @@ abstract class AbstractTest extends TestCase
 
         $pdoStub = $this->createStub(PDO::class);
         $pdoStub->method('prepare')->willReturn($stmtStub);
+        // Every production path that writes qa_chunk_reviews runs inside a transaction opened by its
+        // controller, worker or CLI task, and ChunkReviewDao::lockByJobId() enforces that (SELECT
+        // ... FOR UPDATE outside a transaction would take the locks and drop them immediately).
+        // Default the stub to match, so unit tests exercise the real branch rather than the guard.
+        $pdoStub->method('inTransaction')->willReturn(true);
 
         $dbStub = $this->createStub(IDatabase::class);
         $dbStub->method('getConnection')->willReturn($pdoStub);

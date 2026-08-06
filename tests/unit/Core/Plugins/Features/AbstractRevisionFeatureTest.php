@@ -61,7 +61,21 @@ class AbstractRevisionFeatureTest extends AbstractTest
         $this->feature = new ConcreteTestRevisionFeature(new BasicFeatureStruct([
             'feature_code' => ConcreteTestRevisionFeature::FEATURE_CODE,
         ]));
-        $this->feature->setDatabase($this->createStub(IDatabase::class));
+        // The stub's connection has to report an open transaction: the write paths take
+        // qa_chunk_reviews row locks via ChunkReviewDao::lockByJobId(), which refuses to run
+        // outside one. In production these are all dispatched inside a controller transaction.
+        $stmtStub = $this->createStub(\PDOStatement::class);
+        $stmtStub->queryString = '';
+        $stmtStub->method('fetchAll')->willReturn([]);
+
+        $pdoStub = $this->createStub(\PDO::class);
+        $pdoStub->method('inTransaction')->willReturn(true);
+        $pdoStub->method('prepare')->willReturn($stmtStub);
+
+        $dbStub = $this->createStub(IDatabase::class);
+        $dbStub->method('getConnection')->willReturn($pdoStub);
+
+        $this->feature->setDatabase($dbStub);
     }
 
     #[Test]

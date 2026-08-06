@@ -94,7 +94,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $this->stmtStub->method('fetch')->willReturn([15]);
 
         $dao = new ChunkReviewDao($this->dbStub);
-        $this->assertSame(15, $dao->getPenaltyPointsForChunk($chunk));
+        $this->assertSame(15.0, $dao->getPenaltyPointsForChunk($chunk));
     }
 
     #[Test]
@@ -108,7 +108,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $this->stmtStub->method('fetch')->willReturn([20]);
 
         $dao = new ChunkReviewDao($this->dbStub);
-        $this->assertSame(20, $dao->getPenaltyPointsForChunk($chunk, SourcePages::SOURCE_PAGE_REVISION_2));
+        $this->assertSame(20.0, $dao->getPenaltyPointsForChunk($chunk, SourcePages::SOURCE_PAGE_REVISION_2));
     }
 
     #[Test]
@@ -122,7 +122,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $this->stmtStub->method('fetch')->willReturn(false);
 
         $dao = new ChunkReviewDao($this->dbStub);
-        $this->assertSame(0, $dao->getPenaltyPointsForChunk($chunk, 3));
+        $this->assertSame(0.0, $dao->getPenaltyPointsForChunk($chunk, 3));
     }
 
     #[Test]
@@ -136,7 +136,26 @@ class ChunkReviewDaoTest extends AbstractTest
         $this->stmtStub->method('fetch')->willReturn([null]);
 
         $dao = new ChunkReviewDao($this->dbStub);
-        $this->assertSame(0, $dao->getPenaltyPointsForChunk($chunk, 2));
+        $this->assertSame(0.0, $dao->getPenaltyPointsForChunk($chunk, 2));
+    }
+
+    /**
+     * penalty_points is double(20,2) and PDO returns SUM() as a string. With an int return type
+     * "7.50" silently became 7, and recountAndUpdatePassFailResult() then wrote that truncated
+     * value back as an absolute — so the repair corrupted rows it was meant to fix.
+     */
+    #[Test]
+    public function getPenaltyPointsForChunkKeepsFractionalSumFromStringResult(): void
+    {
+        $chunk = new JobStruct();
+        $chunk->id = 10;
+        $chunk->password = 'pass';
+
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetch')->willReturn(['7.50']);
+
+        $dao = new ChunkReviewDao($this->dbStub);
+        $this->assertSame(7.5, $dao->getPenaltyPointsForChunk($chunk));
     }
 
     #[Test]
