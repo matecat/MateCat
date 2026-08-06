@@ -9,8 +9,11 @@ use PDOStatement;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionMethod;
+use ReflectionProperty;
 use Utils\Registry\AppConfig;
+use Utils\Session\ArraySessionStore;
 
 abstract class AbstractTest extends TestCase
 {
@@ -59,6 +62,25 @@ abstract class AbstractTest extends TestCase
         parent::tearDown();
         $resultTime = microtime(true) - $this->thisTestStartingTime ?? microtime(true);
         echo " " . str_pad(get_class($this) . "::" . $this->name(), 35) . " - Did in " . round($resultTime, 6) . " seconds.\n";
+    }
+
+    /**
+     * Bind a working session store onto a controller double.
+     *
+     * A stateful controller receives its store from the constructor. Test doubles skip that
+     * constructor, so sessionStore() hands back StatelessSessionStore and the first session read
+     * throws — which is correct for a genuinely stateless controller and wrong here. The store is
+     * returned so a test can seed it and assert on it afterwards through all().
+     *
+     * @throws ReflectionException
+     */
+    protected function injectSessionStore(object $controller, ?ArraySessionStore $store = null): ArraySessionStore
+    {
+        $store ??= new ArraySessionStore();
+
+        (new ReflectionProperty($controller, 'sessionStore'))->setValue($controller, $store);
+
+        return $store;
     }
 
     /**

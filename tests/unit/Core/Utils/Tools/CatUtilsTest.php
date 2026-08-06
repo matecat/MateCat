@@ -26,6 +26,7 @@ use Model\Translations\SegmentTranslationStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
 use PDOException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionException;
 use ReflectionMethod;
@@ -897,6 +898,178 @@ class CatUtilsTest extends AbstractTest
     }
 
     // -------------------------------------------------------------------------
+    // replacePlaceholders: ctype extraction and per ctype weight
+    // -------------------------------------------------------------------------
+
+    /**
+     * @return list<array{string, string, string}>
+     */
+    public static function placeholderCTypeProvider(): array
+    {
+        return [
+            // the ctypes carrying the original tag ship an x-orig attribute between ctype and
+            // equiv-text: it must be skipped instead of being dragged into the ctype group, otherwise
+            // the ctype is unrecognisable and the <ph> family cannot be told apart from a variable
+            'original ph content, with x-orig' => [
+                '<ph id="mtc_1" ctype="x-original_ph_content" x-orig="PHBoIGlkPSIxIj54PC9waD4=" equiv-text="base64:eA=="/>',
+                ' ',
+                'a <ph> is a separator here, the word it may earn is granted by countSegmentRawWords',
+            ],
+            'original self closing ph with equiv-text, with x-orig' => [
+                '<ph id="mtc_2" ctype="x-original_ph" x-orig="PHBoIGlkPSIxIi8+" equiv-text="base64:eA=="/>',
+                ' ',
+                'a <ph> is a separator here, the word it may earn is granted by countSegmentRawWords',
+            ],
+            // <x/> is not part of the <ph> family and keeps weighing one word
+            'original x, with x-orig' => [
+                '<ph id="mtc_3" ctype="x-original_x" x-orig="PHggaWQ9IjEiLz4=" equiv-text="base64:eA=="/>',
+                ' P ',
+                'x-orig must be skipped without turning the ctype unrecognisable',
+            ],
+            // no x-orig here, and html/xml keep weighing zero words
+            'html snippet' => [
+                '<ph id="mtc_4" ctype="x-html" equiv-text="base64:Jmx0O2ImZ3Q7"/>',
+                '',
+                'html snippet must be dropped',
+            ],
+            'xml snippet' => [
+                '<ph id="mtc_5" ctype="x-xml" equiv-text="base64:Jmx0O2ImZ3Q7"/>',
+                '',
+                'xml snippet must be dropped',
+            ],
+            // the subfiltering does not pair x-html with x-orig today, but this is what guarantees the
+            // ctype is read on its own instead of being glued to whatever attribute follows it
+            'html snippet, with x-orig' => [
+                '<ph id="mtc_7" ctype="x-html" x-orig="PGI+" equiv-text="base64:Jmx0O2ImZ3Q7"/>',
+                '',
+                'ctype must still be recognised when x-orig sits between ctype and equiv-text',
+            ],
+            'variable' => [
+                '<ph id="mtc_6" ctype="x-twig" equiv-text="base64:e3tuYW1lfX0="/>',
+                ' P ',
+                'variable must count as one word',
+            ],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('placeholderCTypeProvider')]
+    public function testReplacePlaceholdersWeighsEachCTypeL(string $placeholder, string $expected, string $message): void
+    {
+        $method = new ReflectionMethod(CatUtils::class, 'replacePlaceholders');
+        $result = $method->invoke(null, $placeholder, ' P ');
+
+        $this->assertEquals($expected, $result, $message);
+    }
+
+    /**
+     * A segment made of <ph> tags and nothing else weighs one word overall, however many <ph> it holds
+     * and whatever flavour they are: wrapped into a Matecat placeholder by the Layer 0 to Layer 1
+     * transition (<ph> with content, <ph> with equiv-text) or left raw by it (dataRef). As soon as the
+     * segment carries something else, every <ph> is back to weighing zero.
+     *
+     * @return list<array{string, int}>
+     */
+    public static function phWordWeightProvider(): array
+    {
+        return [
+            // nothing but <ph>: one word overall
+            'single ph with content' => ['<ph id="1">{username}</ph>', 1],
+            'single raw dataRef ph' => ['<ph id="source1" dataRef="source1"/>', 1],
+            'two ph with content still weigh one word overall' => ['<ph id="1">a</ph><ph id="2">b</ph>', 1],
+            'three raw dataRef ph still weigh one word overall' => [
+                '<ph id="source1" dataRef="source1"/><ph id="source2" dataRef="source2"/><ph id="source3" dataRef="source3"/>',
+                1,
+            ],
+            'ph tags and punctuation only, punctuation is not translatable text' => [
+                '<ph id="source1" dataRef="source1"/>,<ph id="source2" dataRef="source2"/>',
+                1,
+            ],
+            // disp holds the display text of the inline code: it lives inside the tag, so it is not
+            // translatable text of the segment and must not stop the ph from earning its word
+            'dataRef ph carrying a disp' => ['<ph id="1" dataRef="d2" disp="itemname"/>', 1],
+            'dataRef ph carrying a disp of two words' => ['<ph id="1" dataRef="d2" disp="item name"/>', 1],
+            'dataRef ph carrying a disp, followed by a full stop' => ['<ph id="1" dataRef="d2" disp="itemname"/>.', 1],
+            'uppercase ph' => ['<PH id="1" dataRef="d2"/>', 1],
+            // translatable text around: every <ph> weighs zero
+            'ph with content among words' => ['hello <ph id="1">{username}</ph> world', 2],
+            'raw dataRef ph next to a word' => ['Ciao <ph id="source1" dataRef="source1"/>', 1],
+            'three raw dataRef ph and one word' => [
+                '<ph id="source1" dataRef="source1"/>Ciao <ph id="source2" dataRef="source2"/>,<ph id="source3" dataRef="source3"/>',
+                1,
+            ],
+            'mixed flavours next to a word' => ['Ciao <ph id="1">x</ph><ph id="source1" dataRef="source1"/>', 1],
+            'dataRef ph with a disp next to a word' => ['Ciao <ph id="1" dataRef="d2" disp="itemname"/>', 1],
+            // only <ph> earns the word, the other inline tags do not
+            'x tag alone weighs nothing' => ['<x id="1"/>', 0],
+            'g tag alone weighs nothing' => ['<g id="1"></g>', 0],
+            'x tag with a disp weighs nothing' => ['<x id="1" dataRef="d2" disp="itemname"/>', 0],
+            'a tag whose name only starts with ph weighs nothing' => ['<phrase id="1"/>', 0],
+            // An escaped tag earns no ph word: the subfiltering, not the counter, decides what a tag is,
+            // so the check runs on the string as it arrives, without decoding anything. Mind that the
+            // cleaning does decode the entities on its own, longstanding behaviour left untouched here,
+            // so such a segment ends up weighing zero instead of being counted as plain text.
+            'escaped ph earns no ph word' => ['&lt;ph id="1" dataRef="d2"/&gt;', 0],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('phWordWeightProvider')]
+    public function testCountSegmentRawWordsWeighsPhOnlyWhenAloneInTheSegmentL(string $segment, int $expected): void
+    {
+        $result = (new CatUtils($this->dbStub))->countSegmentRawWords($segment);
+        $this->assertEquals($expected, $result, $segment . ': wrong word count');
+    }
+
+    /**
+     * A CJK count is a character count, so the word granted to a ph only segment must reach the counter
+     * without the spaces padding the placeholder, otherwise it would be worth three.
+     */
+    #[Test]
+    public function testCountSegmentRawWordsWeighsAPhOnlySegmentOneWordInCjkL(): void
+    {
+        $result = (new CatUtils($this->dbStub))->countSegmentRawWords('<ph id="1" dataRef="d2"/>', 'zh-CN');
+        $this->assertEquals(1, $result);
+    }
+
+    /**
+     * Reads tests/resources/files/xliff/word-count-ph-cases.xliff and pairs every unit with the
+     * "expected words" written in the comment above it, so the fixture cannot drift from the code it
+     * documents. The fixture is xliff 2.0 because a 1.2 file is handed over to the filters, which rewrite
+     * every <ph> into an <x/> and would leave this rule untested.
+     *
+     * @return array<string, array{string, int}>
+     */
+    public static function phWordCountXliffFixtureProvider(): array
+    {
+        $xliff = file_get_contents(self::projectRoot() . '/tests/resources/files/xliff/word-count-ph-cases.xliff');
+        self::assertNotFalse($xliff, 'word count fixture not readable');
+
+        preg_match_all(
+            '#<!--\s*expected words:\s*(\d+).*?-->\s*<unit id="([^"]+)">.*?<source>(.*?)</source>#s',
+            $xliff,
+            $matches,
+            PREG_SET_ORDER
+        );
+        self::assertNotEmpty($matches, 'no annotated unit found in the word count fixture');
+
+        $cases = [];
+        foreach ($matches as $match) {
+            $cases[$match[2]] = [$match[3], (int)$match[1]];
+        }
+
+        return $cases;
+    }
+
+    #[Test]
+    #[DataProvider('phWordCountXliffFixtureProvider')]
+    public function testCountSegmentRawWordsMatchesTheXliffFixtureL(string $source, int $expected): void
+    {
+        $result = (new CatUtils($this->dbStub))->countSegmentRawWords($source);
+        $this->assertEquals($expected, $result, $source . ': fixture and word count disagree');
+    }
+
+    // -------------------------------------------------------------------------
     // Additional coverage: uncovered branches
     // -------------------------------------------------------------------------
 
@@ -1465,6 +1638,45 @@ class CatUtilsTest extends AbstractTest
         $struct->json = new Json();
         $result = $this->invokeGetRightExtractionParameter('file.json', $struct);
         $this->assertInstanceOf(Json::class, $result);
+    }
+
+    /**
+     * The JSON extraction parameters must reach the converter with inner_content_type intact,
+     * so the extracted text is interpreted as HTML instead of plain text.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function testGetRightExtractionParameterJsonCarriesInnerContentType(): void
+    {
+        $json = new Json();
+        $json->setInnerContentType('text/html');
+
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->json = $json;
+
+        $result = $this->invokeGetRightExtractionParameter('file.json', $struct);
+
+        $this->assertInstanceOf(Json::class, $result);
+        $this->assertSame('text/html', $result->jsonSerialize()['inner_content_type']);
+    }
+
+    /**
+     * CatUtils::deleteSha() discriminates cached conversions by sha1(json_encode($extractionParams)),
+     * so toggling inner_content_type must produce a different hash and force a re-conversion.
+     */
+    #[Test]
+    public function testJsonInnerContentTypeChangesExtractionParameterHash(): void
+    {
+        $plainText = new Json();
+
+        $html = new Json();
+        $html->setInnerContentType('text/html');
+
+        $this->assertNotSame(
+            sha1(json_encode($plainText)),
+            sha1(json_encode($html))
+        );
     }
 
     #[Test]

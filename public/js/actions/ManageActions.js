@@ -576,7 +576,9 @@ let ManageActions = {
    * @param members
    */
   createTeam: function (teamName, members) {
-    createTeam(teamName, members).then((response) => {
+    // returned so the caller can surface a rejection: the server refuses names that read
+    // as a link, and without this the 400 was an unhandled rejection and the user saw nothing
+    return createTeam(teamName, members).then((response) => {
       let team = response.team
       this.showReloadSpinner()
       UserActions.setTeamInStorage(team.id)
@@ -657,7 +659,8 @@ let ManageActions = {
   },
 
   changeTeamName: function (team, newName) {
-    updateTeamName(team, newName).then(function (data) {
+    // returned for the same reason as createTeam above
+    return updateTeamName(team, newName).then(function (data) {
       AppDispatcher.dispatch({
         actionType: ManageConstants.UPDATE_TEAM_NAME,
         oldTeam: team,

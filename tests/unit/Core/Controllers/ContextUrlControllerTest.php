@@ -566,6 +566,11 @@ class ContextUrlControllerTest extends AbstractTest
         $ref->getProperty('request')->setValue($controller, $this->createStub(Request::class));
         $ref->getProperty('response')->setValue($controller, $this->createStub(Response::class));
         $ref->getProperty('params')->setValue($controller, ['id_project' => '42', 'password' => 'abc123']);
+        // An identity is present but not logged in, which is the state the pipeline can actually reach:
+        // LoginValidator runs before this closure, so $user is always initialized by the time the
+        // ProjectAccessValidator is built with it. Leaving the typed property unset would fail with an
+        // initialization Error instead of the 401 this test is about.
+        $ref->getProperty('user')->setValue($controller, new UserStruct());
         $ref->getProperty('userIsLogged')->setValue($controller, false);
 
         $method = $ref->getMethod('registerValidators');

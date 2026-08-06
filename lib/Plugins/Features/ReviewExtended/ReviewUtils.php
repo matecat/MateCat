@@ -41,6 +41,7 @@ class ReviewUtils
     }
 
     /**
+     * @deprecated Backend should't be instgructed by the front-end about the revision level, this is an internal. It muist be retrieved by the password url.
      *
      * @param int|null $number
      *

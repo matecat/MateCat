@@ -76,8 +76,6 @@ class ConnectedServicesController extends AbstractStatefulKleinController
 
         (new ConnectedServiceDao($this->getDatabase()))->updateStruct($service, ['fields' => ['disabled_at']]);
 
-        $this->refreshClientSessionIfNotApi();
-
         $formatter = new ConnectedService([]);
         $this->response->json(['connected_service' => $formatter->renderItem($service)]);
     }

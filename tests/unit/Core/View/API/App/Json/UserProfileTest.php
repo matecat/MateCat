@@ -7,6 +7,8 @@ use Model\DataAccess\Database;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Predis\Client;
+use Predis\ClientInterface;
 use View\API\App\Json\UserProfile;
 
 #[CoversClass(UserProfile::class)]
@@ -24,10 +26,19 @@ class UserProfileTest extends AbstractTest
         return $user;
     }
 
+    /**
+     * The client is threaded straight through to Team, which only reaches for it once a team is
+     * rendered — every case here renders none, so a bare stub is enough.
+     */
+    private function redis(): ClientInterface
+    {
+        return $this->createStub(Client::class);
+    }
+
     public function testRenderItemReturnsExpectedKeys(): void
     {
         $view   = new UserProfile();
-        $result = $view->renderItem($this->makeUser(), [], [], [], new UserDao(obtainTestDatabase()));
+        $result = $view->renderItem($this->makeUser(), [], new UserDao(obtainTestDatabase()), $this->redis());
 
         $this->assertArrayHasKey('user', $result);
         $this->assertArrayHasKey('connected_services', $result);
@@ -39,7 +50,7 @@ class UserProfileTest extends AbstractTest
     {
         $user   = $this->makeUser(42);
         $view   = new UserProfile();
-        $result = $view->renderItem($user, [], [], [], new UserDao(obtainTestDatabase()));
+        $result = $view->renderItem($user, [], new UserDao(obtainTestDatabase()), $this->redis());
 
         $this->assertSame(42, $result['user']['uid']);
         $this->assertSame('Test', $result['user']['first_name']);
@@ -49,7 +60,7 @@ class UserProfileTest extends AbstractTest
     public function testRenderItemEmptyServicesReturnsEmptyArray(): void
     {
         $view   = new UserProfile();
-        $result = $view->renderItem($this->makeUser(), [], [], [], new UserDao(obtainTestDatabase()));
+        $result = $view->renderItem($this->makeUser(), [], new UserDao(obtainTestDatabase()), $this->redis());
 
         $this->assertSame([], $result['connected_services']);
     }
@@ -57,7 +68,7 @@ class UserProfileTest extends AbstractTest
     public function testRenderItemEmptyTeamsReturnsEmptyArray(): void
     {
         $view   = new UserProfile();
-        $result = $view->renderItem($this->makeUser(), [], [], [], new UserDao(obtainTestDatabase()));
+        $result = $view->renderItem($this->makeUser(), [], new UserDao(obtainTestDatabase()), $this->redis());
 
         $this->assertSame([], $result['teams']);
     }
@@ -65,7 +76,7 @@ class UserProfileTest extends AbstractTest
     public function testRenderItemMetadataNullWhenEmpty(): void
     {
         $view   = new UserProfile();
-        $result = $view->renderItem($this->makeUser(), [], [], [], new UserDao(obtainTestDatabase()));
+        $result = $view->renderItem($this->makeUser(), [], new UserDao(obtainTestDatabase()), $this->redis());
 
         $this->assertNull($result['metadata']);
     }
@@ -74,7 +85,7 @@ class UserProfileTest extends AbstractTest
     {
         $view     = new UserProfile();
         $metadata = ['key' => 'value', 'foo' => 'bar'];
-        $result = $view->renderItem($this->makeUser(), [], [], $metadata, new UserDao(obtainTestDatabase()));
+        $result = $view->renderItem($this->makeUser(), [], new UserDao(obtainTestDatabase()), $this->redis(), null, $metadata);
 
         $this->assertSame($metadata, $result['metadata']);
     }

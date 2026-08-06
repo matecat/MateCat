@@ -4,12 +4,15 @@ namespace Model\Users;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
+use Model\DataAccess\InvalidatesUserProfileCache;
 use PDO;
 use PDOException;
 use ReflectionException;
 
 class MetadataDao extends AbstractDao
 {
+
+    use InvalidatesUserProfileCache;
 
     const string TABLE = 'user_metadata';
 
@@ -112,6 +115,7 @@ class MetadataDao extends AbstractDao
      * @return MetadataStruct
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Exception
      */
     public function set(int $uid, string $key, array|string $value): MetadataStruct
     {
@@ -130,6 +134,7 @@ class MetadataDao extends AbstractDao
         ]);
 
         $this->destroyCacheKey($uid, $key);
+        $this->invalidateUserProfileCache($uid);
 
         return new MetadataStruct([
             'id' => $conn->lastInsertId(),
@@ -146,6 +151,7 @@ class MetadataDao extends AbstractDao
      *
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Exception
      */
     public function delete(int $uid, string $key): void
     {
@@ -160,5 +166,6 @@ class MetadataDao extends AbstractDao
             'key' => '%' . $key,
         ]);
         $this->destroyCacheKey($uid, $key);
+        $this->invalidateUserProfileCache($uid);
     }
 }

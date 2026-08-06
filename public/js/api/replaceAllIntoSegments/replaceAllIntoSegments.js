@@ -1,4 +1,4 @@
-import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
+import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain';
 
 /**
  * Replace all terms into segments
@@ -18,7 +18,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const replaceAllIntoSegments = async ({
   idJob = config.id_job,
-  password = config.password,
+  password = config.currentPassword,
   token,
   source,
   target,
@@ -26,10 +26,11 @@ export const replaceAllIntoSegments = async ({
   matchcase,
   exactmatch,
   replace,
+  includeLocked,
   revisionNumber = config.revisionNumber,
 }) => {
   const paramsData = {
-    job: idJob,
+    id_job: idJob,
     password,
     token,
     source,
@@ -40,6 +41,7 @@ export const replaceAllIntoSegments = async ({
     replace,
     inCurrentChunkOnly: true, // replace is fixed in context of current chunk
     revision_number: revisionNumber,
+    includeLocked,
   }
   const formData = new FormData()
 

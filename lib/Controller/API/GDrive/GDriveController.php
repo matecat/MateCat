@@ -90,11 +90,13 @@ class GDriveController extends AbstractStatefulKleinController
             if (!$this->isAsyncReq) {
                 $guid = Utils::uuid4();
                 (new CookieManager())->set(Constants::COOKIE_UPLOAD_TOKEN, $guid, time() + 86400);
-                $_SESSION[Constants::COOKIE_UPLOAD_TOKEN] = $_COOKIE[Constants::COOKIE_UPLOAD_TOKEN] = $guid;
+                $this->sessionStore()->set(Constants::COOKIE_UPLOAD_TOKEN, $guid);
+                $_COOKIE[Constants::COOKIE_UPLOAD_TOKEN] = $guid;
                 $this->gdriveUserSession->clearFileListFromSession();
             }
 
-            $guid = $_SESSION[Constants::COOKIE_UPLOAD_TOKEN] = $_COOKIE[Constants::COOKIE_UPLOAD_TOKEN];
+            $guid = $_COOKIE[Constants::COOKIE_UPLOAD_TOKEN];
+            $this->sessionStore()->set(Constants::COOKIE_UPLOAD_TOKEN, $guid);
 
             if (!Utils::isTokenValid($guid)) {
                 throw new InvalidArgumentException("Invalid Upload Token.", ConversionHandlerStatus::INVALID_TOKEN);
@@ -109,7 +111,7 @@ class GDriveController extends AbstractStatefulKleinController
             );
 
             $this->doImport($listOfIds);
-            $_SESSION[Constants::SESSION_ACTUAL_SOURCE_LANG] = $this->source_lang;
+            $this->sessionStore()->set(Constants::SESSION_ACTUAL_SOURCE_LANG, $this->source_lang);
 
             $this->finalize();
         } catch (Exception $e) {
@@ -166,7 +168,7 @@ class GDriveController extends AbstractStatefulKleinController
      */
     private function initSessionService(): void
     {
-        $this->gdriveUserSession = new Session($this->getDatabase());
+        $this->gdriveUserSession = new Session($this->getDatabase(), $this->sessionStore(), null, null, $this->user);
     }
 
     /**
@@ -280,7 +282,7 @@ class GDriveController extends AbstractStatefulKleinController
         // set a cookie to allow the frontend to call list endpoint
         $cookieManager->set(
             self::GDRIVE_LIST_COOKIE_NAME,
-            $_SESSION[Constants::COOKIE_UPLOAD_TOKEN],
+            $this->sessionStore()->get(Constants::COOKIE_UPLOAD_TOKEN),
             time() + 86400
         );
 
@@ -363,7 +365,7 @@ class GDriveController extends AbstractStatefulKleinController
      */
     public function changeConversionParameters(): void
     {
-        $originalSourceLang = $_SESSION[Constants::SESSION_ACTUAL_SOURCE_LANG];
+        $originalSourceLang = $this->sessionStore()->get(Constants::SESSION_ACTUAL_SOURCE_LANG);
         $newSourceLang = filter_var($this->request->param('source'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $newSegmentationRule = filter_var($this->request->param('segmentation_rule'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $newFiltersExtractionTemplate = filter_var($this->request->param('filters_extraction_parameters_template'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
@@ -402,10 +404,10 @@ class GDriveController extends AbstractStatefulKleinController
         $success = $this->gdriveUserSession->reConvert($newSourceLang, $newSegmentationRule, $filtersExtractionParameters);
 
         if ($success) {
-            $_SESSION[Constants::SESSION_ACTUAL_SOURCE_LANG] = $newSourceLang;
+            $this->sessionStore()->set(Constants::SESSION_ACTUAL_SOURCE_LANG, $newSourceLang);
             $this->source_lang = $newSourceLang;
         } else {
-            $_SESSION[Constants::SESSION_ACTUAL_SOURCE_LANG] = $originalSourceLang;
+            $this->sessionStore()->set(Constants::SESSION_ACTUAL_SOURCE_LANG, $originalSourceLang);
             $this->source_lang = $originalSourceLang;
         }
 

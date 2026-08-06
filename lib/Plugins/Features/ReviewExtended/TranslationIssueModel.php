@@ -20,6 +20,7 @@ use Model\LQA\EntryValidator;
 use Model\Projects\ProjectDao;
 use Model\Translations\SegmentTranslationDao;
 use Model\Projects\ProjectStruct;
+use Model\Users\UserStruct;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
 use Throwable;
@@ -65,6 +66,7 @@ class TranslationIssueModel
      * @param EntryDao              $entryDao
      * @param TranslationVersionDao $translationVersionDao
      * @param ProjectDao            $projectDao
+     * @param UserStruct            $actingUser
      *
      * @throws Exception
      * @throws TypeError|Throwable
@@ -76,7 +78,8 @@ class TranslationIssueModel
         ChunkReviewDao $chunkReviewDao,
         EntryDao $entryDao,
         TranslationVersionDao $translationVersionDao,
-        ProjectDao $projectDao
+        ProjectDao $projectDao,
+        private readonly UserStruct $actingUser
     ) {
         $this->issue = $issue;
         $this->chunkReviewDao = $chunkReviewDao;
@@ -133,9 +136,9 @@ class TranslationIssueModel
             $chunk_review_model = $this->createChunkReviewModel($this->chunk_review);
 
             if($penaltyPointDiff < 0){
-                $chunk_review_model->subtractPenaltyPoints(-$penaltyPointDiff, $this->project);
+                $chunk_review_model->subtractPenaltyPoints(-$penaltyPointDiff, $this->project, $this->actingUser);
             } elseif($penaltyPointDiff > 0){
-                $chunk_review_model->addPenaltyPoints($penaltyPointDiff, $this->project);
+                $chunk_review_model->addPenaltyPoints($penaltyPointDiff, $this->project, $this->actingUser);
             }
 
             return $this->issue;
@@ -167,7 +170,7 @@ class TranslationIssueModel
             $this->entryDao->createEntry($this->issue);
 
             $chunk_review_model = $this->createChunkReviewModel($this->chunk_review);
-            $chunk_review_model->addPenaltyPoints($this->issue->penalty_points ?? 0.0, $this->project);
+            $chunk_review_model->addPenaltyPoints($this->issue->penalty_points ?? 0.0, $this->project, $this->actingUser);
 
             return $this->issue;
         });
@@ -260,7 +263,7 @@ class TranslationIssueModel
                 throw new Exception('ChunkReview not found for delete operation');
             }
             $chunk_review_model = $this->createChunkReviewModel($chunkReview);
-            $chunk_review_model->subtractPenaltyPoints($this->issue->penalty_points ?? 0.0, $this->project);
+            $chunk_review_model->subtractPenaltyPoints($this->issue->penalty_points ?? 0.0, $this->project, $this->actingUser);
         });
     }
 

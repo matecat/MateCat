@@ -83,8 +83,12 @@
   top: 0;
   z-index: 2;
   width: 100%;
-  padding-left: 5%;
+  padding-left: 4.5%;
   background-color: colors.$grey5;
+
+  @media screen and (max-width: 1180px) {
+    padding-left: 6%;
+  }
 
   &.sticky-project-bar-compressed {
     padding-top: 10px;
@@ -112,20 +116,6 @@
     animation-direction: reverse;
   }
 
-  .sticky-project-bar-blink {
-    animation: blinkBackground 1s;
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
-  }
-
-  .sticky-project-bar-blink-wordcounter {
-    animation: blinkBackground 1s;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
-  }
-
   @keyframes changeFileAnimation {
     0% {
       transform: translateY(0);
@@ -146,18 +136,34 @@
       opacity: 1;
     }
   }
+}
 
-  @keyframes blinkBackground {
-    0% {
-      background-color: transparent;
-    }
+.project-bar-blink {
+  animation: blinkBackground 1.2s;
+  animation-iteration-count: 3;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
 
-    50% {
-      background-color: rgba(42, 140, 252, 0.25);
-    }
+.project-bar-blink-wordcounter {
+  animation: blinkBackground 1.2s;
+  animation-iteration-count: 3;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
 
-    100% {
-      background-color: transparent;
-    }
+@keyframes blinkBackground {
+  0% {
+    background-color: transparent;
+  }
+
+  50% {
+    background-color: rgba(42, 140, 252, 0.4);
+  }
+
+  100% {
+    background-color: transparent;
   }
 }

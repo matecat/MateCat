@@ -9,6 +9,7 @@ use Klein\Request;
 use Matecat\TestHelpers\AbstractTest;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Session\ArraySessionStore;
 
 /**
  * Minimal stub for BaseKleinViewController.
@@ -98,18 +99,16 @@ class SigninRedirectSimulatedException extends \RuntimeException {}
 class ViewLoginRedirectValidatorTest extends AbstractTest
 {
     private ViewLoginRedirectValidatorTestController $controller;
+    private ArraySessionStore $sessionStore;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->controller = new ViewLoginRedirectValidatorTestController();
-        unset($_SESSION['wanted_url']);
-    }
 
-    protected function tearDown(): void
-    {
-        unset($_SESSION['wanted_url']);
-        parent::tearDown();
+        // The stub skips the constructor that would build the store, and a fresh store per test case
+        // replaces the wanted_url unsetting this used to need in setUp, tearDown and each test.
+        $this->sessionStore = $this->injectSessionStore($this->controller);
     }
 
     // ─── A: logged in, no wanted_url — validator completes silently ──────────
@@ -118,7 +117,6 @@ class ViewLoginRedirectValidatorTest extends AbstractTest
     public function passes_silently_when_logged_in_and_no_wanted_url(): void
     {
         $this->controller->loginState = true;
-        unset($_SESSION['wanted_url']);
 
         $validator = new ViewLoginRedirectValidator($this->controller);
         $validator->_validate();
@@ -150,7 +148,7 @@ class ViewLoginRedirectValidatorTest extends AbstractTest
     public function calls_redirectToWantedUrl_when_logged_in_and_wanted_url_is_set(): void
     {
         $this->controller->loginState = true;
-        $_SESSION['wanted_url'] = 'some/previous/page';
+        $this->sessionStore->set('wanted_url', 'some/previous/page');
 
         $validator = new ViewLoginRedirectValidator($this->controller);
 
@@ -162,7 +160,7 @@ class ViewLoginRedirectValidatorTest extends AbstractTest
     public function redirect_stub_sets_redirectWasCalled_flag(): void
     {
         $this->controller->loginState = true;
-        $_SESSION['wanted_url'] = 'another/page';
+        $this->sessionStore->set('wanted_url', 'another/page');
 
         $validator = new ViewLoginRedirectValidator($this->controller);
 
@@ -181,7 +179,6 @@ class ViewLoginRedirectValidatorTest extends AbstractTest
     public function validate_wrapper_executes_success_callback_on_happy_path(): void
     {
         $this->controller->loginState = true;
-        unset($_SESSION['wanted_url']);
 
         $validator = new ViewLoginRedirectValidator($this->controller);
 
@@ -200,8 +197,8 @@ class ViewLoginRedirectValidatorTest extends AbstractTest
     #[Test]
     public function validate_wrapper_invokes_failure_callback_on_thrown_exception(): void
     {
-        $this->controller->loginState  = true;
-        $_SESSION['wanted_url']        = 'fail/path';
+        $this->controller->loginState = true;
+        $this->sessionStore->set('wanted_url', 'fail/path');
         // redirectToWantedUrl throws RuntimeException AFTER the sentinel
         $this->controller->redirectThrows = new \RuntimeException('redirect error', 500);
 

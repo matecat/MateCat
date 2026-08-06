@@ -197,7 +197,7 @@ class ConversionHandler
         );
         $this->filtersAdapter->logConversionToXliff($convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule, $extraction_parameters);
 
-        if ($convertResult['successful'] == 1) {
+        if (($convertResult['successful'] ?? false) === true) {
             //store converted content on a temporary path on disk (and off RAM)
             $cachedXliffPath = tempnam("/tmp", "MAT_XLF");
             file_put_contents($cachedXliffPath, $convertResult['xliff']);

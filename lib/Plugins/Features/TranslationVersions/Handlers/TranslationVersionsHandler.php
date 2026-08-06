@@ -10,6 +10,7 @@ use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Propagation\PropagationResult;
 use Model\Segments\SegmentDao;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
@@ -20,6 +21,7 @@ use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
+use Plugins\Features\TranslationVersions\StoreTranslationEventParams;
 use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 use RuntimeException;
 use Utils\Constants\TranslationStatus;
@@ -110,7 +112,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface
     /**
      * @throws Exception
      */
-    public function propagateTranslation(SegmentTranslationStruct $translationStruct): array
+    public function propagateTranslation(SegmentTranslationStruct $translationStruct): PropagationResult
     {
         return $this->segmentTranslationDao->propagateTranslation(
             $translationStruct,
@@ -181,46 +183,38 @@ class TranslationVersionsHandler implements VersionHandlerInterface
      * @throws Exception
      * @throws \TypeError
      */
-    public function storeTranslationEvent(array $params): void
+    public function storeTranslationEvent(StoreTranslationEventParams $params): void
     {
         // evaluate if the record is to be created, either the
         // status changed, or the translation changed
-        $user = $params['user'];
-
-        /** @var SegmentTranslationStruct $translation */
-        $translation = $params['translation'];
-
-        /** @var SegmentTranslationStruct $old_translation */
-        $old_translation = $params['old_translation'];
-
-        $source_page_code = $params['source_page_code'];
-
-        /** @var JobStruct $chunk */
-        $chunk = $params['chunk'];
-
-        /** @var FeatureSet $features */
-        $features = $params['features'];
-
-        /** @var ProjectStruct $project */
-        $project = $params['project'];
+        //
+        // The acting user used to be checked here, because the batch processor below attributes
+        // chunk-review updates to it and an unattributed update is indistinguishable from user 0.
+        // It is a required, non-nullable constructor argument now, so a caller that omits it cannot
+        // reach this method at all.
+        $translation = $params->translation;
+        $old_translation = $params->oldTranslation;
+        $chunk = $params->chunk;
+        $features = $params->features;
 
         $sourceEvent = $this->createTranslationEvent(
             $old_translation,
             $translation,
-            $user,
-            $source_page_code,
+            $params->user,
+            $params->sourcePageCode,
             $chunk,
+            $params->isAReplaceAllEvent
         );
 
         $translationEventsHandler = $this->createTranslationEventsHandler($chunk);
         $translationEventsHandler->setFeatureSet($features);
         $translationEventsHandler->addEvent($sourceEvent);
-        $translationEventsHandler->setProject($project);
+        $translationEventsHandler->setProject($params->project);
 
         // If propagated segments exist, start cycle here
         // There is no logic here, the version_number is simply got from $segmentTranslationBeforeChange and saved as is in translation events
-        if (isset($params['propagation']['segments_for_propagation']['propagated']) and !empty($params['propagation']['segments_for_propagation']['propagated'])) {
-            $segments_for_propagation = $params['propagation']['segments_for_propagation']['propagated'];
+        if (!empty($params->propagation->segmentsForPropagation['propagated'])) {
+            $segments_for_propagation = $params->propagation->segmentsForPropagation['propagated'];
             $segmentTranslations = [];
 
             if (!empty($segments_for_propagation['not_ice'])) {
@@ -242,18 +236,19 @@ class TranslationVersionsHandler implements VersionHandlerInterface
                 $propagatedEvent = $this->createTranslationEvent(
                     $segmentTranslationBeforeChange,
                     $propagatedSegmentAfterChange,
-                    $user,
-                    $source_page_code,
-                    $chunk,
+                    $params->user,
+                    $params->sourcePageCode,
+                    $chunk
+                // last parameter is false; a propagation event can never be a replaceAll event
                 );
 
-                $propagatedEvent->setPropagationSource(false);
+                $propagatedEvent->markAsPropagated();
                 $translationEventsHandler->addEvent($propagatedEvent);
             }
         }
 
         try {
-            $translationEventsHandler->save($this->createBatchReviewProcessor());
+            $translationEventsHandler->save($this->createBatchReviewProcessor($params->user));
             $this->jobDao->destroyCacheByProjectId($chunk->id_project);
             $this->projectDao->destroyFetchByIdCache($chunk->id_project, ProjectStruct::class);
         } catch (Exception $e) {
@@ -262,16 +257,21 @@ class TranslationVersionsHandler implements VersionHandlerInterface
     }
 
     /**
+     * `$user` is non-nullable: both call sites read it off `StoreTranslationEventParams`, where it is
+     * a required constructor argument. `TranslationEvent` still accepts null for
+     * `BulkSegmentStatusChangeWorker`'s sake, which is why the narrowing lives here.
+     *
      * @throws RuntimeException
      */
     protected function createTranslationEvent(
         SegmentTranslationStruct $old_translation,
         SegmentTranslationStruct $translation,
-        ?UserStruct $user,
+        UserStruct $user,
         int $source_page_code,
         JobStruct $chunk,
+        bool $isAReplaceAllEvent = false
     ): TranslationEvent {
-        return new TranslationEvent(
+        $translationEvent = new TranslationEvent(
             $old_translation,
             $translation,
             $user,
@@ -279,7 +279,13 @@ class TranslationVersionsHandler implements VersionHandlerInterface
             $chunk,
             new TranslationEventDao($this->database),
             new SegmentDao($this->database),
+            $isAReplaceAllEvent
         );
+        if ($isAReplaceAllEvent) {
+            $translationEvent->setShouldIncreaseTte(false);
+        }
+
+        return $translationEvent;
     }
 
     protected function createTranslationEventsHandler(JobStruct $chunk): TranslationEventsHandler
@@ -287,9 +293,9 @@ class TranslationVersionsHandler implements VersionHandlerInterface
         return new TranslationEventsHandler($chunk, new TranslationEventDao($this->database));
     }
 
-    protected function createBatchReviewProcessor(): BatchReviewProcessor
+    protected function createBatchReviewProcessor(UserStruct $actingUser): BatchReviewProcessor
     {
-        return new BatchReviewProcessor(new ChunkReviewDao($this->database));
+        return new BatchReviewProcessor(new ChunkReviewDao($this->database), $actingUser);
     }
 
 }

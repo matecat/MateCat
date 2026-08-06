@@ -8,6 +8,8 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\Segments\SegmentMetadataMarshaller;
 use Model\Segments\SegmentMetadataStruct;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Constants\EngineConstants;
+use Utils\Constants\TranslationStatus;
 use Utils\LQA\QA;
 use Utils\LQA\QA\ErrorManager;
 
@@ -990,6 +992,120 @@ class QATest extends AbstractTest
         $this->assertEquals(ErrorManager::ERROR, QA::ERROR);
         $this->assertEquals(ErrorManager::WARNING, QA::WARNING);
         $this->assertEquals(ErrorManager::INFO, QA::INFO);
+    }
+
+    // ========== isUnmodifiedFuzzyMatchConfirmation Tests ==========
+
+    #[Test]
+    public function isUnmodifiedFuzzyMatchConfirmationReturnsTrueForVerbatimFuzzyConfirmation(): void
+    {
+        $result = QA::isUnmodifiedFuzzyMatchConfirmation(
+            TranslationStatus::STATUS_TRANSLATED,
+            EngineConstants::TM,
+            '75',
+            'Old suggestion',
+            'Old suggestion'
+        );
+
+        $this->assertTrue($result);
+    }
+
+    #[Test]
+    public function isUnmodifiedFuzzyMatchConfirmationReturnsFalseWhenTranslationEdited(): void
+    {
+        $result = QA::isUnmodifiedFuzzyMatchConfirmation(
+            TranslationStatus::STATUS_TRANSLATED,
+            EngineConstants::TM,
+            '75',
+            'Old suggestion',
+            'An edited translation'
+        );
+
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function isUnmodifiedFuzzyMatchConfirmationReturnsFalseForExactMatch(): void
+    {
+        $result = QA::isUnmodifiedFuzzyMatchConfirmation(
+            TranslationStatus::STATUS_TRANSLATED,
+            EngineConstants::TM,
+            '100',
+            'Old suggestion',
+            'Old suggestion'
+        );
+
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function isUnmodifiedFuzzyMatchConfirmationReturnsFalseForZeroMatch(): void
+    {
+        $result = QA::isUnmodifiedFuzzyMatchConfirmation(
+            TranslationStatus::STATUS_TRANSLATED,
+            EngineConstants::TM,
+            '0',
+            'Old suggestion',
+            'Old suggestion'
+        );
+
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function isUnmodifiedFuzzyMatchConfirmationReturnsFalseForNonTMSource(): void
+    {
+        $result = QA::isUnmodifiedFuzzyMatchConfirmation(
+            TranslationStatus::STATUS_TRANSLATED,
+            EngineConstants::MT,
+            '75',
+            'Old suggestion',
+            'Old suggestion'
+        );
+
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function isUnmodifiedFuzzyMatchConfirmationReturnsFalseForDraftStatus(): void
+    {
+        $result = QA::isUnmodifiedFuzzyMatchConfirmation(
+            TranslationStatus::STATUS_DRAFT,
+            EngineConstants::TM,
+            '75',
+            'Old suggestion',
+            'Old suggestion'
+        );
+
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function isUnmodifiedFuzzyMatchConfirmationReturnsFalseForEmptySuggestion(): void
+    {
+        $result = QA::isUnmodifiedFuzzyMatchConfirmation(
+            TranslationStatus::STATUS_TRANSLATED,
+            EngineConstants::TM,
+            '75',
+            null,
+            'Old suggestion'
+        );
+
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function isUnmodifiedFuzzyMatchConfirmationIgnoresLeadingAndTrailingWhitespace(): void
+    {
+        $result = QA::isUnmodifiedFuzzyMatchConfirmation(
+            TranslationStatus::STATUS_APPROVED,
+            EngineConstants::TM,
+            '75',
+            'Old suggestion',
+            '  Old suggestion  '
+        );
+
+        $this->assertTrue($result);
     }
 
     // ========== Segment Language Edge Cases ==========

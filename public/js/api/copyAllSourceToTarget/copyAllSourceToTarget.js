@@ -1,4 +1,4 @@
-import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
+import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain';
 
 /**
  * Copy all source to target (segments)
@@ -11,12 +11,12 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const copyAllSourceToTarget = async ({
   idJob = config.id_job,
-  password = config.password,
+  password = config.currentPassword,
   revisionNumber = config.revisionNumber,
 } = {}) => {
   const paramsData = {
     id_job: idJob,
-    pass: password,
+    password: password,
     revision_number: revisionNumber ? revisionNumber : undefined,
   }
   const formData = new FormData()

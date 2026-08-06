@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Matecat\Core\Controller\API\App\Authentication;
 
+use Utils\Session\ArraySessionStore;
+use Utils\Session\SessionStore;
+
 use Controller\Abstracts\KleinController;
 use Controller\API\App\Authentication\SignupController;
 use Controller\API\Commons\Exceptions\ValidationError;
@@ -54,7 +57,7 @@ class TestableSignupController extends SignupController
         return parent::checkAndIncrementRateLimit($response, $identifier, $route, $maxRetries, $limiterService ?? $this->injectedRateLimiter);
     }
 
-    protected function createSignupModel(array $params, array &$session): SignupModel
+    protected function createSignupModel(array $params, SessionStore $session): SignupModel
     {
         return $this->mockSignupModel ?? parent::createSignupModel($params, $session);
     }
@@ -69,7 +72,7 @@ class TestableSignupController extends SignupController
         return $this->mockInvitedUser ?? parent::createInvitedUser();
     }
 
-    protected function createRedeemableProject(\Model\Users\UserStruct $user, array &$session): \Model\Users\RedeemableProject
+    protected function createRedeemableProject(\Model\Users\UserStruct $user, SessionStore $session): \Model\Users\RedeemableProject
     {
         return $this->mockRedeemableProject ?? parent::createRedeemableProject($user, $session);
     }
@@ -100,11 +103,11 @@ class SignupControllerTest extends AbstractTest
     private Request|MockObject $request;
     private Response $response;
     private RateLimiterService $rateLimiter;
+    private ArraySessionStore $sessionStore;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $_SESSION = [];
 
         $this->request = $this->createStub(Request::class);
         $this->response = new Response();
@@ -112,6 +115,10 @@ class SignupControllerTest extends AbstractTest
 
         $this->controller = new TestableSignupController();
         $this->controller->initWith($this->request, $this->response, $this->rateLimiter);
+
+        // The double skips the constructor that builds the store; a fresh one per case also replaces
+        // resetting $_SESSION here.
+        $this->sessionStore = $this->injectSessionStore($this->controller);
     }
 
     // ─── validateCreationRequest (private, via reflection) ───────────
@@ -372,7 +379,7 @@ class SignupControllerTest extends AbstractTest
         $project->method('getDestinationURL')->willReturn(null);
         $this->controller->mockRedeemableProject = $project;
 
-        $_SESSION['invited_to_team'] = ['team_id' => 42];
+        $this->sessionStore->set('invited_to_team', ['team_id' => 42]);
         $this->request->method('param')->willReturn('valid-token');
 
         $this->controller->confirm();
@@ -432,7 +439,7 @@ class SignupControllerTest extends AbstractTest
         $this->controller->setDatabase(obtainTestDatabase());
 
         $method = new ReflectionMethod(SignupController::class, 'createSignupModel');
-        $session = [];
+        $session = new ArraySessionStore();
         $params = ['email' => 'realbuild@example.com'];
 
         $signupModel = $method->invoke($this->controller, $params, $session);
@@ -462,7 +469,7 @@ class SignupControllerTest extends AbstractTest
         $user = new \Model\Users\UserStruct();
         $user->uid = 1;
         $method = new ReflectionMethod(SignupController::class, 'createRedeemableProject');
-        $session = [];
+        $session = new ArraySessionStore();
 
         $project = $method->invoke($this->controller, $user, $session);
 
@@ -518,5 +525,104 @@ class SignupControllerTest extends AbstractTest
         $this->controller->resendConfirmationEmail();
 
         $this->assertSame(200, $this->controller->getResponse()->code());
+    }
+
+    // ─── control characters in the password ───────────────────────────
+
+    #[Test]
+    public function validateCreationRequest_throws_when_password_contains_a_control_character(): void
+    {
+        $this->request->method('param')->willReturn([
+            'email' => 'test@example.com',
+            'password' => "Valid!Pass\tword1",
+            'password_confirmation' => "Valid!Pass\tword1",
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'wanted_url' => 'https://example.com',
+        ]);
+
+        // A tab reaches validation encoded as &#9; by the sanitising filter, so the generic illegal
+        // character rule already rejects it, but only as a side effect of that encoding and with a
+        // message that never says what was wrong. The rule has to be explicit about it.
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('control characters');
+        $this->invokeValidateCreationRequest();
+    }
+
+    #[Test]
+    public function validateCreationRequest_throws_when_password_contains_a_null_byte(): void
+    {
+        $this->request->method('param')->willReturn([
+            'email' => 'test@example.com',
+            'password' => "Valid!Password1\0",
+            'password_confirmation' => "Valid!Password1\0",
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'wanted_url' => 'https://example.com',
+        ]);
+
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('control characters');
+        $this->invokeValidateCreationRequest();
+    }
+
+    #[Test]
+    public function validateCreationRequest_accepts_a_password_of_printable_characters(): void
+    {
+        $this->request->method('param')->willReturn([
+            'email' => 'test@example.com',
+            'password' => 'Valid!Password1',
+            'password_confirmation' => 'Valid!Password1',
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'wanted_url' => 'https://example.com',
+        ]);
+
+        // The guard must not narrow what a legitimate user may choose: every printable character is
+        // still acceptable, and the value must survive validation unaltered.
+        $user = $this->invokeValidateCreationRequest();
+
+        $this->assertSame('Valid!Password1', $user['password']);
+    }
+
+    #[Test]
+    public function validateCreationRequest_accepts_a_password_containing_html_special_characters(): void
+    {
+        $this->request->method('param')->willReturn([
+            'email' => 'test@example.com',
+            'password' => 'Valid&Pass<word>1',
+            'password_confirmation' => 'Valid&Pass<word>1',
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'wanted_url' => 'https://example.com',
+        ]);
+
+        // These five characters are the ones the sanitising filter rewrites, and the special-character
+        // rule has always advertised them as valid choices. A password is compared against a hash and
+        // never rendered, so escaping it only shrinks the usable character set and has to reach the
+        // hash exactly as the user typed it.
+        $user = $this->invokeValidateCreationRequest();
+
+        $this->assertSame('Valid&Pass<word>1', $user['password']);
+    }
+
+    #[Test]
+    public function validateCreationRequest_measures_the_minimum_length_in_characters_not_bytes(): void
+    {
+        $this->request->method('param')->willReturn([
+            'email' => 'test@example.com',
+            'password' => '密碼密!碼碼碼',
+            'password_confirmation' => '密碼密!碼碼碼',
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'wanted_url' => 'https://example.com',
+        ]);
+
+        // Seven characters, nineteen bytes. Measured in bytes this clears a twelve character minimum
+        // while being far shorter than the rule intends, and the shortfall grows with every non-Latin
+        // alphabet.
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('at least 12 characters');
+        $this->invokeValidateCreationRequest();
     }
 }

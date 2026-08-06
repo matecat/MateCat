@@ -90,7 +90,7 @@ class ReviewsController extends KleinController
             //Add more specific validations, it's necessary to append after the first validation run because we need the project struct
             (new TeamProjectValidator($this))->setProject($this->project)->validate();
         })->onSuccess(function () {
-            (new ProjectAccessValidator($this, $this->project))->validate();
+            (new ProjectAccessValidator($this, $this->project, $this->getUser()))->validate();
         });
 
         $this->appendValidator($Validator);

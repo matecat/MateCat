@@ -9,6 +9,7 @@ import {
 import IconSearch from '../icons/IconSearch'
 import IconClose from '../icons/IconClose'
 import ManageActions from '../../actions/ManageActions'
+import {getApiErrorMessage} from '../../utils/getApiErrorMessage'
 import ModalsActions from '../../actions/ModalsActions'
 import IconEdit from '../icons/IconEdit'
 import Checkmark from '../../../img/icons/Checkmark'
@@ -30,6 +31,7 @@ export const ModifyTeam = ({team}) => {
   const [teamState, setTeamState] = useState(team)
   const [teamName, setTeamName] = useState(teamState.get('name'))
   const [isModifyingName, setIsModifyingName] = useState(false)
+  const [nameError, setNameError] = useState(null)
   const [emailsCollection, setEmailsCollection] = useState([])
   const [searchMember, setSearchMember] = useState('')
   const [removeUserId, setRemoveUserId] = useState()
@@ -203,7 +205,14 @@ export const ModifyTeam = ({team}) => {
 
   const saveTeamName = () => {
     if (teamName && teamName != teamState.get('name')) {
+      setNameError(null)
+      // The server refuses names that read as a link, because the name is quoted back in the
+      // invitation email. Keep the editor open on a rejection so the reason is visible next to
+      // the value that caused it and can be corrected in place.
       ManageActions.changeTeamName(teamState.toJS(), teamName)
+        .then(() => setIsModifyingName(false))
+        .catch((rejection) => setNameError(getApiErrorMessage(rejection)))
+      return
     }
     setIsModifyingName(false)
   }
@@ -256,7 +265,10 @@ export const ModifyTeam = ({team}) => {
                 className="team-modal-input"
                 type="text"
                 value={teamName}
-                onChange={(e) => setTeamName(e.currentTarget.value)}
+                onChange={(e) => {
+                  setNameError(null)
+                  setTeamName(e.currentTarget.value)
+                }}
                 autoFocus
                 onKeyDown={handleEnterKeyConfirmName}
               />
@@ -272,6 +284,7 @@ export const ModifyTeam = ({team}) => {
                 size={BUTTON_SIZE.ICON_STANDARD}
                 onClick={() => {
                   setIsModifyingName(false)
+                  setNameError(null)
                   setTeamName(teamState.get('name'))
                 }}
               >
@@ -290,6 +303,11 @@ export const ModifyTeam = ({team}) => {
                 <IconEdit size={18} />
               </Button>
             </div>
+          )}
+          {nameError && (
+            <p className="team-name-error" role="alert">
+              {nameError}
+            </p>
           )}
         </div>
       </div>

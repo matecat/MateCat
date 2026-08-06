@@ -133,7 +133,7 @@ class AppConfig
     public static string $AUTHCOOKIENAME = 'matecat_login_v6';
     public static string $SUPPORT_MAIL = 'the owner of this MateCat instance.';//the default string is 'the owner of this Matecat instance'
     public static int $ANALYSIS_WORDS_PER_DAYS = 3000;
-    public static int $AUTHCOOKIEDURATION = 86400 * 7;        // 24 hours
+    public static int $AUTHCOOKIEDURATION = 86400 * 7;        // 7 days
     public static int $MAX_UPLOAD_FILE_SIZE = 62914560;     // 60 * 1024 * 1024 // bytes
     public static int $MAX_UPLOAD_TMX_FILE_SIZE = 314572800;    // 300 * 1024 * 1024 // bytes
     public static int $MAX_NUM_FILES = 100;

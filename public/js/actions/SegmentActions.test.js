@@ -275,7 +275,7 @@ describe('SegmentActions.clickOnApprovedButton — mandatory issues gate', () =>
 
   test('opens issues panel when mandatory_issues is undefined (non-array defaults to required)', () => {
     CatToolStore.getJobMetadata.mockReturnValue({
-      project: {mandatory_issues: undefined},
+      job: {mandatory_issues: undefined},
     })
     SegmentActions.clickOnApprovedButton(makeSegment(), false)
     expect(openIssuesSpy).toHaveBeenCalledWith({sid: '1-1'}, true)
@@ -283,7 +283,7 @@ describe('SegmentActions.clickOnApprovedButton — mandatory issues gate', () =>
 
   test('opens issues panel when current revision is in mandatory_issues array', () => {
     CatToolStore.getJobMetadata.mockReturnValue({
-      project: {mandatory_issues: ['r1', 'r2']},
+      job: {mandatory_issues: ['r1', 'r2']},
     })
     SegmentActions.clickOnApprovedButton(makeSegment(), false)
     expect(openIssuesSpy).toHaveBeenCalledWith({sid: '1-1'}, true)
@@ -291,7 +291,7 @@ describe('SegmentActions.clickOnApprovedButton — mandatory issues gate', () =>
 
   test('skips issues panel when current revision is absent from mandatory_issues', () => {
     CatToolStore.getJobMetadata.mockReturnValue({
-      project: {mandatory_issues: ['r2']},
+      job: {mandatory_issues: ['r2']},
     })
     SegmentActions.clickOnApprovedButton(makeSegment(), false)
     expect(openIssuesSpy).not.toHaveBeenCalled()
@@ -299,7 +299,7 @@ describe('SegmentActions.clickOnApprovedButton — mandatory issues gate', () =>
 
   test('skips issues panel when mandatory_issues is empty (none required)', () => {
     CatToolStore.getJobMetadata.mockReturnValue({
-      project: {mandatory_issues: []},
+      job: {mandatory_issues: []},
     })
     SegmentActions.clickOnApprovedButton(makeSegment(), false)
     expect(openIssuesSpy).not.toHaveBeenCalled()
@@ -308,7 +308,7 @@ describe('SegmentActions.clickOnApprovedButton — mandatory issues gate', () =>
   test('opens issues panel for revision 2 when r2 is in mandatory_issues', () => {
     global.config.revisionNumber = 2
     CatToolStore.getJobMetadata.mockReturnValue({
-      project: {mandatory_issues: ['r1', 'r2']},
+      job: {mandatory_issues: ['r1', 'r2']},
     })
     SegmentActions.clickOnApprovedButton(makeSegment(), false)
     expect(openIssuesSpy).toHaveBeenCalledWith({sid: '1-1'}, true)
@@ -317,7 +317,16 @@ describe('SegmentActions.clickOnApprovedButton — mandatory issues gate', () =>
   test('skips issues panel for revision 2 when only r1 is in mandatory_issues', () => {
     global.config.revisionNumber = 2
     CatToolStore.getJobMetadata.mockReturnValue({
-      project: {mandatory_issues: ['r1']},
+      job: {mandatory_issues: ['r1']},
+    })
+    SegmentActions.clickOnApprovedButton(makeSegment(), false)
+    expect(openIssuesSpy).not.toHaveBeenCalled()
+  })
+
+  test('skips a per-job "only r2" override even if project-level default still lists r1 (regression)', () => {
+    CatToolStore.getJobMetadata.mockReturnValue({
+      project: {mandatory_issues: ['r1', 'r2']},
+      job: {mandatory_issues: ['r2']},
     })
     SegmentActions.clickOnApprovedButton(makeSegment(), false)
     expect(openIssuesSpy).not.toHaveBeenCalled()

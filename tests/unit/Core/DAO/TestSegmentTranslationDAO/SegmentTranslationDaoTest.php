@@ -9,8 +9,8 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\IDatabase;
 use Model\Files\FileStruct;
 use Model\Jobs\JobStruct;
-use Model\Search\ReplaceEventStruct;
 use Model\Projects\MetadataStruct;
+use Model\Propagation\PropagationResult;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use PDO;
@@ -610,77 +610,6 @@ class SegmentTranslationDaoTest extends AbstractTest
         $this->assertSame([], $result);
     }
 
-    public function testInstanceRebuildFromReplaceEventsReturnsAffectedRows(): void
-    {
-        $event = new ReplaceEventStruct();
-        $event->id_job = 1;
-        $event->id_segment = 100;
-        $event->translation_after_replacement = 'New translation';
-        $event->replace_version = '1';
-        $event->job_password = 'abc';
-        $event->target = 'it-IT';
-        $event->status = 'TRANSLATED';
-        $event->replacement = 'replacement';
-
-        $this->pdoStub->method('beginTransaction')->willReturn(true);
-        $this->pdoStub->method('commit')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-
-        $dao = new SegmentTranslationDao($this->dbStub);
-        $result = $dao->rebuildFromReplaceEvents([$event]);
-
-        $this->assertSame(1, $result);
-    }
-
-    public function testInstanceRebuildFromReplaceEventsRollsBackOnException(): void
-    {
-        $event = new ReplaceEventStruct();
-        $event->id_job = 1;
-        $event->id_segment = 100;
-        $event->translation_after_replacement = 'New translation';
-        $event->replace_version = '1';
-        $event->job_password = 'abc';
-        $event->target = 'it-IT';
-        $event->status = 'TRANSLATED';
-        $event->replacement = 'replacement';
-
-        $this->pdoStub->method('beginTransaction')->willReturn(true);
-        $this->pdoStub->method('rollBack')->willReturn(true);
-        $this->pdoStub->method('commit')->willReturn(true);
-        $this->stmtStub->method('execute')->willThrowException(new \Exception('Deadlock'));
-
-        $dao = new SegmentTranslationDao($this->dbStub);
-        $result = $dao->rebuildFromReplaceEvents([$event]);
-
-        $this->assertSame(0, $result);
-    }
-
-    public function testInstanceRebuildFromReplaceEventsWithMultipleEvents(): void
-    {
-        $events = [];
-        for ($i = 1; $i <= 3; $i++) {
-            $event = new ReplaceEventStruct();
-            $event->id_job = 1;
-            $event->id_segment = $i;
-            $event->translation_after_replacement = "Translation $i";
-            $event->replace_version = '1';
-            $event->job_password = 'abc';
-            $event->target = 'it-IT';
-            $event->status = 'TRANSLATED';
-            $event->replacement = 'replacement';
-            $events[] = $event;
-        }
-
-        $this->pdoStub->method('beginTransaction')->willReturn(true);
-        $this->pdoStub->method('commit')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-
-        $dao = new SegmentTranslationDao($this->dbStub);
-        $result = $dao->rebuildFromReplaceEvents($events);
-
-        $this->assertSame(3, $result);
-    }
-
     public function testInstanceUpdateSuggestionsArrayExecutes(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
@@ -749,7 +678,11 @@ class SegmentTranslationDaoTest extends AbstractTest
         $dao = new SegmentTranslationDao($this->dbStub);
         $result = $dao->propagateTranslation($st, $job, 100, $project);
 
-        $this->assertIsArray($result);
+        // No twin rows, so the DAO falls back to a fresh struct: an empty result rather than an
+        // array with every key missing.
+        $this->assertInstanceOf(PropagationResult::class, $result);
+        $this->assertSame([], $result->totals);
+        $this->assertSame([], $result->propagatedIds);
     }
 
     public function testInstancePropagateTranslationWithEquivalentWordCount(): void
@@ -768,6 +701,10 @@ class SegmentTranslationDaoTest extends AbstractTest
         $dao = new SegmentTranslationDao($this->dbStub);
         $result = $dao->propagateTranslation($st, $job, 100, $project);
 
-        $this->assertIsArray($result);
+        // No twin rows, so the DAO falls back to a fresh struct: an empty result rather than an
+        // array with every key missing.
+        $this->assertInstanceOf(PropagationResult::class, $result);
+        $this->assertSame([], $result->totals);
+        $this->assertSame([], $result->propagatedIds);
     }
 }

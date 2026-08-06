@@ -216,6 +216,34 @@ class RedisHandlerTest extends AbstractTest
         $handler->getConnection();
     }
 
+    /**
+     * Predis assigns the master role only from `role=master`, never from position, so this set can
+     * serve reads from a random replica and cannot complete a single write. Failing here is what
+     * keeps that from surfacing as "every user is logged out" — authenticate() catches Throwable.
+     */
+    public function testReplicationModeWithoutANamedMasterThrows(): void
+    {
+        AppConfig::$REDIS_MODE    = 'replication';
+        AppConfig::$REDIS_SERVERS = 'tcp://a:6379,tcp://b:6380';
+
+        $handler = new RedisHandler();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('?role=master');
+
+        $handler->getConnection();
+    }
+
+    public function testReplicationModeWithANamedMasterIsAccepted(): void
+    {
+        AppConfig::$REDIS_MODE    = 'replication';
+        AppConfig::$REDIS_SERVERS = 'tcp://a:6379?role=master,tcp://b:6380';
+
+        // Predis connects lazily, so building the client reaches the guard without touching either
+        // host — which is what makes this assertable without a replicated Redis to point at.
+        $this->assertInstanceOf(Client::class, (new RedisHandler())->getConnection());
+    }
+
     // ── Instance identifier ──
 
     public function testGetInstanceIdentifierIsUnique(): void

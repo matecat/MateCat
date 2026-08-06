@@ -10,6 +10,15 @@ import CommentsConstants from '../../constants/CommentsConstants'
 import SegmentActions from '../../actions/SegmentActions'
 import SegmentsContainer from './SegmentsContainer'
 
+global.ResizeObserver = class ResizeObserver {
+  constructor(cb) {
+    this.cb = cb
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 // --- Mocks ---
 
 jest.mock('react-hotkeys-hook', () => ({
@@ -40,6 +49,7 @@ jest.mock('../../utils/shortcuts', () => ({
 const mockSegmentStoreListeners = {}
 const mockCatToolStoreListeners = {}
 const mockCommentsStoreListeners = {}
+let mockCapturedFindFirstVisibleRow
 
 jest.mock('../../stores/SegmentStore', () => ({
   addListener: jest.fn((event, cb) => {
@@ -73,12 +83,11 @@ jest.mock('../../constants/SegmentConstants', () => ({
   SCROLL_TO_SELECTED_SEGMENT: 'SCROLL_TO_SELECTED_SEGMENT',
   OPEN_SIDE: 'OPEN_SIDE',
   CLOSE_SIDE: 'CLOSE_SIDE',
+  OPEN_SEGMENT: 'OPEN_SEGMENT',
 }))
 
 jest.mock('../../constants/CatToolConstants', () => ({
   STORE_FILES_INFO: 'STORE_FILES_INFO',
-  TOGGLE_CONTAINER: 'TOGGLE_CONTAINER',
-  CLOSE_SUBHEADER: 'CLOSE_SUBHEADER',
   CLIENT_CONNECT: 'CLIENT_CONNECT',
 }))
 
@@ -150,9 +159,12 @@ jest.mock('../common/VirtualList/VirtualList', () => {
         renderedRange,
         header,
         items = [],
+        findFirstVisibleRow,
       },
       ref,
     ) => {
+      mockCapturedFindFirstVisibleRow = findFirstVisibleRow
+
       React.useEffect(() => {
         if (setFirstRowIdVisible) setFirstRowIdVisible(items[0]?.id)
         if (renderedRange) renderedRange([0, items.length - 1])
@@ -249,6 +261,7 @@ afterEach(() => {
 describe('SegmentsContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockCapturedFindFirstVisibleRow = undefined
     // Re-register listeners after clearAllMocks resets the mock implementations
     SegmentStore.addListener.mockImplementation((event, cb) => {
       mockSegmentStoreListeners[event] = cb
@@ -266,6 +279,13 @@ describe('SegmentsContainer', () => {
     test('renders the VirtualList', () => {
       const {getByTestId} = renderComponent()
       expect(getByTestId('virtual-list')).toBeInTheDocument()
+    })
+
+    test('passes a findFirstVisibleRow that requires a 30px scroll offset', () => {
+      renderComponent()
+      expect(typeof mockCapturedFindFirstVisibleRow).toBe('function')
+      expect(mockCapturedFindFirstVisibleRow({end: 50}, 10)).toBe(true)
+      expect(mockCapturedFindFirstVisibleRow({end: 30}, 10)).toBe(false)
     })
 
     test('does not render scroll-to-top button initially', () => {
@@ -324,20 +344,16 @@ describe('SegmentsContainer', () => {
         SegmentConstants.CLOSE_SIDE,
         expect.any(Function),
       )
+      expect(SegmentStore.addListener).toHaveBeenCalledWith(
+        SegmentConstants.OPEN_SEGMENT,
+        expect.any(Function),
+      )
     })
 
     test('registers all CatToolStore listeners on mount', () => {
       renderComponent()
       expect(CatToolStore.addListener).toHaveBeenCalledWith(
         CatToolConstants.STORE_FILES_INFO,
-        expect.any(Function),
-      )
-      expect(CatToolStore.addListener).toHaveBeenCalledWith(
-        CatToolConstants.TOGGLE_CONTAINER,
-        expect.any(Function),
-      )
-      expect(CatToolStore.addListener).toHaveBeenCalledWith(
-        CatToolConstants.CLOSE_SUBHEADER,
         expect.any(Function),
       )
       expect(CatToolStore.addListener).toHaveBeenCalledWith(
@@ -365,10 +381,39 @@ describe('SegmentsContainer', () => {
         SegmentConstants.SCROLL_TO_SEGMENT,
         expect.any(Function),
       )
+      expect(SegmentStore.removeListener).toHaveBeenCalledWith(
+        SegmentConstants.OPEN_SEGMENT,
+        expect.any(Function),
+      )
       expect(CatToolStore.removeListener).toHaveBeenCalledWith(
         CatToolConstants.CLIENT_CONNECT,
         expect.any(Function),
       )
+    })
+  })
+
+  describe('OPEN_SEGMENT event (sticky project bar blink signal)', () => {
+    test('does not crash when fired with no rows/segments loaded', () => {
+      renderComponent()
+      expect(() => {
+        act(() => {
+          mockSegmentStoreListeners[SegmentConstants.OPEN_SEGMENT]('1')
+        })
+      }).not.toThrow()
+    })
+
+    test('does not crash when fired after segments are rendered', () => {
+      renderComponent()
+      act(() => {
+        mockSegmentStoreListeners[SegmentConstants.RENDER_SEGMENTS](
+          makeSegments(['1', '2', '3']),
+        )
+      })
+      expect(() => {
+        act(() => {
+          mockSegmentStoreListeners[SegmentConstants.OPEN_SEGMENT]('2')
+        })
+      }).not.toThrow()
     })
   })
 
@@ -405,40 +450,6 @@ describe('SegmentsContainer', () => {
       act(() => {
         mockCatToolStoreListeners[CatToolConstants.CLIENT_CONNECT](null)
       })
-    })
-  })
-
-  describe('TOGGLE_CONTAINER event', () => {
-    test('toggles search bar open when container is "search"', () => {
-      renderComponent()
-      act(() => {
-        mockCatToolStoreListeners[CatToolConstants.TOGGLE_CONTAINER]('search')
-      })
-      act(() => {
-        mockCatToolStoreListeners[CatToolConstants.TOGGLE_CONTAINER]('search')
-      })
-      // No crash
-    })
-
-    test('does not toggle search bar when container is not "search"', () => {
-      renderComponent()
-      act(() => {
-        mockCatToolStoreListeners[CatToolConstants.TOGGLE_CONTAINER]('other')
-      })
-      // No crash, state unchanged
-    })
-  })
-
-  describe('CLOSE_SUBHEADER event', () => {
-    test('closes search bar', () => {
-      renderComponent()
-      act(() => {
-        mockCatToolStoreListeners[CatToolConstants.TOGGLE_CONTAINER]('search')
-      })
-      act(() => {
-        mockCatToolStoreListeners[CatToolConstants.CLOSE_SUBHEADER]()
-      })
-      // No crash
     })
   })
 

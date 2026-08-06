@@ -106,6 +106,40 @@ class PropagationTotalStructTest extends AbstractTest
         $this->assertCount(2, $all);
     }
 
+    /**
+     * The propagated-id list is stored in exactly one place. `addPropagatedId()` used to append it
+     * twice — to `$propagated_ids` and again to `$segments_for_propagation['propagated_ids']` — which
+     * left two spellings of the same answer with nothing keeping them in step. Every consumer reads
+     * the top-level list (`getPropagatedIds()`, `jsonSerialize()['propagated_ids']`, and the editor at
+     * `public/js/setTranslationUtil.js:263`), so the nested copy is the one that goes.
+     */
+    #[Test]
+    public function addPropagatedIdDoesNotAlsoWriteIntoSegmentsForPropagation(): void
+    {
+        $struct = new PropagationTotalStruct();
+        $struct->addPropagatedId('1');
+        $struct->addPropagatedId('2');
+
+        $this->assertSame(['1', '2'], $struct->getPropagatedIds());
+        $this->assertArrayNotHasKey('propagated_ids', $struct->getSegmentsForPropagation());
+    }
+
+    /**
+     * `segments_for_propagation` describes segments split four ways, and its shape is read positionally
+     * by the editor (`segments_for_propagation.not_propagated.ice.id`). Pinning the top-level keys keeps
+     * an unrelated list from being smuggled back into it.
+     */
+    #[Test]
+    public function segmentsForPropagationCarriesOnlyThePropagatedAndNotPropagatedGroups(): void
+    {
+        $struct = new PropagationTotalStruct();
+        $struct->addPropagatedId('1');
+        $struct->addPropagatedIce($this->makeSegment(10));
+        $struct->addNotPropagatedNotIce($this->makeSegment(20));
+
+        $this->assertSame(['propagated', 'not_propagated'], array_keys($struct->getSegmentsForPropagation()));
+    }
+
     #[Test]
     public function jsonSerializeReturnsExpectedKeys(): void
     {

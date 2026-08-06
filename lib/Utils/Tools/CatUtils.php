@@ -6,12 +6,12 @@ use DivisionByZeroError;
 use Exception;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\DTO\IDto;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
-use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
@@ -367,6 +367,12 @@ class CatUtils
         }
 
         //Remove ampersands and entities.
+        // The cleaning below wipes the tags away, so ask now whether the segment carries any <ph>.
+        // Deliberately no entity decoding first: the subfiltering is the one knowing whether a tag is a
+        // tag, so an escaped &lt;ph/&gt; reaching this point is plain text, not a tag.
+        // The character class is what keeps <phrase> and friends out.
+        $hasPhTag = preg_match('#<ph[\s/>]#i', $string) === 1;
+
         //Converters return entities in XML, we want raw strings.
         //
         //Take a look at this string:
@@ -413,7 +419,18 @@ class CatUtils
         //check for a string made of spaces only, after the string was cleaned
         $no_spaces_string = preg_replace('#[\p{Z}\p{C}]+#u', "", $string) ?? "";
         if ($no_spaces_string == "") {
-            return "";
+            /**
+             * Nothing translatable survived the cleaning. A segment carrying <ph> tags and nothing else is
+             * still work to be delivered, so it weighs one word overall, no matter how many <ph> it holds,
+             * while a segment made of any other tag (<x/>, <g>, <bx/>, ...) keeps weighing nothing.
+             *
+             * This is also the only spot able to tell: at the time the <ph> tags were swapped for a space,
+             * the punctuation stripped above was still in place, so a <ph id="1"/>, would have looked like
+             * a segment carrying text.
+             *
+             * The placeholder is trimmed because a CJK count is a character count, see the caller.
+             */
+            return $hasPhTag ? trim($variables_placeholder) : "";
         }
 
         return !array_key_exists($source_lang_two_letter, self::$cjk) ? $string : $no_spaces_string;
@@ -427,24 +444,63 @@ class CatUtils
      */
     private static function replacePlaceholders(string $string, string $variables_placeholder): string
     {
-        $pattern = '|<ph id ?= ?["\'](mtc_[0-9]+)["\'] ?(ctype=["\'].+?["\'] ?) ?(equiv-text=["\'].+?["\'] ?)/>|ui';
 
+        // Matches ONLY Matecat's own placeholder signature:
+        //   <ph id="mtc_N" ctype="..." [x-orig="..."] equiv-text="..."/>
+        // x-orig is emitted for the ctypes that carry the original tag (x-original_ph_content,
+        // x-original_self_close_ph_with_equiv_text, x-original_x) and is skipped without being captured,
+        // so the group indexes below stay stable. Attribute values are quote bounded ([^"']*) on purpose:
+        // a lazy .+? backtracks across x-orig and drags it into the ctype group, and a $cType like
+        // "x-original_ph_content x-orig=PHBoPg==" can never match a CTypeEnum case.
+        $pattern = '|<ph id ?= ?["\'](mtc_[0-9]+)["\'] ?(ctype=["\'][^"\']*["\'] ?) ?(?:x-orig=["\'][^"\']*["\'] ?)? ?(equiv-text=["\'][^"\']*["\'] ?)/>|ui';
+
+        /**
+         * The caller feeds this method a Layer 1 string (it calls fromLayer0ToLayer1() right before),
+         * and Layer 1 is exactly where those <ph id="mtc_N"/> placeholders are born. So this loop is
+         * the regular path, not an edge case: it runs on every segment carrying html or a variable,
+         * project creation included.
+         *
+         * What the Layer 0 to Layer 1 transition turns into a placeholder:
+         *   - html/xml snippets, ctype x-html / x-xml;
+         *   - variables, ctype depending on the filters enabled for the project (x-twig, x-sprintf, ...);
+         *   - a <ph> coming from the source file, ctype x-original_ph_content. Rare, because our
+         *     conversion filters emit <x> tags instead of <ph>.
+         *
+         * How each one weighs on the word count:
+         *   - html/xml: deleted, counts as zero words;
+         *   - a <ph> coming from the source: zero words, see $phCTypes below;
+         *   - everything else: swapped for $variables_placeholder, counts as one word.
+         *
+         * Whatever is not matched here (a plain <x id="N"/> with no equiv-text, <g>, ...) is handled by
+         * the residual-tag cleanup at the end of this method, which turns it into a single space, so it
+         * survives only as a word separator.
+         */
         preg_match_all($pattern, $string, $matches, PREG_SET_ORDER);
 
-        foreach ($matches as $match) {
-            $ctype = trim($match[2]);
-            $ctype = str_replace('"', '', $ctype);
-            $ctype = str_replace('ctype=', '', $ctype);
+        // A <ph> coming from the source file weighs zero words here, whatever flavour it is. The single
+        // word owed to a segment made of <ph> tags only is granted by countSegmentRawWords(), which is
+        // the one able to tell whether anything else survived the cleaning.
+        $phCTypes = [
+            CTypeEnum::ORIGINAL_PH_CONTENT->value,
+            CTypeEnum::ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT->value,
+            CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF->value,
+            CTypeEnum::PH_DATA_REF->value,
+        ];
 
-            if (in_array($ctype, [CTypeEnum::HTML->value, CTypeEnum::XML->value])) {
+        foreach ($matches as $match) {
+            $cType = str_replace(['"', "'", 'ctype='], '', trim($match[2]));
+
+            if (in_array($cType, [CTypeEnum::HTML->value, CTypeEnum::XML->value])) {
                 $string = str_replace($match[0], '', $string); // count html snippets as zero words
+            } elseif (in_array($cType, $phCTypes)) {
+                $string = str_replace($match[0], ' ', $string); // a <ph> is a separator, zero words
             } else {
-                $string = str_replace($match[0], $variables_placeholder, $string); // count variables as one word
+                $string = str_replace($match[0], $variables_placeholder, $string); // count all the rest as one word
             }
         }
 
         // remove all residual xliff tags
-        if (preg_match_all('#</?(?![0-9]+)[a-z0-9\-._]+?(?:\s[:_a-z]+=.+?)?\s*/?>#i', $string, $matches, PREG_SET_ORDER)) {
+        if (preg_match_all('#</?(?![0-9]+)([a-z0-9\-._]+)+?(?:\s[:_a-z]+=.+?)?\s*/?>#i', $string, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $tag) {
                 $string = str_replace($tag[0], " ", $string);
             }
@@ -830,7 +886,7 @@ class CatUtils
     /**
      * Get a job from a combination of ID and ANY password (t,r1 or r2)
      *
-     * @param int    $jobId
+     * @param int $jobId
      * @param string $jobPassword
      *
      * @return null|JobStruct
@@ -902,13 +958,13 @@ class CatUtils
     {
         $idJobs = [];
 
-        foreach ($this->jobDao->getNotDeletedByProjectId((int) $projectStruct->id) as $job) {
+        foreach ($this->jobDao->getNotDeletedByProjectId((int)$projectStruct->id) as $job) {
             $idJobs[] = $job->id;
         }
 
         $idJobs = array_unique($idJobs);
         /** @var array<int, int> $idJobs */
-        $idJobs = array_values(array_filter($idJobs, fn ($value) => $value !== null));
+        $idJobs = array_values(array_filter($idJobs, fn($value) => $value !== null));
 
         return $this->jobDao->getSegmentTranslationsCount($idJobs);
     }

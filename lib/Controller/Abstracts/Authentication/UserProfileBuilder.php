@@ -5,12 +5,14 @@ namespace Controller\Abstracts\Authentication;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
 use Model\ConnectedServices\ConnectedServiceDao;
+use Model\DataAccess\IDatabase;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamModel;
 use Model\Users\MetadataDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use Predis\ClientInterface;
 use ReflectionException;
 use RuntimeException;
 use TypeError;
@@ -31,7 +33,25 @@ class UserProfileBuilder
         private readonly UserDao $userDao,
         private readonly TeamDao $teamDao,
         private readonly MetadataDao $metadataDao,
+        private readonly ClientInterface $redis,
     ) {
+    }
+
+    /**
+     * Composition root for the build: wires the DAOs from a database handle and takes the one Redis
+     * connection the render needs. Shared by every caller that builds a profile, so the wiring is
+     * not duplicated at each of them.
+     */
+    public static function fromDatabase(IDatabase $db, ClientInterface $redis): self
+    {
+        return new self(
+            new MembershipDao($db),
+            new ConnectedServiceDao($db),
+            new UserDao($db),
+            new TeamDao($db),
+            new MetadataDao($db),
+            $redis,
+        );
     }
 
     /**
@@ -63,9 +83,10 @@ class UserProfileBuilder
         return (new UserProfile())->renderItem(
             $user,
             $userTeams,
+            $this->userDao,
+            $this->redis,
             $services,
-            $metadata,
-            $this->userDao
+            $metadata
         );
     }
 }

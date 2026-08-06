@@ -40,6 +40,7 @@ class ProjectTemplateStructTest extends AbstractTest
         $obj->target_language            = ['it-IT', 'de-DE'];
         $obj->mt_quality_value_in_editor = 80;
         $obj->icu_enabled                = true;
+        $obj->mandatory_issues           = ['issue1', 'issue2'];
 
         return $obj;
     }
@@ -91,6 +92,7 @@ class ProjectTemplateStructTest extends AbstractTest
         self::assertIsString($struct->tm);
         self::assertIsString($struct->subfiltering_handlers);
         self::assertIsString($struct->target_language);
+        self::assertIsString($struct->mandatory_issues);
     }
 
     #[Test]
@@ -143,6 +145,54 @@ class ProjectTemplateStructTest extends AbstractTest
             $struct->subfiltering_handlers,
             'subfiltering_handlers should be null when json_encode fails, not empty string'
         );
+    }
+
+    // ── Phase 2b — mandatory_issues null vs empty array ──────────
+
+    #[Test]
+    public function hydrateFromJsonEncodesEmptyArrayMandatoryIssuesAsEmptyJsonArray(): void
+    {
+        $struct = new ProjectTemplateStruct();
+        $obj    = $this->createFullInputObject();
+
+        $obj->mandatory_issues = [];
+
+        $struct->hydrateFromJSON($obj, 1);
+
+        self::assertSame(
+            '[]',
+            $struct->mandatory_issues,
+            'an empty array must be persisted as "[]", not null'
+        );
+        self::assertSame([], $struct->getMandatoryIssues());
+    }
+
+    #[Test]
+    public function hydrateFromJsonSetsMandatoryIssuesToNullWhenInputIsNull(): void
+    {
+        $struct = new ProjectTemplateStruct();
+        $obj    = $this->createFullInputObject();
+
+        $obj->mandatory_issues = null;
+
+        $struct->hydrateFromJSON($obj, 1);
+
+        self::assertNull($struct->mandatory_issues);
+        self::assertNull($struct->getMandatoryIssues());
+    }
+
+    #[Test]
+    public function hydrateFromJsonEncodesNonEmptyMandatoryIssues(): void
+    {
+        $struct = new ProjectTemplateStruct();
+        $obj    = $this->createFullInputObject();
+
+        $obj->mandatory_issues = ['tag_mismatch', 'empty_target'];
+
+        $struct->hydrateFromJSON($obj, 1);
+
+        self::assertSame('["tag_mismatch","empty_target"]', $struct->mandatory_issues);
+        self::assertSame(['tag_mismatch', 'empty_target'], $struct->getMandatoryIssues());
     }
 
     // ── Phase 3 — DateTime safety in jsonSerialize ───────────────
@@ -272,7 +322,7 @@ class ProjectTemplateStructTest extends AbstractTest
             'mt_quality_value_in_editor',
             'character_counter_count_tags', 'character_counter_mode',
             'subject', 'source_language', 'target_language',
-            'created_at', 'modified_at', 'icu_enabled',
+            'created_at', 'modified_at', 'icu_enabled', 'mandatory_issues',
         ];
 
         foreach ($expectedKeys as $key) {
@@ -283,5 +333,6 @@ class ProjectTemplateStructTest extends AbstractTest
         self::assertIsObject($result['mt']);
         self::assertIsArray($result['tm']);
         self::assertIsArray($result['target_language']);
+        self::assertSame(['issue1', 'issue2'], $result['mandatory_issues']);
     }
 }

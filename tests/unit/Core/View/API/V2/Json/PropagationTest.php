@@ -3,6 +3,7 @@
 namespace Matecat\Core\View\API\V2\Json;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\Propagation\PropagationResult;
 use Model\Propagation\PropagationTotalStruct;
 use PHPUnit\Framework\Attributes\CoversClass;
 use View\API\V2\Json\Propagation;
@@ -27,57 +28,64 @@ class PropagationTest extends AbstractTest
         return $struct;
     }
 
-    public function testRenderReturnsExpectedKeys(): void
+    /**
+     * `render()` hands back a `PropagationResult` rather than a loose array. The view is the only
+     * producer of that object in the request path, so this is what makes the type reach the
+     * interface and both controllers.
+     */
+    public function testRenderReturnsAPropagationResult(): void
     {
-        $struct = $this->makeStruct();
-        $view   = new Propagation($struct);
-        $result = $view->render();
+        $result = (new Propagation($this->makeStruct()))->render();
 
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('totals', $result);
-        $this->assertArrayHasKey('propagated_ids', $result);
-        $this->assertArrayHasKey('segments_for_propagation', $result);
+        $this->assertInstanceOf(PropagationResult::class, $result);
     }
 
     public function testRenderTotalsReflectsSetValues(): void
     {
         $struct = $this->makeStruct(['total' => 5, 'countSeg' => 3, 'status' => 'translated']);
-        $view   = new Propagation($struct);
-        $result = $view->render();
+        $result = (new Propagation($struct))->render();
 
-        $this->assertSame(5, $result['totals']['total']);
-        $this->assertSame(3, $result['totals']['countSeg']);
-        $this->assertSame('translated', $result['totals']['status']);
+        $this->assertSame(5, $result->totals['total']);
+        $this->assertSame(3, $result->totals['countSeg']);
+        $this->assertSame('translated', $result->totals['status']);
     }
 
     public function testRenderPropagatedIdsReflectsAddedIds(): void
     {
-        $struct = $this->makeStruct([], ['101', '202']);
-        $view   = new Propagation($struct);
-        $result = $view->render();
+        $result = (new Propagation($this->makeStruct([], ['101', '202'])))->render();
 
-        $this->assertContains('101', $result['propagated_ids']);
-        $this->assertContains('202', $result['propagated_ids']);
+        $this->assertSame(['101', '202'], $result->propagatedIds);
     }
 
     public function testRenderSegmentsForPropagationHasExpectedStructure(): void
     {
-        $struct = $this->makeStruct();
-        $view   = new Propagation($struct);
-        $result = $view->render();
+        $result = (new Propagation($this->makeStruct()))->render();
 
-        $this->assertIsArray($result['segments_for_propagation']);
-        $this->assertArrayHasKey('propagated', $result['segments_for_propagation']);
-        $this->assertArrayHasKey('not_propagated', $result['segments_for_propagation']);
+        $this->assertArrayHasKey('propagated', $result->segmentsForPropagation);
+        $this->assertArrayHasKey('not_propagated', $result->segmentsForPropagation);
     }
 
     public function testRenderEmptyStructReturnsEmptyCollections(): void
     {
-        $struct = new PropagationTotalStruct();
-        $view   = new Propagation($struct);
-        $result = $view->render();
+        $result = (new Propagation(new PropagationTotalStruct()))->render();
 
-        $this->assertSame([], $result['totals']);
-        $this->assertSame([], $result['propagated_ids']);
+        $this->assertSame([], $result->totals);
+        $this->assertSame([], $result->propagatedIds);
+    }
+
+    /**
+     * The response body must not change shape. `PropagationResult` is `JsonSerializable`, and the
+     * editor reads `propagation.propagated_ids` and `propagation.segments_for_propagation`
+     * (`public/js/setTranslationUtil.js:263,274`), so the three legacy snake_case keys have to
+     * survive serialisation of whatever `render()` now returns.
+     */
+    public function testRenderSerialisesToTheLegacyWireKeys(): void
+    {
+        $result = (new Propagation($this->makeStruct([], ['101'])))->render();
+
+        $decoded = json_decode(json_encode($result), true);
+
+        $this->assertSame(['totals', 'propagated_ids', 'segments_for_propagation'], array_keys($decoded));
+        $this->assertSame(['101'], $decoded['propagated_ids']);
     }
 }

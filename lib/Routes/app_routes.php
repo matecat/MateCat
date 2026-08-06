@@ -185,9 +185,9 @@ route('/api/app/comment/get-range', 'POST', ['Controller\API\App\CommentControll
 route('/api/app/copy-all-source-to-target', 'POST', ['Controller\API\App\CopyAllSourceToTargetController', 'copy']);
 route('/api/app/get-global-warning', 'POST', ['Controller\API\App\GetWarningController', 'global']);
 route('/api/app/get-local-warning', 'POST', ['Controller\API\App\GetWarningController', 'local']);
-route('/api/app/split-job-apply', 'POST', ['Controller\API\V2\SplitJobController', 'apply']); // Same API as public V2
-route('/api/app/split-job-check', 'POST', ['Controller\API\V2\SplitJobController', 'check']); // Same API as public V2
-route('/api/app/split-job-merge', 'POST', ['Controller\API\V2\SplitJobController', 'merge']); // Same API as public V2
+route('/api/app/split-job-apply', 'POST', ['Controller\API\App\SplitJobController', 'apply']); // Same API as public V2, stateful for the outsource cart
+route('/api/app/split-job-check', 'POST', ['Controller\API\App\SplitJobController', 'check']); // Same API as public V2, stateful for the outsource cart
+route('/api/app/split-job-merge', 'POST', ['Controller\API\App\SplitJobController', 'merge']); // Same API as public V2, stateful for the outsource cart
 route('/api/app/user-keys-delete', 'POST', ['Controller\API\App\UserKeysController', 'delete']);
 route('/api/app/user-keys-update', 'POST', ['Controller\API\App\UserKeysController', 'update']);
 route('/api/app/user-keys-new-key', 'POST', ['Controller\API\App\UserKeysController', 'newKey']);
@@ -206,7 +206,6 @@ route('/api/app/disable-engine', 'POST', ['Controller\API\App\EngineController',
 route('/api/app/get-contribution', 'POST', ['Controller\API\App\GetContributionController', 'get']);
 route('/api/app/search', 'POST', ['Controller\API\App\GetSearchController', 'search']);
 route('/api/app/replace-all', 'POST', ['Controller\API\App\GetSearchController', 'replaceAll']);
-route('/api/app/redo-replace-all', 'POST', ['Controller\API\App\GetSearchController', 'redoReplaceAll']);
 route('/api/app/undo-replace-all', 'POST', ['Controller\API\App\GetSearchController', 'undoReplaceAll']);
 route('/api/app/update-job-keys', 'POST', ['Controller\API\App\UpdateJobKeysController', 'update']);
 route('/api/app/set-translation', 'POST', ['Controller\API\App\SetTranslationController', 'translate']);

@@ -11,7 +11,7 @@ global $klein;
 $klein->with('/api/v2/projects/[:id_project]/[:password]', function () {
     route('', 'GET', ['Controller\API\V2\ProjectsController', 'get']); //this do not show some info like teams and translators
     route('/urls', 'GET', ['Controller\API\V2\UrlsController', 'urls']);
-    route('/jobs/[:id_job]/merge', 'POST', ['Controller\API\V2\JobMergeController', 'merge']);
+    route('/jobs/[:id_job]/merge', 'POST', ['Controller\API\V2\SplitJobController', 'merge']);
     route('/jobs/[:id_job]/[:job_password]/split/[:num_split]/check', 'POST', ['Controller\API\V2\SplitJobController', 'check']);
     route('/jobs/[:id_job]/[:job_password]/split/[:num_split]/apply', 'POST', ['Controller\API\V2\SplitJobController', 'apply']);
     route('/creation_status', 'GET', ['Controller\API\V2\ProjectCreationStatusController', 'get']);

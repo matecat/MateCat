@@ -210,7 +210,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
                 : 'The key you entered is invalid.'
 
             CatToolActions.addNotification({
-              title: 'Error updating key',
+              title: 'Error updating resource',
               type: 'error',
               text: errMessage,
               position: 'br',

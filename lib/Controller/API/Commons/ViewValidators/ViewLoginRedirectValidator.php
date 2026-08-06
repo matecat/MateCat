@@ -30,11 +30,14 @@ class ViewLoginRedirectValidator extends Base
             /** @var BaseKleinViewController $controller */
             $controller = $this->controller;
             $controller->redirectToSignin();
-        } elseif (isset($_SESSION['wanted_url'])) {
-            // handle redirect after login
+        } else {
             /** @var BaseKleinViewController $controller */
             $controller = $this->controller;
-            $controller->redirectToWantedUrl();
+
+            // handle redirect after login
+            if ($controller->hasWantedUrl()) {
+                $controller->redirectToWantedUrl();
+            }
         }
     }
 }

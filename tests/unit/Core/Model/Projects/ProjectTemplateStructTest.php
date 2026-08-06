@@ -56,6 +56,7 @@ class ProjectTemplateStructTest extends AbstractTest
         $this->assertSame(serialize(['it-IT', 'fr-FR']), $struct->target_language);
         $this->assertSame(42, $struct->mt_quality_value_in_editor);
         $this->assertTrue($struct->icu_enabled);
+        $this->assertSame('["r1","r2"]', $struct->mandatory_issues);
     }
 
     #[Test]
@@ -69,6 +70,7 @@ class ProjectTemplateStructTest extends AbstractTest
         $input->mt = NAN;
         $input->subfiltering_handlers = NAN;
         $input->mt_quality_value_in_editor = 0;
+        $input->mandatory_issues = null;
 
         $struct = new ProjectTemplateStruct();
         $struct->hydrateFromJSON($input, 123, 456);
@@ -84,6 +86,24 @@ class ProjectTemplateStructTest extends AbstractTest
         $this->assertNull($struct->subfiltering_handlers);
         $this->assertNull($struct->mt_quality_value_in_editor);
         $this->assertTrue($struct->icu_enabled);
+        $this->assertNull($struct->mandatory_issues);
+    }
+
+    #[Test]
+    public function hydrateFromJSONEncodesEmptyArrayMandatoryIssuesAsEmptyJsonArrayNotNull(): void
+    {
+        $input = $this->makeHydrationInput();
+        $input->mandatory_issues = [];
+
+        $struct = new ProjectTemplateStruct();
+        $struct->hydrateFromJSON($input, 1, 2);
+
+        $this->assertSame(
+            '[]',
+            $struct->mandatory_issues,
+            'an empty mandatory_issues array must be persisted as "[]", not null'
+        );
+        $this->assertSame([], $struct->getMandatoryIssues());
     }
 
     #[Test]
@@ -234,6 +254,7 @@ class ProjectTemplateStructTest extends AbstractTest
         $struct->created_at = '2026-05-01 10:20:30';
         $struct->modified_at = '2026-05-03 11:22:33';
         $struct->icu_enabled = true;
+        $struct->mandatory_issues = '["r1","r2"]';
 
         $payload = $struct->jsonSerialize();
 
@@ -257,6 +278,7 @@ class ProjectTemplateStructTest extends AbstractTest
         $this->assertSame((new DateTime('2026-05-01 10:20:30'))->format(DATE_RFC822), $payload['created_at']);
         $this->assertSame((new DateTime('2026-05-03 11:22:33'))->format(DATE_RFC822), $payload['modified_at']);
         $this->assertTrue($payload['icu_enabled']);
+        $this->assertSame(['r1', 'r2'], $payload['mandatory_issues']);
     }
 
     #[Test]
@@ -295,6 +317,7 @@ class ProjectTemplateStructTest extends AbstractTest
             'source_language' => 'en-US',
             'target_language' => ['it-IT'],
             'mt_quality_value_in_editor' => null,
+            'mandatory_issues' => ['r1', 'r2'],
         ];
     }
 }

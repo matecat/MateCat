@@ -1,12 +1,17 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Develop: test on every PR/push to develop, deploy only on push to develop
+# Develop: test on every PR except those targeting master, deploy only on push to develop
 # ─────────────────────────────────────────────────────────────────────────────
 name: "CI/CD: Develop (Freddy)"
 on:
   push:
     branches: [ "develop" ]
   pull_request:
-    branches: [ "develop" ]
+    # Filters the BASE branch, so "develop" here meant a pull request stacked on another feature
+    # branch never reached the pipeline at all: no test suite, no phpstan, no phpmd, no codeql and
+    # neither test gate. Only the base-agnostic checklist and secret-scan workflows ran, so such a
+    # pull request showed all green while nothing had been tested. Ignore master instead, which
+    # aws_prod.yml already covers, and gate every other base.
+    branches-ignore: [ "master" ]
     types: [ opened, synchronize, reopened, labeled, unlabeled ]
 permissions:
   contents: read

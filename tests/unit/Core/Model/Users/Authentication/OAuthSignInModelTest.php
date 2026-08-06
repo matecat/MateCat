@@ -2,6 +2,8 @@
 
 namespace Matecat\Core\Model\Users\Authentication;
 
+use Utils\Session\ArraySessionStore;
+
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\Teams\TeamDao;
@@ -40,9 +42,9 @@ class TestableOAuthSignInModel extends OAuthSignInModel
 
 class OAuthSignInModelTest extends AbstractTest
 {
-    private function makeSession(): array
+    private function makeSession(): ArraySessionStore
     {
-        return [];
+        return new ArraySessionStore();
     }
 
     // ─── Constructor ────────────────────────────────────────────────────

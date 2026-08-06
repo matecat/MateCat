@@ -193,6 +193,24 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
      */
     public static function getValidatedInstanceFromString(string $jwtString, string $secretKey): SimpleJWT
     {
+        if ($secretKey === '') {
+            // Refuse rather than degrade. getInstanceFromString() skips isValid() entirely when the
+            // secret is empty, so this entry point — the one whose name promises validation — used to
+            // hand back a parsed instance with neither its signature nor its expiry checked. Every
+            // caller passes AppConfig::$AUTHSECRET, so an unset or blank AUTHSECRET made every login
+            // cookie and every XSRF token forgeable by anyone able to base64-encode a payload, and
+            // accepted expired ones at the same time.
+            //
+            // Parsing without verifying is a legitimate use and already has its own name,
+            // {@see getNotValidatedInstanceFromString()}. A caller that wants it can ask for it.
+            //
+            // DomainException is the same answer a failed signature gives — this token is not
+            // acceptable — so the auth paths that already catch it fail closed: the cookie is dropped
+            // and the request is anonymous, instead of a 500. Code 4 continues the codes isValid()
+            // uses, and is deliberately not 2, which callers read as "expired, safe to collect".
+            throw new DomainException('Refusing to validate a JWT with an empty secret key', 4);
+        }
+
         return self::getInstanceFromString($jwtString, $secretKey);
     }
 

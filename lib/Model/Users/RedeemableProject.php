@@ -15,14 +15,14 @@ use Model\Projects\ProjectStruct;
 use Model\Teams\TeamDao;
 use ReflectionException;
 use RuntimeException;
+use Utils\Session\SessionStore;
 use Utils\Url\CanonicalRoutes;
 
 class RedeemableProject
 {
     protected UserStruct $user;
 
-    /** @var array<string, mixed> */
-    protected array $session;
+    protected SessionStore $session;
 
     protected ?ProjectStruct $project = null;
 
@@ -30,14 +30,13 @@ class RedeemableProject
     private JobDao $jobDao;
     private TeamDao $teamDao;
 
-    /** @param array<string, mixed> $session */
     public function __construct(
         UserStruct $user,
-        array &$session,
+        SessionStore $session,
         TeamDao $teamDao
     ) {
         $this->user = $user;
-        $this->session =& $session;
+        $this->session = $session;
         $this->teamDao = $teamDao;
         $this->projectDao = new ProjectDao($teamDao->getDatabaseHandler());
         $this->jobDao = new JobDao($teamDao->getDatabaseHandler());
@@ -59,8 +58,8 @@ class RedeemableProject
     public function __getProject(): ?ProjectStruct
     {
         if (!isset($this->project)) {
-            if (isset($this->session['last_created_pid'])) {
-                $this->project = $this->projectDao->findById($this->session['last_created_pid']);
+            if ($this->session->has('last_created_pid')) {
+                $this->project = $this->projectDao->findById($this->session->get('last_created_pid'));
             }
         }
 
@@ -69,7 +68,7 @@ class RedeemableProject
 
     public function isRedeemable(): bool
     {
-        return isset($this->session['redeem_project']) && $this->session['redeem_project'] === true;
+        return $this->session->get('redeem_project') === true;
     }
 
     /**
@@ -96,10 +95,8 @@ class RedeemableProject
 
     public function clear(): void
     {
-        unset($this->session['redeem_project']);
-        unset($this->session['last_created_pid']);
-        unset($_SESSION['redeem_project']);
-        unset($_SESSION['last_created_pid']);
+        $this->session->remove('redeem_project');
+        $this->session->remove('last_created_pid');
     }
 
     public function getProject(): ?ProjectStruct

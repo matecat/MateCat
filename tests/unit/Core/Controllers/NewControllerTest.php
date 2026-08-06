@@ -362,6 +362,149 @@ class NewControllerTest extends AbstractTest
     }
 
     /**
+     * icu_enabled must default to `true` when the request omits the parameter entirely.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function testValidateTheRequestDefaultsIcuEnabledToTrueWhenMissing(): void
+    {
+        $user = $this->createMock(UserStruct::class);
+        $user->expects($this->once())->method('getPersonalTeam')->willReturn(new TeamStruct());
+        $user->expects($this->once())->method('getEmail')->willReturn("test-email@translated.com");
+
+        $this->requestMock = new Request(
+            [],
+            [
+                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'google_ads',
+                'due_date' => '20251231',
+                'source_lang' => 'en',
+                'target_lang' => 'fr,de',
+                'mt_engine' => 1,
+                'tms_engine' => 1,
+                'segmentation_rule' => 'patent',
+            ],
+            [],
+            [],
+            [
+                'file[]' => [
+                    'name' => 'foo.docx',
+                    'tmp_name' => '/tmp/xdwlky',
+                ]
+            ]
+        );
+
+        $this->createMocks();
+
+        $reflector = new ReflectionProperty($this->controller, 'user');
+        $reflector->setValue($this->controller, $user);
+
+        $validateParameters = $this->method->invoke($this->controller);
+
+        $this->assertArrayHasKey('icu_enabled', $validateParameters);
+        $this->assertTrue($validateParameters['icu_enabled']);
+        $this->assertTrue($validateParameters['metadata'][\Model\Projects\ProjectsMetadataMarshaller::ICU_ENABLED->value]);
+    }
+
+    /**
+     * icu_enabled must stay `false` when the request explicitly disables it.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function testValidateTheRequestKeepsIcuEnabledFalseWhenExplicitlyDisabled(): void
+    {
+        $user = $this->createMock(UserStruct::class);
+        $user->expects($this->once())->method('getPersonalTeam')->willReturn(new TeamStruct());
+        $user->expects($this->once())->method('getEmail')->willReturn("test-email@translated.com");
+
+        $this->requestMock = new Request(
+            [],
+            [
+                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'google_ads',
+                'due_date' => '20251231',
+                'source_lang' => 'en',
+                'target_lang' => 'fr,de',
+                'mt_engine' => 1,
+                'tms_engine' => 1,
+                'segmentation_rule' => 'patent',
+                'icu_enabled' => 'false',
+            ],
+            [],
+            [],
+            [
+                'file[]' => [
+                    'name' => 'foo.docx',
+                    'tmp_name' => '/tmp/xdwlky',
+                ]
+            ]
+        );
+
+        $this->createMocks();
+
+        $reflector = new ReflectionProperty($this->controller, 'user');
+        $reflector->setValue($this->controller, $user);
+
+        $validateParameters = $this->method->invoke($this->controller);
+
+        $this->assertArrayHasKey('icu_enabled', $validateParameters);
+        $this->assertFalse($validateParameters['icu_enabled']);
+        $this->assertFalse($validateParameters['metadata'][\Model\Projects\ProjectsMetadataMarshaller::ICU_ENABLED->value]);
+    }
+
+    /**
+     * icu_enabled must be `true` when the request explicitly enables it.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function testValidateTheRequestKeepsIcuEnabledTrueWhenExplicitlyEnabled(): void
+    {
+        $user = $this->createMock(UserStruct::class);
+        $user->expects($this->once())->method('getPersonalTeam')->willReturn(new TeamStruct());
+        $user->expects($this->once())->method('getEmail')->willReturn("test-email@translated.com");
+
+        $this->requestMock = new Request(
+            [],
+            [
+                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'google_ads',
+                'due_date' => '20251231',
+                'source_lang' => 'en',
+                'target_lang' => 'fr,de',
+                'mt_engine' => 1,
+                'tms_engine' => 1,
+                'segmentation_rule' => 'patent',
+                'icu_enabled' => 'true',
+            ],
+            [],
+            [],
+            [
+                'file[]' => [
+                    'name' => 'foo.docx',
+                    'tmp_name' => '/tmp/xdwlky',
+                ]
+            ]
+        );
+
+        $this->createMocks();
+
+        $reflector = new ReflectionProperty($this->controller, 'user');
+        $reflector->setValue($this->controller, $user);
+
+        $validateParameters = $this->method->invoke($this->controller);
+
+        $this->assertArrayHasKey('icu_enabled', $validateParameters);
+        $this->assertTrue($validateParameters['icu_enabled']);
+        $this->assertTrue($validateParameters['metadata'][\Model\Projects\ProjectsMetadataMarshaller::ICU_ENABLED->value]);
+    }
+
+    /**
      * @throws ReflectionException
      * @throws Exception
      */

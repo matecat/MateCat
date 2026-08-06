@@ -55,7 +55,7 @@ class ChangeProjectNameController extends KleinController
         $name = CatUtils::sanitizeOrFallbackProjectName(is_string($name) ? $name : '');
 
         $project = $this->project ?? throw new \RuntimeException('Project not loaded');
-        (new ProjectAccessValidator($this, $project))->validate();
+        (new ProjectAccessValidator($this, $project, $this->getUser()))->validate();
         $ownerEmail = $project->id_customer;
 
         $this->changeProjectName((int)$id, (string)$password, $name);

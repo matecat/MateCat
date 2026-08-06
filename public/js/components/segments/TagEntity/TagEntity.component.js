@@ -1,8 +1,11 @@
 import React, {Component, createRef} from 'react'
 import {debounce, find} from 'lodash'
 import {tagSignatures, getTooltipTag} from '../utils/DraftMatecatUtils/tagModel'
+import {classifyPcPhTag} from '../utils/DraftMatecatUtils/pcTagUtils'
 import SegmentStore from '../../../stores/SegmentStore'
+import CatToolStore from '../../../stores/CatToolStore'
 import SegmentConstants from '../../../constants/SegmentConstants'
+import CatToolConstants from '../../../constants/CatToolConstants'
 import EditAreaConstants from '../../../constants/EditAreaConstants'
 import SegmentActions from '../../../actions/SegmentActions'
 import SearchUtils from '../../header/cattol/search/searchUtils'
@@ -22,6 +25,7 @@ class TagEntity extends Component {
       tagWarningStyle: '',
       tooltipAvailable: getTooltipTag().includes(entityName),
       shouldTooltipOnHover: false,
+      phTagsCompressed: CatToolStore.isPhTagsCompressed(),
       clicked: false,
       focused: false,
       searchParams: this.props.getSearchParams(),
@@ -119,6 +123,10 @@ class TagEntity extends Component {
     }
   }
 
+  onPhTagsCompressedToggle = () => {
+    this.setState({phTagsCompressed: CatToolStore.isPhTagsCompressed()})
+  }
+
   componentDidMount() {
     SegmentStore.addListener(
       SegmentConstants.SET_SEGMENT_WARNINGS,
@@ -145,6 +153,10 @@ class TagEntity extends Component {
       this.removeSearchParams,
     )
     SegmentStore.addListener(SegmentConstants.FOCUS_TAGS, this.focusTag)
+    CatToolStore.addListener(
+      CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
+      this.onPhTagsCompressedToggle,
+    )
 
     const textSpanDisplayed =
       this.tagRef && this.tagRef.querySelector('span[data-text="true"]')
@@ -197,15 +209,29 @@ class TagEntity extends Component {
       this.removeSearchParams,
     )
     SegmentStore.removeListener(SegmentConstants.FOCUS_TAGS, this.focusTag)
+    CatToolStore.removeListener(
+      CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
+      this.onPhTagsCompressedToggle,
+    )
   }
 
-  getChildrenContent(index) {
-    return (
-      <>
-        {this.props.children}
-        {index >= 0 && <span className="index-counter">{index + 1}</span>}
-      </>
-    )
+  getChildrenContent(index, entityName, pcRole) {
+    const {phTagsCompressed} = this.state
+    const isPhTag = entityName === 'ph'
+
+    if (isPhTag && index >= 0) {
+      // A closing pc tag always shows only its number (never the equiv-text /
+      // closing content). An opening tag shows its content unless compressed.
+      const isPcClose = pcRole === 'close'
+      return (
+        <>
+          <span className="index-counter">{index + 1}</span>
+          {!phTagsCompressed && !isPcClose && this.props.children}
+        </>
+      )
+    }
+
+    return this.props.children
   }
 
   render() {
@@ -226,18 +252,32 @@ class TagEntity extends Component {
         : this.selectCorrectStyle()
     const {openSplit} = getUpdatedSegmentInfo()
     const {
-      data: {id: entityId, placeholder: entityPlaceholder, index},
+      data: {
+        id: entityId,
+        placeholder: entityPlaceholder,
+        index,
+        name: entityName,
+        pcRole,
+      },
     } = contentState.getEntity(entityKey)
     const decoratedText = Array.isArray(children)
       ? children[0].props.text
       : children.props.decoratedText
 
+    const {phTagsCompressed} = this.state
+    const isCompressedPh = entityName === 'ph' && phTagsCompressed && index >= 0
+    const pcRoleClass = entityName === 'ph' && pcRole ? ` tag-pc-${pcRole}` : ''
+    // A closing pc tag shows only its number, so it never needs a content tooltip.
+    const isPcClose = entityName === 'ph' && pcRole === 'close'
+    const showTooltip =
+      ((shouldTooltipOnHover && tooltipAvailable) || isCompressedPh) &&
+      !isPcClose
+
     return (
       <Tooltip
         stylePointerElement={{display: 'inline-block', position: 'relative'}}
         content={
-          shouldTooltipOnHover &&
-          tooltipAvailable && (
+          showTooltip && (
             <span className={`tag ${style}`}>
               <span>{entityPlaceholder}</span>
             </span>
@@ -249,7 +289,7 @@ class TagEntity extends Component {
             ref={(ref) => (this.tagRef = ref)}
             className={`tag ${style}${
               focused ? ' tag-focused' : ''
-            } ${tagWarningStyle}`}
+            }${isCompressedPh ? ' tag-compressed' : ''}${pcRoleClass} ${tagWarningStyle}`}
             data-offset-key={this.props.offsetkey}
             unselectable="on"
             suppressContentEditableWarning={true}
@@ -272,10 +312,10 @@ class TagEntity extends Component {
             {searchParams.active && markSearch(decoratedText, searchParams)}
             {searchParams.active ? (
               <span style={{display: 'none'}}>
-                {this.getChildrenContent(index)}
+                {this.getChildrenContent(index, entityName, pcRole)}
               </span>
             ) : (
-              this.getChildrenContent(index)
+              this.getChildrenContent(index, entityName, pcRole)
             )}
           </span>
         </div>
@@ -410,15 +450,33 @@ class TagEntity extends Component {
   highlightOnWarnings = () => {
     const {getUpdatedSegmentInfo, contentState, entityKey, isTarget} =
       this.props
-    const {tagMismatch, segmentOpened} = getUpdatedSegmentInfo()
+    const {tagMismatch, segmentOpened, missingTagsInTarget} =
+      getUpdatedSegmentInfo()
     const {data: entityData} = contentState.getEntity(entityKey) || {}
 
-    if (!segmentOpened || !tagMismatch) return
+    if (!segmentOpened) return
+    const {encodedText} = entityData
+
+    // pc (compressible) tags: the QA endpoint can't tell missing closing tags
+    // apart (every one converts to the same generic `</pc>` markup), so
+    // matching by reported string content doesn't work here. missingTagsInTarget
+    // is computed client-side by tag identity/numbering instead (see
+    // checkForMissingTag.js) and is exact, since its entries are the source's
+    // own tag objects.
+    if (classifyPcPhTag(encodedText)) {
+      if (isTarget) return ''
+      const isMissingInTarget = (missingTagsInTarget || []).some(
+        (tag) => tag?.data?.encodedText === encodedText,
+      )
+      return isMissingInTarget ? 'tag-mismatch-error' : ''
+    }
+
+    if (!tagMismatch) return
     let tagWarningStyle = ''
     if (tagMismatch.target && tagMismatch.target.length > 0 && isTarget) {
       // Todo: Check tag type and tag id instead of string
       tagMismatch.target.forEach((tagString) => {
-        if (entityData.encodedText === tagString) {
+        if (encodedText === tagString) {
           tagWarningStyle = 'tag-mismatch-error'
         }
       })
@@ -428,13 +486,13 @@ class TagEntity extends Component {
       !isTarget
     ) {
       tagMismatch.source.forEach((tagString) => {
-        if (entityData.encodedText === tagString) {
+        if (encodedText === tagString) {
           tagWarningStyle = 'tag-mismatch-error'
         }
       })
     } else if (tagMismatch.order && isTarget) {
       tagMismatch.order.forEach((tagString) => {
-        if (entityData.encodedText === tagString) {
+        if (encodedText === tagString) {
           tagWarningStyle = 'tag-mismatch-warning'
         }
       })

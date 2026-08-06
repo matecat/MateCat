@@ -20,6 +20,7 @@ use Model\LQA\ChunkReviewStruct;
 use Model\LQA\ModelDao;
 use Model\LQA\ModelStruct;
 use Model\Projects\ProjectStruct;
+use Model\Users\UserStruct;
 
 class ChunkReviewModel implements IChunkReviewModel
 {
@@ -61,12 +62,13 @@ class ChunkReviewModel implements IChunkReviewModel
      * @param float $penalty_points
      *
      * @param ProjectStruct $projectStruct
+     * @param UserStruct $actingUser
      *
      * @throws Exception
      */
-    public function addPenaltyPoints(float $penalty_points, ProjectStruct $projectStruct): void
+    public function addPenaltyPoints(float $penalty_points, ProjectStruct $projectStruct, UserStruct $actingUser): void
     {
-        $this->updateChunkReviewCountersAndPassFail($penalty_points, 0, 0, $projectStruct);
+        $this->updateChunkReviewCountersAndPassFail($penalty_points, 0, 0, $projectStruct, $actingUser);
     }
 
     /**
@@ -75,12 +77,13 @@ class ChunkReviewModel implements IChunkReviewModel
      * @param float $penalty_points
      *
      * @param ProjectStruct $projectStruct
+     * @param UserStruct $actingUser
      *
      * @throws Exception
      */
-    public function subtractPenaltyPoints(float $penalty_points, ProjectStruct $projectStruct): void
+    public function subtractPenaltyPoints(float $penalty_points, ProjectStruct $projectStruct, UserStruct $actingUser): void
     {
-        $this->updateChunkReviewCountersAndPassFail(-$penalty_points, 0, 0, $projectStruct);
+        $this->updateChunkReviewCountersAndPassFail(-$penalty_points, 0, 0, $projectStruct, $actingUser);
     }
 
     /**
@@ -90,7 +93,7 @@ class ChunkReviewModel implements IChunkReviewModel
      *
      * @throws Exception
      */
-    public function updateChunkReviewCountersAndPassFail(float $penalty_points, int $reviewed_word_count, int $tte, ProjectStruct $projectStruct): void
+    public function updateChunkReviewCountersAndPassFail(float $penalty_points, int $reviewed_word_count, int $tte, ProjectStruct $projectStruct, UserStruct $actingUser): void
     {
         $data = [
             'chunkReview' => $this->chunk_review,
@@ -99,7 +102,7 @@ class ChunkReviewModel implements IChunkReviewModel
             'total_tte' => $tte,
         ];
 
-        $this->_updatePassFailResult($projectStruct, $data);
+        $this->_updatePassFailResult($projectStruct, $data, $actingUser);
     }
 
     /**
@@ -132,10 +135,11 @@ class ChunkReviewModel implements IChunkReviewModel
      *
      * @param ProjectStruct $project
      * @param array{chunkReview: ChunkReviewStruct, penalty_points?: float, reviewed_words_count: int, total_tte: int} $data
+     * @param UserStruct $actingUser
      *
      * @throws Exception
      */
-    protected function _updatePassFailResult(ProjectStruct $project, array $data): void
+    protected function _updatePassFailResult(ProjectStruct $project, array $data, UserStruct $actingUser): void
     {
         $chunkReviewDao = new ChunkReviewDao($this->database);
         $chunkReviewDao->passFailCountsAtomicUpdate((int)$this->chunk_review->id, $data);
@@ -145,7 +149,8 @@ class ChunkReviewModel implements IChunkReviewModel
             $this->chunk_review,
             1,
             $this,
-            $project
+            $project,
+            $actingUser
         ));
     }
 
@@ -172,7 +177,7 @@ class ChunkReviewModel implements IChunkReviewModel
      *
      * @throws Exception
      */
-    public function recountAndUpdatePassFailResult(ProjectStruct $project): void
+    public function recountAndUpdatePassFailResult(ProjectStruct $project, UserStruct $actingUser): void
     {
         /**
          * Count penalty points based on this source_page
@@ -206,7 +211,8 @@ class ChunkReviewModel implements IChunkReviewModel
             $this->chunk_review,
             $update_result,
             $this,
-            $project
+            $project,
+            $actingUser
         ));
     }
 

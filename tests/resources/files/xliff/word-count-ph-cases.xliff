@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="en-US" trgLang="it-IT">
+<!--
+    Word count fixture for the <ph> weighting rule implemented in CatUtils.
+
+    Xliff 2.0 on purpose: a 1.2 file is handed over to the filters, which rewrite every <ph> into an
+    <x/>, so a 1.2 fixture could never exercise this rule. A 2.0 file keeps its inline codes, and its
+    <ph dataRef="..."/> reaches the word counter exactly as written here.
+
+    Rule under test:
+      - a unit made of <ph> tags and nothing else weighs ONE word overall, however many <ph> it holds;
+      - as soon as the unit carries any other translatable text, every <ph> weighs ZERO;
+      - only <ph> earns that word: <sc/>, <ec/>, <pc> and friends keep weighing zero.
+
+    Flavours of <ph> covered here:
+      - <ph id="N" dataRef="dN"/>            an inline code pointing at the original data
+      - <ph id="N" dataRef="dN" disp="..."/> the same, plus the display text of the code. disp lives
+                                             inside the tag, so it is NOT translatable text of the unit
+                                             and must not stop the <ph> from earning its word, not even
+                                             when it holds more than one word.
+      - <ph id="mtc_N" ctype="..." x-orig="..." equiv-text="base64:..."/>
+                                             Matecat's own placeholder, the shape produced by the Layer 0
+                                             to Layer 1 transition and the one reaching the counter when a
+                                             Matecat export is re-imported. x-orig sits between ctype and
+                                             equiv-text on purpose: that is what makes the ctype
+                                             unreadable to a lazy regex. Mind that ctype, x-orig and
+                                             equiv-text are Matecat attributes, not xliff 2.0 ones, so
+                                             that single unit is well formed but not schema pure.
+
+    Not covered here on purpose: an entity escaped &lt;ph/&gt;. Deciding what is a tag is the
+    subfiltering's job, so the counter checks the string as it arrives and decodes nothing, meaning an
+    escaped ph earns no word. Careful though, the cleaning does decode the entities on its own, so such
+    a unit ends up weighing zero rather than being counted as plain text. See the unit test for it.
+
+    The expected count is written on every unit. Values were produced by
+    CatUtils::countSegmentRawWords() with source language en-US, not by hand.
+-->
+    <file id="f1" original="word-count-ph-cases.txt">
+        <notes>
+            <note id="n1">Fixture for the &lt;ph&gt; word weighting rule. See the comments above each unit.</note>
+        </notes>
+
+        <!-- ============================================================
+             Nothing but <ph>: the unit weighs one word overall
+             ============================================================ -->
+
+        <!-- expected words: 1 - a single inline code pointing at the original data -->
+        <unit id="ph-only-dataref">
+            <originalData>
+                <data id="d1">&lt;br/&gt;</data>
+            </originalData>
+            <segment>
+                <source><ph id="1" dataRef="d1"/></source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 1 - disp carries the display text of the inline code, not translatable
+             text of the unit: it lives inside the tag and must not tip the unit over -->
+        <unit id="ph-only-dataref-and-disp">
+            <originalData>
+                <data id="d1">&lt;item name="itemname"/&gt;</data>
+            </originalData>
+            <segment>
+                <source><ph id="1" dataRef="d1" disp="itemname"/></source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 1 - same with a disp holding two words, still nothing translatable -->
+        <unit id="ph-only-dataref-and-disp-with-space">
+            <originalData>
+                <data id="d1">&lt;item name="item name"/&gt;</data>
+            </originalData>
+            <segment>
+                <source><ph id="1" dataRef="d1" disp="item name"/></source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 1 - the same, closed by a full stop: punctuation is not translatable text -->
+        <unit id="ph-only-dataref-and-disp-and-full-stop">
+            <originalData>
+                <data id="d1">&lt;item name="itemname"/&gt;</data>
+            </originalData>
+            <segment>
+                <source><ph id="1" dataRef="d1" disp="itemname"/>.</source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 1 - two inline codes, still one word overall, not two -->
+        <unit id="ph-only-two">
+            <originalData>
+                <data id="d1">&lt;br/&gt;</data>
+                <data id="d2">&lt;hr/&gt;</data>
+            </originalData>
+            <segment>
+                <source><ph id="1" dataRef="d1"/><ph id="2" dataRef="d2"/></source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 1 - three inline codes, still one word overall -->
+        <unit id="ph-only-three">
+            <originalData>
+                <data id="d1">&lt;br/&gt;</data>
+                <data id="d2">&lt;hr/&gt;</data>
+                <data id="d3">&lt;wbr/&gt;</data>
+            </originalData>
+            <segment>
+                <source><ph id="1" dataRef="d1"/><ph id="2" dataRef="d2"/><ph id="3" dataRef="d3"/></source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 1 - punctuation is not translatable text, so the ph still earns its word -->
+        <unit id="ph-only-and-punctuation">
+            <originalData>
+                <data id="d1">&lt;br/&gt;</data>
+                <data id="d2">&lt;hr/&gt;</data>
+            </originalData>
+            <segment>
+                <source><ph id="1" dataRef="d1"/>,<ph id="2" dataRef="d2"/>.</source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 1 - Matecat's own placeholder, x-orig between ctype and equiv-text -->
+        <unit id="ph-only-mtc-x-orig">
+            <segment>
+                <source><ph id="mtc_1" ctype="x-original_ph_content" x-orig="PHBoIGlkPSIxIj57dXNlcm5hbWV9PC9waD4=" equiv-text="base64:e3VzZXJuYW1lfQ=="/></source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 1 - two Matecat placeholders with x-orig, one word overall -->
+        <unit id="ph-only-mtc-x-orig-twice">
+            <segment>
+                <source><ph id="mtc_1" ctype="x-original_ph" x-orig="PHBoIGlkPSIxIi8+" equiv-text="base64:W1tbQlJdXV0="/><ph id="mtc_2" ctype="x-original_ph_content" x-orig="PHBoIGlkPSIyIj54PC9waD4=" equiv-text="base64:eA=="/></source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- ============================================================
+             Translatable text around: every <ph> falls back to zero words
+             ============================================================ -->
+
+        <!-- expected words: 1 - Ciao. The trailing inline code weighs nothing -->
+        <unit id="ph-next-to-one-word">
+            <originalData>
+                <data id="d1">&lt;br/&gt;</data>
+            </originalData>
+            <segment>
+                <source>Ciao <ph id="1" dataRef="d1"/></source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 1 - Ciao. The disp of the inline code is not counted either -->
+        <unit id="ph-dataref-disp-and-one-word">
+            <originalData>
+                <data id="d1">&lt;item name="itemname"/&gt;</data>
+            </originalData>
+            <segment>
+                <source>Ciao <ph id="1" dataRef="d1" disp="itemname"/></source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 2 - hello, world. The inline code in between weighs nothing -->
+        <unit id="ph-among-words">
+            <originalData>
+                <data id="d1">&lt;br/&gt;</data>
+            </originalData>
+            <segment>
+                <source>hello <ph id="1" dataRef="d1"/> world</source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 1 - Ciao again, three inline codes and a comma add nothing -->
+        <unit id="ph-three-and-one-word">
+            <originalData>
+                <data id="d1">&lt;br/&gt;</data>
+                <data id="d2">&lt;hr/&gt;</data>
+                <data id="d3">&lt;wbr/&gt;</data>
+            </originalData>
+            <segment>
+                <source><ph id="1" dataRef="d1"/>Ciao <ph id="2" dataRef="d2"/>,<ph id="3" dataRef="d3"/></source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 2 - a Matecat placeholder with x-orig among words weighs nothing -->
+        <unit id="ph-mtc-x-orig-among-words">
+            <segment>
+                <source>hello <ph id="mtc_1" ctype="x-original_ph_content" x-orig="PHBoIGlkPSIxIj57dXNlcm5hbWV9PC9waD4=" equiv-text="base64:e3VzZXJuYW1lfQ=="/> world</source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- ============================================================
+             Only <ph> earns the word: the other inline codes do not
+             ============================================================ -->
+
+        <!-- expected words: 0 - a lonely sc/ec pair is not a ph -->
+        <unit id="sc-ec-alone">
+            <originalData>
+                <data id="d1">&lt;b&gt;</data>
+                <data id="d2">&lt;/b&gt;</data>
+            </originalData>
+            <segment>
+                <source><sc id="1" dataRef="d1"/><ec startRef="1" dataRef="d2"/></source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 0 - an empty pc holds no text, and a pc is not a ph -->
+        <unit id="empty-pc-alone">
+            <originalData>
+                <data id="d1">&lt;b&gt;</data>
+                <data id="d2">&lt;/b&gt;</data>
+            </originalData>
+            <segment>
+                <source><pc id="1" dataRefStart="d1" dataRefEnd="d2"></pc></source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 3 - the pc weighs nothing, the words it wraps are counted -->
+        <unit id="pc-wrapping-words">
+            <originalData>
+                <data id="d1">&lt;b&gt;</data>
+                <data id="d2">&lt;/b&gt;</data>
+            </originalData>
+            <segment>
+                <source><pc id="1" dataRefStart="d1" dataRefEnd="d2">three bold words</pc></source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 1 - the word survives, the sc/ec pair around it weighs nothing -->
+        <unit id="sc-ec-and-one-word">
+            <originalData>
+                <data id="d1">&lt;b&gt;</data>
+                <data id="d2">&lt;/b&gt;</data>
+            </originalData>
+            <segment>
+                <source><sc id="1" dataRef="d1"/>Ciao<ec startRef="1" dataRef="d2"/></source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- ============================================================
+             Neighbouring behaviours, kept here to show they are untouched
+             ============================================================ -->
+
+        <!-- expected words: 4 - Click, right, here, now. The html snippet around them weighs zero -->
+        <unit id="html-snippet-and-words">
+            <segment>
+                <source>Click &lt;b&gt;right here&lt;/b&gt; now</source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 4 - Welcome, back, the variable, enjoy. A variable weighs one word, unlike a ph -->
+        <unit id="variable-and-words">
+            <segment>
+                <source>Welcome back {{username}}, enjoy</source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 6 - The, invoice, totals, 1042, euro, today. A number weighs one word -->
+        <unit id="number-and-words">
+            <segment>
+                <source>The invoice totals 1042 euro today</source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 18 - plain prose, no inline code at all, the reference case -->
+        <unit id="real-text-plain">
+            <segment>
+                <source>Matecat splits every document into segments, and each segment is counted so that the translator knows the workload.</source>
+                <target/>
+            </segment>
+        </unit>
+
+        <!-- expected words: 31 - prose wrapping a ph and a pc, both weighing zero -->
+        <unit id="real-text-with-inline-codes">
+            <originalData>
+                <data id="d1">&lt;var&gt;</data>
+                <data id="d2">&lt;b&gt;</data>
+                <data id="d3">&lt;/b&gt;</data>
+            </originalData>
+            <segment>
+                <source>When a unit carries actual prose, such as this sentence about the placeholder <ph id="1" dataRef="d1" disp="{placeholder}"/> right here, the code adds nothing to the count, and the same holds for <pc id="2" dataRefStart="d2" dataRefEnd="d3">these three</pc> as well.</source>
+                <target/>
+            </segment>
+        </unit>
+
+    </file>
+</xliff>

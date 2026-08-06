@@ -253,7 +253,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
         $id_job = $projectStructure->jobToSplit ?? throw new RuntimeException('Job id is required when splitting a job');
 
-        ChunkReviewJobLock::run($id_job, function () use ($id_job, $projectStructure) {
+        ChunkReviewJobLock::run($id_job, function () use ($id_job, $projectStructure, $event) {
             $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
             $previousRevisionRecords = $chunkReviewDao->findByIdJob($id_job);
             $project = $this->getProjectDao()->findById($projectStructure->idProject, 86400)
@@ -286,7 +286,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
             foreach ($reviews as $review) {
                 $model = new ChunkReviewModel($review, $this->getDatabase());
-                $model->recountAndUpdatePassFailResult($project);
+                $model->recountAndUpdatePassFailResult($project, $event->actingUser);
             }
         }, 10);
     }
@@ -304,7 +304,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
         $id_job = $projectStructure->jobToMerge ?? throw new RuntimeException('Job id is required when merging jobs');
 
-        ChunkReviewJobLock::run($id_job, function () use ($id_job, $projectStructure) {
+        ChunkReviewJobLock::run($id_job, function () use ($id_job, $projectStructure, $event) {
             $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
             $old_reviews = $chunkReviewDao->findByIdJob($id_job);
             $project = $this->getProjectDao()->findById($projectStructure->idProject, 86400)
@@ -341,7 +341,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
             foreach ($reviews as $review) {
                 $model = new ChunkReviewModel($review, $this->getDatabase());
-                $model->recountAndUpdatePassFailResult($project);
+                $model->recountAndUpdatePassFailResult($project, $event->actingUser);
             }
         }, 10);
     }

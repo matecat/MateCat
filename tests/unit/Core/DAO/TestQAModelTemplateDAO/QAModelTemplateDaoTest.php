@@ -280,6 +280,28 @@ class QAModelTemplateDaoTest extends AbstractTest
 
     #[Test]
     #[Group('PersistenceNeeded')]
+    public function removeIgnoresTemplateOwnedByAnotherUser(): void
+    {
+        $created = $this->create('Foreign Owner Template');
+
+        $count = $this->dao->remove($created->id, $this->uid + 999999);
+
+        // Read with raw SQL rather than through the DAO: the parent must still be un-deleted, and the
+        // children must still exist, which is what proves the cascade never ran for a foreign caller.
+        $this->assertSame(0, $count);
+        $conn = obtainTestDatabase()->getConnection();
+
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM qa_model_templates WHERE id = :id AND deleted_at IS NULL");
+        $stmt->execute(['id' => $created->id]);
+        $this->assertSame(1, (int)$stmt->fetchColumn());
+
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM qa_model_template_passfails WHERE id_template = :id");
+        $stmt->execute(['id' => $created->id]);
+        $this->assertGreaterThan(0, (int)$stmt->fetchColumn());
+    }
+
+    #[Test]
+    #[Group('PersistenceNeeded')]
     public function getAllPaginatedReturnsStructure(): void
     {
         $this->create('Paginated Test');

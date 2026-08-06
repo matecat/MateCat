@@ -3,6 +3,8 @@
 
 namespace Matecat\Core\Model\Users;
 
+use Utils\Session\ArraySessionStore;
+
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\Exceptions\ValidationError;
@@ -28,7 +30,7 @@ class SignupTest extends AbstractTest
     #[Test]
     public function testSignupWithValidParams()
     {
-        $session = [];
+        $session = new ArraySessionStore();
         $signup = new SignupModel([
             'first_name' => 'John',
             'last_name' => 'Doe',
@@ -43,7 +45,7 @@ class SignupTest extends AbstractTest
         $dao = new UserDao(obtainTestDatabase());
         $user = $dao->getByEmail('foo@example.org');
         $this->assertNotEmpty($user);
-        $this->assertEquals('https://fake.example.com', $session['wanted_url']);
+        $this->assertEquals('https://fake.example.com', $session->get('wanted_url'));
     }
 
 }

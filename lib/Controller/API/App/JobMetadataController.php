@@ -3,11 +3,15 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\TeamAccessValidator;
 use Exception;
+use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
+use Model\Projects\ProjectDao;
 use ReflectionException;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
@@ -18,7 +22,40 @@ class JobMetadataController extends KleinController
     protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
-        $this->appendValidator(new ChunkPasswordValidator($this));
+
+        // The job password is a capability to work on the job, not permission to change how it
+        // behaves: these settings alter tag parsing, TM prioritisation and the issues a reviewer is
+        // required to fill in, for everyone on the job. The editor only offers them to the team that
+        // owns the project, so the same rule has to hold here rather than in the browser alone.
+        $teamValidator = new TeamAccessValidator($this);
+
+        $chunkValidator = new ChunkPasswordValidator($this);
+        $chunkValidator->onSuccess(function () use ($chunkValidator, $teamValidator) {
+            // The chunk is already in hand from the validator that just resolved it, so the job is not
+            // read a second time.
+            $teamValidator->setIdTeam($this->resolveTeamId($chunkValidator->getChunk()));
+        });
+
+        // Registration order is execution order, so the team check runs after the callback above has
+        // supplied the id_team. Appending it from inside the callback would not work: validateRequest()
+        // iterates a copy of the list and would never reach it.
+        $this->appendValidator($chunkValidator);
+        $this->appendValidator($teamValidator);
+    }
+
+    /**
+     * Reads the owning team from projects.id_team for the job the caller addressed.
+     *
+     * @throws AuthorizationError if the project has no team, since a project without a team has no
+     *                            members and there is nobody the membership check could match
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    protected function resolveTeamId(JobStruct $chunk): int
+    {
+        $project = $chunk->getProject(new ProjectDao($this->getDatabase()));
+
+        return $project->id_team ?? throw new AuthorizationError('Not Authorized', 401);
     }
 
     /**

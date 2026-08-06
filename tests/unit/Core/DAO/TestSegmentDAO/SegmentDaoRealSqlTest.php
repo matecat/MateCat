@@ -587,6 +587,9 @@ class SegmentDaoRealSqlTest extends AbstractTest
         $this->fixtures->makeSegmentTranslationsSplit($this->segIds[0], $this->idJob);
         $conn = $this->realSqlDb->getConnection();
         $odId = self::ASSIGNABLE_ID_FLOOR + 700_001;
+        // Auto-clean any row orphaned by a previously interrupted run: this fixed id is committed
+        // outside the rolled-back transaction, so a failed run's cleanup may be skipped. Idempotent seed.
+        $conn->exec("DELETE FROM segment_original_data WHERE id = {$odId}");
         $stmt = $conn->prepare('INSERT INTO segment_original_data (id, id_segment, map) VALUES (:id, :sid, :map)');
         $stmt->execute(['id' => $odId, 'sid' => $this->segIds[0], 'map' => '{"k":"v"}']);
     }
@@ -642,6 +645,8 @@ class SegmentDaoRealSqlTest extends AbstractTest
         ]);
         $conn = $this->realSqlDb->getConnection();
         $odId = self::ASSIGNABLE_ID_FLOOR + 700_050;
+        // Auto-clean any orphaned row before re-seeding (see note in seedPaginationTranslations).
+        $conn->exec("DELETE FROM segment_original_data WHERE id = {$odId}");
         $stmt = $conn->prepare('INSERT INTO segment_original_data (id, id_segment, map) VALUES (:id, :sid, :map)');
         $stmt->execute(['id' => $odId, 'sid' => $this->segIds[0], 'map' => '{"a":1}']);
 
