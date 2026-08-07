@@ -120,7 +120,7 @@ test('renders properly', async () => {
     // (getUserData -> getTeamMembers -> getProjects); under coverage
     // instrumentation + parallel workers this can occasionally take much
     // longer than the default timeout, so give it real margin.
-    {timeout: 25000},
+    {timeout: 40000},
   )
 
   window.open = jest.fn()
@@ -151,4 +151,4 @@ test('renders properly', async () => {
     })
     await Promise.resolve()
   })
-}, 30000)
+}, 45000)
