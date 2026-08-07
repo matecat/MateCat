@@ -116,7 +116,11 @@ test('renders properly', async () => {
       ).toBeVisible()
       expect(screen.getByText('Welcome to your Personal area')).toBeVisible()
     },
-    {timeout: 8000},
+    // Dashboard's mount chain awaits 3 sequential fetches before rendering
+    // (getUserData -> getTeamMembers -> getProjects); under coverage
+    // instrumentation + parallel workers this can occasionally take much
+    // longer than the default timeout, so give it real margin.
+    {timeout: 25000},
   )
 
   window.open = jest.fn()
@@ -147,4 +151,4 @@ test('renders properly', async () => {
     })
     await Promise.resolve()
   })
-})
+}, 30000)
