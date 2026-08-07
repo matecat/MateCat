@@ -494,6 +494,34 @@ test('Row Menu items', async () => {
   expect(screen.getByText('Share')).toBeEnabled()
 })
 
+test('Toggling pretranslate and dialect-strict checkboxes modifies the current template', async () => {
+  const user = userEvent.setup()
+  const modifyingCurrentTemplate = jest.fn()
+  const {modifyingCurrentTemplate: _ignored, ...rest} = contextMockValues()
+  const contextValues = {...rest, modifyingCurrentTemplate}
+
+  render(<WrapperComponent {...contextValues} />)
+
+  await act(async () =>
+    user.click(screen.getByTestId('pretranslate-checkbox')),
+  )
+  await act(async () =>
+    user.click(screen.getByTestId('dialect-strict-checkbox')),
+  )
+
+  expect(modifyingCurrentTemplate).toHaveBeenCalledTimes(2)
+
+  const pretranslateUpdater = modifyingCurrentTemplate.mock.calls[0][0]
+  expect(pretranslateUpdater({pretranslate100: false})).toEqual(
+    expect.objectContaining({pretranslate100: true}),
+  )
+
+  const dialectUpdater = modifyingCurrentTemplate.mock.calls[1][0]
+  expect(dialectUpdater({dialectStrict: false})).toEqual(
+    expect.objectContaining({dialectStrict: true}),
+  )
+})
+
 test('Pretranslate truthy', async () => {
   const {currentProjectTemplate, ...rest} = contextMockValues()
   const contextValues = {

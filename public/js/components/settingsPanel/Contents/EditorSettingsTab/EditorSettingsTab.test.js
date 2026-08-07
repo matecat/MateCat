@@ -5,6 +5,7 @@ import {render, screen, within} from '@testing-library/react'
 import projectTemplatesMock from '../../../../../mocks/projectTemplateMock'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import mockLanguages from '../../../../../mocks/languagesMock'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 
 global.config = {
   basepath: 'http://localhost/',
@@ -198,26 +199,34 @@ const contextValues = {
   ],
 }
 
-test.skip('Render properly', () => {
+// EditorSettingsTab's children read the logged-in user's metadata (and the
+// setter used to persist it) from ApplicationWrapperContext, not from
+// SettingsPanelContext.
+const applicationWrapperContextValue = {
+  userInfo: {
+    metadata: {
+      guess_tags: 1,
+      lexiqa: 1,
+      cross_language_matches: {
+        primary: 'fr-FR',
+        secondary: 'el-GR',
+      },
+    },
+  },
+  setUserMetadataKey: jest.fn(() => Promise.resolve()),
+}
+
+const renderWithContext = (settingsPanelContextValue = contextValues) =>
   render(
-    <SettingsPanelContext.Provider
-      value={{
-        ...contextValues,
-        currentProjectTemplate: {
-          ...contextValues.currentProjectTemplate,
-          speech2text: false,
-          tagProjection: true,
-          lexica: true,
-          crossLanguageMatches: {
-            primary: 'fr-FR',
-            secondary: 'el-GR',
-          },
-        },
-      }}
-    >
-      <EditorSettingsTab />
-    </SettingsPanelContext.Provider>,
+    <ApplicationWrapperContext.Provider value={applicationWrapperContextValue}>
+      <SettingsPanelContext.Provider value={settingsPanelContextValue}>
+        <EditorSettingsTab />
+      </SettingsPanelContext.Provider>
+    </ApplicationWrapperContext.Provider>,
   )
+
+test('Render properly', () => {
+  renderWithContext()
 
   expect(screen.getByTestId('switch-speechtotext')).not.toBeChecked()
   expect(screen.getByTestId('switch-guesstag')).toBeChecked()
@@ -230,75 +239,62 @@ test.skip('Render properly', () => {
   expect(crossLanguagesMatches.getByText('Greek')).toBeInTheDocument()
 })
 
-test.skip('Not showing guess tag', () => {
+test('Not showing guess tag', () => {
   config.show_tag_projection = 0
-  render(
-    <SettingsPanelContext.Provider value={contextValues}>
-      <EditorSettingsTab />
-    </SettingsPanelContext.Provider>,
-  )
+  renderWithContext()
 
   expect(screen.queryByTestId('switch-guesstag')).not.toBeInTheDocument()
 })
 
-test.skip('Guess tag not available for...', () => {
-  render(
-    <SettingsPanelContext.Provider
-      value={{
-        ...contextValues,
-        sourceLang: {
-          code: 'af-ZA',
-          name: 'Afrikaans',
-          direction: 'ltr',
-          id: 'af-ZA',
-        },
-      }}
-    >
-      <EditorSettingsTab />
-    </SettingsPanelContext.Provider>,
-  )
+test('Guess tag not available for...', () => {
+  renderWithContext({
+    ...contextValues,
+    sourceLang: {
+      code: 'af-ZA',
+      name: 'Afrikaans',
+      direction: 'ltr',
+      id: 'af-ZA',
+    },
+  })
 
   expect(screen.getByTestId('switch-guesstag')).not.toBeChecked()
 })
 
-test.skip('Lexiqa not available for...', () => {
-  render(
-    <SettingsPanelContext.Provider
-      value={{
-        ...contextValues,
-        sourceLang: {
-          code: 'ace-ID',
-          name: 'Acehnese',
-          direction: 'ltr',
-          id: 'ace-ID',
-        },
-      }}
-    >
-      <EditorSettingsTab />
-    </SettingsPanelContext.Provider>,
-  )
+test('Lexiqa not available for...', () => {
+  renderWithContext({
+    ...contextValues,
+    sourceLang: {
+      code: 'ace-ID',
+      name: 'Acehnese',
+      direction: 'ltr',
+      id: 'ace-ID',
+    },
+  })
 
   expect(screen.getByTestId('switch-lexiqa')).not.toBeChecked()
 })
 
-test.skip('Lexiqa not available for... (target lang)', () => {
-  render(
-    <SettingsPanelContext.Provider
-      value={{
-        ...contextValues,
-        targetLangs: [
-          {
-            code: 'ln-LIN',
-            name: 'Lingala',
-            direction: 'ltr',
-            id: 'ln-LIN',
-          },
-        ],
-      }}
-    >
-      <EditorSettingsTab />
-    </SettingsPanelContext.Provider>,
-  )
+test('Lexiqa not available for... (target lang)', () => {
+  renderWithContext({
+    ...contextValues,
+    targetLangs: [
+      {
+        code: 'ln-LIN',
+        name: 'Lingala',
+        direction: 'ltr',
+        id: 'ln-LIN',
+      },
+    ],
+  })
 
   expect(screen.getByTestId('switch-lexiqa')).not.toBeChecked()
+})
+
+test('shows AiAssistant only when isOpenAiEnabled is set', () => {
+  config.isOpenAiEnabled = true
+  renderWithContext()
+
+  expect(screen.getByTestId('switch-ai-assistant')).toBeInTheDocument()
+
+  config.isOpenAiEnabled = false
 })
