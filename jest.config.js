@@ -43,7 +43,7 @@ module.exports = {
     './public/js/stores/': {lines: 80},
     './public/js/components/header/': {lines: 80},
     './public/js/api/': {lines: 15},
-    './public/js/components/settingsPanel/': {lines: 45},
+    './public/js/components/settingsPanel/': {lines: 80},
     './public/js/components/segments/': {lines: 20},
   },
   roots: ['<rootDir>/public/'],
