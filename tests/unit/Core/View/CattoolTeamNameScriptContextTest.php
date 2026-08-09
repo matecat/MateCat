@@ -28,45 +28,69 @@ class CattoolTeamNameScriptContextTest extends AbstractTest
     private const string BREAKOUT = "x'-alert(1)-'";
 
     /**
-     * The tracked source template, plus the built page when a build is present locally:
-     * lib/View/index.html is a build artifact and is not in the repository, so this must not
-     * require it.
+     * Every source template under lib/View/templates. Built pages under lib/View are generated
+     * from these by the frontend build and are deliberately out of scope: they are artifacts, and
+     * a stale one would report a rule violation that no longer exists in any tracked file.
      *
      * @return array<string, array{string}>
      */
-    public static function cattoolTemplates(): array
+    public static function sourceTemplates(): array
     {
-        return [
-            'source template' => [__DIR__ . '/../../../../lib/View/templates/_index.html'],
-            'built page' => [__DIR__ . '/../../../../lib/View/index.html'],
-        ];
+        $templates = glob(__DIR__ . '/../../../../lib/View/templates/*.html') ?: [];
+
+        $cases = [];
+        foreach ($templates as $template) {
+            $cases[basename($template)] = [$template];
+        }
+
+        return $cases;
     }
 
     /**
-     * The whole fix rests on the template NOT quoting the interpolation, so pin it:
-     * re-adding quotes around ${team_name} reopens the injection.
+     * The general form of the rule this class was opened for. PHPTAL supplies no quotes of its
+     * own inside a script block, so a template that writes `key: \'${value}\'` is asking the value
+     * to behave, and no page configuration should have to. Every value now reaches the page inside
+     * one serialised document instead, which is why this can be asserted over the whole directory
+     * rather than over one variable.
      */
     #[Test]
-    #[DataProvider('cattoolTemplates')]
-    public function theTemplateDoesNotWrapTheTeamNameInterpolationInQuotes(string $template): void
+    #[DataProvider('sourceTemplates')]
+    public function noTemplateWrapsAnInterpolationInItsOwnQuotesInsideAScriptBlock(string $template): void
     {
-        if (!file_exists($template)) {
-            // build artifact absent: the source template case already covers the rule
-            $this->markTestSkipped("$template is not present in this checkout");
-        }
-
         $contents = file_get_contents($template);
         $this->assertIsString($contents, "cannot read $template");
 
-        $this->assertMatchesRegularExpression(
-            '/^\s*team_name:\s*\$\{team_name}\s*,\s*$/m',
+        preg_match_all('#<script\b.*?</script>#s', $contents, $scripts);
+
+        foreach ($scripts[0] as $script) {
+            $this->assertDoesNotMatchRegularExpression(
+                '/[\'"]\$\{/',
+                $script,
+                basename($template) . ' quotes an interpolation inside a script block; pass the value'
+                . ' through the serialised configuration document instead'
+            );
+        }
+    }
+
+    /**
+     * The other half: the cattool page must actually be reading that document. Without this the
+     * test above passes for a template that simply stopped configuring anything.
+     */
+    #[Test]
+    public function theCattoolTemplateBuildsItsConfigurationFromTheSerialisedDocument(): void
+    {
+        $contents = file_get_contents(__DIR__ . '/../../../../lib/View/templates/_index.html');
+        $this->assertIsString($contents, 'cannot read _index.html');
+
+        $this->assertStringContainsString(
+            'var config = ${structure config_json};',
             $contents,
-            'team_name must be interpolated unquoted so PHPTalString can supply the quotes'
+            'the cattool page must take its configuration from the serialised document'
         );
-        $this->assertDoesNotMatchRegularExpression(
-            '/team_name:\s*[\'"]\$\{/',
+        $this->assertStringNotContainsString(
+            '${team_name}',
             $contents,
-            'team_name must not be wrapped in template-supplied quotes'
+            'the team name must reach the page through the document, not through its own interpolation'
         );
     }
 

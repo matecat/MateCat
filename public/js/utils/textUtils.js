@@ -231,11 +231,14 @@ const TEXT_UTILS = {
   },
   replacePlaceholder: function (string) {
     return string
-      .replace(config.lfPlaceholderRegex, 'softReturnMonad')
-      .replace(config.crPlaceholderRegex, 'crPlaceholder')
-      .replace(config.crlfPlaceholderRegex, 'brMarker')
-      .replace(config.tabPlaceholderRegex, 'tabMarkerMonad')
-      .replace(config.nbspPlaceholderRegex, 'nbspPlMark')
+      .replaceAll(config.lfPlaceholder, 'softReturnMonad')
+      .replaceAll(config.crPlaceholder, 'crPlaceholder')
+      // What the superseded crlf pattern matched was a carriage-return placeholder followed by a
+      // line-feed one, not the combined ##$_0D0A$## placeholder. Kept literally: the two lines above
+      // have already consumed both halves by the time this runs, so it matches nothing either way.
+      .replaceAll(config.crPlaceholder + config.lfPlaceholder, 'brMarker')
+      .replaceAll(config.tabPlaceholder, 'tabMarkerMonad')
+      .replaceAll(config.nbspPlaceholder, 'nbspPlMark')
   },
 
   restorePlaceholders: function (string) {

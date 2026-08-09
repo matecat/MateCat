@@ -42,17 +42,12 @@ class CatUtils
     const string lfPlaceholder = '##$_0A$##';
     const string crPlaceholder = '##$_0D$##';
     const string crlfPlaceholder = '##$_0D0A$##';
-    const string lfPlaceholderRegex = '/\#\#\$_0A\$\#\#/g';
-    const string crPlaceholderRegex = '/\#\#\$_0D\$\#\#/g';
-    const string crlfPlaceholderRegex = '/#\#\$_0D\$#\#\#\#\$_0A\$#\#/g';
 
     const string tabPlaceholder = '##$_09$##';
     const string tabPlaceholderClass = '_09';
-    const string tabPlaceholderRegex = '/\#\#\$_09\$\#\#/g';
 
     const string nbspPlaceholder = '##$_A0$##';
     const string nbspPlaceholderClass = '_A0';
-    const string nbspPlaceholderRegex = '/\#\#\$_A0\$\#\#/g';
 
     // CJK and CJ languages
     /** @var array<string, float> */

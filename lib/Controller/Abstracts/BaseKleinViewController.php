@@ -23,6 +23,7 @@ use Model\FeaturesBase\Hook\Event\Run\DecorateViewEvent;
 use PHPTAL;
 use TypeError;
 use Utils\Registry\AppConfig;
+use Utils\Templating\BootstrapConfig;
 use Utils\Templating\PHPTalBoolean;
 use Utils\Templating\PHPTalMap;
 use Utils\Templating\PHPTALWithAppend;
@@ -93,8 +94,16 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->view = new PHPTALWithAppend($templatePath);
         $this->httpCode = $code;
 
-        $this->view->{'basepath'} = AppConfig::$BASEURL;
-        $this->view->{'hostpath'} = AppConfig::$HTTPHOST;
+        // Part of setting up the view, not of filling it: it holds no values of its own, it reads the
+        // view's back and encodes them at the moment the template renders it. Whatever has been
+        // assigned by then is in the document, so nothing here depends on the order below.
+        $this->view->set('config_json', new BootstrapConfig($this->view));
+
+        // `?: '/'` reproduces here, once, the `| string:/` fallback the templates used to apply
+        // inline. `| string:/` only fires on an empty value, so a value that is already '/' renders
+        // identically wherever that fallback is still written.
+        $this->view->{'basepath'} = AppConfig::$BASEURL ?: '/';
+        $this->view->{'hostpath'} = AppConfig::$HTTPHOST ?: '/';
         $this->view->{'build_number'} = AppConfig::$BUILD_NUMBER;
         $this->view->{'support_mail'} = AppConfig::$SUPPORT_MAIL;
         $this->view->{'enableMultiDomainApi'} = new PHPTalBoolean(AppConfig::$ENABLE_MULTI_DOMAIN_API);

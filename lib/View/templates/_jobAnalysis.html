@@ -17,26 +17,9 @@
 
     <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
         /*<![CDATA[*/
-        var config = {
-            basepath: '${basepath | string:/}',
-            status: '${project_status}',
-            totalSegments: ${num_segments},
-            totalAnalyzed: ${num_segments_analyzed},
-            showModalBoxLogin: ${showModalBoxLogin},
-            enable_outsource: ${enable_outsource | string:false},
-            daemon_warning: ${daemon_misconfiguration},
-            support_mail: '${support_mail}',
-            id_project: ${pid},
-            id_job: ${jid},
-            job_password: '${job_password}',
-            project_access_token: '${project_access_token}',
-            outsource_service_login : '${outsource_service_login}',
-            isAnInternalUser: ${isAnInternalUser},
-            jobs: ${json_jobs},
-            jobAnalysis: true,
-            user_plugins: ${user_plugins},
-            project_plugins: ${project_plugins},
-        }
+        // One serialised document rather than a value per line: PHPTAL does not escape inside a script
+        // block, so anything interpolated here lands in JavaScript syntax verbatim. See BootstrapConfig.
+        var config = ${structure config_json};
         /*]]>*/
     </script>
 

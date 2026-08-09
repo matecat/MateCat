@@ -691,7 +691,9 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     const hasAddedSegmentsBefore =
       rows.length > essentialRows.length &&
       essentialRows[0]?.id !== rows[0]?.id &&
-      rows[0]?.id !== config.first_job_segment
+      // compared as numbers on purpose: segment ids arrive as strings from the API, while
+      // config.first_job_segment is a JSON number
+      Number(rows[0]?.id) !== Number(config.first_job_segment)
     if (!hasAddedSegmentsBefore || current.haveBeenAddedSegmentsBefore) return
 
     const stopIndex = rows.findIndex(({id}) => id === essentialRows[0].id)

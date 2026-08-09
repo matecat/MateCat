@@ -48,7 +48,7 @@ class QualityReportController extends BaseKleinViewController implements IContro
 
         $this->setView("revise_summary.html", [
 
-            'jid' => $jobStruct->id,
+            'id_job' => $jobStruct->id,
             'password' => $jobStruct->password,
 
             'brPlaceholdEnabled' => true,
@@ -58,20 +58,15 @@ class QualityReportController extends BaseKleinViewController implements IContro
             'lfPlaceholderClass' => CatUtils::lfPlaceholderClass,
             'crPlaceholderClass' => CatUtils::crPlaceholderClass,
             'crlfPlaceholderClass' => CatUtils::crlfPlaceholderClass,
-            'lfPlaceholderRegex' => CatUtils::lfPlaceholderRegex,
-            'crPlaceholderRegex' => CatUtils::crPlaceholderRegex,
-            'crlfPlaceholderRegex' => CatUtils::crlfPlaceholderRegex,
             'tabPlaceholder' => CatUtils::tabPlaceholder,
             'tabPlaceholderClass' => CatUtils::tabPlaceholderClass,
-            'tabPlaceholderRegex' => CatUtils::tabPlaceholderRegex,
             'nbspPlaceholder' => CatUtils::nbspPlaceholder,
             'nbspPlaceholderClass' => CatUtils::nbspPlaceholderClass,
-            'nbspPlaceholderRegex' => CatUtils::nbspPlaceholderRegex,
 
             'source_code' => $jobStruct['source'],
             'target_code' => $jobStruct['target'],
-            'source_rtl' => new PHPTalBoolean(Languages::getInstance()->isRTL($jobStruct['source'])),
-            'target_rtl' => new PHPTalBoolean(Languages::getInstance()->isRTL($jobStruct['target'])),
+            'isSourceRTL' => new PHPTalBoolean(Languages::getInstance()->isRTL($jobStruct['source'])),
+            'isTargetRTL' => new PHPTalBoolean(Languages::getInstance()->isRTL($jobStruct['target'])),
             'searchable_statuses' => new PHPTalMap($this->searchableStatuses()),
 
         ]);

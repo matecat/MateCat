@@ -105,7 +105,9 @@ class AnalyzeController extends BaseKleinViewController implements IController
             }
 
             $this->setView("jobAnalysis.html", [
-                'jid' => $jid,
+                'id_job' => $jid,
+                // The page distinguishes itself from the project-wide analyze view by this flag alone.
+                'jobAnalysis' => new PHPTalBoolean(true),
                 'job_password' => $chunkStruct->password,
                 'project_access_token' => sha1($projectStruct->id . $projectStruct->password),
             ]);
@@ -122,7 +124,7 @@ class AnalyzeController extends BaseKleinViewController implements IController
             }
 
             $this->setView("analyze.html", [
-                'project_password' => $projectStruct->password,
+                'password' => $projectStruct->password,
             ]);
         }
 
@@ -160,18 +162,24 @@ class AnalyzeController extends BaseKleinViewController implements IController
         }
 
         $this->addParamsToView([
-            'pid' => $projectStruct->id,
-            'project_status' => $projectStruct->status_analysis,
+            'id_project' => $projectStruct->id,
+            'status' => $projectStruct->status_analysis,
             'outsource_service_login' => $this->_outsource_login_API,
             'showModalBoxLogin' => new PHPTalBoolean(!$this->isLoggedIn()),
             'project_plugins' => new PHPTalMap($appendInitialTemplateVarsEvent->getCodes()),
-            'num_segments' => $model->getSummary()->getTotalSegments(),
-            'num_segments_analyzed' => $model->getSummary()->getSegmentsAnalyzed(),
-            'daemon_misconfiguration' => new PHPTalBoolean(Health::thereIsAMisconfiguration()),
-            'json_jobs' => json_encode($model),
-            'split_enabled' => new PHPTalBoolean($split_enabled),
-            'split_feature_available' => new PHPTalBoolean(true),
+            'totalSegments' => $model->getSummary()->getTotalSegments(),
+            'totalAnalyzed' => $model->getSummary()->getSegmentsAnalyzed(),
+            'daemon_warning' => new PHPTalBoolean(Health::thereIsAMisconfiguration()),
+            // Handed over unencoded: the page configuration is serialised once, as a whole, so a
+            // pre-encoded string here would reach the page as a quoted string instead of an object.
+            'jobs' => $model,
+            'splitEnabled' => new PHPTalBoolean($split_enabled),
+            'splitFeatureAvailable' => new PHPTalBoolean(true),
             'enable_outsource' => new PHPTalBoolean(AppConfig::$ENABLE_OUTSOURCE),
+            // Never assigned before, so the template's `| string:false` default is what the page has
+            // always received. Stated outright rather than left to a fallback; whether it should mirror
+            // CattoolController's !empty(DEFAULT_TM_KEY) is a separate question, recorded in the todo doc.
+            'not_empty_default_tm_key' => new PHPTalBoolean(false),
         ]);
 
         $activity = new ActivityLogStruct();
