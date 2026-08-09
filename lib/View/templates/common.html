@@ -11,12 +11,12 @@
 
     <tal:block tal:repeat="config_data config_js">
         /*<![CDATA[*/
-        config.pluggable = ${structure php: json_encode( config_data )} ;
+        config.pluggable = ${structure php: json_encode( config_data, JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE )} ;
         /*]]>*/
     </tal:block>
     <tal:block tal:condition="php: !empty(flashMessages)">
         /*<![CDATA[*/
-        config.flash_messages = ${structure php: json_encode(flashMessages)} ;
+        config.flash_messages = ${structure php: json_encode(flashMessages, JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE)} ;
         /*]]>*/
     </tal:block>
     </script>
