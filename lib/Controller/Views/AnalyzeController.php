@@ -176,10 +176,6 @@ class AnalyzeController extends BaseKleinViewController implements IController
             'splitEnabled' => new PHPTalBoolean($split_enabled),
             'splitFeatureAvailable' => new PHPTalBoolean(true),
             'enable_outsource' => new PHPTalBoolean(AppConfig::$ENABLE_OUTSOURCE),
-            // Never assigned before, so the template's `| string:false` default is what the page has
-            // always received. Stated outright rather than left to a fallback; whether it should mirror
-            // CattoolController's !empty(DEFAULT_TM_KEY) is a separate question, recorded in the todo doc.
-            'not_empty_default_tm_key' => new PHPTalBoolean(false),
         ]);
 
         $activity = new ActivityLogStruct();

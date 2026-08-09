@@ -40,10 +40,6 @@ class ManageController extends BaseKleinViewController implements IController
             // controller chooses is the name the page sees.
             'splitFeatureAvailable' => new PHPTalBoolean(true),
             'enable_outsource' => new PHPTalBoolean(true),
-            // Preserves what this page has always sent. Nothing assigned this variable here, so the
-            // template's `|string:false` fallback supplied it on every render — see the todo doc, the
-            // missing assignment looks like an oversight rather than an intent.
-            'not_empty_default_tm_key' => new PHPTalBoolean(false),
         ]);
 
         $activity = new ActivityLogStruct();
