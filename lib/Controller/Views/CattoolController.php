@@ -263,10 +263,8 @@ class CattoolController extends BaseKleinViewController
             'brPlaceholdEnabled' => new PHPTalBoolean(true),
             'lfPlaceholder' => CatUtils::lfPlaceholder,
             'crPlaceholder' => CatUtils::crPlaceholder,
-            'crlfPlaceholder' => CatUtils::crlfPlaceholder,
             'lfPlaceholderClass' => CatUtils::lfPlaceholderClass,
             'crPlaceholderClass' => CatUtils::crPlaceholderClass,
-            'crlfPlaceholderClass' => CatUtils::crlfPlaceholderClass,
 
             'tabPlaceholder' => CatUtils::tabPlaceholder,
             'tabPlaceholderClass' => CatUtils::tabPlaceholderClass,

@@ -233,10 +233,9 @@ const TEXT_UTILS = {
     return string
       .replaceAll(config.lfPlaceholder, 'softReturnMonad')
       .replaceAll(config.crPlaceholder, 'crPlaceholder')
-      // What the superseded crlf pattern matched was a carriage-return placeholder followed by a
-      // line-feed one, not the combined ##$_0D0A$## placeholder. Kept literally: the two lines above
-      // have already consumed both halves by the time this runs, so it matches nothing either way.
-      .replaceAll(config.crPlaceholder + config.lfPlaceholder, 'brMarker')
+      // No line for the combined ##$_0D0A$## placeholder on purpose: matecat/subfiltering encodes a
+      // CRLF as the two single placeholders (SpecialEntitiesToPlaceholdersForView), so the combined
+      // one never reaches the page. Only the decoder still accepts it, as legacy defence.
       .replaceAll(config.tabPlaceholder, 'tabMarkerMonad')
       .replaceAll(config.nbspPlaceholder, 'nbspPlMark')
   },
@@ -245,7 +244,6 @@ const TEXT_UTILS = {
     return string
       .replace(/softReturnMonad/g, config.lfPlaceholder)
       .replace(/crPlaceholder/g, config.crPlaceholder)
-      .replace(/brMarker/g, config.crlfPlaceholder)
       .replace(/tabMarkerMonad/g, config.tabPlaceholder)
       .replace(/nbspPlMark/g, config.nbspPlaceholder)
   },
@@ -274,11 +272,6 @@ const TEXT_UTILS = {
 
   execDiff: function (mainStr, cfrStr) {
     let _str = cfrStr
-    // let _str = cfrStr.replace( config.lfPlaceholderRegex, "\n" )
-    //     .replace( config.crPlaceholderRegex, "\r" )
-    //     .replace( config.crlfPlaceholderRegex, "\r\n" )
-    //     .replace( config.tabPlaceholderRegex, "\t" )
-    //     .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
     let _edit = mainStr.replace(String.fromCharCode(parseInt(0x21e5, 10)), '\t')
 
     //Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,

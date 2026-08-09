@@ -38,10 +38,8 @@ class CatUtils
 
     const string lfPlaceholderClass = '_0A';
     const string crPlaceholderClass = '_0D';
-    const string crlfPlaceholderClass = '_0D0A';
     const string lfPlaceholder = '##$_0A$##';
     const string crPlaceholder = '##$_0D$##';
-    const string crlfPlaceholder = '##$_0D0A$##';
 
     const string tabPlaceholder = '##$_09$##';
     const string tabPlaceholderClass = '_09';
