@@ -54,12 +54,8 @@ class QualityReportController extends BaseKleinViewController implements IContro
             'brPlaceholdEnabled' => true,
             'lfPlaceholder' => CatUtils::lfPlaceholder,
             'crPlaceholder' => CatUtils::crPlaceholder,
-            'lfPlaceholderClass' => CatUtils::lfPlaceholderClass,
-            'crPlaceholderClass' => CatUtils::crPlaceholderClass,
             'tabPlaceholder' => CatUtils::tabPlaceholder,
-            'tabPlaceholderClass' => CatUtils::tabPlaceholderClass,
             'nbspPlaceholder' => CatUtils::nbspPlaceholder,
-            'nbspPlaceholderClass' => CatUtils::nbspPlaceholderClass,
 
             'source_code' => $jobStruct['source'],
             'target_code' => $jobStruct['target'],

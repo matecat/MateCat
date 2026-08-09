@@ -36,16 +36,12 @@ class CatUtils
 
     const string splitPlaceHolder = '##$_SPLIT$##';
 
-    const string lfPlaceholderClass = '_0A';
-    const string crPlaceholderClass = '_0D';
     const string lfPlaceholder = '##$_0A$##';
     const string crPlaceholder = '##$_0D$##';
 
     const string tabPlaceholder = '##$_09$##';
-    const string tabPlaceholderClass = '_09';
 
     const string nbspPlaceholder = '##$_A0$##';
-    const string nbspPlaceholderClass = '_A0';
 
     // CJK and CJ languages
     /** @var array<string, float> */
