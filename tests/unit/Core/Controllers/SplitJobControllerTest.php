@@ -668,6 +668,7 @@ class SplitJobControllerTest extends AbstractTest
             $this->stubRestructureRequest($base);
 
             $this->expectException(AuthorizationError::class);
+            $this->expectExceptionMessage('Not authorized');
             $this->controller->merge();
         } finally {
             $this->cleanFragments($base);
@@ -684,6 +685,7 @@ class SplitJobControllerTest extends AbstractTest
             $this->stubRestructureRequest($base);
 
             $this->expectException(AuthorizationError::class);
+            $this->expectExceptionMessage('Not authorized');
             $this->controller->check();
         } finally {
             $this->cleanFragments($base);
@@ -700,6 +702,7 @@ class SplitJobControllerTest extends AbstractTest
             $this->stubRestructureRequest($base);
 
             $this->expectException(AuthorizationError::class);
+            $this->expectExceptionMessage('Not authorized');
             $this->controller->apply();
         } finally {
             $this->cleanFragments($base);

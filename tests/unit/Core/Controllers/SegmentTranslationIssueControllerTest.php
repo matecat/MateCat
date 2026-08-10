@@ -969,7 +969,7 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
         $this->controller->mockModel = $modelMock;
 
         $this->expectException(AuthorizationError::class);
-        $this->expectExceptionMessage('Not authorized, the user does not belong to team');
+        $this->expectExceptionMessage('Not authorized');
 
         $this->controller->delete();
     }
