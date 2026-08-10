@@ -85,6 +85,10 @@
   padding-left: 5%;
   background-color: colors.$grey50;
 
+  @media screen and (max-width: 1180px) {
+    padding-left: 6%;
+  }
+
   &.sticky-project-bar-compressed {
     padding-top: 10px;
   }

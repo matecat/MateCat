@@ -1244,7 +1244,7 @@ body.archived section .status-container a.status:hover {
   font-size: 12px;
   line-height: 10px;
   margin: 0 0px;
-  padding: 2px 4px;
+  padding: 4px 4px;
   border-bottom: none;
   border-radius: 1px;
 }
@@ -1430,7 +1430,7 @@ section.opened.editor .status {
   color: colors.$white !important;
 }
 .per-grey {
-  background: #B6B8BB !important;
+  background: #b6b8bb !important;
   color: colors.$white !important;
 }
 .per-red {
@@ -1631,6 +1631,10 @@ section.opened.editor .status {
   }
   section.slide-right .sid {
     left: -8%;
+  }
+
+  .projectbar {
+    padding-left: 6%;
   }
 }
 

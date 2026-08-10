@@ -184,7 +184,7 @@ export const SegmentTargetToolbar = ({
                         <Tooltip
                           content={
                             !canToggleTagsCompression
-                              ? 'No expandable tags in this file'
+                              ? 'No paired tags in this segment'
                               : ''
                           }
                         >
@@ -192,7 +192,7 @@ export const SegmentTargetToolbar = ({
                             ref={createRef()}
                             className="segment-target-toolbar-menu-toggle"
                           >
-                            Show full tags
+                            Expand paired tags
                             <Switch
                               active={!compressed}
                               showText={false}

@@ -12,6 +12,11 @@ import Split from '../../../img/icons/Split'
 import ChevronRight from '../../../img/icons/ChevronRight'
 import Tooltip from '../common/Tooltip'
 
+const SPLIT_NOT_ALLOWED_HINT =
+  'Only the project owner or a member of its team can split a job'
+const MERGE_NOT_ALLOWED_HINT =
+  'Only the project owner or a member of its team can merge a job'
+
 const CompareTableHeader = ({
   countUnit,
   workflowType,
@@ -57,20 +62,44 @@ const CompareTableHeader = ({
         <div>Matecat weighted</div>
       </div>
       <div className="project-card__header-actions">
-        {!config.jobAnalysis && config.splitEnabled ? (
+        {!config.jobAnalysis ? (
           !isSplit ? (
-            <Button
-              type={BUTTON_TYPE.PRIMARY}
-              mode={BUTTON_MODE.OUTLINE}
-              size={BUTTON_SIZE.SMALL}
-              className="split"
-              disabled={status !== 'DONE' || thereIsChunkOutsourced()}
-              onClick={openSplitModal(job.id)}
-            >
-              <Split size={18} />
-              Split
-            </Button>
-          ) : (
+            config.splitFeatureAvailable ? (
+              config.splitEnabled ? (
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
+                  mode={BUTTON_MODE.OUTLINE}
+                  size={BUTTON_SIZE.SMALL}
+                  className="split"
+                  disabled={status !== 'DONE' || thereIsChunkOutsourced()}
+                  onClick={openSplitModal(job.id)}
+                >
+                  <Split size={18} />
+                  Split
+                </Button>
+              ) : (
+                // Refused split/merge stay hoverable so the tooltip below can explain why — a real
+                // `disabled` button drops pointer events in some browsers before the hint can show.
+                <Tooltip
+                  content={SPLIT_NOT_ALLOWED_HINT}
+                  stylePointerElement={{display: 'inline-flex'}}
+                >
+                  <Button
+                    ref={createRef()}
+                    type={BUTTON_TYPE.PRIMARY}
+                    mode={BUTTON_MODE.OUTLINE}
+                    size={BUTTON_SIZE.SMALL}
+                    className="split split-not-allowed"
+                    aria-disabled={true}
+                    onClick={() => {}}
+                  >
+                    <Split size={18} />
+                    Split
+                  </Button>
+                </Tooltip>
+              )
+            ) : null
+          ) : config.splitEnabled ? (
             <Button
               type={BUTTON_TYPE.PRIMARY}
               mode={BUTTON_MODE.OUTLINE}
@@ -81,6 +110,24 @@ const CompareTableHeader = ({
               <Merge size={18} />
               Merge
             </Button>
+          ) : (
+            <Tooltip
+              content={MERGE_NOT_ALLOWED_HINT}
+              stylePointerElement={{display: 'inline-flex'}}
+            >
+              <Button
+                ref={createRef()}
+                type={BUTTON_TYPE.PRIMARY}
+                mode={BUTTON_MODE.OUTLINE}
+                size={BUTTON_SIZE.SMALL}
+                className="merge merge-not-allowed"
+                aria-disabled={true}
+                onClick={() => {}}
+              >
+                <Merge size={18} />
+                Merge
+              </Button>
+            </Tooltip>
           )
         ) : null}
       </div>

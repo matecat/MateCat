@@ -10,7 +10,7 @@ import ManageActions from '../../actions/ManageActions'
 import ManageConstants from '../../constants/ManageConstants'
 
 global.config = {
-  splitEnabled: 1,
+  splitFeatureAvailable: 1,
   basepath: 'http://localhost/',
   enableMultiDomainApi: false,
 }

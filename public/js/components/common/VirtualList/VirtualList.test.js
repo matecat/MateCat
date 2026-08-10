@@ -167,6 +167,34 @@ describe('VirtualList', () => {
     })
   })
 
+  describe('findFirstVisibleRow', () => {
+    it('uses the default lookup when findFirstVisibleRow is not provided', () => {
+      const items = createItems(5)
+      const setFirstRowIdVisible = jest.fn()
+      renderVirtualList({items, setFirstRowIdVisible})
+      expect(setFirstRowIdVisible).toHaveBeenCalledWith('item-0')
+    })
+
+    it('uses a custom findFirstVisibleRow to pick a later row', () => {
+      const items = createItems(5)
+      const setFirstRowIdVisible = jest.fn()
+      const findFirstVisibleRow = (item, scrollOffset) =>
+        item.end > scrollOffset + 60
+      renderVirtualList({items, setFirstRowIdVisible, findFirstVisibleRow})
+      expect(setFirstRowIdVisible).toHaveBeenCalledWith('item-1')
+    })
+
+    it('calls findFirstVisibleRow with the virtual item and current scroll offset', () => {
+      const items = createItems(3)
+      const findFirstVisibleRow = jest.fn(() => true)
+      renderVirtualList({items, findFirstVisibleRow})
+      expect(findFirstVisibleRow).toHaveBeenCalledWith(
+        expect.objectContaining({index: 0, end: 50}),
+        0,
+      )
+    })
+  })
+
   describe('itemStyle', () => {
     it('calls itemStyle for each rendered item', () => {
       const itemStyle = jest.fn(() => ({}))

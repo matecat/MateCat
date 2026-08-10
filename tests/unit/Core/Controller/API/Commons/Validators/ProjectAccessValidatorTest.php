@@ -124,7 +124,7 @@ class ProjectAccessValidatorTest extends AbstractTest
     public function validates_project_access_and_invokes_set_team(): void
     {
         $project = $this->makeProjectStruct(self::TEAM_ID);
-        $validator = new ProjectAccessValidator($this->controller, $project);
+        $validator = new ProjectAccessValidator($this->controller, $project, $this->controller->getUser());
         $validator->validate();
 
         $this->assertInstanceOf(TeamStruct::class, $this->controller->capturedTeam);
@@ -146,7 +146,7 @@ class ProjectAccessValidatorTest extends AbstractTest
         $this->setCtrlProp($ctrl, 'database', obtainTestDatabase());
 
         $project = $this->makeProjectStruct(self::TEAM_ID);
-        $validator = new ProjectAccessValidator($ctrl, $project);
+        $validator = new ProjectAccessValidator($ctrl, $project, $ctrl->getUser());
 
         // must not throw
         $validator->validate();
@@ -161,7 +161,7 @@ class ProjectAccessValidatorTest extends AbstractTest
         $this->setCtrlProp($this->controller, 'userIsLogged', false);
 
         $project = $this->makeProjectStruct(self::TEAM_ID);
-        $validator = new ProjectAccessValidator($this->controller, $project);
+        $validator = new ProjectAccessValidator($this->controller, $project, $this->controller->getUser());
 
         $this->expectException(AuthorizationError::class);
         $this->expectExceptionCode(401);
@@ -176,7 +176,7 @@ class ProjectAccessValidatorTest extends AbstractTest
     {
         $project = new ProjectStruct();
         $project->id_team = null;
-        $validator = new ProjectAccessValidator($this->controller, $project);
+        $validator = new ProjectAccessValidator($this->controller, $project, $this->controller->getUser());
 
         $this->expectException(AuthorizationError::class);
         $this->expectExceptionCode(401);
@@ -190,7 +190,103 @@ class ProjectAccessValidatorTest extends AbstractTest
     public function throws_authorization_error_when_user_does_not_belong_to_team(): void
     {
         $project = $this->makeProjectStruct(99999999);
-        $validator = new ProjectAccessValidator($this->controller, $project);
+        $validator = new ProjectAccessValidator($this->controller, $project, $this->controller->getUser());
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionCode(401);
+
+        $validator->validate();
+    }
+
+    // ─── the owner short-circuit ───
+
+    /**
+     * A project outlives its owner's membership of the team it sits in — ProjectDao moves projects
+     * between teams in bulk — so the owner must pass without a membership lookup or the application
+     * takes projects away from the people who created them.
+     */
+    #[Test]
+    public function theOwnerPassesWithoutBelongingToTheProjectTeam(): void
+    {
+        $project = $this->makeProjectStruct(99999999);
+        $project->id_customer = self::EMAIL;
+
+        $validator = new ProjectAccessValidator($this->controller, $project, $this->controller->getUser());
+        $validator->validate();
+
+        $this->assertNull($this->controller->capturedTeam, 'the membership lookup must not have run');
+    }
+
+    /**
+     * id_team is nullable, so a project with no team at all is legal by construction. Its owner keeps it.
+     */
+    #[Test]
+    public function theOwnerPassesForAProjectCarryingNoTeam(): void
+    {
+        $project = new ProjectStruct();
+        $project->id_team = null;
+        $project->id_customer = self::EMAIL;
+
+        $validator = new ProjectAccessValidator($this->controller, $project, $this->controller->getUser());
+        $validator->validate();
+
+        $this->assertNull($this->controller->capturedTeam);
+    }
+
+    /**
+     * An empty owner matches nobody, least of all a caller whose own address is empty — otherwise a
+     * project created by an unauthenticated caller (id_customer = '') would be open to any identity
+     * carrying no email. The membership lookup decides those, and here refuses.
+     */
+    #[Test]
+    public function anEmptyOwnerMatchesNobody(): void
+    {
+        $user = new UserStruct();
+        $user->uid = self::UID;
+        $user->email = '';
+        $this->setCtrlProp($this->controller, 'user', $user);
+
+        $project = $this->makeProjectStruct(99999999);
+        $project->id_customer = '';
+
+        $validator = new ProjectAccessValidator($this->controller, $project, $this->controller->getUser());
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionCode(401);
+
+        $validator->validate();
+    }
+
+    /**
+     * The owner comparison must read a struct that was assembled by hand as well as one the DAO built:
+     * ProjectStruct::$id_customer is a non-nullable typed property with no default, so a struct that
+     * never had it assigned would raise "must not be accessed before initialization" on a bare read.
+     * Reaching the membership lookup at all is the assertion — it is what proves nothing threw earlier.
+     */
+    #[Test]
+    public function anUnassignedOwnerIsTreatedAsEmptyRatherThanThrowing(): void
+    {
+        $project = $this->makeProjectStruct(self::TEAM_ID);
+
+        $validator = new ProjectAccessValidator($this->controller, $project, $this->controller->getUser());
+        $validator->validate();
+
+        $this->assertSame(self::TEAM_ID, $this->controller->capturedTeam->id);
+    }
+
+    /**
+     * Login state is still the request's, not the passed user's: an owner who is not logged in is refused
+     * before the short-circuit is reached.
+     */
+    #[Test]
+    public function anOwnerWhoIsNotLoggedInIsStillRefused(): void
+    {
+        $this->setCtrlProp($this->controller, 'userIsLogged', false);
+
+        $project = $this->makeProjectStruct(self::TEAM_ID);
+        $project->id_customer = self::EMAIL;
+
+        $validator = new ProjectAccessValidator($this->controller, $project, $this->controller->getUser());
 
         $this->expectException(AuthorizationError::class);
         $this->expectExceptionCode(401);

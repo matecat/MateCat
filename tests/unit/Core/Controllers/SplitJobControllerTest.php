@@ -5,6 +5,7 @@ namespace Matecat\Core\Controllers;
 use ArrayObject;
 use Controller\API\App\SplitJobController as AppSplitJobController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\V2\SplitJobController;
 use InvalidArgumentException;
@@ -13,6 +14,8 @@ use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 use Model\Jobs\JobStruct;
 use Model\JobSplitMerge\JobSplitMergeManager;
 use Model\JobSplitMerge\SplitMergeProjectData;
@@ -83,6 +86,69 @@ class SplitJobControllerTest extends AbstractTest
 
         $resProp = $this->reflector->getProperty('response');
         $resProp->setValue($this->controller, $this->responseMock);
+
+        // The controller resolves the internal-user exemption through the feature set, and
+        // TestableSplitJobController skips the constructor that would build one. Left unset, every route
+        // dies on the uninitialised typed property before reaching its own subject. This default leaves
+        // the event as dispatched, so isInternal() keeps its false default and the authorization runs.
+        $this->controller->setFeatureSet($this->featureSetLeavingEventUntouched());
+    }
+
+    /**
+     * A feature set with no listener for the event: dispatch() hands the event straight back.
+     */
+    private function featureSetLeavingEventUntouched(): FeatureSet
+    {
+        $featureSet = $this->createStub(FeatureSet::class);
+        $featureSet->method('dispatch')->willReturnArgument(0);
+
+        return $featureSet;
+    }
+
+    /**
+     * A feature set standing in for the Translated plugin's isAnInternalUser listener, which marks the
+     * event rather than throwing. $seenEmail captures what the controller asked about.
+     */
+    private function featureSetMarkingInternal(?string &$seenEmail = null): FeatureSet
+    {
+        $featureSet = $this->createStub(FeatureSet::class);
+        $featureSet->method('dispatch')->willReturnCallback(
+            function (object $event) use (&$seenEmail): object {
+                if ($event instanceof IsAnInternalUserEvent) {
+                    $seenEmail = $event->getEmail();
+                    $event->setIsInternal(true);
+                }
+
+                return $event;
+            }
+        );
+
+        return $featureSet;
+    }
+
+    /**
+     * A feature set answering the way the Translated plugin's matcher does — a valid address on a known
+     * internal domain, nothing else. Used where the point is which address the controller offers, rather
+     * than what a listener does with it; the domain list itself is the plugin's own test to keep.
+     */
+    private function featureSetAnsweringDomains(?string &$seenEmail = null): FeatureSet
+    {
+        $featureSet = $this->createStub(FeatureSet::class);
+        $featureSet->method('dispatch')->willReturnCallback(
+            function (object $event) use (&$seenEmail): object {
+                if ($event instanceof IsAnInternalUserEvent) {
+                    $seenEmail = $event->getEmail();
+                    $email = filter_var($event->getEmail(), FILTER_VALIDATE_EMAIL);
+                    $event->setIsInternal(
+                        $email !== false && str_ends_with($email, '@translated.net')
+                    );
+                }
+
+                return $event;
+            }
+        );
+
+        return $featureSet;
     }
 
     #[Test]
@@ -302,8 +368,7 @@ class SplitJobControllerTest extends AbstractTest
     {
         $job = $this->makeJobStub(99, 'jp', false);
 
-        $project = new ProjectStruct();
-        $project->id = 1;
+        $project = $this->makeOwnedProject();
 
         // splitResult is seeded here only to prove merge() ignores it: nothing on the merge path sets
         // it, so echoing it back — as this endpoint used to — could only ever emit null.
@@ -346,8 +411,7 @@ class SplitJobControllerTest extends AbstractTest
     {
         $job = $this->makeJobStub(99, 'jp', false);
 
-        $project = new ProjectStruct();
-        $project->id = 1;
+        $project = $this->makeOwnedProject();
 
         $splitResult = new ArrayObject(['chunks' => [1, 2, 3]]);
         $data        = new SplitMergeProjectData(1);
@@ -388,8 +452,7 @@ class SplitJobControllerTest extends AbstractTest
     {
         $job = $this->makeJobStub(99, 'jp', false);
 
-        $project = new ProjectStruct();
-        $project->id = 1;
+        $project = $this->makeOwnedProject();
 
         $splitResult = new ArrayObject(['chunks' => [1, 2]]);
         $data        = new SplitMergeProjectData(1);
@@ -435,8 +498,7 @@ class SplitJobControllerTest extends AbstractTest
     {
         $job = $this->makeJobStub(10, 'pw', false);
 
-        $project = new ProjectStruct();
-        $project->id = 1;
+        $project = $this->makeOwnedProject();
 
         $data     = new SplitMergeProjectData(1);
         $pManager = $this->createStub(JobSplitMergeManager::class);
@@ -465,8 +527,7 @@ class SplitJobControllerTest extends AbstractTest
     {
         $job = $this->makeJobStub(99, 'correct_pw', false);
 
-        $project = new ProjectStruct();
-        $project->id = 1;
+        $project = $this->makeOwnedProject();
 
         $data     = new SplitMergeProjectData(1);
         $pManager = $this->createStub(JobSplitMergeManager::class);
@@ -540,6 +601,389 @@ class SplitJobControllerTest extends AbstractTest
         } finally {
             $this->cleanFragments($base);
         }
+    }
+
+    // ─── who may restructure a project ───────────────────────────────
+
+    /**
+     * The project password proves knowledge of the project, not standing over it. Before this check a
+     * removed team member who had kept a manage URL could still split, merge and re-split every job in
+     * the project, and so could any authenticated identity that came by the pair some other way.
+     */
+    #[Test]
+    public function merge_refusesACallerWhoIsNeitherOwnerNorTeamMember(): void
+    {
+        $base = self::REAL_DB_BASE + 100;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+
+            $this->expectException(AuthorizationError::class);
+            $this->controller->merge();
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    #[Test]
+    public function check_refusesACallerWhoIsNeitherOwnerNorTeamMember(): void
+    {
+        $base = self::REAL_DB_BASE + 200;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+
+            $this->expectException(AuthorizationError::class);
+            $this->controller->check();
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    #[Test]
+    public function apply_refusesACallerWhoIsNeitherOwnerNorTeamMember(): void
+    {
+        $base = self::REAL_DB_BASE + 300;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+
+            $this->expectException(AuthorizationError::class);
+            $this->controller->apply();
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    /**
+     * A team member who does not own the project may restructure it: the membership is the standing.
+     */
+    #[Test]
+    public function aTeamMemberWhoIsNotTheOwnerMayRestructure(): void
+    {
+        $base = self::REAL_DB_BASE + 400;
+
+        try {
+            $project = $this->seedRestructureScope($base, member: true);
+
+            $this->callPrivate('enforceRestructureAccess', $project);
+            self::assertNotSame($project->id_customer, $this->controller->getUser()->email);
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    /**
+     * The owner is allowed explicitly rather than left to the membership lookup. A project outlives the
+     * owner's membership of its team — moved to another team, or the owner removed from the one it is in
+     * — and on the development dataset 1 project of 1205 is already in that state, plus 9 carrying no
+     * team at all. Membership alone would take those away from the person who created them.
+     */
+    #[Test]
+    public function theOwnerMayRestructureWithoutBelongingToTheProjectTeam(): void
+    {
+        $base = self::REAL_DB_BASE + 500;
+
+        try {
+            $project = $this->seedRestructureScope($base, member: false);
+            $project->id_customer = $this->controller->getUser()->email ?? '';
+
+            $this->callPrivate('enforceRestructureAccess', $project);
+            self::assertTrue(true, 'no AuthorizationError for the owner');
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    #[Test]
+    public function theOwnerMayRestructureAProjectThatCarriesNoTeam(): void
+    {
+        $base = self::REAL_DB_BASE + 600;
+
+        try {
+            $project = $this->seedRestructureScope($base, member: false);
+            $project->id_customer = $this->controller->getUser()->email ?? '';
+            $project->id_team     = null;
+
+            $this->callPrivate('enforceRestructureAccess', $project);
+            self::assertTrue(true, 'no AuthorizationError for the owner of a team-less project');
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    /**
+     * A project created by an unauthenticated caller carries id_customer = '' (CreateProjectController),
+     * so the owner branch must not treat an empty owner as a match for an equally empty caller identity.
+     *
+     * Defence in depth rather than a reachable state: isLogged() requires a non-empty email, so a caller
+     * that got past LoginValidator has one. The emptiness check costs a comparison and removes the need
+     * to keep believing that.
+     */
+    #[Test]
+    public function anEmptyProjectOwnerMatchesAnEmptyCallerIdentity(): void
+    {
+        $base = self::REAL_DB_BASE + 700;
+
+        try {
+            $project = $this->seedRestructureScope($base, member: false);
+            $project->id_customer = '';
+
+            $this->reflector->getProperty('user')->setValue(
+                $this->controller,
+                new UserStruct(['uid' => $this->userId($base), 'email' => ''])
+            );
+
+            $this->expectException(AuthorizationError::class);
+            $this->callPrivate('enforceRestructureAccess', $project);
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    // ─── the internal-user exemption ─────────────────────────────────
+
+    /**
+     * Translated's own staff restructure customer projects they neither own nor share a team with, which
+     * is support work, not an IDOR. The exemption is resolved through the feature set: the plugin decides
+     * who is internal, the controller only reads the answer back off the dispatched event.
+     *
+     * One test per route even though loadProjectForRestructure() is the single choke point, because that
+     * is the property being pinned — a later route that authorizes on its own would pass the merge case
+     * and fail here.
+     */
+    #[Test]
+    public function merge_letsAnInternalUserRestructureWithoutOwnershipOrMembership(): void
+    {
+        $base = self::REAL_DB_BASE + 800;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+            $this->controller->setFeatureSet($this->featureSetMarkingInternal());
+
+            $this->controller->merge();
+
+            self::assertNotSame(
+                $this->controller->fakeProjectData['project']->id_customer,
+                $this->controller->getUser()->email,
+                'the caller must not be the owner, or the exemption is not what let the merge through'
+            );
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    #[Test]
+    public function check_letsAnInternalUserRestructureWithoutOwnershipOrMembership(): void
+    {
+        $base = self::REAL_DB_BASE + 900;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+            $this->controller->setFeatureSet($this->featureSetMarkingInternal());
+
+            $this->controller->check();
+
+            self::assertNotSame(
+                $this->controller->fakeProjectData['project']->id_customer,
+                $this->controller->getUser()->email
+            );
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    #[Test]
+    public function apply_letsAnInternalUserRestructureWithoutOwnershipOrMembership(): void
+    {
+        $base = self::REAL_DB_BASE + 1000;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+            $this->controller->setFeatureSet($this->featureSetMarkingInternal());
+
+            $this->controller->apply();
+
+            self::assertNotSame(
+                $this->controller->fakeProjectData['project']->id_customer,
+                $this->controller->getUser()->email
+            );
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    /**
+     * The exemption must widen by CALLER, never by project. Asking about the project's id_customer would
+     * let any identity holding the id and password restructure a project that happens to be owned by an
+     * internal address — the opposite of the intent, and reachable by picking a target rather than by
+     * holding a credential.
+     */
+    #[Test]
+    public function theInternalUserQuestionIsAskedAboutTheCallerAndNotTheProjectOwner(): void
+    {
+        $base = self::REAL_DB_BASE + 1100;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+
+            $askedAbout = null;
+            $this->controller->setFeatureSet($this->featureSetMarkingInternal($askedAbout));
+
+            $this->controller->merge();
+
+            self::assertSame($this->controller->getUser()->email, $askedAbout);
+            self::assertNotSame($this->controller->fakeProjectData['project']->id_customer, $askedAbout);
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    /**
+     * Fail closed when nothing answers the event. isInternal() defaults to false and dispatch() never
+     * throws, so a feature set carrying no listener — the Translated plugin not autoloaded, an event
+     * renamed, a handler removed — leaves the owner-or-member check in force rather than skipping it.
+     * The refuse tests above rely on this same default, which is what makes them meaningful.
+     */
+    #[Test]
+    public function theCheckStandsWhenNoFeatureAnswersTheInternalUserEvent(): void
+    {
+        $base = self::REAL_DB_BASE + 1200;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+            $this->controller->setFeatureSet($this->featureSetLeavingEventUntouched());
+
+            $this->expectException(AuthorizationError::class);
+            $this->controller->merge();
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    /**
+     * An anonymous identity is not internal. The plugin's matcher runs the address through
+     * FILTER_VALIDATE_EMAIL, so '' fails it, but the controller must not be the thing that relies on
+     * that: it passes '' rather than skipping the dispatch, and the check stays in force.
+     */
+    #[Test]
+    public function anEmptyCallerEmailIsNotTreatedAsInternal(): void
+    {
+        $base = self::REAL_DB_BASE + 1300;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+
+            $this->reflector->getProperty('user')->setValue(
+                $this->controller,
+                new UserStruct(['uid' => $this->userId($base), 'email' => ''])
+            );
+
+            $askedAbout = 'not asked';
+            $this->controller->setFeatureSet($this->featureSetAnsweringDomains($askedAbout));
+
+            $this->expectException(AuthorizationError::class);
+            $this->controller->merge();
+        } finally {
+            self::assertSame('', $askedAbout, 'the dispatch must happen even with no address to offer');
+            $this->cleanFragments($base);
+        }
+    }
+
+    /**
+     * A project the acting user owns, so the restructure authorization clears without touching a
+     * database and the test stays about its own subject.
+     */
+    private function makeOwnedProject(): ProjectStruct
+    {
+        $email = 'ctrlowner@example.org';
+
+        $this->reflector->getProperty('user')->setValue(
+            $this->controller,
+            new UserStruct(['uid' => 987, 'email' => $email])
+        );
+        $this->reflector->getProperty('userIsLogged')->setValue($this->controller, true);
+
+        $project              = new ProjectStruct();
+        $project->id          = 1;
+        $project->id_customer = $email;
+
+        return $project;
+    }
+
+    /**
+     * Seed a real team, user and membership row, point the controller at the test database and act as
+     * that user. Returns the project the restructure is about — owned by somebody else, so the caller's
+     * standing rests on the membership alone unless a test overrides id_customer.
+     */
+    private function seedRestructureScope(int $base, bool $member): ProjectStruct
+    {
+        $this->seedUser($base);
+        $this->seedTeam($base);
+
+        if ($member) {
+            $this->seedMembership($base);
+        }
+
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
+        $this->reflector->getProperty('user')->setValue(
+            $this->controller,
+            new UserStruct(['uid' => $this->userId($base), 'email' => 'ctrluser_' . $base . '@example.org'])
+        );
+        $this->reflector->getProperty('userIsLogged')->setValue($this->controller, true);
+
+        $project              = new ProjectStruct();
+        $project->id          = $this->projectId($base);
+        $project->id_customer = 'someone_else_' . $base . '@example.org';
+        $project->id_team     = $this->teamId($base);
+
+        return $project;
+    }
+
+    /**
+     * A merge/check/apply request whose project and job resolve, so the only thing that can refuse it is
+     * the authorization check.
+     */
+    private function stubRestructureRequest(int $base): void
+    {
+        $job = $this->makeJobStub(99, 'jp', false);
+
+        $data = new SplitMergeProjectData($this->projectId($base));
+
+        $this->controller->fakeJobs        = [$job];
+        $this->controller->fakeProjectData = [
+            'data'       => $data,
+            'pManager'   => $this->createStub(JobSplitMergeManager::class),
+            'count_type' => 'eq_word_count',
+            'project'    => $this->seedRestructureProject($base),
+        ];
+
+        $this->stubRequestParams([
+            'project_id'   => (string)$this->projectId($base),
+            'project_pass' => 'pp',
+            'job_id'       => '99',
+            'job_pass'     => 'jp',
+            'num_split'    => '2',
+        ]);
+    }
+
+    private function seedRestructureProject(int $base): ProjectStruct
+    {
+        $project              = new ProjectStruct();
+        $project->id          = $this->projectId($base);
+        $project->id_customer = 'someone_else_' . $base . '@example.org';
+        $project->id_team     = $this->teamId($base);
+
+        return $project;
     }
 
     /**

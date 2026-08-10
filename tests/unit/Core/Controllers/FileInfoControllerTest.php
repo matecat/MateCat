@@ -5,15 +5,21 @@ declare(strict_types=1);
 namespace Matecat\Core\Controllers;
 
 use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\API\V3\FileInfoController;
 use InvalidArgumentException;
 use Klein\HttpStatus;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\FilesInfoUtility;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
+use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
@@ -56,6 +62,11 @@ class ValidatorTestableFileInfoController extends FileInfoController
 
 class FileInfoControllerTest extends AbstractTest
 {
+    use ControllerSeedFragments;
+
+    private const int    BASE         = 9_000_000 + (73 * 1000);
+    private const string JOB_PASSWORD = 'jobpw';
+
     private ReflectionClass $reflector;
     private TestableFileInfoController $controller;
     private Stub&FilesInfoUtility $utilityStub;
@@ -82,6 +93,8 @@ class FileInfoControllerTest extends AbstractTest
     protected function tearDown(): void
     {
         AppConfig::$SKIP_SQL_CACHE = false;
+        // Id-scoped and safe for the stub-only tests that seed nothing.
+        $this->cleanFragments(self::BASE);
         parent::tearDown();
     }
 
@@ -238,5 +251,61 @@ class FileInfoControllerTest extends AbstractTest
 
         $validators = $ref->getProperty('validators')->getValue($controller);
         self::assertCount(2, $validators);
+    }
+
+    /**
+     * The ProjectAccessValidator is built inside the ChunkPasswordValidator's onSuccess closure, so
+     * registering the validators is not enough to reach it — the chunk password has to actually
+     * validate against a real job. Hence the seeded rows: this is the only path that runs the line
+     * threading the acting user into the access check.
+     */
+    #[Test]
+    public function registerValidators_appends_a_project_access_validator_for_the_acting_user(): void
+    {
+        $owner = $this->ownerEmail(self::BASE);
+        $this->cleanFragments(self::BASE);
+        $this->seedProject(self::BASE, $owner);
+        $this->seedFile(self::BASE);
+        $this->seedJob(self::BASE, $owner, self::JOB_PASSWORD);
+
+        $controller = new ValidatorTestableFileInfoController();
+        $ref        = new ReflectionClass(FileInfoController::class);
+        $params     = ['id_job' => (string)$this->jobId(self::BASE), 'password' => self::JOB_PASSWORD];
+
+        $ref->getProperty('request')->setValue($controller, new Request(
+            $params,
+            [],
+            [],
+            ['REQUEST_URI' => '/api/v3/file-info', 'REQUEST_METHOD' => 'GET']
+        ));
+        $ref->getProperty('response')->setValue($controller, $this->createStub(Response::class));
+        $ref->getProperty('params')->setValue($controller, $params);
+        $ref->getProperty('database')->setValue($controller, obtainTestDatabase());
+        // $user is typed with no default. LoginValidator, appended before this closure runs, always
+        // initializes it in the real pipeline; invoking the closure directly has to stand in for that.
+        $ref->getProperty('user')->setValue($controller, new UserStruct());
+
+        $ref->getMethod('registerValidators')->invoke($controller);
+
+        $validatorsProp = $ref->getProperty('validators');
+        $validators     = $validatorsProp->getValue($controller);
+
+        self::assertCount(2, $validators);
+        self::assertInstanceOf(LoginValidator::class, $validators[0]);
+        self::assertInstanceOf(ChunkPasswordValidator::class, $validators[1]);
+
+        $validators[1]->validate();
+
+        $chunk = $ref->getProperty('chunk')->getValue($controller);
+        self::assertInstanceOf(JobStruct::class, $chunk);
+        self::assertSame($this->jobId(self::BASE), (int)$chunk->id);
+
+        $project = $ref->getProperty('project')->getValue($controller);
+        self::assertInstanceOf(ProjectStruct::class, $project);
+        self::assertSame($this->projectId(self::BASE), (int)$project->id);
+
+        $after = $validatorsProp->getValue($controller);
+        self::assertCount(3, $after);
+        self::assertInstanceOf(ProjectAccessValidator::class, $after[2]);
     }
 }

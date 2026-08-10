@@ -17,6 +17,7 @@ const VirtualList = forwardRef(
       itemStyle = () => ({}),
       onScroll = () => {},
       renderedRange = () => {},
+      findFirstVisibleRow,
     },
     ref,
   ) => {
@@ -36,7 +37,11 @@ const VirtualList = forwardRef(
 
       const scrollOffset = parent?.scrollTop ?? 0
 
-      const firstVisible = virtualItems.find((item) => item.end > scrollOffset)
+      const firstVisible = virtualItems.find((item) =>
+        typeof findFirstVisibleRow === 'function'
+          ? findFirstVisibleRow(item, scrollOffset)
+          : item.end > scrollOffset,
+      )
 
       return firstVisible?.index ?? null
     }
@@ -133,6 +138,7 @@ VirtualList.propTypes = {
   itemStyle: PropTypes.func,
   onScroll: PropTypes.func,
   renderedRange: PropTypes.func,
+  findFirstVisibleRow: PropTypes.func,
 }
 
 VirtualList.displayName = 'VirtualList'

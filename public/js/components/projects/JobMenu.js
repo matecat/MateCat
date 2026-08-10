@@ -198,7 +198,7 @@ const JobMenu = ({
           },
         ]
       : []),
-    ...(!isChunkOutsourced && config.splitEnabled && !isChunk
+    ...(!isChunkOutsourced && config.splitFeatureAvailable && !isChunk
       ? [
           {
             id: JOB_MENU_ITEM_ID.SPLIT,
@@ -213,7 +213,7 @@ const JobMenu = ({
             },
           },
         ]
-      : !isChunkOutsourced && config.splitEnabled && isChunk
+      : !isChunkOutsourced && config.splitFeatureAvailable && isChunk
         ? [
             {
               id: JOB_MENU_ITEM_ID.MERGE,
