@@ -522,23 +522,30 @@ class ProjectDao extends AbstractDao
     }
 
     /**
+     * `id_team_idx` covers `id_team` alone, so every candidate row still has to be read from the
+     * clustered index to test `status_analysis`. An exact total therefore costs one row read per
+     * project in the team, which the largest teams measure in the hundreds of thousands. The count
+     * stops at {@see ProjectsCount::DEFAULT_CAP} instead: the work no longer depends on team size,
+     * and the caller learns from the result whether the figure is exact.
+     *
      * @param int $id_team
      * @param array{search?: array{id?: int, name?: string}} $filter
      * @param int $ttl
+     * @param int $cap the point at which counting stops; overridable so the boundary is testable
      *
-     * @return int
+     * @return ProjectsCount
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function getTotalCountByTeamId(int $id_team, array $filter = [], int $ttl = 0): int
+    public function getTotalCountByTeamId(int $id_team, array $filter = [], int $ttl = 0, int $cap = ProjectsCount::DEFAULT_CAP): ProjectsCount
     {
         $conn = $this->database->getConnection();
 
         $searchId = (isset($filter['search']['id'])) ? $filter['search']['id'] : null;
         $searchName = (isset($filter['search']['name'])) ? $filter['search']['name'] : null;
 
-        $query = "SELECT count(id) as totals FROM projects WHERE id_team = :id_team AND status_analysis NOT IN( :status1, :status2 ) ";
+        $counted = "SELECT id FROM projects WHERE id_team = :id_team AND status_analysis NOT IN( :status1, :status2 ) ";
 
         $values = [
             'id_team' => $id_team,
@@ -547,20 +554,22 @@ class ProjectDao extends AbstractDao
         ];
 
         if ($searchId) {
-            $query .= ' AND id = :id ';
+            $counted .= ' AND id = :id ';
             $values['id'] = $searchId;
         }
 
         if ($searchName) {
-            $query .= ' AND name = :name ';
+            $counted .= ' AND name = :name ';
             $values['name'] = $searchName;
         }
 
-        $stmt = $conn->prepare($query);
+        $counted .= ' LIMIT ' . ProjectsCount::queryLimit($cap);
+
+        $stmt = $conn->prepare("SELECT count(*) as totals FROM ( $counted ) counted");
 
         $results = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $values);
 
-        return (isset($results[0])) ? (int)$results[0]['totals'] : 0;
+        return ProjectsCount::fromCappedQuery((isset($results[0])) ? (int)$results[0]['totals'] : 0, $cap);
     }
 
     /**

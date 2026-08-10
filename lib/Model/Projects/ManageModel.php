@@ -209,6 +209,11 @@ class ManageModel
     }
 
     /**
+     * Counting every project a filter matches means joining `jobs` and deduplicating across the
+     * whole result, and this runs uncached on each manage-page request. In the largest teams that is
+     * hundreds of thousands of projects for a figure the page never shows past its first digits, so
+     * the count stops at {@see ProjectsCount::DEFAULT_CAP} and the caller is told when it did.
+     *
      * @param string|null $search_in_pname
      * @param string|null $search_source
      * @param string|null $search_target
@@ -217,8 +222,9 @@ class ManageModel
      * @param TeamStruct|null $team
      * @param UserStruct|null $assignee
      * @param bool $no_assignee
+     * @param int $cap the point at which counting stops; overridable so the boundary is testable
      *
-     * @return list<array<string, mixed>>
+     * @return ProjectsCount
      *
      * @throws PDOException
      */
@@ -231,8 +237,9 @@ class ManageModel
         ?bool $search_only_completed,
         ?TeamStruct $team = null,
         ?UserStruct $assignee = null,
-        bool $no_assignee = false
-    ): array {
+        bool $no_assignee = false,
+        int $cap = ProjectsCount::DEFAULT_CAP
+    ): ProjectsCount {
         [$conditions, $data] = static::conditionsForProjectsQuery(
             $search_in_pname,
             $search_source,
@@ -241,7 +248,7 @@ class ManageModel
             $search_only_completed
         );
 
-        $query = " SELECT COUNT( distinct id_project ) AS c
+        $counted = " SELECT DISTINCT p.id
                         FROM projects p
                         INNER JOIN jobs j ON j.id_project = p.id  
                   ";
@@ -260,14 +267,18 @@ class ManageModel
         }
 
         if (count($conditions)) {
-            $query = $query . " AND " . implode(" AND ", $conditions);
+            $counted = $counted . " AND " . implode(" AND ", $conditions);
         }
 
-        $stmt = $database->getConnection()->prepare($query);
+        $counted .= " LIMIT " . ProjectsCount::queryLimit($cap);
+
+        $stmt = $database->getConnection()->prepare("SELECT COUNT(*) AS c FROM ( $counted ) counted");
         $stmt->execute($data);
 
-        /** @var list<array<string, mixed>> */
-        return $stmt->fetchAll();
+        /** @var list<array<string, mixed>> $rows */
+        $rows = $stmt->fetchAll();
+
+        return ProjectsCount::fromCappedQuery(isset($rows[0]) ? (int)$rows[0]['c'] : 0, $cap);
     }
 
     /**

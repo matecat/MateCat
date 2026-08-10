@@ -228,9 +228,9 @@ class ProjectDaoTest extends AbstractTest
     #[Test]
     public function getTotalCountByTeamIdReturnsExpectedCounts(): void
     {
-        $this->assertSame(3, (new ProjectDao(obtainTestDatabase()))->getTotalCountByTeamId(self::TEST_TEAM_ID));
-        $this->assertSame(1, (new ProjectDao(obtainTestDatabase()))->getTotalCountByTeamId(self::TEST_TEAM_ID, ['search' => ['id' => self::PROJECT_ID_2]]));
-        $this->assertSame(1, (new ProjectDao(obtainTestDatabase()))->getTotalCountByTeamId(self::TEST_TEAM_ID, ['search' => ['name' => 'Project Alpha']]));
+        $this->assertSame(3, (new ProjectDao(obtainTestDatabase()))->getTotalCountByTeamId(self::TEST_TEAM_ID)->value);
+        $this->assertSame(1, (new ProjectDao(obtainTestDatabase()))->getTotalCountByTeamId(self::TEST_TEAM_ID, ['search' => ['id' => self::PROJECT_ID_2]])->value);
+        $this->assertSame(1, (new ProjectDao(obtainTestDatabase()))->getTotalCountByTeamId(self::TEST_TEAM_ID, ['search' => ['name' => 'Project Alpha']])->value);
     }
 
     #[Test]

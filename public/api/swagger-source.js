@@ -6609,11 +6609,18 @@ var spec = {
             },
             totals: {
               type: 'integer',
-              description: 'Total number of projects available',
+              description:
+                'Number of projects available. Counting stops at a ceiling, so when totals_approximated is true this is a lower bound and the real number is higher.',
+            },
+            totals_approximated: {
+              type: 'boolean',
+              description:
+                'True when the count hit its ceiling and stopped. Display the total as "10000+" and rely on the next link, not on total_pages, to know whether further pages exist.',
             },
             total_pages: {
               type: 'integer',
-              description: 'Total number of pages of projects available',
+              description:
+                'Number of pages covered by totals. When totals_approximated is true there are more pages than this.',
             },
           },
         },

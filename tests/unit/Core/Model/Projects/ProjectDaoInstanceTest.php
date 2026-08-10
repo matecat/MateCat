@@ -204,9 +204,9 @@ class ProjectDaoInstanceTest extends AbstractTest
     public function getTotalCountByTeamIdReturnsExpectedCounts(): void
     {
         $dao = new ProjectDao($this->database);
-        $this->assertSame(3, $dao->getTotalCountByTeamId(self::TEST_TEAM_ID));
-        $this->assertSame(1, $dao->getTotalCountByTeamId(self::TEST_TEAM_ID, ['search' => ['id' => self::PROJECT_ID_2]]));
-        $this->assertSame(1, $dao->getTotalCountByTeamId(self::TEST_TEAM_ID, ['search' => ['name' => 'Project Alpha']]));
+        $this->assertSame(3, $dao->getTotalCountByTeamId(self::TEST_TEAM_ID)->value);
+        $this->assertSame(1, $dao->getTotalCountByTeamId(self::TEST_TEAM_ID, ['search' => ['id' => self::PROJECT_ID_2]])->value);
+        $this->assertSame(1, $dao->getTotalCountByTeamId(self::TEST_TEAM_ID, ['search' => ['name' => 'Project Alpha']])->value);
     }
 
     // ─── findByJobId() ───

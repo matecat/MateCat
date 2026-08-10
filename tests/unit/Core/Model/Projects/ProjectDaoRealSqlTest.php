@@ -201,11 +201,38 @@ class ProjectDaoRealSqlTest extends AbstractTest
         $this->project(['id_team' => $teamId, 'status_analysis' => ProjectStatus::STATUS_DONE]);
         $this->project(['id_team' => $teamId, 'status_analysis' => ProjectStatus::STATUS_DONE]);
 
-        self::assertSame(2, $this->dao->getTotalCountByTeamId($teamId));
+        self::assertSame(2, $this->dao->getTotalCountByTeamId($teamId)->value);
 
         $named = $this->project(['id_team' => $teamId, 'name' => 'unique-name', 'status_analysis' => ProjectStatus::STATUS_DONE]);
-        self::assertSame(1, $this->dao->getTotalCountByTeamId($teamId, ['search' => ['name' => 'unique-name']]));
-        self::assertSame(1, $this->dao->getTotalCountByTeamId($teamId, ['search' => ['id' => $named['id']]]));
+        self::assertSame(1, $this->dao->getTotalCountByTeamId($teamId, ['search' => ['name' => 'unique-name']])->value);
+        self::assertSame(1, $this->dao->getTotalCountByTeamId($teamId, ['search' => ['id' => $named['id']]])->value);
+    }
+
+    /**
+     * The count stops once it has seen one row past the cap, so a team holding more projects than
+     * the cap reports the cap rather than paying for a full scan.
+     */
+    #[Test]
+    public function testGetTotalCountByTeamIdStopsAtTheCap(): void
+    {
+        $teamId = $this->fixtures->nextAssignableId();
+        $this->project(['id_team' => $teamId, 'status_analysis' => ProjectStatus::STATUS_DONE]);
+        $this->project(['id_team' => $teamId, 'status_analysis' => ProjectStatus::STATUS_DONE]);
+        $this->project(['id_team' => $teamId, 'status_analysis' => ProjectStatus::STATUS_DONE]);
+
+        $exact = $this->dao->getTotalCountByTeamId($teamId);
+        self::assertSame(3, $exact->value);
+        self::assertFalse($exact->approximated);
+
+        $capped = $this->dao->getTotalCountByTeamId($teamId, [], 0, 2);
+        self::assertSame(2, $capped->value);
+        self::assertTrue($capped->approximated);
+        self::assertSame('2+', $capped->toString());
+
+        // landing exactly on the cap is not an approximation: there is nothing beyond it
+        $onTheCap = $this->dao->getTotalCountByTeamId($teamId, [], 0, 3);
+        self::assertSame(3, $onTheCap->value);
+        self::assertFalse($onTheCap->approximated);
     }
 
     // ---- updateField / changeName / changePassword / changeProjectStatus -------------------------
