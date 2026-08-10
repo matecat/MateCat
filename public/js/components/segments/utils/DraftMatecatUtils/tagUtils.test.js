@@ -2,6 +2,7 @@ import {setTagSignatureMiddleware} from './tagModel'
 import {
   excludeSomeTagsTransformToText,
   transformTagsToHtml,
+  transformTagsToLexiqaText,
   transformTagsToText,
 } from './tagUtils'
 
@@ -44,4 +45,15 @@ test('Convert tags to text and exclude tag g', () => {
     'test tag ph con &lt; &gt; &amp;lt;  &amp;gt; <p> <strong> </strong>pippoL&apos; placeholder &nbsp; elle-même'
 
   expect(excludeSomeTagsTransformToText(text, ['g'])).toBe(resultText)
+})
+
+test('Lexiqa text keeps offsets correct after decoded html entities before a tag', () => {
+  const text =
+    'They started booking stays through Airbnb.&amp;nbsp;&amp;nbsp;<ph id="mtc_1" ctype="x-html" equiv-text="base64:Jmx0O2JyIC8mZ3Q7"/><ph id="mtc_2" ctype="x-html" equiv-text="base64:Jmx0O2JyIC8mZ3Q7"/>At first, Maria paid for these out of her own pocket, and it was putting a strain on her already limited finances—until Aladina Fundación connected her with Airbnb.org.'
+
+  const result = transformTagsToLexiqaText(text)
+
+  expect(result).toContain(
+    'Airbnb.&nbsp;&nbsp;<<br />><<br />>At first, Maria paid for these out of her own pocket, and it was putting a strain on her already limited finances—until Aladina Fundación connected her with Airbnb.org.',
+  )
 })
