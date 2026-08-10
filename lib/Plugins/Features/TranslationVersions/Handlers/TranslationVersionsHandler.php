@@ -8,7 +8,6 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
-use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Propagation\PropagationResult;
 use Model\Segments\SegmentDao;
@@ -52,7 +51,6 @@ class TranslationVersionsHandler implements VersionHandlerInterface
 
     private SegmentTranslationDao $segmentTranslationDao;
     private JobDao $jobDao;
-    private ProjectDao $projectDao;
     private IDatabase $database;
 
     /**
@@ -81,7 +79,6 @@ class TranslationVersionsHandler implements VersionHandlerInterface
         $this->dao = new TranslationVersionDao($database);
         $this->segmentTranslationDao = new SegmentTranslationDao($database);
         $this->jobDao = new JobDao($database);
-        $this->projectDao = new ProjectDao($database);
     }
 
     /**
@@ -249,8 +246,9 @@ class TranslationVersionsHandler implements VersionHandlerInterface
 
         try {
             $translationEventsHandler->save($this->createBatchReviewProcessor($params->user));
+            // the job word counts advance on every save, so their cache has to go. The project row is
+            // not written here, and every write that does touch it evicts its own keys.
             $this->jobDao->destroyCacheByProjectId($chunk->id_project);
-            $this->projectDao->destroyFetchByIdCache($chunk->id_project, ProjectStruct::class);
         } catch (Exception $e) {
             throw new RuntimeException($e->getMessage(), -2000, $e);
         }
