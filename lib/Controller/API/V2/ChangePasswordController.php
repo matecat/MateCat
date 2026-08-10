@@ -98,9 +98,8 @@ class ChangePasswordController extends KleinController
             $this->checkUserPermissions($pStruct, $user);
 
             $pDao = new ProjectDao($this->getDatabase());
+            // changePassword() evicts every project cache key, under both the old and the new password
             $pDao->changePassword($pStruct, $new_password);
-            $pDao->destroyFetchByIdCache($id, ProjectStruct::class);
-            $pDao->destroyCacheForProjectData($pStruct->id ?? throw new \RuntimeException('Missing project id'), $pStruct->password);
         } else { // change job passwords
 
             $this->getDatabase()->begin();
@@ -143,11 +142,10 @@ class ChangePasswordController extends KleinController
             $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
             $chunkReviewDao->destroyCacheForFindChunkReviews($jStruct);
 
-            // invalidate cache for ProjectData
+            // the job password is part of the project data payload, so the project keys go too
             $pDao = new ProjectDao($this->getDatabase());
             $projectId = $jStruct->getProject($pDao)->id ?? throw new Exception('Project not found');
-            $pDao->destroyCacheForProjectData((int)$projectId, $jStruct->getProject($pDao)->password);
-            $pDao->destroyFetchByIdCache($jStruct->getProject($pDao)->id, ProjectStruct::class);
+            $pDao->destroyCache((int)$projectId);
 
             $this->getDatabase()->commit();
         }

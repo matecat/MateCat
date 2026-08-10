@@ -279,13 +279,15 @@ class ProjectDaoInstanceTest extends AbstractTest
         $this->assertSame('BUSY', $dao->findById(self::PROJECT_ID_1)?->status_analysis);
     }
 
-    // ─── destroyCacheByIdAndPassword() ───
+    // ─── destroyCache() ───
 
     #[Test]
-    public function destroyCacheByIdAndPasswordReturnsBool(): void
+    public function destroyCacheAcceptsAPasswordThatIsNoLongerOnTheRow(): void
     {
         $dao = new ProjectDao($this->database);
-        $this->assertIsBool($dao->destroyCacheByIdAndPassword(self::PROJECT_ID_1, 'ppass-1'));
+        $dao->destroyCache(self::PROJECT_ID_1, 'a-password-nothing-matches');
+
+        $this->assertSame(self::PROJECT_ID_1, $dao->findById(self::PROJECT_ID_1)?->id);
     }
 
     // ─── isGDriveProject() ───

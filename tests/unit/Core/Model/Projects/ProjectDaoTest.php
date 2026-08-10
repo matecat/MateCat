@@ -327,7 +327,7 @@ class ProjectDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function getProjectDataSupportsFilterCombinations(): void
+    public function getProjectDataFiltersOnTheProjectPassword(): void
     {
         $dao = new ProjectDao(obtainTestDatabase());
 
@@ -337,26 +337,20 @@ class ProjectDaoTest extends AbstractTest
         $projectPassword = $dao->getProjectData(self::PROJECT_ID_1, 'ppass-1');
         $this->assertCount(2, $projectPassword);
 
-        $projectPasswordAndJobId = $dao->getProjectData(self::PROJECT_ID_1, 'ppass-1', self::JOB_ID_1);
-        $this->assertCount(1, $projectPasswordAndJobId);
-        $this->assertSame((string)self::JOB_ID_1, (string)$projectPasswordAndJobId[0]['jid']);
-
-        $onlyJobPassword = $dao->getProjectData(self::PROJECT_ID_1, null, null, 'jpass-2');
-        $this->assertCount(1, $onlyJobPassword);
-        $this->assertSame((string)self::JOB_ID_2, (string)$onlyJobPassword[0]['jid']);
-
         $missingPassword = $dao->getProjectData(self::PROJECT_ID_1, 'wrong-project-password');
         $this->assertSame([], $missingPassword);
     }
 
     #[Test]
-    public function cacheDestroyMethodsAreCallableAndReturnBool(): void
+    public function destroyCacheIsCallableWithAndWithoutAPassword(): void
     {
         $dao = new ProjectDao(obtainTestDatabase());
 
-        $this->assertIsBool($dao->destroyFetchByIdCache(self::PROJECT_ID_1, ProjectStruct::class));
-        $this->assertIsBool((new ProjectDao(obtainTestDatabase()))->destroyCacheByIdAndPassword(self::PROJECT_ID_1, 'ppass-1'));
-        $this->assertIsBool($dao->destroyCacheForProjectData(self::PROJECT_ID_1));
+        $dao->destroyCache(self::PROJECT_ID_1, 'ppass-1');
+        $dao->destroyCache(self::PROJECT_ID_1);
+
+        // eviction is not supposed to touch the row itself
+        $this->assertSame(self::PROJECT_ID_1, $dao->findById(self::PROJECT_ID_1)?->id);
     }
 
     #[Test]

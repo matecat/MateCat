@@ -782,7 +782,7 @@ class ProjectManager
         $db->begin();
 
         try {
-            (new ProjectDao($this->dbHandler))->destroyCacheForProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
+            (new ProjectDao($this->dbHandler))->destroyCache((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
             (new ProjectDao($this->dbHandler))->setCacheTTL(60 * 60 * 24)->getProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
 
             $this->features->dispatch(new PostProjectCreateEvent($this->projectStructure));

@@ -149,7 +149,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
      */
     public function destroyProjectAndJobCaches(int $pid): void
     {
-        $this->projectDao->destroyFetchByIdCache($pid, ProjectStruct::class);
+        $this->projectDao->destroyCache($pid);
         $this->jobDao->destroyCacheByProjectId($pid);
     }
 
@@ -159,9 +159,8 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
      */
     public function destroyAllCaches(int $pid, string $projectPassword): void
     {
-        $this->projectDao->destroyFetchByIdCache($pid, ProjectStruct::class);
+        $this->projectDao->destroyCache($pid, $projectPassword);
         $this->jobDao->destroyCacheByProjectId($pid);
-        $this->projectDao->destroyProjectPasswordCache($pid, $projectPassword);
         $this->analysisDao->destroyAnalysisProjectCache($pid);
     }
 }

@@ -547,7 +547,7 @@ class JobSplitMergeService
          $this->createJobDao()->destroyCacheByProjectId($data->idProject);
 
          $projectStruct = $this->getProjectForCacheInvalidation($jobToSplit);
-         $this->createProjectDao()->destroyCacheForProjectData($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
+         $this->createProjectDao()->destroyCache($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
         $this->destroyAnalysisCacheByProjectId($data->idProject);
 
         $this->getCart()?->deleteCart();
@@ -661,6 +661,6 @@ class JobSplitMergeService
         $this->destroyAnalysisCacheByProjectId($data->idProject);
 
          $projectStruct = $this->getProjectForCacheInvalidation($jobStructs[0]);
-         $this->createProjectDao()->destroyCacheForProjectData($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
+         $this->createProjectDao()->destroyCache($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
     }
 }
