@@ -25,7 +25,11 @@ const baseProps = {
 }
 
 beforeEach(() => {
-  global.config = {jobAnalysis: false, splitEnabled: true}
+  global.config = {
+    jobAnalysis: false,
+    splitEnabled: true,
+    splitFeatureAvailable: true,
+  }
 })
 
 test('renders languages, id and word count unit label', () => {
@@ -111,8 +115,50 @@ test('renders no split/merge action when jobAnalysis mode is active', () => {
   expect(screen.queryByText('Merge')).not.toBeInTheDocument()
 })
 
-test('renders no split/merge action when splitEnabled is false', () => {
-  global.config = {jobAnalysis: false, splitEnabled: false}
+test('shows a disabled, hoverable Split hint when splitEnabled is false', async () => {
+  global.config = {
+    jobAnalysis: false,
+    splitEnabled: false,
+    splitFeatureAvailable: true,
+  }
+  const openSplitModal = jest.fn((id) => (e) => e && e.preventDefault && id)
+  render(<CompareTableHeader {...baseProps} openSplitModal={openSplitModal} />)
+
+  const splitButton = screen.getByText('Split').closest('button')
+  expect(splitButton).toHaveAttribute('aria-disabled', 'true')
+
+  await userEvent.click(splitButton)
+  expect(openSplitModal).not.toHaveBeenCalled()
+})
+
+test('shows a disabled, hoverable Merge hint when splitEnabled is false', async () => {
+  global.config = {
+    jobAnalysis: false,
+    splitEnabled: false,
+    splitFeatureAvailable: true,
+  }
+  const openMergeModal = jest.fn((id) => (e) => e && e.preventDefault && id)
+  render(
+    <CompareTableHeader
+      {...baseProps}
+      isSplit
+      openMergeModal={openMergeModal}
+    />,
+  )
+
+  const mergeButton = screen.getByText('Merge').closest('button')
+  expect(mergeButton).toHaveAttribute('aria-disabled', 'true')
+
+  await userEvent.click(mergeButton)
+  expect(openMergeModal).not.toHaveBeenCalled()
+})
+
+test('renders no split action when splitFeatureAvailable is false', () => {
+  global.config = {
+    jobAnalysis: false,
+    splitEnabled: true,
+    splitFeatureAvailable: false,
+  }
   render(<CompareTableHeader {...baseProps} />)
   expect(screen.queryByText('Split')).not.toBeInTheDocument()
 })

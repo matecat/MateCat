@@ -870,7 +870,7 @@ describe('SegmentActions.clickOnApprovedButton — translation path', () => {
     global.config.isReview = true
     jest.clearAllMocks()
     CatToolStore.getJobMetadata.mockReturnValue({
-      project: {mandatory_issues: []},
+      job: {mandatory_issues: []},
     })
   })
 

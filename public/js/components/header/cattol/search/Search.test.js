@@ -13,14 +13,13 @@ import CatToolActions from '../../../../actions/CatToolActions'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {segmentTranslation} from '../../../../setTranslationUtil'
 import {searchTermIntoSegments} from '../../../../api/searchTermIntoSegments'
-import {replaceAllIntoSegments} from '../../../../api/replaceAllIntoSegments'
+import {MODAL_KEY} from '../../../../constants/ModalKeys'
 
 jest.mock('../../../../actions/SegmentActions')
 jest.mock('../../../../actions/CatToolActions')
 jest.mock('../../../../actions/ModalsActions')
 jest.mock('../../../../actions/segmentDispatchActions')
 jest.mock('../../../../api/searchTermIntoSegments')
-jest.mock('../../../../api/replaceAllIntoSegments')
 jest.mock('../../../../setTranslationUtil')
 
 jest.mock('../../../common/Select', () => ({
@@ -414,9 +413,13 @@ test('replaces the current occurrence and refreshes the segment translation', as
   expect(segmentTranslation).toHaveBeenCalled()
 })
 
-test('replace all shows a confirmation modal and executes the bulk replace on confirm', async () => {
+// The confirm/execute/success/error flow used to live here, but Search.js now
+// just opens the registered ReplaceAllModal (see modalRegistry.js) and hands
+// it the current search state — that modal owns the rest, and already has
+// its own coverage in ReplaceAllModal.test.js ("shows the first error
+// message when the replace fails", etc).
+test('replace all opens the ReplaceAllModal with the current search state', async () => {
   const user = userEvent.setup()
-  replaceAllIntoSegments.mockResolvedValue({})
 
   render(<Search {...baseProps()} />)
 
@@ -427,57 +430,15 @@ test('replace all shows a confirmation modal and executes the bulk replace on co
   await user.click(screen.getByText('REPLACE ALL'))
 
   expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
-    expect.any(Function),
-    expect.objectContaining({modalName: 'confirmReplace'}),
-    'Confirmation required',
-  )
-
-  const modalProps = ModalsActions.showModalComponent.mock.calls[0][1]
-  await act(async () => {
-    modalProps.successCallback()
-    await Promise.resolve()
-    await Promise.resolve()
-  })
-
-  expect(replaceAllIntoSegments).toHaveBeenCalled()
-  expect(CatToolActions.onRender).toHaveBeenCalled()
-  expect(ModalsActions.onCloseModal).toHaveBeenCalled()
-
-  modalProps.cancelCallback()
-  expect(ModalsActions.onCloseModal).toHaveBeenCalledTimes(2)
-})
-
-test('replace all shows an error alert when the request fails', async () => {
-  replaceAllIntoSegments.mockRejectedValue([{message: 'boom'}])
-
-  render(<Search {...baseProps()} />)
-
-  act(() => {
-    fireEvent.change(screen.getByPlaceholderText('Find in target'), {
-      target: {value: 'old'},
-    })
-    fireEvent.click(checkboxByLabel('Replace with'))
-  })
-  act(() => {
-    fireEvent.change(screen.getByPlaceholderText('Replace in target'), {
-      target: {value: 'new'},
-    })
-  })
-  act(() => {
-    fireEvent.click(screen.getByText('REPLACE ALL'))
-  })
-
-  const modalProps = ModalsActions.showModalComponent.mock.calls[0][1]
-  await act(async () => {
-    modalProps.successCallback()
-    await Promise.resolve()
-    await Promise.resolve()
-  })
-
-  expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
-    expect.any(Function),
-    {text: 'boom'},
-    'Replace All Alert',
+    MODAL_KEY.REPLACE_ALL,
+    expect.objectContaining({
+      search: expect.objectContaining({
+        searchTarget: 'old',
+        replaceTarget: 'new',
+        enableReplace: true,
+      }),
+    }),
+    'Replace text in all results',
   )
 })
 

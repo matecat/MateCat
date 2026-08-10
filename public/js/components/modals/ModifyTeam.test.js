@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, fireEvent, act} from '@testing-library/react'
+import {render, screen, fireEvent, act, waitFor} from '@testing-library/react'
 import {fromJS} from 'immutable'
 import {ModifyTeam} from './ModifyTeam'
 import ManageActions from '../../actions/ManageActions'
@@ -71,7 +71,8 @@ test('renders team name, member list and pending invitations', () => {
   expect(screen.getByText('Pending user')).toBeInTheDocument()
 })
 
-test('editing the team name and confirming calls ManageActions.changeTeamName', () => {
+test('editing the team name and confirming calls ManageActions.changeTeamName', async () => {
+  ManageActions.changeTeamName.mockResolvedValue()
   const team = buildTeam()
   renderModifyTeam(team)
 
@@ -84,7 +85,25 @@ test('editing the team name and confirming calls ManageActions.changeTeamName', 
     team.toJS(),
     'New Team Name',
   )
-  expect(screen.getByText('New Team Name')).toBeInTheDocument()
+  expect(await screen.findByText('New Team Name')).toBeInTheDocument()
+})
+
+test('shows the name validation error and keeps editing open when the rename is rejected', async () => {
+  ManageActions.changeTeamName.mockRejectedValue({
+    errors: [{message: 'That name is not allowed'}],
+  })
+  const team = buildTeam()
+  renderModifyTeam(team)
+
+  fireEvent.click(document.querySelector('.button-edit'))
+  const input = screen.getByDisplayValue('Team Rocket')
+  fireEvent.change(input, {target: {value: 'http://example.com'}})
+  fireEvent.click(screen.getByText('Confirm'))
+
+  expect(
+    await screen.findByText('That name is not allowed'),
+  ).toBeInTheDocument()
+  expect(screen.getByDisplayValue('http://example.com')).toBeInTheDocument()
 })
 
 test('canceling the team name edit restores the original value without saving', () => {
@@ -102,6 +121,7 @@ test('canceling the team name edit restores the original value without saving', 
 })
 
 test('pressing Enter while editing the team name saves it', () => {
+  ManageActions.changeTeamName.mockResolvedValue()
   const team = buildTeam()
   renderModifyTeam(team)
 

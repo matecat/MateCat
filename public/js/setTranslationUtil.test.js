@@ -97,8 +97,9 @@ describe('setTranslationUtil', () => {
     jest.resetModules()
     localStorage.clear()
     global.config = {
-      id_job: 2, // must match the id_job used at module-import time to compute
-      // HIDE_UNMODIFIED_FUZZY_MATCH_MODAL_STORAGE (see setupFiles.jest.js)
+      id_job: 2, // must match id_job/userMail from setupFiles.jest.js's default
+      userMail: 'jest-user@example.com', // config so HIDE_UNMODIFIED_FUZZY_MATCH_MODAL_STORAGE
+      // (imported once, statically, above) matches what this fresh require() recomputes
       isReview: false,
       offlineModeEnabled: true,
       alternativesEnabled: false,
@@ -169,7 +170,7 @@ describe('setTranslationUtil', () => {
 
       expect(ModalsActions.showModalComponent).toHaveBeenCalledTimes(1)
       const [, props, title] = ModalsActions.showModalComponent.mock.calls[0]
-      expect(title).toBe('Confirm fuzzy match')
+      expect(title).toBe('Confirm unedited fuzzy match?')
       expect(SegmentActions.hideSegmentHeader).not.toHaveBeenCalled()
 
       // Simulate the user confirming through the modal.

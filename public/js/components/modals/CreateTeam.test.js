@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, fireEvent} from '@testing-library/react'
+import {render, screen, fireEvent, waitFor, act} from '@testing-library/react'
 import {CreateTeam} from './CreateTeam'
 import ManageActions from '../../actions/ManageActions'
 import ModalsActions from '../../actions/ModalsActions'
@@ -45,7 +45,8 @@ test('the Create button is disabled until a name and valid emails are provided',
   expect(screen.getByText('Create')).toBeEnabled()
 })
 
-test('clicking Create calls ManageActions.createTeam and closes the modal', () => {
+test('clicking Create calls ManageActions.createTeam and closes the modal', async () => {
+  ManageActions.createTeam.mockResolvedValue()
   renderCreateTeam({
     user: {first_name: 'John', last_name: 'Doe', email: 'john@doe.com'},
     metadata: null,
@@ -60,10 +61,34 @@ test('clicking Create calls ManageActions.createTeam and closes the modal', () =
   expect(ManageActions.createTeam).toHaveBeenCalledWith('My Team', [
     'new@member.com',
   ])
-  expect(ModalsActions.onCloseModal).toHaveBeenCalledTimes(1)
+  await waitFor(() =>
+    expect(ModalsActions.onCloseModal).toHaveBeenCalledTimes(1),
+  )
 })
 
-test('pressing Enter submits when the form is valid', () => {
+test('shows the name validation error and keeps the modal open when creation is rejected', async () => {
+  ManageActions.createTeam.mockRejectedValue({
+    errors: [{message: 'That name is not allowed'}],
+  })
+  renderCreateTeam({
+    user: {first_name: 'John', last_name: 'Doe', email: 'john@doe.com'},
+    metadata: null,
+  })
+
+  fireEvent.change(screen.getByPlaceholderText('Team name'), {
+    target: {value: 'http://example.com'},
+  })
+  fireEvent.click(screen.getByTestId('emails-badge-mock'))
+  fireEvent.click(screen.getByText('Create'))
+
+  expect(
+    await screen.findByText('That name is not allowed'),
+  ).toBeInTheDocument()
+  expect(ModalsActions.onCloseModal).not.toHaveBeenCalled()
+})
+
+test('pressing Enter submits when the form is valid', async () => {
+  ManageActions.createTeam.mockResolvedValue()
   const {container} = renderCreateTeam({
     user: {first_name: 'John', last_name: 'Doe', email: 'john@doe.com'},
     metadata: null,
@@ -78,7 +103,9 @@ test('pressing Enter submits when the form is valid', () => {
   fireEvent.keyDown(container.querySelector('.team-modal-create'), {
     key: 'Enter',
   })
-  jest.advanceTimersByTime(100)
+  await act(async () => {
+    jest.advanceTimersByTime(100)
+  })
   jest.useRealTimers()
 
   expect(ManageActions.createTeam).toHaveBeenCalledWith('My Team', [
