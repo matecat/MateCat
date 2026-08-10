@@ -109,18 +109,29 @@ test('renders properly', async () => {
 
   render(<Dashboard />)
 
+  // The "Search by project name" placeholder lives in the page header and
+  // renders unconditionally, so it doesn't prove the mount chain progressed.
+  // ManageActions.filterProjects(...) below needs selectedTeam to already be
+  // resolved (Dashboard.js:48 mirrors it into selectedTeamRef on every
+  // render), which only requires the first fetch (getUserData), not the
+  // full getUserData -> getTeamMembers -> getProjects chain. Dashboard.js
+  // renders a "Loading Projects" spinner in place of ProjectsContainer until
+  // selectedTeam and teams are both set (Dashboard.js:448), so waiting for
+  // that spinner to disappear is the lightest reliable signal that
+  // selectedTeamRef is populated. The empty-state text this test used to
+  // also wait for here ("Welcome to your Personal area", requiring the full
+  // 3-fetch chain plus a setTimeout tick) is already covered deterministically,
+  // without any network mocking, by ProjectsContainer.test.js ("No projects
+  // found with team type personal") — waiting on it here too was redundant
+  // and was the source of persistent CI-only flakiness.
   await waitFor(
     () => {
       expect(
         screen.getByPlaceholderText('Search by project name'),
       ).toBeVisible()
-      expect(screen.getByText('Welcome to your Personal area')).toBeVisible()
+      expect(screen.queryByText('Loading Projects')).not.toBeInTheDocument()
     },
-    // Dashboard's mount chain awaits 3 sequential fetches before rendering
-    // (getUserData -> getTeamMembers -> getProjects); under coverage
-    // instrumentation + parallel workers this can occasionally take much
-    // longer than the default timeout, so give it real margin.
-    {timeout: 40000},
+    {timeout: 10000},
   )
 
   window.open = jest.fn()
@@ -151,4 +162,4 @@ test('renders properly', async () => {
     })
     await Promise.resolve()
   })
-}, 45000)
+}, 10000)
