@@ -28,6 +28,7 @@ use ReflectionException;
 use RuntimeException;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\Tools\InstructionsSanitizer;
 
 
 class FileInfoController extends KleinController
@@ -135,9 +136,12 @@ class FileInfoController extends KleinController
         $instructions = $this->request->param('instructions');
         $filesInfoUtility = $this->createFilesInfoUtility($this->chunk);
 
+        // Dispatch the plugin hook first: clients relying on it (Uber) post entity encoded
+        // payloads, and that contract predates the sanitization step. Sanitizing before the hook
+        // would let its html_entity_decode() run on already decoded output, i.e. a double decode.
         $decodeInstructionsEvent = new DecodeInstructionsEvent($instructions);
         $this->featureSet->dispatch($decodeInstructionsEvent);
-        $instructions = $decodeInstructionsEvent->getValue();
+        $instructions = InstructionsSanitizer::sanitize((string)$decodeInstructionsEvent->getValue());
 
         if (empty($instructions)) {
             throw new InvalidArgumentException("Empty instructions provided");
