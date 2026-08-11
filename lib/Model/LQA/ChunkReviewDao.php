@@ -269,15 +269,39 @@ class ChunkReviewDao extends AbstractDao
      */
     public function findChunkReviewsForSourcePage(JobStruct $chunkStruct, int $source_page = SourcePages::SOURCE_PAGE_REVISION, int $ttl = 60): array
     {
-        $sql_condition = " WHERE source_page = $source_page ";
+        // Each phase is given its own key map. An eviction deletes a whole key map at once, and the
+        // bind parameters are the same for every phase because the source page is written into the
+        // query text, so on the key map derived from them evicting one phase would take the others
+        // and the unfiltered read down with it.
+        return $this->_findChunkReviews(
+            [$chunkStruct],
+            self::_sourcePageCondition($source_page),
+            $ttl,
+            self::_sourcePageKeyMap($chunkStruct, $source_page)
+        );
+    }
 
-        return $this->_findChunkReviews([$chunkStruct], $sql_condition, $ttl);
+    /**
+     * The condition is interpolated into the query text, and the query text is part of the cache
+     * key, so the read and the eviction of a source page have to build it here or they would key on
+     * two different strings.
+     */
+    private static function _sourcePageCondition(int $source_page): string
+    {
+        return " WHERE source_page = $source_page ";
+    }
+
+    private static function _sourcePageKeyMap(JobStruct $chunkStruct, int $source_page): string
+    {
+        return self::class . '::findChunkReviewsForSourcePage-' . $chunkStruct->id . ':' . $chunkStruct->password . ':' . $source_page;
     }
 
     /**
      * @param JobStruct[] $chunksArray
      * @param string|null $default_condition
      * @param int|null $ttl
+     * @param string|null $keyMap Left null to group the entry with the other reads of the same
+     *                            chunks, since an eviction deletes a whole key map.
      *
      * @return ChunkReviewStruct[]
      * @throws Exception
@@ -287,7 +311,8 @@ class ChunkReviewDao extends AbstractDao
     protected function _findChunkReviews(
         array $chunksArray,
         ?string $default_condition = ' WHERE 1 = 1 ',
-        ?int $ttl = 1 /* 1 second, only to avoid multiple queries to mysql during the same script execution */
+        ?int $ttl = 1 /* 1 second, only to avoid multiple queries to mysql during the same script execution */,
+        ?string $keyMap = null
     ): array
     {
         $findChunkReviewsStatement = $this->_findChunkReviewsStatement($chunksArray, $default_condition);
@@ -295,7 +320,12 @@ class ChunkReviewDao extends AbstractDao
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare($findChunkReviewsStatement['sql']);
 
-        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ChunkReviewStruct::class, $findChunkReviewsStatement['parameters']);
+        return $this->setCacheTTL($ttl)->_fetchObjectMap(
+            $stmt,
+            ChunkReviewStruct::class,
+            $findChunkReviewsStatement['parameters'],
+            $keyMap
+        );
     }
 
     /**
@@ -314,24 +344,39 @@ class ChunkReviewDao extends AbstractDao
     }
 
     /**
-     * Same as destroyCacheForFindChunkReviews(), for a chunk identified by its id and password. A
-     * rotation has to evict the entries of the password it replaces, and the struct it holds already
-     * carries the new one.
+     * Evict findChunkReviewsForSourcePage() for one phase of a chunk.
      *
-     * @param int $id_job
-     * @param string $password
+     * The entry is keyed on the job credential but its value is the review password of that phase,
+     * which is what the editor is handed, so a review password rotation has to evict it as well.
+     *
+     * @param JobStruct $chunkStruct
+     * @param int $source_page
      *
      * @return bool
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheForFindChunkReviewsByIdAndPassword(int $id_job, string $password): bool
+    public function destroyCacheForFindChunkReviewsForSourcePage(JobStruct $chunkStruct, int $source_page): bool
+    {
+        $findChunkReviewsStatement = $this->_findChunkReviewsStatement(
+            [$chunkStruct],
+            self::_sourcePageCondition($source_page)
+        );
+        $stmt = $this->_getStatementForQuery($findChunkReviewsStatement['sql']);
+
+        return $this->_destroyObjectCache($stmt, ChunkReviewStruct::class, $findChunkReviewsStatement['parameters']);
+    }
+
+    /**
+     * A rotation evicts the entries of the password it replaces, which no struct carries any more.
+     */
+    private static function _chunkFor(int $id_job, string $password): JobStruct
     {
         $chunkStruct = new JobStruct();
         $chunkStruct->id = $id_job;
         $chunkStruct->password = $password;
 
-        return $this->destroyCacheForFindChunkReviews($chunkStruct);
+        return $chunkStruct;
     }
 
     /**
@@ -509,7 +554,9 @@ class ChunkReviewDao extends AbstractDao
      */
     public function destroyCacheForJobPassword(int $id_job, string $password): void
     {
-        $this->destroyCacheForFindChunkReviewsByIdAndPassword($id_job, $password);
+        $chunkStruct = self::_chunkFor($id_job, $password);
+
+        $this->destroyCacheForFindChunkReviews($chunkStruct);
         $this->destroyCacheForIsTOrR1OrR2($id_job, $password);
         $this->destroyCacheForReviewPasswordAndJobId($password, $id_job);
 
@@ -521,6 +568,12 @@ class ChunkReviewDao extends AbstractDao
 
         foreach ($sourcePages as $sourcePage) {
             $this->destroyCacheForJobIdReviewPasswordAndSourcePage($id_job, $password, $sourcePage);
+
+            // Its own key map, so it has to be named on top of the read above rather than coming
+            // along with it. There is no review phase to read on the translate page.
+            if ($sourcePage !== SourcePages::SOURCE_PAGE_TRANSLATE) {
+                $this->destroyCacheForFindChunkReviewsForSourcePage($chunkStruct, $sourcePage);
+            }
         }
     }
 

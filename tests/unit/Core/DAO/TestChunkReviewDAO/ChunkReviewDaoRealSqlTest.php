@@ -575,7 +575,7 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
     }
 
     #[Test]
-    public function destroyCacheForFindChunkReviewsByIdAndPassword_closes_the_rotated_job_password(): void
+    public function destroyCacheForFindChunkReviews_closes_the_rotated_job_password(): void
     {
         $this->assertCount(2, $this->dao->findChunkReviews($this->chunk($this->idJob, $this->jobPassword), 3600));
 
@@ -587,8 +587,9 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
             'the rotation alone leaves the old password cached'
         );
 
+        // the struct carries the password that was replaced: that is the entry to evict
         $this->assertTrue(
-            $this->dao->destroyCacheForFindChunkReviewsByIdAndPassword($this->idJob, $this->jobPassword)
+            $this->dao->destroyCacheForFindChunkReviews($this->chunk($this->idJob, $this->jobPassword))
         );
 
         $this->assertSame([], $this->dao->findChunkReviews($this->chunk($this->idJob, $this->jobPassword), 3600));
@@ -618,6 +619,11 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
             )
         );
 
+        $this->assertCount(
+            1,
+            $this->dao->findChunkReviewsForSourcePage($chunk, SourcePages::SOURCE_PAGE_REVISION, 3600)
+        );
+
         $this->assertSame(2, $this->dao->updatePassword($this->idJob, $this->jobPassword, 'rsq_rotated_pwd'));
         $this->rotateBothReviewPasswords('rsq_rev_rotated');
 
@@ -625,6 +631,10 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
         $this->dao->destroyCacheForJobPassword($this->idJob, $this->reviewPassword);
 
         $this->assertSame([], $this->dao->findChunkReviews($chunk, 3600));
+        $this->assertSame(
+            [],
+            $this->dao->findChunkReviewsForSourcePage($chunk, SourcePages::SOURCE_PAGE_REVISION, 3600)
+        );
 
         $probe = $this->dao->isTOrR1OrR2($this->idJob, $this->jobPassword, 3600);
         $this->assertInstanceOf(ShapelessConcreteStruct::class, $probe);
@@ -637,6 +647,38 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
                 $this->reviewPassword,
                 SourcePages::SOURCE_PAGE_REVISION
             )
+        );
+    }
+
+    #[Test]
+    public function destroyCacheForFindChunkReviewsForSourcePage_closes_one_phase_and_leaves_the_other(): void
+    {
+        $chunk = $this->chunk($this->idJob, $this->jobPassword);
+
+        // the read is keyed on the job credential and the phase, so each page owns its own entry
+        $this->assertCount(1, $this->dao->findChunkReviewsForSourcePage($chunk, SourcePages::SOURCE_PAGE_REVISION, 3600));
+        $this->assertCount(1, $this->dao->findChunkReviewsForSourcePage($chunk, SourcePages::SOURCE_PAGE_REVISION_2, 3600));
+
+        $this->assertSame(2, $this->dao->updatePassword($this->idJob, $this->jobPassword, 'rsq_rotated_pwd'));
+
+        $this->assertCount(
+            1,
+            $this->dao->findChunkReviewsForSourcePage($chunk, SourcePages::SOURCE_PAGE_REVISION, 3600),
+            'the rotation alone leaves the old password cached'
+        );
+
+        $this->assertTrue(
+            $this->dao->destroyCacheForFindChunkReviewsForSourcePage($chunk, SourcePages::SOURCE_PAGE_REVISION)
+        );
+
+        $this->assertSame(
+            [],
+            $this->dao->findChunkReviewsForSourcePage($chunk, SourcePages::SOURCE_PAGE_REVISION, 3600)
+        );
+        $this->assertCount(
+            1,
+            $this->dao->findChunkReviewsForSourcePage($chunk, SourcePages::SOURCE_PAGE_REVISION_2, 3600),
+            'evicting one phase must leave the entry of the other one served'
         );
     }
 

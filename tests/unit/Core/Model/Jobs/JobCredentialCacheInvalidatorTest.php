@@ -7,25 +7,56 @@ use Model\Jobs\JobCredentialCacheInvalidator;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Test;
 use TypeError;
+use Utils\Constants\SourcePages;
 
 class JobCredentialCacheInvalidatorTest extends AbstractTest
 {
     private const int ID_JOB = 4_411;
     private const int ID_PROJECT = 991;
 
+    private const string JOB_PASSWORD = 'job-pw';
+    private const string R1_PASSWORD = 'r1-pw';
+    private const string R2_PASSWORD = 'r2-pw';
+
     /**
      * @var list<array{int|null, string|null}>
      */
-    private array $jobDaoCalls = [];
+    private array $jobRowCalls = [];
 
     /**
      * @var list<array{int, string}>
      */
-    private array $chunkReviewDaoCalls = [];
+    private array $jobPasswordSweepCalls = [];
+
+    /**
+     * @var list<array{int, string}>
+     */
+    private array $findChunkReviewsCalls = [];
+
+    /**
+     * @var list<array{int, string, int}>
+     */
+    private array $findChunkReviewsForSourcePageCalls = [];
+
+    /**
+     * @var list<array{string, int}>
+     */
+    private array $reviewPasswordCalls = [];
+
+    /**
+     * @var list<array{int, string, int}>
+     */
+    private array $reviewPasswordAndSourcePageCalls = [];
+
+    /**
+     * @var list<array{int, string}>
+     */
+    private array $isTOrR1OrR2Calls = [];
 
     /**
      * @var list<array{int, string|null}>
@@ -42,7 +73,7 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
         $jobDao = $this->createStub(JobDao::class);
         $jobDao->method('destroyCacheForIdAndPassword')
             ->willReturnCallback(function (?int $id, ?string $password): bool {
-                $this->jobDaoCalls[] = [$id, $password];
+                $this->jobRowCalls[] = [$id, $password];
 
                 return true;
             });
@@ -50,8 +81,42 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
         $chunkReviewDao = $this->createStub(ChunkReviewDao::class);
         $chunkReviewDao->method('destroyCacheForJobPassword')
             ->willReturnCallback(function (int $id, string $password): void {
-                $this->chunkReviewDaoCalls[] = [$id, $password];
+                $this->jobPasswordSweepCalls[] = [$id, $password];
             });
+        $chunkReviewDao->method('destroyCacheForFindChunkReviews')
+            ->willReturnCallback(function (JobStruct $chunk): bool {
+                $this->findChunkReviewsCalls[] = [(int)$chunk->id, (string)$chunk->password];
+
+                return true;
+            });
+        $chunkReviewDao->method('destroyCacheForFindChunkReviewsForSourcePage')
+            ->willReturnCallback(function (JobStruct $chunk, int $sourcePage): bool {
+                $this->findChunkReviewsForSourcePageCalls[] = [(int)$chunk->id, (string)$chunk->password, $sourcePage];
+
+                return true;
+            });
+        $chunkReviewDao->method('destroyCacheForReviewPasswordAndJobId')
+            ->willReturnCallback(function (string $reviewPassword, int $id): bool {
+                $this->reviewPasswordCalls[] = [$reviewPassword, $id];
+
+                return true;
+            });
+        $chunkReviewDao->method('destroyCacheForJobIdReviewPasswordAndSourcePage')
+            ->willReturnCallback(function (int $id, string $reviewPassword, int $sourcePage): bool {
+                $this->reviewPasswordAndSourcePageCalls[] = [$id, $reviewPassword, $sourcePage];
+
+                return true;
+            });
+        $chunkReviewDao->method('destroyCacheForIsTOrR1OrR2')
+            ->willReturnCallback(function (int $id, string $password): bool {
+                $this->isTOrR1OrR2Calls[] = [$id, $password];
+
+                return true;
+            });
+        $chunkReviewDao->method('findByIdJob')->willReturn([
+            $this->makeChunkReview(self::R1_PASSWORD, SourcePages::SOURCE_PAGE_REVISION),
+            $this->makeChunkReview(self::R2_PASSWORD, SourcePages::SOURCE_PAGE_REVISION_2),
+        ]);
 
         $project = new ProjectStruct();
         $project->id = self::ID_PROJECT;
@@ -67,7 +132,6 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
             });
         $projectDao->method('destroyFetchByIdCache')
             ->willReturnCallback(function (int $id, string $fetchClass): bool {
-                self::assertSame(ProjectStruct::class, $fetchClass);
                 $this->projectRowCalls[] = $id;
 
                 return true;
@@ -86,60 +150,164 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
         return $chunk;
     }
 
-    #[Test]
-    public function sweepAfterRotation_evicts_the_replaced_and_the_replacing_credential(): void
+    private function makeChunkReview(string $reviewPassword, int $sourcePage): ChunkReviewStruct
     {
-        // A translate password rotation: the struct already carries the new credential, so the set
-        // of affected credentials is exactly the two passed in.
-        $this->makeInvalidator()->sweepAfterRotation($this->makeChunk('new-pw'), 'old-pw', 'new-pw');
+        $chunkReview = new ChunkReviewStruct();
+        $chunkReview->id_job = self::ID_JOB;
+        $chunkReview->review_password = $reviewPassword;
+        $chunkReview->source_page = $sourcePage;
+
+        return $chunkReview;
+    }
+
+    #[Test]
+    public function jobPasswordRotation_evicts_the_replaced_and_the_replacing_credential(): void
+    {
+        // The struct already carries the new credential, so the set of job credentials to evict is
+        // exactly the two passed in.
+        $this->makeInvalidator()->sweepAfterJobPasswordRotation($this->makeChunk('new-pw'), 'old-pw', 'new-pw');
 
         self::assertSame(
             [[self::ID_JOB, 'old-pw'], [self::ID_JOB, 'new-pw']],
-            $this->jobDaoCalls,
+            $this->jobRowCalls,
             'both the replaced and the replacing job credential must be evicted, and only once each'
         );
-        self::assertSame($this->jobDaoCalls, $this->chunkReviewDaoCalls);
+        // destroyCacheForJobPassword() is what knows the shapes a job credential keys, the per phase
+        // read among them, so the sweep names the credential and nothing else.
+        self::assertSame($this->jobRowCalls, $this->jobPasswordSweepCalls);
+        self::assertSame([], $this->findChunkReviewsForSourcePageCalls);
     }
 
     #[Test]
-    public function sweepAfterRotation_also_evicts_the_job_password_of_a_rotated_review_password(): void
+    public function jobPasswordRotation_evicts_the_reads_keyed_on_every_review_password(): void
     {
-        // A review password rotation leaves the job password untouched, but the chunk review rows it
-        // keys embed the review passwords, so its entries are stale as well.
-        $this->makeInvalidator()->sweepAfterRotation($this->makeChunk('job-pw'), 'old-rev', 'new-rev');
+        // The rotation renamed the password column of every phase row, so the row a review password
+        // read has cached would resolve to no chunk any more.
+        $this->makeInvalidator()->sweepAfterJobPasswordRotation($this->makeChunk('new-pw'), 'old-pw', 'new-pw');
 
         self::assertSame(
-            [[self::ID_JOB, 'old-rev'], [self::ID_JOB, 'new-rev'], [self::ID_JOB, 'job-pw']],
-            $this->chunkReviewDaoCalls
+            [[self::R1_PASSWORD, self::ID_JOB], [self::R2_PASSWORD, self::ID_JOB]],
+            $this->reviewPasswordCalls
         );
+        self::assertSame([
+            [self::ID_JOB, self::R1_PASSWORD, SourcePages::SOURCE_PAGE_REVISION],
+            [self::ID_JOB, self::R2_PASSWORD, SourcePages::SOURCE_PAGE_REVISION_2],
+        ], $this->reviewPasswordAndSourcePageCalls);
     }
 
     #[Test]
-    public function sweepAfterRotation_skips_an_empty_credential(): void
+    public function jobPasswordRotation_evicts_both_project_data_shapes_and_leaves_the_project_row(): void
     {
-        $this->makeInvalidator()->sweepAfterRotation($this->makeChunk('job-pw'), '', 'new-pw');
+        $this->makeInvalidator()->sweepAfterJobPasswordRotation($this->makeChunk('new-pw'), 'old-pw', 'new-pw');
 
-        self::assertSame([[self::ID_JOB, 'new-pw'], [self::ID_JOB, 'job-pw']], $this->jobDaoCalls);
-    }
-
-    #[Test]
-    public function sweepAfterRotation_evicts_both_project_data_shapes_and_the_project_row(): void
-    {
-        $this->makeInvalidator()->sweepAfterRotation($this->makeChunk('new-pw'), 'old-pw', 'new-pw');
-
-        // getProjectData is read both with and without the project password, so both keys go.
+        // getProjectData is read both with and without the project password, and it selects the job
+        // password, so both keys go.
         self::assertSame([[self::ID_PROJECT, null], [self::ID_PROJECT, 'project-pw']], $this->projectDataCalls);
-        self::assertSame([self::ID_PROJECT], $this->projectRowCalls);
+
+        // The projects row carries no job credential: rotating one leaves it valid.
+        self::assertSame([], $this->projectRowCalls);
     }
 
     #[Test]
-    public function sweepAfterRotation_refuses_a_chunk_without_an_id(): void
+    public function jobPasswordRotation_skips_an_empty_credential(): void
+    {
+        $this->makeInvalidator()->sweepAfterJobPasswordRotation($this->makeChunk('new-pw'), '', 'new-pw');
+
+        self::assertSame([[self::ID_JOB, 'new-pw']], $this->jobRowCalls);
+    }
+
+    #[Test]
+    public function jobPasswordRotation_refuses_a_chunk_without_an_id(): void
     {
         $chunk = new JobStruct();
-        $chunk->password = 'job-pw';
+        $chunk->password = 'new-pw';
 
         $this->expectException(TypeError::class);
 
-        $this->makeInvalidator()->sweepAfterRotation($chunk, 'old-pw', 'new-pw');
+        $this->makeInvalidator()->sweepAfterJobPasswordRotation($chunk, 'old-pw', 'new-pw');
+    }
+
+    #[Test]
+    public function reviewPasswordRotation_evicts_only_the_rotated_phase(): void
+    {
+        $this->makeInvalidator()->sweepAfterReviewPasswordRotation(
+            $this->makeChunk(self::JOB_PASSWORD),
+            SourcePages::SOURCE_PAGE_REVISION,
+            'old-r1',
+            'new-r1'
+        );
+
+        self::assertSame([['old-r1', self::ID_JOB], ['new-r1', self::ID_JOB]], $this->reviewPasswordCalls);
+        self::assertSame([
+            [self::ID_JOB, 'old-r1', SourcePages::SOURCE_PAGE_REVISION],
+            [self::ID_JOB, 'new-r1', SourcePages::SOURCE_PAGE_REVISION],
+        ], $this->reviewPasswordAndSourcePageCalls, 'the second pass keys must not be touched');
+        self::assertSame([[self::ID_JOB, 'old-r1'], [self::ID_JOB, 'new-r1']], $this->isTOrR1OrR2Calls);
+    }
+
+    #[Test]
+    public function reviewPasswordRotation_evicts_the_two_entries_publishing_the_rotated_password(): void
+    {
+        $this->makeInvalidator()->sweepAfterReviewPasswordRotation(
+            $this->makeChunk(self::JOB_PASSWORD),
+            SourcePages::SOURCE_PAGE_REVISION_2,
+            'old-r2',
+            'new-r2'
+        );
+
+        // Keyed on the job credential, but their value is where the rotated review password is
+        // published: the list of review links and the link handed to the editor of that phase.
+        self::assertSame([[self::ID_JOB, self::JOB_PASSWORD]], $this->findChunkReviewsCalls);
+        self::assertSame(
+            [[self::ID_JOB, self::JOB_PASSWORD, SourcePages::SOURCE_PAGE_REVISION_2]],
+            $this->findChunkReviewsForSourcePageCalls
+        );
+    }
+
+    #[Test]
+    public function reviewPasswordRotation_leaves_the_job_row_and_the_project_data_alone(): void
+    {
+        $this->makeInvalidator()->sweepAfterReviewPasswordRotation(
+            $this->makeChunk(self::JOB_PASSWORD),
+            SourcePages::SOURCE_PAGE_REVISION,
+            'old-r1',
+            'new-r1'
+        );
+
+        // The job row is untouched by a review password rotation, and getProjectData never selects a
+        // review password: evicting either would only cost the other pages their cache.
+        self::assertSame([], $this->jobRowCalls);
+        self::assertSame([], $this->jobPasswordSweepCalls);
+        self::assertSame([], $this->projectDataCalls);
+        self::assertSame([], $this->projectRowCalls);
+    }
+
+    #[Test]
+    public function reviewPasswordRotation_skips_an_empty_credential(): void
+    {
+        $this->makeInvalidator()->sweepAfterReviewPasswordRotation(
+            $this->makeChunk(self::JOB_PASSWORD),
+            SourcePages::SOURCE_PAGE_REVISION,
+            '',
+            'new-r1'
+        );
+
+        self::assertSame([['new-r1', self::ID_JOB]], $this->reviewPasswordCalls);
+    }
+
+    #[Test]
+    public function reviewPasswordRotation_refuses_a_chunk_without_an_id(): void
+    {
+        $chunk = new JobStruct();
+        $chunk->password = self::JOB_PASSWORD;
+
+        $this->expectException(TypeError::class);
+
+        $this->makeInvalidator()->sweepAfterReviewPasswordRotation(
+            $chunk,
+            SourcePages::SOURCE_PAGE_REVISION,
+            'old-r1',
+            'new-r1'
+        );
     }
 }

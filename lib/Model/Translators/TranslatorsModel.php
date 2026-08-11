@@ -339,7 +339,7 @@ class TranslatorsModel
             $jobDao,
             new ChunkReviewDao($this->database),
             new ProjectDao($this->database)
-        ))->sweepAfterRotation($this->jStruct, $oldPassword, $newPassword);
+        ))->sweepAfterJobPasswordRotation($this->jStruct, $oldPassword, $newPassword);
     }
 
     /**

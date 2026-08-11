@@ -113,6 +113,10 @@ class ChangePasswordController extends KleinController
             $jDao = new JobDao($this->getDatabase());
             $jStruct = $jDao->getByIdAndPassword($id, $actual_pwd);
 
+            // Null when the job password itself was rotated: which phase a review password belongs to
+            // decides how far the eviction below has to reach.
+            $rotatedReviewSourcePage = null;
+
             if ($jStruct !== null) { // the translate password was presented: change the job password
 
                 $pDao = new ProjectDao($this->getDatabase());
@@ -143,6 +147,7 @@ class ChangePasswordController extends KleinController
                 $source_page = $chunkReview->source_page;
                 $revision_number = ReviewUtils::sourcePageToRevisionNumber($source_page)
                     ?? throw new Exception('The matched review row does not belong to a revision phase');
+                $rotatedReviewSourcePage = (int)$source_page;
 
                 $dao->updateReviewPassword($id, $actual_pwd, $new_password, $source_page);
                 FeatureSet::forProject($jStruct->getProject($pDao), $this->getDatabase())
@@ -151,14 +156,25 @@ class ChangePasswordController extends KleinController
 
             $this->getDatabase()->commit();
 
-            // Every credential-keyed read is evicted only now: changing a password has to shut the
-            // editor on the previous link straight away, and an eviction run before the commit
-            // would be undone by any concurrent request still resolving against the old row.
-            (new JobCredentialCacheInvalidator(
+            // Every read the rotated credential reaches is evicted only now: changing a password has
+            // to shut the editor on the previous link straight away, and an eviction run before the
+            // commit would be undone by any concurrent request still resolving against the old row.
+            $invalidator = new JobCredentialCacheInvalidator(
                 $jDao,
                 new ChunkReviewDao($this->getDatabase()),
                 new ProjectDao($this->getDatabase())
-            ))->sweepAfterRotation($jStruct, $actual_pwd, $new_password);
+            );
+
+            if ($rotatedReviewSourcePage === null) {
+                $invalidator->sweepAfterJobPasswordRotation($jStruct, $actual_pwd, $new_password);
+            } else {
+                $invalidator->sweepAfterReviewPasswordRotation(
+                    $jStruct,
+                    $rotatedReviewSourcePage,
+                    $actual_pwd,
+                    $new_password
+                );
+            }
         }
     }
 
