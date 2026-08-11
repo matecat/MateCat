@@ -415,9 +415,23 @@ export const ProjectsBulkActions = ({
         })
         break
       case JOBS_ACTIONS.CHANGE_PASSWORD.id:
-        promises = jobs.map((job) => {
-          return changeJobPassword(job, job.password, rest.revision_number)
-        })
+        // The password sent is the current one of the resource being changed: the server rotates
+        // the password that was presented, so a revision step needs its own current password and a
+        // job without that step has nothing to change.
+        promises = jobs
+          .map((job) => ({
+            job,
+            currentPassword: rest.revision_number
+              ? (job.revise_passwords ?? []).find(
+                  ({revision_number}) =>
+                    Number(revision_number) === Number(rest.revision_number),
+                )?.password
+              : job.password,
+          }))
+          .filter(({currentPassword}) => Boolean(currentPassword))
+          .map(({job, currentPassword}) =>
+            changeJobPassword(job, currentPassword),
+          )
 
         Promise.allSettled(promises).then((result) => {
           const fulfilledPromises = result

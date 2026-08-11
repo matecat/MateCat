@@ -9,11 +9,11 @@
 namespace Controller\API\V2;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
-use InvalidArgumentException;
 use Model\Translations\SegmentTranslationDao;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Utils\ActiveMQ\WorkerClient;
@@ -25,6 +25,15 @@ use Utils\Constants\TranslationStatus;
 class MarkAllSegmentStatusController extends KleinController
 {
     use ChunkNotFoundHandlerTrait;
+
+    /**
+     * The only bulk status each phase may set.
+     */
+    private const STATUS_BY_SOURCE_PAGE = [
+        SourcePages::SOURCE_PAGE_TRANSLATE => TranslationStatus::STATUS_TRANSLATED,
+        SourcePages::SOURCE_PAGE_REVISION => TranslationStatus::STATUS_APPROVED,
+        SourcePages::SOURCE_PAGE_REVISION_2 => TranslationStatus::STATUS_APPROVED2,
+    ];
 
 
     protected function registerValidators(): void
@@ -53,15 +62,25 @@ class MarkAllSegmentStatusController extends KleinController
 
         /*
          * The revision phase comes from the password this request authenticated with, which
-         * ChunkPasswordValidator has already stamped onto the chunk. A revision_number sent by the
-         * client is only allowed to agree with it: on its own it proves nothing about which phase
-         * the caller may act in.
+         * ChunkPasswordValidator has already stamped onto the chunk. The client no longer declares
+         * a revision_number at all: on its own it proved nothing about which phase the caller may
+         * act in, so a value sent by an older client is ignored.
          */
         $source_page = $this->chunk->getSourcePage() ?: SourcePages::SOURCE_PAGE_TRANSLATE;
         $revision_number = ReviewUtils::sourcePageToRevisionNumber($source_page);
 
-        if ($this->request->param('revision_number') && (int)$this->request->param('revision_number') !== $revision_number) {
-            throw new InvalidArgumentException('Invalid revision number');
+        /*
+         * Each of the three bulk statuses belongs to exactly one phase, so a status disagreeing
+         * with the phase the credential resolves to would let a reviewer of one phase stamp the
+         * other one's status onto the segments.
+         */
+        $allowed_status = self::STATUS_BY_SOURCE_PAGE[$source_page] ?? null;
+
+        if ($status !== $allowed_status && in_array($status, self::STATUS_BY_SOURCE_PAGE, true)) {
+            throw new AuthorizationError(
+                'The presented password does not allow to set the segments status to ' . $status,
+                401
+            );
         }
 
         if (in_array($status, [

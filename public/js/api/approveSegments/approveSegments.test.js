@@ -16,8 +16,8 @@ global.config = {
 
 test('addresses the route with the review password, not the job password', async () => {
   // The backend resolves which revision phase the caller may act in from this
-  // password. Sending the job password would resolve every request to the
-  // translate phase and the declared revision_number would be refused.
+  // password alone, and refuses a status belonging to another phase. Sending the
+  // job password would resolve every request to the translate phase.
   let form
   mswServer.use(
     http.post(
@@ -32,12 +32,12 @@ test('addresses the route with the review password, not the job password', async
   const response = await approveSegments(['1', '2'])
 
   expect(response).toEqual({data: 'OK'})
-  expect(form.get('revision_number')).toBe('1')
+  expect(form.get('revision_number')).toBeNull()
   expect(form.get('status')).toBe('APPROVED')
   expect(form.get('client_id')).toBe('client-1')
 })
 
-test('sends the second pass status and revision number in R2', async () => {
+test('sends the second pass status in R2', async () => {
   let form
   mswServer.use(
     http.post(
@@ -51,7 +51,7 @@ test('sends the second pass status and revision number in R2', async () => {
 
   await approveSegments(['1'], '77', 'r2pwd', 2)
 
-  expect(form.get('revision_number')).toBe('2')
+  expect(form.get('revision_number')).toBeNull()
   expect(form.get('status')).toBe('APPROVED2')
 })
 

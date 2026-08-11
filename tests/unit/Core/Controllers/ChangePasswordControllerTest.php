@@ -188,16 +188,19 @@ class ChangePasswordControllerTest extends AbstractTest
      * @throws \Throwable
      */
     #[Test]
-    public function changePassword_throws_on_invalid_revision_number(): void
+    public function changePassword_throws_when_the_password_matches_no_phase_of_the_job(): void
     {
+        // The password decides what is rotated, so one that matches neither the job nor any review
+        // row of it rotates nothing — a client-declared revision_number cannot stand in for it
+        // (GHSA-7q94-2fmr-3p42).
         $this->setRequestParams([
             'id' => '123',
             'password' => 'oldpass',
-            'revision_number' => '9',
+            'revision_number' => '1',
         ]);
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid value for parameter `revision_number`. Allowed values [1, 2]');
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Job not found');
 
         $this->controller->changePassword();
     }

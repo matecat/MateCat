@@ -40,7 +40,6 @@ class ChunkPasswordValidator extends Base
 
     protected int $id_job;
     protected string $password;
-    protected ?int $revision_number = null;
     private int $ttl;
 
     /**
@@ -59,9 +58,6 @@ class ChunkPasswordValidator extends Base
                 'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
                 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
             ],
-            'revision_number' => [
-                'filter' => FILTER_SANITIZE_NUMBER_INT
-            ],
         ];
 
         $postInput = (object)filter_var_array($controller->getParams(), $filterArgs);
@@ -69,10 +65,6 @@ class ChunkPasswordValidator extends Base
         $this->id_job = (int)($postInput->id_job ?? 0);
         $this->password = (string)($postInput->password ?? '');
         $this->ttl = $ttl;
-
-        if (false === empty($postInput->revision_number)) {
-            $this->revision_number = (int)$postInput->revision_number;
-        }
     }
 
     /**
