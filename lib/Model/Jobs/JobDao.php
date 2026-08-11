@@ -243,16 +243,12 @@ class JobDao extends AbstractDao
             'last_update' => date("Y-m-d H:i:s"),
         ]);
 
-        $old_password = $jStruct->password;
         $jStruct->password = $new_password;
 
-        // The link built on the old password must stop working now, not when the cache expires, so
-        // evict the entry it authenticates through. The new password is evicted as well: a lookup
-        // made before the rotation may have cached its miss.
-        $this->destroyCacheForIdAndPassword($jStruct->id, $old_password);
-        $this->destroyCacheByIdAndPassword($jStruct);
-        $this->destroyCacheByProjectId($jStruct->id_project);
-
+        // Nothing is evicted here on purpose. Every caller rotates inside a transaction, and while
+        // it is open another connection still reads the pre-rotation row and caches the replaced
+        // password as valid again, behind whatever was just deleted. Evicting is the caller's, once
+        // it has committed: JobCredentialCacheInvalidator::sweepAfterJobPasswordRotation().
         return $jStruct;
     }
 
@@ -934,20 +930,13 @@ class JobDao extends AbstractDao
      */
     public function updateForMerge(JobStruct $first_job, string $newPass): JobStruct
     {
+        // The struct update cannot carry the password: it is half of the primary key, so it is what
+        // locates the row and is left out of the fields being set. Rotating it is a statement of its
+        // own, and changePassword() is the one that writes it.
         $this->updateStruct($first_job);
 
         if ($newPass) {
-            $this->updateFields(
-                [
-                    'password' => $newPass,
-                    'last_update' => date("Y-m-d H:i:s"),
-                ],
-                [
-                    'id' => $first_job->id,
-                    'password' => $first_job->password
-                ]
-            );
-            $first_job->password = $newPass;
+            $this->changePassword($first_job, $newPass);
         }
 
         return $first_job;

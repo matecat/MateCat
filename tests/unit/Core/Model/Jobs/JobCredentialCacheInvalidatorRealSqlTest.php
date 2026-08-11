@@ -91,6 +91,44 @@ class JobCredentialCacheInvalidatorRealSqlTest extends AbstractTest
     }
 
     #[Test]
+    public function jobPasswordRotation_stops_the_editor_read_of_the_replaced_password(): void
+    {
+        // The editor authenticates through this read, and its callers cache it for up to a day: the
+        // link built on the replaced password has to stop resolving at once, not when the TTL runs out.
+        $jStruct = $this->jobDao->getByIdAndPassword($this->idJob, $this->jobPassword, 86400);
+        $this->assertNotNull($jStruct);
+
+        $rotated = 'jcci_rotated_pwd';
+        $this->jobDao->changePassword($jStruct, $rotated);
+
+        $this->assertNotNull(
+            $this->jobDao->getByIdAndPassword($this->idJob, $this->jobPassword, 86400),
+            'the rotation alone leaves the replaced password authenticating out of the cache'
+        );
+
+        $this->invalidator->sweepAfterJobPasswordRotation($jStruct, $this->jobPassword, $rotated);
+
+        $this->assertNull($this->jobDao->getByIdAndPassword($this->idJob, $this->jobPassword, 86400));
+        $this->assertNotNull($this->jobDao->getByIdAndPassword($this->idJob, $rotated, 86400));
+    }
+
+    #[Test]
+    public function jobPasswordRotation_evicts_a_miss_cached_for_the_replacing_password(): void
+    {
+        $jStruct = $this->jobDao->getByIdAndPassword($this->idJob, $this->jobPassword);
+        $this->assertNotNull($jStruct);
+
+        // a lookup made before the rotation may have cached the miss of the incoming password
+        $rotated = 'jcci_rotated_pwd';
+        $this->assertNull($this->jobDao->getByIdAndPassword($this->idJob, $rotated, 86400));
+
+        $this->jobDao->changePassword($jStruct, $rotated);
+        $this->invalidator->sweepAfterJobPasswordRotation($jStruct, $this->jobPassword, $rotated);
+
+        $this->assertNotNull($this->jobDao->getByIdAndPassword($this->idJob, $rotated, 86400));
+    }
+
+    #[Test]
     public function jobPasswordRotation_stops_the_review_reads_pointing_at_the_replaced_password(): void
     {
         $warm = $this->reviewRowFor(self::R1_PASSWORD, SourcePages::SOURCE_PAGE_REVISION);

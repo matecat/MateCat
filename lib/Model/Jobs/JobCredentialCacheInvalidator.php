@@ -73,8 +73,13 @@ readonly class JobCredentialCacheInvalidator
             );
         }
 
-        // Project data is cached for a day and embeds the job password.
+        // Project data is cached for a day and embeds the job password. The list of the project's
+        // jobs is keyed on the project, not on a credential, but it is the rows themselves that are
+        // cached, so it publishes the password too.
         $this->destroyProjectDataCache($chunk);
+        $this->jobDao->destroyCacheByProjectId(
+            $chunk->id_project ?? throw new TypeError('JobStruct::$id_project cannot be null')
+        );
     }
 
     /**
