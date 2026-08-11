@@ -19,7 +19,6 @@ use Utils\Constants\ProjectStatus;
 class ProjectDao extends AbstractDao
 {
     const string TABLE = "projects";
-    private const string SQL_DESTROY_PROJECT_PASSWORD_CACHE = '%s';
 
     /** @var list<string> */
     protected static array $auto_increment_field = ['id'];
@@ -110,8 +109,16 @@ class ProjectDao extends AbstractDao
     public function changePassword(ProjectStruct $project, string $newPass): ProjectStruct
     {
         $id = $project->id ?? throw new DomainException("Project ID must not be null when changing password");
+        $oldPass = $project->password;
         $res = $this->updateField($project, 'password', $newPass);
         $this->destroyFetchByIdCache($id, ProjectStruct::class);
+
+        // The link built on the old password must stop working now, not when the cache expires, so
+        // evict the entry it is authenticated through. The new password is evicted as well: a lookup
+        // made before the rotation may have cached its miss.
+        foreach (array_filter([$oldPass, $newPass]) as $password) {
+            $this->destroyCacheByIdAndPassword($id, $password);
+        }
 
         return $res;
     }
@@ -197,17 +204,6 @@ class ProjectDao extends AbstractDao
         return $this->_fetchObjectMap($stmt, ProjectStruct::class, $id_list);
     }
 
-    /**
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    public function destroyProjectPasswordCache(int $id, string $password): bool
-    {
-        $sql = sprintf(self::SQL_DESTROY_PROJECT_PASSWORD_CACHE, self::$_sql_get_by_id_and_password);
-        $stmt = $this->database->getConnection()->prepare($sql);
-
-        return $this->_destroyObjectCache($stmt, ProjectStruct::class, ['id' => $id, 'password' => $password]);
-    }
 
     /**
      * @param array<int, int> $project_ids
@@ -293,9 +289,9 @@ class ProjectDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheForProjectData(int $pid, ?string $project_password = null, ?int $jid = null, ?string $jpassword = null): bool
+    public function destroyCacheForProjectData(int $pid, ?string $project_password = null, ?int $jid = null, ?string $jobPassword = null): bool
     {
-        [$query, $values] = $this->_getProjectDataSQLAndValues($pid, $project_password, $jid, $jpassword);
+        [$query, $values] = $this->_getProjectDataSQLAndValues($pid, $project_password, $jid, $jobPassword);
 
         $stmt = $this->_getStatementForQuery($query);
 

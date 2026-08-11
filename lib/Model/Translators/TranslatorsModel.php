@@ -323,8 +323,9 @@ class TranslatorsModel
 
         $this->openTransaction();
         $jobDao = new JobDao($this->database);
+        // changePassword() evicts the cache of both the replaced and the replacing credential, so
+        // revoking a translator here closes the editor on their link at once.
         $jobDao->changePassword($this->jStruct, $newPassword);
-        $jobDao->destroyCacheByIdAndPassword($this->jStruct);
         $this->featureSet->dispatch(new JobPasswordChangedEvent($this->jStruct, $oldPassword));
         $this->commitTransaction();
     }

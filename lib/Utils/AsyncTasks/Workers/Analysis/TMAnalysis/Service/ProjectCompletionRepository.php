@@ -161,7 +161,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
     {
         $this->projectDao->destroyFetchByIdCache($pid, ProjectStruct::class);
         $this->jobDao->destroyCacheByProjectId($pid);
-        $this->projectDao->destroyProjectPasswordCache($pid, $projectPassword);
+        $this->projectDao->destroyCacheByIdAndPassword($pid, $projectPassword);
         $this->analysisDao->destroyAnalysisProjectCache($pid);
     }
 }

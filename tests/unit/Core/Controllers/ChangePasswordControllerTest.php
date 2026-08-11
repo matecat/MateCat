@@ -10,6 +10,10 @@ use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
@@ -18,6 +22,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
+use Utils\Constants\SourcePages;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -442,5 +447,95 @@ class ChangePasswordControllerTest extends AbstractTest
         // No exception => member permitted. Reflection invoke returns null (void).
         $result = $this->invokePrivate('checkUserPermissions', [$project, $user]);
         $this->assertNull($result);
+    }
+
+    // ─── cache invalidation: the replaced credential must stop resolving at once ───
+
+    /**
+     * Changing a password is how a translator is shut out of the editor, so the reads the editor
+     * authenticates through cannot keep serving the replaced credential until their TTL expires
+     * (callers cache them for up to a day).
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function changePassword_job_evicts_the_cached_translate_password(): void
+    {
+        $jobId = $this->jobId(self::BASE);
+        $jDao = new JobDao(obtainTestDatabase());
+
+        // Misses are cached too, so the assertions at the end of this test would otherwise leave the
+        // key holding a miss for a day and poison the next run: start from a cold key.
+        $jDao->destroyCacheForIdAndPassword($jobId, self::JOB_PASSWORD);
+
+        $this->assertInstanceOf(
+            JobStruct::class,
+            $jDao->getByIdAndPassword($jobId, self::JOB_PASSWORD, 86400),
+            'precondition: the credential resolves and is now cached'
+        );
+
+        $this->setRequestParams([
+            'res'      => 'job',
+            'id'       => (string)$jobId,
+            'password' => self::JOB_PASSWORD,
+        ]);
+
+        $captured = null;
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data) use (&$captured): bool {
+                $captured = $data;
+
+                return true;
+            }));
+
+        $this->controller->changePassword();
+
+        $this->assertIsArray($captured);
+        $this->assertNull($jDao->getByIdAndPassword($jobId, self::JOB_PASSWORD, 86400));
+        $this->assertInstanceOf(
+            JobStruct::class,
+            $jDao->getByIdAndPassword($jobId, $captured['new_pwd'], 86400)
+        );
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function changePassword_job_revision_evicts_the_cached_review_password(): void
+    {
+        $jobId = $this->jobId(self::BASE);
+        $this->seedChunkReview(self::BASE, self::JOB_PASSWORD, 'cp_revpw', 2);
+
+        $crDao = new ChunkReviewDao(obtainTestDatabase());
+
+        // see the note above: the closing assertions cache a miss on these keys
+        $crDao->destroyCacheForJobPassword($jobId, 'cp_revpw');
+
+        $this->assertInstanceOf(
+            ChunkReviewStruct::class,
+            $crDao->findByReviewPasswordAndJobId('cp_revpw', $jobId, 3600),
+            'precondition: the review credential resolves and is now cached'
+        );
+        $this->assertInstanceOf(
+            ChunkReviewStruct::class,
+            $crDao->findByJobIdReviewPasswordAndSourcePage($jobId, 'cp_revpw', SourcePages::SOURCE_PAGE_REVISION)
+        );
+
+        $this->setRequestParams([
+            'res'      => 'job',
+            'id'       => (string)$jobId,
+            'password' => 'cp_revpw',
+        ]);
+
+        $this->responseMock->expects($this->once())->method('json');
+
+        $this->controller->changePassword();
+
+        $this->assertNull($crDao->findByReviewPasswordAndJobId('cp_revpw', $jobId, 3600));
+        $this->assertNull(
+            $crDao->findByJobIdReviewPasswordAndSourcePage($jobId, 'cp_revpw', SourcePages::SOURCE_PAGE_REVISION)
+        );
     }
 }

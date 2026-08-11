@@ -524,4 +524,133 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
         $this->assertInstanceOf(ChunkReviewStruct::class, $updated);
         $this->assertSame(1.0, $updated->penalty_points);
     }
+
+    // ------------------------------------------------------------------------- cache invalidation
+
+    /**
+     * Every read keyed on a job credential is cached for up to a day, so rotating a password in the
+     * database is not enough: without an explicit eviction the replaced credential keeps
+     * authenticating for the whole TTL. Each test below warms the read, rotates the rows behind it,
+     * shows the stale answer still being served, and only then asserts that the destroyer closes it.
+     */
+    #[Test]
+    public function destroyCacheForIsTOrR1OrR2_closes_the_rotated_job_password(): void
+    {
+        $warm = $this->dao->isTOrR1OrR2($this->idJob, $this->jobPassword, 3600);
+        $this->assertInstanceOf(ShapelessConcreteStruct::class, $warm);
+        $this->assertSame(2, (int)$warm->t);
+
+        $this->assertSame(2, $this->dao->updatePassword($this->idJob, $this->jobPassword, 'rsq_rotated_pwd'));
+
+        $stale = $this->dao->isTOrR1OrR2($this->idJob, $this->jobPassword, 3600);
+        $this->assertInstanceOf(ShapelessConcreteStruct::class, $stale);
+        $this->assertSame(2, (int)$stale->t, 'the rotation alone leaves the old password cached');
+
+        $this->assertTrue($this->dao->destroyCacheForIsTOrR1OrR2($this->idJob, $this->jobPassword));
+
+        $fresh = $this->dao->isTOrR1OrR2($this->idJob, $this->jobPassword, 3600);
+        $this->assertInstanceOf(ShapelessConcreteStruct::class, $fresh);
+        $this->assertSame(0, (int)$fresh->t);
+        $this->assertSame(0, (int)$fresh->r1);
+        $this->assertSame(0, (int)$fresh->r2);
+    }
+
+    #[Test]
+    public function destroyCacheForReviewPasswordAndJobId_closes_the_rotated_review_password(): void
+    {
+        $warm = $this->dao->findByReviewPasswordAndJobId($this->reviewPassword, $this->idJob, 3600);
+        $this->assertInstanceOf(ChunkReviewStruct::class, $warm);
+
+        $this->rotateBothReviewPasswords('rsq_rev_rotated');
+
+        $this->assertInstanceOf(
+            ChunkReviewStruct::class,
+            $this->dao->findByReviewPasswordAndJobId($this->reviewPassword, $this->idJob, 3600),
+            'the rotation alone leaves the old review password cached'
+        );
+
+        $this->assertTrue($this->dao->destroyCacheForReviewPasswordAndJobId($this->reviewPassword, $this->idJob));
+
+        $this->assertNull($this->dao->findByReviewPasswordAndJobId($this->reviewPassword, $this->idJob, 3600));
+    }
+
+    #[Test]
+    public function destroyCacheForFindChunkReviewsByIdAndPassword_closes_the_rotated_job_password(): void
+    {
+        $this->assertCount(2, $this->dao->findChunkReviews($this->chunk($this->idJob, $this->jobPassword), 3600));
+
+        $this->assertSame(2, $this->dao->updatePassword($this->idJob, $this->jobPassword, 'rsq_rotated_pwd'));
+
+        $this->assertCount(
+            2,
+            $this->dao->findChunkReviews($this->chunk($this->idJob, $this->jobPassword), 3600),
+            'the rotation alone leaves the old password cached'
+        );
+
+        $this->assertTrue(
+            $this->dao->destroyCacheForFindChunkReviewsByIdAndPassword($this->idJob, $this->jobPassword)
+        );
+
+        $this->assertSame([], $this->dao->findChunkReviews($this->chunk($this->idJob, $this->jobPassword), 3600));
+    }
+
+    #[Test]
+    public function destroyCacheForJobPassword_sweeps_every_credential_keyed_read(): void
+    {
+        $chunk = $this->chunk($this->idJob, $this->jobPassword);
+
+        // one warm read per query the sweep has to reach
+        $this->assertCount(2, $this->dao->findChunkReviews($chunk, 3600));
+        $this->assertInstanceOf(
+            ShapelessConcreteStruct::class,
+            $this->dao->isTOrR1OrR2($this->idJob, $this->jobPassword, 3600)
+        );
+        $this->assertInstanceOf(
+            ChunkReviewStruct::class,
+            $this->dao->findByReviewPasswordAndJobId($this->reviewPassword, $this->idJob, 3600)
+        );
+        $this->assertInstanceOf(
+            ChunkReviewStruct::class,
+            $this->dao->findByJobIdReviewPasswordAndSourcePage(
+                $this->idJob,
+                $this->reviewPassword,
+                SourcePages::SOURCE_PAGE_REVISION
+            )
+        );
+
+        $this->assertSame(2, $this->dao->updatePassword($this->idJob, $this->jobPassword, 'rsq_rotated_pwd'));
+        $this->rotateBothReviewPasswords('rsq_rev_rotated');
+
+        $this->dao->destroyCacheForJobPassword($this->idJob, $this->jobPassword);
+        $this->dao->destroyCacheForJobPassword($this->idJob, $this->reviewPassword);
+
+        $this->assertSame([], $this->dao->findChunkReviews($chunk, 3600));
+
+        $probe = $this->dao->isTOrR1OrR2($this->idJob, $this->jobPassword, 3600);
+        $this->assertInstanceOf(ShapelessConcreteStruct::class, $probe);
+        $this->assertSame(0, (int)$probe->t);
+
+        $this->assertNull($this->dao->findByReviewPasswordAndJobId($this->reviewPassword, $this->idJob, 3600));
+        $this->assertNull(
+            $this->dao->findByJobIdReviewPasswordAndSourcePage(
+                $this->idJob,
+                $this->reviewPassword,
+                SourcePages::SOURCE_PAGE_REVISION
+            )
+        );
+    }
+
+    /**
+     * Both fixture rows share the review password, and updateReviewPassword() rotates one phase at
+     * a time, so a job-wide rotation needs one call per phase.
+     */
+    private function rotateBothReviewPasswords(string $newReviewPassword): void
+    {
+        foreach ([SourcePages::SOURCE_PAGE_REVISION, SourcePages::SOURCE_PAGE_REVISION_2] as $sourcePage) {
+            $this->assertSame(
+                1,
+                $this->dao->updateReviewPassword($this->idJob, $this->reviewPassword, $newReviewPassword, $sourcePage)
+            );
+        }
+    }
 }

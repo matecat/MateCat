@@ -120,14 +120,6 @@ class ProjectDaoRealSqlTest extends AbstractTest
         self::assertTrue($this->dao->destroyCacheByIdAndPassword($p['id'], $p['password']));
     }
 
-    public function testDestroyProjectPasswordCache(): void
-    {
-        $p = $this->project();
-        $this->dao->findByIdAndPassword($p['id'], $p['password'], 3600); // prime
-
-        self::assertTrue($this->dao->destroyProjectPasswordCache($p['id'], $p['password']));
-    }
-
     // ---- findByIdCustomer ------------------------------------------------------------------------
 
     public function testFindByIdCustomerReturnsProjects(): void
@@ -235,6 +227,31 @@ class ProjectDaoRealSqlTest extends AbstractTest
         $this->dao->changePassword($struct, 'newpass123');
 
         self::assertNotNull($this->dao->findByIdAndPassword($p['id'], 'newpass123'));
+    }
+
+    /**
+     * The project password gate is cached, so rotating the password has to evict the entry the
+     * replaced credential is served from: otherwise the previous link keeps opening the project for
+     * the whole TTL.
+     */
+    public function testChangePasswordEvictsTheCacheOfTheReplacedPassword(): void
+    {
+        $p = $this->project();
+        $struct = $this->dao->findById($p['id']);
+        $oldPassword = $struct->password;
+
+        self::assertNotNull($this->dao->findByIdAndPassword($p['id'], $oldPassword, 86400));
+
+        $this->dao->changePassword($struct, 'newpass456');
+
+        try {
+            $this->dao->findByIdAndPassword($p['id'], $oldPassword, 86400);
+            self::fail('the replaced password must stop resolving as soon as it is rotated');
+        } catch (NotFoundException) {
+            // expected: the gate no longer authenticates the replaced credential
+        }
+
+        self::assertNotNull($this->dao->findByIdAndPassword($p['id'], 'newpass456', 86400));
     }
 
     public function testChangeProjectStatus(): void

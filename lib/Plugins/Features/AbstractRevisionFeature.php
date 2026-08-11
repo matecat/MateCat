@@ -413,15 +413,19 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
     /**
      * @throws PDOException
+     * @throws ReflectionException
      */
     public function reviewPasswordChanged(ReviewPasswordChangedEvent $event): void
     {
         $feedbackDao = new FeedbackDAO($this->getDatabase());
         $feedbackDao->updateFeedbackPassword($event->jobId, $event->oldPassword, $event->newPassword, $event->revisionNumber);
+
+        $this->destroyChunkReviewCacheForRotatedPassword($event->jobId, $event->oldPassword, $event->newPassword);
     }
 
     /**
      * @throws PDOException
+     * @throws ReflectionException
      * @throws RuntimeException
      */
     public function jobPasswordChanged(JobPasswordChangedEvent $event): void
@@ -431,6 +435,27 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
         $dao = new ChunkReviewDao($this->getDatabase());
         $dao->updatePassword($jobId, $event->oldPassword, $jobPassword);
+
+        $this->destroyChunkReviewCacheForRotatedPassword($jobId, $event->oldPassword, $jobPassword);
+    }
+
+    /**
+     * A rotated password must stop resolving a chunk and a review phase straight away, and the
+     * password taking its place must not inherit a miss cached before the rotation. Both events reach
+     * here from every rotation entry point, the API controller and a translator being replaced alike.
+     *
+     * @param int $jobId
+     * @param string $oldPassword
+     * @param string $newPassword
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    private function destroyChunkReviewCacheForRotatedPassword(int $jobId, string $oldPassword, string $newPassword): void
+    {
+        $dao = new ChunkReviewDao($this->getDatabase());
+        $dao->destroyCacheForJobPassword($jobId, $oldPassword);
+        $dao->destroyCacheForJobPassword($jobId, $newPassword);
     }
 
     /**

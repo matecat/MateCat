@@ -18,6 +18,7 @@ use Model\Teams\MembershipDao;
 use Model\Teams\TeamDao;
 use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
+use Throwable;
 use Utils\Tools\Utils;
 
 class ChangePasswordController extends KleinController
@@ -83,6 +84,7 @@ class ChangePasswordController extends KleinController
      * @param string $new_password
      *
      * @throws Exception
+     * @throws Throwable
      */
     private function changeThePassword(UserStruct $user, string $res, int $id, string $actual_pwd, string $new_password): void
     {
@@ -95,7 +97,14 @@ class ChangePasswordController extends KleinController
             $pDao = new ProjectDao($this->getDatabase());
             $pDao->changePassword($pStruct, $new_password);
             $pDao->destroyFetchByIdCache($id, ProjectStruct::class);
-            $pDao->destroyCacheForProjectData($pStruct->id ?? throw new \RuntimeException('Missing project id'), $pStruct->password);
+
+            // Project data is cached for a day and embeds the passwords, so both the credential that
+            // was replaced and the one replacing it are evicted, along with the variant no password
+            // is passed to.
+            $projectId = $pStruct->id ?? throw new \RuntimeException('Missing project id');
+            $pDao->destroyCacheForProjectData($projectId);
+            $pDao->destroyCacheForProjectData($projectId, $actual_pwd);
+            $pDao->destroyCacheForProjectData($projectId, $new_password);
         } else { // change job passwords
 
             $this->getDatabase()->begin();
@@ -135,19 +144,26 @@ class ChangePasswordController extends KleinController
                     ?? throw new Exception('The matched review row does not belong to a revision phase');
 
                 $dao->updateReviewPassword($id, $actual_pwd, $new_password, $source_page);
-                $dao->destroyCacheForJobIdReviewPasswordAndSourcePage($id, $actual_pwd, $source_page);
                 FeatureSet::forProject($jStruct->getProject($pDao), $this->getDatabase())
                     ->dispatch(new ReviewPasswordChangedEvent($id, $actual_pwd, $new_password, $revision_number));
             }
 
-            // invalidate ChunkReviewDao cache for the job
+            // Invalidate every ChunkReviewDao read keyed on a job credential, for the password that
+            // was replaced and for the one replacing it: changing a password has to shut the editor
+            // on the previous link straight away, not when the cache expires.
             $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
+            $chunkReviewDao->destroyCacheForJobPassword($id, $actual_pwd);
+            $chunkReviewDao->destroyCacheForJobPassword($id, $new_password);
+
+            // The chunk rows carry the review passwords, so the entry keyed on the job password is
+            // stale after a review password rotation as well.
             $chunkReviewDao->destroyCacheForFindChunkReviews($jStruct);
 
-            // invalidate cache for ProjectData
+            // invalidate cache for ProjectData, which embeds the job passwords
             $pDao = new ProjectDao($this->getDatabase());
             $projectId = $jStruct->getProject($pDao)->id ?? throw new Exception('Project not found');
-            $pDao->destroyCacheForProjectData((int)$projectId, $jStruct->getProject($pDao)->password);
+            $pDao->destroyCacheForProjectData($projectId);
+            $pDao->destroyCacheForProjectData($projectId, $jStruct->getProject($pDao)->password);
             $pDao->destroyFetchByIdCache($jStruct->getProject($pDao)->id, ProjectStruct::class);
 
             $this->getDatabase()->commit();

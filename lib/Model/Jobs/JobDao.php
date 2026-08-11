@@ -76,6 +76,21 @@ class JobDao extends AbstractDao
      */
     public function destroyCacheByIdAndPassword(JobStruct $jobQuery): bool
     {
+        return $this->destroyCacheForIdAndPassword($jobQuery->id, $jobQuery->password);
+    }
+
+    /**
+     * Same as destroyCacheByIdAndPassword(), for a credential that is not the one the struct carries:
+     * a rotation has to evict the password it replaces, and the struct already holds the new one.
+     *
+     * @param int|null $id_job
+     * @param string|null $password
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public function destroyCacheForIdAndPassword(?int $id_job, ?string $password): bool
+    {
         /*
         * build the query
         */
@@ -85,8 +100,8 @@ class JobDao extends AbstractDao
             $stmt,
             JobStruct::class,
             [
-                'id_job' => $jobQuery->id,
-                'password' => $jobQuery->password
+                'id_job' => $id_job,
+                'password' => $password
             ]
         );
     }
@@ -207,8 +222,13 @@ class JobDao extends AbstractDao
             'last_update' => date("Y-m-d H:i:s"),
         ]);
 
+        $old_password = $jStruct->password;
         $jStruct->password = $new_password;
 
+        // The link built on the old password must stop working now, not when the cache expires, so
+        // evict the entry it authenticates through. The new password is evicted as well: a lookup
+        // made before the rotation may have cached its miss.
+        $this->destroyCacheForIdAndPassword($jStruct->id, $old_password);
         $this->destroyCacheByIdAndPassword($jStruct);
         $this->destroyCacheByProjectId($jStruct->id_project);
 

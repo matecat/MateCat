@@ -249,6 +249,36 @@ class JobDaoRealSqlTest extends AbstractTest
         $this->dao->changePassword($job, '');
     }
 
+    public function testChangePasswordEvictsTheCacheOfTheReplacedPassword(): void
+    {
+        $job = $this->seedJob();
+        $oldPassword = $job->password;
+        $newPassword = 'newpw_' . bin2hex(random_bytes(4));
+
+        // The editor authenticates through this read, and its callers cache it for up to a day: the
+        // link built on the replaced password has to stop resolving at once, not when the TTL runs
+        // out.
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($job->id, $oldPassword, 86400));
+
+        $this->dao->changePassword($job, $newPassword);
+
+        self::assertNull($this->dao->getByIdAndPassword($job->id, $oldPassword, 86400));
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($job->id, $newPassword, 86400));
+    }
+
+    public function testChangePasswordEvictsAMissCachedForTheNewPassword(): void
+    {
+        $job = $this->seedJob();
+        $newPassword = 'newpw_' . bin2hex(random_bytes(4));
+
+        // a lookup made before the rotation may have cached the miss of the incoming password
+        self::assertNull($this->dao->getByIdAndPassword($job->id, $newPassword, 86400));
+
+        $this->dao->changePassword($job, $newPassword);
+
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($job->id, $newPassword, 86400));
+    }
+
     // ---------------------------------------------------------------------------------------
     // status mutations: setJobComplete / updateJobStatus / updateAllJobsStatusesByProjectId
     // ---------------------------------------------------------------------------------------
