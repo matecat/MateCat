@@ -32,7 +32,10 @@ class ChunkReviewDao extends AbstractDao
 
     const string sql_get_from_review_password_and_id_job_and_source_page = "SELECT * FROM qa_chunk_reviews WHERE review_password = :review_password AND id_job = :id_job  AND source_page = :source_page";
 
-    const string sql_is_t_or_r1_or_r2 = "SELECT
+    // The query text is part of the cache key, so the trailing space on the first line is not
+    // cosmetic: dropping it renames every entry in flight, and a fleet still running the old text
+    // keeps repopulating the name this one no longer produces. Do not trim it.
+    const string sql_is_t_or_r1_or_r2 = "SELECT 
             (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.password=:password) as t,
             (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.review_password=:password and cr.source_page = 2) as r1,
             (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.review_password=:password and cr.source_page = 3) as r2
