@@ -253,7 +253,7 @@ class FileInfoControllerTest extends AbstractTest
             ->willReturn(true);
         $this->controller->stubUtility = $utility;
 
-        $this->responseMock();
+        $this->responseStub();
 
         $this->controller->setInstructions();
     }
@@ -284,7 +284,7 @@ class FileInfoControllerTest extends AbstractTest
             ->willReturn(true);
         $this->controller->stubUtility = $utility;
 
-        $this->responseMock();
+        $this->responseStub();
 
         $this->controller->setInstructions();
     }
