@@ -97,7 +97,7 @@ export const UploadGdrive = () => {
 function LoadingOverlay() {
   return (
     <div className="modal-gdrive">
-      <SpinnerLoader label="Uploading Files" />
+      <SpinnerLoader label="Uploading files" />
     </div>
   )
 }

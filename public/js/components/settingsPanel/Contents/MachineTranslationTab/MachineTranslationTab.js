@@ -118,10 +118,10 @@ export const MachineTranslationTab = () => {
   const [deleteMTRequest, setDeleteMTRequest] = useState()
 
   const COLUMNS_TABLE = config.is_cattool
-    ? [{name: 'Active'}, {name: 'Engine Name'}, {name: 'Description'}]
+    ? [{name: 'Active'}, {name: 'Engine name'}, {name: 'Description'}]
     : [
         {name: 'Active'},
-        {name: 'Engine Name'},
+        {name: 'Engine name'},
         {name: 'Description'},
         {name: 'Action'},
       ]
@@ -310,7 +310,7 @@ export const MachineTranslationTab = () => {
     <div className="machine-translation-tab settings-panel-contentwrapper-tab-background">
       {!config.is_cattool && config.isLoggedIn && addMTVisible && (
         <div className="add-mt-container">
-          <h2>Add MT Engine</h2>
+          <h2>Add MT engine</h2>
           <div className="add-mt-provider" data-testid="add-mt-provider">
             <Select
               placeholder="Choose provider"

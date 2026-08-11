@@ -423,7 +423,7 @@ const NewProject = () => {
       owner: true,
       tm: true,
       glos: true,
-      name: 'No Description',
+      name: 'No description',
       key: tmKeyFromQueryString,
       is_shared: false,
       id: tmKeyFromQueryString,

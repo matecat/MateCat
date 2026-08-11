@@ -111,7 +111,7 @@ xtest('renders properly', async () => {
 
   await waitFor(() => {
     expect(screen.getByPlaceholderText('Search by project name')).toBeVisible()
-    expect(screen.getByText('Welcome to your Personal area')).toBeVisible()
+    expect(screen.getByText('Welcome to your personal area')).toBeVisible()
   }, 2000)
 
   expect(screen.getByTitle('Status Filter')).toBeVisible()

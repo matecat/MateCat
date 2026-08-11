@@ -30,7 +30,7 @@ const OutsourceButton = ({chunk, index, openOutsourceModal, status}) => {
           style={{fontWeight: 500}}
         >
           <TranslatedIcon size={16} />
-          <div>Buy Translation</div>
+          <div>Buy translation</div>
         </Button>
       </Tooltip>
     </div>
@@ -43,7 +43,7 @@ const OutsourceButton = ({chunk, index, openOutsourceModal, status}) => {
       style={{fontWeight: 500}}
     >
       <TranslatedIcon size={16} />
-      <div>Buy Translation</div>
+      <div>Buy translation</div>
     </Button>
   )
 }

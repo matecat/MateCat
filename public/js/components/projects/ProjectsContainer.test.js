@@ -767,8 +767,8 @@ test('No projects found with team type personal', () => {
     ManageActions.updateProjects([])
   })
 
-  expect(screen.getByText('Create Project')).toBeInTheDocument()
-  expect(screen.getByText('Welcome to your Personal area')).toBeInTheDocument()
+  expect(screen.getByText('Create project')).toBeInTheDocument()
+  expect(screen.getByText('Welcome to your personal area')).toBeInTheDocument()
 })
 
 test('No projects found with team type general', () => {
@@ -785,6 +785,6 @@ test('No projects found with team type general', () => {
   })
 
   expect(screen.getByText(`Welcome to ${team.get('name')}`)).toBeInTheDocument()
-  expect(screen.getByText('Create Project')).toBeInTheDocument()
+  expect(screen.getByText('Create project')).toBeInTheDocument()
   expect(screen.getByText('Add member')).toBeInTheDocument()
 })

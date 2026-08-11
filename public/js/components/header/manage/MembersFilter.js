@@ -54,7 +54,7 @@ const MembersFilter = ({selectedTeam, currentUser, setCurrentUser}) => {
           {currentUser === ManageConstants.ALL_MEMBERS_FILTER ? (
             <div className="members-filter-item-filter members-filter-all members-filter-user-full-name">
               <span>ALL</span>
-              All Members
+              All members
             </div>
           ) : currentUser === ManageConstants.NOT_ASSIGNED_FILTER ? (
             <div className="members-filter-item-filter members-filter-user-full-name">
@@ -98,7 +98,7 @@ const MembersFilter = ({selectedTeam, currentUser, setCurrentUser}) => {
                 }
               >
                 <span>ALL</span>
-                All Members
+                All members
               </li>
               <li className="search-by-name">
                 <Input

@@ -81,12 +81,12 @@ export const ProjectsContainer = ({
       <div className="notify-notfound">
         {isFilterApplied ? (
           <div>
-            <div className="message-nofound">No Projects Found</div>
+            <div className="message-nofound">No projects found</div>
             <div className="no-results-found"></div>
           </div>
         ) : isProjectsEmpty && teamState.get('type') === 'personal' ? (
           <div className="no-results-teams">
-            <div className="message-nofound">Welcome to your Personal area</div>
+            <div className="message-nofound">Welcome to your personal area</div>
             <div className="welcome-to-matecat"></div>
             <div className="message-create">
               <Button
@@ -96,8 +96,8 @@ export const ProjectsContainer = ({
                   window.open(`/?idTeam=${teamState.get('id')}`, '_blank')
                 }
               >
-                Create Project
-              </Button>
+                Create project
+</Button>
               {!thereAreMembers && (
                 <Button
                   size={BUTTON_SIZE.MEDIUM}
@@ -126,8 +126,8 @@ export const ProjectsContainer = ({
                     window.open(`/?idTeam=${teamState.get('id')}`, '_blank')
                   }
                 >
-                  Create Project
-                </Button>
+                  Create project
+  </Button>
                 {!thereAreMembers && (
                   <Button
                     size={BUTTON_SIZE.MEDIUM}

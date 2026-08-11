@@ -76,7 +76,7 @@ const Header = ({
                   <a href="https://site.matecat.com/outsourcing/">Outsource</a>
                 </li>
                 <li>
-                  <a href="https://guides.matecat.com/">User Guide</a>
+                  <a href="https://guides.matecat.com/">User guide</a>
                 </li>
                 {headerInterface.getMoreLinks()}
               </ul>

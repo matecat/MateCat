@@ -216,7 +216,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
             {analyzeICU.hasPlural && (
               <div className="segment-footer-icu-plurals-section">
                 <div>
-                  <h3>Plural Rules</h3>
+                  <h3>Plural rules</h3>
                 </div>
                 <div>{pluralRulesForLocale?.cardinal.map(renderRule)}</div>
               </div>

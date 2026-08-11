@@ -75,14 +75,14 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
   return [
     {
       id: SETTINGS_PANEL_TABS.translationMemoryGlossary,
-      label: 'Translation Memory and Termbase',
+      label: 'Translation memory and termbase',
       description:
         'Manage your language resources and select which should be used on your new project. <a href="https://guides.matecat.com/activ" target="_blank">More details</a>',
       component: <TranslationMemoryGlossaryTab />,
     },
     {
       id: SETTINGS_PANEL_TABS.machineTranslation,
-      label: 'Machine Translation',
+      label: 'Machine translation',
       description:
         'Manage your machine translation engines and select which should be used on your new project. <a href="https://guides.matecat.com/machine-translation-engines" target="_blank">More details</a>',
       component: <MachineTranslationTab />,

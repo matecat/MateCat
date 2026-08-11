@@ -477,7 +477,7 @@ test('Rendering elements', async () => {
     pointerEventsCheck: 0,
   })
   // check project menu items
-  expect(screen.getByText('Activity Log')).toBeInTheDocument()
+  expect(screen.getByText('Activity log')).toBeInTheDocument()
   expect(screen.getByText('Archive project')).toBeInTheDocument()
   expect(screen.getByText('Cancel project')).toBeInTheDocument()
 

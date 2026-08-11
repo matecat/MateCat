@@ -110,7 +110,7 @@ export const SearchTerms = () => {
           disabled={isLoading}
         >
           <IconAdd size={12} />
-          Add Term
+          Add term
         </Button>
       </div>
     </div>

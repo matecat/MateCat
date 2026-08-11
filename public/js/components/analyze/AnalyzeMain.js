@@ -24,7 +24,7 @@ const AnalyzeMain = ({volumeAnalysis, project}) => {
 
   const spinner = (
     <div style={spinnerContainer}>
-      <SpinnerLoader label="Loading Volume Analysis" />
+      <SpinnerLoader label="Loading volume analysis" />
     </div>
   )
 
@@ -59,7 +59,7 @@ const AnalyzeMain = ({volumeAnalysis, project}) => {
     <div className="layout__container">
       {volumeAnalysis && project ? (
         <div className="project">
-          <h4>Volume Analysis</h4>
+          <h4>Volume analysis</h4>
           <AnalyzeHeader
             data={volumeAnalysis.get('summary')}
             project={project}

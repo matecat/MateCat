@@ -450,7 +450,7 @@ export const ProjectContainer = ({
         label: (
           <>
             <FileLog size={18} />
-            Activity Log
+            Activity log
           </>
         ),
         onClick: () => window.open(activityLogUrl, '_blank'),
@@ -505,7 +505,7 @@ export const ProjectContainer = ({
               label: (
                 <>
                   <FlipBackward size={18} />
-                  Resume Project
+                  Resume project
                 </>
               ),
               onClick: activateProject,

@@ -90,7 +90,7 @@ export const AddSeverity = ({numbersOfColumns}) => {
       data-testid="qf-add-severity"
     >
       <Popover
-        title="Add Severity"
+        title="Add severity"
         toggleButtonProps={{
           type: BUTTON_TYPE.PRIMARY,
           mode: BUTTON_MODE.BASIC,

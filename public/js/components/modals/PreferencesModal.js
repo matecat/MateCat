@@ -153,7 +153,7 @@ const PreferencesModal = (props) => {
   const getApiKeyHtml = () => {
     return (
       <div data-testid="preferences-modal">
-        <h4>API Key</h4>
+        <h4>API key</h4>
         {credentials ? (
           confirmDelete ? (
             <div className={'user-api'}>
@@ -191,7 +191,7 @@ const PreferencesModal = (props) => {
                 {credentialsCreated ? (
                   <>
                     <div>
-                      <label>Api Key</label>
+                      <label>API key</label>
                       <input
                         type="text"
                         readOnly
@@ -200,7 +200,7 @@ const PreferencesModal = (props) => {
                       />
                     </div>
                     <div>
-                      <label>Api Secret</label>
+                      <label>API secret</label>
                       <input
                         type="text"
                         readOnly
@@ -337,7 +337,7 @@ const PreferencesModal = (props) => {
   if (user.has_password) {
     resetPasswordHtml = (
       <a className="reset-password pull-left" onClick={openResetPassword}>
-        Reset Password
+        Reset password
       </a>
     )
   }

@@ -21,7 +21,7 @@ const RevisionCheckbox = ({
             onChange={onToggle}
             disabled={outsourceConfirmed}
           />
-          <label>Add Revision</label>
+          <label>Add revision</label>
         </div>
       </div>
       {!outsourceConfirmed && (

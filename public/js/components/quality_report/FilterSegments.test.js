@@ -63,7 +63,7 @@ describe('FilterSegments', () => {
   test('renders filter icon and input field', () => {
     renderComponent()
 
-    expect(screen.getByPlaceholderText('Id Segment')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('ID segment')).toBeInTheDocument()
   })
 
   test('renders segment status filter', () => {
@@ -99,7 +99,7 @@ describe('FilterSegments', () => {
   test('shows id_segment input with initial value from segmentToFilter prop', () => {
     renderComponent({segmentToFilter: '42'})
 
-    const input = screen.getByPlaceholderText('Id Segment')
+    const input = screen.getByPlaceholderText('ID segment')
     expect(input).toHaveValue('42')
   })
 
@@ -107,7 +107,7 @@ describe('FilterSegments', () => {
     const user = userEvent.setup()
     renderComponent()
 
-    const input = screen.getByPlaceholderText('Id Segment')
+    const input = screen.getByPlaceholderText('ID segment')
     await user.type(input, '5')
 
     expect(input).toHaveValue('5')

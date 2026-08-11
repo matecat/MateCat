@@ -188,7 +188,7 @@ describe('UploadGdrive', () => {
   describe('Loading state', () => {
     test('does not show loading overlay initially', () => {
       renderWithContext()
-      expect(screen.queryByText('Uploading Files')).not.toBeInTheDocument()
+      expect(screen.queryByText('Uploading files')).not.toBeInTheDocument()
     })
   })
   describe('Action buttons', () => {

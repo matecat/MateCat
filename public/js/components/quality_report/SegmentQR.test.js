@@ -101,7 +101,7 @@ describe('SegmentQR', () => {
 
   test('renders production stats', () => {
     renderComponent()
-    expect(screen.getByText('Machine Translation')).toBeInTheDocument()
+    expect(screen.getByText('Machine translation')).toBeInTheDocument()
     expect(screen.getByText("12''")).toBeInTheDocument()
     expect(screen.getByText('35%')).toBeInTheDocument()
   })
@@ -144,7 +144,7 @@ describe('SegmentQR', () => {
       ],
     })
     expect(screen.getByText('Revision')).toBeInTheDocument()
-    expect(screen.getByText('2nd Revision')).toBeInTheDocument()
+    expect(screen.getByText('2nd revision')).toBeInTheDocument()
   })
 
   test('renders words per second with minutes and seconds', () => {
@@ -164,7 +164,7 @@ describe('SegmentQR', () => {
       suggestion: 'Ciao mondo',
     })
 
-    const diffButtons = screen.getAllByTitle('Show Diff')
+    const diffButtons = screen.getAllByTitle('Show diff')
     expect(diffButtons.length).toBeGreaterThan(0)
 
     // Click the diff button for translation

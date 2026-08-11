@@ -259,7 +259,7 @@ class Search extends React.Component {
         {
           text: 'Attention: you are replacing the same text!',
         },
-        'Replace Alert',
+        'Replace alert',
       )
       return false
     }
@@ -743,7 +743,7 @@ class Search extends React.Component {
                         (item) => item.id === this.state.search.selectStatus,
                       ) || undefined
                     }
-                    placeholder={'Status Segment'}
+                    placeholder={'Status segment'}
                     checkSpaceToReverse={false}
                     showResetButton={true}
                     resetFunction={() => this.handleStatusChange('all')}

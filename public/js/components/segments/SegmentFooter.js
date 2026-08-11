@@ -33,13 +33,13 @@ import {TAB} from '../../constants/SegmentTabConstants'
 
 const TAB_ITEMS = {
   [TAB.MATCHES]: {
-    label: 'Translation Matches',
+    label: 'Translation matches',
     code: 'tm',
     tabClass: 'matches',
     isLoading: false,
   },
   [TAB.CONCORDANCES]: {
-    label: 'TM Search',
+    label: 'TM search',
     code: 'cc',
     tabClass: 'concordances',
     isLoading: false,
@@ -63,13 +63,13 @@ const TAB_ITEMS = {
     isLoading: false,
   },
   [TAB.MULTIMATCHES]: {
-    label: 'Cross-language Matches',
+    label: 'Cross-language matches',
     code: 'cl',
     tabClass: 'cross-matches',
     isLoading: false,
   },
   [TAB.AI_ASSISTANT]: {
-    label: 'AI Assistant',
+    label: 'AI assistant',
     code: 'ai',
     tabClass: 'ai-assistant',
     isLoading: false,
@@ -103,7 +103,7 @@ const TAB_ITEMS = {
     isLoading: false,
   },
   [TAB.AI_ALTERNATIVES]: {
-    label: 'Ai alternatives',
+    label: 'AI alternatives',
     code: 'aialternatives',
     tabClass: 'ai-alternatives',
     isLoading: false,
@@ -147,7 +147,7 @@ function SegmentFooter() {
       elements: [],
       label:
         value.code === 'tm'
-          ? `Translation Matches ${!config.mt_enabled ? ' (No MT) ' : ''}`
+          ? `Translation matches ${!config.mt_enabled ? ' (No MT) ' : ''}`
           : value.label,
     })),
   )

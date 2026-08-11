@@ -454,11 +454,11 @@ const Dashboard = () => {
           requestProjectsStatus={requestProjectsStatus}
         />
       ) : (
-        <SpinnerLoader label="Loading Projects" />
+        <SpinnerLoader label="Loading projects" />
       )}
       {requestProjectsStatus ===
         DASHBOARD_REQUEST_PROJECTS_STATUS.RELOAD_IN_PROGRESS && (
-        <SpinnerLoader label="Updating Projects" />
+        <SpinnerLoader label="Updating projects" />
       )}
       {ReactDOM.createPortal(<CookieConsent />, cookieBannerMountPoint)}
       <SocketListener

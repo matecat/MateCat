@@ -193,7 +193,7 @@ export const ModifyTeam = ({team}) => {
                       size={BUTTON_SIZE.SMALL}
                       onClick={() => resendInvite(email)}
                     >
-                      Resend Invite
+                      Resend invite
                     </Button>
                   </>
                 )}
@@ -259,7 +259,7 @@ export const ModifyTeam = ({team}) => {
   return (
     <div className="team-modal" tabIndex={1} onKeyDown={handleEnterKey}>
       <div>
-        <h5>Change Team Name</h5>
+        <h5>Change team name</h5>
         <div className="team-name-container">
           {isModifyingName ? (
             <div className="container-input">
@@ -311,7 +311,7 @@ export const ModifyTeam = ({team}) => {
       </div>
       {teamState.get('type') !== 'personal' && (
         <div>
-          <h5>Manage Members</h5>
+          <h5>Manage members</h5>
           <EmailsBadge
             name="team"
             value={emailsCollection}
@@ -337,7 +337,7 @@ export const ModifyTeam = ({team}) => {
           <IconSearch />
           <input
             name="search_member"
-            placeholder="Search Member"
+            placeholder="Search member"
             value={searchMember}
             onChange={onChangeSearchMember}
           />
