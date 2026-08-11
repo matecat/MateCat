@@ -37,6 +37,19 @@ class JobDao extends AbstractDao
     protected static string $_query_cache = "SELECT * FROM jobs WHERE  id = :id_job AND password = :password ";
 
     /**
+     * The text of a query is part of the key the cached rows are found by when they have to be
+     * evicted, and read() asks for exactly what getByIdAndPassword() asks for: the same text, the
+     * same parameters, the same fetch class. Sharing that key means the shape written last owns it,
+     * an eviction resolves it to that one alone, and the other keeps answering with whatever
+     * credential it was cached under. The limit is what keeps the two apart. It changes no result:
+     * (id, password) is unique, the primary_id_pass index of the jobs table.
+     */
+    private static function readQuery(): string
+    {
+        return self::$_query_cache . ' LIMIT 1';
+    }
+
+    /**
      * This method is not static and used to cache at Redis level the values for this Job
      *
      * Use when counters of the job value are not important, but only the metadata is needed
@@ -52,7 +65,7 @@ class JobDao extends AbstractDao
      */
     public function read(JobStruct $jobQuery): array
     {
-        $stmt = $this->_getStatementForQuery(self::$_query_cache);
+        $stmt = $this->_getStatementForQuery(self::readQuery());
 
         /** @var JobStruct[] */
         return $this->_fetchObjectMap(
@@ -91,19 +104,27 @@ class JobDao extends AbstractDao
      */
     public function destroyCacheForIdAndPassword(?int $id_job, ?string $password): bool
     {
-        /*
-        * build the query
-        */
-        $stmt = $this->_getStatementForQuery(self::$_query_cache);
+        $bindParams = [
+            'id_job' => $id_job,
+            'password' => $password
+        ];
 
-        return $this->_destroyObjectCache(
-            $stmt,
+        // The row is cached under two texts, so both have to be named here: the one the credential
+        // checks read through getByIdAndPassword(), and the one read() writes for the outsource
+        // quote page.
+        $credentialShape = $this->_destroyObjectCache(
+            $this->_getStatementForQuery(self::$_query_cache),
             JobStruct::class,
-            [
-                'id_job' => $id_job,
-                'password' => $password
-            ]
+            $bindParams
         );
+
+        $readShape = $this->_destroyObjectCache(
+            $this->_getStatementForQuery(self::readQuery()),
+            JobStruct::class,
+            $bindParams
+        );
+
+        return $credentialShape || $readShape;
     }
 
     /**
