@@ -223,7 +223,7 @@ export const ProjectBar = ({
   }
   previousScrollTopRef.current = listRef?.scrollTop
 
-  if (isSticky) previousOpenedFileIdRef.current = currentSegment.id_file
+  if (isSticky) previousOpenedFileIdRef.current = idFileSegment
 
   return (
     <div
