@@ -51,6 +51,7 @@ class SetChunkCompletedController extends KleinController
             new ChunkCompletionEventDao($database),
             new ProjectDao($database),
             new FeatureSet($database),
+            $database,
         );
         $model->save();
 

@@ -76,7 +76,10 @@ class ChunkReviewModelTest extends AbstractTest
         self::$originalSkipCache = AppConfig::$SKIP_SQL_CACHE;
         AppConfig::$SKIP_SQL_CACHE = true;
 
-        [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock();
+        // These tests drive a real ChunkReviewDao, whose write paths take lockByJobId(). In production
+        // the callers (SegmentTranslationIssueController, BulkSegmentStatusChangeWorker,
+        // CopyAllSourceToTargetController, the repair CLI) all open a transaction first.
+        [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock(inTransaction: true);
 
         $this->nullLqaProject = new ProjectStruct();
         $this->nullLqaProject->id = 10;
@@ -323,18 +326,27 @@ class ChunkReviewModelTest extends AbstractTest
     // recountAndUpdatePassFailResult
     // -----------------------------------------------------------------------
 
+    /**
+     * A project with no LQA model has no pass/fail verdict, and NULL is how that is represented —
+     * QualitySummary reads NULL as "no score" rather than as a failure, and
+     * passFailCountsAtomicUpdate() (the delta writer for the same row) leaves it NULL too. Writing
+     * true here asserted a verdict that was never computed and disagreed with that writer.
+     */
     #[Test]
-    public function recountAndUpdatePassFailResultWithNullLqaModelSetsIsPassTrue(): void
+    public function recountAndUpdatePassFailResultLeavesIsPassNullWhenProjectHasNoLqaModel(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('rowCount')->willReturn(1);
         $this->stmtStub->method('fetchAll')->willReturn([]);
         $this->stmtStub->method('fetch')->willReturn([0 => null]);
 
+        // Starts from a stale verdict to prove the recount clears it rather than merely skipping it.
+        $this->chunkReviewStruct->is_pass = true;
+
         $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
         $model->recountAndUpdatePassFailResult($this->nullLqaProject, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
-        $this->assertTrue($this->chunkReviewStruct->is_pass);
+        $this->assertNull($this->chunkReviewStruct->is_pass);
     }
 
     #[Test]

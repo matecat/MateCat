@@ -16,13 +16,39 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use Model\ProjectCreation\ProjectStructure;
+use Model\QualityReport\QualityReportModel;
 use PHPUnit\Framework\Attributes\Test;
 use Plugins\Features\AbstractRevisionFeature;
 use Plugins\Features\ReviewExtended;
 
+/**
+ * Records what resetScore() wrote instead of talking to a database, so the reset itself can be
+ * asserted. getChunkReview() is seeded because the real one reads findChunkReviews(...)[0].
+ */
+class RecordingQualityReportModel extends QualityReportModel
+{
+    public ?ChunkReviewStruct $seededReview = null;
+    public ?ChunkReviewStruct $lastUpdatedStruct = null;
+    /** @var array<string, mixed> */
+    public array $lastUpdatedOptions = [];
+
+    public function getChunkReview(): ChunkReviewStruct
+    {
+        return $this->seededReview ?? throw new \LogicException('seed the review first');
+    }
+
+    protected function updateChunkReview(ChunkReviewStruct $chunkReview, array $options): void
+    {
+        $this->lastUpdatedStruct = $chunkReview;
+        $this->lastUpdatedOptions = $options;
+    }
+}
+
 class ConcreteTestRevisionFeature extends AbstractRevisionFeature
 {
     public const string FEATURE_CODE = 'test_revision_feature';
+
+    public ?RecordingQualityReportModel $qualityReportModel = null;
 
     public function callValidateUndoData(ChunkCompletionEventStruct $event, array $undoData): void
     {
@@ -32,6 +58,11 @@ class ConcreteTestRevisionFeature extends AbstractRevisionFeature
     public function callCreateChunkReviewRecords(ProjectStructure $projectStructure): void
     {
         $this->createChunkReviewRecords($projectStructure);
+    }
+
+    protected function createQualityReportModel(JobStruct $chunk): QualityReportModel
+    {
+        return $this->qualityReportModel ?? parent::createQualityReportModel($chunk);
     }
 }
 
@@ -54,6 +85,7 @@ class TestChunkReviewStruct extends ChunkReviewStruct
 class AbstractRevisionFeatureTest extends AbstractTest
 {
     private ConcreteTestRevisionFeature $feature;
+    private IDatabase $dbStub;
 
     protected function setUp(): void
     {
@@ -61,21 +93,13 @@ class AbstractRevisionFeatureTest extends AbstractTest
         $this->feature = new ConcreteTestRevisionFeature(new BasicFeatureStruct([
             'feature_code' => ConcreteTestRevisionFeature::FEATURE_CODE,
         ]));
-        // The stub's connection has to report an open transaction: the write paths take
-        // qa_chunk_reviews row locks via ChunkReviewDao::lockByJobId(), which refuses to run
-        // outside one. In production these are all dispatched inside a controller transaction.
-        $stmtStub = $this->createStub(\PDOStatement::class);
-        $stmtStub->queryString = '';
+        // The split/merge and undo paths take qa_chunk_reviews row locks via
+        // ChunkReviewDao::lockByJobId(), which refuses to run outside a transaction. In production
+        // JobSplitMergeService and CompletionEventController open one before dispatching.
+        [$this->dbStub, , $stmtStub] = $this->createDatabaseMock(inTransaction: true);
         $stmtStub->method('fetchAll')->willReturn([]);
 
-        $pdoStub = $this->createStub(\PDO::class);
-        $pdoStub->method('inTransaction')->willReturn(true);
-        $pdoStub->method('prepare')->willReturn($stmtStub);
-
-        $dbStub = $this->createStub(IDatabase::class);
-        $dbStub->method('getConnection')->willReturn($pdoStub);
-
-        $this->feature->setDatabase($dbStub);
+        $this->feature->setDatabase($this->dbStub);
     }
 
     #[Test]
@@ -236,36 +260,72 @@ class AbstractRevisionFeatureTest extends AbstractTest
         $this->feature->callCreateChunkReviewRecords($projectStructure);
     }
 
-    #[Test]
-    public function projectCompletionEventSavedInvokesQualityReportModelReset(): void
+    private function makeCompletionEventSavedEvent(): ProjectCompletionEventSavedEvent
     {
-        $chunk = new JobStruct([
-            'id' => 999999,
+        return new ProjectCompletionEventSavedEvent(
+            new JobStruct([
+                'id' => 999999,
+                'password' => 'pw',
+                'id_project' => 1,
+            ]),
+            new CompletionEventStruct([
+                'uid' => 1,
+                'source' => 'test',
+                'is_review' => true,
+            ]),
+            123
+        );
+    }
+
+    #[Test]
+    public function projectCompletionEventSavedResetsTheScoreAndSnapshotsUndoData(): void
+    {
+        $review = new ChunkReviewStruct([
+            'id' => 444,
+            'id_job' => 999999,
             'password' => 'pw',
-            'id_project' => 1,
+            'source_page' => 2,
+            'penalty_points' => 5.5,
+            'reviewed_words_count' => 80,
+            'is_pass' => false,
         ]);
 
-        $completionEvent = new CompletionEventStruct([
-            'uid' => 1,
-            'source' => 'test',
-            'is_review' => true,
-        ]);
+        $model = new RecordingQualityReportModel($this->makeCompletionEventSavedEvent()->chunk, $this->dbStub);
+        $model->seededReview = $review;
+        $this->feature->qualityReportModel = $model;
 
-        $event = new ProjectCompletionEventSavedEvent($chunk, $completionEvent, 123);
+        $this->feature->projectCompletionEventSaved($this->makeCompletionEventSavedEvent());
 
-        set_error_handler(static function (int $severity, string $message): bool {
-            if ($severity === E_WARNING && str_contains($message, 'Undefined array key 0')) {
-                return true;
-            }
+        $this->assertSame(0.0, $review->penalty_points);
+        $this->assertSame(0, $review->reviewed_words_count);
+        $this->assertSame($review, $model->lastUpdatedStruct);
+        $this->assertSame(
+            ['fields' => ['undo_data', 'penalty_points', 'reviewed_words_count', 'is_pass']],
+            $model->lastUpdatedOptions
+        );
 
-            return false;
-        });
+        // undo_data has to carry the pre-reset values, or the reset is unrecoverable.
+        $undoData = json_decode((string)$review->undo_data, true);
+        $this->assertSame(123, $undoData['reset_by_event_id']);
+        $this->assertSame(5.5, $undoData['penalty_points']);
+        $this->assertSame(80, $undoData['reviewed_words_count']);
+        $this->assertFalse($undoData['is_pass']);
+    }
 
-        try {
-            $this->expectException(\TypeError::class);
-            $this->feature->projectCompletionEventSaved($event);
-        } finally {
-            restore_error_handler();
-        }
+    /**
+     * The regression guard for the chunk-completion 500. resetScore() takes the job's
+     * qa_chunk_reviews row locks, and lockByJobId() refuses to run outside a transaction — so this
+     * whole path threw until EventModel::save() opened one. Nothing could catch it while the shared
+     * stub reported an open transaction unconditionally.
+     */
+    #[Test]
+    public function projectCompletionEventSavedThrowsWhenNoTransactionIsOpen(): void
+    {
+        [$dbStub] = $this->createDatabaseMock(inTransaction: false);
+        $this->feature->setDatabase($dbStub);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('requires an open transaction');
+        $this->feature->projectCompletionEventSaved($this->makeCompletionEventSavedEvent());
     }
 }

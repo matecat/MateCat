@@ -40,7 +40,9 @@ class QualityReportModelTest extends AbstractTest
         $metaStruct->key = 'domain';
         $metaStruct->value = 'medical';
 
-        [$this->dbStub, , $stmtStub] = $this->createDatabaseMock();
+        // resetScore() takes lockByJobId() through a real ChunkReviewDao; EventModel::save() opens the
+        // transaction for it in production.
+        [$this->dbStub, , $stmtStub] = $this->createDatabaseMock(inTransaction: true);
         $stmtStub->method('execute')->willReturn(true);
         $stmtStub->method('fetchAll')->willReturn([$metaStruct]);
 

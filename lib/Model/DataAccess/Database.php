@@ -6,6 +6,7 @@ use Exception;
 use PDO;
 use PDOException;
 use Throwable;
+use Utils\Logger\LoggerFactory;
 
 /**
  * Class which implements a database using PDO
@@ -29,6 +30,13 @@ class Database implements IDatabase
 
     // Affected rows
     protected int $affected_rows;
+
+    /**
+     * Work deferred until the current transaction commits.
+     *
+     * @var list<callable(): void>
+     */
+    private array $afterCommitCallbacks = [];
 
 
     const string SEQ_ID_SEGMENT = 'id_segment';
@@ -147,6 +155,10 @@ class Database implements IDatabase
     public function begin(): PDO
     {
         if (!$this->getConnection()->inTransaction()) {
+            // A fresh transaction starts with an empty deferral queue. Anything still queued belongs
+            // to a transaction that never reached commit() or rollback() — an aborted request on a
+            // persistent connection — and must not fire on someone else's commit.
+            $this->afterCommitCallbacks = [];
             $this->getConnection()->beginTransaction();
         }
 
@@ -163,6 +175,50 @@ class Database implements IDatabase
     public function commit(): void
     {
         $this->getConnection()->commit();
+
+        $this->runAfterCommitCallbacks();
+    }
+
+    /**
+     * @Override
+     * {@inheritdoc}
+     *
+     * @throws PDOException
+     */
+    public function onCommit(callable $callback): void
+    {
+        if (!$this->getConnection()->inTransaction()) {
+            $callback();
+
+            return;
+        }
+
+        $this->afterCommitCallbacks[] = $callback;
+    }
+
+    /**
+     * Drains the deferral queue after a successful commit.
+     *
+     * Cleared before running, so a callback that itself calls onCommit() queues for the next
+     * transaction instead of extending this drain. Failures are logged and swallowed: the data is
+     * already committed, and a caller that has been told its write succeeded must not then receive an
+     * exception because a cache invalidation or a message enqueue failed.
+     */
+    private function runAfterCommitCallbacks(): void
+    {
+        $callbacks = $this->afterCommitCallbacks;
+        $this->afterCommitCallbacks = [];
+
+        foreach ($callbacks as $callback) {
+            try {
+                $callback();
+            } catch (Throwable $e) {
+                LoggerFactory::doJsonLog([
+                    'message' => 'after-commit callback failed',
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
     }
 
 
@@ -175,6 +231,10 @@ class Database implements IDatabase
     public function rollback(): void
     {
         $connection = $this->getConnection();
+
+        // Deferred work is discarded: it was queued on the strength of writes that are about to
+        // disappear.
+        $this->afterCommitCallbacks = [];
 
         // Check if a transaction is currently active
         if ($connection->inTransaction()) {

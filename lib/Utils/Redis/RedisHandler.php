@@ -6,13 +6,11 @@ use Exception;
 use InvalidArgumentException;
 use Predis\Client;
 use Utils\Registry\AppConfig;
-use Utils\Tools\Utils;
 
 /**
  * Redis connection handler with support for multiple Predis connection modes.
  *
- * Manages lazy Redis connections via Predis\Client, with automatic health checks
- * (ping-based) and distributed locking (SETNX + EXPIRE).
+ * Manages lazy Redis connections via Predis\Client, with automatic health checks (ping-based).
  *
  * ## Configuration
  *
@@ -88,23 +86,6 @@ use Utils\Tools\Utils;
 class RedisHandler
 {
     private ?Client $redisClient = null;
-
-    private string $instanceHash;
-    private string $instanceUUID;
-
-    /**
-     * @throws Exception
-     */
-    public function __construct()
-    {
-        $this->instanceHash = spl_object_hash($this);
-        $this->instanceUUID = Utils::uuid4();
-    }
-
-    protected function getInstanceIdentifier(): string
-    {
-        return $this->instanceHash . ":" . $this->instanceUUID;
-    }
 
     /**
      * Lazy connection — returns a connected Predis Client, reconnecting if the
@@ -256,55 +237,4 @@ class RedisHandler
         return $dsnString;
     }
 
-    /**
-     * Advisory lock. Currently unused — do not adopt for anything that needs a correctness
-     * guarantee without fixing the two defects below first:
-     *
-     * 1. The TTL is the *wait budget*, not a lease: the key expires $wait_time_seconds after
-     *    acquisition regardless of how long the critical section actually takes, so work that
-     *    outlives the wait continues with the lock already gone and nothing reports it.
-     * 2. Acquisition is not atomic. `setnx` and `expire` are separate round trips; a process that
-     *    dies between them leaves the key with no TTL at all, and unlock() only deletes on an
-     *    identifier match that no later process can produce (the identifier embeds a per-instance
-     *    uuid4). That strands the lock permanently.
-     *
-     * For serializing database writes prefer SELECT ... FOR UPDATE inside the transaction that
-     * already exists — see ChunkReviewDao::lockByJobId(). It releases at commit rather than on a
-     * timer and has no fail-open path.
-     *
-     * @throws Exception
-     */
-    public function tryLock(string $key, int $wait_time_seconds = 10): void
-    {
-        $connection = $this->getConnection();
-        $time       = microtime(true);
-        $exit_time  = $time + $wait_time_seconds;
-        $sleep      = 500000; // microseconds
-
-        do {
-            $lock = (bool) $connection->setnx("lock:" . $key, $this->getInstanceIdentifier());
-
-            if ($lock) {
-                $connection->expire("lock:" . $key, $wait_time_seconds);
-
-                return;
-            }
-
-            usleep($sleep);
-        } while (microtime(true) < $exit_time);
-
-        throw new Exception("Lock wait timeout reached.");
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function unlock(string $key): void
-    {
-        $connection      = $this->getConnection();
-        $lockingInstance = $connection->get("lock:" . $key);
-        if (!empty($lockingInstance) && $lockingInstance == $this->getInstanceIdentifier()) {
-            $connection->del("lock:" . $key);
-        }
-    }
 }

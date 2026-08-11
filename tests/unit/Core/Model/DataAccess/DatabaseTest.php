@@ -386,4 +386,111 @@ class DatabaseTest extends AbstractTest
         $conn = $this->db->getConnection();
         $this->assertInstanceOf(PDO::class, $conn);
     }
+
+    // ─── onCommit() ─────────────────────────────────────────────────────────
+
+    /**
+     * The ordering guarantee callers depend on: nothing scheduled through onCommit() may observe the
+     * data before it is visible. Cache invalidation is the motivating case — bust before the commit
+     * and a concurrent reader can repopulate from the pre-commit row, leaving a stale value that
+     * outlives the commit for the whole TTL.
+     */
+    #[Test]
+    public function onCommitRunsTheCallbackAfterTheCommitAndNotBefore(): void
+    {
+        $ran = false;
+
+        $this->db->begin();
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran = true;
+        });
+
+        $this->assertFalse($ran, 'must not run while the transaction is still open');
+
+        $this->db->commit();
+
+        $this->assertTrue($ran);
+    }
+
+    #[Test]
+    public function onCommitDiscardsTheCallbackOnRollback(): void
+    {
+        $ran = false;
+
+        $this->db->begin();
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran = true;
+        });
+        $this->db->rollback();
+
+        $this->assertFalse($ran, 'work queued on writes that were rolled back must not happen');
+
+        // And it must not leak into the next transaction either.
+        $this->db->begin();
+        $this->db->commit();
+
+        $this->assertFalse($ran);
+    }
+
+    /**
+     * Callers should not have to know whether a transaction is open, so with none the callback runs
+     * straight away — otherwise it would be queued forever and silently never run.
+     */
+    #[Test]
+    public function onCommitRunsImmediatelyWhenNoTransactionIsOpen(): void
+    {
+        $ran = false;
+
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran = true;
+        });
+
+        $this->assertTrue($ran);
+    }
+
+    /**
+     * The commit already succeeded by the time these run, so a failing callback must not turn a
+     * completed write into an exception for the caller.
+     */
+    #[Test]
+    public function onCommitSwallowsAndLogsACallbackFailure(): void
+    {
+        $secondRan = false;
+
+        $this->db->begin();
+        $this->db->onCommit(static function (): void {
+            throw new Exception('cache invalidation failed');
+        });
+        $this->db->onCommit(function () use (&$secondRan): void {
+            $secondRan = true;
+        });
+
+        $this->db->commit();
+
+        $this->assertTrue($secondRan, 'one failing callback must not skip the rest');
+    }
+
+    /**
+     * A callback that itself defers work must queue for the next transaction rather than extend the
+     * drain in progress, or a self-scheduling callback would loop forever inside commit().
+     */
+    #[Test]
+    public function onCommitDoesNotRecurseWhenACallbackSchedulesMoreWork(): void
+    {
+        $outer = 0;
+        $inner = 0;
+
+        $this->db->begin();
+        $this->db->onCommit(function () use (&$outer, &$inner): void {
+            $outer++;
+            // No transaction is open during the drain, so this one runs immediately.
+            $this->db->onCommit(function () use (&$inner): void {
+                $inner++;
+            });
+        });
+        $this->db->commit();
+
+        $this->assertSame(1, $outer);
+        $this->assertSame(1, $inner);
+    }
 }

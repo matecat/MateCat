@@ -344,9 +344,9 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
      * Regression: the recount and the detector must agree on fractional penalties.
      *
      * getPenaltyPointsForChunk() used to return int, so a true sum of 5.50 was recomputed as 5.
-     * recountAndUpdatePassFailResult() writes that value as an absolute, while the detector
-     * compares ROUND(actual, 2) != ROUND(recorded, 2) — so the repair wrote 5, the detector
-     * immediately re-flagged the same row, and revision:recount-drifted could never converge.
+     * recountAndUpdatePassFailResult() writes that value as an absolute, while the detector compares
+     * ABS(actual - recorded) > 0.005 — so the repair wrote 5, the detector immediately re-flagged the
+     * same row, and revision:recount-drifted could never converge.
      */
     #[Test]
     public function fractional_penalties_recount_and_detector_agree(): void
@@ -409,6 +409,77 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
         foreach ($filtered as $row) {
             $this->assertGreaterThan($this->idJob, $row['id_job']);
         }
+    }
+
+    /**
+     * Drift in the other direction — recorded higher than actual — has to be reported too. Every
+     * other fixture here drifts downward (recorded 0, actual 5), so an asymmetric predicate such as
+     * `actual - recorded > 0.005` would satisfy all of them while silently never reporting a
+     * decrement that failed to land, which is the more common production shape.
+     */
+    #[Test]
+    public function findPenaltyPointsMismatches_flags_an_over_recorded_row(): void
+    {
+        $job = $this->fixtures->makeJob($this->idProject, [
+            'password' => 'over_pwd',
+            'job_first_segment' => $this->idSegment,
+            'job_last_segment' => $this->idSegment,
+        ]);
+        $this->fixtures->makeQaChunkReview($this->idProject, $job['id'], 'over_pwd', [
+            'source_page' => SourcePages::SOURCE_PAGE_TRANSLATE,
+        ]);
+        // No qa_entries on TRANSLATE, so actual is 0 while recorded says 9.99.
+        $this->realSqlDb()->getConnection()->exec(
+            "UPDATE qa_chunk_reviews SET penalty_points = 9.99 WHERE id_job = {$job['id']}"
+        );
+
+        $reported = array_filter(
+            $this->dao->findPenaltyPointsMismatches(),
+            fn(array $row): bool => $row['id_job'] === $job['id']
+        );
+
+        $this->assertCount(1, $reported, 'an over-recorded row must be reported');
+        $row = array_values($reported)[0];
+        $this->assertSame(9.99, (float)$row['recorded_penalty_points']);
+        $this->assertSame(0.0, (float)$row['actual_penalty_points']);
+    }
+
+    /**
+     * The page and the total come from the same predicate, so a capped report can state the real
+     * total. Without a cap the first run after deploy renders one table row per drifted chunk review
+     * into an email, unbounded.
+     */
+    #[Test]
+    public function findPenaltyPointsMismatches_caps_the_page_while_the_count_stays_total(): void
+    {
+        // The shared fixture already drifts on two source_pages; add a third drifted chunk.
+        $job = $this->fixtures->makeJob($this->idProject, [
+            'password' => 'limit_pwd',
+            'job_first_segment' => $this->idSegment,
+            'job_last_segment' => $this->idSegment,
+        ]);
+        $this->fixtures->makeQaChunkReview($this->idProject, $job['id'], 'limit_pwd', [
+            'source_page' => SourcePages::SOURCE_PAGE_REVISION,
+        ]);
+        $this->realSqlDb()->getConnection()->exec(
+            "UPDATE qa_chunk_reviews SET penalty_points = 42 WHERE id_job = {$job['id']}"
+        );
+
+        $total = $this->dao->countPenaltyPointsMismatches();
+        $this->assertGreaterThanOrEqual(2, $total);
+        $this->assertSame($total, count($this->dao->findPenaltyPointsMismatches()), 'count and unbounded page must agree');
+
+        $this->assertCount(1, $this->dao->findPenaltyPointsMismatches(null, 1));
+        $this->assertSame($total, $this->dao->countPenaltyPointsMismatches(), 'the count must ignore the page limit');
+    }
+
+    #[Test]
+    public function countPenaltyPointsMismatches_respects_the_min_job_id_filter(): void
+    {
+        $this->assertSame(
+            count($this->dao->findPenaltyPointsMismatches($this->idJob)),
+            $this->dao->countPenaltyPointsMismatches($this->idJob)
+        );
     }
 
     #[Test]
@@ -502,6 +573,47 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
         $this->assertTrue($this->dao->exists($job['id'], 'cr_pwd'));
     }
 
+    /**
+     * createRecord() must return the row that now exists, whichever branch of
+     * INSERT ... ON DUPLICATE KEY UPDATE ran, because the caller feeds that id straight into
+     * recountAndUpdatePassFailResult() (updateStruct keys on the primary key, so a wrong id updates
+     * nothing) and into passFailCountsAtomicUpdate() (an unmatched id takes the insert branch and
+     * creates a duplicate).
+     *
+     * This is a contract test, not a regression test: LAST_INSERT_ID() is documented as unreliable
+     * on the ODKU update branch, and it does return 0 there in an isolated probe — but on this
+     * server and through this code path it happened to report the matched row's id, so the previous
+     * implementation passes this test too. The re-read is the version-independent way to be right;
+     * what is pinned here is the contract, and the guarantee no longer depends on server behaviour
+     * that MySQL does not promise.
+     */
+    #[Test]
+    public function createRecord_returns_the_existing_row_when_it_already_exists(): void
+    {
+        $job = $this->fixtures->makeJob($this->idProject, ['password' => 'cr_dup']);
+        $existing = $this->fixtures->makeQaChunkReview($this->idProject, $job['id'], 'cr_dup', [
+            'source_page' => SourcePages::SOURCE_PAGE_REVISION,
+        ]);
+
+        // A later insert on this same connection, so the assertion cannot be satisfied merely by
+        // LAST_INSERT_ID() still pointing at the row the fixture just wrote.
+        $decoyJob = $this->fixtures->makeJob($this->idProject, ['password' => 'cr_decoy']);
+        $decoy = $this->fixtures->makeQaChunkReview($this->idProject, $decoyJob['id'], 'cr_decoy', [
+            'source_page' => SourcePages::SOURCE_PAGE_REVISION,
+        ]);
+        $this->assertNotSame((int)$existing['id'], (int)$decoy['id'], 'precondition: the decoy is a different row');
+
+        $struct = $this->dao->createRecord([
+            'id_project'  => $this->idProject,
+            'id_job'      => $job['id'],
+            'password'    => 'cr_dup',
+            'source_page' => SourcePages::SOURCE_PAGE_REVISION,
+        ]);
+
+        $this->assertSame((int)$existing['id'], $struct->id);
+        $this->assertGreaterThan(0, $struct->id);
+    }
+
     #[Test]
     public function deleteByJobId_removes_rows(): void
     {
@@ -524,7 +636,10 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
         $chunkReview->id_project = $project['id'];
         $chunkReview->password = 'pf_null';
         $chunkReview->review_password = 'pf_null_rev';
-        $chunkReview->source_page = SourcePages::SOURCE_PAGE_REVISION;
+        // Deliberately not SOURCE_PAGE_REVISION: the test schema declares source_page as
+        // `tinyint(3) unsigned NOT NULL DEFAULT '2'`, so a source_page of 2 is indistinguishable
+        // from the column default and an unbound column would still assert green.
+        $chunkReview->source_page = SourcePages::SOURCE_PAGE_REVISION_2;
 
         $chunkReviewId = self::ASSIGNABLE_ID_FLOOR + 7001;
         $this->fixtures->trackExisting('qa_chunk_reviews', ['id' => $chunkReviewId]);
@@ -542,6 +657,61 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
         $this->assertSame(100, $row->reviewed_words_count);
         $this->assertSame(500, $row->total_tte);
         $this->assertNull($row->is_pass);
+        // The insert branch omitted source_page entirely. In production the column is
+        // `int(11) DEFAULT NULL`, so that wrote NULL — which exempts the row from
+        // UNIQUE KEY job_pw_source_page (MySQL treats every NULL as distinct) and makes the drift
+        // detector's `e.source_page = r.source_page` join match nothing, so the row is reported as
+        // drifted on every scan and no recount can clear it.
+        $this->assertSame(SourcePages::SOURCE_PAGE_REVISION_2, $row->source_page);
+    }
+
+    /**
+     * Two writes carrying different unmatched ids for the same (id_job, password, source_page) must
+     * end as one row: neither id matches the primary key, so both take the insert branch and only
+     * UNIQUE KEY job_pw_source_page collapses them.
+     *
+     * Caveat: the production failure this guards is not reproducible here. Production declares
+     * source_page `int(11) DEFAULT NULL`, so omitting it wrote NULL and the unique key stopped
+     * applying, yielding genuine duplicates. The test schema declares it NOT NULL DEFAULT '2', which
+     * cannot hold NULL at all. What this pins is that the caller's source_page reaches the row, so
+     * both writes land on the same unique key rather than on the column default.
+     */
+    #[Test]
+    public function passFailCountsAtomicUpdate_insert_branch_cannot_duplicate_a_chunk_review(): void
+    {
+        $project = $this->fixtures->makeProjectDetailed();
+        $job = $this->fixtures->makeJob($project['id'], ['password' => 'pf_dup', 'owner' => $this->ownerEmail]);
+
+        $chunkReview = new ChunkReviewStruct();
+        $chunkReview->id_job = $job['id'];
+        $chunkReview->id_project = $project['id'];
+        $chunkReview->password = 'pf_dup';
+        $chunkReview->review_password = 'pf_dup_rev';
+        $chunkReview->source_page = SourcePages::SOURCE_PAGE_REVISION_2;
+
+        $data = [
+            'chunkReview'          => $chunkReview,
+            'penalty_points'       => 2.5,
+            'reviewed_words_count' => 10,
+            'total_tte'            => 20,
+        ];
+
+        foreach ([7201, 7202] as $offset) {
+            $id = self::ASSIGNABLE_ID_FLOOR + $offset;
+            $this->fixtures->trackExisting('qa_chunk_reviews', ['id' => $id]);
+            $this->dao->passFailCountsAtomicUpdate($id, $data);
+        }
+
+        $stmt = $this->realSqlDb()->getConnection()->prepare(
+            'SELECT COUNT(*) FROM qa_chunk_reviews WHERE id_job = :id_job AND password = :password AND source_page = :source_page'
+        );
+        $stmt->execute([
+            'id_job'      => $job['id'],
+            'password'    => 'pf_dup',
+            'source_page' => SourcePages::SOURCE_PAGE_REVISION_2,
+        ]);
+
+        $this->assertSame(1, (int)$stmt->fetchColumn(), 'the unique key must collapse the second write onto the first row');
     }
 
     /**
@@ -550,6 +720,28 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
      * still open. FOR UPDATE under autocommit fails the same way — the locks are taken and dropped
      * before the caller does its work — so the guard has to be loud rather than silent.
      */
+    /**
+     * lockByJobId()'s coverage of the split/merge delete-and-recreate window rests entirely on InnoDB
+     * gap locking, which only exists under REPEATABLE READ. Nothing in lib/, inc/ or INSTALL/ sets or
+     * asserts the isolation level — it is inherited from the server default — so assert it here.
+     * Under READ COMMITTED the SELECT would match nothing during the recreate window, take no locks
+     * at all, and still return success: the guard would become a silent no-op exactly where it
+     * matters, with no failing test to show it. This turns that into a loud failure instead.
+     */
+    #[Test]
+    public function lockByJobId_gap_locking_prerequisite_is_repeatable_read(): void
+    {
+        $isolation = $this->realSqlDb()->getConnection()
+            ->query('SELECT @@session.transaction_isolation')
+            ->fetchColumn();
+
+        $this->assertSame(
+            'REPEATABLE-READ',
+            $isolation,
+            'ChunkReviewDao::lockByJobId() relies on gap locking, which READ COMMITTED disables'
+        );
+    }
+
     #[Test]
     public function lockByJobId_refuses_to_run_outside_a_transaction(): void
     {

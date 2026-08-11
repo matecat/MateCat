@@ -108,49 +108,6 @@ class TranslationIssueModel
     }
 
     /**
-     * @param EntryStruct $oldStruct
-     *
-     * @return EntryStruct
-     * @throws Exception
-     * @throws TypeError
-     */
-    public function editFrom(EntryStruct $oldStruct): EntryStruct
-    {
-        $chunkJobId = $this->chunk->id ?? throw new Exception('Missing chunk job id');
-
-        // Lock up front rather than only inside the penalty-point call: the caller wraps delete()
-        // and save() in one transaction (SegmentTranslationIssueController::update), and taking the
-        // job's row locks here makes the decrement and the increment one atomic unit. The previous
-        // Redis lock was acquired and released separately by each, so another writer could
-        // interleave between them.
-        $this->chunkReviewDao->lockByJobId($chunkJobId);
-
-        $this->setDefaultIssueValues();
-
-        if (!empty($this->diff)) {
-            $this->saveDiff();
-        }
-
-        $this->issue->ensureStartAndStopPositionAreOrdered();
-        $this->applyIssueDefaults();
-        $this->entryDao->modifyEntry($this->issue);
-
-        // update score
-        $penaltyPointDiff = $this->issue->penalty_points - $oldStruct->penalty_points;
-
-        $chunk_review_model = $this->createChunkReviewModel($this->chunk_review);
-
-        if($penaltyPointDiff < 0){
-            $chunk_review_model->subtractPenaltyPoints(-$penaltyPointDiff, $this->project, $this->actingUser);
-        } elseif($penaltyPointDiff > 0){
-            $chunk_review_model->addPenaltyPoints($penaltyPointDiff, $this->project, $this->actingUser);
-        }
-
-        return $this->issue;
-    }
-
-
-    /**
      * Inserts the struct in database and updates review result
      *
      * @return EntryStruct

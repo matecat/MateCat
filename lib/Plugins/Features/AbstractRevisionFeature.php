@@ -360,10 +360,19 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     public function projectCompletionEventSaved(ProjectCompletionEventSavedEvent $event): void
     {
-        // The event stays a pure notification and must NOT carry an IDatabase handle; the feature
-        // itself carries one (set by FeatureSet::dispatch), so source the db from getDatabase().
-        $model = new QualityReportModel($event->chunk, $this->getDatabase());
-        $model->resetScore($event->completionEventId);
+        $this->createQualityReportModel($event->chunk)->resetScore($event->completionEventId);
+    }
+
+    /**
+     * The event stays a pure notification and must NOT carry an IDatabase handle; the feature
+     * itself carries one (set by FeatureSet::dispatch), so source the db from getDatabase().
+     *
+     * Kept as a seam so a test can observe the reset instead of only the exception it used to
+     * raise against an unseeded chunk.
+     */
+    protected function createQualityReportModel(JobStruct $chunk): QualityReportModel
+    {
+        return new QualityReportModel($chunk, $this->getDatabase());
     }
 
     /**
@@ -405,7 +414,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
                 'undo_data'
             ]
         ]);
-        $chunkReviewDao->destroyCachesFor($review);
+        $this->getDatabase()->onCommit(static fn() => $chunkReviewDao->destroyCachesFor($review));
 
         LoggerFactory::doJsonLog("CompletionEventController deleting event: " . var_export($struct->getArrayCopy(), true));
     }

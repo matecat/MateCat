@@ -839,11 +839,24 @@ class ChunkReviewDaoTest extends AbstractTest
         $this->assertNull($result);
     }
 
+    /**
+     * createRecord() reads the row back rather than trusting lastInsertId(), which is 0 whenever
+     * ON DUPLICATE KEY UPDATE took the update branch.
+     */
     #[Test]
-    public function instanceCreateRecordReturnsStructWithInsertedId(): void
+    public function instanceCreateRecordReturnsTheRowItWroteBack(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
-        $this->pdoStub->method('lastInsertId')->willReturn('42');
+        $this->stmtStub->method('fetchAll')->willReturn([
+            new ChunkReviewStruct([
+                'id'              => 42,
+                'id_project'      => 1,
+                'id_job'          => 2,
+                'password'        => 'test_pw',
+                'review_password' => 'rev_pw',
+                'source_page'     => 2,
+            ]),
+        ]);
 
         $data = [
             'id_project'      => 1,
@@ -868,7 +881,17 @@ class ChunkReviewDaoTest extends AbstractTest
     public function instanceCreateRecordSetsDefaultReviewPasswordWhenNull(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
-        $this->pdoStub->method('lastInsertId')->willReturn('43');
+        $this->stmtStub->method('fetchAll')->willReturnCallback(
+            // Echo back whatever setDefaults() generated, the way the database would.
+            fn() => [new ChunkReviewStruct([
+                'id'              => 43,
+                'id_project'      => 1,
+                'id_job'          => 2,
+                'password'        => 'test_pw',
+                'review_password' => 'generated_rev_pw',
+                'source_page'     => 2,
+            ])]
+        );
 
         $data = [
             'id_project'  => 1,
@@ -939,5 +962,73 @@ class ChunkReviewDaoTest extends AbstractTest
 
         $dao = new ChunkReviewDao($injectedDb);
         $dao->updatePassword(1, 'old', 'new');
+    }
+
+    // ── lockByJobId ──
+
+    /**
+     * The guard is load-bearing: under autocommit, FOR UPDATE takes the row locks and drops them
+     * again as soon as the statement returns, so the caller would look protected while protecting
+     * nothing. There is a real-SQL sibling for this, but it needs a live database — this one runs
+     * on every suite invocation.
+     */
+    #[Test]
+    public function lockByJobIdThrowsOutsideATransaction(): void
+    {
+        $dao = new ChunkReviewDao($this->dbStub);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('requires an open transaction');
+        $dao->lockByJobId(123);
+    }
+
+    /**
+     * The guard has to fire *before* the SELECT is issued. If it merely threw afterwards the locks
+     * would already have been taken and dropped, which is the exact failure it exists to prevent.
+     */
+    #[Test]
+    public function lockByJobIdDoesNotIssueTheSelectWhenTheGuardFires(): void
+    {
+        $pdo = $this->createMock(PDO::class);
+        $pdo->method('inTransaction')->willReturn(false);
+        $pdo->expects($this->never())->method('prepare');
+
+        $db = $this->createStub(IDatabase::class);
+        $db->method('getConnection')->willReturn($pdo);
+
+        $this->expectException(\RuntimeException::class);
+        (new ChunkReviewDao($db))->lockByJobId(123);
+    }
+
+    /**
+     * Pins the two properties the whole design rests on: the lock is keyed on id_job (split/merge
+     * deletes and recreates the rows, so no stable row id exists) and it is FOR UPDATE, so InnoDB
+     * holds it until the transaction ends.
+     */
+    #[Test]
+    public function lockByJobIdIssuesASelectForUpdateOnIdJob(): void
+    {
+        $capturedSql = null;
+
+        $stmt = $this->createStub(PDOStatement::class);
+        $stmt->queryString = '';
+        $stmt->method('execute')->willReturn(true);
+
+        $pdo = $this->createStub(PDO::class);
+        $pdo->method('inTransaction')->willReturn(true);
+        $pdo->method('prepare')->willReturnCallback(function (string $sql) use (&$capturedSql, $stmt) {
+            $capturedSql = $sql;
+
+            return $stmt;
+        });
+
+        $db = $this->createStub(IDatabase::class);
+        $db->method('getConnection')->willReturn($pdo);
+
+        (new ChunkReviewDao($db))->lockByJobId(123);
+
+        $this->assertStringContainsString('qa_chunk_reviews', (string)$capturedSql);
+        $this->assertStringContainsString('id_job = :id_job', (string)$capturedSql);
+        $this->assertStringContainsString('FOR UPDATE', (string)$capturedSql);
     }
 }

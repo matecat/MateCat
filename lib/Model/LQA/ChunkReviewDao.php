@@ -180,11 +180,75 @@ class ChunkReviewDao extends AbstractDao
      * standing consistency check and the batch repair CLI task — both need the same identity
      * (id, id_job, password, source_page) plus the recorded vs. actual values for reporting.
      *
+     * @param int|null $minJobId Only consider jobs above this id. A starting watermark, not a cap.
+     * @param int|null $limit    Maximum rows to return; null is unbounded. Anything that renders the
+     *                           result — a console table, an alert email — should pass one and report
+     *                           countPenaltyPointsMismatches() as the total, or a first run after
+     *                           deploy can emit an unbounded report.
+     *
      * @return array<int, array{id:int,id_job:int,password:string,source_page:int,recorded_penalty_points:float,actual_penalty_points:float}>
      * @throws PDOException
      */
-    public function findPenaltyPointsMismatches(?int $minJobId = null): array
+    public function findPenaltyPointsMismatches(?int $minJobId = null, ?int $limit = null): array
     {
+        [$sql, $parameters] = $this->penaltyPointsMismatchesQuery($minJobId);
+
+        $sql .= " ORDER BY r.id_job, r.source_page";
+
+        // Interpolated, not bound: execute() with an array binds every value as a string, which turns
+        // LIMIT into LIMIT '50' and a syntax error. The int cast is the injection guard. Same shape as
+        // ProjectDao::getProjectsByUser().
+        if ($limit !== null) {
+            $sql .= " LIMIT " . (int)$limit;
+        }
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($parameters);
+
+        /** @var array<int, array{id:int,id_job:int,password:string,source_page:int,recorded_penalty_points:float,actual_penalty_points:float}> $rows */
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $rows;
+    }
+
+    /**
+     * How many rows findPenaltyPointsMismatches() would return unbounded.
+     *
+     * Lets a caller render a page of the drift while still reporting the true total, so a capped
+     * alert email reads "showing 50 of 812" instead of quietly looking like the whole picture. Built
+     * from the same predicate as the page so the count and the page can never disagree.
+     *
+     * @throws PDOException
+     */
+    public function countPenaltyPointsMismatches(?int $minJobId = null): int
+    {
+        [$inner, $parameters] = $this->penaltyPointsMismatchesQuery($minJobId);
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM ( " . $inner . " ) mismatches");
+        $stmt->execute($parameters);
+
+        return (int)$stmt->fetchColumn();
+    }
+
+    /**
+     * The shared body of the drift query: every qa_chunk_reviews row whose recorded penalty_points
+     * disagrees with the live SUM(qa_entries.penalty_points) for the same chunk and source_page.
+     *
+     * @param int|null $minJobId Only consider jobs above this id. A starting watermark, not a cap.
+     *
+     * @return array{0: string, 1: array<string, int>}
+     */
+    private function penaltyPointsMismatchesQuery(?int $minJobId): array
+    {
+        // ABS(difference) rather than ROUND(a,2) != ROUND(b,2): penalty_points is double(20,2) in
+        // production, one side accumulates incrementally while the other comes from a single SUM(),
+        // and two logically equal values can therefore differ in the last bits. ROUND() returns a
+        // DOUBLE, so comparing rounded values is still a float comparison and a hair of residue is
+        // enough to report a row as drifted — which the repair cannot settle, because it writes the
+        // sum and the column rounds it back, so the row is flagged again on the next scan. 0.005 is
+        // half the smallest storable unit at 2dp, i.e. "differs by at least one storable cent".
         $sql = "SELECT
                 r.id,
                 r.id_job,
@@ -202,18 +266,9 @@ class ChunkReviewDao extends AbstractDao
                 AND e.deleted_at IS NULL
             " . ($minJobId !== null ? "WHERE r.id_job > :min_job_id " : "") . "
             GROUP BY r.id
-            HAVING ROUND(actual_penalty_points, 2) != ROUND(recorded_penalty_points, 2)
-            ORDER BY r.id_job, r.source_page
-        ";
+            HAVING ABS(actual_penalty_points - recorded_penalty_points) > 0.005";
 
-        $conn = $this->database->getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->execute($minJobId !== null ? ['min_job_id' => $minJobId] : []);
-
-        /** @var array<int, array{id:int,id_job:int,password:string,source_page:int,recorded_penalty_points:float,actual_penalty_points:float}> $rows */
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        return $rows;
+        return [$sql, $minJobId !== null ? ['min_job_id' => $minJobId] : []];
     }
 
     /**
@@ -542,10 +597,14 @@ class ChunkReviewDao extends AbstractDao
 
     /**
      * Invalidates every Redis-cached read that can serve a stale penalty_points/is_pass/
-     * counters value for this chunk review. None of the counter/pass-fail write paths
-     * (passFailCountsAtomicUpdate, or updateStruct as used by recountAndUpdatePassFailResult/
-     * resetScore/alterChunkReviewStruct) bust these caches on their own, so callers that mutate
-     * a chunk review's counters must call this afterward.
+     * counters value for this chunk review.
+     *
+     * Always schedule this through IDatabase::onCommit() rather than calling it inline. Busting
+     * while the writing transaction is still open lets a concurrent reader miss the cache, read the
+     * pre-commit row and repopulate from it — and that stale value then outlives the commit for the
+     * full TTL. The DAO's own mutators (createRecord, deleteByJobId) already defer it this way;
+     * callers that mutate counters through updateStruct or passFailCountsAtomicUpdate must do the
+     * same.
      *
      * @throws PDOException
      * @throws ReflectionException
@@ -609,6 +668,8 @@ class ChunkReviewDao extends AbstractDao
      *
      * @return ChunkReviewStruct
      * @throws PDOException
+     * @throws ReflectionException
+     * @throws RuntimeException if the row cannot be read back after the write
      * @throws TypeError
      */
     public function createRecord(array $data): ChunkReviewStruct
@@ -647,37 +708,81 @@ class ChunkReviewDao extends AbstractDao
         $stmt = $conn->prepare($sql);
         $stmt->execute($attrs);
 
-        $struct->id = (int)$conn->lastInsertId();
+        // Not lastInsertId(): when ON DUPLICATE KEY UPDATE takes the *update* branch MySQL leaves
+        // LAST_INSERT_ID() at 0 (or at a value left by an earlier statement on this connection), so
+        // the caller got id 0 or someone else's id for an existing chunk review. That id then flows
+        // into recountAndUpdatePassFailResult() — whose updateStruct keys on the primary key and so
+        // silently updates nothing — and into passFailCountsAtomicUpdate(), where an unmatched id
+        // takes the insert branch and creates a duplicate row. Both branches leave exactly one row
+        // identified by job_pw_source_page, so read it back; the lookup is uncached, so it sees the
+        // row this statement just wrote inside the caller's transaction.
+        $struct = $this->findByIdJobAndPasswordAndSourcePage(
+            $struct->id_job,
+            $struct->password,
+            $struct->source_page
+        ) ?? throw new RuntimeException('qa_chunk_reviews row not found after createRecord for job ' . $struct->id_job);
+
+        // A new row changes what findChunkReviews()/getByProjectId() should return.
+        $this->database->onCommit(fn() => $this->destroyCachesFor($struct));
 
         return $struct;
     }
 
     /**
      * @throws PDOException
+     * @throws ReflectionException
      */
     public function deleteByJobId(int $id_job): bool
     {
+        // Read the rows before deleting them: their password/source_page are what identify the cache
+        // keys, and after the DELETE there is nothing left to derive them from. This is the worst
+        // staleness case in the system otherwise — split/merge deletes a job's chunk reviews while
+        // the 10-minute ProjectUrls cache keeps serving revise URLs built from review_passwords that
+        // no longer exist. The read is free of new locking: split/merge already holds these rows.
+        $rows = $this->findByIdJob($id_job);
+
         $sql = "DELETE FROM qa_chunk_reviews WHERE id_job = :id_job ";
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
 
-        return $stmt->execute(['id_job' => $id_job]);
+        $deleted = $stmt->execute(['id_job' => $id_job]);
+
+        foreach ($rows as $row) {
+            $this->database->onCommit(fn() => $this->destroyCachesFor($row));
+        }
+
+        return $deleted;
     }
 
     /**
      * Serializes every writer of a job's qa_chunk_reviews rows by taking InnoDB row locks on them,
      * held until the surrounding transaction commits or rolls back.
      *
-     * This replaces the previous Redis advisory lock (ChunkReviewJobLock), which released in a
-     * `finally` block while the caller's transaction was still open — so a second process could
-     * enter the critical section, read state that did not include the uncommitted change, and write
-     * an absolute value over it. Locking the rows themselves ties the release to the commit, covers
-     * every writer automatically, and has no fail-open path.
+     * This replaces a Redis advisory lock, which released in a `finally` block while the caller's
+     * transaction was still open — so a second process could enter the critical section, read state
+     * that did not include the uncommitted change, and write an absolute value over it. Locking the
+     * rows themselves ties the release to the commit, covers every writer automatically, and has no
+     * fail-open path.
      *
-     * Deliberately locks by id_job rather than by row id: split/merge deletes all of a job's rows
-     * and recreates them, so there is no stable row to lock. Under REPEATABLE READ the id_job index
-     * range also gap-locks, which blocks concurrent inserts into the same job — including the
-     * recreate window — not just updates to rows that already exist.
+     * Deliberately locks by id_job rather than by row id: split/merge deletes all of a job's rows and
+     * recreates them, so there is no stable row to lock.
+     *
+     * REQUIRES REPEATABLE READ. That is InnoDB's default and what this installation runs, but nothing
+     * in lib/, inc/ or INSTALL/ sets or asserts it, so the requirement is stated here. The gap lock on
+     * the id_job index range is what covers the recreate window: while the job's rows are deleted the
+     * SELECT matches nothing, so there are no record locks to take, and the gap lock is the only thing
+     * standing between two concurrent recreates. READ COMMITTED disables gap locking, so the same
+     * SELECT would lock nothing and still return success — this method would degrade to a silent
+     * no-op precisely in the window it exists to protect. Do not lower the isolation level to relieve
+     * contention here without first replacing this with a lock on a row that always exists, e.g.
+     * SELECT id FROM jobs WHERE id = :id_job FOR UPDATE, which takes a real record lock at any
+     * isolation level. (That swap is not free either: it would put `jobs` at the head of this lock
+     * chain while BatchReviewProcessor::updateJobWordCounter() writes `jobs` at its tail, turning a
+     * single-table lock graph into a cross-table one.)
+     *
+     * Lock order, repo-wide: qa_chunk_reviews before qa_entries, always. TranslationIssueModel and
+     * BatchReviewProcessor both take this lock before touching qa_entries; acquiring in the opposite
+     * order deadlocks against them.
      *
      * @throws PDOException
      * @throws RuntimeException if called outside a transaction, where FOR UPDATE would acquire the
@@ -694,8 +799,11 @@ class ChunkReviewDao extends AbstractDao
             );
         }
 
-        // ORDER BY id so concurrent callers walk the rows in the same order and cannot deadlock
-        // by grabbing the same set from opposite ends.
+        // The KEY id_job range scan visits the job's rows in primary-key order, and every caller uses
+        // the same predicate, so they all lock the same set in the same order — that is what rules out
+        // grabbing it from opposite ends. The ORDER BY only makes that order explicit in the
+        // statement; it does not control acquisition, which happens during the scan as rows are read,
+        // before any sort could be applied.
         $stmt = $conn->prepare("SELECT id FROM qa_chunk_reviews WHERE id_job = :id_job ORDER BY id FOR UPDATE");
         $stmt->execute(['id_job' => $id_job]);
         $stmt->fetchAll();
@@ -735,14 +843,23 @@ class ChunkReviewDao extends AbstractDao
             $setClauses[] = "is_pass = IF( COALESCE( penalty_points / reviewed_words_count * 1000, 0 ) <= {$forcePassAt}, 1, 0 )";
         }
 
+        // source_page is written on the insert branch but deliberately absent from $setClauses: on the
+        // update branch the row already carries the right value, and rewriting it there could
+        // re-identify an existing row into a different review stage. Omitting it from the INSERT left
+        // genuine inserts with source_page = NULL, which (a) exempts them from
+        // UNIQUE KEY job_pw_source_page, since MySQL treats every NULL as distinct, and (b) makes the
+        // drift detector's `e.source_page = r.source_page` join match nothing, so the row reports as
+        // drifted on every scan and no recount can ever clear it. No GREATEST(): it is an identity,
+        // not a counter.
         $sql = "INSERT INTO
-            qa_chunk_reviews ( id, id_job, id_project, password, review_password, penalty_points, reviewed_words_count, total_tte )
+            qa_chunk_reviews ( id, id_job, id_project, password, review_password, source_page, penalty_points, reviewed_words_count, total_tte )
         VALUES(
             :id,
             :id_job,
             :id_project,
             :password,
             :review_password,
+            :source_page,
             GREATEST( :penalty_points, 0 ),
             GREATEST( :reviewed_words_count, 0 ),
             GREATEST( :total_tte, 0 )
@@ -758,6 +875,7 @@ class ChunkReviewDao extends AbstractDao
             'id_job' => $chunkReview->id_job,
             'id_project' => $chunkReview->id_project,
             'review_password' => $chunkReview->review_password,
+            'source_page' => $chunkReview->source_page,
             'password' => $chunkReview->password,
             'penalty_points' => $penaltyPoints,
             'reviewed_words_count' => $data['reviewed_words_count'],

@@ -150,7 +150,15 @@ class ChunkReviewModel implements IChunkReviewModel
         $chunkReviewDao->lockByJobId((int)$this->chunk_review->id_job);
 
         $chunkReviewDao->passFailCountsAtomicUpdate((int)$this->chunk_review->id, $data);
-        $chunkReviewDao->destroyCachesFor($this->chunk_review);
+
+        // Deferred past the commit for two reasons. Correctness: busting while the transaction is
+        // still open lets a concurrent reader repopulate the cache from the pre-commit row, and that
+        // stale value then outlives the commit for the whole TTL — the same "displayed score is
+        // wrong" symptom this PR exists to fix, moved from the database into Redis. Lock hold time:
+        // these are three Redis round trips, and until now they ran with the job-wide row locks held
+        // on the highest-volume write path in the product.
+        $chunkReview = $this->chunk_review;
+        $this->database->onCommit(static fn() => $chunkReviewDao->destroyCachesFor($chunkReview));
 
         FeatureSet::forProject($project, $this->database)->dispatch(new ChunkReviewUpdatedEvent(
             $this->chunk_review,
@@ -202,12 +210,14 @@ class ChunkReviewModel implements IChunkReviewModel
         $this->chunk_review->reviewed_words_count = $chunkReviewDao->getReviewedWordsCountForSecondPass($this->chunk, $this->chunk_review->source_page);
         $this->chunk_review->total_tte = $chunkReviewDao->countTimeToEdit($this->chunk, $this->chunk_review->source_page);
 
+        // No LQA model means no pass/fail verdict, and NULL is how that third state is already
+        // represented: is_pass is a nullable tinyint, and QualitySummary reads NULL as "no score"
+        // rather than as a failure. This used to write true, asserting a verdict that was never
+        // computed and making a model-less chunk indistinguishable from a genuinely passing one --
+        // while passFailCountsAtomicUpdate(), the high-volume delta writer, left the same case NULL.
+        // Assigned rather than skipped, so rows carrying a stale 1 converge on the next recount.
         $lqaModel = $project->id_qa_model !== null ? (new ModelDao($this->database))->findById($project->id_qa_model) : null;
-        if ($lqaModel) {
-            $this->chunk_review->is_pass = ($this->getScore() <= $this->getQALimit($lqaModel));
-        } else {
-            $this->chunk_review->is_pass = true;
-        }
+        $this->chunk_review->is_pass = $lqaModel !== null ? ($this->getScore() <= $this->getQALimit($lqaModel)) : null;
 
         $chunkReviewDao = new ChunkReviewDao($this->database);
         $update_result = $chunkReviewDao->updateStruct($this->chunk_review, [
@@ -219,8 +229,12 @@ class ChunkReviewModel implements IChunkReviewModel
                 ]
             ]
         );
-        $chunkReviewDao->destroyCachesFor($this->chunk_review);
+        $chunkReview = $this->chunk_review;
+        $this->database->onCommit(static fn() => $chunkReviewDao->destroyCachesFor($chunkReview));
 
+        // Dispatched inside the transaction on purpose, unlike the cache bust above: a plugin
+        // listener may write rows that have to be atomic with this counter update, so deferring the
+        // dispatch past the commit would quietly break that guarantee.
         // External call by Plugins
         FeatureSet::forProject($project, $this->database)->dispatch(new ChunkReviewUpdatedEvent(
             $this->chunk_review,

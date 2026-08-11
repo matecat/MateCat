@@ -198,65 +198,6 @@ class TranslationIssueModelTest extends AbstractTest
         $model->save();
     }
 
-    // ─── editFrom ────────────────────────────────────────────────
-
-    #[Test]
-    public function editFromCallsModifyEntryAndReturnsIssue(): void
-    {
-        $issue = $this->makeIssue(['penalty_points' => 5.0]);
-        $oldStruct = $this->makeIssue(['penalty_points' => 5.0]);
-
-        $this->entryDao->expects($this->once())
-            ->method('modifyEntry')
-            ->with($issue);
-
-        $model = $this->makeModel($issue);
-        $result = $model->editFrom($oldStruct);
-
-        $this->assertSame($issue, $result);
-    }
-
-    #[Test]
-    public function editFromAddsPointsWhenPenaltyIncreased(): void
-    {
-        $issue = $this->makeIssue(['penalty_points' => 8.0]);
-        $oldStruct = $this->makeIssue(['penalty_points' => 5.0]);
-
-        $this->chunkReviewModel->expects($this->once())
-            ->method('addPenaltyPoints')
-            ->with(3.0, $this->project);
-
-        $model = $this->makeModel($issue);
-        $model->editFrom($oldStruct);
-    }
-
-    #[Test]
-    public function editFromSubtractsPointsWhenPenaltyDecreased(): void
-    {
-        $issue = $this->makeIssue(['penalty_points' => 2.0]);
-        $oldStruct = $this->makeIssue(['penalty_points' => 5.0]);
-
-        $this->chunkReviewModel->expects($this->once())
-            ->method('subtractPenaltyPoints')
-            ->with(3.0, $this->project);
-
-        $model = $this->makeModel($issue);
-        $model->editFrom($oldStruct);
-    }
-
-    #[Test]
-    public function editFromSkipsPenaltyUpdateWhenNoDiff(): void
-    {
-        $issue = $this->makeIssue(['penalty_points' => 5.0]);
-        $oldStruct = $this->makeIssue(['penalty_points' => 5.0]);
-
-        $this->chunkReviewModel->expects($this->never())->method('addPenaltyPoints');
-        $this->chunkReviewModel->expects($this->never())->method('subtractPenaltyPoints');
-
-        $model = $this->makeModel($issue);
-        $model->editFrom($oldStruct);
-    }
-
     // ─── save with diff ────────────────────────────────────────────
 
     #[Test]
@@ -295,26 +236,6 @@ class TranslationIssueModelTest extends AbstractTest
         $model = $this->makeModel($issue);
         $model->setDiff(['changed' => 'content']);
         $model->save();
-    }
-
-    // ─── editFrom with diff ─────────────────────────────────────
-
-    #[Test]
-    public function editFromCallsSaveDiffWhenDiffIsSet(): void
-    {
-        $issue = $this->makeIssue(['penalty_points' => 5.0]);
-        $oldStruct = $this->makeIssue(['penalty_points' => 5.0]);
-
-        $this->translationVersionDao->expects($this->once())
-            ->method('getVersionNumberForTranslation')
-            ->willReturn(false);
-
-        $this->translationVersionDao->expects($this->once())
-            ->method('insertStruct');
-
-        $model = $this->makeModel($issue);
-        $model->setDiff(['some' => 'diff']);
-        $model->editFrom($oldStruct);
     }
 
     // ─── delete ──────────────────────────────────────────────────
