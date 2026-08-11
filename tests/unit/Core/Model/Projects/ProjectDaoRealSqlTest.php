@@ -407,7 +407,7 @@ class ProjectDaoRealSqlTest extends AbstractTest
         self::assertSame($p['name'], $rows[0]['name']);
     }
 
-    public function testGetProjectDataWithJobAndPasswordFilters(): void
+    public function testGetProjectDataWithProjectPasswordFilter(): void
     {
         $p = $this->project();
         $f = $this->fixtures->makeFile($p['id']);
@@ -416,7 +416,7 @@ class ProjectDaoRealSqlTest extends AbstractTest
         $this->fixtures->makeFilesJob($j['id'], $f['id']);
         $this->fixtures->makeSegmentTranslation($seg['id'], $j['id']);
 
-        $rows = $this->dao->getProjectData($p['id'], $p['password'], $j['id'], $j['password']);
+        $rows = $this->dao->getProjectData($p['id'], $p['password']);
 
         self::assertNotEmpty($rows);
     }
