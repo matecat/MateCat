@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
 use Model\FeaturesBase\Hook\Event\Run\ReviewPasswordChangedEvent;
+use Model\Jobs\JobCredentialCacheInvalidator;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
@@ -148,25 +149,16 @@ class ChangePasswordController extends KleinController
                     ->dispatch(new ReviewPasswordChangedEvent($id, $actual_pwd, $new_password, $revision_number));
             }
 
-            // Invalidate every ChunkReviewDao read keyed on a job credential, for the password that
-            // was replaced and for the one replacing it: changing a password has to shut the editor
-            // on the previous link straight away, not when the cache expires.
-            $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
-            $chunkReviewDao->destroyCacheForJobPassword($id, $actual_pwd);
-            $chunkReviewDao->destroyCacheForJobPassword($id, $new_password);
-
-            // The chunk rows carry the review passwords, so the entry keyed on the job password is
-            // stale after a review password rotation as well.
-            $chunkReviewDao->destroyCacheForFindChunkReviews($jStruct);
-
-            // invalidate cache for ProjectData, which embeds the job passwords
-            $pDao = new ProjectDao($this->getDatabase());
-            $projectId = $jStruct->getProject($pDao)->id ?? throw new Exception('Project not found');
-            $pDao->destroyCacheForProjectData($projectId);
-            $pDao->destroyCacheForProjectData($projectId, $jStruct->getProject($pDao)->password);
-            $pDao->destroyFetchByIdCache($jStruct->getProject($pDao)->id, ProjectStruct::class);
-
             $this->getDatabase()->commit();
+
+            // Every credential-keyed read is evicted only now: changing a password has to shut the
+            // editor on the previous link straight away, and an eviction run before the commit
+            // would be undone by any concurrent request still resolving against the old row.
+            (new JobCredentialCacheInvalidator(
+                $jDao,
+                new ChunkReviewDao($this->getDatabase()),
+                new ProjectDao($this->getDatabase())
+            ))->sweepAfterRotation($jStruct, $actual_pwd, $new_password);
         }
     }
 
