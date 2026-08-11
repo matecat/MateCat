@@ -728,31 +728,6 @@ class CatUtilsTest extends AbstractTest
     }
 
     // -------------------------------------------------------------------------
-    // getIsRevisionFromRequestUri
-    // -------------------------------------------------------------------------
-
-    #[Test]
-    public function testGetIsRevisionFromRequestUriNotSetReturnsFalseL(): void
-    {
-        $cat = new CatUtils($this->dbStub, []);
-        $this->assertFalse($cat->getIsRevisionFromRequestUri());
-    }
-
-    #[Test]
-    public function testGetIsRevisionFromRequestUriWithRevisePathReturnsTrueL(): void
-    {
-        $cat = new CatUtils($this->dbStub, ['REQUEST_URI' => '/revise/1/abc/2']);
-        $this->assertTrue($cat->getIsRevisionFromRequestUri());
-    }
-
-    #[Test]
-    public function testGetIsRevisionFromRequestUriWithTranslatePathReturnsFalseL(): void
-    {
-        $cat = new CatUtils($this->dbStub, ['REQUEST_URI' => '/translate/1/abc/2']);
-        $this->assertFalse($cat->getIsRevisionFromRequestUri());
-    }
-
-    // -------------------------------------------------------------------------
     // segment_raw_word_count
     // -------------------------------------------------------------------------
 
@@ -1139,18 +1114,6 @@ class CatUtilsTest extends AbstractTest
         ];
         $result = CatUtils::fetchStatus(20, $results, TranslationStatus::STATUS_NEW);
         $this->assertEquals(5, $result);
-    }
-
-    /**
-     * getIsRevisionFromRequestUri with URL that has no 'path' component
-     * Covers line 763 (return false when !isset($_from_url['path']))
-     */
-    #[Test]
-    public function testGetIsRevisionFromRequestUriWithUrlWithoutPathL(): void
-    {
-        // 'http://host' → parse_url returns ['scheme'=>'http','host'=>'host'] — no 'path' key
-        $cat = new CatUtils($this->dbStub, ['REQUEST_URI' => 'http://host']);
-        $this->assertFalse($cat->getIsRevisionFromRequestUri());
     }
 
     /**
@@ -1923,21 +1886,6 @@ class CatUtilsTest extends AbstractTest
         $result = $cat->countSegmentRawWords('Hello world', 'en-US');
 
         $this->assertGreaterThan(0, $result);
-    }
-
-    /**
-     * server seam: injected $server array drives getIsRevisionFromRequestUri().
-     * Already covered in the adapted tests above; this duplicate confirms the
-     * constructor seam is the only path (no global $_SERVER fallback when injected).
-     */
-    #[Test]
-    public function testGetIsRevisionFromRequestUriUsesInjectedServer(): void
-    {
-        $catRevise = new CatUtils($this->dbStub, ['REQUEST_URI' => '/revise/1/abc/2']);
-        $catTranslate = new CatUtils($this->dbStub, ['REQUEST_URI' => '/translate/1/abc/2']);
-
-        $this->assertTrue($catRevise->getIsRevisionFromRequestUri());
-        $this->assertFalse($catTranslate->getIsRevisionFromRequestUri());
     }
 
     // -------------------------------------------------------------------------

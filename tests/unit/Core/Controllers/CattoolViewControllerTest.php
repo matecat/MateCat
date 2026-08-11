@@ -21,6 +21,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
 use Utils\Logger\MatecatLogger;
+use Utils\Constants\SourcePages;
 use Utils\Session\ArraySessionStore;
 
 /**
@@ -32,12 +33,31 @@ use Utils\Session\ArraySessionStore;
  */
 class TestableCattoolController extends CattoolController
 {
+    /** @var array<string, mixed> */
+    public array $capturedViewParams = [];
+    public string $capturedViewTemplate = '';
+
     public function __construct()
     {
     }
 
     protected function registerValidators(): void
     {
+    }
+
+    /**
+     * The render pipeline cannot complete in a unit checkout, so the variable map is recorded on the
+     * way in: it is the only place the page's answer is observable.
+     *
+     * @param array<string, mixed> $params
+     * @throws \Exception
+     */
+    public function setView(string $template_name, array $params = [], int $code = 200): void
+    {
+        $this->capturedViewTemplate = $template_name;
+        $this->capturedViewParams = $params;
+
+        parent::setView($template_name, $params, $code);
     }
 }
 
@@ -178,51 +198,34 @@ class CattoolViewControllerTest extends AbstractTest
         $this->assertSame('9061', $result['jid']);
     }
 
-    // ─── findJobByIdPasswordAndSourcePage ───
+    // ─── findJobByIdAndPassword ───
 
     #[Test]
-    public function findJobByIdPassword_returns_job_chunk_for_non_revision(): void
+    public function findJobByIdPassword_returns_the_job_chunk_for_the_job_password(): void
     {
-        $result = $this->invokePrivate('findJobByIdPasswordAndSourcePage', [
-            $this->jobId(self::BASE), 'jobpw', 1, false,
-        ]);
+        $result = $this->invokePrivate('findJobByIdAndPassword', [$this->jobId(self::BASE), 'jobpw']);
 
         $this->assertInstanceOf(JobStruct::class, $result->chunk);
         $this->assertSame($this->jobId(self::BASE), $result->chunk->id);
         $this->assertNull($result->chunkReviewStruct);
-        $this->assertFalse($result->isRevision);
     }
 
     #[Test]
-    public function findJobByIdPassword_returns_chunk_review_for_revision(): void
+    public function findJobByIdPassword_returns_the_review_row_for_a_review_password(): void
     {
-        $result = $this->invokePrivate('findJobByIdPasswordAndSourcePage', [
-            $this->jobId(self::BASE), 'revpw', 2, true,
-        ]);
+        $result = $this->invokePrivate('findJobByIdAndPassword', [$this->jobId(self::BASE), 'revpw']);
 
         $this->assertNotNull($result->chunkReviewStruct);
         $this->assertSame($this->chunkReviewId(self::BASE), $result->chunkReviewStruct->id);
-        $this->assertTrue($result->isRevision);
+        $this->assertSame(SourcePages::SOURCE_PAGE_REVISION, $result->chunkReviewStruct->source_page);
     }
 
     #[Test]
-    public function findJobByIdPassword_throws_not_found_for_wrong_job_password(): void
+    public function findJobByIdPassword_throws_not_found_when_no_row_matches_the_password(): void
     {
         $this->expectException(NotFoundException::class);
 
-        $this->invokePrivate('findJobByIdPasswordAndSourcePage', [
-            $this->jobId(self::BASE), 'wrong_pw_zzz', 1, false,
-        ]);
-    }
-
-    #[Test]
-    public function findJobByIdPassword_throws_not_found_for_missing_review_record(): void
-    {
-        $this->expectException(NotFoundException::class);
-
-        $this->invokePrivate('findJobByIdPasswordAndSourcePage', [
-            $this->jobId(self::BASE), 'nonexistent_rev_pw', 99, true,
-        ]);
+        $this->invokePrivate('findJobByIdAndPassword', [$this->jobId(self::BASE), 'wrong_pw_zzz']);
     }
 
     // ─── getActiveEngine ───
@@ -409,6 +412,92 @@ class CattoolViewControllerTest extends AbstractTest
         }
     }
 
+    // ─── phase resolution ───
+
+    #[Test]
+    public function renderView_offers_the_first_revision_password_to_a_translate_url_naming_a_phase(): void
+    {
+        $this->seedSecondRevisionPhase();
+
+        // "revise" is a legal project name, so it is a legal path segment, and the phase deciding which
+        // review password the page publishes used to be read out of the path by an unanchored regex: a
+        // translator asking for this URL was handed the second reviewer's password. The credential is
+        // the job password, so this is the translate page and the link it offers is the first
+        // revision's, whatever the path spells.
+        $params = $this->renderViewFor('/translate/revise/en-it/', 'jobpw');
+
+        $this->assertSame('revpw', $params['review_password']);
+        $this->assertSame(SourcePages::SOURCE_PAGE_TRANSLATE, $params['source_page']);
+    }
+
+    #[Test]
+    public function renderView_resolves_the_phase_from_the_presented_review_password(): void
+    {
+        $this->seedSecondRevisionPhase();
+
+        // The path names the first revision, the credential is the second reviewer's. The phase follows
+        // the credential, the contract the API validators already run on.
+        $params = $this->renderViewFor('/revise/CtrlTestProject/en-it/', 'revpw2');
+
+        $this->assertSame(SourcePages::SOURCE_PAGE_REVISION_2, $params['source_page']);
+        $this->assertSame('revpw2', $params['review_password']);
+    }
+
+    #[Test]
+    public function renderView_serves_not_found_for_a_password_no_row_matches(): void
+    {
+        $this->renderViewFor('/revise2/CtrlTestProject/en-it/', 'no_such_pw_value');
+
+        $this->assertSame('job_not_found.html', $this->controller->capturedViewTemplate);
+    }
+
+    private function seedSecondRevisionPhase(): void
+    {
+        $this->seedChunkReview(
+            self::BASE,
+            'jobpw',
+            'revpw2',
+            SourcePages::SOURCE_PAGE_REVISION_2,
+            $this->secondChunkReviewId(self::BASE)
+        );
+    }
+
+    /**
+     * Drive the whole renderView() body for one URL and credential, and return the variable map it
+     * assembled. The render stage it ends in cannot complete here, which is immaterial: setView() has
+     * already run by then.
+     *
+     * @return array<string, mixed>
+     */
+    private function renderViewFor(string $pathPrefix, string $password): array
+    {
+        $jid = (string)$this->jobId(self::BASE);
+        $previousUri = $_SERVER['REQUEST_URI'] ?? null;
+        $_SERVER['REQUEST_URI'] = $pathPrefix . $jid . '-' . $password;
+
+        $this->requestStub->paramsNamed()->set('jid', $jid);
+        $this->requestStub->paramsNamed()->set('password', $password);
+
+        try {
+            $this->controller->renderView();
+        } catch (\Throwable) {
+            // the render/decorator pipeline cannot complete in this checkout
+        } finally {
+            if ($previousUri === null) {
+                unset($_SERVER['REQUEST_URI']);
+            } else {
+                $_SERVER['REQUEST_URI'] = $previousUri;
+            }
+        }
+
+        $this->assertNotEmpty(
+            $this->controller->capturedViewParams,
+            'data assembly stopped before setView()'
+        );
+
+        return $this->controller->capturedViewParams;
+    }
+
     /**
      * Invoke a render-helper closure and assert the render stage was reached:
      * the view was set, and render() threw (RenderTerminatedException when the
@@ -438,10 +527,6 @@ class CattoolViewControllerTest extends AbstractTest
      */
     private function loadSeededJob(): JobStruct
     {
-        $result = $this->invokePrivate('findJobByIdPasswordAndSourcePage', [
-            $this->jobId(self::BASE), 'jobpw', 1, false,
-        ]);
-
-        return $result->chunk;
+        return $this->invokePrivate('findJobByIdAndPassword', [$this->jobId(self::BASE), 'jobpw'])->chunk;
     }
 }

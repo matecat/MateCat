@@ -65,19 +65,15 @@ class CatUtils
     protected JobDao $jobDao;
     protected SegmentTranslationDao $segmentTranslationDao;
     protected FeatureSet $featureSet;
-    /** @var array<string, mixed> */
-    private array $serverGlobalVars;
 
     /**
      * @param IDatabase $database
-     * @param array<string, mixed>|null $serverGlobalVars
      *
      * @throws Exception
      */
-    public function __construct(IDatabase $database, ?array $serverGlobalVars = null)
+    public function __construct(IDatabase $database)
     {
         $this->database = $database;
-        $this->serverGlobalVars = $serverGlobalVars ?? $_SERVER;
         $this->chunkReviewDao = new ChunkReviewDao($database);
         $this->jobDao = new JobDao($database);
         $this->segmentTranslationDao = new SegmentTranslationDao($database);
@@ -827,34 +823,6 @@ class CatUtils
         } catch (Exception) {
             return false;
         }
-    }
-
-    /**
-     * @return bool
-     */
-    public function getIsRevisionFromRequestUri(): bool
-    {
-        if (!isset($this->serverGlobalVars['REQUEST_URI'])) {
-            return false;
-        }
-
-        $_from_url = parse_url($this->serverGlobalVars['REQUEST_URI']);
-
-        if ($_from_url === false || !isset($_from_url['path'])) {
-            return false;
-        }
-
-        return self::isARevisePath($_from_url['path']);
-    }
-
-    /**
-     * @param string $path
-     *
-     * @return bool
-     */
-    private static function isARevisePath(string $path): bool
-    {
-        return str_starts_with($path, "/revise");
     }
 
     /**
