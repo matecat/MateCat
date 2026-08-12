@@ -450,7 +450,7 @@ class ConversionHandler
             }
 
             $this->result->setErrorCode($code);
-            $this->result->setErrorMessage("Zip error: " . $e->getMessage());
+            $this->result->setErrorMessage("ZIP error: " . $e->getMessage());
 
             return [];
         }

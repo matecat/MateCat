@@ -203,7 +203,7 @@ class ProjectModel
         });
 
         if (empty($found)) {
-            throw new AuthorizationError("Not Authorized", 403);
+            throw new AuthorizationError("Not authorized", 403);
         }
 
         $uid = $this->user->uid ?? throw new AuthorizationError("User UID must not be null", 403);

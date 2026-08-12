@@ -313,7 +313,7 @@ class MemoryKeyDaoTest extends AbstractTest
         $struct = new MemoryKeyStruct(['uid' => 123]);
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Invalid Key value');
+        $this->expectExceptionMessage('Invalid key value');
         $this->dao->atomicUpdate($struct);
     }
 
@@ -360,7 +360,7 @@ class MemoryKeyDaoTest extends AbstractTest
         $struct->tm_key = new TmKeyStruct(['key' => 'abc']);
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Invalid Uid');
+        $this->expectExceptionMessage('Invalid UID');
         $this->dao->delete($struct);
     }
 
@@ -370,7 +370,7 @@ class MemoryKeyDaoTest extends AbstractTest
         $struct = new MemoryKeyStruct(['uid' => 123]);
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Invalid Key value');
+        $this->expectExceptionMessage('Invalid key value');
         $this->dao->delete($struct);
     }
 
@@ -381,7 +381,7 @@ class MemoryKeyDaoTest extends AbstractTest
         $struct->tm_key = new TmKeyStruct();
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Invalid Key value');
+        $this->expectExceptionMessage('Invalid key value');
         $this->dao->delete($struct);
     }
 
@@ -416,7 +416,7 @@ class MemoryKeyDaoTest extends AbstractTest
         $struct->tm_key = new TmKeyStruct(['key' => 'abc']);
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Invalid Uid');
+        $this->expectExceptionMessage('Invalid UID');
         $this->dao->disable($struct);
     }
 
@@ -426,7 +426,7 @@ class MemoryKeyDaoTest extends AbstractTest
         $struct = new MemoryKeyStruct(['uid' => 123]);
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Invalid Key value');
+        $this->expectExceptionMessage('Invalid key value');
         $this->dao->disable($struct);
     }
 
@@ -460,7 +460,7 @@ class MemoryKeyDaoTest extends AbstractTest
         $struct = new MemoryKeyStruct(['uid' => 123]);
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Invalid Key value');
+        $this->expectExceptionMessage('Invalid key value');
         $this->dao->enable($struct);
     }
 
@@ -533,7 +533,7 @@ class MemoryKeyDaoTest extends AbstractTest
         $struct->tm_key = new TmKeyStruct(['key' => '']);
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Invalid Key value');
+        $this->expectExceptionMessage('Invalid key value');
         $method->invoke($this->dao, $struct);
     }
 }

@@ -338,7 +338,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $owner = (new UserDao($this->getDatabase()))->getByEmail($job->owner);
 
         if($owner === null){
-            throw new AuthorizationError( "Job owner not found. Not Authorized", 401 );
+            throw new AuthorizationError( "Job owner not found. Not authorized", 401 );
         }
 
         if($owner->uid === $loggerUser->uid){
@@ -349,7 +349,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $team = $project->id_team !== null ? (new TeamDao($this->getDatabase()))->findById($project->id_team) : null;
 
         if ($team === null || $team->id === null) {
-            throw new AuthorizationError( "Team not found. Not Authorized", 401 );
+            throw new AuthorizationError( "Team not found. Not authorized", 401 );
         }
 
         $mDao = new MembershipDao($this->getDatabase());
@@ -360,6 +360,6 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             }
         }
 
-        throw new AuthorizationError( "Not Authorized", 401 );
+        throw new AuthorizationError( "Not authorized", 401 );
     }
 }

@@ -341,7 +341,7 @@ class SegmentTranslationDaoTest extends AbstractTest
         $job = $this->makeJobStruct();
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('not allowed to change status to INVALID');
+        $this->expectExceptionMessage('Not allowed to change status to INVALID');
 
         $dao = new SegmentTranslationDao($this->dbStub);
         $dao->getUnchangeableStatus($job, [100], 'INVALID', null);

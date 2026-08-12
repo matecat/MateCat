@@ -290,7 +290,7 @@ class ProjectCreationStatusControllerTest extends AbstractTest
         $this->primeProjectLookup(found: false);
 
         $this->expectException(AuthorizationError::class);
-        $this->expectExceptionMessage('Not Authorized.');
+        $this->expectExceptionMessage('Not authorized.');
 
         $this->controller->get();
     }

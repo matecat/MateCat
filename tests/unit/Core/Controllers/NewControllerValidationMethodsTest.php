@@ -414,7 +414,7 @@ class NewControllerValidationMethodsTest extends AbstractTest
     public function validateEngines_tms_engine_gt_1_throws(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid TM Engine.');
+        $this->expectExceptionMessage('Invalid TM engine.');
         $this->invokeMethod('validateEngines', [2, 0]);
     }
 
@@ -425,7 +425,7 @@ class NewControllerValidationMethodsTest extends AbstractTest
         $userIsLoggedProp->setValue($this->controller, false);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid MT Engine.');
+        $this->expectExceptionMessage('Invalid MT engine.');
         $this->invokeMethod('validateEngines', [0, 2]);
     }
 

@@ -95,7 +95,7 @@ class ActivityLogController extends KleinController
     private function guardProjectTeamMembership(?ProjectStruct $project): void
     {
         if ($project === null || $project->id_team === null) {
-            throw new AuthorizationError('Not Authorized', 401);
+            throw new AuthorizationError('Not authorized', 401);
         }
 
         $teamValidator = new TeamAccessValidator($this);

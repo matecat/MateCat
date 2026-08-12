@@ -261,7 +261,7 @@ class JobSplitMergeService
         string $count_type = ProjectsMetadataMarshaller::SPLIT_EQUIVALENT_WORD_TYPE->value
     ): ArrayObject {
         if ($num_split < 2) {
-            throw new Exception('Minimum Chunk number for split is 2.', -2);
+            throw new Exception('Minimum chunk number for split is 2.', -2);
         }
 
         if (!empty($requestedWordsPerSplit) && count($requestedWordsPerSplit) != $num_split) {

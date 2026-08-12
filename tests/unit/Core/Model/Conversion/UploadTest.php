@@ -455,7 +455,7 @@ class UploadTest extends AbstractTest
         $fakeUpload = $this->makeFakeUpload('malware.exe', 'MZ executable');
 
         $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('File Extension Not Allowed');
+        $this->expectExceptionMessage('File extension not allowed');
         $upload->uploadFiles(['doc' => $fakeUpload]);
     }
 

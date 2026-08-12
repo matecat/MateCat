@@ -264,7 +264,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         $arFiles = explode('@@SEP@@', html_entity_decode($file_name ?: '', ENT_QUOTES, 'UTF-8'));
 
         if (!isset($_COOKIE['upload_token']) || !Utils::isTokenValid($_COOKIE['upload_token'])) {
-            throw new Exception("Invalid Upload Token.", ProjectCreationError::INVALID_UPLOAD_TOKEN->value);
+            throw new Exception("Invalid upload token.", ProjectCreationError::INVALID_UPLOAD_TOKEN->value);
         }
 
         // Build project name from input or fallback:

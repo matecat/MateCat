@@ -180,7 +180,7 @@ class NewController extends KleinController
         $errors = $projectStructure->result['errors'];
 
         if (!empty($errors)) {
-            throw new RuntimeException('Project Creation Failure');
+            throw new RuntimeException('Project creation failure');
         }
 
         $this->response->json([
@@ -425,7 +425,7 @@ class NewController extends KleinController
         ) ?: null;
 
         if ($this->request->files()->isEmpty()) {
-            throw new InvalidArgumentException("Missing file. Not Sent.");
+            throw new InvalidArgumentException("Missing file. Not sent.");
         }
 
         $lang_handler = Languages::getInstance();
@@ -629,7 +629,7 @@ class NewController extends KleinController
 
             if (!$validator->isValid()) {
                 throw new InvalidArgumentException(
-                    'Invalid Metadata. ' . implode(
+                    'Invalid metadata. ' . implode(
                         "",
                         array_map(
                             function ($exception) {
@@ -693,13 +693,13 @@ class NewController extends KleinController
     private function validateEngines(int $tms_engine, int $mt_engine): array
     {
         if ($tms_engine > 1) {
-            throw new InvalidArgumentException("Invalid TM Engine.", -21);
+            throw new InvalidArgumentException("Invalid TM engine.", -21);
         }
 
         $engineStruct = null;
         if ($mt_engine > 1) {
             if (!$this->userIsLogged) {
-                throw new InvalidArgumentException("Invalid MT Engine.", -2);
+                throw new InvalidArgumentException("Invalid MT engine.", -2);
             }
 
             try {
@@ -1090,7 +1090,7 @@ class NewController extends KleinController
 
             // check if qa_model exists
             if (null === $qaModel) {
-                throw new InvalidArgumentException('This QA Model does not exists');
+                throw new InvalidArgumentException('This QA model does not exist');
             }
 
             // check featureSet
@@ -1098,7 +1098,7 @@ class NewController extends KleinController
             $featureSetCodes = $this->getFeatureSet()->getCodes();
 
             if ($qaModelLabel !== 'default' and !in_array($qaModelLabel, $featureSetCodes)) {
-                throw new InvalidArgumentException('This QA Model does not belong to the authenticated user');
+                throw new InvalidArgumentException('This QA model does not belong to the authenticated user');
             }
 
             return $qaModel;

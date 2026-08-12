@@ -158,7 +158,7 @@ class NewControllerDbValidatorsTest extends AbstractTest
         $this->seedQaModelWithHash('CtrlTestModel');
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('This QA Model does not belong to the authenticated user');
+        $this->expectExceptionMessage('This QA model does not belong to the authenticated user');
         $this->invokeMethod('validateQaModel', [(string)$this->qaModelId(self::BASE)]);
     }
 
@@ -169,7 +169,7 @@ class NewControllerDbValidatorsTest extends AbstractTest
     public function validateQaModel_missing_model_throws(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('This QA Model does not exists');
+        $this->expectExceptionMessage('This QA model does not exist');
         // No qa_model seeded for this id.
         $this->invokeMethod('validateQaModel', [(string)$this->qaModelId(self::BASE)]);
     }

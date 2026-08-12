@@ -214,7 +214,7 @@ class GlossaryWorker extends AbstractWorker
             empty($payload['source_language']) ||
             empty($payload['target_language'])
         ) {
-            throw new EndQueueException("Invalid Payload");
+            throw new EndQueueException("Invalid payload");
         }
 
         $keys = [];

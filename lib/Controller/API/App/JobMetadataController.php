@@ -55,7 +55,7 @@ class JobMetadataController extends KleinController
     {
         $project = $chunk->getProject(new ProjectDao($this->getDatabase()));
 
-        return $project->id_team ?? throw new AuthorizationError('Not Authorized', 401);
+        return $project->id_team ?? throw new AuthorizationError('Not authorized', 401);
     }
 
     /**

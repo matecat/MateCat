@@ -105,7 +105,7 @@ class JSONValidatorTest extends AbstractTest
         $error = $validator->getExceptions()[0];
 
         $this->assertFalse($validator->isValid());
-        $this->assertEquals("JSON Validation Error: Too many items in array", $error->getMessage());
+        $this->assertEquals("JSON validation error: Too many items in array", $error->getMessage());
     }
 
     /**

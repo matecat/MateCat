@@ -99,7 +99,7 @@ class GDriveController extends AbstractStatefulKleinController
             $this->sessionStore()->set(Constants::COOKIE_UPLOAD_TOKEN, $guid);
 
             if (!Utils::isTokenValid($guid)) {
-                throw new InvalidArgumentException("Invalid Upload Token.", ConversionHandlerStatus::INVALID_TOKEN);
+                throw new InvalidArgumentException("Invalid upload token.", ConversionHandlerStatus::INVALID_TOKEN);
             }
 
             $this->gdriveUserSession->setConversionParams(

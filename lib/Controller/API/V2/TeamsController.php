@@ -230,7 +230,7 @@ class TeamsController extends KleinController
         $org = $membershipDao->findTeamByIdAndUser($teamId, $this->user);
 
         if (empty($org)) {
-            throw new AuthorizationError("Not Authorized", 401);
+            throw new AuthorizationError("Not authorized", 401);
         }
 
         $org->name = $name;

@@ -200,7 +200,7 @@ class ProjectModelTest extends AbstractTest
         $model->prepareUpdate('id_team', (int)$team->id);
 
         $this->expectException(AuthorizationError::class);
-        $this->expectExceptionMessage('Not Authorized');
+        $this->expectExceptionMessage('Not authorized');
 
         $model->invokeCheckIdTeam();
     }

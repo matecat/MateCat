@@ -659,7 +659,7 @@ class FastAnalysis extends AbstractDaemon
             try {
                 $this->segments = $this->_getSegmentsForFastVolumeAnalysis($pid);
             } catch (PDOException) {
-                throw new Exception("Error Fetching data for Project. Too large. Skip.", self::ERR_TOO_LARGE);
+                throw new Exception("Error fetching data for project. Too large. Skip.", self::ERR_TOO_LARGE);
             }
         }
 
@@ -1380,7 +1380,7 @@ HD;
     ): void
     {
         if (empty($config['pid'])) {
-            throw new Exception('Can Not set a Total without a Queue ID.');
+            throw new Exception('Cannot set a Total without a Queue ID.');
         }
 
         if (!empty($config['total'])) {
