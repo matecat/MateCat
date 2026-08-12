@@ -2,7 +2,6 @@
 
 namespace Matecat\Core\Features\ReviewExtended;
 
-use InvalidArgumentException;
 use Matecat\TestHelpers\AbstractTest;
 use PHPUnit\Framework\Attributes\Test;
 use Plugins\Features\ReviewExtended\ReviewUtils;
@@ -58,29 +57,6 @@ class ReviewUtilsTest extends AbstractTest
     public function sourcePageToTranslationStatus_returnsNullForUnknownSourcePage(): void
     {
         $this->assertNull(ReviewUtils::sourcePageToTranslationStatus(99));
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    // revisionNumberToSourcePage
-    // ─────────────────────────────────────────────────────────────────
-
-    #[Test]
-    public function revisionNumberToSourcePage_returnsOneWhenNumberIsNull(): void
-    {
-        $this->assertSame(1, ReviewUtils::revisionNumberToSourcePage(null));
-    }
-
-    #[Test]
-    public function revisionNumberToSourcePage_returnsOneWhenNumberIsZero(): void
-    {
-        $this->assertSame(1, ReviewUtils::revisionNumberToSourcePage(0));
-    }
-
-    #[Test]
-    public function revisionNumberToSourcePage_returnsNumberPlusOneForPositiveInput(): void
-    {
-        $this->assertSame(2, ReviewUtils::revisionNumberToSourcePage(1));
-        $this->assertSame(3, ReviewUtils::revisionNumberToSourcePage(2));
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -143,25 +119,5 @@ class ReviewUtilsTest extends AbstractTest
         $lqaModel->method('getLimit')->willReturn([10, 20]);
 
         $this->assertSame(20, ReviewUtils::filterLQAModelLimit($lqaModel, 3));
-    }
-
-    /**
-     * The second revision is the last phase that exists, so nothing above it can be a source page.
-     * Without this an arbitrary request parameter became an arbitrary source page.
-     */
-    #[Test]
-    public function revisionNumberToSourcePage_rejectsARevisionNumberBeyondTheKnownPhases(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        ReviewUtils::revisionNumberToSourcePage(3);
-    }
-
-    #[Test]
-    public function revisionNumberToSourcePage_rejectsANegativeRevisionNumber(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        ReviewUtils::revisionNumberToSourcePage(-1);
     }
 }

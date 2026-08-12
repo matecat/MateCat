@@ -13,7 +13,6 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
-use Plugins\Features\ReviewExtended\ReviewUtils;
 use Stomp\Transport\Message;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -413,7 +412,7 @@ class MarkAllSegmentStatusControllerTest extends AbstractTest
      * @throws \Throwable
      */
     #[Test]
-    public function changeSegmentsStatus_enqueuesTheRevisionNumberDerivedFromTheCredential(): void
+    public function changeSegmentsStatus_enqueuesTheSourcePageDerivedFromTheCredential(): void
     {
         $chunk = $this->buildChunk();
         $chunk->setSourcePage(SourcePages::SOURCE_PAGE_REVISION_2);
@@ -454,8 +453,8 @@ class MarkAllSegmentStatusControllerTest extends AbstractTest
         $this->assertIsString($captured);
         $payload = json_decode($captured, true);
         $this->assertSame(
-            ReviewUtils::sourcePageToRevisionNumber(SourcePages::SOURCE_PAGE_REVISION_2),
-            $payload['params']['revision_number']
+            SourcePages::SOURCE_PAGE_REVISION_2,
+            $payload['params']['source_page']
         );
     }
 }

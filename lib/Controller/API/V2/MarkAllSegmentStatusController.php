@@ -15,7 +15,6 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Model\Translations\SegmentTranslationDao;
-use Plugins\Features\ReviewExtended\ReviewUtils;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\BulkSegmentStatusChangeWorker;
 use Utils\Constants\SourcePages;
@@ -67,7 +66,6 @@ class MarkAllSegmentStatusController extends KleinController
          * act in, so a value sent by an older client is ignored.
          */
         $source_page = $this->chunk->getSourcePage() ?: SourcePages::SOURCE_PAGE_TRANSLATE;
-        $revision_number = ReviewUtils::sourcePageToRevisionNumber($source_page);
 
         /*
          * Each of the three bulk statuses belongs to exactly one phase, so a status disagreeing
@@ -108,7 +106,7 @@ class MarkAllSegmentStatusController extends KleinController
                             'destination_status' => $status,
                             'id_user' => ($this->isLoggedIn() ? $this->getUser()->uid : null),
                             'is_review' => ($status == TranslationStatus::STATUS_APPROVED),
-                            'revision_number' => $revision_number
+                            'source_page' => $source_page
                         ], ['persistent' => true]
                     );
                 } catch (Exception $e) {

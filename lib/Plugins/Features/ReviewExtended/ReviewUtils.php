@@ -9,7 +9,6 @@
 namespace Plugins\Features\ReviewExtended;
 
 use Exception;
-use InvalidArgumentException;
 use Model\LQA\ModelStruct;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
@@ -30,31 +29,6 @@ class ReviewUtils
         ];
 
         return empty($number) ? null : ($statuses[$number] ?? null);
-    }
-
-    /**
-     * @deprecated The front-end must not tell the backend which revision level it is on: the phase is
-     *             resolved from the presented password by ChunkPasswordValidator, and every endpoint
-     *             reads it off the chunk review that password matched.
-     *
-     * @param int|null $number
-     *
-     * @return int
-     * @throws InvalidArgumentException When the number does not name an existing revision phase
-     */
-    public static function revisionNumberToSourcePage(?int $number = null): int
-    {
-        if (empty($number)) {
-            return SourcePages::SOURCE_PAGE_TRANSLATE;
-        }
-
-        $sourcePage = $number + 1;
-
-        if ($sourcePage < SourcePages::SOURCE_PAGE_REVISION || $sourcePage > SourcePages::SOURCE_PAGE_REVISION_2) {
-            throw new InvalidArgumentException('Invalid revision number ' . $number);
-        }
-
-        return $sourcePage;
     }
 
     /**
