@@ -790,7 +790,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         $this->data['split_num'] = $explodeIdSegment[1] ?? null;
 
         if (empty($this->data['id_segment'])) {
-            throw new Exception("missing id_segment", -1);
+            throw new Exception("Missing id_segment", -1);
         }
 
         if ($this->isSplittedSegment()) {

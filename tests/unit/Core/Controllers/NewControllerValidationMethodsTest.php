@@ -74,7 +74,7 @@ class NewControllerValidationMethodsTest extends AbstractTest
         $longString = str_repeat('a', 2049);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('metadata string is too long');
+        $this->expectExceptionMessage('Metadata string is too long');
         $this->invokeMethod('validateMetadataParam', [$longString]);
     }
 

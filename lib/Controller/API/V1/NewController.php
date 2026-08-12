@@ -619,7 +619,7 @@ class NewController extends KleinController
     {
         if (!empty($metadata)) {
             if (strlen($metadata) > 2048) {
-                throw new InvalidArgumentException('metadata string is too long');
+                throw new InvalidArgumentException('Metadata string is too long');
             }
 
             $metadata = html_entity_decode($metadata);

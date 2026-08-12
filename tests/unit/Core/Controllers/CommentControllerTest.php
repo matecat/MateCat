@@ -256,7 +256,7 @@ class CommentControllerTest extends AbstractTest
             $this->invokePrivate('validateTheRequest');
             $this->fail('Expected InvalidArgumentException was not thrown');
         } catch (InvalidArgumentException $e) {
-            $this->assertSame('wrong password', $e->getMessage());
+            $this->assertSame('Wrong password', $e->getMessage());
             $this->assertSame(-10, $e->getCode());
         }
     }

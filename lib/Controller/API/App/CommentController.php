@@ -259,7 +259,7 @@ class CommentController extends KleinController
         $job = (new JobDao($this->getDatabase()))->getByIdAndPassword((int)$id_job, (string)$password, 60 * 60 * 24);
 
         if (empty($job)) {
-            throw new InvalidArgumentException("wrong password", -10);
+            throw new InvalidArgumentException("Wrong password", -10);
         }
 
         return [

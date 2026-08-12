@@ -1685,7 +1685,7 @@ class SetTranslationControllerTest extends AbstractTest
         $method = $this->getAccessibleMethod('checkSegmentSplitData');
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('missing id_segment');
+        $this->expectExceptionMessage('Missing id_segment');
         $method->invoke($controller);
     }
 

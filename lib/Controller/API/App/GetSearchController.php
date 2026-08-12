@@ -179,11 +179,11 @@ class GetSearchController extends AbstractStatefulKleinController
             : filter_var($includeLockedParam, FILTER_VALIDATE_BOOLEAN, ['flags' => FILTER_NULL_ON_FAILURE]) ?? true;
 
         if (empty($job)) {
-            throw new InvalidArgumentException("missing id job", -2);
+            throw new InvalidArgumentException("Missing id job", -2);
         }
 
         if (empty($password)) {
-            throw new InvalidArgumentException("missing job password", -3);
+            throw new InvalidArgumentException("Missing job password", -3);
         }
 
         $job = (int)$job;
@@ -339,7 +339,7 @@ class GetSearchController extends AbstractStatefulKleinController
 
             return $searchModel->search($inCurrentChunkOnly);
         } catch (Exception) {
-            throw new RuntimeException("internal error: see the log", -1000);
+            throw new RuntimeException("Internal error: see the log", -1000);
         }
     }
 

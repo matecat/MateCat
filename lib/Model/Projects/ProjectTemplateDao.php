@@ -198,7 +198,7 @@ class ProjectTemplateDao extends AbstractDao
             $targetLanguages = unserialize($projectTemplateStruct->target_language);
 
             if (!is_array($targetLanguages)) {
-                throw new Exception("target language is not an array", 403);
+                throw new Exception("Target language is not an array", 403);
             }
 
             $languages = Languages::getInstance();

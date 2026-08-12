@@ -964,7 +964,7 @@ class SessionTest extends AbstractTest
         $client = $this->createStub(Google_Client::class);
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('conversion params not set');
+        $this->expectExceptionMessage('Conversion params not set');
         $session->importFile('google-file-id', $client);
     }
 

@@ -284,25 +284,25 @@ class GetContributionController extends KleinController
             //in case of user concordance search skip these lines
             //because the segment can be optional
             if (empty($id_segment)) {
-                throw new InvalidArgumentException("missing id_segment", -1);
+                throw new InvalidArgumentException("Missing id_segment", -1);
             }
         }
 
         // Allowing "0" as text
         if (empty($text) and $text != "0") {
-            throw new InvalidArgumentException("missing text", -2);
+            throw new InvalidArgumentException("Missing text", -2);
         }
 
         if (empty($id_job)) {
-            throw new InvalidArgumentException("missing id job", -3);
+            throw new InvalidArgumentException("Missing id job", -3);
         }
 
         if (empty($password)) {
-            throw new InvalidArgumentException("missing job password", -4);
+            throw new InvalidArgumentException("Missing job password", -4);
         }
 
         if (empty($id_client)) {
-            throw new InvalidArgumentException("missing id_client", -5);
+            throw new InvalidArgumentException("Missing id_client", -5);
         }
 
         // validate Lara model
