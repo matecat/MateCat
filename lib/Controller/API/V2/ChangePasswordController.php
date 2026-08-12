@@ -95,17 +95,8 @@ class ChangePasswordController extends KleinController
 
             $this->checkUserPermissions($pStruct, $user);
 
-            $pDao = new ProjectDao($this->getDatabase());
-            $pDao->changePassword($pStruct, $new_password);
-            $pDao->destroyFetchByIdCache($id, ProjectStruct::class);
-
-            // Project data is cached for a day and embeds the passwords, so both the credential that
-            // was replaced and the one replacing it are evicted, along with the variant no password
-            // is passed to.
-            $projectId = $pStruct->id ?? throw new \RuntimeException('Missing project id');
-            $pDao->destroyCacheForProjectData($projectId);
-            $pDao->destroyCacheForProjectData($projectId, $actual_pwd);
-            $pDao->destroyCacheForProjectData($projectId, $new_password);
+            // changePassword() owns the eviction of every read the rotated credential reaches.
+            (new ProjectDao($this->getDatabase()))->changePassword($pStruct, $new_password);
         } else { // change job passwords
 
             $this->getDatabase()->begin();

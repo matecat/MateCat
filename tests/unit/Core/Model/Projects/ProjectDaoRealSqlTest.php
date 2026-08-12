@@ -254,6 +254,31 @@ class ProjectDaoRealSqlTest extends AbstractTest
         self::assertNotNull($this->dao->findByIdAndPassword($p['id'], 'newpass456', 86400));
     }
 
+    /**
+     * The project URLs are served from a project-data read cached for a day under the password that
+     * was asked for, so a rotation that evicts only the credential gate keeps publishing the job
+     * links of the replaced project password.
+     */
+    public function testChangePasswordEvictsTheProjectDataOfTheReplacedPassword(): void
+    {
+        $p = $this->project();
+        $f = $this->fixtures->makeFile($p['id']);
+        $seg = $this->fixtures->makeSegment($f['id']);
+        $j = $this->fixtures->makeJob($p['id'], ['job_first_segment' => $seg['id'], 'job_last_segment' => $seg['id']]);
+        $this->fixtures->makeFilesJob($j['id'], $f['id']);
+        $this->fixtures->makeSegmentTranslation($seg['id'], $j['id']);
+
+        $struct = $this->dao->findById($p['id']);
+        $oldPassword = $struct->password;
+
+        self::assertNotEmpty($this->dao->setCacheTTL(86400)->getProjectData($p['id'], $oldPassword));
+
+        $this->dao->changePassword($struct, 'newpass789');
+
+        self::assertSame([], $this->dao->setCacheTTL(86400)->getProjectData($p['id'], $oldPassword));
+        self::assertNotEmpty($this->dao->setCacheTTL(86400)->getProjectData($p['id'], 'newpass789'));
+    }
+
     public function testChangeProjectStatus(): void
     {
         $p = $this->project(['status_analysis' => ProjectStatus::STATUS_NEW]);

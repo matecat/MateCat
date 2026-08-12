@@ -114,10 +114,12 @@ class ProjectDao extends AbstractDao
         $this->destroyFetchByIdCache($id, ProjectStruct::class);
 
         // The link built on the old password must stop working now, not when the cache expires, so
-        // evict the entry it is authenticated through. The new password is evicted as well: a lookup
-        // made before the rotation may have cached its miss.
+        // evict every read that credential reaches: the gate it authenticates through and the
+        // project data the job links are built from. The new password is evicted as well, since a
+        // lookup made before the rotation may have cached its miss.
         foreach (array_filter([$oldPass, $newPass]) as $password) {
             $this->destroyCacheByIdAndPassword($id, $password);
+            $this->destroyCacheForProjectData($id, $password);
         }
 
         return $res;
