@@ -161,7 +161,7 @@ class ProjectModelTest extends AbstractTest
         $model = new TestableProjectModel($this->db, new ProjectStruct());
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('Can\'t change the Assignee of a personal project.');
+        $this->expectExceptionMessage('Can\'t change the assignee of a personal project.');
 
         $model->invokeCheckAssigneeChangeInPersonalTeam((int)$personalTeam->id);
     }
