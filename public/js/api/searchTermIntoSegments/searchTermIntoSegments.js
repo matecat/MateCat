@@ -5,7 +5,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain';
  *
  * @param {Object} options
  * @param {string} [options.idJob=config.id_job]
- * @param {string} [options.password=config.password]
+ * @param {string} [options.password=config.currentPassword]
  * @param {string} options.token
  * @param {string} options.source
  * @param {string} options.target
