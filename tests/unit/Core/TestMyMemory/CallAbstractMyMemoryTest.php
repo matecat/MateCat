@@ -370,7 +370,7 @@ class CallAbstractMyMemoryTest extends AbstractTest
         $code = $result_object['error']['code'];
         $this->assertEquals(-43, $code);
         $message = $result_object['error']['message'];
-        $this->assertEquals(" Bad method call. Requested method '" . $function_param . "' not Found.", $message);
+        $this->assertEquals(" Bad method call. Requested method '" . $function_param . "' not found.", $message);
     }
 
     /**

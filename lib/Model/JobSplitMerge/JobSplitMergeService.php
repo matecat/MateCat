@@ -265,7 +265,7 @@ class JobSplitMergeService
         }
 
         if (!empty($requestedWordsPerSplit) && count($requestedWordsPerSplit) != $num_split) {
-            throw new Exception("Requested words per chunk and Number of chunks not consistent.", -3);
+            throw new Exception("Requested words per chunk and number of chunks not consistent.", -3);
         }
 
         if (!empty($requestedWordsPerSplit) && !AppConfig::$VOLUME_ANALYSIS_ENABLED) {

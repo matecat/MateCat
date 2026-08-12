@@ -320,7 +320,7 @@ class UploadHandler
         $file->type = $this->getMimeContentType($file->tmp_name);
 
         if (false === $file->type) {
-            $file->error = "Mime type was not recognized";
+            $file->error = "MIME type was not recognized";
         }
 
         if ($this->validate($uploaded_file, $file, $error)) {

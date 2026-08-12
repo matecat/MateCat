@@ -989,8 +989,8 @@ class ProjectManager
             );
 
             if (!$result) {
-                $this->log("Failed to store the Zip file $zipHash - \n");
-                throw new Exception("Failed to store the original Zip $zipHash ", ProjectCreationError::ZIP_STORE_FAILED->value);
+                $this->log("Failed to store the ZIP file $zipHash - \n");
+                throw new Exception("Failed to store the original ZIP $zipHash ", ProjectCreationError::ZIP_STORE_FAILED->value);
                 //Exit
             }
         } //end zip hashes manipulation
