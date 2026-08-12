@@ -85,9 +85,10 @@ class JobCredentialCacheInvalidatorRealSqlTest extends AbstractTest
         return $chunk;
     }
 
-    private function reviewRowFor(string $reviewPassword, int $sourcePage): ?ChunkReviewStruct
+    private function reviewRowFor(string $reviewPassword): ?ChunkReviewStruct
     {
-        return $this->chunkReviewDao->findByJobIdReviewPasswordAndSourcePage($this->idJob, $reviewPassword, $sourcePage);
+        // The phase is whatever row the password matches, so the credential alone keys this read.
+        return $this->chunkReviewDao->findByReviewPasswordAndJobId($reviewPassword, $this->idJob, 3600);
     }
 
     #[Test]
@@ -131,7 +132,7 @@ class JobCredentialCacheInvalidatorRealSqlTest extends AbstractTest
     #[Test]
     public function jobPasswordRotation_stops_the_review_reads_pointing_at_the_replaced_password(): void
     {
-        $warm = $this->reviewRowFor(self::R1_PASSWORD, SourcePages::SOURCE_PAGE_REVISION);
+        $warm = $this->reviewRowFor(self::R1_PASSWORD);
         $this->assertNotNull($warm);
         $this->assertSame($this->jobPassword, $warm->password);
 
@@ -143,7 +144,7 @@ class JobCredentialCacheInvalidatorRealSqlTest extends AbstractTest
         $this->jobDao->changePassword($jStruct, $rotated);
         $this->assertSame(2, $this->chunkReviewDao->updatePassword($this->idJob, $this->jobPassword, $rotated));
 
-        $stale = $this->reviewRowFor(self::R1_PASSWORD, SourcePages::SOURCE_PAGE_REVISION);
+        $stale = $this->reviewRowFor(self::R1_PASSWORD);
         $this->assertNotNull($stale);
         $this->assertSame(
             $this->jobPassword,
@@ -153,11 +154,11 @@ class JobCredentialCacheInvalidatorRealSqlTest extends AbstractTest
 
         $this->invalidator->sweepAfterJobPasswordRotation($jStruct, $this->jobPassword, $rotated);
 
-        $fresh = $this->reviewRowFor(self::R1_PASSWORD, SourcePages::SOURCE_PAGE_REVISION);
+        $fresh = $this->reviewRowFor(self::R1_PASSWORD);
         $this->assertNotNull($fresh);
         $this->assertSame($rotated, $fresh->password, 'the review link has to resolve the chunk again right after the rotation');
 
-        $second = $this->reviewRowFor(self::R2_PASSWORD, SourcePages::SOURCE_PAGE_REVISION_2);
+        $second = $this->reviewRowFor(self::R2_PASSWORD);
         $this->assertNotNull($second);
         $this->assertSame($rotated, $second->password, 'the second pass link is keyed on its own password and goes stale as well');
     }
@@ -167,8 +168,8 @@ class JobCredentialCacheInvalidatorRealSqlTest extends AbstractTest
     {
         $chunk = $this->chunk();
 
-        $this->assertNotNull($this->reviewRowFor(self::R1_PASSWORD, SourcePages::SOURCE_PAGE_REVISION));
-        $this->assertNotNull($this->reviewRowFor(self::R2_PASSWORD, SourcePages::SOURCE_PAGE_REVISION_2));
+        $this->assertNotNull($this->reviewRowFor(self::R1_PASSWORD));
+        $this->assertNotNull($this->reviewRowFor(self::R2_PASSWORD));
         $this->assertCount(
             1,
             $this->chunkReviewDao->findChunkReviewsForSourcePage($chunk, SourcePages::SOURCE_PAGE_REVISION_2, 3600)
@@ -197,11 +198,11 @@ class JobCredentialCacheInvalidatorRealSqlTest extends AbstractTest
         );
 
         $this->assertNull(
-            $this->reviewRowFor(self::R1_PASSWORD, SourcePages::SOURCE_PAGE_REVISION),
+            $this->reviewRowFor(self::R1_PASSWORD),
             'the replaced first pass password must stop resolving a review'
         );
         $this->assertNotNull(
-            $this->reviewRowFor(self::R2_PASSWORD, SourcePages::SOURCE_PAGE_REVISION_2),
+            $this->reviewRowFor(self::R2_PASSWORD),
             'the second pass entry belongs to another phase and must survive'
         );
         $this->assertCount(

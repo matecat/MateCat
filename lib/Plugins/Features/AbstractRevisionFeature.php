@@ -7,7 +7,6 @@ use DomainException;
 use Exception;
 use Klein\Klein;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
-use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureCodes;

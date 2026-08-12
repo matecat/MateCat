@@ -51,7 +51,6 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
     /**
      * @var list<array{int, string, int}>
      */
-    private array $reviewPasswordAndSourcePageCalls = [];
 
     /**
      * @var list<array{int, string}>
@@ -98,12 +97,6 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
         $chunkReviewDao->method('destroyCacheForReviewPasswordAndJobId')
             ->willReturnCallback(function (string $reviewPassword, int $id): bool {
                 $this->reviewPasswordCalls[] = [$reviewPassword, $id];
-
-                return true;
-            });
-        $chunkReviewDao->method('destroyCacheForJobIdReviewPasswordAndSourcePage')
-            ->willReturnCallback(function (int $id, string $reviewPassword, int $sourcePage): bool {
-                $this->reviewPasswordAndSourcePageCalls[] = [$id, $reviewPassword, $sourcePage];
 
                 return true;
             });
@@ -189,10 +182,6 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
             [[self::R1_PASSWORD, self::ID_JOB], [self::R2_PASSWORD, self::ID_JOB]],
             $this->reviewPasswordCalls
         );
-        self::assertSame([
-            [self::ID_JOB, self::R1_PASSWORD, SourcePages::SOURCE_PAGE_REVISION],
-            [self::ID_JOB, self::R2_PASSWORD, SourcePages::SOURCE_PAGE_REVISION_2],
-        ], $this->reviewPasswordAndSourcePageCalls);
     }
 
     #[Test]
@@ -238,10 +227,6 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
         );
 
         self::assertSame([['old-r1', self::ID_JOB], ['new-r1', self::ID_JOB]], $this->reviewPasswordCalls);
-        self::assertSame([
-            [self::ID_JOB, 'old-r1', SourcePages::SOURCE_PAGE_REVISION],
-            [self::ID_JOB, 'new-r1', SourcePages::SOURCE_PAGE_REVISION],
-        ], $this->reviewPasswordAndSourcePageCalls, 'the second pass keys must not be touched');
         self::assertSame([[self::ID_JOB, 'old-r1'], [self::ID_JOB, 'new-r1']], $this->isTOrR1OrR2Calls);
     }
 

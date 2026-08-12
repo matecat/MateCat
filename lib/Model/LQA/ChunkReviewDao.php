@@ -30,7 +30,6 @@ class ChunkReviewDao extends AbstractDao
 
     const string sql_get_from_review_password_and_id_job = "SELECT * FROM qa_chunk_reviews WHERE review_password = :review_password AND id_job = :id_job";
 
-    const string sql_get_from_review_password_and_id_job_and_source_page = "SELECT * FROM qa_chunk_reviews WHERE review_password = :review_password AND id_job = :id_job  AND source_page = :source_page";
 
     // The query text is part of the cache key, so the trailing space on the first line is not
     // cosmetic: dropping it renames every entry in flight, and a fleet still running the old text
@@ -563,20 +562,10 @@ class ChunkReviewDao extends AbstractDao
         $this->destroyCacheForIsTOrR1OrR2($id_job, $password);
         $this->destroyCacheForReviewPasswordAndJobId($password, $id_job);
 
-        $sourcePages = [
-            SourcePages::SOURCE_PAGE_TRANSLATE,
-            SourcePages::SOURCE_PAGE_REVISION,
-            SourcePages::SOURCE_PAGE_REVISION_2
-        ];
-
-        foreach ($sourcePages as $sourcePage) {
-            $this->destroyCacheForJobIdReviewPasswordAndSourcePage($id_job, $password, $sourcePage);
-
-            // Its own key map, so it has to be named on top of the read above rather than coming
-            // along with it. There is no review phase to read on the translate page.
-            if ($sourcePage !== SourcePages::SOURCE_PAGE_TRANSLATE) {
-                $this->destroyCacheForFindChunkReviewsForSourcePage($chunkStruct, $sourcePage);
-            }
+        // There is no review phase to read on the translate page, so only the two revision phases
+        // have a per phase entry to evict.
+        foreach ([SourcePages::SOURCE_PAGE_REVISION, SourcePages::SOURCE_PAGE_REVISION_2] as $sourcePage) {
+            $this->destroyCacheForFindChunkReviewsForSourcePage($chunkStruct, $sourcePage);
         }
     }
 
@@ -607,47 +596,6 @@ class ChunkReviewDao extends AbstractDao
         );
 
         return $stmt->fetch() ?: null;
-    }
-
-    /**
-     * @param int $id_job
-     * @param string $review_password
-     * @param int $source_page
-     * @param int $ttl
-     *
-     * @return ChunkReviewStruct|null
-     * @throws Exception
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    public function findByJobIdReviewPasswordAndSourcePage(int $id_job, string $review_password, int $source_page, int $ttl = 60 * 60): ?ChunkReviewStruct
-    {
-        $this->setCacheTTL($ttl);
-        $stmt = $this->_getStatementForQuery(self::sql_get_from_review_password_and_id_job_and_source_page);
-        return $this->_fetchObjectMap($stmt, ChunkReviewStruct::class, [
-            'review_password' => $review_password,
-            'id_job' => $id_job,
-            'source_page' => $source_page
-        ])[0] ?? null;
-    }
-
-    /**
-     * @param int $id_job
-     * @param string $review_password
-     * @param int $source_page
-     * @return bool
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    public function destroyCacheForJobIdReviewPasswordAndSourcePage(int $id_job, string $review_password, int $source_page): bool
-    {
-        $stmt = $this->_getStatementForQuery(self::sql_get_from_review_password_and_id_job_and_source_page);
-
-        return $this->_destroyObjectCache($stmt, ChunkReviewStruct::class, [
-            'review_password' => $review_password,
-            'id_job' => $id_job,
-            'source_page' => $source_page
-        ]);
     }
 
 

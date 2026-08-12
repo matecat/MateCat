@@ -13,7 +13,6 @@ use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\Event\Filter\RewriteContributionContextsEvent;
 use Model\Files\FilesPartsDao;
-use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;

@@ -12,7 +12,6 @@ use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
-use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;

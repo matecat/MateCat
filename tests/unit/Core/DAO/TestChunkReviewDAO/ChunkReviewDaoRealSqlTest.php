@@ -244,24 +244,6 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
     }
 
     #[Test]
-    public function findByJobIdReviewPasswordAndSourcePage_hit_miss_and_destroyCache(): void
-    {
-        $hit = $this->dao->findByJobIdReviewPasswordAndSourcePage(
-            $this->idJob, $this->reviewPassword, SourcePages::SOURCE_PAGE_REVISION
-        );
-        $this->assertInstanceOf(ChunkReviewStruct::class, $hit);
-
-        $miss = $this->dao->findByJobIdReviewPasswordAndSourcePage($this->idJob, 'wrong', 2);
-        $this->assertNull($miss);
-
-        $this->assertIsBool(
-            $this->dao->destroyCacheForJobIdReviewPasswordAndSourcePage(
-                $this->idJob, $this->reviewPassword, SourcePages::SOURCE_PAGE_REVISION
-            )
-        );
-    }
-
-    #[Test]
     public function exists_with_and_without_source_page_and_miss(): void
     {
         $this->assertTrue($this->dao->exists($this->idJob, $this->jobPassword));
@@ -610,15 +592,6 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
             ChunkReviewStruct::class,
             $this->dao->findByReviewPasswordAndJobId($this->reviewPassword, $this->idJob, 3600)
         );
-        $this->assertInstanceOf(
-            ChunkReviewStruct::class,
-            $this->dao->findByJobIdReviewPasswordAndSourcePage(
-                $this->idJob,
-                $this->reviewPassword,
-                SourcePages::SOURCE_PAGE_REVISION
-            )
-        );
-
         $this->assertCount(
             1,
             $this->dao->findChunkReviewsForSourcePage($chunk, SourcePages::SOURCE_PAGE_REVISION, 3600)
@@ -641,13 +614,6 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
         $this->assertSame(0, (int)$probe->t);
 
         $this->assertNull($this->dao->findByReviewPasswordAndJobId($this->reviewPassword, $this->idJob, 3600));
-        $this->assertNull(
-            $this->dao->findByJobIdReviewPasswordAndSourcePage(
-                $this->idJob,
-                $this->reviewPassword,
-                SourcePages::SOURCE_PAGE_REVISION
-            )
-        );
     }
 
     #[Test]

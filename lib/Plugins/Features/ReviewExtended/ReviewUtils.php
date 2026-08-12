@@ -10,23 +10,12 @@ namespace Plugins\Features\ReviewExtended;
 
 use Exception;
 use InvalidArgumentException;
-use Model\DataAccess\ShapelessConcreteStruct;
-use Model\Jobs\JobStruct;
-use Model\LQA\ChunkReviewDao;
 use Model\LQA\ModelStruct;
-use ReflectionException;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 
 class ReviewUtils
 {
-    private ChunkReviewDao $chunkReviewDao;
-
-    public function __construct(ChunkReviewDao $chunkReviewDao)
-    {
-        $this->chunkReviewDao = $chunkReviewDao;
-    }
-
     /**
      * @param int|null $number
      *
@@ -44,49 +33,9 @@ class ReviewUtils
     }
 
     /**
-     * Resolve the revision phase from the credential the caller presented instead of from a request
-     * parameter. The password is matched against the job's translate password and against each
-     * review password of the chunk, so the answer is the phase the caller can prove they are in.
-     *
-     * An unresolvable pair yields the translate phase: the least privileged answer is the only safe
-     * default, since a wrong guess in the other direction would grant a revision phase for free.
-     *
-     * @param int $id_job
-     * @param string $password The password presented for this request, not one echoed by the client
-     * @param int $ttl Left at 0 on purpose: a cached answer would keep resolving a rotated review
-     *                 password to its old phase for the whole cache lifetime
-     *
-     * @return int One of the SourcePages constants
-     * @throws Exception
-     * @throws ReflectionException
-     */
-    public function sourcePageFromIdJobAndPassword(int $id_job, string $password, int $ttl = 0): int
-    {
-        if ($password === '') {
-            return SourcePages::SOURCE_PAGE_TRANSLATE;
-        }
-
-        /** @var ShapelessConcreteStruct|null $roles */
-        $roles = $this->chunkReviewDao->isTOrR1OrR2($id_job, $password, $ttl);
-
-        if ($roles === null) {
-            return SourcePages::SOURCE_PAGE_TRANSLATE;
-        }
-
-        if (!empty($roles->r2)) {
-            return SourcePages::SOURCE_PAGE_REVISION_2;
-        }
-
-        if (!empty($roles->r1)) {
-            return SourcePages::SOURCE_PAGE_REVISION;
-        }
-
-        return SourcePages::SOURCE_PAGE_TRANSLATE;
-    }
-
-    /**
-     * @deprecated Backend should't be instgructed by the front-end about the revision level, this is an internal. It muist be retrieved by the password url.
-     *             Use sourcePageFromIdJobAndPassword() instead, which derives the phase from the credential.
+     * @deprecated The front-end must not tell the backend which revision level it is on: the phase is
+     *             resolved from the presented password by ChunkPasswordValidator, and every endpoint
+     *             reads it off the chunk review that password matched.
      *
      * @param int|null $number
      *
@@ -137,18 +86,4 @@ class ReviewUtils
         return (int)$value;
     }
 
-    /**
-     * @param JobStruct $chunk
-     *
-     * @return int[]
-     * @throws Exception
-     */
-    public function validRevisionNumbers(JobStruct $chunk): array
-    {
-        $chunkReviews = $this->chunkReviewDao->findChunkReviews($chunk);
-
-        return array_values(array_filter(array_map(function ($chunkReview) {
-            return self::sourcePageToRevisionNumber($chunkReview->source_page);
-        }, $chunkReviews)));
-    }
 }

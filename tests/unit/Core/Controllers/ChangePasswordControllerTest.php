@@ -22,7 +22,6 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
-use Utils\Constants\SourcePages;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -518,10 +517,6 @@ class ChangePasswordControllerTest extends AbstractTest
             $crDao->findByReviewPasswordAndJobId('cp_revpw', $jobId, 3600),
             'precondition: the review credential resolves and is now cached'
         );
-        $this->assertInstanceOf(
-            ChunkReviewStruct::class,
-            $crDao->findByJobIdReviewPasswordAndSourcePage($jobId, 'cp_revpw', SourcePages::SOURCE_PAGE_REVISION)
-        );
 
         $this->setRequestParams([
             'res'      => 'job',
@@ -534,8 +529,5 @@ class ChangePasswordControllerTest extends AbstractTest
         $this->controller->changePassword();
 
         $this->assertNull($crDao->findByReviewPasswordAndJobId('cp_revpw', $jobId, 3600));
-        $this->assertNull(
-            $crDao->findByJobIdReviewPasswordAndSourcePage($jobId, 'cp_revpw', SourcePages::SOURCE_PAGE_REVISION)
-        );
     }
 }

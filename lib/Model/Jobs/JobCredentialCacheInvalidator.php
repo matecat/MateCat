@@ -66,11 +66,6 @@ readonly class JobCredentialCacheInvalidator
             }
 
             $this->chunkReviewDao->destroyCacheForReviewPasswordAndJobId($reviewPassword, $idJob);
-            $this->chunkReviewDao->destroyCacheForJobIdReviewPasswordAndSourcePage(
-                $idJob,
-                $reviewPassword,
-                (int)$chunkReview->source_page
-            );
         }
 
         // Project data is cached for a day and embeds the job password. The list of the project's
@@ -101,7 +96,6 @@ readonly class JobCredentialCacheInvalidator
 
         foreach ($this->credentials($oldPassword, $newPassword) as $password) {
             $this->chunkReviewDao->destroyCacheForReviewPasswordAndJobId($password, $idJob);
-            $this->chunkReviewDao->destroyCacheForJobIdReviewPasswordAndSourcePage($idJob, $password, $sourcePage);
             $this->chunkReviewDao->destroyCacheForIsTOrR1OrR2($idJob, $password);
         }
 
