@@ -416,10 +416,11 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     public function reviewPasswordChanged(ReviewPasswordChangedEvent $event): void
     {
+        // No cache eviction here: the event is dispatched inside the rotation's transaction, where an
+        // eviction is undone by any concurrent read of the pre-rotation row. Whoever rotates the
+        // password sweeps through JobCredentialCacheInvalidator once its own commit is through.
         $feedbackDao = new FeedbackDAO($this->getDatabase());
         $feedbackDao->updateFeedbackPassword($event->jobId, $event->oldPassword, $event->newPassword, $event->revisionNumber);
-
-        $this->destroyChunkReviewCacheForRotatedPassword($event->jobId, $event->oldPassword, $event->newPassword);
     }
 
     /**
@@ -432,29 +433,11 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $jobId = $event->job->id ?? throw new RuntimeException('Job id is required to update chunk review password');
         $jobPassword = $event->job->password ?? throw new RuntimeException('Job password is required to update chunk review password');
 
+        // Mirroring the new job password onto the phase rows is all this handler owns: the eviction of
+        // everything the replaced credential reaches belongs to the rotation entry point, after its
+        // commit. See reviewPasswordChanged() above.
         $dao = new ChunkReviewDao($this->getDatabase());
         $dao->updatePassword($jobId, $event->oldPassword, $jobPassword);
-
-        $this->destroyChunkReviewCacheForRotatedPassword($jobId, $event->oldPassword, $jobPassword);
-    }
-
-    /**
-     * A rotated password must stop resolving a chunk and a review phase straight away, and the
-     * password taking its place must not inherit a miss cached before the rotation. Both events reach
-     * here from every rotation entry point, the API controller and a translator being replaced alike.
-     *
-     * @param int $jobId
-     * @param string $oldPassword
-     * @param string $newPassword
-     *
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    private function destroyChunkReviewCacheForRotatedPassword(int $jobId, string $oldPassword, string $newPassword): void
-    {
-        $dao = new ChunkReviewDao($this->getDatabase());
-        $dao->destroyCacheForJobPassword($jobId, $oldPassword);
-        $dao->destroyCacheForJobPassword($jobId, $newPassword);
     }
 
     /**
