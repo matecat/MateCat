@@ -44,7 +44,7 @@ module.exports = {
     './public/js/components/header/': {lines: 80},
     './public/js/api/': {lines: 15},
     './public/js/components/settingsPanel/': {lines: 80},
-    './public/js/components/segments/': {lines: 20},
+    './public/js/components/segments/': {lines: 80},
   },
   roots: ['<rootDir>/public/'],
   testPathIgnorePatterns: ['/node_modules/'],
