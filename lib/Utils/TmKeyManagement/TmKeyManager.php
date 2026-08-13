@@ -376,7 +376,7 @@ class TmKeyManager
                             throw new Exception("Anonymous user can not modify existent keys.", 2);
                         }
                     } else {
-                        throw new Exception("Anonymous user can not be OWNER", 3);
+                        throw new Exception("Anonymous user can not be owner", 3);
                     }
                 }
 

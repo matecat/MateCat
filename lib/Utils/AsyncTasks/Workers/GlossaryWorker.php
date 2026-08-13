@@ -321,7 +321,7 @@ class GlossaryWorker extends AbstractWorker
     private function formatGetGlossaryMatches(array $matches, array $payload): array
     {
         if (empty($matches)) {
-            throw new EndQueueException("Empty response received from Glossary");
+            throw new EndQueueException("Empty response received from glossary");
         }
 
         $idSegment = $matches['id_segment'] ?? null;

@@ -536,7 +536,7 @@ class GlossaryWorkerTest extends AbstractTest
         $this->withMock($mock);
 
         $this->expectException(EndQueueException::class);
-        $this->expectExceptionMessage('Empty response received from Glossary');
+        $this->expectExceptionMessage('Empty response received from glossary');
 
         $this->processAction('get', [
             'id_segment' => '10',

@@ -315,7 +315,7 @@ class GDriveController extends AbstractStatefulKleinController
     private function formatErrorMessage(string $message): string
     {
         if ($message == "This file is too large to be exported.") {
-            return "you are trying to upload a file bigger than 10 mb. Google Drive does not allow exports of files bigger than 10 mb. Please download the file and upload it from your computer.";
+            return "You are trying to upload a file bigger than 10 mb. Google Drive does not allow exports of files bigger than 10 mb. Please download the file and upload it from your computer.";
         }
 
         if ($message == "Export only supports Docs Editors files.") {

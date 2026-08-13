@@ -1093,7 +1093,7 @@ class ConversionHandlerTest extends AbstractTest
         $result = $handler->extractZipFile();
 
         $this->assertEmpty($result);
-        $this->assertStringContainsString('Zip error', $handler->getResult()->getMessage());
+        $this->assertStringContainsString('ZIP error', $handler->getResult()->getMessage());
         $this->assertStringContainsString('Cannot open zip file', $handler->getResult()->getMessage());
     }
 
@@ -1113,7 +1113,7 @@ class ConversionHandlerTest extends AbstractTest
         $result = $handler->extractZipFile();
 
         $this->assertEmpty($result);
-        $this->assertStringContainsString('Zip error', $handler->getResult()->getMessage());
+        $this->assertStringContainsString('ZIP error', $handler->getResult()->getMessage());
         $this->assertStringContainsString('Cannot open zip file', $handler->getResult()->getMessage());
     }
 

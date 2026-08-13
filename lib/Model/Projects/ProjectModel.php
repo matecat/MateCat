@@ -159,7 +159,7 @@ class ProjectModel
             throw new ValidationError('Team not found');
         }
         if ($team->type == Teams::PERSONAL) {
-            throw new ValidationError('Can\'t change the Assignee of a personal project.');
+            throw new ValidationError('Can\'t change the assignee of a personal project.');
         }
     }
 

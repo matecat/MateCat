@@ -126,7 +126,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
         }
 
         if (!isset($breakdowns['default'])) {
-            throw new DomainException('`default` node is MANDATORY in the breakdowns array.', 403);
+            throw new DomainException('`default` node is mandatory in the breakdowns array.', 403);
         }
 
         unset($breakdowns['default']);

@@ -654,7 +654,7 @@ class FastAnalysis extends AbstractDaemon
             $this->logger->debug("Fetching data from disk");
             $this->segments = $fs->getFastAnalysisData($pid);
         } catch (UnexpectedValueException) {
-            $this->logger->debug("Error Fetching data from disk. Fallback to database.");
+            $this->logger->debug("Error fetching data from disk. Fallback to database.");
 
             try {
                 $this->segments = $this->_getSegmentsForFastVolumeAnalysis($pid);
@@ -664,8 +664,8 @@ class FastAnalysis extends AbstractDaemon
         }
 
         if (count($this->segments) == 0) {
-            //there is no analysis on that file, it is ALL Pre-Translated
-            $exceptionMsg = 'There is no analysis on that file, it is ALL Pre-Translated';
+            //there is no analysis on that file, it is all pre-translated
+            $exceptionMsg = 'There is no analysis on that file, it is all pre-translated';
             $this->logger->debug($exceptionMsg);
             throw new Exception($exceptionMsg, self::ERR_NO_SEGMENTS);
         }
