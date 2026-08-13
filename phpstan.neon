@@ -33,6 +33,18 @@ services:
                 # prose in a ConfigsController docblock, which is not a Variable node and so was
                 # never a violation.
 
+    -
+        class: Matecat\PhpStan\Rules\NoDirectSessionFunctionRule
+        tags:
+            - phpstan.rules.rule
+        arguments:
+            allowedFiles:
+                # The session runtime adapter: every session_* call and every session.* ini key in
+                # the analysed tree lives here. Unlike the list above this one is already at its end
+                # state and is not expected to grow — Bootstrap configures and closes the session
+                # through it, and controllers start one through it.
+                - lib/Utils/Session/PhpSession.php
+
 parameters:
     level: 8
     paths:
