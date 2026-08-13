@@ -104,7 +104,7 @@ export const DataSampleDropdown = ({
               ?.label + ` - ${samplingSize}%`}
           </>
         ) : (
-          'Data Sample'
+          'Data sample'
         )}
         <ChevronDown />
       </Button>

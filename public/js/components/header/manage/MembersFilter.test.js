@@ -30,7 +30,7 @@ const selectedTeam = fromJS({members})
 
 const openPopover = () => userEvent.click(screen.getByRole('button'))
 
-test('Shows "All Members" by default', () => {
+test('Shows "All members" by default', () => {
   render(
     <MembersFilter
       selectedTeam={selectedTeam}
@@ -39,7 +39,7 @@ test('Shows "All Members" by default', () => {
     />,
   )
 
-  expect(screen.getByRole('button')).toHaveTextContent('All Members')
+  expect(screen.getByRole('button')).toHaveTextContent('All members')
 })
 
 test('Shows "Not assigned" when that filter is selected', () => {
@@ -116,7 +116,7 @@ test('Selecting "Not assigned" updates the current user', async () => {
   )
 })
 
-test('Selecting "All Members" updates the current user', async () => {
+test('Selecting "All members" updates the current user', async () => {
   const setCurrentUser = jest.fn()
   render(
     <MembersFilter
@@ -127,7 +127,7 @@ test('Selecting "All Members" updates the current user', async () => {
   )
 
   await openPopover()
-  await userEvent.click(screen.getByText('All Members'))
+  await userEvent.click(screen.getByText('All members'))
 
   expect(setCurrentUser).toHaveBeenCalledWith(
     ManageConstants.ALL_MEMBERS_FILTER,

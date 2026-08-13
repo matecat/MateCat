@@ -137,12 +137,12 @@ test('renders OutsourceContainer per chunk with the composite idJobLabel', () =>
 test('shows an OutsourceButton per chunk when not in jobAnalysis mode and status DONE', () => {
   const props = buildProps()
   render(<SplitChunkJob {...props} />)
-  expect(screen.getAllByText('Buy Translation')).toHaveLength(2)
+  expect(screen.getAllByText('Buy translation')).toHaveLength(2)
 })
 
 test('hides OutsourceButtons in jobAnalysis mode', () => {
   global.config = {jobAnalysis: true}
   const props = buildProps()
   render(<SplitChunkJob {...props} />)
-  expect(screen.queryByText('Buy Translation')).not.toBeInTheDocument()
+  expect(screen.queryByText('Buy translation')).not.toBeInTheDocument()
 })

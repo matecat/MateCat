@@ -87,7 +87,7 @@ class SetChunkCompletedController extends KleinController
         $job = (new JobDao($this->getDatabase()))->getByIdAndPassword((int)$id_job, (string)$password);
 
         if (empty($job)) {
-            throw new InvalidArgumentException("wrong password", -10);
+            throw new InvalidArgumentException("Wrong password", -10);
         }
 
         $this->id_job = (int)$id_job;

@@ -373,7 +373,7 @@ test('shows the replace input once "Replace with" is enabled and blocks replacin
   expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
     expect.any(Function),
     {text: 'Attention: you are replacing the same text!'},
-    'Replace Alert',
+    'Replace alert',
   )
   expect(SegmentActions.replaceCurrentSearch).not.toHaveBeenCalled()
 })

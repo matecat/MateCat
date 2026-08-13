@@ -80,7 +80,7 @@ export const UserMenu = () => {
           <ul>
             <li>
               <a className="item" href="/manage">
-                My Projects
+                My projects
               </a>
             </li>
             <li>
@@ -110,13 +110,13 @@ export const UserMenu = () => {
           mode={BUTTON_MODE.OUTLINE}
           onClick={ModalsActions.openLoginModal}
         >
-          Sign In
+          Sign in
         </Button>
         <Button
           className={'header-button-signup'}
           onClick={ModalsActions.openRegisterModal}
         >
-          Sign Up
+          Sign up
         </Button>
       </div>
     ))

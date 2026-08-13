@@ -154,13 +154,13 @@ describe('Register', () => {
     expect(contextValue.redirectAfterLogin).toHaveBeenCalled()
   })
 
-  test('"Resend Email" calls resendEmailConfirmation and shows confirmation text', async () => {
+  test('"Resend email" calls resendEmailConfirmation and shows confirmation text', async () => {
     registerUser.mockResolvedValue({})
     resendEmailConfirmation.mockResolvedValue({})
     renderWithContext()
     fillValidForm()
     fireEvent.click(screen.getByRole('button', {name: 'Create account'}))
-    fireEvent.click(await screen.findByRole('button', {name: 'Resend Email'}))
+    fireEvent.click(await screen.findByRole('button', {name: 'Resend email'}))
     await waitFor(() =>
       expect(resendEmailConfirmation).toHaveBeenCalledWith('ada@example.com'),
     )

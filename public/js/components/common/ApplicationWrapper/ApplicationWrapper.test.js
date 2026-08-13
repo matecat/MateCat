@@ -61,7 +61,7 @@ describe('ApplicationWrapper', () => {
       </ApplicationWrapper>,
     )
     expect(screen.queryByText('Please Sign in again')).not.toBeInTheDocument()
-    expect(screen.queryByText('Update Required')).not.toBeInTheDocument()
+    expect(screen.queryByText('Update required')).not.toBeInTheDocument()
   })
 
   it('renders the disconnect modal when userDisconnected is true', () => {
@@ -107,7 +107,7 @@ describe('ApplicationWrapper', () => {
     )
     const forceReloadFn = UserStore.addListener.mock.calls[0][1]
     act(() => forceReloadFn())
-    expect(screen.getByText('Update Required')).toBeInTheDocument()
+    expect(screen.getByText('Update required')).toBeInTheDocument()
   })
 
   it('does not show the reload modal when userDisconnected is true, even after FORCE_RELOAD', () => {
@@ -119,7 +119,7 @@ describe('ApplicationWrapper', () => {
     )
     const forceReloadFn = UserStore.addListener.mock.calls[0][1]
     act(() => forceReloadFn())
-    expect(screen.queryByText('Update Required')).not.toBeInTheDocument()
+    expect(screen.queryByText('Update required')).not.toBeInTheDocument()
     expect(screen.getByText('Please Sign in again')).toBeInTheDocument()
   })
 

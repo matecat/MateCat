@@ -5,7 +5,7 @@ import {HomePageSection} from './HomePageSection'
 describe('HomePageSection', () => {
   test('renders the main heading', () => {
     render(<HomePageSection />)
-    expect(screen.getByText('Why Choose Us')).toBeInTheDocument()
+    expect(screen.getByText('Why choose us')).toBeInTheDocument()
   })
 
   test('renders all six content boxes', () => {

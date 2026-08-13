@@ -144,7 +144,7 @@ const FilterSegments = ({
       <div className="filter-dropdown">
         <div className="filter-idSegment ">
           <InputField
-            placeholder="Id Segment"
+            placeholder="ID segment"
             name="id_segment"
             onFieldChanged={filterIdSegmentChange}
             tabindex={0}

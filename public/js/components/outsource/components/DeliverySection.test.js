@@ -94,7 +94,7 @@ describe('DeliverySection', () => {
     fireEvent.click(screen.getByText('gmt-select-labeled'))
     expect(onChangeTimezone).toHaveBeenCalledWith('3')
 
-    fireEvent.click(screen.getByText('Get Price'))
+    fireEvent.click(screen.getByText('Get price'))
     expect(onGetNewRates).toHaveBeenCalled()
 
     fireEvent.click(screen.getByText('Close'))

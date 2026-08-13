@@ -26,7 +26,7 @@ export const ForcedActionModal = ({action = FORCE_ACTIONS.RELOAD}) => {
 
         {action === FORCE_ACTIONS.RELOAD ? (
           <div>
-            <h2>Update Required</h2>
+            <h2>Update required</h2>
             <p>
               An important update has been released to improve the app's
               performance and security. To continue using the app, please

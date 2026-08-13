@@ -28,7 +28,7 @@ const renderDropdown = (props = {}) => {
 
 test('shows the placeholder label when no sampling type is selected', () => {
   renderDropdown()
-  expect(screen.getByText('Data Sample')).toBeInTheDocument()
+  expect(screen.getByText('Data sample')).toBeInTheDocument()
 })
 
 test('shows the selected sampling type and its sample size', () => {
@@ -38,13 +38,13 @@ test('shows the selected sampling type and its sample size', () => {
 
 test('shows the placeholder label when disabled even with a sampling type set', () => {
   renderDropdown({isDisabled: true, samplingType: 'edit_distance_high_to_low'})
-  expect(screen.getByText('Data Sample')).toBeInTheDocument()
-  expect(screen.getByRole('button', {name: /Data Sample/})).toBeDisabled()
+  expect(screen.getByText('Data sample')).toBeInTheDocument()
+  expect(screen.getByRole('button', {name: /Data sample/})).toBeDisabled()
 })
 
 test('toggles the dropdown open state and registers a click listener', () => {
   const {container} = renderDropdown()
-  const trigger = screen.getByRole('button', {name: /Data Sample/})
+  const trigger = screen.getByRole('button', {name: /Data sample/})
 
   fireEvent.click(trigger)
   expect(
@@ -132,7 +132,7 @@ test('supports a custom resetFunction and stops the click from bubbling to the t
 
 test('closes the dropdown when clicking outside of it', () => {
   const {container} = renderDropdown()
-  fireEvent.click(screen.getByRole('button', {name: /Data Sample/}))
+  fireEvent.click(screen.getByRole('button', {name: /Data sample/}))
 
   const [, closeDropdown] = window.eventHandler.addEventListener.mock.calls[0]
   act(() => {
@@ -150,7 +150,7 @@ test('closes the dropdown when clicking outside of it', () => {
 
 test('keeps the dropdown open when the click originates inside the wrapper', () => {
   const {container} = renderDropdown()
-  fireEvent.click(screen.getByRole('button', {name: /Data Sample/}))
+  fireEvent.click(screen.getByRole('button', {name: /Data sample/}))
 
   const [, closeDropdown] = window.eventHandler.addEventListener.mock.calls[0]
   const insideElement = container.querySelector(

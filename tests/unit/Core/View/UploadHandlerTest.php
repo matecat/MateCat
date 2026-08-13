@@ -394,7 +394,7 @@ class UploadHandlerTest extends AbstractTest
         $result = $this->invokePrivate('validate', ['', $file, '']);
 
         $this->assertFalse($result);
-        $this->assertSame('File Extension Not Allowed', $file->error);
+        $this->assertSame('File extension not allowed', $file->error);
 
         unset($_SERVER['CONTENT_LENGTH']);
     }

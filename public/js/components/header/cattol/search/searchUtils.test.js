@@ -50,7 +50,7 @@ describe('execFind', () => {
       {
         text: 'Enter text in source or target input boxes or select a status.',
       },
-      'Search Alert',
+      'Search alert',
     )
     expect(searchTermIntoSegments).not.toHaveBeenCalled()
   })
@@ -401,7 +401,7 @@ describe('execReplaceAll', () => {
     expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
       expect.any(Function),
       {text: 'You must specify the Target value to replace.'},
-      'Search Alert',
+      'Search alert',
     )
   })
 
@@ -419,7 +419,7 @@ describe('execReplaceAll', () => {
     expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
       expect.any(Function),
       {text: 'You must specify the replacement value.'},
-      'Search Alert',
+      'Search alert',
     )
   })
 

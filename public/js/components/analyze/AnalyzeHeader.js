@@ -114,7 +114,7 @@ const AnalyzeHeader = ({data, project}) => {
             className={'downloadAnalysisReport'}
             onClick={handleDownloadAnalysisReport}
           >
-            Download Analysis Report
+            Download analysis report
             <Download size={16} />
           </a>
         </div>

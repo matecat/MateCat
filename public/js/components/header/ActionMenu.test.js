@@ -42,9 +42,9 @@ test('Quality report menu shows revise and translate links', async () => {
 
   expect(screen.getByText('Revise')).toBeInTheDocument()
   expect(screen.getByText('Translate')).toBeInTheDocument()
-  expect(screen.getByText('Download QA Report CSV')).toBeInTheDocument()
-  expect(screen.getByText('Download QA Report JSON')).toBeInTheDocument()
-  expect(screen.getByText('Download QA Report XML')).toBeInTheDocument()
+  expect(screen.getByText('Download QA report CSV')).toBeInTheDocument()
+  expect(screen.getByText('Download QA report JSON')).toBeInTheDocument()
+  expect(screen.getByText('Download QA report XML')).toBeInTheDocument()
 })
 
 test('Quality report menu hides revise link when there are no revise_urls', async () => {
@@ -94,7 +94,7 @@ test('Downloading the CSV report triggers a download', async () => {
   render(<ActionMenu jobUrls={{}} />)
 
   await openMenu()
-  await userEvent.click(screen.getByText('Download QA Report CSV'))
+  await userEvent.click(screen.getByText('Download QA report CSV'))
 
   await waitFor(() => expect(exportQualityReport).toHaveBeenCalledTimes(1))
 })
@@ -105,7 +105,7 @@ test('A failing CSV export shows an error notification', async () => {
   render(<ActionMenu jobUrls={{}} />)
 
   await openMenu()
-  await userEvent.click(screen.getByText('Download QA Report CSV'))
+  await userEvent.click(screen.getByText('Download QA report CSV'))
 
   await waitFor(() =>
     expect(CatToolActions.addNotification).toHaveBeenCalledWith({
@@ -123,7 +123,7 @@ test('Downloading the JSON report triggers a download', async () => {
   render(<ActionMenu jobUrls={{}} />)
 
   await openMenu()
-  await userEvent.click(screen.getByText('Download QA Report JSON'))
+  await userEvent.click(screen.getByText('Download QA report JSON'))
 
   await waitFor(() =>
     expect(exportQualityReport).toHaveBeenCalledWith({format: 'json'}),
@@ -136,7 +136,7 @@ test('A failing JSON export shows an error notification', async () => {
   render(<ActionMenu jobUrls={{}} />)
 
   await openMenu()
-  await userEvent.click(screen.getByText('Download QA Report JSON'))
+  await userEvent.click(screen.getByText('Download QA report JSON'))
 
   await waitFor(() =>
     expect(CatToolActions.addNotification).toHaveBeenCalledWith({
@@ -154,7 +154,7 @@ test('Downloading the XML report triggers a download', async () => {
   render(<ActionMenu jobUrls={{}} />)
 
   await openMenu()
-  await userEvent.click(screen.getByText('Download QA Report XML'))
+  await userEvent.click(screen.getByText('Download QA report XML'))
 
   await waitFor(() =>
     expect(exportQualityReport).toHaveBeenCalledWith({format: 'xml'}),
@@ -167,7 +167,7 @@ test('A failing XML export shows an error notification', async () => {
   render(<ActionMenu jobUrls={{}} />)
 
   await openMenu()
-  await userEvent.click(screen.getByText('Download QA Report XML'))
+  await userEvent.click(screen.getByText('Download QA report XML'))
 
   await waitFor(() =>
     expect(CatToolActions.addNotification).toHaveBeenCalledWith({

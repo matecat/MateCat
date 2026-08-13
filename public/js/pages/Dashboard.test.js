@@ -115,7 +115,7 @@ test('renders properly', async () => {
   // resolved (Dashboard.js:48 mirrors it into selectedTeamRef on every
   // render), which only requires the first fetch (getUserData), not the
   // full getUserData -> getTeamMembers -> getProjects chain. Dashboard.js
-  // renders a "Loading Projects" spinner in place of ProjectsContainer until
+  // renders a "Loading projects" spinner in place of ProjectsContainer until
   // selectedTeam and teams are both set (Dashboard.js:448), so waiting for
   // that spinner to disappear is the lightest reliable signal that
   // selectedTeamRef is populated. The empty-state text this test used to
@@ -129,7 +129,7 @@ test('renders properly', async () => {
       expect(
         screen.getByPlaceholderText('Search by project name'),
       ).toBeVisible()
-      expect(screen.queryByText('Loading Projects')).not.toBeInTheDocument()
+      expect(screen.queryByText('Loading projects')).not.toBeInTheDocument()
     },
     {timeout: 10000},
   )

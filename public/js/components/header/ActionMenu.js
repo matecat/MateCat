@@ -78,7 +78,7 @@ export const ActionMenu = ({
               className={`${isExportCsvDisabled ? ' disabled' : ''}`}
               title="Export CSV"
             >
-              Download QA Report CSV
+              Download QA report CSV
             </span>
           </>
         ),
@@ -93,7 +93,7 @@ export const ActionMenu = ({
               className={`${isExportJsonDisabled ? ' disabled' : ''}`}
               title="Export JSON"
             >
-              Download QA Report JSON
+              Download QA report JSON
             </span>
           </>
         ),
@@ -108,7 +108,7 @@ export const ActionMenu = ({
               className={`item${isExportXMLDisabled ? ' disabled' : ''}`}
               title="Export XML"
             >
-              Download QA Report XML
+              Download QA report XML
             </span>
           </>
         ),

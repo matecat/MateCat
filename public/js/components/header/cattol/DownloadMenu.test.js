@@ -54,10 +54,10 @@ afterEach(() => {
 
 test('shows the draft download and export items when the job is not completed', () => {
   render(<DownloadMenu password="secret" jid="10" isGDriveProject={false} />)
-  expect(screen.getByText('Download Draft')).toBeInTheDocument()
-  expect(screen.getByText('Download Original')).toBeInTheDocument()
+  expect(screen.getByText('Download draft')).toBeInTheDocument()
+  expect(screen.getByText('Download original')).toBeInTheDocument()
   expect(screen.getByText('Export XLIFF')).toBeInTheDocument()
-  expect(screen.getByText('Export Job TMX')).toBeInTheDocument()
+  expect(screen.getByText('Export job TMX')).toBeInTheDocument()
 })
 
 test('shows google drive labels when the project is a google drive project', () => {
@@ -85,7 +85,7 @@ test('dispatches an analytics event and downloads the draft when the toggle butt
 
 test('opens the original file in a new tab', () => {
   render(<DownloadMenu password="secret" jid="10" isGDriveProject={false} />)
-  fireEvent.click(screen.getByText('Download Original'))
+  fireEvent.click(screen.getByText('Download original'))
   expect(window.open).toHaveBeenCalledWith('/api/v2/original/10/secret', '_blank')
 })
 
@@ -100,7 +100,7 @@ test('opens the xliff export in a new tab', () => {
 
 test('opens the job tmx export in a new tab', () => {
   render(<DownloadMenu password="secret" jid="10" isGDriveProject={false} />)
-  fireEvent.click(screen.getByText('Export Job TMX'))
+  fireEvent.click(screen.getByText('Export job TMX'))
   expect(window.open).toHaveBeenCalledWith('/api/v2/tmx/10/secret', '_blank')
 })
 
@@ -124,7 +124,7 @@ test('switches to the completed-translation labels once the job is completed', (
     CatToolStore.emit(CattolConstants.SET_PROGRESS, {raw: {total: 10}})
   })
 
-  expect(screen.getByText('Download Translation')).toBeInTheDocument()
+  expect(screen.getByText('Download translation')).toBeInTheDocument()
 
   fireEvent.click(screen.getByTestId('toggle-button'))
   expect(CommonUtils.dispatchAnalyticsEvents).not.toHaveBeenCalled()

@@ -4,12 +4,12 @@ export const HomePageSection = () => {
   return (
     <section className="home-page-section">
       <div className={'layout__container'}>
-        <h1>Why Choose Us</h1>
+        <h1>Why choose us</h1>
         <div className={'layout-grid'}>
           <div className="content-box">
             <div className="content-box_header">
               <img src="/public/img/icons/home/home-aiDriven.svg" />
-              <h3>AI-Driven Precision and Speed</h3>
+              <h3>AI-driven precision and speed</h3>
             </div>
             <p>
               Matecat employs cutting-edge AI to help translators save time and
@@ -25,7 +25,7 @@ export const HomePageSection = () => {
           <div className="content-box">
             <div className="content-box_header">
               <img src="/public/img/icons/home/home-goFaster.svg" />
-              <h3>Save time with adaptive Machine Translation</h3>
+              <h3>Save time with adaptive machine translation</h3>
             </div>
             <p>
               Get top-quality machine translation matches in 200+ languages with
@@ -73,7 +73,7 @@ export const HomePageSection = () => {
           <div className="content-box">
             <div className="content-box_header">
               <img src="/public/img/icons/home/home-liveSupport.svg" />
-              <h3>A User-friendly Experience</h3>
+              <h3>A user-friendly experience</h3>
             </div>
             <p>
               Matecat was created with a focus on you. It's designed so that

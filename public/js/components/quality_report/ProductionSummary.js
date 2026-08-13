@@ -94,7 +94,7 @@ export const ProductionSummary = ({
         </div>
         <div className="qr-effort-container">
           <div className="qr-effort">
-            <div className="qr-label">Reviewed Words</div>
+            <div className="qr-label">Reviewed words</div>
             <div className="qr-info">
               <b>{reviewedWordsCount}</b>
             </div>

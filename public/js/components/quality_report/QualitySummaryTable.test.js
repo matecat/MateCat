@@ -74,7 +74,7 @@ describe('QualitySummaryTable', () => {
 
     expect(screen.getByText('Categories')).toBeInTheDocument()
     expect(screen.getByText('Severities')).toBeInTheDocument()
-    expect(screen.getByText('Error Points')).toBeInTheDocument()
+    expect(screen.getByText('Error points')).toBeInTheDocument()
   })
 
   test('renders all category labels', () => {

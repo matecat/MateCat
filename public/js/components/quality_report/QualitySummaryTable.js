@@ -105,7 +105,7 @@ function QualitySummaryTable({qualitySummary}) {
               <div className="qr-title qr-severity" key={sev.label + i} />
             ),
         )}
-        <div className="qr-title qr-total-severity">Error Points</div>
+        <div className="qr-title qr-total-severity">Error points</div>
       </div>
     ),
     [severities],

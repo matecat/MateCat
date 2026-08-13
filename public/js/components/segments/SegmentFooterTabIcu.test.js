@@ -77,7 +77,7 @@ describe('SegmentFooterTabIcu', () => {
       />,
     )
 
-    expect(screen.getByText('Plural Rules')).toBeInTheDocument()
+    expect(screen.getByText('Plural rules')).toBeInTheDocument()
     expect(screen.getByText('count')).toBeInTheDocument()
     expect(screen.getByText('(number)')).toBeInTheDocument()
   })

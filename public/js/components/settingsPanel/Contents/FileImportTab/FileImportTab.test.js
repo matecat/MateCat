@@ -39,7 +39,7 @@ describe('FileImportTab', () => {
   test('renders the segmentation rule section', () => {
     setup()
 
-    expect(screen.getByText('Segmentation Rules')).toBeInTheDocument()
+    expect(screen.getByText('Segmentation rules')).toBeInTheDocument()
     expect(
       screen.getByTestId('container-segmentationrule'),
     ).toBeInTheDocument()

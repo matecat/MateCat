@@ -217,7 +217,7 @@ class SmartMATE extends AbstractEngine
             [
                 'error' => [
                     'code' => -499,
-                    'message' => "Client Closed Get",
+                    'message' => "Client closed get",
                     'response' => 'Maximum recursion limit reached'
                     // Some useful info might still be contained in the response body
                 ],

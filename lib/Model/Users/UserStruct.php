@@ -359,7 +359,7 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
             if (array_key_exists($field, $decoded)) {
                 return $decoded[$field];
             } else {
-                throw new Exception('key not found on token: ' . $field);
+                throw new Exception('Key not found on token: ' . $field);
             }
         }
 

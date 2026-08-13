@@ -91,7 +91,7 @@ let SearchUtils = {
         {
           text: 'Enter text in source or target input boxes or select a status.',
         },
-        'Search Alert',
+        'Search alert',
       )
       return false
     }
@@ -385,7 +385,7 @@ let SearchUtils = {
         {
           text: 'You must specify the Target value to replace.',
         },
-        'Search Alert',
+        'Search alert',
       )
       delete this.searchParams.target
       return false
@@ -400,7 +400,7 @@ let SearchUtils = {
         {
           text: 'You must specify the replacement value.',
         },
-        'Search Alert',
+        'Search alert',
       )
       delete this.searchParams.replace
       return false

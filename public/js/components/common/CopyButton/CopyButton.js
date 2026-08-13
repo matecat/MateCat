@@ -25,7 +25,7 @@ const CopyButton = ({onCopy}) => {
         mode={BUTTON_MODE.GHOST}
         type={BUTTON_TYPE.PRIMARY}
         onClick={handleClick}
-        tooltip={showFeedback ? undefined : 'Copy to Clipboard'}
+        tooltip={showFeedback ? undefined : 'Copy to clipboard'}
       >
         <CopyIcon size={16} />
       </Button>

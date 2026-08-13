@@ -93,7 +93,7 @@ const SegmentQRLine = ({
             <Button size={BUTTON_SIZE.SMALL}
               className={diffActive ? 'active' : ''}
               onClick={onClickDiff}
-              title="Show Diff"
+              title="Show diff"
             >
               {diffActive?  <EyeOn size={16} /> : <EyeOff size={16} />}
             </Button>

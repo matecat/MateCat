@@ -42,7 +42,7 @@ const DeliverySection = ({
       <div className="need-it-faster-box">
         <div className="fields">
           <div className="field">
-            <label>Delivery Date</label>
+            <label>Delivery date</label>
             <DatePicker selected={deliveryDate} onChange={onDateChange} />
           </div>
           <div className="field input-time">
@@ -63,7 +63,7 @@ const DeliverySection = ({
               className="get-price"
               onClick={onGetNewRates}
             >
-              Get Price
+              Get price
             </Button>
 
             <Button mode={BUTTON_MODE.OUTLINE} onClick={onToggleNeedItFaster}>

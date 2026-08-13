@@ -31,12 +31,12 @@ test('renders the column headers', () => {
   })
 
   expect(screen.getByText('User IP')).toBeInTheDocument()
-  expect(screen.getByText('Event Date')).toBeInTheDocument()
+  expect(screen.getByText('Event date')).toBeInTheDocument()
   expect(screen.getByText('Project ID')).toBeInTheDocument()
   expect(screen.getByText('Job ID')).toBeInTheDocument()
-  expect(screen.getByText('Language Pair')).toBeInTheDocument()
-  expect(screen.getByText('User Name')).toBeInTheDocument()
-  expect(screen.getByText('User Email')).toBeInTheDocument()
+  expect(screen.getByText('Language pair')).toBeInTheDocument()
+  expect(screen.getByText('User name')).toBeInTheDocument()
+  expect(screen.getByText('User email')).toBeInTheDocument()
   expect(screen.getByText('Action')).toBeInTheDocument()
 })
 

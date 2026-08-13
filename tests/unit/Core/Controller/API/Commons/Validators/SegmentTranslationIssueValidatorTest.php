@@ -236,7 +236,7 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
         $this->setRequest($this->baseParams(['id_issue' => (string) self::QA_ENTRY_ID]));
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('issue not found');
+        $this->expectExceptionMessage('Issue not found');
         $this->makeValidator()->_validate();
     }
 
@@ -258,7 +258,7 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
         $this->setRequest($this->baseParams(['id_issue' => (string) self::QA_ENTRY_ID]));
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('issue not found');
+        $this->expectExceptionMessage('Issue not found');
         $this->makeValidator()->_validate();
     }
 

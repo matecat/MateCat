@@ -97,11 +97,11 @@ $klein->onHttpError(function (int $code, Klein $klein) use (&$isView) {
     // Check if the error code is 404 (page not found)
     if ($code == 404) {
         if ($isView) {
-            throw new NotFoundException('Not Found.'); // This will be caught by the Bootstrap exception handler
+            throw new NotFoundException('Not found.'); // This will be caught by the Bootstrap exception handler
         } else {
             // If not a view, return a JSON response with the error
             $klein->response()->code(404);
-            $klein->response()->json((new Error(new NotFoundException('Not Found.')))->render());
+            $klein->response()->json((new Error(new NotFoundException('Not found.')))->render());
         }
     }
 });

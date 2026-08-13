@@ -181,7 +181,7 @@ describe('SegmentFooterTabGlossary', () => {
       })
     })
 
-    fireEvent.click(screen.getByRole('button', {name: /Add Term/}))
+    fireEvent.click(screen.getByRole('button', {name: /Add term/}))
 
     expect(
       document.querySelector('input[name="glossary-term-original"]'),

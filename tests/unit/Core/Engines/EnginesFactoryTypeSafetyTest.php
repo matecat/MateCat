@@ -35,7 +35,7 @@ class EnginesFactoryTypeSafetyTest extends AbstractTest
         // Tightened from \Exception::class: callers need to distinguish "misconfigured" (park)
         // from other failures (retry) — see report §11.4.
         $this->expectException(NotFoundException::class);
-        $this->expectExceptionMessage('Engine Class');
+        $this->expectExceptionMessage('Engine class');
         EnginesFactory::getFullyQualifiedClassName('CompletelyNonExistentEngineClass12345');
     }
 

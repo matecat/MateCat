@@ -1685,7 +1685,7 @@ class SetTranslationControllerTest extends AbstractTest
         $method = $this->getAccessibleMethod('checkSegmentSplitData');
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('missing id_segment');
+        $this->expectExceptionMessage('Missing id_segment');
         $method->invoke($controller);
     }
 
@@ -1708,7 +1708,7 @@ class SetTranslationControllerTest extends AbstractTest
         $method = $this->getAccessibleMethod('checkSegmentSplitData');
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Error Hack Status');
+        $this->expectExceptionMessage('Error hack status');
         $method->invoke($controller);
     }
 
@@ -1861,7 +1861,7 @@ class SetTranslationControllerTest extends AbstractTest
         $method = $this->getAccessibleMethod('checkSegmentSplitData');
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Empty Translation');
+        $this->expectExceptionMessage('Empty translation');
         $method->invoke($controller);
     }
 

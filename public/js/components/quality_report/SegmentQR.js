@@ -290,7 +290,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
               <div className="qr-history-status_separator"></div>
             )}
             {elem.status === SEGMENTS_STATUS.APPROVED2
-              ? '2nd Revision'
+              ? '2nd revision'
               : elem.status.charAt(0).toUpperCase() +
                 elem.status.toLowerCase().slice(1)}
           </div>
@@ -479,7 +479,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
           <SegmentQRLine
             segment={segment}
             classes={revised2Classes}
-            label="2nd Revision"
+            label="2nd revision"
             onClickLabel={() => openReviseLink(2)}
             text={renderedRevise2}
             showDiffButton={true}

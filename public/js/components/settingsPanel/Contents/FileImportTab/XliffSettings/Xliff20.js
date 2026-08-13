@@ -106,9 +106,9 @@ export const Xliff20 = () => {
           <span className="xliff-settings-column-name xliff-settings-column-name-state">
             State
           </span>
-          <span className="xliff-settings-column-name">Analysis</span>
+          <span className="xliff-settings-column-name">Analysis behavior</span>
           <span className="xliff-settings-column-name xliff-settings-column-name-editor">
-            Editor
+            State in editor
           </span>
           {xliff20.map((row, index) => (
             <XliffRulesRow

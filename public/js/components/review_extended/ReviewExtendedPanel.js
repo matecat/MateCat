@@ -169,6 +169,7 @@ class ReviewExtendedPanel extends React.Component {
                     Shortcuts.shortCutsKeyType
                   ]}
               </a>
+              <br />
               <i>
                 Note: the job owner and workspace members can disable this
                 requirement from settings.

@@ -167,20 +167,20 @@ test('resending an invite marks it as sent', () => {
   const team = buildTeam()
   renderModifyTeam(team)
 
-  fireEvent.click(screen.getByText('Resend Invite'))
+  fireEvent.click(screen.getByText('Resend invite'))
 
   expect(ManageActions.addUserToTeam).toHaveBeenCalledWith(
     team,
     'pending@member.com',
   )
   expect(screen.getByText('Invite sent')).toBeInTheDocument()
-  expect(screen.queryByText('Resend Invite')).not.toBeInTheDocument()
+  expect(screen.queryByText('Resend invite')).not.toBeInTheDocument()
 })
 
 test('searching filters the member list and shows "No results!" when nothing matches', () => {
   renderModifyTeam()
 
-  const search = screen.getByPlaceholderText('Search Member')
+  const search = screen.getByPlaceholderText('Search member')
   fireEvent.change(search, {target: {value: 'Jane'}})
 
   expect(screen.queryByText('John Doe')).not.toBeInTheDocument()

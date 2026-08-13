@@ -167,7 +167,7 @@ const JobMenu = ({
             label: (
               <>
                 <ChangePassword size={18} />
-                Change Password
+                Change password
               </>
             ),
             items: [

@@ -51,7 +51,7 @@ class SimpleMarkupMimeTypeGuesser implements MimeTypeGuesserInterface
     public function guessMimeType(string $path): ?string
     {
         if (!($fp = fopen($path, "r", false, stream_context_create(null)))) {
-            throw new RuntimeException("could not open XML input");
+            throw new RuntimeException("Could not open XML input");
         }
         $buffer = fread($fp, 1024);
         fclose($fp);

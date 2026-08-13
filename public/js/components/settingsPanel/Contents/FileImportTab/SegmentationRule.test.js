@@ -21,7 +21,7 @@ describe('SegmentationRule', () => {
   test('renders the select with the current active rule', () => {
     setup()
 
-    expect(screen.getByText('Segmentation Rules')).toBeInTheDocument()
+    expect(screen.getByText('Segmentation rules')).toBeInTheDocument()
     expect(screen.getByTestId('container-segmentationrule')).toBeInTheDocument()
     expect(screen.getByText('General')).toBeInTheDocument()
   })

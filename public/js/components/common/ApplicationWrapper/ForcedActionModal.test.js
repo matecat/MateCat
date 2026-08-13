@@ -13,7 +13,7 @@ describe('ForcedActionModal', () => {
 
   it('renders the reload message by default', () => {
     render(<ForcedActionModal />)
-    expect(screen.getByText('Update Required')).toBeInTheDocument()
+    expect(screen.getByText('Update required')).toBeInTheDocument()
     expect(screen.getByText('Refresh page')).toBeInTheDocument()
   })
 

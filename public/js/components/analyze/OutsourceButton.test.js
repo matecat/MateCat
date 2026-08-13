@@ -18,7 +18,7 @@ test('shows a disabled tooltip button when not outsource_available and custom_pa
       openOutsourceModal={jest.fn()}
     />,
   )
-  const button = screen.getByText('Buy Translation').closest('button')
+  const button = screen.getByText('Buy translation').closest('button')
   expect(button).toBeDisabled()
 })
 
@@ -36,7 +36,7 @@ test('renders an enabled button that calls openOutsourceModal when status is DON
       openOutsourceModal={openOutsourceModal}
     />,
   )
-  const button = screen.getByText('Buy Translation').closest('button')
+  const button = screen.getByText('Buy translation').closest('button')
   expect(button).toBeEnabled()
 
   await userEvent.click(button)
@@ -53,5 +53,5 @@ test('disables the button when status is not DONE', () => {
       openOutsourceModal={jest.fn(() => () => {})}
     />,
   )
-  expect(screen.getByText('Buy Translation').closest('button')).toBeDisabled()
+  expect(screen.getByText('Buy translation').closest('button')).toBeDisabled()
 })

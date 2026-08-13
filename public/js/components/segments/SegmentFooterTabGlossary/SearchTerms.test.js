@@ -76,19 +76,19 @@ describe('SearchTerms', () => {
     ).toBeInTheDocument()
   })
 
-  test('Add Term button calls openForm and is disabled while loading', () => {
+  test('Add term button calls openForm and is disabled while loading', () => {
     const openForm = jest.fn()
     render(<Harness openForm={openForm} isLoading />)
-    const button = screen.getByRole('button', {name: /Add Term/})
+    const button = screen.getByRole('button', {name: /Add term/})
     expect(button).toBeDisabled()
     fireEvent.click(button)
     expect(openForm).not.toHaveBeenCalled()
   })
 
-  test('Add Term button calls openForm when enabled', () => {
+  test('Add term button calls openForm when enabled', () => {
     const openForm = jest.fn()
     render(<Harness openForm={openForm} />)
-    fireEvent.click(screen.getByRole('button', {name: /Add Term/}))
+    fireEvent.click(screen.getByRole('button', {name: /Add term/}))
     expect(openForm).toHaveBeenCalled()
   })
 

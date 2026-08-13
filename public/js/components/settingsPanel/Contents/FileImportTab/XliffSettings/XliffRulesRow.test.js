@@ -52,16 +52,19 @@ describe('XliffRulesRow', () => {
   test('renders the match category name for a pre-translated analysis', () => {
     setup()
 
-    expect(screen.getByText('TM 101%')).toBeInTheDocument()
+    expect(screen.getByText("Map to 'TM 101%'")).toBeInTheDocument()
   })
 
-  test('renders N.A. for a new row analysis and disables the editor select', () => {
+  test('renders N/A for a new row analysis and disables the editor select', () => {
     setup({
       value: newRow,
       currentXliffData: [newRow],
     })
 
-    expect(screen.getAllByText('N.A.').length).toBeGreaterThan(0)
+    expect(
+      screen.getByText('Ignore target (run TM analysis)'),
+    ).toBeInTheDocument()
+    expect(screen.getByText('N/A (determined by TM)')).toBeInTheDocument()
   })
 
   test('calls onDelete with the row id when the delete button is clicked', () => {

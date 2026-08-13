@@ -81,7 +81,7 @@ describe('ReviewExtendedTranslationIssuesSideButton', () => {
     expect(container.querySelector('.revise-button')).toHaveClass('no-object')
   })
 
-  test('shows the issue count and a "Show Issues" title when there are issues', () => {
+  test('shows the issue count and a "Show issues" title when there are issues', () => {
     const {container} = render(
       <ReviewExtendedTranslationIssuesSideButton
         sid="1"
@@ -94,7 +94,7 @@ describe('ReviewExtendedTranslationIssuesSideButton', () => {
     )
     expect(
       container.querySelector('.revise-button').getAttribute('title'),
-    ).toEqual(expect.stringContaining('Show Issues'))
+    ).toEqual(expect.stringContaining('Show issues'))
   })
 
   test('sums issue counts across multiple versions', () => {

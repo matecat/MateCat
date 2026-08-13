@@ -47,7 +47,7 @@ test('DONE status shows Complete badge and triggers a report download', async ()
   render(<AnalyzeHeader data={buildData()} project={project} />)
   expect(screen.getByText('Complete')).toBeInTheDocument()
 
-  await userEvent.click(screen.getByText('Download Analysis Report'))
+  await userEvent.click(screen.getByText('Download analysis report'))
   expect(downloadAnalysisReport).toHaveBeenCalledWith({
     idProject: 1,
     password: 'pw',
@@ -59,8 +59,8 @@ test('logs an error when the report download fails', async () => {
   downloadAnalysisReport.mockRejectedValueOnce(new Error('boom'))
   render(<AnalyzeHeader data={buildData()} project={project} />)
 
-  await userEvent.click(screen.getByText('Download Analysis Report'))
-  await screen.findByText('Download Analysis Report')
+  await userEvent.click(screen.getByText('Download analysis report'))
+  await screen.findByText('Download analysis report')
   expect(consoleSpy).toHaveBeenCalled()
   consoleSpy.mockRestore()
 })

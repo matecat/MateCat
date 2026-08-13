@@ -109,14 +109,14 @@ test('shows the OutsourceButton when not in jobAnalysis mode and status DONE', (
   global.config = {jobAnalysis: false}
   const props = buildProps({status: ANALYSIS_STATUS.DONE})
   render(<SingleChunkJob {...props} />)
-  expect(screen.getByText('Buy Translation')).toBeInTheDocument()
+  expect(screen.getByText('Buy translation')).toBeInTheDocument()
 })
 
 test('hides the OutsourceButton in jobAnalysis mode', () => {
   global.config = {jobAnalysis: true}
   const props = buildProps({status: ANALYSIS_STATUS.DONE})
   render(<SingleChunkJob {...props} />)
-  expect(screen.queryByText('Buy Translation')).not.toBeInTheDocument()
+  expect(screen.queryByText('Buy translation')).not.toBeInTheDocument()
 })
 
 test('renders the custom getDirectOpenButton content', () => {

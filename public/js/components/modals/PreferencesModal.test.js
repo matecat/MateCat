@@ -156,8 +156,8 @@ test('internal users see a Delete button for pre-existing credentials', async ()
 
 test('reset password link only shows when the user has a password, and triggers the action', async () => {
   const {rerender} = renderModal()
-  await waitFor(() => screen.getByText('Reset Password'))
-  fireEvent.click(screen.getByText('Reset Password'))
+  await waitFor(() => screen.getByText('Reset password'))
+  fireEvent.click(screen.getByText('Reset password'))
   expect(ModalsActions.openResetPassword).toHaveBeenCalledTimes(1)
 
   rerender(
@@ -174,7 +174,7 @@ test('reset password link only shows when the user has a password, and triggers 
       <PreferencesModal />
     </ApplicationWrapperContext.Provider>,
   )
-  expect(screen.queryByText('Reset Password')).not.toBeInTheDocument()
+  expect(screen.queryByText('Reset password')).not.toBeInTheDocument()
 })
 
 test('clicking Logout calls the context logout function', async () => {

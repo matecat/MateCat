@@ -43,7 +43,7 @@ class SetCurrentSegmentController extends KleinController
         (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($id_job, $password);
 
         if (empty($id_segment)) {
-            throw new InvalidArgumentException("missing segment id", -1);
+            throw new InvalidArgumentException("Missing segment id", -1);
         }
 
         $segmentStruct = new SegmentSplitStruct();

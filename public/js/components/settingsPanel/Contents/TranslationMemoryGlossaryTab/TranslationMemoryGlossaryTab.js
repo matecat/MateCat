@@ -482,7 +482,7 @@ export const TranslationMemoryGlossaryTab = () => {
         )}
         <div className="translation-memory-glossary-tab-active-resources">
           <div className="translation-memory-glossary-tab-table-title">
-            <h2>Active Resources</h2>
+            <h2>Active resources</h2>
             <div className="translation-memory-glossary-tab-buttons-group">
               <Button
                 type={BUTTON_TYPE.PRIMARY}
@@ -510,7 +510,7 @@ export const TranslationMemoryGlossaryTab = () => {
         </div>
         <div className="translation-memory-glossary-tab-inactive-resources">
           <div className="translation-memory-glossary-tab-table-title">
-            <h2>Inactive Resources</h2>
+            <h2>Inactive resources</h2>
             <input
               className="translation-memory-glossary-tab-input-text"
               placeholder="Search resources by name or key"

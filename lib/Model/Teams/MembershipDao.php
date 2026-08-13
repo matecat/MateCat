@@ -270,7 +270,7 @@ class MembershipDao extends AbstractDao
     public function createList(array $obj_arr): array
     {
         if (!$this->database->getConnection()->inTransaction()) {
-            throw new Exception('this method requires to be wrapped in a transaction');
+            throw new Exception('This method requires to be wrapped in a transaction');
         }
 
         if (!isset($obj_arr['members'], $obj_arr['team'])) {
@@ -282,7 +282,7 @@ class MembershipDao extends AbstractDao
         }
 
         if (!$obj_arr['team'] instanceof TeamStruct) {
-            throw new Exception('team must be a TeamStruct instance');
+            throw new Exception('Team must be a TeamStruct instance');
         }
 
         /** @var list<string> $members */

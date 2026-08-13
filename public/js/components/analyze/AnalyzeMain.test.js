@@ -34,13 +34,13 @@ test('shows the spinner while volumeAnalysis or project is missing', () => {
   const {rerender} = render(
     <AnalyzeMain volumeAnalysis={undefined} project={project} />,
   )
-  expect(screen.getByText('Loading Volume Analysis')).toBeInTheDocument()
+  expect(screen.getByText('Loading volume analysis')).toBeInTheDocument()
   expect(AnalyzeHeader).not.toHaveBeenCalled()
 
   rerender(
     <AnalyzeMain volumeAnalysis={buildVolumeAnalysis()} project={undefined} />,
   )
-  expect(screen.getByText('Loading Volume Analysis')).toBeInTheDocument()
+  expect(screen.getByText('Loading volume analysis')).toBeInTheDocument()
 })
 
 test('renders only the header when there are no jobs yet', () => {

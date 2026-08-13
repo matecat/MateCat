@@ -3,6 +3,7 @@ import {
   excludeSomeTagsTransformToText,
   excludeSomeTagsFromText,
   transformTagsToHtml,
+  transformTagsToLexiqaText,
   transformTagsToText,
   removePlaceholdersForGlossary,
   decodeHtmlEntities,
@@ -225,4 +226,15 @@ describe('encodeTagsFromUnicodeChar', () => {
   test('returns falsy input untouched', () => {
     expect(encodeTagsFromUnicodeChar('')).toBe('')
   })
+})
+
+test('Lexiqa text keeps offsets correct after decoded html entities before a tag', () => {
+  const text =
+    'They started booking stays through Airbnb.&amp;nbsp;&amp;nbsp;<ph id="mtc_1" ctype="x-html" equiv-text="base64:Jmx0O2JyIC8mZ3Q7"/><ph id="mtc_2" ctype="x-html" equiv-text="base64:Jmx0O2JyIC8mZ3Q7"/>At first, Maria paid for these out of her own pocket, and it was putting a strain on her already limited finances—until Aladina Fundación connected her with Airbnb.org.'
+
+  const result = transformTagsToLexiqaText(text)
+
+  expect(result).toContain(
+    'Airbnb.&nbsp;&nbsp;<<br />><<br />>At first, Maria paid for these out of her own pocket, and it was putting a strain on her already limited finances—until Aladina Fundación connected her with Airbnb.org.',
+  )
 })
