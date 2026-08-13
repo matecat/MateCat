@@ -17,6 +17,12 @@ module.exports = {
         sourceType: 'module',
         ecmaVersion: nodeEcmaVersion,
         ecmaFeatures: {jsx: true},
+        requireConfigFile: false,
+        babelOptions: {
+          configFile: false,
+          babelrc: false,
+          presets: ['@babel/preset-react'],
+        },
       },
       env: {jest: true, node: true, browser: true, es6: true},
       extends: [
@@ -35,6 +41,12 @@ module.exports = {
         sourceType: 'module',
         ecmaVersion: browserEcmaVersion,
         ecmaFeatures: {jsx: true},
+        requireConfigFile: false,
+        babelOptions: {
+          configFile: false,
+          babelrc: false,
+          presets: ['@babel/preset-react'],
+        },
       },
       extends: ['plugin:react/recommended', 'plugin:react-hooks/recommended'],
       settings: {
