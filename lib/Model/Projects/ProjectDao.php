@@ -512,6 +512,11 @@ class ProjectDao extends AbstractDao
             $values['name'] = $searchName;
         }
 
+        // paging without an order is paging over an undefined sequence: rows can repeat or vanish
+        // between two pages. `id_team_idx` carries the primary key as its suffix, so ordering by id
+        // is the order the index already produces — EXPLAIN reports no filesort for it.
+        $query .= ' ORDER BY id ASC ';
+
         if (isset($limit) and isset($offset)) {
             $query .= " LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
         }
