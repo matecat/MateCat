@@ -935,8 +935,8 @@ const getTranslateUrl = (
 ) => {
   return `/translate/${projectSlug}/${source}-${target}/${chunkId}-${password}${jobFirstSegment}`
 }
-const createTranslateUrl = (index, project, job, jobsLength) => {
-  const usePrefix = jobsLength > 1
+const createTranslateUrl = (index, project, job, jobsLength, isChunk) => {
+  const usePrefix = jobsLength > 1 && isChunk
   const chunckId = `${job.get('id')}${usePrefix ? '-' + index : ''}`
   return getTranslateUrl(
     chunckId,
@@ -1034,21 +1034,27 @@ test('Buy translation: check onClick event', () => {
   expect(buyTranslationElement).toBeEnabled()
 })
 
-xtest('Check Open link', () => {
+test('Check Open link', async () => {
   const {props, project, job} = getFakeProperties(
     fakeProjectsData.jobWithoutActivity,
   )
+  // Open is a Button that calls window.open(...) directly, not an <a href>.
+  const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation(() => {})
+
   render(<JobContainer {...props} />)
 
-  const openElement = screen.getByText(/Open/).getAttribute('href')
+  await userEvent.click(screen.getByText(/Open/))
 
   const correctUrl = createTranslateUrl(
     props.index,
     project,
     job,
     props.jobsLength,
+    props.isChunk,
   )
-  expect(openElement).toBe(correctUrl)
+  expect(windowOpenSpy).toHaveBeenCalledWith(correctUrl, '_blank')
+
+  windowOpenSpy.mockRestore()
 })
 
 const cloneData = (data) => JSON.parse(JSON.stringify(data))

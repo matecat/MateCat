@@ -199,13 +199,14 @@ test('Items are enabled', async () => {
   expect(screen.getByText('Cancel job')).toBeEnabled()
 })
 
-// TODO: Da verificare errore sulla libreria semantic
-test.skip('Change password dropdown menu', async () => {
+test('Change password dropdown menu', async () => {
   const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
   render(<JobMenu {...props} />)
   await userEvent.click(screen.getByTestId('job-menu-button'))
   await userEvent.click(screen.getByText('Change password'))
-  expect(screen.getByTestId('change-password-submenu')).toBeVisible()
+  // no dedicated submenu testid exists; "Translate" only renders as a
+  // Change password submenu item, so its visibility confirms the submenu opened.
+  expect(screen.getByText('Translate')).toBeVisible()
 })
 
 test('Check items href link', async () => {
