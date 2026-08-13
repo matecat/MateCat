@@ -456,7 +456,30 @@ class QAModelTemplateDao extends AbstractDao
         $conn->beginTransaction();
 
         try {
-            $stmt = $conn->prepare("UPDATE qa_model_templates SET uid=:uid, version=:version, label=:label, modified_at=:modified_at WHERE id=:id");
+            // The children below are deleted and rewritten on `id_template` alone, so ownership has
+            // to be established before any of them runs: scoping the parent UPDATE only would still
+            // let a caller who skipped the owner lookup wipe someone else's rows, because its own
+            // statement would quietly match nothing while the DELETEs went ahead. FOR UPDATE holds
+            // the row for the rest of the transaction, so a concurrent soft delete cannot land in
+            // the gap. The row count of the UPDATE cannot stand in for this check: MySQL reports
+            // changed rows rather than matched ones, and an owner saving twice inside the same
+            // second writes an identical `modified_at` and would be refused their own template.
+            $owned = $conn->prepare(
+                "SELECT id FROM qa_model_templates WHERE id = :id AND uid = :uid AND `deleted_at` IS NULL FOR UPDATE"
+            );
+            $owned->execute([
+                'id'  => $modelTemplateStruct->id,
+                'uid' => $modelTemplateStruct->uid,
+            ]);
+
+            if ($owned->fetchColumn() === false) {
+                throw new Exception('Model not found', 404);
+            }
+
+            // `uid` is no longer assigned. Nothing in the tree changes a template's owner, and a
+            // statement able to move ownership silently is what made the missing scope dangerous
+            // rather than merely inconsistent.
+            $stmt = $conn->prepare("UPDATE qa_model_templates SET version=:version, label=:label, modified_at=:modified_at WHERE id=:id AND uid=:uid");
             $stmt->execute([
                 'version' => $modelTemplateStruct->version,
                 'label' => $modelTemplateStruct->label,
