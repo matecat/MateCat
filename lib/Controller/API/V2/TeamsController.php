@@ -36,6 +36,9 @@ class TeamsController extends KleinController
 
     private const int NAME_MAX_LENGTH = 100;
 
+    /** `teams`.`name` is a varchar(255), and the name is stored as it was typed. */
+    private const int NAME_MAX_STORED_LENGTH = 255;
+
     private ?ClientInterface $redis = null;
 
     /**
@@ -82,13 +85,6 @@ class TeamsController extends KleinController
      */
     private function assertNameIsPlainText(string $name): void
     {
-        if (mb_strlen($name) > self::NAME_MAX_LENGTH) {
-            throw new InvalidArgumentException(
-                "Wrong parameter: name must be at most " . self::NAME_MAX_LENGTH . " characters",
-                400
-            );
-        }
-
         // Check what the reader will end up seeing, not what was typed. The email templates
         // escape with double_encode: false so that names stored before names were kept as
         // typed still render correctly, which means entity text passes through to the
@@ -96,6 +92,23 @@ class TeamsController extends KleinController
         // Without decoding first, "evil&#46;com" would satisfy the rules below and still
         // arrive as a clickable "evil.com".
         $decoded = html_entity_decode($name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // The cap counts what the reader sees for the same reason: measured on the raw string, a
+        // name of some sixty visible characters written with entities was rejected for length.
+        // The raw form is what gets stored, so it is bounded separately by the column width.
+        if (mb_strlen($name) > self::NAME_MAX_STORED_LENGTH) {
+            throw new InvalidArgumentException(
+                "Wrong parameter: name must be at most " . self::NAME_MAX_STORED_LENGTH . " characters",
+                400
+            );
+        }
+
+        if (mb_strlen($decoded) > self::NAME_MAX_LENGTH) {
+            throw new InvalidArgumentException(
+                "Wrong parameter: name must be at most " . self::NAME_MAX_LENGTH . " characters",
+                400
+            );
+        }
 
         // a scheme ("https://", "javascript:") or a "www." prefix
         $hasUrlPrefix = preg_match('~[a-z][a-z0-9+.-]*://|\bwww\.~i', $decoded) === 1;

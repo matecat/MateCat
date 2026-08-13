@@ -306,6 +306,49 @@ class TeamsControllerTest extends AbstractTest
     }
 
     /**
+     * @throws Exception
+     * @throws TypeError
+     * @throws PDOException
+     */
+    #[Test]
+    public function create_measures_the_cap_against_the_decoded_name(): void
+    {
+        $this->actAsFactoryUser();
+        // fifty visible characters written with entities: 250 raw, which the raw cap rejected
+        $this->setRequestParams(['name' => str_repeat('&amp;', 50), 'type' => Teams::GENERAL]);
+
+        $captured = null;
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data) use (&$captured): bool {
+                $captured = $data;
+                return true;
+            }));
+
+        $this->controller->create();
+
+        $this->assertIsArray($captured);
+        $this->assertSame(str_repeat('&amp;', 50), $captured['team']['name']);
+    }
+
+    /**
+     * @throws Exception
+     * @throws TypeError
+     */
+    #[Test]
+    public function create_throws_when_the_stored_name_is_wider_than_the_column(): void
+    {
+        // decodes to 52 visible characters, but 260 raw ones do not fit a varchar(255)
+        $this->setRequestParams(['name' => str_repeat('&amp;', 52), 'type' => Teams::GENERAL]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(400);
+        $this->expectExceptionMessage('name must be at most 255 characters');
+
+        $this->controller->create();
+    }
+
+    /**
      * The guard must not reject the ordinary names people actually use: it stops at the
      * next check (type) rather than complaining about the name.
      *
