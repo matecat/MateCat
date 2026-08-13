@@ -73,6 +73,101 @@ class CattoolTeamNameScriptContextTest extends AbstractTest
     }
 
     /**
+     * The stronger form of the rule above, and the one that survives a careless edit. Removing the
+     * quotes is not enough on its own: an unquoted `${value}` inside a script block still writes
+     * whatever the value holds straight into executable text, and PHPTAL supplies no escaping there
+     * beyond `</`. Only a value that arrives already serialised as JSON with tags, ampersands and
+     * both quote characters hex-escaped can be dropped into that context safely, which is exactly
+     * what `config_json` is. Anything else in a script block fails here rather than in production.
+     *
+     * @see \Utils\Templating\BootstrapConfig::JSON_FLAGS
+     */
+    #[Test]
+    #[DataProvider('sourceTemplates')]
+    public function everyInterpolationInsideAScriptBlockIsASerialisedJsonDocument(string $template): void
+    {
+        $contents = file_get_contents($template);
+        $this->assertIsString($contents, "cannot read $template");
+
+        preg_match_all('#<script\b[^>]*>.*?</script>#si', $contents, $scripts);
+
+        foreach ($scripts[0] as $script) {
+            preg_match_all('/\$\{[^}]*}/', $script, $interpolations);
+
+            foreach ($interpolations[0] as $interpolation) {
+                $this->assertTrue(
+                    self::isASerialisedJsonDocument($interpolation),
+                    basename($template) . " interpolates $interpolation inside a script block."
+                    . ' Only a JSON document hex-escaping tags, ampersands and quotes may be written'
+                    . ' there: add the value to the configuration document and read it from there'
+                );
+            }
+        }
+    }
+
+    /**
+     * @return array<string, array{string, bool}>
+     */
+    public static function interpolationSamples(): array
+    {
+        return [
+            'the configuration document' => ['${structure config_json}', true],
+            'an inline encode carrying every hex flag' => [
+                '${structure php: json_encode(flashMessages, JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE)}',
+                true,
+            ],
+            'a bare value' => ['${team_name}', false],
+            'a bare value marked structure' => ['${structure team_name}', false],
+            'an encode that forgets the quote flags' => [
+                '${structure php: json_encode(flashMessages, JSON_HEX_TAG|JSON_HEX_AMP)}',
+                false,
+            ],
+            'an encode with no flags at all' => ['${structure php: json_encode(flashMessages)}', false],
+            'a php expression that is not an encode' => ['${structure php: user/email}', false],
+        ];
+    }
+
+    /**
+     * Proves the sweep above can fail. Without this it could pass because the rule accepts
+     * everything rather than because the templates comply.
+     */
+    #[Test]
+    #[DataProvider('interpolationSamples')]
+    public function theRuleAcceptsOnlySerialisedDocuments(string $interpolation, bool $expected): void
+    {
+        $this->assertSame($expected, self::isASerialisedJsonDocument($interpolation));
+    }
+
+    private static function isASerialisedJsonDocument(string $interpolation): bool
+    {
+        $expression = trim(substr($interpolation, 2, -1));
+
+        // without `structure` PHPTAL escapes for HTML, which is the wrong escaping for a script
+        // block and not a reason to allow the value through
+        if (!str_starts_with($expression, 'structure ')) {
+            return false;
+        }
+
+        $value = trim(substr($expression, strlen('structure ')));
+
+        if ($value === 'config_json') {
+            return true;
+        }
+
+        if (!str_starts_with($value, 'php: json_encode(')) {
+            return false;
+        }
+
+        foreach (['JSON_HEX_TAG', 'JSON_HEX_AMP', 'JSON_HEX_APOS', 'JSON_HEX_QUOT'] as $flag) {
+            if (!str_contains($value, $flag)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * The other half: the cattool page must actually be reading that document. Without this the
      * test above passes for a template that simply stopped configuring anything.
      */
