@@ -40,7 +40,10 @@ module.exports = {
       settings: {
         react: {version: '16.9'},
       },
-      rules: {'react/prop-types': 'off'},
+      rules: {
+        'react/prop-types': 'off',
+        'react/prefer-stateless-function': 'warn',
+      },
     },
 
     // grunt concat related files
