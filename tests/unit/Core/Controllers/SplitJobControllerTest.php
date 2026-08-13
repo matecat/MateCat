@@ -336,6 +336,17 @@ class SplitJobControllerTest extends AbstractTest
     }
 
     #[Test]
+    public function checkSplitAccess_throws_on_a_numerically_equal_password(): void
+    {
+        $job = $this->makeJobStub(5, '1000', false);
+
+        // `!=` compares two numeric strings numerically, so '1e3' would have been accepted
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(-10);
+        $this->callPrivate('checkSplitAccess', 5, '1e3', [$job]);
+    }
+
+    #[Test]
     public function check_throws_when_job_pass_empty(): void
     {
         $this->stubRequestParams([

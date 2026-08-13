@@ -337,7 +337,12 @@ class SplitJobController extends KleinController
     {
         $jobToSplit = $this->filterJobsById($jid, $jobList);
 
-        if ($jobToSplit[0]->password != $job_pass) {
+        $knownPassword = $jobToSplit[0]->password;
+
+        // a password is a secret: `!=` compares two numeric strings numerically in PHP 8, so
+        // '1e3' and '1000' would match, and it is not constant-time either. A job without a
+        // password cannot be unlocked by presenting one, which `null != ''` used to allow.
+        if ($knownPassword === null || !hash_equals($knownPassword, $job_pass)) {
             throw new InvalidArgumentException("Access denied", -10);
         }
     }
