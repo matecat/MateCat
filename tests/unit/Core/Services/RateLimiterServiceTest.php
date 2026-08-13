@@ -34,6 +34,7 @@ class RateLimiterServiceTest extends AbstractTest
             md5('ttl-test' . '/route'),
             md5('default-max' . '/route'),
             md5('penalty-test' . '/route'),
+            md5('weight-test' . '/route'),
         ];
         $this->redis->del($keys);
         parent::tearDown();
@@ -108,6 +109,49 @@ class RateLimiterServiceTest extends AbstractTest
         $ttl = $this->redis->ttl($key);
         // TTL should NOT have been reset (stays ≤ 30, not bumped to 61-120)
         $this->assertLessThanOrEqual(30, $ttl);
+    }
+
+    /**
+     * A caller whose one request does N of the thing being limited spends N of the window, so a
+     * budget written in emails is not silently multiplied by a per-request batch size.
+     */
+    #[Test]
+    public function checkAndIncrementSpendsTheGivenWeightRatherThanOne(): void
+    {
+        $response = new Response();
+        $key = md5('weight-test' . '/route');
+
+        $this->assertNull($this->service->checkAndIncrement($response, 'weight-test', '/route', 10, 5));
+
+        $this->assertSame(5, (int)$this->redis->get($key));
+        // the first call of a window still stamps the expiry, even carrying more than one
+        $this->assertGreaterThan(60, $this->redis->ttl($key));
+    }
+
+    #[Test]
+    public function checkAndIncrementRefusesWhenTheWeightCrossesTheLimit(): void
+    {
+        $response = new Response();
+        $key = md5('weight-test' . '/route');
+        $this->redis->set($key, 8);
+        $this->redis->expire($key, 30);
+
+        // eight already spent, five more asked for, ten allowed: one call takes it over
+        $this->assertInstanceOf(Response::class, $this->service->checkAndIncrement($response, 'weight-test', '/route', 10, 5));
+        $this->assertSame(429, $response->code());
+    }
+
+    #[Test]
+    public function checkAndIncrementChargesOneForACallThatWeighsNothing(): void
+    {
+        $response = new Response();
+        $key = md5('weight-test' . '/route');
+
+        $this->service->checkAndIncrement($response, 'weight-test', '/route', 10, 0);
+
+        // a request that does none of the limited thing still costs a call, so the number of
+        // calls stays bounded as it was before weighting existed
+        $this->assertSame(1, (int)$this->redis->get($key));
     }
 
     #[Test]

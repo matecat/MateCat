@@ -87,7 +87,7 @@ class TeamMembersController extends KleinController
             is_array($params['members']) ? $params['members'] : [],
             'is_string'
         ));
-        if ($this->isOverInvitationRateLimit($this->response, $this->user, '/api/v2/teams/members')) {
+        if ($this->isOverInvitationRateLimit($this->response, $this->user, '/api/v2/teams/members', count($members))) {
             return;
         }
 

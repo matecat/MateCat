@@ -183,16 +183,17 @@ class TeamsController extends KleinController
 
         $userDao = new UserDao($this->getDatabase());
         $model = new TeamModel($teamStruct, $userDao, new TeamDao($this->getDatabase()));
-        $memberEmails = is_array($params['members']) ? $params['members'] : [];
+        $memberEmails = array_values(array_filter(
+            is_array($params['members']) ? $params['members'] : [],
+            'is_string'
+        ));
         foreach ($memberEmails as $email) {
-            if (is_string($email)) {
-                $model->addMemberEmail($email);
-            }
+            $model->addMemberEmail($email);
         }
         $model->setUser($this->user);
 
         // creating a team also invites every member passed with it
-        if ($this->isOverInvitationRateLimit($this->response, $this->user, '/api/v2/teams')) {
+        if ($this->isOverInvitationRateLimit($this->response, $this->user, '/api/v2/teams', count($memberEmails))) {
             return;
         }
 
