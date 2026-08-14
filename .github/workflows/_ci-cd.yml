@@ -231,21 +231,13 @@ jobs:
           # nothing under it can ever reach the clover report and Layer 1 reads it as "not in
           # coverage report" — a verdict no amount of testing could change.
           #
-          # The lib/** entries below are the same class of problem, arrived at three ways:
-          #  - lib/View/templates/**, lib/View/APIDoc.php and lib/View/fileupload/index.php are
-          #    named in phpunit.xml's <source><exclude>, so they never enter coverage.xml. They are
-          #    also mostly inline HTML, for which xdebug records no executable lines anyway.
-          #  - SignalHandlerTrait::installHandler() guards on `PHP_SAPI != 'cli'` and then die()s.
-          #    PHP_SAPI is always 'cli' under PHPUnit and die() is uncatchable, so the guard body is
-          #    unreachable from any test.
-          #  - UploadHandler::post() falls through to flush(), which emits header() twice and then
-          #    die()s — with processIsolation="false" that would kill the whole run. Three of the
-          #    file's six changed lines sit behind it, so it cannot reach the 80% diff threshold.
+          # UploadHandler is listed for a related reason: its public flush() emits header() twice and
+          # then die()s, and post() routes every response through it. Tests reach those lines via a
+          # subclass that overrides flush(), but the production die() itself stays unexecutable under
+          # processIsolation="false".
           extra-exclude-patterns: >-
             .github/**, daemons/**, dev-tools/**, migrations/**, tests/unit/TestHelpers/**,
-            lib/View/templates/**, lib/View/APIDoc.php, lib/View/fileupload/index.php,
-            lib/View/fileupload/UploadHandler.php,
-            lib/Utils/TaskRunner/Commons/SignalHandlerTrait.php
+            lib/View/fileupload/UploadHandler.php
           ai-enabled: 'true'
           # test-guard v2: GitHub Models was retired 2026-07-30 and Layer 3 now
           # calls any OpenAI-compatible endpoint, so it needs a provider key.
