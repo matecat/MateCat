@@ -51,7 +51,6 @@ class CattoolViewControllerTest extends AbstractTest
     private ReflectionClass $reflector;
     private TestableCattoolController $controller;
     private ArraySessionStore $sessionStore;
-    private ?string $previousRequestUri = null;
     private Request $requestStub;
     private Response&MockObject $responseMock;
 
@@ -77,11 +76,6 @@ class CattoolViewControllerTest extends AbstractTest
         $this->controller = new TestableCattoolController();
         $this->reflector = new ReflectionClass(CattoolController::class);
 
-        // The render path reaches TimeLoggerTrait::logPageCall(), which reads $_SERVER['REQUEST_URI']
-        // directly rather than $this->request, so seeding the Request would not satisfy it. Unset
-        // under the CLI, hence the warning these tests hit once they get past the session store.
-        $this->previousRequestUri = $_SERVER['REQUEST_URI'] ?? null;
-        $_SERVER['REQUEST_URI']   = '/translate/test';
 
         $this->requestStub = new Request();
         $this->responseMock = $this->createMock(Response::class);
@@ -108,12 +102,6 @@ class CattoolViewControllerTest extends AbstractTest
 
     protected function tearDown(): void
     {
-        if ($this->previousRequestUri === null) {
-            unset($_SERVER['REQUEST_URI']);
-        } else {
-            $_SERVER['REQUEST_URI'] = $this->previousRequestUri;
-        }
-
         $this->cleanFragments(self::BASE);
         parent::tearDown();
     }
@@ -367,46 +355,42 @@ class CattoolViewControllerTest extends AbstractTest
     #[Test]
     public function renderView_assembles_view_vars_for_translate_page(): void
     {
-        $previousUri = $_SERVER['REQUEST_URI'] ?? null;
-        $_SERVER['REQUEST_URI'] = '/translate/CtrlTestProject/en-it/' . $this->jobId(self::BASE) . '-jobpw';
+        // On the request rather than in $_SERVER: the render path reads the URI from the request it
+        // was given, so there is no global to restore afterwards.
+        $this->requestStub->server()->set(
+            'REQUEST_URI',
+            '/translate/CtrlTestProject/en-it/' . $this->jobId(self::BASE) . '-jobpw'
+        );
 
         $this->requestStub->paramsNamed()->set('jid', (string) $this->jobId(self::BASE));
         $this->requestStub->paramsNamed()->set('password', 'jobpw');
 
+        // renderView() resolves the seeded chunk, assembles the full template
+        // variable map via setView(), then enters the render/decorator
+        // pipeline. In this unit checkout that pipeline (PHPTAL templates +
+        // word-count decorator fixtures) cannot complete, so it throws AFTER
+        // the entire data-assembly body has executed. We assert the failure
+        // originates from the decorator/render stage (proving the whole
+        // assembly path ran) and that setView() populated the view object.
+        $caught = null;
         try {
-            // renderView() resolves the seeded chunk, assembles the full template
-            // variable map via setView(), then enters the render/decorator
-            // pipeline. In this unit checkout that pipeline (PHPTAL templates +
-            // word-count decorator fixtures) cannot complete, so it throws AFTER
-            // the entire data-assembly body has executed. We assert the failure
-            // originates from the decorator/render stage (proving the whole
-            // assembly path ran) and that setView() populated the view object.
-            $caught = null;
-            try {
-                $this->controller->renderView();
-            } catch (\Throwable $e) {
-                $caught = $e;
-            }
-
-            $this->assertNotNull($caught, 'renderView did not reach the render/decorator stage');
-
-            $viewProp = $this->reflector->getProperty('view');
-            $this->assertTrue(
-                $viewProp->isInitialized($this->controller),
-                'setView() did not run — data assembly stopped before building the view'
-            );
-            $this->assertInstanceOf(
-                \PHPTAL::class,
-                $viewProp->getValue($this->controller),
-                'view was not assembled by setView()'
-            );
-        } finally {
-            if ($previousUri === null) {
-                unset($_SERVER['REQUEST_URI']);
-            } else {
-                $_SERVER['REQUEST_URI'] = $previousUri;
-            }
+            $this->controller->renderView();
+        } catch (\Throwable $e) {
+            $caught = $e;
         }
+
+        $this->assertNotNull($caught, 'renderView did not reach the render/decorator stage');
+
+        $viewProp = $this->reflector->getProperty('view');
+        $this->assertTrue(
+            $viewProp->isInitialized($this->controller),
+            'setView() did not run — data assembly stopped before building the view'
+        );
+        $this->assertInstanceOf(
+            \PHPTAL::class,
+            $viewProp->getValue($this->controller),
+            'view was not assembled by setView()'
+        );
     }
 
     /**
