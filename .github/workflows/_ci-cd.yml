@@ -230,14 +230,8 @@ jobs:
           # dev-tools/** holds the custom PHPStan rules. phpunit.xml whitelists ./lib only, so
           # nothing under it can ever reach the clover report and Layer 1 reads it as "not in
           # coverage report" — a verdict no amount of testing could change.
-          #
-          # UploadHandler is listed for a related reason: its public flush() emits header() twice and
-          # then die()s, and post() routes every response through it. Tests reach those lines via a
-          # subclass that overrides flush(), but the production die() itself stays unexecutable under
-          # processIsolation="false".
           extra-exclude-patterns: >-
-            .github/**, daemons/**, dev-tools/**, migrations/**, tests/unit/TestHelpers/**,
-            lib/View/fileupload/UploadHandler.php
+            .github/**, daemons/**, dev-tools/**, migrations/**, tests/unit/TestHelpers/**
           ai-enabled: 'true'
           # test-guard v2: GitHub Models was retired 2026-07-30 and Layer 3 now
           # calls any OpenAI-compatible endpoint, so it needs a provider key.
