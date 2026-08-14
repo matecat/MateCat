@@ -125,7 +125,12 @@ class TeamsController extends KleinController
         // link in an invitation. That is now handled where it happens, by
         // {@see \Utils\Email\LinkDefanger}, which rewrites "evil.com" as "evil[.]com" in every email
         // — including for the names already stored, which a write-time rule could never reach.
-        if (preg_match('~[a-z][a-z0-9+.-]*://|\bwww\.~i', $decoded) === 1) {
+        // `!== 0` rather than `=== 1`: preg_match returns false when PCRE gives up — a backtrack or
+        // JIT stack limit — and a check whose job is to refuse must refuse when it cannot decide.
+        // Only an explicit 0, the engine having looked and found nothing, is a pass. Unreachable
+        // today because the length caps above run first and leave at most a hundred characters
+        // here, but that is an ordering nobody should have to preserve to keep this safe.
+        if (preg_match('~[a-z][a-z0-9+.-]*://|\bwww\.~i', $decoded) !== 0) {
             throw new InvalidArgumentException(
                 "Wrong parameter: name cannot contain a URL",
                 400

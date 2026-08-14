@@ -631,6 +631,37 @@ class TeamsControllerTest extends AbstractTest
      *
      * @return array<string, array{string}>
      */
+    /**
+     * A check whose job is to refuse must refuse when it cannot decide.
+     *
+     * preg_match returns false rather than 0 or 1 when PCRE gives up, and reading that as "no
+     * match" would store the very name the rule exists to reject. Forced here by making the engine
+     * give up immediately; unreachable in production only because the length caps run first, which
+     * is an ordering nobody should have to preserve to keep this safe.
+     *
+     * @throws Exception
+     * @throws TypeError
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function create_refuses_a_link_when_the_regex_engine_gives_up(): void
+    {
+        $this->actAsFactoryUser();
+        $this->setRequestParams(['name' => 'https://bing.com', 'type' => Teams::GENERAL]);
+
+        $previous = ini_get('pcre.backtrack_limit');
+        ini_set('pcre.backtrack_limit', '1');
+
+        try {
+            $this->expectException(InvalidArgumentException::class);
+            $this->expectExceptionCode(400);
+
+            $this->controller->create();
+        } finally {
+            ini_set('pcre.backtrack_limit', (string)$previous);
+        }
+    }
+
     public static function namesCarryingADot(): array
     {
         return [
