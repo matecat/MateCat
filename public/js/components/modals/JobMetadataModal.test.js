@@ -69,7 +69,24 @@ describe('JobMetadataModal', () => {
       expect(container.innerHTML).not.toContain('onerror')
     })
 
-    test('keeps benign markup and real links', () => {
+    test('keeps benign markup', () => {
+      const {container} = render(
+        <JobMetadataModal
+          showCurrent={true}
+          currentFile={1}
+          files={[fileWith({instructions: '<b>Bold</b> and plain text'})]}
+        />,
+      )
+
+      expect(container.querySelector('b')).not.toBeNull()
+      expect(container.textContent).toContain('and plain text')
+    })
+  })
+
+  // The write path stores anchors as anchors — which of them a translator may follow is decided
+  // here, and core decides none of them (isAllowedLinkRedirect is `() => false`).
+  describe('gates stored links through isAllowedLinkRedirect', () => {
+    test('flattens instruction anchors to markdown text', () => {
       const {container} = render(
         <JobMetadataModal
           showCurrent={true}
@@ -77,16 +94,28 @@ describe('JobMetadataModal', () => {
           files={[
             fileWith({
               instructions:
-                '<b>Bold</b> and <a href="https://example.com">a link</a>',
+                '**Job number**: <a href="https://cloud.memsource.com/web/job/Tsit/translate" target="_blank">Tsit</a>',
             }),
           ]}
         />,
       )
 
-      expect(container.querySelector('b')).not.toBeNull()
-      expect(
-        container.querySelector('a[href="https://example.com"]'),
-      ).not.toBeNull()
+      expect(container.querySelector('a')).toBeNull()
+      expect(container.textContent).toContain(
+        '[Tsit](https://cloud.memsource.com/web/job/Tsit/translate)',
+      )
+    })
+
+    test('gates the project instructions too', () => {
+      const {container} = render(
+        <JobMetadataModal
+          projectInfo='read <a href="https://example.com">this</a>'
+          files={[fileWith({instructions: null})]}
+        />,
+      )
+
+      expect(container.querySelector('a')).toBeNull()
+      expect(container.textContent).toContain('[this](https://example.com)')
     })
   })
 

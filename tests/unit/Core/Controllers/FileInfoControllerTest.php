@@ -249,7 +249,7 @@ class FileInfoControllerTest extends AbstractTest
         $utility = $this->createMock(FilesInfoUtility::class);
         $utility->expects(self::once())
             ->method('setInstructions')
-            ->with(35, 'l (http://t.co)')
+            ->with(35, '<a href="http://t.co">l</a>')
             ->willReturn(true);
         $this->controller->stubUtility = $utility;
 
@@ -280,7 +280,7 @@ class FileInfoControllerTest extends AbstractTest
         $utility = $this->createMock(FilesInfoUtility::class);
         $utility->expects(self::once())
             ->method('setInstructions')
-            ->with(35, 'label (http://t.co)')
+            ->with(35, '<a href="http://t.co">label</a>')
             ->willReturn(true);
         $this->controller->stubUtility = $utility;
 

@@ -3,6 +3,31 @@ import CommonUtils from '../../utils/commonUtils'
 import {Accordion} from '../common/Accordion/Accordion'
 import {filterXSS} from 'xss'
 
+// Which links a translator may actually follow is this layer's decision: the stored value keeps
+// every anchor it was given, and whatever the deployment disallows is flattened to inert markdown
+// text here. Core allows nothing (isAllowedLinkRedirect is `() => false`); plugins override it.
+const removeNotAllowedLinksFromHtml = (html) => {
+  const div = document.createElement('div')
+  div.innerHTML = html
+  const links = div.getElementsByTagName('a')
+  const linksArray = Array.from(links)
+  for (var i = 0; i < linksArray.length; i++) {
+    const linkElement = linksArray[i]
+    const link = linkElement.getAttribute('href')
+    if (!CommonUtils.isAllowedLinkRedirect(link)) {
+      const text = '[' + linkElement.textContent + '](' + link + ')'
+      // Replace the node we already hold: re-querying by href breaks on an anchor with no
+      // href and on any href containing a quote.
+      linkElement.parentNode &&
+        linkElement.parentNode.replaceChild(
+          document.createTextNode(text),
+          linkElement,
+        )
+    }
+  }
+  return div.innerHTML
+}
+
 class JobMetadataModal extends React.Component {
   constructor(props) {
     super(props)
@@ -15,28 +40,6 @@ class JobMetadataModal extends React.Component {
     typeof metadata?.['mtc:references'] === 'string'
 
   getMTCReferences({metadata}) {
-    const removeNotAllowedLinksFromHtml = (html) => {
-      const div = document.createElement('div')
-      div.innerHTML = html
-      const links = div.getElementsByTagName('a')
-      const linksArray = Array.from(links)
-      for (var i = 0; i < linksArray.length; i++) {
-        const linkElement = linksArray[i]
-        const link = linkElement.getAttribute('href')
-        if (!CommonUtils.isAllowedLinkRedirect(link)) {
-          const text = '[' + linkElement.textContent + '](' + link + ')'
-          // Replace the node we already hold: re-querying by href breaks on an anchor with no
-          // href and on any href containing a quote.
-          linkElement.parentNode &&
-            linkElement.parentNode.replaceChild(
-              document.createTextNode(text),
-              linkElement,
-            )
-        }
-      }
-      return div.innerHTML
-    }
-
     return (
       this.isMtcReferenceValued({metadata}) && (
         <p
@@ -123,11 +126,13 @@ class JobMetadataModal extends React.Component {
     )
   }
 
-  // Instructions are stored as plain text and injected with dangerouslySetInnerHTML, so the
-  // escaping has to happen here. Plugins override this method to add markdown rendering; they
-  // filter too, and filterXSS is idempotent.
+  // Instructions are stored with their anchors intact and injected with dangerouslySetInnerHTML,
+  // so both the escaping and the link decision have to happen here. `plugins/translated` renders
+  // markdown over the same value first (CommonUtils.parseFiles), so for file instructions this is
+  // the second pass — both steps are idempotent, and the plugin's own isAllowedLinkRedirect keeps
+  // its allowed domains clickable. projectInfo reaches this method with no earlier pass at all.
   getHtml(text) {
-    return text ? filterXSS(text) : text
+    return text ? removeNotAllowedLinksFromHtml(filterXSS(text)) : text
   }
 
   componentDidMount() {

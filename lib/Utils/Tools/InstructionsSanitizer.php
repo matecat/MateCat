@@ -9,16 +9,27 @@ use DOMNode;
 /**
  * Sanitizes the `instructions` strings coming from third party integrations.
  *
- * The contract, identical for file/file_part instructions and for segment level instructions, is:
+ * The contract, identical for file and file_part instructions, is:
  *
- *  - every HTML tag is stripped, `<a>` excepted: for anchors the URL is extracted and shown right
- *    after the label, so `This is a nested <a href="http://test.com">link</a>` becomes
- *    `This is a nested link (http://test.com)`
+ *  - every HTML tag is stripped, `<a>` excepted: an anchor whose URL passes the scheme allowlist
+ *    survives as an anchor, reduced to its safe attributes, so
+ *    `This is a nested <a href="http://test.com" target="_blank" onclick="…">link</a>` becomes
+ *    `This is a nested <a href="http://test.com" target="_blank">link</a>`
  *  - markdown is left untouched, hyperlinks included: `This is a nested [link](http://test.com)`
  *    is stored verbatim so that the URL stays visible
  *
- * The returned value is plain text: HTML entities are resolved, never re-introduced. Escaping
- * belongs to the rendering layer, not to the storage layer.
+ * The anchor is *kept*, not flattened to `label (url)`: which links a translator may actually
+ * follow is a rendering decision, and the front end already owns it — `isAllowedLinkRedirect()`
+ * plus `removeNotAllowedLinksFromHtml()` flatten whatever the current deployment disallows (core
+ * disallows everything, `plugins/translated` allows its own domains). Flattening here would take
+ * that decision away from the only layer that can make it, and would also diverge from the shape
+ * every stored row has had so far.
+ *
+ * Text nodes are never re-encoded: the stored value is deliberately neither strict HTML nor strict
+ * plain text. `Tom & Jerry` stays `Tom & Jerry`, because the value is also read as plain text —
+ * `Uber::filterContributionStructOnSetTranslation()` regex-scrapes `**Client:**` out of it — while
+ * every renderer injecting it as HTML runs `filterXSS` first. Escaping belongs to the rendering
+ * layer, not to the storage layer.
  *
  * Because escaped markup has to be un-escaped before it can be stripped, entities are resolved
  * down to a fixed point: text that merely *looks* like a tag (`&amp;lt;script&amp;gt;`) is
@@ -54,6 +65,13 @@ class InstructionsSanitizer
     private const DROPPED_SUBTREES = ['script', 'style'];
 
     /**
+     * The only values a surviving `target` may hold. An allowlist of values rather than escaping:
+     * it rejects both `target="_blank" onclick="…"` breakout attempts and the stray backslash that
+     * payloads delivering their attributes as `target=\"_blank\"` would otherwise leave behind.
+     */
+    private const ALLOWED_TARGETS = ['_blank', '_self', '_parent', '_top'];
+
+    /**
      * @param string $raw
      *
      * @return string
@@ -82,7 +100,8 @@ class InstructionsSanitizer
 
         if ($sanitized !== $previous) {
             // Hit the cap without converging, so the last pass may have just decoded one more
-            // level into something tag shaped. Never hand that back.
+            // level into something tag shaped. Never hand that back — at this point the anchors go
+            // too, which is the right trade for a payload this pathological.
             $sanitized = strip_tags($sanitized);
         }
 
@@ -118,14 +137,111 @@ class InstructionsSanitizer
             return $html;
         }
 
-        self::dropSubtrees($htmlDom);
-        self::rewriteAnchors($htmlDom);
-        self::rewriteImages($htmlDom);
-
-        // Read the text straight off the DOM rather than serializing and running strip_tags():
+        // Walk the DOM rather than calling saveHtml() and running strip_tags() over the result:
         // saveHtml() re-encodes every entity, so `Tom & Jerry` would come back as `Tom &amp; Jerry`
         // and corrupt every text consumer of the stored value.
-        return $documentElement->textContent;
+        return self::serialize($documentElement);
+    }
+
+    /**
+     * Emit the subtree keeping only what the contract allows: text verbatim, anchors as anchors,
+     * `<img>` as its bare src, `<script>`/`<style>` bodies dropped whole — stripping those two tags
+     * alone would leave their body behind as visible text — and every other element unwrapped to
+     * its children.
+     *
+     * @param DOMNode $node
+     *
+     * @return string
+     */
+    private static function serialize(DOMNode $node): string
+    {
+        $serialized = '';
+
+        foreach ($node->childNodes as $child) {
+            if ($child->nodeType === XML_TEXT_NODE || $child->nodeType === XML_CDATA_SECTION_NODE) {
+                $serialized .= (string)$child->nodeValue;
+
+                continue;
+            }
+
+            // Comments, processing instructions and the doctype carry nothing worth keeping.
+            if (!$child instanceof DOMElement) {
+                continue;
+            }
+
+            $tagName = strtolower($child->tagName);
+
+            if (in_array($tagName, self::DROPPED_SUBTREES, true)) {
+                continue;
+            }
+
+            if ($tagName === 'a') {
+                $serialized .= self::serializeAnchor($child);
+
+                continue;
+            }
+
+            if ($tagName === 'img') {
+                $serialized .= (string)self::sanitizeUrl($child->getAttribute('src'));
+
+                continue;
+            }
+
+            $serialized .= self::serialize($child);
+        }
+
+        return $serialized;
+    }
+
+    /**
+     * Emit an anchor reduced to its safe attributes, or just its label when the URL is not usable.
+     *
+     * Nested anchors cannot survive as nested: the HTML parser has already hoisted them into
+     * siblings, which is what keeps the output re-parseable to the same tree.
+     *
+     * @param DOMElement $anchor
+     *
+     * @return string
+     */
+    private static function serializeAnchor(DOMElement $anchor): string
+    {
+        $label = self::serialize($anchor);
+        $href = self::sanitizeUrl($anchor->getAttribute('href'));
+
+        if ($href === null) {
+            return $label;
+        }
+
+        $attributes = ' href="' . self::escapeAttribute($href) . '"';
+
+        $target = strtolower(trim($anchor->getAttribute('target')));
+
+        if (in_array($target, self::ALLOWED_TARGETS, true)) {
+            $attributes .= ' target="' . $target . '"';
+        }
+
+        $title = trim($anchor->getAttribute('title'));
+
+        if ($title !== '') {
+            $attributes .= ' title="' . self::escapeAttribute($title) . '"';
+        }
+
+        // A label-less anchor would render as a hole in the text: show the URL instead.
+        if (trim($label) === '') {
+            $label = self::escapeAttribute($href);
+        }
+
+        return '<a' . $attributes . '>' . $label . '</a>';
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return string
+     */
+    private static function escapeAttribute(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
     }
 
     /**
@@ -148,84 +264,6 @@ class InstructionsSanitizer
     }
 
     /**
-     * @param DOMDocument $htmlDom
-     *
-     * @return void
-     */
-    private static function dropSubtrees(DOMDocument $htmlDom): void
-    {
-        foreach (self::DROPPED_SUBTREES as $tagName) {
-            $nodes = $htmlDom->getElementsByTagName($tagName);
-
-            // Iterate backwards: the node list is live, removing while going forward skips nodes.
-            for ($i = $nodes->length - 1; $i > -1; $i--) {
-                $node = $nodes->item($i);
-
-                if ($node instanceof DOMNode && $node->parentNode !== null) {
-                    $node->parentNode->removeChild($node);
-                }
-            }
-        }
-    }
-
-    /**
-     * Replace every `<a>` with `label (url)`, or with the bare label when the URL is not usable.
-     *
-     * @param DOMDocument $htmlDom
-     *
-     * @return void
-     */
-    private static function rewriteAnchors(DOMDocument $htmlDom): void
-    {
-        $links = $htmlDom->getElementsByTagName('a');
-
-        for ($i = $links->length - 1; $i > -1; $i--) {
-            $link = $links->item($i);
-
-            if (!$link instanceof DOMElement || $link->parentNode === null) {
-                continue;
-            }
-
-            $label = trim((string)$link->nodeValue);
-            $href = self::sanitizeUrl($link->getAttribute('href'));
-
-            if ($href === null || $href === $label) {
-                $replacement = $label !== '' ? $label : (string)$href;
-            } elseif ($label === '') {
-                $replacement = $href;
-            } else {
-                $replacement = $label . ' (' . $href . ')';
-            }
-
-            $link->parentNode->replaceChild($htmlDom->createTextNode($replacement), $link);
-        }
-    }
-
-    /**
-     * Replace every `<img>` with its src.
-     *
-     * @param DOMDocument $htmlDom
-     *
-     * @return void
-     */
-    private static function rewriteImages(DOMDocument $htmlDom): void
-    {
-        $images = $htmlDom->getElementsByTagName('img');
-
-        for ($i = $images->length - 1; $i > -1; $i--) {
-            $image = $images->item($i);
-
-            if (!$image instanceof DOMElement || $image->parentNode === null) {
-                continue;
-            }
-
-            $src = self::sanitizeUrl($image->getAttribute('src'));
-
-            $image->parentNode->replaceChild($htmlDom->createTextNode((string)$src), $image);
-        }
-    }
-
-    /**
      * @param string $url
      *
      * @return string|null the URL, or null when its scheme is not allowed
@@ -233,8 +271,9 @@ class InstructionsSanitizer
     private static function sanitizeUrl(string $url): ?string
     {
         // Historically hrefs arrive with escaped quotes glued to them, see the JSON payloads in
-        // StripTagsPreservingHrefsTest.
-        $url = trim(str_replace(['\\"', '"', "'"], '', $url));
+        // StripTagsPreservingHrefsTest. Backslashes go whole: a URL never needs one, they are the
+        // residue those payloads leave behind, and browsers normalize them to a slash.
+        $url = trim(str_replace(['\\', '"', "'"], '', $url));
 
         if ($url === '') {
             return null;

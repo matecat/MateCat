@@ -465,7 +465,7 @@ class NewControllerTest extends AbstractTest
         ]);
 
         $this->assertEquals(
-            '**Project number**: 34962138 (https://cloud.memsource.com/web/project2/show/34962138)',
+            '**Project number**: <a href="https://cloud.memsource.com/web/project2/show/34962138" target="_blank">34962138</a>',
             $validateParameters['instructions'][0]
         );
     }
@@ -483,7 +483,10 @@ class NewControllerTest extends AbstractTest
         ]);
 
         $this->assertEquals('first', $validateParameters['instructions'][0]);
-        $this->assertEquals('a l (http://t.co)', $validateParameters['instructions'][1]['nested']);
+        $this->assertEquals(
+            'a <a href="http://t.co">l</a>',
+            $validateParameters['instructions'][1]['nested']
+        );
     }
 
     /**
