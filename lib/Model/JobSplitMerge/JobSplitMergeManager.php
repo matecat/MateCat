@@ -52,9 +52,9 @@ class JobSplitMergeManager
     /**
      * @param UserStruct $actingUser Who is running the split or merge. Carried onto the
      *                               PostJobSplitted / PostJobMerged events so listeners attribute
-     *                               the resulting chunk-review updates without reading the session.
-     *                               Distinct from SplitMergeProjectData::$uid, which also drives
-     *                               translator re-invitation and is left untouched here.
+     *                               the resulting chunk-review updates without reading the session,
+     *                               and used as the inviter when a split moves the link its
+     *                               translator holds.
      *
      * @throws Exception
      */
@@ -112,7 +112,7 @@ class JobSplitMergeManager
      */
     public function applySplit(SplitMergeProjectData $data): void
     {
-        $this->getJobSplitMergeService()->applySplit($data, $this->actingUser, $data->uid);
+        $this->getJobSplitMergeService()->applySplit($data, $this->actingUser);
     }
 
     /**

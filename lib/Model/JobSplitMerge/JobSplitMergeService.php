@@ -387,18 +387,17 @@ class JobSplitMergeService
     /**
      * Apply a new structure of the job: empty cart, begin transaction, split, commit.
      *
-     * @param UserStruct $actingUser The user performing the split
-     * @param int|null $uid The user ID used to re-invite the job translator (nullable)
+     * @param UserStruct $actingUser The user performing the split, and the one re-inviting its translator
      *
      * @throws Exception
      * @throws TypeError
      */
-    public function applySplit(SplitMergeProjectData $data, UserStruct $actingUser, ?int $uid = null): void
+    public function applySplit(SplitMergeProjectData $data, UserStruct $actingUser): void
     {
         $this->getCart()?->emptyCart();
 
         $this->beginTransaction();
-        $this->splitJob($data, $actingUser, $uid);
+        $this->splitJob($data, $actingUser);
         $this->dbHandler->commit();
     }
 
@@ -408,13 +407,12 @@ class JobSplitMergeService
      * first/last segments of every chunk, last opened segment as the first segment of the new job,
      * and the timestamp of creation.
      *
-     * @param UserStruct $actingUser The user performing the split
-     * @param int|null $uid The user ID used to re-invite the job translator
+     * @param UserStruct $actingUser The user performing the split, and the one re-inviting its translator
      *
      * @throws Exception
      * @throws TypeError
      */
-    public function splitJob(SplitMergeProjectData $data, UserStruct $actingUser, ?int $uid = null): void
+    public function splitJob(SplitMergeProjectData $data, UserStruct $actingUser): void
     {
         // init JobDao
         $jobDao = $this->createJobDao();
@@ -425,22 +423,11 @@ class JobSplitMergeService
             throw new Exception('Job not found for id ' . $data->jobToSplit, -8);
         }
 
+        // Read before the chunks are written, because the association is keyed by the password the
+        // job still has. Whether to act on it is decided after, once the first chunk's password is
+        // known.
         $translatorModel = $this->createTranslatorsModel($jobToSplit);
         $jTranslatorStruct = $translatorModel->getTranslator(0); // no cache
-        if (!empty($jTranslatorStruct) && !empty($uid)) {
-            $userStruct = $this->createUserDao()->setCacheTTL(60 * 60)->getByUid($uid);
-            if ($userStruct === null) {
-                throw new Exception('User not found for uid ' . $uid, -8);
-            }
-            $translatorModel
-                ->setUserInvite($userStruct)
-                ->setDeliveryDate($jTranslatorStruct->delivery_date)
-                ->setJobOwnerTimezone($jTranslatorStruct->job_owner_timezone)
-                ->setEmail($jTranslatorStruct->email)
-                ->setNewJobPassword($this->generateRandomString());
-
-            $translatorModel->update();
-        }
 
         if ($data->splitResult === null) {
             throw new Exception('Split result not available. Call getSplitData() first.', -8);
@@ -527,6 +514,33 @@ class JobSplitMergeService
                 $contents['segment_start'],
                 $contents['segment_end']
             ]));
+        }
+
+        // Tell the job's translator only if the split moved the link they hold.
+        //
+        // It usually does not: the first chunk keeps the original id and password — only the chunks
+        // after it get a fresh one, at the `segment_start != job_first_segment` test above — so a
+        // translator carries on working, on a smaller piece, and the remaining chunks are free to be
+        // given to somebody else. Telling them then would be noise, and rotating their password to
+        // do it would break a link that works.
+        //
+        // When the first chunk's password does move, the opposite is true: their link stops
+        // resolving and nothing else would say so. The new password is what gets sent — the previous
+        // shape of this block generated a third, unrelated one — and passing it to
+        // TranslatorsModel::update() is what reaches its "split" mail.
+        //
+        // Withdrawing a translator's access stays the project manager's explicit act, through a
+        // password change; it is not a silent consequence of reorganising the work.
+        $firstChunk = $newJobList[0] ?? null;
+        if (!empty($jTranslatorStruct) && $firstChunk !== null && $firstChunk->password !== $jobToSplit->password) {
+            $translatorModel
+                ->setUserInvite($actingUser)
+                ->setDeliveryDate($jTranslatorStruct->delivery_date)
+                ->setJobOwnerTimezone($jTranslatorStruct->job_owner_timezone)
+                ->setEmail($jTranslatorStruct->email)
+                ->setNewJobPassword((string)$firstChunk->password);
+
+            $translatorModel->update();
         }
 
         foreach ($newJobList as $job) {
