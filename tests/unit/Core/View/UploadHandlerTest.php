@@ -399,6 +399,34 @@ class UploadHandlerTest extends AbstractTest
         unset($_SERVER['CONTENT_LENGTH']);
     }
 
+    // ─── _validateToken ───
+
+    #[Test]
+    public function validateToken_throws_for_a_malformed_token(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Invalid upload token.');
+
+        $this->invokePrivate('_validateToken', ['not-a-uuid']);
+    }
+
+    #[Test]
+    public function validateToken_throws_for_an_empty_token(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Invalid upload token.');
+
+        $this->invokePrivate('_validateToken', ['']);
+    }
+
+    #[Test]
+    public function validateToken_accepts_a_well_formed_uuid(): void
+    {
+        $this->invokePrivate('_validateToken', ['3f2504e0-4f89-11d3-9a0c-0305e82c3301']);
+
+        $this->addToAssertionCount(1); // no exception thrown is the assertion
+    }
+
     #[Test]
     public function validate_returns_false_for_filename_too_long(): void
     {

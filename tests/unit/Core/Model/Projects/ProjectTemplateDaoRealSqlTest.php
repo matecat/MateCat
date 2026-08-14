@@ -380,6 +380,22 @@ class ProjectTemplateDaoRealSqlTest extends AbstractTest
         $this->dao->createFromJSON($json, $this->user);
     }
 
+    /**
+     * hydrateFromJSON() serializes target_language unconditionally, so a scalar unserializes back
+     * to a string and trips the is_array() guard — a different branch from the invalid-language
+     * check above, which passes a well-formed list.
+     */
+    public function testCreateFromJSONThrowsWhenTargetLanguageIsNotAList(): void
+    {
+        $json = $this->newDecodedJson('scalar tgt');
+        $json->target_language = 'it-IT';
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Target language is not an array');
+        $this->expectExceptionCode(403);
+        $this->dao->createFromJSON($json, $this->user);
+    }
+
     public function testCreateFromJSONThrowsOnMissingXliffTemplate(): void
     {
         $json = $this->newDecodedJson('bad xliff');

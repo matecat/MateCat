@@ -79,6 +79,23 @@ class NewControllerValidationMethodsTest extends AbstractTest
     }
 
     #[Test]
+    public function validateMetadataParam_unknown_property_throws(): void
+    {
+        // project_metadata.json declares "additionalProperties": false
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid metadata.');
+        $this->invokeMethod('validateMetadataParam', ['{"not_a_known_key": 1}']);
+    }
+
+    #[Test]
+    public function validateMetadataParam_value_outside_enum_throws(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid metadata.');
+        $this->invokeMethod('validateMetadataParam', ['{"word_count_type": "bogus"}']);
+    }
+
+    #[Test]
     public function validateMetadataParam_empty_string_returns_default(): void
     {
         $result = $this->invokeMethod('validateMetadataParam', ['']);

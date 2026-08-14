@@ -4,6 +4,7 @@
 namespace Matecat\Core\Model\Users;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\ConnectedServices\Oauth\OauthTokenEncryption;
 use Model\Users\AuthTokenScope;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
@@ -377,5 +378,71 @@ class UserStructTest extends AbstractTest
         $user = new UserStruct();
 
         $this->assertNull($user->getDecryptedOauthAccessToken());
+    }
+
+    // ─── getDecodedOauthAccessToken ───
+
+    /**
+     * The encryption singleton reads/creates a key file, so it is pointed at a throwaway path for
+     * the duration of the class and reset afterwards — the instance is process-global.
+     */
+    private static string $oauthKeyFilePath = '';
+
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+        self::$oauthKeyFilePath = sys_get_temp_dir() . '/oauth_userstruct_' . uniqid() . '.key';
+        (new \ReflectionProperty(OauthTokenEncryption::class, 'instance'))
+            ->setValue(null, new OauthTokenEncryption(self::$oauthKeyFilePath));
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        (new \ReflectionProperty(OauthTokenEncryption::class, 'instance'))->setValue(null, null);
+        if (self::$oauthKeyFilePath !== '' && file_exists(self::$oauthKeyFilePath)) {
+            unlink(self::$oauthKeyFilePath);
+        }
+        parent::tearDownAfterClass();
+    }
+
+    private function userWithEncryptedToken(array $payload): UserStruct
+    {
+        $user                      = new UserStruct();
+        $user->oauth_access_token  = OauthTokenEncryption::getInstance()->encrypt(json_encode($payload));
+
+        return $user;
+    }
+
+    #[Test]
+    public function getDecodedOauthAccessTokenReturnsTheWholePayloadWhenNoFieldRequested(): void
+    {
+        $user = $this->userWithEncryptedToken(['access_token' => 'abc', 'expires_in' => 3600]);
+
+        $this->assertSame(['access_token' => 'abc', 'expires_in' => 3600], $user->getDecodedOauthAccessToken());
+    }
+
+    #[Test]
+    public function getDecodedOauthAccessTokenReturnsASingleField(): void
+    {
+        $user = $this->userWithEncryptedToken(['access_token' => 'abc', 'expires_in' => 3600]);
+
+        $this->assertSame('abc', $user->getDecodedOauthAccessToken('access_token'));
+    }
+
+    #[Test]
+    public function getDecodedOauthAccessTokenReturnsNullWhenThereIsNoToken(): void
+    {
+        $this->assertNull((new UserStruct())->getDecodedOauthAccessToken('access_token'));
+    }
+
+    #[Test]
+    public function getDecodedOauthAccessTokenThrowsWhenTheFieldIsAbsent(): void
+    {
+        $user = $this->userWithEncryptedToken(['access_token' => 'abc']);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Key not found on token: refresh_token');
+
+        $user->getDecodedOauthAccessToken('refresh_token');
     }
 }
