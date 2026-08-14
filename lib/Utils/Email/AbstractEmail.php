@@ -89,13 +89,40 @@ abstract class AbstractEmail
         return trim($collapsed ?? '');
     }
 
+    /**
+     * The one place email template variables are escaped.
+     *
+     * Doing it here rather than in each `<?=` is the whole point: eighty of the eighty-seven
+     * interpolations across `lib/View/Emails` were raw when this was written, which is what a rule
+     * applied by hand converges on. {@see EmailValue} escapes on read, so a template writes a value
+     * and gets a safe one without knowing to ask.
+     */
     protected function _buildMessageContent(): string
     {
         ob_start();
-        extract($this->_getTemplateVariables());
+        extract(EmailValue::wrapAll($this->_getTemplateVariables(), $this->verbatimKeys()));
         include($this->_template_path);
 
         return ob_get_clean() ?: '';
+    }
+
+    /**
+     * The template values a reader must receive exactly as given: the links the email exists to
+     * offer, and the addresses it is about. Everything else is defanged — {@see LinkDefanger}.
+     *
+     * Listed by key name rather than detected by shape, so no attacker-written value can exempt
+     * itself by imitating a link or an address. Matched at any depth, which is what covers the
+     * `email` inside a `user`, `sender` or `commenter` array.
+     *
+     * A subclass carrying its own link adds it here. Forgetting to is a broken button in the next
+     * render of that email rather than a silent gap, which is the failure mode this list is
+     * arranged to have.
+     *
+     * @return list<string>
+     */
+    protected function verbatimKeys(): array
+    {
+        return ['signup_url', 'url', 'password_reset_url', 'activation_url', 'email'];
     }
 
     /**
@@ -106,7 +133,7 @@ abstract class AbstractEmail
     protected function _buildHTMLMessage(?string $messageContent = null): string
     {
         ob_start();
-        extract($this->_getLayoutVariables($messageContent));
+        extract(EmailValue::wrapAll($this->_getLayoutVariables($messageContent), $this->verbatimKeys()));
         include($this->_layout_path);
 
         return ob_get_clean() ?: '';
@@ -121,7 +148,10 @@ abstract class AbstractEmail
     {
         return [
             'title' => $this->title ?? 'Matecat',
-            'messageBody' => (!empty($messageBody) ? $messageBody : $this->_buildMessageContent()),
+            // Already-rendered markup: it went through _buildMessageContent(), where its own values
+            // were escaped. Escaping it again would show the reader the tags of their own email.
+            // The allowlist in EmailTemplateEscapingTest names this and nothing else.
+            'messageBody' => EmailValue::raw(!empty($messageBody) ? $messageBody : $this->_buildMessageContent()),
             'closingLine' => "Kind regards, ",
             'showTitle' => false
         ];
