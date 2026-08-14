@@ -8,6 +8,7 @@ use Model\DataAccess\IDatabase;
 use Model\DataAccess\TransactionalTrait;
 use PDOException;
 use ReflectionException;
+use Throwable;
 
 class MetadataDao extends AbstractDao
 {
@@ -150,19 +151,29 @@ class MetadataDao extends AbstractDao
             " ON DUPLICATE KEY UPDATE `value` = :value ";
 
         $this->openTransaction(); // because we have to invalidate the cache after the insert, use the transactional trait
-        $conn = $this->database->getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            'id_job' => $id_job,
-            'password' => $password,
-            'key' => $key,
-            'value' => $value
-        ]);
 
-        $this->destroyCacheByJobAndPassword($id_job, $password);
-        $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
+        try {
+            $conn = $this->database->getConnection();
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                'id_job' => $id_job,
+                'password' => $password,
+                'key' => $key,
+                'value' => $value
+            ]);
 
-        $result = $this->get($id_job, $password, $key);
+            $this->destroyCacheByJobAndPassword($id_job, $password);
+            $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
+
+            $result = $this->get($id_job, $password, $key);
+        } catch (Throwable $e) {
+            // Undo it here rather than leaving it to the end of the request: a worker holds its
+            // connection across messages, so a transaction left open by a failure here would still
+            // be open when the next message starts writing.
+            $this->rollbackTransaction();
+            throw $e;
+        }
+
         $this->commitTransaction(); // commit only if everything went fine
 
         return $result;
@@ -200,14 +211,21 @@ class MetadataDao extends AbstractDao
             . " ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
 
         $this->openTransaction();
-        $conn = $this->database->getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->execute($params);
 
-        $this->destroyCacheByJobAndPassword($id_job, $password);
-        foreach ($metadata as $key => $value) {
-            $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
+        try {
+            $conn = $this->database->getConnection();
+            $stmt = $conn->prepare($sql);
+            $stmt->execute($params);
+
+            $this->destroyCacheByJobAndPassword($id_job, $password);
+            foreach ($metadata as $key => $value) {
+                $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
+            }
+        } catch (Throwable $e) {
+            $this->rollbackTransaction();
+            throw $e;
         }
+
         $this->commitTransaction();
     }
 

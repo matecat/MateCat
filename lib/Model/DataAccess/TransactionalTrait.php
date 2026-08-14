@@ -24,7 +24,16 @@ namespace Model\DataAccess;
 trait TransactionalTrait
 {
 
-    protected static bool $__transactionStarted = false;
+    /**
+     * Whether this object opened the transaction it is inside of.
+     *
+     * Per object, not per class. It used to be static, which made every instance of the using
+     * class share one flag: two of them nested, and the inner commit ended the outer one's
+     * transaction halfway through its work. A flag left set by a failure also outlived the
+     * object, so in a daemon the next commit on that class committed whatever transaction
+     * happened to be open. Neither can happen to a property that dies with its object.
+     */
+    protected bool $__transactionStarted = false;
 
     /**
      * The database the transaction runs on. Each host returns its own injected
@@ -40,7 +49,7 @@ trait TransactionalTrait
         $database = $this->getTransactionalDatabase();
         if (!$database->getConnection()->inTransaction()) {
             $database->begin();
-            static::$__transactionStarted = true;
+            $this->__transactionStarted = true;
         }
     }
 
@@ -49,9 +58,17 @@ trait TransactionalTrait
      */
     protected function commitTransaction(): void
     {
-        if (static::$__transactionStarted) {
-            $this->getTransactionalDatabase()->commit();
-            static::$__transactionStarted = false;
+        if (!$this->__transactionStarted) {
+            return;
+        }
+
+        // Cleared before the command is issued, not after: a commit that throws would otherwise
+        // leave the object believing it still owns a transaction that is no longer there.
+        $this->__transactionStarted = false;
+
+        $database = $this->getTransactionalDatabase();
+        if ($database->getConnection()->inTransaction()) {
+            $database->commit();
         }
     }
 
@@ -60,9 +77,15 @@ trait TransactionalTrait
      */
     protected function rollbackTransaction(): void
     {
-        if (static::$__transactionStarted) {
-            $this->getTransactionalDatabase()->rollback();
-            static::$__transactionStarted = false;
+        if (!$this->__transactionStarted) {
+            return;
+        }
+
+        $this->__transactionStarted = false;
+
+        $database = $this->getTransactionalDatabase();
+        if ($database->getConnection()->inTransaction()) {
+            $database->rollback();
         }
     }
 

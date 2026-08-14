@@ -26,6 +26,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 use TypeError;
 use Utils\Email\SendToTranslatorForDeliveryChangeEmail;
 use Utils\Email\SendToTranslatorForJobSplitEmail;
@@ -322,10 +323,19 @@ class TranslatorsModel
         $oldPassword = $this->jStruct->password ?? throw new TypeError('JobStruct::$password cannot be null');
 
         $this->openTransaction();
-        $jobDao = new JobDao($this->database);
-        $jobDao->changePassword($this->jStruct, $newPassword);
-        $jobDao->destroyCacheByIdAndPassword($this->jStruct);
-        $this->featureSet->dispatch(new JobPasswordChangedEvent($this->jStruct, $oldPassword));
+
+        try {
+            $jobDao = new JobDao($this->database);
+            $jobDao->changePassword($this->jStruct, $newPassword);
+            $jobDao->destroyCacheByIdAndPassword($this->jStruct);
+            $this->featureSet->dispatch(new JobPasswordChangedEvent($this->jStruct, $oldPassword));
+        } catch (Throwable $e) {
+            // Only rolls back a transaction opened here; when the caller already had one open,
+            // openTransaction() joined it and this leaves the decision to that caller.
+            $this->rollbackTransaction();
+            throw $e;
+        }
+
         $this->commitTransaction();
     }
 
