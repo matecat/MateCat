@@ -110,34 +110,24 @@ class TeamsController extends KleinController
             );
         }
 
-        // a scheme ("https://", "javascript:") or a "www." prefix
-        $hasUrlPrefix = preg_match('~[a-z][a-z0-9+.-]*://|\bwww\.~i', $decoded) === 1;
-
-        // A bare hostname: dot-separated labels ending in two or more letters.
+        // A scheme ("https://", "javascript:") or a "www." prefix. No legitimate team name carries
+        // one, so this costs nobody anything and stops the only shape that is unambiguously an
+        // address rather than a word with a dot in it.
         //
-        // Imprecise by nature — nothing distinguishes "Alpha.Beta" from "evil.com" by shape alone,
-        // only a registry does — and measured against production on 2026-08-13 it is wrong far more
-        // often than it is right: of the 120 stored names it rejects, 14 are attacks and 106 are
-        // real. Customers name a team after their own domain, and about twenty teams are named
-        // after a member's address. A list of real top-level domains does not help, because the
-        // suffixes those names end in are live ones.
+        // A bare hostname used to be rejected here too, and is not any more. Measured against
+        // production on 2026-08-13, that rule refused 120 stored names of which 14 were attacks and
+        // 106 were real: customers name a team after their own domain, about twenty teams are named
+        // after a member's address, and one of the refusals was this company's own name. Nothing
+        // distinguishes "Alpha.Beta" from "evil.com" by shape, and a list of real top-level domains
+        // does not help, because the legitimate names end in live suffixes too.
         //
-        // The reason to keep it anyway is narrow: it is the only thing that stops such a name being
-        // stored at all. The risk it was written for — a mail client turning the name into a
-        // clickable link in an invitation — is now handled where it happens, by
-        // {@see \Utils\Email\LinkDefanger}, which rewrites "evil.com" as "evil[.]com" in every
-        // email and does so for the names already in the table, which a write-time rule can never
-        // reach.
-        //
-        // So this check is now redundant for its stated purpose and expensive for its false
-        // positives. Removing it is a policy decision that has not been taken, not an oversight.
-        // Abbreviations already survive: the trailing label needs two letters, so "Translated
-        // S.r.l." passes. The scheme check above stays regardless — no legitimate name carries one.
-        $hasHostname = preg_match('~(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}~i', $decoded) === 1;
-
-        if ($hasUrlPrefix || $hasHostname) {
+        // What the rule was defending against was a mail client turning the name into a clickable
+        // link in an invitation. That is now handled where it happens, by
+        // {@see \Utils\Email\LinkDefanger}, which rewrites "evil.com" as "evil[.]com" in every email
+        // — including for the names already stored, which a write-time rule could never reach.
+        if (preg_match('~[a-z][a-z0-9+.-]*://|\bwww\.~i', $decoded) === 1) {
             throw new InvalidArgumentException(
-                "Wrong parameter: name cannot contain a URL or a domain name",
+                "Wrong parameter: name cannot contain a URL",
                 400
             );
         }

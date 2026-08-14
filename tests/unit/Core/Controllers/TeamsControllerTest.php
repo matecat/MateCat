@@ -260,7 +260,7 @@ class TeamsControllerTest extends AbstractTest
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionCode(400);
-        $this->expectExceptionMessage('name cannot contain a URL or a domain name');
+        $this->expectExceptionMessage('name cannot contain a URL');
 
         $this->controller->create();
     }
@@ -275,16 +275,9 @@ class TeamsControllerTest extends AbstractTest
             'scheme only' => ['http://x'],
             'javascript scheme' => ['javascript://comment'],
             'www prefix' => ['www.example.com'],
-            'bare hostname' => ['example.com'],
-            'hostname inside a pretext' => ['Verify your account at evil-login.co now'],
             'uppercase' => ['HTTPS://EVIL.COM'],
-            'subdomain' => ['login.microsoftonline.com'],
-            // The email templates escape with double_encode: false, so entity text reaches the
-            // recipient and their mail client turns it back into a dot. The rule has to be
-            // applied to what the reader sees, not to what was typed.
-            'dot smuggled as a decimal entity' => ['evil&#46;com'],
-            'dot smuggled as a hex entity' => ['evil&#x2E;com'],
-            'dot smuggled as a named entity' => ['evil&period;com'],
+            // Entity text reaches the recipient and their mail client turns it back into a colon,
+            // so the rule is applied to what the reader sees rather than to what was typed.
             'scheme smuggled as an entity' => ['https&#58;//evil.com'],
         ];
     }
@@ -624,21 +617,68 @@ class TeamsControllerTest extends AbstractTest
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionCode(400);
-        $this->expectExceptionMessage('name cannot contain a URL or a domain name');
+        $this->expectExceptionMessage('name cannot contain a URL');
 
         $this->controller->update();
     }
 
     /**
-     * The rename is refused before it reaches the database, so the stored name is intact.
+     * Names carrying a dot are accepted, because refusing them was wrong far more often than it was
+     * right: measured against production, that rule refused 120 stored names of which 106 were
+     * real — companies named after their own domain, teams named after a member's address, and this
+     * company's own name. What it was defending against is handled where it happens, by
+     * {@see \Utils\Email\LinkDefanger}, which keeps such a name from becoming a link in an email.
      *
+     * @return array<string, array{string}>
+     */
+    public static function namesCarryingADot(): array
+    {
+        return [
+            'a company named after its domain' => ['Acme.com'],
+            'a suffix that is not a domain'    => ['Alpha.Beta'],
+            'a hostname inside prose'          => ['Acme.guru Polite statements'],
+            'a name that is an address'        => ['f.surname@example.com'],
+            'an abbreviation'                  => ['Translated S.r.l.'],
+            // Decoding happens before the scheme check, and a dot is no longer a reason to refuse.
+            'a dot smuggled as an entity'      => ['evil&#46;com'],
+        ];
+    }
+
+    /**
+     * @throws Exception
+     * @throws TypeError
+     * @throws ReflectionException
+     */
+    #[Test]
+    #[DataProvider('namesCarryingADot')]
+    public function create_accepts_a_name_carrying_a_dot(string $name): void
+    {
+        $this->actAsFactoryUser();
+        $this->setRequestParams(['name' => $name, 'type' => Teams::GENERAL]);
+
+        $captured = null;
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data) use (&$captured): bool {
+                $captured = $data;
+                return true;
+            }));
+
+        $this->controller->create();
+
+        // Stored as typed: the name is neutralised where it is read, not where it is written.
+        $this->assertIsArray($captured);
+        $this->assertSame($name, $captured['team']['name']);
+    }
+
+    /**
      * @throws Exception
      * @throws TypeError
      * @throws ReflectionException
      * @throws PDOException
      */
     #[Test]
-    public function update_leaves_the_stored_name_untouched_when_it_looks_like_a_link(): void
+    public function update_accepts_a_name_carrying_a_dot(): void
     {
         $user = $this->actAsFactoryUser();
         $team = (new TeamDao(obtainTestDatabase()))->createUserTeam($user, [
@@ -646,18 +686,14 @@ class TeamsControllerTest extends AbstractTest
             'name' => 'Untouched Team',
         ]);
 
-        $this->setRequestParams(['id_team' => (string)$team->id, 'name' => 'evil.com']);
+        $this->setRequestParams(['id_team' => (string)$team->id, 'name' => 'Acme.com']);
 
-        try {
-            $this->controller->update();
-            $this->fail('expected the link-shaped name to be refused');
-        } catch (InvalidArgumentException) {
-            // expected
-        }
+        $this->controller->update();
 
+        // Stored as typed. The name is neutralised where it is read, not where it is written.
         $stmt = obtainTestDatabase()->getConnection()->query("SELECT name FROM teams WHERE id = " . (int)$team->id);
         $stored = $stmt instanceof PDOStatement ? $stmt->fetchColumn() : null;
-        $this->assertSame('Untouched Team', $stored);
+        $this->assertSame('Acme.com', $stored);
     }
 
     // ─── update() happy path ───
