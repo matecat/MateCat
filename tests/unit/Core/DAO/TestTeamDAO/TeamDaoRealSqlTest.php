@@ -270,6 +270,37 @@ class TeamDaoRealSqlTest extends AbstractTest
         $this->assertSame('Renamed Team', $reloaded->name);
     }
 
+    /**
+     * A rename has to reach the readers that go through the cache rather than through the caller's
+     * own struct, and `fetchById` is cached for a day at a time by
+     * {@see \Model\Teams\MembershipStruct::getTeam()} and by the team-members endpoint.
+     *
+     * Written as the sequence that exposed it rather than as an assertion about eviction: prime the
+     * cache the way opening the members page does, rename, then read it back the way the membership
+     * email does. Before the fix the second read returned the previous name, which is how a renamed
+     * team went on announcing its old one by email for up to twenty-four hours.
+     */
+    #[Test]
+    public function updateTeamName_does_not_leave_the_old_name_in_the_fetchById_cache(): void
+    {
+        $id = $this->makeTeamRow($this->creatorUid, Teams::GENERAL);
+
+        /** @var TeamStruct $primed */
+        $primed = $this->dao->setCacheTTL(60 * 60 * 24)->fetchById($id, TeamStruct::class);
+        $this->assertNotSame('Renamed Team', $primed->name, 'precondition: the cache holds the original name');
+
+        $team       = new TeamStruct(['id' => $id]);
+        $team->name = 'Renamed Team';
+        (new TeamDao($this->realSqlDb()))->updateTeamName($team);
+
+        /** @var TeamStruct $afterRename */
+        $afterRename = (new TeamDao($this->realSqlDb()))
+            ->setCacheTTL(60 * 60 * 24)
+            ->fetchById($id, TeamStruct::class);
+
+        $this->assertSame('Renamed Team', $afterRename->name);
+    }
+
     #[Test]
     public function deleteTeam_deletes_non_personal_and_skips_personal(): void
     {

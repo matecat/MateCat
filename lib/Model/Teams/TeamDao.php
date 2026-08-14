@@ -316,6 +316,18 @@ class TeamDao extends AbstractDao
         $stmt->execute();
         $conn->commit();
 
+        // The row is cached under `TeamDao::fetchById-<id>` for a day at a time, and a rename that
+        // does not clear it is invisible to every reader that goes through the cache rather than
+        // through the caller's own struct. That is how a renamed team kept announcing its old name
+        // by email: MembershipStruct::getTeam() resolves the team with a 24-hour TTL, so adding an
+        // existing user to a just-renamed team sent MembershipCreatedEmail carrying the previous
+        // name — while inviting a new address, which is handed the struct the controller fetched
+        // live, carried the new one. Evicting here rather than in the controller keeps it true for
+        // every caller of this method, not just the one that was noticed.
+        if ($org->id !== null) {
+            $this->destroyFetchByIdCache($org->id, TeamStruct::class);
+        }
+
         return $org;
     }
 

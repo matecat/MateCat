@@ -45,6 +45,9 @@ class TeamDaoTest extends AbstractTest
     private function makeDbStub(): IDatabase
     {
         $stmt = $this->createStub(PDOStatement::class);
+        // Writes that evict a cache entry build its key from the statement they prepared, so a
+        // statement double has to carry one. Uninitialised, the typed property throws instead.
+        $stmt->queryString = 'stubbed';
 
         $pdo = $this->createStub(PDO::class);
         $pdo->method('prepare')->willReturn($stmt);
@@ -102,6 +105,7 @@ class TeamDaoTest extends AbstractTest
     public function updateTeamName_calls_begin_then_commit_on_connection(): void
     {
         $stmt = $this->createStub(PDOStatement::class);
+        $stmt->queryString = 'stubbed';
 
         $pdo = $this->createMock(PDO::class);
         $pdo->method('prepare')->willReturn($stmt);
