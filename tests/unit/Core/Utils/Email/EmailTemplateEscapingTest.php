@@ -296,6 +296,60 @@ class EmailTemplateEscapingTest extends AbstractTest
     }
 
     /**
+     * The plain-text part of an email is built by stripping the HTML one, so everything escaping did
+     * has to be undone again — with the same flags, or it is only partly undone.
+     *
+     * The apostrophe is the case that matters: values are escaped as HTML5, where it becomes
+     * `&apos;`, and PHP decodes as HTML 4.01 by default, which has no such entity. A team called
+     * `O'Brien` reached the reader as `O&apos;Brien`.
+     */
+    #[Test]
+    public function theTextPartUndoesEscapingRatherThanShowingEntities(): void
+    {
+        $email  = $this->invitationFor("O'Brien & Sons <Ltd>");
+        $method = new ReflectionMethod(InvitedToTeamEmail::class, '_buildTxtMessage');
+        $html   = new ReflectionMethod(InvitedToTeamEmail::class, '_buildMessageContent');
+
+        $text = (string)$method->invoke($email, (string)$html->invoke($email));
+
+        $this->assertStringContainsString("O'Brien & Sons <Ltd>", $text);
+        $this->assertStringNotContainsString('&apos;', $text);
+        $this->assertStringNotContainsString('&amp;', $text);
+        $this->assertStringNotContainsString('&lt;', $text);
+    }
+
+    /**
+     * Decoding happens after the tags have been dealt with, so a value that merely contains markup
+     * does not become markup: what a user typed stays what they typed.
+     */
+    #[Test]
+    public function textTypedAsMarkupStaysTextInTheTextPart(): void
+    {
+        $email  = $this->invitationFor('Line&lt;br&gt;Break');
+        $method = new ReflectionMethod(InvitedToTeamEmail::class, '_buildTxtMessage');
+        $html   = new ReflectionMethod(InvitedToTeamEmail::class, '_buildMessageContent');
+
+        $text = (string)$method->invoke($email, (string)$html->invoke($email));
+
+        $this->assertStringContainsString('Line<br>Break', $text);
+    }
+
+    private function invitationFor(string $teamName): InvitedToTeamEmail
+    {
+        $sender             = new UserStruct();
+        $sender->uid        = 1;
+        $sender->email      = 'sender@example.com';
+        $sender->first_name = 'Ada';
+        $sender->last_name  = 'Lovelace';
+
+        $team       = new TeamStruct();
+        $team->id   = 1;
+        $team->name = $teamName;
+
+        return new InvitedToTeamEmail($sender, 'invited@example.com', $team);
+    }
+
+    /**
      * A value the template cannot write — an array reached by mistake — emits nothing rather than
      * "Array" plus a conversion notice.
      */

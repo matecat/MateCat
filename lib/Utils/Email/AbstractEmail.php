@@ -223,9 +223,19 @@ abstract class AbstractEmail
         $messageBody = preg_replace("#<[/]*(ol|ul|li)[^>]*>#i", "\t", $messageBody) ?? '';
         $messageBody = preg_replace("#<[/]*(p)[^>]*>#i", "", $messageBody) ?? '';
         $messageBody = preg_replace("#<a.*?href=[\"'](.*)[\"'][^>]*>(.*?)</a>#i", "$2 $1", $messageBody) ?? '';
-        $messageBody = html_entity_decode($messageBody);
+        $messageBody = preg_replace("#<br[^>]*>#i", "\r\n", $messageBody) ?? '';
 
-        return preg_replace("#<br[^>]*>#i", "\r\n", $messageBody) ?? '';
+        // Decoded last, and with the flags the values were escaped with.
+        //
+        // The flags have to match {@see EmailValue}: it escapes as HTML5, where an apostrophe
+        // becomes `&apos;`, and the default decoding is HTML 4.01, which has no such entity — so
+        // "O'Brien" reached the reader as "O&apos;Brien". Nothing else in this method notices,
+        // because everything it rewrites is a tag.
+        //
+        // Decoding after the tags have been handled rather than before keeps a value that merely
+        // contains markup from becoming markup: text a user typed as `&lt;br&gt;` stays the four
+        // characters they wrote instead of turning into a line break.
+        return html_entity_decode($messageBody, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 
 }
