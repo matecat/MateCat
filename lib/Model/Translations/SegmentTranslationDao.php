@@ -589,7 +589,6 @@ class SegmentTranslationDao extends AbstractDao
 
         $queryTotals = "
            SELECT $sum_sql as total, sum(1) as repetitions_count, segment_translations.*
-
            FROM segment_translations
               INNER JOIN  segments
               ON segments.id = segment_translations.id_segment
@@ -668,11 +667,11 @@ class SegmentTranslationDao extends AbstractDao
 
                 // The last row of a GROUP BY ... WITH ROLLUP is the super-aggregate: the word count and
                 // the row count over every repetition of this segment inside the chunk, the current one
-                // excluded by the query.
+                // excluded by the query. Only the two aggregates carry meaning here; the row's other
+                // columns are either NULL or an arbitrary member of the group.
                 $propagationTotal->setTotals([
                     'total' => $lastRow[0],
                     'repetitions_count' => $lastRow[1],
-                    'status' => $lastRow[2],
                 ]);
 
                 $propagationObject = [
