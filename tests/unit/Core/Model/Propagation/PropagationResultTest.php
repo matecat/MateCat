@@ -28,12 +28,12 @@ class PropagationResultTest extends AbstractTest
     public function itCarriesTheThreeValuesItWasBuiltWith(): void
     {
         $result = new PropagationResult(
-            ['total' => 3, 'countSeg' => 2, 'status' => 'TRANSLATED'],
+            ['total' => 3, 'repetitions_count' => 2, 'status' => 'TRANSLATED'],
             ['101', '202'],
             ['propagated' => ['ice' => [], 'not_ice' => []]]
         );
 
-        $this->assertSame(['total' => 3, 'countSeg' => 2, 'status' => 'TRANSLATED'], $result->totals);
+        $this->assertSame(['total' => 3, 'repetitions_count' => 2, 'status' => 'TRANSLATED'], $result->totals);
         $this->assertSame(['101', '202'], $result->propagatedIds);
         $this->assertSame(['propagated' => ['ice' => [], 'not_ice' => []]], $result->segmentsForPropagation);
     }
@@ -74,12 +74,12 @@ class PropagationResultTest extends AbstractTest
     public function itCarriesTotalsAndSegmentsForPropagationFromTheStruct(): void
     {
         $struct = new PropagationTotalStruct();
-        $struct->setTotals(['total' => 5, 'countSeg' => 4, 'status' => 'TRANSLATED']);
+        $struct->setTotals(['total' => 5, 'repetitions_count' => 4, 'status' => 'TRANSLATED']);
         $struct->addPropagatedId('101');
 
         $result = PropagationResult::fromTotalStruct($struct);
 
-        $this->assertSame(['total' => 5, 'countSeg' => 4, 'status' => 'TRANSLATED'], $result->totals);
+        $this->assertSame(['total' => 5, 'repetitions_count' => 4, 'status' => 'TRANSLATED'], $result->totals);
         $this->assertSame($struct->getSegmentsForPropagation(), $result->segmentsForPropagation);
     }
 

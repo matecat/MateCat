@@ -25,7 +25,7 @@ use JsonSerializable;
 final class PropagationResult implements JsonSerializable
 {
     /**
-     * @param array{total?: int, countSeg?: int, status?: string} $totals
+     * @param array{total?: int, repetitions_count?: int, status?: string} $totals
      * @param list<string> $propagatedIds
      * @param array<string, mixed> $segmentsForPropagation
      */
@@ -56,7 +56,7 @@ final class PropagationResult implements JsonSerializable
 
     /**
      * @return array{
-     *     totals: array{total?: int, countSeg?: int, status?: string},
+     *     totals: array{total?: int, repetitions_count?: int, status?: string},
      *     propagated_ids: list<string>,
      *     segments_for_propagation: array<string, mixed>
      * }

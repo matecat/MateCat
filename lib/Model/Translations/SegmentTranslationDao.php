@@ -588,7 +588,7 @@ class SegmentTranslationDao extends AbstractDao
         }
 
         $queryTotals = "
-           SELECT $sum_sql as total, sum(1) as countSeg, segment_translations.*
+           SELECT $sum_sql as total, sum(1) as repetitions_count, segment_translations.*
 
            FROM segment_translations
               INNER JOIN  segments
@@ -666,13 +666,12 @@ class SegmentTranslationDao extends AbstractDao
                 $propagationAnalyser = new PropagationAnalyser();
                 $propagationTotal = $propagationAnalyser->analyse($segmentTranslationStruct, $arrayOfSegmentTranslationToPropagate);
 
+                // The last row of a GROUP BY ... WITH ROLLUP is the super-aggregate: the word count and
+                // the row count over every repetition of this segment inside the chunk, the current one
+                // excluded by the query.
                 $propagationTotal->setTotals([
-                    'propagated_ice_total' => $propagationAnalyser->getPropagatedIceCount(),
-                    'not_propagated_total' => $propagationAnalyser->getNotPropagatedCount(),
-                    'propagated_total' => $propagationAnalyser->getPropagatedCount(),
-                    'not_propagated_ice_total' => $propagationAnalyser->getNotPropagatedIceCount(),
                     'total' => $lastRow[0],
-                    'countSeg' => $lastRow[1],
+                    'repetitions_count' => $lastRow[1],
                     'status' => $lastRow[2],
                 ]);
 

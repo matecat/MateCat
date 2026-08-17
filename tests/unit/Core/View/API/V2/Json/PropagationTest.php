@@ -42,11 +42,11 @@ class PropagationTest extends AbstractTest
 
     public function testRenderTotalsReflectsSetValues(): void
     {
-        $struct = $this->makeStruct(['total' => 5, 'countSeg' => 3, 'status' => 'translated']);
+        $struct = $this->makeStruct(['total' => 5, 'repetitions_count' => 3, 'status' => 'translated']);
         $result = (new Propagation($struct))->render();
 
         $this->assertSame(5, $result->totals['total']);
-        $this->assertSame(3, $result->totals['countSeg']);
+        $this->assertSame(3, $result->totals['repetitions_count']);
         $this->assertSame('translated', $result->totals['status']);
     }
 
