@@ -69,6 +69,16 @@ class DaoCacheTraitHarness
         $this->_setInCacheMap($keyMap, $query, $value);
     }
 
+    public function callDeleteCacheByKey(string $key, ?bool $isReverseKeyMap = true): bool
+    {
+        return $this->_deleteCacheByKey($key, $isReverseKeyMap);
+    }
+
+    public function callRemoveObjectCacheMapElement(string $keyMap, string $keyElementName): bool
+    {
+        return $this->_removeObjectCacheMapElement($keyMap, $keyElementName);
+    }
+
     public function callSerializeForCacheKey(array $params): string
     {
         return $this->_serializeForCacheKey($params);
@@ -497,5 +507,68 @@ class DaoCacheTraitTest extends AbstractTest
         $this->harness->callSetInCacheMap('map', 'SELECT 1', [['id' => 60]]);
 
         self::assertNotSame([], $this->redis->getStoredHash('map'));
+    }
+
+    #[Test]
+    public function deleteCacheByKeyRunsImmediatelyOutsideATransaction(): void
+    {
+        $this->harness->setTransactionScope(null);
+        $this->redis->setex('plain:key', 60, 'value');
+
+        $this->harness->callDeleteCacheByKey('plain:key', false);
+
+        self::assertNull($this->redis->get('plain:key'));
+    }
+
+    #[Test]
+    public function deleteCacheByKeyIsDeferredWhileATransactionIsOpen(): void
+    {
+        $queued = [];
+        $this->harness->setTransactionScope($this->transactionalDatabaseCollecting($queued));
+        $this->redis->setex('plain:key', 60, 'value');
+
+        self::assertTrue($this->harness->callDeleteCacheByKey('plain:key', false));
+
+        // Still there: the eviction is queued for the commit, not run.
+        self::assertSame('value', $this->redis->get('plain:key'));
+        self::assertCount(1, $queued);
+
+        ($queued[0])();
+
+        self::assertNull($this->redis->get('plain:key'));
+    }
+
+    #[Test]
+    public function removeObjectCacheMapElementIsDeferredWhileATransactionIsOpen(): void
+    {
+        $queued = [];
+        $this->harness->setTransactionScope($this->transactionalDatabaseCollecting($queued));
+        $this->harness->setTTL(300);
+        $this->harness->callSetInCacheMap('map', 'SELECT 1', [['id' => 70]]);
+
+        self::assertTrue($this->harness->callRemoveObjectCacheMapElement('map', 'SELECT 1'));
+        self::assertCount(1, $queued);
+    }
+
+    /**
+     * An IDatabase reporting an open transaction whose onCommit() collects instead of running, so a
+     * test can assert both that nothing happened yet and that the queued work does the job.
+     *
+     * @param list<callable> $queued
+     */
+    private function transactionalDatabaseCollecting(array &$queued): IDatabase
+    {
+        $connection = $this->createStub(PDO::class);
+        $connection->method('inTransaction')->willReturn(true);
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($connection);
+        $database->method('onCommit')->willReturnCallback(
+            static function (callable $callback) use (&$queued): void {
+                $queued[] = $callback;
+            }
+        );
+
+        return $database;
     }
 }

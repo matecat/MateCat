@@ -331,6 +331,25 @@ trait DaoCacheTrait
      */
     protected function _removeObjectCacheMapElement(string $keyMap, string $keyElementName): bool
     {
+        if ($this->_isInsideTransaction()) {
+            $this->_cacheTransactionScope()?->onCommit(
+                function () use ($keyMap, $keyElementName): void {
+                    $this->_removeObjectCacheMapElementNow($keyMap, $keyElementName);
+                }
+            );
+
+            return true;
+        }
+
+        return $this->_removeObjectCacheMapElementNow($keyMap, $keyElementName);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function _removeObjectCacheMapElementNow(string $keyMap, string $keyElementName): bool
+    {
         $this->_cacheSetConnection();
         if (isset(self::$cache_con) && !empty(self::$cache_con)) {
             self::$cache_con->del(md5($keyElementName));
@@ -353,6 +372,25 @@ trait DaoCacheTrait
      *
      */
     protected function _deleteCacheByKey(string $key, ?bool $isReverseKeyMap = true): bool
+    {
+        if ($this->_isInsideTransaction()) {
+            $this->_cacheTransactionScope()?->onCommit(
+                function () use ($key, $isReverseKeyMap): void {
+                    $this->_deleteCacheByKeyNow($key, $isReverseKeyMap);
+                }
+            );
+
+            return true;
+        }
+
+        return $this->_deleteCacheByKeyNow($key, $isReverseKeyMap);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function _deleteCacheByKeyNow(string $key, ?bool $isReverseKeyMap): bool
     {
         $this->_cacheSetConnection();
         if (isset(self::$cache_con) && !empty(self::$cache_con)) {
