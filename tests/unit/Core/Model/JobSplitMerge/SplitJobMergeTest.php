@@ -598,20 +598,26 @@ class SplitJobMergeTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
-    public function mergeALLDestroysJobAndAnalysisCaches(): void
+    public function mergeALLDestroysAnalysisCacheAndSweepsEveryMergedCredential(): void
     {
         $this->setupMergeStubs();
         $chunks = $this->makeJobChunksForMerge();
         $ps = new SplitMergeProjectData(999);
 
-        $this->jobDaoMock->expects($this->once())
-            ->method('destroyCacheByProjectId')
-            ->with(999);
-
         $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         $this->assertTrue($this->service->wasDestroyAnalysisCacheCalled());
         $this->assertEquals(999, $this->service->getDestroyAnalysisCacheProjectId());
+
+        // Both chunk passwords are swept: the first one's row was rewritten, and the second one's row
+        // was deleted, so neither answers what the cache still holds for it.
+        $sweeps = $this->service->getSweepCredentialCachesCalls();
+        $this->assertSame(['pass1', 'pass2'], array_column($sweeps, 'oldPassword'));
+
+        foreach ($sweeps as $sweep) {
+            $this->assertEquals(100, $sweep['chunk']->id);
+            $this->assertSame('pass1', $sweep['newPassword']);
+        }
     }
 
     /**

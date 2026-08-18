@@ -326,35 +326,6 @@ class ChunkReviewDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function findByJobIdReviewPasswordAndSourcePageReturnsStruct(): void
-    {
-        $struct = new ChunkReviewStruct();
-        $struct->id = 500;
-
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
-
-        $dao = new ChunkReviewDao($this->dbStub);
-        $result = $dao->findByJobIdReviewPasswordAndSourcePage(70, 'rev', 2);
-
-        $this->assertInstanceOf(ChunkReviewStruct::class, $result);
-    }
-
-    #[Test]
-    public function findByJobIdReviewPasswordAndSourcePageReturnsNullWhenEmpty(): void
-    {
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-
-        $dao = new ChunkReviewDao($this->dbStub);
-        $result = $dao->findByJobIdReviewPasswordAndSourcePage(70, 'rev', 2);
-
-        $this->assertNull($result);
-    }
-
-    #[Test]
     public function existsReturnsTrueWhenRowFound(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
@@ -579,14 +550,6 @@ class ChunkReviewDaoTest extends AbstractTest
 
         $dao = new ChunkReviewDao($this->dbStub);
         $result = $dao->destroyCacheForFindChunkReviews($chunk);
-        $this->assertIsBool($result);
-    }
-
-    #[Test]
-    public function destroyCacheForJobIdReviewPasswordAndSourcePageDoesNotThrow(): void
-    {
-        $dao = new ChunkReviewDao($this->dbStub);
-        $result = $dao->destroyCacheForJobIdReviewPasswordAndSourcePage(10, 'rev', 2);
         $this->assertIsBool($result);
     }
 

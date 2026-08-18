@@ -19,7 +19,6 @@ use Utils\Constants\ProjectStatus;
 class ProjectDao extends AbstractDao
 {
     const string TABLE = "projects";
-    private const string SQL_DESTROY_PROJECT_PASSWORD_CACHE = '%s';
 
     /** @var list<string> */
     protected static array $auto_increment_field = ['id'];
@@ -110,8 +109,18 @@ class ProjectDao extends AbstractDao
     public function changePassword(ProjectStruct $project, string $newPass): ProjectStruct
     {
         $id = $project->id ?? throw new DomainException("Project ID must not be null when changing password");
+        $oldPass = $project->password;
         $res = $this->updateField($project, 'password', $newPass);
         $this->destroyFetchByIdCache($id, ProjectStruct::class);
+
+        // The link built on the old password must stop working now, not when the cache expires, so
+        // evict every read that credential reaches: the gate it authenticates through and the
+        // project data the job links are built from. The new password is evicted as well, since a
+        // lookup made before the rotation may have cached its miss.
+        foreach (array_filter([$oldPass, $newPass]) as $password) {
+            $this->destroyCacheByIdAndPassword($id, $password);
+            $this->destroyCacheForProjectData($id, $password);
+        }
 
         return $res;
     }
@@ -197,17 +206,6 @@ class ProjectDao extends AbstractDao
         return $this->_fetchObjectMap($stmt, ProjectStruct::class, $id_list);
     }
 
-    /**
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    public function destroyProjectPasswordCache(int $id, string $password): bool
-    {
-        $sql = sprintf(self::SQL_DESTROY_PROJECT_PASSWORD_CACHE, self::$_sql_get_by_id_and_password);
-        $stmt = $this->database->getConnection()->prepare($sql);
-
-        return $this->_destroyObjectCache($stmt, ProjectStruct::class, ['id' => $id, 'password' => $password]);
-    }
 
     /**
      * @param array<int, int> $project_ids
@@ -239,11 +237,11 @@ class ProjectDao extends AbstractDao
     /**
      * @return array{0: string, 1: array<int, int|string>}
      */
-    protected function _getProjectDataSQLAndValues(int $pid, ?string $project_password = null, ?int $jid = null, ?string $jpassword = null): array
+    protected function _getProjectDataSQLAndValues(int $pid, ?string $project_password = null): array
     {
         $query = self::$_sql_project_data;
 
-        $and_1 = $and_2 = $and_3 = null;
+        $and_1 = null;
         $values = [$pid];
 
         if (!empty($project_password)) {
@@ -251,17 +249,11 @@ class ProjectDao extends AbstractDao
             $values[] = $project_password;
         }
 
-        if (!empty($jid)) {
-            $and_2 = " and j.id = ? ";
-            $values[] = $jid;
-        }
-
-        if (!empty($jpassword)) {
-            $and_3 = " and j.password = ? ";
-            $values[] = $jpassword;
-        }
-
-        $query = sprintf($query, $and_1, $and_2, $and_3);
+        // The two trailing placeholders are left in place and filled with nothing on purpose: the
+        // query text is part of the cache key, so removing them would orphan every entry already
+        // stored for a day, and a rotation running against the new key would leave the old one
+        // readable until it expired.
+        $query = sprintf($query, $and_1, null, null);
 
         return [$query, $values];
     }
@@ -269,16 +261,14 @@ class ProjectDao extends AbstractDao
     /**
      * @param int $pid
      * @param string|null $project_password
-     * @param int|null $jid
-     * @param string|null $jpassword
      *
      * @return ShapelessConcreteStruct[]
      * @throws Exception
      * @throws ReflectionException
      */
-    public function getProjectData(int $pid, ?string $project_password = null, ?int $jid = null, ?string $jpassword = null): array
+    public function getProjectData(int $pid, ?string $project_password = null): array
     {
-        [$query, $values] = $this->_getProjectDataSQLAndValues($pid, $project_password, $jid, $jpassword);
+        [$query, $values] = $this->_getProjectDataSQLAndValues($pid, $project_password);
 
         $stmt = $this->_getStatementForQuery($query);
 
@@ -293,9 +283,9 @@ class ProjectDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheForProjectData(int $pid, ?string $project_password = null, ?int $jid = null, ?string $jpassword = null): bool
+    public function destroyCacheForProjectData(int $pid, ?string $project_password = null): bool
     {
-        [$query, $values] = $this->_getProjectDataSQLAndValues($pid, $project_password, $jid, $jpassword);
+        [$query, $values] = $this->_getProjectDataSQLAndValues($pid, $project_password);
 
         $stmt = $this->_getStatementForQuery($query);
 

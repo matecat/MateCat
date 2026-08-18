@@ -141,9 +141,9 @@ export const ReviewExtendedIssue = ({
       return
     }
 
+    // No source_page: the server attributes the comment to the phase the password resolves to.
     const data = {
       message: commentText,
-      source_page: config.isReview ? config.revisionNumber + 1 : 1, // TODO: move this to UI property
     }
 
     SegmentActions.submitIssueComment(sid, issue.id, data)

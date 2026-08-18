@@ -117,6 +117,49 @@ class JobDaoRealSqlTest extends AbstractTest
         self::assertTrue($this->dao->destroyCacheByIdAndPassword($job));
     }
 
+    public function testDestroyCacheForIdAndPasswordEvictsTheCredentialShapeWhenReadCachedLast(): void
+    {
+        $job = $this->seedJob();
+
+        // The comment endpoints cache the credential check for a day and the outsource quote page
+        // caches the same row through read(). The two shapes are found under one key each, and when
+        // they shared it the last one written owned it: a rotation deleted that one and left the
+        // other answering for the password it had just replaced.
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($job->id, $job->password, 86400));
+        self::assertCount(1, $this->dao->setCacheTTL(3600)->read($job));
+
+        $this->rotatePasswordInTheDatabase($job, 'jd_b1_rotated_pwd');
+
+        // Nothing has been evicted yet, so the replaced password is still answered from the cache.
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($job->id, $job->password, 86400));
+
+        self::assertTrue($this->dao->destroyCacheForIdAndPassword($job->id, $job->password));
+
+        self::assertNull(
+            $this->dao->getByIdAndPassword($job->id, $job->password, 86400),
+            'the credential check has to reach the database, where the replaced password is gone'
+        );
+        self::assertSame(
+            [],
+            $this->dao->setCacheTTL(3600)->read($job),
+            'the shape the quote page reads goes with it'
+        );
+    }
+
+    private function rotatePasswordInTheDatabase(JobStruct $job, string $newPassword): void
+    {
+        $statement = $this->realSqlDb()->getConnection()->prepare(
+            'UPDATE jobs SET password = :new_password WHERE id = :id AND password = :old_password'
+        );
+        $statement->execute([
+            'new_password' => $newPassword,
+            'id' => $job->id,
+            'old_password' => $job->password,
+        ]);
+
+        self::assertSame(1, $statement->rowCount());
+    }
+
     public function testDestroyCacheByProjectId(): void
     {
         $job = $this->seedJob();
@@ -247,6 +290,23 @@ class JobDaoRealSqlTest extends AbstractTest
         $job = $this->seedJob();
         $this->expectException(\PDOException::class);
         $this->dao->changePassword($job, '');
+    }
+
+    public function testChangePasswordLeavesTheEvictionToTheCaller(): void
+    {
+        $job = $this->seedJob();
+        $oldPassword = $job->password;
+        $newPassword = 'newpw_' . bin2hex(random_bytes(4));
+
+        // Evicting here would be undone: every caller rotates inside a transaction, and while it is
+        // open another connection still reads the pre-rotation row and caches the replaced password as
+        // valid again, behind whatever was just deleted. The sweep is the caller's, once it has
+        // committed — see JobCredentialCacheInvalidator::sweepAfterJobPasswordRotation().
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($job->id, $oldPassword, 86400));
+
+        $this->dao->changePassword($job, $newPassword);
+
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($job->id, $oldPassword, 86400));
     }
 
     // ---------------------------------------------------------------------------------------

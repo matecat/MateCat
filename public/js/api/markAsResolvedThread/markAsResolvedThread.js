@@ -6,28 +6,26 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {Object} options
  * @param {number} options.idSegment
  * @param {string} options.username
- * @param {string} options.sourcePage
  * @param {string} options.isAnonymous
  * @param {string} [options.idClient=config.id_client]
  * @param {string} [options.idJob=config.id_job]
- * @param {string} [options.password=config.password]
+ * @param {string} [options.password=config.currentPassword]
  * @returns {Promise<object>}
  */
 export const markAsResolvedThread = async ({
   idSegment,
   username,
   isAnonymous,
-  sourcePage,
   idJob = config.id_job,
-  password = config.password,
+  password = config.currentPassword,
 }) => {
+  // No source_page: the thread is resolved in the phase this password resolves to.
   const dataParams = {
     id_job: idJob,
     id_segment: idSegment,
     username,
     password,
     is_anonymous: isAnonymous,
-    source_page: sourcePage,
   }
   const formData = new FormData()
 

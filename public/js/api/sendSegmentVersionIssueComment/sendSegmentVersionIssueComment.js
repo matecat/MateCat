@@ -7,7 +7,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} idIssue
  * @param {Object} paramsToSend
  * @param {string} [idJob=config.id_job]
- * @param {string} [password=config.password]
+ * @param {string} [password=config.currentPassword]
  * @returns {Promise<object>}
  */
 export const sendSegmentVersionIssueComment = async (
@@ -15,7 +15,7 @@ export const sendSegmentVersionIssueComment = async (
   idIssue,
   paramsToSend,
   idJob = config.id_job,
-  password = config.password,
+  password = config.currentPassword,
 ) => {
   const dataParams = {...paramsToSend}
   const formData = new FormData()

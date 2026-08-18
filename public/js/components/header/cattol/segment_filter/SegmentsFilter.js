@@ -53,7 +53,6 @@ class SegmentsFilter extends React.Component {
         filtersEnabled: true,
         dataSampleEnabled: false,
         filterSubmitted: false,
-        revisionNumber: null,
       }
     }
   }
@@ -65,7 +64,6 @@ class SegmentsFilter extends React.Component {
   resetStatusFilter() {
     this.setState({
       selectedStatus: undefined,
-      revisionNumber: undefined,
     })
   }
 
@@ -108,7 +106,6 @@ class SegmentsFilter extends React.Component {
         {
           status: this.state.selectedStatus,
           sample: sample,
-          revision_number: this.state.revisionNumber,
         },
         {
           samplingType: this.state.samplingType,
@@ -129,12 +126,8 @@ class SegmentsFilter extends React.Component {
   }
 
   filterSelectChanged(value) {
-    let revisionNumber
     if (value === 'APPROVED-2') {
-      revisionNumber = 2
       value = SEGMENTS_STATUS.APPROVED2
-    } else {
-      revisionNumber = null
     }
 
     if (
@@ -152,12 +145,10 @@ class SegmentsFilter extends React.Component {
       this.setState({
         selectedStatus: value,
         samplingType: undefined,
-        revisionNumber: revisionNumber,
       })
     } else {
       this.setState({
         selectedStatus: value,
-        revisionNumber: revisionNumber,
       })
     }
     setTimeout(this.doSubmitFilter, 100)
