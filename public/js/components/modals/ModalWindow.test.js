@@ -5,6 +5,7 @@ import React from 'react'
 
 import {ModalWindow, onModalWindowMounted} from './ModalWindow'
 import AppDispatcher from '../../stores/AppDispatcher'
+import CatToolStore from '../../stores/CatToolStore'
 import ModalsConstants from '../../constants/ModalsConstants'
 import ModalsActions from '../../actions/ModalsActions'
 
@@ -117,18 +118,28 @@ test('onModalWindowMounted resolves once the component mounts', async () => {
 })
 
 test('unmounting removes the CatToolStore listeners', () => {
+  const baselineShowCount = CatToolStore.listenerCount(
+    ModalsConstants.SHOW_MODAL,
+  )
+  const baselineCloseCount = CatToolStore.listenerCount(
+    ModalsConstants.CLOSE_MODAL,
+  )
+
   const {unmount} = render(<ModalWindow />)
+
+  expect(CatToolStore.listenerCount(ModalsConstants.SHOW_MODAL)).toBe(
+    baselineShowCount + 1,
+  )
+  expect(CatToolStore.listenerCount(ModalsConstants.CLOSE_MODAL)).toBe(
+    baselineCloseCount + 1,
+  )
 
   unmount()
 
-  ModalsActions.showModalComponent(
-    DummyComponent,
-    {},
-    'Should not appear after unmount',
+  expect(CatToolStore.listenerCount(ModalsConstants.SHOW_MODAL)).toBe(
+    baselineShowCount,
   )
-
-  expect(
-    screen.queryByRole('heading', {name: 'Should not appear after unmount'}),
-  ).not.toBeInTheDocument()
-  expect(screen.queryByText('something')).not.toBeInTheDocument()
+  expect(CatToolStore.listenerCount(ModalsConstants.CLOSE_MODAL)).toBe(
+    baselineCloseCount,
+  )
 })
