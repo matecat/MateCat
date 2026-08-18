@@ -170,6 +170,7 @@ Valid emoji Type Reference
 | style    | Styles                   | 💄    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) | formatting                                                    |
 | test     | Tests                    | ✅     | Adding missing tests or correcting existing tests                                                      | unit, e2e                                                     |
 | i18n     |                          | 🌐    | Internationalization                                                                                   | locale, translation                                           |
+| merge    | Merges                   | 🔀    | Merges a branch into another; the emoji is optional here, since git and the forge write their own      | develop, master                                               |
 
 ### Creating worktrees
 

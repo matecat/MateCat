@@ -16,6 +16,7 @@ const EMOJI_TYPE_MAP = {
     '\u{1F484}':       'style',    // 💄
     '\u2705':          'test',     // ✅
     '\u{1F310}':       'i18n',     // 🌐
+    '\u{1F500}':       'merge',    // 🔀
 };
 
 const TYPE_EMOJI_MAP = Object.fromEntries(
@@ -103,7 +104,12 @@ function validateCommitMessage(message, {requireEmoji = true} = {}) {
     const emojiType = findTypeForEmoji(firstToken);
     const hasEmoji = emojiType !== null;
 
-    if (requireEmoji && !hasEmoji) {
+    // A merge subject may be written by git itself, by a forge, or by hand, and only the last of
+    // those can carry an emoji. Requiring one would reject the two shapes nobody controls, so the
+    // type is accepted bare — the emoji stays optional here and mandatory everywhere else.
+    const declaresMergeType = /^merge(?:\([^)]+\))?!?: /.test(hasEmoji ? rest : subject);
+
+    if (requireEmoji && !hasEmoji && !declaresMergeType) {
         // Check if the token is a known emoji glued to the type (missing space)
         const gluedEmoji = Object.keys(EMOJI_TYPE_MAP).find(
             (e) => firstToken.startsWith(e) || firstToken.startsWith(stripVS16(e)),
