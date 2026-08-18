@@ -12,10 +12,12 @@ use DomainException;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\InvalidatesUserProfileCache;
+use Model\DataAccess\TransactionalTrait;
 use Model\Users\UserStruct;
 use PDO;
 use PDOException;
 use ReflectionException;
+use Throwable;
 use TypeError;
 use Utils\Constants\Teams;
 use Utils\Tools\Utils;
@@ -24,6 +26,7 @@ class TeamDao extends AbstractDao
 {
 
     use InvalidatesUserProfileCache;
+    use TransactionalTrait;
 
     const string TABLE = "teams";
     const string STRUCT_TYPE = TeamStruct::class;
@@ -116,25 +119,29 @@ class TeamDao extends AbstractDao
         //add the creator to the list of members
         $params['members'][] = $orgCreatorUser->email;
 
-        // wrap createList() in a transaction
-        if (false === $this->database->getConnection()->inTransaction()) {
-            $this->database->getConnection()->beginTransaction();
+        // wrap createList() in a transaction; a no-op when the caller already holds one
+        $this->openTransaction();
+
+        try {
+            // get fresh cache from the primary database
+            (new TeamDao($this->database))->setCacheTTL(60 * 60 * 24)->fetchById($teamStruct->id, TeamStruct::class);
+
+            $members = array_values(array_filter($params['members'], fn($member) => $member !== null));
+
+            $membersList = (new MembershipDao($this->database))->createList([
+                'team' => $teamStruct,
+                'members' => $members
+            ]);
+            $teamStruct->setMembers($membersList);
+        } catch (Throwable $e) {
+            // Undo it here rather than leaving it to the end of the request: a worker holds its
+            // connection across messages, so a transaction left open by a failure here would still
+            // be open when the next message starts writing.
+            $this->rollbackTransaction();
+            throw $e;
         }
 
-        // get fresh cache from the primary database
-        (new TeamDao($this->database))->setCacheTTL(60 * 60 * 24)->fetchById($teamStruct->id, TeamStruct::class);
-
-        $members = array_values(array_filter($params['members'], fn($member) => $member !== null));
-
-        $membersList = (new MembershipDao($this->database))->createList([
-            'team' => $teamStruct,
-            'members' => $members
-        ]);
-        $teamStruct->setMembers($membersList);
-
-        if (false === $this->database->getConnection()->inTransaction()) {
-            $this->database->getConnection()->commit();
-        }
+        $this->commitTransaction();
 
         return $teamStruct;
     }

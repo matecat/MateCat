@@ -22,8 +22,11 @@ use Utils\Constants\Teams;
  * isolated rows and the residue gate asserts whole-table COUNT(*) is unchanged after cleanup.
  *
  * createUserTeam wraps MembershipDao::createList in its own transaction (the harness opens no
- * ambient transaction), so the team + membership rows are committed; they are tracked via the
- * returned structs so cleanup removes them.
+ * ambient transaction) and commits it, so the team + membership rows are committed; they are
+ * tracked via the returned structs so cleanup removes them. Until the transaction boundary moved
+ * onto TransactionalTrait the commit never happened — the guard asked for "no transaction open",
+ * which is true only when there is nothing to commit — and every assertion below still passed,
+ * because a connection reads its own uncommitted rows.
  */
 #[Group('PersistenceNeeded')]
 #[Group('DaoRealSql')]
@@ -122,7 +125,8 @@ class TeamDaoRealSqlTest extends AbstractTest
         // creator is_admin arm (created_by == uid)
         $this->assertTrue((bool)$members[0]->is_admin);
 
-        // committed to the DB on the same connection
+        // reachable on the same connection; that the commit really happened is asserted separately,
+        // by createUserTeam_leaves_no_open_transaction_when_it_owns_one()
         $reloaded = $this->dao->findById($team->id);
         $this->assertInstanceOf(TeamStruct::class, $reloaded);
     }
@@ -160,6 +164,34 @@ class TeamDaoRealSqlTest extends AbstractTest
         }
         $this->assertTrue($byUid[$this->creatorUid]);
         $this->assertFalse($byUid[$second['uid']]);
+    }
+
+    /**
+     * createUserTeam() opened its own transaction and then guarded the commit on "no transaction is
+     * open", which is true only when there is nothing to commit. Called outside a transaction it
+     * therefore returned with one still open, on a connection a worker holds across messages.
+     */
+    #[Test]
+    public function createUserTeam_leaves_no_open_transaction_when_it_owns_one(): void
+    {
+        $connection = $this->realSqlDb()->getConnection();
+        $this->assertFalse($connection->inTransaction(), 'precondition: the harness opens no transaction');
+
+        $creator        = new UserStruct();
+        $creator->uid   = $this->creatorUid;
+        $creator->email = $this->creatorEmail;
+
+        $team = $this->dao->createUserTeam($creator, [
+            'name'    => 'Acme Transaction Boundary',
+            'type'    => Teams::GENERAL,
+            'members' => [],
+        ]);
+        $this->trackTeamAndMembers($team);
+
+        $this->assertFalse(
+            $connection->inTransaction(),
+            'createUserTeam() must close the transaction it opened'
+        );
     }
 
     #[Test]
