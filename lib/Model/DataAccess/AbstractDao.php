@@ -28,6 +28,22 @@ abstract class AbstractDao
     protected IDatabase $database;
 
     /**
+     * Satisfies {@see TransactionalTrait}'s abstract for every DAO that adopts the trait.
+     *
+     * The trait asks the question because its users are heterogeneous: a handler reaching through
+     * a DAO has a real choice to make about which handle the transaction runs on. A DAO does not —
+     * it is the handle it was constructed with, or the transaction would not share a connection
+     * with the queries it wraps. Answering it once here keeps that non-choice out of the DAOs.
+     *
+     * AbstractDao deliberately does not `use TransactionalTrait` itself: the trait carries a
+     * per-object ownership flag that only a class actually opening transactions should hold.
+     */
+    protected function getTransactionalDatabase(): IDatabase
+    {
+        return $this->database;
+    }
+
+    /**
      * @var string This property will be overridden in the subclasses.
      */
     const string STRUCT_TYPE = '';

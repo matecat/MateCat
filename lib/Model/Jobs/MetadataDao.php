@@ -4,7 +4,6 @@ namespace Model\Jobs;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\IDatabase;
 use Model\DataAccess\TransactionalTrait;
 use PDOException;
 use ReflectionException;
@@ -14,11 +13,6 @@ class MetadataDao extends AbstractDao
 {
 
     use TransactionalTrait;
-
-    protected function getTransactionalDatabase(): IDatabase
-    {
-        return $this->database;
-    }
 
     const string TABLE = 'job_metadata';
 
