@@ -11,6 +11,7 @@ use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\Hook\Event\Filter\FilterCreateProjectFeaturesEvent;
+use Model\FeaturesBase\Hook\Event\Run\AlterChunkReviewStructEvent;
 use Model\FeaturesBase\Hook\Event\Run\ProjectCompletionEventSavedEvent;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -328,4 +329,114 @@ class AbstractRevisionFeatureTest extends AbstractTest
         $this->expectExceptionMessage('requires an open transaction');
         $this->feature->projectCompletionEventSaved($this->makeCompletionEventSavedEvent());
     }
+
+    private function makeAlterEvent(int $eventId = 77): AlterChunkReviewStructEvent
+    {
+        return new AlterChunkReviewStructEvent(new ChunkCompletionEventStruct([
+            'id'                 => $eventId,
+            'id_project'         => 1,
+            'id_job'             => 999999,
+            'password'           => 'pw',
+            'source'             => 'test',
+            'job_first_segment'  => 1,
+            'job_last_segment'   => 10,
+        ]));
+    }
+
+    /**
+     * @param list<ChunkReviewStruct> $reviews
+     */
+    private function feedChunkReviews(array $reviews, bool $inTransaction = true): void
+    {
+        [$database, , $statement] = $this->createDatabaseMock(inTransaction: $inTransaction);
+        $statement->method('fetchAll')->willReturn($reviews);
+
+        $this->feature->setDatabase($database);
+    }
+
+    private function reviewWithUndoData(?string $undoData): ChunkReviewStruct
+    {
+        return new ChunkReviewStruct([
+            'id'                   => 444,
+            'id_job'               => 999999,
+            'id_project'           => 1,
+            'password'             => 'pw',
+            'source_page'          => 2,
+            'penalty_points'       => 0.0,
+            'reviewed_words_count' => 0,
+            'is_pass'              => true,
+            'undo_data'            => $undoData,
+        ]);
+    }
+
+    #[Test]
+    public function alterChunkReviewStructRestoresTheSnapshottedValues(): void
+    {
+        $review = $this->reviewWithUndoData(json_encode([
+            'reset_by_event_id'    => 77,
+            'penalty_points'       => 5.5,
+            'reviewed_words_count' => 80,
+            'is_pass'              => false,
+        ]));
+
+        $this->feedChunkReviews([$review]);
+
+        $this->feature->alterChunkReviewStruct($this->makeAlterEvent());
+
+        // The undo restores the absolute values the reset had snapshotted, and clears the snapshot
+        // so the same event cannot be undone twice.
+        $this->assertSame(5.5, $review->penalty_points);
+        $this->assertSame(80, $review->reviewed_words_count);
+        $this->assertFalse($review->is_pass);
+        $this->assertNull($review->undo_data);
+    }
+
+    #[Test]
+    public function alterChunkReviewStructThrowsWhenTheChunkReviewIsMissing(): void
+    {
+        $this->feedChunkReviews([]);
+
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('chunk review not found');
+
+        $this->feature->alterChunkReviewStruct($this->makeAlterEvent());
+    }
+
+    #[Test]
+    public function alterChunkReviewStructThrowsWhenNothingWasSnapshotted(): void
+    {
+        $this->feedChunkReviews([$this->reviewWithUndoData(null)]);
+
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('undo data is not available');
+
+        $this->feature->alterChunkReviewStruct($this->makeAlterEvent());
+    }
+
+    #[Test]
+    public function alterChunkReviewStructThrowsWhenTheSnapshotBelongsToAnotherEvent(): void
+    {
+        $this->feedChunkReviews([$this->reviewWithUndoData(json_encode([
+            'reset_by_event_id'    => 78,
+            'penalty_points'       => 5.5,
+            'reviewed_words_count' => 80,
+            'is_pass'              => false,
+        ]))]);
+
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('event does not match with latest revision data');
+
+        $this->feature->alterChunkReviewStruct($this->makeAlterEvent());
+    }
+
+    #[Test]
+    public function alterChunkReviewStructRefusesToRunOutsideATransaction(): void
+    {
+        $this->feedChunkReviews([], inTransaction: false);
+
+        $this->expectException(\RuntimeException::class);
+
+        $this->feature->alterChunkReviewStruct($this->makeAlterEvent());
+    }
+
 }
