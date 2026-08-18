@@ -11,6 +11,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
+use RuntimeException;
 use Utils\Registry\AppConfig;
 
 #[CoversClass(Database::class)]
@@ -492,5 +493,70 @@ class DatabaseTest extends AbstractTest
 
         $this->assertSame(1, $outer);
         $this->assertSame(1, $inner);
+    }
+
+    /**
+     * The data is already committed and the caller has been told the write succeeded, so a failure
+     * in best-effort work — a cache bust, a message enqueue — must not turn into an exception it
+     * cannot act on.
+     */
+    #[Test]
+    public function onCommitSwallowsAFailingBestEffortCallback(): void
+    {
+        $this->db->begin();
+        $this->db->onCommit(static fn() => throw new RuntimeException('redis down'));
+
+        $this->db->commit();
+
+        $this->assertFalse($this->db->getConnection()->inTransaction());
+    }
+
+    /**
+     * The exception to that: work whose silent failure is a correctness or a security problem. A
+     * credential sweep that quietly fails leaves a revoked job password answering out of the cache
+     * for the whole TTL, and the caller is the only party left that can retry.
+     */
+    #[Test]
+    public function onCommitRethrowsAFailingCriticalCallback(): void
+    {
+        $this->db->begin();
+        $this->db->onCommit(static fn() => throw new RuntimeException('redis down'), true);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('redis down');
+        $this->db->commit();
+    }
+
+    #[Test]
+    public function onCommitRunsEveryCallbackBeforeRethrowingACriticalFailure(): void
+    {
+        $ran = false;
+
+        $this->db->begin();
+        $this->db->onCommit(static fn() => throw new RuntimeException('redis down'), true);
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran = true;
+        });
+
+        try {
+            $this->db->commit();
+            $this->fail('the critical failure must be re-thrown');
+        } catch (RuntimeException) {
+            // asserted in onCommitRethrowsAFailingCriticalCallback
+        }
+
+        $this->assertTrue($ran, 'unrelated queued work has already been paid for and must still run');
+    }
+
+    #[Test]
+    public function onCommitRethrowsTheFirstCriticalFailureWhenSeveralFail(): void
+    {
+        $this->db->begin();
+        $this->db->onCommit(static fn() => throw new RuntimeException('first'), true);
+        $this->db->onCommit(static fn() => throw new RuntimeException('second'), true);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('first');
+        $this->db->commit();
     }
 }

@@ -34,7 +34,7 @@ class Database implements IDatabase
     /**
      * Work deferred until the current transaction commits.
      *
-     * @var list<callable(): void>
+     * @var list<array{callable(): void, bool}> The callback and whether its failure is critical.
      */
     private array $afterCommitCallbacks = [];
 
@@ -185,7 +185,7 @@ class Database implements IDatabase
      *
      * @throws PDOException
      */
-    public function onCommit(callable $callback): void
+    public function onCommit(callable $callback, bool $critical = false): void
     {
         if (!$this->getConnection()->inTransaction()) {
             $callback();
@@ -193,7 +193,7 @@ class Database implements IDatabase
             return;
         }
 
-        $this->afterCommitCallbacks[] = $callback;
+        $this->afterCommitCallbacks[] = [$callback, $critical];
     }
 
     /**
@@ -203,21 +203,41 @@ class Database implements IDatabase
      * transaction instead of extending this drain. Failures are logged and swallowed: the data is
      * already committed, and a caller that has been told its write succeeded must not then receive an
      * exception because a cache invalidation or a message enqueue failed.
+     *
+     * A callback queued as critical is the exception. Its failure is still logged, the rest of the
+     * queue still runs, and only then is it re-thrown — because for that kind of work, a revoked
+     * credential still answering out of the cache, the caller is the only party left that can retry.
+     *
+     * @throws Throwable The first critical callback's failure.
      */
     private function runAfterCommitCallbacks(): void
     {
         $callbacks = $this->afterCommitCallbacks;
         $this->afterCommitCallbacks = [];
 
-        foreach ($callbacks as $callback) {
+        $criticalFailure = null;
+
+        foreach ($callbacks as [$callback, $critical]) {
             try {
                 $callback();
             } catch (Throwable $e) {
                 LoggerFactory::doJsonLog([
                     'message' => 'after-commit callback failed',
+                    'critical' => $critical,
                     'error' => $e->getMessage(),
                 ]);
+
+                // Held rather than thrown here: the rest of the queue is unrelated work that has
+                // already been paid for, and abandoning it would trade one silent failure for
+                // several. The first critical failure is the one reported; later ones are logged.
+                if ($critical && $criticalFailure === null) {
+                    $criticalFailure = $e;
+                }
             }
+        }
+
+        if ($criticalFailure !== null) {
+            throw $criticalFailure;
         }
     }
 

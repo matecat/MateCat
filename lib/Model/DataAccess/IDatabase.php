@@ -79,10 +79,15 @@ interface IDatabase
      * than propagated — the commit has already happened by then.
      *
      * @param callable(): void $callback
+     * @param bool $critical Re-throw the failure instead of only logging it, once every other
+     *                       queued callback has run. Reserve it for work whose silent failure is a
+     *                       correctness or a security problem — a credential invalidation, not a
+     *                       performance cache — because the caller is then the only party left that
+     *                       can retry.
      *
      * @throws PDOException
      */
-    public function onCommit(callable $callback): void;
+    public function onCommit(callable $callback, bool $critical = false): void;
 
     /**
      * Execute a callback within a database transaction.
