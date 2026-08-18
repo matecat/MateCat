@@ -15,6 +15,7 @@ use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\LQA\ModelStruct;
 use Model\Users\UserStruct;
+use Model\LQA\ChunkReviewStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -62,7 +63,7 @@ class TestableCattoolController extends CattoolController
 }
 
 #[AllowMockObjectsWithoutExpectations]
-class CattoolViewControllerTest extends AbstractTest
+class CattoolControllerTest extends AbstractTest
 {
     use ControllerSeedFragments;
 
@@ -513,4 +514,35 @@ class CattoolViewControllerTest extends AbstractTest
     {
         return $this->invokePrivate('findJobByIdAndPassword', [$this->jobId(self::BASE), 'jobpw'])->chunk;
     }
+
+    // ─── overallQualityClass ───
+
+    #[Test]
+    public function overallQualityClass_is_empty_when_there_is_no_chunk_review(): void
+    {
+        self::assertSame('', $this->invokePrivate('overallQualityClass', [null]));
+    }
+
+    #[Test]
+    public function overallQualityClass_is_empty_when_the_verdict_is_null(): void
+    {
+        // A project with no LQA model never gets a verdict, and NULL must not read as a failure.
+        $chunkReview = new ChunkReviewStruct(['is_pass' => null]);
+
+        self::assertSame('', $this->invokePrivate('overallQualityClass', [$chunkReview]));
+    }
+
+    #[Test]
+    public function overallQualityClass_reports_the_verdict_when_there_is_one(): void
+    {
+        self::assertSame(
+            'excellent',
+            $this->invokePrivate('overallQualityClass', [new ChunkReviewStruct(['is_pass' => true])])
+        );
+        self::assertSame(
+            'fail',
+            $this->invokePrivate('overallQualityClass', [new ChunkReviewStruct(['is_pass' => false])])
+        );
+    }
+
 }

@@ -194,7 +194,7 @@ class CattoolController extends BaseKleinViewController
             'maxTMXFileSize' => AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE,
             'mt_enabled' => new PHPTalBoolean((bool)$chunkStruct->id_mt_engine),
             'not_empty_default_tm_key' => new PHPTalBoolean(!empty(AppConfig::$DEFAULT_TM_KEY)),
-            'overall_quality_class' => $chunkReviewStruct ? ($chunkReviewStruct->is_pass ? 'excellent' : 'fail') : '',
+            'overall_quality_class' => $this->overallQualityClass($chunkReviewStruct),
             'pageTitle' => $this->buildPageTitle($revisionNumber, $chunkStruct),
             'password' => $chunkPassword,
             'project' => $chunkStruct->getProject(new ProjectDao($this->getDatabase())),
@@ -470,6 +470,20 @@ class CattoolController extends BaseKleinViewController
         }
 
         return $out;
+    }
+
+    /**
+     * is_pass is nullable and NULL means "no verdict" — a project with no LQA model never has one
+     * computed. Rendering NULL as 'fail' told the reviewer their work had failed a check that was
+     * never run, so an absent verdict renders as no class at all, matching QualitySummary.
+     */
+    private function overallQualityClass(?ChunkReviewStruct $chunkReviewStruct): string
+    {
+        if ($chunkReviewStruct === null || $chunkReviewStruct->is_pass === null) {
+            return '';
+        }
+
+        return $chunkReviewStruct->is_pass ? 'excellent' : 'fail';
     }
 
     /**

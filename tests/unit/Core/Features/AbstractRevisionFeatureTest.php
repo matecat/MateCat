@@ -515,9 +515,18 @@ class AbstractRevisionFeatureTest extends AbstractTest
         $data->jobToSplit = 99999;
         $event = new PostJobSplittedEvent($data, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Project not found');
-        $this->feature->postJobSplitted($event);
+        // postJobSplitted locks the job's chunk-review rows, which requires a transaction — in
+        // production it is dispatched inside JobSplitMergeService::applySplit's begin/commit.
+        $db = obtainTestDatabase();
+        $db->begin();
+
+        try {
+            $this->expectException(RuntimeException::class);
+            $this->expectExceptionMessage('Project not found');
+            $this->feature->postJobSplitted($event);
+        } finally {
+            $db->rollback();
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -532,9 +541,17 @@ class AbstractRevisionFeatureTest extends AbstractTest
         $chunk = new JobStruct();
         $event = new PostJobMergedEvent($data, $chunk, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Project not found');
-        $this->feature->postJobMerged($event);
+        // As above: dispatched inside JobSplitMergeService::mergeALL's transaction in production.
+        $db = obtainTestDatabase();
+        $db->begin();
+
+        try {
+            $this->expectException(RuntimeException::class);
+            $this->expectExceptionMessage('Project not found');
+            $this->feature->postJobMerged($event);
+        } finally {
+            $db->rollback();
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────

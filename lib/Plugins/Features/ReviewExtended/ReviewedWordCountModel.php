@@ -432,18 +432,22 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
      *
      * @param int $source_page
      *
-     * @return int
+     * EntryStruct::$penalty_points is a float, so the sum must be too — an int return type here
+     * truncates (two issues of 2.75 subtract 5 instead of 5.50) and the difference is left behind
+     * on the chunk review row as drift.
+     *
+     * @return float
      */
-    private function getPenaltyPointsForSourcePage(int $source_page): int
+    private function getPenaltyPointsForSourcePage(int $source_page): float
     {
         $toReduce = $this->_event->getIssuesToDelete();
         $issues = array_filter($toReduce, function (EntryStruct $issue) use ($source_page) {
             return $issue->source_page == $source_page;
         });
 
-        return array_reduce($issues, function ($carry, EntryStruct $issue) {
+        return (float)array_reduce($issues, function ($carry, EntryStruct $issue) {
             return $carry + $issue->penalty_points;
-        }, 0);
+        }, 0.0);
     }
 
 }
