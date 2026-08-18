@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import {createRoot} from 'react-dom/client'
 import React from 'react'
 
-import {ModalWindow} from './ModalWindow'
+import {ModalWindow, onModalWindowMounted} from './ModalWindow'
 import AppDispatcher from '../../stores/AppDispatcher'
 import ModalsConstants from '../../constants/ModalsConstants'
 import ModalsActions from '../../actions/ModalsActions'
@@ -101,4 +101,34 @@ test('works properly ModalOverlay version', () => {
   expect(onCloseCallback).toHaveBeenCalledTimes(1)
   expect(elButtonClose).not.toBeVisible()
   expect(elTitle).not.toBeVisible()
+})
+
+test('onModalWindowMounted resolves once the component mounts', async () => {
+  const mountedPromise = onModalWindowMounted()
+
+  render(<ModalWindow />)
+
+  const result = await Promise.race([
+    mountedPromise.then(() => 'resolved'),
+    new Promise((resolve) => setTimeout(() => resolve('timeout'), 1000)),
+  ])
+
+  expect(result).toBe('resolved')
+})
+
+test('unmounting removes the CatToolStore listeners', () => {
+  const {unmount} = render(<ModalWindow />)
+
+  unmount()
+
+  ModalsActions.showModalComponent(
+    DummyComponent,
+    {},
+    'Should not appear after unmount',
+  )
+
+  expect(
+    screen.queryByRole('heading', {name: 'Should not appear after unmount'}),
+  ).not.toBeInTheDocument()
+  expect(screen.queryByText('something')).not.toBeInTheDocument()
 })
