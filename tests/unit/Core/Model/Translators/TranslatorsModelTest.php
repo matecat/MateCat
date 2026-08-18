@@ -4,10 +4,13 @@ namespace Matecat\Core\Model\Translators;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\IDatabase;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Translators\TranslatorsModel;
 use Model\Users\UserStruct;
+use PDO;
+use PDOException;
 use PDOStatement;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -214,5 +217,73 @@ class TranslatorsModelTest extends AbstractTest
             ->setDeliveryDate(time() + 86400);
 
         $model->update();
+    }
+
+    #[Test]
+    public function changeJobPasswordRotatesTheCredentialOnTheStruct(): void
+    {
+        $job = $this->makeJobStructWithProject(password: 'old-pw');
+        $model = new TranslatorsModel($job, $this->dbStub);
+
+        $model->changeJobPassword('new-pw');
+
+        self::assertSame('new-pw', $job->password);
+    }
+
+    #[Test]
+    public function changeJobPasswordGeneratesACredentialWhenNoneIsGiven(): void
+    {
+        $job = $this->makeJobStructWithProject(password: 'old-pw');
+        $model = new TranslatorsModel($job, $this->dbStub);
+
+        $model->changeJobPassword();
+
+        self::assertNotSame('old-pw', $job->password);
+        self::assertNotEmpty($job->password);
+    }
+
+    #[Test]
+    public function changeJobPasswordRollsBackAndRethrowsWhenTheRotationFails(): void
+    {
+        $failure = new PDOException('write failed');
+
+        $stmtStub = $this->createStub(PDOStatement::class);
+        $stmtStub->queryString = '';
+        $stmtStub->method('fetchAll')->willReturn([]);
+
+        $pdoStub = $this->createStub(PDO::class);
+        // The rotation is the only statement that fails: everything the constructor and the
+        // transaction helpers ask for still has to work, or the test would never reach the catch.
+        $pdoStub->method('prepare')->willReturnCallback(
+            function (string $sql) use ($stmtStub, $failure): PDOStatement {
+                if (str_contains($sql, 'UPDATE jobs')) {
+                    throw $failure;
+                }
+
+                return $stmtStub;
+            }
+        );
+        // false while openTransaction() decides whether to begin one, true while
+        // rollbackTransaction() decides whether there is one to end.
+        $pdoStub->method('inTransaction')->willReturnOnConsecutiveCalls(false, true);
+
+        $dbMock = $this->createMock(IDatabase::class);
+        $dbMock->method('getConnection')->willReturn($pdoStub);
+        $dbMock->expects($this->once())->method('begin');
+        $dbMock->expects($this->once())->method('rollback');
+        $dbMock->expects($this->never())->method('commit');
+
+        $job = $this->makeJobStructWithProject(password: 'old-pw');
+        $model = new TranslatorsModel($job, $dbMock);
+
+        try {
+            $model->changeJobPassword('new-pw');
+            self::fail('changeJobPassword() should have re-thrown the failure');
+        } catch (PDOException $e) {
+            self::assertSame($failure, $e);
+        }
+
+        // The struct keeps the credential the row still holds.
+        self::assertSame('old-pw', $job->password);
     }
 }
