@@ -17,9 +17,11 @@ use Model\DataAccess\IDatabase;
 use Model\DataAccess\TransactionalTrait;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
+use Model\Jobs\JobCredentialCacheInvalidator;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Outsource\ConfirmationDao;
+use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserDao;
@@ -327,7 +329,6 @@ class TranslatorsModel
         try {
             $jobDao = new JobDao($this->database);
             $jobDao->changePassword($this->jStruct, $newPassword);
-            $jobDao->destroyCacheByIdAndPassword($this->jStruct);
             $this->featureSet->dispatch(new JobPasswordChangedEvent($this->jStruct, $oldPassword));
         } catch (Throwable $e) {
             // Only rolls back a transaction opened here; when the caller already had one open,
@@ -337,6 +338,18 @@ class TranslatorsModel
         }
 
         $this->commitTransaction();
+
+        // Evicting after the commit is what closes the editor on the revoked link: while the
+        // transaction was open a concurrent request could still resolve the job against the old row
+        // and cache the replaced password as valid again.
+        //
+        // commitTransaction() is a no-op when the caller owns the transaction, so a caller that
+        // wraps this one has to sweep again once it commits its own.
+        (new JobCredentialCacheInvalidator(
+            $jobDao,
+            new ChunkReviewDao($this->database),
+            new ProjectDao($this->database)
+        ))->sweepAfterJobPasswordRotation($this->jStruct, $oldPassword, $newPassword);
     }
 
     /**

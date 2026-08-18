@@ -7,7 +7,6 @@ global.config = {
   enableMultiDomainApi: false,
   id_job: '77',
   currentPassword: 'jobpwd',
-  revisionNumber: undefined,
 }
 
 const url = config.basepath + 'api/app/copy-all-source-to-target'
@@ -30,7 +29,7 @@ test('posts copy-all with job credentials from config and returns data', async (
   expect(form.get('revision_number')).toBeNull()
 })
 
-test('sends explicit idJob, password and revision_number when provided', async () => {
+test('sends the explicit idJob and password when provided', async () => {
   let form
   mswServer.use(
     http.post(url, async ({request}) => {
@@ -42,12 +41,12 @@ test('sends explicit idJob, password and revision_number when provided', async (
   await copyAllSourceToTarget({
     idJob: '999',
     password: 'other',
-    revisionNumber: 2,
   })
 
   expect(form.get('id_job')).toBe('999')
   expect(form.get('password')).toBe('other')
-  expect(form.get('revision_number')).toBe('2')
+  // the phase is resolved from the password, so no revision number is sent
+  expect(form.get('revision_number')).toBeNull()
 })
 
 test('rejects with the response on a non-ok status', async () => {

@@ -268,6 +268,56 @@ class ProjectDaoRealSqlTest extends AbstractTest
         self::assertNotNull($this->dao->findByIdAndPassword($p['id'], 'newpass123'));
     }
 
+    /**
+     * The project password gate is cached, so rotating the password has to evict the entry the
+     * replaced credential is served from: otherwise the previous link keeps opening the project for
+     * the whole TTL.
+     */
+    public function testChangePasswordEvictsTheCacheOfTheReplacedPassword(): void
+    {
+        $p = $this->project();
+        $struct = $this->dao->findById($p['id']);
+        $oldPassword = $struct->password;
+
+        self::assertNotNull($this->dao->findByIdAndPassword($p['id'], $oldPassword, 86400));
+
+        $this->dao->changePassword($struct, 'newpass456');
+
+        try {
+            $this->dao->findByIdAndPassword($p['id'], $oldPassword, 86400);
+            self::fail('the replaced password must stop resolving as soon as it is rotated');
+        } catch (NotFoundException) {
+            // expected: the gate no longer authenticates the replaced credential
+        }
+
+        self::assertNotNull($this->dao->findByIdAndPassword($p['id'], 'newpass456', 86400));
+    }
+
+    /**
+     * The project URLs are served from a project-data read cached for a day under the password that
+     * was asked for, so a rotation that evicts only the credential gate keeps publishing the job
+     * links of the replaced project password.
+     */
+    public function testChangePasswordEvictsTheProjectDataOfTheReplacedPassword(): void
+    {
+        $p = $this->project();
+        $f = $this->fixtures->makeFile($p['id']);
+        $seg = $this->fixtures->makeSegment($f['id']);
+        $j = $this->fixtures->makeJob($p['id'], ['job_first_segment' => $seg['id'], 'job_last_segment' => $seg['id']]);
+        $this->fixtures->makeFilesJob($j['id'], $f['id']);
+        $this->fixtures->makeSegmentTranslation($seg['id'], $j['id']);
+
+        $struct = $this->dao->findById($p['id']);
+        $oldPassword = $struct->password;
+
+        self::assertNotEmpty($this->dao->setCacheTTL(86400)->getProjectData($p['id'], $oldPassword));
+
+        $this->dao->changePassword($struct, 'newpass789');
+
+        self::assertSame([], $this->dao->setCacheTTL(86400)->getProjectData($p['id'], $oldPassword));
+        self::assertNotEmpty($this->dao->setCacheTTL(86400)->getProjectData($p['id'], 'newpass789'));
+    }
+
     public function testChangeProjectStatus(): void
     {
         $p = $this->project(['status_analysis' => ProjectStatus::STATUS_NEW]);
@@ -590,7 +640,7 @@ class ProjectDaoRealSqlTest extends AbstractTest
         self::assertSame($p['name'], $rows[0]['name']);
     }
 
-    public function testGetProjectDataWithJobAndPasswordFilters(): void
+    public function testGetProjectDataWithProjectPasswordFilter(): void
     {
         $p = $this->project();
         $f = $this->fixtures->makeFile($p['id']);
@@ -599,7 +649,7 @@ class ProjectDaoRealSqlTest extends AbstractTest
         $this->fixtures->makeFilesJob($j['id'], $f['id']);
         $this->fixtures->makeSegmentTranslation($seg['id'], $j['id']);
 
-        $rows = $this->dao->getProjectData($p['id'], $p['password'], $j['id'], $j['password']);
+        $rows = $this->dao->getProjectData($p['id'], $p['password']);
 
         self::assertNotEmpty($rows);
     }

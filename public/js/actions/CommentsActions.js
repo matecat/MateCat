@@ -17,7 +17,6 @@ const CommentsActions = {
     return submitCommentApi({
       idSegment: sid,
       username: UserStore.getUserName(),
-      sourcePage: config.revisionNumber ? config.revisionNumber + 1 : 1,
       message: text,
       isAnonymous,
     })
@@ -38,7 +37,6 @@ const CommentsActions = {
       idSegment: sid,
       isAnonymous: isAnonymous,
       username: UserStore.getUserName(),
-      sourcePage: config.revisionNumber ? config.revisionNumber + 1 : 1,
     })
       .then((resp) => {
         AppDispatcher.dispatch({

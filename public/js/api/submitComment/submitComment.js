@@ -6,31 +6,27 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {Object} options
  * @param {number} options.idSegment
  * @param {string} options.username
- * @param {string} options.sourcePage
  * @param {string} options.message
  * @param {string} [options.idClient=config.id_client]
  * @param {string} [options.idJob=config.id_job]
- * @param {string} [options.password=config.password]
- * @param {string} [options.revisionNumber=config.revisionNumber]
+ * @param {string} [options.password=config.currentPassword]
  * @returns {Promise<object>}
  */
 export const submitComment = async ({
   idSegment,
   username,
-  sourcePage,
   message,
   idJob = config.id_job,
-  password = config.password,
-  revisionNumber = config.revisionNumber,
+  password = config.currentPassword,
   isAnonymous = false,
 }) => {
+  // No source_page and no revision_number: the server attributes the comment to the phase this
+  // password resolves to, so the current password of that phase has to be sent.
   const dataParams = {
     id_job: idJob,
     id_segment: idSegment,
-    revision_number: revisionNumber,
     username,
     password,
-    source_page: sourcePage,
     message,
     is_anonymous: isAnonymous,
   }

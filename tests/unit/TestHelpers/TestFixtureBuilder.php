@@ -204,6 +204,11 @@ class TestFixtureBuilder
         if (isset($overrides['remote_ip_address'])) {
             $values['remote_ip_address'] = (string)$overrides['remote_ip_address'];
         }
+        // The column is nullable but ProjectStruct::$password is not, so any test that loads the row
+        // as a struct has to be able to set it.
+        if (isset($overrides['password'])) {
+            $values['password'] = (string)$overrides['password'];
+        }
         $id = $this->insertAi('projects', 'id', $values);
 
         return ['id' => $id];

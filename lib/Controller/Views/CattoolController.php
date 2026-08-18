@@ -84,42 +84,36 @@ class CattoolController extends BaseKleinViewController
     }
 
     /**
-     * findJobByIdPasswordAndSourcePage
+     * Finds the current chunk from the job id and the presented password, and with it the phase the
+     * request belongs to.
      *
-     * Finds the current chunk by job id, password and source page. If in revision, then
-     * pass the control to a filter, to allow plugin to interact with the
-     * authorization process.
-     *
-     * Filters may restore the password to the actual password contained in
-     * `jobs` table, while the request may have come with a different password
-     * for access control.
-     *
-     * This is done to avoid the rewrite of preexisting implementations.
+     * The phase comes from the credential, never from the path. The same job id is reachable with the
+     * job password or with the review password of any phase, and only the row the password matches
+     * says which one this is: deciding it from the URL instead let a translator ask a /translate/…
+     * link for the second reviewer's password. This mirrors {@see ChunkPasswordValidator}, which the
+     * APIs the page then calls already resolve through.
      *
      * @throws Exception
+     * @throws NotFoundException
      */
-    private function findJobByIdPasswordAndSourcePage(int $job_id, string $password, int $sourcePage, bool $isRevision): stdClass
+    private function findJobByIdAndPassword(int $job_id, string $password): stdClass
     {
-        $result = [
-            'chunk' => null,
-            'chunkReviewStruct' => null,
-            'isRevision' => $isRevision,
-        ];
+        $chunk = (new JobDao($this->getDatabase()))->getByIdAndPassword($job_id, $password);
 
-        if ($isRevision) {
-            $chunkReviewStruct = (new ChunkReviewDao($this->getDatabase()))->findByJobIdReviewPasswordAndSourcePage($job_id, $password, $sourcePage);
-
-            if (!$chunkReviewStruct) {
-                throw new NotFoundException('Review record was not found');
-            }
-
-            $result['chunk'] = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
-            $result['chunkReviewStruct'] = $chunkReviewStruct;
-        } else {
-            $result['chunk'] = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($job_id, $password);
+        if ($chunk !== null) {
+            return (object)['chunk' => $chunk, 'chunkReviewStruct' => null];
         }
 
-        return (object)$result;
+        $chunkReviewStruct = (new ChunkReviewDao($this->getDatabase()))->findByReviewPasswordAndJobId($password, $job_id);
+
+        if ($chunkReviewStruct === null) {
+            throw new NotFoundException('Review record was not found');
+        }
+
+        return (object)[
+            'chunk' => $chunkReviewStruct->getChunk(new JobDao($this->getDatabase())),
+            'chunkReviewStruct' => $chunkReviewStruct,
+        ];
     }
 
     /**
@@ -130,11 +124,10 @@ class CattoolController extends BaseKleinViewController
     {
         $chunkAndPasswords = new stdClass();
         $request = $this->validateTheRequest();
-        $isRevision = (new CatUtils($this->getDatabase()))->getIsRevisionFromRequestUri();
         $revisionNumber = null;
 
         try {
-            $chunkAndPasswords = $this->findJobByIdPasswordAndSourcePage((int)$request['jid'], $request['password'], Utils::getSourcePage(), $isRevision);
+            $chunkAndPasswords = $this->findJobByIdAndPassword((int)$request['jid'], $request['password']);
             $revisionNumber = ReviewUtils::sourcePageToRevisionNumber($chunkAndPasswords->chunkReviewStruct ? $chunkAndPasswords->chunkReviewStruct->source_page : null);
         } catch (NotFoundException) {
             $this->notFound();
@@ -145,6 +138,9 @@ class CattoolController extends BaseKleinViewController
 
         /** @var ?ChunkReviewStruct $chunkReviewStruct */
         $chunkReviewStruct = $chunkAndPasswords->chunkReviewStruct;
+
+        $isRevision = $chunkReviewStruct !== null;
+        $sourcePage = $chunkReviewStruct->source_page ?? SourcePages::SOURCE_PAGE_TRANSLATE;
 
         $chunkId = $chunkStruct->id ?? throw new RuntimeException('Chunk id is null after successful load');
         $chunkPassword = $chunkStruct->password ?? throw new RuntimeException('Chunk password is null after successful load');
@@ -205,10 +201,12 @@ class CattoolController extends BaseKleinViewController
             'project_name' => Utils::friendlySlug($chunkStruct->getProject(new ProjectDao($this->getDatabase()))->name),
             'quality_report_href' => AppConfig::$BASEURL . "revise-summary/$chunkId-$chunkPassword",
             'review_extended' => new PHPTalBoolean(true),
-            'review_password' => $isRevision ? ($chunkReviewStruct->review_password ?? $chunkPassword) : (new ChunkReviewDao($this->getDatabase()))->findChunkReviewsForSourcePage(
-                $chunkStruct,
-                Utils::getSourcePage() + 1
-            )[0]->review_password,
+            // The translate page publishes the first revision's password: that is the revise link its
+            // footer offers, and the only phase a translator is entitled to reach.
+            'review_password' => $isRevision ? ($chunkReviewStruct->review_password ?? $chunkPassword) : ((new ChunkReviewDao($this->getDatabase()))->findChunkReviewsForSourcePage(
+                    $chunkStruct,
+                    SourcePages::SOURCE_PAGE_REVISION
+                )[0]->review_password ?? $chunkPassword),
             'revisionNumber' => $revisionNumber,
             'public_tm_penalty' => $public_tm_penalty->value ?? '',
             'searchable_statuses' => new PHPTalMap($this->searchableStatuses()),
@@ -232,7 +230,7 @@ class CattoolController extends BaseKleinViewController
             'source_code' => $chunkStruct->source,
             // The page has always carried the same language code under both names.
             'source_rfc' => $chunkStruct->source,
-            'source_page' => Utils::getSourcePage(),
+            'source_page' => $sourcePage,
             'status_labels' => new PHPTalMap([
                     TranslationStatus::STATUS_NEW => 'new',
                     TranslationStatus::STATUS_DRAFT => 'Draft',

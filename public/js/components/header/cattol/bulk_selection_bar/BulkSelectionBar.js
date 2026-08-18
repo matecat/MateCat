@@ -5,6 +5,24 @@ import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentStore from '../../../../stores/SegmentStore'
 import CatToolActions from '../../../../actions/CatToolActions'
 
+// The bulk endpoints reject with {response, errors}; a plain Error can also reach us if the request
+// never left the browser.
+const describeBulkFailure = (error) => {
+  const message = error?.errors?.[0]?.message ?? error?.errors?.message
+  if (message) return message
+  if (error?.response?.status) return `server answered ${error.response.status}`
+  return error?.message ?? 'the request failed'
+}
+
+const MAX_LISTED_SEGMENTS = 20
+
+const listSegments = (segments) =>
+  segments.length > MAX_LISTED_SEGMENTS
+    ? `${segments.slice(0, MAX_LISTED_SEGMENTS).join(', ')} and ${
+        segments.length - MAX_LISTED_SEGMENTS
+      } more`
+    : segments.join(', ')
+
 class BulkSelectionBar extends React.Component {
   constructor(props) {
     super(props)
@@ -20,6 +38,7 @@ class BulkSelectionBar extends React.Component {
     this.removeAll = this.removeAll.bind(this)
     this.onClickBulk = this.onClickBulk.bind(this)
     this.onClickBack = this.onClickBack.bind(this)
+    this.onBulkFailed = this.onBulkFailed.bind(this)
   }
 
   countInBulkElements(segments) {
@@ -73,25 +92,57 @@ class BulkSelectionBar extends React.Component {
     })
   }
 
+  onBulkFailed(error) {
+    // Without this the bar keeps the spinner of a change that is not happening, and the selection is
+    // silently left as it was. The selection is kept so the user can retry it, and the toast names
+    // the segments that stayed behind and stays up until it is closed.
+    this.setState({
+      changingStatus: false,
+    })
+    const segments = this.state.segmentsArray
+    CatToolActions.addNotification({
+      title: 'The status of the selected segments was not changed',
+      text: (
+        <>
+          <p>
+            {segments.length} segments kept their status: the change to{' '}
+            {this.props.isReview ? 'APPROVED' : 'TRANSLATED'} was refused
+            because {describeBulkFailure(error)}.
+          </p>
+          <p>
+            Job {config.id_job}
+            {config.revisionNumber
+              ? `, revision ${config.revisionNumber}`
+              : ''}{' '}
+            — segments {listSegments(segments)}
+          </p>
+        </>
+      ),
+      type: 'error',
+      position: 'bl',
+      autoDismiss: false,
+    })
+  }
+
   onClickBulk() {
     this.setState({
       changingStatus: true,
     })
     if (this.props.isReview) {
-      SegmentActions.approveFilteredSegments(this.state.segmentsArray).then(
-        () => {
+      SegmentActions.approveFilteredSegments(this.state.segmentsArray)
+        .then(() => {
           this.onClickBack()
           CatToolActions.onRender({segmentToOpen: this.state.segmentsArray[0]})
           CatToolActions.reloadQualityReport()
-        },
-      )
+        })
+        .catch((error) => this.onBulkFailed(error))
     } else {
-      SegmentActions.translateFilteredSegments(this.state.segmentsArray).then(
-        () => {
+      SegmentActions.translateFilteredSegments(this.state.segmentsArray)
+        .then(() => {
           CatToolActions.onRender({segmentToOpen: this.state.segmentsArray[0]})
           this.onClickBack()
-        },
-      )
+        })
+        .catch((error) => this.onBulkFailed(error))
     }
     // SegmentActions.closeSegment(SegmentStore.getCurrentSegmentId());
   }
