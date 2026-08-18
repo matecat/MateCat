@@ -86,6 +86,27 @@ Workers in `lib/Utils/AsyncTasks/Workers/` process queued jobs via ActiveMQ. Key
 
 `AbstractDao` → concrete DAOs. `DaoCacheTrait` provides Redis-backed caching with XFetch early recomputation. Structs extend `AbstractDaoObjectStruct` with `ArrayAccessTrait`. `ShapelessConcreteStruct` for untyped data.
 
+### Cache and transactions
+
+`DaoCacheTrait` follows the transaction of the object using it, declared by `_cacheTransactionScope()`.
+`AbstractDao` returns its own injected `IDatabase`; `Pager`, `UserStateStore` and
+`SessionTokenStoreHandler` return null, because they do not write through a transaction and a token
+revocation must never wait behind a commit.
+
+- A read taken inside an open transaction is **not** written to cache — it is not public yet, and a
+  rollback would leave a row that never existed readable for the whole TTL.
+- An eviction issued inside an open transaction is **queued** on `IDatabase::onCommit()` and runs
+  after the commit. Evicting before the commit is worse than not evicting: another connection misses
+  the cache, reads the pre-commit row and caches it again, behind the eviction that just ran.
+
+Callers do not schedule any of this. Do not wrap `destroyCacheXxx()` in `onCommit()` by hand.
+`onCommit($callback, critical: true)` re-throws a failure once the rest of the queue has run — use it
+only where a silent failure is a security problem, such as a credential sweep, not for a cache bust.
+
+A transaction must be opened and closed through `IDatabase::begin()`/`commit()`, or via
+`TransactionalTrait`, never on the PDO handle: a raw commit leaves the deferral queue undrained and
+the next `begin()` discards it.
+
 ## Testing
 
 ```bash
