@@ -3,44 +3,59 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use InvalidArgumentException;
 use Model\Exceptions\NotFoundException;
-use Model\Jobs\JobDao;
 use Model\Segments\SegmentDao;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
 use ReflectionException;
+use RuntimeException;
 use TypeError;
+use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 use Utils\Tools\CatUtils;
 
 class SetCurrentSegmentController extends KleinController
 {
+    use ChunkNotFoundHandlerTrait;
 
     protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
+        $chunkValidator = new ChunkPasswordValidator($this);
+        $chunkValidator->onSuccess(function () use ($chunkValidator) {
+            $this->chunk = $chunkValidator->getChunk();
+        });
+
+        $this->appendValidator($chunkValidator);
     }
 
     /**
      * @throws ReflectionException
      * @throws NotFoundException
+     * @throws RuntimeException
      * @throws Exception
      * @throws TypeError
      */
     public function set(): void
     {
         $request = $this->validateTheRequest();
-        $revision_number = $request['revision_number'];
         $id_segment = $request['id_segment'];
-        $id_job = (int)$request['id_job'];
-        $password = (string)$request['password'];
         $split_num = $request['split_num'];
 
-        //get Job Info, we need only a row of jobs (split)
-        (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($id_job, $password);
+        /*
+         * Which phase the caller is navigating in comes from the password this request
+         * authenticated with, not from a client-declared revision_number.
+         */
+        $isRevision = ($this->chunk->getSourcePage() ?: SourcePages::SOURCE_PAGE_TRANSLATE) !== SourcePages::SOURCE_PAGE_TRANSLATE;
+
+        // The next-segment lookup joins on the job password, which is never the review one.
+        $id_job = $this->chunk->id ?? throw new RuntimeException('Missing job id');
+        $password = $this->chunk->password ?? throw new RuntimeException('Missing job password');
 
         if (empty($id_segment)) {
             throw new InvalidArgumentException("missing segment id", -1);
@@ -78,9 +93,9 @@ class SetCurrentSegmentController extends KleinController
          * End Split check control
          */
         if (!$isASplittedSegment or $isLastSegmentChunk) {
-            $segmentList = (new SegmentDao($this->getDatabase()))->getNextSegment($id_segment_int, $id_job, $password, (bool)$revision_number);
+            $segmentList = (new SegmentDao($this->getDatabase()))->getNextSegment($id_segment_int, $id_job, $password, $isRevision);
 
-            if (!$revision_number) {
+            if (!$isRevision) {
                 $nextSegmentId = CatUtils::fetchStatus($id_segment_int, $segmentList);
             } else {
                 $nextSegmentId = CatUtils::fetchStatus($id_segment_int, $segmentList, TranslationStatus::STATUS_TRANSLATED);
@@ -99,23 +114,12 @@ class SetCurrentSegmentController extends KleinController
     }
 
     /**
-     * @return array{revision_number: string|false, id_segment: string, id_job: string|false, password: string|false, split_num: string|null}
+     * @return array{id_segment: string, split_num: string|null}
      * @throws InvalidArgumentException
      */
     private function validateTheRequest(): array
     {
-        $revision_number = filter_var($this->request->param('revision_number'), FILTER_SANITIZE_NUMBER_INT);
         $id_segment = filter_var($this->request->param('id_segment'), FILTER_SANITIZE_NUMBER_INT);
-        $id_job = filter_var($this->request->param('id_job'), FILTER_SANITIZE_NUMBER_INT);
-        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-
-        if (empty($id_job)) {
-            throw new InvalidArgumentException("No id job provided", -1);
-        }
-
-        if (empty($password)) {
-            throw new InvalidArgumentException("No job password provided", -2);
-        }
 
         if (empty($id_segment)) {
             throw new InvalidArgumentException("No id segment provided", -3);
@@ -126,10 +130,7 @@ class SetCurrentSegmentController extends KleinController
         $split_num = $segment[1] ?? null;
 
         return [
-            'revision_number' => $revision_number,
             'id_segment' => $id_segment,
-            'id_job' => $id_job,
-            'password' => $password,
             'split_num' => $split_num,
         ];
     }

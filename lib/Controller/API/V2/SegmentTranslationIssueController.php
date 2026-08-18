@@ -6,37 +6,46 @@ use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\API\Commons\Validators\SegmentTranslationIssueValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
-use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryCommentDao;
 use Model\Projects\ProjectDao;
 use Model\LQA\EntryDao as EntryDao;
 use Model\LQA\EntryStruct;
 use Model\LQA\EntryValidator;
 use Model\Translations\SegmentTranslationDao;
-use Model\Teams\MembershipDao;
-use Model\Teams\TeamDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
-use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\ReviewExtended\TranslationIssueModel;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use RuntimeException;
 use TypeError;
+use Utils\Constants\SourcePages;
 use View\API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
 use View\API\V2\Json\TranslationIssueComment;
 
 class SegmentTranslationIssueController extends AbstractStatefulKleinController {
 
+    use ChunkNotFoundHandlerTrait;
+
     /**
      * @var SegmentTranslationIssueValidator
      */
     private SegmentTranslationIssueValidator $validator;
+
+    /**
+     * The chunk review resolved from the password this request authenticated with.
+     *
+     * @var ChunkReviewStruct
+     */
+    private ChunkReviewStruct $chunkReview;
 
     /**
      * @throws RuntimeException
@@ -57,10 +66,19 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     /**
      * @throws ValidationError
      * @throws RuntimeException
+     * @throws AuthorizationError
      * @throws Exception
      * @throws \TypeError
      */
     public function create(): void {
+        // Penalty points are charged to a review row, so filing an issue requires a review
+        // credential. A translate password resolves to no phase the caller may score.
+        if ( $this->credentialSourcePage() === SourcePages::SOURCE_PAGE_TRANSLATE ) {
+            throw new AuthorizationError( 'A revision password is required to create an issue', 401 );
+        }
+
+        $this->validator->ensureSegmentRevisionMatchesCredentialPhase();
+
         $data = [
             'id_segment' => $this->request->param( 'id_segment' ),
             'id_job' => $this->request->param( 'id_job' ),
@@ -75,16 +93,18 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             'is_full_segment' => false,
             'comment' => $this->request->param( 'comment' ),
             'uid' => $this->user->uid ?? null,
-            'source_page' => ReviewUtils::revisionNumberToSourcePage( $this->request->param( 'revision_number' ) ),
+            'source_page' => $this->credentialSourcePage(),
         ];
 
         $this->getDatabase()->begin();
 
         $struct = new EntryStruct( $data );
 
+        // The credential decides both the phase the issue belongs to and the review row its penalty
+        // points are charged to, so the two can no longer disagree (GHSA-7q94-2fmr-3p42).
         $model = $this->_getSegmentTranslationIssueModel(
-            $this->request->param( 'id_job' ),
-            $this->request->param( 'password' ),
+            $this->chunkReview->id_job ?? throw new RuntimeException( 'Missing job id' ),
+            $this->chunkReview->review_password ?? throw new RuntimeException( 'Missing review password' ),
             $struct
         );
 
@@ -103,6 +123,14 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * @throws TypeError
      */
     public function update(): void {
+        // An issue scores a review row, so editing one requires a review credential. A translate
+        // password resolves to no phase the caller may score.
+        if ( $this->credentialSourcePage() === SourcePages::SOURCE_PAGE_TRANSLATE ) {
+            throw new AuthorizationError( 'A revision password is required to edit an issue', 401 );
+        }
+
+        $this->validator->ensureSegmentRevisionMatchesCredentialPhase();
+
         $data = [
                 'id_issue'            => $this->request->param( 'id_issue' ),
                 'id_segment'          => $this->request->param( 'id_segment' ),
@@ -131,13 +159,9 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $data['source_page'] = $oldStruct->source_page;
 
         $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
-        $chunkReviewStruct = $chunkReviewDao->findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
 
-        if ( $chunkReviewStruct === null ) {
-            throw new NotFoundException( "Job not found", 404 );
-        }
-
-        $jobStruct = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
+        // Job and phase were already resolved from the presented credential by ChunkPasswordValidator.
+        $jobStruct = $this->chunk;
 
         $this->checkLoggedUserPermissions($oldStruct, $jobStruct, $this->user);
 
@@ -209,24 +233,24 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * @throws \TypeError
      */
     public function delete(): void {
+        // Deleting an issue gives its penalty points back to a review row, so it too requires a
+        // review credential: a translate password identifies no phase to give them back to.
+        if ( $this->credentialSourcePage() === SourcePages::SOURCE_PAGE_TRANSLATE ) {
+            throw new AuthorizationError( 'A revision password is required to delete an issue', 401 );
+        }
+
         $issue = $this->validator->issue ?? throw new RuntimeException('Missing issue');
 
         $this->getDatabase()->begin();
+        // Job, phase and review credential all come from the password this request authenticated
+        // with, as resolved by ChunkPasswordValidator.
         $model = $this->_getSegmentTranslationIssueModel(
-            $this->request->param( 'id_job' ),
-            $this->request->param( 'password' ),
+            $this->chunkReview->id_job ?? throw new RuntimeException( 'Missing job id' ),
+            $this->chunkReview->review_password ?? throw new RuntimeException( 'Missing review password' ),
             $issue
         );
 
-        $chunkReviewStruct = (new ChunkReviewDao($this->getDatabase()))->findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
-
-        if ( $chunkReviewStruct === null ) {
-            throw new NotFoundException( "Job not found", 404 );
-        }
-
-        $jobStruct = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
-
-        $this->checkLoggedUserPermissions($issue, $jobStruct, $this->user);
+        $this->checkLoggedUserPermissions($issue, $this->chunk, $this->user);
 
         $model->delete();
         $this->getDatabase()->commit();
@@ -259,7 +283,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
          $data = [
              'comment' => $this->request->param( 'message' ),
              'id_qa_entry' => (int)($this->validator->issue->id ?? throw new RuntimeException('Missing issue id')),
-             'source_page' => (int)($this->request->param( 'source_page' ) ?? throw new RuntimeException('Missing source_page')),
+             'source_page' => $this->credentialSourcePage(),
              'uid' => (int)($this->user->uid ?? throw new RuntimeException('Missing user uid'))
          ];
 
@@ -311,10 +335,32 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             if ( $chunkReview === null ) {
                 throw new NotFoundException( 'Chunk review not found' );
             }
+
+            // The revision phase this request may act in comes from the password that matched,
+            // which ChunkPasswordValidator has already stamped onto the chunk. Keep both the chunk
+            // and its review row so no endpoint has to re-resolve them from request parameters.
+            $this->chunk       = $jobValidator->getChunk();
+            $this->chunkReview = $chunkReview;
+
             $this->validator = ( new SegmentTranslationIssueValidator( $this ) )->setChunkReview( $chunkReview );
             $this->validator->validate();
         } );
         $this->appendValidator( $jobValidator );
+    }
+
+    /**
+     * The revision phase this request is allowed to act in.
+     *
+     * It is resolved from the password the caller presented — ChunkPasswordValidator stamps it onto
+     * the chunk from the review row that matched — and never from the request body: a
+     * client-declared revision_number proves nothing about which phase the caller may write to
+     * (GHSA-7q94-2fmr-3p42). The parameter is no longer read anywhere: a client that still sends
+     * it is ignored.
+     *
+     * @return int
+     */
+    private function credentialSourcePage(): int {
+        return $this->chunk->getSourcePage() ?: SourcePages::SOURCE_PAGE_TRANSLATE;
     }
 
     private function getVersionNumber(): int {
@@ -345,21 +391,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             return;
         }
 
+        // Anyone else must belong to the team that owns the project.
         $project = $job->getProject(new ProjectDao($this->getDatabase()));
-        $team = $project->id_team !== null ? (new TeamDao($this->getDatabase()))->findById($project->id_team) : null;
-
-        if ($team === null || $team->id === null) {
-            throw new AuthorizationError( "Team not found. Not Authorized", 401 );
-        }
-
-        $mDao = new MembershipDao($this->getDatabase());
-
-        foreach ($mDao->getMemberListByTeamId($team->id) as $member){
-            if($member->uid === $loggerUser->uid){
-                return;
-            }
-        }
-
-        throw new AuthorizationError( "Not Authorized", 401 );
+        (new ProjectAccessValidator($this, $project))->validate();
     }
 }

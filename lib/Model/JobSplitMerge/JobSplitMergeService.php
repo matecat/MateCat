@@ -14,10 +14,12 @@ use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\PostJobMergedEvent;
 use Model\FeaturesBase\Hook\Event\Run\PostJobSplittedEvent;
+use Model\Jobs\JobCredentialCacheInvalidator;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
+use Model\LQA\ChunkReviewDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
@@ -161,6 +163,23 @@ class JobSplitMergeService
     protected function deleteOnMerge(JobStruct $job): void
     {
         (new JobDao($this->dbHandler))->deleteOnMerge($job);
+    }
+
+    /**
+     * Wrapper around the job credential cache sweep — overridable in tests.
+     *
+     * @throws Exception
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws TypeError
+     */
+    protected function sweepCredentialCaches(JobStruct $chunk, string $oldPassword, string $newPassword): void
+    {
+        (new JobCredentialCacheInvalidator(
+            new JobDao($this->dbHandler),
+            new ChunkReviewDao($this->dbHandler),
+            new ProjectDao($this->dbHandler)
+        ))->sweepAfterJobPasswordRotation($chunk, $oldPassword, $newPassword);
     }
 
     /**
@@ -611,9 +630,15 @@ class JobSplitMergeService
         $totalAvgPee = 0;
         $totalTimeToEdit = 0;
 
+        // The merge revokes credentials: deleteOnMerge() drops the row of every chunk but the first,
+        // and the first one's password is rotated when it had a translator. Read them before the write,
+        // the structs are the ones it mutates.
+        $mergedPasswords = [];
+
         foreach ($jobStructs as $i => $_jStruct) {
             $totalAvgPee += $_jStruct->avg_post_editing_effort;
             $totalTimeToEdit += $_jStruct->total_time_to_edit;
+            $mergedPasswords[] = (string)$_jStruct->password;
 
             if ($i > 0) {
                 // delete character_counter_count_tags, character_counter_mode, subfiltering_handlers metadata (not from the first job)
@@ -657,10 +682,15 @@ class JobSplitMergeService
 
         $this->dbHandler->commit();
 
-        $jobDao->destroyCacheByProjectId($data->idProject);
-        $this->destroyAnalysisCacheByProjectId($data->idProject);
+        // Every password the merge revoked keeps resolving out of the cache until its entry expires,
+        // and the surviving one now answers with the pre-merge row. The sweep runs once the merge is
+        // committed: while the transaction was open another connection could still read the old rows
+        // and cache them again behind an eviction. It covers the project data and the project's job
+        // list too, which publish the passwords in their value.
+        foreach ($mergedPasswords as $mergedPassword) {
+            $this->sweepCredentialCaches($chunk, $mergedPassword, (string)$chunk->password);
+        }
 
-         $projectStruct = $this->getProjectForCacheInvalidation($jobStructs[0]);
-         $this->createProjectDao()->destroyCacheForProjectData($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
+        $this->destroyAnalysisCacheByProjectId($data->idProject);
     }
 }
