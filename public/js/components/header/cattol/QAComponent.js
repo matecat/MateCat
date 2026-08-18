@@ -79,6 +79,7 @@ const QAComponent = (props) => {
     setCurrentCategory(category)
   }
 
+  // eslint-disable-next-line no-unused-vars
   const allowHTML = (string) => {
     return {__html: string}
   }
