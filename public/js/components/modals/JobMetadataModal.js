@@ -9,7 +9,10 @@ const JobMetadataModal = (props) => {
   const isMtcReferenceValued = ({metadata}) =>
     typeof metadata?.['mtc:references'] === 'string'
 
-  const getHtml = (text) => text
+  // Instructions are stored as plain text and injected with dangerouslySetInnerHTML, so the
+  // escaping has to happen here. Plugins override this method to add markdown rendering; they
+  // filter too, and filterXSS is idempotent.
+  const getHtml = (text) => (text ? filterXSS(text) : text)
 
   const getMTCReferences = ({metadata}) => {
     const removeNotAllowedLinksFromHtml = (html) => {
@@ -18,14 +21,17 @@ const JobMetadataModal = (props) => {
       const links = div.getElementsByTagName('a')
       const linksArray = Array.from(links)
       for (var i = 0; i < linksArray.length; i++) {
-        const link = linksArray[i].getAttribute('href')
+        const linkElement = linksArray[i]
+        const link = linkElement.getAttribute('href')
         if (!CommonUtils.isAllowedLinkRedirect(link)) {
-          const text = '[' + linksArray[i].textContent + '](' + link + ')'
-          const linkElement = div.querySelector('[href="' + link + '"]')
-          linkElement.parentNode.replaceChild(
-            document.createTextNode(text),
-            linkElement,
-          )
+          const text = '[' + linkElement.textContent + '](' + link + ')'
+          // Replace the node we already hold: re-querying by href breaks on an anchor with no
+          // href and on any href containing a quote.
+          linkElement.parentNode &&
+            linkElement.parentNode.replaceChild(
+              document.createTextNode(text),
+              linkElement,
+            )
         }
       }
       return div.innerHTML

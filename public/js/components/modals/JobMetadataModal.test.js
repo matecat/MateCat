@@ -286,3 +286,163 @@ test('expanding a file accordion toggles the currentFile state', () => {
 
   expect(screen.getByText('Follow these steps')).toBeInTheDocument()
 })
+
+test('strips event handler attributes from file instructions', () => {
+  const maliciousFiles = [
+    {
+      id: 40,
+      file_name: 'onerror.docx',
+      metadata: {
+        instructions: '<img src="x" onerror="alert(1)">caption',
+      },
+    },
+  ]
+  const {container} = render(
+    <JobMetadataModal
+      files={maliciousFiles}
+      currentFile={40}
+      showCurrent={true}
+    />,
+  )
+
+  // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+  expect(container.querySelector('[onerror]')).not.toBeInTheDocument()
+  expect(container.innerHTML).not.toContain('onerror')
+  expect(container).toHaveTextContent('caption')
+})
+
+test('strips javascript: hrefs from file instructions', () => {
+  const maliciousFiles = [
+    {
+      id: 41,
+      file_name: 'javascript-href.docx',
+      metadata: {
+        instructions: '<a href="javascript:alert(1)">click me</a>',
+      },
+    },
+  ]
+  const {container} = render(
+    <JobMetadataModal
+      files={maliciousFiles}
+      currentFile={41}
+      showCurrent={true}
+    />,
+  )
+
+  expect(container.innerHTML).not.toContain('javascript:')
+})
+
+test('escapes script tags in file instructions', () => {
+  const maliciousFiles = [
+    {
+      id: 42,
+      file_name: 'script.docx',
+      metadata: {
+        instructions: '<script>alert(1)</script>',
+      },
+    },
+  ]
+  const {container} = render(
+    <JobMetadataModal
+      files={maliciousFiles}
+      currentFile={42}
+      showCurrent={true}
+    />,
+  )
+
+  // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+  expect(container.querySelector('script')).not.toBeInTheDocument()
+})
+
+test('applies the same sanitization to project instructions', () => {
+  const {container} = render(
+    <JobMetadataModal
+      files={files}
+      projectInfo='<img src="x" onerror="alert(1)">project notes'
+      showCurrent={false}
+    />,
+  )
+
+  expect(container.innerHTML).not.toContain('onerror')
+})
+
+test('keeps benign markup and real links intact', () => {
+  const spy = jest.spyOn(CommonUtils, 'isAllowedLinkRedirect')
+  spy.mockImplementation((href) => href === 'https://example.com')
+
+  const benignFiles = [
+    {
+      id: 43,
+      file_name: 'benign.docx',
+      metadata: {
+        instructions:
+          '<b>Bold notes</b> and <a href="https://example.com">a link</a>',
+      },
+    },
+  ]
+  const {container} = render(
+    <JobMetadataModal
+      files={benignFiles}
+      currentFile={43}
+      showCurrent={true}
+    />,
+  )
+
+  // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+  expect(container.querySelector('b')).toBeInTheDocument()
+  expect(
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+    container.querySelector('a[href="https://example.com"]'),
+  ).toBeInTheDocument()
+
+  spy.mockRestore()
+})
+
+test('renders references whose href contains a quote without throwing', () => {
+  const quotedHrefFiles = [
+    {
+      id: 44,
+      file_name: 'quoted-href.docx',
+      metadata: {
+        instructions: '<p>Notes</p>',
+        'mtc:references': "<a href='https://x.com/a\"b'>quoted</a>",
+      },
+    },
+  ]
+
+  expect(() => {
+    render(
+      <JobMetadataModal
+        files={quotedHrefFiles}
+        currentFile={44}
+        showCurrent={true}
+      />,
+    )
+  }).not.toThrow()
+})
+
+test('flattens references with duplicated hrefs into independent replacements', () => {
+  const duplicatedHrefFiles = [
+    {
+      id: 45,
+      file_name: 'duplicated-href.docx',
+      metadata: {
+        instructions: '<p>Notes</p>',
+        'mtc:references':
+          '<a href="https://dup.com">one</a> and <a href="https://dup.com">two</a>',
+      },
+    },
+  ]
+  const {container} = render(
+    <JobMetadataModal
+      files={duplicatedHrefFiles}
+      currentFile={45}
+      showCurrent={true}
+    />,
+  )
+
+  // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+  expect(container.querySelector('.instructions-container')).toHaveTextContent(
+    '[one](https://dup.com) and [two](https://dup.com)',
+  )
+})
