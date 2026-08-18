@@ -79,22 +79,10 @@ class JobDao extends AbstractDao
     }
 
     /**
-     * Destroy a cached object
+     * Destroy the cached reads of one job credential.
      *
-     * @param JobStruct $jobQuery
-     *
-     * @return bool
-     * @throws Exception
-     *
-     */
-    public function destroyCacheByIdAndPassword(JobStruct $jobQuery): bool
-    {
-        return $this->destroyCacheForIdAndPassword($jobQuery->id, $jobQuery->password);
-    }
-
-    /**
-     * Same as destroyCacheByIdAndPassword(), for a credential that is not the one the struct carries:
-     * a rotation has to evict the password it replaces, and the struct already holds the new one.
+     * The credential is named by the caller rather than read off a JobStruct: a rotation has to evict
+     * the password it replaces, and by then the struct already carries the new one.
      *
      * @param int|null $id_job
      * @param string|null $password

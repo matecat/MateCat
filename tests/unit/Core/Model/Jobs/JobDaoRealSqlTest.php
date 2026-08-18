@@ -114,7 +114,7 @@ class JobDaoRealSqlTest extends AbstractTest
         // Prime the cache (ttl>0 so the entry is actually stored), then destroy it.
         $this->dao->getByIdAndPassword($job->id, $job->password, 3600);
 
-        self::assertTrue($this->dao->destroyCacheByIdAndPassword($job));
+        self::assertTrue($this->dao->destroyCacheForIdAndPassword($job->id, $job->password));
     }
 
     public function testDestroyCacheForIdAndPasswordEvictsTheCredentialShapeWhenReadCachedLast(): void

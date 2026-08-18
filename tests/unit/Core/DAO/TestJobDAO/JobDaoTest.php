@@ -99,9 +99,9 @@ class JobDaoTest extends AbstractTest
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
         $dao = new JobDao($this->dbStub);
-        $dao->destroyCacheByIdAndPassword($job);
+        $dao->destroyCacheForIdAndPassword($job->id, $job->password);
 
-        $this->assertIsBool($dao->destroyCacheByIdAndPassword($job));
+        $this->assertIsBool($dao->destroyCacheForIdAndPassword($job->id, $job->password));
     }
 
     public function testDestroyCacheByProjectIdDoesNotThrow(): void
