@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import $ from 'jquery'
 import {isUndefined} from 'lodash'
 import {cloneDeep} from 'lodash/lang'
@@ -16,9 +16,7 @@ import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
 import CommonUtils from '../../../../utils/commonUtils'
-import {
-  REVISE_STEP_NUMBER,
-} from '../../../../constants/Constants'
+import {REVISE_STEP_NUMBER} from '../../../../constants/Constants'
 import {Select} from '../../../common/Select'
 import {segmentTranslation} from '../../../../setTranslationUtil'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
@@ -26,173 +24,103 @@ import ChevronLeft from '../../../../../img/icons/ChevronLeft'
 import ChevronRight from '../../../../../img/icons/ChevronRight'
 import {MODAL_KEY} from '../../../../constants/ModalKeys'
 
-class Search extends React.Component {
-  constructor(props) {
-    super(props)
-    this.defaultState = {
-      isReview: props.isReview,
-      searchable_statuses: props.searchable_statuses,
-      showReplaceOptionsInSearch: true,
-      search: {
-        enableReplace: false,
-        matchCase: false,
-        exactMatch: false,
-        entireJob: false,
-        replaceTarget: '',
-        selectStatus: 'all',
-        searchTarget: '',
-        searchSource: '',
-        previousIsTagProjectionEnabled: false,
-        isSelectedTag: false,
-      },
-      focus: true,
-      funcFindButton: true, // true=find / false=next
-      total: null,
-      searchReturn: false,
-      searchResults: [],
-      occurrencesList: [],
-      searchResultsDictionary: {},
-      featuredSearchResult: null,
-    }
-    this.state = cloneDeep(this.defaultState)
+// mirrors the class's `defaultState.search` object, used both as the initial
+// value and as the value restored by handleCancelClick/handleClearClick
+const defaultSearch = {
+  enableReplace: false,
+  matchCase: false,
+  exactMatch: false,
+  entireJob: false,
+  replaceTarget: '',
+  selectStatus: 'all',
+  searchTarget: '',
+  searchSource: '',
+  previousIsTagProjectionEnabled: false,
+  isSelectedTag: false,
+}
 
-    this.handleSubmit = this.handleSubmit.bind(this)
-    this.handleCancelClick = this.handleCancelClick.bind(this)
-    this.handleInputChange = this.handleInputChange.bind(this)
-    this.handleReplaceAllClick = this.handleReplaceAllClick.bind(this)
-    this.handleReplaceClick = this.handleReplaceClick.bind(this)
-    this.replaceTargetOnFocus = this.replaceTargetOnFocus.bind(this)
-    this.handelKeydownFunction = this.handelKeydownFunction.bind(this)
-    this.updateSearch = this.updateSearch.bind(this)
-    this.jobIsSplitted = false
+// handling module
+const mod = (n, m) => ((n % m) + m) % m
+
+const Search = (props) => {
+  const [search, setSearch] = useState(() => cloneDeep(defaultSearch))
+  const [focus, setFocus] = useState(true)
+  const [funcFindButton, setFuncFindButton] = useState(true) // true=find / false=next
+  const [total, setTotal] = useState(null)
+  const [searchReturn, setSearchReturn] = useState(false)
+  const [searchResults, setSearchResults] = useState([])
+  const [occurrencesList, setOccurrencesList] = useState([])
+  const [searchResultsDictionary, setSearchResultsDictionary] = useState({})
+  const [featuredSearchResult, setFeaturedSearchResult] = useState(null)
+  const [isSelectedTag, setIsSelectedTag] = useState(false)
+  const [previousIsTagProjectionEnabled, setPreviousIsTagProjectionEnabled] =
+    useState(false)
+
+  // dead state, preserved verbatim from the class component: `this.state.isReview`
+  // is never read anywhere
+  // eslint-disable-next-line no-unused-vars
+  const [isReview] = useState(props.isReview)
+  // dead state, preserved verbatim from the class component: `this.state.searchable_statuses`
+  // is never read anywhere (render() uses the global `config.searchable_statuses` instead)
+  // eslint-disable-next-line no-unused-vars
+  const [searchableStatuses] = useState(props.searchable_statuses)
+  const [showReplaceOptionsInSearch] = useState(true)
+
+  const sourceElRef = useRef(null)
+  const matchCaseCheckRef = useRef(null)
+  const sourceInputRef = useRef(null)
+  const targetInputRef = useRef(null)
+
+  // mirrors the class's non-reactive instance field: mutating this does not
+  // itself trigger a re-render
+  const jobIsSplittedRef = useRef(false)
+
+  const prevActiveRef = useRef(props.active)
+  const isFirstRender = useRef(true)
+
+  const latestRef = useRef({})
+
+  const resetSearchState = useCallback(() => {
+    setSearch(cloneDeep(defaultSearch))
+    setFocus(true)
+    setFuncFindButton(true)
+    setTotal(null)
+    setSearchReturn(false)
+    setSearchResults([])
+    setOccurrencesList([])
+    setSearchResultsDictionary({})
+    setFeaturedSearchResult(null)
+  }, [])
+
+  const handleStatusChange = (value) => {
+    const nextSearch = cloneDeep(search)
+    nextSearch.selectStatus = value
+    if (value === 'APPROVED-2') {
+      nextSearch.revisionNumber = REVISE_STEP_NUMBER.REVISE2
+      nextSearch.selectStatus = 'APPROVED'
+    } else if (value === 'APPROVED') {
+      nextSearch.revisionNumber = REVISE_STEP_NUMBER.REVISE1
+    }
+    setSearch(nextSearch)
+    setFuncFindButton(true)
   }
 
-  handleSubmit() {
-    if (this.state.funcFindButton) {
-      SearchUtils.execFind(this.state.search)
-    }
-
-    const {guess_tag: guessTag} = this.props.userInfo.metadata
-
-    this.setState({
-      funcFindButton: false,
-      ...(guessTag === 1 && {
-        previousIsTagProjectionEnabled: true,
-      }),
-    })
-    // disable tag projection
-    if (guessTag === 1) {
-      SegmentActions.changeTagProjectionStatus(false)
-    }
+  const resetStatusFilter = () => {
+    handleStatusChange('all')
   }
 
-  setResults(data) {
-    this.setState({
-      total: data.total,
-      searchResults: data.searchResults,
-      occurrencesList: data.occurrencesList,
-      searchResultsDictionary: data.searchResultsDictionary,
-      featuredSearchResult: data.featuredSearchResult,
-      searchReturn: true,
-      isSelectedTag: false,
-    })
+  const handleClearClick = () => {
+    // SearchUtils.clearSearchMarkers();
+    resetStatusFilter()
     setTimeout(() => {
-      !isUndefined(this.state.occurrencesList[data.featuredSearchResult]) &&
-        SegmentActions.openSegment(
-          this.state.occurrencesList[data.featuredSearchResult],
-        )
+      resetSearchState()
+      SegmentActions.removeSearchResultToSegments()
     })
   }
 
-  updateSearch() {
-    if (this.props.active) {
-      setTimeout(() => {
-        const searchObject = SearchUtils.updateSearchObject()
-        this.setState({
-          searchResults: searchObject.searchResults,
-          occurrencesList: searchObject.occurrencesList,
-          searchResultsDictionary: searchObject.searchResultsDictionary,
-          featuredSearchResult: searchObject.featuredSearchResult,
-          isSelectedTag: false,
-        })
-        setTimeout(() =>
-          SegmentActions.addSearchResultToSegments(
-            searchObject.occurrencesList,
-            searchObject.searchResultsDictionary,
-            this.state.featuredSearchResult,
-            searchObject.searchParams,
-          ),
-        )
-      })
-    }
-  }
-
-  updateAfterReplace(sid) {
-    let {searchResults} = this.state
-    let itemReplaced = find(searchResults, (item) => item.id === sid)
-    let total = this.state.total
-    total--
-    if (itemReplaced.occurrences.length === 1) {
-      remove(searchResults, (item) => item.id === sid)
-    }
-    let newResultArray = map(searchResults, (item) => item.id)
-    const searchObject =
-      SearchUtils.updateSearchObjectAfterReplace(newResultArray)
-    this.setState({
-      total: total,
-      searchResults: searchObject.searchResults,
-      occurrencesList: searchObject.occurrencesList,
-      searchResultsDictionary: searchObject.searchResultsDictionary,
-    })
-    CatToolActions.storeSearchResults({
-      total: total,
-      searchResults: searchObject.searchResults,
-      occurrencesList: searchObject.occurrencesList,
-      searchResultsDictionary: searchObject.searchResultsDictionary,
-      featuredSearchResult: this.state.featuredSearchResult,
-    })
-    SegmentActions.addSearchResultToSegments(
-      searchObject.occurrencesList,
-      searchObject.searchResultsDictionary,
-      this.state.featuredSearchResult,
-      searchObject.searchParams,
-    )
-  }
-
-  goToNext() {
-    this.setFeatured(this.state.featuredSearchResult + 1)
-  }
-
-  goToPrev() {
-    this.setFeatured(this.state.featuredSearchResult - 1)
-  }
-
-  setFeatured(value) {
-    if (this.state.occurrencesList.length > 1) {
-      let module = this.state.occurrencesList.length
-      value = this.mod(value, module)
-    } else {
-      value = 0
-    }
-    SearchUtils.updateFeaturedResult(value)
-    CatToolActions.storeSearchResults({
-      total: this.state.total,
-      searchResults: this.state.searchResults,
-      occurrencesList: this.state.occurrencesList,
-      searchResultsDictionary: this.state.searchResultsDictionary,
-      featuredSearchResult: value,
-    })
-    SegmentActions.changeCurrentSearchSegment(value)
-  }
-
-  // handling module
-  mod(n, m) {
-    return ((n % m) + m) % m
-  }
-
-  handleCancelClick() {
+  const handleCancelClick = useCallback(() => {
     SearchUtils.searchOpen = false
-    this.handleClearClick()
+    latestRef.current.handleClearClick()
     if (SegmentStore.getSegmentByIdToJS(SegmentStore.getCurrentSegmentId())) {
       setTimeout(() =>
         SegmentActions.scrollToSegment(SegmentStore.getCurrentSegmentId()),
@@ -204,56 +132,71 @@ class Search extends React.Component {
       })
     }
 
-    this.resetStatusFilter()
+    latestRef.current.resetStatusFilter()
     setTimeout(() => {
       CatToolActions.closeSubHeader()
       SegmentActions.removeSearchResultToSegments()
-      this.setState(cloneDeep(this.defaultState))
+      resetSearchState()
     })
-  }
+  }, [resetSearchState])
 
-  handleClearClick() {
-    // SearchUtils.clearSearchMarkers();
-    this.resetStatusFilter()
-    setTimeout(() => {
-      this.setState(cloneDeep(this.defaultState))
-      SegmentActions.removeSearchResultToSegments()
+  const setFeatured = (value) => {
+    let nextValue = value
+    if (occurrencesList.length > 1) {
+      nextValue = mod(value, occurrencesList.length)
+    } else {
+      nextValue = 0
+    }
+    SearchUtils.updateFeaturedResult(nextValue)
+    CatToolActions.storeSearchResults({
+      total: total,
+      searchResults: searchResults,
+      occurrencesList: occurrencesList,
+      searchResultsDictionary: searchResultsDictionary,
+      featuredSearchResult: nextValue,
     })
+    SegmentActions.changeCurrentSearchSegment(nextValue)
   }
 
-  handleKeyDown(e, name) {
-    if (e.code == 'Space' && e.ctrlKey && e.shiftKey) {
-      let textToInsert = tagSignatures.nbsp.placeholder
-      let cursorPosition = e.target.selectionStart
-      let textBeforeCursorPosition = e.target.value.substring(0, cursorPosition)
-      let textAfterCursorPosition = e.target.value.substring(
-        cursorPosition,
-        e.target.value.length,
-      )
-      e.target.value =
-        textBeforeCursorPosition + textToInsert + textAfterCursorPosition
-      this.handleInputChange(name, e)
+  const goToNext = () => {
+    setFeatured(featuredSearchResult + 1)
+  }
+
+  const goToPrev = () => {
+    setFeatured(featuredSearchResult - 1)
+  }
+
+  const updateAfterReplace = (sid) => {
+    let itemReplaced = find(searchResults, (item) => item.id === sid)
+    let newTotal = total
+    newTotal--
+    if (itemReplaced.occurrences.length === 1) {
+      remove(searchResults, (item) => item.id === sid)
     }
-  }
-
-  resetStatusFilter() {
-    this.handleStatusChange('all')
-  }
-
-  handleReplaceAllClick(event) {
-    event.preventDefault()
-    let props = {
-      search: this.state.search,
-    }
-    ModalsActions.showModalComponent(
-      MODAL_KEY.REPLACE_ALL,
-      props,
-      'Replace text in all results',
+    let newResultArray = map(searchResults, (item) => item.id)
+    const searchObject =
+      SearchUtils.updateSearchObjectAfterReplace(newResultArray)
+    setTotal(newTotal)
+    setSearchResults(searchObject.searchResults)
+    setOccurrencesList(searchObject.occurrencesList)
+    setSearchResultsDictionary(searchObject.searchResultsDictionary)
+    CatToolActions.storeSearchResults({
+      total: newTotal,
+      searchResults: searchObject.searchResults,
+      occurrencesList: searchObject.occurrencesList,
+      searchResultsDictionary: searchObject.searchResultsDictionary,
+      featuredSearchResult: featuredSearchResult,
+    })
+    SegmentActions.addSearchResultToSegments(
+      searchObject.occurrencesList,
+      searchObject.searchResultsDictionary,
+      featuredSearchResult,
+      searchObject.searchParams,
     )
   }
 
-  handleReplaceClick() {
-    if (this.state.search.searchTarget === this.state.search.replaceTarget) {
+  const handleReplaceClick = () => {
+    if (search.searchTarget === search.replaceTarget) {
       ModalsActions.showModalComponent(
         AlertModal,
         {
@@ -264,166 +207,216 @@ class Search extends React.Component {
       return false
     }
 
-    SegmentActions.replaceCurrentSearch(this.state.search.replaceTarget)
+    SegmentActions.replaceCurrentSearch(search.replaceTarget)
 
     setTimeout(() => {
       const segment = SegmentStore.getSegmentByIdToJS(
-        this.state.occurrencesList[this.state.featuredSearchResult],
+        occurrencesList[featuredSearchResult],
       )
       if (segment) {
-        this.updateAfterReplace(segment.original_sid)
+        updateAfterReplace(segment.original_sid)
         segmentTranslation(segment, segment.status, () => {}, false)
       }
     })
   }
 
-  handleStatusChange(value) {
-    let search = cloneDeep(this.state.search)
-    search['selectStatus'] = value
-    if (value === 'APPROVED-2') {
-      search.revisionNumber = REVISE_STEP_NUMBER.REVISE2
-      search['selectStatus'] = 'APPROVED'
-    } else if (value === 'APPROVED') {
-      search.revisionNumber = REVISE_STEP_NUMBER.REVISE1
-    }
-    this.setState({
+  const handleReplaceAllClick = (event) => {
+    event.preventDefault()
+    let modalProps = {
       search: search,
-      funcFindButton: true,
-    })
+    }
+    ModalsActions.showModalComponent(
+      MODAL_KEY.REPLACE_ALL,
+      modalProps,
+      'Replace text in all results',
+    )
   }
 
-  handleInputChange(name, event) {
+  const handleSubmit = () => {
+    if (funcFindButton) {
+      SearchUtils.execFind(search)
+    }
+
+    const {guess_tag: guessTag} = props.userInfo.metadata
+
+    setFuncFindButton(false)
+    if (guessTag === 1) {
+      setPreviousIsTagProjectionEnabled(true)
+    }
+    // disable tag projection
+    if (guessTag === 1) {
+      SegmentActions.changeTagProjectionStatus(false)
+    }
+  }
+
+  const handleInputChange = (name, event) => {
     //serch model
     const target = event.target
     const value = target.type === 'checkbox' ? target.checked : target.value
-    let search = this.state.search
-    search[name] = value
+    const nextSearch = {...search, [name]: value}
 
     if (name !== 'enableReplace') {
-      this.setState({
-        search: search,
-        funcFindButton: true,
-        total: null,
-        searchReturn: false,
-        searchResults: [],
-        occurrencesList: [],
-        searchResultsDictionary: {},
-        featuredSearchResult: null,
-      })
+      setSearch(nextSearch)
+      setFuncFindButton(true)
+      setTotal(null)
+      setSearchReturn(false)
+      setSearchResults([])
+      setOccurrencesList([])
+      setSearchResultsDictionary({})
+      setFeaturedSearchResult(null)
     } else {
-      this.setState({
-        search: search,
-      })
+      setSearch(nextSearch)
     }
   }
 
-  replaceTargetOnFocus() {
-    let search = this.state.search
-    search.enableReplace = true
-    this.setState({
-      search: search,
+  // dead code, preserved verbatim from the class component: never wired to
+  // any JSX handler there either
+  // eslint-disable-next-line no-unused-vars
+  const replaceTargetOnFocus = () => {
+    setSearch({...search, enableReplace: true})
+  }
+
+  const handleKeyDown = (e, name) => {
+    if (e.code == 'Space' && e.ctrlKey && e.shiftKey) {
+      let textToInsert = tagSignatures.nbsp.placeholder
+      let cursorPosition = e.target.selectionStart
+      let textBeforeCursorPosition = e.target.value.substring(0, cursorPosition)
+      let textAfterCursorPosition = e.target.value.substring(
+        cursorPosition,
+        e.target.value.length,
+      )
+      e.target.value =
+        textBeforeCursorPosition + textToInsert + textAfterCursorPosition
+      handleInputChange(name, e)
+    }
+  }
+
+  const setResults = useCallback((data) => {
+    setTotal(data.total)
+    setSearchResults(data.searchResults)
+    setOccurrencesList(data.occurrencesList)
+    setSearchResultsDictionary(data.searchResultsDictionary)
+    setFeaturedSearchResult(data.featuredSearchResult)
+    setSearchReturn(true)
+    setIsSelectedTag(false)
+    setTimeout(() => {
+      !isUndefined(data.occurrencesList[data.featuredSearchResult]) &&
+        SegmentActions.openSegment(
+          data.occurrencesList[data.featuredSearchResult],
+        )
     })
-  }
+  }, [])
 
-  componentDidUpdate(prevProps) {
-    if (this.props.active) {
-      this.jobIsSplitted = CommonUtils.checkJobIsSplitted()
-      if (!prevProps.active) {
-        if (this.sourceEl && this.state.focus) {
-          this.sourceEl.focus()
-          this.setState({
-            focus: false,
-          })
-        }
-      }
-    } else {
-      if (!this.state.focus) {
-        this.setState({
-          focus: true,
-        })
-      }
-    }
-
-    // reset tag projection
-    if (!this.props.active && prevProps.active) {
-      this.setState({
-        previousIsTagProjectionEnabled: false,
+  const updateSearch = useCallback(() => {
+    if (latestRef.current.active) {
+      setTimeout(() => {
+        const searchObject = SearchUtils.updateSearchObject()
+        setSearchResults(searchObject.searchResults)
+        setOccurrencesList(searchObject.occurrencesList)
+        setSearchResultsDictionary(searchObject.searchResultsDictionary)
+        setFeaturedSearchResult(searchObject.featuredSearchResult)
+        setIsSelectedTag(false)
+        setTimeout(() =>
+          SegmentActions.addSearchResultToSegments(
+            searchObject.occurrencesList,
+            searchObject.searchResultsDictionary,
+            searchObject.featuredSearchResult,
+            searchObject.searchParams,
+          ),
+        )
       })
     }
-    if (
-      !this.props.active &&
-      this.props.active !== prevProps.active &&
-      this.state.previousIsTagProjectionEnabled
-    ) {
-      SegmentActions.changeTagProjectionStatus(true)
+  }, [])
+
+  const setStateReplaceButton = useCallback(({value}) => {
+    setTimeout(() => {
+      setIsSelectedTag(value)
+    })
+  }, [])
+
+  const handelKeydownFunction = useCallback((event) => {
+    const {
+      active,
+      search,
+      handleCancelClick,
+      handleSubmit,
+      goToPrev,
+      goToNext,
+    } = latestRef.current
+    if (active) {
+      if (event.keyCode === 27) {
+        handleCancelClick()
+      } else if (
+        event.keyCode === 13 &&
+        $(event.target).closest('.find-container').length > 0
+      ) {
+        if (search.searchTarget !== '' || search.searchSource !== '') {
+          event.preventDefault()
+          handleSubmit()
+        }
+      } else if (event.key === 'F3' && event.shiftKey) {
+        event.preventDefault()
+        goToPrev()
+      } else if (event.key === 'F3') {
+        event.preventDefault()
+        goToNext()
+      }
     }
-  }
-  getResultsHtml() {
+  }, [])
+
+  const getResultsHtml = () => {
     var html = ''
-    const {featuredSearchResult, searchReturn, occurrencesList, searchResults} =
-      this.state
     const segmentIndex = findIndex(
       searchResults,
       (item) => item.id === occurrencesList[featuredSearchResult],
     )
     //Waiting for results
-    if (!this.state.funcFindButton && !searchReturn) {
+    if (!funcFindButton && !searchReturn) {
       html = (
         <div className="search-display">
           <p className="searching">Searching ...</p>
         </div>
       )
-    } else if (!this.state.funcFindButton && searchReturn) {
+    } else if (!funcFindButton && searchReturn) {
       let query = []
-      if (this.state.search.exactMatch) query.push(' exactly')
-      if (this.state.search.searchSource)
+      if (search.exactMatch) query.push(' exactly')
+      if (search.searchSource)
         query.push(
           <span key="source" className="query">
-            <span className="param">{this.state.search.searchSource}</span>in
-            source{' '}
+            <span className="param">{search.searchSource}</span>in source{' '}
           </span>,
         )
-      if (this.state.search.searchTarget)
+      if (search.searchTarget)
         query.push(
           <span key="target" className="query">
-            <span className="param">{this.state.search.searchTarget}</span>in
-            target{' '}
+            <span className="param">{search.searchTarget}</span>in target{' '}
           </span>,
         )
-      if (this.state.search.selectStatus !== 'all') {
+      if (search.selectStatus !== 'all') {
         let statusLabel = (
           <span key="status">
             {' '}
-            and status{' '}
-            <span className="param">{this.state.search.selectStatus}</span>
+            and status <span className="param">{search.selectStatus}</span>
           </span>
         )
         query.push(statusLabel)
       }
       let caseLabel =
-        ' (' +
-        (this.state.search.matchCase ? 'case sensitive' : 'case insensitive') +
-        ')'
+        ' (' + (search.matchCase ? 'case sensitive' : 'case insensitive') + ')'
       query.push(caseLabel)
       let searchMode =
-        this.state.search.searchSource !== '' &&
-        this.state.search.searchTarget !== ''
+        search.searchSource !== '' && search.searchTarget !== ''
           ? 'source&target'
           : 'normal'
       let numbers = ''
-      let totalResults = this.state.searchResults.length
+      let totalResults = searchResults.length
       if (searchMode === 'source&target') {
-        let total = this.state.searchResults.length
-          ? this.state.searchResults.length
-          : 0
+        let total = searchResults.length ? searchResults.length : 0
         let label = total === 1 ? 'segment' : 'segments'
         numbers =
           total > 0 ? (
             <span key="numbers" className="numbers">
-              Found{' '}
-              <span className="segments">
-                {this.state.searchResults.length}
-              </span>{' '}
+              Found <span className="segments">{searchResults.length}</span>{' '}
               {label}
             </span>
           ) : (
@@ -432,17 +425,17 @@ class Search extends React.Component {
             </span>
           )
       } else {
-        let total = this.state.total ? parseInt(this.state.total) : 0
-        let label = total === 1 ? 'result' : 'results'
-        let label2 = total === 1 ? 'segment' : 'segments'
+        let total2 = total ? parseInt(total) : 0
+        let label = total2 === 1 ? 'result' : 'results'
+        let label2 = total2 === 1 ? 'segment' : 'segments'
         numbers =
-          total > 0 ? (
+          total2 > 0 ? (
             <span key="numbers" className="numbers">
               Found
-              <span className="results">{' ' + this.state.total}</span>{' '}
+              <span className="results">{' ' + total}</span>{' '}
               <span>{label}</span> in
               <span className="segments">
-                {' ' + this.state.searchResults.length}
+                {' ' + searchResults.length}
               </span>{' '}
               <span>{label2}</span>
             </span>
@@ -458,19 +451,19 @@ class Search extends React.Component {
             {numbers} having
             {query}
           </p>
-          {this.state.searchResults.length > 0 ? (
+          {searchResults.length > 0 ? (
             <div className="search-result-buttons">
               <p>{segmentIndex + 1 + ' of ' + totalResults + ' segments'}</p>
               <Button
                 size={BUTTON_SIZE.ICON_STANDARD}
                 mode={BUTTON_MODE.OUTLINE}
-                onClick={this.goToPrev.bind(this)}
+                onClick={goToPrev}
                 tooltip={'Find Previous (Shift + F3)'}
               >
                 <ChevronLeft />
               </Button>
               <Button
-                onClick={this.goToNext.bind(this)}
+                onClick={goToNext}
                 mode={BUTTON_MODE.OUTLINE}
                 size={BUTTON_SIZE.ICON_STANDARD}
                 tooltip={'Find Next (F3)'}
@@ -484,343 +477,322 @@ class Search extends React.Component {
     }
     return html
   }
-  handelKeydownFunction(event) {
-    if (this.props.active) {
-      if (event.keyCode === 27) {
-        this.handleCancelClick()
-      } else if (
-        event.keyCode === 13 &&
-        $(event.target).closest('.find-container').length > 0
-      ) {
-        if (
-          this.state.search.searchTarget !== '' ||
-          this.state.search.searchSource !== ''
-        ) {
-          event.preventDefault()
-          this.handleSubmit()
-        }
-      } else if (event.key === 'F3' && event.shiftKey) {
-        event.preventDefault()
-        this.goToPrev()
-      } else if (event.key === 'F3') {
-        event.preventDefault()
-        this.goToNext()
-      }
-    }
-  }
-  setStateReplaceButton = ({value}) => {
-    setTimeout(() => {
-      this.setState({
-        isSelectedTag: value,
-      })
-    })
+
+  latestRef.current = {
+    active: props.active,
+    search,
+    handleSubmit,
+    goToPrev,
+    goToNext,
+    handleCancelClick,
+    handleClearClick,
+    resetStatusFilter,
   }
 
-  componentDidMount() {
-    document.addEventListener('keydown', this.handelKeydownFunction, true)
-    CatToolStore.addListener(
-      CattolConstants.STORE_SEARCH_RESULT,
-      this.setResults.bind(this),
-    )
-    CatToolStore.addListener(
-      CattolConstants.CLOSE_SEARCH,
-      this.handleCancelClick,
-    )
-    SegmentStore.addListener(SegmentConstants.UPDATE_SEARCH, this.updateSearch)
+  // mirrors componentDidUpdate: runs after every update (not on mount).
+  // Deliberately no dependency array: this must run after every render,
+  // exactly like componentDidUpdate does, not just when specific values
+  // change (see jobIsSplittedRef, which is recomputed on every update).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      prevActiveRef.current = props.active
+      return
+    }
+
+    const prevActive = prevActiveRef.current
+
+    if (props.active) {
+      jobIsSplittedRef.current = CommonUtils.checkJobIsSplitted()
+      if (!prevActive) {
+        if (sourceElRef.current && focus) {
+          sourceElRef.current.focus()
+          setFocus(false)
+        }
+      }
+    } else {
+      if (!focus) {
+        setFocus(true)
+      }
+    }
+
+    // reset tag projection
+    if (!props.active && prevActive) {
+      setPreviousIsTagProjectionEnabled(false)
+    }
+    if (
+      !props.active &&
+      props.active !== prevActive &&
+      previousIsTagProjectionEnabled
+    ) {
+      SegmentActions.changeTagProjectionStatus(true)
+    }
+
+    prevActiveRef.current = props.active
+  })
+
+  useEffect(() => {
+    document.addEventListener('keydown', handelKeydownFunction, true)
+    CatToolStore.addListener(CattolConstants.STORE_SEARCH_RESULT, setResults)
+    CatToolStore.addListener(CattolConstants.CLOSE_SEARCH, handleCancelClick)
+    SegmentStore.addListener(SegmentConstants.UPDATE_SEARCH, updateSearch)
     SegmentStore.addListener(
       SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
-      this.setStateReplaceButton,
+      setStateReplaceButton,
     )
-  }
-  componentWillUnmount() {
-    document.removeEventListener('keydown', this.handelKeydownFunction)
-    CatToolStore.removeListener(
-      CattolConstants.STORE_SEARCH_RESULT,
-      this.setResults,
-    )
-    CatToolStore.removeListener(
-      CattolConstants.CLOSE_SEARCH,
-      this.handleCancelClick,
-    )
-    SegmentStore.removeListener(
-      SegmentConstants.UPDATE_SEARCH,
-      this.updateSearch,
-    )
-    SegmentStore.removeListener(
-      SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
-      this.setStateReplaceButton,
-    )
-  }
 
-  render() {
-    let statusOptions = config.searchable_statuses.map((item) => {
-      return {
-        name: (
-          <>
-            <div
-              className={
-                'status-dot ' + item.label.toLowerCase() + '-color'
-              }
-            />
-            {item.label}
-          </>
-        ),
-        id: item.value,
-      }
+    return () => {
+      document.removeEventListener('keydown', handelKeydownFunction)
+      CatToolStore.removeListener(
+        CattolConstants.STORE_SEARCH_RESULT,
+        setResults,
+      )
+      CatToolStore.removeListener(
+        CattolConstants.CLOSE_SEARCH,
+        handleCancelClick,
+      )
+      SegmentStore.removeListener(SegmentConstants.UPDATE_SEARCH, updateSearch)
+      SegmentStore.removeListener(
+        SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
+        setStateReplaceButton,
+      )
+    }
+  }, [
+    handelKeydownFunction,
+    setResults,
+    handleCancelClick,
+    updateSearch,
+    setStateReplaceButton,
+  ])
+
+  let statusOptions = config.searchable_statuses.map((item) => {
+    return {
+      name: (
+        <>
+          <div
+            className={'status-dot ' + item.label.toLowerCase() + '-color'}
+          />
+          {item.label}
+        </>
+      ),
+      id: item.value,
+    }
+  })
+  if (config.secondRevisionsCount) {
+    statusOptions.push({
+      name: (
+        <>
+          <div className={'status-dot approved-2ndpass-color'} />
+          APPROVED
+        </>
+      ),
+      id: 'APPROVED-2',
     })
-    if (config.secondRevisionsCount) {
-      statusOptions.push({
-        name: (
-          <>
-            <div
-              className={'status-dot approved-2ndpass-color'}
-            />
-            APPROVED
-          </>
-        ),
-        id: 'APPROVED-2',
-      })
-    }
-    let findIsDisabled = true
-    if (
-      this.state.search.searchTarget !== '' ||
-      this.state.search.searchSource !== ''
-    ) {
-      findIsDisabled = false
-    }
-    let findButtonDisabled = !this.state.funcFindButton || findIsDisabled
-    let statusDropdownClass =
-      this.state.search.selectStatus !== '' &&
-      this.state.search.selectStatus !== 'all'
-        ? 'filtered'
-        : 'not-filtered'
-    let statusDropdownDisabled =
-      this.state.search.searchTarget !== '' ||
-      this.state.search.searchSource !== ''
-        ? ''
-        : 'disabled'
-    let replaceCheckboxClass = this.state.search.searchTarget ? '' : 'disabled'
-    let replaceDisabled = !(
-      this.state.search.enableReplace &&
-      this.state.search.searchTarget &&
-      !this.state.funcFindButton &&
-      !this.state.isSelectedTag
-    )
-    let replaceAllDisabled = !(
-      this.state.search.enableReplace && this.state.search.searchTarget
-    )
-    let clearVisible =
-      this.state.search.searchTarget !== '' ||
-      this.state.search.searchSource !== '' ||
-      (this.state.search.selectStatus !== '' &&
-        this.state.search.selectStatus !== 'all')
-    return this.props.active ? (
-      <div className="search-form">
-        <div className="find-wrapper">
-          <div className="find-container">
-            <div className="find-container-inside">
-              <div className="find-list">
-                <div className="find-element">
-                  <div className="find-in-source">
-                    <input
-                      type="text"
-                      tabIndex={1}
-                      value={this.state.search.searchSource}
-                      placeholder="Find in source"
-                      onKeyDown={(e) => this.handleKeyDown(e, 'searchSource')}
-                      onChange={this.handleInputChange.bind(
-                        this,
-                        'searchSource',
-                      )}
-                      ref={(input) => (this.sourceEl = input)}
-                    />
-                  </div>
-                  <div className="find-exact-match">
-                    <div className="exact-match">
-                      <input
-                        type="checkbox"
-                        tabIndex={3}
-                        checked={this.state.search.matchCase}
-                        onChange={this.handleInputChange.bind(
-                          this,
-                          'matchCase',
-                        )}
-                        ref={(checkbox) => (this.matchCaseCheck = checkbox)}
-                      />
-                      <label> Match Case</label>
-                    </div>
-                    <div className="exact-match">
-                      <input
-                        ref={(ref) => (this.sourceInput = ref)}
-                        type="checkbox"
-                        tabIndex={4}
-                        checked={this.state.search.exactMatch}
-                        onChange={this.handleInputChange.bind(
-                          this,
-                          'exactMatch',
-                        )}
-                      />
-                      <label> Whole word</label>
-                    </div>
-                  </div>
-                </div>
-                <div className="find-element-container">
-                  <div className="find-element">
-                    <div className="find-in-target">
-                      <input
-                        ref={(ref) => (this.targetInput = ref)}
-                        type="text"
-                        tabIndex={2}
-                        placeholder="Find in target"
-                        value={this.state.search.searchTarget}
-                        onChange={this.handleInputChange.bind(
-                          this,
-                          'searchTarget',
-                        )}
-                        onKeyDown={(e) => this.handleKeyDown(e, 'searchTarget')}
-                        className={
-                          !this.state.search.searchTarget &&
-                          this.state.search.enableReplace
-                            ? 'warn'
-                            : null
-                        }
-                      />
-                    </div>
-                    {this.state.showReplaceOptionsInSearch ? (
-                      <div
-                        className={
-                          'enable-replace-check ' + replaceCheckboxClass
-                        }
-                      >
-                        <input
-                          type="checkbox"
-                          tabIndex={5}
-                          checked={this.state.search.enableReplace}
-                          onChange={this.handleInputChange.bind(
-                            this,
-                            'enableReplace',
-                          )}
-                        />
-                        <label> Replace with</label>
-                      </div>
-                    ) : null}
-                  </div>
-                  {this.state.showReplaceOptionsInSearch &&
-                  this.state.search.enableReplace ? (
-                    <div className="find-element">
-                      <div className="find-in-replace">
-                        <input
-                          type="text"
-                          placeholder="Replace in target"
-                          value={this.state.search.replaceTarget}
-                          onChange={this.handleInputChange.bind(
-                            this,
-                            'replaceTarget',
-                          )}
-                        />
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-                <div className="find-element find-dropdown-status">
-                  <Select
-                    options={statusOptions}
-                    className={
-                      'find-dropdown ' +
-                      statusDropdownClass +
-                      ' ' +
-                      statusDropdownDisabled
-                    }
-                    isDisabled={
-                      this.state.search.searchTarget === '' &&
-                      this.state.search.searchSource === ''
-                    }
-                    onSelect={(value) => {
-                      this.handleStatusChange(value.id)
-                    }}
-                    activeOption={
-                      statusOptions.find(
-                        (item) => item.id === this.state.search.selectStatus,
-                      ) || undefined
-                    }
-                    placeholder={'Status segment'}
-                    checkSpaceToReverse={false}
-                    showResetButton={true}
-                    resetFunction={() => this.handleStatusChange('all')}
+  }
+  let findIsDisabled = true
+  if (search.searchTarget !== '' || search.searchSource !== '') {
+    findIsDisabled = false
+  }
+  let findButtonDisabled = !funcFindButton || findIsDisabled
+  let statusDropdownClass =
+    search.selectStatus !== '' && search.selectStatus !== 'all'
+      ? 'filtered'
+      : 'not-filtered'
+  let statusDropdownDisabled =
+    search.searchTarget !== '' || search.searchSource !== '' ? '' : 'disabled'
+  let replaceCheckboxClass = search.searchTarget ? '' : 'disabled'
+  let replaceDisabled = !(
+    search.enableReplace &&
+    search.searchTarget &&
+    !funcFindButton &&
+    !isSelectedTag
+  )
+  let replaceAllDisabled = !(search.enableReplace && search.searchTarget)
+  let clearVisible =
+    search.searchTarget !== '' ||
+    search.searchSource !== '' ||
+    (search.selectStatus !== '' && search.selectStatus !== 'all')
+  return props.active ? (
+    <div className="search-form">
+      <div className="find-wrapper">
+        <div className="find-container">
+          <div className="find-container-inside">
+            <div className="find-list">
+              <div className="find-element">
+                <div className="find-in-source">
+                  <input
+                    type="text"
+                    tabIndex={1}
+                    value={search.searchSource}
+                    placeholder="Find in source"
+                    onKeyDown={(e) => handleKeyDown(e, 'searchSource')}
+                    onChange={(e) => handleInputChange('searchSource', e)}
+                    ref={sourceElRef}
                   />
                 </div>
-                <div className="find-element find-clear-all">
-                  {clearVisible ? (
-                    <div className="find-clear">
-                      <button
-                        type="button"
-                        className=""
-                        onClick={this.handleClearClick.bind(this)}
-                      >
-                        Clear
-                      </button>
-                    </div>
-                  ) : null}
+                <div className="find-exact-match">
+                  <div className="exact-match">
+                    <input
+                      type="checkbox"
+                      tabIndex={3}
+                      checked={search.matchCase}
+                      onChange={(e) => handleInputChange('matchCase', e)}
+                      ref={matchCaseCheckRef}
+                    />
+                    <label> Match Case</label>
+                  </div>
+                  <div className="exact-match">
+                    <input
+                      ref={sourceInputRef}
+                      type="checkbox"
+                      tabIndex={4}
+                      checked={search.exactMatch}
+                      onChange={(e) => handleInputChange('exactMatch', e)}
+                    />
+                    <label> Whole word</label>
+                  </div>
                 </div>
               </div>
-              {this.state.showReplaceOptionsInSearch ? (
-                <div>
-                  <div className="find-actions">
-                    <Button
-                      mode={BUTTON_MODE.OUTLINE}
-                      onClick={this.handleSubmit.bind(this)}
-                      disabled={findButtonDisabled}
-                    >
-                      FIND
-                    </Button>
-                    <Button
-                      mode={BUTTON_MODE.OUTLINE}
-                      onClick={this.handleReplaceClick.bind(this)}
-                      disabled={replaceDisabled}
-                    >
-                      REPLACE
-                    </Button>
-                    <Button
-                      mode={BUTTON_MODE.OUTLINE}
-                      onClick={this.handleReplaceAllClick.bind(this)}
-                      disabled={replaceAllDisabled}
-                    >
-                      REPLACE ALL
-                    </Button>
+              <div className="find-element-container">
+                <div className="find-element">
+                  <div className="find-in-target">
+                    <input
+                      ref={targetInputRef}
+                      type="text"
+                      tabIndex={2}
+                      placeholder="Find in target"
+                      value={search.searchTarget}
+                      onChange={(e) => handleInputChange('searchTarget', e)}
+                      onKeyDown={(e) => handleKeyDown(e, 'searchTarget')}
+                      className={
+                        !search.searchTarget && search.enableReplace
+                          ? 'warn'
+                          : null
+                      }
+                    />
                   </div>
-                  {this.jobIsSplitted && (
-                    <div className="find-option">
+                  {showReplaceOptionsInSearch ? (
+                    <div
+                      className={'enable-replace-check ' + replaceCheckboxClass}
+                    >
                       <input
                         type="checkbox"
                         tabIndex={5}
-                        checked={this.state.search.entireJob}
-                        onChange={this.handleInputChange.bind(
-                          this,
-                          'entireJob',
-                        )}
+                        checked={search.enableReplace}
+                        onChange={(e) => handleInputChange('enableReplace', e)}
                       />
-                      <label> Search all chunks</label>
+                      <label> Replace with</label>
                     </div>
-                  )}
+                  ) : null}
                 </div>
-              ) : (
+                {showReplaceOptionsInSearch && search.enableReplace ? (
+                  <div className="find-element">
+                    <div className="find-in-replace">
+                      <input
+                        type="text"
+                        placeholder="Replace in target"
+                        value={search.replaceTarget}
+                        onChange={(e) => handleInputChange('replaceTarget', e)}
+                      />
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+              <div className="find-element find-dropdown-status">
+                <Select
+                  options={statusOptions}
+                  className={
+                    'find-dropdown ' +
+                    statusDropdownClass +
+                    ' ' +
+                    statusDropdownDisabled
+                  }
+                  isDisabled={
+                    search.searchTarget === '' && search.searchSource === ''
+                  }
+                  onSelect={(value) => {
+                    handleStatusChange(value.id)
+                  }}
+                  activeOption={
+                    statusOptions.find(
+                      (item) => item.id === search.selectStatus,
+                    ) || undefined
+                  }
+                  placeholder={'Status segment'}
+                  checkSpaceToReverse={false}
+                  showResetButton={true}
+                  resetFunction={() => handleStatusChange('all')}
+                />
+              </div>
+              <div className="find-element find-clear-all">
+                {clearVisible ? (
+                  <div className="find-clear">
+                    <button
+                      type="button"
+                      className=""
+                      onClick={handleClearClick}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+            {showReplaceOptionsInSearch ? (
+              <div>
                 <div className="find-actions">
                   <Button
                     mode={BUTTON_MODE.OUTLINE}
-                    onClick={this.handleSubmit.bind(this)}
+                    onClick={handleSubmit}
                     disabled={findButtonDisabled}
                   >
                     FIND
                   </Button>
+                  <Button
+                    mode={BUTTON_MODE.OUTLINE}
+                    onClick={handleReplaceClick}
+                    disabled={replaceDisabled}
+                  >
+                    REPLACE
+                  </Button>
+                  <Button
+                    mode={BUTTON_MODE.OUTLINE}
+                    onClick={handleReplaceAllClick}
+                    disabled={replaceAllDisabled}
+                  >
+                    REPLACE ALL
+                  </Button>
                 </div>
-              )}
-            </div>
-            {this.getResultsHtml()}
+                {jobIsSplittedRef.current && (
+                  <div className="find-option">
+                    <input
+                      type="checkbox"
+                      tabIndex={5}
+                      checked={search.entireJob}
+                      onChange={(e) => handleInputChange('entireJob', e)}
+                    />
+                    <label> Search all chunks</label>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="find-actions">
+                <Button
+                  mode={BUTTON_MODE.OUTLINE}
+                  onClick={handleSubmit}
+                  disabled={findButtonDisabled}
+                >
+                  FIND
+                </Button>
+              </div>
+            )}
           </div>
+          {getResultsHtml()}
         </div>
       </div>
-    ) : null
-  }
+    </div>
+  ) : null
 }
 
 export default Search
