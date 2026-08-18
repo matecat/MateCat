@@ -85,6 +85,30 @@ class MetadataDaoRealSqlTest extends AbstractTest
         self::assertSame('slow', $this->dao->get($this->idJob, $this->password, 'speed')->value);
     }
 
+    /**
+     * set() writes, evicts and re-reads inside one transaction, and DaoCacheTrait now holds that
+     * eviction back until the commit — so at read-back time the cached entry is still there. The
+     * read is correct anyway only because get()'s $ttl defaults to 0, which makes it query. Give
+     * that parameter a non-zero default and set() starts returning the pre-write value.
+     *
+     * The cached entry is primed first: without it there is nothing stale to return and the test
+     * would pass for the wrong reason.
+     */
+    public function testSetReturnsTheValueItWroteEvenThoughTheEvictionIsStillQueued(): void
+    {
+        $this->flushDaoCache();
+        $this->dao->set($this->idJob, $this->password, 'speed', 'fast');
+        $this->track('speed');
+
+        // Publish 'fast' to the cache with a real TTL, so a stale read has something to return.
+        self::assertSame('fast', $this->dao->get($this->idJob, $this->password, 'speed', 3600)->value);
+        self::assertNotSame([], $this->daoCacheRedis()->keys('*'), 'the read has to be cached for this to prove anything');
+
+        $updated = $this->dao->set($this->idJob, $this->password, 'speed', 'slow');
+
+        self::assertSame('slow', $updated->value, 'set() must not read its own eviction back out of the cache');
+    }
+
     public function testGetReturnsNullForMissingKey(): void
     {
         self::assertNull($this->dao->get($this->idJob, $this->password, 'nope'));

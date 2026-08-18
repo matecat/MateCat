@@ -92,11 +92,15 @@ class MetadataDao extends AbstractDao
      * @param int $id_job
      * @param string $password
      * @param string $key
-     * @param int $ttl
+     * @param int $ttl Zero means "do not read from cache", and set() depends on that default: it
+     *                 re-reads the row it has just written, inside the transaction where the
+     *                 eviction it issued is still queued for the commit. Give this parameter a
+     *                 non-zero default and set() starts returning the pre-write value.
      *
      * @return MetadataStruct|null
      * @throws Exception
      * @throws PDOException
+     *
      * @throws ReflectionException
      */
     public function get(int $id_job, string $password, string $key, int $ttl = 0): ?MetadataStruct
