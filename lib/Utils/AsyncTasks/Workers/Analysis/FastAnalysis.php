@@ -1098,7 +1098,7 @@ class FastAnalysis extends AbstractDaemon
         });
 
         // the projects row was written outside the DAO, so evict its id-keyed cache by hand
-        (new ProjectDao($this->db()))->destroyCache($pid);
+        $this->getProjectDao()->destroyCache($pid);
 
         $engine = EnginesFactory::getInstance($this->actual_project_row['id_mt_engine'], $this->db(), AbstractEngine::class);
         if ($engine->isAdaptiveMT()) {
