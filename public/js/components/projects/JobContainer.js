@@ -146,11 +146,9 @@ class JobContainer extends React.Component {
         break
       }
     }
-    changeJobPassword(
-      this.props.job.toJS(),
-      this.oldPassword,
-      revision_number,
-    ).then(function (data) {
+    changeJobPassword(this.props.job.toJS(), this.oldPassword).then(function (
+      data,
+    ) {
       const notification = {
         uid: 'change-password',
         title: revision_number
@@ -180,7 +178,6 @@ class JobContainer extends React.Component {
           changeJobPassword(
             self.props.job.toJS(),
             data.new_pwd,
-            revision_number,
             1,
             self.oldPassword,
           ).then(function (data) {
@@ -237,7 +234,6 @@ class JobContainer extends React.Component {
             changeJobPassword(
               self.props.job.toJS(),
               data.new_pwd,
-              null,
               1,
               self.oldPassword,
             ).then(function (data) {

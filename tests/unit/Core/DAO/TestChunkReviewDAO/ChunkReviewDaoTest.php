@@ -345,35 +345,6 @@ class ChunkReviewDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function findByJobIdReviewPasswordAndSourcePageReturnsStruct(): void
-    {
-        $struct = new ChunkReviewStruct();
-        $struct->id = 500;
-
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
-
-        $dao = new ChunkReviewDao($this->dbStub);
-        $result = $dao->findByJobIdReviewPasswordAndSourcePage(70, 'rev', 2);
-
-        $this->assertInstanceOf(ChunkReviewStruct::class, $result);
-    }
-
-    #[Test]
-    public function findByJobIdReviewPasswordAndSourcePageReturnsNullWhenEmpty(): void
-    {
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-
-        $dao = new ChunkReviewDao($this->dbStub);
-        $result = $dao->findByJobIdReviewPasswordAndSourcePage(70, 'rev', 2);
-
-        $this->assertNull($result);
-    }
-
-    #[Test]
     public function existsReturnsTrueWhenRowFound(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
@@ -609,15 +580,7 @@ class ChunkReviewDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function destroyCacheForJobIdReviewPasswordAndSourcePageDoesNotThrow(): void
-    {
-        $dao = new ChunkReviewDao($this->dbStub);
-        $result = $dao->destroyCacheForJobIdReviewPasswordAndSourcePage(10, 'rev', 2);
-        $this->assertIsBool($result);
-    }
-
-    #[Test]
-    public function destroyCachesForBustsFindByProjectIdAndReviewPasswordCaches(): void
+    public function destroyCachesForBustsTheCredentialAndProjectCaches(): void
     {
         $chunkReview = new ChunkReviewStruct();
         $chunkReview->id_job = 42;
@@ -629,55 +592,23 @@ class ChunkReviewDaoTest extends AbstractTest
         $dao = $this->getMockBuilder(ChunkReviewDao::class)
             ->setConstructorArgs([$this->dbStub])
             ->onlyMethods([
-                'destroyCacheForFindChunkReviews',
+                'destroyCacheForJobPassword',
                 'destroyCacheByProjectId',
-                'destroyCacheForJobIdReviewPasswordAndSourcePage',
             ])
             ->getMock();
 
         $dao->expects($this->once())
-            ->method('destroyCacheForFindChunkReviews')
-            ->with($this->callback(fn(JobStruct $chunk) => $chunk->id === 42 && $chunk->password === 'chunk_pw'))
-            ->willReturn(true);
+            ->method('destroyCacheForJobPassword')
+            ->with(42, 'chunk_pw');
 
         $dao->expects($this->once())
             ->method('destroyCacheByProjectId')
             ->with(7)
             ->willReturn(true);
 
-        $dao->expects($this->once())
-            ->method('destroyCacheForJobIdReviewPasswordAndSourcePage')
-            ->with(42, 'rev_pw', 2)
-            ->willReturn(true);
-
         $dao->destroyCachesFor($chunkReview);
     }
 
-    #[Test]
-    public function destroyCachesForSkipsReviewPasswordCacheWhenNull(): void
-    {
-        $chunkReview = new ChunkReviewStruct();
-        $chunkReview->id_job = 42;
-        $chunkReview->id_project = 7;
-        $chunkReview->password = 'chunk_pw';
-        $chunkReview->review_password = null;
-        $chunkReview->source_page = 2;
-
-        $dao = $this->getMockBuilder(ChunkReviewDao::class)
-            ->setConstructorArgs([$this->dbStub])
-            ->onlyMethods([
-                'destroyCacheForFindChunkReviews',
-                'destroyCacheByProjectId',
-                'destroyCacheForJobIdReviewPasswordAndSourcePage',
-            ])
-            ->getMock();
-
-        $dao->method('destroyCacheForFindChunkReviews')->willReturn(true);
-        $dao->method('destroyCacheByProjectId')->willReturn(true);
-        $dao->expects($this->never())->method('destroyCacheForJobIdReviewPasswordAndSourcePage');
-
-        $dao->destroyCachesFor($chunkReview);
-    }
 
     // ──────────────────────────────────────────────────────────────
     // Instance-method specular tests (Step 1 — mirror of static tests)

@@ -9,9 +9,11 @@ use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
+use Utils\Constants\SourcePages;
 use Utils\Contribution\GetContributionRequest;
 
 class TestableGetContributionController extends GetContributionController
@@ -224,24 +226,6 @@ class GetContributionControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function validateTheRequest_missing_password_throws(): void
-    {
-        $this->setupRequestParams([
-            'id_client' => 'abc123',
-            'id_job' => '999',
-            'id_segment' => '42',
-            'text' => 'Hello',
-            'password' => '',
-            'current_password' => 'pass',
-            'is_concordance' => null,
-        ]);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing job password');
-        $this->invokeMethod('validateTheRequest');
-    }
-
-    #[Test]
     public function validateTheRequest_missing_id_client_throws(): void
     {
         $this->setupRequestParams([
@@ -328,17 +312,14 @@ class GetContributionControllerTest extends AbstractTest
         $this->assertSame(123, $result['id_job']);
         $this->assertSame('Hello world', $result['text']);
         $this->assertSame('Ciao mondo', $result['translation']);
-        $this->assertSame('jobpass', $result['password']);
-        $this->assertSame('currpass', $result['received_password']);
         $this->assertTrue($result['switch_languages']);
         $this->assertSame(['before1', 'before2'], $result['context_list_before']);
         $this->assertSame(['after1'], $result['context_list_after']);
 
-        $idJobProp = $this->reflector->getProperty('id_job');
-        $this->assertSame(123, $idJobProp->getValue($this->controller));
-
-        $passProp = $this->reflector->getProperty('request_password');
-        $this->assertSame('currpass', $passProp->getValue($this->controller));
+        // password/received_password are no longer parsed here: ChunkPasswordValidator resolves the
+        // credential and the job password is read from the credential-resolved chunk in get().
+        $this->assertArrayNotHasKey('password', $result);
+        $this->assertArrayNotHasKey('received_password', $result);
     }
 
     #[Test]
@@ -511,6 +492,13 @@ class GetContributionControllerTest extends AbstractTest
         $user->email = 'foo@example.org';
         $ref->getProperty('user')->setValue($testable, $user);
 
+        // ChunkPasswordValidator runs before get() in production; here get() is called directly, so
+        // seed the credential-resolved chunk the controller now reads instead of fetching by password.
+        $chunk = (new JobDao(obtainTestDatabase()))->getByIdAndPassword(1886428338, 'a90acf203402');
+        self::assertNotNull($chunk);
+        $chunk->setSourcePage(SourcePages::SOURCE_PAGE_TRANSLATE);
+        $ref->getProperty('chunk')->setValue($testable, $chunk);
+
         $testable->get();
 
         $this->assertNotNull($testable->capturedRequest);
@@ -567,6 +555,13 @@ class GetContributionControllerTest extends AbstractTest
         $user->uid = 1886472050;
         $user->email = 'foo@example.org';
         $ref->getProperty('user')->setValue($testable, $user);
+
+        // ChunkPasswordValidator runs before get() in production; here get() is called directly, so
+        // seed the credential-resolved chunk the controller now reads instead of fetching by password.
+        $chunk = (new JobDao(obtainTestDatabase()))->getByIdAndPassword(1886428338, 'a90acf203402');
+        self::assertNotNull($chunk);
+        $chunk->setSourcePage(SourcePages::SOURCE_PAGE_TRANSLATE);
+        $ref->getProperty('chunk')->setValue($testable, $chunk);
 
         $testable->get();
 

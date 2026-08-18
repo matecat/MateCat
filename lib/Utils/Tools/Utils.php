@@ -11,13 +11,11 @@ use InvalidArgumentException;
 use Model\DataAccess\IDatabase;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
-use Plugins\Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use Random\RandomException;
 use Transliterator;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ErrMailWorker;
 use Utils\Constants\Constants;
-use Utils\Constants\SourcePages;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -25,55 +23,6 @@ use Utils\TmKeyManagement\TmKeyStruct;
 
 class Utils
 {
-
-    public static function getSourcePageFromReferer(): int
-    {
-        $parsed = parse_url($_SERVER['HTTP_REFERER'] ?? '');
-
-        return self::returnSourcePageAsInt(is_array($parsed) ? $parsed : []);
-    }
-
-
-    /**
-     * @return int
-     */
-    public static function getSourcePage(): int
-    {
-        $parsed = parse_url($_SERVER['REQUEST_URI'] ?? '');
-
-        return self::returnSourcePageAsInt(is_array($parsed) ? $parsed : []);
-    }
-
-    /**
-     * @param array<string, int|string> $url
-     *
-     * @return int
-     */
-    private static function returnSourcePageAsInt(array $url): int
-    {
-        $sourcePage = SourcePages::SOURCE_PAGE_TRANSLATE;
-
-        if (!isset($url['path'])) {
-            return $sourcePage;
-        }
-
-        if (!is_string($url['path'])) {
-            return $sourcePage;
-        }
-
-        // this regex matches /revise /revise[2-9]
-        preg_match('/revise([2-9]|\'\')?\//', $url['path'], $matches);
-
-        if (count($matches) === 1) { // [0] => revise/
-            $sourcePage = ReviewUtils::revisionNumberToSourcePage(SourcePages::SOURCE_PAGE_TRANSLATE);
-        }
-
-        if (count($matches) > 1) { // [0] => revise2/ [1] => 2
-            $sourcePage = ReviewUtils::revisionNumberToSourcePage((int)$matches[1]);
-        }
-
-        return $sourcePage;
-    }
 
     /**
      * @param string|null $agent

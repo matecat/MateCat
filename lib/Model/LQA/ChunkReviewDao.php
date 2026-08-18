@@ -31,7 +31,15 @@ class ChunkReviewDao extends AbstractDao
 
     const string sql_get_from_review_password_and_id_job = "SELECT * FROM qa_chunk_reviews WHERE review_password = :review_password AND id_job = :id_job";
 
-    const string sql_get_from_review_password_and_id_job_and_source_page = "SELECT * FROM qa_chunk_reviews WHERE review_password = :review_password AND id_job = :id_job  AND source_page = :source_page";
+
+    // The query text is part of the cache key, so the trailing space on the first line is not
+    // cosmetic: dropping it renames every entry in flight, and a fleet still running the old text
+    // keeps repopulating the name this one no longer produces. Do not trim it.
+    const string sql_is_t_or_r1_or_r2 = "SELECT 
+            (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.password=:password) as t,
+            (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.review_password=:password and cr.source_page = 2) as r1,
+            (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.review_password=:password and cr.source_page = 3) as r2
+        from DUAL";
 
     /**
      * @throws PDOException
@@ -364,15 +372,39 @@ class ChunkReviewDao extends AbstractDao
      */
     public function findChunkReviewsForSourcePage(JobStruct $chunkStruct, int $source_page = SourcePages::SOURCE_PAGE_REVISION, int $ttl = 60): array
     {
-        $sql_condition = " WHERE source_page = $source_page ";
+        // Each phase is given its own key map. An eviction deletes a whole key map at once, and the
+        // bind parameters are the same for every phase because the source page is written into the
+        // query text, so on the key map derived from them evicting one phase would take the others
+        // and the unfiltered read down with it.
+        return $this->_findChunkReviews(
+            [$chunkStruct],
+            self::_sourcePageCondition($source_page),
+            $ttl,
+            self::_sourcePageKeyMap($chunkStruct, $source_page)
+        );
+    }
 
-        return $this->_findChunkReviews([$chunkStruct], $sql_condition, $ttl);
+    /**
+     * The condition is interpolated into the query text, and the query text is part of the cache
+     * key, so the read and the eviction of a source page have to build it here or they would key on
+     * two different strings.
+     */
+    private static function _sourcePageCondition(int $source_page): string
+    {
+        return " WHERE source_page = $source_page ";
+    }
+
+    private static function _sourcePageKeyMap(JobStruct $chunkStruct, int $source_page): string
+    {
+        return self::class . '::findChunkReviewsForSourcePage-' . $chunkStruct->id . ':' . $chunkStruct->password . ':' . $source_page;
     }
 
     /**
      * @param JobStruct[] $chunksArray
      * @param string|null $default_condition
      * @param int|null $ttl
+     * @param string|null $keyMap Left null to group the entry with the other reads of the same
+     *                            chunks, since an eviction deletes a whole key map.
      *
      * @return ChunkReviewStruct[]
      * @throws Exception
@@ -382,7 +414,8 @@ class ChunkReviewDao extends AbstractDao
     protected function _findChunkReviews(
         array $chunksArray,
         ?string $default_condition = ' WHERE 1 = 1 ',
-        ?int $ttl = 1 /* 1 second, only to avoid multiple queries to mysql during the same script execution */
+        ?int $ttl = 1 /* 1 second, only to avoid multiple queries to mysql during the same script execution */,
+        ?string $keyMap = null
     ): array
     {
         $findChunkReviewsStatement = $this->_findChunkReviewsStatement($chunksArray, $default_condition);
@@ -390,7 +423,12 @@ class ChunkReviewDao extends AbstractDao
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare($findChunkReviewsStatement['sql']);
 
-        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ChunkReviewStruct::class, $findChunkReviewsStatement['parameters']);
+        return $this->setCacheTTL($ttl)->_fetchObjectMap(
+            $stmt,
+            ChunkReviewStruct::class,
+            $findChunkReviewsStatement['parameters'],
+            $keyMap
+        );
     }
 
     /**
@@ -406,6 +444,42 @@ class ChunkReviewDao extends AbstractDao
         $stmt = $this->_getStatementForQuery($findChunkReviewsStatement['sql']);
 
         return $this->_destroyObjectCache($stmt, ChunkReviewStruct::class, $findChunkReviewsStatement['parameters']);
+    }
+
+    /**
+     * Evict findChunkReviewsForSourcePage() for one phase of a chunk.
+     *
+     * The entry is keyed on the job credential but its value is the review password of that phase,
+     * which is what the editor is handed, so a review password rotation has to evict it as well.
+     *
+     * @param JobStruct $chunkStruct
+     * @param int $source_page
+     *
+     * @return bool
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function destroyCacheForFindChunkReviewsForSourcePage(JobStruct $chunkStruct, int $source_page): bool
+    {
+        $findChunkReviewsStatement = $this->_findChunkReviewsStatement(
+            [$chunkStruct],
+            self::_sourcePageCondition($source_page)
+        );
+        $stmt = $this->_getStatementForQuery($findChunkReviewsStatement['sql']);
+
+        return $this->_destroyObjectCache($stmt, ChunkReviewStruct::class, $findChunkReviewsStatement['parameters']);
+    }
+
+    /**
+     * A rotation evicts the entries of the password it replaces, which no struct carries any more.
+     */
+    private static function _chunkFor(int $id_job, string $password): JobStruct
+    {
+        $chunkStruct = new JobStruct();
+        $chunkStruct->id = $id_job;
+        $chunkStruct->password = $password;
+
+        return $chunkStruct;
     }
 
     /**
@@ -457,21 +531,41 @@ class ChunkReviewDao extends AbstractDao
      */
     public function isTOrR1OrR2(int $jid, string $password, int $ttl = 3600): ?IDaoStruct
     {
-        $sql = "SELECT 
-            (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.password=:password) as t,
-            (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.review_password=:password and cr.source_page = 2) as r1,
-            (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.review_password=:password and cr.source_page = 3) as r2
-        from DUAL";
+        $stmt = $this->_getStatementForQuery(self::sql_is_t_or_r1_or_r2);
 
-        $conn = $this->database->getConnection();
-        $stmt = $conn->prepare($sql);
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, self::isTOrR1OrR2Params($jid, $password))[0] ?? null;
+    }
 
-        $parameters = [
+    /**
+     * Drop what isTOrR1OrR2() cached for a password, so a rotated password stops resolving a phase
+     * before its TTL expires.
+     *
+     * @param int $jid
+     * @param string $password
+     *
+     * @return bool
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function destroyCacheForIsTOrR1OrR2(int $jid, string $password): bool
+    {
+        $stmt = $this->_getStatementForQuery(self::sql_is_t_or_r1_or_r2);
+
+        return $this->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, self::isTOrR1OrR2Params($jid, $password));
+    }
+
+    /**
+     * @param int $jid
+     * @param string $password
+     *
+     * @return array<string, int|string>
+     */
+    private static function isTOrR1OrR2Params(int $jid, string $password): array
+    {
+        return [
             'password' => $password,
             'jid' => $jid
         ];
-
-        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $parameters)[0] ?? null;
     }
 
     /**
@@ -526,6 +620,57 @@ class ChunkReviewDao extends AbstractDao
     }
 
     /**
+     * Drop what findByReviewPasswordAndJobId() cached for a review password. That query authenticates
+     * a reviewer, and callers cache it for up to a day, so a rotated password must be evicted here or
+     * it keeps opening the editor until the TTL expires.
+     *
+     * @param string $review_password
+     * @param int $id_job
+     *
+     * @return bool
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function destroyCacheForReviewPasswordAndJobId(string $review_password, int $id_job): bool
+    {
+        $stmt = $this->_getStatementForQuery(self::sql_get_from_review_password_and_id_job);
+
+        return $this->_destroyObjectCache($stmt, ChunkReviewStruct::class, [
+            'review_password' => $review_password,
+            'id_job' => $id_job
+        ]);
+    }
+
+    /**
+     * Evict every cached read this DAO keys on a job credential, whether that credential is a
+     * translate or a review password.
+     *
+     * A rotation must be called for the password it replaces, which would otherwise keep opening the
+     * editor for the whole TTL, and for the password replacing it, whose entries may hold a miss
+     * cached by a lookup made before the rotation.
+     *
+     * @param int $id_job
+     * @param string $password
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function destroyCacheForJobPassword(int $id_job, string $password): void
+    {
+        $chunkStruct = self::_chunkFor($id_job, $password);
+
+        $this->destroyCacheForFindChunkReviews($chunkStruct);
+        $this->destroyCacheForIsTOrR1OrR2($id_job, $password);
+        $this->destroyCacheForReviewPasswordAndJobId($password, $id_job);
+
+        // There is no review phase to read on the translate page, so only the two revision phases
+        // have a per phase entry to evict.
+        foreach ([SourcePages::SOURCE_PAGE_REVISION, SourcePages::SOURCE_PAGE_REVISION_2] as $sourcePage) {
+            $this->destroyCacheForFindChunkReviewsForSourcePage($chunkStruct, $sourcePage);
+        }
+    }
+
+    /**
      * @param int $id_job
      * @param string $password
      * @param int $source_page
@@ -555,53 +700,12 @@ class ChunkReviewDao extends AbstractDao
     }
 
     /**
-     * @param int $id_job
-     * @param string $review_password
-     * @param int $source_page
-     * @param int $ttl
-     *
-     * @return ChunkReviewStruct|null
-     * @throws Exception
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    public function findByJobIdReviewPasswordAndSourcePage(int $id_job, string $review_password, int $source_page, int $ttl = 60 * 60): ?ChunkReviewStruct
-    {
-        $this->setCacheTTL($ttl);
-        $stmt = $this->_getStatementForQuery(self::sql_get_from_review_password_and_id_job_and_source_page);
-        return $this->_fetchObjectMap($stmt, ChunkReviewStruct::class, [
-            'review_password' => $review_password,
-            'id_job' => $id_job,
-            'source_page' => $source_page
-        ])[0] ?? null;
-    }
-
-    /**
-     * @param int $id_job
-     * @param string $review_password
-     * @param int $source_page
-     * @return bool
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    public function destroyCacheForJobIdReviewPasswordAndSourcePage(int $id_job, string $review_password, int $source_page): bool
-    {
-        $stmt = $this->_getStatementForQuery(self::sql_get_from_review_password_and_id_job_and_source_page);
-
-        return $this->_destroyObjectCache($stmt, ChunkReviewStruct::class, [
-            'review_password' => $review_password,
-            'id_job' => $id_job,
-            'source_page' => $source_page
-        ]);
-    }
-
-    /**
      * Invalidates every Redis-cached read that can serve a stale penalty_points/is_pass/
      * counters value for this chunk review.
      *
      * Always schedule this through IDatabase::onCommit() rather than calling it inline. Busting
      * while the writing transaction is still open lets a concurrent reader miss the cache, read the
-     * pre-commit row and repopulate from it — and that stale value then outlives the commit for the
+     * pre-commit row and repopulate from it - and that stale value then outlives the commit for the
      * full TTL. The DAO's own mutators (createRecord, deleteByJobId) already defer it this way;
      * callers that mutate counters through updateStruct or passFailCountsAtomicUpdate must do the
      * same.
@@ -611,18 +715,11 @@ class ChunkReviewDao extends AbstractDao
      */
     public function destroyCachesFor(ChunkReviewStruct $chunkReview): void
     {
-        $chunk = new JobStruct(['id' => $chunkReview->id_job, 'password' => $chunkReview->password]);
-
-        $this->destroyCacheForFindChunkReviews($chunk);
+        // The credential-keyed door covers the per source page reads, which are the ones that can
+        // still hand back a struct with the pre-write counters; the project keyed read is separate
+        // because a credential says nothing about the project it belongs to.
+        $this->destroyCacheForJobPassword($chunkReview->id_job, $chunkReview->password);
         $this->destroyCacheByProjectId($chunkReview->id_project);
-
-        if ($chunkReview->review_password !== null) {
-            $this->destroyCacheForJobIdReviewPasswordAndSourcePage(
-                $chunkReview->id_job,
-                $chunkReview->review_password,
-                $chunkReview->source_page
-            );
-        }
     }
 
 

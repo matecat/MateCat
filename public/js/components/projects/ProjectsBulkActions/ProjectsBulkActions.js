@@ -70,6 +70,15 @@ const ACTIONS_BY_FILTER = {
   ],
 }
 
+// changeJobPassword() rejects with the errors the server declared, or with the raw Response when it
+// answered nothing usable.
+const describePasswordFailure = (reason) => {
+  if (Array.isArray(reason))
+    return reason.map(({message}) => message).join(', ')
+  if (reason?.status) return `server answered ${reason.status}`
+  return 'request failed'
+}
+
 export const ProjectsBulkActions = ({
   projects,
   teams,
@@ -414,10 +423,32 @@ export const ProjectsBulkActions = ({
           timer: 10000,
         })
         break
-      case JOBS_ACTIONS.CHANGE_PASSWORD.id:
-        promises = jobs.map((job) => {
-          return changeJobPassword(job, job.password, rest.revision_number)
-        })
+      case JOBS_ACTIONS.CHANGE_PASSWORD.id: {
+        // The password sent is the current one of the resource being changed: the server rotates
+        // the password that was presented, so a revision step needs its own current password and a
+        // job without that step has nothing to change.
+        const requested = jobs.map((job) => ({
+          job,
+          currentPassword: rest.revision_number
+            ? (job.revise_passwords ?? []).find(
+                ({revision_number}) =>
+                  Number(revision_number) === Number(rest.revision_number),
+              )?.password
+            : job.password,
+        }))
+        // A job we never asked about still holds its old password, so it has to be reported as
+        // unchanged: a revocation that silently skips jobs is worse than one that fails loudly.
+        const changeable = requested.filter(({currentPassword}) =>
+          Boolean(currentPassword),
+        )
+        const projectNameOfJob = (job) =>
+          projects.find((project) =>
+            project.jobs.some((jobItem) => jobItem.id === job.id),
+          )?.name ?? 'unknown project'
+
+        promises = changeable.map(({job, currentPassword}) =>
+          changeJobPassword(job, currentPassword),
+        )
 
         Promise.allSettled(promises).then((result) => {
           const fulfilledPromises = result
@@ -453,19 +484,54 @@ export const ProjectsBulkActions = ({
               timer: 10000,
             }
             CatToolActions.addNotification(notification)
-          } else if (fulfilledPromises.length < result.length) {
-            const errorNotification = {
+          }
+          // Named one by one: a bulk revocation that only says how many jobs failed leaves the user
+          // guessing which link is still live, and the toast stays up until it is read away.
+          const unchanged = [
+            ...requested
+              .filter(({currentPassword}) => !currentPassword)
+              .map(({job}) => ({
+                job,
+                reason: rest.revision_number
+                  ? `no Revise ${rest.revision_number} phase on this job`
+                  : 'no Translate password on this job',
+              })),
+            ...result
+              .map((outcome, index) => ({outcome, job: changeable[index].job}))
+              .filter(({outcome}) => outcome.status === 'rejected')
+              .map(({job, outcome}) => ({
+                job,
+                reason: describePasswordFailure(outcome.reason),
+              })),
+          ]
+
+          if (unchanged.length) {
+            CatToolActions.addNotification({
               title: 'Error change jobs password',
-              text: 'Some jobs failed',
+              text: (
+                <>
+                  <p>
+                    {unchanged.length} of {requested.length} jobs kept the old
+                    password:
+                  </p>
+                  <ul>
+                    {unchanged.map(({job, reason}) => (
+                      <li key={`${job.id}-${job.password}`}>
+                        {projectNameOfJob(job)} — job {job.id} ({job.source}{' '}
+                        {'>'} {job.target}): {reason}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ),
               type: 'error',
               position: 'bl',
-              allowHtml: true,
-              timer: 10000,
-            }
-            CatToolActions.addNotification(errorNotification)
+              autoDismiss: false,
+            })
           }
         })
         break
+      }
       case JOBS_ACTIONS.ASSIGN_TO_TEAM.id:
         ManageActions.changeProjectsTeamBulk(rest.id_team, projectsSelected)
         break

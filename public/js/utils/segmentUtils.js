@@ -209,7 +209,7 @@ const SegmentUtils = {
     return {
       id_segment: segment.sid,
       id_job: config.id_job,
-      password: config.password,
+      password: config.currentPassword,
       status: status ? status : segment.status,
       translation: translation,
       segment: segmentSource,
@@ -223,8 +223,6 @@ const SegmentUtils = {
       id_before: idBefore,
       context_after: contextAfter,
       id_after: idAfter,
-      revision_number: config.revisionNumber,
-      current_password: config.currentPassword,
       splitStatuses: segment.splitted
         ? SegmentUtils.collectSplittedStatuses(
             segment.original_sid,
