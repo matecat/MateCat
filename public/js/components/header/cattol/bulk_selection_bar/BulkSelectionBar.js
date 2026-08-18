@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import classnames from 'classnames'
 import SegmentActions from '../../../../actions/SegmentActions'
 import SegmentConstants from '../../../../constants/SegmentConstants'
@@ -14,25 +14,15 @@ import IconChevronLeft from '../../../../../img/icons/IconChevronLeft'
 import IconTick from '../../../../../img/icons/IconTick'
 import Checkmark from '../../../../../img/icons/Checkmark'
 
-class BulkSelectionBar extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      count: 0,
-      segmentsArray: [],
-      changingStatus: false,
-    }
+const BulkSelectionBar = ({isReview}) => {
+  const [selection, setSelection] = useState({count: 0, segmentsArray: []})
+  const [changingStatus, setChangingStatus] = useState(false)
 
-    this.countInBulkElements = this.countInBulkElements.bind(this)
-    this.setSegmentsinBulk = this.setSegmentsinBulk.bind(this)
-    this.toggleSegment = this.toggleSegment.bind(this)
-    this.removeAll = this.removeAll.bind(this)
-    this.onClickBulk = this.onClickBulk.bind(this)
-    this.onClickBack = this.onClickBack.bind(this)
-  }
+  const segmentsArrayRef = useRef(selection.segmentsArray)
+  segmentsArrayRef.current = selection.segmentsArray
 
-  countInBulkElements(segments) {
-    let segmentsArray = this.state.segmentsArray
+  const countInBulkElements = (segments) => {
+    let segmentsArray = selection.segmentsArray
     if (segments && segments.size > 0) {
       segments.map(function (segment) {
         let index = segmentsArray.indexOf(segment.get('sid'))
@@ -43,158 +33,145 @@ class BulkSelectionBar extends React.Component {
         }
       })
     }
-    this.setState({
+    setSelection({
       count: segmentsArray.length,
       segmentsArray: segmentsArray,
     })
   }
-  setSegmentsinBulk(segments) {
-    let segmentsArray = segments
 
-    this.setState({
-      count: segmentsArray.length,
-      segmentsArray: segmentsArray,
+  const setSegmentsinBulk = useCallback((segments) => {
+    setSelection({count: segments.length, segmentsArray: segments})
+  }, [])
+
+  const removeAll = useCallback(() => {
+    setSelection({count: 0, segmentsArray: []})
+  }, [])
+
+  const toggleSegment = useCallback((sid) => {
+    setSelection((prev) => {
+      const index = prev.segmentsArray.indexOf(sid)
+      const array =
+        index > -1
+          ? prev.segmentsArray.filter((_, i) => i !== index)
+          : [...prev.segmentsArray, sid]
+      return {count: array.length, segmentsArray: array}
     })
-  }
-  removeAll() {
-    this.setState({
-      count: 0,
-      segmentsArray: [],
-    })
-  }
-  toggleSegment(sid) {
-    let index = this.state.segmentsArray.indexOf(sid)
-    let array = this.state.segmentsArray.slice(0)
-    if (index > -1) {
-      array.splice(index, 1)
-    } else {
-      array.push(sid)
-    }
-    this.setState({
-      count: array.length,
-      segmentsArray: array,
-    })
-  }
-  onClickBack() {
+  }, [])
+
+  const onClickBack = () => {
     SegmentActions.removeSegmentsOnBulk()
-    this.setState({
-      changingStatus: false,
-    })
+    setChangingStatus(false)
   }
 
-  onClickBulk() {
-    this.setState({
-      changingStatus: true,
-    })
-    if (this.props.isReview) {
-      SegmentActions.approveFilteredSegments(this.state.segmentsArray).then(
+  const onClickBulk = () => {
+    setChangingStatus(true)
+    if (isReview) {
+      SegmentActions.approveFilteredSegments(selection.segmentsArray).then(
         () => {
-          this.onClickBack()
-          CatToolActions.onRender({segmentToOpen: this.state.segmentsArray[0]})
+          onClickBack()
+          CatToolActions.onRender({segmentToOpen: segmentsArrayRef.current[0]})
           CatToolActions.reloadQualityReport()
         },
       )
     } else {
-      SegmentActions.translateFilteredSegments(this.state.segmentsArray).then(
+      SegmentActions.translateFilteredSegments(selection.segmentsArray).then(
         () => {
-          CatToolActions.onRender({segmentToOpen: this.state.segmentsArray[0]})
-          this.onClickBack()
+          CatToolActions.onRender({segmentToOpen: segmentsArrayRef.current[0]})
+          onClickBack()
         },
       )
     }
     // SegmentActions.closeSegment(SegmentStore.getCurrentSegmentId());
   }
 
-  componentDidMount() {
-    // SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, this.countInBulkElements);
+  useEffect(() => {
+    // SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, countInBulkElements);
     SegmentStore.addListener(
       SegmentConstants.TOGGLE_SEGMENT_ON_BULK,
-      this.toggleSegment,
+      toggleSegment,
     )
     SegmentStore.addListener(
       SegmentConstants.REMOVE_SEGMENTS_ON_BULK,
-      this.removeAll,
+      removeAll,
     )
     SegmentStore.addListener(
       SegmentConstants.SET_BULK_SELECTION_SEGMENTS,
-      this.setSegmentsinBulk,
+      setSegmentsinBulk,
     )
-  }
 
-  componentWillUnmount() {
-    // SegmentStore.removeListener(SegmentConstants.RENDER_SEGMENTS, this.countInBulkElements);
-    SegmentStore.removeListener(
-      SegmentConstants.TOGGLE_SEGMENT_ON_BULK,
-      this.toggleSegment,
-    )
-    SegmentStore.removeListener(
-      SegmentConstants.REMOVE_SEGMENTS_ON_BULK,
-      this.removeAll,
-    )
-    SegmentStore.removeListener(
-      SegmentConstants.SET_BULK_SELECTION_SEGMENTS,
-      this.setSegmentsinBulk,
-    )
-  }
+    return () => {
+      // SegmentStore.removeListener(SegmentConstants.RENDER_SEGMENTS, countInBulkElements);
+      SegmentStore.removeListener(
+        SegmentConstants.TOGGLE_SEGMENT_ON_BULK,
+        toggleSegment,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.REMOVE_SEGMENTS_ON_BULK,
+        removeAll,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.SET_BULK_SELECTION_SEGMENTS,
+        setSegmentsinBulk,
+      )
+    }
+  }, [])
 
-  render() {
-    let buttonClass = classnames({
-      'approve-all-segments': true,
-      'translated-all-bulked': !this.props.isReview,
-      'approved-all-bulked': this.props.isReview,
-      'approved-2nd-pass':
-        config.secondRevisionsCount &&
-        config.revisionNumber &&
-        config.revisionNumber === 2,
-    })
-    return this.state.count > 0 ? (
-      <div className="bulk-approve-bar">
-        <div className="bulk-back-info">
-          <div className="bulk-back">
-            <Button
-              mode={BUTTON_MODE.GHOST}
-              size={BUTTON_SIZE.SMALL}
-              onClick={this.onClickBack}
-            >
-              <IconChevronLeft size={16} /> back
-            </Button>
-          </div>
-          {this.state.count === 1 ? (
-            <div className="bulk-info">
-              <b>{this.state.count} Segment selected</b>
-            </div>
-          ) : (
-            <div className="bulk-info">
-              <b>{this.state.count} Segments selected</b>
-            </div>
-          )}
+  let buttonClass = classnames({
+    'approve-all-segments': true,
+    'translated-all-bulked': !isReview,
+    'approved-all-bulked': isReview,
+    'approved-2nd-pass':
+      config.secondRevisionsCount &&
+      config.revisionNumber &&
+      config.revisionNumber === 2,
+  })
+  return selection.count > 0 ? (
+    <div className="bulk-approve-bar">
+      <div className="bulk-back-info">
+        <div className="bulk-back">
+          <Button
+            mode={BUTTON_MODE.GHOST}
+            size={BUTTON_SIZE.SMALL}
+            onClick={onClickBack}
+          >
+            <IconChevronLeft size={16} /> back
+          </Button>
         </div>
-
-        {this.state.changingStatus ? (
-          <div className="bulk-activity-icons">
-            <div className="label-filters labl">
-              Applying changes
-              <div className="loader" />
-            </div>
+        {selection.count === 1 ? (
+          <div className="bulk-info">
+            <b>{selection.count} Segment selected</b>
           </div>
         ) : (
-          <div className="bulk-activity-icons">
-            <Button
-              className={`mark-button ${buttonClass}`}
-              type={BUTTON_TYPE.PRIMARY}
-              mode={BUTTON_MODE.OUTLINE}
-              onClick={this.onClickBulk}
-            >
-              <div>
-                <Checkmark size={16} />
-              </div>
-              {this.props.isReview ? 'MARK AS APPROVED' : 'MARK AS TRANSLATED'}
-            </Button>
+          <div className="bulk-info">
+            <b>{selection.count} Segments selected</b>
           </div>
         )}
       </div>
-    ) : null
-  }
+
+      {changingStatus ? (
+        <div className="bulk-activity-icons">
+          <div className="label-filters labl">
+            Applying changes
+            <div className="loader" />
+          </div>
+        </div>
+      ) : (
+        <div className="bulk-activity-icons">
+          <Button
+            className={`mark-button ${buttonClass}`}
+            type={BUTTON_TYPE.PRIMARY}
+            mode={BUTTON_MODE.OUTLINE}
+            onClick={onClickBulk}
+          >
+            <div>
+              <Checkmark size={16} />
+            </div>
+            {isReview ? 'MARK AS APPROVED' : 'MARK AS TRANSLATED'}
+          </Button>
+        </div>
+      )}
+    </div>
+  ) : null
 }
 
 export default BulkSelectionBar

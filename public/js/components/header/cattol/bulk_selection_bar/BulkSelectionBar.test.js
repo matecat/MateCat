@@ -112,3 +112,39 @@ test('toggles a single segment in and out of the bulk selection', () => {
   })
   expect(screen.getByText('2 Segments selected')).toBeInTheDocument()
 })
+
+test('unmounting removes the SegmentStore listeners', () => {
+  const baselineToggle = SegmentStore.listenerCount(
+    SegmentConstants.TOGGLE_SEGMENT_ON_BULK,
+  )
+  const baselineRemove = SegmentStore.listenerCount(
+    SegmentConstants.REMOVE_SEGMENTS_ON_BULK,
+  )
+  const baselineSet = SegmentStore.listenerCount(
+    SegmentConstants.SET_BULK_SELECTION_SEGMENTS,
+  )
+
+  const {unmount} = render(<BulkSelectionBar isReview={false} />)
+
+  expect(
+    SegmentStore.listenerCount(SegmentConstants.TOGGLE_SEGMENT_ON_BULK),
+  ).toBe(baselineToggle + 1)
+  expect(
+    SegmentStore.listenerCount(SegmentConstants.REMOVE_SEGMENTS_ON_BULK),
+  ).toBe(baselineRemove + 1)
+  expect(
+    SegmentStore.listenerCount(SegmentConstants.SET_BULK_SELECTION_SEGMENTS),
+  ).toBe(baselineSet + 1)
+
+  unmount()
+
+  expect(
+    SegmentStore.listenerCount(SegmentConstants.TOGGLE_SEGMENT_ON_BULK),
+  ).toBe(baselineToggle)
+  expect(
+    SegmentStore.listenerCount(SegmentConstants.REMOVE_SEGMENTS_ON_BULK),
+  ).toBe(baselineRemove)
+  expect(
+    SegmentStore.listenerCount(SegmentConstants.SET_BULK_SELECTION_SEGMENTS),
+  ).toBe(baselineSet)
+})
