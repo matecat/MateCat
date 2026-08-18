@@ -464,4 +464,38 @@ class DaoCacheTraitTest extends AbstractTest
 
         self::assertFalse($this->harness->callIsInsideTransaction());
     }
+
+    #[Test]
+    public function setInCacheMapWritesNothingWhileATransactionIsOpen(): void
+    {
+        $connection = $this->createStub(PDO::class);
+        $connection->method('inTransaction')->willReturn(true);
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($connection);
+
+        $this->harness->setTransactionScope($database);
+        $this->harness->setTTL(3600);
+
+        $this->harness->callSetInCacheMap('map', 'SELECT 1', [['id' => 60]]);
+
+        self::assertSame([], $this->redis->getStoredHash('map'));
+    }
+
+    #[Test]
+    public function setInCacheMapWritesOnceNoTransactionIsOpen(): void
+    {
+        $connection = $this->createStub(PDO::class);
+        $connection->method('inTransaction')->willReturn(false);
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($connection);
+
+        $this->harness->setTransactionScope($database);
+        $this->harness->setTTL(3600);
+
+        $this->harness->callSetInCacheMap('map', 'SELECT 1', [['id' => 60]]);
+
+        self::assertNotSame([], $this->redis->getStoredHash('map'));
+    }
 }

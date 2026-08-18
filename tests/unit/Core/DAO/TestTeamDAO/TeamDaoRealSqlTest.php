@@ -167,6 +167,47 @@ class TeamDaoRealSqlTest extends AbstractTest
     }
 
     /**
+     * The phantom team. createUserTeam() re-reads the row it has just inserted with a 24-hour TTL,
+     * and both its callers wrap it in a transaction — SignupModel::processSignup() and
+     * TeamModel::createUserTeam() — so the insert runs inside that transaction too. Before the
+     * cache layer learned to skip a populate taken inside one, that read published an uncommitted
+     * row: a rollback anywhere later in signup left a team that does not exist readable from cache
+     * for a day.
+     */
+    #[Test]
+    public function createUserTeam_publishes_nothing_while_the_callers_transaction_is_open(): void
+    {
+        $database = $this->realSqlDb();
+        $this->flushDaoCache();
+
+        $creator        = new UserStruct();
+        $creator->uid   = $this->creatorUid;
+        $creator->email = $this->creatorEmail;
+
+        // Stand in for SignupModel/TeamModel, which own the transaction createUserTeam joins.
+        $database->begin();
+        try {
+            $this->dao->createUserTeam($creator, [
+                'name'    => 'Acme Phantom',
+                'type'    => Teams::GENERAL,
+                'members' => [],
+            ]);
+
+            self::assertSame(
+                [],
+                $this->daoCacheRedis()->keys('*'),
+                'nothing may be cached from inside the transaction: the rows are not public yet'
+            );
+        } finally {
+            // The rollback is the point: after it the team never existed.
+            $database->rollback();
+        }
+
+        self::assertNull($this->dao->findById(0), 'sanity: the DAO reads through to the database');
+        self::assertSame([], $this->daoCacheRedis()->keys('*'), 'and the rollback left nothing behind');
+    }
+
+    /**
      * createUserTeam() opened its own transaction and then guarded the commit on "no transaction is
      * open", which is true only when there is nothing to commit. Called outside a transaction it
      * therefore returned with one still open, on a connection a worker holds across messages.

@@ -235,6 +235,13 @@ trait DaoCacheTrait
             return null;
         }
 
+        // A row read inside an open transaction is this connection's private view of it: no other
+        // connection can see it, and a rollback un-makes it. Publishing it to a cache every request
+        // shares would hand them all a row that may never exist, for the whole TTL.
+        if ($this->_isInsideTransaction()) {
+            return null;
+        }
+
         if (isset(self::$cache_con) && !empty(self::$cache_con)) {
             $key = md5($query);
 
