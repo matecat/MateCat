@@ -393,6 +393,6 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         // Anyone else must belong to the team that owns the project.
         $project = $job->getProject(new ProjectDao($this->getDatabase()));
-        (new ProjectAccessValidator($this, $project))->validate();
+        (new ProjectAccessValidator($this, $project, $loggerUser))->validate();
     }
 }
