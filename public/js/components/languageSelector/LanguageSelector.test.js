@@ -85,6 +85,15 @@ describe('LanguageSelector', () => {
     ])
   })
 
+  test('pressing Enter while a search query is active does not confirm', () => {
+    const {props} = renderComponent()
+    fireEvent.change(screen.getByPlaceholderText('Search...'), {
+      target: {value: 'ger'},
+    })
+    fireEvent.keyDown(document, {key: 'Enter'})
+    expect(props.onConfirm).not.toHaveBeenCalled()
+  })
+
   test('clicking "Confirm" calls onConfirm with the current selection', () => {
     const {props} = renderComponent()
     fireEvent.click(screen.getByRole('button', {name: 'Confirm'}))
