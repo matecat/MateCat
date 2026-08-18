@@ -10,6 +10,7 @@
 namespace Model\DataAccess;
 
 use Exception;
+use PDOException;
 use Predis\Client;
 use Psr\Log\InvalidArgumentException;
 use Random\RandomException;
@@ -265,6 +266,34 @@ trait DaoCacheTrait
         }
 
         return $this;
+    }
+
+    /**
+     * The transaction whose visibility this object's cache writes have to follow, or null when
+     * there is none.
+     *
+     * Cached data is shared by every connection; data written inside a transaction is not. Where
+     * both are true at once the cache can publish, or keep, a value no other connection can see.
+     * The trait cannot answer that on its own — it holds a Redis connection, not a database one —
+     * so the consumer declares it.
+     *
+     * Null is the safe default and the honest answer for the three non-DAO consumers: Pager only
+     * reads, and UserStateStore and SessionTokenStoreHandler write to Redis alone. A token
+     * revocation in particular has to take effect at once and must never wait behind a commit.
+     */
+    protected function _cacheTransactionScope(): ?IDatabase
+    {
+        return null;
+    }
+
+    /**
+     * @throws PDOException
+     */
+    private function _isInsideTransaction(): bool
+    {
+        $database = $this->_cacheTransactionScope();
+
+        return $database !== null && $database->getConnection()->inTransaction();
     }
 
     /**

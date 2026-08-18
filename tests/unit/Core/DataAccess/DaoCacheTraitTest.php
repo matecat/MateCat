@@ -6,6 +6,8 @@ namespace Matecat\Core\DataAccess;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\DaoCacheTrait;
+use Model\DataAccess\IDatabase;
+use PDO;
 use Model\DataAccess\XFetchEnvelope;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
@@ -23,6 +25,23 @@ class DaoCacheTraitHarness
     public function getTTL(): int
     {
         return $this->cacheTTL;
+    }
+
+    private ?IDatabase $transactionScope = null;
+
+    public function setTransactionScope(?IDatabase $database): void
+    {
+        $this->transactionScope = $database;
+    }
+
+    protected function _cacheTransactionScope(): ?IDatabase
+    {
+        return $this->transactionScope;
+    }
+
+    public function callIsInsideTransaction(): bool
+    {
+        return $this->_isInsideTransaction();
     }
 
     public function setXFetchEnabled(bool $enabled): void
@@ -408,5 +427,41 @@ class DaoCacheTraitTest extends AbstractTest
 
         $reflection = new \ReflectionProperty(DaoCacheTraitHarness::class, 'cache_con');
         self::assertNull($reflection->getValue());
+    }
+
+    #[Test]
+    public function isInsideTransactionIsFalseWithoutAScope(): void
+    {
+        $this->harness->setTransactionScope(null);
+
+        self::assertFalse($this->harness->callIsInsideTransaction());
+    }
+
+    #[Test]
+    public function isInsideTransactionFollowsTheScopedConnection(): void
+    {
+        $connection = $this->createStub(PDO::class);
+        $connection->method('inTransaction')->willReturn(true);
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($connection);
+
+        $this->harness->setTransactionScope($database);
+
+        self::assertTrue($this->harness->callIsInsideTransaction());
+    }
+
+    #[Test]
+    public function isInsideTransactionIsFalseWhenTheScopedConnectionHasNone(): void
+    {
+        $connection = $this->createStub(PDO::class);
+        $connection->method('inTransaction')->willReturn(false);
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($connection);
+
+        $this->harness->setTransactionScope($database);
+
+        self::assertFalse($this->harness->callIsInsideTransaction());
     }
 }

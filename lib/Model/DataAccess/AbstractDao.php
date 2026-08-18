@@ -44,6 +44,21 @@ abstract class AbstractDao
     }
 
     /**
+     * A DAO's cached reads and evictions run on the connection it was constructed with, so that is
+     * the transaction whose visibility they have to follow.
+     *
+     * It answers the same handle as {@see getTransactionalDatabase()} and is deliberately not the
+     * same method: that one says who may close a transaction, this one says whose visibility the
+     * cache follows. The first is only asked of the classes that open transactions — six of them —
+     * while every DAO caches. Merging them would mean putting TransactionalTrait, and its ownership
+     * flag, on AbstractDao.
+     */
+    protected function _cacheTransactionScope(): ?IDatabase
+    {
+        return $this->database;
+    }
+
+    /**
      * @var string This property will be overridden in the subclasses.
      */
     const string STRUCT_TYPE = '';
