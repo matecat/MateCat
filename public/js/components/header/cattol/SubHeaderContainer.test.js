@@ -84,6 +84,42 @@ test('toggles a container open and closed via the store', () => {
   expect(screen.getByTestId('search')).toHaveAttribute('data-active', 'false')
 })
 
+test('unmounting removes the CatToolStore listeners', () => {
+  const baselineShow = CatToolStore.listenerCount(
+    CatToolConstants.SHOW_CONTAINER,
+  )
+  const baselineToggle = CatToolStore.listenerCount(
+    CatToolConstants.TOGGLE_CONTAINER,
+  )
+  const baselineClose = CatToolStore.listenerCount(
+    CatToolConstants.CLOSE_SUBHEADER,
+  )
+
+  const {unmount} = render(<SubHeaderContainer filtersEnabled={true} />)
+
+  expect(CatToolStore.listenerCount(CatToolConstants.SHOW_CONTAINER)).toBe(
+    baselineShow + 1,
+  )
+  expect(CatToolStore.listenerCount(CatToolConstants.TOGGLE_CONTAINER)).toBe(
+    baselineToggle + 1,
+  )
+  expect(CatToolStore.listenerCount(CatToolConstants.CLOSE_SUBHEADER)).toBe(
+    baselineClose + 1,
+  )
+
+  unmount()
+
+  expect(CatToolStore.listenerCount(CatToolConstants.SHOW_CONTAINER)).toBe(
+    baselineShow,
+  )
+  expect(CatToolStore.listenerCount(CatToolConstants.TOGGLE_CONTAINER)).toBe(
+    baselineToggle,
+  )
+  expect(CatToolStore.listenerCount(CatToolConstants.CLOSE_SUBHEADER)).toBe(
+    baselineClose,
+  )
+})
+
 test('closes every container when the subheader is closed', () => {
   render(<SubHeaderContainer filtersEnabled={true} />)
 
