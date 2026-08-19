@@ -2,28 +2,15 @@
  * React Component for the warnings.
 
  */
-import React from 'react'
+import React, {memo} from 'react'
 import {fromJS} from 'immutable'
 import {forOwn} from 'lodash'
 import SegmentQA from '../../../img/icons/SegmentQA'
 import InfoIcon from '../../../img/icons/InfoIcon'
 import AlertIcon from '../../../img/icons/AlertIcon'
 
-class SegmentWarnings extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {}
-  }
-
-  componentDidMount() {}
-
-  componentWillUnmount() {}
-
-  shouldComponentUpdate(nextProps) {
-    return !fromJS(this.props.warnings).equals(fromJS(nextProps.warnings))
-  }
-
-  render() {
+const SegmentWarnings = memo(
+  (props) => {
     let warnings_count = {}
     let warnings = []
     let fnMap = (el, type) => {
@@ -36,23 +23,23 @@ class SegmentWarnings extends React.Component {
         warnings_count[el.outcome] = 1
       }
     }
-    if (this.props.warnings) {
-      if (this.props.warnings.ERROR) {
-        forOwn(this.props.warnings.ERROR.Categories, (value, key) => {
+    if (props.warnings) {
+      if (props.warnings.ERROR) {
+        forOwn(props.warnings.ERROR.Categories, (value, key) => {
           value.map((el) => {
             fnMap(el, 'ERROR')
           })
         })
       }
-      if (this.props.warnings.WARNING) {
-        forOwn(this.props.warnings.WARNING.Categories, (value, key) => {
+      if (props.warnings.WARNING) {
+        forOwn(props.warnings.WARNING.Categories, (value, key) => {
           value.map((el) => {
             fnMap(el, 'WARNING')
           })
         })
       }
-      if (this.props.warnings.INFO) {
-        forOwn(this.props.warnings.INFO.Categories, (value, key) => {
+      if (props.warnings.INFO) {
+        forOwn(props.warnings.INFO.Categories, (value, key) => {
           value.map((el) => {
             fnMap(el, 'INFO')
           })
@@ -103,7 +90,11 @@ class SegmentWarnings extends React.Component {
         })}
       </div>
     )
-  }
-}
+  },
+  (prevProps, nextProps) =>
+    fromJS(prevProps.warnings).equals(fromJS(nextProps.warnings)),
+)
+
+SegmentWarnings.displayName = 'SegmentWarnings'
 
 export default SegmentWarnings
