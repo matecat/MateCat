@@ -33,33 +33,21 @@ class ProjectCompletionRepositoryTest extends AbstractTest
     }
 
     #[Test]
-    public function test_begin_transaction_calls_injected_database_begin(): void
+    public function test_transaction_opens_its_scope_on_the_injected_database(): void
     {
         $db = $this->createMock(IDatabase::class);
-        $db->expects($this->once())->method('begin');
+        // Forwarded whole, not re-implemented: the repository owns the connection, the scope owns
+        // the transaction. Opening one here by hand is the shape this replaced.
+        $db->expects($this->never())->method('begin');
+        $db->expects($this->never())->method('commit');
+        $db->expects($this->never())->method('rollback');
+        $db->expects($this->once())
+            ->method('transaction')
+            ->willReturnCallback(static fn(callable $work) => $work());
 
         $repository = $this->makeRepository($db);
-        $repository->beginTransaction();
-    }
 
-    #[Test]
-    public function test_commit_calls_injected_database_commit(): void
-    {
-        $db = $this->createMock(IDatabase::class);
-        $db->expects($this->once())->method('commit');
-
-        $repository = $this->makeRepository($db);
-        $repository->commit();
-    }
-
-    #[Test]
-    public function test_rollback_calls_injected_database_rollback(): void
-    {
-        $db = $this->createMock(IDatabase::class);
-        $db->expects($this->once())->method('rollback');
-
-        $repository = $this->makeRepository($db);
-        $repository->rollback();
+        self::assertSame('done', $repository->transaction(static fn(): string => 'done'));
     }
 
     #[Test]

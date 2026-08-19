@@ -14,6 +14,7 @@ use PDO;
 use PDOException;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionRepositoryInterface;
 use Utils\Logger\LoggerFactory;
 
@@ -29,27 +30,20 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
     }
 
     /**
-     * @throws PDOException
+     * @Override
+     * {@inheritdoc}
+     *
+     * @template T
+     *
+     * @param callable(): T $work
+     *
+     * @return T
+     *
+     * @throws Throwable Re-throws the original exception after the transaction is aborted
      */
-    public function beginTransaction(): void
+    public function transaction(callable $work): mixed
     {
-        $this->db->begin();
-    }
-
-    /**
-     * @throws PDOException
-     */
-    public function commit(): void
-    {
-        $this->db->commit();
-    }
-
-    /**
-     * @throws PDOException
-     */
-    public function rollback(): void
-    {
-        $this->db->rollback();
+        return $this->db->transaction($work);
     }
 
     /**
