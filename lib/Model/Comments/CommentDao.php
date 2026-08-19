@@ -9,6 +9,7 @@ use Model\Users\UserDao;
 use PDO;
 use PDOException;
 use ReflectionException;
+use Throwable;
 
 class CommentDao extends AbstractDao
 {
@@ -169,27 +170,29 @@ class CommentDao extends AbstractDao
      *
      * @return CommentStruct
      * @throws PDOException
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original; only the Exception half is swallowed
      */
     public function resolveThread(CommentStruct $obj): CommentStruct
     {
         $obj->message_type = self::TYPE_RESOLVE;
         $obj->resolve_date = date('Y-m-d H:i:s');
 
-        $this->database->begin();
-
         try {
-            $comment = $this->saveComment($obj);
+            $comment = $this->database->transaction(function () use ($obj): CommentStruct {
+                $comment = $this->saveComment($obj);
 
-            $this->updateFields(
-                ['resolve_date' => $obj->resolve_date],
-                [
-                    'id_segment' => $obj->id_segment,
-                    'id_job' => $obj->id_job,
-                    'resolve_date' => null
-                ]
-            );
+                $this->updateFields(
+                    ['resolve_date' => $obj->resolve_date],
+                    [
+                        'id_segment' => $obj->id_segment,
+                        'id_job' => $obj->id_job,
+                        'resolve_date' => null
+                    ]
+                );
 
-            $this->database->commit();
+                return $comment;
+            });
 
             $obj->thread_id = $obj->getThreadId();
             $obj->create_date = $comment->create_date;
@@ -197,7 +200,9 @@ class CommentDao extends AbstractDao
 
             $this->destroySegmentIdSegmentCache($obj->id_segment);
         } catch (Exception) {
-            $this->database->rollback();
+            // Swallowed, as it was before the scope: the caller is handed back a struct with no
+            // thread_id rather than an error. Unchanged here on purpose — it is a separate question
+            // from who closes the transaction.
         }
 
         return $obj;

@@ -17,6 +17,7 @@ use Psr\Log\InvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
 use SplFileObject;
+use Throwable;
 use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\MMT\MMTServiceApi;
@@ -343,8 +344,8 @@ class MMT extends AbstractEngine
 
     /**
      * @throws Exception
-     * @throws \Throwable the metadata write runs inside a transaction scope, which aborts the
-     *                     transaction on any throw and re-throws the original, whatever its type
+     * @throws Throwable the metadata write runs inside a transaction scope, which aborts the
+     *                   transaction on any throw and re-throws the original, whatever its type
      */
     public function syncMemories(array $projectRow, ?array $segments = []): void
     {

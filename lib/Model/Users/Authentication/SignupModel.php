@@ -10,6 +10,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 use TypeError;
 use Utils\Email\ForgotPasswordEmail;
 use Utils\Email\SetPasswordRequestEmail;
@@ -72,6 +73,8 @@ class SignupModel
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction
+     *                   on any throw and re-throws the original, whatever its type
      */
     public function processSignup(): void
     {
@@ -81,10 +84,10 @@ class SignupModel
             $this->__prepareNewUser();
             $this->user->uid = $this->userDao->insertStruct($this->user) ?: throw new RuntimeException('User uid must be set after signup insert');
 
-            $this->teamDao->getDatabaseHandler()->begin();
-            $this->teamDao->createPersonalTeam($this->user);
-            $this->teamDao->getDatabaseHandler()->commit();
+            $this->teamDao->getDatabaseHandler()->transaction(fn() => $this->teamDao->createPersonalTeam($this->user));
 
+            // Outside the scope: the mail is the one effect signup cannot take back, so it waits
+            // until the team it announces is committed.
             $this->__sendConfirmationRequestEmail();
 
             return;

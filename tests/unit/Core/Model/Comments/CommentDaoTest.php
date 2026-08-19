@@ -287,6 +287,9 @@ class CommentDaoTest extends AbstractTest
         $dbMock->method('getConnection')->willReturn($this->pdoStub);
         $dbMock->method('insert')->willReturn('1');
         $dbMock->method('last_insert')->willReturn('99');
+        // resolveThread() runs its write inside a scope; unconfigured, transaction() would return
+        // null without calling the closure and the saved comment would never come back.
+        $dbMock->method('transaction')->willReturnCallback(static fn(callable $work) => $work());
 
         $this->setDatabaseInstance($dbMock);
 

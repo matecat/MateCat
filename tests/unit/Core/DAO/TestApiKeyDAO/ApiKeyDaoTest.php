@@ -216,8 +216,12 @@ class ApiKeyDaoTest extends AbstractTest
 
         $db = $this->createMock(IDatabase::class);
         $db->method('getConnection')->willReturn($pdo);
-        $db->expects($this->once())->method('begin');
-        $db->expects($this->once())->method('commit');
+        // The insert and the read-back are one scope; neither half is reached directly any more.
+        $db->expects($this->never())->method('begin');
+        $db->expects($this->never())->method('commit');
+        $db->expects($this->once())
+            ->method('transaction')
+            ->willReturnCallback(static fn(callable $work) => $work());
 
         $dao = new TestApiKeyDaoCreateStub($db);
         $dao->setFetchByIdResult($expected);

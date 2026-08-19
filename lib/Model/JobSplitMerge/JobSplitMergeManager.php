@@ -11,6 +11,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
+use Throwable;
 use Utils\Logger\LoggerFactory;
 use Model\Users\UserStruct;
 use Utils\Session\SessionStore;
@@ -109,8 +110,8 @@ class JobSplitMergeManager
      *
      * @throws Exception
      * @throws \TypeError
-     * @throws \Throwable the split runs inside a transaction scope, which aborts the transaction on
-     *                    any throw and re-throws the original, whatever its type
+     * @throws Throwable the split runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function applySplit(SplitMergeProjectData $data): void
     {
@@ -126,8 +127,8 @@ class JobSplitMergeManager
      *
      * @throws Exception
      * @throws \TypeError
-     * @throws \Throwable the merge runs inside a transaction scope, which aborts the transaction on
-     *                    any throw and re-throws the original, whatever its type
+     * @throws Throwable the merge runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function mergeALL(SplitMergeProjectData $data, array $jobStructs): void
     {
