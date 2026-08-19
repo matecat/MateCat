@@ -769,7 +769,7 @@ class ProjectManager
     }
 
     /**
-     * Finalize the project: warm caches, run post-create hooks, update analysis status, commit transaction.
+     * Finalize the project: evict caches, run post-create hooks, update analysis status.
      * @throws Exception
      * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
      *                   any throw and re-throws the original, whatever its type
@@ -785,7 +785,6 @@ class ProjectManager
         // transaction for it to join and nothing above it to widen.
         $this->dbHandler->transaction(function (): void {
             (new ProjectDao($this->dbHandler))->destroyCache((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
-            (new ProjectDao($this->dbHandler))->setCacheTTL(60 * 60 * 24)->getProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
 
             $this->features->dispatch(new PostProjectCreateEvent($this->projectStructure));
 

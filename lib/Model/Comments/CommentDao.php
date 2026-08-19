@@ -171,39 +171,33 @@ class CommentDao extends AbstractDao
      * @return CommentStruct
      * @throws PDOException
      * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
-     *                   any throw and re-throws the original; only the Exception half is swallowed
+     *                   any throw and re-throws the original, whatever its type
      */
     public function resolveThread(CommentStruct $obj): CommentStruct
     {
         $obj->message_type = self::TYPE_RESOLVE;
         $obj->resolve_date = date('Y-m-d H:i:s');
 
-        try {
-            $comment = $this->database->transaction(function () use ($obj): CommentStruct {
-                $comment = $this->saveComment($obj);
+        $comment = $this->database->transaction(function () use ($obj): CommentStruct {
+            $comment = $this->saveComment($obj);
 
-                $this->updateFields(
-                    ['resolve_date' => $obj->resolve_date],
-                    [
-                        'id_segment' => $obj->id_segment,
-                        'id_job' => $obj->id_job,
-                        'resolve_date' => null
-                    ]
-                );
+            $this->updateFields(
+                ['resolve_date' => $obj->resolve_date],
+                [
+                    'id_segment' => $obj->id_segment,
+                    'id_job' => $obj->id_job,
+                    'resolve_date' => null
+                ]
+            );
 
-                return $comment;
-            });
+            return $comment;
+        });
 
-            $obj->thread_id = $obj->getThreadId();
-            $obj->create_date = $comment->create_date;
-            $obj->timestamp = $comment->timestamp;
+        $obj->thread_id = $obj->getThreadId();
+        $obj->create_date = $comment->create_date;
+        $obj->timestamp = $comment->timestamp;
 
-            $this->destroySegmentIdSegmentCache($obj->id_segment);
-        } catch (Exception) {
-            // Swallowed, as it was before the scope: the caller is handed back a struct with no
-            // thread_id rather than an error. Unchanged here on purpose — it is a separate question
-            // from who closes the transaction.
-        }
+        $this->destroySegmentIdSegmentCache($obj->id_segment);
 
         return $obj;
     }

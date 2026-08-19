@@ -397,7 +397,7 @@ class MMT extends AbstractEngine
                             continue;
                         }
 
-                        $jMetadataDao->setCacheTTL(60 * 60 * 24 * 30)->set(
+                        $jMetadataDao->set(
                             (int)$jobId,
                             "",
                             'mt_context',
