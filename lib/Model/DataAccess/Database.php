@@ -569,6 +569,8 @@ class Database implements IDatabase
      * @return list<int>
      *
      * @throws PDOException
+     * @throws SequenceAllocationInTransaction if a transaction is already open on this connection
+     * @throws Throwable
      */
     public function nextSequence(string $sequence_name, int $seqIncrement = 1): array
     {
@@ -576,19 +578,29 @@ class Database implements IDatabase
             throw new PDOException("Undefined sequence " . $sequence_name);
         }
 
-        $this->getConnection()->beginTransaction();
+        // The allocation owns its transaction and commits it before returning, because the ids it
+        // hands out have to survive whatever the caller does next. Joining a caller's transaction
+        // instead would tie them to that transaction's fate, and a rollback would put ids that were
+        // already handed out back on the counter. Refuse rather than allocate unsafely: the caller
+        // allocates before it opens the transaction that consumes the ids.
+        if ($this->getConnection()->inTransaction()) {
+            throw new SequenceAllocationInTransaction(
+                'refusing to allocate from the `' . $sequence_name . '` sequence: a transaction is already open on this ' .
+                'connection, and an allocation that rolls back with it would hand the same ids out twice'
+            );
+        }
 
-        $statement = $this->getConnection()->prepare("SELECT " . $sequence_name . " FROM sequences FOR UPDATE;");
-        $statement->execute();
-        $first_id = $statement->fetch(PDO::FETCH_OBJ);
+        return $this->transaction(function () use ($sequence_name, $seqIncrement): array {
+            $statement = $this->getConnection()->prepare("SELECT " . $sequence_name . " FROM sequences FOR UPDATE;");
+            $statement->execute();
+            $first_id = $statement->fetch(PDO::FETCH_OBJ);
 
-        $statement = $this->getConnection()->prepare("UPDATE sequences SET " . $sequence_name . " = " . $sequence_name . " + :seqIncrement where 1 limit 1;");
-        $statement->bindValue(':seqIncrement', $seqIncrement, PDO::PARAM_INT);
-        $statement->execute();
+            $statement = $this->getConnection()->prepare("UPDATE sequences SET " . $sequence_name . " = " . $sequence_name . " + :seqIncrement where 1 limit 1;");
+            $statement->bindValue(':seqIncrement', $seqIncrement, PDO::PARAM_INT);
+            $statement->execute();
 
-        $this->getConnection()->commit();
-
-        return range($first_id->{$sequence_name}, $first_id->{$sequence_name} + $seqIncrement - 1);
+            return range($first_id->{$sequence_name}, $first_id->{$sequence_name} + $seqIncrement - 1);
+        });
     }
 
 }

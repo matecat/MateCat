@@ -5,6 +5,7 @@ namespace Matecat\Core\Model\DataAccess;
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
+use Model\DataAccess\SequenceAllocationInTransaction;
 use Model\DataAccess\TransactionAbortedException;
 use PDO;
 use PDOException;
@@ -349,6 +350,37 @@ class DatabaseTest extends AbstractTest
         $this->assertCount(1, $first);
         $this->assertCount(1, $second);
         $this->assertSame($first[0] + 1, $second[0]);
+    }
+
+    #[Test]
+    public function nextSequenceRefusesToAllocateInsideAnOpenTransaction(): void
+    {
+        $this->db->begin();
+
+        try {
+            $this->expectException(SequenceAllocationInTransaction::class);
+
+            $this->db->nextSequence(Database::SEQ_ID_SEGMENT, 1);
+        } finally {
+            $this->db->rollback();
+        }
+    }
+
+    #[Test]
+    public function aRefusedAllocationLeavesTheCallersTransactionUntouched(): void
+    {
+        $this->db->begin();
+
+        try {
+            $this->db->nextSequence(Database::SEQ_ID_SEGMENT, 1);
+            $this->fail('the allocation should have been refused');
+        } catch (SequenceAllocationInTransaction) {
+            // The refusal must not take the caller's transaction down with it: the caller may well
+            // be able to carry on without the ids, and it is not this method's transaction to end.
+            $this->assertTrue($this->db->getConnection()->inTransaction());
+        } finally {
+            $this->db->rollback();
+        }
     }
 
     // ─── useDb() ────────────────────────────────────────────────────────────
