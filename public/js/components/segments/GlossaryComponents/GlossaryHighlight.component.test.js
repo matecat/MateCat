@@ -29,6 +29,10 @@ jest.mock('../../common/Tooltip', () => ({
   ),
 }))
 
+// Renders `props.text` as its own visible text node so tests can shape
+// `children[0].props.text` the same way the space-disabled branch reads it.
+const FakeDecoratedText = ({text}) => <span>{text}</span>
+
 const makeContentState = (plainText) => ({
   getBlockBefore: jest.fn(() => null),
   getPlainText: () => plainText,
@@ -41,122 +45,31 @@ const baseProps = {
   sid: 42,
 }
 
+// onClickTerm() reads `glossaryTerm.term_id` on whatever getTermDetails()
+// returns, so a "no match" outcome throws when clicked — pre-existing
+// behavior this migration must not "fix". The exception is thrown inside a
+// native DOM event listener, so per the DOM spec it never reaches the code
+// that called fireEvent.click (neither try/catch nor expect(fn).toThrow()
+// observes it — verified empirically); it only surfaces as a `window` error
+// event, which is what these tests listen for instead.
+const clickAndCaptureThrow = (element) => {
+  let caught = null
+  const onError = (event) => {
+    caught = event.error
+    event.preventDefault()
+  }
+  window.addEventListener('error', onError)
+  fireEvent.click(element)
+  window.removeEventListener('error', onError)
+  return caught
+}
+
 afterEach(() => {
   jest.clearAllMocks()
 })
 
-describe('GlossaryHighlight.getTermDetails — space signature enabled (default)', () => {
-  test('finds the matching glossary term through the regex callback', () => {
-    TEXT_UTILS.getGlossaryMatchRegex.mockReturnValue({
-      regex: /hello/i,
-      regexCallback: (regex, block, callback) => callback(0, 5),
-    })
-
-    const glossary = [
-      {matching_words: ['hello'], term_id: 7, source: {term: 'ciao'}, target: {term: 'hello'}},
-    ]
-
-    const instance = new GlossaryHighlight({
-      ...baseProps,
-      contentState: makeContentState('hello world'),
-      glossary,
-      children: [],
-    })
-
-    expect(instance.getTermDetails()).toEqual(glossary[0])
-  })
-
-  test('returns undefined when the callback offsets do not overlap the highlight', () => {
-    TEXT_UTILS.getGlossaryMatchRegex.mockReturnValue({
-      regex: /hello/i,
-      regexCallback: (regex, block, callback) => callback(20, 25),
-    })
-
-    const glossary = [{matching_words: ['hello'], term_id: 7}]
-
-    const instance = new GlossaryHighlight({
-      ...baseProps,
-      contentState: makeContentState('hello world, unrelated text'),
-      glossary,
-      children: [],
-    })
-
-    expect(instance.getTermDetails()).toBeUndefined()
-  })
-
-  test('skips regex matching entirely when every term is a missingTerm', () => {
-    const glossary = [{matching_words: ['hello'], missingTerm: true}]
-
-    const instance = new GlossaryHighlight({
-      ...baseProps,
-      contentState: makeContentState('hello world'),
-      glossary,
-      children: [],
-    })
-
-    expect(instance.getTermDetails()).toBeUndefined()
-    expect(TEXT_UTILS.getGlossaryMatchRegex).not.toHaveBeenCalled()
-  })
-})
-
-describe('GlossaryHighlight.getTermDetails — space signature disabled', () => {
-  const originalSpace = tagSignatures.space
-
-  beforeEach(() => {
-    tagSignatures.space = null
-  })
-
-  afterEach(() => {
-    tagSignatures.space = originalSpace
-  })
-
-  test('matches using the decorated text of the first child', () => {
-    const glossary = [{matching_words: ['hello'], term_id: 3}]
-    const instance = new GlossaryHighlight({
-      ...baseProps,
-      contentState: makeContentState('unused'),
-      glossary,
-      children: [{props: {text: '  Hello  '}}],
-    })
-
-    expect(instance.getTermDetails()).toEqual(glossary[0])
-  })
-
-  test('returns undefined when no term matches the decorated text', () => {
-    const glossary = [{matching_words: ['other'], term_id: 3}]
-    const instance = new GlossaryHighlight({
-      ...baseProps,
-      contentState: makeContentState('unused'),
-      glossary,
-      children: [{props: {text: 'hello'}}],
-    })
-
-    expect(instance.getTermDetails()).toBeUndefined()
-  })
-})
-
-describe('GlossaryHighlight.onClickTerm', () => {
-  test('dispatches highlightGlossaryTerm with the matched term id', () => {
-    const instance = new GlossaryHighlight({
-      ...baseProps,
-      contentState: makeContentState('unused'),
-      glossary: [],
-      children: [],
-    })
-    jest.spyOn(instance, 'getTermDetails').mockReturnValue({term_id: 99})
-
-    instance.onClickTerm()
-
-    expect(highlightGlossaryTerm).toHaveBeenCalledWith({
-      sid: 42,
-      termId: 99,
-      type: 'glossary',
-    })
-  })
-})
-
-describe('GlossaryHighlight render', () => {
-  test('renders the tooltip content and forwards clicks to onClickTerm', () => {
+describe('GlossaryHighlight — space signature enabled (default)', () => {
+  test('renders the tooltip content and dispatches highlightGlossaryTerm on click when the callback offsets overlap the highlight', () => {
     TEXT_UTILS.getGlossaryMatchRegex.mockReturnValue({
       regex: /hello/i,
       regexCallback: (regex, block, callback) => callback(0, 5),
@@ -173,7 +86,7 @@ describe('GlossaryHighlight render', () => {
       </GlossaryHighlight>,
     )
 
-    expect(screen.getByTestId('tooltip-content').textContent).toBe(
+    expect(screen.getByTestId('tooltip-content')).toHaveTextContent(
       'Termbase entry',
     )
 
@@ -184,5 +97,104 @@ describe('GlossaryHighlight render', () => {
       termId: 11,
       type: 'glossary',
     })
+  })
+
+  test('does not dispatch when the callback offsets do not overlap the highlight (pre-existing throw on click)', () => {
+    TEXT_UTILS.getGlossaryMatchRegex.mockReturnValue({
+      regex: /hello/i,
+      regexCallback: (regex, block, callback) => callback(20, 25),
+    })
+
+    const glossary = [{matching_words: ['hello'], term_id: 7}]
+
+    render(
+      <GlossaryHighlight
+        {...baseProps}
+        contentState={makeContentState('hello world, unrelated text')}
+        glossary={glossary}
+      >
+        hello
+      </GlossaryHighlight>,
+    )
+
+    const thrown = clickAndCaptureThrow(screen.getByText('hello'))
+
+    expect(thrown).not.toBeNull()
+    expect(highlightGlossaryTerm).not.toHaveBeenCalled()
+  })
+
+  test('skips regex matching entirely when every glossary entry is a missingTerm', () => {
+    const glossary = [{matching_words: ['hello'], missingTerm: true}]
+
+    render(
+      <GlossaryHighlight
+        {...baseProps}
+        contentState={makeContentState('hello world')}
+        glossary={glossary}
+      >
+        hello
+      </GlossaryHighlight>,
+    )
+
+    // getTermDetails() returns undefined here too, so the click still throws —
+    // what this test asserts is that getGlossaryMatchRegex was never reached.
+    const thrown = clickAndCaptureThrow(screen.getByText('hello'))
+
+    expect(thrown).not.toBeNull()
+    expect(TEXT_UTILS.getGlossaryMatchRegex).not.toHaveBeenCalled()
+    expect(highlightGlossaryTerm).not.toHaveBeenCalled()
+  })
+})
+
+describe('GlossaryHighlight — space signature disabled', () => {
+  const originalSpace = tagSignatures.space
+
+  beforeEach(() => {
+    tagSignatures.space = null
+  })
+
+  afterEach(() => {
+    tagSignatures.space = originalSpace
+  })
+
+  test('matches using the decorated text of the first child and dispatches on click', () => {
+    const glossary = [{matching_words: ['hello'], term_id: 3}]
+
+    render(
+      <GlossaryHighlight
+        {...baseProps}
+        contentState={makeContentState('unused')}
+        glossary={glossary}
+      >
+        {[<FakeDecoratedText text="  Hello  " key="child" />]}
+      </GlossaryHighlight>,
+    )
+
+    fireEvent.click(screen.getByText('Hello'))
+
+    expect(highlightGlossaryTerm).toHaveBeenCalledWith({
+      sid: 42,
+      termId: 3,
+      type: 'glossary',
+    })
+  })
+
+  test('does not dispatch when no term matches the decorated text (pre-existing throw on click)', () => {
+    const glossary = [{matching_words: ['other'], term_id: 3}]
+
+    render(
+      <GlossaryHighlight
+        {...baseProps}
+        contentState={makeContentState('unused')}
+        glossary={glossary}
+      >
+        {[<FakeDecoratedText text="hello" key="child" />]}
+      </GlossaryHighlight>,
+    )
+
+    const thrown = clickAndCaptureThrow(screen.getByText('hello'))
+
+    expect(thrown).not.toBeNull()
+    expect(highlightGlossaryTerm).not.toHaveBeenCalled()
   })
 })
