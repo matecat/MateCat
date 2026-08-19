@@ -71,6 +71,9 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
 
         $dbMock = $this->createStub(IDatabase::class);
         $dbMock->method('getConnection')->willReturn($this->pdoStub);
+        // process() does its work inside a scope; unconfigured, transaction() would return null
+        // without ever running the body and every assertion here would pass against nothing.
+        $dbMock->method('transaction')->willReturnCallback(static fn(callable $work) => $work());
 
         $chunk = $chunk ?? $this->createChunkWithProject();
 
