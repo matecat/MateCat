@@ -294,6 +294,46 @@ class ProjectTemplateDaoRealSqlTest extends AbstractTest
         self::assertSame(0, $this->dao->getByIdAndUser($saved->id, $this->uid)->qa_model_template_id);
     }
 
+    public function testRemoveSubTemplateEvictsTheProjectTemplatesItChanged(): void
+    {
+        $struct                       = $this->newStruct('withsubcached');
+        $struct->qa_model_template_id = 7;
+        $saved                        = $this->dao->save($struct);
+        $this->trackTemplate($saved->id);
+
+        // The id handed to removeSubTemplateByIdAndUser numbers a sub-template, not a project
+        // template, so it cannot be used to name the caches below: they are keyed on $saved->id.
+        $this->dao->getByIdAndUser($saved->id, $this->uid, 3600);
+
+        $this->dao->removeSubTemplateByIdAndUser(7, $this->uid, 'qa_model_template_id');
+
+        self::assertSame(
+            0,
+            $this->dao->getByIdAndUser($saved->id, $this->uid, 3600)->qa_model_template_id,
+            'the cached project template must not survive the update that cleared its sub-template'
+        );
+    }
+
+    public function testRemoveSubTemplateEvictsTheDefaultTemplate(): void
+    {
+        $struct                       = $this->newStruct('withsubdefault', true);
+        $struct->qa_model_template_id = 8;
+        $saved                        = $this->dao->save($struct);
+        $this->trackTemplate($saved->id);
+
+        // The default template is cached for a day, against the minute the by-id reads get, so a
+        // missed eviction here is the longest-lived of the three.
+        $this->dao->getTheDefaultProject($this->uid, 3600);
+
+        $this->dao->removeSubTemplateByIdAndUser(8, $this->uid, 'qa_model_template_id');
+
+        self::assertSame(
+            0,
+            $this->dao->getTheDefaultProject($this->uid, 3600)->qa_model_template_id,
+            'the default template must not keep serving a sub-template id that was just cleared'
+        );
+    }
+
     // ---- destroyDefaultTemplateCache -------------------------------------------------------------
 
     public function testDestroyDefaultTemplateCache(): void
@@ -301,7 +341,7 @@ class ProjectTemplateDaoRealSqlTest extends AbstractTest
         $struct = $this->dao->save($this->newStruct('cachedflag', true));
         $this->trackTemplate($struct->id);
         // prime the default-template cache
-        $this->dao->setCacheTTL(3600)->getTheDefaultProject($this->uid);
+        $this->dao->getTheDefaultProject($this->uid, 3600);
 
         $conn = $this->realSqlDb()->getConnection();
         // void method: exercise the cache-destroy SQL path; assert the cached row is gone after.
