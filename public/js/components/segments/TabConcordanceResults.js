@@ -157,8 +157,8 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
                 }}
               >
                 <span>
-                  {item.target !== config.target_rfc ||
-                  item.source !== config.source_rfc
+                  {item.target !== config.target_code ||
+                  item.source !== config.source_code
                     ? 'Different language pair than the job'
                     : 'Same language pair as the job'}
                 </span>
@@ -168,8 +168,8 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
             <li
               ref={createRef()}
               className={`percent ${
-                item.target !== config.target_rfc ||
-                item.source !== config.source_rfc
+                item.target !== config.target_code ||
+                item.source !== config.source_code
                   ? 'per-yellow-variant'
                   : 'per-green'
               } `}

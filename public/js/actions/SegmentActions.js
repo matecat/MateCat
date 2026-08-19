@@ -461,8 +461,8 @@ const SegmentActions = {
       id_job: config.id_job,
       source: source,
       target: target,
-      source_lang: config.source_rfc,
-      target_lang: config.target_rfc,
+      source_lang: config.source_code,
+      target_lang: config.target_code,
       suggestion: suggestion,
       id_segment: sid,
     })

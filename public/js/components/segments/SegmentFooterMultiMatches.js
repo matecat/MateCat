@@ -117,13 +117,13 @@ class SegmentFooterMultiMatches extends React.Component {
         <li
           ref={createRef()}
           className={`percent  ${
-            match.source !== config.source_rfc
+            match.source !== config.source_code
               ? 'per-yellow-variant'
               : 'per-green'
           }`}
         >
           {match.source} {'>'} {match.target}{' '}
-          {match.source !== config.source_rfc ? '(-1%)' : ''}
+          {match.source !== config.source_code ? '(-1%)' : ''}
         </li>
         <li className={'percent ' + match.percentClass}>{match.percentText}</li>
         {/*<li className="graydesc">

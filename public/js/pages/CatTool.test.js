@@ -16,8 +16,6 @@ jest.mock('./mountPage', () => {
     id_project: 1,
     password: 'pass',
     review_password: '',
-    source_rfc: 'en-US',
-    target_rfc: 'it-IT',
     source_code: 'en-US',
     target_code: 'it-IT',
     isReview: false,
