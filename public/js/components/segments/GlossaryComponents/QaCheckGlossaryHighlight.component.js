@@ -1,17 +1,14 @@
-import React, {Component, createRef} from 'react'
+import React, {useRef} from 'react'
 import {highlightGlossaryTerm} from '../../../actions/segmentDispatchActions'
 import Tooltip from '../../common/Tooltip'
 import {tagSignatures} from '../utils/DraftMatecatUtils/tagModel'
 import TEXT_UTILS from '../../../utils/textUtils'
 
-class QaCheckGlossaryHighlight extends Component {
-  constructor(props) {
-    super(props)
-    this.contentRef = createRef()
-  }
-  getTermDetails = () => {
-    const {contentState, missingTerms, start, end, blockKey, children} =
-      this.props
+const QaCheckGlossaryHighlight = (props) => {
+  const contentRef = useRef(null)
+
+  const getTermDetails = () => {
+    const {contentState, missingTerms, start, end, blockKey, children} = props
     if (tagSignatures.space) {
       const getBlocksBefore = (key) => {
         const blocks = []
@@ -95,9 +92,9 @@ class QaCheckGlossaryHighlight extends Component {
       return result
     }
   }
-  onClickTerm = () => {
-    const {sid} = this.props
-    const glossaryTerm = this.getTermDetails()
+  const onClickTerm = () => {
+    const {sid} = props
+    const glossaryTerm = getTermDetails()
     //Call Segment footer Action
     if (glossaryTerm) {
       highlightGlossaryTerm({
@@ -107,20 +104,19 @@ class QaCheckGlossaryHighlight extends Component {
       })
     }
   }
-  render() {
-    const {children} = this.props
 
-    return (
-      <Tooltip
-        stylePointerElement={{display: 'inline-block', position: 'relative'}}
-        content="Termbase translation not found in target"
-      >
-        <div ref={this.contentRef} className="qaCheckGlossaryItem">
-          <span onClick={() => this.onClickTerm()}>{children}</span>
-        </div>
-      </Tooltip>
-    )
-  }
+  const {children} = props
+
+  return (
+    <Tooltip
+      stylePointerElement={{display: 'inline-block', position: 'relative'}}
+      content="Termbase translation not found in target"
+    >
+      <div ref={contentRef} className="qaCheckGlossaryItem">
+        <span onClick={() => onClickTerm()}>{children}</span>
+      </div>
+    </Tooltip>
+  )
 }
 
 export default QaCheckGlossaryHighlight
