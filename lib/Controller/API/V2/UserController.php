@@ -5,13 +5,13 @@ namespace Controller\API\V2;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\JSONRequestValidator;
 use Controller\API\Commons\Validators\LoginValidator;
-use Error;
 use Exception;
 use InvalidArgumentException;
 use Klein\Exceptions\LockedResponseException;
 use Klein\Exceptions\ResponseAlreadySentException;
 use Model\Users\MetadataDao;
 use Model\Users\UserDao;
+use Throwable;
 use TypeError;
 use Utils\Tools\CatUtils;
 
@@ -29,8 +29,8 @@ class UserController extends AbstractStatefulKleinController
      * @throws LockedResponseException
      * @throws ResponseAlreadySentException
      * @throws TypeError
-     * @throws Error the update runs inside a transaction scope, which aborts on any Throwable, so a
-     *               programming error inside it unwinds past this method rather than being caught
+     * @throws Throwable the update runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function edit(): void
     {

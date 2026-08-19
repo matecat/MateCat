@@ -5,7 +5,6 @@ namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use DivisionByZeroError;
-use Error;
 use Exception;
 use Klein\Exceptions\LockedResponseException;
 use Klein\Exceptions\ResponseAlreadySentException;
@@ -127,8 +126,8 @@ class QAModelTemplateController extends KleinController
      * @return Response
      * @throws LockedResponseException
      * @throws ResponseAlreadySentException
-     * @throws Error the delete cascade only catches Exception, so a programming error inside it
-     *                 unwinds past this method
+     * @throws Throwable the delete runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      * @throws TypeError
      */
     public function delete(): Response
