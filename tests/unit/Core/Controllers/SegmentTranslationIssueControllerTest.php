@@ -3,6 +3,7 @@
 namespace Matecat\Core\Controllers;
 
 use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\SegmentTranslationIssueValidator;
 use Controller\API\V2\SegmentTranslationIssueController;
 use Klein\Request;
@@ -10,6 +11,9 @@ use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryStruct;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
@@ -19,6 +23,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use Plugins\Features\ReviewExtended\TranslationIssueModel;
 use ReflectionClass;
 use RuntimeException;
+use Utils\Constants\SourcePages;
 use Utils\Logger\MatecatLogger;
 
 class TestableSegmentTranslationIssueController extends SegmentTranslationIssueController
@@ -98,6 +103,7 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
 
         $this->seedFixtures();
         $this->setControllerUser(self::USER_UID);
+        $this->setCredential();
     }
 
     protected function tearDown(): void
@@ -172,6 +178,41 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
 
         $reflector->getProperty('user')->setValue($this->controller, $user);
         $reflector->getProperty('userIsLogged')->setValue($this->controller, true);
+    }
+
+    /**
+     * Stands in for ChunkPasswordValidator: the chunk is the job the presented password matched,
+     * stamped with the phase that password belongs to, and the review row is the one the password
+     * was found in. A null review password models a translate credential, which carries no review
+     * row at all.
+     */
+    private function setCredential(
+        int $idJob = self::JOB_ID,
+        string $jobPassword = self::JOB_PASSWORD,
+        ?string $reviewPassword = self::REVIEW_PASSWORD,
+        int $sourcePage = SourcePages::SOURCE_PAGE_REVISION,
+        ?int $chunkReviewSourcePage = null
+    ): void {
+        $chunk = (new JobDao(obtainTestDatabase()))->getByIdAndPassword($idJob, $jobPassword);
+        $this->assertInstanceOf(JobStruct::class, $chunk);
+
+        $chunk->setSourcePage($sourcePage);
+        $chunk->setIsReview($sourcePage !== SourcePages::SOURCE_PAGE_TRANSLATE);
+
+        $chunkReview = null;
+        if ($reviewPassword !== null) {
+            $chunkReview = new ChunkReviewStruct();
+            $chunkReview->id_job = $idJob;
+            $chunkReview->password = $jobPassword;
+            $chunkReview->review_password = $reviewPassword;
+            // A translate password resolves no phase of its own, yet ChunkPasswordValidator still
+            // hands back the first review row of the chunk: tests that model that pass it here.
+            $chunkReview->source_page = $chunkReviewSourcePage ?? $sourcePage;
+        }
+
+        $parentReflector = new ReflectionClass(SegmentTranslationIssueController::class);
+        $parentReflector->getProperty('chunk')->setValue($this->controller, $chunk);
+        $parentReflector->getProperty('chunkReview')->setValue($this->controller, $chunkReview);
     }
 
     private function setValidator(?EntryStruct $issue = null, ?SegmentTranslationStruct $translation = null): void
@@ -265,6 +306,48 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
     // ─── delete() ────────────────────────────────────────────────
 
     #[Test]
+    public function deleteRefusesATranslateCredentialThatResolvedAReviewRow(): void
+    {
+        // A translate password carries no phase to give the penalty points back to, even though the
+        // validator hands back the first review row of the chunk (GHSA-7q94-2fmr-3p42).
+        $this->setCredential(
+            reviewPassword: self::REVIEW_PASSWORD,
+            sourcePage: SourcePages::SOURCE_PAGE_TRANSLATE,
+            chunkReviewSourcePage: SourcePages::SOURCE_PAGE_REVISION
+        );
+
+        $this->setRequestParams([
+            'id_job' => self::JOB_ID,
+            'password' => self::JOB_PASSWORD,
+        ]);
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionMessage('A revision password is required to delete an issue');
+
+        $this->controller->delete();
+    }
+
+    #[Test]
+    public function updateRefusesATranslateCredentialThatResolvedAReviewRow(): void
+    {
+        $this->setCredential(
+            reviewPassword: self::REVIEW_PASSWORD,
+            sourcePage: SourcePages::SOURCE_PAGE_TRANSLATE,
+            chunkReviewSourcePage: SourcePages::SOURCE_PAGE_REVISION
+        );
+
+        $this->setRequestParams([
+            'id_job' => self::JOB_ID,
+            'password' => self::JOB_PASSWORD,
+        ]);
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionMessage('A revision password is required to edit an issue');
+
+        $this->controller->update();
+    }
+
+    #[Test]
     public function deleteThrowsRuntimeExceptionWhenValidatorIssueIsNull(): void
     {
         $this->setRequestParams([
@@ -290,28 +373,30 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function deleteThrowsNotFoundWhenChunkReviewNotFound(): void
+    public function registerValidatorsRefusesACredentialThatResolvesNoReviewRow(): void
     {
-        $issue = new EntryStruct();
-        $issue->id = 990030;
-        $issue->uid = self::USER_UID;
-        $issue->id_segment = 1;
-        $issue->id_job = self::JOB_ID;
-        $issue->source_page = 1;
-        $this->setValidator($issue);
+        // A translate password matches no review row, so it resolves no phase to act in: every
+        // issue endpoint is refused before it can read a phase from the request instead.
+        $parentReflector = new ReflectionClass(SegmentTranslationIssueController::class);
+        $parentReflector->getProperty('params')->setValue($this->controller, []);
+        $parentReflector->getMethod('registerValidators')->invoke($this->controller);
 
-        $this->setRequestParams([
-            'id_job' => self::JOB_ID,
-            'password' => 'nonexistent_password',
-        ]);
+        /** @var list<mixed> $validators */
+        $validators = $parentReflector->getProperty('validators')->getValue($this->controller);
+        $chunkValidator = $validators[1];
+        $this->assertInstanceOf(ChunkPasswordValidator::class, $chunkValidator);
 
-        $modelMock = $this->createMock(TranslationIssueModel::class);
-        $this->controller->mockModel = $modelMock;
+        $validatorReflector = new ReflectionClass($chunkValidator);
+        $callbacks = $validatorReflector->getParentClass()
+            ->getProperty('_validationCallbacks')
+            ->getValue($chunkValidator);
+        $this->assertNotEmpty($callbacks);
 
+        // no chunk review was matched, as happens when the translate password is presented
         $this->expectException(NotFoundException::class);
-        $this->expectExceptionMessage('Job not found');
+        $this->expectExceptionMessage('Chunk review not found');
 
-        $this->controller->delete();
+        $callbacks[0]();
     }
 
     #[Test]
@@ -364,12 +449,16 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
     #[Test]
     public function updateThrowsNotFoundWhenChunkReviewNotFound(): void
     {
+        // the phase the issue belongs to has no review row, so the credential cannot reach it
+        obtainTestDatabase()->getConnection()->exec(
+            'DELETE FROM qa_chunk_reviews WHERE id_job = ' . self::JOB_ID
+        );
+
         $this->setValidator();
         $this->setRequestParams([
             'id_issue' => 990030,
             'id_segment' => 1,
             'id_job' => self::JOB_ID,
-            'password' => 'bad_password',
         ]);
 
         $this->expectException(NotFoundException::class);
@@ -807,6 +896,11 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
         );
 
         $this->setControllerUser(self::STRANGER_UID);
+        $this->setCredential(
+            self::GHOST_OWNER_JOB_ID,
+            self::GHOST_OWNER_JOB_PASSWORD,
+            self::GHOST_OWNER_REVIEW_PASSWORD
+        );
 
         $issue = new EntryStruct();
         $issue->id = 990031;
@@ -852,6 +946,11 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
         );
 
         $this->setControllerUser(self::STRANGER_UID);
+        $this->setCredential(
+            self::NO_TEAM_JOB_ID,
+            self::NO_TEAM_JOB_PASSWORD,
+            self::NO_TEAM_REVIEW_PASSWORD
+        );
 
         $issue = new EntryStruct();
         $issue->id = 990032;
@@ -870,7 +969,7 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
         $this->controller->mockModel = $modelMock;
 
         $this->expectException(AuthorizationError::class);
-        $this->expectExceptionMessage('Team not found. Not authorized');
+        $this->expectExceptionMessage('Not Authorized, the user does not belong to team');
 
         $this->controller->delete();
     }

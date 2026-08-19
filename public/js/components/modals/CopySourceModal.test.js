@@ -69,7 +69,7 @@ test('renders the static copy, label and checkbox text', () => {
     ),
   ).toBeInTheDocument()
   expect(screen.getByText(/This action cannot be undone\./)).toBeInTheDocument()
-  expect(screen.getByText('Copy source to target for:')).toBeInTheDocument()
+  expect(screen.getByText(/Copy source to target for:/)).toBeInTheDocument()
   expect(
     screen.getByText(/Don't show this dialog again for the current job/),
   ).toBeInTheDocument()

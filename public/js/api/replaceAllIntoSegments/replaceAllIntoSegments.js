@@ -13,7 +13,6 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain';
  * @param {boolean} options.matchcase
  * @param {boolean} options.exactmatch
  * @param {string} options.replace
- * @param {string} [options.revisionNumber=config.revisionNumber]
  * @returns {Promise<object>}
  */
 export const replaceAllIntoSegments = async ({
@@ -27,8 +26,8 @@ export const replaceAllIntoSegments = async ({
   exactmatch,
   replace,
   includeLocked,
-  revisionNumber = config.revisionNumber,
 }) => {
+  // No revision_number: the phase is derived server side from this password.
   const paramsData = {
     id_job: idJob,
     password,
@@ -40,7 +39,6 @@ export const replaceAllIntoSegments = async ({
     exactmatch,
     replace,
     inCurrentChunkOnly: true, // replace is fixed in context of current chunk
-    revision_number: revisionNumber,
     includeLocked,
   }
   const formData = new FormData()

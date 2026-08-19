@@ -11,7 +11,8 @@
     20px 180px minmax(auto, 240px)
     140px 100px minmax(0, 1fr) auto auto auto;
   align-items: center;
-  padding: 16px 24px;
+  padding: 0px 24px;
+  height: 64px;
   gap: 16px;
   border-bottom: 1px solid colors.$grey100;
 
@@ -30,7 +31,6 @@
   display: flex;
   flex-direction: column;
   padding: 16px 24px;
-  gap: 16px;
   border-bottom: 1px solid colors.$grey100;
 
   .chunks-job-container-line {
@@ -59,7 +59,8 @@
   grid-template-columns:
     180px minmax(auto, 240px)
     140px 100px 1fr auto auto auto;
-  padding: 16px 0px 16px 24px;
+  padding-left: 24px;
+  height: 64px;
 }
 
 .job-container-grid,

@@ -309,7 +309,7 @@ test('createSetTranslationRequest builds the payload from segment, config, and c
   expect(request).toMatchObject({
     id_segment: 1,
     id_job: 2,
-    password: 'pass',
+    password: 'current-pass',
     status: 'TRANSLATED',
     translation: 'hola',
     segment: 'hello',
@@ -318,8 +318,6 @@ test('createSetTranslationRequest builds the payload from segment, config, and c
     id_before: 'id-before',
     context_after: 'after',
     id_after: 'id-after',
-    revision_number: 1,
-    current_password: 'current-pass',
     splitStatuses: null,
     characters_counter: 5,
   })

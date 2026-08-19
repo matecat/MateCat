@@ -382,12 +382,11 @@ describe('CatToolActions simple dispatch methods', () => {
   test('sendRevisionFeedback calls the api with config values', () => {
     global.config = {
       id_job: 2,
-      revisionNumber: 1,
-      review_password: 'pwd',
+      currentPassword: 'pwd',
     }
     CatToolActions.sendRevisionFeedback('nice')
 
-    expect(sendRevisionFeedback).toHaveBeenCalledWith(2, 1, 'pwd', 'nice')
+    expect(sendRevisionFeedback).toHaveBeenCalledWith(2, 'pwd', 'nice')
   })
 
   test('reloadQualityReport dispatches RELOAD_QR', () => {

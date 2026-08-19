@@ -8,7 +8,6 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} options.target
  * @param {Array} options.crossLanguages
  * @param {string} [options.idJob=config.id_job]
- * @param {string} [options.password=config.password]
  * @param {string} [options.idTranslator=config.id_translator]
  * @param {string} [options.idClient=config.id_client]
  * @param {string} [options.currentPassword=config.currentPassword]
@@ -20,7 +19,6 @@ export const getContributions = async ({
   translation,
   crossLanguages,
   idJob = config.id_job,
-  password = config.password,
   idClient = config.id_client,
   currentPassword = config.currentPassword,
   contextListBefore,
@@ -35,7 +33,7 @@ export const getContributions = async ({
   const idAfter = globalFunctions.getIdAfter(idSegment)
 
   const obj = {
-    password: password,
+    password: currentPassword,
     is_concordance: 0,
     id_segment: idSegment,
     text: target,
@@ -47,7 +45,6 @@ export const getContributions = async ({
     id_after: idAfter,
     id_client: idClient,
     cross_language: crossLanguages,
-    current_password: currentPassword,
     context_list_before: JSON.stringify(contextListBefore),
     context_list_after: JSON.stringify(contextListAfter),
     ...(typeof laraStyle === 'string' && {lara_style: laraStyle}),

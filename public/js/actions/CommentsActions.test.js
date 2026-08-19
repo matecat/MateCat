@@ -54,7 +54,6 @@ describe('CommentsActions', () => {
     expect(submitCommentApi).toHaveBeenCalledWith({
       idSegment: 5,
       username: 'user1',
-      sourcePage: 2,
       message: 'hello',
       isAnonymous: false,
     })
@@ -86,7 +85,6 @@ describe('CommentsActions', () => {
       idSegment: 7,
       isAnonymous: false,
       username: 'user1',
-      sourcePage: 2,
     })
     expect(AppDispatcher.dispatch).toHaveBeenCalledWith({
       actionType: 'ADD_COMMENT',
