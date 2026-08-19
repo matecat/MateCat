@@ -119,7 +119,8 @@ describe('GlossaryHighlight — space signature enabled (default)', () => {
 
     const thrown = clickAndCaptureThrow(screen.getByText('hello'))
 
-    expect(thrown).not.toBeNull()
+    expect(thrown).toBeInstanceOf(TypeError)
+    expect(thrown.message).toMatch(/term_id/)
     expect(highlightGlossaryTerm).not.toHaveBeenCalled()
   })
 
@@ -140,7 +141,8 @@ describe('GlossaryHighlight — space signature enabled (default)', () => {
     // what this test asserts is that getGlossaryMatchRegex was never reached.
     const thrown = clickAndCaptureThrow(screen.getByText('hello'))
 
-    expect(thrown).not.toBeNull()
+    expect(thrown).toBeInstanceOf(TypeError)
+    expect(thrown.message).toMatch(/term_id/)
     expect(TEXT_UTILS.getGlossaryMatchRegex).not.toHaveBeenCalled()
     expect(highlightGlossaryTerm).not.toHaveBeenCalled()
   })
@@ -194,7 +196,8 @@ describe('GlossaryHighlight — space signature disabled', () => {
 
     const thrown = clickAndCaptureThrow(screen.getByText('hello'))
 
-    expect(thrown).not.toBeNull()
+    expect(thrown).toBeInstanceOf(TypeError)
+    expect(thrown.message).toMatch(/term_id/)
     expect(highlightGlossaryTerm).not.toHaveBeenCalled()
   })
 })
