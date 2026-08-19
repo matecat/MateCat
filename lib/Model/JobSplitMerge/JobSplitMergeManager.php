@@ -109,6 +109,8 @@ class JobSplitMergeManager
      *
      * @throws Exception
      * @throws \TypeError
+     * @throws \Throwable the split runs inside a transaction scope, which aborts the transaction on
+     *                    any throw and re-throws the original, whatever its type
      */
     public function applySplit(SplitMergeProjectData $data): void
     {
@@ -124,6 +126,8 @@ class JobSplitMergeManager
      *
      * @throws Exception
      * @throws \TypeError
+     * @throws \Throwable the merge runs inside a transaction scope, which aborts the transaction on
+     *                    any throw and re-throws the original, whatever its type
      */
     public function mergeALL(SplitMergeProjectData $data, array $jobStructs): void
     {

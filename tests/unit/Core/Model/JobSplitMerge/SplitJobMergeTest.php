@@ -47,9 +47,14 @@ class SplitJobMergeTest extends AbstractTest
     private CounterModel&MockObject $counterModelMock;
     private JobsMetadataDao&MockObject $jobsMetadataDaoMock;
 
+    /** @var string[] The order in which the cart and the transaction scope were reached */
+    private array $callOrder = [];
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->callOrder = [];
 
         $this->dbHandler = $this->createMock(IDatabase::class);
         $this->features  = $this->createMock(FeatureSet::class);
@@ -64,6 +69,21 @@ class SplitJobMergeTest extends AbstractTest
         $pdo = $this->createStub(\PDO::class);
         $pdo->method('prepare')->willReturn($pdoStmt);
         $this->dbHandler->method('getConnection')->willReturn($pdo);
+
+        // An unconfigured transaction() returns null without ever calling its argument, which would
+        // leave the whole body of applySplit() and mergeALL() unrun and every assertion below testing
+        // nothing. Running it inline reproduces the single-scope behaviour; the nesting and rollback
+        // contract belongs to TransactionScopeTest, which runs against a real connection. The marker
+        // records when the scope opened, so the tests can pin what happens outside it.
+        $this->dbHandler->method('transaction')->willReturnCallback(function (callable $work) {
+            $this->callOrder[] = 'transaction';
+
+            return $work();
+        });
+
+        // Same reasoning for the queue: the merge registers its credential sweep on it from inside the
+        // scope, so an unconfigured onCommit() would swallow the sweep entirely.
+        $this->dbHandler->method('onCommit')->willReturnCallback(static fn(callable $callback) => $callback());
 
         $this->service = new TestableJobSplitMergeService($this->dbHandler, $this->features, $logger);
 
@@ -461,29 +481,32 @@ class SplitJobMergeTest extends AbstractTest
         $chunks = $this->makeTwoChunks();
         $ps = $this->makeSplitProjectStructure($chunks);
 
-        $callOrder = [];
         $this->cartMock->expects($this->once())
             ->method('emptyCart')
-            ->willReturnCallback(function () use (&$callOrder) {
-                $callOrder[] = 'emptyCart';
+            ->willReturnCallback(function () {
+                $this->callOrder[] = 'emptyCart';
             });
 
         $this->service->applySplit($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
-        $this->assertTrue($this->service->wasBeginTransactionCalled());
+        $this->assertSame(['emptyCart', 'transaction'], $this->callOrder);
     }
 
     /**
      * @throws Exception
      */
     #[Test]
-    public function applySplitCommitsTransaction(): void
+    public function applySplitRunsItsWriteInsideATransactionScope(): void
     {
         $this->setupSplitJobStubs();
         $chunks = $this->makeTwoChunks();
         $ps = $this->makeSplitProjectStructure($chunks);
 
-        $this->dbHandler->expects($this->once())->method('commit');
+        // The scope owns both halves now, so neither of these may be reached directly: a begin() the
+        // scope did not open, or a commit() it did not issue, is the mixed-handle shape this replaced.
+        $this->dbHandler->expects($this->never())->method('begin');
+        $this->dbHandler->expects($this->never())->method('commit');
+        $this->dbHandler->expects($this->once())->method('transaction');
 
         $this->service->applySplit($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
     }
@@ -695,9 +718,11 @@ class SplitJobMergeTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
-    public function mergeALLCommitsTransaction(): void
+    public function mergeALLRunsItsWriteInsideATransactionScope(): void
     {
-        $this->dbHandler->expects($this->once())->method('commit');
+        $this->dbHandler->expects($this->never())->method('begin');
+        $this->dbHandler->expects($this->never())->method('commit');
+        $this->dbHandler->expects($this->once())->method('transaction');
 
         // ProjectStruct for cache invalidation
         $projectStruct = new ProjectStruct();

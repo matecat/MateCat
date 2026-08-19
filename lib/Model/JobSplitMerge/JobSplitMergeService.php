@@ -31,6 +31,7 @@ use Model\Users\UserStruct;
 use Model\WordCount\CounterModel;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\JobsWorker;
 use Utils\Logger\MatecatLogger;
@@ -98,15 +99,6 @@ class JobSplitMergeService
     protected function getJobByIdAndPassword(int $id, string $password): ?JobStruct
     {
         return (new JobDao($this->dbHandler))->getByIdAndPassword($id, $password);
-    }
-
-    /**
-     * Begin a database transaction using the injected handler.
-     * @throws PDOException
-     */
-    protected function beginTransaction(): void
-    {
-        $this->dbHandler->begin();
     }
 
     /**
@@ -404,20 +396,25 @@ class JobSplitMergeService
     }
 
     /**
-     * Apply a new structure of the job: empty cart, begin transaction, split, commit.
+     * Apply a new structure of the job: empty the cart, then split inside a transaction scope.
+     *
+     * The cart is emptied first and stays outside the scope: it lives in the session, not in the
+     * database, so a rollback would not put it back and there is nothing to gain by holding it open.
      *
      * @param UserStruct $actingUser The user performing the split, and the one re-inviting its translator
      *
      * @throws Exception
      * @throws TypeError
+     * @throws Throwable the split runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function applySplit(SplitMergeProjectData $data, UserStruct $actingUser): void
     {
         $this->getCart()?->emptyCart();
 
-        $this->beginTransaction();
-        $this->splitJob($data, $actingUser);
-        $this->dbHandler->commit();
+        $this->dbHandler->transaction(function () use ($data, $actingUser): void {
+            $this->splitJob($data, $actingUser);
+        });
     }
 
     /**
@@ -595,6 +592,8 @@ class JobSplitMergeService
      *
      * @throws Exception
      * @throws TypeError
+     * @throws Throwable the merge runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function mergeALL(SplitMergeProjectData $data, array $jobStructs, UserStruct $actingUser): void
     {
@@ -672,41 +671,50 @@ class JobSplitMergeService
         $first_job['avg_post_editing_effort'] = $totalAvgPee;
         $first_job['total_time_to_edit'] = $totalTimeToEdit;
 
-        $this->beginTransaction();
+        $this->dbHandler->transaction(function () use ($data, $jobStructs, $actingUser, $first_job, $mergedPasswords, $standard_word_count, $total_raw_wc): void {
 
-        if ($first_job->getTranslator(new JobsTranslatorsDao($this->dbHandler))) {
-            //Update the password in the struct and in the database for the first job
-            $this->updateForMerge($first_job, $this->generateRandomString());
-            $this->getCart()?->emptyCart();
-        } else {
-            $this->updateForMerge($first_job, '');
-        }
+            if ($first_job->getTranslator(new JobsTranslatorsDao($this->dbHandler))) {
+                //Update the password in the struct and in the database for the first job
+                $this->updateForMerge($first_job, $this->generateRandomString());
+                $this->getCart()?->emptyCart();
+            } else {
+                $this->updateForMerge($first_job, '');
+            }
 
-        $this->deleteOnMerge($first_job);
+            $this->deleteOnMerge($first_job);
 
-        $wCountManager = $this->createCounterModel();
-        $wCountManager->initializeJobWordCount((int)$first_job['id'], (string)$first_job['password']);
+            $wCountManager = $this->createCounterModel();
+            $wCountManager->initializeJobWordCount((int)$first_job['id'], (string)$first_job['password']);
 
-        $chunk = new JobStruct($first_job->toArray());
-        $this->features->dispatch(new PostJobMergedEvent($data, $chunk, $actingUser));
+            $chunk = new JobStruct($first_job->toArray());
+            $this->features->dispatch(new PostJobMergedEvent($data, $chunk, $actingUser));
 
-        $jobDao = $this->createJobDao();
+            $jobDao = $this->createJobDao();
 
-        $jobDao->updateStdWcAndTotalWc((int)$first_job['id'], $standard_word_count, $total_raw_wc);
+            $jobDao->updateStdWcAndTotalWc((int)$first_job['id'], $standard_word_count, $total_raw_wc);
 
-        $this->dbHandler->commit();
+            // Every password the merge revoked keeps resolving out of the cache until its entry expires,
+            // and the surviving one now answers with the pre-merge row. The sweep reads the database, so
+            // it has to run once the merge is committed: while the transaction is open another connection
+            // could still read the old rows and cache them again behind an eviction. Registered from
+            // inside the scope it is queued and runs right after the commit; registered outside it would
+            // find no open transaction and run inline, which would silently discard `critical`. It is
+            // critical because a revoked job credential still answering out of the cache is a security
+            // problem, not the stale read an ordinary eviction failure leaves behind. The sweep covers
+            // the project data and the project's job list too, which publish the passwords in their value.
+            foreach ($mergedPasswords as $mergedPassword) {
+                $this->dbHandler->onCommit(
+                    fn() => $this->sweepCredentialCaches($chunk, $mergedPassword, (string)$chunk->password),
+                    critical: true
+                );
+            }
 
-        // Every password the merge revoked keeps resolving out of the cache until its entry expires,
-        // and the surviving one now answers with the pre-merge row. The sweep runs once the merge is
-        // committed: while the transaction was open another connection could still read the old rows
-        // and cache them again behind an eviction. It covers the project data and the project's job
-        // list too, which publish the passwords in their value.
-        foreach ($mergedPasswords as $mergedPassword) {
-            $this->sweepCredentialCaches($chunk, $mergedPassword, (string)$chunk->password);
-        }
-
-        $projectStruct = $this->getProjectForCacheInvalidation($jobStructs[0]);
-        $this->createProjectDao()->destroyCache($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
-        $this->destroyAnalysisCacheByProjectId($data->idProject);
+            // These stay inside the scope so the DAOs' own deferral applies to them. Outside it they
+            // would fire the moment they are called, which is right while the merge owns the outermost
+            // transaction and wrong the first time it runs nested inside a larger one.
+            $projectStruct = $this->getProjectForCacheInvalidation($jobStructs[0]);
+            $this->createProjectDao()->destroyCache($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
+            $this->destroyAnalysisCacheByProjectId($data->idProject);
+        });
     }
 }
