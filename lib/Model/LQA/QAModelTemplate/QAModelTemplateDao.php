@@ -14,6 +14,7 @@ use PDO;
 use PDOException;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
+use Throwable;
 use TypeError;
 use Utils\Date\DateTimeUtil;
 use Utils\Registry\AppConfig;
@@ -32,6 +33,7 @@ class QAModelTemplateDao extends AbstractDao
      * @throws InvalidValue
      * @throws Exception
      * @throws TypeError
+     * @throws Throwable
      */
     public function createFromJSON(string $json, ?int $uid = null): QAModelTemplateStruct
     {
@@ -53,6 +55,7 @@ class QAModelTemplateDao extends AbstractDao
      * @throws InvalidValue
      * @throws Exception
      * @throws TypeError
+     * @throws Throwable
      */
     public function editFromJSON(QAModelTemplateStruct $QAModelTemplateStruct, string $json): QAModelTemplateStruct
     {
@@ -69,13 +72,13 @@ class QAModelTemplateDao extends AbstractDao
      * @throws PDOException
      * @throws Exception
      * @throws ReflectionException
+     * @throws Throwable
      */
     public function remove(int $id, int $uid): int
     {
-        $conn = $this->database->getConnection();
-        $conn->beginTransaction();
+        return $this->database->transaction(function () use ($id, $uid): int {
+            $conn = $this->database->getConnection();
 
-        try {
             // Scoping this one statement by uid protects the whole cascade: when it matches nothing the
             // method returns early, below, before any of the child tables are touched. The children are
             // reached by id_template and carry no uid of their own, so the parent is the only place the
@@ -90,8 +93,6 @@ class QAModelTemplateDao extends AbstractDao
             $deleted = $stmt->rowCount();
 
             if (!$deleted) {
-                $conn->commit();
-
                 return 0;
             }
 
@@ -134,17 +135,10 @@ class QAModelTemplateDao extends AbstractDao
             ]);
 
             (new ProjectTemplateDao($this->database))->removeSubTemplateByIdAndUser($id, $uid, 'qa_model_template_id');
-
-            $conn->commit();
+            $this->destroyQueryPaginated($uid);
 
             return $deleted;
-        } catch (Exception $exception) {
-            $conn->rollBack();
-
-            throw $exception;
-        } finally {
-            $this->destroyQueryPaginated($uid);
-        }
+        });
     }
 
     /**
@@ -352,15 +346,15 @@ class QAModelTemplateDao extends AbstractDao
      * @return QAModelTemplateStruct
      * @throws Exception
      * @throws TypeError
+     * @throws Throwable
      */
     public function save(QAModelTemplateStruct $modelTemplateStruct): QAModelTemplateStruct
     {
         $passfail = $modelTemplateStruct->passfail ?? throw new Exception("QAModelTemplateStruct::passfail must not be null when saving");
 
-        $conn = $this->database->getConnection();
-        $conn->beginTransaction();
+        $QAModelTemplateId = $this->database->transaction(function () use ($modelTemplateStruct, $passfail): int {
+            $conn = $this->database->getConnection();
 
-        try {
             $stmt = $conn->prepare("INSERT INTO qa_model_templates (uid, version, label) VALUES (:uid, :version, :label) ");
             $stmt->execute([
                 'version' => $modelTemplateStruct->version,
@@ -427,18 +421,16 @@ class QAModelTemplateDao extends AbstractDao
                 }
             }
 
-            $conn->commit();
-
-            $modelTemplateStruct->id = (int)$QAModelTemplateId;
-
-            return $modelTemplateStruct;
-        } catch (Exception $exception) {
-            $conn->rollBack();
-
-            throw $exception;
-        } finally {
             $this->destroyQueryPaginated($modelTemplateStruct->uid);
-        }
+
+            return $QAModelTemplateId;
+        });
+
+        // Assigned only once the write is durable: the caller reads this id as proof the row
+        // exists, and a commit that fails must not leave it holding one.
+        $modelTemplateStruct->id = $QAModelTemplateId;
+
+        return $modelTemplateStruct;
     }
 
     /**
@@ -447,15 +439,15 @@ class QAModelTemplateDao extends AbstractDao
      * @return QAModelTemplateStruct
      * @throws Exception
      * @throws TypeError
+     * @throws Throwable
      */
     public function update(QAModelTemplateStruct $modelTemplateStruct): QAModelTemplateStruct
     {
         $passfail = $modelTemplateStruct->passfail ?? throw new Exception("QAModelTemplateStruct::passfail must not be null when updating");
 
-        $conn = $this->database->getConnection();
-        $conn->beginTransaction();
+        $this->database->transaction(function () use ($modelTemplateStruct, $passfail): void {
+            $conn = $this->database->getConnection();
 
-        try {
             // The children below are deleted and rewritten on `id_template` alone, so ownership has
             // to be established before any of them runs: scoping the parent UPDATE only would still
             // let a caller who skipped the owner lookup wipe someone else's rows, because its own
@@ -556,17 +548,10 @@ class QAModelTemplateDao extends AbstractDao
                     $severityStruct->id_category = $idCategory;
                 }
             }
-
-            $conn->commit();
-
-            return $modelTemplateStruct;
-        } catch (Exception $exception) {
-            $conn->rollBack();
-
-            throw $exception;
-        } finally {
             $this->destroyQueryPaginated($modelTemplateStruct->uid);
-        }
+        });
+
+        return $modelTemplateStruct;
     }
 
     /**

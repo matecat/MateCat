@@ -5,6 +5,7 @@ namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use DivisionByZeroError;
+use Error;
 use Exception;
 use Klein\Exceptions\LockedResponseException;
 use Klein\Exceptions\ResponseAlreadySentException;
@@ -12,6 +13,7 @@ use Klein\Response;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use RuntimeException;
 use Swaggest\JsonSchema\InvalidValue;
+use Throwable;
 use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
@@ -82,6 +84,7 @@ class QAModelTemplateController extends KleinController
      * @throws LockedResponseException
      * @throws ResponseAlreadySentException
      * @throws TypeError
+     * @throws Throwable
      */
     public function create(): Response
     {
@@ -124,6 +127,8 @@ class QAModelTemplateController extends KleinController
      * @return Response
      * @throws LockedResponseException
      * @throws ResponseAlreadySentException
+     * @throws Error the delete cascade only catches Exception, so a programming error inside it
+     *                 unwinds past this method
      * @throws TypeError
      */
     public function delete(): Response
@@ -158,6 +163,7 @@ class QAModelTemplateController extends KleinController
      * @throws LockedResponseException
      * @throws ResponseAlreadySentException
      * @throws TypeError
+     * @throws Throwable
      */
     public function edit(): Response
     {
