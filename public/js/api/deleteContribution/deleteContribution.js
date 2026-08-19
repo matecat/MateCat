@@ -10,7 +10,6 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} [sourceLanguage=config.source_rfc]
  * @param {string} [targetLanguage=config.target_rfc]
  * @param {string} [idJob=config.id_job]
- * @param {string} [password=config.password]
  * @param {string} [currentPassword=config.currentPassword]
  * @param {string} [idTranslator=config.id_translator]
  * @returns {Promise<object>}
@@ -22,7 +21,6 @@ export const deleteContribution = async ({
   sourceLanguage = config.source_rfc,
   targetLanguage = config.target_rfc,
   idJob = config.id_job,
-  password = config.password,
   currentPassword = config.currentPassword,
   idTranslator = config.id_translator,
   sid,
@@ -31,12 +29,11 @@ export const deleteContribution = async ({
     source_lang: sourceLanguage,
     target_lang: targetLanguage,
     id_job: idJob,
-    password: password,
     seg: source,
     tra: target,
     id_translator: idTranslator,
     id_match: id,
-    current_password: currentPassword,
+    password: currentPassword,
     id_segment: sid,
   }
   const formData = new FormData()

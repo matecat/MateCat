@@ -202,14 +202,13 @@ export const JobContainer = ({
         break
       }
     }
-    changeJobPassword(job.toJS(), oldPassword, revision_number).then(
+    changeJobPassword(job.toJS(), oldPassword).then(
       function (data) {
         const onClickUndo = () => {
           CatToolActions.removeNotification(notification)
           changeJobPassword(
             job.toJS(),
             data.new_pwd,
-            revision_number,
             1,
             oldPassword,
           ).then(function (data) {

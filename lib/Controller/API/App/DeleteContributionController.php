@@ -4,15 +4,16 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
-use Controller\Traits\APISourcePageGuesserTrait;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\Jobs\JobDao;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
 use TypeError;
+use Utils\Constants\SourcePages;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Model\Projects\ProjectDao;
@@ -23,11 +24,20 @@ use Utils\TmKeyManagement\TmKeyManager;
 class DeleteContributionController extends KleinController
 {
 
-    use APISourcePageGuesserTrait;
+    use ChunkNotFoundHandlerTrait;
 
     protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
+
+        // Resolve the job and its revision phase from the presented credential (password),
+        // not from a client-declared revision_number. ChunkPasswordValidator stamps
+        // source_page onto the chunk from whichever password matched.
+        $chunkValidator = new ChunkPasswordValidator($this);
+        $chunkValidator->onSuccess(function () use ($chunkValidator) {
+            $this->chunk = $chunkValidator->getChunk();
+        });
+        $this->appendValidator($chunkValidator);
     }
 
     /**
@@ -48,11 +58,10 @@ class DeleteContributionController extends KleinController
         $id_job = $request['id_job'];
 //        $id_translator     = $request[ 'id_translator' ];
         $id_match = $request['id_match'];
-        $password = $request['password'];
-//        $received_password = $request[ 'received_password' ];
 
-        //check Job password
-        $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($id_job, $password);
+        // The job and its revision phase were already resolved by ChunkPasswordValidator from the
+        // presented credential; reuse that chunk instead of re-fetching by a client-declared password.
+        $jobStruct = $this->chunk;
         $this->featureSet->loadForProject($jobStruct->getProject(new ProjectDao($this->getDatabase())));
 
         $tm_keys = $jobStruct['tm_keys'];
@@ -72,7 +81,8 @@ class DeleteContributionController extends KleinController
 
         //get job's TM keys
         try {
-            $userRole = ($this->isRevision()) ? Filter::ROLE_REVISOR : Filter::ROLE_TRANSLATOR;
+            $sourcePage = $this->chunk->getSourcePage() ?: SourcePages::SOURCE_PAGE_TRANSLATE;
+            $userRole = ($sourcePage !== SourcePages::SOURCE_PAGE_TRANSLATE) ? Filter::ROLE_REVISOR : Filter::ROLE_TRANSLATOR;
 
             //get TM keys with read grants
             $tm_keys = TmKeyManager::getJobTmKeys($tm_keys, 'w', 'tm', $this->user->uid, $userRole);
@@ -135,13 +145,9 @@ class DeleteContributionController extends KleinController
         $id_job = filter_var($this->request->param('id_job'), FILTER_SANITIZE_NUMBER_INT);
         $id_translator = !empty($this->request->param('id_translator')) ? filter_var($this->request->param('id_translator'), FILTER_SANITIZE_NUMBER_INT) : null;
         $id_match = filter_var($this->request->param('id_match'), FILTER_SANITIZE_NUMBER_INT);
-        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]) ?: '';
-        $received_password = filter_var($this->request->param('current_password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]) ?: '';
 
         $source = trim($source);
         $target = trim($target);
-        $password = trim($password);
-        $received_password = trim($received_password);
 
         if (empty($source_lang)) {
             throw new InvalidArgumentException("Missing source_lang", -1);
@@ -163,13 +169,6 @@ class DeleteContributionController extends KleinController
             throw new InvalidArgumentException("Missing id job", -5);
         }
 
-        if (empty($password)) {
-            throw new InvalidArgumentException("Missing job password", -6);
-        }
-
-        $this->id_job = (int)$id_job;
-        $this->request_password = $received_password;
-
         return [
             'id_segment' => $id_segment,
             'source_lang' => $source_lang,
@@ -179,8 +178,6 @@ class DeleteContributionController extends KleinController
             'id_job' => (int)$id_job,
             'id_translator' => $id_translator,
             'id_match' => $id_match,
-            'password' => $password,
-            'received_password' => $received_password,
         ];
     }
 

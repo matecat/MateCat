@@ -147,7 +147,6 @@ class GetSearchController extends AbstractStatefulKleinController
      *     isMatchCaseRequested: bool,
      *     isExactMatchRequested: bool,
      *     inCurrentChunkOnly: bool,
-     *     revisionNumber: string|false|null,
      *     queryParams: SearchQueryParamsStruct
      * }
      *
@@ -165,11 +164,6 @@ class GetSearchController extends AbstractStatefulKleinController
         $isMatchCaseRequested = filter_var($this->request->param('matchcase'), FILTER_VALIDATE_BOOLEAN);
         $isExactMatchRequested = filter_var($this->request->param('exactmatch'), FILTER_VALIDATE_BOOLEAN);
         $inCurrentChunkOnly = filter_var($this->request->param('inCurrentChunkOnly'), FILTER_VALIDATE_BOOLEAN);
-        $revision_number = filter_var(
-            $this->request->param('revision_number'),
-            FILTER_SANITIZE_NUMBER_INT,
-            ['filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => ['default' => null]]
-        );
         // Locked segments are included unless the client asks otherwise. Mind that FILTER_VALIDATE_BOOLEAN
         // maps a missing value and an empty one to false, not to null, so the coalesce alone would never
         // fire and the default would silently become "exclude": the absence has to be checked first.
@@ -226,7 +220,6 @@ class GetSearchController extends AbstractStatefulKleinController
             'isMatchCaseRequested' => $isMatchCaseRequested,
             'isExactMatchRequested' => $isExactMatchRequested,
             'inCurrentChunkOnly' => $inCurrentChunkOnly,
-            'revisionNumber' => $revision_number,
             'queryParams' => $queryParams,
         ];
     }

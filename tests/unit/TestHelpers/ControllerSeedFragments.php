@@ -92,6 +92,15 @@ trait ControllerSeedFragments
         return $base + 7;
     }
 
+    /**
+     * A job has one review row per phase, so a suite covering more than the first one needs a second
+     * reserved id.
+     */
+    protected function secondChunkReviewId(int $base): int
+    {
+        return $base + 13;
+    }
+
     protected function chunkReviewId(int $base): int
     {
         return $base + 8;
@@ -215,9 +224,9 @@ trait ControllerSeedFragments
         );
     }
 
-    protected function seedChunkReview(int $base, string $password = 'jobpw', string $reviewPassword = 'revpw', int $sourcePage = 2): void
+    protected function seedChunkReview(int $base, string $password = 'jobpw', string $reviewPassword = 'revpw', int $sourcePage = 2, ?int $id = null): void
     {
-        $id        = $this->chunkReviewId($base);
+        $id      ??= $this->chunkReviewId($base);
         $projectId = $this->projectId($base);
         $jobId     = $this->jobId($base);
         $this->seedConnection()->exec(
@@ -295,7 +304,7 @@ trait ControllerSeedFragments
 
         $conn->exec("DELETE FROM comments WHERE id = " . $this->commentId($base));
         $conn->exec("DELETE FROM segment_translation_versions WHERE id = " . $this->versionId($base));
-        $conn->exec("DELETE FROM qa_chunk_reviews WHERE id = " . $this->chunkReviewId($base));
+        $conn->exec("DELETE FROM qa_chunk_reviews WHERE id IN (" . $this->chunkReviewId($base) . ", " . $this->secondChunkReviewId($base) . ")");
         $conn->exec("DELETE FROM connected_services WHERE id = " . $this->connectedServiceId($base));
         $conn->exec("DELETE FROM segment_translations WHERE id_job = " . $this->jobId($base));
         $conn->exec("DELETE FROM segments WHERE id = " . $this->segmentId($base));

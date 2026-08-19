@@ -10,7 +10,10 @@ export const HIDE_UNLOCK_ALL_SEGMENTS_MODAL_STORAGE =
 export const UnlockAllSegmentsModal = () => {
   const checkbox = useRef()
   const successCallback = () => {
-    getFilteredSegments(config.id_job, config.password, {
+    // currentPassword, not password: in a revision the job password names the translate phase, and
+    // the server reads the phase off the credential it is given, so asking with it returns the ICE
+    // segments of a phase this editor is not on.
+    getFilteredSegments(config.id_job, config.currentPassword, {
       sample: {type: 'ice'},
     }).then((data) => {
       SegmentActions.unlockSegments(data.segment_ids)

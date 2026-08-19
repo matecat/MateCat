@@ -2,7 +2,6 @@
 
 namespace Plugins\Features\TranslationEvents\Model;
 
-use Error;
 use Exception;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;

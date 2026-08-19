@@ -4,7 +4,6 @@ namespace Plugins\Features\TranslationVersions\Handlers;
 
 use Exception;
 use Model\DataAccess\IDatabase;
-use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
