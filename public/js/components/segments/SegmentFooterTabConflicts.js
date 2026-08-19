@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {memo} from 'react'
 import {isUndefined, size} from 'lodash'
 import {fromJS} from 'immutable'
 import $ from 'jquery'
@@ -7,21 +7,22 @@ import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
-class SegmentFooterTabConflicts extends React.Component {
-  chooseAlternative(text) {
+const SegmentFooterTabConflicts = memo((props) => {
+  const allowHTML = (string) => ({__html: string})
+
+  const chooseAlternative = (text) => {
     SegmentActions.setFocusOnEditArea()
-    SegmentActions.disableTPOnSegment(this.props.segment)
+    SegmentActions.disableTPOnSegment(props.segment)
     setTimeout(() => {
-      SegmentActions.replaceEditAreaTextContent(this.props.segment.sid, text)
-      SegmentActions.modifiedTranslation(this.props.segment.sid, true)
+      SegmentActions.replaceEditAreaTextContent(props.segment.sid, text)
+      SegmentActions.modifiedTranslation(props.segment.sid, true)
     })
   }
 
-  renderAlternatives(alternatives) {
-    const segment = this.props.segment
-    const segment_id = this.props.segment.sid
+  const renderAlternatives = (alternatives) => {
+    const segment = props.segment
+    const segment_id = props.segment.sid
     let html = []
-    const self = this
     const source = DraftMatecatUtils.transformTagsToHtml(
       segment.segment,
       config.isSourceRTL,
@@ -45,24 +46,24 @@ class SegmentFooterTabConflicts extends React.Component {
           className="graysmall"
           data-item={index + 1}
           key={'editable' + index}
-          onDoubleClick={() => self.chooseAlternative(this.translation)}
+          onDoubleClick={() => chooseAlternative(this.translation)}
         >
           <li className="sugg-source">
             <span
               id={segment_id + '-tm-' + this.id + '-source'}
               className="suggestion_source"
-              dangerouslySetInnerHTML={self.allowHTML(source)}
+              dangerouslySetInnerHTML={allowHTML(source)}
             />
           </li>
           <li className="b sugg-target">
             {/*<span className="graysmall-message">{'CTRL' + (index + 1)}</span>*/}
             <span
               className="translation"
-              dangerouslySetInnerHTML={self.allowHTML(translation)}
+              dangerouslySetInnerHTML={allowHTML(translation)}
             />
             <span
               className="realData hide"
-              dangerouslySetInnerHTML={self.allowHTML(this.translation)}
+              dangerouslySetInnerHTML={allowHTML(this.translation)}
             />
           </li>
           <li className="goto">
@@ -93,24 +94,24 @@ class SegmentFooterTabConflicts extends React.Component {
           className="graysmall notEditable"
           data-item={index1 + alternatives.editable.length + 1}
           key={'not-editable' + index1}
-          onDoubleClick={() => self.chooseAlternative(this.translation)}
+          onDoubleClick={() => chooseAlternative(this.translation)}
         >
           <li className="sugg-source">
             <span
               id={segment_id + '-tm-' + this.id + '-source'}
               className="suggestion_source"
-              dangerouslySetInnerHTML={self.allowHTML(source)}
+              dangerouslySetInnerHTML={allowHTML(source)}
             />
           </li>
           <li className="b sugg-target">
             {/*<span className="graysmall-message">{'CTRL+' + (index1 + alternatives.data.editable.length + 1)}</span>*/}
             <span
               className="translation"
-              dangerouslySetInnerHTML={self.allowHTML(translation)}
+              dangerouslySetInnerHTML={allowHTML(translation)}
             />
             <span
               className="realData hide"
-              dangerouslySetInnerHTML={self.allowHTML(this.translation)}
+              dangerouslySetInnerHTML={allowHTML(this.translation)}
             />
           </li>
           <li className="goto">
@@ -128,53 +129,36 @@ class SegmentFooterTabConflicts extends React.Component {
     return html
   }
 
-  componentDidMount() {}
-
-  componentWillUnmount() {}
-
-  allowHTML(string) {
-    return {__html: string}
-  }
-
-  shouldComponentUpdate(nextProps) {
+  if (props.segment.alternatives && size(props.segment.alternatives) > 0) {
+    const html = renderAlternatives(props.segment.alternatives)
     return (
-      this.props.active_class !== nextProps.active_class ||
-      this.props.tab_class !== nextProps.tab_class ||
-      ((!isUndefined(nextProps.segment.alternatives) ||
-        !isUndefined(this.props.segment.alternatives)) &&
-        ((!isUndefined(nextProps.segment.alternatives) &&
-          isUndefined(this.props.segment.alternatives)) ||
-          !fromJS(this.props.segment.alternatives).equals(
-            fromJS(nextProps.segment.alternatives),
-          )))
+      <div
+        key={'container_' + props.code}
+        className={
+          'tab sub-editor ' + props.active_class + ' ' + props.tab_class
+        }
+        id={'segment-' + props.segment.sid + '-' + props.tab_class}
+      >
+        <div className="overflow">{html}</div>
+      </div>
     )
+  } else {
+    return ''
   }
+}, (prevProps, nextProps) =>
+  !(
+    prevProps.active_class !== nextProps.active_class ||
+    prevProps.tab_class !== nextProps.tab_class ||
+    ((!isUndefined(nextProps.segment.alternatives) ||
+      !isUndefined(prevProps.segment.alternatives)) &&
+      ((!isUndefined(nextProps.segment.alternatives) &&
+        isUndefined(prevProps.segment.alternatives)) ||
+        !fromJS(prevProps.segment.alternatives).equals(
+          fromJS(nextProps.segment.alternatives),
+        )))
+  ),
+)
 
-  render() {
-    let html
-    if (
-      this.props.segment.alternatives &&
-      size(this.props.segment.alternatives) > 0
-    ) {
-      html = this.renderAlternatives(this.props.segment.alternatives)
-      return (
-        <div
-          key={'container_' + this.props.code}
-          className={
-            'tab sub-editor ' +
-            this.props.active_class +
-            ' ' +
-            this.props.tab_class
-          }
-          id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
-        >
-          <div className="overflow">{html}</div>
-        </div>
-      )
-    } else {
-      return ''
-    }
-  }
-}
+SegmentFooterTabConflicts.displayName = 'SegmentFooterTabConflicts'
 
 export default SegmentFooterTabConflicts
