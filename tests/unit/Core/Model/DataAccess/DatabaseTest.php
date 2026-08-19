@@ -5,6 +5,7 @@ namespace Matecat\Core\Model\DataAccess;
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
+use Model\DataAccess\TransactionAbortedException;
 use PDO;
 use PDOException;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -558,5 +559,81 @@ class DatabaseTest extends AbstractTest
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('first');
         $this->db->commit();
+    }
+
+    /**
+     * A scope nested inside this transaction cannot roll it back — it does not own it — so it marks
+     * it unable to commit instead. Whoever eventually calls commit() is refused, including a caller
+     * that opened the transaction by hand and has never heard of this mechanism.
+     */
+    #[Test]
+    public function commitRefusesWhenTheTransactionWasMarkedRollbackOnly(): void
+    {
+        $this->db->begin();
+        $this->db->markRollbackOnly();
+
+        try {
+            $this->db->commit();
+            $this->fail('the commit must be refused');
+        } catch (TransactionAbortedException) {
+            // The refusal has to leave the connection clean, not half-open: the next caller on this
+            // connection must not inherit an abandoned transaction.
+            $this->assertFalse($this->db->getConnection()->inTransaction());
+        }
+    }
+
+    #[Test]
+    public function aRefusedCommitDiscardsTheDeferralQueue(): void
+    {
+        $ran = false;
+
+        $this->db->begin();
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran = true;
+        });
+        $this->db->markRollbackOnly();
+
+        try {
+            $this->db->commit();
+        } catch (TransactionAbortedException) {
+            // asserted in commitRefusesWhenTheTransactionWasMarkedRollbackOnly
+        }
+
+        $this->assertFalse($ran, 'deferred work must not run for a transaction that was rolled back');
+    }
+
+    /**
+     * The flag belongs to the transaction, not to the connection: once the transaction it condemned
+     * is gone, the next one starts clean.
+     */
+    #[Test]
+    public function rollbackClearsTheRollbackOnlyFlag(): void
+    {
+        $this->db->begin();
+        $this->db->markRollbackOnly();
+        $this->db->rollback();
+
+        $this->db->begin();
+        $this->db->commit();
+
+        $this->assertFalse($this->db->getConnection()->inTransaction());
+    }
+
+    /**
+     * A request that dies between markRollbackOnly() and commit() leaves the flag set on a connection
+     * that outlives it — a worker holds its connection across messages. The next real begin() must
+     * not inherit someone else's verdict.
+     */
+    #[Test]
+    public function beginClearsTheRollbackOnlyFlagOfAnAbandonedTransaction(): void
+    {
+        $this->db->begin();
+        $this->db->markRollbackOnly();
+        $this->db->getConnection()->rollBack(); // an abrupt unwind that bypassed rollback()
+
+        $this->db->begin();
+        $this->db->commit();
+
+        $this->assertFalse($this->db->getConnection()->inTransaction());
     }
 }

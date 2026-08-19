@@ -38,6 +38,15 @@ class Database implements IDatabase
      */
     private array $afterCommitCallbacks = [];
 
+    /**
+     * Set when a scope inside the current transaction failed.
+     *
+     * A nested scope cannot roll back a transaction it does not own, so it condemns it instead and
+     * commit() enforces the verdict. Cleared when a transaction really opens and when one is rolled
+     * back, and never by a successful commit — a successful commit is unreachable while it is set.
+     */
+    private bool $rollbackOnly = false;
+
 
     const string SEQ_ID_SEGMENT = 'id_segment';
     const string SEQ_ID_PROJECT = 'id_project';
@@ -155,10 +164,12 @@ class Database implements IDatabase
     public function begin(): PDO
     {
         if (!$this->getConnection()->inTransaction()) {
-            // A fresh transaction starts with an empty deferral queue. Anything still queued belongs
-            // to a transaction that never reached commit() or rollback() — an aborted request on a
-            // persistent connection — and must not fire on someone else's commit.
+            // A fresh transaction starts with an empty deferral queue and no verdict against it.
+            // Anything still queued, or still condemned, belongs to a transaction that never reached
+            // commit() or rollback() — an aborted request on a connection that outlived it — and must
+            // not fire on, or veto, someone else's commit.
             $this->afterCommitCallbacks = [];
+            $this->rollbackOnly         = false;
             $this->getConnection()->beginTransaction();
         }
 
@@ -171,12 +182,39 @@ class Database implements IDatabase
      * {@inheritdoc}
      *
      * @throws PDOException
+     * @throws TransactionAbortedException when a scope inside this transaction failed
+     * @throws Throwable
      */
     public function commit(): void
     {
-        $this->getConnection()->commit();
+        if ($this->rollbackOnly) {
+            $this->rollback();
+
+            throw new TransactionAbortedException(
+                'commit refused: a scope inside this transaction failed, so the whole transaction was rolled back'
+            );
+        }
+
+        try {
+            $this->getConnection()->commit();
+        } catch (Throwable $e) {
+            // The writes these callbacks were queued against did not land. Nothing may fire, and the
+            // queue must not survive to be drained by whoever commits next on this connection.
+            $this->afterCommitCallbacks = [];
+
+            throw $e;
+        }
 
         $this->runAfterCommitCallbacks();
+    }
+
+    /**
+     * @Override
+     * {@inheritdoc}
+     */
+    public function markRollbackOnly(): void
+    {
+        $this->rollbackOnly = true;
     }
 
     /**
@@ -253,8 +291,9 @@ class Database implements IDatabase
         $connection = $this->getConnection();
 
         // Deferred work is discarded: it was queued on the strength of writes that are about to
-        // disappear.
+        // disappear. The verdict goes with it — it condemned this transaction, which is now gone.
         $this->afterCommitCallbacks = [];
+        $this->rollbackOnly         = false;
 
         // Check if a transaction is currently active
         if ($connection->inTransaction()) {

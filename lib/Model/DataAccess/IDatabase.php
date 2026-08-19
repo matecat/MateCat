@@ -106,6 +106,15 @@ interface IDatabase
     public function transaction( callable $callback ): mixed;
 
     /**
+     * Mark the open transaction as unable to commit.
+     *
+     * A nested scope that fails cannot roll back — it does not own the transaction — so it condemns
+     * it instead. Whoever eventually calls commit() is refused, including a caller that opened the
+     * transaction by hand and knows nothing about this mechanism.
+     */
+    public function markRollbackOnly(): void;
+
+    /**
      * Execute an update query with an array as argument
      *
      * @param string $table Table to update

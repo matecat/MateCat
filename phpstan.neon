@@ -89,6 +89,11 @@ parameters:
             # onto every method that merely holds a SessionStore, which is the whole call graph —
             # and callers must not be encouraged to catch it. Enforcement works by surfacing.
             - 'Utils\Session\StatelessSessionViolation'
+            # Thrown by Database::commit() when a scope inside the transaction failed. Declaring it
+            # checked would push a @throws onto every method that writes anything, which is the whole
+            # call graph — and callers must not be encouraged to catch it: by the time it is thrown
+            # the transaction has already been rolled back and there is nothing left to salvage.
+            - 'Model\DataAccess\TransactionAbortedException'
         check:
             # Report when code throws an exception that has no
             # matching @throws tag in the method's PHPDoc
