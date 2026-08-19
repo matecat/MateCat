@@ -310,30 +310,32 @@ class TeamDao extends AbstractDao
      *
      * @return TeamStruct
      * @throws PDOException
+     * @throws Throwable
      */
     public function updateTeamName(TeamStruct $org): TeamStruct
     {
-        $this->database->begin();
-        $conn = $this->database->getConnection();
+        $this->database->transaction(function () use ($org): void {
+            $conn = $this->database->getConnection();
 
-        $stmt = $conn->prepare(self::$_update_team_by_id);
-        $stmt->bindValue(':id', $org->id, PDO::PARAM_INT);
-        $stmt->bindValue(':name', $org->name);
+            $stmt = $conn->prepare(self::$_update_team_by_id);
+            $stmt->bindValue(':id', $org->id, PDO::PARAM_INT);
+            $stmt->bindValue(':name', $org->name);
 
-        $stmt->execute();
-        $conn->commit();
+            $stmt->execute();
 
-        // The row is cached under `TeamDao::fetchById-<id>` for a day at a time, and a rename that
-        // does not clear it is invisible to every reader that goes through the cache rather than
-        // through the caller's own struct. That is how a renamed team kept announcing its old name
-        // by email: MembershipStruct::getTeam() resolves the team with a 24-hour TTL, so adding an
-        // existing user to a just-renamed team sent MembershipCreatedEmail carrying the previous
-        // name — while inviting a new address, which is handed the struct the controller fetched
-        // live, carried the new one. Evicting here rather than in the controller keeps it true for
-        // every caller of this method, not just the one that was noticed.
-        if ($org->id !== null) {
-            $this->destroyFetchByIdCache($org->id, TeamStruct::class);
-        }
+            // The row is cached under `TeamDao::fetchById-<id>` for a day at a time, and a rename
+            // that does not clear it is invisible to every reader that goes through the cache rather
+            // than through the caller's own struct. That is how a renamed team kept announcing its
+            // old name by email: MembershipStruct::getTeam() resolves the team with a 24-hour TTL,
+            // so adding an existing user to a just-renamed team sent MembershipCreatedEmail carrying
+            // the previous name — while inviting a new address, which is handed the struct the
+            // controller fetched live, carried the new one. Evicting here rather than in the
+            // controller keeps it true for every caller of this method, not just the one that was
+            // noticed.
+            if ($org->id !== null) {
+                $this->destroyFetchByIdCache($org->id, TeamStruct::class);
+            }
+        });
 
         return $org;
     }

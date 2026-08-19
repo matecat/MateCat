@@ -10,6 +10,7 @@ use Model\DataAccess\InvalidatesUserProfileCache;
 use PDO;
 use PDOException;
 use ReflectionException;
+use Throwable;
 use TypeError;
 
 /**
@@ -196,48 +197,52 @@ class UserDao extends AbstractDao
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Throwable
      */
     public function createUser(UserStruct $obj): ?UserStruct
     {
         $conn = $this->database->getConnection();
-        $this->database->begin();
 
-        $obj->create_date = date('Y-m-d H:i:s');
-        $stmt = $conn->prepare(
-            "INSERT INTO users " .
-            " ( uid, email, salt, pass, create_date, first_name, last_name, confirmation_token ) " .
-            " VALUES " .
-            " ( " .
-            " :uid, :email, :salt, :pass, :create_date, " .
-            " :first_name, :last_name, :confirmation_token " .
-            " )"
-        );
+        [$id, $record] = $this->database->transaction(function () use ($conn, $obj): array {
+            $obj->create_date = date('Y-m-d H:i:s');
+            $stmt = $conn->prepare(
+                "INSERT INTO users " .
+                " ( uid, email, salt, pass, create_date, first_name, last_name, confirmation_token ) " .
+                " VALUES " .
+                " ( " .
+                " :uid, :email, :salt, :pass, :create_date, " .
+                " :first_name, :last_name, :confirmation_token " .
+                " )"
+            );
 
-        $stmt->execute($obj->toArray([
-            'uid',
-            'email',
-            'salt',
-            'pass',
-            'create_date',
-            'first_name',
-            'last_name',
-            'confirmation_token'
-        ])
-        );
+            $stmt->execute($obj->toArray([
+                'uid',
+                'email',
+                'salt',
+                'pass',
+                'create_date',
+                'first_name',
+                'last_name',
+                'confirmation_token'
+            ])
+            );
 
-        $id = $conn->lastInsertId();
-        if ($id === false) {
-            throw new Exception('Unable to retrieve last inserted user id');
-        }
+            $id = $conn->lastInsertId();
+            if ($id === false) {
+                throw new Exception('Unable to retrieve last inserted user id');
+            }
 
-        $record = $this->getByUid((int)$id);
-        $conn->commit();
+            return [(int)$id, $this->getByUid((int)$id)];
+        });
 
+        // Both of these stay outside the scope, where the raw commit used to put them: the throw
+        // reports a row that is already durable, and rolling the insert back because the reload came
+        // up empty would turn a failed read into a failed write.
         if (!$record instanceof UserStruct) {
             throw new Exception('Unable to reload updated user');
         }
 
-        $this->invalidateUserProfileCache((int)$id);
+        $this->invalidateUserProfileCache($id);
 
         return $record;
     }
@@ -249,44 +254,48 @@ class UserDao extends AbstractDao
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Throwable
      */
     public function updateUser(UserStruct $obj): UserStruct
     {
         $conn = $this->database->getConnection();
-        $this->database->begin();
 
-        $stmt = $conn->prepare(
-            "UPDATE users
-            SET 
-                uid = :uid, 
-                email = :email, 
-                salt = :salt, 
-                pass = :pass, 
-                create_date = :create_date, 
-                first_name = :first_name, 
-                last_name = :last_name, 
-                confirmation_token = :confirmation_token, 
-                oauth_access_token = :oauth_access_token 
-            WHERE uid = :uid 
+        $record = $this->database->transaction(function () use ($conn, $obj): ?UserStruct {
+            $stmt = $conn->prepare(
+                "UPDATE users
+            SET
+                uid = :uid,
+                email = :email,
+                salt = :salt,
+                pass = :pass,
+                create_date = :create_date,
+                first_name = :first_name,
+                last_name = :last_name,
+                confirmation_token = :confirmation_token,
+                oauth_access_token = :oauth_access_token
+            WHERE uid = :uid
         "
-        );
+            );
 
-        $stmt->execute($obj->toArray([
-            'uid',
-            'email',
-            'salt',
-            'pass',
-            'create_date',
-            'first_name',
-            'last_name',
-            'confirmation_token',
-            'oauth_access_token'
-        ])
-        );
+            $stmt->execute($obj->toArray([
+                'uid',
+                'email',
+                'salt',
+                'pass',
+                'create_date',
+                'first_name',
+                'last_name',
+                'confirmation_token',
+                'oauth_access_token'
+            ])
+            );
 
-        $record = $this->getByUid((int)$obj->uid);
-        $conn->commit();
+            return $this->getByUid((int)$obj->uid);
+        });
 
+        // Outside the scope, where the raw commit used to put them: the update is already durable,
+        // and rolling it back because the reload came up empty would turn a failed read into a
+        // failed write.
         if (!$record instanceof UserStruct) {
             throw new Exception('Unable to reload updated user');
         }

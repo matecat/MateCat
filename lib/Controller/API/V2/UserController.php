@@ -5,6 +5,7 @@ namespace Controller\API\V2;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\JSONRequestValidator;
 use Controller\API\Commons\Validators\LoginValidator;
+use Error;
 use Exception;
 use InvalidArgumentException;
 use Klein\Exceptions\LockedResponseException;
@@ -28,6 +29,8 @@ class UserController extends AbstractStatefulKleinController
      * @throws LockedResponseException
      * @throws ResponseAlreadySentException
      * @throws TypeError
+     * @throws Error the update runs inside a transaction scope, which aborts on any Throwable, so a
+     *               programming error inside it unwinds past this method rather than being caught
      */
     public function edit(): void
     {

@@ -102,17 +102,23 @@ class TeamDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function updateTeamName_calls_begin_then_commit_on_connection(): void
+    public function updateTeamName_runs_its_write_inside_a_transaction_scope(): void
     {
         $stmt = $this->createStub(PDOStatement::class);
         $stmt->queryString = 'stubbed';
 
+        // The scope opens and closes the transaction now. The DAO reaching past it to begin() on the
+        // adapter and commit() on the raw handle is what this test used to pin and now forbids:
+        // a commit issued that way leaves the deferral queue undrained.
         $pdo = $this->createMock(PDO::class);
         $pdo->method('prepare')->willReturn($stmt);
-        $pdo->expects($this->once())->method('commit');
+        $pdo->expects($this->never())->method('commit');
 
         $db = $this->createMock(IDatabase::class);
-        $db->expects($this->once())->method('begin');
+        $db->expects($this->never())->method('begin');
+        $db->expects($this->once())->method('transaction')->willReturnCallback(
+            static fn(callable $callback) => $callback()
+        );
         $db->method('getConnection')->willReturn($pdo);
 
         $team       = new TeamStruct(['id' => 7]);
