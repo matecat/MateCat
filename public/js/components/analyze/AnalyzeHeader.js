@@ -15,6 +15,10 @@ const AnalyzeHeader = ({data, project}) => {
 
   const showProgressBarRef = useRef(false)
 
+  const wordCountBoxRef = useRef()
+  const previousSavingPercRef = useRef()
+  const savingPercChangedRef = useRef(false)
+
   const errorAnalysisHtml = useCallback(() => {
     let analyzerNotRunningErrorString
     if (config.support_mail.indexOf('@') === -1) {
@@ -275,8 +279,20 @@ const AnalyzeHeader = ({data, project}) => {
         ? parseInt(((raw_words - weightedWords) / raw_words) * 100) + '%'
         : '0%'
 
+    if (
+      previousSavingPercRef.current !== undefined &&
+      previousSavingPercRef.current !== saving_perc
+    ) {
+      savingPercChangedRef.current = true
+    }
+    previousSavingPercRef.current = saving_perc
+
     return (
-      <div className="word-count">
+      <div
+        ref={wordCountBoxRef}
+        data-testid="word-count-box"
+        className="word-count"
+      >
         <div className={`percent ${inProgress ? 'in-progress' : ''}`}>
           <h2>{saving_perc}</h2>
           <div className="content">
@@ -294,6 +310,18 @@ const AnalyzeHeader = ({data, project}) => {
       </div>
     )
   }, [data, getSavingWorkCount])
+
+  // Flash the word-count box when the saving percentage changes on an analysis update
+  useEffect(() => {
+    if (savingPercChangedRef.current) {
+      savingPercChangedRef.current = false
+      const el = wordCountBoxRef.current
+      if (el) {
+        el.classList.add('updated-count')
+        setTimeout(() => el.classList.remove('updated-count'), 400)
+      }
+    }
+  }, [data])
 
   const analysisStateHtml = getAnalysisStateHtml()
   const wordsCountHtml = getWordscount()

@@ -361,7 +361,7 @@ export const SettingsPanel = ({
             <>
               <div className="settings-panel-header">
                 <div className="settings-panel-header-logo" />
-                <span>Settings</span>
+                <h4>Settings</h4>
                 <Button
                   type={BUTTON_TYPE.ICON}
                   size={BUTTON_SIZE.ICON_STANDARD}

@@ -498,7 +498,7 @@ export const JobContainer = ({
             onClick={() => window.open(url, '_blank')}
             style={{...(classQuality && {color: classQuality})}}
           >
-            <QR />
+            <QR size={18}/>
           </Button>
         </Tooltip>
       )
