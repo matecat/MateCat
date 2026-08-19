@@ -225,4 +225,136 @@ describe('SegmentFooterMultiMatches', () => {
     })
     expect(document.querySelector('.suggestion-item')).toBeInTheDocument()
   })
+
+  test('memo bails out (skips re-render) when cl_contributions is deep-equal but a new object reference', () => {
+    const DraftMatecatUtils = require('./utils/DraftMatecatUtils').default
+    const match = {
+      id: '1',
+      segment: 'source text',
+      translation: 'target text',
+      created_by: 'MyMemory',
+      match: '95',
+      source: 'en-US',
+      target: 'it-IT',
+    }
+    const segment = {...baseSegment, cl_contributions: {matches: [{...match}]}}
+    const sameShapeNewReference = {
+      ...baseSegment,
+      cl_contributions: {matches: [{...match}]},
+    }
+    const contextValue = {clientConnected: true}
+
+    const {rerender} = renderComponent({segment}, contextValue)
+    const callsAfterFirstRender =
+      DraftMatecatUtils.transformTagsToHtml.mock.calls.length
+    expect(callsAfterFirstRender).toBeGreaterThan(0)
+
+    rerender(
+      <SegmentContext.Provider value={contextValue}>
+        <SegmentFooterMultiMatches
+          code="cl"
+          active_class="active"
+          tab_class="cross-matches"
+          segment={sameShapeNewReference}
+        />
+      </SegmentContext.Provider>,
+    )
+    expect(DraftMatecatUtils.transformTagsToHtml.mock.calls.length).toBe(
+      callsAfterFirstRender,
+    )
+  })
+
+  test('re-renders when cl_contributions content actually changes', () => {
+    const DraftMatecatUtils = require('./utils/DraftMatecatUtils').default
+    const segment = {
+      ...baseSegment,
+      cl_contributions: {
+        matches: [
+          {
+            id: '1',
+            segment: 'source text',
+            translation: 'target text',
+            created_by: 'MyMemory',
+            match: '95',
+            source: 'en-US',
+            target: 'it-IT',
+          },
+        ],
+      },
+    }
+    const changed = {
+      ...baseSegment,
+      cl_contributions: {
+        matches: [
+          {
+            id: '1',
+            segment: 'different source text',
+            translation: 'target text',
+            created_by: 'MyMemory',
+            match: '95',
+            source: 'en-US',
+            target: 'it-IT',
+          },
+        ],
+      },
+    }
+    const contextValue = {clientConnected: true}
+
+    const {rerender} = renderComponent({segment}, contextValue)
+    const callsAfterFirstRender =
+      DraftMatecatUtils.transformTagsToHtml.mock.calls.length
+
+    rerender(
+      <SegmentContext.Provider value={contextValue}>
+        <SegmentFooterMultiMatches
+          code="cl"
+          active_class="active"
+          tab_class="cross-matches"
+          segment={changed}
+        />
+      </SegmentContext.Provider>,
+    )
+    expect(
+      DraftMatecatUtils.transformTagsToHtml.mock.calls.length,
+    ).toBeGreaterThan(callsAfterFirstRender)
+  })
+
+  test('re-renders when active_class changes even if cl_contributions is unchanged', () => {
+    const DraftMatecatUtils = require('./utils/DraftMatecatUtils').default
+    const segment = {
+      ...baseSegment,
+      cl_contributions: {
+        matches: [
+          {
+            id: '1',
+            segment: 'source text',
+            translation: 'target text',
+            created_by: 'MyMemory',
+            match: '95',
+            source: 'en-US',
+            target: 'it-IT',
+          },
+        ],
+      },
+    }
+    const contextValue = {clientConnected: true}
+
+    const {rerender} = renderComponent({segment}, contextValue)
+    const callsAfterFirstRender =
+      DraftMatecatUtils.transformTagsToHtml.mock.calls.length
+
+    rerender(
+      <SegmentContext.Provider value={contextValue}>
+        <SegmentFooterMultiMatches
+          code="cl"
+          active_class="inactive"
+          tab_class="cross-matches"
+          segment={segment}
+        />
+      </SegmentContext.Provider>,
+    )
+    expect(
+      DraftMatecatUtils.transformTagsToHtml.mock.calls.length,
+    ).toBeGreaterThan(callsAfterFirstRender)
+  })
 })
