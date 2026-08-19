@@ -90,10 +90,16 @@ interface IDatabase
     public function onCommit(callable $callback, bool $critical = false): void;
 
     /**
-     * Execute a callback within a database transaction.
+     * Run a callback inside a database transaction.
      *
-     * Begins a transaction, executes the callback, and commits.
-     * On any exception, rolls back (if still in transaction) and re-throws.
+     * The outermost scope owns the transaction: it issues the BEGIN and the single COMMIT. A scope
+     * entered while a transaction is already open is a guest — it opens nothing and closes nothing,
+     * so it cannot commit its caller's work early.
+     *
+     * Any throw aborts the entire tree. A guest that fails marks the transaction unable to commit
+     * before re-throwing, so swallowing its exception does not rescue the writes: the eventual
+     * commit is refused and everything rolls back. That holds even when the outermost transaction
+     * was opened by hand rather than through this method.
      *
      * @template T
      *
@@ -101,7 +107,7 @@ interface IDatabase
      *
      * @return T The value returned by the callback
      *
-     * @throws Throwable Re-throws the original exception after rollback
+     * @throws Throwable Re-throws the original exception after the transaction is aborted
      */
     public function transaction( callable $callback ): mixed;
 

@@ -309,18 +309,53 @@ class Database implements IDatabase
      */
     public function transaction(callable $callback): mixed
     {
-        $this->begin();
+        // Whether this scope is the outermost one, and therefore the one that opens the transaction
+        // and issues its single commit. begin() joins an already open transaction silently, so
+        // having called it is no evidence of having opened anything: the connection has to be asked.
+        $isOutermostScope = !$this->getConnection()->inTransaction();
+
+        if ($isOutermostScope) {
+            $this->begin();
+        } elseif ($this->rollbackOnly) {
+            // Every statement this scope would run is already destined for the rollback.
+            throw new TransactionAbortedException(
+                'refusing to enter a transaction scope: an enclosing scope has already failed'
+            );
+        }
+
         try {
             $result = $callback();
-            $this->commit();
-
-            return $result;
         } catch (Throwable $e) {
-            if ($this->getConnection()->inTransaction()) {
-                $this->rollback();
+            // Condemn it first. A guest cannot roll back, and the owner may be a hand-rolled commit()
+            // that has never heard of this class.
+            $this->markRollbackOnly();
+
+            if ($isOutermostScope) {
+                try {
+                    $this->rollback();
+                } catch (Throwable $rollbackFailure) {
+                    // MySQL kills the transaction itself on deadlock (1213) and on lock wait timeout
+                    // (1205), so the rollback can fail for reasons that say nothing about the cause.
+                    // Record it and let the original exception travel.
+                    LoggerFactory::doJsonLog([
+                        'message' => 'rollback failed while aborting a transaction scope',
+                        'error'   => $rollbackFailure->getMessage(),
+                        'cause'   => $e->getMessage(),
+                    ]);
+                }
             }
+
             throw $e;
         }
+
+        if (!$isOutermostScope) {
+            // A guest opened nothing and closes nothing.
+            return $result;
+        }
+
+        $this->commit();
+
+        return $result;
     }
 
     /**
