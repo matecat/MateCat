@@ -255,7 +255,7 @@ class SegmentSource extends React.Component {
     const plainText = textUtils.removeWhitespacePlaceholders(
       contentState.getPlainText(),
     )
-    const tokens = createIcuTokens(plainText, editorState, config.source_rfc)
+    const tokens = createIcuTokens(plainText, editorState, config.source_code)
     const newDecorator = createICUDecorator(tokens, false)
     remove(
       this.decoratorsStructure,
