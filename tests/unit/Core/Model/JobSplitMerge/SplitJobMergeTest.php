@@ -502,10 +502,7 @@ class SplitJobMergeTest extends AbstractTest
         $chunks = $this->makeTwoChunks();
         $ps = $this->makeSplitProjectStructure($chunks);
 
-        // The scope owns both halves now, so neither of these may be reached directly: a begin() the
-        // scope did not open, or a commit() it did not issue, is the mixed-handle shape this replaced.
-        $this->dbHandler->expects($this->never())->method('begin');
-        $this->dbHandler->expects($this->never())->method('commit');
+        // The scope owns the transaction, so opening it once is what is left to assert.
         $this->dbHandler->expects($this->once())->method('transaction');
 
         $this->service->applySplit($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
@@ -720,8 +717,6 @@ class SplitJobMergeTest extends AbstractTest
     #[Test]
     public function mergeALLRunsItsWriteInsideATransactionScope(): void
     {
-        $this->dbHandler->expects($this->never())->method('begin');
-        $this->dbHandler->expects($this->never())->method('commit');
         $this->dbHandler->expects($this->once())->method('transaction');
 
         // ProjectStruct for cache invalidation

@@ -741,13 +741,12 @@ class MMTEngineMethodsTest extends AbstractTest
         $engine = $this->createEngineWithClient($client);
 
         // DB double: reads go through the real connection, but the scope throws, so the catch is
-        // exercised. Neither begin() nor rollback() may be reached directly.
+        // exercised.
         $faultyDb = $this->createMock(IDatabase::class);
         $faultyDb->method('getConnection')->willReturn(obtainTestDatabase()->getConnection());
-        $faultyDb->method('transaction')->willThrowException(new RuntimeException('scope failed'));
-        $faultyDb->expects(self::never())->method('begin');
-        $faultyDb->expects(self::never())->method('rollback');
-        $faultyDb->expects(self::never())->method('commit');
+        $faultyDb->expects($this->once())
+            ->method('transaction')
+            ->willThrowException(new RuntimeException('scope failed'));
 
         $ref = new ReflectionProperty($engine, 'database');
         $ref->setAccessible(true);

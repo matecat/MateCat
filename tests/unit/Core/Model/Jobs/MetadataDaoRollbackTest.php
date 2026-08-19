@@ -33,9 +33,6 @@ class MetadataDaoRollbackTest extends AbstractTest
 
         $dbMock = $this->createMock(IDatabase::class);
         $dbMock->method('getConnection')->willReturn($pdoStub);
-        $dbMock->expects($this->never())->method('begin');
-        $dbMock->expects($this->never())->method('rollback');
-        $dbMock->expects($this->never())->method('commit');
         // Runs the body and lets the failure through, which is what the real scope does before it
         // aborts. The abort itself is not re-tested here; it belongs to the scope, not to the DAO.
         $dbMock->expects($this->once())
@@ -78,9 +75,6 @@ class MetadataDaoRollbackTest extends AbstractTest
     public function bulkSetOpensNoTransactionForAnEmptyPayload(): void
     {
         $dbMock = $this->createMock(IDatabase::class);
-        $dbMock->expects($this->never())->method('begin');
-        $dbMock->expects($this->never())->method('commit');
-        $dbMock->expects($this->never())->method('rollback');
         $dbMock->expects($this->never())->method('transaction');
 
         (new MetadataDao($dbMock))->bulkSet(12, 'job-pw', []);

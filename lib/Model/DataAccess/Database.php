@@ -156,8 +156,12 @@ class Database implements IDatabase
     }
 
     /**
-     * @Override
-     * {@inheritdoc}
+     * Begin a transaction for InnoDB tables.
+     *
+     * @internal Deliberately not part of IDatabase: a consumer opens a transaction through
+     *           transaction(), which cannot leave a window open on a failure path or an early
+     *           return. This stays public because the test harness opens a fixture scope in
+     *           setUp() and rolls it back in tearDown(), which a callback cannot express.
      *
      * @throws PDOException
      */
@@ -178,8 +182,9 @@ class Database implements IDatabase
 
 
     /**
-     * @Override
-     * {@inheritdoc}
+     * Commit the open transaction and drain the work deferred with onCommit().
+     *
+     * @internal Deliberately not part of IDatabase — see begin().
      *
      * @throws PDOException
      * @throws TransactionAbortedException when a scope inside this transaction failed
@@ -281,8 +286,9 @@ class Database implements IDatabase
 
 
     /**
-     * @Override
-     * {@inheritdoc}
+     * Roll back the open transaction and discard the work deferred with onCommit().
+     *
+     * @internal Deliberately not part of IDatabase — see begin().
      *
      * @throws PDOException
      */

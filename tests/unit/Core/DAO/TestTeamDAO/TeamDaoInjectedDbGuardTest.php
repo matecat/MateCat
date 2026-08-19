@@ -71,8 +71,6 @@ class TeamDaoInjectedDbGuardTest extends AbstractTest
         // IDatabase::onCommit() queue — a raw PDO commit leaves it untouched and the next begin()
         // discards it. Asserting it here rather than on beginTransaction() keeps the guard pointed
         // at the boundary that matters.
-        $this->injectedDbMock->expects($this->never())->method('begin');
-        $this->injectedDbMock->expects($this->never())->method('commit');
         $this->injectedDbMock->expects($this->atLeastOnce())
             ->method('transaction')
             ->willReturnCallback(static fn(callable $work) => $work());
@@ -114,9 +112,9 @@ class TeamDaoInjectedDbGuardTest extends AbstractTest
         $dao->createUserTeam($user, $params);
 
         // The atLeastOnce expectations set in setUp() are the assertions. getConnection() proves
-        // the queries run on the injected handle rather than on the singleton; begin() and commit()
-        // prove the transaction is opened and closed through IDatabase, which is what keeps the
-        // IDatabase::onCommit() queue drainable. Pre-fix code called beginTransaction() straight on
-        // the PDO handle and never committed at all, so both of the latter go unmet.
+        // the queries run on the injected handle rather than on the singleton; transaction() proves
+        // the scope is opened through IDatabase, which is what keeps the IDatabase::onCommit() queue
+        // drainable. Pre-fix code called beginTransaction() straight on the PDO handle and never
+        // committed at all, so both of the latter go unmet.
     }
 }

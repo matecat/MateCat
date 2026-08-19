@@ -15,6 +15,17 @@ services:
                 - router.php
 
     -
+        class: Matecat\PhpStan\Rules\NoManualTransactionControlRule
+        tags:
+            - phpstan.rules.rule
+        arguments:
+            allowedFiles:
+                # The connection object that implements the scope. It is the only place the
+                # statements are the mechanism rather than a hand-rolled window, and this list is
+                # not expected to grow: everything else calls transaction(callable).
+                - lib/Model/DataAccess/Database.php
+
+    -
         class: Matecat\PhpStan\Rules\NoDirectSessionSuperglobalRule
         tags:
             - phpstan.rules.rule

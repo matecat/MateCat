@@ -38,9 +38,6 @@ class ProjectCompletionRepositoryTest extends AbstractTest
         $db = $this->createMock(IDatabase::class);
         // Forwarded whole, not re-implemented: the repository owns the connection, the scope owns
         // the transaction. Opening one here by hand is the shape this replaced.
-        $db->expects($this->never())->method('begin');
-        $db->expects($this->never())->method('commit');
-        $db->expects($this->never())->method('rollback');
         $db->expects($this->once())
             ->method('transaction')
             ->willReturnCallback(static fn(callable $work) => $work());

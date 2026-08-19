@@ -41,49 +41,33 @@ interface IDatabase
     public function useDb(string $name): void;
 
 
-    /**
-     * Begin a transaction for InnoDB tables
-     *
-     * @throws PDOException
-     */
-    public function begin(): PDO;
-
-
-    /**
-     * Commit a transaction for InnoDB tables
-     *
-     * @throws PDOException
-     */
-    public function commit(): void;
-
+    // begin(), commit() and rollback() are deliberately absent. They are the statements a
+    // transaction is built from, not a service a consumer of this interface may reach for:
+    // a caller holding an IDatabase can only open a transaction through transaction() below,
+    // which cannot leave a window open on a failure path or an early return. The three remain
+    // public on Database itself, because the test harness opens a fixture scope in setUp() and
+    // rolls it back in tearDown() — a shape a callback cannot express.
 
     /**
-     * Roll back a transaction for InnoDB tables
+     * Run something once the transaction has committed: a cache eviction, a queue message, a mail.
      *
-     * @throws PDOException
-     */
-    public function rollback(): void;
-
-    /**
-     * Defer work until the current transaction commits.
+     * Two reasons not to run it inline. Before the commit the rows are not visible yet, so whoever
+     * reads that cache or picks up that message sees the old state — or state a rollback then threw
+     * away. And the work does not need the locks the transaction is holding.
      *
-     * For anything whose observers must not see it before the data is visible, and which has no
-     * business running inside the locks the transaction holds — cache invalidation and message
-     * enqueues, typically. Invalidating a cache before the commit lets a concurrent reader repopulate
-     * it from the pre-commit row, and that stale value then outlives the commit for the whole TTL;
-     * enqueuing before the commit lets a worker dequeue and read state that is not there yet, or that
-     * a rollback removed.
+     * Use it when your code does not own the transaction. A DAO write cannot tell whether it is the
+     * outermost scope or nested five calls deep, so it defers and lets the owner's commit run the
+     * callback. When you do own the scope, put the statement after transaction() returns instead:
+     * same effect, and you get the exception if it fails.
      *
-     * Runs the callback immediately when no transaction is open, so callers need not know which case
-     * they are in. Callbacks are discarded on rollback, and a callback that throws is logged rather
-     * than propagated — the commit has already happened by then.
+     * With no transaction open the callback runs straight away, so callers never have to check
+     * which case they are in. A rollback discards the queue.
      *
      * @param callable(): void $callback
-     * @param bool $critical Re-throw the failure instead of only logging it, once every other
-     *                       queued callback has run. Reserve it for work whose silent failure is a
-     *                       correctness or a security problem — a credential invalidation, not a
-     *                       performance cache — because the caller is then the only party left that
-     *                       can retry.
+     * @param bool $critical Re-throw a failure instead of only logging it, after the rest of the
+     *                       queue has run. Only for work whose silent failure is a correctness or a
+     *                       security problem — revoking a credential, not warming a cache — because
+     *                       by then the caller is the only party left that can retry.
      *
      * @throws PDOException
      */

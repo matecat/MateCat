@@ -103,9 +103,27 @@ Callers do not schedule any of this. Do not wrap `destroyCacheXxx()` in `onCommi
 `onCommit($callback, critical: true)` re-throws a failure once the rest of the queue has run — use it
 only where a silent failure is a security problem, such as a credential sweep, not for a cache bust.
 
-A transaction must be opened and closed through `IDatabase::begin()`/`commit()`, or via
-`TransactionalTrait`, never on the PDO handle: a raw commit leaves the deferral queue undrained and
-the next `begin()` discards it.
+A transaction is opened only through `IDatabase::transaction(callable)`. The outermost scope owns
+it; a scope entered inside an open transaction is a guest that opens and closes nothing, so it
+cannot commit its caller's work early. Any throw aborts the whole tree — including one the caller
+catches, because the failing scope marks the transaction unable to commit and `Database::commit()`
+refuses it. Work deferred with `onCommit()` drains once, after the single real commit, and is
+discarded on rollback.
+
+`begin()`, `commit()` and `rollback()` are not on `IDatabase`, so code holding the interface — which
+is all of it — cannot reach them. They stay public on `Database` for the test harness, which opens a
+fixture scope in `setUp()` and rolls it back in `tearDown()`. Those three and
+`PDO::beginTransaction()`/`commit()`/`rollBack()` are also reported by a PHPStan rule
+(`NoManualTransactionControlRule`), which covers the receivers the interface cannot: a `Database`,
+a subclass of it, and a bare PDO handle out of `getConnection()`. A raw commit leaves the deferral
+queue undrained and the next `begin()` discards it. Do not wrap transaction control in a helper
+class or a trait either: two such facades already had to be removed, and a type-based rule cannot
+see through them.
+
+`onCommit()` is for code that does not own the scope. A DAO write cannot tell whether it is the
+outermost scope or nested five calls deep, so it defers and lets the owner's commit drain the queue.
+When you do own the scope, put the statement after `transaction()` returns instead — same effect,
+and you get the exception if it fails, where a queued callback only logs it.
 
 ## Testing
 

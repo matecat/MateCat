@@ -36,7 +36,6 @@ class MetadataDaoInjectedDbGuardTest extends AbstractTest
 
         $singletonDb = $this->createStub(IDatabase::class);
         $singletonDb->method('getConnection')->willReturn($singletonPdo);
-        $singletonDb->method('begin')->willReturn($singletonPdo);
 
         $this->setDatabaseInstance($singletonDb);
     }

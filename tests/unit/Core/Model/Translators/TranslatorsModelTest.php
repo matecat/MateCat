@@ -265,9 +265,6 @@ class TranslatorsModelTest extends AbstractTest
         );
         $dbMock = $this->createMock(IDatabase::class);
         $dbMock->method('getConnection')->willReturn($pdoStub);
-        $dbMock->expects($this->never())->method('begin');
-        $dbMock->expects($this->never())->method('rollback');
-        $dbMock->expects($this->never())->method('commit');
         // Runs the body and lets the failure through, which is what the real scope does before it
         // aborts. The abort itself belongs to the scope and is pinned by TransactionScopeTest.
         $dbMock->expects($this->once())

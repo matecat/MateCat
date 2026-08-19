@@ -107,15 +107,14 @@ class TeamDaoTest extends AbstractTest
         $stmt = $this->createStub(PDOStatement::class);
         $stmt->queryString = 'stubbed';
 
-        // The scope opens and closes the transaction now. The DAO reaching past it to begin() on the
-        // adapter and commit() on the raw handle is what this test used to pin and now forbids:
-        // a commit issued that way leaves the deferral queue undrained.
+        // The scope opens and closes the transaction now. The DAO committing on the raw handle is
+        // the mixed-handle shape this test pins against: a commit issued that way leaves the
+        // deferral queue undrained.
         $pdo = $this->createMock(PDO::class);
         $pdo->method('prepare')->willReturn($stmt);
         $pdo->expects($this->never())->method('commit');
 
         $db = $this->createMock(IDatabase::class);
-        $db->expects($this->never())->method('begin');
         $db->expects($this->once())->method('transaction')->willReturnCallback(
             static fn(callable $callback) => $callback()
         );

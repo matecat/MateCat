@@ -173,12 +173,9 @@ class EventModelTest extends AbstractTest
         $projectDao = $this->createStub(ProjectDao::class);
         $projectDao->method('findById')->willReturn(new ProjectStruct(['id' => 100]));
 
-        // The scope owns both halves, so neither may be reached directly: a begin() the scope did
-        // not open, or a commit() it did not issue, is the shape this replaced.
+        // The scope owns the transaction. Reaching past it is not expressible here any more —
+        // begin() and commit() are no longer on IDatabase — so the scope is what is left to assert.
         $database = $this->createMock(IDatabase::class);
-        $database->expects($this->never())->method('begin');
-        $database->expects($this->never())->method('commit');
-        $database->expects($this->never())->method('rollback');
         $database->expects($this->once())
             ->method('transaction')
             ->willReturnCallback(static fn(callable $work) => $work());
@@ -203,8 +200,6 @@ class EventModelTest extends AbstractTest
         // The scope aborts the transaction and re-throws; the failure has to reach the caller rather
         // than be swallowed by whatever closed the transaction.
         $database = $this->createMock(IDatabase::class);
-        $database->expects($this->never())->method('begin');
-        $database->expects($this->never())->method('commit');
         $database->expects($this->once())
             ->method('transaction')
             ->willReturnCallback(static fn(callable $work) => $work());
