@@ -333,6 +333,7 @@ describe('initEvents', () => {
 describe('filterSubmit', () => {
   test('submits the filter with the review password and opens the first segment', async () => {
     config.isReview = true
+    config.currentPassword = 'revpwd'
     getFilteredSegments.mockResolvedValue({count: 2, segment_ids: ['10', '20']})
 
     SegmentFilterUtils.filterSubmit({status: 'TRANSLATED'})
@@ -343,7 +344,6 @@ describe('filterSubmit', () => {
       42,
       'revpwd',
       expect.objectContaining({status: 'TRANSLATED', revision: true}),
-      undefined,
     )
     expect(CommonUtils.clearStorage).toHaveBeenCalledWith('SegmentFilter')
     expect(SegmentActions.removeAllMutedSegments).toHaveBeenCalled()
@@ -366,6 +366,7 @@ describe('filterSubmit', () => {
 
   test('uses the standard password when not in review', async () => {
     config.isReview = false
+    config.currentPassword = 'pwd'
     getFilteredSegments.mockResolvedValue({count: 0, segment_ids: []})
 
     SegmentFilterUtils.filterSubmit({status: 'NEW'})
@@ -376,7 +377,6 @@ describe('filterSubmit', () => {
       42,
       'pwd',
       expect.objectContaining({status: 'NEW', revision: false}),
-      undefined,
     )
   })
 

@@ -15,7 +15,6 @@ use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
-use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
@@ -80,7 +79,13 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
             throw new EndQueueException('Cannot resolve the user ' . $params['id_user'] . ' that enqueued this bulk status change', -1);
         }
 
-        $source_page = ReviewUtils::revisionNumberToSourcePage($params['revision_number']);
+        // The phase is decided by the credential the enqueuing request authenticated with and travels
+        // in the message. A message published before this key existed must not fall back to the
+        // translate page: it would book its revision events to the wrong phase, so it fails instead.
+        if (!isset($params['source_page'])) {
+            throw new EndQueueException('Missing the source_page of this bulk status change', -1);
+        }
+        $source_page = (int)$params['source_page'];
 
         $this->database->begin();
 

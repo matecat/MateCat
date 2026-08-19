@@ -919,10 +919,11 @@
 .modal-grid {
   display: flex;
   flex-direction: column;
-
+  gap: 16px;
   .modal-grid__footer {
     display: flex;
     justify-content: flex-end;
+    gap: 16px;
   }
 }
 

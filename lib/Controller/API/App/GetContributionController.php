@@ -4,8 +4,8 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
-use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
@@ -13,7 +13,7 @@ use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\Event\Filter\RewriteContributionContextsEvent;
 use Model\Files\FilesPartsDao;
-use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
@@ -26,6 +26,7 @@ use ReflectionException;
 use TypeError;
 use Utils\Contribution\Get;
 use Utils\Contribution\GetContributionRequest;
+use Utils\Constants\SourcePages;
 use Utils\Engines\Lara;
 use Utils\Registry\AppConfig;
 use Model\Projects\ProjectDao;
@@ -35,12 +36,29 @@ use Utils\TmKeyManagement\Filter;
 
 class GetContributionController extends KleinController
 {
-
-    use APISourcePageGuesserTrait;
+    protected JobStruct $chunk;
 
     protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
+
+        // Resolve the job and its revision phase from the presented credential (password), not from a
+        // spoofable Referer. ChunkPasswordValidator stamps source_page onto the chunk from whichever
+        // password (translate or review) matched.
+        $chunkValidator = new ChunkPasswordValidator($this);
+        $chunkValidator->onSuccess(function () use ($chunkValidator) {
+            $this->chunk = $chunkValidator->getChunk();
+        });
+        $this->appendValidator($chunkValidator);
+    }
+
+    /**
+     * The revision phase is derived from the credential-resolved source_page stamped on the chunk
+     * (see registerValidators), never from the request Referer.
+     */
+    private function isRevision(): bool
+    {
+        return ($this->chunk->getSourcePage() ?: SourcePages::SOURCE_PAGE_TRANSLATE) !== SourcePages::SOURCE_PAGE_TRANSLATE;
     }
 
     /**
@@ -55,9 +73,8 @@ class GetContributionController extends KleinController
 
         $id_job = $request['id_job'];
         $id_segment = $request['id_segment'];
-        $password = $request['password'];
 
-        $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($id_job, $password);
+        $jobStruct = $this->chunk;
         $dataRefMap = (new SegmentOriginalDataDao($this->getDatabase()))->getSegmentDataRefMap($id_segment);
 
         $projectStruct = $jobStruct->getProject(new ProjectDao($this->getDatabase()));
@@ -65,7 +82,9 @@ class GetContributionController extends KleinController
 
         $id_client = $request['id_client'];
         $num_results = $request['num_results'];
-        $received_password = $request['received_password'];
+        // Credential-resolved job password (was the client-declared current_password param).
+        // Only feeds the async session/dedup key and a back-compat metadata lookup, never TM authz.
+        $received_password = (string)$jobStruct->password;
         $concordance_search = $request['concordance_search'];
         $switch_languages = $request['switch_languages'];
         $cross_language = $request['cross_language'];
@@ -261,8 +280,6 @@ class GetContributionController extends KleinController
         );
         $text = (string)filter_var($this->request->param('text'), FILTER_UNSAFE_RAW);
         $translation = (string)filter_var($this->request->param('translation'), FILTER_UNSAFE_RAW); // in the case of Lara Think
-        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]) ?: '';
-        $received_password = filter_var($this->request->param('current_password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]) ?: '';
         $concordance_search = filter_var($this->request->param('is_concordance'), FILTER_VALIDATE_BOOLEAN);
         $reasoning = filter_var($this->request->param('reasoning'), FILTER_VALIDATE_BOOLEAN);
         $switch_languages = filter_var($this->request->param('from_target'), FILTER_VALIDATE_BOOLEAN);
@@ -297,10 +314,6 @@ class GetContributionController extends KleinController
             throw new InvalidArgumentException("Missing id job", -3);
         }
 
-        if (empty($password)) {
-            throw new InvalidArgumentException("Missing job password", -4);
-        }
-
         if (empty($id_client)) {
             throw new InvalidArgumentException("Missing id_client", -5);
         }
@@ -315,9 +328,6 @@ class GetContributionController extends KleinController
             $lara_style = Lara::validateLaraStyle($lara_style);
         }
 
-        $this->id_job = (int)$id_job;
-        $this->request_password = $received_password;
-
         return [
             'id_client' => $id_client,
             'id_job' => (int)$id_job,
@@ -325,8 +335,6 @@ class GetContributionController extends KleinController
             'num_results' => $num_results,
             'text' => $text,
             'translation' => $translation,
-            'password' => $password,
-            'received_password' => $received_password,
             'concordance_search' => $concordance_search,
             'switch_languages' => $switch_languages,
             'context_before' => $context_before,

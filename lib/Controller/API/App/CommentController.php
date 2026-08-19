@@ -3,7 +3,9 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
@@ -11,7 +13,6 @@ use Model\Comments\BaseCommentStruct;
 use Model\Comments\CommentDao;
 use Model\Comments\CommentStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
-use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Teams\MembershipDao;
@@ -19,6 +20,7 @@ use Model\Teams\MembershipStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PDOException;
+use Plugins\Features\ReviewExtended\ReviewUtils;
 use ReflectionException;
 use RuntimeException;
 use Stomp\Transport\Message;
@@ -27,16 +29,24 @@ use Utils\ActiveMQ\AMQHandler;
 use Utils\Email\CommentEmail;
 use Utils\Email\CommentMentionEmail;
 use Utils\Email\CommentResolveEmail;
+use Utils\Constants\SourcePages;
 use Utils\Registry\AppConfig;
-use Utils\Tools\Utils;
 use Utils\Url\JobUrlBuilder;
 
 class CommentController extends KleinController
 {
 
+    use ChunkNotFoundHandlerTrait;
+
     protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
+        $chunkValidator = new ChunkPasswordValidator($this, 60 * 60 * 24);
+        $chunkValidator->onSuccess(function () use ($chunkValidator) {
+            $this->chunk = $chunkValidator->getChunk();
+        });
+
+        $this->appendValidator($chunkValidator);
     }
 
     /**
@@ -194,15 +204,13 @@ class CommentController extends KleinController
             throw new InvalidArgumentException("Not corresponding id job.", -206);
         }
 
-        // Fix for R2
-        // The comments from R2 phase are wrongly saved with source_page = 2
-        $sourcePage = Utils::getSourcePageFromReferer();
+        // A comment can only be deleted from the phase it belongs to, and that phase is the one the
+        // presented password resolves to. Fix for R2: the comments from the R2 phase are wrongly
+        // saved with source_page = 2, so an R2 credential also covers those legacy rows.
+        $allowedSourcePages = [(int)$request['source_page']];
 
-        $allowedSourcePages = [];
-        $allowedSourcePages[] = (int)$request['source_page'];
-
-        if ($sourcePage == 3) {
-            $allowedSourcePages[] = 2;
+        if ((int)$request['source_page'] === SourcePages::SOURCE_PAGE_REVISION_2) {
+            $allowedSourcePages[] = SourcePages::SOURCE_PAGE_REVISION;
         }
 
         if (!in_array($comment->source_page, $allowedSourcePages)) {
@@ -246,21 +254,21 @@ class CommentController extends KleinController
         $username = filter_var($this->request->param('username'), FILTER_SANITIZE_SPECIAL_CHARS);
         $id_job = filter_var($this->request->param('id_job'), FILTER_SANITIZE_NUMBER_INT);
         $id_segment = filter_var($this->request->param('id_segment'), FILTER_SANITIZE_NUMBER_INT);
-        $source_page = filter_var($this->request->param('source_page'), FILTER_SANITIZE_NUMBER_INT);
         $is_anonymous = filter_var($this->request->param('is_anonymous'), FILTER_VALIDATE_BOOLEAN);
-        $revision_number = filter_var($this->request->param('revision_number'), FILTER_SANITIZE_NUMBER_INT);
         $first_seg = filter_var($this->request->param('first_seg'), FILTER_SANITIZE_NUMBER_INT);
         $last_seg = filter_var($this->request->param('last_seg'), FILTER_SANITIZE_NUMBER_INT);
         $id_comment = filter_var($this->request->param('id_comment'), FILTER_SANITIZE_NUMBER_INT);
-        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $message = filter_var($this->request->param('message'), FILTER_UNSAFE_RAW);
         $message = htmlspecialchars((string)$message);
 
-        $job = (new JobDao($this->getDatabase()))->getByIdAndPassword((int)$id_job, (string)$password, 60 * 60 * 24);
-
-        if (empty($job)) {
-            throw new InvalidArgumentException("Wrong password", -10);
-        }
+        /*
+         * The phase a comment belongs to comes from the password this request authenticated with,
+         * which ChunkPasswordValidator has already resolved and stamped onto the chunk. The client
+         * declares neither source_page nor revision_number: neither proved anything about which
+         * phase the caller may write in, so values sent by an older client are ignored
+         * (GHSA-7q94-2fmr-3p42).
+         */
+        $source_page = $this->chunk->getSourcePage() ?: SourcePages::SOURCE_PAGE_TRANSLATE;
 
         return [
             'first_seg' => $first_seg,
@@ -269,11 +277,10 @@ class CommentController extends KleinController
             'id_job' => $id_job,
             'id_segment' => $id_segment,
             'is_anonymous' => $is_anonymous,
-            'job' => $job,
+            'job' => $this->chunk,
             'last_seg' => $last_seg,
             'message' => $message,
-            'password' => $password,
-            'revision_number' => (int)$revision_number,
+            'revision_number' => ReviewUtils::sourcePageToRevisionNumber($source_page) ?? 0,
             'source_page' => $source_page,
             'username' => $username,
         ];
@@ -511,7 +518,7 @@ class CommentController extends KleinController
      * @param int $id_project
      * @param int $id
      * @param int $idSegment
-     * @param string $sourcePage
+     * @param int $sourcePage
      *
      * @throws ReflectionException
      * @throws DomainException
@@ -524,7 +531,7 @@ class CommentController extends KleinController
         int $id_project,
         int $id,
         int $idSegment,
-        string $sourcePage
+        int $sourcePage
     ): void {
         $message = (string)json_encode([
             '_type' => 'comment',

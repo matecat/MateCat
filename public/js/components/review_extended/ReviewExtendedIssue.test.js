@@ -269,7 +269,7 @@ describe('ReviewExtendedIssue', () => {
     expect(SegmentActions.submitIssueComment).not.toHaveBeenCalled()
   })
 
-  test('submitting a non-empty comment calls submitIssueComment with source_page 1 when not reviewing', async () => {
+  test('submitting a non-empty comment calls submitIssueComment when not reviewing', async () => {
     global.config.isReview = false
     renderIssue()
     fireEvent.click(screen.getByTitle('Comments'))
@@ -280,12 +280,13 @@ describe('ReviewExtendedIssue', () => {
     })
     expect(SegmentActions.submitIssueComment).toHaveBeenCalledWith('seg-1', 1, {
       message: 'hello',
-      source_page: 1,
     })
     expect(input.value).toEqual('')
   })
 
-  test('submitting a comment while reviewing uses revisionNumber + 1 as source_page', async () => {
+  // No source_page is sent while reviewing either: the server attributes the comment to the
+  // phase the password resolves to, regardless of the client's isReview/revisionNumber state.
+  test('submitting a comment while reviewing does not send a source_page', async () => {
     global.config.isReview = true
     global.config.revisionNumber = 2
     renderIssue()
@@ -297,7 +298,6 @@ describe('ReviewExtendedIssue', () => {
     })
     expect(SegmentActions.submitIssueComment).toHaveBeenCalledWith('seg-1', 1, {
       message: 'hello',
-      source_page: 3,
     })
   })
 

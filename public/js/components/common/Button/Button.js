@@ -22,6 +22,7 @@ export const BUTTON_MODE = {
   OUTLINE_BG: 'outlineBg',
 }
 export const BUTTON_SIZE = {
+  XSMALL: 'xsmall',
   SMALL: 'small',
   STANDARD: 'standard',
   MEDIUM: 'medium',

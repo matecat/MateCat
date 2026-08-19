@@ -155,8 +155,7 @@ test('marks the job as complete when the confirmation succeeds', async () => {
   expect(setChunkComplete).toHaveBeenCalledWith({
     action: 'Features_ProjectCompletion_SetChunkCompleted',
     id_job: '1',
-    password: 'pass',
-    current_password: 'current',
+    password: 'current',
   })
 })
 

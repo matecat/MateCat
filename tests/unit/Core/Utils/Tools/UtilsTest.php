@@ -13,34 +13,6 @@ use Utils\Tools\Utils;
 class UtilsTest extends AbstractTest
 {
     // =========================================================================
-    // Tests for getSourcePage() and getSourcePageFromReferer()
-    // =========================================================================
-
-    #[Test]
-    public function testGetSourcePageReturnsTranslateWhenNoRequestUri(): void
-    {
-        unset($_SERVER['REQUEST_URI']);
-        $result = Utils::getSourcePage();
-        $this->assertEquals(1, $result); // SOURCE_PAGE_TRANSLATE = 1
-    }
-
-    #[Test]
-    public function testGetSourcePageReturnsTranslateForTranslatePath(): void
-    {
-        $_SERVER['REQUEST_URI'] = '/translate/project/1-2/en-US-it-IT';
-        $result = Utils::getSourcePage();
-        $this->assertEquals(1, $result);
-    }
-
-    #[Test]
-    public function testGetSourcePageFromRefererReturnsTranslateWhenNoReferer(): void
-    {
-        unset($_SERVER['HTTP_REFERER']);
-        $result = Utils::getSourcePageFromReferer();
-        $this->assertEquals(1, $result);
-    }
-
-    // =========================================================================
     // Tests for getBrowser()
     // =========================================================================
 
@@ -1746,32 +1718,6 @@ class UtilsTest extends AbstractTest
         $result = Utils::getBrowser($noVersionAgent);
 
         $this->assertEquals('?', $result['version']);
-    }
-
-    #[Test]
-    public function testGetSourcePageForRevisePath(): void
-    {
-        $_SERVER['REQUEST_URI'] = '/revise/project/1-2/en-US-it-IT';
-        $result = Utils::getSourcePage();
-        // SOURCE_PAGE_REVISION = 2
-        $this->assertEquals(2, $result);
-    }
-
-    #[Test]
-    public function testGetSourcePageForRevise2Path(): void
-    {
-        $_SERVER['REQUEST_URI'] = '/revise2/project/1-2/en-US-it-IT';
-        $result = Utils::getSourcePage();
-        // revise2 should return SOURCE_PAGE_REVISION + 1 = 3
-        $this->assertEquals(3, $result);
-    }
-
-    #[Test]
-    public function testGetSourcePageFromRefererForRevisePath(): void
-    {
-        $_SERVER['HTTP_REFERER'] = 'https://example.com/revise/project/1-2/en-US-it-IT';
-        $result = Utils::getSourcePageFromReferer();
-        $this->assertEquals(2, $result);
     }
 
     #[Test]

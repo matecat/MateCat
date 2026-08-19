@@ -3,29 +3,46 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
-use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
-use InvalidArgumentException;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
-use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Projects\ProjectDao;
 use Plugins\Features\ProjectCompletion\Model\EventModel;
 use ReflectionException;
 use TypeError;
+use Utils\Constants\SourcePages;
 use Utils\Tools\Utils;
 
 class SetChunkCompletedController extends KleinController
 {
-
-    use APISourcePageGuesserTrait;
+    protected JobStruct $chunk;
 
     protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
+
+        // Resolve the job and its revision phase from the presented credential (password), not from a
+        // spoofable Referer. ChunkPasswordValidator stamps source_page onto the chunk from whichever
+        // password (translate or review) matched.
+        $chunkValidator = new ChunkPasswordValidator($this);
+        $chunkValidator->onSuccess(function () use ($chunkValidator) {
+            $this->chunk = $chunkValidator->getChunk();
+        });
+        $this->appendValidator($chunkValidator);
+    }
+
+    /**
+     * The revision phase is derived from the credential-resolved source_page stamped on the chunk
+     * (see registerValidators), never from the request Referer.
+     */
+    private function isRevision(): bool
+    {
+        return ($this->chunk->getSourcePage() ?: SourcePages::SOURCE_PAGE_TRANSLATE) !== SourcePages::SOURCE_PAGE_TRANSLATE;
     }
 
     /**
@@ -35,8 +52,6 @@ class SetChunkCompletedController extends KleinController
      */
     public function complete(): void
     {
-        $request = $this->validateTheRequest();
-
         $struct = new CompletionEventStruct([
             'uid' => $this->user->getUid(),
             'remote_ip_address' => Utils::getRealIpAddr() ?? '',
@@ -46,7 +61,7 @@ class SetChunkCompletedController extends KleinController
 
         $database = $this->getDatabase();
         $model = new EventModel(
-            $request['job'],
+            $this->chunk,
             $struct,
             new ChunkCompletionEventDao($database),
             new ProjectDao($database),
@@ -61,43 +76,5 @@ class SetChunkCompletedController extends KleinController
                 ]
             ]
         ]);
-    }
-
-    /**
-     * @return array<string, mixed>
-     * @throws ReflectionException
-     * @throws InvalidArgumentException
-     * @throws Exception
-     * @throws TypeError
-     */
-    private function validateTheRequest(): array
-    {
-        $id_job = filter_var($this->request->param('id_job'), FILTER_SANITIZE_NUMBER_INT);
-        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-        $received_password = filter_var($this->request->param('current_password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-
-        if (empty($id_job)) {
-            throw new InvalidArgumentException("Missing id job", -1);
-        }
-
-        if (empty($password)) {
-            throw new InvalidArgumentException("Missing id password", -2);
-        }
-
-        $job = (new JobDao($this->getDatabase()))->getByIdAndPassword((int)$id_job, (string)$password);
-
-        if (empty($job)) {
-            throw new InvalidArgumentException("Wrong password", -10);
-        }
-
-        $this->id_job = (int)$id_job;
-        $this->request_password = (string)$received_password;
-
-        return [
-            'id_job' => $id_job,
-            'password' => $password,
-            'received_password' => $received_password,
-            'job' => $job,
-        ];
     }
 }

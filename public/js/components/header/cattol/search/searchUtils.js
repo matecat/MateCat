@@ -121,7 +121,6 @@ let SearchUtils = {
         matchcase: this.searchParams['match-case'],
         exactmatch: this.searchParams['exact-match'],
         inCurrentChunkOnly: this.searchParams['inCurrentChunkOnly'],
-        revisionNumber: params.revisionNumber,
         replace,
       }).then((data) => {
         SearchUtils.execFind_success(data)
