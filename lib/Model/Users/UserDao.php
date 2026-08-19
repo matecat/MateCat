@@ -132,59 +132,22 @@ class UserDao extends AbstractDao
      * lifetime governing only its own tokens.
      *
      * The stored value is a digest, so the presented token is hashed before the lookup and the raw
-     * value never reaches a query.
+     * value never reaches a query. A stored value lifted from the table is therefore not a spendable
+     * link: presented as a token it would be hashed again, and the result matches no row.
      *
-     * Two fallbacks cover tokens minted by earlier versions and still inside their window. The
-     * marked-but-unhashed one is guarded on the length of a real secret: without that guard, a
-     * stored digest lifted from the table could be presented as though it were the raw token and
-     * would match its own row, which is exactly the replay this hashing exists to prevent. The
-     * unmarked one predates scoping, so it refuses anything carrying a marker at all: a stored value
-     * copied out of the column marker and all would otherwise match itself here, by the plainest
-     * route of the three. Tokens of that era were base62 and never held an underscore, so nothing
-     * legitimate is turned away. Both fallbacks stop matching once the last pre-hashing token ages
-     * out of the window.
+     * Tokens minted by earlier versions are not recognised. Both flows re-issue on request, so a
+     * link that predates the deploy is answered by asking for a new one.
      *
      * @param string $rawToken the value taken from the link, without a marker
      * @param AuthTokenScope $scope the flow the caller is serving
      *
      * @throws PDOException
-     * @throws ReflectionException
      */
     public function getByScopedConfirmationToken(string $rawToken, AuthTokenScope $scope): ?UserStruct
     {
-        $found = $this->getByConfirmationToken($scope->storedForm($rawToken));
-
-        if ($found === null && strlen($rawToken) === UserStruct::AUTH_TOKEN_RANDOM_LENGTH) {
-            $found = $this->getByConfirmationToken($scope->marker() . $rawToken);
-        }
-
-        if ($found !== null) {
-            return $found;
-        }
-
-        foreach (AuthTokenScope::cases() as $case) {
-            if (str_starts_with($rawToken, $case->marker())) {
-                return null;
-            }
-        }
-
-        return $this->getByConfirmationToken($rawToken);
-    }
-
-    /**
-     * Matches a stored token exactly, marker included. Prefer {@see getByScopedConfirmationToken()},
-     * which is what confines a token to the flow that minted it.
-     *
-     * @param string $token
-     *
-     * @return ?UserStruct
-     * @throws PDOException
-     */
-    public function getByConfirmationToken(string $token): ?UserStruct
-    {
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare(" SELECT * FROM users WHERE confirmation_token = ?");
-        $stmt->execute([$token]);
+        $stmt->execute([$scope->storedForm($rawToken)]);
         $stmt->setFetchMode(PDO::FETCH_CLASS, UserStruct::class);
 
         return $stmt->fetch() ?: null;
