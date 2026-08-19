@@ -54,7 +54,7 @@ const Speech2Text = {
     Speech2Text.recognition.onerror = Speech2Text.onRecognitionError
     Speech2Text.recognition.onend = Speech2Text.onRecognitionEnd
     Speech2Text.recognition.onresult = Speech2Text.onRecognitionResult
-    Speech2Text.recognition.lang = config.target_rfc
+    Speech2Text.recognition.lang = config.target_code
   },
   enableMicrophone: function (segment) {
     Speech2Text.microphone = segment.find('.micSpeech')

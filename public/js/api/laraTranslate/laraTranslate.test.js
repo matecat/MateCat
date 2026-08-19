@@ -12,8 +12,8 @@ jest.mock('@translated/lara', () => ({
 describe('laraTranslate', () => {
   beforeEach(() => {
     global.config = {
-      source_rfc: 'en-US',
-      target_rfc: 'it-IT',
+      source_code: 'en-US',
+      target_code: 'it-IT',
     }
 
     mockTranslate.mockReset()
