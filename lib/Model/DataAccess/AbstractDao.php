@@ -28,30 +28,8 @@ abstract class AbstractDao
     protected IDatabase $database;
 
     /**
-     * Satisfies {@see TransactionalTrait}'s abstract for every DAO that adopts the trait.
-     *
-     * The trait asks the question because its users are heterogeneous: a handler reaching through
-     * a DAO has a real choice to make about which handle the transaction runs on. A DAO does not —
-     * it is the handle it was constructed with, or the transaction would not share a connection
-     * with the queries it wraps. Answering it once here keeps that non-choice out of the DAOs.
-     *
-     * AbstractDao deliberately does not `use TransactionalTrait` itself: the trait carries a
-     * per-object ownership flag that only a class actually opening transactions should hold.
-     */
-    protected function getTransactionalDatabase(): IDatabase
-    {
-        return $this->database;
-    }
-
-    /**
      * A DAO's cached reads and evictions run on the connection it was constructed with, so that is
      * the transaction whose visibility they have to follow.
-     *
-     * It answers the same handle as {@see getTransactionalDatabase()} and is deliberately not the
-     * same method: that one says who may close a transaction, this one says whose visibility the
-     * cache follows. The first is only asked of the classes that open transactions — six of them —
-     * while every DAO caches. Merging them would mean putting TransactionalTrait, and its ownership
-     * flag, on AbstractDao.
      */
     protected function _cacheTransactionScope(): ?IDatabase
     {

@@ -243,7 +243,7 @@ class TranslatorsModelTest extends AbstractTest
     }
 
     #[Test]
-    public function changeJobPasswordRollsBackAndRethrowsWhenTheRotationFails(): void
+    public function changeJobPasswordLetsAFailedRotationReachTheTransactionScope(): void
     {
         $failure = new PDOException('write failed');
 
@@ -252,8 +252,8 @@ class TranslatorsModelTest extends AbstractTest
         $stmtStub->method('fetchAll')->willReturn([]);
 
         $pdoStub = $this->createStub(PDO::class);
-        // The rotation is the only statement that fails: everything the constructor and the
-        // transaction helpers ask for still has to work, or the test would never reach the catch.
+        // The rotation is the only statement that fails: everything else the constructor and the
+        // scope ask for still has to work, or the test would never reach the catch.
         $pdoStub->method('prepare')->willReturnCallback(
             function (string $sql) use ($stmtStub, $failure): PDOStatement {
                 if (str_contains($sql, 'UPDATE jobs')) {
@@ -263,15 +263,16 @@ class TranslatorsModelTest extends AbstractTest
                 return $stmtStub;
             }
         );
-        // false while openTransaction() decides whether to begin one, true while
-        // rollbackTransaction() decides whether there is one to end.
-        $pdoStub->method('inTransaction')->willReturnOnConsecutiveCalls(false, true);
-
         $dbMock = $this->createMock(IDatabase::class);
         $dbMock->method('getConnection')->willReturn($pdoStub);
-        $dbMock->expects($this->once())->method('begin');
-        $dbMock->expects($this->once())->method('rollback');
+        $dbMock->expects($this->never())->method('begin');
+        $dbMock->expects($this->never())->method('rollback');
         $dbMock->expects($this->never())->method('commit');
+        // Runs the body and lets the failure through, which is what the real scope does before it
+        // aborts. The abort itself belongs to the scope and is pinned by TransactionScopeTest.
+        $dbMock->expects($this->once())
+            ->method('transaction')
+            ->willReturnCallback(static fn(callable $work) => $work());
 
         $job = $this->makeJobStructWithProject(password: 'old-pw');
         $model = new TranslatorsModel($job, $dbMock);

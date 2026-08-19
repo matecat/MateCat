@@ -18,9 +18,6 @@ use PHPUnit\Framework\Attributes\Test;
  * Strategy: the singleton PDO stub's prepare() throws a PDOException. If any
  * of the 3 direct obtain() calls in set/bulkSet/delete remain, the test crashes.
  * The injected PDO is fully stubbed so the DAO can complete successfully.
- * TransactionalTrait calls inTransaction()/begin()/commit() on the singleton —
- * those methods are NOT prepare(), so the trait's singleton usage does not
- * trigger the exception.
  */
 class MetadataDaoInjectedDbGuardTest extends AbstractTest
 {
@@ -67,6 +64,9 @@ class MetadataDaoInjectedDbGuardTest extends AbstractTest
         $injectedDb->expects($this->atLeastOnce())
             ->method('getConnection')
             ->willReturn($injectedPdo);
+        // The write lives inside a scope; an unconfigured transaction() would return without ever
+        // running it, and the guard would pass without a single query having been prepared.
+        $injectedDb->method('transaction')->willReturnCallback(static fn(callable $work) => $work());
 
         $dao = new MetadataDao($injectedDb);
         $dao->set(1, 'pw', 'k', 'v');

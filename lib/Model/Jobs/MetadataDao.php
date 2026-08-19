@@ -4,15 +4,12 @@ namespace Model\Jobs;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\TransactionalTrait;
 use PDOException;
 use ReflectionException;
 use Throwable;
 
 class MetadataDao extends AbstractDao
 {
-
-    use TransactionalTrait;
 
     const string TABLE = 'job_metadata';
 
@@ -139,6 +136,8 @@ class MetadataDao extends AbstractDao
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function set(int $id_job, string $password, string $key, string $value): ?MetadataStruct
     {
@@ -148,9 +147,11 @@ class MetadataDao extends AbstractDao
             " ( :id_job, :password, :key, :value ) " .
             " ON DUPLICATE KEY UPDATE `value` = :value ";
 
-        $this->openTransaction(); // because we have to invalidate the cache after the insert, use the transactional trait
-
-        try {
+        // The scope exists so the evictions below are queued and run after the commit rather than
+        // before it. It also undoes the write here rather than leaving it to the end of the request:
+        // a worker holds its connection across messages, so a transaction left open by a failure
+        // here would still be open when the next message starts writing.
+        return $this->database->transaction(function () use ($id_job, $password, $key, $value, $sql): ?MetadataStruct {
             $conn = $this->database->getConnection();
             $stmt = $conn->prepare($sql);
             $stmt->execute([
@@ -163,18 +164,8 @@ class MetadataDao extends AbstractDao
             $this->destroyCacheByJobAndPassword($id_job, $password);
             $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
 
-            $result = $this->get($id_job, $password, $key);
-        } catch (Throwable $e) {
-            // Undo it here rather than leaving it to the end of the request: a worker holds its
-            // connection across messages, so a transaction left open by a failure here would still
-            // be open when the next message starts writing.
-            $this->rollbackTransaction();
-            throw $e;
-        }
-
-        $this->commitTransaction(); // commit only if everything went fine
-
-        return $result;
+            return $this->get($id_job, $password, $key);
+        });
     }
 
     /**
@@ -184,6 +175,8 @@ class MetadataDao extends AbstractDao
      *
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function bulkSet(int $id_job, string $password, array $metadata): void
     {
@@ -208,9 +201,7 @@ class MetadataDao extends AbstractDao
             . implode(', ', $placeholders)
             . " ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
 
-        $this->openTransaction();
-
-        try {
+        $this->database->transaction(function () use ($id_job, $password, $metadata, $params, $sql): void {
             $conn = $this->database->getConnection();
             $stmt = $conn->prepare($sql);
             $stmt->execute($params);
@@ -219,12 +210,7 @@ class MetadataDao extends AbstractDao
             foreach ($metadata as $key => $value) {
                 $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
             }
-        } catch (Throwable $e) {
-            $this->rollbackTransaction();
-            throw $e;
-        }
-
-        $this->commitTransaction();
+        });
     }
 
     /**

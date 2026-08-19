@@ -25,10 +25,8 @@ class TeamDaoInjectedDbGuardTest extends AbstractTest
     private IDatabase&Stub $singletonDbStub;
 
     /**
-     * Injected PDO stub. inTransaction() returns FALSE on the first call so that the pre-fix
-     * obtainTestDatabase()->getConnection()->inTransaction() path is exercised — the fix routes
-     * that call through $this->database->getConnection() instead. It carries no expectation: the
-     * transaction boundary itself is asserted one level up, on the injected IDatabase.
+     * Injected PDO stub. It carries no expectation: the transaction boundary itself is asserted one
+     * level up, on the injected IDatabase.
      */
     private PDO&Stub $injectedPdoMock;
 
@@ -48,17 +46,11 @@ class TeamDaoInjectedDbGuardTest extends AbstractTest
         $this->stmtStub->method('fetch')->willReturn(false);
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        // Injected PDO: inTransaction() returns false on the first call, so openTransaction()
-        // decides it owns the transaction and opens one, then true for every call after it, so
-        // MembershipDao::createList proceeds and commitTransaction() finds a transaction to close.
-        $inTransactionCalls = 0;
+        // Injected PDO: reports an open transaction, which is what the scope's body sees.
         $this->injectedPdoMock = $this->createStub(PDO::class);
         $this->injectedPdoMock->method('prepare')->willReturn($this->stmtStub);
         $this->injectedPdoMock->method('lastInsertId')->willReturn('1');
-        $this->injectedPdoMock->method('inTransaction')
-            ->willReturnCallback(static function () use (&$inTransactionCalls): bool {
-                return $inTransactionCalls++ > 0;
-            });
+        $this->injectedPdoMock->method('inTransaction')->willReturn(true);
         $this->injectedPdoMock->method('beginTransaction')->willReturn(true);
         $this->injectedPdoMock->method('commit')->willReturn(true);
 
@@ -74,15 +66,16 @@ class TeamDaoInjectedDbGuardTest extends AbstractTest
         $this->injectedDbMock->expects($this->atLeastOnce())
             ->method('getConnection')
             ->willReturn($this->injectedPdoMock);
-        // The transaction is opened and closed through IDatabase rather than through the PDO
-        // handle, which is what lets Database::commit() drain the IDatabase::onCommit() queue —
-        // a raw PDO commit leaves it untouched and the next begin() discards it. Asserting it here
-        // rather than on beginTransaction() keeps the guard pointed at the boundary that matters.
+        // The transaction is opened and closed by the injected IDatabase's own scope rather than
+        // through the PDO handle, which is what lets Database::commit() drain the
+        // IDatabase::onCommit() queue — a raw PDO commit leaves it untouched and the next begin()
+        // discards it. Asserting it here rather than on beginTransaction() keeps the guard pointed
+        // at the boundary that matters.
+        $this->injectedDbMock->expects($this->never())->method('begin');
+        $this->injectedDbMock->expects($this->never())->method('commit');
         $this->injectedDbMock->expects($this->atLeastOnce())
-            ->method('begin')
-            ->willReturn($this->injectedPdoMock);
-        $this->injectedDbMock->expects($this->atLeastOnce())
-            ->method('commit');
+            ->method('transaction')
+            ->willReturnCallback(static fn(callable $work) => $work());
         $this->injectedDbMock->method('buildInsertStatement')
             ->willReturn(['INSERT INTO teams (name) VALUES (:name)', []]);
 

@@ -12,7 +12,6 @@ use DomainException;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\InvalidatesUserProfileCache;
-use Model\DataAccess\TransactionalTrait;
 use Model\Users\UserStruct;
 use PDO;
 use PDOException;
@@ -26,7 +25,6 @@ class TeamDao extends AbstractDao
 {
 
     use InvalidatesUserProfileCache;
-    use TransactionalTrait;
 
     const string TABLE = "teams";
     const string STRUCT_TYPE = TeamStruct::class;
@@ -102,6 +100,8 @@ class TeamDao extends AbstractDao
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function createUserTeam(UserStruct $orgCreatorUser, array $params): TeamStruct
     {
@@ -119,13 +119,13 @@ class TeamDao extends AbstractDao
         //add the creator to the list of members
         $params['members'][] = $orgCreatorUser->email;
 
-        // wrap createList() in a transaction; a no-op when the caller already holds one
-        $this->openTransaction();
-
-        try {
-            // get fresh cache from the primary database
-            (new TeamDao($this->database))->setCacheTTL(60 * 60 * 24)->fetchById($teamStruct->id, TeamStruct::class);
-
+        // createList() writes one membership row per member, so it runs in a scope. The scope also
+        // undoes a partial list here rather than leaving it to the end of the request: a worker holds
+        // its connection across messages, so a transaction left open by a failure here would still be
+        // open when the next message starts writing. Entered while the caller already holds a
+        // transaction it is a guest and closes nothing.
+        $this->database->transaction(function () use ($teamStruct, $params): void {
+            /** @var list<string> $members */
             $members = array_values(array_filter($params['members'], fn($member) => $member !== null));
 
             $membersList = (new MembershipDao($this->database))->createList([
@@ -133,15 +133,7 @@ class TeamDao extends AbstractDao
                 'members' => $members
             ]);
             $teamStruct->setMembers($membersList);
-        } catch (Throwable $e) {
-            // Undo it here rather than leaving it to the end of the request: a worker holds its
-            // connection across messages, so a transaction left open by a failure here would still
-            // be open when the next message starts writing.
-            $this->rollbackTransaction();
-            throw $e;
-        }
-
-        $this->commitTransaction();
+        });
 
         return $teamStruct;
     }

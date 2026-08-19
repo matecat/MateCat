@@ -11,9 +11,10 @@ use PDOStatement;
 use PHPUnit\Framework\Attributes\Test;
 
 /**
- * set() and bulkSet() open a transaction so the cache can be evicted after the write. When the write
- * fails they have to close it themselves: a worker holds its connection across messages, so a
- * transaction left open here would still be open when the next message starts writing.
+ * set() and bulkSet() run inside a transaction scope so the cache can be evicted after the write.
+ * What is pinned here is that a failing write reaches the scope rather than being swallowed, and
+ * that neither method closes anything by hand: aborting and rolling back is the scope's job, and
+ * TransactionScopeTest pins it against a real connection.
  *
  * The failure is injected at the connection rather than provoked against the live table, so these
  * cases need no database. MetadataDaoRealSqlTest covers the paths that succeed.
@@ -29,21 +30,23 @@ class MetadataDaoRollbackTest extends AbstractTest
 
         $pdoStub = $this->createStub(PDO::class);
         $pdoStub->method('prepare')->willThrowException($failure);
-        // false while openTransaction() decides whether to begin one, true while
-        // rollbackTransaction() decides whether there is one to end.
-        $pdoStub->method('inTransaction')->willReturnOnConsecutiveCalls(false, true);
 
         $dbMock = $this->createMock(IDatabase::class);
         $dbMock->method('getConnection')->willReturn($pdoStub);
-        $dbMock->expects($this->once())->method('begin');
-        $dbMock->expects($this->once())->method('rollback');
+        $dbMock->expects($this->never())->method('begin');
+        $dbMock->expects($this->never())->method('rollback');
         $dbMock->expects($this->never())->method('commit');
+        // Runs the body and lets the failure through, which is what the real scope does before it
+        // aborts. The abort itself is not re-tested here; it belongs to the scope, not to the DAO.
+        $dbMock->expects($this->once())
+            ->method('transaction')
+            ->willReturnCallback(static fn(callable $work) => $work());
 
         return [$dbMock, $failure];
     }
 
     #[Test]
-    public function setRollsBackAndRethrowsWhenTheWriteFails(): void
+    public function setLetsAFailedWriteReachTheTransactionScope(): void
     {
         [$database, $failure] = $this->makeFailingDatabase();
 
@@ -56,7 +59,7 @@ class MetadataDaoRollbackTest extends AbstractTest
     }
 
     #[Test]
-    public function bulkSetRollsBackAndRethrowsWhenTheWriteFails(): void
+    public function bulkSetLetsAFailedWriteReachTheTransactionScope(): void
     {
         [$database, $failure] = $this->makeFailingDatabase();
 
@@ -78,6 +81,7 @@ class MetadataDaoRollbackTest extends AbstractTest
         $dbMock->expects($this->never())->method('begin');
         $dbMock->expects($this->never())->method('commit');
         $dbMock->expects($this->never())->method('rollback');
+        $dbMock->expects($this->never())->method('transaction');
 
         (new MetadataDao($dbMock))->bulkSet(12, 'job-pw', []);
     }

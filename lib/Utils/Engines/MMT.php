@@ -343,6 +343,8 @@ class MMT extends AbstractEngine
 
     /**
      * @throws Exception
+     * @throws \Throwable the metadata write runs inside a transaction scope, which aborts the
+     *                     transaction on any throw and re-throws the original, whatever its type
      */
     public function syncMemories(array $projectRow, ?array $segments = []): void
     {

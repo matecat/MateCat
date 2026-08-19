@@ -173,22 +173,21 @@ class EventModelTest extends AbstractTest
         $projectDao = $this->createStub(ProjectDao::class);
         $projectDao->method('findById')->willReturn(new ProjectStruct(['id' => 100]));
 
-        // false while openTransaction() decides whether to begin one, true afterwards so that
-        // commitTransaction()/rollbackTransaction() see the transaction they are closing.
-        $connection = $this->createStub(\PDO::class);
-        $connection->method('inTransaction')->willReturnOnConsecutiveCalls(false, true);
-
+        // The scope owns both halves, so neither may be reached directly: a begin() the scope did
+        // not open, or a commit() it did not issue, is the shape this replaced.
         $database = $this->createMock(IDatabase::class);
-        $database->method('getConnection')->willReturn($connection);
-        $database->expects($this->once())->method('begin');
-        $database->expects($this->once())->method('commit');
+        $database->expects($this->never())->method('begin');
+        $database->expects($this->never())->method('commit');
         $database->expects($this->never())->method('rollback');
+        $database->expects($this->once())
+            ->method('transaction')
+            ->willReturnCallback(static fn(callable $work) => $work());
 
         (new EventModel($chunk, $struct, $eventDao, $projectDao, $this->createStub(FeatureSet::class), $database))->save();
     }
 
     #[Test]
-    public function saveRollsBackWhenTheDispatchFails(): void
+    public function saveLetsAFailedDispatchUnwindTheTransactionScope(): void
     {
         $chunk = $this->makeChunk();
         $struct = $this->makeEventStruct(false);
@@ -201,16 +200,14 @@ class EventModelTest extends AbstractTest
         $projectDao = $this->createStub(ProjectDao::class);
         $projectDao->method('findById')->willReturn(null);
 
-        // false while openTransaction() decides whether to begin one, true afterwards so that
-        // commitTransaction()/rollbackTransaction() see the transaction they are closing.
-        $connection = $this->createStub(\PDO::class);
-        $connection->method('inTransaction')->willReturnOnConsecutiveCalls(false, true);
-
+        // The scope aborts the transaction and re-throws; the failure has to reach the caller rather
+        // than be swallowed by whatever closed the transaction.
         $database = $this->createMock(IDatabase::class);
-        $database->method('getConnection')->willReturn($connection);
-        $database->expects($this->once())->method('begin');
+        $database->expects($this->never())->method('begin');
         $database->expects($this->never())->method('commit');
-        $database->expects($this->once())->method('rollback');
+        $database->expects($this->once())
+            ->method('transaction')
+            ->willReturnCallback(static fn(callable $work) => $work());
 
         $model = new EventModel($chunk, $struct, $eventDao, $projectDao, $this->createStub(FeatureSet::class), $database);
 

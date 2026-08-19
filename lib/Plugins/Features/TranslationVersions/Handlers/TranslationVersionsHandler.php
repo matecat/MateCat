@@ -178,6 +178,8 @@ class TranslationVersionsHandler implements VersionHandlerInterface
     /**
      * @throws Exception
      * @throws \TypeError
+     * @throws \Throwable the event save runs inside a transaction scope, which aborts the transaction
+     *                     on any throw and re-throws the original, whatever its type
      */
     public function storeTranslationEvent(StoreTranslationEventParams $params): void
     {

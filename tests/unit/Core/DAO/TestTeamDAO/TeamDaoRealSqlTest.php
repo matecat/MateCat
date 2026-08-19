@@ -21,10 +21,10 @@ use Utils\Constants\Teams;
  * (createPersonalTeam / createUserTeam / updateTeamName / delete / deleteTeam) build their own
  * isolated rows and the residue gate asserts whole-table COUNT(*) is unchanged after cleanup.
  *
- * createUserTeam wraps MembershipDao::createList in its own transaction (the harness opens no
- * ambient transaction) and commits it, so the team + membership rows are committed; they are
- * tracked via the returned structs so cleanup removes them. Until the transaction boundary moved
- * onto TransactionalTrait the commit never happened — the guard asked for "no transaction open",
+ * createUserTeam runs MembershipDao::createList inside a transaction scope (the harness opens no
+ * ambient transaction, so the scope is the outermost one) and commits it, so the team + membership
+ * rows are committed; they are tracked via the returned structs so cleanup removes them. An earlier
+ * version of that boundary never committed at all — its guard asked for "no transaction open",
  * which is true only when there is nothing to commit — and every assertion below still passed,
  * because a connection reads its own uncommitted rows.
  */
