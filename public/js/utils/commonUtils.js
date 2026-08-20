@@ -2,6 +2,12 @@ import React from 'react'
 import Cookies from 'js-cookie'
 import $ from 'jquery'
 import OfflineUtils from './offlineUtils'
+import {extend} from '../extensions/extensionPoints'
+import {
+  FILE_HAS_INSTRUCTIONS,
+  FILES_PARSE,
+  LINK_ALLOWED_REDIRECT,
+} from '../extensions/extensionPointNames'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from '../actions/ModalsActions'
 import FileTypeText from '../../img/icons/FileTypeText'
@@ -584,15 +590,9 @@ const CommonUtils = {
   checkJobIsSplitted: function () {
     return config.job_is_splitted
   },
-  //Plugins
-  parseFiles: (files) => {
-    return files
-  },
-  //Plugins
-  fileHasInstructions: (file) =>
-    file && file.metadata && file.metadata.instructions,
-
-  isAllowedLinkRedirect: () => false,
+  parseFiles: (files) => extend(FILES_PARSE)(files),
+  fileHasInstructions: (file) => extend(FILE_HAS_INSTRUCTIONS)(file),
+  isAllowedLinkRedirect: (link) => extend(LINK_ALLOWED_REDIRECT)(link),
   dispatchTrackingError: (message, attachment) => {
     const event = new CustomEvent('track-error', {
       detail: {message, attachment},

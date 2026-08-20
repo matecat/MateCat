@@ -9,8 +9,11 @@ import {extend} from '../extensions/extensionPoints'
 import {
   SEGMENT_CONTEXT_AFTER,
   SEGMENT_CONTEXT_BEFORE,
+  SEGMENT_FILE_ID,
+  SEGMENT_HAS_NOTE,
   SEGMENT_ID_AFTER,
   SEGMENT_ID_BEFORE,
+  SEGMENT_IS_ICE,
 } from '../extensions/extensionPointNames'
 
 const SegmentUtils = {
@@ -64,9 +67,7 @@ const SegmentUtils = {
   },
   //********** Tag Projection code end ******************/
 
-  isIceSegment: function (segment) {
-    return segment.ice_locked
-  },
+  isIceSegment: (segment) => extend(SEGMENT_IS_ICE)(segment),
   isSecondPassLockedSegment: function (segment) {
     return (
       segment.status?.toUpperCase() === SEGMENTS_STATUS.APPROVED2 &&
@@ -149,21 +150,12 @@ const SegmentUtils = {
       JSON.stringify([...prevValue, {[config.id_job]: keys.map(({id}) => id)}]),
     )
   },
-  segmentHasNote: (segment) => {
-    return !!(
-      segment.notes ||
-      segment.context_groups?.context_json ||
-      segment.metadata?.length > 0
-    )
-  },
+  segmentHasNote: (segment) => extend(SEGMENT_HAS_NOTE)(segment),
   /**
    * Retrieve the file id of a segment
-   * NOTE: used by plugins
    * @param segment
    */
-  getSegmentFileId: (segment) => {
-    return segment.id_file
-  },
+  getSegmentFileId: (segment) => extend(SEGMENT_FILE_ID)(segment),
   collectSplittedStatuses: function (sid, splittedSid, status) {
     let statuses = []
     const segments = SegmentStore.getSegmentsInSplit(sid)
