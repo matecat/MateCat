@@ -115,7 +115,10 @@ class TMXFileController extends KleinController
      */
     private function validateTheRequest(): array
     {
-        $name = filter_var($this->request->param('name'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        // Stored as typed and escaped by each output. `name` is also never read out of the array
+        // this returns — the key name comes from the uploaded file — but filtering it wrongly here
+        // would still be a trap for whoever starts reading it.
+        $name = filter_var($this->request->param('name'), FILTER_UNSAFE_RAW);
         $tm_key = filter_var($this->request->param('tm_key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
         $uuid = filter_var($this->request->param('uuid'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
         $disable_upload_limit = filter_var($this->request->param('disable_upload_limit'), FILTER_VALIDATE_BOOLEAN);

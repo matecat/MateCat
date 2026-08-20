@@ -15,6 +15,8 @@ use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSService;
+use Utils\TmKeyManagement\TmKeyManager;
+use Utils\Validation\UserSuppliedName;
 
 class MyMemoryController extends KleinController
 {
@@ -47,8 +49,17 @@ class MyMemoryController extends KleinController
                 $key = ($keyFiltered !== false) ? $keyFiltered : null;
             }
 
-            $nameFiltered = filter_var($json['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
-            $name = ($nameFiltered !== false) ? $nameFiltered : '';
+            // FILTER_FLAG_STRIP_HIGH deleted every byte above 0x7F, so a key named in Japanese,
+            // Chinese, Arabic or Cyrillic was created at MyMemory with an empty name. The name is
+            // normalised and sent as typed instead, and refused if it does not fit — this is a user
+            // naming something, so a 400 tells them why rather than silently storing something else.
+            $name = UserSuppliedName::validated(
+                is_string($json['name']) ? $json['name'] : null,
+                'name',
+                TmKeyManager::RESOURCE_NAME_MAX_LENGTH,
+                TmKeyManager::RESOURCE_NAME_MAX_LENGTH,
+                refuseUrl: false
+            );
 
             if ($key !== null) {
                 $newKey = $this->checkTheKeyAndAssignToUser($key, $name);

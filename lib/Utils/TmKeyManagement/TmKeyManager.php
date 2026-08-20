@@ -12,6 +12,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PDOException;
 use Utils\Logger\LoggerFactory;
+use Utils\Validation\UserSuppliedName;
 
 /**
  * Created by PhpStorm.
@@ -21,6 +22,12 @@ use Utils\Logger\LoggerFactory;
  */
 class TmKeyManager
 {
+
+    /**
+     * `memory_keys`.`key_name` is a varchar(512), but 255 is the width every other name in MateCat
+     * is held to and there is no reason for this one to be twice as wide as a team's.
+     */
+    const int RESOURCE_NAME_MAX_LENGTH = 255;
 
     /**
      * Returns a TmKeyStruct object. <br/>
@@ -231,9 +238,16 @@ class TmKeyManager
         }
 
         if (!is_null($obj->name)) {
-            $obj->name = preg_replace('/[^.\-_\p{L}\p{N}\s{}]+/u', '', $obj->name);
-            $sanitized = filter_var($obj->name, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-            $obj->name = $sanitized !== false ? $sanitized : null;
+            // A resource name is a name a user typed, so it goes through the same normalisation as
+            // every other one. The allowlist that used to be here kept `. - _`, letters, digits,
+            // whitespace and braces and deleted the rest, and the FILTER_SANITIZE_SPECIAL_CHARS
+            // after it entity-encoded what was left — which is why TmKeyManagementController had to
+            // html_entity_decode the name back on the way out.
+            //
+            // Cut to fit rather than refused: this runs on the job-keys merge path, over a list of
+            // keys the caller already owns, where one over-long legacy name must not fail the whole
+            // merge. The endpoints where a user is naming something check the length and answer 400.
+            $obj->name = UserSuppliedName::normalizeAndTruncate($obj->name, self::RESOURCE_NAME_MAX_LENGTH);
         }
 
         if (!is_null($obj->key)) {
