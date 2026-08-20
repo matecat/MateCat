@@ -456,7 +456,7 @@ class Editarea extends React.Component {
         const icuTokens = createIcuTokens(
           plainText,
           editorState,
-          config.target_rfc,
+          config.target_code,
         )
 
         if (
@@ -750,7 +750,7 @@ class Editarea extends React.Component {
     let readonly = false
 
     if (this.props.segment) {
-      lang = config.target_rfc
+      lang = config.target_code
       readonly =
         this.context.readonly ||
         this.context.locked ||
@@ -780,7 +780,7 @@ class Editarea extends React.Component {
         onDrop={onDragEnd}
         onFocus={onFocus}
         onKeyUp={onKeyUpEvent}
-        lang={config.target_rfc}
+        lang={config.target_code}
         spellCheck={true}
       >
         <Editor

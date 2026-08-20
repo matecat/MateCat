@@ -288,7 +288,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
      */
     public function sendNotificationEmail(): void
     {
-        if (!$this->_event->isAPropagatedEvent() && $this->_event->isLowerTransition()) {
+        if (!$this->_event->isAReplaceAllEvent() && !$this->_event->isAPropagatedEvent() && $this->_event->isLowerTransition()) {
             $chunkReviewsWithFinalRevisions = [];
             foreach ($this->_chunkReviews as $chunkReview) {
                 if (in_array($chunkReview->source_page, $this->_sourcePagesWithFinalRevisions)) {

@@ -7,8 +7,8 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} options.source
  * @param {string} options.target
  * @param {number} options.id
- * @param {string} [sourceLanguage=config.source_rfc]
- * @param {string} [targetLanguage=config.target_rfc]
+ * @param {string} [sourceLanguage=config.source_code]
+ * @param {string} [targetLanguage=config.target_code]
  * @param {string} [idJob=config.id_job]
  * @param {string} [currentPassword=config.currentPassword]
  * @param {string} [idTranslator=config.id_translator]
@@ -18,8 +18,8 @@ export const deleteContribution = async ({
   source,
   target,
   id,
-  sourceLanguage = config.source_rfc,
-  targetLanguage = config.target_rfc,
+  sourceLanguage = config.source_code,
+  targetLanguage = config.target_code,
   idJob = config.id_job,
   currentPassword = config.currentPassword,
   idTranslator = config.id_translator,

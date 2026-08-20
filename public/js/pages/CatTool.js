@@ -668,8 +668,8 @@ function CatTool() {
         jid={config.id_job}
         password={config.password}
         reviewPassword={config.review_password}
-        source_code={config.source_rfc}
-        target_code={config.target_rfc}
+        source_code={config.source_code}
+        target_code={config.target_code}
         isReview={config.isReview}
         revisionNumber={config.revisionNumber}
         userLogged={isUserLogged}
@@ -806,16 +806,16 @@ function CatTool() {
             setMtEngines,
             sourceLang: {
               name: ApplicationStore.getLanguageNameFromLocale(
-                config.source_rfc,
+                config.source_code,
               ),
-              code: config.source_rfc,
+              code: config.source_code,
             },
             targetLangs: [
               {
                 name: ApplicationStore.getLanguageNameFromLocale(
-                  config.target_rfc,
+                  config.target_code,
                 ),
-                code: config.target_rfc,
+                code: config.target_code,
               },
             ],
             projectTemplates,
@@ -829,8 +829,8 @@ function CatTool() {
           idProject={config.id_project}
           idJob={config.id_job}
           password={config.password}
-          source={config.source_rfc}
-          target={config.target_rfc}
+          source={config.source_code}
+          target={config.target_code}
           isReview={config.isReview}
           isCJK={config.isCJK}
           languagesArray={supportedLanguages}
