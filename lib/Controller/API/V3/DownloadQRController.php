@@ -250,6 +250,17 @@ class DownloadQRController extends KleinController
     }
 
     /**
+     * Escape a value for XML character data.
+     *
+     * ENT_XML1 rather than the HTML flags: XML has five predefined entities and `&apos;` is one of
+     * them, where the HTML 4.01 default set does not know it.
+     */
+    private static function xmlText(mixed $value): string
+    {
+        return htmlspecialchars((string)$value, ENT_QUOTES | ENT_XML1, 'UTF-8');
+    }
+
+    /**
      * @param list<array<int, mixed>> $data
      * @param list<string>            $categoryIssues
      *
@@ -392,11 +403,19 @@ class DownloadQRController extends KleinController
             $xml .= '<ice_locked>' . $datum[6] . '</ice_locked>';
             $xml .= '<status>' . $datum[7] . '</status>';
             $xml .= '<time_to_edit>' . $datum[8] . '</time_to_edit>';
-            $xml .= '<filename>' . $datum[9] . '</filename>';
+            // A resource name and a filename are text a user typed, and they are the two fields
+            // here that are neither a number nor segment content. Emitted raw, a TM key called
+            // "A & B" made the whole document fail to parse — an unescaped ampersand is not valid
+            // XML — so escaping them fixes the export as much as it closes the injection.
+            //
+            // The segment fields either side are deliberately left alone: they carry MateCat's own
+            // subfiltering markup, which has its own encoding pipeline, and escaping it here would
+            // corrupt every export rather than fix one.
+            $xml .= '<filename>' . self::xmlText($datum[9]) . '</filename>';
             $xml .= '<id_file>' . $datum[10] . '</id_file>';
             $xml .= '<warning>' . $datum[11] . '</warning>';
             $xml .= '<suggestion_match>' . $datum[12] . '</suggestion_match>';
-            $xml .= '<suggestion_source>' . $datum[13] . '</suggestion_source>';
+            $xml .= '<suggestion_source>' . self::xmlText($datum[13]) . '</suggestion_source>';
             $xml .= '<suggestion>' . $datum[14] . '</suggestion>';
             $xml .= '<edit_distance>' . $datum[15] . '</edit_distance>';
             $xml .= '<locked>' . $datum[16] . '</locked>';

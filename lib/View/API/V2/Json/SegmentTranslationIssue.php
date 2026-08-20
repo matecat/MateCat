@@ -99,16 +99,44 @@ class SegmentTranslationIssue
                 $combined = array_combine($csv_fields, array_fill(0, count($csv_fields), ''));
 
                 $combined["ID Segment"] = $record->id_segment;
-                $combined["Category"] = $record->category_label;
-                $combined["Severity"] = $record->severity;
-                $combined["Selected Text"] = $record->target_text;
-                $combined["Message"] = $c->comment;
+                $combined["Category"] = self::inertCsvValue($record->category_label);
+                $combined["Severity"] = self::inertCsvValue($record->severity);
+                $combined["Selected Text"] = self::inertCsvValue($record->target_text);
+                $combined["Message"] = self::inertCsvValue($c->comment);
                 $combined["Created At"] = $this->getDateValue($c->create_date);
                 $csvHandler->fputcsv($combined);
             }
         }
 
         return $filePath;
+    }
+
+    /**
+     * Keep a spreadsheet from reading a cell as a formula.
+     *
+     * Four of the six columns carry text a user typed: the category and severity labels come from
+     * whoever authored the QA model, and the selected text and message from whoever raised the
+     * issue. Excel, LibreOffice and Google Sheets all evaluate a cell that opens with `=`, `+`, `-`
+     * or `@`, so `=cmd|' /C calc'!A1` in a category label is a command that runs when a reviewer
+     * opens the report someone sent them. The leading tab and CR are here because a spreadsheet
+     * skips them and then reads what follows the same way.
+     *
+     * A single quote is the prefix every one of those three recognises as "this cell is text". It
+     * shows in the formula bar and not in the cell, so a value that needed it still reads correctly.
+     *
+     * Escaping rather than stripping, because a label may legitimately begin with a minus — a
+     * severity called "-2 points" is a label, not an attack — and the reader must still see it.
+     */
+    private static function inertCsvValue(?string $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return $value;
+        }
+
+        // `!== 0` rather than `=== 1`: preg_match returns false when PCRE gives up, and this rule
+        // decides whether to neutralise a cell. Escaping a value that did not need it costs a
+        // leading quote in the formula bar; not escaping one that did runs a command.
+        return preg_match('/^[=+\-@\t\r]/', $value) !== 0 ? "'" . $value : $value;
     }
 
     /**
