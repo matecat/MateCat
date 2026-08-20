@@ -2,6 +2,7 @@ import React from 'react'
 import {render, screen, fireEvent} from '@testing-library/react'
 import GlossaryList from './GlossaryList'
 import {TabGlossaryContext} from './TabGlossaryContext'
+import '../../../extensions/extensionManifest'
 
 jest.mock('../../../stores/SegmentStore', () => {
   const listeners = {}
@@ -57,7 +58,9 @@ const defaultContext = {
 
 const renderList = (contextOverrides = {}) =>
   render(
-    <TabGlossaryContext.Provider value={{...defaultContext, ...contextOverrides}}>
+    <TabGlossaryContext.Provider
+      value={{...defaultContext, ...contextOverrides}}
+    >
       <GlossaryList />
     </TabGlossaryContext.Provider>,
   )
@@ -114,7 +117,13 @@ describe('GlossaryList', () => {
     const setModifyElement = jest.fn()
     const setShowMore = jest.fn()
     const setSelectsActive = jest.fn()
-    renderList({terms: [term], setShowForm, setModifyElement, setShowMore, setSelectsActive})
+    renderList({
+      terms: [term],
+      setShowForm,
+      setModifyElement,
+      setShowMore,
+      setSelectsActive,
+    })
 
     fireEvent.click(document.querySelector('.glossary_item-actions div'))
 

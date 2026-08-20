@@ -7,12 +7,18 @@ import {
   registerExtension,
   resetExtensionOverrides,
 } from './extensionPoints'
+import {
+  defineCapability,
+  resetCapabilities,
+  setCapability,
+} from './capabilities'
 
 // The registry keeps module-level state and each test file gets its own module
 // registry, so these names are private to this file and never collide with the
 // real manifest.
 const A = 'test.alpha'
 const B = 'test.beta'
+const LOGGED = 'test.logged'
 
 const defaultA = jest.fn(() => 'default A')
 const defaultB = jest.fn((x) => `default B ${x}`)
@@ -151,11 +157,26 @@ describe('logExtensionPointStatus', () => {
     registerExtension(A, () => 'extended')
     withNodeEnv('development', () => logExtensionPointStatus())
 
-    expect(info).toHaveBeenCalledTimes(1)
     const message = info.mock.calls[0][0]
     expect(message).toContain('2 points defined')
     expect(message).toContain(`extended: ${A}`)
     expect(message).toContain(`core default: ${B}`)
     info.mockRestore()
+  })
+
+  test('reports which capabilities have been withdrawn', () => {
+    const info = jest.spyOn(console, 'info').mockImplementation(() => {})
+    defineCapability(LOGGED)
+    setCapability(LOGGED, false)
+
+    withNodeEnv('development', () => logExtensionPointStatus())
+
+    expect(
+      info.mock.calls.some(([m]) =>
+        m.includes(`withdrawn capabilities: ${LOGGED}`),
+      ),
+    ).toBe(true)
+    info.mockRestore()
+    resetCapabilities()
   })
 })

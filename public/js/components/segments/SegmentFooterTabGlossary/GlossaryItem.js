@@ -11,6 +11,8 @@ import {
 import {TabGlossaryContext} from './TabGlossaryContext'
 import LabelWithTooltip from '../../common/LabelWithTooltip'
 import Tooltip, {TOOLTIP_POSITION} from '../../common/Tooltip'
+import {can} from '../../../extensions/capabilities'
+import {GLOSSARY_EDIT} from '../../../extensions/capabilityNames'
 
 const DESCRIPTION_ELEMENTS_LINE_CLAMP = 3
 
@@ -108,37 +110,39 @@ export const GlossaryItem = ({
             <span>{metadata.last_update_date}</span>
           </div>
         </div>
-        <div
-          className={`glossary_item-actions${
-            !canModifyItem && !isStatusDeleting
-              ? ' glossary_item-actions--disabled'
-              : ''
-          }`}
-        >
-          <div onClick={() => canModifyItem && modifyElement()}>
-            <ModifyIcon />
-          </div>
-          {!canModifyItem && !isStatusDeleting && (
-            <div
-              className="locked-button"
-              aria-label={
-                isBlacklist
-                  ? 'Forbidden words can only be edited offline'
-                  : 'You can only edit entries from keys that you own'
-              }
-              tooltip-position="left"
-            >
-              <LockIcon />
+        {can(GLOSSARY_EDIT) && (
+          <div
+            className={`glossary_item-actions${
+              !canModifyItem && !isStatusDeleting
+                ? ' glossary_item-actions--disabled'
+                : ''
+            }`}
+          >
+            <div onClick={() => canModifyItem && modifyElement()}>
+              <ModifyIcon />
             </div>
-          )}
-          <div onClick={() => canModifyItem && deleteElement()}>
-            {isStatusDeleting ? (
-              <div className="loader loader_on"></div>
-            ) : (
-              <DeleteIcon />
+            {!canModifyItem && !isStatusDeleting && (
+              <div
+                className="locked-button"
+                aria-label={
+                  isBlacklist
+                    ? 'Forbidden words can only be edited offline'
+                    : 'You can only edit entries from keys that you own'
+                }
+                tooltip-position="left"
+              >
+                <LockIcon />
+              </div>
             )}
+            <div onClick={() => canModifyItem && deleteElement()}>
+              {isStatusDeleting ? (
+                <div className="loader loader_on"></div>
+              ) : (
+                <DeleteIcon />
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div

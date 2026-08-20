@@ -7,6 +7,8 @@
 //
 // Names are capabilities, never a description of who overrides them.
 
+import {defineCapability} from './capabilities'
+import {GLOSSARY_EDIT} from './capabilityNames'
 import {defineExtensionPoint, defineSlot} from './extensionPoints'
 import {
   CHARS_COUNTER_MODE,
@@ -59,3 +61,7 @@ defineExtensionPoint(CHARS_COUNTER_MODE, () => undefined)
 
 // Slots: positions in the tree rather than behaviour.
 defineSlot(HEADER_MORE_LINKS)
+
+// Capabilities: what a deployment is permitted to do, rather than who implements
+// it. Withdrawing one hides the affordance instead of deadening it.
+defineCapability(GLOSSARY_EDIT)

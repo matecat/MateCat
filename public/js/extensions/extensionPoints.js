@@ -10,6 +10,8 @@
 // Point names are capability names drawn from the domain. Nothing here records
 // who registers what — that mapping is deliberately not knowable from core.
 
+import {listCapabilities} from './capabilities'
+
 const defaults = new Map()
 const overrides = new Map()
 
@@ -85,6 +87,15 @@ export const logExtensionPointStatus = () => {
       points.filter(({overridden}) => overridden).map(({name}) => name),
     )} | core default: ${names(
       points.filter(({overridden}) => !overridden).map(({name}) => name),
+    )}`,
+  )
+
+  // eslint-disable-next-line no-console
+  console.info(
+    `[extensions] withdrawn capabilities: ${names(
+      listCapabilities()
+        .filter(({allowed}) => !allowed)
+        .map(({name}) => name),
     )}`,
   )
 }

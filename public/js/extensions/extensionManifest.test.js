@@ -1,6 +1,8 @@
 import './extensionManifest'
 import {getExtensionDefault, listExtensionPoints} from './extensionPoints'
 import * as names from './extensionPointNames'
+import {listCapabilities} from './capabilities'
+import * as capabilityNames from './capabilityNames'
 import * as defaults from './segmentEditorDefaults'
 
 jest.mock('../stores/SegmentStore', () => ({
@@ -97,6 +99,26 @@ describe('the extension manifest', () => {
   test('every name is a dotted capability name', () => {
     Object.values(names).forEach((name) => {
       expect(name).toMatch(/^[a-z][a-zA-Z]*\.[a-z][a-zA-Z]*$/)
+    })
+  })
+
+  describe('the capabilities it declares', () => {
+    test('are exactly the ones named in capabilityNames', () => {
+      expect(
+        listCapabilities()
+          .map(({name}) => name)
+          .sort(),
+      ).toEqual(Object.values(capabilityNames).sort())
+    })
+
+    test('are all permitted until something withdraws one', () => {
+      expect(listCapabilities().every(({allowed}) => allowed)).toBe(true)
+    })
+
+    test('are named the same way points are', () => {
+      Object.values(capabilityNames).forEach((name) => {
+        expect(name).toMatch(/^[a-z][a-zA-Z]*\.[a-z][a-zA-Z]*$/)
+      })
     })
   })
 })
