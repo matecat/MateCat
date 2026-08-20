@@ -179,8 +179,8 @@ class SegmentFooterTabMatches extends React.Component {
           </span>
         </li>
         <li>{match.suggestion_info}</li>
-        {(match.target !== config.target_rfc ||
-          match.source !== config.source_rfc) && (
+        {(match.target !== config.target_code ||
+          match.source !== config.source_code) && (
           <Tooltip
             content={
               <div
