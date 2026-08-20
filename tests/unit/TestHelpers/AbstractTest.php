@@ -84,19 +84,36 @@ abstract class AbstractTest extends TestCase
     }
 
     /**
+     * @param bool $inTransaction Whether the stubbed connection reports an open transaction. Opt in
+     *                           only when the test drives a path whose production caller genuinely
+     *                           opens one — see the note on the stub below.
+     *
      * @return array{0: IDatabase, 1: PDO, 2: PDOStatement}
      * @throws Exception
      */
-    protected function createDatabaseMock(): array
+    protected function createDatabaseMock(bool $inTransaction = false): array
     {
         $stmtStub = $this->createStub(PDOStatement::class);
         $stmtStub->queryString = '';
 
         $pdoStub = $this->createStub(PDO::class);
         $pdoStub->method('prepare')->willReturn($stmtStub);
+        // Defaults to false, which is both what an unconfigured stub would report and the truth for
+        // a bare connection. ChunkReviewDao::lockByJobId() refuses to run outside a transaction, so
+        // a test that needs that guard satisfied passes inTransaction: true and thereby asserts that
+        // its production caller opens one. This used to default to true on the assumption that every
+        // writer of qa_chunk_reviews was already transactional — SetChunkCompletedController ->
+        // EventModel::save() was not, and defaulting to true is what kept any test from finding it.
+        $pdoStub->method('inTransaction')->willReturn($inTransaction);
 
         $dbStub = $this->createStub(IDatabase::class);
         $dbStub->method('getConnection')->willReturn($pdoStub);
+        // Deferred work runs inline under test. A stub would otherwise swallow every onCommit()
+        // callback, so anything scheduled through it — cache invalidation, queued mail — would
+        // silently never happen and the tests asserting it would pass vacuously. Running it
+        // immediately reproduces the observable behaviour these tests were written against; the real
+        // ordering guarantee is covered by DatabaseAfterCommitTest.
+        $dbStub->method('onCommit')->willReturnCallback(static fn(callable $callback) => $callback());
 
         \TestDatabaseProvider::set($dbStub);
         $this->databaseMockApplied = true;
