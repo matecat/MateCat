@@ -8,6 +8,7 @@ let mockCompressed = false
 let mockHasCompressiblePhTags = true
 let mockStoreListeners = {}
 let capturedTagMenuItems = null
+let capturedHoverMenuItems = null
 
 const REMOVE_TAGS_SHORTCUT = 'ctrl+shift+z'
 const ADD_TAGS_SHORTCUT = 'ctrl+shift+i'
@@ -37,6 +38,7 @@ jest.mock('../../hooks/UseHotKeysComponent', () => ({
 jest.mock('../common/DropdownMenu/DropdownMenu', () => ({
   DropdownMenu: ({items, triggerMode}) => {
     if (triggerMode !== 'hover') capturedTagMenuItems = items
+    else capturedHoverMenuItems = items
     return <div data-testid="dropdown-menu" />
   },
   DROPDOWN_MENU_ITEM_TYPE: {DEFAULT: 'default', CRITICAL: 'critical'},
@@ -111,6 +113,8 @@ beforeEach(() => {
   mockHasCompressiblePhTags = true
   mockStoreListeners = {}
   capturedTagMenuItems = null
+  capturedHoverMenuItems = null
+  window.config = {}
 })
 
 describe('SegmentTargetToolbar', () => {
@@ -265,6 +269,98 @@ describe('SegmentTargetToolbar', () => {
         expect(tagMenuItem('tags-menu-copy-from-source').disabled).toBe(false)
         expect(tagMenuItem('tags-menu-remove-all').disabled).toBe(false)
       })
+    })
+  })
+
+  describe('format menu', () => {
+    test('applies uppercase/lowercase/capitalize via the hover format menu', () => {
+      const formatSelection = jest.fn()
+      renderToolbar({
+        showFormatMenu: true,
+        editArea: {
+          formatSelection,
+          addMissingSourceTagsToTarget: jest.fn(),
+        },
+      })
+
+      const formatItems = capturedHoverMenuItems
+      expect(formatItems).toHaveLength(3)
+
+      formatItems[0].onClick()
+      formatItems[1].onClick()
+      formatItems[2].onClick()
+
+      expect(formatSelection).toHaveBeenCalledWith('uppercase')
+      expect(formatSelection).toHaveBeenCalledWith('lowercase')
+      expect(formatSelection).toHaveBeenCalledWith('capitalize')
+    })
+
+    test('is not rendered when showFormatMenu is false', () => {
+      renderToolbar({showFormatMenu: false})
+      expect(capturedHoverMenuItems).toBeNull()
+    })
+  })
+
+  describe('review/quality icons', () => {
+    test('opens the quality report link when there are issues to show', () => {
+      const openSpy = jest.spyOn(window, 'open').mockImplementation(() => {})
+      const {container} = renderToolbar({
+        issuesLength: 2,
+        qrLink: 'https://example.com/qr',
+      })
+
+      const qualityButton = container.querySelector(
+        'button[title="Segment Quality Report."]',
+      )
+      expect(qualityButton).toBeInTheDocument()
+
+      act(() => {
+        qualityButton.click()
+      })
+
+      expect(openSpy).toHaveBeenCalledWith(
+        'https://example.com/qr',
+        '_blank',
+      )
+      openSpy.mockRestore()
+    })
+
+    test('does not render the quality report icon without issues or review mode', () => {
+      const {container} = renderToolbar({issuesLength: 0})
+      expect(
+        container.querySelector('button[title="Segment Quality Report."]'),
+      ).not.toBeInTheDocument()
+    })
+
+    test('triggers lockEditArea when the revise lock icon is clicked in review mode', () => {
+      window.config = {isReview: true}
+      const lockEditArea = jest.fn()
+      const {container} = renderToolbar({lockEditArea})
+
+      const lockButton = container.querySelector(
+        'button[title="Highlight text and assign an issue to the selected text."]',
+      )
+      expect(lockButton).toBeInTheDocument()
+
+      act(() => {
+        lockButton.click()
+      })
+
+      expect(lockEditArea).toHaveBeenCalled()
+    })
+  })
+
+  describe('AI features group', () => {
+    test('groups Lara AI feature icons into a single dropdown when the engine is Lara', () => {
+      window.config = {active_engine: {engine_type: 'Lara'}}
+      renderToolbar()
+
+      expect(capturedHoverMenuItems).toHaveLength(3)
+      expect(
+        capturedHoverMenuItems.every(
+          (item) => typeof item.onClick !== 'function',
+        ),
+      ).toBe(true)
     })
   })
 })
