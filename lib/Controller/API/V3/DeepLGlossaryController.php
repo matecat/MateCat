@@ -11,6 +11,7 @@ use Utils\Engines\DeepL\DeepLApiException;
 use Utils\Engines\EnginesFactory;
 use Utils\Files\CSV as CSVParser;
 use TypeError;
+use Utils\Validation\UserSuppliedName;
 
 class DeepLGlossaryController extends KleinController
 {
@@ -63,7 +64,10 @@ class DeepLGlossaryController extends KleinController
     {
         $this->validateCreateGlossaryPayload();
 
-        $name = filter_var($this->params['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_STRIP_HIGH);
+        // FILTER_FLAG_STRIP_HIGH deleted every byte above 0x7F, so a glossary named in any
+        // non-Latin script was created at DeepL with a mangled name — and the entity encoding on
+        // top of it left `&amp;` there permanently. Sent as typed instead.
+        $name = UserSuppliedName::normalize(is_string($this->params['name']) ? $this->params['name'] : null);
 
         $uploadedFiles = $this->upload->uploadFiles($this->request->files()->all());
 
