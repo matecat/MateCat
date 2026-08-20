@@ -9,6 +9,18 @@ window.config = {
   isTargetRTL: false,
 }
 
+// Suppress expected console output from format-message and ICU parser during tests
+beforeEach(() => {
+  jest.spyOn(console, 'warn').mockImplementation(() => {})
+  jest.spyOn(console, 'error').mockImplementation(() => {})
+  jest.spyOn(console, 'log').mockImplementation(() => {})
+})
+afterEach(() => {
+  console.warn.mockRestore()
+  console.error.mockRestore()
+  console.log.mockRestore()
+})
+
 const createSegment = (translation) => ({
   segment: translation,
   translation,
@@ -58,7 +70,7 @@ describe('SegmentFooterTabIcu', () => {
       />,
     )
 
-    expect(screen.getByText('Plural Rules')).toBeInTheDocument()
+    expect(screen.getByText('Plural rules')).toBeInTheDocument()
     expect(screen.getByText('count')).toBeInTheDocument()
     expect(screen.getByText('(number)')).toBeInTheDocument()
   })

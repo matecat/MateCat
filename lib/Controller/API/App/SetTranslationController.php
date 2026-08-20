@@ -795,8 +795,8 @@ class SetTranslationController extends AbstractStatefulKleinController
         [$__translation, $this->data['split_chunk_lengths']] = (new CatUtils($this->getDatabase()))->parseSegmentSplit($this->data['translation'], '', $this->filter);
 
         if (is_null($__translation) || $__translation === '') {
-            $this->logger->debug("Empty Translation \n\n" . var_export($this->request->paramsPost()->all(), true));
-            throw new RuntimeException("Empty Translation \n\n" . var_export($this->request->paramsPost()->all(), true), 0);
+            $this->logger->debug("Empty translation \n\n" . var_export($this->request->paramsPost()->all(), true));
+            throw new RuntimeException("Empty translation \n\n" . var_export($this->request->paramsPost()->all(), true), 0);
         }
 
         $explodeIdSegment = explode("-", $this->data['id_segment']);
@@ -804,7 +804,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         $this->data['split_num'] = $explodeIdSegment[1] ?? null;
 
         if (empty($this->data['id_segment'])) {
-            throw new Exception("missing id_segment", -1);
+            throw new Exception("Missing id_segment", -1);
         }
 
         if ($this->isSplittedSegment()) {
@@ -901,7 +901,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 break;
 
             default:
-                $msg = "Error Hack Status \n\n " . var_export($this->request->paramsPost()->all(), true);
+                $msg = "Error hack status \n\n " . var_export($this->request->paramsPost()->all(), true);
                 throw new Exception($msg, -1);
         }
     }

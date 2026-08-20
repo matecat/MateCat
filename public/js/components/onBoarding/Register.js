@@ -87,7 +87,7 @@ const Register = () => {
           size={BUTTON_SIZE.LINK_MEDIUM}
           onClick={resendEmail}
         >
-          Resend Email
+          Resend email
         </Button>
         {isEmailSentAgain && (
           <span className="email-sent-again">Email sent again</span>

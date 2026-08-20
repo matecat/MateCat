@@ -42,7 +42,7 @@ class ConvertFileController extends KleinController
         $errDir = AppConfig::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
 
         if (!Utils::isTokenValid($uploadTokenValue)) {
-            throw new RuntimeException("Invalid Upload Token.");
+            throw new RuntimeException("Invalid upload token.");
         }
 
         $this->featureSet->loadFromUserEmail($this->user->email ?? '');

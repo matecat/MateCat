@@ -437,7 +437,7 @@ class UploadTest extends AbstractTest
         $fakeUpload['error'] = 99; // unknown code
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Unknown Error: 99');
+        $this->expectExceptionMessage('Unknown error: 99');
         $upload->uploadFiles(['doc' => $fakeUpload]);
     }
 
@@ -455,7 +455,7 @@ class UploadTest extends AbstractTest
         $fakeUpload = $this->makeFakeUpload('malware.exe', 'MZ executable');
 
         $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('File Extension Not Allowed');
+        $this->expectExceptionMessage('File extension not allowed');
         $upload->uploadFiles(['doc' => $fakeUpload]);
     }
 
@@ -479,7 +479,7 @@ class UploadTest extends AbstractTest
             $fakeUpload = $this->makeFakeUpload('big.txt', 'This content exceeds the 5 byte limit');
 
             $this->expectException(DomainException::class);
-            $this->expectExceptionMessage('File Dimensions Not Allowed');
+            $this->expectExceptionMessage('File dimensions not allowed');
             $upload->uploadFiles(['doc' => $fakeUpload]);
         } finally {
             AppConfig::$MAX_UPLOAD_FILE_SIZE = $originalMax;

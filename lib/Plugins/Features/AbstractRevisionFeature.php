@@ -360,12 +360,12 @@ abstract class AbstractRevisionFeature extends BaseFeature
     {
         $struct = $event->event;
         $review = (new ChunkReviewDao($this->getDatabase()))->findChunkReviews(new JobStruct(['id' => $struct->id_job, 'password' => $struct->password]))[0]
-            ?? throw new ValidationError('chunk review not found');
+            ?? throw new ValidationError('Chunk review not found');
 
         $undo_data = $review->getUndoData();
 
         if (is_null($undo_data)) {
-            throw new ValidationError('undo data is not available');
+            throw new ValidationError('Undo data is not available');
         }
 
         $this->_validateUndoData($struct, $undo_data);
@@ -402,11 +402,11 @@ abstract class AbstractRevisionFeature extends BaseFeature
                 'is_pass'
             ]);
         } catch (Exception $e) {
-            throw new ValidationError('undo data is missing some keys. ' . $e->getMessage());
+            throw new ValidationError('Undo data is missing some keys. ' . $e->getMessage());
         }
 
         if ($undo_data['reset_by_event_id'] != (string)$event->id) {
-            throw new ValidationError('event does not match with latest revision data');
+            throw new ValidationError('Event does not match with latest revision data');
         }
     }
 

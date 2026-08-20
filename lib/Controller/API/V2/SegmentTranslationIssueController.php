@@ -384,7 +384,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $owner = (new UserDao($this->getDatabase()))->getByEmail($job->owner);
 
         if($owner === null){
-            throw new AuthorizationError( "Job owner not found. Not Authorized", 401 );
+            throw new AuthorizationError( "Job owner not found. Not authorized", 401 );
         }
 
         if($owner->uid === $loggerUser->uid){

@@ -679,7 +679,7 @@ class Session
     public function importFile(string $googleFileId, Google_Client $gClient): void
     {
         if (!isset($this->guid)) {
-            throw new Exception('conversion params not set');
+            throw new Exception('Conversion params not set');
         }
 
         $service = $this->getService($gClient);

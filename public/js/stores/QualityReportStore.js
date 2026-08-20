@@ -85,8 +85,10 @@ AppDispatcher.register(function (action) {
       )
       break
     case QRConstants.NO_MORE_SEGMENTS:
-      QualityReportStore.storeJobInfo(action.job)
       QualityReportStore.emitChange(QRConstants.NO_MORE_SEGMENTS)
+      break
+    case QRConstants.LOADING_MORE_SEGMENTS:
+      QualityReportStore.emitChange(QRConstants.LOADING_MORE_SEGMENTS)
       break
   }
 })

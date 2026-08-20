@@ -1351,7 +1351,7 @@ class TmKeyManagementTest extends AbstractTest
     public function testMergeJsonKeys_InvalidRole()
     {
         $this->expectException('Exception');
-        $this->expectExceptionMessage("Invalid Role Type string.");
+        $this->expectExceptionMessage("Invalid role type string.");
         TmKeyManager::mergeJsonKeys(
             self::$client_json_GHI,
             self::$srv_json_GHI,
@@ -1365,7 +1365,7 @@ class TmKeyManagementTest extends AbstractTest
     public function testMergeJsonKeys_InvalidAnonymousOWNER()
     {
         $this->expectException('Exception');
-        $this->expectExceptionMessage("Anonymous user can not be OWNER");
+        $this->expectExceptionMessage("Anonymous user can not be owner");
         TmKeyManager::mergeJsonKeys(
             self::$client_json_GHI,
             self::$srv_json_GHI,

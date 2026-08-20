@@ -94,6 +94,16 @@ const tagMenuItem = (testId) =>
 const registeredShortcuts = () =>
   mockRegisterHotkey.mock.calls.map(([shortcut]) => shortcut)
 
+// useResizeObserver observes the toolbar's parent node to decide when
+// icons should collapse into a dropdown, which jsdom doesn't implement.
+beforeAll(() => {
+  global.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+})
+
 beforeEach(() => {
   mockToggleCompression.mockClear()
   mockRegisterHotkey.mockClear()

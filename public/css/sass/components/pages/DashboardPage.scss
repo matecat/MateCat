@@ -1,11 +1,10 @@
 @use '../../common-main';
+@use '../../commons/reset';
 @use '../../commons/filter-teams';
-@use '../../commons/icons';
 @use '../../commons/project';
 @use '../../commons/shadows';
 @use '../../commons/divider';
 @use '../../commons/progress-mc-bar';
-@use '../../commons/buttons';
 @use '../../commons/aria-label-tooltip';
 
 @use '../../modals/split_modal';
@@ -19,4 +18,6 @@
 @use '../UserProjectDropdown';
 @use '../signin/OnBoarding';
 @use '../MembersFilter';
+@use '../Projects/ProjectContainer.scss';
+@use '../Projects/JobContainer.scss';
 @use '../ProjectBulkActions';

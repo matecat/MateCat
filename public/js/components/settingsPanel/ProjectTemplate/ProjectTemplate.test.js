@@ -18,19 +18,20 @@ global.config = {
   isLoggedIn: 1,
 }
 
-const wrapperElement = document.createElement('div')
+class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+beforeAll(() => {
+  window.ResizeObserver = ResizeObserver
+  return (window.open = jest.fn())
+})
+
 const WrapperComponent = (contextProps) => {
-  const ref = useRef()
-
-  useEffect(() => {
-    ref.current.appendChild(wrapperElement)
-  }, [])
-
   return (
     <SettingsPanelContext.Provider value={contextProps}>
-      <div ref={ref}>
-        <ProjectTemplate portalTarget={wrapperElement} />
-      </div>
+      <ProjectTemplate />
     </SettingsPanelContext.Provider>
   )
 }
@@ -269,7 +270,7 @@ test('Create, update and delete template', async () => {
 
   // delete
   await act(async () =>
-    user.click(screen.getByTestId('menu-button-show-items')),
+    user.click(screen.getByTestId('project-template-more-menu')),
   )
 
   await waitFor(async () => user.click(screen.getByTestId('delete-template')))

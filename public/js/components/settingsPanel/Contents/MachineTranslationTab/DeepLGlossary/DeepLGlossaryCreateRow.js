@@ -8,6 +8,12 @@ import {createAndImportDeepLGlossary} from '../../../../../api/createAndImportDe
 import LabelWithTooltip from '../../../../common/LabelWithTooltip'
 import CatToolActions from '../../../../../actions/CatToolActions'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
+import {
+  Button,
+  BUTTON_HTML_TYPE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../../common/Button/Button'
 
 export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
@@ -172,25 +178,27 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
           isWaitingResult ? ' row-content-create-glossary-waiting' : ''
         }`}
       >
-        <button
-          className="ui primary button settings-panel-button-icon confirm-button"
-          type="submit"
+        <Button
+          type={BUTTON_TYPE.PRIMARY}
+          size={BUTTON_SIZE.SMALL}
           disabled={isWaitingResult || !isFormFilled}
-          data-testid="deeplglossary-create-confirm"
+          htmlType={BUTTON_HTML_TYPE.SUBMIT}
+          testId="deeplglossary-create-confirm"
         >
           <Checkmark size={12} />
           Confirm
-        </button>
+        </Button>
       </div>
       <div className="glossary-row-delete">
-        <button
-          className="ui button orange close-button"
+        <Button
+          type={BUTTON_TYPE.WARNING}
+          size={BUTTON_SIZE.ICON_SMALL}
+          htmlType={BUTTON_HTML_TYPE.RESET}
           onClick={onReset}
-          type="reset"
           disabled={isWaitingResult}
         >
           <Close size={18} />
-        </button>
+        </Button>
       </div>
       {isWaitingResult && <div className="spinner"></div>}
     </form>

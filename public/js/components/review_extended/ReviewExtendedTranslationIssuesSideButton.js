@@ -38,10 +38,10 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component {
           className={`revise-button ${issuesCount === 0 && 'no-object'}`}
           title={
             issuesCount > 0
-              ? `Show Issues ( ${Shortcuts.cattol.events.openIssuesPanel.keystrokes[
+              ? `Show issues ( ${Shortcuts.cattol.events.openIssuesPanel.keystrokes[
                   Shortcuts.shortCutsKeyType
                 ].toUpperCase()}     )`
-              : 'Add Issues'
+              : 'Add issues'
           }
           onClick={this.handleClick.bind(this)}
         >

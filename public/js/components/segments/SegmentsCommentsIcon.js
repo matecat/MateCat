@@ -71,7 +71,7 @@ class SegmentsCommentsIcon extends React.Component {
       this.state.comments
     ) {
       let html
-      let rootClasses = ['mbc-comment-icon-button', 'txt']
+      let rootClasses = ['comment-icon-btn', 'txt']
       if (
         this.state.comments.total === 0 ||
         (this.state.comments.total > 0 && this.state.comments.active === 0)
@@ -98,7 +98,7 @@ class SegmentsCommentsIcon extends React.Component {
           }
           onClick={(e) => this.openComments(e)}
         >
-          <div className="mbc-comment-icon">
+          <div className="comment-icon">
             <CommentsIcon />
             {html}
           </div>

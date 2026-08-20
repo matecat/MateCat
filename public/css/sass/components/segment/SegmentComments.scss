@@ -1,0 +1,543 @@
+@use '../../tokens/colors';
+@use '../../commons/variables';
+/*
+ ******
+ ******
+ Balloon basic layout
+ ******
+ ******
+ */
+
+.comment-balloon-inner {
+  background: colors.$white;
+  box-shadow: 0 1px 2px 0px rgba(0, 0, 0, 0.3);
+}
+
+/*
+ ******
+ Past comments wrap
+ ******
+ */
+
+.comments-wrap {
+  min-height: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  bottom: 0;
+}
+
+/*
+ ******
+ Past comment wrap common
+ ******
+ */
+.comment-thread {
+  padding: 10px;
+  border-top: 1px solid colors.$grey50;
+}
+
+/*
+ ******
+ Show past comment
+ ******
+ */
+.comment-item:not(:first-of-type) {
+  margin-top: 14px;
+}
+
+.comments-wrap .comment-item:not(:last-of-type) {
+  background-color: colors.$grey50;
+  border-radius: 4px;
+  padding: 8px;
+  > .bc-show-comment-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+.comments-wrap .comment-thread-resolved .comment-item:not(:last-of-type) {
+  background-color: rgba(colors.$green300, 0.2);
+  border-radius: 4px;
+}
+
+/*
+ ******
+ Past comment details
+ ******
+ */
+.comment-info-wrap {
+  clear: both;
+  margin-top: -6px;
+}
+
+.comment-info {
+  color: colors.$grey600;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: lighter;
+  padding-bottom: 2px;
+}
+
+/*
+ Message past comment details
+ */
+.comment-body {
+  color: colors.$grey1300;
+  font-size: 14px;
+  margin: 12px 0 16px;
+  word-wrap: break-word;
+}
+
+/*
+ ******
+ ******
+ Comment input
+ ******
+ ******
+ */
+
+.comment-input {
+  border-radius: 2px;
+  outline-width: 0;
+  width: 100%;
+}
+
+.comment-textarea {
+  position: relative;
+  word-break: normal;
+  outline: none;
+  color: colors.$black;
+  border: 1px solid colors.$grey200;
+  box-shadow: inset 0 1px 2px colors.$grey200;
+  -webkit-box-shadow: inset 0 1px 2px colors.$grey200;
+  min-height: 40px;
+  overflow-y: auto !important;
+  max-height: 160px;
+  border-radius: 20px;
+
+  .comment-input__highlighter,
+  textarea {
+    border: unset !important;
+    outline: unset !important;
+    padding: 10px;
+    line-height: 1.5;
+  }
+}
+
+.comment-textarea:hover {
+  border-color: rgba(34, 36, 38, 0.35);
+  box-shadow: none;
+}
+.comment-textarea:focus {
+  border: 1px solid colors.$grey300;
+  box-shadow: inset 0px 0px 2px 2px colors.$grey300;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.comment-textarea:empty:not(:focus):before {
+  content: attr(data-placeholder);
+  color: colors.$grey400;
+  position: absolute;
+  top: 10px;
+  pointer-events: none;
+}
+
+.comment-input__suggestions {
+  z-index: 2 !important;
+}
+
+.comment-input__suggestions__list {
+  background-color: colors.$white;
+  border: 1px solid colors.$grey200;
+}
+
+.comment-input__suggestions__item {
+  padding: 5px 15px;
+  border-bottom: 1px solid colors.$grey75;
+}
+
+.comment-input__suggestions__item--focused {
+  background-color: rgba(colors.$grey75, 0.6);
+  color: colors.$blue500;
+}
+
+.tagging-item {
+  color: colors.$blue500;
+}
+
+.tagging-item-textarea {
+  background-color: rgba(colors.$blue500, 0.3);
+  border-radius: 10px;
+  padding: 2px 0;
+}
+
+/*
+ ******
+ ******
+ Labels
+ ******
+ ******
+ */
+
+/*
+ ******
+ Common label
+ ******
+ */
+.comment-label {
+  display: block;
+  font-size: 14px;
+}
+
+/*
+ Username label
+ */
+.comment-username-label {
+  color: colors.$grey1300;
+  font-weight: bold;
+  margin-bottom: 4px;
+  padding: 5px 5px 2px 0;
+  span {
+    color: colors.$grey400;
+  }
+}
+/*
+ Anonymous label
+ Account for inline edit functionality and state
+ */
+.comment-anonymous-label {
+  padding: 2px 5px 2px 0;
+}
+
+/*
+ ******
+ Resolved labels
+ ******
+ */
+.comment-resolved {
+  margin-top: 10px;
+}
+
+.comment-resolvedby {
+  /*width: 110px;*/
+}
+
+.comment-resolved-label {
+  color: colors.$green800; /* per-green line 2350 style.css */
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/*
+ ******
+ ******
+ Link in comment balloon
+ ******
+ ******
+ */
+a.comment-link-btn,
+a.comment-link-btn:visited {
+  color: colors.$grey600;
+  display: inline-block;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+a.comment-link-btn:hover,
+a.comment-link-btn:active {
+  text-decoration: none;
+}
+
+/*
+ ******
+ View link in history balloon
+ ******
+ */
+a.comment-view-link:link,
+a.comment-view-link:visited {
+  color: colors.$blue600;
+  padding: 0 4px 6px 0;
+}
+
+/*
+ ******
+ View comment ordinal number
+ ******
+ */
+.comment-nth-label {
+  display: block;
+  border-bottom: 1px solid colors.$grey200;
+  font-size: 16px;
+  color: colors.$grey400;
+  line-height: 1.8;
+  margin-bottom: 6px;
+}
+
+/*
+ ******
+ ******
+ Comment intent next to each segment
+ ******
+ ******
+ */
+
+/*
+ ******
+ Txt in comment intent element
+ ******
+ */
+.segment-side-buttons .txt {
+  /* styles based on .sid 401 style.css */
+  cursor: pointer;
+  padding-left: 8px;
+  position: relative;
+  display: block !important;
+}
+
+/*
+ ******
+ Icon in comment intent element
+ ******
+ */
+.comment-icon {
+  position: relative;
+  background-color: colors.$black100;
+  display: flex;
+  padding: 3px;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  align-self: stretch;
+  cursor: pointer;
+  border-radius: variables.$border-radius-default;
+  width: 18px;
+  height: 18px;
+  color: black;
+}
+
+/*
+ ******
+ ******
+ Notification elements
+ ******
+ ******
+ */
+
+/*
+ Highlight element unique properties
+ */
+.comment-highlight {
+  background: colors.$orange200;
+}
+
+/*
+ Invitation element unique properties
+ */
+.comment-highlight-invite {
+  background: colors.$blue900;
+  color: colors.$grey150;
+  position: absolute;
+}
+
+/*
+ ******
+ Commenting opened. Draw comment ballon
+ ******
+ */
+article .comment-balloon-outer {
+  display: block;
+  padding-right: 15px;
+  margin-bottom: 30px;
+  position: absolute;
+  top: -75px;
+  width: 100%;
+  z-index: 1;
+  cursor: auto;
+}
+/*
+ ******
+ ******
+ Ajax error messages
+ ******
+ ******
+ */
+
+.comment-ajax-wrap {
+  padding: 6px 4px;
+}
+/* Warnings style.css line 136 */
+.comment-warnings {
+  color: colors.$red400;
+  font-size: 14px;
+}
+
+/*
+ ******
+ ******
+ Header list item history balloon icon
+ ******
+ ******
+ */
+
+/*
+  Truncate text in label
+ */
+.comment-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+  Set box model to border and account for border's width
+ */
+.comment-balloon-outer * {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+/*
+ ******
+ Triangle in balloon
+ ******
+ */
+.comment-triangle {
+  height: 0;
+  width: 0;
+}
+
+/*
+ Triangle top top in history balloon
+ */
+.comment-triangle-top {
+  border-right: 14px solid colors.$grey50; /* #f7f77f */
+  border-top: 14px solid transparent;
+  -webkit-filter: drop-shadow(-3px -1px 2px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(-3px -1px 2px rgba(0, 0, 0, 0.1));
+  float: right;
+  margin-right: 20px;
+  margin-top: -24px;
+}
+
+/*
+ Triangle top left in comment balloon
+ */
+.comment-triangle-topleft {
+  border-top: 12px solid colors.$white;
+  border-left: 14px solid transparent;
+  -webkit-filter: drop-shadow(-1px 0px 0px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(-1px 0px 0px rgba(0, 0, 0, 0.2));
+  margin-left: -12px;
+  float: left;
+  top: 15px;
+  position: absolute;
+}
+section.editor .comment-triangle.comment-triangle-topleft {
+  top: -10px;
+}
+
+.comment-open-view {
+  border-top: 12px solid colors.$white;
+  border-left: 14px solid transparent;
+  -webkit-filter: drop-shadow(-1px 0px 0px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(-2px 0px 1px rgba(0, 0, 0, 0.2));
+  margin-left: -14px;
+  position: absolute;
+}
+
+.comment-open-view.comment-re-messages {
+  bottom: 0px;
+  border-top: unset;
+  border-left: unset;
+  border-bottom: 12px solid colors.$white;
+  border-left: 14px solid transparent;
+  filter: drop-shadow(-1px 2px 1px rgba(0, 0, 0, 0.2));
+}
+
+/*
+**********
+Close icon ballon - Right panel
+**********
+*/
+
+.comment-close-btn {
+  background: colors.$white !important;
+  position: absolute !important;
+  z-index: 1;
+  right: 0px;
+  top: -14px;
+  border-radius: 50% !important;
+  color: colors.$grey600 !important;
+}
+
+.comment-close-btn:hover {
+  color: colors.$black !important;
+}
+
+.comment-close-btn.comment-close-btn--error {
+  top: -15px;
+  right: -15px;
+}
+
+/*
+ ******
+ Clearfix helpers
+ ******
+ */
+.comment-clearfix:before,
+.comment-clearfix:after {
+  display: table;
+  content: '';
+  line-height: 0;
+}
+
+.comment-clearfix:after {
+  clear: both;
+}
+
+/*
+ ******
+ Pure css solution to hide and unhide the button
+ ******
+ */
+
+.comment-icon-btn {
+  visibility: hidden;
+  display: block;
+}
+.comment-icon-btn.has-object {
+  visibility: visible;
+  display: block;
+}
+
+section:hover .comment-icon-btn,
+.segment-side-buttons:hover .comment-icon-btn,
+.comment-icon-btn:hover {
+  visibility: visible;
+}
+
+.comment-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 4px;
+  div[class*='input-checkbox'] > span {
+    color: colors.$grey400;
+    font-size: 14px;
+  }
+}
+.comment-thread-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 20px;
+  button {
+    color: colors.$black !important;
+  }
+}

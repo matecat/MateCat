@@ -1,4 +1,5 @@
 import React from 'react'
+import CommonUtils from '../../utils/commonUtils'
 
 const SupportedFilesModal = ({supportedFiles}) => {
   const keys = Object.keys(supportedFiles)
@@ -8,11 +9,12 @@ const SupportedFilesModal = ({supportedFiles}) => {
       <div className="fileformat">
         {keys.map((name) => (
           <div className="format-box" key={name}>
-            <h3>{name}</h3>
+            <h4>{name}</h4>
             <div className={'file-list'}>
               {supportedFiles[name].map((item, index) => (
                 <div key={index}>
-                  <span className={item[0].class}>{item[0].ext}</span>
+                  {CommonUtils.getFileIcon(item[0].ext)}
+                  <span>{item[0].ext}</span>
                 </div>
               ))}
             </div>
