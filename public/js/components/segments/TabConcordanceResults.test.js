@@ -32,8 +32,8 @@ beforeAll(() => {
     ...global.config,
     isSourceRTL: false,
     isTargetRTL: false,
-    target_rfc: 'it-IT',
-    source_rfc: 'en-US',
+    target_code: 'it-IT',
+    source_code: 'en-US',
   }
 })
 

@@ -60,8 +60,8 @@ beforeAll(() => {
     ...global.config,
     isSourceRTL: false,
     isTargetRTL: false,
-    source_rfc: 'en-US',
-    target_rfc: 'it-IT',
+    source_code: 'en-US',
+    target_code: 'it-IT',
     mt_enabled: true,
   }
   global.navigator.clipboard = {writeText: jest.fn(() => Promise.resolve())}

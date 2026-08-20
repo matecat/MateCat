@@ -223,7 +223,6 @@ beforeEach(() => {
     ...window.config,
     id_job: 2,
     source_code: 'en-US',
-    source_rfc: 'en-US',
     isSourceRTL: false,
     isOpenAiEnabled: false,
   }

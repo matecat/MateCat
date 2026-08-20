@@ -4,8 +4,8 @@ window.config = {
   lexiqaServer: 'http://lexiqa',
   id_job: 2,
   password: 'pw',
-  source_rfc: 'en-US',
-  target_rfc: 'fr-FR',
+  source_code: 'en-US',
+  target_code: 'fr-FR',
   lexiqa_languages: ['en-US', 'fr-FR'],
 }
 

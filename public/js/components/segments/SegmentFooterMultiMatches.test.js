@@ -21,7 +21,7 @@ beforeAll(() => {
     ...global.config,
     isTargetRTL: false,
     isSourceRTL: false,
-    source_rfc: 'en-US',
+    source_code: 'en-US',
     mt_enabled: true,
   }
 })
@@ -182,7 +182,7 @@ describe('SegmentFooterMultiMatches', () => {
     expect(document.querySelector('.graysmall-details')).toBeInTheDocument()
   })
 
-  test('applies yellow variant class when source differs from source_rfc', () => {
+  test('applies yellow variant class when source differs from source_code', () => {
     renderComponent({
       segment: {
         ...baseSegment,

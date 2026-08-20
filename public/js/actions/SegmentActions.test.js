@@ -460,8 +460,8 @@ const baseConfig = () => ({
   revisionNumber: 1,
   translation_matches_enabled: true,
   alternativesEnabled: true,
-  source_rfc: 'en-US',
-  target_rfc: 'it-IT',
+  source_code: 'en-US',
+  target_code: 'it-IT',
 })
 
 describe('SegmentActions — simple dispatch actions', () => {

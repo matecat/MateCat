@@ -411,7 +411,7 @@ const Editarea = forwardRef((props, ref) => {
         const icuTokens = createIcuTokens(
           plainText,
           editorState,
-          config.target_rfc,
+          config.target_code,
         )
 
         if (
@@ -1984,7 +1984,7 @@ const Editarea = forwardRef((props, ref) => {
   let readonly = false
 
   if (props.segment) {
-    lang = config.target_rfc
+    lang = config.target_code
     readonly =
       context.readonly ||
       context.locked ||
@@ -2014,7 +2014,7 @@ const Editarea = forwardRef((props, ref) => {
       onDrop={instanceRef.current.onDragEnd}
       onFocus={instanceRef.current.onFocus}
       onKeyUp={instanceRef.current.onKeyUpEvent}
-      lang={config.target_rfc}
+      lang={config.target_code}
       spellCheck={true}
     >
       <Editor

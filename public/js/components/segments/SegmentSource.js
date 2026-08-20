@@ -253,7 +253,7 @@ const SegmentSource = forwardRef((props, ref) => {
     const tokens = createIcuTokens(
       plainText,
       liveRef.current.editorState,
-      config.source_rfc,
+      config.source_code,
     )
     const newDecorator = createICUDecorator(tokens, false)
     remove(

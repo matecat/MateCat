@@ -7,19 +7,22 @@ use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryWithCategoryStruct;
+use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentStruct;
 use Model\Translations\SegmentTranslationStruct;
 use Model\WordCount\CounterModel;
+use PDOStatement;
 use PHPUnit\Framework\Attributes\Test;
 use Plugins\Features\ReviewExtended\ReviewedWordCountModel;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\Model\TranslationEventStruct;
+use ReflectionProperty;
 use RuntimeException;
 
 class ReviewedWordCountModelTest extends AbstractTest
 {
     private IDatabase $dbStub;
-    private \PDOStatement $stmtStub;
+    private PDOStatement $stmtStub;
 
     protected function setUp(): void
     {
@@ -49,7 +52,7 @@ class ReviewedWordCountModelTest extends AbstractTest
     {
         $chunk = $this->createStub(JobStruct::class);
         $chunk->id = 1;
-        $chunk->method('getProject')->willReturn($this->createStub(\Model\Projects\ProjectStruct::class));
+        $chunk->method('getProject')->willReturn($this->createStub(ProjectStruct::class));
 
         $event = $this->createStub(TranslationEvent::class);
         $event->method('getChunk')->willReturn($chunk);
@@ -197,17 +200,35 @@ class ReviewedWordCountModelTest extends AbstractTest
     }
 
     /**
-     * A replace-all has no originating segment — it is applied to every matching segment in the job with
-     * nothing open in the editor — so nothing else notifies on its behalf. It accrues no time to edit,
-     * but a downgrade it causes must still reach the translator who set the previous status.
+     * A replace-all is applied to every matching segment in the job at once, with nothing open in the
+     * editor. Notifying reviewers/owners once per affected segment would flood them with emails for a
+     * single bulk action, so the gate must short-circuit before even asking about the transition.
      */
     #[Test]
-    public function sendNotificationEmail_notifiesOnAReplaceAllLowerTransition(): void
+    public function sendNotificationEmail_skipsWhenTheEventIsAReplaceAllOne(): void
+    {
+        $event = $this->createMock(TranslationEvent::class);
+        $event->method('isAReplaceAllEvent')->willReturn(true);
+        $event->expects($this->never())->method('isLowerTransition');
+        $event->expects($this->never())->method('getUser');
+
+        $model = $this->buildModel(event: $event);
+
+        $model->sendNotificationEmail();
+    }
+
+    /**
+     * The ordinary counterpart of the replace-all and propagated-event skips: a genuine lower transition
+     * performed directly by a reviewer (not a replace-all, not a propagation) must still trigger the
+     * notification email.
+     */
+    #[Test]
+    public function sendNotificationEmail_notifiesOnALowerTransition(): void
     {
         $event = $this->createMock(TranslationEvent::class);
         $event->expects($this->once())->method('isLowerTransition')->willReturn(true);
         $event->expects($this->once())->method('getUser')->willReturn(null);
-        $event->method('isAReplaceAllEvent')->willReturn(true);
+        $event->method('isAReplaceAllEvent')->willReturn(false);
         $event->method('shouldIncreaseTte')->willReturn(false);
 
         $model = $this->buildModel(
@@ -409,7 +430,7 @@ class ReviewedWordCountModelTest extends AbstractTest
         ?array $chunkReviews = null,
         ?array $sourcePagesWithFinalRevisions = null,
     ): ReviewedWordCountModel {
-        $project = $this->createStub(\Model\Projects\ProjectStruct::class);
+        $project = $this->createStub(ProjectStruct::class);
         $project->name = 'Test Project';
         $project->id_customer = 'test@example.com';
         $project->id_assignee = null;
@@ -481,7 +502,7 @@ class ReviewedWordCountModelTest extends AbstractTest
         );
 
         if ($sourcePagesWithFinalRevisions !== null) {
-            $ref = new \ReflectionProperty($model, '_sourcePagesWithFinalRevisions');
+            $ref = new ReflectionProperty($model, '_sourcePagesWithFinalRevisions');
             $ref->setValue($model, $sourcePagesWithFinalRevisions);
         }
 
