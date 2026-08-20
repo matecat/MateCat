@@ -313,7 +313,7 @@ class TmKeyManager
         $serverDecodedJson = json_decode($Json_jobKeys, true, 512, JSON_THROW_ON_ERROR);
 
         if (!array_key_exists($userRole, Filter::$GRANTS_MAP)) {
-            throw new Exception ("Invalid Role Type string.", 4);
+            throw new Exception ("Invalid role type string.", 4);
         }
 
         $client_tm_keys = array_map(self::getTmKeyStructure(...), $clientDecodedJson);
@@ -335,7 +335,7 @@ class TmKeyManager
             }
 
             if (empty($_client_tm_key->key)) {
-                throw new Exception("Invalid Key Provided", 5);
+                throw new Exception("Invalid key provided", 5);
             }
         }
 
@@ -376,7 +376,7 @@ class TmKeyManager
                             throw new Exception("Anonymous user can not modify existent keys.", 2);
                         }
                     } else {
-                        throw new Exception("Anonymous user can not be OWNER", 3);
+                        throw new Exception("Anonymous user can not be owner", 3);
                     }
                 }
 

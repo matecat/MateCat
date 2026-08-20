@@ -20,7 +20,8 @@ import SegmentFooterTabMessages from './SegmentFooterTabMessages'
 import {SegmentContext} from './SegmentContext'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
-import IconCloseCircle from '../icons/IconCloseCircle'
+import IconCloseCircle from '../../../img/icons/IconCloseCircle'
+import IconWarning from '../../../img/icons/IconWarning'
 import CatToolActions from '../../actions/CatToolActions'
 import {isMacOS} from '../../utils/Utils'
 import {SegmentFooterTabLaraStyles} from './SegmentFooterTabLaraStyles'
@@ -32,13 +33,13 @@ import {TAB} from '../../constants/SegmentTabConstants'
 
 const TAB_ITEMS = {
   [TAB.MATCHES]: {
-    label: 'Translation Matches',
+    label: 'Translation matches',
     code: 'tm',
     tabClass: 'matches',
     isLoading: false,
   },
   [TAB.CONCORDANCES]: {
-    label: 'TM Search',
+    label: 'TM search',
     code: 'cc',
     tabClass: 'concordances',
     isLoading: false,
@@ -62,13 +63,13 @@ const TAB_ITEMS = {
     isLoading: false,
   },
   [TAB.MULTIMATCHES]: {
-    label: 'Cross-language Matches',
+    label: 'Cross-language matches',
     code: 'cl',
     tabClass: 'cross-matches',
     isLoading: false,
   },
   [TAB.AI_ASSISTANT]: {
-    label: 'AI Assistant',
+    label: 'AI assistant',
     code: 'ai',
     tabClass: 'ai-assistant',
     isLoading: false,
@@ -100,6 +101,13 @@ const TAB_ITEMS = {
     code: 'icu',
     tabClass: 'icu-validator',
     isLoading: false,
+  },
+  [TAB.AI_ALTERNATIVES]: {
+    label: 'AI alternatives',
+    code: 'aialternatives',
+    tabClass: 'ai-alternatives',
+    isLoading: false,
+    isEnableCloseButton: true,
   },
 }
 const DELAY_MESSAGE = 7000
@@ -139,7 +147,7 @@ function SegmentFooter() {
       elements: [],
       label:
         value.code === 'tm'
-          ? `Translation Matches ${!config.mt_enabled ? ' (No MT) ' : ''}`
+          ? `Translation matches ${!config.mt_enabled ? ' (No MT) ' : ''}`
           : value.label,
     })),
   )
@@ -643,7 +651,9 @@ function SegmentFooter() {
           ) : clientConnected || typeof clientConnected === 'undefined' ? (
             <span className="loader loader_on" />
           ) : (
-            <i className="icon-warning2 icon" />
+            <span className={'notLoading'}>
+              <IconWarning size={16} />
+            </span>
           )}
 
           {tab.isEnableCloseButton && (

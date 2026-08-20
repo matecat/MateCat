@@ -44,41 +44,43 @@ class CopySourceModal extends React.Component {
   render() {
     return (
       <div className="copy-source-modal">
-        <h3 className="text-container-top">
-          Do you really want to copy source to target for all new segments?
-          <br />
-          This action cannot be undone.
-        </h3>
+        <div className="modal-grid">
+          <div className="modal-grid__body">
+            Do you really want to copy source to target for all new segments?
+            <br />
+            This action cannot be undone.
+            <br />
+            <br />
+            Copy source to target for:
+          </div>
 
-        <div className="buttons-popup-container">
-          <label>Copy source to target for:</label>
-          <Button
-            mode={BUTTON_MODE.OUTLINE}
-            size={BUTTON_SIZE.BIG}
-            onClick={this.copyAllSources.bind(this)}
-          >
-            ALL new segments
-          </Button>
-          <Button
-            type={BUTTON_TYPE.PRIMARY}
-            size={BUTTON_SIZE.BIG}
-            className="btn-ok"
-            onClick={this.copySegmentOnly.bind(this)}
-          >
-            This segment only
-          </Button>
-          <div className="notes-action"></div>
-        </div>
-        <div className="boxed">
-          <input
-            id="copy_s2t_dont_show"
-            type="checkbox"
-            className="dont_show"
-            ref={(checkbox) => (this.checkbox = checkbox)}
-          />
-          <label htmlFor="copy_s2t_dont_show">
-            {` Don't show this dialog again for the current job`}
-          </label>
+          <div className="modal-grid__footer">
+            <Button
+              mode={BUTTON_MODE.OUTLINE}
+              onClick={this.copyAllSources.bind(this)}
+            >
+              ALL new segments
+            </Button>
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
+              className="btn-ok"
+              onClick={this.copySegmentOnly.bind(this)}
+            >
+              This segment only
+            </Button>
+            <div className="notes-action"></div>
+          </div>
+          <div className="modal-grid__body">
+            <input
+              id="copy_s2t_dont_show"
+              type="checkbox"
+              ref={(checkbox) => (this.checkbox = checkbox)}
+              className="dont_show"
+            />
+            <label htmlFor="copy_s2t_dont_show">
+              {` Don't show this dialog again for the current job`}
+            </label>
+          </div>
         </div>
       </div>
     )

@@ -461,8 +461,8 @@ const SegmentActions = {
       id_job: config.id_job,
       source: source,
       target: target,
-      source_lang: config.source_rfc,
-      target_lang: config.target_rfc,
+      source_lang: config.source_code,
+      target_lang: config.target_code,
       suggestion: suggestion,
       id_segment: sid,
     })
@@ -602,24 +602,32 @@ const SegmentActions = {
       !config.isReview &&
       config.job_completion_current_phase == 'revise'
     if (projectCompletionCheck) {
-      let message =
-        'All segments are in <b>read-only mode</b> because this job is under review.'
-
-      if (config.chunk_completion_undoable && config.last_completion_event_id) {
-        message =
-          message +
-          '<p class=\'warning-call-to\'><a href="javascript:void(0);" id="showTranslateWarningMessageUndoLink" >Re-Open Job</a></p>'
-      }
+      const showUndo =
+        config.chunk_completion_undoable && config.last_completion_event_id
 
       addNotification({
         uid: 'translate-warning',
         autoDismiss: false,
         dismissable: true,
         position: 'tc',
-        text: message,
+        text: (
+          <>
+            All segments are in <b>read-only mode</b> because this job is
+            under review.
+            {showUndo && (
+              <p className="warning-call-to">
+                <a
+                  href="javascript:void(0);"
+                  id="showTranslateWarningMessageUndoLink"
+                >
+                  Re-Open Job
+                </a>
+              </p>
+            )}
+          </>
+        ),
         title: 'Warning',
         type: 'warning',
-        allowHtml: true,
       })
     }
     if (TextUtils.justSelecting('readonly')) return
@@ -1711,8 +1719,7 @@ const SegmentActions = {
     setLastSegmentFromLocalStorage(id_segment.toString())
     const requestData = {
       action: 'setCurrentSegment',
-      password: config.password,
-      revision_number: config.revisionNumber,
+      password: config.currentPassword,
       id_segment: id_segment.toString(),
       id_job: config.id_job,
     }

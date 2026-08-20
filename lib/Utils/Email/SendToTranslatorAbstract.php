@@ -39,7 +39,7 @@ abstract class SendToTranslatorAbstract extends AbstractEmail
         $this->user = $user;
         $this->translator = $translator;
         $this->userDao = $userDao;
-        $this->title = "Matecat - Translation Job";
+        $this->title = "Matecat - Translation job";
         $this->projectName = $projectName;
 
         $translator->delivery_date =

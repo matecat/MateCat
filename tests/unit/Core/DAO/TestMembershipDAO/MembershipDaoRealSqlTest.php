@@ -202,7 +202,7 @@ class MembershipDaoRealSqlTest extends AbstractTest
             $this->dao->createList(['team' => 'nope', 'members' => ['x@example.test']]);
             $this->fail('expected exception for non-TeamStruct team');
         } catch (Exception $e) {
-            $this->assertStringContainsString('team must be a TeamStruct', $e->getMessage());
+            $this->assertStringContainsString('Team must be a TeamStruct', $e->getMessage());
         } finally {
             $conn->rollBack();
         }

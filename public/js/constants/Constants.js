@@ -30,6 +30,7 @@ export const ANALYSIS_STATUS = {
   EMPTY: 'EMPTY',
   DONE: 'DONE',
   NOT_TO_ANALYZE: 'NOT_TO_ANALYZE',
+  FAST_OK: 'FAST_OK',
 }
 
 export const UNIT_COUNT = {
@@ -46,22 +47,22 @@ export const EMAIL_PATTERN =
 export const METADATA_KEY = 'cross_language_matches'
 
 export const ANALYSIS_BUCKETS_LABELS = {
-  MT: 'Machine Translation',
+  MT: 'Machine translation',
   new: 'New',
   repetitions: 'Repetitions',
   internal: 'Internal     75-99%',
-  tm_50_74: 'TM Partial 50-74%',
-  tm_75_84: 'TM Partial 75-84%',
-  tm_85_94: 'TM Partial 85-94%',
-  tm_95_99: 'TM Partial 95-99%',
+  tm_50_74: 'TM partial 50-74%',
+  tm_75_84: 'TM partial 75-84%',
+  tm_85_94: 'TM partial 85-94%',
+  tm_95_99: 'TM partial 95-99%',
   tm_100: 'TM 100%',
   tm_100_public: 'Public TM 100%',
   ice: 'TM 101%',
-  ice_mt: 'Top-Quality Machine Translation',
-  top_quality_mt: 'Premium Machine Translation',
-  higher_quality_mt: 'High-Quality Machine Translation',
-  standard_quality_mt: 'Baseline Machine Translation',
-  numbers_only: 'Numbers Only',
+  ice_mt: 'Top-quality machine translation',
+  top_quality_mt: 'Premium machine translation',
+  higher_quality_mt: 'High-quality machine translation',
+  standard_quality_mt: 'Baseline machine translation',
+  numbers_only: 'Numbers only',
 }
 
 export const ANALYSIS_WORKFLOW_TYPES = {
@@ -70,3 +71,9 @@ export const ANALYSIS_WORKFLOW_TYPES = {
 }
 
 export const splittedTranslationPlaceholder = '##$_SPLIT$##'
+
+export const DASHBOARD_REQUEST_PROJECTS_STATUS = {
+  RELOAD_IN_PROGRESS: 'reload_in_progress',
+  MORE_IN_PROGRESS: 'more_in_progress',
+  COMPLETED: 'completed',
+}

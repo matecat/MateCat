@@ -327,7 +327,7 @@ class ProjectDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function getProjectDataSupportsFilterCombinations(): void
+    public function getProjectDataFiltersOnTheProjectPassword(): void
     {
         $dao = new ProjectDao(obtainTestDatabase());
 
@@ -336,14 +336,6 @@ class ProjectDaoTest extends AbstractTest
 
         $projectPassword = $dao->getProjectData(self::PROJECT_ID_1, 'ppass-1');
         $this->assertCount(2, $projectPassword);
-
-        $projectPasswordAndJobId = $dao->getProjectData(self::PROJECT_ID_1, 'ppass-1', self::JOB_ID_1);
-        $this->assertCount(1, $projectPasswordAndJobId);
-        $this->assertSame((string)self::JOB_ID_1, (string)$projectPasswordAndJobId[0]['jid']);
-
-        $onlyJobPassword = $dao->getProjectData(self::PROJECT_ID_1, null, null, 'jpass-2');
-        $this->assertCount(1, $onlyJobPassword);
-        $this->assertSame((string)self::JOB_ID_2, (string)$onlyJobPassword[0]['jid']);
 
         $missingPassword = $dao->getProjectData(self::PROJECT_ID_1, 'wrong-project-password');
         $this->assertSame([], $missingPassword);

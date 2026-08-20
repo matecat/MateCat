@@ -1,6 +1,8 @@
+@use 'tokens/z-index';
+@use 'tokens/spacing';
 @use 'commons/variables';
-@use 'commons/colors';
-@use 'vendor_mc/semantic/matecat_semantic';
+@use 'tokens/colors';
+@use 'commons/layout';
 
 @use "commons/typography";
 @use 'commons/matecat_fonts';

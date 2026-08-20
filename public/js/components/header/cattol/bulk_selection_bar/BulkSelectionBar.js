@@ -4,6 +4,33 @@ import SegmentActions from '../../../../actions/SegmentActions'
 import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentStore from '../../../../stores/SegmentStore'
 import CatToolActions from '../../../../actions/CatToolActions'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../common/Button/Button'
+import IconChevronLeft from '../../../../../img/icons/IconChevronLeft'
+import IconTick from '../../../../../img/icons/IconTick'
+import Checkmark from '../../../../../img/icons/Checkmark'
+
+// The bulk endpoints reject with {response, errors}; a plain Error can also reach us if the request
+// never left the browser.
+const describeBulkFailure = (error) => {
+  const message = error?.errors?.[0]?.message ?? error?.errors?.message
+  if (message) return message
+  if (error?.response?.status) return `server answered ${error.response.status}`
+  return error?.message ?? 'the request failed'
+}
+
+const MAX_LISTED_SEGMENTS = 20
+
+const listSegments = (segments) =>
+  segments.length > MAX_LISTED_SEGMENTS
+    ? `${segments.slice(0, MAX_LISTED_SEGMENTS).join(', ')} and ${
+        segments.length - MAX_LISTED_SEGMENTS
+      } more`
+    : segments.join(', ')
 
 class BulkSelectionBar extends React.Component {
   constructor(props) {
@@ -20,6 +47,7 @@ class BulkSelectionBar extends React.Component {
     this.removeAll = this.removeAll.bind(this)
     this.onClickBulk = this.onClickBulk.bind(this)
     this.onClickBack = this.onClickBack.bind(this)
+    this.onBulkFailed = this.onBulkFailed.bind(this)
   }
 
   countInBulkElements(segments) {
@@ -73,25 +101,57 @@ class BulkSelectionBar extends React.Component {
     })
   }
 
+  onBulkFailed(error) {
+    // Without this the bar keeps the spinner of a change that is not happening, and the selection is
+    // silently left as it was. The selection is kept so the user can retry it, and the toast names
+    // the segments that stayed behind and stays up until it is closed.
+    this.setState({
+      changingStatus: false,
+    })
+    const segments = this.state.segmentsArray
+    CatToolActions.addNotification({
+      title: 'The status of the selected segments was not changed',
+      text: (
+        <>
+          <p>
+            {segments.length} segments kept their status: the change to{' '}
+            {this.props.isReview ? 'APPROVED' : 'TRANSLATED'} was refused
+            because {describeBulkFailure(error)}.
+          </p>
+          <p>
+            Job {config.id_job}
+            {config.revisionNumber
+              ? `, revision ${config.revisionNumber}`
+              : ''}{' '}
+            — segments {listSegments(segments)}
+          </p>
+        </>
+      ),
+      type: 'error',
+      position: 'bl',
+      autoDismiss: false,
+    })
+  }
+
   onClickBulk() {
     this.setState({
       changingStatus: true,
     })
     if (this.props.isReview) {
-      SegmentActions.approveFilteredSegments(this.state.segmentsArray).then(
-        () => {
+      SegmentActions.approveFilteredSegments(this.state.segmentsArray)
+        .then(() => {
           this.onClickBack()
           CatToolActions.onRender({segmentToOpen: this.state.segmentsArray[0]})
           CatToolActions.reloadQualityReport()
-        },
-      )
+        })
+        .catch((error) => this.onBulkFailed(error))
     } else {
-      SegmentActions.translateFilteredSegments(this.state.segmentsArray).then(
-        () => {
+      SegmentActions.translateFilteredSegments(this.state.segmentsArray)
+        .then(() => {
           CatToolActions.onRender({segmentToOpen: this.state.segmentsArray[0]})
           this.onClickBack()
-        },
-      )
+        })
+        .catch((error) => this.onBulkFailed(error))
     }
     // SegmentActions.closeSegment(SegmentStore.getCurrentSegmentId());
   }
@@ -130,7 +190,7 @@ class BulkSelectionBar extends React.Component {
 
   render() {
     let buttonClass = classnames({
-      'ui button approve-all-segments': true,
+      'approve-all-segments': true,
       'translated-all-bulked': !this.props.isReview,
       'approved-all-bulked': this.props.isReview,
       'approved-2nd-pass':
@@ -142,10 +202,13 @@ class BulkSelectionBar extends React.Component {
       <div className="bulk-approve-bar">
         <div className="bulk-back-info">
           <div className="bulk-back">
-            <button className="ui button back-bulk" onClick={this.onClickBack}>
-              {' '}
-              <i className="icon-arrow-left2 icon" /> back
-            </button>
+            <Button
+              mode={BUTTON_MODE.GHOST}
+              size={BUTTON_SIZE.SMALL}
+              onClick={this.onClickBack}
+            >
+              <IconChevronLeft size={16} /> back
+            </Button>
           </div>
           {this.state.count === 1 ? (
             <div className="bulk-info">
@@ -167,10 +230,17 @@ class BulkSelectionBar extends React.Component {
           </div>
         ) : (
           <div className="bulk-activity-icons">
-            <button className={buttonClass} onClick={this.onClickBulk}>
-              <i className="icon-checkmark5 icon" />{' '}
+            <Button
+              className={`mark-button ${buttonClass}`}
+              type={BUTTON_TYPE.PRIMARY}
+              mode={BUTTON_MODE.OUTLINE}
+              onClick={this.onClickBulk}
+            >
+              <div>
+                <Checkmark size={16} />
+              </div>
               {this.props.isReview ? 'MARK AS APPROVED' : 'MARK AS TRANSLATED'}
-            </button>
+            </Button>
           </div>
         )}
       </div>

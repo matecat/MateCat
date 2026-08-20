@@ -113,14 +113,14 @@ class EntryValidator
         $this->segment = $this->segmentDao->fetchById($this->struct->id_segment, SegmentStruct::class);
 
         if (!$this->segment) {
-            throw new NotFoundException('segment not found');
+            throw new NotFoundException('Segment not found');
         }
 
         $jobs = $this->jobDao->getNotDeletedById($this->struct->id_job);
-        $job  = $jobs[0] ?? throw new NotFoundException('job not found');
+        $job  = $jobs[0] ?? throw new NotFoundException('Job not found');
 
         $this->project = $this->projectDao->findById($job->id_project)
-            ?? throw new NotFoundException('project not found');
+            ?? throw new NotFoundException('Project not found');
 
         $this->validateCategoryId();
         $this->validateInSegmentScope();
@@ -130,7 +130,7 @@ class EntryValidator
     {
         if ($this->struct->id) {
             if ($this->segment === null || $this->struct->id_segment != $this->segment->id) {
-                $this->errors[] = [null, 'issue not found'];
+                $this->errors[] = [null, 'Issue not found'];
             }
         }
     }
@@ -149,7 +149,7 @@ class EntryValidator
         $this->qa_model  = $this->modelDao->fetchById($this->project->id_qa_model, ModelStruct::class)
             ?? throw new NotFoundException('QA model not found');
         $this->category  = $this->categoryDao->fetchById($this->struct->id_category, CategoryStruct::class)
-            ?? throw new NotFoundException('category not found');
+            ?? throw new NotFoundException('Category not found');
 
         if ($this->category->id_model != $this->qa_model->id) {
             $this->errors[] = [null, 'QA model id mismatch'];

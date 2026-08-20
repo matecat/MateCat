@@ -3,12 +3,8 @@ import {XliffSettingsContext} from './XliffSettingsContext'
 import {XliffRulesRow} from './XliffRulesRow'
 import {Accordion} from '../../../../common/Accordion/Accordion'
 import xliffOptions from '../../defaultTemplates/xliffOptions.json'
-import {
-  Button,
-  BUTTON_SIZE,
-  BUTTON_TYPE,
-} from '../../../../common/Button/Button'
-import IconAdd from '../../../../icons/IconAdd'
+import {Button, BUTTON_TYPE} from '../../../../common/Button/Button'
+import IconAdd from '../../../../../../img/icons/IconAdd'
 import {isEqual} from 'lodash'
 
 export const Xliff12 = () => {
@@ -110,9 +106,9 @@ export const Xliff12 = () => {
           <span className="xliff-settings-column-name xliff-settings-column-name-state">
             State / State qualifier
           </span>
-          <span className="xliff-settings-column-name">Analysis</span>
+          <span className="xliff-settings-column-name">Analysis behavior</span>
           <span className="xliff-settings-column-name xliff-settings-column-name-editor">
-            Editor
+            State in editor
           </span>
           {xliff12.map((row, index) => (
             <XliffRulesRow
@@ -129,7 +125,6 @@ export const Xliff12 = () => {
           <Button
             className="button-add-rule"
             type={BUTTON_TYPE.PRIMARY}
-            size={BUTTON_SIZE.MEDIUM}
             onClick={onAdd}
           >
             <IconAdd size={22} /> Add rule

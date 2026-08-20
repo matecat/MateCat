@@ -132,6 +132,63 @@ yarn build:dev      # Development build
 yarn build:production  # Production build
 ```
 
+## User-Facing Copy: Sentence Case
+
+Every English string the app shows a user is **sentence case** — a capital on the first word
+only. This covers UI labels, buttons, headings and page titles, API/AJAX error payloads,
+exception messages, and email subjects and bodies.
+
+Keep existing capitals for:
+
+- **Proper nouns** — Matecat, Lara, DeepL, MyMemory, ModernMT, Google, Amazon S3, Intento,
+  Apertium, AltLang, SmartMATE, XTRF. In prose the brand is **Matecat**; `MateCat` belongs
+  only to identifiers such as `MateCatFilter`.
+- **Acronyms** — API, ID, UID, URL, TM, MT, QA, QE, CSV, TMX, XML, JSON, XLIFF, DB, ZIP,
+  MIME, JWT, SQL, HTTP, IP.
+- **Code identifiers quoted in a message** — class, method and parameter names
+  (`TeamStruct`, `getInstance()`, `id_job`, `batchSize`). A message that *opens* with one keeps
+  its lowercase: `'id_job not valid'`, not `'Id_job not valid'`.
+
+```
+Volume analysis            not   Volume Analysis
+Invalid upload token.      not   Invalid Upload Token.
+Not authorized             not   Not Authorized
+Wrong ID project provided  not   Wrong Id project provided
+ZIP error:                 not   Zip error:
+is mandatory               not   is MANDATORY
+```
+
+**Exception messages are user-facing.** `router.php` maps every exception class to an HTTP
+status and serializes it through `View\API\Commons\Error`, which copies `getMessage()`
+straight into `errors[0].message` of the JSON response — with no `PRINT_ERRORS` guard, and
+including the fallback 500 branch.
+
+**Do not re-case** — these are contracts or protocol, not copy:
+
+- Data exports: the QA-report CSV headers in `lib/View/API/V2/Json/SegmentTranslationIssue.php`
+  and the plain-text analysis report in `lib/Model/Analysis/XTRFStatus.php`.
+- API response keys: the `$SUPPORTED_FILE_TYPES` group names in `lib/Utils/Registry/AppConfig.php`
+  are emitted verbatim by `lib/Controller/API/V2/SupportedFilesController.php`.
+- HTTP reason phrases (`header('HTTP/1.1 400 Bad Request')`) and User-Agent strings.
+- Strings compared against a third-party API's own responses (see `lib/Utils/TMS/TMSService.php`,
+  `lib/Controller/API/GDrive/GDriveController.php`).
+- Internal `logger->debug()/error()` output and timing array keys.
+
+When you add or change one of these strings:
+
+- **Grep `tests/` for the old text before you finish.** Many tests pin exact messages, and
+  `expectExceptionMessage()` / `assertStringContainsString()` match **substrings** — a
+  full-literal grep misses an assertion on a fragment like `'Zip error'`. DB-backed tests
+  (`*RealSqlTest.php` and others) only execute in CI, because host PHP has no `pdo_mysql`;
+  a green local run does **not** mean they pass.
+- **Edit `lib/View/templates/_*.html`, never `lib/View/*.html`** — the latter are git-ignored
+  build artifacts regenerated from the templates by the Vite `htmlTemplatePlugin`.
+- **Check for a CSS override.** `text-transform: capitalize` renders Title Case whatever the
+  string says; that rule used to sit on `h1` and `.btn a` in `lib/View/Emails/skeleton.html`.
+- **Grep beyond `throw new`.** Exceptions passed as an argument
+  (`someCall($x, new DomainException("…"))`) span lines, and single mid-sentence capitals
+  (`and Teams`, `the Assignee`) have no adjacent-capital pair to match on.
+
 ## Git
 
 Do not add Co-Authored-By trailers to commit messages.

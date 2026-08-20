@@ -70,7 +70,7 @@ class ProjectAccessValidator extends Base
     protected function _validate(): void
     {
         if (!$this->controller->isLoggedIn()) {
-            throw new AuthorizationError("Not Authorized. You must be logged in.", 401);
+            throw new AuthorizationError("Not authorized. You must be logged in.", 401);
         }
 
         $ownerEmail = $this->project->id_customer ?? '';

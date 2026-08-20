@@ -240,7 +240,7 @@ class ProjectCompletionRepositoryTest extends AbstractTest
             ->with(88)
             ->willReturn(true);
         $projectDao->expects($this->once())
-            ->method('destroyProjectPasswordCache')
+            ->method('destroyCacheByIdAndPassword')
             ->with(88, 'proj-pw')
             ->willReturn(true);
         $analysisDao->expects($this->once())

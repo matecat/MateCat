@@ -87,7 +87,7 @@ class ValidateBeforeCreationTest extends AbstractTest
         $this->pm->setProjectStructureValue('qa_model', null);
 
         $this->expectException(EndQueueException::class);
-        $this->expectExceptionMessage('Invalid Project found.');
+        $this->expectExceptionMessage('Invalid project found.');
 
         $this->pm->callValidateBeforeCreation();
     }

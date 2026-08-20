@@ -23,9 +23,9 @@ class AuthorizationErrorTest extends AbstractTest
     public function carriesMessageAndCode(): void
     {
         $previous = new Exception('root');
-        $e = new AuthorizationError('Not Authorized', 403, $previous);
+        $e = new AuthorizationError('Not authorized', 403, $previous);
 
-        $this->assertSame('Not Authorized', $e->getMessage());
+        $this->assertSame('Not authorized', $e->getMessage());
         $this->assertSame(403, $e->getCode());
         $this->assertSame($previous, $e->getPrevious());
     }

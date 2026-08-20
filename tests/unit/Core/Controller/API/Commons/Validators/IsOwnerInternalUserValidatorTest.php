@@ -108,7 +108,7 @@ class IsOwnerInternalUserValidatorTest extends AbstractTest
         $validator = new IsOwnerInternalUserValidator($this->controller, $job);
 
         $this->expectException(AuthorizationError::class);
-        $this->expectExceptionMessage('Forbidden, This endpoint only accepts requests from internal users');
+        $this->expectExceptionMessage('Forbidden, this endpoint only accepts requests from internal users');
 
         $validator->_validate();
     }

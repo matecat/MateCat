@@ -22,7 +22,7 @@ const Footer = () => {
           </div>
           <div className="item">
             <a href="https://site.matecat.com/open-source" target="_blank">
-              Open Source
+              Open source
             </a>
           </div>
           <div className="item">

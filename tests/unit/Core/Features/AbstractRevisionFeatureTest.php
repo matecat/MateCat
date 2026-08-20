@@ -247,7 +247,7 @@ class AbstractRevisionFeatureTest extends AbstractTest
         $event->id = 42;
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('undo data is missing some keys');
+        $this->expectExceptionMessage('Undo data is missing some keys');
 
         $method->invoke($this->feature, $event, ['reset_by_event_id' => '42']);
     }
@@ -268,7 +268,7 @@ class AbstractRevisionFeatureTest extends AbstractTest
         ];
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('event does not match with latest revision data');
+        $this->expectExceptionMessage('Event does not match with latest revision data');
 
         $method->invoke($this->feature, $event, $undoData);
     }

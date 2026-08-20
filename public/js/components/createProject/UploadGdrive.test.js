@@ -38,7 +38,7 @@ jest.mock('../../stores/UserStore', () => ({
   updateConnectedService: jest.fn(),
 }))
 jest.mock('../../utils/commonUtils', () => ({
-  getIconClass: jest.fn(() => 'extdoc'),
+  getFileIcon: jest.fn(() => 'extdoc'),
   dispatchCustomEvent: jest.fn(),
 }))
 jest.mock('../../../img/icons/DriveIcon', () => {
@@ -188,7 +188,7 @@ describe('UploadGdrive', () => {
   describe('Loading state', () => {
     test('does not show loading overlay initially', () => {
       renderWithContext()
-      expect(screen.queryByText('Uploading Files')).not.toBeInTheDocument()
+      expect(screen.queryByText('Uploading files')).not.toBeInTheDocument()
     })
   })
   describe('Action buttons', () => {

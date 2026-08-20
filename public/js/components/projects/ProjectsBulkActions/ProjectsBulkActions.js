@@ -23,9 +23,9 @@ import Archive from '../../../../img/icons/Archive'
 import Trash from '../../../../img/icons/Trash'
 import ChangePassword from '../../../../img/icons/ChangePassword'
 import Revise from '../../../../img/icons/Revise'
-import IconCloseCircle from '../../icons/IconCloseCircle'
+import IconCloseCircle from '../../../../img/icons/IconCloseCircle'
 import CheckDone from '../../../../img/icons/CheckDone'
-import FlipBackward from '../../icons/FlipBackward'
+import FlipBackward from '../../../../img/icons/FlipBackward'
 
 const MAX_JOBS_SELECTABLE = 100
 
@@ -68,6 +68,15 @@ const ACTIONS_BY_FILTER = {
     JOBS_ACTIONS.ASSIGN_TO_TEAM,
     JOBS_ACTIONS.ASSIGN_TO_MEMBER,
   ],
+}
+
+// changeJobPassword() rejects with the errors the server declared, or with the raw Response when it
+// answered nothing usable.
+const describePasswordFailure = (reason) => {
+  if (Array.isArray(reason))
+    return reason.map(({message}) => message).join(', ')
+  if (reason?.status) return `server answered ${reason.status}`
+  return 'request failed'
 }
 
 export const ProjectsBulkActions = ({
@@ -211,27 +220,32 @@ export const ProjectsBulkActions = ({
     (projectId) => {
       const currentProject = projects.find(({id}) => id === projectId)
 
+      const currentProjectJobs = currentProject.jobs.reduce(
+        (acc, cur) => (acc.some(({id}) => id === cur.id) ? acc : [...acc, cur]),
+        [],
+      )
+
       if (shiftKeyRef.current.isPressed) {
         const lastJobIdProject =
-          currentProject.jobs[currentProject.jobs.length - 1].id
+          currentProjectJobs[currentProject.jobs.length - 1].id
 
         onCheckedJob(
           shiftKeyRef.current.startJob.id > lastJobIdProject
             ? lastJobIdProject
-            : currentProject.jobs[0].id,
+            : currentProjectJobs[0].id,
         )
       } else {
         setJobsBulk((prevState) => {
-          const jobsBulkForCurrentProject = currentProject.jobs.filter(({id}) =>
+          const jobsBulkForCurrentProject = currentProjectJobs.filter(({id}) =>
             prevState.some((value) => value === id),
           )
 
           const isCheckedAllJobs =
-            jobsBulkForCurrentProject.length === currentProject.jobs.length
+            jobsBulkForCurrentProject.length === currentProjectJobs.length
 
           if (
             !isCheckedAllJobs &&
-            prevState.length + currentProject.jobs.length > MAX_JOBS_SELECTABLE
+            prevState.length + currentProjectJobs.length > MAX_JOBS_SELECTABLE
           )
             return prevState
 
@@ -245,12 +259,12 @@ export const ProjectsBulkActions = ({
                   (value) =>
                     !jobsBulkForCurrentProject.some(({id}) => id === value),
                 ),
-                ...currentProject.jobs.map(({id}) => id),
+                ...currentProjectJobs.map(({id}) => id),
               ]
         })
       }
 
-      shiftKeyRef.current.startJob = currentProject.jobs[0]
+      shiftKeyRef.current.startJob = currentProjectJobs[0]
     },
     [projects, onCheckedJob],
   )
@@ -414,10 +428,32 @@ export const ProjectsBulkActions = ({
           timer: 10000,
         })
         break
-      case JOBS_ACTIONS.CHANGE_PASSWORD.id:
-        promises = jobs.map((job) => {
-          return changeJobPassword(job, job.password, rest.revision_number)
-        })
+      case JOBS_ACTIONS.CHANGE_PASSWORD.id: {
+        // The password sent is the current one of the resource being changed: the server rotates
+        // the password that was presented, so a revision step needs its own current password and a
+        // job without that step has nothing to change.
+        const requested = jobs.map((job) => ({
+          job,
+          currentPassword: rest.revision_number
+            ? (job.revise_passwords ?? []).find(
+                ({revision_number}) =>
+                  Number(revision_number) === Number(rest.revision_number),
+              )?.password
+            : job.password,
+        }))
+        // A job we never asked about still holds its old password, so it has to be reported as
+        // unchanged: a revocation that silently skips jobs is worse than one that fails loudly.
+        const changeable = requested.filter(({currentPassword}) =>
+          Boolean(currentPassword),
+        )
+        const projectNameOfJob = (job) =>
+          projects.find((project) =>
+            project.jobs.some((jobItem) => jobItem.id === job.id),
+          )?.name ?? 'unknown project'
+
+        promises = changeable.map(({job, currentPassword}) =>
+          changeJobPassword(job, currentPassword),
+        )
 
         Promise.allSettled(promises).then((result) => {
           const fulfilledPromises = result
@@ -453,19 +489,54 @@ export const ProjectsBulkActions = ({
               timer: 10000,
             }
             CatToolActions.addNotification(notification)
-          } else if (fulfilledPromises.length < result.length) {
-            const errorNotification = {
+          }
+          // Named one by one: a bulk revocation that only says how many jobs failed leaves the user
+          // guessing which link is still live, and the toast stays up until it is read away.
+          const unchanged = [
+            ...requested
+              .filter(({currentPassword}) => !currentPassword)
+              .map(({job}) => ({
+                job,
+                reason: rest.revision_number
+                  ? `no Revise ${rest.revision_number} phase on this job`
+                  : 'no Translate password on this job',
+              })),
+            ...result
+              .map((outcome, index) => ({outcome, job: changeable[index].job}))
+              .filter(({outcome}) => outcome.status === 'rejected')
+              .map(({job, outcome}) => ({
+                job,
+                reason: describePasswordFailure(outcome.reason),
+              })),
+          ]
+
+          if (unchanged.length) {
+            CatToolActions.addNotification({
               title: 'Error change jobs password',
-              text: 'Some jobs failed',
+              text: (
+                <>
+                  <p>
+                    {unchanged.length} of {requested.length} jobs kept the old
+                    password:
+                  </p>
+                  <ul>
+                    {unchanged.map(({job, reason}) => (
+                      <li key={`${job.id}-${job.password}`}>
+                        {projectNameOfJob(job)} — job {job.id} ({job.source}{' '}
+                        {'>'} {job.target}): {reason}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ),
               type: 'error',
               position: 'bl',
-              allowHtml: true,
-              timer: 10000,
-            }
-            CatToolActions.addNotification(errorNotification)
+              autoDismiss: false,
+            })
           }
         })
         break
+      }
       case JOBS_ACTIONS.ASSIGN_TO_TEAM.id:
         ManageActions.changeProjectsTeamBulk(rest.id_team, projectsSelected)
         break

@@ -75,7 +75,7 @@ export const Shortcuts = {
         },
       },
       translate_nextUntranslated: {
-        label: 'Confirm translation and go to Next untranslated segment',
+        label: 'Confirm translation and go to next untranslated segment',
         equivalent: 'click on [T+>>]',
         keystrokes: {
           standard: 'ctrl+shift+return',
@@ -140,7 +140,7 @@ export const Shortcuts = {
       },
       searchInConcordance: {
         label:
-          'Perform TM Search search on word(s) selected in the source segment',
+          'Perform TM search on word(s) selected in the source segment',
         equivalent: '',
         keystrokes: {
           standard: 'alt+k',
@@ -148,7 +148,7 @@ export const Shortcuts = {
         },
       },
       openSettings: {
-        label: 'Open Settings panel',
+        label: 'Open settings panel',
         equivalent: '',
         keystrokes: {
           standard: 'ctrl+shift+s',
@@ -172,7 +172,7 @@ export const Shortcuts = {
         },
       },
       navigateIssues: {
-        label: 'Navigate issues panel / Add issue',
+        label: 'Navigate issues panel / add issue',
         equivalent: {
           standard: 'Ctrl + Alt + Arrows/Enter',
           mac: 'Ctrl + Option + Arrows/Enter',
@@ -183,7 +183,7 @@ export const Shortcuts = {
         },
       },
       copyContribution1: {
-        label: 'Copy first translation match in Target',
+        label: 'Copy first translation match in target',
         equivalent: '',
         keystrokes: {
           standard: 'ctrl+1',
@@ -191,7 +191,7 @@ export const Shortcuts = {
         },
       },
       copyContribution2: {
-        label: 'Copy second translation match in Target',
+        label: 'Copy second translation match in target',
         equivalent: '',
         keystrokes: {
           standard: 'ctrl+2',
@@ -199,7 +199,7 @@ export const Shortcuts = {
         },
       },
       copyContribution3: {
-        label: 'Copy third translation match in Target',
+        label: 'Copy third translation match in target',
         equivalent: '',
         keystrokes: {
           standard: 'ctrl+3',
@@ -207,7 +207,7 @@ export const Shortcuts = {
         },
       },
       splitSegment: {
-        label: 'Split Segment',
+        label: 'Split segment',
         equivalent: '',
         keystrokes: {
           standard: 'ctrl+s',

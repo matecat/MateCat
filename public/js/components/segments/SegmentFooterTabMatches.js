@@ -16,7 +16,7 @@ import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import {NUM_CONTRIBUTION_RESULTS} from '../../constants/Constants'
 import Tooltip from '../common/Tooltip'
-import IconDown from '../icons/IconDown'
+import IconDown from '../../../img/icons/IconDown'
 
 const MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED = 3
 
@@ -179,8 +179,8 @@ class SegmentFooterTabMatches extends React.Component {
           </span>
         </li>
         <li>{match.suggestion_info}</li>
-        {(match.target !== config.target_rfc ||
-          match.source !== config.source_rfc) && (
+        {(match.target !== config.target_code ||
+          match.source !== config.source_code) && (
           <Tooltip
             content={
               <div

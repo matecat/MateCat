@@ -254,7 +254,7 @@ class FsFilesStorage extends AbstractFilesStorage
         $convertedFilePath = $this->getSingleFileInPath($d);
 
         if (!is_string($convertedFilePath)) {
-            throw new UnexpectedValueException('Internal Error: Failed to create/copy the file on disk from cache.', -13);
+            throw new UnexpectedValueException('Internal error: Failed to create/copy the file on disk from cache.', -13);
         }
 
         $this->logger->debug($convertedFilePath);
@@ -277,7 +277,7 @@ class FsFilesStorage extends AbstractFilesStorage
         $res &= $this->filesystem->link($convertedFilePath, $dest);
 
         if (!$res) {
-            throw new UnexpectedValueException('Internal Error: Failed to create/copy the file on disk from cache.', -13);
+            throw new UnexpectedValueException('Internal error: Failed to create/copy the file on disk from cache.', -13);
         }
 
         return (bool)$res;
@@ -458,7 +458,7 @@ class FsFilesStorage extends AbstractFilesStorage
     {
         $storedBytes = $this->filesystem->filePutContents(AppConfig::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser", serialize($segments_metadata));
         if ($storedBytes === false) {
-            throw new UnexpectedValueException('Internal Error: Failed to store segments for fast analysis on disk.', -14);
+            throw new UnexpectedValueException('Internal error: Failed to store segments for fast analysis on disk.', -14);
         }
     }
 
@@ -472,7 +472,7 @@ class FsFilesStorage extends AbstractFilesStorage
     {
         $rawContent = $this->filesystem->fileGetContents(AppConfig::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser");
         if ($rawContent === false) {
-            throw new UnexpectedValueException('Internal Error: Failed to retrieve analysis information from disk.', -15);
+            throw new UnexpectedValueException('Internal error: Failed to retrieve analysis information from disk.', -15);
         }
 
         // X2: the .ser blob is untrusted storage; forbid object instantiation to kill the
@@ -480,7 +480,7 @@ class FsFilesStorage extends AbstractFilesStorage
         // transparent; a malformed blob still yields false (suppressed warning) and is handled below.
         $analysisData = @unserialize($rawContent, ['allowed_classes' => false]);
         if ($analysisData === false) {
-            throw new UnexpectedValueException('Internal Error: Failed to retrieve analysis information from disk.', -15);
+            throw new UnexpectedValueException('Internal error: Failed to retrieve analysis information from disk.', -15);
         }
 
         return $analysisData;

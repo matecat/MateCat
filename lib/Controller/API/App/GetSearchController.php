@@ -147,7 +147,6 @@ class GetSearchController extends AbstractStatefulKleinController
      *     isMatchCaseRequested: bool,
      *     isExactMatchRequested: bool,
      *     inCurrentChunkOnly: bool,
-     *     revisionNumber: string|false|null,
      *     queryParams: SearchQueryParamsStruct
      * }
      *
@@ -165,11 +164,6 @@ class GetSearchController extends AbstractStatefulKleinController
         $isMatchCaseRequested = filter_var($this->request->param('matchcase'), FILTER_VALIDATE_BOOLEAN);
         $isExactMatchRequested = filter_var($this->request->param('exactmatch'), FILTER_VALIDATE_BOOLEAN);
         $inCurrentChunkOnly = filter_var($this->request->param('inCurrentChunkOnly'), FILTER_VALIDATE_BOOLEAN);
-        $revision_number = filter_var(
-            $this->request->param('revision_number'),
-            FILTER_SANITIZE_NUMBER_INT,
-            ['filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => ['default' => null]]
-        );
         // Locked segments are included unless the client asks otherwise. Mind that FILTER_VALIDATE_BOOLEAN
         // maps a missing value and an empty one to false, not to null, so the coalesce alone would never
         // fire and the default would silently become "exclude": the absence has to be checked first.
@@ -179,11 +173,11 @@ class GetSearchController extends AbstractStatefulKleinController
             : filter_var($includeLockedParam, FILTER_VALIDATE_BOOLEAN, ['flags' => FILTER_NULL_ON_FAILURE]) ?? true;
 
         if (empty($job)) {
-            throw new InvalidArgumentException("missing id job", -2);
+            throw new InvalidArgumentException("Missing id job", -2);
         }
 
         if (empty($password)) {
-            throw new InvalidArgumentException("missing job password", -3);
+            throw new InvalidArgumentException("Missing job password", -3);
         }
 
         $job = (int)$job;
@@ -226,7 +220,6 @@ class GetSearchController extends AbstractStatefulKleinController
             'isMatchCaseRequested' => $isMatchCaseRequested,
             'isExactMatchRequested' => $isExactMatchRequested,
             'inCurrentChunkOnly' => $inCurrentChunkOnly,
-            'revisionNumber' => $revision_number,
             'queryParams' => $queryParams,
         ];
     }
@@ -339,7 +332,7 @@ class GetSearchController extends AbstractStatefulKleinController
 
             return $searchModel->search($inCurrentChunkOnly);
         } catch (Exception) {
-            throw new RuntimeException("internal error: see the log", -1000);
+            throw new RuntimeException("Internal error: see the log", -1000);
         }
     }
 

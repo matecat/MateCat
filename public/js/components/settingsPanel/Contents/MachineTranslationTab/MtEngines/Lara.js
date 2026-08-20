@@ -9,7 +9,7 @@ import {
   BUTTON_TYPE,
 } from '../../../../common/Button/Button'
 import ExternalLink from '../../../../../../img/icons/ExternalLink'
-import IconClose from '../../../../icons/IconClose'
+import IconClose from '../../../../../../img/icons/IconClose'
 import Checkmark from '../../../../../../img/icons/Checkmark'
 
 export const Lara = ({
@@ -105,7 +105,7 @@ export const Lara = ({
                   }
                 >
                   <div ref={infoIcon1}>
-                    <InfoIcon />
+                    <InfoIcon size={16} />
                   </div>
                 </Tooltip>
               </div>
@@ -133,7 +133,6 @@ export const Lara = ({
             <Button
               type={BUTTON_TYPE.PRIMARY}
               mode={BUTTON_MODE.BASIC}
-              size={BUTTON_SIZE.MEDIUM}
               disabled={isRequestInProgress}
               onClick={handleSubmit(onSubmit)}
             >

@@ -236,7 +236,7 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
         $this->setRequest($this->baseParams(['id_issue' => (string) self::QA_ENTRY_ID]));
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('issue not found');
+        $this->expectExceptionMessage('Issue not found');
         $this->makeValidator()->_validate();
     }
 
@@ -258,7 +258,7 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
         $this->setRequest($this->baseParams(['id_issue' => (string) self::QA_ENTRY_ID]));
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('issue not found');
+        $this->expectExceptionMessage('Issue not found');
         $this->makeValidator()->_validate();
     }
 
@@ -284,13 +284,14 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
     public function throws_validation_error_minus_2000_on_unmodified_ice(): void
     {
         $this->seedTranslation(true); // locked ICE, no segment event
-        $this->setRequest($this->baseParams(['revision_number' => '1']), 'POST');
+        $this->setRequest($this->baseParams(), 'POST');
 
         $validator = $this->makeValidator();
         $validator->setChunkReview($this->makeChunkReview(2));
+        $validator->_validate();
 
         try {
-            $validator->_validate();
+            $validator->ensureSegmentRevisionMatchesCredentialPhase();
             $this->fail('Expected ValidationError');
         } catch (ValidationError $e) {
             $this->assertSame(-2000, $e->getCode());
@@ -302,29 +303,31 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
     public function throws_validation_error_on_revision_state_mismatch(): void
     {
         $this->seedTranslation();
-        // event source_page (3) != revisionNumberToSourcePage(1) == 2
+        // the segment sits in R2 (source_page 3) while the presented password resolved to R1 (2)
         $this->seedSegmentEvent(3);
-        $this->setRequest($this->baseParams(['revision_number' => '1']), 'POST');
+        $this->setRequest($this->baseParams(), 'POST');
 
         $validator = $this->makeValidator();
         $validator->setChunkReview($this->makeChunkReview(2));
+        $validator->_validate();
 
         $this->expectException(ValidationError::class);
         $this->expectExceptionMessage('not in same revision state');
-        $validator->_validate();
+        $validator->ensureSegmentRevisionMatchesCredentialPhase();
     }
 
     #[Test]
     public function validates_post_revision_when_state_matches(): void
     {
         $this->seedTranslation();
-        // revisionNumberToSourcePage(1) == 2, so event source_page must be 2
+        // the password resolved to R1 (source_page 2), so the segment must sit in that same phase
         $this->seedSegmentEvent(2);
-        $this->setRequest($this->baseParams(['revision_number' => '1']), 'POST');
+        $this->setRequest($this->baseParams(), 'POST');
 
         $validator = $this->makeValidator();
         $validator->setChunkReview($this->makeChunkReview(2));
         $validator->_validate();
+        $validator->ensureSegmentRevisionMatchesCredentialPhase();
 
         $this->assertSame($this->segmentId(self::BASE), $validator->translation->id_segment);
     }

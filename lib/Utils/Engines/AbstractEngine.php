@@ -259,7 +259,7 @@ abstract class AbstractEngine implements EngineInterface
             $rawValue = json_encode([
                 'error' => [
                     'code' => -(int)$curl_error['errno'],
-                    'message' => " {$curl_error[ 'error' ]} - Server Error (http status " . $curl_error['http_code'] . ")",
+                    'message' => " {$curl_error[ 'error' ]} - Server error (http status " . $curl_error['http_code'] . ")",
                     'response' => $responseRawValue
                 ],
                 'responseStatus' => (int)$curl_error['http_code']
@@ -306,7 +306,7 @@ abstract class AbstractEngine implements EngineInterface
             $this->result = [
                 'error' => [
                     'code' => -43,
-                    'message' => " Bad Method Call. Requested method '$function' not Found."
+                    'message' => " Bad method call. Requested method '$function' not found."
                 ]
             ]; //return a negative number
 

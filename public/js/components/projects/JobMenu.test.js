@@ -30,6 +30,7 @@ const fakeProjectsData = {
       editingLogUrl: '/editlog/90-Y2Q3OTNjE5ZG629',
       qAReportUrl: '/revise-summary/90-Y2Q3OTNjE5ZG629',
       reviseUrl: '/revise/test/en-US-la-XN/90-0-a192d66ec1f5#58',
+      downloadLabel: {label: 'Draft'},
     },
   },
   jobSplitted: {
@@ -118,7 +119,7 @@ const getFakeProperties = (fakeProperties) => {
       getDownloadLabel: {
         label: (
           <>
-            <i className="icon-eye icon" /> Draft
+            Draft
           </>
         ),
         action: () => {},
@@ -168,7 +169,7 @@ test('Rendering elements', async () => {
   const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
   render(<JobMenu {...props} />)
   await userEvent.click(screen.getByTestId('job-menu-button'))
-  expect(screen.getByText('Change Password')).toBeInTheDocument()
+  expect(screen.getByText('Change password')).toBeInTheDocument()
   expect(screen.getByText('Split')).toBeInTheDocument()
   expect(screen.getByText('Revise')).toBeInTheDocument()
   expect(screen.getByText('Generate Revise 2')).toBeInTheDocument()
@@ -185,7 +186,7 @@ test('Items are enabled', async () => {
   const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
   render(<JobMenu {...props} />)
   await userEvent.click(screen.getByTestId('job-menu-button'))
-  expect(screen.getByText('Change Password')).toBeEnabled()
+  expect(screen.getByText('Change password')).toBeEnabled()
   expect(screen.getByText('Split')).toBeEnabled()
   expect(screen.getByText('Revise')).toBeEnabled()
   expect(screen.getByText('Generate Revise 2')).toBeEnabled()
@@ -203,7 +204,7 @@ test.skip('Change password dropdown menu', async () => {
   const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
   render(<JobMenu {...props} />)
   await userEvent.click(screen.getByTestId('job-menu-button'))
-  await userEvent.click(screen.getByText('Change Password'))
+  await userEvent.click(screen.getByText('Change password'))
   expect(screen.getByTestId('change-password-submenu')).toBeVisible()
 })
 
@@ -244,7 +245,7 @@ test('Check items href link', async () => {
 
 test('Splitted job: check Merge item', async () => {
   const {props} = getFakeProperties(fakeProjectsData.jobSplitted)
-  render(<JobMenu {...props} />)
+  render(<JobMenu {...{...props, isJobChunks: true}} />)
   await userEvent.click(screen.getByTestId('job-menu-button'))
 
   expect(screen.getByText('Merge')).toBeInTheDocument()

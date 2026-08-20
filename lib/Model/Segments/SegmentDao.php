@@ -503,8 +503,8 @@ class SegmentDao extends AbstractDao
                 $stm->execute($values);
                 LoggerFactory::getLogger('project_manager')->debug("Segments: Executed Query " . ($i + 1));
             } catch (PDOException $e) {
-                LoggerFactory::getLogger('project_manager')->error("Segment import - DB Error: " . $e->getMessage());
-                throw new Exception("Segment import - DB Error: " . $e->getMessage() . " - " . var_export($chunk, true), -2);
+                LoggerFactory::getLogger('project_manager')->error("Segment import - DB error: " . $e->getMessage());
+                throw new Exception("Segment import - DB error: " . $e->getMessage() . " - " . var_export($chunk, true), -2);
             }
         }
     }

@@ -152,7 +152,7 @@ class UtilsActiveMQAMQHandlerTest extends AbstractTest
     public function getActualForQIDThrowsExceptionWithNullQid(): void
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Can Not get values without a Queue ID');
+        $this->expectExceptionMessage('Cannot get values without a Queue ID');
 
         $this->handler->getActualForQID(null);
     }

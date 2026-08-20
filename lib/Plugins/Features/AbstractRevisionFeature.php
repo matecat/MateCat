@@ -7,7 +7,6 @@ use DomainException;
 use Exception;
 use Klein\Klein;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
-use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureCodes;
@@ -361,12 +360,12 @@ abstract class AbstractRevisionFeature extends BaseFeature
     {
         $struct = $event->event;
         $review = (new ChunkReviewDao($this->getDatabase()))->findChunkReviews(new JobStruct(['id' => $struct->id_job, 'password' => $struct->password]))[0]
-            ?? throw new ValidationError('chunk review not found');
+            ?? throw new ValidationError('Chunk review not found');
 
         $undo_data = $review->getUndoData();
 
         if (is_null($undo_data)) {
-            throw new ValidationError('undo data is not available');
+            throw new ValidationError('Undo data is not available');
         }
 
         $this->_validateUndoData($struct, $undo_data);
@@ -403,25 +402,30 @@ abstract class AbstractRevisionFeature extends BaseFeature
                 'is_pass'
             ]);
         } catch (Exception $e) {
-            throw new ValidationError('undo data is missing some keys. ' . $e->getMessage());
+            throw new ValidationError('Undo data is missing some keys. ' . $e->getMessage());
         }
 
         if ($undo_data['reset_by_event_id'] != (string)$event->id) {
-            throw new ValidationError('event does not match with latest revision data');
+            throw new ValidationError('Event does not match with latest revision data');
         }
     }
 
     /**
      * @throws PDOException
+     * @throws ReflectionException
      */
     public function reviewPasswordChanged(ReviewPasswordChangedEvent $event): void
     {
+        // No cache eviction here: the event is dispatched inside the rotation's transaction, where an
+        // eviction is undone by any concurrent read of the pre-rotation row. Whoever rotates the
+        // password sweeps through JobCredentialCacheInvalidator once its own commit is through.
         $feedbackDao = new FeedbackDAO($this->getDatabase());
         $feedbackDao->updateFeedbackPassword($event->jobId, $event->oldPassword, $event->newPassword, $event->revisionNumber);
     }
 
     /**
      * @throws PDOException
+     * @throws ReflectionException
      * @throws RuntimeException
      */
     public function jobPasswordChanged(JobPasswordChangedEvent $event): void
@@ -429,6 +433,9 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $jobId = $event->job->id ?? throw new RuntimeException('Job id is required to update chunk review password');
         $jobPassword = $event->job->password ?? throw new RuntimeException('Job password is required to update chunk review password');
 
+        // Mirroring the new job password onto the phase rows is all this handler owns: the eviction of
+        // everything the replaced credential reaches belongs to the rotation entry point, after its
+        // commit. See reviewPasswordChanged() above.
         $dao = new ChunkReviewDao($this->getDatabase());
         $dao->updatePassword($jobId, $event->oldPassword, $jobPassword);
     }

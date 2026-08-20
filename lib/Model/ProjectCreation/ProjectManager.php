@@ -460,7 +460,7 @@ class ProjectManager
         if (count($this->projectStructure->result['errors']) > 0) {
             $this->log($this->projectStructure->result['errors']);
 
-            throw new EndQueueException("Invalid Project found.");
+            throw new EndQueueException("Invalid project found.");
         }
     }
 
@@ -509,7 +509,7 @@ class ProjectManager
             $this->getTmKeyService()->setPrivateTMKeys($this->projectStructure, $firstTMXFileName);
 
             if (count($this->projectStructure->result['errors']) > 0) {
-                throw new EndQueueException("Invalid Project found.");
+                throw new EndQueueException("Invalid project found.");
             }
         }
     }
@@ -703,7 +703,7 @@ class ProjectManager
                 ProjectCreationError::NO_TRANSLATABLE_TEXT->value,
                 "No text to translate in the file " . ZipArchiveHandler::getFileName($e->getMessage()) . "."
             ),
-            ProjectCreationError::XLIFF_PARSE_FAILURE->value => $this->projectStructure->addError(ProjectCreationError::XLIFF_IMPORT_ERROR->value, "Xliff Import Error: {$e->getMessage()}"),
+            ProjectCreationError::XLIFF_PARSE_FAILURE->value => $this->projectStructure->addError(ProjectCreationError::XLIFF_IMPORT_ERROR->value, "XLIFF import error: {$e->getMessage()}"),
             ProjectCreationError::INVALID_XLIFF_PARAMETERS->value => $this->projectStructure->addError(
                 $code,
                 (null !== $e->getPrevious()) ? $e->getPrevious()->getMessage() . " in {$e->getMessage()}" : $e->getMessage()
@@ -989,8 +989,8 @@ class ProjectManager
             );
 
             if (!$result) {
-                $this->log("Failed to store the Zip file $zipHash - \n");
-                throw new Exception("Failed to store the original Zip $zipHash ", ProjectCreationError::ZIP_STORE_FAILED->value);
+                $this->log("Failed to store the ZIP file $zipHash - \n");
+                throw new Exception("Failed to store the original ZIP $zipHash ", ProjectCreationError::ZIP_STORE_FAILED->value);
                 //Exit
             }
         } //end zip hashes manipulation

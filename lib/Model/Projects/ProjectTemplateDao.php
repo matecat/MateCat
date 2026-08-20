@@ -198,7 +198,7 @@ class ProjectTemplateDao extends AbstractDao
             $targetLanguages = unserialize($projectTemplateStruct->target_language);
 
             if (!is_array($targetLanguages)) {
-                throw new Exception("target language is not an array", 403);
+                throw new Exception("Target language is not an array", 403);
             }
 
             $languages = Languages::getInstance();
@@ -215,7 +215,7 @@ class ProjectTemplateDao extends AbstractDao
             $xliffConfigModel = (new XliffConfigTemplateDao($this->database))->getByIdAndUser($projectTemplateStruct->xliff_config_template_id, $projectTemplateStruct->uid);
 
             if (empty($xliffConfigModel)) {
-                throw new Exception("Not existing Xliff template.", 404);
+                throw new Exception("Not existing XLIFF template.", 404);
             }
         }
 
@@ -224,7 +224,7 @@ class ProjectTemplateDao extends AbstractDao
             $filtersConfigModel = (new FiltersConfigTemplateDao($this->database))->getByIdAndUser($projectTemplateStruct->filters_template_id, $projectTemplateStruct->uid);
 
             if (empty($filtersConfigModel)) {
-                throw new Exception("Not existing Filters config template.", 404);
+                throw new Exception("Not existing filters config template.", 404);
             }
         }
 

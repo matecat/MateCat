@@ -126,7 +126,7 @@ class UploadHandler
     protected static function _validateToken(string $token): void
     {
         if (!Utils::isTokenValid($token)) {
-            throw new Exception("Invalid Upload Token.");
+            throw new Exception("Invalid upload token.");
         }
     }
 
@@ -193,7 +193,7 @@ class UploadHandler
         }
 
         if (!$this->_isRightExtension($file) && (empty($file->error))) {
-            $file->error = "File Extension Not Allowed";
+            $file->error = "File extension not allowed";
 
             return false;
         }
@@ -320,7 +320,7 @@ class UploadHandler
         $file->type = $this->getMimeContentType($file->tmp_name);
 
         if (false === $file->type) {
-            $file->error = "Mime type was not recognized";
+            $file->error = "MIME type was not recognized";
         }
 
         if ($this->validate($uploaded_file, $file, $error)) {
@@ -454,7 +454,7 @@ class UploadHandler
 
         if (!Utils::isTokenValid($_COOKIE['upload_token'])) {
             $info = [new stdClass()];
-            $info[0]->error = "Invalid Upload Token. Check your browser, cookies must be enabled for this domain.";
+            $info[0]->error = "Invalid upload token. Check your browser, cookies must be enabled for this domain.";
             $this->flush($info);
         }
 
@@ -509,14 +509,14 @@ class UploadHandler
             $file->size = null;
             $file->type = trim($matches[2] ?? '');
             $file->error = "The file is too large. " .
-                "Please Contact " . AppConfig::$SUPPORT_MAIL . " and report these details: " .
+                "Please contact " . AppConfig::$SUPPORT_MAIL . " and report these details: " .
                 "\"The server configuration does not conform with Matecat configuration. " .
                 "Check for max header post size value in the virtualhost configuration or php.ini.\"";
 
             $info = [$file];
         } elseif ($_SERVER['CONTENT_LENGTH'] >= $uploadParams->getUploadMaxFilesize()) {
             $info[0]->error = "The file is too large.  " .
-                "Please Contact " . AppConfig::$SUPPORT_MAIL . " and report these details: " .
+                "Please contact " . AppConfig::$SUPPORT_MAIL . " and report these details: " .
                 "\"The server configuration does not conform with Matecat configuration. " .
                 "Check for max file upload value in the virtualhost configuration or php.ini.\"";
         }
