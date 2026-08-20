@@ -724,6 +724,37 @@ describe('TagEntity tooltip', () => {
     })
     expect(screen.getByTestId('tooltip-content').textContent).toBe('')
   })
+
+  describe('re-measuring the overflow after an update', () => {
+    // No `data-text` span, so the measurement finds nothing to measure and the
+    // tooltip stays off until an update re-measures.
+    const nonOverflowingChildren = [<Leaf key="0" text="short" />]
+
+    const renderThenUpdate = (nextProps) => {
+      const initial = baseProps({children: nonOverflowingChildren})
+      const {rerender} = render(<TagEntity {...initial} />)
+      expect(screen.getByTestId('tooltip-content').textContent).toBe('')
+
+      rerender(
+        <TagEntity
+          {...{...initial, children: overflowingChildren, ...nextProps}}
+        />,
+      )
+      return screen.getByTestId('tooltip-content').textContent
+    }
+
+    test('re-measures when entityKey changes', () => {
+      withOverflowingLeaf(() => {
+        expect(renderThenUpdate({entityKey: '2'})).toBe('PH')
+      })
+    })
+
+    test('does not re-measure when entityKey is unchanged', () => {
+      withOverflowingLeaf(() => {
+        expect(renderThenUpdate({offsetkey: '1-0-1'})).toBe('')
+      })
+    })
+  })
 })
 
 describe('TagEntity store subscriptions', () => {

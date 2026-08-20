@@ -437,15 +437,14 @@ const TagEntity = (props) => {
   }, [])
 
   // componentDidUpdate: no dependency array, so it runs after every committed
-  // render but not on mount, and re-measures the overflow the same way. The
-  // `entitykey` spelling below is the original's, preserved verbatim.
+  // render but not on mount, and re-measures the overflow the same way.
   const prevPropsRef = useRef(null)
   useEffect(() => {
     const prevProps = prevPropsRef.current
     prevPropsRef.current = props
     if (!prevProps) return
 
-    if (prevProps.entitykey !== props.entityKey) {
+    if (prevProps.entityKey !== props.entityKey) {
       const shouldTooltipOnHover = measureShouldTooltipOnHover(tagRef.current)
       if (shouldTooltipOnHover !== liveRef.current.state.shouldTooltipOnHover) {
         patchState({shouldTooltipOnHover})
