@@ -54,7 +54,18 @@ module.exports = {
       },
       rules: {
         'react/prop-types': 'off',
-        'react/prefer-stateless-function': 'warn',
+        // Catches every class component, not just the trivially-stateless ones
+        // react/prefer-stateless-function reports. The superClass matchers are
+        // anchored so `extends SomeInterface` stubs are not swept up.
+        'no-restricted-syntax': [
+          'warn',
+          {
+            selector:
+              'ClassDeclaration[superClass.name=/^(Pure)?Component$/], ' +
+              'ClassDeclaration[superClass.property.name=/^(Pure)?Component$/]',
+            message: 'Write function components with hooks.',
+          },
+        ],
       },
     },
 
