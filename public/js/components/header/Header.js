@@ -6,16 +6,11 @@ import QualityReportConstants from '../../constants/QualityReportConstants'
 import FilterProjects from './manage/FilterProjects'
 import {ActionMenu} from './ActionMenu'
 import {UserMenu} from './UserMenu'
-import {ComponentExtendInterface} from '../../utils/ComponentExtendInterface'
 import {fromJS} from 'immutable'
 import {TeamDropdown} from './TeamDropdown'
 import MembersFilter from './manage/MembersFilter'
-
-export class HeaderInterface extends ComponentExtendInterface {
-  getMoreLinks() {}
-}
-
-const headerInterface = new HeaderInterface()
+import {Slot} from '../../extensions/Slot'
+import {HEADER_MORE_LINKS} from '../../extensions/extensionPointNames'
 
 const Header = ({
   isQualityReport,
@@ -78,7 +73,7 @@ const Header = ({
                 <li>
                   <a href="https://guides.matecat.com/">User guide</a>
                 </li>
-                {headerInterface.getMoreLinks()}
+                <Slot name={HEADER_MORE_LINKS} />
               </ul>
             </div>
           ) : (

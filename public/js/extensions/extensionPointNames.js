@@ -18,3 +18,4 @@ export const LINK_ALLOWED_REDIRECT = 'link.allowedRedirect'
 // One point, two consumers: the CAT tool page and the project-template hook both
 // need the same preset, and only one preset can be in force at a time.
 export const CHARS_COUNTER_MODE = 'charsCounter.mode'
+export const HEADER_MORE_LINKS = 'header.moreLinks'

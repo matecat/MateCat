@@ -7,11 +7,12 @@
 //
 // Names are capabilities, never a description of who overrides them.
 
-import {defineExtensionPoint} from './extensionPoints'
+import {defineExtensionPoint, defineSlot} from './extensionPoints'
 import {
   CHARS_COUNTER_MODE,
   FILE_HAS_INSTRUCTIONS,
   FILES_PARSE,
+  HEADER_MORE_LINKS,
   LINK_ALLOWED_REDIRECT,
   SEGMENT_CONTEXT_AFTER,
   SEGMENT_CONTEXT_BEFORE,
@@ -55,3 +56,6 @@ defineExtensionPoint(
 defineExtensionPoint(LINK_ALLOWED_REDIRECT, () => false)
 // Core ships no preset: undefined means "whatever the job or template already says".
 defineExtensionPoint(CHARS_COUNTER_MODE, () => undefined)
+
+// Slots: positions in the tree rather than behaviour.
+defineSlot(HEADER_MORE_LINKS)

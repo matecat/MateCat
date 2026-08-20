@@ -33,6 +33,15 @@ export const registerExtension = (name, impl) => {
   overrides.set(name, impl)
 }
 
+// A slot is a point whose implementation is a React component, so core can hand
+// over a position in the tree instead of splicing a method's return value into
+// its own render. Rendering nothing is the only sensible core default.
+export const defineSlot = (name) => {
+  defineExtensionPoint(name, () => null)
+}
+
+export const registerSlot = registerExtension
+
 // What core would have done. An extension that means to add to core behaviour
 // rather than replace it calls this instead of reaching for the module that
 // happens to hold the default.
