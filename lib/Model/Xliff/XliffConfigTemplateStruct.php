@@ -12,6 +12,7 @@ use Model\Xliff\DTO\XliffRulesModel;
 use stdClass;
 use TypeError;
 use Utils\Date\DateTimeUtil;
+use Utils\Validation\UserSuppliedName;
 
 class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonSerializable
 {
@@ -49,7 +50,11 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
         }
 
         $this->uid = $decoded_json['uid'] ?? $uid;
-        $this->name = $decoded_json['name'];
+            // Schema validation bounds the length but cannot strip a control character or compose
+            // the Unicode form, and the composed form is what the UNIQUE(uid, name) index needs to
+            // see a clash. Normalising here rather than in the controller covers create and update
+            // together, since both hydrate through this method.
+        $this->name = UserSuppliedName::validated($decoded_json['name'], 'name', UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH, UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH, refuseUrl: false);
 
         if (isset($decoded_json['id'])) {
             $this->id = $decoded_json['id'];

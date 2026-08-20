@@ -1,6 +1,9 @@
 {
   "type": "object",
   "additionalProperties": false,
+  "required": [
+    "name"
+  ],
   "properties": {
     "uid": {
       "type": [
@@ -10,7 +13,9 @@
       "nullable": true
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255
     },
     "json": {
       "type": "object",

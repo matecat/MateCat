@@ -3,6 +3,7 @@
 namespace Model\Projects;
 
 use DateMalformedStringException;
+use InvalidArgumentException;
 use DateTime;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
@@ -10,6 +11,7 @@ use Model\DataAccess\IDaoStruct;
 use Model\Jobs\JobsMetadataMarshaller;
 use stdClass;
 use TypeError;
+use Utils\Validation\UserSuppliedName;
 
 /**
  * @phpstan-type HydrationInput object{
@@ -81,13 +83,18 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
      * @param int|null $id
      *
      * @return $this
+     * @throws InvalidArgumentException when the name is empty or will not fit the column
      * @throws TypeError
      */
     public function hydrateFromJSON(object $decodedObject, int $uid, ?int $id = null): ProjectTemplateStruct
     {
         $this->id = $decodedObject->id ?? $id;
         $this->uid = $decodedObject->uid ?? $uid;
-        $this->name = $decodedObject->name;
+            // Schema validation bounds the length but cannot strip a control character or compose
+            // the Unicode form, and the composed form is what the UNIQUE(uid, name) index needs to
+            // see a clash. Normalising here rather than in the controller covers create and update
+            // together, since both hydrate through this method.
+        $this->name = UserSuppliedName::validated($decodedObject->name, 'name', UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH, UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH, refuseUrl: false);
         $this->is_default = (isset($decodedObject->is_default)) ? $decodedObject->is_default : false;
         $this->id_team = $decodedObject->id_team;
         $this->segmentation_rule = (!empty($decodedObject->segmentation_rule)) ? (json_encode($decodedObject->segmentation_rule) ?: null) : null;

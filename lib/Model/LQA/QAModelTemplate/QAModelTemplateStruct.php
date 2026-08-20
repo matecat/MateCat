@@ -10,6 +10,7 @@ use Model\LQA\CategoryDao;
 use Model\LQA\QAModelInterface;
 use TypeError;
 use Utils\Date\DateTimeUtil;
+use Utils\Validation\UserSuppliedName;
 
 class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable, QAModelInterface
 {
@@ -51,7 +52,18 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         // QAModelTemplateStruct
         $QAModelTemplateStruct = $this;
         $QAModelTemplateStruct->version = $jsonModel->version;
-        $QAModelTemplateStruct->label = $jsonModel->label;
+            // Schema validation bounds the length but cannot strip a control character or compose
+            // the Unicode form, and the composed form is what the UNIQUE(uid, name) index needs to
+            // see a clash. Normalising here rather than in the controller covers create and update
+            // together, since both hydrate through this method.
+        // `qa_model_templates`.`label` is a varchar(45), not the 255 the other template names get.
+        $QAModelTemplateStruct->label = UserSuppliedName::validated(
+            $jsonModel->label,
+            'label',
+            UserSuppliedName::QA_MODEL_LABEL_MAX_LENGTH,
+            UserSuppliedName::QA_MODEL_LABEL_MAX_LENGTH,
+            refuseUrl: false
+        );
         $QAModelTemplateStruct->categories = [];
 
         // QAModelTemplatePassfailStruct

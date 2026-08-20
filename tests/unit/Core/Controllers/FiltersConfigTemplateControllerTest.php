@@ -58,7 +58,13 @@ class ValidatorTestableFiltersConfigTemplateController extends FiltersConfigTemp
 
 class FiltersConfigTemplateControllerTest extends AbstractTest
 {
-    private const VALID_JSON = '{}';
+    /**
+     * `{}` used to stand in for a valid payload here. It never was one — the struct's own
+     * hydrateFromJSON() refuses a payload with no `name` — and it only passed because the DAO is
+     * stubbed, so hydration never ran. The schema now declares `name` required, which is what
+     * surfaced the fixture.
+     */
+    private const VALID_JSON = '{"name":"My filters template"}';
 
     private ReflectionClass $reflector;
     private TestableFiltersConfigTemplateController $controller;

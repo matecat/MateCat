@@ -73,6 +73,7 @@ use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
+use Utils\Validation\UserSuppliedName;
 
 class NewController extends KleinController
 {
@@ -354,7 +355,15 @@ class NewController extends KleinController
 
         $mt_qe_workflow_payable_rate_template_id = filter_var($this->request->param('mt_qe_workflow_payable_rate_template_id'), FILTER_SANITIZE_NUMBER_INT) ?: null; // QE workflow parameters
         $payable_rate_template_id = filter_var($this->request->param('payable_rate_template_id'), FILTER_SANITIZE_NUMBER_INT);
-        $payable_rate_template_name = filter_var($this->request->param('payable_rate_template_name'), FILTER_SANITIZE_SPECIAL_CHARS);
+        // Compared against the stored template name further down, in
+        // validatePayableRateTemplateOrDefault(). FILTER_SANITIZE_SPECIAL_CHARS entity-encoded this
+        // copy while the column holds the name as typed, so the two could never match for a template
+        // whose name contains & < > " ' — the request was refused with "Payable rate model name not
+        // matching" for a name the caller had copied correctly. Normalised the same way the name was
+        // normalised on the way in, so the comparison is between two like forms.
+        $payable_rate_template_name = UserSuppliedName::normalize(
+            filter_var($this->request->param('payable_rate_template_name'), FILTER_UNSAFE_RAW) ?: null
+        ) ?: null;
         $public_tm_penalty = filter_var($this->request->param('public_tm_penalty'), FILTER_SANITIZE_NUMBER_INT);
         $pretranslate_100 = filter_var($this->request->param('pretranslate_100'), FILTER_VALIDATE_BOOLEAN);
         $pretranslate_101 = filter_var($this->request->param('pretranslate_101'), FILTER_VALIDATE_BOOLEAN);

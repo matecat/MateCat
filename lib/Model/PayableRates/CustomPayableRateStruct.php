@@ -11,6 +11,7 @@ use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 use TypeError;
 use Utils\Date\DateTimeUtil;
+use Utils\Validation\UserSuppliedName;
 
 class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable
 {
@@ -106,7 +107,17 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
             $this->version = $json['version'];
         }
 
-        $this->name = $json['payable_rate_template_name'];
+            // Schema validation bounds the length but cannot strip a control character or compose
+            // the Unicode form, and the composed form is what the UNIQUE(uid, name) index needs to
+            // see a clash. Normalising here rather than in the controller covers create and update
+            // together, since both hydrate through this method.
+        $this->name = UserSuppliedName::validated(
+            $json['payable_rate_template_name'],
+            'payable_rate_template_name',
+            UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH,
+            UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH,
+            refuseUrl: false
+        );
         $this->breakdowns = $json['breakdowns'];
 
         return $this;
