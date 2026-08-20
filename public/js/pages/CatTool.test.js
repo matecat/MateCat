@@ -53,14 +53,6 @@ jest.mock('./mountPage', () => {
   return {mountPage: jest.fn()}
 })
 
-jest.mock('./CatToolInterface', () => ({
-  CatToolInterface: class {
-    getCharacterCounterMode() {
-      return undefined
-    }
-  },
-}))
-
 jest.mock('react-hotkeys-hook', () => ({useHotkeys: jest.fn()}))
 
 jest.mock('../hooks/useProjectTemplates', () => ({

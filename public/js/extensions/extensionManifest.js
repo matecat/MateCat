@@ -9,6 +9,7 @@
 
 import {defineExtensionPoint} from './extensionPoints'
 import {
+  CHARS_COUNTER_MODE,
   FILE_HAS_INSTRUCTIONS,
   FILES_PARSE,
   LINK_ALLOWED_REDIRECT,
@@ -52,3 +53,5 @@ defineExtensionPoint(
   (file) => file && file.metadata && file.metadata.instructions,
 )
 defineExtensionPoint(LINK_ALLOWED_REDIRECT, () => false)
+// Core ships no preset: undefined means "whatever the job or template already says".
+defineExtensionPoint(CHARS_COUNTER_MODE, () => undefined)

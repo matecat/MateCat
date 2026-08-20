@@ -81,6 +81,10 @@ describe('the extension manifest', () => {
       expect(callDefault(names.FILE_HAS_INSTRUCTIONS, null)).toBeFalsy()
     })
 
+    test('core declares no character counter preset', () => {
+      expect(callDefault(names.CHARS_COUNTER_MODE)).toBeUndefined()
+    })
+
     test('no link is allowed to redirect', () => {
       expect(callDefault(names.LINK_ALLOWED_REDIRECT, 'https://x.test')).toBe(
         false,

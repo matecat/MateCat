@@ -11,7 +11,10 @@ import {Header} from '../components/header/cattol/Header'
 import SegmentsContainer from '../components/segments/SegmentsContainer'
 import CatToolStore from '../stores/CatToolStore'
 import {extend, logExtensionPointStatus} from '../extensions/extensionPoints'
-import {SEGMENT_FOOTER_TABS} from '../extensions/extensionPointNames'
+import {
+  CHARS_COUNTER_MODE,
+  SEGMENT_FOOTER_TABS,
+} from '../extensions/extensionPointNames'
 import CatToolConstants from '../constants/CatToolConstants'
 import OfflineUtils from '../utils/offlineUtils'
 import SegmentActions from '../actions/SegmentActions'
@@ -44,7 +47,6 @@ import {
   CHARS_SIZE_COUNTER_TYPES,
   charsSizeCounter,
 } from '../utils/charsSizeCounterUtil'
-import {CatToolInterface} from './CatToolInterface'
 import CommentsActions from '../actions/CommentsActions'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
@@ -62,7 +64,7 @@ import {
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 
-const cattoolInterface = new CatToolInterface()
+const getCharacterCounterMode = extend(CHARS_COUNTER_MODE)
 
 function CatTool() {
   useHotkeys(
@@ -632,7 +634,7 @@ function CatTool() {
     if (isFakeCurrentTemplateReady && typeof jobMetadata?.job !== 'undefined') {
       const isValidPresetCharacterMode = Object.values(
         CHARS_SIZE_COUNTER_TYPES,
-      ).some((value) => value === cattoolInterface.getCharacterCounterMode())
+      ).some((value) => value === getCharacterCounterMode())
 
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
@@ -643,7 +645,7 @@ function CatTool() {
           typeof jobMetadata?.job?.character_counter_mode === 'string'
             ? jobMetadata?.job?.character_counter_mode
             : isValidPresetCharacterMode
-              ? cattoolInterface.getCharacterCounterMode()
+              ? getCharacterCounterMode()
               : undefined,
         subfilteringHandlers: jobMetadata.job.subfiltering_handlers,
         mtQualityValueInEditor: jobMetadata.project.mt_quality_value_in_editor,
