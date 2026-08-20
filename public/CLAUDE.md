@@ -34,7 +34,31 @@ Flux (AppDispatcher) — not Redux, not Zustand.
 - Directory-per-component: `ComponentName/ComponentName.js`, optionally `index.js` re-exporting it
 - Complex features group multiple files in one directory (e.g., `Segment/Segment.js`, `SegmentBody.js`, `SegmentFooter.js`)
 - Use PropTypes (no TypeScript — this is a plain JS codebase)
-- React 18 functional components with hooks
+- React 18 function components with hooks. There are no class components left, and
+  eslint fails the build on a new one (`no-restricted-syntax` in `.eslintrc.js`)
+
+## Extending the Frontend
+
+Behaviour that differs per deployment goes through the registry in
+`js/extensions/`, never through prototype patching or module mutation:
+
+- `extensionManifest.js` is the whole contract — every point, slot and capability
+  core offers, with its default. Read it first; it is meant to be readable in one
+  sitting
+- An **extension point** answers "who implements X". Core calls
+  `extend(POINT)(context)`; a deployment calls `registerExtension(POINT, fn)`.
+  Implementations take an explicit context object, never `this`
+- A **slot** is a point whose implementation is a React component
+  (`defineSlot` / `registerSlot`)
+- A **capability** answers "is this deployment allowed to do X" — a boolean, so
+  the UI can omit the affordance rather than leave a dead button. Core calls
+  `can(NAME)`; a deployment calls `setCapability(NAME, false)`
+- Point and capability names live in dependency-free leaf modules
+  (`extensionPointNames.js`, `capabilityNames.js`) so naming one never drags in a
+  dependency graph
+- Names describe a capability, never a customer. Core must not mention a specific
+  deployment; a lint rule enforces this from a local list (see
+  `.eslint-private-names.example.json`)
 
 ## API Layer
 
