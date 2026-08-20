@@ -17,6 +17,9 @@ import {SegmentFooterTabGlossary} from './SegmentFooterTabGlossary'
 import SegmentTabConflicts from './SegmentFooterTabConflicts'
 import SegmentFooterTabMatches from './SegmentFooterTabMatches'
 import SegmentFooterTabMessages from './SegmentFooterTabMessages'
+import {extend} from '../../extensions/extensionPoints'
+import {SEGMENT_NOTES} from '../../extensions/extensionPointNames'
+import {filterMetadataKeys} from '../../extensions/segmentNoteDefaults'
 import {SegmentContext} from './SegmentContext'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
@@ -198,25 +201,16 @@ function SegmentFooter() {
   // Check tab messages has notes
   const hasNotes = useMemo(() => {
     if (!SegmentUtils.segmentHasNote(segment)) return false
-    const tabMessagesContext = {
-      props: {
-        active_class: 'open',
-        tab_class: 'segment-notes',
-        id_segment: segment.sid,
-        notes: segment.notes,
-        metadata: segment.metadata,
-        context_groups: segment.context_groups,
-        segmentSource: segment.segment,
-        segment: segment,
-      },
-      getMetadataNoteTemplate: () =>
-        segment.metadata?.length > 0 ? segment.metadata : null,
-      allowHTML: () => '',
-      getNoteContentStructure: (note) => note,
-      getNoteStructure: SegmentFooterTabMessages.prototype.getNoteStructure,
-    }
-    const notes =
-      SegmentFooterTabMessages.prototype.getNotes.call(tabMessagesContext)
+    // Ask for exactly what the tab would render. The stand-in `this` this
+    // replaced answered a slightly different question, because it supplied its
+    // own cheap versions of the pieces the tab gets from elsewhere.
+    const notes = extend(SEGMENT_NOTES)({
+      notes: segment.notes,
+      contextGroups: segment.context_groups,
+      metadata: filterMetadataKeys(segment.metadata),
+      segment,
+      segmentSource: segment.segment,
+    })
     return Array.isArray(notes) && notes.length > 0
   }, [segment])
 

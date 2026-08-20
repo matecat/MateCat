@@ -24,6 +24,11 @@ import {
   SEGMENT_ID_AFTER,
   SEGMENT_ID_BEFORE,
   SEGMENT_IS_ICE,
+  SEGMENT_MATCH_INFO,
+  SEGMENT_METADATA_NOTES,
+  SEGMENT_NOTE,
+  SEGMENT_NOTE_CONTENT,
+  SEGMENT_NOTES,
 } from './extensionPointNames'
 import {
   getContextAfter,
@@ -32,12 +37,22 @@ import {
   getIdBefore,
   registerFooterTabs,
 } from './segmentEditorDefaults'
+import {
+  getMetadataNotes,
+  getNote,
+  getNoteContent,
+  getNotes,
+} from './segmentNoteDefaults'
 
 defineExtensionPoint(SEGMENT_CONTEXT_BEFORE, getContextBefore)
 defineExtensionPoint(SEGMENT_CONTEXT_AFTER, getContextAfter)
 defineExtensionPoint(SEGMENT_ID_BEFORE, getIdBefore)
 defineExtensionPoint(SEGMENT_ID_AFTER, getIdAfter)
 defineExtensionPoint(SEGMENT_FOOTER_TABS, registerFooterTabs)
+defineExtensionPoint(SEGMENT_NOTES, getNotes)
+defineExtensionPoint(SEGMENT_NOTE, getNote)
+defineExtensionPoint(SEGMENT_NOTE_CONTENT, getNoteContent)
+defineExtensionPoint(SEGMENT_METADATA_NOTES, getMetadataNotes)
 
 // Small enough to live here. Anything with a real body belongs in the module that
 // owns the domain and gets imported by reference, like the five points above.
@@ -56,6 +71,8 @@ defineExtensionPoint(
   (file) => file && file.metadata && file.metadata.instructions,
 )
 defineExtensionPoint(LINK_ALLOWED_REDIRECT, () => false)
+// Core shows nothing beyond the match info it already renders.
+defineExtensionPoint(SEGMENT_MATCH_INFO, () => '')
 // Core ships no preset: undefined means "whatever the job or template already says".
 defineExtensionPoint(CHARS_COUNTER_MODE, () => undefined)
 
