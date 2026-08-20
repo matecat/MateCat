@@ -165,12 +165,15 @@ const getChildrenContent = (
   return children
 }
 
+// Boolean, not the raw `null` a missing node would produce: the callers compare
+// the result against state to decide whether to commit, and `false !== null`
+// would make every mount commit a pointless extra render.
 const measureShouldTooltipOnHover = (tagNode) => {
   const textSpanDisplayed =
     tagNode && tagNode.querySelector('span[data-text="true"]')
-  return (
+  return Boolean(
     textSpanDisplayed &&
-    textSpanDisplayed.offsetWidth < textSpanDisplayed.scrollWidth
+    textSpanDisplayed.offsetWidth < textSpanDisplayed.scrollWidth,
   )
 }
 
@@ -398,9 +401,10 @@ const TagEntity = (props) => {
       onPhTagsCompressedToggle,
     )
 
-    patchState({
-      shouldTooltipOnHover: measureShouldTooltipOnHover(tagRef.current),
-    })
+    const shouldTooltipOnHover = measureShouldTooltipOnHover(tagRef.current)
+    if (shouldTooltipOnHover !== liveRef.current.state.shouldTooltipOnHover) {
+      patchState({shouldTooltipOnHover})
+    }
 
     return () => {
       SegmentStore.removeListener(

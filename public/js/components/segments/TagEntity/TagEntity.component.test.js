@@ -755,6 +755,38 @@ describe('TagEntity tooltip', () => {
       })
     })
   })
+
+  // Wave 4d hit "maximum update depth exceeded" when a parent's state update
+  // cascaded into a freshly mounted TagEntity that set state on mount. A
+  // segment renders one of these per tag, and Editarea re-renders them
+  // wholesale, so the mount measurement must not commit unless it actually
+  // changes something.
+  describe('mount measurement does not cascade', () => {
+    const commitPhases = (children) => {
+      const phases = []
+      render(
+        <React.Profiler
+          id="tag"
+          onRender={(id, phase) => {
+            phases.push(phase)
+          }}
+        >
+          <TagEntity {...baseProps({children})} />
+        </React.Profiler>,
+      )
+      return phases
+    }
+
+    test('commits once when the measurement matches the initial state', () => {
+      expect(commitPhases([<Leaf key="0" text="short" />])).toEqual(['mount'])
+    })
+
+    test('converges after a single update when the measurement differs', () => {
+      withOverflowingLeaf(() => {
+        expect(commitPhases(overflowingChildren)).toEqual(['mount', 'update'])
+      })
+    })
+  })
 })
 
 describe('TagEntity store subscriptions', () => {
