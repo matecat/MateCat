@@ -79,7 +79,9 @@ describe('SegmentFooterTabConcordance', () => {
     global.config.tms_enabled = false
     renderComponent()
     expect(
-      screen.getByText('TM Search is not available when the TM feature is disabled'),
+      screen.getByText(
+        'TM Search is not available when the TM feature is disabled',
+      ),
     ).toBeInTheDocument()
     global.config.tms_enabled = true
   })
@@ -155,9 +157,7 @@ describe('SegmentFooterTabConcordance', () => {
         text: 'found source',
       })
     })
-    expect(document.querySelector('.search-source')).toHaveValue(
-      'found source',
-    )
+    expect(document.querySelector('.search-source')).toHaveValue('found source')
   })
 
   test('FIND_CONCORDANCE event with target text populates target field', () => {
@@ -168,9 +168,7 @@ describe('SegmentFooterTabConcordance', () => {
         text: 'found target',
       })
     })
-    expect(document.querySelector('.search-target')).toHaveValue(
-      'found target',
-    )
+    expect(document.querySelector('.search-target')).toHaveValue('found target')
   })
 
   test('FIND_CONCORDANCE event for a different sid is ignored', () => {
@@ -299,8 +297,6 @@ describe('SegmentFooterTabConcordance', () => {
         />
       </SegmentContext.Provider>,
     )
-    expect(__renderSpy.mock.calls.length).toBeGreaterThan(
-      callsAfterFirstRender,
-    )
+    expect(__renderSpy.mock.calls.length).toBeGreaterThan(callsAfterFirstRender)
   })
 })

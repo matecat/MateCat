@@ -22,10 +22,7 @@ const AlertModal = ({
     <div className="message-modal">
       <div className="matecat-modal-middle">
         <div className={'modal-grid alert_modal'}>
-          <div
-            className="matecat-modal-body"
-            style={{fontSize: '18px'}}
-          >
+          <div className="matecat-modal-body" style={{fontSize: '18px'}}>
             {typeof text === 'string' ? (
               <p dangerouslySetInnerHTML={allowHTML(text)} />
             ) : (
@@ -33,10 +30,7 @@ const AlertModal = ({
             )}
           </div>
           <div className="modal-grid__footer">
-            <Button
-              type={BUTTON_TYPE.PRIMARY}
-              onClick={() => closeModal()}
-            >
+            <Button type={BUTTON_TYPE.PRIMARY} onClick={() => closeModal()}>
               {buttonText ? buttonText : 'Ok'}
             </Button>
           </div>

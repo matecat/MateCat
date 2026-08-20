@@ -212,9 +212,7 @@ describe('SegmentFooterTabMatches', () => {
   })
 
   test('renders trash icon for an owned TM key match', () => {
-    CatToolStore.getJobTmKeys.mockReturnValue([
-      {key: 'memkey', w: 1},
-    ])
+    CatToolStore.getJobTmKeys.mockReturnValue([{key: 'memkey', w: 1}])
     renderComponent({
       segment: {
         ...baseSegment,

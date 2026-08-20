@@ -22,9 +22,7 @@ const SegmentPlaceholderLite = (props) => {
     const decorator = new CompositeDecorator(decoratorsStructureSource)
     const plainEditorStateSource = EditorState.createEmpty(decorator)
     const source = props.segment.segment
-    const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(
-      props.segment,
-    )
+    const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(props.segment)
       ? DraftMatecatUtils.removeTagsFromText(source)
       : source
     const contentEncodedSource = DraftMatecatUtils.encodeContent(

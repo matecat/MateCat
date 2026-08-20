@@ -87,9 +87,7 @@ describe('SegmentHeader', () => {
 
   test('renders an open header when segmentOpened is true', () => {
     const {container} = renderHeader({segmentOpened: true})
-    expect(
-      container.querySelector(`#segment-10-1-header`),
-    ).toBeInTheDocument()
+    expect(container.querySelector(`#segment-10-1-header`)).toBeInTheDocument()
   })
 
   test('shows saving indicator inside the open header', () => {
@@ -162,7 +160,12 @@ describe('SegmentHeader', () => {
   test('hideHeader hides the visible percentage', () => {
     const {container} = renderHeader({segmentOpened: true, sid: '10-1'})
     act(() => {
-      getListenerCallback('SET_SEGMENT_HEADER')('10-1', {}, 'perfect-match', 'Jest User')
+      getListenerCallback('SET_SEGMENT_HEADER')(
+        '10-1',
+        {},
+        'perfect-match',
+        'Jest User',
+      )
     })
     expect(container.querySelector('h2')).toBeInTheDocument()
 

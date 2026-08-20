@@ -82,7 +82,9 @@ describe('LanguageSelectorSearch', () => {
     fireEvent.keyDown(input, {key: 'Backspace'})
 
     expect(props.onDeleteLanguage).toHaveBeenCalledWith(languages[1])
-    expect(container.querySelector('.tag.highlightDelete')).not.toBeInTheDocument()
+    expect(
+      container.querySelector('.tag.highlightDelete'),
+    ).not.toBeInTheDocument()
   })
 
   test('highlight resets when the querySearch prop changes', () => {
@@ -94,7 +96,9 @@ describe('LanguageSelectorSearch', () => {
 
     rerender(<LanguageSelectorSearch {...props} querySearch="f" />)
 
-    expect(container.querySelector('.tag.highlightDelete')).not.toBeInTheDocument()
+    expect(
+      container.querySelector('.tag.highlightDelete'),
+    ).not.toBeInTheDocument()
   })
 
   test('unmounting removes the exact mousedown listener that was added on mount', () => {

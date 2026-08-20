@@ -73,10 +73,7 @@ const SegmentCommentsContainer = forwardRef((props, ref) => {
   // the class's single this.updateComments.bind(this) in the constructor.
   const updateCommentsRef = useRef((sid) => {
     const {segment} = liveRef.current
-    if (
-      isUndefined(sid) ||
-      parseInt(sid) === parseInt(segment.original_sid)
-    ) {
+    if (isUndefined(sid) || parseInt(sid) === parseInt(segment.original_sid)) {
       setComments(CommentsStore.getCommentsBySegment(segment.original_sid))
       setUser(CommentsStore.getUser())
     }
@@ -87,10 +84,7 @@ const SegmentCommentsContainer = forwardRef((props, ref) => {
   const saveDraftRef = useRef(
     debounce(() => {
       const {segment, mentionsInputValue} = liveRef.current
-      CommentsActions.saveDraftComment(
-        segment.original_sid,
-        mentionsInputValue,
-      )
+      CommentsActions.saveDraftComment(segment.original_sid, mentionsInputValue)
     }, 500),
   )
 
@@ -457,7 +451,10 @@ const SegmentCommentsContainer = forwardRef((props, ref) => {
           >
             <IconClose size={10} />
           </Button>
-          <div className="comments-wrap" ref={(wrap) => (wrapRef.current = wrap)}>
+          <div
+            className="comments-wrap"
+            ref={(wrap) => (wrapRef.current = wrap)}
+          >
             {htmlComments}
           </div>
           {htmlInsert}
@@ -526,14 +523,8 @@ const SegmentCommentsContainer = forwardRef((props, ref) => {
 
     updateComments(context.segment.sid)
     CommentsStore.addListener(CommentsConstants.ADD_COMMENT, updateComments)
-    CommentsStore.addListener(
-      CommentsConstants.DELETE_COMMENT,
-      updateComments,
-    )
-    CommentsStore.addListener(
-      CommentsConstants.STORE_COMMENTS,
-      updateComments,
-    )
+    CommentsStore.addListener(CommentsConstants.DELETE_COMMENT, updateComments)
+    CommentsStore.addListener(CommentsConstants.STORE_COMMENTS, updateComments)
     CommentsStore.addListener(CommentsConstants.SET_FOCUS, setFocusOnInput)
     CommentsStore.addListener(
       CommentsConstants.SET_TEAM_USERS,
@@ -574,8 +565,7 @@ const SegmentCommentsContainer = forwardRef((props, ref) => {
 
   //if is not splitted or is the first of the splitted group
   if (
-    (!context.segment.splitted ||
-      context.segment.sid.split('-')[1] === '1') &&
+    (!context.segment.splitted || context.segment.sid.split('-')[1] === '1') &&
     comments
   ) {
     if (context.segment.openComments && context.userInfo) {

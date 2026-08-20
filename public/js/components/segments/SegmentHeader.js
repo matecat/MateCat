@@ -20,8 +20,7 @@ const SegmentHeader = (props) => {
   const [visible, setVisible] = useState(false)
   const [charactersCounter, setCharactersCounter] = useState({})
   const [isGroupByTransUnit, setIsGroupByTransUnit] = useState(false)
-  const [isActiveCharactersCounter, setIsActiveCharactersCounter] =
-    useState()
+  const [isActiveCharactersCounter, setIsActiveCharactersCounter] = useState()
 
   // getDerivedStateFromProps equivalent — adjusting state during render so it affects the
   // SAME render pass, instead of introducing an extra render frame like an effect would.

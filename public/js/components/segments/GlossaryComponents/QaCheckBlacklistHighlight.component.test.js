@@ -53,7 +53,9 @@ describe('QaCheckBlacklistHighlight.getTermDetails — space signature disabled'
   const FakeDecoratedText = ({text}) => <span>{text}</span>
 
   test('matches using the decorated text of the first child', () => {
-    const blackListedTerms = [{matching_words: ['hello'], source: {}, target: {term: 'hello'}}]
+    const blackListedTerms = [
+      {matching_words: ['hello'], source: {}, target: {term: 'hello'}},
+    ]
 
     render(
       <QaCheckBlacklistHighlight
@@ -102,7 +104,11 @@ describe('QaCheckBlacklistHighlight render', () => {
         {...baseProps}
         contentState={makeContentState('hello world')}
         blackListedTerms={[
-          {matching_words: ['hello'], source: {term: 'ciao'}, target: {term: 'hello'}},
+          {
+            matching_words: ['hello'],
+            source: {term: 'ciao'},
+            target: {term: 'hello'},
+          },
         ]}
       >
         hello

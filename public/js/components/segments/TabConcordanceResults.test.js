@@ -79,9 +79,7 @@ describe('TabConcordanceResults', () => {
     act(() => {
       SegmentStore.__emit(SegmentConstants.CONCORDANCE_RESULT, '3', [])
     })
-    expect(
-      screen.getByText(/Can't find any matches/i),
-    ).toBeInTheDocument()
+    expect(screen.getByText(/Can't find any matches/i)).toBeInTheDocument()
   })
 
   test('ignores non-array result data', () => {
@@ -89,9 +87,7 @@ describe('TabConcordanceResults', () => {
     act(() => {
       SegmentStore.__emit(SegmentConstants.CONCORDANCE_RESULT, '3', null)
     })
-    expect(
-      screen.getByText(/Can't find any matches/i),
-    ).toBeInTheDocument()
+    expect(screen.getByText(/Can't find any matches/i)).toBeInTheDocument()
   })
 
   test('renders results and filters out entries missing segment/translation', () => {

@@ -16,9 +16,7 @@ const TagBox = (props) => {
   const prevFocusedTagIndexRef = useRef(focusedTagIndex)
 
   const popoverOpen = Object.assign({}, popoverPosition, styles.popoverOpen)
-  const lastIndex = suggestions.missingTags
-    ? suggestions.missingTags.length
-    : 0
+  const lastIndex = suggestions.missingTags ? suggestions.missingTags.length : 0
 
   const missingSuggestions = suggestions.missingTags
     ? suggestions.missingTags.map((suggestion, index) => {

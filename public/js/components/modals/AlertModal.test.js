@@ -3,7 +3,9 @@ import {render, screen, fireEvent} from '@testing-library/react'
 import AlertModal from './AlertModal'
 
 test('renders string text as html and the default Ok button label', () => {
-  const {container} = render(<AlertModal text="<b>hi</b>" onClose={jest.fn()} />)
+  const {container} = render(
+    <AlertModal text="<b>hi</b>" onClose={jest.fn()} />,
+  )
 
   expect(screen.getByText('Ok')).toBeInTheDocument()
   expect(screen.getByText('hi')).toBeInTheDocument()

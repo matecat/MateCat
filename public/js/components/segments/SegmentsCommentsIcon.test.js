@@ -161,9 +161,7 @@ describe('SegmentsCommentsIcon', () => {
     )
 
     // No extra subscribe/unsubscribe cycle should happen on a context-only change.
-    expect(CommentsStore.addListener.mock.calls.length).toBe(
-      addCallsAfterMount,
-    )
+    expect(CommentsStore.addListener.mock.calls.length).toBe(addCallsAfterMount)
     expect(CommentsStore.removeListener).not.toHaveBeenCalled()
 
     CommentsStore.getCommentsCountBySegment.mockReturnValue({
