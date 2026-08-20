@@ -50,7 +50,6 @@ jest.mock('./mountPage', () => {
     get_public_matches: true,
     isCJK: false,
   }
-  global.globalFunctions = {registerFooterTabs: jest.fn()}
   return {mountPage: jest.fn()}
 })
 
@@ -254,6 +253,14 @@ jest.mock('jquery', () =>
 )
 
 import CatTool from './CatTool'
+import '../extensions/extensionManifest'
+import {
+  registerExtension,
+  resetExtensionOverrides,
+} from '../extensions/extensionPoints'
+import {SEGMENT_FOOTER_TABS} from '../extensions/extensionPointNames'
+
+const registerFooterTabsExtension = jest.fn()
 
 // Fake temporary project template that makes isFakeCurrentTemplateReady truthy
 const fakeTemporaryTemplate = {
@@ -282,6 +289,8 @@ const renderCatTool = (contextOverrides = {}) =>
 describe('CatTool', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    resetExtensionOverrides()
+    registerExtension(SEGMENT_FOOTER_TABS, registerFooterTabsExtension)
     CatToolStore.removeAllListeners()
     SegmentStore.removeAllListeners()
     useProjectTemplates.mockReturnValue({
@@ -873,7 +882,7 @@ describe('CatTool', () => {
         CatToolStore.emit(CatToolConstants.ON_RENDER, {trigger: 1})
       })
       expect(SegmentActions.openSegment).toHaveBeenCalled()
-      expect(globalFunctions.registerFooterTabs).toHaveBeenCalled()
+      expect(registerFooterTabsExtension).toHaveBeenCalled()
     })
 
     test('falls back to first file segment when start segment is missing', async () => {

@@ -5,6 +5,13 @@ import {
   splittedTranslationPlaceholder,
 } from '../constants/Constants'
 import UserStore from '../stores/UserStore'
+import {extend} from '../extensions/extensionPoints'
+import {
+  SEGMENT_CONTEXT_AFTER,
+  SEGMENT_CONTEXT_BEFORE,
+  SEGMENT_ID_AFTER,
+  SEGMENT_ID_BEFORE,
+} from '../extensions/extensionPointNames'
 
 const SegmentUtils = {
   /**
@@ -189,10 +196,10 @@ const SegmentUtils = {
   },
   createSetTranslationRequest: (segment, status, propagate = false) => {
     let {translation, segment: segmentSource, original_sid: sid} = segment
-    const contextBefore = globalFunctions.getContextBefore(sid)
-    const idBefore = globalFunctions.getIdBefore(sid)
-    const contextAfter = globalFunctions.getContextAfter(sid)
-    const idAfter = globalFunctions.getIdAfter(sid)
+    const contextBefore = extend(SEGMENT_CONTEXT_BEFORE)(sid)
+    const idBefore = extend(SEGMENT_ID_BEFORE)(sid)
+    const contextAfter = extend(SEGMENT_CONTEXT_AFTER)(sid)
+    const idAfter = extend(SEGMENT_ID_AFTER)(sid)
     if (segment.splitted) {
       translation = SegmentUtils.collectSplittedTranslations(sid)
       segmentSource = SegmentUtils.collectSplittedTranslations(sid, '.source')

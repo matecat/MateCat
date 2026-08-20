@@ -10,6 +10,8 @@ import $ from 'jquery'
 import {Header} from '../components/header/cattol/Header'
 import SegmentsContainer from '../components/segments/SegmentsContainer'
 import CatToolStore from '../stores/CatToolStore'
+import {extend, logExtensionPointStatus} from '../extensions/extensionPoints'
+import {SEGMENT_FOOTER_TABS} from '../extensions/extensionPointNames'
 import CatToolConstants from '../constants/CatToolConstants'
 import OfflineUtils from '../utils/offlineUtils'
 import SegmentActions from '../actions/SegmentActions'
@@ -586,7 +588,10 @@ function CatTool() {
     setTimeout(function () {
       CatToolActions.checkWarnings(true)
     }, 1000)
-    globalFunctions.registerFooterTabs()
+    extend(SEGMENT_FOOTER_TABS)()
+    // Everything that extends core has registered by now, so this is the point
+    // where a point nobody wired up any more becomes visible.
+    logExtensionPointStatus()
   }, [wasInitSegments])
 
   // user metadata options initialization
