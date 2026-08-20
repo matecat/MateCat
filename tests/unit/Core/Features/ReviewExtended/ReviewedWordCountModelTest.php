@@ -376,6 +376,87 @@ class ReviewedWordCountModelTest extends AbstractTest
         $model->evaluateChunkReviewEventTransitions();
     }
 
+    /**
+     * A replace-all rewrites many segments at once without anyone opening them in the editor, so no reviewer
+     * un-reviewed anything: the reviewed word count must survive the event untouched.
+     *
+     * The penalty points are a different matter. flagIssuesToBeDeleted() runs outside the guard and
+     * BatchReviewProcessor deletes those issue rows regardless, so their points must still come off the
+     * counter — otherwise qa_chunk_reviews.penalty_points drifts away from qa_entries.
+     */
+    #[Test]
+    public function evaluateChunkReviewEventTransitions_lowerTransitionOnAReplaceAllKeepsTheReviewedWordCountButStillDropsThePenaltyPoints(): void
+    {
+        $issue                 = $this->createStub(EntryWithCategoryStruct::class);
+        $issue->source_page    = 2;
+        $issue->penalty_points = 5;
+
+        $partial = null;
+
+        $event = $this->createMock(TranslationEvent::class);
+        $event->method('isAReplaceAllEvent')->willReturn(true);
+        $event->method('getIssuesToDelete')->willReturn([$issue]);
+        $event->expects($this->once())
+            ->method('setChunkReviewForPassFailUpdate')
+            ->willReturnCallback(function (ChunkReviewStruct $chunkReview) use (&$partial) {
+                // evaluateChunkReviewEventTransitions() builds a fresh delta struct per iteration instead of
+                // mutating the one handed to buildModel(), so the value under test only exists here.
+                $partial = clone $chunkReview;
+            });
+
+        $model = $this->buildModel(
+            isChangingStatus: true,
+            isLowerTransition: true,
+            currentEventOnChunk: false,
+            event: $event,
+            sourcePagesWithFinalRevisions: [2],
+        );
+
+        $model->evaluateChunkReviewEventTransitions();
+
+        $this->assertNotNull($partial);
+        $this->assertSame(0, $partial->reviewed_words_count);
+        $this->assertSame(-5.0, (float)$partial->penalty_points);
+    }
+
+    /**
+     * The positive control for the case above: an ordinary lower transition on a single segment still takes
+     * the segment's words off the reviewed count and the source page's points off the penalty total, each
+     * exactly once.
+     */
+    #[Test]
+    public function evaluateChunkReviewEventTransitions_lowerTransitionDecreasesTheCountersExactlyOnce(): void
+    {
+        $issue                 = $this->createStub(EntryWithCategoryStruct::class);
+        $issue->source_page    = 2;
+        $issue->penalty_points = 5;
+
+        $partial = null;
+
+        $event = $this->createMock(TranslationEvent::class);
+        $event->method('isAReplaceAllEvent')->willReturn(false);
+        $event->method('getIssuesToDelete')->willReturn([$issue]);
+        $event->expects($this->once())
+            ->method('setChunkReviewForPassFailUpdate')
+            ->willReturnCallback(function (ChunkReviewStruct $chunkReview) use (&$partial) {
+                $partial = clone $chunkReview;
+            });
+
+        $model = $this->buildModel(
+            isChangingStatus: true,
+            isLowerTransition: true,
+            currentEventOnChunk: false,
+            event: $event,
+            sourcePagesWithFinalRevisions: [2],
+        );
+
+        $model->evaluateChunkReviewEventTransitions();
+
+        $this->assertNotNull($partial);
+        $this->assertSame(-10, $partial->reviewed_words_count);
+        $this->assertSame(-5.0, (float)$partial->penalty_points);
+    }
+
     #[Test]
     public function evaluateChunkReviewEventTransitions_withEmptyChunkReviewsDoesNothing(): void
     {
