@@ -117,7 +117,6 @@ jest.mock('../api/getGlossaryMatch', () => ({getGlossaryMatch: jest.fn()}))
 jest.mock('../api/deleteGlossaryItem', () => ({deleteGlossaryItem: jest.fn()}))
 jest.mock('../api/addGlossaryItem', () => ({addGlossaryItem: jest.fn()}))
 jest.mock('../api/updateGlossaryItem', () => ({updateGlossaryItem: jest.fn()}))
-jest.mock('../extensions/capabilities', () => ({can: jest.fn(() => true)}))
 jest.mock('../api/approveSegments', () => ({approveSegments: jest.fn()}))
 jest.mock('../api/translateSegments', () => ({translateSegments: jest.fn()}))
 jest.mock('../api/splitSegment', () => ({splitSegment: jest.fn()}))
@@ -209,7 +208,6 @@ import {translateSegments} from '../api/translateSegments'
 import {deleteGlossaryItem} from '../api/deleteGlossaryItem'
 import {addGlossaryItem} from '../api/addGlossaryItem'
 import {updateGlossaryItem} from '../api/updateGlossaryItem'
-import {can} from '../extensions/capabilities'
 import {getGlossaryForSegment} from '../api/getGlossaryForSegment'
 import {getGlossaryMatch} from '../api/getGlossaryMatch'
 import {deleteSegmentIssue} from '../api/deleteSegmentIssue'
@@ -1518,26 +1516,6 @@ describe('SegmentActions glossary flows', () => {
     SegmentActions.updateGlossaryItem({})
     await flushDynamicImports()
     expect(OfflineUtils.failedConnection).toHaveBeenCalled()
-  })
-
-  describe('when the deployment may not edit the glossary', () => {
-    beforeEach(() => {
-      can.mockReturnValue(false)
-    })
-
-    afterEach(() => {
-      can.mockReturnValue(true)
-    })
-
-    test('no write reaches the backend', () => {
-      SegmentActions.addGlossaryItem({id_segment: '1'})
-      SegmentActions.updateGlossaryItem({})
-      SegmentActions.deleteGlossaryItem({})
-
-      expect(addGlossaryItem).not.toHaveBeenCalled()
-      expect(updateGlossaryItem).not.toHaveBeenCalled()
-      expect(deleteGlossaryItem).not.toHaveBeenCalled()
-    })
   })
 })
 

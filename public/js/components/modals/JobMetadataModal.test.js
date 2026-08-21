@@ -1,5 +1,4 @@
 import React from 'react'
-import '../../extensions/extensionManifest'
 import {render, screen, fireEvent, act} from '@testing-library/react'
 import JobMetadataModal from './JobMetadataModal'
 import CommonUtils from '../../utils/commonUtils'

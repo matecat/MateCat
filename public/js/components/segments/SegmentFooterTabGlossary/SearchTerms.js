@@ -6,8 +6,6 @@ import IconSearch from '../../../../img/icons/IconSearch'
 import {TabGlossaryContext} from './TabGlossaryContext'
 import IconAdd from '../../../../img/icons/IconAdd'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../../common/Button/Button'
-import {can} from '../../../extensions/capabilities'
-import {GLOSSARY_EDIT} from '../../../extensions/capabilityNames'
 
 export const SearchTerms = () => {
   const {
@@ -104,19 +102,17 @@ export const SearchTerms = () => {
           }}
         />
       </div>
-      {can(GLOSSARY_EDIT) && (
-        <div className="glossary__button-add-container">
-          <Button
-            type={BUTTON_TYPE.PRIMARY}
-            size={BUTTON_SIZE.SMALL}
-            onClick={openForm}
-            disabled={isLoading}
-          >
-            <IconAdd size={12} />
-            Add term
-          </Button>
-        </div>
-      )}
+      <div className="glossary__button-add-container">
+        <Button
+          type={BUTTON_TYPE.PRIMARY}
+          size={BUTTON_SIZE.SMALL}
+          onClick={openForm}
+          disabled={isLoading}
+        >
+          <IconAdd size={12} />
+          Add term
+        </Button>
+      </div>
     </div>
   )
 }

@@ -15,7 +15,7 @@ const babelParserOptions = (ecmaVersion) => ({
 
 // Core is public; the deployments that customise it are not. A name from one of
 // them in core code is a leak, and it is also a design smell: the difference
-// belongs behind an extension point or a capability.
+// belongs on one of core's helper objects, for the deployment to replace.
 //
 // The names cannot be committed, so the list lives in a gitignored file that each
 // checkout and CI supplies. See .eslint-private-names.example.json. Without that
@@ -42,8 +42,8 @@ const privateNameRules = privateNames.map((name) => {
       `JSXIdentifier[name=${pattern}]`,
     ].join(', '),
     message:
-      'Core must not name a particular deployment. Put the difference behind an ' +
-      'extension point, or the permission behind a capability.',
+      'Core must not name a particular deployment. Put the difference on a ' +
+      'helper object and let the deployment replace that member.',
   }
 })
 
@@ -96,9 +96,10 @@ module.exports = {
       },
     },
 
-    // Plugin front-end sources. They extend core through the registry, so the
-    // two habits that predate it are fenced off: patching a core prototype, and
-    // reaching into a core component to do it.
+    // Plugin front-end sources. These files previously failed to parse at all
+    // under `yarn lint`, so nothing in them was ever checked. They replace a
+    // member of one of core's own helper objects, which is why patching a
+    // prototype is fenced off: a function component has none to patch.
     {
       files: ['plugins/*/static/**/*.js'],
       parser: '@babel/eslint-parser',
@@ -117,21 +118,8 @@ module.exports = {
               "AssignmentExpression[left.object.property.name='prototype'], " +
               "AssignmentExpression[left.property.name='prototype']",
             message:
-              'Register an extension instead of patching a prototype. See ' +
-              'public/js/extensions/extensionManifest.js for the points on offer.',
-          },
-        ],
-        'no-restricted-imports': [
-          'error',
-          {
-            patterns: [
-              {
-                group: ['**/public/js/components/**'],
-                message:
-                  'A core component is not an extension surface. Register ' +
-                  'against an extension point or a slot instead.',
-              },
-            ],
+              'Assign over the member of the exported object instead. A ' +
+              'function component has no prototype to patch.',
           },
         ],
       },

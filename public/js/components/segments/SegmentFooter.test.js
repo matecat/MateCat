@@ -1,4 +1,3 @@
-import '../../extensions/extensionManifest'
 import {render, screen, waitFor, fireEvent, act} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
@@ -6,7 +5,7 @@ import {SegmentContext} from './SegmentContext'
 import SegmentFooter from './SegmentFooter'
 import {http, HttpResponse} from 'msw'
 import {mswServer} from '../../../mocks/mswServer'
-import {registerFooterTabs} from '../../extensions/segmentEditorDefaults'
+import globalFunctions from '../../globalFunctions'
 import CatToolStore from '../../stores/CatToolStore'
 window.React = React
 
@@ -358,7 +357,7 @@ beforeEach(() => {
 })
 
 test('Rendering elements', () => {
-  registerFooterTabs()
+  globalFunctions.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment}}>
       <SegmentFooter />
@@ -374,7 +373,7 @@ test('Rendering elements', () => {
 
 test('Add tab', () => {
   const multiMatchLangs = {primary: 'it-IT'}
-  registerFooterTabs()
+  globalFunctions.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment, multiMatchLangs}}>
       <SegmentFooter />
@@ -389,7 +388,7 @@ test('Add tab', () => {
 
 test('Remove tab', () => {
   const multiMatchLangs = undefined
-  registerFooterTabs()
+  globalFunctions.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment, multiMatchLangs}}>
       <SegmentFooter />
@@ -403,7 +402,7 @@ test('Remove tab', () => {
 })
 
 test('Translation Matches count result', () => {
-  registerFooterTabs()
+  globalFunctions.registerFooterTabs()
   config.id_client = 'xxx'
   render(
     <SegmentContext.Provider
@@ -421,7 +420,7 @@ test('Translation Matches count result', () => {
 })
 
 test('Translation conflicts (alternatives)', () => {
-  registerFooterTabs()
+  globalFunctions.registerFooterTabs()
   const modifiedProps = {
     ...props,
     segment: {
@@ -445,7 +444,7 @@ test('Translation conflicts (alternatives)', () => {
 })
 
 test('Click tab', async () => {
-  registerFooterTabs()
+  globalFunctions.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment}}>
       <SegmentFooter />
@@ -459,7 +458,7 @@ test('Click tab', async () => {
 })
 
 test('Move to next tab with keyboard shortcut', async () => {
-  registerFooterTabs()
+  globalFunctions.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment}}>
       <SegmentFooter />

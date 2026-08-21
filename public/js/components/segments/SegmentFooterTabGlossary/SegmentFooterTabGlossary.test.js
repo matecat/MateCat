@@ -4,12 +4,6 @@ import {SegmentFooterTabGlossary} from './SegmentFooterTabGlossary'
 import {SegmentContext} from '../SegmentContext'
 import SegmentConstants from '../../../constants/SegmentConstants'
 import CatToolConstants from '../../../constants/CatToolConstants'
-import '../../../extensions/extensionManifest'
-import {
-  resetCapabilities,
-  setCapability,
-} from '../../../extensions/capabilities'
-import {GLOSSARY_EDIT} from '../../../extensions/capabilityNames'
 
 jest.mock('../../../stores/SegmentStore', () => {
   const listeners = {}
@@ -77,9 +71,7 @@ const segment = {
 
 const renderComponent = (props = {}, contextValue = {}) =>
   render(
-    <SegmentContext.Provider
-      value={{clientConnected: true, clientId: 'c1', ...contextValue}}
-    >
+    <SegmentContext.Provider value={{clientConnected: true, clientId: 'c1', ...contextValue}}>
       <SegmentFooterTabGlossary
         code="glossary"
         active_class="active"
@@ -115,16 +107,12 @@ describe('SegmentFooterTabGlossary', () => {
   test('shows nothing but the wrapper when the client connection status is unknown', () => {
     renderComponent({}, {clientConnected: undefined})
     expect(screen.queryByText('Loading')).not.toBeInTheDocument()
-    expect(
-      document.querySelector('.tab.sub-editor.glossary'),
-    ).toBeInTheDocument()
+    expect(document.querySelector('.tab.sub-editor.glossary')).toBeInTheDocument()
   })
 
   test('shows the error tab when the client failed to connect', () => {
     renderComponent({}, {clientConnected: false})
-    expect(
-      document.querySelector('.tab.sub-editor.glossary'),
-    ).toBeInTheDocument()
+    expect(document.querySelector('.tab.sub-editor.glossary')).toBeInTheDocument()
     expect(screen.queryByText('Loading')).not.toBeInTheDocument()
   })
 
@@ -145,7 +133,9 @@ describe('SegmentFooterTabGlossary', () => {
 
     expect(screen.getByText('No glossary available.')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByText('+ Click here to create one'))
+    fireEvent.click(
+      screen.getByText('+ Click here to create one'),
+    )
 
     expect(
       document.querySelector('input[name="glossary-term-original"]'),
@@ -273,45 +263,5 @@ describe('SegmentFooterTabGlossary', () => {
       CatToolConstants.HAVE_KEYS_GLOSSARY,
       expect.any(Function),
     )
-  })
-
-  describe('when the deployment may not edit the glossary', () => {
-    afterEach(() => {
-      resetCapabilities()
-    })
-
-    const withoutKeys = () =>
-      act(() => {
-        CatToolStore.__emit(CatToolConstants.HAVE_KEYS_GLOSSARY, {
-          value: false,
-          wasAlreadyVerified: true,
-        })
-      })
-
-    test('the no-glossary state offers no way to create one', () => {
-      setCapability(GLOSSARY_EDIT, false)
-      renderComponent()
-      withoutKeys()
-
-      expect(screen.getByText('No glossary available.')).toBeInTheDocument()
-      expect(
-        screen.queryByText('+ Click here to create one'),
-      ).not.toBeInTheDocument()
-    })
-
-    test('the term form does not open even when a prefill is requested', () => {
-      setCapability(GLOSSARY_EDIT, false)
-      renderComponent()
-      withoutKeys()
-
-      act(() => {
-        SegmentStore.__emit(SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL, {
-          sid: '1',
-        })
-      })
-
-      expect(screen.queryByText('Add term')).not.toBeInTheDocument()
-      expect(screen.getByText('No glossary available.')).toBeInTheDocument()
-    })
   })
 })

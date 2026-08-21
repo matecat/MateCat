@@ -22,8 +22,6 @@ import {SegmentFooterTabError} from '../SegmentFooterTabError'
 import {checkMymemoryStatus} from '../../../api/checkMymemoryStatus'
 import AppDispatcher from '../../../stores/AppDispatcher'
 import {removeZeroWidthSpace} from '../utils/DraftMatecatUtils/tagUtils'
-import {can} from '../../../extensions/capabilities'
-import {GLOSSARY_EDIT} from '../../../extensions/capabilityNames'
 
 import {TERM_FORM_FIELDS} from './GlossaryConstants'
 
@@ -44,7 +42,6 @@ export const SegmentFooterTabGlossary = ({
   segment,
   notifyLoadingStatus,
 }) => {
-  const canEditGlossary = can(GLOSSARY_EDIT)
   const [isActive, setIsActive] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [showForm, setShowForm] = useState(false)
@@ -559,19 +556,17 @@ export const SegmentFooterTabGlossary = ({
         ) : haveKeysGlossary ? (
           <>
             <SearchTerms />
-            {canEditGlossary && showForm && <TermForm />}
+            {showForm && <TermForm />}
             <GlossaryList />
           </>
-        ) : canEditGlossary && showForm ? (
+        ) : showForm ? (
           <TermForm />
         ) : haveKeysGlossary === false ? (
           <div className="no_keys_glossary">
             <p>No glossary available.</p>
-            {canEditGlossary && (
-              <button className="glossary__button-add" onClick={openForm}>
-                + Click here to create one
-              </button>
-            )}
+            <button className="glossary__button-add" onClick={openForm}>
+              + Click here to create one
+            </button>
           </div>
         ) : (
           <span className="loading_label">Loading</span>
@@ -587,3 +582,4 @@ SegmentFooterTabGlossary.propTypes = {
   segment: PropTypes.object,
   notifyLoadingStatus: PropTypes.func,
 }
+

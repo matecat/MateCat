@@ -2,8 +2,8 @@
   "comment": [
     "Names that must not appear in core code. Core is public; the deployments that",
     "customise it are not, so core must never mention one by name — a behaviour",
-    "difference belongs behind an extension point, and a permission behind a",
-    "capability.",
+    "difference belongs on one of core's helper objects, for the deployment to",
+    "replace.",
     "",
     "The names are themselves private, which is why they are not committed. Copy",
     "this file to .eslint-private-names.json (gitignored) and fill in the list;",

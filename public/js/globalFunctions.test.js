@@ -1,4 +1,4 @@
-jest.mock('../stores/SegmentStore', () => ({
+jest.mock('./stores/SegmentStore', () => ({
   __esModule: true,
   default: {
     getPrevSegment: jest.fn(),
@@ -6,40 +6,34 @@ jest.mock('../stores/SegmentStore', () => ({
   },
 }))
 
-jest.mock('../utils/segmentUtils', () => ({
+jest.mock('./utils/segmentUtils', () => ({
   __esModule: true,
   default: {
     collectSplittedTranslations: jest.fn(),
   },
 }))
 
-jest.mock('../actions/SegmentActions', () => ({
+jest.mock('./actions/SegmentActions', () => ({
   __esModule: true,
   default: {
     registerTab: jest.fn(),
   },
 }))
 
-import {
-  getContextAfter,
-  getContextBefore,
-  getIdAfter,
-  getIdBefore,
-  registerFooterTabs,
-} from './segmentEditorDefaults'
-import SegmentStore from '../stores/SegmentStore'
-import SegmentUtils from '../utils/segmentUtils'
-import SegmentActions from '../actions/SegmentActions'
+import globalFunctions from './globalFunctions'
+import SegmentStore from './stores/SegmentStore'
+import SegmentUtils from './utils/segmentUtils'
+import SegmentActions from './actions/SegmentActions'
 
 beforeEach(() => {
   jest.clearAllMocks()
 })
 
-describe('getContextBefore', () => {
+describe('globalFunctions.getContextBefore', () => {
   test('returns null when there is no previous segment', () => {
     SegmentStore.getPrevSegment.mockReturnValueOnce(null)
 
-    expect(getContextBefore('10-1')).toBeNull()
+    expect(globalFunctions.getContextBefore('10-1')).toBeNull()
     expect(SegmentStore.getPrevSegment).toHaveBeenCalledWith('10-1', true)
   })
 
@@ -50,7 +44,7 @@ describe('getContextBefore', () => {
       original_sid: '9',
     })
 
-    expect(getContextBefore('10')).toBe('previous segment text')
+    expect(globalFunctions.getContextBefore('10')).toBe('previous segment text')
   })
 
   test('collects splitted translations when original_sid differs from the current segment id', () => {
@@ -59,15 +53,10 @@ describe('getContextBefore', () => {
       original_sid: '9',
       segment: 'unused',
     })
-    SegmentUtils.collectSplittedTranslations.mockReturnValueOnce(
-      'collected source text',
-    )
+    SegmentUtils.collectSplittedTranslations.mockReturnValueOnce('collected source text')
 
-    expect(getContextBefore('10-2')).toBe('collected source text')
-    expect(SegmentUtils.collectSplittedTranslations).toHaveBeenCalledWith(
-      '9',
-      '.source',
-    )
+    expect(globalFunctions.getContextBefore('10-2')).toBe('collected source text')
+    expect(SegmentUtils.collectSplittedTranslations).toHaveBeenCalledWith('9', '.source')
   })
 
   test('recurses on getContextBefore when original_sid matches the current segment id', () => {
@@ -81,21 +70,17 @@ describe('getContextBefore', () => {
         segment: 'final previous text',
       })
 
-    expect(getContextBefore('10-2')).toBe('final previous text')
+    expect(globalFunctions.getContextBefore('10-2')).toBe('final previous text')
     expect(SegmentStore.getPrevSegment).toHaveBeenCalledTimes(2)
-    expect(SegmentStore.getPrevSegment).toHaveBeenNthCalledWith(
-      2,
-      'recurse-id',
-      true,
-    )
+    expect(SegmentStore.getPrevSegment).toHaveBeenNthCalledWith(2, 'recurse-id', true)
   })
 })
 
-describe('getContextAfter', () => {
+describe('globalFunctions.getContextAfter', () => {
   test('returns null when there is no next segment', () => {
     SegmentStore.getNextSegment.mockReturnValueOnce(null)
 
-    expect(getContextAfter('10-1')).toBeNull()
+    expect(globalFunctions.getContextAfter('10-1')).toBeNull()
     expect(SegmentStore.getNextSegment).toHaveBeenCalledWith({
       current_sid: '10-1',
       alsoMutedSegment: true,
@@ -108,7 +93,7 @@ describe('getContextAfter', () => {
       segment: 'next segment text',
     })
 
-    expect(getContextAfter('10')).toBe('next segment text')
+    expect(globalFunctions.getContextAfter('10')).toBe('next segment text')
   })
 
   test('collects splitted translations when the next segment is the first of a split', () => {
@@ -118,15 +103,10 @@ describe('getContextAfter', () => {
       original_sid: '11',
       sid: '11-1',
     })
-    SegmentUtils.collectSplittedTranslations.mockReturnValueOnce(
-      'collected next source text',
-    )
+    SegmentUtils.collectSplittedTranslations.mockReturnValueOnce('collected next source text')
 
-    expect(getContextAfter('10')).toBe('collected next source text')
-    expect(SegmentUtils.collectSplittedTranslations).toHaveBeenCalledWith(
-      '11',
-      '.source',
-    )
+    expect(globalFunctions.getContextAfter('10')).toBe('collected next source text')
+    expect(SegmentUtils.collectSplittedTranslations).toHaveBeenCalledWith('11', '.source')
   })
 
   test('recurses on getContextAfter when the next segment is not the first of a split', () => {
@@ -141,7 +121,7 @@ describe('getContextAfter', () => {
         segment: 'final next text',
       })
 
-    expect(getContextAfter('10')).toBe('final next text')
+    expect(globalFunctions.getContextAfter('10')).toBe('final next text')
     expect(SegmentStore.getNextSegment).toHaveBeenCalledTimes(2)
     expect(SegmentStore.getNextSegment).toHaveBeenNthCalledWith(2, {
       current_sid: '11-2',
@@ -150,77 +130,53 @@ describe('getContextAfter', () => {
   })
 })
 
-describe('getIdBefore', () => {
+describe('globalFunctions.getIdBefore', () => {
   test('returns null when there is no previous segment', () => {
     SegmentStore.getPrevSegment.mockReturnValueOnce(null)
 
-    expect(getIdBefore('10')).toBeNull()
+    expect(globalFunctions.getIdBefore('10')).toBeNull()
   })
 
   test('returns the original_sid of the previous segment', () => {
     SegmentStore.getPrevSegment.mockReturnValueOnce({original_sid: '9'})
 
-    expect(getIdBefore('10')).toBe('9')
+    expect(globalFunctions.getIdBefore('10')).toBe('9')
   })
 })
 
-describe('getIdAfter', () => {
+describe('globalFunctions.getIdAfter', () => {
   test('returns null when there is no next segment', () => {
     SegmentStore.getNextSegment.mockReturnValueOnce(null)
 
-    expect(getIdAfter('10')).toBeNull()
+    expect(globalFunctions.getIdAfter('10')).toBeNull()
   })
 
   test('returns the original_sid of the next segment', () => {
     SegmentStore.getNextSegment.mockReturnValueOnce({original_sid: '11'})
 
-    expect(getIdAfter('10')).toBe('11')
+    expect(globalFunctions.getIdAfter('10')).toBe('11')
   })
 })
 
-describe('registerFooterTabs', () => {
+describe('globalFunctions.registerFooterTabs', () => {
   test('registers the matches tab when translation_matches_enabled is true', () => {
     global.config = {translation_matches_enabled: true}
 
-    registerFooterTabs()
+    globalFunctions.registerFooterTabs()
 
     expect(SegmentActions.registerTab).toHaveBeenCalledTimes(4)
-    expect(SegmentActions.registerTab).toHaveBeenNthCalledWith(
-      1,
-      'concordances',
-      true,
-      false,
-    )
-    expect(SegmentActions.registerTab).toHaveBeenNthCalledWith(
-      2,
-      'matches',
-      true,
-      true,
-    )
-    expect(SegmentActions.registerTab).toHaveBeenNthCalledWith(
-      3,
-      'glossary',
-      true,
-      false,
-    )
-    expect(SegmentActions.registerTab).toHaveBeenNthCalledWith(
-      4,
-      'alternatives',
-      false,
-      false,
-    )
+    expect(SegmentActions.registerTab).toHaveBeenNthCalledWith(1, 'concordances', true, false)
+    expect(SegmentActions.registerTab).toHaveBeenNthCalledWith(2, 'matches', true, true)
+    expect(SegmentActions.registerTab).toHaveBeenNthCalledWith(3, 'glossary', true, false)
+    expect(SegmentActions.registerTab).toHaveBeenNthCalledWith(4, 'alternatives', false, false)
   })
 
   test('does not register the matches tab when translation_matches_enabled is false', () => {
     global.config = {translation_matches_enabled: false}
 
-    registerFooterTabs()
+    globalFunctions.registerFooterTabs()
 
     expect(SegmentActions.registerTab).toHaveBeenCalledTimes(3)
-    expect(SegmentActions.registerTab).not.toHaveBeenCalledWith(
-      'matches',
-      true,
-      true,
-    )
+    expect(SegmentActions.registerTab).not.toHaveBeenCalledWith('matches', true, true)
   })
 })

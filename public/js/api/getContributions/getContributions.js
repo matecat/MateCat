@@ -1,12 +1,5 @@
 import {NUM_CONTRIBUTION_RESULTS} from '../../constants/Constants'
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
-import {extend} from '../../extensions/extensionPoints'
-import {
-  SEGMENT_CONTEXT_AFTER,
-  SEGMENT_CONTEXT_BEFORE,
-  SEGMENT_ID_AFTER,
-  SEGMENT_ID_BEFORE,
-} from '../../extensions/extensionPointNames'
 /**
  * Get contributions
  *
@@ -34,10 +27,10 @@ export const getContributions = async ({
   laraModel,
   reasoning = true,
 }) => {
-  const contextBefore = extend(SEGMENT_CONTEXT_BEFORE)(idSegment)
-  const idBefore = extend(SEGMENT_ID_BEFORE)(idSegment)
-  const contextAfter = extend(SEGMENT_CONTEXT_AFTER)(idSegment)
-  const idAfter = extend(SEGMENT_ID_AFTER)(idSegment)
+  const contextBefore = globalFunctions.getContextBefore(idSegment)
+  const idBefore = globalFunctions.getIdBefore(idSegment)
+  const contextAfter = globalFunctions.getContextAfter(idSegment)
+  const idAfter = globalFunctions.getIdAfter(idSegment)
 
   const obj = {
     password: currentPassword,

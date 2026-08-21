@@ -1,8 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {extend} from '../../extensions/extensionPoints'
-import {SEGMENT_NOTES} from '../../extensions/extensionPointNames'
-import {filterMetadataKeys} from '../../extensions/segmentNoteDefaults'
+import segmentNotes, {filterMetadataKeys} from './segmentNotes'
 
 const SegmentFooterTabMessages = ({
   code,
@@ -23,7 +21,7 @@ const SegmentFooterTabMessages = ({
       <div className="segment-notes-container">
         <div className="segment-notes-panel-body">
           <div className="segments-notes-container">
-            {extend(SEGMENT_NOTES)({
+            {segmentNotes.getNotes({
               notes,
               contextGroups,
               metadata: filterMetadataKeys(metadata),

@@ -62,8 +62,6 @@ import SegmentUtils from '../utils/segmentUtils'
 import {getTranslationMismatches as getTranslationMismatchesApi} from '../api/getTranslationMismatches'
 import TextUtils from '../utils/textUtils'
 import {TAB} from '../constants/SegmentTabConstants'
-import {can} from '../extensions/capabilities'
-import {GLOSSARY_EDIT} from '../extensions/capabilityNames'
 
 // Async-loaded to break circular dependency for static analysis.
 let _SegmentsFilterUtil
@@ -614,8 +612,8 @@ const SegmentActions = {
         position: 'tc',
         text: (
           <>
-            All segments are in <b>read-only mode</b> because this job is under
-            review.
+            All segments are in <b>read-only mode</b> because this job is
+            under review.
             {showUndo && (
               <p className="warning-call-to">
                 <a
@@ -982,10 +980,7 @@ const SegmentActions = {
     })
   },
 
-  // The UI hides the affordance when the capability is withdrawn; these guards
-  // are the second line, for anything reaching the action creator another way.
   deleteGlossaryItem: function (data) {
-    if (!can(GLOSSARY_EDIT)) return
     deleteGlossaryItem(data)
       .then(() => {})
       .catch((errors) => {
@@ -1042,7 +1037,6 @@ const SegmentActions = {
   },
 
   addGlossaryItem: function (data) {
-    if (!can(GLOSSARY_EDIT)) return
     const sid = data.id_segment
     addGlossaryItem(data)
       .then(() => {})
@@ -1099,7 +1093,6 @@ const SegmentActions = {
     })
   },
   updateGlossaryItem: function (data) {
-    if (!can(GLOSSARY_EDIT)) return
     updateGlossaryItem(data)
       .then(() => {})
       .catch((errors) => {

@@ -17,9 +17,7 @@ import {SegmentFooterTabGlossary} from './SegmentFooterTabGlossary'
 import SegmentTabConflicts from './SegmentFooterTabConflicts'
 import SegmentFooterTabMatches from './SegmentFooterTabMatches'
 import SegmentFooterTabMessages from './SegmentFooterTabMessages'
-import {extend} from '../../extensions/extensionPoints'
-import {SEGMENT_NOTES} from '../../extensions/extensionPointNames'
-import {filterMetadataKeys} from '../../extensions/segmentNoteDefaults'
+import segmentNotes, {filterMetadataKeys} from './segmentNotes'
 import {SegmentContext} from './SegmentContext'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
@@ -204,7 +202,7 @@ function SegmentFooter() {
     // Ask for exactly what the tab would render. The stand-in `this` this
     // replaced answered a slightly different question, because it supplied its
     // own cheap versions of the pieces the tab gets from elsewhere.
-    const notes = extend(SEGMENT_NOTES)({
+    const notes = segmentNotes.getNotes({
       notes: segment.notes,
       contextGroups: segment.context_groups,
       metadata: filterMetadataKeys(segment.metadata),

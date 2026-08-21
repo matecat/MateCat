@@ -2,12 +2,6 @@ import React from 'react'
 import {render, screen, fireEvent} from '@testing-library/react'
 import {GlossaryItem} from './GlossaryItem'
 import {TabGlossaryContext} from './TabGlossaryContext'
-import '../../../extensions/extensionManifest'
-import {
-  resetCapabilities,
-  setCapability,
-} from '../../../extensions/capabilities'
-import {GLOSSARY_EDIT} from '../../../extensions/capabilityNames'
 
 const baseItem = {
   term_id: '5',
@@ -153,36 +147,5 @@ describe('GlossaryItem', () => {
     expect(removeSpy).toHaveBeenCalledWith('resize', expect.any(Function))
     addSpy.mockRestore()
     removeSpy.mockRestore()
-  })
-
-  describe('when the deployment may not edit the glossary', () => {
-    afterEach(() => {
-      resetCapabilities()
-    })
-
-    test('the edit and delete controls are not rendered at all', () => {
-      setCapability(GLOSSARY_EDIT, false)
-      renderItem({isEnabledToModify: true})
-      expect(document.querySelector('.glossary_item-actions')).toBeNull()
-    })
-
-    test('the term itself is still shown', () => {
-      setCapability(GLOSSARY_EDIT, false)
-      renderItem()
-      expect(screen.getByText('Source term')).toBeInTheDocument()
-      expect(screen.getByText('Target term')).toBeInTheDocument()
-    })
-
-    test('the controls come back once the capability is restored', () => {
-      setCapability(GLOSSARY_EDIT, false)
-      const {unmount} = renderItem({isEnabledToModify: true})
-      unmount()
-
-      resetCapabilities()
-      renderItem({isEnabledToModify: true})
-      expect(
-        document.querySelector('.glossary_item-actions'),
-      ).toBeInTheDocument()
-    })
   })
 })

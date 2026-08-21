@@ -17,17 +17,6 @@ jest.mock('../stores/UserStore', () => ({
   getUserMetadata: jest.fn(),
 }))
 
-import '../extensions/extensionManifest'
-import {
-  registerExtension,
-  resetExtensionOverrides,
-} from '../extensions/extensionPoints'
-import {
-  SEGMENT_CONTEXT_AFTER,
-  SEGMENT_CONTEXT_BEFORE,
-  SEGMENT_ID_AFTER,
-  SEGMENT_ID_BEFORE,
-} from '../extensions/extensionPointNames'
 import SegmentStore from '../stores/SegmentStore'
 import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
 import UserStore from '../stores/UserStore'
@@ -49,11 +38,12 @@ beforeEach(() => {
     project_completion_feature_enabled: false,
     job_completion_current_phase: 'translate',
   }
-  resetExtensionOverrides()
-  registerExtension(SEGMENT_CONTEXT_BEFORE, () => 'before')
-  registerExtension(SEGMENT_ID_BEFORE, () => 'id-before')
-  registerExtension(SEGMENT_CONTEXT_AFTER, () => 'after')
-  registerExtension(SEGMENT_ID_AFTER, () => 'id-after')
+  global.globalFunctions = {
+    getContextBefore: jest.fn(() => 'before'),
+    getIdBefore: jest.fn(() => 'id-before'),
+    getContextAfter: jest.fn(() => 'after'),
+    getIdAfter: jest.fn(() => 'id-after'),
+  }
   DraftMatecatUtils.removeTagsFromText.mockImplementation((text) => text)
   DraftMatecatUtils.hasDataOriginalTags.mockReturnValue(false)
   DraftMatecatUtils.decodePlaceholdersToPlainText.mockImplementation(

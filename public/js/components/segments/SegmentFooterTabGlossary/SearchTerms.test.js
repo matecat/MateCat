@@ -2,12 +2,6 @@ import React, {useRef, useState} from 'react'
 import {render, screen, fireEvent, act} from '@testing-library/react'
 import {SearchTerms} from './SearchTerms'
 import {TabGlossaryContext} from './TabGlossaryContext'
-import '../../../extensions/extensionManifest'
-import {
-  resetCapabilities,
-  setCapability,
-} from '../../../extensions/capabilities'
-import {GLOSSARY_EDIT} from '../../../extensions/capabilityNames'
 
 jest.mock('../../../actions/SegmentActions', () => ({
   setGlossaryForSegmentBySearch: jest.fn(),
@@ -18,11 +12,7 @@ const SegmentActions = require('../../../actions/SegmentActions')
 
 const segment = {sid: '10', segment: 'Hello world'}
 
-const Harness = ({
-  initialSearchTerm = '',
-  openForm,
-  isLoading = false,
-} = {}) => {
+const Harness = ({initialSearchTerm = '', openForm, isLoading = false} = {}) => {
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm)
   const previousSearchTermRef = useRef('')
   const notifyLoadingStatusToParent = jest.fn()
@@ -138,23 +128,5 @@ describe('SearchTerms', () => {
         isSearchingInTarget: true,
       }),
     )
-  })
-
-  describe('when the deployment may not edit the glossary', () => {
-    afterEach(() => {
-      resetCapabilities()
-    })
-
-    test('the add-term button is not rendered', () => {
-      setCapability(GLOSSARY_EDIT, false)
-      render(<Harness />)
-      expect(screen.queryByText('Add term')).not.toBeInTheDocument()
-    })
-
-    test('searching still works', () => {
-      setCapability(GLOSSARY_EDIT, false)
-      render(<Harness initialSearchTerm="glossary term" />)
-      expect(screen.getByDisplayValue('glossary term')).toBeInTheDocument()
-    })
   })
 })

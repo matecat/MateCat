@@ -1,5 +1,4 @@
 import React from 'react'
-import '../../../../extensions/extensionManifest'
 import {render, act} from '@testing-library/react'
 import RowSegment, {ProjectBar} from './RowSegment'
 import SegmentUtils from '../../../../utils/segmentUtils'

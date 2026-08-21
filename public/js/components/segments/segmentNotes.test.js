@@ -1,20 +1,15 @@
 import React from 'react'
 import {render, screen} from '@testing-library/react'
 
-import './extensionManifest'
-import {
-  filterMetadataKeys,
-  getMetadataNotes,
-  getNote,
-  getNoteContent,
-  getNotes,
-} from './segmentNoteDefaults'
+import segmentNotes, {filterMetadataKeys} from './segmentNotes'
 
-jest.mock('../utils/textUtils', () => ({
+const {getMetadataNotes, getNote, getNoteContent, getNotes} = segmentNotes
+
+jest.mock('../../utils/textUtils', () => ({
   getContentWithAllowedLinkRedirect: jest.fn((note) => [note]),
 }))
 
-import TEXT_UTILS from '../utils/textUtils'
+import TEXT_UTILS from '../../utils/textUtils'
 
 describe('filterMetadataKeys', () => {
   test('drops the size restriction, which has its own place in the editor', () => {

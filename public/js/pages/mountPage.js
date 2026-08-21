@@ -1,7 +1,3 @@
-// Every page bootstraps through here, so this is what makes the extension points
-// exist. Importing it per entry instead would leave a point defined on some pages
-// and unknown on others, which is a runtime throw rather than a missing feature.
-import '../extensions/extensionManifest'
 import {createRoot} from 'react-dom/client'
 import {ApplicationWrapper} from '../components/common/ApplicationWrapper'
 import React from 'react'

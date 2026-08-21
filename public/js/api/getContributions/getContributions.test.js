@@ -1,15 +1,4 @@
 import {getContributions} from './getContributions'
-import '../../extensions/extensionManifest'
-import {
-  registerExtension,
-  resetExtensionOverrides,
-} from '../../extensions/extensionPoints'
-import {
-  SEGMENT_CONTEXT_AFTER,
-  SEGMENT_CONTEXT_BEFORE,
-  SEGMENT_ID_AFTER,
-  SEGMENT_ID_BEFORE,
-} from '../../extensions/extensionPointNames'
 
 jest.mock('../../utils/getMatecatApiDomain', () => ({
   getMatecatApiDomain: jest.fn(() => 'http://localhost/'),
@@ -26,11 +15,12 @@ describe('getContributions', () => {
       currentPassword: 'curr-1',
     }
 
-    resetExtensionOverrides()
-    registerExtension(SEGMENT_CONTEXT_BEFORE, () => 'before-context')
-    registerExtension(SEGMENT_ID_BEFORE, () => 'before-id')
-    registerExtension(SEGMENT_CONTEXT_AFTER, () => 'after-context')
-    registerExtension(SEGMENT_ID_AFTER, () => 'after-id')
+    global.globalFunctions = {
+      getContextBefore: jest.fn(() => 'before-context'),
+      getIdBefore: jest.fn(() => 'before-id'),
+      getContextAfter: jest.fn(() => 'after-context'),
+      getIdAfter: jest.fn(() => 'after-id'),
+    }
   })
 
   afterEach(() => {
@@ -161,8 +151,8 @@ describe('getContributions', () => {
   })
 
   test('filters out null/undefined fields from form data', async () => {
-    registerExtension(SEGMENT_CONTEXT_AFTER, () => null)
-    registerExtension(SEGMENT_ID_AFTER, () => undefined)
+    global.globalFunctions.getContextAfter.mockReturnValue(null)
+    global.globalFunctions.getIdAfter.mockReturnValue(undefined)
 
     fetch.mockResolvedValue({
       ok: true,

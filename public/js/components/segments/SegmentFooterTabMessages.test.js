@@ -1,7 +1,6 @@
 import React from 'react'
 import {render, screen} from '@testing-library/react'
 import SegmentFooterTabMessages from './SegmentFooterTabMessages'
-import '../../extensions/extensionManifest'
 
 jest.mock('../../utils/textUtils', () => ({
   getContentWithAllowedLinkRedirect: jest.fn((text) => [text]),

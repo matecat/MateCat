@@ -10,11 +10,8 @@ import $ from 'jquery'
 import {Header} from '../components/header/cattol/Header'
 import SegmentsContainer from '../components/segments/SegmentsContainer'
 import CatToolStore from '../stores/CatToolStore'
-import {extend, logExtensionPointStatus} from '../extensions/extensionPoints'
-import {
-  CHARS_COUNTER_MODE,
-  SEGMENT_FOOTER_TABS,
-} from '../extensions/extensionPointNames'
+import globalFunctions from '../globalFunctions'
+import catToolInterface from './CatToolInterface'
 import CatToolConstants from '../constants/CatToolConstants'
 import OfflineUtils from '../utils/offlineUtils'
 import SegmentActions from '../actions/SegmentActions'
@@ -63,8 +60,6 @@ import {
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
-
-const getCharacterCounterMode = extend(CHARS_COUNTER_MODE)
 
 function CatTool() {
   useHotkeys(
@@ -590,10 +585,7 @@ function CatTool() {
     setTimeout(function () {
       CatToolActions.checkWarnings(true)
     }, 1000)
-    extend(SEGMENT_FOOTER_TABS)()
-    // Everything that extends core has registered by now, so this is the point
-    // where a point nobody wired up any more becomes visible.
-    logExtensionPointStatus()
+    globalFunctions.registerFooterTabs()
   }, [wasInitSegments])
 
   // user metadata options initialization
@@ -634,7 +626,7 @@ function CatTool() {
     if (isFakeCurrentTemplateReady && typeof jobMetadata?.job !== 'undefined') {
       const isValidPresetCharacterMode = Object.values(
         CHARS_SIZE_COUNTER_TYPES,
-      ).some((value) => value === getCharacterCounterMode())
+      ).some((value) => value === catToolInterface.getCharacterCounterMode())
 
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
@@ -645,7 +637,7 @@ function CatTool() {
           typeof jobMetadata?.job?.character_counter_mode === 'string'
             ? jobMetadata?.job?.character_counter_mode
             : isValidPresetCharacterMode
-              ? getCharacterCounterMode()
+              ? catToolInterface.getCharacterCounterMode()
               : undefined,
         subfilteringHandlers: jobMetadata.job.subfiltering_handlers,
         mtQualityValueInEditor: jobMetadata.project.mt_quality_value_in_editor,

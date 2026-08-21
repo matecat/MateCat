@@ -5,16 +5,6 @@ import {
   splittedTranslationPlaceholder,
 } from '../constants/Constants'
 import UserStore from '../stores/UserStore'
-import {extend} from '../extensions/extensionPoints'
-import {
-  SEGMENT_CONTEXT_AFTER,
-  SEGMENT_CONTEXT_BEFORE,
-  SEGMENT_FILE_ID,
-  SEGMENT_HAS_NOTE,
-  SEGMENT_ID_AFTER,
-  SEGMENT_ID_BEFORE,
-  SEGMENT_IS_ICE,
-} from '../extensions/extensionPointNames'
 
 const SegmentUtils = {
   /**
@@ -67,7 +57,9 @@ const SegmentUtils = {
   },
   //********** Tag Projection code end ******************/
 
-  isIceSegment: (segment) => extend(SEGMENT_IS_ICE)(segment),
+  isIceSegment: function (segment) {
+    return segment.ice_locked
+  },
   isSecondPassLockedSegment: function (segment) {
     return (
       segment.status?.toUpperCase() === SEGMENTS_STATUS.APPROVED2 &&
@@ -150,12 +142,21 @@ const SegmentUtils = {
       JSON.stringify([...prevValue, {[config.id_job]: keys.map(({id}) => id)}]),
     )
   },
-  segmentHasNote: (segment) => extend(SEGMENT_HAS_NOTE)(segment),
+  segmentHasNote: (segment) => {
+    return !!(
+      segment.notes ||
+      segment.context_groups?.context_json ||
+      segment.metadata?.length > 0
+    )
+  },
   /**
    * Retrieve the file id of a segment
+   * NOTE: used by plugins
    * @param segment
    */
-  getSegmentFileId: (segment) => extend(SEGMENT_FILE_ID)(segment),
+  getSegmentFileId: (segment) => {
+    return segment.id_file
+  },
   collectSplittedStatuses: function (sid, splittedSid, status) {
     let statuses = []
     const segments = SegmentStore.getSegmentsInSplit(sid)
@@ -188,10 +189,10 @@ const SegmentUtils = {
   },
   createSetTranslationRequest: (segment, status, propagate = false) => {
     let {translation, segment: segmentSource, original_sid: sid} = segment
-    const contextBefore = extend(SEGMENT_CONTEXT_BEFORE)(sid)
-    const idBefore = extend(SEGMENT_ID_BEFORE)(sid)
-    const contextAfter = extend(SEGMENT_CONTEXT_AFTER)(sid)
-    const idAfter = extend(SEGMENT_ID_AFTER)(sid)
+    const contextBefore = globalFunctions.getContextBefore(sid)
+    const idBefore = globalFunctions.getIdBefore(sid)
+    const contextAfter = globalFunctions.getContextAfter(sid)
+    const idAfter = globalFunctions.getIdAfter(sid)
     if (segment.splitted) {
       translation = SegmentUtils.collectSplittedTranslations(sid)
       segmentSource = SegmentUtils.collectSplittedTranslations(sid, '.source')

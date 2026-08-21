@@ -6,7 +6,6 @@ import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
-import '../../extensions/extensionManifest'
 
 jest.mock('../../stores/SegmentStore', () => {
   const listeners = {}

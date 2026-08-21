@@ -245,12 +245,7 @@ jest.mock('jquery', () =>
 )
 
 import CatTool from './CatTool'
-import '../extensions/extensionManifest'
-import {
-  registerExtension,
-  resetExtensionOverrides,
-} from '../extensions/extensionPoints'
-import {SEGMENT_FOOTER_TABS} from '../extensions/extensionPointNames'
+import globalFunctions from '../globalFunctions'
 
 const registerFooterTabsExtension = jest.fn()
 
@@ -281,8 +276,9 @@ const renderCatTool = (contextOverrides = {}) =>
 describe('CatTool', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    resetExtensionOverrides()
-    registerExtension(SEGMENT_FOOTER_TABS, registerFooterTabsExtension)
+    // Stand in for a deployment replacing core's tab registration, which is
+    // what this object is for.
+    globalFunctions.registerFooterTabs = registerFooterTabsExtension
     CatToolStore.removeAllListeners()
     SegmentStore.removeAllListeners()
     useProjectTemplates.mockReturnValue({

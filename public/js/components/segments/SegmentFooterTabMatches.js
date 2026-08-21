@@ -26,8 +26,7 @@ import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import {NUM_CONTRIBUTION_RESULTS} from '../../constants/Constants'
 import Tooltip from '../common/Tooltip'
 import IconDown from '../../../img/icons/IconDown'
-import {extend} from '../../extensions/extensionPoints'
-import {SEGMENT_MATCH_INFO} from '../../extensions/extensionPointNames'
+import matchInfo from './matchInfo'
 
 const MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED = 3
 const SUGGESTION_SHORTCUT_LABEL = 'CTRL+'
@@ -240,7 +239,7 @@ const SegmentFooterTabMatches = ({code, active_class, tab_class, segment}) => {
           </Tooltip>
         )}
 
-        {extend(SEGMENT_MATCH_INFO)({match, segment})}
+        {matchInfo.getMatchInfoMetadata({match, segment})}
       </ul>
     )
   }

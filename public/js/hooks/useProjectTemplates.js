@@ -5,8 +5,6 @@ import {
   getProjectTemplates,
 } from '../api/getProjectTemplates/getProjectTemplates'
 import useTemplates, {normalizeTemplatesWithNullProps} from './useTemplates'
-import {extend} from '../extensions/extensionPoints'
-import {CHARS_COUNTER_MODE} from '../extensions/extensionPointNames'
 import {CHARS_SIZE_COUNTER_TYPES} from '../utils/charsSizeCounterUtil'
 import defaultMTOptions from '../components/settingsPanel/Contents/defaultTemplates/mtOptions.json'
 
@@ -85,7 +83,12 @@ export const SCHEMA_KEYS = {
   mandatoryIssues: 'mandatory_issues',
 }
 
-const getCharacterCounterMode = extend(CHARS_COUNTER_MODE)
+// The character counter preset a deployment wants applied to new templates.
+// Core ships none, so the job or the template decides.
+// Overridden by plugin.
+export const useProjectTemplateInterface = {
+  getCharacterCounterMode: () => undefined,
+}
 
 function useProjectTemplates({
   tmKeys,
@@ -119,7 +122,10 @@ function useProjectTemplates({
           if (!cleanup) {
             const shouldUsePresetCharacterMode = Object.values(
               CHARS_SIZE_COUNTER_TYPES,
-            ).some((value) => value === getCharacterCounterMode())
+            ).some(
+              (value) =>
+                value === useProjectTemplateInterface.getCharacterCounterMode(),
+            )
 
             const setDefaultExtraMT = (template) => {
               const mt = mtEnginesRef.current.find(
@@ -148,7 +154,8 @@ function useProjectTemplates({
             const templateDefaultNormalized = {
               ...templateDefault,
               ...(shouldUsePresetCharacterMode && {
-                character_counter_mode: getCharacterCounterMode(),
+                character_counter_mode:
+                  useProjectTemplateInterface.getCharacterCounterMode(),
               }),
             }
             // check if users templates have some properties value to undefined or null and assign them default value

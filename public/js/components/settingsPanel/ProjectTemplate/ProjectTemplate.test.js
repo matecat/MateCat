@@ -1,5 +1,4 @@
 import React, {useEffect, useRef} from 'react'
-import '../../../extensions/extensionManifest'
 import {render, renderHook, waitFor, screen, act} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import useProjectTemplates from '../../../hooks/useProjectTemplates'

@@ -1,4 +1,3 @@
-import '../extensions/extensionManifest'
 import {renderHook, act, waitFor} from '@testing-library/react'
 import projectTemplatesMock from '../../mocks/projectTemplateMock'
 import tmKeysMock from '../../mocks/tmKeysMock'

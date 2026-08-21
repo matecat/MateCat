@@ -9,8 +9,7 @@ import {UserMenu} from './UserMenu'
 import {fromJS} from 'immutable'
 import {TeamDropdown} from './TeamDropdown'
 import MembersFilter from './manage/MembersFilter'
-import {Slot} from '../../extensions/Slot'
-import {HEADER_MORE_LINKS} from '../../extensions/extensionPointNames'
+import headerInterface from './headerInterface'
 
 const Header = ({
   isQualityReport,
@@ -73,7 +72,7 @@ const Header = ({
                 <li>
                   <a href="https://guides.matecat.com/">User guide</a>
                 </li>
-                <Slot name={HEADER_MORE_LINKS} />
+                {headerInterface.getMoreLinks()}
               </ul>
             </div>
           ) : (

@@ -1,4 +1,3 @@
-import '../extensions/extensionManifest'
 import CommonUtils, {switchArrayIndex, executeOnce} from './commonUtils'
 
 jest.mock('../actions/ModalsActions', () => ({
