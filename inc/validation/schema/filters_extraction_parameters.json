@@ -1,9 +1,6 @@
 {
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "name"
-  ],
   "properties": {
     "uid": {
       "type": [

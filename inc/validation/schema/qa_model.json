@@ -67,7 +67,7 @@
         "label": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 45
+          "maxLength": 255
         },
         "code": {
           "type": "string",
