@@ -142,10 +142,20 @@ final class EmailValue implements Stringable, ArrayAccess, IteratorAggregate
 
         // `double_encode: false` is deliberate and load-bearing. Names written before the column
         // stored raw text are still entity-encoded in the database, and encoding them again shows
-        // the reader "&amp;lt;" where they wrote "<". The cost is that entity text passes through to
-        // the recipient, whose mail client decodes it — which is why callers that need to judge a
-        // value, rather than print it, decode first: see TeamsController::assertNameIsPlainText().
-        // Retiring this needs the column migrated, which the backlog tracks separately.
+        // the reader "&amp;lt;" where they wrote "<".
+        //
+        // It is not a hole. htmlspecialchars never leaves a raw `<`, `>` or quote here whatever this
+        // flag says; what passes through is an entity reference, and an entity reference in a text
+        // node decodes to a character rather than being re-read as a tag — a name typed as
+        // "&lt;a href=…&gt;" reaches the reader as that text, not as a link. The plain-text half is
+        // built the same way round: {@see AbstractEmail::_buildTxtMessage()} decodes only after it
+        // has finished rewriting tags, for exactly this reason.
+        //
+        // The cost is that a value is read by the recipient's client as its decoded form, which is
+        // why a caller that judges a name rather than printing it judges the decoded form too:
+        // {@see \Utils\Validation\UserSuppliedName} does that before it applies a length cap or
+        // refuses a URL. Retiring the flag needs the columns migrated, which the backlog tracks
+        // separately.
         return $this->escapes ? htmlspecialchars($string, self::FLAGS, 'UTF-8', false) : $string;
     }
 
