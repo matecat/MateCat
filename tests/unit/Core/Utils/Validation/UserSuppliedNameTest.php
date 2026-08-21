@@ -39,7 +39,7 @@ class UserSuppliedNameTest extends AbstractTest
             'cyrillic'                   => ['Тест'],
             'katakana'                   => ['メモリ'],
             'arabic'                     => ['ذاكرة'],
-            'emoji'                      => ['Team 🚀'],
+            'persian with a non-joiner'  => ["می\u{200C}خواهم"],
         ];
     }
 
@@ -77,33 +77,38 @@ class UserSuppliedNameTest extends AbstractTest
     }
 
     #[Test]
-    public function normalize_keeps_the_zero_width_joiner_so_emoji_sequences_survive(): void
+    public function normalize_keeps_the_zero_width_non_joiner_because_it_changes_the_word(): void
     {
-        // A family emoji is four code points held together by three joiners. Deleting them, as a
-        // blanket \p{Cf} strip would, breaks one glyph into four.
-        $family = "\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F467}\u{200D}\u{1F466}";
+        // U+200C is a letter-joining rule in Persian, Urdu, Pashto and Kurdish, not decoration:
+        // "می‌خواهم" written without it is a different word. The loss would happen on write, so it
+        // could never be recovered — the same damage as storing "O'Brien" as "O Brien", which is
+        // what this class exists to stop.
+        $wanted = "می\u{200C}خواهم";
 
-        self::assertSame('Team ' . $family, UserSuppliedName::normalize('Team ' . $family));
+        self::assertSame($wanted, UserSuppliedName::normalize($wanted));
     }
 
     #[Test]
-    public function normalize_keeps_the_joiner_even_when_another_format_character_precedes_it(): void
+    public function normalize_keeps_the_non_joiner_even_when_another_format_character_precedes_it(): void
     {
         // The regression the in-group lookahead exists for: guarding a `+` quantifier from the
-        // front only tests the first character of a run, so a ZWSP immediately followed by a ZWJ
-        // would have had the joiner swallowed by the same match and the sequence after it broken
-        // into separate glyphs.
-        //
-        // The exemption is unconditional, so the joiner left dangling where the ZWSP was is kept
-        // too. Deciding whether a given joiner is load-bearing means knowing what is on both sides
-        // of it, and a rule that fussy would break the sequences it exists to protect the first
-        // time an emoji is added to Unicode. An idle joiner is invisible and joins nothing.
-        $couple = "\u{1F469}\u{200D}\u{1F467}";
-
+        // front only tests the first character of a run, so a ZWSP immediately followed by a ZWNJ
+        // would have had the non-joiner swallowed by the same match and the word after it changed.
         self::assertSame(
-            "A \u{200D}" . $couple,
-            UserSuppliedName::normalize("A\u{200B}\u{200D}\u{1F469}\u{200D}\u{1F467}")
+            "A می\u{200C}خواهم",
+            UserSuppliedName::normalize("A\u{200B}می\u{200C}خواهم")
         );
+    }
+
+    #[Test]
+    public function normalize_removes_the_zero_width_joiner(): void
+    {
+        // The opposite of the non-joiner, and the reason the exemption is not for both. A joiner
+        // between two letters is invisible, so "Ad<ZWJ>min" reads exactly like "Admin" on screen
+        // while being a different string — two rows can then exist under names that read the same.
+        // It only carries meaning inside an emoji sequence, and {@see assertNoAstral()} refuses
+        // those anyway.
+        self::assertSame('Ad min', UserSuppliedName::normalize("Ad\u{200D}min"));
     }
 
     #[Test]
@@ -121,11 +126,25 @@ class UserSuppliedNameTest extends AbstractTest
     }
 
     #[Test]
-    public function normalize_refuses_to_guess_at_invalid_utf8(): void
+    public function normalize_scrubs_a_byte_it_cannot_read(): void
     {
-        // A lone continuation byte. Returning empty hands the caller's own non-empty check the
-        // refusal, instead of letting a byte sequence through that nothing downstream can measure.
-        self::assertSame('', UserSuppliedName::normalize("\x80"));
+        // A lone continuation byte. Scrubbing gives up that byte and keeps the rest, which is the
+        // only outcome of the three that is not a loss: returning empty deletes a name nobody asked
+        // to delete, and returning the input unchanged leaves a string preg_replace cannot process,
+        // so a CR would reach a Subject header.
+        $scrubbed = UserSuppliedName::normalize("\x80Acme");
+
+        self::assertStringContainsString('Acme', $scrubbed);
+        self::assertTrue(mb_check_encoding($scrubbed, 'UTF-8'));
+    }
+
+    #[Test]
+    public function normalize_keeps_an_emoji_because_refusing_is_not_its_job(): void
+    {
+        // The transformer/rule split: normalize() reports what the name is, and
+        // {@see UserSuppliedName::assertNoAstral()} decides whether it can be stored. Stripping
+        // here would take the choice away from the callers that must refuse rather than mangle.
+        self::assertSame('Team 🚀', UserSuppliedName::normalize('Team 🚀'));
     }
 
     #[Test]
@@ -293,7 +312,7 @@ class UserSuppliedNameTest extends AbstractTest
     #[DataProvider('namesStoredAsTyped')]
     public function validated_returns_a_legitimate_name_as_typed(string $typed): void
     {
-        self::assertSame($typed, UserSuppliedName::validated($typed, 'name', 255, 255));
+        self::assertSame($typed, UserSuppliedName::validated($typed, 'name', 255));
     }
 
     #[Test]
@@ -308,11 +327,22 @@ class UserSuppliedNameTest extends AbstractTest
     }
 
     #[Test]
-    public function validated_can_skip_the_url_rule(): void
+    public function validated_does_not_apply_the_url_rule(): void
     {
         // A person's own name is never quoted to a stranger in an invitation, so there is nothing
-        // for the rule to defend; the email sink defangs it like any other value.
-        self::assertSame('www.smith', UserSuppliedName::validated('www.smith', 'last_name', 50, 50, refuseUrl: false));
+        // for the rule to defend; the email sink defangs it like any other value. The rule lives on
+        // validatedForEmailQuote() instead of behind a flag, because the team name is the one field
+        // that needs it and every other caller was writing `refuseUrl: false` to say so.
+        self::assertSame('www.smith', UserSuppliedName::validated('www.smith', 'last_name', 50));
+    }
+
+    #[Test]
+    public function validated_for_an_email_quote_applies_the_url_rule(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('name cannot contain a URL');
+
+        UserSuppliedName::validatedForEmailQuote('https://evil.example', 'name', 255, 100);
     }
 
     #[Test]
@@ -326,5 +356,80 @@ class UserSuppliedNameTest extends AbstractTest
             str_repeat('a ', 19) . 'a ' . str_repeat('b', 20),
             UserSuppliedName::validated($padded, 'name', 60, 60)
         );
+    }
+    // ─── characters the connection cannot carry ───────────────────────────
+
+    #[Test]
+    public function validated_refuses_a_character_outside_the_basic_multilingual_plane(): void
+    {
+        // Nothing refused one before, so MySQL decided: the value was cut at the emoji and
+        // "Acme 😀 Team" was stored as "Acme", silently. The cause is the connection charset —
+        // Database opens every connection with `SET NAMES utf8`, three bytes per character — so
+        // until that changes the honest answer is a 400 that says why.
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('name cannot contain emoji');
+
+        UserSuppliedName::validated('Acme 😀 Team', 'name', 255);
+    }
+
+    #[Test]
+    public function validated_refuses_a_character_outside_the_plane_even_when_it_is_a_letter(): void
+    {
+        // CJK Extension B holds rare but real Chinese and Japanese name characters. Refusing is
+        // still better than the alternative, which is the name being cut at that character with no
+        // error, but this is the cost of the connection charset and not a judgement about the name.
+        $this->expectException(InvalidArgumentException::class);
+
+        UserSuppliedName::validated("\u{20000}", 'name', 255);
+    }
+
+    #[Test]
+    public function normalize_and_truncate_strips_what_validated_refuses(): void
+    {
+        // The OAuth callback and project creation cannot throw: a 400 there refuses the login or
+        // the upload rather than correcting anything. A space rather than nothing, so the words
+        // either side stay separate.
+        self::assertSame('Acme Team', UserSuppliedName::normalizeAndTruncate('Acme 😀 Team', 255));
+    }
+
+    // ─── the two failure modes the transformer has to survive ─────────────
+
+    #[Test]
+    public function normalize_scrubs_invalid_utf8_rather_than_blanking_the_name(): void
+    {
+        // Returning empty would have handed the caller's own non-empty check the refusal, but the
+        // four normalizeAndTruncate callers have no such check — one stray byte from an older
+        // client would have erased the whole name. Returning the input unchanged is worse still:
+        // preg_replace cannot run on it, so a CR would survive into a Subject header.
+        $scrubbed = UserSuppliedName::normalize("Jos\xE9 Smith");
+
+        self::assertNotSame('', $scrubbed);
+        self::assertTrue(mb_check_encoding($scrubbed, 'UTF-8'));
+        self::assertStringContainsString('Smith', $scrubbed);
+    }
+
+    #[Test]
+    public function normalize_scrubs_and_still_removes_a_control_character(): void
+    {
+        $scrubbed = UserSuppliedName::normalize("Bcc:\r\nvictim\xE9");
+
+        self::assertStringNotContainsString("\r", $scrubbed);
+        self::assertStringNotContainsString("\n", $scrubbed);
+    }
+
+    #[Test]
+    public function normalize_and_truncate_does_not_leave_a_trailing_space(): void
+    {
+        // trim() runs inside normalize(), before the cut, so cutting at a word boundary used to
+        // store "aaaa " — a name with a space nobody typed at the end of it.
+        self::assertSame('aaaa', UserSuppliedName::normalizeAndTruncate('aaaa bbbbbbbbbb', 5));
+    }
+
+    #[Test]
+    public function normalize_and_truncate_keeps_a_name_of_zero(): void
+    {
+        // "0" is a name someone can type, and the call sites used to reach here through
+        // `filter_var(...) ?: null`, where '0' ?: null is null.
+        self::assertSame('0', UserSuppliedName::normalizeAndTruncate('0', 100));
     }
 }
