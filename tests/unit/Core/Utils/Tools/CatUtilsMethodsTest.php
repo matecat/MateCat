@@ -62,16 +62,24 @@ class CatUtilsMethodsTest extends AbstractTest
         self::assertSame($expected, CatUtils::sanitizeProjectName($input));
     }
 
+    /**
+     * The allowlist that used to delete every character outside `. - _ \p{L} \p{N} \s` is gone: a
+     * project name is stored as it was typed, and each output escapes for itself. Only control
+     * characters and whitespace are still normalised.
+     */
     public static function sanitizeProjectNameProvider(): array
     {
         return [
             'valid name unchanged'      => ['My_Project-123', 'My_Project-123'],
-            'special chars removed'     => ['Hello@World#!', 'HelloWorld'],
+            'punctuation kept'          => ['Hello@World#!', 'Hello@World#!'],
+            'ampersand kept'            => ['Acme & Co (2024)', 'Acme & Co (2024)'],
             'unicode letters kept'      => ['Progetto Ñoño', 'Progetto Ñoño'],
             'dots preserved'            => ['file.name.v2', 'file.name.v2'],
             'spaces preserved'          => ['My Project', 'My Project'],
             'empty string stays empty'  => ['', ''],
-            'all invalid becomes empty' => ['@#$%^&', ''],
+            'symbols are a valid name'  => ['@#$%^&', '@#$%^&'],
+            'control characters go'     => ["Report\r\n2024", 'Report 2024'],
+            'cut to the column width'   => [str_repeat('p', 240), str_repeat('p', 200)],
         ];
     }
 
@@ -84,16 +92,27 @@ class CatUtilsMethodsTest extends AbstractTest
         self::assertSame($expected, CatUtils::stripMaliciousContentFromAName($input));
     }
 
+    /**
+     * The `\P{L}` strip is gone. It replaced every character that is not a Unicode letter with a
+     * space, which cost `O'Brien`, `Jean-Luc` and `J.R.` their punctuation and any name with a digit
+     * in it its digit. Markup is no longer flattened either — it is stored as typed and escaped by
+     * whichever output prints it, the same way every other name is.
+     */
     public static function stripMaliciousProvider(): array
     {
         return [
             'normal name unchanged'       => ['John Doe', 'John Doe'],
-            'script injection stripped'   => ['<script>alert("xss")</script>', 'script alert xss script'],
-            'numbers removed'             => ['John123', 'John'],
-            'special chars removed'       => ['John!@#Doe', 'John Doe'],
-            'truncated at 50 chars'       => [str_repeat('A', 100), str_repeat('A', 50)],
+            'markup stored as typed'      => ['<script>alert("xss")</script>', '<script>alert("xss")</script>'],
+            'numbers kept'                => ['John123', 'John123'],
+            'punctuation kept'            => ['John!@#Doe', 'John!@#Doe'],
+            'apostrophe kept'             => ["O'Brien", "O'Brien"],
+            'hyphen kept'                 => ['Jean-Luc', 'Jean-Luc'],
+            'initials keep their dots'    => ['J.R. Ewing', 'J.R. Ewing'],
+            'cut to the column width'     => [str_repeat('A', 150), str_repeat('A', 100)],
             'double spaces collapsed'     => ['John   Doe', 'John Doe'],
             'unicode letters preserved'   => ['José García', 'José García'],
+            'non latin script preserved'  => ['李明', '李明'],
+            'control characters go'       => ["John\r\nDoe", 'John Doe'],
         ];
     }
 

@@ -15,7 +15,9 @@
           "type": "integer"
         },
         "label": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 45
         },
         "categories": {
           "type": "array",
@@ -63,7 +65,9 @@
       "type": "object",
       "properties": {
         "label": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
         },
         "code": {
           "type": "string",

@@ -14,10 +14,14 @@ use RuntimeException;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MMT;
 use Utils\Files\CSV as CSVParser;
+use Utils\Validation\UserSuppliedName;
 
 
 class ModernMTController extends KleinController
 {
+
+    /** Not a column: the memory lives at ModernMT. Same bound the DeepL glossary name gets. */
+    private const int PROVIDER_RESOURCE_NAME_MAX_LENGTH = 255;
 
     protected function registerValidators(): void
     {
@@ -165,15 +169,20 @@ class ModernMTController extends KleinController
             throw new Exception('Missing `name` param', 400);
         }
 
-        $name = filter_var($this->params['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
-        if (!is_string($name) || $name === '') {
+        // Sent to ModernMT, not stored here. Entity-encoding it meant ModernMT held `A &amp; B`
+        // and showed it back that way for the life of the memory, with nothing on this side able to
+        // decode it again.
+        $name = UserSuppliedName::normalize(is_string($this->params['name']) ? $this->params['name'] : null);
+        if ($name === '') {
             throw new Exception('Invalid `name` param', 400);
         }
+        // Bounded for the same reason the DeepL glossary name is: the memory lives at ModernMT, so
+        // without a cap the provider decides what an over-long name becomes.
+        UserSuppliedName::assertLength($name, 'name', self::PROVIDER_RESOURCE_NAME_MAX_LENGTH);
 
-        $descriptionRaw = isset($this->params['description'])
-            ? filter_var($this->params['description'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW)
+        $description = isset($this->params['description']) && is_string($this->params['description'])
+            ? UserSuppliedName::normalize($this->params['description'])
             : null;
-        $description = is_string($descriptionRaw) ? $descriptionRaw : null;
 
         $externalIdRaw = isset($this->params['external_id'])
             ? filter_var($this->params['external_id'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW)
@@ -199,8 +208,8 @@ class ModernMTController extends KleinController
             throw new Exception('Missing `name` param', 400);
         }
 
-        $name = filter_var($this->params['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
-        if (!is_string($name) || $name === '') {
+        $name = UserSuppliedName::normalize(is_string($this->params['name']) ? $this->params['name'] : null);
+        if ($name === '') {
             throw new Exception('Invalid `name` param', 400);
         }
 
@@ -253,8 +262,8 @@ class ModernMTController extends KleinController
             throw new Exception('Missing `name` param', 400);
         }
 
-        $name = filter_var($this->params['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
-        if (!is_string($name) || $name === '') {
+        $name = UserSuppliedName::normalize(is_string($this->params['name']) ? $this->params['name'] : null);
+        if ($name === '') {
             throw new Exception('Invalid `name` param', 400);
         }
 

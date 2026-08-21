@@ -20,6 +20,7 @@ use Throwable;
 use TypeError;
 use Utils\Email\WelcomeEmail;
 use Utils\Session\SessionStore;
+use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 
 /**
@@ -58,11 +59,22 @@ class OAuthSignInModel
         MetadataDao $metadataDao,
         TeamDao $teamDao
     ) {
-        if (empty($firstName)) {
+        // Normalised for the same reasons the profile-edit and signup paths normalise: this name
+        // reaches the same columns, the same JSON responses and the same email templates. It had no
+        // treatment at all before, which made the identity provider the only thing standing between
+        // a CR in a display name and the Subject header of a MateCat notification.
+        //
+        // It also has to be cut to fit. `users`.`first_name` is a varchar(100) and Google's provider
+        // puts the account's *full* name in it, so overflow is ordinary rather than hostile —
+        // refusing would refuse the login.
+        $firstName = CatUtils::stripMaliciousContentFromAName($firstName ?? '');
+        $lastName  = CatUtils::stripMaliciousContentFromAName($lastName ?? '');
+
+        if ($firstName === '') {
             $firstName = "Anonymous";
         }
 
-        if (empty($lastName)) {
+        if ($lastName === '') {
             $lastName = "User";
         }
 
