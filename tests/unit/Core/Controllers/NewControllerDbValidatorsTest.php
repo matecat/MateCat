@@ -173,4 +173,32 @@ class NewControllerDbValidatorsTest extends AbstractTest
         // No qa_model seeded for this id.
         $this->invokeMethod('validateQaModel', [(string)$this->qaModelId(self::BASE)]);
     }
+
+    // ──────────────── validateQaModelTemplate() ────────────────
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function validateQaModelTemplate_empty_value_returns_null(): void
+    {
+        $this->assertNull($this->invokeMethod('validateQaModelTemplate', [null]));
+        $this->assertNull($this->invokeMethod('validateQaModelTemplate', [false]));
+        $this->assertNull($this->invokeMethod('validateQaModelTemplate', ['']));
+    }
+
+    /**
+     * The lookup is scoped by uid, so an id with no row for this user is indistinguishable from a
+     * template belonging to somebody else — one message covers both.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function validateQaModelTemplate_unknown_template_throws(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('This QA model template does not exist or does not belong to the logged-in user');
+        // No qa_model_templates row is seeded for this reserved id.
+        $this->invokeMethod('validateQaModelTemplate', [(string)(self::BASE + 8)]);
+    }
 }
