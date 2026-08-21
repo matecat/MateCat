@@ -56,9 +56,7 @@ class MyMemoryController extends KleinController
             $name = UserSuppliedName::validated(
                 is_string($json['name']) ? $json['name'] : null,
                 'name',
-                TmKeyManager::RESOURCE_NAME_MAX_LENGTH,
-                TmKeyManager::RESOURCE_NAME_MAX_LENGTH,
-                refuseUrl: false
+                TmKeyManager::RESOURCE_NAME_MAX_LENGTH
             );
 
             if ($key !== null) {

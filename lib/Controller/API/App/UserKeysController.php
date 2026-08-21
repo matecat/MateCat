@@ -187,9 +187,7 @@ class UserKeysController extends KleinController
             $description = UserSuppliedName::validated(
                 $description,
                 'description',
-                TmKeyManager::RESOURCE_NAME_MAX_LENGTH,
-                TmKeyManager::RESOURCE_NAME_MAX_LENGTH,
-                refuseUrl: false
+                TmKeyManager::RESOURCE_NAME_MAX_LENGTH
             );
         }
 

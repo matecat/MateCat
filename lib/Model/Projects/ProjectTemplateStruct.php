@@ -90,11 +90,10 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     {
         $this->id = $decodedObject->id ?? $id;
         $this->uid = $decodedObject->uid ?? $uid;
-            // Schema validation bounds the length but cannot strip a control character or compose
-            // the Unicode form, and the composed form is what the UNIQUE(uid, name) index needs to
-            // see a clash. Normalising here rather than in the controller covers create and update
-            // together, since both hydrate through this method.
-        $this->name = UserSuppliedName::validated($decodedObject->name, 'name', UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH, UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH, refuseUrl: false);
+        // Here rather than in the controller, so create and update are covered by one call: both
+        // hydrate through this method. The schema bounds the length, but only the composed form
+        // lets UNIQUE(uid, name) see a clash between two spellings of the same name.
+        $this->name = UserSuppliedName::validated($decodedObject->name, 'name', UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH);
         $this->is_default = (isset($decodedObject->is_default)) ? $decodedObject->is_default : false;
         $this->id_team = $decodedObject->id_team;
         $this->segmentation_rule = (!empty($decodedObject->segmentation_rule)) ? (json_encode($decodedObject->segmentation_rule) ?: null) : null;

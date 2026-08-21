@@ -4,6 +4,7 @@ namespace Model\PayableRates;
 
 use DomainException;
 use Exception;
+use InvalidArgumentException;
 use JsonSerializable;
 use Matecat\Locales\Languages;
 use Model\Analysis\PayableRates;
@@ -89,6 +90,8 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
      *
      * @throws Exception
      * @throws TypeError
+     * @throws InvalidArgumentException when the name is empty, holds a character the connection
+     *                                  cannot carry, or will not fit the column
      */
     public function hydrateFromJSON(string $json): CustomPayableRateStruct
     {
@@ -107,16 +110,13 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
             $this->version = $json['version'];
         }
 
-            // Schema validation bounds the length but cannot strip a control character or compose
-            // the Unicode form, and the composed form is what the UNIQUE(uid, name) index needs to
-            // see a clash. Normalising here rather than in the controller covers create and update
-            // together, since both hydrate through this method.
+        // Here rather than in the controller, so create and update are covered by one call: both
+        // hydrate through this method. The schema bounds the length, but only the composed form
+        // lets UNIQUE(uid, name) see a clash between two spellings of the same name.
         $this->name = UserSuppliedName::validated(
             $json['payable_rate_template_name'],
             'payable_rate_template_name',
-            UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH,
-            UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH,
-            refuseUrl: false
+            UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH
         );
         $this->breakdowns = $json['breakdowns'];
 

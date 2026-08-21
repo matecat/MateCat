@@ -67,7 +67,7 @@ class TeamsController extends KleinController
      */
     private function validateTeamName(?string $raw): string
     {
-        return UserSuppliedName::validated($raw, 'name', self::NAME_MAX_STORED_LENGTH, self::NAME_MAX_LENGTH);
+        return UserSuppliedName::validatedForEmailQuote($raw, 'name', self::NAME_MAX_STORED_LENGTH, self::NAME_MAX_LENGTH);
     }
 
     protected function registerValidators(): void

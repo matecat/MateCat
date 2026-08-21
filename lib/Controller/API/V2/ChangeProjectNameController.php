@@ -63,9 +63,7 @@ class ChangeProjectNameController extends KleinController
         $name = UserSuppliedName::validated(
             is_string($name) ? $name : null,
             'name',
-            CatUtils::PROJECT_NAME_MAX_LENGTH,
-            CatUtils::PROJECT_NAME_MAX_LENGTH,
-            refuseUrl: false
+            CatUtils::PROJECT_NAME_MAX_LENGTH
         );
 
         $project = $this->project ?? throw new \RuntimeException('Project not loaded');

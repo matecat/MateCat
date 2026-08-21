@@ -4,6 +4,7 @@ namespace Model\Xliff;
 
 use DomainException;
 use Exception;
+use InvalidArgumentException;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\Xliff\DTO\Xliff12Rule;
@@ -36,6 +37,8 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
      * @return $this
      * @throws Exception
      * @throws TypeError
+     * @throws InvalidArgumentException when the name is empty, holds a character the connection
+     *                                  cannot carry, or will not fit the column
      */
     public function hydrateFromJSON(string $json, ?int $uid = null): XliffConfigTemplateStruct
     {
@@ -50,11 +53,10 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
         }
 
         $this->uid = $decoded_json['uid'] ?? $uid;
-            // Schema validation bounds the length but cannot strip a control character or compose
-            // the Unicode form, and the composed form is what the UNIQUE(uid, name) index needs to
-            // see a clash. Normalising here rather than in the controller covers create and update
-            // together, since both hydrate through this method.
-        $this->name = UserSuppliedName::validated($decoded_json['name'], 'name', UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH, UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH, refuseUrl: false);
+        // Here rather than in the controller, so create and update are covered by one call: both
+        // hydrate through this method. The schema bounds the length, but only the composed form
+        // lets UNIQUE(uid, name) see a clash between two spellings of the same name.
+        $this->name = UserSuppliedName::validated($decoded_json['name'], 'name', UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH);
 
         if (isset($decoded_json['id'])) {
             $this->id = $decoded_json['id'];

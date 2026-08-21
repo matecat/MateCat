@@ -3,6 +3,7 @@
 namespace Model\LQA\QAModelTemplate;
 
 use Exception;
+use InvalidArgumentException;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
@@ -38,6 +39,8 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
      * @return QAModelTemplateStruct
      * @throws Exception
      * @throws TypeError
+     * @throws InvalidArgumentException when the name is empty, holds a character the connection
+     *                                  cannot carry, or will not fit the column
      */
     public function hydrateFromJSON(string $json): QAModelTemplateStruct
     {
@@ -52,17 +55,15 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         // QAModelTemplateStruct
         $QAModelTemplateStruct = $this;
         $QAModelTemplateStruct->version = $jsonModel->version;
-            // Schema validation bounds the length but cannot strip a control character or compose
-            // the Unicode form, and the composed form is what the UNIQUE(uid, name) index needs to
-            // see a clash. Normalising here rather than in the controller covers create and update
-            // together, since both hydrate through this method.
-        // `qa_model_templates`.`label` is a varchar(45), not the 255 the other template names get.
+        // Here rather than in the controller, so create and update are covered by one call: both
+        // hydrate through this method. Unlike its siblings, `qa_model_templates` has a plain
+        // KEY (uid) and no name column at all, so this is about the value being stored as one
+        // spelling rather than about an index seeing a clash — and its `label` is a varchar(45),
+        // not the 255 the other template names get.
         $QAModelTemplateStruct->label = UserSuppliedName::validated(
             $jsonModel->label,
             'label',
-            UserSuppliedName::QA_MODEL_LABEL_MAX_LENGTH,
-            UserSuppliedName::QA_MODEL_LABEL_MAX_LENGTH,
-            refuseUrl: false
+            UserSuppliedName::QA_MODEL_LABEL_MAX_LENGTH
         );
         $QAModelTemplateStruct->categories = [];
 
