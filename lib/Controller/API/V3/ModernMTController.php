@@ -20,6 +20,9 @@ use Utils\Validation\UserSuppliedName;
 class ModernMTController extends KleinController
 {
 
+    /** Not a column: the memory lives at ModernMT. Same bound the DeepL glossary name gets. */
+    private const int PROVIDER_RESOURCE_NAME_MAX_LENGTH = 255;
+
     protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
@@ -173,6 +176,9 @@ class ModernMTController extends KleinController
         if ($name === '') {
             throw new Exception('Invalid `name` param', 400);
         }
+        // Bounded for the same reason the DeepL glossary name is: the memory lives at ModernMT, so
+        // without a cap the provider decides what an over-long name becomes.
+        UserSuppliedName::assertLength($name, 'name', self::PROVIDER_RESOURCE_NAME_MAX_LENGTH);
 
         $description = isset($this->params['description']) && is_string($this->params['description'])
             ? UserSuppliedName::normalize($this->params['description'])

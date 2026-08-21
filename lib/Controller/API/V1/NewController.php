@@ -361,9 +361,12 @@ class NewController extends KleinController
         // whose name contains & < > " ' — the request was refused with "Payable rate model name not
         // matching" for a name the caller had copied correctly. Normalised the same way the name was
         // normalised on the way in, so the comparison is between two like forms.
+        $rawPayableRateTemplateName = $this->request->param('payable_rate_template_name');
         $payable_rate_template_name = UserSuppliedName::normalize(
-            filter_var($this->request->param('payable_rate_template_name'), FILTER_UNSAFE_RAW) ?: null
-        ) ?: null;
+            is_string($rawPayableRateTemplateName) ? $rawPayableRateTemplateName : null
+        );
+        // `!== ''` rather than `?:`, which reads a template named "0" as "not provided".
+        $payable_rate_template_name = $payable_rate_template_name !== '' ? $payable_rate_template_name : null;
         $public_tm_penalty = filter_var($this->request->param('public_tm_penalty'), FILTER_SANITIZE_NUMBER_INT);
         $pretranslate_100 = filter_var($this->request->param('pretranslate_100'), FILTER_VALIDATE_BOOLEAN);
         $pretranslate_101 = filter_var($this->request->param('pretranslate_101'), FILTER_VALIDATE_BOOLEAN);

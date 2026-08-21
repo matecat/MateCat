@@ -260,8 +260,9 @@ class CommentController extends KleinController
         // Stored as typed in `comments`.`full_name` and escaped by each output — the comment emails
         // print it, and those escape and defang every value they are given. It had no length cap
         // against a varchar(100) column.
+        $rawUsername = $this->request->param('username');
         $username = UserSuppliedName::normalizeAndTruncate(
-            filter_var($this->request->param('username'), FILTER_UNSAFE_RAW) ?: null,
+            is_string($rawUsername) ? $rawUsername : null,
             self::COMMENTER_NAME_MAX_LENGTH
         );
         $id_job = filter_var($this->request->param('id_job'), FILTER_SANITIZE_NUMBER_INT);

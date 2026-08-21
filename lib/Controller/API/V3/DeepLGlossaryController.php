@@ -10,11 +10,19 @@ use Utils\Engines\DeepL;
 use Utils\Engines\DeepL\DeepLApiException;
 use Utils\Engines\EnginesFactory;
 use Utils\Files\CSV as CSVParser;
+use InvalidArgumentException;
 use TypeError;
 use Utils\Validation\UserSuppliedName;
 
 class DeepLGlossaryController extends KleinController
 {
+
+    /**
+     * Not a column: the glossary lives at DeepL, not here. A bound is still needed, because without
+     * one the provider decides what happens to an over-long name and MateCat cannot say what was
+     * stored. 255 is the width every name MateCat does own is held to.
+     */
+    private const int PROVIDER_RESOURCE_NAME_MAX_LENGTH = 255;
     protected Upload $upload;
 
     /**
@@ -59,6 +67,7 @@ class DeepLGlossaryController extends KleinController
      *
      * @throws Exception
      * @throws TypeError
+     * @throws InvalidArgumentException when the name is empty or will not fit
      */
     public function create(): void
     {
@@ -66,8 +75,13 @@ class DeepLGlossaryController extends KleinController
 
         // FILTER_FLAG_STRIP_HIGH deleted every byte above 0x7F, so a glossary named in any
         // non-Latin script was created at DeepL with a mangled name — and the entity encoding on
-        // top of it left `&amp;` there permanently. Sent as typed instead.
-        $name = UserSuppliedName::normalize(is_string($this->params['name']) ? $this->params['name'] : null);
+        // top of it left `&amp;` there permanently. Sent as typed instead, and refused rather than
+        // sent empty: a name of nothing but control characters used to reach DeepL as "".
+        $name = UserSuppliedName::validated(
+            is_string($this->params['name']) ? $this->params['name'] : null,
+            'name',
+            self::PROVIDER_RESOURCE_NAME_MAX_LENGTH
+        );
 
         $uploadedFiles = $this->upload->uploadFiles($this->request->files()->all());
 

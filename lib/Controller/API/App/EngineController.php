@@ -307,8 +307,9 @@ class EngineController extends KleinController
         $id = filter_var($this->request->param('id'), FILTER_SANITIZE_SPECIAL_CHARS);
         // Stored as typed and escaped by each output. `engines`.`name` is a varchar(200) and had
         // no cap at all, so a longer name was silently truncated by MySQL or refused by it.
+        $rawName = $this->request->param('name');
         $name = UserSuppliedName::normalizeAndTruncate(
-            filter_var($this->request->param('name'), FILTER_UNSAFE_RAW) ?: null,
+            is_string($rawName) ? $rawName : null,
             self::ENGINE_NAME_MAX_LENGTH
         );
         $data = filter_var($this->request->param('data'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES]);
