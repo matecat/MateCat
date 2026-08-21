@@ -407,9 +407,19 @@ class GetSearchController extends AbstractStatefulKleinController
                     // Undo/redo: the row already holds the exact historical text to restore.
                     $replacedTranslation = Utils::stripBOM((string)($old_translation->translation ?? ''));
                 } else {
-                    $filter = MateCatFilter::getInstance($this->getFeatureSet(), $this->chunk->source, $this->chunk->target);
-                    $replacedTranslation = $filter->fromLayer1ToLayer0($this->getReplacedSegmentTranslation((string)($old_translation->translation ?? ''), $queryParams));
-                    $replacedTranslation = Utils::stripBOM($replacedTranslation);
+                    $filter              = MateCatFilter::getInstance($this->getFeatureSet(), $this->chunk->source, $this->chunk->target);
+                    $originalTranslation = (string)($old_translation->translation ?? '');
+                    $replacement         = $this->getReplacedSegmentTranslation($originalTranslation, $queryParams);
+
+                    // A replacement that yields the same text is not an edit. Writing it anyway would demote the
+                    // segment through getNewStatus() and, on a lower transition, soft-delete its LQA issues via
+                    // ReviewedWordCountModel::decreaseCounters() -> flagIssuesToBeDeleted() — discarding review
+                    // work on a segment nobody actually changed. Skip it, as the guards above do.
+                    if ($replacement === $originalTranslation) {
+                        return null;
+                    }
+
+                    $replacedTranslation = Utils::stripBOM($filter->fromLayer1ToLayer0($replacement));
                 }
 
                 // Setup $new_translation
