@@ -77,6 +77,35 @@ class XliffToTargetConverterControllerTest extends AbstractTest
 
     // ─── convert(): error path with message ───────────────────────────────────
 
+    /**
+     * The name comes from the file the caller uploaded, by way of the filters service. A quote in it
+     * closes the quoted `filename=` value early and a CR ends the header, so this endpoint could be
+     * handed a second header of the caller's choosing. It extends KleinController directly, which is
+     * how it was left out of the sweep that covered the download hierarchy.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function convertStripsHeaderBreakingCharactersFromTheDownloadFilename(): void
+    {
+        $path = $this->writeTempXliff('<xliff>dummy</xliff>');
+        $filters = $this->makeFiltersStub([
+            'successful'       => true,
+            'fileName'         => "evil\".docx\r\nX-Injected: yes",
+            'document_content' => 'BINARY-CONTENT',
+        ]);
+
+        $headers = [];
+        $controller = $this->makeControllerCapturingHeaders($path, $filters, $headers);
+
+        $controller->convert();
+
+        $disposition = $headers['Content-Disposition'] ?? '';
+        $this->assertSame('attachment; filename="evil.docxX-Injected: yes"', $disposition);
+        $this->assertStringNotContainsString("\r", $disposition);
+        $this->assertStringNotContainsString('"evil"', $disposition);
+    }
+
     /** @throws ReflectionException */
     #[Test]
     public function convertReturnsErrorMessageWhenConversionFails(): void
@@ -183,6 +212,34 @@ class XliffToTargetConverterControllerTest extends AbstractTest
             $capturedBody = $body;
             return $response;
         });
+
+        (new ReflectionProperty($controller, 'request'))->setValue($controller, $this->createStub(Request::class));
+        (new ReflectionProperty($controller, 'response'))->setValue($controller, $response);
+
+        return $controller;
+    }
+
+    /**
+     * @param array<string, string> $capturedHeaders
+     */
+    private function makeControllerCapturingHeaders(
+        string $xliffPath,
+        Filters $filters,
+        array &$capturedHeaders
+    ): TestableXliffToTargetConverterController {
+        $reflection = new ReflectionClass(TestableXliffToTargetConverterController::class);
+        /** @var TestableXliffToTargetConverterController $controller */
+        $controller = $reflection->newInstanceWithoutConstructor();
+        $controller->xliffPath = $xliffPath;
+        $controller->filtersStub = $filters;
+
+        $response = $this->createStub(Response::class);
+        $response->method('header')->willReturnCallback(
+            function ($key, $value = null) use (&$capturedHeaders, $response) {
+                $capturedHeaders[(string)$key] = (string)$value;
+                return $response;
+            }
+        );
 
         (new ReflectionProperty($controller, 'request'))->setValue($controller, $this->createStub(Request::class));
         (new ReflectionProperty($controller, 'response'))->setValue($controller, $response);
