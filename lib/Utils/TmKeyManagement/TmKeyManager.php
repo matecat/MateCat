@@ -24,10 +24,11 @@ class TmKeyManager
 {
 
     /**
-     * `memory_keys`.`key_name` is a varchar(512), but 255 is the width every other name in MateCat
-     * is held to and there is no reason for this one to be twice as wide as a team's.
+     * `memory_keys`.`key_name` is a varchar(512). Held to the column rather than to the 255 every
+     * other name gets: this cap is applied on the merge path too, so a shorter one would rewrite a
+     * stored name that had always fitted.
      */
-    const int RESOURCE_NAME_MAX_LENGTH = 255;
+    const int RESOURCE_NAME_MAX_LENGTH = 512;
 
     /**
      * Returns a TmKeyStruct object. <br/>

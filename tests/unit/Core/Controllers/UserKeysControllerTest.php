@@ -409,7 +409,7 @@ class UserKeysControllerTest extends AbstractTest
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionCode(400);
-        $this->expectExceptionMessage('description must be at most 255 characters');
+        $this->expectExceptionMessage('description must be at most 512 characters');
 
         $this->invokePrivate('validateTheRequest');
     }

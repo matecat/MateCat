@@ -108,7 +108,7 @@ class CatUtilsMethodsTest extends AbstractTest
             'apostrophe kept'             => ["O'Brien", "O'Brien"],
             'hyphen kept'                 => ['Jean-Luc', 'Jean-Luc'],
             'initials keep their dots'    => ['J.R. Ewing', 'J.R. Ewing'],
-            'truncated at 50 chars'       => [str_repeat('A', 100), str_repeat('A', 50)],
+            'cut to the column width'     => [str_repeat('A', 150), str_repeat('A', 100)],
             'double spaces collapsed'     => ['John   Doe', 'John Doe'],
             'unicode letters preserved'   => ['José García', 'José García'],
             'non latin script preserved'  => ['李明', '李明'],

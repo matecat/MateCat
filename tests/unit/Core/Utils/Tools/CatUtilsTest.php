@@ -571,11 +571,13 @@ class CatUtilsTest extends AbstractTest
     }
 
     #[Test]
-    public function testStripMaliciousContentTruncatesToFiftyCharsL(): void
+    public function testStripMaliciousContentCutsToTheColumnWidthL(): void
     {
-        $longName = str_repeat('A', 60);
+        // `users`.`first_name` is a varchar(100). It was read as varchar(50) for a while, which cut
+        // a sixty-character name in a column that had room for it.
+        $longName = str_repeat('A', 150);
         $result = CatUtils::stripMaliciousContentFromAName($longName);
-        $this->assertLessThanOrEqual(50, mb_strlen($result));
+        $this->assertSame(CatUtils::PERSON_NAME_MAX_LENGTH, mb_strlen($result));
     }
 
     #[Test]

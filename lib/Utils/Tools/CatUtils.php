@@ -44,8 +44,8 @@ class CatUtils
 
     const string nbspPlaceholder = '##$_A0$##';
 
-    /** `users`.`first_name` and `users`.`last_name` are varchar(50). */
-    const int PERSON_NAME_MAX_LENGTH = 50;
+    /** `users`.`first_name` and `users`.`last_name` are varchar(100). */
+    const int PERSON_NAME_MAX_LENGTH = 100;
 
     /** `projects`.`name` is a varchar(200). */
     const int PROJECT_NAME_MAX_LENGTH = 200;
