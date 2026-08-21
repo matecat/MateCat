@@ -20,11 +20,6 @@ const renderComponent = (overrides = {}) => {
 }
 
 describe('LanguageSelectorSearch', () => {
-  // Must run first: componentWillUnmount removes a *new* arrow function
-  // reference rather than the one added in componentDidMount, so the
-  // document 'mousedown' listener always leaks. Firing mousedown more than
-  // once across this file would re-trigger setState on earlier unmounted
-  // instances, so this is the only test allowed to dispatch it.
   test('resets highlight when clicking outside (document mousedown)', () => {
     const {container} = renderComponent()
     const input = screen.getByPlaceholderText('Search...')
@@ -87,7 +82,9 @@ describe('LanguageSelectorSearch', () => {
     fireEvent.keyDown(input, {key: 'Backspace'})
 
     expect(props.onDeleteLanguage).toHaveBeenCalledWith(languages[1])
-    expect(container.querySelector('.tag.highlightDelete')).not.toBeInTheDocument()
+    expect(
+      container.querySelector('.tag.highlightDelete'),
+    ).not.toBeInTheDocument()
   })
 
   test('highlight resets when the querySearch prop changes', () => {
@@ -99,6 +96,29 @@ describe('LanguageSelectorSearch', () => {
 
     rerender(<LanguageSelectorSearch {...props} querySearch="f" />)
 
-    expect(container.querySelector('.tag.highlightDelete')).not.toBeInTheDocument()
+    expect(
+      container.querySelector('.tag.highlightDelete'),
+    ).not.toBeInTheDocument()
+  })
+
+  test('unmounting removes the exact mousedown listener that was added on mount', () => {
+    const addSpy = jest.spyOn(document, 'addEventListener')
+    const removeSpy = jest.spyOn(document, 'removeEventListener')
+
+    const {unmount} = renderComponent()
+
+    const addedCall = addSpy.mock.calls.find(([event]) => event === 'mousedown')
+    expect(addedCall).toBeDefined()
+    const [, addedHandler] = addedCall
+
+    unmount()
+
+    const removedCall = removeSpy.mock.calls.find(
+      ([event, handler]) => event === 'mousedown' && handler === addedHandler,
+    )
+    expect(removedCall).toBeDefined()
+
+    addSpy.mockRestore()
+    removeSpy.mockRestore()
   })
 })

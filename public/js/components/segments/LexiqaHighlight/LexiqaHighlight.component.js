@@ -1,18 +1,15 @@
-import React, {Component, createRef} from 'react'
+import React, {useRef} from 'react'
 import {find} from 'lodash'
 
 import LexiqaTooltipInfo from '../TooltipInfo/LexiqaTooltipInfo.component'
 import LexiqaUtils from '../../../utils/lxq.main'
 import Tooltip from '../../common/Tooltip'
 
-class LexiqaHighlight extends Component {
-  constructor(props) {
-    super(props)
-    this.contentRef = createRef()
-  }
+const LexiqaHighlight = (props) => {
+  const contentRef = useRef(null)
 
-  getWarning = () => {
-    let {blockKey, start, end, warnings, isSource, sid} = this.props
+  const getWarning = () => {
+    let {blockKey, start, end, warnings, isSource, sid} = props
     // Every block starts from offset 0, so we have to check warnings's blockKey
     let warning = find(
       warnings,
@@ -29,38 +26,36 @@ class LexiqaHighlight extends Component {
     return warning
   }
 
-  render() {
-    const {children, getUpdatedSegmentInfo} = this.props
-    const {segmentOpened} = getUpdatedSegmentInfo()
-    const warning = this.getWarning()
+  const {children, getUpdatedSegmentInfo} = props
+  const {segmentOpened} = getUpdatedSegmentInfo()
+  const warning = getWarning()
 
-    return (
-      warning && (
-        <Tooltip
-          stylePointerElement={{display: 'inline-block', position: 'relative'}}
-          content={
-            segmentOpened &&
-            warning &&
-            warning.messages && (
-              <LexiqaTooltipInfo
-                messages={warning.messages}
-                onReplaceWord={this.props.replaceWordAt}
-              />
-            )
-          }
-          isInteractiveContent={true}
-        >
-          <div ref={this.contentRef} className="lexiqahighlight">
-            <span
-              style={{backgroundColor: warning.messages ? warning.color : ''}}
-            >
-              {children}
-            </span>
-          </div>
-        </Tooltip>
-      )
+  return (
+    warning && (
+      <Tooltip
+        stylePointerElement={{display: 'inline-block', position: 'relative'}}
+        content={
+          segmentOpened &&
+          warning &&
+          warning.messages && (
+            <LexiqaTooltipInfo
+              messages={warning.messages}
+              onReplaceWord={props.replaceWordAt}
+            />
+          )
+        }
+        isInteractiveContent={true}
+      >
+        <div ref={contentRef} className="lexiqahighlight">
+          <span
+            style={{backgroundColor: warning.messages ? warning.color : ''}}
+          >
+            {children}
+          </span>
+        </div>
+      </Tooltip>
     )
-  }
+  )
 }
 
 export default LexiqaHighlight

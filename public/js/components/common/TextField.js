@@ -1,73 +1,78 @@
 import PropTypes from 'prop-types'
-import React from 'react'
+import React, {useEffect, useRef} from 'react'
 
-export default class TextField extends React.Component {
-  constructor(props) {
-    super(props)
-    this.shouldDisplayError = this.shouldDisplayError.bind(this)
-    this.spanStyle = {
-      color: 'red',
-      fontSize: '14px',
-    }
-  }
+const spanStyle = {
+  color: 'red',
+  fontSize: '14px',
+}
 
-  shouldDisplayError() {
-    return this.props.showError && this.props.errorText != ''
-  }
+const TextField = ({
+  showError,
+  errorText,
+  text,
+  onFieldChanged,
+  type,
+  placeholder,
+  name,
+  classes,
+  tabindex,
+  onKeyPress,
+}) => {
+  const inputRef = useRef(null)
 
-  componentDidMount() {
-    if (this.props.text) {
+  useEffect(() => {
+    if (text) {
       var event = new Event('input', {bubbles: true})
-      this.input.dispatchEvent(event)
+      inputRef.current.dispatchEvent(event)
 
-      if (this.props.onFieldChanged)
-        this.props.onFieldChanged({target: {value: this.props.text}})
+      if (onFieldChanged) onFieldChanged({target: {value: text}})
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  var errorHtml = ''
+  var inputType = 'text'
+
+  if (type) {
+    inputType = type
   }
 
-  render() {
-    var errorHtml = ''
-    var type = 'text'
-
-    if (this.props.type) {
-      type = this.props.type
-    }
-
-    if (this.shouldDisplayError()) {
-      errorHtml = (
-        <div className="validation-error">
-          <div style={this.spanStyle} className="text">
-            {this.props.errorText}
-          </div>
+  if (showError && errorText != '') {
+    errorHtml = (
+      <div className="validation-error">
+        <div style={spanStyle} className="text">
+          {errorText}
         </div>
-      )
-    }
-
-    return (
-      <div
-        style={{
-          position: 'relative',
-          marginBottom: '17px',
-        }}
-      >
-        <input
-          type={type}
-          placeholder={this.props.placeholder}
-          defaultValue={this.props.text}
-          name={this.props.name}
-          onChange={this.props.onFieldChanged}
-          className={this.props.classes}
-          tabIndex={this.props.tabindex}
-          onKeyPress={this.props.onKeyPress}
-          ref={(input) => (this.input = input)}
-        />
-        {errorHtml}
       </div>
     )
   }
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        marginBottom: '17px',
+      }}
+    >
+      <input
+        type={inputType}
+        placeholder={placeholder}
+        defaultValue={text}
+        name={name}
+        onChange={onFieldChanged}
+        className={classes}
+        tabIndex={tabindex}
+        onKeyPress={onKeyPress}
+        ref={inputRef}
+      />
+      {errorHtml}
+    </div>
+  )
 }
 
 TextField.propTypes = {
   showError: PropTypes.bool.isRequired,
   onFieldChanged: PropTypes.func.isRequired,
 }
+
+export default TextField

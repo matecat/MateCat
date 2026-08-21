@@ -261,6 +261,44 @@ describe('ReviewExtendedIssuesContainer', () => {
     jest.useRealTimers()
   })
 
+  test('does not call SegmentActions.openIssueComments after unmount (listener is removed)', () => {
+    jest.useFakeTimers()
+    const {unmount} = renderContainer({issues: [makeIssue({id: 1})]})
+    unmount()
+    act(() => {
+      SegmentStore.emit(SegmentConstants.ISSUE_ADDED, 'seg-1', 1)
+    })
+    act(() => {
+      jest.advanceTimersByTime(200)
+    })
+    expect(SegmentActions.openIssueComments).not.toHaveBeenCalled()
+    jest.useRealTimers()
+  })
+
+  test('reads the current context after a context change, not the one from first render', () => {
+    jest.useFakeTimers()
+    const {rerender} = renderContainer({issues: [makeIssue({id: 1})]})
+
+    const newContext = {segment: {sid: 'seg-2', unlocked: false}}
+    rerender(
+      <SegmentContext.Provider value={newContext}>
+        <ReviewExtendedIssuesContainer
+          issues={[makeIssue({id: 1})]}
+          isReview={true}
+        />
+      </SegmentContext.Provider>,
+    )
+
+    act(() => {
+      SegmentStore.emit(SegmentConstants.ISSUE_ADDED, 'seg-2', 1)
+    })
+    act(() => {
+      jest.advanceTimersByTime(200)
+    })
+    expect(SegmentActions.openIssueComments).toHaveBeenCalledWith('seg-2', 1)
+    jest.useRealTimers()
+  })
+
   test('calls CatToolActions.removeAllNotifications on unmount', () => {
     jest.useFakeTimers()
     const {unmount} = renderContainer({issues: [makeIssue({id: 1})]})

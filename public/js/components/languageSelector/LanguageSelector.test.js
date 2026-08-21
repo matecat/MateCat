@@ -85,6 +85,15 @@ describe('LanguageSelector', () => {
     ])
   })
 
+  test('pressing Enter while a search query is active does not confirm', () => {
+    const {props} = renderComponent()
+    fireEvent.change(screen.getByPlaceholderText('Search...'), {
+      target: {value: 'ger'},
+    })
+    fireEvent.keyDown(document, {key: 'Enter'})
+    expect(props.onConfirm).not.toHaveBeenCalled()
+  })
+
   test('clicking "Confirm" calls onConfirm with the current selection', () => {
     const {props} = renderComponent()
     fireEvent.click(screen.getByRole('button', {name: 'Confirm'}))
@@ -125,6 +134,61 @@ describe('LanguageSelector', () => {
     expect(screen.getByText('All languages')).toBeInTheDocument()
     fireEvent.click(screen.getByText('All languages'))
     expect(screen.queryByText('All languages')).not.toBeInTheDocument()
+  })
+
+  test('unmounting removes the document keydown listener registered on mount', () => {
+    const addSpy = jest.spyOn(document, 'addEventListener')
+    const removeSpy = jest.spyOn(document, 'removeEventListener')
+
+    const {unmount} = renderComponent()
+
+    const addedKeydownCall = addSpy.mock.calls.find(
+      ([event]) => event === 'keydown',
+    )
+    expect(addedKeydownCall).toBeDefined()
+    const [, addedHandler] = addedKeydownCall
+
+    unmount()
+
+    const removedKeydownCall = removeSpy.mock.calls.find(
+      ([event]) => event === 'keydown',
+    )
+    expect(removedKeydownCall).toBeDefined()
+    const [, removedHandler] = removedKeydownCall
+
+    expect(removedHandler).toBe(addedHandler)
+
+    addSpy.mockRestore()
+    removeSpy.mockRestore()
+  })
+
+  test('unmounting removes the container keydown listener registered on mount', () => {
+    const addSpy = jest.spyOn(HTMLElement.prototype, 'addEventListener')
+    const removeSpy = jest.spyOn(HTMLElement.prototype, 'removeEventListener')
+
+    const {unmount, container} = renderComponent()
+    const modalNode = container.querySelector('.matecat-modal')
+
+    const addedKeydownCall = addSpy.mock.calls.find(
+      ([event], index) =>
+        event === 'keydown' && addSpy.mock.instances[index] === modalNode,
+    )
+    expect(addedKeydownCall).toBeDefined()
+    const [, addedHandler] = addedKeydownCall
+
+    unmount()
+
+    const removedKeydownCall = removeSpy.mock.calls.find(
+      ([event], index) =>
+        event === 'keydown' && removeSpy.mock.instances[index] === modalNode,
+    )
+    expect(removedKeydownCall).toBeDefined()
+    const [, removedHandler] = removedKeydownCall
+
+    expect(removedHandler).toBe(addedHandler)
+
+    addSpy.mockRestore()
+    removeSpy.mockRestore()
   })
 })
 

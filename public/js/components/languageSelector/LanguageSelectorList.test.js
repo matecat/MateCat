@@ -1,6 +1,9 @@
 import React from 'react'
 import {render, screen, fireEvent, act} from '@testing-library/react'
-import LanguageSelectorList, {chunk, buildRangeArray} from './LanguageSelectorList'
+import LanguageSelectorList, {
+  chunk,
+  buildRangeArray,
+} from './LanguageSelectorList'
 
 const languagesList = [
   {code: 'it-IT', id: 'it-IT', name: 'Italian', direction: 'ltr'},
@@ -87,14 +90,20 @@ describe('LanguageSelectorList', () => {
     // matches Italian, German, Spanish (in that order) - French has no "an"
 
     act(() => {
-      ref.current.navigateLanguagesList({keyCode: 40, preventDefault: jest.fn()})
+      ref.current.navigateLanguagesList({
+        keyCode: 40,
+        preventDefault: jest.fn(),
+      })
     })
     let hovered = container.querySelectorAll('.lang-item.hover')
     expect(hovered.length).toBe(1)
     expect(hovered[0]).toHaveTextContent('German')
 
     act(() => {
-      ref.current.navigateLanguagesList({keyCode: 38, preventDefault: jest.fn()})
+      ref.current.navigateLanguagesList({
+        keyCode: 38,
+        preventDefault: jest.fn(),
+      })
     })
     hovered = container.querySelectorAll('.lang-item.hover')
     expect(hovered.length).toBe(1)
@@ -131,22 +140,54 @@ describe('LanguageSelectorList', () => {
     expect(props.onResetResults).not.toHaveBeenCalled()
   })
 
-  test('resets hover position to 0 when querySearch prop changes', () => {
-    const {container, ref, rerender, props} = renderComponent({querySearch: 'an'})
+  test('navigateLanguagesList reflects fresh querySearch and callback props after a rerender, not values captured at mount', () => {
+    const {ref, rerender, props} = renderComponent({querySearch: 'ital'})
 
-    act(() => {
-      ref.current.navigateLanguagesList({keyCode: 40, preventDefault: jest.fn()})
-    })
-    expect(
-      container.querySelectorAll('.lang-item.hover')[0],
-    ).toHaveTextContent('German')
-
+    const onToggleLanguageAfterRerender = jest.fn()
+    const onResetResultsAfterRerender = jest.fn()
     rerender(
-      <LanguageSelectorList ref={ref} {...props} querySearch="ital" />,
+      <LanguageSelectorList
+        ref={ref}
+        {...props}
+        querySearch="germ"
+        onToggleLanguage={onToggleLanguageAfterRerender}
+        onResetResults={onResetResultsAfterRerender}
+      />,
     )
 
-    expect(
-      container.querySelectorAll('.lang-item.hover')[0],
-    ).toHaveTextContent('Italian')
+    act(() => {
+      ref.current.navigateLanguagesList({
+        keyCode: 13,
+        preventDefault: jest.fn(),
+        stopPropagation: jest.fn(),
+      })
+    })
+
+    expect(props.onToggleLanguage).not.toHaveBeenCalled()
+    expect(props.onResetResults).not.toHaveBeenCalled()
+    expect(onToggleLanguageAfterRerender).toHaveBeenCalledWith(languagesList[2])
+    expect(onResetResultsAfterRerender).toHaveBeenCalled()
+  })
+
+  test('resets hover position to 0 when querySearch prop changes', () => {
+    const {container, ref, rerender, props} = renderComponent({
+      querySearch: 'an',
+    })
+
+    act(() => {
+      ref.current.navigateLanguagesList({
+        keyCode: 40,
+        preventDefault: jest.fn(),
+      })
+    })
+    expect(container.querySelectorAll('.lang-item.hover')[0]).toHaveTextContent(
+      'German',
+    )
+
+    rerender(<LanguageSelectorList ref={ref} {...props} querySearch="ital" />)
+
+    expect(container.querySelectorAll('.lang-item.hover')[0]).toHaveTextContent(
+      'Italian',
+    )
   })
 })

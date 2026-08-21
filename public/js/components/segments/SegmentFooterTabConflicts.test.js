@@ -140,4 +140,107 @@ describe('SegmentFooterTabConflicts', () => {
     fireEvent.click(container.querySelector('.goto a'))
     expect(SegmentActions.openSegment).toHaveBeenCalledWith('99')
   })
+
+  test('memo bails out (skips re-render) when alternatives is deep-equal but a new object reference', () => {
+    // TextUtils.getDiffHtml is only invoked while rendering an editable alternative, so its call
+    // count across a rerender is a proxy for whether the memoized component actually re-rendered.
+    const TextUtils = require('../../utils/textUtils').default
+    const segment = {
+      ...baseSegment,
+      alternatives: {
+        editable: [
+          {id: '1', translation: 'Buongiorno mondo', involved_id: ['99']},
+        ],
+        not_editable: [],
+      },
+    }
+    const sameShapeNewReference = {
+      ...baseSegment,
+      alternatives: {
+        editable: [
+          {id: '1', translation: 'Buongiorno mondo', involved_id: ['99']},
+        ],
+        not_editable: [],
+      },
+    }
+
+    const {rerender} = renderComponent({segment})
+    const callsAfterFirstRender = TextUtils.getDiffHtml.mock.calls.length
+    expect(callsAfterFirstRender).toBeGreaterThan(0)
+
+    rerender(
+      <SegmentFooterTabConflicts
+        code="al"
+        active_class="active"
+        tab_class="alternatives"
+        segment={sameShapeNewReference}
+      />,
+    )
+    expect(TextUtils.getDiffHtml.mock.calls.length).toBe(callsAfterFirstRender)
+  })
+
+  test('re-renders when alternatives content actually changes', () => {
+    const TextUtils = require('../../utils/textUtils').default
+    const segment = {
+      ...baseSegment,
+      alternatives: {
+        editable: [
+          {id: '1', translation: 'Buongiorno mondo', involved_id: ['99']},
+        ],
+        not_editable: [],
+      },
+    }
+    const changed = {
+      ...baseSegment,
+      alternatives: {
+        editable: [
+          {id: '1', translation: 'Buonasera mondo', involved_id: ['99']},
+        ],
+        not_editable: [],
+      },
+    }
+
+    const {rerender} = renderComponent({segment})
+    const callsAfterFirstRender = TextUtils.getDiffHtml.mock.calls.length
+
+    rerender(
+      <SegmentFooterTabConflicts
+        code="al"
+        active_class="active"
+        tab_class="alternatives"
+        segment={changed}
+      />,
+    )
+    expect(TextUtils.getDiffHtml.mock.calls.length).toBeGreaterThan(
+      callsAfterFirstRender,
+    )
+  })
+
+  test('re-renders when active_class changes even if alternatives is unchanged', () => {
+    const TextUtils = require('../../utils/textUtils').default
+    const segment = {
+      ...baseSegment,
+      alternatives: {
+        editable: [
+          {id: '1', translation: 'Buongiorno mondo', involved_id: ['99']},
+        ],
+        not_editable: [],
+      },
+    }
+
+    const {rerender} = renderComponent({segment})
+    const callsAfterFirstRender = TextUtils.getDiffHtml.mock.calls.length
+
+    rerender(
+      <SegmentFooterTabConflicts
+        code="al"
+        active_class="inactive"
+        tab_class="alternatives"
+        segment={segment}
+      />,
+    )
+    expect(TextUtils.getDiffHtml.mock.calls.length).toBeGreaterThan(
+      callsAfterFirstRender,
+    )
+  })
 })

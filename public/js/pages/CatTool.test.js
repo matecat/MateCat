@@ -50,17 +50,8 @@ jest.mock('./mountPage', () => {
     get_public_matches: true,
     isCJK: false,
   }
-  global.globalFunctions = {registerFooterTabs: jest.fn()}
   return {mountPage: jest.fn()}
 })
-
-jest.mock('./CatToolInterface', () => ({
-  CatToolInterface: class {
-    getCharacterCounterMode() {
-      return undefined
-    }
-  },
-}))
 
 jest.mock('react-hotkeys-hook', () => ({useHotkeys: jest.fn()}))
 
@@ -254,6 +245,9 @@ jest.mock('jquery', () =>
 )
 
 import CatTool from './CatTool'
+import globalFunctions from '../globalFunctions'
+
+const registerFooterTabsExtension = jest.fn()
 
 // Fake temporary project template that makes isFakeCurrentTemplateReady truthy
 const fakeTemporaryTemplate = {
@@ -282,6 +276,9 @@ const renderCatTool = (contextOverrides = {}) =>
 describe('CatTool', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    // Stand in for a deployment replacing core's tab registration, which is
+    // what this object is for.
+    globalFunctions.registerFooterTabs = registerFooterTabsExtension
     CatToolStore.removeAllListeners()
     SegmentStore.removeAllListeners()
     useProjectTemplates.mockReturnValue({
@@ -873,7 +870,7 @@ describe('CatTool', () => {
         CatToolStore.emit(CatToolConstants.ON_RENDER, {trigger: 1})
       })
       expect(SegmentActions.openSegment).toHaveBeenCalled()
-      expect(globalFunctions.registerFooterTabs).toHaveBeenCalled()
+      expect(registerFooterTabsExtension).toHaveBeenCalled()
     })
 
     test('falls back to first file segment when start segment is missing', async () => {

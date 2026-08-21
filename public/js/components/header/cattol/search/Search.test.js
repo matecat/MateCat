@@ -641,8 +641,16 @@ test('unmounts cleanly and removes all listeners', () => {
     CattolConstants.STORE_SEARCH_RESULT,
     expect.any(Function),
   )
+  expect(addCatSpy).toHaveBeenCalledWith(
+    CattolConstants.CLOSE_SEARCH,
+    expect.any(Function),
+  )
   expect(addSegSpy).toHaveBeenCalledWith(
     SegmentConstants.UPDATE_SEARCH,
+    expect.any(Function),
+  )
+  expect(addSegSpy).toHaveBeenCalledWith(
+    SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
     expect.any(Function),
   )
 
@@ -652,8 +660,79 @@ test('unmounts cleanly and removes all listeners', () => {
     CattolConstants.STORE_SEARCH_RESULT,
     expect.any(Function),
   )
+  // Quirk 2: the document keydown listener is added with `useCapture: true`
+  // and removed without it, so removeEventListener never truly detaches it
+  // (see the "does not react to keyboard shortcuts when not active" test
+  // above). removeListener is still called with the matching reference here
+  // though, since CatToolStore's own add/remove pair doesn't have that
+  // capture-flag mismatch.
+  expect(removeCatSpy).toHaveBeenCalledWith(
+    CattolConstants.CLOSE_SEARCH,
+    expect.any(Function),
+  )
   expect(removeSegSpy).toHaveBeenCalledWith(
     SegmentConstants.UPDATE_SEARCH,
     expect.any(Function),
   )
+  expect(removeSegSpy).toHaveBeenCalledWith(
+    SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
+    expect.any(Function),
+  )
+})
+
+// Quirk 1: setState's shallow merge in the original class meant the "reset to
+// defaultState" call in handleCancelClick/handleClearClick never touched the
+// top-level `isSelectedTag` field (only a dead, never-read nested copy exists
+// inside defaultState.search). The converted hooks version must preserve this
+// exactly: isSelectedTag must survive a Clear/Cancel reset untouched.
+test('clearing the search does not reset isSelectedTag (preserves the shallow-merge quirk)', () => {
+  jest.useFakeTimers()
+
+  render(<Search {...baseProps()} />)
+
+  act(() => {
+    fireEvent.change(screen.getByPlaceholderText('Find in target'), {
+      target: {value: 'old'},
+    })
+    fireEvent.click(checkboxByLabel('Replace with'))
+  })
+
+  act(() => {
+    fireEvent.click(screen.getByText('FIND'))
+  })
+
+  act(() => {
+    SegmentStore.emit(SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG, {
+      value: true,
+    })
+    jest.runAllTimers()
+  })
+
+  expect(screen.getByText('REPLACE')).toBeDisabled()
+
+  act(() => {
+    fireEvent.click(screen.getByText('Clear'))
+    jest.runAllTimers()
+  })
+
+  expect(screen.getByPlaceholderText('Find in target')).toHaveValue('')
+
+  // Re-populate the fields and submit a new search, without ever clearing
+  // isSelectedTag via a new SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG event.
+  act(() => {
+    fireEvent.change(screen.getByPlaceholderText('Find in target'), {
+      target: {value: 'new'},
+    })
+    fireEvent.click(checkboxByLabel('Replace with'))
+  })
+
+  act(() => {
+    fireEvent.click(screen.getByText('FIND'))
+  })
+
+  // If isSelectedTag had incorrectly been reset to false by Clear, REPLACE
+  // would now be enabled.
+  expect(screen.getByText('REPLACE')).toBeDisabled()
+
+  jest.useRealTimers()
 })

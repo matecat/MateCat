@@ -1,14 +1,30 @@
-import {CatToolInterface} from './CatToolInterface'
+import catToolInterface from './CatToolInterface'
 
-describe('CatToolInterface', () => {
-  test('instantiates and calls getCharacterCounterMode without error', () => {
-    const instance = new CatToolInterface()
-    expect(instance.getCharacterCounterMode()).toBeUndefined()
+describe('catToolInterface', () => {
+  let original
+
+  beforeEach(() => {
+    original = catToolInterface.getCharacterCounterMode
   })
 
-  test('inherits props behavior from ComponentExtendInterface', () => {
-    const instance = new CatToolInterface()
-    instance.props = {foo: 'bar'}
-    expect(instance.foo).toBe('bar')
+  afterEach(() => {
+    catToolInterface.getCharacterCounterMode = original
+  })
+
+  test('core ships no preset, so the job or the template decides', () => {
+    expect(catToolInterface.getCharacterCounterMode()).toBeUndefined()
+  })
+
+  test('a replaced member is what callers get', () => {
+    catToolInterface.getCharacterCounterMode = () => 'exclude_cjk'
+
+    expect(catToolInterface.getCharacterCounterMode()).toBe('exclude_cjk')
+  })
+
+  test('a member can wrap the one already installed', () => {
+    const previous = catToolInterface.getCharacterCounterMode
+    catToolInterface.getCharacterCounterMode = () => previous() ?? 'all_one'
+
+    expect(catToolInterface.getCharacterCounterMode()).toBe('all_one')
   })
 })

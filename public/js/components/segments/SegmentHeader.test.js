@@ -87,9 +87,7 @@ describe('SegmentHeader', () => {
 
   test('renders an open header when segmentOpened is true', () => {
     const {container} = renderHeader({segmentOpened: true})
-    expect(
-      container.querySelector(`#segment-10-1-header`),
-    ).toBeInTheDocument()
+    expect(container.querySelector(`#segment-10-1-header`)).toBeInTheDocument()
   })
 
   test('shows saving indicator inside the open header', () => {
@@ -162,7 +160,12 @@ describe('SegmentHeader', () => {
   test('hideHeader hides the visible percentage', () => {
     const {container} = renderHeader({segmentOpened: true, sid: '10-1'})
     act(() => {
-      getListenerCallback('SET_SEGMENT_HEADER')('10-1', {}, 'perfect-match', 'Jest User')
+      getListenerCallback('SET_SEGMENT_HEADER')(
+        '10-1',
+        {},
+        'perfect-match',
+        'Jest User',
+      )
     })
     expect(container.querySelector('h2')).toBeInTheDocument()
 
@@ -227,5 +230,115 @@ describe('SegmentHeader', () => {
       </ApplicationWrapperContext.Provider>,
     )
     expect(container.querySelector('.segment-counter')).toBeInTheDocument()
+  })
+
+  test('re-forces autopropagated back to true within the same render when the prop becomes true again after being genuinely cleared', () => {
+    const contextValue = {}
+    const {container, rerender} = renderHeader(
+      {segmentOpened: false, autopropagated: true},
+      contextValue,
+    )
+    expect(container.textContent).toContain('Autopropagated')
+
+    // A prop change to false does NOT reset internal state on its own (only the
+    // listener callbacks do) -- the marker stays visible purely from prior state.
+    rerender(
+      <ApplicationWrapperContext.Provider value={contextValue}>
+        <SegmentHeader
+          sid="10-1"
+          segmentOpened={false}
+          saving={false}
+          repetition={false}
+          splitted={false}
+          autopropagated={false}
+        />
+      </ApplicationWrapperContext.Provider>,
+    )
+    expect(container.textContent).toContain('Autopropagated')
+
+    // Now that props.autopropagated is genuinely false, hideHeader can actually clear it.
+    act(() => {
+      getListenerCallback('HIDE_SEGMENT_HEADER')('10-1')
+    })
+    expect(container.textContent).not.toContain('Autopropagated')
+
+    // Re-render with the prop true again: a naive useEffect-based sync would commit one
+    // frame showing no marker before a follow-up render fixed it. The in-render adjustment
+    // must re-force it back to true within this same render pass, with nothing ever
+    // committing the intermediate false state.
+    rerender(
+      <ApplicationWrapperContext.Provider value={contextValue}>
+        <SegmentHeader
+          sid="10-1"
+          segmentOpened={false}
+          saving={false}
+          repetition={false}
+          splitted={false}
+          autopropagated={true}
+        />
+      </ApplicationWrapperContext.Provider>,
+    )
+    expect(container.textContent).toContain('Autopropagated')
+  })
+
+  test('memo bails out (skips re-render) when props are shallow-equal', () => {
+    const metadataSpy = jest.fn(() => ({character_counter: true}))
+    const contextValue = {
+      userInfo: {
+        get metadata() {
+          return metadataSpy()
+        },
+      },
+    }
+    const {rerender} = renderHeader(
+      {segmentOpened: true, sid: '10-1'},
+      contextValue,
+    )
+    const callsAfterFirstRender = metadataSpy.mock.calls.length
+    expect(callsAfterFirstRender).toBeGreaterThan(0)
+
+    rerender(
+      <ApplicationWrapperContext.Provider value={contextValue}>
+        <SegmentHeader
+          sid="10-1"
+          segmentOpened={true}
+          saving={false}
+          repetition={false}
+          splitted={false}
+          autopropagated={false}
+        />
+      </ApplicationWrapperContext.Provider>,
+    )
+    expect(metadataSpy.mock.calls.length).toBe(callsAfterFirstRender)
+  })
+
+  test('re-renders when a prop actually changes', () => {
+    const metadataSpy = jest.fn(() => ({character_counter: true}))
+    const contextValue = {
+      userInfo: {
+        get metadata() {
+          return metadataSpy()
+        },
+      },
+    }
+    const {rerender} = renderHeader(
+      {segmentOpened: true, sid: '10-1', saving: false},
+      contextValue,
+    )
+    const callsAfterFirstRender = metadataSpy.mock.calls.length
+
+    rerender(
+      <ApplicationWrapperContext.Provider value={contextValue}>
+        <SegmentHeader
+          sid="10-1"
+          segmentOpened={true}
+          saving={true}
+          repetition={false}
+          splitted={false}
+          autopropagated={false}
+        />
+      </ApplicationWrapperContext.Provider>,
+    )
+    expect(metadataSpy.mock.calls.length).toBeGreaterThan(callsAfterFirstRender)
   })
 })

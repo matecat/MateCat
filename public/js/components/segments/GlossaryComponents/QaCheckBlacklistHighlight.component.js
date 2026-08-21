@@ -1,16 +1,14 @@
-import React, {Component, createRef} from 'react'
+import React, {useRef} from 'react'
 import Tooltip from '../../common/Tooltip'
 import {tagSignatures} from '../utils/DraftMatecatUtils/tagModel'
 import TEXT_UTILS from '../../../utils/textUtils'
 
-class QaCheckBlacklistHighlight extends Component {
-  constructor(props) {
-    super(props)
-    this.contentRef = createRef()
-  }
-  getTermDetails = () => {
+const QaCheckBlacklistHighlight = (props) => {
+  const contentRef = useRef(null)
+
+  const getTermDetails = () => {
     const {contentState, blackListedTerms, start, end, blockKey, children} =
-      this.props
+      props
     if (tagSignatures.space) {
       const getBlocksBefore = (key) => {
         const blocks = []
@@ -94,28 +92,27 @@ class QaCheckBlacklistHighlight extends Component {
       return result
     }
   }
-  render() {
-    const {children} = this.props
 
-    const term = this.getTermDetails()
+  const {children} = props
 
-    const {source, target} = term || {}
+  const term = getTermDetails()
 
-    return term ? (
-      <Tooltip
-        stylePointerElement={{display: 'inline-block', position: 'relative'}}
-        content={
-          source.term
-            ? `${target.term} is flagged as a forbidden translation for ${source.term}`
-            : `${target.term} is flagged as a forbidden word`
-        }
-      >
-        <div ref={this.contentRef} className="blacklistItem">
-          <span>{children}</span>
-        </div>
-      </Tooltip>
-    ) : null
-  }
+  const {source, target} = term || {}
+
+  return term ? (
+    <Tooltip
+      stylePointerElement={{display: 'inline-block', position: 'relative'}}
+      content={
+        source.term
+          ? `${target.term} is flagged as a forbidden translation for ${source.term}`
+          : `${target.term} is flagged as a forbidden word`
+      }
+    >
+      <div ref={contentRef} className="blacklistItem">
+        <span>{children}</span>
+      </div>
+    </Tooltip>
+  ) : null
 }
 
 export default QaCheckBlacklistHighlight

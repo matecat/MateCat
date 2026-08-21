@@ -1,8 +1,14 @@
 import React from 'react'
 import {render} from '@testing-library/react'
 import '@testing-library/jest-dom'
+import {forOwn} from 'lodash'
 
 import SegmentWarnings from './SegmentWarnings'
+
+jest.mock('lodash', () => {
+  const actual = jest.requireActual('lodash')
+  return {...actual, forOwn: jest.fn(actual.forOwn)}
+})
 
 describe('SegmentWarnings', () => {
   test('renders an empty warnings-block when no warnings are provided', () => {
@@ -80,5 +86,35 @@ describe('SegmentWarnings', () => {
 
     rerender(<SegmentWarnings warnings={updated} />)
     expect(container.textContent).toContain('second')
+  })
+
+  test('memo bails out (skips re-render) when warnings is deep-equal but a new object reference', () => {
+    // fnMap() mutates each warning entry in place (`item.type = type`), aliasing the actual
+    // props object — a pre-existing characteristic of this component, unrelated to this
+    // migration. Pre-setting `type` here keeps both objects deep-equal even after that
+    // in-render mutation runs on the first one, so this test isolates the memo comparator
+    // behavior instead of tripping over that mutation quirk.
+    const warnings = {
+      ERROR: {
+        Categories: {
+          cat1: [{outcome: 'e1', debug: 'first', tip: '', type: 'ERROR'}],
+        },
+      },
+    }
+    const sameShapeNewReference = {
+      ERROR: {
+        Categories: {
+          cat1: [{outcome: 'e1', debug: 'first', tip: '', type: 'ERROR'}],
+        },
+      },
+    }
+
+    forOwn.mockClear()
+    const {rerender} = render(<SegmentWarnings warnings={warnings} />)
+    const callsAfterFirstRender = forOwn.mock.calls.length
+    expect(callsAfterFirstRender).toBeGreaterThan(0)
+
+    rerender(<SegmentWarnings warnings={sameShapeNewReference} />)
+    expect(forOwn.mock.calls.length).toBe(callsAfterFirstRender)
   })
 })

@@ -1,28 +1,28 @@
-import React, {Component} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {CompositeDecorator, Editor, EditorState} from 'draft-js'
 
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import SegmentUtils from '../../utils/segmentUtils'
 import IconSplit from '../../../img/icons/IconSplit'
 
-class SegmentPlaceholderLite extends React.Component {
-  constructor(props) {
-    super(props)
-    // --- Prepare  Decorator
-    this.decoratorsStructureSource = [
+const SegmentPlaceholderLite = (props) => {
+  const containerRef = useRef(null)
+  const editorSourceRef = useRef(null)
+  const editorTargetRef = useRef(null)
+
+  // --- Prepare Source
+  const [editorStateSource] = useState(() => {
+    const decoratorsStructureSource = [
       {
         strategy: DraftMatecatUtils.getEntityStrategy('IMMUTABLE'),
         component: TagEntity,
       },
     ]
-    //const decorator = new CompoundDecorator(this.decoratorsStructureSource);
-    const decorator = new CompositeDecorator(this.decoratorsStructureSource)
-    // --- Prepare Source
+    //const decorator = new CompoundDecorator(decoratorsStructureSource);
+    const decorator = new CompositeDecorator(decoratorsStructureSource)
     const plainEditorStateSource = EditorState.createEmpty(decorator)
-    const source = this.props.segment.segment
-    const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(
-      this.props.segment,
-    )
+    const source = props.segment.segment
+    const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(props.segment)
       ? DraftMatecatUtils.removeTagsFromText(source)
       : source
     const contentEncodedSource = DraftMatecatUtils.encodeContent(
@@ -30,13 +30,23 @@ class SegmentPlaceholderLite extends React.Component {
       cleanSource,
     )
     const {editorState: editorStateSource} = contentEncodedSource
+    return editorStateSource
+  })
 
-    // --- Prepare Translation
+  // --- Prepare Translation
+  const [editorStateTarget] = useState(() => {
+    const decoratorsStructureSource = [
+      {
+        strategy: DraftMatecatUtils.getEntityStrategy('IMMUTABLE'),
+        component: TagEntity,
+      },
+    ]
+    const decorator = new CompositeDecorator(decoratorsStructureSource)
     const plainEditorStateTarget = EditorState.createEmpty(decorator)
-    const translation = this.props.segment.translation
+    const translation = props.segment.translation
 
     const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(
-      this.props.segment,
+      props.segment,
     )
       ? DraftMatecatUtils.removeTagsFromText(translation)
       : translation
@@ -45,24 +55,19 @@ class SegmentPlaceholderLite extends React.Component {
       cleanTranslation,
     )
     const {editorState: editorStateTarget} = contentEncodedTarget
-    // --- Set Editor content
-    this.state = {
-      editorStateSource,
-      editorStateTarget,
-    }
-    this.onChange = () => {}
-  }
+    return editorStateTarget
+  })
 
-  containerRef = null
+  const onChange = () => {}
 
-  componentDidMount() {
+  useEffect(() => {
     // Set container width as window width
-    this.containerRef.style.cssText = `width:${
+    containerRef.current.style.cssText = `width:${
       window.innerWidth - 10
     }px !important;`
     // Get rendered source and target
-    const source = this.containerRef.getElementsByClassName('source')[0],
-      target = this.containerRef.getElementsByClassName('target')[0]
+    const source = containerRef.current.getElementsByClassName('source')[0],
+      target = containerRef.current.getElementsByClassName('target')[0]
     // Get div "source" size
     const sourceBCR = source.getBoundingClientRect()
     // Get Editors
@@ -88,26 +93,12 @@ class SegmentPlaceholderLite extends React.Component {
       maxEditor + outerDivPadding > minEditorHeight
         ? maxEditor + outerDivPadding
         : minEditorHeight
-    this.props.computeHeight(computedH)
-  }
+    props.computeHeight(computedH)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  render() {
-    const segmentPlaceholder = this.getSegmentStructure()
-    return (
-      <div
-        className={'segment-container segment-placeholder'}
-        ref={(el) => (this.containerRef = el)}
-        style={{display: 'inline-block', width: '100%'}}
-      >
-        {segmentPlaceholder}
-      </div>
-    )
-  }
-
-  getSegmentStructure = () => {
-    const {sideOpen} = this.props
-    const {editorStateSource, editorStateTarget} = this.state
-    const {onChange} = this
+  const getSegmentStructure = () => {
+    const {sideOpen} = props
 
     return (
       <section className={`status-draft ${sideOpen ? 'slide-right' : ''}`}>
@@ -136,7 +127,7 @@ class SegmentPlaceholderLite extends React.Component {
                   <Editor
                     editorState={editorStateSource}
                     onChange={onChange}
-                    ref={(el) => (this.editorSource = el)}
+                    ref={(el) => (editorSourceRef.current = el)}
                     readOnly={false}
                   />
                 </div>
@@ -150,7 +141,7 @@ class SegmentPlaceholderLite extends React.Component {
                       <Editor
                         editorState={editorStateTarget}
                         onChange={onChange}
-                        ref={(el) => (this.editorTarget = el)}
+                        ref={(el) => (editorTargetRef.current = el)}
                         readOnly={false}
                       />
                     </div>
@@ -216,40 +207,24 @@ class SegmentPlaceholderLite extends React.Component {
       </section>
     )
   }
+
+  const segmentPlaceholder = getSegmentStructure()
+  return (
+    <div
+      className={'segment-container segment-placeholder'}
+      ref={(el) => (containerRef.current = el)}
+      style={{display: 'inline-block', width: '100%'}}
+    >
+      {segmentPlaceholder}
+    </div>
+  )
 }
 
 export default SegmentPlaceholderLite
 
-class TagEntity extends Component {
-  constructor(props) {
-    super(props)
-
-    const tagStyle = this.selectCorrectStyle()
-
-    this.state = {
-      tagStyle,
-    }
-  }
-
-  render() {
-    const {children} = this.props
-    const {tagStyle} = this.state
-
-    return (
-      <div className={'tag-container'}>
-        <span
-          className={`tag ${tagStyle} `}
-          unselectable="on"
-          suppressContentEditableWarning={true}
-        >
-          {children}
-        </span>
-      </div>
-    )
-  }
-
-  selectCorrectStyle = () => {
-    const {entityKey, contentState} = this.props
+const TagEntity = (props) => {
+  const selectCorrectStyle = () => {
+    const {entityKey, contentState} = props
     const entityInstance = contentState.getEntity(entityKey)
     let tagStyle = []
 
@@ -262,4 +237,20 @@ class TagEntity extends Component {
     }
     return tagStyle.join(' ')
   }
+
+  const [tagStyle] = useState(() => selectCorrectStyle())
+
+  const {children} = props
+
+  return (
+    <div className={'tag-container'}>
+      <span
+        className={`tag ${tagStyle} `}
+        unselectable="on"
+        suppressContentEditableWarning={true}
+      >
+        {children}
+      </span>
+    </div>
+  )
 }

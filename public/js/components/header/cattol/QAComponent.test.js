@@ -109,10 +109,28 @@ test('shows the lexiqa report links once the lexiqa info category is selected', 
     'https://lexiqa.example.com/documentation.html',
   )
   const reportLink = screen.getByText('Report')
+  expect(reportLink.getAttribute('href')).toContain('/errorreport?id=')
   expect(reportLink.getAttribute('href')).toContain(
-    '/errorreport?id=',
+    '-42-pass123&type=translate',
   )
-  expect(reportLink.getAttribute('href')).toContain('-42-pass123&type=translate')
+})
+
+test('unmounting removes the SegmentStore listener', () => {
+  const baseline = SegmentStore.listenerCount(
+    SegmentConstants.UPDATE_GLOBAL_WARNINGS,
+  )
+
+  const {unmount} = render(<QAComponent active={true} isReview={false} />)
+
+  expect(
+    SegmentStore.listenerCount(SegmentConstants.UPDATE_GLOBAL_WARNINGS),
+  ).toBe(baseline + 1)
+
+  unmount()
+
+  expect(
+    SegmentStore.listenerCount(SegmentConstants.UPDATE_GLOBAL_WARNINGS),
+  ).toBe(baseline)
 })
 
 test('renders nothing once the component is deactivated again', () => {

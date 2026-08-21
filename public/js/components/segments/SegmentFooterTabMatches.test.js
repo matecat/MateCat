@@ -60,8 +60,8 @@ beforeAll(() => {
     ...global.config,
     isSourceRTL: false,
     isTargetRTL: false,
-    source_rfc: 'en-US',
-    target_rfc: 'it-IT',
+    source_code: 'en-US',
+    target_code: 'it-IT',
     mt_enabled: true,
   }
   global.navigator.clipboard = {writeText: jest.fn(() => Promise.resolve())}
@@ -212,9 +212,7 @@ describe('SegmentFooterTabMatches', () => {
   })
 
   test('renders trash icon for an owned TM key match', () => {
-    CatToolStore.getJobTmKeys.mockReturnValue([
-      {key: 'memkey', w: 1},
-    ])
+    CatToolStore.getJobTmKeys.mockReturnValue([{key: 'memkey', w: 1}])
     renderComponent({
       segment: {
         ...baseSegment,
