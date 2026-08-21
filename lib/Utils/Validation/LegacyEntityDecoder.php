@@ -43,7 +43,7 @@ final class LegacyEntityDecoder
      * old filter wrote for "<" and what it wrote for a user who typed "&#60;" — after one pass the
      * second is the correct value and decoding it again destroys it. Nothing in the string
      * distinguishes them, so the caller has to bound by when the row was written, not by what it
-     * holds. `support_scripts/tasks/decode-legacy-memory-key-names.php` does that with `update_date`.
+     * holds. `internal_scripts/decode-legacy-memory-key-names.php` does that with `update_date`.
      */
     public static function decode(string $value): string
     {
