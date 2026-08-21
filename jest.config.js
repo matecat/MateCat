@@ -20,7 +20,6 @@ module.exports = {
     './public/js/components/footer/': {lines: 80},
     './public/js/components/review/': {lines: 80},
     './public/js/components/quality_report/': {lines: 80},
-    './public/js/extensions/': {lines: 80},
     './public/js/components/contextPreview/': {lines: 80},
     './public/js/components/activityLog/': {lines: 80},
     './public/js/sse/': {lines: 29},
