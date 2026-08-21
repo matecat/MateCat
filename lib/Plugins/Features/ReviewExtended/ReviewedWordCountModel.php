@@ -135,12 +135,13 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
     {
         // when downgrading a revision to translation, the issues must be removed (from R1, R2 or both)
         $this->flagIssuesToBeDeleted($chunkReview->source_page);
-        $chunkReview->reviewed_words_count -= $this->_segment->raw_word_count;
         $chunkReview->penalty_points -= $this->getPenaltyPointsForSourcePage($chunkReview->source_page);
 
         if (!$this->_event->isAReplaceAllEvent()) {
+            $chunkReview->reviewed_words_count -= $this->_segment->raw_word_count;
             $this->_event->setFinalRevisionToRemove($chunkReview->source_page);
         }
+
         $this->_event->setChunkReviewForPassFailUpdate($chunkReview);
     }
 
@@ -203,8 +204,10 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
                     // in that case, we must add the reviewed word count
                     // otherwise remove the previous final flag to allow the new one
                     $this->increaseCountersButCheckForFinalRevision($chunkReview);
-                } elseif ($this->aFinalRevisionExistsForThisChunk($chunkReview) && $this->_event->isLowerTransition(
-                    )) {  // check for lower transition, we want to not decrement when upgrading statuses
+                } elseif (
+                    $this->aFinalRevisionExistsForThisChunk($chunkReview)
+                    && $this->_event->isLowerTransition()
+                ) {  // check for lower transition, we want to not decrement when upgrading statuses
 
                     // This case fits any chunkReview record when an event exists on it.
                     // Whenever a revision is lower reviewed, we expect the upper revisions to be invalidated.
