@@ -726,31 +726,33 @@ class MMTEngineMethodsTest extends AbstractTest
     }
 
     #[Test]
-    public function syncMemoriesRollsBackWhenTransactionFails(): void
+    public function syncMemoriesSwallowsAFailedContextWriteWithoutClosingTheTransactionItself(): void
     {
-        // Regression guard for the transaction-safety fix (§6.1): a failure between begin() and
-        // commit() must call database->rollback(). Previously the catch only logged, leaving the
-        // transaction open on the shared connection (a known innodb_lock_wait cascade trigger).
+        // Regression guard for the transaction-safety fix (§6.1): a failure inside the context write
+        // must not leave a transaction open on the shared connection (a known innodb_lock_wait
+        // cascade trigger), and must not be closed by hand here either. The scope owns the undo; what
+        // this method still owns is swallowing the failure rather than failing the whole sync.
         $pid = 920600;
         (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_activate_context_analyzer', '1');
 
-        // Context-vector map so getContext() is non-null and the begin()/commit() block is entered.
+        // Context-vector map so getContext() is non-null and the scope is entered.
         $client = $this->createStub(MMTServiceApi::class);
         $client->method('getContextVectorFromFile')->willReturn(['vectors' => ['it-IT' => '1:0.5']]);
         $engine = $this->createEngineWithClient($client);
 
-        // DB double: reads go through the real connection, but begin() fails inside the try block,
-        // so the catch → rollback() path (the fix) is exercised. The once() expectation asserts it.
+        // DB double: reads go through the real connection, but the scope throws, so the catch is
+        // exercised.
         $faultyDb = $this->createMock(IDatabase::class);
         $faultyDb->method('getConnection')->willReturn(obtainTestDatabase()->getConnection());
-        $faultyDb->method('begin')->willThrowException(new RuntimeException('begin failed'));
-        $faultyDb->expects(self::once())->method('rollback');
+        $faultyDb->expects($this->once())
+            ->method('transaction')
+            ->willThrowException(new RuntimeException('scope failed'));
 
         $ref = new ReflectionProperty($engine, 'database');
         $ref->setAccessible(true);
         $ref->setValue($engine, $faultyDb);
 
-        // syncMemories() swallows the failure after rolling back; the rollback() expectation verifies it.
+        // Returns rather than throwing: the failure is logged and the rest of the sync continues.
         $engine->syncMemories(
             ['id' => $pid, 'id_customer' => 'nobody@example.invalid'],
             [['source' => 'en-US', 'target' => '111222:it-IT', 'segment' => 'hello world']]

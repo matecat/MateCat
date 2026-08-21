@@ -231,18 +231,19 @@ const TEXT_UTILS = {
   },
   replacePlaceholder: function (string) {
     return string
-      .replace(config.lfPlaceholderRegex, 'softReturnMonad')
-      .replace(config.crPlaceholderRegex, 'crPlaceholder')
-      .replace(config.crlfPlaceholderRegex, 'brMarker')
-      .replace(config.tabPlaceholderRegex, 'tabMarkerMonad')
-      .replace(config.nbspPlaceholderRegex, 'nbspPlMark')
+      .replaceAll(config.lfPlaceholder, 'softReturnMonad')
+      .replaceAll(config.crPlaceholder, 'crPlaceholder')
+      // No line for the combined ##$_0D0A$## placeholder on purpose: matecat/subfiltering encodes a
+      // CRLF as the two single placeholders (SpecialEntitiesToPlaceholdersForView), so the combined
+      // one never reaches the page. Only the decoder still accepts it, as legacy defence.
+      .replaceAll(config.tabPlaceholder, 'tabMarkerMonad')
+      .replaceAll(config.nbspPlaceholder, 'nbspPlMark')
   },
 
   restorePlaceholders: function (string) {
     return string
       .replace(/softReturnMonad/g, config.lfPlaceholder)
       .replace(/crPlaceholder/g, config.crPlaceholder)
-      .replace(/brMarker/g, config.crlfPlaceholder)
       .replace(/tabMarkerMonad/g, config.tabPlaceholder)
       .replace(/nbspPlMark/g, config.nbspPlaceholder)
   },
@@ -271,11 +272,6 @@ const TEXT_UTILS = {
 
   execDiff: function (mainStr, cfrStr) {
     let _str = cfrStr
-    // let _str = cfrStr.replace( config.lfPlaceholderRegex, "\n" )
-    //     .replace( config.crPlaceholderRegex, "\r" )
-    //     .replace( config.crlfPlaceholderRegex, "\r\n" )
-    //     .replace( config.tabPlaceholderRegex, "\t" )
-    //     .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
     let _edit = mainStr.replace(String.fromCharCode(parseInt(0x21e5, 10)), '\t')
 
     //Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,

@@ -52,7 +52,7 @@ class TestableSignupController extends SignupController
         (new ReflectionClass(KleinController::class))->getProperty('database')->setValue($this, $database);
     }
 
-    public function checkAndIncrementRateLimit(Response $response, string $identifier, string $route, int $maxRetries = 10, ?RateLimiterService $limiterService = null): ?Response
+    public function checkAndIncrementRateLimit(Response $response, string $identifier, string $route, int $maxRetries = 10, ?RateLimiterService $limiterService = null, int $weight = 1): ?Response
     {
         return parent::checkAndIncrementRateLimit($response, $identifier, $route, $maxRetries, $limiterService ?? $this->injectedRateLimiter);
     }

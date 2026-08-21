@@ -12,6 +12,7 @@ use Model\Users\UserStruct;
 use PDOException;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 use TypeError;
 use Utils\Constants\Teams;
 use Utils\Email\InvitedToTeamEmail;
@@ -127,6 +128,8 @@ class TeamModel
      * @throws Exception
      * @throws PDOException
      * @throws TypeError
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction
+     *                   on any throw and re-throws the original, whatever its type
      */
     public function updateMembers(): array
     {
@@ -134,54 +137,54 @@ class TeamModel
 
         $teamId = $this->getTeamId();
 
-        $this->db()->begin();
+        $this->db()->transaction(function () use ($teamId): void {
+            $membershipDao = new MembershipDao($this->db());
 
-        $membershipDao = new MembershipDao($this->db());
+            if (!empty($this->member_emails)) {
+                $this->_checkAddMembersToPersonalTeam();
 
-        if (!empty($this->member_emails)) {
-            $this->_checkAddMembersToPersonalTeam();
+                $this->new_memberships = $membershipDao->createList([
+                    'team' => $this->struct,
+                    'members' => $this->member_emails
+                ]);
+            }
 
-            $this->new_memberships = $membershipDao->createList([
-                'team' => $this->struct,
-                'members' => $this->member_emails
-            ]);
-        }
-
-        if (!empty($this->uids_to_remove)) {
-            //check if this is the last user of the team
-            $memberList = $membershipDao->getMemberListByTeamId($teamId);
-
-            $projectDao = new ProjectDao($this->db());
-
-            foreach ($this->uids_to_remove as $uid) {
-                $user = $membershipDao->deleteUserFromTeam($uid, $teamId);
-
+            if (!empty($this->uids_to_remove)) {
                 //check if this is the last user of the team
-                // if it is, move all projects of the team to the personal team and assign them to himself
-                // moreover, delete the old team
-                if (count($memberList) == 1) {
-                    if ($user === null) {
-                        continue;
+                $memberList = $membershipDao->getMemberListByTeamId($teamId);
+
+                $projectDao = new ProjectDao($this->db());
+
+                foreach ($this->uids_to_remove as $uid) {
+                    $user = $membershipDao->deleteUserFromTeam($uid, $teamId);
+
+                    //check if this is the last user of the team
+                    // if it is, move all projects of the team to the personal team and assign them to himself
+                    // moreover, delete the old team
+                    if (count($memberList) == 1) {
+                        if ($user === null) {
+                            continue;
+                        }
+                        $teamDao = new TeamDao($this->db());
+                        $personalTeam = $teamDao->setCacheTTL(60 * 60 * 24)->getPersonalByUser($user);
+                        $projectDao->massiveSelfAssignment($this->struct, $user, $personalTeam);
+                        $teamDao->deleteTeam($this->struct);
+                    } elseif ($user !== null) {
+                        $this->removed_users[] = $user;
+                        $projectDao->unassignProjects($this->struct, $user);
                     }
-                    $teamDao = new TeamDao($this->db());
-                    $personalTeam = $teamDao->setCacheTTL(60 * 60 * 24)->getPersonalByUser($user);
-                    $projectDao->massiveSelfAssignment($this->struct, $user, $personalTeam);
-                    $teamDao->deleteTeam($this->struct);
-                } elseif ($user !== null) {
-                    $this->removed_users[] = $user;
-                    $projectDao->unassignProjects($this->struct, $user);
                 }
             }
-        }
 
-        (new MembershipDao($this->db()))->destroyCacheForListByTeamId($teamId);
+            (new MembershipDao($this->db()))->destroyCacheForListByTeamId($teamId);
 
-        $this->all_memberships = (new MembershipDao($this->db()))
-            ->setCacheTTL(3600)
-            ->getMemberListByTeamId($teamId);
+            $this->all_memberships = (new MembershipDao($this->db()))
+                ->setCacheTTL(3600)
+                ->getMemberListByTeamId($teamId);
+        });
 
-        $this->db()->commit();
-
+        // The mails stay outside the scope, where the commit used to put them: they are the one
+        // effect this method cannot take back, so they wait until the rows they announce are real.
         $this->_sendEmailsToNewMemberships();
         $this->_sendEmailsToInvited();
         $this->_setPendingStatuses();
@@ -324,6 +327,8 @@ class TeamModel
 
     /**
      * @throws DomainException
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction
+     *                   on any throw and re-throws the original, whatever its type
      */
     protected function _checkAddMembersToPersonalTeam(): void
     {
@@ -345,18 +350,17 @@ class TeamModel
 
         $dao = new TeamDao($this->db());
 
-        $this->db()->begin();
-        $team = $dao->createUserTeam($this->user, [
-            'type' => $this->struct->type,
-            'name' => $this->struct->name,
-            'members' => $this->member_emails
-        ]);
+        return $this->db()->transaction(function () use ($dao): TeamStruct {
+            $team = $dao->createUserTeam($this->user, [
+                'type' => $this->struct->type,
+                'name' => $this->struct->name,
+                'members' => $this->member_emails
+            ]);
 
-        $this->new_memberships = $this->all_memberships = $team->getMembers();
+            $this->new_memberships = $this->all_memberships = $team->getMembers();
 
-        $this->db()->commit();
-
-        return $team;
+            return $team;
+        });
     }
 
     /**

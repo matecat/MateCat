@@ -82,10 +82,8 @@ class ChangeProjectNameController extends KleinController
         $this->checkUserPermissions($pStruct, $this->getUser());
 
         $pDao = new ProjectDao($this->getDatabase());
+        // changeName() goes through updateField(), which evicts every project cache key
         $pDao->changeName($pStruct, $name);
-        $pDao->destroyFetchByIdCache($id, ProjectStruct::class);
-        $projectId = $pStruct->id ?? throw new Exception('Project not found');
-        $pDao->destroyCacheForProjectData((int)$projectId, $pStruct->password);
     }
 
     /**

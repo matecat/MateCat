@@ -769,8 +769,10 @@ class ProjectManager
     }
 
     /**
-     * Finalize the project: warm caches, run post-create hooks, update analysis status, commit transaction.
+     * Finalize the project: evict caches, run post-create hooks, update analysis status.
      * @throws Exception
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     private function finalizeProjectInTransaction(): void
     {
@@ -778,12 +780,11 @@ class ProjectManager
             $this->projectStructure->result['analyze_url'] = $this->getAnalyzeURL();
         }
 
-        $db = $this->dbHandler;
-        $db->begin();
-
-        try {
-            (new ProjectDao($this->dbHandler))->destroyCacheForProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
-            (new ProjectDao($this->dbHandler))->setCacheTTL(60 * 60 * 24)->getProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
+        // The scope stays the outermost one here. This runs in the project-creation daemon, at the
+        // end of a creation that has already allocated its sequence ids, so there is no caller
+        // transaction for it to join and nothing above it to widen.
+        $this->dbHandler->transaction(function (): void {
+            (new ProjectDao($this->dbHandler))->destroyCache((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
 
             $this->features->dispatch(new PostProjectCreateEvent($this->projectStructure));
 
@@ -799,12 +800,7 @@ class ProjectManager
             );
 
             $this->pushActivityLog();
-
-            $db->commit();
-        } catch (Exception $e) {
-            $db->rollback();
-            throw $e;
-        }
+        });
     }
 
     /**

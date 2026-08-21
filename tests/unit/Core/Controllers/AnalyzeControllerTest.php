@@ -279,11 +279,11 @@ class AnalyzeControllerTest extends AbstractTest
             $this->fail('Expected RenderTerminatedException');
         } catch (RenderTerminatedException) {
             $this->assertSame('jobAnalysis.html', $this->controller->lastTemplate);
-            $this->assertSame((string)$this->jobId(self::BASE), $this->controller->lastViewData['jid']);
+            $this->assertSame((string)$this->jobId(self::BASE), $this->controller->lastViewData['id_job']);
             $this->assertSame(self::JOB_PASSWORD, $this->controller->lastViewData['job_password']);
             $this->assertArrayHasKey('project_access_token', $this->controller->lastViewData);
-            $this->assertSame($this->projectId(self::BASE), $this->controller->addedParams['pid']);
-            $this->assertArrayHasKey('num_segments', $this->controller->addedParams);
+            $this->assertSame($this->projectId(self::BASE), $this->controller->addedParams['id_project']);
+            $this->assertArrayHasKey('totalSegments', $this->controller->addedParams);
             $this->assertTrue($this->controller->rendered);
         } finally {
             AppConfig::$ENV = $previousEnv;
@@ -310,9 +310,9 @@ class AnalyzeControllerTest extends AbstractTest
             $this->fail('Expected RenderTerminatedException');
         } catch (RenderTerminatedException) {
             $this->assertSame('analyze.html', $this->controller->lastTemplate);
-            $this->assertSame(self::PROJECT_PASSWORD, $this->controller->lastViewData['project_password']);
-            $this->assertSame($this->projectId(self::BASE), $this->controller->addedParams['pid']);
-            $this->assertSame('DONE', $this->controller->addedParams['project_status']);
+            $this->assertSame(self::PROJECT_PASSWORD, $this->controller->lastViewData['password']);
+            $this->assertSame($this->projectId(self::BASE), $this->controller->addedParams['id_project']);
+            $this->assertSame('DONE', $this->controller->addedParams['status']);
             $this->assertTrue($this->controller->rendered);
         } finally {
             AppConfig::$ENV = $previousEnv;
@@ -352,7 +352,7 @@ class AnalyzeControllerTest extends AbstractTest
         // split_feature_available says the affordance exists on this page, split_enabled is the button
         // state for this caller. Collapsing them back into one would either take the split entry away
         // from everybody or leave it clickable for a caller the endpoints refuse.
-        $this->assertSame('true', (string)$this->controller->addedParams['split_feature_available']);
+        $this->assertSame('true', (string)$this->controller->addedParams['splitFeatureAvailable']);
     }
 
     /**
@@ -450,7 +450,7 @@ class AnalyzeControllerTest extends AbstractTest
             $this->controller->renderView();
             $this->fail('Expected RenderTerminatedException');
         } catch (RenderTerminatedException) {
-            return (string)$this->controller->addedParams['split_enabled'];
+            return (string)$this->controller->addedParams['splitEnabled'];
         } finally {
             AppConfig::$ENV = $previousEnv;
         }

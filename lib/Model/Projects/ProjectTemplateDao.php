@@ -640,6 +640,17 @@ class ProjectTemplateDao extends AbstractDao
     public function removeSubTemplateByIdAndUser(int $id, int $uid, string $subTemplateField): int
     {
         $conn = $this->database->getConnection();
+
+        // Which project templates point at the sub-template, asked before the UPDATE clears the
+        // field: afterwards there is nothing left to match them on. $id is the sub-template's own
+        // id and numbers a different table, so it cannot be used to name a project template cache.
+        $stmt = $conn->prepare("SELECT id FROM " . self::TABLE . " WHERE uid = :uid AND `$subTemplateField` = :id ");
+        $stmt->execute([
+            'id' => $id,
+            'uid' => $uid,
+        ]);
+        $affectedTemplateIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
         $stmt = $conn->prepare("UPDATE " . self::TABLE . " SET `$subTemplateField` = :zero WHERE uid = :uid and `$subTemplateField` = :id ");
         $stmt->execute([
             'zero' => 0,
@@ -647,8 +658,14 @@ class ProjectTemplateDao extends AbstractDao
             'uid' => $uid,
         ]);
 
-        $this->destroyFetchByIdCache($id, ProjectTemplateStruct::class);
-        $this->destroyQueryByIdAndUserCache($conn, $id, $uid);
+        foreach ($affectedTemplateIds as $affectedTemplateId) {
+            $this->destroyFetchByIdCache((int)$affectedTemplateId, ProjectTemplateStruct::class);
+            $this->destroyQueryByIdAndUserCache($conn, (int)$affectedTemplateId, $uid);
+        }
+
+        // The default template is one of the rows the UPDATE may have touched, and it is cached for
+        // a day against the minute the by-id reads get.
+        $this->destroyDefaultTemplateCache($conn, $uid);
         $this->destroyQueryPaginated($uid);
 
         return $stmt->rowCount();

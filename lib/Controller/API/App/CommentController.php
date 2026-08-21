@@ -24,6 +24,7 @@ use Plugins\Features\ReviewExtended\ReviewUtils;
 use ReflectionException;
 use RuntimeException;
 use Stomp\Transport\Message;
+use Throwable;
 use TypeError;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Email\CommentEmail;
@@ -86,6 +87,7 @@ class CommentController extends KleinController
      * @throws ReflectionException
      * @throws TypeError
      * @throws Exception
+     * @throws Throwable
      */
     public function resolve(): void
     {

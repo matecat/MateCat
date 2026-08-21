@@ -359,7 +359,6 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      * @param bool $is_review
      *
      * @return $this
-     * @throws TypeError
      */
     public function setIsReview(bool $is_review = false): JobStruct
     {
@@ -370,7 +369,6 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
 
     /**
      * @param int $_revisionNumber
-     * @throws TypeError
      */
     public function setSourcePage(int $_revisionNumber): void
     {

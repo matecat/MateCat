@@ -16,6 +16,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use Utils\Email\SetPasswordRequestEmail;
+use Utils\Email\SignupEmail;
 
 #[Group('unit')]
 class SignupModelUnitTest extends AbstractTest
@@ -296,7 +297,7 @@ class SignupModelUnitTest extends AbstractTest
      */
     #[Test]
     #[Group('PersistenceNeeded')]
-    public function testSignupOnAnExistingAccountKeepsATokenThatIsStillFresh()
+    public function testSignupOnAnExistingAccountKeepsTheDeadlineOfATokenThatIsStillFresh()
     {
         $email = 'oauth-signup-churn-' . bin2hex(random_bytes(4)) . '@example.org';
         $uid = $this->insertOauthOnlyUser($email);
@@ -307,6 +308,7 @@ class SignupModelUnitTest extends AbstractTest
         $existing->initAuthToken(AuthTokenScope::PasswordReset);
         $dao->updateStruct($existing, ['fields' => ['confirmation_token', 'confirmation_token_created_at']]);
         $issuedToken = $existing->confirmation_token;
+        $issuedAt = $existing->confirmation_token_created_at;
 
         $session = new ArraySessionStore();
         $model = new SignupModelWithoutMailer(
@@ -319,8 +321,51 @@ class SignupModelUnitTest extends AbstractTest
 
         $row = $this->fetchCredentialColumns($uid);
 
-        $this->assertSame($issuedToken, $row['confirmation_token'], 'the in-flight link must still work');
-        $this->assertSame(1, $model->setPasswordMailsSent, 'and the same link is sent again');
+        // Only a digest of the link is stored, so the one in flight cannot be re-sent: a fresh link
+        // goes to the same mailbox instead. What must not move is the deadline, or naming an address
+        // repeatedly would keep a token alive indefinitely.
+        $this->assertNotSame($issuedToken, $row['confirmation_token'], 'a new link is minted');
+        $this->assertSame($issuedAt, $row['confirmation_token_created_at'], 'the expiry does not slide');
+        $this->assertSame(1, $model->setPasswordMailsSent, 'and it is mailed to the address on file');
+    }
+
+    /**
+     * The row holds a digest, so the confirmation link sent at signup cannot be rebuilt from it. A
+     * resend therefore has to mint and persist a new token — otherwise the mail goes out carrying an
+     * empty one and the account can never be confirmed.
+     */
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function testResendingAConfirmationMintsAToken()
+    {
+        $email = 'resend-confirm-' . bin2hex(random_bytes(4)) . '@example.org';
+        $uid = $this->insertOauthOnlyUser($email);
+
+        $dao = new UserDao(obtainTestDatabase());
+        $existing = $dao->getByUid($uid);
+        $existing->initAuthToken(AuthTokenScope::SignupConfirmation);
+        $dao->updateStruct($existing, ['fields' => ['confirmation_token', 'confirmation_token_created_at']]);
+        $issuedToken = $existing->confirmation_token;
+        $issuedAt = $existing->confirmation_token_created_at;
+
+        SignupModelWithoutMailer::resendConfirmationEmail($email, new UserDao(obtainTestDatabase()));
+
+        $row = $this->fetchCredentialColumns($uid);
+
+        $this->assertNotSame($issuedToken, $row['confirmation_token'], 'a fresh link is minted');
+        $this->assertStringStartsWith(
+            AuthTokenScope::SignupConfirmation->marker(),
+            (string)$row['confirmation_token'],
+            'and it stays confined to the confirmation flow'
+        );
+        $this->assertSame($issuedAt, $row['confirmation_token_created_at'], 'the deadline does not slide');
+        $this->assertNotNull(
+            (new UserDao(obtainTestDatabase()))->getByScopedConfirmationToken(
+                SignupModelWithoutMailer::$lastResentToken,
+                AuthTokenScope::SignupConfirmation
+            ),
+            'the token the mail carries is the one that resolves'
+        );
     }
 
     /**
@@ -484,10 +529,33 @@ class SignupModelUnitTest extends AbstractTest
  * Counts set-password mails instead of handing them to the real mailer, so the persistence
  * assertions can run without SMTP.
  */
+/**
+ * Stops a real message going out; delivery itself is covered by SignupEmailTest.
+ */
+class SignupEmailWithoutDelivery extends SignupEmail
+{
+    public function send(): void
+    {
+    }
+}
+
 class SignupModelWithoutMailer extends SignupModel
 {
 
     public int $setPasswordMailsSent = 0;
+
+    /**
+     * The secret the confirmation mail would have carried. Only the sender ever sees it, so a test
+     * that wants to check the link resolves has to take it from here.
+     */
+    public static string $lastResentToken = '';
+
+    protected static function createSignupEmail(UserStruct $user): SignupEmail
+    {
+        self::$lastResentToken = $user->authTokenForUrl();
+
+        return new SignupEmailWithoutDelivery($user);
+    }
 
     protected function createSetPasswordRequestEmail(): SetPasswordRequestEmail
     {

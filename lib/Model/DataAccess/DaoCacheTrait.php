@@ -10,6 +10,7 @@
 namespace Model\DataAccess;
 
 use Exception;
+use PDOException;
 use Predis\Client;
 use Psr\Log\InvalidArgumentException;
 use Random\RandomException;
@@ -234,6 +235,13 @@ trait DaoCacheTrait
             return null;
         }
 
+        // A row read inside an open transaction is this connection's private view of it: no other
+        // connection can see it, and a rollback un-makes it. Publishing it to a cache every request
+        // shares would hand them all a row that may never exist, for the whole TTL.
+        if ($this->_isInsideTransaction()) {
+            return null;
+        }
+
         if (isset(self::$cache_con) && !empty(self::$cache_con)) {
             $key = md5($query);
 
@@ -268,6 +276,34 @@ trait DaoCacheTrait
     }
 
     /**
+     * The transaction whose visibility this object's cache writes have to follow, or null when
+     * there is none.
+     *
+     * Cached data is shared by every connection; data written inside a transaction is not. Where
+     * both are true at once the cache can publish, or keep, a value no other connection can see.
+     * The trait cannot answer that on its own — it holds a Redis connection, not a database one —
+     * so the consumer declares it.
+     *
+     * Null is the safe default and the honest answer for the three non-DAO consumers: Pager only
+     * reads, and UserStateStore and SessionTokenStoreHandler write to Redis alone. A token
+     * revocation in particular has to take effect at once and must never wait behind a commit.
+     */
+    protected function _cacheTransactionScope(): ?IDatabase
+    {
+        return null;
+    }
+
+    /**
+     * @throws PDOException
+     */
+    private function _isInsideTransaction(): bool
+    {
+        $database = $this->_cacheTransactionScope();
+
+        return $database !== null && $database->getConnection()->inTransaction();
+    }
+
+    /**
      * Serialize params, ensuring values are always treated as strings.
      *
      * @param array<int|string, scalar|null> $params
@@ -286,14 +322,42 @@ trait DaoCacheTrait
     /**
      * Destroy a single element in the hash set
      *
+     * Inside an open transaction the eviction is queued for the commit instead of running.
+     * Running it now would be worse than not running it at all: another connection cannot see the
+     * uncommitted write, so it misses the cache, reads the old row and caches it again for the full
+     * TTL — behind the eviction that has just happened, and outliving the commit.
+     *
+     * @return bool True when the entry was removed, or when the eviction was queued for the commit.
+     *              A queued eviction cannot report what it will find, so the two are not
+     *              distinguishable through the return value. Callers that assert on it have to run
+     *              outside a transaction.
+     *
      * @param string $keyMap
      * @param string $keyElementName
      *
-     * @return bool
      * @throws ReflectionException
      * @throws Exception
      */
     protected function _removeObjectCacheMapElement(string $keyMap, string $keyElementName): bool
+    {
+        if ($this->_isInsideTransaction()) {
+            $this->_cacheTransactionScope()?->onCommit(
+                function () use ($keyMap, $keyElementName): void {
+                    $this->_removeObjectCacheMapElementNow($keyMap, $keyElementName);
+                }
+            );
+
+            return true;
+        }
+
+        return $this->_removeObjectCacheMapElementNow($keyMap, $keyElementName);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function _removeObjectCacheMapElementNow(string $keyMap, string $keyElementName): bool
     {
         $this->_cacheSetConnection();
         if (isset(self::$cache_con) && !empty(self::$cache_con)) {
@@ -308,15 +372,43 @@ trait DaoCacheTrait
     /**
      * Destroy a key directly when it is known
      *
+     * Inside an open transaction the eviction is queued for the commit instead of running.
+     * Running it now would be worse than not running it at all: another connection cannot see the
+     * uncommitted write, so it misses the cache, reads the old row and caches it again for the full
+     * TTL — behind the eviction that has just happened, and outliving the commit.
+     *
+     * @return bool True when the entry was removed, or when the eviction was queued for the commit.
+     *              A queued eviction cannot report what it will find, so the two are not
+     *              distinguishable through the return value. Callers that assert on it have to run
+     *              outside a transaction.
+     *
      * @param string $key
      * @param ?bool $isReverseKeyMap
      *
-     * @return bool
      * @throws ReflectionException
      * @throws Exception
      *
      */
     protected function _deleteCacheByKey(string $key, ?bool $isReverseKeyMap = true): bool
+    {
+        if ($this->_isInsideTransaction()) {
+            $this->_cacheTransactionScope()?->onCommit(
+                function () use ($key, $isReverseKeyMap): void {
+                    $this->_deleteCacheByKeyNow($key, $isReverseKeyMap);
+                }
+            );
+
+            return true;
+        }
+
+        return $this->_deleteCacheByKeyNow($key, $isReverseKeyMap);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function _deleteCacheByKeyNow(string $key, ?bool $isReverseKeyMap): bool
     {
         $this->_cacheSetConnection();
         if (isset(self::$cache_con) && !empty(self::$cache_con)) {

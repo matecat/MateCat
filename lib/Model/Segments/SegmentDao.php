@@ -203,7 +203,15 @@ class SegmentDao extends AbstractDao
             $options_conditions_query .= " AND st.status = :status ";
             $options_conditions_values['status'] = $options['filter']['status'];
 
-            $union_ice = "UNION
+            // The limit is substituted here rather than left as a conversion specifier for the
+            // caller's sprintf() below. This fragment is interpolated into those format strings, so
+            // a specifier inside it silently changed how many conversions they had — and with it
+            // which argument every later one received. The 'center' arm was built for the count
+            // this fragment produced when present, so without a status filter its second block's
+            // join placeholder took the step instead, emitting a bare number where a JOIN clause
+            // belongs and making MySQL reject the whole statement. A fragment that carries no
+            // specifiers cannot shift anything.
+            $union_ice = sprintf("UNION
                 (SELECT distinct(s.id) AS __sid
                     FROM segments s
                     JOIN segment_translations st ON s.id = st.id_segment
@@ -212,9 +220,9 @@ class SegmentDao extends AbstractDao
                     AND j.password = :password
                     AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
                     AND st.status = :status
-                    AND st.version_number = 0 AND st.match_type = 'ICE' AND st.translation_date IS NULL 
+                    AND st.version_number = 0 AND st.match_type = 'ICE' AND st.translation_date IS NULL
                     ORDER BY __sid DESC
-                LIMIT %u)";
+                LIMIT %u)", $step);
         } else {
             $union_ice = "";
         }
@@ -344,10 +352,12 @@ class SegmentDao extends AbstractDao
                         LIMIT %u
                   ) AS TT2";
 
+        // One argument per conversion, and the count no longer depends on whether a status filter
+        // added the ICE union: that fragment is fully substituted before it reaches these formats.
         $subQuery = match ($where) {
-            'after' => sprintf($queryAfter, $options_join_query, $options_conditions_query, $step, $step),
-            'before' => sprintf($queryBefore, $options_join_query, $options_conditions_query, $step, $step),
-            'center' => sprintf($queryCenter, $options_join_query, $options_conditions_query, $step, $step, $options_join_query, $options_conditions_query, $step),
+            'after' => sprintf($queryAfter, $options_join_query, $options_conditions_query, $step),
+            'before' => sprintf($queryBefore, $options_join_query, $options_conditions_query, $step),
+            'center' => sprintf($queryCenter, $options_join_query, $options_conditions_query, $step, $options_join_query, $options_conditions_query, $step),
             default => throw new Exception("No direction selected"),
         };
 

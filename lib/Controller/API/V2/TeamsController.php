@@ -36,6 +36,9 @@ class TeamsController extends KleinController
 
     private const int NAME_MAX_LENGTH = 100;
 
+    /** `teams`.`name` is a varchar(255), and the name is stored as it was typed. */
+    private const int NAME_MAX_STORED_LENGTH = 255;
+
     private ?ClientInterface $redis = null;
 
     /**
@@ -82,13 +85,6 @@ class TeamsController extends KleinController
      */
     private function assertNameIsPlainText(string $name): void
     {
-        if (mb_strlen($name) > self::NAME_MAX_LENGTH) {
-            throw new InvalidArgumentException(
-                "Wrong parameter: name must be at most " . self::NAME_MAX_LENGTH . " characters",
-                400
-            );
-        }
-
         // Check what the reader will end up seeing, not what was typed. The email templates
         // escape with double_encode: false so that names stored before names were kept as
         // typed still render correctly, which means entity text passes through to the
@@ -97,14 +93,46 @@ class TeamsController extends KleinController
         // arrive as a clickable "evil.com".
         $decoded = html_entity_decode($name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-        // a scheme ("https://", "javascript:") or a "www." prefix
-        $hasUrlPrefix = preg_match('~[a-z][a-z0-9+.-]*://|\bwww\.~i', $decoded) === 1;
-        // a bare hostname: one or more dot-separated labels ending in a letters-only TLD
-        $hasHostname = preg_match('~(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}~i', $decoded) === 1;
-
-        if ($hasUrlPrefix || $hasHostname) {
+        // The cap counts what the reader sees for the same reason: measured on the raw string, a
+        // name of some sixty visible characters written with entities was rejected for length.
+        // The raw form is what gets stored, so it is bounded separately by the column width.
+        if (mb_strlen($name) > self::NAME_MAX_STORED_LENGTH) {
             throw new InvalidArgumentException(
-                "Wrong parameter: name cannot contain a URL or a domain name",
+                "Wrong parameter: name must be at most " . self::NAME_MAX_STORED_LENGTH . " characters",
+                400
+            );
+        }
+
+        if (mb_strlen($decoded) > self::NAME_MAX_LENGTH) {
+            throw new InvalidArgumentException(
+                "Wrong parameter: name must be at most " . self::NAME_MAX_LENGTH . " characters",
+                400
+            );
+        }
+
+        // A scheme ("https://", "javascript:") or a "www." prefix. No legitimate team name carries
+        // one, so this costs nobody anything and stops the only shape that is unambiguously an
+        // address rather than a word with a dot in it.
+        //
+        // A bare hostname used to be rejected here too, and is not any more. Measured against
+        // production on 2026-08-13, that rule refused 120 stored names of which 14 were attacks and
+        // 106 were real: customers name a team after their own domain, about twenty teams are named
+        // after a member's address, and one of the refusals was this company's own name. Nothing
+        // distinguishes "Alpha.Beta" from "evil.com" by shape, and a list of real top-level domains
+        // does not help, because the legitimate names end in live suffixes too.
+        //
+        // What the rule was defending against was a mail client turning the name into a clickable
+        // link in an invitation. That is now handled where it happens, by
+        // {@see \Utils\Email\LinkDefanger}, which rewrites "evil.com" as "evil[.]com" in every email
+        // — including for the names already stored, which a write-time rule could never reach.
+        // `!== 0` rather than `=== 1`: preg_match returns false when PCRE gives up — a backtrack or
+        // JIT stack limit — and a check whose job is to refuse must refuse when it cannot decide.
+        // Only an explicit 0, the engine having looked and found nothing, is a pass. Unreachable
+        // today because the length caps above run first and leave at most a hundred characters
+        // here, but that is an ordering nobody should have to preserve to keep this safe.
+        if (preg_match('~[a-z][a-z0-9+.-]*://|\bwww\.~i', $decoded) !== 0) {
+            throw new InvalidArgumentException(
+                "Wrong parameter: name cannot contain a URL",
                 400
             );
         }
@@ -170,16 +198,17 @@ class TeamsController extends KleinController
 
         $userDao = new UserDao($this->getDatabase());
         $model = new TeamModel($teamStruct, $userDao, new TeamDao($this->getDatabase()));
-        $memberEmails = is_array($params['members']) ? $params['members'] : [];
+        $memberEmails = array_values(array_filter(
+            is_array($params['members']) ? $params['members'] : [],
+            'is_string'
+        ));
         foreach ($memberEmails as $email) {
-            if (is_string($email)) {
-                $model->addMemberEmail($email);
-            }
+            $model->addMemberEmail($email);
         }
         $model->setUser($this->user);
 
         // creating a team also invites every member passed with it
-        if ($this->isOverInvitationRateLimit($this->response, $this->user, '/api/v2/teams')) {
+        if ($this->isOverInvitationRateLimit($this->response, $this->user, '/api/v2/teams', count($memberEmails))) {
             return;
         }
 
