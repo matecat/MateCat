@@ -921,6 +921,85 @@ class GetSearchControllerTest extends AbstractTest
         $this->assertNotNull($updated);
     }
 
+    /**
+     * A replace whose replacement equals what is already there is not an edit. It must not demote the
+     * segment, because a lower transition soft-deletes that segment's LQA issues — throwing away a
+     * reviewer's work on a segment nobody actually changed.
+     */
+    #[Test]
+    public function updateSegments_skipsSegmentsWhoseReplacementLeavesTheTextUnchanged(): void
+    {
+        $dao    = new \Model\Translations\SegmentTranslationDao(obtainTestDatabase());
+        $before = $dao->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
+        $this->assertNotNull($before);
+
+        $queryParams = new SearchQueryParamsStruct([
+            'job' => self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'target' => 'mondo',
+            'replacement' => 'mondo',
+            'isMatchCaseRequested' => false,
+            'isExactMatchRequested' => false,
+        ]);
+
+        $search_results = [
+            new SegmentTranslationStruct([
+                'id_segment' => self::TEST_SEGMENT_1,
+                'id_job' => self::TEST_JOB_ID,
+                'translation' => $before->translation,
+                'status' => 'TRANSLATED',
+            ]),
+        ];
+
+        $committed = $this->invokePrivate('updateSegments', [$search_results, self::TEST_JOB_ID, $queryParams]);
+
+        $this->assertSame([], $committed, 'a no-op replacement must commit nothing');
+
+        $after = $dao->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
+        $this->assertNotNull($after);
+        $this->assertSame($before->translation, $after->translation);
+        $this->assertSame($before->status, $after->status);
+    }
+
+    /**
+     * The unchanged-text skip belongs to the forward replace only. Undo/redo carries the historical text
+     * AND status, and the counters are driven purely by the status transition, so a replay whose text
+     * happens to match must still be written or the counters never move back.
+     */
+    #[Test]
+    public function updateSegments_historyReplayIsNotSkippedWhenTheTextIsIdentical(): void
+    {
+        $dao    = new \Model\Translations\SegmentTranslationDao(obtainTestDatabase());
+        $before = $dao->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
+        $this->assertNotNull($before);
+
+        $queryParams = new SearchQueryParamsStruct([
+            'job' => self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'target' => 'mondo',
+            'replacement' => 'mondo',
+            'isMatchCaseRequested' => false,
+            'isExactMatchRequested' => false,
+        ]);
+
+        $search_results = [
+            new SegmentTranslationStruct([
+                'id_segment' => self::TEST_SEGMENT_1,
+                'id_job' => self::TEST_JOB_ID,
+                'translation' => $before->translation,
+                'status' => 'DRAFT',
+            ]),
+        ];
+
+        $committed = $this->invokePrivate('updateSegments', [$search_results, self::TEST_JOB_ID, $queryParams, true]);
+
+        $this->assertCount(1, $committed, 'a history replay must be written even when the text does not change');
+
+        $after = $dao->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
+        $this->assertNotNull($after);
+        $this->assertSame('DRAFT', $after->status);
+    }
+
     #[Test]
     public function updateSegments_throws_not_found_when_project_is_missing(): void
     {
