@@ -18,6 +18,7 @@ use PHPUnit\Framework\Attributes\Test;
 use ReflectionMethod;
 use ReflectionProperty;
 use Utils\Constants\Teams;
+use Utils\Tools\CatUtils;
 
 class FakeProjectAssignedEmail
 {
@@ -150,6 +151,92 @@ class ProjectModelTest extends AbstractTest
         $this->expectExceptionMessage('Project name cannot be empty');
 
         $model->invokeCheckName();
+    }
+
+    #[Test]
+    public function checkNameThrowsForANameWiderThanTheColumn(): void
+    {
+        // `projects`.`name` is a varchar(200), and this endpoint used to write the request straight
+        // into it — over-length went in as typed and MySQL decided what survived.
+        $model = new TestableProjectModel($this->db, new ProjectStruct());
+        $model->prepareUpdate('name', str_repeat('a', CatUtils::PROJECT_NAME_MAX_LENGTH + 1));
+
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('Project name must be at most 200 characters');
+
+        $model->invokeCheckName();
+    }
+
+    #[Test]
+    public function checkNameAcceptsANameThatExactlyFillsTheColumn(): void
+    {
+        // The boundary itself is not over-length. A cap that refuses the last character it can store
+        // is as wrong as one that refuses nothing.
+        $exactly = str_repeat('a', CatUtils::PROJECT_NAME_MAX_LENGTH);
+        $model = new TestableProjectModel($this->db, new ProjectStruct());
+        $model->prepareUpdate('name', $exactly);
+
+        $model->invokeCheckName();
+
+        $property = new ReflectionProperty(ProjectModel::class, 'willChange');
+        $this->assertSame(['name' => $exactly], $property->getValue($model));
+    }
+
+    #[Test]
+    public function checkNameThrowsWhenTheNameIsNotAString(): void
+    {
+        // This endpoint writes whatever the request body carried. A number or an array is not a name,
+        // and reaching the column with it is worse than answering 400.
+        $model = new TestableProjectModel($this->db, new ProjectStruct());
+        $model->prepareUpdate('name', ['not', 'a', 'name']);
+
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('Project name cannot be empty');
+
+        $model->invokeCheckName();
+    }
+
+    #[Test]
+    public function checkNameThrowsForANameOfNothingButControlCharacters(): void
+    {
+        // Not caught by an `empty()` check, which is what used to guard this: the string is not
+        // empty until it has been normalised.
+        $model = new TestableProjectModel($this->db, new ProjectStruct());
+        $model->prepareUpdate('name', "\r\n\t ");
+
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('Project name cannot be empty');
+
+        $model->invokeCheckName();
+    }
+
+    #[Test]
+    public function checkNameWritesTheNormalisedNameBackSoTheColumnGetsIt(): void
+    {
+        // The point of normalising in the model rather than the controller: what gets stored is the
+        // normalised form, for both callers of update(). A CR here would otherwise travel into the
+        // Subject header of the assignment email this same update sends.
+        $model = new TestableProjectModel($this->db, new ProjectStruct());
+        $model->prepareUpdate('name', "Acme\r\nProject   \u{200B}2024 ");
+
+        $model->invokeCheckName();
+
+        $property = new ReflectionProperty(ProjectModel::class, 'willChange');
+        $this->assertSame(['name' => 'Acme Project 2024'], $property->getValue($model));
+    }
+
+    #[Test]
+    public function checkNameComposesTheUnicodeFormItStores(): void
+    {
+        // "Équipe" written as E + U+0301 and as a precomposed É are the same name to a reader, and
+        // one spelling has to reach the column.
+        $model = new TestableProjectModel($this->db, new ProjectStruct());
+        $model->prepareUpdate('name', "E\u{0301}quipe");
+
+        $model->invokeCheckName();
+
+        $property = new ReflectionProperty(ProjectModel::class, 'willChange');
+        $this->assertSame(['name' => "\u{00C9}quipe"], $property->getValue($model));
     }
 
     #[Test]
