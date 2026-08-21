@@ -15,6 +15,7 @@ use Model\LQA\ModelDao;
 use Model\Projects\ProjectDao;
 use Model\QualityReport\QualityReportSegmentModel;
 use TypeError;
+use Utils\Files\CsvCell;
 use Utils\Registry\AppConfig;
 
 
@@ -350,7 +351,11 @@ class DownloadQRController extends KleinController
         // @codeCoverageIgnoreEnd
 
         foreach ($csvData as $fields) {
-            if (!fputcsv($fp, $fields)) {
+            // Every row, headings included: the column headings are LQA category labels, which is
+            // text whoever authored the QA model typed. The filename, the suggestion source and the
+            // reviewer comments in the row beside them are the same kind of value. CSV is this
+            // endpoint's default format, so this is the copy of the report most people open.
+            if (!fputcsv($fp, CsvCell::inertRow($fields))) {
                 // @codeCoverageIgnoreStart - fputcsv failure is not reproducible in a unit test
                 fclose($fp);
                 return false;
@@ -403,14 +408,16 @@ class DownloadQRController extends KleinController
             $xml .= '<ice_locked>' . $datum[6] . '</ice_locked>';
             $xml .= '<status>' . $datum[7] . '</status>';
             $xml .= '<time_to_edit>' . $datum[8] . '</time_to_edit>';
-            // A resource name and a filename are text a user typed, and they are the two fields
-            // here that are neither a number nor segment content. Emitted raw, a TM key called
-            // "A & B" made the whole document fail to parse — an unescaped ampersand is not valid
-            // XML — so escaping them fixes the export as much as it closes the injection.
+            // Escaped because it is text a user typed and carries no markup of its own. Emitted
+            // raw, a TM key called "A & B" made the whole document fail to parse — an unescaped
+            // ampersand is not valid XML — so escaping fixes the export as much as it closes the
+            // injection. The same holds for the category label and the reviewer comment further
+            // down, which is why they go through {@see xmlText()} too.
             //
-            // The segment fields either side are deliberately left alone: they carry MateCat's own
-            // subfiltering markup, which has its own encoding pipeline, and escaping it here would
-            // corrupt every export rather than fix one.
+            // The segment fields either side are the exception, deliberately: they carry MateCat's
+            // own subfiltering markup, which has its own encoding pipeline, and escaping it here
+            // would corrupt every export rather than fix one. Segment content, not user-typed
+            // text, is the boundary.
             $xml .= '<filename>' . self::xmlText($datum[9]) . '</filename>';
             $xml .= '<id_file>' . $datum[10] . '</id_file>';
             $xml .= '<warning>' . $datum[11] . '</warning>';
@@ -441,7 +448,7 @@ class DownloadQRController extends KleinController
                 $comments = $issueValue['comments'];
 
                 $xml .= '<issue>';
-                $xml .= '<label>' . $label . '</label>';
+                $xml .= '<label>' . self::xmlText($label) . '</label>';
                 $xml .= '<count>' . $count . '</count>';
                 $xml .= '<comments>';
 
@@ -452,7 +459,7 @@ class DownloadQRController extends KleinController
                         $xml .= '<uid>' . $comment['uid'] . '</uid>';
                         $xml .= '<id_qa_entry>' . $comment['id_qa_entry'] . '</id_qa_entry>';
                         $xml .= '<create_date>' . $comment['create_date'] . '</create_date>';
-                        $xml .= '<comment>' . $comment['comment'] . '</comment>';
+                        $xml .= '<comment>' . self::xmlText($comment['comment']) . '</comment>';
                         $xml .= '<source_page>' . $comment['source_page'] . '</source_page>';
                         $xml .= '</comment>';
                     }
