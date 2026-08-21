@@ -2,7 +2,6 @@
 
 namespace View\API\V2\Json;
 
-use LogicException;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\LQA\EntryCommentDao;
@@ -10,16 +9,9 @@ use Model\LQA\EntryStruct;
 use PDOException;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use RuntimeException;
-use SplFileObject;
-use Utils\Files\CsvCell;
 
 class SegmentTranslationIssue
 {
-
-    /**
-     * @var SplFileObject
-     */
-    private SplFileObject $csvHandler;
 
     private EntryCommentDao $entryCommentDao;
 
@@ -65,58 +57,6 @@ class SegmentTranslationIssue
     }
 
     /**
-     * @param EntryStruct[] $data
-     * @throws LogicException
-     * @throws RuntimeException
-     * @throws PDOException
-     */
-    public function genCSVTmpFile(array $data): string
-    {
-        $filePath = tempnam("/tmp", "SegmentsIssuesComments_");
-        $csvHandler = new SplFileObject($filePath, "w");
-        $csvHandler->setCsvControl(';');
-
-        $this->csvHandler = $csvHandler; // set the handler to allow to clean resource
-
-        $csv_fields = [
-            "ID Segment",
-            "Category",
-            "Severity",
-            "Selected Text",
-            "Message",
-            "Created At",
-        ];
-
-        $csvHandler->fputcsv($csv_fields);
-
-        foreach ($data as $record) {
-            $dao = $this->entryCommentDao;
-
-            if ($record->id === null) {
-                continue;
-            }
-            $comments = $dao->findByIssueId($record->id);
-            foreach ($comments as $c) {
-                $combined = array_combine($csv_fields, array_fill(0, count($csv_fields), ''));
-
-                // Four of these six columns carry text a user typed: the category and severity
-                // labels come from whoever authored the QA model, the selected text and message
-                // from whoever raised the issue. {@see CsvCell} for what a spreadsheet does with
-                // one that opens with `=`.
-                $combined["ID Segment"] = $record->id_segment;
-                $combined["Category"] = CsvCell::inert($record->category_label);
-                $combined["Severity"] = CsvCell::inert($record->severity);
-                $combined["Selected Text"] = CsvCell::inert($record->target_text);
-                $combined["Message"] = CsvCell::inert($c->comment);
-                $combined["Created At"] = $this->getDateValue($c->create_date);
-                $csvHandler->fputcsv($combined);
-            }
-        }
-
-        return $filePath;
-    }
-
-    /**
      * Render an array of records into a JSON format.
      *
      * @param AbstractDaoObjectStruct[] $array
@@ -134,23 +74,6 @@ class SegmentTranslationIssue
         }
 
         return $out;
-    }
-
-    private function getDateValue(?string $strDate = null): ?string
-    {
-        if ($strDate != null) {
-            $timestamp = strtotime($strDate);
-            return date('c', $timestamp !== false ? $timestamp : null);
-        }
-
-        return null;
-    }
-
-    public function cleanDownloadResource(): void
-    {
-        $path = $this->csvHandler->getRealPath();
-        unset($this->csvHandler);
-        @unlink($path);
     }
 
 }
