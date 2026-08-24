@@ -1083,15 +1083,15 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     this._segments.forEach((segment) => {
       if (isUndefined(result)) {
         if (currentFind || current_sid === -1) {
+          const segmentStatus = segment.get('status')?.toUpperCase() ?? ''
           if (segment.get('readonly') === 'true' && !alsoMutedSegment) {
             return false
           } else if (
             status === SEGMENTS_STATUS.UNTRANSLATED &&
-            (segment.get('status').toUpperCase() === SEGMENTS_STATUS.DRAFT ||
-              segment.get('status').toUpperCase() === SEGMENTS_STATUS.NEW ||
+            (segmentStatus === SEGMENTS_STATUS.DRAFT ||
+              segmentStatus === SEGMENTS_STATUS.NEW ||
               (autopropagated &&
-                segment.get('status').toUpperCase() ===
-                  SEGMENTS_STATUS.TRANSLATED &&
+                segmentStatus === SEGMENTS_STATUS.TRANSLATED &&
                 segment.get('autopropagated_from') != 0)) &&
             (alsoMutedSegment ||
               (!alsoMutedSegment && !segment.get('muted'))) &&
@@ -1102,16 +1102,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
           } else if (status === SEGMENTS_STATUS.UNAPPROVED && revisionNumber) {
             // Second pass
             if (
-              ((segment.get('status').toUpperCase() ===
-                SEGMENTS_STATUS.APPROVED ||
-                segment.get('status').toUpperCase() ===
-                  SEGMENTS_STATUS.APPROVED2 ||
-                segment.get('status').toUpperCase() ===
-                  SEGMENTS_STATUS.TRANSLATED) &&
+              ((segmentStatus === SEGMENTS_STATUS.APPROVED ||
+                segmentStatus === SEGMENTS_STATUS.APPROVED2 ||
+                segmentStatus === SEGMENTS_STATUS.TRANSLATED) &&
                 segment.get('revision_number') === revisionNumber) ||
               (autopropagated &&
-                segment.get('status').toUpperCase() ===
-                  SEGMENTS_STATUS.APPROVED &&
+                segmentStatus === SEGMENTS_STATUS.APPROVED &&
                 segment.get('autopropagated_from') != 0 &&
                 segment.get('revision_number') !== revisionNumber)
             ) {
@@ -1119,8 +1115,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
               return false
             }
           } else if (
-            ((status && segment.get('status').toUpperCase() === status) ||
-              !status) &&
+            ((status && segmentStatus === status) || !status) &&
             (alsoMutedSegment ||
               (!alsoMutedSegment && !segment.get('muted'))) &&
             (lockedSegments || (!lockedSegments && !segment.get('ice_locked')))
