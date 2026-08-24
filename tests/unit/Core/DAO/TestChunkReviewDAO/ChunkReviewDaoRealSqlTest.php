@@ -299,19 +299,19 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
     }
 
     #[Test]
-    public function findPenaltyPointsMismatches_flags_only_the_drifted_source_page(): void
+    public function findPenaltyPointsMismatchesByJobRange_flags_only_the_drifted_source_page(): void
     {
         // The shared fixture already drifted: REVISION's qa_chunk_reviews.penalty_points is the
         // struct default (0) while its qa_entries sum to 5; REVISION_2 has no entries, so 0 == 0.
-        $mismatches = $this->dao->findPenaltyPointsMismatches();
+        $mismatches = $this->dao->findPenaltyPointsMismatchesByJobRange($this->idJob, $this->idJob);
 
         $revisionMismatch = null;
         foreach ($mismatches as $row) {
-            if ($row['id_job'] === $this->idJob && $row['source_page'] === SourcePages::SOURCE_PAGE_REVISION) {
+            if ((int)$row['id_job'] === $this->idJob && (int)$row['source_page'] === SourcePages::SOURCE_PAGE_REVISION) {
                 $revisionMismatch = $row;
             }
             $this->assertFalse(
-                $row['id_job'] === $this->idJob && $row['source_page'] === SourcePages::SOURCE_PAGE_REVISION_2,
+                (int)$row['id_job'] === $this->idJob && (int)$row['source_page'] === SourcePages::SOURCE_PAGE_REVISION_2,
                 'REVISION_2 has no qa_entries and recorded 0, so it must not be reported as a mismatch'
             );
         }
@@ -326,9 +326,9 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
      * Regression: the recount and the detector must agree on fractional penalties.
      *
      * getPenaltyPointsForChunk() used to return int, so a true sum of 5.50 was recomputed as 5.
-     * recountAndUpdatePassFailResult() writes that value as an absolute, while the detector compares
+     * The recount writes that value as an absolute, while the detector compares
      * ABS(actual - recorded) > 0.005 — so the repair wrote 5, the detector immediately re-flagged the
-     * same row, and revision:recount-drifted could never converge.
+     * same row, and no amount of repairing could ever settle it.
      */
     #[Test]
     public function fractional_penalties_recount_and_detector_agree(): void
@@ -346,15 +346,15 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
         $recomputed = $this->dao->getPenaltyPointsForChunk($this->chunk($this->idJob, $this->jobPassword));
         $this->assertSame(10.5, $recomputed, 'the fractional part must survive the recompute');
 
-        // Write it back the way recountAndUpdatePassFailResult() does — as an absolute value.
+        // Write it back the way the recount does — as an absolute value.
         $this->realSqlDb()->getConnection()->exec(
             "UPDATE qa_chunk_reviews SET penalty_points = {$recomputed}
              WHERE id_job = {$this->idJob} AND source_page = " . SourcePages::SOURCE_PAGE_REVISION
         );
 
-        foreach ($this->dao->findPenaltyPointsMismatches() as $row) {
+        foreach ($this->dao->findPenaltyPointsMismatchesByJobRange($this->idJob, $this->idJob) as $row) {
             $this->assertFalse(
-                $row['id_job'] === $this->idJob && $row['source_page'] === SourcePages::SOURCE_PAGE_REVISION,
+                (int)$row['id_job'] === $this->idJob && (int)$row['source_page'] === SourcePages::SOURCE_PAGE_REVISION,
                 'after recomputing, the detector must consider the row settled — it reported '
                 . $row['recorded_penalty_points'] . ' vs ' . $row['actual_penalty_points']
             );
@@ -362,7 +362,7 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
     }
 
     #[Test]
-    public function findPenaltyPointsMismatches_excludes_a_row_once_it_matches(): void
+    public function findPenaltyPointsMismatchesByJobRange_excludes_a_row_once_it_matches(): void
     {
         $job = $this->fixtures->makeJob($this->idProject, [
             'password' => 'match_pwd',
@@ -376,20 +376,26 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
             "UPDATE qa_chunk_reviews SET penalty_points = 0 WHERE id_job = {$job['id']}"
         );
 
-        foreach ($this->dao->findPenaltyPointsMismatches() as $row) {
-            $this->assertNotSame($job['id'], $row['id_job'], 'a row with no drift must not be reported');
+        foreach ($this->dao->findPenaltyPointsMismatchesByJobRange($this->idJob, (int)$job['id']) as $row) {
+            $this->assertNotSame((int)$job['id'], (int)$row['id_job'], 'a row with no drift must not be reported');
         }
     }
 
+    /**
+     * The window is the whole point of the method: it is what turns a full index scan of `jobs` into
+     * a range scan, so a job outside it must not be reachable however drifted it is.
+     */
     #[Test]
-    public function findPenaltyPointsMismatches_respects_the_min_job_id_filter(): void
+    public function findPenaltyPointsMismatchesByJobRange_reports_nothing_outside_the_window(): void
     {
-        $allMismatches = $this->dao->findPenaltyPointsMismatches();
-        $this->assertNotEmpty($allMismatches, 'sanity check: the shared fixture drift must be present');
+        $inside = $this->dao->findPenaltyPointsMismatchesByJobRange($this->idJob, $this->idJob);
+        $this->assertNotEmpty($inside, 'sanity check: the shared fixture drift must be inside its own window');
 
-        $filtered = $this->dao->findPenaltyPointsMismatches($this->idJob);
-        foreach ($filtered as $row) {
-            $this->assertGreaterThan($this->idJob, $row['id_job']);
+        $below = $this->dao->findPenaltyPointsMismatchesByJobRange($this->idJob - 2, $this->idJob - 1);
+        $above = $this->dao->findPenaltyPointsMismatchesByJobRange($this->idJob + 1, $this->idJob + 2);
+
+        foreach (array_merge($below, $above) as $row) {
+            $this->assertNotSame($this->idJob, (int)$row['id_job'], 'the seeded job lies outside both windows');
         }
     }
 
@@ -400,7 +406,7 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
      * decrement that failed to land, which is the more common production shape.
      */
     #[Test]
-    public function findPenaltyPointsMismatches_flags_an_over_recorded_row(): void
+    public function findPenaltyPointsMismatchesByJobRange_flags_an_over_recorded_row(): void
     {
         $job = $this->fixtures->makeJob($this->idProject, [
             'password' => 'over_pwd',
@@ -416,8 +422,8 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
         );
 
         $reported = array_filter(
-            $this->dao->findPenaltyPointsMismatches(),
-            fn(array $row): bool => $row['id_job'] === $job['id']
+            $this->dao->findPenaltyPointsMismatchesByJobRange((int)$job['id'], (int)$job['id']),
+            fn(array $row): bool => (int)$row['id_job'] === (int)$job['id']
         );
 
         $this->assertCount(1, $reported, 'an over-recorded row must be reported');
@@ -427,14 +433,13 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
     }
 
     /**
-     * The page and the total come from the same predicate, so a capped report can state the real
-     * total. Without a cap the first run after deploy renders one table row per drifted chunk review
-     * into an email, unbounded.
+     * Without a cap, a window that has never been checked renders one table row per drifted chunk
+     * review into an email, unbounded.
      */
     #[Test]
-    public function findPenaltyPointsMismatches_caps_the_page_while_the_count_stays_total(): void
+    public function findPenaltyPointsMismatchesByJobRange_caps_the_page(): void
     {
-        // The shared fixture already drifts on two source_pages; add a third drifted chunk.
+        // The shared fixture already drifts on REVISION; add a second drifted chunk in range.
         $job = $this->fixtures->makeJob($this->idProject, [
             'password' => 'limit_pwd',
             'job_first_segment' => $this->idSegment,
@@ -447,21 +452,56 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
             "UPDATE qa_chunk_reviews SET penalty_points = 42 WHERE id_job = {$job['id']}"
         );
 
-        $total = $this->dao->countPenaltyPointsMismatches();
-        $this->assertGreaterThanOrEqual(2, $total);
-        $this->assertSame($total, count($this->dao->findPenaltyPointsMismatches()), 'count and unbounded page must agree');
+        $uncapped = $this->dao->findPenaltyPointsMismatchesByJobRange($this->idJob, (int)$job['id']);
+        $this->assertGreaterThanOrEqual(2, count($uncapped));
 
-        $this->assertCount(1, $this->dao->findPenaltyPointsMismatches(null, 1));
-        $this->assertSame($total, $this->dao->countPenaltyPointsMismatches(), 'the count must ignore the page limit');
+        $this->assertCount(1, $this->dao->findPenaltyPointsMismatchesByJobRange($this->idJob, (int)$job['id'], 1));
     }
 
+    /**
+     * The date window is anchored on jobs.create_date, the only indexed timestamp on the driving
+     * side. What it selects is jobs *created* in the window, not reviews performed in it.
+     */
     #[Test]
-    public function countPenaltyPointsMismatches_respects_the_min_job_id_filter(): void
+    public function findPenaltyPointsMismatchesByDateRange_windows_on_the_job_creation_date(): void
     {
-        $this->assertSame(
-            count($this->dao->findPenaltyPointsMismatches($this->idJob)),
-            $this->dao->countPenaltyPointsMismatches($this->idJob)
+        $this->realSqlDb()->getConnection()->exec(
+            "UPDATE jobs SET create_date = '2024-03-10 12:00:00' WHERE id = {$this->idJob}"
         );
+
+        $inside = $this->dao->findPenaltyPointsMismatchesByDateRange('2024-03-10 00:00:00', '2024-03-11 00:00:00');
+        $this->assertNotEmpty(
+            array_filter($inside, fn(array $row): bool => (int)$row['id_job'] === $this->idJob),
+            'the seeded drift must be reported when its job was created inside the window'
+        );
+
+        $after = $this->dao->findPenaltyPointsMismatchesByDateRange('2024-03-11 00:00:00', '2024-03-12 00:00:00');
+        foreach ($after as $row) {
+            $this->assertNotSame($this->idJob, (int)$row['id_job'], 'a job created before the window must not be reported');
+        }
+    }
+
+    /**
+     * The bounds are half-open, [from, to), so a run over Monday and a run over Tuesday neither
+     * report the midnight job twice nor skip it.
+     */
+    #[Test]
+    public function findPenaltyPointsMismatchesByDateRange_bounds_are_half_open(): void
+    {
+        $this->realSqlDb()->getConnection()->exec(
+            "UPDATE jobs SET create_date = '2024-03-10 00:00:00' WHERE id = {$this->idJob}"
+        );
+
+        $startsOnIt = $this->dao->findPenaltyPointsMismatchesByDateRange('2024-03-10 00:00:00', '2024-03-11 00:00:00');
+        $this->assertNotEmpty(
+            array_filter($startsOnIt, fn(array $row): bool => (int)$row['id_job'] === $this->idJob),
+            'a job created exactly at --from is inside the window'
+        );
+
+        $endsOnIt = $this->dao->findPenaltyPointsMismatchesByDateRange('2024-03-09 00:00:00', '2024-03-10 00:00:00');
+        foreach ($endsOnIt as $row) {
+            $this->assertNotSame($this->idJob, (int)$row['id_job'], 'a job created exactly at --to is outside the window');
+        }
     }
 
     #[Test]
@@ -1084,6 +1124,108 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
             $this->dao->findChunkReviewsForSourcePage($chunk, SourcePages::SOURCE_PAGE_REVISION_2, 3600),
             'evicting one phase must leave the entry of the other one served'
         );
+    }
+
+    /**
+     * The case that motivates the method. Once R2 approves a segment its status is APPROVED2, so the status
+     * derivation stops seeing it for R1 — and a job fully approved through R2 recounts R1 to zero. The final
+     * revision record is unaffected: R1 did finish reviewing this segment, and that stays true afterwards.
+     */
+    #[Test]
+    public function getReviewedWordsCountFromFinalRevisions_stillCountsASegmentR2HasSincePromoted(): void
+    {
+        $this->setSegmentTranslation(['status' => TranslationStatus::STATUS_APPROVED2]);
+        $this->flagFinalRevision(SourcePages::SOURCE_PAGE_REVISION);
+
+        $chunk = $this->chunk($this->idJob, $this->jobPassword);
+
+        $this->assertSame(10, $this->dao->getReviewedWordsCountFromFinalRevisions($chunk, SourcePages::SOURCE_PAGE_REVISION));
+        $this->assertSame(0, $this->dao->getReviewedWordsCountForSecondPass($chunk, SourcePages::SOURCE_PAGE_REVISION));
+    }
+
+    /**
+     * A reviewer who reads a pretranslated segment and approves it without changing anything leaves
+     * version_number at 0. That is ordinary review work, but `version_number != 0` filters it out.
+     */
+    #[Test]
+    public function getReviewedWordsCountFromFinalRevisions_countsASegmentApprovedWithoutAnEdit(): void
+    {
+        $this->setSegmentTranslation(['version_number' => 0]);
+        $this->flagFinalRevision(SourcePages::SOURCE_PAGE_REVISION);
+
+        $chunk = $this->chunk($this->idJob, $this->jobPassword);
+
+        $this->assertSame(10, $this->dao->getReviewedWordsCountFromFinalRevisions($chunk, SourcePages::SOURCE_PAGE_REVISION));
+        $this->assertSame(0, $this->dao->getReviewedWordsCountForSecondPass($chunk, SourcePages::SOURCE_PAGE_REVISION));
+    }
+
+    /**
+     * A replace-all demotes reviewed segments back to TRANSLATED without anyone un-reviewing them. The words
+     * stay reviewed, so the count has to survive the demotion.
+     */
+    #[Test]
+    public function getReviewedWordsCountFromFinalRevisions_survivesADemotionBackToTranslated(): void
+    {
+        $this->setSegmentTranslation(['status' => TranslationStatus::STATUS_TRANSLATED]);
+        $this->flagFinalRevision(SourcePages::SOURCE_PAGE_REVISION);
+
+        $chunk = $this->chunk($this->idJob, $this->jobPassword);
+
+        $this->assertSame(10, $this->dao->getReviewedWordsCountFromFinalRevisions($chunk, SourcePages::SOURCE_PAGE_REVISION));
+        $this->assertSame(0, $this->dao->getReviewedWordsCountForSecondPass($chunk, SourcePages::SOURCE_PAGE_REVISION));
+    }
+
+    /**
+     * The flag is not guaranteed unique per (segment, source_page) — live data carries rows where it is not —
+     * so the query groups by segment before summing. Without that the segment is counted once per flag.
+     */
+    #[Test]
+    public function getReviewedWordsCountFromFinalRevisions_doesNotDoubleCountDuplicateFinalRevisionFlags(): void
+    {
+        $this->flagFinalRevision(SourcePages::SOURCE_PAGE_REVISION, 1);
+        $this->flagFinalRevision(SourcePages::SOURCE_PAGE_REVISION, 2);
+
+        $chunk = $this->chunk($this->idJob, $this->jobPassword);
+
+        $this->assertSame(10, $this->dao->getReviewedWordsCountFromFinalRevisions($chunk, SourcePages::SOURCE_PAGE_REVISION));
+    }
+
+    /**
+     * The negative control. setUp() leaves a REVISION event with final_revision 0, so an unreviewed segment
+     * must count for neither phase however its status reads.
+     */
+    #[Test]
+    public function getReviewedWordsCountFromFinalRevisions_ignoresAPhaseWithNoFinalRevision(): void
+    {
+        $chunk = $this->chunk($this->idJob, $this->jobPassword);
+
+        $this->assertSame(0, $this->dao->getReviewedWordsCountFromFinalRevisions($chunk, SourcePages::SOURCE_PAGE_REVISION));
+        $this->assertSame(0, $this->dao->getReviewedWordsCountFromFinalRevisions($chunk, SourcePages::SOURCE_PAGE_REVISION_2));
+    }
+
+    /**
+     * @param array<string, string|int> $columns
+     */
+    private function setSegmentTranslation(array $columns): void
+    {
+        $assignments = [];
+        foreach ($columns as $column => $value) {
+            $assignments[] = $column . ' = ' . (is_int($value) ? $value : "'" . $value . "'");
+        }
+
+        $this->realSqlDb()->getConnection()->exec(
+            'UPDATE segment_translations SET ' . implode(', ', $assignments) .
+            ' WHERE id_segment = ' . $this->idSegment . ' AND id_job = ' . $this->idJob
+        );
+    }
+
+    private function flagFinalRevision(int $sourcePage, int $versionNumber = 1): void
+    {
+        $this->fixtures->makeSegmentTranslationEvent($this->idJob, $this->idSegment, [
+            'source_page'    => $sourcePage,
+            'final_revision' => 1,
+            'version_number' => $versionNumber,
+        ]);
     }
 
     /**

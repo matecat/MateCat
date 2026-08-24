@@ -375,4 +375,160 @@ class ChunkReviewModelTest extends AbstractTest
 
         $this->assertTrue($this->chunkReviewStruct->is_pass);
     }
+
+    // -----------------------------------------------------------------------
+    // recountAndUpdatePassFailResultFromFinalRevisions
+    // -----------------------------------------------------------------------
+
+    /**
+     * The pass/fail half of the recount is shared between both entry points, so the no-model case
+     * has to hold here too: NULL is how "no verdict was computed" is represented, and a stale true
+     * must be cleared rather than left standing.
+     */
+    #[Test]
+    public function recountFromFinalRevisionsLeavesIsPassNullWhenProjectHasNoLqaModel(): void
+    {
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('rowCount')->willReturn(1);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+        $this->stmtStub->method('fetch')->willReturn([0 => null]);
+
+        $this->chunkReviewStruct->is_pass = true;
+
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
+        $model->recountAndUpdatePassFailResultFromFinalRevisions($this->nullLqaProject, $this->operator());
+
+        $this->assertNull($this->chunkReviewStruct->is_pass);
+    }
+
+    #[Test]
+    public function recountFromFinalRevisionsWithLqaModelSetsIsPassWhenScoreBelowLimit(): void
+    {
+        $lqaModel = new ModelStruct([
+            'pass_options' => json_encode(['limit' => [8, 5]]),
+            'pass_type'    => 'combined',
+            'label'        => 'test',
+            'create_date'  => '2024-01-01',
+            'hash'         => 'abc',
+        ]);
+
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('rowCount')->willReturn(1);
+        $this->stmtStub->method('fetchAll')->willReturnOnConsecutiveCalls([], [$lqaModel], [], [], []);
+        $this->stmtStub->method('fetch')->willReturn([0 => null]);
+
+        $project = new ProjectStruct();
+        $project->id = 10;
+        $project->id_qa_model = 1;
+
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
+        $model->recountAndUpdatePassFailResultFromFinalRevisions($project, $this->operator());
+
+        $this->assertTrue($this->chunkReviewStruct->is_pass);
+    }
+
+    /**
+     * The one property that distinguishes this entry point, and the one an is_pass assertion cannot
+     * see: it must derive the reviewed words from the phase's own final-revision records, not from
+     * the segments' current status. The status derivation only answers for the top phase of a job
+     * and recounts R1 towards zero as R2 approves — a repair tool writing a wrong value over a right
+     * one. Swapping the derivation back would leave every other assertion in this file green, so the
+     * query itself is what gets pinned.
+     */
+    #[Test]
+    public function recountFromFinalRevisionsDerivesTheWordsFromTheFinalRevisionRecords(): void
+    {
+        $captured = $this->captureSqlWhile(
+            fn(IDatabase $database) => (new ChunkReviewModel($this->chunkReviewStruct, $database))
+                ->recountAndUpdatePassFailResultFromFinalRevisions($this->nullLqaProject, $this->operator())
+        );
+
+        $this->assertTrue(
+            $this->anyStatementContains($captured, 'ste.final_revision = 1'),
+            'the recount must read the phase\'s final revision records'
+        );
+        $this->assertFalse(
+            $this->anyStatementContains($captured, 'st.status = :translation_status'),
+            'the recount must not fall back to the segment-status derivation'
+        );
+    }
+
+    /**
+     * The companion guard. The split and merge callers deliberately keep the status derivation, so
+     * that re-partitioning a job does not silently change its numbers as a side effect of the fix
+     * that added the entry point above. That "unchanged" claim is only worth anything if something
+     * fails when it stops being true.
+     */
+    #[Test]
+    public function recountAndUpdatePassFailResultStillDerivesTheWordsFromTheSegmentStatus(): void
+    {
+        $captured = $this->captureSqlWhile(
+            fn(IDatabase $database) => (new ChunkReviewModel($this->chunkReviewStruct, $database))
+                ->recountAndUpdatePassFailResult($this->nullLqaProject, $this->operator())
+        );
+
+        $this->assertTrue(
+            $this->anyStatementContains($captured, 'st.status = :translation_status'),
+            'the original recount must still read the segments\' current status'
+        );
+        $this->assertFalse(
+            $this->anyStatementContains($captured, 'ste.final_revision = 1'),
+            'the original recount must not have been switched to the final revision derivation'
+        );
+    }
+
+    private function operator(): UserStruct
+    {
+        return new UserStruct(['uid' => 987, 'email' => 'actor@example.org']);
+    }
+
+    /**
+     * Runs $exercise against a database stub that records the SQL of every statement prepared, and
+     * returns what it saw. Built here rather than reconfiguring the shared pdoStub, whose prepare()
+     * is already stubbed in setUp.
+     *
+     * @param callable(IDatabase): void $exercise
+     *
+     * @return string[]
+     */
+    private function captureSqlWhile(callable $exercise): array
+    {
+        $captured = [];
+
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('rowCount')->willReturn(1);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+        $this->stmtStub->method('fetch')->willReturn([0 => null]);
+
+        $pdo = $this->createStub(\PDO::class);
+        // lockByJobId() refuses to run outside a transaction; both entry points take it.
+        $pdo->method('inTransaction')->willReturn(true);
+        $pdo->method('prepare')->willReturnCallback(function (string $sql) use (&$captured): \PDOStatement {
+            $captured[] = $sql;
+
+            return $this->stmtStub;
+        });
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($pdo);
+        $database->method('onCommit')->willReturnCallback(static fn(callable $callback) => $callback());
+
+        $exercise($database);
+
+        return $captured;
+    }
+
+    /**
+     * @param string[] $statements
+     */
+    private function anyStatementContains(array $statements, string $needle): bool
+    {
+        foreach ($statements as $sql) {
+            if (str_contains($sql, $needle)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
