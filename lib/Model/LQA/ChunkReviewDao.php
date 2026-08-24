@@ -183,72 +183,74 @@ class ChunkReviewDao extends AbstractDao
     }
 
     /**
-     * Finds qa_chunk_reviews rows whose recorded penalty_points has drifted away from the true
-     * live sum of qa_entries.penalty_points (non-deleted, same job/source_page). Used by the
-     * standing consistency check and the batch repair CLI task — both need the same identity
-     * (id, id_job, password, source_page) plus the recorded vs. actual values for reporting.
+     * Finds qa_chunk_reviews rows whose recorded penalty_points has drifted away from the true live
+     * sum of qa_entries.penalty_points (non-deleted, same job/source_page), within a window of job
+     * ids. Callers get the identity (id, id_job, password, source_page) plus the recorded vs. actual
+     * values for reporting.
      *
-     * @param int|null $minJobId Only consider jobs above this id. A starting watermark, not a cap.
+     * The window is mandatory and has no "everything" form, because unwindowed this is a different
+     * query rather than the same one without a filter: it drives from a full index scan of `jobs`
+     * and materialises one temporary-table row per chunk review in the instance. Bounded on
+     * r.id_job it drives from qa_chunk_reviews instead, with jobs joined eq_ref.
+     *
+     * @param int      $minJobId Inclusive lower bound on the job id.
+     * @param int      $maxJobId Inclusive upper bound on the job id.
      * @param int|null $limit    Maximum rows to return; null is unbounded. Anything that renders the
-     *                           result — a console table, an alert email — should pass one and report
-     *                           countPenaltyPointsMismatches() as the total, or a first run after
-     *                           deploy can emit an unbounded report.
+     *                           result — a console table, an alert email — should pass one.
      *
      * @return array<int, array{id:int,id_job:int,password:string,source_page:int,recorded_penalty_points:float,actual_penalty_points:float}>
      * @throws PDOException
      */
-    public function findPenaltyPointsMismatches(?int $minJobId = null, ?int $limit = null): array
+    public function findPenaltyPointsMismatchesByJobRange(int $minJobId, int $maxJobId, ?int $limit = null): array
     {
-        [$sql, $parameters] = $this->penaltyPointsMismatchesQuery($minJobId);
-
-        $sql .= " ORDER BY r.id_job, r.source_page";
-
-        // Interpolated, not bound: execute() with an array binds every value as a string, which turns
-        // LIMIT into LIMIT '50' and a syntax error. The int cast is the injection guard. Same shape as
-        // ProjectDao::getProjectsByUser().
-        if ($limit !== null) {
-            $sql .= " LIMIT " . (int)$limit;
-        }
-
-        $conn = $this->database->getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->execute($parameters);
-
-        /** @var array<int, array{id:int,id_job:int,password:string,source_page:int,recorded_penalty_points:float,actual_penalty_points:float}> $rows */
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        return $rows;
+        return $this->queryPenaltyPointsMismatches(
+            "WHERE r.id_job BETWEEN :min_job_id AND :max_job_id",
+            ['min_job_id' => $minJobId, 'max_job_id' => $maxJobId],
+            $limit
+        );
     }
 
     /**
-     * How many rows findPenaltyPointsMismatches() would return unbounded.
+     * The same drift query, windowed by when the job was created rather than by its id.
      *
-     * Lets a caller render a page of the drift while still reporting the true total, so a capped
-     * alert email reads "showing 50 of 812" instead of quietly looking like the whole picture. Built
-     * from the same predicate as the page so the count and the page can never disagree.
+     * Anchored on jobs.create_date because that is the only indexed timestamp on the driving side
+     * (create_date_idx), so the window range-scans instead of filtering after the fact. Note what
+     * that does and does not select: jobs *created* in the window, not reviews *performed* in it. A
+     * job created last year and reviewed this morning is outside every recent window, so this is a
+     * way to check recent work cheaply, never a way to prove the instance is clean.
      *
+     * The bounds are half-open — [from, to) — so consecutive windows neither overlap nor leave a gap
+     * at the boundary.
+     *
+     * @param string   $from Inclusive lower bound, 'Y-m-d H:i:s'.
+     * @param string   $to   Exclusive upper bound, 'Y-m-d H:i:s'.
+     * @param int|null $limit
+     *
+     * @return array<int, array{id:int,id_job:int,password:string,source_page:int,recorded_penalty_points:float,actual_penalty_points:float}>
      * @throws PDOException
      */
-    public function countPenaltyPointsMismatches(?int $minJobId = null): int
+    public function findPenaltyPointsMismatchesByDateRange(string $from, string $to, ?int $limit = null): array
     {
-        [$inner, $parameters] = $this->penaltyPointsMismatchesQuery($minJobId);
-
-        $conn = $this->database->getConnection();
-        $stmt = $conn->prepare("SELECT COUNT(*) FROM ( " . $inner . " ) mismatches");
-        $stmt->execute($parameters);
-
-        return (int)$stmt->fetchColumn();
+        return $this->queryPenaltyPointsMismatches(
+            "WHERE j.create_date >= :from AND j.create_date < :to",
+            ['from' => $from, 'to' => $to],
+            $limit
+        );
     }
 
     /**
-     * The shared body of the drift query: every qa_chunk_reviews row whose recorded penalty_points
-     * disagrees with the live SUM(qa_entries.penalty_points) for the same chunk and source_page.
+     * The shared body of the drift query: every qa_chunk_reviews row in the window whose recorded
+     * penalty_points disagrees with the live SUM(qa_entries.penalty_points) for the same chunk and
+     * source_page.
      *
-     * @param int|null $minJobId Only consider jobs above this id. A starting watermark, not a cap.
+     * @param string                    $where      The window predicate, including the WHERE keyword.
+     * @param array<string, int|string> $parameters Its bound values.
+     * @param int|null                  $limit
      *
-     * @return array{0: string, 1: array<string, int>}
+     * @return array<int, array{id:int,id_job:int,password:string,source_page:int,recorded_penalty_points:float,actual_penalty_points:float}>
+     * @throws PDOException
      */
-    private function penaltyPointsMismatchesQuery(?int $minJobId): array
+    private function queryPenaltyPointsMismatches(string $where, array $parameters, ?int $limit): array
     {
         // ABS(difference) rather than ROUND(a,2) != ROUND(b,2): penalty_points is double(20,2) in
         // production, one side accumulates incrementally while the other comes from a single SUM(),
@@ -272,11 +274,26 @@ class ChunkReviewDao extends AbstractDao
                 AND e.id_segment <= j.job_last_segment
                 AND e.source_page = r.source_page
                 AND e.deleted_at IS NULL
-            " . ($minJobId !== null ? "WHERE r.id_job > :min_job_id " : "") . "
+            " . $where . "
             GROUP BY r.id
-            HAVING ABS(actual_penalty_points - recorded_penalty_points) > 0.005";
+            HAVING ABS(actual_penalty_points - recorded_penalty_points) > 0.005
+            ORDER BY r.id_job, r.source_page";
 
-        return [$sql, $minJobId !== null ? ['min_job_id' => $minJobId] : []];
+        // Interpolated, not bound: execute() with an array binds every value as a string, which turns
+        // LIMIT into LIMIT '50' and a syntax error. The int cast is the injection guard. Same shape as
+        // ProjectDao::getProjectsByUser().
+        if ($limit !== null) {
+            $sql .= " LIMIT " . (int)$limit;
+        }
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($parameters);
+
+        /** @var array<int, array{id:int,id_job:int,password:string,source_page:int,recorded_penalty_points:float,actual_penalty_points:float}> $rows */
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $rows;
     }
 
     /**
@@ -308,6 +325,54 @@ class ChunkReviewDao extends AbstractDao
         $result = $stmt->fetch();
 
         return (!$result || $result[0] == null) ? 0 : $result[0];
+    }
+
+    /**
+     * Reviewed words for one chunk phase, derived from the final revision records instead of from the
+     * segments' current status.
+     *
+     * getReviewedWordsCountForSecondPass() below asks which segments sit in this phase's status right now.
+     * That only answers the question for the *top* phase of a job, because only the top phase's status is
+     * terminal: the moment R2 approves a segment it stops being APPROVED, so R1's count loses it, and a job
+     * fully approved through R2 recounts R1 to zero. A final revision record instead states that this phase
+     * finished reviewing this segment, which stays true through promotion to APPROVED2, through a demotion
+     * back to TRANSLATED, and for a segment approved without any edit — all three of which the status test
+     * silently drops.
+     *
+     * Segments are grouped before summing: the final_revision flag is not guaranteed unique per
+     * (segment, source_page), so summing the events directly double counts wherever it is not.
+     *
+     * @throws PDOException
+     */
+    public function getReviewedWordsCountFromFinalRevisions(JobStruct $chunk, int $source_page): int
+    {
+        $sql = "SELECT COALESCE( SUM( reviewed.raw_word_count ), 0 )
+        FROM (
+            SELECT s.id, s.raw_word_count
+            FROM segment_translation_events ste
+            JOIN jobs j ON j.id = ste.id_job
+            JOIN segments s ON s.id = ste.id_segment
+                AND s.id <= j.job_last_segment
+                AND s.id >= j.job_first_segment
+            WHERE ste.id_job = :id_job
+                AND j.password = :password
+                AND ste.source_page = :source_page
+                AND ste.final_revision = 1
+            GROUP BY s.id, s.raw_word_count
+        ) reviewed
+        ";
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'id_job'      => $chunk->id,
+            'password'    => $chunk->password,
+            'source_page' => $source_page
+        ]);
+
+        $result = $stmt->fetch();
+
+        return (!$result || $result[0] === null) ? 0 : (int)$result[0];
     }
 
     /**
