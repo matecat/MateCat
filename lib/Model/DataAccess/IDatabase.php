@@ -65,6 +65,26 @@ interface IDatabase
     public function rollback(): void;
 
     /**
+     * Defer work until the current transaction commits.
+     *
+     * For anything whose observers must not see it before the data is visible, and which has no
+     * business running inside the locks the transaction holds — cache invalidation and message
+     * enqueues, typically. Invalidating a cache before the commit lets a concurrent reader repopulate
+     * it from the pre-commit row, and that stale value then outlives the commit for the whole TTL;
+     * enqueuing before the commit lets a worker dequeue and read state that is not there yet, or that
+     * a rollback removed.
+     *
+     * Runs the callback immediately when no transaction is open, so callers need not know which case
+     * they are in. Callbacks are discarded on rollback, and a callback that throws is logged rather
+     * than propagated — the commit has already happened by then.
+     *
+     * @param callable(): void $callback
+     *
+     * @throws PDOException
+     */
+    public function onCommit(callable $callback): void;
+
+    /**
      * Execute a callback within a database transaction.
      *
      * Begins a transaction, executes the callback, and commits.
