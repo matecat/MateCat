@@ -94,7 +94,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $this->stmtStub->method('fetch')->willReturn([15]);
 
         $dao = new ChunkReviewDao($this->dbStub);
-        $this->assertSame(15, $dao->getPenaltyPointsForChunk($chunk));
+        $this->assertSame(15.0, $dao->getPenaltyPointsForChunk($chunk));
     }
 
     #[Test]
@@ -108,7 +108,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $this->stmtStub->method('fetch')->willReturn([20]);
 
         $dao = new ChunkReviewDao($this->dbStub);
-        $this->assertSame(20, $dao->getPenaltyPointsForChunk($chunk, SourcePages::SOURCE_PAGE_REVISION_2));
+        $this->assertSame(20.0, $dao->getPenaltyPointsForChunk($chunk, SourcePages::SOURCE_PAGE_REVISION_2));
     }
 
     #[Test]
@@ -122,7 +122,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $this->stmtStub->method('fetch')->willReturn(false);
 
         $dao = new ChunkReviewDao($this->dbStub);
-        $this->assertSame(0, $dao->getPenaltyPointsForChunk($chunk, 3));
+        $this->assertSame(0.0, $dao->getPenaltyPointsForChunk($chunk, 3));
     }
 
     #[Test]
@@ -136,7 +136,26 @@ class ChunkReviewDaoTest extends AbstractTest
         $this->stmtStub->method('fetch')->willReturn([null]);
 
         $dao = new ChunkReviewDao($this->dbStub);
-        $this->assertSame(0, $dao->getPenaltyPointsForChunk($chunk, 2));
+        $this->assertSame(0.0, $dao->getPenaltyPointsForChunk($chunk, 2));
+    }
+
+    /**
+     * penalty_points is double(20,2) and PDO returns SUM() as a string. With an int return type
+     * "7.50" silently became 7, and recountAndUpdatePassFailResult() then wrote that truncated
+     * value back as an absolute — so the repair corrupted rows it was meant to fix.
+     */
+    #[Test]
+    public function getPenaltyPointsForChunkKeepsFractionalSumFromStringResult(): void
+    {
+        $chunk = new JobStruct();
+        $chunk->id = 10;
+        $chunk->password = 'pass';
+
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetch')->willReturn(['7.50']);
+
+        $dao = new ChunkReviewDao($this->dbStub);
+        $this->assertSame(7.5, $dao->getPenaltyPointsForChunk($chunk));
     }
 
     #[Test]
@@ -396,7 +415,7 @@ class ChunkReviewDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function passFailCountsAtomicUpdateReturnsEarlyWhenLqaModelIsNull(): void
+    public function passFailCountsAtomicUpdateSkipsIsPassClauseWhenLqaModelIsNull(): void
     {
         $projectStub = $this->createStub(ProjectStruct::class);
         $projectStub->id_qa_model = null;
@@ -407,16 +426,23 @@ class ChunkReviewDaoTest extends AbstractTest
         $chunkReview = $this->createStub(ChunkReviewStruct::class);
         $chunkReview->method('getChunk')->willReturn($chunkStub);
         $chunkReview->source_page = 2;
+        $chunkReview->id_job = 5;
+        $chunkReview->id_project = 1;
+        $chunkReview->password = 'p';
+        $chunkReview->review_password = 'rp';
 
         $stmtMock = $this->createMock(PDOStatement::class);
         $stmtMock->queryString = '';
-        $stmtMock->expects($this->never())->method('execute');
+        $stmtMock->expects($this->once())->method('execute')->willReturn(true);
 
-        $pdoStub = $this->createStub(PDO::class);
-        $pdoStub->method('prepare')->willReturn($stmtMock);
+        $pdoMock = $this->createMock(PDO::class);
+        $pdoMock->expects($this->once())
+            ->method('prepare')
+            ->with($this->logicalNot($this->stringContains('is_pass')))
+            ->willReturn($stmtMock);
 
         $dbStub = $this->createStub(IDatabase::class);
-        $dbStub->method('getConnection')->willReturn($pdoStub);
+        $dbStub->method('getConnection')->willReturn($pdoMock);
 
         $this->setDatabaseInstance($dbStub);
 
@@ -552,6 +578,37 @@ class ChunkReviewDaoTest extends AbstractTest
         $result = $dao->destroyCacheForFindChunkReviews($chunk);
         $this->assertIsBool($result);
     }
+
+    #[Test]
+    public function destroyCachesForBustsTheCredentialAndProjectCaches(): void
+    {
+        $chunkReview = new ChunkReviewStruct();
+        $chunkReview->id_job = 42;
+        $chunkReview->id_project = 7;
+        $chunkReview->password = 'chunk_pw';
+        $chunkReview->review_password = 'rev_pw';
+        $chunkReview->source_page = 2;
+
+        $dao = $this->getMockBuilder(ChunkReviewDao::class)
+            ->setConstructorArgs([$this->dbStub])
+            ->onlyMethods([
+                'destroyCacheForJobPassword',
+                'destroyCacheByProjectId',
+            ])
+            ->getMock();
+
+        $dao->expects($this->once())
+            ->method('destroyCacheForJobPassword')
+            ->with(42, 'chunk_pw');
+
+        $dao->expects($this->once())
+            ->method('destroyCacheByProjectId')
+            ->with(7)
+            ->willReturn(true);
+
+        $dao->destroyCachesFor($chunkReview);
+    }
+
 
     // ──────────────────────────────────────────────────────────────
     // Instance-method specular tests (Step 1 — mirror of static tests)
@@ -713,11 +770,24 @@ class ChunkReviewDaoTest extends AbstractTest
         $this->assertNull($result);
     }
 
+    /**
+     * createRecord() reads the row back rather than trusting lastInsertId(), which is 0 whenever
+     * ON DUPLICATE KEY UPDATE took the update branch.
+     */
     #[Test]
-    public function instanceCreateRecordReturnsStructWithInsertedId(): void
+    public function instanceCreateRecordReturnsTheRowItWroteBack(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
-        $this->pdoStub->method('lastInsertId')->willReturn('42');
+        $this->stmtStub->method('fetchAll')->willReturn([
+            new ChunkReviewStruct([
+                'id'              => 42,
+                'id_project'      => 1,
+                'id_job'          => 2,
+                'password'        => 'test_pw',
+                'review_password' => 'rev_pw',
+                'source_page'     => 2,
+            ]),
+        ]);
 
         $data = [
             'id_project'      => 1,
@@ -742,7 +812,17 @@ class ChunkReviewDaoTest extends AbstractTest
     public function instanceCreateRecordSetsDefaultReviewPasswordWhenNull(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
-        $this->pdoStub->method('lastInsertId')->willReturn('43');
+        $this->stmtStub->method('fetchAll')->willReturnCallback(
+            // Echo back whatever setDefaults() generated, the way the database would.
+            fn() => [new ChunkReviewStruct([
+                'id'              => 43,
+                'id_project'      => 1,
+                'id_job'          => 2,
+                'password'        => 'test_pw',
+                'review_password' => 'generated_rev_pw',
+                'source_page'     => 2,
+            ])]
+        );
 
         $data = [
             'id_project'  => 1,
@@ -813,5 +893,73 @@ class ChunkReviewDaoTest extends AbstractTest
 
         $dao = new ChunkReviewDao($injectedDb);
         $dao->updatePassword(1, 'old', 'new');
+    }
+
+    // ── lockByJobId ──
+
+    /**
+     * The guard is load-bearing: under autocommit, FOR UPDATE takes the row locks and drops them
+     * again as soon as the statement returns, so the caller would look protected while protecting
+     * nothing. There is a real-SQL sibling for this, but it needs a live database — this one runs
+     * on every suite invocation.
+     */
+    #[Test]
+    public function lockByJobIdThrowsOutsideATransaction(): void
+    {
+        $dao = new ChunkReviewDao($this->dbStub);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('requires an open transaction');
+        $dao->lockByJobId(123);
+    }
+
+    /**
+     * The guard has to fire *before* the SELECT is issued. If it merely threw afterwards the locks
+     * would already have been taken and dropped, which is the exact failure it exists to prevent.
+     */
+    #[Test]
+    public function lockByJobIdDoesNotIssueTheSelectWhenTheGuardFires(): void
+    {
+        $pdo = $this->createMock(PDO::class);
+        $pdo->method('inTransaction')->willReturn(false);
+        $pdo->expects($this->never())->method('prepare');
+
+        $db = $this->createStub(IDatabase::class);
+        $db->method('getConnection')->willReturn($pdo);
+
+        $this->expectException(\RuntimeException::class);
+        (new ChunkReviewDao($db))->lockByJobId(123);
+    }
+
+    /**
+     * Pins the two properties the whole design rests on: the lock is keyed on id_job (split/merge
+     * deletes and recreates the rows, so no stable row id exists) and it is FOR UPDATE, so InnoDB
+     * holds it until the transaction ends.
+     */
+    #[Test]
+    public function lockByJobIdIssuesASelectForUpdateOnIdJob(): void
+    {
+        $capturedSql = null;
+
+        $stmt = $this->createStub(PDOStatement::class);
+        $stmt->queryString = '';
+        $stmt->method('execute')->willReturn(true);
+
+        $pdo = $this->createStub(PDO::class);
+        $pdo->method('inTransaction')->willReturn(true);
+        $pdo->method('prepare')->willReturnCallback(function (string $sql) use (&$capturedSql, $stmt) {
+            $capturedSql = $sql;
+
+            return $stmt;
+        });
+
+        $db = $this->createStub(IDatabase::class);
+        $db->method('getConnection')->willReturn($pdo);
+
+        (new ChunkReviewDao($db))->lockByJobId(123);
+
+        $this->assertStringContainsString('qa_chunk_reviews', (string)$capturedSql);
+        $this->assertStringContainsString('id_job = :id_job', (string)$capturedSql);
+        $this->assertStringContainsString('FOR UPDATE', (string)$capturedSql);
     }
 }
