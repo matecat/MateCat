@@ -409,6 +409,118 @@ class NewControllerTest extends AbstractTest
     }
 
     /**
+     * @param array<int|string, mixed>|string $instructions
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     *
+     * @return array<string, mixed>
+     */
+    private function validateRequestWithInstructions(array|string $instructions): array
+    {
+        $user = $this->createMock(UserStruct::class);
+        $user->expects($this->once())->method('getPersonalTeam')->willReturn(new TeamStruct());
+        $user->expects($this->once())->method('getEmail')->willReturn("test-email@translated.com");
+
+        $this->requestMock = new Request(
+            [],
+            [
+                'due_date' => '20251231',
+                'source_lang' => 'en',
+                'target_lang' => 'fr,de',
+                'mt_engine' => 1,
+                'tms_engine' => 1,
+                'instructions' => $instructions,
+            ],
+            [],
+            [],
+            [
+                'file[]' => [
+                    'name' => 'foo.docx',
+                    'tmp_name' => '/tmp/xdwlky',
+                ]
+            ]
+        );
+
+        $this->createMocks();
+
+        $reflector = new ReflectionProperty($this->controller, 'user');
+        $reflector->setValue($this->controller, $user);
+
+        return $this->method->invoke($this->controller);
+    }
+
+    /**
+     * Connectors such as TOS/Phrase deliver their anchors entity escaped: the sanitizer has to
+     * decode them, otherwise the raw markup reaches the translator verbatim.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function testValidateTheRequestSanitizesEntityEscapedInstructions(): void
+    {
+        $validateParameters = $this->validateRequestWithInstructions([
+            '**Project number**: &lt;a href="https://cloud.memsource.com/web/project2/show/34962138" target="_blank"&gt;34962138&lt;/a&gt;',
+        ]);
+
+        $this->assertEquals(
+            '**Project number**: <a href="https://cloud.memsource.com/web/project2/show/34962138" target="_blank">34962138</a>',
+            $validateParameters['instructions'][0]
+        );
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function testValidateTheRequestSanitizesEveryInstructionsLeaf(): void
+    {
+        $validateParameters = $this->validateRequestWithInstructions([
+            '<script>alert(1)</script>first',
+            ['nested' => 'a <a href="http://t.co">l</a>'],
+        ]);
+
+        $this->assertEquals('first', $validateParameters['instructions'][0]);
+        $this->assertEquals(
+            'a <a href="http://t.co">l</a>',
+            $validateParameters['instructions'][1]['nested']
+        );
+    }
+
+    /**
+     * filter_var() stringifies the leaves before handing them to the callback, so a null or an
+     * integer must not blow up on the sanitizer's `string` parameter.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function testValidateTheRequestAcceptsNonStringInstructionsLeaves(): void
+    {
+        $validateParameters = $this->validateRequestWithInstructions(['a' => null, 'b' => 5]);
+
+        $this->assertEquals('', $validateParameters['instructions']['a']);
+        $this->assertEquals('5', $validateParameters['instructions']['b']);
+    }
+
+    /**
+     * `instructions[]` is the documented contract: a scalar is rejected by FILTER_REQUIRE_ARRAY
+     * and ends up null. Pinned so the drop stays a deliberate choice.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function testValidateTheRequestDropsScalarInstructions(): void
+    {
+        $validateParameters = $this->validateRequestWithInstructions('not an array');
+
+        $this->assertNull($validateParameters['instructions']);
+    }
+
+    /**
      * icu_enabled must stay `false` when the request explicitly disables it.
      *
      * @throws ReflectionException

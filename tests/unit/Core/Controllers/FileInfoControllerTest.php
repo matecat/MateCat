@@ -16,6 +16,7 @@ use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\DecodeInstructionsEvent;
 use Model\Files\FilesInfoUtility;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
@@ -231,6 +232,71 @@ class FileInfoControllerTest extends AbstractTest
         $this->responseStub();
 
         $this->expectException(NotFoundException::class);
+
+        $this->controller->setInstructions();
+    }
+
+    #[Test]
+    public function setInstructions_sanitizes_the_payload_before_storing_it(): void
+    {
+        $this->setRequest([
+            'id_file' => '35',
+            'instructions' => '<script>alert(1)</script><a href="http://t.co">l</a>',
+        ]);
+        $this->setFeatureSet();
+
+        // A mock, not the shared stub: the point is the argument the utility receives.
+        $utility = $this->createMock(FilesInfoUtility::class);
+        $utility->expects(self::once())
+            ->method('setInstructions')
+            ->with(35, '<a href="http://t.co">l</a>')
+            ->willReturn(true);
+        $this->controller->stubUtility = $utility;
+
+        $this->responseStub();
+
+        $this->controller->setInstructions();
+    }
+
+    /**
+     * The plugin hook (Uber's html_entity_decode) has to run before the sanitizer: reversing the
+     * order would let it decode already sanitized output, i.e. a double decode.
+     */
+    #[Test]
+    public function setInstructions_dispatches_the_decode_hook_before_sanitizing(): void
+    {
+        $this->setRequest(['id_file' => '35', 'instructions' => 'ignored, the hook rewrites it']);
+
+        $featureSet = $this->createMock(FeatureSet::class);
+        $featureSet->expects(self::once())
+            ->method('dispatch')
+            ->willReturnCallback(static function (DecodeInstructionsEvent $event): DecodeInstructionsEvent {
+                $event->setValue('&lt;a href="http://t.co"&gt;label&lt;/a&gt;');
+
+                return $event;
+            });
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, $featureSet);
+
+        $utility = $this->createMock(FilesInfoUtility::class);
+        $utility->expects(self::once())
+            ->method('setInstructions')
+            ->with(35, '<a href="http://t.co">label</a>')
+            ->willReturn(true);
+        $this->controller->stubUtility = $utility;
+
+        $this->responseStub();
+
+        $this->controller->setInstructions();
+    }
+
+    #[Test]
+    public function setInstructions_throws_when_the_payload_sanitizes_down_to_nothing(): void
+    {
+        $this->setRequest(['id_file' => '35', 'instructions' => '<script>alert(1)</script>']);
+        $this->setFeatureSet();
+        $this->responseStub();
+
+        $this->expectException(InvalidArgumentException::class);
 
         $this->controller->setInstructions();
     }
