@@ -465,9 +465,9 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   useEffect(() => {
     const recalcHeight = () => {
       const headerHeight =
-        document.getElementsByTagName('header')[0].offsetHeight
+        document.getElementsByTagName('header')[0]?.offsetHeight ?? 0
       const footerHeight =
-        document.getElementsByTagName('footer')[0].offsetHeight
+        document.getElementsByTagName('footer')[0]?.offsetHeight ?? 0
       const wrapperEl = document.getElementById('context-preview-wrapper')
       const wrapperHeight = wrapperEl ? wrapperEl.offsetHeight : 0
 
