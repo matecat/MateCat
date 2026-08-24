@@ -1087,6 +1087,108 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
     }
 
     /**
+     * The case that motivates the method. Once R2 approves a segment its status is APPROVED2, so the status
+     * derivation stops seeing it for R1 — and a job fully approved through R2 recounts R1 to zero. The final
+     * revision record is unaffected: R1 did finish reviewing this segment, and that stays true afterwards.
+     */
+    #[Test]
+    public function getReviewedWordsCountFromFinalRevisions_stillCountsASegmentR2HasSincePromoted(): void
+    {
+        $this->setSegmentTranslation(['status' => TranslationStatus::STATUS_APPROVED2]);
+        $this->flagFinalRevision(SourcePages::SOURCE_PAGE_REVISION);
+
+        $chunk = $this->chunk($this->idJob, $this->jobPassword);
+
+        $this->assertSame(10, $this->dao->getReviewedWordsCountFromFinalRevisions($chunk, SourcePages::SOURCE_PAGE_REVISION));
+        $this->assertSame(0, $this->dao->getReviewedWordsCountForSecondPass($chunk, SourcePages::SOURCE_PAGE_REVISION));
+    }
+
+    /**
+     * A reviewer who reads a pretranslated segment and approves it without changing anything leaves
+     * version_number at 0. That is ordinary review work, but `version_number != 0` filters it out.
+     */
+    #[Test]
+    public function getReviewedWordsCountFromFinalRevisions_countsASegmentApprovedWithoutAnEdit(): void
+    {
+        $this->setSegmentTranslation(['version_number' => 0]);
+        $this->flagFinalRevision(SourcePages::SOURCE_PAGE_REVISION);
+
+        $chunk = $this->chunk($this->idJob, $this->jobPassword);
+
+        $this->assertSame(10, $this->dao->getReviewedWordsCountFromFinalRevisions($chunk, SourcePages::SOURCE_PAGE_REVISION));
+        $this->assertSame(0, $this->dao->getReviewedWordsCountForSecondPass($chunk, SourcePages::SOURCE_PAGE_REVISION));
+    }
+
+    /**
+     * A replace-all demotes reviewed segments back to TRANSLATED without anyone un-reviewing them. The words
+     * stay reviewed, so the count has to survive the demotion.
+     */
+    #[Test]
+    public function getReviewedWordsCountFromFinalRevisions_survivesADemotionBackToTranslated(): void
+    {
+        $this->setSegmentTranslation(['status' => TranslationStatus::STATUS_TRANSLATED]);
+        $this->flagFinalRevision(SourcePages::SOURCE_PAGE_REVISION);
+
+        $chunk = $this->chunk($this->idJob, $this->jobPassword);
+
+        $this->assertSame(10, $this->dao->getReviewedWordsCountFromFinalRevisions($chunk, SourcePages::SOURCE_PAGE_REVISION));
+        $this->assertSame(0, $this->dao->getReviewedWordsCountForSecondPass($chunk, SourcePages::SOURCE_PAGE_REVISION));
+    }
+
+    /**
+     * The flag is not guaranteed unique per (segment, source_page) — live data carries rows where it is not —
+     * so the query groups by segment before summing. Without that the segment is counted once per flag.
+     */
+    #[Test]
+    public function getReviewedWordsCountFromFinalRevisions_doesNotDoubleCountDuplicateFinalRevisionFlags(): void
+    {
+        $this->flagFinalRevision(SourcePages::SOURCE_PAGE_REVISION, 1);
+        $this->flagFinalRevision(SourcePages::SOURCE_PAGE_REVISION, 2);
+
+        $chunk = $this->chunk($this->idJob, $this->jobPassword);
+
+        $this->assertSame(10, $this->dao->getReviewedWordsCountFromFinalRevisions($chunk, SourcePages::SOURCE_PAGE_REVISION));
+    }
+
+    /**
+     * The negative control. setUp() leaves a REVISION event with final_revision 0, so an unreviewed segment
+     * must count for neither phase however its status reads.
+     */
+    #[Test]
+    public function getReviewedWordsCountFromFinalRevisions_ignoresAPhaseWithNoFinalRevision(): void
+    {
+        $chunk = $this->chunk($this->idJob, $this->jobPassword);
+
+        $this->assertSame(0, $this->dao->getReviewedWordsCountFromFinalRevisions($chunk, SourcePages::SOURCE_PAGE_REVISION));
+        $this->assertSame(0, $this->dao->getReviewedWordsCountFromFinalRevisions($chunk, SourcePages::SOURCE_PAGE_REVISION_2));
+    }
+
+    /**
+     * @param array<string, string|int> $columns
+     */
+    private function setSegmentTranslation(array $columns): void
+    {
+        $assignments = [];
+        foreach ($columns as $column => $value) {
+            $assignments[] = $column . ' = ' . (is_int($value) ? $value : "'" . $value . "'");
+        }
+
+        $this->realSqlDb()->getConnection()->exec(
+            'UPDATE segment_translations SET ' . implode(', ', $assignments) .
+            ' WHERE id_segment = ' . $this->idSegment . ' AND id_job = ' . $this->idJob
+        );
+    }
+
+    private function flagFinalRevision(int $sourcePage, int $versionNumber = 1): void
+    {
+        $this->fixtures->makeSegmentTranslationEvent($this->idJob, $this->idSegment, [
+            'source_page'    => $sourcePage,
+            'final_revision' => 1,
+            'version_number' => $versionNumber,
+        ]);
+    }
+
+    /**
      * Both fixture rows share the review password, and updateReviewPassword() rotates one phase at
      * a time, so a job-wide rotation needs one call per phase.
      */

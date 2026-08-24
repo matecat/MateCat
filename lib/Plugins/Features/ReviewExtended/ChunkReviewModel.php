@@ -203,11 +203,54 @@ class ChunkReviewModel implements IChunkReviewModel
         // caller of the recount — BatchReviewProcessor, split/merge, and the repair CLI alike.
         $chunkReviewDao->lockByJobId((int)$this->chunk_review->id_job);
 
+        $this->applyRecount(
+            $chunkReviewDao,
+            $chunkReviewDao->getReviewedWordsCountForSecondPass($this->chunk, $this->chunk_review->source_page),
+            $project,
+            $actingUser
+        );
+    }
+
+    /**
+     * Same recount, deriving reviewed_words_count from the final revision records rather than from the
+     * segments' current status.
+     *
+     * The status derivation used above only answers the question for the top phase of a job, so on a job
+     * with both R1 and R2 it recounts R1 towards zero as R2 approves. This entry point exists for the
+     * repair tasks, which have to be correct for any job shape. The split/merge callers deliberately keep
+     * the older derivation for now, so that re-partitioning a job does not silently change its numbers as
+     * a side effect of this fix; that path needs its own change.
+     *
+     * @throws Exception
+     */
+    public function recountAndUpdatePassFailResultFromFinalRevisions(ProjectStruct $project, UserStruct $actingUser): void
+    {
+        $chunkReviewDao = new ChunkReviewDao($this->database);
+
+        // Same ordering requirement as the recount above: lock before the aggregate reads.
+        $chunkReviewDao->lockByJobId((int)$this->chunk_review->id_job);
+
+        $this->applyRecount(
+            $chunkReviewDao,
+            $chunkReviewDao->getReviewedWordsCountFromFinalRevisions($this->chunk, (int)$this->chunk_review->source_page),
+            $project,
+            $actingUser
+        );
+    }
+
+    /**
+     * The body shared by both recount entry points. Callers must already hold the job's chunk review row
+     * locks and must have computed $reviewedWordsCount while holding them.
+     *
+     * @throws Exception
+     */
+    private function applyRecount(ChunkReviewDao $chunkReviewDao, int $reviewedWordsCount, ProjectStruct $project, UserStruct $actingUser): void
+    {
         /**
          * Count penalty points based on this source_page
          */
         $this->chunk_review->penalty_points = $chunkReviewDao->getPenaltyPointsForChunk($this->chunk, $this->chunk_review->source_page);
-        $this->chunk_review->reviewed_words_count = $chunkReviewDao->getReviewedWordsCountForSecondPass($this->chunk, $this->chunk_review->source_page);
+        $this->chunk_review->reviewed_words_count = $reviewedWordsCount;
         $this->chunk_review->total_tte = $chunkReviewDao->countTimeToEdit($this->chunk, $this->chunk_review->source_page);
 
         // No LQA model means no pass/fail verdict, and NULL is how that third state is already

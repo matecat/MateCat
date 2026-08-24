@@ -311,6 +311,54 @@ class ChunkReviewDao extends AbstractDao
     }
 
     /**
+     * Reviewed words for one chunk phase, derived from the final revision records instead of from the
+     * segments' current status.
+     *
+     * getReviewedWordsCountForSecondPass() below asks which segments sit in this phase's status right now.
+     * That only answers the question for the *top* phase of a job, because only the top phase's status is
+     * terminal: the moment R2 approves a segment it stops being APPROVED, so R1's count loses it, and a job
+     * fully approved through R2 recounts R1 to zero. A final revision record instead states that this phase
+     * finished reviewing this segment, which stays true through promotion to APPROVED2, through a demotion
+     * back to TRANSLATED, and for a segment approved without any edit — all three of which the status test
+     * silently drops.
+     *
+     * Segments are grouped before summing: the final_revision flag is not guaranteed unique per
+     * (segment, source_page), so summing the events directly double counts wherever it is not.
+     *
+     * @throws PDOException
+     */
+    public function getReviewedWordsCountFromFinalRevisions(JobStruct $chunk, int $source_page): int
+    {
+        $sql = "SELECT COALESCE( SUM( reviewed.raw_word_count ), 0 )
+        FROM (
+            SELECT s.id, s.raw_word_count
+            FROM segment_translation_events ste
+            JOIN jobs j ON j.id = ste.id_job
+            JOIN segments s ON s.id = ste.id_segment
+                AND s.id <= j.job_last_segment
+                AND s.id >= j.job_first_segment
+            WHERE ste.id_job = :id_job
+                AND j.password = :password
+                AND ste.source_page = :source_page
+                AND ste.final_revision = 1
+            GROUP BY s.id, s.raw_word_count
+        ) reviewed
+        ";
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'id_job'      => $chunk->id,
+            'password'    => $chunk->password,
+            'source_page' => $source_page
+        ]);
+
+        $result = $stmt->fetch();
+
+        return (!$result || $result[0] === null) ? 0 : (int)$result[0];
+    }
+
+    /**
      * @param JobStruct $chunk
      * @param int|null $source_page
      *
