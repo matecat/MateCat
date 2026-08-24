@@ -1187,6 +1187,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     return this._segments.get(index)
   },
   getSegmentIndex(sid) {
+    if (isUndefined(sid) || sid === null) return -1
+
     const index = this._segments.findIndex(function (segment) {
       if (sid.toString().indexOf('-') === -1) {
         return parseInt(segment.get('sid')) === parseInt(sid)

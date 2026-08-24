@@ -26,3 +26,26 @@ describe('SegmentStore.getNextSegment', () => {
     expect(next.sid).toBe(3)
   })
 })
+
+describe('SegmentStore.getSegmentIndex', () => {
+  afterEach(() => {
+    SegmentStore._segments = fromJS([])
+  })
+
+  test('returns -1 instead of throwing when sid is undefined', () => {
+    SegmentStore._segments = fromJS([{sid: 1}, {sid: 2}])
+
+    let index
+    expect(() => {
+      index = SegmentStore.getSegmentIndex(undefined)
+    }).not.toThrow()
+
+    expect(index).toBe(-1)
+  })
+
+  test('finds the matching segment by numeric sid', () => {
+    SegmentStore._segments = fromJS([{sid: 1}, {sid: 2}])
+
+    expect(SegmentStore.getSegmentIndex(2)).toBe(1)
+  })
+})
