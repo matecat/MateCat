@@ -397,7 +397,7 @@ class AbstractRevisionFeatureTest extends AbstractTest
         $this->feedChunkReviews([]);
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('chunk review not found');
+        $this->expectExceptionMessage('Chunk review not found');
 
         $this->feature->alterChunkReviewStruct($this->makeAlterEvent());
     }
@@ -408,7 +408,7 @@ class AbstractRevisionFeatureTest extends AbstractTest
         $this->feedChunkReviews([$this->reviewWithUndoData(null)]);
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('undo data is not available');
+        $this->expectExceptionMessage('Undo data is not available');
 
         $this->feature->alterChunkReviewStruct($this->makeAlterEvent());
     }
@@ -424,7 +424,7 @@ class AbstractRevisionFeatureTest extends AbstractTest
         ]))]);
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('event does not match with latest revision data');
+        $this->expectExceptionMessage('Event does not match with latest revision data');
 
         $this->feature->alterChunkReviewStruct($this->makeAlterEvent());
     }
