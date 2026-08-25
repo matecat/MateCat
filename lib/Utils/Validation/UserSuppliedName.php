@@ -132,18 +132,25 @@ final class UserSuppliedName
     }
 
     /**
-     * Refuse a character the database connection cannot carry.
+     * Refuse a character the storage cannot carry.
      *
      * Nothing between the request and the row rejects one today, so MySQL decides: the value is cut
      * at the offending character and `Acme 😀 Team` is stored as `Acme`, silently, with no error and
-     * nothing shown to the user. The cause is not the column — the name columns are `utf8mb4` — but
-     * {@see \Model\DataAccess\Database} opening every connection with `SET NAMES utf8`, which is
-     * `utf8mb3` and carries three bytes per character at most. Until that changes, a name outside
-     * the Basic Multilingual Plane cannot be stored, and the honest place to say so is here, where
-     * the answer reaches the user, rather than in a truncation nobody sees.
+     * nothing shown to the user.
+     *
+     * How many bytes a name column holds is not something this code knows, and should not be.
+     * MateCat is open source and every installation owns its schema — `INSTALL/matecat.sql` ships
+     * `utf8mb4`, while an older installation is three-byte — so a rule that read the storage would
+     * be a rule that behaved differently on each. This refuses on the narrower assumption instead:
+     * where the column could hold the character the rule is stricter than it needs to be, which is
+     * the safe direction to be wrong in. See the golden rule in CLAUDE.md.
+     *
+     * Relaxing it where the storage allows is an `ALTER TABLE` per column, the connection charset,
+     * and the index widths that follow from four bytes per character — infrastructure, not a
+     * change here.
      *
      * This refuses CJK Extension B (`𠀀`) along with the emoji, which holds rare but real Chinese
-     * and Japanese name characters. That is the cost of the connection charset, not of this rule.
+     * and Japanese name characters. That is the cost of assuming the narrower storage.
      *
      * @throws InvalidArgumentException
      */

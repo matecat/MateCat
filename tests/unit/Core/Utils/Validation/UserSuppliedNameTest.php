@@ -357,15 +357,15 @@ class UserSuppliedNameTest extends AbstractTest
             UserSuppliedName::validated($padded, 'name', 60, 60)
         );
     }
-    // ─── characters the connection cannot carry ───────────────────────────
+    // ─── characters the storage cannot carry ──────────────────────────────
 
     #[Test]
     public function validated_refuses_a_character_outside_the_basic_multilingual_plane(): void
     {
         // Nothing refused one before, so MySQL decided: the value was cut at the emoji and
-        // "Acme 😀 Team" was stored as "Acme", silently. The cause is the connection charset —
-        // Database opens every connection with `SET NAMES utf8`, three bytes per character — so
-        // until that changes the honest answer is a 400 that says why.
+        // "Acme 😀 Team" was stored as "Acme", silently. How wide the column is depends on the
+        // installation, so the rule assumes the narrower storage rather than reading it, and the
+        // honest answer is a 400 that says why.
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('name cannot contain emoji');
 
@@ -377,7 +377,8 @@ class UserSuppliedNameTest extends AbstractTest
     {
         // CJK Extension B holds rare but real Chinese and Japanese name characters. Refusing is
         // still better than the alternative, which is the name being cut at that character with no
-        // error, but this is the cost of the connection charset and not a judgement about the name.
+        // error, but this is the cost of assuming the narrower storage, not a judgement about the
+        // name.
         $this->expectException(InvalidArgumentException::class);
 
         UserSuppliedName::validated("\u{20000}", 'name', 255);
