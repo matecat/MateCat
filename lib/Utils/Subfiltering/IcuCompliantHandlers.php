@@ -23,7 +23,7 @@ class IcuCompliantHandlers
     /**
      * @param array<int|string, mixed>|null $tagNames Handler tag names as they travel on the wire.
      *
-     * @return array<int, string>|null The reduced list, or null when no handler survives.
+     * @return list<string>|null The reduced list, or null when no handler survives.
      */
     public static function reduceToIcuCompliant(?array $tagNames): ?array
     {
@@ -40,8 +40,12 @@ class IcuCompliantHandlers
         // resolveClassNames() is the same entry point AbstractFilter::getInstance() resolves
         // its own handlers through, down to the fallback to the default set for a list that
         // maps to nothing. Going through it is what keeps the two sides equal.
-        $reduced = InjectableFiltersTags::tagNamesForArrayClasses(
-            HandlersSorter::resolveClassNames(array_values(array_filter($tagNames, 'is_string')), true)
+        // array_values() because the list travels as JSON: the library documents the mapping as an
+        // array of tag names, and only a sequential one encodes as a JSON array.
+        $reduced = array_values(
+            InjectableFiltersTags::tagNamesForArrayClasses(
+                HandlersSorter::resolveClassNames(array_values(array_filter($tagNames, 'is_string')), true)
+            )
         );
 
         // An empty array would be read as "load the defaults", which is the opposite of
