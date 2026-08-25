@@ -133,6 +133,16 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
+     * Expose the per-segment fast-analysis subfiltering.
+     *
+     * @throws Exception
+     */
+    public function callSubfilterForAnalysis(string $segment): string
+    {
+        return $this->subfilterForAnalysis($segment);
+    }
+
+    /**
      * Set a specific key in the projectStructure for testing.
      */
     public function setProjectStructureValue(string $key, mixed $value): void
