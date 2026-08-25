@@ -353,7 +353,9 @@ class OauthResponseHandlerControllerTest extends AbstractTest
         $ref = new ReflectionClass(\Controller\Abstracts\KleinController::class);
         $dbProp = $ref->getProperty('database');
         $dbProp->setAccessible(true);
-        [$dbMock, $pdoMock, $stmtMock] = $this->createDatabaseMock();
+        // The sign-in path reaches MembershipDao::createList(), which has its own guard requiring an
+        // open transaction; OAuthSignInModel opens one in production.
+        [$dbMock, $pdoMock, $stmtMock] = $this->createDatabaseMock(inTransaction: true);
 
         $dbMock->method('buildInsertStatement')->willReturnCallback(
             fn(string $table, array $attrs) => [
