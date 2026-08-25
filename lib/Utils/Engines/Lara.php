@@ -14,6 +14,8 @@ use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Model\Engines\Structs\MMTStruct;
 use Model\Jobs\JobDao;
+use Model\Jobs\JobSettingsResolver;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
@@ -308,12 +310,13 @@ class Lara extends AbstractEngine
 
                 $translateOptions->setHeaders($headers->getArrayCopy());
 
-                if (!empty($_config['id_project'])) {
-                    $laraGlossaries = $metadataDao->setCacheTTL(86400)->getValue($_config['id_project'], ProjectsMetadataMarshaller::LARA_GLOSSARIES->value);
+                // Glossaries live on the job so the project owner can change them after creation,
+                // falling back to project metadata for projects created before the move.
+                $laraGlossaries = (new JobSettingsResolver($this->database))
+                    ->resolveFromEngineConfig($_config, JobsMetadataMarshaller::LARA_GLOSSARIES->value);
 
-                    if ($laraGlossaries !== null) {
-                        $translateOptions->setGlossaries($laraGlossaries);
-                    }
+                if ($laraGlossaries !== null) {
+                    $translateOptions->setGlossaries($laraGlossaries);
                 }
 
                 if ($laraStyle !== null) {

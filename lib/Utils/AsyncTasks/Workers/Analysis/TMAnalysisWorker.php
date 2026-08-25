@@ -413,6 +413,10 @@ class TMAnalysisWorker extends AbstractWorker
         $_config['additional_params'] = $params->additional_params ?? null;
         $_config['priority_key'] = $params->tm_prioritization ?? null;
         $_config['job_id'] = $params->id_job ?? null;
+        // The job (chunk) password completes the job_metadata key, so the engines can resolve the
+        // MT settings from the job before falling back to the project.
+        // @see \Model\Jobs\JobSettingsResolver
+        $_config['job_password'] = $params->password ?? null;
         $_config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = isset($params->subfiltering_handlers)
             ? $params->subfiltering_handlers->toArray()
             : null;

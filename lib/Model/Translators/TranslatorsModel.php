@@ -20,6 +20,7 @@ use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
 use Model\Jobs\JobCredentialCacheInvalidator;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Outsource\ConfirmationDao;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
@@ -338,7 +339,8 @@ class TranslatorsModel
         (new JobCredentialCacheInvalidator(
             $jobDao,
             new ChunkReviewDao($this->database),
-            new ProjectDao($this->database)
+            new ProjectDao($this->database),
+            new JobsMetadataDao($this->database)
         ))->sweepAfterJobPasswordRotation($this->jStruct, $oldPassword, $newPassword);
     }
 

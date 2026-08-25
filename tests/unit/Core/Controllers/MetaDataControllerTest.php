@@ -137,6 +137,10 @@ class MetaDataControllerTest extends AbstractTest
 
         // job_metadata keyed by (id_job, password)
         $conn->exec("INSERT IGNORE INTO job_metadata (id_job, password, `key`, value) VALUES ($jobId, '" . self::JOB_PASSWORD . "', 'tag_projection', 'enabled')");
+        // An MT setting that IS an engine configuration parameter (-> job.mt_extra) and one that is
+        // not, so it stays flat on job the way the project scope reports it (-> job.<key>).
+        $conn->exec("INSERT IGNORE INTO job_metadata (id_job, password, `key`, value) VALUES ($jobId, '" . self::JOB_PASSWORD . "', 'deepl_formality', 'prefer_more')");
+        $conn->exec("INSERT IGNORE INTO job_metadata (id_job, password, `key`, value) VALUES ($jobId, '" . self::JOB_PASSWORD . "', 'mt_quality_value_in_editor', '90')");
 
         // file_metadata keyed by (id_project, id_file)
         $conn->exec("INSERT IGNORE INTO file_metadata (id_project, id_file, `key`, value) VALUES ($projectId, $fileId, 'original_filename', 'real_name.docx')");
@@ -310,6 +314,91 @@ class MetaDataControllerTest extends AbstractTest
         $this->assertSame('enabled', $result->tag_projection);
         $this->assertObjectHasProperty('subfiltering_handlers', $result);
         $this->assertSame([], $result->subfiltering_handlers);
+    }
+
+    /**
+     * The two scopes report the MT settings the same way, so a client resolves one key in one place
+     * whichever scope answered: engine parameters under `mt_extra`, everything else flat.
+     *
+     * A project created before those settings moved to the job answers from `project` alone and
+     * cannot be migrated — production holds billions of project_metadata rows — so a client has to
+     * read `job` first and fall back to `project`.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function getJobMetaData_routes_engine_keys_to_mt_extra_and_keeps_other_keys_top_level(): void
+    {
+        $job = $this->loadSeededJob();
+
+        /** @var stdClass $result */
+        $result = $this->invokePrivate('getJobMetaData', [$job]);
+
+        $this->assertObjectHasProperty('mt_extra', $result);
+        $this->assertSame('prefer_more', $result->mt_extra->deepl_formality);
+        $this->assertObjectNotHasProperty('deepl_formality', $result);
+
+        // The MT application threshold is not an engine configuration parameter, so no engine
+        // declares it and it is reported flat — exactly where the project scope reports it.
+        $this->assertSame(90, $result->mt_quality_value_in_editor);
+        $this->assertObjectNotHasProperty('mt_quality_value_in_editor', $result->mt_extra);
+
+        // Job-only keys are untouched by the split.
+        $this->assertSame('enabled', $result->tag_projection);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function getJobMetaData_reports_mt_extra_even_when_the_job_has_no_engine_setting(): void
+    {
+        $conn  = $this->seedConnection();
+        $jobId = $this->jobId(self::BASE);
+        $conn->exec("DELETE FROM job_metadata WHERE id_job = $jobId AND `key` = 'deepl_formality'");
+        (new JobMetadataDao(obtainTestDatabase()))->destroyCacheByJobAndPassword($jobId, self::JOB_PASSWORD);
+
+        $job = $this->loadSeededJob();
+
+        /** @var stdClass $result */
+        $result = $this->invokePrivate('getJobMetaData', [$job]);
+
+        // Present but empty rather than absent: a client reading job.mt_extra.<key> must not have to
+        // guard against the container itself being missing.
+        $this->assertObjectHasProperty('mt_extra', $result);
+        $this->assertSame([], (array)$result->mt_extra);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function index_reports_the_mt_settings_of_both_scopes_side_by_side(): void
+    {
+        $this->setRequestParams([
+            'id_job'   => (string) $this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ]);
+
+        $captured = null;
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (stdClass $data) use (&$captured): bool {
+                $captured = $data;
+                return true;
+            }));
+
+        $this->controller->index();
+
+        $this->assertInstanceOf(stdClass::class, $captured);
+
+        // The job answers for the setting it owns...
+        $this->assertSame('prefer_more', $captured->job->mt_extra->deepl_formality);
+        $this->assertSame(90, $captured->job->mt_quality_value_in_editor);
+
+        // ...and the project keeps answering for the one only it has, the way it did before the move.
+        $this->assertSame('[101]', $captured->project->mt_extra->mmt_glossaries);
+        $this->assertObjectNotHasProperty('mmt_glossaries', $captured->job->mt_extra);
     }
 
     // ─── getJobFilesMetaData() ───

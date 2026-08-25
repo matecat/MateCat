@@ -237,6 +237,37 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * Move every row of a chunk onto its new password.
+     *
+     * The password is half of the natural key, so rotating jobs.password without this leaves the
+     * rows stranded under a credential nothing resolves any more: the chunk silently loses its
+     * settings. Sibling tables that mirror the job password do the same thing
+     * (@see \Model\LQA\ChunkReviewDao::updateReviewPassword(),
+     * \Model\ReviseFeedback\FeedbackDAO, \Model\ChunksCompletion\ChunkCompletionEventDao).
+     *
+     * Caches are deliberately not evicted here: the rotation runs inside a transaction and, while it
+     * is open, another connection still reads the pre-rotation row and would cache the replaced
+     * credential as valid again behind the eviction. Evicting is the caller's, once it has committed
+     * (@see \Model\Jobs\JobCredentialCacheInvalidator::sweepAfterJobPasswordRotation()).
+     *
+     * @throws PDOException
+     */
+    public function updateJobPassword(int $id_job, string $old_password, string $new_password): void
+    {
+        $sql = "UPDATE job_metadata " .
+            " SET password = :new_password " .
+            " WHERE id_job = :id_job AND password = :old_password ";
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'id_job' => $id_job,
+            'old_password' => $old_password,
+            'new_password' => $new_password,
+        ]);
+    }
+
+    /**
      * @param int $id_job
      * @param string $password
      *

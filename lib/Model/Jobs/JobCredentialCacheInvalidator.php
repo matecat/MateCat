@@ -32,6 +32,7 @@ readonly class JobCredentialCacheInvalidator
         private JobDao $jobDao,
         private ChunkReviewDao $chunkReviewDao,
         private ProjectDao $projectDao,
+        private ?MetadataDao $jobMetadataDao = null,
     ) {
     }
 
@@ -53,6 +54,11 @@ readonly class JobCredentialCacheInvalidator
         foreach ($this->credentials($oldPassword, $newPassword) as $password) {
             $this->jobDao->destroyCacheForIdAndPassword($idJob, $password);
             $this->chunkReviewDao->destroyCacheForJobPassword($idJob, $password);
+
+            // JobDao::changePassword() moved the job_metadata rows onto the new password, so both
+            // credentials hold a stale answer: the old one the settings that no longer live there,
+            // the new one an emptiness cached by any lookup made before the rotation.
+            $this->jobMetadataDao?->destroyCacheByJobAndPassword($idJob, $password);
         }
 
         // The rotation renamed the password column of every phase row, so the reads keyed on a review

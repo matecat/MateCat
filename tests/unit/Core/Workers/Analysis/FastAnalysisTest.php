@@ -6,6 +6,9 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobsMetadataMarshaller;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
+use Model\Jobs\MetadataStruct;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
@@ -23,6 +26,7 @@ use Stomp\Exception\ConnectionException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\FastAnalysis;
 use Utils\Constants\ProjectStatus;
+use Utils\Registry\AppConfig;
 use Utils\Engines\Results\MyMemory\AnalyzeResponse;
 use Utils\Logger\MatecatLogger;
 
@@ -1306,6 +1310,174 @@ class FastAnalysisTest extends AbstractTest
     {
         $handler = (new ReflectionClass(FastAnalysis::class))->getProperty('queueHandler')->getValue($probe);
         $handler->getRedisClient()->sismemberReturns = $script;
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // resolveJobAnalysisMetadata(): the per-job settings the publish loop puts on each element
+    //
+    // The MT application threshold became editable after project creation, so the analysis can no
+    // longer read it once for the whole project. These tests pin the precedence, which is the part
+    // that decides what the TM workers are actually told.
+    //
+    // The DAO and the resolver are both constructed inline from db(), so there is nothing to inject:
+    // these drive the real test connection with real job_metadata rows, the same way the engine
+    // suites do for the same reason (@see MMTEngineMethodsTest, LaraEngineTest).
+    // ---------------------------------------------------------------------------------------
+
+    private const int JOB_METADATA_TEST_JOB_ID = 990111;
+
+    /**
+     * @param array<string, string> $rows
+     */
+    private function seedJobMetadata(string $password, array $rows): void
+    {
+        (new JobsMetadataDao(obtainTestDatabase()))->bulkSet(self::JOB_METADATA_TEST_JOB_ID, $password, $rows);
+    }
+
+    private function cleanJobMetadata(string $password): void
+    {
+        $dao = new JobsMetadataDao(obtainTestDatabase());
+        foreach ($dao->getByJobIdAndPassword(self::JOB_METADATA_TEST_JOB_ID, $password) as $row) {
+            $dao->delete(self::JOB_METADATA_TEST_JOB_ID, $password, $row->key);
+        }
+    }
+
+    /**
+     * @param array<string, string> $rows
+     * @return array<string, mixed>
+     */
+    private function resolveWithSeededRows(array $rows, ?int $projectMtQualityValue): array
+    {
+        // The DAOs are asked for a 10-minute TTL; without this they would open a Redis connection,
+        // and setCacheTTL() is a no-op under the flag so both reads stay pure PDO.
+        $previousSkipCache = AppConfig::$SKIP_SQL_CACHE;
+        AppConfig::$SKIP_SQL_CACHE = true;
+
+        $password = 'fapw_' . bin2hex(random_bytes(4));
+
+        try {
+            $this->seedJobMetadata($password, $rows);
+
+            /** @var array<string, mixed> $resolved */
+            $resolved = $this->invoke(
+                $this->daemonWithDb(obtainTestDatabase()),
+                'resolveJobAnalysisMetadata',
+                self::JOB_METADATA_TEST_JOB_ID,
+                $password,
+                $projectMtQualityValue
+            );
+
+            return $resolved;
+        } finally {
+            $this->cleanJobMetadata($password);
+            AppConfig::$SKIP_SQL_CACHE = $previousSkipCache;
+        }
+    }
+
+    #[Test]
+    public function jobThresholdWinsOverTheProjectOne(): void
+    {
+        $resolved = $this->resolveWithSeededRows(
+            [JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '95'],
+            85
+        );
+
+        self::assertSame(95, $resolved['mt_quality_value_in_editor']);
+    }
+
+    #[Test]
+    public function aStoredZeroThresholdWinsInsteadOfFallingThrough(): void
+    {
+        // The one case `?:` would get wrong: 0 is falsy but it is a real value the owner chose, and
+        // silently analysing at the project value instead would misprice the job.
+        $resolved = $this->resolveWithSeededRows(
+            [JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '0'],
+            85
+        );
+
+        self::assertSame(0, $resolved['mt_quality_value_in_editor']);
+    }
+
+    #[Test]
+    public function withoutAJobRowTheProjectThresholdIsUsed(): void
+    {
+        // Every project created before the settings moved to the job takes this path.
+        $resolved = $this->resolveWithSeededRows(
+            [JobsMetadataMarshaller::TM_PRIORITIZATION->value => '1'],
+            85
+        );
+
+        self::assertSame(85, $resolved['mt_quality_value_in_editor']);
+    }
+
+    #[Test]
+    public function withNeitherScopeSetTheQueueElementCarriesFalse(): void
+    {
+        $resolved = $this->resolveWithSeededRows(
+            [JobsMetadataMarshaller::TM_PRIORITIZATION->value => '1'],
+            null
+        );
+
+        self::assertFalse($resolved['mt_quality_value_in_editor']);
+    }
+
+    #[Test]
+    public function theProjectFallbackOfTheResolverIsNotConsulted(): void
+    {
+        // The resolver is called with a null project id on purpose: main() already read the project
+        // value from the master node inside a transaction, and a cached read must not replace it. So
+        // a project-metadata row for the same key has to be ignored in favour of the argument.
+        $projectId = 990112;
+        $projectMetadataDao = new ProjectMetadataDao(obtainTestDatabase());
+        $projectMetadataDao->set($projectId, JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value, '70');
+
+        try {
+            $resolved = $this->resolveWithSeededRows([JobsMetadataMarshaller::TM_PRIORITIZATION->value => '1'], 85);
+
+            self::assertSame(85, $resolved['mt_quality_value_in_editor']);
+        } finally {
+            $projectMetadataDao->delete($projectId, JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value);
+        }
+    }
+
+    #[Test]
+    public function theOtherThreeKeysComeBackAsRawRowsTheLoopReadsValueFrom(): void
+    {
+        // The publish loop does `$public_tm_penalty->value`, so these must stay MetadataStructs
+        // rather than being reduced like the threshold is.
+        $resolved = $this->resolveWithSeededRows([
+            JobsMetadataMarshaller::TM_PRIORITIZATION->value => '1',
+            JobsMetadataMarshaller::DIALECT_STRICT->value => '1',
+            JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value => '7',
+        ], 85);
+
+        self::assertInstanceOf(MetadataStruct::class, $resolved['tm_prioritization']);
+        self::assertInstanceOf(MetadataStruct::class, $resolved['dialect_strict']);
+        self::assertInstanceOf(MetadataStruct::class, $resolved['public_tm_penalty']);
+        self::assertSame('7', $resolved['public_tm_penalty']->value);
+    }
+
+    #[Test]
+    public function absentKeysComeBackAsNullSoTheLoopSkipsThem(): void
+    {
+        $resolved = $this->resolveWithSeededRows([], 85);
+
+        self::assertNull($resolved['tm_prioritization']);
+        self::assertNull($resolved['dialect_strict']);
+        self::assertNull($resolved['public_tm_penalty']);
+    }
+
+    #[Test]
+    public function everyKeyThePublishLoopReadsIsPresentInTheResult(): void
+    {
+        // The loop indexes the returned array directly, so a missing key would be an undefined-index
+        // notice per segment rather than a visible failure.
+        $resolved = $this->resolveWithSeededRows([], null);
+
+        self::assertSame(
+            ['tm_prioritization', 'dialect_strict', 'public_tm_penalty', 'mt_quality_value_in_editor'],
+            array_keys($resolved)
+        );
     }
 }
 

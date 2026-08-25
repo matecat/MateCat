@@ -4,7 +4,8 @@ namespace Utils\Engines;
 
 use Exception;
 use Model\DataAccess\IDatabase;
-use Model\Projects\MetadataDao;
+use Model\Jobs\JobSettingsResolver;
+use Model\Jobs\JobsMetadataMarshaller;
 use ReflectionException;
 use TypeError;
 use Utils\Constants\EngineConstants;
@@ -169,20 +170,25 @@ class Intento extends AbstractEngine
         $parameters['context']['to'] = $_config['target'];
         $parameters['context']['text'] = $_config['segment'];
 
-        if (isset($_config['pid'])) {
-            $metadataDao = new MetadataDao($this->database);
+        // Custom provider / custom routing live on the job so the project owner can change them
+        // after creation, and fall back to project metadata for projects created before the move.
+        $settings = (new JobSettingsResolver($this->database))->resolveManyFromEngineConfig(
+            $_config,
+            [
+                JobsMetadataMarshaller::INTENTO_PROVIDER->value,
+                JobsMetadataMarshaller::INTENTO_ROUTING->value,
+            ]
+        );
 
-            // custom provider or custom routing
-            $customProvider = $metadataDao->setCacheTTL(86400)->getValue($_config['pid'], 'intento_provider');
-            $customRouting = $metadataDao->setCacheTTL(86400)->getValue($_config['pid'], 'intento_routing');
+        $customProvider = $settings[JobsMetadataMarshaller::INTENTO_PROVIDER->value] ?? null;
+        $customRouting = $settings[JobsMetadataMarshaller::INTENTO_ROUTING->value] ?? null;
 
-            if ($customProvider !== null) {
-                $parameters['service']['async'] = true;
-                $parameters['service']['provider'] = $customProvider;
-            } elseif ($customRouting !== null and $customRouting !== "smart_routing") {
-                $parameters['service']['async'] = true;
-                $parameters['service']['routing'] = "best_quality";
-            }
+        if ($customProvider !== null) {
+            $parameters['service']['async'] = true;
+            $parameters['service']['provider'] = $customProvider;
+        } elseif ($customRouting !== null and $customRouting !== "smart_routing") {
+            $parameters['service']['async'] = true;
+            $parameters['service']['routing'] = "best_quality";
         }
 
         $this->_setIntentoUserAgent(); //Set Intento User Agent

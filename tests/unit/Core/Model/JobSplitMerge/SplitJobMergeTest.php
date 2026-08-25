@@ -692,11 +692,10 @@ class SplitJobMergeTest extends AbstractTest
         $chunks = $this->makeTwoChunks();
         $ps = $this->makeSplitProjectStructure($chunks);
 
-        $metadataKeys = [
-            JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value,
-            JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value,
-            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
-        ];
+        // Derived rather than hardcoded: the service copies whatever propagatedOnSplit() lists, and
+        // a key added there has to reach every chunk without this test needing an edit.
+        $metadataKeys = JobsMetadataMarshaller::propagatedOnSplit();
+        $keyCount = count($metadataKeys);
 
         // Stub get() to return a MetadataStruct for every key on the original job
         $this->jobsMetadataDaoMock->method('get')
@@ -730,8 +729,8 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
-        // 2 chunks × 3 keys = 6 set() calls
-        $this->assertCount(6, $setCalls, 'Expected 6 set() calls (2 chunks × 3 keys)');
+        // 2 chunks × every propagated key
+        $this->assertCount(2 * $keyCount, $setCalls, "Expected " . (2 * $keyCount) . " set() calls (2 chunks x $keyCount keys)");
 
         // Verify that set() was called with the correct job id, password, key, and value for each chunk
         // Chunk 1 retains original password 'origpass'; Chunk 2 gets 'pass_chunk2'
@@ -739,7 +738,7 @@ class SplitJobMergeTest extends AbstractTest
 
         foreach ($expectedPasswords as $chunkIdx => $expectedPassword) {
             foreach ($metadataKeys as $keyIdx => $key) {
-                $callIndex = ($chunkIdx * 3) + $keyIdx;
+                $callIndex = ($chunkIdx * $keyCount) + $keyIdx;
                 $this->assertEquals(100, $setCalls[$callIndex][0], "set() call $callIndex: wrong job id");
                 $this->assertEquals($expectedPassword, $setCalls[$callIndex][1], "set() call $callIndex: wrong password");
                 $this->assertEquals($key, $setCalls[$callIndex][2], "set() call $callIndex: wrong key");
@@ -747,9 +746,9 @@ class SplitJobMergeTest extends AbstractTest
             }
         }
 
-        // destroyCache is called on the ORIGINAL job for each key, once per chunk iteration
-        // 2 chunks × 3 keys = 6 destroyCache() calls, all targeting origpass
-        $this->assertCount(6, $destroyCacheCalls, 'Expected 6 destroyCacheByJobAndPasswordAndKey() calls');
+        // destroyCache is called on the ORIGINAL job for each key, once per chunk iteration:
+        // 2 chunks × every propagated key, all targeting origpass
+        $this->assertCount(2 * $keyCount, $destroyCacheCalls, 'Expected one destroyCacheByJobAndPasswordAndKey() call per chunk and key');
         foreach ($destroyCacheCalls as $i => $call) {
             $this->assertEquals(100, $call[0], "destroyCache call $i: wrong job id");
             $this->assertEquals('origpass', $call[1], "destroyCache call $i: wrong password");
@@ -796,11 +795,9 @@ class SplitJobMergeTest extends AbstractTest
         $chunks = $this->makeJobChunksForMerge();
         $ps = new SplitMergeProjectData(999);
 
-        $metadataKeys = [
-            JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value,
-            JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value,
-            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
-        ];
+        // The merge drops exactly what the split copied, so both sides read the same list.
+        $metadataKeys = JobsMetadataMarshaller::propagatedOnSplit();
+        $keyCount = count($metadataKeys);
 
         // Track delete() calls: [jobId, password, key]
         $deleteCalls = [];
@@ -820,16 +817,16 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
-        // Only chunk2 (pass2) metadata should be deleted — 3 keys
-        $this->assertCount(3, $deleteCalls, 'Expected 3 delete() calls (1 non-first chunk × 3 keys)');
+        // Only chunk2 (pass2) metadata should be deleted, one call per propagated key
+        $this->assertCount($keyCount, $deleteCalls, "Expected $keyCount delete() calls (1 non-first chunk x $keyCount keys)");
         foreach ($deleteCalls as $i => $call) {
             $this->assertEquals(100, $call[0], "delete() call $i: wrong job id");
             $this->assertEquals('pass2', $call[1], "delete() call $i: wrong password — should be chunk2's password");
             $this->assertEquals($metadataKeys[$i], $call[2], "delete() call $i: wrong key");
         }
 
-        // destroyCache should also be called 3 times for chunk2
-        $this->assertCount(3, $destroyCacheCalls, 'Expected 3 destroyCacheByJobAndPasswordAndKey() calls');
+        // destroyCache should also be called once per key for chunk2
+        $this->assertCount($keyCount, $destroyCacheCalls, 'Expected one destroyCacheByJobAndPasswordAndKey() call per key');
         foreach ($destroyCacheCalls as $i => $call) {
             $this->assertEquals(100, $call[0], "destroyCache call $i: wrong job id");
             $this->assertEquals('pass2', $call[1], "destroyCache call $i: wrong password");
@@ -905,17 +902,16 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
-        // 2 non-first chunks × 3 keys = 6 delete() calls
-        $this->assertCount(6, $deleteCalls, 'Expected 6 delete() calls (2 non-first chunks × 3 keys)');
+        // 2 non-first chunks × every propagated key
+        $keyCount = count(JobsMetadataMarshaller::propagatedOnSplit());
+        $this->assertCount(2 * $keyCount, $deleteCalls, 'Expected one delete() call per non-first chunk and key');
 
-        // First 3 calls should target chunk2 (pass2)
-        $this->assertEquals('pass2', $deleteCalls[0][1]);
-        $this->assertEquals('pass2', $deleteCalls[1][1]);
-        $this->assertEquals('pass2', $deleteCalls[2][1]);
-
-        // Next 3 calls should target chunk3 (pass3)
-        $this->assertEquals('pass3', $deleteCalls[3][1]);
-        $this->assertEquals('pass3', $deleteCalls[4][1]);
-        $this->assertEquals('pass3', $deleteCalls[5][1]);
+        // The first block of calls targets chunk2 (pass2), the second chunk3 (pass3). The first
+        // chunk keeps its rows: it is the job the merge leaves behind.
+        $passwords = array_column($deleteCalls, 1);
+        $this->assertSame(
+            array_merge(array_fill(0, $keyCount, 'pass2'), array_fill(0, $keyCount, 'pass3')),
+            $passwords
+        );
     }
 }

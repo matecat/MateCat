@@ -54,6 +54,21 @@ class MetaDataController extends KleinController
         $this->chunk = $job;
         $this->return404IfTheJobWasDeleted();
 
+        /**
+         * The MT settings (DeepL formality, Lara style, the glossaries, the MT application
+         * threshold) are reported on both scopes, and a client has to read `job` first and only then
+         * `project`:
+         *
+         * - a project created before those settings moved to the job answers from `project` alone,
+         *   and cannot be migrated — production holds billions of project_metadata rows;
+         * - a project created after the move answers from `job` alone, per target language, and is
+         *   the only scope the owner's later edits are written to.
+         *
+         * The engine parameters sit under `mt_extra` on both scopes; everything else, the
+         * threshold included, is reported flat.
+         *
+         * @see \Model\Jobs\JobSettingsResolver the same precedence, applied server side
+         */
         $metadata = new stdClass();
         $metadata->project = $this->getProjectInfo($job->getProject(new ProjectDao($this->getDatabase())));
         $metadata->job = $this->getJobMetaData($job);
@@ -74,18 +89,12 @@ class MetaDataController extends KleinController
         $metadata = new stdClass();
         $metadata->mt_extra = new stdClass();
 
-        $myExtraKeys = [];
-
-        foreach (EngineConstants::getAvailableEnginesList() as $engineName) {
-            $myExtraKeys = array_merge($myExtraKeys, $engineName::getConfigurationParameters());
-        }
-
-        $myExtraKeys = array_unique($myExtraKeys);
+        $myExtraKeys = self::engineConfigurationKeys();
 
         foreach ((new ProjectMetadataDao($this->getDatabase()))->setCacheTTL(3600)->allByProjectId((int) $project->id) as $metadatum) {
             $key = $metadatum->key;
 
-            if (in_array($key, $myExtraKeys)) {
+            if (in_array($key, $myExtraKeys, true)) {
                 $metadata->mt_extra->$key = $metadatum->value;
             } else {
                 $metadata->$key = $metadatum->value;
@@ -93,6 +102,25 @@ class MetaDataController extends KleinController
         }
 
         return $metadata;
+    }
+
+    /**
+     * The union of the configuration parameters of every registered MT/TM engine.
+     *
+     * Both scopes report these under `mt_extra` instead of flat, so the same key is found in the
+     * same place whichever scope answered.
+     *
+     * @return list<string>
+     */
+    private static function engineConfigurationKeys(): array
+    {
+        $keys = [];
+
+        foreach (EngineConstants::getAvailableEnginesList() as $engineName) {
+            $keys = array_merge($keys, $engineName::getConfigurationParameters());
+        }
+
+        return array_values(array_unique($keys));
     }
 
     /**
@@ -106,14 +134,23 @@ class MetaDataController extends KleinController
     private function getJobMetaData(JobStruct $job): object
     {
         $metadata = new stdClass();
+        $metadata->mt_extra = new stdClass();
         $jobMetaDataDao = new MetadataDao($this->getDatabase());
+
+        $myExtraKeys = self::engineConfigurationKeys();
 
         foreach ($jobMetaDataDao->getByJobIdAndPassword(
             $job->id ?? throw new DomainException('Job ID must not be null'),
             $job->password ?? throw new DomainException('Job password must not be null'),
             60 * 5
         ) as $metadatum) {
-            $metadata->{$metadatum->key} = $metadatum->value;
+            $key = $metadatum->key;
+
+            if (in_array($key, $myExtraKeys, true)) {
+                $metadata->mt_extra->$key = $metadatum->value;
+            } else {
+                $metadata->$key = $metadatum->value;
+            }
         }
 
         if (!property_exists($metadata, JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value)) {

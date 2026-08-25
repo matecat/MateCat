@@ -72,6 +72,168 @@
             ]
           }
         }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "const": "mt_quality_value_in_editor"
+          },
+          "value": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "const": "deepl_formality"
+          },
+          "value": {
+            "enum": [
+              "default",
+              "prefer_less",
+              "prefer_more"
+            ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "const": "deepl_engine_type"
+          },
+          "value": {
+            "enum": [
+              "prefer_quality_optimized",
+              "latency_optimized"
+            ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "const": "deepl_id_glossary"
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "const": "lara_style"
+          },
+          "value": {
+            "enum": [
+              "faithful",
+              "fluid",
+              "creative"
+            ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "const": "lara_style_guideline_id"
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "const": "lara_glossaries"
+          },
+          "value": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "const": "mmt_glossaries"
+          },
+          "value": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "const": "mmt_ignore_glossary_case"
+          },
+          "value": {
+            "type": [
+              "boolean"
+            ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "const": "intento_provider"
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "const": "intento_routing"
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          }
+        }
       }
     ]
   }

@@ -81,13 +81,36 @@ readonly class ProjectMetadataService
             $extraKeys = array_merge($extraKeys, $engineName::getConfigurationParameters());
         }
 
-        // Copy any engine-specific config values (e.g., deepl_formality, mmt_glossaries)
-        // from the project structure into the options array
+        /**
+         * Copy the engine-specific config values that stay project-wide (e.g. enable_mt_analysis,
+         * mmt_activate_context_analyzer) from the project structure into the options array.
+         *
+         * The MT tuning settings — DeepL formality, Lara style, the glossaries, the MT
+         * application threshold — are deliberately skipped: they are written per job by
+         * {@see JobCreationService::saveJobsMetadata()} so the project owner can change them
+         * after creation. Writing them here as well would be dead weight that goes stale the
+         * moment one of them is edited on a job, and reads would have no way to tell which of
+         * the two copies is the current one.
+         *
+         * Reads keep answering from project metadata for projects created before this move.
+         * @see \Model\Jobs\JobSettingsResolver
+         */
+        $jobScopedKeys = array_flip(JobsMetadataMarshaller::mtSettings());
+
         foreach ($extraKeys as $extraKey) {
+            if (isset($jobScopedKeys[$extraKey])) {
+                continue;
+            }
             $engineValue = $projectStructure->$extraKey;
             if (!empty($engineValue)) {
                 $options[$extraKey] = $engineValue;
             }
+        }
+
+        // mt_quality_value_in_editor reaches us inside $projectStructure->metadata rather than as
+        // an engine parameter, so the loop above cannot filter it out.
+        foreach ($jobScopedKeys as $jobScopedKey => $_) {
+            unset($options[$jobScopedKey]);
         }
 
         /** Duplicate the JobsMetadataMarshaller::SUBFILTERING_HANDLERS in project metadata for easier retrieval.

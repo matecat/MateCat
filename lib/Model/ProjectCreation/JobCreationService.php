@@ -226,7 +226,53 @@ class JobCreationService
             }
         }
 
+        $metadata = array_merge($metadata, self::buildMtSettingsMetadata($projectStructure));
+
         $this->getJobsMetadataDao()->bulkSet((int)$job->id, (string)$job->password, $metadata);
+    }
+
+    /**
+     * The MT tuning settings — DeepL formality, Lara style, the glossaries, the MT application
+     * threshold — are stored per job rather than per project so the project owner can change them
+     * after the project has been created.
+     *
+     * They are written here only, never to project metadata: a second copy would go stale the
+     * moment one of them is edited on a job. Projects created before this move have no job rows at
+     * all, which is why every read goes through {@see \Model\Jobs\JobSettingsResolver} and falls
+     * back to project metadata.
+     *
+     * @return array<string, string>
+     */
+    private static function buildMtSettingsMetadata(ProjectStructure $projectStructure): array
+    {
+        $metadata = [];
+
+        $thresholdKey = JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value;
+
+        // The MT application threshold travels inside the metadata blob, not as an engine
+        // parameter, so it cannot be read off the structure like the keys below.
+        $threshold = $projectStructure->metadata[$thresholdKey] ?? null;
+        if (is_numeric($threshold)) {
+            $metadata[$thresholdKey] = (string)(int)$threshold;
+        }
+
+        foreach (JobsMetadataMarshaller::mtSettings() as $key) {
+            if ($key === $thresholdKey) {
+                continue;
+            }
+
+            // Both creation controllers copy only the configuration parameters of the engine the
+            // project actually uses, so every other key is still null here and must not be
+            // persisted as an empty row: an empty row would shadow the project-metadata fallback.
+            $value = $projectStructure->$key;
+            if (!is_scalar($value) || $value === '') {
+                continue;
+            }
+
+            $metadata[$key] = is_bool($value) ? (string)(int)$value : (string)$value;
+        }
+
+        return $metadata;
     }
 
     /**

@@ -6,7 +6,9 @@ use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\RealSqlDaoTestTrait;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobDao;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
@@ -36,6 +38,7 @@ class JobDaoRealSqlTest extends AbstractTest
         'files_job',
         'files_parts',
         'job_custom_payable_rates',
+        'job_metadata',
         'jobs',
         'segment_translation_events',
         'segment_translations',
@@ -307,6 +310,95 @@ class JobDaoRealSqlTest extends AbstractTest
         $this->dao->changePassword($job, $newPassword);
 
         self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($job->id, $oldPassword, 86400));
+    }
+
+    /**
+     * Register the (id_job, password, key) rows the metadata DAO INSERTed so the whole-table residue
+     * gate over job_metadata returns to its baseline.
+     *
+     * @param list<string> $keys
+     */
+    private function trackJobMetadata(int $idJob, string $password, array $keys): void
+    {
+        foreach ($keys as $key) {
+            $this->fixtures->trackExisting('job_metadata', [
+                'id_job'   => $idJob,
+                'password' => $password,
+                'key'      => $key,
+            ]);
+        }
+    }
+
+    public function testChangePasswordMovesJobMetadataOntoTheNewPassword(): void
+    {
+        $job = $this->seedJob();
+        $oldPassword = (string)$job->password;
+        $newPassword = 'newpw_' . bin2hex(random_bytes(4));
+
+        $metadataDao = new JobsMetadataDao($this->realSqlDb());
+        $metadataDao->bulkSet((int)$job->id, $oldPassword, [
+            JobsMetadataMarshaller::DEEPL_FORMALITY->value => 'prefer_more',
+            JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '90',
+        ]);
+
+        $this->dao->changePassword($job, $newPassword);
+
+        // Registered under the NEW password: that is where the rotation has just moved them, so that
+        // is where cleanup has to look to bring job_metadata back to its baseline row count.
+        $this->trackJobMetadata((int)$job->id, $newPassword, [
+            JobsMetadataMarshaller::DEEPL_FORMALITY->value,
+            JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value,
+        ]);
+
+        // The password is half the natural key: without the migration the rows are stranded under a
+        // credential nothing resolves any more and the chunk silently loses every stored setting,
+        // falling back to the project value — or to no value at all for a project created after the
+        // MT settings moved to the job.
+        self::assertSame(
+            'prefer_more',
+            $metadataDao->get((int)$job->id, $newPassword, JobsMetadataMarshaller::DEEPL_FORMALITY->value)?->value
+        );
+        self::assertSame(
+            '90',
+            $metadataDao->get((int)$job->id, $newPassword, JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value)?->value
+        );
+
+        self::assertNull(
+            $metadataDao->get((int)$job->id, $oldPassword, JobsMetadataMarshaller::DEEPL_FORMALITY->value),
+            'the rows must move, not be copied: two answers for one setting is worse than none'
+        );
+    }
+
+    public function testChangePasswordLeavesAnotherChunkMetadataAlone(): void
+    {
+        $job = $this->seedJob();
+        $oldPassword = (string)$job->password;
+        $newPassword = 'newpw_' . bin2hex(random_bytes(4));
+        $siblingPassword = 'sibling_' . bin2hex(random_bytes(4));
+
+        $metadataDao = new JobsMetadataDao($this->realSqlDb());
+        $metadataDao->bulkSet((int)$job->id, $oldPassword, [
+            JobsMetadataMarshaller::LARA_STYLE->value => 'creative',
+        ]);
+        // A split leaves several chunks sharing one id_job, told apart only by the password.
+        $metadataDao->bulkSet((int)$job->id, $siblingPassword, [
+            JobsMetadataMarshaller::LARA_STYLE->value => 'faithful',
+        ]);
+
+        $this->dao->changePassword($job, $newPassword);
+
+        $this->trackJobMetadata((int)$job->id, $newPassword, [JobsMetadataMarshaller::LARA_STYLE->value]);
+        $this->trackJobMetadata((int)$job->id, $siblingPassword, [JobsMetadataMarshaller::LARA_STYLE->value]);
+
+        self::assertSame(
+            'faithful',
+            $metadataDao->get((int)$job->id, $siblingPassword, JobsMetadataMarshaller::LARA_STYLE->value)?->value,
+            'rotating one chunk credential must not touch the rows of its siblings'
+        );
+        self::assertSame(
+            'creative',
+            $metadataDao->get((int)$job->id, $newPassword, JobsMetadataMarshaller::LARA_STYLE->value)?->value
+        );
     }
 
     // ---------------------------------------------------------------------------------------
