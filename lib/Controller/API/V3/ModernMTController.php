@@ -212,6 +212,9 @@ class ModernMTController extends KleinController
         if ($name === '') {
             throw new Exception('Invalid `name` param', 400);
         }
+        // Bounded for the same reason it is in createMemory(): the memory lives at ModernMT, so
+        // without a cap the provider decides what an over-long name becomes.
+        UserSuppliedName::assertLength($name, 'name', self::PROVIDER_RESOURCE_NAME_MAX_LENGTH);
 
         $MMTClient = $this->getModernMTClient($this->requireEngineId());
 
@@ -266,6 +269,9 @@ class ModernMTController extends KleinController
         if ($name === '') {
             throw new Exception('Invalid `name` param', 400);
         }
+        // Bounded for the same reason it is in createMemory(): the memory lives at ModernMT, so
+        // without a cap the provider decides what an over-long name becomes.
+        UserSuppliedName::assertLength($name, 'name', self::PROVIDER_RESOURCE_NAME_MAX_LENGTH);
 
         $memoryId = filter_var($this->request->param('memoryId'), FILTER_SANITIZE_NUMBER_INT);
         if (!is_string($memoryId) || $memoryId === '') {
