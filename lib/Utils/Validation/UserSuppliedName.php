@@ -160,7 +160,7 @@ final class UserSuppliedName
         if (preg_match('/[\x{10000}-\x{10FFFF}]/u', $name) !== 0) {
             throw new InvalidArgumentException(
                 self::REFUSAL_PREFIX . $param
-                . ' cannot contain emoji or other characters outside the Basic Multilingual Plane',
+                . ' cannot contain characters outside the Basic Multilingual Plane, such as emoji',
                 400
             );
         }

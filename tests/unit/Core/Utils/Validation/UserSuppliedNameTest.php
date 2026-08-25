@@ -367,7 +367,7 @@ class UserSuppliedNameTest extends AbstractTest
         // installation, so the rule assumes the narrower storage rather than reading it, and the
         // honest answer is a 400 that says why.
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('name cannot contain emoji');
+        $this->expectExceptionMessage('name cannot contain characters outside the Basic Multilingual Plane');
 
         UserSuppliedName::validated('Acme 😀 Team', 'name', 255);
     }
@@ -382,6 +382,20 @@ class UserSuppliedNameTest extends AbstractTest
         $this->expectException(InvalidArgumentException::class);
 
         UserSuppliedName::validated("\u{20000}", 'name', 255);
+    }
+
+    #[Test]
+    public function validated_accepts_an_emoji_that_fits_inside_the_plane(): void
+    {
+        // The rule is about how many bytes the character needs, not about emoji: these sit inside
+        // the Basic Multilingual Plane and fit wherever the astral ones do not. Refusing them would
+        // be a product restriction with nothing behind it, so the message says what the rule checks
+        // rather than promising "no emoji" and then accepting these.
+        // The variation selector on the last two is U+FE0F, a mark rather than a format character,
+        // so normalize() leaves it alone and the name comes back exactly as typed.
+        self::assertSame('Acme ☺ Team', UserSuppliedName::validated('Acme ☺ Team', 'name', 255));
+        self::assertSame('Love ❤️ Co', UserSuppliedName::validated('Love ❤️ Co', 'name', 255));
+        self::assertSame('Team ✈️', UserSuppliedName::validated('Team ✈️', 'name', 255));
     }
 
     #[Test]
