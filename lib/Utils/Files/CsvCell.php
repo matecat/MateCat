@@ -11,11 +11,12 @@ namespace Utils\Files;
  * `=cmd|' /C calc'!A1` in a category label is a command that runs when a colleague opens the report
  * someone sent them. Nothing in the CSV format marks a cell as text, so the writer has to.
  *
- * Every MateCat export that puts a user-typed value in a cell goes through here: the QA report
- * ({@see \View\API\V2\Json\SegmentTranslationIssue}) and the quality-report download
- * ({@see \Controller\API\V3\DownloadQRController}). It holds no state so that both can reach it —
- * it started life as a private method on the first of the two, which is how the second was left
- * without a guard.
+ * The quality-report download ({@see \Controller\API\V3\DownloadQRController}) is the only export
+ * that reaches this today, over every row including the headings, since those are category labels.
+ * It is a class rather than a private method there because being a private method is how the guard
+ * came to be missing: it lived on the QA report view, and the download beside it never got one.
+ * `TMSService::exportJobAsCSV()` and {@see \Utils\Files\CSV::save()} still write user-typed values
+ * through `fputcsv` unguarded, and are the callers this is waiting for.
  */
 final class CsvCell
 {
