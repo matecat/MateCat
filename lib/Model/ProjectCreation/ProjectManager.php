@@ -3,6 +3,7 @@
 namespace Model\ProjectCreation;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use DomainException;
 use Exception;
 use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
@@ -507,7 +508,7 @@ class ProjectManager
      * Validate and insert private TM keys. Aborts if validation errors occur.
      *
      * @throws EndQueueException
-     * @throws \DomainException
+     * @throws DomainException
      * @throws TypeError
      * @throws \Psr\Log\InvalidArgumentException
      */
@@ -898,37 +899,42 @@ class ProjectManager
      * converted with the ICU-compliant handlers only, otherwise the project handlers
      * would wrap ICU arguments in PH tags and the pattern would stop parsing as ICU.
      *
-     * ICU presence is a property of the single segment, not of the project, hence the
-     * per-segment decision.
-     *
      * @throws Exception
      * @throws TypeError
      */
-    protected function subfilterForAnalysis(string $segment): string
+    protected function subfilterForAnalysis(string $segment, bool $isIcuSource): string
     {
-        return $this->analysisFilter($segment)->fromLayer0ToLayer1($segment);
+        return ($isIcuSource ? $this->icuCompliantFilter() : $this->filter)->fromLayer0ToLayer1($segment);
+    }
+
+    /**
+     * Whether the raw source is an ICU message, by the same rule the editor applies:
+     * ICU is enabled on the project and the pattern carries valid complex syntax.
+     *
+     * ICU presence is a property of the single segment, not of the project, hence the
+     * per-segment decision.
+     *
+     * @throws DomainException
+     */
+    protected function sourceIsIcuMessage(string $rawSource): bool
+    {
+        $icuEnabled = (bool)($this->projectStructure->metadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] ?? false);
+        if (!$icuEnabled) {
+            return false;
+        }
+
+        return ICUSourceSegmentDetector::sourceContainsIcu(
+            new MessagePatternValidator((string)$this->projectStructure->source_language, $rawSource),
+            true
+        );
     }
 
     /**
      * @throws Exception
      * @throws TypeError
      */
-    private function analysisFilter(string $rawSource): MateCatFilter
+    private function icuCompliantFilter(): MateCatFilter
     {
-        $icuEnabled = (bool)($this->projectStructure->metadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] ?? false);
-        if (!$icuEnabled) {
-            return $this->filter;
-        }
-
-        $containsIcu = ICUSourceSegmentDetector::sourceContainsIcu(
-            new MessagePatternValidator((string)$this->projectStructure->source_language, $rawSource),
-            true
-        );
-
-        if (!$containsIcu) {
-            return $this->filter;
-        }
-
         if ($this->icuFilter === null) {
             /** @var MateCatFilter $icuFilter */
             $icuFilter = MateCatFilter::getInstance(
@@ -946,6 +952,42 @@ class ProjectManager
     }
 
     /**
+     * Fills in the per-segment fields of one fast-analysis row.
+     *
+     * `icu_source` records the decision taken here so the TM query can ship the same
+     * reduced handler list the text was built with: MyMemory decodes what we send and
+     * re-encodes the matches with the handlers it is given, and it has no ICU flag of
+     * its own, so the full project list would bring the arguments back wrapped in PH
+     * tags.
+     *
+     * @param array<string, mixed> $segmentElement
+     *
+     * @return array<string, mixed>
+     *
+     * @throws DomainException
+     * @throws Exception
+     * @throws TypeError
+     */
+    protected function decorateFastAnalysisSegment(array $segmentElement, string $job_id_passes): array
+    {
+        unset($segmentElement['internal_id']);
+        unset($segmentElement['xliff_mrk_id']);
+        unset($segmentElement['show_in_cattool']);
+
+        $isIcuSource = $this->sourceIsIcuMessage((string)$segmentElement['segment']);
+
+        $segmentElement['jsid'] = $segmentElement['id'] . "-" . $job_id_passes;
+        $segmentElement['source'] = $this->projectStructure->source_language;
+        $segmentElement['target'] = implode(",", $this->projectStructure->array_jobs['job_languages']);
+        $segmentElement['payable_rates'] = $this->projectStructure->array_jobs['payable_rates'];
+        $segmentElement['icu_source'] = $isIcuSource;
+        $segmentElement['segment'] = $this->subfilterForAnalysis((string)$segmentElement['segment'], $isIcuSource);
+
+        return $segmentElement;
+    }
+
+    /**
+     * @throws DomainException
      * @throws Exception
      * @throws TypeError
      */
@@ -965,15 +1007,7 @@ class ProjectManager
         );
 
         foreach ($this->projectStructure->segments_metadata as &$segmentElement) {
-            unset($segmentElement['internal_id']);
-            unset($segmentElement['xliff_mrk_id']);
-            unset($segmentElement['show_in_cattool']);
-
-            $segmentElement['jsid'] = $segmentElement['id'] . "-" . $job_id_passes;
-            $segmentElement['source'] = $this->projectStructure->source_language;
-            $segmentElement['target'] = implode(",", $this->projectStructure->array_jobs['job_languages']);
-            $segmentElement['payable_rates'] = $this->projectStructure->array_jobs['payable_rates'];
-            $segmentElement['segment'] = $this->subfilterForAnalysis($segmentElement['segment']);
+            $segmentElement = $this->decorateFastAnalysisSegment($segmentElement, $job_id_passes);
         }
         unset($segmentElement); // break the reference to the last array element to avoid accidental overwrites
 
