@@ -32,22 +32,16 @@ class IcuCompliantHandlers
             return null;
         }
 
-        $classNames = InjectableFiltersTags::classesForArrayTagNames(
-            array_values(array_filter($tagNames, 'is_string'))
-        );
-
-        if (empty($classNames)) {
-            // Same fallback AbstractFilter::getInstance() applies to a list that maps to
-            // nothing: the default set. Reducing it here is what keeps the two sides equal.
-            $classNames = array_keys(HandlersSorter::getDefaultInjectedHandlers());
-        }
-
         // The literal is HandlersSorter's $icu_enabled, and it is the reduction itself: with
         // false the sorter hands back the same list, so this method would return its own input.
         // Whether a segment needs the reduction is the caller's question, answered against a
         // flag that may be missing, false or true; by the time we are here it is settled.
+        //
+        // resolveClassNames() is the same entry point AbstractFilter::getInstance() resolves
+        // its own handlers through, down to the fallback to the default set for a list that
+        // maps to nothing. Going through it is what keeps the two sides equal.
         $reduced = InjectableFiltersTags::tagNamesForArrayClasses(
-            (new HandlersSorter($classNames, true))->getOrderedHandlersClassNames()
+            HandlersSorter::resolveClassNames(array_values(array_filter($tagNames, 'is_string')), true)
         );
 
         // An empty array would be read as "load the defaults", which is the opposite of
