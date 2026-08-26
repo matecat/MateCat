@@ -242,6 +242,36 @@ test('disables tag projection when the user has guess tag enabled', async () => 
   expect(SegmentActions.changeTagProjectionStatus).toHaveBeenCalledWith(false)
 })
 
+// The natural order is to search first and only then type what to replace the
+// hits with. Typing into "Replace in target" used to run the same reset branch
+// as a query field, which cleared the results and re-armed FIND.
+test('keeps REPLACE enabled when the replacement is typed after the search', async () => {
+  const user = userEvent.setup()
+  searchTermIntoSegments.mockResolvedValue({segments: [], total: 0})
+
+  render(<Search {...baseProps()} />)
+
+  await user.type(screen.getByPlaceholderText('Find in target'), 'old')
+  await user.click(checkboxByLabel('Replace with'))
+  await user.click(screen.getByText('FIND'))
+
+  emitStoreSearchResult({
+    total: 2,
+    searchResults: [{id: 1}, {id: 2}],
+    occurrencesList: [1, 2],
+    searchResultsDictionary: {1: {id: 1}, 2: {id: 2}},
+    featuredSearchResult: 0,
+  })
+
+  const replaceButton = screen.getByText('REPLACE').closest('button')
+  expect(replaceButton).toBeEnabled()
+
+  await user.type(screen.getByPlaceholderText('Replace in target'), 'new')
+
+  expect(replaceButton).toBeEnabled()
+  expect(screen.getByPlaceholderText('Replace in target')).toHaveValue('new')
+})
+
 test('shows the searching state and then the results summary once the store emits results', () => {
   render(<Search {...baseProps()} />)
 
@@ -610,7 +640,12 @@ test('updates search results when the segment store emits an update while active
   expect(screen.getByText(/result/)).toBeInTheDocument()
 })
 
-test('marks the replace button disabled while a tag occurrence is selected', () => {
+// A tag decorator reporting that the current hit sits inside a tag used to
+// disable REPLACE. Nothing ever reported the opposite, so one such event left
+// the button dead — with REPLACE ALL still enabled — until the next search or
+// navigation. REPLACE now tracks what REPLACE ALL tracks: a replacement to
+// apply, and hits to apply it to.
+test('keeps the replace button enabled when a tag occurrence is reported', () => {
   render(<Search {...baseProps()} />)
 
   act(() => {
@@ -621,12 +656,27 @@ test('marks the replace button disabled while a tag occurrence is selected', () 
   })
 
   act(() => {
+    fireEvent.click(screen.getByText('FIND'))
+  })
+
+  emitStoreSearchResult({
+    total: 2,
+    searchResults: [{id: 1}, {id: 2}],
+    occurrencesList: [1, 2],
+    searchResultsDictionary: {1: {id: 1}, 2: {id: 2}},
+    featuredSearchResult: 0,
+  })
+
+  expect(screen.getByText('REPLACE')).toBeEnabled()
+
+  act(() => {
     SegmentStore.emit(SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG, {
       value: true,
     })
   })
 
-  expect(screen.getByText('REPLACE')).toBeDisabled()
+  expect(screen.getByText('REPLACE')).toBeEnabled()
+  expect(screen.getByText('REPLACE ALL')).toBeEnabled()
 })
 
 test('unmounts cleanly and removes all listeners', () => {
@@ -647,10 +697,6 @@ test('unmounts cleanly and removes all listeners', () => {
   )
   expect(addSegSpy).toHaveBeenCalledWith(
     SegmentConstants.UPDATE_SEARCH,
-    expect.any(Function),
-  )
-  expect(addSegSpy).toHaveBeenCalledWith(
-    SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
     expect.any(Function),
   )
 
@@ -674,18 +720,13 @@ test('unmounts cleanly and removes all listeners', () => {
     SegmentConstants.UPDATE_SEARCH,
     expect.any(Function),
   )
-  expect(removeSegSpy).toHaveBeenCalledWith(
-    SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
-    expect.any(Function),
-  )
 })
 
-// Quirk 1: setState's shallow merge in the original class meant the "reset to
-// defaultState" call in handleCancelClick/handleClearClick never touched the
-// top-level `isSelectedTag` field (only a dead, never-read nested copy exists
-// inside defaultState.search). The converted hooks version must preserve this
-// exactly: isSelectedTag must survive a Clear/Cancel reset untouched.
-test('clearing the search does not reset isSelectedTag (preserves the shallow-merge quirk)', () => {
+// A tag occurrence reported during one search used to latch REPLACE off: the
+// flag survived Clear untouched (setState's shallow merge in the original class
+// never reset it), so the button stayed dead for later searches too. REPLACE now
+// depends only on there being a replacement and hits to apply it to.
+test('a tag occurrence seen earlier does not disable replace for a later search', () => {
   jest.useFakeTimers()
 
   render(<Search {...baseProps()} />)
@@ -708,8 +749,6 @@ test('clearing the search does not reset isSelectedTag (preserves the shallow-me
     jest.runAllTimers()
   })
 
-  expect(screen.getByText('REPLACE')).toBeDisabled()
-
   act(() => {
     fireEvent.click(screen.getByText('Clear'))
     jest.runAllTimers()
@@ -717,8 +756,6 @@ test('clearing the search does not reset isSelectedTag (preserves the shallow-me
 
   expect(screen.getByPlaceholderText('Find in target')).toHaveValue('')
 
-  // Re-populate the fields and submit a new search, without ever clearing
-  // isSelectedTag via a new SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG event.
   act(() => {
     fireEvent.change(screen.getByPlaceholderText('Find in target'), {
       target: {value: 'new'},
@@ -730,9 +767,15 @@ test('clearing the search does not reset isSelectedTag (preserves the shallow-me
     fireEvent.click(screen.getByText('FIND'))
   })
 
-  // If isSelectedTag had incorrectly been reset to false by Clear, REPLACE
-  // would now be enabled.
-  expect(screen.getByText('REPLACE')).toBeDisabled()
+  emitStoreSearchResult({
+    total: 1,
+    searchResults: [{id: 1}],
+    occurrencesList: [1],
+    searchResultsDictionary: {1: {id: 1}},
+    featuredSearchResult: 0,
+  })
+
+  expect(screen.getByText('REPLACE')).toBeEnabled()
 
   jest.useRealTimers()
 })

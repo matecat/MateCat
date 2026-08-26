@@ -52,7 +52,6 @@ const Search = (props) => {
   const [occurrencesList, setOccurrencesList] = useState([])
   const [searchResultsDictionary, setSearchResultsDictionary] = useState({})
   const [featuredSearchResult, setFeaturedSearchResult] = useState(null)
-  const [isSelectedTag, setIsSelectedTag] = useState(false)
   const [previousIsTagProjectionEnabled, setPreviousIsTagProjectionEnabled] =
     useState(false)
 
@@ -255,7 +254,14 @@ const Search = (props) => {
     const value = target.type === 'checkbox' ? target.checked : target.value
     const nextSearch = {...search, [name]: value}
 
-    if (name !== 'enableReplace') {
+    // `enableReplace` and `replaceTarget` describe the replacement, not the
+    // query: neither changes which segments match, so editing them must not
+    // throw the current results away. Doing so re-armed FIND, which disabled
+    // REPLACE the moment you typed the replacement for the word you had just
+    // searched.
+    const changesTheQuery = name !== 'enableReplace' && name !== 'replaceTarget'
+
+    if (changesTheQuery) {
       setSearch(nextSearch)
       setFuncFindButton(true)
       setTotal(null)
@@ -298,7 +304,6 @@ const Search = (props) => {
     setSearchResultsDictionary(data.searchResultsDictionary)
     setFeaturedSearchResult(data.featuredSearchResult)
     setSearchReturn(true)
-    setIsSelectedTag(false)
     setTimeout(() => {
       !isUndefined(data.occurrencesList[data.featuredSearchResult]) &&
         SegmentActions.openSegment(
@@ -315,7 +320,6 @@ const Search = (props) => {
         setOccurrencesList(searchObject.occurrencesList)
         setSearchResultsDictionary(searchObject.searchResultsDictionary)
         setFeaturedSearchResult(searchObject.featuredSearchResult)
-        setIsSelectedTag(false)
         setTimeout(() =>
           SegmentActions.addSearchResultToSegments(
             searchObject.occurrencesList,
@@ -326,12 +330,6 @@ const Search = (props) => {
         )
       })
     }
-  }, [])
-
-  const setStateReplaceButton = useCallback(({value}) => {
-    setTimeout(() => {
-      setIsSelectedTag(value)
-    })
   }, [])
 
   const handelKeydownFunction = useCallback((event) => {
@@ -537,10 +535,6 @@ const Search = (props) => {
     CatToolStore.addListener(CattolConstants.STORE_SEARCH_RESULT, setResults)
     CatToolStore.addListener(CattolConstants.CLOSE_SEARCH, handleCancelClick)
     SegmentStore.addListener(SegmentConstants.UPDATE_SEARCH, updateSearch)
-    SegmentStore.addListener(
-      SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
-      setStateReplaceButton,
-    )
 
     return () => {
       document.removeEventListener('keydown', handelKeydownFunction)
@@ -553,17 +547,12 @@ const Search = (props) => {
         handleCancelClick,
       )
       SegmentStore.removeListener(SegmentConstants.UPDATE_SEARCH, updateSearch)
-      SegmentStore.removeListener(
-        SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
-        setStateReplaceButton,
-      )
     }
   }, [
     handelKeydownFunction,
     setResults,
     handleCancelClick,
     updateSearch,
-    setStateReplaceButton,
   ])
 
   let statusOptions = config.searchable_statuses.map((item) => {
@@ -602,11 +591,17 @@ const Search = (props) => {
   let statusDropdownDisabled =
     search.searchTarget !== '' || search.searchSource !== '' ? '' : 'disabled'
   let replaceCheckboxClass = search.searchTarget ? '' : 'disabled'
+  // REPLACE needs what REPLACE ALL needs: a replacement to apply, and hits to
+  // apply it to. It used to additionally require `funcFindButton` to be spent
+  // and `isSelectedTag` to be false. The latter is a latch — the only thing that
+  // ever sets it is a tag decorator deciding the current hit falls inside its
+  // range, and nothing ever sets it back — so one false positive left REPLACE
+  // dead until the next search or navigation, with REPLACE ALL still enabled.
   let replaceDisabled = !(
     search.enableReplace &&
     search.searchTarget &&
-    !funcFindButton &&
-    !isSelectedTag
+    searchReturn &&
+    total > 0
   )
   let replaceAllDisabled = !(search.enableReplace && search.searchTarget)
   let clearVisible =
