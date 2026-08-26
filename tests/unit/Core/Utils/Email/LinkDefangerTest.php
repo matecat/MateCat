@@ -35,9 +35,9 @@ class LinkDefangerTest extends AbstractTest
             'every label, not just one' => ['login.microsoftonline.com', 'login[.]microsoftonline[.]com'],
             'a hostname inside prose'  => ['Verify at evil-login.co now', 'Verify at evil-login[.]co now'],
 
-            // Entity forms. Emails escape with double_encode: false, so entity text reaches the
-            // recipient and their client turns it back into a dot — matching only the literal
-            // character would let these through as live hostnames.
+            // Entity forms. Callers decode once before defanging, and one pass does not flatten
+            // text that was encoded twice, so a residual entity dot still has to be matched here
+            // or the recipient's client turns it back into a live hostname.
             'a decimal entity dot'     => ['evil&#46;com', 'evil[.]com'],
             'a hex entity dot'         => ['evil&#x2E;com', 'evil[.]com'],
             'a named entity dot'       => ['evil&period;com', 'evil[.]com'],

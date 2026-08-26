@@ -134,19 +134,32 @@ final class EmailValue implements Stringable, ArrayAccess, IteratorAggregate
 
         $string = (string)$this->value;
 
-        // Before escaping, so the pattern reads the text a reader will see rather than a stream of
-        // entities. {@see LinkDefanger} for why this happens at all.
+        if (!$this->escapes) {
+            // {@see raw()}: markup that has already been rendered. Neither treatment applies, and
+            // decoding it would rewrite the entities that rendering put there on purpose.
+            return $string;
+        }
+
+        // Both treatments read the text the reader will end up seeing, which is the decoded form:
+        // the recipient's mail client decodes entities whatever this class does, so judging
+        // `evil&#46;com` as if it were literal text is judging something nobody is shown. Decoding
+        // first and escaping the result afterwards is what makes the two agree. The same reasoning
+        // is why callers that judge a value rather than print it decode first: see
+        // TeamsController::assertNameIsPlainText().
+        $string = html_entity_decode($string, self::FLAGS, 'UTF-8');
+
+        // After decoding, so the pattern reads a hostname rather than a stream of entities.
+        // {@see LinkDefanger} for why this happens at all.
         if ($this->defangs) {
             $string = LinkDefanger::defang($string);
         }
 
-        // `double_encode: false` is deliberate and load-bearing. Names written before the column
-        // stored raw text are still entity-encoded in the database, and encoding them again shows
-        // the reader "&amp;lt;" where they wrote "<". The cost is that entity text passes through to
-        // the recipient, whose mail client decodes it — which is why callers that need to judge a
-        // value, rather than print it, decode first: see TeamsController::assertNameIsPlainText().
-        // Retiring this needs the column migrated, which the backlog tracks separately.
-        return $this->escapes ? htmlspecialchars($string, self::FLAGS, 'UTF-8', false) : $string;
+        // `double_encode` keeps its default of true, so an `&` that survived the decode cannot reach
+        // the recipient still looking like the start of an entity. Names stored before the column
+        // held raw text were entity-encoded and needed the flag off to render; that population was
+        // decoded in the database on 2026-08-26, and what is left is a handful of XSS test payloads
+        // which are meant to read as text.
+        return htmlspecialchars($string, self::FLAGS, 'UTF-8');
     }
 
     /**

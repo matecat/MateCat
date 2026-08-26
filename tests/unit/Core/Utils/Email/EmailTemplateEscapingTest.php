@@ -140,15 +140,34 @@ class EmailTemplateEscapingTest extends AbstractTest
     }
 
     /**
-     * The legacy half of the contract, and the reason `double_encode` is false: names stored before
-     * the column held raw text are entity-encoded, and encoding them again is what the reader sees.
+     * Entity text is decoded and then escaped once, so what reaches the reader is the characters
+     * rather than either the entities or a double-encoded "&amp;amp;". The entity spellings differ
+     * between input and output — `&#39;` in, `&apos;` out — because the output is escaped from the
+     * decoded characters and not copied from the input.
      */
     #[Test]
-    public function alreadyEncodedTextIsNotEncodedAgain(): void
+    public function alreadyEncodedTextIsDecodedThenEscapedOnce(): void
     {
         $wrapped = EmailValue::wrapAll(['name' => 'Ben &amp; Jerry&#39;s']);
 
-        $this->assertSame('Ben &amp; Jerry&#39;s', (string)$wrapped['name']);
+        $rendered = (string)$wrapped['name'];
+
+        $this->assertSame('Ben &amp; Jerry&apos;s', $rendered);
+        $this->assertStringNotContainsString('&amp;amp;', $rendered, 'must not double-encode');
+        $this->assertSame('Ben & Jerry\'s', html_entity_decode($rendered, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+    }
+
+    /**
+     * The point of escaping the decoded form. An entity-encoded colon is invisible to the defanger
+     * until the text is decoded, and the recipient's mail client decodes it either way — so before
+     * the decode this arrived as a live `https://evil.com`.
+     */
+    #[Test]
+    public function aSchemeSmuggledAsEntitiesIsStillDefanged(): void
+    {
+        $wrapped = EmailValue::wrapAll(['name' => 'Visit https&#58;//evil&#46;com now']);
+
+        $this->assertSame('Visit https[:]//evil[.]com now', (string)$wrapped['name']);
     }
 
     /**

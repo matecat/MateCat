@@ -85,12 +85,11 @@ class TeamsController extends KleinController
      */
     private function assertNameIsPlainText(string $name): void
     {
-        // Check what the reader will end up seeing, not what was typed. The email templates
-        // escape with double_encode: false so that names stored before names were kept as
-        // typed still render correctly, which means entity text passes through to the
-        // recipient and is turned back into characters by the mail client's HTML parser.
-        // Without decoding first, "evil&#46;com" would satisfy the rules below and still
-        // arrive as a clickable "evil.com".
+        // Check what the reader will end up seeing, not what was typed. A mail client turns
+        // entity text back into characters with its HTML parser, so without decoding first
+        // "evil&#46;com" would satisfy the rules below and still arrive as a clickable
+        // "evil.com". {@see EmailValue} decodes before writing for the same reason; this check
+        // decodes on its own so the rule holds whatever the output path does.
         $decoded = html_entity_decode($name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
         // The cap counts what the reader sees for the same reason: measured on the raw string, a
