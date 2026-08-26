@@ -117,8 +117,8 @@ section {
       }
     }
   }
-  &.opened .target{
-    .buttons {
+  &.opened {
+    .target .buttons {
       display: flex;
       align-items: center;
       margin-right: 0;
@@ -131,6 +131,9 @@ section {
         text-transform: uppercase;
       }
     }
+    // .segment-body-content is an ancestor of .target, not a descendant, so this
+    // rule must stay outside the .target scope — nesting it there stops it
+    // matching and the base `display: none` below keeps the warnings hidden.
     .segment-body-content {
       .warnings-block {
         display: inline-block;
@@ -237,14 +240,14 @@ section .segment-body-content .warnings-block {
     color: colors.$grey700;
     min-height: 41px;
     &.error-alert {
-      background: colors.$grey75;
+      background: colors.$red50;
       .icon-column {
         background-color: colors.$red100;
         color: colors.$red500;
       }
     }
     &.warning-alert {
-      background: colors.$grey75;
+      background: colors.$orange50;
       .icon-column {
         background-color: colors.$orange100;
         color: colors.$orange200;
@@ -272,10 +275,11 @@ section .segment-body-content .warnings-block {
       height: 100%;
     }
     .icon-column {
-      width: 10%;
+      width: 12%;
       position: relative;
       vertical-align: middle;
       text-align: center;
+      padding: 4px;
     }
     .content-column {
       width: 90%;

@@ -201,6 +201,20 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * Whether the project asked for ICU MessageFormat support. A read failure is not swallowed
+     * into a false: reporting "ICU off" for a project that enabled it converts its segments with
+     * the ordinary handlers, which wraps the ICU arguments in PH tags.
+     *
+     * @throws Exception
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function isIcuEnabled(int $id_project): bool
+    {
+        return (bool)$this->setCacheTTL(3600)->getValue($id_project, ProjectsMetadataMarshaller::ICU_ENABLED->value);
+    }
+
+    /**
      * @param int $id_project
      *
      * @return array<string, mixed>
