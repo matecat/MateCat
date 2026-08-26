@@ -92,6 +92,15 @@ const Editarea = forwardRef((props, ref) => {
   const compositionEventChecksRef = useRef(undefined)
   const editorRef = useRef(null)
   const editAreaDomRef = useRef(null)
+  // The class held this node in `this.editAreaRef`, and consumers of the
+  // imperative handle still read it under that name — the AI alternatives
+  // button asks whether focus sits inside the editor. Mirror it onto the
+  // instance on commit, exactly as the class's callback ref did, or that read
+  // is `undefined.contains(...)` and takes the page down.
+  const setEditAreaDomRef = useRef((node) => {
+    editAreaDomRef.current = node
+    instanceRef.current.editAreaRef = node
+  })
   // this.prevIcuTokens (plain mutable instance field, internal only)
   const prevIcuTokensRef = useRef(undefined)
 
@@ -2007,7 +2016,7 @@ const Editarea = forwardRef((props, ref) => {
   return (
     <div
       className={classes.join(' ')}
-      ref={editAreaDomRef}
+      ref={setEditAreaDomRef.current}
       id={'segment-' + props.segment.sid + '-editarea'}
       data-sid={props.segment.sid}
       tabIndex="-1"

@@ -445,6 +445,19 @@ describe('Editarea lifecycle', () => {
     instance.wasTripleClickTriggered.current = false
   })
 
+  // The toolbar reads this node off the imperative handle to ask whether focus
+  // sits inside the editor. The class exposed it as `this.editAreaRef`; when the
+  // hooks version kept the node private the read became `undefined.contains()`,
+  // which crashed the page as soon as a selection made the toolbar evaluate it.
+  test('exposes the edit area node on the imperative handle', () => {
+    const {instance} = mountEditarea()
+
+    expect(instance.editAreaRef).toHaveClass('targetarea')
+    expect(instance.editAreaRef).toHaveAttribute('id', 'segment-12-1-editarea')
+    // the mounted node, not a detached one: the focus check needs the live tree
+    expect(instance.editAreaRef.isConnected).toBe(true)
+  })
+
   test('focuses the editor on mount when the segment is opened', () => {
     const {instance} = renderEditarea()
     const focusSpy = jest.spyOn(instance.editor, 'focus')
