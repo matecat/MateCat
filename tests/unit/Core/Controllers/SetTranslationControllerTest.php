@@ -1885,7 +1885,7 @@ class SetTranslationControllerTest extends AbstractTest
         $this->setNamedProperty($controller, 'featureSet', new FeatureSet(obtainTestDatabase()));
         $this->setNamedProperty($controller, 'id_job', $jobId);
         $this->setNamedProperty($controller, 'password', $jobPassword);
-        $this->setNamedProperty($controller, 'sourceContainsIcu', false);
+        $this->setNamedProperty($controller, 'segmentContainsIcu', false);
         $this->setProperty($controller, [
             'project' => $project,
             'chunk' => $chunk,

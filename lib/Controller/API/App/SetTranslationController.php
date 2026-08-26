@@ -58,7 +58,7 @@ use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 use Utils\Contribution\Set;
 use Utils\Contribution\SetContributionRequest;
-use Utils\LQA\ICUSourceSegmentChecker;
+use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\LQA\QA;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
@@ -69,7 +69,16 @@ use Utils\Tools\Utils;
 
 class SetTranslationController extends AbstractStatefulKleinController
 {
-    use ICUSourceSegmentChecker;
+    /**
+     * Whether the stored source of this segment is valid ICU. Decided in validateTheRequest()
+     * and read by setSubFilteringBehavior() and setQaChecks(), which run later in the same
+     * request: the handler set the segment is converted with and the QA check that grades the
+     * translation have to agree on it.
+     */
+    private bool $segmentContainsIcu = false;
+
+    /** The source-side pattern the QA comparator is built against, kept for the same reason. */
+    private ?MessagePatternValidator $icuSourceValidator = null;
 
     /**
      * @var array{
@@ -707,7 +716,13 @@ class SetTranslationController extends AbstractStatefulKleinController
          */
         $sourcePage = $chunk->getSourcePage() ?: SourcePages::SOURCE_PAGE_TRANSLATE;
 
-        $this->sourceContainsIcu($chunk->getProject(new ProjectDao($this->getDatabase())), $chunk, $segmentString, $this->getDatabase());
+        $this->icuSourceValidator = new MessagePatternValidator($chunk->source, $segmentString);
+        $this->segmentContainsIcu = ICUSourceSegmentDetector::sourceContainsIcu(
+            $this->icuSourceValidator,
+            (new ProjectMetadataDao($this->getDatabase()))->isIcuEnabled(
+                (int)$chunk->getProject(new ProjectDao($this->getDatabase()))->id
+            )
+        );
 
         $data = [
             'id_job' => $id_job,
@@ -736,7 +751,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             'chunk' => $chunk,
             'project' => $chunk->getProject(new ProjectDao($this->getDatabase())),
             'id_project' => $chunk->id_project,
-            'segment_contains_icu' => $this->sourceContainsIcu,
+            'segment_contains_icu' => $this->segmentContainsIcu,
             'split_num' => null,
             'split_chunk_lengths' => null,
         ];
@@ -834,7 +849,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $this->data['chunk']->target,
             (new SegmentOriginalDataDao($this->getDatabase()))->getSegmentDataRefMap((int)$this->data['id_segment']),
             $metadata->getSubfilteringCustomHandlers($this->id_job, $this->password ?? ''),
-            $this->sourceContainsIcu
+            $this->segmentContainsIcu
         );
 
         if (!$filter instanceof MateCatFilter) {
@@ -854,8 +869,8 @@ class SetTranslationController extends AbstractStatefulKleinController
         $check = new QA(
             $segment,
             $translation,
-            ($this->icuSourcePatternValidator !== null) ? MessagePatternComparator::fromValidators(
-                $this->icuSourcePatternValidator,
+            ($this->icuSourceValidator !== null) ? MessagePatternComparator::fromValidators(
+                $this->icuSourceValidator,
                 new MessagePatternValidator(
                     $this->data['chunk']->target,
                     // Transform target content: convert control character placeholders back to ASCII control characters
@@ -864,7 +879,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 )
             ) : null,
             // ICU syntax is enabled for this project, and the translation content must contain valid ICU syntax
-            $this->sourceContainsIcu
+            $this->segmentContainsIcu
         ); // Layer 1 here
 
         $check->setChunk($this->data['chunk']);

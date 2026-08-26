@@ -3,7 +3,9 @@
 namespace Model\ProjectCreation;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use DomainException;
 use Exception;
+use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Concerns\LogsMessages;
@@ -43,6 +45,7 @@ use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ActivityLogWorker;
 use Utils\Constants\ProjectStatus;
 use Utils\Logger\LoggerFactory;
+use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -84,6 +87,12 @@ class ProjectManager
     protected IDatabase $dbHandler;
 
     protected MateCatFilter $filter;
+
+    /**
+     * Sibling of $filter carrying only the ICU-compliant handlers. Built on first use,
+     * because most projects never hit an ICU segment.
+     */
+    protected ?MateCatFilter $icuFilter = null;
 
     protected MetadataDao $filesMetadataDao;
 
@@ -417,7 +426,7 @@ class ProjectManager
     /**
      * Initialize a Google Drive session if a UID is present in the session data.
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function initGdriveSession(): void
     {
@@ -499,8 +508,8 @@ class ProjectManager
      * Validate and insert private TM keys. Aborts if validation errors occur.
      *
      * @throws EndQueueException
-     * @throws \DomainException
-     * @throws \TypeError
+     * @throws DomainException
+     * @throws TypeError
      * @throws \Psr\Log\InvalidArgumentException
      */
     private function setPrivateTmKeysOrFail(string $firstTMXFileName): void
@@ -554,7 +563,7 @@ class ProjectManager
      *
      * @throws EndQueueException
      * @throws \Psr\Log\InvalidArgumentException
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function handleZipFiles(array $linkFiles): void
     {
@@ -662,7 +671,7 @@ class ProjectManager
      * @param array<int, array<string, mixed>> $totalFilesStructure
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function extractSegmentsFromFiles(array &$totalFilesStructure): void
     {
@@ -832,7 +841,7 @@ class ProjectManager
      * @param string $fileName
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function getSingleS3QueueFile(string $fileName): void
     {
@@ -878,8 +887,105 @@ class ProjectManager
     }
 
     /**
+     * Layer 0 to Layer 1 for the fast-analysis payload.
+     *
+     * The payload written here is what every MT/TM call of the analysis eventually
+     * receives, so the handler set must be chosen the same way the editor chooses it
+     * when it renders the same segment: a source carrying valid complex ICU syntax is
+     * converted with the ICU-compliant handlers only, otherwise the project handlers
+     * would wrap ICU arguments in PH tags and the pattern would stop parsing as ICU.
+     *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
+     */
+    protected function subfilterForAnalysis(string $segment, bool $isIcuSource): string
+    {
+        return ($isIcuSource ? $this->icuCompliantFilter() : $this->filter)->fromLayer0ToLayer1($segment);
+    }
+
+    /**
+     * Whether the raw source is an ICU message, by the same rule the editor applies:
+     * ICU is enabled on the project and the pattern carries valid complex syntax.
+     *
+     * ICU presence is a property of the single segment, not of the project, hence the
+     * per-segment decision.
+     *
+     * @throws DomainException
+     */
+    protected function sourceIsIcuMessage(string $rawSource): bool
+    {
+        $icuEnabled = (bool)($this->projectStructure->metadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] ?? false);
+        if (!$icuEnabled) {
+            return false;
+        }
+
+        return ICUSourceSegmentDetector::sourceContainsIcu(
+            new MessagePatternValidator((string)$this->projectStructure->source_language, $rawSource),
+            true
+        );
+    }
+
+    /**
+     * @throws Exception
+     * @throws TypeError
+     */
+    private function icuCompliantFilter(): MateCatFilter
+    {
+        if ($this->icuFilter === null) {
+            /** @var MateCatFilter $icuFilter */
+            $icuFilter = MateCatFilter::getInstance(
+                $this->features,
+                $this->projectStructure->source_language,
+                (string)json_encode($this->projectStructure->target_language),
+                [],
+                json_decode($this->projectStructure->subfiltering_handlers ?? 'null'),
+                true
+            );
+            $this->icuFilter = $icuFilter;
+        }
+
+        return $this->icuFilter;
+    }
+
+    /**
+     * Fills in the per-segment fields of one fast-analysis row.
+     *
+     * `icu_source` records the decision taken here so the TM query can ship the same
+     * reduced handler list the text was built with: MyMemory decodes what we send and
+     * re-encodes the matches with the handlers it is given, and it has no ICU flag of
+     * its own, so the full project list would bring the arguments back wrapped in PH
+     * tags.
+     *
+     * @param array<string, mixed> $segmentElement
+     *
+     * @return array<string, mixed>
+     *
+     * @throws DomainException
+     * @throws Exception
+     * @throws TypeError
+     */
+    protected function decorateFastAnalysisSegment(array $segmentElement, string $job_id_passes): array
+    {
+        unset($segmentElement['internal_id']);
+        unset($segmentElement['xliff_mrk_id']);
+        unset($segmentElement['show_in_cattool']);
+
+        $isIcuSource = $this->sourceIsIcuMessage((string)$segmentElement['segment']);
+
+        $segmentElement['jsid'] = $segmentElement['id'] . "-" . $job_id_passes;
+        $segmentElement['source'] = $this->projectStructure->source_language;
+        $segmentElement['target'] = implode(",", $this->projectStructure->array_jobs['job_languages']);
+        $segmentElement['payable_rates'] = $this->projectStructure->array_jobs['payable_rates'];
+        $segmentElement['icu_source'] = $isIcuSource;
+        $segmentElement['segment'] = $this->subfilterForAnalysis((string)$segmentElement['segment'], $isIcuSource);
+
+        return $segmentElement;
+    }
+
+    /**
+     * @throws DomainException
+     * @throws Exception
+     * @throws TypeError
      */
     private function writeFastAnalysisData(): void
     {
@@ -897,15 +1003,7 @@ class ProjectManager
         );
 
         foreach ($this->projectStructure->segments_metadata as &$segmentElement) {
-            unset($segmentElement['internal_id']);
-            unset($segmentElement['xliff_mrk_id']);
-            unset($segmentElement['show_in_cattool']);
-
-            $segmentElement['jsid'] = $segmentElement['id'] . "-" . $job_id_passes;
-            $segmentElement['source'] = $this->projectStructure->source_language;
-            $segmentElement['target'] = implode(",", $this->projectStructure->array_jobs['job_languages']);
-            $segmentElement['payable_rates'] = $this->projectStructure->array_jobs['payable_rates'];
-            $segmentElement['segment'] = $this->filter->fromLayer0ToLayer1($segmentElement['segment']);
+            $segmentElement = $this->decorateFastAnalysisSegment($segmentElement, $job_id_passes);
         }
         unset($segmentElement); // break the reference to the last array element to avoid accidental overwrites
 
@@ -970,7 +1068,7 @@ class ProjectManager
      * @param array<string, mixed> $linkFiles
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     protected function zipFileHandling(array $linkFiles): void
     {
@@ -996,7 +1094,7 @@ class ProjectManager
     /**
      * @return list<JobStruct>
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     protected function createJobs(): array
     {
@@ -1012,7 +1110,7 @@ class ProjectManager
      *
      * @param list<JobStruct> $jobs
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function linkFilesAndInsertPreTranslations(array $jobs): void
     {
@@ -1031,7 +1129,7 @@ class ProjectManager
      * @param array<string, mixed> $file_info
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     protected function extractSegments(int $fid, array $file_info): void
     {
@@ -1073,7 +1171,7 @@ class ProjectManager
     /**
      * Store segments for a file — delegates to SegmentStorageService.
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     protected function storeSegments(int $fid): void
     {

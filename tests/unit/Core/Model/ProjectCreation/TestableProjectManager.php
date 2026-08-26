@@ -3,6 +3,7 @@
 namespace Matecat\Core\Model\ProjectCreation;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use DomainException;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
@@ -130,6 +131,41 @@ class TestableProjectManager extends ProjectManager
     public function getTotalSegments(): int
     {
         return $this->total_segments;
+    }
+
+    /**
+     * Expose the per-segment fast-analysis subfiltering.
+     *
+     * @throws Exception
+     */
+    public function callSubfilterForAnalysis(string $segment, bool $isIcuSource): string
+    {
+        return $this->subfilterForAnalysis($segment, $isIcuSource);
+    }
+
+    /**
+     * Expose the per-segment ICU detection.
+     *
+     * @throws DomainException
+     */
+    public function callSourceIsIcuMessage(string $rawSource): bool
+    {
+        return $this->sourceIsIcuMessage($rawSource);
+    }
+
+    /**
+     * Expose the assembly of one fast-analysis payload row.
+     *
+     * @param array<string, mixed> $segmentElement
+     *
+     * @return array<string, mixed>
+     *
+     * @throws DomainException
+     * @throws Exception
+     */
+    public function callDecorateFastAnalysisSegment(array $segmentElement, string $job_id_passes): array
+    {
+        return $this->decorateFastAnalysisSegment($segmentElement, $job_id_passes);
     }
 
     /**
