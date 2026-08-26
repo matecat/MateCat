@@ -125,7 +125,7 @@ class GetContributionController extends KleinController
             // the ICU-compliant handlers only, and the same reduced list is what the TM is told,
             // so the matches come back encoded the way they were sent.
             $segmentsList = $this->fetchContributionContexts($request);
-            $icuEnabled = (bool)(new ProjectMetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::ICU_ENABLED->value);
+            $icuEnabled = (new ProjectMetadataDao($this->getDatabase()))->isIcuEnabled((int)$projectStruct->id);
             $sourceContainsIcu = $this->segmentSourceContainsIcu($icuEnabled, $jobStruct, $segmentsList);
 
             /** @var MateCatFilter $Filter */

@@ -10,8 +10,6 @@ use Matecat\ICU\MessagePatternValidator;
  */
 final class ICUSourceSegmentDetector
 {
-    use ICUSourceSegmentChecker;
-
     /**
      * Determines whether a source segment contains valid ICU MessageFormat patterns.
      *
