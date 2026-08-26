@@ -629,6 +629,35 @@ describe('replaceCurrentSearch', () => {
     expect(container.textContent).toContain('universo')
   })
 
+  // The editor showing the replacement is only half of it: the setState callback
+  // pushes the new content to the store, and it used to read the pre-replace
+  // editorState and write the original text straight back over the replacement.
+  test('pushes the replaced text to the store, not the text it replaced', () => {
+    const {instance} = mountEditarea({
+      segment: makeSegment({
+        inSearch: true,
+        currentInSearch: true,
+        currentInSearchIndex: 0,
+        searchParams: {target: 'mondo'},
+        occurrencesInSearch: {occurrences: [{searchProgressiveIndex: 0}]},
+      }),
+    })
+
+    SegmentActions.updateTranslation.mockClear()
+
+    act(() => {
+      instance.replaceCurrentSearch('universo')
+    })
+    flush()
+
+    expect(SegmentActions.updateTranslation).toHaveBeenCalled()
+    const [, decodedSegment, plainText] =
+      SegmentActions.updateTranslation.mock.calls.at(-1)
+    expect(plainText).toContain('universo')
+    expect(plainText).not.toContain('mondo')
+    expect(decodedSegment).toContain('universo')
+  })
+
   test('does nothing when the segment is not the current search result', () => {
     const {instance, container} = mountEditarea({
       segment: makeSegment({

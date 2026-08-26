@@ -1882,6 +1882,12 @@ const Editarea = forwardRef((props, ref) => {
       // synchronous React commit (flushSync here previously caused a nested-update-depth
       // crash when triggered from within an in-progress commit, e.g. via focus handlers).
       instanceRef.current.state = {...instanceRef.current.state, ...resolved}
+      // The handlers read live values through liveRef, which is otherwise only
+      // refreshed on the next render. Mirror there too, or a setState callback
+      // still sees the pre-update value — replaceCurrentSearch set the replaced
+      // editorState and its updateTranslationInStore callback then decoded the
+      // old one, writing the unreplaced text straight back over it.
+      Object.assign(liveRef.current, resolved)
 
       if (callback) callback()
     }
