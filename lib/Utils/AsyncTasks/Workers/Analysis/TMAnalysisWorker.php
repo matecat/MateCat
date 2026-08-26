@@ -34,6 +34,7 @@ use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\Subfiltering\IcuCompliantHandlers;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EmptyElementException;
@@ -413,9 +414,19 @@ class TMAnalysisWorker extends AbstractWorker
         $_config['additional_params'] = $params->additional_params ?? null;
         $_config['priority_key'] = $params->tm_prioritization ?? null;
         $_config['job_id'] = $params->id_job ?? null;
-        $_config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = isset($params->subfiltering_handlers)
+        $subfilteringHandlers = isset($params->subfiltering_handlers)
             ? $params->subfiltering_handlers->toArray()
             : null;
+
+        // The payload text of an ICU segment was built with the ICU-compliant handlers only
+        // (see ProjectManager::decorateFastAnalysisSegment). MyMemory re-encodes the matches
+        // with the handlers this list names and knows nothing about ICU, so the full project
+        // list would hand the matches back with the ICU arguments wrapped in PH tags.
+        if (!empty($params->icu_source)) {
+            $subfilteringHandlers = IcuCompliantHandlers::reduceToIcuCompliant($subfilteringHandlers);
+        }
+
+        $_config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $subfilteringHandlers;
 
         if ($params->dialect_strict ?? false) {
             $_config['dialect_strict'] = $params->dialect_strict;

@@ -54,15 +54,15 @@ const SegmentWarnings = memo(
           switch (el.type) {
             case 'ERROR':
               classes_block = 'error-alert alert-block'
-              icon = <SegmentQA />
+              icon = <SegmentQA size={16}/>
               break
             case 'WARNING':
               classes_block = 'warning-alert alert-block'
-              icon = <AlertIcon size={18} />
+              icon = <AlertIcon size={16} />
               break
             case 'INFO':
               classes_block = 'info-alert alert-block'
-              icon = <InfoIcon size={18} />
+              icon = <InfoIcon size={16} />
               break
             default:
               classes_block = 'alert-block'
