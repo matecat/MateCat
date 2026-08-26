@@ -2282,6 +2282,47 @@ describe('formatSelection', () => {
       instance.state.editorState.getCurrentContent().getPlainText(),
     ).toContain('CIAO')
   })
+
+  test('uppercases the selection in place when the target has more than one block', () => {
+    // A target ending with a newline tag is split over two blocks. The
+    // formatted text must replace the selection in its own block, not be
+    // appended to the last one.
+    const {instance} = mountEditarea({translation: 'ciao\nmondo'})
+    flush()
+
+    const blocks = instance.state.editorState
+      .getCurrentContent()
+      .getBlocksAsArray()
+    expect(blocks.length).toBeGreaterThan(1)
+
+    act(() => {
+      instance.setState({
+        editorState: EditorState.forceSelection(
+          instance.state.editorState,
+          instance.state.editorState.getSelection().merge({
+            anchorKey: blocks[0].getKey(),
+            focusKey: blocks[0].getKey(),
+            anchorOffset: 0,
+            focusOffset: 4,
+          }),
+        ),
+      })
+    })
+    flush()
+
+    act(() => {
+      instance.formatSelection('uppercase')
+    })
+    flush()
+
+    const after = instance.state.editorState
+      .getCurrentContent()
+      .getBlocksAsArray()
+      .map((block) => block.getText())
+
+    expect(after[0]).toBe('CIAO')
+    expect(after[after.length - 1]).toBe('mondo')
+  })
 })
 
 describe('addMissingSourceTagsToTarget', () => {
