@@ -182,7 +182,7 @@ class ProjectModel
             throw new ValidationError('Team not found');
         }
         if ($team->type == Teams::PERSONAL) {
-            throw new ValidationError('Can\'t change the Assignee of a personal project.');
+            throw new ValidationError('Can\'t change the assignee of a personal project.');
         }
     }
 
@@ -226,7 +226,7 @@ class ProjectModel
         });
 
         if (empty($found)) {
-            throw new AuthorizationError("Not Authorized", 403);
+            throw new AuthorizationError("Not authorized", 403);
         }
 
         $uid = $this->user->uid ?? throw new AuthorizationError("User UID must not be null", 403);

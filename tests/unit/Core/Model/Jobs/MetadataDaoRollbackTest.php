@@ -63,7 +63,7 @@ class MetadataDaoRollbackTest extends AbstractTest
         try {
             (new MetadataDao($database))->bulkSet(12, 'job-pw', [
                 'lock_segments' => '1',
-                'speech2text'   => '0',
+                'speech2text' => '0',
             ]);
             self::fail('bulkSet() should have re-thrown the failure');
         } catch (PDOException $e) {

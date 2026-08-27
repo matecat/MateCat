@@ -1,10 +1,5 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
-import {
-  BUTTON_MODE,
-  BUTTON_SIZE,
-  BUTTON_TYPE,
-  Button,
-} from '../../../common/Button/Button'
+import {BUTTON_MODE, BUTTON_TYPE, Button} from '../../../common/Button/Button'
 import PropTypes from 'prop-types'
 import Checkmark from '../../../../../img/icons/Checkmark'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
@@ -142,17 +137,12 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
           {content}
         </div>
         <div className="popover-component-actions">
-          <Button
-            mode={BUTTON_MODE.OUTLINE}
-            size={BUTTON_SIZE.MEDIUM}
-            onClick={cancel}
-          >
+          <Button mode={BUTTON_MODE.OUTLINE} onClick={cancel}>
             Cancel
           </Button>
           <Button
             ref={confirmRef}
             type={BUTTON_TYPE.PRIMARY}
-            size={BUTTON_SIZE.MEDIUM}
             onClick={updateLabel}
             disabled={!label || typeof error === 'string'}
           >

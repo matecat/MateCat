@@ -12,24 +12,8 @@ import TEXT_UTILS from '../../utils/textUtils'
 import ChevronDown from '../../../img/icons/ChevronDown'
 import Tooltip from './Tooltip'
 import usePortal from '../../hooks/usePortal'
-import IconClose from '../icons/IconClose'
-
-const mergeClassNames = (...args) => {
-  return (
-    Array.prototype.slice
-      // eslint-disable-next-line no-undef
-      .call(args)
-      .reduce(
-        (classList, arg) =>
-          typeof arg === 'string' || Array.isArray(arg)
-            ? classList.concat(arg)
-            : classList,
-        [],
-      )
-      .filter(Boolean)
-      .join(' ')
-  )
-}
+import IconClose from '../../../img/icons/IconClose'
+import classnames from 'classnames'
 export const Select = ({
   className,
   label,
@@ -276,7 +260,7 @@ export const Select = ({
     const inputMultipleCLassName =
       multipleSelect !== 'off' ? 'select--is-multiple' : ''
 
-    return mergeClassNames(
+    return classnames(
       defaultClassName,
       inputPlaceholderClassName,
       inputIsFocusedClassName,
@@ -365,7 +349,7 @@ export const Select = ({
                 <IconClose size={8} />
               </div>
             ) : undefined}
-            {renderSelection()}
+            <span>{renderSelection()}</span>
           </div>
           <input
             name={name}

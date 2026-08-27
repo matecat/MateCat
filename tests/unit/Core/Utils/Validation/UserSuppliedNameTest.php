@@ -23,23 +23,23 @@ class UserSuppliedNameTest extends AbstractTest
     public static function namesStoredAsTyped(): array
     {
         return [
-            'plain'                      => ['Marketing Team'],
-            'apostrophe'                 => ["O'Brien"],
-            'hyphen'                     => ['Jean-Luc'],
-            'ampersand and parentheses'  => ['Acme & Co (2024)'],
-            'angle brackets'             => ['Team <core>'],
-            'double quote'               => ['The "Best" Team'],
-            'entity text typed as text'  => ['A &amp; B'],
-            'version number'             => ['Localisation 2.0'],
-            'abbreviation'               => ['Translated S.r.l.'],
+            'plain' => ['Marketing Team'],
+            'apostrophe' => ["O'Brien"],
+            'hyphen' => ['Jean-Luc'],
+            'ampersand and parentheses' => ['Acme & Co (2024)'],
+            'angle brackets' => ['Team <core>'],
+            'double quote' => ['The "Best" Team'],
+            'entity text typed as text' => ['A &amp; B'],
+            'version number' => ['Localisation 2.0'],
+            'abbreviation' => ['Translated S.r.l.'],
             'a company named after its domain' => ['Acme.com'],
-            'an address'                 => ['f.surname@example.com'],
-            'accented latin'             => ['Équipe Française'],
-            'han'                        => ['李明'],
-            'cyrillic'                   => ['Тест'],
-            'katakana'                   => ['メモリ'],
-            'arabic'                     => ['ذاكرة'],
-            'persian with a non-joiner'  => ["می\u{200C}خواهم"],
+            'an address' => ['f.surname@example.com'],
+            'accented latin' => ['Équipe Française'],
+            'han' => ['李明'],
+            'cyrillic' => ['Тест'],
+            'katakana' => ['メモリ'],
+            'arabic' => ['ذاكرة'],
+            'persian with a non-joiner' => ["می\u{200C}خواهم"],
         ];
     }
 
@@ -114,7 +114,7 @@ class UserSuppliedNameTest extends AbstractTest
     #[Test]
     public function normalize_composes_to_a_single_unicode_form(): void
     {
-        $decomposed  = "E\u{0301}quipe";   // E + COMBINING ACUTE ACCENT
+        $decomposed = "E\u{0301}quipe";   // E + COMBINING ACUTE ACCENT
         $precomposed = "\u{00C9}quipe";    // É
 
         self::assertSame($precomposed, UserSuppliedName::normalize($decomposed));
@@ -242,11 +242,11 @@ class UserSuppliedNameTest extends AbstractTest
     public static function linkShapedNames(): array
     {
         return [
-            'the reported payload'         => ['https://bing.com'],
-            'scheme only'                  => ['http://x'],
-            'javascript scheme'            => ['javascript://comment'],
-            'www prefix'                   => ['www.example.com'],
-            'uppercase'                    => ['HTTPS://EVIL.COM'],
+            'the reported payload' => ['https://bing.com'],
+            'scheme only' => ['http://x'],
+            'javascript scheme' => ['javascript://comment'],
+            'www prefix' => ['www.example.com'],
+            'uppercase' => ['HTTPS://EVIL.COM'],
             'scheme smuggled as an entity' => ['https&#58;//evil.com'],
         ];
     }
@@ -272,11 +272,11 @@ class UserSuppliedNameTest extends AbstractTest
     {
         return [
             'a company named after its domain' => ['Acme.com'],
-            'a suffix that is not a domain'    => ['Alpha.Beta'],
-            'a hostname inside prose'          => ['Acme.guru Polite statements'],
-            'a name that is an address'        => ['f.surname@example.com'],
-            'an abbreviation'                  => ['Translated S.r.l.'],
-            'a dot smuggled as an entity'      => ['evil&#46;com'],
+            'a suffix that is not a domain' => ['Alpha.Beta'],
+            'a hostname inside prose' => ['Acme.guru Polite statements'],
+            'a name that is an address' => ['f.surname@example.com'],
+            'an abbreviation' => ['Translated S.r.l.'],
+            'a dot smuggled as an entity' => ['evil&#46;com'],
         ];
     }
 
@@ -357,6 +357,7 @@ class UserSuppliedNameTest extends AbstractTest
             UserSuppliedName::validated($padded, 'name', 60, 60)
         );
     }
+
     // ─── characters the storage cannot carry ──────────────────────────────
 
     #[Test]

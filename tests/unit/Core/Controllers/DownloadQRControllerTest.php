@@ -330,14 +330,18 @@ class DownloadQRControllerTest extends AbstractTest
         $label = 'Accuracy & <b>style</b> [minor]';
         $row = $this->makeDataRow();
         $row[30] = [$label => 1];
-        $row[31] = [$label => [[
-            'id' => 7,
-            'uid' => 3,
-            'id_qa_entry' => 11,
-            'create_date' => '2026-06-11',
-            'comment' => 'A & B <fix> this',
-            'source_page' => 1,
-        ]]];
+        $row[31] = [
+            $label => [
+                [
+                    'id' => 7,
+                    'uid' => 3,
+                    'id_qa_entry' => 11,
+                    'create_date' => '2026-06-11',
+                    'comment' => 'A & B <fix> this',
+                    'source_page' => 1,
+                ]
+            ]
+        ];
 
         $xml = $this->invoke('createXMLFile', [[$row], [$label]]);
 

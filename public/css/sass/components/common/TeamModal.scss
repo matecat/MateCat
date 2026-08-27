@@ -1,11 +1,11 @@
-@use '../../commons/colors';
+@use '../../tokens/colors';
 
 .team-modal {
   display: flex;
   flex-direction: column;
   padding: 30px;
   gap: 30px;
-  height: 700px;
+  height: 685px;
 
   .team-name-container {
     align-items: center;
@@ -46,7 +46,6 @@
   }
 
   .button-invite {
-    display: flex;
     margin-left: auto;
     margin-top: 10px;
   }
@@ -59,7 +58,7 @@
     border-radius: 4px;
     padding: 6px;
     font-size: 15px;
-    color: #000;
+    color: colors.$black;
     transition: 0.6s;
 
     > input {
@@ -79,7 +78,7 @@
       margin-right: 2px;
 
       > svg {
-        color: colors.$grey6;
+        color: colors.$grey700;
       }
     }
 
@@ -94,7 +93,7 @@
 
   .no-result {
     font-size: 14px;
-    color: #666666;
+    color: colors.$grey700;
     padding: 7px;
   }
 
@@ -113,10 +112,10 @@
     }
 
     .removing-user-message {
-      color: colors.$grey1;
+      color: colors.$grey500;
     }
 
-    .button-remove {
+    .remove-user-button {
       margin-left: auto;
     }
 
@@ -132,23 +131,6 @@
       }
     }
 
-    .confirm-button {
-      height: 26px;
-      font-size: 14px !important;
-      min-width: unset;
-      gap: 5px !important;
-      border-radius: unset;
-      padding: 0 8px;
-      display: flex;
-    }
-
-    .close-button {
-      width: 30px;
-      padding: 0 !important;
-      display: flex !important;
-      justify-content: center !important;
-    }
-
     .pending-member-remove {
       display: flex;
       align-items: center;
@@ -156,7 +138,7 @@
       margin-left: auto;
 
       > span {
-        color: colors.$grey1;
+        color: colors.$grey500;
         font-size: 14px;
       }
     }
@@ -176,7 +158,7 @@
     width: 40px;
     max-width: 40px;
     height: 40px;
-    background-color: colors.$grey2;
+    background-color: colors.$grey300;
     border-radius: 50%;
     vertical-align: middle;
     text-align: center;
@@ -194,13 +176,17 @@
 
     > :not(:first-child) {
       font-size: 14px;
-      color: colors.$grey1;
+      color: colors.$grey500;
     }
   }
 
-  .button-close {
-    display: flex;
+  h5 {
+    margin-bottom: 10px;
+  }
+
+  .submit-team-button {
     margin-left: auto;
+    width: 80px;
   }
 }
 
@@ -209,18 +195,18 @@
   height: 40px;
   padding: 0 10px;
   border-radius: 4px;
-  box-shadow: inset 0 1px 3px #ddd;
+  box-shadow: inset 0 1px 3px colors.$grey200;
   border: 1px solid rgba(34, 36, 38, 0.15);
   background-color: white;
 
   &:focus {
     outline: none;
-    border-color: colors.$linkBlueTransparent;
+    border-color: colors.$blue300;
   }
 }
 
 .team-modal-create {
-  height: 510px;
+  height: 485px;
 
   > p {
     margin: 0;

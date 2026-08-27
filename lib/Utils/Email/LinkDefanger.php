@@ -49,7 +49,7 @@ final class LinkDefanger
 
     public static function defang(string $text): string
     {
-        $host    = '(?:' . self::LABEL . self::DOT . ')+[a-z]{2,}';
+        $host = '(?:' . self::LABEL . self::DOT . ')+[a-z]{2,}';
         $address = '[a-z0-9._%+-]+@' . $host;
 
         // Addresses first, so an address is recognised whole. Matching the host alone would leave

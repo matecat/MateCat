@@ -573,7 +573,7 @@ class TMAnalysisWorker extends AbstractWorker
     private function decrementSegmentsToAnalyzeOfWaitingProjects(int $projectId): void
     {
         if (empty($projectId)) {
-            throw new Exception('Can Not send without a Queue ID. \Analysis\QueueHandler::setQueueID ', self::ERR_WRONG_PROJECT);
+            throw new Exception('Cannot send without a Queue ID. \Analysis\QueueHandler::setQueueID ', self::ERR_WRONG_PROJECT);
         }
 
         $workingJobs = $this->redisService->getWorkingProjects($this->_myContext->redis_key);

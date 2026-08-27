@@ -180,16 +180,16 @@ class TeamDaoRealSqlTest extends AbstractTest
         $database = $this->realSqlDb();
         $this->flushDaoCache();
 
-        $creator        = new UserStruct();
-        $creator->uid   = $this->creatorUid;
+        $creator = new UserStruct();
+        $creator->uid = $this->creatorUid;
         $creator->email = $this->creatorEmail;
 
         // Stand in for SignupModel/TeamModel, which own the transaction createUserTeam joins.
         $database->begin();
         try {
             $this->dao->createUserTeam($creator, [
-                'name'    => 'Acme Phantom',
-                'type'    => Teams::GENERAL,
+                'name' => 'Acme Phantom',
+                'type' => Teams::GENERAL,
                 'members' => [],
             ]);
 
@@ -218,13 +218,13 @@ class TeamDaoRealSqlTest extends AbstractTest
         $connection = $this->realSqlDb()->getConnection();
         $this->assertFalse($connection->inTransaction(), 'precondition: the harness opens no transaction');
 
-        $creator        = new UserStruct();
-        $creator->uid   = $this->creatorUid;
+        $creator = new UserStruct();
+        $creator->uid = $this->creatorUid;
         $creator->email = $this->creatorEmail;
 
         $team = $this->dao->createUserTeam($creator, [
-            'name'    => 'Acme Transaction Boundary',
-            'type'    => Teams::GENERAL,
+            'name' => 'Acme Transaction Boundary',
+            'type' => Teams::GENERAL,
             'members' => [],
         ]);
         $this->trackTeamAndMembers($team);
@@ -362,7 +362,7 @@ class TeamDaoRealSqlTest extends AbstractTest
         $primed = $this->dao->setCacheTTL(60 * 60 * 24)->fetchById($id, TeamStruct::class);
         $this->assertNotSame('Renamed Team', $primed->name, 'precondition: the cache holds the original name');
 
-        $team       = new TeamStruct(['id' => $id]);
+        $team = new TeamStruct(['id' => $id]);
         $team->name = 'Renamed Team';
         (new TeamDao($this->realSqlDb()))->updateTeamName($team);
 

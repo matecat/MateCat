@@ -42,7 +42,7 @@ class EmailTemplateEscapingTest extends AbstractTest
      */
     public static function emailTemplates(): array
     {
-        $root      = __DIR__ . '/../../../../../lib/View/Emails';
+        $root = __DIR__ . '/../../../../../lib/View/Emails';
         $templates = [];
 
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($root));
@@ -175,19 +175,19 @@ class EmailTemplateEscapingTest extends AbstractTest
     #[Test]
     public function aPayloadInAnUntestedFieldIsEscapedInARenderedEmail(): void
     {
-        $sender             = new UserStruct();
-        $sender->uid        = 1;
-        $sender->email      = 'sender@example.com';
+        $sender = new UserStruct();
+        $sender->uid = 1;
+        $sender->email = 'sender@example.com';
         $sender->first_name = self::PAYLOAD;
-        $sender->last_name  = 'Lovelace';
+        $sender->last_name = 'Lovelace';
 
-        $team       = new TeamStruct();
-        $team->id   = 1;
+        $team = new TeamStruct();
+        $team->id = 1;
         $team->name = 'Harmless Team';
 
-        $email  = new InvitedToTeamEmail($sender, 'invited@example.com', $team);
+        $email = new InvitedToTeamEmail($sender, 'invited@example.com', $team);
         $method = new ReflectionMethod(InvitedToTeamEmail::class, '_buildMessageContent');
-        $body   = (string)$method->invoke($email);
+        $body = (string)$method->invoke($email);
 
         $this->assertStringNotContainsString('<script', $body);
         $this->assertStringNotContainsString('<a href="https://evil.com"', $body);
@@ -260,7 +260,7 @@ class EmailTemplateEscapingTest extends AbstractTest
         $user = EmailValue::wrapAll(['user' => ['company' => 'Acme.com']])['user'];
 
         $user['company'] = 'replaced';
-        $user['added']   = 'new';
+        $user['added'] = 'new';
         unset($user['company']);
 
         $this->assertSame('Acme[.]com', (string)$user['company'], 'the value is unchanged');
@@ -306,9 +306,9 @@ class EmailTemplateEscapingTest extends AbstractTest
     #[Test]
     public function theTextPartUndoesEscapingRatherThanShowingEntities(): void
     {
-        $email  = $this->invitationFor("O'Brien & Sons <Ltd>");
+        $email = $this->invitationFor("O'Brien & Sons <Ltd>");
         $method = new ReflectionMethod(InvitedToTeamEmail::class, '_buildTxtMessage');
-        $html   = new ReflectionMethod(InvitedToTeamEmail::class, '_buildMessageContent');
+        $html = new ReflectionMethod(InvitedToTeamEmail::class, '_buildMessageContent');
 
         $text = (string)$method->invoke($email, (string)$html->invoke($email));
 
@@ -325,9 +325,9 @@ class EmailTemplateEscapingTest extends AbstractTest
     #[Test]
     public function textTypedAsMarkupStaysTextInTheTextPart(): void
     {
-        $email  = $this->invitationFor('Line&lt;br&gt;Break');
+        $email = $this->invitationFor('Line&lt;br&gt;Break');
         $method = new ReflectionMethod(InvitedToTeamEmail::class, '_buildTxtMessage');
-        $html   = new ReflectionMethod(InvitedToTeamEmail::class, '_buildMessageContent');
+        $html = new ReflectionMethod(InvitedToTeamEmail::class, '_buildMessageContent');
 
         $text = (string)$method->invoke($email, (string)$html->invoke($email));
 
@@ -336,14 +336,14 @@ class EmailTemplateEscapingTest extends AbstractTest
 
     private function invitationFor(string $teamName): InvitedToTeamEmail
     {
-        $sender             = new UserStruct();
-        $sender->uid        = 1;
-        $sender->email      = 'sender@example.com';
+        $sender = new UserStruct();
+        $sender->uid = 1;
+        $sender->email = 'sender@example.com';
         $sender->first_name = 'Ada';
-        $sender->last_name  = 'Lovelace';
+        $sender->last_name = 'Lovelace';
 
-        $team       = new TeamStruct();
-        $team->id   = 1;
+        $team = new TeamStruct();
+        $team->id = 1;
         $team->name = $teamName;
 
         return new InvitedToTeamEmail($sender, 'invited@example.com', $team);

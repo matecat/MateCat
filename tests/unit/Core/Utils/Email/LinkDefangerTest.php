@@ -31,39 +31,39 @@ class LinkDefangerTest extends AbstractTest
     {
         return [
             // The vector, and the reason any of this exists.
-            'a bare hostname'          => ['evil.com', 'evil[.]com'],
+            'a bare hostname' => ['evil.com', 'evil[.]com'],
             'every label, not just one' => ['login.microsoftonline.com', 'login[.]microsoftonline[.]com'],
-            'a hostname inside prose'  => ['Verify at evil-login.co now', 'Verify at evil-login[.]co now'],
+            'a hostname inside prose' => ['Verify at evil-login.co now', 'Verify at evil-login[.]co now'],
 
             // Entity forms. Emails escape with double_encode: false, so entity text reaches the
             // recipient and their client turns it back into a dot — matching only the literal
             // character would let these through as live hostnames.
-            'a decimal entity dot'     => ['evil&#46;com', 'evil[.]com'],
-            'a hex entity dot'         => ['evil&#x2E;com', 'evil[.]com'],
-            'a named entity dot'       => ['evil&period;com', 'evil[.]com'],
+            'a decimal entity dot' => ['evil&#46;com', 'evil[.]com'],
+            'a hex entity dot' => ['evil&#x2E;com', 'evil[.]com'],
+            'a named entity dot' => ['evil&period;com', 'evil[.]com'],
 
             // Schemes: the colon rather than the scheme's letters, so one rule covers all of them.
-            'an http scheme'           => ['https://evil.com', 'https[:]//evil[.]com'],
-            'a path is kept'           => ['https://evil.com/login?a=1', 'https[:]//evil[.]com/login?a=1'],
-            'a javascript scheme'      => ['javascript://evil.com', 'javascript[:]//evil[.]com'],
+            'an http scheme' => ['https://evil.com', 'https[:]//evil[.]com'],
+            'a path is kept' => ['https://evil.com/login?a=1', 'https[:]//evil[.]com/login?a=1'],
+            'a javascript scheme' => ['javascript://evil.com', 'javascript[:]//evil[.]com'],
 
             // Addresses are recognised whole. Half-defanging one is worse than either choice made
             // consistently, and roughly twenty real teams are named after a member's address.
-            'an address is untouched'  => ['f.surname@example.com', 'f.surname@example.com'],
-            'a long address'           => ['student.if17@campus.edu.ua', 'student.if17@campus.edu.ua'],
+            'an address is untouched' => ['f.surname@example.com', 'f.surname@example.com'],
+            'a long address' => ['student.if17@campus.edu.ua', 'student.if17@campus.edu.ua'],
 
             // The cost, asserted so it is visible here rather than discovered by a customer.
-            'a real customer name'     => ['Acme.com', 'Acme[.]com'],
+            'a real customer name' => ['Acme.com', 'Acme[.]com'],
             'a real customer in prose' => ['Acme.guru Polite statements', 'Acme[.]guru Polite statements'],
 
             // False positives Apple Mail would not have linkified. No shape-based rule can tell
             // these from a real company name ending in a live suffix, which it did.
-            'a non-TLD suffix'         => ['Alpha.Beta', 'Alpha[.]Beta'],
-            'an abbreviation pair'     => ['Ejercicio HH.CC Bilbo y Frodo', 'Ejercicio HH[.]CC Bilbo y Frodo'],
+            'a non-TLD suffix' => ['Alpha.Beta', 'Alpha[.]Beta'],
+            'an abbreviation pair' => ['Ejercicio HH.CC Bilbo y Frodo', 'Ejercicio HH[.]CC Bilbo y Frodo'],
 
             // Left alone: a single trailing letter is not a suffix.
-            'an abbreviation'          => ['Translated S.r.l.', 'Translated S.r.l.'],
-            'ordinary text'            => ['Marketing Team', 'Marketing Team'],
+            'an abbreviation' => ['Translated S.r.l.', 'Translated S.r.l.'],
+            'ordinary text' => ['Marketing Team', 'Marketing Team'],
         ];
     }
 
@@ -204,19 +204,19 @@ class LinkDefangerTest extends AbstractTest
     #[Test]
     public function aRenderedInvitationDefangsTheTeamNameAndKeepsItsLink(): void
     {
-        $sender             = new UserStruct();
-        $sender->uid        = 1;
-        $sender->email      = 'sender@example.com';
+        $sender = new UserStruct();
+        $sender->uid = 1;
+        $sender->email = 'sender@example.com';
         $sender->first_name = 'Ada';
-        $sender->last_name  = 'Lovelace';
+        $sender->last_name = 'Lovelace';
 
-        $team       = new TeamStruct();
-        $team->id   = 1;
+        $team = new TeamStruct();
+        $team->id = 1;
         $team->name = 'evil.com';
 
-        $email  = new InvitedToTeamEmail($sender, 'invited@example.com', $team);
+        $email = new InvitedToTeamEmail($sender, 'invited@example.com', $team);
         $method = new ReflectionMethod(InvitedToTeamEmail::class, '_buildMessageContent');
-        $body   = (string)$method->invoke($email);
+        $body = (string)$method->invoke($email);
 
         $this->assertStringContainsString('evil[.]com', $body);
         $this->assertStringNotContainsString('"evil.com"', $body);

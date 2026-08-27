@@ -1,22 +1,48 @@
 @use 'components/common/Select';
 @use 'components/common/Dropdown';
-@use 'components/common/CookieConsent';
-@use 'components/common/Switch';
-@use 'components/common/MenuButton';
-@use 'components/common/Tooltip';
-@use 'components/common/Button';
-@use 'components/common/Popover';
 @use 'components/common/UserDisconnectedBox';
 @use 'components/common/UserMenu';
-@use 'components/common/Input';
-@use 'components/common/EmailsBadge';
-@use 'components/common/DropdownMenu';
-@use 'components/common/LabelWithTooltip';
-@use 'components/common/Checkbox';
-@use 'components/common/NumericStepper';
-@use 'components/common/SegmentedControl';
-@use 'components/common/Accordion';
-@use 'components/common/FilenameLabel';
 @use 'components/common/OnBoardingTooltip';
-@use 'components/common/ProgressBar';
-@use 'components/common/Badge';
+
+.ui-user-dropdown-image {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  vertical-align: middle;
+  object-fit: cover;
+}
+
+.user-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #e8e8e8;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.75rem;
+  font-weight: 700;
+  vertical-align: middle;
+  cursor: default;
+}
+
+.cancel-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 50%;
+  vertical-align: middle;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+

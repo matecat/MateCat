@@ -457,7 +457,7 @@ class SegmentDaoTest extends AbstractTest
         $this->stmtStub->method('execute')->willThrowException(new \PDOException('Connection lost'));
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage("Segment import - DB Error: Connection lost");
+        $this->expectExceptionMessage("Segment import - DB error: Connection lost");
 
         $dao = new SegmentDao($this->dbStub);
         $dao->createList([$seg]);

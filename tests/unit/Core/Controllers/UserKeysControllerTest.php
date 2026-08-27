@@ -386,13 +386,13 @@ class UserKeysControllerTest extends AbstractTest
     public static function htmlSignificantDescriptionProvider(): array
     {
         return [
-            'less-than'      => ['Glossary < name'],
-            'greater-than'   => ['Glossary > name'],
-            'ampersand'      => ['Smith & Sons'],
-            'double-quote'   => ['The "Best" glossary'],
-            'single-quote'   => ["O'Brien's glossary"],
-            'markup'         => ['<script>alert(1)</script>'],
-            'non latin'      => ['メモリ'],
+            'less-than' => ['Glossary < name'],
+            'greater-than' => ['Glossary > name'],
+            'ampersand' => ['Smith & Sons'],
+            'double-quote' => ['The "Best" glossary'],
+            'single-quote' => ["O'Brien's glossary"],
+            'markup' => ['<script>alert(1)</script>'],
+            'non latin' => ['メモリ'],
         ];
     }
 
@@ -421,7 +421,7 @@ class UserKeysControllerTest extends AbstractTest
     public function validateTheRequest_strips_control_characters_from_the_description(): void
     {
         $this->setRequestParams([
-            'key'         => 'abcdef1234567890',
+            'key' => 'abcdef1234567890',
             'description' => "Glossary\r\nBcc: victim",
         ]);
 

@@ -20,7 +20,7 @@ class SendToTranslatorForJobSplitEmail extends SendToTranslatorAbstract
     public function __construct(UserStruct $user, JobsTranslatorsStruct $translator, string $projectName, UserDao $userDao)
     {
         parent::__construct($user, $translator, $projectName, $userDao);
-        $this->title = "Matecat - Job delivery updated.";
+        $this->title = "Matecat - Job delivery updated";
         $this->_setTemplate('Translator/job_split_send_to_translator_content.html');
         $this->_RoutesMethod = [CanonicalRoutes::class, 'translate'];
     }

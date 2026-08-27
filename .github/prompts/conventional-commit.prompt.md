@@ -110,18 +110,18 @@ distinct change with its own subject line:
 
 | Type     | Title                    | Emoji | Description                                                                                            | Example Scopes (non-exaustive)                                |
 |----------|--------------------------|-------|--------------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
-| build    | Builds                   | 🏗️   | Changes that affect the build system or external dependencies                                          | gulp, broccoli, npm                                           |
+| build    | Builds                   | 🏗️    | Changes that affect the build system or external dependencies                                          | gulp, broccoli, npm                                           |
 | chore    | Chores                   | 🔧    | Other changes that don't modify src or test files                                                      | scripts, config                                               |
 | ci       | Continuous Integrations  | 👷    | Changes to our CI configuration files and scripts                                                      | Travis, Circle, BrowserStack, SauceLabs,github actions, husky |
 | docs     | Documentation            | 📝    | Documentation only changes                                                                             | README, API                                                   |
-| feat     | Features                 | ✨     | A new feature                                                                                          | user, payment, gallery                                        |
+| feat     | Features                 | ✨    | A new feature                                                                                          | user, payment, gallery                                        |
 | fix      | Bug Fixes                | 🐛    | A bug fix                                                                                              | auth, data                                                    |
 | security | Security Fixes           | 🔒    | A change that fixes a vulnerability or hardens against one                                             | auth, idor, xss, injection                                    |
 | perf     | Performance Improvements | ⚡️    | A code change that improves performance                                                                | query, cache                                                  |
 | refactor | Code Refactoring         | ♻️    | A code change that neither fixes a bug nor adds a feature                                              | utils, helpers                                                |
 | revert   | Reverts                  | ⏪️    | Reverts a previous commit                                                                              | query, utils,                                                 |
 | style    | Styles                   | 💄    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) | formatting                                                    |
-| test     | Tests                    | ✅     | Adding missing tests or correcting existing tests                                                      | unit, e2e                                                     |
+| test     | Tests                    | ✅    | Adding missing tests or correcting existing tests                                                      | unit, e2e                                                     |
 | i18n     |                          | 🌐    | Internationalization                                                                                   | locale, translation                                           |
 | merge    | Merges                   | 🔀    | Merges a branch into another; the emoji is optional here, since git and the forge write their own      | develop, master                                               |
 

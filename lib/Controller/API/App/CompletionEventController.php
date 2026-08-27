@@ -46,7 +46,7 @@ class CompletionEventController extends KleinController
             $event = (new ChunkCompletionEventDao($this->getDatabase()))->getByIdAndChunk($this->getParams()['id_event'], $Validator->getChunk());
 
             if (!$event) {
-                throw new NotFoundException("Event Not Found.", 404);
+                throw new NotFoundException("Event not found.", 404);
             }
 
             $this->chunk = $Validator->getChunk();

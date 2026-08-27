@@ -82,8 +82,8 @@ describe('map consistency', () => {
         assert.deepEqual([...VALID_TYPES].sort(), fromMap);
     });
 
-    it('has 14 type entries', () => {
-        assert.equal(VALID_TYPES.length, 14);
+  it('has 14 type entries', () => {
+    assert.equal(VALID_TYPES.length, 14);
     });
 });
 
@@ -107,7 +107,7 @@ describe('validateCommitMessage – valid', () => {
         assert.equal(r.valid, true);
     });
 
-    it('all 14 types accepted', () => {
+  it('all 14 types accepted', () => {
         const messages = [
             ['\u{1F3D7}\uFE0F', 'build'],
             ['\u{1F527}', 'chore'],
@@ -122,7 +122,7 @@ describe('validateCommitMessage – valid', () => {
             ['\u{1F484}', 'style'],
             ['\u2705', 'test'],
             ['\u{1F310}', 'i18n'],
-            ['\u{1F500}', 'merge'],
+          ['\u{1F500}', 'merge'],
         ];
         for (const [emoji, type] of messages) {
             const r = validateCommitMessage(`${emoji} ${type}: do something`);
@@ -347,31 +347,31 @@ describe('validateCommitMessage – relaxed mode', () => {
 // ── merge subjects ─────────────────────────────────────────
 
 describe('merge subjects', () => {
-    it('accepts a hand written merge with its emoji', () => {
-        const r = validateCommitMessage('\u{1F500} merge(develop): reconcile the credential cache sweep');
-        assert.equal(r.valid, true);
-        assert.equal(r.skipped, false);
-    });
+  it('accepts a hand written merge with its emoji', () => {
+    const r = validateCommitMessage('\u{1F500} merge(develop): reconcile the credential cache sweep');
+    assert.equal(r.valid, true);
+    assert.equal(r.skipped, false);
+  });
 
-    it('accepts a hand written merge without an emoji even when one is required', () => {
-        const r = validateCommitMessage('merge(develop): reconcile the credential cache sweep', {requireEmoji: true});
-        assert.equal(r.valid, true);
-        assert.deepEqual(r.errors, []);
-    });
+  it('accepts a hand written merge without an emoji even when one is required', () => {
+    const r = validateCommitMessage('merge(develop): reconcile the credential cache sweep', {requireEmoji: true});
+    assert.equal(r.valid, true);
+    assert.deepEqual(r.errors, []);
+  });
 
-    it('still requires the emoji for every other type', () => {
-        const r = validateCommitMessage('test(x): add a case', {requireEmoji: true});
-        assert.equal(r.valid, false);
-    });
+  it('still requires the emoji for every other type', () => {
+    const r = validateCommitMessage('test(x): add a case', {requireEmoji: true});
+    assert.equal(r.valid, false);
+  });
 
-    it('skips the subject git writes itself', () => {
-        const r = validateCommitMessage("Merge branch 'develop' into minor-gaps", {requireEmoji: true});
-        assert.equal(r.skipped, true);
-        assert.equal(r.valid, true);
-    });
+  it('skips the subject git writes itself', () => {
+    const r = validateCommitMessage('Merge branch \'develop\' into minor-gaps', {requireEmoji: true});
+    assert.equal(r.skipped, true);
+    assert.equal(r.valid, true);
+  });
 
-    it('rejects another type\u2019s emoji on a merge', () => {
-        const r = validateCommitMessage('\u{1F527} merge(develop): wrong emoji');
-        assert.equal(r.valid, false);
-    });
+  it('rejects another type\u2019s emoji on a merge', () => {
+    const r = validateCommitMessage('\u{1F527} merge(develop): wrong emoji');
+    assert.equal(r.valid, false);
+  });
 });

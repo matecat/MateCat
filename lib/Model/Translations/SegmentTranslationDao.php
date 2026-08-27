@@ -352,7 +352,7 @@ class SegmentTranslationDao extends AbstractDao
             $where_values[] = TranslationStatus::STATUS_APPROVED;
             $where_values[] = TranslationStatus::STATUS_APPROVED2;
         } else {
-            throw new Exception('not allowed to change status to ' . $status);
+            throw new Exception('Not allowed to change status to ' . $status);
         }
 
         $status_placeholders = str_repeat('?,', count($where_values) - 1) . '?';

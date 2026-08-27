@@ -124,10 +124,12 @@ class TeamsController extends KleinController
 
         $userDao = new UserDao($this->getDatabase());
         $model = new TeamModel($teamStruct, $userDao, new TeamDao($this->getDatabase()));
-        $memberEmails = array_values(array_filter(
-            is_array($params['members']) ? $params['members'] : [],
-            'is_string'
-        ));
+        $memberEmails = array_values(
+            array_filter(
+                is_array($params['members']) ? $params['members'] : [],
+                'is_string'
+            )
+        );
         foreach ($memberEmails as $email) {
             $model->addMemberEmail($email);
         }
@@ -179,7 +181,7 @@ class TeamsController extends KleinController
         $org = $membershipDao->findTeamByIdAndUser($teamId, $this->user);
 
         if (empty($org)) {
-            throw new AuthorizationError("Not Authorized", 401);
+            throw new AuthorizationError("Not authorized", 401);
         }
 
         $org->name = $name;

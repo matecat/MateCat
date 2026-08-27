@@ -372,7 +372,7 @@ class Executor implements SplObserver
             /* jump the ack */
         } catch (Exception $e) {
             $this->logger->debug($e->getMessage());
-            throw new FrameException("*** \$this->amqHandler->read() Failed. Continue Execution. ***", -1, $e);
+            throw new FrameException("*** \$this->amqHandler->read() Failed. Continue execution. ***", -1, $e);
         }
 
         return [$msgFrame, $queueElement];

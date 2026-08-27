@@ -116,7 +116,7 @@ class SimpleJWTTest extends AbstractTest
         $signedToken['signature'] = 'tampered_signature';
 
         $this->expectException(DomainException::class);
-        $this->expectExceptionMessage("Invalid Token Signature");
+        $this->expectExceptionMessage("Invalid token signature");
 
         SimpleJWT::isValid($signedToken, $this->secretKey);
     }
@@ -134,7 +134,7 @@ class SimpleJWTTest extends AbstractTest
         $signedToken = $jwt->sign();
 
         $this->expectException(UnexpectedValueException::class);
-        $this->expectExceptionMessage("Token Expired");
+        $this->expectExceptionMessage("Token expired");
 
         SimpleJWT::isValid($signedToken, $this->secretKey);
     }
@@ -204,7 +204,7 @@ class SimpleJWTTest extends AbstractTest
         $tamperedTokenString = substr($tokenString, 0, -strlen($tamperPart)) . $tamperPart;
 
         $this->expectException(DomainException::class);
-        $this->expectExceptionMessage("Invalid Token Signature");
+        $this->expectExceptionMessage("Invalid token signature");
 
         SimpleJWT::isValid($tamperedTokenString, $this->secretKey);
     }
@@ -425,7 +425,7 @@ class SimpleJWTTest extends AbstractTest
         $jwt = new SimpleJWT([], 'simple.jwt.claims', $this->secretKey, 3600);
 
         $this->expectException(UnexpectedValueException::class);
-        $this->expectExceptionMessage('Time To Live must be a positive integer');
+        $this->expectExceptionMessage('Time to live must be a positive integer');
 
         $jwt->setTimeToLive(-10);
     }
@@ -672,7 +672,7 @@ class SimpleJWTTest extends AbstractTest
     #[Test]
     public function testGetExpireDateOnAParsedInstanceReturnsTheTokenExp(): void
     {
-        $jwt      = new SimpleJWT(['foo' => 'bar'], 'simple.jwt.claims', $this->secretKey, 3600);
+        $jwt = new SimpleJWT(['foo' => 'bar'], 'simple.jwt.claims', $this->secretKey, 3600);
         $original = $jwt->sign();
 
         $parsed = SimpleJWT::getValidatedInstanceFromString((string)$jwt, $this->secretKey);
@@ -684,7 +684,7 @@ class SimpleJWTTest extends AbstractTest
     #[Test]
     public function testReSigningAParsedInstancePreservesIatAndExp(): void
     {
-        $jwt      = new SimpleJWT(['foo' => 'bar'], 'simple.jwt.claims', $this->secretKey, 3600);
+        $jwt = new SimpleJWT(['foo' => 'bar'], 'simple.jwt.claims', $this->secretKey, 3600);
         $original = $jwt->sign();
 
         $reSigned = SimpleJWT::getValidatedInstanceFromString((string)$jwt, $this->secretKey)->sign();
@@ -696,7 +696,7 @@ class SimpleJWTTest extends AbstractTest
     #[Test]
     public function testGetExpireDateOnAParsedInstanceWithoutExpFallsBackToIssuedAt(): void
     {
-        $jwt      = new SimpleJWT(['foo' => 'bar'], 'simple.jwt.claims', $this->secretKey, 3600);
+        $jwt = new SimpleJWT(['foo' => 'bar'], 'simple.jwt.claims', $this->secretKey, 3600);
         $original = $jwt->sign();
 
         $payload = $original['payload'];

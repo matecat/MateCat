@@ -68,7 +68,7 @@ class OAuthSignInModel
         // puts the account's *full* name in it, so overflow is ordinary rather than hostile —
         // refusing would refuse the login.
         $firstName = CatUtils::stripMaliciousContentFromAName($firstName ?? '');
-        $lastName  = CatUtils::stripMaliciousContentFromAName($lastName ?? '');
+        $lastName = CatUtils::stripMaliciousContentFromAName($lastName ?? '');
 
         if ($firstName === '') {
             $firstName = "Anonymous";

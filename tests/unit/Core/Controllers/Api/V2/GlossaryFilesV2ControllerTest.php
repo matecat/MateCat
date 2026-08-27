@@ -224,7 +224,7 @@ class GlossaryFilesV2ControllerTest extends AbstractTest
         // this endpoint's name is optional — on the upload paths it comes from the file.
         $this->setProp('request', new Request([
             'tm_key' => 'abc123key',
-            'name'   => ['first', 'second'],
+            'name' => ['first', 'second'],
         ]));
 
         $this->invoke('validateRequest');
@@ -239,7 +239,7 @@ class GlossaryFilesV2ControllerTest extends AbstractTest
         // non-string, so it is normalised like any other value and stays empty. Pinned because the
         // two look interchangeable and only one of them reaches the normalizer.
         $this->setProp('request', new Request([
-            'tm_key'        => 'abc123key',
+            'tm_key' => 'abc123key',
             'downloadToken' => 'tok-42',
         ]));
 
@@ -257,7 +257,7 @@ class GlossaryFilesV2ControllerTest extends AbstractTest
         // name and the Subject header of a notification email.
         $this->setProp('request', new Request([
             'tm_key' => 'abc123key',
-            'name'   => "A & B\r\nGlossary   \u{200B}2024 ",
+            'name' => "A & B\r\nGlossary   \u{200B}2024 ",
         ]));
 
         $this->invoke('validateRequest');
@@ -275,7 +275,7 @@ class GlossaryFilesV2ControllerTest extends AbstractTest
         // because the name is a label on an upload that has already happened.
         $this->setProp('request', new Request([
             'tm_key' => 'abc123key',
-            'name'   => str_repeat('g', TmKeyManager::RESOURCE_NAME_MAX_LENGTH + 50),
+            'name' => str_repeat('g', TmKeyManager::RESOURCE_NAME_MAX_LENGTH + 50),
         ]));
 
         $this->invoke('validateRequest');

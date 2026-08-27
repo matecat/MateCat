@@ -12,16 +12,15 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../../common/Button/Button'
-import AddWide from '../../../../../img/icons/AddWide'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 import {Select} from '../../../common/Select'
 import {InputPercentage} from './InputPercentage'
-import IconClose from '../../../icons/IconClose'
+import IconClose from '../../../../../img/icons/IconClose'
 import Checkmark from '../../../../../img/icons/Checkmark'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {cloneDeep, isEqual} from 'lodash'
 import {v4 as uuidV4} from 'uuid'
-import IconAdd from '../../../icons/IconAdd'
+import IconAdd from '../../../../../img/icons/IconAdd'
 
 export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
   const {analysisTemplates} = useContext(SettingsPanelContext)
@@ -177,7 +176,6 @@ export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
       <Button
         className="add-button"
         type={BUTTON_TYPE.PRIMARY}
-        size={BUTTON_SIZE.MEDIUM}
         onClick={() =>
           setPendingExceptionsId((prevState) => [...prevState, uuidV4()])
         }
@@ -303,9 +301,7 @@ const LanguageException = ({
         <div className="analysis-tab-buttons">
           <Button
             type={BUTTON_TYPE.PRIMARY}
-            size={BUTTON_SIZE.MEDIUM}
             disabled={source && target && value ? false : true}
-            className={'confirm-button'}
             onClick={() => {
               addException({source, target, value})
               setModified(false)
@@ -316,7 +312,6 @@ const LanguageException = ({
           </Button>
           <Button
             type={BUTTON_TYPE.WARNING}
-            size={BUTTON_SIZE.MEDIUM}
             className="close-button"
             onClick={removeException}
           >

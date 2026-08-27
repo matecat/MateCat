@@ -97,8 +97,8 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
      */
     public function initAuthToken(AuthTokenScope $scope): void
     {
-        $this->rawAuthToken                  = Utils::randomString(self::AUTH_TOKEN_RANDOM_LENGTH);
-        $this->confirmation_token            = $scope->storedForm($this->rawAuthToken);
+        $this->rawAuthToken = Utils::randomString(self::AUTH_TOKEN_RANDOM_LENGTH);
+        $this->confirmation_token = $scope->storedForm($this->rawAuthToken);
         $this->confirmation_token_created_at = Utils::mysqlTimestamp(time());
     }
 
@@ -377,7 +377,7 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
             if (array_key_exists($field, $decoded)) {
                 return $decoded[$field];
             } else {
-                throw new Exception('key not found on token: ' . $field);
+                throw new Exception('Key not found on token: ' . $field);
             }
         }
 

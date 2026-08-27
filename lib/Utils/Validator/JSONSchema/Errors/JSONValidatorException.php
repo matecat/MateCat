@@ -20,7 +20,7 @@ class JSONValidatorException extends Exception implements JsonSerializable
      */
     public function __construct(Error $error)
     {
-        parent::__construct("JSON Validation Error: " . $error->error);
+        parent::__construct("JSON validation error: " . $error->error);
         $this->error = $error;
     }
 

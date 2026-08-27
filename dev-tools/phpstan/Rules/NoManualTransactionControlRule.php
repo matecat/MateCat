@@ -50,14 +50,14 @@ final class NoManualTransactionControlRule implements Rule
     /** @var array<string, string> lower-case method name => name as written, for PDO receivers */
     private const PDO_METHODS = [
         'begintransaction' => 'beginTransaction',
-        'commit'           => 'commit',
-        'rollback'         => 'rollBack',
+        'commit' => 'commit',
+        'rollback' => 'rollBack',
     ];
 
     /** @var array<string, string> lower-case method name => name as written, for IDatabase receivers */
     private const DATABASE_METHODS = [
-        'begin'    => 'begin',
-        'commit'   => 'commit',
+        'begin' => 'begin',
+        'commit' => 'commit',
         'rollback' => 'rollback',
     ];
 

@@ -2,7 +2,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 export const getJobMetadata = async (idJob, password) => {
   const response = await fetch(
-    `${getMatecatApiDomain()}api/app/jobs/${idJob}/${password}/metadata`,
+      `${getMatecatApiDomain()}api/app/jobs/${idJob}/${password}/metadata`,
     {
       credentials: 'include',
     },

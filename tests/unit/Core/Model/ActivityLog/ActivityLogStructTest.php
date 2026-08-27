@@ -13,7 +13,7 @@ class ActivityLogStructTest extends AbstractTest
     #[Test]
     public function getAction_returns_correct_string_for_download(): void
     {
-        $this->assertSame('Editing Log downloaded', ActivityLogStruct::getAction(ActivityLogStruct::DOWNLOAD_EDIT_LOG));
+        $this->assertSame('Editing log downloaded', ActivityLogStruct::getAction(ActivityLogStruct::DOWNLOAD_EDIT_LOG));
     }
 
     #[Test]
@@ -31,7 +31,7 @@ class ActivityLogStructTest extends AbstractTest
     #[Test]
     public function getAction_returns_correct_string_for_translation_delivered(): void
     {
-        $this->assertSame('Translation Delivered', ActivityLogStruct::getAction(ActivityLogStruct::TRANSLATION_DELIVERED));
+        $this->assertSame('Translation delivered', ActivityLogStruct::getAction(ActivityLogStruct::TRANSLATION_DELIVERED));
     }
 
     #[Test]

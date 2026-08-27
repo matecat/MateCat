@@ -92,19 +92,19 @@ abstract class AbstractController extends BaseKleinViewController
 
         // Check if the required properties are set in the concrete class
         if (empty($this->review_order_page)) {
-            throw new LogicException("Property 'review_order_page' can not be EMPTY");
+            throw new LogicException("Property 'review_order_page' can not be empty");
         }
 
         if (empty($this->tokenName)) {
-            throw new LogicException("Property 'tokenName' can not be EMPTY");
+            throw new LogicException("Property 'tokenName' can not be empty");
         }
 
         if (empty($this->id_vendor)) {
-            throw new LogicException("Property 'id_vendor' can not be EMPTY");
+            throw new LogicException("Property 'id_vendor' can not be empty");
         }
 
         if (empty($this->vendor_name)) {
-            throw new LogicException("Property 'vendor_name' can not be EMPTY");
+            throw new LogicException("Property 'vendor_name' can not be empty");
         }
 
         $filterArgs = [
@@ -191,7 +191,7 @@ abstract class AbstractController extends BaseKleinViewController
             'tokenAuth'      => $this->tokenAuth,
             'data'           => json_encode([$item]),
             'redirect_url'   => $this->review_order_page,
-            'data_key'     => $this->data_key_content,
+            'data_key' => $this->data_key_content,
         ];
     }
 

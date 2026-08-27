@@ -90,8 +90,8 @@ class XliffToTargetConverterControllerTest extends AbstractTest
     {
         $path = $this->writeTempXliff('<xliff>dummy</xliff>');
         $filters = $this->makeFiltersStub([
-            'successful'       => true,
-            'fileName'         => "evil\".docx\r\nX-Injected: yes",
+            'successful' => true,
+            'fileName' => "evil\".docx\r\nX-Injected: yes",
             'document_content' => 'BINARY-CONTENT',
         ]);
 

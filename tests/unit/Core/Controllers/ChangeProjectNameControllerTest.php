@@ -203,7 +203,7 @@ class ChangeProjectNameControllerTest extends AbstractTest
         $this->setProp('project', $project);
 
         $this->setRequestParams([
-            'id_project' => (string) $this->projectId(self::BASE),
+            'id_project' => (string)$this->projectId(self::BASE),
             'password' => self::PROJECT_PASSWORD,
             'name' => str_repeat('p', 201),
         ]);
@@ -228,7 +228,7 @@ class ChangeProjectNameControllerTest extends AbstractTest
 
         $typed = 'Acme & Co (2024)';
         $this->setRequestParams([
-            'id_project' => (string) $this->projectId(self::BASE),
+            'id_project' => (string)$this->projectId(self::BASE),
             'password' => self::PROJECT_PASSWORD,
             'name' => $typed,
         ]);

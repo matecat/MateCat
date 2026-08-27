@@ -34,13 +34,11 @@ export function useGDrivePicker({setIsGDriveEnabled, onFilesPicked}) {
   const createPicker = useCallback(
     (service) => {
       const token = JSON.parse(service.oauth_access_token)
-      const picker = new google.picker.PickerBuilder()
-        .setAppId(config.clientId)
+      const picker = new google.picker.PickerBuilder().setAppId(config.clientId)
         .addView(google.picker.ViewId.DOCUMENTS)
         .addView(google.picker.ViewId.PRESENTATIONS)
         .addView(google.picker.ViewId.SPREADSHEETS)
-        .setOAuthToken(token.access_token)
-        .setDeveloperKey(config.developerKey)
+        .setOAuthToken(token.access_token).setDeveloperKey(config.developerKey)
         .setCallback(onFilesPicked)
         .enableFeature(google.picker.Feature.MINE_ONLY)
         .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)

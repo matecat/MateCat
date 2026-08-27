@@ -66,7 +66,6 @@ class CopyAllSourceToTargetController extends KleinController
         $database = $this->getDatabase();
 
         return $database->transaction(function () use ($chunk): array {
-
             $features = FeatureSet::forProject($chunk->getProject(new ProjectDao($this->getDatabase())), $this->getDatabase());
 
             $batchEventCreator = new TranslationEventsHandler($chunk, new TranslationEventDao($this->getDatabase()));

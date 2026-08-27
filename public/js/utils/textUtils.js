@@ -230,14 +230,11 @@ const TEXT_UTILS = {
     return array
   },
   replacePlaceholder: function (string) {
-    return string
-      .replaceAll(config.lfPlaceholder, 'softReturnMonad')
-      .replaceAll(config.crPlaceholder, 'crPlaceholder')
-      // No line for the combined ##$_0D0A$## placeholder on purpose: matecat/subfiltering encodes a
-      // CRLF as the two single placeholders (SpecialEntitiesToPlaceholdersForView), so the combined
-      // one never reaches the page. Only the decoder still accepts it, as legacy defence.
-      .replaceAll(config.tabPlaceholder, 'tabMarkerMonad')
-      .replaceAll(config.nbspPlaceholder, 'nbspPlMark')
+    return string.replaceAll(config.lfPlaceholder, 'softReturnMonad').replaceAll(config.crPlaceholder, 'crPlaceholder')
+        // No line for the combined ##$_0D0A$## placeholder on purpose: matecat/subfiltering encodes a
+        // CRLF as the two single placeholders (SpecialEntitiesToPlaceholdersForView), so the combined
+        // one never reaches the page. Only the decoder still accepts it, as legacy defence.
+        .replaceAll(config.tabPlaceholder, 'tabMarkerMonad').replaceAll(config.nbspPlaceholder, 'nbspPlMark')
   },
 
   restorePlaceholders: function (string) {

@@ -211,7 +211,8 @@ class SegmentDao extends AbstractDao
             // join placeholder took the step instead, emitting a bare number where a JOIN clause
             // belongs and making MySQL reject the whole statement. A fragment that carries no
             // specifiers cannot shift anything.
-            $union_ice = sprintf("UNION
+            $union_ice = sprintf(
+                "UNION
                 (SELECT distinct(s.id) AS __sid
                     FROM segments s
                     JOIN segment_translations st ON s.id = st.id_segment
@@ -222,7 +223,9 @@ class SegmentDao extends AbstractDao
                     AND st.status = :status
                     AND st.version_number = 0 AND st.match_type = 'ICE' AND st.translation_date IS NULL
                     ORDER BY __sid DESC
-                LIMIT %u)", $step);
+                LIMIT %u)",
+                $step
+            );
         } else {
             $union_ice = "";
         }
@@ -513,8 +516,8 @@ class SegmentDao extends AbstractDao
                 $stm->execute($values);
                 LoggerFactory::getLogger('project_manager')->debug("Segments: Executed Query " . ($i + 1));
             } catch (PDOException $e) {
-                LoggerFactory::getLogger('project_manager')->error("Segment import - DB Error: " . $e->getMessage());
-                throw new Exception("Segment import - DB Error: " . $e->getMessage() . " - " . var_export($chunk, true), -2);
+                LoggerFactory::getLogger('project_manager')->error("Segment import - DB error: " . $e->getMessage());
+                throw new Exception("Segment import - DB error: " . $e->getMessage() . " - " . var_export($chunk, true), -2);
             }
         }
     }

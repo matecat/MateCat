@@ -115,7 +115,6 @@ class ChangePasswordController extends KleinController
                     $jDao->changePassword($jStruct, $new_password);
                     FeatureSet::forProject($jStruct->getProject($pDao), $this->getDatabase())
                         ->dispatch(new JobPasswordChangedEvent($jStruct, $actual_pwd));
-
                 } else { // a review password was presented: rotate the phase that password belongs to
 
                     // The phase is read from the review row the password matched, never from a

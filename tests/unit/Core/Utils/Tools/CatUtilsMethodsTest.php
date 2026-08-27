@@ -71,15 +71,15 @@ class CatUtilsMethodsTest extends AbstractTest
     {
         return [
             'valid name unchanged'      => ['My_Project-123', 'My_Project-123'],
-            'punctuation kept'          => ['Hello@World#!', 'Hello@World#!'],
-            'ampersand kept'            => ['Acme & Co (2024)', 'Acme & Co (2024)'],
+            'punctuation kept' => ['Hello@World#!', 'Hello@World#!'],
+            'ampersand kept' => ['Acme & Co (2024)', 'Acme & Co (2024)'],
             'unicode letters kept'      => ['Progetto Ñoño', 'Progetto Ñoño'],
             'dots preserved'            => ['file.name.v2', 'file.name.v2'],
             'spaces preserved'          => ['My Project', 'My Project'],
             'empty string stays empty'  => ['', ''],
-            'symbols are a valid name'  => ['@#$%^&', '@#$%^&'],
-            'control characters go'     => ["Report\r\n2024", 'Report 2024'],
-            'cut to the column width'   => [str_repeat('p', 240), str_repeat('p', 200)],
+            'symbols are a valid name' => ['@#$%^&', '@#$%^&'],
+            'control characters go' => ["Report\r\n2024", 'Report 2024'],
+            'cut to the column width' => [str_repeat('p', 240), str_repeat('p', 200)],
         ];
     }
 
@@ -102,17 +102,17 @@ class CatUtilsMethodsTest extends AbstractTest
     {
         return [
             'normal name unchanged'       => ['John Doe', 'John Doe'],
-            'markup stored as typed'      => ['<script>alert("xss")</script>', '<script>alert("xss")</script>'],
-            'numbers kept'                => ['John123', 'John123'],
-            'punctuation kept'            => ['John!@#Doe', 'John!@#Doe'],
-            'apostrophe kept'             => ["O'Brien", "O'Brien"],
-            'hyphen kept'                 => ['Jean-Luc', 'Jean-Luc'],
-            'initials keep their dots'    => ['J.R. Ewing', 'J.R. Ewing'],
-            'cut to the column width'     => [str_repeat('A', 150), str_repeat('A', 100)],
+            'markup stored as typed' => ['<script>alert("xss")</script>', '<script>alert("xss")</script>'],
+            'numbers kept' => ['John123', 'John123'],
+            'punctuation kept' => ['John!@#Doe', 'John!@#Doe'],
+            'apostrophe kept' => ["O'Brien", "O'Brien"],
+            'hyphen kept' => ['Jean-Luc', 'Jean-Luc'],
+            'initials keep their dots' => ['J.R. Ewing', 'J.R. Ewing'],
+            'cut to the column width' => [str_repeat('A', 150), str_repeat('A', 100)],
             'double spaces collapsed'     => ['John   Doe', 'John Doe'],
             'unicode letters preserved'   => ['José García', 'José García'],
-            'non latin script preserved'  => ['李明', '李明'],
-            'control characters go'       => ["John\r\nDoe", 'John Doe'],
+            'non latin script preserved' => ['李明', '李明'],
+            'control characters go' => ["John\r\nDoe", 'John Doe'],
         ];
     }
 

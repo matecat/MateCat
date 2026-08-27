@@ -21,4 +21,7 @@ module.exports = {
     '^.+\\.js$': 'babel-jest',
     '.+\\.(css|styl|less|sass|scss)$': 'jest-transform-css',
   },
+  moduleNameMapper: {
+    '\\.module\\.(css|scss|sass|less)$': '<rootDir>/test-utils/cssModuleMock.js',
+  },
 }

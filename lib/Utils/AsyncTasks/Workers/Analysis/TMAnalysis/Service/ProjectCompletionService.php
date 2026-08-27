@@ -159,7 +159,7 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
                         (float)$rollup['st_wc']
                     );
 
-                    $jobs         = $this->repository->getProjectJobIds($pid);
+                    $jobs = $this->repository->getProjectJobIds($pid);
                     $numberOfJobs = count($jobs);
 
                     foreach ($jobs as $job) {

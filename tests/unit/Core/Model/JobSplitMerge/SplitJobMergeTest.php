@@ -227,8 +227,8 @@ class SplitJobMergeTest extends AbstractTest
 
         $translators = $this->createMock(TranslatorsModel::class);
         $translators->method('getTranslator')->willReturn(new JobsTranslatorsStruct([
-            'email'              => 'translator@example.org',
-            'delivery_date'      => '2026-09-01 12:00:00',
+            'email' => 'translator@example.org',
+            'delivery_date' => '2026-09-01 12:00:00',
             'job_owner_timezone' => 2.0,
         ]));
         $translators->expects($this->never())->method('update');
@@ -257,8 +257,8 @@ class SplitJobMergeTest extends AbstractTest
 
         $translators = $this->createMock(TranslatorsModel::class);
         $translators->method('getTranslator')->willReturn(new JobsTranslatorsStruct([
-            'email'              => 'translator@example.org',
-            'delivery_date'      => '2026-09-01 12:00:00',
+            'email' => 'translator@example.org',
+            'delivery_date' => '2026-09-01 12:00:00',
             'job_owner_timezone' => 2.0,
         ]));
         $translators->method('setUserInvite')->willReturnSelf();

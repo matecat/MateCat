@@ -107,7 +107,7 @@ class AbstractControllerTest extends AbstractTest
         $ctrl = new StubOutsourceController();
 
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage("'review_order_page' can not be EMPTY");
+        $this->expectExceptionMessage("'review_order_page' can not be empty");
 
         $ctrl->callValidateTheRequest();
     }
@@ -119,7 +119,7 @@ class AbstractControllerTest extends AbstractTest
         $this->setProp($ctrl, 'review_order_page', 'https://example.com/review');
 
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage("'tokenName' can not be EMPTY");
+        $this->expectExceptionMessage("'tokenName' can not be empty");
 
         $ctrl->callValidateTheRequest();
     }
@@ -133,7 +133,7 @@ class AbstractControllerTest extends AbstractTest
         $this->setProp($ctrl, 'id_vendor', null);
 
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage("'id_vendor' can not be EMPTY");
+        $this->expectExceptionMessage("'id_vendor' can not be empty");
 
         $ctrl->callValidateTheRequest();
     }
@@ -148,7 +148,7 @@ class AbstractControllerTest extends AbstractTest
         $this->setProp($ctrl, 'vendor_name', null);
 
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage("'vendor_name' can not be EMPTY");
+        $this->expectExceptionMessage("'vendor_name' can not be empty");
 
         $ctrl->callValidateTheRequest();
     }

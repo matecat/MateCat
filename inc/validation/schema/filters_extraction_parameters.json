@@ -10,9 +10,9 @@
       "nullable": true
     },
     "name": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 255
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 255
     },
     "json": {
       "type": "object",

@@ -23,6 +23,9 @@ let QualityReportActions = {
   },
 
   getMoreQRSegments(filter, segmentId) {
+    AppDispatcher.dispatch({
+      actionType: QRConstants.LOADING_MORE_SEGMENTS,
+    })
     getQualityReportSegmentsFiles(filter, segmentId).then((response) => {
       if (response.segments && response.segments.length > 0) {
         AppDispatcher.dispatch({

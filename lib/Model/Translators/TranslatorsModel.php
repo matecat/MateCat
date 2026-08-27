@@ -200,7 +200,7 @@ class TranslatorsModel
         $confirmationStruct = $confDao->getConfirmation($this->jStruct);
 
         if (!empty($confirmationStruct)) {
-            throw new InvalidArgumentException("The Job is Outsourced.", 400);
+            throw new InvalidArgumentException("The job is outsourced.", 400);
         }
 
         //create jobs_translator struct to call inside the dao

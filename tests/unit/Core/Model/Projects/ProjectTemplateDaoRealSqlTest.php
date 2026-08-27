@@ -296,9 +296,9 @@ class ProjectTemplateDaoRealSqlTest extends AbstractTest
 
     public function testRemoveSubTemplateEvictsTheProjectTemplatesItChanged(): void
     {
-        $struct                       = $this->newStruct('withsubcached');
+        $struct = $this->newStruct('withsubcached');
         $struct->qa_model_template_id = 7;
-        $saved                        = $this->dao->save($struct);
+        $saved = $this->dao->save($struct);
         $this->trackTemplate($saved->id);
 
         // The id handed to removeSubTemplateByIdAndUser numbers a sub-template, not a project
@@ -316,9 +316,9 @@ class ProjectTemplateDaoRealSqlTest extends AbstractTest
 
     public function testRemoveSubTemplateEvictsTheDefaultTemplate(): void
     {
-        $struct                       = $this->newStruct('withsubdefault', true);
+        $struct = $this->newStruct('withsubdefault', true);
         $struct->qa_model_template_id = 8;
-        $saved                        = $this->dao->save($struct);
+        $saved = $this->dao->save($struct);
         $this->trackTemplate($saved->id);
 
         // The default template is cached for a day, against the minute the by-id reads get, so a

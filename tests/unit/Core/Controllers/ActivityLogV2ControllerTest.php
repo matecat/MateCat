@@ -394,7 +394,7 @@ class ActivityLogV2ControllerTest extends AbstractTest
     {
         $this->setControllerUser(self::OUTSIDER_UID);
         $this->setRequestParams([
-            'id_job'   => (string) $this->jobId(self::BASE),
+            'id_job' => (string)$this->jobId(self::BASE),
             'password' => self::JOB_PASSWORD,
         ]);
 

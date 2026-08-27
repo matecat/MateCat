@@ -36,7 +36,7 @@ class IsOwnerInternalUserValidator extends Base
     public function _validate(): void
     {
         $event = $this->controller->getFeatureSet()->dispatch(new IsAnInternalUserEvent($this->jobStruct->owner));
-        $event->isInternal() ?: throw new AuthorizationError('Forbidden, This endpoint only accepts requests from internal users');
+        $event->isInternal() ?: throw new AuthorizationError('Forbidden, this endpoint only accepts requests from internal users');
     }
 
 

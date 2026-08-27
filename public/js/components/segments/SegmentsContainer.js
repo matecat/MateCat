@@ -28,6 +28,7 @@ import CommentsStore from '../../stores/CommentsStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import ContextPreviewChannel from '../../utils/contextPreviewChannel'
+import IconSplit from '../../../img/icons/IconSplit'
 
 const ROW_MARGIN = 3
 const ROW_HEIGHT = 90
@@ -691,9 +692,9 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     const hasAddedSegmentsBefore =
       rows.length > essentialRows.length &&
       essentialRows[0]?.id !== rows[0]?.id &&
-      // compared as numbers on purpose: segment ids arrive as strings from the API, while
-      // config.first_job_segment is a JSON number
-      Number(rows[0]?.id) !== Number(config.first_job_segment)
+        // compared as numbers on purpose: segment ids arrive as strings from the API, while
+        // config.first_job_segment is a JSON number
+        Number(rows[0]?.id) !== Number(config.first_job_segment)
     if (!hasAddedSegmentsBefore || current.haveBeenAddedSegmentsBefore) return
 
     const stopIndex = rows.findIndex(({id}) => id === essentialRows[0].id)
@@ -1042,7 +1043,7 @@ const getSegmentStructure = (segment, sideOpen) => {
         </div>
         <div className="actions">
           <button className="split" title="Click to split segment">
-            <i className="icon-split"> </i>
+            <IconSplit />
           </button>
           <p className="split-shortcut">CTRL + S</p>
         </div>

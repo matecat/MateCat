@@ -579,23 +579,23 @@ class SplitJobControllerTest extends AbstractTest
      */
     private function runRouteWithAForeignJobId(string $route): void
     {
-        $job     = $this->makeJobStub(99, 'correct_pw', false);
+        $job = $this->makeJobStub(99, 'correct_pw', false);
         $project = $this->makeOwnedProject();
 
         $this->controller->fakeJobs = [$job];
         $this->controller->fakeProjectData = [
-            'data'       => new SplitMergeProjectData(1),
-            'pManager'   => $this->createStub(JobSplitMergeManager::class),
+            'data' => new SplitMergeProjectData(1),
+            'pManager' => $this->createStub(JobSplitMergeManager::class),
             'count_type' => 'eq_word_count',
-            'project'    => $project,
+            'project' => $project,
         ];
 
         $this->stubRequestParams([
-            'project_id'   => '1',
+            'project_id' => '1',
             'project_pass' => 'pp',
-            'job_id'       => '4321',
-            'job_pass'     => 'correct_pw',
-            'num_split'    => '2',
+            'job_id' => '4321',
+            'job_pass' => 'correct_pw',
+            'num_split' => '2',
         ]);
 
         $this->controller->$route();

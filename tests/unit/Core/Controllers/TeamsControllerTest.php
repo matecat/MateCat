@@ -313,10 +313,12 @@ class TeamsControllerTest extends AbstractTest
         $captured = null;
         $this->responseMock->expects($this->once())
             ->method('json')
-            ->with($this->callback(function (array $data) use (&$captured): bool {
-                $captured = $data;
-                return true;
-            }));
+            ->with(
+                $this->callback(function (array $data) use (&$captured): bool {
+                    $captured = $data;
+                    return true;
+                })
+            );
 
         $this->controller->create();
 
@@ -666,12 +668,12 @@ class TeamsControllerTest extends AbstractTest
     {
         return [
             'a company named after its domain' => ['Acme.com'],
-            'a suffix that is not a domain'    => ['Alpha.Beta'],
-            'a hostname inside prose'          => ['Acme.guru Polite statements'],
-            'a name that is an address'        => ['f.surname@example.com'],
-            'an abbreviation'                  => ['Translated S.r.l.'],
+            'a suffix that is not a domain' => ['Alpha.Beta'],
+            'a hostname inside prose' => ['Acme.guru Polite statements'],
+            'a name that is an address' => ['f.surname@example.com'],
+            'an abbreviation' => ['Translated S.r.l.'],
             // Decoding happens before the scheme check, and a dot is no longer a reason to refuse.
-            'a dot smuggled as an entity'      => ['evil&#46;com'],
+            'a dot smuggled as an entity' => ['evil&#46;com'],
         ];
     }
 
@@ -690,10 +692,12 @@ class TeamsControllerTest extends AbstractTest
         $captured = null;
         $this->responseMock->expects($this->once())
             ->method('json')
-            ->with($this->callback(function (array $data) use (&$captured): bool {
-                $captured = $data;
-                return true;
-            }));
+            ->with(
+                $this->callback(function (array $data) use (&$captured): bool {
+                    $captured = $data;
+                    return true;
+                })
+            );
 
         $this->controller->create();
 

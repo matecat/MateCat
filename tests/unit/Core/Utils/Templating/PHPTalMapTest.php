@@ -120,8 +120,8 @@ class PHPTalMapTest extends AbstractTest
         return [
             'categories' => [
                 [
-                    'id'         => 1,
-                    'label'      => self::HOSTILE_LABEL,
+                    'id' => 1,
+                    'label' => self::HOSTILE_LABEL,
                     'severities' => [
                         ['id' => 1, 'label' => self::HOSTILE_LABEL, 'penalty' => 1],
                     ],
@@ -149,7 +149,7 @@ class PHPTalMapTest extends AbstractTest
     {
         return [
             'lqa_nested_categories' => [self::nestedCategories()],
-            'lqa_flat_categories'   => [self::flatCategories()],
+            'lqa_flat_categories' => [self::flatCategories()],
         ];
     }
 
@@ -183,9 +183,9 @@ class PHPTalMapTest extends AbstractTest
     #[Test]
     public function aHostileCategoryLabelIsInertInTheConfigurationDocument(): void
     {
-        $view                          = new PHPTAL();
-        $view->lqa_nested_categories   = new PHPTalMap(self::nestedCategories());
-        $view->lqa_flat_categories     = new PHPTalMap(self::flatCategories());
+        $view = new PHPTAL();
+        $view->lqa_nested_categories = new PHPTalMap(self::nestedCategories());
+        $view->lqa_flat_categories = new PHPTalMap(self::flatCategories());
 
         $document = (string)(new BootstrapConfig($view));
 
@@ -219,7 +219,7 @@ class PHPTalMapTest extends AbstractTest
         );
 
         try {
-            $view                      = new PHPTAL($templatePath);
+            $view = new PHPTAL($templatePath);
             $view->setOutputMode(PHPTAL::HTML5);
             $view->lqa_flat_categories = new PHPTalMap(self::flatCategories());
 
