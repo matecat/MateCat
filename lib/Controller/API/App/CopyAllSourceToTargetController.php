@@ -20,6 +20,7 @@ use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 use TypeError;
 use Utils\Constants\TranslationStatus;
 
@@ -57,81 +58,78 @@ class CopyAllSourceToTargetController extends KleinController
      * @throws ReflectionException
      * @throws TypeError
      * @throws Exception
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction
+     *                   on any throw and re-throws the original, whatever its type
      */
     private function saveEventsAndUpdateTranslations(JobStruct $chunk): array
     {
-        // BEGIN TRANSACTION
         $database = $this->getDatabase();
-        $database->begin();
 
-        $features = FeatureSet::forProject($chunk->getProject(new ProjectDao($this->getDatabase())), $this->getDatabase());
+        return $database->transaction(function () use ($chunk): array {
+            $features = FeatureSet::forProject($chunk->getProject(new ProjectDao($this->getDatabase())), $this->getDatabase());
 
-        $batchEventCreator = new TranslationEventsHandler($chunk, new TranslationEventDao($this->getDatabase()));
-        $batchEventCreator->setFeatureSet($features);
-        $batchEventCreator->setProject($chunk->getProject(new ProjectDao($this->getDatabase())));
-        $segments = $chunk->getSegments(new SegmentDao($this->getDatabase()));
+            $batchEventCreator = new TranslationEventsHandler($chunk, new TranslationEventDao($this->getDatabase()));
+            $batchEventCreator->setFeatureSet($features);
+            $batchEventCreator->setProject($chunk->getProject(new ProjectDao($this->getDatabase())));
+            $segments = $chunk->getSegments(new SegmentDao($this->getDatabase()));
 
-        $affected_rows = 0;
+            $affected_rows = 0;
 
-        foreach ($segments as $segment) {
-            $segment_id = $segment->id;
-            $chunk_id = (int)$chunk->id;
+            foreach ($segments as $segment) {
+                $segment_id = $segment->id;
+                $chunk_id = (int)$chunk->id;
 
-            $segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
-            $old_translation = $segmentTranslationDao->findBySegmentAndJob($segment_id, $chunk_id);
+                $segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
+                $old_translation = $segmentTranslationDao->findBySegmentAndJob($segment_id, $chunk_id);
 
-            if (empty($old_translation) || ($old_translation->status !== TranslationStatus::STATUS_NEW)) {
-                //no segment found
-                continue;
-            }
+                if (empty($old_translation) || ($old_translation->status !== TranslationStatus::STATUS_NEW)) {
+                    //no segment found
+                    continue;
+                }
 
-            $new_translation = clone $old_translation;
-            $new_translation->translation = $segment->segment;
-            $new_translation->status = TranslationStatus::STATUS_DRAFT;
-            $new_translation->translation_date = date("Y-m-d H:i:s");
+                $new_translation = clone $old_translation;
+                $new_translation->translation = $segment->segment;
+                $new_translation->status = TranslationStatus::STATUS_DRAFT;
+                $new_translation->translation_date = date("Y-m-d H:i:s");
 
-            try {
-                $affected_rows += $segmentTranslationDao->updateTranslationAndStatusAndDate($new_translation);
-            } catch (Exception $e) {
-                $database->rollback();
-
-                throw new RuntimeException($e->getMessage(), -4);
-            }
-
-            if ($features->hasFeature(FeatureCodes::TRANSLATION_VERSIONS)) {
                 try {
-                    $segmentTranslationEventModel = new TranslationEvent(
-                        $old_translation,
-                        $new_translation,
-                        $this->user,
-                        $this->chunk->getSourcePage(),
-                        null,
-                        new TranslationEventDao($this->getDatabase()),
-                        new SegmentDao($this->getDatabase())
-                    );
-                    $batchEventCreator->addEvent($segmentTranslationEventModel);
-                } catch (Exception) {
-                    $database->rollback();
+                    $affected_rows += $segmentTranslationDao->updateTranslationAndStatusAndDate($new_translation);
+                } catch (Exception $e) {
+                    // Re-thrown rather than rolled back: the scope owns the undo and re-throws this.
+                    throw new RuntimeException($e->getMessage(), -4);
+                }
 
-                    throw new RuntimeException("Job archived or deleted", -5);
+                if ($features->hasFeature(FeatureCodes::TRANSLATION_VERSIONS)) {
+                    try {
+                        $segmentTranslationEventModel = new TranslationEvent(
+                            $old_translation,
+                            $new_translation,
+                            $this->user,
+                            $this->chunk->getSourcePage(),
+                            null,
+                            new TranslationEventDao($this->getDatabase()),
+                            new SegmentDao($this->getDatabase())
+                        );
+                        $batchEventCreator->addEvent($segmentTranslationEventModel);
+                    } catch (Exception) {
+                        throw new RuntimeException("Job archived or deleted", -5);
+                    }
                 }
             }
-        }
 
-        // save all events
-        $batchEventCreator->save(new BatchReviewProcessor(new ChunkReviewDao($this->getDatabase()), $this->user));
+            // save all events
+            $batchEventCreator->save(new BatchReviewProcessor(new ChunkReviewDao($this->getDatabase()), $this->user));
 
-        $data = [
-            'code' => 1,
-            'segments_modified' => $affected_rows
-        ];
+            $data = [
+                'code' => 1,
+                'segments_modified' => $affected_rows
+            ];
 
-        $this->logger->debug('Segment Translation events saved completed');
-        $this->logger->debug($data);
+            $this->logger->debug('Segment Translation events saved completed');
+            $this->logger->debug($data);
 
-        $database->commit(); // COMMIT TRANSACTION
-
-        return $data;
+            return $data;
+        });
     }
 }
 

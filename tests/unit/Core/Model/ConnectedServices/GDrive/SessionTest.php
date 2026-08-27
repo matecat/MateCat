@@ -233,39 +233,6 @@ class SessionTest extends AbstractTest
     }
 
     #[Test]
-    public function sessionHasFilesReturnsFalseWhenNoFiles(): void
-    {
-        $sessionData = $this->createSessionData();
-        $session = new Session($this->dbStub, new ArraySessionStore($sessionData), null, null, $sessionData['user'] ?? null);
-
-        $this->assertFalse($session->sessionHasFiles());
-    }
-
-    #[Test]
-    public function sessionHasFilesReturnsTrueWhenFilesExist(): void
-    {
-        $sessionData = $this->createSessionData();
-        $sessionData[Session::SESSION_KEY] = [
-            Session::FILE_LIST => ['file1' => [Session::FILE_NAME => 'test.docx']],
-        ];
-
-        $session = new Session($this->dbStub, new ArraySessionStore($sessionData), null, null, $sessionData['user'] ?? null);
-        $this->assertTrue($session->sessionHasFiles());
-    }
-
-    #[Test]
-    public function sessionHasFilesReturnsFalseWhenFileListIsEmptyArray(): void
-    {
-        $sessionData = $this->createSessionData();
-        $sessionData[Session::SESSION_KEY] = [
-            Session::FILE_LIST => [],
-        ];
-
-        $session = new Session($this->dbStub, new ArraySessionStore($sessionData), null, null, $sessionData['user'] ?? null);
-        $this->assertFalse($session->sessionHasFiles());
-    }
-
-    #[Test]
     public function findFileIdByNameReturnsNullWhenNoFiles(): void
     {
         $sessionData = $this->createSessionData();

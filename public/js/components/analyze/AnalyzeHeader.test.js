@@ -268,4 +268,19 @@ describe('word-count box flash animation', () => {
       'updated-count',
     )
   })
+
+  test('does not throw when unmounted while the flash timeout is pending', () => {
+    const {rerender, unmount} = render(
+      <AnalyzeHeader data={buildData(50)} project={project} />,
+    )
+
+    rerender(<AnalyzeHeader data={buildData(20)} project={project} />)
+    unmount()
+
+    expect(() => {
+      act(() => {
+        jest.advanceTimersByTime(400)
+      })
+    }).not.toThrow()
+  })
 })

@@ -17,6 +17,7 @@ use Psr\Log\InvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
 use SplFileObject;
+use Throwable;
 use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\MMT\MMTServiceApi;
@@ -343,6 +344,8 @@ class MMT extends AbstractEngine
 
     /**
      * @throws Exception
+     * @throws Throwable the metadata write runs inside a transaction scope, which aborts the
+     *                   transaction on any throw and re-throws the original, whatever its type
      */
     public function syncMemories(array $projectRow, ?array $segments = []): void
     {
@@ -387,25 +390,26 @@ class MMT extends AbstractEngine
 
                 $jMetadataDao = new MetadataDao($this->database);
 
-                $this->database->begin();
-                foreach ($result as $langPair => $context) {
-                    $jobId = array_search($langPair, $jobLanguages, true);
-                    if ($jobId === false) {
-                        continue;
-                    }
+                $this->database->transaction(function () use ($result, $jobLanguages, $jMetadataDao): void {
+                    foreach ($result as $langPair => $context) {
+                        $jobId = array_search($langPair, $jobLanguages, true);
+                        if ($jobId === false) {
+                            continue;
+                        }
 
-                    $jMetadataDao->setCacheTTL(60 * 60 * 24 * 30)->set(
-                        (int)$jobId,
-                        "",
-                        'mt_context',
-                        $context
-                    );
-                }
-                $this->database->commit();
+                        $jMetadataDao->set(
+                            (int)$jobId,
+                            "",
+                            'mt_context',
+                            $context
+                        );
+                    }
+                });
             } catch (Exception $e) {
+                // Swallowed as before: an MT context that fails to store is not worth failing the
+                // sync over. The scope has already undone the writes by the time this runs.
                 $this->logger->debug($e->getMessage());
                 $this->logger->debug($e->getTraceAsString());
-                $this->database->rollback();
             } finally {
                 unset($tmpFileObject);
                 @unlink($tmp_name);

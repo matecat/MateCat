@@ -20,6 +20,7 @@ use ReflectionClass;
 use RuntimeException;
 use Utils\Engines\Results\MyMemory\ExportResponse;
 use Utils\TMS\TMSService;
+use Utils\TmKeyManagement\TmKeyManager;
 
 /**
  * Testable subclass: the empty constructor bypasses Klein DI wiring so
@@ -212,6 +213,77 @@ class GlossaryFilesV2ControllerTest extends AbstractTest
         self::assertSame('My Glossary', $this->reflector->getProperty('name')->getValue($this->controller));
         self::assertSame('abc123key', $this->reflector->getProperty('tm_key')->getValue($this->controller));
         self::assertSame('tok-42', $this->reflector->getProperty('downloadToken')->getValue($this->controller));
+    }
+
+    #[Test]
+    public function validateRequest_leaves_the_name_null_when_it_is_not_a_string(): void
+    {
+        // `name[]=a&name[]=b` is a request anyone can send, and `filter_var_array` answers an array
+        // it was not told to expect with false. Normalising that would mean passing false to a
+        // string parameter; the name is left unset instead, which the callers already handle because
+        // this endpoint's name is optional — on the upload paths it comes from the file.
+        $this->setProp('request', new Request([
+            'tm_key' => 'abc123key',
+            'name' => ['first', 'second'],
+        ]));
+
+        $this->invoke('validateRequest');
+
+        self::assertNull($this->reflector->getProperty('name')->getValue($this->controller));
+    }
+
+    #[Test]
+    public function validateRequest_normalizes_an_absent_name_to_an_empty_string(): void
+    {
+        // Not the same path as above: an absent key arrives as the empty string rather than as a
+        // non-string, so it is normalised like any other value and stays empty. Pinned because the
+        // two look interchangeable and only one of them reaches the normalizer.
+        $this->setProp('request', new Request([
+            'tm_key' => 'abc123key',
+            'downloadToken' => 'tok-42',
+        ]));
+
+        $this->invoke('validateRequest');
+
+        self::assertSame('', $this->reflector->getProperty('name')->getValue($this->controller));
+    }
+
+    #[Test]
+    public function validateRequest_normalizes_the_name_it_stores(): void
+    {
+        // FILTER_SANITIZE_SPECIAL_CHARS used to entity-encode this on the way in, so a glossary
+        // called "A & B" was stored as "A &#38; B" and shown that way for good. It is stored as
+        // typed now, which makes normalising it the only thing standing between a CR in a glossary
+        // name and the Subject header of a notification email.
+        $this->setProp('request', new Request([
+            'tm_key' => 'abc123key',
+            'name' => "A & B\r\nGlossary   \u{200B}2024 ",
+        ]));
+
+        $this->invoke('validateRequest');
+
+        self::assertSame(
+            'A & B Glossary 2024',
+            $this->reflector->getProperty('name')->getValue($this->controller)
+        );
+    }
+
+    #[Test]
+    public function validateRequest_cuts_a_name_to_fit_the_column(): void
+    {
+        // `memory_keys`.`key_name` is a varchar(512). This path truncates rather than refusing,
+        // because the name is a label on an upload that has already happened.
+        $this->setProp('request', new Request([
+            'tm_key' => 'abc123key',
+            'name' => str_repeat('g', TmKeyManager::RESOURCE_NAME_MAX_LENGTH + 50),
+        ]));
+
+        $this->invoke('validateRequest');
+
+        self::assertSame(
+            str_repeat('g', TmKeyManager::RESOURCE_NAME_MAX_LENGTH),
+            $this->reflector->getProperty('name')->getValue($this->controller)
+        );
     }
 
     // ── setSuccessResponse ───────────────────────────────────────────────

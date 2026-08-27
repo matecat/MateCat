@@ -42,7 +42,7 @@ describe('SegmentFooterTabMessages', () => {
 
   test('renders note content as a link when getContentWithAllowedLinkRedirect returns multiple pieces', () => {
     const textUtils = require('../../utils/textUtils')
-    // getNoteContent calls getContentWithAllowedLinkRedirect twice
+    // getNoteContentStructure calls getContentWithAllowedLinkRedirect twice
     // (once to check length, once to map), so queue the value for both calls.
     const multiPiece = ['See ', {isLink: true, link: 'https://matecat.com'}]
     textUtils.getContentWithAllowedLinkRedirect
@@ -106,9 +106,7 @@ describe('SegmentFooterTabMessages', () => {
     })
     // This branch does not append visible notes due to a forEach not
     // propagating its return value, but it must not throw.
-    expect(
-      container.querySelector('.segments-notes-container'),
-    ).toBeInTheDocument()
+    expect(container.querySelector('.segments-notes-container')).toBeInTheDocument()
   })
 
   test('renders a note when item.json is a plain string', () => {

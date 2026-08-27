@@ -80,7 +80,11 @@ const SegmentQRLine = ({
         .toString()
         .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'), '')
         .replace(/·/g, ' ')
-      return await navigator.clipboard.writeText(plainText)
+      try {
+        await navigator.clipboard.writeText(plainText)
+      } catch {
+        // The browser or OS denied clipboard permission — nothing more we can do here.
+      }
     }
   }
 

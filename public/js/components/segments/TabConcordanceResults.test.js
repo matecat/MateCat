@@ -32,8 +32,8 @@ beforeAll(() => {
     ...global.config,
     isSourceRTL: false,
     isTargetRTL: false,
-    target_code: 'it-IT',
-    source_code: 'en-US',
+    target_rfc: 'it-IT',
+    source_rfc: 'en-US',
   }
 })
 
@@ -79,7 +79,9 @@ describe('TabConcordanceResults', () => {
     act(() => {
       SegmentStore.__emit(SegmentConstants.CONCORDANCE_RESULT, '3', [])
     })
-    expect(screen.getByText(/Can't find any matches/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/Can't find any matches/i),
+    ).toBeInTheDocument()
   })
 
   test('ignores non-array result data', () => {
@@ -87,7 +89,9 @@ describe('TabConcordanceResults', () => {
     act(() => {
       SegmentStore.__emit(SegmentConstants.CONCORDANCE_RESULT, '3', null)
     })
-    expect(screen.getByText(/Can't find any matches/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/Can't find any matches/i),
+    ).toBeInTheDocument()
   })
 
   test('renders results and filters out entries missing segment/translation', () => {

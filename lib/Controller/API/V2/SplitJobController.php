@@ -3,7 +3,6 @@
 namespace Controller\API\V2;
 
 use Controller\Abstracts\KleinController;
-use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectAccessValidator;
@@ -88,7 +87,7 @@ class SplitJobController extends KleinController
         $pManager = $projectStructure['pManager'];
         $project = $projectStructure['project'];
 
-        $jobStructs = $this->checkMergeAccess($request['job_id'], $this->getProjectJobs($project));
+        $jobStructs = $this->filterJobsById($request['job_id'], $this->getProjectJobs($project));
         $data->jobToMerge = $request['job_id'];
         $pManager->mergeALL($data, $jobStructs);
 
@@ -308,46 +307,41 @@ class SplitJobController extends KleinController
     }
 
     /**
-     * @param int $jid
      * @param JobStruct[] $jobList
-     *
-     * @return JobStruct[]
      *
      * @throws NotFoundException
-     */
-    private function checkMergeAccess(int $jid, array $jobList): array
-    {
-        try {
-            return $this->filterJobsById($jid, $jobList);
-        } catch (AuthenticationError $e) {
-            // 404, not the 401 filterJobsById raises for the split endpoints: a job id that is not in
-            // this project is a missing record, and the caller is authenticated. This is also the status
-            // the retired JobMergeController returned here, so its api-key callers see no change.
-            throw new NotFoundException($e->getMessage(), $e->getCode(), $e);
-        }
-    }
-
-    /**
-     * @param JobStruct[] $jobList
-     *
-     * @throws AuthenticationError
      * @throws InvalidArgumentException
      */
     private function checkSplitAccess(int $jid, string $job_pass, array $jobList): void
     {
         $jobToSplit = $this->filterJobsById($jid, $jobList);
 
-        if ($jobToSplit[0]->password != $job_pass) {
+        $knownPassword = $jobToSplit[0]->password;
+
+        // a password is a secret: `!=` compares two numeric strings numerically in PHP 8, so
+        // '1e3' and '1000' would match, and it is not constant-time either. A job without a
+        // password cannot be unlocked by presenting one, which `null != ''` used to allow.
+        if ($knownPassword === null || !hash_equals($knownPassword, $job_pass)) {
             throw new InvalidArgumentException("Access denied", -10);
         }
     }
 
     /**
+     * The chunks of one job inside a project the caller has already been granted.
+     *
+     * 404, not 401: by the time this runs the caller is authenticated and holds standing over the
+     * project — LoginValidator, then the project id and password, then owner-or-member. A job id that
+     * names nothing in that project is a record that is not there, and answering "unauthenticated" to
+     * a caller who just proved otherwise tells them to log in again for a mistake no login fixes.
+     * Merge already converted this to a 404 in its own wrapper, to keep the status the retired
+     * JobMergeController gave its api-key callers; check and apply answered 401 for the same input
+     * until the conversion moved here, where all three share it.
+     *
      * @param JobStruct[] $jobList
      *
      * @return JobStruct[]
      *
-     * @throws AuthenticationError
+     * @throws NotFoundException
      */
     private function filterJobsById(int $jid, array $jobList): array
     {
@@ -356,7 +350,8 @@ class SplitJobController extends KleinController
         }));
 
         if (empty($filteredJobs)) {
-            throw new AuthenticationError("Access denied", -10);
+            // Message and code are the ones merge already returned, so no caller sees its body change.
+            throw new NotFoundException("Access denied", -10);
         }
 
         return $filteredJobs;

@@ -58,15 +58,16 @@ class CatUtilsTest extends AbstractTest
     }
 
     /**
-     * Test that an invalid project name is sanitized.
+     * Test that a project name carrying punctuation is kept rather than rewritten.
      */
     #[Test]
-    public function testSanitizeOrFallbackProjectNameWithInvalidName()
+    public function testSanitizeOrFallbackProjectNameWithPunctuation()
     {
+        // Punctuation is no longer deleted, so this name is not "invalid" any more and no fallback
+        // is reached. Only an input that normalises to nothing at all does that.
         $invalidName = "Invalid@Project#Name!";
-        $expected_name = "InvalidProjectName";
         $sanitizedName = CatUtils::sanitizeOrFallbackProjectName($invalidName);
-        $this->assertEquals($expected_name, $sanitizedName);
+        $this->assertEquals($invalidName, $sanitizedName);
     }
 
     /**
@@ -561,19 +562,22 @@ class CatUtilsTest extends AbstractTest
     }
 
     #[Test]
-    public function testStripMaliciousContentRemovesSpecialCharsL(): void
+    public function testStripMaliciousContentKeepsPunctuationL(): void
     {
+        // Punctuation used to be replaced with spaces, which cost every O'Brien its apostrophe.
+        // A name is stored as typed; the output that prints it escapes it.
         $result = CatUtils::stripMaliciousContentFromAName("John@Doe!");
-        // @ and ! are non-letters, replaced with spaces, then trimmed
-        $this->assertEquals("John Doe", $result);
+        $this->assertEquals("John@Doe!", $result);
     }
 
     #[Test]
-    public function testStripMaliciousContentTruncatesToFiftyCharsL(): void
+    public function testStripMaliciousContentCutsToTheColumnWidthL(): void
     {
-        $longName = str_repeat('A', 60);
+        // `users`.`first_name` is a varchar(100). It was read as varchar(50) for a while, which cut
+        // a sixty-character name in a column that had room for it.
+        $longName = str_repeat('A', 150);
         $result = CatUtils::stripMaliciousContentFromAName($longName);
-        $this->assertLessThanOrEqual(50, mb_strlen($result));
+        $this->assertSame(CatUtils::PERSON_NAME_MAX_LENGTH, mb_strlen($result));
     }
 
     #[Test]
@@ -595,10 +599,10 @@ class CatUtilsTest extends AbstractTest
     // -------------------------------------------------------------------------
 
     #[Test]
-    public function testSanitizeProjectNameRemovesSpecialCharsL(): void
+    public function testSanitizeProjectNameKeepsPunctuationL(): void
     {
         $result = CatUtils::sanitizeProjectName("Project@#2024!");
-        $this->assertEquals("Project2024", $result);
+        $this->assertEquals("Project@#2024!", $result);
     }
 
     #[Test]
@@ -618,8 +622,10 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testSanitizeProjectNameWithOnlySpecialCharsL(): void
     {
+        // Symbols are a name a user may choose. Only an input that normalises to nothing at all is
+        // empty, and only that reaches the generated fallback.
         $result = CatUtils::sanitizeProjectName("@#$%!");
-        $this->assertEquals("", $result);
+        $this->assertEquals("@#$%!", $result);
     }
 
     // -------------------------------------------------------------------------

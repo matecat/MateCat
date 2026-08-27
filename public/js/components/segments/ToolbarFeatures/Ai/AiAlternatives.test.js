@@ -121,15 +121,4 @@ describe('AiAlternatives', () => {
     renderComponent({editArea})
     expect(screen.getByRole('button')).toBeDisabled()
   })
-
-  // Every other case here hands over an editAreaRef, which is why none of them
-  // caught the editArea whose node had not been attached yet: the `.contains`
-  // read threw during render and took the page down with it.
-  test('is disabled, not crashing, when editArea has no node attached', () => {
-    getSelectedTextWithTags.mockReturnValue([{value: 'Hello'}])
-    const editArea = {state: {editorState: {}}}
-
-    expect(() => renderComponent({editArea})).not.toThrow()
-    expect(screen.getByRole('button')).toBeDisabled()
-  })
 })

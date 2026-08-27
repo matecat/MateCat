@@ -60,12 +60,7 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
     /**
      * @var list<array{int, string|null}>
      */
-    private array $projectDataCalls = [];
-
-    /**
-     * @var list<int>
-     */
-    private array $projectRowCalls = [];
+    private array $projectCacheCalls = [];
 
     private function makeInvalidator(): JobCredentialCacheInvalidator
     {
@@ -117,17 +112,9 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
 
         $projectDao = $this->createStub(ProjectDao::class);
         $projectDao->method('findById')->willReturn($project);
-        $projectDao->method('destroyCacheForProjectData')
-            ->willReturnCallback(function (int $pid, ?string $projectPassword = null): bool {
-                $this->projectDataCalls[] = [$pid, $projectPassword];
-
-                return true;
-            });
-        $projectDao->method('destroyFetchByIdCache')
-            ->willReturnCallback(function (int $id, string $fetchClass): bool {
-                $this->projectRowCalls[] = $id;
-
-                return true;
+        $projectDao->method('destroyCache')
+            ->willReturnCallback(function (int $id, ?string $password = null): void {
+                $this->projectCacheCalls[] = [$id, $password];
             });
 
         return new JobCredentialCacheInvalidator($jobDao, $chunkReviewDao, $projectDao);
@@ -185,16 +172,15 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
     }
 
     #[Test]
-    public function jobPasswordRotation_evicts_both_project_data_shapes_and_leaves_the_project_row(): void
+    public function jobPasswordRotation_evicts_the_project_cache_through_the_single_door(): void
     {
         $this->makeInvalidator()->sweepAfterJobPasswordRotation($this->makeChunk('new-pw'), 'old-pw', 'new-pw');
 
-        // getProjectData is read both with and without the project password, and it selects the job
-        // password, so both keys go.
-        self::assertSame([[self::ID_PROJECT, null], [self::ID_PROJECT, 'project-pw']], $this->projectDataCalls);
-
-        // The projects row carries no job credential: rotating one leaves it valid.
-        self::assertSame([], $this->projectRowCalls);
+        // getProjectData selects the job password, so its entries have to go. Which keys that means is
+        // ProjectDao's own inventory, not something to enumerate from here: one call to the door, and
+        // a read added to the DAO later cannot leave a stale entry behind. It also drops the project
+        // row, which the rotation left valid, at the price of one miss on a rare event.
+        self::assertSame([[self::ID_PROJECT, null]], $this->projectCacheCalls);
     }
 
     #[Test]
@@ -263,8 +249,7 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
         // review password: evicting either would only cost the other pages their cache.
         self::assertSame([], $this->jobRowCalls);
         self::assertSame([], $this->jobPasswordSweepCalls);
-        self::assertSame([], $this->projectDataCalls);
-        self::assertSame([], $this->projectRowCalls);
+        self::assertSame([], $this->projectCacheCalls);
     }
 
     #[Test]

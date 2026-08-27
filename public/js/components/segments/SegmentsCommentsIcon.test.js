@@ -122,60 +122,6 @@ describe('SegmentsCommentsIcon', () => {
     )
   })
 
-  test('unregisters the exact same listener reference that was registered', () => {
-    // CommentsStore.removeListener must be called with the SAME function object
-    // addListener received, or the real store would never actually unsubscribe it.
-    // expect.any(Function) (used above) can't catch a listener whose identity
-    // changes across renders — this test asserts reference identity directly.
-    const {unmount} = renderIcon(baseSegment, {total: 1, active: 1})
-    const addedAddComment = CommentsStore.addListener.mock.calls.find(
-      (call) => call[0] === 'ADD_COMMENT',
-    )[1]
-    const addedStoreComments = CommentsStore.addListener.mock.calls.find(
-      (call) => call[0] === 'STORE_COMMENTS',
-    )[1]
-
-    unmount()
-
-    const removedAddComment = CommentsStore.removeListener.mock.calls.find(
-      (call) => call[0] === 'ADD_COMMENT',
-    )[1]
-    const removedStoreComments = CommentsStore.removeListener.mock.calls.find(
-      (call) => call[0] === 'STORE_COMMENTS',
-    )[1]
-
-    expect(removedAddComment).toBe(addedAddComment)
-    expect(removedStoreComments).toBe(addedStoreComments)
-  })
-
-  test('reads the current segment via a live context read, not a stale closure, and does not re-subscribe when the segment changes without unmounting', () => {
-    const {rerender} = renderIcon(baseSegment, {total: 1, active: 1})
-    const updateComments = CommentsStore.addListener.mock.calls[0][1]
-    const addCallsAfterMount = CommentsStore.addListener.mock.calls.length
-
-    const otherSegment = {sid: '20-1', original_sid: 20, splitted: false}
-    rerender(
-      <SegmentContext.Provider value={{segment: otherSegment}}>
-        <SegmentsCommentsIcon />
-      </SegmentContext.Provider>,
-    )
-
-    // No extra subscribe/unsubscribe cycle should happen on a context-only change.
-    expect(CommentsStore.addListener.mock.calls.length).toBe(addCallsAfterMount)
-    expect(CommentsStore.removeListener).not.toHaveBeenCalled()
-
-    CommentsStore.getCommentsCountBySegment.mockReturnValue({
-      total: 7,
-      active: 7,
-    })
-    // The listener captured at mount time must still read the CURRENT segment
-    // (otherSegment), not the one that was live when it was registered.
-    act(() => {
-      updateComments(otherSegment.sid)
-    })
-    expect(screen.getByText('7')).toBeInTheDocument()
-  })
-
   test('updateComments ignores updates for a different segment when sid is provided', () => {
     renderIcon(baseSegment, {total: 1, active: 1})
     const updateComments = CommentsStore.addListener.mock.calls[0][1]

@@ -669,6 +669,51 @@ class SimpleJWTTest extends AbstractTest
         $this->assertTrue(SimpleJWT::isValid($storage, $this->secretKey));
     }
 
+    #[Test]
+    public function testGetExpireDateOnAParsedInstanceReturnsTheTokenExp(): void
+    {
+        $jwt = new SimpleJWT(['foo' => 'bar'], 'simple.jwt.claims', $this->secretKey, 3600);
+        $original = $jwt->sign();
+
+        $parsed = SimpleJWT::getValidatedInstanceFromString((string)$jwt, $this->secretKey);
+
+        // A parsed instance must report the expiry the token actually carries, not iat + exp.
+        $this->assertSame($original['payload']['exp'], $parsed->getExpireDate());
+    }
+
+    #[Test]
+    public function testReSigningAParsedInstancePreservesIatAndExp(): void
+    {
+        $jwt = new SimpleJWT(['foo' => 'bar'], 'simple.jwt.claims', $this->secretKey, 3600);
+        $original = $jwt->sign();
+
+        $reSigned = SimpleJWT::getValidatedInstanceFromString((string)$jwt, $this->secretKey)->sign();
+
+        $this->assertSame($original['payload']['iat'], $reSigned['payload']['iat']);
+        $this->assertSame($original['payload']['exp'], $reSigned['payload']['exp']);
+    }
+
+    #[Test]
+    public function testGetExpireDateOnAParsedInstanceWithoutExpFallsBackToIssuedAt(): void
+    {
+        $jwt = new SimpleJWT(['foo' => 'bar'], 'simple.jwt.claims', $this->secretKey, 3600);
+        $original = $jwt->sign();
+
+        $payload = $original['payload'];
+        unset($payload['exp']);
+
+        $tokenWithoutExp = $this->base64UrlEncode(json_encode($original['header'])) .
+            '.' .
+            $this->base64UrlEncode(json_encode($payload)) .
+            '.' .
+            $this->base64UrlEncode('unchecked-signature');
+
+        $parsed = SimpleJWT::getNotValidatedInstanceFromString($tokenWithoutExp);
+
+        // No exp to report: the instance has no lifetime, so the expiry collapses onto iat.
+        $this->assertSame($payload['iat'], $parsed->getExpireDate());
+    }
+
     /**
      * Helper for tests to mirror SimpleJWT::base64url_encode behavior.
      */

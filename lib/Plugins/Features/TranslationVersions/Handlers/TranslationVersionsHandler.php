@@ -7,7 +7,6 @@ use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
-use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Propagation\PropagationResult;
 use Model\Segments\SegmentDao;
@@ -23,6 +22,7 @@ use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
 use Plugins\Features\TranslationVersions\StoreTranslationEventParams;
 use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 use RuntimeException;
+use Throwable;
 use Utils\Constants\TranslationStatus;
 
 /**
@@ -51,7 +51,6 @@ class TranslationVersionsHandler implements VersionHandlerInterface
 
     private SegmentTranslationDao $segmentTranslationDao;
     private JobDao $jobDao;
-    private ProjectDao $projectDao;
     private IDatabase $database;
 
     /**
@@ -80,7 +79,6 @@ class TranslationVersionsHandler implements VersionHandlerInterface
         $this->dao = new TranslationVersionDao($database);
         $this->segmentTranslationDao = new SegmentTranslationDao($database);
         $this->jobDao = new JobDao($database);
-        $this->projectDao = new ProjectDao($database);
     }
 
     /**
@@ -181,6 +179,8 @@ class TranslationVersionsHandler implements VersionHandlerInterface
     /**
      * @throws Exception
      * @throws \TypeError
+     * @throws Throwable the event save runs inside a transaction scope, which aborts the transaction
+     *                   on any throw and re-throws the original, whatever its type
      */
     public function storeTranslationEvent(StoreTranslationEventParams $params): void
     {
@@ -248,8 +248,9 @@ class TranslationVersionsHandler implements VersionHandlerInterface
 
         try {
             $translationEventsHandler->save($this->createBatchReviewProcessor($params->user));
+            // the job word counts advance on every save, so their cache has to go. The project row is
+            // not written here, and every write that does touch it evicts its own keys.
             $this->jobDao->destroyCacheByProjectId($chunk->id_project);
-            $this->projectDao->destroyFetchByIdCache($chunk->id_project, ProjectStruct::class);
         } catch (Exception $e) {
             throw new RuntimeException($e->getMessage(), -2000, $e);
         }

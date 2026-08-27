@@ -72,24 +72,38 @@ class UserDaoRealSqlTest extends AbstractTest
     }
 
     /**
-     * Tokens stored before scoping carry no marker. They stay usable until they age out, so the
-     * fallback has to keep finding them.
+     * The whole point of storing a digest is that reading the table gives no usable link. Someone
+     * holding a stored value must not be able to spend it by presenting it as the token: whatever
+     * arrives is hashed before the lookup, so the stored value hashes to something else and matches
+     * nothing.
      */
-    public function testScopedConfirmationTokenLookupStillFindsUnmarkedLegacyTokens(): void
+    public function testScopedConfirmationTokenLookupRejectsTheStoredDigestItself(): void
     {
-        $legacy = 'legacy_' . bin2hex(random_bytes(16));
-
         $struct = new UserStruct();
-        $struct->email = 'rsq_legacy_' . bin2hex(random_bytes(6)) . '@example.test';
-        $struct->first_name = 'Legacy';
-        $struct->last_name = 'Token';
+        $struct->email = 'rsq_digest_' . bin2hex(random_bytes(6)) . '@example.test';
+        $struct->first_name = 'Digest';
+        $struct->last_name = 'Replay';
         $struct->create_date = date('Y-m-d H:i:s');
-        $struct->confirmation_token = $legacy;
+        $struct->initAuthToken(AuthTokenScope::PasswordReset);
 
         $uid = $this->dao->insertStruct($struct);
         $this->fixtures->trackExisting('users', ['uid' => (int)$uid]);
 
-        $this->assertNotNull($this->dao->getByScopedConfirmationToken($legacy, AuthTokenScope::PasswordReset));
+        $stored = (string)$struct->confirmation_token;
+        $digest = substr($stored, strlen(AuthTokenScope::PasswordReset->marker()));
+
+        $this->assertNull(
+            $this->dao->getByScopedConfirmationToken($digest, AuthTokenScope::PasswordReset),
+            'the digest read out of the column is not a token'
+        );
+        $this->assertNull(
+            $this->dao->getByScopedConfirmationToken($stored, AuthTokenScope::PasswordReset),
+            'and neither is the stored value with its marker'
+        );
+        $this->assertNotNull(
+            $this->dao->getByScopedConfirmationToken($struct->authTokenForUrl(), AuthTokenScope::PasswordReset),
+            'only the secret that was mailed finds the row'
+        );
     }
 
     public function testCreateUserPersistsAndRoundTrips(): void
@@ -144,20 +158,35 @@ class UserDaoRealSqlTest extends AbstractTest
         $this->assertNull($this->dao->getByEmail('absent_' . bin2hex(random_bytes(6)) . '@example.test'));
     }
 
-    public function testGetByConfirmationTokenReturnsRow(): void
+    public function testScopedConfirmationTokenLookupReturnsRow(): void
     {
-        $token = 'tok_' . bin2hex(random_bytes(10));
-        $made = $this->fixtures->makeUser(['confirmation_token' => $token]);
+        $struct = new UserStruct();
+        $struct->email = 'rsq_lookup_' . bin2hex(random_bytes(6)) . '@example.test';
+        $struct->first_name = 'Lookup';
+        $struct->last_name = 'Token';
+        $struct->create_date = date('Y-m-d H:i:s');
+        $struct->initAuthToken(AuthTokenScope::PasswordReset);
 
-        $found = $this->dao->getByConfirmationToken($token);
+        $uid = $this->dao->insertStruct($struct);
+        $this->fixtures->trackExisting('users', ['uid' => (int)$uid]);
+
+        $found = $this->dao->getByScopedConfirmationToken(
+            $struct->authTokenForUrl(),
+            AuthTokenScope::PasswordReset
+        );
 
         $this->assertInstanceOf(UserStruct::class, $found);
-        $this->assertSame($made['uid'], (int)$found->uid);
+        $this->assertSame((int)$uid, (int)$found->uid);
     }
 
-    public function testGetByConfirmationTokenReturnsNullWhenAbsent(): void
+    public function testScopedConfirmationTokenLookupReturnsNullWhenAbsent(): void
     {
-        $this->assertNull($this->dao->getByConfirmationToken('missing_' . bin2hex(random_bytes(8))));
+        $this->assertNull(
+            $this->dao->getByScopedConfirmationToken(
+                'missing_' . bin2hex(random_bytes(8)),
+                AuthTokenScope::PasswordReset
+            )
+        );
     }
 
     public function testGetByUidsReturnsMapKeyedByUid(): void

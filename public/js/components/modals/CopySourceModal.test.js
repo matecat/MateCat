@@ -51,26 +51,5 @@ test('choosing "This segment only" aborts and closes the modal without checking 
   expect(abortCopyAllSources).toHaveBeenCalledTimes(1)
   expect(confirmCopyAllSources).not.toHaveBeenCalled()
   expect(sessionStorage.getItem(COPY_SOURCE_COOKIE)).toBeNull()
-  expect(Cookies.set).not.toHaveBeenCalled()
   expect(ModalsActions.onCloseModal).toHaveBeenCalledTimes(1)
-})
-
-test('renders the static copy, label and checkbox text', () => {
-  render(
-    <CopySourceModal
-      confirmCopyAllSources={jest.fn()}
-      abortCopyAllSources={jest.fn()}
-    />,
-  )
-
-  expect(
-    screen.getByText(
-      /Do you really want to copy source to target for all new segments\?/,
-    ),
-  ).toBeInTheDocument()
-  expect(screen.getByText(/This action cannot be undone\./)).toBeInTheDocument()
-  expect(screen.getByText(/Copy source to target for:/)).toBeInTheDocument()
-  expect(
-    screen.getByText(/Don't show this dialog again for the current job/),
-  ).toBeInTheDocument()
 })

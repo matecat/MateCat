@@ -14,6 +14,7 @@ use PDOException;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 use TypeError;
 use Utils\Constants\SourcePages;
 
@@ -768,12 +769,11 @@ class ChunkReviewDao extends AbstractDao
      * Invalidates every Redis-cached read that can serve a stale penalty_points/is_pass/
      * counters value for this chunk review.
      *
-     * Always schedule this through IDatabase::onCommit() rather than calling it inline. Busting
-     * while the writing transaction is still open lets a concurrent reader miss the cache, read the
-     * pre-commit row and repopulate from it - and that stale value then outlives the commit for the
-     * full TTL. The DAO's own mutators (createRecord, deleteByJobId) already defer it this way;
-     * callers that mutate counters through updateStruct or passFailCountsAtomicUpdate must do the
-     * same.
+     * Call it inline, right after the write. Busting while the writing transaction is still open
+     * would let a concurrent reader miss the cache, read the pre-commit row and repopulate from it,
+     * leaving a stale value that outlives the commit for the full TTL - so DaoCacheTrait holds each
+     * eviction back until the transaction commits. Callers do not schedule that themselves; wrapping
+     * this in IDatabase::onCommit() by hand only adds a layer that defers what is already deferred.
      *
      * @throws PDOException
      * @throws ReflectionException
@@ -833,6 +833,8 @@ class ChunkReviewDao extends AbstractDao
      * @throws ReflectionException
      * @throws RuntimeException if the row cannot be read back after the write
      * @throws TypeError
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function createRecord(array $data): ChunkReviewStruct
     {
@@ -865,26 +867,35 @@ class ChunkReviewDao extends AbstractDao
 
                 ";
 
-        $conn = $this->database->getConnection();
+        // The INSERT and the read-back have to reach the same server. ProxySQL routes a bare SELECT to
+        // the reader hostgroup and an INSERT to the writer, so with nothing open the two statements
+        // land on different machines: the read arrives at a replica that has not received the row yet
+        // and the ?? below throws on a write that in fact succeeded, leaving a committed row the
+        // caller never learns about. A transaction keeps them together, because transaction_persistent
+        // pins every statement of one to the writer. A caller that already holds one enters here as a
+        // guest — the scope opens and commits nothing, and that caller's transaction does the pinning.
+        $struct = $this->database->transaction(function () use ($sql, $attrs, $struct): ChunkReviewStruct {
+            $stmt = $this->database->getConnection()->prepare($sql);
+            $stmt->execute($attrs);
 
-        $stmt = $conn->prepare($sql);
-        $stmt->execute($attrs);
+            // Not lastInsertId(): when ON DUPLICATE KEY UPDATE takes the *update* branch MySQL leaves
+            // LAST_INSERT_ID() at 0 (or at a value left by an earlier statement on this connection), so
+            // the caller got id 0 or someone else's id for an existing chunk review. That id then flows
+            // into recountAndUpdatePassFailResult() — whose updateStruct keys on the primary key and so
+            // silently updates nothing — and into passFailCountsAtomicUpdate(), where an unmatched id
+            // takes the insert branch and creates a duplicate row. Both branches leave exactly one row
+            // identified by job_pw_source_page, so read it back; the lookup is uncached, so it sees the
+            // row this statement just wrote.
+            return $this->findByIdJobAndPasswordAndSourcePage(
+                $struct->id_job,
+                $struct->password,
+                $struct->source_page
+            ) ?? throw new RuntimeException('qa_chunk_reviews row not found after createRecord for job ' . $struct->id_job);
+        });
 
-        // Not lastInsertId(): when ON DUPLICATE KEY UPDATE takes the *update* branch MySQL leaves
-        // LAST_INSERT_ID() at 0 (or at a value left by an earlier statement on this connection), so
-        // the caller got id 0 or someone else's id for an existing chunk review. That id then flows
-        // into recountAndUpdatePassFailResult() — whose updateStruct keys on the primary key and so
-        // silently updates nothing — and into passFailCountsAtomicUpdate(), where an unmatched id
-        // takes the insert branch and creates a duplicate row. Both branches leave exactly one row
-        // identified by job_pw_source_page, so read it back; the lookup is uncached, so it sees the
-        // row this statement just wrote inside the caller's transaction.
-        $struct = $this->findByIdJobAndPasswordAndSourcePage(
-            $struct->id_job,
-            $struct->password,
-            $struct->source_page
-        ) ?? throw new RuntimeException('qa_chunk_reviews row not found after createRecord for job ' . $struct->id_job);
-
-        // A new row changes what findChunkReviews()/getByProjectId() should return.
+        // A new row changes what findChunkReviews()/getByProjectId() should return. After the commit,
+        // not before: a guest scope returns with the caller's transaction still open, and a bust
+        // issued there lets a concurrent reader repopulate the cache from the pre-commit row.
         $this->database->onCommit(fn() => $this->destroyCachesFor($struct));
 
         return $struct;
@@ -910,7 +921,7 @@ class ChunkReviewDao extends AbstractDao
         $deleted = $stmt->execute(['id_job' => $id_job]);
 
         foreach ($rows as $row) {
-            $this->database->onCommit(fn() => $this->destroyCachesFor($row));
+            $this->destroyCachesFor($row);
         }
 
         return $deleted;

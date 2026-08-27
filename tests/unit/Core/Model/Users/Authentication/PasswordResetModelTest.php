@@ -84,6 +84,31 @@ class PasswordResetModelTest extends AbstractTest
         $model->validateUser();
     }
 
+    /**
+     * Arriving with no token at all is a bad request, not a server fault. It used to raise a
+     * RuntimeException, which Bootstrap::exceptionHandler() has no case for, so the caller was
+     * answered 500 for something they were free to get wrong.
+     */
+    #[Test]
+    public function anAbsentTokenIsARejectionRatherThanAFailure(): void
+    {
+        foreach (['validateUser', 'resetPassword'] as $method) {
+            $model = new PasswordResetModel(
+                new ArraySessionStore(),
+                $this->makeMockDao(),
+                $this->makeTokenStore(),
+                null
+            );
+
+            try {
+                $method === 'validateUser' ? $model->validateUser() : $model->resetPassword('new-pass!');
+                $this->fail("$method accepted a request carrying no reset token");
+            } catch (ValidationError $e) {
+                $this->assertSame('Missing reset token', $e->getMessage());
+            }
+        }
+    }
+
     #[Test]
     public function validateUserThrowsWhenTokenExpired(): void
     {

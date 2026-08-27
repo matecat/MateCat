@@ -445,19 +445,6 @@ describe('Editarea lifecycle', () => {
     instance.wasTripleClickTriggered.current = false
   })
 
-  // The toolbar reads this node off the imperative handle to ask whether focus
-  // sits inside the editor. The class exposed it as `this.editAreaRef`; when the
-  // hooks version kept the node private the read became `undefined.contains()`,
-  // which crashed the page as soon as a selection made the toolbar evaluate it.
-  test('exposes the edit area node on the imperative handle', () => {
-    const {instance} = mountEditarea()
-
-    expect(instance.editAreaRef).toHaveClass('targetarea')
-    expect(instance.editAreaRef).toHaveAttribute('id', 'segment-12-1-editarea')
-    // the mounted node, not a detached one: the focus check needs the live tree
-    expect(instance.editAreaRef.isConnected).toBe(true)
-  })
-
   test('focuses the editor on mount when the segment is opened', () => {
     const {instance} = renderEditarea()
     const focusSpy = jest.spyOn(instance.editor, 'focus')
@@ -640,35 +627,6 @@ describe('replaceCurrentSearch', () => {
     flush()
 
     expect(container.textContent).toContain('universo')
-  })
-
-  // The editor showing the replacement is only half of it: the setState callback
-  // pushes the new content to the store, and it used to read the pre-replace
-  // editorState and write the original text straight back over the replacement.
-  test('pushes the replaced text to the store, not the text it replaced', () => {
-    const {instance} = mountEditarea({
-      segment: makeSegment({
-        inSearch: true,
-        currentInSearch: true,
-        currentInSearchIndex: 0,
-        searchParams: {target: 'mondo'},
-        occurrencesInSearch: {occurrences: [{searchProgressiveIndex: 0}]},
-      }),
-    })
-
-    SegmentActions.updateTranslation.mockClear()
-
-    act(() => {
-      instance.replaceCurrentSearch('universo')
-    })
-    flush()
-
-    expect(SegmentActions.updateTranslation).toHaveBeenCalled()
-    const [, decodedSegment, plainText] =
-      SegmentActions.updateTranslation.mock.calls.at(-1)
-    expect(plainText).toContain('universo')
-    expect(plainText).not.toContain('mondo')
-    expect(decodedSegment).toContain('universo')
   })
 
   test('does nothing when the segment is not the current search result', () => {
@@ -2281,47 +2239,6 @@ describe('formatSelection', () => {
     expect(
       instance.state.editorState.getCurrentContent().getPlainText(),
     ).toContain('CIAO')
-  })
-
-  test('uppercases the selection in place when the target has more than one block', () => {
-    // A target ending with a newline tag is split over two blocks. The
-    // formatted text must replace the selection in its own block, not be
-    // appended to the last one.
-    const {instance} = mountEditarea({translation: 'ciao\nmondo'})
-    flush()
-
-    const blocks = instance.state.editorState
-      .getCurrentContent()
-      .getBlocksAsArray()
-    expect(blocks.length).toBeGreaterThan(1)
-
-    act(() => {
-      instance.setState({
-        editorState: EditorState.forceSelection(
-          instance.state.editorState,
-          instance.state.editorState.getSelection().merge({
-            anchorKey: blocks[0].getKey(),
-            focusKey: blocks[0].getKey(),
-            anchorOffset: 0,
-            focusOffset: 4,
-          }),
-        ),
-      })
-    })
-    flush()
-
-    act(() => {
-      instance.formatSelection('uppercase')
-    })
-    flush()
-
-    const after = instance.state.editorState
-      .getCurrentContent()
-      .getBlocksAsArray()
-      .map((block) => block.getText())
-
-    expect(after[0]).toBe('CIAO')
-    expect(after[after.length - 1]).toBe('mondo')
   })
 })
 

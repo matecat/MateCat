@@ -129,7 +129,11 @@ const SegmentFooterTabConcordance = memo(
             '',
           )
           .replace(/·/g, ' ')
-        return await navigator.clipboard.writeText(plainText)
+        try {
+          await navigator.clipboard.writeText(plainText)
+        } catch {
+          // The browser or OS denied clipboard permission — nothing more we can do here.
+        }
       }
     }
 

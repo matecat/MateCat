@@ -10,6 +10,12 @@
       "Bash(*mysql*)",
       "Bash(*mariadb*)",
       "Bash(*mycli*)"
+    ],
+    "allow": [
+      "mcp__dbhub__execute_sql_my_test_database",
+      "mcp__bruno-mcp__list_collections",
+      "mcp__bruno-mcp__list_requests",
+      "mcp__bruno-mcp__run_collection"
     ]
   }
 }

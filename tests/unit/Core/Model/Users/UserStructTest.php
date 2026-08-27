@@ -164,7 +164,31 @@ class UserStructTest extends AbstractTest
 
         $this->assertNotNull($user->confirmation_token);
         $this->assertNotNull($user->confirmation_token_created_at);
-        $this->assertSame(50, strlen($user->confirmation_token), 'marker plus secret must fill varchar(50) exactly');
+        $this->assertSame(
+            66,
+            strlen($user->confirmation_token),
+            'two-character marker plus a sha256 digest in hex'
+        );
+    }
+
+    /**
+     * The point of the whole scheme: a copy of the table is not a set of spendable links. What is
+     * stored has to be the digest, and the secret that travels in the mail must not appear in it.
+     */
+    #[Test]
+    public function initAuthTokenStoresADigestAndNeverTheSecret(): void
+    {
+        $user = new UserStruct();
+
+        $user->initAuthToken(AuthTokenScope::PasswordReset);
+        $raw = $user->authTokenForUrl();
+
+        $this->assertSame(UserStruct::AUTH_TOKEN_RANDOM_LENGTH, strlen($raw));
+        $this->assertStringNotContainsString($raw, (string)$user->confirmation_token);
+        $this->assertSame(
+            AuthTokenScope::PasswordReset->storedForm($raw),
+            $user->confirmation_token
+        );
     }
 
     /**
@@ -250,23 +274,25 @@ class UserStructTest extends AbstractTest
     }
 
     /**
-     * A link already in flight has to survive another request for one, otherwise naming an address is
-     * enough to retire whatever is sitting in that mailbox.
+     * The token in flight cannot be re-sent — only a digest of it is stored — so a repeated request
+     * mints. What must survive is the deadline: naming an address repeatedly cannot push the expiry
+     * of a live token forward.
      */
     #[Test]
-    public function initAuthTokenIfStaleKeepsATokenInsideItsWindow(): void
+    public function initAuthTokenIfStaleKeepsTheDeadlineOfATokenInsideItsWindow(): void
     {
         $user = new UserStruct();
         $user->initAuthToken(AuthTokenScope::PasswordReset);
         $token = $user->confirmation_token;
         $createdAt = $user->confirmation_token_created_at;
 
-        $this->assertFalse($user->initAuthTokenIfStale(AuthTokenScope::PasswordReset));
-        $this->assertSame($token, $user->confirmation_token);
+        $user->initAuthTokenIfStale(AuthTokenScope::PasswordReset);
+
+        $this->assertNotSame($token, $user->confirmation_token);
         $this->assertSame(
             $createdAt,
             $user->confirmation_token_created_at,
-            'reuse must not slide the expiry forward, or repeated requests keep a token alive for ever'
+            'a repeated request must not slide the expiry forward, or a token stays alive for ever'
         );
     }
 
@@ -281,9 +307,15 @@ class UserStructTest extends AbstractTest
             time() - AuthTokenScope::PasswordReset->ttlSeconds() - 60
         );
 
-        $this->assertTrue($user->initAuthTokenIfStale(AuthTokenScope::PasswordReset));
+        $user->initAuthTokenIfStale(AuthTokenScope::PasswordReset);
+
         $this->assertNotSame($token, $user->confirmation_token);
-        $this->assertSame(50, strlen((string)$user->confirmation_token));
+        $this->assertSame(66, strlen((string)$user->confirmation_token));
+        $this->assertGreaterThan(
+            time() - 60,
+            strtotime((string)$user->confirmation_token_created_at),
+            'an expired token gets a fresh deadline, otherwise the new link is born dead'
+        );
     }
 
     #[Test]
@@ -291,8 +323,10 @@ class UserStructTest extends AbstractTest
     {
         $user = new UserStruct();
 
-        $this->assertTrue($user->initAuthTokenIfStale(AuthTokenScope::PasswordReset));
+        $user->initAuthTokenIfStale(AuthTokenScope::PasswordReset);
+
         $this->assertNotEmpty($user->confirmation_token);
+        $this->assertNotEmpty($user->authTokenForUrl());
     }
 
     /**
@@ -307,7 +341,8 @@ class UserStructTest extends AbstractTest
         $user->initAuthToken(AuthTokenScope::SignupConfirmation);
         $confirmToken = $user->confirmation_token;
 
-        $this->assertTrue($user->initAuthTokenIfStale(AuthTokenScope::PasswordReset));
+        $user->initAuthTokenIfStale(AuthTokenScope::PasswordReset);
+
         $this->assertNotSame($confirmToken, $user->confirmation_token);
         $this->assertStringStartsWith(AuthTokenScope::PasswordReset->marker(), (string)$user->confirmation_token);
     }
@@ -317,7 +352,7 @@ class UserStructTest extends AbstractTest
      * mismatch miss.
      */
     #[Test]
-    public function authTokenForUrlStripsTheScopeMarker(): void
+    public function authTokenForUrlReturnsTheSecretMintedThisRequest(): void
     {
         $user = new UserStruct();
         $user->initAuthToken(AuthTokenScope::PasswordReset);
@@ -326,7 +361,35 @@ class UserStructTest extends AbstractTest
 
         $this->assertSame(48, strlen($raw));
         $this->assertStringStartsNotWith(AuthTokenScope::PasswordReset->marker(), $raw);
-        $this->assertSame(AuthTokenScope::PasswordReset->marker() . $raw, $user->confirmation_token);
+        $this->assertSame($raw, $user->authTokenForUrl(), 'the secret is stable for the whole request');
+    }
+
+    /**
+     * A struct hydrated from a row holds a digest and nothing else. There is no link to build from
+     * it, and the digest itself must never be handed out as one — presenting it back would be a
+     * replay of a value an attacker could have read straight out of the table.
+     */
+    #[Test]
+    public function authTokenForUrlHasNothingToReturnForAStoredDigest(): void
+    {
+        $user = new UserStruct();
+        $user->confirmation_token = AuthTokenScope::PasswordReset->storedForm('some-secret');
+
+        $this->assertSame('', $user->authTokenForUrl());
+    }
+
+    /**
+     * Tokens stored before hashing carry the secret in clear behind their marker, and links built
+     * from them are still in flight, so those keep working until they expire.
+     */
+    #[Test]
+    public function authTokenForUrlStillStripsTheMarkerOffAPreHashingToken(): void
+    {
+        $secret = str_repeat('a', UserStruct::AUTH_TOKEN_RANDOM_LENGTH);
+        $user = new UserStruct();
+        $user->confirmation_token = AuthTokenScope::PasswordReset->marker() . $secret;
+
+        $this->assertSame($secret, $user->authTokenForUrl());
     }
 
     /**
@@ -366,7 +429,8 @@ class UserStructTest extends AbstractTest
         $user->confirmation_token = 'a-token-with-no-timestamp';
         $user->confirmation_token_created_at = null;
 
-        $this->assertTrue($user->initAuthTokenIfStale(AuthTokenScope::PasswordReset));
+        $user->initAuthTokenIfStale(AuthTokenScope::PasswordReset);
+
         $this->assertNotSame('a-token-with-no-timestamp', $user->confirmation_token);
         $this->assertNotNull($user->confirmation_token_created_at);
     }

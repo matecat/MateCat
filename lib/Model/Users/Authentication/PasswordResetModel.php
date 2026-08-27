@@ -62,7 +62,13 @@ class PasswordResetModel
     /**
      * Retrieves the user associated with the reset token.
      *
+     * Arriving without a token is something the caller is free to get wrong — a stale form, a
+     * session that never passed through the link — so it is refused as a bad request. A
+     * RuntimeException would fall to the default arm of Bootstrap::exceptionHandler() and answer
+     * 500 for it.
+     *
      * @return ?UserStruct The user associated with the reset token, or null if not found.
+     * @throws ValidationError If the request carries no reset token at all.
      * @throws Exception If an error occurs while retrieving the user.
      *
      */
@@ -70,7 +76,7 @@ class PasswordResetModel
      {
          if (!isset($this->user)) {
              $this->user = $this->userDao->getByScopedConfirmationToken(
-                 $this->token ?? throw new RuntimeException('Missing reset token'),
+                 $this->token ?? throw new ValidationError('Missing reset token'),
                  AuthTokenScope::PasswordReset
              );
          }
@@ -92,9 +98,10 @@ class PasswordResetModel
 
         $this->discardExpiredToken($user);
 
-        // The unmarked value, matching what the link carried: the form submission that follows reads
-        // this back and hands it to the same scoped lookup.
-        $this->session->set('password_reset_token', $user->authTokenForUrl());
+        // What the link carried, taken from the request rather than from the struct: only a digest is
+        // stored, so the row cannot give the value back. The form submission that follows reads this
+        // out of the session and hands it to the same scoped lookup.
+        $this->session->set('password_reset_token', $this->token ?? '');
     }
 
     /**

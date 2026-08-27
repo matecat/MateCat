@@ -1000,6 +1000,17 @@ const SegmentSource = forwardRef((props, ref) => {
   useImperativeHandle(ref, () => instanceRef.current)
 
   const {segment} = context
+
+  const updateOptionsToolbarVisibility = () => {
+    if (!editorRef.current) return
+
+    setIsShowingOptionsToolbar(
+      !editorRef.current._latestEditorState.getSelection().isCollapsed(),
+    )
+
+    instanceRef.current.helpAiAssistant()
+  }
+
   // Set correct handlers
   const handlers = !segment.openSplit
     ? {
@@ -1011,13 +1022,7 @@ const SegmentSource = forwardRef((props, ref) => {
         onDragStart: dragFragment,
         onMouseUp: () => {
           setTimeout(() => {
-            setIsShowingOptionsToolbar(
-              !editorRef.current._latestEditorState
-                .getSelection()
-                .isCollapsed(),
-            )
-
-            instanceRef.current.helpAiAssistant()
+            updateOptionsToolbarVisibility()
           })
         },
         onKeyUp: (event) => {
@@ -1027,13 +1032,7 @@ const SegmentSource = forwardRef((props, ref) => {
             event.key === 'ArrowUp' ||
             event.key === 'ArrowDown'
           ) {
-            setIsShowingOptionsToolbar(
-              !editorRef.current._latestEditorState
-                .getSelection()
-                .isCollapsed(),
-            )
-
-            instanceRef.current.helpAiAssistant()
+            updateOptionsToolbarVisibility()
           }
         },
       }

@@ -26,6 +26,7 @@ use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\TranslationIssueModel;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use RuntimeException;
+use Throwable;
 use TypeError;
 use Utils\Constants\SourcePages;
 use View\API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
@@ -69,6 +70,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * @throws AuthorizationError
      * @throws Exception
      * @throws \TypeError
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction
+     *                   on any throw and re-throws the original, whatever its type
      */
     public function create(): void {
         // Penalty points are charged to a review row, so filing an issue requires a review
@@ -96,21 +99,19 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             'source_page' => $this->credentialSourcePage(),
         ];
 
-        $this->getDatabase()->begin();
+        $struct = $this->getDatabase()->transaction(function () use ($data): EntryStruct {
+            $struct = new EntryStruct($data);
 
-        $struct = new EntryStruct( $data );
+            // The credential decides both the phase the issue belongs to and the review row its penalty
+            // points are charged to, so the two can no longer disagree (GHSA-7q94-2fmr-3p42).
+            $model = $this->_getSegmentTranslationIssueModel(
+                $this->chunkReview->id_job ?? throw new RuntimeException('Missing job id'),
+                $this->chunkReview->review_password ?? throw new RuntimeException('Missing review password'),
+                $struct
+            );
 
-        // The credential decides both the phase the issue belongs to and the review row its penalty
-        // points are charged to, so the two can no longer disagree (GHSA-7q94-2fmr-3p42).
-        $model = $this->_getSegmentTranslationIssueModel(
-            $this->chunkReview->id_job ?? throw new RuntimeException( 'Missing job id' ),
-            $this->chunkReview->review_password ?? throw new RuntimeException( 'Missing review password' ),
-            $struct
-        );
-
-        $struct = $model->save();
-
-        $this->getDatabase()->commit();
+            return $model->save();
+        });
 
         $json     = new TranslationIssueFormatter(new EntryCommentDao($this->getDatabase()));
         $rendered = $json->renderItem( $struct );
@@ -121,6 +122,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     /**
      * @throws Exception
      * @throws TypeError
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction
+     *                   on any throw and re-throws the original, whatever its type
      */
     public function update(): void {
         // An issue scores a review row, so editing one requires a review credential. A translate
@@ -148,76 +151,76 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
                 'uid'                 => $this->user->uid ?? null,
         ];
 
-        $this->getDatabase()->begin();
+        $struct = $this->getDatabase()->transaction(function () use ($data): EntryStruct {
+            $oldStruct = (new EntryDao($this->getDatabase()))->findById($data['id_issue']);
 
-        $oldStruct = (new EntryDao($this->getDatabase()))->findById( $data[ 'id_issue' ] );
+            if ($oldStruct === null) {
+                throw new NotFoundException("Issue not found", 404);
+            }
 
-        if ( $oldStruct === null ) {
-            throw new NotFoundException( "Issue not found", 404 );
-        }
+            $data['source_page'] = $oldStruct->source_page;
 
-        $data['source_page'] = $oldStruct->source_page;
+            $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
 
-        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
+            // Job and phase were already resolved from the presented credential by ChunkPasswordValidator.
+            $jobStruct = $this->chunk;
 
-        // Job and phase were already resolved from the presented credential by ChunkPasswordValidator.
-        $jobStruct = $this->chunk;
+            $this->checkLoggedUserPermissions($oldStruct, $jobStruct, $this->user);
 
-        $this->checkLoggedUserPermissions($oldStruct, $jobStruct, $this->user);
+            // This is the chunk review that will be updated
+            $chunkReviewToBeUpdated = $chunkReviewDao->findByIdJobAndPasswordAndSourcePage(
+                $jobStruct->id ?? throw new RuntimeException('Missing job id'),
+                $jobStruct->password ?? throw new RuntimeException('Missing job password'),
+                $oldStruct->source_page
+            );
 
-        // This is the chunk review that will be updated
-        $chunkReviewToBeUpdated = $chunkReviewDao->findByIdJobAndPasswordAndSourcePage(
-            $jobStruct->id ?? throw new RuntimeException('Missing job id'),
-            $jobStruct->password ?? throw new RuntimeException('Missing job password'),
-            $oldStruct->source_page
-        );
+            if ($chunkReviewToBeUpdated === null) {
+                throw new NotFoundException("Job not found", 404);
+            }
 
-        if ( $chunkReviewToBeUpdated === null ) {
-            throw new NotFoundException( "Job not found", 404 );
-        }
+            $oldStruct->setDefaults(
+                new EntryValidator($oldStruct, database: $this->getDatabase()),
+                new SegmentTranslationDao($this->getDatabase())
+            );
 
-        $oldStruct->setDefaults(
-            new EntryValidator( $oldStruct, database: $this->getDatabase() ),
-            new SegmentTranslationDao( $this->getDatabase() )
-        );
+            $newStruct = new EntryStruct($data);
+            $newStruct->id = $data['id_issue'];
+            $newStruct->setDefaults(
+                new EntryValidator($newStruct, database: $this->getDatabase()),
+                new SegmentTranslationDao($this->getDatabase())
+            );
 
-        $newStruct     = new EntryStruct( $data );
-        $newStruct->id = $data[ 'id_issue' ];
-        $newStruct->setDefaults(
-            new EntryValidator( $newStruct, database: $this->getDatabase() ),
-            new SegmentTranslationDao( $this->getDatabase() )
-        );
+            // remove old issue
+            $model = $this->_getSegmentTranslationIssueModel(
+                $chunkReviewToBeUpdated->id_job,
+                $chunkReviewToBeUpdated->review_password ?? throw new RuntimeException('Missing review password'),
+                $oldStruct
+            );
 
-        // remove old issue
-        $model = $this->_getSegmentTranslationIssueModel(
-            $chunkReviewToBeUpdated->id_job,
-            $chunkReviewToBeUpdated->review_password ?? throw new RuntimeException('Missing review password'),
-            $oldStruct
-        );
+            $model->delete();
 
-        $model->delete();
+            // create new issue
+            $model = $this->_getSegmentTranslationIssueModel(
+                $chunkReviewToBeUpdated->id_job,
+                $chunkReviewToBeUpdated->review_password ?? throw new RuntimeException('Missing review password'),
+                $newStruct
+            );
 
-        // create new issue
-        $model = $this->_getSegmentTranslationIssueModel(
-            $chunkReviewToBeUpdated->id_job,
-            $chunkReviewToBeUpdated->review_password ?? throw new RuntimeException('Missing review password'),
-            $newStruct
-        );
+            $struct = $model->save();
 
-        $struct = $model->save();
+            // move comments from old issue to new one
+            $commentDao = new EntryCommentDao($this->getDatabase());
+            $commentDao->move(
+                (int)$oldStruct->id,
+                (int)$struct->id
+            );
 
-        // move comments from old issue to new one
-        $commentDao = new EntryCommentDao($this->getDatabase());
-        $commentDao->move(
-            (int)$oldStruct->id,
-            (int)$struct->id
-        );
+            // update replies count
+            $entryDao = new EntryDao($this->getDatabase());
+            $entryDao->updateRepliesCount($struct->id ?? throw new RuntimeException('Missing entry id'));
 
-         // update replies count
-         $entryDao = new EntryDao($this->getDatabase());
-         $entryDao->updateRepliesCount($struct->id ?? throw new RuntimeException('Missing entry id'));
-
-        $this->getDatabase()->commit();
+            return $struct;
+        });
 
         $msg = "[AUDIT][ISSUE_UPDATE] issue_id={$struct->id}; segment_id={$struct->id_segment}; user={$this->user->email}; new_severity={$struct->severity}";
         $this->logger->debug($msg);
@@ -231,6 +234,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     /**
      * @throws Exception
      * @throws \TypeError
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction
+     *                   on any throw and re-throws the original, whatever its type
      */
     public function delete(): void {
         // Deleting an issue gives its penalty points back to a review row, so it too requires a
@@ -241,19 +246,19 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         $issue = $this->validator->issue ?? throw new RuntimeException('Missing issue');
 
-        $this->getDatabase()->begin();
-        // Job, phase and review credential all come from the password this request authenticated
-        // with, as resolved by ChunkPasswordValidator.
-        $model = $this->_getSegmentTranslationIssueModel(
-            $this->chunkReview->id_job ?? throw new RuntimeException( 'Missing job id' ),
-            $this->chunkReview->review_password ?? throw new RuntimeException( 'Missing review password' ),
-            $issue
-        );
+        $this->getDatabase()->transaction(function () use ($issue): void {
+            // Job, phase and review credential all come from the password this request authenticated
+            // with, as resolved by ChunkPasswordValidator.
+            $model = $this->_getSegmentTranslationIssueModel(
+                $this->chunkReview->id_job ?? throw new RuntimeException('Missing job id'),
+                $this->chunkReview->review_password ?? throw new RuntimeException('Missing review password'),
+                $issue
+            );
 
-        $this->checkLoggedUserPermissions($issue, $this->chunk, $this->user);
+            $this->checkLoggedUserPermissions($issue, $this->chunk, $this->user);
 
-        $model->delete();
-        $this->getDatabase()->commit();
+            $model->delete();
+        });
 
         $this->response->code( 200 );
     }

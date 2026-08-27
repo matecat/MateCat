@@ -81,71 +81,51 @@ class ProjectCompletionServiceTest extends AbstractTest
     }
 
     #[Test]
-    public function test_rollback_is_called_inside_throwable_catch(): void
+    public function test_the_throwable_catch_closes_no_transaction_by_hand(): void
     {
         $source = $this->readSource();
 
         $catchPos = strpos($source, 'catch (Throwable $e)');
-        $this->assertNotFalse($catchPos, 'Expected catch (\Throwable $e) block in tryCloseProject.');
+        $this->assertNotFalse($catchPos, 'Expected a catch (Throwable $e) in ProjectCompletionService.');
 
-        $rollbackPos = strpos($source, '->rollback()', $catchPos);
+        // The transaction scope has already rolled back by the time this catch runs, so a rollback
+        // here would be closing a transaction this class did not open. What the catch still owns is
+        // releasing the completion lock.
+        $this->assertStringNotContainsString(
+            '->rollback()',
+            $source,
+            'ProjectCompletionService must not roll back by hand: the transaction scope owns that.'
+        );
+
         $this->assertNotFalse(
-            $rollbackPos,
-            'Expected ->rollback() call inside the \Throwable catch block.'
+            strpos($source, 'releaseCompletionLock(', $catchPos),
+            'Expected releaseCompletionLock() in the catch block.'
         );
     }
 
     #[Test]
-    public function test_release_completion_lock_is_called_inside_throwable_catch(): void
-    {
-        $source = $this->readSource();
-
-        $catchPos = strpos($source, 'catch (Throwable $e)');
-        $this->assertNotFalse($catchPos, 'Expected catch (\Throwable $e) block in tryCloseProject.');
-
-        $releasePos = strpos($source, 'releaseCompletionLock(', $catchPos);
-        $this->assertNotFalse(
-            $releasePos,
-            'Expected releaseCompletionLock() call inside the \Throwable catch block.'
-        );
-    }
-
-    #[Test]
-    public function test_remove_project_from_queue_appears_after_commit(): void
+    public function test_remove_project_from_queue_appears_after_the_scope_closes(): void
     {
         $source = $this->readSource();
 
         $methodPos = strpos($source, 'public function tryCloseProject');
         $this->assertNotFalse($methodPos);
 
-        $commitPos = strpos($source, '->commit()', $methodPos);
-        $this->assertNotFalse($commitPos, 'Expected ->commit() call in tryCloseProject.');
+        $scopePos = strpos($source, '$this->repository->transaction(function ()', $methodPos);
+        $this->assertNotFalse($scopePos, 'Expected the finalization transaction scope in tryCloseProject.');
+
+        // The commit happens where the closure returns, so the anchor is the line that closes it.
+        $scopeEndPos = strpos($source, "\n                });", $scopePos);
+        $this->assertNotFalse($scopeEndPos, 'Expected the finalization scope to be closed.');
 
         $removePos = strpos($source, 'removeProjectFromQueue(', $methodPos);
         $this->assertNotFalse($removePos, 'Expected removeProjectFromQueue() call in tryCloseProject.');
 
         $this->assertGreaterThan(
-            $commitPos,
+            $scopeEndPos,
             $removePos,
-            'removeProjectFromQueue() must appear AFTER commit() — if the worker crashes before commit, the project must remain in the queue for retry.'
+            'removeProjectFromQueue() must appear AFTER the transaction scope closes — if the worker crashes before commit, the project must remain in the queue for retry.'
         );
-    }
-
-    #[Test]
-    public function test_rollback_appears_before_release_in_catch(): void
-    {
-        $source = $this->readSource();
-
-        $catchPos = strpos($source, 'catch (Throwable $e)');
-        $this->assertNotFalse($catchPos);
-
-        $rollbackPos  = strpos($source, '->rollback()', $catchPos);
-        $releasePos   = strpos($source, 'releaseCompletionLock(', $catchPos);
-
-        $this->assertNotFalse($rollbackPos, 'Expected ->rollback() in catch block.');
-        $this->assertNotFalse($releasePos, 'Expected releaseCompletionLock() in catch block.');
-
-        $this->assertLessThan($releasePos, $rollbackPos, 'rollback() must appear before releaseCompletionLock().');
     }
 
     #[Test]
@@ -290,6 +270,7 @@ class ProjectCompletionServiceTest extends AbstractTest
         $redisService->method('acquireCompletionLock')->willReturn(true);
 
         $repository = $this->createStub(ProjectCompletionRepositoryInterface::class);
+        $repository->method('transaction')->willReturnCallback(static fn(callable $work) => $work());
         // Single ROLLUP totals row → array_pop() yields it; dbRemaining = 3039 - 3039 = 0 → finalize.
         $repository->method('getProjectSegmentsTranslationSummary')->willReturn([
             ['project_segments' => 3039, 'num_analyzed' => 3039, 'eq_wc' => 10.0, 'st_wc' => 8.0],

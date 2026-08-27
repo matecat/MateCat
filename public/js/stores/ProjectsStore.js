@@ -46,6 +46,7 @@ const ProjectsStore = assign({}, EventEmitter.prototype, {
     let projectOld = this.projects.find(function (prj) {
       return prj.get('id') == project.get('id')
     })
+    if (!projectOld) return
     let indexProject = this.projects.indexOf(projectOld)
     const chunks = project
       .get('jobs')
