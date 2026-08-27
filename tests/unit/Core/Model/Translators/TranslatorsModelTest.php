@@ -2,10 +2,12 @@
 
 namespace Matecat\Core\Model\Translators;
 
+use InvalidArgumentException;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Outsource\TranslatedConfirmationStruct;
 use Model\Projects\ProjectStruct;
 use Model\Translators\TranslatorsModel;
 use Model\Users\UserStruct;
@@ -215,6 +217,22 @@ class TranslatorsModelTest extends AbstractTest
         $model->setUserInvite($user)
             ->setEmail('translator@example.com')
             ->setDeliveryDate(time() + 86400);
+
+        $model->update();
+    }
+
+    #[Test]
+    public function updateThrowsWhenTheJobIsAlreadyOutsourced(): void
+    {
+        // A fresh mock is required: the fetchAll() matcher installed in setUp() cannot be re-stubbed.
+        [$dbStub, , $stmtStub] = $this->createDatabaseMock();
+        $stmtStub->method('fetchAll')->willReturn([new TranslatedConfirmationStruct()]);
+
+        $model = new TranslatorsModel($this->makeJobStructWithProject(), $dbStub);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('The job is outsourced.');
+        $this->expectExceptionCode(400);
 
         $model->update();
     }

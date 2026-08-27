@@ -1361,6 +1361,30 @@ class TmKeyManagementTest extends AbstractTest
         );
     }
 
+    /**
+     * A grant is set, so the "select Lookup and/or Update" guard passes and execution reaches the
+     * empty-key guard right after it.
+     *
+     * The key must be null rather than "": TmKeyStruct::getCrypt() runs first (it feeds the
+     * duplicate-key lookup) and does str_repeat('*', strlen($key) - 5), which raises a ValueError
+     * for any key shorter than five characters. null is the only value that both short-circuits
+     * getCrypt() and satisfies empty().
+     */
+    #[Test]
+    public function testMergeJsonKeys_NullKeyProvided()
+    {
+        $this->expectException('Exception');
+        $this->expectExceptionMessage("Invalid key provided");
+        $this->expectExceptionCode(5);
+        TmKeyManager::mergeJsonKeys(
+            '[{"key":null,"name":"My GHI","r":0,"w":1}]',
+            self::$srv_json_GHI,
+            obtainTestDatabase(),
+            Filter::OWNER,
+            123
+        );
+    }
+
     #[Test]
     public function testMergeJsonKeys_InvalidAnonymousOWNER()
     {

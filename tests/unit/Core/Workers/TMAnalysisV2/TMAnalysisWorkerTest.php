@@ -1189,6 +1189,24 @@ class TMAnalysisWorkerTest extends AbstractTest
         $this->assertSame(['100', '200'], $decremented);
     }
 
+    /**
+     * The guard is documented as a programming-error check, so it is unreachable through
+     * process() — a queue element always carries a pid. Invoke it directly instead.
+     */
+    #[Test]
+    public function decrementSegmentsToAnalyzeOfWaitingProjects_throws_when_project_id_is_empty(): void
+    {
+        $worker = $this->buildWorker();
+
+        $ref = new \ReflectionMethod($worker, 'decrementSegmentsToAnalyzeOfWaitingProjects');
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Cannot send without a Queue ID.');
+        $this->expectExceptionCode(TMAnalysisWorker::ERR_WRONG_PROJECT);
+
+        $ref->invoke($worker, 0);
+    }
+
     #[Test]
     public function process_eq_word_count_capped_at_raw_word_count(): void
     {
