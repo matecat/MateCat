@@ -2,34 +2,22 @@
 
 namespace Matecat\Core\View;
 
+use Controller\Exceptions\RenderTerminatedException;
 use Matecat\TestHelpers\AbstractTest;
+use Model\Conversion\ZipArchiveHandler;
 use Model\DataAccess\IDatabase;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionProperty;
-use RuntimeException;
 use UploadHandler;
 use Utils\Logger\MatecatLogger;
+use Utils\Registry\AppConfig;
 use Utils\ServerCheck\ServerCheck;
 use Utils\ServerCheck\UploadParams;
 
 require_once AbstractTest::projectRoot() . '/lib/View/fileupload/UploadHandler.php';
-
-/**
- * Stands in for the `die()` that ends the production flush(). Recording the payload without
- * stopping is not enough: post() calls flush() at :458 with no `return` after it, so execution
- * would fall through to :461 and `$info = []` at :463 would discard the payload before flush()
- * fired a second time at the end of the method. Throwing reproduces the real termination point.
- */
-class FlushCalled extends RuntimeException
-{
-    public function __construct(public readonly mixed $info)
-    {
-        parent::__construct('flush() was called');
-    }
-}
 
 class TestableUploadHandler extends UploadHandler
 {
@@ -72,11 +60,17 @@ class TestableUploadHandler extends UploadHandler
         $this->database = $database;
     }
 
+    /**
+     * Records the payload, then runs the real body: production terminates there, so returning
+     * would let post() fall through to `$info = []` at :463 and flush a second time. Under
+     * ENV=testing parent::flush() raises RenderTerminatedException in place of its die(), which
+     * is the termination this records against.
+     */
     public function flush(mixed $info): void
     {
         $this->flushCalls[] = $info;
 
-        throw new FlushCalled($info);
+        parent::flush($info);
     }
 }
 
@@ -185,6 +179,28 @@ class UploadHandlerTest extends AbstractTest
     }
 
     /**
+     * The same entry with scalar values instead of one-element arrays, which is the shape PHP
+     * builds for a `file` (rather than `files[]`) param name. post() branches on
+     * is_array($upload['tmp_name']) to tell the two apart.
+     *
+     * @return array<string, mixed>
+     */
+    private function makeSingleUploadedFile(string $name, string $content, int $declaredSize, int $error = 0): array
+    {
+        $tmp = '/tmp/opencode/upload_test/tmp_' . uniqid() . '_' . $name;
+        file_put_contents($tmp, $content);
+
+        return [
+            'files' => [
+                'tmp_name' => $tmp,
+                'name' => $name,
+                'size' => $declaredSize,
+                'error' => $error,
+            ],
+        ];
+    }
+
+    /**
      * A $_FILES-shaped single-file entry under the default `files` param name, backed by a real
      * temp file so getMimeContentType() has something to inspect.
      *
@@ -208,6 +224,11 @@ class UploadHandlerTest extends AbstractTest
     /**
      * Runs an endpoint method, capturing whatever it echoes and whatever it handed to flush().
      *
+     * RenderTerminatedException is production's own stand-in for the die() that ends flush() (see
+     * UploadHandler::flush()), so swallowing it here reproduces the request ending there. The
+     * payload comes from TestableUploadHandler::$flushCalls rather than the exception, which
+     * carries nothing.
+     *
      * E_WARNING is masked for the duration. get()/delete() call header(), and the test bootstrap
      * echoes at tests/inc/functions.php:72, so headers are always "already sent" in this suite —
      * an artefact of the harness, not of the code under test. deleteSha() likewise warns from
@@ -218,19 +239,21 @@ class UploadHandlerTest extends AbstractTest
      */
     private function callAndCapture(callable $fn): array
     {
-        $flushed = null;
-
         // Swallow only E_WARNING, and only here; anything else still reaches PHPUnit's handler.
         set_error_handler(static fn(): bool => true, E_WARNING);
         ob_start();
         try {
             $fn();
-        } catch (FlushCalled $e) {
-            $flushed = $e->info;
+        } catch (RenderTerminatedException) {
+            // the request ended inside flush(), exactly as it does in production
         } finally {
             $output = ob_get_clean();
             restore_error_handler();
         }
+
+        $flushed = $this->handler->flushCalls === []
+            ? null
+            : $this->handler->flushCalls[count($this->handler->flushCalls) - 1];
 
         return [$output, $flushed];
     }
@@ -483,6 +506,17 @@ class UploadHandlerTest extends AbstractTest
         $this->assertSame('file', $result);
     }
 
+    /**
+     * The suffix is only stripped when it ends the name. Here '.tar' sits mid-name, so the
+     * basename comes back whole.
+     */
+    #[Test]
+    public function my_basename_keeps_a_suffix_that_is_not_at_the_end(): void
+    {
+        $result = $this->invokePrivate('my_basename', ['path//archive.tar.gz', '.tar']);
+        $this->assertSame('archive.tar.gz', $result);
+    }
+
     // ─── validate ───
 
     #[Test]
@@ -705,6 +739,24 @@ class UploadHandlerTest extends AbstractTest
         $this->assertTrue($this->invokePrivate('validate', ['', $file, '']));
     }
 
+    /**
+     * Every earlier guard passes — the extension and MIME type are fine — so the length check is
+     * the one that rejects it.
+     */
+    #[Test]
+    public function validate_returns_false_for_a_filename_longer_than_the_limit(): void
+    {
+        $file = new \stdClass();
+        $file->name = str_repeat('a', AppConfig::$MAX_FILENAME_LENGTH + 1) . '.xliff';
+        $file->size = 100;
+        $file->type = 'application/xml';
+
+        $_SERVER['CONTENT_LENGTH'] = 100;
+
+        $this->assertFalse($this->invokePrivate('validate', ['', $file, '']));
+        $this->assertSame('filenameTooLong', $file->error);
+    }
+
     // ─── trim_file_name — collision loop ───
 
     #[Test]
@@ -822,6 +874,59 @@ class UploadHandlerTest extends AbstractTest
         $this->assertFileDoesNotExist('/tmp/opencode/upload_test/bundle.zip');
     }
 
+    /**
+     * The archive is unlinked before the glob that looks for its extracted members, so an archive
+     * on its own never enters the loop. With one member present the sweep runs and reports both.
+     */
+    #[Test]
+    public function delete_of_a_zip_also_removes_its_extracted_members(): void
+    {
+        $this->handler->setDatabaseForTest($this->createStub(IDatabase::class));
+        $member = 'bundle.zip' . ZipArchiveHandler::INTERNAL_SEPARATOR . 'inner.docx';
+        file_put_contents('/tmp/opencode/upload_test/bundle.zip', 'PK');
+        file_put_contents('/tmp/opencode/upload_test/' . $member, 'inner');
+
+        $_REQUEST['file'] = 'bundle.zip';
+        $_REQUEST['source'] = 'en-US';
+        $_REQUEST['segmentationRule'] = null;
+        $_REQUEST['filtersTemplate'] = 0;
+
+        [$output] = $this->callAndCapture(fn() => $this->handler->delete());
+
+        // the member is keyed by its display path, the separator mapped back to a slash
+        $success = json_decode($output, true);
+        $this->assertTrue($success['bundle.zip']);
+        $this->assertTrue($success['bundle.zip' . DIRECTORY_SEPARATOR . 'inner.docx']);
+        $this->assertFileDoesNotExist('/tmp/opencode/upload_test/bundle.zip');
+        $this->assertFileDoesNotExist('/tmp/opencode/upload_test/' . $member);
+    }
+
+    /**
+     * A file *inside* an archive arrives as "bundle.zip/inner.docx". The basename alone has a docx
+     * extension, so the zip branch is skipped and the slash pattern routes it to the internal
+     * delete, which is what maps the path onto the flattened on-disk name.
+     */
+    #[Test]
+    public function delete_routes_a_file_inside_a_zip_to_the_internal_handler(): void
+    {
+        $this->handler->setDatabaseForTest($this->createStub(IDatabase::class));
+        $onDisk = 'bundle.zip' . ZipArchiveHandler::INTERNAL_SEPARATOR . 'inner.docx';
+        file_put_contents('/tmp/opencode/upload_test/' . $onDisk, 'inner');
+
+        $_REQUEST['file'] = 'bundle.zip' . DIRECTORY_SEPARATOR . 'inner.docx';
+        $_REQUEST['source'] = 'en-US';
+        $_REQUEST['segmentationRule'] = null;
+        $_REQUEST['filtersTemplate'] = 0;
+
+        [$output] = $this->callAndCapture(fn() => $this->handler->delete());
+
+        $this->assertSame(
+            ['bundle.zip' . DIRECTORY_SEPARATOR . 'inner.docx' => true],
+            json_decode($output, true)
+        );
+        $this->assertFileDoesNotExist('/tmp/opencode/upload_test/' . $onDisk);
+    }
+
     // ─── post ───
 
     #[Test]
@@ -926,5 +1031,98 @@ class UploadHandlerTest extends AbstractTest
         $this->assertTrue($flushed[0]->convert);
         $this->assertObjectHasProperty('delete_url', $flushed[0]);
         $this->assertFileDoesNotExist('/tmp/opencode/upload_test/document.xliff');
+    }
+
+    /**
+     * A `file`-style param name gives scalar entries rather than one-element arrays, so post()
+     * takes the single-object branch and hands handle_file_upload() the values directly. Nothing
+     * can land on disk from a unit test, so the aborted-upload cleanup runs here too.
+     */
+    #[Test]
+    public function post_handles_a_single_non_array_upload_entry(): void
+    {
+        $this->handler->setLoggerForTest($this->createStub(MatecatLogger::class));
+        $_COOKIE['upload_token'] = self::VALID_TOKEN;
+        $this->seedUploadParams(postMaxSize: 10_000, uploadMaxFilesize: 10_000);
+        $_SERVER['CONTENT_LENGTH'] = 25;
+
+        $this->setFiles($this->makeSingleUploadedFile('single.xliff', '<?xml version="1.0"?><x/>', 25));
+
+        [, $flushed] = $this->callAndCapture(fn() => $this->handler->post());
+
+        $this->assertNotNull($flushed);
+        $this->assertCount(1, $flushed);
+        $this->assertSame('single.xliff', $flushed[0]->name);
+        $this->assertSame(
+            'File upload failed. Refresh the page using CTRL+R (or CMD+R) and try again.',
+            $flushed[0]->error
+        );
+    }
+
+    // ─── constructor + flush ───
+
+    /**
+     * The real constructor, which every other test skips: it derives the whole option map from the
+     * upload-token cookie and the request URI. Nothing here touches the filesystem —
+     * Utils::uploadDirFromSessionCookie() only concatenates and Monolog opens its stream lazily.
+     */
+    #[Test]
+    public function constructor_derives_the_option_map_from_the_cookie_and_the_request_uri(): void
+    {
+        $_COOKIE['upload_token'] = self::VALID_TOKEN;
+        $_SERVER['REQUEST_URI'] = '/fileupload/';
+
+        $handler = new UploadHandler($this->createStub(IDatabase::class));
+        $options = (new ReflectionProperty(UploadHandler::class, 'options'))->getValue($handler);
+
+        $base = rtrim(AppConfig::$HTTPHOST, '/') . '/fileupload';
+        $this->assertSame($base . '/', $options['script_url']);
+        $this->assertSame($base . '/files/', $options['upload_url']);
+        $this->assertSame(self::VALID_TOKEN, $options['upload_token']);
+        $this->assertSame(
+            AppConfig::$UPLOAD_REPOSITORY . '/' . self::VALID_TOKEN . '/',
+            $options['upload_dir']
+        );
+        $this->assertSame('files', $options['param_name']);
+        $this->assertSame('DELETE', $options['delete_type']);
+        $this->assertSame(AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE, $options['max_tmx_file_size']);
+        $this->assertSame(AppConfig::$MAX_UPLOAD_FILE_SIZE, $options['max_file_size']);
+        $this->assertSame(1, $options['min_file_size']);
+        $this->assertSame(AppConfig::$MAX_NUM_FILES, $options['max_number_of_files']);
+        $this->assertTrue($options['discard_aborted_uploads']);
+    }
+
+    /**
+     * flush() is the real endpoint terminator: it emits the payload and then ends the request.
+     * Production die()s; under ENV=testing it raises RenderTerminatedException instead, which is
+     * how the branch becomes assertable at all.
+     */
+    #[Test]
+    public function flush_emits_the_json_payload_and_terminates_the_request(): void
+    {
+        $_COOKIE['upload_token'] = self::VALID_TOKEN;
+        $_SERVER['REQUEST_URI'] = '/fileupload/';
+
+        $handler = new UploadHandler($this->createStub(IDatabase::class));
+
+        $file = new \stdClass();
+        $file->name = 'document.xliff';
+        $file->error = 'maxFileSize';
+        $info = [$file];
+
+        set_error_handler(static fn(): bool => true, E_WARNING);
+        ob_start();
+        $terminated = false;
+        try {
+            $handler->flush($info);
+        } catch (RenderTerminatedException) {
+            $terminated = true;
+        } finally {
+            $output = ob_get_clean();
+            restore_error_handler();
+        }
+
+        $this->assertTrue($terminated, 'flush() must end the request, not return to its caller');
+        $this->assertSame(json_encode($info), $output);
     }
 }

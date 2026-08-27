@@ -1,5 +1,6 @@
 <?php
 
+use Controller\Exceptions\RenderTerminatedException;
 use Model\Conversion\MimeTypes\MimeTypes;
 use Model\Conversion\ZipArchiveHandler;
 use Model\DataAccess\IDatabase;
@@ -544,6 +545,10 @@ class UploadHandler
         header('Content-type: application/json');
 
         echo $json;
+
+        if (AppConfig::$ENV === 'testing') {
+            throw new RenderTerminatedException();
+        }
 
         die();
     }
