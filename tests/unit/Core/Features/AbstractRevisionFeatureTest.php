@@ -276,10 +276,20 @@ class AbstractRevisionFeatureTest extends AbstractTest
     {
         $event = $this->makeAlterChunkReviewEvent(99_999_999, 'no_such_password');
 
-        $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('Chunk review not found');
+        // alterChunkReviewStruct locks the job's chunk-review rows before reading them back, which
+        // requires a transaction — in production it is dispatched inside the transaction scope
+        // CompletionEventController::__performUndo opens.
+        $db = obtainTestDatabase();
+        $db->begin();
 
-        $this->feature->alterChunkReviewStruct($event);
+        try {
+            $this->expectException(ValidationError::class);
+            $this->expectExceptionMessage('Chunk review not found');
+
+            $this->feature->alterChunkReviewStruct($event);
+        } finally {
+            $db->rollback();
+        }
     }
 
     /**
@@ -290,6 +300,11 @@ class AbstractRevisionFeatureTest extends AbstractTest
     {
         $this->seedChunkReviewWithoutUndoData();
 
+        // As above: the row lock needs an open transaction. The fixtures are seeded outside it, so
+        // the rollback leaves them for cleanFragments() to remove.
+        $db = obtainTestDatabase();
+        $db->begin();
+
         try {
             $event = $this->makeAlterChunkReviewEvent($this->jobId(self::CHUNK_REVIEW_BASE), 'jobpw');
 
@@ -298,6 +313,7 @@ class AbstractRevisionFeatureTest extends AbstractTest
 
             $this->feature->alterChunkReviewStruct($event);
         } finally {
+            $db->rollback();
             $this->cleanFragments(self::CHUNK_REVIEW_BASE);
         }
     }

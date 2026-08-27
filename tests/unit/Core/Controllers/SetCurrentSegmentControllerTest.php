@@ -411,9 +411,8 @@ class SetCurrentSegmentControllerTest extends AbstractTest
     #[Test]
     public function set_throws_invalid_argument_when_the_segment_part_of_id_segment_is_empty(): void
     {
+        $this->setChunkFromCredential(SourcePages::SOURCE_PAGE_TRANSLATE);
         $this->setRequestParams([
-            'id_job' => (string) self::TEST_JOB_ID,
-            'password' => self::TEST_JOB_PASSWORD,
             'id_segment' => '0-1',
         ]);
 
