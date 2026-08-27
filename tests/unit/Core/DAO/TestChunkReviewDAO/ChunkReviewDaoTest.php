@@ -32,6 +32,13 @@ class ChunkReviewDaoTest extends AbstractTest
         AppConfig::$SKIP_SQL_CACHE = true;
 
         [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock();
+
+        // createRecord() runs its write inside a transaction scope. An unstubbed transaction() returns
+        // null without ever calling back, which would make the method look as though it produced
+        // nothing. Run it inline here rather than in the shared harness: on this branch other
+        // controllers still drive their transactions by hand, and stubbing it globally would start
+        // executing scopes those tests deliberately leave inert.
+        $this->dbStub->method('transaction')->willReturnCallback(static fn(callable $callback) => $callback());
     }
 
     protected function tearDown(): void
@@ -806,6 +813,131 @@ class ChunkReviewDaoTest extends AbstractTest
         $this->assertSame(2, $result->id_job);
         $this->assertSame('test_pw', $result->password);
         $this->assertSame('rev_pw', $result->review_password);
+    }
+
+    /**
+     * The INSERT and its read-back have to run inside one transaction scope.
+     *
+     * ProxySQL routes a bare SELECT to the reader hostgroup and an INSERT to the writer, so a
+     * read-back issued with no transaction open can reach a replica that has not received the row
+     * yet. createRecord then throws on a write that in fact succeeded, leaving a committed row its
+     * caller never learns about. Only a transaction keeps both statements on the writer.
+     */
+    #[Test]
+    public function instanceCreateRecordWritesInsideATransactionScope(): void
+    {
+        $insideScope      = false;
+        $scopesOpened     = 0;
+        $statementsOutside = 0;
+
+        $this->stmtStub->method('execute')->willReturnCallback(
+            function () use (&$insideScope, &$statementsOutside): bool {
+                if (!$insideScope) {
+                    $statementsOutside++;
+                }
+
+                return true;
+            }
+        );
+
+        $this->stmtStub->method('fetchAll')->willReturnCallback(
+            function () use (&$insideScope, &$statementsOutside): array {
+                if (!$insideScope) {
+                    $statementsOutside++;
+                }
+
+                return [
+                    new ChunkReviewStruct([
+                        'id'              => 44,
+                        'id_project'      => 1,
+                        'id_job'          => 2,
+                        'password'        => 'test_pw',
+                        'review_password' => 'rev_pw',
+                        'source_page'     => 2,
+                    ])
+                ];
+            }
+        );
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($this->pdoStub);
+        $database->method('transaction')->willReturnCallback(
+            function (callable $callback) use (&$insideScope, &$scopesOpened) {
+                $scopesOpened++;
+                $insideScope = true;
+
+                try {
+                    return $callback();
+                } finally {
+                    $insideScope = false;
+                }
+            }
+        );
+
+        $result = (new ChunkReviewDao($database))->createRecord([
+            'id_project'      => 1,
+            'id_job'          => 2,
+            'password'        => 'test_pw',
+            'review_password' => 'rev_pw',
+            'source_page'     => 2,
+        ]);
+
+        $this->assertSame(1, $scopesOpened, 'createRecord must open exactly one transaction scope');
+        $this->assertSame(0, $statementsOutside, 'the write and its read-back must not leave the scope');
+        $this->assertSame(44, $result->id);
+    }
+
+    /**
+     * A caller that has already begun a transaction must not have one opened underneath it.
+     *
+     * transaction() on this branch begins and commits unconditionally - there is no nested scope - so
+     * opening one here would commit the caller's work early and leave its later commit with nothing to
+     * close. The caller's transaction has already pinned the connection to the writer, which is the
+     * only thing the wrap is there to achieve.
+     */
+    #[Test]
+    public function instanceCreateRecordDoesNotOpenATransactionInsideAnOpenOne(): void
+    {
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([
+            new ChunkReviewStruct([
+                'id'              => 45,
+                'id_project'      => 1,
+                'id_job'          => 2,
+                'password'        => 'test_pw',
+                'review_password' => 'rev_pw',
+                'source_page'     => 2,
+            ])
+        ]);
+
+        // A connection of its own: the shared harness already stubs inTransaction() on $this->pdoStub,
+        // and the first matcher registered for a method is the one that answers.
+        $connection = $this->createStub(PDO::class);
+        $connection->method('inTransaction')->willReturn(true);
+        $connection->method('prepare')->willReturn($this->stmtStub);
+
+        $scopesOpened = 0;
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($connection);
+        $database->method('transaction')->willReturnCallback(
+            function (callable $callback) use (&$scopesOpened) {
+                $scopesOpened++;
+
+                return $callback();
+            }
+        );
+
+        $result = (new ChunkReviewDao($database))->createRecord([
+            'id_project'      => 1,
+            'id_job'          => 2,
+            'password'        => 'test_pw',
+            'review_password' => 'rev_pw',
+            'source_page'     => 2,
+        ]);
+
+        $this->assertSame(0, $scopesOpened, 'createRecord must not open a transaction inside an open one');
+        $this->assertSame(45, $result->id);
     }
 
     #[Test]
