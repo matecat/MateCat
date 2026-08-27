@@ -14,6 +14,8 @@ use PDO;
 use PDOStatement;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Stub;
+use RuntimeException;
+use Throwable;
 use Utils\Constants\SourcePages;
 use Utils\Registry\AppConfig;
 
@@ -32,13 +34,6 @@ class ChunkReviewDaoTest extends AbstractTest
         AppConfig::$SKIP_SQL_CACHE = true;
 
         [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock();
-
-        // createRecord() runs its write inside a transaction scope. An unstubbed transaction() returns
-        // null without ever calling back, which would make the method look as though it produced
-        // nothing. Run it inline here rather than in the shared harness: on this branch other
-        // controllers still drive their transactions by hand, and stubbing it globally would start
-        // executing scopes those tests deliberately leave inert.
-        $this->dbStub->method('transaction')->willReturnCallback(static fn(callable $callback) => $callback());
     }
 
     protected function tearDown(): void
@@ -888,15 +883,17 @@ class ChunkReviewDaoTest extends AbstractTest
     }
 
     /**
-     * A caller that has already begun a transaction must not have one opened underneath it.
+     * A caller that already holds a transaction still goes through transaction().
      *
-     * transaction() on this branch begins and commits unconditionally - there is no nested scope - so
-     * opening one here would commit the caller's work early and leave its later commit with nothing to
-     * close. The caller's transaction has already pinned the connection to the writer, which is the
-     * only thing the wrap is there to achieve.
+     * Guest handling belongs to Database: an inner scope opens nothing and commits nothing, and the
+     * caller's own transaction is what pins the connection to the writer. So there is nothing for the
+     * DAO to decide, and deciding anyway - skipping the scope when a transaction is already open - is
+     * the shape this fix carried on the release branch, where transaction() had no guest semantics. It
+     * must not come back here: it would leave the read-back unpinned on any path that reached
+     * createRecord outside a transaction after the check.
      */
     #[Test]
-    public function instanceCreateRecordDoesNotOpenATransactionInsideAnOpenOne(): void
+    public function instanceCreateRecordEntersTheScopeEvenInsideAnOpenTransaction(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('fetchAll')->willReturn([
@@ -916,13 +913,13 @@ class ChunkReviewDaoTest extends AbstractTest
         $connection->method('inTransaction')->willReturn(true);
         $connection->method('prepare')->willReturn($this->stmtStub);
 
-        $scopesOpened = 0;
+        $scopesEntered = 0;
 
         $database = $this->createStub(IDatabase::class);
         $database->method('getConnection')->willReturn($connection);
         $database->method('transaction')->willReturnCallback(
-            function (callable $callback) use (&$scopesOpened) {
-                $scopesOpened++;
+            function (callable $callback) use (&$scopesEntered) {
+                $scopesEntered++;
 
                 return $callback();
             }
@@ -936,8 +933,109 @@ class ChunkReviewDaoTest extends AbstractTest
             'source_page'     => 2,
         ]);
 
-        $this->assertSame(0, $scopesOpened, 'createRecord must not open a transaction inside an open one');
+        $this->assertSame(1, $scopesEntered, 'createRecord must always enter a transaction scope');
         $this->assertSame(45, $result->id);
+    }
+
+    /**
+     * A read-back that finds nothing has to fail inside the scope.
+     *
+     * The row is unreadable either because the write did not happen or because it is not visible from
+     * here, and neither is a state to commit: throwing from within the scope is what makes the
+     * transaction abort. Thrown after the commit instead, it would leave exactly the row-exists-but-
+     * caller-was-told-otherwise state that made a second revision pass impossible to create.
+     */
+    #[Test]
+    public function instanceCreateRecordFailsInsideTheScopeWhenTheReadBackFindsNothing(): void
+    {
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+
+        $insideScope = false;
+        $failedInsideScope = null;
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($this->pdoStub);
+        $database->method('transaction')->willReturnCallback(
+            function (callable $callback) use (&$insideScope, &$failedInsideScope) {
+                $insideScope = true;
+
+                try {
+                    return $callback();
+                } catch (Throwable $e) {
+                    $failedInsideScope = $insideScope;
+
+                    throw $e;
+                } finally {
+                    $insideScope = false;
+                }
+            }
+        );
+
+        $dao = new ChunkReviewDao($database);
+
+        try {
+            $dao->createRecord([
+                'id_project'      => 1,
+                'id_job'          => 2,
+                'password'        => 'test_pw',
+                'review_password' => 'rev_pw',
+                'source_page'     => 2,
+            ]);
+
+            $this->fail('createRecord must throw when the row it wrote cannot be read back');
+        } catch (RuntimeException $e) {
+            $this->assertStringContainsString('qa_chunk_reviews row not found after createRecord', $e->getMessage());
+        }
+
+        $this->assertTrue($failedInsideScope, 'the failure must reach the scope, so that it aborts');
+    }
+
+    /**
+     * The cache bust waits for the commit.
+     *
+     * createRecord returns with the transaction still open whenever its caller owns one. A bust issued
+     * there is a window in which a concurrent reader repopulates the cache from the pre-commit row, and
+     * that stale value then outlives the commit for the whole TTL.
+     */
+    #[Test]
+    public function instanceCreateRecordDefersTheCacheBustUntilCommit(): void
+    {
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([
+            new ChunkReviewStruct([
+                'id'              => 46,
+                'id_project'      => 1,
+                'id_job'          => 2,
+                'password'        => 'test_pw',
+                'review_password' => 'rev_pw',
+                'source_page'     => 2,
+            ])
+        ]);
+
+        /** @var list<callable> $deferred */
+        $deferred = [];
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($this->pdoStub);
+        $database->method('transaction')->willReturnCallback(static fn(callable $callback) => $callback());
+        // Hold the callbacks instead of running them, which is what a real open transaction does.
+        $database->method('onCommit')->willReturnCallback(
+            function (callable $callback) use (&$deferred): void {
+                $deferred[] = $callback;
+            }
+        );
+
+        $result = (new ChunkReviewDao($database))->createRecord([
+            'id_project'      => 1,
+            'id_job'          => 2,
+            'password'        => 'test_pw',
+            'review_password' => 'rev_pw',
+            'source_page'     => 2,
+        ]);
+
+        $this->assertCount(1, $deferred, 'the cache bust must be scheduled through onCommit');
+        $this->assertSame(46, $result->id);
     }
 
     #[Test]
