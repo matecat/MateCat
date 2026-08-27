@@ -29,6 +29,7 @@ use Throwable;
 use Utils\Logger\MatecatLogger;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSService;
+use Utils\TmKeyManagement\TmKeyManager;
 
 /**
  * Real-DB suite for {@see UserKeysController}.
@@ -354,67 +355,80 @@ class UserKeysControllerTest extends AbstractTest
     }
 
     /**
+     * The inverse of what this used to assert.
+     *
+     * A description whose entity-encoded form differed from what was typed used to be refused with
+     * code -3 — which is every name containing < > & " ' — on the grounds that markup in a resource
+     * name is an XSS attempt. It is not: `Smith & Sons` is a resource name, and the reason markup
+     * was dangerous here was that the sinks printing it did not escape. They do now, each for its
+     * own context, so the name is stored as typed and held to the same rules as every other one.
+     *
      * @throws Throwable
      */
     #[Test]
-    public function validateTheRequest_throws_minus_three_on_xss_description(): void
+    #[DataProvider('htmlSignificantDescriptionProvider')]
+    public function validateTheRequest_stores_a_description_carrying_markup_as_typed(string $typed): void
     {
         $this->setRequestParams([
             'key'         => 'abcdef1234567890',
-            'description' => '<script>alert(1)</script>',
+            'description' => $typed,
         ]);
 
-        try {
-            $this->invokePrivate('validateTheRequest');
-            $this->fail('Expected InvalidArgumentException was not thrown');
-        } catch (InvalidArgumentException $e) {
-            $this->assertSame(-3, $e->getCode());
-            $this->assertStringContainsString('&lt;', $e->getMessage());
-            $this->assertStringContainsString('&gt;', $e->getMessage());
-            $this->assertStringContainsString('&amp;', $e->getMessage());
-            $this->assertStringContainsString('&quot;', $e->getMessage());
-            $this->assertStringContainsString('&#39;', $e->getMessage());
-            $this->assertStringNotContainsString(
-                'gist.github.com',
-                $e->getMessage(),
-                'the gist link about non-printable characters was intentionally dropped from the message'
-            );
-        }
-    }
+        $result = $this->invokePrivate('validateTheRequest');
 
-    /**
-     * @throws Throwable
-     */
-    #[Test]
-    #[DataProvider('forbiddenDescriptionCharacterProvider')]
-    public function validateTheRequest_throws_minus_three_for_each_forbidden_character(string $char): void
-    {
-        $this->setRequestParams([
-            'key'         => 'abcdef1234567890',
-            'description' => "Glossary {$char} name",
-        ]);
-
-        try {
-            $this->invokePrivate('validateTheRequest');
-            $this->fail('Expected InvalidArgumentException was not thrown');
-        } catch (InvalidArgumentException $e) {
-            $this->assertSame(-3, $e->getCode());
-            $this->assertStringContainsString('Resource names cannot contain', $e->getMessage());
-        }
+        $this->assertIsArray($result);
+        $this->assertSame($typed, $result['description']);
     }
 
     /**
      * @return array<string, array{0: string}>
      */
-    public static function forbiddenDescriptionCharacterProvider(): array
+    public static function htmlSignificantDescriptionProvider(): array
     {
         return [
-            'less-than'    => ['<'],
-            'greater-than' => ['>'],
-            'ampersand'    => ['&'],
-            'double-quote' => ['"'],
-            'single-quote' => ["'"],
+            'less-than'      => ['Glossary < name'],
+            'greater-than'   => ['Glossary > name'],
+            'ampersand'      => ['Smith & Sons'],
+            'double-quote'   => ['The "Best" glossary'],
+            'single-quote'   => ["O'Brien's glossary"],
+            'markup'         => ['<script>alert(1)</script>'],
+            'non latin'      => ['メモリ'],
         ];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_refuses_a_description_wider_than_the_column(): void
+    {
+        $this->setRequestParams([
+            'key'         => 'abcdef1234567890',
+            'description' => str_repeat('a', TmKeyManager::RESOURCE_NAME_MAX_LENGTH + 1),
+        ]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(400);
+        $this->expectExceptionMessage('description must be at most 512 characters');
+
+        $this->invokePrivate('validateTheRequest');
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_strips_control_characters_from_the_description(): void
+    {
+        $this->setRequestParams([
+            'key'         => 'abcdef1234567890',
+            'description' => "Glossary\r\nBcc: victim",
+        ]);
+
+        $result = $this->invokePrivate('validateTheRequest');
+
+        $this->assertIsArray($result);
+        $this->assertSame('Glossary Bcc: victim', $result['description']);
     }
 
     // ─── getMkDao ───

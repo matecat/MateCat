@@ -125,6 +125,39 @@ outermost scope or nested five calls deep, so it defers and lets the owner's com
 When you do own the scope, put the statement after `transaction()` returns instead — same effect,
 and you get the exception if it fails, where a queued callback only logs it.
 
+### Database character set
+
+The character set of the database, its tables and the connection is infrastructure. Never set,
+change or work around it from PHP.
+
+MateCat is open source and every installation owns its own schema. `INSTALL/matecat.sql` ships
+`utf8mb4`, which is what a fresh self-hosted install gets. Older installations are `utf8mb3`, and
+`tests/inc/unittest_matecat_local.sql` matches those. Several tables — `project_templates`,
+`filters_config_templates`, `xliff_config_templates`, `payable_rate_templates` — are created by
+migrations with no charset clause at all and inherit the database default; the two `mt_qe_*` `name`
+columns are explicitly `CHARACTER SET latin1`. All of these are legitimate. None is drift to be
+reconciled.
+
+PHP knows nothing about any of it, and that is correct — it is the property that lets one codebase
+run on every installation. Do not treat it as a gap to close: **never read, assume or encode a
+storage charset in application code.** A rule written for three-byte storage is needlessly strict
+where four bytes are available; one written for four truncates silently where they are not. Neither
+belongs in the code.
+
+`Database::getConnection()` opens every connection with `SET NAMES utf8` (utf8mb3), and does it
+twice — once as `MYSQL_ATTR_INIT_COMMAND` and once as a bare `exec()`. `Model\Conversion\Filters`
+does the same on its own connection. Those lines are not a bug to tidy. Changing the connection
+charset alone, against columns that are narrower, corrupts or truncates across every query with no
+error and nothing shown to the user. Widening a column is an `ALTER TABLE` per column, plus the
+connection, plus the index key widths that follow from four bytes per character — coordinated, in a
+migration window, owned by whoever runs that installation. Never a code edit, never a rider on a
+feature PR.
+
+Application code adapts to what the storage can hold rather than changing it.
+`UserSuppliedName::assertNoAstral()` is the pattern: refuse on the narrower assumption where the
+user can see the 400, strip where a throw would break the request (the OAuth callback, project
+creation), and explain the limit without naming a charset.
+
 ## Testing
 
 ```bash

@@ -17,6 +17,8 @@ use PDOException;
 use ReflectionException;
 use Utils\Constants\Teams;
 use Utils\Email\ProjectAssignedEmail;
+use Utils\Tools\CatUtils;
+use Utils\Validation\UserSuppliedName;
 
 /**
  * Class ProjectModel
@@ -137,13 +139,34 @@ class ProjectModel
     }
 
     /**
+     * Normalise the new project name, and refuse one that is empty or will not fit.
+     *
+     * This is the only guard on `PUT /api/v2/teams/{id_team}/projects/{id_project}`, which writes
+     * `projects`.`name` straight out of the request. It had no sanitisation of any kind — not even
+     * the allowlist the three other project-name paths ran — so a name carrying CR/LF, zero-width
+     * characters or two hundred more characters than the column holds went in as typed.
+     *
+     * Normalising here rather than in the controller keeps it true for both callers of update().
+     *
      * @throws ValidationError
      */
     private function checkName(): void
     {
-        if (empty($this->willChange['name'])) {
+        $name = UserSuppliedName::normalize(
+            is_string($this->willChange['name']) ? $this->willChange['name'] : null
+        );
+
+        if ($name === '') {
             throw new ValidationError('Project name cannot be empty');
         }
+
+        if (mb_strlen($name) > CatUtils::PROJECT_NAME_MAX_LENGTH) {
+            throw new ValidationError(
+                'Project name must be at most ' . CatUtils::PROJECT_NAME_MAX_LENGTH . ' characters'
+            );
+        }
+
+        $this->willChange['name'] = $name;
     }
 
     /**

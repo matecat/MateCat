@@ -257,6 +257,46 @@ class DownloadQRControllerTest extends AbstractTest
     }
 
     #[Test]
+    public function createCSVFile_neutralises_a_formula_in_a_cell_a_user_typed(): void
+    {
+        // Excel, LibreOffice and Google Sheets evaluate a cell that opens with `=`, `+`, `-` or
+        // `@`, and CSV is this endpoint's default format — so this is the copy of the report most
+        // people open. The filename, the category label used as a column heading and the reviewer
+        // comment are all text somebody typed.
+        $row = $this->makeDataRow();
+        $row[9] = "=cmd|' /C calc'!A1";
+        $row[31] = ['Accuracy [minor]' => [['comment' => '@SUM(1+1)'] + $row[31]['Accuracy [minor]'][0]]];
+
+        $csv = $this->invoke('createCSVFile', [[$row], ['Accuracy [minor]']]);
+
+        self::assertIsString($csv);
+        self::assertStringContainsString("'=cmd|' /C calc'!A1", $csv);
+        self::assertStringContainsString("'@SUM(1+1)", $csv);
+    }
+
+    #[Test]
+    public function createCSVFile_neutralises_a_formula_in_a_column_heading(): void
+    {
+        // The headings are LQA category labels, which is text whoever authored the QA model typed.
+        $csv = $this->invoke('createCSVFile', [[], ['=HYPERLINK("http://evil.example")']]);
+
+        self::assertIsString($csv);
+        self::assertStringContainsString('\'=HYPERLINK', $csv);
+    }
+
+    #[Test]
+    public function createCSVFile_leaves_an_ordinary_cell_alone(): void
+    {
+        // A quote on every cell would be a quote in every formula bar. Only a cell that opens with
+        // one of those characters gets one.
+        $csv = $this->invoke('createCSVFile', [[$this->makeDataRow()], ['Accuracy [minor]']]);
+
+        self::assertIsString($csv);
+        self::assertStringContainsString('file.txt', $csv);
+        self::assertStringNotContainsString("'file.txt", $csv);
+    }
+
+    #[Test]
     public function createCSVFile_handles_empty_data(): void
     {
         $csv = $this->invoke('createCSVFile', [[], []]);
@@ -279,6 +319,34 @@ class DownloadQRControllerTest extends AbstractTest
 
         $dom = new \DOMDocument();
         self::assertTrue($dom->loadXML($xml));
+    }
+
+    #[Test]
+    public function createXMLFile_escapes_a_label_and_a_comment(): void
+    {
+        // Both are text somebody typed — an LQA category label and a reviewer comment — and neither
+        // carries subfiltering markup, so the reason the segment fields are left raw does not cover
+        // them. A single unescaped `&` made loadXML() fail and the export came out empty.
+        $label = 'Accuracy & <b>style</b> [minor]';
+        $row = $this->makeDataRow();
+        $row[30] = [$label => 1];
+        $row[31] = [$label => [[
+            'id' => 7,
+            'uid' => 3,
+            'id_qa_entry' => 11,
+            'create_date' => '2026-06-11',
+            'comment' => 'A & B <fix> this',
+            'source_page' => 1,
+        ]]];
+
+        $xml = $this->invoke('createXMLFile', [[$row], [$label]]);
+
+        self::assertIsString($xml);
+        self::assertStringContainsString('Accuracy &amp; ', $xml);
+        self::assertStringContainsString('A &amp; B ', $xml);
+
+        $dom = new \DOMDocument();
+        self::assertTrue($dom->loadXML($xml), 'an unescaped ampersand in a label empties the export');
     }
 
     // ── createJsonFile ───────────────────────────────────────────────────
