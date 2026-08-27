@@ -198,6 +198,51 @@ class ProjectAccessValidatorTest extends AbstractTest
         $validator->validate();
     }
 
+    // ─── what the refusal is allowed to say ───
+
+    /**
+     * A caller with no standing over the project must not learn from the refusal whether the project
+     * sits in a team at all: the two team-related refusals answer the same opaque sentence, and the
+     * one for a team-less project used to say "the user does not belong to team". Asserted by exact
+     * comparison rather than expectExceptionMessage(), which matches on a substring and would still
+     * pass if a detail were appended back onto the sentence.
+     */
+    #[Test]
+    public function theTeamlessRefusalDoesNotDiscloseWhyAccessWasRefused(): void
+    {
+        $project = new ProjectStruct();
+        $project->id_team = null;
+        $validator = new ProjectAccessValidator($this->controller, $project, $this->controller->getUser());
+
+        try {
+            $validator->validate();
+            $this->fail('a project with no team must refuse a caller who does not own it');
+        } catch (AuthorizationError $e) {
+            $this->assertSame('Not authorized', $e->getMessage());
+            $this->assertSame(401, $e->getCode());
+        }
+    }
+
+    /**
+     * The refusal for a caller outside the team used to carry the team id, handing an unauthorized
+     * caller an internal identifier it had no way to see otherwise. The sentence must stay opaque.
+     */
+    #[Test]
+    public function theNonMemberRefusalDoesNotDiscloseTheTeamId(): void
+    {
+        $project = $this->makeProjectStruct(99999999);
+        $validator = new ProjectAccessValidator($this->controller, $project, $this->controller->getUser());
+
+        try {
+            $validator->validate();
+            $this->fail('a caller outside the project team must be refused');
+        } catch (AuthorizationError $e) {
+            $this->assertSame('Not authorized', $e->getMessage());
+            $this->assertSame(401, $e->getCode());
+            $this->assertStringNotContainsString('99999999', $e->getMessage());
+        }
+    }
+
     // ─── the owner short-circuit ───
 
     /**
