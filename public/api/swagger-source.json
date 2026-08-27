@@ -139,13 +139,6 @@
             "default": "anonymous"
           },
           {
-            "name": "due_date",
-            "in": "formData",
-            "description": "If you want to set a due date for your project, send this param with a timestamp",
-            "required": false,
-            "type": "string"
-          },
-          {
             "name": "id_team",
             "in": "formData",
             "description": "The team you want to assign this project",
@@ -155,16 +148,9 @@
           {
             "name": "payable_rate_template_id",
             "in": "formData",
-            "description": "The id of the billing model you want to use in the project you are creating (if you want to use a custom billing model in a project, both relevant parameters must be included in the API call)",
+            "description": "The id of the billing model you want to use in the project you are creating.",
             "required": false,
             "type": "integer"
-          },
-          {
-            "name": "payable_rate_template_name",
-            "in": "formData",
-            "description": "The name of the billing model you want to use in the project you are creating (if you want to use a custom billing model in a project, both relevant parameters must be included in the API call)",
-            "required": false,
-            "type": "string"
           },
           {
             "name": "get_public_matches",
@@ -209,6 +195,26 @@
             "required": false,
             "type": "string",
             "example": "[\"gls_xyz123\"]"
+          },
+          {
+            "name": "lara_style",
+            "in": "formData",
+            "description": "The translation style applied to Lara's suggestions for every segment in the project. Only works if a Lara engine is used.",
+            "required": false,
+            "type": "string",
+            "default": "faithful",
+            "enum": [
+              "faithful",
+              "fluid",
+              "creative"
+            ]
+          },
+          {
+            "name": "lara_style_guideline_id",
+            "in": "formData",
+            "description": "The ID of the Lara style guide to apply to the project's translations (activates Lara Prose). Only works if a Lara engine is used.",
+            "required": false,
+            "type": "string"
           },
           {
             "name": "mmt_glossaries",
@@ -371,13 +377,6 @@
             "description": "Enable project completion feature",
             "required": false,
             "type": "boolean"
-          },
-          {
-            "name": "qa_model_template_id",
-            "in": "formData",
-            "description": "The id of the QA model you want to use in the project you are creating (if you want to use a custom QA model in a project, both relevant parameters must be included in the API call)",
-            "required": false,
-            "type": "integer"
           },
           {
             "name": "enable_mt_analysis",
