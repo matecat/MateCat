@@ -58,10 +58,6 @@ class TraitTestSubject
         return obtainTestDatabase();
     }
 
-    public static function sessionStart(): void
-    {
-        // no-op in tests
-    }
 }
 
 class AuthenticationTraitTest extends AbstractTest

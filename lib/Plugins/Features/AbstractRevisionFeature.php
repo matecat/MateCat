@@ -413,7 +413,8 @@ abstract class AbstractRevisionFeature extends BaseFeature
                 'undo_data'
             ]
         ]);
-        $this->getDatabase()->onCommit(static fn() => $chunkReviewDao->destroyCachesFor($review));
+        // Deferred to the commit inside DaoCacheTrait; the caller does not schedule it.
+        $chunkReviewDao->destroyCachesFor($review);
 
         LoggerFactory::doJsonLog("CompletionEventController deleting event: " . var_export($struct->getArrayCopy(), true));
     }

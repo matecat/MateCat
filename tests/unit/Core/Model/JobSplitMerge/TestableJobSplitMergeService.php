@@ -38,7 +38,6 @@ class TestableJobSplitMergeService extends JobSplitMergeService
     private array $randomStrings = [];
     private int $randomStringIndex = 0;
 
-    private bool $beginTransactionCalled = false;
     private bool $destroyAnalysisCacheCalled = false;
     private ?int $destroyAnalysisCacheProjectId = null;
 
@@ -93,18 +92,6 @@ class TestableJobSplitMergeService extends JobSplitMergeService
     protected function getJobByIdAndPassword(int $id, string $password): ?JobStruct
     {
         return $this->jobByIdAndPasswordOverride ?? parent::getJobByIdAndPassword($id, $password);
-    }
-
-    // ── beginTransaction ──
-
-    protected function beginTransaction(): void
-    {
-        $this->beginTransactionCalled = true;
-    }
-
-    public function wasBeginTransactionCalled(): bool
-    {
-        return $this->beginTransactionCalled;
     }
 
     // ── Cart ──

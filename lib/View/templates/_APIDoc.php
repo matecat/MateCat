@@ -13,7 +13,6 @@ use Utils\Tools\Utils;
 require_once '../../lib/Bootstrap.php';
 try {
     Bootstrap::start();
-    session_start();
 } catch (Exception $e) {
 }
 

@@ -768,12 +768,11 @@ class ChunkReviewDao extends AbstractDao
      * Invalidates every Redis-cached read that can serve a stale penalty_points/is_pass/
      * counters value for this chunk review.
      *
-     * Always schedule this through IDatabase::onCommit() rather than calling it inline. Busting
-     * while the writing transaction is still open lets a concurrent reader miss the cache, read the
-     * pre-commit row and repopulate from it - and that stale value then outlives the commit for the
-     * full TTL. The DAO's own mutators (createRecord, deleteByJobId) already defer it this way;
-     * callers that mutate counters through updateStruct or passFailCountsAtomicUpdate must do the
-     * same.
+     * Call it inline, right after the write. Busting while the writing transaction is still open
+     * would let a concurrent reader miss the cache, read the pre-commit row and repopulate from it,
+     * leaving a stale value that outlives the commit for the full TTL - so DaoCacheTrait holds each
+     * eviction back until the transaction commits. Callers do not schedule that themselves; wrapping
+     * this in IDatabase::onCommit() by hand only adds a layer that defers what is already deferred.
      *
      * @throws PDOException
      * @throws ReflectionException
@@ -885,7 +884,7 @@ class ChunkReviewDao extends AbstractDao
         ) ?? throw new RuntimeException('qa_chunk_reviews row not found after createRecord for job ' . $struct->id_job);
 
         // A new row changes what findChunkReviews()/getByProjectId() should return.
-        $this->database->onCommit(fn() => $this->destroyCachesFor($struct));
+        $this->destroyCachesFor($struct);
 
         return $struct;
     }
@@ -910,7 +909,7 @@ class ChunkReviewDao extends AbstractDao
         $deleted = $stmt->execute(['id_job' => $id_job]);
 
         foreach ($rows as $row) {
-            $this->database->onCommit(fn() => $this->destroyCachesFor($row));
+            $this->destroyCachesFor($row);
         }
 
         return $deleted;

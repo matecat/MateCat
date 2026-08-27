@@ -13,44 +13,17 @@
 
     <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
         /*<![CDATA[*/
-        var config = {
-            basepath: '${basepath | string:/}',
-            id_job: ${jid},
-            password: '${password}',
-            isSourceRTL: ${source_rtl | string:false},
-            isTargetRTL: ${target_rtl | string:false},
-            searchable_statuses : ${searchable_statuses},
-            user_plugins: ${user_plugins},
-            enableMultiDomainApi: ${enableMultiDomainApi},
-            ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
-            isAnInternalUser: ${isAnInternalUser},
-            source_code: '${source_code}',
-            target_code: '${target_code}'
+        // One serialised document rather than a value per line: PHPTAL does not escape inside a script
+        // block, so anything interpolated here lands in JavaScript syntax verbatim. See BootstrapConfig.
+        var config = $;
+        {
+          structure;
+          config_json;
         }
+        ;
         /*]]>*/
     </script>
 
-    <script tal:condition="true:brPlaceholdEnabled" tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
-        /*<![CDATA[*/
-        config.lfPlaceholder = '${lfPlaceholder | null}';
-        config.crPlaceholder = '${crPlaceholder | null}';
-        config.crlfPlaceholder = '${crlfPlaceholder | null}';
-        config.lfPlaceholderClass = '${lfPlaceholderClass | null}';
-        config.crPlaceholderClass = '${crPlaceholderClass | null}';
-        config.crlfPlaceholderClass = '${crlfPlaceholderClass | null}';
-        config.lfPlaceholderRegex = ${lfPlaceholderRegex | null};
-        config.crPlaceholderRegex = ${crPlaceholderRegex | null};
-        config.crlfPlaceholderRegex = ${crlfPlaceholderRegex | null};
-
-        config.tabPlaceholder       = '${tabPlaceholder | null}';
-        config.tabPlaceholderClass  = '${tabPlaceholderClass | null}';
-        config.tabPlaceholderRegex  = ${tabPlaceholderRegex | null};
-
-        config.nbspPlaceholder       = '${nbspPlaceholder | null}';
-        config.nbspPlaceholderClass  = '${nbspPlaceholderClass | null}';
-        config.nbspPlaceholderRegex  = ${nbspPlaceholderRegex | null};
-        /*]]>*/
-    </script>
 
 </head>
 

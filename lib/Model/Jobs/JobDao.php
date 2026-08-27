@@ -14,6 +14,7 @@ use Model\Users\UserStruct;
 use PDOException;
 use PDOStatement;
 use ReflectionException;
+use Throwable;
 use Utils\Constants\JobStatus;
 use Utils\Constants\TranslationStatus;
 
@@ -79,22 +80,10 @@ class JobDao extends AbstractDao
     }
 
     /**
-     * Destroy a cached object
+     * Destroy the cached reads of one job credential.
      *
-     * @param JobStruct $jobQuery
-     *
-     * @return bool
-     * @throws Exception
-     *
-     */
-    public function destroyCacheByIdAndPassword(JobStruct $jobQuery): bool
-    {
-        return $this->destroyCacheForIdAndPassword($jobQuery->id, $jobQuery->password);
-    }
-
-    /**
-     * Same as destroyCacheByIdAndPassword(), for a credential that is not the one the struct carries:
-     * a rotation has to evict the password it replaces, and the struct already holds the new one.
+     * The credential is named by the caller rather than read off a JobStruct: a rotation has to evict
+     * the password it replaces, and by then the struct already carries the new one.
      *
      * @param int|null $id_job
      * @param string|null $password
@@ -879,6 +868,7 @@ class JobDao extends AbstractDao
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Throwable
      */
     public function createFromStruct(JobStruct $jobStruct): JobStruct
     {
@@ -900,23 +890,19 @@ class JobDao extends AbstractDao
         $columns = array_values($columns);
         $values = array_values($values);
 
-        $this->database->begin();
+        return $this->database->transaction(function () use ($conn, $columns, $values): JobStruct {
+            /** @noinspection SqlInsertValues */
+            /** @noinspection DuplicatedCode */
+            $stmt = $conn->prepare('INSERT INTO `jobs` ( ' . implode(',', $columns) . ' ) VALUES ( ' . implode(',', array_fill(0, count($values), '?')) . ' )');
 
-        /** @noinspection SqlInsertValues */
-        /** @noinspection DuplicatedCode */
-        $stmt = $conn->prepare('INSERT INTO `jobs` ( ' . implode(',', $columns) . ' ) VALUES ( ' . implode(',', array_fill(0, count($values), '?')) . ' )');
+            foreach ($values as $k => $v) {
+                $stmt->bindValue($k + 1, $v); //Columns/Parameters are 1-based
+            }
 
-        foreach ($values as $k => $v) {
-            $stmt->bindValue($k + 1, $v); //Columns/Parameters are 1-based
-        }
+            $stmt->execute();
 
-        $stmt->execute();
-
-        $job = $this->getNotDeletedById((int)$conn->lastInsertId())[0];
-
-        $conn->commit();
-
-        return $job;
+            return $this->getNotDeletedById((int)$conn->lastInsertId())[0];
+        });
     }
 
     /**

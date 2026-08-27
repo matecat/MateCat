@@ -28,6 +28,15 @@ abstract class AbstractDao
     protected IDatabase $database;
 
     /**
+     * A DAO's cached reads and evictions run on the connection it was constructed with, so that is
+     * the transaction whose visibility they have to follow.
+     */
+    protected function _cacheTransactionScope(): ?IDatabase
+    {
+        return $this->database;
+    }
+
+    /**
      * @var string This property will be overridden in the subclasses.
      */
     const string STRUCT_TYPE = '';

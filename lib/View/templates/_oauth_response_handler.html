@@ -3,9 +3,14 @@
     <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
     <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript" language="javascript">
         /*<![CDATA[*/
-        var config = {
-            wanted_url: '${wanted_url | string: }'
-        };
+        // One serialised document rather than a value per line: PHPTAL does not escape inside a script
+        // block, so anything interpolated here lands in JavaScript syntax verbatim. See BootstrapConfig.
+        var config = $;
+        {
+          structure;
+          config_json;
+        }
+        ;
 
         if ( config.wanted_url ) {
             window.localStorage.setItem( 'wanted_url', config.wanted_url );

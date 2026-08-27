@@ -4,6 +4,7 @@ namespace Model\Filters;
 
 use DomainException;
 use Exception;
+use InvalidArgumentException;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\Filters\DTO\Dita;
@@ -16,6 +17,7 @@ use Model\Filters\DTO\Xml;
 use Model\Filters\DTO\Yaml;
 use TypeError;
 use Utils\Date\DateTimeUtil;
+use Utils\Validation\UserSuppliedName;
 
 class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonSerializable
 {
@@ -267,6 +269,8 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
      * @return FiltersConfigTemplateStruct
      * @throws DomainException
      * @throws TypeError
+     * @throws InvalidArgumentException when the name is empty, holds a character the connection
+     *                                  cannot carry, or will not fit the column
      *
      */
     public function hydrateFromJSON(string $json, ?int $uid = null): FiltersConfigTemplateStruct
@@ -282,7 +286,15 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
         }
 
         $this->uid = $json['uid'] ?? $uid;
-        $this->name = $json['name'];
+        // Here rather than in the controller, so create and update are covered by one call: both
+        // hydrate through this method. The schema bounds the length, but only the composed form
+        // lets UNIQUE(uid, name) see a clash between two spellings of the same name. The three
+        // sibling template structs already went through this; this one was missed.
+        $this->name = UserSuppliedName::validated(
+            $json['name'],
+            'name',
+            UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH
+        );
 
         if (isset($json['id'])) {
             $this->id = $json['id'];

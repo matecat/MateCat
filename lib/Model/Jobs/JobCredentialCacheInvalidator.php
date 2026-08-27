@@ -127,7 +127,6 @@ readonly class JobCredentialCacheInvalidator
         $project = $chunk->getProject($this->projectDao);
         $projectId = $project->id ?? throw new TypeError('ProjectStruct::$id cannot be null');
 
-        $this->projectDao->destroyCacheForProjectData($projectId);
-        $this->projectDao->destroyCacheForProjectData($projectId, $project->password);
+        $this->projectDao->destroyCache($projectId);
     }
 }

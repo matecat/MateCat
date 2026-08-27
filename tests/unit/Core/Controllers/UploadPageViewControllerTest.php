@@ -226,7 +226,7 @@ class UploadPageViewControllerTest extends AbstractTest
 
     /** @throws ReflectionException */
     #[Test]
-    public function renderViewSkipsUploadDirAndLxqParamsWhenNoGuidAndNoLicense(): void
+    public function renderViewSkipsUploadDirAndDefaultsLxqParamsWhenNoGuidAndNoLicense(): void
     {
         $_COOKIE[GDriveController::GDRIVE_LIST_COOKIE_NAME] = '1';
 
@@ -241,9 +241,17 @@ class UploadPageViewControllerTest extends AbstractTest
         } catch (RenderTerminatedException) {
             $this->assertSame('upload.html', $this->controller->lastTemplate);
             $this->assertArrayHasKey('formats_number', $this->controller->lastViewData);
-            $this->assertArrayHasKey('subjects', $this->controller->lastViewData);
+            $this->assertArrayHasKey('subject_array', $this->controller->lastViewData);
             $this->assertSame(200, $this->controller->lastViewCode);
-            $this->assertSame(0, $this->controller->addParamsCallCount);
+
+            // The four LexiQA keys are supplied even with no licence: the page is built from the
+            // variables the view holds, so an unset variable is a key the page never receives, and
+            // lxq.main.js reads lexiqa_languages before it looks at the licence.
+            $this->assertSame(1, $this->controller->addParamsCallCount);
+            $this->assertSame('', $this->controller->addedParams['lxq_license']);
+            $this->assertSame('', $this->controller->addedParams['lxq_partnerid']);
+            $this->assertSame('', $this->controller->addedParams['lexiqaServer']);
+            $this->assertSame([], $this->controller->addedParams['lexiqa_languages']->jsonSerialize());
         } finally {
             AppConfig::$LXQ_LICENSE = $previousLicense;
             $restoreCache();

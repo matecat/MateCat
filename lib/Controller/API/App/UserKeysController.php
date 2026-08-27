@@ -24,6 +24,7 @@ use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSService;
 use Utils\Tools\Utils;
+use Utils\Validation\UserSuppliedName;
 
 class UserKeysController extends KleinController
 {
@@ -166,7 +167,10 @@ class UserKeysController extends KleinController
     {
         $key = filter_var($this->request->param('key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $emails = filter_var($this->request->param('emails'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-        $description = filter_var($this->request->param('description'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        // FILTER_UNSAFE_RAW: the name is stored as typed and escaped by each output. The
+        // ShareKey email prints it, and that template escapes and defangs every value it is given
+        // — see Utils\Email\EmailValue.
+        $description = filter_var($this->request->param('description'), FILTER_UNSAFE_RAW);
         $remove_from = filter_var($this->request->param('remove_from'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
 
         // check for eventual errors on the input passed
@@ -174,22 +178,16 @@ class UserKeysController extends KleinController
             throw new InvalidArgumentException("Key missing", -2);
         }
 
-        // Prevent XSS attack
-        // ===========================
-        // POC. Try to add this string in the input:
-        // <details x=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:2 open ontoggle="prompt(document.cookie);">
-        // in this case, an error MUST be thrown
-        if ($this->request->param('description') and $this->request->param('description') !== $description) {
-            throw new InvalidArgumentException(
-                "<span>Resource names cannot contain the following characters:</span>"
-                . "<ul>"
-                . "<li>&lt; (less than)</li>"
-                . "<li>&gt; (greater than)</li>"
-                . "<li>&amp; (ampersand)</li>"
-                . "<li>&quot; (double quote)</li>"
-                . "<li>&#39; (single quote)</li>"
-                . "</ul>",
-                -3
+        // This used to refuse any name whose entity-encoded form differed from what was typed —
+        // which is every name containing < > & " ' — on the grounds that markup in a resource name
+        // is an XSS attempt. It is not: `Smith & Sons` is a resource name, and the reason markup
+        // was dangerous here was that the sinks printing it did not escape. They do now, each for
+        // its own context, so the name is held to the same rules as every other one instead.
+        if ($description !== false && $description !== null && $description !== '') {
+            $description = UserSuppliedName::validated(
+                $description,
+                'description',
+                TmKeyManager::RESOURCE_NAME_MAX_LENGTH
             );
         }
 

@@ -14,7 +14,7 @@ use Utils\Registry\AppConfig;
 
 /**
  * @group  regression
- * @covers JobDao::destroyCacheByIdAndPassword
+ * @covers JobDao::destroyCacheForIdAndPassword
  * User: dinies
  * Date: 27/05/16
  * Time: 11.48
@@ -117,7 +117,7 @@ class DestroyCacheJobTest extends AbstractTest
 
     /**
      * @group  regression
-     * @covers JobDao::destroyCacheByIdAndPassword
+     * @covers JobDao::destroyCacheForIdAndPassword
      */
     #[Test]
     public function test_DestroyCache_with_ID_and_Password()
@@ -131,14 +131,14 @@ class DestroyCacheJobTest extends AbstractTest
         $output_before_destruction = $this->cache->get($key);
         $this->assertEquals($value, $output_before_destruction);
         $this->assertTrue(unserialize($output_before_destruction) instanceof JobStruct);
-        $this->job_Dao->destroyCacheByIdAndPassword($this->job_struct);
+        $this->job_Dao->destroyCacheForIdAndPassword($this->job_struct->id, $this->job_struct->password);
         $output_after_destruction = $this->cache->get($cache_key);
         $this->assertNull($output_after_destruction);
     }
 
     /**
      * @group  regression
-     * @covers JobDao::destroyCacheByIdAndPassword
+     * @covers JobDao::destroyCacheForIdAndPassword
      * @throws Exception
      */
     #[Test]
@@ -153,7 +153,7 @@ class DestroyCacheJobTest extends AbstractTest
         $output_before_destruction = $this->cache->get($key);
         $this->assertEquals($value, $output_before_destruction);
         $this->assertTrue(unserialize($output_before_destruction) instanceof JobStruct);
-        $this->job_Dao->destroyCacheByIdAndPassword($this->job_struct);
+        $this->job_Dao->destroyCacheForIdAndPassword($this->job_struct->id, $this->job_struct->password);
         $output_after_destruction = $this->cache->get($cache_key);
         $this->assertNull($output_after_destruction);
     }

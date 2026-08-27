@@ -17,19 +17,14 @@
 
     <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
         /*<![CDATA[*/
-        var config = {
-            basepath: '${basepath | string:/}',
-            hostpath: '${hostpath | string:/}',
-            enable_outsource: ${enable_outsource | string:false},
-            outsource_service_login : '${outsource_service_login}',
-            splitFeatureAvailable: ${split_feature_available},
-            splitEnabled: ${split_feature_enabled},
-            user_plugins: ${user_plugins},
-            enableMultiDomainApi: ${enableMultiDomainApi | string:false},
-            isAnInternalUser: ${isAnInternalUser},
-            not_empty_default_tm_key: ${not_empty_default_tm_key|string:false},
-            ajaxDomainsNumber: ${ajaxDomainsNumber}
-        };
+        // One serialised document rather than a value per line: PHPTAL does not escape inside a script
+        // block, so anything interpolated here lands in JavaScript syntax verbatim. See BootstrapConfig.
+        var config = $;
+        {
+          structure;
+          config_json;
+        }
+        ;
         /*]]>*/
     </script>
 
