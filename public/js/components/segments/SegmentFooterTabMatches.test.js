@@ -328,6 +328,36 @@ describe('SegmentFooterTabMatches', () => {
     getSelectionSpy.mockRestore()
   })
 
+  test('does not reject when the browser denies clipboard permission', async () => {
+    const getSelectionSpy = jest
+      .spyOn(document, 'getSelection')
+      .mockReturnValue({toString: () => 'clip text'})
+    global.navigator.clipboard.writeText.mockRejectedValueOnce(
+      new DOMException('denied', 'NotAllowedError'),
+    )
+    const unhandledRejection = jest.fn()
+    process.on('unhandledRejection', unhandledRejection)
+
+    renderComponent({
+      segment: {
+        ...baseSegment,
+        contributions: {matches: [makeMatch()]},
+      },
+    })
+    const container = document.querySelector('#segment-20-matches')
+    await act(async () => {
+      fireEvent.copy(container)
+    })
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    process.off('unhandledRejection', unhandledRejection)
+
+    expect(unhandledRejection).not.toHaveBeenCalled()
+    expect(global.navigator.clipboard.writeText).toHaveBeenCalledWith(
+      'clip text',
+    )
+    getSelectionSpy.mockRestore()
+  })
+
   test('renders quality info when sentence_confidence is present', () => {
     renderComponent({
       segment: {

@@ -821,6 +821,25 @@ describe('SegmentSource editor handlers', () => {
     expect(typeof ref.current.state.isShowingOptionsToolbar).toBe('boolean')
   })
 
+  test('mouse up does not throw when the editor ref is gone before the deferred read', async () => {
+    const {container, unmount} = renderSource(makeSegment())
+    await flushTimers()
+
+    const uncaught = jest.fn()
+    process.on('uncaughtException', uncaught)
+
+    // The deferred read is scheduled while the editor is still mounted; React
+    // nulls the ref on unmount, so the callback lands on a ref that is gone.
+    fireEvent.mouseUp(container.querySelector('#segment-10-source'))
+    unmount()
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    process.off('uncaughtException', uncaught)
+    expect(uncaught).not.toHaveBeenCalled()
+  })
+
   test('arrow keys re-evaluate the options toolbar but other keys do not', async () => {
     const {container, ref} = renderSource(makeSegment())
     await flushTimers()
