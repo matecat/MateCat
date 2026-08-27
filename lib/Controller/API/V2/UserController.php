@@ -11,6 +11,7 @@ use Klein\Exceptions\LockedResponseException;
 use Klein\Exceptions\ResponseAlreadySentException;
 use Model\Users\MetadataDao;
 use Model\Users\UserDao;
+use Throwable;
 use TypeError;
 use Utils\Tools\CatUtils;
 
@@ -28,6 +29,8 @@ class UserController extends AbstractStatefulKleinController
      * @throws LockedResponseException
      * @throws ResponseAlreadySentException
      * @throws TypeError
+     * @throws Throwable the update runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function edit(): void
     {

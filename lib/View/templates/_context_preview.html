@@ -10,12 +10,9 @@
     <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
 
     <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
-      var config = {
-        basepath: '${basepath | string:/}',
-        hostpath: '${hostpath | string:/}',
-        id_project: ${id_project | string:0},
-        password: '${password | string:}',
-      };
+      // One serialised document rather than a value per line: PHPTAL does not escape inside a script
+      // block, so anything interpolated here lands in JavaScript syntax verbatim. See BootstrapConfig.
+      var config = ${structure config_json};
     </script>
 
 </head>

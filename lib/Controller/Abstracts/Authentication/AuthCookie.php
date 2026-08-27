@@ -252,9 +252,8 @@ class AuthCookie
             return;
         }
 
-        // Read the age from iat, which a parsed instance keeps as issued. Deliberately NOT
-        // getExpireDate(): for a parsed instance :172-174 loads the absolute exp into timeToLive,
-        // so it returns iat + exp. Pre-existing bug, avoided rather than relied on.
+        // Read the age from iat, which a parsed instance keeps as issued. Renewal is decided by how
+        // long ago the cookie was minted, so iat is the claim to read here rather than the expiry.
         $issuedAt = $jwt['iat'] ?? null;
 
         if (!is_int($issuedAt) || (time() - $issuedAt) <= $this->renewAfterSeconds()) {

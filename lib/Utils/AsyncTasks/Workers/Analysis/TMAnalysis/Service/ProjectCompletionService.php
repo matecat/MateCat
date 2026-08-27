@@ -149,34 +149,32 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
 
                 $this->log("--- trying to initialize job total word count for project $pid.");
 
-                $this->repository->beginTransaction();
+                $this->repository->transaction(function () use ($pid, $rollup, $_analyzed_report): void {
+                    $this->log("--- analysis project $pid finished: change status to DONE");
 
-                $this->log("--- analysis project $pid finished: change status to DONE");
-
-                $this->repository->updateProjectAnalysisStatus(
-                    $pid,
-                    ProjectStatus::STATUS_DONE,
-                    (float)$rollup['eq_wc'],
-                    (float)$rollup['st_wc']
-                );
-
-                $jobs         = $this->repository->getProjectJobIds($pid);
-                $numberOfJobs = count($jobs);
-
-                foreach ($jobs as $job) {
-                    $this->repository->updateJobStandardWordCount(
-                        $job['id'],
-                        (float)$rollup['st_wc'] / $numberOfJobs
+                    $this->repository->updateProjectAnalysisStatus(
+                        $pid,
+                        ProjectStatus::STATUS_DONE,
+                        (float)$rollup['eq_wc'],
+                        (float)$rollup['st_wc']
                     );
-                }
 
-                $this->repository->destroyProjectAndJobCaches($pid);
+                    $jobs = $this->repository->getProjectJobIds($pid);
+                    $numberOfJobs = count($jobs);
 
-                foreach ($_analyzed_report as $job_info) {
-                    $this->repository->initializeJobWordCount((int)$job_info['id_job'], (string)$job_info['password']);
-                }
+                    foreach ($jobs as $job) {
+                        $this->repository->updateJobStandardWordCount(
+                            $job['id'],
+                            (float)$rollup['st_wc'] / $numberOfJobs
+                        );
+                    }
 
-                $this->repository->commit();
+                    $this->repository->destroyProjectAndJobCaches($pid);
+
+                    foreach ($_analyzed_report as $job_info) {
+                        $this->repository->initializeJobWordCount((int)$job_info['id_job'], (string)$job_info['password']);
+                    }
+                });
 
                 // Remove from queue AFTER commit — if the worker crashes before commit,
                 // the project stays in the queue and another worker can retry.
@@ -188,12 +186,9 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
             } catch (Throwable $e) {
                 $this->log("**** Finalization failed for project $pid: " . $e->getMessage());
 
-                try {
-                    $this->repository->rollback();
-                } catch (Throwable) {
-                    // Already rolled back or no active transaction
-                }
-
+                // No rollback here: the scope has already rolled its transaction back by the time
+                // this catch runs, and the guard that used to sit around it existed because the
+                // rollback could not tell "already rolled back" from "never opened".
                 $this->redisService->releaseCompletionLock($pid);
             }
         }
@@ -208,10 +203,6 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
         // Wrap in transaction to force master-read in read-replica environments.
         // Called from initializeTMAnalysis (no outer transaction) and from the
         // DB-authoritative gate in tryCloseProject (before its transaction starts).
-        $this->repository->beginTransaction();
-        $result = $this->repository->getProjectSegmentsTranslationSummary($pid);
-        $this->repository->commit();
-
-        return $result;
+        return $this->repository->transaction(fn(): array => $this->repository->getProjectSegmentsTranslationSummary($pid));
     }
 }

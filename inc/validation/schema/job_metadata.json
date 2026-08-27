@@ -1,4 +1,5 @@
 {
+    "$comment": "This schema gates writes only. Nothing gates reads per key: the editor's own read returns every key stored against a job to whoever opens it, which is by design, since the translator working a job is routinely outside the team that owns the project. A key added here is therefore readable by anyone who can open the job. Do not add one holding anything that audience should not see.",
   "type": "array",
   "items": {
     "anyOf": [

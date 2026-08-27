@@ -168,9 +168,12 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
         // Set the current time as the issued-at time (iat)
         $that->now = $that->storage['payload']['iat'] ?? time();
 
-        // Set the token expiration time (exp)
+        // Set the lifetime the token was issued with, as a duration: `timeToLive` is a duration
+        // everywhere else, since both sign() and getExpireDate() derive the expiry as now + ttl.
+        // Loading the absolute `exp` here instead made getExpireDate() answer iat + exp, and
+        // re-signing a parsed instance stamp an expiry decades in the future.
         $that->timeToLive = isset($that->storage['payload']['exp']) && is_int($that->storage['payload']['exp'])
-            ? $that->storage['payload']['exp']
+            ? $that->storage['payload']['exp'] - $that->now
             : 0;
 
         // Set the namespace for custom claims

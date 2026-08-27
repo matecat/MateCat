@@ -240,7 +240,7 @@ class QualityReportViewControllerTest extends AbstractTest
             $this->fail('Expected RenderTerminatedException');
         } catch (RenderTerminatedException) {
             $this->assertSame('revise_summary.html', $this->controller->lastTemplate);
-            $this->assertSame(self::JOB_ID_VALID, $this->controller->lastViewData['jid']);
+            $this->assertSame(self::JOB_ID_VALID, $this->controller->lastViewData['id_job']);
             $this->assertSame(self::JOB_PASSWORD_VALID, $this->controller->lastViewData['password']);
             $this->assertArrayHasKey('searchable_statuses', $this->controller->lastViewData);
         } finally {

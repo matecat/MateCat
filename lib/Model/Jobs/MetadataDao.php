@@ -4,20 +4,12 @@ namespace Model\Jobs;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\IDatabase;
-use Model\DataAccess\TransactionalTrait;
 use PDOException;
 use ReflectionException;
+use Throwable;
 
 class MetadataDao extends AbstractDao
 {
-
-    use TransactionalTrait;
-
-    protected function getTransactionalDatabase(): IDatabase
-    {
-        return $this->database;
-    }
 
     const string TABLE = 'job_metadata';
 
@@ -97,11 +89,15 @@ class MetadataDao extends AbstractDao
      * @param int $id_job
      * @param string $password
      * @param string $key
-     * @param int $ttl
+     * @param int $ttl Zero means "do not read from cache", and set() depends on that default: it
+     *                 re-reads the row it has just written, inside the transaction where the
+     *                 eviction it issued is still queued for the commit. Give this parameter a
+     *                 non-zero default and set() starts returning the pre-write value.
      *
      * @return MetadataStruct|null
      * @throws Exception
      * @throws PDOException
+     *
      * @throws ReflectionException
      */
     public function get(int $id_job, string $password, string $key, int $ttl = 0): ?MetadataStruct
@@ -140,6 +136,8 @@ class MetadataDao extends AbstractDao
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function set(int $id_job, string $password, string $key, string $value): ?MetadataStruct
     {
@@ -149,23 +147,25 @@ class MetadataDao extends AbstractDao
             " ( :id_job, :password, :key, :value ) " .
             " ON DUPLICATE KEY UPDATE `value` = :value ";
 
-        $this->openTransaction(); // because we have to invalidate the cache after the insert, use the transactional trait
-        $conn = $this->database->getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            'id_job' => $id_job,
-            'password' => $password,
-            'key' => $key,
-            'value' => $value
-        ]);
+        // The scope exists so the evictions below are queued and run after the commit rather than
+        // before it. It also undoes the write here rather than leaving it to the end of the request:
+        // a worker holds its connection across messages, so a transaction left open by a failure
+        // here would still be open when the next message starts writing.
+        return $this->database->transaction(function () use ($id_job, $password, $key, $value, $sql): ?MetadataStruct {
+            $conn = $this->database->getConnection();
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                'id_job' => $id_job,
+                'password' => $password,
+                'key' => $key,
+                'value' => $value
+            ]);
 
-        $this->destroyCacheByJobAndPassword($id_job, $password);
-        $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
+            $this->destroyCacheByJobAndPassword($id_job, $password);
+            $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
 
-        $result = $this->get($id_job, $password, $key);
-        $this->commitTransaction(); // commit only if everything went fine
-
-        return $result;
+            return $this->get($id_job, $password, $key);
+        });
     }
 
     /**
@@ -175,6 +175,8 @@ class MetadataDao extends AbstractDao
      *
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function bulkSet(int $id_job, string $password, array $metadata): void
     {
@@ -199,16 +201,16 @@ class MetadataDao extends AbstractDao
             . implode(', ', $placeholders)
             . " ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
 
-        $this->openTransaction();
-        $conn = $this->database->getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->execute($params);
+        $this->database->transaction(function () use ($id_job, $password, $metadata, $params, $sql): void {
+            $conn = $this->database->getConnection();
+            $stmt = $conn->prepare($sql);
+            $stmt->execute($params);
 
-        $this->destroyCacheByJobAndPassword($id_job, $password);
-        foreach ($metadata as $key => $value) {
-            $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
-        }
-        $this->commitTransaction();
+            $this->destroyCacheByJobAndPassword($id_job, $password);
+            foreach ($metadata as $key => $value) {
+                $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
+            }
+        });
     }
 
     /**

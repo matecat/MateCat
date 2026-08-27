@@ -200,21 +200,25 @@ class ConcurrencyRegressionTest extends AbstractTest
         $methodPos = strpos($source, 'public function tryCloseProject');
         $this->assertNotFalse($methodPos);
 
-        $commitPos = strpos($source, '->commit()', $methodPos);
-        $this->assertNotFalse($commitPos, 'Expected ->commit() in tryCloseProject().');
+        $scopePos = strpos($source, '$this->repository->transaction(function ()', $methodPos);
+        $this->assertNotFalse($scopePos, 'Expected the finalization transaction scope in tryCloseProject().');
+
+        // The commit happens where the closure returns, so the anchor is the line that closes it.
+        $scopeEndPos = strpos($source, "\n                });", $scopePos);
+        $this->assertNotFalse($scopeEndPos, 'Expected the finalization scope to be closed.');
 
         $removePos = strpos($source, 'removeProjectFromQueue(', $methodPos);
         $this->assertNotFalse($removePos, 'Expected removeProjectFromQueue() in tryCloseProject().');
 
         $this->assertGreaterThan(
-            $commitPos,
+            $scopeEndPos,
             $removePos,
-            'removeProjectFromQueue() must appear AFTER commit() — crash-safety requires the project to stay in the queue until DB work is committed.'
+            'removeProjectFromQueue() must appear AFTER the transaction scope closes — crash-safety requires the project to stay in the queue until DB work is committed.'
         );
     }
 
     #[Test]
-    public function test_project_completion_service_recovers_on_transaction_failure_with_rollback(): void
+    public function test_project_completion_service_recovers_on_transaction_failure_by_releasing_the_lock(): void
     {
         $source = $this->readSource($this->projectCompletionServicePath());
 
@@ -224,10 +228,13 @@ class ConcurrencyRegressionTest extends AbstractTest
         $catchPos = strpos($source, 'catch (Throwable $e)', $methodPos);
         $this->assertNotFalse($catchPos, 'Expected catch (Throwable $e) in ProjectCompletionService::tryCloseProject().');
 
-        $this->assertStringContainsString(
+        // Undoing the writes belongs to the transaction scope, which has already rolled back by the
+        // time this catch runs. A hand-rolled rollback here would be closing a transaction this
+        // class did not open.
+        $this->assertStringNotContainsString(
             '->rollback()',
             $source,
-            'Expected DB rollback() in ProjectCompletionService failure path.'
+            'ProjectCompletionService must not roll back by hand: the transaction scope owns that.'
         );
 
         $releasePos = strpos($source, 'releaseCompletionLock(', $catchPos);
@@ -235,24 +242,24 @@ class ConcurrencyRegressionTest extends AbstractTest
     }
 
     #[Test]
-    public function test_project_completion_service_has_db_authoritative_gate_before_transaction(): void
+    public function test_project_completion_service_has_db_authoritative_gate_before_the_scope(): void
     {
         $source = $this->readSource($this->projectCompletionServicePath());
 
         $methodPos = strpos($source, 'public function tryCloseProject');
         $this->assertNotFalse($methodPos);
 
-        // DB gate must query MySQL via getProjectSegmentsTranslationSummary BEFORE beginTransaction
+        // DB gate must query MySQL via getProjectSegmentsTranslationSummary BEFORE the finalization scope
         $summaryPos = strpos($source, 'getProjectSegmentsTranslationSummary(', $methodPos);
         $this->assertNotFalse($summaryPos, 'Expected getProjectSegmentsTranslationSummary() call in tryCloseProject().');
 
-        $beginPos = strpos($source, '->beginTransaction()', $methodPos);
-        $this->assertNotFalse($beginPos, 'Expected beginTransaction() in tryCloseProject().');
+        $scopePos = strpos($source, '$this->repository->transaction(function ()', $methodPos);
+        $this->assertNotFalse($scopePos, 'Expected the finalization transaction scope in tryCloseProject().');
 
         $this->assertLessThan(
-            $beginPos,
+            $scopePos,
             $summaryPos,
-            'DB-authoritative gate (getProjectSegmentsTranslationSummary) must appear BEFORE beginTransaction — verify segments are DONE in MySQL before starting the completion transaction.'
+            'DB-authoritative gate (getProjectSegmentsTranslationSummary) must appear BEFORE the finalization scope — verify segments are DONE in MySQL before starting the completion transaction.'
         );
 
         // Must release lock and return early if MySQL disagrees
@@ -263,9 +270,9 @@ class ConcurrencyRegressionTest extends AbstractTest
         $this->assertNotFalse($releaseOnDriftPos, 'Expected releaseCompletionLock() when MySQL says segments remain (Redis/MySQL drift).');
 
         $this->assertLessThan(
-            $beginPos,
+            $scopePos,
             $releaseOnDriftPos,
-            'Lock release on drift must happen BEFORE beginTransaction — do not start a transaction if MySQL disagrees.'
+            'Lock release on drift must happen BEFORE the finalization scope — do not start a transaction if MySQL disagrees.'
         );
     }
 

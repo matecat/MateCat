@@ -118,11 +118,11 @@ class Session
      *
      *        Read from `$_SESSION['user']` until that key was deleted for holding the password hash.
      *        Nullable, and appended rather than placed next to `$session`, because the callers split
-     *        cleanly: the three that reach a user-dependent operation
-     *        ({@see getToken()}, {@see grantFileAccessByUrl()}, {@see doConversion()}) have an
-     *        authenticated user to hand, while {@see \lib\View\fileupload} only asks
-     *        {@see sessionHasFiles()} and has none to give. Passing null reproduces exactly what an
-     *        absent session user did before.
+     *        cleanly: the one that reaches a user-dependent operation
+     *        ({@see getToken()}, {@see grantFileAccessByUrl()}, {@see doConversion()}) has an
+     *        authenticated user to hand, while the two that only read or clear the file list
+     *        ({@see \Controller\API\App\CreateProjectController}, {@see \Controller\API\App\AjaxUtilsController})
+     *        have none to give. Passing null reproduces exactly what an absent session user did before.
      * @throws Exception
      * @throws \TypeError
      */
@@ -344,19 +344,6 @@ class Session
     public function hasFiles(): bool
     {
         return (isset($this->gDriveSession[self::FILE_LIST]) and count($this->gDriveSession[self::FILE_LIST]) > 0);
-    }
-
-    /**
-     * @return bool
-     */
-    public function sessionHasFiles(): bool
-    {
-        if (isset($this->gDriveSession[self::FILE_LIST])
-            && !empty($this->gDriveSession[self::FILE_LIST])) {
-            return true;
-        }
-
-        return false;
     }
 
     /**
