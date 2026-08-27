@@ -19,12 +19,7 @@
         /*<![CDATA[*/
         // One serialised document rather than a value per line: PHPTAL does not escape inside a script
         // block, so anything interpolated here lands in JavaScript syntax verbatim. See BootstrapConfig.
-        var config = $;
-        {
-          structure;
-          config_json;
-        }
-        ;
+        var config = ${structure config_json};
         /*]]>*/
     </script>
 

@@ -11,12 +11,7 @@
         /*<![CDATA[*/
         // One serialised document rather than a value per line: PHPTAL does not escape inside a script
         // block, so anything interpolated here lands in JavaScript syntax verbatim. See BootstrapConfig.
-        var config = $;
-        {
-          structure;
-          config_json;
-        }
-        ;
+        var config = ${structure config_json};
         /*]]>*/
     </script>
 </head>
@@ -38,7 +33,7 @@
 <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
   document.getElementById('reactivate-job').addEventListener('click', function(e) {
     e.preventDefault();
-    const url = '/api/v3/jobs/' + config.jid + '/' + config.password + '/active';
+    const url = '/api/v3/jobs/' + config.jid + '/' + config.password+'/active'
     fetch(url, {
       method: 'POST',
       credentials: 'include',
