@@ -1854,6 +1854,144 @@
         }
       }
     },
+    "/api/v3/jobs/{id_job}/{password}/segment-analysis": {
+      "get": {
+        "tags": [
+          "Job"
+        ],
+        "summary": "Segment analysis",
+        "description": "Returns a paginated, segment by segment analysis of a job: source and target text, word counts, match type, revision status, LQA issues and notes. Access is granted by the id/password pair itself, so the exact pair must be presented: either the translate password of the job or the password of one of its revision steps.",
+        "parameters": [
+          {
+            "name": "id_job",
+            "in": "path",
+            "description": "The id of the job",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "password",
+            "in": "path",
+            "description": "The password of the job. Either the translate password or the password of a revision step.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page of segments to retrieve. Defaults to 1. Asking for a page beyond the last one is an error.",
+            "required": false,
+            "type": "integer",
+            "default": 1,
+            "minimum": 1
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of segments per page. Defaults to 50. Values above 200 are silently reduced to 200.",
+            "required": false,
+            "type": "integer",
+            "default": 50,
+            "maximum": 200
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of analysed segments.",
+            "schema": {
+              "$ref": "#/definitions/SegmentAnalysis"
+            }
+          },
+          "401": {
+            "description": "The caller is not authenticated.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "No job matches the supplied id and password.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/api/v3/projects/{id_project}/{password}/segment-analysis": {
+      "get": {
+        "tags": [
+          "Project"
+        ],
+        "summary": "Segment analysis",
+        "description": "Returns a paginated, segment by segment analysis of every job in a project: source and target text, word counts, match type, revision status, LQA issues and notes. Each item carries the id and password of the chunk it belongs to. Access is granted by the id/password pair itself, so the exact pair must be presented.",
+        "parameters": [
+          {
+            "name": "id_project",
+            "in": "path",
+            "description": "The id of the project",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "password",
+            "in": "path",
+            "description": "The password of the project",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page of segments to retrieve. Defaults to 1. Asking for a page beyond the last one is an error, and so is asking for page 1 of a project that has no segments.",
+            "required": false,
+            "type": "integer",
+            "default": 1,
+            "minimum": 1
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of segments per page. Defaults to 50. Values above 200 are silently reduced to 200.",
+            "required": false,
+            "type": "integer",
+            "default": 50,
+            "maximum": 200
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of analysed segments.",
+            "schema": {
+              "$ref": "#/definitions/SegmentAnalysis"
+            }
+          },
+          "401": {
+            "description": "The caller is not authenticated.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "No project matches the supplied id and password.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/api/v3/teams": {
       "get": {
         "tags": [
@@ -8004,6 +8142,253 @@
         },
         "review_password": {
           "type": "string"
+        }
+      }
+    },
+    "SegmentAnalysis": {
+      "type": "object",
+      "properties": {
+        "workflow_type": {
+          "type": "string",
+          "description": "The analysis workflow the project runs on. It decides which set of values match_type can take.",
+          "enum": [
+            "standard",
+            "mtqe"
+          ]
+        },
+        "_links": {
+          "type": "object",
+          "properties": {
+            "page": {
+              "type": "integer",
+              "description": "The page returned by this call"
+            },
+            "per_page": {
+              "type": "integer",
+              "description": "Number of segments in a full page, after the 200 cap has been applied"
+            },
+            "total_pages": {
+              "type": "number",
+              "description": "Number of pages the result set is split into. Serialized as a number, not necessarily an integer."
+            },
+            "total_items": {
+              "type": "integer",
+              "description": "Total number of segments available"
+            },
+            "next_page": {
+              "type": "string",
+              "description": "Path of the next page, or null on the last page. Note that this path is built with the /api/app prefix rather than /api/v3: use the page and per_page values instead of following it verbatim.",
+              "x-nullable": true
+            },
+            "prev_page": {
+              "type": "string",
+              "description": "Path of the previous page, or null on the first page. The same /api/app prefix caveat as next_page applies.",
+              "x-nullable": true
+            }
+          }
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SegmentAnalysisItem"
+          }
+        }
+      }
+    },
+    "SegmentAnalysisItem": {
+      "type": "object",
+      "properties": {
+        "id_segment": {
+          "type": "integer"
+        },
+        "id_chunk": {
+          "type": "integer",
+          "description": "The id of the job (chunk) this segment belongs to"
+        },
+        "chunk_password": {
+          "type": "string",
+          "description": "The translate password of the job (chunk) this segment belongs to"
+        },
+        "urls": {
+          "type": "object",
+          "description": "Editor links to this segment, one per phase. A key is present only when the corresponding phase exists on the job, so the object can be empty.",
+          "properties": {
+            "t": {
+              "type": "string",
+              "description": "Link to the segment in the translation phase"
+            },
+            "r1": {
+              "type": "string",
+              "description": "Link to the segment in the first revision phase"
+            },
+            "r2": {
+              "type": "string",
+              "description": "Link to the segment in the second revision phase"
+            }
+          }
+        },
+        "id_request": {
+          "type": "string",
+          "description": "The external request id stored against this segment, or null when none was set",
+          "x-nullable": true
+        },
+        "filename": {
+          "type": "string",
+          "description": "The name of the file the segment was extracted from",
+          "x-nullable": true
+        },
+        "original_filename": {
+          "type": "string",
+          "description": "The name of the file as originally uploaded, before any conversion. Falls back to filename.",
+          "x-nullable": true
+        },
+        "source": {
+          "type": "string",
+          "description": "The source text of the segment",
+          "x-nullable": true
+        },
+        "target": {
+          "type": "string",
+          "description": "The current translation of the segment, or null when it has never been translated",
+          "x-nullable": true
+        },
+        "source_lang": {
+          "type": "string",
+          "description": "RFC 5646 language+region code of the source, e.g. en-US"
+        },
+        "target_lang": {
+          "type": "string",
+          "description": "RFC 5646 language+region code of the target, e.g. it-IT"
+        },
+        "stored_source_raw_word_count": {
+          "type": "string",
+          "description": "The source raw word count recorded at analysis time. It comes straight from storage as a decimal string, e.g. \"12.00\".",
+          "x-nullable": true
+        },
+        "source_raw_word_count": {
+          "type": "integer",
+          "description": "The source raw word count recomputed on this request, using the subfiltering handlers the project was created with"
+        },
+        "target_raw_word_count": {
+          "type": "integer",
+          "description": "The target raw word count recomputed on this request, using the subfiltering handlers the project was created with"
+        },
+        "match_type": {
+          "type": "string",
+          "description": "How the segment was matched during analysis. On a standard workflow: new, tm_50_74, tm_75_84, tm_85_94, tm_95_99, tm_100, tm_100_public, ice, MT, ice_mt, repetitions, internal, numbers_only. On an mtqe workflow: tm_100, tm_100_public, ice, ice_mt, repetitions, top_quality_mt, higher_quality_mt, standard_quality_mt. Read workflow_type to know which set applies."
+        },
+        "revision_number": {
+          "type": "integer",
+          "description": "The revision step the segment last moved through: 1 for the first revision, 2 for the second. Null when the segment has never left the translation phase.",
+          "x-nullable": true
+        },
+        "issues": {
+          "type": "array",
+          "description": "The LQA issues open on this segment, across every phase. Empty when there are none.",
+          "items": {
+            "$ref": "#/definitions/SegmentAnalysisIssue"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "description": "The notes carried by the segment in the source file. Empty when there are none.",
+          "items": {
+            "type": "string",
+            "x-nullable": true
+          }
+        },
+        "status": {
+          "type": "object",
+          "properties": {
+            "translation_status": {
+              "type": "string",
+              "description": "The status of the segment translation",
+              "enum": [
+                "NEW",
+                "DRAFT",
+                "TRANSLATED",
+                "APPROVED",
+                "APPROVED2",
+                "REJECTED",
+                "FIXED"
+              ]
+            },
+            "final_version": {
+              "type": "string",
+              "description": "The phase that produced the current version of the translation. Null when the segment has no recorded event.",
+              "enum": [
+                "t",
+                "r1",
+                "r2"
+              ],
+              "x-nullable": true
+            },
+            "counts": {
+              "type": "object",
+              "description": "Raw word count attributed to each revision phase. A phase reports the count as a decimal string when the segment passed through it, the number 0 when it did not, and null when the phase does not apply to this segment.",
+              "properties": {
+                "r1": {
+                  "type": "string",
+                  "x-nullable": true
+                },
+                "r2": {
+                  "type": "string",
+                  "x-nullable": true
+                }
+              }
+            }
+          }
+        },
+        "last_edit": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of the last recorded event on the segment, or null when there is none",
+          "x-nullable": true
+        },
+        "disabled": {
+          "type": "boolean",
+          "description": "True when the segment has been disabled and is excluded from translation"
+        }
+      }
+    },
+    "SegmentAnalysisIssue": {
+      "type": "object",
+      "properties": {
+        "source_page": {
+          "type": "string",
+          "description": "The phase the issue was raised in",
+          "enum": [
+            "t",
+            "r1",
+            "r2"
+          ],
+          "x-nullable": true
+        },
+        "id_category": {
+          "type": "integer",
+          "description": "The id of the QA category the issue belongs to"
+        },
+        "category": {
+          "type": "string",
+          "description": "The label of the QA category, as defined in the quality framework of the project",
+          "x-nullable": true
+        },
+        "severity": {
+          "type": "string",
+          "description": "The severity assigned to the issue, as defined in the quality framework of the project"
+        },
+        "translation_version": {
+          "type": "integer",
+          "description": "The version of the translation the issue was raised against"
+        },
+        "penalty_points": {
+          "type": "number",
+          "description": "The penalty points the issue carries"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of when the issue was raised"
         }
       }
     },
