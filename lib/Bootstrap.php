@@ -174,7 +174,7 @@ class Bootstrap
             }
             self::$TASK_RUNNER_CONFIG = $parsed;
         } else {
-            throw new RuntimeException("Task Manager Configuration file not found: " . $task_runner_config_file->getPathname());
+            throw new RuntimeException("Task manager configuration file not found: " . $task_runner_config_file->getPathname());
         }
 
         // Load the app version from 'version.ini'

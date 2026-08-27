@@ -145,7 +145,7 @@ final class EmailValue implements Stringable, ArrayAccess, IteratorAggregate
         // `evil&#46;com` as if it were literal text is judging something nobody is shown. Decoding
         // first and escaping the result afterwards is what makes the two agree. The same reasoning
         // is why callers that judge a value rather than print it decode first: see
-        // TeamsController::assertNameIsPlainText().
+        // {@see \Utils\Validation\UserSuppliedName}.
         $string = html_entity_decode($string, self::FLAGS, 'UTF-8');
 
         // After decoding, so the pattern reads a hostname rather than a stream of entities.

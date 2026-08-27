@@ -10,13 +10,14 @@ import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import CatToolActions from '../../../../../actions/CatToolActions'
 import CatToolConstants from '../../../../../constants/CatToolConstants'
 import CatToolStore from '../../../../../stores/CatToolStore'
-import IconAdd from '../../../../icons/IconAdd'
+import IconAdd from '../../../../../../img/icons/IconAdd'
 import {DeleteResource} from '../DeleteResource'
 import {deleteMemoryGlossary} from '../../../../../api/deleteMemoryGlossary'
 import CreateProjectActions from '../../../../../actions/CreateProjectActions'
 import ModalsActions from '../../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
 import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
+import {Button, BUTTON_TYPE} from '../../../../common/Button/Button'
 
 const COLUMNS_TABLE = [
   {name: 'Active'},
@@ -111,9 +112,13 @@ export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
           CatToolActions.addNotification({
             title: 'Glossary deleted',
             type: 'success',
-            text: `The glossary (<b>${glossary.name}</b>) has been successfully deleted`,
+            text: (
+              <>
+                The glossary (<b>{glossary.name}</b>) has been successfully
+                deleted
+              </>
+            ),
             position: 'br',
-            allowHtml: true,
             timer: 5000,
           })
           CreateProjectActions.updateProjectTemplates({
@@ -342,26 +347,27 @@ export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
         (haveRecords ? (
           <div className="main-buttons-container">
             {!shouldHideNewButton && (
-              <button
-                className="ui primary button settings-panel-button-icon confirm-button create-glossary-button"
+              <Button
+                type={BUTTON_TYPE.PRIMARY}
                 onClick={addGlossary}
                 title="Add glossary"
               >
                 <IconAdd size={18} />
                 New glossary
-              </button>
+              </Button>
             )}
           </div>
         ) : Array.isArray(rows) ? (
           <div className="empty-list-mode">
             <p>Start using ModernMT’s glossary feature</p>
-            <button
-              className="grey-button create-glossary-button"
+            <Button
+              className="settings-panel-grey-button"
               onClick={addGlossary}
+              title="Add glossary"
             >
               <IconAdd size={18} />
               New glossary
-            </button>
+            </Button>
           </div>
         ) : (
           <p className="loading-list-mode">Loading...</p>

@@ -7,6 +7,8 @@ import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper
 import userMock from '../../mocks/userMock'
 import React from 'react'
 import {QualityReport} from './QualityReport'
+import AppDispatcher from '../stores/AppDispatcher'
+import QualityReportConstants from '../constants/QualityReportConstants'
 
 jest.mock('../sse/SocketListener', () => () => null)
 
@@ -1336,6 +1338,15 @@ test('renders properly', async () => {
   // expect(screen.getByText('Loading')).toBeVisible()
 
   await waitFor(() => {
-    expect(screen.getByText('QR Job summary')).toBeVisible()
+    expect(screen.getByText('Quality report')).toBeVisible()
+  })
+
+  act(() => {
+    AppDispatcher.dispatch({
+      actionType: QualityReportConstants.NO_MORE_SEGMENTS,
+    })
+    AppDispatcher.dispatch({
+      actionType: QualityReportConstants.LOADING_MORE_SEGMENTS,
+    })
   })
 })

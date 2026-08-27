@@ -1,4 +1,4 @@
-import React, {createRef, useEffect, useState} from 'react'
+import React, {createRef, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 import ReviseLockIcon from '../../../img/icons/ReviseLockIcon'
@@ -16,12 +16,14 @@ import LowerCaseIcon from '../../../img/icons/LowerCaseIcon'
 import CapitalizeIcon from '../../../img/icons/CapitalizeIcon'
 import {Shortcuts} from '../../utils/shortcuts'
 import RemoveTagsIcon from '../../../img/icons/RemoveTagsIcon'
-import IconDown from '../icons/IconDown'
+import IconDown from '../../../img/icons/IconDown'
 import {LaraStyles} from './ToolbarFeatures/Ai/LaraStyles'
 import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 import AddTagsIcon from '../../../img/icons/AddTagsIcon'
 import {AiAlternatives} from './ToolbarFeatures/Ai/AiAlternatives'
 import {AiFeedback} from './ToolbarFeatures/Ai/AiFeedback'
+import Star from '../../../img/icons/Star'
+import useResizeObserver from '../../hooks/useResizeObserver'
 import {hasCompressiblePhTags} from './utils/DraftMatecatUtils/pcTagUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolActions from '../../actions/CatToolActions'
@@ -56,6 +58,16 @@ export const SegmentTargetToolbar = ({
       )
   }, [])
 
+  const [isIconsBundled, setIsIconsBundled] = useState(false)
+
+  const ref = useRef()
+
+  const {width} = useResizeObserver({current: ref?.current?.parentNode})
+
+  useEffect(() => {
+    setIsIconsBundled(width <= 400)
+  }, [width])
+
   const getIconButton = (props) => {
     const {children, key, ...rest} = props
 
@@ -88,26 +100,36 @@ export const SegmentTargetToolbar = ({
   const tagMenuVisible =
     canRemoveTags || canCopyMissingTags || canToggleTagsCompression
 
-  const buttons = [
+  const items = [
     ...(config.active_engine?.engine_type === 'Lara'
       ? [
           {
+            group: 0,
             component: (
-              <LaraStyles key="larastyle" sid={sid} segment={segment} />
+              <LaraStyles
+                {...{key: 'larastyle', sid, segment, isIconsBundled}}
+              />
             ),
           },
           {
+            group: 0,
             component: (
-              <AiFeedback key="aifeedback" sid={sid} segment={segment} />
+              <AiFeedback
+                {...{key: 'aifeedback', sid, segment, isIconsBundled}}
+              />
             ),
           },
           {
+            group: 0,
             component: (
               <AiAlternatives
-                key="aialternatives"
-                sid={sid}
-                segment={segment}
-                editArea={editArea}
+                {...{
+                  key: 'aialternatives',
+                  sid,
+                  segment,
+                  editArea,
+                  isIconsBundled,
+                }}
               />
             ),
           },
@@ -240,7 +262,6 @@ export const SegmentTargetToolbar = ({
                 key="formatmenu"
                 triggerMode={DROPDOWN_MENU_TRIGGER_MODE.HOVER}
                 toggleButtonProps={{
-                  className: 'segment-target-toolbar-dropdown-trigger',
                   mode: BUTTON_MODE.OUTLINE,
                   size: BUTTON_SIZE.SMALL,
                   children: (
@@ -286,8 +307,50 @@ export const SegmentTargetToolbar = ({
       : []),
   ]
 
+  const buttons = items.reduce((acc, cur, index, arr) => {
+    if (
+      typeof cur.group === 'number' &&
+      acc.find(
+        (item) =>
+          item.group === cur.group && typeof item.dropdownGroup !== 'undefined',
+      )
+    )
+      return acc
+
+    if (typeof cur.group === 'number' && isIconsBundled && !cur.dropdownGroup) {
+      const groups = arr.filter(({group}) => group === cur.group)
+
+      return [
+        ...acc,
+        {
+          group: cur.group,
+          dropdownGroup: (
+            <DropdownMenu
+              triggerMode={DROPDOWN_MENU_TRIGGER_MODE.HOVER}
+              toggleButtonProps={{
+                size: BUTTON_SIZE.SMALL,
+                mode: BUTTON_MODE.OUTLINE,
+                children: (
+                  <>
+                    <Star size={16} />
+                    <IconDown size={16} />
+                  </>
+                ),
+              }}
+              items={groups.map(({component}) => ({
+                label: component,
+              }))}
+            />
+          ),
+        },
+      ]
+    } else {
+      return [...acc, cur]
+    }
+  }, [])
+
   return (
-    <div className="segment-target-toolbar">
+    <div ref={ref} className="segment-target-toolbar">
       {/*
         Shortcuts must be registered outside the dropdown: its content is
         mounted only while the menu is open, so hotkeys living inside the
@@ -305,9 +368,10 @@ export const SegmentTargetToolbar = ({
           callback={addMissingSourceTagsToTarget}
         />
       )}
-      {buttons.map((button, index) => (
-        <React.Fragment key={`btn-${index}`}>{button.component}</React.Fragment>
-      ))}
+      {buttons.map((button, index) => {
+        if (button.dropdownGroup) return <React.Fragment key={`group-${index}`}>{button.dropdownGroup}</React.Fragment>
+        return <React.Fragment key={`btn-${index}`}>{button.component}</React.Fragment>
+      })}
     </div>
   )
 }

@@ -274,13 +274,13 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
 
         // Verify that the provided signature matches the recomputed one.
         if (!hash_equals($expected_hash, $data_hash)) {
-            throw new DomainException("Invalid Token Signature", 1);
+            throw new DomainException("Invalid token signature", 1);
         }
 
         // Check token expiration: if the current time is greater than `exp`, the token is expired.
         // If `exp` is missing, treat it as non-expiring (PHP_INT_MAX).
         if (time() > ($_storage['payload']['exp'] ?? PHP_INT_MAX)) {
-            throw new UnexpectedValueException("Token Expired", 2);
+            throw new UnexpectedValueException("Token expired", 2);
         }
 
         // Check "not before" (`nbf`): if set and the current time is before it, the token is not yet valid.
@@ -345,7 +345,7 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
     public function setTimeToLive(int $timeToLive): SimpleJWT
     {
         if ($timeToLive < 0) {
-            throw new UnexpectedValueException('Time To Live must be a positive integer');
+            throw new UnexpectedValueException('Time to live must be a positive integer');
         }
 
         $this->timeToLive = $timeToLive;

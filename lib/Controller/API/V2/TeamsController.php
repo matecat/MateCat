@@ -27,6 +27,7 @@ use ReflectionException;
 use Throwable;
 use Utils\Constants\Teams;
 use Utils\Redis\RedisHandler;
+use Utils\Validation\UserSuppliedName;
 use View\API\V2\Json\Team;
 
 class TeamsController extends KleinController
@@ -53,88 +54,20 @@ class TeamsController extends KleinController
     }
 
     /**
-     * Normalise a team name on the way in.
+     * Normalise a team name on the way in, and refuse one that reads as a link.
      *
-     * The name is no longer entity-encoded before it is stored, so the two things that
-     * encoding used to take care of have to be done explicitly. Control and format
-     * characters are removed: a name is a single line of text, and CR/LF in particular would
-     * otherwise travel into the Subject header of the membership emails. Runs of whitespace
-     * collapse so a name cannot be padded out to look like separate lines.
-     *
-     * Everything else is preserved verbatim; making the value safe for a given output is
-     * that output's job.
-     */
-    private function sanitizeTeamName(?string $raw): string
-    {
-        $name = preg_replace('/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]+/u', ' ', $raw ?? '') ?? '';
-        $name = preg_replace('/\s+/u', ' ', $name) ?? $name;
-
-        return trim($name);
-    }
-
-    /**
-     * Reject a team name that reads as a link.
-     *
-     * The name is quoted back in the invitation email MateCat sends, on the team owner's
-     * behalf, to any address that owner types in. Mail clients auto-link bare URLs and
-     * bare hostnames, so a name like "verify at example.com" needs no markup to become a
-     * clickable link in a message carrying MateCat's domain and signature. Holding names
-     * to plain text keeps that transactional email from carrying someone else's URL.
+     * Both halves live in {@see UserSuppliedName}, which every hand-typed name in MateCat now goes
+     * through — the rules a team name needed turned out to be the rules all of them needed, and
+     * there were five incompatible sanitizers doing the job before. The team name is the one that
+     * gets the URL rule: it is quoted back in the invitation email MateCat sends, on the team
+     * owner's behalf, to any address that owner types in, so it carries someone else's URL into a
+     * message wearing MateCat's domain and signature.
      *
      * @throws InvalidArgumentException
      */
-    private function assertNameIsPlainText(string $name): void
+    private function validateTeamName(?string $raw): string
     {
-        // Check what the reader will end up seeing, not what was typed. A mail client turns
-        // entity text back into characters with its HTML parser, so without decoding first
-        // "evil&#46;com" would satisfy the rules below and still arrive as a clickable
-        // "evil.com". {@see EmailValue} decodes before writing for the same reason; this check
-        // decodes on its own so the rule holds whatever the output path does.
-        $decoded = html_entity_decode($name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-        // The cap counts what the reader sees for the same reason: measured on the raw string, a
-        // name of some sixty visible characters written with entities was rejected for length.
-        // The raw form is what gets stored, so it is bounded separately by the column width.
-        if (mb_strlen($name) > self::NAME_MAX_STORED_LENGTH) {
-            throw new InvalidArgumentException(
-                "Wrong parameter: name must be at most " . self::NAME_MAX_STORED_LENGTH . " characters",
-                400
-            );
-        }
-
-        if (mb_strlen($decoded) > self::NAME_MAX_LENGTH) {
-            throw new InvalidArgumentException(
-                "Wrong parameter: name must be at most " . self::NAME_MAX_LENGTH . " characters",
-                400
-            );
-        }
-
-        // A scheme ("https://", "javascript:") or a "www." prefix. No legitimate team name carries
-        // one, so this costs nobody anything and stops the only shape that is unambiguously an
-        // address rather than a word with a dot in it.
-        //
-        // A bare hostname used to be rejected here too, and is not any more. Measured against
-        // production on 2026-08-13, that rule refused 120 stored names of which 14 were attacks and
-        // 106 were real: customers name a team after their own domain, about twenty teams are named
-        // after a member's address, and one of the refusals was this company's own name. Nothing
-        // distinguishes "Alpha.Beta" from "evil.com" by shape, and a list of real top-level domains
-        // does not help, because the legitimate names end in live suffixes too.
-        //
-        // What the rule was defending against was a mail client turning the name into a clickable
-        // link in an invitation. That is now handled where it happens, by
-        // {@see \Utils\Email\LinkDefanger}, which rewrites "evil.com" as "evil[.]com" in every email
-        // — including for the names already stored, which a write-time rule could never reach.
-        // `!== 0` rather than `=== 1`: preg_match returns false when PCRE gives up — a backtrack or
-        // JIT stack limit — and a check whose job is to refuse must refuse when it cannot decide.
-        // Only an explicit 0, the engine having looked and found nothing, is a pass. Unreachable
-        // today because the length caps above run first and leave at most a hundred characters
-        // here, but that is an ordering nobody should have to preserve to keep this safe.
-        if (preg_match('~[a-z][a-z0-9+.-]*://|\bwww\.~i', $decoded) !== 0) {
-            throw new InvalidArgumentException(
-                "Wrong parameter: name cannot contain a URL",
-                400
-            );
-        }
+        return UserSuppliedName::validatedForEmailQuote($raw, 'name', self::NAME_MAX_STORED_LENGTH, self::NAME_MAX_LENGTH);
     }
 
     protected function registerValidators(): void
@@ -173,13 +106,7 @@ class TeamsController extends KleinController
             ]
         ]);
 
-        $params['name'] = $this->sanitizeTeamName(is_string($params['name']) ? $params['name'] : null);
-
-        if (empty($params['name'])) {
-            throw new InvalidArgumentException("Wrong parameter: name is empty", 400);
-        }
-
-        $this->assertNameIsPlainText($params['name']);
+        $params['name'] = $this->validateTeamName(is_string($params['name']) ? $params['name'] : null);
 
         if (empty($params['type'])) {
             throw new InvalidArgumentException("Wrong parameter: type is empty", 400);
@@ -197,10 +124,12 @@ class TeamsController extends KleinController
 
         $userDao = new UserDao($this->getDatabase());
         $model = new TeamModel($teamStruct, $userDao, new TeamDao($this->getDatabase()));
-        $memberEmails = array_values(array_filter(
-            is_array($params['members']) ? $params['members'] : [],
-            'is_string'
-        ));
+        $memberEmails = array_values(
+            array_filter(
+                is_array($params['members']) ? $params['members'] : [],
+                'is_string'
+            )
+        );
         foreach ($memberEmails as $email) {
             $model->addMemberEmail($email);
         }
@@ -245,20 +174,14 @@ class TeamsController extends KleinController
 
         $org = new TeamStruct();
         $org->id = $teamId;
-        $name = $this->sanitizeTeamName(is_string($params['name']) ? $params['name'] : null);
+        $name = $this->validateTeamName(is_string($params['name']) ? $params['name'] : null);
         $org->name = $name;
-
-        if (empty($org->name)) {
-            throw new InvalidArgumentException("Wrong parameter: name is empty", 400);
-        }
-
-        $this->assertNameIsPlainText($org->name);
 
         $membershipDao = new MembershipDao($this->getDatabase());
         $org = $membershipDao->findTeamByIdAndUser($teamId, $this->user);
 
         if (empty($org)) {
-            throw new AuthorizationError("Not Authorized", 401);
+            throw new AuthorizationError("Not authorized", 401);
         }
 
         $org->name = $name;

@@ -70,8 +70,8 @@ const renderSplitJob = () =>
     jobsAnalysisProp: splitJobsAnalysis,
   })
 
-const splitButton = () => screen.queryByText('Split')?.closest('.split.button')
-const mergeButton = () => screen.queryByText('Merge')?.closest('.merge.button')
+const splitButton = () => screen.queryByRole('button', {name: 'Split'})
+const mergeButton = () => screen.queryByRole('button', {name: 'Merge'})
 
 describe('AnalyzeChunksResume split button', () => {
   beforeEach(() => {

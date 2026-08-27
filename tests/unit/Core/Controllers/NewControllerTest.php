@@ -252,7 +252,7 @@ class NewControllerTest extends AbstractTest
         $this->createMocks();
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing file. Not Sent.');
+        $this->expectExceptionMessage('Missing file. Not sent.');
         $this->method->invoke($this->controller);
     }
 
@@ -281,7 +281,7 @@ class NewControllerTest extends AbstractTest
         $this->createMocks();
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid TM Engine.');
+        $this->expectExceptionMessage('Invalid TM engine.');
         $this->method->invoke($this->controller);
     }
 

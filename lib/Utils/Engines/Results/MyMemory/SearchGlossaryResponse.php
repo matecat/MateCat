@@ -19,7 +19,7 @@ class SearchGlossaryResponse extends TMSAbstractResponse
     public function __construct(mixed $response)
     {
         if (!is_array($response)) {
-            throw new Exception("Invalid Response", -1);
+            throw new Exception("Invalid response", -1);
         }
 
         $this->matches = $response['matches'] ?? [];

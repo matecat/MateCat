@@ -19,14 +19,14 @@ final class ProjectsCount
     public const int DEFAULT_CAP = 10000;
 
     private function __construct(
-        public readonly int  $value,
+        public readonly int $value,
         public readonly bool $approximated
     ) {
     }
 
     /**
      * @param int $counted rows returned by the capped query, at most $cap + 1
-     * @param int $cap     the ceiling the query was built with
+     * @param int $cap the ceiling the query was built with
      */
     public static function fromCappedQuery(int $counted, int $cap = self::DEFAULT_CAP): self
     {

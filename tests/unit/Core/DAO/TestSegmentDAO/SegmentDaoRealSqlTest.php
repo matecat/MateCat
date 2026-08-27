@@ -575,7 +575,7 @@ class SegmentDaoRealSqlTest extends AbstractTest
         $struct = $this->newSegmentStruct($dupId, 'dup');
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Segment import - DB Error');
+        $this->expectExceptionMessage('Segment import - DB error');
         $this->dao->createList([$struct]);
     }
 

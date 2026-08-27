@@ -73,6 +73,7 @@ use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
+use Utils\Validation\UserSuppliedName;
 
 class NewController extends KleinController
 {
@@ -180,7 +181,7 @@ class NewController extends KleinController
         $errors = $projectStructure->result['errors'];
 
         if (!empty($errors)) {
-            throw new RuntimeException('Project Creation Failure');
+            throw new RuntimeException('Project creation failure');
         }
 
         $this->response->json([
@@ -354,7 +355,18 @@ class NewController extends KleinController
 
         $mt_qe_workflow_payable_rate_template_id = filter_var($this->request->param('mt_qe_workflow_payable_rate_template_id'), FILTER_SANITIZE_NUMBER_INT) ?: null; // QE workflow parameters
         $payable_rate_template_id = filter_var($this->request->param('payable_rate_template_id'), FILTER_SANITIZE_NUMBER_INT);
-        $payable_rate_template_name = filter_var($this->request->param('payable_rate_template_name'), FILTER_SANITIZE_SPECIAL_CHARS);
+        // Compared against the stored template name further down, in
+        // validatePayableRateTemplateOrDefault(). FILTER_SANITIZE_SPECIAL_CHARS entity-encoded this
+        // copy while the column holds the name as typed, so the two could never match for a template
+        // whose name contains & < > " ' — the request was refused with "Payable rate model name not
+        // matching" for a name the caller had copied correctly. Normalised the same way the name was
+        // normalised on the way in, so the comparison is between two like forms.
+        $rawPayableRateTemplateName = $this->request->param('payable_rate_template_name');
+        $payable_rate_template_name = UserSuppliedName::normalize(
+            is_string($rawPayableRateTemplateName) ? $rawPayableRateTemplateName : null
+        );
+        // `!== ''` rather than `?:`, which reads a template named "0" as "not provided".
+        $payable_rate_template_name = $payable_rate_template_name !== '' ? $payable_rate_template_name : null;
         $public_tm_penalty = filter_var($this->request->param('public_tm_penalty'), FILTER_SANITIZE_NUMBER_INT);
         $pretranslate_100 = filter_var($this->request->param('pretranslate_100'), FILTER_VALIDATE_BOOLEAN);
         $pretranslate_101 = filter_var($this->request->param('pretranslate_101'), FILTER_VALIDATE_BOOLEAN);
@@ -425,7 +437,7 @@ class NewController extends KleinController
         ) ?: null;
 
         if ($this->request->files()->isEmpty()) {
-            throw new InvalidArgumentException("Missing file. Not Sent.");
+            throw new InvalidArgumentException("Missing file. Not sent.");
         }
 
         $lang_handler = Languages::getInstance();
@@ -619,7 +631,7 @@ class NewController extends KleinController
     {
         if (!empty($metadata)) {
             if (strlen($metadata) > 2048) {
-                throw new InvalidArgumentException('metadata string is too long');
+                throw new InvalidArgumentException('Metadata string is too long');
             }
 
             $metadata = html_entity_decode($metadata);
@@ -629,7 +641,7 @@ class NewController extends KleinController
 
             if (!$validator->isValid()) {
                 throw new InvalidArgumentException(
-                    'Invalid Metadata. ' . implode(
+                    'Invalid metadata. ' . implode(
                         "",
                         array_map(
                             function ($exception) {
@@ -693,13 +705,13 @@ class NewController extends KleinController
     private function validateEngines(int $tms_engine, int $mt_engine): array
     {
         if ($tms_engine > 1) {
-            throw new InvalidArgumentException("Invalid TM Engine.", -21);
+            throw new InvalidArgumentException("Invalid TM engine.", -21);
         }
 
         $engineStruct = null;
         if ($mt_engine > 1) {
             if (!$this->userIsLogged) {
-                throw new InvalidArgumentException("Invalid MT Engine.", -2);
+                throw new InvalidArgumentException("Invalid MT engine.", -2);
             }
 
             try {
@@ -1022,9 +1034,7 @@ class NewController extends KleinController
 
             // check if qa_model template exists
             if (null === $qaModelTemplate) {
-                throw new InvalidArgumentException(
-                    'This QA Model template does not exists or does not belongs to the logged in user'
-                );
+                throw new InvalidArgumentException('This QA model template does not exist or does not belong to the logged-in user');
             }
 
             return $qaModelTemplate;
@@ -1090,7 +1100,7 @@ class NewController extends KleinController
 
             // check if qa_model exists
             if (null === $qaModel) {
-                throw new InvalidArgumentException('This QA Model does not exists');
+                throw new InvalidArgumentException('This QA model does not exist');
             }
 
             // check featureSet
@@ -1098,7 +1108,7 @@ class NewController extends KleinController
             $featureSetCodes = $this->getFeatureSet()->getCodes();
 
             if ($qaModelLabel !== 'default' and !in_array($qaModelLabel, $featureSetCodes)) {
-                throw new InvalidArgumentException('This QA Model does not belong to the authenticated user');
+                throw new InvalidArgumentException('This QA model does not belong to the authenticated user');
             }
 
             return $qaModel;

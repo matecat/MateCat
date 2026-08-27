@@ -56,8 +56,8 @@ class PhpSessionTest extends AbstractTest
     {
         PhpSession::start();
 
-        $id                = session_id();
-        $_SESSION['uid']   = 36;
+        $id = session_id();
+        $_SESSION['uid'] = 36;
 
         PhpSession::start();
 
@@ -105,7 +105,7 @@ class PhpSessionTest extends AbstractTest
     {
         PhpSession::start();
 
-        $id              = session_id();
+        $id = session_id();
         $_SESSION['uid'] = 36;
 
         PhpSession::close();

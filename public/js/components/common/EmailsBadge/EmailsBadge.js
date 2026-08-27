@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {EMAIL_PATTERN} from '../../../constants/Constants'
 import {TAG_STATUS, Tag} from './Tag'
 import {isEqual} from 'lodash'
+import styles from './EmailsBadge.module.scss'
 
 const EMAIL_SEPARATORS = [',', ';', ' ']
 export const SPECIALS_SEPARATORS = {
@@ -213,7 +214,7 @@ export const EmailsBadge = ({
     return (
       <div
         key={index}
-        className="email-badge-item"
+        className={styles['email-badge-item']}
         onClick={(e) => handleClickOnChip(e, index)}
       >
         <Tag
@@ -232,17 +233,17 @@ export const EmailsBadge = ({
     )
   }
   return (
-    <div className={`email-badge${disabled ? ' email-badge-disabled' : ''}`}>
+    <div className={[styles['email-badge'], disabled && styles['email-badge-disabled']].filter(Boolean).join(' ')}>
       <div
         ref={areaRef}
-        className="email-badge-fakeInput"
+        className={styles['email-badge-fakeInput']}
         onClick={setFocus}
         onKeyDown={handleAreaKeyDown}
         tabIndex="0"
         data-testid="email-area"
       >
         {emails.length === 0 && inputValue === '' ? (
-          <span className="email-badge-placeholder">
+          <span className={styles['email-badge-placeholder']}>
             {typeof placeholder === 'string'
               ? placeholder
               : 'john@email.com, federico@email.com, sara@email.com'}
@@ -250,7 +251,7 @@ export const EmailsBadge = ({
         ) : (
           emails.map(renderChip)
         )}
-        <span className="email-badge-wrapper">
+        <span className={styles['email-badge-wrapper']}>
           <input
             ref={inputRef}
             name={name}
@@ -266,7 +267,7 @@ export const EmailsBadge = ({
         </span>
       </div>
       {error && error.message && (
-        <span className="email-badge-error">{error.message}</span>
+        <span className={styles['email-badge-error']}>{error.message}</span>
       )}
     </div>
   )

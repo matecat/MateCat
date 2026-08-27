@@ -583,7 +583,7 @@ class GetSearchControllerTest extends AbstractTest
         ];
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage("internal error: see the log");
+        $this->expectExceptionMessage("Internal error: see the log");
 
         $this->invokePrivate('doSearch', [$request]);
     }

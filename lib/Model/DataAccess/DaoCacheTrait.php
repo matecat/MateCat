@@ -327,13 +327,13 @@ trait DaoCacheTrait
      * uncommitted write, so it misses the cache, reads the old row and caches it again for the full
      * TTL — behind the eviction that has just happened, and outliving the commit.
      *
+     * @param string $keyMap
+     * @param string $keyElementName
+     *
      * @return bool True when the entry was removed, or when the eviction was queued for the commit.
      *              A queued eviction cannot report what it will find, so the two are not
      *              distinguishable through the return value. Callers that assert on it have to run
      *              outside a transaction.
-     *
-     * @param string $keyMap
-     * @param string $keyElementName
      *
      * @throws ReflectionException
      * @throws Exception
@@ -377,13 +377,13 @@ trait DaoCacheTrait
      * uncommitted write, so it misses the cache, reads the old row and caches it again for the full
      * TTL — behind the eviction that has just happened, and outliving the commit.
      *
+     * @param string $key
+     * @param ?bool $isReverseKeyMap
+     *
      * @return bool True when the entry was removed, or when the eviction was queued for the commit.
      *              A queued eviction cannot report what it will find, so the two are not
      *              distinguishable through the return value. Callers that assert on it have to run
      *              outside a transaction.
-     *
-     * @param string $key
-     * @param ?bool $isReverseKeyMap
      *
      * @throws ReflectionException
      * @throws Exception

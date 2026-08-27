@@ -296,9 +296,9 @@ class ProjectTemplateDaoRealSqlTest extends AbstractTest
 
     public function testRemoveSubTemplateEvictsTheProjectTemplatesItChanged(): void
     {
-        $struct                       = $this->newStruct('withsubcached');
+        $struct = $this->newStruct('withsubcached');
         $struct->qa_model_template_id = 7;
-        $saved                        = $this->dao->save($struct);
+        $saved = $this->dao->save($struct);
         $this->trackTemplate($saved->id);
 
         // The id handed to removeSubTemplateByIdAndUser numbers a sub-template, not a project
@@ -316,9 +316,9 @@ class ProjectTemplateDaoRealSqlTest extends AbstractTest
 
     public function testRemoveSubTemplateEvictsTheDefaultTemplate(): void
     {
-        $struct                       = $this->newStruct('withsubdefault', true);
+        $struct = $this->newStruct('withsubdefault', true);
         $struct->qa_model_template_id = 8;
-        $saved                        = $this->dao->save($struct);
+        $saved = $this->dao->save($struct);
         $this->trackTemplate($saved->id);
 
         // The default template is cached for a day, against the minute the by-id reads get, so a
@@ -417,6 +417,22 @@ class ProjectTemplateDaoRealSqlTest extends AbstractTest
         $json->target_language = ['zz-ZZ'];
 
         $this->expectException(Exception::class);
+        $this->dao->createFromJSON($json, $this->user);
+    }
+
+    /**
+     * hydrateFromJSON() serializes target_language unconditionally, so a scalar unserializes back
+     * to a string and trips the is_array() guard — a different branch from the invalid-language
+     * check above, which passes a well-formed list.
+     */
+    public function testCreateFromJSONThrowsWhenTargetLanguageIsNotAList(): void
+    {
+        $json = $this->newDecodedJson('scalar tgt');
+        $json->target_language = 'it-IT';
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Target language is not an array');
+        $this->expectExceptionCode(403);
         $this->dao->createFromJSON($json, $this->user);
     }
 

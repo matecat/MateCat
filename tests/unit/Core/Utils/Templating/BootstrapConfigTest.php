@@ -118,15 +118,18 @@ class BootstrapConfigTest extends AbstractTest
     #[Test]
     public function anArbitraryJsonSerializableIsCarried(): void
     {
-        $this->view->set('custom', new class implements JsonSerializable {
-            /**
-             * @return array<string, int>
-             */
-            public function jsonSerialize(): array
-            {
-                return ['answer' => 42];
+        $this->view->set(
+            'custom',
+            new class implements JsonSerializable {
+                /**
+                 * @return array<string, int>
+                 */
+                public function jsonSerialize(): array
+                {
+                    return ['answer' => 42];
+                }
             }
-        });
+        );
 
         $this->assertSame(['custom' => ['answer' => 42]], $this->decoded());
     }

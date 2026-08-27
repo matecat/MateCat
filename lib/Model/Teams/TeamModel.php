@@ -305,7 +305,7 @@ class TeamModel
     protected function _checkType(): void
     {
         if (!Teams::isAllowedType($this->struct->type)) {
-            throw new InvalidArgumentException("Invalid Team Type");
+            throw new InvalidArgumentException("Invalid team type");
         }
     }
 

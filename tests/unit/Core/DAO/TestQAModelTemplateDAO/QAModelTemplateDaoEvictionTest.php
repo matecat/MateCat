@@ -83,21 +83,21 @@ class QAModelTemplateDaoEvictionTest extends AbstractTest
     {
         return json_encode([
             'model' => [
-                'version'    => 1,
-                'label'      => 'Eviction pin ' . uniqid(),
+                'version' => 1,
+                'label' => 'Eviction pin ' . uniqid(),
                 'categories' => [
                     [
-                        'label'      => 'Style',
-                        'code'       => 'STY',
-                        'sort'       => 1,
+                        'label' => 'Style',
+                        'code' => 'STY',
+                        'sort' => 1,
                         'severities' => [
                             ['label' => 'Neutral', 'code' => 'NEU', 'penalty' => 0, 'sort' => 1],
                             ['label' => 'Minor', 'code' => 'MIN', 'penalty' => 1, 'sort' => 2],
                         ],
                     ],
                 ],
-                'passfail'   => [
-                    'type'       => 'points',
+                'passfail' => [
+                    'type' => 'points',
                     'thresholds' => [
                         ['label' => 'R1', 'value' => 5],
                         ['label' => 'R2', 'value' => 10],

@@ -313,10 +313,12 @@ class TeamsControllerTest extends AbstractTest
         $captured = null;
         $this->responseMock->expects($this->once())
             ->method('json')
-            ->with($this->callback(function (array $data) use (&$captured): bool {
-                $captured = $data;
-                return true;
-            }));
+            ->with(
+                $this->callback(function (array $data) use (&$captured): bool {
+                    $captured = $data;
+                    return true;
+                })
+            );
 
         $this->controller->create();
 
@@ -575,6 +577,44 @@ class TeamsControllerTest extends AbstractTest
     }
 
     /**
+     * update() re-resolves the membership itself instead of reusing the team TeamAccessValidator
+     * already loaded, so it carries its own identical AuthorizationError. Reaching that second
+     * check requires the two lookups to disagree, which is possible because the validator reads
+     * id_team from the Klein request while update() reads it from $this->params.
+     *
+     * The message and code are the same at both sites, so the assertion is on the throwing file:
+     * that is what distinguishes update()'s guard from the validator's.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function update_throws_authorization_error_when_the_params_team_differs_from_the_validated_one(): void
+    {
+        $user = $this->actAsFactoryUser();
+        $team = (new TeamDao(obtainTestDatabase()))->createUserTeam($user, [
+            'type' => Teams::GENERAL,
+            'name' => 'Validated Team',
+        ]);
+
+        // The request carries the team the user really belongs to, so the validator passes...
+        $this->setRequestParams(['id_team' => (string)$team->id, 'name' => 'Renamed']);
+        // ...while the params update() actually reads point at a team that is not theirs.
+        $this->setProp('params', ['id_team' => '8888882', 'name' => 'Renamed']);
+
+        try {
+            $this->controller->update();
+            $this->fail('Expected an AuthorizationError from TeamsController::update()');
+        } catch (AuthorizationError $e) {
+            $this->assertSame(401, $e->getCode());
+            $this->assertStringEndsWith(
+                'lib/Controller/API/V2/TeamsController.php',
+                $e->getFile(),
+                'the error must come from update() itself, not from TeamAccessValidator'
+            );
+        }
+    }
+
+    /**
      * @throws Throwable
      */
     #[Test]
@@ -666,12 +706,12 @@ class TeamsControllerTest extends AbstractTest
     {
         return [
             'a company named after its domain' => ['Acme.com'],
-            'a suffix that is not a domain'    => ['Alpha.Beta'],
-            'a hostname inside prose'          => ['Acme.guru Polite statements'],
-            'a name that is an address'        => ['f.surname@example.com'],
-            'an abbreviation'                  => ['Translated S.r.l.'],
+            'a suffix that is not a domain' => ['Alpha.Beta'],
+            'a hostname inside prose' => ['Acme.guru Polite statements'],
+            'a name that is an address' => ['f.surname@example.com'],
+            'an abbreviation' => ['Translated S.r.l.'],
             // Decoding happens before the scheme check, and a dot is no longer a reason to refuse.
-            'a dot smuggled as an entity'      => ['evil&#46;com'],
+            'a dot smuggled as an entity' => ['evil&#46;com'],
         ];
     }
 
@@ -690,10 +730,12 @@ class TeamsControllerTest extends AbstractTest
         $captured = null;
         $this->responseMock->expects($this->once())
             ->method('json')
-            ->with($this->callback(function (array $data) use (&$captured): bool {
-                $captured = $data;
-                return true;
-            }));
+            ->with(
+                $this->callback(function (array $data) use (&$captured): bool {
+                    $captured = $data;
+                    return true;
+                })
+            );
 
         $this->controller->create();
 

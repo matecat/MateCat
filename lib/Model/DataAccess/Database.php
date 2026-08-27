@@ -158,12 +158,12 @@ class Database implements IDatabase
     /**
      * Begin a transaction for InnoDB tables.
      *
+     * @throws PDOException
      * @internal Deliberately not part of IDatabase: a consumer opens a transaction through
      *           transaction(), which cannot leave a window open on a failure path or an early
      *           return. This stays public because the test harness opens a fixture scope in
      *           setUp() and rolls it back in tearDown(), which a callback cannot express.
      *
-     * @throws PDOException
      */
     public function begin(): PDO
     {
@@ -173,7 +173,7 @@ class Database implements IDatabase
             // commit() or rollback() — an aborted request on a connection that outlived it — and must
             // not fire on, or veto, someone else's commit.
             $this->afterCommitCallbacks = [];
-            $this->rollbackOnly         = false;
+            $this->rollbackOnly = false;
             $this->getConnection()->beginTransaction();
         }
 
@@ -184,11 +184,11 @@ class Database implements IDatabase
     /**
      * Commit the open transaction and drain the work deferred with onCommit().
      *
-     * @internal Deliberately not part of IDatabase — see begin().
-     *
      * @throws PDOException
      * @throws TransactionAbortedException when a scope inside this transaction failed
      * @throws Throwable
+     * @internal Deliberately not part of IDatabase — see begin().
+     *
      */
     public function commit(): void
     {
@@ -288,9 +288,9 @@ class Database implements IDatabase
     /**
      * Roll back the open transaction and discard the work deferred with onCommit().
      *
+     * @throws PDOException
      * @internal Deliberately not part of IDatabase — see begin().
      *
-     * @throws PDOException
      */
     public function rollback(): void
     {
@@ -299,7 +299,7 @@ class Database implements IDatabase
         // Deferred work is discarded: it was queued on the strength of writes that are about to
         // disappear. The verdict goes with it — it condemned this transaction, which is now gone.
         $this->afterCommitCallbacks = [];
-        $this->rollbackOnly         = false;
+        $this->rollbackOnly = false;
 
         // Check if a transaction is currently active
         if ($connection->inTransaction()) {
@@ -345,8 +345,8 @@ class Database implements IDatabase
                     // Record it and let the original exception travel.
                     LoggerFactory::doJsonLog([
                         'message' => 'rollback failed while aborting a transaction scope',
-                        'error'   => $rollbackFailure->getMessage(),
-                        'cause'   => $e->getMessage(),
+                        'error' => $rollbackFailure->getMessage(),
+                        'cause' => $e->getMessage(),
                     ]);
                 }
             }

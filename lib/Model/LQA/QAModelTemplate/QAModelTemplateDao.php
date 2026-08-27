@@ -460,7 +460,7 @@ class QAModelTemplateDao extends AbstractDao
                 "SELECT id FROM qa_model_templates WHERE id = :id AND uid = :uid AND `deleted_at` IS NULL FOR UPDATE"
             );
             $owned->execute([
-                'id'  => $modelTemplateStruct->id,
+                'id' => $modelTemplateStruct->id,
                 'uid' => $modelTemplateStruct->uid,
             ]);
 

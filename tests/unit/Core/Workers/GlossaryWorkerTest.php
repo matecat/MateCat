@@ -251,7 +251,7 @@ class GlossaryWorkerTest extends AbstractTest
         $this->withStub($this->createStub(MyMemory::class));
 
         $this->expectException(EndQueueException::class);
-        $this->expectExceptionMessage('Invalid Payload');
+        $this->expectExceptionMessage('Invalid payload');
 
         $this->processAction('get', [
             'id_client' => 'client-1',
@@ -536,7 +536,7 @@ class GlossaryWorkerTest extends AbstractTest
         $this->withMock($mock);
 
         $this->expectException(EndQueueException::class);
-        $this->expectExceptionMessage('Empty response received from Glossary');
+        $this->expectExceptionMessage('Empty response received from glossary');
 
         $this->processAction('get', [
             'id_segment' => '10',

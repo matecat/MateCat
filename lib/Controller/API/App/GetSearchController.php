@@ -174,11 +174,11 @@ class GetSearchController extends AbstractStatefulKleinController
             : filter_var($includeLockedParam, FILTER_VALIDATE_BOOLEAN, ['flags' => FILTER_NULL_ON_FAILURE]) ?? true;
 
         if (empty($job)) {
-            throw new InvalidArgumentException("missing id job", -2);
+            throw new InvalidArgumentException("Missing id job", -2);
         }
 
         if (empty($password)) {
-            throw new InvalidArgumentException("missing job password", -3);
+            throw new InvalidArgumentException("Missing job password", -3);
         }
 
         $job = (int)$job;
@@ -333,7 +333,7 @@ class GetSearchController extends AbstractStatefulKleinController
 
             return $searchModel->search($inCurrentChunkOnly);
         } catch (Exception) {
-            throw new RuntimeException("internal error: see the log", -1000);
+            throw new RuntimeException("Internal error: see the log", -1000);
         }
     }
 
@@ -381,7 +381,6 @@ class GetSearchController extends AbstractStatefulKleinController
             // One scope per segment: replace-all writes each match on its own, so a failure on
             // one leaves the ones already committed alone.
             $written = $db->transaction(function () use ($old_translation, $queryParams, $project, $id_job, $isHistoryReplay, $revisionNumber): ?array {
-
                 $versionsHandler = TranslationVersions::getVersionHandlerNewInstance($this->chunk, $this->user, $project, (int)$old_translation->id_segment, $this->getDatabase());
                 $segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
                 $segment = (new SegmentDao($this->getDatabase()))->fetchById((int)$old_translation->id_segment, SegmentStruct::class);
@@ -407,9 +406,9 @@ class GetSearchController extends AbstractStatefulKleinController
                     // Undo/redo: the row already holds the exact historical text to restore.
                     $replacedTranslation = Utils::stripBOM((string)($old_translation->translation ?? ''));
                 } else {
-                    $filter              = MateCatFilter::getInstance($this->getFeatureSet(), $this->chunk->source, $this->chunk->target);
+                    $filter = MateCatFilter::getInstance($this->getFeatureSet(), $this->chunk->source, $this->chunk->target);
                     $originalTranslation = (string)($old_translation->translation ?? '');
-                    $replacement         = $this->getReplacedSegmentTranslation($originalTranslation, $queryParams);
+                    $replacement = $this->getReplacedSegmentTranslation($originalTranslation, $queryParams);
 
                     // A replacement that yields the same text is not an edit. Writing it anyway would demote the
                     // segment through getNewStatus() and, on a lower transition, soft-delete its LQA issues via
@@ -451,18 +450,19 @@ class GetSearchController extends AbstractStatefulKleinController
                     $segmentTranslationDao->updateTranslationAndStatusAndDate($new_translation);
 
                     // preSetTranslationCommitted
-                    $versionsHandler->storeTranslationEvent(new StoreTranslationEventParams(
-                        $new_translation,
-                        $old_translation,
-                        $propagationTotal,
-                        $this->chunk,
-                        $this->user,
-                        $this->chunk->getSourcePage(),
-                        $this->featureSet,
-                        $project,
-                        isAReplaceAllEvent: true
-                    ));
-
+                    $versionsHandler->storeTranslationEvent(
+                        new StoreTranslationEventParams(
+                            $new_translation,
+                            $old_translation,
+                            $propagationTotal,
+                            $this->chunk,
+                            $this->user,
+                            $this->chunk->getSourcePage(),
+                            $this->featureSet,
+                            $project,
+                            isAReplaceAllEvent: true
+                        )
+                    );
                 } catch (Exception $e) {
                     $this->logger->debug("Lock: Transaction Aborted. " . $e->getMessage());
 

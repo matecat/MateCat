@@ -251,7 +251,7 @@ $csp = str_replace('${x_self_ajax_location_hosts}', $x_self_ajax_location_hosts,
 
             <!-- Swagger anchors -->
 
-            <li><a href="#file-format">Supported file format</a></li>
+            <li><a href="#file-format">Supported file formats</a></li>
             <li><a href="#languages">Supported languages</a></li>
             <li><a href="#subjects">Supported subjects</a></li>
             <li><a href="#seg-rules">Supported segmentation rules</a></li>
@@ -275,9 +275,9 @@ $csp = str_replace('${x_self_ajax_location_hosts}', $x_self_ajax_location_hosts,
                 <tr>
                     <th width="40%">Office</th>
                     <th width="15%">Web</th>
-                    <th width="15%">Scanned Files</th>
-                    <th width="15%">Interchange Formats</th>
-                    <th width="15%">Desktop Publishing</th>
+                    <th width="15%">Scanned files</th>
+                    <th width="15%">Interchange formats</th>
+                    <th width="15%">Desktop publishing</th>
                     <th width="15%">Localization</th>
                 </tr>
                 </thead>

@@ -529,6 +529,7 @@ class SignupModelUnitTest extends AbstractTest
  * Counts set-password mails instead of handing them to the real mailer, so the persistence
  * assertions can run without SMTP.
  */
+
 /**
  * Stops a real message going out; delivery itself is covered by SignupEmailTest.
  */

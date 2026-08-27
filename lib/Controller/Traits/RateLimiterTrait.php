@@ -17,7 +17,7 @@ trait RateLimiterTrait
      * @param string   $route       Static route pattern. NEVER include passwords, tokens, or secrets.
      * @param int      $maxRetries
      * @param RateLimiterService|null $limiterService Optional RateLimiterService instance for dependency injection (useful for testing).
-     * @param int      $weight      What this call costs the window; see RateLimiterService::checkAndIncrement().
+     * @param int $weight What this call costs the window; see RateLimiterService::checkAndIncrement().
      * @return Response|null  429 response if rate-limited, null if under limit.
      * @throws Exception
      */

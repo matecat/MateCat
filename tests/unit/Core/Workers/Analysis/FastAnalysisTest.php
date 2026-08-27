@@ -2,9 +2,12 @@
 
 namespace Matecat\Core\Workers\Analysis;
 
+use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use Model\Engines\EngineDAO;
+use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
@@ -16,6 +19,7 @@ use PDOStatement;
 use PDOException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Stub;
 use Predis\Client as PredisClient;
 use ReflectionClass;
 use RuntimeException;
@@ -482,6 +486,124 @@ class FastAnalysisTest extends AbstractTest
         $this->assertLessThan($rpushIndex, $lremIndex, 'LREM must precede RPUSH');
         $this->assertSame(['lrem', 'p_queue_position', 0, '7'], $redis->calls[$lremIndex]);
         $this->assertSame(['rpush', 'p_queue_position', [7]], $redis->calls[$rpushIndex]);
+    }
+
+    // ─── _fetchMyMemoryFast ───────────────────────────────────────────────
+
+    /**
+     * _fetchMyMemoryFast() opens with EnginesFactory::getInstance(1, ..., MyMemory::class), and the
+     * test fixture has no engine id 1. Install one for the duration of the callback, defeating the
+     * EngineDAO Redis cache on both sides so neither this test nor its neighbours see a stale row.
+     *
+     * @param callable(IDatabase):void $fn
+     */
+    private function withEngineOneAsMyMemory(callable $fn): void
+    {
+        $database   = obtainTestDatabase();
+        $connection = $database->getConnection();
+
+        $struct     = EngineStruct::getStruct();
+        $struct->id = 1;
+        $dao        = new EngineDAO($database);
+
+        // id 1 is not part of tests/inc/unittest_matecat_local.sql, but an environment may still
+        // carry it. Snapshot whatever is there and put it back verbatim afterwards, so this fixture
+        // can never destroy a row it did not create.
+        $existing = $connection->query("SELECT * FROM engines WHERE id = 1")->fetch(\PDO::FETCH_ASSOC) ?: null;
+
+        if ($existing !== null) {
+            $connection->exec("DELETE FROM engines WHERE id = 1");
+        }
+
+        $connection->exec(
+            "INSERT INTO engines (id, name, type, description, base_url, translate_relative_url, class_load, others, extra_parameters, penalty, active) "
+            . "VALUES (1, 'MyMemory', 'TM', 'fixture', 'https://api.mymemory.translated.net', 'get', 'MyMemory', '{}', '{}', 0, 1)"
+        );
+        $dao->destroyCache($struct);
+
+        try {
+            $fn($database);
+        } finally {
+            $connection->exec("DELETE FROM engines WHERE id = 1");
+
+            if ($existing !== null) {
+                $columns      = array_keys($existing);
+                $placeholders = array_map(static fn(string $c): string => ':' . $c, $columns);
+                $restore      = $connection->prepare(
+                    'INSERT INTO engines (`' . implode('`, `', $columns) . '`) VALUES (' . implode(', ', $placeholders) . ')'
+                );
+                $restore->execute($existing);
+            }
+
+            $dao->destroyCache($struct);
+        }
+    }
+
+    /**
+     * @return AbstractFilesStorage&Stub
+     */
+    private function filesStorageThrowingOnFastAnalysisData(): AbstractFilesStorage
+    {
+        $fs = $this->createStub(AbstractFilesStorage::class);
+        $fs->method('getFastAnalysisData')
+            ->willThrowException(new \UnexpectedValueException('no data on disk'));
+
+        return $fs;
+    }
+
+    /**
+     * Disk read fails, the database fallback runs and finds nothing, so the project is reported as
+     * fully pre-translated rather than as an error.
+     */
+    #[Test]
+    public function fetchMyMemoryFastFallsBackToTheDatabaseAndReportsAFullyPreTranslatedProject(): void
+    {
+        $this->withEngineOneAsMyMemory(function (IDatabase $database): void {
+            $daemon = $this->daemonWithDb($database);
+            $this->setProp($daemon, 'files_storage', $this->filesStorageThrowingOnFastAnalysisData());
+
+            $this->expectException(Exception::class);
+            $this->expectExceptionMessage('There is no analysis on that file, it is all pre-translated');
+            $this->expectExceptionCode(FastAnalysis::ERR_NO_SEGMENTS);
+
+            // No project rows exist for this pid, so the fallback query returns an empty set
+            $this->invoke($daemon, '_fetchMyMemoryFast', 99_999_999);
+        });
+    }
+
+    /**
+     * Both the disk read and the database fallback fail: that is the "too large" classification.
+     */
+    #[Test]
+    public function fetchMyMemoryFastReportsTooLargeWhenTheDatabaseFallbackAlsoFails(): void
+    {
+        $this->withEngineOneAsMyMemory(function (IDatabase $database): void {
+            $ref    = new ReflectionClass(FastAnalysisPdoFailingProbe::class);
+            $daemon = $ref->newInstanceWithoutConstructor();
+            (new ReflectionClass(FastAnalysis::class))->getProperty('db')->setValue($daemon, $database);
+            (new ReflectionClass(FastAnalysis::class))->getProperty('logger')
+                ->setValue($daemon, $this->createStub(MatecatLogger::class));
+            (new ReflectionClass(FastAnalysis::class))->getProperty('files_storage')
+                ->setValue($daemon, $this->filesStorageThrowingOnFastAnalysisData());
+
+            $this->expectException(Exception::class);
+            $this->expectExceptionMessage('Error fetching data for project. Too large. Skip.');
+            $this->expectExceptionCode(FastAnalysis::ERR_TOO_LARGE);
+
+            (new ReflectionClass(FastAnalysis::class))
+                ->getMethod('_fetchMyMemoryFast')->invoke($daemon, 12_345);
+        });
+    }
+
+    #[Test]
+    public function setTotalThrowsWhenThePidIsMissing(): void
+    {
+        $daemon = $this->daemonWithDb($this->createStub(IDatabase::class));
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Cannot set a Total without a Queue ID.');
+
+        $this->invoke($daemon, '_setTotal', ['total' => 5, 'pid' => 0, 'queueInfo' => null]);
     }
 
     /**
@@ -1460,6 +1582,19 @@ class FastAnalysisFakeRedis extends PredisClient
         $this->calls[] = ['rpush', $key, $values];
 
         return 1;
+    }
+}
+
+/**
+ * Probe subclass that makes the database fallback inside _fetchMyMemoryFast() fail the way a
+ * too-large project does. The engine lookup that runs before the try block still uses the real
+ * connection, so only the segments query is affected.
+ */
+class FastAnalysisPdoFailingProbe extends FastAnalysis
+{
+    protected function _getSegmentsForFastVolumeAnalysis(int $pid): array
+    {
+        throw new PDOException('simulated statement failure');
     }
 }
 

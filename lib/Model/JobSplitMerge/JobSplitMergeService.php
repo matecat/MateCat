@@ -272,11 +272,11 @@ class JobSplitMergeService
         string $count_type = ProjectsMetadataMarshaller::SPLIT_EQUIVALENT_WORD_TYPE->value
     ): ArrayObject {
         if ($num_split < 2) {
-            throw new Exception('Minimum Chunk number for split is 2.', -2);
+            throw new Exception('Minimum chunk number for split is 2.', -2);
         }
 
         if (!empty($requestedWordsPerSplit) && count($requestedWordsPerSplit) != $num_split) {
-            throw new Exception("Requested words per chunk and Number of chunks not consistent.", -3);
+            throw new Exception("Requested words per chunk and number of chunks not consistent.", -3);
         }
 
         if (!empty($requestedWordsPerSplit) && !AppConfig::$VOLUME_ANALYSIS_ENABLED) {
@@ -672,7 +672,6 @@ class JobSplitMergeService
         $first_job['total_time_to_edit'] = $totalTimeToEdit;
 
         $this->dbHandler->transaction(function () use ($data, $jobStructs, $actingUser, $first_job, $mergedPasswords, $standard_word_count, $total_raw_wc): void {
-
             if ($first_job->getTranslator(new JobsTranslatorsDao($this->dbHandler))) {
                 //Update the password in the struct and in the database for the first job
                 $this->updateForMerge($first_job, $this->generateRandomString());

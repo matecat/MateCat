@@ -1,6 +1,7 @@
 import React, {useState, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {Button, BUTTON_MODE, BUTTON_SIZE, BUTTON_TYPE} from '../Button/Button'
+import styles from './Popover.module.scss'
 
 export const POPOVER_ALIGN = {
   LEFT: 'left',
@@ -19,6 +20,7 @@ export const POPOVER_TOGGLE = {
 export const Popover = ({
   className = '',
   contentClassName = '',
+  buttonContainerClassName = '',
   title = '',
   toggleButtonVariant = POPOVER_TOGGLE.DEFAULT,
   toggleButtonProps,
@@ -27,9 +29,12 @@ export const Popover = ({
   align = POPOVER_ALIGN.LEFT,
   verticalAlign = POPOVER_VERTICAL_ALIGN.BOTTOM,
   onClose = () => {},
+  disabled = false,
   children,
+  closeOnClickInside = false,
+  forceOpenMenu = false,
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(forceOpenMenu)
 
   const containerRef = useRef()
 
@@ -93,7 +98,7 @@ export const Popover = ({
   return (
     <div
       ref={containerRef}
-      className="popover-component-container"
+      className={[styles['popover-component-container'], buttonContainerClassName].filter(Boolean).join(' ')}
       data-testid="popover-container"
     >
       {toggleButtonVariant === POPOVER_TOGGLE.DEFAULT ? (
@@ -101,12 +106,13 @@ export const Popover = ({
           active={isOpen}
           onClick={togglePopover}
           {...defaultToggleButtonProps}
+          disabled={disabled}
         />
       ) : (
         <button
           type="button"
           tabIndex="-1"
-          className={`popover-component-toggle ${isOpen ? 'popover__toggle--active' : ''}`}
+          className={[styles['popover-component-toggle'], isOpen && styles['popover__toggle--active']].filter(Boolean).join(' ')}
           onClick={togglePopover}
           aria-label={defaultToggleButtonProps.tooltip}
           // eslint-disable-next-line react/no-unknown-property
@@ -117,20 +123,25 @@ export const Popover = ({
       )}
       {isOpen && (
         <div
-          className={`popover-component-popover popover-component-${align} popover-component-${verticalAlign} ${className}`}
+          className={[styles['popover-component-popover'], styles[`popover-component-${align}`], styles[`popover-component-${verticalAlign}`], className].filter(Boolean).join(' ')}
           data-testid="popover"
           onKeyDown={(event) => event.key === 'Escape' && handleCancel(event)}
         >
           {title && (
-            <div className="popover-component-header">
-              <span className="popover-component-title">{title}</span>
+            <div className={styles['popover-component-header']}>
+              <span className={styles['popover-component-title']}>{title}</span>
             </div>
           )}
-          <div className={`popover-component-body ${contentClassName}`}>
+          <div
+            className={[styles['popover-component-body'], contentClassName].filter(Boolean).join(' ')}
+            onClick={() => {
+              if (closeOnClickInside) setIsOpen(false)
+            }}
+          >
             {children}
           </div>
           {(cancelButtonProps || confirmButtonProps) && (
-            <div className="popover-component-actions">
+            <div className={styles['popover-component-actions']}>
               {cancelButtonProps && <Button {...defaultCancelButtonProps} />}
               {confirmButtonProps && <Button {...defaultConfirmButtonProps} />}
             </div>
@@ -153,4 +164,6 @@ Popover.propTypes = {
   verticalAlign: PropTypes.oneOf([...Object.values(POPOVER_VERTICAL_ALIGN)]),
   onClose: PropTypes.func,
   children: PropTypes.node,
+  forceOpenMenu: PropTypes.bool,
+  closeOnClickInside: PropTypes.bool,
 }

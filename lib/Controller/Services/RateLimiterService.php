@@ -40,7 +40,7 @@ class RateLimiterService
      * @param string   $identifier  Stable, attacker-invariant identifier (email, IP). NEVER a secret.
      * @param string   $route       Static route pattern. NEVER include passwords, tokens, or secrets.
      * @param int      $maxRetries
-     * @param int      $weight      What this call costs the window. Defaults to one, so a caller
+     * @param int $weight What this call costs the window. Defaults to one, so a caller
      *                              that limits requests needs no change; a caller whose single
      *                              request does a variable amount of the thing being limited —
      *                              sending N emails, say — passes N so the budget is spent in the
@@ -53,7 +53,7 @@ class RateLimiterService
         $key   = $this->getKey($identifier, $route);
         $redis = $this->getRedis();
 
-        $weight  = max(1, $weight);
+        $weight = max(1, $weight);
         $current = $redis->incrby($key, $weight);
 
         // the counter rises monotonically, so only the first call of a window can come back

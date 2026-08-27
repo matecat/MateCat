@@ -258,22 +258,24 @@ class MetaDataControllerTest extends AbstractTest
     #[Test]
     public function indexForUi_serves_a_caller_who_holds_only_the_job_password(): void
     {
-        $outsider      = new UserStruct();
+        $outsider = new UserStruct();
         $outsider->uid = 9052950;
         $this->setProp('user', $outsider);
 
         $this->setRequestParams([
-            'id_job'   => (string) $this->jobId(self::BASE),
+            'id_job' => (string)$this->jobId(self::BASE),
             'password' => self::JOB_PASSWORD,
         ]);
 
         $captured = null;
         $this->responseMock->expects($this->once())
             ->method('json')
-            ->with($this->callback(function (stdClass $data) use (&$captured): bool {
-                $captured = $data;
-                return true;
-            }));
+            ->with(
+                $this->callback(function (stdClass $data) use (&$captured): bool {
+                    $captured = $data;
+                    return true;
+                })
+            );
 
         $this->controller->indexForUi();
 
@@ -293,12 +295,12 @@ class MetaDataControllerTest extends AbstractTest
     #[Test]
     public function index_denies_a_caller_who_holds_only_the_job_password(): void
     {
-        $outsider      = new UserStruct();
+        $outsider = new UserStruct();
         $outsider->uid = 9052950;
         $this->setProp('user', $outsider);
 
         $this->setRequestParams([
-            'id_job'   => (string) $this->jobId(self::BASE),
+            'id_job' => (string)$this->jobId(self::BASE),
             'password' => self::JOB_PASSWORD,
         ]);
 
