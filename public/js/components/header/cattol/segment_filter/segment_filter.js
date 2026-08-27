@@ -272,10 +272,10 @@ let SegmentFilterUtils = {
     } else {
       nextGroupHash = groupsArray[0]
     }
-    const nextItem = segmentFilterData.serverData.grouping[nextGroupHash][0]
-    segmentTranslation(segment, status, () =>
-      SegmentActions.openSegment(nextItem),
-    )
+    const nextItem = segmentFilterData.serverData.grouping[nextGroupHash]?.[0]
+    segmentTranslation(segment, status, () => {
+      if (nextItem) SegmentActions.openSegment(nextItem)
+    })
   },
   gotoPreviousSegment: () => {
     var list = SegmentFilterUtils.getLastFilterData()['segment_ids']

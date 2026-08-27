@@ -561,3 +561,17 @@ describe('SegmentsContainer', () => {
     })
   })
 })
+
+describe('SegmentsContainer height calculation', () => {
+  test('does not throw when the page has no footer', () => {
+    document.querySelector('footer').remove()
+
+    expect(() => render(<SegmentsContainer />)).not.toThrow()
+  })
+
+  test('does not throw when the page has no header', () => {
+    document.querySelector('header').remove()
+
+    expect(() => render(<SegmentsContainer />)).not.toThrow()
+  })
+})

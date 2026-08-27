@@ -24,7 +24,7 @@ export const UserProjectDropdown = ({
 
   const selectedUser = users.find(({user}) => user.uid === idAssignee)
   const isPersonalTeam = userInfo
-    ? userInfo.teams.find(({id}) => id === project.id_team).type === 'personal'
+    ? userInfo.teams.find(({id}) => id === project.id_team)?.type === 'personal'
     : undefined
 
   const onChangeSearch = useCallback(

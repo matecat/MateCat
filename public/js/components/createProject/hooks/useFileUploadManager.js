@@ -273,8 +273,13 @@ export function useFileUploadManager({
 
         const onSuccess = (responseText) => {
           const fileResponse = JSON.parse(responseText)[0]
-          const fileError = getFileErrorMessage(fileResponse)
-          if (fileResponse.error || fileError) {
+          // /fileupload/ answers 200 with an empty array when PHP receives the
+          // request without the file (empty $_FILES), so there is not always an
+          // entry to read here.
+          const fileError = fileResponse
+            ? getFileErrorMessage(fileResponse)
+            : 'Error during upload. Please try again.'
+          if (fileError || fileResponse?.error) {
             setFiles((prevFiles) =>
               prevFiles.map((f) =>
                 f.file === file
