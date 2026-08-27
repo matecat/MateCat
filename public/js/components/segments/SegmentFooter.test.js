@@ -401,7 +401,7 @@ test('Remove tab', () => {
   expect(screen.queryByTestId('multiMatches')).toBeNull()
 })
 
-xtest('Translation Matches count result', () => {
+test('Translation Matches count result', () => {
   globalFunctions.registerFooterTabs()
   config.id_client = 'xxx'
   render(
@@ -419,7 +419,7 @@ xtest('Translation Matches count result', () => {
   expect(screen.getByText('(1)')).toBeInTheDocument()
 })
 
-xtest('Translation conflicts (alternatives)', () => {
+test('Translation conflicts (alternatives)', () => {
   globalFunctions.registerFooterTabs()
   const modifiedProps = {
     ...props,
@@ -443,7 +443,7 @@ xtest('Translation conflicts (alternatives)', () => {
   expect(screen.getByTestId('alternatives')).toHaveClass('active')
 })
 
-xtest('Click tab', async () => {
+test('Click tab', async () => {
   globalFunctions.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment}}>
@@ -457,7 +457,7 @@ xtest('Click tab', async () => {
   expect(screen.getByTestId('concordances')).toHaveClass('active')
 })
 
-xtest('Move to next tab with keyboard shortcut', async () => {
+test('Move to next tab with keyboard shortcut', async () => {
   globalFunctions.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment}}>

@@ -1,3 +1,4 @@
+import React from 'react'
 import {List} from 'immutable'
 import {CompositeDecorator} from 'draft-js'
 
