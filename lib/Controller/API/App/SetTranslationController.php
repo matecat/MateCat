@@ -4,8 +4,8 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
-use Controller\Traits\APISourcePageGuesserTrait;
 use DivisionByZeroError;
 use DomainException;
 use Exception;
@@ -28,8 +28,7 @@ use Model\FeaturesBase\Hook\Event\Run\SetTranslationCommittedEvent;
 use Model\Files\FilesPartsDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
-use Model\Jobs\MetadataDao as JobsMetadataDao;
-use Model\Projects\MetadataDao as ProjectMetadataDao;
+use Model\Jobs\MetadataDao as JobsMetadataDao;use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
@@ -45,21 +44,21 @@ use Model\Translations\SegmentTranslationStruct;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
 use Model\WordCount\WordCountStruct;
-use PDOException;
-use Plugins\Features\ReviewExtended\ReviewUtils;
-use Plugins\Features\TranslationVersions;
+use PDOException;use Plugins\Features\TranslationVersions;
 use Plugins\Features\TranslationVersions\StoreTranslationEventParams;
 use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\JobStatus;
 use Utils\Constants\ProjectStatus;
+use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 use Utils\Contribution\Set;
 use Utils\Contribution\SetContributionRequest;
-use Utils\LQA\ICUSourceSegmentChecker;
+use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\LQA\QA;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
@@ -70,14 +69,21 @@ use Utils\Tools\Utils;
 
 class SetTranslationController extends AbstractStatefulKleinController
 {
-    use APISourcePageGuesserTrait;
-    use ICUSourceSegmentChecker;
+    /**
+     * Whether the stored source of this segment is valid ICU. Decided in validateTheRequest()
+     * and read by setSubFilteringBehavior() and setQaChecks(), which run later in the same
+     * request: the handler set the segment is converted with and the QA check that grades the
+     * translation have to agree on it.
+     */
+    private bool $segmentContainsIcu = false;
+
+    /** The source-side pattern the QA comparator is built against, kept for the same reason. */
+    private ?MessagePatternValidator $icuSourceValidator = null;
 
     /**
      * @var array{
      *  id_job: string,
      *  password: string,
-     *  received_password: string,
      *  id_segment: string,
      *  time_to_edit: int|string,
      *  id_translator: string,
@@ -92,7 +98,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      *  context_after: string,
      *  id_before: string|null,
      *  id_after: string|null,
-     *  revisionNumber: int|null,
+     *  sourcePage: int,
      *  guess_tag_used: bool|null,
      *  characters_counter: string|null,
      *  propagate: bool|null,
@@ -110,6 +116,8 @@ class SetTranslationController extends AbstractStatefulKleinController
     protected array $data;
 
     protected ?string $password = null;
+
+    protected int $id_job = 0;
 
     /**
      * @var JobStruct
@@ -134,6 +142,24 @@ class SetTranslationController extends AbstractStatefulKleinController
     protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
+
+        // Resolve the job and its revision phase from the presented credential (password), not from a
+        // client-declared revision_number or a spoofable Referer. ChunkPasswordValidator stamps
+        // source_page onto the chunk from whichever password (translate or review) matched.
+        $chunkValidator = new ChunkPasswordValidator($this);
+        $chunkValidator->onSuccess(function () use ($chunkValidator) {
+            $this->chunk = $chunkValidator->getChunk();
+        });
+        $this->appendValidator($chunkValidator);
+    }
+
+    /**
+     * The revision phase is derived from the credential-resolved source_page stamped on the chunk
+     * (see registerValidators), never from the request Referer.
+     */
+    private function isRevision(): bool
+    {
+        return ($this->data['sourcePage'] ?? SourcePages::SOURCE_PAGE_TRANSLATE) !== SourcePages::SOURCE_PAGE_TRANSLATE;
     }
 
     /**
@@ -148,44 +174,44 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @throws RuntimeException
      * @throws TypeError
      * @throws DivisionByZeroError
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction
+     *                   on any throw and re-throws the original, whatever its type
      */
     public function translate(): void
     {
         $db = $this->getDatabase();
 
-        try {
-            $prepared    = $this->prepareTranslation();
-            $translation = $prepared['translation'];
-            $check       = $prepared['check'];
-            $err_json    = $prepared['err_json'];
+        $prepared = $this->prepareTranslation();
+        $translation = $prepared['translation'];
+        $check = $prepared['check'];
+        $err_json = $prepared['err_json'];
 
-            /*
-             * begin stat counter
-             *
-             * It works well with default InnoDB Isolation level
-             *
-             * REPEATABLE-READ offering a row level lock for this id_segment
-             *
-             */
-            $db->begin();
-
+        /*
+         * begin stat counter
+         *
+         * It works well with default InnoDB Isolation level
+         *
+         * REPEATABLE-READ offering a row level lock for this id_segment
+         *
+         */
+        [$new_translation, $old_translation, $propagationTotal] = $db->transaction(function () use ($translation, $err_json, $check): array {
             $translations    = $this->buildNewTranslation($translation, $err_json, $check);
             $new_translation = $translations['new'];
             $old_translation = $translations['old'];
 
             $propagationTotal = $this->persistTranslation($new_translation, $old_translation, $translation, $err_json, $check);
 
-            $db->commit();
+            return [$new_translation, $old_translation, $propagationTotal];
+        });
 
-            $result = $this->buildResult($new_translation, $old_translation, $propagationTotal, $check);
+        // Everything below reports work that is already durable, so it stays outside the scope where
+        // the commit used to put it. The try/catch that used to wrap the whole method existed only to
+        // roll back; the scope does that itself and re-throws the original.
+        $result = $this->buildResult($new_translation, $old_translation, $propagationTotal, $check);
 
-            $this->finalizeTranslation($new_translation, $old_translation, $propagationTotal, $result);
+        $this->finalizeTranslation($new_translation, $old_translation, $propagationTotal, $result);
 
-            $this->response->json($result);
-        } catch (Exception $exception) {
-            $db->rollback();
-            throw $exception;
-        }
+        $this->response->json($result);
     }
 
     /**
@@ -442,7 +468,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $propagationTotal,
             $this->chunk,
             $this->user,
-            ReviewUtils::revisionNumberToSourcePage($this->data['revisionNumber']),
+            $this->data['sourcePage'],
             $this->featureSet,
             $this->data['project'],
             isAReplaceAllEvent: false
@@ -516,7 +542,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             'chunk' => $this->data['chunk'],
             'segment' => $this->data['segment'],
             'user' => $this->user,
-            'source_page_code' => ReviewUtils::revisionNumberToSourcePage($this->data['revisionNumber'])
+            'source_page_code' => $this->data['sourcePage']
         ], $this->user));
 
         return $result;
@@ -580,7 +606,6 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @return array{
      *   id_job: string,
      *   password: string,
-     *   received_password: string,
      *   id_segment: string,
      *   time_to_edit: int|string,
      *   id_translator: string,
@@ -595,7 +620,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      *   context_after: string,
      *   id_before: string|null,
      *   id_after: string|null,
-     *   revisionNumber: int|null,
+     *   sourcePage: int,
      *   guess_tag_used: bool|null,
      *   characters_counter: string|null,
      *   propagate: bool|null,
@@ -614,8 +639,6 @@ class SetTranslationController extends AbstractStatefulKleinController
     private function validateTheRequest(): array
     {
         $id_job = filter_var($this->request->param('id_job'), FILTER_SANITIZE_NUMBER_INT);
-        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-        $received_password = (string)filter_var($this->request->param('current_password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $propagate = filter_var($this->request->param('propagate'), FILTER_VALIDATE_BOOLEAN, ['flags' => FILTER_NULL_ON_FAILURE]);
         $id_segment = filter_var($this->request->param('id_segment'), FILTER_SANITIZE_NUMBER_INT); // FILTER_SANITIZE_NUMBER_INT leaves untouched segments id with the split flag. Ex: 123-1
         $time_to_edit = filter_var($this->request->param('time_to_edit'), FILTER_SANITIZE_NUMBER_INT, ['filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR | FILTER_NULL_ON_FAILURE]
@@ -648,7 +671,6 @@ class SetTranslationController extends AbstractStatefulKleinController
         $context_after = (string)filter_var($this->request->param('context_after'), FILTER_UNSAFE_RAW);
         $id_before = filter_var($this->request->param('id_before'), FILTER_SANITIZE_NUMBER_INT);
         $id_after = filter_var($this->request->param('id_after'), FILTER_SANITIZE_NUMBER_INT);
-        $revisionNumber = filter_var($this->request->param('revision_number'), FILTER_SANITIZE_NUMBER_INT);
         $guess_tag_used = filter_var($this->request->param('guess_tag_used'), FILTER_VALIDATE_BOOLEAN);
         $characters_counter = filter_var($this->request->param('characters_counter'), FILTER_SANITIZE_NUMBER_INT);
 
@@ -665,17 +687,14 @@ class SetTranslationController extends AbstractStatefulKleinController
             throw new InvalidArgumentException("Missing id job", -2);
         }
 
-        if (empty($password)) {
-            throw new InvalidArgumentException("Missing password", -3);
-        }
-
         if (empty($id_segment)) {
             throw new InvalidArgumentException("Missing id segment", -4);
         }
 
-        //to get Job Info, we need only a row of jobs (split)
-        $chunk = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail((int)$id_job, $password);
-        $this->chunk = $chunk;
+        // The job (a single split row) and its revision phase were resolved by ChunkPasswordValidator
+        // from the presented credential; reuse that chunk and its own job password.
+        $chunk = $this->chunk;
+        $password = (string)$chunk->password;
 
         //add check for job status archived.
         if (strtolower($chunk['status']) == JobStatus::STATUS_ARCHIVED) {
@@ -688,15 +707,26 @@ class SetTranslationController extends AbstractStatefulKleinController
         $this->segment = $dao->fetchById((int)$id_segment, SegmentStruct::class); // Cast to int to remove eventually split positions. Ex: id_segment = 123-1
 
         $this->id_job = (int)$id_job;
-        $this->password = (string)$password;
-        $this->request_password = $received_password;
+        $this->password = $password;
 
-        $this->sourceContainsIcu($chunk->getProject(new ProjectDao($this->getDatabase())), $chunk, $segmentString, $this->getDatabase());
+        /*
+         * The revision phase is the source_page ChunkPasswordValidator stamped on the chunk from
+         * whichever password (translate or review) authenticated this request. The client no longer
+         * declares a revision_number at all: the credential alone determines the phase.
+         */
+        $sourcePage = $chunk->getSourcePage() ?: SourcePages::SOURCE_PAGE_TRANSLATE;
+
+        $this->icuSourceValidator = new MessagePatternValidator($chunk->source, $segmentString);
+        $this->segmentContainsIcu = ICUSourceSegmentDetector::sourceContainsIcu(
+            $this->icuSourceValidator,
+            (new ProjectMetadataDao($this->getDatabase()))->isIcuEnabled(
+                (int)$chunk->getProject(new ProjectDao($this->getDatabase()))->id
+            )
+        );
 
         $data = [
             'id_job' => $id_job,
             'password' => $password,
-            'received_password' => $received_password,
             'id_segment' => $id_segment,
             'time_to_edit' => $time_to_edit,
             'id_translator' => $id_translator,
@@ -711,7 +741,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             'context_after' => $context_after,
             'id_before' => $id_before ?: null,
             'id_after' => $id_after ?: null,
-            'revisionNumber' => ($revisionNumber !== false && $revisionNumber !== '') ? (int)$revisionNumber : null,
+            'sourcePage' => $sourcePage,
             'guess_tag_used' => $guess_tag_used,
             'characters_counter' => $characters_counter ?: null,
             'propagate' => $propagate,
@@ -721,7 +751,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             'chunk' => $chunk,
             'project' => $chunk->getProject(new ProjectDao($this->getDatabase())),
             'id_project' => $chunk->id_project,
-            'segment_contains_icu' => $this->sourceContainsIcu,
+            'segment_contains_icu' => $this->segmentContainsIcu,
             'split_num' => null,
             'split_chunk_lengths' => null,
         ];
@@ -819,7 +849,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $this->data['chunk']->target,
             (new SegmentOriginalDataDao($this->getDatabase()))->getSegmentDataRefMap((int)$this->data['id_segment']),
             $metadata->getSubfilteringCustomHandlers($this->id_job, $this->password ?? ''),
-            $this->sourceContainsIcu
+            $this->segmentContainsIcu
         );
 
         if (!$filter instanceof MateCatFilter) {
@@ -839,8 +869,8 @@ class SetTranslationController extends AbstractStatefulKleinController
         $check = new QA(
             $segment,
             $translation,
-            ($this->icuSourcePatternValidator !== null) ? MessagePatternComparator::fromValidators(
-                $this->icuSourcePatternValidator,
+            ($this->icuSourceValidator !== null) ? MessagePatternComparator::fromValidators(
+                $this->icuSourceValidator,
                 new MessagePatternValidator(
                     $this->data['chunk']->target,
                     // Transform target content: convert control character placeholders back to ASCII control characters
@@ -849,7 +879,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 )
             ) : null,
             // ICU syntax is enabled for this project, and the translation content must contain valid ICU syntax
-            $this->sourceContainsIcu
+            $this->segmentContainsIcu
         ); // Layer 1 here
 
         $check->setChunk($this->data['chunk']);
@@ -967,7 +997,8 @@ class SetTranslationController extends AbstractStatefulKleinController
             try {
                 (new CatUtils($this->getDatabase()))->addSegmentTranslation($translation, (bool)$this->isRevision());
             } catch (Exception $e) {
-                $this->getDatabase()->rollback();
+                // Re-thrown, not rolled back: this runs inside the caller's transaction scope, which
+                // owns the undo. Rolling back here would end a transaction this method did not open.
                 throw new RuntimeException($e->getMessage());
             }
 
@@ -1025,7 +1056,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     {
         //update total time to edit
         $jobTotalTTEForTranslation = $this->chunk['total_time_to_edit'];
-        if (!self::isRevision()) {
+        if (!$this->isRevision()) {
             $jobTotalTTEForTranslation += $new_translation['time_to_edit'];
         }
 

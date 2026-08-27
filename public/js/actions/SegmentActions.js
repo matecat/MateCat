@@ -266,7 +266,7 @@ const SegmentActions = {
        If is an ICE we allow to change the translation because is not possible to add an issue
      */
 
-    const mandatoryIssues = CatToolStore.getJobMetadata().job.mandatory_issues
+    const mandatoryIssues = CatToolStore.getJobMetadata()?.job?.mandatory_issues
 
     const currentRevisionKey = `r${config.revisionNumber}`
 
@@ -461,8 +461,8 @@ const SegmentActions = {
       id_job: config.id_job,
       source: source,
       target: target,
-      source_lang: config.source_rfc,
-      target_lang: config.target_rfc,
+      source_lang: config.source_code,
+      target_lang: config.target_code,
       suggestion: suggestion,
       id_segment: sid,
     })
@@ -1719,8 +1719,7 @@ const SegmentActions = {
     setLastSegmentFromLocalStorage(id_segment.toString())
     const requestData = {
       action: 'setCurrentSegment',
-      password: config.password,
-      revision_number: config.revisionNumber,
+      password: config.currentPassword,
       id_segment: id_segment.toString(),
       id_job: config.id_job,
     }

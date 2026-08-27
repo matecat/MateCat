@@ -354,7 +354,7 @@ article .comment-balloon-outer {
   padding-right: 15px;
   margin-bottom: 30px;
   position: absolute;
-  top: -75px;
+  top: 0px;
   width: 100%;
   z-index: 1;
   cursor: auto;
@@ -452,10 +452,10 @@ section.editor .comment-triangle.comment-triangle-topleft {
 }
 
 .comment-open-view.comment-re-messages {
-  bottom: 0px;
+  top: 0px;
   border-top: unset;
   border-left: unset;
-  border-bottom: 12px solid colors.$white;
+  border-top: 12px solid colors.$white;
   border-left: 14px solid transparent;
   filter: drop-shadow(-1px 2px 1px rgba(0, 0, 0, 0.2));
 }

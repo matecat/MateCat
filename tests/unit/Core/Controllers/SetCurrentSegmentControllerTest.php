@@ -11,6 +11,7 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
 use Model\Users\UserStruct;
 use PDOException;
 use PHPUnit\Event\NoPreviousThrowableException;
@@ -24,6 +25,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
 use TypeError;
+use Utils\Constants\SourcePages;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -183,37 +185,30 @@ class SetCurrentSegmentControllerTest extends AbstractTest
         return $m->invoke($this->controller, ...$args);
     }
 
+    /**
+     * Stands in for ChunkPasswordValidator, which resolves the chunk and stamps onto it the phase
+     * the presented password belongs to.
+     *
+     * @throws ReflectionException
+     */
+    private function setChunkFromCredential(int $sourcePage): void
+    {
+        $chunk = new JobStruct([
+            'id' => self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+        ]);
+        $chunk->setSourcePage($sourcePage);
+        $chunk->setIsReview($sourcePage !== SourcePages::SOURCE_PAGE_TRANSLATE);
+
+        $this->reflector->getProperty('chunk')->setValue($this->controller, $chunk);
+    }
+
     // ─── validateTheRequest ───
 
     /**
-     * @throws ReflectionException
-     */
-    #[Test]
-    public function validateTheRequest_throws_when_id_job_is_empty(): void
-    {
-        $this->setRequestParams(['password' => 'pw', 'id_segment' => '5']);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-1);
-
-        $this->invokePrivate('validateTheRequest');
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    #[Test]
-    public function validateTheRequest_throws_when_password_is_empty(): void
-    {
-        $this->setRequestParams(['id_job' => '100', 'id_segment' => '5']);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-2);
-
-        $this->invokePrivate('validateTheRequest');
-    }
-
-    /**
+     * The job id and the password are validated by ChunkPasswordValidator, so validateTheRequest()
+     * only looks at the segment id.
+     *
      * @throws ReflectionException
      */
     #[Test]
@@ -245,11 +240,10 @@ class SetCurrentSegmentControllerTest extends AbstractTest
         $result = $this->invokePrivate('validateTheRequest');
 
         $this->assertIsArray($result);
-        $this->assertSame('42', $result['id_job']);
-        $this->assertSame('mypass', $result['password']);
         $this->assertSame('7', $result['id_segment']);
-        $this->assertSame('1', $result['revision_number']);
         $this->assertNull($result['split_num']);
+        $this->assertArrayNotHasKey('revision_number', $result);
+        $this->assertArrayNotHasKey('password', $result);
     }
 
     /**
@@ -281,9 +275,8 @@ class SetCurrentSegmentControllerTest extends AbstractTest
     #[Test]
     public function set_returns_next_segment_id_on_success(): void
     {
+        $this->setChunkFromCredential(SourcePages::SOURCE_PAGE_TRANSLATE);
         $this->setRequestParams([
-            'id_job' => (string) self::TEST_JOB_ID,
-            'password' => self::TEST_JOB_PASSWORD,
             'id_segment' => (string) self::TEST_SEGMENT_ID,
         ]);
 
@@ -306,18 +299,16 @@ class SetCurrentSegmentControllerTest extends AbstractTest
      * @throws PDOException
      */
     #[Test]
-    public function set_returns_translated_next_segment_when_revision_number_set(): void
+    public function set_returns_translated_next_segment_when_the_credential_is_a_revision_one(): void
     {
         // mark the next segment TRANSLATED so the revision branch finds it
         obtainTestDatabase()->getConnection()->exec(
             "UPDATE segment_translations SET status = 'TRANSLATED' WHERE id_segment = " . self::TEST_NEXT_SEGMENT_ID . " AND id_job = " . self::TEST_JOB_ID
         );
 
+        $this->setChunkFromCredential(SourcePages::SOURCE_PAGE_REVISION);
         $this->setRequestParams([
-            'id_job' => (string) self::TEST_JOB_ID,
-            'password' => self::TEST_JOB_PASSWORD,
             'id_segment' => (string) self::TEST_SEGMENT_ID,
-            'revision_number' => '1',
         ]);
 
         $this->responseMock->expects($this->once())
@@ -337,13 +328,11 @@ class SetCurrentSegmentControllerTest extends AbstractTest
      * @throws TypeError
      */
     #[Test]
-    public function set_returns_null_next_segment_when_revision_number_set_and_none_translated(): void
+    public function set_returns_null_next_segment_for_a_revision_credential_when_none_translated(): void
     {
+        $this->setChunkFromCredential(SourcePages::SOURCE_PAGE_REVISION);
         $this->setRequestParams([
-            'id_job' => (string) self::TEST_JOB_ID,
-            'password' => self::TEST_JOB_PASSWORD,
             'id_segment' => (string) self::TEST_SEGMENT_ID,
-            'revision_number' => '1',
         ]);
 
         $this->responseMock->expects($this->once())
@@ -353,25 +342,6 @@ class SetCurrentSegmentControllerTest extends AbstractTest
                 $this->assertNull($data['nextSegmentId']);
                 return true;
             }));
-
-        $this->controller->set();
-    }
-
-    /**
-     * @throws ReflectionException
-     * @throws Exception
-     * @throws TypeError
-     */
-    #[Test]
-    public function set_throws_not_found_for_wrong_password(): void
-    {
-        $this->setRequestParams([
-            'id_job' => (string) self::TEST_JOB_ID,
-            'password' => 'wrong_password_xyz',
-            'id_segment' => (string) self::TEST_SEGMENT_ID,
-        ]);
-
-        $this->expectException(NotFoundException::class);
 
         $this->controller->set();
     }
@@ -396,9 +366,8 @@ class SetCurrentSegmentControllerTest extends AbstractTest
             . "VALUES (" . self::TEST_SEGMENT_ID . ", " . self::TEST_JOB_ID . ", '[5,5]', '{\"len\":[0],\"statuses\":[\"DRAFT\"]}')"
         );
 
+        $this->setChunkFromCredential(SourcePages::SOURCE_PAGE_TRANSLATE);
         $this->setRequestParams([
-            'id_job' => (string) self::TEST_JOB_ID,
-            'password' => self::TEST_JOB_PASSWORD,
             'id_segment' => (string) self::TEST_SEGMENT_ID . '-0',
         ]);
 
@@ -423,12 +392,10 @@ class SetCurrentSegmentControllerTest extends AbstractTest
      * @throws TypeError
      */
     #[Test]
-    public function set_throws_invalid_argument_when_id_job_missing(): void
+    public function set_throws_invalid_argument_when_id_segment_missing(): void
     {
-        $this->setRequestParams([
-            'password' => self::TEST_JOB_PASSWORD,
-            'id_segment' => (string) self::TEST_SEGMENT_ID,
-        ]);
+        $this->setChunkFromCredential(SourcePages::SOURCE_PAGE_TRANSLATE);
+        $this->setRequestParams([]);
 
         $this->expectException(InvalidArgumentException::class);
 

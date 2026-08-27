@@ -348,7 +348,7 @@ class ReviewsControllerTest extends AbstractTest
 
         $this->controller->revisionFactoryStub = $factory;
 
-        // project->password is read by destroyCacheForProjectData (source line 57)
+        // project->password is read by destroyCache (source line 57)
         $project           = new ProjectStruct();
         $project->id       = $this->projectId(self::BASE);
         $project->password = 'projpw';

@@ -27,8 +27,8 @@ window.config = {
   id_job: '6',
   segmentFilterEnabled: true,
   translation_matches_enabled: 1,
-  source_rfc: 'en-US',
-  target_rfc: 'it-IT',
+  source_code: 'en-US',
+  target_code: 'it-IT',
   tag_projection_languages:
     '{"en-de":"English - German","en-es":"English - Spanish","en-fr":"English - French","en-it":"English - Italian","en-pt":"English - Portuguese","en-ru":"English - Russian","en-cs":"English - Czech","en-nl":"English - Dutch","en-fi":"English - Finnish","en-pl":"English - Polish","en-da":"English - Danish","en-sv":"English - Swedish","en-el":"English - Greek","en-hu":"English - Hungarian","en-lt":"English - Lithuanian","en-ja":"English - Japanese","en-et":"English - Estonian","en-sk":"English - Slovak","en-bg":"English - Bulgarian","en-bs":"English - Bosnian","en-ar":"English - Arabic","en-ca":"English - Catalan","en-zh":"English - Chinese","en-he":"English - Hebrew","en-hr":"English - Croatian","en-id":"English - Indonesian","en-is":"English - Icelandic","en-ko":"English - Korean","en-lv":"English - Latvian","en-mk":"English - Macedonian","en-ms":"English - Malay","en-mt":"English - Maltese","en-nb":"English - Norwegian Bokmål","en-nn":"English - Norwegian Nynorsk","en-ro":"English - Romanian","en-sl":"English - Slovenian","en-sq":"English - Albanian","en-sr":"English - Montenegrin","en-th":"English - Thai","en-tr":"English - Turkish","en-uk":"English - Ukrainian","en-vi":"English - Vietnamese","de-it":"German - Italian","de-fr":"German - French","de-cs":"German - Czech","fr-it":"French - Italian","fr-nl":"French - Dutch","it-es":"Italian - Spanish","da-sv":"Danish - Swedish","nl-pt":"Dutch - Portuguese","nl-fi":"Dutch - Finnish","zh-en":"Chinese - English","sv-da":"Swedish - Danish","cs-de":"Czech - German"}',
   languages_array: [
@@ -401,7 +401,7 @@ test('Remove tab', () => {
   expect(screen.queryByTestId('multiMatches')).toBeNull()
 })
 
-xtest('Translation Matches count result', () => {
+test('Translation Matches count result', () => {
   globalFunctions.registerFooterTabs()
   config.id_client = 'xxx'
   render(
@@ -419,7 +419,7 @@ xtest('Translation Matches count result', () => {
   expect(screen.getByText('(1)')).toBeInTheDocument()
 })
 
-xtest('Translation conflicts (alternatives)', () => {
+test('Translation conflicts (alternatives)', () => {
   globalFunctions.registerFooterTabs()
   const modifiedProps = {
     ...props,
@@ -443,7 +443,7 @@ xtest('Translation conflicts (alternatives)', () => {
   expect(screen.getByTestId('alternatives')).toHaveClass('active')
 })
 
-xtest('Click tab', async () => {
+test('Click tab', async () => {
   globalFunctions.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment}}>
@@ -457,7 +457,7 @@ xtest('Click tab', async () => {
   expect(screen.getByTestId('concordances')).toHaveClass('active')
 })
 
-xtest('Move to next tab with keyboard shortcut', async () => {
+test('Move to next tab with keyboard shortcut', async () => {
   globalFunctions.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment}}>

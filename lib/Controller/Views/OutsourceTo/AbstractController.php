@@ -11,10 +11,7 @@ use LogicException;
 use Model\Outsource\ConfirmationStruct;
 use TypeError;
 use Utils\Logger\LoggerFactory;
-use Utils\Registry\AppConfig;
-use Utils\Shop\AbstractItem;
 use Utils\Shop\Cart;
-use Utils\Tools\SimpleJWT;
 
 /**
  * Class AbstractController
@@ -190,80 +187,12 @@ abstract class AbstractController extends BaseKleinViewController
             throw new LogicException('Cart item not found for key: ' . $this->data_key_content);
         }
 
-        [$id_job, $password,] = explode("-", $item['id']);
-
-        $payload = [
-            'id_vendor'     => $this->id_vendor,
-            'vendor_name'   => $this->vendor_name,
-            'id_job'        => (int)$id_job,
-            'password'      => $password,
-            'currency'      => $item['currency'],
-            'price'         => $this->calculatePrice($item),
-            'delivery_date' => $this->calculateDeliveryDate($item),
-            'quote_pid'     => $item['quote_pid'],
-        ];
-
-        $JWT = new SimpleJWT(
-            $payload,
-            AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
-            AppConfig::$AUTHSECRET,
-            60 * 20 //20 minutes to complete the order
-        );
-
         return [
             'tokenAuth'      => $this->tokenAuth,
             'data'           => json_encode([$item]),
             'redirect_url'   => $this->review_order_page,
-            'data_key'       => $this->data_key_content,
-            'confirm_tokens' => [$item['id'] => $JWT->jsonSerialize()],
+            'data_key' => $this->data_key_content,
         ];
     }
 
-    /**
-     * Calculates the total price for a given item.
-     *
-     * @param AbstractItem $item The item data, including price and optional additional price (r_price).
-     * @return float The calculated total price, rounded to the nearest integer.
-     */
-    private function calculatePrice(?AbstractItem $item = null): float
-    {
-        if(empty($item)){
-            return 0;
-        }
-
-        if(empty($item['price'])){
-            return 0;
-        }
-
-        $price = $item['price'];
-
-        // add the revision price if the service type is premium and r_price is not empty
-        if($item['typeOfService'] === "premium" && !empty($item['r_price'])){
-            $price = $price + $item['r_price'];
-        }
-
-        return round($price, PHP_ROUND_HALF_UP);
-    }
-
-    /**
-     * Calculates the delivery date for a given item.
-     *
-     * @param AbstractItem $item The item for which the delivery date is being calculated.
-     *                     This array should include either 'r_delivery' or 'delivery' keys.
-     * @return string|null Returns the delivery date specified in 'r_delivery' if present,
-     *                     otherwise falls back to 'delivery'. Returns null if neither key is present.
-     */
-    private function calculateDeliveryDate(?AbstractItem $item = null): ?string
-    {
-        if(empty($item)){
-            return null;
-        }
-
-        // if the service type is premium and r_delivery is not empty, return it
-        if($item['typeOfService'] === "premium" && !empty($item['r_delivery'])){
-            return $item['r_delivery'];
-        }
-
-        return $item['delivery'];
-    }
 }

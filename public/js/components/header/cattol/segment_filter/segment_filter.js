@@ -135,8 +135,7 @@ let SegmentFilterUtils = {
     }
     SegmentFilterUtils.filteringSegments = true
     filter.revision = config.isReview
-    var password = config.isReview ? config.review_password : config.password
-    getFilteredSegments(config.id_job, password, filter, filter.revision_number)
+    getFilteredSegments(config.id_job, config.currentPassword, filter)
       .then((data) => {
         CommonUtils.clearStorage('SegmentFilter')
 
@@ -273,10 +272,10 @@ let SegmentFilterUtils = {
     } else {
       nextGroupHash = groupsArray[0]
     }
-    const nextItem = segmentFilterData.serverData.grouping[nextGroupHash][0]
-    segmentTranslation(segment, status, () =>
-      SegmentActions.openSegment(nextItem),
-    )
+    const nextItem = segmentFilterData.serverData.grouping[nextGroupHash]?.[0]
+    segmentTranslation(segment, status, () => {
+      if (nextItem) SegmentActions.openSegment(nextItem)
+    })
   },
   gotoPreviousSegment: () => {
     var list = SegmentFilterUtils.getLastFilterData()['segment_ids']

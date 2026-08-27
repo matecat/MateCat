@@ -17,7 +17,7 @@
         "matecat/cwh": "^3.1",
         "matecat/klein": "^3.2",
         "matecat/simple-s3": "^v2.0.0",
-        "matecat/subfiltering": "^4.1",
+        "matecat/subfiltering": "^4.1.1",
         "matecat/whole-text-finder": "^2.0",
         "matecat/xliff-parser": "~v3.0",
         "matecat/icu-intl": "^v1",

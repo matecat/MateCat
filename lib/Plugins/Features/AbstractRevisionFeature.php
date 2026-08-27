@@ -7,7 +7,6 @@ use DomainException;
 use Exception;
 use Klein\Klein;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
-use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureCodes;
@@ -251,7 +250,15 @@ abstract class AbstractRevisionFeature extends BaseFeature
          */
 
         $id_job = $projectStructure->jobToSplit ?? throw new RuntimeException('Job id is required when splitting a job');
+
         $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
+
+        // Dispatched inside JobSplitMergeService::applySplit's transaction (begin -> splitJob ->
+        // commit), so these row locks are held for the whole delete+recreate+recount and released
+        // only at commit. The id_job index range is gap-locked too, which is what keeps another
+        // writer out of the window where the rows have been deleted but not yet recreated.
+        $chunkReviewDao->lockByJobId($id_job);
+
         $previousRevisionRecords = $chunkReviewDao->findByIdJob($id_job);
         $project = $this->getProjectDao()->findById($projectStructure->idProject, 86400)
             ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
@@ -299,7 +306,14 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $projectStructure = $event->data;
 
         $id_job = $projectStructure->jobToMerge ?? throw new RuntimeException('Job id is required when merging jobs');
+
         $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
+
+        // Dispatched inside JobSplitMergeService::mergeALL's transaction, so the locks below span
+        // the delete+recreate+recount and release at commit. See postJobSplitted for why the gap
+        // lock on the id_job range matters here.
+        $chunkReviewDao->lockByJobId($id_job);
+
         $old_reviews = $chunkReviewDao->findByIdJob($id_job);
         $project = $this->getProjectDao()->findById($projectStructure->idProject, 86400)
             ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
@@ -345,10 +359,19 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     public function projectCompletionEventSaved(ProjectCompletionEventSavedEvent $event): void
     {
-        // The event stays a pure notification and must NOT carry an IDatabase handle; the feature
-        // itself carries one (set by FeatureSet::dispatch), so source the db from getDatabase().
-        $model = new QualityReportModel($event->chunk, $this->getDatabase());
-        $model->resetScore($event->completionEventId);
+        $this->createQualityReportModel($event->chunk)->resetScore($event->completionEventId);
+    }
+
+    /**
+     * The event stays a pure notification and must NOT carry an IDatabase handle; the feature
+     * itself carries one (set by FeatureSet::dispatch), so source the db from getDatabase().
+     *
+     * Kept as a seam so a test can observe the reset instead of only the exception it used to
+     * raise against an unseeded chunk.
+     */
+    protected function createQualityReportModel(JobStruct $chunk): QualityReportModel
+    {
+        return new QualityReportModel($chunk, $this->getDatabase());
     }
 
     /**
@@ -360,6 +383,11 @@ abstract class AbstractRevisionFeature extends BaseFeature
     public function alterChunkReviewStruct(AlterChunkReviewStructEvent $event): void
     {
         $struct = $event->event;
+
+        // Restores absolute values from undo_data, so it is a read-modify-write like resetScore:
+        // lock the job's rows before reading the review back.
+        (new ChunkReviewDao($this->getDatabase()))->lockByJobId((int)$struct->id_job);
+
         $review = (new ChunkReviewDao($this->getDatabase()))->findChunkReviews(new JobStruct(['id' => $struct->id_job, 'password' => $struct->password]))[0]
             ?? throw new ValidationError('Chunk review not found');
 
@@ -376,7 +404,8 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $review->reviewed_words_count = $undo_data['reviewed_words_count'];
         $review->undo_data = null;
 
-        (new ChunkReviewDao($this->getDatabase()))->updateStruct($review, [
+        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
+        $chunkReviewDao->updateStruct($review, [
             'fields' => [
                 'is_pass',
                 'penalty_points',
@@ -384,6 +413,8 @@ abstract class AbstractRevisionFeature extends BaseFeature
                 'undo_data'
             ]
         ]);
+        // Deferred to the commit inside DaoCacheTrait; the caller does not schedule it.
+        $chunkReviewDao->destroyCachesFor($review);
 
         LoggerFactory::doJsonLog("CompletionEventController deleting event: " . var_export($struct->getArrayCopy(), true));
     }
@@ -413,15 +444,20 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
     /**
      * @throws PDOException
+     * @throws ReflectionException
      */
     public function reviewPasswordChanged(ReviewPasswordChangedEvent $event): void
     {
+        // No cache eviction here: the event is dispatched inside the rotation's transaction, where an
+        // eviction is undone by any concurrent read of the pre-rotation row. Whoever rotates the
+        // password sweeps through JobCredentialCacheInvalidator once its own commit is through.
         $feedbackDao = new FeedbackDAO($this->getDatabase());
         $feedbackDao->updateFeedbackPassword($event->jobId, $event->oldPassword, $event->newPassword, $event->revisionNumber);
     }
 
     /**
      * @throws PDOException
+     * @throws ReflectionException
      * @throws RuntimeException
      */
     public function jobPasswordChanged(JobPasswordChangedEvent $event): void
@@ -429,6 +465,9 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $jobId = $event->job->id ?? throw new RuntimeException('Job id is required to update chunk review password');
         $jobPassword = $event->job->password ?? throw new RuntimeException('Job password is required to update chunk review password');
 
+        // Mirroring the new job password onto the phase rows is all this handler owns: the eviction of
+        // everything the replaced credential reaches belongs to the rotation entry point, after its
+        // commit. See reviewPasswordChanged() above.
         $dao = new ChunkReviewDao($this->getDatabase());
         $dao->updatePassword($jobId, $event->oldPassword, $jobPassword);
     }

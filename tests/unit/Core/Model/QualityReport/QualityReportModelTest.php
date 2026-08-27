@@ -40,7 +40,9 @@ class QualityReportModelTest extends AbstractTest
         $metaStruct->key = 'domain';
         $metaStruct->value = 'medical';
 
-        [$this->dbStub, , $stmtStub] = $this->createDatabaseMock();
+        // resetScore() takes lockByJobId() through a real ChunkReviewDao; EventModel::save() opens the
+        // transaction for it in production.
+        [$this->dbStub, , $stmtStub] = $this->createDatabaseMock(inTransaction: true);
         $stmtStub->method('execute')->willReturn(true);
         $stmtStub->method('fetchAll')->willReturn([$metaStruct]);
 
@@ -596,6 +598,51 @@ class QualityReportModelTest extends AbstractTest
         $this->assertSame(91.23, $structure['chunk']['reviews'][0]['score']);
         $this->assertSame('reviewer-from-test', $structure['chunk']['reviews'][0]['reviewer_name']);
     }
+
+    /**
+     * updateChunkReview() is the write boundary the reset goes through, so it is also where the
+     * cached reads of the row have to be dropped. Doing that inline would be worse than not doing
+     * it: a concurrent reader would miss the cache, read the row the open transaction has not
+     * committed yet, and cache that pre-reset value for the whole TTL.
+     *
+     * The model calls the DAO door straight, and DaoCacheTrait is what holds each eviction back
+     * until the commit — so what is asserted is that every one of them was queued and none ran on
+     * the spot. The number is not pinned: it is destroyCachesFor()'s key inventory, which is the
+     * DAO's business and changes when its cached reads do.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function updateChunkReviewDefersTheCacheBustUntilTheTransactionCommits(): void
+    {
+        $chunkReview = new ChunkReviewStruct([
+            'id'         => 444,
+            'id_job'     => 999999,
+            'id_project' => 1,
+            'password'   => 'pw',
+        ]);
+
+        $deferred = [];
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($this->dbStub->getConnection());
+        $database->method('onCommit')
+            ->willReturnCallback(function (callable $callback) use (&$deferred): void {
+                $deferred[] = $callback;
+            });
+
+        $model = new QualityReportModel(new JobStruct(['id' => 999999, 'password' => 'pw']), $database);
+
+        $method = new ReflectionMethod($model, 'updateChunkReview');
+        $method->invoke($model, $chunkReview, ['fields' => ['penalty_points']]);
+
+        self::assertNotEmpty($deferred, 'the cache busts must be deferred, not run inside the transaction');
+
+        // And what was deferred is the busts themselves, which run clean once the commit releases them.
+        foreach ($deferred as $callback) {
+            $callback();
+        }
+    }
 }
 
 class TestableQualityReportModel extends QualityReportModel
@@ -762,4 +809,6 @@ class TestableQualityReportModel extends QualityReportModel
         $property = new \ReflectionProperty(QualityReportModel::class, 'chunk_review_model');
         $property->setValue($this, $model);
     }
+
+
 }

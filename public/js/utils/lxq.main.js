@@ -166,8 +166,8 @@ const LXQ = {
   checkCanActivate: function () {
     if (isUndefined(this.canActivate)) {
       this.canActivate =
-        config.lexiqa_languages.indexOf(config.source_rfc) > -1 &&
-        config.lexiqa_languages.indexOf(config.target_rfc) > -1
+        config.lexiqa_languages.indexOf(config.source_code) > -1 &&
+        config.lexiqa_languages.indexOf(config.target_code) > -1
     }
     return this.canActivate
   },
@@ -197,8 +197,8 @@ const LXQ = {
 
     const returnUrl = window.location.href.split('#')[0] + '#' + id_segment
     const data = {
-      sourcelanguage: config.source_rfc,
-      targetlanguage: config.target_rfc,
+      sourcelanguage: config.source_code,
+      targetlanguage: config.target_code,
       sourcetext: sourcetext,
       targettext: translation,
       returnUrl: returnUrl,

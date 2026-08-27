@@ -4,6 +4,8 @@ namespace Matecat\Core\Workers\TMAnalysisV2;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\DataAccess\Database;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -904,5 +906,144 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
         $this->assertTrue($config['onlyprivate']);
         // only_private + no id_user + !get_mt → id_tms = 0
         $this->assertEquals(0, $config['id_tms']);
+    }
+    // ── ICU handler-list reduction ──────────────────────────────────────
+
+    #[Test]
+    public function buildEngineConfig_reduces_the_handler_list_for_an_icu_segment(): void
+    {
+        $this->ensureFakeEnginesExist();
+
+        $worker = new class($this->createStub(AMQHandler::class), obtainTestDatabase()) extends TMAnalysisWorker {
+            /**
+             * @return array<string, mixed>
+             * @throws Exception
+             */
+            public function exposedBuildEngineConfig(QueueElement $queueElement): array
+            {
+                return $this->buildEngineConfig($queueElement);
+            }
+        };
+
+        $element = $this->makeQueueElement([
+            'id_tms' => 900,
+            'id_mt_engine' => 901,
+            'tm_keys' => '[]',
+            'icu_source' => true,
+            'subfiltering_handlers' => new Params([
+                InjectableFiltersTags::single_curly->value,
+                InjectableFiltersTags::markup->value,
+                InjectableFiltersTags::sprintf->value,
+            ]),
+        ]);
+
+        $config = $worker->exposedBuildEngineConfig($element);
+
+        // MyMemory re-encodes the matches with the handlers it is given and has no ICU flag,
+        // so only the ICU-compliant ones may travel with an ICU segment.
+        $this->assertSame(
+            [InjectableFiltersTags::markup->value],
+            $config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value]
+        );
+    }
+
+    #[Test]
+    public function buildEngineConfig_keeps_the_full_handler_list_for_a_non_icu_segment(): void
+    {
+        $this->ensureFakeEnginesExist();
+
+        $worker = new class($this->createStub(AMQHandler::class), obtainTestDatabase()) extends TMAnalysisWorker {
+            /**
+             * @return array<string, mixed>
+             * @throws Exception
+             */
+            public function exposedBuildEngineConfig(QueueElement $queueElement): array
+            {
+                return $this->buildEngineConfig($queueElement);
+            }
+        };
+
+        $handlers = [
+            InjectableFiltersTags::single_curly->value,
+            InjectableFiltersTags::markup->value,
+        ];
+
+        $element = $this->makeQueueElement([
+            'id_tms' => 900,
+            'id_mt_engine' => 901,
+            'tm_keys' => '[]',
+            'icu_source' => false,
+            'subfiltering_handlers' => new Params($handlers),
+        ]);
+
+        $config = $worker->exposedBuildEngineConfig($element);
+
+        $this->assertSame($handlers, $config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value]);
+    }
+
+    #[Test]
+    public function buildEngineConfig_keeps_the_full_handler_list_when_the_icu_flag_is_absent(): void
+    {
+        $this->ensureFakeEnginesExist();
+
+        // Rows rebuilt by FastAnalysis::_getSegmentsForFastVolumeAnalysis carry no icu_source,
+        // so a missing flag must behave exactly like a non-ICU segment.
+        $worker = new class($this->createStub(AMQHandler::class), obtainTestDatabase()) extends TMAnalysisWorker {
+            /**
+             * @return array<string, mixed>
+             * @throws Exception
+             */
+            public function exposedBuildEngineConfig(QueueElement $queueElement): array
+            {
+                return $this->buildEngineConfig($queueElement);
+            }
+        };
+
+        $handlers = [InjectableFiltersTags::single_curly->value];
+
+        $element = $this->makeQueueElement([
+            'id_tms' => 900,
+            'id_mt_engine' => 901,
+            'tm_keys' => '[]',
+            'subfiltering_handlers' => new Params($handlers),
+        ]);
+
+        $config = $worker->exposedBuildEngineConfig($element);
+
+        $this->assertSame($handlers, $config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value]);
+    }
+
+    #[Test]
+    public function buildEngineConfig_sends_the_default_set_explicitly_for_an_icu_segment(): void
+    {
+        $this->ensureFakeEnginesExist();
+
+        $worker = new class($this->createStub(AMQHandler::class), obtainTestDatabase()) extends TMAnalysisWorker {
+            /**
+             * @return array<string, mixed>
+             * @throws Exception
+             */
+            public function exposedBuildEngineConfig(QueueElement $queueElement): array
+            {
+                return $this->buildEngineConfig($queueElement);
+            }
+        };
+
+        // An empty list means "use your defaults", four of which are not ICU-compliant, so it
+        // must leave as the explicit reduced set instead.
+        $element = $this->makeQueueElement([
+            'id_tms' => 900,
+            'id_mt_engine' => 901,
+            'tm_keys' => '[]',
+            'icu_source' => true,
+            'subfiltering_handlers' => new Params([]),
+        ]);
+
+        $config = $worker->exposedBuildEngineConfig($element);
+
+        $this->assertSame(
+            [InjectableFiltersTags::markup->value],
+            $config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value]
+        );
     }
 }

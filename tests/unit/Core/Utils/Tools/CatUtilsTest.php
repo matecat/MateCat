@@ -58,15 +58,16 @@ class CatUtilsTest extends AbstractTest
     }
 
     /**
-     * Test that an invalid project name is sanitized.
+     * Test that a project name carrying punctuation is kept rather than rewritten.
      */
     #[Test]
-    public function testSanitizeOrFallbackProjectNameWithInvalidName()
+    public function testSanitizeOrFallbackProjectNameWithPunctuation()
     {
+        // Punctuation is no longer deleted, so this name is not "invalid" any more and no fallback
+        // is reached. Only an input that normalises to nothing at all does that.
         $invalidName = "Invalid@Project#Name!";
-        $expected_name = "InvalidProjectName";
         $sanitizedName = CatUtils::sanitizeOrFallbackProjectName($invalidName);
-        $this->assertEquals($expected_name, $sanitizedName);
+        $this->assertEquals($invalidName, $sanitizedName);
     }
 
     /**
@@ -561,19 +562,22 @@ class CatUtilsTest extends AbstractTest
     }
 
     #[Test]
-    public function testStripMaliciousContentRemovesSpecialCharsL(): void
+    public function testStripMaliciousContentKeepsPunctuationL(): void
     {
+        // Punctuation used to be replaced with spaces, which cost every O'Brien its apostrophe.
+        // A name is stored as typed; the output that prints it escapes it.
         $result = CatUtils::stripMaliciousContentFromAName("John@Doe!");
-        // @ and ! are non-letters, replaced with spaces, then trimmed
-        $this->assertEquals("John Doe", $result);
+        $this->assertEquals("John@Doe!", $result);
     }
 
     #[Test]
-    public function testStripMaliciousContentTruncatesToFiftyCharsL(): void
+    public function testStripMaliciousContentCutsToTheColumnWidthL(): void
     {
-        $longName = str_repeat('A', 60);
+        // `users`.`first_name` is a varchar(100). It was read as varchar(50) for a while, which cut
+        // a sixty-character name in a column that had room for it.
+        $longName = str_repeat('A', 150);
         $result = CatUtils::stripMaliciousContentFromAName($longName);
-        $this->assertLessThanOrEqual(50, mb_strlen($result));
+        $this->assertSame(CatUtils::PERSON_NAME_MAX_LENGTH, mb_strlen($result));
     }
 
     #[Test]
@@ -595,10 +599,10 @@ class CatUtilsTest extends AbstractTest
     // -------------------------------------------------------------------------
 
     #[Test]
-    public function testSanitizeProjectNameRemovesSpecialCharsL(): void
+    public function testSanitizeProjectNameKeepsPunctuationL(): void
     {
         $result = CatUtils::sanitizeProjectName("Project@#2024!");
-        $this->assertEquals("Project2024", $result);
+        $this->assertEquals("Project@#2024!", $result);
     }
 
     #[Test]
@@ -618,8 +622,10 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testSanitizeProjectNameWithOnlySpecialCharsL(): void
     {
+        // Symbols are a name a user may choose. Only an input that normalises to nothing at all is
+        // empty, and only that reaches the generated fallback.
         $result = CatUtils::sanitizeProjectName("@#$%!");
-        $this->assertEquals("", $result);
+        $this->assertEquals("@#$%!", $result);
     }
 
     // -------------------------------------------------------------------------
@@ -725,56 +731,6 @@ class CatUtilsTest extends AbstractTest
         $job = new JobStruct(['id' => 1, 'password' => 'mypassword']);
         $result = (new CatUtils($this->dbStub))->getJobPassword($job, 0);
         $this->assertEquals('mypassword', $result);
-    }
-
-    // -------------------------------------------------------------------------
-    // getIsRevisionFromRequestUri
-    // -------------------------------------------------------------------------
-
-    #[Test]
-    public function testGetIsRevisionFromRequestUriNotSetReturnsFalseL(): void
-    {
-        $cat = new CatUtils($this->dbStub, []);
-        $this->assertFalse($cat->getIsRevisionFromRequestUri());
-    }
-
-    #[Test]
-    public function testGetIsRevisionFromRequestUriWithRevisePathReturnsTrueL(): void
-    {
-        $cat = new CatUtils($this->dbStub, ['REQUEST_URI' => '/revise/1/abc/2']);
-        $this->assertTrue($cat->getIsRevisionFromRequestUri());
-    }
-
-    #[Test]
-    public function testGetIsRevisionFromRequestUriWithTranslatePathReturnsFalseL(): void
-    {
-        $cat = new CatUtils($this->dbStub, ['REQUEST_URI' => '/translate/1/abc/2']);
-        $this->assertFalse($cat->getIsRevisionFromRequestUri());
-    }
-
-    // -------------------------------------------------------------------------
-    // getIsRevisionFromReferer
-    // -------------------------------------------------------------------------
-
-    #[Test]
-    public function testGetIsRevisionFromRefererNotSetReturnsFalseL(): void
-    {
-        $cat = new CatUtils($this->dbStub, []);
-        $this->assertFalse($cat->getIsRevisionFromReferer());
-    }
-
-    #[Test]
-    public function testGetIsRevisionFromRefererWithRevisePathReturnsTrueL(): void
-    {
-        $cat = new CatUtils($this->dbStub, ['HTTP_REFERER' => 'http://example.com/revise/1/abc/2']);
-        $this->assertTrue($cat->getIsRevisionFromReferer());
-    }
-
-    #[Test]
-    public function testGetIsRevisionFromRefererWithTranslatePathReturnsFalseL(): void
-    {
-        $cat = new CatUtils($this->dbStub, ['HTTP_REFERER' => 'http://example.com/translate/1/abc/2']);
-        $this->assertFalse($cat->getIsRevisionFromReferer());
     }
 
     // -------------------------------------------------------------------------
@@ -1164,29 +1120,6 @@ class CatUtilsTest extends AbstractTest
         ];
         $result = CatUtils::fetchStatus(20, $results, TranslationStatus::STATUS_NEW);
         $this->assertEquals(5, $result);
-    }
-
-    /**
-     * getIsRevisionFromRequestUri with URL that has no 'path' component
-     * Covers line 763 (return false when !isset($_from_url['path']))
-     */
-    #[Test]
-    public function testGetIsRevisionFromRequestUriWithUrlWithoutPathL(): void
-    {
-        // 'http://host' → parse_url returns ['scheme'=>'http','host'=>'host'] — no 'path' key
-        $cat = new CatUtils($this->dbStub, ['REQUEST_URI' => 'http://host']);
-        $this->assertFalse($cat->getIsRevisionFromRequestUri());
-    }
-
-    /**
-     * getIsRevisionFromReferer with URL that has no 'path' component
-     * Covers line 788 (return false when !isset($_from_url['path']))
-     */
-    #[Test]
-    public function testGetIsRevisionFromRefererWithUrlWithoutPathL(): void
-    {
-        $cat = new CatUtils($this->dbStub, ['HTTP_REFERER' => 'http://host']);
-        $this->assertFalse($cat->getIsRevisionFromReferer());
     }
 
     /**
@@ -1959,21 +1892,6 @@ class CatUtilsTest extends AbstractTest
         $result = $cat->countSegmentRawWords('Hello world', 'en-US');
 
         $this->assertGreaterThan(0, $result);
-    }
-
-    /**
-     * server seam: injected $server array drives getIsRevisionFromRequestUri().
-     * Already covered in the adapted tests above; this duplicate confirms the
-     * constructor seam is the only path (no global $_SERVER fallback when injected).
-     */
-    #[Test]
-    public function testGetIsRevisionFromRequestUriUsesInjectedServer(): void
-    {
-        $catRevise = new CatUtils($this->dbStub, ['REQUEST_URI' => '/revise/1/abc/2']);
-        $catTranslate = new CatUtils($this->dbStub, ['REQUEST_URI' => '/translate/1/abc/2']);
-
-        $this->assertTrue($catRevise->getIsRevisionFromRequestUri());
-        $this->assertFalse($catTranslate->getIsRevisionFromRequestUri());
     }
 
     // -------------------------------------------------------------------------

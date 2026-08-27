@@ -255,7 +255,7 @@ class SegmentSource extends React.Component {
     const plainText = textUtils.removeWhitespacePlaceholders(
       contentState.getPlainText(),
     )
-    const tokens = createIcuTokens(plainText, editorState, config.source_rfc)
+    const tokens = createIcuTokens(plainText, editorState, config.source_code)
     const newDecorator = createICUDecorator(tokens, false)
     remove(
       this.decoratorsStructure,
@@ -584,6 +584,18 @@ class SegmentSource extends React.Component {
     return proxy[sourceLanguageCode]
   }
 
+  updateOptionsToolbarVisibility = () => {
+    if (!this.editor) return
+
+    this.setState({
+      isShowingOptionsToolbar: !this.editor._latestEditorState
+        .getSelection()
+        .isCollapsed(),
+    })
+
+    this.helpAiAssistant()
+  }
+
   helpAiAssistant = () => {
     if (this.delayAiAssistant) clearTimeout(this.delayAiAssistant)
 
@@ -633,13 +645,7 @@ class SegmentSource extends React.Component {
           onDragStart: dragFragment,
           onMouseUp: () => {
             setTimeout(() => {
-              this.setState({
-                isShowingOptionsToolbar: !this.editor._latestEditorState
-                  .getSelection()
-                  .isCollapsed(),
-              })
-
-              this.helpAiAssistant()
+              this.updateOptionsToolbarVisibility()
             })
           },
           onKeyUp: (event) => {
@@ -649,13 +655,7 @@ class SegmentSource extends React.Component {
               event.key === 'ArrowUp' ||
               event.key === 'ArrowDown'
             ) {
-              this.setState({
-                isShowingOptionsToolbar: !this.editor._latestEditorState
-                  .getSelection()
-                  .isCollapsed(),
-              })
-
-              this.helpAiAssistant()
+              this.updateOptionsToolbarVisibility()
             }
           },
         }

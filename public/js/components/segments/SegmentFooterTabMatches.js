@@ -179,8 +179,8 @@ class SegmentFooterTabMatches extends React.Component {
           </span>
         </li>
         <li>{match.suggestion_info}</li>
-        {(match.target !== config.target_rfc ||
-          match.source !== config.source_rfc) && (
+        {(match.target !== config.target_code ||
+          match.source !== config.source_code) && (
           <Tooltip
             content={
               <div
@@ -308,7 +308,11 @@ class SegmentFooterTabMatches extends React.Component {
         .toString()
         .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'), '')
         .replace(/·/g, ' ')
-      return await navigator.clipboard.writeText(plainText)
+      try {
+        await navigator.clipboard.writeText(plainText)
+      } catch {
+        // The browser or OS denied clipboard permission — nothing more we can do here.
+      }
     }
   }
 

@@ -247,7 +247,7 @@ const JobMenu = ({
       id: JOB_MENU_ITEM_ID.QA_REPORT,
       label: (
         <>
-          <QR /> Quality report
+          <QR size={18}/> Quality report
         </>
       ),
       onClick: () => {

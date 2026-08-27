@@ -25,12 +25,10 @@ class TeamDaoInjectedDbGuardTest extends AbstractTest
     private IDatabase&Stub $singletonDbStub;
 
     /**
-     * Injected PDO stub. inTransaction() returns FALSE so that the pre-fix
-     * obtainTestDatabase()->getConnection()->inTransaction() path is exercised —
-     * the fix routes that call through $this->database->getConnection() instead,
-     * and beginTransaction() + commit() are called on this same stub.
+     * Injected PDO stub. It carries no expectation: the transaction boundary itself is asserted one
+     * level up, on the injected IDatabase.
      */
-    private PDO&MockObject $injectedPdoMock;
+    private PDO&Stub $injectedPdoMock;
 
     /** Singleton PDO stub — permissive, used only by nested no-arg DAOs. */
     private PDO&Stub $singletonPdoStub;
@@ -48,18 +46,12 @@ class TeamDaoInjectedDbGuardTest extends AbstractTest
         $this->stmtStub->method('fetch')->willReturn(false);
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        // Injected PDO: inTransaction() returns false on the first call so beginTransaction()
-        // IS invoked (proving the transaction path routes through the injected mock), then
-        // returns true for all subsequent calls so MembershipDao::createList proceeds and the
-        // final commit guard is skipped.
-        $this->injectedPdoMock = $this->createMock(PDO::class);
+        // Injected PDO: reports an open transaction, which is what the scope's body sees.
+        $this->injectedPdoMock = $this->createStub(PDO::class);
         $this->injectedPdoMock->method('prepare')->willReturn($this->stmtStub);
         $this->injectedPdoMock->method('lastInsertId')->willReturn('1');
-        $this->injectedPdoMock->method('inTransaction')
-            ->willReturnOnConsecutiveCalls(false, true, true, true);
-        $this->injectedPdoMock->expects($this->atLeastOnce())
-            ->method('beginTransaction')
-            ->willReturn(true);
+        $this->injectedPdoMock->method('inTransaction')->willReturn(true);
+        $this->injectedPdoMock->method('beginTransaction')->willReturn(true);
         $this->injectedPdoMock->method('commit')->willReturn(true);
 
         // Singleton PDO: permissive stub for nested no-arg DAOs (UserDao etc.).
@@ -74,6 +66,14 @@ class TeamDaoInjectedDbGuardTest extends AbstractTest
         $this->injectedDbMock->expects($this->atLeastOnce())
             ->method('getConnection')
             ->willReturn($this->injectedPdoMock);
+        // The transaction is opened and closed by the injected IDatabase's own scope rather than
+        // through the PDO handle, which is what lets Database::commit() drain the
+        // IDatabase::onCommit() queue — a raw PDO commit leaves it untouched and the next begin()
+        // discards it. Asserting it here rather than on beginTransaction() keeps the guard pointed
+        // at the boundary that matters.
+        $this->injectedDbMock->expects($this->atLeastOnce())
+            ->method('transaction')
+            ->willReturnCallback(static fn(callable $work) => $work());
         $this->injectedDbMock->method('buildInsertStatement')
             ->willReturn(['INSERT INTO teams (name) VALUES (:name)', []]);
 
@@ -111,10 +111,10 @@ class TeamDaoInjectedDbGuardTest extends AbstractTest
         $dao = new TeamDao($this->injectedDbMock);
         $dao->createUserTeam($user, $params);
 
-        // The atLeastOnce beginTransaction on injectedPdoMock is the key assertion:
-        // pre-fix code calls obtainTestDatabase()->getConnection()->beginTransaction()
-        // (hits the singleton PDO, not the injected one → expectation unmet → FAIL).
-        // Fixed code calls $this->database->getConnection()->beginTransaction()
-        // (hits injectedPdoMock → expectation met → PASS).
+        // The atLeastOnce expectations set in setUp() are the assertions. getConnection() proves
+        // the queries run on the injected handle rather than on the singleton; transaction() proves
+        // the scope is opened through IDatabase, which is what keeps the IDatabase::onCommit() queue
+        // drainable. Pre-fix code called beginTransaction() straight on the PDO handle and never
+        // committed at all, so both of the latter go unmet.
     }
 }

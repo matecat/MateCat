@@ -33,33 +33,18 @@ class ProjectCompletionRepositoryTest extends AbstractTest
     }
 
     #[Test]
-    public function test_begin_transaction_calls_injected_database_begin(): void
+    public function test_transaction_opens_its_scope_on_the_injected_database(): void
     {
         $db = $this->createMock(IDatabase::class);
-        $db->expects($this->once())->method('begin');
+        // Forwarded whole, not re-implemented: the repository owns the connection, the scope owns
+        // the transaction. Opening one here by hand is the shape this replaced.
+        $db->expects($this->once())
+            ->method('transaction')
+            ->willReturnCallback(static fn(callable $work) => $work());
 
         $repository = $this->makeRepository($db);
-        $repository->beginTransaction();
-    }
 
-    #[Test]
-    public function test_commit_calls_injected_database_commit(): void
-    {
-        $db = $this->createMock(IDatabase::class);
-        $db->expects($this->once())->method('commit');
-
-        $repository = $this->makeRepository($db);
-        $repository->commit();
-    }
-
-    #[Test]
-    public function test_rollback_calls_injected_database_rollback(): void
-    {
-        $db = $this->createMock(IDatabase::class);
-        $db->expects($this->once())->method('rollback');
-
-        $repository = $this->makeRepository($db);
-        $repository->rollback();
+        self::assertSame('done', $repository->transaction(static fn(): string => 'done'));
     }
 
     #[Test]
@@ -211,9 +196,8 @@ class ProjectCompletionRepositoryTest extends AbstractTest
         $jobDao = $this->createMock(JobDao::class);
 
         $projectDao->expects($this->once())
-            ->method('destroyFetchByIdCache')
-            ->with(44, ProjectStruct::class)
-            ->willReturn(true);
+            ->method('destroyCache')
+            ->with(44);
 
         $jobDao->expects($this->once())
             ->method('destroyCacheByProjectId')
@@ -232,16 +216,11 @@ class ProjectCompletionRepositoryTest extends AbstractTest
         $analysisDao = $this->createMock(AnalysisDao::class);
 
         $projectDao->expects($this->once())
-            ->method('destroyFetchByIdCache')
-            ->with(88, ProjectStruct::class)
-            ->willReturn(true);
+            ->method('destroyCache')
+            ->with(88, 'proj-pw');
         $jobDao->expects($this->once())
             ->method('destroyCacheByProjectId')
             ->with(88)
-            ->willReturn(true);
-        $projectDao->expects($this->once())
-            ->method('destroyProjectPasswordCache')
-            ->with(88, 'proj-pw')
             ->willReturn(true);
         $analysisDao->expects($this->once())
             ->method('destroyAnalysisProjectCache')

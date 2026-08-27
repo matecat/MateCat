@@ -10,7 +10,6 @@ namespace Plugins\Features\ReviewExtended;
 
 use Exception;
 use Model\DataAccess\IDatabase;
-use Model\DataAccess\TransactionalTrait;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Filter\FilterRevisionChangeNotificationListEvent;
 use Model\Jobs\JobStruct;
@@ -37,13 +36,6 @@ use Utils\Url\CanonicalRoutes;
 
 class ReviewedWordCountModel implements IReviewedWordCountModel
 {
-
-    use TransactionalTrait;
-
-    protected function getTransactionalDatabase(): IDatabase
-    {
-        return $this->_database;
-    }
 
     /**
      * @var TranslationEvent
@@ -141,14 +133,18 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
      */
     private function decreaseCounters(ChunkReviewStruct $chunkReview): void
     {
-        // when downgrading a revision to translation, the issues must be removed (from R1, R2 or both)
-        $this->flagIssuesToBeDeleted($chunkReview->source_page);
-        $chunkReview->reviewed_words_count -= $this->_segment->raw_word_count;
-        $chunkReview->penalty_points -= $this->getPenaltyPointsForSourcePage($chunkReview->source_page);
-
+        // A replace-all leaves this phase's review accounting alone entirely. The issues and the
+        // penalty_points cached from them have to move as one unit: dropping the points while the
+        // qa_entries rows survive — or the reverse — is exactly the drift #4690 was merged to stop.
+        // So the guard wraps the whole block rather than individual lines.
         if (!$this->_event->isAReplaceAllEvent()) {
+            // when downgrading a revision to translation, the issues must be removed (from R1, R2 or both)
+            $this->flagIssuesToBeDeleted($chunkReview->source_page);
+            $chunkReview->penalty_points -= $this->getPenaltyPointsForSourcePage($chunkReview->source_page);
+            $chunkReview->reviewed_words_count -= $this->_segment->raw_word_count;
             $this->_event->setFinalRevisionToRemove($chunkReview->source_page);
         }
+
         $this->_event->setChunkReviewForPassFailUpdate($chunkReview);
     }
 
@@ -157,6 +153,19 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
      */
     private function increaseCountersButCheckForFinalRevision(ChunkReviewStruct $chunkReview): void
     {
+        // A replace-all is not review work — nobody read the segment — so neither branch below may run
+        // for it. Both are harmful here. The first credits the words while the final revision they are
+        // meant to represent is not reliably written, which is how the counter drifts above the flagged
+        // truth. The second moves an existing final-revision flag onto the demoting event, so the later
+        // genuine review of that segment finds a flag already present and counts zero. Denying the flag
+        // explicitly keeps that decision here instead of leaving it to whichever path writes it.
+        if ($this->_event->isAReplaceAllEvent()) {
+            $this->_event->setRevisionFlagAllowed(false);
+            $this->_event->setChunkReviewForPassFailUpdate($chunkReview);
+
+            return;
+        }
+
         // There is a change status to this review, we must check if is the first time it happens;
         // in that case, we must add the reviewed word count
         if (!$this->aFinalRevisionExistsForThisChunk($chunkReview)) {
@@ -211,8 +220,10 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
                     // in that case, we must add the reviewed word count
                     // otherwise remove the previous final flag to allow the new one
                     $this->increaseCountersButCheckForFinalRevision($chunkReview);
-                } elseif ($this->aFinalRevisionExistsForThisChunk($chunkReview) && $this->_event->isLowerTransition(
-                    )) {  // check for lower transition, we want to not decrement when upgrading statuses
+                } elseif (
+                    $this->aFinalRevisionExistsForThisChunk($chunkReview)
+                    && $this->_event->isLowerTransition()
+                ) {  // check for lower transition, we want to not decrement when upgrading statuses
 
                     // This case fits any chunkReview record when an event exists on it.
                     // Whenever a revision is lower reviewed, we expect the upper revisions to be invalidated.
@@ -288,7 +299,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
      */
     public function sendNotificationEmail(): void
     {
-        if (!$this->_event->isAPropagatedEvent() && $this->_event->isLowerTransition()) {
+        if (!$this->_event->isAReplaceAllEvent() && !$this->_event->isAPropagatedEvent() && $this->_event->isLowerTransition()) {
             $chunkReviewsWithFinalRevisions = [];
             foreach ($this->_chunkReviews as $chunkReview) {
                 if (in_array($chunkReview->source_page, $this->_sourcePagesWithFinalRevisions)) {
@@ -432,18 +443,22 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
      *
      * @param int $source_page
      *
-     * @return int
+     * EntryStruct::$penalty_points is a float, so the sum must be too — an int return type here
+     * truncates (two issues of 2.75 subtract 5 instead of 5.50) and the difference is left behind
+     * on the chunk review row as drift.
+     *
+     * @return float
      */
-    private function getPenaltyPointsForSourcePage(int $source_page): int
+    private function getPenaltyPointsForSourcePage(int $source_page): float
     {
         $toReduce = $this->_event->getIssuesToDelete();
         $issues = array_filter($toReduce, function (EntryStruct $issue) use ($source_page) {
             return $issue->source_page == $source_page;
         });
 
-        return array_reduce($issues, function ($carry, EntryStruct $issue) {
+        return (float)array_reduce($issues, function ($carry, EntryStruct $issue) {
             return $carry + $issue->penalty_points;
-        }, 0);
+        }, 0.0);
     }
 
 }

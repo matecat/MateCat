@@ -84,42 +84,36 @@ class CattoolController extends BaseKleinViewController
     }
 
     /**
-     * findJobByIdPasswordAndSourcePage
+     * Finds the current chunk from the job id and the presented password, and with it the phase the
+     * request belongs to.
      *
-     * Finds the current chunk by job id, password and source page. If in revision, then
-     * pass the control to a filter, to allow plugin to interact with the
-     * authorization process.
-     *
-     * Filters may restore the password to the actual password contained in
-     * `jobs` table, while the request may have come with a different password
-     * for access control.
-     *
-     * This is done to avoid the rewrite of preexisting implementations.
+     * The phase comes from the credential, never from the path. The same job id is reachable with the
+     * job password or with the review password of any phase, and only the row the password matches
+     * says which one this is: deciding it from the URL instead let a translator ask a /translate/…
+     * link for the second reviewer's password. This mirrors {@see ChunkPasswordValidator}, which the
+     * APIs the page then calls already resolve through.
      *
      * @throws Exception
+     * @throws NotFoundException
      */
-    private function findJobByIdPasswordAndSourcePage(int $job_id, string $password, int $sourcePage, bool $isRevision): stdClass
+    private function findJobByIdAndPassword(int $job_id, string $password): stdClass
     {
-        $result = [
-            'chunk' => null,
-            'chunkReviewStruct' => null,
-            'isRevision' => $isRevision,
-        ];
+        $chunk = (new JobDao($this->getDatabase()))->getByIdAndPassword($job_id, $password);
 
-        if ($isRevision) {
-            $chunkReviewStruct = (new ChunkReviewDao($this->getDatabase()))->findByJobIdReviewPasswordAndSourcePage($job_id, $password, $sourcePage);
-
-            if (!$chunkReviewStruct) {
-                throw new NotFoundException('Review record was not found');
-            }
-
-            $result['chunk'] = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
-            $result['chunkReviewStruct'] = $chunkReviewStruct;
-        } else {
-            $result['chunk'] = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($job_id, $password);
+        if ($chunk !== null) {
+            return (object)['chunk' => $chunk, 'chunkReviewStruct' => null];
         }
 
-        return (object)$result;
+        $chunkReviewStruct = (new ChunkReviewDao($this->getDatabase()))->findByReviewPasswordAndJobId($password, $job_id);
+
+        if ($chunkReviewStruct === null) {
+            throw new NotFoundException('Review record was not found');
+        }
+
+        return (object)[
+            'chunk' => $chunkReviewStruct->getChunk(new JobDao($this->getDatabase())),
+            'chunkReviewStruct' => $chunkReviewStruct,
+        ];
     }
 
     /**
@@ -130,11 +124,10 @@ class CattoolController extends BaseKleinViewController
     {
         $chunkAndPasswords = new stdClass();
         $request = $this->validateTheRequest();
-        $isRevision = (new CatUtils($this->getDatabase()))->getIsRevisionFromRequestUri();
         $revisionNumber = null;
 
         try {
-            $chunkAndPasswords = $this->findJobByIdPasswordAndSourcePage((int)$request['jid'], $request['password'], Utils::getSourcePage(), $isRevision);
+            $chunkAndPasswords = $this->findJobByIdAndPassword((int)$request['jid'], $request['password']);
             $revisionNumber = ReviewUtils::sourcePageToRevisionNumber($chunkAndPasswords->chunkReviewStruct ? $chunkAndPasswords->chunkReviewStruct->source_page : null);
         } catch (NotFoundException) {
             $this->notFound();
@@ -145,6 +138,9 @@ class CattoolController extends BaseKleinViewController
 
         /** @var ?ChunkReviewStruct $chunkReviewStruct */
         $chunkReviewStruct = $chunkAndPasswords->chunkReviewStruct;
+
+        $isRevision = $chunkReviewStruct !== null;
+        $sourcePage = $chunkReviewStruct->source_page ?? SourcePages::SOURCE_PAGE_TRANSLATE;
 
         $chunkId = $chunkStruct->id ?? throw new RuntimeException('Chunk id is null after successful load');
         $chunkPassword = $chunkStruct->password ?? throw new RuntimeException('Chunk password is null after successful load');
@@ -190,25 +186,27 @@ class CattoolController extends BaseKleinViewController
             'isReview' => new PHPTalBoolean($isRevision),
             'isSourceRTL' => new PHPTalBoolean(Languages::getInstance()->isRTL($chunkStruct->source)),
             'isTargetRTL' => new PHPTalBoolean(Languages::getInstance()->isRTL($chunkStruct->target)),
-            'jobOwnerIsMe' => new PHPTalBoolean($jobOwnership['jobOwnerIsMe']),
+            'ownerIsMe' => new PHPTalBoolean($jobOwnership['jobOwnerIsMe']),
             'job_is_splitted' => new PHPTalBoolean($chunkStruct->isSplit(new JobDao($this->getDatabase()))),
-            'lqa_categories' => new PHPTalMap($model ? $model->getSerializedCategories(new CategoryDao($this->getDatabase())) : []),
+            'lqa_nested_categories' => new PHPTalMap($model ? $model->getSerializedCategories(new CategoryDao($this->getDatabase())) : []),
             'lqa_flat_categories' => new PHPTalMap($model ? $this->getCategoriesAsJson($model) : []),
             'maxFileSize' => AppConfig::$MAX_UPLOAD_FILE_SIZE,
             'maxTMXFileSize' => AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE,
             'mt_enabled' => new PHPTalBoolean((bool)$chunkStruct->id_mt_engine),
             'not_empty_default_tm_key' => new PHPTalBoolean(!empty(AppConfig::$DEFAULT_TM_KEY)),
-            'overall_quality_class' => $chunkReviewStruct ? ($chunkReviewStruct->is_pass ? 'excellent' : 'fail') : '',
+            'overall_quality_class' => $this->overallQualityClass($chunkReviewStruct),
             'pageTitle' => $this->buildPageTitle($revisionNumber, $chunkStruct),
             'password' => $chunkPassword,
             'project' => $chunkStruct->getProject(new ProjectDao($this->getDatabase())),
             'project_name' => Utils::friendlySlug($chunkStruct->getProject(new ProjectDao($this->getDatabase()))->name),
             'quality_report_href' => AppConfig::$BASEURL . "revise-summary/$chunkId-$chunkPassword",
             'review_extended' => new PHPTalBoolean(true),
-            'review_password' => $isRevision ? ($chunkReviewStruct->review_password ?? $chunkPassword) : (new ChunkReviewDao($this->getDatabase()))->findChunkReviewsForSourcePage(
-                $chunkStruct,
-                Utils::getSourcePage() + 1
-            )[0]->review_password,
+            // The translate page publishes the first revision's password: that is the revise link its
+            // footer offers, and the only phase a translator is entitled to reach.
+            'review_password' => $isRevision ? ($chunkReviewStruct->review_password ?? $chunkPassword) : ((new ChunkReviewDao($this->getDatabase()))->findChunkReviewsForSourcePage(
+                    $chunkStruct,
+                    SourcePages::SOURCE_PAGE_REVISION
+                )[0]->review_password ?? $chunkPassword),
             'revisionNumber' => $revisionNumber,
             'public_tm_penalty' => $public_tm_penalty->value ?? '',
             'searchable_statuses' => new PHPTalMap($this->searchableStatuses()),
@@ -221,11 +219,18 @@ class CattoolController extends BaseKleinViewController
                 )
             ),
             'segmentFilterEnabled' => new PHPTalBoolean(true),
+            // Constants the template used to spell out as literals.
+            'alternativesEnabled' => new PHPTalBoolean(true),
+            'is_cattool' => new PHPTalBoolean(true),
+            'offlineModeEnabled' => new PHPTalBoolean(true),
+            'splitSegmentEnabled' => new PHPTalBoolean(true),
             'segmentQACheckInterval' => CatUtils::isCJK($chunkStruct->target) ? 3000 * (AppConfig::$SEGMENT_QA_CHECK_INTERVAL) : 1000 * (AppConfig::$SEGMENT_QA_CHECK_INTERVAL),
             'show_tag_projection' => new PHPTalBoolean(true),
             'socket_base_url' => AppConfig::$SOCKET_BASE_URL,
             'source_code' => $chunkStruct->source,
-            'source_page' => Utils::getSourcePage(),
+            // The page has always carried the same language code under both names.
+            'source_rfc' => $chunkStruct->source,
+            'source_page' => $sourcePage,
             'status_labels' => new PHPTalMap([
                     TranslationStatus::STATUS_NEW => 'new',
                     TranslationStatus::STATUS_DRAFT => 'Draft',
@@ -237,12 +242,13 @@ class CattoolController extends BaseKleinViewController
             'tag_projection_languages' => new PHPTalMap(LexiQaAndTagProjectionLanguages::$tagProjectionAllowedLanguages),
             'targetIsCJK' => new PHPTalBoolean(CatUtils::isCJK($chunkStruct->target)),
             'target_code' => $chunkStruct->target,
+            'target_rfc' => $chunkStruct->target,
             // The team name is user supplied and lands inside an inline <script>, where
             // PHPTAL emits interpolations verbatim. PHPTalString renders it as its own
             // quoted JSON literal so it cannot close the literal or the script element.
             'team_name' => new PHPTalString($jobOwnership['team']->name ?? ''),
             'tms_enabled' => new PHPTalBoolean((bool)$chunkStruct->id_tms),
-            'translation_engines_intento_providers' => new PHPTalMap(Intento::getProviderList()),
+            'intento_providers' => new PHPTalMap(Intento::getProviderList()),
             'translation_matches_enabled' => new PHPTalBoolean(true),
             'warningPollingInterval' => 1000 * (AppConfig::$WARNING_POLLING_INTERVAL),
             'word_count_type' => (new \Model\Projects\MetadataDao($this->getDatabase()))
@@ -255,33 +261,25 @@ class CattoolController extends BaseKleinViewController
             'brPlaceholdEnabled' => new PHPTalBoolean(true),
             'lfPlaceholder' => CatUtils::lfPlaceholder,
             'crPlaceholder' => CatUtils::crPlaceholder,
-            'crlfPlaceholder' => CatUtils::crlfPlaceholder,
-            'lfPlaceholderClass' => CatUtils::lfPlaceholderClass,
-            'crPlaceholderClass' => CatUtils::crPlaceholderClass,
-            'crlfPlaceholderClass' => CatUtils::crlfPlaceholderClass,
-            'lfPlaceholderRegex' => CatUtils::lfPlaceholderRegex,
-            'crPlaceholderRegex' => CatUtils::crPlaceholderRegex,
-            'crlfPlaceholderRegex' => CatUtils::crlfPlaceholderRegex,
 
             'tabPlaceholder' => CatUtils::tabPlaceholder,
-            'tabPlaceholderClass' => CatUtils::tabPlaceholderClass,
-            'tabPlaceholderRegex' => CatUtils::tabPlaceholderRegex,
 
             'nbspPlaceholder' => CatUtils::nbspPlaceholder,
-            'nbspPlaceholderClass' => CatUtils::nbspPlaceholderClass,
-            'nbspPlaceholderRegex' => CatUtils::nbspPlaceholderRegex,
 
         ]);
 
-        if (AppConfig::$LXQ_LICENSE) {
-            $this->addParamsToView([
-                    'lxq_license' => AppConfig::$LXQ_LICENSE,
-                    'lxq_partnerid' => AppConfig::$LXQ_PARTNERID,
-                    'lexiqa_languages' => new PHPTalMap(LexiQaAndTagProjectionLanguages::$lexiQaAllowedLanguages),
-                    'lexiqaServer' => AppConfig::$LXQ_SERVER,
-                ]
-            );
-        }
+        // Set unconditionally. The template used to supply the unlicensed defaults itself
+        // (`${lexiqa_languages || string:[]}` and friends); now that the page is built from the
+        // variables the view holds, a variable left unset is a key the page never receives, and
+        // lxq.main.js reads lexiqa_languages before it consults the licence.
+        $licensed = (bool)AppConfig::$LXQ_LICENSE;
+        $this->addParamsToView([
+                'lxq_license' => $licensed ? AppConfig::$LXQ_LICENSE : '',
+                'lxq_partnerid' => $licensed ? AppConfig::$LXQ_PARTNERID : '',
+                'lexiqa_languages' => new PHPTalMap($licensed ? LexiQaAndTagProjectionLanguages::$lexiQaAllowedLanguages : []),
+                'lexiqaServer' => $licensed ? AppConfig::$LXQ_SERVER : '',
+            ]
+        );
 
         // reset the feature set and load only the features for the current project (plus the autoloaded ones)
         $this->featureSet->loadForProject($chunkStruct->getProject(new ProjectDao($this->getDatabase())));
@@ -472,6 +470,20 @@ class CattoolController extends BaseKleinViewController
         }
 
         return $out;
+    }
+
+    /**
+     * is_pass is nullable and NULL means "no verdict" — a project with no LQA model never has one
+     * computed. Rendering NULL as 'fail' told the reviewer their work had failed a check that was
+     * never run, so an absent verdict renders as no class at all, matching QualitySummary.
+     */
+    private function overallQualityClass(?ChunkReviewStruct $chunkReviewStruct): string
+    {
+        if ($chunkReviewStruct === null || $chunkReviewStruct->is_pass === null) {
+            return '';
+        }
+
+        return $chunkReviewStruct->is_pass ? 'excellent' : 'fail';
     }
 
     /**

@@ -14,6 +14,7 @@ use Model\Users\UserStruct;
 use PDOException;
 use PDOStatement;
 use ReflectionException;
+use Throwable;
 use Utils\Constants\JobStatus;
 use Utils\Constants\TranslationStatus;
 
@@ -37,6 +38,19 @@ class JobDao extends AbstractDao
     protected static string $_query_cache = "SELECT * FROM jobs WHERE  id = :id_job AND password = :password ";
 
     /**
+     * The text of a query is part of the key the cached rows are found by when they have to be
+     * evicted, and read() asks for exactly what getByIdAndPassword() asks for: the same text, the
+     * same parameters, the same fetch class. Sharing that key means the shape written last owns it,
+     * an eviction resolves it to that one alone, and the other keeps answering with whatever
+     * credential it was cached under. The limit is what keeps the two apart. It changes no result:
+     * (id, password) is unique, the primary_id_pass index of the jobs table.
+     */
+    private static function readQuery(): string
+    {
+        return self::$_query_cache . ' LIMIT 1';
+    }
+
+    /**
      * This method is not static and used to cache at Redis level the values for this Job
      *
      * Use when counters of the job value are not important, but only the metadata is needed
@@ -52,7 +66,7 @@ class JobDao extends AbstractDao
      */
     public function read(JobStruct $jobQuery): array
     {
-        $stmt = $this->_getStatementForQuery(self::$_query_cache);
+        $stmt = $this->_getStatementForQuery(self::readQuery());
 
         /** @var JobStruct[] */
         return $this->_fetchObjectMap(
@@ -66,29 +80,40 @@ class JobDao extends AbstractDao
     }
 
     /**
-     * Destroy a cached object
+     * Destroy the cached reads of one job credential.
      *
-     * @param JobStruct $jobQuery
+     * The credential is named by the caller rather than read off a JobStruct: a rotation has to evict
+     * the password it replaces, and by then the struct already carries the new one.
+     *
+     * @param int|null $id_job
+     * @param string|null $password
      *
      * @return bool
      * @throws Exception
-     *
      */
-    public function destroyCacheByIdAndPassword(JobStruct $jobQuery): bool
+    public function destroyCacheForIdAndPassword(?int $id_job, ?string $password): bool
     {
-        /*
-        * build the query
-        */
-        $stmt = $this->_getStatementForQuery(self::$_query_cache);
+        $bindParams = [
+            'id_job' => $id_job,
+            'password' => $password
+        ];
 
-        return $this->_destroyObjectCache(
-            $stmt,
+        // The row is cached under two texts, so both have to be named here: the one the credential
+        // checks read through getByIdAndPassword(), and the one read() writes for the outsource
+        // quote page.
+        $credentialShape = $this->_destroyObjectCache(
+            $this->_getStatementForQuery(self::$_query_cache),
             JobStruct::class,
-            [
-                'id_job' => $jobQuery->id,
-                'password' => $jobQuery->password
-            ]
+            $bindParams
         );
+
+        $readShape = $this->_destroyObjectCache(
+            $this->_getStatementForQuery(self::readQuery()),
+            JobStruct::class,
+            $bindParams
+        );
+
+        return $credentialShape || $readShape;
     }
 
     /**
@@ -209,9 +234,10 @@ class JobDao extends AbstractDao
 
         $jStruct->password = $new_password;
 
-        $this->destroyCacheByIdAndPassword($jStruct);
-        $this->destroyCacheByProjectId($jStruct->id_project);
-
+        // Nothing is evicted here on purpose. Every caller rotates inside a transaction, and while
+        // it is open another connection still reads the pre-rotation row and caches the replaced
+        // password as valid again, behind whatever was just deleted. Evicting is the caller's, once
+        // it has committed: JobCredentialCacheInvalidator::sweepAfterJobPasswordRotation().
         return $jStruct;
     }
 
@@ -842,6 +868,7 @@ class JobDao extends AbstractDao
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Throwable
      */
     public function createFromStruct(JobStruct $jobStruct): JobStruct
     {
@@ -863,23 +890,19 @@ class JobDao extends AbstractDao
         $columns = array_values($columns);
         $values = array_values($values);
 
-        $this->database->begin();
+        return $this->database->transaction(function () use ($conn, $columns, $values): JobStruct {
+            /** @noinspection SqlInsertValues */
+            /** @noinspection DuplicatedCode */
+            $stmt = $conn->prepare('INSERT INTO `jobs` ( ' . implode(',', $columns) . ' ) VALUES ( ' . implode(',', array_fill(0, count($values), '?')) . ' )');
 
-        /** @noinspection SqlInsertValues */
-        /** @noinspection DuplicatedCode */
-        $stmt = $conn->prepare('INSERT INTO `jobs` ( ' . implode(',', $columns) . ' ) VALUES ( ' . implode(',', array_fill(0, count($values), '?')) . ' )');
+            foreach ($values as $k => $v) {
+                $stmt->bindValue($k + 1, $v); //Columns/Parameters are 1-based
+            }
 
-        foreach ($values as $k => $v) {
-            $stmt->bindValue($k + 1, $v); //Columns/Parameters are 1-based
-        }
+            $stmt->execute();
 
-        $stmt->execute();
-
-        $job = $this->getNotDeletedById((int)$conn->lastInsertId())[0];
-
-        $conn->commit();
-
-        return $job;
+            return $this->getNotDeletedById((int)$conn->lastInsertId())[0];
+        });
     }
 
     /**
@@ -893,20 +916,13 @@ class JobDao extends AbstractDao
      */
     public function updateForMerge(JobStruct $first_job, string $newPass): JobStruct
     {
+        // The struct update cannot carry the password: it is half of the primary key, so it is what
+        // locates the row and is left out of the fields being set. Rotating it is a statement of its
+        // own, and changePassword() is the one that writes it.
         $this->updateStruct($first_job);
 
         if ($newPass) {
-            $this->updateFields(
-                [
-                    'password' => $newPass,
-                    'last_update' => date("Y-m-d H:i:s"),
-                ],
-                [
-                    'id' => $first_job->id,
-                    'password' => $first_job->password
-                ]
-            );
-            $first_job->password = $newPass;
+            $this->changePassword($first_job, $newPass);
         }
 
         return $first_job;

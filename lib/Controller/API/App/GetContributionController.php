@@ -3,44 +3,67 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
+use DomainException;
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
-use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
 use InvalidArgumentException;
+use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\Event\Filter\RewriteContributionContextsEvent;
 use Model\Files\FilesPartsDao;
-use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentStruct;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Users\UserDao;
 use ReflectionException;
 use TypeError;
 use Utils\Contribution\Get;
 use Utils\Contribution\GetContributionRequest;
+use Utils\Constants\SourcePages;
 use Utils\Engines\Lara;
+use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\Registry\AppConfig;
 use Model\Projects\ProjectDao;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\Subfiltering\IcuCompliantHandlers;
 use Utils\TmKeyManagement\Filter;
 
 class GetContributionController extends KleinController
 {
-
-    use APISourcePageGuesserTrait;
+    protected JobStruct $chunk;
 
     protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
+
+        // Resolve the job and its revision phase from the presented credential (password), not from a
+        // spoofable Referer. ChunkPasswordValidator stamps source_page onto the chunk from whichever
+        // password (translate or review) matched.
+        $chunkValidator = new ChunkPasswordValidator($this);
+        $chunkValidator->onSuccess(function () use ($chunkValidator) {
+            $this->chunk = $chunkValidator->getChunk();
+        });
+        $this->appendValidator($chunkValidator);
+    }
+
+    /**
+     * The revision phase is derived from the credential-resolved source_page stamped on the chunk
+     * (see registerValidators), never from the request Referer.
+     */
+    private function isRevision(): bool
+    {
+        return ($this->chunk->getSourcePage() ?: SourcePages::SOURCE_PAGE_TRANSLATE) !== SourcePages::SOURCE_PAGE_TRANSLATE;
     }
 
     /**
@@ -55,9 +78,8 @@ class GetContributionController extends KleinController
 
         $id_job = $request['id_job'];
         $id_segment = $request['id_segment'];
-        $password = $request['password'];
 
-        $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($id_job, $password);
+        $jobStruct = $this->chunk;
         $dataRefMap = (new SegmentOriginalDataDao($this->getDatabase()))->getSegmentDataRefMap($id_segment);
 
         $projectStruct = $jobStruct->getProject(new ProjectDao($this->getDatabase()));
@@ -65,7 +87,9 @@ class GetContributionController extends KleinController
 
         $id_client = $request['id_client'];
         $num_results = $request['num_results'];
-        $received_password = $request['received_password'];
+        // Credential-resolved job password (was the client-declared current_password param).
+        // Only feeds the async session/dedup key and a back-compat metadata lookup, never TM authz.
+        $received_password = (string)$jobStruct->password;
         $concordance_search = $request['concordance_search'];
         $switch_languages = $request['switch_languages'];
         $cross_language = $request['cross_language'];
@@ -87,12 +111,26 @@ class GetContributionController extends KleinController
         $jobId = $jobStruct->id ?? throw new TypeError('Job ID must not be null');
         $jobPassword = $jobStruct->password ?? throw new TypeError('Job password must not be null');
         $subfiltering_handlers = (new MetadataDao($this->getDatabase()))->getSubfilteringCustomHandlers($jobId, $jobPassword);
-        /** @var MateCatFilter $Filter */
-        $Filter = MateCatFilter::getInstance($this->featureSet, $jobStruct->source, $jobStruct->target, $dataRefMap, $subfiltering_handlers);
 
         $context_list_before = [];
         $context_list_after = [];
+
+        // A concordance search has no stored segment behind it, so no source can be inspected and
+        // the project handlers travel untouched. Everything else takes the decision below.
+        $wire_handlers = $this->contributionHandlers($subfiltering_handlers, false);
+
         if (!$concordance_search) {
+            // The stored contexts are read before the filter exists, because the stored source is
+            // what decides the handler set: a segment carrying valid complex ICU is converted with
+            // the ICU-compliant handlers only, and the same reduced list is what the TM is told,
+            // so the matches come back encoded the way they were sent.
+            $segmentsList = $this->fetchContributionContexts($request);
+            $icuEnabled = (new ProjectMetadataDao($this->getDatabase()))->isIcuEnabled((int)$projectStruct->id);
+            $sourceContainsIcu = $this->segmentSourceContainsIcu($icuEnabled, $jobStruct, $segmentsList);
+
+            /** @var MateCatFilter $Filter */
+            $Filter = MateCatFilter::getInstance($this->featureSet, $jobStruct->source, $jobStruct->target, $dataRefMap, $subfiltering_handlers, $sourceContainsIcu);
+
             $context_list_before = array_values(array_map(function (string $context) use ($Filter) {
                 return $Filter->fromLayer2ToLayer1($context);
             }, $request['context_list_before'] ?? []));
@@ -101,7 +139,8 @@ class GetContributionController extends KleinController
                 return $Filter->fromLayer2ToLayer1($context);
             }, $request['context_list_after'] ?? []));
 
-            $this->rewriteContributionContexts($request, $Filter);
+            $this->subfilterContributionContexts($request, $Filter, $segmentsList);
+            $wire_handlers = $this->contributionHandlers($subfiltering_handlers, $sourceContainsIcu);
 
             $mtEvaluation = (new ProjectMetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_EVALUATION->value);
             if ($mtEvaluation === null) {
@@ -150,7 +189,7 @@ class GetContributionController extends KleinController
 
         $mtQeParams = $projectMetadataDao->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value);
         $contributionRequest->mt_qe_workflow_parameters = $mtQeParams instanceof MTQEWorkflowParams ? $mtQeParams->toArray() : null;
-        $contributionRequest->subfiltering_handlers = $subfiltering_handlers !== null ? array_values($subfiltering_handlers) : null;
+        $contributionRequest->subfiltering_handlers = $wire_handlers;
 
         if ($this->isRevision()) {
             $contributionRequest->userRole = Filter::ROLE_REVISOR;
@@ -261,8 +300,6 @@ class GetContributionController extends KleinController
         );
         $text = (string)filter_var($this->request->param('text'), FILTER_UNSAFE_RAW);
         $translation = (string)filter_var($this->request->param('translation'), FILTER_UNSAFE_RAW); // in the case of Lara Think
-        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]) ?: '';
-        $received_password = filter_var($this->request->param('current_password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]) ?: '';
         $concordance_search = filter_var($this->request->param('is_concordance'), FILTER_VALIDATE_BOOLEAN);
         $reasoning = filter_var($this->request->param('reasoning'), FILTER_VALIDATE_BOOLEAN);
         $switch_languages = filter_var($this->request->param('from_target'), FILTER_VALIDATE_BOOLEAN);
@@ -297,10 +334,6 @@ class GetContributionController extends KleinController
             throw new InvalidArgumentException("Missing id job", -3);
         }
 
-        if (empty($password)) {
-            throw new InvalidArgumentException("Missing job password", -4);
-        }
-
         if (empty($id_client)) {
             throw new InvalidArgumentException("Missing id_client", -5);
         }
@@ -315,9 +348,6 @@ class GetContributionController extends KleinController
             $lara_style = Lara::validateLaraStyle($lara_style);
         }
 
-        $this->id_job = (int)$id_job;
-        $this->request_password = $received_password;
-
         return [
             'id_client' => $id_client,
             'id_job' => (int)$id_job,
@@ -325,8 +355,6 @@ class GetContributionController extends KleinController
             'num_results' => $num_results,
             'text' => $text,
             'translation' => $translation,
-            'password' => $password,
-            'received_password' => $received_password,
             'concordance_search' => $concordance_search,
             'switch_languages' => $switch_languages,
             'context_before' => $context_before,
@@ -344,8 +372,12 @@ class GetContributionController extends KleinController
     }
 
     /**
+     * Reads the stored contexts and lets the features rewrite them. Nothing is converted here:
+     * the Layer 0 source this returns is what decides the handler set the conversion runs with.
+     *
      * @param array<string, mixed> $request
-     * @param MateCatFilter $Filter
+     *
+     * @return object{id_before: ?SegmentStruct, id_segment: ?SegmentStruct, id_after: ?SegmentStruct}
      *
      * @throws AuthenticationError
      * @throws EndQueueException
@@ -355,7 +387,7 @@ class GetContributionController extends KleinController
      * @throws ValidationError
      * @throws Exception
      */
-    private function rewriteContributionContexts(array &$request, MateCatFilter $Filter): void
+    private function fetchContributionContexts(array &$request): object
     {
         //Get contexts
         $segmentsList = (new SegmentDao($this->getDatabase()))->setCacheTTL(60 * 60 * 24)->getContextAndSegmentByIDs(
@@ -368,9 +400,19 @@ class GetContributionController extends KleinController
 
         $rewriteContributionContextsEvent = new RewriteContributionContextsEvent($segmentsList, $request);
         $this->featureSet->dispatch($rewriteContributionContextsEvent);
-        $segmentsList = $rewriteContributionContextsEvent->getSegmentsList();
         $request = $rewriteContributionContextsEvent->getRequestData();
 
+        return $rewriteContributionContextsEvent->getSegmentsList();
+    }
+
+    /**
+     * @param array<string, mixed> $request
+     * @param object{id_before: ?SegmentStruct, id_segment: ?SegmentStruct, id_after: ?SegmentStruct} $segmentsList
+     *
+     * @throws Exception
+     */
+    private function subfilterContributionContexts(array &$request, MateCatFilter $Filter, object $segmentsList): void
+    {
         if ($segmentsList->id_before) {
             $request['context_before'] = $Filter->fromLayer0ToLayer1($segmentsList->id_before->segment);
         }
@@ -382,6 +424,47 @@ class GetContributionController extends KleinController
         if ($segmentsList->id_after) {
             $request['context_after'] = $Filter->fromLayer0ToLayer1($segmentsList->id_after->segment);
         }
+    }
+
+    /**
+     * ICU presence is a property of the single segment, not of the project, so the segment the
+     * editor asked matches for is the one that answers. A concordance search has no stored
+     * segment behind it and never gets here.
+     *
+     * @param object{id_before: ?SegmentStruct, id_segment: ?SegmentStruct, id_after: ?SegmentStruct} $segmentsList
+     *
+     * @throws DomainException
+     */
+    private function segmentSourceContainsIcu(bool $icuEnabled, JobStruct $chunk, object $segmentsList): bool
+    {
+        if (empty($segmentsList->id_segment)) {
+            return false;
+        }
+
+        return ICUSourceSegmentDetector::sourceContainsIcu(
+            new MessagePatternValidator((string)$chunk->source, (string)$segmentsList->id_segment->segment),
+            $icuEnabled
+        );
+    }
+
+    /**
+     * The list travels with the request because MyMemory decodes what it receives back to Layer 0
+     * with the very same handlers, and re-encodes its matches with them. Sending the project list
+     * for a segment converted with the ICU-compliant one would have the matches come back with the
+     * ICU arguments wrapped in PH tags, and the Layer 1 to Layer 2 transition has no PH restore to
+     * undo it.
+     *
+     * @param array<int|string, mixed>|null $subfilteringHandlers
+     *
+     * @return list<mixed>|null
+     */
+    private function contributionHandlers(?array $subfilteringHandlers, bool $sourceContainsIcu): ?array
+    {
+        if ($sourceContainsIcu) {
+            return IcuCompliantHandlers::reduceToIcuCompliant($subfilteringHandlers);
+        }
+
+        return $subfilteringHandlers !== null ? array_values($subfilteringHandlers) : null;
     }
 
     /**

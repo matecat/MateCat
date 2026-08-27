@@ -518,7 +518,7 @@ var spec = {
           name: 'password',
           in: 'formData',
           description:
-              'The current password of the resource (project or job) whose password you want to change.',
+              'The current password of the resource whose password you want to change. For a project, the project password. For a job, either the translate password (to change the job password) or the current password of a revision step (to change that step\'s password): the presented password alone decides which password is rotated.',
           required: true,
           type: 'string',
         },
@@ -529,14 +529,6 @@ var spec = {
               'Use this to define the new password of the resource whose password you are changing. Ignored if "undo" is not set or set to "false", mandatory if undo is set to "true".',
           required: false,
           type: 'string',
-        },
-        {
-          name: 'revision_number',
-          in: 'formData',
-          description:
-              'Fill this in if you want to change the password of a revision job. Use this field to specify the revision step whose password you are changing. If this field is filled in, the password sent in the "password" field should be the one for the corresponding revision step. Possible values: 1, 2.',
-          required: false,
-          type: 'integer',
         },
         {
           name: 'undo',
@@ -1685,14 +1677,8 @@ var spec = {
           {
             name: 'password',
             in: 'formData',
-            description: 'The password of the job',
-            required: true,
-            type: 'string',
-          },
-          {
-            name: 'revision_number',
-            in: 'formData',
-            description: 'The revision number (1 or 2)',
+            description:
+                'The current password of the revision phase the feedback belongs to. The phase is derived from this password, so a translate password is rejected.',
             required: true,
             type: 'string',
           },
@@ -6609,11 +6595,18 @@ var spec = {
             },
             totals: {
               type: 'integer',
-              description: 'Total number of projects available',
+              description:
+                  'Number of projects available. Counting stops at a ceiling, so when totals_approximated is true this is a lower bound and the real number is higher.',
+            },
+            totals_approximated: {
+              type: 'boolean',
+              description:
+                  'True when the count hit its ceiling and stopped. Display the total as "10000+" and rely on the next link, not on total_pages, to know whether further pages exist.',
             },
             total_pages: {
               type: 'integer',
-              description: 'Total number of pages of projects available',
+              description:
+                  'Number of pages covered by totals. When totals_approximated is true there are more pages than this.',
             },
           },
         },

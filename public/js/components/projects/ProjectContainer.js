@@ -175,7 +175,7 @@ export const ProjectContainer = ({
             <>
               <Button
                 type={BUTTON_TYPE.PRIMARY}
-                size={BUTTON_SIZE.SMALL}
+                size={BUTTON_SIZE.XSMALL}
                 htmlType={BUTTON_HTML_TYPE.SUBMIT}
                 form={changeNameFormId}
               >
@@ -185,7 +185,7 @@ export const ProjectContainer = ({
 
               <Button
                 type={BUTTON_TYPE.WARNING}
-                size={BUTTON_SIZE.SMALL}
+                size={BUTTON_SIZE.XSMALL}
                 htmlType={BUTTON_HTML_TYPE.RESET}
                 form={changeNameFormId}
               >
@@ -202,7 +202,7 @@ export const ProjectContainer = ({
           <Button
             className="project-container-button-edit-name"
             mode={BUTTON_MODE.GHOST}
-            size={BUTTON_SIZE.ICON_SMALL}
+            size={BUTTON_SIZE.ICON_XSMALL}
             onClick={() => setIsEditingName(true)}
           >
             <IconEdit size={16} />
@@ -559,7 +559,11 @@ export const ProjectContainer = ({
           />
           <div>
             {projectNameElements}
-            <span data-testid="project-id" title="Project id">
+            <span
+              className="project-id"
+              data-testid="project-id"
+              title="Project id"
+            >
               ID: {project.get('id')}
             </span>
           </div>

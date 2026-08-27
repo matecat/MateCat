@@ -63,9 +63,10 @@ class SegmentTranslationIssueValidator extends Base
             $this->__ensureIssueIsInScope();
         }
 
-        if ($this->request->httpMethod('post') && $this->request->param('revision_number')) {
-            $this->__ensureSegmentRevisionIsCompatibleWithIssueRevisionNumber();
-        } elseif ($this->request->httpMethod('delete')) {
+        // The segment-state check is not run here: only the endpoints that write an issue need it,
+        // and they invoke ensureSegmentRevisionMatchesCredentialPhase() themselves. Inferring it
+        // from the HTTP verb would also apply it to comment creation, which does not write a phase.
+        if ($this->request->httpMethod('delete')) {
             $this->__ensureRevisionPasswordAllowsDeleteForIssue();
         }
     }
@@ -85,11 +86,13 @@ class SegmentTranslationIssueValidator extends Base
     }
 
     /**
+     * A segment may only receive an issue for the phase it currently sits in, and that phase is the
+     * one the presented password resolved to.
      *
      * @throws Exception
      * @throws ValidationError
      */
-    protected function __ensureSegmentRevisionIsCompatibleWithIssueRevisionNumber(): void
+    public function ensureSegmentRevisionMatchesCredentialPhase(): void
     {
         $latestSegmentEvent = (new TranslationEventDao($this->controller->getDatabase()))->getLatestEventForSegment($this->chunkReview->id_job, $this->translation->id_segment);
 
@@ -105,10 +108,14 @@ class SegmentTranslationIssueValidator extends Base
             throw new Exception('Unable to find the current state of this segment. Please report this issue to support.');
         }
 
-        if ($latestSegmentEvent->source_page != ReviewUtils::revisionNumberToSourcePage($this->request->param('revision_number'))) {
+        // The phase to compare against is the one the presented password resolved to, not one the
+        // client declared: a caller holding one phase's review password must not be able to act on
+        // another phase's segments (GHSA-7q94-2fmr-3p42).
+        if ($latestSegmentEvent->source_page != $this->chunkReview->source_page) {
             throw new ValidationError(
                 "Trying access segment issue for revision number " .
-                $this->request->param('revision_number') . " but segment is not in same revision state."
+                ReviewUtils::sourcePageToRevisionNumber($this->chunkReview->source_page) .
+                " but segment is not in same revision state."
             );
         }
     }

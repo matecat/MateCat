@@ -11,15 +11,16 @@ import {
  *
  * @param {Array} segments
  * @param {string} [idJob=config.id_job]
- * @param {string} [password=config.password]
+ * @param {string} [password=config.currentPassword]
  * @param {string} [idClient=config.id_client]
- * @param {number} [revisionNumber=config.revisionNumber]
+ * @param {number} [revisionNumber=config.revisionNumber] only picks the requested status: the
+ *        server checks it against the phase the password resolves to and never sends it back.
  * @returns {Promise<object>}
  */
 export const approveSegments = async (
   segments,
   idJob = config.id_job,
-  password = config.password,
+  password = config.currentPassword,
   revisionNumber = config.revisionNumber,
 ) => {
   const dataParams = flattenObject({
@@ -29,7 +30,6 @@ export const approveSegments = async (
         ? SEGMENTS_STATUS.APPROVED
         : SEGMENTS_STATUS.APPROVED2,
     client_id: config.id_client,
-    revision_number: revisionNumber,
   })
   const formData = new FormData()
 

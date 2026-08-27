@@ -3,6 +3,7 @@
 namespace Model\LQA\QAModelTemplate;
 
 use Exception;
+use InvalidArgumentException;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
@@ -10,6 +11,7 @@ use Model\LQA\CategoryDao;
 use Model\LQA\QAModelInterface;
 use TypeError;
 use Utils\Date\DateTimeUtil;
+use Utils\Validation\UserSuppliedName;
 
 class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable, QAModelInterface
 {
@@ -37,6 +39,8 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
      * @return QAModelTemplateStruct
      * @throws Exception
      * @throws TypeError
+     * @throws InvalidArgumentException when the name is empty, holds a character the connection
+     *                                  cannot carry, or will not fit the column
      */
     public function hydrateFromJSON(string $json): QAModelTemplateStruct
     {
@@ -51,7 +55,16 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         // QAModelTemplateStruct
         $QAModelTemplateStruct = $this;
         $QAModelTemplateStruct->version = $jsonModel->version;
-        $QAModelTemplateStruct->label = $jsonModel->label;
+        // Here rather than in the controller, so create and update are covered by one call: both
+        // hydrate through this method. Unlike its siblings, `qa_model_templates` has a plain
+        // KEY (uid) and no name column at all, so this is about the value being stored as one
+        // spelling rather than about an index seeing a clash — and its `label` is a varchar(45),
+        // not the 255 the other template names get.
+        $QAModelTemplateStruct->label = UserSuppliedName::validated(
+            $jsonModel->label,
+            'label',
+            UserSuppliedName::QA_MODEL_LABEL_MAX_LENGTH
+        );
         $QAModelTemplateStruct->categories = [];
 
         // QAModelTemplatePassfailStruct

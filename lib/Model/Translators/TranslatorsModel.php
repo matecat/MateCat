@@ -14,18 +14,20 @@ use Controller\Abstracts\KleinController;
 use Exception;
 use InvalidArgumentException;
 use Model\DataAccess\IDatabase;
-use Model\DataAccess\TransactionalTrait;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
+use Model\Jobs\JobCredentialCacheInvalidator;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Outsource\ConfirmationDao;
+use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 use TypeError;
 use Utils\Email\SendToTranslatorForDeliveryChangeEmail;
 use Utils\Email\SendToTranslatorForJobSplitEmail;
@@ -34,13 +36,6 @@ use Utils\Tools\Utils;
 
 class TranslatorsModel
 {
-
-    use TransactionalTrait;
-
-    protected function getTransactionalDatabase(): IDatabase
-    {
-        return $this->database;
-    }
 
     /**
      * @var ?UserStruct
@@ -312,6 +307,8 @@ class TranslatorsModel
     /**
      * @throws Exception
      * @throws TypeError
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function changeJobPassword(?string $newPassword = null): void
     {
@@ -321,12 +318,27 @@ class TranslatorsModel
 
         $oldPassword = $this->jStruct->password ?? throw new TypeError('JobStruct::$password cannot be null');
 
-        $this->openTransaction();
-        $jobDao = new JobDao($this->database);
-        $jobDao->changePassword($this->jStruct, $newPassword);
-        $jobDao->destroyCacheByIdAndPassword($this->jStruct);
-        $this->featureSet->dispatch(new JobPasswordChangedEvent($this->jStruct, $oldPassword));
-        $this->commitTransaction();
+        $this->database->transaction(function () use ($newPassword, $oldPassword): void {
+            $jobDao = new JobDao($this->database);
+            $jobDao->changePassword($this->jStruct, $newPassword);
+            $this->featureSet->dispatch(new JobPasswordChangedEvent($this->jStruct, $oldPassword));
+
+            // Evicting after the commit is what closes the editor on the revoked link: while the
+            // transaction is open a concurrent request could still resolve the job against the old
+            // row and cache the replaced password as valid again. Registered from inside the scope
+            // the sweep is queued and runs after the commit that makes the new password real —
+            // the enclosing one when a caller wraps this method, which is what the old code could
+            // not do and left to the caller to remember. Critical, because a revoked credential
+            // still answering out of the cache is a security problem rather than a stale read.
+            $this->database->onCommit(
+                fn() => (new JobCredentialCacheInvalidator(
+                    $jobDao,
+                    new ChunkReviewDao($this->database),
+                    new ProjectDao($this->database)
+                ))->sweepAfterJobPasswordRotation($this->jStruct, $oldPassword, $newPassword),
+                critical: true
+            );
+        });
     }
 
     /**

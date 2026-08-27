@@ -1429,6 +1429,84 @@ class FastAnalysisTest extends AbstractTest
         $handler = (new ReflectionClass(FastAnalysis::class))->getProperty('queueHandler')->getValue($probe);
         $handler->getRedisClient()->sismemberReturns = $script;
     }
+
+    /**
+     * The daemon writes the projects row through the raw query builder rather than through the DAO,
+     * so nothing evicts the row's cached reads for it. Both call sites below do it by hand, and both
+     * used to name several key families one by one; they go through the DAO's single door now.
+     */
+    private function daemonWithProjectDao(IDatabase $db, ProjectDao $projectDao): FastAnalysis
+    {
+        $daemon = $this->daemonWithDb($db);
+        // getProjectDao() memoises, so seeding the property is enough to hand both call sites the
+        // same double without a partial mock over a private method.
+        $this->setProp($daemon, 'projectDao', $projectDao);
+
+        return $daemon;
+    }
+
+    #[Test]
+    public function purgeProjectCachesEvictsTheProjectThroughTheDaoDoorWithItsPassword(): void
+    {
+        $projectDao = $this->createMock(ProjectDao::class);
+        $projectDao->expects($this->once())
+            ->method('destroyCache')
+            ->with(4242, 'proj-pw');
+
+        $daemon = $this->daemonWithProjectDao($this->stubDatabase(), $projectDao);
+
+        $this->invoke($daemon, '_purgeProjectCaches', 4242, 'proj-pw');
+    }
+
+    #[Test]
+    public function insertFastAnalysisEvictsTheProjectRowAfterWritingItOutsideTheDao(): void
+    {
+        $projectDao = $this->createMock(ProjectDao::class);
+        // Only the id: the word-count write does not touch the password, and the DAO reads the
+        // current one itself.
+        $projectDao->expects($this->once())
+            ->method('destroyCache')
+            ->with(77);
+
+        $daemon = $this->daemonWithProjectDao($this->stubDatabase(), $projectDao);
+        // No segments: the insert loop and its batched flush have their own cases, and this one is
+        // about the eviction that follows the projects write.
+        $this->setProp($daemon, 'segments', []);
+        $this->setProp($daemon, 'actual_project_row', ['id_mt_engine' => 0]);
+
+        $project = new ProjectStruct();
+        $project->id = 77;
+
+        try {
+            $this->invoke(
+                $daemon,
+                '_insertFastAnalysis',
+                $project,
+                '',
+                [],
+                $this->createStub(FeatureSet::class),
+                false
+            );
+        } catch (\Throwable $e) {
+            // The engine lookup that follows the eviction needs a live engine row; reaching it means
+            // the eviction already ran, which is what this case is about.
+        }
+    }
+
+    private function stubDatabase(): IDatabase
+    {
+        $stmt = $this->createStub(PDOStatement::class);
+        $stmt->queryString = '';
+        $stmt->method('fetchAll')->willReturn([]);
+
+        $pdo = $this->createStub(PDO::class);
+        $pdo->method('prepare')->willReturn($stmt);
+
+        $db = $this->createStub(IDatabase::class);
+        $db->method('getConnection')->willReturn($pdo);
+
+        return $db;
+    }
 }
 
 /**

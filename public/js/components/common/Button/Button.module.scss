@@ -141,6 +141,13 @@ a.button-component-container {
   }
 
   // Size modifiers
+  &.xsmall {
+    height: 28px;
+    padding: 6px 12px;
+    gap: 6px;
+    font: variables.$font-style-small;
+    font-weight: 700;
+  }
   &.small {
     height: 32px;
     padding: 6px 12px;

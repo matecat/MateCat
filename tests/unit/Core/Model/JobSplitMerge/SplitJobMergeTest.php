@@ -27,6 +27,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use Utils\Logger\MatecatLogger;
 use Utils\Shop\Cart;
+use Model\Translators\JobsTranslatorsStruct;
 use Model\Users\UserStruct;
 
 /**
@@ -46,9 +47,14 @@ class SplitJobMergeTest extends AbstractTest
     private CounterModel&MockObject $counterModelMock;
     private JobsMetadataDao&MockObject $jobsMetadataDaoMock;
 
+    /** @var string[] The order in which the cart and the transaction scope were reached */
+    private array $callOrder = [];
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->callOrder = [];
 
         $this->dbHandler = $this->createMock(IDatabase::class);
         $this->features  = $this->createMock(FeatureSet::class);
@@ -63,6 +69,21 @@ class SplitJobMergeTest extends AbstractTest
         $pdo = $this->createStub(\PDO::class);
         $pdo->method('prepare')->willReturn($pdoStmt);
         $this->dbHandler->method('getConnection')->willReturn($pdo);
+
+        // An unconfigured transaction() returns null without ever calling its argument, which would
+        // leave the whole body of applySplit() and mergeALL() unrun and every assertion below testing
+        // nothing. Running it inline reproduces the single-scope behaviour; the nesting and rollback
+        // contract belongs to TransactionScopeTest, which runs against a real connection. The marker
+        // records when the scope opened, so the tests can pin what happens outside it.
+        $this->dbHandler->method('transaction')->willReturnCallback(function (callable $work) {
+            $this->callOrder[] = 'transaction';
+
+            return $work();
+        });
+
+        // Same reasoning for the queue: the merge registers its credential sweep on it from inside the
+        // scope, so an unconfigured onCommit() would swallow the sweep entirely.
+        $this->dbHandler->method('onCommit')->willReturnCallback(static fn(callable $callback) => $callback());
 
         $this->service = new TestableJobSplitMergeService($this->dbHandler, $this->features, $logger);
 
@@ -189,6 +210,75 @@ class SplitJobMergeTest extends AbstractTest
             ->with(100, 250, 300);
 
         $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
+    }
+
+    /**
+     * The usual split: the first chunk keeps the id and password it had, so the translator working
+     * on it carries on with a link that still resolves — to a smaller piece, the rest being free to
+     * hand to somebody else. Telling them would be noise, and the only way to tell them would be to
+     * rotate the password that currently works.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function splitJobLeavesTheTranslatorAloneWhenTheirLinkStillWorks(): void
+    {
+        $this->setupSplitJobStubs();
+
+        $translators = $this->createMock(TranslatorsModel::class);
+        $translators->method('getTranslator')->willReturn(new JobsTranslatorsStruct([
+            'email' => 'translator@example.org',
+            'delivery_date' => '2026-09-01 12:00:00',
+            'job_owner_timezone' => 2.0,
+        ]));
+        $translators->expects($this->never())->method('update');
+        $this->service->setTranslatorsModel($translators);
+
+        $ps = $this->makeSplitProjectStructure($this->makeTwoChunks());
+
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
+
+        $this->assertEquals('origpass', $ps->jobPass[0], 'precondition: the first chunk kept its password');
+    }
+
+    /**
+     * The case worth notifying: the first chunk does not begin where the job began, so it is given a
+     * fresh password and the link the translator holds stops resolving. The password they are sent
+     * is the one that chunk actually has — an earlier shape of this generated a third, unrelated one
+     * — and handing it to TranslatorsModel::update() is what reaches its "split" mail.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function splitJobReInvitesTheTranslatorWhenTheirLinkStopsWorking(): void
+    {
+        $this->setupSplitJobStubs();
+        $this->service->setRandomStrings(['newpass1', 'newpass2']);
+
+        $translators = $this->createMock(TranslatorsModel::class);
+        $translators->method('getTranslator')->willReturn(new JobsTranslatorsStruct([
+            'email' => 'translator@example.org',
+            'delivery_date' => '2026-09-01 12:00:00',
+            'job_owner_timezone' => 2.0,
+        ]));
+        $translators->method('setUserInvite')->willReturnSelf();
+        $translators->method('setDeliveryDate')->willReturnSelf();
+        $translators->method('setJobOwnerTimezone')->willReturnSelf();
+        $translators->method('setEmail')->willReturnSelf();
+
+        // The new password is the one the chunk was actually given, not a freshly invented one.
+        $translators->expects($this->once())->method('setNewJobPassword')->with('newpass1')->willReturnSelf();
+        $translators->expects($this->once())->method('update');
+
+        $this->service->setTranslatorsModel($translators);
+
+        // Neither chunk starts at the job's first segment, so the first one is re-passworded too.
+        $ps = $this->makeSplitProjectStructure($this->makeTwoChunks());
+        $ps->splitResult['job_first_segment'] = 999;
+
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
+
+        $this->assertEquals('newpass1', $ps->jobPass[0], 'precondition: the first chunk was re-passworded');
     }
 
     /**
@@ -391,29 +481,29 @@ class SplitJobMergeTest extends AbstractTest
         $chunks = $this->makeTwoChunks();
         $ps = $this->makeSplitProjectStructure($chunks);
 
-        $callOrder = [];
         $this->cartMock->expects($this->once())
             ->method('emptyCart')
-            ->willReturnCallback(function () use (&$callOrder) {
-                $callOrder[] = 'emptyCart';
+            ->willReturnCallback(function () {
+                $this->callOrder[] = 'emptyCart';
             });
 
         $this->service->applySplit($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
-        $this->assertTrue($this->service->wasBeginTransactionCalled());
+        $this->assertSame(['emptyCart', 'transaction'], $this->callOrder);
     }
 
     /**
      * @throws Exception
      */
     #[Test]
-    public function applySplitCommitsTransaction(): void
+    public function applySplitRunsItsWriteInsideATransactionScope(): void
     {
         $this->setupSplitJobStubs();
         $chunks = $this->makeTwoChunks();
         $ps = $this->makeSplitProjectStructure($chunks);
 
-        $this->dbHandler->expects($this->once())->method('commit');
+        // The scope owns the transaction, so opening it once is what is left to assert.
+        $this->dbHandler->expects($this->once())->method('transaction');
 
         $this->service->applySplit($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
     }
@@ -598,20 +688,26 @@ class SplitJobMergeTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
-    public function mergeALLDestroysJobAndAnalysisCaches(): void
+    public function mergeALLDestroysAnalysisCacheAndSweepsEveryMergedCredential(): void
     {
         $this->setupMergeStubs();
         $chunks = $this->makeJobChunksForMerge();
         $ps = new SplitMergeProjectData(999);
 
-        $this->jobDaoMock->expects($this->once())
-            ->method('destroyCacheByProjectId')
-            ->with(999);
-
         $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         $this->assertTrue($this->service->wasDestroyAnalysisCacheCalled());
         $this->assertEquals(999, $this->service->getDestroyAnalysisCacheProjectId());
+
+        // Both chunk passwords are swept: the first one's row was rewritten, and the second one's row
+        // was deleted, so neither answers what the cache still holds for it.
+        $sweeps = $this->service->getSweepCredentialCachesCalls();
+        $this->assertSame(['pass1', 'pass2'], array_column($sweeps, 'oldPassword'));
+
+        foreach ($sweeps as $sweep) {
+            $this->assertEquals(100, $sweep['chunk']->id);
+            $this->assertSame('pass1', $sweep['newPassword']);
+        }
     }
 
     /**
@@ -619,9 +715,9 @@ class SplitJobMergeTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
-    public function mergeALLCommitsTransaction(): void
+    public function mergeALLRunsItsWriteInsideATransactionScope(): void
     {
-        $this->dbHandler->expects($this->once())->method('commit');
+        $this->dbHandler->expects($this->once())->method('transaction');
 
         // ProjectStruct for cache invalidation
         $projectStruct = new ProjectStruct();

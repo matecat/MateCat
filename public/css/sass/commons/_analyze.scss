@@ -1,6 +1,15 @@
 @use '../tokens/colors';
 @use '../commons/variables';
 
+@keyframes inline-loader-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 // rewrite semantic CSS
 html,
 body {
@@ -194,8 +203,8 @@ body.analyze {
           }
         }
 
-        .updated-count {
-          background-color: colors.$orange50;
+        &.updated-count {
+          background-color: colors.$blue50;
         }
       }
 
