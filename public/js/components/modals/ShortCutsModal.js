@@ -45,7 +45,7 @@ const ShortCutsModal = ({onClose}) => {
       if (elem.label) {
         let group = (
           <div key={'events' + c} className="shortcut-list">
-            <h2>{elem.label}</h2>
+            <h4>{elem.label}</h4>
             <div className="shortcut-item-list">{events}</div>
           </div>
         )

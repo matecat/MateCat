@@ -15,7 +15,6 @@ import {
   getDefaultKeyBinding,
   KeyBindingUtil,
   CompositeDecorator,
-  SelectionState, // eslint-disable-line no-unused-vars
 } from 'draft-js'
 import {remove, cloneDeep, findIndex, size, isEqual} from 'lodash'
 import {debounce} from 'lodash/function'
@@ -32,8 +31,6 @@ import TagBox from './utils/DraftMatecatUtils/TagMenu/TagBox'
 import insertTag from './utils/DraftMatecatUtils/TagMenu/insertTag'
 import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissingTag'
 import LexiqaUtils from '../../utils/lxq.main'
-// eslint-disable-next-line no-unused-vars
-import transformLexiqaPoints from './utils/DraftMatecatUtils/transformLexiqaPoints'
 import updateOffsetBasedOnEditorState from './utils/DraftMatecatUtils/updateOffsetBasedOnEditorState'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
