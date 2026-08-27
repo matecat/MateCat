@@ -158,7 +158,8 @@ class ChunkReviewModel implements IChunkReviewModel
         // these are three Redis round trips, and until now they ran with the job-wide row locks held
         // on the highest-volume write path in the product.
         $chunkReview = $this->chunk_review;
-        $this->database->onCommit(static fn() => $chunkReviewDao->destroyCachesFor($chunkReview));
+        // Deferred to the commit inside DaoCacheTrait; the caller does not schedule it.
+        $chunkReviewDao->destroyCachesFor($chunkReview);
 
         FeatureSet::forProject($project, $this->database)->dispatch(new ChunkReviewUpdatedEvent(
             $this->chunk_review,
@@ -273,7 +274,8 @@ class ChunkReviewModel implements IChunkReviewModel
             ]
         );
         $chunkReview = $this->chunk_review;
-        $this->database->onCommit(static fn() => $chunkReviewDao->destroyCachesFor($chunkReview));
+        // Deferred to the commit inside DaoCacheTrait; the caller does not schedule it.
+        $chunkReviewDao->destroyCachesFor($chunkReview);
 
         // Dispatched inside the transaction on purpose, unlike the cache bust above: a plugin
         // listener may write rows that have to be atomic with this counter update, so deferring the

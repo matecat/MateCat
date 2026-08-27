@@ -15,18 +15,6 @@ use Plugins\Features\ProjectCompletion\Model\EventModel;
 
 class EventModelTest extends AbstractTest
 {
-    /**
-     * TransactionalTrait tracks whether it started the transaction in a protected *static*, so a
-     * test that leaves it set makes the next test's commitTransaction() fire without a matching
-     * openTransaction(). Reset it between tests.
-     */
-    protected function tearDown(): void
-    {
-        (new \ReflectionProperty(EventModel::class, '__transactionStarted'))->setValue(null, false);
-
-        parent::tearDown();
-    }
-
     private function makeDatabase(): IDatabase
     {
         [$dbStub] = $this->createDatabaseMock();
@@ -185,17 +173,18 @@ class EventModelTest extends AbstractTest
         $projectDao = $this->createStub(ProjectDao::class);
         $projectDao->method('findById')->willReturn(new ProjectStruct(['id' => 100]));
 
+        // The scope owns the transaction. Reaching past it is not expressible here any more —
+        // begin() and commit() are no longer on IDatabase — so the scope is what is left to assert.
         $database = $this->createMock(IDatabase::class);
-        $database->method('getConnection')->willReturn($this->createStub(\PDO::class));
-        $database->expects($this->once())->method('begin');
-        $database->expects($this->once())->method('commit');
-        $database->expects($this->never())->method('rollback');
+        $database->expects($this->once())
+            ->method('transaction')
+            ->willReturnCallback(static fn(callable $work) => $work());
 
         (new EventModel($chunk, $struct, $eventDao, $projectDao, $this->createStub(FeatureSet::class), $database))->save();
     }
 
     #[Test]
-    public function saveRollsBackWhenTheDispatchFails(): void
+    public function saveLetsAFailedDispatchUnwindTheTransactionScope(): void
     {
         $chunk = $this->makeChunk();
         $struct = $this->makeEventStruct(false);
@@ -208,11 +197,12 @@ class EventModelTest extends AbstractTest
         $projectDao = $this->createStub(ProjectDao::class);
         $projectDao->method('findById')->willReturn(null);
 
+        // The scope aborts the transaction and re-throws; the failure has to reach the caller rather
+        // than be swallowed by whatever closed the transaction.
         $database = $this->createMock(IDatabase::class);
-        $database->method('getConnection')->willReturn($this->createStub(\PDO::class));
-        $database->expects($this->once())->method('begin');
-        $database->expects($this->never())->method('commit');
-        $database->expects($this->once())->method('rollback');
+        $database->expects($this->once())
+            ->method('transaction')
+            ->willReturnCallback(static fn(callable $work) => $work());
 
         $model = new EventModel($chunk, $struct, $eventDao, $projectDao, $this->createStub(FeatureSet::class), $database);
 

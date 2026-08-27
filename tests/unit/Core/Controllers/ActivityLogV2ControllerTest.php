@@ -159,7 +159,10 @@ class ActivityLogV2ControllerTest extends AbstractTest
     }
 
     /**
-     * Stand in for the user LoginValidator would have identified in production.
+     * Stand in for the user LoginValidator would have identified in production. It sets the logged
+     * flag as well: the flag is a typed property with no default, so a validator that reads it on a
+     * controller built here fails on the uninitialized property rather than on the authorization
+     * decision under test.
      *
      * @throws ReflectionException
      */
@@ -168,6 +171,7 @@ class ActivityLogV2ControllerTest extends AbstractTest
         $user = new UserStruct();
         $user->uid = $uid;
         $this->reflector->getProperty('user')->setValue($this->controller, $user);
+        $this->reflector->getProperty('userIsLogged')->setValue($this->controller, true);
     }
 
     // ─── allOnProject ───
@@ -374,6 +378,32 @@ class ActivityLogV2ControllerTest extends AbstractTest
         $this->assertCount(1, $captured['activity']);
         $this->assertSame(self::ACTIVITY_ID, $captured['activity'][0]['id']);
         $this->assertSame($this->jobId(self::BASE), $captured['activity'][0]['id_job']);
+    }
+
+    /**
+     * The job password alone used to be enough here, so anyone holding a working link to one job could
+     * read the name, email and IP of whoever last acted on it. The record this endpoint returns is the
+     * same shape the project-wide reads restrict to the owning team, and no client in the tree calls
+     * this endpoint on a job password alone, so it now carries the same restriction: the project's
+     * owner, or a member of its team.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function lastOnJob_denies_a_non_member(): void
+    {
+        $this->setControllerUser(self::OUTSIDER_UID);
+        $this->setRequestParams([
+            'id_job'   => (string) $this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ]);
+
+        $this->responseMock->expects($this->never())->method('json');
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionCode(401);
+
+        $this->controller->lastOnJob();
     }
 
     /**

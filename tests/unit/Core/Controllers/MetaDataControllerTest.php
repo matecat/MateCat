@@ -24,6 +24,7 @@ use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
@@ -83,6 +84,12 @@ class MetaDataControllerTest extends AbstractTest
         $user->first_name = 'Ctrl';
         $user->last_name  = 'Tester';
         $this->setProp('user', $user);
+
+        // index() authorizes through ProjectAccessValidator, which reads this typed property before it
+        // reaches the authorization decision. Left unset, a controller built here errors on the
+        // uninitialized property instead. The seeded user owns the project, so it takes the owner
+        // branch; the refusal case below supplies a user who owns nothing.
+        $this->setProp('userIsLogged', true);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
@@ -237,6 +244,70 @@ class MetaDataControllerTest extends AbstractTest
         $this->assertCount(1, $captured->files);
         $this->assertSame($this->fileId(self::BASE), $captured->files[0]->id);
         $this->assertSame('real_name.docx', $captured->files[0]->data->original_filename);
+    }
+
+    // ─── the two entry points differ only in authorization ───
+
+    /**
+     * The editor's read. It carries no membership check on purpose: the caller is a translator working
+     * the job on its password, routinely outside the team that owns the project, and the settings this
+     * returns are what the editor needs to open at all. The same user is refused by index() below.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function indexForUi_serves_a_caller_who_holds_only_the_job_password(): void
+    {
+        $outsider      = new UserStruct();
+        $outsider->uid = 9052950;
+        $this->setProp('user', $outsider);
+
+        $this->setRequestParams([
+            'id_job'   => (string) $this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ]);
+
+        $captured = null;
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (stdClass $data) use (&$captured): bool {
+                $captured = $data;
+                return true;
+            }));
+
+        $this->controller->indexForUi();
+
+        $this->assertInstanceOf(stdClass::class, $captured);
+        $this->assertObjectHasProperty('project', $captured);
+        $this->assertObjectHasProperty('job', $captured);
+        $this->assertObjectHasProperty('files', $captured);
+    }
+
+    /**
+     * The public API read. The job password alone used to be enough on this route too; it now demands
+     * the project's owner or a member of its team, which is why the editor was moved onto the /api/app
+     * route rather than this one.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function index_denies_a_caller_who_holds_only_the_job_password(): void
+    {
+        $outsider      = new UserStruct();
+        $outsider->uid = 9052950;
+        $this->setProp('user', $outsider);
+
+        $this->setRequestParams([
+            'id_job'   => (string) $this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ]);
+
+        $this->responseMock->expects($this->never())->method('json');
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionCode(401);
+
+        $this->controller->index();
     }
 
     // ─── index() failure path ───

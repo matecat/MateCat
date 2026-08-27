@@ -271,8 +271,7 @@ class FastAnalysis extends AbstractDaemon
     protected function _purgeProjectCaches(int $pid, string $password): void
     {
         (new JobDao($this->db()))->destroyCacheByProjectId($pid);
-        (new ProjectDao($this->db()))->destroyFetchByIdCache($pid, ProjectStruct::class);
-        $this->getProjectDao()->destroyCacheByIdAndPassword($pid, $password);
+        $this->getProjectDao()->destroyCache($pid, $password);
         (new AnalysisDao($this->db()))->destroyCacheByProjectId($pid);
     }
 
@@ -807,6 +806,7 @@ class FastAnalysis extends AbstractDaemon
     /**
      * @throws PDOException
      * @throws LogInvalidArgumentException
+     * @throws ReflectionException
      */
     protected function _updateProject(int $pid, string $status): void
     {
@@ -1096,6 +1096,9 @@ class FastAnalysis extends AbstractDaemon
 
             return $this->db()->update('projects', $data2, $where);
         });
+
+        // the projects row was written outside the DAO, so evict its id-keyed cache by hand
+        $this->getProjectDao()->destroyCache($pid);
 
         $engine = EnginesFactory::getInstance($this->actual_project_row['id_mt_engine'], $this->db(), AbstractEngine::class);
         if ($engine->isAdaptiveMT()) {

@@ -49,6 +49,7 @@ use Plugins\Features\TranslationVersions\StoreTranslationEventParams;
 use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\JobStatus;
@@ -173,44 +174,44 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @throws RuntimeException
      * @throws TypeError
      * @throws DivisionByZeroError
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction
+     *                   on any throw and re-throws the original, whatever its type
      */
     public function translate(): void
     {
         $db = $this->getDatabase();
 
-        try {
-            $prepared    = $this->prepareTranslation();
-            $translation = $prepared['translation'];
-            $check       = $prepared['check'];
-            $err_json    = $prepared['err_json'];
+        $prepared    = $this->prepareTranslation();
+        $translation = $prepared['translation'];
+        $check       = $prepared['check'];
+        $err_json    = $prepared['err_json'];
 
-            /*
-             * begin stat counter
-             *
-             * It works well with default InnoDB Isolation level
-             *
-             * REPEATABLE-READ offering a row level lock for this id_segment
-             *
-             */
-            $db->begin();
-
+        /*
+         * begin stat counter
+         *
+         * It works well with default InnoDB Isolation level
+         *
+         * REPEATABLE-READ offering a row level lock for this id_segment
+         *
+         */
+        [$new_translation, $old_translation, $propagationTotal] = $db->transaction(function () use ($translation, $err_json, $check): array {
             $translations    = $this->buildNewTranslation($translation, $err_json, $check);
             $new_translation = $translations['new'];
             $old_translation = $translations['old'];
 
             $propagationTotal = $this->persistTranslation($new_translation, $old_translation, $translation, $err_json, $check);
 
-            $db->commit();
+            return [$new_translation, $old_translation, $propagationTotal];
+        });
 
-            $result = $this->buildResult($new_translation, $old_translation, $propagationTotal, $check);
+        // Everything below reports work that is already durable, so it stays outside the scope where
+        // the commit used to put it. The try/catch that used to wrap the whole method existed only to
+        // roll back; the scope does that itself and re-throws the original.
+        $result = $this->buildResult($new_translation, $old_translation, $propagationTotal, $check);
 
-            $this->finalizeTranslation($new_translation, $old_translation, $propagationTotal, $result);
+        $this->finalizeTranslation($new_translation, $old_translation, $propagationTotal, $result);
 
-            $this->response->json($result);
-        } catch (Exception $exception) {
-            $db->rollback();
-            throw $exception;
-        }
+        $this->response->json($result);
     }
 
     /**
@@ -996,7 +997,8 @@ class SetTranslationController extends AbstractStatefulKleinController
             try {
                 (new CatUtils($this->getDatabase()))->addSegmentTranslation($translation, (bool)$this->isRevision());
             } catch (Exception $e) {
-                $this->getDatabase()->rollback();
+                // Re-thrown, not rolled back: this runs inside the caller's transaction scope, which
+                // owns the undo. Rolling back here would end a transaction this method did not open.
                 throw new RuntimeException($e->getMessage());
             }
 

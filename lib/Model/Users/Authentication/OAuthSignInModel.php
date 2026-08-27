@@ -16,6 +16,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 use TypeError;
 use Utils\Email\WelcomeEmail;
 use Utils\Session\SessionStore;
@@ -167,15 +168,15 @@ class OAuthSignInModel
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction
+     *                   on any throw and re-throws the original, whatever its type
      */
     protected function _createNewUser(): void
     {
         $this->user->create_date = Utils::mysqlTimestamp(time());
         $this->user->uid = $this->userDao->insertStruct($this->user) ?: throw new RuntimeException('User uid must be set after OAuth insert');
 
-        $this->teamDao->getDatabaseHandler()->begin();
-        $this->teamDao->createPersonalTeam($this->user);
-        $this->teamDao->getDatabaseHandler()->commit();
+        $this->teamDao->getDatabaseHandler()->transaction(fn() => $this->teamDao->createPersonalTeam($this->user));
     }
 
     /**

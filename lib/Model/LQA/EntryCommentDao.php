@@ -5,6 +5,7 @@ namespace Model\LQA;
 use Model\DataAccess\AbstractDao;
 use PDO;
 use PDOException;
+use Throwable;
 use TypeError;
 
 class EntryCommentDao extends AbstractDao
@@ -41,6 +42,7 @@ class EntryCommentDao extends AbstractDao
      * @return EntryCommentStruct
      * @throws PDOException
      * @throws TypeError
+     * @throws Throwable
      */
     public function createComment(array $data): EntryCommentStruct
     {
@@ -53,24 +55,23 @@ class EntryCommentDao extends AbstractDao
             " VALUES " .
             " ( :uid, :id_qa_entry, :create_date, :comment, :source_page ) ";
 
-        $conn = $this->database->getConnection();
-        $this->database->begin();
+        $this->database->transaction(function () use ($struct, $sql): void {
+            $conn = $this->database->getConnection();
 
-        $stmt = $conn->prepare($sql);
-        $stmt->setFetchMode(PDO::FETCH_CLASS, EntryCommentStruct::class);
-        $result = $stmt->execute(
-            $struct->toArray(
-                ['uid', 'id_qa_entry', 'create_date', 'comment', 'source_page']
-            )
-        );
-        $lastId = (int)$conn->lastInsertId();
+            $stmt = $conn->prepare($sql);
+            $stmt->setFetchMode(PDO::FETCH_CLASS, EntryCommentStruct::class);
+            $result = $stmt->execute(
+                $struct->toArray(
+                    ['uid', 'id_qa_entry', 'create_date', 'comment', 'source_page']
+                )
+            );
+            $lastId = (int)$conn->lastInsertId();
 
-        if ($result) {
-            (new EntryDao($this->database))->updateRepliesCount($struct->id_qa_entry);
-        }
-        $struct->id = $lastId;
-
-        $conn->commit();
+            if ($result) {
+                (new EntryDao($this->database))->updateRepliesCount($struct->id_qa_entry);
+            }
+            $struct->id = $lastId;
+        });
 
         return $struct;
     }

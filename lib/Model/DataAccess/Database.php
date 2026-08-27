@@ -34,9 +34,18 @@ class Database implements IDatabase
     /**
      * Work deferred until the current transaction commits.
      *
-     * @var list<callable(): void>
+     * @var list<array{callable(): void, bool}> The callback and whether its failure is critical.
      */
     private array $afterCommitCallbacks = [];
+
+    /**
+     * Set when a scope inside the current transaction failed.
+     *
+     * A nested scope cannot roll back a transaction it does not own, so it condemns it instead and
+     * commit() enforces the verdict. Cleared when a transaction really opens and when one is rolled
+     * back, and never by a successful commit — a successful commit is unreachable while it is set.
+     */
+    private bool $rollbackOnly = false;
 
 
     const string SEQ_ID_SEGMENT = 'id_segment';
@@ -147,18 +156,24 @@ class Database implements IDatabase
     }
 
     /**
-     * @Override
-     * {@inheritdoc}
+     * Begin a transaction for InnoDB tables.
+     *
+     * @internal Deliberately not part of IDatabase: a consumer opens a transaction through
+     *           transaction(), which cannot leave a window open on a failure path or an early
+     *           return. This stays public because the test harness opens a fixture scope in
+     *           setUp() and rolls it back in tearDown(), which a callback cannot express.
      *
      * @throws PDOException
      */
     public function begin(): PDO
     {
         if (!$this->getConnection()->inTransaction()) {
-            // A fresh transaction starts with an empty deferral queue. Anything still queued belongs
-            // to a transaction that never reached commit() or rollback() — an aborted request on a
-            // persistent connection — and must not fire on someone else's commit.
+            // A fresh transaction starts with an empty deferral queue and no verdict against it.
+            // Anything still queued, or still condemned, belongs to a transaction that never reached
+            // commit() or rollback() — an aborted request on a connection that outlived it — and must
+            // not fire on, or veto, someone else's commit.
             $this->afterCommitCallbacks = [];
+            $this->rollbackOnly         = false;
             $this->getConnection()->beginTransaction();
         }
 
@@ -167,16 +182,44 @@ class Database implements IDatabase
 
 
     /**
-     * @Override
-     * {@inheritdoc}
+     * Commit the open transaction and drain the work deferred with onCommit().
+     *
+     * @internal Deliberately not part of IDatabase — see begin().
      *
      * @throws PDOException
+     * @throws TransactionAbortedException when a scope inside this transaction failed
+     * @throws Throwable
      */
     public function commit(): void
     {
-        $this->getConnection()->commit();
+        if ($this->rollbackOnly) {
+            $this->rollback();
+
+            throw new TransactionAbortedException(
+                'commit refused: a scope inside this transaction failed, so the whole transaction was rolled back'
+            );
+        }
+
+        try {
+            $this->getConnection()->commit();
+        } catch (Throwable $e) {
+            // The writes these callbacks were queued against did not land. Nothing may fire, and the
+            // queue must not survive to be drained by whoever commits next on this connection.
+            $this->afterCommitCallbacks = [];
+
+            throw $e;
+        }
 
         $this->runAfterCommitCallbacks();
+    }
+
+    /**
+     * @Override
+     * {@inheritdoc}
+     */
+    public function markRollbackOnly(): void
+    {
+        $this->rollbackOnly = true;
     }
 
     /**
@@ -185,7 +228,7 @@ class Database implements IDatabase
      *
      * @throws PDOException
      */
-    public function onCommit(callable $callback): void
+    public function onCommit(callable $callback, bool $critical = false): void
     {
         if (!$this->getConnection()->inTransaction()) {
             $callback();
@@ -193,7 +236,7 @@ class Database implements IDatabase
             return;
         }
 
-        $this->afterCommitCallbacks[] = $callback;
+        $this->afterCommitCallbacks[] = [$callback, $critical];
     }
 
     /**
@@ -203,28 +246,49 @@ class Database implements IDatabase
      * transaction instead of extending this drain. Failures are logged and swallowed: the data is
      * already committed, and a caller that has been told its write succeeded must not then receive an
      * exception because a cache invalidation or a message enqueue failed.
+     *
+     * A callback queued as critical is the exception. Its failure is still logged, the rest of the
+     * queue still runs, and only then is it re-thrown — because for that kind of work, a revoked
+     * credential still answering out of the cache, the caller is the only party left that can retry.
+     *
+     * @throws Throwable The first critical callback's failure.
      */
     private function runAfterCommitCallbacks(): void
     {
         $callbacks = $this->afterCommitCallbacks;
         $this->afterCommitCallbacks = [];
 
-        foreach ($callbacks as $callback) {
+        $criticalFailure = null;
+
+        foreach ($callbacks as [$callback, $critical]) {
             try {
                 $callback();
             } catch (Throwable $e) {
                 LoggerFactory::doJsonLog([
                     'message' => 'after-commit callback failed',
+                    'critical' => $critical,
                     'error' => $e->getMessage(),
                 ]);
+
+                // Held rather than thrown here: the rest of the queue is unrelated work that has
+                // already been paid for, and abandoning it would trade one silent failure for
+                // several. The first critical failure is the one reported; later ones are logged.
+                if ($critical && $criticalFailure === null) {
+                    $criticalFailure = $e;
+                }
             }
+        }
+
+        if ($criticalFailure !== null) {
+            throw $criticalFailure;
         }
     }
 
 
     /**
-     * @Override
-     * {@inheritdoc}
+     * Roll back the open transaction and discard the work deferred with onCommit().
+     *
+     * @internal Deliberately not part of IDatabase — see begin().
      *
      * @throws PDOException
      */
@@ -233,8 +297,9 @@ class Database implements IDatabase
         $connection = $this->getConnection();
 
         // Deferred work is discarded: it was queued on the strength of writes that are about to
-        // disappear.
+        // disappear. The verdict goes with it — it condemned this transaction, which is now gone.
         $this->afterCommitCallbacks = [];
+        $this->rollbackOnly         = false;
 
         // Check if a transaction is currently active
         if ($connection->inTransaction()) {
@@ -250,18 +315,53 @@ class Database implements IDatabase
      */
     public function transaction(callable $callback): mixed
     {
-        $this->begin();
+        // Whether this scope is the outermost one, and therefore the one that opens the transaction
+        // and issues its single commit. begin() joins an already open transaction silently, so
+        // having called it is no evidence of having opened anything: the connection has to be asked.
+        $isOutermostScope = !$this->getConnection()->inTransaction();
+
+        if ($isOutermostScope) {
+            $this->begin();
+        } elseif ($this->rollbackOnly) {
+            // Every statement this scope would run is already destined for the rollback.
+            throw new TransactionAbortedException(
+                'refusing to enter a transaction scope: an enclosing scope has already failed'
+            );
+        }
+
         try {
             $result = $callback();
-            $this->commit();
-
-            return $result;
         } catch (Throwable $e) {
-            if ($this->getConnection()->inTransaction()) {
-                $this->rollback();
+            // Condemn it first. A guest cannot roll back, and the owner may be a hand-rolled commit()
+            // that has never heard of this class.
+            $this->markRollbackOnly();
+
+            if ($isOutermostScope) {
+                try {
+                    $this->rollback();
+                } catch (Throwable $rollbackFailure) {
+                    // MySQL kills the transaction itself on deadlock (1213) and on lock wait timeout
+                    // (1205), so the rollback can fail for reasons that say nothing about the cause.
+                    // Record it and let the original exception travel.
+                    LoggerFactory::doJsonLog([
+                        'message' => 'rollback failed while aborting a transaction scope',
+                        'error'   => $rollbackFailure->getMessage(),
+                        'cause'   => $e->getMessage(),
+                    ]);
+                }
             }
+
             throw $e;
         }
+
+        if (!$isOutermostScope) {
+            // A guest opened nothing and closes nothing.
+            return $result;
+        }
+
+        $this->commit();
+
+        return $result;
     }
 
     /**
@@ -475,6 +575,8 @@ class Database implements IDatabase
      * @return list<int>
      *
      * @throws PDOException
+     * @throws SequenceAllocationInTransaction if a transaction is already open on this connection
+     * @throws Throwable
      */
     public function nextSequence(string $sequence_name, int $seqIncrement = 1): array
     {
@@ -482,19 +584,29 @@ class Database implements IDatabase
             throw new PDOException("Undefined sequence " . $sequence_name);
         }
 
-        $this->getConnection()->beginTransaction();
+        // The allocation owns its transaction and commits it before returning, because the ids it
+        // hands out have to survive whatever the caller does next. Joining a caller's transaction
+        // instead would tie them to that transaction's fate, and a rollback would put ids that were
+        // already handed out back on the counter. Refuse rather than allocate unsafely: the caller
+        // allocates before it opens the transaction that consumes the ids.
+        if ($this->getConnection()->inTransaction()) {
+            throw new SequenceAllocationInTransaction(
+                'refusing to allocate from the `' . $sequence_name . '` sequence: a transaction is already open on this ' .
+                'connection, and an allocation that rolls back with it would hand the same ids out twice'
+            );
+        }
 
-        $statement = $this->getConnection()->prepare("SELECT " . $sequence_name . " FROM sequences FOR UPDATE;");
-        $statement->execute();
-        $first_id = $statement->fetch(PDO::FETCH_OBJ);
+        return $this->transaction(function () use ($sequence_name, $seqIncrement): array {
+            $statement = $this->getConnection()->prepare("SELECT " . $sequence_name . " FROM sequences FOR UPDATE;");
+            $statement->execute();
+            $first_id = $statement->fetch(PDO::FETCH_OBJ);
 
-        $statement = $this->getConnection()->prepare("UPDATE sequences SET " . $sequence_name . " = " . $sequence_name . " + :seqIncrement where 1 limit 1;");
-        $statement->bindValue(':seqIncrement', $seqIncrement, PDO::PARAM_INT);
-        $statement->execute();
+            $statement = $this->getConnection()->prepare("UPDATE sequences SET " . $sequence_name . " = " . $sequence_name . " + :seqIncrement where 1 limit 1;");
+            $statement->bindValue(':seqIncrement', $seqIncrement, PDO::PARAM_INT);
+            $statement->execute();
 
-        $this->getConnection()->commit();
-
-        return range($first_id->{$sequence_name}, $first_id->{$sequence_name} + $seqIncrement - 1);
+            return range($first_id->{$sequence_name}, $first_id->{$sequence_name} + $seqIncrement - 1);
+        });
     }
 
 }

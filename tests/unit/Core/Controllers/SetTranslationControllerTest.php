@@ -187,10 +187,10 @@ class SetTranslationControllerTest extends AbstractTest
      *
      * Call order:
      * 1. prepareTranslation()    — Phase 1-3
-     * 2. $db->begin()            — Transaction start
+     * 2. $db->transaction(       — Transaction scope opens
      * 3. buildNewTranslation()   — Phase 4-6
      * 4. persistTranslation()    — Phase 7-15
-     * 5. $db->commit()           — Transaction commit
+     * 5. });                     — Scope closes, and with it the commit
      * 6. buildResult()           — Phase 16-18
      * 7. finalizeTranslation()   — Phase 19-20
      */
@@ -2999,10 +2999,11 @@ class SetTranslationControllerTest extends AbstractTest
     {
         $expectedCalls = [
             'prepareTranslation',
-            '$db->begin()',
+            '$db->transaction(',
             'buildNewTranslation',
             'persistTranslation',
-            '$db->commit()',
+            // The commit is where the closure returns, so the anchor is the line that closes it.
+            '});',
             'buildResult',
             'finalizeTranslation',
         ];

@@ -1,45 +1,22 @@
 <div metal:define-macro="footer_includes">
     <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
         /*<![CDATA[*/
+        // Everything this block used to assign is a view variable, so it is already in the document
+        // the page emitted in its <head>. The fallback stays for any page that renders this macro
+        // without one. See BootstrapConfig.
         if ( typeof config == 'undefined' ) {
             config = {} ;
         }
-        config.userMail  = '${userMail}';
-        config.isLoggedIn = ${isLoggedIn|string:false};
-        config.gdriveAuthURL = ${structure php:json_encode(gdriveAuthURL)} ;
-        config.googleAuthURL = ${structure php:json_encode(googleAuthURL)} ;
-        config.googleDriveEnabled = ${googleDriveEnabled};
-        config.build_number = '${build_number}';
         /*]]>*/
 
-    <tal:block tal:condition="php: !empty(githubAuthUrl)">
-        /*<![CDATA[*/
-            config.githubAuthUrl = ${structure php:json_encode(githubAuthUrl)} ;
-        /*]]>*/
-    </tal:block>
-    <tal:block tal:condition="php: !empty(linkedInAuthUrl)">
-        /*<![CDATA[*/
-            config.linkedInAuthUrl = ${structure php:json_encode(linkedInAuthUrl)} ;
-        /*]]>*/
-    </tal:block>
-    <tal:block tal:condition="php: !empty(microsoftAuthUrl)">
-        /*<![CDATA[*/
-            config.microsoftAuthUrl = ${structure php:json_encode(microsoftAuthUrl)} ;
-        /*]]>*/
-    </tal:block>
-    <tal:block tal:condition="php: !empty(facebookAuthUrl)">
-        /*<![CDATA[*/
-            config.facebookAuthUrl = ${structure php:json_encode(facebookAuthUrl)} ;
-        /*]]>*/
-    </tal:block>
     <tal:block tal:repeat="config_data config_js">
         /*<![CDATA[*/
-        config.pluggable = ${structure php: json_encode( config_data )} ;
+        config.pluggable = ${structure php: json_encode( config_data, JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE )} ;
         /*]]>*/
     </tal:block>
     <tal:block tal:condition="php: !empty(flashMessages)">
         /*<![CDATA[*/
-        config.flash_messages = ${structure php: json_encode(flashMessages)} ;
+        config.flash_messages = ${structure php: json_encode(flashMessages, JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE)} ;
         /*]]>*/
     </tal:block>
     </script>

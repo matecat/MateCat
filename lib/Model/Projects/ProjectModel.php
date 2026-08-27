@@ -268,7 +268,7 @@ class ProjectModel
             return;
         }
         $projectDao = new ProjectDao($this->database);
-        $projectDao->destroyFetchByIdCache($id, ProjectStruct::class);
+        $projectDao->destroyCache((int)$id);
     }
 
 }
