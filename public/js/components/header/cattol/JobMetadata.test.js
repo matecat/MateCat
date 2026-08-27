@@ -42,7 +42,7 @@ test('shows the button when metadata contains project info and opens the modal o
       projectInfo,
     },
     'Job instructions and references',
-    {minWidth: 600, minHeight: 400, maxWidth: 900},
+    {minWidth: 600, minHeight: 400, maxWidth: 900, maxHeight: 600},
   )
 })
 
