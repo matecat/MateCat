@@ -281,6 +281,14 @@ describe('SegmentActions.clickOnApprovedButton — mandatory issues gate', () =>
     expect(openIssuesSpy).toHaveBeenCalledWith({sid: '1-1'}, true)
   })
 
+  test('does not throw and defaults to required when job metadata has not loaded yet', () => {
+    CatToolStore.getJobMetadata.mockReturnValue(undefined)
+    expect(() =>
+      SegmentActions.clickOnApprovedButton(makeSegment(), false),
+    ).not.toThrow()
+    expect(openIssuesSpy).toHaveBeenCalledWith({sid: '1-1'}, true)
+  })
+
   test('opens issues panel when current revision is in mandatory_issues array', () => {
     CatToolStore.getJobMetadata.mockReturnValue({
       job: {mandatory_issues: ['r1', 'r2']},

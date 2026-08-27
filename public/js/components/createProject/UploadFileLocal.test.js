@@ -239,6 +239,25 @@ describe('UploadFileLocal', () => {
       expect(screen.getByText('test.docx')).toBeInTheDocument()
     })
 
+    test('upload response without a file entry does not crash', async () => {
+      fileUpload.mockImplementation((file, onProgress, onSuccess) => {
+        onProgress(100)
+        onSuccess(JSON.stringify([]))
+      })
+      renderWithContext()
+
+      const input = document.getElementById('fileInput')
+      const file = createMockFile('test.docx')
+
+      await act(async () => {
+        fireEvent.change(input, {target: {files: [file]}})
+      })
+
+      expect(
+        screen.getByText('Error during upload. Please try again.'),
+      ).toBeInTheDocument()
+    })
+
     test('conversion error shows error message', async () => {
       simulateUploadSuccess()
       convertFileRequest.mockRejectedValue({
