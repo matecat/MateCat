@@ -8,6 +8,8 @@ use Exception;
 class SignInController extends BaseKleinViewController
 {
 
+    protected bool $isIndexable = true;
+
     /**
      * Renders the appropriate view based on the user's session and login status.
      *
