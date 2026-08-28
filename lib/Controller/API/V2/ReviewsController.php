@@ -56,11 +56,10 @@ class ReviewsController extends KleinController
         $projectId = $this->project->id ?? throw new Exception('Project not found');
         (new ProjectDao($this->getDatabase()))->destroyCache((int)$projectId, $this->project->password);
 
-        // destroy the 5 minutes chunk review cache
-        $chunk = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($records[0]->id_job, $records[0]->password);
-        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
-        $chunkReviewDao->destroyCacheForFindChunkReviews($chunk);
-        $chunkReviewDao->destroyCacheByProjectId((int)$projectId);
+        // The created record names the job and the project it belongs to, which is every address a
+        // qa_chunk_reviews row is cached under, so the door reaches all of them - including the read
+        // of the phase just written, which carries its own key map that no unfiltered eviction hits.
+        (new ChunkReviewDao($this->getDatabase()))->destroyCachesFor($records[0]);
 
         $this->response->json([
                 'chunk_review' => [

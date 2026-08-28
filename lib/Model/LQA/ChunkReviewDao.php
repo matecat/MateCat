@@ -498,6 +498,11 @@ class ChunkReviewDao extends AbstractDao
     }
 
     /**
+     * Evict the unfiltered findChunkReviews() read of a chunk, the one that spans every phase.
+     *
+     * Public for {@see \Model\Jobs\JobCredentialCacheInvalidator}; see
+     * {@see destroyCacheForJobPassword()} for why that caller cannot go through the door.
+     *
      * @param JobStruct $chunkStruct
      *
      * @return bool
@@ -517,6 +522,9 @@ class ChunkReviewDao extends AbstractDao
      *
      * The entry is keyed on the job credential but its value is the review password of that phase,
      * which is what the editor is handed, so a review password rotation has to evict it as well.
+     *
+     * Public for {@see \Model\Jobs\JobCredentialCacheInvalidator}; see
+     * {@see destroyCacheForJobPassword()} for why that caller cannot go through the door.
      *
      * @param JobStruct $chunkStruct
      * @param int $source_page
@@ -606,6 +614,9 @@ class ChunkReviewDao extends AbstractDao
      * Drop what isTOrR1OrR2() cached for a password, so a rotated password stops resolving a phase
      * before its TTL expires.
      *
+     * Public for {@see \Model\Jobs\JobCredentialCacheInvalidator}; see
+     * {@see destroyCacheForJobPassword()} for why that caller cannot go through the door.
+     *
      * @param int $jid
      * @param string $password
      *
@@ -690,6 +701,9 @@ class ChunkReviewDao extends AbstractDao
      * a reviewer, and callers cache it for up to a day, so a rotated password must be evicted here or
      * it keeps opening the editor until the TTL expires.
      *
+     * Public for {@see \Model\Jobs\JobCredentialCacheInvalidator}; see
+     * {@see destroyCacheForJobPassword()} for why that caller cannot go through the door.
+     *
      * @param string $review_password
      * @param int $id_job
      *
@@ -714,6 +728,12 @@ class ChunkReviewDao extends AbstractDao
      * A rotation must be called for the password it replaces, which would otherwise keep opening the
      * editor for the whole TTL, and for the password replacing it, whose entries may hold a miss
      * cached by a lookup made before the rotation.
+     *
+     * This and the four narrow methods it groups stay public for
+     * {@see \Model\Jobs\JobCredentialCacheInvalidator}, which names the retired password directly
+     * and, for a review phase, a set of review passwords enumerated from the job. No
+     * ChunkReviewStruct carries either, so {@see destroyCachesFor()} cannot derive them from the
+     * entity, and addressing the key families by hand is the only way to reach them.
      *
      * @param int $id_job
      * @param string $password
