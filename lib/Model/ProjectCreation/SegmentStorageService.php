@@ -24,6 +24,7 @@ use Utils\Constants\XliffTranslationStatus;
 use Utils\Logger\MatecatLogger;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
+use TypeError;
 
 /**
  * Encapsulates segment storage logic that was previously embedded in
@@ -142,7 +143,7 @@ class SegmentStorageService
      * @throws EndQueueException
      * @throws ReQueueException
      * @throws \PDOException
-     * @throws \Exception
+     * @throws Exception
      * @throws \TypeError
      */
     private function prepareAndPersistSegment(
@@ -321,7 +322,8 @@ class SegmentStorageService
     /**
      * Persist a single segment metadata record.
      * Protected so test subclasses can override to capture calls.
-     * @throws \Exception
+     * @throws Exception
+     * @throws TypeError
      */
     protected function persistSegmentMetadata(SegmentMetadataStruct $metadataStruct): void
     {
@@ -400,7 +402,8 @@ class SegmentStorageService
     /**
      * Validate and persist segment metadata if the struct has valid key/value.
      *
-     * @throws \Exception
+     * @throws Exception
+     * @throws TypeError
      */
     protected function saveSegmentMetadata(int $id_segment, ?SegmentMetadataStruct $metadataStruct = null): void
     {

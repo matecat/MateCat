@@ -5,6 +5,7 @@ namespace Model\Segments;
 use Exception;
 use PDOException;
 use ReflectionException;
+use TypeError;
 
 /**
  * Service for managing segment disabled state.
@@ -45,13 +46,14 @@ class SegmentDisabledService
      * Disable translation for a segment.
      *
      * Idempotent — safe to call multiple times. If already disabled, returns immediately.
-     * Persists the row via save(), then busts all related DAO caches.
+     * Persists the row via save(), which evicts every address it is read at.
      *
      * @param int $id_segment
      *
      * @return void
      * @throws PDOException
      * @throws Exception
+     * @throws TypeError
      */
     public function disable(int $id_segment): void
     {
@@ -65,16 +67,12 @@ class SegmentDisabledService
         $metadata->meta_value = "1";
 
         $this->segmentMetadataDao->save($metadata);
-        $this->segmentMetadataDao->destroyGetCache($id_segment, $metadata->meta_key);
-        $this->segmentMetadataDao->destroyGetAllCache($id_segment);
-        $this->segmentMetadataDao->destroyGetBySegmentIdsCache($metadata->meta_key);
-        $this->segmentMetadataDao->destroyGetAllInRangeCache();
     }
 
     /**
      * Enable translation for a previously disabled segment.
      *
-     * Deletes the metadata row and busts all related DAO caches.
+     * Deletes the metadata row, which evicts every address it was read at.
      * Safe to call even if the segment is not currently disabled.
      *
      * @param int $id_segment
@@ -82,15 +80,11 @@ class SegmentDisabledService
      * @return void
      * @throws ReflectionException
      * @throws PDOException
+     * @throws TypeError
      * @throws Exception
      */
     public function enable(int $id_segment): void
     {
-        $key = 'translation_disabled';
-        $this->segmentMetadataDao->delete($id_segment, $key);
-        $this->segmentMetadataDao->destroyGetCache($id_segment, $key);
-        $this->segmentMetadataDao->destroyGetAllCache($id_segment);
-        $this->segmentMetadataDao->destroyGetBySegmentIdsCache($key);
-        $this->segmentMetadataDao->destroyGetAllInRangeCache();
+        $this->segmentMetadataDao->delete($id_segment, 'translation_disabled');
     }
 }

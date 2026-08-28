@@ -233,6 +233,7 @@ class ContextUrlController extends KleinController
      * @throws ReflectionException
      * @throws InvalidArgumentException
      * @throws Exception
+     * @throws TypeError
      */
     public function setForSegment(): void
     {
