@@ -761,17 +761,6 @@ export const JobContainer = ({
         <div className="job-container-outsource">
           {getOutsourceJobSent()}
           {getOutsourceDelivery()}
-          {job.get('translator') && (
-            <div
-              className="item"
-              onClick={removeTranslator}
-              data-testid="remove-translator-button"
-            >
-              <div className="cancel-label">
-                <IconClose />
-              </div>
-            </div>
-          )}
         </div>
         <div>{getOutsourceButton()}</div>
         <div>
