@@ -108,16 +108,16 @@ class JobDaoRealSqlTest extends AbstractTest
         self::assertSame([], $this->dao->read($job));
     }
 
-    public function testDestroyCacheByIdAndPassword(): void
+    public function testDestroyCacheClearsTheCredentialEntry(): void
     {
         $job = $this->seedJob();
         // Prime the cache (ttl>0 so the entry is actually stored), then destroy it.
         $this->dao->getByIdAndPassword($job->id, $job->password, 3600);
 
-        self::assertTrue($this->dao->destroyCacheForIdAndPassword($job->id, $job->password));
+        $this->dao->destroyCache($job);
     }
 
-    public function testDestroyCacheForIdAndPasswordEvictsTheCredentialShapeWhenReadCachedLast(): void
+    public function testDestroyCacheEvictsTheCredentialShapeWhenReadCachedLast(): void
     {
         $job = $this->seedJob();
 
@@ -133,7 +133,7 @@ class JobDaoRealSqlTest extends AbstractTest
         // Nothing has been evicted yet, so the replaced password is still answered from the cache.
         self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($job->id, $job->password, 86400));
 
-        self::assertTrue($this->dao->destroyCacheForIdAndPassword($job->id, $job->password));
+        $this->dao->destroyCache($job);
 
         self::assertNull(
             $this->dao->getByIdAndPassword($job->id, $job->password, 86400),
@@ -171,6 +171,63 @@ class JobDaoRealSqlTest extends AbstractTest
     // ---------------------------------------------------------------------------------------
     // getByIdAndPassword / OrFail / getNotDeleted* / getByIdProjectAndIdJob
     // ---------------------------------------------------------------------------------------
+
+    /**
+     * A rotation replaces jobs.password, and the entry keyed on the password it replaced still holds
+     * the row. A request presenting the retired credential hits that entry, resolves to a job and is
+     * served for the rest of the TTL - the rotation buys nothing until the entry is gone. The struct
+     * handed to the door carries only the new password, so the old one has to be named.
+     */
+    public function testDestroyCacheEvictsTheRetiredPassword(): void
+    {
+        $job = $this->seedJob();
+        $idJob = (int)$job->id;
+        $retired = (string)$job->password;
+        $rotated = $retired . 'x';
+
+        // getByIdAndPassword() resets the TTL from its own argument, so the entry exists only when the
+        // read asks for it.
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($idJob, $retired, 60));
+
+        $this->rotatePasswordInTheDatabase($job, $rotated);
+
+        $job->password = $rotated;
+        $this->dao->destroyCache($job, $retired);
+
+        self::assertNull(
+            $this->dao->getByIdAndPassword($idJob, $retired, 60),
+            'the replaced credential must stop resolving to a job'
+        );
+    }
+
+    /**
+     * The retired password is not decorative. A cache key is the query and its bind values, so the
+     * entry of a password nobody names is not reachable from the struct that replaced it: the door
+     * clears what it is given and cannot derive the rest. This pins that, so a later door that drops
+     * the parameter has to fail here rather than quietly leave the credential live.
+     */
+    public function testDestroyCacheLeavesAPasswordItWasNotGiven(): void
+    {
+        $job = $this->seedJob();
+        $idJob = (int)$job->id;
+        $retired = (string)$job->password;
+        $rotated = $retired . 'x';
+
+        // getByIdAndPassword() resets the TTL from its own argument, so the entry exists only when the
+        // read asks for it.
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($idJob, $retired, 60));
+
+        $this->rotatePasswordInTheDatabase($job, $rotated);
+
+        $job->password = $rotated;
+        $this->dao->destroyCache($job);
+
+        self::assertInstanceOf(
+            JobStruct::class,
+            $this->dao->getByIdAndPassword($idJob, $retired, 60),
+            'unnamed, the retired entry is out of the door\'s reach'
+        );
+    }
 
     public function testGetByIdAndPasswordRoundTrips(): void
     {

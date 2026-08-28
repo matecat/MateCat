@@ -50,8 +50,9 @@ readonly class JobCredentialCacheInvalidator
     {
         $idJob = $chunk->id ?? throw new TypeError('JobStruct::$id cannot be null');
 
+        $this->jobDao->destroyCache($chunk, $oldPassword);
+
         foreach ($this->credentials($oldPassword, $newPassword) as $password) {
-            $this->jobDao->destroyCacheForIdAndPassword($idJob, $password);
             $this->chunkReviewDao->destroyCachesByJobAndPassword($idJob, $password);
         }
 
