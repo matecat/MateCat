@@ -337,7 +337,7 @@ class InvalidatesUserProfileCacheTest extends AbstractTest
 
         (new TeamDao(obtainTestDatabase()))
             ->setUserStateStore($this->store)
-            ->destroyCacheAssignee($team);
+            ->destroyCacheAssigneeWithProjectsByTeam($team);
 
         $this->assertSame([77, 88], $dropped);
     }

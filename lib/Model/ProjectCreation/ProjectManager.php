@@ -368,7 +368,7 @@ class ProjectManager
 
             //clean the cache for the team member list of assigned projects
             $teamDao = $this->getTeamDao();
-            $teamDao->destroyCacheAssignee($this->projectStructure->team);
+            $teamDao->destroyCacheAssigneeWithProjectsByTeam($this->projectStructure->team);
         }
     }
 

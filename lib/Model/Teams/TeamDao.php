@@ -156,6 +156,44 @@ class TeamDao extends AbstractDao
     }
 
     /**
+     * The one way in from outside: a caller names the team it already holds, and every Redis-cached
+     * read that could still serve the row as it stood before the write is dropped.
+     *
+     * The row is cached under three addresses - its id, and, for the two reads that answer "which
+     * team did this user create", the creator with and without the personal type. Both halves are
+     * demanded: a struct built from an id alone would leave the creator-keyed entries publishing the
+     * row as it stood, which is the failure the door exists to make impossible.
+     *
+     * The assignee aggregate is not here. It is keyed on the team but caches rows of the projects
+     * table, so it goes stale when a project moves, not when this row changes: see
+     * {@see destroyCacheAssigneeWithProjectsByTeam()}, which the caller that moved the project calls.
+     *
+     * @throws ReflectionException
+     * @throws PDOException
+     * @throws TypeError
+     */
+    public function destroyCache(TeamStruct $team): void
+    {
+        $this->destroyFetchByIdCache(
+            $team->id ?? throw new TypeError('TeamStruct::$id cannot be null'),
+            TeamStruct::class
+        );
+
+        if (!isset($team->created_by)) {
+            throw new TypeError('TeamStruct::$created_by must be set');
+        }
+
+        $this->destroyCachePersonalByUid($team->created_by);
+        $this->destroyCacheUserCreatedTeams($team->created_by);
+    }
+
+    /**
+     * The per-assignee project counts of one team, which the team page reads.
+     *
+     * Public, and outside {@see destroyCache()}, because it is the projects table that is cached
+     * here: the counts change when a project is created, reassigned or moved between teams, none of
+     * which touches the teams row. The caller that moved the project is the only one that knows.
+     *
      * @param TeamStruct $team
      *
      * @return bool
@@ -163,7 +201,7 @@ class TeamDao extends AbstractDao
      * @throws PDOException
      * @throws Exception
      */
-    public function destroyCacheAssignee(TeamStruct $team): bool
+    public function destroyCacheAssigneeWithProjectsByTeam(TeamStruct $team): bool
     {
         $stmt = $this->_getStatementForQuery(self::$_query_get_assignee_with_projects);
 
@@ -234,17 +272,15 @@ class TeamDao extends AbstractDao
      * @throws ReflectionException
      * @throws PDOException
      */
-    public function destroyCachePersonalByUid(int $uid): bool
+    private function destroyCachePersonalByUid(int $uid): bool
     {
         $stmt = $this->_getStatementForQuery(self::$_query_get_personal_by_id);
-        $teamQuery = new TeamStruct();
-        $teamQuery->created_by = $uid;
 
         return $this->_destroyObjectCache(
             $stmt,
             TeamStruct::class,
             [
-                'created_by' => $teamQuery->created_by,
+                'created_by' => $uid,
                 'type' => Teams::PERSONAL
             ]
         );
@@ -271,25 +307,21 @@ class TeamDao extends AbstractDao
     }
 
     /**
-     * @param UserStruct $user
+     * @param int $uid
      *
      * @return bool
      * @throws ReflectionException
      * @throws PDOException
-     * @throws TypeError
      */
-    public function destroyCacheUserCreatedTeams(UserStruct $user): bool
+    private function destroyCacheUserCreatedTeams(int $uid): bool
     {
         $stmt = $this->_getStatementForQuery(self::$_query_get_user_teams);
-
-        $teamQuery = new TeamStruct();
-        $teamQuery->created_by = (int)$user->uid;
 
         return $this->_destroyObjectCache(
             $stmt,
             TeamStruct::class,
             [
-                'created_by' => $teamQuery->created_by,
+                'created_by' => $uid,
             ]
         );
     }
@@ -321,9 +353,7 @@ class TeamDao extends AbstractDao
             // controller fetched live, carried the new one. Evicting here rather than in the
             // controller keeps it true for every caller of this method, not just the one that was
             // noticed.
-            if ($org->id !== null) {
-                $this->destroyFetchByIdCache($org->id, TeamStruct::class);
-            }
+            $this->destroyCache($org);
         });
 
         return $org;
