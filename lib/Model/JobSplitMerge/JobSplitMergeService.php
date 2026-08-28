@@ -126,7 +126,7 @@ class JobSplitMergeService
      */
     protected function destroyAnalysisCacheByProjectId(int $projectId): void
     {
-        (new AnalysisDao($this->dbHandler))->destroyCacheByProjectId($projectId);
+        (new AnalysisDao($this->dbHandler))->destroyCacheProjectStatsVolumeAnalysis($projectId);
     }
 
     /**

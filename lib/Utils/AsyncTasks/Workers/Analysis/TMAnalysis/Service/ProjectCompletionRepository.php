@@ -155,6 +155,6 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
     {
         $this->projectDao->destroyCache($pid, $projectPassword);
         $this->jobDao->destroyCacheByProjectId($pid);
-        $this->analysisDao->destroyAnalysisProjectCache($pid);
+        $this->analysisDao->destroyCacheProjectStatsVolumeAnalysis($pid);
     }
 }

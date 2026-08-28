@@ -31,27 +31,6 @@ class AnalysisDaoTest extends AbstractTest
         parent::tearDown();
     }
 
-    #[Test]
-    public function destroyAnalysisProjectCacheReturnsBool(): void
-    {
-        $dao = new AnalysisDao(obtainTestDatabase());
-        $result = $dao->destroyAnalysisProjectCache(42);
-
-        $this->assertIsBool($result);
-    }
-
-    #[Test]
-    public function destroyAnalysisProjectCacheWithDifferentIds(): void
-    {
-        $dao = new AnalysisDao(obtainTestDatabase());
-
-        $result1 = $dao->destroyAnalysisProjectCache(1);
-        $result2 = $dao->destroyAnalysisProjectCache(500);
-
-        $this->assertIsBool($result1);
-        $this->assertIsBool($result2);
-    }
-
     // ── Instance method tests (specular) ──
 
     #[Test]
@@ -117,21 +96,21 @@ class AnalysisDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function instanceDestroyCacheByProjectIdReturnsBool(): void
+    public function instanceDestroyCacheProjectStatsVolumeAnalysisReturnsBool(): void
     {
         $dao = new AnalysisDao(obtainTestDatabase());
-        $result = $dao->destroyCacheByProjectId(42);
+        $result = $dao->destroyCacheProjectStatsVolumeAnalysis(42);
 
         $this->assertIsBool($result);
     }
 
     #[Test]
-    public function instanceDestroyCacheByProjectIdWithDifferentIds(): void
+    public function instanceDestroyCacheProjectStatsVolumeAnalysisWithDifferentIds(): void
     {
         $dao = new AnalysisDao(obtainTestDatabase());
 
-        $result1 = $dao->destroyCacheByProjectId(1);
-        $result2 = $dao->destroyCacheByProjectId(999);
+        $result1 = $dao->destroyCacheProjectStatsVolumeAnalysis(1);
+        $result2 = $dao->destroyCacheProjectStatsVolumeAnalysis(999);
 
         $this->assertIsBool($result1);
         $this->assertIsBool($result2);
