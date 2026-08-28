@@ -59,7 +59,7 @@ class ReviewsController extends KleinController
         // The created record names the job and the project it belongs to, which is every address a
         // qa_chunk_reviews row is cached under, so the door reaches all of them - including the read
         // of the phase just written, which carries its own key map that no unfiltered eviction hits.
-        (new ChunkReviewDao($this->getDatabase()))->destroyCachesFor($records[0]);
+        (new ChunkReviewDao($this->getDatabase()))->destroyCache($records[0]);
 
         $this->response->json([
                 'chunk_review' => [

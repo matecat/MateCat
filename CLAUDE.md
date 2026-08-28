@@ -123,6 +123,42 @@ nested five calls deep, so it defers and lets the owner's commit drain the queue
 statement after `transaction()` returns instead — same effect, and you get the exception if it fails, where a queued
 callback only logs it.
 
+### Cache eviction method names
+
+A cache key is `md5(query . bind params)`. The query is half the address, so an eviction is named
+after the **read whose entry it deletes**, never after the parameters alone: two reads can bind the
+same values and differ only in their SQL, and a name built from the parameters cannot tell them
+apart. Take the read's name and drop its `find`/`get` prefix. Declare the eviction next to the read.
+
+```
+findByProjectId()               ->  destroyCacheByProjectId()
+findUserTeams()                 ->  destroyCacheUserTeams()
+findChunkReviewsForSourcePage() ->  destroyCacheChunkReviewsForSourcePage()
+isTOrR1OrR2()                   ->  destroyCacheIsTOrR1OrR2()
+```
+
+Three tiers, and the name says which one you are looking at:
+
+| tier    | name                        | takes           | clears              | visibility                          |
+|---------|-----------------------------|-----------------|---------------------|-------------------------------------|
+| door    | `destroyCache`              | the struct      | every address       | public, one per DAO                 |
+| fan-out | `destroyCaches<Address>`    | key components  | one address, N reads| private unless a caller is named     |
+| leaf    | `destroyCache<ReadName>`    | bind values     | one read            | private by default                  |
+
+The door is the only tier that takes a struct, which is what keeps it apart from the leaves at a
+call site — outside code names the entity it already holds and never a key it cannot see. A fan-out
+is plural because it is not a leaf; make it public only with a docblock naming the caller and the
+value that caller holds which the struct does not (a retired password, an old email). Leaves return
+`bool` from `_destroyObjectCache()`; a door returns `void`, because a fan-out's aggregate of
+per-key booleans tells a caller nothing it can act on.
+
+Two shapes are wrong and neither should be added: a `For` before the read name, which carries no
+meaning the tier does not already give, and a leaf keeping the `find` its read was named with.
+
+Not every DAO can have a door. It is expressible only when entity identity determines the whole
+key: both `MetadataDao` classes bind a caller-supplied `key` column, so their evictions stay narrow
+and public.
+
 ### Database character set
 
 The character set of the database, its tables and the connection is infrastructure. Never set, change or work around it

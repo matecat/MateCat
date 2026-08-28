@@ -510,7 +510,7 @@ class ChangePasswordControllerTest extends AbstractTest
         $crDao = new ChunkReviewDao(obtainTestDatabase());
 
         // see the note above: the closing assertions cache a miss on these keys
-        $crDao->destroyCacheForJobPassword($jobId, 'cp_revpw');
+        $crDao->destroyCachesByJobAndPassword($jobId, 'cp_revpw');
 
         $this->assertInstanceOf(
             ChunkReviewStruct::class,

@@ -577,7 +577,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $chunk->password = 'dc_pw';
 
         $dao = new ChunkReviewDao($this->dbStub);
-        $result = $dao->destroyCacheForFindChunkReviews($chunk);
+        $result = $dao->destroyCacheChunkReviews($chunk);
         $this->assertIsBool($result);
     }
 
@@ -594,13 +594,13 @@ class ChunkReviewDaoTest extends AbstractTest
         $dao = $this->getMockBuilder(ChunkReviewDao::class)
             ->setConstructorArgs([$this->dbStub])
             ->onlyMethods([
-                'destroyCacheForJobPassword',
+                'destroyCachesByJobAndPassword',
                 'destroyCacheByProjectId',
             ])
             ->getMock();
 
         $dao->expects($this->once())
-            ->method('destroyCacheForJobPassword')
+            ->method('destroyCachesByJobAndPassword')
             ->with(42, 'chunk_pw');
 
         $dao->expects($this->once())
@@ -608,7 +608,7 @@ class ChunkReviewDaoTest extends AbstractTest
             ->with(7)
             ->willReturn(true);
 
-        $dao->destroyCachesFor($chunkReview);
+        $dao->destroyCache($chunkReview);
     }
 
 

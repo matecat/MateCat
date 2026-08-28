@@ -73,29 +73,29 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
             });
 
         $chunkReviewDao = $this->createStub(ChunkReviewDao::class);
-        $chunkReviewDao->method('destroyCacheForJobPassword')
+        $chunkReviewDao->method('destroyCachesByJobAndPassword')
             ->willReturnCallback(function (int $id, string $password): void {
                 $this->jobPasswordSweepCalls[] = [$id, $password];
             });
-        $chunkReviewDao->method('destroyCacheForFindChunkReviews')
+        $chunkReviewDao->method('destroyCacheChunkReviews')
             ->willReturnCallback(function (JobStruct $chunk): bool {
                 $this->findChunkReviewsCalls[] = [(int)$chunk->id, (string)$chunk->password];
 
                 return true;
             });
-        $chunkReviewDao->method('destroyCacheForFindChunkReviewsForSourcePage')
+        $chunkReviewDao->method('destroyCacheChunkReviewsForSourcePage')
             ->willReturnCallback(function (JobStruct $chunk, int $sourcePage): bool {
                 $this->findChunkReviewsForSourcePageCalls[] = [(int)$chunk->id, (string)$chunk->password, $sourcePage];
 
                 return true;
             });
-        $chunkReviewDao->method('destroyCacheForReviewPasswordAndJobId')
+        $chunkReviewDao->method('destroyCacheByReviewPasswordAndJobId')
             ->willReturnCallback(function (string $reviewPassword, int $id): bool {
                 $this->reviewPasswordCalls[] = [$reviewPassword, $id];
 
                 return true;
             });
-        $chunkReviewDao->method('destroyCacheForIsTOrR1OrR2')
+        $chunkReviewDao->method('destroyCacheIsTOrR1OrR2')
             ->willReturnCallback(function (int $id, string $password): bool {
                 $this->isTOrR1OrR2Calls[] = [$id, $password];
 
@@ -152,7 +152,7 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
             $this->jobRowCalls,
             'both the replaced and the replacing job credential must be evicted, and only once each'
         );
-        // destroyCacheForJobPassword() is what knows the shapes a job credential keys, the per phase
+        // destroyCachesByJobAndPassword() is what knows the shapes a job credential keys, the per phase
         // read among them, so the sweep names the credential and nothing else.
         self::assertSame($this->jobRowCalls, $this->jobPasswordSweepCalls);
         self::assertSame([], $this->findChunkReviewsForSourcePageCalls);

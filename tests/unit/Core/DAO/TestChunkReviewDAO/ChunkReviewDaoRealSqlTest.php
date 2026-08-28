@@ -209,7 +209,7 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
     {
         $this->dao->findChunkReviews($this->chunk($this->idJob, $this->jobPassword), 60);
         $this->assertIsBool(
-            $this->dao->destroyCacheForFindChunkReviews($this->chunk($this->idJob, $this->jobPassword))
+            $this->dao->destroyCacheChunkReviews($this->chunk($this->idJob, $this->jobPassword))
         );
     }
 
@@ -1006,7 +1006,7 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
         $this->assertInstanceOf(ShapelessConcreteStruct::class, $stale);
         $this->assertSame(2, (int)$stale->t, 'the rotation alone leaves the old password cached');
 
-        $this->assertTrue($this->dao->destroyCacheForIsTOrR1OrR2($this->idJob, $this->jobPassword));
+        $this->assertTrue($this->dao->destroyCacheIsTOrR1OrR2($this->idJob, $this->jobPassword));
 
         $fresh = $this->dao->isTOrR1OrR2($this->idJob, $this->jobPassword, 3600);
         $this->assertInstanceOf(ShapelessConcreteStruct::class, $fresh);
@@ -1029,7 +1029,7 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
             'the rotation alone leaves the old review password cached'
         );
 
-        $this->assertTrue($this->dao->destroyCacheForReviewPasswordAndJobId($this->reviewPassword, $this->idJob));
+        $this->assertTrue($this->dao->destroyCacheByReviewPasswordAndJobId($this->reviewPassword, $this->idJob));
 
         $this->assertNull($this->dao->findByReviewPasswordAndJobId($this->reviewPassword, $this->idJob, 3600));
     }
@@ -1049,7 +1049,7 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
 
         // the struct carries the password that was replaced: that is the entry to evict
         $this->assertTrue(
-            $this->dao->destroyCacheForFindChunkReviews($this->chunk($this->idJob, $this->jobPassword))
+            $this->dao->destroyCacheChunkReviews($this->chunk($this->idJob, $this->jobPassword))
         );
 
         $this->assertSame([], $this->dao->findChunkReviews($this->chunk($this->idJob, $this->jobPassword), 3600));
@@ -1078,8 +1078,8 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
         $this->assertSame(2, $this->dao->updatePassword($this->idJob, $this->jobPassword, 'rsq_rotated_pwd'));
         $this->rotateBothReviewPasswords('rsq_rev_rotated');
 
-        $this->dao->destroyCacheForJobPassword($this->idJob, $this->jobPassword);
-        $this->dao->destroyCacheForJobPassword($this->idJob, $this->reviewPassword);
+        $this->dao->destroyCachesByJobAndPassword($this->idJob, $this->jobPassword);
+        $this->dao->destroyCachesByJobAndPassword($this->idJob, $this->reviewPassword);
 
         $this->assertSame([], $this->dao->findChunkReviews($chunk, 3600));
         $this->assertSame(
@@ -1112,7 +1112,7 @@ class ChunkReviewDaoRealSqlTest extends AbstractTest
         );
 
         $this->assertTrue(
-            $this->dao->destroyCacheForFindChunkReviewsForSourcePage($chunk, SourcePages::SOURCE_PAGE_REVISION)
+            $this->dao->destroyCacheChunkReviewsForSourcePage($chunk, SourcePages::SOURCE_PAGE_REVISION)
         );
 
         $this->assertSame(
