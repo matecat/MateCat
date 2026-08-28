@@ -33,7 +33,6 @@ class TeamDao extends AbstractDao
     protected static array $primary_keys = ['id'];
 
     protected static string $_query_get_personal_by_id = " SELECT * FROM teams WHERE created_by = :created_by AND `type` = :type ";
-    protected static string $_query_get_user_teams = " SELECT * FROM teams WHERE created_by = :created_by ";
     protected static string $_update_team_by_id = " UPDATE teams SET name = :name WHERE id = :id ";
 
     protected static string $_query_get_assignee_with_projects = "
@@ -159,10 +158,9 @@ class TeamDao extends AbstractDao
      * The one way in from outside: a caller names the team it already holds, and every Redis-cached
      * read that could still serve the row as it stood before the write is dropped.
      *
-     * The row is cached under three addresses - its id, and, for the two reads that answer "which
-     * team did this user create", the creator with and without the personal type. Both halves are
-     * demanded: a struct built from an id alone would leave the creator-keyed entries publishing the
-     * row as it stood, which is the failure the door exists to make impossible.
+     * The row is cached under two addresses - its id, and the creator of the personal team. Both
+     * halves are demanded: a struct built from an id alone would leave the creator-keyed entry
+     * publishing the row as it stood, which is the failure the door exists to make impossible.
      *
      * The assignee aggregate is not here. It is keyed on the team but caches rows of the projects
      * table, so it goes stale when a project moves, not when this row changes: see
@@ -184,7 +182,6 @@ class TeamDao extends AbstractDao
         }
 
         $this->destroyCachePersonalByUid($team->created_by);
-        $this->destroyCacheUserCreatedTeams($team->created_by);
     }
 
     /**
@@ -282,46 +279,6 @@ class TeamDao extends AbstractDao
             [
                 'created_by' => $uid,
                 'type' => Teams::PERSONAL
-            ]
-        );
-    }
-
-    /**
-     * @param UserStruct $user
-     *
-     * @return TeamStruct|null
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public function findUserCreatedTeams(UserStruct $user): ?TeamStruct
-    {
-        $stmt = $this->_getStatementForQuery(self::$_query_get_user_teams);
-
-        return $this->_fetchObjectMap(
-            $stmt,
-            TeamStruct::class,
-            [
-                'created_by' => $user->uid,
-            ]
-        )[0] ?? null;
-    }
-
-    /**
-     * @param int $uid
-     *
-     * @return bool
-     * @throws ReflectionException
-     * @throws PDOException
-     */
-    private function destroyCacheUserCreatedTeams(int $uid): bool
-    {
-        $stmt = $this->_getStatementForQuery(self::$_query_get_user_teams);
-
-        return $this->_destroyObjectCache(
-            $stmt,
-            TeamStruct::class,
-            [
-                'created_by' => $uid,
             ]
         );
     }

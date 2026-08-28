@@ -311,35 +311,6 @@ class TeamDaoRealSqlTest extends AbstractTest
         $this->assertSame('rn_personal', $this->dao->setCacheTTL(3600)->getPersonalByUid($this->creatorUid)->name);
     }
 
-    #[Test]
-    public function findUserCreatedTeams_hit_and_miss(): void
-    {
-        $this->makeTeamRow($this->creatorUid, Teams::GENERAL);
-
-        $team = $this->dao->findUserCreatedTeams($this->userWithUid($this->creatorUid));
-        $this->assertInstanceOf(TeamStruct::class, $team);
-        $this->assertSame($this->creatorUid, $team->created_by);
-
-        // a user with no created teams returns null ([0] ?? null arm)
-        $this->assertNull($this->dao->findUserCreatedTeams($this->userWithUid(self::ASSIGNABLE_ID_FLOOR + 990003)));
-    }
-
-    #[Test]
-    public function destroyCache_drops_the_user_created_teams_entry(): void
-    {
-        $id = $this->makeTeamRow($this->creatorUid, Teams::GENERAL);
-        $user = $this->userWithUid($this->creatorUid);
-
-        $this->dao->setCacheTTL(3600)->findUserCreatedTeams($user);
-        $this->renameBehindTheCache($id, 'rn_created');
-
-        $team = $this->dao->findById($id);
-        $this->assertInstanceOf(TeamStruct::class, $team);
-        $this->dao->destroyCache($team);
-
-        $this->assertSame('rn_created', $this->dao->setCacheTTL(3600)->findUserCreatedTeams($user)?->name);
-    }
-
     /** Writes on the connection, so a cached read keeps answering with the row it holds. */
     private function renameBehindTheCache(int $id, string $name): void
     {

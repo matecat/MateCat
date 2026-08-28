@@ -146,33 +146,6 @@ class TeamDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function findUserCreatedTeams_returns_team_struct_when_found(): void
-    {
-        $dao = new TestTeamDao($this->makeDbStub());
-
-        $expected       = new TeamStruct(['id' => 1]);
-        $expected->name = 'My Team';
-        $dao->fetchResult = [$expected];
-
-        $user      = new UserStruct();
-        $user->uid = 42;
-
-        $this->assertSame($expected, $dao->findUserCreatedTeams($user));
-    }
-
-    #[Test]
-    public function findUserCreatedTeams_returns_null_when_not_found(): void
-    {
-        $dao = new TestTeamDao($this->makeDbStub());
-        $dao->fetchResult = [];
-
-        $user      = new UserStruct();
-        $user->uid = 42;
-
-        $this->assertNull($dao->findUserCreatedTeams($user));
-    }
-
-    #[Test]
     public function destroyCache_refuses_a_struct_that_carries_no_creator(): void
     {
         $dao = new TestTeamDao($this->makeDbStub());

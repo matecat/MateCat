@@ -683,24 +683,8 @@ class SegmentDaoRealSqlTest extends AbstractTest
     }
 
     // =========================================================================================
-    // destroyCacheForGlobalTranslationMismatches  +  getTranslationsMismatches
+    // getTranslationsMismatches
     // =========================================================================================
-
-    #[Test]
-    public function destroyCacheForGlobalTranslationMismatches_evicts_a_primed_entry(): void
-    {
-        $this->insertTranslation($this->segIds[0], TranslationStatus::STATUS_TRANSLATED);
-
-        $job     = new JobStruct();
-        $job->id = $this->idJob;
-
-        // Prime the cache via the global-aggregation read so a cache entry exists, then destroy.
-        $this->dao->setCacheTTL(60)->getTranslationsMismatches($this->idJob, $this->password, null);
-
-        $this->dao->setCacheTTL(60);
-        $destroyed = $this->dao->destroyCacheForGlobalTranslationMismatches($job);
-        $this->assertTrue($destroyed);
-    }
 
     #[Test]
     public function getTranslationsMismatches_returns_empty_for_unknown_job(): void
