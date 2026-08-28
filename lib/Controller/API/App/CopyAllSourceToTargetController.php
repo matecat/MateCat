@@ -65,22 +65,36 @@ class CopyAllSourceToTargetController extends KleinController
     {
         $database = $this->getDatabase();
 
-        return $database->transaction(function () use ($chunk): array {
-            $features = FeatureSet::forProject($chunk->getProject(new ProjectDao($this->getDatabase())), $this->getDatabase());
+        return $database->transaction(function () use ($chunk, $database): array {
+            $project = $chunk->getProject(new ProjectDao($database));
+            $features = FeatureSet::forProject($project, $database);
 
-            $batchEventCreator = new TranslationEventsHandler($chunk, new TranslationEventDao($this->getDatabase()));
+            // Built once and reused for every segment. Constructing them inside the loop bought
+            // nothing and made a chunk-sized copy allocate three DAOs per segment.
+            $segmentTranslationDao = new SegmentTranslationDao($database);
+            $translationEventDao = new TranslationEventDao($database);
+            $segmentDao = new SegmentDao($database);
+
+            $batchEventCreator = new TranslationEventsHandler($chunk, $translationEventDao);
             $batchEventCreator->setFeatureSet($features);
-            $batchEventCreator->setProject($chunk->getProject(new ProjectDao($this->getDatabase())));
-            $segments = $chunk->getSegments(new SegmentDao($this->getDatabase()));
+            $batchEventCreator->setProject($project);
+            $segments = $chunk->getSegments($segmentDao);
+
+            $chunk_id = (int)$chunk->id;
+
+            // One read for the whole job instead of one SELECT per segment. The per-segment call
+            // this replaces keyed on (id_segment, id_job), so this is the same row set indexed by
+            // segment id; a job split into chunks returns its siblings' rows too, and the lookup
+            // below simply never asks for them.
+            $translations = [];
+            foreach ($segmentTranslationDao->getByJobId($chunk_id) as $translation) {
+                $translations[(int)$translation->id_segment] = $translation;
+            }
 
             $affected_rows = 0;
 
             foreach ($segments as $segment) {
-                $segment_id = $segment->id;
-                $chunk_id = (int)$chunk->id;
-
-                $segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
-                $old_translation = $segmentTranslationDao->findBySegmentAndJob($segment_id, $chunk_id);
+                $old_translation = $translations[(int)$segment->id] ?? null;
 
                 if (empty($old_translation) || ($old_translation->status !== TranslationStatus::STATUS_NEW)) {
                     //no segment found
@@ -93,6 +107,14 @@ class CopyAllSourceToTargetController extends KleinController
                 $new_translation->translation_date = date("Y-m-d H:i:s");
 
                 try {
+                    // One UPDATE per row, deliberately: updateTranslationAndStatusAndDateByList()
+                    // is not this statement in bulk. It is an INSERT .. ON DUPLICATE KEY UPDATE,
+                    // so it writes a row where this UPDATE matches none — and it never binds
+                    // segment_hash, which is NOT NULL with no default. The read above snapshots
+                    // the rows once; DatabaseCleanTask erases segment_translations by id_job in
+                    // autocommit batches, so a job wiped mid-copy leaves this loop holding rows
+                    // that no longer exist. That is a no-op here. Batched, it recreates each one
+                    // with an empty segment_hash, which is the key TM propagation matches on.
                     $affected_rows += $segmentTranslationDao->updateTranslationAndStatusAndDate($new_translation);
                 } catch (Exception $e) {
                     // Re-thrown rather than rolled back: the scope owns the undo and re-throws this.
@@ -107,8 +129,8 @@ class CopyAllSourceToTargetController extends KleinController
                             $this->user,
                             $this->chunk->getSourcePage(),
                             null,
-                            new TranslationEventDao($this->getDatabase()),
-                            new SegmentDao($this->getDatabase())
+                            $translationEventDao,
+                            $segmentDao
                         );
                         $batchEventCreator->addEvent($segmentTranslationEventModel);
                     } catch (Exception) {
@@ -118,7 +140,7 @@ class CopyAllSourceToTargetController extends KleinController
             }
 
             // save all events
-            $batchEventCreator->save(new BatchReviewProcessor(new ChunkReviewDao($this->getDatabase()), $this->user));
+            $batchEventCreator->save(new BatchReviewProcessor(new ChunkReviewDao($database), $this->user));
 
             $data = [
                 'code' => 1,
