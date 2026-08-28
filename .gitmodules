@@ -30,3 +30,6 @@
 [submodule "MateCat-docs"]
 	path = MateCat-docs
 	url = git@github.com:matecat/MateCat-docs.git
+[submodule "plugins/fedex"]
+	path = plugins/fedex
+	url = git@github.com:matecat/fedex_plugin.git
