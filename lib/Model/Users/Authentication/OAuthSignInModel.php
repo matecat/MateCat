@@ -145,6 +145,7 @@ class OAuthSignInModel
      * @throws Exception
      * @throws ReflectionException
      * @throws RuntimeException
+     * @throws TypeError
      */
     protected function _updateProfilePicture(): void
     {
@@ -163,6 +164,7 @@ class OAuthSignInModel
      * @throws Exception
      * @throws ReflectionException
      * @throws RuntimeException
+     * @throws TypeError
      */
     protected function _updateProvider(): void
     {

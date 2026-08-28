@@ -18,6 +18,7 @@ use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\ClientUserFacade;
 use Model\Users\MetadataDao;
+use Model\Users\MetadataStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -249,7 +250,10 @@ class UserKeysControllerTest extends AbstractTest
         // MetadataDao::get() caches by (uid, key) for 30 days (see removeKeyFromEngines()); bust
         // it on both sides of every test so no test's result leaks into a sibling test that reads
         // the same (uid, 'Utils\Engines\MMT') pair with a different seeded value.
-        (new MetadataDao(obtainTestDatabase()))->destroyCacheKey($this->userId(self::BASE), 'Utils\Engines\MMT');
+        (new MetadataDao(obtainTestDatabase()))->destroyCache(new MetadataStruct([
+            'uid' => $this->userId(self::BASE),
+            'key' => 'Utils\Engines\MMT',
+        ]));
     }
 
     /**

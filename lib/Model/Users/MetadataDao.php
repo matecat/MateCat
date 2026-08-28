@@ -8,6 +8,7 @@ use Model\DataAccess\InvalidatesUserProfileCache;
 use PDO;
 use PDOException;
 use ReflectionException;
+use TypeError;
 
 class MetadataDao extends AbstractDao
 {
@@ -99,13 +100,12 @@ class MetadataDao extends AbstractDao
     }
 
     /**
-     * Evict one user's metadata. The door the batched read needs: it names a uid, which is all a
-     * write to that user's metadata knows, and it reaches every list that cached it.
+     * The uid-addressed read, shared by the batched read and by every member list that cached it.
      *
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheAllByUid(int $uid): bool
+    private function destroyCacheAllByUid(int $uid): bool
     {
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_uid);
 
@@ -164,13 +164,37 @@ class MetadataDao extends AbstractDao
     }
 
     /**
-     * @param int $uid
-     * @param string $key
+     * Evict every address one metadata row is read at: the row itself, and the uid-addressed read
+     * that a member list shares.
+     *
+     * The struct has to name both the uid and the key the row is STORED under. `delete()` is given
+     * a key suffix rather than a stored key, so it discovers the stored ones before removing them.
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws TypeError when the struct names no uid or no key
+     */
+    public function destroyCache(MetadataStruct $metadata): void
+    {
+        if (!isset($metadata->uid)) {
+            throw new TypeError('A metadata cache eviction needs the uid of the row.');
+        }
+
+        if (!isset($metadata->key)) {
+            throw new TypeError('A metadata cache eviction needs the key of the row.');
+        }
+
+        $this->destroyCacheKey((int)$metadata->uid, $metadata->key);
+        $this->destroyCacheAllByUid((int)$metadata->uid);
+    }
+
+    /**
+     * The read addressed by uid and key, `get()`.
      *
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheKey(int $uid, string $key): bool
+    private function destroyCacheKey(int $uid, string $key): bool
     {
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_uid_key);
 
@@ -185,6 +209,7 @@ class MetadataDao extends AbstractDao
      * @return MetadataStruct
      * @throws PDOException
      * @throws ReflectionException
+     * @throws TypeError
      * @throws Exception
      */
     public function set(int $uid, string $key, array|string $value): MetadataStruct
@@ -203,8 +228,7 @@ class MetadataDao extends AbstractDao
             'value' => (is_array($value)) ? serialize($value) : $value,
         ]);
 
-        $this->destroyCacheKey($uid, $key);
-        $this->destroyCacheAllByUid($uid);
+        $this->destroyCache(new MetadataStruct(['uid' => $uid, 'key' => $key]));
         $this->invalidateUserProfileCache($uid);
 
         return new MetadataStruct([
@@ -217,15 +241,21 @@ class MetadataDao extends AbstractDao
 
 
     /**
-     * @param int $uid
-     * @param string $key
+     * Remove every metadata row of a user whose key ends with $key.
+     *
+     * An engine is stored under its class_load and deleted by its engine type, the last segment of
+     * that class_load, so the keys removed here are read and cached under names this call is never
+     * given. They are collected before the DELETE, which is the only moment they are still visible.
      *
      * @throws PDOException
      * @throws ReflectionException
+     * @throws TypeError
      * @throws Exception
      */
     public function delete(int $uid, string $key): void
     {
+        $removed = $this->storedKeysEndingWith($uid, $key);
+
         $sql = "DELETE FROM user_metadata " .
             " WHERE uid = :uid " .
             " AND `key` LIKE :key ";
@@ -236,8 +266,27 @@ class MetadataDao extends AbstractDao
             'uid' => $uid,
             'key' => '%' . $key,
         ]);
-        $this->destroyCacheKey($uid, $key);
-        $this->destroyCacheAllByUid($uid);
+
+        foreach (array_unique(array_merge($removed, [$key])) as $removedKey) {
+            $this->destroyCache(new MetadataStruct(['uid' => $uid, 'key' => $removedKey]));
+        }
+
         $this->invalidateUserProfileCache($uid);
+    }
+
+    /**
+     * The keys a delete is about to remove, as they are stored — and therefore as they are cached.
+     *
+     * @return list<string>
+     * @throws PDOException
+     */
+    private function storedKeysEndingWith(int $uid, string $key): array
+    {
+        $stmt = $this->database->getConnection()->prepare(
+            "SELECT `key` FROM user_metadata WHERE uid = :uid AND `key` LIKE :key"
+        );
+        $stmt->execute(['uid' => $uid, 'key' => '%' . $key]);
+
+        return array_values(array_map('strval', $stmt->fetchAll(PDO::FETCH_COLUMN)));
     }
 }

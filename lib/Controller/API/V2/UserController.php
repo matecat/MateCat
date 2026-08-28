@@ -96,6 +96,7 @@ class UserController extends AbstractStatefulKleinController
      * @throws InvalidArgumentException
      * @throws LockedResponseException
      * @throws ResponseAlreadySentException
+     * @throws TypeError
      */
     public function setMetadata(): void
     {
