@@ -13,6 +13,7 @@ use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\Projects\ProjectDao;
 use ReflectionException;
+use TypeError;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
 
@@ -62,6 +63,7 @@ class JobMetadataController extends KleinController
      * Delete metadata by key
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     public function delete(): void
     {
