@@ -68,9 +68,27 @@ class UserDao extends AbstractDao
     }
 
     /**
+     * The cache address of one user, shared by the single and the batched read.
+     *
+     * Both have to name the same entry: it is what lets `destroyCacheByUid()` — which knows one
+     * uid and nothing about any list that uid appears in — evict what a member list cached.
+     */
+    private static function uidKeyMapPrefix(): string
+    {
+        return self::class . '::getByUid-';
+    }
+
+    /**
+     * Load several users at once.
+     *
+     * Each user is cached under its own entry rather than the set under one, so renaming a user
+     * evicts it everywhere through `destroyCacheByUid()`, and adding or removing a member leaves
+     * the other members cached. The cache read is a single round trip; only members that missed
+     * are read from the database.
+     *
      * @param array<int, int|string|array{uid:int|string}> $uids_array
      *
-     * @return UserStruct[]
+     * @return UserStruct[] Keyed by uid. Uids that match no row are absent.
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
@@ -93,34 +111,55 @@ class UserDao extends AbstractDao
             return [];
         }
 
-        $query = "SELECT * FROM " . self::TABLE .
-            " WHERE uid IN ( " . str_repeat('?,', count($sanitized_array) - 1) . '?' . " ) ";
-
-        $stmt = $this->_getStatementForQuery($query);
-
-        /**
-         * @var UserStruct[] $__resultSet
-         */
-        $__resultSet = $this->_fetchObjectMap(
-            $stmt,
+        $perUid = $this->_fetchObjectMapPerId(
+            $sanitized_array,
+            self::$_query_user_by_uid,
+            'uid',
             UserStruct::class,
-            $sanitized_array
+            self::uidKeyMapPrefix(),
+            fn(array $missing): array => $this->loadUsersByUids($missing)
         );
 
         $resultSet = [];
-        if (!is_iterable($__resultSet)) {
-            return $resultSet;
-        }
 
-        foreach ($__resultSet as $user) {
-            if (!$user instanceof UserStruct) {
-                continue;
+        foreach ($perUid as $uid => $rows) {
+            $user = $rows[0] ?? null;
+
+            if ($user instanceof UserStruct) {
+                $resultSet[$uid] = $user;
             }
-
-            $resultSet[$user->uid] = $user;
         }
 
         return $resultSet;
+    }
+
+    /**
+     * The uncached bulk read behind `getByUids()`. It fills cache entries but is never itself
+     * cached: a result addressed by the whole uid list is the thing no eviction door can reach.
+     *
+     * @param list<int|string> $uids
+     *
+     * @return array<int, list<UserStruct>>
+     * @throws PDOException
+     */
+    private function loadUsersByUids(array $uids): array
+    {
+        $query = "SELECT * FROM " . self::TABLE .
+            " WHERE uid IN ( " . str_repeat('?,', count($uids) - 1) . '?' . " ) ";
+
+        $stmt = $this->_getStatementForQuery($query);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, UserStruct::class);
+        $stmt->execute(array_values($uids));
+
+        $byUid = [];
+
+        foreach ($stmt->fetchAll() as $user) {
+            if ($user instanceof UserStruct) {
+                $byUid[(int)$user->uid][] = $user;
+            }
+        }
+
+        return $byUid;
     }
 
     /**
@@ -288,7 +327,11 @@ class UserDao extends AbstractDao
             UserStruct::class,
             [
                 'uid' => $id,
-            ]
+            ],
+            // Named rather than left to the backtrace default, because getByUids() has to build
+            // the identical address from outside this method. The string is what that default
+            // produced, so entries already in Redis keep being found.
+            self::uidKeyMapPrefix() . $id
         )[0] ?? null;
 
         if (!$res instanceof UserStruct) {

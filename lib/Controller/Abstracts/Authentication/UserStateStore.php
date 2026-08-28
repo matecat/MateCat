@@ -70,11 +70,10 @@ class UserStateStore
      * cost is round trips, not queries. The payload fans out per member — `Membership::renderItem()`
      * resolves a user for every member of every team — and each of those resolutions is a separate
      * sequential Redis read, because {@see \Model\Teams\MembershipStruct::getUser()} does set a 24h
-     * TTL on the DAO it is handed. Add a Redis round trip per team for pending invitations, plus the
-     * two reads that genuinely are uncached SQL ({@see \Model\Users\MetadataDao::getAllByUid()}
-     * and {@see \Model\ConnectedServices\ConnectedServiceDao::findServicesByUser()}), and a manager
-     * in several large teams pays a latency linear in their total membership — of the order of a
-     * hundred sequential round trips — at one to two calls per page load.
+     * TTL on the DAO it is handed. Add a Redis round trip per team for pending invitations, plus one
+     * read that is uncached SQL ({@see \Model\ConnectedServices\ConnectedServiceDao::findServicesByUser()}),
+     * and a manager in several large teams pays a latency linear in their total membership — of the
+     * order of a hundred sequential round trips — at one to two calls per page load.
      *
      * An earlier revision of this docblock justified the store by claiming those per-member reads go
      * through a TTL-less DAO and are therefore live SQL. That was wrong, and it mattered: it named a
@@ -87,10 +86,14 @@ class UserStateStore
      *
      * **Staleness is bounded by invalidation, not by the TTL.** Every DAO write that can change any
      * part of this payload drops the field: the users row, user metadata, connected services, team
-     * membership, team renames and per-team project counts. One known gap is recorded rather than
-     * fixed — a renamed user stays stale inside *other* members' cached team lists for up to 24h,
-     * because those names come from a `getByUids()` `IN (...)` query that `destroyCacheByUid()` does
-     * not bust.
+     * membership, team renames and per-team project counts.
+     *
+     * A gap used to be recorded here rather than fixed: a renamed user stayed stale inside *other*
+     * members' cached team lists for up to 24h, because those names came from a `getByUids()`
+     * `IN (...)` query whose cache key was addressed by the whole uid list, and `destroyCacheByUid()`
+     * — which knows one uid — could never name it. Both member-list reads now cache one entry per
+     * uid, at the same address their single-uid accessors use, so the single-uid doors reach them.
+     * See {@see \Model\DataAccess\AbstractDao::_fetchObjectMapPerId()}.
      */
     private const string USER_PROFILE_FIELD = 'user_profile:%d';
 
