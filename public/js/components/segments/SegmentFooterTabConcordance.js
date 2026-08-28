@@ -1,184 +1,166 @@
-import React from 'react'
+import React, {memo, useContext, useState, useRef, useEffect} from 'react'
 
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
 import OfflineUtils from '../../utils/offlineUtils'
-import {getConcordance} from '../../api/getConcordance'
+import {getConcordance as getConcordanceApi} from '../../api/getConcordance'
 import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
 import {TabConcordanceResults} from './TabConcordanceResults'
 
-class SegmentFooterTabConcordance extends React.Component {
-  static contextType = SegmentContext
+const SegmentFooterTabConcordance = memo(
+  (props) => {
+    const {clientConnected} = useContext(SegmentContext)
+    const [loading, setLoading] = useState(false)
+    const [source, setSource] = useState('')
+    const [target, setTarget] = useState('')
 
-  constructor(props) {
-    super(props)
+    const resultsRef = useRef(null)
 
-    this.state = {
-      numDisplayContributionMatches: 3,
-      loading: false,
-      source: '',
-      target: '',
-    }
+    // Mirrors `this.props`/`this.state` always reflecting the CURRENT values when read live inside
+    // a stable, ref-backed callback that was only created once (on mount) — same technique as
+    // SegmentsCommentsIcon.js earlier in this wave. Updated on every render, AND patched directly
+    // inside findConcordance itself (see below) so a same-tick setTimeout read sees the fresh value
+    // without waiting for the next render to flow through.
+    const liveRef = useRef({segment: props.segment, source, target})
+    liveRef.current = {segment: props.segment, source, target}
 
-    this.searchSubmit = this.searchSubmit.bind(this)
-    this.findConcordance = this.findConcordance.bind(this)
-    this.renderConcordances = this.renderConcordances.bind(this)
-  }
+    const getConcordanceRef = useRef((query, type) => {
+      //type 0 = source, 1 = target
+      getConcordanceApi(query, type).catch(() => {
+        OfflineUtils.failedConnection()
+      })
+      setLoading(true)
 
-  allowHTML(string) {
-    return {__html: string}
-  }
-
-  findConcordance(sid, data) {
-    if (this.props.segment.sid == sid) {
-      if (data.inTarget) {
-        this.setState({
-          source: '',
-          target: data.text,
-        })
-      } else {
-        this.setState({
-          source: data.text,
-          target: '',
-        })
-      }
-      setTimeout(() => this.searchSubmit())
       // reset component results
-      this.resultsRef.reset()
+      resultsRef.current && resultsRef.current.reset()
+    })
+
+    const searchSubmitRef = useRef((event) => {
+      event ? event.preventDefault() : ''
+      const {source, target} = liveRef.current
+      if (source.length > 0) {
+        getConcordanceRef.current(source, 0)
+      } else if (target.length > 0) {
+        getConcordanceRef.current(target, 1)
+      }
+    })
+
+    const findConcordanceRef = useRef((sid, data) => {
+      const {segment} = liveRef.current
+      if (segment.sid == sid) {
+        if (data.inTarget) {
+          setSource('')
+          setTarget(data.text)
+          liveRef.current = {...liveRef.current, source: '', target: data.text}
+        } else {
+          setSource(data.text)
+          setTarget('')
+          liveRef.current = {...liveRef.current, source: data.text, target: ''}
+        }
+        setTimeout(() => searchSubmitRef.current())
+        // reset component results
+        resultsRef.current.reset()
+      }
+    })
+
+    const renderConcordancesRef = useRef((sid, data) => {
+      const {segment} = liveRef.current
+      if (sid !== segment.sid) return
+      if (data.length) {
+        setLoading(false)
+      } else {
+        setLoading(false)
+      }
+    })
+
+    useEffect(() => {
+      const findConcordance = findConcordanceRef.current
+      const renderConcordances = renderConcordancesRef.current
+      SegmentStore.addListener(
+        SegmentConstants.FIND_CONCORDANCE,
+        findConcordance,
+      )
+      SegmentStore.addListener(
+        SegmentConstants.CONCORDANCE_RESULT,
+        renderConcordances,
+      )
+      return () => {
+        SegmentStore.removeListener(
+          SegmentConstants.FIND_CONCORDANCE,
+          findConcordance,
+        )
+        SegmentStore.removeListener(
+          SegmentConstants.CONCORDANCE_RESULT,
+          renderConcordances,
+        )
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    /* eslint-disable-next-line no-unused-vars */
+    const allowHTML = (string) => ({__html: string})
+
+    const sourceChange = (event) => {
+      setSource(event.target.value)
+      setTarget('')
+
+      // reset component results
+      resultsRef.current.reset()
     }
-  }
 
-  sourceChange(event) {
-    this.setState({
-      source: event.target.value,
-      target: '',
-    })
+    const targetChange = (event) => {
+      setSource('')
+      setTarget(event.target.value)
 
-    // reset component results
-    this.resultsRef.reset()
-  }
-
-  targetChange(event) {
-    this.setState({
-      source: '',
-      target: event.target.value,
-    })
-
-    // reset component results
-    this.resultsRef.reset()
-  }
-
-  getConcordance(query, type) {
-    //type 0 = source, 1 = target
-    getConcordance(query, type).catch(() => {
-      OfflineUtils.failedConnection()
-    })
-    this.setState({
-      loading: true,
-    })
-
-    // reset component results
-    this.resultsRef && this.resultsRef.reset()
-  }
-
-  renderConcordances(sid, data) {
-    if (sid !== this.props.segment.sid) return
-    if (data.length) {
-      this.setState({
-        loading: false,
-      })
-    } else {
-      this.setState({
-        loading: false,
-      })
+      // reset component results
+      resultsRef.current.reset()
     }
-  }
 
-  searchSubmit(event) {
-    event ? event.preventDefault() : ''
-    if (this.state.source.length > 0) {
-      this.getConcordance(this.state.source, 0)
-    } else if (this.state.target.length > 0) {
-      this.getConcordance(this.state.target, 1)
-    }
-  }
-
-  async copyText(e) {
-    const internalClipboard = document.getSelection()
-    if (internalClipboard) {
-      e.preventDefault()
-      // Get plain text form internalClipboard fragment
-      const plainText = internalClipboard
-        .toString()
-        .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'), '')
-        .replace(/·/g, ' ')
-      try {
-        await navigator.clipboard.writeText(plainText)
-      } catch {
-        // The browser or OS denied clipboard permission — nothing more we can do here.
+    const copyText = async (e) => {
+      const internalClipboard = document.getSelection()
+      if (internalClipboard) {
+        e.preventDefault()
+        // Get plain text form internalClipboard fragment
+        const plainText = internalClipboard
+          .toString()
+          .replace(
+            new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'),
+            '',
+          )
+          .replace(/·/g, ' ')
+        try {
+          await navigator.clipboard.writeText(plainText)
+        } catch {
+          // The browser or OS denied clipboard permission — nothing more we can do here.
+        }
       }
     }
-  }
 
-  componentDidMount() {
-    SegmentStore.addListener(
-      SegmentConstants.FIND_CONCORDANCE,
-      this.findConcordance,
-    )
-    SegmentStore.addListener(
-      SegmentConstants.CONCORDANCE_RESULT,
-      this.renderConcordances,
-    )
-  }
-
-  componentWillUnmount() {
-    SegmentStore.removeListener(
-      SegmentConstants.FIND_CONCORDANCE,
-      this.findConcordance,
-    )
-    SegmentStore.removeListener(
-      SegmentConstants.CONCORDANCE_RESULT,
-      this.renderConcordances,
-    )
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return (
-      this.state.loading !== nextState.loading ||
-      this.state.source !== nextState.source ||
-      this.state.target !== nextState.target ||
-      this.props.active_class !== nextProps.active_class ||
-      this.props.tab_class !== nextProps.tab_class
-    )
-  }
-
-  render() {
-    const {clientConnected} = this.context
     let html = '',
       loadingClass = ''
 
-    if (this.state.loading) {
+    if (loading) {
       loadingClass = 'loading'
     }
     if (config.tms_enabled) {
       html = (
         <div className={'cc-search ' + loadingClass}>
-          <form onSubmit={this.searchSubmit}>
+          <form onSubmit={searchSubmitRef.current}>
             <div className="input-group">
               <input
                 type="text"
                 className="input search-source"
-                onChange={this.sourceChange.bind(this)}
-                value={this.state.source}
+                onChange={sourceChange}
+                value={source}
               />
             </div>
             <div className="input-group">
               <input
                 type="text"
                 className="input search-target"
-                onChange={this.targetChange.bind(this)}
-                value={this.state.target}
+                onChange={targetChange}
+                value={target}
               />
             </div>
             <input
@@ -204,16 +186,13 @@ class SegmentFooterTabConcordance extends React.Component {
 
     return (
       <div
-        key={'container_' + this.props.code}
+        key={'container_' + props.code}
         className={
-          'tab sub-editor ' +
-          this.props.active_class +
-          ' ' +
-          this.props.tab_class
+          'tab sub-editor ' + props.active_class + ' ' + props.tab_class
         }
-        id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
-        onCopy={this.copyText}
-        onCut={this.copyText}
+        id={'segment-' + props.segment.sid + '-' + props.tab_class}
+        onCopy={copyText}
+        onCut={copyText}
       >
         {' '}
         {!clientConnected ? (
@@ -223,16 +202,30 @@ class SegmentFooterTabConcordance extends React.Component {
             <div className="overflow">
               {html}
               <TabConcordanceResults
-                ref={(resultsRef) => (this.resultsRef = resultsRef)}
-                segment={this.props.segment}
-                isActive={this.props.active_class === 'open'}
+                ref={(ref) => (resultsRef.current = ref)}
+                segment={props.segment}
+                isActive={props.active_class === 'open'}
               />
             </div>
           </>
         )}
       </div>
     )
-  }
-}
+  },
+  (prevProps, nextProps) => {
+    // shouldComponentUpdate compared state too, but memo's comparator only receives props —
+    // state comparisons don't apply here since a memoized function component's internal useState
+    // changes always trigger its own re-render regardless of memo (memo only gates re-renders
+    // caused by the PARENT re-rendering with new/same props — it cannot and does not block a
+    // component's own internal state updates). So the comparator only needs the PROPS half of the
+    // original condition:
+    return !(
+      prevProps.active_class !== nextProps.active_class ||
+      prevProps.tab_class !== nextProps.tab_class
+    )
+  },
+)
+
+SegmentFooterTabConcordance.displayName = 'SegmentFooterTabConcordance'
 
 export default SegmentFooterTabConcordance

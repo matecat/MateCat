@@ -1,24 +1,17 @@
-import React from 'react'
+import React, {useState} from 'react'
 
 import CatToolActions from '../../actions/CatToolActions'
 import ModalsActions from '../../actions/ModalsActions'
 import {Button, BUTTON_TYPE} from '../common/Button/Button'
 
-class RevisionFeedbackModal extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      sending: false,
-      feedback: this.props.feedback,
-      buttonEnabled: false,
-    }
-  }
+const RevisionFeedbackModal = (props) => {
+  const [sending, setSending] = useState(false)
+  const [feedback, setFeedback] = useState(props.feedback)
+  const [buttonEnabled, setButtonEnabled] = useState(false)
 
-  sendFeedback() {
-    this.setState({
-      sending: true,
-    })
-    CatToolActions.sendRevisionFeedback(this.state.feedback)
+  const sendFeedback = () => {
+    setSending(true)
+    CatToolActions.sendRevisionFeedback(feedback)
       .then(() => {
         setTimeout(() => CatToolActions.reloadQualityReport())
         ModalsActions.onCloseModal()
@@ -39,81 +32,71 @@ class RevisionFeedbackModal extends React.Component {
       })
   }
 
-  onChange = (e) => {
+  const onChange = (e) => {
     let value = e.target.value
     if (value !== '') {
-      this.setState({
-        feedback: value,
-        buttonEnabled: true,
-      })
+      setFeedback(value)
+      setButtonEnabled(true)
     } else {
-      this.setState({
-        feedback: value,
-        buttonEnabled: false,
-      })
+      setFeedback(value)
+      setButtonEnabled(false)
     }
   }
 
-  render() {
-    let sendLabel = this.props.feedback ? 'Modify' : 'Submit'
-    return (
-      <div className="feedback-modal">
-        <div className="matecat-modal-top">
-          <h1>Leave your feedback</h1>
+  let sendLabel = props.feedback ? 'Modify' : 'Submit'
+  return (
+    <div className="feedback-modal">
+      <div className="matecat-modal-top">
+        <h1>Leave your feedback</h1>
+      </div>
+      <div className="matecat-modal-middle">
+        <div className="matecat-modal-text">
+          {props.revisionNumber === 1 ? (
+            <span>
+              Please leave some feedback for the translator on the job quality.
+            </span>
+          ) : (
+            <span>
+              Please leave some feedback for the reviser on the job quality.
+            </span>
+          )}
         </div>
-        <div className="matecat-modal-middle">
-          <div className="matecat-modal-text">
-            {this.props.revisionNumber === 1 ? (
-              <span>
-                Please leave some feedback for the translator on the job
-                quality.
-              </span>
-            ) : (
-              <span>
-                Please leave some feedback for the reviser on the job quality.
-              </span>
-            )}
-          </div>
-          <div className="matecat-modal-textarea">
-            <textarea
-              value={this.state.feedback}
-              style={{width: '100%', height: '100px', resize: 'none', padding: 4}}
-              placeholder="Leave your feedback here"
-              onChange={this.onChange}
-            />
-          </div>
-        </div>
-        <div className="matecat-modal-bottom">
-          <div className="modal-buttons">
-            <Button
-              type={BUTTON_TYPE.DEFAULT}
-              onClick={() => ModalsActions.onCloseModal()}
-            >
-              {this.props.feedback ? 'Close' : "I'll do it later"}
-            </Button>
-
-            {this.state.sending ? (
-              <Button type={BUTTON_TYPE.PRIMARY} disabled={true}>
-                <span className="button-loader show" style={{left: '280px'}} />
-                {sendLabel}
-              </Button>
-            ) : !this.state.buttonEnabled ? (
-              <Button type={BUTTON_TYPE.PRIMARY} disabled={true}>
-                {sendLabel}
-              </Button>
-            ) : (
-              <Button
-                type={BUTTON_TYPE.PRIMARY}
-                onClick={() => this.sendFeedback()}
-              >
-                {sendLabel}
-              </Button>
-            )}
-          </div>
+        <div className="matecat-modal-textarea">
+          <textarea
+            value={feedback}
+            style={{width: '100%', height: '100px', resize: 'none', padding: 4}}
+            placeholder="Leave your feedback here"
+            onChange={onChange}
+          />
         </div>
       </div>
-    )
-  }
+      <div className="matecat-modal-bottom">
+        <div className="modal-buttons">
+          <Button
+            type={BUTTON_TYPE.DEFAULT}
+            onClick={() => ModalsActions.onCloseModal()}
+          >
+            {props.feedback ? 'Close' : "I'll do it later"}
+          </Button>
+
+          {sending ? (
+            <Button type={BUTTON_TYPE.PRIMARY} disabled={true}>
+              <span className="button-loader show" style={{left: '280px'}} />
+              {sendLabel}
+            </Button>
+          ) : !buttonEnabled ? (
+            <Button type={BUTTON_TYPE.PRIMARY} disabled={true}>
+              {sendLabel}
+            </Button>
+          ) : (
+            <Button type={BUTTON_TYPE.PRIMARY} onClick={() => sendFeedback()}>
+              {sendLabel}
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default RevisionFeedbackModal

@@ -26,13 +26,16 @@ jest.mock('../../utils/offlineUtils', () => ({
 
 jest.mock('./TabConcordanceResults', () => {
   const ReactLib = require('react')
+  const renderSpy = jest.fn()
   return {
     TabConcordanceResults: ReactLib.forwardRef((props, ref) => {
+      renderSpy(props)
       ReactLib.useImperativeHandle(ref, () => ({reset: jest.fn()}))
       return ReactLib.createElement('div', {
         'data-testid': 'tab-concordance-results',
       })
     }),
+    __renderSpy: renderSpy,
   }
 })
 
@@ -46,6 +49,7 @@ beforeAll(() => {
 
 afterEach(() => {
   jest.clearAllMocks()
+  jest.useRealTimers()
 })
 
 const baseSegment = {sid: '7'}
@@ -75,7 +79,9 @@ describe('SegmentFooterTabConcordance', () => {
     global.config.tms_enabled = false
     renderComponent()
     expect(
-      screen.getByText('TM Search is not available when the TM feature is disabled'),
+      screen.getByText(
+        'TM Search is not available when the TM feature is disabled',
+      ),
     ).toBeInTheDocument()
     global.config.tms_enabled = true
   })
@@ -151,9 +157,7 @@ describe('SegmentFooterTabConcordance', () => {
         text: 'found source',
       })
     })
-    expect(document.querySelector('.search-source')).toHaveValue(
-      'found source',
-    )
+    expect(document.querySelector('.search-source')).toHaveValue('found source')
   })
 
   test('FIND_CONCORDANCE event with target text populates target field', () => {
@@ -164,9 +168,7 @@ describe('SegmentFooterTabConcordance', () => {
         text: 'found target',
       })
     })
-    expect(document.querySelector('.search-target')).toHaveValue(
-      'found target',
-    )
+    expect(document.querySelector('.search-target')).toHaveValue('found target')
   })
 
   test('FIND_CONCORDANCE event for a different sid is ignored', () => {
@@ -196,31 +198,132 @@ describe('SegmentFooterTabConcordance', () => {
     )
     getSelectionSpy.mockRestore()
   })
-})
-
-describe('SegmentFooterTabConcordance.prototype.copyText', () => {
-  afterEach(() => {
-    jest.restoreAllMocks()
-  })
 
   test('does not reject when the browser denies clipboard permission', async () => {
-    jest
+    const getSelectionSpy = jest
       .spyOn(document, 'getSelection')
-      .mockReturnValue({toString: () => 'some concordance text'})
-    navigator.clipboard = {
-      writeText: jest
-        .fn()
-        .mockRejectedValue(new DOMException('denied', 'NotAllowedError')),
-    }
-
-    await expect(
-      SegmentFooterTabConcordance.prototype.copyText({
-        preventDefault: jest.fn(),
-      }),
-    ).resolves.not.toThrow()
-
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      'some concordance text',
+      .mockReturnValue({
+        toString: () => 'selected text',
+      })
+    global.navigator.clipboard.writeText.mockRejectedValueOnce(
+      new DOMException('denied', 'NotAllowedError'),
     )
+    const unhandledRejection = jest.fn()
+    process.on('unhandledRejection', unhandledRejection)
+
+    renderComponent()
+    const container = document.querySelector('#segment-7-concordances')
+    await act(async () => {
+      fireEvent.copy(container)
+    })
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    process.off('unhandledRejection', unhandledRejection)
+
+    expect(unhandledRejection).not.toHaveBeenCalled()
+    expect(global.navigator.clipboard.writeText).toHaveBeenCalledWith(
+      'selected text',
+    )
+    getSelectionSpy.mockRestore()
+  })
+
+  test('FIND_CONCORDANCE event triggers an automatic search via getConcordance', () => {
+    jest.useFakeTimers()
+    const {getConcordance} = require('../../api/getConcordance')
+    renderComponent()
+
+    act(() => {
+      SegmentStore.__emit(SegmentConstants.FIND_CONCORDANCE, '7', {
+        inTarget: false,
+        text: 'found source',
+      })
+    })
+    act(() => {
+      jest.runAllTimers()
+    })
+
+    expect(getConcordance).toHaveBeenCalledWith('found source', 0)
+  })
+
+  test('FIND_CONCORDANCE event with target text triggers getConcordance with type 1', () => {
+    jest.useFakeTimers()
+    const {getConcordance} = require('../../api/getConcordance')
+    renderComponent()
+
+    act(() => {
+      SegmentStore.__emit(SegmentConstants.FIND_CONCORDANCE, '7', {
+        inTarget: true,
+        text: 'found target',
+      })
+    })
+    act(() => {
+      jest.runAllTimers()
+    })
+
+    expect(getConcordance).toHaveBeenCalledWith('found target', 1)
+  })
+
+  test('CONCORDANCE_RESULT event clears the loading state', () => {
+    renderComponent()
+    const sourceInput = document.querySelector('.search-source')
+    fireEvent.change(sourceInput, {target: {value: 'hello'}})
+    fireEvent.submit(document.querySelector('form'))
+    expect(document.querySelector('.cc-search')).toHaveClass('loading')
+
+    act(() => {
+      SegmentStore.__emit(SegmentConstants.CONCORDANCE_RESULT, '7', [])
+    })
+    expect(document.querySelector('.cc-search')).not.toHaveClass('loading')
+  })
+
+  test('CONCORDANCE_RESULT event for a different sid does not clear the loading state', () => {
+    renderComponent()
+    const sourceInput = document.querySelector('.search-source')
+    fireEvent.change(sourceInput, {target: {value: 'hello'}})
+    fireEvent.submit(document.querySelector('form'))
+    expect(document.querySelector('.cc-search')).toHaveClass('loading')
+
+    act(() => {
+      SegmentStore.__emit(SegmentConstants.CONCORDANCE_RESULT, '999', [])
+    })
+    expect(document.querySelector('.cc-search')).toHaveClass('loading')
+  })
+
+  test('memo bails out (skips re-render) when active_class and tab_class are unchanged', () => {
+    const {__renderSpy} = require('./TabConcordanceResults')
+    const contextValue = {clientConnected: true}
+    const {rerender} = renderComponent({}, contextValue)
+    const callsAfterFirstRender = __renderSpy.mock.calls.length
+    expect(callsAfterFirstRender).toBeGreaterThan(0)
+
+    rerender(
+      <SegmentContext.Provider value={contextValue}>
+        <SegmentFooterTabConcordance
+          code="cc"
+          active_class="active"
+          tab_class="concordances"
+          segment={baseSegment}
+        />
+      </SegmentContext.Provider>,
+    )
+    expect(__renderSpy.mock.calls.length).toBe(callsAfterFirstRender)
+  })
+
+  test('re-renders when active_class changes', () => {
+    const {__renderSpy} = require('./TabConcordanceResults')
+    const contextValue = {clientConnected: true}
+    const {rerender} = renderComponent({}, contextValue)
+    const callsAfterFirstRender = __renderSpy.mock.calls.length
+
+    rerender(
+      <SegmentContext.Provider value={contextValue}>
+        <SegmentFooterTabConcordance
+          code="cc"
+          active_class="inactive"
+          tab_class="concordances"
+          segment={baseSegment}
+        />
+      </SegmentContext.Provider>,
+    )
+    expect(__renderSpy.mock.calls.length).toBeGreaterThan(callsAfterFirstRender)
   })
 })

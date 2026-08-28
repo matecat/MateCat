@@ -1,4 +1,13 @@
-import React, {createRef} from 'react'
+import React, {
+  createRef,
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+import PropTypes from 'prop-types'
 import {isUndefined} from 'lodash'
 import {fromJS} from 'immutable'
 import $ from 'jquery'
@@ -17,31 +26,64 @@ import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import {NUM_CONTRIBUTION_RESULTS} from '../../constants/Constants'
 import Tooltip from '../common/Tooltip'
 import IconDown from '../../../img/icons/IconDown'
+import matchInfo from './matchInfo'
 
 const MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED = 3
+const SUGGESTION_SHORTCUT_LABEL = 'CTRL+'
 
-class SegmentFooterTabMatches extends React.Component {
-  static contextType = SegmentContext
+const allowHTML = (string) => ({__html: string})
 
-  constructor(props) {
-    super(props)
-    this.suggestionShortcutLabel = 'CTRL+'
-    this.processContributions = this.processContributions.bind(this)
-    this.chooseSuggestion = this.chooseSuggestion.bind(this)
-    this.setJobTmKeys = this.setJobTmKeys.bind(this)
+const SegmentFooterTabMatches = ({code, active_class, tab_class, segment}) => {
+  const {clientConnected, multiMatchLangs} = useContext(SegmentContext)
 
-    this.state = {
-      tmKeys: CatToolStore.getJobTmKeys(),
-      numContributionsToShow: MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED,
+  const [tmKeys, setTmKeys] = useState(() => CatToolStore.getJobTmKeys())
+  const [numContributionsToShow, setNumContributionsToShow] = useState(
+    MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED,
+  )
+
+  // The listeners are registered once, so they read the current segment through
+  // a ref rather than closing over the first one.
+  const segmentRef = useRef(segment)
+  segmentRef.current = segment
+
+  useEffect(() => {
+    const chooseSuggestion = (sid, index) => {
+      if (segmentRef.current.sid === sid) {
+        suggestionDblClick(index)
+      }
     }
-  }
+    const setJobTmKeys = (keys) => setTmKeys(keys)
 
-  processContributions(matches) {
-    var self = this
-    var matchesProcessed = []
-    // SegmentActions.createFooter(this.props.segment.sid);
+    SegmentActions.getContributions(segment.sid, multiMatchLangs)
+    SegmentStore.addListener(
+      SegmentConstants.CHOOSE_CONTRIBUTION,
+      chooseSuggestion,
+    )
+    CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
+
+    return () => {
+      SegmentStore.removeListener(
+        SegmentConstants.CHOOSE_CONTRIBUTION,
+        chooseSuggestion,
+      )
+      CatToolStore.removeListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Was componentDidUpdate: ask again once the segment becomes editable.
+  const wasUnlocked = useRef(segment.unlocked)
+  useEffect(() => {
+    if (!wasUnlocked.current && segment.unlocked) {
+      SegmentActions.getContribution(segment.sid, multiMatchLangs)
+    }
+    wasUnlocked.current = segment.unlocked
+  }, [segment.unlocked, segment.sid, multiMatchLangs])
+
+  const processContributions = (matches) => {
+    const matchesProcessed = []
     $.each(matches, function () {
-      var item = {}
+      const item = {}
       item.id = this.id
       item.disabled = this.id == '0' ? true : false
       item.cb = this.created_by.split('MT-').pop()
@@ -94,7 +136,7 @@ class SegmentFooterTabMatches extends React.Component {
       ) {
         item.sourceDiff = TextUtils.getDiffHtml(
           this.segment,
-          self.props.segment.segment,
+          segmentRef.current.segment,
         )
 
         item.sourceDiff = DraftMatecatUtils.transformTagsToHtml(
@@ -106,68 +148,37 @@ class SegmentFooterTabMatches extends React.Component {
       if (!isUndefined(this.tm_properties)) {
         item.tm_properties = this.tm_properties
       }
-      let matchToInsert = self.processMatchCallback(item)
-      if (matchToInsert) {
-        matchesProcessed.push(item)
-      }
+      matchesProcessed.push(item)
     })
     return matchesProcessed
   }
 
-  /**
-   * Used by the plugins to override matches
-   * @param item
-   * @returns {*}
-   */
-  processMatchCallback(item) {
-    return item
-  }
+  const isOwnerKey = (key) =>
+    Boolean(
+      tmKeys?.length > 0 &&
+      tmKeys.find((currentKey) => currentKey.key === key && currentKey.w === 1),
+    )
 
-  chooseSuggestion(sid, index) {
-    if (this.props.segment.sid === sid) {
-      this.suggestionDblClick(this.props.segment.contributions, index)
-    }
-  }
-  setJobTmKeys(keys) {
-    this.setState({tmKeys: keys})
-  }
-
-  isOwnerKey(key) {
-    const {tmKeys} = this.state
-    if (tmKeys && tmKeys.length > 0) {
-      const ownedKey = tmKeys.find(
-        (currentKey) => currentKey.key === key && currentKey.w === 1,
-      )
-      return !!ownedKey
-    }
-    return false
-  }
-
-  suggestionDblClick(match, index) {
+  const suggestionDblClick = (index) => {
     setTimeout(() => {
+      const currentSegment = segmentRef.current
       SegmentActions.setFocusOnEditArea()
-      SegmentActions.disableTPOnSegment(this.props.segment)
-      SegmentActions.setChoosenSuggestion(
-        this.props.segment.original_sid,
-        index,
-      )
-      TranslationMatches.copySuggestionInEditarea(this.props.segment, index)
+      SegmentActions.disableTPOnSegment(currentSegment)
+      SegmentActions.setChoosenSuggestion(currentSegment.original_sid, index)
+      TranslationMatches.copySuggestionInEditarea(currentSegment, index)
     }, 200)
   }
 
-  deleteSuggestion(match) {
-    var source = match.segment
-    var target = match.translation
-
+  const deleteSuggestion = (match) => {
     SegmentActions.deleteContribution(
-      source,
-      target,
+      match.segment,
+      match.translation,
       match.id,
-      this.props.segment.original_sid,
+      segment.original_sid,
     )
   }
 
-  getMatchInfo(match) {
+  const getMatchInfo = (match) => {
     const penaltyPercRef = createRef()
     return (
       <ul className="graysmall-details">
@@ -228,78 +239,12 @@ class SegmentFooterTabMatches extends React.Component {
           </Tooltip>
         )}
 
-        {/*<li className={'graydesc'}>
-          <span className={'bold'} style={{fontSize: '14px'}}>
-            {ApplicationStore.getLanguageNameFromLocale(match.target)}
-          </span>
-        </li>*/}
-
-        {this.getMatchInfoMetadata(match)}
+        {matchInfo.getMatchInfoMetadata({match, segment})}
       </ul>
     )
   }
 
-  /**
-   * Get others match info metadata, function overrided inside plugin
-   *
-   * @param {object} match
-   * @returns {object}
-   */
-  getMatchInfoMetadata() {
-    return ''
-  }
-
-  componentDidMount() {
-    const {multiMatchLangs} = this.context
-    this._isMounted = true
-    SegmentActions.getContributions(this.props.segment.sid, multiMatchLangs)
-    SegmentStore.addListener(
-      SegmentConstants.CHOOSE_CONTRIBUTION,
-      this.chooseSuggestion,
-    )
-    CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, this.setJobTmKeys)
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false
-    SegmentStore.removeListener(
-      SegmentConstants.CHOOSE_CONTRIBUTION,
-      this.chooseSuggestion,
-    )
-    CatToolStore.removeListener(
-      CatToolConstants.UPDATE_TM_KEYS,
-      this.setJobTmKeys,
-    )
-  }
-
-  /**
-   * Do not delete, overwritten by plugin
-   */
-  componentDidUpdate(prevProps) {
-    if (!prevProps.segment.unlocked && this.props.segment.unlocked) {
-      const {multiMatchLangs} = this.context
-      SegmentActions.getContribution(this.props.segment.sid, multiMatchLangs)
-    }
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return (
-      ((!isUndefined(nextProps.segment.contributions) ||
-        !isUndefined(this.props.segment.contributions)) &&
-        ((!isUndefined(nextProps.segment.contributions) &&
-          isUndefined(this.props.segment.contributions)) ||
-          !fromJS(this.props.segment.contributions).equals(
-            fromJS(nextProps.segment.contributions),
-          ))) ||
-      this.props.active_class !== nextProps.active_class ||
-      this.props.tab_class !== nextProps.tab_class ||
-      this.props.segment.unlocked !== nextProps.segment.unlocked ||
-      this.state.tmKeys !== nextState.tmKeys ||
-      this.state.numContributionsToShow !== nextState.numContributionsToShow
-    )
-  }
-
-  async copyText(e) {
+  const copyText = useCallback(async (e) => {
     const internalClipboard = document.getSelection()
     if (internalClipboard) {
       e.preventDefault()
@@ -314,201 +259,189 @@ class SegmentFooterTabMatches extends React.Component {
         // The browser or OS denied clipboard permission — nothing more we can do here.
       }
     }
-  }
+  }, [])
 
-  allowHTML(string) {
-    return {__html: string}
-  }
+  const toggleExtendend = () =>
+    setNumContributionsToShow((previous) =>
+      previous < NUM_CONTRIBUTION_RESULTS
+        ? NUM_CONTRIBUTION_RESULTS
+        : MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED,
+    )
 
-  toggleExtendend = () => {
-    this.setState({
-      numContributionsToShow:
-        this.state.numContributionsToShow < NUM_CONTRIBUTION_RESULTS
-          ? NUM_CONTRIBUTION_RESULTS
-          : MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED,
-    })
-  }
+  const matchesHtml = []
+  if (segment.contributions?.matches?.length > 0) {
+    const tpmMatches = processContributions(
+      segment.contributions.matches.filter(
+        (contribution, index) => index < numContributionsToShow,
+      ),
+    )
 
-  render() {
-    const {clientConnected} = this.context
-
-    let matchesHtml = []
-    let self = this
-    if (
-      this.props.segment.contributions &&
-      this.props.segment.contributions.matches &&
-      this.props.segment.contributions.matches.length > 0
-    ) {
-      let tpmMatches = this.processContributions(
-        this.props.segment.contributions.matches.filter(
-          (contribution, index) => index < this.state.numContributionsToShow,
-        ),
-      )
-
-      tpmMatches.forEach((match, index) => {
-        const {memoryKey} = match
-        const isOwnedKey = memoryKey ? this.isOwnerKey(memoryKey) : false
-        const isPublicTm = match.cb !== 'MT' && !memoryKey
-        const trashIcon =
-          match.disabled || (!isOwnedKey && !isPublicTm) ? (
-            ''
-          ) : (
+    tpmMatches.forEach((match, index) => {
+      const {memoryKey} = match
+      const isOwnedKey = memoryKey ? isOwnerKey(memoryKey) : false
+      const isPublicTm = match.cb !== 'MT' && !memoryKey
+      const trashIcon =
+        match.disabled || (!isOwnedKey && !isPublicTm) ? (
+          ''
+        ) : (
+          <span
+            id={segment.sid + '-tm-' + match.id + '-delete'}
+            className="trash"
+            title="delete this row"
+            onClick={() => deleteSuggestion(match)}
+          />
+        )
+      matchesHtml.push(
+        <ul
+          key={match.id}
+          className="suggestion-item graysmall"
+          data-item={index + 1}
+          data-id={match.id}
+          data-original={match.segment}
+          onDoubleClick={() => suggestionDblClick(index + 1)}
+        >
+          <li className="sugg-source">
             <span
-              id={self.props.segment.sid + '-tm-' + match.id + '-delete'}
-              className="trash"
-              title="delete this row"
-              onClick={self.deleteSuggestion.bind(self, match, index)}
-            />
-          )
-        var item = (
-          <ul
-            key={match.id}
-            className="suggestion-item graysmall"
-            data-item={index + 1}
-            data-id={match.id}
-            data-original={match.segment}
-            onDoubleClick={self.suggestionDblClick.bind(self, match, index + 1)}
-          >
-            <li className="sugg-source">
-              <span
-                id={self.props.segment.sid + '-tm-' + match.id + '-source'}
-                className="suggestion_source"
-                dangerouslySetInnerHTML={self.allowHTML(match.sourceDiff)}
-              ></span>
-            </li>
-            <li className="b sugg-target">
-              <span className="graysmall-message">
-                {' '}
-                {self.suggestionShortcutLabel + (index + 1)}
+              id={segment.sid + '-tm-' + match.id + '-source'}
+              className="suggestion_source"
+              dangerouslySetInnerHTML={allowHTML(match.sourceDiff)}
+            ></span>
+          </li>
+          <li className="b sugg-target">
+            <span className="graysmall-message">
+              {' '}
+              {SUGGESTION_SHORTCUT_LABEL + (index + 1)}
+            </span>
+            <span
+              id={segment.sid + '-tm-' + match.id + '-translation'}
+              className="translation"
+              dangerouslySetInnerHTML={allowHTML(match.translationDecodedHtml)}
+            ></span>
+            {trashIcon}
+          </li>
+          {getMatchInfo(match)}
+        </ul>,
+      )
+    })
+  } else if (segment.contributions?.matches?.length === 0) {
+    matchesHtml.push(
+      config.mt_enabled ? (
+        <ul key={0} className="graysmall message">
+          <li>
+            No matches could be found for this segment. Please, contact{' '}
+            <a href="mailto:support@matecat.com">support@matecat.com</a> if you
+            think this is an error.
+          </li>
+        </ul>
+      ) : (
+        <ul key={0} className="graysmall message">
+          <li>No match found for this segment</li>
+        </ul>
+      ),
+    )
+  }
+
+  const errors = []
+  if (segment.contributions?.error && segment.contributions.errors.length > 0) {
+    segment.contributions.errors.forEach((error) => {
+      let toAdd = false,
+        messageClass,
+        imgClass,
+        messageTypeText
+
+      switch (error.code) {
+        case '-2001':
+          toAdd = true
+          messageClass = 'error'
+          imgClass = 'error-img'
+          messageTypeText = 'Error: '
+          break
+        case '-2002':
+          toAdd = true
+          messageClass = 'warning'
+          imgClass = 'warning-img'
+          messageTypeText = 'Warning: '
+          break
+      }
+      if (toAdd) {
+        errors.push(
+          <ul className="engine-error-item graysmall" key={error.code}>
+            <li className="engine-error">
+              <div className={imgClass} />
+              <span className={'engine-error-message ' + messageClass}>
+                {messageTypeText + ' ' + error.message}
               </span>
-              <span
-                id={self.props.segment.sid + '-tm-' + match.id + '-translation'}
-                className="translation"
-                dangerouslySetInnerHTML={self.allowHTML(
-                  match.translationDecodedHtml,
-                )}
-              ></span>
-              {trashIcon}
             </li>
-            {self.getMatchInfo(match)}
-          </ul>
-        )
-        matchesHtml.push(item)
-      })
-    } else if (
-      this.props.segment.contributions &&
-      this.props.segment.contributions.matches &&
-      this.props.segment.contributions.matches.length === 0
-    ) {
-      if (config.mt_enabled) {
-        matchesHtml.push(
-          <ul key={0} className="graysmall message">
-            <li>
-              No matches could be found for this segment. Please, contact{' '}
-              <a href="mailto:support@matecat.com">support@matecat.com</a> if
-              you think this is an error.
-            </li>
-          </ul>,
-        )
-      } else {
-        matchesHtml.push(
-          <ul key={0} className="graysmall message">
-            <li>No match found for this segment</li>
           </ul>,
         )
       }
-    }
-
-    let errors = []
-    if (
-      this.props.segment.contributions &&
-      this.props.segment.contributions.error &&
-      this.props.segment.contributions.errors.length > 0
-    ) {
-      this.props.segment.contributions.errors.forEach((error) => {
-        let toAdd = false,
-          messageClass,
-          imgClass,
-          messageTypeText
-
-        switch (error.code) {
-          case '-2001':
-            toAdd = true
-            messageClass = 'error'
-            imgClass = 'error-img'
-            messageTypeText = 'Error: '
-            break
-          case '-2002':
-            toAdd = true
-            messageClass = 'warning'
-            imgClass = 'warning-img'
-            messageTypeText = 'Warning: '
-            break
-        }
-        if (toAdd) {
-          let item = (
-            <ul className="engine-error-item graysmall">
-              <li className="engine-error">
-                <div className={imgClass} />
-                <span className={'engine-error-message ' + messageClass}>
-                  {messageTypeText + ' ' + error.message}
-                </span>
-              </li>
-            </ul>
-          )
-
-          errors.push(item)
-        }
-      })
-    }
-
-    const isExtended =
-      this.state.numContributionsToShow === NUM_CONTRIBUTION_RESULTS
-
-    const moreButton = (
-      <Button
-        className={`segment-footer-tab-more-button ${isExtended ? 'segment-footer-tab-more-button-extended-mode' : ''}`}
-        type={BUTTON_TYPE.DEFAULT}
-        size={BUTTON_SIZE.SMALL}
-        onClick={this.toggleExtendend}
-      >
-        <IconDown size={18} />
-        {isExtended ? 'Fewer' : 'More'}
-      </Button>
-    )
-
-    return (
-      <div
-        key={'container_' + this.props.code}
-        className={
-          'tab sub-editor ' +
-          this.props.active_class +
-          ' ' +
-          this.props.tab_class
-        }
-        id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
-        onCopy={this.copyText}
-        onCut={this.copyText}
-      >
-        {clientConnected ? (
-          <>
-            <div className="overflow">
-              {!isUndefined(matchesHtml) && matchesHtml.length > 0 ? (
-                matchesHtml
-              ) : (
-                <span className="loader loader_on" />
-              )}
-            </div>
-            {this.props.segment.contributions?.matches.length >
-              MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED && moreButton}
-            {errors.length > 0 && <div className="engine-errors">{errors}</div>}
-          </>
-        ) : (
-          clientConnected === false && <SegmentFooterTabError />
-        )}
-      </div>
-    )
+    })
   }
+
+  const isExtended = numContributionsToShow === NUM_CONTRIBUTION_RESULTS
+
+  const moreButton = (
+    <Button
+      className={`segment-footer-tab-more-button ${isExtended ? 'segment-footer-tab-more-button-extended-mode' : ''}`}
+      type={BUTTON_TYPE.DEFAULT}
+      size={BUTTON_SIZE.SMALL}
+      onClick={toggleExtendend}
+    >
+      <IconDown size={18} />
+      {isExtended ? 'Fewer' : 'More'}
+    </Button>
+  )
+
+  return (
+    <div
+      key={'container_' + code}
+      className={'tab sub-editor ' + active_class + ' ' + tab_class}
+      id={'segment-' + segment.sid + '-' + tab_class}
+      onCopy={copyText}
+      onCut={copyText}
+    >
+      {clientConnected ? (
+        <>
+          <div className="overflow">
+            {matchesHtml.length > 0 ? (
+              matchesHtml
+            ) : (
+              <span className="loader loader_on" />
+            )}
+          </div>
+          {segment.contributions?.matches.length >
+            MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED && moreButton}
+          {errors.length > 0 && <div className="engine-errors">{errors}</div>}
+        </>
+      ) : (
+        clientConnected === false && <SegmentFooterTabError />
+      )}
+    </div>
+  )
 }
 
-export default SegmentFooterTabMatches
+SegmentFooterTabMatches.propTypes = {
+  code: PropTypes.string,
+  active_class: PropTypes.string,
+  tab_class: PropTypes.string,
+  segment: PropTypes.object.isRequired,
+}
+
+// Carried over from shouldComponentUpdate. The two state comparisons it also
+// made cannot come across — state changes always re-render now, which is the
+// safe direction.
+const propsAreEqual = (prev, next) =>
+  !(
+    ((!isUndefined(next.segment.contributions) ||
+      !isUndefined(prev.segment.contributions)) &&
+      ((!isUndefined(next.segment.contributions) &&
+        isUndefined(prev.segment.contributions)) ||
+        !fromJS(prev.segment.contributions).equals(
+          fromJS(next.segment.contributions),
+        ))) ||
+    prev.active_class !== next.active_class ||
+    prev.tab_class !== next.tab_class ||
+    prev.segment.unlocked !== next.segment.unlocked
+  )
+
+export default memo(SegmentFooterTabMatches, propsAreEqual)

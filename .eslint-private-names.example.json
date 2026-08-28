@@ -1,0 +1,14 @@
+{
+  "comment": [
+    "Names that must not appear in core code. Core is public; the deployments that",
+    "customise it are not, so core must never mention one by name — a behaviour",
+    "difference belongs on one of core's helper objects, for the deployment to",
+    "replace.",
+    "",
+    "The names are themselves private, which is why they are not committed. Copy",
+    "this file to .eslint-private-names.json (gitignored) and fill in the list;",
+    "CI supplies the same file from a secret. With no such file the rule is simply",
+    "absent, so a fresh checkout lints without it."
+  ],
+  "names": ["example-deployment"]
+}

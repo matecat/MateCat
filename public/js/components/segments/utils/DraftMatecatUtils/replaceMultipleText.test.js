@@ -1,4 +1,4 @@
-import {EditorState, ContentState} from 'draft-js'
+import {EditorState, ContentState, SelectionState} from 'draft-js'
 import replaceMultipleText from './replaceMultipleText'
 
 test('replaces the given offset range with the provided value', () => {
@@ -26,21 +26,41 @@ test('applies each replacement sequentially on the updated content', () => {
   expect(result.getCurrentContent().getPlainText()).toBe('YO world')
 })
 
-test('builds a same-offset selection for every block but only commits the last one', () => {
-  // Each block gets a same-offset selection, but the function replaces text
-  // against the original (non-accumulated) content state on every iteration,
-  // so only the last processed block's replacement survives in the result.
-  const editorState = EditorState.createWithContent(
-    ContentState.createFromText('aaaa\nbbbb'),
-  )
+test('replaces inside the block the selection starts in, leaving the others alone', () => {
+  // A target ending with a newline tag has more than one block: the offsets
+  // belong to the block the selection starts in, and every other block must be
+  // left untouched. Replacing in each block instead appended the new text to
+  // the last one and left the selected text unchanged.
+  const contentState = ContentState.createFromText('aaaa\nbbbb')
+  const editorState = EditorState.createWithContent(contentState)
 
   const result = replaceMultipleText(editorState, [
     {start: 0, end: 2, value: 'X'},
   ])
 
   const blocks = result.getCurrentContent().getBlocksAsArray()
+  expect(blocks[0].getText()).toBe('Xaa')
+  expect(blocks[1].getText()).toBe('bbbb')
+})
+
+test('replaces inside the block the selection starts in when it is not the first', () => {
+  const contentState = ContentState.createFromText('aaaa\nbbbb')
+  const secondBlockKey = contentState.getBlocksAsArray()[1].getKey()
+  const editorState = EditorState.acceptSelection(
+    EditorState.createWithContent(contentState),
+    SelectionState.createEmpty(secondBlockKey).merge({
+      anchorOffset: 1,
+      focusOffset: 3,
+    }),
+  )
+
+  const result = replaceMultipleText(editorState, [
+    {start: 1, end: 3, value: 'ZZ'},
+  ])
+
+  const blocks = result.getCurrentContent().getBlocksAsArray()
   expect(blocks[0].getText()).toBe('aaaa')
-  expect(blocks[1].getText()).toBe('Xbb')
+  expect(blocks[1].getText()).toBe('bZZb')
 })
 
 test('returns the same editor state when there is nothing to replace', () => {

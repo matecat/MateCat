@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState, useRef, useEffect} from 'react'
 
 import LanguageSelectorList from './LanguageSelectorList'
 import LanguageSelectorSearch from './LanguageSelectorSearch'
@@ -48,252 +48,93 @@ export const setRecentlyUsedLanguages = (languages) => {
   )
 }
 
-class LanguageSelector extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      selectedLanguages: null,
-      initialLanguages: null,
-      fromLanguage: null,
-      querySearch: '',
-      filteredLanguages: [],
+const LanguageSelector = (props) => {
+  const {
+    languagesList,
+    onClose,
+    selectedLanguagesFromDropdown,
+    fromLanguage: fromLanguageProp,
+  } = props
+
+  const [selectedLanguages, setSelectedLanguages] = useState(null)
+  // `initialLanguages` is write-only dead state, preserved verbatim from the
+  // class component (set once at mount, never read anywhere).
+  const [, setInitialLanguages] = useState(null)
+  const [fromLanguage, setFromLanguage] = useState(null)
+  const [querySearch, setQuerySearch] = useState('')
+  const [filteredLanguages, setFilteredLanguages] = useState([])
+
+  const containerRef = useRef(null)
+  const listRef = useRef(null)
+
+  const latestRef = useRef({})
+  latestRef.current = {onClose: props.onClose, querySearch, onConfirm}
+
+  useEffect(() => {
+    const container = containerRef.current
+    const navigateLanguagesList = listRef.current.navigateLanguagesList
+    container.addEventListener('keydown', navigateLanguagesList)
+
+    const handleDocumentKeyDown = (event) => {
+      const keyCode = event.keyCode
+      if (keyCode === 27) {
+        latestRef.current.onClose()
+      }
+      if (event.key === 'Enter' && !latestRef.current.querySearch) {
+        latestRef.current.onConfirm()
+      }
     }
+    document.addEventListener('keydown', handleDocumentKeyDown)
 
-    this.listRef = React.createRef()
-  }
-
-  componentDidMount() {
-    const {selectedLanguagesFromDropdown, languagesList, fromLanguage} =
-      this.props
-    this.container.addEventListener(
-      'keydown',
-      this.listRef.current.navigateLanguagesList,
-    )
-    document.addEventListener('keydown', this.keyHandler)
-
-    this.setState({
-      fromLanguage: languagesList.filter((i) => i.code === fromLanguage)[0],
-      selectedLanguages: selectedLanguagesFromDropdown.map(
+    setFromLanguage(languagesList.filter((i) => i.code === fromLanguageProp)[0])
+    setSelectedLanguages(
+      selectedLanguagesFromDropdown.map(
         (e) => languagesList.filter((i) => i.code === e)[0],
       ),
-      initialLanguages: selectedLanguagesFromDropdown.map(
+    )
+    setInitialLanguages(
+      selectedLanguagesFromDropdown.map(
         (e) => languagesList.filter((i) => i.code === e)[0],
       ),
-    })
-  }
-
-  componentWillUnmount() {
-    this.container.removeEventListener(
-      'keydown',
-      this.listRef.current.navigateLanguagesList,
     )
-    document.removeEventListener('keydown', this.keyHandler)
-  }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.querySearch !== this.state.querySearch) {
-      const filteredLanguages = this.state.querySearch
-        ? this.props.languagesList.filter(
+    return () => {
+      container.removeEventListener('keydown', navigateLanguagesList)
+      document.removeEventListener('keydown', handleDocumentKeyDown)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const isFirstRender = useRef(true)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    setFilteredLanguages(
+      querySearch
+        ? languagesList.filter(
             (e) =>
-              e.name
-                .toLowerCase()
-                .indexOf(this.state.querySearch.toLowerCase()) === 0,
+              e.name.toLowerCase().indexOf(querySearch.toLowerCase()) === 0,
           )
-        : []
-      this.setState({filteredLanguages})
-    }
-  }
-
-  setSelectLanguagesFromRecentlyUsed = (list) => {
-    this.setState({selectedLanguages: list})
-  }
-
-  render() {
-    const {
-      onQueryChange,
-      onToggleLanguage,
-      onConfirm,
-      preventDismiss,
-      onReset,
-      onResetResults,
-    } = this
-    const {languagesList, onClose} = this.props
-    const {selectedLanguages, querySearch, fromLanguage, filteredLanguages} =
-      this.state
-
-    const recentyUsedLanguages = getRecentyUsedLanguages().reverse()
-
-    return (
-      <div
-        id="matecat-modal-languages"
-        className="matecat-modal"
-        ref={(el) => {
-          this.container = el
-        }}
-        onClick={onClose}
-      >
-        <div className="matecat-modal-content" onClick={preventDismiss}>
-          <div className="matecat-modal-header">
-            <span className={'modal-title'}>Target languages</span>
-            <Button
-              type={BUTTON_TYPE.ICON}
-              size={BUTTON_SIZE.ICON_STANDARD}
-              mode={BUTTON_MODE.GHOST}
-              onClick={onClose}
-            >
-              <Close size={20} />
-            </Button>
-          </div>
-
-          <div className="matecat-modal-body">
-            <div className="matecat-modal-subheader">
-              <div className={'language-from'}>
-                <div className={'first-column'}>
-                  <span className={'label'}>From:</span>
-                </div>
-                <div>
-                  <span>{fromLanguage && fromLanguage.name}</span>
-                </div>
-              </div>
-              <div className={'language-to'}>
-                <div className={'first-column'}>
-                  <span className={'label'}>To:</span>
-                </div>
-                <div className={'language-search'}>
-                  <LanguageSelectorSearch
-                    languagesList={languagesList}
-                    selectedLanguages={selectedLanguages}
-                    querySearch={querySearch}
-                    onDeleteLanguage={onToggleLanguage}
-                    onQueryChange={onQueryChange}
-                  />
-                </div>
-              </div>
-              {recentyUsedLanguages.length > 0 && (
-                <div className="recently-used">
-                  <div className="first-column">
-                    <span className="label">Recently used:</span>
-                  </div>
-                  <div className="second-column">
-                    {recentyUsedLanguages.map((list, index) => (
-                      <div
-                        className="list-badge"
-                        key={index}
-                        onClick={() =>
-                          this.setSelectLanguagesFromRecentlyUsed(list)
-                        }
-                      >
-                        <LabelWithTooltip>
-                          <span className="language-name">
-                            {list.map(({name}) => name).join(', ')}
-                          </span>
-                        </LabelWithTooltip>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {(filteredLanguages.length > 0 ||
-                (querySearch && !filteredLanguages.length)) && (
-                <div className="button-all-languages">
-                  <Button
-                    type={BUTTON_TYPE.DEFAULT}
-                    mode={BUTTON_MODE.OUTLINE}
-                    onClick={onResetResults}
-                  >
-                    <FlipBackwardIcon />
-                    All languages
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            <LanguageSelectorList
-              ref={this.listRef}
-              languagesList={languagesList}
-              selectedLanguages={selectedLanguages}
-              querySearch={querySearch}
-              onToggleLanguage={onToggleLanguage}
-              onResetResults={onResetResults}
-            />
-          </div>
-
-          <div className="matecat-modal-footer">
-            <div className="selected-counter">
-              {selectedLanguages && selectedLanguages.length > 0 ? (
-                <span className={'uncheck-all'} onClick={onReset}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="12"
-                    height="12"
-                    viewBox="0 0 12 12"
-                  >
-                    <g
-                      fill="#00AEE4"
-                      fillRule="nonzero"
-                      stroke="#00AEE4"
-                      strokeWidth="1"
-                      transform="translate(-5 -5) translate(5 5)"
-                    >
-                      <rect
-                        width="13"
-                        height="1"
-                        x="-0.5"
-                        y="5.5"
-                        rx="0.5"
-                        transform="rotate(45 6 6)"
-                      >
-                        {' '}
-                      </rect>
-                      <rect
-                        width="13"
-                        height="1"
-                        x="-0.5"
-                        y="5.5"
-                        rx="0.5"
-                        transform="rotate(-45 6 6)"
-                      >
-                        {' '}
-                      </rect>
-                    </g>
-                  </svg>
-                </span>
-              ) : null}
-              <span className={'badge'}>
-                {selectedLanguages && selectedLanguages.length}
-              </span>
-              <span className={'label'}>
-                {`Language${selectedLanguages?.length === 0 || selectedLanguages?.length > 1 ? 's' : ''}`}{' '}
-                selected
-              </span>
-            </div>
-            <div className="">
-              <Button type={BUTTON_TYPE.PRIMARY} onClick={onConfirm}>
-                Confirm
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+        : [],
     )
-  }
+  }, [querySearch])
 
-  preventDismiss = (event) => {
+  const preventDismiss = (event) => {
     event.stopPropagation()
   }
-  onConfirm = () => {
+
+  function onConfirm() {
     //confirm must have 1 language selected
-    const {selectedLanguages} = this.state
-    this.props.onConfirm(selectedLanguages)
+    props.onConfirm(selectedLanguages)
   }
 
-  onQueryChange = (querySearch) => {
-    this.setState({querySearch})
+  const onQueryChange = (querySearch) => {
+    setQuerySearch(querySearch)
   }
 
-  onToggleLanguage = (language) => {
-    const {selectedLanguages} = this.state
+  const onToggleLanguage = (language) => {
     let newSelectedLanguages = [...selectedLanguages]
     const indexSearch = selectedLanguages
       .map((e) => e.code)
@@ -305,44 +146,182 @@ class LanguageSelector extends React.Component {
     }
 
     const areAllResultsSelected =
-      this.state.filteredLanguages.filter(({code}) =>
+      filteredLanguages.filter(({code}) =>
         newSelectedLanguages.find((selected) => selected.code === code),
-      ).length === this.state.filteredLanguages.length
+      ).length === filteredLanguages.length
 
     const shouldResetQuery =
-      this.state.filteredLanguages.length < 2 || areAllResultsSelected
+      filteredLanguages.length < 2 || areAllResultsSelected
 
-    this.setState({
-      selectedLanguages: newSelectedLanguages,
-      ...(shouldResetQuery && {querySearch: ''}),
-    })
+    setSelectedLanguages(newSelectedLanguages)
+    if (shouldResetQuery) setQuerySearch('')
     //when add a language, restore query search.
   }
 
-  onReset = () => {
-    this.setState({
-      selectedLanguages: [],
-      querySearch: '',
-    })
+  const onReset = () => {
+    setSelectedLanguages([])
+    setQuerySearch('')
   }
-  onResetResults = () => {
-    this.setState({querySearch: ''})
+  const onResetResults = () => {
+    setQuerySearch('')
   }
 
-  keyHandler = (event) => {
-    const {onClose} = this.props
-    const keyCode = event.keyCode
-
-    if (keyCode === 27) {
-      onClose()
-    }
-
-    if (event.key === 'Enter' && !this.state.querySearch) {
-      this.onConfirm()
-    }
-
-    //27
+  const setSelectLanguagesFromRecentlyUsed = (list) => {
+    setSelectedLanguages(list)
   }
+
+  const recentyUsedLanguages = getRecentyUsedLanguages().reverse()
+
+  return (
+    <div
+      id="matecat-modal-languages"
+      className="matecat-modal"
+      ref={containerRef}
+      onClick={onClose}
+    >
+      <div className="matecat-modal-content" onClick={preventDismiss}>
+        <div className="matecat-modal-header">
+          <span className={'modal-title'}>Target languages</span>
+          <Button
+            type={BUTTON_TYPE.ICON}
+            size={BUTTON_SIZE.ICON_STANDARD}
+            mode={BUTTON_MODE.GHOST}
+            onClick={onClose}
+          >
+            <Close size={20} />
+          </Button>
+        </div>
+
+        <div className="matecat-modal-body">
+          <div className="matecat-modal-subheader">
+            <div className={'language-from'}>
+              <div className={'first-column'}>
+                <span className={'label'}>From:</span>
+              </div>
+              <div>
+                <span>{fromLanguage && fromLanguage.name}</span>
+              </div>
+            </div>
+            <div className={'language-to'}>
+              <div className={'first-column'}>
+                <span className={'label'}>To:</span>
+              </div>
+              <div className={'language-search'}>
+                <LanguageSelectorSearch
+                  languagesList={languagesList}
+                  selectedLanguages={selectedLanguages}
+                  querySearch={querySearch}
+                  onDeleteLanguage={onToggleLanguage}
+                  onQueryChange={onQueryChange}
+                />
+              </div>
+            </div>
+            {recentyUsedLanguages.length > 0 && (
+              <div className="recently-used">
+                <div className="first-column">
+                  <span className="label">Recently used:</span>
+                </div>
+                <div className="second-column">
+                  {recentyUsedLanguages.map((list, index) => (
+                    <div
+                      className="list-badge"
+                      key={index}
+                      onClick={() => setSelectLanguagesFromRecentlyUsed(list)}
+                    >
+                      <LabelWithTooltip>
+                        <span className="language-name">
+                          {list.map(({name}) => name).join(', ')}
+                        </span>
+                      </LabelWithTooltip>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(filteredLanguages.length > 0 ||
+              (querySearch && !filteredLanguages.length)) && (
+              <div className="button-all-languages">
+                <Button
+                  type={BUTTON_TYPE.DEFAULT}
+                  mode={BUTTON_MODE.OUTLINE}
+                  onClick={onResetResults}
+                >
+                  <FlipBackwardIcon />
+                  All languages
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <LanguageSelectorList
+            ref={listRef}
+            languagesList={languagesList}
+            selectedLanguages={selectedLanguages}
+            querySearch={querySearch}
+            onToggleLanguage={onToggleLanguage}
+            onResetResults={onResetResults}
+          />
+        </div>
+
+        <div className="matecat-modal-footer">
+          <div className="selected-counter">
+            {selectedLanguages && selectedLanguages.length > 0 ? (
+              <span className={'uncheck-all'} onClick={onReset}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 12 12"
+                >
+                  <g
+                    fill="#00AEE4"
+                    fillRule="nonzero"
+                    stroke="#00AEE4"
+                    strokeWidth="1"
+                    transform="translate(-5 -5) translate(5 5)"
+                  >
+                    <rect
+                      width="13"
+                      height="1"
+                      x="-0.5"
+                      y="5.5"
+                      rx="0.5"
+                      transform="rotate(45 6 6)"
+                    >
+                      {' '}
+                    </rect>
+                    <rect
+                      width="13"
+                      height="1"
+                      x="-0.5"
+                      y="5.5"
+                      rx="0.5"
+                      transform="rotate(-45 6 6)"
+                    >
+                      {' '}
+                    </rect>
+                  </g>
+                </svg>
+              </span>
+            ) : null}
+            <span className={'badge'}>
+              {selectedLanguages && selectedLanguages.length}
+            </span>
+            <span className={'label'}>
+              {`Language${selectedLanguages?.length === 0 || selectedLanguages?.length > 1 ? 's' : ''}`}{' '}
+              selected
+            </span>
+          </div>
+          <div className="">
+            <Button type={BUTTON_TYPE.PRIMARY} onClick={onConfirm}>
+              Confirm
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 LanguageSelector.defaultProps = {

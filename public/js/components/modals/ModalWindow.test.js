@@ -3,8 +3,9 @@ import userEvent from '@testing-library/user-event'
 import {createRoot} from 'react-dom/client'
 import React from 'react'
 
-import {ModalWindow} from './ModalWindow'
+import {ModalWindow, onModalWindowMounted} from './ModalWindow'
 import AppDispatcher from '../../stores/AppDispatcher'
+import CatToolStore from '../../stores/CatToolStore'
 import ModalsConstants from '../../constants/ModalsConstants'
 import ModalsActions from '../../actions/ModalsActions'
 
@@ -101,4 +102,44 @@ test('works properly ModalOverlay version', () => {
   expect(onCloseCallback).toHaveBeenCalledTimes(1)
   expect(elButtonClose).not.toBeVisible()
   expect(elTitle).not.toBeVisible()
+})
+
+test('onModalWindowMounted resolves once the component mounts', async () => {
+  const mountedPromise = onModalWindowMounted()
+
+  render(<ModalWindow />)
+
+  const result = await Promise.race([
+    mountedPromise.then(() => 'resolved'),
+    new Promise((resolve) => setTimeout(() => resolve('timeout'), 1000)),
+  ])
+
+  expect(result).toBe('resolved')
+})
+
+test('unmounting removes the CatToolStore listeners', () => {
+  const baselineShowCount = CatToolStore.listenerCount(
+    ModalsConstants.SHOW_MODAL,
+  )
+  const baselineCloseCount = CatToolStore.listenerCount(
+    ModalsConstants.CLOSE_MODAL,
+  )
+
+  const {unmount} = render(<ModalWindow />)
+
+  expect(CatToolStore.listenerCount(ModalsConstants.SHOW_MODAL)).toBe(
+    baselineShowCount + 1,
+  )
+  expect(CatToolStore.listenerCount(ModalsConstants.CLOSE_MODAL)).toBe(
+    baselineCloseCount + 1,
+  )
+
+  unmount()
+
+  expect(CatToolStore.listenerCount(ModalsConstants.SHOW_MODAL)).toBe(
+    baselineShowCount,
+  )
+  expect(CatToolStore.listenerCount(ModalsConstants.CLOSE_MODAL)).toBe(
+    baselineCloseCount,
+  )
 })

@@ -5,7 +5,6 @@ import {
   getProjectTemplates,
 } from '../api/getProjectTemplates/getProjectTemplates'
 import useTemplates, {normalizeTemplatesWithNullProps} from './useTemplates'
-import {ComponentExtendInterface} from '../utils/ComponentExtendInterface'
 import {CHARS_SIZE_COUNTER_TYPES} from '../utils/charsSizeCounterUtil'
 import defaultMTOptions from '../components/settingsPanel/Contents/defaultTemplates/mtOptions.json'
 
@@ -84,11 +83,12 @@ export const SCHEMA_KEYS = {
   mandatoryIssues: 'mandatory_issues',
 }
 
-export class UseProjectTemplateInterface extends ComponentExtendInterface {
-  getCharacterCounterMode() {}
+// The character counter preset a deployment wants applied to new templates.
+// Core ships none, so the job or the template decides.
+// Overridden by plugin.
+export const useProjectTemplateInterface = {
+  getCharacterCounterMode: () => undefined,
 }
-
-const useProjectTemplateInterface = new UseProjectTemplateInterface()
 
 function useProjectTemplates({
   tmKeys,

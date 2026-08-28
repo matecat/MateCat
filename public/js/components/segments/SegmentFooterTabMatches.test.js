@@ -60,8 +60,8 @@ beforeAll(() => {
     ...global.config,
     isSourceRTL: false,
     isTargetRTL: false,
-    source_rfc: 'en-US',
-    target_rfc: 'it-IT',
+    source_code: 'en-US',
+    target_code: 'it-IT',
     mt_enabled: true,
   }
   global.navigator.clipboard = {writeText: jest.fn(() => Promise.resolve())}
@@ -212,9 +212,7 @@ describe('SegmentFooterTabMatches', () => {
   })
 
   test('renders trash icon for an owned TM key match', () => {
-    CatToolStore.getJobTmKeys.mockReturnValue([
-      {key: 'memkey', w: 1},
-    ])
+    CatToolStore.getJobTmKeys.mockReturnValue([{key: 'memkey', w: 1}])
     renderComponent({
       segment: {
         ...baseSegment,
@@ -330,6 +328,36 @@ describe('SegmentFooterTabMatches', () => {
     getSelectionSpy.mockRestore()
   })
 
+  test('does not reject when the browser denies clipboard permission', async () => {
+    const getSelectionSpy = jest
+      .spyOn(document, 'getSelection')
+      .mockReturnValue({toString: () => 'clip text'})
+    global.navigator.clipboard.writeText.mockRejectedValueOnce(
+      new DOMException('denied', 'NotAllowedError'),
+    )
+    const unhandledRejection = jest.fn()
+    process.on('unhandledRejection', unhandledRejection)
+
+    renderComponent({
+      segment: {
+        ...baseSegment,
+        contributions: {matches: [makeMatch()]},
+      },
+    })
+    const container = document.querySelector('#segment-20-matches')
+    await act(async () => {
+      fireEvent.copy(container)
+    })
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    process.off('unhandledRejection', unhandledRejection)
+
+    expect(unhandledRejection).not.toHaveBeenCalled()
+    expect(global.navigator.clipboard.writeText).toHaveBeenCalledWith(
+      'clip text',
+    )
+    getSelectionSpy.mockRestore()
+  })
+
   test('renders quality info when sentence_confidence is present', () => {
     renderComponent({
       segment: {
@@ -340,30 +368,5 @@ describe('SegmentFooterTabMatches', () => {
       },
     })
     expect(document.querySelector('.graysmall-details')).toBeInTheDocument()
-  })
-})
-
-describe('SegmentFooterTabMatches.prototype.copyText', () => {
-  afterEach(() => {
-    jest.restoreAllMocks()
-  })
-
-  test('does not reject when the browser denies clipboard permission', async () => {
-    jest
-      .spyOn(document, 'getSelection')
-      .mockReturnValue({toString: () => 'some matched text'})
-    navigator.clipboard = {
-      writeText: jest
-        .fn()
-        .mockRejectedValue(new DOMException('denied', 'NotAllowedError')),
-    }
-
-    await expect(
-      SegmentFooterTabMatches.prototype.copyText({preventDefault: jest.fn()}),
-    ).resolves.not.toThrow()
-
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      'some matched text',
-    )
   })
 })

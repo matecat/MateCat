@@ -35,8 +35,12 @@ export const AiAlternatives = ({sid, editArea, isIconsBundled}) => {
     CommonUtils.dispatchTrackingEvents('LaraStyle', message)
   }
 
+  // Guard `editAreaRef` as well as `editArea`: the node is only attached on
+  // commit, so it is absent for the first render of a freshly opened segment.
+  // Without a focusable editor to check there is nothing to offer alternatives
+  // for, so the button stays disabled.
   const isDisabled =
-    !selectedText || !editArea?.editAreaRef.contains(document.activeElement)
+    !selectedText || !editArea?.editAreaRef?.contains(document.activeElement)
 
   return (
     !config.isReview && (
