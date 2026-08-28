@@ -20,7 +20,7 @@ class TeamDaoInjectedDbGuardTest extends AbstractTest
     /**
      * Installed as the Database singleton — provides a working PDO for any
      * no-arg DAO constructions inside nested collaborators (e.g. UserDao inside
-     * MembershipDao::createList) that are not part of this fix's scope.
+     * MembershipDao::addMembersByEmail) that are not part of this fix's scope.
      */
     private IDatabase&Stub $singletonDbStub;
 
@@ -100,7 +100,7 @@ class TeamDaoInjectedDbGuardTest extends AbstractTest
         $user->email = 'test@example.com';
 
         // members=[] — after createUserTeam appends the creator email the filter
-        // produces ['test@example.com']. MembershipDao::createList calls
+        // produces ['test@example.com']. MembershipDao::addMembersByEmail calls
         // (new UserDao)->getByEmails() which returns [] (stub fetchAll=[]) → early-return [].
         $params = [
             'name'    => 't',

@@ -143,10 +143,10 @@ class TeamModel
             if (!empty($this->member_emails)) {
                 $this->_checkAddMembersToPersonalTeam();
 
-                $this->new_memberships = $membershipDao->createList([
-                    'team' => $this->struct,
-                    'members' => $this->member_emails
-                ]);
+                $this->new_memberships = $membershipDao->addMembersByEmail(
+                    $this->struct,
+                    $this->member_emails
+                );
             }
 
             if (!empty($this->uids_to_remove)) {

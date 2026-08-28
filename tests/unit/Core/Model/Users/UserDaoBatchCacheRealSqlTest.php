@@ -5,13 +5,14 @@ namespace Matecat\Core\Model\Users;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\RealSqlDaoTestTrait;
 use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Real-SQL coverage for the batched read `UserDao::getByUids()`.
  *
  * The set-valued cache key this method used to build — one entry addressed by the whole uid
- * list — was unreachable from any eviction door. `destroyCacheByUid()` addresses a single uid,
+ * list — was unreachable from any eviction door. `destroyCache()` addresses a single uid,
  * so it could never name the set entry, and a renamed user stayed visible inside other members'
  * cached team lists for the full 24h TTL that `MembershipDao::getMemberListByTeamId()` sets.
  * The same property made the entry die on every membership change: adding or removing one member
@@ -83,19 +84,19 @@ class UserDaoBatchCacheRealSqlTest extends AbstractTest
         $this->assertCount(2, $this->dao->getByUids([$a, $b]));
 
         $this->renameBehindTheDao($a, 'evicted');
-        $this->dao->destroyCacheByUid($a);
+        $this->dao->destroyCache($this->identityOf($a));
 
         $this->assertSame(
             'evicted',
             $this->firstNameFromBatch([$a, $b], $a),
-            'destroyCacheByUid() must evict the entry getByUids() reads.'
+            'destroyCache() must evict the entry getByUids() reads.'
         );
     }
 
     /**
      * Evicting one member must not evict the others: the entries are per-uid, not per-set.
      */
-    public function testDestroyCacheByUidLeavesTheOtherMembersCached(): void
+    public function testDestroyCacheLeavesTheOtherMembersCached(): void
     {
         $a = (int)$this->fixtures->makeUser()['uid'];
         $b = (int)$this->fixtures->makeUser()['uid'];
@@ -105,7 +106,7 @@ class UserDaoBatchCacheRealSqlTest extends AbstractTest
 
         $this->renameBehindTheDao($a, 'evicted');
         $this->renameBehindTheDao($b, 'untouched');
-        $this->dao->destroyCacheByUid($a);
+        $this->dao->destroyCache($this->identityOf($a));
 
         $set = $this->dao->getByUids([$a, $b]);
 
@@ -240,5 +241,17 @@ class UserDaoBatchCacheRealSqlTest extends AbstractTest
 
         $this->assertSame([$a], array_keys($set), 'keyed by uid, deduplicated, absent rows omitted');
         $this->assertSame($a, (int)$set[$a]->uid);
+    }
+
+    /**
+     * The door is addressed by the entity, and these tests hold only a uid. The email is left unset
+     * on purpose: the door skips that key, so the eviction stays confined to the uid entry.
+     */
+    private function identityOf(int $uid): UserStruct
+    {
+        $user = new UserStruct();
+        $user->uid = $uid;
+
+        return $user;
     }
 }

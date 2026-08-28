@@ -235,12 +235,14 @@ abstract class AbstractDao
     }
 
     /**
+     * Bulk-inserts a list of structs of this DAO's own type. Implemented only where a DAO has a
+     * batched insert worth having; the rest inherit this refusal.
+     *
      * @param array<int, IDaoStruct> $obj_arr
      *
-     * @return mixed
      * @throws Exception
      */
-    public function createList(array $obj_arr)
+    public function createList(array $obj_arr): void
     {
         throw new Exception("Abstract method " . __METHOD__ . " must be overridden ");
     }

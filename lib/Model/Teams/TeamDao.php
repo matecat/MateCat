@@ -119,19 +119,16 @@ class TeamDao extends AbstractDao
         //add the creator to the list of members
         $params['members'][] = $orgCreatorUser->email;
 
-        // createList() writes one membership row per member, so it runs in a scope. The scope also
-        // undoes a partial list here rather than leaving it to the end of the request: a worker holds
-        // its connection across messages, so a transaction left open by a failure here would still be
-        // open when the next message starts writing. Entered while the caller already holds a
-        // transaction it is a guest and closes nothing.
+        // addMembersByEmail() writes one membership row per member, so it runs in a scope. The scope
+        // also undoes a partial list here rather than leaving it to the end of the request: a worker
+        // holds its connection across messages, so a transaction left open by a failure here would
+        // still be open when the next message starts writing. Entered while the caller already holds
+        // a transaction it is a guest and closes nothing.
         $this->database->transaction(function () use ($teamStruct, $params): void {
             /** @var list<string> $members */
             $members = array_values(array_filter($params['members'], fn($member) => $member !== null));
 
-            $membersList = (new MembershipDao($this->database))->createList([
-                'team' => $teamStruct,
-                'members' => $members
-            ]);
+            $membersList = (new MembershipDao($this->database))->addMembersByEmail($teamStruct, $members);
             $teamStruct->setMembers($membersList);
         });
 

@@ -172,10 +172,9 @@ class PasswordResetModel
         }
 
         $this->userDao->updateStruct($user, $fieldsToUpdate);
-        $this->userDao->destroyCacheByEmail($user->email ?? throw new RuntimeException('User email must be set before cache invalidation'));
+        $this->userDao->destroyCache($user);
 
         $uid = $user->uid ?? throw new RuntimeException('User uid must be set before cache invalidation');
-        $this->userDao->destroyCacheByUid($uid);
 
         // Until now this flow revoked nothing at all: the user arrives without an authentication
         // cookie, so removeLoginCookieFromStore() was handed an empty value and returned early.

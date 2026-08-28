@@ -41,7 +41,7 @@ class UserStateStore
      *   rest with a lifetime nobody purges on password change. That is the defect being walked back,
      *   not a shape to reproduce under a new key name.
      * - *The users row itself.* {@see \Model\Users\UserDao::getByUid()} is already a uid-keyed Redis
-     *   cache with its own TTL and an explicit `destroyCacheByUid()`. A second copy here would be a
+     *   cache with its own TTL and an explicit `destroyCache()` door. A second copy here would be a
      *   cache of a cache with independent invalidation, i.e. two sources of truth that drift.
      * - *Authorization decisions.* Identity is resolved from the login-token ring on every request.
      *   If a field here could authorise, `DEL user_state:<uid>` would become a security operation and
@@ -75,11 +75,6 @@ class UserStateStore
      * and a manager in several large teams pays a latency linear in their total membership — of the
      * order of a hundred sequential round trips — at one to two calls per page load.
      *
-     * An earlier revision of this docblock justified the store by claiming those per-member reads go
-     * through a TTL-less DAO and are therefore live SQL. That was wrong, and it mattered: it named a
-     * cost an order of magnitude larger than the real one. The store is still worth its keep on the
-     * round-trip count above, which is the honest reason.
-     *
      * **Storage shape.** Wrapped in a single-element list, as the trait's contract requires, inside an
      * XFetch envelope carrying the measured build cost — see {@see self::setProfile()} for why that
      * measurement has to be passed in rather than left to the trait's fallback.
@@ -88,11 +83,9 @@ class UserStateStore
      * part of this payload drops the field: the users row, user metadata, connected services, team
      * membership, team renames and per-team project counts.
      *
-     * A gap used to be recorded here rather than fixed: a renamed user stayed stale inside *other*
-     * members' cached team lists for up to 24h, because those names came from a `getByUids()`
-     * `IN (...)` query whose cache key was addressed by the whole uid list, and `destroyCacheByUid()`
-     * — which knows one uid — could never name it. Both member-list reads now cache one entry per
-     * uid, at the same address their single-uid accessors use, so the single-uid doors reach them.
+     * That reaches a renamed user inside *other* members' cached team lists, which a set-addressed
+     * key could not: both member-list reads cache one entry per uid, at the same address their
+     * single-uid accessors use, so `UserDao::destroyCache()` — which knows one uid — names them.
      * See {@see \Model\DataAccess\AbstractDao::_fetchObjectMapPerId()}.
      */
     private const string USER_PROFILE_FIELD = 'user_profile:%d';

@@ -316,8 +316,7 @@ class SignupModel
         $user->clearAuthToken();
 
         $this->userDao->updateStruct($user, ['fields' => ['confirmation_token', 'email_confirmed_at']]);
-        $this->userDao->destroyCacheByEmail($user->email ?? throw new RuntimeException('Missing user email'));
-        $this->userDao->destroyCacheByUid($user->uid ?? throw new RuntimeException('Missing user uid'));
+        $this->userDao->destroyCache($user);
 
         return $user;
     }

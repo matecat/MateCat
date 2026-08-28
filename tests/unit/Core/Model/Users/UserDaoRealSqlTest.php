@@ -7,6 +7,7 @@ use Matecat\TestHelpers\RealSqlDaoTestTrait;
 use Model\Users\AuthTokenScope;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use RuntimeException;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -331,26 +332,146 @@ class UserDaoRealSqlTest extends AbstractTest
         $this->assertSame($assignee['uid'], (int)$found->uid);
     }
 
-    public function testDestroyCacheByUidEvictsWarmedEntry(): void
+
+    /**
+     * The door is the whole invalidation for a user row: a caller names the entity it already holds
+     * and both addresses that row is cached under go. Asserted by mutating the row underneath a warm
+     * cache — a read that still returns the old name proves the entry was live, and the same read
+     * returning the new one after the door proves it was evicted.
+     */
+    public function testDestroyCacheEvictsBothTheUidAndTheEmailKeys(): void
     {
         $made = $this->fixtures->makeUser();
-        // Warm the cache with a non-zero TTL so a key actually exists to evict.
+        $user = $this->dao->getByUid($made['uid']);
+        $this->assertInstanceOf(UserStruct::class, $user);
+
         $this->dao->setCacheTTL(60);
         $this->dao->getByUid($made['uid']);
+        $this->dao->getByEmail($made['email']);
 
-        $this->assertTrue($this->dao->destroyCacheByUid($made['uid']));
-        // Second eviction finds nothing -> false: proves the first call really removed the key.
-        $this->assertFalse($this->dao->destroyCacheByUid($made['uid']));
+        $this->renameBehindTheCache((int)$made['uid'], 'Renamed');
+
+        $this->assertNotSame(
+            'Renamed',
+            $this->dao->getByUid($made['uid'])?->first_name,
+            'precondition: the uid entry must be warm and therefore stale'
+        );
+        $this->assertNotSame(
+            'Renamed',
+            $this->dao->getByEmail($made['email'])?->first_name,
+            'precondition: the email entry must be warm and therefore stale'
+        );
+
+        $this->dao->destroyCache($user);
+
+        $this->assertSame('Renamed', $this->dao->getByUid($made['uid'])?->first_name);
+        $this->assertSame('Renamed', $this->dao->getByEmail($made['email'])?->first_name);
         $this->dao->setCacheTTL(0);
     }
 
-    public function testDestroyCacheByEmailEvictsWarmedEntry(): void
+    /**
+     * A struct handed to the door after an email change carries only the new address, so the entry
+     * keyed on the old one would survive its whole TTL and keep answering lookups for an address the
+     * account no longer has. The parameter is the only way the door can learn that value.
+     */
+    public function testDestroyCacheEvictsTheRetiredEmailKey(): void
     {
         $made = $this->fixtures->makeUser();
+        $retiredEmail = $made['email'];
+        $newEmail = 'rsq_moved_' . bin2hex(random_bytes(6)) . '@example.test';
+
         $this->dao->setCacheTTL(60);
+        $this->dao->getByEmail($retiredEmail);
+
+        $this->realSqlDb()->getConnection()
+            ->prepare('UPDATE users SET email = :email WHERE uid = :uid')
+            ->execute(['email' => $newEmail, 'uid' => (int)$made['uid']]);
+
+        $this->assertInstanceOf(
+            UserStruct::class,
+            $this->dao->getByEmail($retiredEmail),
+            'precondition: the retired address still resolves out of the warm entry'
+        );
+
+        $moved = new UserStruct();
+        $moved->uid = (int)$made['uid'];
+        $moved->email = $newEmail;
+
+        $this->dao->destroyCache($moved, $retiredEmail);
+
+        $this->assertNull(
+            $this->dao->getByEmail($retiredEmail),
+            'the retired address must resolve to nothing once its entry is evicted'
+        );
+        $this->dao->setCacheTTL(0);
+    }
+
+    /**
+     * Callers bust the same user from more than one path — a password change and the logout that
+     * follows it. The second call must find nothing and say nothing, not fail.
+     */
+    public function testDestroyCacheIsIdempotent(): void
+    {
+        $made = $this->fixtures->makeUser();
+        $user = $this->dao->getByUid($made['uid']);
+        $this->assertInstanceOf(UserStruct::class, $user);
+
+        $this->dao->setCacheTTL(60);
+        $this->dao->getByUid($made['uid']);
         $this->dao->getByEmail($made['email']);
 
-        $this->assertTrue($this->dao->destroyCacheByEmail($made['email']));
+        $this->dao->destroyCache($user);
+        $this->dao->destroyCache($user);
+
+        $this->renameBehindTheCache((int)$made['uid'], 'Twice');
+        $this->assertSame('Twice', $this->dao->getByUid($made['uid'])?->first_name);
         $this->dao->setCacheTTL(0);
+    }
+
+    /**
+     * The uid is the identity the door is addressed by. Without it there is nothing to evict, and
+     * silently doing nothing would leave a caller believing it had invalidated a row.
+     */
+    public function testDestroyCacheRefusesAStructWithNoUid(): void
+    {
+        $anonymous = new UserStruct();
+        $anonymous->email = 'rsq_nouid_' . bin2hex(random_bytes(6)) . '@example.test';
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('User uid must be set before cache invalidation');
+
+        $this->dao->destroyCache($anonymous);
+    }
+
+    /**
+     * users.email is NOT NULL, so no stored row is reachable through the email query with a null
+     * bind — there is provably no entry under that address to evict. The uid key still has to go.
+     */
+    public function testDestroyCacheEvictsTheUidKeyWhenTheStructCarriesNoEmail(): void
+    {
+        $made = $this->fixtures->makeUser();
+
+        $this->dao->setCacheTTL(60);
+        $this->dao->getByUid($made['uid']);
+
+        $emailless = new UserStruct();
+        $emailless->uid = (int)$made['uid'];
+
+        $this->dao->destroyCache($emailless);
+
+        $this->renameBehindTheCache((int)$made['uid'], 'NoEmail');
+        $this->assertSame('NoEmail', $this->dao->getByUid($made['uid'])?->first_name);
+        $this->dao->setCacheTTL(0);
+    }
+
+    /**
+     * Writes the row on the connection directly, so the cached copy cannot follow it. A read that
+     * still returns the previous value is then proof the entry is live rather than proof of nothing.
+     */
+    private function renameBehindTheCache(int $uid, string $firstName): void
+    {
+        $this->realSqlDb()->getConnection()
+            ->prepare('UPDATE users SET first_name = :first_name WHERE uid = :uid')
+            ->execute(['first_name' => $firstName, 'uid' => $uid]);
     }
 }
