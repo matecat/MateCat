@@ -570,7 +570,7 @@ class ChunkReviewDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function destroyCacheForFindChunkReviewsDoesNotThrow(): void
+    public function destroyCacheChunkReviewsDoesNotThrow(): void
     {
         $chunk = new JobStruct();
         $chunk->id = 50;
@@ -582,7 +582,7 @@ class ChunkReviewDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function destroyCachesForBustsTheCredentialAndProjectCaches(): void
+    public function destroyCacheBustsTheCredentialAndProjectCaches(): void
     {
         $chunkReview = new ChunkReviewStruct();
         $chunkReview->id_job = 42;
