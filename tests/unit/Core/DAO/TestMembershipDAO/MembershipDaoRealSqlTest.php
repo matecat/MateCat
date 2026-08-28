@@ -12,6 +12,7 @@ use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Throwable;
+use TypeError;
 
 /**
  * Real-SQL coverage for MembershipDao (campaign dao-realsql-90).
@@ -124,21 +125,40 @@ class MembershipDaoRealSqlTest extends AbstractTest
 
 
     #[Test]
-    public function destroyCache_methods_evict_primed_entries(): void
+    public function destroyCache_evicts_the_three_reads_a_membership_row_addresses(): void
     {
         $this->dao->setCacheTTL(60);
-
-        // findUserTeams cache
         $this->dao->findUserTeams($this->user());
-        $this->assertTrue($this->dao->destroyCacheUserTeams($this->user()));
-
-        // findTeamByIdAndUser cache
         $this->dao->findTeamByIdAndUser($this->teamId, $this->user());
-        $this->assertTrue($this->dao->destroyCacheTeamByIdAndUser($this->teamId, $this->user()));
-
-        // getMemberListByTeamId cache
         $this->dao->getMemberListByTeamId($this->teamId, false);
-        $this->assertTrue($this->dao->destroyCacheForListByTeamId($this->teamId));
+
+        // Two of the three select teams.* through the join, so the name reaches them; the member list
+        // is the teams_users row itself.
+        $this->writeBehindTheCache('UPDATE teams SET name = :name WHERE id = :id', ['name' => 'rsq_renamed', 'id' => $this->teamId]);
+        $this->writeBehindTheCache('UPDATE teams_users SET is_admin = 0 WHERE id_team = :id AND uid = :uid', ['id' => $this->teamId, 'uid' => $this->uid]);
+
+        $this->dao->destroyCache(new MembershipStruct(['uid' => $this->uid, 'id_team' => $this->teamId]));
+
+        $teams = $this->dao->setCacheTTL(60)->findUserTeams($this->user());
+        $this->assertIsArray($teams);
+        $this->assertSame('rsq_renamed', $teams[0]->name);
+        $this->assertSame('rsq_renamed', $this->dao->setCacheTTL(60)->findTeamByIdAndUser($this->teamId, $this->user())?->name);
+        $this->assertFalse((bool)$this->dao->setCacheTTL(60)->getMemberListByTeamId($this->teamId, false)[0]->is_admin);
+    }
+
+    #[Test]
+    public function destroyCache_refuses_a_membership_that_names_no_user(): void
+    {
+        $this->expectException(TypeError::class);
+        $this->dao->destroyCache(new MembershipStruct(['id_team' => $this->teamId]));
+    }
+
+    /**
+     * @param array<string, int|string> $bind
+     */
+    private function writeBehindTheCache(string $sql, array $bind): void
+    {
+        $this->realSqlDb()->getConnection()->prepare($sql)->execute($bind);
     }
 
     /**

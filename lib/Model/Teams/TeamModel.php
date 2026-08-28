@@ -176,7 +176,7 @@ class TeamModel
                 }
             }
 
-            (new MembershipDao($this->db()))->destroyCacheForListByTeamId($teamId);
+            (new MembershipDao($this->db()))->destroyCacheMemberListByTeamId($teamId);
 
             $this->all_memberships = (new MembershipDao($this->db()))
                 ->setCacheTTL(3600)

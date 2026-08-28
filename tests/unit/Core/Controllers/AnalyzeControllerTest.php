@@ -14,6 +14,7 @@ use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 use Model\Teams\MembershipDao;
+use Model\Teams\MembershipStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
@@ -371,7 +372,9 @@ class AnalyzeControllerTest extends AbstractTest
         // The rows were just written, so drop the cached view of them. Without this the test depends on
         // whatever a previous run left in Redis for this (uid, id_team) — the membership read is cached
         // for 10 minutes and caches misses as readily as hits.
-        (new MembershipDao(obtainTestDatabase()))->destroyCacheTeamByIdAndUser($this->teamId(self::BASE), $user);
+        (new MembershipDao(obtainTestDatabase()))->destroyCache(
+            new MembershipStruct(['uid' => $user->uid, 'id_team' => $this->teamId(self::BASE)])
+        );
 
         $this->assertSame('true', $this->renderAndReadSplitEnabled());
     }

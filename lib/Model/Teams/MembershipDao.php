@@ -17,6 +17,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PDOException;
 use ReflectionException;
+use TypeError;
 
 class MembershipDao extends AbstractDao
 {
@@ -73,6 +74,37 @@ class MembershipDao extends AbstractDao
                 'uid' => $user->uid,
             ]
         );
+    }
+
+    /**
+     * The one way in from outside for a membership write: a caller names the row it added or removed,
+     * and the three reads that could still answer as if it were still there - or not yet there - are
+     * dropped.
+     *
+     * A team rename does not come through here. It stales the same reads, because two of them select
+     * teams.* through the join, but no membership row changed and the caller holds no membership: see
+     * {@see destroyCacheUserTeams()} and {@see destroyCacheMemberListByTeamId()}, which stay public
+     * for it.
+     *
+     * Nor does a batch. destroyCacheMemberListByTeamId() re-reads the member list and invalidates
+     * every member's profile, so calling this once per inserted row would sweep the whole team once
+     * per member: {@see addMembersByEmail()} evicts per member and lists once, on purpose.
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function destroyCache(MembershipStruct $membership): void
+    {
+        $uid = $membership->uid ?? throw new TypeError('MembershipStruct::$uid cannot be null');
+
+        $user = new UserStruct();
+        $user->uid = $uid;
+
+        $this->destroyCacheUserTeams($user);
+        $this->destroyCacheTeamByIdAndUser($membership->id_team, $user);
+        $this->destroyCacheMemberListByTeamId($membership->id_team);
     }
 
     /**
@@ -133,7 +165,7 @@ class MembershipDao extends AbstractDao
      * @see MembershipDao::findTeamByIdAndUser
      *
      */
-    public function destroyCacheTeamByIdAndUser(int $id, UserStruct $user): bool
+    private function destroyCacheTeamByIdAndUser(int $id, UserStruct $user): bool
     {
         $stmt = $this->_getStatementForQuery(self::$_query_team_from_uid_and_id);
 
@@ -197,7 +229,7 @@ class MembershipDao extends AbstractDao
      * @throws ReflectionException  @see MembershipDao::getMemberListByTeamId()
      * @throws Exception
      */
-    public function destroyCacheForListByTeamId(int $id_team): bool
+    public function destroyCacheMemberListByTeamId(int $id_team): bool
     {
         $stmt = $this->_getStatementForQuery(self::$_query_member_list);
 
@@ -232,6 +264,7 @@ class MembershipDao extends AbstractDao
      * @throws ReflectionException
      * @throws Exception
      * @throws PDOException
+     * @throws TypeError
      */
     public function deleteUserFromTeam(int $uid, int $teamId): ?UserStruct
     {
@@ -244,11 +277,7 @@ class MembershipDao extends AbstractDao
             'id_team' => $teamId
         ]);
 
-        $this->destroyCacheForListByTeamId($teamId);
-        if ($user !== null) {
-            $this->destroyCacheUserTeams($user);
-            $this->destroyCacheTeamByIdAndUser($teamId, $user);
-        }
+        $this->destroyCache(new MembershipStruct(['uid' => $uid, 'id_team' => $teamId]));
         if ($stmt->rowCount()) {
             return $user;
         } else {
@@ -310,7 +339,7 @@ class MembershipDao extends AbstractDao
         }
 
         if (count($membersList) && $team->id !== null) {
-            $this->destroyCacheForListByTeamId($team->id);
+            $this->destroyCacheMemberListByTeamId($team->id);
         }
 
         return $membersList;

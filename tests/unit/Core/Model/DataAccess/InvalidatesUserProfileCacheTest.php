@@ -309,7 +309,7 @@ class InvalidatesUserProfileCacheTest extends AbstractTest
 
         (new MembershipDao(obtainTestDatabase()))
             ->setUserStateStore($this->store)
-            ->destroyCacheForListByTeamId(3);
+            ->destroyCacheMemberListByTeamId(3);
 
         $this->assertSame([77, 88, 99], $dropped);
     }
