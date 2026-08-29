@@ -267,11 +267,12 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
     }
 
     /**
-     * The one line a test can replace: a header emitted under CLI cannot be read back.
+     * The one line a test can replace: a header emitted under CLI cannot be read back. Every raw
+     * header on the redirect path goes through here, so a test observing this observes all of them.
      */
-    protected function emitRawHeader(string $header): void
+    protected function emitRawHeader(string $header, bool $replace = true): void
     {
-        header($header, true);
+        header($header, $replace);
     }
 
     public function redirectToWantedUrl(): never
@@ -282,7 +283,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $wantedUrl = is_string($wantedUrl) ? $wantedUrl : '';
         $this->sessionStore()->remove('wanted_url');
 
-        header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . $wantedUrl, false);
+        $this->emitRawHeader("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . $wantedUrl, false);
 
         if (AppConfig::$ENV === 'testing') {
             throw new RenderTerminatedException();
@@ -296,7 +297,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->sendNoIndexHeaderOnRedirect();
 
         $this->sessionStore()->set('wanted_url', ltrim($_SERVER['REQUEST_URI'], '/'));
-        header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . "signin", false);
+        $this->emitRawHeader("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . "signin", false);
 
         if (AppConfig::$ENV === 'testing') {
             throw new RenderTerminatedException();
