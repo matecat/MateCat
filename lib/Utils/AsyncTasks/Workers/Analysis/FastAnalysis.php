@@ -272,7 +272,7 @@ class FastAnalysis extends AbstractDaemon
     {
         (new JobDao($this->db()))->destroyCacheByProjectId($pid);
         $this->getProjectDao()->destroyCache($pid, $password);
-        (new AnalysisDao($this->db()))->destroyCacheByProjectId($pid);
+        (new AnalysisDao($this->db()))->destroyCacheProjectStatsVolumeAnalysis($pid);
     }
 
     const int ERR_NO_SEGMENTS = 127;

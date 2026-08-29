@@ -299,10 +299,10 @@ final class UserSuppliedName
     /**
      * What the reader ends up seeing, rather than what was typed.
      *
-     * The email templates escape with `double_encode: false`, so that names stored before the
-     * columns held raw text still render correctly. The cost is that entity text passes through to
-     * the recipient and is turned back into characters by their mail client's HTML parser — so a
-     * rule that judges a name, rather than printing it, has to judge the decoded form.
+     * A mail client parses what it is given as HTML, so entity text is turned back into characters
+     * before anyone reads it: "evil&#46;com" arrives as "evil.com". A rule that judges a name,
+     * rather than printing it, therefore has to judge the decoded form — and it decodes on its own
+     * so the rule holds whatever the output path escaped.
      */
     private static function asRead(string $name): string
     {

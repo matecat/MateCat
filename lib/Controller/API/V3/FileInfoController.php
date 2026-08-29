@@ -28,6 +28,7 @@ use ReflectionException;
 use RuntimeException;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
+use TypeError;
 
 
 class FileInfoController extends KleinController
@@ -126,6 +127,7 @@ class FileInfoController extends KleinController
      * @throws Exception
      * @throws InvalidArgumentException
      * @throws RuntimeException
+     * @throws TypeError
      */
     public function setInstructions(): void
     {

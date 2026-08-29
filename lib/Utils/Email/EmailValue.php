@@ -134,29 +134,32 @@ final class EmailValue implements Stringable, ArrayAccess, IteratorAggregate
 
         $string = (string)$this->value;
 
-        // Before escaping, so the pattern reads the text a reader will see rather than a stream of
-        // entities. {@see LinkDefanger} for why this happens at all.
+        if (!$this->escapes) {
+            // {@see raw()}: markup that has already been rendered. Neither treatment applies, and
+            // decoding it would rewrite the entities that rendering put there on purpose.
+            return $string;
+        }
+
+        // Both treatments read the text the reader will end up seeing, which is the decoded form:
+        // the recipient's mail client decodes entities whatever this class does, so judging
+        // `evil&#46;com` as if it were literal text is judging something nobody is shown. Decoding
+        // first and escaping the result afterwards is what makes the two agree. The same reasoning
+        // is why callers that judge a value rather than print it decode first: see
+        // {@see \Utils\Validation\UserSuppliedName}.
+        $string = html_entity_decode($string, self::FLAGS, 'UTF-8');
+
+        // After decoding, so the pattern reads a hostname rather than a stream of entities.
+        // {@see LinkDefanger} for why this happens at all.
         if ($this->defangs) {
             $string = LinkDefanger::defang($string);
         }
 
-        // `double_encode: false` is deliberate and load-bearing. Names written before the column
-        // stored raw text are still entity-encoded in the database, and encoding them again shows
-        // the reader "&amp;lt;" where they wrote "<".
-        //
-        // It is not a hole. htmlspecialchars never leaves a raw `<`, `>` or quote here whatever this
-        // flag says; what passes through is an entity reference, and an entity reference in a text
-        // node decodes to a character rather than being re-read as a tag — a name typed as
-        // "&lt;a href=…&gt;" reaches the reader as that text, not as a link. The plain-text half is
-        // built the same way round: {@see AbstractEmail::_buildTxtMessage()} decodes only after it
-        // has finished rewriting tags, for exactly this reason.
-        //
-        // The cost is that a value is read by the recipient's client as its decoded form, which is
-        // why a caller that judges a name rather than printing it judges the decoded form too:
-        // {@see \Utils\Validation\UserSuppliedName} does that before it applies a length cap or
-        // refuses a URL. Retiring the flag needs the columns migrated, which the backlog tracks
-        // separately.
-        return $this->escapes ? htmlspecialchars($string, self::FLAGS, 'UTF-8', false) : $string;
+        // `double_encode` keeps its default of true, so an `&` that survived the decode cannot reach
+        // the recipient still looking like the start of an entity. Names stored before the column
+        // held raw text were entity-encoded and needed the flag off to render; that population was
+        // decoded in the database on 2026-08-26, and what is left is a handful of XSS test payloads
+        // which are meant to read as text.
+        return htmlspecialchars($string, self::FLAGS, 'UTF-8');
     }
 
     /**

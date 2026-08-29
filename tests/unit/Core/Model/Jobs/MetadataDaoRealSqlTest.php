@@ -8,6 +8,7 @@ use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\Jobs\MetadataStruct;
 use PHPUnit\Framework\Attributes\Group;
+use TypeError;
 
 /**
  * Real-SQL coverage for Model\Jobs\MetadataDao (plan dao-realsql-90.md, Wave 2 / T2).
@@ -166,31 +167,90 @@ class MetadataDaoRealSqlTest extends AbstractTest
         self::assertNull($this->dao->get($this->idJob, $this->password, 'temp'));
     }
 
-    public function testDestroyCacheByJobId(): void
+    public function testDestroyCacheEvictsTheThreeReadsAMetadataRowAddresses(): void
     {
+        $this->flushDaoCache();
         $this->dao->set($this->idJob, $this->password, 'cachekey', 'v');
         $this->track('cachekey');
-        $this->dao->getByIdJob($this->idJob, 'cachekey', 3600); // prime cache (ttl>0)
 
-        self::assertTrue($this->dao->destroyCacheByJobId($this->idJob, 'cachekey'));
+        $this->dao->getByIdJob($this->idJob, 'cachekey', 3600);
+        $this->dao->getByJobIdAndPassword($this->idJob, $this->password, 3600);
+        $this->dao->get($this->idJob, $this->password, 'cachekey', 3600);
+
+        $this->writeBehindTheCache('cachekey', 'w');
+        // all three still answer with the value they cached, which is what the door has to undo
+        self::assertSame('v', $this->dao->getByIdJob($this->idJob, 'cachekey', 3600)[0]->value);
+
+        $this->dao->destroyCache(new MetadataStruct([
+            'id_job'   => $this->idJob,
+            'password' => $this->password,
+            'key'      => 'cachekey',
+        ]));
+
+        self::assertSame('w', $this->dao->getByIdJob($this->idJob, 'cachekey', 3600)[0]->value);
+        self::assertSame('w', $this->dao->getByJobIdAndPassword($this->idJob, $this->password, 3600)[0]->value);
+        self::assertSame('w', $this->dao->get($this->idJob, $this->password, 'cachekey', 3600)->value);
     }
 
-    public function testDestroyCacheByJobAndPassword(): void
+    /**
+     * MMT reads the MT context by (id_job, key) alone, with no password, and caches it for a month.
+     * A write has to reach that address too, or the engine keeps sending the context it replaced.
+     *
+     * The entry is primed at a real TTL first: with nothing cached the assertion below holds for the
+     * wrong reason.
+     */
+    public function testSetEvictsThePasswordLessAddress(): void
     {
-        $this->dao->set($this->idJob, $this->password, 'k', 'v');
-        $this->track('k');
-        $this->dao->getByJobIdAndPassword($this->idJob, $this->password, 3600); // prime cache (ttl>0)
+        $this->flushDaoCache();
+        $this->dao->set($this->idJob, $this->password, 'mt_context', 'ctx-1');
+        $this->track('mt_context');
 
-        self::assertTrue($this->dao->destroyCacheByJobAndPassword($this->idJob, $this->password));
+        self::assertSame('ctx-1', $this->dao->getByIdJob($this->idJob, 'mt_context', 3600)[0]->value);
+        self::assertNotSame([], $this->daoCacheRedis()->keys('*'), 'the read has to be cached for this to prove anything');
+
+        $this->dao->set($this->idJob, $this->password, 'mt_context', 'ctx-2');
+
+        self::assertSame('ctx-2', $this->dao->getByIdJob($this->idJob, 'mt_context', 3600)[0]->value);
     }
 
-    public function testDestroyCacheByJobAndPasswordAndKey(): void
+    /**
+     * The counterpart: a key the door was not given keeps its entry. Without this the test above
+     * would also pass on a door that cleared the whole DAO.
+     */
+    public function testDestroyCacheLeavesAKeyItWasNotGiven(): void
     {
-        $this->dao->set($this->idJob, $this->password, 'k', 'v');
-        $this->track('k');
-        $this->dao->get($this->idJob, $this->password, 'k', 3600); // prime cache (ttl>0)
+        $this->flushDaoCache();
+        $this->dao->set($this->idJob, $this->password, 'colour', 'blue');
+        $this->track('colour');
+        self::assertSame('blue', $this->dao->getByIdJob($this->idJob, 'colour', 3600)[0]->value);
 
-        self::assertTrue($this->dao->destroyCacheByJobAndPasswordAndKey($this->idJob, $this->password, 'k'));
+        $this->writeBehindTheCache('colour', 'red');
+
+        $this->dao->destroyCache(new MetadataStruct([
+            'id_job'   => $this->idJob,
+            'password' => $this->password,
+            'key'      => 'unrelated',
+        ]));
+
+        self::assertSame('blue', $this->dao->getByIdJob($this->idJob, 'colour', 3600)[0]->value);
+    }
+
+    public function testDestroyCacheRefusesAStructThatNamesNoKey(): void
+    {
+        $this->expectException(TypeError::class);
+
+        $this->dao->destroyCache(new MetadataStruct([
+            'id_job'   => $this->idJob,
+            'password' => $this->password,
+        ]));
+    }
+
+    /** Change the stored value without going through the DAO, so any entry left behind shows up. */
+    private function writeBehindTheCache(string $key, string $value): void
+    {
+        $this->realSqlDb()->getConnection()
+            ->prepare('UPDATE job_metadata SET value = :v WHERE id_job = :j AND password = :p AND `key` = :k')
+            ->execute(['v' => $value, 'j' => $this->idJob, 'p' => $this->password, 'k' => $key]);
     }
 
     public function testGetSubfilteringCustomHandlersReturnsDecodedJson(): void

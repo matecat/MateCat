@@ -256,6 +256,8 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
     /**
      * @return array<string, mixed>
      * @throws RuntimeException
+     * @throws ReflectionException
+     * @throws Exception
      */
     public function getMetadataAsKeyValue(MetadataDao $metadataDao): array
     {

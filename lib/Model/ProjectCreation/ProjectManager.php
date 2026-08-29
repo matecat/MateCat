@@ -368,7 +368,7 @@ class ProjectManager
 
             //clean the cache for the team member list of assigned projects
             $teamDao = $this->getTeamDao();
-            $teamDao->destroyCacheAssignee($this->projectStructure->team);
+            $teamDao->destroyCacheAssigneeWithProjectsByTeam($this->projectStructure->team);
         }
     }
 
@@ -761,6 +761,7 @@ class ProjectManager
      *
      * @throws Exception
      *
+     * @throws TypeError
      */
     private function insertFileInstructions(array $totalFilesStructure): void
     {
@@ -1158,6 +1159,7 @@ class ProjectManager
      * @throws ReQueueException
      * @throws ReflectionException
      * @throws ValidationError
+     * @throws TypeError
      */
     protected function insertInstructions(int $fid, array|string $value): void
     {

@@ -607,7 +607,7 @@ class QualityReportModelTest extends AbstractTest
      *
      * The model calls the DAO door straight, and DaoCacheTrait is what holds each eviction back
      * until the commit — so what is asserted is that every one of them was queued and none ran on
-     * the spot. The number is not pinned: it is destroyCachesFor()'s key inventory, which is the
+     * the spot. The number is not pinned: it is destroyCache()'s key inventory, which is the
      * DAO's business and changes when its cached reads do.
      *
      * @throws ReflectionException

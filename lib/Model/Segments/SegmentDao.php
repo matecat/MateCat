@@ -712,22 +712,6 @@ class SegmentDao extends AbstractDao
     }
 
     /**
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    public function destroyCacheForGlobalTranslationMismatches(JobStruct $job): bool
-    {
-        $stmt = $this->_getStatementForQuery(self::$queryForGlobalMismatches);
-
-        return $this->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, [
-            'id_job' => $job->id,
-            'st_approved' => TranslationStatus::STATUS_APPROVED,
-            'st_approved2' => TranslationStatus::STATUS_APPROVED2,
-            'st_translated' => TranslationStatus::STATUS_TRANSLATED,
-        ]);
-    }
-
-    /**
      * @param int $jid
      * @param string $jpassword
      * @param int|null $sid

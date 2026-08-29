@@ -223,7 +223,7 @@ class ProjectCompletionRepositoryTest extends AbstractTest
             ->with(88)
             ->willReturn(true);
         $analysisDao->expects($this->once())
-            ->method('destroyAnalysisProjectCache')
+            ->method('destroyCacheProjectStatsVolumeAnalysis')
             ->with(88)
             ->willReturn(true);
 

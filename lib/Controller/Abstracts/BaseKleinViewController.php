@@ -41,6 +41,21 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
     protected bool $isView = true;
 
     /**
+     * Whether a search engine may list this view's URL. Off unless a view opts in, because most of
+     * them address a specific job and carry its password in the URL: the link is the credential, so
+     * one published on a crawlable page puts the address in a search index.
+     *
+     * A `Disallow` in robots.txt did not prevent that — it stops the fetch, not the listing, and an
+     * address reached through an inbound link is listed without ever being read. Only
+     * `X-Robots-Tag: noindex` removes it, and a crawler reads that on the page itself, which is why
+     * the answer has to come from here rather than from a file listing paths.
+     *
+     * Opting in is a deliberate choice for a page that exists to be found: the entry page, sign-in
+     * and the public converter. A new view is not indexable by omission.
+     */
+    protected bool $isIndexable = false;
+
+    /**
      * @var PHPTALWithAppend
      */
     protected PHPTAL $view;
@@ -205,6 +220,11 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
     public function render(?int $code = null): never
     {
         $this->response->noCache();
+
+        if (!$this->isIndexable) {
+            $this->response->header('X-Robots-Tag', 'noindex, nofollow');
+        }
+
         $this->response->code($code ?? $this->httpCode);
 
         if (isset($this->view)) {
@@ -230,13 +250,40 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         return $this->sessionStore()->has('wanted_url');
     }
 
+    /**
+     * A view that must not be listed has to say so on a redirect as well. A crawler reaching a job
+     * URL carries no session, so it is sent to sign-in and never reaches render(): without the
+     * header on that response the address it followed is still eligible to be listed.
+     *
+     * The two redirects below write headers directly instead of going through the Klein response,
+     * so this one goes out the same way. Kept overridable so a test can observe it, since a header
+     * emitted under CLI cannot be read back.
+     */
+    protected function sendNoIndexHeaderOnRedirect(): void
+    {
+        if (!$this->isIndexable) {
+            $this->emitRawHeader('X-Robots-Tag: noindex, nofollow');
+        }
+    }
+
+    /**
+     * The one line a test can replace: a header emitted under CLI cannot be read back. Every raw
+     * header on the redirect path goes through here, so a test observing this observes all of them.
+     */
+    protected function emitRawHeader(string $header, bool $replace = true): void
+    {
+        header($header, $replace);
+    }
+
     public function redirectToWantedUrl(): never
     {
+        $this->sendNoIndexHeaderOnRedirect();
+
         $wantedUrl = $this->sessionStore()->get('wanted_url');
         $wantedUrl = is_string($wantedUrl) ? $wantedUrl : '';
         $this->sessionStore()->remove('wanted_url');
 
-        header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . $wantedUrl, false);
+        $this->emitRawHeader("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . $wantedUrl, false);
 
         if (AppConfig::$ENV === 'testing') {
             throw new RenderTerminatedException();
@@ -247,8 +294,10 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
 
     public function redirectToSignin(): never
     {
+        $this->sendNoIndexHeaderOnRedirect();
+
         $this->sessionStore()->set('wanted_url', ltrim($_SERVER['REQUEST_URI'], '/'));
-        header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . "signin", false);
+        $this->emitRawHeader("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . "signin", false);
 
         if (AppConfig::$ENV === 'testing') {
             throw new RenderTerminatedException();

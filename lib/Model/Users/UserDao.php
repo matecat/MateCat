@@ -10,6 +10,7 @@ use Model\DataAccess\InvalidatesUserProfileCache;
 use PDO;
 use PDOException;
 use ReflectionException;
+use RuntimeException;
 use Throwable;
 use TypeError;
 
@@ -68,9 +69,28 @@ class UserDao extends AbstractDao
     }
 
     /**
+     * The cache address of one user, shared by the single and the batched read.
+     *
+     * Both have to name the same entry: it is what lets the uid eviction behind `destroyCache()`
+     * — which knows one uid and nothing about any list that uid appears in — evict what a member
+     * list cached.
+     */
+    private static function uidKeyMapPrefix(): string
+    {
+        return self::class . '::getByUid-';
+    }
+
+    /**
+     * Load several users at once.
+     *
+     * Each user is cached under its own entry rather than the set under one, so renaming a user
+     * evicts it everywhere through `destroyCache()`, and adding or removing a member leaves the
+     * other members cached. The cache read is a single round trip; only members that missed are
+     * read from the database.
+     *
      * @param array<int, int|string|array{uid:int|string}> $uids_array
      *
-     * @return UserStruct[]
+     * @return UserStruct[] Keyed by uid. Uids that match no row are absent.
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
@@ -93,34 +113,55 @@ class UserDao extends AbstractDao
             return [];
         }
 
-        $query = "SELECT * FROM " . self::TABLE .
-            " WHERE uid IN ( " . str_repeat('?,', count($sanitized_array) - 1) . '?' . " ) ";
-
-        $stmt = $this->_getStatementForQuery($query);
-
-        /**
-         * @var UserStruct[] $__resultSet
-         */
-        $__resultSet = $this->_fetchObjectMap(
-            $stmt,
+        $perUid = $this->_fetchObjectMapPerId(
+            $sanitized_array,
+            self::$_query_user_by_uid,
+            'uid',
             UserStruct::class,
-            $sanitized_array
+            self::uidKeyMapPrefix(),
+            fn(array $missing): array => $this->loadUsersByUids($missing)
         );
 
         $resultSet = [];
-        if (!is_iterable($__resultSet)) {
-            return $resultSet;
-        }
 
-        foreach ($__resultSet as $user) {
-            if (!$user instanceof UserStruct) {
-                continue;
+        foreach ($perUid as $uid => $rows) {
+            $user = $rows[0] ?? null;
+
+            if ($user instanceof UserStruct) {
+                $resultSet[$uid] = $user;
             }
-
-            $resultSet[$user->uid] = $user;
         }
 
         return $resultSet;
+    }
+
+    /**
+     * The uncached bulk read behind `getByUids()`. It fills cache entries but is never itself
+     * cached: a result addressed by the whole uid list is the thing no eviction door can reach.
+     *
+     * @param list<int|string> $uids
+     *
+     * @return array<int, list<UserStruct>>
+     * @throws PDOException
+     */
+    private function loadUsersByUids(array $uids): array
+    {
+        $query = "SELECT * FROM " . self::TABLE .
+            " WHERE uid IN ( " . str_repeat('?,', count($uids) - 1) . '?' . " ) ";
+
+        $stmt = $this->_getStatementForQuery($query);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, UserStruct::class);
+        $stmt->execute(array_values($uids));
+
+        $byUid = [];
+
+        foreach ($stmt->fetchAll() as $user) {
+            if ($user instanceof UserStruct) {
+                $byUid[(int)$user->uid][] = $user;
+            }
+        }
+
+        return $byUid;
     }
 
     /**
@@ -288,7 +329,11 @@ class UserDao extends AbstractDao
             UserStruct::class,
             [
                 'uid' => $id,
-            ]
+            ],
+            // Named rather than left to the backtrace default, because getByUids() has to build
+            // the identical address from outside this method. The string is what that default
+            // produced, so entries already in Redis keep being found.
+            self::uidKeyMapPrefix() . $id
         )[0] ?? null;
 
         if (!$res instanceof UserStruct) {
@@ -299,10 +344,53 @@ class UserDao extends AbstractDao
     }
 
     /**
+     * The one way in from outside: a caller names the user it already holds, never a cache key it
+     * cannot see. A user row is reachable under two addresses — `getByUid()` and `getByEmail()` —
+     * and both have to go together, because a row left cached under either one answers lookups with
+     * the value it held before the write for the whole TTL. The door is what makes that pairing a
+     * property of the code rather than something each caller has to remember.
+     *
+     * `$retiredEmail` exists because the address is updatable — `updateUser()` writes
+     * `email = :email` — and a struct handed here after such a write carries only the new value, so
+     * the entry keyed on the old one is not derivable from it. `UserGDPRAnonymizeTask` is the caller
+     * that needs it: it rewrites the address to a tombstone and then has to evict the address the
+     * account was actually reachable under, which nothing on the struct still names.
+     *
+     * A null `email` is skipped rather than evicted: `users.email` is NOT NULL and `getByEmail()`
+     * takes a non-nullable string, so no stored row was ever cached under a null bind. There is no
+     * entry at that address to remove.
+     *
+     * This does not call `invalidateUserProfileCache()`. That bust hangs off the write methods in
+     * {@see InvalidatesUserProfileCache}, so it has already run by the time a caller gets here;
+     * repeating it would make the door look like the place that owns it.
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws RuntimeException when the struct carries no uid, which is the identity the entry is
+     *                          addressed by — there would be nothing to evict and a caller would
+     *                          believe it had invalidated the row
+     * @throws TypeError
+     */
+    public function destroyCache(UserStruct $user, ?string $retiredEmail = null): void
+    {
+        $uid = $user->uid ?? throw new RuntimeException('User uid must be set before cache invalidation');
+
+        $this->destroyCacheByUid($uid);
+
+        if ($user->email !== null) {
+            $this->destroyCacheByEmail($user->email);
+        }
+
+        if ($retiredEmail !== null && $retiredEmail !== $user->email) {
+            $this->destroyCacheByEmail($retiredEmail);
+        }
+    }
+
+    /**
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheByUid(int|string $uid): bool
+    private function destroyCacheByUid(int|string $uid): bool
     {
         $stmt = $this->_getStatementForQuery(self::$_query_user_by_uid);
 
@@ -351,7 +439,7 @@ class UserDao extends AbstractDao
      * @throws ReflectionException
      * @throws TypeError
      */
-    public function destroyCacheByEmail(string $email): bool
+    private function destroyCacheByEmail(string $email): bool
     {
         $stmt = $this->_getStatementForQuery(self::$_query_user_by_email);
         $userQuery = new UserStruct();

@@ -159,7 +159,7 @@ class ChunkReviewModel implements IChunkReviewModel
         // on the highest-volume write path in the product.
         $chunkReview = $this->chunk_review;
         // Deferred to the commit inside DaoCacheTrait; the caller does not schedule it.
-        $chunkReviewDao->destroyCachesFor($chunkReview);
+        $chunkReviewDao->destroyCache($chunkReview);
 
         FeatureSet::forProject($project, $this->database)->dispatch(new ChunkReviewUpdatedEvent(
             $this->chunk_review,
@@ -275,7 +275,7 @@ class ChunkReviewModel implements IChunkReviewModel
         );
         $chunkReview = $this->chunk_review;
         // Deferred to the commit inside DaoCacheTrait; the caller does not schedule it.
-        $chunkReviewDao->destroyCachesFor($chunkReview);
+        $chunkReviewDao->destroyCache($chunkReview);
 
         // Dispatched inside the transaction on purpose, unlike the cache bust above: a plugin
         // listener may write rows that have to be atomic with this counter update, so deferring the
