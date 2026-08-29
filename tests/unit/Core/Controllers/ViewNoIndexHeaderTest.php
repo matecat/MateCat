@@ -3,6 +3,8 @@
 namespace Matecat\Core\Controllers;
 
 use Controller\Abstracts\BaseKleinViewController;
+use Controller\Exceptions\RenderTerminatedException;
+use Utils\Registry\AppConfig;
 use Controller\Views\ActivityLogController;
 use Controller\Views\AnalyzeController;
 use Controller\Views\CattoolController;
@@ -104,6 +106,56 @@ class ViewNoIndexHeaderTest extends AbstractTest
     }
 
     /**
+     * The sign-in redirect is the response a crawler actually receives, so the whole method has to
+     * run with the header on it: the emission comes before the destination is recorded and before
+     * the Location header goes out.
+     */
+    public function testTheSigninRedirectEmitsTheHeaderAndRecordsTheDestination(): void
+    {
+        $spy   = (new ReflectionClass(HeaderRecordingView::class))->newInstanceWithoutConstructor();
+        $store = $this->injectSessionStore($spy);
+
+        $_SERVER['REQUEST_URI'] = '/translate/project/it-IT-abc/1-abcdef123456';
+
+        try {
+            $spy->redirectToSignin();
+        } catch (RenderTerminatedException) {
+            // redirectToSignin() is declared `never`; under the testing environment it ends here.
+        }
+
+        self::assertSame(
+            ['X-Robots-Tag: noindex, nofollow', 'Location: ' . AppConfig::$HTTPHOST . AppConfig::$BASEURL . 'signin'],
+            $spy->sent,
+            'The header has to precede the redirect it labels.'
+        );
+        self::assertSame('translate/project/it-IT-abc/1-abcdef123456', $store->get('wanted_url'));
+    }
+
+    /**
+     * The post-login hop carries the header too: the address it hands back is the same job URL.
+     */
+    public function testTheWantedUrlRedirectEmitsTheHeaderAndConsumesTheDestination(): void
+    {
+        $spy   = (new ReflectionClass(HeaderRecordingView::class))->newInstanceWithoutConstructor();
+        $store = $this->injectSessionStore($spy);
+        $store->set('wanted_url', 'translate/project/it-IT-abc/1-abcdef123456');
+
+        try {
+            $spy->redirectToWantedUrl();
+        } catch (RenderTerminatedException) {
+            // redirectToWantedUrl() is declared `never`; under the testing environment it ends here.
+        }
+
+        $wanted = 'translate/project/it-IT-abc/1-abcdef123456';
+        self::assertSame(
+            ['X-Robots-Tag: noindex, nofollow', 'Location: ' . AppConfig::$HTTPHOST . AppConfig::$BASEURL . $wanted],
+            $spy->sent,
+            'The header has to precede the redirect it labels.'
+        );
+        self::assertFalse($store->has('wanted_url'), 'A consumed destination must not be replayed.');
+    }
+
+    /**
      * A header emitted under CLI cannot be read back, so the emission point is observed instead.
      *
      * @param class-string<BaseKleinViewController> $controllerClass
@@ -193,7 +245,7 @@ class HeaderRecordingView extends BaseKleinViewController
     {
     }
 
-    protected function emitRawHeader(string $header): void
+    protected function emitRawHeader(string $header, bool $replace = true): void
     {
         $this->sent[] = $header;
     }
