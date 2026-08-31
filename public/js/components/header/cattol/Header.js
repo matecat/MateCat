@@ -10,10 +10,16 @@ import {SegmentsQAButton} from './SegmetsQAButton'
 import {SearchButton} from './SearchButton'
 import {CommentsButton} from './CommentsButton'
 import {SegmentsFilterButton} from './SegmentsFilterButton'
-import {SettingsButton} from './SettingsButton'
 import {ActionMenu} from '../ActionMenu'
 import {UserMenu} from '../UserMenu'
 import {ApplicationWrapperContext} from '../../common/ApplicationWrapper/ApplicationWrapperContext'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../common/Button/Button'
+import SettingsIcon from '../../../../img/icons/SettingsIcon'
 
 export const Header = ({
   jid,
@@ -27,7 +33,6 @@ export const Header = ({
   projectCompletionEnabled,
   isReview,
   secondRevisionsCount,
-  overallQualityClass,
   qualityReportHref,
   allowLinkToAnalysis,
   analysisEnabled,
@@ -80,30 +85,35 @@ export const Header = ({
                 jid={jid}
                 isGDriveProject={isGDriveProject}
               />
+              {/*Search*/}
+              <SearchButton />
+
+              {/*Segments filter*/}
+              <SegmentsFilterButton />
+
+              {/*Comments*/}
+              <CommentsButton />
+
+              {/*Segments Issues*/}
+              <SegmentsQAButton />
 
               {/*Quality Report*/}
               <QualityReportButton
                 isReview={isReview}
                 revisionNumber={revisionNumber}
-                overallQualityClass={overallQualityClass}
                 qualityReportHref={qualityReportHref}
                 secondRevisionsCount={secondRevisionsCount}
               />
 
-              {/*Segments Issues*/}
-              <SegmentsQAButton />
-
-              {/*Search*/}
-              <SearchButton />
-
-              {/*Comments*/}
-              <CommentsButton />
-
-              {/*Segments filter*/}
-              <SegmentsFilterButton />
-
               {/*Settings Icon*/}
-              <SettingsButton openTmPanel={openTmPanel} />
+              <Button
+                type={BUTTON_TYPE.ICON}
+                mode={BUTTON_MODE.GHOST}
+                onClick={openTmPanel}
+                size={BUTTON_SIZE.ICON_STANDARD}
+              >
+                <SettingsIcon size={24} />
+              </Button>
 
               {/*Dropdown menu*/}
               <ActionMenu

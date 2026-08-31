@@ -5,6 +5,7 @@ namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use DomainException;
 use Exception;
@@ -19,6 +20,7 @@ use Model\Projects\ProjectStruct;
 use ReflectionException;
 use RuntimeException;
 use stdClass;
+use Throwable;
 use Utils\Constants\EngineConstants;
 
 class MetaDataController extends KleinController
@@ -32,13 +34,54 @@ class MetaDataController extends KleinController
 
 
     /**
+     * The public API read, restricted to the project's owner or a member of the team it sits in.
+     *
+     * The editor reads the same payload through the /api/app route, which carries no such restriction:
+     * its caller is a translator working the job on its password, who is not necessarily a member of
+     * anything. Both entry points exist because that is the only difference between them — the payload
+     * is built once, in buildMetadata().
+     *
      * @throws ReflectionException
      * @throws NotFoundException
      * @throws RuntimeException
      * @throws DomainException
-     * @throws \Exception
+     * @throws Throwable
      */
     public function index(): void
+    {
+        $job = $this->requireJob();
+
+        (new ProjectAccessValidator(
+            $this,
+            $job->getProject(new ProjectDao($this->getDatabase())),
+            $this->getUser()
+        ))->validate();
+
+        $this->response->json($this->buildMetadata($job));
+    }
+
+    /**
+     * The editor's read, reached from the UI on /api/app/jobs/{id_job}/{password}/metadata. Holding the
+     * job password is the whole authorization: the settings this returns are what the editor needs to
+     * open, and the translator it opens for is routinely outside the owning team.
+     *
+     * @throws ReflectionException
+     * @throws NotFoundException
+     * @throws RuntimeException
+     * @throws DomainException
+     * @throws Exception
+     */
+    public function indexForUi(): void
+    {
+        $this->response->json($this->buildMetadata($this->requireJob()));
+    }
+
+    /**
+     * @throws NotFoundException if no job matches the id and password, or if the job was deleted
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function requireJob(): JobStruct
     {
         // params
         $id_job = (int)$this->request->param('id_job');
@@ -54,6 +97,17 @@ class MetaDataController extends KleinController
         $this->chunk = $job;
         $this->return404IfTheJobWasDeleted();
 
+        return $job;
+    }
+
+    /**
+     * @throws RuntimeException
+     * @throws DomainException
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function buildMetadata(JobStruct $job): stdClass
+    {
         /**
          * The MT settings (DeepL formality, Lara style, the glossaries, the MT application
          * threshold) are reported on both scopes, and a client has to read `job` first and only then
@@ -74,7 +128,7 @@ class MetaDataController extends KleinController
         $metadata->job = $this->getJobMetaData($job);
         $metadata->files = $this->getJobFilesMetaData($job);
 
-        $this->response->json($metadata);
+        return $metadata;
     }
 
     /**

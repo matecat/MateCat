@@ -3,7 +3,7 @@ import React from 'react'
 import {fromJS} from 'immutable'
 import {http, HttpResponse} from 'msw'
 
-import ProjectsContainer from './ProjectsContainer'
+import {ProjectsContainer} from './ProjectsContainer'
 import ManageActions from '../../actions/ManageActions'
 import {mswServer} from '../../../mocks/mswServer'
 import userMock from '../../../mocks/userMock'
@@ -763,8 +763,12 @@ test('No projects found with team type personal', () => {
 
   render(<ProjectsContainer {...props} />)
 
-  expect(screen.getByText('Create Project')).toBeInTheDocument()
-  expect(screen.getByText('Welcome to your Personal area')).toBeInTheDocument()
+  act(() => {
+    ManageActions.updateProjects([])
+  })
+
+  expect(screen.getByText('Create project')).toBeInTheDocument()
+  expect(screen.getByText('Welcome to your personal area')).toBeInTheDocument()
 })
 
 test('No projects found with team type general', () => {
@@ -776,7 +780,11 @@ test('No projects found with team type general', () => {
 
   render(<ProjectsContainer {...{...props, team}} />)
 
+  act(() => {
+    ManageActions.updateProjects([])
+  })
+
   expect(screen.getByText(`Welcome to ${team.get('name')}`)).toBeInTheDocument()
-  expect(screen.getByText('Create Project')).toBeInTheDocument()
+  expect(screen.getByText('Create project')).toBeInTheDocument()
   expect(screen.getByText('Add member')).toBeInTheDocument()
 })

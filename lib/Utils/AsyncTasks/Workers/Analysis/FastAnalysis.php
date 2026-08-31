@@ -273,9 +273,8 @@ class FastAnalysis extends AbstractDaemon
     protected function _purgeProjectCaches(int $pid, string $password): void
     {
         (new JobDao($this->db()))->destroyCacheByProjectId($pid);
-        (new ProjectDao($this->db()))->destroyFetchByIdCache($pid, ProjectStruct::class);
-        $this->getProjectDao()->destroyCacheByIdAndPassword($pid, $password);
-        (new AnalysisDao($this->db()))->destroyCacheByProjectId($pid);
+        $this->getProjectDao()->destroyCache($pid, $password);
+        (new AnalysisDao($this->db()))->destroyCacheProjectStatsVolumeAnalysis($pid);
     }
 
     const int ERR_NO_SEGMENTS = 127;
@@ -656,18 +655,18 @@ class FastAnalysis extends AbstractDaemon
             $this->logger->debug("Fetching data from disk");
             $this->segments = $fs->getFastAnalysisData($pid);
         } catch (UnexpectedValueException) {
-            $this->logger->debug("Error Fetching data from disk. Fallback to database.");
+            $this->logger->debug("Error fetching data from disk. Fallback to database.");
 
             try {
                 $this->segments = $this->_getSegmentsForFastVolumeAnalysis($pid);
             } catch (PDOException) {
-                throw new Exception("Error Fetching data for Project. Too large. Skip.", self::ERR_TOO_LARGE);
+                throw new Exception("Error fetching data for project. Too large. Skip.", self::ERR_TOO_LARGE);
             }
         }
 
         if (count($this->segments) == 0) {
-            //there is no analysis on that file, it is ALL Pre-Translated
-            $exceptionMsg = 'There is no analysis on that file, it is ALL Pre-Translated';
+            //there is no analysis on that file, it is all pre-translated
+            $exceptionMsg = 'There is no analysis on that file, it is all pre-translated';
             $this->logger->debug($exceptionMsg);
             throw new Exception($exceptionMsg, self::ERR_NO_SEGMENTS);
         }
@@ -809,6 +808,7 @@ class FastAnalysis extends AbstractDaemon
     /**
      * @throws PDOException
      * @throws LogInvalidArgumentException
+     * @throws ReflectionException
      */
     protected function _updateProject(int $pid, string $status): void
     {
@@ -1146,6 +1146,9 @@ class FastAnalysis extends AbstractDaemon
             return $this->db()->update('projects', $data2, $where);
         });
 
+        // the projects row was written outside the DAO, so evict its id-keyed cache by hand
+        $this->getProjectDao()->destroyCache($pid);
+
         $engine = EnginesFactory::getInstance($this->actual_project_row['id_mt_engine'], $this->db(), AbstractEngine::class);
         if ($engine->isAdaptiveMT()) {
             $engine->syncMemories($this->actual_project_row, array_values($this->segments));
@@ -1424,7 +1427,7 @@ HD;
     ): void
     {
         if (empty($config['pid'])) {
-            throw new Exception('Can Not set a Total without a Queue ID.');
+            throw new Exception('Cannot set a Total without a Queue ID.');
         }
 
         if (!empty($config['total'])) {

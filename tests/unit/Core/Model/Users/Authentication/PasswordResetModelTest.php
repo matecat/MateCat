@@ -44,8 +44,7 @@ class PasswordResetModelTest extends AbstractTest
         $dao = $this->createStub(UserDao::class);
         $dao->method('getByScopedConfirmationToken')->willReturn($user);
         $dao->method('updateStruct')->willReturn(1);
-        $dao->method('destroyCacheByEmail')->willReturn(true);
-        $dao->method('destroyCacheByUid')->willReturn(true);
+        $dao->method('destroyCache');
 
         return $dao;
     }
@@ -82,6 +81,31 @@ class PasswordResetModelTest extends AbstractTest
         $dao = $this->makeMockDao(null);
         $model = new PasswordResetModel($session, $dao, $this->makeTokenStore(), 'bad-token');
         $model->validateUser();
+    }
+
+    /**
+     * Arriving with no token at all is a bad request, not a server fault. It used to raise a
+     * RuntimeException, which Bootstrap::exceptionHandler() has no case for, so the caller was
+     * answered 500 for something they were free to get wrong.
+     */
+    #[Test]
+    public function anAbsentTokenIsARejectionRatherThanAFailure(): void
+    {
+        foreach (['validateUser', 'resetPassword'] as $method) {
+            $model = new PasswordResetModel(
+                new ArraySessionStore(),
+                $this->makeMockDao(),
+                $this->makeTokenStore(),
+                null
+            );
+
+            try {
+                $method === 'validateUser' ? $model->validateUser() : $model->resetPassword('new-pass!');
+                $this->fail("$method accepted a request carrying no reset token");
+            } catch (ValidationError $e) {
+                $this->assertSame('Missing reset token', $e->getMessage());
+            }
+        }
     }
 
     #[Test]

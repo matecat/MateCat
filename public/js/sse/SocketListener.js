@@ -1,4 +1,4 @@
-import {useContext, useEffect} from 'react'
+import React, {useContext, useEffect} from 'react'
 import useSocketLayer, {ConnectionStates} from '../hooks/useSocketLayer'
 import CatToolActions from '../actions/CatToolActions'
 import SegmentActions from '../actions/SegmentActions'
@@ -25,13 +25,23 @@ const SocketListener = ({isAuthenticated, userId}) => {
       if (serverVersion !== config.build_number) {
         const notification = {
           title: 'New update available!',
-          text:
-            'We’ve just released an update with improvements and bug fixes.<br/>' +
-            'To ensure all changes are applied correctly, we recommend refreshing the page.<br/><br/>' +
-            'Click Refresh or press <strong>Ctrl+R</strong> (Windows) / <strong>Cmd+R</strong> (Mac).<br/><br/>' +
-            'Thank you for using Matecat!',
+          text: (
+            <>
+              We&rsquo;ve just released an update with improvements and bug
+              fixes.
+              <br />
+              To ensure all changes are applied correctly, we recommend
+              refreshing the page.
+              <br />
+              <br />
+              Click Refresh or press <strong>Ctrl+R</strong> (Windows) /{' '}
+              <strong>Cmd+R</strong> (Mac).
+              <br />
+              <br />
+              Thank you for using Matecat!
+            </>
+          ),
           type: 'warning',
-          allowHtml: true,
         }
         CatToolActions.addNotification(notification)
       }

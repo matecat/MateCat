@@ -20,6 +20,16 @@ class ProjectDao extends AbstractDao
 {
     const string TABLE = "projects";
 
+    /**
+     * The statement findByJobId() reads through. Eviction has to rebuild it byte for byte, because the
+     * cache key is the md5 of the query string plus its bound parameters: a single changed space would
+     * leave the entry unreachable and permanently stale. Shared as a constant so it cannot drift.
+     */
+    private const string SQL_FIND_BY_JOB_ID = "SELECT projects.* FROM projects " .
+    " INNER JOIN jobs ON projects.id = jobs.id_project " .
+    " WHERE jobs.id = :id_job " .
+    " LIMIT 1 ";
+
     /** @var list<string> */
     protected static array $auto_increment_field = ['id'];
     /** @var list<string> */
@@ -44,8 +54,6 @@ class ProjectDao extends AbstractDao
                        LEFT JOIN segment_translations st ON st.id_segment = s.id AND st.id_job = j.id
                        WHERE p.id= ?
                        AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
-                       %s
-                       %s
                        %s
                        GROUP BY f.id, j.id, j.password
                        ORDER BY j.id,j.create_date, j.job_first_segment
@@ -80,6 +88,7 @@ class ProjectDao extends AbstractDao
      * @return ProjectStruct
      * @throws DomainException
      * @throws PDOException
+     * @throws ReflectionException
      */
     public function updateField(ProjectStruct $project, string $field, int|float|string|bool|null $value): ProjectStruct
     {
@@ -91,6 +100,7 @@ class ProjectDao extends AbstractDao
 
         if ($success) {
             $project->$field = $value;
+            $this->destroyCache((int)$project->id);
         }
 
         return $project;
@@ -108,21 +118,18 @@ class ProjectDao extends AbstractDao
      */
     public function changePassword(ProjectStruct $project, string $newPass): ProjectStruct
     {
-        $id = $project->id ?? throw new DomainException("Project ID must not be null when changing password");
+            $project->id ?? throw new DomainException("Project ID must not be null when changing password");
+
         $oldPass = $project->password;
-        $res = $this->updateField($project, 'password', $newPass);
-        $this->destroyFetchByIdCache($id, ProjectStruct::class);
 
-        // The link built on the old password must stop working now, not when the cache expires, so
-        // evict every read that credential reaches: the gate it authenticates through and the
-        // project data the job links are built from. The new password is evicted as well, since a
-        // lookup made before the rotation may have cached its miss.
-        foreach (array_filter([$oldPass, $newPass]) as $password) {
-            $this->destroyCacheByIdAndPassword($id, $password);
-            $this->destroyCacheForProjectData($id, $password);
-        }
+        $updated = $this->updateField($project, 'password', $newPass);
 
-        return $res;
+        // the eviction inside updateField() runs against the row as it is now, so it can only reach the
+        // keys built from the new password. The old one is no longer discoverable anywhere: pass it in,
+        // or every entry cached under it stays readable until it expires on its own.
+        $this->destroyCache((int)$updated->id, $oldPass);
+
+        return $updated;
     }
 
     /**
@@ -136,11 +143,9 @@ class ProjectDao extends AbstractDao
      */
     public function changeName(ProjectStruct $project, string $name): ProjectStruct
     {
-        $id = $project->id ?? throw new DomainException("Project ID must not be null when changing name");
-        $res = $this->updateField($project, 'name', $name);
-        $this->destroyFetchByIdCache($id, ProjectStruct::class);
+            $project->id ?? throw new DomainException("Project ID must not be null when changing name");
 
-        return $res;
+        return $this->updateField($project, 'name', $name);
     }
 
     /**
@@ -152,15 +157,20 @@ class ProjectDao extends AbstractDao
      *
      * @return int
      * @throws PDOException
+     * @throws ReflectionException
      */
     public function unassignProjects(TeamStruct $team, UserStruct $user): int
     {
+        $affectedIds = $this->getIdsByTeam((int)$team->id, (int)$user->uid);
+
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare(static::$_sql_for_project_unassignment);
         $stmt->execute([
             'id_assignee' => $user->uid,
             'id_team' => $team->id
         ]);
+
+        $this->destroyCacheByIds($affectedIds);
 
         return $stmt->rowCount();
     }
@@ -172,9 +182,12 @@ class ProjectDao extends AbstractDao
      *
      * @return int
      * @throws PDOException
+     * @throws ReflectionException
      */
     public function massiveSelfAssignment(TeamStruct $team, UserStruct $user, TeamStruct $personalTeam): int
     {
+        $affectedIds = $this->getIdsByTeam((int)$team->id);
+
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare(static::$_sql_massive_self_assignment);
         $stmt->execute([
@@ -183,7 +196,136 @@ class ProjectDao extends AbstractDao
             'personal_team' => $personalTeam->id
         ]);
 
+        $this->destroyCacheByIds($affectedIds);
+
         return $stmt->rowCount();
+    }
+
+    /**
+     * The ids a team-wide update is about to touch, read before the write so the rows are still
+     * matchable by the old team. Feeds cache eviction: both team updates change `id_team` and
+     * `id_assignee`, and nothing else can name the affected projects once the update has run.
+     *
+     * @param int $id_team
+     * @param int|null $id_assignee restricts the set to the projects assigned to this user
+     *
+     * @return int[]
+     * @throws PDOException
+     */
+    private function getIdsByTeam(int $id_team, ?int $id_assignee = null): array
+    {
+        $sql = "SELECT id FROM projects WHERE id_team = :id_team ";
+        $params = ['id_team' => $id_team];
+
+        if ($id_assignee !== null) {
+            $sql .= " AND id_assignee = :id_assignee ";
+            $params['id_assignee'] = $id_assignee;
+        }
+
+        $stmt = $this->database->getConnection()->prepare($sql);
+        $stmt->execute($params);
+
+        /** @var array<int, int|string> $rows */
+        $rows = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        return array_map('intval', $rows);
+    }
+
+    /**
+     * @param int[] $ids
+     *
+     * @return void
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    private function destroyCacheByIds(array $ids): void
+    {
+        foreach ($ids as $id) {
+            $this->destroyCache($id);
+        }
+    }
+
+    /**
+     * The single eviction entry point for a project: call this after ANY write to a projects row and
+     * every cached copy of that row goes, whichever read put it there.
+     *
+     * The row is cached under keys that share nothing but the project: `findById()` keys on the id,
+     * `findByJobId()` on each job id, `findByIdAndPassword()` on id plus password, `getProjectData()`
+     * on the id with or without the password — and each key is the md5 of its own query string and
+     * bound parameters, so none of them can be derived from another. That is why this is a method and
+     * not a one-liner, and why callers should never reach for the specialized evictions directly.
+     *
+     * Call it AFTER the write. The jobs and the current password are read live, and neither changes
+     * on the writes that reach here — except a password change, which is why `$password` exists:
+     * pass the OLD password so the key it was cached under dies with it.
+     *
+     * @param int $id
+     * @param string|null $password an additional password whose keys must go, on top of the current one
+     *
+     * @return void
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function destroyCache(int $id, ?string $password = null): void
+    {
+        $this->destroyCachesByProjectId($id);
+
+        $passwords = [];
+        foreach ([$password, $this->getPassword($id)] as $candidate) {
+            if ($candidate !== null && !in_array($candidate, $passwords, true)) {
+                $passwords[] = $candidate;
+            }
+        }
+
+        // the password-less key is what CommentController and UrlsController cache under
+        $this->destroyCacheProjectData($id);
+
+        foreach ($passwords as $candidate) {
+            $this->destroyCacheByIdAndPassword($id, $candidate);
+            $this->destroyCacheProjectData($id, $candidate);
+        }
+    }
+
+    /**
+     * Read live and deliberately uncached: this feeds cache eviction, so answering it from the cache
+     * being evicted would be circular.
+     *
+     * @param int $id
+     *
+     * @return string|null null when the project is gone
+     * @throws PDOException
+     */
+    private function getPassword(int $id): ?string
+    {
+        $stmt = $this->database->getConnection()->prepare("SELECT password FROM projects WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+
+        $password = $stmt->fetchColumn();
+
+        return $password === false ? null : (string)$password;
+    }
+
+    /**
+     * The reads addressed by the project itself: the row under its own id, and the same row under
+     * each of its jobs, which is a second address for the same content.
+     *
+     * @param int $id
+     *
+     * @return void
+     * @throws PDOException
+     */
+    private function destroyCachesByProjectId(int $id): void
+    {
+        $this->destroyFetchByIdCache($id, ProjectStruct::class);
+
+        $stmt = $this->database->getConnection()->prepare(self::SQL_FIND_BY_JOB_ID);
+
+        // a split job keeps one row per chunk under the same jobs.id, and they all share one cache key
+        $jobIds = array_unique(array_map(static fn(array $job): int => (int)$job['id'], $this->getJobIds($id)));
+
+        foreach ($jobIds as $id_job) {
+            $this->_destroyObjectCache($stmt, ProjectStruct::class, ['id_job' => $id_job]);
+        }
     }
 
     /**
@@ -205,7 +347,6 @@ class ProjectDao extends AbstractDao
 
         return $this->_fetchObjectMap($stmt, ProjectStruct::class, $id_list);
     }
-
 
     /**
      * @param array<int, int> $project_ids
@@ -239,8 +380,6 @@ class ProjectDao extends AbstractDao
      */
     protected function _getProjectDataSQLAndValues(int $pid, ?string $project_password = null): array
     {
-        $query = self::$_sql_project_data;
-
         $and_1 = null;
         $values = [$pid];
 
@@ -249,11 +388,7 @@ class ProjectDao extends AbstractDao
             $values[] = $project_password;
         }
 
-        // The two trailing placeholders are left in place and filled with nothing on purpose: the
-        // query text is part of the cache key, so removing them would orphan every entry already
-        // stored for a day, and a rotation running against the new key would leave the old one
-        // readable until it expired.
-        $query = sprintf($query, $and_1, null, null);
+        $query = sprintf(self::$_sql_project_data, $and_1);
 
         return [$query, $values];
     }
@@ -283,7 +418,7 @@ class ProjectDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheForProjectData(int $pid, ?string $project_password = null): bool
+    private function destroyCacheProjectData(int $pid, ?string $project_password = null): bool
     {
         [$query, $values] = $this->_getProjectDataSQLAndValues($pid, $project_password);
 
@@ -380,6 +515,11 @@ class ProjectDao extends AbstractDao
             $values['name'] = $searchName;
         }
 
+        // paging without an order is paging over an undefined sequence: rows can repeat or vanish
+        // between two pages. `id_team_idx` carries the primary key as its suffix, so ordering by id
+        // is the order the index already produces — EXPLAIN reports no filesort for it.
+        $query .= ' ORDER BY id ASC ';
+
         if (isset($limit) and isset($offset)) {
             $query .= " LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
         }
@@ -390,23 +530,30 @@ class ProjectDao extends AbstractDao
     }
 
     /**
+     * `id_team_idx` covers `id_team` alone, so every candidate row still has to be read from the
+     * clustered index to test `status_analysis`. An exact total therefore costs one row read per
+     * project in the team, which the largest teams measure in the hundreds of thousands. The count
+     * stops at {@see ProjectsCount::DEFAULT_CAP} instead: the work no longer depends on team size,
+     * and the caller learns from the result whether the figure is exact.
+     *
      * @param int $id_team
      * @param array{search?: array{id?: int, name?: string}} $filter
      * @param int $ttl
+     * @param int $cap the point at which counting stops; overridable so the boundary is testable
      *
-     * @return int
+     * @return ProjectsCount
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function getTotalCountByTeamId(int $id_team, array $filter = [], int $ttl = 0): int
+    public function getTotalCountByTeamId(int $id_team, array $filter = [], int $ttl = 0, int $cap = ProjectsCount::DEFAULT_CAP): ProjectsCount
     {
         $conn = $this->database->getConnection();
 
         $searchId = (isset($filter['search']['id'])) ? $filter['search']['id'] : null;
         $searchName = (isset($filter['search']['name'])) ? $filter['search']['name'] : null;
 
-        $query = "SELECT count(id) as totals FROM projects WHERE id_team = :id_team AND status_analysis NOT IN( :status1, :status2 ) ";
+        $counted = "SELECT id FROM projects WHERE id_team = :id_team AND status_analysis NOT IN( :status1, :status2 ) ";
 
         $values = [
             'id_team' => $id_team,
@@ -415,20 +562,22 @@ class ProjectDao extends AbstractDao
         ];
 
         if ($searchId) {
-            $query .= ' AND id = :id ';
+            $counted .= ' AND id = :id ';
             $values['id'] = $searchId;
         }
 
         if ($searchName) {
-            $query .= ' AND name = :name ';
+            $counted .= ' AND name = :name ';
             $values['name'] = $searchName;
         }
 
-        $stmt = $conn->prepare($query);
+        $counted .= ' LIMIT ' . ProjectsCount::queryLimit($cap);
+
+        $stmt = $conn->prepare("SELECT count(*) as totals FROM ( $counted ) counted");
 
         $results = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $values);
 
-        return (isset($results[0])) ? (int)$results[0]['totals'] : 0;
+        return ProjectsCount::fromCappedQuery((isset($results[0])) ? (int)$results[0]['totals'] : 0, $cap);
     }
 
     /**
@@ -443,11 +592,7 @@ class ProjectDao extends AbstractDao
     public function findByJobId(int $id_job, int $ttl = 0): ?ProjectStruct
     {
         $conn = $this->database->getConnection();
-        $sql = "SELECT projects.* FROM projects " .
-            " INNER JOIN jobs ON projects.id = jobs.id_project " .
-            " WHERE jobs.id = :id_job " .
-            " LIMIT 1 ";
-        $stmt = $conn->prepare($sql);
+        $stmt = $conn->prepare(self::SQL_FIND_BY_JOB_ID);
 
         /** @var ProjectStruct $result */
         $result = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ProjectStruct::class, ['id_job' => $id_job])[0] ?? null;
@@ -534,7 +679,7 @@ class ProjectDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheByIdAndPassword(int $id, string $password): bool
+    private function destroyCacheByIdAndPassword(int $id, string $password): bool
     {
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare(self::$_sql_get_by_id_and_password);
@@ -572,6 +717,7 @@ class ProjectDao extends AbstractDao
 
     /**
      * @throws PDOException
+     * @throws ReflectionException
      */
     public function updateAnalysisStatus(int $project_id, string $status, int $stWordCount): bool
     {
@@ -585,16 +731,23 @@ class ProjectDao extends AbstractDao
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare($update_project_count);
 
-        return $stmt->execute([
+        $success = $stmt->execute([
             'status_analysis' => $status,
             'standard_analysis_wc' => $stWordCount,
             'id' => $project_id
         ]);
+
+        if ($success) {
+            $this->destroyCache($project_id);
+        }
+
+        return $success;
     }
 
     /**
      * @throws DomainException
      * @throws PDOException
+     * @throws ReflectionException
      */
     public function changeProjectStatus(int $pid, string $status): int
     {
@@ -602,7 +755,13 @@ class ProjectDao extends AbstractDao
         $data['status_analysis'] = $status;
         $where = ["id" => $pid];
 
-        return $this->updateFields($data, $where);
+        $affected = $this->updateFields($data, $where);
+
+        if ($affected > 0) {
+            $this->destroyCache($pid);
+        }
+
+        return $affected;
     }
 
     /**
@@ -614,6 +773,7 @@ class ProjectDao extends AbstractDao
      * @return int affected rows: 0 means the project was already DONE (or gone) and the write was
      *             intentionally skipped
      * @throws PDOException
+     * @throws ReflectionException
      */
     public function changeProjectStatusIfNotDone(int $pid, string $status): int
     {
@@ -626,7 +786,13 @@ class ProjectDao extends AbstractDao
             'done'   => ProjectStatus::STATUS_DONE,
         ]);
 
-        return $stmt->rowCount();
+        $affected = $stmt->rowCount();
+
+        if ($affected > 0) {
+            $this->destroyCache($pid);
+        }
+
+        return $affected;
     }
 
     /**

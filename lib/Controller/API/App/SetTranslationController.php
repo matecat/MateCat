@@ -51,6 +51,7 @@ use Plugins\Features\TranslationVersions\StoreTranslationEventParams;
 use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\JobStatus;
@@ -59,7 +60,7 @@ use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 use Utils\Contribution\Set;
 use Utils\Contribution\SetContributionRequest;
-use Utils\LQA\ICUSourceSegmentChecker;
+use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\LQA\QA;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
@@ -70,7 +71,16 @@ use Utils\Tools\Utils;
 
 class SetTranslationController extends AbstractStatefulKleinController
 {
-    use ICUSourceSegmentChecker;
+    /**
+     * Whether the stored source of this segment is valid ICU. Decided in validateTheRequest()
+     * and read by setSubFilteringBehavior() and setQaChecks(), which run later in the same
+     * request: the handler set the segment is converted with and the QA check that grades the
+     * translation have to agree on it.
+     */
+    private bool $segmentContainsIcu = false;
+
+    /** The source-side pattern the QA comparator is built against, kept for the same reason. */
+    private ?MessagePatternValidator $icuSourceValidator = null;
 
     /**
      * @var array{
@@ -166,44 +176,44 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @throws RuntimeException
      * @throws TypeError
      * @throws DivisionByZeroError
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction
+     *                   on any throw and re-throws the original, whatever its type
      */
     public function translate(): void
     {
         $db = $this->getDatabase();
 
-        try {
-            $prepared    = $this->prepareTranslation();
-            $translation = $prepared['translation'];
-            $check       = $prepared['check'];
-            $err_json    = $prepared['err_json'];
+        $prepared = $this->prepareTranslation();
+        $translation = $prepared['translation'];
+        $check = $prepared['check'];
+        $err_json = $prepared['err_json'];
 
-            /*
-             * begin stat counter
-             *
-             * It works well with default InnoDB Isolation level
-             *
-             * REPEATABLE-READ offering a row level lock for this id_segment
-             *
-             */
-            $db->begin();
-
+        /*
+         * begin stat counter
+         *
+         * It works well with default InnoDB Isolation level
+         *
+         * REPEATABLE-READ offering a row level lock for this id_segment
+         *
+         */
+        [$new_translation, $old_translation, $propagationTotal] = $db->transaction(function () use ($translation, $err_json, $check): array {
             $translations    = $this->buildNewTranslation($translation, $err_json, $check);
             $new_translation = $translations['new'];
             $old_translation = $translations['old'];
 
             $propagationTotal = $this->persistTranslation($new_translation, $old_translation, $translation, $err_json, $check);
 
-            $db->commit();
+            return [$new_translation, $old_translation, $propagationTotal];
+        });
 
-            $result = $this->buildResult($new_translation, $old_translation, $propagationTotal, $check);
+        // Everything below reports work that is already durable, so it stays outside the scope where
+        // the commit used to put it. The try/catch that used to wrap the whole method existed only to
+        // roll back; the scope does that itself and re-throws the original.
+        $result = $this->buildResult($new_translation, $old_translation, $propagationTotal, $check);
 
-            $this->finalizeTranslation($new_translation, $old_translation, $propagationTotal, $result);
+        $this->finalizeTranslation($new_translation, $old_translation, $propagationTotal, $result);
 
-            $this->response->json($result);
-        } catch (Exception $exception) {
-            $db->rollback();
-            throw $exception;
-        }
+        $this->response->json($result);
     }
 
     /**
@@ -717,7 +727,13 @@ class SetTranslationController extends AbstractStatefulKleinController
          */
         $sourcePage = $chunk->getSourcePage() ?: SourcePages::SOURCE_PAGE_TRANSLATE;
 
-        $this->sourceContainsIcu($chunk->getProject(new ProjectDao($this->getDatabase())), $chunk, $segmentString, $this->getDatabase());
+        $this->icuSourceValidator = new MessagePatternValidator($chunk->source, $segmentString);
+        $this->segmentContainsIcu = ICUSourceSegmentDetector::sourceContainsIcu(
+            $this->icuSourceValidator,
+            (new ProjectMetadataDao($this->getDatabase()))->isIcuEnabled(
+                (int)$chunk->getProject(new ProjectDao($this->getDatabase()))->id
+            )
+        );
 
         $data = [
             'id_job' => $id_job,
@@ -746,7 +762,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             'chunk' => $chunk,
             'project' => $chunk->getProject(new ProjectDao($this->getDatabase())),
             'id_project' => $chunk->id_project,
-            'segment_contains_icu' => $this->sourceContainsIcu,
+            'segment_contains_icu' => $this->segmentContainsIcu,
             'split_num' => null,
             'split_chunk_lengths' => null,
         ];
@@ -805,9 +821,9 @@ class SetTranslationController extends AbstractStatefulKleinController
     {
         [$__translation, $this->data['split_chunk_lengths']] = (new CatUtils($this->getDatabase()))->parseSegmentSplit($this->data['translation'], '', $this->filter);
 
-        if (is_null($__translation) || $__translation === '') {
-            $this->logger->debug("Empty Translation \n\n" . var_export($this->request->paramsPost()->all(), true));
-            throw new RuntimeException("Empty Translation \n\n" . var_export($this->request->paramsPost()->all(), true), 0);
+        if ($__translation === '') {
+            $this->logger->debug("Empty translation \n\n" . var_export($this->request->paramsPost()->all(), true));
+            throw new RuntimeException("Empty translation \n\n" . var_export($this->request->paramsPost()->all(), true), 0);
         }
 
         $explodeIdSegment = explode("-", $this->data['id_segment']);
@@ -815,7 +831,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         $this->data['split_num'] = $explodeIdSegment[1] ?? null;
 
         if (empty($this->data['id_segment'])) {
-            throw new Exception("missing id_segment", -1);
+            throw new Exception("Missing id_segment", -1);
         }
 
         if ($this->isSplittedSegment()) {
@@ -844,7 +860,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $this->data['chunk']->target,
             (new SegmentOriginalDataDao($this->getDatabase()))->getSegmentDataRefMap((int)$this->data['id_segment']),
             $metadata->getSubfilteringCustomHandlers($this->id_job, $this->password ?? ''),
-            $this->sourceContainsIcu
+            $this->segmentContainsIcu
         );
 
         if (!$filter instanceof MateCatFilter) {
@@ -864,8 +880,8 @@ class SetTranslationController extends AbstractStatefulKleinController
         $check = new QA(
             $segment,
             $translation,
-            ($this->icuSourcePatternValidator !== null) ? MessagePatternComparator::fromValidators(
-                $this->icuSourcePatternValidator,
+            ($this->icuSourceValidator !== null) ? MessagePatternComparator::fromValidators(
+                $this->icuSourceValidator,
                 new MessagePatternValidator(
                     $this->data['chunk']->target,
                     // Transform target content: convert control character placeholders back to ASCII control characters
@@ -874,7 +890,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 )
             ) : null,
             // ICU syntax is enabled for this project, and the translation content must contain valid ICU syntax
-            $this->sourceContainsIcu
+            $this->segmentContainsIcu
         ); // Layer 1 here
 
         $check->setChunk($this->data['chunk']);
@@ -912,7 +928,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 break;
 
             default:
-                $msg = "Error Hack Status \n\n " . var_export($this->request->paramsPost()->all(), true);
+                $msg = "Error hack status \n\n " . var_export($this->request->paramsPost()->all(), true);
                 throw new Exception($msg, -1);
         }
     }
@@ -992,7 +1008,8 @@ class SetTranslationController extends AbstractStatefulKleinController
             try {
                 (new CatUtils($this->getDatabase()))->addSegmentTranslation($translation, (bool)$this->isRevision());
             } catch (Exception $e) {
-                $this->getDatabase()->rollback();
+                // Re-thrown, not rolled back: this runs inside the caller's transaction scope, which
+                // owns the undo. Rolling back here would end a transaction this method did not open.
                 throw new RuntimeException($e->getMessage());
             }
 

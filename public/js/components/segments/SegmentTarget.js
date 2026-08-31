@@ -104,6 +104,11 @@ class SegmentTarget extends React.Component {
     const {showFormatMenu} = this.state
     const {toggleFormatMenu, updateCounter} = this
 
+    const buttonsDisabled =
+      !translation ||
+      translation.trim().length === 0 ||
+      OfflineUtils.offlineCacheRemaining <= 0
+
     var textAreaContainer = ''
     let issues = this.getAllIssues()
     if (this.props.segment.edit_area_locked) {
@@ -133,18 +138,21 @@ class SegmentTarget extends React.Component {
               )}
             />
           </div>
-          <div className="segment-target-toolbar">
-            {config.isReview ? (
-              <Button
-                size={BUTTON_SIZE.ICON_SMALL}
-                mode={BUTTON_MODE.OUTLINE}
-                onClick={this.lockEditArea.bind(this)}
-                title="Highlight text and assign an issue to the selected text."
-                className="segment-target-toolbar-icon revise-lock-editArea-active"
-              >
-                <ReviseLockIcon />
-              </Button>
-            ) : null}
+          <div className="segment-actions-container">
+            <div className="segment-target-toolbar">
+              {config.isReview ? (
+                <Button
+                  size={BUTTON_SIZE.ICON_SMALL}
+                  mode={BUTTON_MODE.OUTLINE}
+                  onClick={this.lockEditArea.bind(this)}
+                  title="Highlight text and assign an issue to the selected text."
+                  className="revise-lock-editArea-active"
+                >
+                  <ReviseLockIcon />
+                </Button>
+              ) : null}
+            </div>
+            <SegmentButtons disabled={buttonsDisabled} {...this.context} />
           </div>
         </div>
       )
@@ -204,22 +212,25 @@ class SegmentTarget extends React.Component {
             updateCounter={updateCounter}
           />
           {s2tMicro}
-          <SegmentTargetToolbar
-            {...{
-              sid: this.props.segment.sid,
-              segment: this.props.segment,
-              editArea: this.editArea,
-              lockEditArea: this.lockEditArea.bind(this),
-              qrLink,
-              issuesLength: issues.length,
-              showFormatMenu,
-              textHasTags: Boolean(textHasTags(translation)),
-              removeTagsFromText: this.removeTagsFromText.bind(this),
-              missingTagsInTarget: segment.missingTagsInTarget,
-              addMissingSourceTagsToTarget:
-                this.editArea?.addMissingSourceTagsToTarget,
-            }}
-          />
+          <div className="segment-actions-container">
+            <SegmentTargetToolbar
+              {...{
+                sid: this.props.segment.sid,
+                segment: this.props.segment,
+                editArea: this.editArea,
+                lockEditArea: this.lockEditArea.bind(this),
+                qrLink,
+                issuesLength: issues.length,
+                showFormatMenu,
+                textHasTags: Boolean(textHasTags(translation)),
+                removeTagsFromText: this.removeTagsFromText.bind(this),
+                missingTagsInTarget: segment.missingTagsInTarget,
+                addMissingSourceTagsToTarget:
+                  this.editArea?.addMissingSourceTagsToTarget,
+              }}
+            />
+            <SegmentButtons disabled={buttonsDisabled} {...this.context} />
+          </div>
         </div>
       )
     }
@@ -292,16 +303,7 @@ class SegmentTarget extends React.Component {
   }
 
   render() {
-    let buttonsDisabled = false
     let translation = this.props.segment.translation
-
-    if (
-      !translation ||
-      translation.trim().length === 0 ||
-      OfflineUtils.offlineCacheRemaining <= 0
-    ) {
-      buttonsDisabled = true
-    }
 
     return (
       <div
@@ -312,7 +314,6 @@ class SegmentTarget extends React.Component {
         {this.getTargetArea(translation)}
         <p className="warnings" />
 
-        <SegmentButtons disabled={buttonsDisabled} {...this.context} />
         {this.props.segment.warnings ? (
           <SegmentWarnings warnings={this.props.segment.warnings} />
         ) : null}

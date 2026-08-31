@@ -1,4 +1,15 @@
-@use 'commons/colors';
+@use 'tokens/colors';
+
+*,
+:before,
+:after {
+  box-sizing: inherit;
+}
+
+html {
+  box-sizing: border-box;
+}
+
 html,
 body {
   height: 100%;
@@ -81,11 +92,11 @@ ul {
   padding: 30px 0 30px 0;
   display: block;
   z-index: 999999;
-  background: #fff;
-  box-shadow: 0px 0px 5px #ccc;
+  background: colors.$white;
+  box-shadow: 0px 0px 5px colors.$grey200;
   border-radius: 2px;
   font-size: 18px;
-  border: 1px solid #ccc;
+  border: 1px solid colors.$grey200;
 }
 
 .iepopup img {
@@ -94,7 +105,7 @@ ul {
 
 .iepopup ul a {
   padding: 0px 0 0 0;
-  color: #39699a;
+  color: colors.$blue400;
   text-decoration: underline;
 }
 
@@ -140,7 +151,7 @@ section mark.searchMarker {
 }
 
 section mark.searchMarker.currSearchItem {
-  background: #f7d315;
+  background: colors.$orange200;
   /*	background: #00c1e6; */
 }
 
@@ -163,8 +174,8 @@ section mark.searchMarker.currSearchItem {
 }
 
 .offline header {
-  background: #6d6e71;
-  border-bottom: 1px solid #333;
+  background: colors.$grey600;
+  border-bottom: 1px solid colors.$grey1300;
   padding: 0px 0 2px 0;
   margin-bottom: 20px;
   height: 45px;
@@ -178,840 +189,13 @@ section mark.searchMarker.currSearchItem {
 }
 
 .offline h2 {
-  color: #999999 !important;
+  color: colors.$grey400 !important;
   font-weight: normal !important;
 }
 
 .claim span {
   font-weight: bold;
-  color: #39699a;
-}
-
-.fileformat span {
-  padding: 10px 0px 10px 40px;
-  margin: 5px 0 0 0;
-  width: 100%;
-  height: 35px;
-  float: left;
-  background-size: 25px !important;
-}
-
-.extdoc {
-  background: url(/public/img/matecat_file_icons.png) 6px 0 no-repeat !important;
-}
-
-/* .doc, .dot, . docx, .dotx, .docm, .dotm, .odt, .sxw*/
-.extppt {
-  background: url(/public/img/matecat_file_icons.png) 6px -34px no-repeat !important;
-}
-
-/* .pot, .pps, .ppt, .potm, .potx, .ppsm, .ppsx, .pptm, .pptx, .odp, .sxi*/
-.exthtm {
-  background: url(/public/img/matecat_file_icons.png) 6px -70px no-repeat !important;
-}
-
-/* .htm, .html, .xhtml */
-.extpdf {
-  background: url(/public/img/matecat_file_icons.png) 6px -104px no-repeat !important;
-}
-
-/* .pdf */
-.extxls {
-  background: url(/public/img/matecat_file_icons.png) 6px -140px no-repeat !important;
-}
-
-/* .xls, .xlt, .xlsm, .xlsx, .xltx, .ods, .sxc, .csv */
-.exttxt {
-  background: url(/public/img/matecat_file_icons.png) 6px -172px no-repeat !important;
-}
-
-/* .txt */
-.extxif {
-  background: url(/public/img/matecat_file_icons.png) 6px -208px no-repeat !important;
-}
-
-/* .xliff */
-.extttx {
-  background: url(/public/img/matecat_file_icons.png) 6px -242px no-repeat !important;
-}
-
-/* .ttx */
-.extitd {
-  background: url(/public/img/matecat_file_icons.png) 6px -276px no-repeat !important;
-}
-
-/* .itd */
-.extxlf {
-  background: url(/public/img/matecat_file_icons.png) 6px -310px no-repeat !important;
-}
-
-/* .xlf */
-.extmif {
-  background: url(/public/img/matecat_file_icons.png) 6px -342px no-repeat !important;
-}
-
-/* .mif */
-.extidd {
-  background: url(/public/img/matecat_file_icons.png) 6px -378px no-repeat !important;
-}
-
-/* .idml, .inx, .icml */
-.extqxp {
-  background: url(/public/img/matecat_file_icons.png) 6px -412px no-repeat !important;
-}
-
-/* .xtg */
-.extxml {
-  background: url(/public/img/matecat_file_icons.png) 6px -446px no-repeat !important;
-}
-
-/* .xml */
-.extrcc {
-  background: url(/public/img/matecat_file_icons.png) 6px -484px no-repeat !important;
-}
-
-/* .rc */
-.extres {
-  background: url(/public/img/matecat_file_icons.png) 6px -516px no-repeat !important;
-}
-
-/* .resx */
-.extsgl {
-  background: url(/public/img/matecat_file_icons.png) 6px -552px no-repeat !important;
-}
-
-/* .sgml */
-.extsgm {
-  background: url(/public/img/matecat_file_icons.png) 6px -584px no-repeat !important;
-}
-
-/* .sgm */
-.extpro {
-  background: url(/public/img/matecat_file_icons.png) 6px -618px no-repeat !important;
-}
-
-/* .properties */
-.extdit {
-  background: url(/public/img/matecat_file_icons.png) 6px -652px no-repeat !important;
-}
-
-/* .dita */
-.exttag {
-  background: url(/public/img/matecat_file_icons.png) 6px -686px no-repeat !important;
-}
-
-/* .tag */
-.exttmx {
-  background: url(/public/img/matecat_file_icons.png) 6px -722px no-repeat !important;
-}
-
-/* .tmx */
-.extstr {
-  background: url(/public/img/matecat_file_icons.png) 6px -758px no-repeat !important;
-}
-
-/* .str */
-.extzip {
-  background: url(/public/img/matecat_file_icons.png) 6px -792px no-repeat !important;
-}
-
-/* .zip */
-.exticml {
-  background: url(/public/img/matecat_file_icons.png) 6px -826px no-repeat !important;
-}
-
-/* .icml */
-.extimg {
-  background: url(/public/img/matecat_file_icons.png) 6px -860px no-repeat !important;
-}
-
-/* .bmp, .gif, .jpeg, .png, .tiff */
-.extwix {
-  background: url(/public/img/matecat_file_icons.png) 6px -894px no-repeat !important;
-}
-
-/* .wix */
-.extsrt {
-  background: url(/public/img/matecat_file_icons.png) 6px -928px no-repeat !important;
-}
-
-/* .sbv */
-.extsbv {
-  background: url(/public/img/matecat_file_icons.png) 6px -1133px no-repeat !important;
-}
-
-/* .vtt */
-.extvtt {
-  background: url(/public/img/matecat_file_icons.png) 6px -1167px no-repeat !important;
-}
-
-/* .srt */
-.extpo {
-  background: url(/public/img/matecat_file_icons.png) 6px -962px no-repeat !important;
-}
-
-/* .po */
-.extg {
-  background: url(/public/img/matecat_file_icons.png) 6px -996px no-repeat !important;
-}
-
-/* .g */
-.exts {
-  background: url(/public/img/matecat_file_icons_ts.png) 6px -0px no-repeat !important;
-}
-
-/* .ts */
-.extgsli {
-  background: url(/public/img/matecat_file_icons.png) 6px -1033px no-repeat !important;
-}
-
-/* Google Slides */
-.extgdoc {
-  background: url(/public/img/matecat_file_icons.png) 6px -1070px no-repeat !important;
-}
-
-/* Google Document */
-.extgsheet {
-  background: url(/public/img/matecat_file_icons.png) 6px -1107px no-repeat !important;
-}
-
-/* retina display query */
-@media only screen and (-webkit-min-device-pixel-ratio: 2),
-  only screen and (min--moz-device-pixel-ratio: 2),
-  only screen and (-o-min-device-pixel-ratio: 2/1),
-  only screen and (min-device-pixel-ratio: 2),
-  only screen and (min-resolution: 192dpi),
-  only screen and (min-resolution: 2dppx) {
-  .preview span {
-    height: 30px;
-    width: 30px;
-    display: block;
-    background-size: 25px;
-  }
-  .extdoc {
-    background: url(/public/img/matecat_file_icons2x.png) 6px 0 no-repeat !important;
-  }
-  /* .doc, .dot, . docx, .dotx, .docm, .dotm, .odt, .sxw*/
-  .extppt {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -34px no-repeat !important;
-  }
-  /* .pot, .pps, .ppt, .potm, .potx, .ppsm, .ppsx, .pptm, .pptx, .odp, .sxi*/
-  .exthtm {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -70px no-repeat !important;
-  }
-  /* .htm, .html, .xhtml */
-  .extpdf {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -104px no-repeat !important;
-  }
-  /* .pdf */
-  .extxls {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -140px no-repeat !important;
-  }
-  /* .xls, .xlt, .xlsm, .xlsx, .xltx, .ods, .sxc, .csv */
-  .exttxt {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -172px no-repeat !important;
-  }
-  /* .txt */
-  .extxif {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -208px no-repeat !important;
-  }
-  /* .xliff */
-  .extttx {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -242px no-repeat !important;
-  }
-  /* .ttx */
-  .extitd {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -276px no-repeat !important;
-  }
-  /* .itd */
-  .extxlf {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -310px no-repeat !important;
-  }
-  /* .xlf */
-  .extmif {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -342px no-repeat !important;
-  }
-  /* .mif */
-  .extidd {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -378px no-repeat !important;
-  }
-  /* .idml, .inx, .icml */
-  .extqxp {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -412px no-repeat !important;
-  }
-  /* .xtg */
-  .extxml {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -446px no-repeat !important;
-  }
-  /* .xml */
-  .extrcc {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -484px no-repeat !important;
-  }
-  /* .rc */
-  .extres {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -516px no-repeat !important;
-  }
-  /* .resx */
-  .extsgl {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -552px no-repeat !important;
-  }
-  /* .sgml */
-  .extsgm {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -584px no-repeat !important;
-  }
-  /* .sgm */
-  .extpro {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -618px no-repeat !important;
-  }
-  /* .properties */
-  .extdit {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -652px no-repeat !important;
-  }
-  /* .dita */
-  .exttag {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -686px no-repeat !important;
-  }
-  /* .tag */
-  .exttmx {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -722px no-repeat !important;
-  }
-  /* .tmx */
-  .extstr {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -758px no-repeat !important;
-  }
-  /* .str */
-  .extzip {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -792px no-repeat !important;
-  }
-  /* .zip */
-  .exticml {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -826px no-repeat !important;
-  }
-  /* .icml */
-  .extimg {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -860px no-repeat !important;
-  }
-  /* .bmp, .gif, .jpeg, .png, .tiff */
-  .extwix {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -894px no-repeat !important;
-  }
-  /* .srt */
-  .extsrt {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -928px no-repeat !important;
-  }
-  /* .sbv */
-  .extsbv {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -1133px no-repeat !important;
-  }
-  /* .vtt */
-  .extvtt {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -1167px no-repeat !important;
-  }
-  /* .po */
-  .extpo {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -962px no-repeat !important;
-  }
-  /* .po */
-  .extg {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -996px no-repeat !important;
-  }
-  /* .g */
-  .exts {
-    background: url(/public/img/matecat_file_icons_ts2x.png) 6px 0px no-repeat !important;
-  }
-  /* .ts */
-  .extgsli {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -1033px no-repeat !important;
-  }
-  /* Google Slides */
-  .extgdoc {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -1070px no-repeat !important;
-  }
-  /* Google Document */
-  .extgsheet {
-    background: url(/public/img/matecat_file_icons2x.png) 6px -1107px no-repeat !important;
-  }
-  /* Google Sheet */
-}
-
-@font-face {
-  font-family: 'icomoon';
-  src: url('/public/css/fonts/icomoon.eot?7sjwen');
-  src:
-    url('/public/css/fonts/icomoon.eot?7sjwen#iefix')
-      format('embedded-opentype'),
-    url('/public/css/fonts/icomoon.ttf?7sjwen') format('truetype'),
-    url('/public/css/fonts/icomoon.woff?7sjwen') format('woff'),
-    url('/public/css/fonts/icomoon.svg?7sjwen#icomoon') format('svg');
-  font-weight: normal;
-  font-style: normal;
-}
-
-/*
-/* mbc extend iconmoon set with icons for matecat chat
-/* TODO: add icons to main set
-*/
-
-/*
-/* mbc extend iconmoon set with icons for matecat chat
-*/
-icon-iconmoon:before,
-#logoutlink:before,
-.btn-confirm-small .text:before,
-.btn-orange-small .text:before,
-.btn-orange-medium .text:before,
-[class^="icon-"], [class*=" icon-"],
-.sorting_desc:after,
-.sorting_asc:after,
-.open-popup-addtm-tr:before,
-.sorting:after,
-.x-popup:before,
-.x-popup2:before,
-.popup .x-popup:before,
-.mgmt-panel .x-popup:before,
-.popup-tm .x-popup:before,
-td.actions a:before,
-a.archive-project:before,
-a.unarchive-project:before,
-a.unarchive-project:after,
-.splitpoint:before,
-.notific:before,
-#swaplang:after,
-.more:before,
-.more.minus:before,
-.close:before,
-.notific.error:before,
-.breadcrumbs #pname:before,
-.delete button:before,
-.cancel button:before,
-.graysmall:hover .trash:before,
-.splitpoint-delete:after,
-#point2seg:after,
-.warnings:before,
-  /* mbc chat */
-.mbc-warnings:before,
-  /* mbc chat */
-.text .alternatives:before,
-header .filter:before,
-.export-button-label:before,
-.canceladd-export:before {
-  font-family: 'icomoon';
-  speak: none;
-  font-style: normal;
-  font-weight: normal;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 1;
-
-  /* Better Font Rendering =========== */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-header .filter:before {
-  content: '\f0b0';
-}
-
-.close:before {
-  content: '\ea0d';
-}
-
-.header .close:before {
-  content: '\ea0d';
-  text-align: center;
-  margin-top: 0px;
-  margin-left: -1px;
-  display: block;
-  vertical-align: middle;
-}
-
-.notific:before {
-  content: '\f058';
-  font-size: 25px;
-}
-
-.notific.error:before {
-  content: '\f071';
-  font-size: 25px;
-}
-
-.warnings:before,
-.mbc-warnings:before,
-.text .alternatives:before {
-  content: '\f071';
-  color: #d65959;
-  margin-right: 10px;
-}
-
-#point2seg:after {
-  content: '\e903';
-  font-size: 24px;
-}
-
-#swaplang:after {
-  content: '\f0ec';
-}
-
-.more:before,
-.more.minus:before {
-  margin-right: 5px;
-  position: relative;
-  top: 2px;
-}
-
-.graysmall:hover .trash:before {
-  content: '\f014';
-}
-
-.more:before {
-  content: '\f196';
-}
-
-.cancel button:before,
-.delete button:before {
-  content: '\f014';
-  font-size: 13px;
-  vertical-align: middle;
-}
-
-.delete button.zip_row:before {
-  content: 'Clear Archive';
-  font-size: 12px;
-  font-weight: bold;
-  font-family: Calibri, Arial, Helvetica, sans-serif;
-}
-
-a.unarchive-project:before {
-  content: '\e606';
-  font-size: 14px;
-}
-
-a.unarchive-project:after {
-  content: '\e607';
-  color: red;
-  font-size: 16px;
-  position: absolute;
-  left: -1px;
-  top: 1px;
-  transform: rotate(-45deg);
-}
-
-.x-popup:before,
-.x-popup2:before {
-  content: '\f057';
-}
-
-.open-popup-addtm-tr:before {
-  content: '\e602';
-  padding-right: 5px;
-  vertical-align: text-top;
-}
-
-.icon-uniE96B:before {
-  content: '\e96b';
-}
-
-.icon-uniE96D:before {
-  content: '\e96d';
-}
-
-.icon-uniE96E:before {
-  content: '\e96e';
-}
-
-.icon-uniE970:before {
-  content: '\e970';
-}
-
-.icon-error_outline:before {
-  content: '\e001';
-}
-
-.icon-power-cord:before {
-  content: '\e291';
-}
-
-.icon-power-cord2:before {
-  content: '\e292';
-}
-
-.icon-user22:before {
-  content: '\e601';
-}
-
-.icon-upload:before {
-  content: '\e602';
-}
-
-.icon-stop:before {
-  content: '\e604';
-}
-
-.icon-info:before {
-  content: '\e605';
-}
-
-.icon-minus:before {
-  content: '\e607';
-}
-
-.icon-settings:before {
-  content: '\e8b8';
-}
-
-.icon-zip:before {
-  content: '\e901';
-}
-
-.icon-mic:before {
-  content: '\e91e';
-}
-
-.icon-bubble2:before {
-  content: '\e96f';
-}
-
-.icon-cancel-circle:before {
-  content: '\ea0d';
-}
-
-.icon-make-group:before {
-  content: '\ea58';
-}
-
-.icon-text-height:before {
-  content: '\ea5f';
-}
-
-.icon-superscript2:before {
-  content: '\ea6b';
-}
-
-.icon-subscript2:before {
-  content: '\ea6c';
-}
-
-.icon-split:before {
-  content: '\f03d';
-}
-
-.icon-play:before {
-  content: '\f04b';
-}
-
-.icon-chevron-left:before {
-  content: '\f053';
-}
-
-.icon-eye:before {
-  content: '\f06e';
-}
-
-.icon-google-plus-square2:before {
-  content: '\f0d5';
-}
-
-.icon-sort-up:before {
-  content: '\f0e0';
-}
-
-.icon-code:before {
-  content: '\f121';
-}
-
-.icon-star-half-empty:before {
-  content: '\f123';
-}
-.icon-users:before {
-  content: '\e972';
-}
-
-.icon-share:before {
-  content: '\ea82';
-}
-
-.icon-lock:before {
-  content: '\e98f';
-}
-
-.icon-unlocked:before {
-  content: '\e990';
-}
-
-.icon-earth:before {
-  content: '\e9ca';
-}
-
-.icon-user2:before {
-  content: '\e600';
-}
-
-.icon-checkmark:before {
-  content: '\ea10';
-}
-
-.icon-search:before {
-  content: '\f002';
-}
-
-.icon-envelope-o:before {
-  content: '\f003';
-}
-
-.icon-heart:before {
-  content: '\f004';
-}
-
-.icon-star:before {
-  content: '\f005';
-}
-
-.icon-user:before {
-  content: '\f007';
-}
-
-.icon-check:before {
-  content: '\f00c';
-}
-
-.icon-times:before {
-  content: '\f00d';
-}
-
-.icon-power-off:before {
-  content: '\f011';
-}
-
-.icon-gear:before {
-  content: '\f013';
-}
-
-.icon-share-square-o:before {
-  content: '\f045';
-}
-
-.icon-chevron-right:before {
-  content: '\f054';
-}
-
-.icon-plus-circle:before {
-  content: '\f055';
-}
-
-.icon-times-circle:before {
-  content: '\f057';
-}
-
-.icon-check-circle:before {
-  content: '\f058';
-}
-
-.icon-times-circle-o:before {
-  content: '\f05c';
-}
-
-.icon-check-circle-o:before {
-  content: '\f05d';
-}
-
-.icon-plus:before {
-  content: '\f067';
-}
-
-.icon-warning:before {
-  content: '\f071';
-}
-
-.icon-sign-in:before {
-  content: '\f090';
-}
-
-.icon-wrench:before {
-  content: '\f0ad';
-}
-
-.icon-tasks:before {
-  content: '\f0ae';
-}
-
-.icon-filter:before {
-  content: '\f0b0';
-}
-
-.icon-google-plus-square:before {
-  content: '\f0d4';
-}
-
-.icon-unsorted:before {
-  content: '\f0dc';
-}
-
-.icon-sort-down:before {
-  content: '\f0dd';
-}
-
-.icon-exchange:before {
-  content: '\f0ec';
-}
-
-.icon-mail-reply:before {
-  content: '\f112';
-}
-
-.icon-minus-square-o:before {
-  content: '\f147';
-}
-
-.icon-plus-square-o:before {
-  content: '\f196';
-}
-
-.icon-language:before {
-  content: '\f1ab';
-}
-
-.icon-paw:before {
-  content: '\f1b0';
-}
-
-.icon-file-text:before {
-  content: '\e922';
-}
-
-.icon-file:before {
-  content: '\e904';
-}
-
-.icon-unlocked3:before {
-  content: '\ea8a';
-}
-
-.icon-picture:before {
-  content: '\e95d';
-}
-
-.icon-window:before {
-  content: '\e933';
-}
-
-.icon-gdrive:before {
-  content: url(/public/img/logo-drive-16-gray.png);
-}
-
-.icon-preview-bottom-window:before {
-  content: '\ea8b';
-}
-
-.icon-preview-new-window:before {
-  content: '\ea8c';
-}
-
-.icon-no-preview:before {
-  content: '\ea8d';
-}
-
-.icon-go-to-first:before {
-  content: '\ea8e';
+  color: colors.$blue400;
 }
 
 @font-face {
@@ -1043,7 +227,7 @@ a.unarchive-project:after {
 }
 
 #menu-site li a {
-  color: #fff;
+  color: colors.$white;
   text-decoration: none;
   -webkit-font-smoothing: antialiased;
   line-height: 22px;
@@ -1055,9 +239,9 @@ a.unarchive-project:after {
 #menu-site li a.bigblue {
   font-size: 17px !important;
   border: none !important;
-  color: colors.$darkBlue !important;
+  color: colors.$blue900 !important;
   border-radius: 18px;
-  background-color: #fff;
+  background-color: colors.$white;
   padding: 4px 18px;
   font-weight: bold;
   margin-left: 5px;
@@ -1065,17 +249,11 @@ a.unarchive-project:after {
 }
 
 #menu-site li a.bigred:hover {
-  color: colors.$darkBlueHover !important;
+  color: colors.$blue950 !important;
 }
 
 #menu-site li a:hover {
-  color: #3aa9dd;
-}
-
-.ui.primary.button.button-modal.warning-button.orange.margin.left-10.right-20 {
-  height: 43px;
-  padding: 1px 10px;
-  font-size: 15px;
+  color: colors.$blue500;
 }
 
 /*****************************/
@@ -1098,12 +276,20 @@ body svg {
     > span {
       display: block;
       text-align: center;
-      background-color: colors.$grey7;
+      background-color: colors.$grey400;
       border-radius: 4px;
       padding: 2px 4px;
       color: colors.$white;
       font-size: 14px;
       white-space: nowrap;
     }
+  }
+}
+
+a {
+  color: colors.$blue700;
+  &:hover,
+  &:active {
+    color: colors.$blue400;
   }
 }

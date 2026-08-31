@@ -266,7 +266,7 @@ const SegmentActions = {
        If is an ICE we allow to change the translation because is not possible to add an issue
      */
 
-    const mandatoryIssues = CatToolStore.getJobMetadata().job.mandatory_issues
+    const mandatoryIssues = CatToolStore.getJobMetadata()?.job?.mandatory_issues
 
     const currentRevisionKey = `r${config.revisionNumber}`
 
@@ -602,24 +602,32 @@ const SegmentActions = {
       !config.isReview &&
       config.job_completion_current_phase == 'revise'
     if (projectCompletionCheck) {
-      let message =
-        'All segments are in <b>read-only mode</b> because this job is under review.'
-
-      if (config.chunk_completion_undoable && config.last_completion_event_id) {
-        message =
-          message +
-          '<p class=\'warning-call-to\'><a href="javascript:void(0);" id="showTranslateWarningMessageUndoLink" >Re-Open Job</a></p>'
-      }
+      const showUndo =
+        config.chunk_completion_undoable && config.last_completion_event_id
 
       addNotification({
         uid: 'translate-warning',
         autoDismiss: false,
         dismissable: true,
         position: 'tc',
-        text: message,
+        text: (
+          <>
+            All segments are in <b>read-only mode</b> because this job is
+            under review.
+            {showUndo && (
+              <p className="warning-call-to">
+                <a
+                  href="javascript:void(0);"
+                  id="showTranslateWarningMessageUndoLink"
+                >
+                  Re-Open Job
+                </a>
+              </p>
+            )}
+          </>
+        ),
         title: 'Warning',
         type: 'warning',
-        allowHtml: true,
       })
     }
     if (TextUtils.justSelecting('readonly')) return

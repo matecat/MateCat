@@ -23,7 +23,7 @@ class AltlangStruct extends EngineStruct
     /**
      * @var ?string
      */
-    public ?string $description = "AltLang Engine";
+    public ?string $description = "AltLang engine";
 
     /**
      * @var ?string

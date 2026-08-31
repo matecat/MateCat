@@ -98,7 +98,7 @@ class BootstrapTest extends AbstractTest
         $missingTaskRunner = new SplFileInfo($this->tmpDir . '/nonexistent_task.ini');
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Task Manager Configuration file not found');
+        $this->expectExceptionMessage('Task manager configuration file not found');
         $this->invokePrivateMethod($instance, 'loadConfigurationFiles', [
             new SplFileInfo($configFile),
             $missingTaskRunner,

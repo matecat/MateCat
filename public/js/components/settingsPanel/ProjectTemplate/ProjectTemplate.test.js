@@ -10,6 +10,7 @@ import projectTemplatesMock from '../../../../mocks/projectTemplateMock'
 import userMock from '../../../../mocks/userMock'
 import {ApplicationWrapperContext} from '../../common/ApplicationWrapper/ApplicationWrapperContext'
 import tmKeysMock from '../../../../mocks/tmKeysMock'
+import CatToolActions from '../../../actions/CatToolActions'
 
 global.config = {
   basepath: 'http://localhost/',
@@ -18,19 +19,20 @@ global.config = {
   isLoggedIn: 1,
 }
 
-const wrapperElement = document.createElement('div')
+class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+beforeAll(() => {
+  window.ResizeObserver = ResizeObserver
+  return (window.open = jest.fn())
+})
+
 const WrapperComponent = (contextProps) => {
-  const ref = useRef()
-
-  useEffect(() => {
-    ref.current.appendChild(wrapperElement)
-  }, [])
-
   return (
     <SettingsPanelContext.Provider value={contextProps}>
-      <div ref={ref}>
-        <ProjectTemplate portalTarget={wrapperElement} />
-      </div>
+      <ProjectTemplate />
     </SettingsPanelContext.Provider>
   )
 }
@@ -269,7 +271,7 @@ test('Create, update and delete template', async () => {
 
   // delete
   await act(async () =>
-    user.click(screen.getByTestId('menu-button-show-items')),
+    user.click(screen.getByTestId('project-template-more-menu')),
   )
 
   await waitFor(async () => user.click(screen.getByTestId('delete-template')))
@@ -289,6 +291,146 @@ test('Create, update and delete template', async () => {
   )
 
   expect(screen.getByText('Standard')).toBeInTheDocument()
+})
+
+test('Renaming a template to an already used name shows a notification and does not persist', async () => {
+  const user = userEvent.setup()
+  const spyNotification = jest.spyOn(CatToolActions, 'addNotification')
+
+  const {result} = renderHook(() =>
+    useProjectTemplates({tmKeys: tmKeysMock.tm_keys, mtEngines: []}),
+  )
+
+  await waitFor(() => {
+    expect(result.current.projectTemplates?.length).toBe(2)
+  })
+
+  let {projectTemplates, setProjectTemplates, currentProjectTemplate} =
+    result.current
+
+  const {rerender} = render(
+    <ApplicationWrapperContext.Provider
+      value={{isUserLogged: true, userInfo: userMock}}
+    >
+      <WrapperComponent
+        {...{projectTemplates, setProjectTemplates, currentProjectTemplate}}
+      />
+    </ApplicationWrapperContext.Provider>,
+  )
+
+  await act(async () => user.click(screen.getByText('Standard')))
+  await act(async () => user.click(screen.getByText('Testing template')))
+
+  projectTemplates = result.current.projectTemplates
+  currentProjectTemplate = result.current.currentProjectTemplate
+  rerender(
+    <WrapperComponent
+      {...{projectTemplates, setProjectTemplates, currentProjectTemplate}}
+    />,
+  )
+
+  await act(async () =>
+    user.click(screen.getByTestId('project-template-more-menu')),
+  )
+  await act(async () => user.click(screen.getByText('Rename')))
+
+  const input = screen.getByTestId('template-name-input')
+  await act(async () => {
+    await user.clear(input)
+    await user.type(input, 'Standard')
+  })
+  await act(async () =>
+    user.click(screen.getByTestId('create-update-template')),
+  )
+
+  expect(spyNotification).toHaveBeenCalledWith(
+    expect.objectContaining({title: 'Duplicated name'}),
+  )
+  expect(result.current.currentProjectTemplate.name).toBe('Testing template')
+
+  spyNotification.mockRestore()
+})
+
+test('Renaming a template persists the new name via the API', async () => {
+  const user = userEvent.setup()
+
+  mswServer.use(
+    http.put(`${config.basepath}api/v3/project-template/:id`, () => {
+      return HttpResponse.json({})
+    }),
+  )
+
+  const {result} = renderHook(() =>
+    useProjectTemplates({tmKeys: tmKeysMock.tm_keys, mtEngines: []}),
+  )
+
+  await waitFor(() => {
+    expect(result.current.projectTemplates?.length).toBe(2)
+  })
+
+  let {
+    projectTemplates,
+    setProjectTemplates,
+    currentProjectTemplate,
+    modifyingCurrentTemplate,
+  } = result.current
+
+  const {rerender} = render(
+    <ApplicationWrapperContext.Provider
+      value={{isUserLogged: true, userInfo: userMock}}
+    >
+      <WrapperComponent
+        {...{
+          projectTemplates,
+          setProjectTemplates,
+          currentProjectTemplate,
+          modifyingCurrentTemplate,
+        }}
+      />
+    </ApplicationWrapperContext.Provider>,
+  )
+
+  await act(async () => user.click(screen.getByText('Standard')))
+  await act(async () => user.click(screen.getByText('Testing template')))
+
+  projectTemplates = result.current.projectTemplates
+  currentProjectTemplate = result.current.currentProjectTemplate
+  rerender(
+    <WrapperComponent
+      {...{
+        projectTemplates,
+        setProjectTemplates,
+        currentProjectTemplate,
+        modifyingCurrentTemplate,
+      }}
+    />,
+  )
+
+  await act(async () =>
+    user.click(screen.getByTestId('project-template-more-menu')),
+  )
+  await act(async () => user.click(screen.getByText('Rename')))
+
+  const input = screen.getByTestId('template-name-input')
+  await act(async () => {
+    await user.clear(input)
+    await user.type(input, 'Renamed template')
+  })
+  await waitFor(async () =>
+    user.click(screen.getByTestId('create-update-template')),
+  )
+
+  expect(result.current.currentProjectTemplate.name).toBe('Renamed template')
+
+  projectTemplates = result.current.projectTemplates
+  currentProjectTemplate = result.current.currentProjectTemplate
+  rerender(
+    <WrapperComponent
+      {...{projectTemplates, setProjectTemplates, currentProjectTemplate}}
+    />,
+  )
+
+  expect(screen.getByText('Renamed template')).toBeInTheDocument()
 })
 
 test('Set template as default', async () => {

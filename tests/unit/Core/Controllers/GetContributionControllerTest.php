@@ -15,6 +15,11 @@ use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use Utils\Constants\SourcePages;
 use Utils\Contribution\GetContributionRequest;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
+use Matecat\SubFiltering\MateCatFilter;
+use Model\Jobs\JobStruct;
+use Model\Segments\SegmentStruct;
+use Model\Jobs\MetadataDao;
 
 class TestableGetContributionController extends GetContributionController
 {
@@ -156,7 +161,7 @@ class GetContributionControllerTest extends AbstractTest
         ]);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing id_segment');
+        $this->expectExceptionMessage('Missing id_segment');
         $this->invokeMethod('validateTheRequest');
     }
 
@@ -174,7 +179,7 @@ class GetContributionControllerTest extends AbstractTest
         ]);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing text');
+        $this->expectExceptionMessage('Missing text');
         $this->invokeMethod('validateTheRequest');
     }
 
@@ -221,7 +226,7 @@ class GetContributionControllerTest extends AbstractTest
         ]);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing id job');
+        $this->expectExceptionMessage('Missing id job');
         $this->invokeMethod('validateTheRequest');
     }
 
@@ -239,7 +244,7 @@ class GetContributionControllerTest extends AbstractTest
         ]);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing id_client');
+        $this->expectExceptionMessage('Missing id_client');
         $this->invokeMethod('validateTheRequest');
     }
 
@@ -507,6 +512,12 @@ class GetContributionControllerTest extends AbstractTest
         $this->assertSame('test-client-1', $testable->capturedRequest->id_client);
         $this->assertTrue($testable->capturedRequest->concordanceSearch);
         $this->assertSame(10, $testable->capturedRequest->resultNum);
+        // No stored segment is read on this branch, so no source can be inspected and the
+        // project handlers must reach the TM exactly as the job declares them.
+        $this->assertSame(
+            (new MetadataDao(obtainTestDatabase()))->getSubfilteringCustomHandlers(1886428338, 'a90acf203402'),
+            $testable->capturedRequest->subfiltering_handlers
+        );
     }
 
     #[Test]
@@ -571,5 +582,225 @@ class GetContributionControllerTest extends AbstractTest
         $this->assertNotEmpty($testable->capturedRequest->context_list_before);
         $this->assertNotEmpty($testable->capturedRequest->context_list_after);
         $this->assertInstanceOf(GetContributionRequest::class, $testable->capturedRequest);
+        // The stored source of this segment carries no complex ICU, so the reduction must not
+        // fire: the job handlers travel untouched.
+        $this->assertSame(
+            (new MetadataDao(obtainTestDatabase()))->getSubfilteringCustomHandlers(1886428338, 'a90acf203402'),
+            $testable->capturedRequest->subfiltering_handlers
+        );
     }
+
+    // ──────────────────────────────────────────────────────────────────
+    // ICU: the stored source decides the handler set, and the TM is told
+    // ──────────────────────────────────────────────────────────────────
+
+    /**
+     * Complex ICU plural block plus a simple argument. The simple argument is the
+     * discriminating part: the single-curly handler cannot match the plural block but it
+     * does match {SEARCH_TERM}.
+     */
+    private const ICU_SEGMENT = 'You have {NUM_RESULTS, plural, one {1 result} other {# results}} for "{SEARCH_TERM}".';
+
+    private function segmentsList(?string $segment, ?string $before = null, ?string $after = null): object
+    {
+        $wrap = static function (?string $text): ?SegmentStruct {
+            if ($text === null) {
+                return null;
+            }
+            $struct = new SegmentStruct();
+            $struct->segment = $text;
+
+            return $struct;
+        };
+
+        return (object)[
+            'id_before' => $wrap($before),
+            'id_segment' => $wrap($segment),
+            'id_after' => $wrap($after),
+        ];
+    }
+
+    private function chunk(): JobStruct
+    {
+        $chunk = new JobStruct();
+        $chunk->source = 'en-US';
+        $chunk->target = 'it-IT';
+
+        return $chunk;
+    }
+
+    #[Test]
+    public function segmentSourceContainsIcu_true_for_a_valid_complex_pattern(): void
+    {
+        $result = $this->invokeMethod('segmentSourceContainsIcu', [
+            true, $this->chunk(), $this->segmentsList(self::ICU_SEGMENT)
+        ]);
+
+        $this->assertTrue($result);
+    }
+
+    #[Test]
+    public function segmentSourceContainsIcu_false_for_a_bare_placeholder(): void
+    {
+        $result = $this->invokeMethod('segmentSourceContainsIcu', [
+            true, $this->chunk(), $this->segmentsList('Hello {NAME}, welcome.')
+        ]);
+
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function segmentSourceContainsIcu_false_when_the_project_flag_is_off(): void
+    {
+        $result = $this->invokeMethod('segmentSourceContainsIcu', [
+            false, $this->chunk(), $this->segmentsList(self::ICU_SEGMENT)
+        ]);
+
+        $this->assertFalse($result);
+    }
+
+    /**
+     * A concordance search reaches the dispatch with no stored segment behind it.
+     */
+    #[Test]
+    public function segmentSourceContainsIcu_false_without_a_stored_segment(): void
+    {
+        $result = $this->invokeMethod('segmentSourceContainsIcu', [
+            true, $this->chunk(), $this->segmentsList(null)
+        ]);
+
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function contributionHandlers_reduces_the_wire_list_for_an_icu_segment(): void
+    {
+        $handlers = [
+            InjectableFiltersTags::single_curly->value,
+            InjectableFiltersTags::markup->value,
+            InjectableFiltersTags::sprintf->value,
+        ];
+
+        $result = $this->invokeMethod('contributionHandlers', [$handlers, true]);
+
+        $this->assertSame([InjectableFiltersTags::markup->value], $result);
+    }
+
+    /**
+     * An empty reduction has to travel as null: an empty array is read as a request for the
+     * default handlers, which is the opposite of keeping none.
+     */
+    #[Test]
+    public function contributionHandlers_sends_null_when_no_handler_survives(): void
+    {
+        $result = $this->invokeMethod('contributionHandlers', [[InjectableFiltersTags::single_curly->value], true]);
+
+        $this->assertNull($result);
+    }
+
+    #[Test]
+    public function contributionHandlers_keeps_the_project_list_for_a_plain_segment(): void
+    {
+        $handlers = [InjectableFiltersTags::single_curly->value, InjectableFiltersTags::markup->value];
+
+        $result = $this->invokeMethod('contributionHandlers', [$handlers, false]);
+
+        $this->assertSame($handlers, $result);
+    }
+
+    #[Test]
+    public function contributionHandlers_passes_the_no_handlers_sentinel_through(): void
+    {
+        $this->assertNull($this->invokeMethod('contributionHandlers', [null, false]));
+        $this->assertNull($this->invokeMethod('contributionHandlers', [null, true]));
+    }
+
+    #[Test]
+    public function subfilterContributionContexts_keeps_icu_when_the_filter_is_icu_compliant(): void
+    {
+        $request = ['text' => 'client sent this'];
+        $filter = $this->filter(true);
+
+        $this->invokeMethodByReference('subfilterContributionContexts', $request, [
+            $filter, $this->segmentsList(self::ICU_SEGMENT, 'Before {TOKEN}', 'After')
+        ]);
+
+        $this->assertSame(self::ICU_SEGMENT, $request['text']);
+        $this->assertStringNotContainsString('<ph ', $request['text']);
+        // The contexts travel with the same reduced handler set, or the TM would decode them
+        // with a list it was never given.
+        $this->assertStringContainsString('{TOKEN}', $request['context_before']);
+    }
+
+    #[Test]
+    public function subfilterContributionContexts_wraps_placeholders_for_a_plain_segment(): void
+    {
+        $request = ['text' => 'client sent this'];
+        $filter = $this->filter(false);
+
+        $this->invokeMethodByReference('subfilterContributionContexts', $request, [
+            $filter, $this->segmentsList('Hello {NAME}, welcome.')
+        ]);
+
+        $this->assertStringContainsString('ctype="x-curly-brackets"', $request['text']);
+        $this->assertStringNotContainsString('{NAME}', $request['text']);
+    }
+
+    /**
+     * The invariant the whole wiring exists for: the list the TM is told must be the list the
+     * text was actually built with. MyMemory decodes what it receives with the handlers it is
+     * given and re-encodes its matches with them, so any drift between the two comes back as
+     * ICU arguments wrapped in PH tags, and the Layer 1 to Layer 2 transition has no PH restore
+     * to undo it. Reading the set back off the filter is what makes the two comparable.
+     */
+    #[Test]
+    public function theWireListIsTheSetTheFilterActuallyResolved(): void
+    {
+        $handlers = [
+            InjectableFiltersTags::single_curly->value,
+            InjectableFiltersTags::markup->value,
+            InjectableFiltersTags::sprintf->value,
+        ];
+
+        foreach ([true, false] as $sourceContainsIcu) {
+            $filter = $this->filter($sourceContainsIcu);
+            $wire = $this->invokeMethod('contributionHandlers', [$handlers, $sourceContainsIcu]);
+
+            $this->assertEqualsCanonicalizing(
+                $filter->getOrderedHandlerTagNames(),
+                $wire ?? [],
+                sprintf('handler set drifted from the filter (icu: %s)', var_export($sourceContainsIcu, true))
+            );
+        }
+    }
+
+    private function filter(bool $icuEnabled): MateCatFilter
+    {
+        /** @var MateCatFilter $filter */
+        $filter = MateCatFilter::getInstance(
+            null,
+            'en-US',
+            (string)json_encode(['it-IT']),
+            [],
+            [
+                InjectableFiltersTags::single_curly->value,
+                InjectableFiltersTags::markup->value,
+                InjectableFiltersTags::sprintf->value,
+            ],
+            $icuEnabled
+        );
+
+        return $filter;
+    }
+
+    /**
+     * @param array<string, mixed> $request
+     * @param array<int, mixed> $args
+     */
+    private function invokeMethodByReference(string $name, array &$request, array $args): void
+    {
+        $method = $this->reflector->getMethod($name);
+        $method->invokeArgs($this->controller, [&$request, ...$args]);
+    }
+
 }

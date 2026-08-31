@@ -14,6 +14,8 @@ use Model\Users\UserStruct;
 use PDOException;
 use PDOStatement;
 use ReflectionException;
+use Throwable;
+use TypeError;
 use Utils\Constants\JobStatus;
 use Utils\Constants\TranslationStatus;
 
@@ -79,30 +81,43 @@ class JobDao extends AbstractDao
     }
 
     /**
-     * Destroy a cached object
+     * The one way in from outside: a caller names the job it already holds, and every Redis-cached
+     * read that could still serve the row it has just written is dropped.
      *
-     * @param JobStruct $jobQuery
+     * A rotation needs $retiredPassword. The password is half the key of the reads this door clears,
+     * and the struct handed in carries the one that replaced it, so the entry of the retired
+     * credential is not reachable from the entity - name it, or a request presenting the password
+     * the rotation revoked keeps resolving to a job for the whole TTL. An empty or unchanged
+     * $retiredPassword addresses nothing the current one does not, and is dropped.
      *
-     * @return bool
+     * The project wide reads are not here: a job says which project it belongs to, but the sweep
+     * covers every job of that project, which is a coarser decision than "this row changed". It is
+     * {@see destroyCacheByProjectId()}, and the caller makes it.
+     *
      * @throws Exception
-     *
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws TypeError
      */
-    public function destroyCacheByIdAndPassword(JobStruct $jobQuery): bool
+    public function destroyCache(JobStruct $job, ?string $retiredPassword = null): void
     {
-        return $this->destroyCacheForIdAndPassword($jobQuery->id, $jobQuery->password);
+        $idJob = $job->id ?? throw new TypeError('JobStruct::$id cannot be null');
+
+        $this->destroyCachesByIdAndPassword($idJob, (string)$job->password);
+
+        if ($retiredPassword !== null && $retiredPassword !== '' && $retiredPassword !== (string)$job->password) {
+            $this->destroyCachesByIdAndPassword($idJob, $retiredPassword);
+        }
     }
 
     /**
-     * Same as destroyCacheByIdAndPassword(), for a credential that is not the one the struct carries:
-     * a rotation has to evict the password it replaces, and the struct already holds the new one.
+     * The two reads keyed on a job credential.
      *
-     * @param int|null $id_job
-     * @param string|null $password
-     *
-     * @return bool
      * @throws Exception
+     * @throws PDOException
+     * @throws ReflectionException
      */
-    public function destroyCacheForIdAndPassword(?int $id_job, ?string $password): bool
+    private function destroyCachesByIdAndPassword(int $id_job, string $password): void
     {
         $bindParams = [
             'id_job' => $id_job,
@@ -112,22 +127,24 @@ class JobDao extends AbstractDao
         // The row is cached under two texts, so both have to be named here: the one the credential
         // checks read through getByIdAndPassword(), and the one read() writes for the outsource
         // quote page.
-        $credentialShape = $this->_destroyObjectCache(
+        $this->_destroyObjectCache(
             $this->_getStatementForQuery(self::$_query_cache),
             JobStruct::class,
             $bindParams
         );
 
-        $readShape = $this->_destroyObjectCache(
+        $this->_destroyObjectCache(
             $this->_getStatementForQuery(self::readQuery()),
             JobStruct::class,
             $bindParams
         );
-
-        return $credentialShape || $readShape;
     }
 
     /**
+     * The second, coarser door: every job of a project at once, for a caller whose write is about the
+     * project rather than about one job - a status change, a deletion, an analysis that reopened all
+     * of them. It stays public because no JobStruct expresses that decision.
+     *
      * @param int $project_id
      *
      * @return bool
@@ -888,6 +905,7 @@ class JobDao extends AbstractDao
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Throwable
      */
     public function createFromStruct(JobStruct $jobStruct): JobStruct
     {
@@ -909,23 +927,19 @@ class JobDao extends AbstractDao
         $columns = array_values($columns);
         $values = array_values($values);
 
-        $this->database->begin();
+        return $this->database->transaction(function () use ($conn, $columns, $values): JobStruct {
+            /** @noinspection SqlInsertValues */
+            /** @noinspection DuplicatedCode */
+            $stmt = $conn->prepare('INSERT INTO `jobs` ( ' . implode(',', $columns) . ' ) VALUES ( ' . implode(',', array_fill(0, count($values), '?')) . ' )');
 
-        /** @noinspection SqlInsertValues */
-        /** @noinspection DuplicatedCode */
-        $stmt = $conn->prepare('INSERT INTO `jobs` ( ' . implode(',', $columns) . ' ) VALUES ( ' . implode(',', array_fill(0, count($values), '?')) . ' )');
+            foreach ($values as $k => $v) {
+                $stmt->bindValue($k + 1, $v); //Columns/Parameters are 1-based
+            }
 
-        foreach ($values as $k => $v) {
-            $stmt->bindValue($k + 1, $v); //Columns/Parameters are 1-based
-        }
+            $stmt->execute();
 
-        $stmt->execute();
-
-        $job = $this->getNotDeletedById((int)$conn->lastInsertId())[0];
-
-        $conn->commit();
-
-        return $job;
+            return $this->getNotDeletedById((int)$conn->lastInsertId())[0];
+        });
     }
 
     /**

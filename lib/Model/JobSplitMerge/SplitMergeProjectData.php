@@ -27,7 +27,6 @@ class SplitMergeProjectData
 
     // ── Mutable input ───────────────────────────────────────────────
 
-    public ?int $uid = null;
     public ?int $jobToSplit = null;
     public ?string $jobToSplitPass = null;
     public ?int $jobToMerge = null;

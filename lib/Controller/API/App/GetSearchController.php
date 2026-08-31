@@ -30,6 +30,7 @@ use Plugins\Features\TranslationVersions;
 use Plugins\Features\TranslationVersions\StoreTranslationEventParams;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 use TypeError;
 use Utils\Constants\TranslationStatus;
 use Utils\Registry\AppConfig;
@@ -84,8 +85,18 @@ class GetSearchController extends AbstractStatefulKleinController
         $search_results = [];
 
         // and then hydrate the $search_results array
+        // One read per 20 hits instead of one per hit — the DAO chunks the id list internally.
+        // It also prepends each chunk to the accumulated set, so above 20 hits the rows come back
+        // with the chunks in reverse order. Index by segment id and pick below in sid_list order:
+        // that order decides which segments are committed first and the order their replace-history
+        // events are written under one shared version, so it has to survive the batching.
+        $translationsBySegmentId = [];
+        foreach ($this->batchLoadTranslations($res['sid_list'], (int)$this->chunk->id) as $segmentTranslation) {
+            $translationsBySegmentId[(int)$segmentTranslation->id_segment] = $segmentTranslation;
+        }
+
         foreach ($res['sid_list'] as $segmentId) {
-            $segmentTranslation = (new SegmentTranslationDao($this->getDatabase()))->findBySegmentAndJob($segmentId, (int)$this->chunk->id);
+            $segmentTranslation = $translationsBySegmentId[(int)$segmentId] ?? null;
             if ($segmentTranslation === null) {
                 continue;
             }
@@ -173,11 +184,11 @@ class GetSearchController extends AbstractStatefulKleinController
             : filter_var($includeLockedParam, FILTER_VALIDATE_BOOLEAN, ['flags' => FILTER_NULL_ON_FAILURE]) ?? true;
 
         if (empty($job)) {
-            throw new InvalidArgumentException("missing id job", -2);
+            throw new InvalidArgumentException("Missing id job", -2);
         }
 
         if (empty($password)) {
-            throw new InvalidArgumentException("missing job password", -3);
+            throw new InvalidArgumentException("Missing job password", -3);
         }
 
         $job = (int)$job;
@@ -222,6 +233,32 @@ class GetSearchController extends AbstractStatefulKleinController
             'inCurrentChunkOnly' => $inCurrentChunkOnly,
             'queryParams' => $queryParams,
         ];
+    }
+
+    /**
+     * Reads the translation rows for a list of segments in batches, replacing a per-segment
+     * findBySegmentAndJob(). Same key (id_segment, id_job), same live read — both default to
+     * ttl 0 — and the same struct. The DAO splits the list 20 ids at a time, so this is one query
+     * per 20 segments rather than one for the lot. The caller indexes the result itself: the rows
+     * come back in the DAO's order, which is neither this list's order nor sorted.
+     *
+     * @param array<int, int|string> $segmentIds
+     *
+     * @return array<int, SegmentTranslationStruct>
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function batchLoadTranslations(array $segmentIds, int $jobId): array
+    {
+        $ids = array_values(array_unique(array_map('intval', $segmentIds)));
+
+        if (empty($ids)) {
+            // The DAO already returns [] for an empty list without preparing anything. This is
+            // here to skip the call and the DAO construction, not to avoid a malformed query.
+            return [];
+        }
+
+        return (new SegmentTranslationDao($this->getDatabase()))->getAllSegmentsByIdListAndJobId($ids, $jobId);
     }
 
     /**
@@ -332,7 +369,7 @@ class GetSearchController extends AbstractStatefulKleinController
 
             return $searchModel->search($inCurrentChunkOnly);
         } catch (Exception) {
-            throw new RuntimeException("internal error: see the log", -1000);
+            throw new RuntimeException("Internal error: see the log", -1000);
         }
     }
 
@@ -356,6 +393,8 @@ class GetSearchController extends AbstractStatefulKleinController
      * @throws ReflectionException
      * @throws TypeError
      * @throws Exception
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction
+     *                   on any throw and re-throws the original, whatever its type
      */
     private function updateSegments(
         array $search_results,
@@ -372,101 +411,118 @@ class GetSearchController extends AbstractStatefulKleinController
             throw new NotFoundException("Project not found for job $id_job");
         }
 
+        // Built once and reused, so every scope below now shares these two instances and whatever
+        // per-instance cache state they hold. Safe only because neither call site here passes a
+        // TTL: fetchById() below is called without one, so setCacheTTL() is never reached and
+        // cacheTTL stays 0. The reads and writes themselves stay inside their own scope, where the
+        // original put them.
+        $segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
+        $segmentDao = new SegmentDao($this->getDatabase());
+
         // loop all segments to replace
         $committed = [];
         foreach ($search_results as $old_translation) {
-            // start the transaction
-            $db->begin();
+            // One scope per segment: replace-all writes each match on its own, so a failure on
+            // one leaves the ones already committed alone.
+            $written = $db->transaction(function () use ($old_translation, $queryParams, $project, $id_job, $isHistoryReplay, $revisionNumber, $segmentTranslationDao, $segmentDao): ?array {
+                $versionsHandler = TranslationVersions::getVersionHandlerNewInstance($this->chunk, $this->user, $project, (int)$old_translation->id_segment, $this->getDatabase());
+                $segment = $segmentDao->fetchById((int)$old_translation->id_segment, SegmentStruct::class);
 
-            $versionsHandler = TranslationVersions::getVersionHandlerNewInstance($this->chunk, $this->user, $project, (int)$old_translation->id_segment, $this->getDatabase());
-            $segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
-            $segment = (new SegmentDao($this->getDatabase()))->fetchById((int)$old_translation->id_segment, SegmentStruct::class);
+                if (
+                    $old_translation === null ||
+                    $segment === null ||
+                    ($queryParams->includeLocked === false && $old_translation->match_type === InternalMatchesConstants::TM_ICE)) {
+                    // Nothing written yet, so there is nothing to undo: leaving the scope normally is
+                    // the same empty transaction the rollback used to end.
+                    return null;
+                }
 
-            if (
-                $old_translation === null ||
-                $segment === null ||
-                ($queryParams->includeLocked === false && $old_translation->match_type === InternalMatchesConstants::TM_ICE)) {
-                $db->rollback();
+                // Replace-all never propagates: each matched segment is written on its own, so there is
+                // no repetition set to fan out to. The empty result is what the two consumers below
+                // require — `storeTranslationEvent()` types `propagation` as non-nullable, and
+                // `SetTranslationCommittedEvent`'s `propagated_ids` is read unguarded by
+                // `plugins/translated/lib/Features/Translated.php:479` on its way into a Kafka payload,
+                // where an empty list is the truthful value and null would be a third state.
+                $propagationTotal = PropagationResult::empty();
+
+                if ($isHistoryReplay) {
+                    // Undo/redo: the row already holds the exact historical text to restore.
+                    $replacedTranslation = Utils::stripBOM((string)($old_translation->translation ?? ''));
+                } else {
+                    $filter = MateCatFilter::getInstance($this->getFeatureSet(), $this->chunk->source, $this->chunk->target);
+                    $originalTranslation = (string)($old_translation->translation ?? '');
+                    $replacement = $this->getReplacedSegmentTranslation($originalTranslation, $queryParams);
+
+                    // A replacement that yields the same text is not an edit. Writing it anyway would demote the
+                    // segment through getNewStatus() and, on a lower transition, soft-delete its LQA issues via
+                    // ReviewedWordCountModel::decreaseCounters() -> flagIssuesToBeDeleted() — discarding review
+                    // work on a segment nobody actually changed. Skip it, as the guards above do.
+                    if ($replacement === $originalTranslation) {
+                        return null;
+                    }
+
+                    $replacedTranslation = Utils::stripBOM($filter->fromLayer1ToLayer0($replacement));
+                }
+
+                // Setup $new_translation
+                $new_translation = new SegmentTranslationStruct();
+                $new_translation->id_segment = $old_translation->id_segment;
+                $new_translation->id_job = $id_job;
+                // Undo/redo restore the exact historical status; forward applies the review ladder. Because
+                // all reviewed-word/advancement/pass-fail counters are driven purely by the status
+                // transition, restoring the historical status moves the counters back correctly too.
+                $new_translation->status = $isHistoryReplay ? (string)$old_translation->status : $this->getNewStatus($old_translation, $revisionNumber);
+                $new_translation->time_to_edit = $old_translation->time_to_edit;
+                $new_translation->segment_hash = $segment->segment_hash;
+                $new_translation->translation = $replacedTranslation;
+                $new_translation->serialized_errors_list = $old_translation->serialized_errors_list;
+                $new_translation->suggestion_position = $old_translation->suggestion_position;
+                $new_translation->warning = $old_translation->warning;
+                $new_translation->translation_date = date("Y-m-d H:i:s");
+
+                // commit the transaction
+                try {
+                    // Save version. saveVersionAndIncrement() sets $new_translation->version_number
+                    // (old + 1 when the text changed, else old), so no manual pre-increment is needed here.
+                    $versionsHandler->saveVersionAndIncrement($new_translation, $old_translation);
+
+                    // Write the translation row first, then persist the version/review event, mirroring
+                    // SetTranslationController. Keeping storeTranslationEvent inside this try means a
+                    // handler failure rolls back the whole segment instead of abandoning the open
+                    // transaction (which previously skipped both the event and the translation write).
+                    $segmentTranslationDao->updateTranslationAndStatusAndDate($new_translation);
+
+                    // preSetTranslationCommitted
+                    $versionsHandler->storeTranslationEvent(
+                        new StoreTranslationEventParams(
+                            $new_translation,
+                            $old_translation,
+                            $propagationTotal,
+                            $this->chunk,
+                            $this->user,
+                            $this->chunk->getSourcePage(),
+                            $this->featureSet,
+                            $project,
+                            isAReplaceAllEvent: true
+                        )
+                    );
+                } catch (Exception $e) {
+                    $this->logger->debug("Lock: Transaction Aborted. " . $e->getMessage());
+
+                    // Re-thrown rather than rolled back: the scope aborts on the way out and re-throws
+                    // this, so the segment's writes disappear with it.
+                    throw new RuntimeException("A fatal error occurred during saving of segments");
+                }
+
+                return [$new_translation, $propagationTotal, $segment];
+            });
+
+            if ($written === null) {
                 continue;
             }
 
-            // Replace-all never propagates: each matched segment is written on its own, so there is
-            // no repetition set to fan out to. The empty result is what the two consumers below
-            // require — `storeTranslationEvent()` types `propagation` as non-nullable, and
-            // `SetTranslationCommittedEvent`'s `propagated_ids` is read unguarded by
-            // `plugins/translated/lib/Features/Translated.php:479` on its way into a Kafka payload,
-            // where an empty list is the truthful value and null would be a third state.
-            $propagationTotal = PropagationResult::empty();
-
-            if ($isHistoryReplay) {
-                // Undo/redo: the row already holds the exact historical text to restore.
-                $replacedTranslation = Utils::stripBOM((string)($old_translation->translation ?? ''));
-            } else {
-                $filter = MateCatFilter::getInstance($this->getFeatureSet(), $this->chunk->source, $this->chunk->target);
-                $originalTranslation = (string)($old_translation->translation ?? '');
-                $replacement         = $this->getReplacedSegmentTranslation($originalTranslation, $queryParams);
-
-                // A replacement that yields the same text is not an edit. Writing it anyway would demote the
-                // segment through getNewStatus() and, on a lower transition, soft-delete its LQA issues via
-                // ReviewedWordCountModel::decreaseCounters() -> flagIssuesToBeDeleted() — discarding review
-                // work on a segment nobody actually changed. Skip it, as the guards above do.
-                if ($replacement === $originalTranslation) {
-                    $db->rollback();
-                    continue;
-                }
-
-                $replacedTranslation = Utils::stripBOM($filter->fromLayer1ToLayer0($replacement));
-            }
-
-            // Setup $new_translation
-            $new_translation = new SegmentTranslationStruct();
-            $new_translation->id_segment = $old_translation->id_segment;
-            $new_translation->id_job = $id_job;
-            // Undo/redo restore the exact historical status; forward applies the review ladder. Because
-            // all reviewed-word/advancement/pass-fail counters are driven purely by the status
-            // transition, restoring the historical status moves the counters back correctly too.
-            $new_translation->status = $isHistoryReplay ? (string)$old_translation->status : $this->getNewStatus($old_translation, $revisionNumber);
-            $new_translation->time_to_edit = $old_translation->time_to_edit;
-            $new_translation->segment_hash = $segment->segment_hash;
-            $new_translation->translation = $replacedTranslation;
-            $new_translation->serialized_errors_list = $old_translation->serialized_errors_list;
-            $new_translation->suggestion_position = $old_translation->suggestion_position;
-            $new_translation->warning = $old_translation->warning;
-            $new_translation->translation_date = date("Y-m-d H:i:s");
-
-            // commit the transaction
-            try {
-                // Save version. saveVersionAndIncrement() sets $new_translation->version_number
-                // (old + 1 when the text changed, else old), so no manual pre-increment is needed here.
-                $versionsHandler->saveVersionAndIncrement($new_translation, $old_translation);
-
-                // Write the translation row first, then persist the version/review event, mirroring
-                // SetTranslationController. Keeping storeTranslationEvent inside this try means a
-                // handler failure rolls back the whole segment instead of abandoning the open
-                // transaction (which previously skipped both the event and the translation write).
-                $segmentTranslationDao->updateTranslationAndStatusAndDate($new_translation);
-
-                // preSetTranslationCommitted
-                $versionsHandler->storeTranslationEvent(new StoreTranslationEventParams(
-                    $new_translation,
-                    $old_translation,
-                    $propagationTotal,
-                    $this->chunk,
-                    $this->user,
-                    $this->chunk->getSourcePage(),
-                    $this->featureSet,
-                    $project,
-                    isAReplaceAllEvent: true
-                ));
-
-                $db->commit();
-                $committed[] = $old_translation;
-            } catch (Exception $e) {
-                $this->logger->debug("Lock: Transaction Aborted. " . $e->getMessage());
-                $db->rollback();
-
-                throw new RuntimeException("A fatal error occurred during saving of segments");
-            }
+            [$new_translation, $propagationTotal, $segment] = $written;
+            $committed[] = $old_translation;
 
             // setTranslationCommitted
             try {
@@ -517,10 +573,25 @@ class GetSearchController extends AbstractStatefulKleinController
         SearchQueryParamsStruct $queryParams,
         bool $isHistoryReplay = false
     ): void {
-        $segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
+        // One read per job instead of one per row. The rows carry their own id_job — a replace
+        // event records the job it was applied to — so they are grouped by job and each group read
+        // with its own id list. Indexing on the PAIR keeps a segment id that appears under a
+        // foreign job from matching this job's row, which is what the per-row lookup guaranteed.
+        $byJob = [];
+        foreach ($search_results as $tRow) {
+            $byJob[(int)$tRow['id_job']][] = (int)$tRow['id_segment'];
+        }
+
+        $currentByPair = [];
+        foreach ($byJob as $jobId => $segmentIds) {
+            foreach ($this->batchLoadTranslations($segmentIds, $jobId) as $translation) {
+                $currentByPair[$jobId . ':' . (int)$translation->id_segment] = $translation;
+            }
+        }
+
         $result = [];
         foreach ($search_results as $tRow) {
-            $currentTranslation = $segmentTranslationDao->findBySegmentAndJob((int)$tRow['id_segment'], (int)$tRow['id_job']);
+            $currentTranslation = $currentByPair[(int)$tRow['id_job'] . ':' . (int)$tRow['id_segment']] ?? null;
             if (empty($currentTranslation)) {
                 continue;
             }

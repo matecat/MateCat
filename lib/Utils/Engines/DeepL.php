@@ -57,7 +57,7 @@ class DeepL extends AbstractEngine
                 'error' =>
                     [
                         'code' => 0,
-                        'message' => '  - Server Error (http status 403)',
+                        'message' => '  - Server error (http status 403)',
                         'response' => '{"message":"This account is not allowed to access the API. You can find more info in our docs: https://developers.deepl.com/docs/getting-started/auth"}',
                     ],
                 'responseStatus' => 403,

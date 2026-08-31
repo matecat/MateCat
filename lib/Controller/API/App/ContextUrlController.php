@@ -29,6 +29,7 @@ use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
+use TypeError;
 
 class ContextUrlController extends KleinController
 {
@@ -184,6 +185,7 @@ class ContextUrlController extends KleinController
      * @throws ReflectionException
      * @throws InvalidArgumentException
      * @throws Exception
+     * @throws TypeError
      */
     public function setForFile(): void
     {
@@ -231,6 +233,7 @@ class ContextUrlController extends KleinController
      * @throws ReflectionException
      * @throws InvalidArgumentException
      * @throws Exception
+     * @throws TypeError
      */
     public function setForSegment(): void
     {

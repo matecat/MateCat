@@ -117,7 +117,7 @@ class OutsourceToController extends AbstractStatefulKleinController
         }
 
         if (empty($ppassword)) {
-            throw new InvalidArgumentException("No project Password Provided", -2);
+            throw new InvalidArgumentException("No project password provided", -2);
         }
 
         /**
@@ -134,7 +134,7 @@ class OutsourceToController extends AbstractStatefulKleinController
          * </pre>
          */
         if (empty($jobList)) {
-            throw new InvalidArgumentException("No job list Provided", -3);
+            throw new InvalidArgumentException("No job list provided", -3);
         }
 
         if (empty($currency)) {

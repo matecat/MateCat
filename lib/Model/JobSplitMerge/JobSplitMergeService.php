@@ -19,6 +19,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
+use Model\Jobs\MetadataStruct as JobsMetadataStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
@@ -31,6 +32,7 @@ use Model\Users\UserStruct;
 use Model\WordCount\CounterModel;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\JobsWorker;
 use Utils\Logger\MatecatLogger;
@@ -101,15 +103,6 @@ class JobSplitMergeService
     }
 
     /**
-     * Begin a database transaction using the injected handler.
-     * @throws PDOException
-     */
-    protected function beginTransaction(): void
-    {
-        $this->dbHandler->begin();
-    }
-
-    /**
      * The cached outsource quote, which splitting or merging a job invalidates.
      *
      * Overridable in tests. These invalidations became effective again only once the UI's routes were
@@ -133,7 +126,7 @@ class JobSplitMergeService
      */
     protected function destroyAnalysisCacheByProjectId(int $projectId): void
     {
-        (new AnalysisDao($this->dbHandler))->destroyCacheByProjectId($projectId);
+        (new AnalysisDao($this->dbHandler))->destroyCacheProjectStatsVolumeAnalysis($projectId);
     }
 
     /**
@@ -280,11 +273,11 @@ class JobSplitMergeService
         string $count_type = ProjectsMetadataMarshaller::SPLIT_EQUIVALENT_WORD_TYPE->value
     ): ArrayObject {
         if ($num_split < 2) {
-            throw new Exception('Minimum Chunk number for split is 2.', -2);
+            throw new Exception('Minimum chunk number for split is 2.', -2);
         }
 
         if (!empty($requestedWordsPerSplit) && count($requestedWordsPerSplit) != $num_split) {
-            throw new Exception("Requested words per chunk and Number of chunks not consistent.", -3);
+            throw new Exception("Requested words per chunk and number of chunks not consistent.", -3);
         }
 
         if (!empty($requestedWordsPerSplit) && !AppConfig::$VOLUME_ANALYSIS_ENABLED) {
@@ -404,21 +397,25 @@ class JobSplitMergeService
     }
 
     /**
-     * Apply a new structure of the job: empty cart, begin transaction, split, commit.
+     * Apply a new structure of the job: empty the cart, then split inside a transaction scope.
      *
-     * @param UserStruct $actingUser The user performing the split
-     * @param int|null $uid The user ID used to re-invite the job translator (nullable)
+     * The cart is emptied first and stays outside the scope: it lives in the session, not in the
+     * database, so a rollback would not put it back and there is nothing to gain by holding it open.
+     *
+     * @param UserStruct $actingUser The user performing the split, and the one re-inviting its translator
      *
      * @throws Exception
      * @throws TypeError
+     * @throws Throwable the split runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
-    public function applySplit(SplitMergeProjectData $data, UserStruct $actingUser, ?int $uid = null): void
+    public function applySplit(SplitMergeProjectData $data, UserStruct $actingUser): void
     {
         $this->getCart()?->emptyCart();
 
-        $this->beginTransaction();
-        $this->splitJob($data, $actingUser, $uid);
-        $this->dbHandler->commit();
+        $this->dbHandler->transaction(function () use ($data, $actingUser): void {
+            $this->splitJob($data, $actingUser);
+        });
     }
 
     /**
@@ -427,13 +424,12 @@ class JobSplitMergeService
      * first/last segments of every chunk, last opened segment as the first segment of the new job,
      * and the timestamp of creation.
      *
-     * @param UserStruct $actingUser The user performing the split
-     * @param int|null $uid The user ID used to re-invite the job translator
+     * @param UserStruct $actingUser The user performing the split, and the one re-inviting its translator
      *
      * @throws Exception
      * @throws TypeError
      */
-    public function splitJob(SplitMergeProjectData $data, UserStruct $actingUser, ?int $uid = null): void
+    public function splitJob(SplitMergeProjectData $data, UserStruct $actingUser): void
     {
         // init JobDao
         $jobDao = $this->createJobDao();
@@ -444,22 +440,11 @@ class JobSplitMergeService
             throw new Exception('Job not found for id ' . $data->jobToSplit, -8);
         }
 
+        // Read before the chunks are written, because the association is keyed by the password the
+        // job still has. Whether to act on it is decided after, once the first chunk's password is
+        // known.
         $translatorModel = $this->createTranslatorsModel($jobToSplit);
         $jTranslatorStruct = $translatorModel->getTranslator(0); // no cache
-        if (!empty($jTranslatorStruct) && !empty($uid)) {
-            $userStruct = $this->createUserDao()->setCacheTTL(60 * 60)->getByUid($uid);
-            if ($userStruct === null) {
-                throw new Exception('User not found for uid ' . $uid, -8);
-            }
-            $translatorModel
-                ->setUserInvite($userStruct)
-                ->setDeliveryDate($jTranslatorStruct->delivery_date)
-                ->setJobOwnerTimezone($jTranslatorStruct->job_owner_timezone)
-                ->setEmail($jTranslatorStruct->email)
-                ->setNewJobPassword($this->generateRandomString());
-
-            $translatorModel->update();
-        }
 
         if ($data->splitResult === null) {
             throw new Exception('Split result not available. Call getSplitData() first.', -8);
@@ -527,7 +512,13 @@ class JobSplitMergeService
                          $key,
                          $_data->value
                      );
-                     $jobsMetadataDao->destroyCacheByJobAndPasswordAndKey($jobToSplit->id ?? throw new RuntimeException('Missing job id'), $jobToSplit->password ?? throw new RuntimeException('Missing job password'), $key);
+                     // The write above landed on the new job; the row it was copied from belongs to the
+                     // job being split, which no write here touches.
+                     $jobsMetadataDao->destroyCache(new JobsMetadataStruct([
+                         'id_job'   => $jobToSplit->id ?? throw new RuntimeException('Missing job id'),
+                         'password' => $jobToSplit->password ?? throw new RuntimeException('Missing job password'),
+                         'key'      => $key,
+                     ]));
                  }
              }
 
@@ -545,6 +536,33 @@ class JobSplitMergeService
             ]));
         }
 
+        // Tell the job's translator only if the split moved the link they hold.
+        //
+        // It usually does not: the first chunk keeps the original id and password — only the chunks
+        // after it get a fresh one, at the `segment_start != job_first_segment` test above — so a
+        // translator carries on working, on a smaller piece, and the remaining chunks are free to be
+        // given to somebody else. Telling them then would be noise, and rotating their password to
+        // do it would break a link that works.
+        //
+        // When the first chunk's password does move, the opposite is true: their link stops
+        // resolving and nothing else would say so. The new password is what gets sent — the previous
+        // shape of this block generated a third, unrelated one — and passing it to
+        // TranslatorsModel::update() is what reaches its "split" mail.
+        //
+        // Withdrawing a translator's access stays the project manager's explicit act, through a
+        // password change; it is not a silent consequence of reorganising the work.
+        $firstChunk = $newJobList[0] ?? null;
+        if (!empty($jTranslatorStruct) && $firstChunk !== null && $firstChunk->password !== $jobToSplit->password) {
+            $translatorModel
+                ->setUserInvite($actingUser)
+                ->setDeliveryDate($jTranslatorStruct->delivery_date)
+                ->setJobOwnerTimezone($jTranslatorStruct->job_owner_timezone)
+                ->setEmail($jTranslatorStruct->email)
+                ->setNewJobPassword((string)$firstChunk->password);
+
+            $translatorModel->update();
+        }
+
         foreach ($newJobList as $job) {
             /**
              * Async worker to re-count avg-PEE and total-TTE for split jobs
@@ -560,10 +578,10 @@ class JobSplitMergeService
             }
         }
 
-         $this->createJobDao()->destroyCacheByProjectId($data->idProject);
+        $this->createJobDao()->destroyCacheByProjectId($data->idProject);
 
-         $projectStruct = $this->getProjectForCacheInvalidation($jobToSplit);
-         $this->createProjectDao()->destroyCacheForProjectData($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
+        $projectStruct = $this->getProjectForCacheInvalidation($jobToSplit);
+        $this->createProjectDao()->destroyCache($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
         $this->destroyAnalysisCacheByProjectId($data->idProject);
 
         $this->getCart()?->deleteCart();
@@ -578,6 +596,8 @@ class JobSplitMergeService
      *
      * @throws Exception
      * @throws TypeError
+     * @throws Throwable the merge runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function mergeALL(SplitMergeProjectData $data, array $jobStructs, UserStruct $actingUser): void
     {
@@ -644,7 +664,6 @@ class JobSplitMergeService
 
                  foreach ($metadata as $key) {
                      $jobsMetadataDao->delete($_jStruct->id ?? throw new RuntimeException('Missing job id'), $_jStruct->password ?? throw new RuntimeException('Missing job password'), $key);
-                     $jobsMetadataDao->destroyCacheByJobAndPasswordAndKey($_jStruct->id ?? throw new RuntimeException('Missing job id'), $_jStruct->password ?? throw new RuntimeException('Missing job password'), $key);
                  }
             }
         }
@@ -652,39 +671,49 @@ class JobSplitMergeService
         $first_job['avg_post_editing_effort'] = $totalAvgPee;
         $first_job['total_time_to_edit'] = $totalTimeToEdit;
 
-        $this->beginTransaction();
+        $this->dbHandler->transaction(function () use ($data, $jobStructs, $actingUser, $first_job, $mergedPasswords, $standard_word_count, $total_raw_wc): void {
+            if ($first_job->getTranslator(new JobsTranslatorsDao($this->dbHandler))) {
+                //Update the password in the struct and in the database for the first job
+                $this->updateForMerge($first_job, $this->generateRandomString());
+                $this->getCart()?->emptyCart();
+            } else {
+                $this->updateForMerge($first_job, '');
+            }
 
-        if ($first_job->getTranslator(new JobsTranslatorsDao($this->dbHandler))) {
-            //Update the password in the struct and in the database for the first job
-            $this->updateForMerge($first_job, $this->generateRandomString());
-            $this->getCart()?->emptyCart();
-        } else {
-            $this->updateForMerge($first_job, '');
-        }
+            $this->deleteOnMerge($first_job);
 
-        $this->deleteOnMerge($first_job);
+            $wCountManager = $this->createCounterModel();
+            $wCountManager->initializeJobWordCount((int)$first_job['id'], (string)$first_job['password']);
 
-        $wCountManager = $this->createCounterModel();
-        $wCountManager->initializeJobWordCount((int)$first_job['id'], (string)$first_job['password']);
+            $chunk = new JobStruct($first_job->toArray());
+            $this->features->dispatch(new PostJobMergedEvent($data, $chunk, $actingUser));
 
-        $chunk = new JobStruct($first_job->toArray());
-        $this->features->dispatch(new PostJobMergedEvent($data, $chunk, $actingUser));
+            $jobDao = $this->createJobDao();
 
-        $jobDao = $this->createJobDao();
+            $jobDao->updateStdWcAndTotalWc((int)$first_job['id'], $standard_word_count, $total_raw_wc);
 
-        $jobDao->updateStdWcAndTotalWc((int)$first_job['id'], $standard_word_count, $total_raw_wc);
+            // Every password the merge revoked keeps resolving out of the cache until its entry expires,
+            // and the surviving one now answers with the pre-merge row. The sweep reads the database, so
+            // it has to run once the merge is committed: while the transaction is open another connection
+            // could still read the old rows and cache them again behind an eviction. Registered from
+            // inside the scope it is queued and runs right after the commit; registered outside it would
+            // find no open transaction and run inline, which would silently discard `critical`. It is
+            // critical because a revoked job credential still answering out of the cache is a security
+            // problem, not the stale read an ordinary eviction failure leaves behind. The sweep covers
+            // the project data and the project's job list too, which publish the passwords in their value.
+            foreach ($mergedPasswords as $mergedPassword) {
+                $this->dbHandler->onCommit(
+                    fn() => $this->sweepCredentialCaches($chunk, $mergedPassword, (string)$chunk->password),
+                    critical: true
+                );
+            }
 
-        $this->dbHandler->commit();
-
-        // Every password the merge revoked keeps resolving out of the cache until its entry expires,
-        // and the surviving one now answers with the pre-merge row. The sweep runs once the merge is
-        // committed: while the transaction was open another connection could still read the old rows
-        // and cache them again behind an eviction. It covers the project data and the project's job
-        // list too, which publish the passwords in their value.
-        foreach ($mergedPasswords as $mergedPassword) {
-            $this->sweepCredentialCaches($chunk, $mergedPassword, (string)$chunk->password);
-        }
-
-        $this->destroyAnalysisCacheByProjectId($data->idProject);
+            // These stay inside the scope so the DAOs' own deferral applies to them. Outside it they
+            // would fire the moment they are called, which is right while the merge owns the outermost
+            // transaction and wrong the first time it runs nested inside a larger one.
+            $projectStruct = $this->getProjectForCacheInvalidation($jobStructs[0]);
+            $this->createProjectDao()->destroyCache($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
+            $this->destroyAnalysisCacheByProjectId($data->idProject);
+        });
     }
 }

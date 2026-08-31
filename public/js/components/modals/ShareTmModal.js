@@ -3,6 +3,7 @@ import React from 'react'
 import CommonUtils from '../../utils/commonUtils'
 import {shareTmKey} from '../../api/shareTmKey'
 import CatToolActions from '../../actions/CatToolActions'
+import {Button, BUTTON_TYPE} from '../common/Button/Button'
 
 class ShareTmModal extends React.Component {
   constructor(props) {
@@ -99,8 +100,8 @@ class ShareTmModal extends React.Component {
     return (
       <div className="message-modal">
         <div className="matecat-modal-middle">
-          <div className={'ui one column grid ' + this.props.modalName}>
-            <div className="column left aligned" style={{fontSize: '18px'}}>
+          <div className={'modal-grid ' + this.props.modalName}>
+            <div className="modal-grid__body" style={{fontSize: '18px'}}>
               <div className="share-popup-container">
                 <div className="share-popup-top">
                   <p className="popup-tm pull-left">
@@ -124,12 +125,12 @@ class ShareTmModal extends React.Component {
                       ref={(input) => (this.emails = input)}
                       onKeyUp={(e) => this.onKeyUp(e)}
                     />
-                    <button
-                      className="ui primary button right floated"
+                    <Button
+                      type={BUTTON_TYPE.PRIMARY}
                       onClick={() => this.shareTmKeyByEmail()}
                     >
                       Share
-                    </button>
+                    </Button>
                   </div>
                   <div className="share-popup-input-result">
                     {errorEmailsResult && (

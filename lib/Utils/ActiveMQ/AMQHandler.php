@@ -266,7 +266,7 @@ class AMQHandler
     public function getActualForQID(?int $qid = null): ?string
     {
         if (empty($qid)) {
-            throw new Exception('Can Not get values without a Queue ID. Use ' . AMQHandler::class . '::setQueueID  or pass a queue id to this method');
+            throw new Exception('Cannot get values without a Queue ID. Use ' . AMQHandler::class . '::setQueueID  or pass a queue id to this method');
         }
 
         return $this->getRedisClient()->get(RedisKeys::TOTAL_SEGMENTS_TO_WAIT . $qid);

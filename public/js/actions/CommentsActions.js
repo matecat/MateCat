@@ -23,7 +23,7 @@ const CommentsActions = {
       .then((resp) => {
         AppDispatcher.dispatch({
           actionType: CommentsConstants.ADD_COMMENT,
-          comment: resp.data.entries.comment[0],
+          comment: resp.data.entries.comments[0],
           sid: sid,
         })
         return resp
@@ -41,7 +41,7 @@ const CommentsActions = {
       .then((resp) => {
         AppDispatcher.dispatch({
           actionType: CommentsConstants.ADD_COMMENT,
-          comment: resp.data.entries.comment[0],
+          comment: resp.data.entries.comments[0],
           sid: sid,
         })
       })

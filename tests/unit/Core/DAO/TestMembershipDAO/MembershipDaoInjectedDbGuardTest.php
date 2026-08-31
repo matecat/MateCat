@@ -62,13 +62,10 @@ class MembershipDaoInjectedDbGuardTest extends AbstractTest
     {
         $dao = new MembershipDao($this->injectedDbMock);
 
-        // createList checks inTransaction() — fixed source uses $this->database->getConnection()
+        // addMembersByEmail checks inTransaction() — fixed source uses $this->database->getConnection()
         // (the injectedDbMock), satisfying atLeastOnce. UserDao's no-arg obtain() hits the
         // singletonDbStub. getByEmails(['x@example.com']) returns [] → early-exit return [].
-        $result = $dao->createList([
-            'team'    => new TeamStruct(),
-            'members' => ['x@example.com'],
-        ]);
+        $result = $dao->addMembersByEmail(new TeamStruct(), ['x@example.com']);
 
         $this->assertSame([], $result);
     }

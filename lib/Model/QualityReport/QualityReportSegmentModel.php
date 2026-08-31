@@ -220,6 +220,7 @@ class QualityReportSegmentModel
 
         $translationVersionDao = new TranslationVersionDao($this->database);
         $all_events = $translationVersionDao->getAllRelevantEvents($segmentIds, $chunkId);
+        $history_events = $translationVersionDao->historyEvents($segment_ids, $chunkId);
 
         $segments = [];
 
@@ -241,7 +242,8 @@ class QualityReportSegmentModel
             $this->_commonSegmentAssignments($seg, $Filter, $featureSet, $this->chunk, $isForUI);
             $this->_assignIssues($seg, $issues, $issue_comments);
             $this->_assignComments($seg, $comments);
-            $this->_populateLastTranslationAndRevision($seg, $Filter, $all_events, $isForUI);
+            $this->_populateLastTranslationAndRevision($seg, $Filter, $all_events,  $isForUI);
+            $this->_populateHistory($seg, $Filter, $history_events, $issues, $isForUI);
 
             $seg->pee_translation_revise = $seg->getPEEBwtTranslationRevise();
             $seg->pee_translation_suggestion = $seg->getPEEBwtTranslationSuggestion();
@@ -250,6 +252,57 @@ class QualityReportSegmentModel
         }
 
         return $segments;
+    }
+
+    /**
+     * Populates the history for a given quality report segment by organizing events and associated issues.
+     *
+     * @param QualityReportSegmentStruct $seg The segment structure where the history will be populated.
+     * @param MateCatFilter $Filter The filter used to process translations for UI rendering.
+     * @param HistoryElementStruct[] $events An array of SegmentEventsStruct objects representing the events related to the segment.
+     * @param ShapelessConcreteStruct[] $issues An array of issue objects to associate with the events, filtered by segment and version.
+     * @param bool $isForUI Indicates whether the translation should be processed for UI display purposes.
+     *
+     * @throws Exception
+     *
+     * @return void
+     */
+    protected function _populateHistory(
+        QualityReportSegmentStruct $seg,
+        MateCatFilter $Filter,
+        array $events = [],
+        array $issues = [],
+        bool $isForUI = false
+    ): void
+    {
+        $elements = [];
+
+        $eventsForThisSegment = array_filter($events, function (HistoryElementStruct $event) use ($seg) {
+            return $event->id_segment == $seg->sid;
+        });
+
+        /** @var HistoryElementStruct $event */
+        foreach ($eventsForThisSegment as $event) {
+            $translation = ($isForUI) ? $Filter->fromLayer0ToLayer2($event->translation) : $event->translation;
+
+            $elements[] = [
+                'status' => $event->status,
+                'date' => $event->creation_date ?? $event->create_date,
+                'revision_number' => ReviewUtils::sourcePageToRevisionNumber($event->source_page),
+                'source_page' => $event->source_page,
+                'version_number' => $event->version_number,
+                'translation' => $translation,
+                'issues' => array_filter($issues, function ($issue) use ($event) {
+                    return
+                        $issue->deleted_at === null &&
+                        $event->id_segment == $issue->segment_id &&
+                        $event->version_number == $issue->translation_version
+                    ;
+                })
+            ];
+        }
+
+        $seg->history = $elements;
     }
 
     /**

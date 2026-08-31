@@ -28,7 +28,7 @@ export const ReplaceAllModal = ({search}) => {
               ? errors[0].message
               : 'We got an error, please contact support',
           },
-          'Replace All Alert',
+          'Replace all alert',
         )
       })
     ModalsActions.onCloseModal()

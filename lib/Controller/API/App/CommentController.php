@@ -24,6 +24,7 @@ use Plugins\Features\ReviewExtended\ReviewUtils;
 use ReflectionException;
 use RuntimeException;
 use Stomp\Transport\Message;
+use Throwable;
 use TypeError;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Email\CommentEmail;
@@ -32,9 +33,13 @@ use Utils\Email\CommentResolveEmail;
 use Utils\Constants\SourcePages;
 use Utils\Registry\AppConfig;
 use Utils\Url\JobUrlBuilder;
+use Utils\Validation\UserSuppliedName;
 
 class CommentController extends KleinController
 {
+    /** `comments`.`full_name` is a varchar(100). */
+    private const int COMMENTER_NAME_MAX_LENGTH = 100;
+
 
     use ChunkNotFoundHandlerTrait;
 
@@ -86,6 +91,7 @@ class CommentController extends KleinController
      * @throws ReflectionException
      * @throws TypeError
      * @throws Exception
+     * @throws Throwable
      */
     public function resolve(): void
     {
@@ -251,7 +257,14 @@ class CommentController extends KleinController
     private function validateTheRequest(): array
     {
         $id_client = filter_var($this->request->param('id_client'), FILTER_SANITIZE_SPECIAL_CHARS);
-        $username = filter_var($this->request->param('username'), FILTER_SANITIZE_SPECIAL_CHARS);
+        // Stored as typed in `comments`.`full_name` and escaped by each output — the comment emails
+        // print it, and those escape and defang every value they are given. It had no length cap
+        // against a varchar(100) column.
+        $rawUsername = $this->request->param('username');
+        $username = UserSuppliedName::normalizeAndTruncate(
+            is_string($rawUsername) ? $rawUsername : null,
+            self::COMMENTER_NAME_MAX_LENGTH
+        );
         $id_job = filter_var($this->request->param('id_job'), FILTER_SANITIZE_NUMBER_INT);
         $id_segment = filter_var($this->request->param('id_segment'), FILTER_SANITIZE_NUMBER_INT);
         $is_anonymous = filter_var($this->request->param('is_anonymous'), FILTER_VALIDATE_BOOLEAN);

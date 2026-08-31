@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Volume Analysis - Matecat</title>
+    <title>Volume analysis - Matecat</title>
     <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
     <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width"/>
@@ -16,28 +16,9 @@
 
     <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
         /*<![CDATA[*/
-        var config = {
-            basepath: '${basepath | string:/}',
-            status: '${project_status}',
-            totalSegments: ${num_segments},
-            totalAnalyzed: ${num_segments_analyzed},
-            showModalBoxLogin: ${showModalBoxLogin},
-            enable_outsource: ${enable_outsource | string:false},
-            daemon_warning: ${daemon_misconfiguration},
-            support_mail: '${support_mail}',
-            id_project: ${pid},
-            password: '${project_password}',
-            outsource_service_login: '${outsource_service_login}',
-            jobs: ${json_jobs},
-            splitEnabled: ${split_enabled},
-            splitFeatureAvailable: ${split_feature_available},
-            user_plugins: ${user_plugins},
-            project_plugins: ${project_plugins},
-            not_empty_default_tm_key: ${not_empty_default_tm_key|string:false},
-            isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
-            enableMultiDomainApi: ${enableMultiDomainApi | string:false},
-            ajaxDomainsNumber: ${ajaxDomainsNumber | string:false}
-        };
+        // One serialised document rather than a value per line: PHPTAL does not escape inside a script
+        // block, so anything interpolated here lands in JavaScript syntax verbatim. See BootstrapConfig.
+        var config = ${structure config_json};
         /*]]>*/
     </script>
 </head>

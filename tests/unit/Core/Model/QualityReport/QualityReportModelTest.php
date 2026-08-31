@@ -603,8 +603,12 @@ class QualityReportModelTest extends AbstractTest
      * updateChunkReview() is the write boundary the reset goes through, so it is also where the
      * cached reads of the row have to be dropped. Doing that inline would be worse than not doing
      * it: a concurrent reader would miss the cache, read the row the open transaction has not
-     * committed yet, and cache that pre-reset value for the whole TTL. So the assertion here is
-     * that the bust is handed to onCommit() and not run on the spot.
+     * committed yet, and cache that pre-reset value for the whole TTL.
+     *
+     * The model calls the DAO door straight, and DaoCacheTrait is what holds each eviction back
+     * until the commit — so what is asserted is that every one of them was queued and none ran on
+     * the spot. The number is not pinned: it is destroyCache()'s key inventory, which is the
+     * DAO's business and changes when its cached reads do.
      *
      * @throws ReflectionException
      */
@@ -620,10 +624,9 @@ class QualityReportModelTest extends AbstractTest
 
         $deferred = [];
 
-        $database = $this->createMock(IDatabase::class);
+        $database = $this->createStub(IDatabase::class);
         $database->method('getConnection')->willReturn($this->dbStub->getConnection());
-        $database->expects($this->once())
-            ->method('onCommit')
+        $database->method('onCommit')
             ->willReturnCallback(function (callable $callback) use (&$deferred): void {
                 $deferred[] = $callback;
             });
@@ -633,10 +636,12 @@ class QualityReportModelTest extends AbstractTest
         $method = new ReflectionMethod($model, 'updateChunkReview');
         $method->invoke($model, $chunkReview, ['fields' => ['penalty_points']]);
 
-        self::assertCount(1, $deferred, 'the cache bust must be deferred, not run inside the transaction');
+        self::assertNotEmpty($deferred, 'the cache busts must be deferred, not run inside the transaction');
 
-        // And what was deferred is the bust itself, which runs clean once the commit releases it.
-        $deferred[0]();
+        // And what was deferred is the busts themselves, which run clean once the commit releases them.
+        foreach ($deferred as $callback) {
+            $callback();
+        }
     }
 }
 

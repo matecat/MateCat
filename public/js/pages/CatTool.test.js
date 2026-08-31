@@ -7,6 +7,21 @@ import CatToolConstants from '../constants/CatToolConstants'
 import SegmentConstants from '../constants/SegmentConstants'
 import useProjectTemplates from '../hooks/useProjectTemplates'
 import useSegmentsLoader from '../hooks/useSegmentsLoader'
+import {useHotkeys} from 'react-hotkeys-hook'
+import SegmentActions from '../actions/SegmentActions'
+import CatToolActions from '../actions/CatToolActions'
+import CommentsActions from '../actions/CommentsActions'
+import ModalsActions from '../actions/ModalsActions'
+import OfflineUtils from '../utils/offlineUtils'
+import CommonUtils from '../utils/commonUtils'
+import Speech2Text from '../utils/speech2text'
+import LXQ from '../utils/lxq.main'
+import ContextPreviewChannel from '../utils/contextPreviewChannel'
+import {extractSegmentContextFields} from '../utils/contextPreviewUtils'
+import {getTmKeysJob} from '../api/getTmKeysJob'
+import {getTmKeysUser} from '../api/getTmKeysUser'
+import {getMTEngines} from '../api/getMTEngines'
+import {getSupportedLanguages} from '../api/getSupportedLanguages'
 
 // Must be first: factory is hoisted before ES6 imports, so this sets global.config
 // before any module-level code in CatTool.js is evaluated.
@@ -197,7 +212,10 @@ jest.mock('../components/segments/utils/DraftMatecatUtils/tagModel', () => ({
 }))
 
 jest.mock('../components/header/cattol/Header', () => ({
-  Header: () => <div data-testid="header" />,
+  Header: (props) => {
+    global.__headerProps = props
+    return <div data-testid="header" />
+  },
 }))
 jest.mock('../components/segments/SegmentsContainer', () => () => (
   <div data-testid="segments-container" />
@@ -220,8 +238,8 @@ jest.mock('../sse/SocketListener', () => () => (
   <div data-testid="socket-listener" />
 ))
 jest.mock('../components/modals/FatalErrorModal', () => 'FatalErrorModal')
-jest.mock('../components/icons/IconRedirect', () => () => null)
-jest.mock('../components/icons/IconDown', () => () => null)
+jest.mock('../../img/icons/IconRedirect', () => () => null)
+jest.mock('../../img/icons/IconDown', () => () => null)
 jest.mock('../components/common/Button/Button', () => ({
   BUTTON_MODE: {GHOST: 'ghost'},
   BUTTON_SIZE: {SMALL: 'small'},
@@ -278,6 +296,10 @@ describe('CatTool', () => {
     test('renders Header', async () => {
       await act(async () => renderCatTool())
       expect(screen.getByTestId('header')).toBeInTheDocument()
+
+      await act(async () => {
+        global.__headerProps.openTmPanel()
+      })
     })
 
     test('renders SocketListener', async () => {
@@ -354,7 +376,9 @@ describe('CatTool', () => {
       await act(async () => {
         SegmentStore.emit(SegmentConstants.FREEZING_SEGMENTS, false)
       })
-      expect(container.querySelector('.freezing-overlay')).not.toBeInTheDocument()
+      expect(
+        container.querySelector('.freezing-overlay'),
+      ).not.toBeInTheDocument()
     })
   })
 
@@ -506,6 +530,434 @@ describe('CatTool', () => {
         characterCounterCountTags: false,
         icuEnabled: false,
       })
+    })
+  })
+
+  const flush = async () => {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+  }
+
+  describe('async data loading', () => {
+    test('loads supported languages on mount', async () => {
+      getSupportedLanguages.mockResolvedValueOnce([
+        {code: 'en-US', name: 'English'},
+      ])
+      await act(async () => renderCatTool())
+      await flush()
+      expect(getSupportedLanguages).toHaveBeenCalled()
+    })
+
+    test('handles supported languages failure', async () => {
+      getSupportedLanguages.mockRejectedValueOnce(new Error('nope'))
+      await act(async () => renderCatTool())
+      await flush()
+      expect(getSupportedLanguages).toHaveBeenCalled()
+    })
+
+    test('merges and dedupes tm keys then applies template update', async () => {
+      getTmKeysJob.mockResolvedValueOnce({
+        tm_keys: [{key: 'k1', r: 1, w: 0, is_shared: false, name: 'Job TM'}],
+      })
+      getTmKeysUser.mockResolvedValueOnce({
+        tm_keys: [
+          {key: 'k1', r: 0, w: 1, is_shared: true, name: 'User TM'},
+          {key: 'k2', r: 1, w: 1, is_shared: false, name: 'Second TM'},
+        ],
+      })
+      await act(async () => renderCatTool())
+      await flush()
+      const updaterCall = mockModifyingCurrentTemplate.mock.calls.find((c) => {
+        const r = c[0]?.({})
+        return r && 'getPublicMatches' in r
+      })
+      expect(updaterCall).toBeTruthy()
+      const result = updaterCall[0]({})
+      expect(result.getPublicMatches).toBe(true)
+    })
+
+    test('fetches MT engines and applies active engine when owner', async () => {
+      config.ownerIsMe = true
+      config.active_engine = {id: 'mt-1', name: 'Engine'}
+      getMTEngines.mockResolvedValueOnce([{id: 'mt-1', name: 'Engine'}])
+      await act(async () => renderCatTool())
+      await flush()
+      expect(getMTEngines).toHaveBeenCalled()
+      config.ownerIsMe = false
+      config.active_engine = null
+    })
+
+    test('sets empty tm keys when tm keys request fails', async () => {
+      getTmKeysJob.mockRejectedValueOnce(new Error('fail'))
+      await act(async () => renderCatTool())
+      await flush()
+      expect(getTmKeysUser).toHaveBeenCalled()
+    })
+  })
+
+  describe('query params', () => {
+    test('opens comments menu when action is openComments', async () => {
+      jest.useFakeTimers()
+      CommonUtils.getParameterByName.mockReturnValueOnce('openComments')
+      await act(async () => renderCatTool())
+      act(() => {
+        jest.advanceTimersByTime(600)
+      })
+      expect(CommentsActions.openCommentsMenu).toHaveBeenCalled()
+      expect(CommonUtils.removeParam).toHaveBeenCalledWith('action')
+      jest.useRealTimers()
+    })
+
+    test('toggles QA issues when action is warnings', async () => {
+      jest.useFakeTimers()
+      CommonUtils.getParameterByName.mockReturnValueOnce('warnings')
+      await act(async () => renderCatTool())
+      act(() => {
+        jest.advanceTimersByTime(600)
+      })
+      expect(CatToolActions.toggleQaIssues).toHaveBeenCalled()
+      jest.useRealTimers()
+    })
+  })
+
+  describe('window unload', () => {
+    test('onbeforeunload delegates to CommonUtils.goodbye', async () => {
+      await act(async () => renderCatTool())
+      const event = {}
+      window.onbeforeunload(event)
+      expect(CommonUtils.goodbye).toHaveBeenCalledWith(event)
+    })
+  })
+
+  describe('metadata dependent init', () => {
+    test('initializes Speech2Text and LXQ when enabled', async () => {
+      Speech2Text.enabled.mockReturnValueOnce(true)
+      LXQ.enabled.mockReturnValueOnce(true)
+      await act(async () =>
+        renderCatTool({
+          userInfo: {user: {uid: 1}, metadata: {some: 'meta'}},
+        }),
+      )
+      expect(Speech2Text.init).toHaveBeenCalled()
+      expect(LXQ.init).toHaveBeenCalled()
+    })
+  })
+
+  describe('character counter rules', () => {
+    test('applies character counter rules from current template', async () => {
+      const tmpl = {...fakeTemporaryTemplate, characterCounterMode: 'chars'}
+      useProjectTemplates.mockReturnValue({
+        projectTemplates: [tmpl],
+        currentProjectTemplate: tmpl,
+        modifyingCurrentTemplate: mockModifyingCurrentTemplate,
+      })
+      await act(async () => renderCatTool())
+      expect(SegmentActions.changeCharactersCounterRules).toHaveBeenCalled()
+    })
+  })
+
+  describe('context preview channel messages', () => {
+    const getHandler = () => {
+      const calls = ContextPreviewChannel.onMessage.mock.calls
+      return calls[calls.length - 1][0]
+    }
+
+    test('segmentClicked opens the segment', async () => {
+      await act(async () => renderCatTool())
+      act(() => {
+        getHandler()({type: 'segmentClicked', sid: 7})
+      })
+      expect(SegmentActions.openSegment).toHaveBeenCalledWith(7)
+    })
+
+    test('requestSegments sends segments and highlight', async () => {
+      SegmentStore.getAllSegments.mockReturnValueOnce([
+        {sid: 1, segment: 's', translation: 't', internal_id: 'i1'},
+      ])
+      SegmentStore.getCurrentSegmentId.mockReturnValueOnce(1)
+      await act(async () => renderCatTool())
+      act(() => {
+        getHandler()({type: 'requestSegments'})
+      })
+      expect(ContextPreviewChannel.sendMessage).toHaveBeenCalledWith(
+        expect.objectContaining({type: 'segments'}),
+      )
+      expect(ContextPreviewChannel.sendMessage).toHaveBeenCalledWith(
+        expect.objectContaining({type: 'highlight'}),
+      )
+    })
+
+    test('loadMoreSegments requests more segments', async () => {
+      SegmentStore.getLastSegmentId.mockReturnValueOnce('99')
+      await act(async () => renderCatTool())
+      act(() => {
+        getHandler()({type: 'loadMoreSegments', where: 'after'})
+      })
+      expect(SegmentStore.getLastSegmentId).toHaveBeenCalled()
+    })
+  })
+
+  describe('segment store events', () => {
+    test('RENDER_SEGMENTS without preview content hides preview', async () => {
+      SegmentStore.getCurrentSegment.mockReturnValue({sid: 5})
+      SegmentStore.getSegmentById.mockReturnValueOnce({toJS: () => ({sid: 5})})
+      extractSegmentContextFields.mockReturnValueOnce({})
+      await act(async () => renderCatTool())
+      await act(async () => {
+        SegmentStore.emit(SegmentConstants.RENDER_SEGMENTS)
+      })
+      expect(ContextPreviewChannel.sendMessage).toHaveBeenCalledWith(
+        expect.objectContaining({type: 'highlight', sid: 5}),
+      )
+      SegmentStore.getCurrentSegment.mockReturnValue(null)
+    })
+
+    test('RENDER_SEGMENTS with preview content extracts context fields', async () => {
+      SegmentStore.getCurrentSegment.mockReturnValue({sid: 8})
+      SegmentStore.getSegmentById.mockReturnValueOnce(null)
+      SegmentStore.getAllSegments.mockReturnValueOnce([{sid: 8}])
+      extractSegmentContextFields.mockReturnValueOnce({context_url: 'http://x'})
+      await act(async () => renderCatTool())
+      await act(async () => {
+        SegmentStore.emit(SegmentConstants.RENDER_SEGMENTS)
+      })
+      expect(extractSegmentContextFields).toHaveBeenCalled()
+      SegmentStore.getCurrentSegment.mockReturnValue(null)
+    })
+
+    test('RENDER_SEGMENTS with no current segment returns early', async () => {
+      SegmentStore.getCurrentSegment.mockReturnValue(null)
+      await act(async () => renderCatTool())
+      await act(async () => {
+        SegmentStore.emit(SegmentConstants.RENDER_SEGMENTS)
+      })
+      expect(SegmentStore.getCurrentSegment).toHaveBeenCalled()
+    })
+
+    test('SET_PROGRESS with incomplete analysis shows modal', async () => {
+      await act(async () => renderCatTool())
+      await act(async () => {
+        CatToolStore.emit(CatToolConstants.SET_PROGRESS, {
+          analysis_complete: false,
+        })
+      })
+      expect(ModalsActions.showModalComponent).toHaveBeenCalled()
+    })
+
+    test('SET_PROGRESS with complete analysis does not show modal', async () => {
+      await act(async () => renderCatTool())
+      await act(async () => {
+        CatToolStore.emit(CatToolConstants.SET_PROGRESS, {
+          analysis_complete: true,
+        })
+      })
+      expect(ModalsActions.showModalComponent).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('hotkeys and preview interactions', () => {
+    const getHotkeyCallback = (index) => useHotkeys.mock.calls[index][1]
+
+    test('openSettings hotkey opens the settings panel', async () => {
+      await act(async () => renderCatTool())
+      act(() => {
+        getHotkeyCallback(0)()
+      })
+      expect(CatToolActions.openSettingsPanel).toHaveBeenCalledWith(
+        'editorSettings',
+      )
+    })
+
+    test('toggleContextPreview hotkey expands the preview', async () => {
+      const {container} = await act(async () => renderCatTool())
+      act(() => {
+        getHotkeyCallback(1)()
+      })
+      expect(
+        container.querySelector('.context-preview-wrapper--collapsed'),
+      ).not.toBeInTheDocument()
+    })
+
+    test('open in another tab opens a popup and toggling closes it', async () => {
+      const popup = {closed: false, focus: jest.fn(), close: jest.fn()}
+      const openSpy = jest.spyOn(window, 'open').mockReturnValue(popup)
+      await act(async () => renderCatTool())
+      act(() => {
+        getHotkeyCallback(1)()
+      })
+      act(() => {
+        fireEvent.click(screen.getByTitle('Open in another tab'))
+      })
+      expect(openSpy).toHaveBeenCalled()
+      act(() => {
+        getHotkeyCallback(1)()
+      })
+      expect(popup.close).toHaveBeenCalled()
+      openSpy.mockRestore()
+    })
+
+    test('clicking the tab while popup is open reopens inline', async () => {
+      const popup = {closed: false, focus: jest.fn(), close: jest.fn()}
+      const openSpy = jest.spyOn(window, 'open').mockReturnValue(popup)
+      const {container} = await act(async () => renderCatTool())
+      act(() => {
+        getHotkeyCallback(1)()
+      })
+      act(() => {
+        fireEvent.click(screen.getByTitle('Open in another tab'))
+      })
+      act(() => {
+        fireEvent.click(container.querySelector('.context-preview__tab'))
+      })
+      expect(popup.close).toHaveBeenCalled()
+      openSpy.mockRestore()
+    })
+
+    test('popup polling detects a manually closed popup', async () => {
+      jest.useFakeTimers()
+      const popup = {closed: false, focus: jest.fn(), close: jest.fn()}
+      const openSpy = jest.spyOn(window, 'open').mockReturnValue(popup)
+      await act(async () => renderCatTool())
+      act(() => {
+        getHotkeyCallback(1)()
+      })
+      act(() => {
+        fireEvent.click(screen.getByTitle('Open in another tab'))
+      })
+      popup.closed = true
+      act(() => {
+        jest.advanceTimersByTime(600)
+      })
+      openSpy.mockRestore()
+      jest.useRealTimers()
+    })
+  })
+
+  describe('segments result handling', () => {
+    test('reports errors and offline state on error result', async () => {
+      useSegmentsLoader.mockReturnValue({
+        isLoading: false,
+        result: {where: 'center', errors: true, length: 1},
+      })
+      await act(async () => renderCatTool())
+      expect(OfflineUtils.failedConnection).toHaveBeenCalled()
+      expect(CatToolActions.processErrors).toHaveBeenCalled()
+    })
+
+    test('processes center result and opens the segment', async () => {
+      useSegmentsLoader.mockReturnValue({isLoading: false, result: null})
+      await act(async () => renderCatTool())
+      await act(async () => {
+        CatToolStore.emit(CatToolConstants.ON_RENDER, {
+          startSegmentId: '2-3',
+          openCurrentSegmentAfter: true,
+        })
+      })
+      useSegmentsLoader.mockReturnValue({
+        isLoading: false,
+        result: {
+          where: 'center',
+          data: {
+            files: {
+              f1: {
+                segments: [
+                  {sid: '2', segment: 's', translation: 't', internal_id: 1},
+                ],
+              },
+            },
+          },
+        },
+      })
+      await act(async () => {
+        CatToolStore.emit(CatToolConstants.ON_RENDER, {trigger: 1})
+      })
+      expect(SegmentActions.openSegment).toHaveBeenCalled()
+      expect(globalFunctions.registerFooterTabs).toHaveBeenCalled()
+    })
+
+    test('falls back to first file segment when start segment is missing', async () => {
+      useSegmentsLoader.mockReturnValue({isLoading: false, result: null})
+      await act(async () => renderCatTool())
+      await act(async () => {
+        CatToolStore.emit(CatToolConstants.ON_RENDER, {startSegmentId: '999'})
+      })
+      useSegmentsLoader.mockReturnValue({
+        isLoading: false,
+        result: {
+          where: 'center',
+          data: {
+            files: {
+              f1: {
+                segments: [
+                  {sid: '1', segment: 's', translation: 't', internal_id: 1},
+                ],
+              },
+            },
+          },
+        },
+      })
+      await act(async () => {
+        CatToolStore.emit(CatToolConstants.ON_RENDER, {trigger: 2})
+      })
+      expect(SegmentActions.openSegment).toHaveBeenCalled()
+    })
+
+    test('processes more-segments result and dispatches custom event', async () => {
+      config.isReview = true
+      useSegmentsLoader.mockReturnValue({isLoading: false, result: null})
+      await act(async () => renderCatTool())
+      useSegmentsLoader.mockReturnValue({
+        isLoading: false,
+        result: {
+          where: 'after',
+          data: {
+            files: {
+              f1: {
+                segments: [
+                  {sid: '5', segment: 's', translation: 't', internal_id: 2},
+                ],
+              },
+            },
+          },
+        },
+      })
+      await act(async () => {
+        CatToolStore.emit(CatToolConstants.ON_RENDER, {trigger: 3})
+      })
+      expect(CommonUtils.dispatchCustomEvent).toHaveBeenCalled()
+      expect(SegmentActions.addPreloadedIssuesToSegment).toHaveBeenCalled()
+      config.isReview = false
+    })
+
+    test('runs callbackAfterSegmentsResponse when segments arrive', async () => {
+      const cb = jest.fn()
+      useSegmentsLoader.mockReturnValue({isLoading: false, result: null})
+      await act(async () => renderCatTool())
+      await act(async () => {
+        CatToolStore.emit(CatToolConstants.ON_RENDER, {
+          callbackAfterSegmentsResponse: cb,
+        })
+      })
+      useSegmentsLoader.mockReturnValue({
+        isLoading: false,
+        result: {where: 'after', data: {files: {}}},
+      })
+      await act(async () => {
+        CatToolStore.emit(CatToolConstants.ON_RENDER, {trigger: 4})
+      })
+      expect(cb).toHaveBeenCalled()
+    })
+  })
+
+  describe('more segments loader', () => {
+    test('requests segments after the last one', async () => {
+      SegmentStore.getLastSegmentId.mockReturnValueOnce('50')
+      await act(async () => renderCatTool())
+      await act(async () => {
+        SegmentStore.emit(SegmentConstants.GET_MORE_SEGMENTS, 'after')
+      })
+      expect(SegmentStore.getLastSegmentId).toHaveBeenCalled()
     })
   })
 })

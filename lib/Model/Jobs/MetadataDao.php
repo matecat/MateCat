@@ -4,20 +4,13 @@ namespace Model\Jobs;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\IDatabase;
-use Model\DataAccess\TransactionalTrait;
 use PDOException;
 use ReflectionException;
+use Throwable;
+use TypeError;
 
 class MetadataDao extends AbstractDao
 {
-
-    use TransactionalTrait;
-
-    protected function getTransactionalDatabase(): IDatabase
-    {
-        return $this->database;
-    }
 
     const string TABLE = 'job_metadata';
 
@@ -49,7 +42,7 @@ class MetadataDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheByJobId(int $id_job, string $key): bool
+    private function destroyCacheByIdJob(int $id_job, string $key): bool
     {
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_id_key);
 
@@ -86,7 +79,7 @@ class MetadataDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheByJobAndPassword(int $id_job, string $password): bool
+    private function destroyCacheByJobAndPassword(int $id_job, string $password): bool
     {
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password);
 
@@ -97,11 +90,15 @@ class MetadataDao extends AbstractDao
      * @param int $id_job
      * @param string $password
      * @param string $key
-     * @param int $ttl
+     * @param int $ttl Zero means "do not read from cache", and set() depends on that default: it
+     *                 re-reads the row it has just written, inside the transaction where the
+     *                 eviction it issued is still queued for the commit. Give this parameter a
+     *                 non-zero default and set() starts returning the pre-write value.
      *
      * @return MetadataStruct|null
      * @throws Exception
      * @throws PDOException
+     *
      * @throws ReflectionException
      */
     public function get(int $id_job, string $password, string $key, int $ttl = 0): ?MetadataStruct
@@ -119,7 +116,7 @@ class MetadataDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheByJobAndPasswordAndKey(int $id_job, string $password, string $key): bool
+    private function destroyCacheByJobAndPasswordAndKey(int $id_job, string $password, string $key): bool
     {
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password_key);
 
@@ -128,6 +125,53 @@ class MetadataDao extends AbstractDao
             'password' => $password,
             'key' => $key
         ]);
+    }
+
+    /**
+     * The one eviction a caller needs. A metadata row answers three reads, and the struct names the
+     * address of all three: getByIdJob() binds id_job and key alone, so a write that only clears the
+     * two password-bound addresses leaves it serving the value it replaced for the whole TTL.
+     *
+     * An empty password is a real address here, not a missing one: MMT stores the MT context under it.
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws TypeError when the struct names less than a whole address
+     */
+    public function destroyCache(MetadataStruct $metadata): void
+    {
+        if (!isset($metadata->id_job, $metadata->password, $metadata->key)) {
+            throw new TypeError('MetadataStruct must carry id_job, password and key');
+        }
+
+        $this->destroyCacheByIdJob($metadata->id_job, $metadata->key);
+        $this->destroyCacheByJobAndPassword($metadata->id_job, $metadata->password);
+        $this->destroyCacheByJobAndPasswordAndKey($metadata->id_job, $metadata->password, $metadata->key);
+    }
+
+    /**
+     * Evict every cached read of every key a chunk's credential can address.
+     *
+     * A password rotation moves the rows wholesale (@see self::updateJobPassword()), so there is no
+     * single row for the caller to name: it knows the credential, not which keys are stored under
+     * it. Naming only the credential is not enough either — get() binds the key as well, so its
+     * entries hash differently from the bulk read's and survive an eviction that names two values
+     * where the read named three. The key list is the enum's, so a key added later cannot be
+     * forgotten here.
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws TypeError
+     */
+    public function destroyCacheForCredential(int $id_job, string $password): void
+    {
+        foreach (JobsMetadataMarshaller::cases() as $case) {
+            $this->destroyCache(new MetadataStruct([
+                'id_job'   => $id_job,
+                'password' => $password,
+                'key'      => $case->value,
+            ]));
+        }
     }
 
     /**
@@ -140,6 +184,8 @@ class MetadataDao extends AbstractDao
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function set(int $id_job, string $password, string $key, string $value): ?MetadataStruct
     {
@@ -149,23 +195,28 @@ class MetadataDao extends AbstractDao
             " ( :id_job, :password, :key, :value ) " .
             " ON DUPLICATE KEY UPDATE `value` = :value ";
 
-        $this->openTransaction(); // because we have to invalidate the cache after the insert, use the transactional trait
-        $conn = $this->database->getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            'id_job' => $id_job,
-            'password' => $password,
-            'key' => $key,
-            'value' => $value
-        ]);
+        // The scope exists so the evictions below are queued and run after the commit rather than
+        // before it. It also undoes the write here rather than leaving it to the end of the request:
+        // a worker holds its connection across messages, so a transaction left open by a failure
+        // here would still be open when the next message starts writing.
+        return $this->database->transaction(function () use ($id_job, $password, $key, $value, $sql): ?MetadataStruct {
+            $conn = $this->database->getConnection();
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                'id_job' => $id_job,
+                'password' => $password,
+                'key' => $key,
+                'value' => $value
+            ]);
 
-        $this->destroyCacheByJobAndPassword($id_job, $password);
-        $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
+            $this->destroyCache(new MetadataStruct([
+                'id_job'   => $id_job,
+                'password' => $password,
+                'key'      => $key,
+            ]));
 
-        $result = $this->get($id_job, $password, $key);
-        $this->commitTransaction(); // commit only if everything went fine
-
-        return $result;
+            return $this->get($id_job, $password, $key);
+        });
     }
 
     /**
@@ -175,6 +226,8 @@ class MetadataDao extends AbstractDao
      *
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function bulkSet(int $id_job, string $password, array $metadata): void
     {
@@ -199,16 +252,19 @@ class MetadataDao extends AbstractDao
             . implode(', ', $placeholders)
             . " ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
 
-        $this->openTransaction();
-        $conn = $this->database->getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->execute($params);
+        $this->database->transaction(function () use ($id_job, $password, $metadata, $params, $sql): void {
+            $conn = $this->database->getConnection();
+            $stmt = $conn->prepare($sql);
+            $stmt->execute($params);
 
-        $this->destroyCacheByJobAndPassword($id_job, $password);
-        foreach ($metadata as $key => $value) {
-            $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
-        }
-        $this->commitTransaction();
+            foreach ($metadata as $key => $value) {
+                $this->destroyCache(new MetadataStruct([
+                    'id_job'   => $id_job,
+                    'password' => $password,
+                    'key'      => $key,
+                ]));
+            }
+        });
     }
 
     /**
@@ -217,6 +273,7 @@ class MetadataDao extends AbstractDao
      * @param string $key
      * @throws PDOException
      * @throws ReflectionException
+     * @throws TypeError
      */
     public function delete(int $id_job, string $password, string $key): void
     {
@@ -232,8 +289,11 @@ class MetadataDao extends AbstractDao
             'key' => $key,
         ]);
 
-        $this->destroyCacheByJobAndPassword($id_job, $password);
-        $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
+        $this->destroyCache(new MetadataStruct([
+            'id_job'   => $id_job,
+            'password' => $password,
+            'key'      => $key,
+        ]));
     }
 
     /**

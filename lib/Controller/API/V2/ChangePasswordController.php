@@ -95,57 +95,57 @@ class ChangePasswordController extends KleinController
 
             $this->checkUserPermissions($pStruct, $user);
 
-            // changePassword() owns the eviction of every read the rotated credential reaches.
+            // changePassword() owns the eviction of every read the rotated credential reaches, under
+            // both the old and the new password.
             (new ProjectDao($this->getDatabase()))->changePassword($pStruct, $new_password);
         } else { // change job passwords
 
-            $this->getDatabase()->begin();
+            [$jDao, $jStruct, $rotatedReviewSourcePage] = $this->getDatabase()->transaction(function () use ($user, $id, $actual_pwd, $new_password): array {
+                $jDao = new JobDao($this->getDatabase());
+                $jStruct = $jDao->getByIdAndPassword($id, $actual_pwd);
 
-            $jDao = new JobDao($this->getDatabase());
-            $jStruct = $jDao->getByIdAndPassword($id, $actual_pwd);
+                // Null when the job password itself was rotated: which phase a review password belongs to
+                // decides how far the eviction below has to reach.
+                $rotatedReviewSourcePage = null;
 
-            // Null when the job password itself was rotated: which phase a review password belongs to
-            // decides how far the eviction below has to reach.
-            $rotatedReviewSourcePage = null;
+                if ($jStruct !== null) { // the translate password was presented: change the job password
 
-            if ($jStruct !== null) { // the translate password was presented: change the job password
+                    $pDao = new ProjectDao($this->getDatabase());
+                    $this->checkUserPermissions($jStruct->getProject($pDao), $user);
 
-                $pDao = new ProjectDao($this->getDatabase());
-                $this->checkUserPermissions($jStruct->getProject($pDao), $user);
+                    $jDao->changePassword($jStruct, $new_password);
+                    FeatureSet::forProject($jStruct->getProject($pDao), $this->getDatabase())
+                        ->dispatch(new JobPasswordChangedEvent($jStruct, $actual_pwd));
+                } else { // a review password was presented: rotate the phase that password belongs to
 
-                $jDao->changePassword($jStruct, $new_password);
-                FeatureSet::forProject($jStruct->getProject($pDao), $this->getDatabase())
-                    ->dispatch(new JobPasswordChangedEvent($jStruct, $actual_pwd));
+                    // The phase is read from the review row the password matched, never from a
+                    // client-declared revision_number: the caller must present the current password of
+                    // the resource being changed (GHSA-7q94-2fmr-3p42). This also removes a silent
+                    // no-op, since updateReviewPassword() already filtered on review_password and
+                    // matched nothing when the declared phase disagreed with the credential.
+                    $dao = new ChunkReviewDao($this->getDatabase());
+                    $chunkReview = $dao->findByReviewPasswordAndJobId($actual_pwd, $id);
 
-            } else { // a review password was presented: rotate the phase that password belongs to
+                    if ($chunkReview === null) {
+                        throw new Exception('Job not found');
+                    }
 
-                // The phase is read from the review row the password matched, never from a
-                // client-declared revision_number: the caller must present the current password of
-                // the resource being changed (GHSA-7q94-2fmr-3p42). This also removes a silent
-                // no-op, since updateReviewPassword() already filtered on review_password and
-                // matched nothing when the declared phase disagreed with the credential.
-                $dao = new ChunkReviewDao($this->getDatabase());
-                $chunkReview = $dao->findByReviewPasswordAndJobId($actual_pwd, $id);
+                    $jStruct = $chunkReview->getChunk($jDao);
+                    $pDao = new ProjectDao($this->getDatabase());
+                    $this->checkUserPermissions($jStruct->getProject($pDao), $user);
 
-                if ($chunkReview === null) {
-                    throw new Exception('Job not found');
+                    $source_page = $chunkReview->source_page;
+                    $revision_number = ReviewUtils::sourcePageToRevisionNumber($source_page)
+                        ?? throw new Exception('The matched review row does not belong to a revision phase');
+                    $rotatedReviewSourcePage = (int)$source_page;
+
+                    $dao->updateReviewPassword($id, $actual_pwd, $new_password, $source_page);
+                    FeatureSet::forProject($jStruct->getProject($pDao), $this->getDatabase())
+                        ->dispatch(new ReviewPasswordChangedEvent($id, $actual_pwd, $new_password, $revision_number));
                 }
 
-                $jStruct = $chunkReview->getChunk($jDao);
-                $pDao = new ProjectDao($this->getDatabase());
-                $this->checkUserPermissions($jStruct->getProject($pDao), $user);
-
-                $source_page = $chunkReview->source_page;
-                $revision_number = ReviewUtils::sourcePageToRevisionNumber($source_page)
-                    ?? throw new Exception('The matched review row does not belong to a revision phase');
-                $rotatedReviewSourcePage = (int)$source_page;
-
-                $dao->updateReviewPassword($id, $actual_pwd, $new_password, $source_page);
-                FeatureSet::forProject($jStruct->getProject($pDao), $this->getDatabase())
-                    ->dispatch(new ReviewPasswordChangedEvent($id, $actual_pwd, $new_password, $revision_number));
-            }
-
-            $this->getDatabase()->commit();
+                return [$jDao, $jStruct, $rotatedReviewSourcePage];
+            });
 
             // Every read the rotated credential reaches is evicted only now: changing a password has
             // to shut the editor on the previous link straight away, and an eviction run before the

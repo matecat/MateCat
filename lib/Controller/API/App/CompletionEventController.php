@@ -19,6 +19,7 @@ use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\Hook\Event\Run\AlterChunkReviewStructEvent;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
+use Throwable;
 
 class CompletionEventController extends KleinController
 {
@@ -45,7 +46,7 @@ class CompletionEventController extends KleinController
             $event = (new ChunkCompletionEventDao($this->getDatabase()))->getByIdAndChunk($this->getParams()['id_event'], $Validator->getChunk());
 
             if (!$event) {
-                throw new NotFoundException("Event Not Found.", 404);
+                throw new NotFoundException("Event not found.", 404);
             }
 
             $this->chunk = $Validator->getChunk();
@@ -58,6 +59,7 @@ class CompletionEventController extends KleinController
 
     /**
      * @throws Exception
+     * @throws Throwable
      */
     public function delete(): void
     {
@@ -68,18 +70,19 @@ class CompletionEventController extends KleinController
 
     /**
      * @throws Exception
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction
+     *                   on any throw and re-throws the original, whatever its type
      */
     private function __performUndo(): void
     {
-        $this->getDatabase()->begin();
+        $this->getDatabase()->transaction(function (): void {
+            /**
+             * This method means to allow project_completion to work alone, the undo feature belongs to AbstractRevisionFeature
+             */
+            $this->featureSet->dispatch(new AlterChunkReviewStructEvent($this->event));
 
-        /**
-         * This method means to allow project_completion to work alone, the undo feature belongs to AbstractRevisionFeature
-         */
-        $this->featureSet->dispatch(new AlterChunkReviewStructEvent($this->event));
-
-        (new ChunkCompletionEventDao($this->getDatabase()))->deleteEvent($this->event);
-        $this->getDatabase()->commit();
+            (new ChunkCompletionEventDao($this->getDatabase()))->deleteEvent($this->event);
+        });
     }
 
 }

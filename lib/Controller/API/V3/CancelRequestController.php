@@ -28,6 +28,7 @@ use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\TranslationStatus;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
+use TypeError;
 
 class CancelRequestController extends KleinController
 {
@@ -55,6 +56,7 @@ class CancelRequestController extends KleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function enableRequest(): void
     {
@@ -88,6 +90,7 @@ class CancelRequestController extends KleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function cancelRequest(): void
     {

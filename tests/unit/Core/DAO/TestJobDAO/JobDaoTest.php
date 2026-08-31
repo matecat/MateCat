@@ -38,7 +38,9 @@ class JobDaoTest extends AbstractTest
 
         $this->dbStub = $this->createStub(IDatabase::class);
         $this->dbStub->method('getConnection')->willReturn($this->pdoStub);
-        $this->dbStub->method('begin')->willReturn($this->pdoStub);
+        // Unconfigured, transaction() returns null without calling its argument, so the body of
+        // every method that runs through a scope would silently not execute.
+        $this->dbStub->method('transaction')->willReturnCallback(static fn(callable $callback) => $callback());
     }
 
     protected function tearDown(): void
@@ -99,9 +101,9 @@ class JobDaoTest extends AbstractTest
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
         $dao = new JobDao($this->dbStub);
-        $dao->destroyCacheByIdAndPassword($job);
+        $dao->destroyCache($job);
 
-        $this->assertIsBool($dao->destroyCacheByIdAndPassword($job));
+        $this->assertNull($dao->destroyCache($job));
     }
 
     public function testDestroyCacheByProjectIdDoesNotThrow(): void
