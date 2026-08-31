@@ -399,10 +399,53 @@ class JobMetadataControllerTest extends AbstractTest
             // mmt_glossaries holds MyMemory numeric ids, lara_glossaries opaque string ids.
             'mmt glossary strings' => ['mmt_glossaries', ['12']],
             'lara glossary ints'   => ['lara_glossaries', [12]],
+            // An empty list is the array-shaped version of the empty string above: the Lara SDK
+            // forwards whatever it is given, so `[]` would go out as "glossaries": [] rather than
+            // omitting the parameter. delete() is how a glossary is cleared.
+            'empty lara glossaries' => ['lara_glossaries', []],
+            'empty mmt glossaries'  => ['mmt_glossaries', []],
+            // A MyMemory glossary id is a positive integer.
+            'zero mmt glossary id'  => ['mmt_glossaries', [0]],
+            'negative mmt glossary id' => ['mmt_glossaries', [-1]],
             // Only the engine-tunable settings are job-scoped: the analysis was priced on this one.
             'enable_mt_analysis'   => ['enable_mt_analysis', true],
             // Consumed once at creation by MMT::syncMemories(), which has no job context.
             'context analyzer'     => ['mmt_activate_context_analyzer', true],
+        ];
+    }
+
+    /**
+     * Every branch of the schema constrains `key` and `value` but none used to require them, so an
+     * item could carry neither and still validate. `save()` then coerced the missing value to the
+     * four-character string "null" and stored it — past the enum the schema declares — and a missing
+     * key reached MetadataDao::set(… string $key …) as null, which is a 500 rather than a 400.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    #[DataProvider('malformedItemProvider')]
+    public function save_rejects_an_item_missing_key_or_value(string $body): void
+    {
+        $this->setRequest([
+            'id_job' => (string)$this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ], $body, true);
+
+        $this->expectException(JSONValidatorException::class);
+
+        $this->controller->save();
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function malformedItemProvider(): array
+    {
+        return [
+            'empty object'    => ['[{}]'],
+            'key with no value' => ['[{"key":"deepl_formality"}]'],
+            'value with no key' => ['[{"value":"prefer_more"}]'],
+            'valid item followed by an empty one' => ['[{"key":"lara_style","value":"fluid"},{}]'],
         ];
     }
 

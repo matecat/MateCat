@@ -11,6 +11,16 @@ namespace Model\Jobs;
 
 enum JobsMetadataMarshaller: string
 {
+    /**
+     * The MT application threshold a job falls back to when neither scope stores one.
+     *
+     * It used to be written out at each of the six sites that need it, and they disagreed: the
+     * analysis defaulted to 85 and the editor to 86. Both are consumed as a penalty of
+     * `100 - $value`, so the same unset setting was priced at 15 in the analysis and applied at 14
+     * in the editor.
+     */
+    public const int DEFAULT_MT_QUALITY_VALUE = 85;
+
     case CHARACTER_COUNTER_COUNT_TAGS = 'character_counter_count_tags';
     case CHARACTER_COUNTER_MODE       = 'character_counter_mode';
     case DIALECT_STRICT               = 'dialect_strict';
@@ -99,6 +109,10 @@ enum JobsMetadataMarshaller: string
      * Job metadata is keyed by (id_job, password), so a key missing from this list silently
      * disappears from the new chunks.
      *
+     * Every key {@see \Model\ProjectCreation\JobCreationService::saveJobsMetadata()} writes at
+     * creation belongs here — the four below were written but never propagated, so a split dropped
+     * them and the chunks fell back to the code defaults.
+     *
      * @return list<string>
      */
     public static function propagatedOnSplit(): array
@@ -108,6 +122,10 @@ enum JobsMetadataMarshaller: string
                 self::CHARACTER_COUNTER_COUNT_TAGS->value,
                 self::CHARACTER_COUNTER_MODE->value,
                 self::SUBFILTERING_HANDLERS->value,
+                self::DIALECT_STRICT->value,
+                self::MANDATORY_ISSUES->value,
+                self::PUBLIC_TM_PENALTY->value,
+                self::TM_PRIORITIZATION->value,
             ],
             self::mtSettings()
         );

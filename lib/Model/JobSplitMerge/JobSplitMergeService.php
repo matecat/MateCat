@@ -171,7 +171,8 @@ class JobSplitMergeService
         (new JobCredentialCacheInvalidator(
             new JobDao($this->dbHandler),
             new ChunkReviewDao($this->dbHandler),
-            new ProjectDao($this->dbHandler)
+            new ProjectDao($this->dbHandler),
+            new MetadataDao($this->dbHandler)
         ))->sweepAfterJobPasswordRotation($chunk, $oldPassword, $newPassword);
     }
 

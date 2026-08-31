@@ -107,9 +107,10 @@ class GetContributionController extends KleinController
         $subfiltering_handlers = (new MetadataDao($this->getDatabase()))->getSubfilteringCustomHandlers($jobId, $jobPassword);
 
         /**
-         * MT settings are stored on the job so the project owner can change them after the project
-         * has been created. Projects created before that move have no job rows, so the read falls
-         * back to project metadata — @see JobSettingsResolver. Both keys are fetched in one pass.
+         * MT settings are overridable per job so the project owner can change them after the
+         * project has been created. A job row exists only where one was overridden; every other job
+         * answers from the project's creation-time value — @see JobSettingsResolver. Both keys are
+         * fetched in one pass.
          */
         $mtSettings = (new JobSettingsResolver($this->getDatabase()))->resolveMany(
             $jobId,
@@ -200,7 +201,8 @@ class GetContributionController extends KleinController
         $contributionRequest->resultNum = $num_results;
         $contributionRequest->crossLangTargets = array_values($this->getCrossLanguages($cross_language));
         $projectMetadataDao = new ProjectMetadataDao($this->getDatabase());
-        $contributionRequest->mt_quality_value_in_editor = (int)($mtSettings[JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] ?? 86);
+        $contributionRequest->mt_quality_value_in_editor = (int)($mtSettings[JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value]
+            ?? JobsMetadataMarshaller::DEFAULT_MT_QUALITY_VALUE);
         $contributionRequest->mt_qe_workflow_enabled = (bool)$projectMetadataDao->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value);
 
         $mtQeParams = $projectMetadataDao->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value);

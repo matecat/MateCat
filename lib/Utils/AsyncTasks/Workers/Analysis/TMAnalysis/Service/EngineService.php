@@ -92,8 +92,8 @@ class EngineService implements EngineServiceInterface
 
             $mtEngine->setAnalysis();
 
-            // The Lara style is job-scoped so the project owner can change it after creation, with
-            // a project-metadata fallback for projects created before the move.
+            // The Lara style is overridable per job so the project owner can change it after
+            // creation, falling back to the project's creation-time value where it was not.
             $lara_style = (new JobSettingsResolver($this->database))->resolve(
                 isset($queueElement->params->id_job) ? (int)$queueElement->params->id_job : null,
                 isset($queueElement->params->password) ? (string)$queueElement->params->password : null,

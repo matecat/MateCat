@@ -6,6 +6,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "character_counter_count_tags"
@@ -20,6 +24,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "character_counter_mode"
@@ -36,6 +44,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "subfiltering_handlers"
@@ -48,6 +60,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "mandatory_issues"
@@ -63,6 +79,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "tm_prioritization"
@@ -77,6 +97,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "mt_quality_value_in_editor"
@@ -91,6 +115,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "deepl_formality"
@@ -107,6 +135,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "deepl_engine_type"
@@ -122,6 +154,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "deepl_id_glossary"
@@ -136,6 +172,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "lara_style"
@@ -152,6 +192,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "lara_style_guideline_id"
@@ -166,12 +210,17 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "lara_glossaries"
           },
           "value": {
             "type": "array",
+            "minItems": 1,
             "items": {
               "type": "string",
               "minLength": 1
@@ -182,14 +231,20 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "mmt_glossaries"
           },
           "value": {
             "type": "array",
+            "minItems": 1,
             "items": {
-              "type": "integer"
+              "type": "integer",
+              "minimum": 1
             }
           }
         }
@@ -197,6 +252,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "mmt_ignore_glossary_case"
@@ -211,6 +270,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "intento_provider"
@@ -225,6 +288,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "intento_routing"

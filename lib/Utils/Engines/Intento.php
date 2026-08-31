@@ -170,8 +170,8 @@ class Intento extends AbstractEngine
         $parameters['context']['to'] = $_config['target'];
         $parameters['context']['text'] = $_config['segment'];
 
-        // Custom provider / custom routing live on the job so the project owner can change them
-        // after creation, and fall back to project metadata for projects created before the move.
+        // Custom provider / custom routing are overridable per job so the project owner can change
+        // them after creation, falling back to the project's creation-time value where they were not.
         $settings = (new JobSettingsResolver($this->database))->resolveManyFromEngineConfig(
             $_config,
             [

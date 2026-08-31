@@ -113,10 +113,11 @@ class MetaDataController extends KleinController
          * threshold) are reported on both scopes, and a client has to read `job` first and only then
          * `project`:
          *
-         * - a project created before those settings moved to the job answers from `project` alone,
-         *   and cannot be migrated — production holds billions of project_metadata rows;
-         * - a project created after the move answers from `job` alone, per target language, and is
-         *   the only scope the owner's later edits are written to.
+         * - `project` always carries the creation-time value, for every project, old or new. It
+         *   cannot be migrated away — production holds billions of project_metadata rows;
+         * - `job` carries it only where the owner has overridden it, per target language, and it is
+         *   the only scope those edits are written to. So both scopes can hold the same key, and the
+         *   job one is the answer whenever it is present.
          *
          * The engine parameters sit under `mt_extra` on both scopes; everything else, the
          * threshold included, is reported flat.

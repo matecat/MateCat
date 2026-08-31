@@ -315,9 +315,10 @@ class SetTranslationController extends AbstractStatefulKleinController
                 /** @var ProjectStruct $project */
                 $project = $this->data['project'];
                 // case 1. is MT
-                // The MT application threshold is stored on the job so the project owner can change
-                // it after creation; projects created before that move still answer from project
-                // metadata. @see JobSettingsResolver
+                // The MT application threshold is overridable per job so the project owner can
+                // change it after creation. A job row exists only where it was overridden; every
+                // other job answers from the project's creation-time value.
+                // @see JobSettingsResolver
                 $new_translation->suggestion_match = (string)((new JobSettingsResolver($this->getDatabase()))->resolve(
                     $this->id_job,
                     $this->password,

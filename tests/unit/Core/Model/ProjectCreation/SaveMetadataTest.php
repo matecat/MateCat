@@ -347,30 +347,38 @@ class SaveMetadataTest extends AbstractTest
     }
 
     /**
-     * The MT tuning settings are written per job by JobCreationService::saveJobsMetadata() so the
-     * project owner can change them after creation. A second copy at project level would go stale
-     * the moment one of them is edited, and a read would have no way to tell which copy is current.
-     *
-     * Reads still answer from project metadata for projects created before the move, which is why
-     * the keys remain valid ProjectsMetadataMarshaller cases — they just stop being written.
+     * The MT tuning settings are written here as the project's creation-time base value. The owner's
+     * later edits go to job metadata and win on read (@see \Model\Jobs\JobSettingsResolver), so
+     * the two scopes are copy-on-write: this row is what every job that was never customised
+     * resolves to, and it is what a revert of the job scope falls back on.
      */
     #[Test]
     #[DataProvider('jobScopedMtSettingProvider')]
-    public function testMtSettingsAreNotPersistedAtProjectLevel(string $key): void
+    public function testMtSettingsArePersistedAtProjectLevelAsTheBaseValue(string $key, mixed $value, string $expected): void
     {
-        $this->projectStructure->$key = 'some_value';
-        $this->projectStructure->metadata = [$key => 'some_value'];
+        $this->projectStructure->$key = $value;
 
         $this->service->save($this->projectStructure, $this->features);
 
-        self::assertEmpty(
-            $this->findDaoCallsByKey($key),
-            "'$key' is job-scoped and must not be written to project metadata"
+        self::assertSame(
+            $expected,
+            $this->getPersistedValue($key),
+            "'$key' is the creation-time base value and must be written to project metadata"
         );
     }
 
+    /**
+     * @return array<string, array{string, mixed, string}>
+     */
     public static function jobScopedMtSettingProvider(): array
     {
+        // ProjectStructure declares these with real types, so the input has to be type-appropriate
+        // and the expectation is the string the DAO is handed. mmt_ignore_glossary_case is the one
+        // that is not a string: it is ?bool, and the write normalises it to '1'/'0'.
+        $inputs = [
+            JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE->value => [true, '1'],
+        ];
+
         $cases = [];
 
         foreach (JobsMetadataMarshaller::mtSettings() as $key) {
@@ -380,26 +388,73 @@ class SaveMetadataTest extends AbstractTest
                 continue;
             }
 
-            $cases[$key] = [$key];
+            [$value, $expected] = $inputs[$key] ?? ['some_value', 'some_value'];
+            $cases[$key] = [$key, $value, $expected];
         }
 
         return $cases;
     }
 
     #[Test]
-    public function testMtQualityValueInEditorIsNotPersistedAtProjectLevel(): void
+    public function testMtQualityValueInEditorIsPersistedAtProjectLevel(): void
     {
         // Unlike the engine parameters this one reaches the service inside the metadata blob, so it
-        // is stripped there rather than skipped in the engine-key copy loop.
+        // rides through on $options rather than through the engine-key copy loop.
         $this->projectStructure->metadata = [
             ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '90',
         ];
 
         $this->service->save($this->projectStructure, $this->features);
 
+        self::assertSame(
+            '90',
+            $this->getPersistedValue(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value),
+            'the MT application threshold is the creation-time base value'
+        );
+    }
+
+    /**
+     * The guard the eager per-job write used to own, now that these keys go through the project
+     * write again. `!empty()` is right for the project-wide engine params — there, falsy is the
+     * absent default — but for the MT settings a threshold of 0 and mmt_ignore_glossary_case turned
+     * off are answers the owner chose, and dropping them silently reverts to the engine default.
+     */
+    #[Test]
+    public function testFalsyMtSettingsAreStillPersisted(): void
+    {
+        $this->projectStructure->mmt_ignore_glossary_case = false;
+        $this->projectStructure->metadata = [
+            ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '0',
+        ];
+
+        $this->service->save($this->projectStructure, $this->features);
+
+        self::assertSame(
+            '0',
+            $this->getPersistedValue(JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE->value),
+            'mmt_ignore_glossary_case = false is an answer, not an absence'
+        );
+        self::assertSame(
+            '0',
+            $this->getPersistedValue(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value),
+            'a threshold of 0 is an answer, not an absence'
+        );
+    }
+
+    /**
+     * The other half of the same guard: an unset key must produce no row at all, because an empty
+     * value would be indistinguishable from a real one on read.
+     */
+    #[Test]
+    public function testEmptyStringMtSettingsProduceNoRow(): void
+    {
+        $this->projectStructure->deepl_formality = '';
+
+        $this->service->save($this->projectStructure, $this->features);
+
         self::assertEmpty(
-            $this->findDaoCallsByKey(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value),
-            'the MT application threshold is job-scoped and must not be written to project metadata'
+            $this->findDaoCallsByKey(JobsMetadataMarshaller::DEEPL_FORMALITY->value),
+            'an empty MT setting must not be persisted'
         );
     }
 
@@ -471,8 +526,9 @@ class SaveMetadataTest extends AbstractTest
         self::assertSame('[{"name":"handler1"}]', $this->getPersistedValue(ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value));
         self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::ICU_ENABLED->value));
 
-        // Set alongside the rest, but job-scoped: it must not have reached project metadata.
-        self::assertEmpty($this->findDaoCallsByKey('mmt_glossaries'));
+        // Set alongside the rest: the MT settings are written here as the project's base value, and
+        // a job row only appears if the owner later overrides one.
+        self::assertSame('gl_abc', $this->getPersistedValue('mmt_glossaries'));
     }
 
     // =========================================================================

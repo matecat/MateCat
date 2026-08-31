@@ -32,7 +32,7 @@ readonly class JobCredentialCacheInvalidator
         private JobDao $jobDao,
         private ChunkReviewDao $chunkReviewDao,
         private ProjectDao $projectDao,
-        private ?MetadataDao $jobMetadataDao = null,
+        private MetadataDao $jobMetadataDao,
     ) {
     }
 
@@ -62,7 +62,7 @@ readonly class JobCredentialCacheInvalidator
             // to be named, not just the credential: JobSettingsResolver reads one setting at a time
             // through get(), which binds the key too, so those entries hash into a different place
             // from the bulk read's and would answer the retired password for the whole TTL.
-            $this->jobMetadataDao?->destroyCacheForCredential($idJob, $password);
+            $this->jobMetadataDao->destroyCacheForCredential($idJob, $password);
         }
 
         // The rotation renamed the password column of every phase row, so the reads keyed on a review

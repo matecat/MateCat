@@ -402,79 +402,59 @@ class SaveJobsMetadataTest extends AbstractTest
     }
 
     // =========================================================================
-    // MT settings (moved off project metadata so the owner can change them later)
+    // MT settings — copy-on-write, so creation writes no job row at all
     // =========================================================================
 
+    /**
+     * The MT settings are written to project metadata at creation
+     * (@see \Model\ProjectCreation\ProjectMetadataService::save()) and a job row appears only when
+     * the owner overrides one through the API. Writing them here as well would put every project's
+     * values in job_metadata only, and reverting the job scope would then silently drop them to the
+     * engine defaults with no migration back.
+     */
     #[Test]
     #[DataProvider('engineMtSettingProvider')]
-    public function testEngineMtSettingIsPersistedFromProjectStructure(string $key, mixed $value, string $expected): void
+    public function testEngineMtSettingIsNotWrittenToTheJobAtCreation(string $key, mixed $value): void
     {
         $this->setConfigAndSave([$key => $value]);
 
-        $this->assertArrayHasKey($key, $this->capturedMetadata);
-        $this->assertSame($expected, $this->capturedMetadata[$key]);
-    }
-
-    public static function engineMtSettingProvider(): array
-    {
-        return [
-            'deepl_formality'         => ['deepl_formality', 'prefer_more', 'prefer_more'],
-            'deepl_id_glossary'       => ['deepl_id_glossary', 'gl-1', 'gl-1'],
-            'deepl_engine_type'       => ['deepl_engine_type', 'latency_optimized', 'latency_optimized'],
-            'lara_style'              => ['lara_style', 'creative', 'creative'],
-            'lara_style_guideline_id' => ['lara_style_guideline_id', 'guideline-3', 'guideline-3'],
-            'lara_glossaries'         => ['lara_glossaries', '["a","b"]', '["a","b"]'],
-            'mmt_glossaries'          => ['mmt_glossaries', '[1,2]', '[1,2]'],
-            'intento_provider'        => ['intento_provider', 'ai.text.translate.google', 'ai.text.translate.google'],
-            'intento_routing'         => ['intento_routing', 'best_quality', 'best_quality'],
-            // job_metadata.value is a string column, so a bool has to be normalised on the way in.
-            'ignore case true'        => ['mmt_ignore_glossary_case', true, '1'],
-            'ignore case false'       => ['mmt_ignore_glossary_case', false, '0'],
-        ];
-    }
-
-    #[Test]
-    public function testMtQualityValueInEditorIsReadFromTheMetadataBlob(): void
-    {
-        // Both creation controllers put the threshold in the metadata blob rather than on a
-        // ProjectStructure property of its own, unlike every other MT setting.
-        $this->projectStructure->metadata = [
-            JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '90',
-        ];
-
-        $this->setConfigAndSave();
-
-        $this->assertSame('90', $this->capturedMetadata[JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value]);
-    }
-
-    #[Test]
-    public function testMtQualityValueInEditorIsNormalisedToAnInteger(): void
-    {
-        $this->projectStructure->metadata = [
-            JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => 85,
-        ];
-
-        $this->setConfigAndSave();
-
-        $this->assertSame('85', $this->capturedMetadata[JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value]);
-    }
-
-    #[Test]
-    public function testMtQualityValueInEditorIsNotPersistedWhenAbsentFromTheBlob(): void
-    {
-        $this->setConfigAndSave();
-
         $this->assertArrayNotHasKey(
-            JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value,
-            $this->capturedMetadata
+            $key,
+            $this->capturedMetadata,
+            "'$key' belongs to the project scope at creation; a job row is written only on override"
         );
     }
 
+    /**
+     * @return array<string, array{string, mixed}>
+     */
+    public static function engineMtSettingProvider(): array
+    {
+        return [
+            'deepl_formality'         => ['deepl_formality', 'prefer_more'],
+            'deepl_id_glossary'       => ['deepl_id_glossary', 'gl-1'],
+            'deepl_engine_type'       => ['deepl_engine_type', 'latency_optimized'],
+            'lara_style'              => ['lara_style', 'creative'],
+            'lara_style_guideline_id' => ['lara_style_guideline_id', 'guideline-3'],
+            'lara_glossaries'         => ['lara_glossaries', '["a","b"]'],
+            'mmt_glossaries'          => ['mmt_glossaries', '[1,2]'],
+            'intento_provider'        => ['intento_provider', 'ai.text.translate.google'],
+            'intento_routing'         => ['intento_routing', 'best_quality'],
+            'ignore case true'        => ['mmt_ignore_glossary_case', true],
+            'ignore case false'       => ['mmt_ignore_glossary_case', false],
+        ];
+    }
+
+    /**
+     * The threshold is the one MT setting that arrives inside the metadata blob rather than on a
+     * ProjectStructure property, so it takes a different route out of this method — but the same
+     * rule applies to it.
+     */
     #[Test]
-    public function testMtQualityValueInEditorIsNotPersistedWhenNotNumeric(): void
+    public function testMtQualityValueInEditorIsNotWrittenToTheJobAtCreation(): void
     {
         $this->projectStructure->metadata = [
-            JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '',
+            JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '90',
         ];
 
         $this->setConfigAndSave();
@@ -486,31 +466,11 @@ class SaveJobsMetadataTest extends AbstractTest
     }
 
     /**
-     * Only the parameters of the engine the project actually uses are copied onto the structure, so
-     * most MT settings are null at this point. Writing them anyway would put an empty row in
-     * job_metadata, and an empty row is found by the resolver — it would shadow the project-metadata
-     * fallback instead of falling through to it.
+     * The guard against regressing to the eager write: whatever else creation persists per job, none
+     * of the eleven MT keys may be among it.
      */
     #[Test]
-    public function testUnsetMtSettingsProduceNoRows(): void
-    {
-        $this->setConfigAndSave();
-
-        foreach (JobsMetadataMarshaller::mtSettings() as $key) {
-            $this->assertArrayNotHasKey($key, $this->capturedMetadata, "'$key' must not be persisted when unset");
-        }
-    }
-
-    #[Test]
-    public function testEmptyStringMtSettingProducesNoRow(): void
-    {
-        $this->setConfigAndSave(['deepl_formality' => '']);
-
-        $this->assertArrayNotHasKey('deepl_formality', $this->capturedMetadata);
-    }
-
-    #[Test]
-    public function testMtSettingsArePersistedAlongsideTheJobOnlyKeys(): void
+    public function testNoMtSettingReachesTheJobEvenAlongsideTheJobOnlyKeys(): void
     {
         $this->projectStructure->metadata = [
             JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '70',
@@ -520,22 +480,16 @@ class SaveJobsMetadataTest extends AbstractTest
             'public_tm_penalty' => '5',
             'tm_prioritization' => true,
             'lara_style'        => 'fluid',
+            'deepl_formality'   => 'prefer_less',
         ]);
 
         $this->assertSame([
             JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value => '5',
             JobsMetadataMarshaller::TM_PRIORITIZATION->value => '1',
-            JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '70',
-            JobsMetadataMarshaller::LARA_STYLE->value => 'fluid',
         ], $this->capturedMetadata);
-    }
 
-    #[Test]
-    public function testBulkSetStillTargetsTheJobCredentialWhenOnlyMtSettingsAreSet(): void
-    {
-        $this->setConfigAndSave(['deepl_formality' => 'default']);
-
-        $this->assertSame(self::JOB_ID, $this->capturedIdJob);
-        $this->assertSame(self::JOB_PASSWORD, $this->capturedPassword);
+        foreach (JobsMetadataMarshaller::mtSettings() as $key) {
+            $this->assertArrayNotHasKey($key, $this->capturedMetadata, "'$key' must stay project-scoped at creation");
+        }
     }
 }

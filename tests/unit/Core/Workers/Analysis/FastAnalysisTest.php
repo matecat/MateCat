@@ -1468,7 +1468,7 @@ class FastAnalysisTest extends AbstractTest
      * @param array<string, string> $rows
      * @return array<string, mixed>
      */
-    private function resolveWithSeededRows(array $rows, ?int $projectMtQualityValue): array
+    private function resolveWithSeededRows(array $rows, ?int $projectMtQualityValue, ?int $idProject = null): array
     {
         // The DAOs are asked for a 10-minute TTL; without this they would open a Redis connection,
         // and setCacheTTL() is a no-op under the flag so both reads stay pure PDO.
@@ -1486,6 +1486,7 @@ class FastAnalysisTest extends AbstractTest
                 'resolveJobAnalysisMetadata',
                 self::JOB_METADATA_TEST_JOB_ID,
                 $password,
+                $idProject,
                 $projectMtQualityValue
             );
 
@@ -1543,23 +1544,72 @@ class FastAnalysisTest extends AbstractTest
         self::assertFalse($resolved['mt_quality_value_in_editor']);
     }
 
+    /**
+     * The regression this pins: with the resolver's project leg switched off, a job read that missed
+     * fell straight through to the hard-coded default. That read runs in the publish loop, outside
+     * any transaction, so ProxySQL can answer it from a replica that has not caught up with a
+     * project created seconds earlier, and the analysis then priced MT at a threshold the owner
+     * never chose.
+     */
     #[Test]
-    public function theProjectFallbackOfTheResolverIsNotConsulted(): void
+    public function theProjectRowIsConsultedWhenTheJobHasNoRow(): void
     {
-        // The resolver is called with a null project id on purpose: main() already read the project
-        // value from the master node inside a transaction, and a cached read must not replace it. So
-        // a project-metadata row for the same key has to be ignored in favour of the argument.
         $projectId = 990112;
         $projectMetadataDao = new ProjectMetadataDao(obtainTestDatabase());
         $projectMetadataDao->set($projectId, JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value, '70');
 
         try {
-            $resolved = $this->resolveWithSeededRows([JobsMetadataMarshaller::TM_PRIORITIZATION->value => '1'], 85);
+            $resolved = $this->resolveWithSeededRows(
+                [JobsMetadataMarshaller::TM_PRIORITIZATION->value => '1'],
+                JobsMetadataMarshaller::DEFAULT_MT_QUALITY_VALUE,
+                $projectId
+            );
 
-            self::assertSame(85, $resolved['mt_quality_value_in_editor']);
+            self::assertSame(70, $resolved['mt_quality_value_in_editor']);
         } finally {
             $projectMetadataDao->delete($projectId, JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value);
         }
+    }
+
+    /**
+     * The job row still wins over the project row, which is what makes the owner's override take
+     * effect on the very next analysis.
+     */
+    #[Test]
+    public function theJobRowWinsOverTheProjectRow(): void
+    {
+        $projectId = 990113;
+        $projectMetadataDao = new ProjectMetadataDao(obtainTestDatabase());
+        $projectMetadataDao->set($projectId, JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value, '70');
+
+        try {
+            $resolved = $this->resolveWithSeededRows(
+                [JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '95'],
+                JobsMetadataMarshaller::DEFAULT_MT_QUALITY_VALUE,
+                $projectId
+            );
+
+            self::assertSame(95, $resolved['mt_quality_value_in_editor']);
+        } finally {
+            $projectMetadataDao->delete($projectId, JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value);
+        }
+    }
+
+    /**
+     * With neither row readable, the value main() materialised is the last resort. It is last rather
+     * than second because it is not the fresher of the two: main() reads it through
+     * setCacheTTL(3600), so it can be answered from Redis without touching the master.
+     */
+    #[Test]
+    public function theMaterialisedProjectValueIsTheLastResort(): void
+    {
+        $resolved = $this->resolveWithSeededRows(
+            [JobsMetadataMarshaller::TM_PRIORITIZATION->value => '1'],
+            80,
+            990114
+        );
+
+        self::assertSame(80, $resolved['mt_quality_value_in_editor']);
     }
 
     #[Test]

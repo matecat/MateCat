@@ -124,6 +124,27 @@ class JobsMetadataMarshallerTest extends AbstractTest
         $this->assertContains(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, $propagated);
     }
 
+    /**
+     * The guard against the class of bug rather than one instance of it. dialect_strict,
+     * mandatory_issues, public_tm_penalty and tm_prioritization were all written at creation and
+     * none was propagated, so a split dropped them and the chunks silently fell back to the code
+     * defaults. Every key the enum declares is written by some path, so every key belongs here —
+     * asserting the whole set means the next key added cannot repeat it.
+     */
+    #[Test]
+    public function propagatedOnSplitCarriesEveryDeclaredKey(): void
+    {
+        $propagated = JobsMetadataMarshaller::propagatedOnSplit();
+
+        foreach (JobsMetadataMarshaller::cases() as $case) {
+            $this->assertContains(
+                $case->value,
+                $propagated,
+                "'{$case->value}' is stored against a job but would not survive a split"
+            );
+        }
+    }
+
     #[Test]
     public function propagatedOnSplitHasNoDuplicates(): void
     {

@@ -310,12 +310,16 @@ class Lara extends AbstractEngine
 
                 $translateOptions->setHeaders($headers->getArrayCopy());
 
-                // Glossaries live on the job so the project owner can change them after creation,
-                // falling back to project metadata for projects created before the move.
+                // Glossaries are overridable per job so the project owner can change them after
+                // creation, falling back to the project's creation-time value where they were not.
                 $laraGlossaries = (new JobSettingsResolver($this->database))
                     ->resolveFromEngineConfig($_config, JobsMetadataMarshaller::LARA_GLOSSARIES->value);
 
-                if ($laraGlossaries !== null) {
+                // An empty list is not "no glossary": the SDK forwards whatever getGlossaries()
+                // returns, so `[]` would go out as "glossaries": []. The job scope cannot hold one
+                // (job_metadata.json bounds the array), but the legacy project scope was never
+                // validated, so the guard belongs here rather than only in the schema.
+                if (!empty($laraGlossaries)) {
                     $translateOptions->setGlossaries($laraGlossaries);
                 }
 

@@ -82,35 +82,40 @@ readonly class ProjectMetadataService
         }
 
         /**
-         * Copy the engine-specific config values that stay project-wide (e.g. enable_mt_analysis,
-         * mmt_activate_context_analyzer) from the project structure into the options array.
+         * Copy the engine-specific config values from the project structure into the options array.
          *
-         * The MT tuning settings — DeepL formality, Lara style, the glossaries, the MT
-         * application threshold — are deliberately skipped: they are written per job by
-         * {@see JobCreationService::saveJobsMetadata()} so the project owner can change them
-         * after creation. Writing them here as well would be dead weight that goes stale the
-         * moment one of them is edited on a job, and reads would have no way to tell which of
-         * the two copies is the current one.
+         * The MT tuning settings — DeepL formality, Lara style, the glossaries, the MT application
+         * threshold — are written here as the project's creation-time base value, and the owner's
+         * later edits are written per job by {@see \Controller\API\App\JobMetadataController}.
+         * Reads take the job row when one exists and this value otherwise
+         * ({@see \Model\Jobs\JobSettingsResolver}), so the two scopes are copy-on-write rather
+         * than two copies of one truth: nothing updates the project row after creation, so it
+         * cannot go stale, and it is what every job that was never customised resolves to.
          *
-         * Reads keep answering from project metadata for projects created before this move.
-         * @see \Model\Jobs\JobSettingsResolver
+         * Writing it is also what makes the job scope revertible. Without it, a project created
+         * while the job scope is live would hold these values nowhere else, and there is no
+         * migration in either direction — production holds billions of project_metadata rows.
          */
         $jobScopedKeys = array_flip(JobsMetadataMarshaller::mtSettings());
 
         foreach ($extraKeys as $extraKey) {
+            $engineValue = $projectStructure->$extraKey;
+
             if (isset($jobScopedKeys[$extraKey])) {
+                // 0 and false are answers the owner chose for these keys — a threshold of 0, or
+                // mmt_ignore_glossary_case turned off — so !empty() would silently drop them. The
+                // project-wide params below are the opposite case: there, falsy *is* the default.
+                if (!is_scalar($engineValue) || $engineValue === '') {
+                    continue;
+                }
+
+                $options[$extraKey] = is_bool($engineValue) ? (string)(int)$engineValue : (string)$engineValue;
                 continue;
             }
-            $engineValue = $projectStructure->$extraKey;
+
             if (!empty($engineValue)) {
                 $options[$extraKey] = $engineValue;
             }
-        }
-
-        // mt_quality_value_in_editor reaches us inside $projectStructure->metadata rather than as
-        // an engine parameter, so the loop above cannot filter it out.
-        foreach ($jobScopedKeys as $jobScopedKey => $_) {
-            unset($options[$jobScopedKey]);
         }
 
         /** Duplicate the JobsMetadataMarshaller::SUBFILTERING_HANDLERS in project metadata for easier retrieval.

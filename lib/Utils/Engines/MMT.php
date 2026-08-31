@@ -128,9 +128,9 @@ class MMT extends AbstractEngine
 
         $client = $this->_getClient();
 
-        // Glossary settings live on the job so the project owner can change them after creation,
-        // and fall back to project metadata for projects created before the move. Both keys are
-        // resolved in one pass because this runs once per segment on the MT path.
+        // Glossary settings are overridable per job so the project owner can change them after
+        // creation, falling back to the project's creation-time value where they were not. Both keys
+        // are resolved in one pass because this runs once per segment on the MT path.
         $settings = (new JobSettingsResolver($this->database))->resolveManyFromEngineConfig(
             $_config,
             [
