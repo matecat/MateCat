@@ -159,18 +159,20 @@ class MetadataDao extends AbstractDao
      * where the read named three. The key list is the enum's, so a key added later cannot be
      * forgotten here.
      *
+     * The two key-bound addresses are named per key, but the credential-bound one is named once
+     * rather than through destroyCache(): a merge sweeps every chunk it folds in, so repeating one
+     * identical eviction per key would triple the round trips for nothing.
+     *
      * @throws PDOException
      * @throws ReflectionException
-     * @throws TypeError
      */
     public function destroyCacheForCredential(int $id_job, string $password): void
     {
+        $this->destroyCacheByJobAndPassword($id_job, $password);
+
         foreach (JobsMetadataMarshaller::cases() as $case) {
-            $this->destroyCache(new MetadataStruct([
-                'id_job'   => $id_job,
-                'password' => $password,
-                'key'      => $case->value,
-            ]));
+            $this->destroyCacheByIdJob($id_job, $case->value);
+            $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $case->value);
         }
     }
 
