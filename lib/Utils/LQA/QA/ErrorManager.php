@@ -84,7 +84,17 @@ class ErrorManager
     public const string WARNING = 'WARNING';
     public const string INFO = 'INFO';
 
-    /** @var array<int, string|null> */
+    /**
+     * Messages shown next to the segment in the editor.
+     *
+     * These reach the browser as {@see ErrObject::$debug} and the editor injects them as raw HTML
+     * (`dangerouslySetInnerHTML` in public/js/components/segments/SegmentWarnings.js), so a value here
+     * is an HTML fragment: write a literal angle bracket as `&lt;`/`&gt;` or the browser eats the word
+     * as a tag, and add markup only where it is meant to render. {@see ICUChecker} is the one place
+     * that does the latter, joining its parts with `<br/>`.
+     *
+     * @var array<int, string|null>
+     */
     protected array $errorMap = [
         0 => '',
         1 => 'Tag count mismatch',
@@ -99,7 +109,7 @@ class ErrorManager
         10 => 'Tail carriage return mismatch',
         11 => 'Char mismatch between tags',
         12 => 'End line char mismatch',
-        13 => 'Wrong format for x tag. Should be < x .... />',
+        13 => 'Wrong format for x tag. Should be &lt;x ... /&gt;',
         14 => 'Char mismatch before a tag',
         15 => 'Tag order mismatch',
         16 => 'New line mismatch',
@@ -125,18 +135,25 @@ class ErrorManager
         1104 => 'Whitespace(s) mismatch after a tag.',
         1105 => 'Whitespace(s) mismatch before a tag.',
         1200 => 'Symbol mismatch',
-        1300 => 'Found nested <ex> and/or <bx> tag(s) inside a <g> tag',
-        1301 => 'Wrong <ex> and/or <bx> placement',
-        1302 => '<ex>, <bx> and/or <g> total count mismatch',
+        1300 => 'Found nested &lt;ex&gt; and/or &lt;bx&gt; tag(s) inside a &lt;g&gt; tag',
+        1301 => 'Wrong &lt;ex&gt; and/or &lt;bx&gt; placement',
+        1302 => '&lt;ex&gt;, &lt;bx&gt; and/or &lt;g&gt; total count mismatch',
         2000 => 'Smart count plural forms mismatch',
         2001 => '%smartcount tag count mismatch',
         3000 => 'Characters limit exceeded',
         4000 => 'Unedited fuzzy match confirmed',
     ];
 
-    /** @var array<int, string|null> */
+    /**
+     * Suggestions shown under the message.
+     *
+     * The mirror image of {@see self::$errorMap}: the editor renders {@see ErrObject::$tip} as plain
+     * text, so write angle brackets raw. An entity here would be shown to the user verbatim.
+     *
+     * @var array<int, string|null>
+     */
     protected array $tipMap = [
-        29 => "Should be < g ... > ... < /g >",
+        29 => 'Should be <g>...</g>',
         1000 => "Press 'alt + t' shortcut to add tags or delete extra tags.",
         3000 => 'Maximum characters limit exceeded.',
         4000 => 'This segment was confirmed without making any changes, despite being a fuzzy match.',
