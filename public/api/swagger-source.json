@@ -4926,7 +4926,7 @@
           "Context URL"
         ],
         "summary": "Set context URL for a project",
-        "description": "Sets the context URL at the project level. Requires authentication, project access, and passes rate limiting (max 10 requests per route).",
+        "description": "Sets the context URL at the project level. Requires authentication, project access, and passes rate limiting (max 600 requests per ~2 minute window, roughly 5 requests/second).",
         "consumes": [
           "application/json"
         ],
@@ -5000,7 +5000,7 @@
           "Context URL"
         ],
         "summary": "Set context URL for a file",
-        "description": "Sets the context URL at the file level. The file must belong to the specified project. Requires authentication, project access, and passes rate limiting (max 10 requests per route).",
+        "description": "Sets the context URL at the file level. The file must belong to the specified project. Requires authentication, project access, and passes rate limiting (max 600 requests per ~2 minute window, roughly 5 requests/second).",
         "consumes": [
           "application/json"
         ],
@@ -5080,7 +5080,7 @@
           "Context URL"
         ],
         "summary": "Set context URL for a segment",
-        "description": "Sets the context URL at the segment level. The segment must belong to a file in the specified project. Requires authentication, project access, and passes rate limiting (max 10 requests per route).",
+        "description": "Sets the context URL at the segment level. The segment must belong to a file in the specified project. Requires authentication, project access, and passes rate limiting (max 600 requests per ~2 minute window, roughly 5 requests/second).",
         "consumes": [
           "application/json"
         ],
