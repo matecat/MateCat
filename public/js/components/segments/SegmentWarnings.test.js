@@ -68,6 +68,68 @@ describe('SegmentWarnings', () => {
     expect(container.textContent).toContain('first')
   })
 
+  test('renders escaped tag names in debug as visible text', () => {
+    // `debug` is injected as HTML, so the backend escapes the tag names it mentions.
+    // Written raw they would be parsed as markup and vanish from the warning.
+    const warnings = {
+      ERROR: {
+        Categories: {
+          cat1: [
+            {
+              outcome: 1302,
+              debug:
+                '&lt;ex&gt;, &lt;bx&gt; and/or &lt;g&gt; total count mismatch',
+              tip: '',
+            },
+          ],
+        },
+      },
+    }
+    const {container} = render(<SegmentWarnings warnings={warnings} />)
+
+    expect(container.textContent).toContain(
+      '<ex>, <bx> and/or <g> total count mismatch',
+    )
+  })
+
+  test('keeps intentional markup in debug, such as the ICU line breaks', () => {
+    const warnings = {
+      ERROR: {
+        Categories: {
+          cat1: [
+            {outcome: 30, debug: 'first line<br/><br/>second line', tip: ''},
+          ],
+        },
+      },
+    }
+    const {container} = render(<SegmentWarnings warnings={warnings} />)
+
+    expect(container.querySelectorAll('br')).toHaveLength(2)
+    expect(container.textContent).toContain('first line')
+    expect(container.textContent).toContain('second line')
+  })
+
+  test('renders a tip as plain text, so raw tag names survive', () => {
+    const warnings = {
+      ERROR: {
+        Categories: {
+          cat1: [
+            {
+              outcome: 29,
+              debug: 'File-breaking tag issue',
+              tip: 'Should be <g>...</g>',
+            },
+          ],
+        },
+      },
+    }
+    const {container} = render(<SegmentWarnings warnings={warnings} />)
+
+    expect(container.querySelector('.error-solution')).toHaveTextContent(
+      'Should be <g>...</g>',
+    )
+  })
+
   test('shouldComponentUpdate re-renders when warnings prop changes', () => {
     const initial = {
       ERROR: {Categories: {cat1: [{outcome: 'e1', debug: 'first', tip: ''}]}},
