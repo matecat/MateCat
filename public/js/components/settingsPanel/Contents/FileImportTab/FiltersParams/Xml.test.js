@@ -104,6 +104,25 @@ describe('Xml', () => {
     expect(updated.xml.translate_attributes).toEqual(['p@class'])
   })
 
+  test('the space bar and the comma both close a pill, without the padding', async () => {
+    const user = userEvent.setup()
+    const {modifyingCurrentTemplate, currentTemplate} = setup()
+
+    const elementsInput = screen.getAllByTestId('email-input')[0]
+
+    await user.type(elementsInput, ' div span,p ')
+    await user.keyboard('{Enter}')
+
+    await waitFor(() => expect(modifyingCurrentTemplate).toHaveBeenCalled())
+
+    const updater =
+      modifyingCurrentTemplate.mock.calls[
+        modifyingCurrentTemplate.mock.calls.length - 1
+      ][0]
+    const updated = updater(currentTemplate)
+    expect(updated.xml.translate_elements).toEqual(['div', 'span', 'p'])
+  })
+
   test('does not call modifyingCurrentTemplate when nothing changed', () => {
     const {modifyingCurrentTemplate} = setup()
 

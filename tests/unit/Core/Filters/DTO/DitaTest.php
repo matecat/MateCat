@@ -45,4 +45,22 @@ class DitaTest extends AbstractTest
         $dto = new Dita();
         $this->assertInstanceOf(\JsonSerializable::class, $dto);
     }
+
+    #[Test]
+    public function setterTrimsNamesAndDropsTheEmptyOnes(): void
+    {
+        $dto = new Dita();
+        $dto->setDoNotTranslateElements([' topic ', "note\t", '  ']);
+
+        $this->assertSame(['topic', 'note'], $dto->jsonSerialize()['do_not_translate_elements']);
+    }
+
+    #[Test]
+    public function fromArrayTrimsNames(): void
+    {
+        $dto = new Dita();
+        $dto->fromArray(['do_not_translate_elements' => [' keyword ']]);
+
+        $this->assertSame(['keyword'], $dto->jsonSerialize()['do_not_translate_elements']);
+    }
 }
