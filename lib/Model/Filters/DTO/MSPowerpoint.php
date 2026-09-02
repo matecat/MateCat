@@ -27,6 +27,11 @@ class MSPowerpoint implements IDto
     }
 
     /**
+     * Slide numbers, not names: the frontend converts a pill list to integers before it saves
+     * (convertTranslateSlidesToServer in MsPowerpoint.js), so they are stored and returned as
+     * numbers. They are left verbatim — casting them to strings would change the stored type,
+     * and NumbersDashBadge already refuses whitespace on the way in.
+     *
      * @param list<string> $translate_slides
      */
     public function setTranslateSlides(array $translate_slides): void

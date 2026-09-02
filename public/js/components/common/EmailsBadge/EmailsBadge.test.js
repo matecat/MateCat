@@ -219,6 +219,121 @@ describe('EmailsBadge additional behaviors', () => {
     expect(screen.getByText('b@mail.com')).toBeInTheDocument()
   })
 
+  it('drops an entry that is only whitespace instead of committing an empty chip', async () => {
+    const user = userEvent.setup()
+    let emails = []
+    const setEmails = (data) => (emails = data)
+
+    render(
+      <EmailsBadge
+        name="invite"
+        value={emails}
+        onChange={setEmails}
+        separators={[',', SPECIALS_SEPARATORS.EnterKey]}
+      />,
+    )
+
+    const inputElement = screen.getByTestId('email-input')
+    await user.type(inputElement, '   ')
+    await user.keyboard('{Enter}')
+
+    expect(emails).toEqual([])
+  })
+
+  it('keeps the padding when trimChips is false', async () => {
+    const user = userEvent.setup()
+    let emails = []
+    const setEmails = (data) => (emails = data)
+
+    render(
+      <EmailsBadge
+        name="invite"
+        value={emails}
+        onChange={setEmails}
+        separators={[',', SPECIALS_SEPARATORS.EnterKey]}
+        trimChips={false}
+      />,
+    )
+
+    const inputElement = screen.getByTestId('email-input')
+    await user.type(inputElement, ' my key ')
+    await user.keyboard('{Enter}')
+
+    expect(emails).toEqual([' my key '])
+  })
+
+  it('trims the padding by default', async () => {
+    const user = userEvent.setup()
+    let emails = []
+    const setEmails = (data) => (emails = data)
+
+    render(
+      <EmailsBadge
+        name="invite"
+        value={emails}
+        onChange={setEmails}
+        separators={[',', SPECIALS_SEPARATORS.EnterKey]}
+      />,
+    )
+
+    const inputElement = screen.getByTestId('email-input')
+    await user.type(inputElement, ' my-key ')
+    await user.keyboard('{Enter}')
+
+    expect(emails).toEqual(['my-key'])
+  })
+
+  it('closes a chip on the space bar when the space is a configured separator', async () => {
+    const user = userEvent.setup()
+    let emails = []
+    const setEmails = (data) => (emails = data)
+
+    render(
+      <EmailsBadge
+        name="invite"
+        value={emails}
+        onChange={setEmails}
+        separators={[',', ' ', SPECIALS_SEPARATORS.EnterKey]}
+      />,
+    )
+
+    const inputElement = screen.getByTestId('email-input')
+    await user.type(inputElement, 'div span,p')
+    await user.keyboard('{Enter}')
+
+    expect(emails).toEqual(['div', 'span', 'p'])
+  })
+
+  it('spells out the edge whitespace when revealEdgeWhitespace is set', () => {
+    render(
+      <EmailsBadge
+        name="invite"
+        value={[' my key  ']}
+        onChange={() => {}}
+        revealEdgeWhitespace
+      />,
+    )
+
+    // one dot per edge space, the internal space untouched
+    expect(screen.getByText('·')).toBeInTheDocument()
+    expect(screen.getByText('··')).toBeInTheDocument()
+    expect(screen.getByText('my key')).toBeInTheDocument()
+    // getByTitle normalizes whitespace, so assert on the raw attribute
+    expect(document.querySelector('[title]')).toHaveAttribute(
+      'title',
+      ' my key  ',
+    )
+  })
+
+  it('renders the value as-is when revealEdgeWhitespace is not set', () => {
+    render(
+      <EmailsBadge name="invite" value={[' my key  ']} onChange={() => {}} />,
+    )
+
+    expect(screen.queryByText('·')).not.toBeInTheDocument()
+    expect(document.querySelector('[title]')).toBeNull()
+  })
+
   it('supports a RegExp validateChip prop for marking invalid chips', () => {
     render(
       <EmailsBadge

@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import {SegmentedControl} from '../../../../common/SegmentedControl'
-import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
+import {KeysBadge} from '../../../../common/KeysBadge/KeysBadge'
 import {FiltersParamsContext} from './FiltersParamsContext'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
@@ -106,7 +106,7 @@ export const Yaml = () => {
             control={control}
             name={id}
             render={({field: {onChange, value, name}}) => (
-              <WordsBadge
+              <KeysBadge
                 name={name}
                 value={value}
                 onChange={onChange}
@@ -172,7 +172,7 @@ export const Yaml = () => {
           control={control}
           name="context_keys"
           render={({field: {onChange, value, name}}) => (
-            <WordsBadge
+            <KeysBadge
               name={name}
               value={value}
               onChange={onChange}
@@ -201,7 +201,7 @@ export const Yaml = () => {
           control={control}
           name="character_limit"
           render={({field: {onChange, value, name}}) => (
-            <WordsBadge
+            <KeysBadge
               name={name}
               value={value}
               onChange={onChange}

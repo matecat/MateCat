@@ -5,6 +5,8 @@ namespace Model\Filters\DTO;
 class Dita implements IDto
 {
 
+    use NormalizesNamesTrait;
+
     /** @var list<string> */
     private array $do_not_translate_elements = [];
 
@@ -13,7 +15,7 @@ class Dita implements IDto
      */
     public function setDoNotTranslateElements(array $do_not_translate_elements): void
     {
-        $this->do_not_translate_elements = $do_not_translate_elements;
+        $this->do_not_translate_elements = $this->normalizeNames($do_not_translate_elements);
     }
 
     /**
