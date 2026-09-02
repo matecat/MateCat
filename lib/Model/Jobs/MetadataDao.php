@@ -150,6 +150,33 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * Evict every cached read of every key a chunk's credential can address.
+     *
+     * A password rotation moves the rows wholesale (@see self::updateJobPassword()), so there is no
+     * single row for the caller to name: it knows the credential, not which keys are stored under
+     * it. Naming only the credential is not enough either — get() binds the key as well, so its
+     * entries hash differently from the bulk read's and survive an eviction that names two values
+     * where the read named three. The key list is the enum's, so a key added later cannot be
+     * forgotten here.
+     *
+     * The two key-bound addresses are named per key, but the credential-bound one is named once
+     * rather than through destroyCache(): a merge sweeps every chunk it folds in, so repeating one
+     * identical eviction per key would triple the round trips for nothing.
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function destroyCacheForCredential(int $id_job, string $password): void
+    {
+        $this->destroyCacheByJobAndPassword($id_job, $password);
+
+        foreach (JobsMetadataMarshaller::cases() as $case) {
+            $this->destroyCacheByIdJob($id_job, $case->value);
+            $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $case->value);
+        }
+    }
+
+    /**
      * @param int $id_job
      * @param string $password
      * @param string $key
@@ -269,6 +296,37 @@ class MetadataDao extends AbstractDao
             'password' => $password,
             'key'      => $key,
         ]));
+    }
+
+    /**
+     * Move every row of a chunk onto its new password.
+     *
+     * The password is half of the natural key, so rotating jobs.password without this leaves the
+     * rows stranded under a credential nothing resolves any more: the chunk silently loses its
+     * settings. Sibling tables that mirror the job password do the same thing
+     * (@see \Model\LQA\ChunkReviewDao::updateReviewPassword(),
+     * \Model\ReviseFeedback\FeedbackDAO, \Model\ChunksCompletion\ChunkCompletionEventDao).
+     *
+     * Caches are deliberately not evicted here: the rotation runs inside a transaction and, while it
+     * is open, another connection still reads the pre-rotation row and would cache the replaced
+     * credential as valid again behind the eviction. Evicting is the caller's, once it has committed
+     * (@see \Model\Jobs\JobCredentialCacheInvalidator::sweepAfterJobPasswordRotation()).
+     *
+     * @throws PDOException
+     */
+    public function updateJobPassword(int $id_job, string $old_password, string $new_password): void
+    {
+        $sql = "UPDATE job_metadata " .
+            " SET password = :new_password " .
+            " WHERE id_job = :id_job AND password = :old_password ";
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'id_job' => $id_job,
+            'old_password' => $old_password,
+            'new_password' => $new_password,
+        ]);
     }
 
     /**

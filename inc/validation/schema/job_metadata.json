@@ -6,6 +6,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "character_counter_count_tags"
@@ -20,6 +24,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "character_counter_mode"
@@ -36,6 +44,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "subfiltering_handlers"
@@ -48,6 +60,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "mandatory_issues"
@@ -63,6 +79,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "tm_prioritization"
@@ -71,6 +91,215 @@
             "type": [
               "boolean"
             ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "mt_quality_value_in_editor"
+          },
+          "value": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "deepl_formality"
+          },
+          "value": {
+            "enum": [
+              "default",
+              "prefer_less",
+              "prefer_more"
+            ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "deepl_engine_type"
+          },
+          "value": {
+            "enum": [
+              "prefer_quality_optimized",
+              "latency_optimized"
+            ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "deepl_id_glossary"
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "lara_style"
+          },
+          "value": {
+            "enum": [
+              "faithful",
+              "fluid",
+              "creative"
+            ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "lara_style_guideline_id"
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "lara_glossaries"
+          },
+          "value": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "mmt_glossaries"
+          },
+          "value": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "mmt_ignore_glossary_case"
+          },
+          "value": {
+            "type": [
+              "boolean"
+            ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "intento_provider"
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "intento_routing"
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
           }
         }
       }

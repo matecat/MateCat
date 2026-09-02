@@ -11,6 +11,7 @@ use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
 use Model\FeaturesBase\Hook\Event\Run\ReviewPasswordChangedEvent;
 use Model\Jobs\JobCredentialCacheInvalidator;
 use Model\Jobs\JobDao;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
@@ -152,7 +153,8 @@ class ChangePasswordController extends KleinController
             $invalidator = new JobCredentialCacheInvalidator(
                 $jDao,
                 new ChunkReviewDao($this->getDatabase()),
-                new ProjectDao($this->getDatabase())
+                new ProjectDao($this->getDatabase()),
+                new JobsMetadataDao($this->getDatabase())
             );
 
             if ($rotatedReviewSourcePage === null) {

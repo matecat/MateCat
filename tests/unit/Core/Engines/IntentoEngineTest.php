@@ -57,14 +57,21 @@ namespace Matecat\Core\Engines {
     use Exception;
     use Matecat\TestHelpers\AbstractTest;
     use Model\Engines\Structs\EngineStruct;
+    use Model\Jobs\JobsMetadataMarshaller;
+    use Model\Jobs\MetadataDao as JobsMetadataDao;
+    use Model\Projects\MetadataDao as ProjectsMetadataDao;
     use PHPUnit\Framework\Attributes\Test;
     use Utils\Constants\EngineConstants;
     use Utils\Engines\Intento;
     use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+    use Utils\Registry\AppConfig;
     use Utils\Redis\RedisHandler;
 
     class IntentoEngineTest extends AbstractTest
     {
+        private const int SETTINGS_PROJECT_ID = 990211;
+        private const int SETTINGS_JOB_ID = 990212;
+
         private TestIntento $engine;
 
         protected function setUp(): void
@@ -115,6 +122,161 @@ namespace Matecat\Core\Engines {
             self::assertSame(200, $response->responseStatus);
             self::assertSame([], $response->matches);
             self::assertCount(0, $this->engine->capturedCalls);
+        }
+
+        // ---------------------------------------------------------------------------------
+        // Custom provider / custom routing
+        //
+        // Both settings moved from project metadata to job metadata so the project owner can change
+        // them after creation, and are read through JobSettingsResolver with the project scope as a
+        // permanent fallback for projects created before that move.
+        //
+        // The resolver is constructed inline from $this->database, so there is nothing to inject:
+        // these seed real metadata rows and drive the real read path, the same way the MMT and Lara
+        // engine suites do for the same reason.
+        // ---------------------------------------------------------------------------------------
+
+        /**
+         * Intento::get() posts the parameters as a raw array (it does not ask call() to JSON-encode
+         * them), so the captured curl options carry the structure directly.
+         *
+         * @return array<string, mixed>
+         */
+        private function capturedServiceParameters(): array
+        {
+            self::assertCount(1, $this->engine->capturedCalls);
+
+            $postFields = $this->engine->capturedCalls[0]['options'][CURLOPT_POSTFIELDS];
+            self::assertIsArray($postFields);
+
+            return $postFields;
+        }
+
+        /**
+         * @param array<string, string> $projectRows
+         * @param array<string, string> $jobRows
+         * @param array<string, mixed>  $extraConfig
+         *
+         * @return array<string, mixed> the parameters Intento was called with
+         */
+        private function translateWithSeededSettings(array $projectRows, array $jobRows = [], array $extraConfig = []): array
+        {
+            // JobSettingsResolver reads with an 86400s TTL, which would otherwise open a Redis
+            // connection; setCacheTTL() is a no-op under this flag so the reads stay pure PDO.
+            $previousSkipCache = AppConfig::$SKIP_SQL_CACHE;
+            AppConfig::$SKIP_SQL_CACHE = true;
+
+            $projectMetadataDao = new ProjectsMetadataDao(obtainTestDatabase());
+            $jobMetadataDao = new JobsMetadataDao(obtainTestDatabase());
+            $jobPassword = 'intpw_' . bin2hex(random_bytes(4));
+
+            try {
+                foreach ($projectRows as $key => $value) {
+                    $projectMetadataDao->set(self::SETTINGS_PROJECT_ID, $key, $value);
+                }
+                if ($jobRows !== []) {
+                    $jobMetadataDao->bulkSet(self::SETTINGS_JOB_ID, $jobPassword, $jobRows);
+                }
+
+                $this->engine->queueCallResponse('{"results":["Ciao mondo"]}');
+                $this->engine->get(array_merge([
+                    'segment' => 'Hello world',
+                    'source' => 'en-US',
+                    'target' => 'it-IT',
+                    'pid' => self::SETTINGS_PROJECT_ID,
+                ], $extraConfig, $jobRows !== [] ? ['job_password' => $jobPassword] : []));
+
+                return $this->capturedServiceParameters();
+            } finally {
+                foreach (array_keys($projectRows) as $key) {
+                    $projectMetadataDao->delete(self::SETTINGS_PROJECT_ID, $key);
+                }
+                foreach (array_keys($jobRows) as $key) {
+                    $jobMetadataDao->delete(self::SETTINGS_JOB_ID, $jobPassword, $key);
+                }
+                AppConfig::$SKIP_SQL_CACHE = $previousSkipCache;
+            }
+        }
+
+        #[Test]
+        public function getWithACustomProviderAsksIntentoForThatProviderAsynchronously(): void
+        {
+            $parameters = $this->translateWithSeededSettings([
+                JobsMetadataMarshaller::INTENTO_PROVIDER->value => 'ai.text.translate.google.translate_api.v3',
+            ]);
+
+            self::assertSame('ai.text.translate.google.translate_api.v3', $parameters['service']['provider']);
+            self::assertTrue($parameters['service']['async']);
+        }
+
+        #[Test]
+        public function getWithACustomRoutingAsksForBestQualityAsynchronously(): void
+        {
+            $parameters = $this->translateWithSeededSettings([
+                JobsMetadataMarshaller::INTENTO_ROUTING->value => 'best_price',
+            ]);
+
+            self::assertSame('best_quality', $parameters['service']['routing']);
+            self::assertTrue($parameters['service']['async']);
+            self::assertArrayNotHasKey('provider', $parameters['service']);
+        }
+
+        #[Test]
+        public function smartRoutingIsLeftToIntentoRatherThanOverridden(): void
+        {
+            // Intento's own default: overriding it with best_quality would silently change the
+            // routing the owner asked for, which is why the branch guards on it.
+            $parameters = $this->translateWithSeededSettings([
+                JobsMetadataMarshaller::INTENTO_ROUTING->value => 'smart_routing',
+            ]);
+
+            self::assertArrayNotHasKey('service', $parameters);
+        }
+
+        #[Test]
+        public function aProviderWinsOverARoutingWhenBothAreSet(): void
+        {
+            $parameters = $this->translateWithSeededSettings([
+                JobsMetadataMarshaller::INTENTO_PROVIDER->value => 'ai.text.translate.deepl.api',
+                JobsMetadataMarshaller::INTENTO_ROUTING->value => 'best_price',
+            ]);
+
+            self::assertSame('ai.text.translate.deepl.api', $parameters['service']['provider']);
+            self::assertArrayNotHasKey('routing', $parameters['service']);
+        }
+
+        #[Test]
+        public function withNeitherSettingStoredNoServiceBlockIsSent(): void
+        {
+            $parameters = $this->translateWithSeededSettings([]);
+
+            self::assertArrayNotHasKey('service', $parameters);
+        }
+
+        #[Test]
+        public function aJobProviderOverridesTheProjectOne(): void
+        {
+            // The whole point of the move: the owner edits the setting on the job after creation and
+            // the engine picks it up, while older projects keep answering from the project scope.
+            $parameters = $this->translateWithSeededSettings(
+                [JobsMetadataMarshaller::INTENTO_PROVIDER->value => 'ai.text.translate.project.one'],
+                [JobsMetadataMarshaller::INTENTO_PROVIDER->value => 'ai.text.translate.job.one'],
+                ['job_id' => self::SETTINGS_JOB_ID]
+            );
+
+            self::assertSame('ai.text.translate.job.one', $parameters['service']['provider']);
+        }
+
+        #[Test]
+        public function aProjectProviderStillAnswersWhenTheJobHasNoRow(): void
+        {
+            $parameters = $this->translateWithSeededSettings(
+                [JobsMetadataMarshaller::INTENTO_PROVIDER->value => 'ai.text.translate.project.only'],
+                [JobsMetadataMarshaller::INTENTO_ROUTING->value => 'smart_routing'],
+                ['job_id' => self::SETTINGS_JOB_ID]
+            );
+
+            self::assertSame('ai.text.translate.project.only', $parameters['service']['provider']);
         }
 
         #[Test]
