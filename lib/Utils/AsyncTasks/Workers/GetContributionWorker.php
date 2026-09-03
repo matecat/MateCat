@@ -83,7 +83,10 @@ class GetContributionWorker extends AbstractWorker
 
         [$mt_result, $matches] = $this->_getMatches($contributionStruct, $jobStruct, $jobStruct->target, $featureSet);
 
-        $matches = $this->matchSorter->sortMatches($mt_result, $matches);
+        // The limit is applied by the sorter, which reserves a slot for the MT suggestion:
+        // the TM is asked for resultNum matches and the MT row is appended to them, so cutting
+        // the tail here would drop the MT row whenever every TM match outscores it.
+        $matches = $this->matchSorter->sortMatches($mt_result, $matches, $contributionStruct->resultNum);
 
         if (!$contributionStruct->concordanceSearch) {
             //execute these lines only in segment contribution search,
@@ -91,7 +94,6 @@ class GetContributionWorker extends AbstractWorker
             $this->updateAnalysisSuggestion($matches, $contributionStruct);
         }
 
-        $matches = array_slice($matches, 0, $contributionStruct->resultNum);
         $this->normalizeMTMatches($matches, $contributionStruct, $featureSet);
 
         $this->_publishPayload($matches, $contributionStruct, $featureSet, $jobStruct->target);
@@ -467,7 +469,7 @@ class GetContributionWorker extends AbstractWorker
             !$contributionStruct->concordanceSearch &&
             !$isCrossLang
         ) {
-            if ($contributionStruct->mt_quality_value_in_editor > 99 || empty($tms_match) || (int)str_replace("%", "", $tms_match[0]['match']) < 100) {
+            if ($contributionStruct->mt_quality_value_in_editor > 99 || empty($tms_match) || $this->bestTmScore($tms_match) < 100) {
                 /**
                  * Call The MT EnginesFactory IF
                  * - The user has set an MT Quality value in the editor > 99
@@ -531,6 +533,23 @@ class GetContributionWorker extends AbstractWorker
         }
 
         return [$mt_result, $tms_match];
+    }
+
+    /**
+     * Highest score among the TM matches. The list is not assumed to be ordered: the worker
+     * re-sorts it with the MatchSorter, so the TM engine's own ordering is not relied upon.
+     *
+     * @param array<int, array<string, mixed>> $tms_match
+     */
+    private function bestTmScore(array $tms_match): int
+    {
+        $best = 0;
+
+        foreach ($tms_match as $match) {
+            $best = max($best, (int)str_replace("%", "", (string)($match['match'] ?? 0)));
+        }
+
+        return $best;
     }
 
     /**
