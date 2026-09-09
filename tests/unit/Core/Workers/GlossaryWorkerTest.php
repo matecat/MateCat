@@ -179,6 +179,36 @@ class GlossaryWorkerTest extends AbstractTest
     }
 
     #[Test]
+    public function deletePublishesPayloadWhenResponseStatus202(): void
+    {
+        $mock = $this->createMock(MyMemory::class);
+        $response = new DeleteGlossaryResponse([
+            'responseStatus' => 202,
+            'responseDetails' => '',
+        ]);
+
+        $mock->expects($this->once())
+            ->method('glossaryDelete')
+            ->willReturn($response);
+
+        $this->withMock($mock);
+
+        $this->processAction('delete', [
+            'id_segment' => 'seg-1',
+            'id_job' => 42,
+            'password' => 'pwd',
+            'term' => ['term1'],
+            'id_client' => 'client-1',
+            'jobData' => $this->jobData(),
+        ]);
+
+        $msg = $this->worker->publishedMessages[0];
+        $payload = $msg['data']['payload'];
+        $this->assertArrayNotHasKey('error', $payload);
+        $this->assertNotNull($payload['payload']);
+    }
+
+    #[Test]
     public function deletePublishesErrorWhenResponseStatusGte300(): void
     {
         $mock = $this->createMock(MyMemory::class);
@@ -392,6 +422,40 @@ class GlossaryWorkerTest extends AbstractTest
     }
 
     #[Test]
+    public function setPublishesPayloadWhenResponseStatus202(): void
+    {
+        $mock = $this->createMock(MyMemory::class);
+        $response = new SetGlossaryResponse([
+            'responseStatus' => 202,
+            'responseDetails' => 'req-202',
+        ]);
+
+        $mock->expects($this->once())
+            ->method('glossarySet')
+            ->willReturn($response);
+
+        $this->withMock($mock);
+
+        $this->processAction('set', [
+            'id_segment' => 'seg-1',
+            'id_job' => 42,
+            'password' => 'pwd',
+            'term' => [
+                'matching_words' => ['foo', 'bar'],
+                'metadata' => ['keys' => ['k1', 'k2']],
+            ],
+            'id_client' => 'client-1',
+            'jobData' => $this->jobData(),
+        ]);
+
+        $msg = $this->worker->publishedMessages[0];
+        $payload = $msg['data']['payload'];
+        $this->assertArrayNotHasKey('error', $payload);
+        $this->assertNotNull($payload['payload']);
+        $this->assertSame('req-202', $payload['payload']['request_id']);
+    }
+
+    #[Test]
     public function setPublishesErrorOnFailure(): void
     {
         $mock = $this->createMock(MyMemory::class);
@@ -456,13 +520,17 @@ class GlossaryWorkerTest extends AbstractTest
         $this->assertArrayNotHasKey('error', $payload);
     }
 
+    /**
+     * MyMemory answers 202 to acknowledge receipt of the request. It is not an error and carries
+     * no message for the user, so it must publish a payload exactly like a 200 does.
+     */
     #[Test]
-    public function updatePublishesBusyErrorWhenResponseStatus202(): void
+    public function updatePublishesPayloadWhenResponseStatus202(): void
     {
         $mock = $this->createMock(MyMemory::class);
         $response = new UpdateGlossaryResponse([
             'responseStatus' => 202,
-            'responseDetails' => '',
+            'responseDetails' => 'req-202',
         ]);
 
         $mock->expects($this->once())
@@ -482,10 +550,10 @@ class GlossaryWorkerTest extends AbstractTest
 
         $msg = $this->worker->publishedMessages[0];
         $payload = $msg['data']['payload'];
-        $this->assertArrayHasKey('error', $payload);
-        $this->assertSame(202, $payload['error']['code']);
-        $this->assertSame('MyMemory is busy, please try later', $payload['error']['message']);
-        $this->assertNull($payload['payload']);
+        $this->assertArrayNotHasKey('error', $payload);
+        $this->assertSame('seg-1', $payload['id_segment']);
+        $this->assertNotNull($payload['payload']);
+        $this->assertSame('req-202', $payload['payload']['request_id']);
     }
 
     #[Test]
