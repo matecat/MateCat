@@ -441,6 +441,47 @@ class UploadHandlerTest extends AbstractTest
         $this->assertTrue($result);
     }
 
+    /**
+     * The keys of AppConfig::$SUPPORTED_FILE_TYPES are both the section listing shown by
+     * /api/v3/files and the accepted-upload allowlist. Regrouping or relabelling a section must
+     * therefore never change this set — this test is what catches a display-only edit that
+     * silently stops accepting a format.
+     */
+    #[Test]
+    public function isRightExtension_accepts_every_configured_extension(): void
+    {
+        foreach (AppConfig::$SUPPORTED_FILE_TYPES as $section => $formats) {
+            foreach (array_keys($formats) as $extension) {
+                // 'Android xml' is not a real extension and cannot survive the strtolower() the
+                // method applies to the filename; it is a listing entry only.
+                if ($extension !== strtolower($extension)) {
+                    continue;
+                }
+
+                $file = new \stdClass();
+                $file->name = 'document.' . $extension;
+
+                $this->assertTrue(
+                    $this->invokePrivate('_isRightExtension', [$file]),
+                    "'$extension', listed under '$section', is no longer accepted for upload"
+                );
+            }
+        }
+    }
+
+    #[Test]
+    public function isRightExtension_accepts_key_and_not_its_keynote_label(): void
+    {
+        $key = new \stdClass();
+        $key->name = 'deck.key';
+        $this->assertTrue($this->invokePrivate('_isRightExtension', [$key]));
+
+        // 'key/keynote' is the label the listing shows for the 'key' entry, not a second extension.
+        $keynote = new \stdClass();
+        $keynote->name = 'deck.keynote';
+        $this->assertFalse($this->invokePrivate('_isRightExtension', [$keynote]));
+    }
+
     // ─── _isRightMime ───
 
     #[Test]

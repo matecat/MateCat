@@ -62,7 +62,7 @@ class SupportedFilesV2ControllerTest extends AbstractTest
     }
 
     /**
-     * @return array<string, list<list<array{ext: int|string, class: mixed}>>>
+     * @return array<string, list<list<array{ext: string, class: string}>>>
      */
     private function buildExpectedFileList(): array
     {
@@ -72,8 +72,8 @@ class SupportedFilesV2ControllerTest extends AbstractTest
             $val = [];
             foreach ($value as $ext => $info) {
                 $val[] = [
-                    'ext'   => $ext,
-                    'class' => $info[2],
+                    'ext'   => $info['label'] ?? $ext,
+                    'class' => $info['class'],
                 ];
             }
 
@@ -81,6 +81,28 @@ class SupportedFilesV2ControllerTest extends AbstractTest
         }
 
         return $ret;
+    }
+
+    /**
+     * The flat list of every 'ext' the response emits, across all sections.
+     *
+     * @param array<string, list<list<array{ext: string, class: string}>>> $fileList
+     *
+     * @return list<string>
+     */
+    private function flattenExtensions(array $fileList): array
+    {
+        $flat = [];
+
+        foreach ($fileList as $chunks) {
+            foreach ($chunks as $chunk) {
+                foreach ($chunk as $entry) {
+                    $flat[] = $entry['ext'];
+                }
+            }
+        }
+
+        return $flat;
     }
 
     /**
@@ -109,6 +131,63 @@ class SupportedFilesV2ControllerTest extends AbstractTest
                 }
             }
         }
+    }
+
+    /**
+     * The section names and their order are the response contract — three routes serve this same
+     * payload (/api/app/files, /api/v2/files, /api/v3/files) and swagger-source.json declares the
+     * sections by name. Pinning them here, rather than deriving them from the config the way
+     * buildExpectedFileList() does, is what makes an accidental rename or reorder fail.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function getFileList_returns_the_agreed_sections_in_order(): void
+    {
+        self::assertSame([
+            'Archives',
+            'Documents',
+            'Markup and Structured Data',
+            'Images',
+            'Desktop Publishing',
+            'Subtitling',
+            'Localization',
+        ], array_keys($this->invokeGetFileList()));
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function getFileList_lists_each_extension_in_exactly_one_section(): void
+    {
+        $flat = $this->flattenExtensions($this->invokeGetFileList());
+
+        self::assertSame(
+            array_values(array_unique($flat)),
+            $flat,
+            'an extension is listed in more than one section: ' . implode(
+                ', ',
+                array_keys(array_filter(array_count_values($flat), static fn(int $n): bool => $n > 1))
+            )
+        );
+        self::assertCount(76, $flat);
+    }
+
+    /**
+     * 'key/keynote' is a label: the section listing shows it, while the accepted-upload extension
+     * stays 'key'. See UploadHandlerTest for the allowlist side of the same invariant.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function getFileList_emits_the_label_of_a_relabelled_extension(): void
+    {
+        $flat = $this->flattenExtensions($this->invokeGetFileList());
+
+        self::assertContains('key/keynote', $flat);
+        self::assertNotContains('key', $flat);
+        self::assertArrayHasKey('key', AppConfig::$SUPPORTED_FILE_TYPES['Documents']);
     }
 
     /**

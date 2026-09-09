@@ -7243,7 +7243,7 @@
     "Files": {
       "type": "object",
       "properties": {
-        "Office": {
+        "Archives": {
           "type": "array",
           "items": {
             "type": "array",
@@ -7252,7 +7252,7 @@
             }
           }
         },
-        "Web": {
+        "Documents": {
           "type": "array",
           "items": {
             "type": "array",
@@ -7261,7 +7261,7 @@
             }
           }
         },
-        "Scanned Files": {
+        "Markup and Structured Data": {
           "type": "array",
           "items": {
             "type": "array",
@@ -7270,7 +7270,7 @@
             }
           }
         },
-        "Interchange Formats": {
+        "Images": {
           "type": "array",
           "items": {
             "type": "array",
@@ -7280,6 +7280,15 @@
           }
         },
         "Desktop Publishing": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/File"
+            }
+          }
+        },
+        "Subtitling": {
           "type": "array",
           "items": {
             "type": "array",
