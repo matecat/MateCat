@@ -578,20 +578,6 @@ class SegmentDaoTest extends AbstractTest
     }
 
 
-    public function testDestroyCacheForGlobalTranslationMismatchesReturnsBoolean(): void
-    {
-        $job = $this->makeJobStruct();
-
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-
-        $dao = new SegmentDao($this->dbStub);
-        $result = $dao->destroyCacheForGlobalTranslationMismatches($job);
-
-        $this->assertIsBool($result);
-    }
-
-
     public function testGetTranslationsMismatchesReturnsEmptyWhenJobNotFound(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);

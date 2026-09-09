@@ -268,7 +268,7 @@ class ProjectDao extends AbstractDao
      */
     public function destroyCache(int $id, ?string $password = null): void
     {
-        $this->destroyCacheForProject($id);
+        $this->destroyCachesByProjectId($id);
 
         $passwords = [];
         foreach ([$password, $this->getPassword($id)] as $candidate) {
@@ -278,11 +278,11 @@ class ProjectDao extends AbstractDao
         }
 
         // the password-less key is what CommentController and UrlsController cache under
-        $this->destroyCacheForProjectData($id);
+        $this->destroyCacheProjectData($id);
 
         foreach ($passwords as $candidate) {
             $this->destroyCacheByIdAndPassword($id, $candidate);
-            $this->destroyCacheForProjectData($id, $candidate);
+            $this->destroyCacheProjectData($id, $candidate);
         }
     }
 
@@ -306,12 +306,15 @@ class ProjectDao extends AbstractDao
     }
 
     /**
+     * The reads addressed by the project itself: the row under its own id, and the same row under
+     * each of its jobs, which is a second address for the same content.
+     *
      * @param int $id
      *
      * @return void
      * @throws PDOException
      */
-    private function destroyCacheForProject(int $id): void
+    private function destroyCachesByProjectId(int $id): void
     {
         $this->destroyFetchByIdCache($id, ProjectStruct::class);
 
@@ -415,7 +418,7 @@ class ProjectDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    private function destroyCacheForProjectData(int $pid, ?string $project_password = null): bool
+    private function destroyCacheProjectData(int $pid, ?string $project_password = null): bool
     {
         [$query, $values] = $this->_getProjectDataSQLAndValues($pid, $project_password);
 

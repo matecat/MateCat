@@ -235,12 +235,14 @@ abstract class AbstractDao
     }
 
     /**
+     * Bulk-inserts a list of structs of this DAO's own type. Implemented only where a DAO has a
+     * batched insert worth having; the rest inherit this refusal.
+     *
      * @param array<int, IDaoStruct> $obj_arr
      *
-     * @return mixed
      * @throws Exception
      */
-    public function createList(array $obj_arr)
+    public function createList(array $obj_arr): void
     {
         throw new Exception("Abstract method " . __METHOD__ . " must be overridden ");
     }
@@ -363,6 +365,102 @@ abstract class AbstractDao
 
             return false;
         }
+    }
+
+    /**
+     * Read a set of entities through the cache entries of the SINGLE-entity accessor, loading only
+     * the ones that missed.
+     *
+     * A batched read that caches its result under one key addressed by the whole id list cannot be
+     * evicted: the per-entity door names one id and can never name the set. Worse, the address
+     * encodes the membership of the set, so adding or removing one id produces a different key —
+     * guaranteeing a miss and orphaning the previous payload until its TTL runs out. A team whose
+     * membership changes therefore re-reads every member it already had.
+     *
+     * This reads and writes the entries the per-id accessor uses, so the per-id eviction door
+     * reaches them and a change to the list leaves the unchanged ids cached. `$perIdKeyMapPrefix`
+     * concatenated with an id has to equal the keyMap that accessor passes to `_fetchObjectMap()` —
+     * that accessor must pass it explicitly rather than let the backtrace default build it, or the
+     * two will address different entries and neither of those properties holds.
+     *
+     * The batch is one Redis round trip, the same as the set-shaped key it replaces.
+     *
+     * @template T of IDaoStruct
+     *
+     * @param list<int|string> $ids
+     * @param string $perIdQuery The single-entity query text, verbatim
+     * @param string $perIdParamName Its one bound parameter
+     * @param class-string<T> $fetchClass
+     * @param string $perIdKeyMapPrefix
+     * @param callable(list<int|string>): array<int|string, list<T>> $loadMissing Uncached bulk read
+     *
+     * @return array<int|string, list<T>> Every requested id, in the order given. An id that matches
+     *                                    no row maps to an empty list and is cached as one, exactly
+     *                                    as the single-entity accessor caches a miss.
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    protected function _fetchObjectMapPerId(
+        array    $ids,
+        string   $perIdQuery,
+        string   $perIdParamName,
+        string   $fetchClass,
+        string   $perIdKeyMapPrefix,
+        callable $loadMissing
+    ): array {
+        $ids = array_values(array_unique($ids));
+
+        if ($ids === []) {
+            return [];
+        }
+
+        $specs = [];
+        foreach ($ids as $id) {
+            $specs[$id] = [
+                'keyMap' => $perIdKeyMapPrefix . $id,
+                'query'  => $perIdQuery . $this->_serializeForCacheKey([$perIdParamName => $id]) . $fetchClass,
+            ];
+        }
+
+        $cached = $this->_getManyFromCacheMap($specs);
+
+        $result = [];
+        $missing = [];
+
+        foreach ($ids as $id) {
+            if (!isset($cached[$id])) {
+                $missing[] = $id;
+                continue;
+            }
+
+            $typed = [];
+            foreach ($cached[$id] as $item) {
+                if ($item instanceof $fetchClass) {
+                    $typed[] = $item;
+                }
+            }
+
+            $result[$id] = $typed;
+        }
+
+        if ($missing === []) {
+            return $result;
+        }
+
+        $t0 = microtime(true);
+        $loaded = $loadMissing($missing);
+        $this->_setLastComputeDelta(microtime(true) - $t0);
+
+        $toCache = [];
+        foreach ($missing as $id) {
+            $rows = $loaded[$id] ?? [];
+            $result[$id] = $rows;
+            $toCache[$id] = $specs[$id] + ['value' => $rows];
+        }
+
+        $this->_setManyInCacheMap($toCache);
+
+        return $result;
     }
 
     /**

@@ -10,6 +10,7 @@ use Model\Exceptions\NotFoundException;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Engines\EngineInterface;
 use Utils\Engines\EnginesFactory;
+use Utils\Engines\MyMemory;
 use Utils\Engines\NONE;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 
@@ -76,6 +77,28 @@ class EnginesFactoryTypeSafetyTest extends AbstractTest
             $engine = EnginesFactory::getInstance($id, $database);
             self::assertInstanceOf(EngineInterface::class, $engine);
             self::assertInstanceOf(NONE::class, $engine);
+        } finally {
+            $connection->exec("DELETE FROM engines WHERE id = $id");
+        }
+    }
+
+    /**
+     * The engineClass argument is an assertion about the row, not a lookup filter: a row that
+     * resolves fine but to the wrong engine type must be rejected. A NULL-class_load row degrades
+     * to NONE (see the test above), so asking for MyMemory gives a resolvable-but-mismatched pair.
+     */
+    #[Test]
+    public function getInstanceThrowsWhenTheRowIsNotTheExpectedEngineClass(): void
+    {
+        $database   = obtainTestDatabase();
+        $connection = $database->getConnection();
+        $connection->exec("INSERT INTO engines (base_url) VALUES ('http://test.invalid')");
+        $id = (int)$connection->lastInsertId();
+
+        try {
+            $this->expectException(NotFoundException::class);
+            $this->expectExceptionMessage("Engine ID " . $id . " is not the expected " . MyMemory::class . " engine instance");
+            EnginesFactory::getInstance($id, $database, MyMemory::class);
         } finally {
             $connection->exec("DELETE FROM engines WHERE id = $id");
         }

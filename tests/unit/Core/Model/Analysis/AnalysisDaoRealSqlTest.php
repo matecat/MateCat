@@ -12,7 +12,7 @@ use Matecat\TestHelpers\RealSqlDaoTestTrait;
  * Real-SQL coverage for AnalysisDao (plan dao-realsql-90.md, Wave 6 / T15).
  *
  * Every public SQL method is called DIRECTLY and asserted on real returned data (DoD b):
- *   getProjectStatsVolumeAnalysis, destroyCacheByProjectId, destroyAnalysisProjectCache.
+ *   getProjectStatsVolumeAnalysis, destroyCacheProjectStatsVolumeAnalysis.
  *
  * getProjectStatsVolumeAnalysis is a 6-table JOIN (segment_translations -> segments -> jobs ->
  * projects -> files, LEFT JOIN files_parts). The fixture mirrors that topology so the JOIN and
@@ -127,20 +127,43 @@ class AnalysisDaoRealSqlTest extends AbstractTest
         $this->assertSame('DONE', $rows[0]->status_analysis);
     }
 
-    public function testDestroyCacheByProjectIdReturnsTrue(): void
+    /**
+     * The one address this DAO caches. The eviction is asserted through a value written behind the
+     * cache, so it proves the entry is gone rather than that the call returned true.
+     */
+    public function testDestroyCacheProjectStatsVolumeAnalysisEvictsTheWarmedEntry(): void
     {
         $chunk = $this->buildAnalysisChunk('NEW');
-        // prime the cache with a TTL>0 read so there is an entry to destroy
-        $this->dao->getProjectStatsVolumeAnalysis($chunk['id_project'], 60);
 
-        $this->assertTrue($this->dao->destroyCacheByProjectId($chunk['id_project']));
+        $this->assertSame(12, (int)$this->dao->getProjectStatsVolumeAnalysis($chunk['id_project'], 60)[0]->raw_word_count);
+        $this->editWordCountBehindTheCache($chunk['id_project'], 34);
+        $this->assertSame(12, (int)$this->dao->getProjectStatsVolumeAnalysis($chunk['id_project'], 60)[0]->raw_word_count);
+
+        $this->assertTrue($this->dao->destroyCacheProjectStatsVolumeAnalysis($chunk['id_project']));
+
+        $this->assertSame(34, (int)$this->dao->getProjectStatsVolumeAnalysis($chunk['id_project'], 60)[0]->raw_word_count);
     }
 
-    public function testDestroyAnalysisProjectCacheReturnsTrue(): void
+    public function testDestroyCacheProjectStatsVolumeAnalysisLeavesAnotherProjectCached(): void
     {
-        $chunk = $this->buildAnalysisChunk('NEW');
-        $this->dao->getProjectStatsVolumeAnalysis($chunk['id_project'], 60);
+        $mine = $this->buildAnalysisChunk('NEW');
+        $other = $this->buildAnalysisChunk('NEW');
 
-        $this->assertTrue($this->dao->destroyAnalysisProjectCache($chunk['id_project']));
+        $this->dao->getProjectStatsVolumeAnalysis($other['id_project'], 60);
+        $this->editWordCountBehindTheCache($other['id_project'], 34);
+
+        $this->dao->destroyCacheProjectStatsVolumeAnalysis($mine['id_project']);
+
+        $this->assertSame(12, (int)$this->dao->getProjectStatsVolumeAnalysis($other['id_project'], 60)[0]->raw_word_count);
+    }
+
+    /** Change the joined row without going through the DAO, so a stale entry is observable. */
+    private function editWordCountBehindTheCache(int $idProject, int $rawWordCount): void
+    {
+        $this->realSqlDb()->getConnection()->prepare(
+            'UPDATE segments s ' .
+            ' JOIN files f ON f.id = s.id_file ' .
+            ' SET s.raw_word_count = :count WHERE f.id_project = :project'
+        )->execute(['count' => $rawWordCount, 'project' => $idProject]);
     }
 }

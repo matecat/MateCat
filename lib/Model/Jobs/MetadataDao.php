@@ -7,6 +7,7 @@ use Model\DataAccess\AbstractDao;
 use PDOException;
 use ReflectionException;
 use Throwable;
+use TypeError;
 
 class MetadataDao extends AbstractDao
 {
@@ -41,7 +42,7 @@ class MetadataDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheByJobId(int $id_job, string $key): bool
+    private function destroyCacheByIdJob(int $id_job, string $key): bool
     {
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_id_key);
 
@@ -78,7 +79,7 @@ class MetadataDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheByJobAndPassword(int $id_job, string $password): bool
+    private function destroyCacheByJobAndPassword(int $id_job, string $password): bool
     {
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password);
 
@@ -115,7 +116,7 @@ class MetadataDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheByJobAndPasswordAndKey(int $id_job, string $password, string $key): bool
+    private function destroyCacheByJobAndPasswordAndKey(int $id_job, string $password, string $key): bool
     {
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password_key);
 
@@ -124,6 +125,28 @@ class MetadataDao extends AbstractDao
             'password' => $password,
             'key' => $key
         ]);
+    }
+
+    /**
+     * The one eviction a caller needs. A metadata row answers three reads, and the struct names the
+     * address of all three: getByIdJob() binds id_job and key alone, so a write that only clears the
+     * two password-bound addresses leaves it serving the value it replaced for the whole TTL.
+     *
+     * An empty password is a real address here, not a missing one: MMT stores the MT context under it.
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws TypeError when the struct names less than a whole address
+     */
+    public function destroyCache(MetadataStruct $metadata): void
+    {
+        if (!isset($metadata->id_job, $metadata->password, $metadata->key)) {
+            throw new TypeError('MetadataStruct must carry id_job, password and key');
+        }
+
+        $this->destroyCacheByIdJob($metadata->id_job, $metadata->key);
+        $this->destroyCacheByJobAndPassword($metadata->id_job, $metadata->password);
+        $this->destroyCacheByJobAndPasswordAndKey($metadata->id_job, $metadata->password, $metadata->key);
     }
 
     /**
@@ -161,8 +184,11 @@ class MetadataDao extends AbstractDao
                 'value' => $value
             ]);
 
-            $this->destroyCacheByJobAndPassword($id_job, $password);
-            $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
+            $this->destroyCache(new MetadataStruct([
+                'id_job'   => $id_job,
+                'password' => $password,
+                'key'      => $key,
+            ]));
 
             return $this->get($id_job, $password, $key);
         });
@@ -206,9 +232,12 @@ class MetadataDao extends AbstractDao
             $stmt = $conn->prepare($sql);
             $stmt->execute($params);
 
-            $this->destroyCacheByJobAndPassword($id_job, $password);
             foreach ($metadata as $key => $value) {
-                $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
+                $this->destroyCache(new MetadataStruct([
+                    'id_job'   => $id_job,
+                    'password' => $password,
+                    'key'      => $key,
+                ]));
             }
         });
     }
@@ -219,6 +248,7 @@ class MetadataDao extends AbstractDao
      * @param string $key
      * @throws PDOException
      * @throws ReflectionException
+     * @throws TypeError
      */
     public function delete(int $id_job, string $password, string $key): void
     {
@@ -234,8 +264,11 @@ class MetadataDao extends AbstractDao
             'key' => $key,
         ]);
 
-        $this->destroyCacheByJobAndPassword($id_job, $password);
-        $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
+        $this->destroyCache(new MetadataStruct([
+            'id_job'   => $id_job,
+            'password' => $password,
+            'key'      => $key,
+        ]));
     }
 
     /**

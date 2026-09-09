@@ -19,6 +19,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
+use Model\Jobs\MetadataStruct as JobsMetadataStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
@@ -125,7 +126,7 @@ class JobSplitMergeService
      */
     protected function destroyAnalysisCacheByProjectId(int $projectId): void
     {
-        (new AnalysisDao($this->dbHandler))->destroyCacheByProjectId($projectId);
+        (new AnalysisDao($this->dbHandler))->destroyCacheProjectStatsVolumeAnalysis($projectId);
     }
 
     /**
@@ -514,7 +515,13 @@ class JobSplitMergeService
                          $key,
                          $_data->value
                      );
-                     $jobsMetadataDao->destroyCacheByJobAndPasswordAndKey($jobToSplit->id ?? throw new RuntimeException('Missing job id'), $jobToSplit->password ?? throw new RuntimeException('Missing job password'), $key);
+                     // The write above landed on the new job; the row it was copied from belongs to the
+                     // job being split, which no write here touches.
+                     $jobsMetadataDao->destroyCache(new JobsMetadataStruct([
+                         'id_job'   => $jobToSplit->id ?? throw new RuntimeException('Missing job id'),
+                         'password' => $jobToSplit->password ?? throw new RuntimeException('Missing job password'),
+                         'key'      => $key,
+                     ]));
                  }
              }
 
@@ -663,7 +670,6 @@ class JobSplitMergeService
 
                  foreach ($metadata as $key) {
                      $jobsMetadataDao->delete($_jStruct->id ?? throw new RuntimeException('Missing job id'), $_jStruct->password ?? throw new RuntimeException('Missing job password'), $key);
-                     $jobsMetadataDao->destroyCacheByJobAndPasswordAndKey($_jStruct->id ?? throw new RuntimeException('Missing job id'), $_jStruct->password ?? throw new RuntimeException('Missing job password'), $key);
                  }
             }
         }

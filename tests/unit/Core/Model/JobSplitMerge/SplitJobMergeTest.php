@@ -809,13 +809,11 @@ class SplitJobMergeTest extends AbstractTest
                 return null; // return value unused by production code
             });
 
-        // Track destroyCacheByJobAndPasswordAndKey() calls: [jobId, password, key]
+        // Track destroyCache() calls: [jobId, password, key]
         $destroyCacheCalls = [];
-        $this->jobsMetadataDaoMock->method('destroyCacheByJobAndPasswordAndKey')
-            ->willReturnCallback(function (int $jobId, string $password, string $key) use (&$destroyCacheCalls) {
-                $destroyCacheCalls[] = [$jobId, $password, $key];
-
-                return true;
+        $this->jobsMetadataDaoMock->method('destroyCache')
+            ->willReturnCallback(function (MetadataStruct $metadata) use (&$destroyCacheCalls) {
+                $destroyCacheCalls[] = [$metadata->id_job, $metadata->password, $metadata->key];
             });
 
         $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
@@ -839,7 +837,7 @@ class SplitJobMergeTest extends AbstractTest
 
         // destroyCache is called on the ORIGINAL job for each key, once per chunk iteration
         // 2 chunks × 3 keys = 6 destroyCache() calls, all targeting origpass
-        $this->assertCount(6, $destroyCacheCalls, 'Expected 6 destroyCacheByJobAndPasswordAndKey() calls');
+        $this->assertCount(6, $destroyCacheCalls, 'Expected 6 destroyCache() calls');
         foreach ($destroyCacheCalls as $i => $call) {
             $this->assertEquals(100, $call[0], "destroyCache call $i: wrong job id");
             $this->assertEquals('origpass', $call[1], "destroyCache call $i: wrong password");
@@ -866,8 +864,8 @@ class SplitJobMergeTest extends AbstractTest
         // set() should never be called
         $this->jobsMetadataDaoMock->expects($this->never())->method('set');
 
-        // destroyCacheByJobAndPasswordAndKey should never be called
-        $this->jobsMetadataDaoMock->expects($this->never())->method('destroyCacheByJobAndPasswordAndKey');
+        // no metadata copied means nothing to evict on the job it was copied from
+        $this->jobsMetadataDaoMock->expects($this->never())->method('destroyCache');
 
         $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
     }
@@ -899,14 +897,8 @@ class SplitJobMergeTest extends AbstractTest
                 $deleteCalls[] = [$jobId, $password, $key];
             });
 
-        // Track destroyCacheByJobAndPasswordAndKey() calls: [jobId, password, key]
-        $destroyCacheCalls = [];
-        $this->jobsMetadataDaoMock->method('destroyCacheByJobAndPasswordAndKey')
-            ->willReturnCallback(function (int $jobId, string $password, string $key) use (&$destroyCacheCalls) {
-                $destroyCacheCalls[] = [$jobId, $password, $key];
-
-                return true;
-            });
+        // The merge does not evict on its own: delete() owns the eviction of the row it removes.
+        $this->jobsMetadataDaoMock->expects($this->never())->method('destroyCache');
 
         $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
@@ -916,14 +908,6 @@ class SplitJobMergeTest extends AbstractTest
             $this->assertEquals(100, $call[0], "delete() call $i: wrong job id");
             $this->assertEquals('pass2', $call[1], "delete() call $i: wrong password — should be chunk2's password");
             $this->assertEquals($metadataKeys[$i], $call[2], "delete() call $i: wrong key");
-        }
-
-        // destroyCache should also be called 3 times for chunk2
-        $this->assertCount(3, $destroyCacheCalls, 'Expected 3 destroyCacheByJobAndPasswordAndKey() calls');
-        foreach ($destroyCacheCalls as $i => $call) {
-            $this->assertEquals(100, $call[0], "destroyCache call $i: wrong job id");
-            $this->assertEquals('pass2', $call[1], "destroyCache call $i: wrong password");
-            $this->assertEquals($metadataKeys[$i], $call[2], "destroyCache call $i: wrong key");
         }
     }
 
@@ -991,7 +975,6 @@ class SplitJobMergeTest extends AbstractTest
                 $deleteCalls[] = [$jobId, $password, $key];
             });
 
-        $this->jobsMetadataDaoMock->method('destroyCacheByJobAndPasswordAndKey')->willReturn(true);
 
         $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 

@@ -27,9 +27,11 @@ namespace Utils\Email;
 final class LinkDefanger
 {
     /**
-     * The separator a reader will see as a dot. Entity forms are matched because emails escape with
-     * `double_encode: false`, so entity text reaches the recipient and their mail client turns it
-     * back into a dot — `evil&#46;com` arrives as `evil.com`.
+     * The separator a reader will see as a dot. Entity forms are matched as well as the character
+     * because a caller decodes once before defanging, and one pass does not flatten text that was
+     * encoded twice: `evil&amp;#46;com` decodes to `evil&#46;com`, which the recipient's mail
+     * client would turn back into a dot. Matching the entity forms keeps the rule from depending on
+     * how many passes ran.
      */
     private const string DOT = '(?:\.|&#0*46;|&#[xX]0*2[eE];|&period;)';
 

@@ -1319,4 +1319,315 @@ class GetSearchControllerTest extends AbstractTest
 
         $this->controller->replaceAll();
     }
+
+    /**
+     * The search query reads the segments table joined to files_job, which the shared fixture does
+     * not seed. Every test that needs real search hits (rather than hand-built structs) needs it.
+     */
+    private function withFilesJob(callable $body): void
+    {
+        $conn = obtainTestDatabase()->getConnection();
+        $conn->exec("INSERT INTO files_job (id_file, id_job) VALUES (" . self::TEST_FILE_ID . ", " . self::TEST_JOB_ID . ")");
+
+        try {
+            $body();
+        } finally {
+            $conn->exec("DELETE FROM files_job WHERE id_job = " . self::TEST_JOB_ID);
+        }
+    }
+
+    /**
+     * @return array<int, string|null> translation text keyed by segment id
+     */
+    private function translationsBySegment(): array
+    {
+        $rows = obtainTestDatabase()->getConnection()->query(
+            "SELECT id_segment, translation FROM segment_translations WHERE id_job = " . self::TEST_JOB_ID
+        )->fetchAll(\PDO::FETCH_ASSOC);
+
+        $out = [];
+        foreach ($rows as $row) {
+            $out[(int)$row['id_segment']] = $row['translation'];
+        }
+
+        return $out;
+    }
+
+    #[Test]
+    public function replaceAll_writes_each_matched_segment_its_own_replaced_text(): void
+    {
+        // Two of the three seeded segments contain "o"; "Arrivederci" does not and must not be
+        // touched. Pins that every hit is replaced from its OWN row: a hydration step that paired a
+        // segment id with another segment's translation would write one segment's text over another.
+        $this->withFilesJob(function (): void {
+            $this->setRequestParams([
+                'id_job' => (string)self::TEST_JOB_ID,
+                'password' => self::TEST_JOB_PASSWORD,
+                'source' => '',
+                'target' => 'o',
+                'replace' => '0',
+                'token' => 'tok',
+                'status' => 'all',
+                'matchcase' => '0',
+                'exactmatch' => '0',
+                'inCurrentChunkOnly' => '0',
+            ]);
+
+            $this->controller->replaceAll();
+
+            $after = $this->translationsBySegment();
+
+            $this->assertSame('Cia0 m0nd0', $after[self::TEST_SEGMENT_1]);
+            $this->assertSame('Bu0ngi0rn0 amic0', $after[self::TEST_SEGMENT_2]);
+            $this->assertSame('Arrivederci', $after[self::TEST_SEGMENT_3], 'no match => untouched');
+        });
+    }
+
+    #[Test]
+    public function replaceAll_commits_segments_in_the_order_the_search_returned_them(): void
+    {
+        // The commit order is observable: it drives the order of the replace-history events, and a
+        // single undo replays them. Pins that the hydration loop preserves sid_list order rather
+        // than whatever order a batched read happens to return rows in.
+        $spy = new SpyFeatureSet($this->createStub(IDatabase::class));
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, $spy);
+
+        $this->withFilesJob(function () use ($spy): void {
+            $this->setRequestParams([
+                'id_job' => (string)self::TEST_JOB_ID,
+                'password' => self::TEST_JOB_PASSWORD,
+                'source' => '',
+                'target' => 'o',
+                'replace' => '0',
+                'token' => 'tok',
+                'status' => 'all',
+                'matchcase' => '0',
+                'exactmatch' => '0',
+                'inCurrentChunkOnly' => '0',
+            ]);
+
+            $searched = [];
+            $this->responseMock->expects($this->once())
+                ->method('json')
+                ->with($this->callback(function (array $data) use (&$searched): bool {
+                    $searched = array_map('intval', $data['segments']);
+
+                    return true;
+                }));
+
+            $this->controller->replaceAll();
+
+            $committed = array_values(array_map(
+                static fn(object $e): int => (int)$e->context['translation']->id_segment,
+                array_filter($spy->dispatched, static fn(object $e): bool => $e instanceof SetTranslationCommittedEvent)
+            ));
+
+            $this->assertSame([self::TEST_SEGMENT_1, self::TEST_SEGMENT_2], $searched);
+            $this->assertSame($searched, $committed, 'commit order follows the search result order');
+        });
+    }
+
+    /**
+     * Seeds $count extra matching segments beyond the shared fixture's three, and widens the job's
+     * segment range to cover them. cleanTestData() removes them: it deletes segments by file and
+     * translations by job.
+     *
+     * @return array<int, int> the seeded segment ids, ascending
+     */
+    private function seedManyMatchingSegments(int $count): array
+    {
+        $conn = obtainTestDatabase()->getConnection();
+        $base = 9999100;
+        $ids = [];
+
+        for ($i = 0; $i < $count; $i++) {
+            $id = $base + $i;
+            $ids[] = $id;
+            $conn->exec("INSERT INTO segments (id, id_file, internal_id, segment, segment_hash, raw_word_count, show_in_cattool) VALUES ($id, " . self::TEST_FILE_ID . ", '" . (100 + $i) . "', 'source $id', 'hash_$id', 2, 1)");
+            $conn->exec("INSERT INTO segment_translations (id_segment, id_job, segment_hash, translation, status, version_number, translation_date) VALUES ($id, " . self::TEST_JOB_ID . ", 'hash_$id', 'parola numero $id', 'TRANSLATED', 0, NOW())");
+        }
+
+        $conn->exec("UPDATE jobs SET job_last_segment = " . end($ids) . " WHERE id = " . self::TEST_JOB_ID);
+
+        return $ids;
+    }
+
+    #[Test]
+    public function replaceAll_keeps_search_order_across_the_daos_chunk_boundary(): void
+    {
+        // The DAO reads 20 ids at a time and PREPENDS each chunk to the accumulated set, so past 20
+        // hits its return order is the chunks reversed. Below that boundary the batch order and the
+        // search order coincide and every ordering test passes vacuously. This one seeds 21 extra
+        // matches so the batch spans two chunks and the re-pick against sid_list is the only thing
+        // holding the commit order: delete it and this test fails.
+        $extra = $this->seedManyMatchingSegments(21);
+
+        $spy = new SpyFeatureSet($this->createStub(IDatabase::class));
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, $spy);
+
+        $this->withFilesJob(function () use ($spy, $extra): void {
+            $this->setRequestParams([
+                'id_job' => (string)self::TEST_JOB_ID,
+                'password' => self::TEST_JOB_PASSWORD,
+                'source' => '',
+                'target' => 'o',
+                'replace' => '0',
+                'token' => 'tok',
+                'status' => 'all',
+                'matchcase' => '0',
+                'exactmatch' => '0',
+                'inCurrentChunkOnly' => '0',
+            ]);
+
+            $searched = [];
+            $this->responseMock->expects($this->once())
+                ->method('json')
+                ->with($this->callback(function (array $data) use (&$searched): bool {
+                    $searched = array_map('intval', $data['segments']);
+
+                    return true;
+                }));
+
+            $this->controller->replaceAll();
+
+            $committed = array_values(array_map(
+                static fn(object $e): int => (int)$e->context['translation']->id_segment,
+                array_filter($spy->dispatched, static fn(object $e): bool => $e instanceof SetTranslationCommittedEvent)
+            ));
+
+            $this->assertGreaterThan(20, count($searched), 'the batch has to span more than one chunk or this proves nothing');
+            $this->assertSame($searched, $committed, 'commit order follows the search order across the chunk boundary');
+            $this->assertContains(end($extra), $committed);
+        });
+    }
+
+    #[Test]
+    public function undoSegments_restores_each_row_from_its_own_historical_values(): void
+    {
+        $queryParams = new SearchQueryParamsStruct([
+            'job' => self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'target' => 'mondo',
+            'replacement' => 'universo',
+            'isMatchCaseRequested' => false,
+            'isExactMatchRequested' => false,
+        ]);
+
+        // Two rows, two different historical texts. A lookup that lost the row-to-segment pairing
+        // would restore one segment's history onto the other and still look like it worked.
+        $this->invokePrivate('undoSegments', [
+            [
+                ['id_segment' => self::TEST_SEGMENT_1, 'id_job' => self::TEST_JOB_ID, 'translation' => 'PRIMA UNO', 'status' => 'TRANSLATED'],
+                ['id_segment' => self::TEST_SEGMENT_2, 'id_job' => self::TEST_JOB_ID, 'translation' => 'PRIMA DUE', 'status' => 'DRAFT'],
+            ],
+            self::TEST_JOB_ID,
+            $queryParams,
+            true,
+        ]);
+
+        $after = $this->translationsBySegment();
+        $this->assertSame('PRIMA UNO', $after[self::TEST_SEGMENT_1]);
+        $this->assertSame('PRIMA DUE', $after[self::TEST_SEGMENT_2]);
+
+        $statuses = obtainTestDatabase()->getConnection()->query(
+            "SELECT id_segment, status FROM segment_translations WHERE id_job = " . self::TEST_JOB_ID
+                . " AND id_segment IN (" . self::TEST_SEGMENT_1 . ", " . self::TEST_SEGMENT_2 . ") ORDER BY id_segment"
+        )->fetchAll(\PDO::FETCH_KEY_PAIR);
+
+        $this->assertSame('TRANSLATED', $statuses[self::TEST_SEGMENT_1]);
+        $this->assertSame('DRAFT', $statuses[self::TEST_SEGMENT_2], 'history replay restores the exact historical status');
+    }
+
+    #[Test]
+    public function undoSegments_ignores_a_row_whose_job_does_not_match_the_segment(): void
+    {
+        $queryParams = new SearchQueryParamsStruct([
+            'job' => self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'target' => 'mondo',
+            'replacement' => 'universo',
+            'isMatchCaseRequested' => false,
+            'isExactMatchRequested' => false,
+        ]);
+
+        // The lookup keys on the PAIR (id_segment, id_job), not on the segment alone. A real segment
+        // id carried under a foreign job must find nothing and be skipped, not fall through to this
+        // job's row. The event rows carry their own id_job, so the pair is not a formality.
+        $this->invokePrivate('undoSegments', [
+            [['id_segment' => self::TEST_SEGMENT_1, 'id_job' => self::TEST_JOB_ID + 424242, 'translation' => 'FOREIGN', 'status' => 'DRAFT']],
+            self::TEST_JOB_ID,
+            $queryParams,
+            true,
+        ]);
+
+        $after = $this->translationsBySegment();
+        $this->assertSame('Ciao mondo', $after[self::TEST_SEGMENT_1], 'foreign job row must not touch this job');
+    }
+
+    #[Test]
+    public function undoSegments_keeps_the_live_rows_own_fields_and_overrides_only_text_and_status(): void
+    {
+        $conn = obtainTestDatabase()->getConnection();
+        $conn->exec("UPDATE segment_translations SET time_to_edit = 4321 WHERE id_job = " . self::TEST_JOB_ID . " AND id_segment = " . self::TEST_SEGMENT_1);
+
+        $queryParams = new SearchQueryParamsStruct([
+            'job' => self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'target' => 'mondo',
+            'replacement' => 'universo',
+            'isMatchCaseRequested' => false,
+            'isExactMatchRequested' => false,
+        ]);
+
+        // A replace event stores only the text and status to put back; everything else must come
+        // from the live row it is hydrated onto.
+        $this->invokePrivate('undoSegments', [
+            [['id_segment' => self::TEST_SEGMENT_1, 'id_job' => self::TEST_JOB_ID, 'translation' => 'PRIMA UNO', 'status' => 'TRANSLATED']],
+            self::TEST_JOB_ID,
+            $queryParams,
+            true,
+        ]);
+
+        $row = $conn->query(
+            "SELECT translation, time_to_edit, segment_hash FROM segment_translations WHERE id_job = " . self::TEST_JOB_ID . " AND id_segment = " . self::TEST_SEGMENT_1
+        )->fetch(\PDO::FETCH_ASSOC);
+
+        $this->assertSame('PRIMA UNO', $row['translation']);
+        $this->assertSame(4321, (int)$row['time_to_edit'], 'live time_to_edit survives the undo');
+        $this->assertSame('hash1_test_search', $row['segment_hash']);
+    }
+
+    #[Test]
+    public function updateSegments_writes_each_segments_own_segment_hash(): void
+    {
+        $queryParams = new SearchQueryParamsStruct([
+            'job' => self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'target' => 'o',
+            'replacement' => '0',
+            'isMatchCaseRequested' => false,
+            'isExactMatchRequested' => false,
+        ]);
+
+        // segment_hash is copied off the segments row read per segment, and it is the key TM
+        // propagation matches on. Two segments in one batch must each keep their own.
+        $committed = $this->invokePrivate('updateSegments', [
+            [
+                new SegmentTranslationStruct(['id_segment' => self::TEST_SEGMENT_1, 'id_job' => self::TEST_JOB_ID, 'translation' => 'Ciao mondo', 'status' => 'TRANSLATED']),
+                new SegmentTranslationStruct(['id_segment' => self::TEST_SEGMENT_2, 'id_job' => self::TEST_JOB_ID, 'translation' => 'Buongiorno amico', 'status' => 'TRANSLATED']),
+            ],
+            self::TEST_JOB_ID,
+            $queryParams,
+        ]);
+
+        $this->assertCount(2, $committed);
+
+        $hashes = obtainTestDatabase()->getConnection()->query(
+            "SELECT id_segment, segment_hash FROM segment_translations WHERE id_job = " . self::TEST_JOB_ID
+                . " AND id_segment IN (" . self::TEST_SEGMENT_1 . ", " . self::TEST_SEGMENT_2 . ")"
+        )->fetchAll(\PDO::FETCH_KEY_PAIR);
+
+        $this->assertSame('hash1_test_search', $hashes[self::TEST_SEGMENT_1]);
+        $this->assertSame('hash2_test_search', $hashes[self::TEST_SEGMENT_2]);
+    }
 }

@@ -276,7 +276,7 @@ class ProjectModel
             if ($teamInCacheToClean === null) {
                 continue;
             }
-            $teamDao->destroyCacheAssignee($teamInCacheToClean);
+            $teamDao->destroyCacheAssigneeWithProjectsByTeam($teamInCacheToClean);
         }
     }
 

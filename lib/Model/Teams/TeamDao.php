@@ -33,7 +33,6 @@ class TeamDao extends AbstractDao
     protected static array $primary_keys = ['id'];
 
     protected static string $_query_get_personal_by_id = " SELECT * FROM teams WHERE created_by = :created_by AND `type` = :type ";
-    protected static string $_query_get_user_teams = " SELECT * FROM teams WHERE created_by = :created_by ";
     protected static string $_update_team_by_id = " UPDATE teams SET name = :name WHERE id = :id ";
 
     protected static string $_query_get_assignee_with_projects = "
@@ -119,19 +118,16 @@ class TeamDao extends AbstractDao
         //add the creator to the list of members
         $params['members'][] = $orgCreatorUser->email;
 
-        // createList() writes one membership row per member, so it runs in a scope. The scope also
-        // undoes a partial list here rather than leaving it to the end of the request: a worker holds
-        // its connection across messages, so a transaction left open by a failure here would still be
-        // open when the next message starts writing. Entered while the caller already holds a
-        // transaction it is a guest and closes nothing.
+        // addMembersByEmail() writes one membership row per member, so it runs in a scope. The scope
+        // also undoes a partial list here rather than leaving it to the end of the request: a worker
+        // holds its connection across messages, so a transaction left open by a failure here would
+        // still be open when the next message starts writing. Entered while the caller already holds
+        // a transaction it is a guest and closes nothing.
         $this->database->transaction(function () use ($teamStruct, $params): void {
             /** @var list<string> $members */
             $members = array_values(array_filter($params['members'], fn($member) => $member !== null));
 
-            $membersList = (new MembershipDao($this->database))->createList([
-                'team' => $teamStruct,
-                'members' => $members
-            ]);
+            $membersList = (new MembershipDao($this->database))->addMembersByEmail($teamStruct, $members);
             $teamStruct->setMembers($membersList);
         });
 
@@ -159,6 +155,42 @@ class TeamDao extends AbstractDao
     }
 
     /**
+     * The one way in from outside: a caller names the team it already holds, and every Redis-cached
+     * read that could still serve the row as it stood before the write is dropped.
+     *
+     * The row is cached under two addresses - its id, and the creator of the personal team. Both
+     * halves are demanded: a struct built from an id alone would leave the creator-keyed entry
+     * publishing the row as it stood, which is the failure the door exists to make impossible.
+     *
+     * The assignee aggregate is not here. It is keyed on the team but caches rows of the projects
+     * table, so it goes stale when a project moves, not when this row changes: see
+     * {@see destroyCacheAssigneeWithProjectsByTeam()}, which the caller that moved the project calls.
+     *
+     * @throws ReflectionException
+     * @throws PDOException
+     * @throws TypeError
+     */
+    public function destroyCache(TeamStruct $team): void
+    {
+        $this->destroyFetchByIdCache(
+            $team->id ?? throw new TypeError('TeamStruct::$id cannot be null'),
+            TeamStruct::class
+        );
+
+        if (!isset($team->created_by)) {
+            throw new TypeError('TeamStruct::$created_by must be set');
+        }
+
+        $this->destroyCachePersonalByUid($team->created_by);
+    }
+
+    /**
+     * The per-assignee project counts of one team, which the team page reads.
+     *
+     * Public, and outside {@see destroyCache()}, because it is the projects table that is cached
+     * here: the counts change when a project is created, reassigned or moved between teams, none of
+     * which touches the teams row. The caller that moved the project is the only one that knows.
+     *
      * @param TeamStruct $team
      *
      * @return bool
@@ -166,7 +198,7 @@ class TeamDao extends AbstractDao
      * @throws PDOException
      * @throws Exception
      */
-    public function destroyCacheAssignee(TeamStruct $team): bool
+    public function destroyCacheAssigneeWithProjectsByTeam(TeamStruct $team): bool
     {
         $stmt = $this->_getStatementForQuery(self::$_query_get_assignee_with_projects);
 
@@ -237,62 +269,16 @@ class TeamDao extends AbstractDao
      * @throws ReflectionException
      * @throws PDOException
      */
-    public function destroyCachePersonalByUid(int $uid): bool
+    private function destroyCachePersonalByUid(int $uid): bool
     {
         $stmt = $this->_getStatementForQuery(self::$_query_get_personal_by_id);
-        $teamQuery = new TeamStruct();
-        $teamQuery->created_by = $uid;
 
         return $this->_destroyObjectCache(
             $stmt,
             TeamStruct::class,
             [
-                'created_by' => $teamQuery->created_by,
+                'created_by' => $uid,
                 'type' => Teams::PERSONAL
-            ]
-        );
-    }
-
-    /**
-     * @param UserStruct $user
-     *
-     * @return TeamStruct|null
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public function findUserCreatedTeams(UserStruct $user): ?TeamStruct
-    {
-        $stmt = $this->_getStatementForQuery(self::$_query_get_user_teams);
-
-        return $this->_fetchObjectMap(
-            $stmt,
-            TeamStruct::class,
-            [
-                'created_by' => $user->uid,
-            ]
-        )[0] ?? null;
-    }
-
-    /**
-     * @param UserStruct $user
-     *
-     * @return bool
-     * @throws ReflectionException
-     * @throws PDOException
-     * @throws TypeError
-     */
-    public function destroyCacheUserCreatedTeams(UserStruct $user): bool
-    {
-        $stmt = $this->_getStatementForQuery(self::$_query_get_user_teams);
-
-        $teamQuery = new TeamStruct();
-        $teamQuery->created_by = (int)$user->uid;
-
-        return $this->_destroyObjectCache(
-            $stmt,
-            TeamStruct::class,
-            [
-                'created_by' => $teamQuery->created_by,
             ]
         );
     }
@@ -324,9 +310,7 @@ class TeamDao extends AbstractDao
             // controller fetched live, carried the new one. Evicting here rather than in the
             // controller keeps it true for every caller of this method, not just the one that was
             // noticed.
-            if ($org->id !== null) {
-                $this->destroyFetchByIdCache($org->id, TeamStruct::class);
-            }
+            $this->destroyCache($org);
         });
 
         return $org;

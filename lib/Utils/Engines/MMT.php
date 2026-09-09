@@ -761,7 +761,7 @@ class MMT extends AbstractEngine
         // Common metadata loading
         if (!empty($id_job)) {
             $metadataDao = new MetadataDao($this->database);
-            $contextRs = $metadataDao->setCacheTTL($cacheTtl)->getByIdJob($id_job, 'mt_context');
+            $contextRs = $metadataDao->getByIdJob($id_job, 'mt_context', $cacheTtl);
 
             $mt_context = array_pop($contextRs);
             if (!empty($mt_context)) {

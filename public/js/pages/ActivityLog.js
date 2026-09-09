@@ -83,9 +83,9 @@ export const ActivityLog = () => {
         />
       </HeaderPortal>
       <div className="activity-log-content">
-        <h1>
+        <h3>
           Activity Log project: {project.id} - {project.name}
-        </h1>
+        </h3>
         <FilterColumn />
         <ActivityLogTable />
       </div>

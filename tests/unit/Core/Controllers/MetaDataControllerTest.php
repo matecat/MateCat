@@ -22,6 +22,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao as FileMetadataDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobMetadataDao;
+use Model\Jobs\MetadataStruct as JobMetadataStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Controller\API\Commons\Exceptions\AuthorizationError;
@@ -150,7 +151,11 @@ class MetaDataControllerTest extends AbstractTest
 
         // metadata DAOs are Redis-cached (TTL); drop any stale cache for the seeded ids
         (new ProjectMetadataDao(obtainTestDatabase()))->destroyMetadataCache($projectId);
-        (new JobMetadataDao(obtainTestDatabase()))->destroyCacheByJobAndPassword($jobId, self::JOB_PASSWORD);
+        (new JobMetadataDao(obtainTestDatabase()))->destroyCache(new JobMetadataStruct([
+            'id_job'   => $jobId,
+            'password' => self::JOB_PASSWORD,
+            'key'      => 'tag_projection',
+        ]));
         (new FileMetadataDao(obtainTestDatabase()))->destroyCacheByJobIdProjectAndIdFile($projectId, $fileId);
     }
 

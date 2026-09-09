@@ -24,7 +24,7 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
     private const string R2_PASSWORD = 'r2-pw';
 
     /**
-     * @var list<array{int|null, string|null}>
+     * @var list<array{int, string, string|null}>
      */
     private array $jobRowCalls = [];
 
@@ -65,37 +65,35 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
     private function makeInvalidator(): JobCredentialCacheInvalidator
     {
         $jobDao = $this->createStub(JobDao::class);
-        $jobDao->method('destroyCacheForIdAndPassword')
-            ->willReturnCallback(function (?int $id, ?string $password): bool {
-                $this->jobRowCalls[] = [$id, $password];
-
-                return true;
+        $jobDao->method('destroyCache')
+            ->willReturnCallback(function (JobStruct $job, ?string $retiredPassword): void {
+                $this->jobRowCalls[] = [(int)$job->id, (string)$job->password, $retiredPassword];
             });
 
         $chunkReviewDao = $this->createStub(ChunkReviewDao::class);
-        $chunkReviewDao->method('destroyCacheForJobPassword')
+        $chunkReviewDao->method('destroyCachesByJobAndPassword')
             ->willReturnCallback(function (int $id, string $password): void {
                 $this->jobPasswordSweepCalls[] = [$id, $password];
             });
-        $chunkReviewDao->method('destroyCacheForFindChunkReviews')
+        $chunkReviewDao->method('destroyCacheChunkReviews')
             ->willReturnCallback(function (JobStruct $chunk): bool {
                 $this->findChunkReviewsCalls[] = [(int)$chunk->id, (string)$chunk->password];
 
                 return true;
             });
-        $chunkReviewDao->method('destroyCacheForFindChunkReviewsForSourcePage')
+        $chunkReviewDao->method('destroyCacheChunkReviewsForSourcePage')
             ->willReturnCallback(function (JobStruct $chunk, int $sourcePage): bool {
                 $this->findChunkReviewsForSourcePageCalls[] = [(int)$chunk->id, (string)$chunk->password, $sourcePage];
 
                 return true;
             });
-        $chunkReviewDao->method('destroyCacheForReviewPasswordAndJobId')
+        $chunkReviewDao->method('destroyCacheByReviewPasswordAndJobId')
             ->willReturnCallback(function (string $reviewPassword, int $id): bool {
                 $this->reviewPasswordCalls[] = [$reviewPassword, $id];
 
                 return true;
             });
-        $chunkReviewDao->method('destroyCacheForIsTOrR1OrR2')
+        $chunkReviewDao->method('destroyCacheIsTOrR1OrR2')
             ->willReturnCallback(function (int $id, string $password): bool {
                 $this->isTOrR1OrR2Calls[] = [$id, $password];
 
@@ -147,14 +145,16 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
         // exactly the two passed in.
         $this->makeInvalidator()->sweepAfterJobPasswordRotation($this->makeChunk('new-pw'), 'old-pw', 'new-pw');
 
+        // The door takes the chunk as it stands and the credential it replaced: the replacing password
+        // is on the struct, the replaced one is reachable nowhere else.
+        self::assertSame([[self::ID_JOB, 'new-pw', 'old-pw']], $this->jobRowCalls);
+        // destroyCachesByJobAndPassword() is what knows the shapes a job credential keys, the per phase
+        // read among them, so the sweep names the credential and nothing else.
         self::assertSame(
             [[self::ID_JOB, 'old-pw'], [self::ID_JOB, 'new-pw']],
-            $this->jobRowCalls,
+            $this->jobPasswordSweepCalls,
             'both the replaced and the replacing job credential must be evicted, and only once each'
         );
-        // destroyCacheForJobPassword() is what knows the shapes a job credential keys, the per phase
-        // read among them, so the sweep names the credential and nothing else.
-        self::assertSame($this->jobRowCalls, $this->jobPasswordSweepCalls);
         self::assertSame([], $this->findChunkReviewsForSourcePageCalls);
     }
 
@@ -188,7 +188,8 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
     {
         $this->makeInvalidator()->sweepAfterJobPasswordRotation($this->makeChunk('new-pw'), '', 'new-pw');
 
-        self::assertSame([[self::ID_JOB, 'new-pw']], $this->jobRowCalls);
+        self::assertSame([[self::ID_JOB, 'new-pw', '']], $this->jobRowCalls);
+        self::assertSame([[self::ID_JOB, 'new-pw']], $this->jobPasswordSweepCalls);
     }
 
     #[Test]

@@ -285,6 +285,63 @@ class EntryValidatorTest extends AbstractTest
         $validator->validate();
     }
 
+    #[Test]
+    public function validate_throws_not_found_when_category_missing(): void
+    {
+        $struct = $this->makeStruct(1, 2, 99);
+
+        $segmentDao = $this->createStub(SegmentDao::class);
+        $segmentDao->method('fetchById')->willReturn($this->makeSegment(1));
+
+        $jobDao = $this->createStub(JobDao::class);
+        $jobDao->method('getNotDeletedById')->willReturn([$this->makeJob(10)]);
+
+        $projectDao = $this->createStub(ProjectDao::class);
+        $projectDao->method('findById')->willReturn($this->makeProject(5));
+
+        $modelDao = $this->createStub(ModelDao::class);
+        $modelDao->method('fetchById')->willReturn($this->makeQaModel(5));
+
+        $categoryDao = $this->createStub(CategoryDao::class);
+        $categoryDao->method('fetchById')->willReturn(null);
+
+        $validator = $this->makeValidator($struct, $segmentDao, $jobDao, $projectDao, $modelDao, $categoryDao);
+
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage('Category not found');
+        $validator->validate();
+    }
+
+    // ─── validateInSegmentScope ──────────────────────────────────────────
+
+    #[Test]
+    public function validate_records_issue_not_found_when_the_issue_belongs_to_another_segment(): void
+    {
+        // An update (struct->id set) whose id_segment does not match the fetched segment
+        $struct     = $this->makeStruct(1, 2, 3);
+        $struct->id = 7;
+
+        $segmentDao = $this->createStub(SegmentDao::class);
+        $segmentDao->method('fetchById')->willReturn($this->makeSegment(99));
+
+        $jobDao = $this->createStub(JobDao::class);
+        $jobDao->method('getNotDeletedById')->willReturn([$this->makeJob(10)]);
+
+        $projectDao = $this->createStub(ProjectDao::class);
+        $projectDao->method('findById')->willReturn($this->makeProject(5));
+
+        $modelDao = $this->createStub(ModelDao::class);
+        $modelDao->method('fetchById')->willReturn($this->makeQaModel(5));
+
+        $categoryDao = $this->createStub(CategoryDao::class);
+        $categoryDao->method('fetchById')->willReturn($this->makeCategory(3, 5));
+
+        $validator = $this->makeValidator($struct, $segmentDao, $jobDao, $projectDao, $modelDao, $categoryDao);
+
+        $this->assertFalse($validator->isValid());
+        $this->assertStringContainsString('Issue not found', implode(' ', $validator->getErrorMessages()));
+    }
+
     // ─── error helpers ───────────────────────────────────────────────────
 
     #[Test]

@@ -10,7 +10,6 @@ import {changeJobPassword} from '../../api/changeJobPassword'
 import CatToolActions from '../../actions/CatToolActions'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import IconDown from '../../../img/icons/IconDown'
-import IconClose from '../../../img/icons/IconClose'
 import {
   Button,
   BUTTON_MODE,
@@ -638,6 +637,7 @@ export const JobContainer = ({
                 className="job-delivery-date-button-close"
                 size={BUTTON_SIZE.ICON_XSMALL}
                 onClick={removeTranslator}
+                testId="remove-translator-button"
               >
                 <Close size={18} />
               </Button>
@@ -761,17 +761,6 @@ export const JobContainer = ({
         <div className="job-container-outsource">
           {getOutsourceJobSent()}
           {getOutsourceDelivery()}
-          {job.get('translator') && (
-            <div
-              className="item"
-              onClick={removeTranslator}
-              data-testid="remove-translator-button"
-            >
-              <div className="cancel-label">
-                <IconClose />
-              </div>
-            </div>
-          )}
         </div>
         <div>{getOutsourceButton()}</div>
         <div>

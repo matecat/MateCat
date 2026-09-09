@@ -6,6 +6,7 @@ use Exception;
 use Model\DataAccess\AbstractDao;
 use PDOException;
 use ReflectionException;
+use TypeError;
 
 class SegmentMetadataDao extends AbstractDao
 {
@@ -73,17 +74,23 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
+     * @throws ReflectionException
      * @throws PDOException
+     * @throws TypeError
+     * @throws Exception
      */
     public function delete(int $id_segment, string $key): void
     {
         $stmt = $this->database->getConnection()->prepare("DELETE FROM segment_metadata WHERE id_segment = ? AND meta_key = ?");
         $stmt->execute([$id_segment, $key]);
+
+        $this->destroyCache($this->addressOf($id_segment, $key));
     }
 
     /**
      * @throws ReflectionException
      * @throws PDOException
+     * @throws TypeError
      * @throws Exception
      */
     public function save(SegmentMetadataStruct $metadataStruct): void
@@ -100,15 +107,13 @@ class SegmentMetadataDao extends AbstractDao
             'value' => $metadataStruct->meta_value,
         ]);
 
-        $this->destroyGetAllCache($metadataStruct->id_segment);
-        $this->destroyGetCache($metadataStruct->id_segment, $metadataStruct->meta_key);
-        $this->destroyGetBySegmentIdsCache($metadataStruct->meta_key);
-        $this->destroyGetAllInRangeCache();
+        $this->destroyCache($metadataStruct);
     }
 
     /**
      * @throws ReflectionException
      * @throws PDOException
+     * @throws TypeError
      * @throws Exception
      */
     public function upsert(int $id_segment, string $key, string $value): void
@@ -126,17 +131,52 @@ class SegmentMetadataDao extends AbstractDao
             'value' => $value,
         ]);
 
-        $this->destroyGetAllCache($id_segment);
-        $this->destroyGetCache($id_segment, $key);
-        $this->destroyGetBySegmentIdsCache($key);
-        $this->destroyGetAllInRangeCache();
+        $this->destroyCache($this->addressOf($id_segment, $key));
+    }
+
+    /**
+     * Evict every address one metadata row is read at: by segment, by segment and key, by that key
+     * across a set of segments, and across a segment range.
+     *
+     * The struct has to name the segment and the key. Every write in this DAO goes through here, so
+     * a caller never holds a list of evictions it can be one short of.
+     *
+     * @throws ReflectionException
+     * @throws PDOException
+     * @throws TypeError when the struct names no segment or no key
+     * @throws Exception
+     */
+    public function destroyCache(SegmentMetadataStruct $metadata): void
+    {
+        if (!isset($metadata->id_segment)) {
+            throw new TypeError('A segment metadata cache eviction needs the id of the segment.');
+        }
+
+        if (!isset($metadata->meta_key)) {
+            throw new TypeError('A segment metadata cache eviction needs the meta key of the row.');
+        }
+
+        $this->destroyCacheAll((int)$metadata->id_segment);
+        $this->destroyCacheKey((int)$metadata->id_segment, $metadata->meta_key);
+        $this->destroyCacheBySegmentIds($metadata->meta_key);
+        $this->destroyCacheAllInRange();
+    }
+
+    /** The struct a write holds only as a pair of values. */
+    private function addressOf(int $id_segment, string $key): SegmentMetadataStruct
+    {
+        $address = new SegmentMetadataStruct();
+        $address->id_segment = $id_segment;
+        $address->meta_key = $key;
+
+        return $address;
     }
 
     /**
      * @throws ReflectionException
      * @throws PDOException
      */
-    public function destroyGetAllCache(int $id_segment): bool
+    private function destroyCacheAll(int $id_segment): bool
     {
         $stmt = $this->database->getConnection()->prepare(self::_query_get_all);
 
@@ -147,7 +187,7 @@ class SegmentMetadataDao extends AbstractDao
      * @throws ReflectionException
      * @throws PDOException
      */
-    public function destroyGetCache(int $id_segment, string $key): bool
+    private function destroyCacheKey(int $id_segment, string $key): bool
     {
         $stmt = $this->database->getConnection()->prepare(self::_query_get);
 
@@ -158,7 +198,7 @@ class SegmentMetadataDao extends AbstractDao
      * @throws ReflectionException
      * @throws Exception
      */
-    public function destroyGetBySegmentIdsCache(string $key): bool
+    private function destroyCacheBySegmentIds(string $key): bool
     {
         $keyMap = self::_keymap_get_by_segment_ids . $key;
 
@@ -169,9 +209,9 @@ class SegmentMetadataDao extends AbstractDao
      * @throws ReflectionException
      * @throws Exception
      */
-    public function destroyGetAllInRangeCache(): bool
+    private function destroyCacheAllInRange(): void
     {
-        return $this->_deleteCacheByKey(self::_keymap_get_all_in_range, false);
+        $this->_deleteCacheByKey(self::_keymap_get_all_in_range, false);
     }
 
     /**
@@ -196,7 +236,7 @@ class SegmentMetadataDao extends AbstractDao
 
         $grouped = [];
         foreach ($results as $struct) {
-            $grouped[(int)$struct->id_segment][] = $struct;
+            $grouped[$struct->id_segment][] = $struct;
         }
 
         return array_map(

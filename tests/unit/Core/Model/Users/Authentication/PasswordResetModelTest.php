@@ -44,8 +44,7 @@ class PasswordResetModelTest extends AbstractTest
         $dao = $this->createStub(UserDao::class);
         $dao->method('getByScopedConfirmationToken')->willReturn($user);
         $dao->method('updateStruct')->willReturn(1);
-        $dao->method('destroyCacheByEmail')->willReturn(true);
-        $dao->method('destroyCacheByUid')->willReturn(true);
+        $dao->method('destroyCache');
 
         return $dao;
     }

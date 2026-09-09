@@ -168,7 +168,7 @@ class InvalidatesUserProfileCacheTest extends AbstractTest
 
     /**
      * The hooks sit on the writes precisely so they do not depend on a TTL: cacheTTL defaults to 0,
-     * and at 0 DaoCacheTrait neither reads nor busts anything. A hook hung off destroyCacheByUid()
+     * and at 0 DaoCacheTrait neither reads nor busts anything. A hook hung off destroyCache()
      * would therefore do nothing here, which is why the plan's earlier "hook the cache busts"
      * variant could not deliver the guarantee.
      */
@@ -309,7 +309,7 @@ class InvalidatesUserProfileCacheTest extends AbstractTest
 
         (new MembershipDao(obtainTestDatabase()))
             ->setUserStateStore($this->store)
-            ->destroyCacheForListByTeamId(3);
+            ->destroyCacheMemberListByTeamId(3);
 
         $this->assertSame([77, 88, 99], $dropped);
     }
@@ -337,7 +337,7 @@ class InvalidatesUserProfileCacheTest extends AbstractTest
 
         (new TeamDao(obtainTestDatabase()))
             ->setUserStateStore($this->store)
-            ->destroyCacheAssignee($team);
+            ->destroyCacheAssigneeWithProjectsByTeam($team);
 
         $this->assertSame([77, 88], $dropped);
     }

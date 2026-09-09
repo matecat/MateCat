@@ -392,7 +392,9 @@ class SignupModelUnitTest extends AbstractTest
     private function fetchCredentialColumns(int $uid): array
     {
         $dao = new UserDao(obtainTestDatabase());
-        $dao->destroyCacheByUid($uid);
+        $evicted = new UserStruct();
+        $evicted->uid = $uid;
+        $dao->destroyCache($evicted);
 
         $statement = obtainTestDatabase()->getConnection()->prepare(
             "SELECT salt, pass, confirmation_token, confirmation_token_created_at FROM users WHERE uid = ?"
@@ -460,8 +462,7 @@ class SignupModelUnitTest extends AbstractTest
             ->with('abc123')
             ->willReturn($user);
         $dao->method('updateStruct')->willReturn(1);
-        $dao->method('destroyCacheByEmail')->willReturn(true);
-        $dao->method('destroyCacheByUid')->willReturn(true);
+        $dao->method('destroyCache');
 
         $session = new ArraySessionStore();
         $signup = new SignupModel(['token' => 'abc123'], $session, $dao, new TeamDao(obtainTestDatabase()));

@@ -50,9 +50,10 @@ readonly class JobCredentialCacheInvalidator
     {
         $idJob = $chunk->id ?? throw new TypeError('JobStruct::$id cannot be null');
 
+        $this->jobDao->destroyCache($chunk, $oldPassword);
+
         foreach ($this->credentials($oldPassword, $newPassword) as $password) {
-            $this->jobDao->destroyCacheForIdAndPassword($idJob, $password);
-            $this->chunkReviewDao->destroyCacheForJobPassword($idJob, $password);
+            $this->chunkReviewDao->destroyCachesByJobAndPassword($idJob, $password);
         }
 
         // The rotation renamed the password column of every phase row, so the reads keyed on a review
@@ -65,7 +66,7 @@ readonly class JobCredentialCacheInvalidator
                 continue;
             }
 
-            $this->chunkReviewDao->destroyCacheForReviewPasswordAndJobId($reviewPassword, $idJob);
+            $this->chunkReviewDao->destroyCacheByReviewPasswordAndJobId($reviewPassword, $idJob);
         }
 
         // Project data is cached for a day and embeds the job password. The list of the project's
@@ -95,8 +96,8 @@ readonly class JobCredentialCacheInvalidator
         $jobPassword = (string)$chunk->password;
 
         foreach ($this->credentials($oldPassword, $newPassword) as $password) {
-            $this->chunkReviewDao->destroyCacheForReviewPasswordAndJobId($password, $idJob);
-            $this->chunkReviewDao->destroyCacheForIsTOrR1OrR2($idJob, $password);
+            $this->chunkReviewDao->destroyCacheByReviewPasswordAndJobId($password, $idJob);
+            $this->chunkReviewDao->destroyCacheIsTOrR1OrR2($idJob, $password);
         }
 
         // These two are keyed on the job credential, so they belong to the other pages as much as to
@@ -104,8 +105,8 @@ readonly class JobCredentialCacheInvalidator
         // review links, and the link the editor of this phase is handed. Nothing else the job
         // credential keys carries a review password, and no other phase is touched.
         if ($jobPassword !== '') {
-            $this->chunkReviewDao->destroyCacheForFindChunkReviews($chunk);
-            $this->chunkReviewDao->destroyCacheForFindChunkReviewsForSourcePage($chunk, $sourcePage);
+            $this->chunkReviewDao->destroyCacheChunkReviews($chunk);
+            $this->chunkReviewDao->destroyCacheChunkReviewsForSourcePage($chunk, $sourcePage);
         }
     }
 

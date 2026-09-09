@@ -17,6 +17,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PDOException;
 use ReflectionException;
+use TypeError;
 
 class MembershipDao extends AbstractDao
 {
@@ -73,6 +74,37 @@ class MembershipDao extends AbstractDao
                 'uid' => $user->uid,
             ]
         );
+    }
+
+    /**
+     * The one way in from outside for a membership write: a caller names the row it added or removed,
+     * and the three reads that could still answer as if it were still there - or not yet there - are
+     * dropped.
+     *
+     * A team rename does not come through here. It stales the same reads, because two of them select
+     * teams.* through the join, but no membership row changed and the caller holds no membership: see
+     * {@see destroyCacheUserTeams()} and {@see destroyCacheMemberListByTeamId()}, which stay public
+     * for it.
+     *
+     * Nor does a batch. destroyCacheMemberListByTeamId() re-reads the member list and invalidates
+     * every member's profile, so calling this once per inserted row would sweep the whole team once
+     * per member: {@see addMembersByEmail()} evicts per member and lists once, on purpose.
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function destroyCache(MembershipStruct $membership): void
+    {
+        $uid = $membership->uid ?? throw new TypeError('MembershipStruct::$uid cannot be null');
+
+        $user = new UserStruct();
+        $user->uid = $uid;
+
+        $this->destroyCacheUserTeams($user);
+        $this->destroyCacheTeamByIdAndUser($membership->id_team, $user);
+        $this->destroyCacheMemberListByTeamId($membership->id_team);
     }
 
     /**
@@ -133,7 +165,7 @@ class MembershipDao extends AbstractDao
      * @see MembershipDao::findTeamByIdAndUser
      *
      */
-    public function destroyCacheTeamByIdAndUser(int $id, UserStruct $user): bool
+    private function destroyCacheTeamByIdAndUser(int $id, UserStruct $user): bool
     {
         $stmt = $this->_getStatementForQuery(self::$_query_team_from_uid_and_id);
 
@@ -197,7 +229,7 @@ class MembershipDao extends AbstractDao
      * @throws ReflectionException  @see MembershipDao::getMemberListByTeamId()
      * @throws Exception
      */
-    public function destroyCacheForListByTeamId(int $id_team): bool
+    public function destroyCacheMemberListByTeamId(int $id_team): bool
     {
         $stmt = $this->_getStatementForQuery(self::$_query_member_list);
 
@@ -232,6 +264,7 @@ class MembershipDao extends AbstractDao
      * @throws ReflectionException
      * @throws Exception
      * @throws PDOException
+     * @throws TypeError
      */
     public function deleteUserFromTeam(int $uid, int $teamId): ?UserStruct
     {
@@ -244,11 +277,7 @@ class MembershipDao extends AbstractDao
             'id_team' => $teamId
         ]);
 
-        $this->destroyCacheForListByTeamId($teamId);
-        if ($user !== null) {
-            $this->destroyCacheUserTeams($user);
-            $this->destroyCacheTeamByIdAndUser($teamId, $user);
-        }
+        $this->destroyCache(new MembershipStruct(['uid' => $uid, 'id_team' => $teamId]));
         if ($stmt->rowCount()) {
             return $user;
         } else {
@@ -258,38 +287,28 @@ class MembershipDao extends AbstractDao
 
 
     /**
-     * This method takes a list of email addresses as an argument.
-     * If email corresponds to existing users, a membership is created into the team.
+     * Puts every address that already has an account into the team, and reports the memberships it
+     * created. An address matching no user creates nothing and is not an error: the invitation flow
+     * hands over whatever was typed.
      *
-     * @param array<int, IDaoStruct>|array{team: TeamStruct, members: list<string>} $obj_arr
+     * One INSERT per member, so a failure partway through leaves the team holding half a member
+     * list. The guard refuses to start outside a transaction rather than write that; entered inside
+     * one already open it is a guest, and the owner's rollback undoes the whole set.
      *
+     * @param list<string> $emails
      *
-     * @return MembershipStruct[]
+     * @return MembershipStruct[] one entry per address that produced a row, in the order the users
+     *                            came back; addresses that matched nothing are absent
      * @throws Exception
+     * @throws ReflectionException
      */
-    public function createList(array $obj_arr): array
+    public function addMembersByEmail(TeamStruct $team, array $emails): array
     {
         if (!$this->database->getConnection()->inTransaction()) {
             throw new Exception('This method requires to be wrapped in a transaction');
         }
 
-        if (!isset($obj_arr['members'], $obj_arr['team'])) {
-            throw new Exception('Missing required keys: members, team');
-        }
-
-        if (!is_array($obj_arr['members'])) {
-            throw new Exception('members must be an array of email strings');
-        }
-
-        if (!$obj_arr['team'] instanceof TeamStruct) {
-            throw new Exception('Team must be a TeamStruct instance');
-        }
-
-        /** @var list<string> $members */
-        $members = $obj_arr['members'];
-        $teamStruct = $obj_arr['team'];
-
-        $users = (new UserDao($this->database))->getByEmails($members);
+        $users = (new UserDao($this->database))->getByEmails($emails);
 
         if (empty($users)) {
             return [];
@@ -300,9 +319,9 @@ class MembershipDao extends AbstractDao
         foreach ($users as $user) {
             // try to make an insert and ignore pkey errors
             $membershipStruct = (new MembershipStruct([
-                'id_team' => $teamStruct->id,
+                'id_team' => $team->id,
                 'uid' => $user->uid,
-                'is_admin' => $teamStruct->created_by == $user->uid
+                'is_admin' => $team->created_by == $user->uid
             ]));
 
             $lastId = $this->insertStruct($membershipStruct, ['ignore' => true]);
@@ -313,14 +332,14 @@ class MembershipDao extends AbstractDao
                 $membersList[] = $membershipStruct;
 
                 $this->destroyCacheUserTeams($user);
-                if ($teamStruct->id !== null) {
-                    $this->destroyCacheTeamByIdAndUser($teamStruct->id, $user);
+                if ($team->id !== null) {
+                    $this->destroyCacheTeamByIdAndUser($team->id, $user);
                 }
             }
         }
 
-        if (count($membersList) && $teamStruct->id !== null) {
-            $this->destroyCacheForListByTeamId($teamStruct->id);
+        if (count($membersList) && $team->id !== null) {
+            $this->destroyCacheMemberListByTeamId($team->id);
         }
 
         return $membersList;

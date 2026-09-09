@@ -1,5 +1,6 @@
 <?php
 
+use Controller\Exceptions\RenderTerminatedException;
 use Model\Conversion\MimeTypes\MimeTypes;
 use Model\Conversion\ZipArchiveHandler;
 use Model\DataAccess\IDatabase;
@@ -497,7 +498,18 @@ class UploadHandler
                 $readBuff = fread($fp, 1024);
                 $maxRead = 16 * 1024; // 16KB cap — multipart headers are always <1KB
                 while ($readBuff !== false && strlen($readBuff) < $maxRead && !preg_match($regexp, $readBuff, $matches)) {
-                    $readBuff .= fread($fp, 1024);
+                    $chunk = fread($fp, 1024);
+
+                    // At EOF fread() returns '' rather than false, so appending it leaves the buffer
+                    // unchanged and every loop condition holds again — an endless spin. PHP discards
+                    // the request body once post_max_size is exceeded while CONTENT_LENGTH keeps the
+                    // original size, which is exactly how this branch is entered, so the body is
+                    // routinely empty here. The $maxRead cap only bounds the loop while bytes arrive.
+                    if ($chunk === false || $chunk === '') {
+                        break;
+                    }
+
+                    $readBuff .= $chunk;
                 }
                 fclose($fp);
             } else {
@@ -533,6 +545,10 @@ class UploadHandler
         header('Content-type: application/json');
 
         echo $json;
+
+        if (AppConfig::$ENV === 'testing') {
+            throw new RenderTerminatedException();
+        }
 
         die();
     }

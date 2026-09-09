@@ -1034,9 +1034,7 @@ class NewController extends KleinController
 
             // check if qa_model template exists
             if (null === $qaModelTemplate) {
-                throw new InvalidArgumentException(
-                    'This QA model template does not exist or does not belong to the logged-in user'
-                );
+                throw new InvalidArgumentException('This QA model template does not exist or does not belong to the logged-in user');
             }
 
             return $qaModelTemplate;

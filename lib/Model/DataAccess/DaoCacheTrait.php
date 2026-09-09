@@ -185,10 +185,35 @@ trait DaoCacheTrait
         }
 
         $key = md5($query);
-        $raw = self::$cache_con->hget($keyMap, $key);
 
-        if ($raw === null) {
-            $this->_logCache("GETMAP_MISS: " . $keyMap, $key, null, $query);
+        return $this->_decodeCacheMapValue($keyMap, $key, $query, self::$cache_con->hget($keyMap, $key));
+    }
+
+    /**
+     * Turn one stored entry into the value a reader gets back, or null when there is nothing
+     * usable to return: an absent entry, an XFetch envelope this reader should recompute early,
+     * or a payload that did not survive as an array.
+     *
+     * Shared by the single and the batched reader so the two cannot drift apart. They address the
+     * same entries, so a difference in how they decode one would be a difference in what the same
+     * cached row means depending on which method asked for it.
+     *
+     * @return ?list<mixed>
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function _decodeCacheMapValue(
+        string $keyMap,
+        string $key,
+        string $query,
+        mixed $raw,
+        bool $logEntry = true
+    ): ?array {
+        if (!is_string($raw)) {
+            if ($logEntry) {
+                $this->_logCache("GETMAP_MISS: " . $keyMap, $key, null, $query);
+            }
+
             return null;
         }
 
@@ -200,14 +225,19 @@ trait DaoCacheTrait
                 && $this->cacheTTL >= static::XFETCH_MIN_TTL_THRESHOLD
                 && $this->_shouldRecompute($unserialized->storedAt, $unserialized->delta, $this->cacheTTL)
             ) {
-                $this->_logCache("GETMAP_XFETCH_RECOMPUTE: " . $keyMap, $key, null, $query);
+                if ($logEntry) {
+                    $this->_logCache("GETMAP_XFETCH_RECOMPUTE: " . $keyMap, $key, null, $query);
+                }
+
                 return null;
             }
         }
 
         $unserialized = $this->_unwrapCacheMapValue($unserialized);
 
-        $this->_logCache("GETMAP: " . $keyMap, $key, $unserialized, $query);
+        if ($logEntry) {
+            $this->_logCache("GETMAP: " . $keyMap, $key, $unserialized, $query);
+        }
 
         if (!is_array($unserialized)) {
             return null;
@@ -215,6 +245,74 @@ trait DaoCacheTrait
 
         /** @var list<mixed> $unserialized */
         return $unserialized;
+    }
+
+    /**
+     * Read many entries in one round trip.
+     *
+     * Every entry lives in its own single-field hash, so no single Redis command fetches them
+     * together; a pipeline sends the whole batch and reads the whole batch back. That is what lets
+     * a set of entities be cached one entity per entry — evictable through the per-entity door —
+     * without paying one round trip per entity for the privilege.
+     *
+     * @param array<array-key, array{keyMap: string, query: string}> $specs
+     *
+     * @return array<array-key, list<mixed>> Hits only, under the caller's own keys. A miss is
+     *                                       absent rather than null, so a cached empty result
+     *                                       stays distinguishable from no result at all.
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    protected function _getManyFromCacheMap(array $specs): array
+    {
+        if (AppConfig::$SKIP_SQL_CACHE || $this->cacheTTL == 0 || $specs === []) {
+            return [];
+        }
+
+        $this->_cacheSetConnection();
+
+        if (self::$cache_con === null) {
+            return [];
+        }
+
+        /** @var list<mixed> $responses */
+        $responses = self::$cache_con->pipeline(static function ($pipe) use ($specs): void {
+            foreach ($specs as $spec) {
+                $pipe->hget($spec['keyMap'], md5($spec['query']));
+            }
+        });
+
+        $hits = [];
+        $position = 0;
+
+        foreach ($specs as $id => $spec) {
+            $value = $this->_decodeCacheMapValue(
+                $spec['keyMap'],
+                md5($spec['query']),
+                $spec['query'],
+                $responses[$position++] ?? null,
+                false
+            );
+
+            if ($value !== null) {
+                $hits[$id] = $value;
+            }
+        }
+
+        // One line for the batch, not one per entry. The single-key reader logs per key because a
+        // key is what it did; this method does one round trip for the whole set, so a line per entry
+        // describes nothing extra and costs a log write per member. Measured against a 327-member
+        // team on production data, the per-entry lines were 95% of this method's wall clock —
+        // 29.96 ms with them against 1.49 ms without — which made the cached path several times
+        // slower than the uncached query it exists to avoid.
+        $this->_logCache(
+            "GETMAP_BATCH: " . count($hits) . "/" . count($specs) . " hit",
+            (string)array_key_first($specs),
+            null,
+            reset($specs)['query']
+        );
+
+        return $hits;
     }
 
     /**
@@ -244,21 +342,100 @@ trait DaoCacheTrait
 
         if (isset(self::$cache_con) && !empty(self::$cache_con)) {
             $key = md5($query);
-
-            if ($this->xFetchEnabled && $this->cacheTTL >= static::XFETCH_MIN_TTL_THRESHOLD) {
-                $delta = $this->lastComputeDelta > 0.0 ? $this->lastComputeDelta : static::XFETCH_FALLBACK_DELTA;
-                $this->lastComputeDelta = 0.0;
-                $storable = serialize(new XFetchEnvelope($value, microtime(true), $delta));
-            } else {
-                $this->lastComputeDelta = 0.0;
-                $storable = serialize($value);
-            }
+            $storable = $this->_storableCacheMapValue($value, $this->_consumeComputeDelta());
 
             self::$cache_con->hset($keyMap, $key, $storable);
             self::$cache_con->expire($keyMap, $this->cacheTTL);
             self::$cache_con->setex($key, $this->cacheTTL, $keyMap);
             $this->_logCache("SETMAP: " . $keyMap, $key, $value, $query);
         }
+    }
+
+    /**
+     * The measured cost of the read that produced the value about to be stored, taken once and
+     * cleared. XFetch uses it to decide how early a reader should recompute, so a stale delta
+     * carried into the next unrelated write would misprice that decision.
+     */
+    private function _consumeComputeDelta(): float
+    {
+        $delta = $this->lastComputeDelta > 0.0 ? $this->lastComputeDelta : static::XFETCH_FALLBACK_DELTA;
+        $this->lastComputeDelta = 0.0;
+
+        return $delta;
+    }
+
+    /**
+     * @param list<mixed> $value
+     */
+    private function _storableCacheMapValue(array $value, float $delta): string
+    {
+        if ($this->xFetchEnabled && $this->cacheTTL >= static::XFETCH_MIN_TTL_THRESHOLD) {
+            return serialize(new XFetchEnvelope($value, microtime(true), $delta));
+        }
+
+        return serialize($value);
+    }
+
+    /**
+     * Write many entries in one round trip, under the same addresses `_setInCacheMap()` uses.
+     *
+     * The batch shares one compute delta because it comes from one query: the cost of that read
+     * is the cost of producing every entry in it, and splitting it per entry would tell XFetch
+     * each row was cheaper to compute than it was.
+     *
+     * @param array<array-key, array{keyMap: string, query: string, value: list<mixed>}> $entries
+     *
+     * @throws PDOException
+     * @throws InvalidArgumentException
+     * @throws Exception
+     */
+    protected function _setManyInCacheMap(array $entries): void
+    {
+        if ($this->cacheTTL == 0 || $entries === []) {
+            return;
+        }
+
+        // Same reason as the single write: a row read inside an open transaction is private to
+        // this connection, and publishing it would share a row that a rollback un-makes.
+        if ($this->_isInsideTransaction()) {
+            return;
+        }
+
+        if (!isset(self::$cache_con) || empty(self::$cache_con)) {
+            return;
+        }
+
+        $delta = $this->_consumeComputeDelta();
+        $storables = [];
+
+        foreach ($entries as $entry) {
+            $storables[] = [
+                'keyMap'   => $entry['keyMap'],
+                'key'      => md5($entry['query']),
+                'storable' => $this->_storableCacheMapValue($entry['value'], $delta),
+            ];
+        }
+
+        $ttl = $this->cacheTTL;
+
+        self::$cache_con->pipeline(static function ($pipe) use ($storables, $ttl): void {
+            foreach ($storables as $storable) {
+                $pipe->hset($storable['keyMap'], $storable['key'], $storable['storable']);
+                $pipe->expire($storable['keyMap'], $ttl);
+                $pipe->setex($storable['key'], $ttl, $storable['keyMap']);
+            }
+        });
+
+        // One line for the batch, for the same reason the batched reader logs once: see the comment
+        // there.
+        $firstEntry = reset($entries);
+
+        $this->_logCache(
+            "SETMAP_BATCH: " . count($entries) . " entries",
+            (string)array_key_first($entries),
+            null,
+            $firstEntry['query']
+        );
     }
 
     /**

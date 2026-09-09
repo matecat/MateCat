@@ -9,6 +9,7 @@ use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
 use Model\DataAccess\IDatabase;
+use Model\Files\FilesMetadataMarshaller;
 use Model\Files\MetadataDao as FilesMetadataDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobMetadataDao;
@@ -67,6 +68,22 @@ class TestableGetSegmentsController extends GetSegmentsController
     protected function createJobMetadataDao(): JobMetadataDao
     {
         return $this->fakeJobMetadataDao ?? new JobMetadataDao(obtainTestDatabase());
+    }
+
+    /** @var array<int, mixed>|null */
+    public ?array $fakeNotes = null;
+
+    /** @var array<int, mixed>|null */
+    public ?array $fakeContexts = null;
+
+    protected function prepareNotes(array $segments): array
+    {
+        return $this->fakeNotes ?? parent::prepareNotes($segments);
+    }
+
+    protected function getContextGroups(array $segments): array
+    {
+        return $this->fakeContexts ?? parent::getContextGroups($segments);
     }
 
     protected function createSegmentMetadataDao(): SegmentMetadataDao
@@ -468,6 +485,108 @@ class GetSegmentsControllerTest extends AbstractTest
         self::assertArrayHasKey('data', $captured);
         self::assertSame([], $captured['data']['files']);
         self::assertSame('after', $captured['data']['where']);
+    }
+
+    /**
+     * The file context URL is read once per file at a 24h TTL, and that TTL has to travel as the
+     * read's own argument: `Files\MetadataDao::get()` declares `int $ttl = 0` and calls
+     * `setCacheTTL($ttl)` itself, so a TTL chained onto the DAO is overwritten with 0 and the read
+     * caches nothing.
+     */
+    #[Test]
+    public function segments_reads_the_file_context_url_with_the_ttl_as_an_argument(): void
+    {
+        $this->stubRequestParams([
+            'jid'      => '10',
+            'step'     => '20',
+            'segment'  => '100',
+            'password' => 'pw',
+            'where'    => 'after',
+        ]);
+
+        $job = $this->createStub(JobStruct::class);
+        $job->id       = 10;
+        $job->password = 'pw';
+        $job->source   = 'en-US';
+        $job->target   = 'it-IT';
+
+        $project = $this->createStub(ProjectStruct::class);
+        $project->id = 1;
+        $job->method('getProject')->willReturn($project);
+
+        $this->controller->fakeJob = $job;
+
+        $segmentDao = $this->createStub(SegmentDao::class);
+        $segmentDao->method('getPaginationSegments')->willReturn([self::segmentRow()]);
+        $this->controller->fakeSegmentDao = $segmentDao;
+
+        $this->controller->fakeNotes    = [];
+        $this->controller->fakeContexts = [];
+
+        $projectMetaDao = $this->createStub(ProjectMetadataDao::class);
+        $projectMetaDao->method('setCacheTTL')->willReturn($projectMetaDao);
+        $projectMetaDao->method('getValue')->willReturn(null);
+        $this->controller->fakeProjectMetadataDao = $projectMetaDao;
+
+        $filesMetaDao = $this->createMock(FilesMetadataDao::class);
+        $filesMetaDao->expects(self::never())->method('setCacheTTL');
+        $filesMetaDao->expects(self::once())
+            ->method('get')
+            ->with(1, 7, FilesMetadataMarshaller::CONTEXT_URL->value, null, 60 * 60 * 24)
+            ->willReturn(null);
+        $this->controller->fakeFilesMetadataDao = $filesMetaDao;
+
+        $jobMetaDao = $this->createStub(JobMetadataDao::class);
+        $jobMetaDao->method('getSubfilteringCustomHandlers')->willReturn([]);
+        $this->controller->fakeJobMetadataDao = $jobMetaDao;
+
+        $segmentMetaDao = $this->createStub(SegmentMetadataDao::class);
+        $segmentMetaDao->method('getAllInRange')->willReturn([]);
+        $this->controller->fakeSegmentMetadataDao = $segmentMetaDao;
+
+        $this->setFeatureSet();
+
+        $dbProp = $this->reflector->getProperty('database');
+        $dbProp->setValue($this->controller, $this->createStub(IDatabase::class));
+
+        $captured     = null;
+        $responseMock = $this->createMock(Response::class);
+        $responseMock->expects(self::once())
+            ->method('json')
+            ->willReturnCallback(function ($data) use (&$captured, $responseMock) {
+                $captured = $data;
+
+                return $responseMock;
+            });
+
+        $resProp = $this->reflector->getProperty('response');
+        $resProp->setValue($this->controller, $responseMock);
+
+        $this->controller->segments();
+
+        self::assertIsArray($captured);
+        self::assertArrayHasKey(7, $captured['data']['files']);
+        self::assertCount(1, $captured['data']['files'][7]['segments']);
+    }
+
+    /**
+     * One row of the pagination read, carrying only the columns the loop touches.
+     *
+     */
+    private static function segmentRow(): SegmentUIStruct
+    {
+        return new SegmentUIStruct([
+            'sid'                  => '55',
+            'id_file'              => 7,
+            'jid'                  => 10,
+            'filename'             => 'file.txt',
+            'segment'              => 'hello',
+            'translation'          => 'ciao',
+            'time_to_edit'         => 0,
+            'source_chunk_lengths' => null,
+            'target_chunk_lengths' => null,
+            'data_ref_map'         => null,
+        ]);
     }
 
     // ─── prepareNotes / getContextGroups (non-empty path) ────────────

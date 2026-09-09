@@ -416,11 +416,38 @@ class Utils
 
         $queue_element = array_merge([], $mailConf);
         $queue_element['subject'] = $subject;
-        $queue_element['body'] = '<pre>' . self::_getBackTrace() . "<br />" . $htmlContent . '</pre>';
+        $queue_element['body'] = self::errMailBody($htmlContent);
 
         WorkerClient::enqueue('MAIL', ErrMailWorker::class, $queue_element, ['persistent' => WorkerClient::$_HANDLER->persistent]);
 
         LoggerFactory::doJsonLog('Message has been sent');
+    }
+
+    /**
+     * The one email body assembled by hand rather than through a template, so it is the one place
+     * `EmailValue` cannot escape for us. Every caller passes plain text — an exception message, a
+     * `print_r()` of `$_REQUEST`, a conversion dump — and some of that text is user-controlled: a
+     * project or file name reaches a stack trace, and the request dump is whatever was posted. The
+     * `<pre>` and the break are the only markup this body is entitled to; the rest is escaped so a
+     * payload arrives as characters the reader can see rather than as tags their client renders.
+     *
+     * The backtrace is escaped on the same footing, though nothing in it is reachable today: it is
+     * built from class, function and line names plus a date and an IP that {@see getRealIpAddr()}
+     * has already put through `FILTER_VALIDATE_IP`. Escaping both halves means the rule is "this
+     * body escapes its content" rather than a list of which halves are currently safe.
+     *
+     * Split out from {@see sendErrMailReport()} because that method's other half enqueues to
+     * ActiveMQ, and the escaping is worth testing without a broker.
+     */
+    public static function errMailBody(string $htmlContent): string
+    {
+        $escape = static fn(string $text): string => htmlspecialchars(
+            $text,
+            ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5,
+            'UTF-8'
+        );
+
+        return '<pre>' . $escape(self::_getBackTrace()) . '<br />' . $escape($htmlContent) . '</pre>';
     }
 
     protected static function _getBackTrace(): string

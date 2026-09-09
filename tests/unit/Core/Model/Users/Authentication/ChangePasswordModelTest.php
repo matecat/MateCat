@@ -39,8 +39,7 @@ class ChangePasswordModelTest extends AbstractTest
     {
         $dao = $this->createStub(UserDao::class);
         $dao->method('updateStruct')->willReturn(1);
-        $dao->method('destroyCacheByEmail')->willReturn(true);
-        $dao->method('destroyCacheByUid')->willReturn(true);
+        $dao->method('destroyCache');
 
         return $dao;
     }
@@ -189,8 +188,7 @@ class ChangePasswordModelTest extends AbstractTest
 
         $captured = [];
         $dao = $this->createMock(UserDao::class);
-        $dao->method('destroyCacheByEmail')->willReturn(true);
-        $dao->method('destroyCacheByUid')->willReturn(true);
+        $dao->method('destroyCache');
         $dao->expects($this->once())
             ->method('updateStruct')
             ->willReturnCallback(function ($struct, $options) use (&$captured) {
@@ -221,8 +219,7 @@ class ChangePasswordModelTest extends AbstractTest
                 return 1;
             }
         );
-        $dao->method('destroyCacheByEmail')->willReturn(true);
-        $dao->method('destroyCacheByUid')->willReturn(true);
+        $dao->method('destroyCache');
 
         (new ChangePasswordModel($user, $dao, $this->makeTokenStore()))->changePassword('old-pass', 'new-pass');
 

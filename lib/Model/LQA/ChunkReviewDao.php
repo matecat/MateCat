@@ -498,13 +498,18 @@ class ChunkReviewDao extends AbstractDao
     }
 
     /**
+     * Evict the unfiltered findChunkReviews() read of a chunk, the one that spans every phase.
+     *
+     * Public for {@see \Model\Jobs\JobCredentialCacheInvalidator}; see
+     * {@see destroyCachesByJobAndPassword()} for why that caller cannot go through the door.
+     *
      * @param JobStruct $chunkStruct
      *
      * @return bool
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheForFindChunkReviews(JobStruct $chunkStruct): bool
+    public function destroyCacheChunkReviews(JobStruct $chunkStruct): bool
     {
         $findChunkReviewsStatement = $this->_findChunkReviewsStatement([$chunkStruct], null);
         $stmt = $this->_getStatementForQuery($findChunkReviewsStatement['sql']);
@@ -518,6 +523,9 @@ class ChunkReviewDao extends AbstractDao
      * The entry is keyed on the job credential but its value is the review password of that phase,
      * which is what the editor is handed, so a review password rotation has to evict it as well.
      *
+     * Public for {@see \Model\Jobs\JobCredentialCacheInvalidator}; see
+     * {@see destroyCachesByJobAndPassword()} for why that caller cannot go through the door.
+     *
      * @param JobStruct $chunkStruct
      * @param int $source_page
      *
@@ -525,7 +533,7 @@ class ChunkReviewDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheForFindChunkReviewsForSourcePage(JobStruct $chunkStruct, int $source_page): bool
+    public function destroyCacheChunkReviewsForSourcePage(JobStruct $chunkStruct, int $source_page): bool
     {
         $findChunkReviewsStatement = $this->_findChunkReviewsStatement(
             [$chunkStruct],
@@ -606,6 +614,9 @@ class ChunkReviewDao extends AbstractDao
      * Drop what isTOrR1OrR2() cached for a password, so a rotated password stops resolving a phase
      * before its TTL expires.
      *
+     * Public for {@see \Model\Jobs\JobCredentialCacheInvalidator}; see
+     * {@see destroyCachesByJobAndPassword()} for why that caller cannot go through the door.
+     *
      * @param int $jid
      * @param string $password
      *
@@ -613,7 +624,7 @@ class ChunkReviewDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheForIsTOrR1OrR2(int $jid, string $password): bool
+    public function destroyCacheIsTOrR1OrR2(int $jid, string $password): bool
     {
         $stmt = $this->_getStatementForQuery(self::sql_is_t_or_r1_or_r2);
 
@@ -690,6 +701,9 @@ class ChunkReviewDao extends AbstractDao
      * a reviewer, and callers cache it for up to a day, so a rotated password must be evicted here or
      * it keeps opening the editor until the TTL expires.
      *
+     * Public for {@see \Model\Jobs\JobCredentialCacheInvalidator}; see
+     * {@see destroyCachesByJobAndPassword()} for why that caller cannot go through the door.
+     *
      * @param string $review_password
      * @param int $id_job
      *
@@ -697,7 +711,7 @@ class ChunkReviewDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheForReviewPasswordAndJobId(string $review_password, int $id_job): bool
+    public function destroyCacheByReviewPasswordAndJobId(string $review_password, int $id_job): bool
     {
         $stmt = $this->_getStatementForQuery(self::sql_get_from_review_password_and_id_job);
 
@@ -715,24 +729,30 @@ class ChunkReviewDao extends AbstractDao
      * editor for the whole TTL, and for the password replacing it, whose entries may hold a miss
      * cached by a lookup made before the rotation.
      *
+     * This and the four narrow methods it groups stay public for
+     * {@see \Model\Jobs\JobCredentialCacheInvalidator}, which names the retired password directly
+     * and, for a review phase, a set of review passwords enumerated from the job. No
+     * ChunkReviewStruct carries either, so {@see destroyCache()} cannot derive them from the
+     * entity, and addressing the key families by hand is the only way to reach them.
+     *
      * @param int $id_job
      * @param string $password
      *
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheForJobPassword(int $id_job, string $password): void
+    public function destroyCachesByJobAndPassword(int $id_job, string $password): void
     {
         $chunkStruct = self::_chunkFor($id_job, $password);
 
-        $this->destroyCacheForFindChunkReviews($chunkStruct);
-        $this->destroyCacheForIsTOrR1OrR2($id_job, $password);
-        $this->destroyCacheForReviewPasswordAndJobId($password, $id_job);
+        $this->destroyCacheChunkReviews($chunkStruct);
+        $this->destroyCacheIsTOrR1OrR2($id_job, $password);
+        $this->destroyCacheByReviewPasswordAndJobId($password, $id_job);
 
         // There is no review phase to read on the translate page, so only the two revision phases
         // have a per phase entry to evict.
         foreach ([SourcePages::SOURCE_PAGE_REVISION, SourcePages::SOURCE_PAGE_REVISION_2] as $sourcePage) {
-            $this->destroyCacheForFindChunkReviewsForSourcePage($chunkStruct, $sourcePage);
+            $this->destroyCacheChunkReviewsForSourcePage($chunkStruct, $sourcePage);
         }
     }
 
@@ -766,8 +786,9 @@ class ChunkReviewDao extends AbstractDao
     }
 
     /**
-     * Invalidates every Redis-cached read that can serve a stale penalty_points/is_pass/
-     * counters value for this chunk review.
+     * The one way in from outside: a caller names the chunk review it already holds, and every
+     * Redis-cached read that could still serve a stale penalty_points/is_pass/counters value for
+     * that row is dropped.
      *
      * Call it inline, right after the write. Busting while the writing transaction is still open
      * would let a concurrent reader miss the cache, read the pre-commit row and repopulate from it,
@@ -778,12 +799,12 @@ class ChunkReviewDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCachesFor(ChunkReviewStruct $chunkReview): void
+    public function destroyCache(ChunkReviewStruct $chunkReview): void
     {
-        // The credential-keyed door covers the per source page reads, which are the ones that can
-        // still hand back a struct with the pre-write counters; the project keyed read is separate
-        // because a credential says nothing about the project it belongs to.
-        $this->destroyCacheForJobPassword($chunkReview->id_job, $chunkReview->password);
+        // The credential-keyed fan-out covers the per source page reads, which are the ones that
+        // can still hand back a struct with the pre-write counters; the project keyed read is
+        // separate because a credential says nothing about the project it belongs to.
+        $this->destroyCachesByJobAndPassword($chunkReview->id_job, $chunkReview->password);
         $this->destroyCacheByProjectId($chunkReview->id_project);
     }
 
@@ -896,7 +917,7 @@ class ChunkReviewDao extends AbstractDao
         // A new row changes what findChunkReviews()/getByProjectId() should return. After the commit,
         // not before: a guest scope returns with the caller's transaction still open, and a bust
         // issued there lets a concurrent reader repopulate the cache from the pre-commit row.
-        $this->database->onCommit(fn() => $this->destroyCachesFor($struct));
+        $this->database->onCommit(fn() => $this->destroyCache($struct));
 
         return $struct;
     }
@@ -921,7 +942,7 @@ class ChunkReviewDao extends AbstractDao
         $deleted = $stmt->execute(['id_job' => $id_job]);
 
         foreach ($rows as $row) {
-            $this->destroyCachesFor($row);
+            $this->destroyCache($row);
         }
 
         return $deleted;

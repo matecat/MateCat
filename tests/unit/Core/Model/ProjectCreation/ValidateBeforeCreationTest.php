@@ -118,7 +118,7 @@ class ValidateBeforeCreationTest extends AbstractTest
         $this->pm->setProjectStructureValue('qa_model', null);
 
         $teamDao = $this->createMock(TeamDao::class);
-        $teamDao->expects($this->once())->method('destroyCacheAssignee');
+        $teamDao->expects($this->once())->method('destroyCacheAssigneeWithProjectsByTeam');
         $this->pm->setTeamDao($teamDao);
 
         $this->pm->callValidateBeforeCreation();
@@ -144,7 +144,7 @@ class ValidateBeforeCreationTest extends AbstractTest
         $this->pm->setProjectStructureValue('qa_model', null);
 
         $teamDao = $this->createMock(TeamDao::class);
-        $teamDao->expects($this->never())->method('destroyCacheAssignee');
+        $teamDao->expects($this->never())->method('destroyCacheAssigneeWithProjectsByTeam');
         $this->pm->setTeamDao($teamDao);
 
         $this->pm->callValidateBeforeCreation();

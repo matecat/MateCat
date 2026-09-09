@@ -11,15 +11,17 @@ use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Throwable;
+use TypeError;
 
 /**
  * Real-SQL coverage for MembershipDao (campaign dao-realsql-90).
  *
  * Every public SQL method is exercised against the real unittest DB: findUserTeams,
  * findTeamByIdAndUser, findTeamByIdAndName, getMemberListByTeamId (traverse on/off),
- * deleteUserFromTeam, createList (+ its validation branches) and the three destroyCache*
+ * deleteUserFromTeam, addMembersByEmail (+ its transaction guard) and the three destroyCache*
  * evictions. Fixtures (User -> Team -> teams_users) are built through TestFixtureBuilder and
- * reverse-FK cleaned; rows the DAO inserts itself (createList) are registered via trackExisting
+ * reverse-FK cleaned; rows the DAO inserts itself are registered via trackExisting
  * so the whole-table residue gate returns to baseline (DoD c).
  */
 #[Group('PersistenceNeeded')]
@@ -120,16 +122,57 @@ class MembershipDaoRealSqlTest extends AbstractTest
         $this->assertNull($this->dao->deleteUserFromTeam($this->uid, $this->teamId));
     }
 
+
+
     #[Test]
-    public function createList_inserts_memberships_for_known_emails(): void
+    public function destroyCache_evicts_the_three_reads_a_membership_row_addresses(): void
+    {
+        $this->dao->setCacheTTL(60);
+        $this->dao->findUserTeams($this->user());
+        $this->dao->findTeamByIdAndUser($this->teamId, $this->user());
+        $this->dao->getMemberListByTeamId($this->teamId, false);
+
+        // Two of the three select teams.* through the join, so the name reaches them; the member list
+        // is the teams_users row itself.
+        $this->writeBehindTheCache('UPDATE teams SET name = :name WHERE id = :id', ['name' => 'rsq_renamed', 'id' => $this->teamId]);
+        $this->writeBehindTheCache('UPDATE teams_users SET is_admin = 0 WHERE id_team = :id AND uid = :uid', ['id' => $this->teamId, 'uid' => $this->uid]);
+
+        $this->dao->destroyCache(new MembershipStruct(['uid' => $this->uid, 'id_team' => $this->teamId]));
+
+        $teams = $this->dao->setCacheTTL(60)->findUserTeams($this->user());
+        $this->assertIsArray($teams);
+        $this->assertSame('rsq_renamed', $teams[0]->name);
+        $this->assertSame('rsq_renamed', $this->dao->setCacheTTL(60)->findTeamByIdAndUser($this->teamId, $this->user())?->name);
+        $this->assertFalse((bool)$this->dao->setCacheTTL(60)->getMemberListByTeamId($this->teamId, false)[0]->is_admin);
+    }
+
+    #[Test]
+    public function destroyCache_refuses_a_membership_that_names_no_user(): void
+    {
+        $this->expectException(TypeError::class);
+        $this->dao->destroyCache(new MembershipStruct(['id_team' => $this->teamId]));
+    }
+
+    /**
+     * @param array<string, int|string> $bind
+     */
+    private function writeBehindTheCache(string $sql, array $bind): void
+    {
+        $this->realSqlDb()->getConnection()->prepare($sql)->execute($bind);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function addMembersByEmail_inserts_memberships_for_known_emails(): void
     {
         $newUser = $this->fixtures->makeUser();
         $team = new TeamStruct(['id' => $this->teamId, 'created_by' => $this->uid]);
 
-        $conn = $this->realSqlDb()->getConnection();
-        $conn->beginTransaction();
-        $created = $this->dao->createList(['team' => $team, 'members' => [$newUser['email']]]);
-        $conn->commit();
+        $created = $this->realSqlDb()->transaction(
+            fn(): array => $this->dao->addMembersByEmail($team, [$newUser['email']])
+        );
 
         foreach ($created as $m) {
             $this->fixtures->trackExisting('teams_users', ['id' => (int)$m->id]);
@@ -141,88 +184,51 @@ class MembershipDaoRealSqlTest extends AbstractTest
         $this->assertSame($this->teamId, (int)$created[0]->id_team);
     }
 
+    /**
+     * An address with no account behind it is not an error: the team invitation flow hands over
+     * whatever was typed, and the addresses that match nothing simply create no membership.
+     *
+     * @throws Throwable
+     */
     #[Test]
-    public function createList_returns_empty_when_no_email_matches_a_user(): void
+    public function addMembersByEmail_returns_empty_when_no_email_matches_a_user(): void
     {
         $team = new TeamStruct(['id' => $this->teamId, 'created_by' => $this->uid]);
 
-        $conn = $this->realSqlDb()->getConnection();
-        $conn->beginTransaction();
-        $created = $this->dao->createList([
-            'team'    => $team,
-            'members' => ['no_such_user_' . bin2hex(random_bytes(6)) . '@example.test'],
-        ]);
-        $conn->commit();
+        $created = $this->realSqlDb()->transaction(
+            fn(): array => $this->dao->addMembersByEmail(
+                $team,
+                ['no_such_user_' . bin2hex(random_bytes(6)) . '@example.test']
+            )
+        );
 
         $this->assertSame([], $created);
     }
 
+    /**
+     * One row per member, so a failure halfway leaves a team holding part of its member list. The
+     * guard refuses to start rather than write that.
+     */
     #[Test]
-    public function createList_throws_when_not_wrapped_in_a_transaction(): void
+    public function addMembersByEmail_throws_when_not_wrapped_in_a_transaction(): void
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('requires to be wrapped in a transaction');
 
-        $this->dao->createList([
-            'team'    => new TeamStruct(['id' => $this->teamId]),
-            'members' => ['x@example.test'],
-        ]);
+        $this->dao->addMembersByEmail(new TeamStruct(['id' => $this->teamId]), ['x@example.test']);
     }
 
+    /**
+     * The inherited stub is the whole implementation here: this DAO writes memberships from email
+     * addresses, which is not the struct-list insert the name describes, and it exposes that under
+     * its own name instead.
+     */
     #[Test]
-    public function createList_validates_payload_shape(): void
+    public function createList_is_not_implemented_by_this_dao(): void
     {
-        $conn = $this->realSqlDb()->getConnection();
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('must be overridden');
 
-        // missing required keys
-        $conn->beginTransaction();
-        try {
-            $this->dao->createList(['members' => ['x@example.test']]);
-            $this->fail('expected exception for missing keys');
-        } catch (Exception $e) {
-            $this->assertStringContainsString('Missing required keys', $e->getMessage());
-        } finally {
-            $conn->rollBack();
-        }
-
-        // members not an array
-        $conn->beginTransaction();
-        try {
-            $this->dao->createList(['team' => new TeamStruct(), 'members' => 'nope']);
-            $this->fail('expected exception for non-array members');
-        } catch (Exception $e) {
-            $this->assertStringContainsString('members must be an array', $e->getMessage());
-        } finally {
-            $conn->rollBack();
-        }
-
-        // team not a TeamStruct
-        $conn->beginTransaction();
-        try {
-            $this->dao->createList(['team' => 'nope', 'members' => ['x@example.test']]);
-            $this->fail('expected exception for non-TeamStruct team');
-        } catch (Exception $e) {
-            $this->assertStringContainsString('Team must be a TeamStruct', $e->getMessage());
-        } finally {
-            $conn->rollBack();
-        }
-    }
-
-    #[Test]
-    public function destroyCache_methods_evict_primed_entries(): void
-    {
-        $this->dao->setCacheTTL(60);
-
-        // findUserTeams cache
-        $this->dao->findUserTeams($this->user());
-        $this->assertTrue($this->dao->destroyCacheUserTeams($this->user()));
-
-        // findTeamByIdAndUser cache
-        $this->dao->findTeamByIdAndUser($this->teamId, $this->user());
-        $this->assertTrue($this->dao->destroyCacheTeamByIdAndUser($this->teamId, $this->user()));
-
-        // getMemberListByTeamId cache
-        $this->dao->getMemberListByTeamId($this->teamId, false);
-        $this->assertTrue($this->dao->destroyCacheForListByTeamId($this->teamId));
+        $this->dao->createList([new MembershipStruct()]);
     }
 }

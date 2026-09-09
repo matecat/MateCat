@@ -25,6 +25,8 @@ use Utils\Tools\Utils;
 class UploadPageController extends BaseKleinViewController
 {
 
+    protected bool $isIndexable = true;
+
     /**
      * @throws Exception
      */

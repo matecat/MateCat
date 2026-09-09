@@ -85,8 +85,18 @@ class GetSearchController extends AbstractStatefulKleinController
         $search_results = [];
 
         // and then hydrate the $search_results array
+        // One read per 20 hits instead of one per hit — the DAO chunks the id list internally.
+        // It also prepends each chunk to the accumulated set, so above 20 hits the rows come back
+        // with the chunks in reverse order. Index by segment id and pick below in sid_list order:
+        // that order decides which segments are committed first and the order their replace-history
+        // events are written under one shared version, so it has to survive the batching.
+        $translationsBySegmentId = [];
+        foreach ($this->batchLoadTranslations($res['sid_list'], (int)$this->chunk->id) as $segmentTranslation) {
+            $translationsBySegmentId[(int)$segmentTranslation->id_segment] = $segmentTranslation;
+        }
+
         foreach ($res['sid_list'] as $segmentId) {
-            $segmentTranslation = (new SegmentTranslationDao($this->getDatabase()))->findBySegmentAndJob($segmentId, (int)$this->chunk->id);
+            $segmentTranslation = $translationsBySegmentId[(int)$segmentId] ?? null;
             if ($segmentTranslation === null) {
                 continue;
             }
@@ -223,6 +233,32 @@ class GetSearchController extends AbstractStatefulKleinController
             'inCurrentChunkOnly' => $inCurrentChunkOnly,
             'queryParams' => $queryParams,
         ];
+    }
+
+    /**
+     * Reads the translation rows for a list of segments in batches, replacing a per-segment
+     * findBySegmentAndJob(). Same key (id_segment, id_job), same live read — both default to
+     * ttl 0 — and the same struct. The DAO splits the list 20 ids at a time, so this is one query
+     * per 20 segments rather than one for the lot. The caller indexes the result itself: the rows
+     * come back in the DAO's order, which is neither this list's order nor sorted.
+     *
+     * @param array<int, int|string> $segmentIds
+     *
+     * @return array<int, SegmentTranslationStruct>
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function batchLoadTranslations(array $segmentIds, int $jobId): array
+    {
+        $ids = array_values(array_unique(array_map('intval', $segmentIds)));
+
+        if (empty($ids)) {
+            // The DAO already returns [] for an empty list without preparing anything. This is
+            // here to skip the call and the DAO construction, not to avoid a malformed query.
+            return [];
+        }
+
+        return (new SegmentTranslationDao($this->getDatabase()))->getAllSegmentsByIdListAndJobId($ids, $jobId);
     }
 
     /**
@@ -375,15 +411,22 @@ class GetSearchController extends AbstractStatefulKleinController
             throw new NotFoundException("Project not found for job $id_job");
         }
 
+        // Built once and reused, so every scope below now shares these two instances and whatever
+        // per-instance cache state they hold. Safe only because neither call site here passes a
+        // TTL: fetchById() below is called without one, so setCacheTTL() is never reached and
+        // cacheTTL stays 0. The reads and writes themselves stay inside their own scope, where the
+        // original put them.
+        $segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
+        $segmentDao = new SegmentDao($this->getDatabase());
+
         // loop all segments to replace
         $committed = [];
         foreach ($search_results as $old_translation) {
             // One scope per segment: replace-all writes each match on its own, so a failure on
             // one leaves the ones already committed alone.
-            $written = $db->transaction(function () use ($old_translation, $queryParams, $project, $id_job, $isHistoryReplay, $revisionNumber): ?array {
+            $written = $db->transaction(function () use ($old_translation, $queryParams, $project, $id_job, $isHistoryReplay, $revisionNumber, $segmentTranslationDao, $segmentDao): ?array {
                 $versionsHandler = TranslationVersions::getVersionHandlerNewInstance($this->chunk, $this->user, $project, (int)$old_translation->id_segment, $this->getDatabase());
-                $segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
-                $segment = (new SegmentDao($this->getDatabase()))->fetchById((int)$old_translation->id_segment, SegmentStruct::class);
+                $segment = $segmentDao->fetchById((int)$old_translation->id_segment, SegmentStruct::class);
 
                 if (
                     $old_translation === null ||
@@ -530,10 +573,25 @@ class GetSearchController extends AbstractStatefulKleinController
         SearchQueryParamsStruct $queryParams,
         bool $isHistoryReplay = false
     ): void {
-        $segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
+        // One read per job instead of one per row. The rows carry their own id_job — a replace
+        // event records the job it was applied to — so they are grouped by job and each group read
+        // with its own id list. Indexing on the PAIR keeps a segment id that appears under a
+        // foreign job from matching this job's row, which is what the per-row lookup guaranteed.
+        $byJob = [];
+        foreach ($search_results as $tRow) {
+            $byJob[(int)$tRow['id_job']][] = (int)$tRow['id_segment'];
+        }
+
+        $currentByPair = [];
+        foreach ($byJob as $jobId => $segmentIds) {
+            foreach ($this->batchLoadTranslations($segmentIds, $jobId) as $translation) {
+                $currentByPair[$jobId . ':' . (int)$translation->id_segment] = $translation;
+            }
+        }
+
         $result = [];
         foreach ($search_results as $tRow) {
-            $currentTranslation = $segmentTranslationDao->findBySegmentAndJob((int)$tRow['id_segment'], (int)$tRow['id_job']);
+            $currentTranslation = $currentByPair[(int)$tRow['id_job'] . ':' . (int)$tRow['id_segment']] ?? null;
             if (empty($currentTranslation)) {
                 continue;
             }

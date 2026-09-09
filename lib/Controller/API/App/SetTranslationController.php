@@ -810,7 +810,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     {
         [$__translation, $this->data['split_chunk_lengths']] = (new CatUtils($this->getDatabase()))->parseSegmentSplit($this->data['translation'], '', $this->filter);
 
-        if (is_null($__translation) || $__translation === '') {
+        if ($__translation === '') {
             $this->logger->debug("Empty translation \n\n" . var_export($this->request->paramsPost()->all(), true));
             throw new RuntimeException("Empty translation \n\n" . var_export($this->request->paramsPost()->all(), true), 0);
         }

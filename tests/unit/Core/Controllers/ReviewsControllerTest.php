@@ -12,6 +12,7 @@ use Exception;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectStruct;
 use PDOException;
@@ -323,9 +324,9 @@ class ReviewsControllerTest extends AbstractTest
 
     /**
      * Happy path: {@see ReviewsController::initRevisionFromProject} is stubbed so the heavy
-     * full-stack revision graph is bypassed; the record it yields must reference the seeded job
-     * ({@see self::BASE} id + 'jobpw' password) so the real-DB cache-destroy tail (getByIdAndPasswordOrFail
-     * + destroyCache* calls) executes against seeded rows.
+     * full-stack revision graph is bypassed. The record it yields names the seeded job
+     * ({@see self::BASE} id + 'jobpw' password) and the seeded project, which is what the cache
+     * doors address, so the real-DB eviction tail runs against seeded rows.
      *
      * @throws ReflectionException
      * @throws Exception
@@ -334,10 +335,13 @@ class ReviewsControllerTest extends AbstractTest
     #[Test]
     public function createReview_creates_records_destroys_caches_and_returns_json(): void
     {
-        $record                 = new ChunkReviewStruct();
-        $record->id             = self::BASE + 8;
-        $record->id_job         = $this->jobId(self::BASE);
-        $record->password       = 'jobpw';
+        // createRecord() reads the row back, so a record reaching the controller always carries the
+        // project it belongs to; the project keyed eviction is addressed by it.
+        $record                  = new ChunkReviewStruct();
+        $record->id              = self::BASE + 8;
+        $record->id_project      = $this->projectId(self::BASE);
+        $record->id_job          = $this->jobId(self::BASE);
+        $record->password        = 'jobpw';
         $record->review_password = 'revpw';
 
         $feature = $this->createMock(AbstractRevisionFeature::class);
@@ -368,6 +372,81 @@ class ReviewsControllerTest extends AbstractTest
             ]);
 
         $this->controller->createReview();
+    }
+
+    /**
+     * `createReview()` writes a chunk review for one revision phase, so the read of that phase
+     * describes a set the database no longer holds. Each phase carries its own key map — one per
+     * phase, so that evicting a phase cannot take the others or the unfiltered read down with it —
+     * and the unfiltered eviction therefore does not reach it. Left standing it answers with the
+     * pre-write set for the full 60 second TTL.
+     *
+     * Rotating the review password on the connection is the probe: only a read that reaches MySQL
+     * can return the new value, so the assertion fails exactly when the entry survived.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws \PHPUnit\Framework\MockObject\Exception
+     */
+    #[Test]
+    public function createReview_evicts_the_source_page_entry_of_the_phase_it_writes(): void
+    {
+        $jobId = $this->jobId(self::BASE);
+
+        $chunk           = new JobStruct();
+        $chunk->id       = $jobId;
+        $chunk->password = 'jobpw';
+
+        $dao    = new ChunkReviewDao(obtainTestDatabase());
+        $warmed = $dao->findChunkReviewsForSourcePage($chunk, 2);
+        $this->assertSame('revpw', $warmed[0]->review_password, 'the seeded row warms the entry');
+
+        $this->rotateReviewPasswordBehindTheCache($jobId, 'rotated');
+
+        $record                  = new ChunkReviewStruct();
+        $record->id              = self::BASE + 8;
+        $record->id_project      = $this->projectId(self::BASE);
+        $record->id_job          = $jobId;
+        $record->password        = 'jobpw';
+        $record->review_password = 'rotated';
+
+        $feature = $this->createMock(AbstractRevisionFeature::class);
+        $feature->method('createQaChunkReviewRecords')->willReturn([$record]);
+
+        $factory = $this->createMock(RevisionFactory::class);
+        $factory->method('getRevisionFeature')->willReturn($feature);
+
+        $this->controller->revisionFactoryStub = $factory;
+
+        $project           = new ProjectStruct();
+        $project->id       = $this->projectId(self::BASE);
+        $project->password = 'projpw';
+        $this->setProp('project', $project);
+
+        $this->setProp('chunk', new JobStruct());
+        $this->setProp('nextSourcePage', 2);
+
+        $this->controller->createReview();
+
+        $this->assertSame(
+            'rotated',
+            $dao->findChunkReviewsForSourcePage($chunk, 2)[0]->review_password,
+            'the entry of the phase createReview() wrote has to drop with the write'
+        );
+    }
+
+    /**
+     * Writes on the connection, so a cached read still answers with the value it holds.
+     *
+     * @throws PDOException
+     */
+    private function rotateReviewPasswordBehindTheCache(int $jobId, string $reviewPassword): void
+    {
+        $stmt = obtainTestDatabase()->getConnection()->prepare(
+            'UPDATE qa_chunk_reviews SET review_password = :review_password ' .
+            ' WHERE id_job = :id_job AND source_page = 2 '
+        );
+        $stmt->execute(['review_password' => $reviewPassword, 'id_job' => $jobId]);
     }
 
     // ─── registerValidators onSuccess closures ───

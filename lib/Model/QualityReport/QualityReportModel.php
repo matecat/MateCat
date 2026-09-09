@@ -210,7 +210,7 @@ class QualityReportModel
         $chunkReviewDao->updateStruct($chunkReview, $options);
         // After the commit: busting now would let a reader repopulate from the pre-reset row.
         // Deferred to the commit inside DaoCacheTrait; the caller does not schedule it.
-        $chunkReviewDao->destroyCachesFor($chunkReview);
+        $chunkReviewDao->destroyCache($chunkReview);
     }
 
     /**

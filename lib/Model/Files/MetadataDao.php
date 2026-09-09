@@ -12,6 +12,7 @@ use Exception;
 use Model\DataAccess\AbstractDao;
 use PDOException;
 use ReflectionException;
+use TypeError;
 
 class MetadataDao extends AbstractDao
 {
@@ -49,6 +50,10 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * The second, coarser door: every metadata row of a file, whatever its keys. FilesInfoUtility
+     * clears a whole file after a write it does not describe key by key, and no single struct says
+     * that, so this stays public alongside destroyCache().
+     *
      * @throws PDOException
      * @throws ReflectionException
      */
@@ -68,7 +73,7 @@ class MetadataDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyGetCache(int $id_project, int $id_file, string $key, ?int $filePartsId = null): bool
+    private function destroyCacheByProjectFileAndKey(int $id_project, int $id_file, string $key, ?int $filePartsId = null): bool
     {
         $params = [
             'id_project' => $id_project,
@@ -126,6 +131,59 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * The one eviction a caller needs. A row here answers three reads, and two of them differ only in
+     * whether files_parts_id is bound: the same row, at two addresses. A write reaches whichever side
+     * it named — the UPDATE has no files_parts_id clause — so the part ids are read back from the table
+     * rather than taken from the caller, which never has them on both paths.
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws TypeError when the struct names less than a whole address
+     */
+    public function destroyCache(MetadataStruct $metadata): void
+    {
+        if (!isset($metadata->id_project, $metadata->id_file, $metadata->key)) {
+            throw new TypeError('MetadataStruct must carry id_project, id_file and key');
+        }
+
+        $this->destroyCacheByJobIdProjectAndIdFile($metadata->id_project, $metadata->id_file);
+        $this->destroyCacheByProjectFileAndKey($metadata->id_project, $metadata->id_file, $metadata->key);
+
+        $partIds = $this->filePartIdsHolding($metadata->id_project, $metadata->id_file, $metadata->key);
+        if ($metadata->files_parts_id !== null) {
+            $partIds[] = $metadata->files_parts_id;
+        }
+
+        foreach (array_unique($partIds) as $filePartsId) {
+            $this->destroyCacheByProjectFileAndKey(
+                $metadata->id_project,
+                $metadata->id_file,
+                $metadata->key,
+                $filePartsId
+            );
+        }
+    }
+
+    /**
+     * The part ids under which this key is stored right now. A row removed before the door runs is not
+     * in here, which is why the caller's own id is added on top.
+     *
+     * @return list<int>
+     * @throws PDOException
+     */
+    private function filePartIdsHolding(int $id_project, int $id_file, string $key): array
+    {
+        $stmt = $this->database->getConnection()->prepare(
+            "SELECT DISTINCT files_parts_id FROM file_metadata " .
+            " WHERE id_project = :id_project AND id_file = :id_file AND `key` = :key " .
+            " AND files_parts_id IS NOT NULL "
+        );
+        $stmt->execute(['id_project' => $id_project, 'id_file' => $id_file, 'key' => $key]);
+
+        return array_values(array_map('intval', $stmt->fetchAll(\PDO::FETCH_COLUMN)));
+    }
+
+    /**
      * @param int $id_project
      * @param int $id_file
      * @param string $key
@@ -135,6 +193,7 @@ class MetadataDao extends AbstractDao
      * @return MetadataStruct|null
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     public function insert(int $id_project, int $id_file, string $key, string $value, ?int $filePartsId = null): ?MetadataStruct
     {
@@ -153,8 +212,12 @@ class MetadataDao extends AbstractDao
             'value' => $value
         ]);
 
-        $this->destroyCacheByJobIdProjectAndIdFile($id_project, $id_file);
-        $this->destroyGetCache($id_project, $id_file, $key, $filePartsId);
+        $this->destroyCache(new MetadataStruct([
+            'id_project'     => $id_project,
+            'id_file'        => $id_file,
+            'key'            => $key,
+            'files_parts_id' => $filePartsId,
+        ]));
 
         return $this->get($id_project, $id_file, $key, $filePartsId);
     }
@@ -169,6 +232,7 @@ class MetadataDao extends AbstractDao
      * @return MetadataStruct|null
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     public function update(int $id_project, int $id_file, string $key, string $value, ?int $filePartsId = null): ?MetadataStruct
     {
@@ -192,8 +256,12 @@ class MetadataDao extends AbstractDao
 
         $stmt->execute($args);
 
-        $this->destroyCacheByJobIdProjectAndIdFile($id_project, $id_file);
-        $this->destroyGetCache($id_project, $id_file, $key, $filePartsId);
+        $this->destroyCache(new MetadataStruct([
+            'id_project'     => $id_project,
+            'id_file'        => $id_file,
+            'key'            => $key,
+            'files_parts_id' => $filePartsId,
+        ]));
 
         return $this->get($id_project, $id_file, $key, $filePartsId);
     }
@@ -207,6 +275,7 @@ class MetadataDao extends AbstractDao
      * @return bool|null
      * @throws ReflectionException
      * @throws PDOException
+     * @throws TypeError
      */
     public function bulkInsert(int $id_project, int $id_file, array $metadata = [], ?int $filePartsId = null): bool|null
     {
@@ -239,10 +308,14 @@ class MetadataDao extends AbstractDao
 
             $result = $stmt->execute($bind_values);
 
-            $this->destroyCacheByJobIdProjectAndIdFile($id_project, $id_file);
             foreach ($metadata as $key => $value) {
                 if ($value !== null and $value !== '') {
-                    $this->destroyGetCache($id_project, $id_file, $key, $filePartsId);
+                    $this->destroyCache(new MetadataStruct([
+                        'id_project'     => $id_project,
+                        'id_file'        => $id_file,
+                        'key'            => $key,
+                        'files_parts_id' => $filePartsId,
+                    ]));
                 }
             }
 

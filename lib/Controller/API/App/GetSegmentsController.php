@@ -139,10 +139,12 @@ class GetSegmentsController extends KleinController
                 $res[$id_file]['target_code'] = $job->target;
                 $res[$id_file]['segments'] = [];
 
-                $fileContextUrls[$id_file] = $filesMetadataDao->setCacheTTL(60 * 60 * 24)->get(
+                $fileContextUrls[$id_file] = $filesMetadataDao->get(
                     $projectId,
                     $id_file,
-                    FilesMetadataMarshaller::CONTEXT_URL->value
+                    FilesMetadataMarshaller::CONTEXT_URL->value,
+                    null,
+                    60 * 60 * 24
                 )?->value;
             }
 
