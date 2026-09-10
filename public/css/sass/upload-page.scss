@@ -135,7 +135,7 @@ body {
   }
 
   .select-with-label__wrapper {
-    gap: 8px;
+    gap: 4px;
     .select {
       padding: 9px 46px 9px 12px;
       border: 1px solid rgba(34, 36, 38, 0.15);
@@ -326,7 +326,7 @@ body {
   min-width: 992px;
   max-width: 1600px;
   position: relative;
-  padding: 0 24px 24px;
+  padding: 0 24px 12px;
   background: colors.$grey50;
   border-radius: 16px;
 }

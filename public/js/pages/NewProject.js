@@ -1110,7 +1110,7 @@ const NewProject = () => {
           <div className="uploadbtn-box">
             {!projectSent ? (
               <Button
-                size={BUTTON_SIZE.BIG}
+                size={BUTTON_SIZE.MEDIUM}
                 type={BUTTON_TYPE.PRIMARY}
                 disabled={
                   !isFormReadyToSubmit ||
