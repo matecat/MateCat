@@ -93,6 +93,9 @@ module.exports = {
         'public/js/components/review_extended/**/*.js',
         'public/js/components/common/WrapperLoader.js',
         'public/js/components/header/cattol/**/*.js',
+        'public/js/components/segments/GlossaryComponents/**/*.js',
+        'public/js/components/segments/LexiqaHighlight/**/*.js',
+        'public/js/components/segments/TooltipInfo/**/*.js',
       ],
       rules: {
         'no-restricted-syntax': [
