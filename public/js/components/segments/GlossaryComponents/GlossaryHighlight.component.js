@@ -1,16 +1,14 @@
-import React, {Component, createRef} from 'react'
+import React, {useRef} from 'react'
 import {highlightGlossaryTerm} from '../../../actions/segmentDispatchActions'
 import Tooltip from '../../common/Tooltip'
 import TEXT_UTILS from '../../../utils/textUtils'
 import {tagSignatures} from '../utils/DraftMatecatUtils/tagModel'
 
-class GlossaryHighlight extends Component {
-  constructor(props) {
-    super(props)
-    this.contentRef = createRef()
-  }
-  getTermDetails = () => {
-    const {contentState, glossary, start, end, blockKey, children} = this.props
+const GlossaryHighlight = (props) => {
+  const contentRef = useRef(null)
+
+  const getTermDetails = () => {
+    const {contentState, glossary, start, end, blockKey, children} = props
     if (tagSignatures.space) {
       const getBlocksBefore = (key) => {
         const blocks = []
@@ -97,9 +95,10 @@ class GlossaryHighlight extends Component {
       return result
     }
   }
-  onClickTerm = () => {
-    const {sid} = this.props
-    const glossaryTerm = this.getTermDetails()
+
+  const onClickTerm = () => {
+    const {sid} = props
+    const glossaryTerm = getTermDetails()
     //Call Segment footer Action
     highlightGlossaryTerm({
       sid,
@@ -107,20 +106,19 @@ class GlossaryHighlight extends Component {
       type: 'glossary',
     })
   }
-  render() {
-    const {children} = this.props
 
-    return (
-      <Tooltip
-        stylePointerElement={{display: 'inline-block', position: 'relative'}}
-        content="Termbase entry"
-      >
-        <div ref={this.contentRef} className="glossaryItem">
-          <span onClick={() => this.onClickTerm()}>{children}</span>
-        </div>
-      </Tooltip>
-    )
-  }
+  const {children} = props
+
+  return (
+    <Tooltip
+      stylePointerElement={{display: 'inline-block', position: 'relative'}}
+      content="Termbase entry"
+    >
+      <div ref={contentRef} className="glossaryItem">
+        <span onClick={() => onClickTerm()}>{children}</span>
+      </div>
+    </Tooltip>
+  )
 }
 
 export default GlossaryHighlight

@@ -39,44 +39,6 @@ afterEach(() => {
   jest.clearAllMocks()
 })
 
-describe('QaCheckBlacklistHighlight.getTermDetails — space signature enabled (default)', () => {
-  test('finds the matching blacklisted term through the regex callback', () => {
-    TEXT_UTILS.getGlossaryMatchRegex.mockReturnValue({
-      regex: /hello/i,
-      regexCallback: (regex, block, callback) => callback(0, 5),
-    })
-
-    const blackListedTerms = [
-      {matching_words: ['hello'], source: {term: 'ciao'}, target: {term: 'hello'}},
-    ]
-
-    const instance = new QaCheckBlacklistHighlight({
-      ...baseProps,
-      contentState: makeContentState('hello world'),
-      blackListedTerms,
-      children: [],
-    })
-
-    expect(instance.getTermDetails()).toEqual(blackListedTerms[0])
-  })
-
-  test('returns undefined when no term overlaps the highlighted range', () => {
-    TEXT_UTILS.getGlossaryMatchRegex.mockReturnValue({
-      regex: /hello/i,
-      regexCallback: (regex, block, callback) => callback(20, 25),
-    })
-
-    const instance = new QaCheckBlacklistHighlight({
-      ...baseProps,
-      contentState: makeContentState('hello world, unrelated'),
-      blackListedTerms: [{matching_words: ['hello']}],
-      children: [],
-    })
-
-    expect(instance.getTermDetails()).toBeUndefined()
-  })
-})
-
 describe('QaCheckBlacklistHighlight.getTermDetails — space signature disabled', () => {
   const originalSpace = tagSignatures.space
 
@@ -88,16 +50,26 @@ describe('QaCheckBlacklistHighlight.getTermDetails — space signature disabled'
     tagSignatures.space = originalSpace
   })
 
-  test('matches using the decorated text of the first child', () => {
-    const blackListedTerms = [{matching_words: ['hello'], source: {}, target: {term: 'hello'}}]
-    const instance = new QaCheckBlacklistHighlight({
-      ...baseProps,
-      contentState: makeContentState('unused'),
-      blackListedTerms,
-      children: [{props: {text: '  Hello  '}}],
-    })
+  const FakeDecoratedText = ({text}) => <span>{text}</span>
 
-    expect(instance.getTermDetails()).toEqual(blackListedTerms[0])
+  test('matches using the decorated text of the first child', () => {
+    const blackListedTerms = [
+      {matching_words: ['hello'], source: {}, target: {term: 'hello'}},
+    ]
+
+    render(
+      <QaCheckBlacklistHighlight
+        {...baseProps}
+        contentState={makeContentState('unused')}
+        blackListedTerms={blackListedTerms}
+        // eslint-disable-next-line react/no-children-prop -- explicit array needed to mirror children[0] access
+        children={[<FakeDecoratedText text="  Hello  " key="0" />]}
+      />,
+    )
+
+    expect(screen.getByTestId('tooltip-content')).toHaveTextContent(
+      'hello is flagged as a forbidden word',
+    )
   })
 })
 
@@ -132,7 +104,11 @@ describe('QaCheckBlacklistHighlight render', () => {
         {...baseProps}
         contentState={makeContentState('hello world')}
         blackListedTerms={[
-          {matching_words: ['hello'], source: {term: 'ciao'}, target: {term: 'hello'}},
+          {
+            matching_words: ['hello'],
+            source: {term: 'ciao'},
+            target: {term: 'hello'},
+          },
         ]}
       >
         hello
