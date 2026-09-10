@@ -1,4 +1,10 @@
-import React from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import ReviewExtendedCategorySelector from './ReviewExtendedCategorySelector'
 import CommonUtils from '../../utils/commonUtils'
 import SegmentActions from '../../actions/SegmentActions'
@@ -11,39 +17,80 @@ import CatToolActions from '../../actions/CatToolActions'
 import {editSegmentIssue} from '../../api/editSegmentIssue/editSegmentIssue'
 import {sendSegmentVersionIssue} from '../../api/sendSegmentVersionIssue'
 
-class ReviewExtendedIssuePanel extends React.Component {
-  static contextType = SegmentContext
-
-  constructor(props) {
-    super(props)
-    this.issueCategoriesFlat = config.lqa_flat_categories
-    this.state = {
-      submitDisabled: false,
-      categorySelectedIndex: 0,
-      categorySelectedId: this.issueCategoriesFlat[0].id,
-      enableArrows: false,
-      severityIndex: 0,
-    }
-    this.issueCategories = orderBy(config.lqa_nested_categories.categories, [
-      'id',
-    ])
-
-    this.handleShortcutsKeyDown = this.handleShortcutsKeyDown.bind(this)
-    this.handleShortcutsKeyUp = this.handleShortcutsKeyUp.bind(this)
+const getNextCategoryIndex = (direction, currentIndex, length) => {
+  switch (direction) {
+    case 'next':
+      return (currentIndex + 1) % length
+    case 'prev':
+      return (currentIndex === 0 && length - 1) || currentIndex - 1
+    default:
+      return currentIndex
   }
-  sendIssue(category, severity) {
-    if (this.state.submitDisabled) return
-    this.props.setCreationIssueLoader(true)
-    this.setState({
-      submitDisabled: true,
-    })
+}
 
-    const {selection} = this.props
+const getNextSeverityIndex = (direction, currentIndex, length) => {
+  switch (direction) {
+    case 'next':
+      return (currentIndex + 1) % length
+    case 'prev':
+      return (currentIndex === 0 && length - 1) || currentIndex - 1
+    default:
+      return currentIndex
+  }
+}
+
+const ReviewExtendedIssuePanel = ({
+  setCreationIssueLoader,
+  selection,
+  segmentVersion,
+  issueEditing,
+  submitIssueCallback,
+  setIssueEditing,
+  handleFail = () => {},
+}) => {
+  const context = useContext(SegmentContext)
+
+  const issueCategoriesFlatRef = useRef(config.lqa_flat_categories)
+  const issueCategoriesRef = useRef(
+    orderBy(config.lqa_nested_categories.categories, ['id']),
+  )
+  const issueCategoriesFlat = issueCategoriesFlatRef.current
+  const issueCategories = issueCategoriesRef.current
+
+  const listElmRef = useRef(null)
+  const latestRef = useRef({})
+
+  const [submitDisabled, setSubmitDisabled] = useState(false)
+  // eslint-disable-next-line no-unused-vars
+  const [submitDone, setSubmitDone] = useState()
+  const [categorySelected, setCategorySelected] = useState({
+    index: 0,
+    id: issueCategoriesFlat[0].id,
+  })
+  const [severityIndex, setSeverityIndex] = useState(0)
+  const [enableArrows, setEnableArrows] = useState(false)
+
+  const handleSendIssueFail = (response) => {
+    if (response.errors && response.errors[0].code === -2000) {
+      CatToolActions.processErrors(response.errors, 'createIssue')
+    } else {
+      CommonUtils.genericErrorAlertMessage()
+    }
+    setCreationIssueLoader(false)
+    handleFail()
+    setSubmitDone(false)
+    setSubmitDisabled(false)
+  }
+
+  const sendIssue = (category, severity) => {
+    if (submitDisabled) return
+    setCreationIssueLoader(true)
+    setSubmitDisabled(true)
 
     const issue = {
       id_category: category.id,
       severity: severity,
-      version: this.props.segmentVersion,
+      version: segmentVersion,
       ...(selection
         ? {
             target_text: selection.selected_string,
@@ -63,33 +110,29 @@ class ReviewExtendedIssuePanel extends React.Component {
     const deferredSubmit = () => {
       SegmentActions.setStatus(segment.sid, segment.fid, segment.status)
 
-      const {issueEditing} = this.props
-
       const promise = issueEditing ? editSegmentIssue : sendSegmentVersionIssue
 
       promise({
-        idSegment: this.context.segment.sid,
+        idSegment: context.segment.sid,
         issueDetails: issue,
-        issueId: this.props.issueEditing?.id,
+        issueId: issueEditing?.id,
       })
         .then((data) => {
-          SegmentActions.getSegmentVersionsIssues(this.context.segment.sid)
+          SegmentActions.getSegmentVersionsIssues(context.segment.sid)
           CatToolActions.reloadQualityReport()
 
-          this.setState({
-            submitDisabled: false,
-          })
-          this.props.submitIssueCallback()
-          this.props.setCreationIssueLoader(false)
-          if (issueEditing) this.props.setIssueEditing(undefined)
+          setSubmitDisabled(false)
+          submitIssueCallback()
+          setCreationIssueLoader(false)
+          if (issueEditing) setIssueEditing(undefined)
           setTimeout(() => {
-            SegmentActions.issueAdded(this.context.segment.sid, data.issue.id)
+            SegmentActions.issueAdded(context.segment.sid, data.issue.id)
           })
         })
-        .catch(this.handleFail.bind(this))
+        .catch(handleSendIssueFail)
     }
 
-    const segment = this.context.segment
+    const segment = context.segment
     if (
       segment.revision_number !== config.revisionNumber ||
       ![SEGMENTS_STATUS.APPROVED, SEGMENTS_STATUS.APPROVED2].includes(
@@ -108,73 +151,55 @@ class ReviewExtendedIssuePanel extends React.Component {
           SegmentActions.addClassToSegment(segment.sid, 'modified')
           deferredSubmit()
         })
-        .catch(this.handleFail.bind(this))
+        .catch(handleSendIssueFail)
     } else {
       deferredSubmit()
     }
   }
 
-  handleFail(response) {
-    if (response.errors && response.errors[0].code === -2000) {
-      CatToolActions.processErrors(response.errors, 'createIssue')
-    } else {
-      CommonUtils.genericErrorAlertMessage()
-    }
-    this.props.setCreationIssueLoader(false)
-    this.props.handleFail()
-    this.setState({submitDone: false, submitDisabled: false})
-  }
+  const thereAreSubcategories = () =>
+    (issueCategories[0]?.subcategories &&
+      issueCategories[0].subcategories.length > 0) ||
+    (issueCategories[1]?.subcategories &&
+      issueCategories[1].subcategories.length > 0)
 
-  thereAreSubcategories() {
-    return (
-      (this.issueCategories[0]?.subcategories &&
-        this.issueCategories[0].subcategories.length > 0) ||
-      (this.issueCategories[1]?.subcategories &&
-        this.issueCategories[1].subcategories.length > 0)
-    )
-  }
-
-  getCategoriesHtml() {
-    const {issueEditing} = this.props
+  const getCategoriesHtml = () => {
     let categoryComponents = []
-    this.issueCategories.forEach(
-      function (category, i) {
-        let selectedValue = ''
-        categoryComponents.push(
-          <ReviewExtendedCategorySelector
-            key={'category-selector-' + i}
-            sendIssue={this.sendIssue.bind(this)}
-            selectedValue={selectedValue}
-            nested={false}
-            category={category}
-            sid={this.context.segment.sid}
-            active={
-              (this.state.enableArrows &&
-                parseInt(this.state.categorySelectedId) ===
-                  parseInt(category.id)) ||
-              (issueEditing &&
-                parseInt(issueEditing.id_category) === parseInt(category.id))
-            }
-            severityActiveIndex={
-              (this.state.enableArrows &&
-              parseInt(this.state.categorySelectedId) === parseInt(category.id)
-                ? this.state.severityIndex
-                : null) ||
-              (issueEditing &&
-              parseInt(issueEditing.id_category) === parseInt(category.id)
-                ? category.severities.findIndex(
-                    ({label}) => label === issueEditing.severity,
-                  )
-                : null)
-            }
-          />,
-        )
-      }.bind(this),
-    )
+    issueCategories.forEach((category, i) => {
+      let selectedValue = ''
+      categoryComponents.push(
+        <ReviewExtendedCategorySelector
+          key={'category-selector-' + i}
+          sendIssue={sendIssue}
+          selectedValue={selectedValue}
+          nested={false}
+          category={category}
+          sid={context.segment.sid}
+          active={
+            (enableArrows &&
+              parseInt(categorySelected.id) === parseInt(category.id)) ||
+            (issueEditing &&
+              parseInt(issueEditing.id_category) === parseInt(category.id))
+          }
+          severityActiveIndex={
+            (enableArrows &&
+            parseInt(categorySelected.id) === parseInt(category.id)
+              ? severityIndex
+              : null) ||
+            (issueEditing &&
+            parseInt(issueEditing.id_category) === parseInt(category.id)
+              ? category.severities.findIndex(
+                  ({label}) => label === issueEditing.severity,
+                )
+              : null)
+          }
+        />,
+      )
+    })
 
     return (
       <div>
-        {!this.props.issueEditing && (
+        {!issueEditing && (
           <div className="re-item-head pad-left-10">New issue</div>
         )}
         {categoryComponents}
@@ -182,74 +207,36 @@ class ReviewExtendedIssuePanel extends React.Component {
     )
   }
 
-  getSubCategoriesHtml() {
+  const getSubCategoriesHtml = () => {
     let categoryComponents = []
-    this.issueCategories.forEach(
-      function (category, i) {
-        let selectedValue = ''
-        let subcategoriesComponents = []
+    issueCategories.forEach((category, i) => {
+      let selectedValue = ''
+      let subcategoriesComponents = []
 
-        const {issueEditing} = this.props
+      if (category.subcategories.length > 0) {
+        category.subcategories.forEach((category, ii) => {
+          let key = '' + i + '-' + ii
+          let kk = 'category-selector-' + key
+          let selectedValue = ''
 
-        if (category.subcategories.length > 0) {
-          category.subcategories.forEach((category, ii) => {
-            let key = '' + i + '-' + ii
-            let kk = 'category-selector-' + key
-            let selectedValue = ''
-
-            subcategoriesComponents.push(
-              <ReviewExtendedCategorySelector
-                key={kk}
-                selectedValue={selectedValue}
-                sendIssue={this.sendIssue.bind(this)}
-                nested={true}
-                category={category}
-                sid={this.context.segment.sid}
-                active={
-                  (this.state.enableArrows &&
-                    parseInt(this.state.categorySelectedId) ===
-                      parseInt(category.id)) ||
-                  (issueEditing &&
-                    parseInt(issueEditing.id_category) ===
-                      parseInt(category.id))
-                }
-                severityActiveIndex={
-                  (this.state.enableArrows &&
-                  parseInt(this.state.categorySelectedId) ===
-                    parseInt(category.id)
-                    ? this.state.severityIndex
-                    : null) ||
-                  (issueEditing &&
-                  parseInt(issueEditing.id_category) === parseInt(category.id)
-                    ? category.severities.findIndex(
-                        ({label}) => label === issueEditing.severity,
-                      )
-                    : null)
-                }
-              />,
-            )
-          })
-        } else {
           subcategoriesComponents.push(
             <ReviewExtendedCategorySelector
-              key={'default'}
+              key={kk}
               selectedValue={selectedValue}
-              sendIssue={this.sendIssue.bind(this)}
+              sendIssue={sendIssue}
               nested={true}
               category={category}
-              sid={this.context.segment.sid}
+              sid={context.segment.sid}
               active={
-                (this.state.enableArrows &&
-                  parseInt(this.state.categorySelectedId) ===
-                    parseInt(category.id)) ||
+                (enableArrows &&
+                  parseInt(categorySelected.id) === parseInt(category.id)) ||
                 (issueEditing &&
                   parseInt(issueEditing.id_category) === parseInt(category.id))
               }
               severityActiveIndex={
-                (this.state.enableArrows &&
-                parseInt(this.state.categorySelectedId) ===
-                  parseInt(category.id)
-                  ? this.state.severityIndex
+                (enableArrows &&
+                parseInt(categorySelected.id) === parseInt(category.id)
+                  ? severityIndex
                   : null) ||
                 (issueEditing &&
                 parseInt(issueEditing.id_category) === parseInt(category.id)
@@ -260,134 +247,141 @@ class ReviewExtendedIssuePanel extends React.Component {
               }
             />,
           )
-        }
-        let html = (
-          <div key={category.id}>
-            <div className="re-item-head pad-left-10">{category.label}</div>
-            {subcategoriesComponents}
-          </div>
+        })
+      } else {
+        subcategoriesComponents.push(
+          <ReviewExtendedCategorySelector
+            key={'default'}
+            selectedValue={selectedValue}
+            sendIssue={sendIssue}
+            nested={true}
+            category={category}
+            sid={context.segment.sid}
+            active={
+              (enableArrows &&
+                parseInt(categorySelected.id) === parseInt(category.id)) ||
+              (issueEditing &&
+                parseInt(issueEditing.id_category) === parseInt(category.id))
+            }
+            severityActiveIndex={
+              (enableArrows &&
+              parseInt(categorySelected.id) === parseInt(category.id)
+                ? severityIndex
+                : null) ||
+              (issueEditing &&
+              parseInt(issueEditing.id_category) === parseInt(category.id)
+                ? category.severities.findIndex(
+                    ({label}) => label === issueEditing.severity,
+                  )
+                : null)
+            }
+          />,
         )
-        categoryComponents.push(html)
-      }.bind(this),
-    )
+      }
+      let html = (
+        <div key={category.id}>
+          <div className="re-item-head pad-left-10">{category.label}</div>
+          {subcategoriesComponents}
+        </div>
+      )
+      categoryComponents.push(html)
+    })
 
     return categoryComponents
   }
-  getNextCategoryIndex(direction) {
-    let idx = this.state.categorySelectedIndex
-    let length = this.issueCategoriesFlat.length
-    switch (direction) {
-      case 'next':
-        return (idx + 1) % length
-      case 'prev':
-        return (idx === 0 && length - 1) || idx - 1
-      default:
-        return idx
-    }
+
+  latestRef.current = {
+    enableArrows,
+    categorySelected,
+    severityIndex,
+    sendIssue,
   }
-  getNextSeverityIndex(direction) {
-    let idx = this.state.severityIndex
-    let length =
-      this.issueCategoriesFlat[this.state.categorySelectedIndex].severities
-        .length
-    switch (direction) {
-      case 'next':
-        return (idx + 1) % length
-      case 'prev':
-        return (idx === 0 && length - 1) || idx - 1
-      default:
-        return idx
+
+  const handleShortcutsKeyDown = useCallback((e) => {
+    const {enableArrows, categorySelected, severityIndex, sendIssue} =
+      latestRef.current
+    const issueCategoriesFlat = issueCategoriesFlatRef.current
+
+    if (e.ctrlKey && e.altKey && !enableArrows) {
+      setEnableArrows(true)
     }
-  }
-  handleShortcutsKeyDown(e) {
-    if (e.ctrlKey && e.altKey && !this.state.enableArrows) {
-      this.setState({
-        enableArrows: true,
-      })
-    }
-    if (this.state.enableArrows && e.code === 'ArrowDown') {
-      let index = this.getNextCategoryIndex('next')
-      this.setState({
-        categorySelectedIndex: index,
-        categorySelectedId: this.issueCategoriesFlat[index].id,
-        severityIndex: 0,
-      })
-    } else if (this.state.enableArrows && e.code === 'ArrowUp') {
-      let index = this.getNextCategoryIndex('prev')
-      this.setState({
-        categorySelectedIndex: index,
-        categorySelectedId: this.issueCategoriesFlat[index].id,
-        severityIndex: 0,
-      })
-    } else if (this.state.enableArrows && e.code === 'ArrowLeft') {
-      let index = this.getNextSeverityIndex('prev')
-      this.setState({
-        severityIndex: index,
-      })
-    } else if (this.state.enableArrows && e.code === 'ArrowRight') {
-      let index = this.getNextSeverityIndex('next')
-      this.setState({
-        severityIndex: index,
-      })
-    } else if (this.state.enableArrows && e.code === 'Enter') {
-      this.sendIssue(
-        this.issueCategoriesFlat[this.state.categorySelectedIndex],
-        this.issueCategoriesFlat[this.state.categorySelectedIndex].severities[
-          this.state.severityIndex
-        ].label,
+    if (enableArrows && e.code === 'ArrowDown') {
+      const index = getNextCategoryIndex(
+        'next',
+        categorySelected.index,
+        issueCategoriesFlat.length,
+      )
+      setCategorySelected({index, id: issueCategoriesFlat[index].id})
+      setSeverityIndex(0)
+    } else if (enableArrows && e.code === 'ArrowUp') {
+      const index = getNextCategoryIndex(
+        'prev',
+        categorySelected.index,
+        issueCategoriesFlat.length,
+      )
+      setCategorySelected({index, id: issueCategoriesFlat[index].id})
+      setSeverityIndex(0)
+    } else if (enableArrows && e.code === 'ArrowLeft') {
+      const length =
+        issueCategoriesFlat[categorySelected.index].severities.length
+      setSeverityIndex(getNextSeverityIndex('prev', severityIndex, length))
+    } else if (enableArrows && e.code === 'ArrowRight') {
+      const length =
+        issueCategoriesFlat[categorySelected.index].severities.length
+      setSeverityIndex(getNextSeverityIndex('next', severityIndex, length))
+    } else if (enableArrows && e.code === 'Enter') {
+      sendIssue(
+        issueCategoriesFlat[categorySelected.index],
+        issueCategoriesFlat[categorySelected.index].severities[severityIndex]
+          .label,
       )
       setTimeout(() => SegmentActions.setFocusOnEditArea(), 1000)
     }
-  }
+  }, [])
 
-  handleShortcutsKeyUp(e) {
-    if ((!e.ctrlKey || !e.altKey) && this.state.enableArrows) {
-      this.setState({
-        enableArrows: false,
-        categorySelectedIndex: 0,
-        categorySelectedId: this.issueCategoriesFlat[0].id,
-        severityIndex: 0,
+  const handleShortcutsKeyUp = useCallback((e) => {
+    const {enableArrows} = latestRef.current
+    if ((!e.ctrlKey || !e.altKey) && enableArrows) {
+      setEnableArrows(false)
+      setCategorySelected({
+        index: 0,
+        id: issueCategoriesFlatRef.current[0].id,
       })
+      setSeverityIndex(0)
     }
-  }
+  }, [])
 
-  componentDidMount() {
-    document.addEventListener('keydown', this.handleShortcutsKeyDown)
-    document.addEventListener('keyup', this.handleShortcutsKeyUp)
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('keyup', this.handleShortcutsKeyUp)
-    document.removeEventListener('keydown', this.handleShortcutsKeyDown)
-  }
-
-  render() {
-    let html = []
-
-    if (this.thereAreSubcategories()) {
-      html = this.getSubCategoriesHtml()
-    } else {
-      html = this.getCategoriesHtml()
+  useEffect(() => {
+    document.addEventListener('keydown', handleShortcutsKeyDown)
+    document.addEventListener('keyup', handleShortcutsKeyUp)
+    return () => {
+      document.removeEventListener('keyup', handleShortcutsKeyUp)
+      document.removeEventListener('keydown', handleShortcutsKeyDown)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-    return (
-      <div className="re-issues-box re-to-create">
-        {/*<h4 className="re-issues-box-title">Error list</h4>*/}
-        {/*<div className="comment-triangle comment-triangle-topleft"></div>*/}
-        <div
-          className="re-list errors"
-          id={'re-category-list-' + this.context.segment.sid}
-          ref={(node) => (this.listElm = node)}
-        >
-          {html}
-        </div>
+  let html = []
+
+  if (thereAreSubcategories()) {
+    html = getSubCategoriesHtml()
+  } else {
+    html = getCategoriesHtml()
+  }
+
+  return (
+    <div className="re-issues-box re-to-create">
+      {/*<h4 className="re-issues-box-title">Error list</h4>*/}
+      {/*<div className="comment-triangle comment-triangle-topleft"></div>*/}
+      <div
+        className="re-list errors"
+        id={'re-category-list-' + context.segment.sid}
+        ref={listElmRef}
+      >
+        {html}
       </div>
-    )
-  }
-}
-
-ReviewExtendedIssuePanel.defaultProps = {
-  handleFail: function () {},
+    </div>
+  )
 }
 
 export default ReviewExtendedIssuePanel

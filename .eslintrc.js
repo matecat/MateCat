@@ -90,6 +90,8 @@ module.exports = {
       files: [
         'public/js/components/modals/**/*.js',
         'public/js/components/languageSelector/**/*.js',
+        'public/js/components/review_extended/**/*.js',
+        'public/js/components/common/WrapperLoader.js',
       ],
       rules: {
         'no-restricted-syntax': [
