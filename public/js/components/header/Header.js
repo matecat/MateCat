@@ -6,16 +6,10 @@ import QualityReportConstants from '../../constants/QualityReportConstants'
 import FilterProjects from './manage/FilterProjects'
 import {ActionMenu} from './ActionMenu'
 import {UserMenu} from './UserMenu'
-import {ComponentExtendInterface} from '../../utils/ComponentExtendInterface'
 import {fromJS} from 'immutable'
 import {TeamDropdown} from './TeamDropdown'
 import MembersFilter from './manage/MembersFilter'
-
-export class HeaderInterface extends ComponentExtendInterface {
-  getMoreLinks() {}
-}
-
-const headerInterface = new HeaderInterface()
+import headerInterface from './headerInterface'
 
 const Header = ({
   isQualityReport,

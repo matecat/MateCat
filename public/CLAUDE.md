@@ -4,20 +4,20 @@ Guidance for working in the `public/` frontend source tree (React/Vite, plain JS
 
 ## Directory Structure
 
-| Path | Purpose |
-|------|---------|
-| `js/actions/` | Flux action creators (AppDispatcher-based) |
-| `js/api/` | One file per backend endpoint (~170+ files) |
-| `js/components/` | React components, grouped by feature area |
-| `js/components/common/` | Shared/reusable UI components |
-| `js/constants/` | Flux constants and global keys |
-| `js/hooks/` | Custom React hooks |
-| `js/pages/` | Top-level page components, mounted by Vite entries |
-| `js/stores/` | Flux stores (AppDispatcher, not Redux) |
-| `js/utils/` | Utility modules |
-| `css/sass/` | SCSS source — entry files at top level, partials in `commons/` and `components/` |
-| `vite-entries/` | Vite entry points (JS wrappers per page group, mapped by `groups.json`) |
-| `mocks/` | Jest mock data (language, segments, user, QA model) |
+| Path                    | Purpose                                                                          |
+| ----------------------- | -------------------------------------------------------------------------------- |
+| `js/actions/`           | Flux action creators (AppDispatcher-based)                                       |
+| `js/api/`               | One file per backend endpoint (~170+ files)                                      |
+| `js/components/`        | React components, grouped by feature area                                        |
+| `js/components/common/` | Shared/reusable UI components                                                    |
+| `js/constants/`         | Flux constants and global keys                                                   |
+| `js/hooks/`             | Custom React hooks                                                               |
+| `js/pages/`             | Top-level page components, mounted by Vite entries                               |
+| `js/stores/`            | Flux stores (AppDispatcher, not Redux)                                           |
+| `js/utils/`             | Utility modules                                                                  |
+| `css/sass/`             | SCSS source — entry files at top level, partials in `commons/` and `components/` |
+| `vite-entries/`         | Vite entry points (JS wrappers per page group, mapped by `groups.json`)          |
+| `mocks/`                | Jest mock data (language, segments, user, QA model)                              |
 
 ## State Management
 
@@ -34,7 +34,65 @@ Flux (AppDispatcher) — not Redux, not Zustand.
 - Directory-per-component: `ComponentName/ComponentName.js`, optionally `index.js` re-exporting it
 - Complex features group multiple files in one directory (e.g., `Segment/Segment.js`, `SegmentBody.js`, `SegmentFooter.js`)
 - Use PropTypes (no TypeScript — this is a plain JS codebase)
-- React 18 functional components with hooks
+- React 18 function components with hooks. There are no class components left, and
+  eslint fails the build on a new one (`no-restricted-syntax` in `.eslintrc.js`)
+
+## Extending the Frontend
+
+There is no extension mechanism. Behaviour a plugin needs to change lives on a
+plain exported object, and the plugin assigns over the member it wants:
+
+```js
+// core — js/globalFunctions.js
+const globalFunctions = {
+  /*** Overridden by plugin */
+  registerFooterTabs: function () { ... },
+}
+export default globalFunctions
+
+// plugin — replace
+globalFunctions.registerFooterTabs = () => { ... }
+
+// plugin — extend: capture what is installed now, then call it
+const previous = globalFunctions.registerFooterTabs
+globalFunctions.registerFooterTabs = () => {
+  previous()
+  SegmentActions.registerTab('myTab', false, false)
+}
+```
+
+Rules:
+
+- Core imports the object and calls `theObject.theMember(...)`. It never names a
+  plugin, a registry, or an extension point — the call reads as ordinary code
+- The members that a plugin may replace carry an `Overridden by plugin` comment.
+  Everything else is core's business
+- Internal calls go through the object too (`segmentNotes.getNotes` calls
+  `segmentNotes.getNote`), so replacing a member replaces it for its callers
+- Members are **plain functions of an explicit context object**, never methods
+  that need `this`. A wrapper can then call `previous(ctx)` unbound and safely
+- Capture-then-replace, never a reference to core's original: `previous` is
+  whatever is currently installed, so two plugins wrapping one member chain
+  instead of one silently overwriting the other
+- Patching a React prototype does not work — function components have none — and
+  eslint rejects it in `plugins/*/static/**` (`no-restricted-syntax`)
+- Core must not name a specific deployment; a lint rule enforces this from a
+  local list (see `.eslint-private-names.example.json`)
+
+The objects core exposes this way:
+
+| Module                                    | Members                                                                               |
+| ----------------------------------------- | ------------------------------------------------------------------------------------- |
+| `js/globalFunctions.js`                   | segment context (`getContextBefore/After`, `getIdBefore/After`), `registerFooterTabs` |
+| `js/components/segments/segmentNotes.js`  | `getNotes`, `getNote`, `getNoteContent`, `getMetadataNotes`                           |
+| `js/components/segments/matchInfo.js`     | `getMatchInfoMetadata`                                                                |
+| `js/components/header/headerInterface.js` | `getMoreLinks`                                                                        |
+| `js/pages/CatToolInterface.js`            | `getCharacterCounterMode`                                                             |
+| `js/hooks/useProjectTemplates.js`         | `useProjectTemplateInterface.getCharacterCounterMode`                                 |
+
+Plugin front-end sources are bundled by `vite-entries/cattoolPlugins.js`
+(`import.meta.glob` over `plugins/*/static/src/cattool/*.js`) and load after
+core's entry, so the assignment lands before anything a user interacts with.
 
 ## API Layer
 

@@ -1,106 +1,64 @@
-import React from 'react'
+import React, {useLayoutEffect, useRef} from 'react'
 
 import TagSuggestion from './TagSuggestion'
 
-class TagBox extends React.Component {
-  tagBox = React.createRef()
-  childRefs = []
+const TagBox = (props) => {
+  const {
+    popoverPosition,
+    displayPopover,
+    suggestions,
+    onTagClick,
+    focusedTagIndex,
+  } = props
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    this.scrollElementIntoViewIfNeeded(prevProps)
-  }
+  const tagBoxRef = useRef(null)
+  const childRefsRef = useRef([])
+  const prevFocusedTagIndexRef = useRef(focusedTagIndex)
 
-  render() {
-    const {
-      popoverPosition,
-      displayPopover,
-      suggestions,
-      onTagClick,
-      focusedTagIndex,
-    } = this.props
-    const popoverOpen = Object.assign({}, popoverPosition, styles.popoverOpen)
-    const lastIndex = suggestions.missingTags
-      ? suggestions.missingTags.length
-      : 0
+  const popoverOpen = Object.assign({}, popoverPosition, styles.popoverOpen)
+  const lastIndex = suggestions.missingTags ? suggestions.missingTags.length : 0
 
-    const missingSuggestions = suggestions.missingTags
-      ? suggestions.missingTags.map((suggestion, index) => {
-          this.childRefs[index] = React.createRef()
-          return (
-            <TagSuggestion
-              ref={this.childRefs[index]}
-              tabIndex={index}
-              key={index}
-              suggestion={suggestion}
-              onTagClick={onTagClick}
-              isFocused={focusedTagIndex === index}
-            />
-          )
-        })
-      : null
+  const missingSuggestions = suggestions.missingTags
+    ? suggestions.missingTags.map((suggestion, index) => {
+        childRefsRef.current[index] = React.createRef()
+        return (
+          <TagSuggestion
+            ref={childRefsRef.current[index]}
+            tabIndex={index}
+            key={index}
+            suggestion={suggestion}
+            onTagClick={onTagClick}
+            isFocused={focusedTagIndex === index}
+          />
+        )
+      })
+    : null
 
-    const allSuggestions = suggestions.sourceTags
-      ? suggestions.sourceTags.map((suggestion, index) => {
-          this.childRefs[index + lastIndex] = React.createRef()
-          return (
-            <TagSuggestion
-              ref={this.childRefs[index + lastIndex]}
-              tabIndex={index + lastIndex}
-              key={index + lastIndex}
-              suggestion={suggestion}
-              onTagClick={onTagClick}
-              isFocused={focusedTagIndex === index + lastIndex}
-            />
-          )
-        })
-      : null
+  const allSuggestions = suggestions.sourceTags
+    ? suggestions.sourceTags.map((suggestion, index) => {
+        childRefsRef.current[index + lastIndex] = React.createRef()
+        return (
+          <TagSuggestion
+            ref={childRefsRef.current[index + lastIndex]}
+            tabIndex={index + lastIndex}
+            key={index + lastIndex}
+            suggestion={suggestion}
+            onTagClick={onTagClick}
+            isFocused={focusedTagIndex === index + lastIndex}
+          />
+        )
+      })
+    : null
 
-    return (
-      <div
-        className={`tag-box`}
-        style={displayPopover ? popoverOpen : styles.popoverClosed}
-      >
-        <div className={`tag-box-inner`} ref={this.tagBox}>
-          {missingSuggestions && missingSuggestions.length > 0 && (
-            <div className={`missing`}>
-              <div className={`tag-box-heading`}>
-                Missing source&nbsp;
-                <div className={'tag-container'}>
-                  <span
-                    className={`tag tag-heading tag-selfclosed tag-mismatch-error`}
-                  >
-                    tags
-                  </span>
-                </div>
-                &nbsp;in target
-              </div>
-              {missingSuggestions}
-            </div>
-          )}
-          <div className={`all`}>
-            <div className={`tag-box-heading`}>
-              All&nbsp;
-              <div className={'tag-container'}>
-                <span className={`tag tag-heading tag-selfclosed`}>tags</span>
-              </div>
-              &nbsp;available
-            </div>
-            {allSuggestions}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  scrollElementIntoViewIfNeeded = (prevProps) => {
-    const {focusedTagIndex} = this.props
+  useLayoutEffect(() => {
+    const prevFocusedTagIndex = prevFocusedTagIndexRef.current
     if (
-      this.childRefs[focusedTagIndex] &&
-      prevProps.focusedTagIndex !== focusedTagIndex
+      childRefsRef.current[focusedTagIndex] &&
+      prevFocusedTagIndex !== focusedTagIndex
     ) {
-      const tabBoxClientRect = this.tagBox.current.getBoundingClientRect()
+      const tabBoxClientRect = tagBoxRef.current.getBoundingClientRect()
       const activeElementClientRect =
-        this.childRefs[focusedTagIndex].current.getBoundingClientRect()
+        childRefsRef.current[focusedTagIndex].current.getBoundingClientRect()
       if (
         activeElementClientRect.top < tabBoxClientRect.top ||
         activeElementClientRect.bottom > tabBoxClientRect.bottom
@@ -108,15 +66,52 @@ class TagBox extends React.Component {
         const top =
           focusedTagIndex === 0
             ? 0
-            : this.childRefs[focusedTagIndex].current.offsetTop - 60
-        this.tagBox.current.scrollTo({
+            : childRefsRef.current[focusedTagIndex].current.offsetTop - 60
+        tagBoxRef.current.scrollTo({
           top: top,
           left: 0,
           behavior: 'smooth',
         })
       }
     }
-  }
+    prevFocusedTagIndexRef.current = focusedTagIndex
+  })
+
+  return (
+    <div
+      className={`tag-box`}
+      style={displayPopover ? popoverOpen : styles.popoverClosed}
+    >
+      <div className={`tag-box-inner`} ref={tagBoxRef}>
+        {missingSuggestions && missingSuggestions.length > 0 && (
+          <div className={`missing`}>
+            <div className={`tag-box-heading`}>
+              Missing source&nbsp;
+              <div className={'tag-container'}>
+                <span
+                  className={`tag tag-heading tag-selfclosed tag-mismatch-error`}
+                >
+                  tags
+                </span>
+              </div>
+              &nbsp;in target
+            </div>
+            {missingSuggestions}
+          </div>
+        )}
+        <div className={`all`}>
+          <div className={`tag-box-heading`}>
+            All&nbsp;
+            <div className={'tag-container'}>
+              <span className={`tag tag-heading tag-selfclosed`}>tags</span>
+            </div>
+            &nbsp;available
+          </div>
+          {allSuggestions}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 const styles = {

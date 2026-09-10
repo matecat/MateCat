@@ -2,7 +2,14 @@
  * React Component for the warnings.
 
  */
-import React from 'react'
+import React, {
+  forwardRef,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react'
 import {isUndefined} from 'lodash'
 import {debounce} from 'lodash/function'
 import CommentsStore from '../../stores/CommentsStore'
@@ -25,123 +32,140 @@ import Check from '../../../img/icons/Check'
 import commonUtils from '../../utils/commonUtils'
 import IconClose from '../../../img/icons/IconClose'
 
-class SegmentCommentsContainer extends React.Component {
-  static contextType = SegmentContext
+const COMMENT_TYPES = {sticky: 3, resolve: 2, comment: 1}
 
-  constructor(props, context) {
-    super(props)
-    this.localStorageKey = 'anonymous-comments' + context.userInfo.user.uid
-    this.state = {
-      comments: CommentsStore.getCommentsBySegment(
-        context.segment.original_sid,
-      ),
-      user: UserStore.getUser(),
-      teamUsers: CommentsStore.getTeamUsers(),
-      sendCommentError: false,
-      showTagging: false,
-      mentionsInputValue: '',
-      anonymousComments:
-        commonUtils.getFromStorage(this.localStorageKey) === 'true',
+const SegmentCommentsContainer = forwardRef((props, ref) => {
+  const context = useContext(SegmentContext)
+
+  // Computed ONCE, matching the constructor's `this.localStorageKey` which is never
+  // recomputed even if context changes later.
+  const [localStorageKey] = useState(
+    () => 'anonymous-comments' + context.userInfo.user.uid,
+  )
+
+  const [comments, setComments] = useState(() =>
+    CommentsStore.getCommentsBySegment(context.segment.original_sid),
+  )
+  const [user, setUser] = useState(() => UserStore.getUser())
+  const [teamUsers, setTeamUsersState] = useState(() =>
+    CommentsStore.getTeamUsers(),
+  )
+  const [sendCommentError, setSendCommentError] = useState(false)
+  const [showTagging] = useState(false)
+  const [mentionsInputValue, setMentionsInputValue] = useState('')
+  // Not part of the constructor's initial state object — only ever set via
+  // handleChangeMentionsInputValue's setState, so it starts undefined.
+  const [mentionsMarkup, setMentionsMarkup] = useState()
+  const [anonymousComments, setAnonymousComments] = useState(
+    () => commonUtils.getFromStorage(localStorageKey) === 'true',
+  )
+
+  const commentInputRef = useRef(null)
+  const wrapRef = useRef(null)
+
+  // Always holds the CURRENT context/state read live inside stable callbacks, mirroring
+  // `this.context`/`this.state` never being a stale closure.
+  const liveRef = useRef({segment: context.segment, mentionsInputValue})
+  liveRef.current = {segment: context.segment, mentionsInputValue}
+
+  // Created once via useRef so its identity never changes across renders — required so that
+  // CommentsStore.addListener/removeListener (matched by reference) stay in sync, exactly like
+  // the class's single this.updateComments.bind(this) in the constructor.
+  const updateCommentsRef = useRef((sid) => {
+    const {segment} = liveRef.current
+    if (isUndefined(sid) || parseInt(sid) === parseInt(segment.original_sid)) {
+      setComments(CommentsStore.getCommentsBySegment(segment.original_sid))
+      setUser(CommentsStore.getUser())
     }
-    this.types = {sticky: 3, resolve: 2, comment: 1}
-    this.updateComments = this.updateComments.bind(this)
-    this.setFocusOnInput = this.setFocusOnInput.bind(this)
-    this.setTeamUsers = this.setTeamUsers.bind(this)
-    this.saveDraft = debounce(() => {
-      CommentsActions.saveDraftComment(
-        this.context.segment.original_sid,
-        this.state.mentionsInputValue,
-      )
-    }, 500)
-  }
+  })
 
-  closeComments(e) {
+  // Seeded once so the debounce() call itself only ever executes one time, preserving the
+  // single persistent timer (recreating it every render would silently break debouncing).
+  const saveDraftRef = useRef(
+    debounce(() => {
+      const {segment, mentionsInputValue} = liveRef.current
+      CommentsActions.saveDraftComment(segment.original_sid, mentionsInputValue)
+    }, 500),
+  )
+
+  const setFocusOnInputRef = useRef(() => {
+    commentInputRef.current.focus()
+  })
+
+  const setTeamUsersRef = useRef((users) => {
+    setTeamUsersState(users)
+  })
+
+  // Bridges the imperative ref API back onto a stable object so that internal calls made
+  // through it (e.g. onKeyDown -> sendComment) are visible to jest.spyOn, exactly like a class
+  // instance's `this.sendComment()` performing a property lookup at call time.
+  const instanceRef = useRef({})
+
+  const closeComments = (e) => {
     e.preventDefault()
     e.stopPropagation()
-    SegmentActions.closeSegmentComment(this.context.segment.sid)
+    SegmentActions.closeSegmentComment(context.segment.sid)
   }
 
-  sendComment() {
-    const {mentionsMarkup} = this.state
+  const sendComment = () => {
     if (mentionsMarkup?.length > 0) {
       CommentsActions.sendComment(
         mentionsMarkup,
-        this.state.anonymousComments,
-        this.context.segment.original_sid,
+        anonymousComments,
+        context.segment.original_sid,
       )
         .catch(() => {
-          this.setState({sendCommentError: true})
+          setSendCommentError(true)
         })
         .then(() => {
-          this.setState({sendCommentError: false})
+          setSendCommentError(false)
           setTimeout(() => {
-            if (this.commentInput) {
-              this.setState({
-                mentionsInputValue: '',
-              })
+            if (commentInputRef.current) {
+              setMentionsInputValue('')
             }
           })
         })
     }
   }
 
-  deleteComment = () => {
-    const {comments} = this.state
+  const deleteComment = () => {
     const lastCommentId = comments[comments.length - 1].id
-    CommentsActions.deleteComment(
-      lastCommentId,
-      this.context.segment.original_sid,
-    )
+    CommentsActions.deleteComment(lastCommentId, context.segment.original_sid)
   }
 
-  resolveThread() {
+  const resolveThread = () => {
     CommentsActions.resolveThread(
-      this.context.segment.original_sid,
-      this.state.anonymousComments,
+      context.segment.original_sid,
+      anonymousComments,
     )
   }
 
-  updateComments(sid) {
-    if (
-      isUndefined(sid) ||
-      parseInt(sid) === parseInt(this.context.segment.original_sid)
-    ) {
-      const comments = CommentsStore.getCommentsBySegment(
-        this.context.segment.original_sid,
-      )
-      const user = CommentsStore.getUser()
-      this.setState({
-        comments: comments,
-        user: user,
-      })
-    }
-  }
-
-  setTeamUsers(users) {
-    this.setState({
-      teamUsers: users,
-    })
-  }
-
-  handleChangeMentionsInputValue = (
+  const handleChangeMentionsInputValue = (
     event,
     newValue,
     newPlainTextValue,
     mentions,
   ) => {
-    const mentionsMarkup = mentions.reduce(
+    const newMentionsMarkup = mentions.reduce(
       (acc, cur) =>
         acc.replace(`{@${cur.id}||${cur.display}@}`, `{@${cur.id}@}`),
       newValue,
     )
 
-    this.setState({
-      mentionsInputValue: newValue,
-      mentionsMarkup,
-    })
+    setMentionsInputValue(newValue)
+    setMentionsMarkup(newMentionsMarkup)
   }
 
-  getComments() {
+  const onKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey && !showTagging) {
+      e.preventDefault()
+      if (mentionsInputValue) instanceRef.current.sendComment()
+    } else {
+      saveDraftRef.current()
+    }
+  }
+
+  const getComments = () => {
     let htmlComments, htmlInsert, resolveButton, deleteButton
     const nl2br = function (str, is_xhtml) {
       var breakTag =
@@ -153,8 +177,8 @@ class SegmentCommentsContainer extends React.Component {
     }
 
     const findUser = (id) => {
-      if (this.state.teamUsers) {
-        return this.state.teamUsers.find((item) => {
+      if (teamUsers) {
+        return teamUsers.find((item) => {
           return item.uid === id
         })
       }
@@ -184,14 +208,14 @@ class SegmentCommentsContainer extends React.Component {
 
       return text
     }
-    if (this.state.comments.length > 0) {
+    if (comments.length > 0) {
       let thread_wrap = [],
         thread_id = 0,
         count = 0,
         commentsHtml = [],
         threadClass
-      let comments = this.state.comments.slice()
-      comments.forEach((comment, i) => {
+      let commentsCopy = comments.slice()
+      commentsCopy.forEach((comment, i) => {
         if (comment.thread_id !== thread_id) {
           // start a new thread
           if (thread_wrap.length > 0) {
@@ -208,10 +232,10 @@ class SegmentCommentsContainer extends React.Component {
           }
           thread_wrap = []
         }
-        if (Number(comment.message_type) === this.types.comment) {
+        if (Number(comment.message_type) === COMMENT_TYPES.comment) {
           count++
         }
-        if (Number(comment.message_type) === this.types.resolve) {
+        if (Number(comment.message_type) === COMMENT_TYPES.resolve) {
           threadClass = 'comment-thread-resolved'
           thread_wrap.push(
             <div className="comment-resolved" key={'comment-' + i}>
@@ -239,15 +263,15 @@ class SegmentCommentsContainer extends React.Component {
             .split('(')[0]
             .trim()
           const isAuthorOfLastComment =
-            comments[comments.length - 1].id === comment.id &&
-            comment.uid === this.context.userInfo?.user.uid &&
+            commentsCopy[commentsCopy.length - 1].id === comment.id &&
+            comment.uid === context.userInfo?.user.uid &&
             comment.source_page == config.revisionNumber + 1
           deleteButton = isAuthorOfLastComment ? (
             <Button
               type={BUTTON_TYPE.DEFAULT}
               mode={BUTTON_MODE.GHOST}
               size={BUTTON_SIZE.ICON_XSMALL}
-              onClick={this.deleteComment}
+              onClick={deleteComment}
             >
               <Trash size={20} />
             </Button>
@@ -293,10 +317,10 @@ class SegmentCommentsContainer extends React.Component {
       })
       // Thread is not resolved
       if (
-        !isUndefined(comments.length - 1) &&
+        !isUndefined(commentsCopy.length - 1) &&
         !(
-          parseInt(comments[comments.length - 1].message_type) ===
-          this.types.resolve
+          parseInt(commentsCopy[commentsCopy.length - 1].message_type) ===
+          COMMENT_TYPES.resolve
         )
       ) {
         resolveButton = (
@@ -304,7 +328,7 @@ class SegmentCommentsContainer extends React.Component {
             type={BUTTON_TYPE.DEFAULT}
             mode={BUTTON_MODE.OUTLINE}
             size={BUTTON_SIZE.SMALL}
-            onClick={() => this.resolveThread()}
+            onClick={() => resolveThread()}
           >
             <Check size={16} /> Resolve
           </Button>
@@ -327,30 +351,27 @@ class SegmentCommentsContainer extends React.Component {
     }
 
     const userMentionData =
-      this.state.teamUsers?.map((user) => ({
+      teamUsers?.map((user) => ({
         id: user.uid,
         display: ` ${user.first_name} ${user.last_name} `, // eslint-disable-line
       })) ?? []
 
     // workaround - textarea fit to content
-    if (this.commentInput) {
+    if (commentInputRef.current) {
       setTimeout(() => {
-        if (this.commentInput)
-          this.commentInput.style.height = `${this.commentInput.parentNode.clientHeight}px`
+        if (commentInputRef.current)
+          commentInputRef.current.style.height = `${commentInputRef.current.parentNode.clientHeight}px`
       }, 200)
     }
 
     htmlInsert = (
-      <div
-        className="comment-thread comment-post-wrap comment-clearfix comment-first-input"
-        ref={(container) => (this.container = container)}
-      >
+      <div className="comment-thread comment-post-wrap comment-clearfix comment-first-input">
         <div className="comment-post">
           <span className="comment-label comment-username comment-username-label comment-truncate comment-anonymous-label">
-            {!this.state.anonymousComments
-              ? this.context.userInfo.user.first_name +
+            {!anonymousComments
+              ? context.userInfo.user.first_name +
                 ' ' +
-                this.context.userInfo.user.last_name
+                context.userInfo.user.last_name
               : config.isReview
                 ? config.revisionNumber === 2
                   ? '2nd pass revisor'
@@ -358,10 +379,10 @@ class SegmentCommentsContainer extends React.Component {
                 : 'Translator'}
           </span>
           <MentionsInput
-            inputRef={(input) => (this.commentInput = input)}
-            value={this.state.mentionsInputValue}
-            onKeyDown={(e) => this.onKeyDown(e)}
-            onChange={this.handleChangeMentionsInputValue}
+            inputRef={(input) => (commentInputRef.current = input)}
+            value={mentionsInputValue}
+            onKeyDown={(e) => onKeyDown(e)}
+            onChange={handleChangeMentionsInputValue}
             placeholder="Write a comment..."
             className="comment-input comment-textarea"
             suggestionsPortalHost={document.body}
@@ -375,7 +396,7 @@ class SegmentCommentsContainer extends React.Component {
               displayTransform={function (id, display) {
                 return display || id
               }}
-              onAdd={() => this.saveDraft()}
+              onAdd={() => saveDraftRef.current()}
               onRemove={() => null}
               isLoading={false}
               appendSpaceOnAdd={false}
@@ -385,12 +406,12 @@ class SegmentCommentsContainer extends React.Component {
             <div>
               <Checkbox
                 onChange={(value) => {
-                  this.setState({anonymousComments: value})
-                  commonUtils.addInStorage(this.localStorageKey, value)
+                  setAnonymousComments(value)
+                  commonUtils.addInStorage(localStorageKey, value)
                 }}
                 label={'Post your comment anonymously'}
                 value={
-                  this.state.anonymousComments
+                  anonymousComments
                     ? CHECKBOX_STATE.CHECKED
                     : CHECKBOX_STATE.UNCHECKED
                 }
@@ -399,13 +420,13 @@ class SegmentCommentsContainer extends React.Component {
             <Button
               type={BUTTON_TYPE.PRIMARY}
               size={BUTTON_SIZE.STANDARD}
-              onClick={() => this.sendComment()}
-              disabled={!this.state.mentionsInputValue}
+              onClick={() => instanceRef.current.sendComment()}
+              disabled={!mentionsInputValue}
             >
               Comment
             </Button>
           </div>
-          {this.state.sendCommentError ? (
+          {sendCommentError ? (
             <div className="comment-ajax-wrap">
               <span className="comment-warnings">
                 Oops, something went wrong. Please try again later.
@@ -426,11 +447,14 @@ class SegmentCommentsContainer extends React.Component {
             type={BUTTON_TYPE.ICON}
             size={BUTTON_SIZE.ICON_XSMALL}
             className="comment-close-btn"
-            onClick={(e) => this.closeComments(e)}
+            onClick={(e) => closeComments(e)}
           >
             <IconClose size={10} />
           </Button>
-          <div className="comments-wrap" ref={(wrap) => (this.wrap = wrap)}>
+          <div
+            className="comments-wrap"
+            ref={(wrap) => (wrapRef.current = wrap)}
+          >
             {htmlComments}
           </div>
           {htmlInsert}
@@ -439,97 +463,119 @@ class SegmentCommentsContainer extends React.Component {
     )
   }
 
-  scrollToBottom() {
-    if (this.wrap) {
-      const scrollHeight = this.wrap.scrollHeight
-      const height = this.wrap.clientHeight
+  const scrollToBottom = () => {
+    if (wrapRef.current) {
+      const scrollHeight = wrapRef.current.scrollHeight
+      const height = wrapRef.current.clientHeight
       const maxScrollTop = scrollHeight - height
-      this.wrap.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0
+      wrapRef.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0
     }
   }
 
-  setFocusOnInput() {
-    this.commentInput.focus()
-  }
+  // Updated every render so both the mount effect and the update effect can call
+  // scrollToBottomRef.current() without exhaustive-deps friction — scrollToBottom itself is
+  // recreated every render (matching this migration's convention for non-listener handlers).
+  const scrollToBottomRef = useRef()
+  scrollToBottomRef.current = scrollToBottom
 
-  onKeyDown(e) {
-    if (e.key === 'Enter' && !e.shiftKey && !this.state.showTagging) {
-      e.preventDefault()
-      if (this.state.mentionsInputValue) this.sendComment()
-    } else {
-      this.saveDraft()
-    }
-  }
+  const isFirstRenderRef = useRef(true)
 
-  componentDidUpdate() {
-    this.scrollToBottom()
+  instanceRef.current.state = {
+    comments,
+    user,
+    teamUsers,
+    sendCommentError,
+    showTagging,
+    mentionsInputValue,
+    anonymousComments,
+    mentionsMarkup,
   }
+  instanceRef.current.setState = (partial) => {
+    if ('comments' in partial) setComments(partial.comments)
+    if ('user' in partial) setUser(partial.user)
+    if ('teamUsers' in partial) setTeamUsersState(partial.teamUsers)
+    if ('sendCommentError' in partial)
+      setSendCommentError(partial.sendCommentError)
+    if ('mentionsInputValue' in partial)
+      setMentionsInputValue(partial.mentionsInputValue)
+    if ('anonymousComments' in partial)
+      setAnonymousComments(partial.anonymousComments)
+    if ('mentionsMarkup' in partial) setMentionsMarkup(partial.mentionsMarkup)
+  }
+  instanceRef.current.sendComment = sendComment
+  instanceRef.current.handleChangeMentionsInputValue =
+    handleChangeMentionsInputValue
+  instanceRef.current.onKeyDown = onKeyDown
+  instanceRef.current.updateComments = updateCommentsRef.current
+  instanceRef.current.setTeamUsers = setTeamUsersRef.current
 
-  componentDidMount() {
-    const draftText = CommentsStore.getDraftComment(this.context.segment.sid)
+  useImperativeHandle(ref, () => instanceRef.current)
+
+  useEffect(() => {
+    const draftText = CommentsStore.getDraftComment(context.segment.sid)
     if (draftText) {
-      this.setState({mentionsInputValue: draftText})
+      setMentionsInputValue(draftText)
     }
 
-    this.updateComments(this.context.segment.sid)
-    CommentsStore.addListener(
-      CommentsConstants.ADD_COMMENT,
-      this.updateComments,
-    )
-    CommentsStore.addListener(
-      CommentsConstants.DELETE_COMMENT,
-      this.updateComments,
-    )
-    CommentsStore.addListener(
-      CommentsConstants.STORE_COMMENTS,
-      this.updateComments,
-    )
-    CommentsStore.addListener(CommentsConstants.SET_FOCUS, this.setFocusOnInput)
+    const updateComments = updateCommentsRef.current
+    const setFocusOnInput = setFocusOnInputRef.current
+    const handleSetTeamUsers = setTeamUsersRef.current
+
+    updateComments(context.segment.sid)
+    CommentsStore.addListener(CommentsConstants.ADD_COMMENT, updateComments)
+    CommentsStore.addListener(CommentsConstants.DELETE_COMMENT, updateComments)
+    CommentsStore.addListener(CommentsConstants.STORE_COMMENTS, updateComments)
+    CommentsStore.addListener(CommentsConstants.SET_FOCUS, setFocusOnInput)
     CommentsStore.addListener(
       CommentsConstants.SET_TEAM_USERS,
-      this.setTeamUsers,
+      handleSetTeamUsers,
     )
-    this.scrollToBottom()
-    this.commentInput.focus()
-  }
+    scrollToBottomRef.current()
+    commentInputRef.current.focus()
 
-  componentWillUnmount() {
-    CommentsStore.removeListener(
-      CommentsConstants.ADD_COMMENT,
-      this.updateComments,
-    )
-    CommentsStore.removeListener(
-      CommentsConstants.DELETE_COMMENT,
-      this.updateComments,
-    )
-    CommentsStore.removeListener(
-      CommentsConstants.STORE_COMMENTS,
-      this.updateComments,
-    )
-    CommentsStore.removeListener(
-      CommentsConstants.SET_FOCUS,
-      this.setFocusOnInput,
-    )
-    CommentsStore.removeListener(
-      CommentsConstants.SET_TEAM_USERS,
-      this.setTeamUsers,
-    )
-  }
-
-  render() {
-    //if is not splitted or is the first of the splitted group
-    if (
-      (!this.context.segment.splitted ||
-        this.context.segment.sid.split('-')[1] === '1') &&
-      this.state.comments
-    ) {
-      if (this.context.segment.openComments && this.context.userInfo) {
-        return this.getComments()
-      }
-    } else {
-      return null
+    return () => {
+      CommentsStore.removeListener(
+        CommentsConstants.ADD_COMMENT,
+        updateComments,
+      )
+      CommentsStore.removeListener(
+        CommentsConstants.DELETE_COMMENT,
+        updateComments,
+      )
+      CommentsStore.removeListener(
+        CommentsConstants.STORE_COMMENTS,
+        updateComments,
+      )
+      CommentsStore.removeListener(CommentsConstants.SET_FOCUS, setFocusOnInput)
+      CommentsStore.removeListener(
+        CommentsConstants.SET_TEAM_USERS,
+        handleSetTeamUsers,
+      )
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false
+      return
+    }
+    scrollToBottomRef.current()
+  })
+
+  //if is not splitted or is the first of the splitted group
+  if (
+    (!context.segment.splitted || context.segment.sid.split('-')[1] === '1') &&
+    comments
+  ) {
+    if (context.segment.openComments && context.userInfo) {
+      return getComments()
+    }
+  } else {
+    return null
   }
-}
+})
+
+SegmentCommentsContainer.displayName = 'SegmentCommentsContainer'
 
 export default SegmentCommentsContainer

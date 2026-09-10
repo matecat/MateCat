@@ -1,6 +1,9 @@
 .*
 !/.gitignore
 !/.stylelintrc.json
+# The local list of names core must not mention stays ignored by the .* rule above;
+# only its documented example is committed.
+!/.eslint-private-names.example.json
 # IDE stuffs
 .settings
 .idea

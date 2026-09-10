@@ -1,41 +1,44 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import CommonUtils from '../../utils/commonUtils'
 import {Accordion} from '../common/Accordion/Accordion'
 import {filterXSS} from 'xss'
 
-class JobMetadataModal extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      currentFile: this.props.currentFile,
-    }
-  }
+const JobMetadataModal = (props) => {
+  const [currentFile, setCurrentFile] = useState(props.currentFile)
 
-  isMtcReferenceValued = ({metadata}) =>
+  const isMtcReferenceValued = ({metadata}) =>
     typeof metadata?.['mtc:references'] === 'string'
 
-  getMTCReferences({metadata}) {
+  // Instructions are stored as plain text and injected with dangerouslySetInnerHTML, so the
+  // escaping has to happen here. Plugins override this method to add markdown rendering; they
+  // filter too, and filterXSS is idempotent.
+  const getHtml = (text) => (text ? filterXSS(text) : text)
+
+  const getMTCReferences = ({metadata}) => {
     const removeNotAllowedLinksFromHtml = (html) => {
       const div = document.createElement('div')
       div.innerHTML = html
       const links = div.getElementsByTagName('a')
       const linksArray = Array.from(links)
       for (var i = 0; i < linksArray.length; i++) {
-        const link = linksArray[i].getAttribute('href')
+        const linkElement = linksArray[i]
+        const link = linkElement.getAttribute('href')
         if (!CommonUtils.isAllowedLinkRedirect(link)) {
-          const text = '[' + linksArray[i].textContent + '](' + link + ')'
-          const linkElement = div.querySelector('[href="' + link + '"]')
-          linkElement.parentNode.replaceChild(
-            document.createTextNode(text),
-            linkElement,
-          )
+          const text = '[' + linkElement.textContent + '](' + link + ')'
+          // Replace the node we already hold: re-querying by href breaks on an anchor with no
+          // href and on any href containing a quote.
+          linkElement.parentNode &&
+            linkElement.parentNode.replaceChild(
+              document.createTextNode(text),
+              linkElement,
+            )
         }
       }
       return div.innerHTML
     }
 
     return (
-      this.isMtcReferenceValued({metadata}) && (
+      isMtcReferenceValued({metadata}) && (
         <p
           dangerouslySetInnerHTML={{
             __html: `<b>Reference:</b> ${removeNotAllowedLinksFromHtml(filterXSS(metadata['mtc:references']))}`,
@@ -45,9 +48,8 @@ class JobMetadataModal extends React.Component {
     )
   }
 
-  createFileList() {
-    const {currentFile} = this.state
-    return this.props.files.map((file) => {
+  const createFileList = () => {
+    return props.files.map((file) => {
       let isCurrentFile = currentFile && currentFile === file.id
 
       const title = (
@@ -62,29 +64,25 @@ class JobMetadataModal extends React.Component {
 
       return (
         file.metadata &&
-        (file.metadata.instructions || this.isMtcReferenceValued(file)) && (
+        (file.metadata.instructions || isMtcReferenceValued(file)) && (
           <Accordion
             key={file.id}
             id={file.id}
             className="instructions-accordion"
             title={title}
             expanded={isCurrentFile}
-            onShow={(id) =>
-              this.setState({
-                currentFile: this.state.currentFile !== id ? id : undefined,
-              })
-            }
+            onShow={(id) => setCurrentFile(currentFile !== id ? id : undefined)}
           >
             <div className="content">
               <div className="transition">
                 {file.metadata.instructions && (
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: this.getHtml(file.metadata.instructions),
+                      __html: getHtml(file.metadata.instructions),
                     }}
                   ></div>
                 )}
-                {this.getMTCReferences(file)}
+                {getMTCReferences(file)}
               </div>
             </div>
           </Accordion>
@@ -93,9 +91,9 @@ class JobMetadataModal extends React.Component {
     })
   }
 
-  createSingleFile() {
-    const file = this.props.files.find(
-      (file) => parseInt(file.id) === parseInt(this.props.currentFile),
+  const createSingleFile = () => {
+    const file = props.files.find(
+      (file) => parseInt(file.id) === parseInt(props.currentFile),
     )
     return (
       <div className="matecat-modal-text">
@@ -105,64 +103,56 @@ class JobMetadataModal extends React.Component {
         <div className="instructions-container">
           <p
             dangerouslySetInnerHTML={{
-              __html: this.getHtml(file.metadata.instructions),
+              __html: getHtml(file.metadata.instructions),
             }}
           />
-          {this.getMTCReferences(file)}
+          {getMTCReferences(file)}
         </div>
       </div>
     )
   }
 
-  getHtml(text) {
-    return text
-  }
-
-  componentDidMount() {
+  useEffect(() => {
     setTimeout(() => {
       const element = document.querySelector('.title.current.active')
       element && element.scrollIntoView({behavior: 'smooth'})
     }, 200)
-  }
+  }, [])
 
-  render() {
-    return (
-      <div className="instructions-modal">
-        <div className="matecat-modal-middle">
-          {this.props.showCurrent ? (
-            this.createSingleFile()
-          ) : (
-            <div className="matecat-modal-text">
-              {this.props.projectInfo && (
+  return (
+    <div className="instructions-modal">
+      <div className="matecat-modal-middle">
+        {props.showCurrent ? (
+          createSingleFile()
+        ) : (
+          <div className="matecat-modal-text">
+            {props.projectInfo && (
+              <div>
+                <h4>Project instructions</h4>
+                <div className="instructions-container">
+                  <p
+                    dangerouslySetInnerHTML={{
+                      __html: getHtml(props.projectInfo),
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+            {props.files &&
+              (props.files.find((file) => file.metadata.instructions) ||
+                props.files.find((file) => isMtcReferenceValued(file))) && (
                 <div>
-                  <h4>Project instructions</h4>
-                  <div className="instructions-container">
-                    <p
-                      dangerouslySetInnerHTML={{
-                        __html: this.getHtml(this.props.projectInfo),
-                      }}
-                    />
+                  <h4>File instructions</h4>
+                  <div className="file-instructions-accordion">
+                    {createFileList()}
                   </div>
                 </div>
               )}
-              {this.props.files &&
-                (this.props.files.find((file) => file.metadata.instructions) ||
-                  this.props.files.find((file) =>
-                    this.isMtcReferenceValued(file),
-                  )) && (
-                  <div>
-                    <h4>File instructions</h4>
-                    <div className="file-instructions-accordion">
-                      {this.createFileList()}
-                    </div>
-                  </div>
-                )}
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-    )
-  }
+    </div>
+  )
 }
 
 export default JobMetadataModal

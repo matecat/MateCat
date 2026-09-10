@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useContext, useState, useEffect, useRef} from 'react'
 import {isUndefined} from 'lodash'
 
 import CommentsStore from '../../stores/CommentsStore'
@@ -9,105 +9,85 @@ import {SegmentContext} from './SegmentContext'
 import SegmentUtils from '../../utils/segmentUtils'
 import CommentsIcon from '../../../img/icons/CommentsIcon'
 
-class SegmentsCommentsIcon extends React.Component {
-  static contextType = SegmentContext
+const SegmentsCommentsIcon = () => {
+  const context = useContext(SegmentContext)
+  const contextRef = useRef(context)
+  contextRef.current = context // always holds the CURRENT context, read live inside updateComments,
+  // mirroring `this.context` never being a stale closure
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      comments: null,
-    }
-    this.types = {sticky: 3, resolve: 2, comment: 1}
+  const [comments, setComments] = useState(null)
 
-    this.updateComments = this.updateComments.bind(this)
-  }
-
-  updateComments(sid) {
-    if (isUndefined(sid) || sid === this.context.segment.sid) {
-      const comments = CommentsStore.getCommentsCountBySegment(
-        this.context.segment.original_sid,
+  // Created once via useRef so its identity never changes across renders — required so that
+  // CommentsStore.addListener/removeListener (matched by reference) stay in sync, exactly like the
+  // class's single this.updateComments.bind(this) in the constructor.
+  const updateCommentsRef = useRef((sid) => {
+    const {segment} = contextRef.current
+    if (isUndefined(sid) || sid === segment.sid) {
+      const updatedComments = CommentsStore.getCommentsCountBySegment(
+        segment.original_sid,
       )
-      this.setState({
-        comments: comments,
-      })
+      setComments(updatedComments)
     }
-  }
+  })
+  const updateComments = updateCommentsRef.current
 
-  openComments(event) {
+  useEffect(() => {
+    updateComments(contextRef.current.segment.sid)
+    CommentsStore.addListener(CommentsConstants.ADD_COMMENT, updateComments)
+    CommentsStore.addListener(CommentsConstants.STORE_COMMENTS, updateComments)
+    return () => {
+      CommentsStore.removeListener(
+        CommentsConstants.ADD_COMMENT,
+        updateComments,
+      )
+      CommentsStore.removeListener(
+        CommentsConstants.STORE_COMMENTS,
+        updateComments,
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // intentionally empty — must run exactly once on mount/unmount, matching
+  // componentDidMount/componentWillUnmount timing exactly; do not add deps here
+
+  const {segment} = context
+
+  const openComments = (event) => {
     event.stopPropagation()
-    SegmentActions.openSegmentComment(this.context.segment.sid)
-    if (!SegmentUtils.isReadonlySegment(this.context.segment))
-      SegmentActions.openSegment(this.context.segment.sid)
+    SegmentActions.openSegmentComment(segment.sid)
+    if (!SegmentUtils.isReadonlySegment(segment))
+      SegmentActions.openSegment(segment.sid)
   }
 
-  componentDidMount() {
-    this.updateComments(this.context.segment.sid)
-    CommentsStore.addListener(
-      CommentsConstants.ADD_COMMENT,
-      this.updateComments,
-    )
-    CommentsStore.addListener(
-      CommentsConstants.STORE_COMMENTS,
-      this.updateComments,
-    )
-  }
-
-  componentWillUnmount() {
-    CommentsStore.removeListener(
-      CommentsConstants.ADD_COMMENT,
-      this.updateComments,
-    )
-    CommentsStore.removeListener(
-      CommentsConstants.STORE_COMMENTS,
-      this.updateComments,
-    )
-  }
-
-  render() {
-    //if is not splitted or is the first of the splitted group
-    if (
-      (!this.context.segment.splitted ||
-        this.context.segment.sid.split('-')[1] === '1') &&
-      this.state.comments
-    ) {
-      let html
-      let rootClasses = ['comment-icon-btn', 'txt']
-      if (
-        this.state.comments.total === 0 ||
-        (this.state.comments.total > 0 && this.state.comments.active === 0)
-      ) {
-        html = <div className="badge-icon badge-blue">+</div>
-      } else if (this.state.comments.active > 0) {
-        rootClasses.push('has-object')
-        html = (
-          <div className="badge-icon badge-blue ">
-            {this.state.comments.active}
-          </div>
-        )
-      }
-
-      return (
-        <div
-          className={rootClasses.join(' ')}
-          title={
-            'Add comment (' +
-            Shortcuts.cattol.events.openComments.keystrokes[
-              Shortcuts.shortCutsKeyType
-            ].toUpperCase() +
-            ')'
-          }
-          onClick={(e) => this.openComments(e)}
-        >
-          <div className="comment-icon">
-            <CommentsIcon />
-            {html}
-          </div>
-        </div>
-      )
-    } else {
-      return null
+  if ((!segment.splitted || segment.sid.split('-')[1] === '1') && comments) {
+    let html
+    let rootClasses = ['comment-icon-btn', 'txt']
+    if (comments.total === 0 || (comments.total > 0 && comments.active === 0)) {
+      html = <div className="badge-icon badge-blue">+</div>
+    } else if (comments.active > 0) {
+      rootClasses.push('has-object')
+      html = <div className="badge-icon badge-blue ">{comments.active}</div>
     }
+
+    return (
+      <div
+        className={rootClasses.join(' ')}
+        title={
+          'Add comment (' +
+          Shortcuts.cattol.events.openComments.keystrokes[
+            Shortcuts.shortCutsKeyType
+          ].toUpperCase() +
+          ')'
+        }
+        onClick={(e) => openComments(e)}
+      >
+        <div className="comment-icon">
+          <CommentsIcon />
+          {html}
+        </div>
+      </div>
+    )
   }
+  return null
 }
 
 export default SegmentsCommentsIcon

@@ -204,9 +204,9 @@ describe('ProjectBar', () => {
       const {container} = render(
         <ProjectBar {...defaultProjectBarProps} isSticky={true} />,
       )
-      expect(
-        container.querySelector('.projectbar-filename'),
-      ).not.toHaveClass('project-bar-blink')
+      expect(container.querySelector('.projectbar-filename')).not.toHaveClass(
+        'project-bar-blink',
+      )
     })
 
     it('blinks when isSegmentOpenedNotRendered describes "true"', () => {
@@ -230,9 +230,9 @@ describe('ProjectBar', () => {
           isSegmentOpenedNotRendered={Symbol(false)}
         />,
       )
-      expect(
-        container.querySelector('.projectbar-filename'),
-      ).not.toHaveClass('project-bar-blink')
+      expect(container.querySelector('.projectbar-filename')).not.toHaveClass(
+        'project-bar-blink',
+      )
     })
 
     it('does not blink when not sticky, even if the signal says true', () => {
@@ -243,9 +243,9 @@ describe('ProjectBar', () => {
           isSegmentOpenedNotRendered={Symbol(true)}
         />,
       )
-      expect(
-        container.querySelector('.projectbar-filename'),
-      ).not.toHaveClass('project-bar-blink')
+      expect(container.querySelector('.projectbar-filename')).not.toHaveClass(
+        'project-bar-blink',
+      )
     })
 
     it('clears the blink automatically after the animation duration, even without an animationend event', () => {
@@ -265,9 +265,9 @@ describe('ProjectBar', () => {
         jest.advanceTimersByTime(BLINK_ANIMATION_DURATION)
       })
 
-      expect(
-        container.querySelector('.projectbar-filename'),
-      ).not.toHaveClass('project-bar-blink')
+      expect(container.querySelector('.projectbar-filename')).not.toHaveClass(
+        'project-bar-blink',
+      )
     })
 
     it('re-triggers the blink when a new Symbol signal describes "true" again', () => {
@@ -283,9 +283,9 @@ describe('ProjectBar', () => {
       act(() => {
         jest.advanceTimersByTime(BLINK_ANIMATION_DURATION)
       })
-      expect(
-        container.querySelector('.projectbar-filename'),
-      ).not.toHaveClass('project-bar-blink')
+      expect(container.querySelector('.projectbar-filename')).not.toHaveClass(
+        'project-bar-blink',
+      )
 
       act(() => {
         rerender(

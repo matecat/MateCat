@@ -34,6 +34,7 @@ export const JobMetadata = ({metadata}) => {
       minWidth: 600,
       minHeight: 400,
       maxWidth: 900,
+      maxHeight: 600,
     }
     ModalsActions.showModalComponent(
       JobMetadataModal,

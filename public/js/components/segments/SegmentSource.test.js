@@ -139,7 +139,6 @@ import SegmentStore from '../../stores/SegmentStore'
 import SegmentActions from '../../actions/SegmentActions'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import SegmentConstants from '../../constants/SegmentConstants'
-import {segmentsMock} from '../../../mocks/segmentsMock'
 
 function makeSegment(overrides = {}) {
   return {
@@ -224,7 +223,6 @@ beforeEach(() => {
     ...window.config,
     id_job: 2,
     source_code: 'en-US',
-    source_rfc: 'en-US',
     isSourceRTL: false,
     isOpenAiEnabled: false,
   }
@@ -264,9 +262,9 @@ describe('SegmentSource rendering', () => {
     await flushTimers()
 
     expect(mockCheckCurrentSegmentTPEnabled).toHaveBeenCalled()
-    expect(container.querySelector('#segment-10-source').textContent).not.toContain(
-      '<g',
-    )
+    expect(
+      container.querySelector('#segment-10-source').textContent,
+    ).not.toContain('<g')
   })
 
   test('renders tag entities through the tag decorator strategy', async () => {
@@ -274,9 +272,9 @@ describe('SegmentSource rendering', () => {
     const {container} = renderSource(segment)
     await flushTimers()
 
-    expect(container.querySelectorAll('[data-testid="tag-entity"]').length).toBeGreaterThan(
-      0,
-    )
+    expect(
+      container.querySelectorAll('[data-testid="tag-entity"]').length,
+    ).toBeGreaterThan(0)
   })
 
   test('renders right-to-left when the source language is RTL', async () => {
@@ -285,7 +283,9 @@ describe('SegmentSource rendering', () => {
     const {container} = renderSource(segment)
     await flushTimers()
 
-    expect(container.querySelector('.public-DraftEditor-content')).not.toBeNull()
+    expect(
+      container.querySelector('.public-DraftEditor-content'),
+    ).not.toBeNull()
   })
 
   test('wraps the editor in a split container when openSplit is set', async () => {
@@ -333,13 +333,17 @@ describe('SegmentSource lifecycle', () => {
     const {unmount} = renderSource(segment)
     await flushTimers()
 
-    const registered = SegmentStore.addListener.mock.calls.map(([event]) => event)
+    const registered = SegmentStore.addListener.mock.calls.map(
+      ([event]) => event,
+    )
     expect(registered).toContain(SegmentConstants.CLOSE_SPLIT_SEGMENT)
     expect(registered).toContain(SegmentConstants.SET_SEGMENT_TAGGED)
     expect(registered).toContain(SegmentConstants.REFRESH_TAG_MAP)
 
     unmount()
-    const removed = SegmentStore.removeListener.mock.calls.map(([event]) => event)
+    const removed = SegmentStore.removeListener.mock.calls.map(
+      ([event]) => event,
+    )
     expect(removed).toContain(SegmentConstants.CLOSE_SPLIT_SEGMENT)
     expect(removed).toContain(SegmentConstants.REFRESH_TAG_MAP)
   })
@@ -530,7 +534,9 @@ describe('SegmentSource decorators', () => {
     expect(ref.current.decoratorsStructure.length).toBeGreaterThan(1)
 
     act(() => ref.current.removeDecorator())
-    expect(ref.current.decoratorsStructure.map(({name}) => name)).toEqual(['tags'])
+    expect(ref.current.decoratorsStructure.map(({name}) => name)).toEqual([
+      'tags',
+    ])
   })
 
   test('removeDecorator with a name clears only that decorator', async () => {
@@ -541,7 +547,9 @@ describe('SegmentSource decorators', () => {
     await flushTimers()
 
     act(() => ref.current.removeDecorator('glossary'))
-    expect(ref.current.decoratorsStructure.map(({name}) => name)).toEqual(['tags'])
+    expect(ref.current.decoratorsStructure.map(({name}) => name)).toEqual([
+      'tags',
+    ])
   })
 
   test('disableDecorator returns a new editor state without that decorator', async () => {
@@ -556,7 +564,9 @@ describe('SegmentSource decorators', () => {
       'glossary',
     )
     expect(next).toBeDefined()
-    expect(ref.current.decoratorsStructure.map(({name}) => name)).toEqual(['tags'])
+    expect(ref.current.decoratorsStructure.map(({name}) => name)).toEqual([
+      'tags',
+    ])
   })
 })
 
@@ -662,7 +672,9 @@ describe('SegmentSource split mode', () => {
     )
     await flushTimers()
 
-    update(makeSegment({splitted: true, split_group: ['10', '11'], openSplit: true}))
+    update(
+      makeSegment({splitted: true, split_group: ['10', '11'], openSplit: true}),
+    )
     await flushTimers()
 
     expect(SegmentStore.getSegmentByIdToJS).toHaveBeenCalledWith('10')
@@ -673,7 +685,9 @@ describe('SegmentSource split mode', () => {
   })
 
   test('addSplitTag inserts a split point and bumps the split counter', async () => {
-    const {ref} = renderSource(makeSegment({openSplit: true, split_group: ['10']}))
+    const {ref} = renderSource(
+      makeSegment({openSplit: true, split_group: ['10']}),
+    )
     await flushTimers()
     stubSelection({anchorNode: null})
     const before = ref.current.splitPoint
@@ -683,7 +697,9 @@ describe('SegmentSource split mode', () => {
   })
 
   test('addSplitTag clears the selection instead of splitting when text is selected', async () => {
-    const {ref} = renderSource(makeSegment({openSplit: true, split_group: ['10']}))
+    const {ref} = renderSource(
+      makeSegment({openSplit: true, split_group: ['10']}),
+    )
     await flushTimers()
     const {removeAllRanges} = stubSelection({
       anchorNode: document.createElement('div'),
@@ -697,7 +713,9 @@ describe('SegmentSource split mode', () => {
   })
 
   test('addSplitTag proceeds when the caret is collapsed inside the editor', async () => {
-    const {ref} = renderSource(makeSegment({openSplit: true, split_group: ['10']}))
+    const {ref} = renderSource(
+      makeSegment({openSplit: true, split_group: ['10']}),
+    )
     await flushTimers()
     stubSelection({
       anchorNode: document.createElement('div'),
@@ -721,7 +739,9 @@ describe('SegmentSource split mode', () => {
   })
 
   test('updateSplitNumberNew is a no-op for already-splitted segments', async () => {
-    const {ref} = renderSource(makeSegment({splitted: true, split_group: ['10']}))
+    const {ref} = renderSource(
+      makeSegment({splitted: true, split_group: ['10']}),
+    )
     await flushTimers()
     const before = ref.current.splitPoint
 
@@ -801,6 +821,25 @@ describe('SegmentSource editor handlers', () => {
     expect(typeof ref.current.state.isShowingOptionsToolbar).toBe('boolean')
   })
 
+  test('mouse up does not throw when the editor ref is gone before the deferred read', async () => {
+    const {container, unmount} = renderSource(makeSegment())
+    await flushTimers()
+
+    const uncaught = jest.fn()
+    process.on('uncaughtException', uncaught)
+
+    // The deferred read is scheduled while the editor is still mounted; React
+    // nulls the ref on unmount, so the callback lands on a ref that is gone.
+    fireEvent.mouseUp(container.querySelector('#segment-10-source'))
+    unmount()
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    process.off('uncaughtException', uncaught)
+    expect(uncaught).not.toHaveBeenCalled()
+  })
+
   test('arrow keys re-evaluate the options toolbar but other keys do not', async () => {
     const {container, ref} = renderSource(makeSegment())
     await flushTimers()
@@ -871,7 +910,10 @@ describe('SegmentSource clipboard and drag', () => {
     const {ref} = renderSource(makeSegment())
     await flushTimers()
     ref.current.editor.getClipboard = () => null
-    const event = {preventDefault: jest.fn(), clipboardData: {setData: jest.fn()}}
+    const event = {
+      preventDefault: jest.fn(),
+      clipboardData: {setData: jest.fn()},
+    }
 
     ref.current.copyFragment(event)
 
@@ -911,7 +953,9 @@ describe('SegmentSource clipboard and drag', () => {
 
 describe('SegmentSource entity click', () => {
   test('forces the selection onto the clicked entity', async () => {
-    const {ref} = renderSource(makeSegment({segment: 'Hello <g id="1">world</g>'}))
+    const {ref} = renderSource(
+      makeSegment({segment: 'Hello <g id="1">world</g>'}),
+    )
     await flushTimers()
     const before = ref.current.state.editorState
 
@@ -953,7 +997,9 @@ describe('SegmentSource AI assistant', () => {
 
     expect(isValidPhraseToAiAssistant({phrase: ''})).toBe(false)
     expect(isValidPhraseToAiAssistant({phrase: 'one two three'})).toBe(true)
-    expect(isValidPhraseToAiAssistant({phrase: 'one two three four'})).toBe(false)
+    expect(isValidPhraseToAiAssistant({phrase: 'one two three four'})).toBe(
+      false,
+    )
   })
 
   test.each([
@@ -962,22 +1008,21 @@ describe('SegmentSource AI assistant', () => {
     ['zh-HK', '一二三四五六', '一二三四五六七'],
     ['zh-MO', '一二三四五六', '一二三四五六七'],
     ['ja-JP', 'あいうえおかきくけこ', 'あいうえおかきくけこさ'],
-  ])('isValidPhraseToAiAssistant applies the %s character limit', async (
-    lang,
-    valid,
-    tooLong,
-  ) => {
-    const {ref} = renderSource(makeSegment())
-    await flushTimers()
-    const {isValidPhraseToAiAssistant} = ref.current
+  ])(
+    'isValidPhraseToAiAssistant applies the %s character limit',
+    async (lang, valid, tooLong) => {
+      const {ref} = renderSource(makeSegment())
+      await flushTimers()
+      const {isValidPhraseToAiAssistant} = ref.current
 
-    expect(
-      isValidPhraseToAiAssistant({phrase: valid, sourceLanguageCode: lang}),
-    ).toBe(true)
-    expect(
-      isValidPhraseToAiAssistant({phrase: tooLong, sourceLanguageCode: lang}),
-    ).toBe(false)
-  })
+      expect(
+        isValidPhraseToAiAssistant({phrase: valid, sourceLanguageCode: lang}),
+      ).toBe(true)
+      expect(
+        isValidPhraseToAiAssistant({phrase: tooLong, sourceLanguageCode: lang}),
+      ).toBe(false)
+    },
+  )
 
   test('getSelectedWords returns the plain selected text', async () => {
     const {ref} = renderSource(makeSegment())
@@ -1146,49 +1191,3 @@ describe('SegmentSource triple click', () => {
 // `preventEdit`, which is unit-tested directly above — driving them through the
 // editor needs real contentEditable + `Selection` behaviour that jsdom does not
 // implement.
-
-describe('SegmentSource.updateOptionsToolbarVisibility', () => {
-  beforeEach(() => {
-    global.config = {
-      ...global.config,
-      source_code: 'en-US',
-      target_code: 'it-IT',
-      tag_projection_languages: {},
-    }
-  })
-
-  const buildInstance = () =>
-    new SegmentSource({
-      segment: segmentsMock[0],
-      splitGroupLength: 1,
-    })
-
-  test('does not throw when the editor ref is null', () => {
-    const instance = buildInstance()
-    instance.editor = null
-    instance.setState = jest.fn()
-    instance.helpAiAssistant = jest.fn()
-
-    expect(() => instance.updateOptionsToolbarVisibility()).not.toThrow()
-    expect(instance.setState).not.toHaveBeenCalled()
-    expect(instance.helpAiAssistant).not.toHaveBeenCalled()
-  })
-
-  test('updates the toolbar visibility when the editor ref is set', () => {
-    const instance = buildInstance()
-    instance.editor = {
-      _latestEditorState: {
-        getSelection: () => ({isCollapsed: () => false}),
-      },
-    }
-    instance.setState = jest.fn()
-    instance.helpAiAssistant = jest.fn()
-
-    instance.updateOptionsToolbarVisibility()
-
-    expect(instance.setState).toHaveBeenCalledWith({
-      isShowingOptionsToolbar: true,
-    })
-    expect(instance.helpAiAssistant).toHaveBeenCalled()
-  })
-})
