@@ -87,7 +87,10 @@ module.exports = {
     // Migrated to function components; ban the class form here so it can't return.
     // Grows with the migration one directory at a time instead of gating it.
     {
-      files: ['public/js/components/modals/**/*.js'],
+      files: [
+        'public/js/components/modals/**/*.js',
+        'public/js/components/languageSelector/**/*.js',
+      ],
       rules: {
         'no-restricted-syntax': [
           'error',
