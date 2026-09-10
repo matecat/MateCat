@@ -4,11 +4,18 @@ import Tooltip from '../../common/Tooltip'
 import TEXT_UTILS from '../../../utils/textUtils'
 import {tagSignatures} from '../utils/DraftMatecatUtils/tagModel'
 
-const GlossaryHighlight = (props) => {
+const GlossaryHighlight = ({
+  contentState,
+  glossary,
+  start,
+  end,
+  blockKey,
+  children,
+  sid,
+}) => {
   const contentRef = useRef(null)
 
   const getTermDetails = () => {
-    const {contentState, glossary, start, end, blockKey, children} = props
     if (tagSignatures.space) {
       const getBlocksBefore = (key) => {
         const blocks = []
@@ -97,7 +104,6 @@ const GlossaryHighlight = (props) => {
   }
 
   const onClickTerm = () => {
-    const {sid} = props
     const glossaryTerm = getTermDetails()
     //Call Segment footer Action
     highlightGlossaryTerm({
@@ -106,8 +112,6 @@ const GlossaryHighlight = (props) => {
       type: 'glossary',
     })
   }
-
-  const {children} = props
 
   return (
     <Tooltip

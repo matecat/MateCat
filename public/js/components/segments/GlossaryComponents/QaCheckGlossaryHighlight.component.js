@@ -4,11 +4,18 @@ import Tooltip from '../../common/Tooltip'
 import {tagSignatures} from '../utils/DraftMatecatUtils/tagModel'
 import TEXT_UTILS from '../../../utils/textUtils'
 
-const QaCheckGlossaryHighlight = (props) => {
+const QaCheckGlossaryHighlight = ({
+  contentState,
+  missingTerms,
+  start,
+  end,
+  blockKey,
+  children,
+  sid,
+}) => {
   const contentRef = useRef(null)
 
   const getTermDetails = () => {
-    const {contentState, missingTerms, start, end, blockKey, children} = props
     if (tagSignatures.space) {
       const getBlocksBefore = (key) => {
         const blocks = []
@@ -93,7 +100,6 @@ const QaCheckGlossaryHighlight = (props) => {
     }
   }
   const onClickTerm = () => {
-    const {sid} = props
     const glossaryTerm = getTermDetails()
     //Call Segment footer Action
     if (glossaryTerm) {
@@ -104,8 +110,6 @@ const QaCheckGlossaryHighlight = (props) => {
       })
     }
   }
-
-  const {children} = props
 
   return (
     <Tooltip

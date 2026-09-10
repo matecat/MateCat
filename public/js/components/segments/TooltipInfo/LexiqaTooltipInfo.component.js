@@ -3,7 +3,7 @@ import React from 'react'
 import LXQ from '../../../utils/lxq.main'
 import IconCloseCircle from '../../../../img/icons/IconCloseCircle'
 
-const LexiqaTooltipInfo = (props) => {
+const LexiqaTooltipInfo = ({onReplaceWord, messages}) => {
   const ignoreError = (message) => {
     if (message.error) {
       LXQ.ignoreError(message.error)
@@ -11,12 +11,11 @@ const LexiqaTooltipInfo = (props) => {
   }
 
   const replaceWord = ({newWord, start, end}) => {
-    props.onReplaceWord({newWord, start, end})
+    onReplaceWord({newWord, start, end})
     //LXQ.redoHighlighting(segmentId, false)
   }
 
   const buildTooltipError = () => {
-    const {messages} = props
     const suggestions = messages.filter((item) => item.type === 'suggestion')
     const errors = messages.filter((item) => item.type !== 'suggestion')
 

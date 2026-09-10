@@ -1,7 +1,6 @@
 import React from 'react'
 
-const TooltipInfo = (props) => {
-  const {text, isTag, tagStyle} = props
+const TooltipInfo = ({text, isTag, tagStyle}) => {
 
   /*render() {
         return <div className="tag-tooltip">

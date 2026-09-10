@@ -3,12 +3,17 @@ import Tooltip from '../../common/Tooltip'
 import {tagSignatures} from '../utils/DraftMatecatUtils/tagModel'
 import TEXT_UTILS from '../../../utils/textUtils'
 
-const QaCheckBlacklistHighlight = (props) => {
+const QaCheckBlacklistHighlight = ({
+  contentState,
+  blackListedTerms,
+  start,
+  end,
+  blockKey,
+  children,
+}) => {
   const contentRef = useRef(null)
 
   const getTermDetails = () => {
-    const {contentState, blackListedTerms, start, end, blockKey, children} =
-      props
     if (tagSignatures.space) {
       const getBlocksBefore = (key) => {
         const blocks = []
@@ -92,8 +97,6 @@ const QaCheckBlacklistHighlight = (props) => {
       return result
     }
   }
-
-  const {children} = props
 
   const term = getTermDetails()
 

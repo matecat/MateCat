@@ -5,11 +5,20 @@ import LexiqaTooltipInfo from '../TooltipInfo/LexiqaTooltipInfo.component'
 import LexiqaUtils from '../../../utils/lxq.main'
 import Tooltip from '../../common/Tooltip'
 
-const LexiqaHighlight = (props) => {
+const LexiqaHighlight = ({
+  blockKey,
+  start,
+  end,
+  warnings,
+  isSource,
+  sid,
+  children,
+  getUpdatedSegmentInfo,
+  replaceWordAt,
+}) => {
   const contentRef = useRef(null)
 
   const getWarning = () => {
-    let {blockKey, start, end, warnings, isSource, sid} = props
     // Every block starts from offset 0, so we have to check warnings's blockKey
     let warning = find(
       warnings,
@@ -26,7 +35,6 @@ const LexiqaHighlight = (props) => {
     return warning
   }
 
-  const {children, getUpdatedSegmentInfo} = props
   const {segmentOpened} = getUpdatedSegmentInfo()
   const warning = getWarning()
 
@@ -40,7 +48,7 @@ const LexiqaHighlight = (props) => {
           warning.messages && (
             <LexiqaTooltipInfo
               messages={warning.messages}
-              onReplaceWord={props.replaceWordAt}
+              onReplaceWord={replaceWordAt}
             />
           )
         }
