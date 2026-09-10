@@ -84,6 +84,24 @@ module.exports = {
       },
     },
 
+    // Migrated to function components; ban the class form here so it can't return.
+    // Grows with the migration one directory at a time instead of gating it.
+    {
+      files: ['public/js/components/modals/**/*.js'],
+      rules: {
+        'no-restricted-syntax': [
+          'error',
+          {
+            selector:
+              'ClassDeclaration[superClass.name=/^(Pure)?Component$/], ' +
+              'ClassDeclaration[superClass.property.name=/^(Pure)?Component$/]',
+            message: 'Write function components with hooks.',
+          },
+          ...privateNameRules,
+        ],
+      },
+    },
+
     // grunt concat related files
     {
       files: ['**/public/js/**/*.js'],
