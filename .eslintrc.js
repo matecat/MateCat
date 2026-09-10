@@ -96,6 +96,8 @@ module.exports = {
         'public/js/components/segments/GlossaryComponents/**/*.js',
         'public/js/components/segments/LexiqaHighlight/**/*.js',
         'public/js/components/segments/TooltipInfo/**/*.js',
+        'public/js/components/segments/TagEntity/**/*.js',
+        'public/js/components/segments/utils/DraftMatecatUtils/TagMenu/**/*.js',
       ],
       rules: {
         'no-restricted-syntax': [
