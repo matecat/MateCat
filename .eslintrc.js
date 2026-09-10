@@ -92,6 +92,7 @@ module.exports = {
         'public/js/components/languageSelector/**/*.js',
         'public/js/components/review_extended/**/*.js',
         'public/js/components/common/WrapperLoader.js',
+        'public/js/components/header/cattol/**/*.js',
       ],
       rules: {
         'no-restricted-syntax': [
