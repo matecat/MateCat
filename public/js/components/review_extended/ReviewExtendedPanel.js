@@ -1,5 +1,5 @@
 import {isEmpty} from 'lodash'
-import React from 'react'
+import React, {useCallback, useContext, useEffect, useState} from 'react'
 import classnames from 'classnames'
 
 import ReviewExtendedIssuesContainer from './ReviewExtendedIssuesContainer'
@@ -20,40 +20,30 @@ import {
   BUTTON_TYPE,
 } from '../common/Button/Button'
 
-class ReviewExtendedPanel extends React.Component {
-  static contextType = SegmentContext
+const removeMessageType = 0
+const addIssueToApproveMessageType = 1
+const addIssueToSelectedTextMessageType = 2
 
-  constructor(props) {
-    super(props)
-    this.removeMessageType = 0
-    this.addIssueToApproveMessageType = 1
-    this.addIssueToSelectedTextMessageType = 2
-    this.state = {
-      versionNumber: this.props.segment.versions[0]
-        ? this.props.segment.versions[0].version_number
-        : 0,
-      diffPatch: null,
-      newtranslation: this.props.segment.translation,
-      issueInCreation: false,
-      showAddIssueMessage: false,
-      showAddIssueToSelectedTextMessage: false,
-      issueEditing: undefined,
-    }
-  }
+const ReviewExtendedPanel = (props) => {
+  const context = useContext(SegmentContext)
 
-  removeSelection() {
-    this.setCreationIssueLoader(false)
-    this.context.removeSelection()
-    this.setState({
-      showAddIssueMessage: false,
-      showAddIssueToSelectedTextMessage: false,
-    })
-    SegmentActions.unlockEditArea(this.props.segment.sid)
-  }
+  const versionNumber = props.segment.versions[0]
+    ? props.segment.versions[0].version_number
+    : 0
 
-  getAllIssues() {
+  // eslint-disable-next-line no-unused-vars
+  const [diffPatch, setDiffPatch] = useState(null)
+  const [newtranslation] = useState(props.segment.translation)
+  const [issueInCreation, setIssueInCreation] = useState(false)
+  const [issueEditing, setIssueEditing] = useState(undefined)
+  const [issueMessages, setIssueMessages] = useState({
+    showAddIssueMessage: false,
+    showAddIssueToSelectedTextMessage: false,
+  })
+
+  const getAllIssues = () => {
     let issues = []
-    this.props.segment.versions.forEach(function (version) {
+    props.segment.versions.forEach(function (version) {
       if (!isEmpty(version.issues)) {
         issues = issues.concat(version.issues)
       }
@@ -61,149 +51,136 @@ class ReviewExtendedPanel extends React.Component {
     return issues
   }
 
-  setCreationIssueLoader(inCreation) {
-    this.setState({
-      issueInCreation: inCreation,
+  const removeSelection = () => {
+    setIssueInCreation(false)
+    context.removeSelection()
+    setIssueMessages({
+      showAddIssueMessage: false,
+      showAddIssueToSelectedTextMessage: false,
     })
+    SegmentActions.unlockEditArea(props.segment.sid)
   }
 
-  showIssuesMessage(sid, type) {
+  const showIssuesMessage = useCallback((sid, type) => {
     switch (type) {
-      case this.addIssueToApproveMessageType:
-        this.setState({
+      case addIssueToApproveMessageType:
+        setIssueMessages({
           showAddIssueMessage: true,
           showAddIssueToSelectedTextMessage: false,
         })
         break
-      case this.addIssueToSelectedTextMessageType:
-        this.setState({
+      case addIssueToSelectedTextMessageType:
+        setIssueMessages({
           showAddIssueMessage: false,
           showAddIssueToSelectedTextMessage: true,
         })
         break
-      case this.removeMessageType:
-        this.setState({
+      case removeMessageType:
+        setIssueMessages({
           showAddIssueMessage: false,
           showAddIssueToSelectedTextMessage: false,
         })
         break
     }
+  }, [])
+
+  const closePanel = () => {
+    SegmentActions.closeSegmentIssuePanel(props.segment.sid)
   }
 
-  closePanel() {
-    SegmentActions.closeSegmentIssuePanel(this.props.segment.sid)
-  }
-
-  static getDerivedStateFromProps(props) {
-    return {
-      versionNumber: props.segment.versions[0]
-        ? props.segment.versions[0].version_number
-        : 0,
-    }
-  }
-
-  componentDidMount() {
-    // this.props.setParentLoader(false);
+  useEffect(() => {
     SegmentStore.addListener(
       SegmentConstants.SHOW_ISSUE_MESSAGE,
-      this.showIssuesMessage.bind(this),
+      showIssuesMessage,
     )
-  }
+    return () => {
+      SegmentStore.removeListener(
+        SegmentConstants.SHOW_ISSUE_MESSAGE,
+        showIssuesMessage,
+      )
+    }
+  }, [showIssuesMessage])
 
-  componentWillUnmount() {
-    SegmentStore.removeListener(
-      SegmentConstants.SHOW_ISSUE_MESSAGE,
-      this.showIssuesMessage,
-    )
-  }
+  const issues = getAllIssues()
+  const thereAreIssuesClass = issues.length > 0 ? 'thereAreIssues' : ''
+  const cornerClass = classnames({
+    error: issueMessages.showAddIssueMessage,
+    warning: issueMessages.showAddIssueToSelectedTextMessage,
+    're-open-view re-issues': true,
+  })
 
-  setIssueEditing(issue) {
-    this.setState({issueEditing: issue})
-  }
-  render() {
-    let issues = this.getAllIssues()
-    let thereAreIssuesClass = issues.length > 0 ? 'thereAreIssues' : ''
-    let cornerClass = classnames({
-      error: this.state.showAddIssueMessage,
-      warning: this.state.showAddIssueToSelectedTextMessage,
-      're-open-view re-issues': true,
-    })
-    return (
-      <div className={'re-wrapper shadow-1 ' + thereAreIssuesClass}>
-        <div className={cornerClass} />
-        <Button
-          type={BUTTON_TYPE.ICON}
-          mode={BUTTON_MODE.GHOST}
-          size={BUTTON_SIZE.ICON_XSMALL}
-          className="re-close-balloon"
-          onClick={this.closePanel.bind(this)}
-        >
-          <IconClose />
-        </Button>
-        <ReviewExtendedIssuesContainer
-          loader={this.state.issueInCreation}
-          issues={issues}
-          isReview={this.props.isReview}
-          issueEditing={this.state.issueEditing}
-          setIssueEditing={this.setIssueEditing.bind(this)}
-          selection={this.props.selectionObj}
-          segmentVersion={this.state.versionNumber}
+  return (
+    <div className={'re-wrapper shadow-1 ' + thereAreIssuesClass}>
+      <div className={cornerClass} />
+      <Button
+        type={BUTTON_TYPE.ICON}
+        mode={BUTTON_MODE.GHOST}
+        size={BUTTON_SIZE.ICON_XSMALL}
+        className="re-close-balloon"
+        onClick={closePanel}
+      >
+        <IconClose />
+      </Button>
+      <ReviewExtendedIssuesContainer
+        loader={issueInCreation}
+        issues={issues}
+        isReview={props.isReview}
+        issueEditing={issueEditing}
+        setIssueEditing={setIssueEditing}
+        selection={props.selectionObj}
+        segmentVersion={versionNumber}
+      />
+      {issueMessages.showAddIssueMessage ? (
+        <div className="re-warning-not-added-issue">
+          <p>
+            You must add an issue from the list below before approving this
+            segment.
+            <br />
+            <a
+              onClick={() =>
+                ModalsActions.showModalComponent(
+                  ShortCutsModal,
+                  null,
+                  'Shortcuts',
+                )
+              }
+            >
+              {'Shortcut: ' +
+                Shortcuts.cattol.events.navigateIssues.equivalent[
+                  Shortcuts.shortCutsKeyType
+                ]}
+            </a>
+            <br />
+            <i>
+              Note: the job owner and workspace members can disable this
+              requirement from settings.
+            </i>
+          </p>
+        </div>
+      ) : null}
+
+      {issueMessages.showAddIssueToSelectedTextMessage ? (
+        <div className="re-warning-selected-text-issue">
+          <p>
+            Select an issue from the list below to associate it to the selected
+            text.
+          </p>
+        </div>
+      ) : null}
+
+      {props.isReview &&
+      !(SegmentUtils.isIceSegment(props.segment) && !props.segment.unlocked) ? (
+        <ReviewExtendedIssuePanel
+          selection={props.selectionObj}
+          segmentVersion={versionNumber}
+          submitIssueCallback={removeSelection}
+          newtranslation={newtranslation}
+          setCreationIssueLoader={setIssueInCreation}
+          setIssueEditing={setIssueEditing}
         />
-        {this.state.showAddIssueMessage ? (
-          <div className="re-warning-not-added-issue">
-            <p>
-              You must add an issue from the list below before approving this
-              segment.
-              <br />
-              <a
-                onClick={() =>
-                  ModalsActions.showModalComponent(
-                    ShortCutsModal,
-                    null,
-                    'Shortcuts',
-                  )
-                }
-              >
-                {'Shortcut: ' +
-                  Shortcuts.cattol.events.navigateIssues.equivalent[
-                    Shortcuts.shortCutsKeyType
-                  ]}
-              </a>
-              <br />
-              <i>
-                Note: the job owner and workspace members can disable this
-                requirement from settings.
-              </i>
-            </p>
-          </div>
-        ) : null}
-
-        {this.state.showAddIssueToSelectedTextMessage ? (
-          <div className="re-warning-selected-text-issue">
-            <p>
-              Select an issue from the list below to associate it to the
-              selected text.
-            </p>
-          </div>
-        ) : null}
-
-        {this.props.isReview &&
-        !(
-          SegmentUtils.isIceSegment(this.props.segment) &&
-          !this.props.segment.unlocked
-        ) ? (
-          <ReviewExtendedIssuePanel
-            selection={this.props.selectionObj}
-            segmentVersion={this.state.versionNumber}
-            submitIssueCallback={this.removeSelection.bind(this)}
-            newtranslation={this.state.newtranslation}
-            setCreationIssueLoader={this.setCreationIssueLoader.bind(this)}
-            setIssueEditing={this.setIssueEditing.bind(this)}
-          />
-        ) : null}
-      </div>
-    )
-  }
+      ) : null}
+    </div>
+  )
 }
 
 export default ReviewExtendedPanel

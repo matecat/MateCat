@@ -7,7 +7,7 @@ header {
   z-index: 6;
   margin: 0;
   background: colors.$blue900;
-  height: 60px;
+  min-height: 60px;
   @media only screen and (max-width: 992px) {
     min-width: 992px;
     position: relative;
