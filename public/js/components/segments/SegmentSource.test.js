@@ -133,7 +133,10 @@ jest.mock('./utils/DraftMatecatUtils', () => {
   }
 })
 
-import SegmentSource from './SegmentSource'
+import SegmentSource, {
+  getSearchParams,
+  isValidPhraseToAiAssistant,
+} from './SegmentSource'
 import {SegmentContext} from './SegmentContext'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentActions from '../../actions/SegmentActions'
@@ -362,11 +365,16 @@ describe('SegmentSource lifecycle', () => {
 
   test('does not push the source into the store when the source is empty', async () => {
     const segment = makeSegment({segment: ''})
-    const {ref} = renderSource(segment)
+    renderSource(segment)
     await flushTimers()
     SegmentActions.updateSource.mockClear()
 
-    act(() => ref.current.updateSourceInStore())
+    // Triggers it the same way production does: broadcast the store event
+    // updateSourceInStore is registered against, rather than reaching in.
+    const refreshTagMapListener = SegmentStore.addListener.mock.calls.find(
+      ([event]) => event === SegmentConstants.REFRESH_TAG_MAP,
+    )[1]
+    act(() => refreshTagMapListener())
     expect(SegmentActions.updateSource).not.toHaveBeenCalled()
   })
 
@@ -377,7 +385,7 @@ describe('SegmentSource lifecycle', () => {
     SegmentActions.focusTags.mockClear()
 
     act(() => {
-      const current = ref.current.state.editorState
+      const current = ref.current.getEditorState()
       ref.current.onChange(
         EditorState.acceptSelection(current, current.getSelection()),
       )
@@ -389,7 +397,8 @@ describe('SegmentSource lifecycle', () => {
 })
 
 describe('SegmentSource search params', () => {
-  test('returns the active search descriptor when the source is in search', async () => {
+  // Pure function, tested directly — no rendering needed.
+  test('returns the active search descriptor when the source is in search', () => {
     const segment = makeSegment({
       inSearch: true,
       currentInSearch: true,
@@ -397,10 +406,8 @@ describe('SegmentSource search params', () => {
       searchParams: {source: 'Hello'},
       occurrencesInSearch: {occurrences: [1, 2]},
     })
-    const {ref} = renderSource(segment)
-    await flushTimers()
 
-    expect(ref.current.getSearchParams()).toEqual({
+    expect(getSearchParams(segment)).toEqual({
       active: true,
       currentActive: true,
       textToReplace: 'Hello',
@@ -411,11 +418,8 @@ describe('SegmentSource search params', () => {
     })
   })
 
-  test('returns an inactive descriptor when the source is not in search', async () => {
-    const {ref} = renderSource(makeSegment())
-    await flushTimers()
-
-    expect(ref.current.getSearchParams()).toEqual({active: false})
+  test('returns an inactive descriptor when the source is not in search', () => {
+    expect(getSearchParams(makeSegment())).toEqual({active: false})
   })
 })
 
@@ -435,7 +439,7 @@ describe('SegmentSource decorators', () => {
     await flushTimers()
 
     expect(DraftMatecatUtils.activateSearch).toHaveBeenCalled()
-    expect(ref.current.state.activeDecorators.search).toBe(true)
+    expect(ref.current.getActiveDecorators().search).toBe(true)
   })
 
   test('drops the search decorator when the segment leaves search', async () => {
@@ -447,12 +451,12 @@ describe('SegmentSource decorators', () => {
       }),
     )
     await flushTimers()
-    expect(ref.current.state.activeDecorators.search).toBe(true)
+    expect(ref.current.getActiveDecorators().search).toBe(true)
 
     update(makeSegment())
     await flushTimers()
 
-    expect(ref.current.state.activeDecorators.search).toBe(false)
+    expect(ref.current.getActiveDecorators().search).toBe(false)
   })
 
   test('activates and then drops the glossary decorator', async () => {
@@ -462,11 +466,11 @@ describe('SegmentSource decorators', () => {
     update(makeSegment({glossary: [{isBlacklist: false, missingTerm: false}]}))
     await flushTimers()
     expect(DraftMatecatUtils.activateGlossary).toHaveBeenCalled()
-    expect(ref.current.state.activeDecorators.glossary).toBe(true)
+    expect(ref.current.getActiveDecorators().glossary).toBe(true)
 
     update(makeSegment({glossary: []}))
     await flushTimers()
-    expect(ref.current.state.activeDecorators.glossary).toBe(false)
+    expect(ref.current.getActiveDecorators().glossary).toBe(false)
   })
 
   test('activates and then drops the QA glossary decorator', async () => {
@@ -476,11 +480,11 @@ describe('SegmentSource decorators', () => {
     update(makeSegment({glossary: [{missingTerm: true, isBlacklist: false}]}))
     await flushTimers()
     expect(DraftMatecatUtils.activateQaCheckGlossary).toHaveBeenCalled()
-    expect(ref.current.state.activeDecorators.qaCheckGlossary).toBe(true)
+    expect(ref.current.getActiveDecorators().qaCheckGlossary).toBe(true)
 
     update(makeSegment({glossary: []}))
     await flushTimers()
-    expect(ref.current.state.activeDecorators.qaCheckGlossary).toBe(false)
+    expect(ref.current.getActiveDecorators().qaCheckGlossary).toBe(false)
   })
 
   test('activates the lexiqa decorator when warnings resolve to ranges', async () => {
@@ -494,11 +498,11 @@ describe('SegmentSource decorators', () => {
     await flushTimers()
 
     expect(DraftMatecatUtils.activateLexiqa).toHaveBeenCalled()
-    expect(ref.current.state.activeDecorators.lexiqa).toBe(true)
+    expect(ref.current.getActiveDecorators().lexiqa).toBe(true)
 
     update(makeSegment({lexiqa: {}}))
     await flushTimers()
-    expect(ref.current.state.activeDecorators.lexiqa).toBe(false)
+    expect(ref.current.getActiveDecorators().lexiqa).toBe(false)
   })
 
   test('removes the lexiqa decorator when no offsets survive the editor state', async () => {
@@ -512,16 +516,16 @@ describe('SegmentSource decorators', () => {
     await flushTimers()
 
     expect(DraftMatecatUtils.activateLexiqa).not.toHaveBeenCalled()
-    expect(ref.current.state.activeDecorators.lexiqa).toBe(true)
+    expect(ref.current.getActiveDecorators().lexiqa).toBe(true)
   })
 
   test('adds the ICU decorator on the first check when ICU is enabled', async () => {
     const {ref} = renderSource(makeSegment({icu: true}))
     await flushTimers()
 
-    expect(ref.current.firstIcuCheck).toBe(true)
+    expect(ref.current.getFirstIcuCheck()).toBe(true)
     expect(
-      ref.current.decoratorsStructure.some(({name}) => name === 'icu'),
+      ref.current.getDecoratorsStructure().some(({name}) => name === 'icu'),
     ).toBe(true)
   })
 
@@ -531,12 +535,12 @@ describe('SegmentSource decorators', () => {
 
     update(makeSegment({glossary: [{isBlacklist: false}]}))
     await flushTimers()
-    expect(ref.current.decoratorsStructure.length).toBeGreaterThan(1)
+    expect(ref.current.getDecoratorsStructure().length).toBeGreaterThan(1)
 
     act(() => ref.current.removeDecorator())
-    expect(ref.current.decoratorsStructure.map(({name}) => name)).toEqual([
-      'tags',
-    ])
+    expect(
+      ref.current.getDecoratorsStructure().map(({name}) => name),
+    ).toEqual(['tags'])
   })
 
   test('removeDecorator with a name clears only that decorator', async () => {
@@ -547,9 +551,9 @@ describe('SegmentSource decorators', () => {
     await flushTimers()
 
     act(() => ref.current.removeDecorator('glossary'))
-    expect(ref.current.decoratorsStructure.map(({name}) => name)).toEqual([
-      'tags',
-    ])
+    expect(
+      ref.current.getDecoratorsStructure().map(({name}) => name),
+    ).toEqual(['tags'])
   })
 
   test('disableDecorator returns a new editor state without that decorator', async () => {
@@ -560,13 +564,13 @@ describe('SegmentSource decorators', () => {
     await flushTimers()
 
     const next = ref.current.disableDecorator(
-      ref.current.state.editorState,
+      ref.current.getEditorState(),
       'glossary',
     )
     expect(next).toBeDefined()
-    expect(ref.current.decoratorsStructure.map(({name}) => name)).toEqual([
-      'tags',
-    ])
+    expect(
+      ref.current.getDecoratorsStructure().map(({name}) => name),
+    ).toEqual(['tags'])
   })
 })
 
@@ -574,7 +578,7 @@ describe('SegmentSource tagged source and tag map', () => {
   test('setTaggedSource rebuilds the editor state for the matching sid', async () => {
     const {ref} = renderSource(makeSegment())
     await flushTimers()
-    const before = ref.current.state.editorState
+    const before = ref.current.getEditorState()
     SegmentActions.updateSource.mockClear()
 
     await act(async () => {
@@ -582,14 +586,14 @@ describe('SegmentSource tagged source and tag map', () => {
       await new Promise((resolve) => setTimeout(resolve, 0))
     })
 
-    expect(ref.current.state.editorState).not.toBe(before)
+    expect(ref.current.getEditorState()).not.toBe(before)
     expect(SegmentActions.updateSource).toHaveBeenCalled()
   })
 
   test('setTaggedSource ignores a different sid', async () => {
     const {ref} = renderSource(makeSegment())
     await flushTimers()
-    const before = ref.current.state.editorState
+    const before = ref.current.getEditorState()
     SegmentActions.updateSource.mockClear()
 
     await act(async () => {
@@ -597,7 +601,7 @@ describe('SegmentSource tagged source and tag map', () => {
       await new Promise((resolve) => setTimeout(resolve, 0))
     })
 
-    expect(ref.current.state.editorState).toBe(before)
+    expect(ref.current.getEditorState()).toBe(before)
     expect(SegmentActions.updateSource).not.toHaveBeenCalled()
   })
 
@@ -680,7 +684,7 @@ describe('SegmentSource split mode', () => {
     expect(SegmentStore.getSegmentByIdToJS).toHaveBeenCalledWith('10')
     expect(SegmentStore.getSegmentByIdToJS).toHaveBeenCalledWith('11')
     expect(
-      ref.current.state.editorState.getCurrentContent().getPlainText(),
+      ref.current.getEditorState().getCurrentContent().getPlainText(),
     ).toContain('part-11')
   })
 
@@ -690,10 +694,10 @@ describe('SegmentSource split mode', () => {
     )
     await flushTimers()
     stubSelection({anchorNode: null})
-    const before = ref.current.splitPoint
+    const before = ref.current.getSplitPoint()
 
     act(() => ref.current.addSplitTag())
-    expect(ref.current.splitPoint).toBe(before + 1)
+    expect(ref.current.getSplitPoint()).toBe(before + 1)
   })
 
   test('addSplitTag clears the selection instead of splitting when text is selected', async () => {
@@ -705,11 +709,11 @@ describe('SegmentSource split mode', () => {
       anchorNode: document.createElement('div'),
       getRangeAt: () => ({startOffset: 0, endOffset: 3}),
     })
-    const before = ref.current.splitPoint
+    const before = ref.current.getSplitPoint()
 
     act(() => ref.current.addSplitTag())
     expect(removeAllRanges).toHaveBeenCalled()
-    expect(ref.current.splitPoint).toBe(before)
+    expect(ref.current.getSplitPoint()).toBe(before)
   })
 
   test('addSplitTag proceeds when the caret is collapsed inside the editor', async () => {
@@ -721,21 +725,21 @@ describe('SegmentSource split mode', () => {
       anchorNode: document.createElement('div'),
       getRangeAt: () => ({startOffset: 2, endOffset: 2}),
     })
-    const before = ref.current.splitPoint
+    const before = ref.current.getSplitPoint()
 
     act(() => ref.current.addSplitTag())
-    expect(ref.current.splitPoint).toBe(before + 1)
+    expect(ref.current.getSplitPoint()).toBe(before + 1)
   })
 
   test('insertTagAtSelection bails out for a non-buildable tag name', async () => {
     const {ref} = renderSource(makeSegment())
     await flushTimers()
-    const before = ref.current.state.editorState
+    const before = ref.current.getEditorState()
 
     // `g` is a known tag signature but has no encodedPlaceholder, so it is not
     // buildable: structFromName returns null and insertion must be skipped.
     act(() => ref.current.insertTagAtSelection('g'))
-    expect(ref.current.state.editorState).toBe(before)
+    expect(ref.current.getEditorState()).toBe(before)
   })
 
   test('updateSplitNumberNew is a no-op for already-splitted segments', async () => {
@@ -743,31 +747,31 @@ describe('SegmentSource split mode', () => {
       makeSegment({splitted: true, split_group: ['10']}),
     )
     await flushTimers()
-    const before = ref.current.splitPoint
+    const before = ref.current.getSplitPoint()
 
     ref.current.updateSplitNumberNew(5)
-    expect(ref.current.splitPoint).toBe(before)
+    expect(ref.current.getSplitPoint()).toBe(before)
   })
 
   test('endSplitMode restores the pre-split editor state while split is open', async () => {
     const segment = makeSegment({openSplit: true, split_group: ['10', '11']})
     const {ref} = renderSource(segment)
     await flushTimers()
-    const beforeSplit = ref.current.state.editorStateBeforeSplit
+    const beforeSplit = ref.current.getEditorStateBeforeSplit()
 
     act(() => ref.current.endSplitMode())
-    expect(ref.current.splitPoint).toBe(1)
-    expect(ref.current.state.editorState).toBe(beforeSplit)
+    expect(ref.current.getSplitPoint()).toBe(1)
+    expect(ref.current.getEditorState()).toBe(beforeSplit)
   })
 
   test('endSplitMode only recomputes the split point when split is closed', async () => {
     const {ref} = renderSource(makeSegment({split_group: null}))
     await flushTimers()
-    const current = ref.current.state.editorState
+    const current = ref.current.getEditorState()
 
     act(() => ref.current.endSplitMode())
-    expect(ref.current.splitPoint).toBe(0)
-    expect(ref.current.state.editorState).toBe(current)
+    expect(ref.current.getSplitPoint()).toBe(0)
+    expect(ref.current.getEditorState()).toBe(current)
   })
 })
 
@@ -794,7 +798,7 @@ describe('SegmentSource editor handlers', () => {
       await new Promise((resolve) => setTimeout(resolve, 0))
     })
 
-    expect(ref.current.state.isShowingOptionsToolbar).toBe(false)
+    expect(ref.current.getIsShowingOptionsToolbar()).toBe(false)
     expect(SegmentActions.highlightTags).toHaveBeenCalled()
     expect(SegmentActions.focusTags).toHaveBeenCalledWith([])
   })
@@ -818,7 +822,7 @@ describe('SegmentSource editor handlers', () => {
       await new Promise((resolve) => setTimeout(resolve, 0))
     })
 
-    expect(typeof ref.current.state.isShowingOptionsToolbar).toBe('boolean')
+    expect(typeof ref.current.getIsShowingOptionsToolbar()).toBe('boolean')
   })
 
   test('mouse up does not throw when the editor ref is gone before the deferred read', async () => {
@@ -869,10 +873,10 @@ describe('SegmentSource editor handlers', () => {
     )
     await flushTimers()
     stubSelection({anchorNode: null})
-    const before = ref.current.splitPoint
+    const before = ref.current.getSplitPoint()
 
     fireEvent.click(container.querySelector('#segment-10-source'))
-    expect(ref.current.splitPoint).toBe(before + 1)
+    expect(ref.current.getSplitPoint()).toBe(before + 1)
   })
 
   test('blur on the wrapper hides the toolbar', async () => {
@@ -884,7 +888,7 @@ describe('SegmentSource editor handlers', () => {
       fireEvent.blur(container.querySelector('#segment-10-source'))
       await new Promise((resolve) => setTimeout(resolve, 0))
     })
-    expect(ref.current.state.isShowingOptionsToolbar).toBe(false)
+    expect(ref.current.getIsShowingOptionsToolbar()).toBe(false)
   })
 })
 
@@ -957,10 +961,10 @@ describe('SegmentSource entity click', () => {
       makeSegment({segment: 'Hello <g id="1">world</g>'}),
     )
     await flushTimers()
-    const before = ref.current.state.editorState
+    const before = ref.current.getEditorState()
 
     act(() => ref.current.onEntityClick(0, 2, 'g'))
-    expect(ref.current.state.editorState).not.toBe(before)
+    expect(ref.current.getEditorState()).not.toBe(before)
   })
 
   test('removes the split point entity when clicked in split mode', async () => {
@@ -971,10 +975,10 @@ describe('SegmentSource entity click', () => {
     })
     const {ref} = renderSource(segment)
     await flushTimers()
-    const before = ref.current.splitPoint
+    const before = ref.current.getSplitPoint()
 
     act(() => ref.current.onEntityClick(0, 2, 'splitPoint'))
-    expect(ref.current.splitPoint).toBe(before - 1)
+    expect(ref.current.getSplitPoint()).toBe(before - 1)
   })
 
   test('swallows errors coming from a missing editor reference', async () => {
@@ -990,11 +994,8 @@ describe('SegmentSource entity click', () => {
 })
 
 describe('SegmentSource AI assistant', () => {
-  test('isValidPhraseToAiAssistant accepts up to three words by default', async () => {
-    const {ref} = renderSource(makeSegment())
-    await flushTimers()
-    const {isValidPhraseToAiAssistant} = ref.current
-
+  // Pure function, tested directly — no rendering needed.
+  test('isValidPhraseToAiAssistant accepts up to three words by default', () => {
     expect(isValidPhraseToAiAssistant({phrase: ''})).toBe(false)
     expect(isValidPhraseToAiAssistant({phrase: 'one two three'})).toBe(true)
     expect(isValidPhraseToAiAssistant({phrase: 'one two three four'})).toBe(
@@ -1010,11 +1011,7 @@ describe('SegmentSource AI assistant', () => {
     ['ja-JP', 'あいうえおかきくけこ', 'あいうえおかきくけこさ'],
   ])(
     'isValidPhraseToAiAssistant applies the %s character limit',
-    async (lang, valid, tooLong) => {
-      const {ref} = renderSource(makeSegment())
-      await flushTimers()
-      const {isValidPhraseToAiAssistant} = ref.current
-
+    (lang, valid, tooLong) => {
       expect(
         isValidPhraseToAiAssistant({phrase: valid, sourceLanguageCode: lang}),
       ).toBe(true)
@@ -1175,12 +1172,12 @@ describe('SegmentSource triple click', () => {
   test('selects the whole source after a triple click', async () => {
     const {ref} = renderSource(makeSegment())
     await flushTimers()
-    const before = ref.current.state.editorState
+    const before = ref.current.getEditorState()
 
     ref.current.wasTripleClickTriggered.current = true
     act(() => ref.current.forceUpdate())
 
-    expect(ref.current.state.editorState).not.toBe(before)
+    expect(ref.current.getEditorState()).not.toBe(before)
     expect(ref.current.wasTripleClickTriggered.current).toBe(false)
   })
 })

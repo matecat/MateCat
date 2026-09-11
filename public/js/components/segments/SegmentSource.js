@@ -44,23 +44,74 @@ import {
 } from '../common/Button/Button'
 import textUtils from '../../utils/textUtils'
 
+// Pure — reads only its arguments, so it's a plain module-level function
+// rather than a component method, and testable directly with no rendering.
+export const isValidPhraseToAiAssistant = ({
+  phrase,
+  sourceLanguageCode = config.source_code,
+}) => {
+  if (!phrase) return false
+
+  const phraseValidator = {
+    'zh-CN': (value) => value.split('').length <= 6,
+    'zh-TW': (value) => value.split('').length <= 6,
+    'zh-HK': (value) => value.split('').length <= 6,
+    'zh-MO': (value) => value.split('').length <= 6,
+    'ja-JP': (value) => value.split('').length <= 10,
+    default: (value) => value.split(' ').length <= 3,
+  }
+
+  const handler = {
+    get: function (target, prop) {
+      const counter = target[prop] ? target[prop] : target.default
+      return counter(phrase)
+    },
+  }
+
+  const proxy = new Proxy(phraseValidator, handler)
+  return proxy[sourceLanguageCode]
+}
+
+// Pure — reads only its argument, testable directly with no rendering.
+export const getSearchParams = (segment) => {
+  const {
+    inSearch,
+    currentInSearch,
+    searchParams,
+    occurrencesInSearch,
+    currentInSearchIndex,
+  } = segment
+  if (inSearch && searchParams.source) {
+    return {
+      active: inSearch,
+      currentActive: currentInSearch,
+      textToReplace: searchParams.source,
+      params: searchParams,
+      occurrences: occurrencesInSearch.occurrences,
+      currentInSearchIndex,
+      isTarget: false,
+    }
+  } else {
+    return {
+      active: false,
+    }
+  }
+}
+
 const SegmentSource = forwardRef(({segment}, ref) => {
   const context = useContext(SegmentContext)
+  const {segment: contextSegment, userInfo: contextUserInfo} = context
 
-  // Bridges the imperative ref API back onto a stable object so that internal calls made
-  // through it (e.g. render -> helpAiAssistant, onKeyUp -> helpAiAssistant) are visible to
-  // jest.spyOn exactly like a class instance's `this.method()` performing a property lookup
-  // at call time. Every method below is assigned onto it exactly ONCE (see methodsAssignedRef
-  // below) rather than every render, so a spy installed on `ref.current.someMethod` survives
-  // any number of subsequent re-renders (setState/forceUpdate) — matching how a real class
-  // instance field, set once in the constructor, is never reassigned by React re-rendering.
-  const instanceRef = useRef({})
-  const methodsAssignedRef = useRef(false)
+  // Holds this render's methods, reassigned in full every render (not a hook) so the three
+  // permanently-stable store listeners below (endSplitMode, setTaggedSource, refreshTagMap —
+  // registered once with SegmentStore, which matches handlers by reference) can call the
+  // current render's other methods instead of the ones that existed when they were created.
+  const methodsRef = useRef({})
+  const stableMethodsAssignedRef = useRef(false)
 
-  // Tracks the latest props/context/state for the stable (assigned-once) closures below, so
-  // they never see stale values despite being created only on the first render — exactly like
-  // a class instance method reading `this.props`/`this.context`/`this.state` live.
-  const liveRef = useRef({})
+  // Same idea as methodsRef, but for the handful of segment/context/state values those three
+  // listeners read directly rather than through another method.
+  const latestRef = useRef({})
 
   // Refs replacing plain class-instance fields that are mutated outside the render/state cycle.
   const splitPointRef = useRef(
@@ -77,33 +128,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
   const [originalSource] = useState(() => segment.segment)
   const [icuEnabled] = useState(() => segment.icu)
 
-  const getSearchParamsRef = useRef(() => {
-    const {
-      inSearch,
-      currentInSearch,
-      searchParams,
-      occurrencesInSearch,
-      currentInSearchIndex,
-    } = liveRef.current.segment
-    if (inSearch && searchParams.source) {
-      return {
-        active: inSearch,
-        currentActive: currentInSearch,
-        textToReplace: searchParams.source,
-        params: searchParams,
-        occurrences: occurrencesInSearch.occurrences,
-        currentInSearchIndex,
-        isTarget: false,
-      }
-    } else {
-      return {
-        active: false,
-      }
-    }
-  })
-  const getSearchParams = getSearchParamsRef.current
-
-  const openConcordanceRef = useRef((e) => {
+  const openConcordance = (e) => {
     e.preventDefault()
     var selection = window.getSelection()
     if (selection.type === 'Range') {
@@ -111,13 +136,12 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       var str = selection.toString().trim()
       if (str.length) {
         // the trimmed string is not empty
-        SegmentActions.openConcordance(liveRef.current.segment.sid, str, false)
+        SegmentActions.openConcordance(segment.sid, str, false)
       }
     }
-  })
-  const openConcordance = openConcordanceRef.current
+  }
 
-  const removeDecoratorRef = useRef((decoratorName) => {
+  const removeDecorator = (decoratorName) => {
     if (!decoratorName) {
       // All decorators except tags
       remove(
@@ -130,23 +154,19 @@ const SegmentSource = forwardRef(({segment}, ref) => {
         (decorator) => decorator.name === decoratorName,
       )
     }
-  })
-  const removeDecorator = removeDecoratorRef.current
+  }
 
-  const disableDecoratorRef = useRef((editorState, decoratorName) => {
+  const disableDecorator = (editorState, decoratorName) => {
     remove(
       decoratorsStructureRef.current,
       (decorator) => decorator.name === decoratorName,
     )
     const decorator = new CompositeDecorator(decoratorsStructureRef.current)
     return EditorState.set(editorState, {decorator})
-  })
-  const disableDecorator = disableDecoratorRef.current
+  }
 
-  const addSearchDecoratorRef = useRef(() => {
-    let {tagRange} = liveRef.current
-    let {searchParams, occurrencesInSearch, currentInSearchIndex} =
-      liveRef.current.segment
+  const addSearchDecorator = () => {
+    let {searchParams, occurrencesInSearch, currentInSearchIndex} = segment
     const textToSearch = searchParams.source ? searchParams.source : ''
     const newDecorator = DraftMatecatUtils.activateSearch(
       textToSearch,
@@ -160,11 +180,10 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       (decorator) => decorator.name === DraftMatecatConstants.SEARCH_DECORATOR,
     )
     decoratorsStructureRef.current.push(newDecorator)
-  })
-  const addSearchDecorator = addSearchDecoratorRef.current
+  }
 
-  const addGlossaryDecoratorRef = useRef(() => {
-    let {glossary, sid} = liveRef.current.segment
+  const addGlossaryDecorator = () => {
+    let {glossary, sid} = segment
     const newDecorator = DraftMatecatUtils.activateGlossary(
       glossary.filter(({isBlacklist}) => !isBlacklist),
       sid,
@@ -175,15 +194,14 @@ const SegmentSource = forwardRef(({segment}, ref) => {
         decorator.name === DraftMatecatConstants.GLOSSARY_DECORATOR,
     )
     decoratorsStructureRef.current.push(newDecorator)
-  })
-  const addGlossaryDecorator = addGlossaryDecoratorRef.current
+  }
 
-  const addQaCheckGlossaryDecoratorRef = useRef(() => {
-    let {glossary, segment, sid} = liveRef.current.segment
+  const addQaCheckGlossaryDecorator = () => {
+    let {glossary, segment: segmentText, sid} = segment
     const missingGossaryItems = glossary.filter((item) => item.missingTerm)
     const newDecorator = DraftMatecatUtils.activateQaCheckGlossary(
       missingGossaryItems,
-      segment,
+      segmentText,
       sid,
       SegmentActions.activateTab,
     )
@@ -193,39 +211,37 @@ const SegmentSource = forwardRef(({segment}, ref) => {
         decorator.name === DraftMatecatConstants.QA_GLOSSARY_DECORATOR,
     )
     decoratorsStructureRef.current.push(newDecorator)
-  })
-  const addQaCheckGlossaryDecorator = addQaCheckGlossaryDecoratorRef.current
+  }
 
-  const getUpdatedSegmentInfoRef = useRef(() => {
+  const getUpdatedSegmentInfo = () => {
     const {sid, warnings, tagMismatch, opened, missingTagsInTarget, openSplit} =
-      liveRef.current.contextSegment
+      contextSegment
     return {
       sid,
       warnings,
       tagMismatch,
-      tagRange: liveRef.current.tagRange,
+      tagRange,
       segmentOpened: opened,
       missingTagsInTarget,
-      currentSelection: liveRef.current.editorState.getSelection(),
+      currentSelection: editorState.getSelection(),
       openSplit,
     }
-  })
-  const getUpdatedSegmentInfo = getUpdatedSegmentInfoRef.current
+  }
 
-  const addLexiqaDecoratorRef = useRef(() => {
-    let {lexiqa, sid, lxqDecodedSource} = liveRef.current.segment
+  const addLexiqaDecorator = () => {
+    let {lexiqa, sid, lxqDecodedSource} = segment
     let ranges = LexiqaUtils.getRanges(
       cloneDeep(lexiqa.source),
       lxqDecodedSource,
       true,
     )
     const updatedLexiqaWarnings = updateOffsetBasedOnEditorState(
-      liveRef.current.editorState,
+      editorState,
       ranges,
     )
     if (updatedLexiqaWarnings.length > 0) {
       const newDecorator = DraftMatecatUtils.activateLexiqa(
-        liveRef.current.editorState,
+        editorState,
         updatedLexiqaWarnings,
         sid,
         true,
@@ -238,35 +254,28 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       )
       decoratorsStructureRef.current.push(newDecorator)
     } else {
-      instanceRef.current.removeDecorator(
+      methodsRef.current.removeDecorator(
         DraftMatecatConstants.LEXIQA_DECORATOR,
       )
     }
-  })
-  const addLexiqaDecorator = addLexiqaDecoratorRef.current
+  }
 
-  const addIcuDecoratorRef = useRef(() => {
-    const contentState = liveRef.current.editorState.getCurrentContent()
+  const addIcuDecorator = () => {
+    const contentState = editorState.getCurrentContent()
     const plainText = textUtils.removeWhitespacePlaceholders(
       contentState.getPlainText(),
     )
-    const tokens = createIcuTokens(
-      plainText,
-      liveRef.current.editorState,
-      config.source_code,
-    )
+    const tokens = createIcuTokens(plainText, editorState, config.source_code)
     const newDecorator = createICUDecorator(tokens, false)
     remove(
       decoratorsStructureRef.current,
       (decorator) => decorator.name === DraftMatecatConstants.ICU_DECORATOR,
     )
     decoratorsStructureRef.current.push(newDecorator)
-  })
-  const addIcuDecorator = addIcuDecoratorRef.current
+  }
 
-  const updateSourceInStoreRef = useRef(() => {
-    if (liveRef.current.source !== '') {
-      const {editorState, tagRange} = liveRef.current
+  const updateSourceInStore = () => {
+    if (source !== '') {
       let contentState = editorState.getCurrentContent()
       let plainText = contentState.getPlainText()
       plainText = removeZeroWidthSpace(plainText)
@@ -274,29 +283,28 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       const lxqDecodedSource =
         DraftMatecatUtils.prepareTextForLexiqa(decodedSegment)
       SegmentActions.updateSource(
-        liveRef.current.segment.sid,
+        segment.sid,
         decodedSegment,
         plainText,
         tagRange,
         lxqDecodedSource,
       )
     }
-  })
-  const updateSourceInStore = updateSourceInStoreRef.current
+  }
 
   // Called three ways, exactly like the original: `checkDecorators({segment: prevSegment})`
   // from the componentDidUpdate-equivalent effect, and `checkDecorators()` with no argument
   // from both the mount effect and refreshTagMap's delayed setTimeout.
-  const checkDecoratorsRef = useRef((prevProps) => {
+  const checkDecorators = (prevProps) => {
     let changedDecorator = false
     const {inSearch, searchParams, currentInSearch, currentInSearchIndex} =
-      liveRef.current.segment
-    const prevActiveDecorators = liveRef.current.activeDecorators
-    const activeDecorators = {...prevActiveDecorators}
+      segment
+    const prevActiveDecorators = activeDecorators
+    const nextActiveDecorators = {...prevActiveDecorators}
 
     if (!inSearch) {
       //Glossary
-      const {glossary} = liveRef.current.segment
+      const {glossary} = segment
       const prevGlossary = prevProps ? prevProps.segment.glossary : undefined
 
       //Qa Check Glossary
@@ -312,19 +320,21 @@ const SegmentSource = forwardRef(({segment}, ref) => {
             fromJS(missingGlossaryItems),
           ))
       ) {
-        instanceRef.current.addQaCheckGlossaryDecorator()
+        methodsRef.current.addQaCheckGlossaryDecorator()
         changedDecorator = true
-        activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] = true
+        nextActiveDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] =
+          true
       } else if (
         prevMissingGlossaryItems &&
         prevMissingGlossaryItems.length > 0 &&
         (!missingGlossaryItems || missingGlossaryItems.length === 0)
       ) {
         changedDecorator = true
-        instanceRef.current.removeDecorator(
+        methodsRef.current.removeDecorator(
           DraftMatecatConstants.QA_GLOSSARY_DECORATOR,
         )
-        activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] = false
+        nextActiveDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] =
+          false
       }
 
       if (
@@ -334,21 +344,21 @@ const SegmentSource = forwardRef(({segment}, ref) => {
           !fromJS(prevGlossary).equals(fromJS(glossary)) ||
           !prevActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR])
       ) {
-        activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = true
+        nextActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = true
         changedDecorator = true
-        instanceRef.current.addGlossaryDecorator()
+        methodsRef.current.addGlossaryDecorator()
       } else if (
         size(prevGlossary) > 0 &&
         (!glossary || size(glossary) === 0)
       ) {
-        activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false
+        nextActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false
         changedDecorator = true
-        instanceRef.current.removeDecorator(
+        methodsRef.current.removeDecorator(
           DraftMatecatConstants.GLOSSARY_DECORATOR,
         )
       }
       //Lexiqa
-      const {lexiqa} = liveRef.current.segment
+      const {lexiqa} = segment
       const prevLexiqa = prevProps ? prevProps.segment.lexiqa : undefined
       const currentLexiqaSource = lexiqa && lexiqa.source && size(lexiqa.source)
       const prevLexiqaSource =
@@ -364,29 +374,29 @@ const SegmentSource = forwardRef(({segment}, ref) => {
           lexiqaChanged ||
           !prevActiveDecorators[DraftMatecatConstants.LEXIQA_DECORATOR])
       ) {
-        activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = true
+        nextActiveDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = true
         changedDecorator = true
-        instanceRef.current.addLexiqaDecorator()
+        methodsRef.current.addLexiqaDecorator()
       } else if (prevLexiqaSource && !currentLexiqaSource) {
-        activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
+        nextActiveDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
         changedDecorator = true
-        instanceRef.current.removeDecorator(
+        methodsRef.current.removeDecorator(
           DraftMatecatConstants.LEXIQA_DECORATOR,
         )
       }
 
       // Search
       if (prevProps && prevProps.segment.inSearch) {
-        activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = false
+        nextActiveDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = false
         changedDecorator = true
-        instanceRef.current.removeDecorator(
+        methodsRef.current.removeDecorator(
           DraftMatecatConstants.SEARCH_DECORATOR,
         )
       }
       if (!firstIcuCheckRef.current && icuEnabled) {
         firstIcuCheckRef.current = true
         changedDecorator = true
-        instanceRef.current.addIcuDecorator()
+        methodsRef.current.addIcuDecorator()
       }
     } else {
       //Search
@@ -405,39 +415,38 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       ) {
         //There are more occurrences and the current change
         // Cleanup all decorators
-        instanceRef.current.removeDecorator()
-        activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
-        activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false
-        activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] = false
-        instanceRef.current.addSearchDecorator()
-        activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = true
+        methodsRef.current.removeDecorator()
+        nextActiveDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
+        nextActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false
+        nextActiveDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] =
+          false
+        methodsRef.current.addSearchDecorator()
+        nextActiveDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = true
         changedDecorator = true
       }
     }
 
     if (changedDecorator) {
       const decorator = new CompositeDecorator(decoratorsStructureRef.current)
-      setEditorState(EditorState.set(liveRef.current.editorState, {decorator}))
-      setActiveDecorators(activeDecorators)
+      setEditorState(EditorState.set(editorState, {decorator}))
+      setActiveDecorators(nextActiveDecorators)
     }
-  })
-  const checkDecorators = checkDecoratorsRef.current
+  }
 
-  const updateSplitNumberNewRef = useRef((step) => {
-    if (liveRef.current.segment.splitted) return
+  const updateSplitNumberNew = (step) => {
+    if (segment.splitted) return
     splitPointRef.current += step
-  })
-  const updateSplitNumberNew = updateSplitNumberNewRef.current
+  }
 
-  const insertTagAtSelectionRef = useRef((tagName) => {
+  const insertTagAtSelection = (tagName) => {
     const customTag = DraftMatecatUtils.structFromName(tagName)
     // If tag creation has failed, return
     if (!customTag) return
     // remove lexiqa to avoid insertion error
-    instanceRef.current.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
-    instanceRef.current.removeDecorator(DraftMatecatConstants.SPLIT_DECORATOR)
+    methodsRef.current.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
+    methodsRef.current.removeDecorator(DraftMatecatConstants.SPLIT_DECORATOR)
     const decorator = new CompositeDecorator(decoratorsStructureRef.current)
-    let newEditorState = EditorState.set(liveRef.current.editorState, {
+    let newEditorState = EditorState.set(editorState, {
       decorator,
     })
     newEditorState = DraftMatecatUtils.insertEntityAtSelection(
@@ -445,10 +454,9 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       customTag,
     )
     setEditorState(newEditorState)
-  })
-  const insertTagAtSelection = insertTagAtSelectionRef.current
+  }
 
-  const addSplitTagRef = useRef(() => {
+  const addSplitTag = () => {
     // Check chars are selected
     const selection = window.getSelection()
     if (selection.anchorNode) {
@@ -459,37 +467,28 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       }
     }
 
-    instanceRef.current.insertTagAtSelection('splitPoint')
-    instanceRef.current.updateSplitNumberNew(1)
-  })
-  const addSplitTag = addSplitTagRef.current
+    methodsRef.current.insertTagAtSelection('splitPoint')
+    methodsRef.current.updateSplitNumberNew(1)
+  }
 
-  const splitSegmentNewRef = useRef((split) => {
-    let {decodedSegment: text} = DraftMatecatUtils.decodeSegment(
-      liveRef.current.editorState,
-    )
+  const splitSegmentNew = (split) => {
+    let {decodedSegment: text} = DraftMatecatUtils.decodeSegment(editorState)
     // Prepare text for backend
     text = text.replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    SegmentActions.splitSegment(
-      liveRef.current.segment.original_sid,
-      text,
-      split,
-    )
-  })
-  const splitSegmentNew = splitSegmentNewRef.current
+    SegmentActions.splitSegment(segment.original_sid, text, split)
+  }
 
-  const onBlurEventRef = useRef(() => {
+  const onBlurEvent = () => {
     setTimeout(() => {
       SegmentActions.highlightTags()
       SegmentActions.focusTags([])
     })
 
     setIsShowingOptionsToolbar(false)
-  })
-  const onBlurEvent = onBlurEventRef.current
+  }
 
-  const onEntityClickRef = useRef((start, end, entityName) => {
-    const segment = liveRef.current.contextSegment
+  const onEntityClick = (start, end, entityName) => {
+    const segment = contextSegment
     try {
       // Get latest selection
       let newSelection = editorRef.current._latestEditorState.getSelection()
@@ -510,7 +509,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
         focusOffset: end + addZwspExtraStepAfter,
       })
       let newEditorState = EditorState.forceSelection(
-        liveRef.current.editorState,
+        editorState,
         newSelection,
       )
       const contentState = newEditorState.getCurrentContent()
@@ -529,7 +528,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
           newEditorState,
           newSelection,
         )
-        instanceRef.current.updateSplitNumberNew(-1)
+        methodsRef.current.updateSplitNumberNew(-1)
         newEditorState = EditorState.set(newEditorState, {
           currentContent: contentStateWithoutSplitPoint,
         })
@@ -539,12 +538,10 @@ const SegmentSource = forwardRef(({segment}, ref) => {
     } catch (e) {
       console.log(e)
     }
-  })
-  const onEntityClick = onEntityClickRef.current
+  }
 
-  const copyFragmentRef = useRef((e) => {
+  const copyFragment = (e) => {
     const internalClipboard = editorRef.current.getClipboard()
-    const {editorState} = liveRef.current
     if (internalClipboard) {
       e.preventDefault()
       // Get plain text form internalClipboard fragment
@@ -565,11 +562,9 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       e.clipboardData.setData('text/plain', plainText)
       SegmentActions.copyFragmentToClipboard(fragment, plainText)
     }
-  })
-  const copyFragment = copyFragmentRef.current
+  }
 
-  const dragFragmentRef = useRef((e) => {
-    const {editorState} = liveRef.current
+  const dragFragment = (e) => {
     let fragment = getFragmentFromSelection(editorState)
     if (fragment) {
       const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(
@@ -584,13 +579,11 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       e.dataTransfer.setData('text/plain', fragment)
       e.dataTransfer.setData('text/html', fragment)
     }
-  })
-  const dragFragment = dragFragmentRef.current
+  }
 
-  const allowHTMLRef = useRef((string) => ({__html: string}))
-  const allowHTML = allowHTMLRef.current
+  const allowHTML = (string) => ({__html: string})
 
-  const onChangeRef = useRef((editorState) => {
+  const onChange = (editorState) => {
     const {entityKey} = DraftMatecatUtils.selectionIsEntity(editorState)
     if (!entityKey) {
       setTimeout(() => {
@@ -598,58 +591,39 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       })
     }
     setEditorState(editorState)
-  })
-  const onChange = onChangeRef.current
+  }
 
-  const preventEditRef = useRef(() => 'handled')
-  const preventEdit = preventEditRef.current
+  const preventEdit = () => 'handled'
 
+  // Assigned once (like the three store listeners below), not recreated
+  // every render: tests spy on these via the exposed ref
+  // (jest.spyOn(ref.current, 'getSelectedWords')), and a spy installed on a
+  // freshly-recreated-every-render function would be silently discarded the
+  // next time this component re-renders. Reads latestRef instead of closing
+  // over editorState/contextUserInfo directly for that same reason.
   const getSelectedWordsRef = useRef(() =>
     DraftMatecatUtils.getSelectedTextWithoutEntities(
-      liveRef.current.editorState,
+      latestRef.current.editorState,
     ).reduce((acc, {value}) => `${acc}${value}`, ''),
   )
   const getSelectedWords = getSelectedWordsRef.current
-
-  const isValidPhraseToAiAssistantRef = useRef(
-    ({phrase, sourceLanguageCode = config.source_code}) => {
-      if (!phrase) return false
-
-      const phraseValidator = {
-        'zh-CN': (value) => value.split('').length <= 6,
-        'zh-TW': (value) => value.split('').length <= 6,
-        'zh-HK': (value) => value.split('').length <= 6,
-        'zh-MO': (value) => value.split('').length <= 6,
-        'ja-JP': (value) => value.split('').length <= 10,
-        default: (value) => value.split(' ').length <= 3,
-      }
-
-      const handler = {
-        get: function (target, prop) {
-          const counter = target[prop] ? target[prop] : target.default
-          return counter(phrase)
-        },
-      }
-
-      const proxy = new Proxy(phraseValidator, handler)
-      return proxy[sourceLanguageCode]
-    },
-  )
-  const isValidPhraseToAiAssistant = isValidPhraseToAiAssistantRef.current
 
   const helpAiAssistantRef = useRef(() => {
     if (delayAiAssistantRef.current) clearTimeout(delayAiAssistantRef.current)
 
     const isOpenAiEnabled =
       Boolean(config.isOpenAiEnabled) &&
-      liveRef.current.contextUserInfo?.metadata.ai_assistant === 1
+      latestRef.current.contextUserInfo?.metadata.ai_assistant === 1
 
     if (isOpenAiEnabled) {
+      // Reads via latestRef, not the segment/getSelectedWords/
+      // isValidPhraseToAiAssistant closed over above: this fires 200ms
+      // later, potentially after other renders, and must see fresh values.
       delayAiAssistantRef.current = setTimeout(() => {
-        const segment = liveRef.current.contextSegment
-        const value = instanceRef.current.getSelectedWords()
+        const segment = latestRef.current.contextSegment
+        const value = methodsRef.current.getSelectedWords()
 
-        const isValid = instanceRef.current.isValidPhraseToAiAssistant({
+        const isValid = isValidPhraseToAiAssistant({
           phrase: value,
         })
 
@@ -665,7 +639,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
   const helpAiAssistant = helpAiAssistantRef.current
 
   const endSplitModeRef = useRef(() => {
-    const {editorStateBeforeSplit, contextSegment: segment} = liveRef.current
+    const {editorStateBeforeSplit, contextSegment: segment} = latestRef.current
     splitPointRef.current = segment.split_group
       ? segment.split_group.length - 1
       : 0
@@ -678,7 +652,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
 
   // Restore tagged source in draftJS after GuessTag
   const setTaggedSourceRef = useRef((sid) => {
-    const segment = liveRef.current.segment
+    const segment = latestRef.current.segment
     if (sid === segment.sid) {
       // Escape html
       const translation = segment.segment
@@ -689,20 +663,20 @@ const SegmentSource = forwardRef(({segment}, ref) => {
         : translation
       // TODO: get taggedSource from store
       const contentEncoded = DraftMatecatUtils.encodeContent(
-        liveRef.current.editorState,
+        latestRef.current.editorState,
         cleanSource,
       )
       const {editorState: newEditorState, tagRange: newTagRange} =
         contentEncoded
       setEditorState(newEditorState)
       setTagRange(newTagRange)
-      setTimeout(() => instanceRef.current.updateSourceInStore())
+      setTimeout(() => methodsRef.current.updateSourceInStore())
     }
   })
   const setTaggedSource = setTaggedSourceRef.current
 
   const refreshTagMapRef = useRef(() => {
-    const segment = liveRef.current.segment
+    const segment = latestRef.current.segment
     const translation = segment.segment
 
     // If GuessTag enabled, clean string from tag
@@ -711,7 +685,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       : translation
     // New EditorState with translation
     const contentEncoded = DraftMatecatUtils.encodeContent(
-      liveRef.current.editorState,
+      latestRef.current.editorState,
       cleanSource,
     )
     const {editorState: newEditorState, tagRange: newTagRange} = contentEncoded
@@ -721,9 +695,9 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       setTagRange(newTagRange)
     })
 
-    instanceRef.current.updateSourceInStore()
+    methodsRef.current.updateSourceInStore()
 
-    setTimeout(() => instanceRef.current.checkDecorators(), 100)
+    setTimeout(() => methodsRef.current.checkDecorators(), 100)
   })
   const refreshTagMap = refreshTagMapRef.current
 
@@ -739,7 +713,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
         onClick: onEntityClick,
         getUpdatedSegmentInfo: getUpdatedSegmentInfo,
         isTarget: false,
-        getSearchParams: getSearchParams,
+        getSearchParams: () => getSearchParams(segment),
         isRTL: config.isSourceRTL,
         sid: segment.sid,
       },
@@ -774,10 +748,16 @@ const SegmentSource = forwardRef(({segment}, ref) => {
   const [editorState, setEditorState] = useState(
     () => initialContentRef.current.editorState,
   )
+  // Dead state, preserved verbatim from the class component: `this.state.editAreaClasses`
+  // was never read anywhere, including in the original render().
+  // eslint-disable-next-line no-unused-vars
   const [editAreaClasses, setEditAreaClasses] = useState(['targetarea'])
   const [tagRange, setTagRange] = useState(
     () => initialContentRef.current.tagRange,
   )
+  // Dead state, preserved verbatim from the class component: `this.state.unlockedForCopy`
+  // was never read anywhere, including in the original render().
+  // eslint-disable-next-line no-unused-vars
   const [unlockedForCopy, setUnlockedForCopy] = useState(false)
   const [editorStateBeforeSplit, setEditorStateBeforeSplit] = useState(
     () => initialContentRef.current.editorState,
@@ -791,14 +771,15 @@ const SegmentSource = forwardRef(({segment}, ref) => {
   }))
   const [isShowingOptionsToolbar, setIsShowingOptionsToolbar] = useState(false)
 
-  liveRef.current.segment = segment
-  liveRef.current.contextSegment = context.segment
-  liveRef.current.contextUserInfo = context.userInfo
-  liveRef.current.source = source
-  liveRef.current.editorState = editorState
-  liveRef.current.tagRange = tagRange
-  liveRef.current.editorStateBeforeSplit = editorStateBeforeSplit
-  liveRef.current.activeDecorators = activeDecorators
+  // Only what the three permanently-stable listeners (and helpAiAssistant's
+  // delayed setTimeout) read, refreshed every render.
+  latestRef.current = {
+    segment,
+    contextSegment,
+    contextUserInfo,
+    editorState,
+    editorStateBeforeSplit,
+  }
 
   const isFirstRenderRef = useRef(true)
   const prevSegmentRef = useRef(segment)
@@ -814,8 +795,8 @@ const SegmentSource = forwardRef(({segment}, ref) => {
     )
     SegmentStore.addListener(SegmentConstants.REFRESH_TAG_MAP, refreshTagMap)
     setTimeout(() => {
-      instanceRef.current.checkDecorators()
-      instanceRef.current.updateSourceInStore()
+      methodsRef.current.checkDecorators()
+      methodsRef.current.updateSourceInStore()
     })
 
     new CommonUtils.DetectTripleClick(
@@ -852,7 +833,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
 
     const prevSegment = prevSegmentRef.current
 
-    instanceRef.current.checkDecorators({segment: prevSegment})
+    methodsRef.current.checkDecorators({segment: prevSegment})
 
     // Check if splitMode
     if (!prevSegment.openSplit && segment.openSplit) {
@@ -915,21 +896,45 @@ const SegmentSource = forwardRef(({segment}, ref) => {
     prevEditorStateRef.current = editorState
   })
 
-  instanceRef.current.state = {
-    source,
-    editorState,
-    editAreaClasses,
-    tagRange,
-    unlockedForCopy,
-    editorStateBeforeSplit,
-    activeDecorators,
-    isShowingOptionsToolbar,
+  // Lets the three permanently-stable listeners below (registered once with
+  // SegmentStore, which matches handlers by reference) call this render's
+  // methods without going stale. Reassigned in full every render — unlike
+  // the old instanceRef, nothing needs its identity to stay stable.
+  // Single stable object, mutated in place every render (never recreated),
+  // used BOTH for internal cross-method calls (the three permanently-stable
+  // store listeners reach other current-render methods through it) AND as
+  // the ref exposed to tests below — so a jest.spyOn(ref.current, 'x')
+  // affects the same property internal code actually calls through, and
+  // survives subsequent re-renders instead of being silently replaced.
+  // Assigned exactly once: these five have their own stable identity
+  // (created via useRef above, never recreated) precisely so a
+  // jest.spyOn(ref.current, 'x') survives later re-renders — reassigning
+  // them here every render, even to the same underlying function, would
+  // blow away a spy sitting on the property. Everything else below is
+  // fine to refresh every render since nothing depends on its identity.
+  if (!stableMethodsAssignedRef.current) {
+    stableMethodsAssignedRef.current = true
+    Object.assign(methodsRef.current, {
+      endSplitMode,
+      setTaggedSource,
+      refreshTagMap,
+      getSelectedWords,
+      helpAiAssistant,
+    })
+    // Test-only accessor: lets a test null out the editor DOM ref to
+    // simulate it going missing (e.g. mid-unmount) without needing its own
+    // exported setter method.
+    Object.defineProperty(methodsRef.current, 'editor', {
+      get: () => editorRef.current,
+      set: (v) => {
+        editorRef.current = v
+      },
+      configurable: true,
+    })
   }
 
-  if (!methodsAssignedRef.current) {
-    methodsAssignedRef.current = true
-
-    instanceRef.current.setState = (partial) => {
+  Object.assign(methodsRef.current, {
+    setState: (partial) => {
       if ('source' in partial) setSource(partial.source)
       if ('editorState' in partial) setEditorState(partial.editorState)
       if ('editAreaClasses' in partial)
@@ -943,63 +948,48 @@ const SegmentSource = forwardRef(({segment}, ref) => {
         setActiveDecorators(partial.activeDecorators)
       if ('isShowingOptionsToolbar' in partial)
         setIsShowingOptionsToolbar(partial.isShowingOptionsToolbar)
-    }
+    },
+    forceUpdate: () => bumpForceRender(),
+    openConcordance,
+    onEntityClick,
+    addSplitTag,
+    removeDecorator,
+    dragFragment,
+    copyFragment,
+    updateSplitNumberNew,
+    updateSourceInStore,
+    preventEdit,
+    onChange,
+    onBlurEvent,
+    insertTagAtSelection,
+    getUpdatedSegmentInfo,
+    disableDecorator,
+    allowHTML,
+    checkDecorators,
+    splitSegmentNew,
+    addSearchDecorator,
+    addGlossaryDecorator,
+    addQaCheckGlossaryDecorator,
+    addLexiqaDecorator,
+    addIcuDecorator,
+    getEditorState: () => editorState,
+    getEditorStateBeforeSplit: () => editorStateBeforeSplit,
+    getIsShowingOptionsToolbar: () => isShowingOptionsToolbar,
+    getSplitPoint: () => splitPointRef.current,
+    getActiveDecorators: () => activeDecorators,
+    getFirstIcuCheck: () => firstIcuCheckRef.current,
+    getDecoratorsStructure: () => decoratorsStructureRef.current,
+    wasTripleClickTriggered: wasTripleClickTriggeredRef,
+  })
 
-    instanceRef.current.forceUpdate = () => bumpForceRender()
-
-    instanceRef.current.helpAiAssistant = helpAiAssistant
-    instanceRef.current.setTaggedSource = setTaggedSource
-    instanceRef.current.openConcordance = openConcordance
-    instanceRef.current.onEntityClick = onEntityClick
-    instanceRef.current.addSplitTag = addSplitTag
-    instanceRef.current.removeDecorator = removeDecorator
-    instanceRef.current.getSearchParams = getSearchParams
-    instanceRef.current.endSplitMode = endSplitMode
-    instanceRef.current.dragFragment = dragFragment
-    instanceRef.current.copyFragment = copyFragment
-    instanceRef.current.updateSplitNumberNew = updateSplitNumberNew
-    instanceRef.current.updateSourceInStore = updateSourceInStore
-    instanceRef.current.refreshTagMap = refreshTagMap
-    instanceRef.current.preventEdit = preventEdit
-    instanceRef.current.onChange = onChange
-    instanceRef.current.onBlurEvent = onBlurEvent
-    instanceRef.current.insertTagAtSelection = insertTagAtSelection
-    instanceRef.current.getUpdatedSegmentInfo = getUpdatedSegmentInfo
-    instanceRef.current.getSelectedWords = getSelectedWords
-    instanceRef.current.disableDecorator = disableDecorator
-    instanceRef.current.allowHTML = allowHTML
-    instanceRef.current.checkDecorators = checkDecorators
-    instanceRef.current.isValidPhraseToAiAssistant = isValidPhraseToAiAssistant
-    instanceRef.current.splitSegmentNew = splitSegmentNew
-    instanceRef.current.addSearchDecorator = addSearchDecorator
-    instanceRef.current.addGlossaryDecorator = addGlossaryDecorator
-    instanceRef.current.addQaCheckGlossaryDecorator =
-      addQaCheckGlossaryDecorator
-    instanceRef.current.addLexiqaDecorator = addLexiqaDecorator
-    instanceRef.current.addIcuDecorator = addIcuDecorator
-
-    Object.defineProperties(instanceRef.current, {
-      splitPoint: {get: () => splitPointRef.current, configurable: true},
-      decoratorsStructure: {
-        get: () => decoratorsStructureRef.current,
-        configurable: true,
-      },
-      firstIcuCheck: {get: () => firstIcuCheckRef.current, configurable: true},
-      editor: {
-        get: () => editorRef.current,
-        set: (v) => {
-          editorRef.current = v
-        },
-        configurable: true,
-      },
-    })
-
-    instanceRef.current.wasTripleClickTriggered = wasTripleClickTriggeredRef
-  }
-
-  useImperativeHandle(ref, () => instanceRef.current)
-
-  const {segment: contextSegment} = context
+  // Test-only: jsdom has no real contentEditable/Selection implementation,
+  // so a few behaviors that only fire from genuine rich-text editor
+  // interactions (triple-click selection, keystroke/paste handlers, and the
+  // selection-dependent tag/split operations) can't be driven through
+  // simulated DOM events. Exposed here so tests can invoke them directly,
+  // matching how the previous class-based tests already had to work around
+  // the same jsdom limitation.
+  useImperativeHandle(ref, () => methodsRef.current, [])
 
   const updateOptionsToolbarVisibility = () => {
     if (!editorRef.current) return
@@ -1008,7 +998,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       !editorRef.current._latestEditorState.getSelection().isCollapsed(),
     )
 
-    instanceRef.current.helpAiAssistant()
+    methodsRef.current.helpAiAssistant()
   }
 
   // Set correct handlers
@@ -1041,10 +1031,9 @@ const SegmentSource = forwardRef(({segment}, ref) => {
         onBlur: onBlurEvent,
       }
 
-  const isEnabledAiAssistantButton =
-    instanceRef.current.isValidPhraseToAiAssistant({
-      phrase: instanceRef.current.getSelectedWords(),
-    })
+  const isEnabledAiAssistantButton = isValidPhraseToAiAssistant({
+    phrase: methodsRef.current.getSelectedWords(),
+  })
 
   const optionsToolbar = isShowingOptionsToolbar && (
     <div className="optionsToolbar">
@@ -1063,7 +1052,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
               if (isEnabledAiAssistantButton) {
                 SegmentActions.helpAiAssistant({
                   sid: contextSegment.sid,
-                  value: instanceRef.current.getSelectedWords(),
+                  value: methodsRef.current.getSelectedWords(),
                 })
               }
             }}
@@ -1082,7 +1071,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
           SegmentActions.openGlossaryFormPrefill({
             sid: contextSegment.sid,
             [TERM_FORM_FIELDS.ORIGINAL_TERM]:
-              instanceRef.current.getSelectedWords(),
+              methodsRef.current.getSelectedWords(),
           })
         }}
       >
