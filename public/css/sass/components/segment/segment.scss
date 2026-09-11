@@ -302,3 +302,199 @@ section .segment-body-content .warnings-block {
     }
   }
 }
+
+.toggle {
+  display: none;
+}
+
+.editor .toggle {
+  display: block;
+}
+.sid {
+  position: absolute;
+  left: -5.5%;
+  text-align: center;
+  display: block;
+  font-size: 11px;
+  color: colors.$grey300;
+  text-decoration: none;
+  cursor: default;
+  height: 100%;
+  padding-bottom: 1px;
+  width: 4.5%;
+}
+
+.sid .txt {
+  padding: 0px 3px;
+  margin: 2px 0px 0 0px;
+  background: colors.$grey50;
+  display: contents;
+}
+
+section.readonly .txt input {
+  display: none !important;
+}
+
+section.segment-selected-inBulk .sid .txt input {
+  display: unset;
+}
+/*section.editor .sid .txt input {
+    display: unset;
+}*/
+
+section.editor.segment-selected-inBulk .sid .txt.segment-add-inBulk {
+  display: unset;
+}
+
+section.editor .txt.segment-add-inBulk {
+  display: block;
+}
+
+p.split-shortcut {
+  padding: 1px 0px;
+  width: 55px;
+  margin: 0 auto;
+  margin-top: 5px;
+}
+
+section:hover .sid {
+  color: colors.$grey500;
+}
+
+.editor .sid {
+  height: 100%;
+}
+section {
+  position: relative;
+  float: left;
+  width: 88%;
+  margin-left: 5%;
+  min-width: 700px;
+  //height: 100%;
+  /*-webkit-transition: all 100ms ease-in;*/
+  /*transition: all 100ms ease-in;*/
+  //box-shadow: 0 0 0 #e0e0e0, 0 0 0px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+  //border: 1px solid $grey100;
+}
+
+strong:first-child {
+  margin-right: 0px !important;
+}
+.editor {
+  width: 100%;
+  position: relative;
+  z-index: 999;
+  -moz-border-radius: 2px;
+}
+
+.editor,
+.editor .text {
+  background: colors.$white;
+}
+section.editor .loader_on {
+  display: block !important;
+}
+section .header .context {
+  display: none;
+  float: left;
+  color: colors.$grey500;
+  text-decoration: none;
+  margin: 3px 0 0 10px;
+}
+
+section .header .context:hover {
+  color: colors.$black;
+}
+.percentuage.visible {
+  display: block !important;
+}
+section.status-new.opened .editarea {
+  text-indent: 0;
+}
+
+section.editor {
+  z-index: 2;
+  position: relative;
+  width: 89%;
+  margin-left: 4.5%;
+}
+
+section.editor .sid {
+  color: black;
+  left: -5%;
+}
+.editarea.rtl,
+.source.rtl,
+.graysmall li.rtl {
+  direction: rtl !important;
+  text-align: right !important;
+}
+.rtl-target .editor .editarea span {
+  display: inline-block;
+}
+section.rtl-source .source,
+section.rtl-target .targetarea,
+.rtl-source .footer .sugg-source,
+.rtl-target .footer .sugg-target {
+  direction: rtl !important;
+  text-align: right !important;
+}
+section.ice-locked.rtl-target .target {
+  text-align: right;
+}
+.edit-distance {
+  display: none;
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 0.8rem;
+  color: colors.$grey400;
+}
+/*Editor Toggle*/
+.editor .toggle {
+  //display: inline-block;
+  margin-right: 0;
+  z-index: 0;
+  position: relative;
+}
+@media screen and (max-width: 1380px) {
+  p.split-shortcut,
+  .sid .txt {
+    font-size: 10px;
+  }
+  .sid {
+    width: 5.3%;
+    left: -5.7%;
+  }
+  section.editor .sid {
+    left: -5.1%;
+    width: 4.5%;
+  }
+}
+@media screen and (max-width: 1180px) {
+  .number {
+    left: -40px;
+  }
+
+  .number {
+    left: -52px;
+  }
+
+  section.editor {
+    width: 87%;
+    margin-left: 6%;
+  }
+
+  .sid {
+    width: 6%;
+    left: -6.5%;
+  }
+  section.editor .sid {
+    left: -6.5%;
+    width: 6%;
+  }
+  section {
+    width: 86%;
+    margin-left: 6%;
+  }
+}

@@ -77,3 +77,9 @@ body ::-webkit-scrollbar-thumb:window-inactive {
 body ::-webkit-scrollbar-thumb:hover {
   background: rgba(128, 135, 139, 0.8);
 }
+
+input,
+textarea {
+  font-family: calibri, Arial, Helvetica, sans-serif;
+  font-size: variables.$font-size-small;
+}

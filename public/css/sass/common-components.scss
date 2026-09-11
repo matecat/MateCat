@@ -3,6 +3,7 @@
 @use 'components/common/UserDisconnectedBox';
 @use 'components/common/UserMenu';
 @use 'components/common/OnBoardingTooltip';
+@use 'components/common/WrapperLoader';
 
 .ui-user-dropdown-image {
   display: inline-block;

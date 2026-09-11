@@ -2,7 +2,6 @@
 @use '../../commons/reset';
 @use '../../commons/aria-label-tooltip';
 @use "../../common";
-@use '../../style';
 @use '../../commons/progress-mc-bar';
 @use '../segment/SegmentComments';
 @use '../../lexiqa';
@@ -11,6 +10,9 @@
 @use '../ReviewExtendedPanel';
 //components
 @use '../segment/segment';
+@use '../segment/SegmentBody';
+@use '../segment/SegmentWarnings';
+@use '../segment/SplitSegment';
 @use '../segment/segmentFooter';
 @use '../segment/segmentFooterTabGlossary';
 @use '../segment/issuesContainer';
@@ -46,3 +48,46 @@
 
 
 
+
+body #outer {
+  //overflow: hidden;
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+#outer {
+  #file {
+    z-index: 2;
+  }
+  #loader-getMoreSegments {
+    display: none;
+    position: fixed;
+    background: url(/public/img/loading.gif) 48% top no-repeat !important;
+    background-size: 30px 30px !important;
+    width: 30px;
+    height: 30px;
+    z-index: 2;
+  }
+  &.loadingBefore {
+    #loader-getMoreSegments {
+      display: block;
+      top: 70px;
+      left: 50%;
+    }
+  }
+  &.loadingAfter #loader-getMoreSegments {
+    display: block;
+    bottom: 100px;
+    left: 50%;
+  }
+}
+
+#outer.loading {
+  display: block;
+  background: url(/public/img/loading.gif) 48% center no-repeat;
+  background-size: 30px 30px !important;
+  float: left;
+  position: relative;
+  height: 100vh;
+}
