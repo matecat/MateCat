@@ -1,4 +1,12 @@
-import React, {createRef} from 'react'
+import React, {
+  forwardRef,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useReducer,
+  useRef,
+  useState,
+} from 'react'
 import {fromJS} from 'immutable'
 import {remove, cloneDeep, size, isUndefined} from 'lodash'
 import {CompositeDecorator, Editor, EditorState, Modifier} from 'draft-js'
@@ -34,129 +42,93 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../common/Button/Button'
-import CatToolStore from '../../stores/CatToolStore'
 import textUtils from '../../utils/textUtils'
 
-class SegmentSource extends React.Component {
-  static contextType = SegmentContext
+// Pure — reads only its arguments, so it's a plain module-level function
+// rather than a component method, and testable directly with no rendering.
+export const isValidPhraseToAiAssistant = ({
+  phrase,
+  sourceLanguageCode = config.source_code,
+}) => {
+  if (!phrase) return false
 
-  constructor(props) {
-    super(props)
-    const {onEntityClick, getUpdatedSegmentInfo} = this
-    this.originalSource = this.props.segment.segment
-    this.openConcordance = this.openConcordance.bind(this)
-    this.decoratorsStructure = [
-      {
-        name: 'tags',
-        strategy: getEntityStrategy('IMMUTABLE'),
-        component: TagEntity,
-        props: {
-          onClick: onEntityClick,
-          getUpdatedSegmentInfo: getUpdatedSegmentInfo,
-          isTarget: false,
-          getSearchParams: this.getSearchParams,
-          isRTL: config.isSourceRTL,
-          sid: this.props.segment.sid,
-        },
-      },
-    ]
-    //const decorator = new CompoundDecorator(this.decoratorsStructure);
-    const decorator = new CompositeDecorator(this.decoratorsStructure)
-    // Initialise EditorState
-    const plainEditorState = EditorState.createEmpty(decorator)
-    const translation = this.props.segment.segment
-
-    // If GuessTag enabled, clean string from tag
-    const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(
-      this.props.segment,
-    )
-      ? DraftMatecatUtils.removeTagsFromText(translation)
-      : translation
-    // New EditorState with translation
-    const contentEncoded = DraftMatecatUtils.encodeContent(
-      plainEditorState,
-      cleanSource,
-    )
-    const {editorState, tagRange} = contentEncoded
-    this.icuEnabled = this.props.segment.icu
-    this.state = {
-      source: cleanSource,
-      editorState: editorState,
-      editAreaClasses: ['targetarea'],
-      tagRange: tagRange,
-      unlockedForCopy: false,
-      editorStateBeforeSplit: editorState,
-      activeDecorators: {
-        [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
-        [DraftMatecatConstants.GLOSSARY_DECORATOR]: false,
-        [DraftMatecatConstants.QA_GLOSSARY_DECORATOR]: false,
-        [DraftMatecatConstants.SEARCH_DECORATOR]: false,
-        [DraftMatecatConstants.ICU_DECORATOR]: this.icuEnabled,
-      },
-      isShowingOptionsToolbar: false,
-    }
-    this.splitPoint = this.props.segment.split_group
-      ? this.props.segment.split_group.length - 1
-      : 0
-
-    this.delayAiAssistant
-
-    this.firstIcuCheck = false
-
-    this.wasTripleClickTriggered = createRef()
+  const phraseValidator = {
+    'zh-CN': (value) => value.split('').length <= 6,
+    'zh-TW': (value) => value.split('').length <= 6,
+    'zh-HK': (value) => value.split('').length <= 6,
+    'zh-MO': (value) => value.split('').length <= 6,
+    'ja-JP': (value) => value.split('').length <= 10,
+    default: (value) => value.split(' ').length <= 3,
   }
 
-  getSearchParams = () => {
-    const {
-      inSearch,
-      currentInSearch,
-      searchParams,
-      occurrencesInSearch,
+  const handler = {
+    get: function (target, prop) {
+      const counter = target[prop] ? target[prop] : target.default
+      return counter(phrase)
+    },
+  }
+
+  const proxy = new Proxy(phraseValidator, handler)
+  return proxy[sourceLanguageCode]
+}
+
+// Pure — reads only its argument, testable directly with no rendering.
+export const getSearchParams = (segment) => {
+  const {
+    inSearch,
+    currentInSearch,
+    searchParams,
+    occurrencesInSearch,
+    currentInSearchIndex,
+  } = segment
+  if (inSearch && searchParams.source) {
+    return {
+      active: inSearch,
+      currentActive: currentInSearch,
+      textToReplace: searchParams.source,
+      params: searchParams,
+      occurrences: occurrencesInSearch.occurrences,
       currentInSearchIndex,
-    } = this.props.segment
-    if (inSearch && searchParams.source) {
-      return {
-        active: inSearch,
-        currentActive: currentInSearch,
-        textToReplace: searchParams.source,
-        params: searchParams,
-        occurrences: occurrencesInSearch.occurrences,
-        currentInSearchIndex,
-        isTarget: false,
-      }
-    } else {
-      return {
-        active: false,
-      }
+      isTarget: false,
+    }
+  } else {
+    return {
+      active: false,
     }
   }
+}
 
-  // Restore tagged source in draftJS after GuessTag
-  setTaggedSource = (sid) => {
-    if (sid === this.props.segment.sid) {
-      // Escape html
+const SegmentSource = forwardRef(({segment}, ref) => {
+  const context = useContext(SegmentContext)
+  const {segment: contextSegment, userInfo: contextUserInfo} = context
 
-      const translation = this.props.segment.segment
+  // Holds this render's methods, reassigned in full every render (not a hook) so the three
+  // permanently-stable store listeners below (endSplitMode, setTaggedSource, refreshTagMap —
+  // registered once with SegmentStore, which matches handlers by reference) can call the
+  // current render's other methods instead of the ones that existed when they were created.
+  const methodsRef = useRef({})
+  const stableMethodsAssignedRef = useRef(false)
 
-      // If GuessTag enabled, clean string from tag
-      const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled()
-        ? DraftMatecatUtils.removeTagsFromText(translation)
-        : translation
-      // TODO: get taggedSource from store
-      const contentEncoded = DraftMatecatUtils.encodeContent(
-        this.state.editorState,
-        cleanSource,
-      )
-      const {editorState, tagRange} = contentEncoded
-      this.setState({
-        editorState: editorState,
-        tagRange: tagRange,
-      })
-      setTimeout(() => this.updateSourceInStore())
-    }
-  }
+  // Same idea as methodsRef, but for the handful of segment/context/state values those three
+  // listeners read directly rather than through another method.
+  const latestRef = useRef({})
 
-  openConcordance(e) {
+  // Refs replacing plain class-instance fields that are mutated outside the render/state cycle.
+  const splitPointRef = useRef(
+    segment.split_group ? segment.split_group.length - 1 : 0,
+  )
+  const delayAiAssistantRef = useRef()
+  const firstIcuCheckRef = useRef(false)
+  const wasTripleClickTriggeredRef = useRef(false)
+  const editorRef = useRef(null)
+  const sourceRef = useRef(null)
+
+  // Computed ONCE, matching the constructor's `this.originalSource`/`this.icuEnabled`, which
+  // are never recomputed even if props change later.
+  const [originalSource] = useState(() => segment.segment)
+  const [icuEnabled] = useState(() => segment.icu)
+
+  const openConcordance = (e) => {
     e.preventDefault()
     var selection = window.getSelection()
     if (selection.type === 'Range') {
@@ -164,15 +136,37 @@ class SegmentSource extends React.Component {
       var str = selection.toString().trim()
       if (str.length) {
         // the trimmed string is not empty
-        SegmentActions.openConcordance(this.props.segment.sid, str, false)
+        SegmentActions.openConcordance(segment.sid, str, false)
       }
     }
   }
 
-  addSearchDecorator = () => {
-    let {tagRange} = this.state
-    let {searchParams, occurrencesInSearch, currentInSearchIndex} =
-      this.props.segment
+  const removeDecorator = (decoratorName) => {
+    if (!decoratorName) {
+      // All decorators except tags
+      remove(
+        decoratorsStructureRef.current,
+        (decorator) => decorator.name !== DraftMatecatConstants.TAGS_DECORATOR,
+      )
+    } else {
+      remove(
+        decoratorsStructureRef.current,
+        (decorator) => decorator.name === decoratorName,
+      )
+    }
+  }
+
+  const disableDecorator = (editorState, decoratorName) => {
+    remove(
+      decoratorsStructureRef.current,
+      (decorator) => decorator.name === decoratorName,
+    )
+    const decorator = new CompositeDecorator(decoratorsStructureRef.current)
+    return EditorState.set(editorState, {decorator})
+  }
+
+  const addSearchDecorator = () => {
+    let {searchParams, occurrencesInSearch, currentInSearchIndex} = segment
     const textToSearch = searchParams.source ? searchParams.source : ''
     const newDecorator = DraftMatecatUtils.activateSearch(
       textToSearch,
@@ -182,46 +176,60 @@ class SegmentSource extends React.Component {
       tagRange,
     )
     remove(
-      this.decoratorsStructure,
+      decoratorsStructureRef.current,
       (decorator) => decorator.name === DraftMatecatConstants.SEARCH_DECORATOR,
     )
-    this.decoratorsStructure.push(newDecorator)
+    decoratorsStructureRef.current.push(newDecorator)
   }
 
-  addGlossaryDecorator = () => {
-    let {glossary, sid} = this.props.segment
+  const addGlossaryDecorator = () => {
+    let {glossary, sid} = segment
     const newDecorator = DraftMatecatUtils.activateGlossary(
       glossary.filter(({isBlacklist}) => !isBlacklist),
       sid,
     )
     remove(
-      this.decoratorsStructure,
+      decoratorsStructureRef.current,
       (decorator) =>
         decorator.name === DraftMatecatConstants.GLOSSARY_DECORATOR,
     )
-    this.decoratorsStructure.push(newDecorator)
+    decoratorsStructureRef.current.push(newDecorator)
   }
 
-  addQaCheckGlossaryDecorator = () => {
-    let {glossary, segment, sid} = this.props.segment
+  const addQaCheckGlossaryDecorator = () => {
+    let {glossary, segment: segmentText, sid} = segment
     const missingGossaryItems = glossary.filter((item) => item.missingTerm)
     const newDecorator = DraftMatecatUtils.activateQaCheckGlossary(
       missingGossaryItems,
-      segment,
+      segmentText,
       sid,
       SegmentActions.activateTab,
     )
     remove(
-      this.decoratorsStructure,
+      decoratorsStructureRef.current,
       (decorator) =>
         decorator.name === DraftMatecatConstants.QA_GLOSSARY_DECORATOR,
     )
-    this.decoratorsStructure.push(newDecorator)
+    decoratorsStructureRef.current.push(newDecorator)
   }
 
-  addLexiqaDecorator = () => {
-    let {editorState} = this.state
-    let {lexiqa, sid, lxqDecodedSource} = this.props.segment
+  const getUpdatedSegmentInfo = () => {
+    const {sid, warnings, tagMismatch, opened, missingTagsInTarget, openSplit} =
+      contextSegment
+    return {
+      sid,
+      warnings,
+      tagMismatch,
+      tagRange,
+      segmentOpened: opened,
+      missingTagsInTarget,
+      currentSelection: editorState.getSelection(),
+      openSplit,
+    }
+  }
+
+  const addLexiqaDecorator = () => {
+    let {lexiqa, sid, lxqDecodedSource} = segment
     let ranges = LexiqaUtils.getRanges(
       cloneDeep(lexiqa.source),
       lxqDecodedSource,
@@ -237,20 +245,22 @@ class SegmentSource extends React.Component {
         updatedLexiqaWarnings,
         sid,
         true,
-        this.getUpdatedSegmentInfo,
+        getUpdatedSegmentInfo,
       )
       remove(
-        this.decoratorsStructure,
+        decoratorsStructureRef.current,
         (decorator) =>
           decorator.name === DraftMatecatConstants.LEXIQA_DECORATOR,
       )
-      this.decoratorsStructure.push(newDecorator)
+      decoratorsStructureRef.current.push(newDecorator)
     } else {
-      this.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
+      methodsRef.current.removeDecorator(
+        DraftMatecatConstants.LEXIQA_DECORATOR,
+      )
     }
   }
-  addIcuDecorator = () => {
-    const {editorState} = this.state
+
+  const addIcuDecorator = () => {
     const contentState = editorState.getCurrentContent()
     const plainText = textUtils.removeWhitespacePlaceholders(
       contentState.getPlainText(),
@@ -258,15 +268,14 @@ class SegmentSource extends React.Component {
     const tokens = createIcuTokens(plainText, editorState, config.source_code)
     const newDecorator = createICUDecorator(tokens, false)
     remove(
-      this.decoratorsStructure,
+      decoratorsStructureRef.current,
       (decorator) => decorator.name === DraftMatecatConstants.ICU_DECORATOR,
     )
-    this.decoratorsStructure.push(newDecorator)
+    decoratorsStructureRef.current.push(newDecorator)
   }
 
-  updateSourceInStore = () => {
-    if (this.state.source !== '') {
-      const {editorState, tagRange} = this.state
+  const updateSourceInStore = () => {
+    if (source !== '') {
       let contentState = editorState.getCurrentContent()
       let plainText = contentState.getPlainText()
       plainText = removeZeroWidthSpace(plainText)
@@ -274,7 +283,7 @@ class SegmentSource extends React.Component {
       const lxqDecodedSource =
         DraftMatecatUtils.prepareTextForLexiqa(decodedSegment)
       SegmentActions.updateSource(
-        this.props.segment.sid,
+        segment.sid,
         decodedSegment,
         plainText,
         tagRange,
@@ -283,16 +292,19 @@ class SegmentSource extends React.Component {
     }
   }
 
-  checkDecorators = (prevProps) => {
+  // Called three ways, exactly like the original: `checkDecorators({segment: prevSegment})`
+  // from the componentDidUpdate-equivalent effect, and `checkDecorators()` with no argument
+  // from both the mount effect and refreshTagMap's delayed setTimeout.
+  const checkDecorators = (prevProps) => {
     let changedDecorator = false
     const {inSearch, searchParams, currentInSearch, currentInSearchIndex} =
-      this.props.segment
-    const {activeDecorators: prevActiveDecorators, editorState} = this.state
-    const activeDecorators = {...prevActiveDecorators}
+      segment
+    const prevActiveDecorators = activeDecorators
+    const nextActiveDecorators = {...prevActiveDecorators}
 
     if (!inSearch) {
       //Glossary
-      const {glossary} = this.props.segment
+      const {glossary} = segment
       const prevGlossary = prevProps ? prevProps.segment.glossary : undefined
 
       //Qa Check Glossary
@@ -308,17 +320,21 @@ class SegmentSource extends React.Component {
             fromJS(missingGlossaryItems),
           ))
       ) {
-        this.addQaCheckGlossaryDecorator()
+        methodsRef.current.addQaCheckGlossaryDecorator()
         changedDecorator = true
-        activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] = true
+        nextActiveDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] =
+          true
       } else if (
         prevMissingGlossaryItems &&
         prevMissingGlossaryItems.length > 0 &&
         (!missingGlossaryItems || missingGlossaryItems.length === 0)
       ) {
         changedDecorator = true
-        this.removeDecorator(DraftMatecatConstants.QA_GLOSSARY_DECORATOR)
-        activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] = false
+        methodsRef.current.removeDecorator(
+          DraftMatecatConstants.QA_GLOSSARY_DECORATOR,
+        )
+        nextActiveDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] =
+          false
       }
 
       if (
@@ -328,19 +344,21 @@ class SegmentSource extends React.Component {
           !fromJS(prevGlossary).equals(fromJS(glossary)) ||
           !prevActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR])
       ) {
-        activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = true
+        nextActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = true
         changedDecorator = true
-        this.addGlossaryDecorator()
+        methodsRef.current.addGlossaryDecorator()
       } else if (
         size(prevGlossary) > 0 &&
         (!glossary || size(glossary) === 0)
       ) {
-        activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false
+        nextActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false
         changedDecorator = true
-        this.removeDecorator(DraftMatecatConstants.GLOSSARY_DECORATOR)
+        methodsRef.current.removeDecorator(
+          DraftMatecatConstants.GLOSSARY_DECORATOR,
+        )
       }
       //Lexiqa
-      const {lexiqa} = this.props.segment
+      const {lexiqa} = segment
       const prevLexiqa = prevProps ? prevProps.segment.lexiqa : undefined
       const currentLexiqaSource = lexiqa && lexiqa.source && size(lexiqa.source)
       const prevLexiqaSource =
@@ -356,25 +374,29 @@ class SegmentSource extends React.Component {
           lexiqaChanged ||
           !prevActiveDecorators[DraftMatecatConstants.LEXIQA_DECORATOR])
       ) {
-        activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = true
+        nextActiveDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = true
         changedDecorator = true
-        this.addLexiqaDecorator()
+        methodsRef.current.addLexiqaDecorator()
       } else if (prevLexiqaSource && !currentLexiqaSource) {
-        activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
+        nextActiveDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
         changedDecorator = true
-        this.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
+        methodsRef.current.removeDecorator(
+          DraftMatecatConstants.LEXIQA_DECORATOR,
+        )
       }
 
       // Search
       if (prevProps && prevProps.segment.inSearch) {
-        activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = false
+        nextActiveDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = false
         changedDecorator = true
-        this.removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR)
+        methodsRef.current.removeDecorator(
+          DraftMatecatConstants.SEARCH_DECORATOR,
+        )
       }
-      if (!this.firstIcuCheck && this.icuEnabled) {
-        this.firstIcuCheck = true
+      if (!firstIcuCheckRef.current && icuEnabled) {
+        firstIcuCheckRef.current = true
         changedDecorator = true
-        this.addIcuDecorator()
+        methodsRef.current.addIcuDecorator()
       }
     } else {
       //Search
@@ -393,440 +415,48 @@ class SegmentSource extends React.Component {
       ) {
         //There are more occurrences and the current change
         // Cleanup all decorators
-        this.removeDecorator()
-        activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
-        activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false
-        activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] = false
-        this.addSearchDecorator()
-        activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = true
+        methodsRef.current.removeDecorator()
+        nextActiveDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
+        nextActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false
+        nextActiveDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] =
+          false
+        methodsRef.current.addSearchDecorator()
+        nextActiveDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = true
         changedDecorator = true
       }
     }
 
     if (changedDecorator) {
-      const decorator = new CompositeDecorator(this.decoratorsStructure)
-      this.setState({
-        editorState: EditorState.set(editorState, {decorator}),
-        activeDecorators,
-      })
+      const decorator = new CompositeDecorator(decoratorsStructureRef.current)
+      setEditorState(EditorState.set(editorState, {decorator}))
+      setActiveDecorators(nextActiveDecorators)
     }
   }
 
-  componentDidMount() {
-    SegmentStore.addListener(
-      SegmentConstants.CLOSE_SPLIT_SEGMENT,
-      this.endSplitMode,
-    )
-    SegmentStore.addListener(
-      SegmentConstants.SET_SEGMENT_TAGGED,
-      this.setTaggedSource,
-    )
-    SegmentStore.addListener(
-      SegmentConstants.REFRESH_TAG_MAP,
-      this.refreshTagMap,
-    )
-    setTimeout(() => {
-      this.checkDecorators()
-      this.updateSourceInStore()
-    })
-
-    new CommonUtils.DetectTripleClick(
-      this.source,
-      () => (this.wasTripleClickTriggered.current = true),
-    )
+  const updateSplitNumberNew = (step) => {
+    if (segment.splitted) return
+    splitPointRef.current += step
   }
 
-  componentWillUnmount() {
-    SegmentStore.removeListener(
-      SegmentConstants.CLOSE_SPLIT_SEGMENT,
-      this.endSplitMode,
-    )
-    SegmentStore.removeListener(
-      SegmentConstants.REFRESH_TAG_MAP,
-      this.refreshTagMap,
-    )
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    this.checkDecorators(prevProps)
-    // Check if splitMode
-    if (!prevProps.segment.openSplit && this.props.segment.openSplit) {
-      // if segment splitted, rebuild its original content
-      if (this.props.segment.splitted) {
-        let segmentsSplit = this.props.segment.split_group
-        let sourceHtml = ''
-        // join splitted segment content
-        segmentsSplit.forEach((sid, index) => {
-          let segment = SegmentStore.getSegmentByIdToJS(sid)
-          if (sid === this.props.segment.sid) {
-            // if splitted wrap inside highlight span
-            //sourceHtml += `##$_SPLITSTART$##${segment.segment}##$_SPLITEND$##`
-            sourceHtml += segment.segment
-          } else {
-            // if not splitted, add only content
-            sourceHtml += segment.segment
-          }
-          // add splitPoint after every segment content except for last one
-          if (index !== segmentsSplit.length - 1) {
-            sourceHtml += '##$_SPLIT$##'
-          }
-        })
-        // create a new editorState
-        //const decorator = new CompoundDecorator(this.decoratorsStructure);
-        const decorator = new CompositeDecorator(this.decoratorsStructure)
-        const plainEditorState = EditorState.createEmpty(decorator)
-        // add the content
-        const contentEncoded = DraftMatecatUtils.encodeContent(
-          plainEditorState,
-          sourceHtml,
-        )
-        const {editorState: editorStateSplitGroup} = contentEncoded
-        // update current editorState
-        this.setState({editorState: editorStateSplitGroup})
-      }
-    }
-
-    if (prevState.editorState !== this.state.editorState) {
-      const {editorState} = this.state
-
-      const entitiesSelected = getEntitiesSelected(editorState)
-      SegmentActions.focusTags(entitiesSelected)
-    }
-
-    // Select all triple click
-    if (this.wasTripleClickTriggered.current) {
-      const {editorState} = this.state
-      const contentState = editorState.getCurrentContent()
-
-      const selectAll = editorState.getSelection().merge({
-        anchorKey: contentState.getFirstBlock().getKey(),
-        anchorOffset: 0,
-        focusOffset: contentState.getLastBlock().getText().length,
-        focusKey: contentState.getLastBlock().getKey(),
-      })
-
-      const newEditorState = EditorState.forceSelection(editorState, selectAll)
-      this.setState({editorState: newEditorState})
-    }
-
-    this.wasTripleClickTriggered.current = false
-  }
-
-  refreshTagMap = () => {
-    const translation = this.props.segment.segment
-
-    // If GuessTag enabled, clean string from tag
-    const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(
-      this.props.segment,
-    )
-      ? DraftMatecatUtils.removeTagsFromText(translation)
-      : translation
-    // New EditorState with translation
-    const contentEncoded = DraftMatecatUtils.encodeContent(
-      this.state.editorState,
-      cleanSource,
-    )
-    const {editorState, tagRange} = contentEncoded
-
-    flushSync(() => this.setState({editorState, tagRange}))
-
-    this.updateSourceInStore()
-
-    setTimeout(() => this.checkDecorators(), 100)
-  }
-
-  allowHTML(string) {
-    return {__html: string}
-  }
-
-  onChange = (editorState) => {
-    const {entityKey} = DraftMatecatUtils.selectionIsEntity(editorState)
-    if (!entityKey) {
-      setTimeout(() => {
-        SegmentActions.highlightTags()
-      })
-    }
-    this.setState({
-      editorState,
-    })
-  }
-
-  preventEdit = () => 'handled'
-
-  getSelectedWords = () =>
-    DraftMatecatUtils.getSelectedTextWithoutEntities(
-      this.state.editorState,
-    ).reduce((acc, {value}) => `${acc}${value}`, '')
-
-  isValidPhraseToAiAssistant = ({
-    phrase,
-    sourceLanguageCode = config.source_code,
-  }) => {
-    if (!phrase) return false
-
-    const phraseValidator = {
-      'zh-CN': (value) => value.split('').length <= 6,
-      'zh-TW': (value) => value.split('').length <= 6,
-      'zh-HK': (value) => value.split('').length <= 6,
-      'zh-MO': (value) => value.split('').length <= 6,
-      'ja-JP': (value) => value.split('').length <= 10,
-      default: (value) => value.split(' ').length <= 3,
-    }
-
-    const handler = {
-      get: function (target, prop) {
-        const counter = target[prop] ? target[prop] : target.default
-        return counter(phrase)
-      },
-    }
-
-    const proxy = new Proxy(phraseValidator, handler)
-    return proxy[sourceLanguageCode]
-  }
-
-  updateOptionsToolbarVisibility = () => {
-    if (!this.editor) return
-
-    this.setState({
-      isShowingOptionsToolbar: !this.editor._latestEditorState
-        .getSelection()
-        .isCollapsed(),
-    })
-
-    this.helpAiAssistant()
-  }
-
-  helpAiAssistant = () => {
-    if (this.delayAiAssistant) clearTimeout(this.delayAiAssistant)
-
-    const isOpenAiEnabled =
-      Boolean(config.isOpenAiEnabled) &&
-      this.context.userInfo?.metadata.ai_assistant === 1
-
-    if (isOpenAiEnabled) {
-      this.delayAiAssistant = setTimeout(() => {
-        const {segment} = this.context
-        const value = this.getSelectedWords()
-
-        const isValid = this.isValidPhraseToAiAssistant({phrase: value})
-
-        if (isValid) {
-          SegmentActions.helpAiAssistant({
-            sid: segment.sid,
-            value,
-          })
-        }
-      }, 200)
-    }
-  }
-
-  render() {
-    const {segment} = this.context
-    const {editorState} = this.state
-    const {
-      onChange,
-      copyFragment,
-      onBlurEvent,
-      dragFragment,
-      addSplitTag,
-      splitSegmentNew,
-      preventEdit,
-      getSelectedWords,
-      isValidPhraseToAiAssistant,
-    } = this
-    // Set correct handlers
-    const handlers = !segment.openSplit
-      ? {
-          onCut: (e) => {
-            e.preventDefault()
-          },
-          onCopy: copyFragment,
-          onBlur: onBlurEvent,
-          onDragStart: dragFragment,
-          onMouseUp: () => {
-            setTimeout(() => {
-              this.updateOptionsToolbarVisibility()
-            })
-          },
-          onKeyUp: (event) => {
-            if (
-              event.key === 'ArrowLeft' ||
-              event.key === 'ArrowRight' ||
-              event.key === 'ArrowUp' ||
-              event.key === 'ArrowDown'
-            ) {
-              this.updateOptionsToolbarVisibility()
-            }
-          },
-        }
-      : {
-          onClick: () => addSplitTag(),
-          onBlur: onBlurEvent,
-        }
-
-    const isEnabledAiAssistantButton = isValidPhraseToAiAssistant({
-      phrase: getSelectedWords(),
-    })
-
-    const optionsToolbar = this.state.isShowingOptionsToolbar && (
-      <div className="optionsToolbar">
-        {Boolean(config.isOpenAiEnabled) &&
-          this.context.userInfo?.metadata.ai_assistant === 0 && (
-            <Button
-              className="segment-target-toolbar-icon"
-              size={BUTTON_SIZE.ICON_SMALL}
-              mode={BUTTON_MODE.OUTLINE}
-              title={
-                isEnabledAiAssistantButton
-                  ? 'See the meaning of the highlighted text in this context'
-                  : "Your selection is over the AI assistant's limit of 3 words, 6 Chinese characters or 10 Japanese characters, please reduce it."
-              }
-              onMouseDown={() => {
-                if (isEnabledAiAssistantButton) {
-                  SegmentActions.helpAiAssistant({
-                    sid: segment.sid,
-                    value: getSelectedWords(),
-                  })
-                }
-              }}
-              disabled={!isEnabledAiAssistantButton}
-            >
-              <Assistant />
-            </Button>
-          )}
-
-        <Button
-          className="segment-target-toolbar-icon"
-          size={BUTTON_SIZE.ICON_SMALL}
-          mode={BUTTON_MODE.OUTLINE}
-          title="Click to add the highlighted text to the termbase"
-          onMouseDown={() => {
-            SegmentActions.openGlossaryFormPrefill({
-              sid: segment.sid,
-              [TERM_FORM_FIELDS.ORIGINAL_TERM]: getSelectedWords(),
-            })
-          }}
-        >
-          <Education />
-        </Button>
-      </div>
-    )
-
-    // Standard editor
-    const editorHtml = (
-      <div
-        ref={(source) => (this.source = source)}
-        className={`source item`}
-        tabIndex={0}
-        id={'segment-' + segment.sid + '-source'}
-        data-original={this.originalSource}
-        {...handlers}
-      >
-        <UseHotKeysComponent
-          shortcut={
-            Shortcuts.cattol.events.searchInConcordance.keystrokes[
-              Shortcuts.shortCutsKeyType
-            ]
-          }
-          callback={this.openConcordance}
-        />
-        <Editor
-          editorState={editorState}
-          onChange={onChange}
-          onCut={preventEdit}
-          ref={(el) => (this.editor = el)}
-          readOnly={false}
-          handleBeforeInput={preventEdit}
-          handlePastedText={preventEdit}
-          handleDrop={preventEdit}
-          handleReturn={preventEdit}
-          handleKeyCommand={preventEdit}
-          handleDroppedFiles={preventEdit}
-          handlePastedFiles={preventEdit}
-          textAlignment={config.isSourceRTL ? 'right' : 'left'}
-          textDirectionality={config.isSourceRTL ? 'RTL' : 'LTR'}
-        />
-        {optionsToolbar}
-      </div>
-    )
-
-    // Wrap editor in splitContainer
-    return segment.openSplit ? (
-      <div className="splitContainer">
-        {editorHtml}
-        <div className="splitBar">
-          {!!this.splitPoint && (
-            <div className="splitNum">
-              Split in <span className="num">{this.splitPoint}</span> segment
-              <span className="plural" />
-            </div>
-          )}
-          <div className="buttons">
-            <Button
-              mode={BUTTON_MODE.OUTLINE}
-              onClick={() => SegmentActions.closeSplitSegment()}
-            >
-              Cancel
-            </Button>
-            <Button
-              type={BUTTON_TYPE.PRIMARY}
-              disabled={!this.splitPoint}
-              onClick={() => splitSegmentNew()}
-            >
-              {' '}
-              Confirm{' '}
-            </Button>
-          </div>
-        </div>
-      </div>
-    ) : (
-      editorHtml
-    )
-  }
-
-  disableDecorator = (editorState, decoratorName) => {
-    remove(
-      this.decoratorsStructure,
-      (decorator) => decorator.name === decoratorName,
-    )
-    //const decorator = new CompoundDecorator(this.decoratorsStructure);
-    const decorator = new CompositeDecorator(this.decoratorsStructure)
-    return EditorState.set(editorState, {decorator})
-  }
-
-  removeDecorator = (decoratorName) => {
-    if (!decoratorName) {
-      // All decorators except tags
-      remove(
-        this.decoratorsStructure,
-        (decorator) => decorator.name !== DraftMatecatConstants.TAGS_DECORATOR,
-      )
-    } else {
-      remove(
-        this.decoratorsStructure,
-        (decorator) => decorator.name === decoratorName,
-      )
-    }
-  }
-
-  insertTagAtSelection = (tagName) => {
-    const {editorState} = this.state
+  const insertTagAtSelection = (tagName) => {
     const customTag = DraftMatecatUtils.structFromName(tagName)
     // If tag creation has failed, return
     if (!customTag) return
     // remove lexiqa to avoid insertion error
-    this.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
-    this.removeDecorator(DraftMatecatConstants.SPLIT_DECORATOR)
-    const decorator = new CompositeDecorator(this.decoratorsStructure)
-    let newEditorState = EditorState.set(editorState, {decorator})
+    methodsRef.current.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
+    methodsRef.current.removeDecorator(DraftMatecatConstants.SPLIT_DECORATOR)
+    const decorator = new CompositeDecorator(decoratorsStructureRef.current)
+    let newEditorState = EditorState.set(editorState, {
+      decorator,
+    })
     newEditorState = DraftMatecatUtils.insertEntityAtSelection(
       newEditorState,
       customTag,
     )
-    this.setState({editorState: newEditorState})
+    setEditorState(newEditorState)
   }
 
-  addSplitTag = () => {
+  const addSplitTag = () => {
     // Check chars are selected
     const selection = window.getSelection()
     if (selection.anchorNode) {
@@ -837,54 +467,33 @@ class SegmentSource extends React.Component {
       }
     }
 
-    this.insertTagAtSelection('splitPoint')
-    this.updateSplitNumberNew(1)
+    methodsRef.current.insertTagAtSelection('splitPoint')
+    methodsRef.current.updateSplitNumberNew(1)
   }
 
-  updateSplitNumberNew = (step) => {
-    if (this.props.segment.splitted) return
-    this.splitPoint += step
-  }
-
-  splitSegmentNew = (split) => {
-    const {editorState} = this.state
+  const splitSegmentNew = (split) => {
     let {decodedSegment: text} = DraftMatecatUtils.decodeSegment(editorState)
     // Prepare text for backend
     text = text.replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    SegmentActions.splitSegment(this.props.segment.original_sid, text, split)
+    SegmentActions.splitSegment(segment.original_sid, text, split)
   }
 
-  endSplitMode = () => {
-    const {editorStateBeforeSplit} = this.state
-    const {segment} = this.context
-    this.splitPoint = segment.split_group ? segment.split_group.length - 1 : 0
-    // TODO: why so much calls endSplitMode??
-    if (segment.openSplit) {
-      this.setState({
-        editorState: editorStateBeforeSplit,
-      })
-    }
-  }
-
-  onBlurEvent = () => {
+  const onBlurEvent = () => {
     setTimeout(() => {
       SegmentActions.highlightTags()
       SegmentActions.focusTags([])
     })
 
-    this.setState({
-      isShowingOptionsToolbar: false,
-    })
+    setIsShowingOptionsToolbar(false)
   }
 
-  onEntityClick = (start, end, entityName) => {
-    const {editorState} = this.state
-    const {segment} = this.context
+  const onEntityClick = (start, end, entityName) => {
+    const segment = contextSegment
     try {
       // Get latest selection
-      let newSelection = this.editor._latestEditorState.getSelection()
+      let newSelection = editorRef.current._latestEditorState.getSelection()
 
-      const currentBlockText = this.editor._latestEditorState
+      const currentBlockText = editorRef.current._latestEditorState
         .getCurrentContent()
         .getBlockForKey(newSelection.getFocusKey())
         .getText()
@@ -899,7 +508,10 @@ class SegmentSource extends React.Component {
         anchorOffset: start - addZwspExtraStepBefore,
         focusOffset: end + addZwspExtraStepAfter,
       })
-      let newEditorState = EditorState.forceSelection(editorState, newSelection)
+      let newEditorState = EditorState.forceSelection(
+        editorState,
+        newSelection,
+      )
       const contentState = newEditorState.getCurrentContent()
       // remove split tag
       if (segment.openSplit && entityName === tagSignatures.splitPoint.type) {
@@ -916,21 +528,20 @@ class SegmentSource extends React.Component {
           newEditorState,
           newSelection,
         )
-        this.updateSplitNumberNew(-1)
+        methodsRef.current.updateSplitNumberNew(-1)
         newEditorState = EditorState.set(newEditorState, {
           currentContent: contentStateWithoutSplitPoint,
         })
       }
       // update editorState
-      this.setState({editorState: newEditorState})
+      setEditorState(newEditorState)
     } catch (e) {
       console.log(e)
     }
   }
 
-  copyFragment = (e) => {
-    const internalClipboard = this.editor.getClipboard()
-    const {editorState} = this.state
+  const copyFragment = (e) => {
+    const internalClipboard = editorRef.current.getClipboard()
     if (internalClipboard) {
       e.preventDefault()
       // Get plain text form internalClipboard fragment
@@ -953,8 +564,7 @@ class SegmentSource extends React.Component {
     }
   }
 
-  dragFragment = (e) => {
-    const {editorState} = this.state
+  const dragFragment = (e) => {
     let fragment = getFragmentFromSelection(editorState)
     if (fragment) {
       const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(
@@ -971,30 +581,577 @@ class SegmentSource extends React.Component {
     }
   }
 
-  getUpdatedSegmentInfo = () => {
-    const {
-      segment: {
-        sid,
-        warnings,
-        tagMismatch,
-        opened,
-        missingTagsInTarget,
-        openSplit,
+  const allowHTML = (string) => ({__html: string})
+
+  const onChange = (editorState) => {
+    const {entityKey} = DraftMatecatUtils.selectionIsEntity(editorState)
+    if (!entityKey) {
+      setTimeout(() => {
+        SegmentActions.highlightTags()
+      })
+    }
+    setEditorState(editorState)
+  }
+
+  const preventEdit = () => 'handled'
+
+  // Assigned once (like the three store listeners below), not recreated
+  // every render: tests spy on these via the exposed ref
+  // (jest.spyOn(ref.current, 'getSelectedWords')), and a spy installed on a
+  // freshly-recreated-every-render function would be silently discarded the
+  // next time this component re-renders. Reads latestRef instead of closing
+  // over editorState/contextUserInfo directly for that same reason.
+  const getSelectedWordsRef = useRef(() =>
+    DraftMatecatUtils.getSelectedTextWithoutEntities(
+      latestRef.current.editorState,
+    ).reduce((acc, {value}) => `${acc}${value}`, ''),
+  )
+  const getSelectedWords = getSelectedWordsRef.current
+
+  const helpAiAssistantRef = useRef(() => {
+    if (delayAiAssistantRef.current) clearTimeout(delayAiAssistantRef.current)
+
+    const isOpenAiEnabled =
+      Boolean(config.isOpenAiEnabled) &&
+      latestRef.current.contextUserInfo?.metadata.ai_assistant === 1
+
+    if (isOpenAiEnabled) {
+      // Reads via latestRef, not the segment/getSelectedWords/
+      // isValidPhraseToAiAssistant closed over above: this fires 200ms
+      // later, potentially after other renders, and must see fresh values.
+      delayAiAssistantRef.current = setTimeout(() => {
+        const segment = latestRef.current.contextSegment
+        const value = methodsRef.current.getSelectedWords()
+
+        const isValid = isValidPhraseToAiAssistant({
+          phrase: value,
+        })
+
+        if (isValid) {
+          SegmentActions.helpAiAssistant({
+            sid: segment.sid,
+            value,
+          })
+        }
+      }, 200)
+    }
+  })
+  const helpAiAssistant = helpAiAssistantRef.current
+
+  const endSplitModeRef = useRef(() => {
+    const {editorStateBeforeSplit, contextSegment: segment} = latestRef.current
+    splitPointRef.current = segment.split_group
+      ? segment.split_group.length - 1
+      : 0
+    // TODO: why so much calls endSplitMode??
+    if (segment.openSplit) {
+      setEditorState(editorStateBeforeSplit)
+    }
+  })
+  const endSplitMode = endSplitModeRef.current
+
+  // Restore tagged source in draftJS after GuessTag
+  const setTaggedSourceRef = useRef((sid) => {
+    const segment = latestRef.current.segment
+    if (sid === segment.sid) {
+      // Escape html
+      const translation = segment.segment
+
+      // If GuessTag enabled, clean string from tag
+      const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled()
+        ? DraftMatecatUtils.removeTagsFromText(translation)
+        : translation
+      // TODO: get taggedSource from store
+      const contentEncoded = DraftMatecatUtils.encodeContent(
+        latestRef.current.editorState,
+        cleanSource,
+      )
+      const {editorState: newEditorState, tagRange: newTagRange} =
+        contentEncoded
+      setEditorState(newEditorState)
+      setTagRange(newTagRange)
+      setTimeout(() => methodsRef.current.updateSourceInStore())
+    }
+  })
+  const setTaggedSource = setTaggedSourceRef.current
+
+  const refreshTagMapRef = useRef(() => {
+    const segment = latestRef.current.segment
+    const translation = segment.segment
+
+    // If GuessTag enabled, clean string from tag
+    const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(segment)
+      ? DraftMatecatUtils.removeTagsFromText(translation)
+      : translation
+    // New EditorState with translation
+    const contentEncoded = DraftMatecatUtils.encodeContent(
+      latestRef.current.editorState,
+      cleanSource,
+    )
+    const {editorState: newEditorState, tagRange: newTagRange} = contentEncoded
+
+    flushSync(() => {
+      setEditorState(newEditorState)
+      setTagRange(newTagRange)
+    })
+
+    methodsRef.current.updateSourceInStore()
+
+    setTimeout(() => methodsRef.current.checkDecorators(), 100)
+  })
+  const refreshTagMap = refreshTagMapRef.current
+
+  // Seeded once with the same logic as the constructor, mutated in place by the add*/remove
+  // decorator helpers above via lodash `remove()`/`.push()` — a working buffer, not reactive
+  // state, matching class-instance-field semantics precisely.
+  const decoratorsStructureRef = useRef([
+    {
+      name: 'tags',
+      strategy: getEntityStrategy('IMMUTABLE'),
+      component: TagEntity,
+      props: {
+        onClick: onEntityClick,
+        getUpdatedSegmentInfo: getUpdatedSegmentInfo,
+        isTarget: false,
+        getSearchParams: () => getSearchParams(segment),
+        isRTL: config.isSourceRTL,
+        sid: segment.sid,
       },
-    } = this.context
-    const {tagRange, editorState} = this.state
-    return {
-      sid,
-      warnings,
-      tagMismatch,
-      tagRange,
-      segmentOpened: opened,
-      missingTagsInTarget,
-      currentSelection: editorState.getSelection(),
-      openSplit,
+    },
+  ])
+
+  // Computed ONCE (lazily cached via a ref), matching the constructor building a single
+  // CompositeDecorator/EditorState and deriving `source`/`editorState`/`tagRange` from it.
+  const initialContentRef = useRef(null)
+  if (initialContentRef.current === null) {
+    const decorator = new CompositeDecorator(decoratorsStructureRef.current)
+    const plainEditorState = EditorState.createEmpty(decorator)
+    const translation = segment.segment
+
+    // If GuessTag enabled, clean string from tag
+    const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(segment)
+      ? DraftMatecatUtils.removeTagsFromText(translation)
+      : translation
+    // New EditorState with translation
+    const contentEncoded = DraftMatecatUtils.encodeContent(
+      plainEditorState,
+      cleanSource,
+    )
+    initialContentRef.current = {
+      source: cleanSource,
+      editorState: contentEncoded.editorState,
+      tagRange: contentEncoded.tagRange,
     }
   }
-}
+
+  const [source, setSource] = useState(() => initialContentRef.current.source)
+  const [editorState, setEditorState] = useState(
+    () => initialContentRef.current.editorState,
+  )
+  // Dead state, preserved verbatim from the class component: `this.state.editAreaClasses`
+  // was never read anywhere, including in the original render().
+  // eslint-disable-next-line no-unused-vars
+  const [editAreaClasses, setEditAreaClasses] = useState(['targetarea'])
+  const [tagRange, setTagRange] = useState(
+    () => initialContentRef.current.tagRange,
+  )
+  // Dead state, preserved verbatim from the class component: `this.state.unlockedForCopy`
+  // was never read anywhere, including in the original render().
+  // eslint-disable-next-line no-unused-vars
+  const [unlockedForCopy, setUnlockedForCopy] = useState(false)
+  const [editorStateBeforeSplit, setEditorStateBeforeSplit] = useState(
+    () => initialContentRef.current.editorState,
+  )
+  const [activeDecorators, setActiveDecorators] = useState(() => ({
+    [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
+    [DraftMatecatConstants.GLOSSARY_DECORATOR]: false,
+    [DraftMatecatConstants.QA_GLOSSARY_DECORATOR]: false,
+    [DraftMatecatConstants.SEARCH_DECORATOR]: false,
+    [DraftMatecatConstants.ICU_DECORATOR]: icuEnabled,
+  }))
+  const [isShowingOptionsToolbar, setIsShowingOptionsToolbar] = useState(false)
+
+  // Only what the three permanently-stable listeners (and helpAiAssistant's
+  // delayed setTimeout) read, refreshed every render.
+  latestRef.current = {
+    segment,
+    contextSegment,
+    contextUserInfo,
+    editorState,
+    editorStateBeforeSplit,
+  }
+
+  const isFirstRenderRef = useRef(true)
+  const prevSegmentRef = useRef(segment)
+  const prevEditorStateRef = useRef(editorState)
+
+  const [, bumpForceRender] = useReducer((x) => x + 1, 0)
+
+  useEffect(() => {
+    SegmentStore.addListener(SegmentConstants.CLOSE_SPLIT_SEGMENT, endSplitMode)
+    SegmentStore.addListener(
+      SegmentConstants.SET_SEGMENT_TAGGED,
+      setTaggedSource,
+    )
+    SegmentStore.addListener(SegmentConstants.REFRESH_TAG_MAP, refreshTagMap)
+    setTimeout(() => {
+      methodsRef.current.checkDecorators()
+      methodsRef.current.updateSourceInStore()
+    })
+
+    new CommonUtils.DetectTripleClick(
+      sourceRef.current,
+      () => (wasTripleClickTriggeredRef.current = true),
+    )
+
+    return () => {
+      SegmentStore.removeListener(
+        SegmentConstants.CLOSE_SPLIT_SEGMENT,
+        endSplitMode,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.REFRESH_TAG_MAP,
+        refreshTagMap,
+      )
+      // NOTE: SET_SEGMENT_TAGGED/setTaggedSource is intentionally NOT removed here — this
+      // mirrors a pre-existing bug in the original componentWillUnmount, preserved verbatim.
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // componentDidUpdate-equivalent: runs after every render (including forceUpdate-only
+  // renders) but not on the initial mount. No dependency array — matches componentDidUpdate's
+  // unconditional per-update re-sync.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false
+      prevSegmentRef.current = segment
+      prevEditorStateRef.current = editorState
+      return
+    }
+
+    const prevSegment = prevSegmentRef.current
+
+    methodsRef.current.checkDecorators({segment: prevSegment})
+
+    // Check if splitMode
+    if (!prevSegment.openSplit && segment.openSplit) {
+      // if segment splitted, rebuild its original content
+      if (segment.splitted) {
+        let segmentsSplit = segment.split_group
+        let sourceHtml = ''
+        // join splitted segment content
+        segmentsSplit.forEach((sid, index) => {
+          let segment = SegmentStore.getSegmentByIdToJS(sid)
+          if (sid === segment.sid) {
+            // if splitted wrap inside highlight span
+            sourceHtml += segment.segment
+          } else {
+            // if not splitted, add only content
+            sourceHtml += segment.segment
+          }
+          // add splitPoint after every segment content except for last one
+          if (index !== segmentsSplit.length - 1) {
+            sourceHtml += '##$_SPLIT$##'
+          }
+        })
+        // create a new editorState
+        const decorator = new CompositeDecorator(decoratorsStructureRef.current)
+        const plainEditorState = EditorState.createEmpty(decorator)
+        // add the content
+        const contentEncoded = DraftMatecatUtils.encodeContent(
+          plainEditorState,
+          sourceHtml,
+        )
+        const {editorState: editorStateSplitGroup} = contentEncoded
+        // update current editorState
+        setEditorState(editorStateSplitGroup)
+      }
+    }
+
+    if (prevEditorStateRef.current !== editorState) {
+      const entitiesSelected = getEntitiesSelected(editorState)
+      SegmentActions.focusTags(entitiesSelected)
+    }
+
+    // Select all triple click
+    if (wasTripleClickTriggeredRef.current) {
+      const contentState = editorState.getCurrentContent()
+
+      const selectAll = editorState.getSelection().merge({
+        anchorKey: contentState.getFirstBlock().getKey(),
+        anchorOffset: 0,
+        focusOffset: contentState.getLastBlock().getText().length,
+        focusKey: contentState.getLastBlock().getKey(),
+      })
+
+      const newEditorState = EditorState.forceSelection(editorState, selectAll)
+      setEditorState(newEditorState)
+    }
+
+    wasTripleClickTriggeredRef.current = false
+
+    prevSegmentRef.current = segment
+    prevEditorStateRef.current = editorState
+  })
+
+  // Lets the three permanently-stable listeners below (registered once with
+  // SegmentStore, which matches handlers by reference) call this render's
+  // methods without going stale. Reassigned in full every render — unlike
+  // the old instanceRef, nothing needs its identity to stay stable.
+  // Single stable object, mutated in place every render (never recreated),
+  // used BOTH for internal cross-method calls (the three permanently-stable
+  // store listeners reach other current-render methods through it) AND as
+  // the ref exposed to tests below — so a jest.spyOn(ref.current, 'x')
+  // affects the same property internal code actually calls through, and
+  // survives subsequent re-renders instead of being silently replaced.
+  // Assigned exactly once: these five have their own stable identity
+  // (created via useRef above, never recreated) precisely so a
+  // jest.spyOn(ref.current, 'x') survives later re-renders — reassigning
+  // them here every render, even to the same underlying function, would
+  // blow away a spy sitting on the property. Everything else below is
+  // fine to refresh every render since nothing depends on its identity.
+  if (!stableMethodsAssignedRef.current) {
+    stableMethodsAssignedRef.current = true
+    Object.assign(methodsRef.current, {
+      endSplitMode,
+      setTaggedSource,
+      refreshTagMap,
+      getSelectedWords,
+      helpAiAssistant,
+    })
+    // Test-only accessor: lets a test null out the editor DOM ref to
+    // simulate it going missing (e.g. mid-unmount) without needing its own
+    // exported setter method.
+    Object.defineProperty(methodsRef.current, 'editor', {
+      get: () => editorRef.current,
+      set: (v) => {
+        editorRef.current = v
+      },
+      configurable: true,
+    })
+  }
+
+  Object.assign(methodsRef.current, {
+    setState: (partial) => {
+      if ('source' in partial) setSource(partial.source)
+      if ('editorState' in partial) setEditorState(partial.editorState)
+      if ('editAreaClasses' in partial)
+        setEditAreaClasses(partial.editAreaClasses)
+      if ('tagRange' in partial) setTagRange(partial.tagRange)
+      if ('unlockedForCopy' in partial)
+        setUnlockedForCopy(partial.unlockedForCopy)
+      if ('editorStateBeforeSplit' in partial)
+        setEditorStateBeforeSplit(partial.editorStateBeforeSplit)
+      if ('activeDecorators' in partial)
+        setActiveDecorators(partial.activeDecorators)
+      if ('isShowingOptionsToolbar' in partial)
+        setIsShowingOptionsToolbar(partial.isShowingOptionsToolbar)
+    },
+    forceUpdate: () => bumpForceRender(),
+    openConcordance,
+    onEntityClick,
+    addSplitTag,
+    removeDecorator,
+    dragFragment,
+    copyFragment,
+    updateSplitNumberNew,
+    updateSourceInStore,
+    preventEdit,
+    onChange,
+    onBlurEvent,
+    insertTagAtSelection,
+    getUpdatedSegmentInfo,
+    disableDecorator,
+    allowHTML,
+    checkDecorators,
+    splitSegmentNew,
+    addSearchDecorator,
+    addGlossaryDecorator,
+    addQaCheckGlossaryDecorator,
+    addLexiqaDecorator,
+    addIcuDecorator,
+    getEditorState: () => editorState,
+    getEditorStateBeforeSplit: () => editorStateBeforeSplit,
+    getIsShowingOptionsToolbar: () => isShowingOptionsToolbar,
+    getSplitPoint: () => splitPointRef.current,
+    getActiveDecorators: () => activeDecorators,
+    getFirstIcuCheck: () => firstIcuCheckRef.current,
+    getDecoratorsStructure: () => decoratorsStructureRef.current,
+    wasTripleClickTriggered: wasTripleClickTriggeredRef,
+  })
+
+  // Test-only: jsdom has no real contentEditable/Selection implementation,
+  // so a few behaviors that only fire from genuine rich-text editor
+  // interactions (triple-click selection, keystroke/paste handlers, and the
+  // selection-dependent tag/split operations) can't be driven through
+  // simulated DOM events. Exposed here so tests can invoke them directly,
+  // matching how the previous class-based tests already had to work around
+  // the same jsdom limitation.
+  useImperativeHandle(ref, () => methodsRef.current, [])
+
+  const updateOptionsToolbarVisibility = () => {
+    if (!editorRef.current) return
+
+    setIsShowingOptionsToolbar(
+      !editorRef.current._latestEditorState.getSelection().isCollapsed(),
+    )
+
+    methodsRef.current.helpAiAssistant()
+  }
+
+  // Set correct handlers
+  const handlers = !contextSegment.openSplit
+    ? {
+        onCut: (e) => {
+          e.preventDefault()
+        },
+        onCopy: copyFragment,
+        onBlur: onBlurEvent,
+        onDragStart: dragFragment,
+        onMouseUp: () => {
+          setTimeout(() => {
+            updateOptionsToolbarVisibility()
+          })
+        },
+        onKeyUp: (event) => {
+          if (
+            event.key === 'ArrowLeft' ||
+            event.key === 'ArrowRight' ||
+            event.key === 'ArrowUp' ||
+            event.key === 'ArrowDown'
+          ) {
+            updateOptionsToolbarVisibility()
+          }
+        },
+      }
+    : {
+        onClick: () => addSplitTag(),
+        onBlur: onBlurEvent,
+      }
+
+  const isEnabledAiAssistantButton = isValidPhraseToAiAssistant({
+    phrase: methodsRef.current.getSelectedWords(),
+  })
+
+  const optionsToolbar = isShowingOptionsToolbar && (
+    <div className="optionsToolbar">
+      {Boolean(config.isOpenAiEnabled) &&
+        context.userInfo?.metadata.ai_assistant === 0 && (
+          <Button
+            className="segment-target-toolbar-icon"
+            size={BUTTON_SIZE.ICON_SMALL}
+            mode={BUTTON_MODE.OUTLINE}
+            title={
+              isEnabledAiAssistantButton
+                ? 'See the meaning of the highlighted text in this context'
+                : "Your selection is over the AI assistant's limit of 3 words, 6 Chinese characters or 10 Japanese characters, please reduce it."
+            }
+            onMouseDown={() => {
+              if (isEnabledAiAssistantButton) {
+                SegmentActions.helpAiAssistant({
+                  sid: contextSegment.sid,
+                  value: methodsRef.current.getSelectedWords(),
+                })
+              }
+            }}
+            disabled={!isEnabledAiAssistantButton}
+          >
+            <Assistant />
+          </Button>
+        )}
+
+      <Button
+        className="segment-target-toolbar-icon"
+        size={BUTTON_SIZE.ICON_SMALL}
+        mode={BUTTON_MODE.OUTLINE}
+        title="Click to add the highlighted text to the termbase"
+        onMouseDown={() => {
+          SegmentActions.openGlossaryFormPrefill({
+            sid: contextSegment.sid,
+            [TERM_FORM_FIELDS.ORIGINAL_TERM]:
+              methodsRef.current.getSelectedWords(),
+          })
+        }}
+      >
+        <Education />
+      </Button>
+    </div>
+  )
+
+  // Standard editor
+  const editorHtml = (
+    <div
+      ref={sourceRef}
+      className={`source item`}
+      tabIndex={0}
+      id={'segment-' + contextSegment.sid + '-source'}
+      data-original={originalSource}
+      {...handlers}
+    >
+      <UseHotKeysComponent
+        shortcut={
+          Shortcuts.cattol.events.searchInConcordance.keystrokes[
+            Shortcuts.shortCutsKeyType
+          ]
+        }
+        callback={openConcordance}
+      />
+      <Editor
+        editorState={editorState}
+        onChange={onChange}
+        onCut={preventEdit}
+        ref={editorRef}
+        readOnly={false}
+        handleBeforeInput={preventEdit}
+        handlePastedText={preventEdit}
+        handleDrop={preventEdit}
+        handleReturn={preventEdit}
+        handleKeyCommand={preventEdit}
+        handleDroppedFiles={preventEdit}
+        handlePastedFiles={preventEdit}
+        textAlignment={config.isSourceRTL ? 'right' : 'left'}
+        textDirectionality={config.isSourceRTL ? 'RTL' : 'LTR'}
+      />
+      {optionsToolbar}
+    </div>
+  )
+
+  // Wrap editor in splitContainer
+  return contextSegment.openSplit ? (
+    <div className="splitContainer">
+      {editorHtml}
+      <div className="splitBar">
+        {!!splitPointRef.current && (
+          <div className="splitNum">
+            Split in <span className="num">{splitPointRef.current}</span>{' '}
+            segment
+            <span className="plural" />
+          </div>
+        )}
+        <div className="buttons">
+          <Button
+            mode={BUTTON_MODE.OUTLINE}
+            onClick={() => SegmentActions.closeSplitSegment()}
+          >
+            Cancel
+          </Button>
+          <Button
+            type={BUTTON_TYPE.PRIMARY}
+            disabled={!splitPointRef.current}
+            onClick={() => splitSegmentNew()}
+          >
+            {' '}
+            Confirm{' '}
+          </Button>
+        </div>
+      </div>
+    </div>
+  ) : (
+    editorHtml
+  )
+})
 
 function getEntityStrategy(mutability) {
   return function (contentBlock, callback, contentState) {
@@ -1007,5 +1164,7 @@ function getEntityStrategy(mutability) {
     }, callback)
   }
 }
+
+SegmentSource.displayName = 'SegmentSource'
 
 export default SegmentSource
