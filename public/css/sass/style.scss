@@ -1529,18 +1529,6 @@ section .segment-side-buttons {
   color: colors.$grey500;
 }
 
-.grey-button {
-  color: colors.$grey1300;
-  background: colors.$grey50;
-  background: -webkit-gradient(
-    linear,
-    left top,
-    left bottom,
-    from(colors.$grey50),
-    to(colors.$grey100)
-  );
-}
-
 .edit-distance {
   display: none;
   position: absolute;
