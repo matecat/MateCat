@@ -242,3 +242,74 @@
   color: colors.$grey500;
 }
 
+#logoutlink,
+.reset-password {
+  margin-bottom: 10px;
+  text-decoration: underline;
+  float: left;
+  cursor: pointer;
+  color: colors.$blue700;
+
+  &:hover {
+    text-decoration: none;
+    color: colors.$blue400;
+  }
+}
+
+.user-info-form,
+.user-reset-password,
+.user-gdrive {
+  margin: 0 auto;
+  width: 100%;
+  float: left;
+  position: relative;
+}
+
+.user-reset-password {
+  width: 100%;
+}
+
+.user-info-form input {
+  margin-top: 5px;
+  font-size: variables.$font-size-xsmall;
+  width: 100%;
+  padding: 0.7em 0.6em;
+  display: inline-block;
+  border: 1px solid colors.$grey200;
+  box-shadow: inset 0 1px 3px colors.$grey200;
+  border-radius: 4px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  font-size: 15px;
+  color: colors.$grey1300;
+}
+
+.user-info-form input {
+  margin-top: 5px;
+  width: 100%;
+  color: colors.$black;
+}
+
+.preference-modal-message {
+  box-shadow: 0 2px 2px colors.$grey100;
+  border-radius: 2px;
+  border: 1px solid colors.$grey200;
+  line-height: 20px;
+  padding: 10px 15px;
+  background: rgb(195, 224, 195);
+  /*margin-top: 20px;*/
+  margin-bottom: 10px;
+}
+
+.user-link {
+  float: left;
+  clear: both;
+  font-size: variables.$font-size-small;
+  margin-left: 66px;
+  height: 20px;
+  margin-top: 12px;
+  display: flex;
+  gap: 16px;
+}
+

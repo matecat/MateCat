@@ -7,7 +7,16 @@
 @use "commons/typography";
 @use 'commons/matecat_fonts';
 
-@use 'common-modals';
+@use 'modals/instructionsModal';
+@use 'modals/tmShareModal';
+@use 'modals/PreferenceModal';
+@use 'modals/SuccessModal';
+@use 'modals/FatalErrorModal';
+@use 'modals/ShortCutsModal';
+@use 'modals/CopySourceModal';
+@use 'modals/AlertModal';
+@use 'modals/ConfirmDeleteResourceProjectTemplates';
+@use 'modals/ModalContainer';
 @use 'components/NotificationBox';
 @use 'common-components';
 @use 'commons/nav-bar';
