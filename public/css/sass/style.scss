@@ -109,38 +109,9 @@ section.opened .warnings {
   color: colors.$black !important;
 }
 
-.mismatch .warnings {
-  display: block;
-}
-
 .warnings .tip {
   display: block;
   margin-left: 24px;
-}
-
-.cattool #quality-report[data-vote='acceptable'],
-.cattool #quality-report[data-vote='poor'],
-.cattool #quality-report[data-vote='fail'],
-.cattool.review #quality-report {
-  display: block;
-}
-
-.cattool #quality-report[data-vote='excellent'],
-.cattool #quality-report[data-vote='verygood'],
-.cattool #quality-report[data-vote='good'] {
-  background-color: colors.$green700 !important;
-}
-
-.cattool #quality-report[data-vote='poor'] {
-  background-color: colors.$orange600 !important;
-}
-
-.cattool #quality-report[data-vote='acceptable'] {
-  background-color: colors.$orange400 !important;
-}
-
-.cattool #quality-report[data-vote='fail'] {
-  background-color: colors.$red400 !important;
 }
 
 .logo {
@@ -236,10 +207,6 @@ section.opened .warnings {
   width: 4.5%;
 }
 
-.slide-right .sid {
-  left: -6%;
-}
-
 .sid .txt {
   padding: 0px 3px;
   margin: 2px 0px 0 0px;
@@ -280,33 +247,6 @@ p.split-shortcut {
   margin-top: 5px;
 }
 
-.splitStart .sid {
-  background: url(/public/img/split-bg.png) no-repeat;
-  background-position: 48.5% 23px;
-}
-
-.splitInner .sid {
-  background: url(/public/img/split-bg.png) no-repeat;
-  background-position: 48.5% 16px;
-}
-
-.splitEnd .sid {
-  background: url(/public/img/split-bg.png) no-repeat;
-  background-position: 49% bottom;
-}
-
-.editor.splitStart .sid {
-  background-position: 49% 43px;
-}
-
-.editor.splitInner .sid {
-  background-position: 52% -40px;
-}
-
-.editor.splitEnd .sid {
-  background-position: 50.5% bottom;
-}
-
 section:hover .sid {
   color: colors.$grey500;
 }
@@ -330,11 +270,6 @@ section:hover .sid {
   display: block;
 }
 
-.split-action .outersource .actions,
-.split-action .actions {
-  display: block !important;
-}
-
 section {
   position: relative;
   float: left;
@@ -352,9 +287,6 @@ strong:first-child {
   margin-right: 0px !important;
 }
 
-.download {
-  position: absolute;
-}
 .outersource .copy {
   display: none;
   margin-top: 14px;
@@ -649,10 +581,6 @@ section.editor .sid {
   color: black;
   left: -5%;
 }
-section.editor.slide-right .sid {
-  left: -6%;
-}
-
 .source {
   line-height: 27px;
   padding-top: 7px !important;
@@ -998,32 +926,6 @@ body.archived section .status-container a.status:hover {
   padding-left: 40px !important;
 }
 
-.error-img {
-  background: colors.$red600 url(/public/img/warning.png) no-repeat center;
-  background-size: 17px;
-  width: 22px;
-  height: 22px;
-  margin: 0;
-  border-radius: 5px;
-  margin-left: -28px;
-  top: -4px;
-  position: relative;
-  float: left;
-}
-
-.warning-img {
-  background: colors.$orange600 url(/public/img/warning.png) no-repeat center;
-  background-size: 17px;
-  width: 22px;
-  height: 22px;
-  margin: 0;
-  border-radius: 5px;
-  margin-left: -28px;
-  top: -4px;
-  position: relative;
-  float: left;
-}
-
 .engine-errors {
   position: relative;
   width: 100%;
@@ -1096,12 +998,6 @@ section.status-approved2 .status {
 /* section.status-draft .status{background-color:#dddedf !important;} */
 section.status-rejected .status {
   background-color: colors.$orange600 !important;
-}
-
-.message-offline-icons {
-  float: left;
-  margin-right: 10px;
-  margin-top: 1px;
 }
 
 section.editor.status-rejected .status {
@@ -1234,13 +1130,6 @@ section.opened.editor .status {
     left: -5.1%;
     width: 4.5%;
   }
-
-  section.slide-right .sid {
-    left: -6.5%;
-  }
-  section.editor.slide-right .sid {
-    left: -6%;
-  }
 }
 
 @media screen and (max-width: 1280px) {
@@ -1342,19 +1231,6 @@ section.opened.editor .status {
   section {
     width: 86%;
     margin-left: 6%;
-  }
-  section.editor.slide-right .sid {
-    left: -7%;
-    width: 6%;
-  }
-  section.editor.slide-right {
-    width: 70% !important;
-  }
-  section.slide-right {
-    width: 68% !important;
-  }
-  section.slide-right .sid {
-    left: -8%;
   }
 
   .projectbar {
