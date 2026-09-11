@@ -1,0 +1,42 @@
+@use '../../tokens/colors';
+@use 'commons/variables';
+
+.splitContainer {
+  position: relative;
+  float: left;
+  width: 45%;
+  display: flex;
+  flex-direction: column;
+  padding-right: 42px;
+}
+
+.splitContainer .source.item {
+  width: 100% !important;
+}
+.splitBar {
+  display: flex;
+  justify-content: end;
+  gap: 15px;
+  align-items: center;
+}
+
+.splitBar p,
+.splitBar .splitNum {
+  float: left;
+  margin: 0;
+}
+
+.splitBar .splitNum {
+  /*display: none;*/
+  margin-top: 7px;
+}
+
+.splitBar .buttons {
+  display: flex;
+  gap: 10px;
+}
+.optionsToolbar {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+}

@@ -1,0 +1,343 @@
+@use '../../tokens/colors';
+@use 'commons/variables';
+
+.wrap .outersource {
+  display: flex;
+}
+.text .source.item,
+.text .target.item {
+  width: 45%;
+  table-layout: fixed;
+  float: left;
+  padding: 3px 16px;
+  text-align: left;
+  list-style: none;
+  height: 95%;
+  outline: none;
+  line-height: 23px;
+  word-break: break-word;
+}
+.text a {
+  text-color: colors.$black;
+}
+.outersource .actions {
+  display: none;
+  position: absolute;
+  bottom: 25px;
+}
+
+.editor .outersource .actions {
+  display: block;
+}
+.outersource .copy {
+  display: none;
+  margin-top: 14px;
+  background: url(/public/img/outercopy.png) center 1px no-repeat;
+  width: 50px !important;
+  height: 60px;
+  margin-left: 24px;
+  z-index: 1;
+  background-size: 42px;
+  /*	opacity: 0.4;*/
+}
+
+.outersource .copy:hover {
+  background: url(/public/img/outercopy.png) 4px -69px no-repeat;
+  background-size: 42px;
+}
+
+.editor .outersource .copy {
+  display: block;
+  background-size: 42px;
+}
+
+.outersource .copy:hover {
+  cursor: pointer;
+}
+
+.outersource .copy p {
+  visibility: hidden;
+  font-size: 11px;
+  color: colors.$grey700;
+  margin-top: 46px;
+  margin-left: -4px;
+}
+
+.outersource .copy:hover p {
+  visibility: visible;
+}
+article {
+  //margin: 0px auto 100px auto;
+  -moz-border-radius: 2px;
+  -moz-box-shadow: 0 1px 3px colors.$grey200;
+  position: relative;
+  width: 100%;
+  float: left;
+  box-sizing: content-box;
+}
+body #file section:not(.editor) {
+  background: colors.$grey150;
+  cursor: pointer;
+  border: 1px solid colors.$grey300;
+}
+
+#file section:not(.editor) .text:first-child {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+.source {
+  line-height: 27px;
+  padding-top: 7px !important;
+}
+
+.editor .source {
+  padding-top: 4px !important;
+  font-size: variables.$font-size-base;
+}
+
+.textarea-container {
+  height: inherit;
+  table-layout: fixed;
+}
+
+.editor .textarea-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+section.opened {
+  .toolbar {
+    float: left;
+    margin-top: 16px;
+    width: 40%;
+    button {
+      padding: 0;
+    }
+    .revise-lock-editArea-active {
+      background-color: colors.$grey100;
+    }
+  }
+}
+
+.editarea {
+  width: 100%;
+  min-height: 54px;
+  resize: none;
+  margin: 2px 0 0px -11px;
+  padding: 5px;
+  color: colors.$grey700;
+  border: 1px solid transparent;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  transition: all 50ms ease-in;
+  -webkit-transition: all 50ms ease-in;
+}
+section.readonly {
+  background: transparent;
+}
+
+section.ice-locked:not(.segment-selected) .text {
+  cursor: no-drop !important;
+  background-color: colors.$grey50 !important;
+}
+
+body section:not(.editor).ice-locked {
+  background: colors.$grey150 !important;
+}
+
+section.readonly {
+  background: colors.$grey50;
+  color: colors.$grey400;
+  cursor: not-allowed !important;
+}
+section.readonly .status-container a.status:hover {
+  cursor: default !important;
+}
+
+.editor .editarea {
+  width: 100%;
+  font-size: variables.$font-size-base;
+  margin: 2px 0 0px -11px;
+  word-break: normal;
+  line-height: 25px;
+  outline: none;
+  color: colors.$black;
+  border: 1px solid colors.$grey200;
+  box-shadow: inset 0 1px 2px colors.$grey300;
+  -webkit-box-shadow: inset 0 1px 2px colors.$grey300;
+  /*font-variant-ligatures: none;*/
+  cursor: text;
+}
+
+.editarea:focus {
+  border: 1px solid colors.$grey300;
+  box-shadow: inset 0px 0px 2px 2px colors.$grey300;
+  outline-color: colors.$grey300;
+}
+
+.source {
+  position: relative;
+  z-index: 0;
+  /*word-break: break-all;*/
+}
+.wrap {
+  float: left;
+  width: 99%;
+  height: 100%;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  font-size: variables.$font-size-small;
+}
+
+.editor .wrap {
+  height: 87% !important;
+}
+
+.editor .wrap {
+  margin-bottom: 0px;
+}
+
+.wrap:after {
+  clear: both;
+}
+
+.source {
+  display: table-cell;
+  vertical-align: top;
+  padding-right: 26px !important;
+}
+
+.target {
+  display: table-cell;
+  height: inherit;
+  float: right !important;
+  vertical-align: top;
+  padding-left: 26px !important;
+}
+.status-container .status {
+  width: 8px;
+  display: block;
+  position: absolute;
+  right: 0;
+  height: 100%;
+  background: colors.$grey300;
+  top: 0;
+  border-bottom: 0;
+  z-index: 0;
+  &.no-hover {
+    cursor: default;
+  }
+}
+
+section.readonly .status-container a.status:hover {
+  cursor: default !important;
+}
+
+.status img {
+  display: none;
+}
+
+.editor .status img {
+  display: block;
+  margin: -6px 0px 0 0 !important;
+  position: absolute;
+  top: 0;
+  right: 0px;
+}
+
+section.status-translated .status {
+  background-color: colors.$blue500 !important;
+}
+
+section.status-approved .status {
+  background-color: colors.$green800 !important;
+}
+
+section.status-approved2 .status {
+  background-color: colors.$purple500 !important;
+}
+
+/* section.status-draft .status{background-color:#dddedf !important;} */
+section.status-rejected .status {
+  background-color: colors.$orange600 !important;
+}
+
+section.editor.status-rejected .status {
+  background-color: colors.$orange600 !important;
+}
+
+section.modified .status {
+  background-image: url(/public/img/stripes.png) !important;
+  background-repeat: repeat !important;
+  background-size: 140% !important;
+}
+
+section.modified.editor .status {
+  background-size: 200% !important;
+}
+section.opened.editor .status {
+  height: 100%;
+  position: absolute;
+}
+@media only screen and (-webkit-min-device-pixel-ratio: 2),
+  only screen and (min--moz-device-pixel-ratio: 2),
+  only screen and (-o-min-device-pixel-ratio: 2/1),
+  only screen and (min-device-pixel-ratio: 2),
+  only screen and (min-resolution: 192dpi),
+  only screen and (min-resolution: 2dppx) {
+  .outersource .copy {
+    top: 7px;
+    background: url(/public/img/outercopy@2x.png) center 1px no-repeat;
+    background-size: 12px 11px;
+  }
+
+  .outersource .copy:hover {
+    background: url(/public/img/outercopy@2x.png) 4px -69px no-repeat;
+    background-size: 42px;
+  }
+}
+@-moz-document url-prefix() {
+  .wrap {
+    padding-bottom: 15px !important;
+  }
+  .editor .wrap {
+    padding-bottom: 31px !important;
+  }
+  .editor .status {
+    padding-bottom: 8px !important;
+  }
+}
+@media screen and (min-width: 1600px) {
+  .text .source.item,
+  .text .target.item,
+  .splitContainer {
+    width: 48% !important;
+  }
+}
+@media screen and (max-width: 1280px) {
+  .text .source.item,
+  .text .target.item {
+    width: 45% !important;
+  }
+
+  .target.item {
+    margin-left: 10px !important;
+  }
+}
+@media screen and (max-width: 1260px) {
+  .text .item {
+    width: 44.5% !important;
+  }
+}
+@media screen and (max-width: 1180px) {
+  .text .target {
+    padding-left: 45px;
+  }
+
+  .text .source.item,
+  .text .target.item,
+  .splitContainer {
+    width: 44% !important;
+  }
+}

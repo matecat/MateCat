@@ -1,0 +1,67 @@
+@use '../../tokens/colors';
+@use 'commons/variables';
+
+.error a {
+  display: block !important;
+}
+
+.error {
+  font-size: variables.$font-size-small;
+}
+.warnings,
+.text .alternatives {
+  clear: left;
+  color: colors.$red400;
+  float: left;
+  margin-left: -10px;
+  font-size: variables.$font-size-xsmall;
+  max-width: 50%;
+  margin-top: 12px;
+  display: none;
+  margin-bottom: 0;
+}
+
+.warnings,
+section.opened .warnings:empty {
+  display: none;
+}
+
+section.opened .warnings {
+  display: block;
+}
+
+.warnings,
+section.opened .warnings:empty {
+  display: none;
+}
+
+section.opened .warnings {
+  display: block;
+}
+
+.warnings:last-child {
+  margin-bottom: 25px;
+}
+
+.text .alternatives {
+  max-width: 300px;
+}
+
+.alternatives a {
+  color: colors.$black !important;
+}
+section .text .warning {
+  background: colors.$orange200;
+  padding: 2px 7px;
+  text-align: center;
+  border: 1px solid colors.$grey1300;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  -moz-box-shadow: 0 1px 3px colors.$grey300;
+  -webkit-box-shadow: 0 1px 3px colors.$grey300;
+  display: block;
+  position: absolute;
+  bottom: -30px;
+  font-size: 12px;
+  font-weight: bold;
+}
