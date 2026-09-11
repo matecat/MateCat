@@ -644,19 +644,12 @@ body section:not(.editor).ice-locked {
   background: colors.$grey150 !important;
 }
 
-body.archived section {
-  z-index: 9998;
-  background: transparent;
-}
-
-section.readonly,
-body.archived section {
+section.readonly {
   background: colors.$grey50;
   color: colors.$grey400;
   cursor: not-allowed !important;
 }
-section.readonly .status-container a.status:hover,
-body.archived section .status-container a.status:hover {
+section.readonly .status-container a.status:hover {
   cursor: default !important;
 }
 
@@ -966,8 +959,7 @@ body.archived section .status-container a.status:hover {
   }
 }
 
-section.readonly .status-container a.status:hover,
-body.archived section .status-container a.status:hover {
+section.readonly .status-container a.status:hover {
   cursor: default !important;
 }
 
@@ -1170,34 +1162,12 @@ section.opened.editor .status {
 }
 
 @media screen and (max-width: 1180px) {
-  .second {
-    width: 30%;
-  }
-
   .number {
     left: -40px;
   }
 
-  .main {
-    width: 90.3%;
-    margin-left: 3%;
-  }
-
   .number {
     left: -52px;
-  }
-
-  .editarea,
-  .source {
-    /* word-break: break-all */
-  }
-
-  .meter {
-    width: 10%;
-  }
-
-  .review .wrapper {
-    width: 100%;
   }
 
   .text .target {
@@ -1257,16 +1227,6 @@ section.rtl-target .targetarea,
 }
 section.ice-locked.rtl-target .target {
   text-align: right;
-}
-
-body.archived .buttons,
-body.archived .footer {
-  display: none !important;
-}
-
-p.percent {
-  margin-left: -10px;
-  margin-right: 10px;
 }
 
 .editToolbar {
