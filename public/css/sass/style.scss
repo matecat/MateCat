@@ -570,7 +570,21 @@ ul.suggestion-item.graysmall:last-child {
   background: colors.$white;
 }
 
+.loader {
+  width: 20px;
+  height: 20px;
+  background: url(/public/img/loading.gif) 0 0 no-repeat !important;
+  position: absolute;
+  bottom: 11px;
+  display: none;
+  left: 50%;
+  background-size: 20px 20px !important;
+}
+
 @-moz-document url-prefix() {
+  .loader {
+    bottom: -40px;
+  }
   .wrap {
     padding-bottom: 15px !important;
   }
@@ -1112,14 +1126,6 @@ section.opened.editor .status {
   display: none;
 }
 
-.hidden {
-  visibility: hidden !important;
-}
-
-.source .original {
-  display: none;
-}
-
 .bold {
   font-weight: 700;
 }
@@ -1442,29 +1448,10 @@ section.editor .toolbar {
   margin-left: 5px;
 }
 
-.fileupload {
-  margin-right: 10px;
-  font-weight: bold;
-}
-
 .addtmx-tr:active {
   -moz-box-shadow: inset 0 0 1px 1px colors.$grey400;
   -webkit-box-shadow: inset 0 0 1px 1px colors.$grey400;
   box-shadow: inset 0 0 1px 1px colors.$grey400;
-}
-
-.alternatives .deleted,
-.suggestion_source .deleted,
-.suggestion_source del {
-  background: colors.$red100;
-  text-decoration: line-through;
-}
-
-.alternatives .added,
-.suggestion_source .added,
-.suggestion_source ins {
-  background: colors.$green300;
-  text-decoration: none;
 }
 
 .splitContainer {
