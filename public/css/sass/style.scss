@@ -40,8 +40,7 @@ header .wrapper {
 }
 
 .text .source.item,
-.text .target.item,
-.white li {
+.text .target.item {
   width: 45%;
   table-layout: fixed;
   float: left;
@@ -107,11 +106,6 @@ section.opened .warnings {
 
 .alternatives a {
   color: colors.$black !important;
-}
-
-.warnings .tip {
-  display: block;
-  margin-left: 24px;
 }
 
 .logo {
@@ -246,11 +240,6 @@ section:hover .sid {
 
 .editor .sid {
   height: 100%;
-}
-
-.sid .actions.disabled {
-  background: none;
-  border: none;
 }
 
 .outersource .actions {
@@ -590,8 +579,7 @@ section.opened {
   }
 }
 
-.editarea,
-.textarea-container .area {
+.editarea {
   width: 100%;
   min-height: 54px;
   resize: none;
@@ -757,22 +745,6 @@ section.readonly .status-container a.status:hover {
   &:hover {
     text-decoration: none;
   }
-}
-
-.graysmall li.details {
-  width: 100%;
-  padding: 0;
-  margin: 0;
-}
-
-.graysmall div.comment {
-  float: left;
-  margin-left: 30px;
-  width: 60%;
-  padding: 3px 0;
-  border-top: 1px dotted colors.$grey300;
-  font-style: italic;
-  overflow: hidden;
 }
 
 .graysmall .b {
@@ -1073,7 +1045,6 @@ section.opened.editor .status {
 @media screen and (min-width: 1600px) {
   .text .source.item,
   .text .target.item,
-  .white li,
   .splitContainer {
     width: 48% !important;
   }
@@ -1100,8 +1071,7 @@ section.opened.editor .status {
 
 @media screen and (max-width: 1280px) {
   .text .source.item,
-  .text .target.item,
-  .white li {
+  .text .target.item {
     width: 45% !important;
   }
 
@@ -1115,8 +1085,7 @@ section.opened.editor .status {
 }
 
 @media screen and (max-width: 1260px) {
-  .text .item,
-  .white li {
+  .text .item {
     width: 44.5% !important;
   }
 }
@@ -1154,7 +1123,6 @@ section.opened.editor .status {
 
   .text .source.item,
   .text .target.item,
-  .white li,
   .splitContainer {
     width: 44% !important;
   }
@@ -1208,10 +1176,6 @@ section.ice-locked.rtl-target .target {
   display: flex;
   gap: 8px;
   visibility: hidden;
-}
-
-.editToolbar.visible {
-  visibility: visible;
 }
 
 section .toolbar {
@@ -1298,10 +1262,6 @@ section.editor .toolbar {
 .splitBar .buttons {
   display: flex;
   gap: 10px;
-}
-
-.splitBar .btn-ok:hover {
-  background: colors.$blue200;
 }
 
 /**
