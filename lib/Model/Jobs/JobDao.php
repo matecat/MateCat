@@ -260,6 +260,15 @@ class JobDao extends AbstractDao
             'last_update' => date("Y-m-d H:i:s"),
         ]);
 
+        // Job metadata is keyed by (id_job, password), so the rows have to follow the rotation or
+        // the chunk loses every setting stored on it — the MT settings included. Same transaction as
+        // the jobs row above, so the two cannot disagree.
+        (new MetadataDao($this->database))->updateJobPassword(
+            (int)$jStruct->id,
+            (string)$jStruct->password,
+            $new_password
+        );
+
         $jStruct->password = $new_password;
 
         // Nothing is evicted here on purpose. Every caller rotates inside a transaction, and while

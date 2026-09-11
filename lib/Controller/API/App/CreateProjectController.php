@@ -371,7 +371,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             'disable_tms_engine_flag' => $disable_tms_engine_flag,
             'private_tm_key' => $private_tm_key,
             'only_private' => $only_private,
-            'mt_quality_value_in_editor' => (!empty($mt_quality_value_in_editor)) ? $mt_quality_value_in_editor : 85,
+            'mt_quality_value_in_editor' => (!empty($mt_quality_value_in_editor)) ? $mt_quality_value_in_editor : JobsMetadataMarshaller::DEFAULT_MT_QUALITY_VALUE,
             'due_date' => $due_date,
             'file_names_list' => $arFiles,
             'public_tm_penalty' => $public_tm_penalty,

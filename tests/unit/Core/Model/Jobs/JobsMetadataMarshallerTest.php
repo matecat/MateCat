@@ -7,6 +7,7 @@ use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataStruct;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Constants\EngineConstants;
 
 /**
  * Tests for {@see JobsMetadataMarshaller} enum.
@@ -23,9 +24,10 @@ class JobsMetadataMarshallerTest extends AbstractTest
     // =========================================================================
 
     #[Test]
-    public function enumHasExactlySevenCases(): void
+    public function enumHasOneCasePerKnownKey(): void
     {
-        $this->assertCount(7, JobsMetadataMarshaller::cases());
+        // Seven job-only keys plus the eleven MT settings that moved off the project.
+        $this->assertCount(18, JobsMetadataMarshaller::cases());
     }
 
     #[Test]
@@ -44,7 +46,189 @@ class JobsMetadataMarshallerTest extends AbstractTest
             'PUBLIC_TM_PENALTY'            => [JobsMetadataMarshaller::PUBLIC_TM_PENALTY, 'public_tm_penalty'],
             'SUBFILTERING_HANDLERS'        => [JobsMetadataMarshaller::SUBFILTERING_HANDLERS, 'subfiltering_handlers'],
             'TM_PRIORITIZATION'            => [JobsMetadataMarshaller::TM_PRIORITIZATION, 'tm_prioritization'],
+            'MT_QUALITY_VALUE_IN_EDITOR'   => [JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR, 'mt_quality_value_in_editor'],
+            'DEEPL_FORMALITY'              => [JobsMetadataMarshaller::DEEPL_FORMALITY, 'deepl_formality'],
+            'DEEPL_ID_GLOSSARY'            => [JobsMetadataMarshaller::DEEPL_ID_GLOSSARY, 'deepl_id_glossary'],
+            'DEEPL_ENGINE_TYPE'            => [JobsMetadataMarshaller::DEEPL_ENGINE_TYPE, 'deepl_engine_type'],
+            'LARA_STYLE'                   => [JobsMetadataMarshaller::LARA_STYLE, 'lara_style'],
+            'LARA_STYLE_GUIDELINE_ID'      => [JobsMetadataMarshaller::LARA_STYLE_GUIDELINE_ID, 'lara_style_guideline_id'],
+            'LARA_GLOSSARIES'              => [JobsMetadataMarshaller::LARA_GLOSSARIES, 'lara_glossaries'],
+            'MMT_GLOSSARIES'               => [JobsMetadataMarshaller::MMT_GLOSSARIES, 'mmt_glossaries'],
+            'MMT_IGNORE_GLOSSARY_CASE'     => [JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE, 'mmt_ignore_glossary_case'],
+            'INTENTO_ROUTING'              => [JobsMetadataMarshaller::INTENTO_ROUTING, 'intento_routing'],
+            'INTENTO_PROVIDER'             => [JobsMetadataMarshaller::INTENTO_PROVIDER, 'intento_provider'],
         ];
+    }
+
+    // =========================================================================
+    // Key lists
+    // =========================================================================
+
+    #[Test]
+    public function mtSettingsAreAllDeclaredCases(): void
+    {
+        $cases = array_map(static fn(JobsMetadataMarshaller $case): string => $case->value, JobsMetadataMarshaller::cases());
+
+        foreach (JobsMetadataMarshaller::mtSettings() as $key) {
+            $this->assertContains($key, $cases, "mtSettings() lists '$key', which is not an enum case");
+        }
+    }
+
+    #[Test]
+    public function mtSettingsMatchTheEngineConfigurationParametersThatCanChangeAfterCreation(): void
+    {
+        $engineKeys = [];
+        foreach (EngineConstants::getAvailableEnginesList() as $engineName) {
+            $engineKeys = array_merge($engineKeys, $engineName::getConfigurationParameters());
+        }
+
+        // Every engine parameter is job-scoped except these two, which the analysis was priced on
+        // (enable_mt_analysis) or which is only ever consumed once at creation time
+        // (mmt_activate_context_analyzer, read by MMT::syncMemories() from a project row).
+        $expected = array_values(array_diff(
+            array_unique($engineKeys),
+            ['enable_mt_analysis', 'mmt_activate_context_analyzer']
+        ));
+
+        sort($expected);
+
+        $actual = array_values(array_diff(
+            JobsMetadataMarshaller::mtSettings(),
+            // The MT application threshold is not an engine parameter: it is read from the project
+            // metadata blob, so no engine declares it.
+            [JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value]
+        ));
+        sort($actual);
+
+        $this->assertSame($expected, $actual);
+    }
+
+    #[Test]
+    public function propagatedOnSplitCarriesEveryMtSetting(): void
+    {
+        $propagated = JobsMetadataMarshaller::propagatedOnSplit();
+
+        foreach (JobsMetadataMarshaller::mtSettings() as $key) {
+            // A key missing here silently disappears from every chunk a split creates.
+            $this->assertContains($key, $propagated);
+        }
+    }
+
+    #[Test]
+    public function propagatedOnSplitKeepsTheKeysItCarriedBeforeTheMtSettingsMoved(): void
+    {
+        $propagated = JobsMetadataMarshaller::propagatedOnSplit();
+
+        $this->assertContains(JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value, $propagated);
+        $this->assertContains(JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value, $propagated);
+        $this->assertContains(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, $propagated);
+    }
+
+    /**
+     * The guard against the class of bug rather than one instance of it. dialect_strict,
+     * mandatory_issues, public_tm_penalty and tm_prioritization were all written at creation and
+     * none was propagated, so a split dropped them and the chunks silently fell back to the code
+     * defaults. Every key the enum declares is written by some path, so every key belongs here —
+     * asserting the whole set means the next key added cannot repeat it.
+     */
+    #[Test]
+    public function propagatedOnSplitCarriesEveryDeclaredKey(): void
+    {
+        $propagated = JobsMetadataMarshaller::propagatedOnSplit();
+
+        foreach (JobsMetadataMarshaller::cases() as $case) {
+            $this->assertContains(
+                $case->value,
+                $propagated,
+                "'{$case->value}' is stored against a job but would not survive a split"
+            );
+        }
+    }
+
+    #[Test]
+    public function propagatedOnSplitHasNoDuplicates(): void
+    {
+        // Both call sites iterate the list and write/delete one row per entry, so a duplicate would
+        // mean redundant statements.
+        $propagated = JobsMetadataMarshaller::propagatedOnSplit();
+
+        $this->assertSame(array_values(array_unique($propagated)), $propagated);
+    }
+
+    // =========================================================================
+    // unMarshall — MT settings
+    // =========================================================================
+
+    #[Test]
+    #[DataProvider('integerCastProvider')]
+    public function unMarshallMtQualityValueInEditorCastsToInt(mixed $rawValue, int $expected): void
+    {
+        $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('mt_quality_value_in_editor', $rawValue));
+        $this->assertSame($expected, $result);
+    }
+
+    #[Test]
+    #[DataProvider('booleanTruthyProvider')]
+    public function unMarshallMmtIgnoreGlossaryCaseTruthyReturnsTrue(mixed $rawValue): void
+    {
+        $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('mmt_ignore_glossary_case', $rawValue));
+        $this->assertTrue($result);
+    }
+
+    #[Test]
+    #[DataProvider('booleanFalsyProvider')]
+    public function unMarshallMmtIgnoreGlossaryCaseFalsyReturnsFalse(mixed $rawValue): void
+    {
+        $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('mmt_ignore_glossary_case', $rawValue));
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    #[DataProvider('stringSettingProvider')]
+    public function unMarshallStringSettingsAreLeftAsStrings(string $key, mixed $rawValue, string $expected): void
+    {
+        $result = JobsMetadataMarshaller::unMarshall($this->makeStruct($key, $rawValue));
+        $this->assertSame($expected, $result);
+    }
+
+    public static function stringSettingProvider(): array
+    {
+        return [
+            'deepl_formality'         => ['deepl_formality', 'prefer_more', 'prefer_more'],
+            'deepl_engine_type'       => ['deepl_engine_type', 'latency_optimized', 'latency_optimized'],
+            'deepl_id_glossary'       => ['deepl_id_glossary', 'abc-123', 'abc-123'],
+            'lara_style'              => ['lara_style', 'creative', 'creative'],
+            'lara_style_guideline_id' => ['lara_style_guideline_id', 'guideline-7', 'guideline-7'],
+            'intento_provider'        => ['intento_provider', 'ai.text.translate.google', 'ai.text.translate.google'],
+            'intento_routing'         => ['intento_routing', 'best_quality', 'best_quality'],
+            // The engine json_decodes this one itself, so the raw JSON has to survive un-marshalling.
+            'mmt_glossaries'          => ['mmt_glossaries', '[12,34]', '[12,34]'],
+            // A numeric-looking style id must not become an int: the engines send it as a string.
+            'numeric guideline id'    => ['lara_style_guideline_id', 42, '42'],
+        ];
+    }
+
+    #[Test]
+    public function unMarshallLaraGlossariesDecodesJsonArray(): void
+    {
+        $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('lara_glossaries', '["one","two"]'));
+        $this->assertSame(['one', 'two'], $result);
+    }
+
+    #[Test]
+    public function unMarshallLaraGlossariesDecodesHtmlEntityEncodedJson(): void
+    {
+        // Old projects stored the JSON HTML-entity encoded; the project-side marshaller decodes it,
+        // so the job side has to agree or the same stored value would resolve to two different types.
+        $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('lara_glossaries', '[&quot;one&quot;]'));
+        $this->assertSame(['one'], $result);
+    }
+
+    #[Test]
+    public function unMarshallLaraGlossariesReturnsNullForUndecodableValue(): void
+    {
+        $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('lara_glossaries', 'not json'));
+        $this->assertNull($result);
     }
 
     #[Test]

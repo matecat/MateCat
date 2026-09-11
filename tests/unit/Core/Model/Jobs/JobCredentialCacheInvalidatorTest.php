@@ -5,6 +5,7 @@ namespace Matecat\Core\Model\Jobs;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Jobs\JobCredentialCacheInvalidator;
 use Model\Jobs\JobDao;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
@@ -115,7 +116,11 @@ class JobCredentialCacheInvalidatorTest extends AbstractTest
                 $this->projectCacheCalls[] = [$id, $password];
             });
 
-        return new JobCredentialCacheInvalidator($jobDao, $chunkReviewDao, $projectDao);
+        // The metadata eviction has its own real-SQL case; here it only has to be a live double so
+        // the credential sweep can run.
+        $jobMetadataDao = $this->createStub(JobsMetadataDao::class);
+
+        return new JobCredentialCacheInvalidator($jobDao, $chunkReviewDao, $projectDao, $jobMetadataDao);
     }
 
     private function makeChunk(string $jobPassword): JobStruct

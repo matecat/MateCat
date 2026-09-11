@@ -81,10 +81,38 @@ readonly class ProjectMetadataService
             $extraKeys = array_merge($extraKeys, $engineName::getConfigurationParameters());
         }
 
-        // Copy any engine-specific config values (e.g., deepl_formality, mmt_glossaries)
-        // from the project structure into the options array
+        /**
+         * Copy the engine-specific config values from the project structure into the options array.
+         *
+         * The MT tuning settings — DeepL formality, Lara style, the glossaries, the MT application
+         * threshold — are written here as the project's creation-time base value, and the owner's
+         * later edits are written per job by {@see \Controller\API\App\JobMetadataController}.
+         * Reads take the job row when one exists and this value otherwise
+         * ({@see \Model\Jobs\JobSettingsResolver}), so the two scopes are copy-on-write rather
+         * than two copies of one truth: nothing updates the project row after creation, so it
+         * cannot go stale, and it is what every job that was never customised resolves to.
+         *
+         * Writing it is also what makes the job scope revertible. Without it, a project created
+         * while the job scope is live would hold these values nowhere else, and there is no
+         * migration in either direction — production holds billions of project_metadata rows.
+         */
+        $jobScopedKeys = array_flip(JobsMetadataMarshaller::mtSettings());
+
         foreach ($extraKeys as $extraKey) {
             $engineValue = $projectStructure->$extraKey;
+
+            if (isset($jobScopedKeys[$extraKey])) {
+                // 0 and false are answers the owner chose for these keys — a threshold of 0, or
+                // mmt_ignore_glossary_case turned off — so !empty() would silently drop them. The
+                // project-wide params below are the opposite case: there, falsy *is* the default.
+                if (!is_scalar($engineValue) || $engineValue === '') {
+                    continue;
+                }
+
+                $options[$extraKey] = is_bool($engineValue) ? (string)(int)$engineValue : (string)$engineValue;
+                continue;
+            }
+
             if (!empty($engineValue)) {
                 $options[$extraKey] = $engineValue;
             }

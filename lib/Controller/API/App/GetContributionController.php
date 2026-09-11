@@ -15,6 +15,7 @@ use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\Event\Filter\RewriteContributionContextsEvent;
 use Model\Files\FilesPartsDao;
+use Model\Jobs\JobSettingsResolver;
 use Model\Jobs\JobStruct;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
@@ -96,13 +97,6 @@ class GetContributionController extends KleinController
         $reasoning = $request['reasoning'];
         $lara_style = $request['lara_style'];
 
-        // try to get from metadata if Lara style is empty of fallback to the default
-        if (empty($lara_style)) {
-            $lara_style = (new ProjectMetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$projectStruct->id, 'lara_style') ?? Lara::DEFAULT_STYLE;
-        } else {
-            $lara_style = $request['lara_style'];
-        }
-
         if (empty($num_results)) {
             $num_results = AppConfig::$DEFAULT_NUM_RESULTS_FROM_TM;
         }
@@ -111,6 +105,29 @@ class GetContributionController extends KleinController
         $jobId = $jobStruct->id ?? throw new TypeError('Job ID must not be null');
         $jobPassword = $jobStruct->password ?? throw new TypeError('Job password must not be null');
         $subfiltering_handlers = (new MetadataDao($this->getDatabase()))->getSubfilteringCustomHandlers($jobId, $jobPassword);
+
+        /**
+         * MT settings are overridable per job so the project owner can change them after the
+         * project has been created. A job row exists only where one was overridden; every other job
+         * answers from the project's creation-time value — @see JobSettingsResolver. Both keys are
+         * fetched in one pass.
+         */
+        $mtSettings = (new JobSettingsResolver($this->getDatabase()))->resolveMany(
+            $jobId,
+            $jobPassword,
+            (int)$projectStruct->id,
+            [
+                JobsMetadataMarshaller::LARA_STYLE->value,
+                JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value,
+            ],
+            3600
+        );
+
+        // A style explicitly asked for in the request wins over the stored one: it is what the
+        // editor is requesting for this single contribution.
+        if (empty($lara_style)) {
+            $lara_style = $mtSettings[JobsMetadataMarshaller::LARA_STYLE->value] ?? Lara::DEFAULT_STYLE;
+        }
 
         $context_list_before = [];
         $context_list_after = [];
@@ -184,7 +201,8 @@ class GetContributionController extends KleinController
         $contributionRequest->resultNum = $num_results;
         $contributionRequest->crossLangTargets = array_values($this->getCrossLanguages($cross_language));
         $projectMetadataDao = new ProjectMetadataDao($this->getDatabase());
-        $contributionRequest->mt_quality_value_in_editor = (int)($projectMetadataDao->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) ?? 86);
+        $contributionRequest->mt_quality_value_in_editor = (int)($mtSettings[JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value]
+            ?? JobsMetadataMarshaller::DEFAULT_MT_QUALITY_VALUE);
         $contributionRequest->mt_qe_workflow_enabled = (bool)$projectMetadataDao->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value);
 
         $mtQeParams = $projectMetadataDao->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value);
