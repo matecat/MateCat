@@ -283,6 +283,34 @@ header {
   height: 40px;
 }
 
+.logo {
+  float: left;
+  border: 0;
+  background: url(/public/img/logo_matecat_big_white.svg) 0px 0px no-repeat;
+  width: 190px;
+  height: 40px;
+  position: relative;
+}
+
+#menu-site li {
+  display: inline-block;
+  /*padding-top: 8px;*/
+}
+
+#menu-site li a {
+  color: colors.$white;
+  text-decoration: none;
+  -webkit-font-smoothing: antialiased;
+  line-height: 22px;
+  padding: 10px 15px;
+  font-weight: 200;
+  font-size: variables.$font-size-base;
+}
+
+#menu-site li a:hover {
+  color: colors.$blue500;
+}
+
 #menu-site {
   height: 40px;
   display: flex;

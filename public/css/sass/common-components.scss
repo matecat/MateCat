@@ -4,6 +4,8 @@
 @use 'components/common/UserMenu';
 @use 'components/common/OnBoardingTooltip';
 @use 'components/common/WrapperLoader';
+@use 'tokens/colors';
+@use 'commons/variables';
 
 .ui-user-dropdown-image {
   display: inline-block;
@@ -103,5 +105,41 @@
     justify-content: flex-end;
     gap: 16px;
   }
+}
+
+.language-dropdown-item-container {
+  display: grid;
+  grid-template-columns: 70px auto;
+  gap: 10px;
+  align-items: center;
+  overflow: hidden;
+
+  .code-badge {
+    min-width: 60px;
+    font-weight: normal;
+
+    > span {
+      display: block;
+      text-align: center;
+      background-color: colors.$grey400;
+      border-radius: 4px;
+      padding: 2px 4px;
+      color: colors.$white;
+      font-size: variables.$font-size-xsmall;
+      white-space: nowrap;
+    }
+  }
+}
+
+body svg {
+  padding: 0 !important;
+}
+
+.pull-left {
+  float: left !important;
+}
+
+.pull-right {
+  float: right !important;
 }
 

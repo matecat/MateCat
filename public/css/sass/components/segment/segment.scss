@@ -498,3 +498,19 @@ section.ice-locked.rtl-target .target {
     margin-left: 6%;
   }
 }
+
+section mark {
+  background: transparent;
+}
+
+section .graysmall mark {
+  background: yellow !important;
+}
+
+section mark.searchMarker {
+  background: yellow;
+}
+
+section mark.searchMarker.currSearchItem {
+  background: colors.$orange200;
+}

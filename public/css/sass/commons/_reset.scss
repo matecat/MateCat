@@ -1,3 +1,6 @@
+@use '../tokens/colors';
+@use 'commons/variables';
+
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -34,4 +37,37 @@ ul {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+html, body {
+  height: 100%;
+  font-size: variables.$font-size-small;
+}
+
+body {
+  min-width: 1024px;
+  position: relative;
+  text-align: center;
+  margin: 0;
+  font-family: calibri, Arial, Helvetica, sans-serif;
+  -webkit-transition: all 100ms ease-in;
+  -moz-transition: all 100ms ease-in;
+  font-size: variables.$font-size-small;
+  line-height: 1.4285em;
+  background: colors.$white;
+  color: colors.$black;
+  &.no-min-width {
+    min-width: auto;
+  }
+  header {
+    min-width: auto;
+  }
+}
+
+a {
+  color: colors.$blue700;
+  &:hover,
+  &:active {
+    color: colors.$blue400;
+  }
 }
