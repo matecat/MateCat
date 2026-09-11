@@ -39,9 +39,6 @@
   }
 
   .translation-options {
-    > :not(:last-child) {
-      margin-right: 8px;
-    }
     &.user-not-logged {
       opacity: 0.4;
       h2,
@@ -53,6 +50,11 @@
         cursor: not-allowed;
         background-color: colors.$grey75;
       }
+    }
+    .swap-langs {
+      color: colors.$grey500;
+      align-self: flex-end;
+
     }
   }
 

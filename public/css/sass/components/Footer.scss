@@ -61,7 +61,8 @@
           color: colors.$white;
           background-color: colors.$grey500;
           padding: 6px 24px;
-          border-radius: 2px;
+          border-radius: 8px;
+          cursor: pointer;
           &:hover {
             background-color: colors.$grey700;
           }

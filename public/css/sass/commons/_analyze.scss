@@ -362,7 +362,7 @@ body.analyze {
       align-self: stretch;
       border-radius: variables.$border-radius-big;
       h5 {
-        font-size: 16px;
+        font-size: variables.$font-size-base;
       }
       .job {
         display: flex;

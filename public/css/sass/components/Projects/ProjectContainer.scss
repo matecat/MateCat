@@ -76,7 +76,7 @@
   height: 40px;
   > * {
     color: colors.$grey700 !important;
-    font-size: 12px !important;
+    font-size: variables.$font-size-xsmall !important;
     font-style: italic !important;
   }
 

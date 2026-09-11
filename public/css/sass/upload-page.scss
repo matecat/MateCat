@@ -369,7 +369,7 @@ body {
 }
 
 .wrapper-claim h1 {
-  font-size: 40px;
+  font-size: 48px;
   padding: 8px 0 6px;
   margin: 0px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
@@ -643,25 +643,6 @@ ul.test li {
   float: left;
   width: 200px;
   background: yellow;
-}
-
-#swaplang {
-  float: left;
-  display: block;
-  text-decoration: none;
-  height: 18px;
-  margin: 52px 14px 0 5px;
-  font-size: 20px;
-  color: colors.$grey200;
-  cursor: pointer;
-}
-
-#swaplang span {
-  display: none;
-}
-
-#swaplang:hover {
-  color: colors.$grey200;
 }
 
 .name {

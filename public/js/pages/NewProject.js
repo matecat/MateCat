@@ -39,14 +39,14 @@ import ApplicationActions from '../actions/ApplicationActions'
 import useDeviceCompatibility from '../hooks/useDeviceCompatibility'
 import useProjectTemplates, {SCHEMA_KEYS} from '../hooks/useProjectTemplates'
 import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
-import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
+import {getMMTKeys} from '../api/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
 import {handleCreationStatus} from '../utils/newProjectUtils'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
 import UserActions from '../actions/UserActions'
-import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries/getDeepLGlosssaries'
+import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries'
 import SocketListener from '../sse/SocketListener'
 import {
   Button,
@@ -61,12 +61,13 @@ import {
 import {UploadFile} from '../components/createProject/UploadFile'
 import {flushSync} from 'react-dom'
 import DriveIcon from '../../img/icons/DriveIcon'
+import Switch from '../../img/icons/Switch'
 import useTemplates from '../hooks/useTemplates'
 import {QF_SCHEMA_KEYS} from '../components/settingsPanel/Contents/QualityFrameworkTab'
 import {ANALYSIS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/AnalysisTab'
 import {FILTERS_PARAMS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/FiltersParams/FiltersParams'
 import {XLIFF_SETTINGS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/XliffSettings/XliffSettings'
-import {DEEPL_GLOSSARY_ROW_NONE} from '../components/settingsPanel/Contents/MachineTranslationTab/DeepLGlossary/DeepLGlossary'
+import {DEEPL_GLOSSARY_ROW_NONE} from '../components/settingsPanel/Contents/MachineTranslationTab/DeepLGlossary'
 
 const SELECT_HEIGHT = 324
 
@@ -1012,14 +1013,17 @@ const NewProject = () => {
             <div className="translate-box source">
               <SourceLanguageSelect />
             </div>
-            <a
-              id="swaplang"
-              title="Swap languages"
+            <Button
+              type={BUTTON_TYPE.ICON}
               {...(isUserLogged &&
                 !isLoadingTemplates && {onClick: swapLanguages})}
+              title="Swap languages"
+              mode={BUTTON_MODE.GHOST}
+              size={BUTTON_SIZE.ICON_STANDARD}
+              className="swap-langs"
             >
-              <span>Swap languages</span>
-            </a>
+              <Switch size={24} />
+            </Button>
             {/*Target Language*/}
             <div className="translate-box target">
               <TargetLanguagesSelect />

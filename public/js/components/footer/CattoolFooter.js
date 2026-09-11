@@ -103,7 +103,7 @@ export const CattoolFooter = ({
                 mode={BUTTON_MODE.GHOST}
                 onClick={onClickOpenJobAnalysis}
               >
-                <IconRedirect />
+                <IconRedirect size={14}/>
               </Button>
             </Tooltip>
           )}
