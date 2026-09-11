@@ -1,4 +1,5 @@
 @use "../../tokens/colors";
+@use 'commons/variables';
 
 section .issues-container {
   display: none;
@@ -188,7 +189,7 @@ section.readonly .issues-container {
 .editor.loaded .issues-container .border-box-issue .issues-list .issue-item .comments-view .re-add-comment,
 .editor.loaded .issues-container .border-box-issue .issues-list .issue-item .comments-view .re-comment-list {
   padding: 5px 10px;
-  font-size: 18px;
+  font-size: variables.$font-size-base;
   background: colors.$grey75;
   color: colors.$grey600;
   box-shadow: 0 0 0 colors.$grey200, 0 0 2px rgba(0, 0, 0, 0.12),
@@ -202,7 +203,7 @@ section.readonly .issues-container {
 }
 
 .editor.loaded .issues-container .border-box-issue .issues-list .issue-item .comments-view .re-comment-list {
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   background: colors.$white;
 }
 

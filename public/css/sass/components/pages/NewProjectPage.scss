@@ -126,7 +126,7 @@
     height: 37px;
     padding: 4px;
     padding-left: 10px;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     margin: 0 0 5px 0;
     border-radius: 2px;
     min-height: initial;
@@ -139,13 +139,13 @@
   input.search {
     padding: inherit !important;
     font-family: system-ui, Calibri, Arial, Helvetica, sans-serif;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
   }
 }
 .project-name {
   .upload-input {
     padding: 3px 5px 3px 9px;
-    font-size: 16px !important;
+    font-size: variables.$font-size-small !important;
     border-radius: variables.$border-radius-default;
     border: 1px solid rgba(34, 36, 38, 0.15);
     height: 40px;
@@ -194,7 +194,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
   }
   .divider {
     margin: 0 !important;
@@ -206,7 +206,7 @@
     margin: 0 !important;
     line-height: 28px !important;
     max-width: 85% !important;
-    font-size: 16px !important;
+    font-size: variables.$font-size-small !important;
   }
   .item {
     &.active {

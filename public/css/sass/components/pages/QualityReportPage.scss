@@ -22,7 +22,7 @@ body {
   font-family: Calibri, Arial, Helvetica, sans-serif;
   text-align: left;
   background: colors.$grey50;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   min-width: 1024px;
   overflow-x: auto;
   overflow-y: hidden;
@@ -119,7 +119,7 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
 }
 
 header .nav-bar .header-project-container-info .header-project-info .header-team-assignee-icon .header-icon-dropdown i {
-  font-size: 20px;
+  font-size: variables.$font-size-big;
   position: relative;
   top: -2px;
 }
@@ -164,7 +164,7 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-info {
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-production-quality .qr-production-container {
@@ -185,7 +185,7 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-production-quality .qr-production .job-id {
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   min-width: 90px;
   color: colors.$grey700;
   line-height: 24px;
@@ -284,7 +284,7 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-production-quality .qr-effort.qr-score .qr-pass-score {
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   font-weight: 700;
   line-height: 16px;
 }
@@ -320,7 +320,7 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
   z-index: 1;
   border-radius: variables.$border-radius-default;
   overflow: hidden;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-production-quality .qr-quality .qr-head {
@@ -364,7 +364,7 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-production-quality .qr-quality .qr-body-list.severity_weight-line .qr-element {
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   height: 100%;
   line-height: 32px;
 }
@@ -432,7 +432,7 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-header .filter-dropdown .dropdown {
-  font-size: 20px !important;
+  font-size: variables.$font-size-big !important;
   max-width: 190px;
 }
 
@@ -447,7 +447,7 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
   border-radius: variables.$border-radius-default;
   margin-bottom: 20px;
   border: 1px solid colors.$grey150;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-kudos .qr-kudos-value {
@@ -504,7 +504,7 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .document-name {
   display: flex;
   align-items: center;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   margin-top: 8px;
   line-height: 16px;
   gap: 8px;
@@ -540,7 +540,7 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
   align-items: center;
   height: 48px;
   padding: 0 24px;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-head .segment-id {
@@ -571,7 +571,7 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .segment-status-container .qr-info {
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   text-transform: capitalize;
 }
 
@@ -580,7 +580,7 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
   background: colors.$white;
   border-bottom: 1px solid colors.$grey100;
   min-height: 40px;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   align-items: center;
 }
 
@@ -754,7 +754,7 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-text .qr-issues-list .qr-issue .qr-comment-list {
   padding: 5px 10px;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   background: colors.$white;
   color: colors.$grey600;
   box-shadow:
@@ -767,7 +767,7 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-text .qr-issues-list .qr-issue .qr-comment-list .re-comment {
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   margin-bottom: 0;
 }
 
@@ -796,7 +796,7 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-spec .tm-percent {
   padding: 0 3px;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   width: 100%;
 }
 
@@ -965,7 +965,7 @@ padding: 8px;
 display: flex;
 align-items: center;
 gap: 8px;
-font-size: 16px;
+font-size: variables.$font-size-small;
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .custom-dropdown.select__dropdown {

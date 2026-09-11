@@ -5,6 +5,7 @@
 @use 'Register';
 @use 'ForgotPassword';
 @use 'PasswordReset';
+@use 'commons/variables';
 
 .onboarding-controls {
   position: absolute;
@@ -60,7 +61,7 @@
   }
 }
 .form-errorMessage {
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   color: colors.$red500;
   text-align: center;
   padding-left: 2px;

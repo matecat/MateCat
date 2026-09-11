@@ -2,6 +2,7 @@
 @use 'modals/tmShareModal';
 @use 'modals/PreferenceModal';
 @use 'tokens/colors';
+@use 'commons/variables';
 
 /***********************/
 /***** Login Footer ****/
@@ -57,7 +58,7 @@
 .register-form-container input[type='password'],
 .user-info-form input {
   margin-top: 5px;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   width: 100%;
   padding: 0.7em 0.6em;
   display: inline-block;
@@ -329,7 +330,7 @@
 .user-link {
   float: left;
   clear: both;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   margin-left: 66px;
   height: 20px;
   margin-top: 12px;
@@ -360,7 +361,7 @@
 
 .matecat-modal-content,
 .matecat-modal-overlay-content {
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   font-family: Calibri, Arial, Helvetica, sans-serif;
 }
 
@@ -450,7 +451,7 @@
 }
 
 .matecat-modal-content .modify-team-modal .no-result {
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   color: colors.$grey700;
   padding: 7px;
 }
@@ -474,7 +475,7 @@
 }
 
 .matecat-modal-content .change-team-modal .button {
-  font-size: 18px;
+  font-size: variables.$font-size-base;
   padding: 11px 22px;
 }
 
@@ -827,7 +828,7 @@
   padding: 30px 25px 20px;
 
   h3 {
-    font-size: 20px;
+    font-size: variables.$font-size-big;
   }
 
   .buttons-popup-container {
@@ -837,7 +838,7 @@
     gap: 20px;
     align-items: center;
     label {
-      font-size: 18px;
+      font-size: variables.$font-size-base;
       margin-right: 10px;
       position: relative;
       top: 2px;

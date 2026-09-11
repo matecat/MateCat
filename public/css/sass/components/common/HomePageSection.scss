@@ -1,4 +1,5 @@
 @use "../../tokens/colors";
+@use 'commons/variables';
 .home-page-section {
   .layout-bottom {
     height: 260px;
@@ -16,7 +17,7 @@
       margin: 0;
     }
     span {
-      font-size: 18px;
+      font-size: variables.$font-size-base;
       line-height: 28px;
       color: colors.$white;
       margin-bottom: 16px;
@@ -51,7 +52,7 @@
         align-items: center;
       }
       p {
-        font-size: 18px;
+        font-size: variables.$font-size-base;
         line-height: 24px;
         color: colors.$grey700;
       }

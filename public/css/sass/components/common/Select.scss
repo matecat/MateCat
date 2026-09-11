@@ -16,7 +16,7 @@
   flex-direction: column;
   width: 100%;
   /* .select {
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     padding: 9px 46px 9px 12px;
     border-radius: 2px;
     border: 1px solid rgba(34, 36, 38, 0.15);
@@ -54,7 +54,7 @@
   border-radius: variables.$border-radius-default;
   padding: 4px 8px;
   outline: none;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   //line-height: 16px;
   width: 100%;
   background-color: colors.$white;

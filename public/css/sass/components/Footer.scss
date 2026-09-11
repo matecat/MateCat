@@ -1,4 +1,5 @@
 @use "../tokens/colors";
+@use 'commons/variables';
 
 .normal-foo {
   background-color: colors.$grey100;
@@ -52,7 +53,7 @@
         margin: 0;
         color: colors.$grey500;
         text-align: left;
-        font-size: 16px;
+        font-size: variables.$font-size-small;
         font-weight: bold;
         text-decoration: none;
         display: flex;

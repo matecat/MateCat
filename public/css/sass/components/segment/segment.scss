@@ -106,7 +106,7 @@ section {
       right: 0;
       top: 0;
       span {
-        font-size: 14px;
+        font-size: variables.$font-size-xsmall;
         padding: 0;
       }
       .header-segment-saving-loader {
@@ -156,7 +156,7 @@ section {
       box-sizing: content-box;
       margin-top: 10px;
       margin-left: -20px;
-      font-size: 14px;
+      font-size: variables.$font-size-xsmall;
     }
   }
   &.slide-right {
@@ -175,7 +175,7 @@ section {
 }
 .collection-type-separator {
   color: colors.$grey600;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   float: left;
   width: 100%;
   box-shadow: none !important;
@@ -202,7 +202,7 @@ section {
   font-size: 15px;
   margin-top: 4px;
   margin-right: 2%;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
 
   display: flex;
   gap: 30px;
@@ -262,7 +262,7 @@ section .segment-body-content .warnings-block {
     }
     .icon {
       padding: 8px 8px 10px 8px;
-      font-size: 18px;
+      font-size: variables.$font-size-base;
       margin: 0;
     }
   }

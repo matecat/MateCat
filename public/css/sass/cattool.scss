@@ -104,7 +104,7 @@ body.cattool {
     left: 50%;
     transform: translateX(-50%);
     font-family: Calibri, sans-serif;
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
     font-weight: 700;
     line-height: 16px;
     color: colors.$black;
@@ -115,7 +115,7 @@ body.cattool {
     align-items: center;
     gap: 6px;
     font-family: Calibri, sans-serif;
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
     font-weight: 500;
     line-height: 20px;
     color: colors.$black;
@@ -138,7 +138,7 @@ body.cattool {
   }
   .context-preview__tab-title {
     font-family: Calibri, sans-serif;
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
     font-weight: 700;
     line-height: 16px;
     color: colors.$black;
@@ -294,7 +294,7 @@ body.cattool {
 .segment-target-toolbar-dropdown-trigger {
   height: 32px !important;
   font-weight: bold;
-  font-size: 14px !important;
+  font-size: variables.$font-size-xsmall !important;
 }
 
 .tags-switch {
@@ -335,7 +335,7 @@ body.cattool {
   width: 320px;
 
   .lara-styles-dropdown-item {
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
     color: colors.$grey400;
     padding: 12px;
     border-radius: 6px;

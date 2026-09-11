@@ -1,4 +1,5 @@
 @use '../tokens/colors';
+@use 'commons/variables';
 
 header {
   font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -48,7 +49,7 @@ header {
     position: relative;
     vertical-align: top;
     float: right;
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
     height: 36px;
     width: 36px;
     min-width: 35px;
@@ -70,7 +71,7 @@ header {
     border-radius: 30px;
     min-width: 105px;
     color: colors.$black;
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
     padding: 3px 15px;
     float: left;
     margin-left: 10px;
@@ -210,7 +211,7 @@ header {
 #profile-menu .menu .item {
   border-radius: 2px;
   padding: 8px !important;
-  font-size: 16px !important;
+  font-size: variables.$font-size-small !important;
 
   &:hover {
     background-color: colors.$grey50 !important;
@@ -292,7 +293,7 @@ header {
 #menu-site .btn {
   background: colors.$white;
   color: colors.$blue900;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   width: 140px;
   text-align: center;
   max-height: 40px;

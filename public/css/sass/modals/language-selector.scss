@@ -1,5 +1,6 @@
 /* Language Selector Modal */
 @use "../tokens/colors";
+@use 'commons/variables';
 
 #matecat-modal-languages {
   $light-blue: colors.$blue500;
@@ -75,7 +76,7 @@
       .language-name {
         display: block;
         color: white;
-        font-size: 14px;
+        font-size: variables.$font-size-xsmall;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;

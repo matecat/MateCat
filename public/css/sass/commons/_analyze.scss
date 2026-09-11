@@ -89,7 +89,7 @@ body.analyze {
         .analysis-create {
           display: flex;
           align-items: center;
-          font-size: 16px;
+          font-size: variables.$font-size-small;
           width: 100%;
           .inline-loader {
             width: 20px;

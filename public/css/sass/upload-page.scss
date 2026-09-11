@@ -76,7 +76,7 @@ body {
       width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-size: 16px;
+      font-size: variables.$font-size-small;
       white-space: nowrap;
     }
     .divider {
@@ -130,7 +130,7 @@ body {
   h2,
   .select-with-label__wrapper label {
     color: colors.$grey1300;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     font-weight: normal;
   }
 
@@ -228,7 +228,7 @@ body {
         border-radius: 4px;
         padding: 4px 8px;
         outline: none;
-        font-size: 14px;
+        font-size: variables.$font-size-xsmall;
         line-height: 16px;
         &:focus,
         &:focus-visible {
@@ -250,7 +250,7 @@ body {
         border: none;
         background-color: colors.$white;
         color: colors.$blue400;
-        font-size: 14px;
+        font-size: variables.$font-size-xsmall;
         font-weight: bold;
         margin: 0;
         padding: 15px;
@@ -388,7 +388,7 @@ body {
 h2 {
   margin: 0;
   padding: 0;
-  font-size: 18px;
+  font-size: variables.$font-size-base;
 }
 
 /*button*/
@@ -443,7 +443,7 @@ a:hover {
 
 .translate-box a {
   display: block;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
 }
 
 body {
@@ -454,7 +454,7 @@ body {
   width: 257px;
   height: 37px;
   padding: 5px;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   border: 1px solid colors.$grey200;
   margin: 0 0 5px 0;
   font-family: Calibri, Arial, Helvetica, sans-serif;
@@ -471,7 +471,7 @@ a {
 .supported-files {
   float: left;
   font-weight: bold;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   color: colors.$grey500;
   margin: 0px;
   .supported-file-formats {
@@ -505,7 +505,7 @@ a {
   margin: 0px auto 0 auto;
   padding: 5px 0 0 0;
   width: 92%;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   position: relative;
   text-align: left;
 }
@@ -522,7 +522,7 @@ a {
 }
 
 .popup h3 {
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   margin: 10px 0 5px 0;
   color: colors.$grey1300;
 }
@@ -548,7 +548,7 @@ a {
   padding: 0;
   float: left;
   list-style: none;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
 }
 
 .popup ul li {
@@ -571,7 +571,7 @@ a {
   background: colors.$blue500;
   font-weight: bold;
   float: right;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   cursor: pointer;
   color: colors.$grey1300;
   border: 1px solid colors.$grey200 !important;
@@ -860,7 +860,7 @@ select:focus {
   }
   p {
     line-height: 25px;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     float: left;
     margin-left: 12px;
   }

@@ -41,7 +41,7 @@ body {
 input,
 textarea {
   font-family: calibri, Arial, Helvetica, sans-serif;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
 }
 
 ul {
@@ -55,7 +55,7 @@ ul {
   margin: 0 auto;
   padding: 5px 0 0 0;
   width: 92%;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   position: relative;
   text-align: left;
 }
@@ -96,7 +96,7 @@ ul {
   background: colors.$white;
   box-shadow: 0px 0px 5px colors.$grey200;
   border-radius: 2px;
-  font-size: 18px;
+  font-size: variables.$font-size-base;
   border: 1px solid colors.$grey200;
 }
 
@@ -234,7 +234,7 @@ section mark.searchMarker.currSearchItem {
   line-height: 22px;
   padding: 10px 15px;
   font-weight: 200;
-  font-size: 18px;
+  font-size: variables.$font-size-base;
 }
 
 #menu-site li a.bigblue {
@@ -281,7 +281,7 @@ body svg {
       border-radius: 4px;
       padding: 2px 4px;
       color: colors.$white;
-      font-size: 14px;
+      font-size: variables.$font-size-xsmall;
       white-space: nowrap;
     }
   }

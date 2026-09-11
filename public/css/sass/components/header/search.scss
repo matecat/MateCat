@@ -1,4 +1,5 @@
 @use '../../tokens/colors';
+@use 'commons/variables';
 
 .searchbox {
   position: relative;
@@ -33,7 +34,7 @@
   height: 28px;
   background: colors.$grey100;
   cursor: pointer;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   width: fit-content;
   text-transform: uppercase;
 
@@ -606,5 +607,5 @@ button#exec-replace {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
 }

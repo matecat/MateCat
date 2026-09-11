@@ -101,7 +101,7 @@
       }
 
       .select {
-        font-size: 14px;
+        font-size: variables.$font-size-xsmall;
         padding: 5px;
 
         &:hover {
@@ -113,7 +113,7 @@
 
     .activity-log-filter-column-input {
       width: 250px;
-      font-size: 14px;
+      font-size: variables.$font-size-xsmall;
       border-radius: 2px;
       border: 1px solid colors.$grey300;
       padding: 7px;

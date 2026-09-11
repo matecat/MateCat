@@ -1,4 +1,5 @@
 @use '../tokens/colors';
+@use 'commons/variables';
 
 .members-filter-trigger-button {
   position: relative;
@@ -8,7 +9,7 @@
   justify-content: start !important;
   padding-left: 4px !important;
   padding-right: 5px !important;
-  font-size: 14px !important;
+  font-size: variables.$font-size-xsmall !important;
   color: black !important;
 
   &:disabled {

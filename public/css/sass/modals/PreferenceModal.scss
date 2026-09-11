@@ -1,7 +1,8 @@
 @use "../tokens/colors";
+@use 'commons/variables';
 
 .preferences-modal .user-info-form {
-  font-size: 18px;
+  font-size: variables.$font-size-base;
   line-height: 30px;
   margin-bottom: 30px;
   background-color: white;
@@ -193,12 +194,12 @@
 .preferences-modal .user-info-form label {
   float: left;
   margin-top: 7px;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
 }
 
 .preferences-modal .user-reset-password label {
   float: left;
-  font-size: 18px;
+  font-size: variables.$font-size-base;
   margin-top: 25px;
 }
 
@@ -208,7 +209,7 @@
     vertical-align: top;
     border: 1px solid colors.$grey600;
     border-radius: 2px;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     margin-bottom: 15px;
     margin-left: 80%;
     background-color: colors.$blue500;

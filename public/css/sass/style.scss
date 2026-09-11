@@ -24,7 +24,7 @@ body.incomingMsg {
 input,
 textarea {
   font-family: calibri, Arial, Helvetica, sans-serif;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
 }
 
 body.login header {
@@ -76,7 +76,7 @@ header .wrapper {
 }
 
 .error {
-  font-size: 16px;
+  font-size: variables.$font-size-small;
 }
 
 .warnings,
@@ -85,7 +85,7 @@ header .wrapper {
   color: colors.$red400;
   float: left;
   margin-left: -10px;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   max-width: 50%;
   margin-top: 12px;
   display: none;
@@ -190,7 +190,7 @@ section.opened .warnings {
     overflow: hidden;
     text-overflow: ellipsis;
     font-weight: bold;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
   }
   .projectbar-filename {
     display: flex;
@@ -204,7 +204,7 @@ section.opened .warnings {
     text-decoration: none;
     padding: 6px 12px;
     border-radius: 2px;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     background: colors.$blue500;
     user-select: none;
     cursor: pointer;
@@ -223,7 +223,7 @@ section.opened .warnings {
     min-width: 140px;
     display: flex;
     height: 35px;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     align-items: center;
     padding-right: 8px;
 
@@ -788,7 +788,7 @@ ul.suggestion-item.graysmall:last-child {
   height: 28px;
   background: colors.$grey200;
   cursor: pointer;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   width: 120px;
 }
 
@@ -928,7 +928,7 @@ section.editor.slide-right .sid {
 
 .editor .source {
   padding-top: 4px !important;
-  font-size: 18px;
+  font-size: variables.$font-size-base;
 }
 
 .textarea-container {
@@ -1002,7 +1002,7 @@ body.archived section .status-container a.status:hover {
 
 .editor .editarea {
   width: 100%;
-  font-size: 18px;
+  font-size: variables.$font-size-base;
   margin: 2px 0 0px -11px;
   word-break: normal;
   line-height: 25px;
@@ -1046,7 +1046,7 @@ body.archived section .status-container a.status:hover {
   height: 100%;
   padding-bottom: 5px;
   padding-top: 5px;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
 }
 
 .editor .wrap {
@@ -1084,7 +1084,7 @@ body.archived section .status-container a.status:hover {
   text-align: left;
   color: colors.$grey700;
   list-style: none;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   line-height: 16px;
   cursor: text;
   -webkit-transition: all 100ms ease-in;
@@ -1299,7 +1299,7 @@ body.archived section .status-container a.status:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
 }
 
 .engine-error-item.graysmall:hover {
@@ -1897,7 +1897,7 @@ section.editor .toolbar {
     padding: 3px 0px 5px 3px;
     margin: 7px 1.7%;
     background: colors.$grey75;
-    font-size: 18px;
+    font-size: variables.$font-size-base;
     min-height: 70px;
     outline: 0;
     text-align: left;

@@ -3,7 +3,7 @@
 .segment-footer-icu-container.open {
   h3 {
     margin: 0;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
   }
   > div {
     display: flex;
@@ -45,11 +45,11 @@
     .category {
       text-transform: capitalize;
       font-weight: 700;
-      font-size: 14px;
+      font-size: variables.$font-size-xsmall;
     }
     .rule {
       color: colors.$grey400;
-      font-size: 14px;
+      font-size: variables.$font-size-xsmall;
       width: 100%;
       max-width: 120px;
       text-overflow: ellipsis;
@@ -106,7 +106,7 @@
       display: flex;
       gap: 16px;
       flex-wrap: wrap;
-      font-size: 14px;
+      font-size: variables.$font-size-xsmall;
     }
     .segment-footer-icu-preview-container {
       display: flex;

@@ -46,14 +46,14 @@
       flex-direction: row;
       gap: 80px;
       text-align: left;
-      font-size: 16px;
+      font-size: variables.$font-size-small;
       > div.content {
         display: flex;
         gap: 16px;
         flex-direction: column;
       }
       h4 {
-        font-size: 16px;
+        font-size: variables.$font-size-small;
         margin: 0;
 
         .ai-feature-grey-label {
@@ -203,7 +203,7 @@ section.loaded .submenu {
   padding: 5px 20px;
   display: block;
   color: colors.$grey500;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   float: left;
   text-decoration: none;
   border-right: 2px solid colors.$grey150;
@@ -225,7 +225,7 @@ section.loaded .submenu {
 .submenu .on {
   background: colors.$white;
   color: colors.$black;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   text-shadow: none;
 }
 
@@ -306,7 +306,7 @@ section.loaded .submenu {
   color: colors.$white;
   padding: 0 10px;
   background: colors.$grey400;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
   min-width: 40px;
