@@ -79,8 +79,9 @@ jest.mock('../../utils/shortcuts', () => ({
   },
 }))
 
+const mockUseHotKeysComponent = jest.fn(() => null)
 jest.mock('../../hooks/UseHotKeysComponent', () => ({
-  UseHotKeysComponent: () => null,
+  UseHotKeysComponent: (...args) => mockUseHotKeysComponent(...args),
 }))
 
 jest.mock('./TagEntity/TagEntity.component', () => ({
@@ -141,6 +142,7 @@ import SegmentSource, {
   isValidPhraseToAiAssistant,
   preventEdit,
   allowHTML,
+  getUpdatedSegmentInfo,
 } from './SegmentSource'
 import {SegmentContext} from './SegmentContext'
 import SegmentStore from '../../stores/SegmentStore'
@@ -664,12 +666,18 @@ describe('SegmentSource tagged source and tag map', () => {
 })
 
 describe('SegmentSource concordance', () => {
+  // openConcordance is only ever invoked as the callback registered with the
+  // (mocked) hotkey hook - extract it the same way the Flux listener tests
+  // above extract their registered callback from a mocked addListener.
+  const getOpenConcordanceCallback = () =>
+    mockUseHotKeysComponent.mock.calls[0][0].callback
+
   test('opens concordance search for a non-empty range selection', async () => {
-    const {ref} = renderSource(makeSegment())
+    renderSource(makeSegment())
     await flushTimers()
     stubSelection({type: 'Range', toString: () => '  world  '})
 
-    ref.current.openConcordance({preventDefault: jest.fn()})
+    getOpenConcordanceCallback()({preventDefault: jest.fn()})
     expect(SegmentActions.openConcordance).toHaveBeenCalledWith(
       '10',
       'world',
@@ -678,20 +686,20 @@ describe('SegmentSource concordance', () => {
   })
 
   test('ignores a range selection that trims to nothing', async () => {
-    const {ref} = renderSource(makeSegment())
+    renderSource(makeSegment())
     await flushTimers()
     stubSelection({type: 'Range', toString: () => '   '})
 
-    ref.current.openConcordance({preventDefault: jest.fn()})
+    getOpenConcordanceCallback()({preventDefault: jest.fn()})
     expect(SegmentActions.openConcordance).not.toHaveBeenCalled()
   })
 
   test('ignores a caret selection', async () => {
-    const {ref} = renderSource(makeSegment())
+    renderSource(makeSegment())
     await flushTimers()
     stubSelection({type: 'Caret', toString: () => ''})
 
-    ref.current.openConcordance({preventDefault: jest.fn()})
+    getOpenConcordanceCallback()({preventDefault: jest.fn()})
     expect(SegmentActions.openConcordance).not.toHaveBeenCalled()
   })
 })
@@ -1185,27 +1193,28 @@ describe('SegmentSource options toolbar', () => {
   })
 })
 
-describe('SegmentSource segment info', () => {
-  test('getUpdatedSegmentInfo exposes the current segment and selection', async () => {
-    const segment = makeSegment({
+describe('getUpdatedSegmentInfo', () => {
+  test('exposes the current segment and selection', () => {
+    const contextSegment = makeSegment({
       warnings: {a: 1},
       tagMismatch: {b: 2},
       missingTagsInTarget: ['x'],
     })
-    const {ref} = renderSource(segment)
-    await flushTimers()
+    const tagRange = {start: 0, end: 1}
+    const editorState = EditorState.createEmpty()
 
-    const info = ref.current.getUpdatedSegmentInfo()
-    expect(info).toMatchObject({
+    const info = getUpdatedSegmentInfo({contextSegment, tagRange, editorState})
+
+    expect(info).toEqual({
       sid: '10',
       warnings: {a: 1},
       tagMismatch: {b: 2},
+      tagRange,
       segmentOpened: true,
       missingTagsInTarget: ['x'],
+      currentSelection: editorState.getSelection(),
       openSplit: false,
     })
-    expect(info.currentSelection).toBeDefined()
-    expect(info.tagRange).toBeDefined()
   })
 })
 

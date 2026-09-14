@@ -105,6 +105,28 @@ export const preventEdit = () => 'handled'
 // Pure — reads only its argument, testable directly with no rendering.
 export const allowHTML = (string) => ({__html: string})
 
+// Pure — reads only its argument, testable directly with no rendering. Takes
+// editorState explicitly rather than closing over it, since its only two
+// callers (below) already have it at hand.
+export const getUpdatedSegmentInfo = ({
+  contextSegment,
+  tagRange,
+  editorState,
+}) => {
+  const {sid, warnings, tagMismatch, opened, missingTagsInTarget, openSplit} =
+    contextSegment
+  return {
+    sid,
+    warnings,
+    tagMismatch,
+    tagRange,
+    segmentOpened: opened,
+    missingTagsInTarget,
+    currentSelection: editorState.getSelection(),
+    openSplit,
+  }
+}
+
 const SegmentSource = forwardRef(({segment}, ref) => {
   const context = useContext(SegmentContext)
   const {segment: contextSegment, userInfo: contextUserInfo} = context
@@ -224,21 +246,6 @@ const SegmentSource = forwardRef(({segment}, ref) => {
     decoratorsStructureRef.current.push(newDecorator)
   }
 
-  const getUpdatedSegmentInfo = () => {
-    const {sid, warnings, tagMismatch, opened, missingTagsInTarget, openSplit} =
-      contextSegment
-    return {
-      sid,
-      warnings,
-      tagMismatch,
-      tagRange,
-      segmentOpened: opened,
-      missingTagsInTarget,
-      currentSelection: editorState.getSelection(),
-      openSplit,
-    }
-  }
-
   const addLexiqaDecorator = () => {
     let {lexiqa, sid, lxqDecodedSource} = segment
     let ranges = LexiqaUtils.getRanges(
@@ -256,7 +263,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
         updatedLexiqaWarnings,
         sid,
         true,
-        getUpdatedSegmentInfo,
+        () => getUpdatedSegmentInfo({contextSegment, tagRange, editorState}),
       )
       remove(
         decoratorsStructureRef.current,
@@ -666,7 +673,8 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       component: TagEntity,
       props: {
         onClick: onEntityClick,
-        getUpdatedSegmentInfo: getUpdatedSegmentInfo,
+        getUpdatedSegmentInfo: () =>
+          getUpdatedSegmentInfo({contextSegment, tagRange, editorState}),
         isTarget: false,
         getSearchParams: () => getSearchParams(segment),
         isRTL: config.isSourceRTL,
@@ -941,7 +949,6 @@ const SegmentSource = forwardRef(({segment}, ref) => {
         setIsShowingOptionsToolbar(partial.isShowingOptionsToolbar)
     },
     forceUpdate: () => bumpForceRender(),
-    openConcordance,
     onEntityClick,
     removeDecorator,
     copyFragment,
@@ -949,7 +956,6 @@ const SegmentSource = forwardRef(({segment}, ref) => {
     updateSourceInStore,
     onChange,
     insertTagAtSelection,
-    getUpdatedSegmentInfo,
     getSelectedWords,
     disableDecorator,
     checkDecorators,
