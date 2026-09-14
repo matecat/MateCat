@@ -1,5 +1,6 @@
 import React, {
   forwardRef,
+  useCallback,
   useContext,
   useEffect,
   useImperativeHandle,
@@ -595,18 +596,11 @@ const SegmentSource = forwardRef(({segment}, ref) => {
 
   const preventEdit = () => 'handled'
 
-  // Assigned once (like the three store listeners below), not recreated
-  // every render: tests spy on these via the exposed ref
-  // (jest.spyOn(ref.current, 'getSelectedWords')), and a spy installed on a
-  // freshly-recreated-every-render function would be silently discarded the
-  // next time this component re-renders. Reads latestRef instead of closing
-  // over editorState/contextUserInfo directly for that same reason.
-  const getSelectedWordsRef = useRef(() =>
-    DraftMatecatUtils.getSelectedTextWithoutEntities(
-      latestRef.current.editorState,
-    ).reduce((acc, {value}) => `${acc}${value}`, ''),
-  )
-  const getSelectedWords = getSelectedWordsRef.current
+  const getSelectedWords = () =>
+    DraftMatecatUtils.getSelectedTextWithoutEntities(editorState).reduce(
+      (acc, {value}) => `${acc}${value}`,
+      '',
+    )
 
   const helpAiAssistantRef = useRef(() => {
     if (delayAiAssistantRef.current) clearTimeout(delayAiAssistantRef.current)
@@ -638,19 +632,14 @@ const SegmentSource = forwardRef(({segment}, ref) => {
   })
   const helpAiAssistant = helpAiAssistantRef.current
 
-  const endSplitModeRef = useRef(() => {
-    const {editorStateBeforeSplit, contextSegment: segment} = latestRef.current
-    splitPointRef.current = segment.split_group
-      ? segment.split_group.length - 1
-      : 0
-    // TODO: why so much calls endSplitMode??
-    if (segment.openSplit) {
-      setEditorState(editorStateBeforeSplit)
-    }
-  })
-  const endSplitMode = endSplitModeRef.current
-
-  // Restore tagged source in draftJS after GuessTag
+  // Restore tagged source in draftJS after GuessTag. Assigned once (see
+  // stableMethodsAssignedRef below): registered only on mount, and its own
+  // SET_SEGMENT_TAGGED listener is intentionally never removed (matches a
+  // pre-existing bug in the original componentWillUnmount, preserved
+  // verbatim) — re-registering this one on every dependency change would
+  // turn that single leaked listener into one leaked per change instead.
+  // Reads latestRef, not segment/editorState closed over above, for the
+  // same reason.
   const setTaggedSourceRef = useRef((sid) => {
     const segment = latestRef.current.segment
     if (sid === segment.sid) {
@@ -674,32 +663,6 @@ const SegmentSource = forwardRef(({segment}, ref) => {
     }
   })
   const setTaggedSource = setTaggedSourceRef.current
-
-  const refreshTagMapRef = useRef(() => {
-    const segment = latestRef.current.segment
-    const translation = segment.segment
-
-    // If GuessTag enabled, clean string from tag
-    const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(segment)
-      ? DraftMatecatUtils.removeTagsFromText(translation)
-      : translation
-    // New EditorState with translation
-    const contentEncoded = DraftMatecatUtils.encodeContent(
-      latestRef.current.editorState,
-      cleanSource,
-    )
-    const {editorState: newEditorState, tagRange: newTagRange} = contentEncoded
-
-    flushSync(() => {
-      setEditorState(newEditorState)
-      setTagRange(newTagRange)
-    })
-
-    methodsRef.current.updateSourceInStore()
-
-    setTimeout(() => methodsRef.current.checkDecorators(), 100)
-  })
-  const refreshTagMap = refreshTagMapRef.current
 
   // Seeded once with the same logic as the constructor, mutated in place by the add*/remove
   // decorator helpers above via lodash `remove()`/`.push()` — a working buffer, not reactive
@@ -748,20 +711,55 @@ const SegmentSource = forwardRef(({segment}, ref) => {
   const [editorState, setEditorState] = useState(
     () => initialContentRef.current.editorState,
   )
-  // Dead state, preserved verbatim from the class component: `this.state.editAreaClasses`
-  // was never read anywhere, including in the original render().
-  // eslint-disable-next-line no-unused-vars
-  const [editAreaClasses, setEditAreaClasses] = useState(['targetarea'])
   const [tagRange, setTagRange] = useState(
     () => initialContentRef.current.tagRange,
   )
-  // Dead state, preserved verbatim from the class component: `this.state.unlockedForCopy`
-  // was never read anywhere, including in the original render().
-  // eslint-disable-next-line no-unused-vars
-  const [unlockedForCopy, setUnlockedForCopy] = useState(false)
   const [editorStateBeforeSplit, setEditorStateBeforeSplit] = useState(
     () => initialContentRef.current.editorState,
   )
+
+  // Plain per-render closures: registered via their own useEffect below,
+  // which re-subscribes whenever their actual dependencies change, so
+  // (unlike setTaggedSource above) they never need to read stale data
+  // through a ref — the effect's cleanup always removes exactly the
+  // listener it added. Defined here (after the state they read) rather
+  // than up near setTaggedSource because useCallback's dependency array,
+  // unlike a plain function body, is evaluated immediately — referencing
+  // not-yet-declared state there throws.
+  const endSplitMode = useCallback(() => {
+    splitPointRef.current = contextSegment.split_group
+      ? contextSegment.split_group.length - 1
+      : 0
+    // TODO: why so much calls endSplitMode??
+    if (contextSegment.openSplit) {
+      setEditorState(editorStateBeforeSplit)
+    }
+  }, [contextSegment, editorStateBeforeSplit])
+
+  const refreshTagMap = useCallback(() => {
+    const translation = segment.segment
+
+    // If GuessTag enabled, clean string from tag
+    const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(segment)
+      ? DraftMatecatUtils.removeTagsFromText(translation)
+      : translation
+    // New EditorState with translation
+    const contentEncoded = DraftMatecatUtils.encodeContent(
+      editorState,
+      cleanSource,
+    )
+    const {editorState: newEditorState, tagRange: newTagRange} = contentEncoded
+
+    flushSync(() => {
+      setEditorState(newEditorState)
+      setTagRange(newTagRange)
+    })
+
+    methodsRef.current.updateSourceInStore()
+
+    setTimeout(() => methodsRef.current.checkDecorators(), 100)
+  }, [segment, editorState])
+
   const [activeDecorators, setActiveDecorators] = useState(() => ({
     [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
     [DraftMatecatConstants.GLOSSARY_DECORATOR]: false,
@@ -771,14 +769,13 @@ const SegmentSource = forwardRef(({segment}, ref) => {
   }))
   const [isShowingOptionsToolbar, setIsShowingOptionsToolbar] = useState(false)
 
-  // Only what the three permanently-stable listeners (and helpAiAssistant's
-  // delayed setTimeout) read, refreshed every render.
+  // Only what the permanently-stable setTaggedSource and helpAiAssistant's
+  // delayed setTimeout read, refreshed every render.
   latestRef.current = {
     segment,
     contextSegment,
     contextUserInfo,
     editorState,
-    editorStateBeforeSplit,
   }
 
   const isFirstRenderRef = useRef(true)
@@ -788,12 +785,10 @@ const SegmentSource = forwardRef(({segment}, ref) => {
   const [, bumpForceRender] = useReducer((x) => x + 1, 0)
 
   useEffect(() => {
-    SegmentStore.addListener(SegmentConstants.CLOSE_SPLIT_SEGMENT, endSplitMode)
     SegmentStore.addListener(
       SegmentConstants.SET_SEGMENT_TAGGED,
       setTaggedSource,
     )
-    SegmentStore.addListener(SegmentConstants.REFRESH_TAG_MAP, refreshTagMap)
     setTimeout(() => {
       methodsRef.current.checkDecorators()
       methodsRef.current.updateSourceInStore()
@@ -804,20 +799,34 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       () => (wasTripleClickTriggeredRef.current = true),
     )
 
+    // NOTE: SET_SEGMENT_TAGGED/setTaggedSource is intentionally NOT removed here — this
+    // mirrors a pre-existing bug in the original componentWillUnmount, preserved verbatim.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // endSplitMode is a plain closure (see its definition above), so this effect
+  // re-registers it — cleanly removing the previous one first — whenever its
+  // actual dependencies change, instead of reading stale data through a ref.
+  useEffect(() => {
+    SegmentStore.addListener(SegmentConstants.CLOSE_SPLIT_SEGMENT, endSplitMode)
     return () => {
       SegmentStore.removeListener(
         SegmentConstants.CLOSE_SPLIT_SEGMENT,
         endSplitMode,
       )
+    }
+  }, [endSplitMode])
+
+  // Same idea for refreshTagMap.
+  useEffect(() => {
+    SegmentStore.addListener(SegmentConstants.REFRESH_TAG_MAP, refreshTagMap)
+    return () => {
       SegmentStore.removeListener(
         SegmentConstants.REFRESH_TAG_MAP,
         refreshTagMap,
       )
-      // NOTE: SET_SEGMENT_TAGGED/setTaggedSource is intentionally NOT removed here — this
-      // mirrors a pre-existing bug in the original componentWillUnmount, preserved verbatim.
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [refreshTagMap])
 
   // componentDidUpdate-equivalent: runs after every render (including forceUpdate-only
   // renders) but not on the initial mount. No dependency array — matches componentDidUpdate's
@@ -906,19 +915,18 @@ const SegmentSource = forwardRef(({segment}, ref) => {
   // the ref exposed to tests below — so a jest.spyOn(ref.current, 'x')
   // affects the same property internal code actually calls through, and
   // survives subsequent re-renders instead of being silently replaced.
-  // Assigned exactly once: these five have their own stable identity
-  // (created via useRef above, never recreated) precisely so a
-  // jest.spyOn(ref.current, 'x') survives later re-renders — reassigning
-  // them here every render, even to the same underlying function, would
-  // blow away a spy sitting on the property. Everything else below is
-  // fine to refresh every render since nothing depends on its identity.
+  // Assigned exactly once: setTaggedSource (its own SET_SEGMENT_TAGGED
+  // listener is intentionally never removed, see above) and helpAiAssistant
+  // (tests spy on it via the exposed ref, across a re-render triggered by
+  // its own setIsShowingOptionsToolbar call — a spy on a freshly-recreated-
+  // every-render function would be silently discarded there) both need a
+  // stable identity; reassigning them here every render, even to the same
+  // underlying function, would still blow away a spy sitting on the
+  // property. Everything else below is fine to refresh every render.
   if (!stableMethodsAssignedRef.current) {
     stableMethodsAssignedRef.current = true
     Object.assign(methodsRef.current, {
-      endSplitMode,
       setTaggedSource,
-      refreshTagMap,
-      getSelectedWords,
       helpAiAssistant,
     })
     // Test-only accessor: lets a test null out the editor DOM ref to
@@ -937,11 +945,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
     setState: (partial) => {
       if ('source' in partial) setSource(partial.source)
       if ('editorState' in partial) setEditorState(partial.editorState)
-      if ('editAreaClasses' in partial)
-        setEditAreaClasses(partial.editAreaClasses)
       if ('tagRange' in partial) setTagRange(partial.tagRange)
-      if ('unlockedForCopy' in partial)
-        setUnlockedForCopy(partial.unlockedForCopy)
       if ('editorStateBeforeSplit' in partial)
         setEditorStateBeforeSplit(partial.editorStateBeforeSplit)
       if ('activeDecorators' in partial)
@@ -950,6 +954,8 @@ const SegmentSource = forwardRef(({segment}, ref) => {
         setIsShowingOptionsToolbar(partial.isShowingOptionsToolbar)
     },
     forceUpdate: () => bumpForceRender(),
+    endSplitMode,
+    refreshTagMap,
     openConcordance,
     onEntityClick,
     addSplitTag,
@@ -963,6 +969,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
     onBlurEvent,
     insertTagAtSelection,
     getUpdatedSegmentInfo,
+    getSelectedWords,
     disableDecorator,
     allowHTML,
     checkDecorators,

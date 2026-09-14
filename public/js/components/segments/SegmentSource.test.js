@@ -10,6 +10,7 @@ const mockCheckCurrentSegmentTPEnabled = jest.fn(() => false)
 const mockGetRanges = jest.fn(() => [])
 const mockUpdateOffset = jest.fn(() => [])
 const mockGetFragmentFromSelection = jest.fn(() => null)
+const mockGetSelectedTextWithoutEntities = jest.fn(() => [])
 
 jest.mock('../../stores/SegmentStore', () => ({
   __esModule: true,
@@ -129,6 +130,8 @@ jest.mock('./utils/DraftMatecatUtils', () => {
         component: () => null,
       })),
       getEntitiesInFragment: jest.fn(() => ({})),
+      getSelectedTextWithoutEntities: (...args) =>
+        mockGetSelectedTextWithoutEntities(...args),
     },
   }
 })
@@ -238,6 +241,8 @@ beforeEach(() => {
   mockUpdateOffset.mockReturnValue([])
   mockGetFragmentFromSelection.mockReset()
   mockGetFragmentFromSelection.mockReturnValue(null)
+  mockGetSelectedTextWithoutEntities.mockReset()
+  mockGetSelectedTextWithoutEntities.mockReturnValue([])
   jest.clearAllMocks()
 })
 
@@ -1047,7 +1052,7 @@ describe('SegmentSource AI assistant', () => {
       userInfo: {metadata: {ai_assistant: 1}},
     })
     await flushTimers()
-    jest.spyOn(ref.current, 'getSelectedWords').mockReturnValue('two words')
+    mockGetSelectedTextWithoutEntities.mockReturnValue([{value: 'two words'}])
 
     await act(async () => {
       ref.current.helpAiAssistant()
@@ -1068,9 +1073,9 @@ describe('SegmentSource AI assistant', () => {
       userInfo: {metadata: {ai_assistant: 1}},
     })
     await flushTimers()
-    jest
-      .spyOn(ref.current, 'getSelectedWords')
-      .mockReturnValue('way too many words here')
+    mockGetSelectedTextWithoutEntities.mockReturnValue([
+      {value: 'way too many words here'},
+    ])
 
     await act(async () => {
       ref.current.helpAiAssistant()
@@ -1100,7 +1105,7 @@ describe('SegmentSource options toolbar', () => {
       userInfo: {metadata: {ai_assistant: 0}},
     })
     await flushTimers()
-    jest.spyOn(ref.current, 'getSelectedWords').mockReturnValue('two words')
+    mockGetSelectedTextWithoutEntities.mockReturnValue([{value: 'two words'}])
     act(() => ref.current.setState({isShowingOptionsToolbar: true}))
 
     fireEvent.mouseDown(
@@ -1118,9 +1123,9 @@ describe('SegmentSource options toolbar', () => {
       userInfo: {metadata: {ai_assistant: 0}},
     })
     await flushTimers()
-    jest
-      .spyOn(ref.current, 'getSelectedWords')
-      .mockReturnValue('far too many words to allow')
+    mockGetSelectedTextWithoutEntities.mockReturnValue([
+      {value: 'far too many words to allow'},
+    ])
     act(() => ref.current.setState({isShowingOptionsToolbar: true}))
 
     const button = getByTitle(
