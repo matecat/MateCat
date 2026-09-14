@@ -99,6 +99,12 @@ export const getSearchParams = (segment) => {
   }
 }
 
+// Pure — ignores its argument entirely, testable directly with no rendering.
+export const preventEdit = () => 'handled'
+
+// Pure — reads only its argument, testable directly with no rendering.
+export const allowHTML = (string) => ({__html: string})
+
 const SegmentSource = forwardRef(({segment}, ref) => {
   const context = useContext(SegmentContext)
   const {segment: contextSegment, userInfo: contextUserInfo} = context
@@ -572,8 +578,6 @@ const SegmentSource = forwardRef(({segment}, ref) => {
     }
   }
 
-  const allowHTML = (string) => ({__html: string})
-
   const onChange = (editorState) => {
     const {entityKey} = DraftMatecatUtils.selectionIsEntity(editorState)
     if (!entityKey) {
@@ -583,8 +587,6 @@ const SegmentSource = forwardRef(({segment}, ref) => {
     }
     setEditorState(editorState)
   }
-
-  const preventEdit = () => 'handled'
 
   const getSelectedWords = () =>
     DraftMatecatUtils.getSelectedTextWithoutEntities(editorState).reduce(
@@ -900,19 +902,18 @@ const SegmentSource = forwardRef(({segment}, ref) => {
   // methodsRef is declared above, and as the ref exposed to tests below —
   // so a jest.spyOn(ref.current, 'x') affects the same property internal
   // code actually calls through, and survives subsequent re-renders instead
-  // of being silently replaced. Assigned exactly once: setTaggedSource (its
-  // own SET_SEGMENT_TAGGED listener is intentionally never removed, see
-  // above) and helpAiAssistant (tests spy on it via the exposed ref, across
-  // a re-render triggered by its own setIsShowingOptionsToolbar call — a spy
-  // on a freshly-recreated-every-render function would be silently discarded
-  // there) both need a stable identity; reassigning them here every render,
-  // even to the same underlying function, would still blow away a spy
-  // sitting on the property. Everything else below is fine to refresh every
-  // render.
+  // of being silently replaced. Assigned exactly once: helpAiAssistant is
+  // spied on via the exposed ref, across a re-render triggered by its own
+  // setIsShowingOptionsToolbar call — a spy on a freshly-recreated-every-
+  // render function would be silently discarded there, so it needs a stable
+  // identity; reassigning it here every render, even to the same underlying
+  // function, would still blow away a spy sitting on the property. (Note:
+  // setTaggedSource is not exposed here at all — it's permanently stable for
+  // an unrelated reason, see where it's defined above — nothing reads it off
+  // methodsRef.) Everything else below is fine to refresh every render.
   if (!stableMethodsAssignedRef.current) {
     stableMethodsAssignedRef.current = true
     Object.assign(methodsRef.current, {
-      setTaggedSource,
       helpAiAssistant,
     })
     // Test-only accessor: lets a test null out the editor DOM ref to
@@ -940,24 +941,17 @@ const SegmentSource = forwardRef(({segment}, ref) => {
         setIsShowingOptionsToolbar(partial.isShowingOptionsToolbar)
     },
     forceUpdate: () => bumpForceRender(),
-    endSplitMode,
-    refreshTagMap,
     openConcordance,
     onEntityClick,
-    addSplitTag,
     removeDecorator,
-    dragFragment,
     copyFragment,
     updateSplitNumberNew,
     updateSourceInStore,
-    preventEdit,
     onChange,
-    onBlurEvent,
     insertTagAtSelection,
     getUpdatedSegmentInfo,
     getSelectedWords,
     disableDecorator,
-    allowHTML,
     checkDecorators,
     splitSegmentNew,
     addSearchDecorator,
@@ -967,7 +961,6 @@ const SegmentSource = forwardRef(({segment}, ref) => {
     addIcuDecorator,
     getEditorState: () => editorState,
     getEditorStateBeforeSplit: () => editorStateBeforeSplit,
-    getIsShowingOptionsToolbar: () => isShowingOptionsToolbar,
     getSplitPoint: () => splitPointRef.current,
     getActiveDecorators: () => activeDecorators,
     getFirstIcuCheck: () => firstIcuCheckRef.current,
