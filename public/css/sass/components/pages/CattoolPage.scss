@@ -10,14 +10,14 @@
 @use '../header/segmentsFilter';
 @use '../ReviewExtendedPanel';
 //components
-@use '../segment/segment';
+@use '../segment/Segments';
+@use '../segment/SegmentHeader';
 @use '../segment/SegmentBody';
 @use '../segment/SegmentWarnings';
 @use '../segment/SplitSegment';
-@use '../segment/segmentFooter';
-@use '../segment/segmentFooterTabGlossary';
+@use '../segment/SegmentFooter';
+@use '../segment/SegmentFooterTabGlossary';
 @use '../segment/issuesContainer';
-@use '../segment/tagsMenu';
 @use '../segment/Tag';
 @use '../segment/TooltipInfo';
 @use '../segment/Glossary';
@@ -29,8 +29,8 @@
 @use '../SegmentsContainer';
 @use '../header/FilesMenu';
 @use '../header/ActionMenu';
-@use '../segment/segmentFooterTabAiAssistant';
-@use '../segment/segmentFooterTabIcu';
+@use '../segment/SegmentFooterTabAiAssistant';
+@use '../segment/SegmentFooterTabIcu';
 @use '../CattolFooter';
 @use '../signin/OnBoarding';
 

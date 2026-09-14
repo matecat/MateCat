@@ -553,3 +553,7 @@ section .segment-side-buttons {
     width: 43%;
   }
 }
+
+section.editor .loader_on {
+  display: block !important;
+}
