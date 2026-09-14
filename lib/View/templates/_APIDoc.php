@@ -16,13 +16,6 @@ try {
 } catch (Exception $e) {
 }
 
-$count = 0;
-foreach (AppConfig::$SUPPORTED_FILE_TYPES as $key => $value) {
-    $count += count($value);
-}
-
-$nr_supported_files = $count;
-
 $max_file_size_in_MB = AppConfig::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
 
 $csp_nonce = Utils::uuid4();
@@ -269,125 +262,35 @@ $csp = str_replace('${x_self_ajax_location_hosts}', $x_self_ajax_location_hosts,
 
         <div class="block block-api">
             <h3 name="file-format" class="method-title">Supported file formats</h3>
+            <?php
+            // The section names, their order and the per-format icon class all come from
+            // AppConfig::$SUPPORTED_FILE_TYPES, which is what /api/v3/files serves. Column widths
+            // follow how many formats each section holds, with a floor so the narrow ones stay
+            // readable.
+            $sections = AppConfig::$SUPPORTED_FILE_TYPES;
+            $weights = array_map(static fn(array $formats): int => max(9, count($formats)), $sections);
+            $totalWeight = array_sum($weights);
+            ?>
             <table class="tablestats fileformat" width="100%" border="0" cellspacing="0" cellpadding="0">
 
                 <thead>
                 <tr>
-                    <th width="40%">Office</th>
-                    <th width="15%">Web</th>
-                    <th width="15%">Scanned files</th>
-                    <th width="15%">Interchange formats</th>
-                    <th width="15%">Desktop publishing</th>
-                    <th width="15%">Localization</th>
+                    <?php foreach ($sections as $section => $formats) { ?>
+                        <th width="<?= round($weights[$section] / $totalWeight * 100, 1) ?>%"><?= htmlspecialchars($section) ?></th>
+                    <?php } ?>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
-                    <td>
-                        <ul class="office">
-                            <li><span class="extdoc">doc</span></li>
-                            <li><span class="extdoc">pages</span></li>
-                            <li><span class="extdoc">dot</span></li>
-                            <li><span class="extdoc">docx</span></li>
-                            <li><span class="extdoc">dotx</span></li>
-                            <li><span class="extdoc">docm</span></li>
-                            <li><span class="extdoc">dotm</span></li>
-                            <li><span class="extdoc">rtf</span></li>
-                            <li><span class="extdoc">odt</span></li>
-                            <li><span class="extdoc">ott</span></li>
-                            <li><span class="extpdf">pdf</span></li>
-                            <li><span class="extxls">numbers</span></li>
-                            <li><span class="exttxt">txt</span></li>
-                            <li><span class="extxls">xls</span></li>
-                            <li><span class="extxls">xlt</span></li>
-                            <li><span class="extxls">xlsm</span></li>
-                            <li><span class="extxls">xlsx</span></li>
-                            <li><span class="extxls">xltx</span></li>
-                            <li><span class="extxls">xltm</span></li>
-                            <li><span class="extxls">ods</span></li>
-                            <li><span class="extxls">ots</span></li>
-                            <li><span class="extxls">tsv</span></li>
-                            <li><span class="extppt">key</span></li>
-                            <li><span class="extppt">ppt</span></li>
-                            <li><span class="extppt">pps</span></li>
-                            <li><span class="extppt">pot</span></li>
-                            <li><span class="extppt">pptx</span></li>
-                            <li><span class="extppt">pptm</span></li>
-                            <li><span class="extppt">ppsx</span></li>
-                            <li><span class="extppt">ppsm</span></li>
-                            <li><span class="extppt">potx</span></li>
-                            <li><span class="extppt">potm</span></li>
-                            <li><span class="extppt">odp</span></li>
-                            <li><span class="extppt">otp</span></li>
-                            <li><span class="extxml">xml</span></li>
-                            <li><span class="extzip">zip</span></li>
-                        </ul>
-                    </td>
-                    <td>
-                        <ul>
-                            <li><span class="exthtm">htm</span></li>
-                            <li><span class="exthtm">html</span></li>
-                            <li><span class="exthtm">xhtml</span></li>
-                            <li><span class="extxml">xml</span></li>
-                            <li><span class="extxml">dtd</span></li>
-                            <li><span class="extxml">json</span></li>
-                            <li><span class="extxml">jsont</span></li>
-                            <li><span class="extxml">jsont2</span></li>
-                            <li><span class="extxml">yaml</span></li>
-                            <li><span class="extxml">yml</span></li>
-                            <li><span class="extxml">md</span></li>
-                        </ul>
-                    </td>
-                    <td>
-                        <ul>
-                            <li><span class="extpdf">pdf</span></li>
-                            <li><span class="extimg">bmp</span></li>
-                            <li><span class="extimg">png</span></li>
-                            <li><span class="extimg">gif</span></li>
-                            <li><span class="extimg">jpeg</span></li>
-                            <li><span class="extimg">jpg</span></li>
-                            <li><span class="extimg">jfif</span></li>
-                            <li><span class="extimg">tiff</span></li>
-                        </ul>
-                    </td>
-                    <td>
-                        <ul>
-                            <li><span class="extxif">xliff</span></li>
-                            <li><span class="extxif">sdlxliff</span></li>
-                            <li><span class="exttmx">tmx</span></li>
-                            <li><span class="extttx">ttx</span></li>
-                            <li><span class="extitd">itd</span></li>
-                            <li><span class="extxlf">xlf</span></li>
-                        </ul>
-                    </td>
-                    <td>
-                        <ul>
-                            <li><span class="extmif">mif</span></li>
-                            <li><span class="extidd">idml</span></li>
-                            <li><span class="extidd">icml</span></li>
-                            <li><span class="extxml">xml</span></li>
-                            <li><span class="extdit">dita</span></li>
-                        </ul>
-                    </td>
-                    <td>
-                        <ul>
-                            <li><span class="extpro">properties</span></li>
-                            <li><span class="extres">resx</span></li>
-                            <li><span class="extxml">xml</span></li>
-                            <li><span class="extxml">sxml</span></li>
-                            <li><span class="extxml">txml</span></li>
-                            <li><span class="extdit">dita</span></li>
-                            <li><span class="extxml">Android xml</span></li>
-                            <li><span class="extstr">strings</span></li>
-                            <li><span class="extsbv">sbv</span></li>
-                            <li><span class="extsrt">srt</span></li>
-                            <li><span class="extvtt">vtt</span></li>
-                            <li><span class="extwix">wix</span></li>
-                            <li><span class="extpo">po</span></li>
-                            <li><span class="extg">g</span></li>
-                            <li><span class="exts">QT linguist ts</span></li>
-                        </ul>
-                    </td>
+                    <?php foreach ($sections as $formats) { ?>
+                        <td>
+                            <ul<?= count($formats) > 20 ? ' class="cols-3"' : '' ?>>
+                                <?php foreach ($formats as $extension => $info) { ?>
+                                    <li><span class="<?= htmlspecialchars($info['class']) ?>"><?= htmlspecialchars($info['label'] ?? $extension) ?></span></li>
+                                <?php } ?>
+                            </ul>
+                        </td>
+                    <?php } ?>
                 </tr>
                 </tbody>
             </table>
