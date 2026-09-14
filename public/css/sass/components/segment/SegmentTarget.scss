@@ -1,19 +1,7 @@
-@use 'commons/mixins';
-
-@use './tokens/colors';
-.activeSegmentButton {
-  @include mixins.box-shadow(inset 0 1px 2px rgba(0, 0, 0, 0.1));
-  @include mixins.linear-gradient(colors.$grey75, top, colors.$grey75, colors.$grey200);
-  border-color: colors.$grey200;
-}
-
-.editarea.micActive {
-  width: 94%;
-  padding-right: 7%;
-}
+@use '../../commons/mixins';
+@use '../../tokens/colors';
 
 .micSpeech {
-
   display: none;
   position: absolute;
   top: 10px;
@@ -35,14 +23,11 @@
   }
 
   &.micSpeechReceiving {
-    /*  @extend .activeSegmentButton; */
-
     svg g {
       fill: colors.$white;
     }
   }
 
-  /*    &.micSpeechActive .micBg, */
   &.micSpeechReceiving .micBg {
     background: red;
     -webkit-border-radius: 60px;
@@ -70,14 +55,8 @@
 }
 
 section.opened .micSpeech,
-section.opened .micSpeechActive,
-section.opened svg.micBgSpeechActive,
-section.opened svg.micBgSpeechReceiving {
+section.opened .micSpeechActive {
   display: block;
-}
-
-.tlbr-btn-act {
-  opacity: 1;
 }
 
 .micBg2 {
