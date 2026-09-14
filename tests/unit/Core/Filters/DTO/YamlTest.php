@@ -128,4 +128,29 @@ class YamlTest extends AbstractTest
             $this->assertSame($type, $dto->jsonSerialize()['inner_content_type']);
         }
     }
+
+    #[Test]
+    public function keysKeepTheirLeadingAndTrailingSpaces(): void
+    {
+        // a YAML mapping key is an arbitrary string, so " label " is a legitimate key
+        // distinct from "label" and must survive untouched
+        $dto = new Yaml();
+        $dto->setTranslateKeys([' label ']);
+        $dto->setContextKeys(['  note']);
+        $dto->setCharacterLimit(['limit  ']);
+
+        $result = $dto->jsonSerialize();
+        $this->assertSame([' label '], $result['translate_keys']);
+        $this->assertSame(['  note'], $result['context_keys']);
+        $this->assertSame(['limit  '], $result['character_limit']);
+    }
+
+    #[Test]
+    public function fromArrayKeepsKeyPadding(): void
+    {
+        $dto = new Yaml();
+        $dto->fromArray(['do_not_translate_keys' => [' label ', '   ']]);
+
+        $this->assertSame([' label ', '   '], $dto->jsonSerialize()['do_not_translate_keys']);
+    }
 }
