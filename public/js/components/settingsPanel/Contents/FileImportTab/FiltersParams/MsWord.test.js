@@ -135,6 +135,27 @@ describe('MsWord', () => {
     expect(updated.msWord.exclude_highlight_colors).toEqual(['yellow'])
   })
 
+  test('a style name loses its padding but keeps its internal space', async () => {
+    const user = userEvent.setup()
+    const {modifyingCurrentTemplate, currentTemplate} = setup()
+
+    const excludeStylesInput = screen.getAllByTestId('email-input')[0]
+
+    // the panel tells users to strip the spaces from a style name, so the space bar
+    // closing the pill is what they want; only the padding is dropped
+    await user.type(excludeStylesInput, ' testStyle ')
+    await user.keyboard('{Enter}')
+
+    await waitFor(() => expect(modifyingCurrentTemplate).toHaveBeenCalled())
+
+    const updater =
+      modifyingCurrentTemplate.mock.calls[
+        modifyingCurrentTemplate.mock.calls.length - 1
+      ][0]
+    const updated = updater(currentTemplate)
+    expect(updated.msWord.exclude_styles).toEqual(['testStyle'])
+  })
+
   test('does not call modifyingCurrentTemplate when nothing changed', () => {
     const {modifyingCurrentTemplate} = setup()
 
