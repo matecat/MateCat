@@ -7,15 +7,19 @@
 @use '../../commons/tooltip';
 
 @use '../../modals/LanguageSelector';
+@use '../../modals/SupportedFilesModal';
 @use '../common/HomePageSection';
-@use '../../upload-page';
+@use '../../UploadPage';
 @use '../signin/OnBoarding';
 @use '../Footer';
 
 @use '../SettingsPanel';
+@use '../settingsPanel/TemplateSelect';
 @use '../../tokens/colors';
 @use '../../commons/variables';
 @use '../UploadFile';
+@use '../UploadGdrive';
+@use '../TmGlossarySelect';
 
 .new_project__page {
   overflow-y: auto;
