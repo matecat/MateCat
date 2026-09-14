@@ -120,7 +120,9 @@ class MetaDataController extends KleinController
          *   job one is the answer whenever it is present.
          *
          * The engine parameters sit under `mt_extra` on both scopes; everything else, the
-         * threshold included, is reported flat.
+         * threshold included, is reported flat. `job.mt_extra` is omitted entirely when the job
+         * carries no engine override, so its absence, and not an empty object, is what tells a
+         * client to fall back to `project.mt_extra`.
          *
          * @see \Model\Jobs\JobSettingsResolver the same precedence, applied server side
          */
@@ -142,6 +144,8 @@ class MetaDataController extends KleinController
     private function getProjectInfo(ProjectStruct $project): stdClass
     {
         $metadata = new stdClass();
+        // Emitted even when empty, unlike the job scope: this is the creation-time baseline every
+        // project has, so an empty container here says nothing a client could act on.
         $metadata->mt_extra = new stdClass();
 
         $myExtraKeys = self::engineConfigurationKeys();
@@ -189,7 +193,6 @@ class MetaDataController extends KleinController
     private function getJobMetaData(JobStruct $job): object
     {
         $metadata = new stdClass();
-        $metadata->mt_extra = new stdClass();
         $jobMetaDataDao = new MetadataDao($this->getDatabase());
 
         $myExtraKeys = self::engineConfigurationKeys();
@@ -202,6 +205,10 @@ class MetaDataController extends KleinController
             $key = $metadatum->key;
 
             if (in_array($key, $myExtraKeys, true)) {
+                // Created on the first engine key and not before: the container is absent when the
+                // job overrides nothing, which is how a client tells "no job-scope override" from an
+                // override it has to read. The project scope always emits it, see getProjectInfo().
+                $metadata->mt_extra ??= new stdClass();
                 $metadata->mt_extra->$key = $metadatum->value;
             } else {
                 $metadata->$key = $metadatum->value;
