@@ -3119,14 +3119,116 @@
         "tags": [
           "Languages"
         ],
-        "summary": "Supported languages list.",
-        "description": "List of supported languages.",
+        "summary": "List of supported languages and their specific information",
+        "description": "List of all languages supported by Matecat and associated information (code, name, direction and relevant CLDR rules)",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Languages List",
+            "description": "The list of supported languages.",
             "schema": {
               "$ref": "#/definitions/Languages"
+            },
+            "examples": {
+              "application/json": [
+                {
+                  "code": "ar-SA",
+                  "name": "Arabic",
+                  "direction": "rtl",
+                  "plurals": {
+                    "name": "Arabic",
+                    "isoCode": "ar",
+                    "cardinal": [
+                      {
+                        "category": "zero",
+                        "rule": "n = 0",
+                        "human_rule": "Exactly 0",
+                        "example": "\u202b0 ولد حضر / 0.0000 ولد حضر\u202c"
+                      },
+                      {
+                        "category": "one",
+                        "rule": "n = 1",
+                        "human_rule": "Exactly 1",
+                        "example": "\u202bولد واحد حضر / ولد واحد حضر\u202c"
+                      },
+                      {
+                        "category": "two",
+                        "rule": "n = 2",
+                        "human_rule": "Exactly 2",
+                        "example": "\u202bولدان حضرا / ولدان حضرا\u202c"
+                      },
+                      {
+                        "category": "few",
+                        "rule": "n % 100 = 3..10",
+                        "human_rule": "Ends in 03–10",
+                        "example": "\u202b3 أولاد حضروا / 3.0 أولاد حضروا\u202c"
+                      },
+                      {
+                        "category": "many",
+                        "rule": "n % 100 = 11..99",
+                        "human_rule": "Ends in 11–99",
+                        "example": "\u202b11 ولدًا حضروا / 11.0 ولدًا حضروا\u202c"
+                      },
+                      {
+                        "category": "other",
+                        "rule": "",
+                        "human_rule": "Any other number",
+                        "example": "\u202b100 ولد حضروا / 0.1 ولد حضروا\u202c"
+                      }
+                    ],
+                    "ordinal": [
+                      {
+                        "category": "other",
+                        "rule": "",
+                        "human_rule": "Any number",
+                        "example": "\u202bاتجه إلى المنعطف الـ 15 يمينًا.\u202c"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "code": "it-IT",
+                  "name": "Italian (Italy)",
+                  "direction": "ltr",
+                  "plurals": {
+                    "name": "Italian (Italy)",
+                    "isoCode": "it",
+                    "cardinal": [
+                      {
+                        "category": "one",
+                        "rule": "i = 1 and v = 0",
+                        "human_rule": "Exactly 1 (no decimals)",
+                        "example": "1 giorno"
+                      },
+                      {
+                        "category": "many",
+                        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0..5",
+                        "human_rule": "Multiples of 1,000,000 (no decimals)",
+                        "example": "1.000.000 di giorni / 1 Mln di giorni"
+                      },
+                      {
+                        "category": "other",
+                        "rule": "",
+                        "human_rule": "Any other number",
+                        "example": "2 giorni / 1,5 giorni"
+                      }
+                    ],
+                    "ordinal": [
+                      {
+                        "category": "many",
+                        "rule": "n = 11,8,80,800",
+                        "human_rule": "Exactly 8, 11, 80, or 800",
+                        "example": "Prendi l’8° a destra."
+                      },
+                      {
+                        "category": "other",
+                        "rule": "",
+                        "human_rule": "Any other number",
+                        "example": "Prendi la 7° a destra."
+                      }
+                    ]
+                  }
+                }
+              ]
             }
           },
           "default": {
@@ -7215,6 +7317,7 @@
     },
     "Languages": {
       "type": "array",
+      "description": "The supported languages, sorted alphabetically by name.",
       "items": {
         "$ref": "#/definitions/Language"
       }
@@ -7224,11 +7327,13 @@
       "properties": {
         "code": {
           "type": "string",
-          "description": "Rfc code"
+          "description": "BCP 47 language+region code",
+          "example": "it-IT"
         },
         "name": {
           "type": "string",
-          "description": "Language name"
+          "description": "Language name",
+          "example": "Italian (Italy)"
         },
         "direction": {
           "type": "string",
@@ -7236,7 +7341,76 @@
             "ltr",
             "rtl"
           ],
-          "description": "Language direction, ltr (left-to-right text) or rtl (right-to-left text)"
+          "description": "Language direction, ltr (left-to-right text) or rtl (right-to-left text)",
+          "example": "ltr"
+        },
+        "plurals": {
+          "$ref": "#/definitions/LanguagePluralRules",
+          "x-nullable": true
+        }
+      }
+    },
+    "LanguagePluralRules": {
+      "type": "object",
+      "description": "The CLDR plural rules of the language, as used by the plural and selectordinal arguments of an ICU message. It is null when no rules are available for the language.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the language the rules were resolved from. Regional variants of the same language share one rule set, so this can name a different variant than the name of the language you asked for.",
+          "example": "Italian (Italy)"
+        },
+        "isoCode": {
+          "type": "string",
+          "description": "The ISO 639 code the rules are keyed by. A regional code falls back to its base language, so it-IT resolves to it; pt_pt is currently the only rule set defined per region.",
+          "example": "it"
+        },
+        "cardinal": {
+          "type": "array",
+          "description": "The cardinal categories, in CLDR order. They apply to a plural argument, as in {count, plural, one{...} other{...}}.",
+          "items": {
+            "$ref": "#/definitions/PluralCategoryRule"
+          }
+        },
+        "ordinal": {
+          "type": "array",
+          "description": "The ordinal categories, in CLDR order. They apply to a selectordinal argument, as in {count, selectordinal, one{...} other{...}}.",
+          "items": {
+            "$ref": "#/definitions/PluralCategoryRule"
+          }
+        }
+      }
+    },
+    "PluralCategoryRule": {
+      "type": "object",
+      "description": "A single CLDR plural category of a language.",
+      "properties": {
+        "category": {
+          "type": "string",
+          "enum": [
+            "zero",
+            "one",
+            "two",
+            "few",
+            "many",
+            "other"
+          ],
+          "description": "The CLDR category name. It is the selector to use in an ICU message.",
+          "example": "one"
+        },
+        "rule": {
+          "type": "string",
+          "description": "The formal CLDR rule expression. It is empty for the other category, which matches everything the preceding categories do not.",
+          "example": "i = 1 and v = 0"
+        },
+        "human_rule": {
+          "type": "string",
+          "description": "A plain English reading of the rule.",
+          "example": "Exactly 1 (no decimals)"
+        },
+        "example": {
+          "type": "string",
+          "description": "A sample phrase in the language that matches the category. It can be empty.",
+          "example": "1 giorno"
         }
       }
     },
