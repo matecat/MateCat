@@ -10,22 +10,6 @@
   width: 100%;
 }
 
-.share-popup-top h3 {
-  font-size: variables.$font-size-small !important;
-  text-align: left;
-  margin-top: -5px !important;
-  font-weight: normal;
-}
-
-.share-popup-top-label,
-.share-popup-list-title,
-.share-popup-bottom-label {
-  float: left;
-  text-align: left;
-  font-size: variables.$font-size-small;
-  line-height: 20px;
-}
-
 .share-popup-container-bottom p {
   margin: 0 !important;
   text-align: left;
@@ -42,18 +26,6 @@
   margin: 0 !important;
   margin: 0 !important;
   padding: 5px 12px;
-}
-
-.share-popup-input-key {
-  font-weight: bold;
-  border: 0;
-  text-align: center;
-  width: 165px;
-  border-bottom: 1px dashed colors.$grey200;
-}
-
-.share-popup-input-key:focus {
-  border: 0;
 }
 
 .share-popup-copy-result {
