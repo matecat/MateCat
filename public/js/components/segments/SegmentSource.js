@@ -103,15 +103,19 @@ const SegmentSource = forwardRef(({segment}, ref) => {
   const context = useContext(SegmentContext)
   const {segment: contextSegment, userInfo: contextUserInfo} = context
 
-  // Holds this render's methods, reassigned in full every render (not a hook) so the three
-  // permanently-stable store listeners below (endSplitMode, setTaggedSource, refreshTagMap —
-  // registered once with SegmentStore, which matches handlers by reference) can call the
-  // current render's other methods instead of the ones that existed when they were created.
+  // Two jobs bundled into one object: (1) a handful of call sites that are frozen relative to
+  // render — setTaggedSource (permanently stable), refreshTagMap's own body and setTimeout, and
+  // the mount-only effect's setTimeout below — read other methods through methodsRef.current
+  // instead of closing over them directly, so they always reach whichever version is current
+  // when they actually run, not whichever existed when they were created; (2) the object
+  // returned by useImperativeHandle below, exposing every method to tests via ref.current.x.
+  // Everywhere else, methods call each other directly — declaration order doesn't matter, since
+  // none of them run until after the whole render body has finished executing at least once.
   const methodsRef = useRef({})
   const stableMethodsAssignedRef = useRef(false)
 
-  // Same idea as methodsRef, but for the handful of segment/context/state values those three
-  // listeners read directly rather than through another method.
+  // Same idea as methodsRef, but for the handful of segment/context/state values setTaggedSource
+  // and helpAiAssistant's delayed setTimeout read directly rather than through another method.
   const latestRef = useRef({})
 
   // Refs replacing plain class-instance fields that are mutated outside the render/state cycle.
@@ -255,9 +259,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       )
       decoratorsStructureRef.current.push(newDecorator)
     } else {
-      methodsRef.current.removeDecorator(
-        DraftMatecatConstants.LEXIQA_DECORATOR,
-      )
+      removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
     }
   }
 
@@ -321,19 +323,16 @@ const SegmentSource = forwardRef(({segment}, ref) => {
             fromJS(missingGlossaryItems),
           ))
       ) {
-        methodsRef.current.addQaCheckGlossaryDecorator()
+        addQaCheckGlossaryDecorator()
         changedDecorator = true
-        nextActiveDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] =
-          true
+        nextActiveDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] = true
       } else if (
         prevMissingGlossaryItems &&
         prevMissingGlossaryItems.length > 0 &&
         (!missingGlossaryItems || missingGlossaryItems.length === 0)
       ) {
         changedDecorator = true
-        methodsRef.current.removeDecorator(
-          DraftMatecatConstants.QA_GLOSSARY_DECORATOR,
-        )
+        removeDecorator(DraftMatecatConstants.QA_GLOSSARY_DECORATOR)
         nextActiveDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] =
           false
       }
@@ -347,16 +346,14 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       ) {
         nextActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = true
         changedDecorator = true
-        methodsRef.current.addGlossaryDecorator()
+        addGlossaryDecorator()
       } else if (
         size(prevGlossary) > 0 &&
         (!glossary || size(glossary) === 0)
       ) {
         nextActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false
         changedDecorator = true
-        methodsRef.current.removeDecorator(
-          DraftMatecatConstants.GLOSSARY_DECORATOR,
-        )
+        removeDecorator(DraftMatecatConstants.GLOSSARY_DECORATOR)
       }
       //Lexiqa
       const {lexiqa} = segment
@@ -377,27 +374,23 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       ) {
         nextActiveDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = true
         changedDecorator = true
-        methodsRef.current.addLexiqaDecorator()
+        addLexiqaDecorator()
       } else if (prevLexiqaSource && !currentLexiqaSource) {
         nextActiveDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
         changedDecorator = true
-        methodsRef.current.removeDecorator(
-          DraftMatecatConstants.LEXIQA_DECORATOR,
-        )
+        removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
       }
 
       // Search
       if (prevProps && prevProps.segment.inSearch) {
         nextActiveDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = false
         changedDecorator = true
-        methodsRef.current.removeDecorator(
-          DraftMatecatConstants.SEARCH_DECORATOR,
-        )
+        removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR)
       }
       if (!firstIcuCheckRef.current && icuEnabled) {
         firstIcuCheckRef.current = true
         changedDecorator = true
-        methodsRef.current.addIcuDecorator()
+        addIcuDecorator()
       }
     } else {
       //Search
@@ -416,12 +409,12 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       ) {
         //There are more occurrences and the current change
         // Cleanup all decorators
-        methodsRef.current.removeDecorator()
+        removeDecorator()
         nextActiveDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
         nextActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false
         nextActiveDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] =
           false
-        methodsRef.current.addSearchDecorator()
+        addSearchDecorator()
         nextActiveDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = true
         changedDecorator = true
       }
@@ -444,8 +437,8 @@ const SegmentSource = forwardRef(({segment}, ref) => {
     // If tag creation has failed, return
     if (!customTag) return
     // remove lexiqa to avoid insertion error
-    methodsRef.current.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
-    methodsRef.current.removeDecorator(DraftMatecatConstants.SPLIT_DECORATOR)
+    removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
+    removeDecorator(DraftMatecatConstants.SPLIT_DECORATOR)
     const decorator = new CompositeDecorator(decoratorsStructureRef.current)
     let newEditorState = EditorState.set(editorState, {
       decorator,
@@ -468,8 +461,8 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       }
     }
 
-    methodsRef.current.insertTagAtSelection('splitPoint')
-    methodsRef.current.updateSplitNumberNew(1)
+    insertTagAtSelection('splitPoint')
+    updateSplitNumberNew(1)
   }
 
   const splitSegmentNew = (split) => {
@@ -509,10 +502,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
         anchorOffset: start - addZwspExtraStepBefore,
         focusOffset: end + addZwspExtraStepAfter,
       })
-      let newEditorState = EditorState.forceSelection(
-        editorState,
-        newSelection,
-      )
+      let newEditorState = EditorState.forceSelection(editorState, newSelection)
       const contentState = newEditorState.getCurrentContent()
       // remove split tag
       if (segment.openSplit && entityName === tagSignatures.splitPoint.type) {
@@ -529,7 +519,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
           newEditorState,
           newSelection,
         )
-        methodsRef.current.updateSplitNumberNew(-1)
+        updateSplitNumberNew(-1)
         newEditorState = EditorState.set(newEditorState, {
           currentContent: contentStateWithoutSplitPoint,
         })
@@ -842,7 +832,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
 
     const prevSegment = prevSegmentRef.current
 
-    methodsRef.current.checkDecorators({segment: prevSegment})
+    checkDecorators({segment: prevSegment})
 
     // Check if splitMode
     if (!prevSegment.openSplit && segment.openSplit) {
@@ -905,24 +895,20 @@ const SegmentSource = forwardRef(({segment}, ref) => {
     prevEditorStateRef.current = editorState
   })
 
-  // Lets the three permanently-stable listeners below (registered once with
-  // SegmentStore, which matches handlers by reference) call this render's
-  // methods without going stale. Reassigned in full every render — unlike
-  // the old instanceRef, nothing needs its identity to stay stable.
   // Single stable object, mutated in place every render (never recreated),
-  // used BOTH for internal cross-method calls (the three permanently-stable
-  // store listeners reach other current-render methods through it) AND as
-  // the ref exposed to tests below — so a jest.spyOn(ref.current, 'x')
-  // affects the same property internal code actually calls through, and
-  // survives subsequent re-renders instead of being silently replaced.
-  // Assigned exactly once: setTaggedSource (its own SET_SEGMENT_TAGGED
-  // listener is intentionally never removed, see above) and helpAiAssistant
-  // (tests spy on it via the exposed ref, across a re-render triggered by
-  // its own setIsShowingOptionsToolbar call — a spy on a freshly-recreated-
-  // every-render function would be silently discarded there) both need a
-  // stable identity; reassigning them here every render, even to the same
-  // underlying function, would still blow away a spy sitting on the
-  // property. Everything else below is fine to refresh every render.
+  // used both for the few frozen-relative-to-render call sites noted where
+  // methodsRef is declared above, and as the ref exposed to tests below —
+  // so a jest.spyOn(ref.current, 'x') affects the same property internal
+  // code actually calls through, and survives subsequent re-renders instead
+  // of being silently replaced. Assigned exactly once: setTaggedSource (its
+  // own SET_SEGMENT_TAGGED listener is intentionally never removed, see
+  // above) and helpAiAssistant (tests spy on it via the exposed ref, across
+  // a re-render triggered by its own setIsShowingOptionsToolbar call — a spy
+  // on a freshly-recreated-every-render function would be silently discarded
+  // there) both need a stable identity; reassigning them here every render,
+  // even to the same underlying function, would still blow away a spy
+  // sitting on the property. Everything else below is fine to refresh every
+  // render.
   if (!stableMethodsAssignedRef.current) {
     stableMethodsAssignedRef.current = true
     Object.assign(methodsRef.current, {
@@ -1005,6 +991,11 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       !editorRef.current._latestEditorState.getSelection().isCollapsed(),
     )
 
+    // Not a direct call: tests spy on this property via the exposed ref
+    // (jest.spyOn(ref.current, 'helpAiAssistant')), which patches
+    // methodsRef.current.helpAiAssistant in place, not the underlying
+    // helpAiAssistantRef.current value — calling the closed-over local
+    // variable here would silently bypass that spy.
     methodsRef.current.helpAiAssistant()
   }
 
@@ -1039,7 +1030,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       }
 
   const isEnabledAiAssistantButton = isValidPhraseToAiAssistant({
-    phrase: methodsRef.current.getSelectedWords(),
+    phrase: getSelectedWords(),
   })
 
   const optionsToolbar = isShowingOptionsToolbar && (
@@ -1059,7 +1050,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
               if (isEnabledAiAssistantButton) {
                 SegmentActions.helpAiAssistant({
                   sid: contextSegment.sid,
-                  value: methodsRef.current.getSelectedWords(),
+                  value: getSelectedWords(),
                 })
               }
             }}
@@ -1077,8 +1068,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
         onMouseDown={() => {
           SegmentActions.openGlossaryFormPrefill({
             sid: contextSegment.sid,
-            [TERM_FORM_FIELDS.ORIGINAL_TERM]:
-              methodsRef.current.getSelectedWords(),
+            [TERM_FORM_FIELDS.ORIGINAL_TERM]: getSelectedWords(),
           })
         }}
       >
