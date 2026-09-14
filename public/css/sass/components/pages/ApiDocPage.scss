@@ -1,4 +1,5 @@
 @use '../../tokens/colors';
+@use 'commons/variables';
 ﻿/*API DOC page*/
 
 
@@ -33,7 +34,7 @@ h2 {
 h3 {
   margin: 0px 0 0 0;
   padding: 0;
-  font-size: 18px;
+  font-size: variables.$font-size-base;
   color: colors.$grey400 !important;
   font-weight: normal !important;
 }
@@ -82,7 +83,7 @@ h3 {
   margin-right: 40px;
   font-weight: bold !important;
   font-family: Calibri, Arial, Helvetica, sans-serif;
-  font-size: 18px;
+  font-size: variables.$font-size-base;
   color: colors.$black !important;
 }
 
@@ -358,7 +359,7 @@ code {
 .outsource-price {
   text-align: center;
   display: block;
-  font-size: 18px;
+  font-size: variables.$font-size-base;
   background: colors.$green300;
   font-weight: bold;
   padding: 10px;
@@ -378,7 +379,7 @@ code {
 }
 
 .outsource-delivery strong {
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
 }
 
 /* revise page */
@@ -387,7 +388,7 @@ code {
   margin-top: 40px;
   margin-left: 10px;
   color: colors.$grey700;
-  font-size: 20px;
+  font-size: variables.$font-size-big;
 }
 
 .revision-info tr[data-vote='Excellent'],
@@ -415,7 +416,7 @@ td[data-vote='Fail'] {
 }
 
 .tablestats.revision {
-  font-size: 18px;
+  font-size: variables.$font-size-base;
 }
 
 .tablestats.revision td,
@@ -424,12 +425,12 @@ td[data-vote='Fail'] {
 }
 
 .vote-howto p {
-  font-size: 18px;
+  font-size: variables.$font-size-base;
   line-height: 30px;
 }
 
 .reviselog .percent {
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
 }
 
 .details-anchor {
@@ -440,7 +441,7 @@ td[data-vote='Fail'] {
 }
 
 #details-link {
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   color: colors.$grey400;
   text-shadow: none;
   margin-top: 15px;
@@ -524,7 +525,7 @@ td[data-vote='Fail'] {
 table.tablestats.revision-info td,
 table.tablestats.revision-info th {
   padding: 15px;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
 }
 
 /* Table Equivalent Translated Score Highlight */
@@ -551,7 +552,7 @@ table.tablestats.revision-info th {
 }
 
 .qa_eq_td {
-  font-size: 18px !important;
+  font-size: variables.$font-size-base !important;
   border-top: 1px solid;
   border-bottom: 1px solid !important;
   border-left: 0 !important;
@@ -583,7 +584,7 @@ blockquote {
   padding: 10px 20px;
   margin: 20px 30px 30px 30px;
   background: colors.$grey75;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   border-left: 5px solid colors.$grey400;
   width: 700px;
 }
@@ -673,7 +674,7 @@ blockquote {
 }
 
 .chart-container span {
-  font-size: 18px;
+  font-size: variables.$font-size-base;
 }
 
 .chart-container text {

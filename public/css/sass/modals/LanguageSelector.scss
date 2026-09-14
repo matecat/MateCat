@@ -1,5 +1,6 @@
 /* Language Selector Modal */
 @use "../tokens/colors";
+@use 'commons/variables';
 
 #matecat-modal-languages {
   $light-blue: colors.$blue500;
@@ -7,18 +8,9 @@
   $dark-blue: colors.$blue900;
 
   $placeholder-gray: #cdd4de;
-  $btn-shadow-gray: colors.$grey500;
-  $btn-hover-blue: colors.$blue600;
 
   $medium-gray: colors.$grey300;
   $dark-gray: colors.$grey500;
-
-  /* Modal */
-  .matecat-modal {
-    button:focus {
-      border: 1px solid colors.$blue500;
-    }
-  }
 
   /* Modal Content */
   .matecat-modal-content {
@@ -75,7 +67,7 @@
       .language-name {
         display: block;
         color: white;
-        font-size: 14px;
+        font-size: variables.$font-size-xsmall;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -112,7 +104,6 @@
         }
       }
     }
-    .language-from .language-search input[type='text'],
     .language-to .language-search input[type='text'] {
       border: none;
       margin: 0;
@@ -126,7 +117,6 @@
       }
     }
     /* Tag chips */
-    .language-from .language-search .react-tagsinput,
     .language-to .language-search .react-tagsinput {
       width: 100%;
       & > span {
@@ -137,7 +127,6 @@
         }
       }
     }
-    .language-from .language-search .tag,
     .language-to .language-search .tag {
       position: relative;
       display: inline-block;

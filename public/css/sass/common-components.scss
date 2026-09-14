@@ -3,6 +3,9 @@
 @use 'components/common/UserDisconnectedBox';
 @use 'components/common/UserMenu';
 @use 'components/common/OnBoardingTooltip';
+@use 'components/common/WrapperLoader';
+@use 'tokens/colors';
+@use 'commons/variables';
 
 .ui-user-dropdown-image {
   display: inline-block;
@@ -44,5 +47,91 @@
   vertical-align: middle;
   flex-shrink: 0;
   margin-right: 4px;
+}
+
+.button-loader {
+  background: url(/public/img/loader.gif) center center no-repeat;
+  width: 20px;
+  height: 20px;
+  visibility: hidden;
+  position: absolute;
+  background-size: 20px 20px;
+  left: 15px;
+  opacity: 0;
+}
+
+.button-loader.show {
+  visibility: visible;
+  opacity: 1;
+  -webkit-transition: all 0.3s ease-in;
+  -moz-transition: all 0.3s ease-in;
+  -o-transition: all 0.3s ease-in;
+}
+
+.matecat-modal-content .buttons-container,
+.matecat-modal-overlay-content .buttons-container {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+  width: 100%;
+  padding: 20px;
+}
+
+.matecat-modal-content .message-modal {
+  padding: 25px 0;
+}
+
+.matecat-modal-content .modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  gap: 16px;
+}
+
+.modal-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  .modal-grid__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+  }
+}
+
+.language-dropdown-item-container {
+  display: grid;
+  grid-template-columns: 70px auto;
+  gap: 10px;
+  align-items: center;
+  overflow: hidden;
+
+  .code-badge {
+    min-width: 60px;
+    font-weight: normal;
+
+    > span {
+      display: block;
+      text-align: center;
+      background-color: colors.$grey400;
+      border-radius: 4px;
+      padding: 2px 4px;
+      color: colors.$white;
+      font-size: variables.$font-size-xsmall;
+      white-space: nowrap;
+    }
+  }
+}
+
+body svg {
+  padding: 0 !important;
+}
+
+.pull-left {
+  float: left !important;
+}
+
+.pull-right {
+  float: right !important;
 }
 

@@ -5,9 +5,8 @@ import ModalsActions from '../../actions/ModalsActions'
 import SearchUtils from '../header/cattol/search/searchUtils'
 import CatToolActions from '../../actions/CatToolActions'
 import AlertModal from './AlertModal'
+import {Button, BUTTON_TYPE, BUTTON_MODE} from '../common/Button/Button'
 
-export const HIDE_UNLOCK_ALL_SEGMENTS_MODAL_STORAGE =
-  'unlock-segments-modal' + config.id_job
 export const ReplaceAllModal = ({search}) => {
   const checkbox = useRef()
   const successCallback = () => {
@@ -41,23 +40,17 @@ export const ReplaceAllModal = ({search}) => {
     })
   }
 
-  const checkboxCheck = () => {
-    if (checkbox.current.checked) {
-      localStorage.setItem(HIDE_UNLOCK_ALL_SEGMENTS_MODAL_STORAGE, 1)
-    }
-  }
-
   return (
     <div className="message-modal">
       <div className="matecat-modal-middle">
-        <div className={'ui one column grid'}>
-          <div className="column left aligned" style={{fontSize: '18px'}}>
+        <div className="modal-grid">
+          <div className="modal-grid__body" style={{fontSize: '18px'}}>
             You are about to replace this text in all search results.
             <br />
             To let you easily review these changes, modified segments will
             revert to <b>{config.isReview ? 'translated' : 'draft'}</b> status.
           </div>
-          <div className="column left aligned">
+          <div className="modal-grid__body">
             <input
               id="checkbox_unlock"
               type="checkbox"
@@ -68,21 +61,16 @@ export const ReplaceAllModal = ({search}) => {
               {` Include locked segments`}
             </label>
           </div>
-          <div className="column right aligned">
-            <div
-              className="ui button cancel-button"
-              onClick={() => {
-                ModalsActions.onCloseModal()
-              }}
+          <div className="modal-buttons">
+            <Button
+              mode={BUTTON_MODE.OUTLINE}
+              onClick={() => ModalsActions.onCloseModal()}
             >
               Cancel
-            </div>
-            <div
-              className="ui primary button right floated"
-              onClick={successCallback}
-            >
+            </Button>
+            <Button type={BUTTON_TYPE.PRIMARY} onClick={successCallback}>
               Replace all
-            </div>
+            </Button>
           </div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 @use '../../tokens/colors';
+@use 'commons/variables';
 .header-buttons {
   display: flex;
   gap: 20px;
@@ -53,9 +54,9 @@
     display: flex;
     flex-direction: column;
     align-items: start;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     > :first-child {
-      font-size: 18px;
+      font-size: variables.$font-size-base;
       font-weight: bold;
       color: black;
     }
@@ -82,7 +83,7 @@
   .item {
     border-radius: 2px;
     padding: 8px !important;
-    font-size: 16px !important;
+    font-size: variables.$font-size-small !important;
     cursor: pointer;
     width: 100%;
     display: block;

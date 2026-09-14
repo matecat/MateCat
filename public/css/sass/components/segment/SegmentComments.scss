@@ -87,7 +87,7 @@
  */
 .comment-body {
   color: colors.$grey1300;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   margin: 12px 0 16px;
   word-wrap: break-word;
 }
@@ -191,7 +191,7 @@
  */
 .comment-label {
   display: block;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
 }
 
 /*
@@ -244,7 +244,7 @@ a.comment-link-btn,
 a.comment-link-btn:visited {
   color: colors.$grey600;
   display: inline-block;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   text-decoration: underline;
 }
 
@@ -272,7 +272,7 @@ a.comment-view-link:visited {
 .comment-nth-label {
   display: block;
   border-bottom: 1px solid colors.$grey200;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   color: colors.$grey400;
   line-height: 1.8;
   margin-bottom: 6px;
@@ -373,7 +373,7 @@ article .comment-balloon-outer {
 /* Warnings style.css line 136 */
 .comment-warnings {
   color: colors.$red400;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
 }
 
 /*
@@ -529,7 +529,7 @@ section:hover .comment-icon-btn,
   padding: 8px 4px;
   div[class*='input-checkbox'] > span {
     color: colors.$grey400;
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
   }
 }
 .comment-thread-footer {

@@ -25,7 +25,6 @@
      "autopropagated_from":"0",
      "repetitions_in_chunk":"1",
      "has_reference":"false",
-     "parsed_time_to_edit":["00","00","00","00"],
      "notes":null
  }
  */
@@ -173,7 +172,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             splitted: true,
             autopropagated_from: 0,
             has_reference: 'false',
-            parsed_time_to_edit: ['00', '00', '00', '00'],
             readonly: false,
             segment: splittedSourceAr[i],
             decodedSource: transformTagsToText(

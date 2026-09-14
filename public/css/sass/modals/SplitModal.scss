@@ -1,4 +1,5 @@
 @use "../tokens/colors";
+@use 'commons/variables';
 
 /*Split modal*/
 .popup-split {
@@ -20,7 +21,7 @@
     //width: 100%;
     .popup-split-job-id {
       font-weight: 100;
-      font-size: 16px;
+      font-size: variables.$font-size-small;
       color: colors.$grey500;
       margin-right: 5px;
     }
@@ -30,21 +31,18 @@
     padding: 0;
     margin-top: 0px;
     margin-right: 15px !important;
-    font-size: 18px;
+    font-size: variables.$font-size-base;
     text-align: right;
     color: colors.$red400 !important;
     display: block;
     line-height: 13px !important;
-  }
-  .error-number .error-count {
-    display: block;
   }
   .error-count.current {
     color: black !important;
   }
   .splitbtn-cont {
     overflow: hidden;
-    font-size: 18px;
+    font-size: variables.$font-size-base;
     color: colors.$grey500;
     font-weight: bold;
     display: flex;
@@ -61,41 +59,16 @@
       gap: 10px;
     }
   }
-  .jobcontainer.splitted .splitbtn-cont {
-    display: none;
-  }
   .splitbtn-cont .label {
     padding: 5px 10px;
   }
 
-  .nosplit {
-    float: right;
-    font-size: 20px;
-    color: colors.$grey500;
-    display: none;
-    margin: 45px 140px 0 0;
-  }
-  .jobcontainer.splitted .nosplit {
-    display: block;
-  }
   .none {
     display: none;
   }
 
-  input[type='text'][disabled] {
-    background: colors.$grey75;
-  }
-
-  h2 {
-    font-size: 24px !important;
-    font-weight: bold !important;
-    padding: 0;
-    margin: 15px 10px !important;
-    margin-bottom: 21px !important;
-  }
-
   h3 {
-    font-size: 20px !important;
+    font-size: variables.$font-size-big !important;
     font-weight: bold !important;
     color: colors.$grey1300 !important;
     display: inline-block;
@@ -103,7 +76,7 @@
   }
 
   h4 {
-    font-size: 18px;
+    font-size: variables.$font-size-base;
   }
 
   .container-split-select {
@@ -115,7 +88,7 @@
       height: 37px;
       padding: 4px;
       color: colors.$grey500;
-      font-size: 18px;
+      font-size: variables.$font-size-base;
       border: 1px solid colors.$grey500;
       box-sizing: border-box;
       display: inline-block;
@@ -125,50 +98,6 @@
   }
 
 
-  .popup-split-project-title {
-    display: none;
-  }
-
-  .splitbtn-cont.disabled {
-    background: none;
-    border: none;
-    opacity: 1 !important;
-  }
-  .disabled,
-  .disabled:hover,
-  .disabled:active {
-    opacity: 0.5 !important;
-    cursor: default;
-    -moz-box-shadow: none;
-    -webkit-box-shadow: none;
-    border: 1px solid colors.$grey500;
-    background: colors.$grey200;
-  }
-
-  .split-box2 {
-    display: none;
-    width: 670px;
-    margin: 0 auto;
-    position: fixed;
-    padding: 0px 0 0px 0;
-    top: 50%;
-    left: 50%;
-    margin: -300px 0 0 -350px;
-    z-index: 999999;
-    background: colors.$white;
-    box-shadow: 0px 0px 25px colors.$black;
-    border-radius: 2px;
-    text-align: left;
-    font-size: 18px;
-    border: 1px solid colors.$grey500;
-  }
-  .split-box3 .input,
-  .split-box2 .input {
-    font-size: 16px;
-    width: 20px;
-    margin-top: -1px;
-    text-align: center;
-  }
   .split-box3 {
     margin: 5px 15px;
   }
@@ -188,17 +117,13 @@
     width: 70px;
     margin-right: 0px;
     padding: 6px 5px 5px 5px;
-    font-size: 18px;
+    font-size: variables.$font-size-base;
     background: colors.$white;
     background-size: 13px 11px;
     box-sizing: content-box;
     border: 1px solid colors.$grey200;
     border-radius: 6px;
     box-shadow: inset 0 1px 3px colors.$grey200;
-  }
-
-  .btn-cancel {
-    padding: 2px 15px !important;
   }
 
   .split-box3 .jobs li {
@@ -214,47 +139,10 @@
   .split-box3 .jobs li.void {
     border: 1px solid red !important;
   }
-  .error-perc {
-    float: left;
-    width: 82%;
-    margin: 25px 0 -20px 20px;
-    text-align: right;
-    color: colors.$red500;
-    font-size: 12px;
-  }
-
-  .error-message {
-    background: colors.$red400;
-    color: colors.$white;
-    margin: 0 0 10px 0;
-    float: left;
-    font-weight: bold;
-    width: 100%;
-    -moz-border-radius: 2px;
-    border-radius: 2px;
-    border: 1px solid colors.$orange500;
-    margin-top: 10px;
-  }
-
   .error {
     margin-right: auto;
     color: colors.$red500;
   }
-
-  .jobcontainer {
-    padding-bottom: 50px;
-    border-bottom: 1px dashed colors.$grey200;
-  }
-
-  div.wrapper div:last-child {
-    border: none;
-  }
-
-  .error-message p {
-    padding: 0 10px 0 10px;
-    line-height: 40px !important;
-  }
-
 
   .jobs h4 {
     margin: 11px 0 0 10px;
@@ -269,20 +157,20 @@
     margin: 0;
     float: left;
     padding: 10px;
-    font-size: 18px;
+    font-size: variables.$font-size-base;
     color: colors.$black;
     text-align: right;
   }
   .job-perc p {
     float: left;
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
     margin: 1px 6px 0 3px !important;
     padding: 0;
     line-height: 30px !important;
   }
 
   .total .wordsum {
-    font-size: 20px;
+    font-size: variables.$font-size-big;
     color: colors.$grey500;
     text-align: right;
     margin-right: 15px;
@@ -293,21 +181,6 @@
     span {
       color: black;
     }
-  }
-
-  .disabled,
-  .disabled:hover,
-  .disabled:active {
-    opacity: 0.5 !important;
-    cursor: default;
-    -moz-box-shadow: none;
-    -webkit-box-shadow: none;
-    background: colors.$grey200 !important;
-  }
-
-  .btn-cancel {
-    padding: 2px 15px !important;
-    float: right;
   }
 
   .total .wordsum .total-w,

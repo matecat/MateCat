@@ -22,7 +22,7 @@
 .tab.glossary .input-with-label__wrapper label {
   display: block;
   margin-bottom: 4px;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   line-height: 16px;
   color: colors.$grey700;
 }
@@ -98,7 +98,7 @@
   text-align: left;
   color: colors.$grey700;
   font-style: italic;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   border: none;
   background: none;
   cursor: pointer;
@@ -156,7 +156,7 @@
   border: 1px solid colors.$grey300;
   padding: 4px 8px;
   outline: none;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   line-height: 16px;
 }
 
@@ -205,7 +205,7 @@
 
 .tab.glossary input.glossary_search-input {
   width: 300px;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   border: none;
 }
 
@@ -229,7 +229,7 @@
   margin-left: 4px;
   padding: 6px 12px;
   border-radius: 2px;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   line-height: 20px;
   background: colors.$blue500;
   user-select: none;
@@ -248,7 +248,7 @@
   text-decoration: none;
   padding: 6px 12px;
   border-radius: 2px;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   line-height: 20px;
   background: colors.$white;
   user-select: none;
@@ -419,7 +419,7 @@ span {
 
 .tab.glossary .glossary_items .glossary_item .glossary-item_column .glossary_word {
   font-weight: 700;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   line-height: 20px;
   color: colors.$black;
   display: flex;
@@ -448,7 +448,7 @@ span {
 .tab.glossary .glossary_items .glossary_item .glossary-item_column .glossary_word .forbidden-badge {
   background-color: colors.$grey100;
   font-weight: normal;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   color: colors.$grey700;
   border-radius: 4px;
   padding: 2px 6px;
@@ -593,7 +593,7 @@ span {
 }
 
 .tab.glossary .no_keys_glossary > p {
-  font-size: 16px;
+  font-size: variables.$font-size-small;
 }
 
 .tab.glossary .select--is-disabled {

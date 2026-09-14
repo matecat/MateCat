@@ -166,3 +166,67 @@
     background-color: transparent;
   }
 }
+
+.projectbar {
+  color: colors.$grey500;
+  display: flex;
+  justify-content: flex-start;
+  padding: 10px 115px 10px 5%;
+  align-items: center;
+  span.fileFormat {
+    padding: 10px;
+    background-size: 25px !important;
+    line-height: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: bold;
+    font-size: variables.$font-size-small;
+  }
+  .projectbar-filename {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    max-width: 80%;
+  }
+  .button-notes {
+    color: colors.$white !important;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 2px;
+    font-size: variables.$font-size-small;
+    background: colors.$blue500;
+    user-select: none;
+    cursor: pointer;
+    min-width: 95px;
+    margin-left: 15px;
+    &:hover {
+      background-color: colors.$blue600;
+    }
+    svg {
+      display: block;
+      margin-top: 1px;
+      float: left;
+    }
+  }
+  .projectbar-wordcounter {
+    min-width: 140px;
+    display: flex;
+    height: 35px;
+    font-size: variables.$font-size-small;
+    align-items: center;
+    padding-right: 8px;
+
+    > span {
+      display: list-item;
+      list-style-type: disc;
+      list-style-position: inside;
+    }
+  }
+}
+@media screen and (max-width: 1180px) {
+  .projectbar {
+    padding-left: 6%;
+  }
+}

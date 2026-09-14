@@ -1,0 +1,233 @@
+@use '../tokens/colors';
+@use '../commons/variables';
+
+/********Modal window ****/
+.matecat-modal,
+.matecat-modal-overlay {
+  display: block;
+  z-index: 12;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: colors.$black;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.matecat-modal p,
+.matecat-modal-overlay p {
+  line-height: 25px;
+}
+
+.matecat-modal .matecat-modal-header,
+.matecat-modal-overlay .matecat-modal-header {
+  text-align: left;
+  min-height: 50px;
+  border-radius: 16px 16px 0 0;
+  overflow: visible;
+  max-height: inherit;
+  font-size: 23px;
+  background: colors.$blue900;
+  padding: 7px 10px 7px 24px;
+  background-size: 35px;
+  color: colors.$white;
+  margin: 0 !important;
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  position: relative;
+  grid-column-gap: 8px;
+  align-items: center;
+}
+
+.matecat-modal .matecat-modal-header h2,
+.matecat-modal-overlay .matecat-modal-header h2 {
+  margin: 0 !important;
+  line-height: 30px;
+  font-size: 24px;
+  width: auto !important;
+  float: none !important;
+  font-family: Calibri, Arial, Helvetica, sans-serif;
+  font-weight: normal;
+}
+
+.matecat-modal .modal-logo,
+.matecat-modal-overlay .modal-logo {
+  background-size: inherit;
+  background: url(/public/img/logo_matecat_small_white.svg) no-repeat;
+  background-position-y: center;
+  background-size: contain;
+  width: 35px;
+  height: 35px;
+}
+
+/* Modal Body */
+.matecat-modal .matecat-modal-body,
+.matecat-modal-overlay .matecat-modal-body {
+  min-height: 50px;
+  height: 100%;
+  /*color: #000;*/
+  background-color: colors.$grey50;
+  border-radius: 0 0 16px 16px;
+  margin: 0 auto;
+  overflow: hidden;
+  text-align: left;
+}
+
+.matecat-modal .matecat-modal-body h1,
+.matecat-modal-overlay .matecat-modal-body h1 {
+  text-align: center;
+}
+
+/* Modal Footer */
+.matecat-modal .matecat-modal-footer,
+.matecat-modal-overlay .matecat-modal-footer {
+  padding: 2px 16px;
+  color: colors.$black;
+  text-align: left;
+  min-height: 30px;
+}
+
+/* Modal Content */
+.matecat-modal .matecat-modal-content,
+.matecat-modal-overlay .matecat-modal-content {
+  margin: auto;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  border-radius: 4px;
+  -webkit-animation-name: animatetop;
+  -webkit-animation-duration: 0.4s;
+  animation-name: animatetop;
+  animation-duration: 0.4s;
+  text-align: center;
+  max-width: 640px;
+  min-width: 400px;
+  z-index: 2;
+}
+
+.matecat-modal .matecat-modal-content .half-form-left,
+.matecat-modal-overlay .matecat-modal-content .half-form-left {
+  margin-right: 4%;
+}
+
+.matecat-modal .matecat-modal-content .half-form,
+.matecat-modal-overlay .matecat-modal-content .half-form {
+  width: 48%;
+  float: left;
+}
+
+.matecat-modal .matecat-modal-background,
+.matecat-modal-overlay .matecat-modal-background {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  position: relative;
+}
+
+.matecat-modal-overlay {
+  display: block;
+  z-index: 13;
+  position: fixed;
+  left: 6px;
+  bottom: 48px;
+  top: unset;
+  width: 380px;
+  height: 380px;
+  overflow: auto;
+  background-color: unset;
+}
+
+.matecat-modal-overlay .modal-logo {
+  width: 34px;
+}
+
+.matecat-modal-overlay .matecat-modal-content {
+  width: 340px;
+  min-width: unset;
+  box-shadow:
+    0 0 0 colors.$grey200,
+    0 0 2px rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.24) !important;
+}
+
+.matecat-modal-overlay .matecat-modal-header {
+  text-align: left;
+  min-height: 32px;
+  border-radius: 4px 4px 0 0;
+  overflow: visible;
+  max-height: inherit;
+  background: colors.$blue900;
+  padding: 6px 10px 3px 24px;
+  background-size: 31px;
+  color: colors.$white;
+  margin: 0 !important;
+  display: grid;
+  grid-template-columns: 35px 1fr 40px;
+  position: relative;
+  grid-column-gap: 8px;
+}
+
+.matecat-modal-overlay .matecat-modal-header h2 {
+  font-size: 21px;
+}
+
+.matecat-modal-overlay .matecat-modal-body h1 {
+  font-size: 1.7rem;
+}
+
+.matecat-modal-overlay .matecat-modal-body .matecat-modal-textarea {
+  padding: 0;
+}
+
+.matecat-modal-overlay .matecat-modal-body .matecat-modal-middle {
+  padding: 0 20px;
+}
+
+.matecat-modal-overlay .matecat-modal-body .matecat-modal-top,
+.matecat-modal-overlay .matecat-modal-body .matecat-modal-bottom {
+  padding: 15px 20px;
+}
+
+/* buttons */
+
+.matecat-modal-content .disabled,
+.matecat-modal-content .disabled:hover,
+.matecat-modal-content .disabled:active {
+  opacity: 0.5 !important;
+  cursor: default;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+  border: 1px solid colors.$grey700;
+}
+
+.matecat-modal-content .disabled,
+.matecat-modal-content .disabled:hover,
+.matecat-modal-content .disabled:active {
+  cursor: default;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+  background: colors.$grey200;
+}
+
+.matecat-modal-content,
+.matecat-modal-overlay-content {
+  font-size: variables.$font-size-small;
+  font-family: Calibri, Arial, Helvetica, sans-serif;
+}
+
+.matecat-modal-content .matecat-modal-middle,
+.matecat-modal-content .matecat-modal-bottom,
+.matecat-modal-content .matecat-modal-top,
+.matecat-modal-overlay-content .matecat-modal-middle,
+.matecat-modal-overlay-content .matecat-modal-bottom,
+.matecat-modal-overlay-content .matecat-modal-top {
+  padding: 25px;
+}
+
+.matecat-modal-content .matecat-modal-middle {
+  padding: 0 25px;
+}

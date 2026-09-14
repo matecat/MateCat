@@ -1,0 +1,11 @@
+@use '../tokens/colors';
+
+.modal-gdrive {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-overlay);
+  background: rgba(colors.$white, 0.5);
+}

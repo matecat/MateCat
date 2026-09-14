@@ -60,7 +60,7 @@ input {
   border-bottom: 1px solid colors.$grey50;
   padding-top: 10px;
   margin-right: 1px;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   font-weight: bold;
   padding-bottom: 3px;
 }
@@ -92,7 +92,7 @@ input {
   overflow: hidden;
   text-overflow: ellipsis;
   display: flex;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
 }
 
 .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-issue .issue-head .re-category-issue-head {
@@ -342,7 +342,7 @@ section.editAreaLocked.opened .segment-text-area-container {
 
 section.editAreaLocked.opened .segment-text-area-container .textarea-container {
   padding: 0 5px;
-  font-size: 18px;
+  font-size: variables.$font-size-base;
   margin: 3px 0 2px;
 }
 
@@ -468,7 +468,7 @@ section .revise-button-2 {
   display: flex;
   align-items: center;
   height: 42px;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   color: colors.$black;
   padding: 0 15px;
   cursor: pointer;
