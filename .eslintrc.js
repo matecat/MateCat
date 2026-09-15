@@ -98,6 +98,8 @@ module.exports = {
         'public/js/components/segments/TooltipInfo/**/*.js',
         'public/js/components/segments/TagEntity/**/*.js',
         'public/js/components/segments/utils/DraftMatecatUtils/TagMenu/**/*.js',
+        'public/js/components/segments/Editarea.js',
+        'public/js/components/segments/SegmentTarget.js',
       ],
       rules: {
         'no-restricted-syntax': [
