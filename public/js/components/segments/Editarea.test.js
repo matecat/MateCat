@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, act} from '@testing-library/react'
+import {render, act, fireEvent} from '@testing-library/react'
 
 // ---------------------------------------------------------------------------
 // Mocks: only side-effecting collaborators (stores, flux actions, broadcast
@@ -918,6 +918,122 @@ describe('removeDecorator / disableDecorator', () => {
 // myKeyBindingFn
 // ---------------------------------------------------------------------------
 
+// A source tag map with one entry, so the tag menu has something to suggest —
+// `toggle-tag-menu` is a no-op when the segment has no source tags.
+const SOURCE_TAG_MAP = [
+  {
+    type: 'g',
+    data: {id: '1', name: 'g', encodedText: '&lt;g id="1"&gt;'},
+    offset: 0,
+    length: 1,
+  },
+]
+
+function mountWithSourceTags(segmentOverrides = {}) {
+  return mountEditarea({
+    segment: makeSegment({sourceTagMap: SOURCE_TAG_MAP, ...segmentOverrides}),
+  })
+}
+
+const editorNode = (container) =>
+  container.querySelector('.public-DraftEditor-content')
+const tagBox = (container) => container.querySelector('.tag-box')
+
+/**
+ * Presses a key on the editor the way a user does, so the event travels through
+ * DraftJS's own keyBindingFn/handleKeyCommand wiring rather than being invoked
+ * directly on the component.
+ */
+function pressKey(container, key) {
+  // fireEvent already wraps in act, and flush() wraps the timer advance.
+  fireEvent.keyDown(editorNode(container), key)
+  flush()
+}
+
+/**
+ * jsdom implements Range but not `Range.prototype.getBoundingClientRect`, which
+ * Editarea calls to position the tag menu. Without it every tag-menu path
+ * throws before the menu can open — which is why reaching those behaviours used
+ * to require calling methods on the instance. Patching the gap is test-side
+ * setup; the component is untouched.
+ */
+function useRangeRectPolyfill() {
+  let original
+  beforeAll(() => {
+    original = Range.prototype.getBoundingClientRect
+    Range.prototype.getBoundingClientRect = () => ({
+      x: 0,
+      y: 0,
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+      width: 0,
+      height: 0,
+    })
+  })
+  afterAll(() => {
+    Range.prototype.getBoundingClientRect = original
+  })
+}
+
+describe('tag menu keyboard shortcuts', () => {
+  useRangeRectPolyfill()
+
+  test('alt + t opens the tag menu', () => {
+    const {container} = mountWithSourceTags()
+    expect(tagBox(container)).not.toBeVisible()
+
+    pressKey(container, {keyCode: 84, key: 't', altKey: true})
+
+    expect(tagBox(container)).toBeVisible()
+  })
+
+  test('the mac option-t glyph also opens the tag menu', () => {
+    const {container} = mountWithSourceTags()
+
+    pressKey(container, {key: '™', altKey: true})
+
+    expect(tagBox(container)).toBeVisible()
+  })
+
+  test('alt + shift + t does not open the tag menu', () => {
+    const {container} = mountWithSourceTags()
+
+    pressKey(container, {keyCode: 84, key: 'T', altKey: true, shiftKey: true})
+
+    expect(tagBox(container)).not.toBeVisible()
+  })
+
+  test('typing "<" opens the tag menu', () => {
+    const {container} = mountWithSourceTags()
+
+    pressKey(container, {key: '<'})
+
+    expect(tagBox(container)).toBeVisible()
+  })
+
+  test('escape closes an open tag menu', () => {
+    const {container} = mountWithSourceTags()
+    pressKey(container, {keyCode: 84, key: 't', altKey: true})
+    expect(tagBox(container)).toBeVisible()
+
+    pressKey(container, {key: 'Escape', keyCode: 27})
+
+    expect(tagBox(container)).not.toBeVisible()
+  })
+
+  test('the tag menu stays closed when the segment has no source tags', () => {
+    const {container} = mountEditarea({
+      segment: makeSegment({sourceTagMap: []}),
+    })
+
+    pressKey(container, {keyCode: 84, key: 't', altKey: true})
+
+    expect(tagBox(container)).not.toBeVisible()
+  })
+})
+
 describe('myKeyBindingFn', () => {
   let instance
 
@@ -925,37 +1041,9 @@ describe('myKeyBindingFn', () => {
     instance = mountEditarea().instance
   })
 
-  test('alt + t opens the tag menu and resets the trigger text', () => {
-    expect(
-      instance.myKeyBindingFn(keyEvent({keyCode: 84, key: 't', altKey: true})),
-    ).toBe('toggle-tag-menu')
-    expect(instance.state.triggerText).toBeNull()
-  })
-
-  test('alt + the mac option-t glyph opens the tag menu', () => {
-    expect(instance.myKeyBindingFn(keyEvent({key: '™', altKey: true}))).toBe(
-      'toggle-tag-menu',
-    )
-  })
-
-  test('alt + shift + t does not open the tag menu', () => {
-    expect(
-      instance.myKeyBindingFn(
-        keyEvent({keyCode: 84, key: 'T', altKey: true, shiftKey: true}),
-      ),
-    ).not.toBe('toggle-tag-menu')
-  })
-
-  test('typing "<" types the char and opens the tag menu', () => {
-    let command
-    act(() => {
-      command = instance.myKeyBindingFn(keyEvent({key: '<'}))
-    })
-    flush()
-
-    expect(command).toBe('toggle-tag-menu')
-    expect(instance.state.triggerText).toBe('<')
-  })
+  // The four tag-menu key mappings that used to be asserted here as command
+  // strings are covered by 'tag menu keyboard shortcuts' above, which presses
+  // the keys on the editor and checks the menu actually opens.
 
   test('arrow up only maps to a command while the popover is open', () => {
     expect(instance.myKeyBindingFn(keyEvent({key: 'ArrowUp'}))).not.toBe(
