@@ -1886,8 +1886,6 @@ const Editarea = forwardRef((props, ref) => {
     instanceRef.current.onCompositionStop = onCompositionStopRef.current
     instanceRef.current.removeDecorator = removeDecorator
     instanceRef.current.disableDecorator = disableDecorator
-    instanceRef.current.getEditorRelativeSelectionOffset =
-      getEditorRelativeSelectionOffset
     instanceRef.current.getUpdatedSegmentInfo = getUpdatedSegmentInfoRef.current
     instanceRef.current.formatSelection = formatSelection
     instanceRef.current.addMissingSourceTagsToTarget =
@@ -1899,9 +1897,6 @@ const Editarea = forwardRef((props, ref) => {
       onCompositionStopDebouncedRef.current
     instanceRef.current.insertTagAtSelectionDebounced =
       insertTagAtSelectionDebouncedRef.current
-
-    instanceRef.current.isShiftPressedOnNavigation =
-      isShiftPressedOnNavigationRef
   }
 
   // The component's public API: exactly the four members production reaches
@@ -1915,9 +1910,14 @@ const Editarea = forwardRef((props, ref) => {
   useImperativeHandle(
     ref,
     () => ({
+      // Read through instanceRef, not the locals: this factory runs once (the
+      // dependency array is empty), so calling the locals directly would pin
+      // the handle to whichever closures existed at the first render, while
+      // instanceRef is refreshed every render.
       addMissingSourceTagsToTarget: (...args) =>
-        addMissingSourceTagsToTarget(...args),
-      formatSelection: (...args) => formatSelection(...args),
+        instanceRef.current.addMissingSourceTagsToTarget(...args),
+      formatSelection: (...args) =>
+        instanceRef.current.formatSelection(...args),
       get state() {
         return instanceRef.current.state
       },
