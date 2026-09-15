@@ -209,7 +209,7 @@ const Editarea = forwardRef((props, ref) => {
         sid,
         false,
         instanceRef.current.getUpdatedSegmentInfo,
-        instanceRef.current.replaceWordAt,
+        replaceWordAt,
       )
       remove(
         decoratorsStructureRef.current,
@@ -218,9 +218,7 @@ const Editarea = forwardRef((props, ref) => {
       )
       decoratorsStructureRef.current.push(newDecorator)
     } else {
-      instanceRef.current.removeDecorator(
-        DraftMatecatConstants.LEXIQA_DECORATOR,
-      )
+      removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
     }
   }
 
@@ -547,7 +545,7 @@ const Editarea = forwardRef((props, ref) => {
   const typeTextInEditor = (textToInsert) => {
     const {editorState} = liveRef.current
     editorSync.onComposition = true
-    let newEditorState = instanceRef.current.disableDecorator(
+    let newEditorState = disableDecorator(
       editorState,
       DraftMatecatConstants.LEXIQA_DECORATOR,
     )
@@ -581,7 +579,7 @@ const Editarea = forwardRef((props, ref) => {
       instanceRef.current.setState({triggerText: null})
       return 'toggle-tag-menu'
     } else if (e.key === '<' && !hasCommandModifier(e)) {
-      instanceRef.current.typeTextInEditor('<')
+      typeTextInEditor('<')
       return 'toggle-tag-menu'
     } else if (e.key === 'ArrowUp' && !hasCommandModifier(e)) {
       if (displayPopover) return 'up-arrow-press'
@@ -664,17 +662,17 @@ const Editarea = forwardRef((props, ref) => {
     } else if (e.code === 'BracketLeft' || e.code === 'BracketRight') {
       if (e.code === 'BracketLeft' && isCtrlKeyCommand(e)) {
         if (e.shiftKey) {
-          instanceRef.current.typeTextInEditor('“')
+          typeTextInEditor('“')
         } else {
-          instanceRef.current.typeTextInEditor('‘')
+          typeTextInEditor('‘')
         }
         return 'quote-shortcut'
       }
       if (e.code === 'BracketRight' && isCtrlKeyCommand(e)) {
         if (e.shiftKey) {
-          instanceRef.current.typeTextInEditor('”')
+          typeTextInEditor('”')
         } else {
-          instanceRef.current.typeTextInEditor('’')
+          typeTextInEditor('’')
         }
         return 'quote-shortcut'
       }
@@ -728,7 +726,7 @@ const Editarea = forwardRef((props, ref) => {
           Modifier.replaceText(contentState, selectionState, null),
           'insert-characters',
         )
-        instanceRef.current.onChange(updatedEditorState)
+        onChange(updatedEditorState)
         return 'delete-entity'
       }
     }
@@ -747,24 +745,21 @@ const Editarea = forwardRef((props, ref) => {
           sourceTags: sourceTagMap,
         }
         if (tagSuggestions.sourceTags && tagSuggestions.sourceTags.length > 0) {
-          instanceRef.current.openPopover(
-            tagSuggestions,
-            instanceRef.current.getEditorRelativeSelectionOffset(),
-          )
+          openPopover(tagSuggestions, getEditorRelativeSelectionOffset())
         }
         return 'handled'
       }
       case 'close-tag-menu':
-        instanceRef.current.closePopover()
+        closePopover()
         return 'handled'
       case 'up-arrow-press':
-        instanceRef.current.moveUpTagMenuSelection()
+        moveUpTagMenuSelection()
         return 'handled'
       case 'down-arrow-press':
-        instanceRef.current.moveDownTagMenuSelection()
+        moveDownTagMenuSelection()
         return 'handled'
       case 'enter-press':
-        instanceRef.current.acceptTagMenuSelection()
+        acceptTagMenuSelection()
         return 'handled'
       case 'left-nav':
         return 'handled'
@@ -955,13 +950,13 @@ const Editarea = forwardRef((props, ref) => {
       })
 
     // if opened, close TagsMenu
-    if (displayPopover) instanceRef.current.closePopover()
+    if (displayPopover) closePopover()
     if (contentChanged) {
       // Stop checking decorators while typing...
       editorSync.onComposition = true
       // ...remove unwanted decorators like lexiqa and qa blacklist...
       if (activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR]) {
-        editorState = instanceRef.current.disableDecorator(
+        editorState = disableDecorator(
           editorState,
           DraftMatecatConstants.LEXIQA_DECORATOR,
         )
@@ -971,7 +966,7 @@ const Editarea = forwardRef((props, ref) => {
         }
       }
       if (activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR]) {
-        editorState = instanceRef.current.disableDecorator(
+        editorState = disableDecorator(
           editorState,
           DraftMatecatConstants.QA_BLACKLIST_DECORATOR,
         )
@@ -1055,7 +1050,7 @@ const Editarea = forwardRef((props, ref) => {
     // Start typing
     editorSync.onComposition = true
     // Remove lexiqa while typing
-    const newEditorState = instanceRef.current.disableDecorator(
+    const newEditorState = disableDecorator(
       editorState,
       DraftMatecatConstants.LEXIQA_DECORATOR,
     )
@@ -1112,7 +1107,7 @@ const Editarea = forwardRef((props, ref) => {
     // Start typing...
     editorSync.onComposition = true
     // Disable lexiqa while typing
-    const newEditorState = instanceRef.current.disableDecorator(
+    const newEditorState = disableDecorator(
       editorState,
       DraftMatecatConstants.LEXIQA_DECORATOR,
     )
@@ -1886,19 +1881,11 @@ const Editarea = forwardRef((props, ref) => {
       refreshCharactersCounterRulesRef.current
     instanceRef.current.onCompositionStart = onCompositionStartRef.current
     instanceRef.current.onCompositionEnd = onCompositionEndRef.current
-    instanceRef.current.replaceWordAt = replaceWordAt
     instanceRef.current.focusEditor = focusEditorRef.current
-    instanceRef.current.typeTextInEditor = typeTextInEditor
     instanceRef.current.insertTagAtSelection = insertTagAtSelectionRef.current
     instanceRef.current.onCompositionStop = onCompositionStopRef.current
     instanceRef.current.removeDecorator = removeDecorator
     instanceRef.current.disableDecorator = disableDecorator
-    instanceRef.current.onChange = onChange
-    instanceRef.current.moveUpTagMenuSelection = moveUpTagMenuSelection
-    instanceRef.current.moveDownTagMenuSelection = moveDownTagMenuSelection
-    instanceRef.current.acceptTagMenuSelection = acceptTagMenuSelection
-    instanceRef.current.openPopover = openPopover
-    instanceRef.current.closePopover = closePopover
     instanceRef.current.getEditorRelativeSelectionOffset =
       getEditorRelativeSelectionOffset
     instanceRef.current.getUpdatedSegmentInfo = getUpdatedSegmentInfoRef.current
@@ -1929,9 +1916,8 @@ const Editarea = forwardRef((props, ref) => {
     ref,
     () => ({
       addMissingSourceTagsToTarget: (...args) =>
-        instanceRef.current.addMissingSourceTagsToTarget(...args),
-      formatSelection: (...args) =>
-        instanceRef.current.formatSelection(...args),
+        addMissingSourceTagsToTarget(...args),
+      formatSelection: (...args) => formatSelection(...args),
       get state() {
         return instanceRef.current.state
       },
