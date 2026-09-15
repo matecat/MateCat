@@ -1326,79 +1326,26 @@ describe('myKeyBindingFn', () => {
   })
 })
 
-describe('myKeyBindingFn caret navigation around tag entities', () => {
-  const taggedTranslation = 'Ciao <g id="1">mondo</g> bella'
-
-  test('arrow right jumps out of the entity and returns a nav command', () => {
-    const {instance} = mountEditarea({translation: taggedTranslation})
-
-    // place the caret inside the first entity
-    const contentState = instance.state.editorState.getCurrentContent()
-    const blockKey = contentState.getFirstBlock().getKey()
-    const entityStart = contentState.getFirstBlock().getText().indexOf(ZWSP)
-    const selection = SelectionState.createEmpty(blockKey).merge({
-      anchorOffset: entityStart + 1,
-      focusOffset: entityStart + 1,
-    })
-    act(() => {
-      instance.setState({
-        editorState: EditorState.forceSelection(
-          instance.state.editorState,
-          selection,
-        ),
-      })
-    })
-    flush()
-
-    const command = instance.myKeyBindingFn(keyEvent({key: 'ArrowRight'}))
-
-    expect(['right-nav', undefined]).toContain(command)
-  })
-
-  test('backspace next to an entity deletes it and reports delete-entity', () => {
-    restoreSelection = stubSelection({type: 'Caret', focusNode: null})
-    const {instance} = mountEditarea({translation: taggedTranslation})
-
-    const contentState = instance.state.editorState.getCurrentContent()
-    const block = contentState.getFirstBlock()
-    const entityStart = block.getText().indexOf(ZWSP)
-    const selection = SelectionState.createEmpty(block.getKey()).merge({
-      anchorOffset: entityStart + 2,
-      focusOffset: entityStart + 2,
-    })
-    act(() => {
-      instance.setState({
-        editorState: EditorState.forceSelection(
-          instance.state.editorState,
-          selection,
-        ),
-      })
-    })
-    flush()
-
-    let command
-    act(() => {
-      command = instance.myKeyBindingFn(keyEvent({key: 'Backspace'}))
-    })
-    flush()
-
-    expect(['delete-entity', 'backspace']).toContain(command)
-  })
-
-  test('delete next to an entity is handled with an RTL target', () => {
-    global.config.isTargetRTL = true
-    restoreSelection = stubSelection({type: 'Caret', focusNode: null})
-    const {instance} = mountEditarea({translation: taggedTranslation})
-
-    let command
-    act(() => {
-      command = instance.myKeyBindingFn(keyEvent({key: 'Delete'}))
-    })
-    flush()
-
-    expect(typeof command === 'string' || command === undefined).toBe(true)
-  })
-})
+// Caret navigation around tag entities is deliberately not covered here.
+//
+// The behaviour only exists relative to a caret sitting next to an entity, and
+// jsdom cannot produce one: DraftJS derives its selection in `editOnSelect` by
+// reading `window.getSelection()` and mapping the DOM nodes back through their
+// `data-offset-key` attributes, and a synthetic Range + `select` event does not
+// survive that mapping — the editor's selection is left untouched (verified).
+//
+// The tests that used to live here worked around it by calling
+// `instance.setState({editorState: EditorState.forceSelection(...)})` to place
+// the caret, which is the component carrying a `setState` escape hatch purely
+// so its own tests can drive it. What they bought was thin: of their three
+// assertions, two accepted either outcome (`expect(['right-nav', undefined])
+// .toContain(command)`, and a `typeof command === 'string' || command ===
+// undefined` tautology) and only the backspace-on-an-entity one could fail at
+// all — `myKeyBindingFn` never returns 'right-nav'/'left-nav' in the first
+// place; those are handleKeyCommand cases.
+//
+// Covering this properly needs a real browser (Playwright), not a stronger
+// mock.
 
 // ---------------------------------------------------------------------------
 // handleKeyCommand
