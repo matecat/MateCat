@@ -657,12 +657,25 @@ const SegmentSource = ({segment}) => {
       name: 'tags',
       strategy: getEntityStrategy('IMMUTABLE'),
       component: TagEntity,
+      // This decorator is built exactly once and then kept in the ref, so these
+      // props are frozen relative to render: anything they close over directly
+      // stays at its first-render value for the life of the segment. TagEntity
+      // calls them on every one of its own renders and must see current data —
+      // a tag only turns red once it appears in missingTagsInTarget, which by
+      // definition changes after this object is created. So they read through
+      // latestRef/methodsRef, the same way the other frozen call sites in this
+      // component do, which is what `this.context`/`this.state` gave the class
+      // version for free.
       props: {
-        onClick: onEntityClick,
+        onClick: (...args) => methodsRef.current.onEntityClick(...args),
         getUpdatedSegmentInfo: () =>
-          getUpdatedSegmentInfo({contextSegment, tagRange, editorState}),
+          getUpdatedSegmentInfo({
+            contextSegment: latestRef.current.contextSegment,
+            tagRange: latestRef.current.tagRange,
+            editorState: latestRef.current.editorState,
+          }),
         isTarget: false,
-        getSearchParams: () => getSearchParams(segment),
+        getSearchParams: () => getSearchParams(latestRef.current.segment),
         isRTL: config.isSourceRTL,
         sid: segment.sid,
       },
@@ -755,13 +768,14 @@ const SegmentSource = ({segment}) => {
   }))
   const [isShowingOptionsToolbar, setIsShowingOptionsToolbar] = useState(false)
 
-  // Only what the permanently-stable setTaggedSource and helpAiAssistant's
-  // delayed setTimeout read, refreshed every render.
+  // What the permanently-stable setTaggedSource, helpAiAssistant's delayed
+  // setTimeout and the tag decorator's props read, refreshed every render.
   latestRef.current = {
     segment,
     contextSegment,
     contextUserInfo,
     editorState,
+    tagRange,
   }
 
   const isFirstRenderRef = useRef(true)
@@ -898,6 +912,7 @@ const SegmentSource = ({segment}) => {
     checkDecorators,
     updateSourceInStore,
     getSelectedWords,
+    onEntityClick,
   })
 
   const updateOptionsToolbarVisibility = () => {

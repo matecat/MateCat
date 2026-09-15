@@ -84,19 +84,36 @@ jest.mock('../../hooks/UseHotKeysComponent', () => ({
   UseHotKeysComponent: (...args) => mockUseHotKeysComponent(...args),
 }))
 
-// Stands in for the real TagEntity, reproducing exactly the one interaction the
+// Holds the props object SegmentSource hands the tag decorator. The decorator is
+// built once and kept in a ref, so this is the *same* object production keeps
+// calling for the life of the segment — which is what makes calling it again
+// later, after the segment has changed, a meaningful assertion.
+let mockTagProps = null
+
+// Stands in for the real TagEntity, reproducing the two interactions the
 // component under test depends on: its click handler resolves the entity's name
 // from the content state and calls back with the entity's own offsets
-// (TagEntity.component.js `onClickBound`). Clicking a rendered tag therefore
-// drives SegmentSource the same way a user clicking a tag does — which is what
-// lets these tests reach selection-dependent behaviour without jsdom needing a
-// working contentEditable.
+// (TagEntity.component.js `onClickBound`), and it calls getUpdatedSegmentInfo()
+// on every render to decide its warning styling. Clicking a rendered tag
+// therefore drives SegmentSource the same way a user clicking a tag does —
+// which is what lets these tests reach selection-dependent behaviour without
+// jsdom needing a working contentEditable.
 jest.mock('./TagEntity/TagEntity.component', () => ({
   __esModule: true,
-  default: ({children, start, end, entityKey, contentState, onClick}) => {
+  default: ({
+    children,
+    start,
+    end,
+    entityKey,
+    contentState,
+    onClick,
+    getUpdatedSegmentInfo,
+    getSearchParams,
+  }) => {
     const {
       data: {name: entityName},
     } = contentState.getEntity(entityKey)
+    mockTagProps = {onClick, getUpdatedSegmentInfo, getSearchParams}
     return (
       <span
         data-testid="tag-entity"
@@ -330,6 +347,60 @@ describe('SegmentSource rendering', () => {
     await flushTimers()
 
     expect(getTagEntity(container)).toBeInTheDocument()
+  })
+
+  // Regression guard. The tag decorator is built once and kept in a ref, so its
+  // props are frozen relative to render — but TagEntity keeps calling them for
+  // the life of the segment, re-rendering itself off EDIT_AREA_CHANGED whenever
+  // the target is edited. `highlightOnWarnings` turns a tag red once it appears
+  // in missingTagsInTarget, which by definition only happens after the
+  // decorator was created. If these callbacks close over first-render values,
+  // the tag never turns red.
+  test('the tag decorator callbacks report the current segment, not the first render one', async () => {
+    const {update} = renderSource(
+      makeSegment({
+        segment: TAGGED_SOURCE,
+        missingTagsInTarget: [],
+        opened: false,
+      }),
+    )
+    await flushTimers()
+    expect(mockTagProps.getUpdatedSegmentInfo()).toMatchObject({
+      missingTagsInTarget: [],
+      segmentOpened: false,
+    })
+
+    const missingTagsInTarget = [{data: {encodedText: '&lt;g id="1"&gt;'}}]
+    update(
+      makeSegment({segment: TAGGED_SOURCE, missingTagsInTarget, opened: true}),
+    )
+    await flushTimers()
+
+    expect(mockTagProps.getUpdatedSegmentInfo()).toMatchObject({
+      missingTagsInTarget,
+      segmentOpened: true,
+    })
+  })
+
+  test('the tag decorator search params follow the current segment', async () => {
+    const {update} = renderSource(makeSegment({segment: TAGGED_SOURCE}))
+    await flushTimers()
+    expect(mockTagProps.getSearchParams()).toEqual({active: false})
+
+    update(
+      makeSegment({
+        segment: TAGGED_SOURCE,
+        inSearch: true,
+        searchParams: {source: 'world'},
+        occurrencesInSearch: {occurrences: [1]},
+      }),
+    )
+    await flushTimers()
+
+    expect(mockTagProps.getSearchParams()).toMatchObject({
+      active: true,
+      textToReplace: 'world',
+    })
   })
 
   test('renders right-to-left when the source language is RTL', async () => {
