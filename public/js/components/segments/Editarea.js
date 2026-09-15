@@ -93,10 +93,10 @@ const Editarea = forwardRef((props, ref) => {
   // button asks whether focus sits inside the editor. Mirror it onto the
   // instance on commit, exactly as the class's callback ref did, or that read
   // is `undefined.contains(...)` and takes the page down.
-  const setEditAreaDomRef = useRef((node) => {
+  const setEditAreaDom = (node) => {
     editAreaDomRef.current = node
     instanceRef.current.editAreaRef = node
-  })
+  }
   // this.prevIcuTokens (plain mutable instance field, internal only)
   const prevIcuTokensRef = useRef(undefined)
 
@@ -570,7 +570,7 @@ const Editarea = forwardRef((props, ref) => {
     )
   })
 
-  const myKeyBindingFnRef = useRef((e) => {
+  const myKeyBindingFn = (e) => {
     const {displayPopover} = liveRef.current
     const isChromeBook = navigator.userAgent.indexOf('CrOS') > -1
     if (
@@ -733,9 +733,9 @@ const Editarea = forwardRef((props, ref) => {
       }
     }
     return getDefaultKeyBinding(e)
-  })
+  }
 
-  const handleKeyCommandRef = useRef((command) => {
+  const handleKeyCommand = (command) => {
     const {
       segment: {sourceTagMap, missingTagsInTarget},
     } = liveRef.current.props
@@ -800,7 +800,7 @@ const Editarea = forwardRef((props, ref) => {
       default:
         return 'not-handled'
     }
-  })
+  }
 
   const insertTagAtSelectionRef = useRef((tagName) => {
     const {editorState} = liveRef.current
@@ -833,14 +833,14 @@ const Editarea = forwardRef((props, ref) => {
     )
   })
 
-  const onMouseUpEventRef = useRef(() => {
+  const onMouseUpEvent = () => {
     const {toggleFormatMenu} = liveRef.current.props
     toggleFormatMenu(
       !editorRef.current._latestEditorState.getSelection().isCollapsed(),
     )
-  })
+  }
 
-  const onKeyUpEventRef = useRef((event) => {
+  const onKeyUpEvent = (event) => {
     if (
       event.key === 'ArrowLeft' ||
       event.key === 'ArrowRight' ||
@@ -852,14 +852,14 @@ const Editarea = forwardRef((props, ref) => {
         !editorRef.current._latestEditorState.getSelection().isCollapsed(),
       )
     }
-  })
+  }
 
-  const onBlurEventRef = useRef(() => {
+  const onBlurEvent = () => {
     const {toggleFormatMenu} = liveRef.current.props
     editorSync.editorFocused = false
     // Hide Edit Toolbar
     toggleFormatMenu(false)
-  })
+  }
 
   // Focus on editor trigger 2 onChange events
   /*onBlur = () => {
@@ -872,9 +872,9 @@ const Editarea = forwardRef((props, ref) => {
         }
     };*/
 
-  const onFocusRef = useRef(() => {
+  const onFocus = () => {
     editorSync.editorFocused = true
-  })
+  }
 
   const onCompositionStopRef = useRef(() => {
     if (editorSync.onComposition) {
@@ -1107,7 +1107,7 @@ const Editarea = forwardRef((props, ref) => {
     })
   })
 
-  const onTagClickRef = useRef((suggestionTag) => {
+  const onTagClick = (suggestionTag) => {
     const {editorState, triggerText} = liveRef.current
     // Start typing...
     editorSync.onComposition = true
@@ -1141,10 +1141,10 @@ const Editarea = forwardRef((props, ref) => {
         instanceRef.current.onCompositionStopDebounced()
       },
     )
-  })
+  }
   // Methods for TagMenu ---- END
 
-  const pasteFragmentRef = useRef((text) => {
+  const pasteFragment = (text) => {
     const {editorState} = liveRef.current
     const {fragment: clipboardFragment, plainText: clipboardPlainText} =
       SegmentStore.getFragmentFromClipboard()
@@ -1206,9 +1206,9 @@ const Editarea = forwardRef((props, ref) => {
     }
     // Paste plain standard clipboard
     return false
-  })
+  }
 
-  const copyFragmentRef = useRef((e) => {
+  const copyFragment = (e) => {
     const internalClipboard = editorRef.current.getClipboard()
     const {editorState} = liveRef.current
     if (internalClipboard) {
@@ -1231,17 +1231,17 @@ const Editarea = forwardRef((props, ref) => {
       e.clipboardData.setData('text/plain', plainText)
       SegmentActions.copyFragmentToClipboard(fragment, plainText)
     }
-  })
+  }
 
-  const onDragEventRef = useRef(() => {
+  const onDragEvent = () => {
     editorSync.draggingFromEditArea = true
-  })
+  }
 
-  const onDragEndRef = useRef(() => {
+  const onDragEnd = () => {
     editorSync.draggingFromEditArea = false
-  })
+  }
 
-  const handleDropRef = useRef((selection, dataTransfer) => {
+  const handleDrop = (selection, dataTransfer) => {
     let {editorState} = liveRef.current
     const text = dataTransfer.getText()
 
@@ -1339,7 +1339,7 @@ const Editarea = forwardRef((props, ref) => {
         return 'not-handled'
       }
     }
-  })
+  }
 
   const onEntityClickRef = useRef((start, end) => {
     const {editorState} = liveRef.current
@@ -1966,19 +1966,19 @@ const Editarea = forwardRef((props, ref) => {
   return (
     <div
       className={classes.join(' ')}
-      ref={setEditAreaDomRef.current}
+      ref={setEditAreaDom}
       id={'segment-' + props.segment.sid + '-editarea'}
       data-sid={props.segment.sid}
       tabIndex="-1"
-      onCopy={copyFragmentRef.current}
-      onCut={copyFragmentRef.current}
-      onMouseUp={onMouseUpEventRef.current}
-      onBlur={onBlurEventRef.current}
-      onDragStart={onDragEventRef.current}
-      onDragEnd={onDragEndRef.current}
-      onDrop={onDragEndRef.current}
-      onFocus={onFocusRef.current}
-      onKeyUp={onKeyUpEventRef.current}
+      onCopy={copyFragment}
+      onCut={copyFragment}
+      onMouseUp={onMouseUpEvent}
+      onBlur={onBlurEvent}
+      onDragStart={onDragEvent}
+      onDragEnd={onDragEnd}
+      onDrop={onDragEnd}
+      onFocus={onFocus}
+      onKeyUp={onKeyUpEvent}
       lang={config.target_code}
       spellCheck={true}
     >
@@ -1986,12 +1986,12 @@ const Editarea = forwardRef((props, ref) => {
         lang={lang}
         editorState={editorState}
         onChange={onChangeRef.current}
-        handlePastedText={pasteFragmentRef.current}
+        handlePastedText={pasteFragment}
         ref={editorRef}
         readOnly={readonly}
-        handleKeyCommand={handleKeyCommandRef.current}
-        keyBindingFn={myKeyBindingFnRef.current}
-        handleDrop={handleDropRef.current}
+        handleKeyCommand={handleKeyCommand}
+        keyBindingFn={myKeyBindingFn}
+        handleDrop={handleDrop}
         spellCheck={true}
         textAlignment={config.isTargetRTL ? 'right' : 'left'}
         textDirectionality={config.isTargetRTL ? 'RTL' : 'LTR'}
@@ -1999,7 +1999,7 @@ const Editarea = forwardRef((props, ref) => {
       <TagBox
         displayPopover={displayPopover}
         suggestions={autocompleteSuggestions}
-        onTagClick={onTagClickRef.current}
+        onTagClick={onTagClick}
         focusedTagIndex={focusedTagIndex}
         popoverPosition={popoverPosition}
       />
