@@ -1889,13 +1889,7 @@ const Editarea = forwardRef((props, ref) => {
     instanceRef.current.replaceWordAt = replaceWordAtRef.current
     instanceRef.current.focusEditor = focusEditorRef.current
     instanceRef.current.typeTextInEditor = typeTextInEditorRef.current
-    instanceRef.current.myKeyBindingFn = myKeyBindingFnRef.current
-    instanceRef.current.handleKeyCommand = handleKeyCommandRef.current
     instanceRef.current.insertTagAtSelection = insertTagAtSelectionRef.current
-    instanceRef.current.onMouseUpEvent = onMouseUpEventRef.current
-    instanceRef.current.onKeyUpEvent = onKeyUpEventRef.current
-    instanceRef.current.onBlurEvent = onBlurEventRef.current
-    instanceRef.current.onFocus = onFocusRef.current
     instanceRef.current.onCompositionStop = onCompositionStopRef.current
     instanceRef.current.removeDecorator = removeDecoratorRef.current
     instanceRef.current.disableDecorator = disableDecoratorRef.current
@@ -1908,12 +1902,6 @@ const Editarea = forwardRef((props, ref) => {
       acceptTagMenuSelectionRef.current
     instanceRef.current.openPopover = openPopoverRef.current
     instanceRef.current.closePopover = closePopoverRef.current
-    instanceRef.current.onTagClick = onTagClickRef.current
-    instanceRef.current.pasteFragment = pasteFragmentRef.current
-    instanceRef.current.copyFragment = copyFragmentRef.current
-    instanceRef.current.onDragEvent = onDragEventRef.current
-    instanceRef.current.onDragEnd = onDragEndRef.current
-    instanceRef.current.handleDrop = handleDropRef.current
     instanceRef.current.getEditorRelativeSelectionOffset =
       getEditorRelativeSelectionOffsetRef.current
     instanceRef.current.getUpdatedSegmentInfo = getUpdatedSegmentInfoRef.current
@@ -1927,24 +1915,6 @@ const Editarea = forwardRef((props, ref) => {
       onCompositionStopDebouncedRef.current
     instanceRef.current.insertTagAtSelectionDebounced =
       insertTagAtSelectionDebouncedRef.current
-
-    Object.defineProperties(instanceRef.current, {
-      decoratorsStructure: {
-        get: () => decoratorsStructureRef.current,
-        configurable: true,
-      },
-      editor: {
-        get: () => editorRef.current,
-        set: (value) => {
-          editorRef.current = value
-        },
-        configurable: true,
-      },
-      props: {
-        get: () => liveRef.current.props,
-        configurable: true,
-      },
-    })
 
     instanceRef.current.isShiftPressedOnNavigation =
       isShiftPressedOnNavigationRef
@@ -2000,28 +1970,28 @@ const Editarea = forwardRef((props, ref) => {
       id={'segment-' + props.segment.sid + '-editarea'}
       data-sid={props.segment.sid}
       tabIndex="-1"
-      onCopy={instanceRef.current.copyFragment}
-      onCut={instanceRef.current.copyFragment}
-      onMouseUp={instanceRef.current.onMouseUpEvent}
-      onBlur={instanceRef.current.onBlurEvent}
-      onDragStart={instanceRef.current.onDragEvent}
-      onDragEnd={instanceRef.current.onDragEnd}
-      onDrop={instanceRef.current.onDragEnd}
-      onFocus={instanceRef.current.onFocus}
-      onKeyUp={instanceRef.current.onKeyUpEvent}
+      onCopy={copyFragmentRef.current}
+      onCut={copyFragmentRef.current}
+      onMouseUp={onMouseUpEventRef.current}
+      onBlur={onBlurEventRef.current}
+      onDragStart={onDragEventRef.current}
+      onDragEnd={onDragEndRef.current}
+      onDrop={onDragEndRef.current}
+      onFocus={onFocusRef.current}
+      onKeyUp={onKeyUpEventRef.current}
       lang={config.target_code}
       spellCheck={true}
     >
       <Editor
         lang={lang}
         editorState={editorState}
-        onChange={instanceRef.current.onChange}
-        handlePastedText={instanceRef.current.pasteFragment}
+        onChange={onChangeRef.current}
+        handlePastedText={pasteFragmentRef.current}
         ref={editorRef}
         readOnly={readonly}
-        handleKeyCommand={instanceRef.current.handleKeyCommand}
-        keyBindingFn={instanceRef.current.myKeyBindingFn}
-        handleDrop={instanceRef.current.handleDrop}
+        handleKeyCommand={handleKeyCommandRef.current}
+        keyBindingFn={myKeyBindingFnRef.current}
+        handleDrop={handleDropRef.current}
         spellCheck={true}
         textAlignment={config.isTargetRTL ? 'right' : 'left'}
         textDirectionality={config.isTargetRTL ? 'RTL' : 'LTR'}
@@ -2029,7 +1999,7 @@ const Editarea = forwardRef((props, ref) => {
       <TagBox
         displayPopover={displayPopover}
         suggestions={autocompleteSuggestions}
-        onTagClick={instanceRef.current.onTagClick}
+        onTagClick={onTagClickRef.current}
         focusedTagIndex={focusedTagIndex}
         popoverPosition={popoverPosition}
       />
