@@ -1,11 +1,4 @@
-import React, {
-  forwardRef,
-  useContext,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import $ from 'jquery'
 import {isEmpty, isUndefined} from 'lodash'
 
@@ -29,7 +22,7 @@ import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import {SegmentTargetToolbar} from './SegmentTargetToolbar'
 
-const SegmentTarget = forwardRef((props, ref) => {
+const SegmentTarget = (props) => {
   const context = useContext(SegmentContext)
 
   const [showFormatMenu, setShowFormatMenu] = useState(false)
@@ -373,21 +366,6 @@ const SegmentTarget = forwardRef((props, ref) => {
     }
   })
 
-  const instanceRef = useRef({})
-  instanceRef.current.state = {
-    showFormatMenu,
-    charactersCounter,
-    segmentCharacters,
-    charactersCounterLimit,
-  }
-  instanceRef.current.autoFillTagsInTarget = autoFillTagsInTarget
-  instanceRef.current.lockEditArea = lockEditArea
-  instanceRef.current.removeTagsFromText = removeTagsFromText
-  instanceRef.current.toggleFormatMenu = toggleFormatMenu
-  instanceRef.current.updateCounter = updateCounter
-
-  useImperativeHandle(ref, () => instanceRef.current)
-
   let translation = props.segment.translation
 
   return (
@@ -404,8 +382,6 @@ const SegmentTarget = forwardRef((props, ref) => {
       ) : null}
     </div>
   )
-})
-
-SegmentTarget.displayName = 'SegmentTarget'
+}
 
 export default SegmentTarget
