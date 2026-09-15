@@ -104,7 +104,7 @@ const Editarea = forwardRef((props, ref) => {
 
   // ---- stable method closures (useRef-seeded once, always dispatched via instanceRef.current) ----
 
-  const getTextToApplyCounterRef = useRef((translation) => {
+  const getTextToApplyCounter = (translation) => {
     const canCountTagsAsChars =
       CatToolStore.getCurrentProjectTemplate().characterCounterCountTags
     if (canCountTagsAsChars) {
@@ -119,7 +119,7 @@ const Editarea = forwardRef((props, ref) => {
         DraftMatecatUtils.removeTagsFromText(translation),
       )
     }
-  })
+  }
 
   const getSearchParamsRef = useRef(() => {
     const {
@@ -146,16 +146,16 @@ const Editarea = forwardRef((props, ref) => {
     }
   })
 
-  const addIcuDecoratorRef = useRef((tokens) => {
+  const addIcuDecorator = (tokens) => {
     const newDecorator = createICUDecorator(tokens)
     remove(
       decoratorsStructureRef.current,
       (decorator) => decorator.name === DraftMatecatConstants.ICU_DECORATOR,
     )
     decoratorsStructureRef.current.push(newDecorator)
-  })
+  }
 
-  const addSearchDecoratorRef = useRef(() => {
+  const addSearchDecorator = () => {
     const {tagRange} = liveRef.current
     const {searchParams, occurrencesInSearch, currentInSearchIndex} =
       liveRef.current.props.segment
@@ -173,9 +173,9 @@ const Editarea = forwardRef((props, ref) => {
       (decorator) => decorator.name === DraftMatecatConstants.SEARCH_DECORATOR,
     )
     decoratorsStructureRef.current.push(newDecorator)
-  })
+  }
 
-  const addQaBlacklistGlossaryDecoratorRef = useRef(() => {
+  const addQaBlacklistGlossaryDecorator = () => {
     const {qaBlacklistGlossary, sid} = liveRef.current.props.segment
     const newDecorator = DraftMatecatUtils.activateQaCheckBlacklist(
       qaBlacklistGlossary,
@@ -187,9 +187,9 @@ const Editarea = forwardRef((props, ref) => {
         decorator.name === DraftMatecatConstants.QA_BLACKLIST_DECORATOR,
     )
     decoratorsStructureRef.current.push(newDecorator)
-  })
+  }
 
-  const addLexiqaDecoratorRef = useRef(() => {
+  const addLexiqaDecorator = () => {
     const {editorState} = liveRef.current
     const {lexiqa, sid, lxqDecodedTranslation} = liveRef.current.props.segment
     // pass decoded translation with tags like <g id='1'>
@@ -222,7 +222,7 @@ const Editarea = forwardRef((props, ref) => {
         DraftMatecatConstants.LEXIQA_DECORATOR,
       )
     }
-  })
+  }
 
   // Receive the new translation and decode it for draftJS
   const setNewTranslationRef = useRef((sid, translation) => {
@@ -516,7 +516,7 @@ const Editarea = forwardRef((props, ref) => {
     }
   })
 
-  const replaceWordAtRef = useRef(({newWord, start, end}) => {
+  const replaceWordAt = ({newWord, start, end}) => {
     const startIndex = start
     const endIndex = end
     const selection = liveRef.current.editorState.getSelection().merge({
@@ -538,13 +538,13 @@ const Editarea = forwardRef((props, ref) => {
       // Stop composition mode
       instanceRef.current.onCompositionStopDebounced()
     })
-  })
+  }
 
   const focusEditorRef = useRef(() => {
     if (editorRef.current) editorRef.current.focus()
   })
 
-  const typeTextInEditorRef = useRef((textToInsert) => {
+  const typeTextInEditor = (textToInsert) => {
     const {editorState} = liveRef.current
     editorSync.onComposition = true
     let newEditorState = instanceRef.current.disableDecorator(
@@ -568,7 +568,7 @@ const Editarea = forwardRef((props, ref) => {
         instanceRef.current.onCompositionStopDebounced()
       },
     )
-  })
+  }
 
   const myKeyBindingFn = (e) => {
     const {displayPopover} = liveRef.current
@@ -886,7 +886,7 @@ const Editarea = forwardRef((props, ref) => {
     }
   })
 
-  const removeDecoratorRef = useRef((decoratorName) => {
+  const removeDecorator = (decoratorName) => {
     if (!decoratorName) {
       remove(
         decoratorsStructureRef.current,
@@ -898,19 +898,19 @@ const Editarea = forwardRef((props, ref) => {
         (decorator) => decorator.name === decoratorName,
       )
     }
-  })
+  }
 
   // has to be followed by a setState for editorState
-  const disableDecoratorRef = useRef((editorState, decoratorName) => {
+  const disableDecorator = (editorState, decoratorName) => {
     remove(
       decoratorsStructureRef.current,
       (decorator) => decorator.name === decoratorName,
     )
     const decorator = new CompositeDecorator(decoratorsStructureRef.current)
     return EditorState.set(editorState, {decorator})
-  })
+  }
 
-  const onChangeRef = useRef((editorState) => {
+  const onChange = (editorState) => {
     const {displayPopover, activeDecorators} = liveRef.current
     const prevEditorState = liveRef.current.editorState
 
@@ -1005,11 +1005,11 @@ const Editarea = forwardRef((props, ref) => {
         },
       )
     }
-  })
+  }
 
   // fix cursor jump at the beginning
   // Methods for TagMenu ---- START
-  const moveUpTagMenuSelectionRef = useRef(() => {
+  const moveUpTagMenuSelection = () => {
     const {displayPopover} = liveRef.current
     if (!displayPopover) return
     const {
@@ -1025,9 +1025,9 @@ const Editarea = forwardRef((props, ref) => {
     instanceRef.current.setState({
       focusedTagIndex: newFocusedTagIndex,
     })
-  })
+  }
 
-  const moveDownTagMenuSelectionRef = useRef(() => {
+  const moveDownTagMenuSelection = () => {
     const {displayPopover} = liveRef.current
     if (!displayPopover) return
     const {
@@ -1039,9 +1039,9 @@ const Editarea = forwardRef((props, ref) => {
       focusedTagIndex:
         (focusedTagIndex + 1) % mergeAutocompleteSuggestions.length,
     })
-  })
+  }
 
-  const acceptTagMenuSelectionRef = useRef(() => {
+  const acceptTagMenuSelection = () => {
     const {
       focusedTagIndex,
       displayPopover,
@@ -1083,9 +1083,9 @@ const Editarea = forwardRef((props, ref) => {
         instanceRef.current.onCompositionStopDebounced()
       },
     )
-  })
+  }
 
-  const openPopoverRef = useRef((suggestions, position) => {
+  const openPopover = (suggestions, position) => {
     // Posizione da salvare e passare al compoennte
     const popoverPosition = {
       top: position.top,
@@ -1098,14 +1098,14 @@ const Editarea = forwardRef((props, ref) => {
       focusedTagIndex: 0,
       popoverPosition: popoverPosition,
     })
-  })
+  }
 
-  const closePopoverRef = useRef(() => {
+  const closePopover = () => {
     instanceRef.current.setState({
       displayPopover: false,
       triggerText: null,
     })
-  })
+  }
 
   const onTagClick = (suggestionTag) => {
     const {editorState, triggerText} = liveRef.current
@@ -1378,7 +1378,7 @@ const Editarea = forwardRef((props, ref) => {
    * @param minWidth - min length of element to show
    * @returns {{top: number, left: number}}
    */
-  const getEditorRelativeSelectionOffsetRef = useRef((minWidth = 300) => {
+  const getEditorRelativeSelectionOffset = (minWidth = 300) => {
     const editorBoundingRect = editorRef.current.editor.getBoundingClientRect()
     const selectionBoundingRect = window
       .getSelection()
@@ -1407,7 +1407,7 @@ const Editarea = forwardRef((props, ref) => {
         selectionBoundingRect.height,
       left: leftAdjusted,
     }
-  })
+  }
 
   const getUpdatedSegmentInfoRef = useRef(() => {
     const {
@@ -1435,7 +1435,7 @@ const Editarea = forwardRef((props, ref) => {
     }
   })
 
-  const formatSelectionRef = useRef((format) => {
+  const formatSelection = (format) => {
     const {editorState} = liveRef.current
     // Todo: if selectionIsEntity return
     if (editorState.getSelection().isCollapsed()) {
@@ -1461,9 +1461,9 @@ const Editarea = forwardRef((props, ref) => {
         instanceRef.current.updateTranslationDebounced()
       },
     )
-  })
+  }
 
-  const addMissingSourceTagsToTargetRef = useRef(() => {
+  const addMissingSourceTagsToTarget = () => {
     const {segment} = liveRef.current.props
     const {editorState} = liveRef.current
     // Append missing tag at the end of the current translation string
@@ -1501,7 +1501,7 @@ const Editarea = forwardRef((props, ref) => {
         translation: newTranslation,
       })
     }, 100)
-  })
+  }
 
   // ---- decoratorsStructure (mutable buffer, seeded once) ----
   const decoratorsStructureRef = useRef(null)
@@ -1581,7 +1581,7 @@ const Editarea = forwardRef((props, ref) => {
     constructorRanRef.current = true
     props.updateCounter(
       DraftMatecatUtils.getCharactersCounter(
-        getTextToApplyCounterRef.current(props.translation),
+        getTextToApplyCounter(props.translation),
       ),
     )
   }
@@ -1868,12 +1868,12 @@ const Editarea = forwardRef((props, ref) => {
       if (callback) callback()
     }
 
-    instanceRef.current.getTextToApplyCounter = getTextToApplyCounterRef.current
-    instanceRef.current.addIcuDecorator = addIcuDecoratorRef.current
-    instanceRef.current.addSearchDecorator = addSearchDecoratorRef.current
+    instanceRef.current.getTextToApplyCounter = getTextToApplyCounter
+    instanceRef.current.addIcuDecorator = addIcuDecorator
+    instanceRef.current.addSearchDecorator = addSearchDecorator
     instanceRef.current.addQaBlacklistGlossaryDecorator =
-      addQaBlacklistGlossaryDecoratorRef.current
-    instanceRef.current.addLexiqaDecorator = addLexiqaDecoratorRef.current
+      addQaBlacklistGlossaryDecorator
+    instanceRef.current.addLexiqaDecorator = addLexiqaDecorator
     instanceRef.current.setNewTranslation = setNewTranslationRef.current
     instanceRef.current.replaceCurrentSearch = replaceCurrentSearchRef.current
     instanceRef.current.updateTranslationInStore =
@@ -1886,28 +1886,25 @@ const Editarea = forwardRef((props, ref) => {
       refreshCharactersCounterRulesRef.current
     instanceRef.current.onCompositionStart = onCompositionStartRef.current
     instanceRef.current.onCompositionEnd = onCompositionEndRef.current
-    instanceRef.current.replaceWordAt = replaceWordAtRef.current
+    instanceRef.current.replaceWordAt = replaceWordAt
     instanceRef.current.focusEditor = focusEditorRef.current
-    instanceRef.current.typeTextInEditor = typeTextInEditorRef.current
+    instanceRef.current.typeTextInEditor = typeTextInEditor
     instanceRef.current.insertTagAtSelection = insertTagAtSelectionRef.current
     instanceRef.current.onCompositionStop = onCompositionStopRef.current
-    instanceRef.current.removeDecorator = removeDecoratorRef.current
-    instanceRef.current.disableDecorator = disableDecoratorRef.current
-    instanceRef.current.onChange = onChangeRef.current
-    instanceRef.current.moveUpTagMenuSelection =
-      moveUpTagMenuSelectionRef.current
-    instanceRef.current.moveDownTagMenuSelection =
-      moveDownTagMenuSelectionRef.current
-    instanceRef.current.acceptTagMenuSelection =
-      acceptTagMenuSelectionRef.current
-    instanceRef.current.openPopover = openPopoverRef.current
-    instanceRef.current.closePopover = closePopoverRef.current
+    instanceRef.current.removeDecorator = removeDecorator
+    instanceRef.current.disableDecorator = disableDecorator
+    instanceRef.current.onChange = onChange
+    instanceRef.current.moveUpTagMenuSelection = moveUpTagMenuSelection
+    instanceRef.current.moveDownTagMenuSelection = moveDownTagMenuSelection
+    instanceRef.current.acceptTagMenuSelection = acceptTagMenuSelection
+    instanceRef.current.openPopover = openPopover
+    instanceRef.current.closePopover = closePopover
     instanceRef.current.getEditorRelativeSelectionOffset =
-      getEditorRelativeSelectionOffsetRef.current
+      getEditorRelativeSelectionOffset
     instanceRef.current.getUpdatedSegmentInfo = getUpdatedSegmentInfoRef.current
-    instanceRef.current.formatSelection = formatSelectionRef.current
+    instanceRef.current.formatSelection = formatSelection
     instanceRef.current.addMissingSourceTagsToTarget =
-      addMissingSourceTagsToTargetRef.current
+      addMissingSourceTagsToTarget
 
     instanceRef.current.updateTranslationDebounced =
       updateTranslationDebouncedRef.current
@@ -1985,7 +1982,7 @@ const Editarea = forwardRef((props, ref) => {
       <Editor
         lang={lang}
         editorState={editorState}
-        onChange={onChangeRef.current}
+        onChange={onChange}
         handlePastedText={pasteFragment}
         ref={editorRef}
         readOnly={readonly}
