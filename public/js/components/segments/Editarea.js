@@ -3,7 +3,6 @@ import React, {
   useContext,
   useEffect,
   useImperativeHandle,
-  useReducer,
   useRef,
   useState,
 } from 'react'
@@ -1009,15 +1008,6 @@ const Editarea = forwardRef((props, ref) => {
   })
 
   // fix cursor jump at the beginning
-  const forceSelectionFocusRef = useRef((editorState) => {
-    const currentSelection = editorState.getSelection()
-    if (!currentSelection.getHasFocus()) {
-      const selection = currentSelection.set('hasFocus', true)
-      editorState = EditorState.acceptSelection(editorState, selection)
-    }
-    return editorState
-  })
-
   // Methods for TagMenu ---- START
   const moveUpTagMenuSelectionRef = useRef(() => {
     const {displayPopover} = liveRef.current
@@ -1153,24 +1143,6 @@ const Editarea = forwardRef((props, ref) => {
     )
   })
   // Methods for TagMenu ---- END
-
-  const onPasteRef = useRef(() => {
-    const {editorState} = liveRef.current
-    const internalClipboard = editorRef.current.getClipboard()
-    if (internalClipboard) {
-      const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
-        internalClipboard,
-        editorState,
-      )
-      instanceRef.current.onChange(clipboardEditorPasted)
-      instanceRef.current.setState({
-        editorState: clipboardEditorPasted,
-      })
-      return true
-    } else {
-      return false
-    }
-  })
 
   const pasteFragmentRef = useRef((text) => {
     const {editorState} = liveRef.current
@@ -1655,8 +1627,6 @@ const Editarea = forwardRef((props, ref) => {
   liveRef.current.clickedTag = clickedTag
   liveRef.current.icuEnabled = icuEnabled
 
-  const [, bumpForceRender] = useReducer((x) => x + 1, 0)
-
   const isFirstRenderRef = useRef(true)
   const prevPropsRef = useRef(props)
   const prevStateRef = useRef(null)
@@ -1898,12 +1868,7 @@ const Editarea = forwardRef((props, ref) => {
       if (callback) callback()
     }
 
-    instanceRef.current.forceUpdate = () => bumpForceRender()
-
-    instanceRef.current.icuEnabled = icuEnabled
-
     instanceRef.current.getTextToApplyCounter = getTextToApplyCounterRef.current
-    instanceRef.current.getSearchParams = getSearchParamsRef.current
     instanceRef.current.addIcuDecorator = addIcuDecoratorRef.current
     instanceRef.current.addSearchDecorator = addSearchDecoratorRef.current
     instanceRef.current.addQaBlacklistGlossaryDecorator =
@@ -1935,7 +1900,6 @@ const Editarea = forwardRef((props, ref) => {
     instanceRef.current.removeDecorator = removeDecoratorRef.current
     instanceRef.current.disableDecorator = disableDecoratorRef.current
     instanceRef.current.onChange = onChangeRef.current
-    instanceRef.current.forceSelectionFocus = forceSelectionFocusRef.current
     instanceRef.current.moveUpTagMenuSelection =
       moveUpTagMenuSelectionRef.current
     instanceRef.current.moveDownTagMenuSelection =
@@ -1945,13 +1909,11 @@ const Editarea = forwardRef((props, ref) => {
     instanceRef.current.openPopover = openPopoverRef.current
     instanceRef.current.closePopover = closePopoverRef.current
     instanceRef.current.onTagClick = onTagClickRef.current
-    instanceRef.current.onPaste = onPasteRef.current
     instanceRef.current.pasteFragment = pasteFragmentRef.current
     instanceRef.current.copyFragment = copyFragmentRef.current
     instanceRef.current.onDragEvent = onDragEventRef.current
     instanceRef.current.onDragEnd = onDragEndRef.current
     instanceRef.current.handleDrop = handleDropRef.current
-    instanceRef.current.onEntityClick = onEntityClickRef.current
     instanceRef.current.getEditorRelativeSelectionOffset =
       getEditorRelativeSelectionOffsetRef.current
     instanceRef.current.getUpdatedSegmentInfo = getUpdatedSegmentInfoRef.current
@@ -1986,8 +1948,6 @@ const Editarea = forwardRef((props, ref) => {
 
     instanceRef.current.isShiftPressedOnNavigation =
       isShiftPressedOnNavigationRef
-    instanceRef.current.wasTripleClickTriggered = wasTripleClickTriggeredRef
-    instanceRef.current.compositionEventChecks = compositionEventChecksRef
   }
 
   // The component's public API: exactly the four members production reaches
