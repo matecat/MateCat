@@ -1034,6 +1034,80 @@ describe('tag menu keyboard shortcuts', () => {
   })
 })
 
+describe('tag insertion keyboard shortcuts', () => {
+  const tagCount = (container) =>
+    container.querySelectorAll('.public-DraftEditor-content .tag-container')
+      .length
+
+  test('tab inserts a tab tag and shift + tab does not', () => {
+    const {container} = mountEditarea({translation: 'ciao'})
+    expect(tagCount(container)).toBe(0)
+
+    pressKey(container, {key: 'Tab'})
+    expect(tagCount(container)).toBe(1)
+
+    pressKey(container, {key: 'Tab', shiftKey: true})
+    expect(tagCount(container)).toBe(1)
+  })
+
+  test('space inserts a space tag when the space signature is enabled', () => {
+    const {container} = mountEditarea({translation: 'ciao'})
+
+    pressKey(container, {code: 'Space', key: ' '})
+
+    expect(tagCount(container)).toBe(1)
+  })
+
+  test('space does not insert a space tag when the signature is disabled', () => {
+    setTagSignatureMiddleware('space', () => false)
+    const {container} = mountEditarea({translation: 'ciao'})
+
+    pressKey(container, {code: 'Space', key: ' '})
+
+    expect(tagCount(container)).toBe(0)
+  })
+
+  test('ctrl + shift + space inserts a nbsp tag', () => {
+    const {container} = mountEditarea({translation: 'ciao'})
+
+    pressKey(container, {key: ' ', ctrlKey: true, shiftKey: true})
+
+    expect(tagCount(container)).toBe(1)
+  })
+
+  test('alt + space on a chromebook inserts a nbsp tag', () => {
+    const userAgent = jest
+      .spyOn(window.navigator, 'userAgent', 'get')
+      .mockReturnValue('Mozilla/5.0 (X11; CrOS x86_64)')
+    const {container} = mountEditarea({translation: 'ciao'})
+
+    pressKey(container, {key: ' ', altKey: true})
+
+    expect(tagCount(container)).toBe(1)
+    userAgent.mockRestore()
+  })
+
+  test('alt + space off a chromebook does not insert a nbsp tag', () => {
+    const userAgent = jest
+      .spyOn(window.navigator, 'userAgent', 'get')
+      .mockReturnValue('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)')
+    const {container} = mountEditarea({translation: 'ciao'})
+
+    pressKey(container, {key: ' ', altKey: true})
+
+    expect(tagCount(container)).toBe(0)
+    userAgent.mockRestore()
+  })
+
+  test('ctrl + alt + space inserts a word joiner tag', () => {
+    const {container} = mountEditarea({translation: 'ciao'})
+
+    pressKey(container, {key: ' ', ctrlKey: true, altKey: true})
+
+    expect(tagCount(container)).toBe(1)
+  })
+})
+
 describe('myKeyBindingFn', () => {
   let instance
 
@@ -1136,56 +1210,9 @@ describe('myKeyBindingFn', () => {
     )
   })
 
-  test('tab inserts a tab tag and shift + tab does not', () => {
-    expect(instance.myKeyBindingFn(keyEvent({key: 'Tab'}))).toBe(
-      'insert-tab-tag',
-    )
-    expect(
-      instance.myKeyBindingFn(keyEvent({key: 'Tab', shiftKey: true})),
-    ).toBeNull()
-  })
-
-  test('space inserts a space tag when the space signature is enabled', () => {
-    expect(instance.myKeyBindingFn(keyEvent({code: 'Space', key: ' '}))).toBe(
-      'insert-space-tag',
-    )
-  })
-
-  test('space does not insert a space tag when the signature is disabled', () => {
-    setTagSignatureMiddleware('space', () => false)
-
-    expect(
-      instance.myKeyBindingFn(keyEvent({code: 'Space', key: ' '})),
-    ).not.toBe('insert-space-tag')
-  })
-
-  test('ctrl + shift + space inserts a nbsp tag', () => {
-    expect(
-      instance.myKeyBindingFn(
-        keyEvent({key: ' ', ctrlKey: true, shiftKey: true}),
-      ),
-    ).toBe('insert-nbsp-tag')
-  })
-
-  test('alt + space on a chromebook inserts a nbsp tag', () => {
-    const userAgent = jest
-      .spyOn(window.navigator, 'userAgent', 'get')
-      .mockReturnValue('Mozilla/5.0 (X11; CrOS x86_64)')
-
-    expect(
-      instance.myKeyBindingFn(keyEvent({key: 'Spacebar', altKey: true})),
-    ).toBe('insert-nbsp-tag')
-
-    userAgent.mockRestore()
-  })
-
-  test('ctrl + alt + space inserts a word joiner tag', () => {
-    expect(
-      instance.myKeyBindingFn(
-        keyEvent({key: ' ', ctrlKey: true, altKey: true}),
-      ),
-    ).toBe('insert-word-joiner-tag')
-  })
+  // The tag-insertion key mappings are covered by 'tag insertion keyboard
+  // shortcuts' above, which presses the keys and checks a tag entity is
+  // actually inserted into the editor.
 
   test('ctrl + k triggers the tm search', () => {
     expect(instance.myKeyBindingFn(keyEvent({key: 'k', ctrlKey: true}))).toBe(
