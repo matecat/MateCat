@@ -144,18 +144,31 @@ function renderEditarea({
   toggleFormatMenu = jest.fn(),
 } = {}) {
   const ref = React.createRef()
-  const utils = render(
+  const tree = (seg, trans) => (
     <SegmentContext.Provider value={context}>
       <Editarea
         ref={ref}
-        segment={segment}
-        translation={translation}
+        segment={seg}
+        translation={trans}
         updateCounter={updateCounter}
         toggleFormatMenu={toggleFormatMenu}
       />
-    </SegmentContext.Provider>,
+    </SegmentContext.Provider>
   )
-  return {...utils, instance: ref.current, updateCounter, toggleFormatMenu}
+  const utils = render(tree(segment, translation))
+  return {
+    ...utils,
+    instance: ref.current,
+    updateCounter,
+    toggleFormatMenu,
+    /** Re-renders with a different segment, then drains deferred work. */
+    update: (nextSegment, nextTranslation = nextSegment.translation) => {
+      act(() => {
+        utils.rerender(tree(nextSegment, nextTranslation))
+      })
+      flush()
+    },
+  }
 }
 
 /** Runs every pending timer + microtask inside act(). */
@@ -855,5 +868,99 @@ describe('Editarea production ref surface', () => {
     expect(typeof instance.editAreaRef.contains(document.activeElement)).toBe(
       'boolean',
     )
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Stale-closure guards
+// ---------------------------------------------------------------------------
+//
+// The handlers below are registered with the store ONCE, in a mount-only
+// effect, so whatever function object is read at mount is kept for the life of
+// the component. They must still see the CURRENT props when they fire later.
+//
+// Each guard re-renders with a different segment first, then fires the handler
+// that was registered at mount. If a handler closed over the props it was
+// created with, it compares against the old sid and silently does nothing —
+// which is the defect that shipped in 71cd271, where a once-built callback kept
+// returning first-render data.
+//
+// These are the safety net for converting the remaining useRef-wrapped methods
+// into plain per-render closures: a conversion that freezes one of these paths
+// fails here instead of in production.
+describe('frozen call sites see the current props', () => {
+  const OTHER = '12-2'
+
+  /** The handler the component registered for `event` at mount. */
+  const listenerFor = (event) => {
+    const call = SegmentStore.addListener.mock.calls.find(
+      ([registered]) => registered === event,
+    )
+    if (!call) throw new Error(`no listener registered for ${event}`)
+    return call[1]
+  }
+
+  function renderThenSwapSegment(overrides = {}) {
+    const first = makeSegment({sid: '12-1', translation: 'uno'})
+    const rendered = renderEditarea({segment: first, translation: 'uno'})
+    flush()
+    const second = makeSegment({sid: OTHER, translation: 'due', ...overrides})
+    rendered.update(second, 'due')
+    return rendered
+  }
+
+  test('REPLACE_TRANSLATION applies to the segment rendered now', () => {
+    const {container} = renderThenSwapSegment()
+
+    act(() => {
+      listenerFor(SegmentConstants.REPLACE_TRANSLATION)(OTHER, 'tre')
+    })
+    flush()
+
+    expect(container.textContent).toContain('tre')
+  })
+
+  test('REPLACE_TRANSLATION ignores the segment that was mounted first', () => {
+    const {container} = renderThenSwapSegment()
+
+    act(() => {
+      listenerFor(SegmentConstants.REPLACE_TRANSLATION)('12-1', 'stale')
+    })
+    flush()
+
+    expect(container.textContent).not.toContain('stale')
+  })
+
+  test('REFRESH_TAG_MAP re-encodes against the segment rendered now', () => {
+    const {container} = renderThenSwapSegment({
+      translation: 'due <g id="1">tag</g>',
+      sourceTagMap: [
+        {
+          type: 'g',
+          data: {id: '1', name: 'g', encodedText: '&lt;g id="1"&gt;'},
+          offset: 0,
+          length: 1,
+        },
+      ],
+    })
+
+    act(() => {
+      listenerFor(SegmentConstants.REFRESH_TAG_MAP)()
+    })
+    flush()
+
+    expect(container.textContent).toContain('tag')
+  })
+
+  test('CHANGE_CHARACTERS_COUNTER_RULES recounts the segment rendered now', () => {
+    const {updateCounter} = renderThenSwapSegment()
+    updateCounter.mockClear()
+
+    act(() => {
+      listenerFor(SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES)()
+    })
+    flush()
+
+    expect(updateCounter).toHaveBeenCalled()
   })
 })
