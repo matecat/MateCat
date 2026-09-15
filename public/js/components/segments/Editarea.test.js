@@ -2528,3 +2528,52 @@ describe('tag entity decoration', () => {
     expect(entities(container)).toHaveLength(0)
   })
 })
+
+// The ref Editarea exposes is production API, not test scaffolding: three
+// components reach through it, and each of their own test suites passes a
+// hand-made `editArea` stub instead of a real instance. Nothing else checks
+// that the real handle still satisfies them, so this does — and it is the
+// contract that has to survive any narrowing of the exposed surface.
+//
+//   SegmentTarget.js          editArea.addMissingSourceTagsToTarget
+//   SegmentTargetToolbar.js   editArea.formatSelection('uppercase' | ...)
+//   AiAlternatives.js         editArea?.state?.editorState
+//   AiAlternatives.js         editArea?.editAreaRef.contains(...)
+//
+// Note the last two: neither `editAreaRef` nor `formatSelection` is reached
+// through optional chaining at the call site, so they must always be present
+// on a mounted instance, not merely usually.
+describe('Editarea production ref surface', () => {
+  test('exposes addMissingSourceTagsToTarget for SegmentTarget', () => {
+    const {instance} = mountEditarea({translation: 'Ciao'})
+
+    expect(typeof instance.addMissingSourceTagsToTarget).toBe('function')
+  })
+
+  test('exposes formatSelection for SegmentTargetToolbar', () => {
+    const {instance} = mountEditarea({translation: 'Ciao'})
+
+    expect(typeof instance.formatSelection).toBe('function')
+  })
+
+  test('exposes state.editorState for AiAlternatives', () => {
+    const {instance} = mountEditarea({translation: 'Ciao'})
+
+    expect(instance.state).toBeDefined()
+    expect(typeof instance.state.editorState.getSelection).toBe('function')
+    expect(typeof instance.state.editorState.getCurrentContent).toBe('function')
+  })
+
+  test('exposes editAreaRef as a live DOM node for AiAlternatives', () => {
+    const {instance} = mountEditarea({translation: 'Ciao'})
+
+    expect(instance.editAreaRef).toBeInstanceOf(HTMLElement)
+    // AiAlternatives uses this to decide whether focus sits inside the editor,
+    // so the call has to work on a real node rather than return a useful value
+    // here — the editor holds focus once mounted.
+    expect(instance.editAreaRef.contains(document.body)).toBe(false)
+    expect(typeof instance.editAreaRef.contains(document.activeElement)).toBe(
+      'boolean',
+    )
+  })
+})
