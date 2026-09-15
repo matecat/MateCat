@@ -5,6 +5,7 @@ import {Yaml} from './Yaml'
 import {FiltersParamsContext} from './FiltersParamsContext'
 
 const defaultYaml = {
+  force_double_quoting: false,
   translate_keys: [],
   character_limit: [],
   context_keys: [],
@@ -33,6 +34,12 @@ describe('Yaml', () => {
   test('renders all sections with default values', () => {
     setup()
 
+    expect(
+      screen.getByText('Force double quotes on single-line strings'),
+    ).toBeInTheDocument()
+    expect(
+      document.querySelector('input[name="force_double_quoting"]'),
+    ).not.toBeChecked()
     expect(screen.getByText('Translatable keys')).toBeInTheDocument()
     expect(screen.getByText('Context keys')).toBeInTheDocument()
     expect(screen.getByText('Character limit keys')).toBeInTheDocument()
@@ -49,6 +56,30 @@ describe('Yaml', () => {
     expect(
       screen.getByTestId('radio-option-do_not_translate_keys'),
     ).toBeChecked()
+  })
+
+  test('force double quoting reflects the saved value', () => {
+    setup({yamlOverrides: {force_double_quoting: true}})
+
+    expect(
+      document.querySelector('input[name="force_double_quoting"]'),
+    ).toBeChecked()
+  })
+
+  test('toggling force double quoting reports the updated value', async () => {
+    const {modifyingCurrentTemplate, currentTemplate} = setup()
+
+    fireEvent.click(
+      document.querySelector('input[name="force_double_quoting"]'),
+    )
+
+    await waitFor(() => expect(modifyingCurrentTemplate).toHaveBeenCalled())
+
+    const updater =
+      modifyingCurrentTemplate.mock.calls[
+        modifyingCurrentTemplate.mock.calls.length - 1
+      ][0]
+    expect(updater(currentTemplate).yaml.force_double_quoting).toBe(true)
   })
 
   test('switching segmented control updates the active option', async () => {
