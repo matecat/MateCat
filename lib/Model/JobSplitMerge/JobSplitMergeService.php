@@ -171,7 +171,8 @@ class JobSplitMergeService
         (new JobCredentialCacheInvalidator(
             new JobDao($this->dbHandler),
             new ChunkReviewDao($this->dbHandler),
-            new ProjectDao($this->dbHandler)
+            new ProjectDao($this->dbHandler),
+            new MetadataDao($this->dbHandler)
         ))->sweepAfterJobPasswordRotation($chunk, $oldPassword, $newPassword);
     }
 
@@ -494,12 +495,9 @@ class JobSplitMergeService
 
             $newJobList[] = $newJob;
 
-            // duplicate character_counter_count_tags, character_counter_mode, subfiltering_handlers metadata
-            $metadata = [
-                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value,
-                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value,
-                JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
-            ];
+            // Job metadata is keyed by (id_job, password) and the new chunks get fresh passwords, so
+            // every key that must survive the split has to be copied across explicitly.
+            $metadata = JobsMetadataMarshaller::propagatedOnSplit();
 
              foreach ($metadata as $key) {
                  $_data = $jobsMetadataDao->get(
@@ -661,12 +659,9 @@ class JobSplitMergeService
             $mergedPasswords[] = (string)$_jStruct->password;
 
             if ($i > 0) {
-                // delete character_counter_count_tags, character_counter_mode, subfiltering_handlers metadata (not from the first job)
-                $metadata = [
-                    JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value,
-                    JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value,
-                    JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
-                ];
+                // Drop the copies the split created on every chunk but the first: the same key list,
+                // otherwise a merge would leave rows behind for a password nothing reads any more.
+                $metadata = JobsMetadataMarshaller::propagatedOnSplit();
 
                  foreach ($metadata as $key) {
                      $jobsMetadataDao->delete($_jStruct->id ?? throw new RuntimeException('Missing job id'), $_jStruct->password ?? throw new RuntimeException('Missing job password'), $key);

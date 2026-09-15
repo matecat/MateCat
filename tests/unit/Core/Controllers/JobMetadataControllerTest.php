@@ -16,6 +16,7 @@ use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\ExpectationFailedException;
@@ -310,6 +311,142 @@ class JobMetadataControllerTest extends AbstractTest
             }));
 
         $this->controller->save();
+    }
+
+    // ─── save(): MT settings ───
+
+    /**
+     * The MT settings moved from project metadata to job metadata so the project owner can change
+     * them after creation, and this endpoint is what writes them. The JSON Schema is the gate: a key
+     * missing from it is rejected before the DAO is reached, so every one of them needs a branch.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    #[DataProvider('mtSettingPayloadProvider')]
+    public function save_persists_mt_setting(string $key, mixed $value, string $expectedStored): void
+    {
+        $body = (string)json_encode([['key' => $key, 'value' => $value]]);
+
+        $this->setRequest([
+            'id_job' => (string)$this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ], $body, true);
+
+        $this->responseMock->expects($this->once())->method('json');
+
+        $this->controller->save();
+
+        $persisted = (new MetadataDao(obtainTestDatabase()))
+            ->get($this->jobId(self::BASE), self::JOB_PASSWORD, $key);
+
+        $this->assertNotNull($persisted, "'$key' was accepted but not persisted");
+        $this->assertSame($expectedStored, $persisted->value);
+    }
+
+    public static function mtSettingPayloadProvider(): array
+    {
+        return [
+            'threshold'               => ['mt_quality_value_in_editor', 90, '90'],
+            'threshold zero'          => ['mt_quality_value_in_editor', 0, '0'],
+            'deepl formality'         => ['deepl_formality', 'prefer_more', 'prefer_more'],
+            'deepl engine type'       => ['deepl_engine_type', 'latency_optimized', 'latency_optimized'],
+            'deepl glossary'          => ['deepl_id_glossary', 'gl-abc', 'gl-abc'],
+            'lara style'              => ['lara_style', 'creative', 'creative'],
+            'lara style guideline'    => ['lara_style_guideline_id', 'guideline-3', 'guideline-3'],
+            // Arrays are JSON-encoded by the controller before they reach the DAO.
+            'lara glossaries'         => ['lara_glossaries', ['a', 'b'], '["a","b"]'],
+            'mmt glossaries'          => ['mmt_glossaries', [1, 2], '[1,2]'],
+            'intento provider'        => ['intento_provider', 'ai.text.translate.google', 'ai.text.translate.google'],
+            'intento routing'         => ['intento_routing', 'best_quality', 'best_quality'],
+        ];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    #[DataProvider('rejectedMtSettingPayloadProvider')]
+    public function save_rejects_invalid_mt_setting(string $key, mixed $value): void
+    {
+        $body = (string)json_encode([['key' => $key, 'value' => $value]]);
+
+        $this->setRequest([
+            'id_job' => (string)$this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ], $body, true);
+
+        $this->expectException(JSONValidatorException::class);
+
+        $this->controller->save();
+    }
+
+    public static function rejectedMtSettingPayloadProvider(): array
+    {
+        return [
+            // The engines only accept these three formalities; storing anything else would make the
+            // MT call fail at request time instead of here.
+            'unknown formality'   => ['deepl_formality', 'very_formal'],
+            'unknown lara style'  => ['lara_style', 'formal'],
+            'unknown engine type' => ['deepl_engine_type', 'fastest'],
+            'threshold above 100' => ['mt_quality_value_in_editor', 101],
+            'threshold below 0'   => ['mt_quality_value_in_editor', -1],
+            'threshold as string' => ['mt_quality_value_in_editor', '90'],
+            // An empty string is an answer, not an absence: it would shadow the project-metadata
+            // fallback with a value the engine cannot use. Clearing a setting is what delete() is for.
+            'empty glossary id'   => ['deepl_id_glossary', ''],
+            'empty lara style guideline' => ['lara_style_guideline_id', ''],
+            // mmt_glossaries holds MyMemory numeric ids, lara_glossaries opaque string ids.
+            'mmt glossary strings' => ['mmt_glossaries', ['12']],
+            'lara glossary ints'   => ['lara_glossaries', [12]],
+            // An empty list is the array-shaped version of the empty string above: the Lara SDK
+            // forwards whatever it is given, so `[]` would go out as "glossaries": [] rather than
+            // omitting the parameter. delete() is how a glossary is cleared.
+            'empty lara glossaries' => ['lara_glossaries', []],
+            'empty mmt glossaries'  => ['mmt_glossaries', []],
+            // A MyMemory glossary id is a positive integer.
+            'zero mmt glossary id'  => ['mmt_glossaries', [0]],
+            'negative mmt glossary id' => ['mmt_glossaries', [-1]],
+            // Only the engine-tunable settings are job-scoped: the analysis was priced on this one.
+            'enable_mt_analysis'   => ['enable_mt_analysis', true],
+            // Consumed once at creation by MMT::syncMemories(), which has no job context.
+            'context analyzer'     => ['mmt_activate_context_analyzer', true],
+        ];
+    }
+
+    /**
+     * Every branch of the schema constrains `key` and `value` but none used to require them, so an
+     * item could carry neither and still validate. `save()` then coerced the missing value to the
+     * four-character string "null" and stored it — past the enum the schema declares — and a missing
+     * key reached MetadataDao::set(… string $key …) as null, which is a 500 rather than a 400.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    #[DataProvider('malformedItemProvider')]
+    public function save_rejects_an_item_missing_key_or_value(string $body): void
+    {
+        $this->setRequest([
+            'id_job' => (string)$this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ], $body, true);
+
+        $this->expectException(JSONValidatorException::class);
+
+        $this->controller->save();
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function malformedItemProvider(): array
+    {
+        return [
+            'empty object'    => ['[{}]'],
+            'key with no value' => ['[{"key":"deepl_formality"}]'],
+            'value with no key' => ['[{"value":"prefer_more"}]'],
+            'valid item followed by an empty one' => ['[{"key":"lara_style","value":"fluid"},{}]'],
+        ];
     }
 
     /**

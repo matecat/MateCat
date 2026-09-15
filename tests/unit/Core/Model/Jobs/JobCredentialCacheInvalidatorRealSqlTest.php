@@ -5,7 +5,10 @@ namespace Matecat\Core\Model\Jobs;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\RealSqlDaoTestTrait;
 use Model\Jobs\JobCredentialCacheInvalidator;
+use Model\Jobs\JobSettingsResolver;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobDao;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
@@ -71,7 +74,8 @@ class JobCredentialCacheInvalidatorRealSqlTest extends AbstractTest
         $this->invalidator = new JobCredentialCacheInvalidator(
             $this->jobDao,
             $this->chunkReviewDao,
-            new ProjectDao($this->realSqlDb())
+            new ProjectDao($this->realSqlDb()),
+            new JobsMetadataDao($this->realSqlDb())
         );
     }
 
@@ -247,5 +251,86 @@ class JobCredentialCacheInvalidatorRealSqlTest extends AbstractTest
         $this->assertCount(2, $allLinks);
         $this->assertSame('jcci_r1_rotated', $allLinks[0]->review_password);
         $this->assertSame(self::R2_PASSWORD, $allLinks[1]->review_password);
+    }
+
+    /**
+     * The regression this pins. JobDao::changePassword() moves the job_metadata rows onto the new
+     * password, and the sweep used to evict only the bulk read — getByJobIdAndPassword(), bound to
+     * (id_job, password). But every MT setting is read one key at a time through
+     * JobSettingsResolver::resolve() → MetadataDao::get(), a different statement bound to
+     * (id_job, password, key). Different SQL and a different bind set means a different hash, so the
+     * per-key entries survived the eviction for the whole 86400s TTL, keyed on the retired password:
+     * any flow that returned a job to a previously used password read its pre-rotation settings.
+     */
+    #[Test]
+    public function jobPasswordRotation_evicts_the_per_key_settings_reads_and_not_only_the_bulk_one(): void
+    {
+        $key = JobsMetadataMarshaller::LARA_STYLE->value;
+        $metadataDao = new JobsMetadataDao($this->realSqlDb());
+        $resolver = new JobSettingsResolver($this->realSqlDb());
+
+        $metadataDao->set($this->idJob, $this->jobPassword, $key, 'faithful');
+
+        // warm the per-key read the engines actually use, at the TTL they actually ask for
+        $this->assertSame(
+            'faithful',
+            $resolver->resolve($this->idJob, $this->jobPassword, null, $key, JobSettingsResolver::DEFAULT_TTL)
+        );
+
+        $jStruct = $this->jobDao->getByIdAndPassword($this->idJob, $this->jobPassword, 86400);
+        $this->assertNotNull($jStruct);
+
+        $rotated = 'jcci_meta_rotated_pwd';
+        $this->jobDao->changePassword($jStruct, $rotated);
+
+        // the row has moved, so the old credential now addresses nothing — but the warm entry still
+        // answers with the value that used to live there
+        $this->assertSame(
+            'faithful',
+            $resolver->resolve($this->idJob, $this->jobPassword, null, $key, JobSettingsResolver::DEFAULT_TTL),
+            'the rotation alone leaves the retired password serving its pre-rotation settings'
+        );
+
+        $this->invalidator->sweepAfterJobPasswordRotation($jStruct, $this->jobPassword, $rotated);
+
+        $this->assertNull(
+            $resolver->resolve($this->idJob, $this->jobPassword, null, $key, JobSettingsResolver::DEFAULT_TTL),
+            'the retired password must resolve to nothing once the sweep has run'
+        );
+        $this->assertSame(
+            'faithful',
+            $resolver->resolve($this->idJob, $rotated, null, $key, JobSettingsResolver::DEFAULT_TTL),
+            'the setting followed the rotation onto the new password'
+        );
+    }
+
+    /**
+     * The eviction is driven off the marshaller's own case list, so a key added later cannot be
+     * forgotten. This walks every key rather than trusting that.
+     */
+    #[Test]
+    public function jobPasswordRotation_evicts_every_key_the_marshaller_declares(): void
+    {
+        $metadataDao = new JobsMetadataDao($this->realSqlDb());
+        $resolver = new JobSettingsResolver($this->realSqlDb());
+
+        foreach (JobsMetadataMarshaller::cases() as $case) {
+            $metadataDao->set($this->idJob, $this->jobPassword, $case->value, '1');
+            $resolver->resolve($this->idJob, $this->jobPassword, null, $case->value, JobSettingsResolver::DEFAULT_TTL);
+        }
+
+        $jStruct = $this->jobDao->getByIdAndPassword($this->idJob, $this->jobPassword, 86400);
+        $this->assertNotNull($jStruct);
+
+        $rotated = 'jcci_meta_all_rotated';
+        $this->jobDao->changePassword($jStruct, $rotated);
+        $this->invalidator->sweepAfterJobPasswordRotation($jStruct, $this->jobPassword, $rotated);
+
+        foreach (JobsMetadataMarshaller::cases() as $case) {
+            $this->assertNull(
+                $resolver->resolve($this->idJob, $this->jobPassword, null, $case->value, JobSettingsResolver::DEFAULT_TTL),
+                "'{$case->value}' still answers for the retired password"
+            );
+        }
     }
 }

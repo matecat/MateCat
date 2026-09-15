@@ -13,8 +13,10 @@ use Model\FeaturesBase\Hook\Event\Run\TmAnalysisDisabledEvent;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobDao;
+use Model\Jobs\JobSettingsResolver;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
+use Model\Jobs\MetadataStruct;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
@@ -549,7 +551,8 @@ class FastAnalysis extends AbstractDaemon
                         $mt_qe_workflow_parameters = is_array($mt_qe_workflow_parameters_decoded)
                             ? new MTQEWorkflowParams($mt_qe_workflow_parameters_decoded)
                             : null;
-                        $mt_quality_value_in_editor = (int)($allMetadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] ?? 85);
+                        $mt_quality_value_in_editor = (int)($allMetadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value]
+                            ?? JobsMetadataMarshaller::DEFAULT_MT_QUALITY_VALUE);
                         $subfiltering_handlers = $allMetadata[ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? [];
                         $subfiltering_handlers = is_array($subfiltering_handlers) ? $subfiltering_handlers : [];
                         $icu_enabled = (bool)($allMetadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] ?? false);
@@ -949,6 +952,65 @@ class FastAnalysis extends AbstractDaemon
     }
 
     /**
+     * The per-job settings the analysis needs, resolved once per (id_job, password) pair.
+     *
+     * The MT application threshold is job-scoped since it became editable after project creation, so
+     * it cannot be read once for the whole project like the rest of the analysis configuration. It is
+     * returned already reduced to the value the queue element should carry, rather than as a raw row,
+     * so the precedence lives here and not spliced through the publish loop.
+     *
+     * Three legs, in order: the job row, then the project row through the resolver, then
+     * $projectMtQualityValue.
+     *
+     * The project row has to be consulted here even though main() already read the project
+     * metadata, because this read is the one that can miss. It runs in the publish loop, outside
+     * any transaction, so ProxySQL is free to route it to a read replica that has not caught up
+     * with a project created seconds earlier (@see \Model\ProjectCreation\JobCreationService for
+     * the same hazard, documented). With the project leg switched off, such a miss fell through to
+     * a hard-coded 85 and silently analysed at a threshold the owner never chose.
+     *
+     * $projectMtQualityValue stays as the last resort rather than the second one: it is the value
+     * main() materialised for this project, but it is not the fresher of the two — that read goes
+     * through setCacheTTL(3600), so it can be answered from Redis without touching the master at
+     * all.
+     *
+     * @param int|null $idProject the project the job belongs to, or null when it is not known
+     * @param int|null $projectMtQualityValue the project-wide threshold main() read for this project
+     *
+     * @return array{
+     *     tm_prioritization: ?MetadataStruct,
+     *     dialect_strict: ?MetadataStruct,
+     *     public_tm_penalty: ?MetadataStruct,
+     *     mt_quality_value_in_editor: int|false
+     * }
+     * @throws Exception
+     * @throws PDOException
+     * @throws ReflectionException
+     * @see JobSettingsResolver
+     */
+    protected function resolveJobAnalysisMetadata(int $idJob, string $password, ?int $idProject, ?int $projectMtQualityValue): array
+    {
+        $jobsMetadataDao = new MetadataDao($this->db());
+
+        $jobMtQualityValue = (new JobSettingsResolver($this->db()))->resolve(
+            $idJob,
+            $password,
+            $idProject,
+            JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value,
+            10 * 60
+        );
+
+        return [
+            'tm_prioritization' => $jobsMetadataDao->get($idJob, $password, JobsMetadataMarshaller::TM_PRIORITIZATION->value, 10 * 60),
+            'dialect_strict' => $jobsMetadataDao->get($idJob, $password, JobsMetadataMarshaller::DIALECT_STRICT->value, 10 * 60),
+            'public_tm_penalty' => $jobsMetadataDao->get($idJob, $password, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, 10 * 60),
+            // `??`, not `?:`: a stored 0 is a real answer the owner chose and has to win over the
+            // project value, and `false` is what the queue element carries when nothing is set at all.
+            'mt_quality_value_in_editor' => $jobMtQualityValue ?? $projectMtQualityValue ?? false,
+        ];
+    }
+
+    /**
      * @param ProjectStruct $projectStruct
      * @param string $projectFeaturesString
      * @param array<string, int|float> $equivalentWordMapping
@@ -972,7 +1034,7 @@ class FastAnalysis extends AbstractDaemon
         ?bool               $mt_evaluation = false,
         ?bool               $mt_qe_workflow_enabled = false,
         ?MTQEWorkflowParams $mt_qe_workflow_parameters = null,
-        ?int                $mt_quality_value_in_editor = 85,
+        ?int                $mt_quality_value_in_editor = JobsMetadataMarshaller::DEFAULT_MT_QUALITY_VALUE,
         ?array              $subfiltering_handlers = [],
         bool                $icu_enabled = false
     ): int
@@ -1191,12 +1253,7 @@ class FastAnalysis extends AbstractDaemon
 
                         $cacheKey = "$id_job:$password";
                         if (!isset($metadataCache[$cacheKey])) {
-                            $jobsMetadataDao = new MetadataDao($this->db());
-                            $metadataCache[$cacheKey] = [
-                                'tm_prioritization' => $jobsMetadataDao->get((int)$id_job, $password, JobsMetadataMarshaller::TM_PRIORITIZATION->value, 10 * 60),
-                                'dialect_strict' => $jobsMetadataDao->get((int)$id_job, $password, JobsMetadataMarshaller::DIALECT_STRICT->value, 10 * 60),
-                                'public_tm_penalty' => $jobsMetadataDao->get((int)$id_job, $password, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, 10 * 60),
-                            ];
+                            $metadataCache[$cacheKey] = $this->resolveJobAnalysisMetadata((int)$id_job, $password, $pid, $mt_quality_value_in_editor);
                         }
                         $tm_prioritization = $metadataCache[$cacheKey]['tm_prioritization'];
                         $dialect_strict = $metadataCache[$cacheKey]['dialect_strict'];
@@ -1222,7 +1279,7 @@ class FastAnalysis extends AbstractDaemon
                         if ($mt_qe_workflow_enabled) {
                             $queue_element['mt_qe_workflow_parameters'] = $mt_qe_workflow_parameters;
                         }
-                        $queue_element['mt_quality_value_in_editor'] = $mt_quality_value_in_editor ?? false;
+                        $queue_element['mt_quality_value_in_editor'] = $metadataCache[$cacheKey]['mt_quality_value_in_editor'];
 
                         $queue_element[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $subfiltering_handlers;
                         $queue_element[ProjectsMetadataMarshaller::ICU_ENABLED->value] = $icu_enabled;

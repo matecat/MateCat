@@ -8,7 +8,10 @@ use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Filter\AnalysisBeforeMTGetContributionEvent;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\Jobs\JobSettingsResolver;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use TypeError;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineResolverInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineServiceInterface;
@@ -89,9 +92,22 @@ class EngineService implements EngineServiceInterface
 
             $mtEngine->setAnalysis();
 
+            // The Lara style is overridable per job so the project owner can change it after
+            // creation, falling back to the project's creation-time value where it was not.
+            $lara_style = (new JobSettingsResolver($this->database))->resolve(
+                isset($queueElement->params->id_job) ? (int)$queueElement->params->id_job : null,
+                isset($queueElement->params->password) ? (string)$queueElement->params->password : null,
+                (int)$queueElement->params->pid,
+                JobsMetadataMarshaller::LARA_STYLE->value
+            );
+
+            // enable_mt_analysis stays project-wide: it decides whether the analysis calls MT at
+            // all, which is what the customer was quoted for. Cached like every other engine read
+            // of project metadata — this runs once per analysed segment.
             $metadataDao = new ProjectsMetadataDao($this->database);
-            $lara_style = $metadataDao->getValue($queueElement->params->pid, 'lara_style');
-            $enable_mt_analysis = $metadataDao->getValue($queueElement->params->pid, 'enable_mt_analysis');
+            $enable_mt_analysis = $metadataDao
+                ->setCacheTTL(JobSettingsResolver::DEFAULT_TTL)
+                ->getValue($queueElement->params->pid, ProjectsMetadataMarshaller::ENABLE_MT_ANALYSIS->value);
             $mtEngine->setSkipAnalysis(!($enable_mt_analysis ?? false));
 
             $mt_qe_workflow_enabled = (bool)($queueElement->params->mt_qe_workflow_enabled ?? false);
