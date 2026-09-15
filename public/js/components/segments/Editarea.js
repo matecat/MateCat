@@ -1990,7 +1990,30 @@ const Editarea = forwardRef((props, ref) => {
     instanceRef.current.compositionEventChecks = compositionEventChecksRef
   }
 
-  useImperativeHandle(ref, () => instanceRef.current)
+  // The component's public API: exactly the four members production reaches
+  // through the ref, and nothing else. SegmentTarget calls
+  // addMissingSourceTagsToTarget, SegmentTargetToolbar calls formatSelection,
+  // and AiAlternatives reads state.editorState and editAreaRef. Everything else
+  // on instanceRef is internal dispatch — it exists to give the frozen call
+  // sites a stable way to reach the current closures, not to be called from
+  // outside. state and editAreaRef are getters so callers keep seeing the live
+  // values rather than a snapshot taken when the handle was built.
+  useImperativeHandle(
+    ref,
+    () => ({
+      addMissingSourceTagsToTarget: (...args) =>
+        instanceRef.current.addMissingSourceTagsToTarget(...args),
+      formatSelection: (...args) =>
+        instanceRef.current.formatSelection(...args),
+      get state() {
+        return instanceRef.current.state
+      },
+      get editAreaRef() {
+        return instanceRef.current.editAreaRef
+      },
+    }),
+    [],
+  )
 
   let lang = ''
   let readonly = false
