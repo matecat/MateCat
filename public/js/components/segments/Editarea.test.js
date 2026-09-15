@@ -9,6 +9,22 @@ import {render, act, fireEvent} from '@testing-library/react'
 
 const segmentStoreListeners = {}
 
+// Holds the props object the tag decorator was built with. That object is
+// seeded once behind a lazy-init guard, so it is the same object production
+// keeps calling for the life of the component — which is what makes calling it
+// again, after the segment has changed, a meaningful staleness check.
+// The stand-in keeps the `tag-container` class so the tests that count rendered
+// tag entities are unaffected.
+let mockTagProps = null
+
+jest.mock('./TagEntity/TagEntity.component', () => ({
+  __esModule: true,
+  default: (props) => {
+    mockTagProps = props
+    return <span className="tag-container">{props.children}</span>
+  },
+}))
+
 jest.mock('../../stores/SegmentStore', () => ({
   __esModule: true,
   default: {
@@ -962,5 +978,71 @@ describe('frozen call sites see the current props', () => {
     flush()
 
     expect(updateCounter).toHaveBeenCalled()
+  })
+})
+
+// The tag decorator's props object is seeded once, behind a lazy-init guard, so
+// every callback on it is frozen relative to render while TagEntity keeps
+// calling them for the life of the segment. This is the same site whose stale
+// closure stopped missing tags turning red in SegmentSource (fixed in
+// 71cd271), and it is why getSearchParams and onEntityClick are still stable
+// closures rather than plain per-render ones.
+describe('the tag decorator sees the current segment', () => {
+  const TAG_MAP = [
+    {
+      type: 'g',
+      data: {id: '1', name: 'g', encodedText: '&lt;g id="1"&gt;'},
+      offset: 0,
+      length: 1,
+    },
+  ]
+
+  function renderWithTag() {
+    const first = makeSegment({
+      sid: '12-1',
+      translation: 'uno <g id="1">tag</g>',
+      sourceTagMap: TAG_MAP,
+    })
+    const rendered = renderEditarea({
+      segment: first,
+      translation: first.translation,
+    })
+    flush()
+    return rendered
+  }
+
+  test('getSearchParams follows the segment rendered now', () => {
+    const rendered = renderWithTag()
+    expect(mockTagProps).not.toBeNull()
+    expect(mockTagProps.getSearchParams()).toMatchObject({active: false})
+
+    rendered.update(
+      makeSegment({
+        sid: '12-1',
+        translation: 'uno <g id="1">tag</g>',
+        sourceTagMap: TAG_MAP,
+        inSearch: true,
+        searchParams: {target: 'uno'},
+        occurrencesInSearch: {occurrences: [{}]},
+        currentInSearch: true,
+      }),
+    )
+
+    expect(mockTagProps.getSearchParams()).toMatchObject({active: true})
+  })
+
+  test('getUpdatedSegmentInfo follows the segment rendered now', () => {
+    const rendered = renderWithTag()
+    expect(mockTagProps.getUpdatedSegmentInfo()).toMatchObject({sid: '12-1'})
+
+    rendered.update(
+      makeSegment({
+        sid: '12-9',
+        translation: 'uno <g id="1">tag</g>',
+        sourceTagMap: TAG_MAP,
+      }),
+    )
+
+    expect(mockTagProps.getUpdatedSegmentInfo()).toMatchObject({sid: '12-9'})
   })
 })
