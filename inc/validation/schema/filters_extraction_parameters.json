@@ -112,6 +112,11 @@
     "yaml": {
       "type": "object",
       "properties": {
+        "force_double_quoting": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
         "translate_keys": {
           "type": "array",
           "nullable": true

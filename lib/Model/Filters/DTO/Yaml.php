@@ -7,6 +7,7 @@ use DomainException;
 class Yaml implements IDto
 {
 
+    private bool $force_double_quoting = false;
     /** @var list<string> */
     private array $translate_keys = [];
     /** @var list<string> */
@@ -16,6 +17,11 @@ class Yaml implements IDto
     /** @var list<string> */
     private array $character_limit = [];
     private ?string $inner_content_type = null;
+
+    public function setForceDoubleQuoting(bool $force_double_quoting): void
+    {
+        $this->force_double_quoting = $force_double_quoting;
+    }
 
     /**
      * @param list<string> $translate_keys
@@ -80,6 +86,10 @@ class Yaml implements IDto
      */
     public function fromArray(array $data): void
     {
+        if (isset($data['force_double_quoting'])) {
+            $this->setForceDoubleQuoting($data['force_double_quoting']);
+        }
+
         if (isset($data['translate_keys'])) {
             $this->setTranslateKeys($data['translate_keys']);
         }
@@ -108,6 +118,7 @@ class Yaml implements IDto
     {
         $format = [];
 
+        $format['force_double_quoting'] = $this->force_double_quoting;
         $format['translate_keys'] = $this->translate_keys;
 
         if (!empty($this->do_not_translate_keys)) {
