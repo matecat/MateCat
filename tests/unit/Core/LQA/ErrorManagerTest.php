@@ -3,7 +3,9 @@
 namespace Matecat\Core\LQA;
 
 use Matecat\TestHelpers\AbstractTest;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionProperty;
 use Utils\LQA\QA\ErrorManager;
 
 class ErrorManagerTest extends AbstractTest
@@ -639,6 +641,76 @@ class ErrorManagerTest extends AbstractTest
 
         $notices = $this->errorManager->getNotices();
         $this->assertCount(3, $notices);
+    }
+
+    // ========== HTML/text sink contract ==========
+    // ErrObject::$debug is injected with dangerouslySetInnerHTML by
+    // public/js/components/segments/SegmentWarnings.js, while $tip is rendered as a JSX child.
+    // A tag name written raw in a message is therefore swallowed by the browser, which is how
+    // '<ex>, <bx> and/or <g> total count mismatch' used to reach the user as ', and/or total
+    // count mismatch'. These tests pin the two opposite treatments.
+
+    /**
+     * @return list<array{int, list<string>}>
+     */
+    public static function messagesNamingTagsProvider(): array
+    {
+        return [
+            [ErrorManager::ERR_UNCLOSED_X_TAG, ['&lt;x']],
+            [ErrorManager::ERR_EX_BX_NESTED_IN_G, ['&lt;ex&gt;', '&lt;bx&gt;', '&lt;g&gt;']],
+            [ErrorManager::ERR_EX_BX_WRONG_POSITION, ['&lt;ex&gt;', '&lt;bx&gt;']],
+            [ErrorManager::ERR_EX_BX_COUNT_MISMATCH, ['&lt;ex&gt;', '&lt;bx&gt;', '&lt;g&gt;']],
+        ];
+    }
+
+    /**
+     * @param list<string> $expectedEntities
+     */
+    #[Test]
+    #[DataProvider('messagesNamingTagsProvider')]
+    public function messagesNamingTagsUseEntities(int $errorCode, array $expectedEntities): void
+    {
+        $message = $this->errorManager->getErrorMessage($errorCode);
+
+        foreach ($expectedEntities as $entity) {
+            $this->assertStringContainsString($entity, $message);
+        }
+
+        $this->assertStringNotContainsString('<', $message);
+        $this->assertStringNotContainsString('>', $message);
+    }
+
+    #[Test]
+    public function noStaticMessageCarriesUnescapedMarkup(): void
+    {
+        $errorMap = (new ReflectionProperty(ErrorManager::class, 'errorMap'))
+            ->getValue($this->errorManager);
+
+        foreach ($errorMap as $code => $message) {
+            $this->assertDoesNotMatchRegularExpression(
+                '#<[a-zA-Z/]#',
+                (string)$message,
+                "Message for code $code reaches an HTML sink: escape its angle brackets."
+            );
+        }
+    }
+
+    #[Test]
+    public function tipsAreWrittenAsPlainText(): void
+    {
+        $tipMap = (new ReflectionProperty(ErrorManager::class, 'tipMap'))
+            ->getValue($this->errorManager);
+
+        // The mirror of the check above: an entity in a tip would be shown to the user verbatim.
+        foreach ($tipMap as $code => $tip) {
+            $this->assertStringNotContainsString(
+                '&lt;',
+                (string)$tip,
+                "Tip for code $code is rendered as text: write its angle brackets raw."
+            );
+        }
+
+        $this->assertStringContainsString('<g>', (string)$tipMap[ErrorManager::ERR_UNCLOSED_G_TAG]);
     }
 }
 

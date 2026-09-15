@@ -87,10 +87,9 @@ class SegmentWarnings extends React.Component {
               <ul>
                 <li className="icon-column">{icon}</li>
                 <li className="content-column">
+                  {/* `debug` is an HTML fragment: ErrorManager escapes its literal angle
+                      brackets and ICUChecker joins its parts with <br/>. */}
                   <p dangerouslySetInnerHTML={{__html: el.debug}} />
-                  {/*  {el.debug}*/}
-                  {/*  /!*<b>({warnings_count[el.outcome]})</b>*!/*/}
-                  {/*</p>*/}
                   {el.tip !== '' ? (
                     <p className="error-solution">
                       <b>{el.tip}</b>

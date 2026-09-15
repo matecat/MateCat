@@ -147,5 +147,22 @@ class ErrObjectTest extends AbstractTest
         $this->assertNull($errObj->outcome);
         $this->assertEquals('', (string)$errObj);
     }
+
+    #[Test]
+    public function carriesDebugAndTipVerbatim(): void
+    {
+        // The editor renders $debug as HTML and $tip as text, so escaping belongs to whoever
+        // writes the message. ErrObject is a plain carrier and must not transform either field:
+        // escaping here would double-encode the map, and unescaping would undo it.
+        $errObj = ErrObject::get([
+            'outcome' => 1302,
+            'debug'   => '&lt;ex&gt;, &lt;bx&gt; and/or &lt;g&gt; total count mismatch',
+            'tip'     => 'Should be <g>...</g>',
+        ]);
+
+        $this->assertEquals('&lt;ex&gt;, &lt;bx&gt; and/or &lt;g&gt; total count mismatch', $errObj->debug);
+        $this->assertEquals('&lt;ex&gt;, &lt;bx&gt; and/or &lt;g&gt; total count mismatch', $errObj->getOrigDebug());
+        $this->assertEquals('Should be <g>...</g>', $errObj->getTip());
+    }
 }
 
