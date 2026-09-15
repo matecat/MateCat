@@ -1,10 +1,7 @@
 import React, {
-  forwardRef,
   useCallback,
   useContext,
   useEffect,
-  useImperativeHandle,
-  useReducer,
   useRef,
   useState,
 } from 'react'
@@ -127,20 +124,18 @@ export const getUpdatedSegmentInfo = ({
   }
 }
 
-const SegmentSource = forwardRef(({segment}, ref) => {
+const SegmentSource = ({segment}) => {
   const context = useContext(SegmentContext)
   const {segment: contextSegment, userInfo: contextUserInfo} = context
 
-  // Two jobs bundled into one object: (1) a handful of call sites that are frozen relative to
-  // render — setTaggedSource (permanently stable), refreshTagMap's own body and setTimeout, and
-  // the mount-only effect's setTimeout below — read other methods through methodsRef.current
-  // instead of closing over them directly, so they always reach whichever version is current
-  // when they actually run, not whichever existed when they were created; (2) the object
-  // returned by useImperativeHandle below, exposing every method to tests via ref.current.x.
-  // Everywhere else, methods call each other directly — declaration order doesn't matter, since
-  // none of them run until after the whole render body has finished executing at least once.
+  // A handful of call sites are frozen relative to render — setTaggedSource (permanently
+  // stable), refreshTagMap's own body and setTimeout, and the mount-only effect's setTimeout
+  // below. They read the methods they need through methodsRef.current instead of closing over
+  // them directly, so they always reach whichever version is current when they actually run,
+  // not whichever existed when they were created. Everywhere else, methods call each other
+  // directly — declaration order doesn't matter, since none of them run until after the whole
+  // render body has finished executing at least once.
   const methodsRef = useRef({})
-  const stableMethodsAssignedRef = useRef(false)
 
   // Same idea as methodsRef, but for the handful of segment/context/state values setTaggedSource
   // and helpAiAssistant's delayed setTimeout read directly rather than through another method.
@@ -187,15 +182,6 @@ const SegmentSource = forwardRef(({segment}, ref) => {
         (decorator) => decorator.name === decoratorName,
       )
     }
-  }
-
-  const disableDecorator = (editorState, decoratorName) => {
-    remove(
-      decoratorsStructureRef.current,
-      (decorator) => decorator.name === decoratorName,
-    )
-    const decorator = new CompositeDecorator(decoratorsStructureRef.current)
-    return EditorState.set(editorState, {decorator})
   }
 
   const addSearchDecorator = () => {
@@ -707,14 +693,14 @@ const SegmentSource = forwardRef(({segment}, ref) => {
     }
   }
 
-  const [source, setSource] = useState(() => initialContentRef.current.source)
+  const [source] = useState(() => initialContentRef.current.source)
   const [editorState, setEditorState] = useState(
     () => initialContentRef.current.editorState,
   )
   const [tagRange, setTagRange] = useState(
     () => initialContentRef.current.tagRange,
   )
-  const [editorStateBeforeSplit, setEditorStateBeforeSplit] = useState(
+  const [editorStateBeforeSplit] = useState(
     () => initialContentRef.current.editorState,
   )
 
@@ -781,8 +767,6 @@ const SegmentSource = forwardRef(({segment}, ref) => {
   const isFirstRenderRef = useRef(true)
   const prevSegmentRef = useRef(segment)
   const prevEditorStateRef = useRef(editorState)
-
-  const [, bumpForceRender] = useReducer((x) => x + 1, 0)
 
   useEffect(() => {
     SegmentStore.addListener(
@@ -905,83 +889,16 @@ const SegmentSource = forwardRef(({segment}, ref) => {
     prevEditorStateRef.current = editorState
   })
 
-  // Single stable object, mutated in place every render (never recreated),
-  // used both for the few frozen-relative-to-render call sites noted where
-  // methodsRef is declared above, and as the ref exposed to tests below —
-  // so a jest.spyOn(ref.current, 'x') affects the same property internal
-  // code actually calls through, and survives subsequent re-renders instead
-  // of being silently replaced. Assigned exactly once: helpAiAssistant is
-  // spied on via the exposed ref, across a re-render triggered by its own
-  // setIsShowingOptionsToolbar call — a spy on a freshly-recreated-every-
-  // render function would be silently discarded there, so it needs a stable
-  // identity; reassigning it here every render, even to the same underlying
-  // function, would still blow away a spy sitting on the property. (Note:
-  // setTaggedSource is not exposed here at all — it's permanently stable for
-  // an unrelated reason, see where it's defined above — nothing reads it off
-  // methodsRef.) Everything else below is fine to refresh every render.
-  if (!stableMethodsAssignedRef.current) {
-    stableMethodsAssignedRef.current = true
-    Object.assign(methodsRef.current, {
-      helpAiAssistant,
-    })
-    // Test-only accessor: lets a test null out the editor DOM ref to
-    // simulate it going missing (e.g. mid-unmount) without needing its own
-    // exported setter method.
-    Object.defineProperty(methodsRef.current, 'editor', {
-      get: () => editorRef.current,
-      set: (v) => {
-        editorRef.current = v
-      },
-      configurable: true,
-    })
-  }
-
+  // Single stable object, mutated in place every render (never recreated), holding exactly the
+  // methods the frozen-relative-to-render call sites noted where methodsRef is declared above
+  // need to reach at their current version. setTaggedSource is deliberately absent — it is
+  // permanently stable for an unrelated reason (see where it is defined), and nothing reads it
+  // back off methodsRef.
   Object.assign(methodsRef.current, {
-    setState: (partial) => {
-      if ('source' in partial) setSource(partial.source)
-      if ('editorState' in partial) setEditorState(partial.editorState)
-      if ('tagRange' in partial) setTagRange(partial.tagRange)
-      if ('editorStateBeforeSplit' in partial)
-        setEditorStateBeforeSplit(partial.editorStateBeforeSplit)
-      if ('activeDecorators' in partial)
-        setActiveDecorators(partial.activeDecorators)
-      if ('isShowingOptionsToolbar' in partial)
-        setIsShowingOptionsToolbar(partial.isShowingOptionsToolbar)
-    },
-    forceUpdate: () => bumpForceRender(),
-    onEntityClick,
-    removeDecorator,
-    copyFragment,
-    updateSplitNumberNew,
-    updateSourceInStore,
-    onChange,
-    insertTagAtSelection,
-    getSelectedWords,
-    disableDecorator,
     checkDecorators,
-    splitSegmentNew,
-    addSearchDecorator,
-    addGlossaryDecorator,
-    addQaCheckGlossaryDecorator,
-    addLexiqaDecorator,
-    addIcuDecorator,
-    getEditorState: () => editorState,
-    getEditorStateBeforeSplit: () => editorStateBeforeSplit,
-    getSplitPoint: () => splitPointRef.current,
-    getActiveDecorators: () => activeDecorators,
-    getFirstIcuCheck: () => firstIcuCheckRef.current,
-    getDecoratorsStructure: () => decoratorsStructureRef.current,
-    wasTripleClickTriggered: wasTripleClickTriggeredRef,
+    updateSourceInStore,
+    getSelectedWords,
   })
-
-  // Test-only: jsdom has no real contentEditable/Selection implementation,
-  // so a few behaviors that only fire from genuine rich-text editor
-  // interactions (triple-click selection, keystroke/paste handlers, and the
-  // selection-dependent tag/split operations) can't be driven through
-  // simulated DOM events. Exposed here so tests can invoke them directly,
-  // matching how the previous class-based tests already had to work around
-  // the same jsdom limitation.
-  useImperativeHandle(ref, () => methodsRef.current, [])
 
   const updateOptionsToolbarVisibility = () => {
     if (!editorRef.current) return
@@ -990,12 +907,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
       !editorRef.current._latestEditorState.getSelection().isCollapsed(),
     )
 
-    // Not a direct call: tests spy on this property via the exposed ref
-    // (jest.spyOn(ref.current, 'helpAiAssistant')), which patches
-    // methodsRef.current.helpAiAssistant in place, not the underlying
-    // helpAiAssistantRef.current value — calling the closed-over local
-    // variable here would silently bypass that spy.
-    methodsRef.current.helpAiAssistant()
+    helpAiAssistant()
   }
 
   // Set correct handlers
@@ -1147,7 +1059,7 @@ const SegmentSource = forwardRef(({segment}, ref) => {
   ) : (
     editorHtml
   )
-})
+}
 
 function getEntityStrategy(mutability) {
   return function (contentBlock, callback, contentState) {
@@ -1160,7 +1072,5 @@ function getEntityStrategy(mutability) {
     }, callback)
   }
 }
-
-SegmentSource.displayName = 'SegmentSource'
 
 export default SegmentSource
