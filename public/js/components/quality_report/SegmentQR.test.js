@@ -327,3 +327,61 @@ describe('SegmentQR', () => {
     expect(screen.getByText('Character mismatch')).toBeInTheDocument()
   })
 })
+
+describe('segment history toggle', () => {
+  // The history query adds the first-version rows with `null as status`, and
+  // renderSegmentHistory drops them. The toggle used to count the unfiltered
+  // list, so a segment whose history holds only those rows offered a button
+  // that opened an empty panel.
+  const historyEvent = (status) => ({
+    status,
+    date: `2026-01-0${status ? 2 : 1} 10:00:00`,
+    revision_number: null,
+    source_page: 1,
+    version_number: 1,
+    translation: 'a translation',
+    issues: [],
+  })
+
+  // automatedQaOpen starts true when the segment has no issues and at least one
+  // warning, and that is what puts the QA block -- and the history toggle inside
+  // it -- on screen.
+  const renderWithHistory = (history) =>
+    renderComponent({
+      warnings: {
+        total: 1,
+        details: {
+          issues_info: {
+            ERROR: {Categories: {}},
+            WARNING: {Categories: {}},
+            INFO: {Categories: {}},
+          },
+        },
+      },
+      history,
+    })
+
+  test('hides the toggle when every history event has a null status', () => {
+    renderWithHistory([historyEvent(null), historyEvent(null)])
+
+    expect(
+      screen.queryByRole('button', {name: /open history/i}),
+    ).not.toBeInTheDocument()
+  })
+
+  test('shows the toggle when at least one history event has a status', () => {
+    renderWithHistory([historyEvent(null), historyEvent('TRANSLATED')])
+
+    expect(
+      screen.getByRole('button', {name: /open history/i}),
+    ).toBeInTheDocument()
+  })
+
+  test('hides the toggle when there is no history at all', () => {
+    renderWithHistory([])
+
+    expect(
+      screen.queryByRole('button', {name: /open history/i}),
+    ).not.toBeInTheDocument()
+  })
+})

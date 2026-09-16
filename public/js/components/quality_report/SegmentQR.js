@@ -274,19 +274,24 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
     [urls, segment],
   )
 
+  // Events carrying no status are the first-version rows the history query adds
+  // with `null as status`; they are not shown. The toggle below has to count the
+  // same list the panel renders, or a segment whose history is only those rows
+  // offers a button that opens an empty panel.
+  const segmentHistory = useMemo(
+    () => (segment.get('history')?.toJS() ?? []).filter((elem) => elem.status),
+    [segment],
+  )
+
   const renderSegmentHistory = () => {
-    const history = segment
-      .get('history')
-      .toJS()
-      .filter((elem) => elem.status)
-    return history.map((elem, index) => {
+    return segmentHistory.map((elem, index) => {
       return (
         <div key={elem.date} className="qr-history-item">
           <div
             className={`qr-history-status qr-history-status_${elem.status.toLowerCase()}`}
           >
             <div className="qr-history-status_point"></div>
-            {index < history.length - 1 && (
+            {index < segmentHistory.length - 1 && (
               <div className="qr-history-status_separator"></div>
             )}
             {elem.status === SEGMENTS_STATUS.APPROVED2
@@ -304,7 +309,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
                 index === 0
                   ? elem.translation
                   : TextUtils.getDiffHtml(
-                      history[index - 1].translation,
+                      segmentHistory[index - 1].translation,
                       elem.translation,
                     ),
                 config.isTargetRTL,
@@ -574,7 +579,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
               )}
             </div>
             <div style={{alignSelf: 'center', marginRight: 24}}>
-              {(segment.get('history')?.size ?? 0) > 0 ? (
+              {segmentHistory.length > 0 ? (
                 !showHistory ? (
                   <Button
                     onClick={() => setShowHistory(true)}
@@ -596,7 +601,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
             </div>
           </div>
         )}
-        {(segment.get('history')?.size ?? 0) > 0 && showHistory && (
+        {segmentHistory.length > 0 && showHistory && (
           <div className="qr-history">{renderSegmentHistory()}</div>
         )}
       </div>
