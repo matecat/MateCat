@@ -1817,6 +1817,16 @@ const Editarea = forwardRef(({segment, translation, updateCounter}, ref) => {
     clickedTag,
   }
 
+  // Assigned once, not on every render. Most of the methods below are now plain
+  // per-render closures, so what lands here is whichever copy the first render
+  // produced — and every frozen call site reads its target through this object.
+  //
+  // That is safe only because these methods take their inputs from liveRef (or
+  // from their own parameters) rather than closing over segment, translation,
+  // editorState and friends directly. A method added here that reads a
+  // render-scoped binding would be pinned to the first render and go quietly
+  // stale, which is the defect fixed in 71cd271. Read through liveRef, or move
+  // the assignment out of this guard.
   if (!methodsAssignedRef.current) {
     methodsAssignedRef.current = true
 
