@@ -219,6 +219,51 @@ describe('SegmentStore', () => {
     })
   })
 
+  describe('side panels (comments vs issues)', () => {
+    test('OPEN_ISSUES_PANEL closes an open comments panel', () => {
+      render([makeSegment(1), makeSegment(2)])
+      dispatch({actionType: SegmentConstants.OPEN_COMMENTS, sid: '1'})
+      expect(SegmentStore.getSegmentByIdToJS('1').openComments).toBe(true)
+
+      dispatch({
+        actionType: SegmentConstants.OPEN_ISSUES_PANEL,
+        data: {sid: '1'},
+      })
+
+      const segment = SegmentStore.getSegmentByIdToJS('1')
+      expect(segment.openIssues).toBe(true)
+      expect(segment.openComments).toBe(false)
+    })
+
+    test('OPEN_COMMENTS closes an open issues panel', () => {
+      render([makeSegment(1), makeSegment(2)])
+      dispatch({
+        actionType: SegmentConstants.OPEN_ISSUES_PANEL,
+        data: {sid: '1'},
+      })
+      expect(SegmentStore.getSegmentByIdToJS('1').openIssues).toBe(true)
+
+      dispatch({actionType: SegmentConstants.OPEN_COMMENTS, sid: '1'})
+
+      const segment = SegmentStore.getSegmentByIdToJS('1')
+      expect(segment.openComments).toBe(true)
+      expect(segment.openIssues).toBe(false)
+    })
+
+    test('the issues panel clears comments on every segment, not just the opened one', () => {
+      render([makeSegment(1), makeSegment(2)])
+      dispatch({actionType: SegmentConstants.OPEN_COMMENTS, sid: '2'})
+      expect(SegmentStore.getSegmentByIdToJS('2').openComments).toBe(true)
+
+      dispatch({
+        actionType: SegmentConstants.OPEN_ISSUES_PANEL,
+        data: {sid: '1'},
+      })
+
+      expect(SegmentStore.getSegmentByIdToJS('2').openComments).toBe(false)
+    })
+  })
+
   describe('status / metadata / propagation', () => {
     beforeEach(() => render([makeSegment(1), makeSegment(2)]))
 

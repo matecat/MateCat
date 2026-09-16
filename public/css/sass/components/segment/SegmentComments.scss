@@ -470,10 +470,11 @@ Close icon ballon - Right panel
   background: colors.$white !important;
   position: absolute !important;
   z-index: 1;
-  right: 0px;
-  top: -14px;
+  right: 16px;
+  top: 2px;
   border-radius: 50% !important;
   color: colors.$grey600 !important;
+  cursor: pointer;
 }
 
 .comment-close-btn:hover {

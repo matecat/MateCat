@@ -303,27 +303,21 @@ ul.suggestion-item.graysmall:last-child {
 }
 
 .graysmall:hover .trash {
-  height: 20px;
+  opacity: 1;
+  pointer-events: auto;
 }
 
-.trash:hover {
-  margin-top: -2px;
-  color: colors.$black;
-}
-
+// A <Button type=ICON> owns the box, the colours, the hover and the cursor, so
+// all this rule still does is place the control in the row and keep it hidden
+// until the row is hovered. It cannot be collapsed with height: 0 the way the
+// old icon-font glyph was — the inline SVG would simply overflow.
 .trash {
-  transition: all 0.1s linear;
-  color: colors.$grey500;
-  text-decoration: none;
-  -o-transition: all 0.1s linear;
-  -webkit-transition: all 0.1s linear;
-  display: block;
-  height: 0;
-  width: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s linear;
   position: absolute;
-  right: 5px;
   top: 14px;
-  cursor: pointer;
+  right: 20px;
 }
 
 .graysmall-message {
