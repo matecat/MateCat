@@ -943,7 +943,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
 
     return (
       <div
-        className={`sticky-project-bar ${props.sideOpen ? 'sticky-project-bar-slide-right' : ''}`}
+        className={`sticky-project-bar`}
       >
         <ProjectBar
           {...{
