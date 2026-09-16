@@ -1116,9 +1116,7 @@ const getSegmentStructure = (segment, sideOpen) => {
             </div>
           </div>
           <div className="status-container">
-            <a href="#" className="status no-hover">
-              {' '}
-            </a>
+            <div className="status no-hover" />
           </div>
         </div>
         <div className="edit-distance">Edit Distance:</div>

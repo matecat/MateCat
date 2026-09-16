@@ -28,7 +28,6 @@ export const SegmentBody = ({onClick}) => {
             title="Copy source to target"
             onClick={(e) => copySource(e)}
           >
-            <a href="#" />
             <p>{copySourceShortcuts.toUpperCase()}</p>
           </div>
 
@@ -36,7 +35,7 @@ export const SegmentBody = ({onClick}) => {
         </div>
       </div>
       <div className="status-container">
-        <a href="#" className="status no-hover" />
+        <div className="status no-hover" />
       </div>
     </div>
   )

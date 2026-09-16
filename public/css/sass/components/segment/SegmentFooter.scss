@@ -280,21 +280,6 @@ section.loaded .submenu {
   bottom: 20px;
 }
 
-.addtmx-tr .open-popup-addtm-tr {
-  height: 13px;
-  width: 140px;
-  position: absolute;
-  bottom: -24px;
-  right: 0px;
-  border-radius: 0 0 0 2px;
-  color: colors.$white;
-  padding: 3px 10px 7px 4px;
-  font-size: 12px;
-  background: colors.$blue500;
-  box-shadow: 0px 2px 4px 0px colors.$grey600;
-  z-index: 2;
-}
-
 .sub-editor.concordances .results {
   float: left;
   width: 100%;
@@ -340,24 +325,4 @@ section.loaded .submenu {
 
 .sub-editor .cc-search .search-target {
   width: 44.2%;
-}
-.addtmx-tr.white-tx .open-popup-addtm-tr {
-  width: 130px;
-  color: colors.$grey1300;
-  background: colors.$white;
-}
-
-.addtmx-tr.white-tx .open-popup-addtm-tr:hover {
-  background: colors.$grey100;
-}
-
-.open-popup-addtm-tr {
-  cursor: pointer;
-  margin-left: 5px;
-}
-
-.addtmx-tr:active {
-  -moz-box-shadow: inset 0 0 1px 1px colors.$grey400;
-  -webkit-box-shadow: inset 0 0 1px 1px colors.$grey400;
-  box-shadow: inset 0 0 1px 1px colors.$grey400;
 }

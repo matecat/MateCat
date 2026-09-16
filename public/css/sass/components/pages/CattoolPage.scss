@@ -93,6 +93,10 @@ body #outer {
   height: 100vh;
 }
 
+body.cattool {
+  background-color: colors.$grey50;
+}
+
 body.cattool header {
   top: 0;
   left: 0;
