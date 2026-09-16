@@ -250,6 +250,27 @@ class TranslationVersionDao extends AbstractDao
     }
 
     /**
+     * One history row per (segment, version, step) for the quality report panel.
+     *
+     * The first branch carries version 0 on its own because no event points at it: a
+     * `segment_translation_versions` row holds the translation *before* the change
+     * (TranslationVersionsHandler::saveVersion() builds it from the old translation), while an
+     * event carries the version number *after* it. Version 0 is therefore the pre-first-edit text,
+     * and it is emitted with a null source_page, status and create_date because none of those
+     * exist for a version nobody acted on.
+     *
+     * The event branch is scoped by id_job everywhere — join included. Jobs of the same project
+     * share their segment ids (JobCreationService::linkFilesToJob() links every project file to
+     * every target-language job), so id_segment alone lets another language's events through.
+     *
+     * The GROUP BY collapses the two rows the inner UNION can produce for one version, which
+     * happens when ReviewExtended\TranslationIssueModel::saveDiff() has written a versions row for
+     * the version still current in segment_translations. That row carries a null translation, so
+     * the aggregate has to be MAX() rather than a bare column: MAX() skips nulls and
+     * HistoryElementStruct::$translation is a non-nullable string that a null would fatal on.
+     * saveDiff() can write that null-translation row at version 0 too, before the translator has
+     * saved anything, which is why the first branch skips it: there is no first version to show.
+     *
      * @param array<int|string> $segments_id
      * @param int $job_id
      * @return array<HistoryElementStruct>
@@ -260,17 +281,17 @@ class TranslationVersionDao extends AbstractDao
         $conn = $this->database->getConnection();
         $prepare_str_segments_id = implode(', ', array_fill(0, count($segments_id), '?'));
 
-        $query = "SELECT 
+        $query = "SELECT
             id_segment,
-            first_sv.version_number, 
+            first_sv.version_number,
             null as source_page,
             null as status,
             null as create_date,
-            first_sv.creation_date, 
+            first_sv.creation_date,
             first_sv.translation
-            FROM segment_translation_versions first_sv WHERE id_segment IN ( $prepare_str_segments_id ) AND id_job = ? AND version_number = 0
+            FROM segment_translation_versions first_sv WHERE id_segment IN ( $prepare_str_segments_id ) AND id_job = ? AND version_number = 0 AND first_sv.translation IS NOT NULL
             UNION
-            SELECT ste.id_segment, ste.version_number, ste.source_page, ste.status, ste.create_date, stv.creation_date, stv.translation FROM segment_translation_events ste 
+            SELECT ste.id_segment, ste.version_number, ste.source_page, ste.status, ste.create_date, MAX(stv.creation_date) AS creation_date, MAX(stv.translation) AS translation FROM segment_translation_events ste
             INNER JOIN (
             SELECT creation_date, id_segment, translation, version_number, id_job
                  FROM segment_translation_versions
@@ -281,13 +302,13 @@ class TranslationVersionDao extends AbstractDao
                  FROM segment_translations
                  WHERE id_segment IN ( $prepare_str_segments_id )
                    AND id_job = ?
-            ) AS stv ON stv.version_number = ste.version_number AND stv.id_segment = ste.id_segment
-          
-            WHERE ste.id_segment IN ( $prepare_str_segments_id ) GROUP BY version_number, source_page;";
+            ) AS stv ON stv.version_number = ste.version_number AND stv.id_segment = ste.id_segment AND stv.id_job = ste.id_job
+
+            WHERE ste.id_segment IN ( $prepare_str_segments_id ) AND ste.id_job = ? GROUP BY ste.id_segment, ste.version_number, ste.source_page;";
 
         $stmt = $conn->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_CLASS, HistoryElementStruct::class);
-        $stmt->execute(array_merge($segments_id, [$job_id], $segments_id, [$job_id], $segments_id, [$job_id], $segments_id));
+        $stmt->execute(array_merge($segments_id, [$job_id], $segments_id, [$job_id], $segments_id, [$job_id], $segments_id, [$job_id]));
 
         return $stmt->fetchAll();
     }
