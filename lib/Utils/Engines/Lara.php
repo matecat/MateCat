@@ -315,10 +315,10 @@ class Lara extends AbstractEngine
                 $laraGlossaries = (new JobSettingsResolver($this->database))
                     ->resolveFromEngineConfig($_config, JobsMetadataMarshaller::LARA_GLOSSARIES->value);
 
-                // An empty list is not "no glossary": the SDK forwards whatever getGlossaries()
-                // returns, so `[]` would go out as "glossaries": []. The job scope cannot hold one
-                // (job_metadata.json bounds the array), but the legacy project scope was never
-                // validated, so the guard belongs here rather than only in the schema.
+                // A job stores `[]` to shadow a project that has glossaries, so the guard here is
+                // what turns that override into an omitted parameter: the SDK forwards whatever
+                // getGlossaries() returns, and `[]` would go out as "glossaries": []. It also covers
+                // a legacy project row the marshaller could not decode, which arrives as null.
                 if (!empty($laraGlossaries)) {
                     $translateOptions->setGlossaries($laraGlossaries);
                 }

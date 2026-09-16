@@ -220,7 +220,7 @@
           },
           "value": {
             "type": "array",
-            "minItems": 1,
+            "$comment": "An empty list is an answer, not an absence: it is how a job says \"no glossary here\" over a project that has one, and the job scope wins. DELETE /metadata/{key} is the other operation — it drops the job row so the job inherits the project value again.",
             "items": {
               "type": "string",
               "minLength": 1
@@ -241,7 +241,7 @@
           },
           "value": {
             "type": "array",
-            "minItems": 1,
+            "$comment": "An empty list is an answer, not an absence: it is how a job says \"no glossary here\" over a project that has one, and the job scope wins. DELETE /metadata/{key} is the other operation — it drops the job row so the job inherits the project value again.",
             "items": {
               "type": "integer",
               "minimum": 1

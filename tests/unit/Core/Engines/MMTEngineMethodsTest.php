@@ -221,6 +221,54 @@ class MMTEngineMethodsTest extends AbstractTest
     }
 
     #[Test]
+    public function getWithAnEmptyJobGlossaryListOmitsTheGlossaryParameters(): void
+    {
+        // The job scope stores `[]` to shadow a project that has glossaries. It is an answer, not an
+        // absence, so the resolver must not fall back to the project row and the engine must send
+        // no `glossaries` at all rather than an empty string.
+        $pid = 910002;
+        $jobId = 910003;
+        $password = 'glossaryless';
+
+        (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_glossaries', '["g1","g2"]');
+        (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_ignore_glossary_case', '1');
+        (new JobsMetadataDao(obtainTestDatabase()))->set($jobId, $password, 'mmt_glossaries', '[]');
+
+        $client = $this->createMock(MMTServiceApi::class);
+        $client->expects(self::once())
+            ->method('translate')
+            ->with(
+                'en-US',
+                'fr-FR',
+                'Hello',
+                null,
+                ['x_mm-k1'],
+                $jobId,
+                MMT::GET_REQUEST_TIMEOUT,
+                'normal',
+                null,
+                null,
+                null,
+                null,
+                '2'
+            )
+            ->willReturn(['translation' => 'Bonjour']);
+
+        $engine = $this->createEngineWithClient($client);
+        $response = $engine->get([
+            'id_project' => $pid,
+            'job_id' => $jobId,
+            'job_password' => $password,
+            'source' => 'en-US',
+            'target' => 'fr-FR',
+            'segment' => 'Hello',
+            'keys' => ['k1'],
+        ]);
+
+        self::assertCount(1, $response->matches);
+    }
+
+    #[Test]
     public function setSuccessReturnsTrue(): void
     {
         $client = $this->createMock(MMTServiceApi::class);

@@ -256,7 +256,7 @@ class MetaDataControllerTest extends AbstractTest
 
         // project: engine-config key routed to mt_extra, plain key stays top-level
         $this->assertObjectHasProperty('mt_extra', $captured->project);
-        $this->assertSame('[101]', $captured->project->mt_extra->mmt_glossaries);
+        $this->assertSame([101], $captured->project->mt_extra->mmt_glossaries);
         $this->assertSame('plain_value', $captured->project->ctrl_plain_key);
 
         // job metadata key present + marshaller default subfiltering_handlers
@@ -387,7 +387,7 @@ class MetaDataControllerTest extends AbstractTest
         $result = $this->invokePrivate('getProjectInfo', [$project]);
 
         $this->assertObjectHasProperty('mt_extra', $result);
-        $this->assertSame('[101]', $result->mt_extra->mmt_glossaries);
+        $this->assertSame([101], $result->mt_extra->mmt_glossaries);
         $this->assertSame('plain_value', $result->ctrl_plain_key);
         $this->assertObjectNotHasProperty('mmt_glossaries', $result);
     }
@@ -519,7 +519,7 @@ class MetaDataControllerTest extends AbstractTest
 
         $this->assertInstanceOf(stdClass::class, $captured);
         $this->assertObjectNotHasProperty('mt_extra', $captured->job);
-        $this->assertSame('[101]', $captured->project->mt_extra->mmt_glossaries);
+        $this->assertSame([101], $captured->project->mt_extra->mmt_glossaries);
     }
 
     /**
@@ -550,7 +550,7 @@ class MetaDataControllerTest extends AbstractTest
         $this->assertSame(90, $captured->job->mt_quality_value_in_editor);
 
         // ...and the project keeps answering for the one only it has, the way it did before the move.
-        $this->assertSame('[101]', $captured->project->mt_extra->mmt_glossaries);
+        $this->assertSame([101], $captured->project->mt_extra->mmt_glossaries);
         $this->assertObjectNotHasProperty('mmt_glossaries', $captured->job->mt_extra);
     }
 

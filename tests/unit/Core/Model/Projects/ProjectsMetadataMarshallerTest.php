@@ -358,7 +358,7 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
     }
 
     // =========================================================================
-    // unMarshall -- string-cast branch (9 keys)
+    // unMarshall -- string-cast branch (8 keys)
     // =========================================================================
 
     #[Test]
@@ -417,7 +417,6 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
     public static function stringCastKeyProvider(): array
     {
         return [
-            'mmt_glossaries'    => ['mmt_glossaries'],
             'lara_style'        => ['lara_style'],
             'intento_routing'   => ['intento_routing'],
             'intento_provider'  => ['intento_provider'],
@@ -426,6 +425,54 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'deepl_engine_type' => ['deepl_engine_type'],
             'segmentation_rule' => ['segmentation_rule'],
             'context-url'       => ['context-url'],
+        ];
+    }
+
+    // =========================================================================
+    // unMarshall -- glossary list branch (2 keys)
+    // =========================================================================
+
+    #[Test]
+    #[DataProvider('glossaryKeyProvider')]
+    public function unMarshallGlossaryListDecodesJsonArray(string $key): void
+    {
+        // Both lists decode, so the same stored value resolves to the same PHP type whichever
+        // glossary a client is looking at, and whichever scope answered.
+        $result = ProjectsMetadataMarshaller::unMarshall($this->makeStruct($key, '["one","two"]'));
+        $this->assertSame(['one', 'two'], $result);
+    }
+
+    #[Test]
+    #[DataProvider('glossaryKeyProvider')]
+    public function unMarshallGlossaryListDecodesHtmlEntityEncodedJson(string $key): void
+    {
+        // Both creation controllers run the request parameter through FILTER_SANITIZE_SPECIAL_CHARS
+        // before validating it, so old rows can still hold the entity-encoded form.
+        $result = ProjectsMetadataMarshaller::unMarshall($this->makeStruct($key, '[&quot;one&quot;]'));
+        $this->assertSame(['one'], $result);
+    }
+
+    #[Test]
+    #[DataProvider('glossaryKeyProvider')]
+    public function unMarshallGlossaryListDecodesEmptyList(string $key): void
+    {
+        $result = ProjectsMetadataMarshaller::unMarshall($this->makeStruct($key, '[]'));
+        $this->assertSame([], $result);
+    }
+
+    #[Test]
+    #[DataProvider('glossaryKeyProvider')]
+    public function unMarshallGlossaryListReturnsNullForUndecodableValue(string $key): void
+    {
+        $result = ProjectsMetadataMarshaller::unMarshall($this->makeStruct($key, 'not json'));
+        $this->assertNull($result);
+    }
+
+    public static function glossaryKeyProvider(): array
+    {
+        return [
+            'lara_glossaries' => ['lara_glossaries'],
+            'mmt_glossaries'  => ['mmt_glossaries'],
         ];
     }
 

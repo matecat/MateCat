@@ -141,11 +141,13 @@ class MMT extends AbstractEngine
 
         $glossaries = $settings[JobsMetadataMarshaller::MMT_GLOSSARIES->value] ?? null;
 
-        if (is_string($glossaries) && $glossaries !== '') {
-            $mmtGlossariesArray = json_decode($glossaries, true);
+        // An empty list is not "no setting": the job stores one to shadow a project that has
+        // glossaries, and the parameter has to be omitted rather than sent empty. The same guard
+        // covers a legacy row the marshaller could not decode, which arrives as null.
+        if (is_array($glossaries) && $glossaries !== []) {
             $ignore_glossary_case = $settings[JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE->value] ?? null;
 
-            $_config['glossaries'] = implode(",", is_array($mmtGlossariesArray) ? $mmtGlossariesArray : []);
+            $_config['glossaries'] = implode(",", $glossaries);
 
             if ($ignore_glossary_case !== null) {
                 $_config['ignore_glossary_case'] = $ignore_glossary_case;

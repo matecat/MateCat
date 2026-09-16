@@ -143,6 +143,28 @@ class JobSettingsResolverTest extends AbstractTest
         );
     }
 
+    #[Test]
+    public function anEmptyGlossaryListOnTheJobShadowsANonEmptyProjectList(): void
+    {
+        // The only way to say "no glossary on this job" while the project has one. The job row is
+        // present, so the project is never consulted, and the caller gets [] rather than the
+        // project's list — the engines turn that into an omitted parameter.
+        $this->jobDao->method('get')->willReturn(
+            $this->struct(JobsMetadataMarshaller::MMT_GLOSSARIES->value, '[]')
+        );
+        $this->projectDao->expects($this->never())->method('getValue');
+
+        $this->assertSame(
+            [],
+            $this->resolver->resolve(
+                self::JOB_ID,
+                self::PASSWORD,
+                self::PROJECT_ID,
+                JobsMetadataMarshaller::MMT_GLOSSARIES->value
+            )
+        );
+    }
+
     // =========================================================================
     // resolve() — callers without a full job context
     // =========================================================================

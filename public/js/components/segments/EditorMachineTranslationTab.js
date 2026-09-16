@@ -37,14 +37,6 @@ export const EditorMachineTranslationTab = (props) => {
         currentProjectTemplate.mt?.extra[prop] !==
           previousCurrentProjectTemplate.current?.mtExtra[prop],
     )
-    console.log('<------------------')
-    console.log(
-      'mtExtraCurrentTemplate',
-      mtExtraCurrentTemplate,
-      'wasExtraPropChanges',
-      wasExtraPropChanges,
-    )
-    console.log('------------------<')
     if (
       config.is_cattool &&
       typeof previousCurrentProjectTemplate.current !== 'undefined' &&

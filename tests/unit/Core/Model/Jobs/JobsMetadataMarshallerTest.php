@@ -201,8 +201,6 @@ class JobsMetadataMarshallerTest extends AbstractTest
             'lara_style_guideline_id' => ['lara_style_guideline_id', 'guideline-7', 'guideline-7'],
             'intento_provider'        => ['intento_provider', 'ai.text.translate.google', 'ai.text.translate.google'],
             'intento_routing'         => ['intento_routing', 'best_quality', 'best_quality'],
-            // The engine json_decodes this one itself, so the raw JSON has to survive un-marshalling.
-            'mmt_glossaries'          => ['mmt_glossaries', '[12,34]', '[12,34]'],
             // A numeric-looking style id must not become an int: the engines send it as a string.
             'numeric guideline id'    => ['lara_style_guideline_id', 42, '42'],
         ];
@@ -228,6 +226,41 @@ class JobsMetadataMarshallerTest extends AbstractTest
     public function unMarshallLaraGlossariesReturnsNullForUndecodableValue(): void
     {
         $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('lara_glossaries', 'not json'));
+        $this->assertNull($result);
+    }
+
+    #[Test]
+    public function unMarshallMmtGlossariesDecodesJsonArray(): void
+    {
+        // Not a raw string: the two glossary lists have to leave the marshaller with the same shape,
+        // or a client reading both out of the same mt_extra object gets an array for one and a
+        // string for the other, and posting back what it read fails the write schema.
+        $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('mmt_glossaries', '[12,34]'));
+        $this->assertSame([12, 34], $result);
+    }
+
+    #[Test]
+    public function unMarshallMmtGlossariesDecodesHtmlEntityEncodedJson(): void
+    {
+        // Both creation controllers run the request parameter through FILTER_SANITIZE_SPECIAL_CHARS
+        // before validating it, so old rows can still hold the entity-encoded form.
+        $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('mmt_glossaries', '[&quot;g1&quot;]'));
+        $this->assertSame(['g1'], $result);
+    }
+
+    #[Test]
+    public function unMarshallMmtGlossariesDecodesEmptyList(): void
+    {
+        // An empty list is a stored answer — the job shadowing a project that has glossaries — and
+        // has to survive as one, not collapse to null.
+        $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('mmt_glossaries', '[]'));
+        $this->assertSame([], $result);
+    }
+
+    #[Test]
+    public function unMarshallMmtGlossariesReturnsNullForUndecodableValue(): void
+    {
+        $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('mmt_glossaries', 'not json'));
         $this->assertNull($result);
     }
 

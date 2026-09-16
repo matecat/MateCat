@@ -9,6 +9,7 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
 use Exception;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\Projects\ProjectDao;
@@ -109,6 +110,15 @@ class JobMetadataController extends KleinController
                 $item['key'],
                 is_array($item['value']) ? json_encode($item['value']) : $item['value'] ?? 'null'
             );
+
+            // set() answers with the row as stored, and the column is a string. Un-marshalling it
+            // here is what MetadataDao::getByJobIdAndPassword() does for the read endpoint, so a
+            // client gets the same types back from this response as from GET /metadata and can
+            // reuse what it just sent without a second round trip.
+            if ($struct !== null) {
+                $struct->value = JobsMetadataMarshaller::unMarshall($struct);
+            }
+
             $return[] = $struct;
         }
 

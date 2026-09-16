@@ -357,9 +357,51 @@ class JobMetadataControllerTest extends AbstractTest
             // Arrays are JSON-encoded by the controller before they reach the DAO.
             'lara glossaries'         => ['lara_glossaries', ['a', 'b'], '["a","b"]'],
             'mmt glossaries'          => ['mmt_glossaries', [1, 2], '[1,2]'],
+            // An empty list is an answer, not an absence: it is how a job says "no glossary here"
+            // over a project that has one, and the job scope wins. delete() is the other operation,
+            // dropping the job row so the project value is inherited again.
+            'empty lara glossaries'   => ['lara_glossaries', [], '[]'],
+            'empty mmt glossaries'    => ['mmt_glossaries', [], '[]'],
             'intento provider'        => ['intento_provider', 'ai.text.translate.google', 'ai.text.translate.google'],
             'intento routing'         => ['intento_routing', 'best_quality', 'best_quality'],
         ];
+    }
+
+    /**
+     * The column is a string, so the row as stored says nothing about the type the caller sent. The
+     * response un-marshalls it, the same way the read endpoint does, so a client can reuse what it
+     * just posted instead of following every write with a GET.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function save_answers_with_un_marshalled_values(): void
+    {
+        $body = (string)json_encode([
+            ['key' => 'mmt_glossaries', 'value' => [12, 34]],
+            ['key' => 'lara_glossaries', 'value' => []],
+            ['key' => 'mt_quality_value_in_editor', 'value' => 90],
+            ['key' => 'tm_prioritization', 'value' => true],
+        ]);
+
+        $this->setRequest([
+            'id_job' => (string)$this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ], $body, true);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertCount(4, $data);
+                $this->assertSame([12, 34], $data[0]->value);
+                $this->assertSame([], $data[1]->value);
+                $this->assertSame(90, $data[2]->value);
+                $this->assertTrue($data[3]->value);
+
+                return true;
+            }));
+
+        $this->controller->save();
     }
 
     /**
@@ -392,18 +434,14 @@ class JobMetadataControllerTest extends AbstractTest
             'threshold above 100' => ['mt_quality_value_in_editor', 101],
             'threshold below 0'   => ['mt_quality_value_in_editor', -1],
             'threshold as string' => ['mt_quality_value_in_editor', '90'],
-            // An empty string is an answer, not an absence: it would shadow the project-metadata
-            // fallback with a value the engine cannot use. Clearing a setting is what delete() is for.
+            // An empty string is not a well-formed "none" the way an empty list is: it would shadow
+            // the project-metadata fallback with a value the engine cannot use. delete() is how
+            // these two are cleared.
             'empty glossary id'   => ['deepl_id_glossary', ''],
             'empty lara style guideline' => ['lara_style_guideline_id', ''],
             // mmt_glossaries holds MyMemory numeric ids, lara_glossaries opaque string ids.
             'mmt glossary strings' => ['mmt_glossaries', ['12']],
             'lara glossary ints'   => ['lara_glossaries', [12]],
-            // An empty list is the array-shaped version of the empty string above: the Lara SDK
-            // forwards whatever it is given, so `[]` would go out as "glossaries": [] rather than
-            // omitting the parameter. delete() is how a glossary is cleared.
-            'empty lara glossaries' => ['lara_glossaries', []],
-            'empty mmt glossaries'  => ['mmt_glossaries', []],
             // A MyMemory glossary id is a positive integer.
             'zero mmt glossary id'  => ['mmt_glossaries', [0]],
             'negative mmt glossary id' => ['mmt_glossaries', [-1]],
