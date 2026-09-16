@@ -338,22 +338,34 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   setDisabledMetadata(sid, disabled) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
-    const metaValue = disabled ? '1' : '0'
     const metadata = this._segments.getIn([index, 'metadata']) || fromJS([])
     const metaIndex = metadata.findIndex(
       (entry) => entry.get('meta_key') === 'translation_disabled',
     )
+
+    // Mirror the server shape: a disabled segment carries the entry with a boolean
+    // meta_value, an enabled one has no entry at all. Keeping the entry with a falsy
+    // value would not work, every consumer tests meta_value for truthiness.
+    if (!disabled) {
+      if (metaIndex === -1) return
+      this._segments = this._segments.setIn(
+        [index, 'metadata'],
+        metadata.delete(metaIndex),
+      )
+      return
+    }
+
     this._segments =
       metaIndex === -1
         ? this._segments.setIn(
             [index, 'metadata'],
             metadata.push(
-              fromJS({meta_key: 'translation_disabled', meta_value: metaValue}),
+              fromJS({meta_key: 'translation_disabled', meta_value: true}),
             ),
           )
         : this._segments.setIn(
             [index, 'metadata', metaIndex, 'meta_value'],
-            metaValue,
+            true,
           )
   },
 
