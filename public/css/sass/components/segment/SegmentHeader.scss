@@ -45,13 +45,13 @@ section .header {
   .header-segment-saving {
     display: flex;
     justify-content: space-between;
-    width: 55px;
     align-items: center;
     float: right;
     padding-right: 15px;
     position: absolute;
     right: 0;
     top: 0;
+    gap: 4px;
     span {
       font-size: variables.$font-size-xsmall;
       padding: 0;
