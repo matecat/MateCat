@@ -2,6 +2,7 @@ import React from 'react'
 import {act, fireEvent, render, screen, waitFor} from '@testing-library/react'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import CatToolStore from '../stores/CatToolStore'
+import {JobMetadataProxy} from '../stores/JobMetadataProxy'
 import SegmentStore from '../stores/SegmentStore'
 import CatToolConstants from '../constants/CatToolConstants'
 import SegmentConstants from '../constants/SegmentConstants'
@@ -438,21 +439,26 @@ describe('CatTool', () => {
   })
 
   describe('jobMetadata mandatory_issues mapping', () => {
-    const makeJobMetadata = (mandatory_issues) => ({
-      job: {
-        tm_prioritization: false,
-        character_counter_count_tags: false,
-        character_counter_mode: null,
-        subfiltering_handlers: [],
-        mandatory_issues,
-      },
-      project: {
-        mandatory_issues,
-        mt_quality_value_in_editor: false,
-        mt_extra: {},
-        icu_enabled: 0,
-      },
-    })
+    // CatTool.js stores whatever GET_JOB_METADATA emits as-is, which in
+    // production is CatToolStore.getJobMetadata() — a JobMetadataProxy
+    // instance. Building the fixture through the real class (rather than a
+    // hand-flattened object) exercises the actual job/project merge rules.
+    const makeJobMetadata = (mandatory_issues) =>
+      new JobMetadataProxy({
+        job: {
+          tm_prioritization: false,
+          character_counter_count_tags: false,
+          character_counter_mode: null,
+          subfiltering_handlers: [],
+          mandatory_issues,
+        },
+        project: {
+          mandatory_issues,
+          mt_quality_value_in_editor: false,
+          mt_extra: {},
+          icu_enabled: 0,
+        },
+      }).proxy
 
     const emitJobMetadata = (metadata) =>
       CatToolStore.emit(CatToolConstants.GET_JOB_METADATA, {

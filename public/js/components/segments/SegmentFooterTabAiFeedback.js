@@ -52,7 +52,7 @@ export const SegmentFooterTabAiFeedback = ({
         source: decodedSource,
         target: decodedTarget,
         style:
-          CatToolStore.getJobMetadata().project.mt_extra.lara_style ??
+          CatToolStore.getJobMetadata().mt_extra.lara_style ??
           LARA_STYLES.FAITHFUL,
       }
 

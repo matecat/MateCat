@@ -15,7 +15,7 @@ export const LaraStyles = ({sid, segment, isIconsBundled}) => {
 
   const openTab = () => {
     const styles = LARA_STYLES_OPTIONS.map((style) =>
-      style.id !== CatToolStore.getJobMetadata().project.mt_extra.lara_style
+      style.id !== CatToolStore.getJobMetadata().mt_extra.lara_style
         ? style
         : {...style, isDefault: true},
     )

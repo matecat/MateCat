@@ -106,16 +106,15 @@ export const SegmentTargetToolbar = ({
           {
             group: 0,
             component: (
-              <LaraStyles
-                {...{key: 'larastyle', sid, segment, isIconsBundled}}
-              />
+              <LaraStyles key="larastyle" {...{sid, segment, isIconsBundled}} />
             ),
           },
           {
             group: 0,
             component: (
               <AiFeedback
-                {...{key: 'aifeedback', sid, segment, isIconsBundled}}
+                key="aifeedback"
+                {...{sid, segment, isIconsBundled}}
               />
             ),
           },
@@ -123,8 +122,8 @@ export const SegmentTargetToolbar = ({
             group: 0,
             component: (
               <AiAlternatives
+                key="aialternatives"
                 {...{
-                  key: 'aialternatives',
                   sid,
                   segment,
                   editArea,
@@ -369,8 +368,17 @@ export const SegmentTargetToolbar = ({
         />
       )}
       {buttons.map((button, index) => {
-        if (button.dropdownGroup) return <React.Fragment key={`group-${index}`}>{button.dropdownGroup}</React.Fragment>
-        return <React.Fragment key={`btn-${index}`}>{button.component}</React.Fragment>
+        if (button.dropdownGroup)
+          return (
+            <React.Fragment key={`group-${index}`}>
+              {button.dropdownGroup}
+            </React.Fragment>
+          )
+        return (
+          <React.Fragment key={`btn-${index}`}>
+            {button.component}
+          </React.Fragment>
+        )
       })}
     </div>
   )

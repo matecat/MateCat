@@ -61,6 +61,6 @@ export const AiAlternatives = ({sid, editArea, isIconsBundled}) => {
 
 AiAlternatives.propTypes = {
   sid: PropTypes.string.isRequired,
-  editArea: PropTypes.object.isRequired,
+  editArea: PropTypes.object,
   isIconsBundled: PropTypes.bool,
 }

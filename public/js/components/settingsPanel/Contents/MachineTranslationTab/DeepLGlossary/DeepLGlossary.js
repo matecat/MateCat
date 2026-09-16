@@ -27,7 +27,6 @@ const COLUMNS_TABLE = [
   {name: ''},
 ]
 
-
 export const DEEPL_GLOSSARY_ROW_NONE = ''
 
 export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
@@ -212,9 +211,10 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
 
     const glossaryId = activeGlossaryRef.current
     let glossariesFromJobMetadata = []
-    const getJobMetadata = ({jobMetadata: {project} = {}}) => {
+    const getJobMetadata = ({jobMetadata}) => {
       const rows = glossariesFromJobMetadata.filter(
-        ({glossary_id}) => project.mt_extra.deepl_id_glossary === glossary_id,
+        ({glossary_id}) =>
+          jobMetadata.mt_extra.deepl_id_glossary === glossary_id,
       )
 
       updateRowsState(

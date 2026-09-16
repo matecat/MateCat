@@ -117,7 +117,6 @@ export const LaraOptions = ({isCattoolPage}) => {
         <Controller
           control={control}
           name="lara_style"
-          disabled={isCattoolPage}
           render={({field: {onChange, value, name, disabled}}) => (
             <Select
               name={name}
@@ -155,7 +154,7 @@ export const LaraOptions = ({isCattoolPage}) => {
           <Controller
             control={control}
             name="lara_style_guideline_id"
-            disabled={isCattoolPage || styleGuidesOptions.length === 0}
+            disabled={styleGuidesOptions.length === 0}
             render={({field: {onChange, value, name, disabled}}) => (
               <Select
                 name={name}

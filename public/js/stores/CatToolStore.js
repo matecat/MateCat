@@ -5,6 +5,7 @@ import {filter} from 'lodash'
 import AppDispatcher from './AppDispatcher'
 import CatToolConstants from '../constants/CatToolConstants'
 import ModalsConstants from '../constants/ModalsConstants'
+import {JobMetadataProxy} from './JobMetadataProxy'
 
 EventEmitter.prototype.setMaxListeners(0)
 
@@ -139,7 +140,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
     this._currentProjectTemplate = currentProjectTemplate
   },
   setJobMetadata: function (jobMetadata) {
-    this.jobMetadata = jobMetadata
+    this.jobMetadata = new JobMetadataProxy(jobMetadata).proxy
   },
   getJobMetadata: function () {
     return this.jobMetadata
@@ -297,7 +298,6 @@ AppDispatcher.register(function (action) {
       })
       break
     case CatToolConstants.GET_JOB_METADATA:
-      CatToolStore.setJobMetadata(action.jobMetadata)
       CatToolStore.emitChange(CatToolConstants.GET_JOB_METADATA, {
         ...action,
       })

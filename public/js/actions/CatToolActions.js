@@ -259,18 +259,18 @@ let CatToolActions = {
     })
   },
   getJobMetadata: ({idJob, password}) => {
-    if (!CatToolStore.jobMetadata) {
+    if (!CatToolStore.getJobMetadata()) {
       getJobMetadata(idJob, password).then((jobMetadata) => {
+        CatToolStore.setJobMetadata(jobMetadata)
         AppDispatcher.dispatch({
           actionType: CatToolConstants.GET_JOB_METADATA,
-          jobMetadata,
+          jobMetadata: CatToolStore.getJobMetadata(),
         })
-        CatToolStore.jobMetadata = jobMetadata
       })
     } else {
       AppDispatcher.dispatch({
         actionType: CatToolConstants.GET_JOB_METADATA,
-        jobMetadata: CatToolStore.jobMetadata,
+        jobMetadata: CatToolStore.getJobMetadata(),
       })
     }
   },
