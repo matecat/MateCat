@@ -22,7 +22,7 @@ import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import {SegmentTargetToolbar} from './SegmentTargetToolbar'
 
-const SegmentTarget = (props) => {
+const SegmentTarget = ({segment}) => {
   const context = useContext(SegmentContext)
 
   const [showFormatMenu, setShowFormatMenu] = useState(false)
@@ -40,8 +40,8 @@ const SegmentTarget = (props) => {
   // `this.props` never being a stale closure inside updateCounter/autoFillTagsInTarget,
   // which are registered once (by reference) and must keep a stable identity across
   // renders while still reading the CURRENT segment prop.
-  const liveRef = useRef({segment: props.segment})
-  liveRef.current.segment = props.segment
+  const liveRef = useRef({segment: segment})
+  liveRef.current.segment = segment
 
   // Created once via useRef so its identity never changes across renders — required
   // because updateCounter is passed down as a long-lived prop to <EditArea> and is also
@@ -81,7 +81,7 @@ const SegmentTarget = (props) => {
   // SegmentStore.addListener/removeListener, exactly like the class's single
   // this.autoFillTagsInTarget.bind(this) in the constructor. The setTimeout callback
   // re-reads liveRef.current.segment at fire time (not a locally captured variable) so
-  // it always reads the freshest props 100ms later, matching `this.props.segment` being
+  // it always reads the freshest props 100ms later, matching `this.segment` being
   // dereferenced live off the instance in the original class.
   const autoFillTagsInTargetRef = useRef((sid) => {
     const {segment} = liveRef.current
@@ -111,16 +111,16 @@ const SegmentTarget = (props) => {
       event.stopPropagation()
       selection = CursorUtils.getSelectionData(selection, container)
       SegmentActions.openIssuesPanel(
-        {sid: props.segment.sid, selection: selection},
+        {sid: segment.sid, selection: selection},
         true,
       )
       setTimeout(() => {
-        SegmentActions.showIssuesMessage(props.segment.sid, 2)
+        SegmentActions.showIssuesMessage(segment.sid, 2)
       })
     } else {
       context.removeSelection()
       setTimeout(() => {
-        SegmentActions.showIssuesMessage(props.segment.sid, 0)
+        SegmentActions.showIssuesMessage(segment.sid, 0)
       })
     }
   }
@@ -137,10 +137,10 @@ const SegmentTarget = (props) => {
 
   const lockEditArea = (event) => {
     event.preventDefault()
-    if (!props.segment.edit_area_locked) {
-      SegmentActions.showIssuesMessage(props.segment.sid, 0)
+    if (!segment.edit_area_locked) {
+      SegmentActions.showIssuesMessage(segment.sid, 0)
     }
-    SegmentActions.lockEditArea(props.segment.sid, props.segment.fid)
+    SegmentActions.lockEditArea(segment.sid, segment.fid)
   }
 
   const allowHTML = (string) => {
@@ -149,8 +149,8 @@ const SegmentTarget = (props) => {
 
   const getAllIssues = () => {
     let issues = []
-    if (props.segment.versions) {
-      props.segment.versions.forEach(function (version) {
+    if (segment.versions) {
+      segment.versions.forEach(function (version) {
         if (!isEmpty(version.issues)) {
           issues = issues.concat(version.issues)
         }
@@ -160,8 +160,8 @@ const SegmentTarget = (props) => {
   }
 
   const removeTagsFromText = () => {
-    const cleanText = removeTagsFromTextUtil(props.segment.translation)
-    SegmentActions.replaceEditAreaTextContent(props.segment.sid, cleanText)
+    const cleanText = removeTagsFromTextUtil(segment.translation)
+    SegmentActions.replaceEditAreaTextContent(segment.sid, cleanText)
   }
 
   const getTargetArea = (translation) => {
@@ -174,10 +174,10 @@ const SegmentTarget = (props) => {
 
     var textAreaContainer = ''
     let issues = getAllIssues()
-    if (props.segment.edit_area_locked) {
+    if (segment.edit_area_locked) {
       const text =
-        props.segment.versions && props.segment.versions[0].translation
-          ? props.segment.versions[0].translation
+        segment.versions && segment.versions[0].translation
+          ? segment.versions[0].translation
           : translation
       let currentTranslationVersion = DraftMatecatUtils.transformTagsToHtml(
         text,
@@ -259,14 +259,14 @@ const SegmentTarget = (props) => {
         '?revision_type=' +
         (config.revisionNumber ? config.revisionNumber : 1) +
         '&id_segment=' +
-        props.segment.sid
+        segment.sid
 
       //Text Area
       textAreaContainer = (
         <div className="textarea-container">
           <EditArea
             ref={(ref) => (editAreaRef.current = ref)}
-            segment={props.segment}
+            segment={segment}
             translation={translation}
             toggleFormatMenu={toggleFormatMenu}
             updateCounter={updateCounter}
@@ -275,8 +275,8 @@ const SegmentTarget = (props) => {
           <div className="segment-actions-container">
             <SegmentTargetToolbar
               {...{
-                sid: props.segment.sid,
-                segment: props.segment,
+                sid: segment.sid,
+                segment: segment,
                 editArea: editAreaRef.current,
                 lockEditArea: lockEditArea,
                 qrLink,
@@ -330,10 +330,10 @@ const SegmentTarget = (props) => {
 
     const prevValues = prevValuesRef.current
 
-    const newCharactersCounterLimit = props.segment.metadata.find(
+    const newCharactersCounterLimit = segment.metadata.find(
       (meta) =>
         meta.meta_key === 'sizeRestriction' &&
-        meta.id_segment.toString() === props.segment.sid,
+        meta.id_segment.toString() === segment.sid,
     )?.meta_value
 
     if (
@@ -351,7 +351,7 @@ const SegmentTarget = (props) => {
     ) {
       setTimeout(() => {
         SegmentActions.characterCounter({
-          sid: props.segment.sid,
+          sid: segment.sid,
           counter: charactersCounter,
           segmentCharacters: segmentCharacters,
           limit: charactersCounterLimit,
@@ -366,19 +366,19 @@ const SegmentTarget = (props) => {
     }
   })
 
-  let translation = props.segment.translation
+  let translation = segment.translation
 
   return (
     <div
       className={`target item target-${config.target_code}`}
-      id={'segment-' + props.segment.sid + '-target'}
+      id={'segment-' + segment.sid + '-target'}
       ref={(target) => (targetRef.current = target)}
     >
       {getTargetArea(translation)}
       <p className="warnings" />
 
-      {props.segment.warnings ? (
-        <SegmentWarnings warnings={props.segment.warnings} />
+      {segment.warnings ? (
+        <SegmentWarnings warnings={segment.warnings} />
       ) : null}
     </div>
   )

@@ -75,8 +75,14 @@ const typingWordJoiner = matchTypingSequence(
   2000,
 )
 
-const Editarea = forwardRef((props, ref) => {
+const Editarea = forwardRef(({segment, translation, updateCounter}, ref) => {
   const context = useContext(SegmentContext)
+
+  // A snapshot of this render's props, kept as one object because two things
+  // need props *collectively* rather than field by field: liveRef, which the
+  // frozen call sites read through, and prevPropsRef, which the
+  // componentDidUpdate-equivalent effect diffs against.
+  const currentProps = {segment, translation, updateCounter}
 
   const instanceRef = useRef({})
   const methodsAssignedRef = useRef(false)
@@ -100,7 +106,7 @@ const Editarea = forwardRef((props, ref) => {
   // this.prevIcuTokens (plain mutable instance field, internal only)
   const prevIcuTokensRef = useRef(undefined)
 
-  const [icuEnabled] = useState(() => props.segment.icu)
+  const [icuEnabled] = useState(() => segment.icu)
 
   // ---- stable method closures (useRef-seeded once, always dispatched via instanceRef.current) ----
 
@@ -1512,7 +1518,7 @@ const Editarea = forwardRef((props, ref) => {
           getUpdatedSegmentInfo: getUpdatedSegmentInfoRef.current,
           getSearchParams: getSearchParamsRef.current, //TODO: Make it general ?
           isRTL: config.isTargetRTL,
-          sid: props.segment.sid,
+          sid: segment.sid,
         },
       },
     ]
@@ -1521,12 +1527,8 @@ const Editarea = forwardRef((props, ref) => {
   // ---- initial content, computed once ----
   const initialContentRef = useRef(null)
   if (initialContentRef.current === null) {
-    const translation = props.translation
-
     // If GuessTag is Enabled, clean translation from tags
-    const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(
-      props.segment,
-    )
+    const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(segment)
       ? DraftMatecatUtils.removeTagsFromText(translation)
       : translation
 
@@ -1574,9 +1576,9 @@ const Editarea = forwardRef((props, ref) => {
   const constructorRanRef = useRef(false)
   if (!constructorRanRef.current) {
     constructorRanRef.current = true
-    props.updateCounter(
+    updateCounter(
       DraftMatecatUtils.getCharactersCounter(
-        getTextToApplyCounter(props.translation),
+        getTextToApplyCounter(translation),
       ),
     )
   }
@@ -1606,7 +1608,7 @@ const Editarea = forwardRef((props, ref) => {
   }
 
   // refresh liveRef every render so stable closures always see current data
-  liveRef.current.props = props
+  liveRef.current.props = currentProps
   liveRef.current.editorState = editorState
   liveRef.current.editAreaClasses = editAreaClasses
   liveRef.current.tagRange = tagRange
@@ -1623,7 +1625,7 @@ const Editarea = forwardRef((props, ref) => {
   liveRef.current.icuEnabled = icuEnabled
 
   const isFirstRenderRef = useRef(true)
-  const prevPropsRef = useRef(props)
+  const prevPropsRef = useRef(currentProps)
   const prevStateRef = useRef(null)
 
   // componentDidMount / componentWillUnmount equivalent
@@ -1712,7 +1714,7 @@ const Editarea = forwardRef((props, ref) => {
   useEffect(() => {
     if (isFirstRenderRef.current) {
       isFirstRenderRef.current = false
-      prevPropsRef.current = props
+      prevPropsRef.current = currentProps
       prevStateRef.current = instanceRef.current.state
       return
     }
@@ -1720,10 +1722,10 @@ const Editarea = forwardRef((props, ref) => {
     const prevProps = prevPropsRef.current
     const prevState = prevStateRef.current
 
-    if (!prevProps.segment.opened && props.segment.opened) {
+    if (!prevProps.segment.opened && segment.opened) {
       const newEditorState = EditorState.moveFocusToEnd(editorState)
       instanceRef.current.setState({editorState: newEditorState})
-    } else if (prevProps.segment.opened && !props.segment.opened) {
+    } else if (prevProps.segment.opened && !segment.opened) {
       const newEditorState = EditorState.moveSelectionToEnd(editorState)
       instanceRef.current.setState({editorState: newEditorState})
     }
@@ -1733,16 +1735,13 @@ const Editarea = forwardRef((props, ref) => {
 
     // update editor state when receive prop of segment "sourceTagMap"
     if (
-      props.segment.sourceTagMap?.length &&
-      !isEqual(previousSourceTagMap, props.segment.sourceTagMap)
+      segment.sourceTagMap?.length &&
+      !isEqual(previousSourceTagMap, segment.sourceTagMap)
     ) {
       instanceRef.current.setState({
-        previousSourceTagMap: props.segment.sourceTagMap,
+        previousSourceTagMap: segment.sourceTagMap,
       })
-      instanceRef.current.setNewTranslation(
-        props.segment.sid,
-        props.translation,
-      )
+      instanceRef.current.setNewTranslation(segment.sid, translation)
     }
 
     // Adjust caret position and set focus to entity
@@ -1798,7 +1797,7 @@ const Editarea = forwardRef((props, ref) => {
 
     wasTripleClickTriggeredRef.current = false
 
-    prevPropsRef.current = props
+    prevPropsRef.current = currentProps
     prevStateRef.current = instanceRef.current.state
   })
 
@@ -1931,13 +1930,10 @@ const Editarea = forwardRef((props, ref) => {
   let lang = ''
   let readonly = false
 
-  if (props.segment) {
+  if (segment) {
     lang = config.target_code
     readonly =
-      context.readonly ||
-      context.locked ||
-      props.segment.muted ||
-      !props.segment.opened
+      context.readonly || context.locked || segment.muted || !segment.opened
   }
   const classes = editAreaClasses.slice()
   if (context.locked || context.readonly) {
@@ -1950,8 +1946,8 @@ const Editarea = forwardRef((props, ref) => {
     <div
       className={classes.join(' ')}
       ref={setEditAreaDom}
-      id={'segment-' + props.segment.sid + '-editarea'}
-      data-sid={props.segment.sid}
+      id={'segment-' + segment.sid + '-editarea'}
+      data-sid={segment.sid}
       tabIndex="-1"
       onCopy={copyFragment}
       onCut={copyFragment}
