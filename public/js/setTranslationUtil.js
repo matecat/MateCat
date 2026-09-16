@@ -213,14 +213,14 @@ export const execSetTranslationTail = () => {
     status,
     propagate,
   )
-  if (callback) {
-    callback.call(this)
-  }
   setTranslation(translateRequest)
     .then((data) => {
       SegmentActions.setChoosenSuggestion(idSegment, null)
       SegmentActions.setSegmentSaving(idSegment, false)
       setTranslation_success(data, item)
+      if (callback) {
+        callback.call(this)
+      }
       //Review
       if (config.isReview) {
         SegmentActions.getSegmentVersionsIssues(idSegment)
@@ -241,7 +241,7 @@ export const execSetTranslationTail = () => {
         OfflineUtils.changeStatusOffline(idSegment)
         OfflineUtils.startOfflineMode()
       }
-      SegmentActions.setSegmentSaving(idSegment, true)
+      SegmentActions.setSegmentSaving(idSegment, false)
     })
 }
 const setTranslation_success = (response, item) => {
