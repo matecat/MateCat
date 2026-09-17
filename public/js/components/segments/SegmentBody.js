@@ -5,6 +5,7 @@ import SegmentWrapper from './SegmentWrapper'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
 import {isMacOS} from '../../utils/Utils'
+import ChevronRight from '../../../img/icons/ChevronRight'
 
 export const SegmentBody = ({onClick}) => {
   const {segment} = useContext(SegmentContext)
@@ -28,6 +29,7 @@ export const SegmentBody = ({onClick}) => {
             title="Copy source to target"
             onClick={(e) => copySource(e)}
           >
+            <ChevronRight size={40} />
             <p>{copySourceShortcuts.toUpperCase()}</p>
           </div>
 

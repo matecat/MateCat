@@ -31,36 +31,28 @@
 }
 .outersource .copy {
   display: none;
+  flex-direction: column;
+  align-items: center;
+  width: 48px;
   margin-top: 14px;
-  background: url(/public/img/outercopy.png) center 1px no-repeat;
-  width: 50px !important;
-  height: 60px;
   margin-left: 24px;
   z-index: 1;
-  background-size: 42px;
-  /*	opacity: 0.4;*/
-}
-
-.outersource .copy:hover {
-  background: url(/public/img/outercopy.png) 4px -69px no-repeat;
-  background-size: 42px;
+  color: colors.$blue500;
+  cursor: pointer;
 }
 
 .editor .outersource .copy {
-  display: block;
-  background-size: 42px;
+  display: flex;
 }
 
 .outersource .copy:hover {
-  cursor: pointer;
+  color: colors.$blue600;
 }
 
 .outersource .copy p {
   visibility: hidden;
   font-size: 11px;
   color: colors.$grey700;
-  margin-top: 46px;
-  margin-left: -4px;
 }
 
 .outersource .copy:hover p {
@@ -290,23 +282,6 @@ section.modified.editor .status {
 section.opened.editor .status {
   height: 100%;
   position: absolute;
-}
-@media only screen and (-webkit-min-device-pixel-ratio: 2),
-  only screen and (min--moz-device-pixel-ratio: 2),
-  only screen and (-o-min-device-pixel-ratio: 2/1),
-  only screen and (min-device-pixel-ratio: 2),
-  only screen and (min-resolution: 192dpi),
-  only screen and (min-resolution: 2dppx) {
-  .outersource .copy {
-    top: 7px;
-    background: url(/public/img/outercopy@2x.png) center 1px no-repeat;
-    background-size: 12px 11px;
-  }
-
-  .outersource .copy:hover {
-    background: url(/public/img/outercopy@2x.png) 4px -69px no-repeat;
-    background-size: 42px;
-  }
 }
 @-moz-document url-prefix() {
   .wrap {
