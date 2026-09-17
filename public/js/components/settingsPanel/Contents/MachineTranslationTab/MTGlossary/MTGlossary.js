@@ -237,35 +237,23 @@ export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
       updateRowsState(rows.map(({id, name}) => ({id, name, isActive: true})))
     }
 
-    if (config.ownerIsMe || !isCattoolPage) {
+    if (config.ownerIsMe) {
       getMMTKeys({engineId: id}).then((data) => {
         const items = [...data].reverse()
         if (!wasCleanup) {
-          if (!isCattoolPage) {
-            updateRowsState(
-              items.map(({name, id: idRow}) => {
-                const isActive = Array.isArray(glossaries)
-                  ? glossaries.some((value) => value === idRow)
-                  : false
+          updateRowsState(
+            items.map(({name, id: idRow}) => {
+              const isActive = Array.isArray(glossaries)
+                ? glossaries.some((value) => value === idRow)
+                : false
 
-                return {
-                  id: idRow,
-                  name,
-                  isActive,
-                }
-              }),
-            )
-          } else {
-            memories = items
-            CatToolStore.addListener(
-              CatToolConstants.GET_JOB_METADATA,
-              getJobMetadata,
-            )
-            CatToolActions.getJobMetadata({
-              idJob: config.id_job,
-              password: config.password,
-            })
-          }
+              return {
+                id: idRow,
+                name,
+                isActive,
+              }
+            }),
+          )
         }
       })
     }
@@ -277,33 +265,30 @@ export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
         getJobMetadata,
       )
     }
-  }, [id, isCattoolPage, updateRowsState])
+  }, [id, updateRowsState])
 
   useEffect(() => {
-    if (!isCattoolPage) {
-      const glossaries = activeGlossariesRef.current
+    const glossaries = activeGlossariesRef.current
 
-      updateRowsState((prevState) =>
-        Array.isArray(prevState)
-          ? prevState.map(({name, id: idRow}) => {
-              const isActive = Array.isArray(glossaries)
-                ? glossaries.some((value) => value === idRow)
-                : false
+    updateRowsState((prevState) =>
+      Array.isArray(prevState)
+        ? prevState.map(({name, id: idRow}) => {
+            const isActive = Array.isArray(glossaries)
+              ? glossaries.some((value) => value === idRow)
+              : false
 
-              return {
-                id: idRow,
-                name,
-                isActive,
-              }
-            })
-          : prevState,
-      )
-    }
-  }, [currentProjectTemplate.id, isCattoolPage, updateRowsState])
+            return {
+              id: idRow,
+              name,
+              isActive,
+            }
+          })
+        : prevState,
+    )
+  }, [currentProjectTemplate.id, updateRowsState])
 
   useEffect(() => {
     if (
-      isCattoolPage ||
       !rows ||
       (rows.length === 1 &&
         rows.some(({id}) => id === MT_GLOSSARY_CREATE_ROW_ID))
@@ -313,7 +298,7 @@ export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
     const rowsActive = rows.filter(({isActive}) => isActive).map(({id}) => id)
 
     setGlossaries(rowsActive)
-  }, [rows, isCattoolPage, modifyingCurrentTemplate, setGlossaries])
+  }, [rows, modifyingCurrentTemplate, setGlossaries])
 
   const addGlossary = () => {
     const row = {

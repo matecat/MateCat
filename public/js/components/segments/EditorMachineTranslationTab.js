@@ -32,7 +32,7 @@ export const EditorMachineTranslationTab = (props) => {
     const wasExtraPropChanges = propsExtra.some(
       (prop) =>
         typeof currentProjectTemplate.mt?.extra[prop] !== 'undefined' &&
-        typeof previousCurrentProjectTemplate.current?.mtExtra[prop] !==
+        typeof previousCurrentProjectTemplate.current?.mtExtra !==
           'undefined' &&
         currentProjectTemplate.mt?.extra[prop] !==
           previousCurrentProjectTemplate.current?.mtExtra[prop],
@@ -46,7 +46,13 @@ export const EditorMachineTranslationTab = (props) => {
     ) {
       updateJobMetadata({
         mtQualityValueInEditor: currentProjectTemplate.mtQualityValueInEditor,
-        mtExtra: mtExtraCurrentTemplate,
+        mtExtra: {
+          ...(Object.keys(mtExtraCurrentTemplate).some(
+            (value) =>
+              value === 'intento_provider' || value === 'intento_routing',
+          ) && {intento_provider: undefined, intento_routing: undefined}),
+          ...mtExtraCurrentTemplate,
+        },
       }).then(() => {
         const jobMetadata = CatToolStore.getJobMetadata()
         if (!jobMetadata) return

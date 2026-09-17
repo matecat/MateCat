@@ -35,7 +35,12 @@ export const updateJobMetadata = async ({
     mt_quality_value_in_editor: mtQualityValueInEditor,
     ...mtExtra,
   })
-    .filter(([, value]) => typeof value !== 'undefined')
+    .filter(
+      ([key, value]) =>
+        typeof value !== 'undefined' ||
+        (typeof value === 'undefined' &&
+          (key === 'intento_provider' || key === 'intento_routing')),
+    )
     .map(([key, value]) => ({key, value}))
 
   const response = await fetch(

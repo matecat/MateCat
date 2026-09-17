@@ -1,3 +1,11 @@
+// Wraps the raw {job, project} job-metadata payload so property access
+// transparently resolves overrides: a job-level value wins, falling back to
+// the project's value and then to any plain root-level field. When both
+// sides have a plain object at the same key (e.g. mt_extra), the two are
+// shallow-merged (job keys win) instead of one replacing the other outright.
+// Arrays are treated as plain values, never merged, so a job's own
+// mandatory_issues list replaces the project's rather than being combined
+// with it index-by-index.
 export class JobMetadataProxy {
   constructor(jobMetadata) {
     const root = this

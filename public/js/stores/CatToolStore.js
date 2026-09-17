@@ -140,6 +140,11 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
     this._currentProjectTemplate = currentProjectTemplate
   },
   setJobMetadata: function (jobMetadata) {
+    // The API returns metadata as {job, project}: job-level settings override
+    // the project's own defaults when a job scopes an MT/editor setting to
+    // itself. JobMetadataProxy exposes a flattened view so every consumer can
+    // read e.g. jobMetadata.mt_extra directly, without knowing or caring
+    // whether the value came from the job or fell back to the project.
     this.jobMetadata = new JobMetadataProxy(jobMetadata).proxy
   },
   getJobMetadata: function () {

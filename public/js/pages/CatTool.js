@@ -98,6 +98,7 @@ function CatTool() {
   const contextPreviewUrl = `${window.origin}/context-preview/${config.id_job}/${config.password}?source_code=${encodeURIComponent(config.source_code)}&target_code=${encodeURIComponent(config.target_code)}`
   const popupWindowRef = useRef(null)
   const previewDesiredOpenRef = useRef(false)
+  const isJobmetadataParsedOnInit = useRef(false)
 
   const togglePreview = useCallback(() => {
     setIsPreviewOpen((prev) => {
@@ -624,7 +625,11 @@ function CatTool() {
     Array.isArray(temporaryFakeTemplate.tm)
 
   useEffect(() => {
-    if (isFakeCurrentTemplateReady && typeof jobMetadata?.job !== 'undefined') {
+    if (
+      isFakeCurrentTemplateReady &&
+      typeof jobMetadata?.job !== 'undefined' &&
+      !isJobmetadataParsedOnInit.current
+    ) {
       const isValidPresetCharacterMode = Object.values(
         CHARS_SIZE_COUNTER_TYPES,
       ).some((value) => value === cattoolInterface.getCharacterCounterMode())
@@ -652,6 +657,8 @@ function CatTool() {
           ? jobMetadata.mandatory_issues
           : ['r1', 'r2'],
       }))
+
+      isJobmetadataParsedOnInit.current = true
     }
   }, [jobMetadata, isFakeCurrentTemplateReady, modifyingCurrentTemplate])
 
