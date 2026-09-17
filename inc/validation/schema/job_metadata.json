@@ -271,15 +271,18 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "key",
-          "value"
+          "key"
         ],
         "properties": {
           "key": {
             "const": "intento_provider"
           },
           "value": {
-            "type": "string",
+            "$comment": "Null is an answer, not an absence, and unlike `deepl_id_glossary` and `lara_style_guideline_id` this key cannot be cleared with DELETE /metadata/{key}. `intento_provider` and `intento_routing` are mutually exclusive and the provider outranks the routing, while the project row is written once at creation and never updated: dropping the job row would re-inherit the project's provider and silently discard the routing the job just chose. Null is stored as the empty string, the job scope's \"explicitly none\"; an empty string on the wire stays refused, exactly as it is for those two.",
+            "type": [
+              "string",
+              "null"
+            ],
             "minLength": 1,
             "maxLength": 255
           }
@@ -289,15 +292,18 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "key",
-          "value"
+          "key"
         ],
         "properties": {
           "key": {
             "const": "intento_routing"
           },
           "value": {
-            "type": "string",
+            "$comment": "Null is an answer, not an absence, and unlike `deepl_id_glossary` and `lara_style_guideline_id` this key cannot be cleared with DELETE /metadata/{key}. `intento_provider` and `intento_routing` are mutually exclusive and the provider outranks the routing, while the project row is written once at creation and never updated: dropping the job row would re-inherit the project's provider and silently discard the routing the job just chose. Null is stored as the empty string, the job scope's \"explicitly none\"; an empty string on the wire stays refused, exactly as it is for those two.",
+            "type": [
+              "string",
+              "null"
+            ],
             "minLength": 1,
             "maxLength": 255
           }

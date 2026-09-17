@@ -183,10 +183,15 @@ class Intento extends AbstractEngine
         $customProvider = $settings[JobsMetadataMarshaller::INTENTO_PROVIDER->value] ?? null;
         $customRouting = $settings[JobsMetadataMarshaller::INTENTO_ROUTING->value] ?? null;
 
-        if ($customProvider !== null) {
+        // !empty() rather than a null check, the same test IntentoEngineOptionsValidator makes: the
+        // column is NOT NULL and both marshallers cast these two keys with (string), so a job that
+        // cleared one holds an empty string, not a missing row. It has to, because the project row
+        // is written once at creation and never unwritten — dropping the job row would re-inherit
+        // the project's provider, and the provider outranks the routing right here.
+        if (!empty($customProvider)) {
             $parameters['service']['async'] = true;
             $parameters['service']['provider'] = $customProvider;
-        } elseif ($customRouting !== null and $customRouting !== "smart_routing") {
+        } elseif (!empty($customRouting) and $customRouting !== "smart_routing") {
             $parameters['service']['async'] = true;
             $parameters['service']['routing'] = "best_quality";
         }

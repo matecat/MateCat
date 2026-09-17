@@ -6,6 +6,7 @@ use Controller\API\App\JobMetadataController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Exception;
+use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
@@ -364,7 +365,144 @@ class JobMetadataControllerTest extends AbstractTest
             'empty mmt glossaries'    => ['mmt_glossaries', [], '[]'],
             'intento provider'        => ['intento_provider', 'ai.text.translate.google', 'ai.text.translate.google'],
             'intento routing'         => ['intento_routing', 'best_quality', 'best_quality'],
+            // These two alone accept null, and it is stored as the empty string. They are mutually
+            // exclusive and the provider outranks the routing, so picking a routing has to clear the
+            // provider in the same write; delete() cannot do it, because the project row is written
+            // once at creation and never unwritten, so dropping the job row re-inherits the
+            // project's provider and discards the routing the job just chose.
+            'cleared intento provider' => ['intento_provider', null, ''],
+            'cleared intento routing'  => ['intento_routing', null, ''],
         ];
+    }
+
+    /**
+     * JSON.stringify() drops a property whose value is undefined, so the editor clears a key by
+     * sending an item with no `value` at all rather than an explicit null. Both mean the same thing
+     * here, and neither may become the four-character string "null".
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    #[DataProvider('clearedIntentoKeyProvider')]
+    public function save_stores_an_omitted_intento_value_as_the_empty_string(string $key): void
+    {
+        $body = '[{"key":"' . $key . '"}]';
+
+        $this->setRequest([
+            'id_job' => (string)$this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ], $body, true);
+
+        $this->responseMock->expects($this->once())->method('json');
+
+        $this->controller->save();
+
+        $persisted = (new MetadataDao(obtainTestDatabase()))
+            ->get($this->jobId(self::BASE), self::JOB_PASSWORD, $key);
+
+        $this->assertNotNull($persisted, "'$key' was accepted but not persisted");
+        $this->assertSame('', $persisted->value);
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function clearedIntentoKeyProvider(): array
+    {
+        return [
+            'intento provider' => ['intento_provider'],
+            'intento routing'  => ['intento_routing'],
+        ];
+    }
+
+    /**
+     * The editor's own payload: pick a routing, clear the provider, in one write. This is the case
+     * the endpoint used to reject outright.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function save_accepts_one_intento_key_set_and_the_other_cleared(): void
+    {
+        $body = (string)json_encode([
+            ['key' => 'mt_quality_value_in_editor', 'value' => 88],
+            ['key' => 'intento_provider', 'value' => null],
+            ['key' => 'intento_routing', 'value' => 'best_quality'],
+        ]);
+
+        $this->setRequest([
+            'id_job' => (string)$this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ], $body, true);
+
+        $this->responseMock->expects($this->once())->method('json');
+
+        $this->controller->save();
+
+        $dao = new MetadataDao(obtainTestDatabase());
+
+        $this->assertSame('', $dao->get($this->jobId(self::BASE), self::JOB_PASSWORD, 'intento_provider')?->value);
+        $this->assertSame('best_quality', $dao->get($this->jobId(self::BASE), self::JOB_PASSWORD, 'intento_routing')?->value);
+    }
+
+    /**
+     * Intento takes a provider or a routing, never both: Intento::get() picks the provider whenever
+     * it is set, so a job holding both would silently ignore the routing. The same rule is enforced
+     * at project creation by IntentoEngineOptionsValidator.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function save_rejects_both_intento_keys_set_at_once(): void
+    {
+        $body = (string)json_encode([
+            ['key' => 'intento_provider', 'value' => 'ai.text.translate.google'],
+            ['key' => 'intento_routing', 'value' => 'best_quality'],
+        ]);
+
+        $this->setRequest([
+            'id_job' => (string)$this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ], $body, true);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Intento provider and routing cannot be set at the same time.');
+
+        $this->controller->save();
+    }
+
+    /**
+     * The exclusivity check runs before the first write, so a rejected payload leaves no half of
+     * itself behind.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function save_writes_nothing_when_the_intento_keys_conflict(): void
+    {
+        $body = (string)json_encode([
+            ['key' => 'lara_style', 'value' => 'creative'],
+            ['key' => 'intento_provider', 'value' => 'ai.text.translate.google'],
+            ['key' => 'intento_routing', 'value' => 'best_quality'],
+        ]);
+
+        $this->setRequest([
+            'id_job' => (string)$this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ], $body, true);
+
+        try {
+            $this->controller->save();
+            $this->fail('Expected the conflicting payload to be rejected');
+        } catch (InvalidArgumentException) {
+            // expected
+        }
+
+        $dao = new MetadataDao(obtainTestDatabase());
+
+        $this->assertNull($dao->get($this->jobId(self::BASE), self::JOB_PASSWORD, 'lara_style'));
+        $this->assertNull($dao->get($this->jobId(self::BASE), self::JOB_PASSWORD, 'intento_provider'));
+        $this->assertNull($dao->get($this->jobId(self::BASE), self::JOB_PASSWORD, 'intento_routing'));
     }
 
     /**
@@ -439,6 +577,12 @@ class JobMetadataControllerTest extends AbstractTest
             // these two are cleared.
             'empty glossary id'   => ['deepl_id_glossary', ''],
             'empty lara style guideline' => ['lara_style_guideline_id', ''],
+            // The Intento pair accepts null, not an empty string: null is the wire form and "" is
+            // only ever the stored one, so a client cannot post back what it read without meaning
+            // it. minLength applies to strings alone, which is what keeps these two rejected while
+            // the null above is accepted.
+            'empty intento provider' => ['intento_provider', ''],
+            'empty intento routing'  => ['intento_routing', ''],
             // mmt_glossaries holds MyMemory numeric ids, lara_glossaries opaque string ids.
             'mmt glossary strings' => ['mmt_glossaries', ['12']],
             'lara glossary ints'   => ['lara_glossaries', [12]],

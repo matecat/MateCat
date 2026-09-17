@@ -279,6 +279,64 @@ namespace Matecat\Core\Engines {
             self::assertSame('ai.text.translate.project.only', $parameters['service']['provider']);
         }
 
+        /**
+         * The regression the empty string exists for. A provider outranks a routing, and the project
+         * row is written once at creation and never unwritten, so deleting the job row would hand
+         * the project's provider back and discard the routing the job just chose. An empty job row
+         * is how the job says "no provider here", and it has to beat the project scope.
+         */
+        #[Test]
+        public function aClearedJobProviderLetsTheJobRoutingWin(): void
+        {
+            $parameters = $this->translateWithSeededSettings(
+                [JobsMetadataMarshaller::INTENTO_PROVIDER->value => 'ai.text.translate.project.only'],
+                [
+                    JobsMetadataMarshaller::INTENTO_PROVIDER->value => '',
+                    JobsMetadataMarshaller::INTENTO_ROUTING->value => 'best_price',
+                ],
+                ['job_id' => self::SETTINGS_JOB_ID]
+            );
+
+            self::assertArrayNotHasKey('provider', $parameters['service']);
+            self::assertSame('best_quality', $parameters['service']['routing']);
+            self::assertTrue($parameters['service']['async']);
+        }
+
+        /**
+         * A cleared provider with nothing put in its place is not a provider named "": Intento would
+         * answer that with an error for every segment of the job.
+         */
+        #[Test]
+        public function aClearedJobProviderSendsNoServiceBlock(): void
+        {
+            $parameters = $this->translateWithSeededSettings(
+                [JobsMetadataMarshaller::INTENTO_PROVIDER->value => 'ai.text.translate.project.only'],
+                [JobsMetadataMarshaller::INTENTO_PROVIDER->value => ''],
+                ['job_id' => self::SETTINGS_JOB_ID]
+            );
+
+            self::assertArrayNotHasKey('service', $parameters);
+        }
+
+        /**
+         * The mirror case: a job that picked a provider clears the project's routing.
+         */
+        #[Test]
+        public function aClearedJobRoutingLeavesOnlyTheJobProvider(): void
+        {
+            $parameters = $this->translateWithSeededSettings(
+                [JobsMetadataMarshaller::INTENTO_ROUTING->value => 'best_price'],
+                [
+                    JobsMetadataMarshaller::INTENTO_ROUTING->value => '',
+                    JobsMetadataMarshaller::INTENTO_PROVIDER->value => 'ai.text.translate.job.one',
+                ],
+                ['job_id' => self::SETTINGS_JOB_ID]
+            );
+
+            self::assertSame('ai.text.translate.job.one', $parameters['service']['provider']);
+            self::assertArrayNotHasKey('routing', $parameters['service']);
+        }
+
         #[Test]
         public function getMalformedPayloadReturnsErrorLikeResponse(): void
         {
