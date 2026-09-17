@@ -98,6 +98,9 @@ module.exports = {
         'public/js/components/segments/TooltipInfo/**/*.js',
         'public/js/components/segments/TagEntity/**/*.js',
         'public/js/components/segments/utils/DraftMatecatUtils/TagMenu/**/*.js',
+        'public/js/components/segments/SegmentCommentsContainer.js',
+        'public/js/components/segments/SegmentHeader.js',
+        'public/js/components/segments/SegmentsCommentsIcon.js',
       ],
       rules: {
         'no-restricted-syntax': [
