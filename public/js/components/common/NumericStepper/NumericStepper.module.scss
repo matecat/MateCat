@@ -29,6 +29,10 @@
       border: 1px solid colors.$grey400 !important;
       border-radius: 0 0 variables.$border-radius-default 0;
 
+      &:disabled {
+        border-color: colors.$grey200 !important;
+      }
+
       &:hover {
         background-color: colors.$grey50 !important;
       }

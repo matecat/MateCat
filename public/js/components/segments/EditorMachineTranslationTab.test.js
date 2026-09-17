@@ -27,16 +27,22 @@ const baseTemplate = {
   mt: {extra: {}},
 }
 
+let modifyingCurrentTemplate
+
 const renderComponent = (template = baseTemplate, props = {}) =>
   render(
-    <SettingsPanelContext.Provider value={{currentProjectTemplate: template}}>
+    <SettingsPanelContext.Provider
+      value={{currentProjectTemplate: template, modifyingCurrentTemplate}}
+    >
       <EditorMachineTranslationTab {...props} />
     </SettingsPanelContext.Provider>,
   )
 
 const reRenderComponent = (rerender, template, props = {}) =>
   rerender(
-    <SettingsPanelContext.Provider value={{currentProjectTemplate: template}}>
+    <SettingsPanelContext.Provider
+      value={{currentProjectTemplate: template, modifyingCurrentTemplate}}
+    >
       <EditorMachineTranslationTab {...props} />
     </SettingsPanelContext.Provider>,
   )
@@ -44,6 +50,7 @@ const reRenderComponent = (rerender, template, props = {}) =>
 beforeEach(() => {
   jest.clearAllMocks()
   global.config = {is_cattool: true}
+  modifyingCurrentTemplate = jest.fn()
   CatToolStore.getJobMetadata.mockReturnValue({
     job: {mt_quality_value_in_editor: 75, mt_extra: {}, other_job_field: 1},
     project: {other_project_field: 2},
@@ -62,6 +69,134 @@ describe('EditorMachineTranslationTab', () => {
       expect(screen.getByTestId('machine-translation-tab')).toHaveTextContent(
         JSON.stringify({isCattoolPage: true}),
       )
+    })
+  })
+
+  describe('intento double-key workaround', () => {
+    test('calls modifyingCurrentTemplate once on mount when mt.extra is defined', () => {
+      renderComponent()
+
+      expect(modifyingCurrentTemplate).toHaveBeenCalledTimes(1)
+      expect(modifyingCurrentTemplate).toHaveBeenCalledWith(
+        expect.any(Function),
+      )
+    })
+
+    test('does not call modifyingCurrentTemplate when CatToolStore has no job metadata yet', () => {
+      CatToolStore.getJobMetadata.mockReturnValue(undefined)
+
+      renderComponent()
+
+      expect(modifyingCurrentTemplate).not.toHaveBeenCalled()
+    })
+
+    test('runs only once even across re-renders', () => {
+      const {rerender} = renderComponent()
+      reRenderComponent(rerender, {...baseTemplate, mtQualityValueInEditor: 90})
+      reRenderComponent(rerender, {...baseTemplate, mtQualityValueInEditor: 95})
+
+      expect(modifyingCurrentTemplate).toHaveBeenCalledTimes(1)
+    })
+
+    const runUpdater = (prevExtra) => {
+      const updater = modifyingCurrentTemplate.mock.calls[0][0]
+      return updater({mt: {id: 1, extra: prevExtra}})
+    }
+
+    test('keeps the job intento_provider when both job keys are set', () => {
+      CatToolStore.getJobMetadata.mockReturnValue({
+        job: {
+          mt_extra: {
+            intento_provider: 'job-provider',
+            intento_routing: 'job-routing',
+          },
+        },
+        project: {},
+      })
+      renderComponent()
+
+      const result = runUpdater({
+        intento_provider: 'stale',
+        intento_routing: 'stale',
+        lara_style: 'faithful',
+      })
+
+      expect(result.mt.extra).toEqual({
+        lara_style: 'faithful',
+        intento_provider: 'job-provider',
+      })
+    })
+
+    test('falls back to the job intento_routing when the job provider is empty', () => {
+      CatToolStore.getJobMetadata.mockReturnValue({
+        job: {mt_extra: {intento_provider: '', intento_routing: 'job-routing'}},
+        project: {},
+      })
+      renderComponent()
+
+      const result = runUpdater({intento_provider: 'stale'})
+
+      expect(result.mt.extra).toEqual({intento_routing: 'job-routing'})
+    })
+
+    test('falls back to the project intento_provider when neither job key is set', () => {
+      CatToolStore.getJobMetadata.mockReturnValue({
+        job: {mt_extra: {}},
+        project: {mt_extra: {intento_provider: 'project-provider'}},
+      })
+      renderComponent()
+
+      const result = runUpdater({})
+
+      expect(result.mt.extra).toEqual({intento_provider: 'project-provider'})
+    })
+
+    test('falls back to the project intento_routing as a last resort', () => {
+      CatToolStore.getJobMetadata.mockReturnValue({
+        job: {mt_extra: {}},
+        project: {mt_extra: {intento_routing: 'project-routing'}},
+      })
+      renderComponent()
+
+      const result = runUpdater({})
+
+      expect(result.mt.extra).toEqual({intento_routing: 'project-routing'})
+    })
+
+    test('drops both intento keys when neither job nor project has one set', () => {
+      CatToolStore.getJobMetadata.mockReturnValue({
+        job: {mt_extra: {}},
+        project: {mt_extra: {}},
+      })
+      renderComponent()
+
+      const result = runUpdater({
+        intento_provider: 'stale',
+        lara_style: 'faithful',
+      })
+
+      expect(result.mt.extra).toEqual({lara_style: 'faithful'})
+    })
+
+    test('preserves the rest of prevTemplate untouched', () => {
+      CatToolStore.getJobMetadata.mockReturnValue({
+        job: {mt_extra: {}},
+        project: {},
+      })
+      renderComponent()
+
+      const updater = modifyingCurrentTemplate.mock.calls[0][0]
+      const result = updater({
+        id: 9,
+        mtQualityValueInEditor: 80,
+        mt: {id: 1, extra: {}},
+      })
+
+      expect(result).toMatchObject({
+        id: 9,
+        mtQualityValueInEditor: 80,
+        mt: {id: 1},
+      })
     })
   })
 

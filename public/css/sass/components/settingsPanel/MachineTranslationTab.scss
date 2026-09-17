@@ -616,7 +616,11 @@
       align-items: center;
       gap: 4px;
 
-      &:hover {
+      &:disabled {
+        cursor: default;
+      }
+
+      &:hover:not(:disabled) {
         text-decoration: underline;
       }
 

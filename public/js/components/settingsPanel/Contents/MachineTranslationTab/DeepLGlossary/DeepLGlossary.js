@@ -206,17 +206,6 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
     let wasCleanup = false
 
     const glossaryId = activeGlossaryRef.current
-    let glossariesFromJobMetadata = []
-    const getJobMetadata = ({jobMetadata}) => {
-      const rows = glossariesFromJobMetadata.filter(
-        ({glossary_id}) =>
-          jobMetadata.mt_extra.deepl_id_glossary === glossary_id,
-      )
-
-      updateRowsState(
-        rows.map(({glossary_id: id, name}) => ({id, name, isActive: true})),
-      )
-    }
 
     getDeepLGlosssaries({engineId: id}).then(({glossaries}) => {
       const items = [...glossaries].reverse()
@@ -238,10 +227,6 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
 
     return () => {
       wasCleanup = true
-      CatToolStore.removeListener(
-        CatToolConstants.GET_JOB_METADATA,
-        getJobMetadata,
-      )
     }
   }, [id, updateRowsState])
 

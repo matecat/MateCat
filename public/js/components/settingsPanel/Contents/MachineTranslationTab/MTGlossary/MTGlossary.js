@@ -229,43 +229,30 @@ export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
     let wasCleanup = false
 
     const glossaries = activeGlossariesRef.current
-    let memories = []
-    const getJobMetadata = ({jobMetadata}) => {
-      const rows = memories.filter(({id}) =>
-        jobMetadata.mt_extra.mmt_glossaries?.some((value) => value === id),
-      )
-      updateRowsState(rows.map(({id, name}) => ({id, name, isActive: true})))
-    }
 
-    if (config.ownerIsMe || !isCattoolPage) {
-      getMMTKeys({engineId: id}).then((data) => {
-        const items = [...data].reverse()
-        if (!wasCleanup) {
-          updateRowsState(
-            items.map(({name, id: idRow}) => {
-              const isActive = Array.isArray(glossaries)
-                ? glossaries.some((value) => value === idRow)
-                : false
+    getMMTKeys({engineId: id}).then((data) => {
+      const items = [...data].reverse()
+      if (!wasCleanup) {
+        updateRowsState(
+          items.map(({name, id: idRow}) => {
+            const isActive = Array.isArray(glossaries)
+              ? glossaries.some((value) => value === idRow)
+              : false
 
-              return {
-                id: idRow,
-                name,
-                isActive,
-              }
-            }),
-          )
-        }
-      })
-    }
+            return {
+              id: idRow,
+              name,
+              isActive,
+            }
+          }),
+        )
+      }
+    })
 
     return () => {
       wasCleanup = true
-      CatToolStore.removeListener(
-        CatToolConstants.GET_JOB_METADATA,
-        getJobMetadata,
-      )
     }
-  }, [id, isCattoolPage, updateRowsState])
+  }, [id, updateRowsState])
 
   useEffect(() => {
     const glossaries = activeGlossariesRef.current
