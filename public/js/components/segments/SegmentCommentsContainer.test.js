@@ -360,6 +360,21 @@ describe('SegmentCommentsContainer', () => {
     expect(container).toHaveTextContent('hello there')
   })
 
+  // CommentsStore returns the array it stores and pushes into it, so the
+  // reference never changes. Resolving a thread has no other state change to
+  // ride on, so a component that trusts the reference never repaints it.
+  test('a thread resolved in place still repaints', () => {
+    const thread = [buildComment()]
+    CommentsStore.getCommentsBySegment.mockReturnValue(thread)
+    const {container} = renderContainer()
+    expect(container).not.toHaveTextContent('marked as resolved')
+
+    thread.push(buildComment({id: 2, thread_id: 1, message_type: '2'}))
+    emitStoreEvent('ADD_COMMENT', '1')
+
+    expect(container).toHaveTextContent('marked as resolved')
+  })
+
   test('a comment added to another segment is ignored', () => {
     const {container} = renderContainer()
 

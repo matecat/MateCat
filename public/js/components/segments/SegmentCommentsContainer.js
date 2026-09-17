@@ -31,9 +31,13 @@ const SegmentCommentsContainer = () => {
 
   const localStorageKey = 'anonymous-comments' + userInfo?.user.uid
 
-  const [comments, setComments] = useState(() =>
-    CommentsStore.getCommentsBySegment(originalSid),
-  )
+  // CommentsStore hands out the very array it stores and mutates it in place
+  // (adding and resolving both push into it), so every read is copied here.
+  // Without the copy setComments would be handed the reference it already has,
+  // React would skip the render, and a resolved thread would never repaint.
+  const [comments, setComments] = useState(() => [
+    ...CommentsStore.getCommentsBySegment(originalSid),
+  ])
   const [teamUsers, setTeamUsers] = useState(() => CommentsStore.getTeamUsers())
   const [sendCommentError, setSendCommentError] = useState(false)
   const [mentionsInputValue, setMentionsInputValue] = useState('')
@@ -67,7 +71,7 @@ const SegmentCommentsContainer = () => {
         isUndefined(updatedSid) ||
         parseInt(updatedSid) === parseInt(originalSid)
       ) {
-        setComments(CommentsStore.getCommentsBySegment(originalSid))
+        setComments([...CommentsStore.getCommentsBySegment(originalSid)])
       }
     }
     const setFocusOnInput = () => commentInputRef.current.focus()
@@ -262,7 +266,7 @@ const SegmentCommentsContainer = () => {
             size={BUTTON_SIZE.ICON_XSMALL}
             onClick={deleteComment}
           >
-            <Trash />
+            <Trash size={20} />
           </Button>
         ) : (
           ''
@@ -320,7 +324,7 @@ const SegmentCommentsContainer = () => {
           size={BUTTON_SIZE.SMALL}
           onClick={resolveThread}
         >
-          <Check /> Resolve
+          <Check size={16} /> Resolve
         </Button>
       )
     }
@@ -364,7 +368,7 @@ const SegmentCommentsContainer = () => {
           className="comment-close-btn"
           onClick={closeComments}
         >
-          <IconClose />
+          <IconClose size={10} />
         </Button>
         <div className="comments-wrap" ref={wrapRef}>
           {htmlComments}
