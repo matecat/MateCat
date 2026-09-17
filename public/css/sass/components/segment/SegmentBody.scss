@@ -33,6 +33,9 @@
   display: none;
   flex-direction: column;
   align-items: center;
+  /* .outersource is a flex row: without this the box stretches to the full
+     segment height and the empty gutter below the icon stays clickable. */
+  align-self: flex-start;
   width: 48px;
   margin-top: 14px;
   margin-left: 24px;
