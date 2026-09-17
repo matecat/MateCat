@@ -59,9 +59,13 @@ It opens by stating which environment it is on and what it verified, writes its 
 *before* touching the browser, then reports each bug the moment it finds it — severity label,
 score, steps to reproduce, expected vs. actual — and closes with a summary table.
 
+At the end it offers to file the confirmed bugs into the **Matecat team backlog** on Asana, in the
+*🔎 New requests to analyze* section, with priority and type set from the severity it scored. It
+always shows you the task first and files nothing without a yes.
+
 Two things it deliberately will not do. It will not report something as a bug when it cannot point
 at a source of truth for the expected behaviour; those are labelled `[OBSERVATION]` so you can tell
-them apart at a glance. And it will not write a Playwright spec — this repo has no browser test
+them apart at a glance — and those are never filed. And it will not write a Playwright spec — this repo has no browser test
 harness, so regression tests go to Jest or PHPUnit where they will actually run.
 
 ## Golden rule: always use the real browser
@@ -291,11 +295,14 @@ or *"test project creation with this XLIFF file"*):
    everything to the end.
 5. **For `[CRITICAL]`/`[HIGH]` bugs, write the regression test** — see "Regression artifact".
    `[MEDIUM]`/`[LOW]` are reported but not auto-spec'd unless asked.
-6. **Re-check the deployed ref** recorded in pre-flight. On a repo that is pulled and switched
+6. **Offer to file eligible findings** to the Asana board — see "Filing to Asana". Draft each
+   task, show it, and create only on a yes. Never file an `[OBSERVATION]`, and never file a
+   finding whose cause turned out to be environmental.
+7. **Re-check the deployed ref** recorded in pre-flight. On a repo that is pulled and switched
    during the working day, the tree can move underneath a run — if the SHA changed, say so in the
    report and mark which findings predate the change rather than quietly presenting them as
    current.
-7. **Clean up** (mandatory on `staging`), then close with the summary table.
+8. **Clean up** (mandatory on `staging`), then close with the summary table.
 
 **Stop condition.** The checklist is the budget. When it is exhausted — or when a reasonable
 budget of edge cases per item is spent — stop and report. Do not wander. If you believe the
@@ -381,6 +388,116 @@ Anything without an oracle is reported as `[OBSERVATION]` and is **not** scored.
 
 | Feature | Status | Notes |
 |---|---|---|
+
+## Filing to Asana
+
+Confirmed findings can be filed to the team board. **Never file without showing the draft and
+getting a yes** — the same gate this skill applies to `production` and to staging's disruptive
+checks, and for the same reason: a task on a shared board is visible to colleagues and costs
+someone's attention.
+
+### Target
+
+| | |
+|---|---|
+| project | `1134617950425092` — **Matecat team backlog** |
+| section | `1201629208199506` — **🔎 New requests to analyze** (intake; never file straight into a sprint column) |
+
+Use `mcp__claude_ai_Asana__create_tasks` with `project_id`, `section_id` and `custom_fields`.
+`create_task_preview_v4` renders a confirmation widget instead, which is only useful in a
+widget-capable client — in a terminal, draft as text and ask.
+
+### What may be filed
+
+| severity | action |
+|---|---|
+| `[CRITICAL]` `[HIGH]` `[MEDIUM]` | eligible — draft a task, ask, file on yes |
+| `[LOW]` | report only; file only if the user asks for it by name |
+| `[OBSERVATION]` | **never** — it has no oracle, so there is nothing to assert |
+
+**Never file a finding whose cause is environmental.** A stale daemon, a disconnected VPN, an
+unreachable `*.ajax.dev.matecat.com`, a bundle older than the source — pre-flight exists to catch
+these, and they are extremely convincing before they are diagnosed. Filing one sends a colleague
+hunting a class that does not exist.
+
+**Group copy-contract findings.** Sentence-case violations land at `[MEDIUM]`, and a thorough sweep
+finds many. File **one** task per run with a checklist of the strings, never one task per string.
+
+### Check for a duplicate first
+
+Search before drafting, with `mcp__claude_ai_Asana__search_tasks`
+(`projects_any: "1134617950425092"`, `completed: false`) on the file path and the symptom.
+
+- **Match found** → do not create a second task. Offer to add a comment
+  (`mcp__claude_ai_Asana__add_comment`) confirming it still reproduces, naming the tier and the
+  commit SHA. Ask first; a comment notifies followers.
+- **No match** → draft a new task.
+
+### Custom fields
+
+Values are **option GIDs**, not display names. `custom_fields` takes a JSON string.
+
+**T-Priority** `1201742199425152` — from the severity label:
+
+| severity | option | gid |
+|---|---|---|
+| `[CRITICAL]` | P1 - Critical | `1201742199425154` |
+| `[HIGH]` | P2 - High | `1201742199425155` |
+| `[MEDIUM]` | P3 - Medium | `1201742199425156` |
+| `[LOW]` | P4 - Low | `1201742199425157` |
+
+**Never set P0 - Emergency** (`1201742199425153`). P0 means a production incident, and this skill
+is barred from production — it cannot have observed one. A human escalates to P0.
+
+**T-Ticket Type** `1204338065427320`:
+
+| when | option | gid |
+|---|---|---|
+| the SECURITY floor applied | Security vulnerability | `1205292687981011` |
+| everything else | Bug | `1204338065427321` |
+
+**Dept** `1134617950422935` — the same layer decision already made to route the regression test:
+
+| finding lives in | option | gid |
+|---|---|---|
+| `public/js/**` | FE | `1134617950422937` |
+| `lib/**`, `daemons/**`, `plugins/*/lib/**` | BE | `1134617950422936` |
+| both | BE + FE | `1134617950422938` |
+| cannot tell | ? | `1203654908152660` |
+
+Leave **Impact**, **T-Progress**, **Days** and **Additional tests required** unset — those are
+triage and planning fields, and guessing at them is worse than leaving a human to fill them in.
+
+### Task shape
+
+Title — no severity prefix, the field carries it:
+
+```
+Support mailto link is a literal string, not interpolated (AnalyzeHeader.js:191,205)
+```
+
+Body (`notes`, or `html_notes` for formatting):
+
+```
+Severity     MEDIUM — score 20 (IMPACT 2 × REPRODUCIBILITY 5 × SURFACE 2), no floor applied
+Oracle       line 34 of the same file uses the correct form
+Environment  local · develop @ 43c500cc · found by the beta-tester skill
+
+Steps to reproduce
+  1. …
+
+Expected     …
+Actual       …
+
+Evidence
+  DOM: href="mailto: + config.support_mail + "
+  shipped in public/build/analyze.DQm_fDVG.js
+```
+
+Always state the score with its factors and any floor, the oracle, and the tier plus commit SHA —
+a finding whose environment is unrecorded cannot be re-checked later.
+
+Report the created task's URL back, shape `app.asana.com/0/<project_gid>/<task_gid>`.
 
 ## Bug prioritization model
 
