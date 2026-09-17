@@ -133,7 +133,7 @@ describe('EditorMachineTranslationTab', () => {
       })
     })
 
-    test('does not call updateJobMetadata when a tracked mt.extra value is newly set (was previously undefined)', () => {
+    test('calls updateJobMetadata when a tracked mt.extra value is newly set (was previously undefined)', () => {
       const initialTemplate = {...baseTemplate, mt: {extra: {}}}
       const {rerender} = renderComponent(initialTemplate)
       reRenderComponent(rerender, {
@@ -141,7 +141,11 @@ describe('EditorMachineTranslationTab', () => {
         mt: {extra: {lara_style: 'faithful'}},
       })
 
-      expect(updateJobMetadata).not.toHaveBeenCalled()
+      expect(updateJobMetadata).toHaveBeenCalledTimes(1)
+      expect(updateJobMetadata).toHaveBeenCalledWith({
+        mtQualityValueInEditor: 75,
+        mtExtra: {lara_style: 'faithful'},
+      })
     })
   })
 
