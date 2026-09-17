@@ -6,9 +6,7 @@
 }
 .text .source.item,
 .text .target.item {
-  width: 45%;
   table-layout: fixed;
-  float: left;
   padding: 3px 16px;
   text-align: left;
   list-style: none;
@@ -16,6 +14,19 @@
   outline: none;
   line-height: 23px;
   word-break: break-word;
+}
+
+/* The columns of .outersource: the source, the target, and — once a segment is
+   split — the splitContainer that takes the source's place. Sizing them with
+   flex rather than fixed percentages keeps the two sides equal and leaves no
+   remainder at any width. The percentages only added up at >= 1600px; at 1440px
+   they left 54px unused to the right of the target, and 30px at 1280px, because
+   none of them accounted for the fixed-width copy column between them. */
+.outersource > .source.item,
+.outersource > .splitContainer,
+.outersource > .target.item {
+  flex: 1 1 0;
+  min-width: 0;
 }
 .text a {
   text-color: colors.$black;
@@ -38,7 +49,10 @@
   align-self: flex-start;
   width: 48px;
   margin-top: 14px;
-  margin-left: 24px;
+  /* Split evenly so the chevron sits in the middle of the gap between the
+     columns rather than flush against the target. */
+  margin-left: 12px;
+  margin-right: 12px;
   z-index: 1;
   color: colors.$blue500;
   cursor: pointer;
@@ -119,7 +133,7 @@ section.opened {
   width: 100%;
   min-height: 54px;
   resize: none;
-  margin: 2px 0 0px -11px;
+  margin: 2px 0 0px;
   padding: 5px;
   color: colors.$grey700;
   border: 1px solid transparent;
@@ -153,7 +167,7 @@ section.readonly .status-container a.status:hover {
 .editor .editarea {
   width: 100%;
   font-size: variables.$font-size-base;
-  margin: 2px 0 0px -11px;
+  margin: 2px 0 0px;
   word-break: normal;
   line-height: 25px;
   outline: none;
@@ -297,37 +311,9 @@ section.opened.editor .status {
     padding-bottom: 8px !important;
   }
 }
-@media screen and (min-width: 1600px) {
-  .text .source.item,
-  .text .target.item,
-  .splitContainer {
-    width: 48% !important;
-  }
-}
-@media screen and (max-width: 1280px) {
-  .text .source.item,
-  .text .target.item {
-    width: 45% !important;
-  }
-
-  .target.item {
-    margin-left: 10px !important;
-  }
-}
-@media screen and (max-width: 1260px) {
-  .text .item {
-    width: 44.5% !important;
-  }
-}
 @media screen and (max-width: 1180px) {
   .text .target {
     padding-left: 45px;
-  }
-
-  .text .source.item,
-  .text .target.item,
-  .splitContainer {
-    width: 44% !important;
   }
 }
 
