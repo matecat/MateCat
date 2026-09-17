@@ -377,6 +377,16 @@ describe('segment history toggle', () => {
     ).toBeInTheDocument()
   })
 
+  test('shows the toggle even when no QA section is open', () => {
+    // The toggle used to live inside the isQaVisible block, so a segment with
+    // real history but no issues and no warnings offered no way to reach it.
+    renderComponent({history: [historyEvent('TRANSLATED')]})
+
+    expect(
+      screen.getByRole('button', {name: /open history/i}),
+    ).toBeInTheDocument()
+  })
+
   test('hides the toggle when there is no history at all', () => {
     renderWithHistory([])
 

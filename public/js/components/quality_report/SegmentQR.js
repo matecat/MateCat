@@ -283,6 +283,28 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
     [segment],
   )
 
+  // The toggle is shown inside the QA row when that row is on screen, and on a
+  // row of its own when it is not: the history does not depend on QA being open.
+  const historyToggle =
+    segmentHistory.length > 0 ? (
+      <div style={{alignSelf: 'center', marginRight: 24, marginLeft: 'auto'}}>
+        {!showHistory ? (
+          <Button onClick={() => setShowHistory(true)} size={BUTTON_SIZE.SMALL}>
+            Open history
+            <ChevronDown size={16} />
+          </Button>
+        ) : (
+          <Button
+            onClick={() => setShowHistory(false)}
+            size={BUTTON_SIZE.SMALL}
+          >
+            Close history
+            <ChevronUp size={16} />
+          </Button>
+        )}
+      </div>
+    ) : null
+
   const renderSegmentHistory = () => {
     return segmentHistory.map((elem, index) => {
       return (
@@ -578,28 +600,11 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
                 </div>
               )}
             </div>
-            <div style={{alignSelf: 'center', marginRight: 24}}>
-              {segmentHistory.length > 0 ? (
-                !showHistory ? (
-                  <Button
-                    onClick={() => setShowHistory(true)}
-                    size={BUTTON_SIZE.SMALL}
-                  >
-                    Open history
-                    <ChevronDown size={16} />
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => setShowHistory(false)}
-                    size={BUTTON_SIZE.SMALL}
-                  >
-                    Close history
-                    <ChevronUp size={16} />
-                  </Button>
-                )
-              ) : null}
-            </div>
+            {historyToggle}
           </div>
+        )}
+        {!isQaVisible && segmentHistory.length > 0 && (
+          <div className="segment-container qr-issues">{historyToggle}</div>
         )}
         {segmentHistory.length > 0 && showHistory && (
           <div className="qr-history">{renderSegmentHistory()}</div>
