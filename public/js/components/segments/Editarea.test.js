@@ -1046,3 +1046,31 @@ describe('the tag decorator sees the current segment', () => {
     expect(mockTagProps.getUpdatedSegmentInfo()).toMatchObject({sid: '12-9'})
   })
 })
+
+// Editarea takes four props from SegmentTarget, and toggleFormatMenu is the one
+// it never reads as `props.toggleFormatMenu` — it pulls it out of
+// liveRef.current.props by destructuring, which is why a sweep looking for
+// dot-access missed it and the destructured signature dropped it in 3c8aa2849c.
+//
+// With the prop missing, every mouse-up in the target threw before it could
+// report the selection, so the format menu never appeared and the AI
+// alternatives button never activated. The whole suite passed regardless: the
+// old tests never fired a mouse-up at the editor.
+describe('the format menu follows the selection', () => {
+  test('mouse up reports whether anything is selected', () => {
+    const {container, toggleFormatMenu} = mountEditarea({translation: 'ciao'})
+
+    fireEvent.mouseUp(editorNode(container))
+
+    expect(toggleFormatMenu).toHaveBeenCalledWith(expect.any(Boolean))
+  })
+
+  test('blurring the editor closes the format menu', () => {
+    const {container, toggleFormatMenu} = mountEditarea({translation: 'ciao'})
+    toggleFormatMenu.mockClear()
+
+    fireEvent.blur(editorNode(container))
+
+    expect(toggleFormatMenu).toHaveBeenCalledWith(false)
+  })
+})
