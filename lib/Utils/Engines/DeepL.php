@@ -4,7 +4,8 @@ namespace Utils\Engines;
 
 use DomainException;
 use Exception;
-use Model\Projects\MetadataDao;
+use Model\Jobs\JobSettingsResolver;
+use Model\Jobs\JobsMetadataMarshaller;
 use TypeError;
 use Utils\Engines\DeepL\DeepLApiClient;
 use Utils\Engines\DeepL\DeepLApiException;
@@ -106,12 +107,30 @@ class DeepL extends AbstractEngine
             throw new Exception("DeepL API key not set");
         }
 
-        // glossaries (only for DeepL)
-        $metadataDao = new MetadataDao($this->database);
-        // null coalescing operator is used to avoid errors when validating the engine for the first time
-        $deepLFormality = $metadataDao->setCacheTTL(86400)->getValue($_config['pid'], 'deepl_formality');
-        $deepLIdGlossary = $metadataDao->setCacheTTL(86400)->getValue($_config['pid'], 'deepl_id_glossary');
-        $deepLEngineType = $metadataDao->setCacheTTL(86400)->getValue($_config['pid'], 'deepl_engine_type');
+        // Settings (formality, glossary, engine type) live on the job so the project owner can
+        // change them after creation, and fall back to project metadata for projects created
+        // before the move. Resolved in one pass rather than one lookup per key: this runs once per
+        // segment on the MT path.
+        // A key missing from both scopes stays null, which is also what happens while validating
+        // the engine for the first time (no job and no real project yet).
+        $settings = (new JobSettingsResolver($this->database))->resolveManyFromEngineConfig(
+            $_config,
+            [
+                JobsMetadataMarshaller::DEEPL_FORMALITY->value,
+                JobsMetadataMarshaller::DEEPL_ID_GLOSSARY->value,
+                JobsMetadataMarshaller::DEEPL_ENGINE_TYPE->value,
+            ]
+        );
+
+        $deepLFormality = $settings[JobsMetadataMarshaller::DEEPL_FORMALITY->value] ?? null;
+        $deepLEngineType = $settings[JobsMetadataMarshaller::DEEPL_ENGINE_TYPE->value] ?? null;
+
+        // A job that picked "none" in the glossary list stores the empty string: the job scope's
+        // "explicitly none", which shadows the glossary the project was created with. DeepL is told
+        // about it the same way a job with no glossary at all is — with a null id, never with an
+        // empty one, which is not a glossary id it could resolve.
+        $storedIdGlossary = $settings[JobsMetadataMarshaller::DEEPL_ID_GLOSSARY->value] ?? null;
+        $deepLIdGlossary = !empty($storedIdGlossary) ? (string)$storedIdGlossary : null;
 
         $parameters = [
             'text' => [

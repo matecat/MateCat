@@ -14,6 +14,8 @@ use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Model\Engines\Structs\MMTStruct;
 use Model\Jobs\JobDao;
+use Model\Jobs\JobSettingsResolver;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
@@ -308,12 +310,17 @@ class Lara extends AbstractEngine
 
                 $translateOptions->setHeaders($headers->getArrayCopy());
 
-                if (!empty($_config['id_project'])) {
-                    $laraGlossaries = $metadataDao->setCacheTTL(86400)->getValue($_config['id_project'], ProjectsMetadataMarshaller::LARA_GLOSSARIES->value);
+                // Glossaries are overridable per job so the project owner can change them after
+                // creation, falling back to the project's creation-time value where they were not.
+                $laraGlossaries = (new JobSettingsResolver($this->database))
+                    ->resolveFromEngineConfig($_config, JobsMetadataMarshaller::LARA_GLOSSARIES->value);
 
-                    if ($laraGlossaries !== null) {
-                        $translateOptions->setGlossaries($laraGlossaries);
-                    }
+                // A job stores `[]` to shadow a project that has glossaries, so the guard here is
+                // what turns that override into an omitted parameter: the SDK forwards whatever
+                // getGlossaries() returns, and `[]` would go out as "glossaries": []. It also covers
+                // a legacy project row the marshaller could not decode, which arrives as null.
+                if (!empty($laraGlossaries)) {
+                    $translateOptions->setGlossaries($laraGlossaries);
                 }
 
                 if ($laraStyle !== null) {

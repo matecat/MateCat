@@ -11,6 +11,7 @@ use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Xliff\DTO\XliffRulesModel;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Logger\MatecatLogger;
 
@@ -330,21 +331,131 @@ class SaveMetadataTest extends AbstractTest
     }
 
     // =========================================================================
-    // Engine extra keys (mmt_glossaries, deepl_formality, etc.)
+    // Engine extra keys (enable_mt_analysis, mmt_activate_context_analyzer)
     // =========================================================================
 
     #[Test]
-    public function testEngineExtraKeysArePersistedFromProjectStructure(): void
+    public function testProjectWideEngineExtraKeysArePersistedFromProjectStructure(): void
     {
-        $this->projectStructure->mmt_glossaries = 'glossary_123';
-        $this->projectStructure->deepl_formality = 'more';
-        $this->projectStructure->lara_style = 'formal';
+        $this->projectStructure->enable_mt_analysis = '1';
+        $this->projectStructure->mmt_activate_context_analyzer = '1';
 
         $this->service->save($this->projectStructure, $this->features);
 
-        self::assertSame('glossary_123', $this->getPersistedValue('mmt_glossaries'));
-        self::assertSame('more', $this->getPersistedValue('deepl_formality'));
-        self::assertSame('formal', $this->getPersistedValue('lara_style'));
+        self::assertSame('1', $this->getPersistedValue('enable_mt_analysis'));
+        self::assertSame('1', $this->getPersistedValue('mmt_activate_context_analyzer'));
+    }
+
+    /**
+     * The MT tuning settings are written here as the project's creation-time base value. The owner's
+     * later edits go to job metadata and win on read (@see \Model\Jobs\JobSettingsResolver), so
+     * the two scopes are copy-on-write: this row is what every job that was never customised
+     * resolves to, and it is what a revert of the job scope falls back on.
+     */
+    #[Test]
+    #[DataProvider('jobScopedMtSettingProvider')]
+    public function testMtSettingsArePersistedAtProjectLevelAsTheBaseValue(string $key, mixed $value, string $expected): void
+    {
+        $this->projectStructure->$key = $value;
+
+        $this->service->save($this->projectStructure, $this->features);
+
+        self::assertSame(
+            $expected,
+            $this->getPersistedValue($key),
+            "'$key' is the creation-time base value and must be written to project metadata"
+        );
+    }
+
+    /**
+     * @return array<string, array{string, mixed, string}>
+     */
+    public static function jobScopedMtSettingProvider(): array
+    {
+        // ProjectStructure declares these with real types, so the input has to be type-appropriate
+        // and the expectation is the string the DAO is handed. mmt_ignore_glossary_case is the one
+        // that is not a string: it is ?bool, and the write normalises it to '1'/'0'.
+        $inputs = [
+            JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE->value => [true, '1'],
+        ];
+
+        $cases = [];
+
+        foreach (JobsMetadataMarshaller::mtSettings() as $key) {
+            // The threshold is the only one that does not exist as a ProjectStructure property: it
+            // travels inside the metadata blob, and the test below covers it on its own.
+            if ($key === JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) {
+                continue;
+            }
+
+            [$value, $expected] = $inputs[$key] ?? ['some_value', 'some_value'];
+            $cases[$key] = [$key, $value, $expected];
+        }
+
+        return $cases;
+    }
+
+    #[Test]
+    public function testMtQualityValueInEditorIsPersistedAtProjectLevel(): void
+    {
+        // Unlike the engine parameters this one reaches the service inside the metadata blob, so it
+        // rides through on $options rather than through the engine-key copy loop.
+        $this->projectStructure->metadata = [
+            ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '90',
+        ];
+
+        $this->service->save($this->projectStructure, $this->features);
+
+        self::assertSame(
+            '90',
+            $this->getPersistedValue(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value),
+            'the MT application threshold is the creation-time base value'
+        );
+    }
+
+    /**
+     * The guard the eager per-job write used to own, now that these keys go through the project
+     * write again. `!empty()` is right for the project-wide engine params — there, falsy is the
+     * absent default — but for the MT settings a threshold of 0 and mmt_ignore_glossary_case turned
+     * off are answers the owner chose, and dropping them silently reverts to the engine default.
+     */
+    #[Test]
+    public function testFalsyMtSettingsAreStillPersisted(): void
+    {
+        $this->projectStructure->mmt_ignore_glossary_case = false;
+        $this->projectStructure->metadata = [
+            ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '0',
+        ];
+
+        $this->service->save($this->projectStructure, $this->features);
+
+        self::assertSame(
+            '0',
+            $this->getPersistedValue(JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE->value),
+            'mmt_ignore_glossary_case = false is an answer, not an absence'
+        );
+        self::assertSame(
+            '0',
+            $this->getPersistedValue(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value),
+            'a threshold of 0 is an answer, not an absence'
+        );
+    }
+
+    /**
+     * The other half of the same guard: an unset key must produce no row at all, because an empty
+     * value would be indistinguishable from a real one on read.
+     */
+    #[Test]
+    public function testEmptyStringMtSettingsProduceNoRow(): void
+    {
+        $this->projectStructure->deepl_formality = '';
+
+        $this->service->save($this->projectStructure, $this->features);
+
+        self::assertEmpty(
+            $this->findDaoCallsByKey(JobsMetadataMarshaller::DEEPL_FORMALITY->value),
+            'an empty MT setting must not be persisted'
+        );
     }
 
     #[Test]
@@ -354,8 +465,8 @@ class SaveMetadataTest extends AbstractTest
         // appear in the DAO bulkSet() calls
         $this->service->save($this->projectStructure, $this->features);
 
-        $calls = $this->findDaoCallsByKey('mmt_glossaries');
-        self::assertEmpty($calls, 'mmt_glossaries should not be persisted when empty');
+        $calls = $this->findDaoCallsByKey('enable_mt_analysis');
+        self::assertEmpty($calls, 'enable_mt_analysis should not be persisted when empty');
 
         $calls = $this->findDaoCallsByKey('deepl_formality');
         self::assertEmpty($calls, 'deepl_formality should not be persisted when empty');
@@ -398,6 +509,7 @@ class SaveMetadataTest extends AbstractTest
     {
         $this->projectStructure->from_api = true;
         $this->projectStructure->pretranslate_101 = '0';
+        $this->projectStructure->enable_mt_analysis = '1';
         $this->projectStructure->mmt_glossaries = 'gl_abc';
         $this->projectStructure->subfiltering_handlers = '[{"name":"handler1"}]';
         $this->projectStructure->metadata = [
@@ -410,9 +522,13 @@ class SaveMetadataTest extends AbstractTest
         // Boolean true is coerced to '1' by DAO set() string type hint
         self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::FROM_API->value));
         self::assertSame('0', $this->getPersistedValue(ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value));
-        self::assertSame('gl_abc', $this->getPersistedValue('mmt_glossaries'));
+        self::assertSame('1', $this->getPersistedValue('enable_mt_analysis'));
         self::assertSame('[{"name":"handler1"}]', $this->getPersistedValue(ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value));
         self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::ICU_ENABLED->value));
+
+        // Set alongside the rest: the MT settings are written here as the project's base value, and
+        // a job row only appears if the owner later overrides one.
+        self::assertSame('gl_abc', $this->getPersistedValue('mmt_glossaries'));
     }
 
     // =========================================================================
@@ -466,15 +582,15 @@ class SaveMetadataTest extends AbstractTest
     #[Test]
     public function testEngineExtraKeysPassThroughGuard(): void
     {
-        // mmt_glossaries and deepl_formality are engine configuration parameter keys
-        // and must be allowed through the guard
-        $this->projectStructure->mmt_glossaries  = 'glossary_abc';
-        $this->projectStructure->deepl_formality = 'more';
+        // enable_mt_analysis and mmt_activate_context_analyzer are engine configuration parameter
+        // keys that stay project-wide, and must be allowed through the guard
+        $this->projectStructure->enable_mt_analysis = '1';
+        $this->projectStructure->mmt_activate_context_analyzer = '1';
 
         $this->service->save($this->projectStructure, $this->features);
 
-        self::assertSame('glossary_abc', $this->getPersistedValue('mmt_glossaries'));
-        self::assertSame('more', $this->getPersistedValue('deepl_formality'));
+        self::assertSame('1', $this->getPersistedValue('enable_mt_analysis'));
+        self::assertSame('1', $this->getPersistedValue('mmt_activate_context_analyzer'));
     }
 
     #[Test]

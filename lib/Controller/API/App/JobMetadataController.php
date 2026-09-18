@@ -9,6 +9,8 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
 use Exception;
+use InvalidArgumentException;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\Projects\ProjectDao;
@@ -84,6 +86,7 @@ class JobMetadataController extends KleinController
 
     /**
      * Upsert metadata
+     * @throws InvalidArgumentException when a payload sets both Intento keys at once
      * @throws Exception
      */
     public function save(): void
@@ -101,18 +104,88 @@ class JobMetadataController extends KleinController
         $jsonValidator = new JSONValidator('job_metadata.json', true);
         $jsonValidator->validate($jsonValidatorObject);
 
+        $items = $jsonValidatorObject->getValue(true);
+
+        $this->assertIntentoKeysAreExclusive($items);
+
         $return = [];
-        foreach ($jsonValidatorObject->getValue(true) as $item) {
+        foreach ($items as $item) {
             $struct = $dao->set(
                 (int)$params['id_job'],
                 (string)$params['password'],
                 $item['key'],
-                is_array($item['value']) ? json_encode($item['value']) : $item['value'] ?? 'null'
+                self::marshallValue($item)
             );
+
+            // set() answers with the row as stored, and the column is a string. Un-marshalling it
+            // here is what MetadataDao::getByJobIdAndPassword() does for the read endpoint, so a
+            // client gets the same types back from this response as from GET /metadata and can
+            // reuse what it just sent without a second round trip.
+            if ($struct !== null) {
+                $struct->value = JobsMetadataMarshaller::unMarshall($struct);
+            }
+
             $return[] = $struct;
         }
 
         $this->response->json($return);
+    }
+
+    /**
+     * The column is a string, so every value is stored as one.
+     *
+     * Three keys are stored as the empty string, which is how the job scope says "explicitly none"
+     * for a setting whose project row can never be unwritten. The two Intento branches take it as a
+     * null — or as a missing value, since every other branch still requires one — and
+     * `deepl_id_glossary` takes it either way, including as the empty string the client read back
+     * from GET /metadata. {@see \Utils\Engines\Intento::get()} and {@see \Utils\Engines\DeepL::get()}
+     * both read it with !empty().
+     *
+     * @param array<string, mixed> $item
+     */
+    private static function marshallValue(array $item): string
+    {
+        $value = $item['value'] ?? null;
+
+        return match (true) {
+            is_array($value) => (string)json_encode($value),
+            $value === null => '',
+            default => (string)$value,
+        };
+    }
+
+    /**
+     * Intento takes a provider or a routing, never both: {@see \Utils\Engines\Intento::get()} picks
+     * the provider whenever it is set, so a job holding both would silently ignore the routing.
+     *
+     * {@see \Utils\Engines\Validators\IntentoEngineOptionsValidator} enforces the same rule at
+     * project creation and cannot be reused here — it wants an engine struct, and its else branch
+     * also rejects a payload that sets neither key, which is every payload that is not about
+     * Intento.
+     *
+     * @param array<int, array<string, mixed>> $items
+     *
+     * @throws InvalidArgumentException
+     */
+    private function assertIntentoKeysAreExclusive(array $items): void
+    {
+        $set = [];
+
+        foreach ($items as $item) {
+            $key = $item['key'] ?? null;
+
+            if ($key === JobsMetadataMarshaller::INTENTO_PROVIDER->value
+                || $key === JobsMetadataMarshaller::INTENTO_ROUTING->value) {
+                // A cleared key is not a set one, and it is the whole point of accepting null here.
+                if (self::marshallValue($item) !== '') {
+                    $set[$key] = true;
+                }
+            }
+        }
+
+        if (count($set) > 1) {
+            throw new InvalidArgumentException('Intento provider and routing cannot be set at the same time.');
+        }
     }
 
     /**

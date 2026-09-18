@@ -42,7 +42,7 @@ export const ApplicationThreshold = () => {
           minimumValue={76}
           maximumValue={101}
           stepValue={1}
-          disabled={config.is_cattool}
+          disabled={!config.ownerIsMe}
         />
       </div>
     )

@@ -214,7 +214,7 @@ export const SegmentFooterTabAiAlternatives = ({
       const {contextListBefore, contextListAfter} =
         SegmentUtils.getSegmentContext(segment.sid)
       const laraStyle =
-        CatToolStore.getJobMetadata().project.mt_extra.lara_style ??
+        CatToolStore.getJobMetadata().mt_extra.lara_style ??
         LARA_STYLES.FAITHFUL
 
       requestingParams.current = {

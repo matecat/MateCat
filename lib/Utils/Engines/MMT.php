@@ -6,6 +6,8 @@ use DomainException;
 use Exception;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use Model\Jobs\JobSettingsResolver;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Jobs\JobDao;
@@ -125,22 +127,27 @@ class MMT extends AbstractEngine
         }
 
         $client = $this->_getClient();
-        $metadataDao = new ProjectsMetadataDao($this->database);
 
-        $glossaries = null;
+        // Glossary settings are overridable per job so the project owner can change them after
+        // creation, falling back to the project's creation-time value where they were not. Both keys
+        // are resolved in one pass because this runs once per segment on the MT path.
+        $settings = (new JobSettingsResolver($this->database))->resolveManyFromEngineConfig(
+            $_config,
+            [
+                JobsMetadataMarshaller::MMT_GLOSSARIES->value,
+                JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE->value,
+            ]
+        );
 
-        if (!empty($_config['id_project'])) {
-            $glossaries = $metadataDao->setCacheTTL(86400)->getValue($_config['id_project'], 'mmt_glossaries');
-        }
+        $glossaries = $settings[JobsMetadataMarshaller::MMT_GLOSSARIES->value] ?? null;
 
-        if ($glossaries !== null) {
-            $mmtGlossariesArray = json_decode($glossaries, true);
-            $ignore_glossary_case = $metadataDao->setCacheTTL(86400)->getValue(
-                $_config['id_project'],
-                'mmt_ignore_glossary_case'
-            );
+        // An empty list is not "no setting": the job stores one to shadow a project that has
+        // glossaries, and the parameter has to be omitted rather than sent empty. The same guard
+        // covers a legacy row the marshaller could not decode, which arrives as null.
+        if (is_array($glossaries) && $glossaries !== []) {
+            $ignore_glossary_case = $settings[JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE->value] ?? null;
 
-            $_config['glossaries'] = implode(",", $mmtGlossariesArray);
+            $_config['glossaries'] = implode(",", $glossaries);
 
             if ($ignore_glossary_case !== null) {
                 $_config['ignore_glossary_case'] = $ignore_glossary_case;

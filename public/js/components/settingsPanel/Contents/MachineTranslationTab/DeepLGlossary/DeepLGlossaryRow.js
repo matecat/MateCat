@@ -39,7 +39,7 @@ export const DeepLGlossaryRow = ({
           checked={isActive}
           onChange={onChangeIsActive}
           type="radio"
-          disabled={isWaitingResult || isReadOnly}
+          disabled={isWaitingResult}
           data-testid={`deeplglossary-active-${row.id}`}
         />
       </div>

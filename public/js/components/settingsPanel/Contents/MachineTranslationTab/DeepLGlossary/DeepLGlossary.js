@@ -27,7 +27,6 @@ const COLUMNS_TABLE = [
   {name: ''},
 ]
 
-
 export const DEEPL_GLOSSARY_ROW_NONE = ''
 
 export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
@@ -156,15 +155,11 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
         )
         return [
           ...(createRow ? [createRow] : []),
-          ...(!isCattoolPage
-            ? [
-                {
-                  id: DEEPL_GLOSSARY_ROW_NONE,
-                  name: 'None',
-                  isActive: newValueFiltered.every(({isActive}) => !isActive),
-                },
-              ]
-            : []),
+          {
+            id: DEEPL_GLOSSARY_ROW_NONE,
+            name: 'None',
+            isActive: newValueFiltered.every(({isActive}) => !isActive),
+          },
           ...newValueFiltered,
         ].map((row) => ({
           ...row,
@@ -211,82 +206,53 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
     let wasCleanup = false
 
     const glossaryId = activeGlossaryRef.current
-    let glossariesFromJobMetadata = []
-    const getJobMetadata = ({jobMetadata: {project} = {}}) => {
-      const rows = glossariesFromJobMetadata.filter(
-        ({glossary_id}) => project.mt_extra.deepl_id_glossary === glossary_id,
-      )
-
-      updateRowsState(
-        rows.map(({glossary_id: id, name}) => ({id, name, isActive: true})),
-      )
-    }
 
     getDeepLGlosssaries({engineId: id}).then(({glossaries}) => {
       const items = [...glossaries].reverse()
       if (!wasCleanup) {
-        if (!isCattoolPage) {
-          updateRowsState(
-            items.map(({name, glossary_id: idRow}) => {
-              const isActive =
-                typeof glossaryId !== 'undefined' ? idRow === glossaryId : false
+        updateRowsState(
+          items.map(({name, glossary_id: idRow}) => {
+            const isActive =
+              typeof glossaryId !== 'undefined' ? idRow === glossaryId : false
 
-              return {
-                id: idRow,
-                name,
-                isActive,
-              }
-            }),
-          )
-        } else {
-          glossariesFromJobMetadata = items
-          CatToolStore.addListener(
-            CatToolConstants.GET_JOB_METADATA,
-            getJobMetadata,
-          )
-          CatToolActions.getJobMetadata({
-            idJob: config.id_job,
-            password: config.password,
-          })
-        }
+            return {
+              id: idRow,
+              name,
+              isActive,
+            }
+          }),
+        )
       }
     })
 
     return () => {
       wasCleanup = true
-      CatToolStore.removeListener(
-        CatToolConstants.GET_JOB_METADATA,
-        getJobMetadata,
-      )
     }
-  }, [id, isCattoolPage, updateRowsState])
+  }, [id, updateRowsState])
 
   useEffect(() => {
-    if (!isCattoolPage) {
-      const deeplIdGlossary = activeGlossaryRef.current
+    const deeplIdGlossary = activeGlossaryRef.current
 
-      updateRowsState((prevState) =>
-        Array.isArray(prevState)
-          ? prevState.map(({name, id: idRow}) => {
-              const isActive =
-                typeof deeplIdGlossary !== 'undefined'
-                  ? idRow === deeplIdGlossary
-                  : false
+    updateRowsState((prevState) =>
+      Array.isArray(prevState)
+        ? prevState.map(({name, id: idRow}) => {
+            const isActive =
+              typeof deeplIdGlossary !== 'undefined'
+                ? idRow === deeplIdGlossary
+                : false
 
-              return {
-                id: idRow,
-                name,
-                isActive,
-              }
-            })
-          : prevState,
-      )
-    }
-  }, [currentProjectTemplate.id, isCattoolPage, updateRowsState])
+            return {
+              id: idRow,
+              name,
+              isActive,
+            }
+          })
+        : prevState,
+    )
+  }, [currentProjectTemplate.id, updateRowsState])
 
   useEffect(() => {
     if (
-      isCattoolPage ||
       !rows ||
       (rows.length === 1 &&
         rows.some(({id}) => id === DEEPL_GLOSSARY_CREATE_ROW_ID))
@@ -296,7 +262,7 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
     const activeRow = rows.find(({isActive}) => isActive)
 
     if (typeof activeRow?.id !== 'undefined') setGlossaries(activeRow.id)
-  }, [rows, isCattoolPage, setGlossaries])
+  }, [rows, setGlossaries])
 
   const addGlossary = () => {
     const row = {

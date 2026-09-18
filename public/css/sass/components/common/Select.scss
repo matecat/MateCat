@@ -175,6 +175,11 @@ label
   z-index: 12;
   top: 0;
 }
+
+.select__dropdown-wrapper.select-with-label__wrapper-is-portal.select__dropdown--is-reversed {
+  top: 0;
+  bottom: auto;
+}
 .select,
 .select__dropdown-wrapper {
   .new-color {

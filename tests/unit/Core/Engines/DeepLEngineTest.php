@@ -14,15 +14,22 @@ use DomainException;
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Engines\Structs\EngineStruct;
+use Model\Jobs\JobsMetadataMarshaller;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
+use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\DeepL;
 use Utils\Engines\DeepL\DeepLApiClient;
 use Utils\Engines\DeepL\DeepLApiException;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\Registry\AppConfig;
 
 class DeepLEngineTest extends AbstractTest
 {
+    private const int SETTINGS_PROJECT_ID = 990411;
+    private const int SETTINGS_JOB_ID = 990412;
+
     private TestDeepL $engine;
 
     protected function setUp(): void
@@ -247,6 +254,109 @@ class DeepLEngineTest extends AbstractTest
         ], DeepL::getConfigurationParameters());
     }
 
+    // ---------------------------------------------------------------------------------------
+    // Glossary resolution
+    //
+    // The three DeepL settings moved from project metadata to job metadata so the project owner can
+    // change them after creation, and are read through JobSettingsResolver with the project scope as
+    // a permanent fallback for projects created before that move. The resolver is constructed inline
+    // from $this->database, so there is nothing to inject: these seed real metadata rows and drive
+    // the real read path, the same way the Intento, MMT and Lara engine suites do.
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * A job that picked "None" in the glossary list stores the empty string — the job scope's
+     * "explicitly none", which is the only way to shadow the glossary the project was created with,
+     * since delete() would re-inherit it. DeepL must be told about that the way a job with no
+     * glossary at all is told, with a null id: an empty string is not an id it could resolve.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function aClearedJobGlossarySendsNoGlossaryId(): void
+    {
+        $parameters = $this->translateWithSeededSettings(
+            [JobsMetadataMarshaller::DEEPL_ID_GLOSSARY->value => 'gl-project'],
+            [JobsMetadataMarshaller::DEEPL_ID_GLOSSARY->value => '']
+        );
+
+        self::assertNull($parameters['glossary_id']);
+    }
+
+    /**
+     * The mirror case, so the test above cannot pass by resolving nothing at all.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function aJobGlossaryOverridesTheProjectOne(): void
+    {
+        $parameters = $this->translateWithSeededSettings(
+            [JobsMetadataMarshaller::DEEPL_ID_GLOSSARY->value => 'gl-project'],
+            [JobsMetadataMarshaller::DEEPL_ID_GLOSSARY->value => 'gl-job']
+        );
+
+        self::assertSame('gl-job', $parameters['glossary_id']);
+    }
+
+    /**
+     * @param array<string, string> $projectRows
+     * @param array<string, string> $jobRows
+     *
+     * @return array<string, mixed> the parameters DeepL was called with
+     * @throws Exception
+     */
+    private function translateWithSeededSettings(array $projectRows, array $jobRows = []): array
+    {
+        // JobSettingsResolver reads with an 86400s TTL, which would otherwise open a Redis
+        // connection; setCacheTTL() is a no-op under this flag so the reads stay pure PDO.
+        $previousSkipCache = AppConfig::$SKIP_SQL_CACHE;
+        AppConfig::$SKIP_SQL_CACHE = true;
+
+        $projectMetadataDao = new ProjectsMetadataDao(obtainTestDatabase());
+        $jobMetadataDao = new JobsMetadataDao(obtainTestDatabase());
+        $jobPassword = 'deeplpw_' . bin2hex(random_bytes(4));
+
+        try {
+            foreach ($projectRows as $key => $value) {
+                $projectMetadataDao->set(self::SETTINGS_PROJECT_ID, $key, $value);
+            }
+            if ($jobRows !== []) {
+                $jobMetadataDao->bulkSet(self::SETTINGS_JOB_ID, $jobPassword, $jobRows);
+            }
+
+            $this->engine->setNextRawResponse((string)json_encode([
+                'translations' => [
+                    [
+                        'detected_source_language' => 'EN',
+                        'text' => 'Ciao mondo',
+                    ],
+                ],
+            ]));
+
+            $this->engine->get([
+                'segment' => 'Hello world',
+                'source' => 'en-US',
+                'target' => 'it-IT',
+                'pid' => self::SETTINGS_PROJECT_ID,
+                'job_id' => self::SETTINGS_JOB_ID,
+                'job_password' => $jobPassword,
+            ]);
+
+            self::assertIsArray($this->engine->lastParameters);
+
+            return $this->engine->lastParameters;
+        } finally {
+            foreach (array_keys($projectRows) as $key) {
+                $projectMetadataDao->delete(self::SETTINGS_PROJECT_ID, $key);
+            }
+            foreach (array_keys($jobRows) as $key) {
+                $jobMetadataDao->delete(self::SETTINGS_JOB_ID, $jobPassword, $key);
+            }
+            AppConfig::$SKIP_SQL_CACHE = $previousSkipCache;
+        }
+    }
+
     #[Test]
     public function deepLApiClientTranslateBuildsExpectedResponseAndOptions(): void
     {
@@ -456,6 +566,13 @@ class DeepLEngineTest extends AbstractTest
 
 class TestDeepL extends DeepL
 {
+    /**
+     * The parameters get() handed to call(), kept so a test can assert on what DeepL is told.
+     *
+     * @var array<string, mixed>|null
+     */
+    public ?array $lastParameters = null;
+
     private ?DeepLApiClient $mockClient = null;
     private ?string $nextRawResponse = null;
     private ?int $forcedErrorStatus = null;
@@ -488,6 +605,8 @@ class TestDeepL extends DeepL
 
     public function call(string $function, array $parameters = [], bool $isPostRequest = false, bool $isJsonRequest = false): void
     {
+        $this->lastParameters = $parameters;
+
         if ($this->forcedErrorStatus !== null) {
             $this->result = [
                 'error' => [

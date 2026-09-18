@@ -30,6 +30,7 @@ export const OptionsContainer = ({activeMTEngineData, isCattoolPage}) => {
           className={`${isExpanded ? 'rotate' : ''}`}
           onClick={() => setIsExpanded((prevState) => !prevState)}
           title="Glossary options"
+          disabled={!config.ownerIsMe}
         >
           <IconDown size={16} />
           Options

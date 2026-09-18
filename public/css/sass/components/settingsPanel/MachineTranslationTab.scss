@@ -268,10 +268,6 @@
     }
   }
 
-  .select__dropdown--is-reversed {
-    top: 100% !important;
-  }
-
   .select,
   .dropdown__option--is-active-option,
   .dropdown__option.dropdown__option--is-active-option:hover {
@@ -620,7 +616,11 @@
       align-items: center;
       gap: 4px;
 
-      &:hover {
+      &:disabled {
+        cursor: default;
+      }
+
+      &:hover:not(:disabled) {
         text-decoration: underline;
       }
 

@@ -11,7 +11,8 @@ jest.mock('../stores/CatToolStore', () => ({
   getKeysDomains: jest.fn(),
   getHaveKeysGlossary: jest.fn(),
   isClientConnected: jest.fn(),
-  jobMetadata: undefined,
+  getJobMetadata: jest.fn(),
+  setJobMetadata: jest.fn(),
 }))
 
 jest.mock('../stores/SegmentStore', () => ({
@@ -561,29 +562,33 @@ describe('CatToolActions.getJobMetadata', () => {
   beforeEach(() => {
     global.config = {id_job: 2}
     jest.clearAllMocks()
-    CatToolStore.jobMetadata = undefined
+    CatToolStore.getJobMetadata.mockReturnValue(undefined)
   })
 
   test('fetches metadata when not already cached', async () => {
     getJobMetadata.mockResolvedValueOnce({title: 'meta'})
+    CatToolStore.setJobMetadata.mockImplementation((jobMetadata) => {
+      CatToolStore.getJobMetadata.mockReturnValue(jobMetadata)
+    })
 
     CatToolActions.getJobMetadata({idJob: 1, password: 'pwd'})
     await Promise.resolve()
 
     expect(getJobMetadata).toHaveBeenCalledWith(1, 'pwd')
+    expect(CatToolStore.setJobMetadata).toHaveBeenCalledWith({title: 'meta'})
     expect(AppDispatcher.dispatch).toHaveBeenCalledWith({
       actionType: 'GET_JOB_METADATA',
       jobMetadata: {title: 'meta'},
     })
-    expect(CatToolStore.jobMetadata).toEqual({title: 'meta'})
   })
 
   test('reuses cached metadata when already present', () => {
-    CatToolStore.jobMetadata = {title: 'cached'}
+    CatToolStore.getJobMetadata.mockReturnValue({title: 'cached'})
 
     CatToolActions.getJobMetadata({idJob: 1, password: 'pwd'})
 
     expect(getJobMetadata).not.toHaveBeenCalled()
+    expect(CatToolStore.setJobMetadata).not.toHaveBeenCalled()
     expect(AppDispatcher.dispatch).toHaveBeenCalledWith({
       actionType: 'GET_JOB_METADATA',
       jobMetadata: {title: 'cached'},

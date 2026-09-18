@@ -13,6 +13,12 @@ import {
 import userEvent from '@testing-library/user-event'
 import ModalsActions from '../../../../actions/ModalsActions'
 
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 beforeEach(() => {
   global.config = {
     basepath: 'http://localhost/',
@@ -212,6 +218,7 @@ test('Modern MT and glossary', async () => {
   const user = userEvent.setup()
 
   global.config.isLoggedIn = true
+  global.config.ownerIsMe = true
   config.is_cattool = false
 
   const projectTemplates = [
@@ -312,6 +319,7 @@ test('DeepL and glossary', async () => {
   const user = userEvent.setup()
 
   global.config.isLoggedIn = true
+  global.config.ownerIsMe = true
   config.is_cattool = false
 
   const projectTemplates = [

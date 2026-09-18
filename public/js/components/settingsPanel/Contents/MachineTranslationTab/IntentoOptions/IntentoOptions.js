@@ -94,7 +94,6 @@ export const IntentoOptions = ({id, isCattoolPage}) => {
         <Controller
           control={control}
           name={routingOrProviderKey}
-          disabled={isCattoolPage}
           render={({field: {value, name, disabled}}) => (
             <Select
               name={name}
@@ -108,6 +107,7 @@ export const IntentoOptions = ({id, isCattoolPage}) => {
                   : KEY_PROVIDER
 
                 setValue(actualKey, option.id)
+                setValue(actualKey === KEY_ROUTING ? KEY_PROVIDER : KEY_ROUTING)
               }}
               isPortalDropdown={true}
               isActiveOptionOnTop={false}

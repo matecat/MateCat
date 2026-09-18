@@ -14,6 +14,7 @@ use Exception;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
@@ -96,7 +97,7 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public bool $tm_prioritization = false;
 
     public bool $mt_evaluation = false;
-    public int $mt_quality_value_in_editor = 86;
+    public int $mt_quality_value_in_editor = JobsMetadataMarshaller::DEFAULT_MT_QUALITY_VALUE;
     public bool $mt_qe_workflow_enabled = false;
     /** @var ?array<string, mixed> */
     public ?array $mt_qe_workflow_parameters = null;

@@ -309,8 +309,7 @@ let TranslationMatches = {
     //     ).length === 2
     const allowedLaraThink = false //Temp disable Lara Think
 
-    const laraStyleGuide =
-      jobMetadata?.project?.mt_extra?.lara_style_guideline_id
+    const laraStyleGuide = jobMetadata?.mt_extra?.lara_style_guideline_id
     const allowedLaraProsa =
       typeof laraStyleGuide === 'string' && laraStyleGuide !== ''
 
@@ -336,8 +335,7 @@ let TranslationMatches = {
         reasoning: laraModel === 'think',
       })
         .then((response) => {
-          const glossaries =
-            jobMetadata?.project?.mt_extra?.lara_glossaries || []
+          const glossaries = jobMetadata?.mt_extra?.lara_glossaries || []
           const decodedSource = decodeTagsToUnicodeChar(currentSegment.segment)
           laraTranslate({
             token: response.token,

@@ -90,11 +90,7 @@ jest.mock('../../../api/laraTranslate', () => ({
 }))
 
 jest.mock('../../../stores/CatToolStore', () => ({
-  getJobMetadata: jest.fn(() => ({
-    project: {
-      mt_extra: {},
-    },
-  })),
+  getJobMetadata: jest.fn(),
 }))
 
 jest.mock('./DraftMatecatUtils/tagUtils', () => ({
@@ -110,6 +106,7 @@ import OfflineUtils from '../../../utils/offlineUtils'
 import Speech2Text from '../../../utils/speech2text'
 import DraftMatecatUtils from './DraftMatecatUtils'
 import CatToolStore from '../../../stores/CatToolStore'
+import {JobMetadataProxy} from '../../../stores/JobMetadataProxy'
 import CatToolActions from '../../../actions/CatToolActions'
 import {getContributions} from '../../../api/getContributions'
 import {deleteContribution} from '../../../api/deleteContribution'
@@ -123,7 +120,10 @@ import {
   setSegmentContributions,
   setChoosenSuggestion,
 } from '../../../actions/segmentDispatchActions'
-import {getSegmentsQa, startSegmentQACheck} from '../../../actions/segmentQaActions'
+import {
+  getSegmentsQa,
+  startSegmentQACheck,
+} from '../../../actions/segmentQaActions'
 import {disableTPOnSegment} from '../../../actions/tagProjectionActions'
 
 const flushPromises = async () => {
@@ -131,6 +131,11 @@ const flushPromises = async () => {
   await Promise.resolve()
   await Promise.resolve()
 }
+
+const mockJobMetadata = (mtExtra) =>
+  CatToolStore.getJobMetadata.mockReturnValue(
+    new JobMetadataProxy({project: {mt_extra: mtExtra}}).proxy,
+  )
 
 describe('translationMatches', () => {
   beforeEach(() => {
@@ -146,6 +151,8 @@ describe('translationMatches', () => {
       password: 'pw',
       id_client: 99,
     }
+
+    mockJobMetadata({})
 
     SegmentUtils.getSegmentContext.mockReturnValue({
       contextListBefore: ['ctx before'],
@@ -169,13 +176,9 @@ describe('translationMatches', () => {
   })
 
   test('calls Lara translate with style guide and requests contributions with prosa model', async () => {
-    CatToolStore.getJobMetadata.mockReturnValue({
-      project: {
-        mt_extra: {
-          lara_style_guideline_id: 'style-1',
-          lara_glossaries: ['gl-1'],
-        },
-      },
+    mockJobMetadata({
+      lara_style_guideline_id: 'style-1',
+      lara_glossaries: ['gl-1'],
     })
 
     TranslationMatches.getContribution({
@@ -215,13 +218,7 @@ describe('translationMatches', () => {
   })
 
   test('falls back to classic contributions when Lara auth fails', async () => {
-    CatToolStore.getJobMetadata.mockReturnValue({
-      project: {
-        mt_extra: {
-          lara_style_guideline_id: 'style-2',
-        },
-      },
-    })
+    mockJobMetadata({lara_style_guideline_id: 'style-2'})
 
     laraAuthJob.mockRejectedValueOnce(new Error('auth failed'))
 
@@ -452,7 +449,9 @@ describe('translationMatches', () => {
     test('does nothing when the top match reports an error', () => {
       SegmentStore.getSegmentByIdToJS.mockReturnValue(
         makeSegment({
-          contributions: {matches: [{translation: 'x', match: '100%', error: 'boom'}]},
+          contributions: {
+            matches: [{translation: 'x', match: '100%', error: 'boom'}],
+          },
         }),
       )
 
@@ -751,7 +750,10 @@ describe('translationMatches', () => {
 
     test('retries after a delay when the client id is not yet available', () => {
       jest.useFakeTimers()
-      const getContributionSpy = jest.spyOn(TranslationMatches, 'getContribution')
+      const getContributionSpy = jest.spyOn(
+        TranslationMatches,
+        'getContribution',
+      )
       delete global.config.id_client
 
       TranslationMatches.getContribution({
@@ -799,9 +801,7 @@ describe('translationMatches', () => {
     })
 
     test('skips the Lara flow on fast fetch even when Lara prosa is allowed', async () => {
-      CatToolStore.getJobMetadata.mockReturnValue({
-        project: {mt_extra: {lara_style_guideline_id: 'style-1'}},
-      })
+      mockJobMetadata({lara_style_guideline_id: 'style-1'})
 
       await TranslationMatches.getContribution({
         sid: 1,
@@ -815,9 +815,7 @@ describe('translationMatches', () => {
     })
 
     test('falls back to classic contributions when Lara translate fails', async () => {
-      CatToolStore.getJobMetadata.mockReturnValue({
-        project: {mt_extra: {lara_style_guideline_id: 'style-1'}},
-      })
+      mockJobMetadata({lara_style_guideline_id: 'style-1'})
       laraTranslate.mockRejectedValueOnce(new Error('translate failed'))
 
       TranslationMatches.getContribution({

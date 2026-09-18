@@ -9,6 +9,7 @@ use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Matecat\SubFiltering\HandlersSorter;
 use Model\DataAccess\AbstractDao;
 use Model\Filters\FiltersConfigTemplateDao;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\Pagination\Pager;
 use Model\Pagination\PaginationParameters;
@@ -82,7 +83,7 @@ class ProjectTemplateDao extends AbstractDao
         $default->qa_model_template_id = 0;
         $default->xliff_config_template_id = 0;
         $default->filters_template_id = 0;
-        $default->mt_quality_value_in_editor = 85;
+        $default->mt_quality_value_in_editor = JobsMetadataMarshaller::DEFAULT_MT_QUALITY_VALUE;
         $default->subject = "general";
         $default->source_language = "en-US";
         $default->target_language = serialize(["fr-FR"]);

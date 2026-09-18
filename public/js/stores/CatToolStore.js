@@ -5,6 +5,7 @@ import {filter} from 'lodash'
 import AppDispatcher from './AppDispatcher'
 import CatToolConstants from '../constants/CatToolConstants'
 import ModalsConstants from '../constants/ModalsConstants'
+import {JobMetadataProxy} from './JobMetadataProxy'
 
 EventEmitter.prototype.setMaxListeners(0)
 
@@ -139,7 +140,12 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
     this._currentProjectTemplate = currentProjectTemplate
   },
   setJobMetadata: function (jobMetadata) {
-    this.jobMetadata = jobMetadata
+    // The API returns metadata as {job, project}: job-level settings override
+    // the project's own defaults when a job scopes an MT/editor setting to
+    // itself. JobMetadataProxy exposes a flattened view so every consumer can
+    // read e.g. jobMetadata.mt_extra directly, without knowing or caring
+    // whether the value came from the job or fell back to the project.
+    this.jobMetadata = new JobMetadataProxy(jobMetadata).proxy
   },
   getJobMetadata: function () {
     return this.jobMetadata
@@ -297,7 +303,6 @@ AppDispatcher.register(function (action) {
       })
       break
     case CatToolConstants.GET_JOB_METADATA:
-      CatToolStore.setJobMetadata(action.jobMetadata)
       CatToolStore.emitChange(CatToolConstants.GET_JOB_METADATA, {
         ...action,
       })

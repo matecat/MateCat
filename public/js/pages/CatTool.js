@@ -98,6 +98,7 @@ function CatTool() {
   const contextPreviewUrl = `${window.origin}/context-preview/${config.id_job}/${config.password}?source_code=${encodeURIComponent(config.source_code)}&target_code=${encodeURIComponent(config.target_code)}`
   const popupWindowRef = useRef(null)
   const previewDesiredOpenRef = useRef(false)
+  const isJobmetadataParsedOnInit = useRef(false)
 
   const togglePreview = useCallback(() => {
     setIsPreviewOpen((prev) => {
@@ -624,42 +625,42 @@ function CatTool() {
     Array.isArray(temporaryFakeTemplate.tm)
 
   useEffect(() => {
-    if (isFakeCurrentTemplateReady && typeof jobMetadata?.job !== 'undefined') {
+    if (
+      isFakeCurrentTemplateReady &&
+      typeof jobMetadata?.job !== 'undefined' &&
+      !isJobmetadataParsedOnInit.current
+    ) {
       const isValidPresetCharacterMode = Object.values(
         CHARS_SIZE_COUNTER_TYPES,
       ).some((value) => value === cattoolInterface.getCharacterCounterMode())
-
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        tmPrioritization: jobMetadata?.job?.tm_prioritization ?? false,
+        tmPrioritization: jobMetadata?.tm_prioritization ?? false,
         characterCounterCountTags:
-          jobMetadata?.job?.character_counter_count_tags ?? false,
+          jobMetadata?.character_counter_count_tags ?? false,
         characterCounterMode:
-          typeof jobMetadata?.job?.character_counter_mode === 'string'
-            ? jobMetadata?.job?.character_counter_mode
+          typeof jobMetadata?.character_counter_mode === 'string'
+            ? jobMetadata?.character_counter_mode
             : isValidPresetCharacterMode
               ? cattoolInterface.getCharacterCounterMode()
               : undefined,
-        subfilteringHandlers: jobMetadata.job.subfiltering_handlers,
-        mtQualityValueInEditor: jobMetadata.project.mt_quality_value_in_editor,
+        subfilteringHandlers: jobMetadata.subfiltering_handlers,
+        mtQualityValueInEditor: jobMetadata.mt_quality_value_in_editor,
         mt: {
           ...prevTemplate.mt,
           extra: {
-            ...(jobMetadata.project.mt_extra ?? {}),
+            ...(jobMetadata.mt_extra ?? {}),
           },
         },
-        icuEnabled: !!jobMetadata.project.icu_enabled ?? false,
-        mandatoryIssues: Array.isArray(jobMetadata.job.mandatory_issues)
-          ? jobMetadata.job.mandatory_issues
+        icuEnabled: !!jobMetadata.icu_enabled ?? false,
+        mandatoryIssues: Array.isArray(jobMetadata.mandatory_issues)
+          ? jobMetadata.mandatory_issues
           : ['r1', 'r2'],
       }))
+
+      isJobmetadataParsedOnInit.current = true
     }
-  }, [
-    jobMetadata?.job,
-    jobMetadata?.project,
-    isFakeCurrentTemplateReady,
-    modifyingCurrentTemplate,
-  ])
+  }, [jobMetadata, isFakeCurrentTemplateReady, modifyingCurrentTemplate])
 
   return (
     <>

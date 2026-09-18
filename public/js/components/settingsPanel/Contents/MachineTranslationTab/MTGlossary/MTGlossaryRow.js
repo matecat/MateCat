@@ -195,7 +195,7 @@ export const MTGlossaryRow = ({
           checked={isActive}
           onChange={onChangeIsActive}
           type="checkbox"
-          disabled={isWaitingResult || isReadOnly}
+          disabled={isWaitingResult}
           data-testid={`mtglossary-active-${row.id}`}
         />
       </div>
