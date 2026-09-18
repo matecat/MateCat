@@ -101,6 +101,10 @@ module.exports = {
         'public/js/components/segments/SegmentCommentsContainer.js',
         'public/js/components/segments/SegmentHeader.js',
         'public/js/components/segments/SegmentsCommentsIcon.js',
+        'public/js/components/segments/SegmentWarnings.js',
+        'public/js/components/segments/SegmentWrapper.js',
+        'public/js/components/projects/Header.js',
+        'public/js/components/review/TranslationIssuesSideButton.js',
       ],
       rules: {
         'no-restricted-syntax': [
