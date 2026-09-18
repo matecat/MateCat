@@ -192,6 +192,10 @@ describe('SegmentFooterTabMatches', () => {
     })
     const trash = document.querySelector('.trash')
     expect(trash).toBeInTheDocument()
+    // The control used to be an empty span painted by an icon-font glyph. When
+    // the glyph went, the button was still in the DOM but had nothing to show,
+    // so assert it actually carries a visible icon.
+    expect(trash.querySelector('svg')).toBeInTheDocument()
     fireEvent.click(trash)
     expect(SegmentActions.deleteContribution).toHaveBeenCalledWith(
       'source text',

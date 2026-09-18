@@ -402,6 +402,14 @@ test('replaces the current occurrence and refreshes the segment translation', as
     featuredSearchResult: 0,
   })
 
+  // The replacement is applied by the save callback, not before the save is
+  // fired: replacing up front left the editor holding the new text while the
+  // request that had already been built still carried the old one.
+  let saveCallback
+  segmentTranslation.mockImplementationOnce((segment, status, callback) => {
+    saveCallback = callback
+  })
+
   jest.useFakeTimers()
   act(() => {
     fireEvent.click(screen.getByText('REPLACE'))
@@ -409,8 +417,12 @@ test('replaces the current occurrence and refreshes the segment translation', as
   })
   jest.useRealTimers()
 
-  expect(SegmentActions.replaceCurrentSearch).toHaveBeenCalledWith('new')
   expect(segmentTranslation).toHaveBeenCalled()
+  expect(SegmentActions.replaceCurrentSearch).not.toHaveBeenCalled()
+
+  act(() => saveCallback())
+
+  expect(SegmentActions.replaceCurrentSearch).toHaveBeenCalledWith('new')
 })
 
 // The confirm/execute/success/error flow used to live here, but Search.js now

@@ -1538,7 +1538,7 @@ describe('SegmentActions issues panel', () => {
     expect(SegmentActions.openIssuesPanel({sid: '1'}, false)).toBe(false)
   })
 
-  test('openIssuesPanel opens segment and dispatches when allowed', () => {
+  test('openIssuesPanel opens a closed segment and dispatches when allowed', () => {
     jest.useFakeTimers()
     SegmentStore.getSegmentByIdToJS.mockReturnValue({status: 'TRANSLATED'})
     const openSpy = jest.spyOn(SegmentActions, 'openSegment').mockReturnValue()
@@ -1548,7 +1548,31 @@ describe('SegmentActions issues panel', () => {
     SegmentActions.openIssuesPanel({sid: '1'}, true)
     jest.runAllTimers()
     expect(openSpy).toHaveBeenCalledWith('1')
-    expect(scrollSpy).toHaveBeenCalled()
+    // openSegment already scrolls; the panel must not scroll a second time
+    expect(scrollSpy).not.toHaveBeenCalled()
+    expect(AppDispatcher.dispatch).toHaveBeenCalled()
+    openSpy.mockRestore()
+    scrollSpy.mockRestore()
+    jest.useRealTimers()
+  })
+
+  test('openIssuesPanel leaves the scroll alone when the segment is already open', () => {
+    jest.useFakeTimers()
+    SegmentStore.getSegmentByIdToJS.mockReturnValue({
+      status: 'TRANSLATED',
+      opened: true,
+    })
+    const openSpy = jest.spyOn(SegmentActions, 'openSegment').mockReturnValue()
+    const scrollSpy = jest
+      .spyOn(SegmentActions, 'scrollToSegment')
+      .mockReturnValue()
+
+    SegmentActions.openIssuesPanel({sid: '1'}, true)
+    jest.runAllTimers()
+
+    // Nothing may move the list: the row would land under the sticky header.
+    expect(openSpy).not.toHaveBeenCalled()
+    expect(scrollSpy).not.toHaveBeenCalled()
     expect(AppDispatcher.dispatch).toHaveBeenCalled()
     openSpy.mockRestore()
     scrollSpy.mockRestore()

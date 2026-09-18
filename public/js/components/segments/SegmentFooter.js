@@ -691,14 +691,6 @@ function SegmentFooter() {
                 tab.open && !getHideMatchesCookie() ? 'active' : '',
               ),
             )}
-          <div className="addtmx-tr white-tx">
-            <a
-              className="open-popup-addtm-tr"
-              onClick={() => CatToolActions.openSettingsPanel()}
-            >
-              Add private resources
-            </a>
-          </div>
         </>
       ) : (
         <div

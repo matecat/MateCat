@@ -399,18 +399,18 @@ section .revise-button {
 }
 
 section .translation-issues-button .revise-button {
-  display: block;
+  visibility: visible;
   position: relative;
 
   &.no-object {
-    display: none;
+    visibility: hidden;
   }
 }
 
 section:hover .translation-issues-button .revise-button,
 section .translation-issues-button:hover .revise-button,
 section .segment-side-buttons:hover .translation-issues-button .revise-button.no-object {
-  display: block !important;
+  visibility: visible !important;
 }
 
 section .revise-button-2 {

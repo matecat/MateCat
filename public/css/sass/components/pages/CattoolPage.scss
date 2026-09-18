@@ -7,6 +7,7 @@
 @use '../segment/SegmentComments';
 @use '../segment/Lexiqa';
 @use '../segment/SegmentFooterTabMessages';
+@use '../segment/SegmentFooterTabMatches';
 @use '../header/SegmentsFilter';
 @use '../ReviewExtendedPanel';
 //components
@@ -91,6 +92,10 @@ body #outer {
   float: left;
   position: relative;
   height: 100vh;
+}
+
+body.cattool {
+  background-color: colors.$grey50;
 }
 
 body.cattool header {

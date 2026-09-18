@@ -64,6 +64,15 @@ test('renders the source and target wrappers plus the copy control', () => {
   expect(container.querySelector('.status-container .status')).not.toBeNull()
 })
 
+test('renders the copy control as an inline chevron icon, not a background image', () => {
+  renderBody()
+
+  const icon = screen.getByTitle('Copy source to target').querySelector('svg')
+  expect(icon).toBeInTheDocument()
+  expect(icon.getAttribute('width')).toBe('40')
+  expect(icon.getAttribute('height')).toBe('40')
+})
+
 test('shows the standard copy-source shortcut on non-Mac platforms', () => {
   const {container} = renderBody()
   expect(container.querySelector('.copy p').textContent).toBe('CTRL+I')

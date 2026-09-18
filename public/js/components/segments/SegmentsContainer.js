@@ -943,7 +943,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
 
     return (
       <div
-        className={`sticky-project-bar ${props.sideOpen ? 'sticky-project-bar-slide-right' : ''}`}
+        className={`sticky-project-bar`}
       >
         <ProjectBar
           {...{
@@ -1116,9 +1116,7 @@ const getSegmentStructure = (segment, sideOpen) => {
             </div>
           </div>
           <div className="status-container">
-            <a href="#" className="status no-hover">
-              {' '}
-            </a>
+            <div className="status no-hover" />
           </div>
         </div>
         <div className="edit-distance">Edit Distance:</div>
