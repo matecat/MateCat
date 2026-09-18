@@ -134,10 +134,12 @@ class JobMetadataController extends KleinController
     /**
      * The column is a string, so every value is stored as one.
      *
-     * A missing or null value reaches here only from the two Intento branches of the schema — every
-     * other branch still requires a value — and it is stored as the empty string, which is how the
-     * job scope says "explicitly none" for a key whose project row can never be unwritten.
-     * {@see \Utils\Engines\Intento::get()} reads it back with !empty().
+     * Three keys are stored as the empty string, which is how the job scope says "explicitly none"
+     * for a setting whose project row can never be unwritten. The two Intento branches take it as a
+     * null — or as a missing value, since every other branch still requires one — and
+     * `deepl_id_glossary` takes it either way, including as the empty string the client read back
+     * from GET /metadata. {@see \Utils\Engines\Intento::get()} and {@see \Utils\Engines\DeepL::get()}
+     * both read it with !empty().
      *
      * @param array<string, mixed> $item
      */

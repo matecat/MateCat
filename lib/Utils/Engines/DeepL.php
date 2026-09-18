@@ -123,8 +123,14 @@ class DeepL extends AbstractEngine
         );
 
         $deepLFormality = $settings[JobsMetadataMarshaller::DEEPL_FORMALITY->value] ?? null;
-        $deepLIdGlossary = $settings[JobsMetadataMarshaller::DEEPL_ID_GLOSSARY->value] ?? null;
         $deepLEngineType = $settings[JobsMetadataMarshaller::DEEPL_ENGINE_TYPE->value] ?? null;
+
+        // A job that picked "none" in the glossary list stores the empty string: the job scope's
+        // "explicitly none", which shadows the glossary the project was created with. DeepL is told
+        // about it the same way a job with no glossary at all is — with a null id, never with an
+        // empty one, which is not a glossary id it could resolve.
+        $storedIdGlossary = $settings[JobsMetadataMarshaller::DEEPL_ID_GLOSSARY->value] ?? null;
+        $deepLIdGlossary = !empty($storedIdGlossary) ? (string)$storedIdGlossary : null;
 
         $parameters = [
             'text' => [

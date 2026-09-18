@@ -353,6 +353,13 @@ class JobMetadataControllerTest extends AbstractTest
             'deepl formality'         => ['deepl_formality', 'prefer_more', 'prefer_more'],
             'deepl engine type'       => ['deepl_engine_type', 'latency_optimized', 'latency_optimized'],
             'deepl glossary'          => ['deepl_id_glossary', 'gl-abc', 'gl-abc'],
+            // "None" in the glossary list. The empty string is an answer, not an absence: it
+            // shadows the glossary the project was created with, which delete() cannot do — the
+            // project row is written once and never unwritten, so dropping the job row re-inherits
+            // it. Null says the same thing, and the empty string is accepted on the wire as well as
+            // stored, so a client can post back what GET /metadata just gave it.
+            'cleared deepl glossary'  => ['deepl_id_glossary', '', ''],
+            'null deepl glossary'     => ['deepl_id_glossary', null, ''],
             'lara style'              => ['lara_style', 'creative', 'creative'],
             'lara style guideline'    => ['lara_style_guideline_id', 'guideline-3', 'guideline-3'],
             // Arrays are JSON-encoded by the controller before they reach the DAO.
@@ -365,11 +372,11 @@ class JobMetadataControllerTest extends AbstractTest
             'empty mmt glossaries'    => ['mmt_glossaries', [], '[]'],
             'intento provider'        => ['intento_provider', 'ai.text.translate.google', 'ai.text.translate.google'],
             'intento routing'         => ['intento_routing', 'best_quality', 'best_quality'],
-            // These two alone accept null, and it is stored as the empty string. They are mutually
-            // exclusive and the provider outranks the routing, so picking a routing has to clear the
-            // provider in the same write; delete() cannot do it, because the project row is written
-            // once at creation and never unwritten, so dropping the job row re-inherits the
-            // project's provider and discards the routing the job just chose.
+            // These two accept null and nothing else — the empty string above is refused for them.
+            // They are mutually exclusive and the provider outranks the routing, so picking a
+            // routing has to clear the provider in the same write; delete() cannot do it, because
+            // the project row is written once at creation and never unwritten, so dropping the job
+            // row re-inherits the project's provider and discards the routing the job just chose.
             'cleared intento provider' => ['intento_provider', null, ''],
             'cleared intento routing'  => ['intento_routing', null, ''],
         ];
@@ -572,10 +579,10 @@ class JobMetadataControllerTest extends AbstractTest
             'threshold above 100' => ['mt_quality_value_in_editor', 101],
             'threshold below 0'   => ['mt_quality_value_in_editor', -1],
             'threshold as string' => ['mt_quality_value_in_editor', '90'],
-            // An empty string is not a well-formed "none" the way an empty list is: it would shadow
-            // the project-metadata fallback with a value the engine cannot use. delete() is how
-            // these two are cleared.
-            'empty glossary id'   => ['deepl_id_glossary', ''],
+            // An empty string is not a well-formed "none" for this one: no UI offers it, so it
+            // would shadow the project-metadata fallback with a value Lara cannot use. delete() is
+            // how it is cleared. `deepl_id_glossary` is the opposite case — the glossary list has a
+            // "None" row — and accepts it; see mtSettingPayloadProvider().
             'empty lara style guideline' => ['lara_style_guideline_id', ''],
             // The Intento pair accepts null, not an empty string: null is the wire form and "" is
             // only ever the stored one, so a client cannot post back what it read without meaning

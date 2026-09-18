@@ -163,8 +163,11 @@
             "const": "deepl_id_glossary"
           },
           "value": {
-            "type": "string",
-            "minLength": 1,
+            "$comment": "The empty string is an answer, not an absence: it is how a job says \"no glossary here\" over a project that has one, and the job scope wins. DELETE /metadata/{key} cannot say it — the project row is written once at creation and never updated, so dropping the job row re-inherits the project's glossary and the job is back where it started. Null is accepted as the same answer and stored the same way; unlike the Intento pair, the stored empty string is also accepted on the wire, so a client can post back the value GET /metadata just gave it.",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 255
           }
         }
@@ -278,7 +281,7 @@
             "const": "intento_provider"
           },
           "value": {
-            "$comment": "Null is an answer, not an absence, and unlike `deepl_id_glossary` and `lara_style_guideline_id` this key cannot be cleared with DELETE /metadata/{key}. `intento_provider` and `intento_routing` are mutually exclusive and the provider outranks the routing, while the project row is written once at creation and never updated: dropping the job row would re-inherit the project's provider and silently discard the routing the job just chose. Null is stored as the empty string, the job scope's \"explicitly none\"; an empty string on the wire stays refused, exactly as it is for those two.",
+            "$comment": "Null is an answer, not an absence, and unlike `lara_style_guideline_id` this key cannot be cleared with DELETE /metadata/{key}. `intento_provider` and `intento_routing` are mutually exclusive and the provider outranks the routing, while the project row is written once at creation and never updated: dropping the job row would re-inherit the project's provider and silently discard the routing the job just chose. Null is stored as the empty string, the job scope's \"explicitly none\"; unlike `deepl_id_glossary`, an empty string on the wire stays refused here, so null is the only wire form.",
             "type": [
               "string",
               "null"
@@ -299,7 +302,7 @@
             "const": "intento_routing"
           },
           "value": {
-            "$comment": "Null is an answer, not an absence, and unlike `deepl_id_glossary` and `lara_style_guideline_id` this key cannot be cleared with DELETE /metadata/{key}. `intento_provider` and `intento_routing` are mutually exclusive and the provider outranks the routing, while the project row is written once at creation and never updated: dropping the job row would re-inherit the project's provider and silently discard the routing the job just chose. Null is stored as the empty string, the job scope's \"explicitly none\"; an empty string on the wire stays refused, exactly as it is for those two.",
+            "$comment": "Null is an answer, not an absence, and unlike `lara_style_guideline_id` this key cannot be cleared with DELETE /metadata/{key}. `intento_provider` and `intento_routing` are mutually exclusive and the provider outranks the routing, while the project row is written once at creation and never updated: dropping the job row would re-inherit the project's provider and silently discard the routing the job just chose. Null is stored as the empty string, the job scope's \"explicitly none\"; unlike `deepl_id_glossary`, an empty string on the wire stays refused here, so null is the only wire form.",
             "type": [
               "string",
               "null"
