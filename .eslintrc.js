@@ -103,6 +103,8 @@ module.exports = {
         'public/js/components/segments/SegmentsCommentsIcon.js',
         'public/js/components/segments/SegmentWarnings.js',
         'public/js/components/segments/SegmentWrapper.js',
+        'public/js/components/segments/Editarea.js',
+        'public/js/components/segments/SegmentTarget.js',
         'public/js/components/projects/Header.js',
         'public/js/components/review/TranslationIssuesSideButton.js',
       ],
