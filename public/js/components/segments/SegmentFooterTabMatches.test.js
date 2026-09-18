@@ -216,9 +216,7 @@ describe('SegmentFooterTabMatches', () => {
   })
 
   test('renders trash icon for an owned TM key match', () => {
-    CatToolStore.getJobTmKeys.mockReturnValue([
-      {key: 'memkey', w: 1},
-    ])
+    CatToolStore.getJobTmKeys.mockReturnValue([{key: 'memkey', w: 1}])
     renderComponent({
       segment: {
         ...baseSegment,
@@ -347,7 +345,10 @@ describe('SegmentFooterTabMatches', () => {
   })
 })
 
-describe('SegmentFooterTabMatches.prototype.copyText', () => {
+// Copying a suggestion strips the zero-width and middle-dot markers before it
+// reaches the clipboard. Driven through a real copy event rather than the
+// component's internals, so it survives however the component is written.
+describe('copying from the matches tab', () => {
   afterEach(() => {
     jest.restoreAllMocks()
   })
@@ -355,19 +356,20 @@ describe('SegmentFooterTabMatches.prototype.copyText', () => {
   test('does not reject when the browser denies clipboard permission', async () => {
     jest
       .spyOn(document, 'getSelection')
-      .mockReturnValue({toString: () => 'some matched text'})
+      .mockReturnValue({toString: () => 'some\u200B suggestion·text'})
     navigator.clipboard = {
       writeText: jest
         .fn()
         .mockRejectedValue(new DOMException('denied', 'NotAllowedError')),
     }
+    const {container} = renderComponent()
 
-    await expect(
-      SegmentFooterTabMatches.prototype.copyText({preventDefault: jest.fn()}),
-    ).resolves.not.toThrow()
+    fireEvent.copy(container.querySelector('.tab.sub-editor'))
+    await Promise.resolve()
 
+    // the zero-width marker is dropped and the middle dot becomes a space
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      'some matched text',
+      'some suggestion text',
     )
   })
 })
