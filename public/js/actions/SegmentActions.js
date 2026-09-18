@@ -1230,16 +1230,12 @@ const SegmentActions = {
     }
     localStorage.setItem(this.localStorageReviewPanelClosed, false)
     window.dispatchEvent(new Event('resize'))
-    if (data && openSegment) {
+    // Only bring the segment into view when it is not already open. Both
+    // openSegment() and scrollToSegment() scroll the row to 'start', and the
+    // file header is sticky at that offset, so scrolling a segment the user is
+    // already working in pushes it underneath the header for no reason.
+    if (data && openSegment && !segment?.opened) {
       SegmentActions.openSegment(data.sid)
-      SegmentActions.scrollToSegment(data.sid)
-      window.setTimeout(
-        function (data) {
-          SegmentActions.scrollToSegment(data.sid)
-        },
-        500,
-        data,
-      )
     }
     AppDispatcher.dispatch({
       actionType: SegmentConstants.OPEN_ISSUES_PANEL,

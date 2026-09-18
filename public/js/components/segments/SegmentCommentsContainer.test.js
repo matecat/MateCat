@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, act} from '@testing-library/react'
+import {render, act, fireEvent, screen, waitFor} from '@testing-library/react'
 import '@testing-library/jest-dom'
 
 import SegmentCommentsContainer from './SegmentCommentsContainer'
@@ -10,24 +10,27 @@ import SegmentActions from '../../actions/SegmentActions'
 import UserStore from '../../stores/UserStore'
 import commonUtils from '../../utils/commonUtils'
 
+// The real MentionsInput owns the caret and the mention parsing, so the mock
+// keeps the props it was last rendered with: that is how a test types into the
+// composer, the same way the component's own user would.
+const mockMentionsProps = {current: null}
+
 jest.mock('react-mentions', () => ({
-  MentionsInput: ({
-    inputRef,
-    value,
-    onKeyDown,
-    placeholder,
-    className,
-  }) => (
-    <textarea
-      ref={inputRef}
-      data-testid="comment-input"
-      value={value}
-      readOnly
-      onKeyDown={onKeyDown}
-      placeholder={placeholder}
-      className={className}
-    />
-  ),
+  MentionsInput: (props) => {
+    mockMentionsProps.current = props
+    const {inputRef, value, onKeyDown, placeholder, className} = props
+    return (
+      <textarea
+        ref={inputRef}
+        data-testid="comment-input"
+        value={value}
+        readOnly
+        onKeyDown={onKeyDown}
+        placeholder={placeholder}
+        className={className}
+      />
+    )
+  },
 }))
 
 jest.mock('../common/Mention', () => () => null)
@@ -61,7 +64,9 @@ jest.mock('../../actions/SegmentActions', () => ({
 }))
 
 jest.mock('../../stores/UserStore', () => ({
-  getUser: jest.fn(() => ({user: {uid: 42, first_name: 'Jane', last_name: 'Doe'}})),
+  getUser: jest.fn(() => ({
+    user: {uid: 42, first_name: 'Jane', last_name: 'Doe'},
+  })),
 }))
 
 jest.mock('../../utils/commonUtils', () => ({
@@ -82,8 +87,25 @@ const buildComment = (overrides = {}) => ({
   ...overrides,
 })
 
+// Types into the composer the way the real MentionsInput would report it.
+const typeComment = (value, mentions = []) =>
+  act(() => {
+    mockMentionsProps.current.onChange({}, value, value, mentions)
+  })
+
+const commentInput = () => screen.getByTestId('comment-input')
+
+const postButton = () => screen.getByRole('button', {name: 'Comment'})
+
+// Hands a store event to whichever listener the component registered for it.
+const emitStoreEvent = (constant, ...args) =>
+  act(() => {
+    CommentsStore.addListener.mock.calls
+      .filter(([event]) => event === constant)
+      .forEach(([, listener]) => listener(...args))
+  })
+
 const renderContainer = (contextOverrides = {}) => {
-  const ref = React.createRef()
   const contextValue = {
     segment: {
       sid: '1-1',
@@ -96,14 +118,18 @@ const renderContainer = (contextOverrides = {}) => {
   }
   const utils = render(
     <SegmentContext.Provider value={contextValue}>
-      <SegmentCommentsContainer ref={ref} />
+      <SegmentCommentsContainer />
     </SegmentContext.Provider>,
   )
-  return {...utils, ref, contextValue}
+  return {...utils, contextValue}
 }
 
 describe('SegmentCommentsContainer', () => {
   beforeEach(() => {
+    // emitStoreEvent reads these call lists, so they must only hold the
+    // listeners registered by the component under test in this test.
+    CommentsStore.addListener.mockClear()
+    CommentsStore.removeListener.mockClear()
     window.config = {revisionNumber: 0}
     CommentsStore.getCommentsBySegment.mockReturnValue([])
     CommentsStore.getTeamUsers.mockReturnValue([])
@@ -130,7 +156,9 @@ describe('SegmentCommentsContainer', () => {
     const {container} = renderContainer()
     expect(container.textContent).toContain('Jane Doe')
     expect(container.textContent).toContain('hello there')
-    expect(container.querySelector('.comment-thread-active')).toBeInTheDocument()
+    expect(
+      container.querySelector('.comment-thread-active'),
+    ).toBeInTheDocument()
   })
 
   test('shows the translator/revisor label for a non-anonymous comment', () => {
@@ -146,9 +174,9 @@ describe('SegmentCommentsContainer', () => {
       buildComment({is_anonymous: 1}),
     ])
     const {container} = renderContainer()
-    expect(
-      container.querySelector('.comment-username-label').textContent,
-    ).toBe('Jane Doe')
+    expect(container.querySelector('.comment-username-label').textContent).toBe(
+      'Jane Doe',
+    )
   })
 
   test('renders a resolved marker for a resolve-type comment', () => {
@@ -156,7 +184,9 @@ describe('SegmentCommentsContainer', () => {
       buildComment({message_type: '2', is_anonymous: 0}),
     ])
     const {container} = renderContainer()
-    expect(container.querySelector('.comment-thread-resolved')).toBeInTheDocument()
+    expect(
+      container.querySelector('.comment-thread-resolved'),
+    ).toBeInTheDocument()
     expect(container.textContent).toContain('marked as resolved')
   })
 
@@ -179,7 +209,7 @@ describe('SegmentCommentsContainer', () => {
     CommentsStore.getCommentsBySegment.mockReturnValue([
       buildComment({uid: 42, source_page: 1}),
     ])
-    const {container, ref} = renderContainer()
+    const {container} = renderContainer()
     const deleteBtn = container.querySelector('.comment-item button')
     expect(deleteBtn).toBeInTheDocument()
 
@@ -195,31 +225,23 @@ describe('SegmentCommentsContainer', () => {
       buildComment({uid: 999}),
     ])
     const {container} = renderContainer()
-    expect(container.querySelector('.comment-item button')).not.toBeInTheDocument()
+    expect(
+      container.querySelector('.comment-item button'),
+    ).not.toBeInTheDocument()
   })
 
   test('clicking resolve dispatches resolveThread', () => {
     CommentsStore.getCommentsBySegment.mockReturnValue([buildComment()])
     const {container} = renderContainer()
-    const resolveButton = Array.from(
-      container.querySelectorAll('button'),
-    ).find((btn) => btn.textContent.includes('Resolve'))
+    const resolveButton = Array.from(container.querySelectorAll('button')).find(
+      (btn) => btn.textContent.includes('Resolve'),
+    )
 
     act(() => {
       resolveButton.click()
     })
 
     expect(CommentsActions.resolveThread).toHaveBeenCalledWith(1, false)
-  })
-
-  test('shows the send-comment error message when sendCommentError is set', () => {
-    const {container, ref} = renderContainer()
-    act(() => {
-      ref.current.setState({sendCommentError: true})
-    })
-    expect(container.textContent).toContain(
-      'Oops, something went wrong. Please try again later.',
-    )
   })
 
   test('closeComments prevents default and dispatches closeSegmentComment', () => {
@@ -234,142 +256,146 @@ describe('SegmentCommentsContainer', () => {
     expect(SegmentActions.closeSegmentComment).toHaveBeenCalledWith('1-1')
   })
 
-  test('sendComment dispatches when mentionsMarkup is present and clears the input on success', async () => {
-    const {ref} = renderContainer()
+  test('posting a comment sends what was typed, for the segment being commented', async () => {
+    renderContainer()
 
-    act(() => {
-      ref.current.setState({mentionsMarkup: '{@42@} hi', mentionsInputValue: 'hi'})
-    })
-    await act(async () => {
-      await ref.current.sendComment()
-    })
+    typeComment('{@42@} hi')
+    fireEvent.click(postButton())
 
-    expect(CommentsActions.sendComment).toHaveBeenCalledWith(
-      '{@42@} hi',
-      false,
-      1,
+    await waitFor(() =>
+      expect(CommentsActions.sendComment).toHaveBeenCalledWith(
+        '{@42@} hi',
+        false,
+        1,
+      ),
     )
   })
 
-  test('sendComment is a no-op when there is no mentionsMarkup', async () => {
-    const {ref} = renderContainer()
+  test('the post button stays disabled until something is typed', () => {
+    renderContainer()
 
-    await act(async () => {
-      await ref.current.sendComment()
-    })
+    expect(postButton()).toBeDisabled()
+    expect(CommentsActions.sendComment).not.toHaveBeenCalled()
+  })
+
+  test('a send that fails tells the user it went wrong', async () => {
+    CommentsActions.sendComment.mockReturnValueOnce(Promise.reject())
+    const {container} = renderContainer()
+
+    typeComment('{@42@} hi')
+    fireEvent.click(postButton())
+
+    await waitFor(() =>
+      expect(container).toHaveTextContent('Oops, something went wrong'),
+    )
+  })
+
+  test('a send that succeeds leaves no error message behind', async () => {
+    const {container} = renderContainer()
+
+    typeComment('{@42@} hi')
+    fireEvent.click(postButton())
+
+    await waitFor(() => expect(CommentsActions.sendComment).toHaveBeenCalled())
+    expect(container).not.toHaveTextContent('Oops, something went wrong')
+  })
+
+  test('a mention typed into the composer is sent as a bare id', async () => {
+    renderContainer()
+
+    typeComment('hello {@1||John@}', [{id: 1, display: 'John'}])
+    fireEvent.click(postButton())
+
+    await waitFor(() =>
+      expect(CommentsActions.sendComment).toHaveBeenCalledWith(
+        'hello {@1@}',
+        false,
+        1,
+      ),
+    )
+  })
+
+  test('pressing Enter posts the comment', async () => {
+    renderContainer()
+
+    typeComment('{@42@} hi')
+    fireEvent.keyDown(commentInput(), {key: 'Enter', shiftKey: false})
+
+    await waitFor(() =>
+      expect(CommentsActions.sendComment).toHaveBeenCalledWith(
+        '{@42@} hi',
+        false,
+        1,
+      ),
+    )
+  })
+
+  test('Shift+Enter writes a newline instead of posting', () => {
+    renderContainer()
+
+    typeComment('{@42@} hi')
+    fireEvent.keyDown(commentInput(), {key: 'Enter', shiftKey: true})
 
     expect(CommentsActions.sendComment).not.toHaveBeenCalled()
   })
 
-  test('sendComment recovers from a rejected send and clears the error afterwards', async () => {
-    CommentsActions.sendComment.mockReturnValueOnce(Promise.reject())
-    const {ref} = renderContainer()
-
-    act(() => {
-      ref.current.setState({mentionsMarkup: '{@42@} hi'})
-    })
-    await act(async () => {
-      ref.current.sendComment()
-      await Promise.resolve()
-      await Promise.resolve()
-      await Promise.resolve()
-    })
-
-    expect(ref.current.state.sendCommentError).toBe(false)
-  })
-
-  test('handleChangeMentionsInputValue converts mention placeholders and updates state', () => {
-    const {ref} = renderContainer()
-
-    act(() => {
-      ref.current.handleChangeMentionsInputValue(
-        {},
-        'hello {@1||John@}',
-        'hello John',
-        [{id: 1, display: 'John'}],
-      )
-    })
-
-    expect(ref.current.state.mentionsInputValue).toBe('hello {@1||John@}')
-    expect(ref.current.state.mentionsMarkup).toBe('hello {@1@}')
-  })
-
-  test('onKeyDown sends the comment on Enter when there is input', () => {
-    const {ref} = renderContainer()
-    act(() => {
-      ref.current.setState({mentionsMarkup: '{@42@} hi', mentionsInputValue: 'hi'})
-    })
-    const sendCommentSpy = jest.spyOn(ref.current, 'sendComment')
-    const fakeEvent = {key: 'Enter', shiftKey: false, preventDefault: jest.fn()}
-
-    act(() => {
-      ref.current.onKeyDown(fakeEvent)
-    })
-
-    expect(fakeEvent.preventDefault).toHaveBeenCalled()
-    expect(sendCommentSpy).toHaveBeenCalled()
-  })
-
-  test('onKeyDown debounces a draft save for non-Enter key presses', () => {
+  test('typing anything else schedules a draft save', () => {
     jest.useFakeTimers()
-    const {ref} = renderContainer()
-    const fakeEvent = {key: 'a', shiftKey: false, preventDefault: jest.fn()}
+    renderContainer()
 
-    act(() => {
-      ref.current.onKeyDown(fakeEvent)
-      jest.advanceTimersByTime(600)
-    })
+    fireEvent.keyDown(commentInput(), {key: 'a'})
+    act(() => jest.advanceTimersByTime(600))
 
     expect(CommentsActions.saveDraftComment).toHaveBeenCalledWith(1, '')
     jest.useRealTimers()
   })
 
-  test('onKeyDown does nothing special for other keys', () => {
-    const {ref} = renderContainer()
-    const fakeEvent = {key: 'a', shiftKey: false, preventDefault: jest.fn()}
+  test('a comment added to this segment appears in the thread', () => {
+    const {container} = renderContainer()
+    expect(container).not.toHaveTextContent('hello there')
 
-    act(() => {
-      ref.current.onKeyDown(fakeEvent)
-    })
-
-    expect(fakeEvent.preventDefault).not.toHaveBeenCalled()
-  })
-
-  test('updateComments refreshes comments and user when the sid matches', () => {
     CommentsStore.getCommentsBySegment.mockReturnValue([buildComment()])
-    CommentsStore.getUser.mockReturnValue({uid: 1})
-    const {ref} = renderContainer()
+    emitStoreEvent('ADD_COMMENT', '1')
 
-    act(() => {
-      ref.current.updateComments('1')
-    })
-
-    expect(ref.current.state.comments).toEqual([buildComment()])
-    expect(ref.current.state.user).toEqual({uid: 1})
+    expect(container).toHaveTextContent('hello there')
   })
 
-  test('updateComments ignores a non-matching sid', () => {
-    const {ref} = renderContainer()
-    const previousComments = ref.current.state.comments
+  // CommentsStore returns the array it stores and pushes into it, so the
+  // reference never changes. Resolving a thread has no other state change to
+  // ride on, so a component that trusts the reference never repaints it.
+  test('a thread resolved in place still repaints', () => {
+    const thread = [buildComment()]
+    CommentsStore.getCommentsBySegment.mockReturnValue(thread)
+    const {container} = renderContainer()
+    expect(container).not.toHaveTextContent('marked as resolved')
 
-    act(() => {
-      CommentsStore.getCommentsBySegment.mockReturnValue([buildComment()])
-      ref.current.updateComments('999')
-    })
+    thread.push(buildComment({id: 2, thread_id: 1, message_type: '2'}))
+    emitStoreEvent('ADD_COMMENT', '1')
 
-    expect(ref.current.state.comments).toBe(previousComments)
+    expect(container).toHaveTextContent('marked as resolved')
   })
 
-  test('setTeamUsers replaces the teamUsers state', () => {
-    const {ref} = renderContainer()
+  test('a comment added to another segment is ignored', () => {
+    const {container} = renderContainer()
 
-    act(() => {
-      ref.current.setTeamUsers([{uid: 7, first_name: 'A', last_name: 'B'}])
-    })
+    CommentsStore.getCommentsBySegment.mockReturnValue([buildComment()])
+    emitStoreEvent('ADD_COMMENT', '999')
 
-    expect(ref.current.state.teamUsers).toEqual([
-      {uid: 7, first_name: 'A', last_name: 'B'},
+    expect(container).not.toHaveTextContent('hello there')
+  })
+
+  test('a mention shows the team member name once the team arrives', () => {
+    CommentsStore.getCommentsBySegment.mockReturnValue([
+      buildComment({message: 'ping {@7@}'}),
     ])
+    const {container} = renderContainer()
+    expect(container).not.toHaveTextContent('Ada Lovelace')
+
+    emitStoreEvent('SET_TEAM_USERS', [
+      {uid: 7, first_name: 'Ada', last_name: 'Lovelace'},
+    ])
+
+    expect(container).toHaveTextContent('Ada Lovelace')
   })
 
   test('registers and unregisters CommentsStore listeners on mount/unmount', () => {
@@ -395,8 +421,8 @@ describe('SegmentCommentsContainer', () => {
 
   test('picks up a draft comment on mount', () => {
     CommentsStore.getDraftComment.mockReturnValue('draft text')
-    const {ref} = renderContainer()
-    expect(ref.current.state.mentionsInputValue).toBe('draft text')
+    renderContainer()
+    expect(commentInput()).toHaveValue('draft text')
   })
 
   test('renders anonymously with the reviewer label when posting anonymously in review mode', () => {

@@ -5,6 +5,8 @@ namespace Model\Filters\DTO;
 class MSExcel implements IDto
 {
 
+    use NormalizesNamesTrait;
+
     private bool $extract_doc_properties = false;
     private bool $extract_hidden_cells = false;
     private bool $extract_diagrams = false;
@@ -43,7 +45,7 @@ class MSExcel implements IDto
      */
     public function setExcludeColumns(array $exclude_columns): void
     {
-        $this->exclude_columns = $exclude_columns;
+        $this->exclude_columns = $this->normalizeNames($exclude_columns);
     }
 
     /**

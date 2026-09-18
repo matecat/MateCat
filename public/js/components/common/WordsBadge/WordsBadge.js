@@ -17,7 +17,9 @@ export const WordsBadge = ({
         onChange,
         value,
         validateChip: /./,
-        separators: [',', SPECIALS_SEPARATORS.EnterKey],
+        // none of these formats allows whitespace inside a name, so the space bar
+        // closes a pill just like the comma does
+        separators: [',', ' ', SPECIALS_SEPARATORS.EnterKey],
         placeholder,
         disabled,
         error,

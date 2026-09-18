@@ -1,0 +1,121 @@
+@use '../../tokens/colors';
+@use 'commons/variables';
+
+section .header {
+  height: 24px;
+  width: 100%;
+  color: colors.$grey500;
+  font-size: 12px;
+  background: colors.$grey100 !important;
+  margin-bottom: 0px;
+  .percentuage {
+    position: relative;
+    display: none;
+    width: 45px;
+    color: colors.$white;
+    font-size: 12px;
+    text-decoration: none;
+    font-weight: 100;
+    margin: 0 auto;
+    text-align: center;
+    line-height: 20px;
+  }
+  &.header-closed {
+    background: transparent !important;
+    position: absolute;
+
+    span {
+      z-index: 1;
+      padding: 2px 6px;
+      font-size: 11px;
+      top: -2px;
+    }
+  }
+  .repetition {
+    margin: 0 auto;
+    text-transform: uppercase;
+    color: colors.$white;
+    font-size: 12px;
+    background: colors.$grey300;
+    padding: 4px 8px;
+    position: relative;
+    z-index: 12;
+    max-width: 102px;
+  }
+  .header-segment-saving {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    float: right;
+    padding-right: 15px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    gap: 4px;
+    span {
+      font-size: variables.$font-size-xsmall;
+      padding: 0;
+    }
+    .header-segment-saving-loader {
+      width: 16px;
+      height: 16px;
+      background: url(/public/img/loading.gif);
+      background-size: cover;
+    }
+  }
+}
+
+.segment-counter {
+  position: absolute;
+  z-index: 1;
+  right: 0;
+  top: 0;
+  line-height: 16px;
+  font-size: 15px;
+  margin-top: 4px;
+  margin-right: 2%;
+  font-size: variables.$font-size-xsmall;
+
+  display: flex;
+  gap: 30px;
+
+  > div > span:first-of-type {
+    font-weight: bold;
+  }
+
+  .segment-counter-limit {
+    margin-left: 2px;
+  }
+
+  &.segment-counter-limit-warning {
+    .segment-counter-current {
+      color: variables.$notification-warning;
+      margin-right: 2px;
+    }
+  }
+
+  &.segment-counter-limit-error {
+    .segment-counter-current {
+      color: variables.$notification-error;
+      background-color: rgba(variables.$notification-error, 0.2);
+      border-radius: 4px;
+      padding: 2px;
+    }
+  }
+}
+
+section .header .context {
+  display: none;
+  float: left;
+  color: colors.$grey500;
+  text-decoration: none;
+  margin: 3px 0 0 10px;
+}
+
+section .header .context:hover {
+  color: colors.$black;
+}
+
+.percentuage.visible {
+  display: block !important;
+}

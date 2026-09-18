@@ -14,7 +14,7 @@ body.manage {
   background-color: colors.$grey100;
   overflow-y: hidden;
   overflow-x: auto;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   line-height: 1.4285em;
 }
 
@@ -71,7 +71,7 @@ div#manage-container {
         vertical-align: text-bottom;
       }
       .project-id {
-        font-size: 14px;
+        font-size: variables.$font-size-xsmall;
         font-weight: normal;
         margin-left: 8px;
         display: inline-block;
@@ -124,7 +124,7 @@ div#manage-container {
               font-family: Calibri, Arial, Helvetica, sans-serif;
               padding: 5px 17px;
               border: 1px solid colors.$grey600;
-              font-size: 16px;
+              font-size: variables.$font-size-small;
               transition: 0.3s ease !important;
             }
           }
@@ -314,7 +314,7 @@ div#manage-container {
               }
               .open-vendor {
                 font-family: Calibri, Arial, Helvetica, sans-serif;
-                font-size: 16px;
+                font-size: variables.$font-size-small;
                 //border: 1px solid #7eaf3e;
                 border-radius: 2px;
                 font-weight: bold;
@@ -337,7 +337,7 @@ div#manage-container {
                 font-family: Calibri, Arial, Helvetica, sans-serif;
                 padding: 6px 22px;
                 vertical-align: top;
-                font-size: 16px;
+                font-size: variables.$font-size-small;
                 //border: 1px solid #797979;
                 border-radius: 2px;
                 float: right;
@@ -353,14 +353,14 @@ div#manage-container {
                   color: colors.$black;
                   font-weight: normal;
                   border: none; // border: 1px solid #979797;
-                  font-size: 14px;
+                  font-size: variables.$font-size-xsmall;
                   padding: 0;
                   .buy-translation-span:hover {
                     text-decoration: none;
                   }
                   .buy-translation-span {
                     text-decoration: underline;
-                    font-size: 14px;
+                    font-size: variables.$font-size-xsmall;
                     white-space: nowrap;
                     overflow: hidden;
                   }
@@ -386,7 +386,7 @@ div#manage-container {
                 font-family: Calibri, Arial, Helvetica, sans-serif;
                 padding: 6px 19px;
                 vertical-align: top;
-                font-size: 16px;
+                font-size: variables.$font-size-small;
                 //border: 1px solid #797979;
                 border-radius: 2px;
                 float: right;
@@ -544,7 +544,7 @@ div#manage-container {
 }
 
 .project-activity-icon button.project-team-dropdown {
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   color: colors.$black;
   padding: 5px 15px;
   background-color: colors.$white;

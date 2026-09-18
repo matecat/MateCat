@@ -121,6 +121,27 @@ describe('Json', () => {
     expect(updated.json.context_keys).toEqual(['note'])
   })
 
+  test('a key keeps its padding and the pill spells it out', async () => {
+    const user = userEvent.setup()
+    const {modifyingCurrentTemplate, currentTemplate} = setup()
+
+    const contextKeysInput = screen.getAllByTestId('email-input')[1]
+
+    await user.type(contextKeysInput, ' my key ')
+    await user.keyboard('{Enter}')
+
+    await waitFor(() => expect(modifyingCurrentTemplate).toHaveBeenCalled())
+
+    const updater =
+      modifyingCurrentTemplate.mock.calls[
+        modifyingCurrentTemplate.mock.calls.length - 1
+      ][0]
+    const updated = updater(currentTemplate)
+    // the space bar must not split a JSON key
+    expect(updated.json.context_keys).toEqual([' my key '])
+    expect(screen.getAllByText('·')).toHaveLength(2)
+  })
+
   test('does not call modifyingCurrentTemplate when nothing changed', () => {
     const {modifyingCurrentTemplate} = setup()
 

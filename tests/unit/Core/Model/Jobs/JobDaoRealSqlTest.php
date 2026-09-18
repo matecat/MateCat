@@ -8,7 +8,7 @@ use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
-use Model\Jobs\MetadataDao as JobsMetadataDao;
+use Model\Jobs\MetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
@@ -352,6 +352,64 @@ class JobDaoRealSqlTest extends AbstractTest
         $this->dao->changePassword($job, '');
     }
 
+    /**
+     * job_metadata is keyed by (id_job, password, key), so renaming the credential without carrying
+     * the rows over leaves every setting the job has at an address nothing resolves any more:
+     * dialect_strict, mandatory_issues, the character counter, the subfiltering handlers. The move
+     * belongs to the rename, because ChangePasswordController, TranslatorsModel::changeJobPassword()
+     * and updateForMerge() all rotate through here and the last one dispatches no event to hang a
+     * listener on.
+     */
+    public function testChangePasswordCarriesTheJobMetadataOntoTheNewPassword(): void
+    {
+        $job = $this->seedJob();
+        $oldPassword = (string)$job->password;
+        $newPassword = 'rotated_' . bin2hex(random_bytes(4));
+
+        $metadataDao = new MetadataDao($this->realSqlDb());
+        $stored = [
+            JobsMetadataMarshaller::DIALECT_STRICT->value   => '1',
+            JobsMetadataMarshaller::MANDATORY_ISSUES->value => '["r1"]',
+        ];
+
+        foreach ($stored as $key => $value) {
+            $metadataDao->set((int)$job->id, $oldPassword, $key, $value);
+            $this->fixtures->trackExisting('job_metadata', [
+                'id_job'   => $job->id,
+                'password' => $newPassword,
+                'key'      => $key,
+            ]);
+        }
+
+        $this->dao->changePassword($job, $newPassword);
+
+        self::assertSame([], $metadataDao->getRawMapByJobIdAndPassword((int)$job->id, $oldPassword));
+        self::assertSame($stored, $metadataDao->getRawMapByJobIdAndPassword((int)$job->id, $newPassword));
+    }
+
+    /**
+     * The MT context is stored under the empty password and read by (id_job, key) alone, so it is
+     * not the rotated credential's to carry.
+     */
+    public function testChangePasswordLeavesThePasswordLessMetadataRowWhereItIs(): void
+    {
+        $job = $this->seedJob();
+        $newPassword = 'rotated_' . bin2hex(random_bytes(4));
+
+        $metadataDao = new MetadataDao($this->realSqlDb());
+        $metadataDao->set((int)$job->id, '', 'mt_context', 'ctx-1');
+        $this->fixtures->trackExisting('job_metadata', [
+            'id_job'   => $job->id,
+            'password' => '',
+            'key'      => 'mt_context',
+        ]);
+
+        $this->dao->changePassword($job, $newPassword);
+
+        self::assertSame(['mt_context' => 'ctx-1'], $metadataDao->getRawMapByJobIdAndPassword((int)$job->id, ''));
+        self::assertSame([], $metadataDao->getRawMapByJobIdAndPassword((int)$job->id, $newPassword));
+    }
+
     public function testChangePasswordLeavesTheEvictionToTheCaller(): void
     {
         $job = $this->seedJob();
@@ -392,7 +450,7 @@ class JobDaoRealSqlTest extends AbstractTest
         $oldPassword = (string)$job->password;
         $newPassword = 'newpw_' . bin2hex(random_bytes(4));
 
-        $metadataDao = new JobsMetadataDao($this->realSqlDb());
+        $metadataDao = new MetadataDao($this->realSqlDb());
         $metadataDao->bulkSet((int)$job->id, $oldPassword, [
             JobsMetadataMarshaller::DEEPL_FORMALITY->value => 'prefer_more',
             JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '90',
@@ -433,7 +491,7 @@ class JobDaoRealSqlTest extends AbstractTest
         $newPassword = 'newpw_' . bin2hex(random_bytes(4));
         $siblingPassword = 'sibling_' . bin2hex(random_bytes(4));
 
-        $metadataDao = new JobsMetadataDao($this->realSqlDb());
+        $metadataDao = new MetadataDao($this->realSqlDb());
         $metadataDao->bulkSet((int)$job->id, $oldPassword, [
             JobsMetadataMarshaller::LARA_STYLE->value => 'creative',
         ]);

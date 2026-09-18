@@ -11,6 +11,17 @@ describe('SegmentWarnings', () => {
     expect(container.querySelectorAll('.alert-block')).toHaveLength(0)
   })
 
+  test('leaves the warnings it was given untouched', () => {
+    const entry = {outcome: 'e1', debug: 'error debug', tip: 'fix it'}
+    const warnings = {ERROR: {Categories: {cat1: [entry]}}}
+
+    render(<SegmentWarnings warnings={warnings} />)
+
+    // The class stamped `type` onto this object, which then compared unequal to
+    // a freshly supplied set and forced a re-render through the memo comparator.
+    expect(entry).not.toHaveProperty('type')
+  })
+
   test('renders ERROR, WARNING and INFO entries with correct classes and icons', () => {
     const warnings = {
       ERROR: {

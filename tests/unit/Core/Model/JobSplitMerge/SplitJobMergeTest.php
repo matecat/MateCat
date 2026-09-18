@@ -14,7 +14,6 @@ use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
 use Model\Translators\JobsTranslatorsDao;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
-use Model\Jobs\MetadataStruct;
 use Model\JobSplitMerge\SplitMergeProjectData;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
@@ -168,6 +167,39 @@ class SplitJobMergeTest extends AbstractTest
                 'standard_word_count' => 250,
                 'raw_word_count'      => 300,
                 'eq_word_count'       => 200,
+            ],
+        ];
+    }
+
+    /**
+     * Three chunks, so a test can tell "every chunk after the first" from "the second chunk".
+     */
+    private function makeThreeChunks(): array
+    {
+        return [
+            [
+                'segment_start'       => 1,
+                'segment_end'         => 33,
+                'last_opened_segment' => 1,
+                'standard_word_count' => 160,
+                'raw_word_count'      => 200,
+                'eq_word_count'       => 130,
+            ],
+            [
+                'segment_start'       => 34,
+                'segment_end'         => 66,
+                'last_opened_segment' => 34,
+                'standard_word_count' => 160,
+                'raw_word_count'      => 200,
+                'eq_word_count'       => 130,
+            ],
+            [
+                'segment_start'       => 67,
+                'segment_end'         => 100,
+                'last_opened_segment' => 67,
+                'standard_word_count' => 160,
+                'raw_word_count'      => 200,
+                'eq_word_count'       => 130,
             ],
         ];
     }
@@ -549,6 +581,37 @@ class SplitJobMergeTest extends AbstractTest
         return [$chunk1, $chunk2];
     }
 
+    /**
+     * Helper: three JobStruct chunks for merging, so the delete can be told apart from the survivor.
+     * @return JobStruct[]
+     */
+    private function makeThreeJobChunksForMerge(): array
+    {
+        $chunks = [];
+
+        foreach ([['pass1', 1, 33, 30, 1000], ['pass2', 34, 66, 20, 800], ['pass3', 67, 100, 25, 900]] as $spec) {
+            [$password, $first, $last, $pee, $tte] = $spec;
+
+            $chunk = new JobStruct();
+            $chunk->id = 100;
+            $chunk->password = $password;
+            $chunk->id_project = 999;
+            $chunk->job_first_segment = $first;
+            $chunk->job_last_segment = $last;
+            $chunk->source = 'en-US';
+            $chunk->target = 'it-IT';
+            $chunk->total_raw_wc = 200;
+            $chunk->standard_analysis_wc = 150;
+            $chunk->avg_post_editing_effort = $pee;
+            $chunk->total_time_to_edit = $tte;
+            $chunk->tm_keys = '[]';
+
+            $chunks[] = $chunk;
+        }
+
+        return $chunks;
+    }
+
     private function setupMergeStubs(): void
     {
         // ProjectStruct for cache invalidation (avoids DB call via getProject())
@@ -765,152 +828,203 @@ class SplitJobMergeTest extends AbstractTest
     }
 
     // ────────────────────────────────────────────────────────────────
-    // Metadata duplication / deletion tests
+    // Metadata propagation / deletion tests
     // ────────────────────────────────────────────────────────────────
 
     /**
-     * During split, each chunk must receive copies of the original job's
-     * character_counter_count_tags, character_counter_mode, and
-     * subfiltering_handlers metadata via get()/set()/destroyCache().
+     * job_metadata is keyed by (id_job, password, key), so a chunk that gets a fresh password gets
+     * an empty address and keeps nothing it is not given.
+     *
+     * This test used to pin the opposite and assert that exactly three keys were copied —
+     * character_counter_count_tags, character_counter_mode and subfiltering_handlers. That list was
+     * the bug: dialect_strict, mandatory_issues, public_tm_penalty and tm_prioritization were left
+     * behind on every chunk after the first. Do not narrow it back down.
      *
      * @throws Exception
      */
     #[Test]
-    public function splitJobDuplicatesMetadataForEachChunk(): void
+    public function splitJobCopiesEveryMetadataKeyOntoEachNewChunk(): void
     {
         $this->setupSplitJobStubs();
         $chunks = $this->makeTwoChunks();
         $ps = $this->makeSplitProjectStructure($chunks);
 
-        // Derived rather than hardcoded: the service copies whatever propagatedOnSplit() lists, and
-        // a key added there has to reach every chunk without this test needing an edit.
-        $metadataKeys = JobsMetadataMarshaller::propagatedOnSplit();
-        $keyCount = count($metadataKeys);
+        $sourceMetadata = [
+            JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
+            JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value       => 'google_ads',
+            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value        => '["html"]',
+            JobsMetadataMarshaller::DIALECT_STRICT->value               => '1',
+            JobsMetadataMarshaller::MANDATORY_ISSUES->value             => '["r1","r2"]',
+            JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value            => '25',
+            JobsMetadataMarshaller::TM_PRIORITIZATION->value            => '1',
+        ];
 
-        // Stub get() to return a MetadataStruct for every key on the original job
-        $this->jobsMetadataDaoMock->method('get')
-            ->willReturnCallback(function (int $jobId, string $password, string $key) {
-                $struct = new MetadataStruct();
-                $struct->id_job = $jobId;
-                $struct->password = $password;
-                $struct->key = $key;
-                $struct->value = 'value_for_' . $key;
+        $this->jobsMetadataDaoMock->method('getRawMapByJobIdAndPassword')->willReturn($sourceMetadata);
 
-                return $struct;
-            });
-
-        // Track set() calls: [jobId, password, key, value]
-        $setCalls = [];
-        $this->jobsMetadataDaoMock->method('set')
-            ->willReturnCallback(function (int $jobId, string $password, string $key, string $value) use (&$setCalls) {
-                $setCalls[] = [$jobId, $password, $key, $value];
-
-                return null; // return value unused by production code
-            });
-
-        // Track destroyCache() calls: [jobId, password, key]
-        $destroyCacheCalls = [];
-        $this->jobsMetadataDaoMock->method('destroyCache')
-            ->willReturnCallback(function (MetadataStruct $metadata) use (&$destroyCacheCalls) {
-                $destroyCacheCalls[] = [$metadata->id_job, $metadata->password, $metadata->key];
+        $bulkSetCalls = [];
+        $this->jobsMetadataDaoMock->method('bulkSet')
+            ->willReturnCallback(function (int $jobId, string $password, array $metadata) use (&$bulkSetCalls) {
+                $bulkSetCalls[] = [$jobId, $password, $metadata];
             });
 
         $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
-        // 2 chunks × every propagated key
-        $this->assertCount(2 * $keyCount, $setCalls, "Expected " . (2 * $keyCount) . " set() calls (2 chunks x $keyCount keys)");
-
-        // Verify that set() was called with the correct job id, password, key, and value for each chunk
-        // Chunk 1 retains original password 'origpass'; Chunk 2 gets 'pass_chunk2'
-        $expectedPasswords = ['origpass', 'pass_chunk2'];
-
-        foreach ($expectedPasswords as $chunkIdx => $expectedPassword) {
-            foreach ($metadataKeys as $keyIdx => $key) {
-                $callIndex = ($chunkIdx * $keyCount) + $keyIdx;
-                $this->assertEquals(100, $setCalls[$callIndex][0], "set() call $callIndex: wrong job id");
-                $this->assertEquals($expectedPassword, $setCalls[$callIndex][1], "set() call $callIndex: wrong password");
-                $this->assertEquals($key, $setCalls[$callIndex][2], "set() call $callIndex: wrong key");
-                $this->assertEquals('value_for_' . $key, $setCalls[$callIndex][3], "set() call $callIndex: wrong value");
-            }
-        }
-
-        // destroyCache is called on the ORIGINAL job for each key, once per chunk iteration:
-        // 2 chunks × every propagated key, all targeting origpass
-        $this->assertCount(2 * $keyCount, $destroyCacheCalls, 'Expected one destroyCache() call per chunk and key');
-        foreach ($destroyCacheCalls as $i => $call) {
-            $this->assertEquals(100, $call[0], "destroyCache call $i: wrong job id");
-            $this->assertEquals('origpass', $call[1], "destroyCache call $i: wrong password");
-            $this->assertContains($call[2], $metadataKeys, "destroyCache call $i: unexpected key '{$call[2]}'");
-        }
+        // Chunk 1 keeps 'origpass', so its rows are already at that address and it is skipped.
+        $this->assertCount(1, $bulkSetCalls, 'Only the chunk that got a new password is written to');
+        $this->assertSame(100, $bulkSetCalls[0][0], 'wrong job id');
+        $this->assertSame('pass_chunk2', $bulkSetCalls[0][1], 'wrong chunk password');
+        $this->assertSame($sourceMetadata, $bulkSetCalls[0][2], 'every key must reach the chunk, values verbatim');
     }
 
     /**
-     * During split, if get() returns null for a metadata key, set() and
-     * destroyCache() should NOT be called for that key.
+     * The reported defect, named: a split used to leave both of these behind, so the second chunk
+     * fell back to the default — no strict dialect on the MyMemory request, no mandatory issue
+     * gating delivery.
      *
      * @throws Exception
      */
     #[Test]
-    public function splitJobSkipsMetadataDuplicationWhenGetReturnsNull(): void
+    public function splitJobPropagatesDialectStrictAndMandatoryIssuesToEveryChunk(): void
     {
         $this->setupSplitJobStubs();
-        $chunks = $this->makeTwoChunks();
+        $chunks = $this->makeThreeChunks();
         $ps = $this->makeSplitProjectStructure($chunks);
 
-        // get() always returns null — no metadata to duplicate
-        $this->jobsMetadataDaoMock->method('get')->willReturn(null);
+        $this->jobsMetadataDaoMock->method('getRawMapByJobIdAndPassword')->willReturn([
+            JobsMetadataMarshaller::DIALECT_STRICT->value   => '1',
+            JobsMetadataMarshaller::MANDATORY_ISSUES->value => '["r2"]',
+        ]);
 
-        // set() should never be called
-        $this->jobsMetadataDaoMock->expects($this->never())->method('set');
+        $writtenTo = [];
+        $this->jobsMetadataDaoMock->method('bulkSet')
+            ->willReturnCallback(function (int $jobId, string $password, array $metadata) use (&$writtenTo) {
+                $writtenTo[$password] = $metadata;
+            });
 
-        // no metadata copied means nothing to evict on the job it was copied from
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
+
+        foreach (['pass_chunk2', 'pass_chunk3'] as $chunkPassword) {
+            $this->assertArrayHasKey($chunkPassword, $writtenTo, "chunk $chunkPassword received no metadata");
+            $this->assertSame('1', $writtenTo[$chunkPassword][JobsMetadataMarshaller::DIALECT_STRICT->value]);
+            $this->assertSame('["r2"]', $writtenTo[$chunkPassword][JobsMetadataMarshaller::MANDATORY_ISSUES->value]);
+        }
+    }
+
+    /**
+     * The source is the same for every chunk, so it is read before the loop rather than once per
+     * chunk. The previous shape also evicted the source row on each iteration, which no write there
+     * ever touched.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function splitJobReadsTheSourceMetadataOnceForAllChunks(): void
+    {
+        $this->setupSplitJobStubs();
+        $chunks = $this->makeThreeChunks();
+        $ps = $this->makeSplitProjectStructure($chunks);
+
+        $this->jobsMetadataDaoMock->expects($this->once())
+            ->method('getRawMapByJobIdAndPassword')
+            ->with(100, 'origpass')
+            ->willReturn([JobsMetadataMarshaller::TM_PRIORITIZATION->value => '1']);
+
+        // Nothing is copied away from the job being split, so nothing on it goes stale.
         $this->jobsMetadataDaoMock->expects($this->never())->method('destroyCache');
 
         $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
     }
 
     /**
-     * During merge, metadata keys (character_counter_count_tags,
-     * character_counter_mode, subfiltering_handlers) must be deleted
-     * from all chunks AFTER the first ($i > 0).
+     * The first chunk keeps the password of the job being split, so its rows are already where they
+     * belong and re-writing them would be a self-upsert.
      *
      * @throws Exception
      */
     #[Test]
-    public function mergeALLDeletesMetadataFromNonFirstChunks(): void
+    public function splitJobDoesNotCopyMetadataOntoTheChunkThatKeptItsPassword(): void
+    {
+        $this->setupSplitJobStubs();
+        $chunks = $this->makeTwoChunks();
+        $ps = $this->makeSplitProjectStructure($chunks);
+
+        $this->jobsMetadataDaoMock->method('getRawMapByJobIdAndPassword')
+            ->willReturn([JobsMetadataMarshaller::DIALECT_STRICT->value => '1']);
+
+        $passwords = [];
+        $this->jobsMetadataDaoMock->method('bulkSet')
+            ->willReturnCallback(function (int $jobId, string $password) use (&$passwords) {
+                $passwords[] = $password;
+            });
+
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
+
+        $this->assertSame(['pass_chunk2'], $passwords);
+        $this->assertNotContains('origpass', $passwords, 'the retained password must not be written to');
+    }
+
+    /**
+     * A job with no metadata gives the chunks nothing to inherit.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function splitJobCopiesNothingWhenTheJobHasNoMetadata(): void
+    {
+        $this->setupSplitJobStubs();
+        $chunks = $this->makeTwoChunks();
+        $ps = $this->makeSplitProjectStructure($chunks);
+
+        $this->jobsMetadataDaoMock->method('getRawMapByJobIdAndPassword')->willReturn([]);
+
+        $bulkSetCalls = [];
+        $this->jobsMetadataDaoMock->method('bulkSet')
+            ->willReturnCallback(function (int $jobId, string $password, array $metadata) use (&$bulkSetCalls) {
+                $bulkSetCalls[] = $metadata;
+            });
+
+        $this->jobsMetadataDaoMock->expects($this->never())->method('destroyCache');
+
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
+
+        // bulkSet() early-returns on an empty map, so handing it one is harmless; what matters is
+        // that nothing is invented for the chunk.
+        foreach ($bulkSetCalls as $metadata) {
+            $this->assertSame([], $metadata);
+        }
+    }
+
+    /**
+     * deleteOnMerge() drops the row of every chunk but the first, so their metadata has to go with
+     * them — all of it. This too used to name three keys and leave four behind as rows addressed to
+     * a password that no longer exists.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function mergeALLDeletesEveryMetadataKeyFromNonFirstChunks(): void
     {
         $this->setupMergeStubs();
         $chunks = $this->makeJobChunksForMerge();
         $ps = new SplitMergeProjectData(999);
 
-        // The merge drops exactly what the split copied, so both sides read the same list.
-        $metadataKeys = JobsMetadataMarshaller::propagatedOnSplit();
-        $keyCount = count($metadataKeys);
-
-        // Track delete() calls: [jobId, password, key]
         $deleteCalls = [];
-        $this->jobsMetadataDaoMock->method('delete')
-            ->willReturnCallback(function ($jobId, $password, $key) use (&$deleteCalls) {
-                $deleteCalls[] = [$jobId, $password, $key];
+        $this->jobsMetadataDaoMock->method('deleteByJobIdAndPassword')
+            ->willReturnCallback(function (int $jobId, string $password) use (&$deleteCalls) {
+                $deleteCalls[] = [$jobId, $password];
             });
 
-        // The merge does not evict on its own: delete() owns the eviction of the row it removes.
+        // The merge does not evict on its own: the delete owns the eviction of the rows it removes.
         $this->jobsMetadataDaoMock->expects($this->never())->method('destroyCache');
 
         $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
-        // Only chunk2 (pass2) metadata should be deleted, one call per propagated key
-        $this->assertCount($keyCount, $deleteCalls, "Expected $keyCount delete() calls (1 non-first chunk x $keyCount keys)");
-        foreach ($deleteCalls as $i => $call) {
-            $this->assertEquals(100, $call[0], "delete() call $i: wrong job id");
-            $this->assertEquals('pass2', $call[1], "delete() call $i: wrong password — should be chunk2's password");
-            $this->assertEquals($metadataKeys[$i], $call[2], "delete() call $i: wrong key");
-        }
+        $this->assertSame([[100, 'pass2']], $deleteCalls, 'only the chunk being removed loses its metadata');
     }
 
     /**
-     * During merge with 3 chunks, metadata should be deleted from chunks 2
-     * and 3 but NOT from chunk 1.
+     * With three chunks, the two that are removed lose their metadata and the surviving one keeps
+     * its own.
      *
      * @throws Exception
      */
@@ -919,72 +1033,40 @@ class SplitJobMergeTest extends AbstractTest
     {
         $this->setupMergeStubs();
 
-        // Create 3 chunks
-        $chunk1 = new JobStruct();
-        $chunk1->id = 100;
-        $chunk1->password = 'pass1';
-        $chunk1->id_project = 999;
-        $chunk1->job_first_segment = 1;
-        $chunk1->job_last_segment = 33;
-        $chunk1->source = 'en-US';
-        $chunk1->target = 'it-IT';
-        $chunk1->total_raw_wc = 200;
-        $chunk1->standard_analysis_wc = 150;
-        $chunk1->avg_post_editing_effort = 30;
-        $chunk1->total_time_to_edit = 1000;
-        $chunk1->tm_keys = '[]';
-
-        $chunk2 = new JobStruct();
-        $chunk2->id = 100;
-        $chunk2->password = 'pass2';
-        $chunk2->id_project = 999;
-        $chunk2->job_first_segment = 34;
-        $chunk2->job_last_segment = 66;
-        $chunk2->source = 'en-US';
-        $chunk2->target = 'it-IT';
-        $chunk2->total_raw_wc = 200;
-        $chunk2->standard_analysis_wc = 150;
-        $chunk2->avg_post_editing_effort = 20;
-        $chunk2->total_time_to_edit = 800;
-        $chunk2->tm_keys = '[]';
-
-        $chunk3 = new JobStruct();
-        $chunk3->id = 100;
-        $chunk3->password = 'pass3';
-        $chunk3->id_project = 999;
-        $chunk3->job_first_segment = 67;
-        $chunk3->job_last_segment = 100;
-        $chunk3->source = 'en-US';
-        $chunk3->target = 'it-IT';
-        $chunk3->total_raw_wc = 200;
-        $chunk3->standard_analysis_wc = 150;
-        $chunk3->avg_post_editing_effort = 25;
-        $chunk3->total_time_to_edit = 900;
-        $chunk3->tm_keys = '[]';
-
-        $chunks = [$chunk1, $chunk2, $chunk3];
+        $chunks = $this->makeThreeJobChunksForMerge();
         $ps = new SplitMergeProjectData(999);
 
-        // Track delete() calls
         $deleteCalls = [];
-        $this->jobsMetadataDaoMock->method('delete')
-            ->willReturnCallback(function ($jobId, $password, $key) use (&$deleteCalls) {
-                $deleteCalls[] = [$jobId, $password, $key];
+        $this->jobsMetadataDaoMock->method('deleteByJobIdAndPassword')
+            ->willReturnCallback(function (int $jobId, string $password) use (&$deleteCalls) {
+                $deleteCalls[] = [$jobId, $password];
             });
-
 
         $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
-        // 2 non-first chunks × every propagated key
-        $keyCount = count(JobsMetadataMarshaller::propagatedOnSplit());
-        $this->assertCount(2 * $keyCount, $deleteCalls, 'Expected one delete() call per non-first chunk and key');
+        $this->assertSame([[100, 'pass2'], [100, 'pass3']], $deleteCalls);
+    }
 
-        // The first block of calls targets chunk2 (pass2), the second chunk3 (pass3). The first
-        // chunk keeps its rows: it is the job the merge leaves behind.
-        $passwords = array_column($deleteCalls, 1);
-        $this->assertSame(
-            array_merge(array_fill(0, $keyCount, 'pass2'), array_fill(0, $keyCount, 'pass3')),
-            $passwords
-        );
+    /**
+     * The delete belongs inside the scope: run before it, a merge that fails afterwards would leave
+     * the settings already gone with nothing to roll them back.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function mergeALLDeletesChunkMetadataInsideTheTransactionScope(): void
+    {
+        $this->setupMergeStubs();
+        $chunks = $this->makeJobChunksForMerge();
+        $ps = new SplitMergeProjectData(999);
+
+        $this->jobsMetadataDaoMock->method('deleteByJobIdAndPassword')
+            ->willReturnCallback(function (): void {
+                $this->callOrder[] = 'deleteChunkMetadata';
+            });
+
+        $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
+
+        $this->assertSame(['transaction', 'deleteChunkMetadata'], $this->callOrder);
     }
 }

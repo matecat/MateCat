@@ -152,7 +152,7 @@ class MetadataDao extends AbstractDao
     /**
      * Evict every cached read of every key a chunk's credential can address.
      *
-     * A password rotation moves the rows wholesale (@see self::updateJobPassword()), so there is no
+     * A password rotation moves the rows wholesale (@see self::movePassword()), so there is no
      * single row for the caller to name: it knows the credential, not which keys are stored under
      * it. Naming only the credential is not enough either — get() binds the key as well, so its
      * entries hash differently from the bulk read's and survive an eviction that names two values
@@ -299,25 +299,113 @@ class MetadataDao extends AbstractDao
     }
 
     /**
-     * Move every row of a chunk onto its new password.
+     * Every row of one chunk as a `key => value` map, with the values exactly as stored.
      *
-     * The password is half of the natural key, so rotating jobs.password without this leaves the
-     * rows stranded under a credential nothing resolves any more: the chunk silently loses its
-     * settings. Sibling tables that mirror the job password do the same thing
-     * (@see \Model\LQA\ChunkReviewDao::updateReviewPassword(),
-     * \Model\ReviseFeedback\FeedbackDAO, \Model\ChunksCompletion\ChunkCompletionEventDao).
+     * getByJobIdAndPassword() cannot serve a copy: it runs every value through
+     * JobsMetadataMarshaller::unMarshall(), so a boolean comes back as `true` and a JSON list as an
+     * array. Writing that back would store `1` or `Array` in place of the text every reader parses.
+     * The statement is the same one, so this shares its cache address and adds no read of its own.
      *
-     * Caches are deliberately not evicted here: the rotation runs inside a transaction and, while it
-     * is open, another connection still reads the pre-rotation row and would cache the replaced
-     * credential as valid again behind the eviction. Evicting is the caller's, once it has committed
-     * (@see \Model\Jobs\JobCredentialCacheInvalidator::sweepAfterJobPasswordRotation()).
+     * The empty password is an address like any other here, and it is not this one: MMT stores the
+     * MT context under it and reads it with getByIdJob(), which ignores the password, so that row is
+     * already shared by every chunk of the job. Binding the password is what keeps it out of a copy.
      *
+     * @return array<string, string>
+     * @throws Exception
      * @throws PDOException
+     * @throws ReflectionException
      */
-    public function updateJobPassword(int $id_job, string $old_password, string $new_password): void
+    public function getRawMapByJobIdAndPassword(int $id_job, string $password): array
     {
-        $sql = "UPDATE job_metadata " .
-            " SET password = :new_password " .
+        $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password);
+
+        /** @var MetadataStruct[] $list */
+        $list = $this->setCacheTTL(0)->_fetchObjectMap($stmt, MetadataStruct::class, [
+            'id_job' => $id_job,
+            'password' => $password,
+        ]);
+
+        $map = [];
+        foreach ($list as $metadata) {
+            $map[(string)$metadata->key] = (string)$metadata->value;
+        }
+
+        return $map;
+    }
+
+    /**
+     * Delete every row of one chunk.
+     *
+     * @throws Exception
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws TypeError
+     */
+    public function deleteByJobIdAndPassword(int $id_job, string $password): void
+    {
+        // The keys are read before the statement runs: destroyCache() names one address per key, and
+        // once the rows are gone there is nothing left to enumerate them from.
+        $keys = array_keys($this->getRawMapByJobIdAndPassword($id_job, $password));
+
+        if (empty($keys)) {
+            return;
+        }
+
+        $sql = "DELETE FROM job_metadata " .
+            " WHERE id_job = :id_job AND password = :password ";
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'id_job' => $id_job,
+            'password' => $password,
+        ]);
+
+        foreach ($keys as $key) {
+            $this->destroyCache(new MetadataStruct([
+                'id_job'   => $id_job,
+                'password' => $password,
+                'key'      => $key,
+            ]));
+        }
+    }
+
+    /**
+     * Carry every row of a chunk onto the password that replaced it.
+     *
+     * JobDao::changePassword() renames a job credential in place, and job_metadata is keyed by
+     * (id_job, password, key). Without this the rows stay at a password that no longer exists and
+     * the job silently loses every setting it had — dialect_strict, mandatory_issues, the character
+     * counter, the subfiltering handlers. It mirrors what ChunkReviewDao::updatePassword() does for
+     * the phase rows, and like that one it is the rename that owns it, not the caller.
+     *
+     * A plain UPDATE is safe against the unique key: the password arriving is freshly generated, and
+     * a collision would mean the same (id, password) already exists in `jobs`, which the unique key
+     * there forbids.
+     *
+     * @return int the number of rows carried over
+     *
+     * @throws Exception
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws TypeError
+     */
+    public function movePassword(int $id_job, string $old_password, string $new_password): int
+    {
+        // The empty password is not a chunk credential and nothing renames it: it is the address MMT
+        // stores the MT context under, shared by every chunk of the job. A rotation that swept it up
+        // would take the context away from the chunks that did not rotate.
+        if ($old_password === '' || $old_password === $new_password) {
+            return 0;
+        }
+
+        $keys = array_keys($this->getRawMapByJobIdAndPassword($id_job, $old_password));
+
+        if (empty($keys)) {
+            return 0;
+        }
+
+        $sql = "UPDATE job_metadata SET password = :new_password " .
             " WHERE id_job = :id_job AND password = :old_password ";
 
         $conn = $this->database->getConnection();
@@ -327,6 +415,20 @@ class MetadataDao extends AbstractDao
             'old_password' => $old_password,
             'new_password' => $new_password,
         ]);
+
+        // Both ends go. The rows answer under the password they left, and under the one they arrived
+        // at a lookup made before the rotation may have cached the miss it found there.
+        foreach ($keys as $key) {
+            foreach ([$old_password, $new_password] as $password) {
+                $this->destroyCache(new MetadataStruct([
+                    'id_job'   => $id_job,
+                    'password' => $password,
+                    'key'      => $key,
+                ]));
+            }
+        }
+
+        return $stmt->rowCount();
     }
 
     /**

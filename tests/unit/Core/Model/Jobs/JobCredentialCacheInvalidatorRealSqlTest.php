@@ -255,12 +255,17 @@ class JobCredentialCacheInvalidatorRealSqlTest extends AbstractTest
 
     /**
      * The regression this pins. JobDao::changePassword() moves the job_metadata rows onto the new
-     * password, and the sweep used to evict only the bulk read — getByJobIdAndPassword(), bound to
+     * password, and the eviction used to name only the bulk read — getByJobIdAndPassword(), bound to
      * (id_job, password). But every MT setting is read one key at a time through
      * JobSettingsResolver::resolve() → MetadataDao::get(), a different statement bound to
      * (id_job, password, key). Different SQL and a different bind set means a different hash, so the
-     * per-key entries survived the eviction for the whole 86400s TTL, keyed on the retired password:
-     * any flow that returned a job to a previously used password read its pre-rotation settings.
+     * per-key entries survived for the whole 86400s TTL, keyed on the retired password: any flow that
+     * returned a job to a previously used password read its pre-rotation settings.
+     *
+     * MetadataDao::movePassword() now names both ends per key as part of the move, so the retired
+     * credential is cold before the sweep runs. The sweep is asserted after it all the same: it
+     * covers the other credential-keyed tables, and this must keep holding whichever of the two
+     * cleared the entry.
      */
     #[Test]
     public function jobPasswordRotation_evicts_the_per_key_settings_reads_and_not_only_the_bulk_one(): void
@@ -283,12 +288,11 @@ class JobCredentialCacheInvalidatorRealSqlTest extends AbstractTest
         $rotated = 'jcci_meta_rotated_pwd';
         $this->jobDao->changePassword($jStruct, $rotated);
 
-        // the row has moved, so the old credential now addresses nothing — but the warm entry still
-        // answers with the value that used to live there
-        $this->assertSame(
-            'faithful',
+        // the row has moved, so the old credential addresses nothing — and the warm per-key entry
+        // must not keep answering with the value that used to live there
+        $this->assertNull(
             $resolver->resolve($this->idJob, $this->jobPassword, null, $key, JobSettingsResolver::DEFAULT_TTL),
-            'the rotation alone leaves the retired password serving its pre-rotation settings'
+            'the move must take the per-key entry of the retired password with it'
         );
 
         $this->invalidator->sweepAfterJobPasswordRotation($jStruct, $this->jobPassword, $rotated);

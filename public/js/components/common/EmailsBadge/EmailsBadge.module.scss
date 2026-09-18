@@ -94,6 +94,16 @@
   }
 }
 
+// only rendered when the chip has to reveal its edge whitespace: `pre` keeps repeated
+// internal spaces at their real width too
+.email-badge-tag-label {
+  white-space: pre;
+}
+
+.email-badge-tag-whitespace {
+  opacity: 0.55;
+}
+
 .email-badge-tag-remove {
   flex-shrink: 0;
   margin: -2px -4px -2px 0 !important;

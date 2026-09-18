@@ -13,6 +13,8 @@ use Model\Filters\DTO\Xml;
 use Model\Filters\DTO\Yaml;
 use Model\Filters\FiltersConfigTemplateStruct;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class FiltersConfigTemplateStructTest extends AbstractTest
 {
@@ -146,6 +148,73 @@ class FiltersConfigTemplateStructTest extends AbstractTest
         $this->assertInstanceOf(MSWord::class, $struct->getMsWord());
         $this->assertInstanceOf(MSPowerpoint::class, $struct->getMsPowerpoint());
         $this->assertInstanceOf(Dita::class, $struct->getDita());
+    }
+
+    #[Test]
+    public function hydrateAllDto_normalizes_the_names_that_cannot_carry_padding(): void
+    {
+        // hydrateAllDto() runs on the read path too (FiltersConfigTemplateDao::hydrateTemplateStruct),
+        // so a row stored with padding before the names were normalized comes back clean
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->hydrateAllDto([
+            'xml'           => ['translate_elements' => [' div ', '  ']],
+            'ms_word'       => ['exclude_styles' => [' Heading 1 ']],
+            'ms_excel'      => ['exclude_columns' => [' A ']],
+            'dita'          => ['do_not_translate_elements' => [' topic ']],
+        ]);
+
+        $this->assertSame(['div'], $struct->getXml()->jsonSerialize()['translate_elements']);
+        $this->assertSame(['Heading 1'], $struct->getMsWord()->jsonSerialize()['exclude_styles']);
+        $this->assertSame(['A'], $struct->getMsExcel()->jsonSerialize()['exclude_columns']);
+        $this->assertSame(['topic'], $struct->getDita()->jsonSerialize()['do_not_translate_elements']);
+    }
+
+    #[Test]
+    public function hydrateAllDto_preserves_json_and_yaml_key_padding(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->hydrateAllDto([
+            'json' => '{"translate_keys":[" label "]}',
+            'yaml' => ['context_keys' => ['  note']],
+        ]);
+
+        $this->assertSame([' label '], $struct->getJson()->jsonSerialize()['translate_keys']);
+        $this->assertSame(['  note'], $struct->getYaml()->jsonSerialize()['context_keys']);
+    }
+
+    #[Test]
+    public function the_whole_write_path_normalizes_the_names_and_keeps_the_keys(): void
+    {
+        // the payload a client POSTs to /api/v3/filters-config-template: the schema declares the
+        // lists without an `items` constraint, so the padding passes validation and the DTOs are
+        // the only place that can strip it
+        $payload = json_encode([
+            'name'     => 'padded',
+            'uid'      => 1,
+            'xml'      => ['translate_elements' => [' div ', '  ']],
+            'ms_word'  => ['exclude_styles' => [' Heading 1 ']],
+            'ms_excel' => ['exclude_columns' => [' A ']],
+            'dita'     => ['do_not_translate_elements' => [' topic ']],
+            'json'     => ['translate_keys' => [' label ']],
+            'yaml'     => ['context_keys' => ['  note']],
+        ], JSON_THROW_ON_ERROR);
+
+        $validatorObject = new JSONValidatorObject($payload);
+        (new JSONValidator('filters_extraction_parameters.json', true))->validate($validatorObject);
+
+        $struct = (new FiltersConfigTemplateStruct())->hydrateFromJSON($payload);
+        $serialized = $struct->jsonSerialize();
+
+        $this->assertSame(['div'], $serialized['xml']->jsonSerialize()['translate_elements']);
+        $this->assertSame(['Heading 1'], $serialized['ms_word']->jsonSerialize()['exclude_styles']);
+        $this->assertSame(['A'], $serialized['ms_excel']->jsonSerialize()['exclude_columns']);
+        $this->assertSame(
+            ['topic'],
+            $serialized['dita']->jsonSerialize()['do_not_translate_elements']
+        );
+        // JSON and YAML keys are arbitrary strings: the padding is part of the identifier
+        $this->assertSame([' label '], $serialized['json']->jsonSerialize()['translate_keys']);
+        $this->assertSame(['  note'], $serialized['yaml']->jsonSerialize()['context_keys']);
     }
 
     #[Test]

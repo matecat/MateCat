@@ -104,34 +104,4 @@ enum JobsMetadataMarshaller: string
             self::INTENTO_PROVIDER->value,
         ];
     }
-
-    /**
-     * Keys duplicated onto every new chunk when a job is split, and dropped from every chunk
-     * but the first when jobs are merged.
-     *
-     * Job metadata is keyed by (id_job, password), so a key missing from this list silently
-     * disappears from the new chunks.
-     *
-     * Every key {@see \Model\ProjectCreation\JobCreationService::saveJobsMetadata()} writes at
-     * creation belongs here — the four below were written but never propagated, so a split dropped
-     * them and the chunks fell back to the code defaults.
-     *
-     * @return list<string>
-     */
-    public static function propagatedOnSplit(): array
-    {
-        return array_merge(
-            [
-                self::CHARACTER_COUNTER_COUNT_TAGS->value,
-                self::CHARACTER_COUNTER_MODE->value,
-                self::SUBFILTERING_HANDLERS->value,
-                self::DIALECT_STRICT->value,
-                self::MANDATORY_ISSUES->value,
-                self::PUBLIC_TM_PENALTY->value,
-                self::TM_PRIORITIZATION->value,
-            ],
-            self::mtSettings()
-        );
-    }
-
 }

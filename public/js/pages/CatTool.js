@@ -709,7 +709,7 @@ function CatTool() {
                 <SegmentsContainer
                   isReview={config.isReview}
                   startSegmentId={startSegmentIdRef.current}
-                  firstJobSegment={config.first_job_segment}
+                  firstJobSegment={config.first_job_segment?.toString()}
                   languages={supportedLanguages}
                 />
               </div>

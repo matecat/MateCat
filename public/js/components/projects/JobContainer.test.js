@@ -923,6 +923,15 @@ const getFakeProperties = (fakeProperties) => {
   }
 }
 
+// The outsourced delivery row renders the translator email and the delivery date
+// as one run of text, so the email is no longer a text node of its own and an
+// exact getByText cannot reach it. Match the row that carries it instead.
+const getDeliveryEmailRow = (email) =>
+  screen.getByText(
+    (content, element) =>
+      element?.className === 'job-delivery-email' && content.startsWith(email),
+  )
+
 const getProjectAnalyzeUrl = (slug, id, password) =>
   `/analyze/${slug}/${id}-${password}`
 const getTranslateUrl = (
@@ -1003,7 +1012,7 @@ test('Render elements translated outsourced', () => {
 
   // user email
   expect(
-    screen.getByText(job.get('translator').get('email')),
+    getDeliveryEmailRow(job.get('translator').get('email')),
   ).toBeInTheDocument()
 
   // date
@@ -1336,7 +1345,9 @@ describe('Extended interactions (menu actions, outsource, notifications)', () =>
     )
     render(<JobContainer {...props} downloadTranslationFn={jest.fn()} />)
 
-    await userEvent.click(screen.getByText(job.get('translator').get('email')))
+    await userEvent.click(
+      getDeliveryEmailRow(job.get('translator').get('email')),
+    )
 
     expect(screen.getByTestId('outsource-container-mock')).toBeInTheDocument()
   })

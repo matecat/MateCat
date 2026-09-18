@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState, useRef, useCallback, useEffect} from 'react'
 
 import {ModalContainer} from './ModalContainer'
 import {ModalOverlay} from './ModalOverlay'
@@ -45,14 +45,17 @@ const componentStatus = (() => {
 export const onModalWindowMounted = () =>
   new Promise((resolve) => (componentStatus.resolve = resolve))
 
-export class ModalWindow extends React.Component {
-  state = initialState
+export const ModalWindow = () => {
+  const [modalState, setModalState] = useState(initialState)
 
-  onCloseModal = () => {
-    this.state.compProps?.onCloseCallback?.()
+  const modalStateRef = useRef(modalState)
+  modalStateRef.current = modalState
 
-    this.setState(initialState)
-  }
+  const onCloseModal = useCallback(() => {
+    modalStateRef.current.compProps?.onCloseCallback?.()
+
+    setModalState(initialState)
+  }, [])
 
   /**
    * @NOTE DO NOT REMOVE THIS FUNCTION!
@@ -61,86 +64,84 @@ export class ModalWindow extends React.Component {
    * for legacy reasons, so before removing we need
    * to refactor these dirty usages first!
    */
-  showModalComponent = (
-    component,
-    props = {},
-    title,
-    style,
-    onCloseCallback,
-    showHeader,
-    styleBody,
-    isCloseButtonDisabled,
-  ) => {
-    const resolvedComponent = resolveModal(component)
-    this.setState({
-      ...initialState,
+  const showModalComponent = useCallback(
+    (
+      component,
+      props = {},
       title,
-      component: resolvedComponent,
-      showHeader,
-      compProps: {
-        ...initialState.compProps,
-        ...props,
-        onClose: this.onCloseModal,
-        closeOnSuccess: props?.closeOnSuccess ? props.closeOnSuccess : true,
-      },
-      styleContainer: style,
-      onCloseCallback: onCloseCallback,
-      isShowingModal: true,
-      styleBody,
-      isCloseButtonDisabled: isCloseButtonDisabled,
-    })
-  }
-
-  componentDidMount() {
-    CatToolStore.addListener(
-      ModalsConstants.SHOW_MODAL,
-      this.showModalComponent,
-    )
-    CatToolStore.addListener(ModalsConstants.CLOSE_MODAL, this.onCloseModal)
-
-    componentStatus.isMounted = true
-  }
-
-  componentWillUnmount() {
-    CatToolStore.removeListener(
-      ModalsConstants.SHOW_MODAL,
-      this.showModalComponent,
-    )
-    CatToolStore.removeListener(ModalsConstants.CLOSE_MODAL, this.onCloseModal)
-
-    componentStatus.isMounted = false
-  }
-
-  render() {
-    const {
-      component: InjectedComponent,
-      title,
-      styleContainer,
-      compProps,
-      isShowingModal,
+      style,
+      onCloseCallback,
       showHeader,
       styleBody,
       isCloseButtonDisabled,
-    } = this.state
+    ) => {
+      const resolvedComponent = resolveModal(component)
+      setModalState({
+        ...initialState,
+        title,
+        component: resolvedComponent,
+        showHeader,
+        compProps: {
+          ...initialState.compProps,
+          ...props,
+          onClose: onCloseModal,
+          closeOnSuccess: props?.closeOnSuccess ? props.closeOnSuccess : true,
+        },
+        styleContainer: style,
+        onCloseCallback: onCloseCallback,
+        isShowingModal: true,
+        styleBody,
+        isCloseButtonDisabled: isCloseButtonDisabled,
+      })
+    },
+    [],
+  )
 
-    return (
-      <div>
-        {!isShowingModal
-          ? null
-          : React.createElement(
-              compProps?.overlay ? ModalOverlay : ModalContainer,
-              {
-                title,
-                showHeader,
-                styleContainer,
-                onClose: this.onCloseModal,
-                closeOnOutsideClick: compProps.closeOnOutsideClick,
-                styleBody,
-                isCloseButtonDisabled,
-              },
-              <InjectedComponent {...compProps} />,
-            )}
-      </div>
-    )
-  }
+  useEffect(() => {
+    CatToolStore.addListener(ModalsConstants.SHOW_MODAL, showModalComponent)
+    CatToolStore.addListener(ModalsConstants.CLOSE_MODAL, onCloseModal)
+
+    componentStatus.isMounted = true
+
+    return () => {
+      CatToolStore.removeListener(
+        ModalsConstants.SHOW_MODAL,
+        showModalComponent,
+      )
+      CatToolStore.removeListener(ModalsConstants.CLOSE_MODAL, onCloseModal)
+
+      componentStatus.isMounted = false
+    }
+  }, [])
+
+  const {
+    component: InjectedComponent,
+    title,
+    styleContainer,
+    compProps,
+    isShowingModal,
+    showHeader,
+    styleBody,
+    isCloseButtonDisabled,
+  } = modalState
+
+  return (
+    <div>
+      {!isShowingModal
+        ? null
+        : React.createElement(
+            compProps?.overlay ? ModalOverlay : ModalContainer,
+            {
+              title,
+              showHeader,
+              styleContainer,
+              onClose: onCloseModal,
+              closeOnOutsideClick: compProps.closeOnOutsideClick,
+              styleBody,
+              isCloseButtonDisabled,
+            },
+            <InjectedComponent {...compProps} />,
+          )}
+    </div>
+  )
 }

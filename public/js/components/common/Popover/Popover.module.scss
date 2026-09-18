@@ -30,8 +30,8 @@
 
 .popover-component-popover {
   position: absolute;
-
   z-index: 4;
+  width: max-content;
   border-radius: variables.$border-radius-default;
   box-shadow: 0 0 24px rgba(colors.$black, 0.15);
   overflow: hidden;

@@ -97,7 +97,6 @@ const buildSegment = (overrides = {}) => ({
 
 const renderTarget = (props = {}, contextValue = {}) => {
   const segment = props.segment || buildSegment()
-  const ref = React.createRef()
   const defaultContext = {
     segment,
     removeSelection: jest.fn(),
@@ -105,10 +104,10 @@ const renderTarget = (props = {}, contextValue = {}) => {
   }
   const utils = render(
     <SegmentContext.Provider value={{...defaultContext, ...contextValue}}>
-      <SegmentTarget {...{segment}} {...props} ref={ref} />
+      <SegmentTarget {...{segment}} {...props} />
     </SegmentContext.Provider>,
   )
-  return {...utils, ref, segment}
+  return {...utils, segment}
 }
 
 describe('SegmentTarget', () => {
@@ -129,9 +128,7 @@ describe('SegmentTarget', () => {
     expect(
       container.querySelector(`#segment-${segment.sid}-target`),
     ).toBeInTheDocument()
-    expect(container.querySelector('.target.item')).toHaveClass(
-      'target-en',
-    )
+    expect(container.querySelector('.target.item')).toHaveClass('target-en')
   })
 
   test('renders SegmentWarnings only when the segment has warnings', () => {
@@ -180,9 +177,7 @@ describe('SegmentTarget', () => {
       const {container, segment} = renderTarget({
         segment: buildSegment({edit_area_locked: true}),
       })
-      const lockButton = container.querySelector(
-        '.revise-lock-editArea-active',
-      )
+      const lockButton = container.querySelector('.revise-lock-editArea-active')
       expect(lockButton).toBeInTheDocument()
 
       act(() => {
@@ -243,7 +238,9 @@ describe('SegmentTarget', () => {
         mockSegmentTargetToolbar.mock.calls[
           mockSegmentTargetToolbar.mock.calls.length - 1
         ][0]
-      expect(lastCallProps.qrLink).toBe('/revise-summary/10-pwd?revision_type=1&id_segment=2-1')
+      expect(lastCallProps.qrLink).toBe(
+        '/revise-summary/10-pwd?revision_type=1&id_segment=2-1',
+      )
       expect(lastCallProps.issuesLength).toBe(2)
     })
 
@@ -284,147 +281,6 @@ describe('SegmentTarget', () => {
         'FILL_TAGS_IN_TARGET',
         expect.any(Function),
       )
-    })
-  })
-
-  describe('instance methods', () => {
-    test('autoFillTagsInTarget replaces target content when sid matches', () => {
-      jest.useFakeTimers()
-      const {ref, segment} = renderTarget()
-
-      act(() => {
-        ref.current.autoFillTagsInTarget(segment.sid)
-        jest.advanceTimersByTime(150)
-      })
-
-      expect(SegmentActions.replaceEditAreaTextContent).toHaveBeenCalledWith(
-        segment.sid,
-        'auto-filled-translation',
-      )
-      expect(SegmentActions.getSegmentsQa).toHaveBeenCalledWith(segment)
-      jest.useRealTimers()
-    })
-
-    test('autoFillTagsInTarget is a no-op for a different sid', () => {
-      jest.useFakeTimers()
-      const {ref} = renderTarget()
-
-      act(() => {
-        ref.current.autoFillTagsInTarget('other-sid')
-        jest.advanceTimersByTime(150)
-      })
-
-      expect(SegmentActions.replaceEditAreaTextContent).not.toHaveBeenCalled()
-      jest.useRealTimers()
-    })
-
-    test('lockEditArea shows the issues message when not already locked', () => {
-      const {ref, segment} = renderTarget({
-        segment: buildSegment({edit_area_locked: false}),
-      })
-      const fakeEvent = {preventDefault: jest.fn()}
-
-      act(() => {
-        ref.current.lockEditArea(fakeEvent)
-      })
-
-      expect(fakeEvent.preventDefault).toHaveBeenCalled()
-      expect(SegmentActions.showIssuesMessage).toHaveBeenCalledWith(
-        segment.sid,
-        0,
-      )
-      expect(SegmentActions.lockEditArea).toHaveBeenCalledWith(
-        segment.sid,
-        segment.fid,
-      )
-    })
-
-    test('removeTagsFromText replaces the edit area content with the cleaned text', () => {
-      const {ref, segment} = renderTarget({
-        segment: buildSegment({translation: 'raw <ph/> text'}),
-      })
-
-      act(() => {
-        ref.current.removeTagsFromText()
-      })
-
-      expect(removeTagsFromText).toHaveBeenCalledWith('raw <ph/> text')
-      expect(SegmentActions.replaceEditAreaTextContent).toHaveBeenCalledWith(
-        segment.sid,
-        'clean-raw <ph/> text',
-      )
-    })
-
-    test('toggleFormatMenu(true) shows the format menu immediately', () => {
-      const {ref} = renderTarget()
-
-      act(() => {
-        ref.current.toggleFormatMenu(true)
-      })
-
-      expect(ref.current.state.showFormatMenu).toBe(true)
-    })
-
-    test('toggleFormatMenu(false) hides the format menu after a delay', () => {
-      jest.useFakeTimers()
-      const {ref} = renderTarget()
-
-      act(() => {
-        ref.current.toggleFormatMenu(true)
-      })
-      expect(ref.current.state.showFormatMenu).toBe(true)
-
-      act(() => {
-        ref.current.toggleFormatMenu(false)
-        jest.advanceTimersByTime(250)
-      })
-
-      expect(ref.current.state.showFormatMenu).toBe(false)
-      jest.useRealTimers()
-    })
-
-    test('updateCounter updates character counter state and dispatches characterCounter action', () => {
-      jest.useFakeTimers()
-      const {ref, segment} = renderTarget({
-        segment: buildSegment({metadata: []}),
-      })
-
-      act(() => {
-        ref.current.updateCounter({counter: 12, segmentCharacters: 12})
-      })
-      act(() => {
-        jest.advanceTimersByTime(10)
-      })
-
-      expect(ref.current.state.charactersCounter).toBe(12)
-      expect(SegmentActions.characterCounter).toHaveBeenCalledWith(
-        expect.objectContaining({sid: segment.sid, counter: 12}),
-      )
-      jest.useRealTimers()
-    })
-
-    test('componentDidUpdate picks up a matching sizeRestriction metadata limit', () => {
-      jest.useFakeTimers()
-      const {ref} = renderTarget({
-        segment: buildSegment({
-          sid: '1-1',
-          metadata: [
-            {
-              meta_key: 'sizeRestriction',
-              id_segment: '1-1',
-              meta_value: 42,
-            },
-          ],
-        }),
-      })
-
-      act(() => {
-        ref.current.updateCounter({counter: 1, segmentCharacters: 1})
-        jest.advanceTimersByTime(10)
-      })
-
-      expect(ref.current.state.charactersCounterLimit).toBe(42)
-      jest.useRealTimers()
     })
   })
 })
