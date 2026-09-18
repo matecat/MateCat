@@ -22,7 +22,9 @@ use Model\Segments\SegmentMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Teams\TeamDao;
 use Model\Translations\SegmentTranslationDao;
+use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;
 use Stomp\Exception\ConnectionException;
+use Stomp\Exception\StompException;
 use Stomp\Transport\Message;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\TranslationStatus;
@@ -195,7 +197,11 @@ class CancelRequestController extends KleinController
      * every open browser tab for the project can live-patch its segment state without a
      * page refresh.
      *
-     * @throws ConnectionException
+     * The state is already persisted when this runs, so a broker failure must not fail the
+     * request: the notification is a best-effort live patch and a tab that misses it reads
+     * the correct state on its next page load.
+     *
+     * @throws LogInvalidArgumentException
      */
     private function publishSegmentStateChange(JobStruct $job, int $id_job, int $id_segment, bool $disabled): void
     {
@@ -212,8 +218,15 @@ class CancelRequestController extends KleinController
             ],
         ]);
 
-        $queueHandler = $this->getQueueHandler();
-        $queueHandler->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message));
+        try {
+            $queueHandler = $this->getQueueHandler();
+            $queueHandler->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message));
+        } catch (StompException $e) {
+            $this->logger->error(
+                'Failed to publish the segment state change to the socket queue: ' . $e->getMessage(),
+                ['id_segment' => $id_segment, 'id_job' => $id_job, 'disabled' => $disabled]
+            );
+        }
     }
 
     /**
