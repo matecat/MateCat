@@ -179,9 +179,7 @@ function renderEditarea({
     toggleFormatMenu,
     /** Re-renders with a different segment, then drains deferred work. */
     update: (nextSegment, nextTranslation = nextSegment.translation) => {
-      act(() => {
-        utils.rerender(tree(nextSegment, nextTranslation))
-      })
+      utils.rerender(tree(nextSegment, nextTranslation))
       flush()
     },
   }
@@ -196,9 +194,9 @@ function flush(ms = 1500) {
 
 /** Mounts and drains the deferred componentDidMount work. */
 function mountEditarea(options) {
-  const rendered = renderEditarea(options)
+  const view = renderEditarea(options)
   flush()
-  return rendered
+  return view
 }
 
 /** Minimal synthetic keyboard event accepted by KeyBindingUtil. */
@@ -250,11 +248,11 @@ describe('Editarea rendering', () => {
   test('renders the edit area wrapper with sid based identifiers', () => {
     const {container} = mountEditarea()
 
-    const wrapper = container.querySelector('#segment-12-1-editarea')
+    const wrapper = editAreaWrapper(container, '12-1')
     expect(wrapper).not.toBeNull()
-    expect(wrapper.getAttribute('data-sid')).toBe('12-1')
+    expect(wrapper).toHaveAttribute('data-sid', '12-1')
     expect(wrapper.className).toBe('targetarea editarea')
-    expect(wrapper.getAttribute('lang')).toBe('it-IT')
+    expect(wrapper).toHaveAttribute('lang', 'it-IT')
   })
 
   test('uses the "area" class instead of "editarea" when locked', () => {
@@ -262,9 +260,7 @@ describe('Editarea rendering', () => {
       context: {readonly: false, locked: true},
     })
 
-    expect(container.querySelector('.targetarea').className).toBe(
-      'targetarea area',
-    )
+    expect(targetArea(container).className).toBe('targetarea area')
   })
 
   test('uses the "area" class when the context is readonly', () => {
@@ -272,9 +268,7 @@ describe('Editarea rendering', () => {
       context: {readonly: true, locked: false},
     })
 
-    expect(container.querySelector('.targetarea').className).toBe(
-      'targetarea area',
-    )
+    expect(targetArea(container).className).toBe('targetarea area')
   })
 
   test('renders the translation text inside the draft editor', () => {
@@ -288,11 +282,7 @@ describe('Editarea rendering', () => {
       segment: makeSegment({opened: false}),
     })
 
-    expect(
-      container
-        .querySelector('[contenteditable]')
-        .getAttribute('contenteditable'),
-    ).toBe('false')
+    expect(editableNode(container)).toHaveAttribute('contenteditable', 'false')
   })
 
   test('marks the draft editor readonly when the segment is muted', () => {
@@ -300,11 +290,7 @@ describe('Editarea rendering', () => {
       segment: makeSegment({muted: true}),
     })
 
-    expect(
-      container
-        .querySelector('[contenteditable]')
-        .getAttribute('contenteditable'),
-    ).toBe('false')
+    expect(editableNode(container)).toHaveAttribute('contenteditable', 'false')
   })
 
   test('renders RTL alignment when the target language is RTL', () => {
@@ -312,9 +298,7 @@ describe('Editarea rendering', () => {
 
     const {container} = mountEditarea()
 
-    expect(
-      container.querySelector('.public-DraftEditor-content'),
-    ).not.toBeNull()
+    expect(editorNode(container)).not.toBeNull()
   })
 })
 
@@ -346,7 +330,7 @@ describe('Editarea character counter on mount', () => {
     })
 
     expect(SegmentUtils.checkCurrentSegmentTPEnabled).toHaveBeenCalled()
-    expect(container.textContent).toContain('Ciao')
+    expect(container).toHaveTextContent(/Ciao/)
   })
 })
 
@@ -424,9 +408,23 @@ function mountWithSourceTags(segmentOverrides = {}) {
   })
 }
 
+// DraftJS renders a bare contenteditable with no accessible role, and its tags
+// are decorator spans, so the editor's internals can only be reached by
+// selector. Every such lookup lives here, which keeps the rule exemption in one
+// place instead of scattered across the tests.
+/* eslint-disable testing-library/no-node-access */
 const editorNode = (container) =>
   container.querySelector('.public-DraftEditor-content')
 const tagBox = (container) => container.querySelector('.tag-box')
+const editAreaWrapper = (container, sid) =>
+  container.querySelector(`#segment-${sid}-editarea`)
+const targetArea = (container) => container.querySelector('.targetarea')
+const editableNode = (container) => container.querySelector('[contenteditable]')
+// TagBox renders its own .tag-container heading, so scope the lookup to the
+// draft content itself.
+const tagEntities = (container) =>
+  container.querySelectorAll('.public-DraftEditor-content .tag-container')
+/* eslint-enable testing-library/no-node-access */
 
 /**
  * Presses a key on the editor the way a user does, so the event travels through
@@ -524,9 +522,7 @@ describe('tag menu keyboard shortcuts', () => {
 })
 
 describe('tag insertion keyboard shortcuts', () => {
-  const tagCount = (container) =>
-    container.querySelectorAll('.public-DraftEditor-content .tag-container')
-      .length
+  const tagCount = (container) => tagEntities(container).length
 
   test('tab inserts a tab tag and shift + tab does not', () => {
     const {container} = mountEditarea({translation: 'ciao'})
@@ -715,19 +711,17 @@ describe('componentDidUpdate', () => {
     )
     flush()
 
-    act(() => {
-      rerender(
-        <SegmentContext.Provider value={{readonly: false, locked: false}}>
-          <Editarea
-            ref={ref}
-            segment={makeSegment({opened: true})}
-            translation={closed.translation}
-            updateCounter={jest.fn()}
-            toggleFormatMenu={jest.fn()}
-          />
-        </SegmentContext.Provider>,
-      )
-    })
+    rerender(
+      <SegmentContext.Provider value={{readonly: false, locked: false}}>
+        <Editarea
+          ref={ref}
+          segment={makeSegment({opened: true})}
+          translation={closed.translation}
+          updateCounter={jest.fn()}
+          toggleFormatMenu={jest.fn()}
+        />
+      </SegmentContext.Provider>,
+    )
     flush()
 
     expect(ref.current.state.editorState.getSelection().getHasFocus()).toBe(
@@ -750,19 +744,17 @@ describe('componentDidUpdate', () => {
     )
     flush()
 
-    act(() => {
-      rerender(
-        <SegmentContext.Provider value={{readonly: false, locked: false}}>
-          <Editarea
-            ref={ref}
-            segment={makeSegment({opened: false})}
-            translation="Ciao mondo"
-            updateCounter={jest.fn()}
-            toggleFormatMenu={jest.fn()}
-          />
-        </SegmentContext.Provider>,
-      )
-    })
+    rerender(
+      <SegmentContext.Provider value={{readonly: false, locked: false}}>
+        <Editarea
+          ref={ref}
+          segment={makeSegment({opened: false})}
+          translation="Ciao mondo"
+          updateCounter={jest.fn()}
+          toggleFormatMenu={jest.fn()}
+        />
+      </SegmentContext.Provider>,
+    )
     flush()
 
     expect(ref.current.state.editorState.getSelection().isCollapsed()).toBe(
@@ -793,19 +785,17 @@ describe('componentDidUpdate', () => {
         length: 1,
       },
     ]
-    act(() => {
-      rerender(
-        <SegmentContext.Provider value={{readonly: false, locked: false}}>
-          <Editarea
-            ref={ref}
-            segment={makeSegment({sourceTagMap})}
-            translation='Ciao <g id="1">mondo</g>'
-            updateCounter={jest.fn()}
-            toggleFormatMenu={jest.fn()}
-          />
-        </SegmentContext.Provider>,
-      )
-    })
+    rerender(
+      <SegmentContext.Provider value={{readonly: false, locked: false}}>
+        <Editarea
+          ref={ref}
+          segment={makeSegment({sourceTagMap})}
+          translation='Ciao <g id="1">mondo</g>'
+          updateCounter={jest.fn()}
+          toggleFormatMenu={jest.fn()}
+        />
+      </SegmentContext.Provider>,
+    )
     flush()
 
     expect(ref.current.state.previousSourceTagMap).toEqual(sourceTagMap)
@@ -817,10 +807,7 @@ describe('componentDidUpdate', () => {
 // ---------------------------------------------------------------------------
 
 describe('tag entity decoration', () => {
-  // TagBox renders its own .tag-container heading, so scope the lookup to the
-  // draft content itself
-  const entities = (container) =>
-    container.querySelectorAll('.public-DraftEditor-content .tag-container')
+  const entities = tagEntities
 
   test('renders a tag entity component for encoded tags', () => {
     const {container} = mountEditarea({
@@ -881,6 +868,9 @@ describe('Editarea production ref surface', () => {
     // so the call has to work on a real node rather than return a useful value
     // here — the editor holds focus once mounted.
     expect(instance.editAreaRef.contains(document.body)).toBe(false)
+    // The point of this assertion is that the exposed ref is a real DOM node,
+    // which cannot be checked without touching one.
+    // eslint-disable-next-line testing-library/no-node-access
     expect(typeof instance.editAreaRef.contains(document.activeElement)).toBe(
       'boolean',
     )
@@ -918,11 +908,11 @@ describe('frozen call sites see the current props', () => {
 
   function renderThenSwapSegment(overrides = {}) {
     const first = makeSegment({sid: '12-1', translation: 'uno'})
-    const rendered = renderEditarea({segment: first, translation: 'uno'})
+    const view = renderEditarea({segment: first, translation: 'uno'})
     flush()
     const second = makeSegment({sid: OTHER, translation: 'due', ...overrides})
-    rendered.update(second, 'due')
-    return rendered
+    view.update(second, 'due')
+    return view
   }
 
   test('REPLACE_TRANSLATION applies to the segment rendered now', () => {
@@ -933,7 +923,7 @@ describe('frozen call sites see the current props', () => {
     })
     flush()
 
-    expect(container.textContent).toContain('tre')
+    expect(container).toHaveTextContent(/tre/)
   })
 
   test('REPLACE_TRANSLATION ignores the segment that was mounted first', () => {
@@ -944,7 +934,7 @@ describe('frozen call sites see the current props', () => {
     })
     flush()
 
-    expect(container.textContent).not.toContain('stale')
+    expect(container).not.toHaveTextContent(/stale/)
   })
 
   test('REFRESH_TAG_MAP re-encodes against the segment rendered now', () => {
@@ -965,7 +955,7 @@ describe('frozen call sites see the current props', () => {
     })
     flush()
 
-    expect(container.textContent).toContain('tag')
+    expect(container).toHaveTextContent(/tag/)
   })
 
   test('CHANGE_CHARACTERS_COUNTER_RULES recounts the segment rendered now', () => {
@@ -1003,20 +993,20 @@ describe('the tag decorator sees the current segment', () => {
       translation: 'uno <g id="1">tag</g>',
       sourceTagMap: TAG_MAP,
     })
-    const rendered = renderEditarea({
+    const view = renderEditarea({
       segment: first,
       translation: first.translation,
     })
     flush()
-    return rendered
+    return view
   }
 
   test('getSearchParams follows the segment rendered now', () => {
-    const rendered = renderWithTag()
+    const view = renderWithTag()
     expect(mockTagProps).not.toBeNull()
     expect(mockTagProps.getSearchParams()).toMatchObject({active: false})
 
-    rendered.update(
+    view.update(
       makeSegment({
         sid: '12-1',
         translation: 'uno <g id="1">tag</g>',
@@ -1032,10 +1022,10 @@ describe('the tag decorator sees the current segment', () => {
   })
 
   test('getUpdatedSegmentInfo follows the segment rendered now', () => {
-    const rendered = renderWithTag()
+    const view = renderWithTag()
     expect(mockTagProps.getUpdatedSegmentInfo()).toMatchObject({sid: '12-1'})
 
-    rendered.update(
+    view.update(
       makeSegment({
         sid: '12-9',
         translation: 'uno <g id="1">tag</g>',
