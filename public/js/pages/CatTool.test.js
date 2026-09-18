@@ -55,10 +55,11 @@ jest.mock('./mountPage', () => {
 })
 
 jest.mock('./CatToolInterface', () => ({
-  CatToolInterface: class {
+  __esModule: true,
+  default: {
     getCharacterCounterMode() {
       return undefined
-    }
+    },
   },
 }))
 

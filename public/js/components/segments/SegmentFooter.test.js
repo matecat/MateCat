@@ -371,6 +371,29 @@ test('Rendering elements', () => {
   expect(screen.getByTestId('alternatives')).toHaveClass('hide')
 })
 
+// The notes tab only appears when the segment has notes, and deciding that used
+// to reach through SegmentFooterTabMessages.prototype with a synthetic `this`.
+// Every fixture here has notes: null, so the guard short-circuited and nothing
+// exercised that call until it broke.
+test('a segment with notes shows the notes tab', () => {
+  const multiMatchLangs = {primary: 'it-IT'}
+  globalFunctions.registerFooterTabs()
+  const segmentWithNotes = {
+    ...props.segment,
+    notes: [{note: 'a translator note'}],
+  }
+
+  render(
+    <SegmentContext.Provider
+      value={{segment: segmentWithNotes, multiMatchLangs}}
+    >
+      <SegmentFooter />
+    </SegmentContext.Provider>,
+  )
+
+  expect(screen.getByTestId('messages')).toBeInTheDocument()
+})
+
 test('Add tab', () => {
   const multiMatchLangs = {primary: 'it-IT'}
   globalFunctions.registerFooterTabs()
