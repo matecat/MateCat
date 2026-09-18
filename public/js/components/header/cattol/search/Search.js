@@ -206,15 +206,18 @@ const Search = (props) => {
       return false
     }
 
-    SegmentActions.replaceCurrentSearch(search.replaceTarget)
-
     setTimeout(() => {
       const segment = SegmentStore.getSegmentByIdToJS(
         occurrencesList[featuredSearchResult],
       )
       if (segment) {
         updateAfterReplace(segment.original_sid)
-        segmentTranslation(segment, segment.status, () => {}, false)
+        segmentTranslation(
+          segment,
+          segment.status,
+          () => SegmentActions.replaceCurrentSearch(search.replaceTarget),
+          false,
+        )
       }
     })
   }
