@@ -224,7 +224,7 @@ const Editarea = forwardRef(
           updatedLexiqaWarnings,
           sid,
           false,
-          instanceRef.current.getUpdatedSegmentInfo,
+          getUpdatedSegmentInfoRef.current,
           replaceWordAt,
         )
         remove(
@@ -267,7 +267,7 @@ const Editarea = forwardRef(
             editorState: newEditorState,
           },
           () => {
-            instanceRef.current.updateTranslationDebounced()
+            updateTranslationDebouncedRef.current()
           },
         )
       }
@@ -296,7 +296,7 @@ const Editarea = forwardRef(
             editorState: newEditorState,
           },
           () => {
-            instanceRef.current.updateTranslationInStore()
+            updateTranslationInStoreRef.current()
           },
         )
       }
@@ -496,22 +496,22 @@ const Editarea = forwardRef(
             editorState: newEditorState,
           },
           () => {
-            instanceRef.current.updateTranslationDebounced()
+            updateTranslationDebouncedRef.current()
           },
         )
       }
     })
 
     const refreshTagMapRef = useRef(() => {
-      instanceRef.current.setNewTranslation(
+      setNewTranslationRef.current(
         propsRef.current.segment.sid,
         propsRef.current.translation,
       )
-      setTimeout(() => instanceRef.current.checkDecorators(), 100)
+      setTimeout(() => checkDecoratorsRef.current(), 100)
     })
 
     const refreshCharactersCounterRulesRef = useRef(() => {
-      instanceRef.current.setNewTranslation(
+      setNewTranslationRef.current(
         propsRef.current.segment.sid,
         propsRef.current.translation,
       )
@@ -549,9 +549,9 @@ const Editarea = forwardRef(
       )
       setState({editorState: updatedState}, () => {
         // Reactivate decorators
-        instanceRef.current.updateTranslationDebounced()
+        updateTranslationDebouncedRef.current()
         // Stop composition mode
-        instanceRef.current.onCompositionStopDebounced()
+        onCompositionStopDebouncedRef.current()
       })
     }
 
@@ -581,9 +581,9 @@ const Editarea = forwardRef(
         }),
         () => {
           // Update translation
-          instanceRef.current.updateTranslationDebounced()
+          updateTranslationDebouncedRef.current()
           // Reactivate decorators
-          instanceRef.current.onCompositionStopDebounced()
+          onCompositionStopDebouncedRef.current()
         },
       )
     }
@@ -792,23 +792,23 @@ const Editarea = forwardRef(
         case 'right-nav':
           return 'handled'
         case 'insert-tab-tag':
-          instanceRef.current.insertTagAtSelectionDebounced('tab')
+          insertTagAtSelectionDebouncedRef.current('tab')
           return 'handled'
         case 'insert-space-tag':
           if (tagSignatures.space) {
-            instanceRef.current.insertTagAtSelectionDebounced('space')
+            insertTagAtSelectionDebouncedRef.current('space')
             return 'handled'
           } else {
             return 'not-handled'
           }
 
         case 'insert-nbsp-tag':
-          instanceRef.current.insertTagAtSelectionDebounced('nbsp')
+          insertTagAtSelectionDebouncedRef.current('nbsp')
           return 'handled'
         case 'add-issue':
           return 'handled'
         case 'insert-word-joiner-tag':
-          instanceRef.current.insertTagAtSelectionDebounced('wordJoiner')
+          insertTagAtSelectionDebouncedRef.current('wordJoiner')
           return 'handled'
         case 'delete-entity':
           return 'handled'
@@ -847,9 +847,9 @@ const Editarea = forwardRef(
         }),
         () => {
           // Reactivate decorators
-          instanceRef.current.updateTranslationDebounced()
+          updateTranslationDebouncedRef.current()
           // Stop composition mode
-          instanceRef.current.onCompositionStopDebounced()
+          onCompositionStopDebouncedRef.current()
         },
       )
     })
@@ -952,7 +952,7 @@ const Editarea = forwardRef(
               : prevEditorState,
           }),
           () => {
-            instanceRef.current.onCompositionStopDebounced()
+            onCompositionStopDebouncedRef.current()
           },
         )
         if (compositionEventChecksRef?.endIsTriggered)
@@ -1013,8 +1013,8 @@ const Editarea = forwardRef(
           }),
           () => {
             // Reactivate decorators
-            instanceRef.current.updateTranslationDebounced()
-            instanceRef.current.onCompositionStopDebounced()
+            updateTranslationDebouncedRef.current()
+            onCompositionStopDebouncedRef.current()
           },
         )
       } else {
@@ -1023,7 +1023,7 @@ const Editarea = forwardRef(
             editorState: editorState,
           }),
           () => {
-            instanceRef.current.onCompositionStopDebounced()
+            onCompositionStopDebouncedRef.current()
           },
         )
       }
@@ -1100,9 +1100,9 @@ const Editarea = forwardRef(
         }),
         () => {
           // Reactivate decorators
-          instanceRef.current.updateTranslationDebounced()
+          updateTranslationDebouncedRef.current()
           // Stop typing
-          instanceRef.current.onCompositionStopDebounced()
+          onCompositionStopDebouncedRef.current()
         },
       )
     }
@@ -1158,9 +1158,9 @@ const Editarea = forwardRef(
         }),
         () => {
           // Reactivate decorators
-          instanceRef.current.updateTranslationDebounced()
+          updateTranslationDebouncedRef.current()
           // Stop typing
-          instanceRef.current.onCompositionStopDebounced()
+          onCompositionStopDebouncedRef.current()
         },
       )
     }
@@ -1192,7 +1192,7 @@ const Editarea = forwardRef(
               editorState: clipboardEditorPasted,
             },
             () => {
-              instanceRef.current.updateTranslationDebounced()
+              updateTranslationDebouncedRef.current()
             },
           )
           // Paste fragment
@@ -1220,7 +1220,7 @@ const Editarea = forwardRef(
             editorState: clipboardEditorPasted,
           },
           () => {
-            instanceRef.current.updateTranslationDebounced()
+            updateTranslationDebouncedRef.current()
           },
         )
         // Paste fragment
@@ -1302,7 +1302,7 @@ const Editarea = forwardRef(
               editorState: editorStateWithFragment,
             },
             () => {
-              instanceRef.current.updateTranslationDebounced()
+              updateTranslationDebouncedRef.current()
             },
           )
           return 'handled'
@@ -1352,7 +1352,7 @@ const Editarea = forwardRef(
               editorState: editorState,
             },
             () => {
-              instanceRef.current.updateTranslationDebounced()
+              updateTranslationDebouncedRef.current()
               setTimeout(() => {
                 SegmentActions.highlightTags()
               })
@@ -1484,7 +1484,7 @@ const Editarea = forwardRef(
           editorState: newEditorState,
         },
         () => {
-          instanceRef.current.updateTranslationDebounced()
+          updateTranslationDebouncedRef.current()
         },
       )
     }
@@ -1644,14 +1644,14 @@ const Editarea = forwardRef(
     const updateTranslationDebouncedRef = useRef(null)
     if (updateTranslationDebouncedRef.current === null) {
       updateTranslationDebouncedRef.current = debounce(
-        () => instanceRef.current.updateTranslationInStore(),
+        () => updateTranslationInStoreRef.current(),
         100,
       )
     }
     const onCompositionStopDebouncedRef = useRef(null)
     if (onCompositionStopDebouncedRef.current === null) {
       onCompositionStopDebouncedRef.current = debounce(
-        () => instanceRef.current.onCompositionStop(),
+        () => onCompositionStopRef.current(),
         1000,
       )
     }
@@ -1659,7 +1659,7 @@ const Editarea = forwardRef(
     const insertTagAtSelectionDebouncedRef = useRef(null)
     if (insertTagAtSelectionDebouncedRef.current === null) {
       insertTagAtSelectionDebouncedRef.current = debounce(
-        (tagName) => instanceRef.current.insertTagAtSelection(tagName),
+        (tagName) => insertTagAtSelectionRef.current(tagName),
         1,
       )
     }
@@ -1673,48 +1673,45 @@ const Editarea = forwardRef(
 
     // componentDidMount / componentWillUnmount equivalent
     useEffect(() => {
-      // captured once: instanceRef.current is a stable object for the component's whole
-      // lifetime (only mutated in place, never reassigned), so this local alias is safe to
-      // reuse in the cleanup below without re-reading the ref.
-      const instance = instanceRef.current
+      // Captured at mount so the cleanup removes the very same references,
+      // rather than re-reading the refs after React has torn the component down.
+      const setNewTranslation = setNewTranslationRef.current
+      const replaceCurrentSearch = replaceCurrentSearchRef.current
+      const copyGlossaryToEditArea = copyGlossaryToEditAreaRef.current
+      const refreshTagMap = refreshTagMapRef.current
+      const refreshCharactersCounterRules =
+        refreshCharactersCounterRulesRef.current
+      const onCompositionStart = onCompositionStartRef.current
+      const onCompositionEnd = onCompositionEndRef.current
 
       SegmentStore.addListener(
         SegmentConstants.REPLACE_TRANSLATION,
-        instance.setNewTranslation,
+        setNewTranslation,
       )
       SegmentStore.addListener(
         EditAreaConstants.REPLACE_SEARCH_RESULTS,
-        instance.replaceCurrentSearch,
+        replaceCurrentSearch,
       )
       SegmentStore.addListener(
         EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA,
-        instance.copyGlossaryToEditArea,
+        copyGlossaryToEditArea,
       )
-      SegmentStore.addListener(
-        SegmentConstants.REFRESH_TAG_MAP,
-        instance.refreshTagMap,
-      )
+      SegmentStore.addListener(SegmentConstants.REFRESH_TAG_MAP, refreshTagMap)
       SegmentStore.addListener(
         SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES,
-        instance.refreshCharactersCounterRules,
+        refreshCharactersCounterRules,
       )
       setTimeout(() => {
-        instance.checkDecorators()
-        instance.updateTranslationInStore()
+        checkDecoratorsRef.current()
+        updateTranslationInStoreRef.current()
         if (propsRef.current.segment.opened) {
-          instance.focusEditor()
+          focusEditorRef.current()
         }
       })
 
       const {editor: editorElement} = editorRef.current
-      editorElement.addEventListener(
-        'compositionstart',
-        instance.onCompositionStart,
-      )
-      editorElement.addEventListener(
-        'compositionend',
-        instance.onCompositionEnd,
-      )
+      editorElement.addEventListener('compositionstart', onCompositionStart)
+      editorElement.addEventListener('compositionend', onCompositionEnd)
 
       new CommonUtils.DetectTripleClick(editAreaDomRef.current, () => {
         wasTripleClickTriggeredRef.current = true
@@ -1723,35 +1720,32 @@ const Editarea = forwardRef(
       return () => {
         SegmentStore.removeListener(
           SegmentConstants.REPLACE_TRANSLATION,
-          instance.setNewTranslation,
+          setNewTranslation,
         )
         SegmentStore.removeListener(
           EditAreaConstants.REPLACE_SEARCH_RESULTS,
-          instance.replaceCurrentSearch,
+          replaceCurrentSearch,
         )
         SegmentStore.removeListener(
           EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA,
-          instance.copyGlossaryToEditArea,
+          copyGlossaryToEditArea,
         )
         SegmentStore.removeListener(
           SegmentConstants.REFRESH_TAG_MAP,
-          instance.refreshTagMap,
+          refreshTagMap,
         )
         SegmentStore.removeListener(
           SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES,
-          instance.refreshCharactersCounterRules,
+          refreshCharactersCounterRules,
         )
 
         // captured above, not re-read here: by the time this passive-effect
         // cleanup runs, React has already nulled editorRef.current
         editorElement.removeEventListener(
           'compositionstart',
-          instance.onCompositionStart,
+          onCompositionStart,
         )
-        editorElement.removeEventListener(
-          'compositionend',
-          instance.onCompositionEnd,
-        )
+        editorElement.removeEventListener('compositionend', onCompositionEnd)
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
@@ -1776,7 +1770,7 @@ const Editarea = forwardRef(
         setState({editorState: newEditorState})
       }
       if (!editorState.isInCompositionMode() && !editorSync.onComposition) {
-        instanceRef.current.checkDecorators(prevProps)
+        checkDecoratorsRef.current(prevProps)
       }
 
       // update editor state when receive prop of segment "sourceTagMap"
@@ -1787,7 +1781,7 @@ const Editarea = forwardRef(
         setState({
           previousSourceTagMap: segment.sourceTagMap,
         })
-        instanceRef.current.setNewTranslation(segment.sid, translation)
+        setNewTranslationRef.current(segment.sid, translation)
       }
 
       // Adjust caret position and set focus to entity
@@ -1871,35 +1865,11 @@ const Editarea = forwardRef(
       instanceRef.current.addQaBlacklistGlossaryDecorator =
         addQaBlacklistGlossaryDecorator
       instanceRef.current.addLexiqaDecorator = addLexiqaDecorator
-      instanceRef.current.setNewTranslation = setNewTranslationRef.current
-      instanceRef.current.replaceCurrentSearch = replaceCurrentSearchRef.current
-      instanceRef.current.updateTranslationInStore =
-        updateTranslationInStoreRef.current
-      instanceRef.current.checkDecorators = checkDecoratorsRef.current
-      instanceRef.current.copyGlossaryToEditArea =
-        copyGlossaryToEditAreaRef.current
-      instanceRef.current.refreshTagMap = refreshTagMapRef.current
-      instanceRef.current.refreshCharactersCounterRules =
-        refreshCharactersCounterRulesRef.current
-      instanceRef.current.onCompositionStart = onCompositionStartRef.current
-      instanceRef.current.onCompositionEnd = onCompositionEndRef.current
-      instanceRef.current.focusEditor = focusEditorRef.current
-      instanceRef.current.insertTagAtSelection = insertTagAtSelectionRef.current
-      instanceRef.current.onCompositionStop = onCompositionStopRef.current
       instanceRef.current.removeDecorator = removeDecorator
       instanceRef.current.disableDecorator = disableDecorator
-      instanceRef.current.getUpdatedSegmentInfo =
-        getUpdatedSegmentInfoRef.current
       instanceRef.current.formatSelection = formatSelection
       instanceRef.current.addMissingSourceTagsToTarget =
         addMissingSourceTagsToTarget
-
-      instanceRef.current.updateTranslationDebounced =
-        updateTranslationDebouncedRef.current
-      instanceRef.current.onCompositionStopDebounced =
-        onCompositionStopDebouncedRef.current
-      instanceRef.current.insertTagAtSelectionDebounced =
-        insertTagAtSelectionDebouncedRef.current
     }
 
     // The component's public API: exactly the four members production reaches
