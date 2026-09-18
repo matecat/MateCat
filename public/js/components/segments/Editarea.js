@@ -88,14 +88,14 @@ const Editarea = forwardRef(
     const context = useContext(SegmentContext)
 
     // A snapshot of this render's props, kept as one object because two things
-    // need props *collectively* rather than field by field: liveRef, which the
+    // need props *collectively* rather than field by field: propsRef, which the
     // frozen call sites read through, and prevPropsRef, which the
     // componentDidUpdate-equivalent effect diffs against.
     const currentProps = {segment, translation, updateCounter, toggleFormatMenu}
 
     const instanceRef = useRef({})
     const methodsAssignedRef = useRef(false)
-    const liveRef = useRef({})
+    const propsRef = useRef({})
 
     // Plain instance fields (createRef equivalents) preserved as-is
     const isShiftPressedOnNavigationRef = useRef(undefined)
@@ -143,7 +143,7 @@ const Editarea = forwardRef(
         searchParams,
         occurrencesInSearch,
         currentInSearchIndex,
-      } = liveRef.current.props.segment
+      } = propsRef.current.segment
       if (inSearch && searchParams.target) {
         return {
           active: inSearch,
@@ -171,9 +171,9 @@ const Editarea = forwardRef(
     }
 
     const addSearchDecorator = () => {
-      const {tagRange} = liveRef.current
+      const {tagRange} = stateRef.current
       const {searchParams, occurrencesInSearch, currentInSearchIndex} =
-        liveRef.current.props.segment
+        propsRef.current.segment
       console.log('occurrencesInSearch', occurrencesInSearch)
       const textToSearch = searchParams.target ? searchParams.target : ''
       const newDecorator = DraftMatecatUtils.activateSearch(
@@ -192,7 +192,7 @@ const Editarea = forwardRef(
     }
 
     const addQaBlacklistGlossaryDecorator = () => {
-      const {qaBlacklistGlossary, sid} = liveRef.current.props.segment
+      const {qaBlacklistGlossary, sid} = propsRef.current.segment
       const newDecorator = DraftMatecatUtils.activateQaCheckBlacklist(
         qaBlacklistGlossary,
         sid,
@@ -206,8 +206,8 @@ const Editarea = forwardRef(
     }
 
     const addLexiqaDecorator = () => {
-      const {editorState} = liveRef.current
-      const {lexiqa, sid, lxqDecodedTranslation} = liveRef.current.props.segment
+      const {editorState} = stateRef.current
+      const {lexiqa, sid, lxqDecodedTranslation} = propsRef.current.segment
       // pass decoded translation with tags like <g id='1'>
       const ranges = LexiqaUtils.getRanges(
         cloneDeep(lexiqa.target),
@@ -240,12 +240,12 @@ const Editarea = forwardRef(
 
     // Receive the new translation and decode it for draftJS
     const setNewTranslationRef = useRef((sid, translation) => {
-      if (sid === liveRef.current.props.segment.sid) {
-        const {editorState} = liveRef.current
+      if (sid === propsRef.current.segment.sid) {
+        const {editorState} = stateRef.current
         const contentEncoded = DraftMatecatUtils.encodeContent(
           editorState,
           translation,
-          liveRef.current.props.segment.sourceTagMap,
+          propsRef.current.segment.sourceTagMap,
         )
         // this must be done to make the Undo action possible, otherwise encodeContent will delete all editor history
         let {editorState: newEditorState} = contentEncoded
@@ -257,7 +257,7 @@ const Editarea = forwardRef(
         )
         newEditorState = EditorState.moveSelectionToEnd(newEditorState)
 
-        liveRef.current.props.updateCounter(
+        propsRef.current.updateCounter(
           DraftMatecatUtils.getCharactersCounter(
             instanceRef.current.getTextToApplyCounter(translation),
           ),
@@ -279,14 +279,14 @@ const Editarea = forwardRef(
         occurrencesInSearch,
         currentInSearchIndex,
         currentInSearch,
-      } = liveRef.current.props.segment
+      } = propsRef.current.segment
       if (currentInSearch && searchParams.target) {
         const index = findIndex(
           occurrencesInSearch.occurrences,
           (item) => item.searchProgressiveIndex === currentInSearchIndex,
         )
         const newEditorState = DraftMatecatUtils.replaceOccurrences(
-          liveRef.current.editorState,
+          stateRef.current.editorState,
           searchParams.target,
           text,
           index,
@@ -303,11 +303,11 @@ const Editarea = forwardRef(
     })
 
     const updateTranslationInStoreRef = useRef(() => {
-      const {editorState} = liveRef.current
+      const {editorState} = stateRef.current
       const {
         segment,
         segment: {sourceTagMap},
-      } = liveRef.current.props
+      } = propsRef.current
       const {decodedSegment, entitiesRange} =
         DraftMatecatUtils.decodeSegment(editorState)
       if (decodedSegment !== '') {
@@ -338,27 +338,27 @@ const Editarea = forwardRef(
           sid: segment.sid,
           target: decodedSegment,
         })
-        liveRef.current.props.updateCounter(
+        propsRef.current.updateCounter(
           DraftMatecatUtils.getCharactersCounter(
             instanceRef.current.getTextToApplyCounter(decodedSegment),
           ),
         )
         SegmentActions.startSegmentQACheck()
       } else {
-        liveRef.current.props.updateCounter(0)
+        propsRef.current.updateCounter(0)
       }
     })
 
     const checkDecoratorsRef = useRef((prevProps) => {
       let changedDecorator = false
-      const {inSearch} = liveRef.current.props.segment
-      const prevActiveDecorators = liveRef.current.activeDecorators
-      const {editorState} = liveRef.current
+      const {inSearch} = propsRef.current.segment
+      const prevActiveDecorators = stateRef.current.activeDecorators
+      const {editorState} = stateRef.current
       const activeDecorators = {...prevActiveDecorators}
 
       if (!inSearch) {
         // Qa Check Blacklist
-        const {qaBlacklistGlossary} = liveRef.current.props.segment
+        const {qaBlacklistGlossary} = propsRef.current.segment
         const prevQaBlacklistGlossary = prevProps
           ? prevProps.segment.qaBlacklistGlossary
           : undefined
@@ -385,7 +385,7 @@ const Editarea = forwardRef(
         }
 
         // Lexiqa
-        const {lexiqa} = liveRef.current.props.segment
+        const {lexiqa} = propsRef.current.segment
         const prevLexiqa = prevProps ? prevProps.segment.lexiqa : undefined
         const currentLexiqaTarget =
           lexiqa && lexiqa.target && size(lexiqa.target)
@@ -427,7 +427,7 @@ const Editarea = forwardRef(
         const plainText = textUtils.removeWhitespacePlaceholders(
           contentState.getPlainText(),
         )
-        if (liveRef.current.icuEnabled) {
+        if (icuEnabled) {
           const icuTokens = createIcuTokens(
             plainText,
             editorState,
@@ -447,19 +447,19 @@ const Editarea = forwardRef(
       } else {
         // Search
         if (
-          liveRef.current.props.segment.searchParams.target &&
+          propsRef.current.segment.searchParams.target &&
           (!prevProps ||
             !prevProps.segment.inSearch || // Before was not active
             (prevProps.segment.inSearch &&
               !fromJS(prevProps.segment.searchParams).equals(
-                fromJS(liveRef.current.props.segment.searchParams),
+                fromJS(propsRef.current.segment.searchParams),
               )) || // Before was active but some params change
             (prevProps.segment.inSearch &&
               prevProps.segment.currentInSearch !==
-                liveRef.current.props.segment.currentInSearch) || // Before was the current
+                propsRef.current.segment.currentInSearch) || // Before was the current
             (prevProps.segment.inSearch &&
               prevProps.segment.currentInSearchIndex !==
-                liveRef.current.props.segment.currentInSearchIndex))
+                propsRef.current.segment.currentInSearchIndex))
         ) {
           // There are more occurrences and the current change
           // Cleanup all decorators
@@ -485,8 +485,8 @@ const Editarea = forwardRef(
     })
 
     const copyGlossaryToEditAreaRef = useRef((segment, glossaryTranslation) => {
-      if (segment.sid === liveRef.current.props.segment.sid) {
-        const {editorState} = liveRef.current
+      if (segment.sid === propsRef.current.segment.sid) {
+        const {editorState} = stateRef.current
         const newEditorState = DraftMatecatUtils.insertText(
           editorState,
           glossaryTranslation,
@@ -504,16 +504,16 @@ const Editarea = forwardRef(
 
     const refreshTagMapRef = useRef(() => {
       instanceRef.current.setNewTranslation(
-        liveRef.current.props.segment.sid,
-        liveRef.current.props.translation,
+        propsRef.current.segment.sid,
+        propsRef.current.translation,
       )
       setTimeout(() => instanceRef.current.checkDecorators(), 100)
     })
 
     const refreshCharactersCounterRulesRef = useRef(() => {
       instanceRef.current.setNewTranslation(
-        liveRef.current.props.segment.sid,
-        liveRef.current.props.translation,
+        propsRef.current.segment.sid,
+        propsRef.current.translation,
       )
     })
 
@@ -534,17 +534,17 @@ const Editarea = forwardRef(
     const replaceWordAt = ({newWord, start, end}) => {
       const startIndex = start
       const endIndex = end
-      const selection = liveRef.current.editorState.getSelection().merge({
+      const selection = stateRef.current.editorState.getSelection().merge({
         anchorOffset: startIndex,
         focusOffset: endIndex,
       })
       const contentState = Modifier.replaceText(
-        liveRef.current.editorState.getCurrentContent(),
+        stateRef.current.editorState.getCurrentContent(),
         selection,
         newWord,
       )
       const updatedState = EditorState.push(
-        liveRef.current.editorState,
+        stateRef.current.editorState,
         contentState,
       )
       instanceRef.current.setState({editorState: updatedState}, () => {
@@ -560,7 +560,7 @@ const Editarea = forwardRef(
     })
 
     const typeTextInEditor = (textToInsert) => {
-      const {editorState} = liveRef.current
+      const {editorState} = stateRef.current
       editorSync.onComposition = true
       let newEditorState = disableDecorator(
         editorState,
@@ -589,7 +589,7 @@ const Editarea = forwardRef(
     }
 
     const myKeyBindingFn = (e) => {
-      const {displayPopover} = liveRef.current
+      const {displayPopover} = stateRef.current
       const isChromeBook = navigator.userAgent.indexOf('CrOS') > -1
       if (
         (e.keyCode === 84 || e.key === 't' || e.key === '™') &&
@@ -653,7 +653,7 @@ const Editarea = forwardRef(
 
         // check caret is near zwsp char and move caret position
         const updatedStateNearZwsp = checkCaretIsNearZwsp({
-          editorState: liveRef.current.editorState,
+          editorState: stateRef.current.editorState,
           direction,
           isShiftPressed: e.shiftKey,
         })
@@ -662,7 +662,7 @@ const Editarea = forwardRef(
         const updatedStateNearEntity = checkCaretIsNearEntity({
           editorState: updatedStateNearZwsp
             ? updatedStateNearZwsp
-            : liveRef.current.editorState,
+            : stateRef.current.editorState,
           direction,
           isShiftPressed: e.shiftKey,
         })
@@ -711,7 +711,7 @@ const Editarea = forwardRef(
         }
       } else if (
         (e.key === 'Backspace' || e.key === 'Delete') &&
-        !isSelectedEntity(liveRef.current.editorState) &&
+        !isSelectedEntity(stateRef.current.editorState) &&
         window.getSelection().type === 'Caret'
       ) {
         const isRTL = Boolean(config.isTargetRTL)
@@ -725,7 +725,7 @@ const Editarea = forwardRef(
               : 'left'
 
         const updatedStateNearZwsp = checkCaretIsNearZwsp({
-          editorState: liveRef.current.editorState,
+          editorState: stateRef.current.editorState,
           direction,
           isShiftPressed: true,
         })
@@ -734,7 +734,7 @@ const Editarea = forwardRef(
         const updatedStateNearEntity = checkCaretIsNearEntity({
           editorState: updatedStateNearZwsp
             ? updatedStateNearZwsp
-            : liveRef.current.editorState,
+            : stateRef.current.editorState,
           direction,
           isShiftPressed: true,
           isBackspacePressed: e.key === 'Backspace',
@@ -759,7 +759,7 @@ const Editarea = forwardRef(
     const handleKeyCommand = (command) => {
       const {
         segment: {sourceTagMap, missingTagsInTarget},
-      } = liveRef.current.props
+      } = propsRef.current
 
       switch (command) {
         case 'toggle-tag-menu': {
@@ -824,7 +824,7 @@ const Editarea = forwardRef(
     }
 
     const insertTagAtSelectionRef = useRef((tagName) => {
-      const {editorState} = liveRef.current
+      const {editorState} = stateRef.current
       const customTag = DraftMatecatUtils.structFromName(tagName)
       // If tag creation has failed, return
       if (!customTag) return
@@ -855,7 +855,7 @@ const Editarea = forwardRef(
     })
 
     const onMouseUpEvent = () => {
-      const {toggleFormatMenu} = liveRef.current.props
+      const {toggleFormatMenu} = propsRef.current
       toggleFormatMenu(
         !editorRef.current._latestEditorState.getSelection().isCollapsed(),
       )
@@ -868,7 +868,7 @@ const Editarea = forwardRef(
         event.key === 'ArrowUp' ||
         event.key === 'ArrowDown'
       ) {
-        const {toggleFormatMenu} = liveRef.current.props
+        const {toggleFormatMenu} = propsRef.current
         toggleFormatMenu(
           !editorRef.current._latestEditorState.getSelection().isCollapsed(),
         )
@@ -876,7 +876,7 @@ const Editarea = forwardRef(
     }
 
     const onBlurEvent = () => {
-      const {toggleFormatMenu} = liveRef.current.props
+      const {toggleFormatMenu} = propsRef.current
       editorSync.editorFocused = false
       // Hide Edit Toolbar
       toggleFormatMenu(false)
@@ -902,10 +902,7 @@ const Editarea = forwardRef(
         editorSync.onComposition = false
         // Tell tags to update themself
         setTimeout(() => {
-          SegmentActions.editAreaChanged(
-            liveRef.current.props.segment.sid,
-            true,
-          )
+          SegmentActions.editAreaChanged(propsRef.current.segment.sid, true)
         })
       }
     })
@@ -936,8 +933,8 @@ const Editarea = forwardRef(
     }
 
     const onChange = (editorState) => {
-      const {displayPopover, activeDecorators} = liveRef.current
-      const prevEditorState = liveRef.current.editorState
+      const {displayPopover, activeDecorators} = stateRef.current
+      const prevEditorState = stateRef.current.editorState
 
       // check caret is inside entity and restore previous editorState
       if (
@@ -1035,12 +1032,12 @@ const Editarea = forwardRef(
     // fix cursor jump at the beginning
     // Methods for TagMenu ---- START
     const moveUpTagMenuSelection = () => {
-      const {displayPopover} = liveRef.current
+      const {displayPopover} = stateRef.current
       if (!displayPopover) return
       const {
         focusedTagIndex,
         autocompleteSuggestions: {missingTags, sourceTags},
-      } = liveRef.current
+      } = stateRef.current
       const mergeAutocompleteSuggestions = [...missingTags, ...sourceTags]
       const newFocusedTagIndex =
         focusedTagIndex - 1 < 0
@@ -1053,12 +1050,12 @@ const Editarea = forwardRef(
     }
 
     const moveDownTagMenuSelection = () => {
-      const {displayPopover} = liveRef.current
+      const {displayPopover} = stateRef.current
       if (!displayPopover) return
       const {
         focusedTagIndex,
         autocompleteSuggestions: {missingTags, sourceTags},
-      } = liveRef.current
+      } = stateRef.current
       const mergeAutocompleteSuggestions = [...missingTags, ...sourceTags]
       instanceRef.current.setState({
         focusedTagIndex:
@@ -1073,7 +1070,7 @@ const Editarea = forwardRef(
         editorState,
         triggerText,
         autocompleteSuggestions: {missingTags = [], sourceTags},
-      } = liveRef.current
+      } = stateRef.current
       if (!displayPopover) return
       const mergeAutocompleteSuggestions = [...missingTags, ...sourceTags]
       const selectedTag = mergeAutocompleteSuggestions[focusedTagIndex]
@@ -1133,7 +1130,7 @@ const Editarea = forwardRef(
     }
 
     const onTagClick = (suggestionTag) => {
-      const {editorState, triggerText} = liveRef.current
+      const {editorState, triggerText} = stateRef.current
       // Start typing...
       editorSync.onComposition = true
       // Disable lexiqa while typing
@@ -1170,7 +1167,7 @@ const Editarea = forwardRef(
     // Methods for TagMenu ---- END
 
     const pasteFragment = (text) => {
-      const {editorState} = liveRef.current
+      const {editorState} = stateRef.current
       const {fragment: clipboardFragment, plainText: clipboardPlainText} =
         SegmentStore.getFragmentFromClipboard()
       // if text in standard clipboard matches the the plainClipboard saved in store proceed using fragment
@@ -1235,7 +1232,7 @@ const Editarea = forwardRef(
 
     const copyFragment = (e) => {
       const internalClipboard = editorRef.current.getClipboard()
-      const {editorState} = liveRef.current
+      const {editorState} = stateRef.current
       if (internalClipboard) {
         e.preventDefault()
         // Get plain text form internalClipboard fragment
@@ -1270,7 +1267,7 @@ const Editarea = forwardRef(
     }
 
     const handleDrop = (selection, dataTransfer) => {
-      let {editorState} = liveRef.current
+      let {editorState} = stateRef.current
       const text = dataTransfer.getText()
 
       // get selection of dragged text
@@ -1370,7 +1367,7 @@ const Editarea = forwardRef(
     }
 
     const onEntityClickRef = useRef((start, end) => {
-      const {editorState} = liveRef.current
+      const {editorState} = stateRef.current
       // Use _latestEditorState
       try {
         // Selection
@@ -1448,8 +1445,8 @@ const Editarea = forwardRef(
           missingTagsInTarget,
           openSplit,
         },
-      } = liveRef.current.props
-      const {tagRange, editorState} = liveRef.current
+      } = propsRef.current
+      const {tagRange, editorState} = stateRef.current
       return {
         sid,
         warnings,
@@ -1465,7 +1462,7 @@ const Editarea = forwardRef(
     })
 
     const formatSelection = (format) => {
-      const {editorState} = liveRef.current
+      const {editorState} = stateRef.current
       // Todo: if selectionIsEntity return
       if (editorState.getSelection().isCollapsed()) {
         return
@@ -1493,8 +1490,8 @@ const Editarea = forwardRef(
     }
 
     const addMissingSourceTagsToTarget = () => {
-      const {segment} = liveRef.current.props
-      const {editorState} = liveRef.current
+      const {segment} = propsRef.current
+      const {editorState} = stateRef.current
       // Append missing tag at the end of the current translation string
       let newTranslation = segment.translation
       let newDecodedTranslation = segment.decodedTranslation
@@ -1526,7 +1523,7 @@ const Editarea = forwardRef(
           [],
         )
         SegmentActions.getSegmentsQa({
-          ...liveRef.current.props.segment,
+          ...propsRef.current.segment,
           translation: newTranslation,
         })
       }, 100)
@@ -1647,10 +1644,8 @@ const Editarea = forwardRef(
       )
     }
 
-    // refresh liveRef every render so stable closures always see current data
-    liveRef.current.props = currentProps
-    Object.assign(liveRef.current, state)
-    liveRef.current.icuEnabled = icuEnabled
+    // refresh every render so stable closures always see the current props
+    propsRef.current = currentProps
 
     const isFirstRenderRef = useRef(true)
     const prevPropsRef = useRef(currentProps)
@@ -1686,7 +1681,7 @@ const Editarea = forwardRef(
       setTimeout(() => {
         instance.checkDecorators()
         instance.updateTranslationInStore()
-        if (liveRef.current.props.segment.opened) {
+        if (propsRef.current.segment.opened) {
           instance.focusEditor()
         }
       })
@@ -1843,11 +1838,11 @@ const Editarea = forwardRef(
     // per-render closures, so what lands here is whichever copy the first render
     // produced — and every frozen call site reads its target through this object.
     //
-    // That is safe only because these methods take their inputs from liveRef (or
+    // That is safe only because these methods take their inputs from propsRef (or
     // from their own parameters) rather than closing over segment, translation,
     // editorState and friends directly. A method added here that reads a
     // render-scoped binding would be pinned to the first render and go quietly
-    // stale, which is the defect fixed in 71cd271. Read through liveRef, or move
+    // stale, which is the defect fixed in 71cd271. Read through propsRef, or move
     // the assignment out of this guard.
     if (!methodsAssignedRef.current) {
       methodsAssignedRef.current = true
@@ -1862,7 +1857,6 @@ const Editarea = forwardRef(
         // which a dispatch alone would not provide until the next render.
         stateRef.current = {...stateRef.current, ...resolved}
         instanceRef.current.state = stateRef.current
-        Object.assign(liveRef.current, resolved)
 
         dispatchState(resolved)
 
