@@ -14,6 +14,7 @@ use Model\Users\UserStruct;
 use PDOException;
 use PDOStatement;
 use ReflectionException;
+use TypeError;
 use Utils\Constants\JobStatus;
 use Utils\Constants\TranslationStatus;
 
@@ -227,6 +228,7 @@ class JobDao extends AbstractDao
      * @return JobStruct
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError when the struct carries no id, so the metadata cannot be carried over
      */
     public function changePassword(JobStruct $jStruct, string $new_password): JobStruct
     {
@@ -242,6 +244,19 @@ class JobDao extends AbstractDao
             'old_password' => $jStruct->password,
             'last_update' => date("Y-m-d H:i:s"),
         ]);
+
+        // job_metadata is keyed by (id_job, password, key), so the rename above leaves every setting
+        // the job has at an address nothing can reach any more: dialect_strict, mandatory_issues, the
+        // character counter, the subfiltering handlers. Carrying them is part of the rename, not of
+        // the caller — ChangePasswordController, TranslatorsModel::changeJobPassword() and
+        // updateForMerge() all rotate through here, and the last one dispatches no event at all, so
+        // the jobPasswordChanged listeners that mirror the other side tables cannot cover this one.
+        // Those listeners are plugin features besides, enabled per project, and job_metadata is core.
+        (new MetadataDao($this->database))->movePassword(
+            $jStruct->id ?? throw new TypeError('JobStruct::$id cannot be null'),
+            (string)$jStruct->password,
+            $new_password
+        );
 
         $jStruct->password = $new_password;
 
@@ -927,6 +942,7 @@ class JobDao extends AbstractDao
      * @throws ReflectionException
      * @throws ValidationError
      * @throws Exception
+     * @throws TypeError propagated from changePassword()
      */
     public function updateForMerge(JobStruct $first_job, string $newPass): JobStruct
     {

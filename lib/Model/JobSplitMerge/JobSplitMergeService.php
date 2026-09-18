@@ -16,7 +16,6 @@ use Model\FeaturesBase\Hook\Event\Run\PostJobMergedEvent;
 use Model\FeaturesBase\Hook\Event\Run\PostJobSplittedEvent;
 use Model\Jobs\JobCredentialCacheInvalidator;
 use Model\Jobs\JobDao;
-use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\LQA\ChunkReviewDao;
@@ -150,6 +149,7 @@ class JobSplitMergeService
     /**
      * Wrapper around static JobDao::updateForMerge() — overridable in tests.
      * @throws Exception
+     * @throws TypeError propagated from the password rotation, which carries the job metadata over
      */
     protected function updateForMerge(JobStruct $job, string $newPassword): void
     {
@@ -472,6 +472,15 @@ class JobSplitMergeService
 
         $jobsMetadataDao = $this->createJobMetadataDao();
 
+        // Read once, before the loop. job_metadata is keyed by (id_job, password, key), so a chunk
+        // that gets a fresh password gets an empty address: whatever is not copied onto it is gone.
+        // The read binds the password of the job being split, which is what leaves MMT's mt_context
+        // row out — it lives under the empty password and is already shared by every chunk.
+        $sourceMetadata = $jobsMetadataDao->getRawMapByJobIdAndPassword(
+            $jobToSplit->id ?? throw new RuntimeException('Missing job id'),
+            $jobToSplit->password ?? throw new RuntimeException('Missing job password')
+        );
+
         $newJobList = [];
 
         // create the other chunks of the job to split
@@ -509,30 +518,20 @@ class JobSplitMergeService
 
             $newJobList[] = $newJob;
 
-            // duplicate character_counter_count_tags, character_counter_mode, subfiltering_handlers metadata
-            $metadata = [
-                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value,
-                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value,
-                JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
-            ];
-
-             foreach ($metadata as $key) {
-                 $_data = $jobsMetadataDao->get(
-                     $jobToSplit->id ?? throw new RuntimeException('Missing job id'),
-                     $jobToSplit->password ?? throw new RuntimeException('Missing job password'),
-                     $key
-                 );
-
-                 if (!empty($_data)) {
-                     $jobsMetadataDao->set(
-                         $newJob->id ?? throw new RuntimeException('Missing new job id'),
-                         $newJob->password ?? throw new RuntimeException('Missing new job password'),
-                         $key,
-                         $_data->value
-                     );
-                     $jobsMetadataDao->destroyCacheByJobAndPasswordAndKey($jobToSplit->id ?? throw new RuntimeException('Missing job id'), $jobToSplit->password ?? throw new RuntimeException('Missing job password'), $key);
-                 }
-             }
+            // Every key the job carries goes to the chunk, not a chosen few: they are all
+            // configuration of the same piece of work, and a chunk that answers with the default for
+            // one of them is a silent behaviour change — dialect_strict and public_tm_penalty reach
+            // MyMemory, tm_prioritization orders the suggestions, mandatory_issues gates delivery.
+            //
+            // The chunk that kept the password of the job being split is skipped: its rows are
+            // already at that address, and the copy would be a self-upsert.
+            if ($newJob->password !== $jobToSplit->password) {
+                $jobsMetadataDao->bulkSet(
+                    $newJob->id ?? throw new RuntimeException('Missing new job id'),
+                    $newJob->password ?? throw new RuntimeException('Missing new job password'),
+                    $sourceMetadata
+                );
+            }
 
             $stmt->closeCursor();
             unset($stmt);
@@ -635,24 +634,10 @@ class JobSplitMergeService
         // the structs are the ones it mutates.
         $mergedPasswords = [];
 
-        foreach ($jobStructs as $i => $_jStruct) {
+        foreach ($jobStructs as $_jStruct) {
             $totalAvgPee += $_jStruct->avg_post_editing_effort;
             $totalTimeToEdit += $_jStruct->total_time_to_edit;
             $mergedPasswords[] = (string)$_jStruct->password;
-
-            if ($i > 0) {
-                // delete character_counter_count_tags, character_counter_mode, subfiltering_handlers metadata (not from the first job)
-                $metadata = [
-                    JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value,
-                    JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value,
-                    JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
-                ];
-
-                 foreach ($metadata as $key) {
-                     $jobsMetadataDao->delete($_jStruct->id ?? throw new RuntimeException('Missing job id'), $_jStruct->password ?? throw new RuntimeException('Missing job password'), $key);
-                     $jobsMetadataDao->destroyCacheByJobAndPasswordAndKey($_jStruct->id ?? throw new RuntimeException('Missing job id'), $_jStruct->password ?? throw new RuntimeException('Missing job password'), $key);
-                 }
-            }
         }
 
         $first_job['avg_post_editing_effort'] = $totalAvgPee;
@@ -660,6 +645,21 @@ class JobSplitMergeService
 
         $this->beginTransaction();
 
+        // deleteOnMerge() below drops the row of every chunk but the first. Their metadata is
+        // keyed by the password that row carries, so it would outlive them as rows nothing can
+        // reach — every key, not the three this used to name. Inside the transaction, because a
+        // merge that fails after this point must not leave the settings already deleted.
+        foreach ($jobStructs as $i => $_jStruct) {
+            if ($i > 0) {
+                $jobsMetadataDao->deleteByJobIdAndPassword(
+                    $_jStruct->id ?? throw new RuntimeException('Missing job id'),
+                    $_jStruct->password ?? throw new RuntimeException('Missing job password')
+                );
+            }
+        }
+
+        // The first chunk keeps its own rows, and JobDao::changePassword() carries them over when
+        // the rotation below renames the credential they are keyed by.
         if ($first_job->getTranslator(new JobsTranslatorsDao($this->dbHandler))) {
             //Update the password in the struct and in the database for the first job
             $this->updateForMerge($first_job, $this->generateRandomString());
