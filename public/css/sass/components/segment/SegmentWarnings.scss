@@ -77,12 +77,13 @@ section.opened {
   }
 }
 
+/* Child of .target.item, so it spans that column's content box — same left edge
+   as the editarea and the target toolbar, same right edge as the status button. */
 section .segment-body-content .warnings-block {
   display: none;
-  width: 103%;
-  box-sizing: content-box;
+  width: 100%;
+  box-sizing: border-box;
   margin-top: 10px;
-  margin-left: -20px;
   font-size: variables.$font-size-xsmall;
 }
 
@@ -134,6 +135,11 @@ section .segment-body-content .warnings-block {
       vertical-align: middle;
       text-align: center;
       padding: 4px;
+      // The icon is an svg, which is a block box: text-align only centres
+      // inline content, so without auto margins it sits against the left edge.
+      svg {
+        margin: 0 auto;
+      }
     }
     .content-column {
       width: 90%;

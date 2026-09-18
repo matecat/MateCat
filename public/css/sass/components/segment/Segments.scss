@@ -48,6 +48,12 @@ body.cattool {
 }
 
 section {
+  &.editor {
+    z-index: 2;
+    position: relative;
+    width: 89%;
+    margin-left: 4.5%;
+  }
   &.opened {
     .target .buttons {
       display: flex;
@@ -100,10 +106,6 @@ section {
   &.slide-right {
     width: 75%;
   }
-}
-
-.projectbar.slide-right {
-  width: 70%;
 }
 
 .toggle {
@@ -193,12 +195,6 @@ strong:first-child {
 .editor,
 .editor .text {
   background: colors.$white;
-}
-section.editor {
-  z-index: 2;
-  position: relative;
-  width: 89%;
-  margin-left: 4.5%;
 }
 
 section.editor .sid {

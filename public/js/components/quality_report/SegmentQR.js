@@ -274,19 +274,46 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
     [urls, segment],
   )
 
+  // Events carrying no status are the first-version rows the history query adds
+  // with `null as status`; they are not shown. The toggle below has to count the
+  // same list the panel renders, or a segment whose history is only those rows
+  // offers a button that opens an empty panel.
+  const segmentHistory = useMemo(
+    () => (segment.get('history')?.toJS() ?? []).filter((elem) => elem.status),
+    [segment],
+  )
+
+  // The toggle is shown inside the QA row when that row is on screen, and on a
+  // row of its own when it is not: the history does not depend on QA being open.
+  const historyToggle =
+    segmentHistory.length > 0 ? (
+      <div style={{alignSelf: 'center', marginRight: 24, marginLeft: 'auto'}}>
+        {!showHistory ? (
+          <Button onClick={() => setShowHistory(true)} size={BUTTON_SIZE.SMALL}>
+            Open history
+            <ChevronDown size={16} />
+          </Button>
+        ) : (
+          <Button
+            onClick={() => setShowHistory(false)}
+            size={BUTTON_SIZE.SMALL}
+          >
+            Close history
+            <ChevronUp size={16} />
+          </Button>
+        )}
+      </div>
+    ) : null
+
   const renderSegmentHistory = () => {
-    const history = segment
-      .get('history')
-      .toJS()
-      .filter((elem) => elem.status)
-    return history.map((elem, index) => {
+    return segmentHistory.map((elem, index) => {
       return (
         <div key={elem.date} className="qr-history-item">
           <div
             className={`qr-history-status qr-history-status_${elem.status.toLowerCase()}`}
           >
             <div className="qr-history-status_point"></div>
-            {index < history.length - 1 && (
+            {index < segmentHistory.length - 1 && (
               <div className="qr-history-status_separator"></div>
             )}
             {elem.status === SEGMENTS_STATUS.APPROVED2
@@ -304,7 +331,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
                 index === 0
                   ? elem.translation
                   : TextUtils.getDiffHtml(
-                      history[index - 1].translation,
+                      segmentHistory[index - 1].translation,
                       elem.translation,
                     ),
                 config.isTargetRTL,
@@ -573,30 +600,13 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
                 </div>
               )}
             </div>
-            <div style={{alignSelf: 'center', marginRight: 24}}>
-              {(segment.get('history')?.size ?? 0) > 0 ? (
-                !showHistory ? (
-                  <Button
-                    onClick={() => setShowHistory(true)}
-                    size={BUTTON_SIZE.SMALL}
-                  >
-                    Open history
-                    <ChevronDown size={16} />
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => setShowHistory(false)}
-                    size={BUTTON_SIZE.SMALL}
-                  >
-                    Close history
-                    <ChevronUp size={16} />
-                  </Button>
-                )
-              ) : null}
-            </div>
+            {historyToggle}
           </div>
         )}
-        {(segment.get('history')?.size ?? 0) > 0 && showHistory && (
+        {!isQaVisible && segmentHistory.length > 0 && (
+          <div className="segment-container qr-issues">{historyToggle}</div>
+        )}
+        {segmentHistory.length > 0 && showHistory && (
           <div className="qr-history">{renderSegmentHistory()}</div>
         )}
       </div>

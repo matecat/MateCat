@@ -14,6 +14,7 @@ import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
+import Trash from '../../../img/icons/Trash'
 import {NUM_CONTRIBUTION_RESULTS} from '../../constants/Constants'
 import Tooltip from '../common/Tooltip'
 import IconDown from '../../../img/icons/IconDown'
@@ -353,12 +354,16 @@ class SegmentFooterTabMatches extends React.Component {
           match.disabled || (!isOwnedKey && !isPublicTm) ? (
             ''
           ) : (
-            <span
+            <Button
               id={self.props.segment.sid + '-tm-' + match.id + '-delete'}
               className="trash"
               title="delete this row"
+              type={BUTTON_TYPE.ICON}
+              size={BUTTON_SIZE.ICON_XSMALL}
               onClick={self.deleteSuggestion.bind(self, match, index)}
-            />
+            >
+              <Trash size={16} />
+            </Button>
           )
         var item = (
           <ul

@@ -1,8 +1,4 @@
-/**
- * React Component for the warnings.
-
- */
-import React from 'react'
+import React, {useContext, useEffect, useMemo, useRef, useState} from 'react'
 import {isUndefined} from 'lodash'
 import {debounce} from 'lodash/function'
 import CommentsStore from '../../stores/CommentsStore'
@@ -12,7 +8,6 @@ import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
 import {MentionsInput} from 'react-mentions'
 import Mention from '../common/Mention'
-import UserStore from '../../stores/UserStore'
 import {
   Button,
   BUTTON_MODE,
@@ -25,511 +20,426 @@ import Check from '../../../img/icons/Check'
 import commonUtils from '../../utils/commonUtils'
 import IconClose from '../../../img/icons/IconClose'
 
-class SegmentCommentsContainer extends React.Component {
-  static contextType = SegmentContext
+const MESSAGE_TYPE = {resolve: 2, comment: 1}
 
-  constructor(props, context) {
-    super(props)
-    this.localStorageKey = 'anonymous-comments' + context.userInfo.user.uid
-    this.state = {
-      comments: CommentsStore.getCommentsBySegment(
-        context.segment.original_sid,
-      ),
-      user: UserStore.getUser(),
-      teamUsers: CommentsStore.getTeamUsers(),
-      sendCommentError: false,
-      showTagging: false,
-      mentionsInputValue: '',
-      anonymousComments:
-        commonUtils.getFromStorage(this.localStorageKey) === 'true',
+const nl2br = (str) =>
+  (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1<br />$2')
+
+const SegmentCommentsContainer = () => {
+  const {segment, userInfo} = useContext(SegmentContext)
+  const {sid, original_sid: originalSid, splitted, openComments} = segment
+
+  const localStorageKey = 'anonymous-comments' + userInfo?.user.uid
+
+  // CommentsStore hands out the very array it stores and mutates it in place
+  // (adding and resolving both push into it), so every read is copied here.
+  // Without the copy setComments would be handed the reference it already has,
+  // React would skip the render, and a resolved thread would never repaint.
+  const [comments, setComments] = useState(() => [
+    ...CommentsStore.getCommentsBySegment(originalSid),
+  ])
+  const [teamUsers, setTeamUsers] = useState(() => CommentsStore.getTeamUsers())
+  const [sendCommentError, setSendCommentError] = useState(false)
+  const [mentionsInputValue, setMentionsInputValue] = useState('')
+  const [mentionsMarkup, setMentionsMarkup] = useState('')
+  const [anonymousComments, setAnonymousComments] = useState(
+    () => commonUtils.getFromStorage(localStorageKey) === 'true',
+  )
+
+  const commentInputRef = useRef(null)
+  const wrapRef = useRef(null)
+
+  // saveDraft is debounced, so its body runs long after the render that built
+  // it; it has to read the draft through a ref rather than close over it.
+  const latestRef = useRef({})
+  latestRef.current = {originalSid, mentionsInputValue}
+
+  const saveDraft = useMemo(
+    () =>
+      debounce(() => {
+        CommentsActions.saveDraftComment(
+          latestRef.current.originalSid,
+          latestRef.current.mentionsInputValue,
+        )
+      }, 500),
+    [],
+  )
+
+  useEffect(() => {
+    const updateComments = (updatedSid) => {
+      if (
+        isUndefined(updatedSid) ||
+        parseInt(updatedSid) === parseInt(originalSid)
+      ) {
+        setComments([...CommentsStore.getCommentsBySegment(originalSid)])
+      }
     }
-    this.types = {sticky: 3, resolve: 2, comment: 1}
-    this.updateComments = this.updateComments.bind(this)
-    this.setFocusOnInput = this.setFocusOnInput.bind(this)
-    this.setTeamUsers = this.setTeamUsers.bind(this)
-    this.saveDraft = debounce(() => {
-      CommentsActions.saveDraftComment(
-        this.context.segment.original_sid,
-        this.state.mentionsInputValue,
-      )
-    }, 500)
-  }
+    const setFocusOnInput = () => commentInputRef.current.focus()
 
-  closeComments(e) {
+    updateComments(sid)
+    CommentsStore.addListener(CommentsConstants.ADD_COMMENT, updateComments)
+    CommentsStore.addListener(CommentsConstants.DELETE_COMMENT, updateComments)
+    CommentsStore.addListener(CommentsConstants.STORE_COMMENTS, updateComments)
+    CommentsStore.addListener(CommentsConstants.SET_FOCUS, setFocusOnInput)
+    CommentsStore.addListener(CommentsConstants.SET_TEAM_USERS, setTeamUsers)
+
+    return () => {
+      CommentsStore.removeListener(
+        CommentsConstants.ADD_COMMENT,
+        updateComments,
+      )
+      CommentsStore.removeListener(
+        CommentsConstants.DELETE_COMMENT,
+        updateComments,
+      )
+      CommentsStore.removeListener(
+        CommentsConstants.STORE_COMMENTS,
+        updateComments,
+      )
+      CommentsStore.removeListener(CommentsConstants.SET_FOCUS, setFocusOnInput)
+      CommentsStore.removeListener(
+        CommentsConstants.SET_TEAM_USERS,
+        setTeamUsers,
+      )
+    }
+  }, [sid, originalSid])
+
+  useEffect(() => {
+    const draftText = CommentsStore.getDraftComment(sid)
+    if (draftText) setMentionsInputValue(draftText)
+    commentInputRef.current.focus()
+    // Mount only, matching the class's componentDidMount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // componentDidUpdate in the class: after every render, including the first.
+  useEffect(() => {
+    const wrap = wrapRef.current
+    if (!wrap) return
+    const maxScrollTop = wrap.scrollHeight - wrap.clientHeight
+    wrap.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0
+  })
+
+  // Workaround - textarea fit to content. The class started this timer from
+  // inside render and never cleared it.
+  useEffect(() => {
+    if (!commentInputRef.current) return
+    const timer = setTimeout(() => {
+      const input = commentInputRef.current
+      if (input) input.style.height = `${input.parentNode.clientHeight}px`
+    }, 200)
+    return () => clearTimeout(timer)
+  })
+
+  const closeComments = (e) => {
     e.preventDefault()
     e.stopPropagation()
-    SegmentActions.closeSegmentComment(this.context.segment.sid)
+    SegmentActions.closeSegmentComment(sid)
   }
 
-  sendComment() {
-    const {mentionsMarkup} = this.state
-    if (mentionsMarkup?.length > 0) {
-      CommentsActions.sendComment(
-        mentionsMarkup,
-        this.state.anonymousComments,
-        this.context.segment.original_sid,
-      )
-        .catch(() => {
-          this.setState({sendCommentError: true})
+  const sendComment = () => {
+    if (!(mentionsMarkup?.length > 0)) return
+    // catch must come last: chained after then, it would swallow the failure
+    // and clear the error in the same chain that set it.
+    CommentsActions.sendComment(mentionsMarkup, anonymousComments, originalSid)
+      .then(() => {
+        setSendCommentError(false)
+        setTimeout(() => {
+          if (commentInputRef.current) setMentionsInputValue('')
         })
-        .then(() => {
-          this.setState({sendCommentError: false})
-          setTimeout(() => {
-            if (this.commentInput) {
-              this.setState({
-                mentionsInputValue: '',
-              })
-            }
-          })
-        })
-    }
-  }
-
-  deleteComment = () => {
-    const {comments} = this.state
-    const lastCommentId = comments[comments.length - 1].id
-    CommentsActions.deleteComment(
-      lastCommentId,
-      this.context.segment.original_sid,
-    )
-  }
-
-  resolveThread() {
-    CommentsActions.resolveThread(
-      this.context.segment.original_sid,
-      this.state.anonymousComments,
-    )
-  }
-
-  updateComments(sid) {
-    if (
-      isUndefined(sid) ||
-      parseInt(sid) === parseInt(this.context.segment.original_sid)
-    ) {
-      const comments = CommentsStore.getCommentsBySegment(
-        this.context.segment.original_sid,
-      )
-      const user = CommentsStore.getUser()
-      this.setState({
-        comments: comments,
-        user: user,
       })
-    }
+      .catch(() => setSendCommentError(true))
   }
 
-  setTeamUsers(users) {
-    this.setState({
-      teamUsers: users,
-    })
-  }
+  const deleteComment = () =>
+    CommentsActions.deleteComment(comments[comments.length - 1].id, originalSid)
 
-  handleChangeMentionsInputValue = (
+  const resolveThread = () =>
+    CommentsActions.resolveThread(originalSid, anonymousComments)
+
+  const handleChangeMentionsInputValue = (
     event,
     newValue,
     newPlainTextValue,
     mentions,
   ) => {
-    const mentionsMarkup = mentions.reduce(
-      (acc, cur) =>
-        acc.replace(`{@${cur.id}||${cur.display}@}`, `{@${cur.id}@}`),
-      newValue,
+    setMentionsInputValue(newValue)
+    setMentionsMarkup(
+      mentions.reduce(
+        (acc, cur) =>
+          acc.replace(`{@${cur.id}||${cur.display}@}`, `{@${cur.id}@}`),
+        newValue,
+      ),
     )
+  }
 
-    this.setState({
-      mentionsInputValue: newValue,
-      mentionsMarkup,
+  const onKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      if (mentionsInputValue) sendComment()
+    } else {
+      saveDraft()
+    }
+  }
+
+  // Show the balloon on a whole segment, or only on the first piece of a split
+  // one; and only once the segment has been opened for commenting.
+  const isFirstOfSplitGroup = !splitted || sid.split('-')[1] === '1'
+  if (!isFirstOfSplitGroup || !comments || !openComments || !userInfo)
+    return null
+
+  const findUser = (id) => teamUsers?.find((item) => item.uid === id)
+
+  const parseCommentHtml = (text) => {
+    const regExp = /{@([0-9]+|team)@}/gm
+    if (!regExp.test(text)) return text
+    return text.replace(regExp, (match, rawId) => {
+      const id = rawId === 'team' ? rawId : parseInt(rawId)
+      const user = findUser(id)
+      if (!user) return match
+      return `<span contenteditable="false" class="tagging-item" data-id="${id}">${user.first_name} ${user.last_name}</span>`
     })
   }
 
-  getComments() {
-    let htmlComments, htmlInsert, resolveButton, deleteButton
-    const nl2br = function (str, is_xhtml) {
-      var breakTag =
-        is_xhtml || typeof is_xhtml === 'undefined' ? '<br />' : '<br>'
-      return (str + '').replace(
-        /([^>\r\n]?)(\r\n|\n\r|\r|\n)/g,
-        '$1' + breakTag + '$2',
-      )
-    }
+  let htmlComments
+  if (comments.length > 0) {
+    let threadWrap = [],
+      threadId = 0,
+      count = 0,
+      threadClass
+    const commentsHtml = []
+    let deleteButton, resolveButton
 
-    const findUser = (id) => {
-      if (this.state.teamUsers) {
-        return this.state.teamUsers.find((item) => {
-          return item.uid === id
-        })
-      }
-      return undefined
-    }
-
-    const parseCommentHtml = function (text) {
-      var regExp = /{@([0-9]+|team)@}/gm
-      if (regExp.test(text)) {
-        text = text.replace(regExp, function (match, id) {
-          id = id === 'team' ? id : parseInt(id)
-          var user = findUser(id)
-          if (user) {
-            var html =
-              '<span contenteditable="false" class="tagging-item" data-id="' +
-              id +
-              '">' +
-              user.first_name +
-              ' ' +
-              user.last_name +
-              '</span>'
-            return match.replace(match, html)
-          }
-          return match
-        })
-      }
-
-      return text
-    }
-    if (this.state.comments.length > 0) {
-      let thread_wrap = [],
-        thread_id = 0,
-        count = 0,
-        commentsHtml = [],
-        threadClass
-      let comments = this.state.comments.slice()
-      comments.forEach((comment, i) => {
-        if (comment.thread_id !== thread_id) {
-          // start a new thread
-          if (thread_wrap.length > 0) {
-            commentsHtml.push(
-              <div
-                key={'thread-' + i}
-                className={'comment-thread comment-clearfix ' + threadClass}
-                data-count={count}
-              >
-                {thread_wrap}
-              </div>,
-            )
-            count = 0
-          }
-          thread_wrap = []
-        }
-        if (Number(comment.message_type) === this.types.comment) {
-          count++
-        }
-        if (Number(comment.message_type) === this.types.resolve) {
-          threadClass = 'comment-thread-resolved'
-          thread_wrap.push(
-            <div className="comment-resolved" key={'comment-' + i}>
-              <span className="comment-resolved-label">
-                {comment.is_anonymous === 0 && (
-                  <span className="comment-username comment-resolvedby">
-                    {comment.full_name}
-                  </span>
-                )}
-                <span className="">
-                  {' '}
-                  {comment.is_anonymous === 0 ? 'm' : 'M'}arked as resolved
-                </span>
-              </span>
-            </div>,
-          )
-        } else {
-          threadClass = 'comment-thread-active'
-          let text = nl2br(comment.message)
-          text = parseCommentHtml(text)
-          const formattedDate = new Date(
-            comment.timestamp ? comment.timestamp * 1000 : comment.create_date,
-          )
-            .toString()
-            .split('(')[0]
-            .trim()
-          const isAuthorOfLastComment =
-            comments[comments.length - 1].id === comment.id &&
-            comment.uid === this.context.userInfo?.user.uid &&
-            comment.source_page == config.revisionNumber + 1
-          deleteButton = isAuthorOfLastComment ? (
-            <Button
-              type={BUTTON_TYPE.DEFAULT}
-              mode={BUTTON_MODE.GHOST}
-              size={BUTTON_SIZE.ICON_XSMALL}
-              onClick={this.deleteComment}
+    comments.forEach((comment, i) => {
+      if (comment.thread_id !== threadId) {
+        // start a new thread
+        if (threadWrap.length > 0) {
+          commentsHtml.push(
+            <div
+              key={'thread-' + i}
+              className={'comment-thread comment-clearfix ' + threadClass}
+              data-count={count}
             >
-              <Trash size={20} />
-            </Button>
-          ) : (
-            ''
-          )
-          thread_wrap.push(
-            <div className="comment-item comment-clearfix" key={'comment-' + i}>
-              <div className="bc-show-comment-top">
-                {comment.is_anonymous === 1 ? (
-                  <div className="comment-label comment-username comment-username-label comment-truncate">
-                    {comment.full_name}
-                  </div>
-                ) : (
-                  <div className="comment-label comment-username comment-username-label comment-truncate">
-                    {comment.full_name}
-                    <span>
-                      {' '}
-                      {comment.source_page === 1
-                        ? '(translator)'
-                        : comment.source_page === 2
-                          ? '(revisor)'
-                          : '(2nd pass revisor)'}
-                    </span>
-                  </div>
-                )}
-                {deleteButton}
-              </div>
-              <div className="comment-info-wrap comment-clearfix">
-                <span className="comment-info comment-time pull-left">
-                  {formattedDate}
-                </span>
-              </div>
-              <p
-                className="comment-body"
-                dangerouslySetInnerHTML={{__html: text}}
-              />
+              {threadWrap}
             </div>,
           )
+          count = 0
         }
+        threadWrap = []
+      }
+      if (Number(comment.message_type) === MESSAGE_TYPE.comment) count++
 
-        thread_id = comment.thread_id
-      })
-      // Thread is not resolved
-      if (
-        !isUndefined(comments.length - 1) &&
-        !(
-          parseInt(comments[comments.length - 1].message_type) ===
-          this.types.resolve
+      if (Number(comment.message_type) === MESSAGE_TYPE.resolve) {
+        threadClass = 'comment-thread-resolved'
+        threadWrap.push(
+          <div className="comment-resolved" key={'comment-' + i}>
+            <span className="comment-resolved-label">
+              {comment.is_anonymous === 0 && (
+                <span className="comment-username comment-resolvedby">
+                  {comment.full_name}
+                </span>
+              )}
+              <span className="">
+                {' '}
+                {comment.is_anonymous === 0 ? 'm' : 'M'}arked as resolved
+              </span>
+            </span>
+          </div>,
         )
-      ) {
-        resolveButton = (
+      } else {
+        threadClass = 'comment-thread-active'
+        const text = parseCommentHtml(nl2br(comment.message))
+        const formattedDate = new Date(
+          comment.timestamp ? comment.timestamp * 1000 : comment.create_date,
+        )
+          .toString()
+          .split('(')[0]
+          .trim()
+        const isAuthorOfLastComment =
+          comments[comments.length - 1].id === comment.id &&
+          comment.uid === userInfo?.user.uid &&
+          comment.source_page == config.revisionNumber + 1
+        deleteButton = isAuthorOfLastComment ? (
           <Button
             type={BUTTON_TYPE.DEFAULT}
-            mode={BUTTON_MODE.OUTLINE}
-            size={BUTTON_SIZE.SMALL}
-            onClick={() => this.resolveThread()}
+            mode={BUTTON_MODE.GHOST}
+            size={BUTTON_SIZE.ICON_XSMALL}
+            onClick={deleteComment}
           >
-            <Check size={16} /> Resolve
+            <Trash size={20} />
           </Button>
+        ) : (
+          ''
         )
-      }
-      if (thread_wrap.length > 0) {
-        commentsHtml.push(
-          <div
-            key={'thread-' + 900}
-            className={'comment-thread comment-clearfix ' + threadClass}
-            data-count={count}
-          >
-            {thread_wrap}
-            <div className={'comment-thread-footer'}>{resolveButton}</div>
+        threadWrap.push(
+          <div className="comment-item comment-clearfix" key={'comment-' + i}>
+            <div className="bc-show-comment-top">
+              {comment.is_anonymous === 1 ? (
+                <div className="comment-label comment-username comment-username-label comment-truncate">
+                  {comment.full_name}
+                </div>
+              ) : (
+                <div className="comment-label comment-username comment-username-label comment-truncate">
+                  {comment.full_name}
+                  <span>
+                    {' '}
+                    {comment.source_page === 1
+                      ? '(translator)'
+                      : comment.source_page === 2
+                        ? '(revisor)'
+                        : '(2nd pass revisor)'}
+                  </span>
+                </div>
+              )}
+              {deleteButton}
+            </div>
+            <div className="comment-info-wrap comment-clearfix">
+              <span className="comment-info comment-time pull-left">
+                {formattedDate}
+              </span>
+            </div>
+            <p
+              className="comment-body"
+              dangerouslySetInnerHTML={{__html: text}}
+            />
           </div>,
         )
       }
 
-      htmlComments = commentsHtml
-    }
+      threadId = comment.thread_id
+    })
 
-    const userMentionData =
-      this.state.teamUsers?.map((user) => ({
-        id: user.uid,
-        display: ` ${user.first_name} ${user.last_name} `, // eslint-disable-line
-      })) ?? []
-
-    // workaround - textarea fit to content
-    if (this.commentInput) {
-      setTimeout(() => {
-        if (this.commentInput)
-          this.commentInput.style.height = `${this.commentInput.parentNode.clientHeight}px`
-      }, 200)
-    }
-
-    htmlInsert = (
-      <div
-        className="comment-thread comment-post-wrap comment-clearfix comment-first-input"
-        ref={(container) => (this.container = container)}
-      >
-        <div className="comment-post">
-          <span className="comment-label comment-username comment-username-label comment-truncate comment-anonymous-label">
-            {!this.state.anonymousComments
-              ? this.context.userInfo.user.first_name +
-                ' ' +
-                this.context.userInfo.user.last_name
-              : config.isReview
-                ? config.revisionNumber === 2
-                  ? '2nd pass revisor'
-                  : 'Revisor'
-                : 'Translator'}
-          </span>
-          <MentionsInput
-            inputRef={(input) => (this.commentInput = input)}
-            value={this.state.mentionsInputValue}
-            onKeyDown={(e) => this.onKeyDown(e)}
-            onChange={this.handleChangeMentionsInputValue}
-            placeholder="Write a comment..."
-            className="comment-input comment-textarea"
-            suggestionsPortalHost={document.body}
-          >
-            <Mention
-              type="user"
-              trigger="@"
-              data={userMentionData}
-              className="tagging-item-textarea"
-              markup="{@__id__||__display__@}"
-              displayTransform={function (id, display) {
-                return display || id
-              }}
-              onAdd={() => this.saveDraft()}
-              onRemove={() => null}
-              isLoading={false}
-              appendSpaceOnAdd={false}
-            />
-          </MentionsInput>
-          <div className="comment-bottom">
-            <div>
-              <Checkbox
-                onChange={(value) => {
-                  this.setState({anonymousComments: value})
-                  commonUtils.addInStorage(this.localStorageKey, value)
-                }}
-                label={'Post your comment anonymously'}
-                value={
-                  this.state.anonymousComments
-                    ? CHECKBOX_STATE.CHECKED
-                    : CHECKBOX_STATE.UNCHECKED
-                }
-              />
-            </div>
-            <Button
-              type={BUTTON_TYPE.PRIMARY}
-              size={BUTTON_SIZE.STANDARD}
-              onClick={() => this.sendComment()}
-              disabled={!this.state.mentionsInputValue}
-            >
-              Comment
-            </Button>
-          </div>
-          {this.state.sendCommentError ? (
-            <div className="comment-ajax-wrap">
-              <span className="comment-warnings">
-                Oops, something went wrong. Please try again later.
-              </span>
-            </div>
-          ) : null}
-
-          <div></div>
-        </div>
-      </div>
-    )
-
-    return (
-      <div className="comment-balloon-outer">
-        <div className="comment-balloon-inner">
-          <div className="comment-triangle comment-open-view comment-re-messages" />
-          <Button
-            type={BUTTON_TYPE.ICON}
-            size={BUTTON_SIZE.ICON_XSMALL}
-            className="comment-close-btn"
-            onClick={(e) => this.closeComments(e)}
-          >
-            <IconClose size={10} />
-          </Button>
-          <div className="comments-wrap" ref={(wrap) => (this.wrap = wrap)}>
-            {htmlComments}
-          </div>
-          {htmlInsert}
-        </div>
-      </div>
-    )
-  }
-
-  scrollToBottom() {
-    if (this.wrap) {
-      const scrollHeight = this.wrap.scrollHeight
-      const height = this.wrap.clientHeight
-      const maxScrollTop = scrollHeight - height
-      this.wrap.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0
-    }
-  }
-
-  setFocusOnInput() {
-    this.commentInput.focus()
-  }
-
-  onKeyDown(e) {
-    if (e.key === 'Enter' && !e.shiftKey && !this.state.showTagging) {
-      e.preventDefault()
-      if (this.state.mentionsInputValue) this.sendComment()
-    } else {
-      this.saveDraft()
-    }
-  }
-
-  componentDidUpdate() {
-    this.scrollToBottom()
-  }
-
-  componentDidMount() {
-    const draftText = CommentsStore.getDraftComment(this.context.segment.sid)
-    if (draftText) {
-      this.setState({mentionsInputValue: draftText})
-    }
-
-    this.updateComments(this.context.segment.sid)
-    CommentsStore.addListener(
-      CommentsConstants.ADD_COMMENT,
-      this.updateComments,
-    )
-    CommentsStore.addListener(
-      CommentsConstants.DELETE_COMMENT,
-      this.updateComments,
-    )
-    CommentsStore.addListener(
-      CommentsConstants.STORE_COMMENTS,
-      this.updateComments,
-    )
-    CommentsStore.addListener(CommentsConstants.SET_FOCUS, this.setFocusOnInput)
-    CommentsStore.addListener(
-      CommentsConstants.SET_TEAM_USERS,
-      this.setTeamUsers,
-    )
-    this.scrollToBottom()
-    this.commentInput.focus()
-  }
-
-  componentWillUnmount() {
-    CommentsStore.removeListener(
-      CommentsConstants.ADD_COMMENT,
-      this.updateComments,
-    )
-    CommentsStore.removeListener(
-      CommentsConstants.DELETE_COMMENT,
-      this.updateComments,
-    )
-    CommentsStore.removeListener(
-      CommentsConstants.STORE_COMMENTS,
-      this.updateComments,
-    )
-    CommentsStore.removeListener(
-      CommentsConstants.SET_FOCUS,
-      this.setFocusOnInput,
-    )
-    CommentsStore.removeListener(
-      CommentsConstants.SET_TEAM_USERS,
-      this.setTeamUsers,
-    )
-  }
-
-  render() {
-    //if is not splitted or is the first of the splitted group
+    // Thread is not resolved
     if (
-      (!this.context.segment.splitted ||
-        this.context.segment.sid.split('-')[1] === '1') &&
-      this.state.comments
+      !isUndefined(comments.length - 1) &&
+      !(
+        parseInt(comments[comments.length - 1].message_type) ===
+        MESSAGE_TYPE.resolve
+      )
     ) {
-      if (this.context.segment.openComments && this.context.userInfo) {
-        return this.getComments()
-      }
-    } else {
-      return null
+      resolveButton = (
+        <Button
+          type={BUTTON_TYPE.DEFAULT}
+          mode={BUTTON_MODE.OUTLINE}
+          size={BUTTON_SIZE.SMALL}
+          onClick={resolveThread}
+        >
+          <Check size={16} /> Resolve
+        </Button>
+      )
     }
+    if (threadWrap.length > 0) {
+      commentsHtml.push(
+        <div
+          key={'thread-' + 900}
+          className={'comment-thread comment-clearfix ' + threadClass}
+          data-count={count}
+        >
+          {threadWrap}
+          <div className={'comment-thread-footer'}>{resolveButton}</div>
+        </div>,
+      )
+    }
+
+    htmlComments = commentsHtml
   }
+
+  const userMentionData =
+    teamUsers?.map((user) => ({
+      id: user.uid,
+      display: `　${user.first_name} ${user.last_name}　`, // eslint-disable-line
+    })) ?? []
+
+  const authorLabel = !anonymousComments
+    ? userInfo.user.first_name + ' ' + userInfo.user.last_name
+    : config.isReview
+      ? config.revisionNumber === 2
+        ? '2nd pass revisor'
+        : 'Revisor'
+      : 'Translator'
+
+  return (
+    <div className="comment-balloon-outer">
+      <div className="comment-balloon-inner">
+        <div className="comment-triangle comment-open-view comment-re-messages" />
+        <Button
+          type={BUTTON_TYPE.ICON}
+          size={BUTTON_SIZE.ICON_XSMALL}
+          className="comment-close-btn"
+          onClick={closeComments}
+        >
+          <IconClose size={10} />
+        </Button>
+        <div className="comments-wrap" ref={wrapRef}>
+          {htmlComments}
+        </div>
+        <div className="comment-thread comment-post-wrap comment-clearfix comment-first-input">
+          <div className="comment-post">
+            <span className="comment-label comment-username comment-username-label comment-truncate comment-anonymous-label">
+              {authorLabel}
+            </span>
+            <MentionsInput
+              inputRef={commentInputRef}
+              value={mentionsInputValue}
+              onKeyDown={onKeyDown}
+              onChange={handleChangeMentionsInputValue}
+              placeholder="Write a comment..."
+              className="comment-input comment-textarea"
+              suggestionsPortalHost={document.body}
+            >
+              <Mention
+                type="user"
+                trigger="@"
+                data={userMentionData}
+                className="tagging-item-textarea"
+                markup="{@__id__||__display__@}"
+                displayTransform={function (id, display) {
+                  return display || id
+                }}
+                onAdd={() => saveDraft()}
+                onRemove={() => null}
+                isLoading={false}
+                appendSpaceOnAdd={false}
+              />
+            </MentionsInput>
+            <div className="comment-bottom">
+              <div>
+                <Checkbox
+                  onChange={(value) => {
+                    setAnonymousComments(value)
+                    commonUtils.addInStorage(localStorageKey, value)
+                  }}
+                  label={'Post your comment anonymously'}
+                  value={
+                    anonymousComments
+                      ? CHECKBOX_STATE.CHECKED
+                      : CHECKBOX_STATE.UNCHECKED
+                  }
+                />
+              </div>
+              <Button
+                type={BUTTON_TYPE.PRIMARY}
+                size={BUTTON_SIZE.STANDARD}
+                onClick={sendComment}
+                disabled={!mentionsInputValue}
+              >
+                Comment
+              </Button>
+            </div>
+            {sendCommentError ? (
+              <div className="comment-ajax-wrap">
+                <span className="comment-warnings">
+                  Oops, something went wrong. Please try again later.
+                </span>
+              </div>
+            ) : null}
+
+            <div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default SegmentCommentsContainer

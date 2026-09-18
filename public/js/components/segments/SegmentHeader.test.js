@@ -87,9 +87,7 @@ describe('SegmentHeader', () => {
 
   test('renders an open header when segmentOpened is true', () => {
     const {container} = renderHeader({segmentOpened: true})
-    expect(
-      container.querySelector(`#segment-10-1-header`),
-    ).toBeInTheDocument()
+    expect(container.querySelector(`#segment-10-1-header`)).toBeInTheDocument()
   })
 
   test('shows saving indicator inside the open header', () => {
@@ -162,7 +160,12 @@ describe('SegmentHeader', () => {
   test('hideHeader hides the visible percentage', () => {
     const {container} = renderHeader({segmentOpened: true, sid: '10-1'})
     act(() => {
-      getListenerCallback('SET_SEGMENT_HEADER')('10-1', {}, 'perfect-match', 'Jest User')
+      getListenerCallback('SET_SEGMENT_HEADER')(
+        '10-1',
+        {},
+        'perfect-match',
+        'Jest User',
+      )
     })
     expect(container.querySelector('h2')).toBeInTheDocument()
 
@@ -227,5 +230,46 @@ describe('SegmentHeader', () => {
       </ApplicationWrapperContext.Provider>,
     )
     expect(container.querySelector('.segment-counter')).toBeInTheDocument()
+  })
+
+  test('warns when the character count comes within 20 of the limit', () => {
+    const {container} = renderHeader(
+      {segmentOpened: true},
+      {userInfo: {metadata: {character_counter: true}}},
+    )
+
+    act(() => {
+      getListenerCallback('CHARACTER_COUNTER')({
+        sid: '10-1',
+        counter: 85,
+        limit: 100,
+        segmentCharacters: 85,
+      })
+    })
+
+    const counter = container.querySelector('.segment-counter')
+    expect(counter).toHaveClass('segment-counter-limit-warning')
+    expect(counter).not.toHaveClass('segment-counter-limit-error')
+  })
+
+  test('does not warn while the character count is comfortably inside the limit', () => {
+    const {container} = renderHeader(
+      {segmentOpened: true},
+      {userInfo: {metadata: {character_counter: true}}},
+    )
+
+    act(() => {
+      getListenerCallback('CHARACTER_COUNTER')({
+        sid: '10-1',
+        counter: 10,
+        limit: 100,
+        segmentCharacters: 10,
+      })
+    })
+
+    const counter = container.querySelector('.segment-counter')
+    expect(counter).toBeInTheDocument()
+    expect(counter).not.toHaveClass('segment-counter-limit-warning')
+    expect(counter).not.toHaveClass('segment-counter-limit-error')
   })
 })
