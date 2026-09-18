@@ -93,8 +93,6 @@ const Editarea = forwardRef(
     // componentDidUpdate-equivalent effect diffs against.
     const currentProps = {segment, translation, updateCounter, toggleFormatMenu}
 
-    const instanceRef = useRef({})
-    const methodsAssignedRef = useRef(false)
     const propsRef = useRef({})
 
     // Plain instance fields (createRef equivalents) preserved as-is
@@ -110,14 +108,15 @@ const Editarea = forwardRef(
     // is `undefined.contains(...)` and takes the page down.
     const setEditAreaDom = (node) => {
       editAreaDomRef.current = node
-      instanceRef.current.editAreaRef = node
     }
     // this.prevIcuTokens (plain mutable instance field, internal only)
     const prevIcuTokensRef = useRef(undefined)
 
     const [icuEnabled] = useState(() => segment.icu)
 
-    // ---- stable method closures (useRef-seeded once, always dispatched via instanceRef.current) ----
+    // ---- method closures: seeded once where a frozen call site needs a stable
+    // identity, plain per-render consts otherwise. All read through propsRef and
+    // stateRef, so either kind sees current data. ----
 
     const getTextToApplyCounter = (translation) => {
       const canCountTagsAsChars =
@@ -259,7 +258,7 @@ const Editarea = forwardRef(
 
         propsRef.current.updateCounter(
           DraftMatecatUtils.getCharactersCounter(
-            instanceRef.current.getTextToApplyCounter(translation),
+            getTextToApplyCounter(translation),
           ),
         )
         setState(
@@ -340,7 +339,7 @@ const Editarea = forwardRef(
         })
         propsRef.current.updateCounter(
           DraftMatecatUtils.getCharactersCounter(
-            instanceRef.current.getTextToApplyCounter(decodedSegment),
+            getTextToApplyCounter(decodedSegment),
           ),
         )
         SegmentActions.startSegmentQACheck()
@@ -371,7 +370,7 @@ const Editarea = forwardRef(
         ) {
           activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] = true
           changedDecorator = true
-          instanceRef.current.addQaBlacklistGlossaryDecorator()
+          addQaBlacklistGlossaryDecorator()
         } else if (
           prevQaBlacklistGlossary &&
           prevQaBlacklistGlossary.length > 0 &&
@@ -379,9 +378,7 @@ const Editarea = forwardRef(
         ) {
           activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] = false
           changedDecorator = true
-          instanceRef.current.removeDecorator(
-            DraftMatecatConstants.QA_BLACKLIST_DECORATOR,
-          )
+          removeDecorator(DraftMatecatConstants.QA_BLACKLIST_DECORATOR)
         }
 
         // Lexiqa
@@ -407,21 +404,17 @@ const Editarea = forwardRef(
         ) {
           activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = true
           changedDecorator = true
-          instanceRef.current.addLexiqaDecorator()
+          addLexiqaDecorator()
         } else if (prevLexiqaTarget && !currentLexiqaTarget) {
           activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
           changedDecorator = true
-          instanceRef.current.removeDecorator(
-            DraftMatecatConstants.LEXIQA_DECORATOR,
-          )
+          removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
         }
         // Search
         if (prevProps && prevProps.segment.inSearch) {
           activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = false
           changedDecorator = true
-          instanceRef.current.removeDecorator(
-            DraftMatecatConstants.SEARCH_DECORATOR,
-          )
+          removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR)
         }
         const contentState = editorState.getCurrentContent()
         const plainText = textUtils.removeWhitespacePlaceholders(
@@ -441,7 +434,7 @@ const Editarea = forwardRef(
           ) {
             prevIcuTokensRef.current = icuTokens
             changedDecorator = true
-            instanceRef.current.addIcuDecorator(icuTokens)
+            addIcuDecorator(icuTokens)
           }
         }
       } else {
@@ -463,10 +456,10 @@ const Editarea = forwardRef(
         ) {
           // There are more occurrences and the current change
           // Cleanup all decorators
-          instanceRef.current.removeDecorator()
+          removeDecorator()
           activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
           activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] = false
-          instanceRef.current.addSearchDecorator()
+          addSearchDecorator()
           activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = true
           changedDecorator = true
         }
@@ -830,7 +823,7 @@ const Editarea = forwardRef(
       if (!customTag) return
       // Start composition mode and remove lexiqa
       editorSync.onComposition = true
-      let newEditorState = instanceRef.current.disableDecorator(
+      let newEditorState = disableDecorator(
         editorState,
         DraftMatecatConstants.LEXIQA_DECORATOR,
       )
@@ -1628,8 +1621,6 @@ const Editarea = forwardRef(
       previousSourceTagMap,
     } = state
     // constructor-time synchronous side effect: this.props.updateCounter(...)
-    // No test can spy on the instance before mount completes, so calling the raw
-    // seeded closure here (instead of instanceRef.current, not assigned yet) is safe.
     const constructorRanRef = useRef(false)
     if (!constructorRanRef.current) {
       constructorRanRef.current = true
@@ -1846,56 +1837,32 @@ const Editarea = forwardRef(
       prevStateRef.current = stateRef.current
     })
 
-    // Assigned once, not on every render. Most of the methods below are now plain
-    // per-render closures, so what lands here is whichever copy the first render
-    // produced — and every frozen call site reads its target through this object.
-    //
-    // That is safe only because these methods take their inputs from propsRef (or
-    // from their own parameters) rather than closing over segment, translation,
-    // editorState and friends directly. A method added here that reads a
-    // render-scoped binding would be pinned to the first render and go quietly
-    // stale, which is the defect fixed in 71cd271. Read through propsRef, or move
-    // the assignment out of this guard.
-    if (!methodsAssignedRef.current) {
-      methodsAssignedRef.current = true
-
-      instanceRef.current.getTextToApplyCounter = getTextToApplyCounter
-      instanceRef.current.addIcuDecorator = addIcuDecorator
-      instanceRef.current.addSearchDecorator = addSearchDecorator
-      instanceRef.current.addQaBlacklistGlossaryDecorator =
-        addQaBlacklistGlossaryDecorator
-      instanceRef.current.addLexiqaDecorator = addLexiqaDecorator
-      instanceRef.current.removeDecorator = removeDecorator
-      instanceRef.current.disableDecorator = disableDecorator
-      instanceRef.current.formatSelection = formatSelection
-      instanceRef.current.addMissingSourceTagsToTarget =
-        addMissingSourceTagsToTarget
-    }
-
     // The component's public API: exactly the four members production reaches
     // through the ref, and nothing else. SegmentTarget calls
     // addMissingSourceTagsToTarget, SegmentTargetToolbar calls formatSelection,
-    // and AiAlternatives reads state.editorState and editAreaRef. Everything else
-    // on instanceRef is internal dispatch — it exists to give the frozen call
-    // sites a stable way to reach the current closures, not to be called from
-    // outside. state and editAreaRef are getters so callers keep seeing the live
-    // values rather than a snapshot taken when the handle was built.
+    // and AiAlternatives reads state.editorState and editAreaRef. state and
+    // editAreaRef are getters so callers keep seeing the live values rather than
+    // a snapshot taken when the handle was built.
+    // Refreshed every render so the handle, whose factory runs once, always
+    // reaches the current closures rather than the first render's.
+    const handleRef = useRef(null)
+    handleRef.current = {addMissingSourceTagsToTarget, formatSelection}
+
     useImperativeHandle(
       ref,
       () => ({
-        // Read through instanceRef, not the locals: this factory runs once (the
+        // Read through handleRef, not the locals: this factory runs once (the
         // dependency array is empty), so calling the locals directly would pin
-        // the handle to whichever closures existed at the first render, while
-        // instanceRef is refreshed every render.
+        // the handle to whichever closures existed at the first render.
         addMissingSourceTagsToTarget: (...args) =>
-          instanceRef.current.addMissingSourceTagsToTarget(...args),
+          handleRef.current.addMissingSourceTagsToTarget(...args),
         formatSelection: (...args) =>
-          instanceRef.current.formatSelection(...args),
+          handleRef.current.formatSelection(...args),
         get state() {
           return stateRef.current
         },
         get editAreaRef() {
-          return instanceRef.current.editAreaRef
+          return editAreaDomRef.current
         },
       }),
       [],
