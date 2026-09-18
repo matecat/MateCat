@@ -441,6 +441,84 @@ class FiltersConfigTemplateStructTest extends AbstractTest
         $this->assertSame('text/html', $serialized['json']['inner_content_type']);
         $this->assertSame('text/markdown', $serialized['yaml']['inner_content_type']);
     }
+
+    #[Test]
+    public function hydrateAllDto_hydrates_yaml_force_double_quoting(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->hydrateAllDto([
+            'yaml' => ['force_double_quoting' => true],
+        ]);
+
+        $yaml = $struct->getYaml();
+        $this->assertInstanceOf(Yaml::class, $yaml);
+        $this->assertTrue($yaml->jsonSerialize()['force_double_quoting']);
+    }
+
+    #[Test]
+    public function hydrateAllDto_hydrates_yaml_force_double_quoting_from_json_string(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->hydrateAllDto([
+            'yaml' => '{"force_double_quoting":true}',
+        ]);
+
+        $yaml = $struct->getYaml();
+        $this->assertInstanceOf(Yaml::class, $yaml);
+        $this->assertTrue($yaml->jsonSerialize()['force_double_quoting']);
+    }
+
+    /**
+     * Omitting the parameter is how the caller asks for the source quoting style to be kept.
+     */
+    #[Test]
+    public function hydrateAllDto_yaml_force_double_quoting_defaults_to_false(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->hydrateAllDto([
+            'yaml' => [],
+        ]);
+
+        $yaml = $struct->getYaml();
+        $this->assertInstanceOf(Yaml::class, $yaml);
+        $this->assertFalse($yaml->jsonSerialize()['force_double_quoting']);
+    }
+
+    /**
+     * The yaml block is additionalProperties:false, so the schema is what decides whether an
+     * API client may send the parameter at all.
+     */
+    #[Test]
+    public function schema_accepts_yaml_force_double_quoting(): void
+    {
+        $payload = json_encode([
+            'name' => 'test',
+            'uid'  => 1,
+            'yaml' => ['force_double_quoting' => true],
+        ], JSON_THROW_ON_ERROR);
+
+        // throwExceptions is on, so an unknown key under additionalProperties:false fails here
+        $validatorObject = new JSONValidatorObject($payload);
+        (new JSONValidator('filters_extraction_parameters.json', true))->validate($validatorObject);
+
+        $struct = (new FiltersConfigTemplateStruct())->hydrateFromJSON($payload);
+        $this->assertTrue($struct->jsonSerialize()['yaml']->jsonSerialize()['force_double_quoting']);
+    }
+
+    #[Test]
+    public function jsonSerialize_exposes_yaml_force_double_quoting(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->hydrateFromJSON(json_encode([
+            'name' => 'test',
+            'uid'  => 1,
+            'yaml' => ['force_double_quoting' => true],
+        ]));
+
+        $serialized = json_decode(json_encode($struct->jsonSerialize()), true);
+
+        $this->assertTrue($serialized['yaml']['force_double_quoting']);
+    }
 }
 
 class TestableFiltersConfigTemplateStruct extends FiltersConfigTemplateStruct
