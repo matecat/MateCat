@@ -262,7 +262,7 @@ const Editarea = forwardRef(
             instanceRef.current.getTextToApplyCounter(translation),
           ),
         )
-        instanceRef.current.setState(
+        setState(
           {
             editorState: newEditorState,
           },
@@ -291,7 +291,7 @@ const Editarea = forwardRef(
           text,
           index,
         )
-        instanceRef.current.setState(
+        setState(
           {
             editorState: newEditorState,
           },
@@ -476,7 +476,7 @@ const Editarea = forwardRef(
         const timer = inSearch ? 400 : 0
         const decorator = new CompositeDecorator(decoratorsStructureRef.current)
         setTimeout(() => {
-          instanceRef.current.setState({
+          setState({
             editorState: EditorState.set(editorState, {decorator}),
             activeDecorators,
           })
@@ -491,7 +491,7 @@ const Editarea = forwardRef(
           editorState,
           glossaryTranslation,
         )
-        instanceRef.current.setState(
+        setState(
           {
             editorState: newEditorState,
           },
@@ -547,7 +547,7 @@ const Editarea = forwardRef(
         stateRef.current.editorState,
         contentState,
       )
-      instanceRef.current.setState({editorState: updatedState}, () => {
+      setState({editorState: updatedState}, () => {
         // Reactivate decorators
         instanceRef.current.updateTranslationDebounced()
         // Stop composition mode
@@ -570,7 +570,7 @@ const Editarea = forwardRef(
         newEditorState,
         textToInsert,
       )
-      instanceRef.current.setState(
+      setState(
         (prevState) => ({
           activeDecorators: {
             ...prevState.activeDecorators,
@@ -596,7 +596,7 @@ const Editarea = forwardRef(
         (isOptionKeyCommand(e) || e.altKey) &&
         !e.shiftKey
       ) {
-        instanceRef.current.setState({triggerText: null})
+        setState({triggerText: null})
         return 'toggle-tag-menu'
       } else if (e.key === '<' && !hasCommandModifier(e)) {
         typeTextInEditor('<')
@@ -668,7 +668,7 @@ const Editarea = forwardRef(
         })
 
         if (updatedStateNearEntity || updatedStateNearZwsp) {
-          instanceRef.current.setState({
+          setState({
             editorState: updatedStateNearEntity
               ? updatedStateNearEntity
               : updatedStateNearZwsp,
@@ -837,7 +837,7 @@ const Editarea = forwardRef(
 
       newEditorState = insertTag(customTag, newEditorState)
 
-      instanceRef.current.setState(
+      setState(
         (prevState) => ({
           activeDecorators: {
             ...prevState.activeDecorators,
@@ -945,7 +945,7 @@ const Editarea = forwardRef(
           editorState,
         })
 
-        instanceRef.current.setState(
+        setState(
           () => ({
             editorState: updatedStateNearEntity
               ? updatedStateNearEntity
@@ -1006,7 +1006,7 @@ const Editarea = forwardRef(
           editorState,
           editorState.getSelection().set('hasFocus', true),
         )
-        instanceRef.current.setState(
+        setState(
           () => ({
             activeDecorators: newActiveDecorators,
             editorState: editorState,
@@ -1018,7 +1018,7 @@ const Editarea = forwardRef(
           },
         )
       } else {
-        instanceRef.current.setState(
+        setState(
           () => ({
             editorState: editorState,
           }),
@@ -1044,7 +1044,7 @@ const Editarea = forwardRef(
           ? mergeAutocompleteSuggestions.length - 1
           : (focusedTagIndex - 1) % mergeAutocompleteSuggestions.length
 
-      instanceRef.current.setState({
+      setState({
         focusedTagIndex: newFocusedTagIndex,
       })
     }
@@ -1057,7 +1057,7 @@ const Editarea = forwardRef(
         autocompleteSuggestions: {missingTags, sourceTags},
       } = stateRef.current
       const mergeAutocompleteSuggestions = [...missingTags, ...sourceTags]
-      instanceRef.current.setState({
+      setState({
         focusedTagIndex:
           (focusedTagIndex + 1) % mergeAutocompleteSuggestions.length,
       })
@@ -1086,7 +1086,7 @@ const Editarea = forwardRef(
         newEditorState,
         triggerText,
       )
-      instanceRef.current.setState(
+      setState(
         (prevState) => ({
           activeDecorators: {
             ...prevState.activeDecorators,
@@ -1114,7 +1114,7 @@ const Editarea = forwardRef(
         left: position.left,
       }
 
-      instanceRef.current.setState({
+      setState({
         displayPopover: true,
         autocompleteSuggestions: suggestions,
         focusedTagIndex: 0,
@@ -1123,7 +1123,7 @@ const Editarea = forwardRef(
     }
 
     const closePopover = () => {
-      instanceRef.current.setState({
+      setState({
         displayPopover: false,
         triggerText: null,
       })
@@ -1143,7 +1143,7 @@ const Editarea = forwardRef(
         newEditorState,
         triggerText,
       )
-      instanceRef.current.setState(
+      setState(
         (prevState) => ({
           activeDecorators: {
             ...prevState.activeDecorators,
@@ -1187,7 +1187,7 @@ const Editarea = forwardRef(
             editorState,
             fragmentContent.entitiesMap,
           )
-          instanceRef.current.setState(
+          setState(
             {
               editorState: clipboardEditorPasted,
             },
@@ -1215,7 +1215,7 @@ const Editarea = forwardRef(
           plainTextClipboardFragment,
           editorState,
         )
-        instanceRef.current.setState(
+        setState(
           {
             editorState: clipboardEditorPasted,
           },
@@ -1297,7 +1297,7 @@ const Editarea = forwardRef(
             editorState,
             fragmentContent.entitiesMap,
           )
-          instanceRef.current.setState(
+          setState(
             {
               editorState: editorStateWithFragment,
             },
@@ -1347,7 +1347,7 @@ const Editarea = forwardRef(
           )
           editorState = EditorState.forceSelection(editorState, selection)
 
-          instanceRef.current.setState(
+          setState(
             {
               editorState: editorState,
             },
@@ -1391,7 +1391,7 @@ const Editarea = forwardRef(
           editorState,
           newSelection,
         )
-        instanceRef.current.setState({editorState: newEditorState})
+        setState({editorState: newEditorState})
         // Highlight
       } catch (e) {
         console.log('Invalid selection')
@@ -1479,7 +1479,7 @@ const Editarea = forwardRef(
         selectionsText,
       )
 
-      instanceRef.current.setState(
+      setState(
         {
           editorState: newEditorState,
         },
@@ -1510,7 +1510,7 @@ const Editarea = forwardRef(
         ...segment.missingTagsInTarget,
       ]
       // Insert tag entity in current editor without recompute tags associations
-      instanceRef.current.setState({
+      setState({
         editorState: newEditorState,
       })
       // lock tags and run again getWarnings
@@ -1597,6 +1597,26 @@ const Editarea = forwardRef(
     // Mirrors `state` for synchronous read-back; see setState below.
     const stateRef = useRef(state)
     stateRef.current = state
+
+    /**
+     * The setState the class port was written against. It advances stateRef
+     * synchronously before dispatching, because a callback -- and a store
+     * listener that sets state then reads straight back, as
+     * replaceCurrentSearch does -- has to observe the new values, which a
+     * dispatch alone would not provide until the next render.
+     *
+     * Safe for a once-built closure to capture: it touches only stateRef and
+     * dispatchState, both stable for the life of the component.
+     */
+    const setState = (partial, callback) => {
+      const resolved =
+        typeof partial === 'function' ? partial(stateRef.current) : partial
+
+      stateRef.current = {...stateRef.current, ...resolved}
+      dispatchState(resolved)
+
+      if (callback) callback()
+    }
 
     const {
       editorState,
@@ -1741,7 +1761,7 @@ const Editarea = forwardRef(
       if (isFirstRenderRef.current) {
         isFirstRenderRef.current = false
         prevPropsRef.current = currentProps
-        prevStateRef.current = instanceRef.current.state
+        prevStateRef.current = stateRef.current
         return
       }
 
@@ -1750,10 +1770,10 @@ const Editarea = forwardRef(
 
       if (!prevProps.segment.opened && segment.opened) {
         const newEditorState = EditorState.moveFocusToEnd(editorState)
-        instanceRef.current.setState({editorState: newEditorState})
+        setState({editorState: newEditorState})
       } else if (prevProps.segment.opened && !segment.opened) {
         const newEditorState = EditorState.moveSelectionToEnd(editorState)
-        instanceRef.current.setState({editorState: newEditorState})
+        setState({editorState: newEditorState})
       }
       if (!editorState.isInCompositionMode() && !editorSync.onComposition) {
         instanceRef.current.checkDecorators(prevProps)
@@ -1764,7 +1784,7 @@ const Editarea = forwardRef(
         segment.sourceTagMap?.length &&
         !isEqual(previousSourceTagMap, segment.sourceTagMap)
       ) {
-        instanceRef.current.setState({
+        setState({
           previousSourceTagMap: segment.sourceTagMap,
         })
         instanceRef.current.setNewTranslation(segment.sid, translation)
@@ -1823,16 +1843,14 @@ const Editarea = forwardRef(
           editorState,
           selectAll,
         )
-        instanceRef.current.setState({editorState: newEditorState})
+        setState({editorState: newEditorState})
       }
 
       wasTripleClickTriggeredRef.current = false
 
       prevPropsRef.current = currentProps
-      prevStateRef.current = instanceRef.current.state
+      prevStateRef.current = stateRef.current
     })
-
-    instanceRef.current.state = stateRef.current
 
     // Assigned once, not on every render. Most of the methods below are now plain
     // per-render closures, so what lands here is whichever copy the first render
@@ -1846,22 +1864,6 @@ const Editarea = forwardRef(
     // the assignment out of this guard.
     if (!methodsAssignedRef.current) {
       methodsAssignedRef.current = true
-
-      instanceRef.current.setState = (partial, callback) => {
-        const resolved =
-          typeof partial === 'function' ? partial(stateRef.current) : partial
-
-        // Advance the synchronous mirrors before React re-renders. A setState
-        // callback -- and a store listener that sets state then reads straight
-        // back, as replaceCurrentSearch does -- has to observe the new values,
-        // which a dispatch alone would not provide until the next render.
-        stateRef.current = {...stateRef.current, ...resolved}
-        instanceRef.current.state = stateRef.current
-
-        dispatchState(resolved)
-
-        if (callback) callback()
-      }
 
       instanceRef.current.getTextToApplyCounter = getTextToApplyCounter
       instanceRef.current.addIcuDecorator = addIcuDecorator
@@ -1920,7 +1922,7 @@ const Editarea = forwardRef(
         formatSelection: (...args) =>
           instanceRef.current.formatSelection(...args),
         get state() {
-          return instanceRef.current.state
+          return stateRef.current
         },
         get editAreaRef() {
           return instanceRef.current.editAreaRef
