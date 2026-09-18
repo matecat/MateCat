@@ -24,6 +24,7 @@ import SegmentStore from '../../stores/SegmentStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import * as DraftMatecatConstants from './utils/DraftMatecatUtils/editorConstants'
 import resolveEditorCommand from './utils/DraftMatecatUtils/resolveEditorCommand'
+import getEditorRelativeSelectionOffset from './utils/DraftMatecatUtils/getEditorRelativeSelectionOffset'
 import TagEntity from './TagEntity/TagEntity.component'
 import SegmentUtils from '../../utils/segmentUtils'
 import CommonUtils from '../../utils/commonUtils'
@@ -620,7 +621,10 @@ const Editarea = forwardRef(
             tagSuggestions.sourceTags &&
             tagSuggestions.sourceTags.length > 0
           ) {
-            openPopover(tagSuggestions, getEditorRelativeSelectionOffset())
+            openPopover(
+              tagSuggestions,
+              getEditorRelativeSelectionOffset(editorRef.current.editor),
+            )
           }
           return 'handled'
         }
@@ -1232,43 +1236,6 @@ const Editarea = forwardRef(
         console.log('Invalid selection')
       }
     })
-
-    /**
-     *
-     * @param minWidth - min length of element to show
-     * @returns {{top: number, left: number}}
-     */
-    const getEditorRelativeSelectionOffset = (minWidth = 300) => {
-      const editorBoundingRect =
-        editorRef.current.editor.getBoundingClientRect()
-      const selectionBoundingRect = window
-        .getSelection()
-        .getRangeAt(0)
-        .getBoundingClientRect()
-      const leftInitial = selectionBoundingRect.x - editorBoundingRect.x
-      const leftAdjusted =
-        editorBoundingRect.right - selectionBoundingRect.left < minWidth
-          ? leftInitial -
-            (minWidth - (editorBoundingRect.right - selectionBoundingRect.left))
-          : leftInitial
-      if (
-        selectionBoundingRect.bottom === 0 &&
-        selectionBoundingRect.left === 0 &&
-        selectionBoundingRect.height === 0
-      ) {
-        return {
-          top: 50,
-          left: 50,
-        }
-      }
-      return {
-        top:
-          selectionBoundingRect.bottom -
-          editorBoundingRect.top +
-          selectionBoundingRect.height,
-        left: leftAdjusted,
-      }
-    }
 
     const getUpdatedSegmentInfoRef = useRef(() => {
       const {
