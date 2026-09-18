@@ -637,10 +637,6 @@ const Editarea = forwardRef(
         case 'enter-press':
           acceptTagMenuSelection()
           return 'handled'
-        case 'left-nav':
-          return 'handled'
-        case 'right-nav':
-          return 'handled'
         case 'insert-tab-tag':
           insertTagAtSelectionDebouncedRef.current('tab')
           return 'handled'
@@ -655,17 +651,22 @@ const Editarea = forwardRef(
         case 'insert-nbsp-tag':
           insertTagAtSelectionDebouncedRef.current('nbsp')
           return 'handled'
-        case 'add-issue':
-          return 'handled'
         case 'insert-word-joiner-tag':
           insertTagAtSelectionDebouncedRef.current('wordJoiner')
-          return 'handled'
-        case 'delete-entity':
           return 'handled'
         case 'translate':
           return 'not-handled'
         case 'next-translate':
           return 'not-handled'
+        // Nothing left to do for these here: the caret moves and the quote
+        // insertion were already applied from resolveEditorCommand's result, and
+        // add-issue is picked up by a shortcut listener outside the editor.
+        // 'handled' is still required -- it is what stops Draft running its own
+        // handling on top, which would move the caret or delete a second time.
+        case 'left-nav':
+        case 'right-nav':
+        case 'add-issue':
+        case 'delete-entity':
         case 'quote-shortcut':
           return 'handled'
         default:
