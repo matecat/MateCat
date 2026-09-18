@@ -1064,3 +1064,146 @@ describe('the format menu follows the selection', () => {
     expect(toggleFormatMenu).toHaveBeenCalledWith(false)
   })
 })
+
+// ---------------------------------------------------------------------------
+// Which interactions schedule a store sync
+//
+// The handlers are deliberately split. Some pass `setState` a callback that
+// runs `updateTranslationDebounced()`; others replace `editorState` with no
+// callback at all. That split is behaviour, not an oversight: moving the caret
+// must not push a translation to the store, or every arrow key would queue a
+// save and a QA check.
+//
+// Note the two routes to the tag menu disagree, and correctly so. `<` types a
+// character before opening the menu, so it syncs; `Alt+T` opens the same menu
+// without touching the content, so it does not.
+//
+// Decomposing this component replaces the `setState(partial, callback)` shim
+// with a reducer plus effects. An effect keyed on `editorState` alone would
+// fire for every case below, including the ones that must stay silent, so the
+// split is pinned here before that change lands.
+// ---------------------------------------------------------------------------
+describe('store sync scheduling', () => {
+  useRangeRectPolyfill()
+
+  const syncCount = () => SegmentActions.updateTranslation.mock.calls.length
+
+  /** Mounts, then discards the sync the mount effect performs on its own. */
+  const settled = (mount) => {
+    const view = mount()
+    flush()
+    SegmentActions.updateTranslation.mockClear()
+    return view
+  }
+
+  // `SOURCE_TAG_MAP` carries no `data.placeholder`, which `insertTag` needs for
+  // its offset arithmetic. Tests that only open the menu never reach that line;
+  // accepting a suggestion does.
+  const ACCEPTABLE_TAG = [
+    {
+      type: 'g',
+      data: {
+        id: '1',
+        name: 'g',
+        encodedText: '&lt;g id="1"&gt;',
+        placeholder: '<g id="1">',
+      },
+      offset: 0,
+      length: 1,
+    },
+  ]
+
+  /** Mounts with source tags and the menu already open, via the silent route. */
+  const withMenuOpen = () => {
+    const view = settled(() =>
+      mountWithSourceTags({sourceTagMap: ACCEPTABLE_TAG}),
+    )
+    pressKey(view.container, {key: 't', altKey: true})
+    flush()
+    expect(tagBox(view.container)).toBeVisible()
+    SegmentActions.updateTranslation.mockClear()
+    return view
+  }
+
+  describe('stays silent', () => {
+    test('moving the caret left', () => {
+      const {container} = settled(() =>
+        mountEditarea({translation: 'ciao mondo'}),
+      )
+
+      pressKey(container, {key: 'ArrowLeft'})
+      flush()
+
+      expect(syncCount()).toBe(0)
+    })
+
+    test('moving the caret right', () => {
+      const {container} = settled(() =>
+        mountEditarea({translation: 'ciao mondo'}),
+      )
+
+      pressKey(container, {key: 'ArrowRight'})
+      flush()
+
+      expect(syncCount()).toBe(0)
+    })
+
+    test('opening the tag menu without typing', () => {
+      const {container} = settled(() => mountWithSourceTags())
+
+      pressKey(container, {key: 't', altKey: true})
+      flush()
+
+      expect(tagBox(container)).toBeVisible()
+      expect(syncCount()).toBe(0)
+    })
+
+    test('closing the tag menu', () => {
+      const {container} = withMenuOpen()
+
+      pressKey(container, {key: 'Escape'})
+      flush()
+
+      expect(tagBox(container)).not.toBeVisible()
+      expect(syncCount()).toBe(0)
+    })
+
+    test('moving the tag menu selection', () => {
+      const {container} = withMenuOpen()
+
+      pressKey(container, {key: 'ArrowDown'})
+      flush()
+
+      expect(syncCount()).toBe(0)
+    })
+  })
+
+  describe('schedules a sync', () => {
+    test('opening the tag menu by typing the trigger character', () => {
+      const {container} = settled(() => mountWithSourceTags())
+
+      pressKey(container, {key: '<'})
+      flush()
+
+      expect(syncCount()).toBeGreaterThan(0)
+    })
+
+    test('inserting a tab tag', () => {
+      const {container} = settled(() => mountEditarea({translation: 'ciao'}))
+
+      pressKey(container, {key: 'Tab'})
+      flush()
+
+      expect(syncCount()).toBeGreaterThan(0)
+    })
+
+    test('accepting a tag from the menu', () => {
+      const {container} = withMenuOpen()
+
+      pressKey(container, {key: 'Enter'})
+      flush()
+
+      expect(syncCount()).toBeGreaterThan(0)
+    })
+  })
+})
