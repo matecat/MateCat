@@ -13,7 +13,6 @@ import {
   Editor,
   EditorState,
   getDefaultKeyBinding,
-  KeyBindingUtil,
   CompositeDecorator,
 } from 'draft-js'
 import {remove, cloneDeep, findIndex, size, isEqual} from 'lodash'
@@ -24,6 +23,7 @@ import EditAreaConstants from '../../constants/EditAreaConstants'
 import SegmentStore from '../../stores/SegmentStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import * as DraftMatecatConstants from './utils/DraftMatecatUtils/editorConstants'
+import resolveEditorCommand from './utils/DraftMatecatUtils/resolveEditorCommand'
 import TagEntity from './TagEntity/TagEntity.component'
 import SegmentUtils from '../../utils/segmentUtils'
 import CommonUtils from '../../utils/commonUtils'
@@ -42,8 +42,6 @@ import {
   checkCaretIsNearEntity,
   adjustCaretPosition,
   isCaretInsideEntity,
-  checkCaretIsNearZwsp,
-  isSelectedEntity,
   getEntitiesSelected,
 } from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 import {
@@ -51,13 +49,9 @@ import {
   createIcuTokens,
   isEqualICUTokens,
 } from './utils/DraftMatecatUtils/createICUDecorator'
-import {isMacOS} from '../../utils/Utils'
 import {removeZeroWidthSpace} from './utils/DraftMatecatUtils/tagUtils'
 import textUtils from '../../utils/textUtils'
 import ContextPreviewChannel from '../../utils/contextPreviewChannel'
-
-const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
-  KeyBindingUtil
 
 const editorSync = {
   editorFocused: true,
@@ -582,171 +576,34 @@ const Editarea = forwardRef(
     }
 
     const myKeyBindingFn = (e) => {
-      const {displayPopover} = stateRef.current
-      const isChromeBook = navigator.userAgent.indexOf('CrOS') > -1
-      if (
-        (e.keyCode === 84 || e.key === 't' || e.key === '™') &&
-        (isOptionKeyCommand(e) || e.altKey) &&
-        !e.shiftKey
-      ) {
-        setState({triggerText: null})
-        return 'toggle-tag-menu'
-      } else if (e.key === '<' && !hasCommandModifier(e)) {
-        typeTextInEditor('<')
-        return 'toggle-tag-menu'
-      } else if (e.key === 'ArrowUp' && !hasCommandModifier(e)) {
-        if (displayPopover) return 'up-arrow-press'
-      } else if (e.key === 'ArrowDown' && !hasCommandModifier(e)) {
-        if (displayPopover) return 'down-arrow-press'
-      } else if (e.key === 'Enter') {
-        if (
-          (e.altKey && e.ctrlKey) ||
-          (e.ctrlKey && isOptionKeyCommand(e) && e.shiftKey)
-        ) {
-          return 'add-issue'
-        } else if (displayPopover && !hasCommandModifier(e)) {
-          return 'enter-press'
-        } else if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
-          return 'next-translate'
-        } else if (e.ctrlKey || e.metaKey) {
-          return 'translate'
-        }
-      } else if (e.key === 'Escape') {
-        return 'close-tag-menu'
-      } else if (e.key === 'Tab') {
-        return e.shiftKey ? null : 'insert-tab-tag'
-      } else if (
-        e.code === 'Space' &&
-        !e.ctrlKey &&
-        !e.altKey &&
-        !e.shiftKey &&
-        tagSignatures.space
-      ) {
-        return 'insert-space-tag'
-      } else if (
-        (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
-        ((isCtrlKeyCommand(e) && e.shiftKey) ||
-          (isMacOS() && isOptionKeyCommand(e) && !e.ctrlKey))
-      ) {
-        return 'insert-nbsp-tag' // Windows && Mac
-      } else if (
-        (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
-        !e.shiftKey &&
-        e.altKey &&
-        isChromeBook
-      ) {
-        return 'insert-nbsp-tag' // Chromebook
-      } else if (
-        (e.key === 'ArrowLeft' || e.key === 'ArrowRight') &&
-        !e.altKey
-      ) {
-        isShiftPressedOnNavigationRef.current = e.shiftKey
+      const {
+        command,
+        editorState: adjusted,
+        applyVia,
+        typeText,
+        clearTriggerText,
+        shiftOnNavigation,
+      } = resolveEditorCommand(e, {
+        displayPopover: stateRef.current.displayPopover,
+        editorState: stateRef.current.editorState,
+        isRTL: Boolean(config.isTargetRTL),
+        isChromeBook: navigator.userAgent.indexOf('CrOS') > -1,
+        hasSpaceTag: tagSignatures.space,
+        selectionIsCaret: () => window.getSelection().type === 'Caret',
+        typingWordJoiner,
+      })
 
-        const direction = e.key === 'ArrowLeft' ? 'left' : 'right'
-
-        // check caret is near zwsp char and move caret position
-        const updatedStateNearZwsp = checkCaretIsNearZwsp({
-          editorState: stateRef.current.editorState,
-          direction,
-          isShiftPressed: e.shiftKey,
-        })
-
-        // check caret is near entity and move caret position
-        const updatedStateNearEntity = checkCaretIsNearEntity({
-          editorState: updatedStateNearZwsp
-            ? updatedStateNearZwsp
-            : stateRef.current.editorState,
-          direction,
-          isShiftPressed: e.shiftKey,
-        })
-
-        if (updatedStateNearEntity || updatedStateNearZwsp) {
-          setState({
-            editorState: updatedStateNearEntity
-              ? updatedStateNearEntity
-              : updatedStateNearZwsp,
-          })
-          return `${direction}-nav`
-        }
-      } else if (e.ctrlKey && e.key === 'k') {
-        return 'tm-search'
-      } else if (
-        (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
-        ((e.ctrlKey && e.altKey) || (isMacOS() && e.shiftKey))
-      ) {
-        return 'insert-word-joiner-tag'
-      } else if (e.code === 'BracketLeft' || e.code === 'BracketRight') {
-        if (e.code === 'BracketLeft' && isCtrlKeyCommand(e)) {
-          if (e.shiftKey) {
-            typeTextInEditor('“')
-          } else {
-            typeTextInEditor('‘')
-          }
-          return 'quote-shortcut'
-        }
-        if (e.code === 'BracketRight' && isCtrlKeyCommand(e)) {
-          if (e.shiftKey) {
-            typeTextInEditor('”')
-          } else {
-            typeTextInEditor('’')
-          }
-          return 'quote-shortcut'
-        }
-      } else if (e.altKey && !e.shiftKey && !e.ctrlKey) {
-        const {get, reset} = typingWordJoiner
-        if (e.key !== 'Alt') {
-          const result = get(e.keyCode)
-          if (result) {
-            return 'insert-word-joiner-tag'
-          }
-        } else {
-          reset()
-        }
-      } else if (
-        (e.key === 'Backspace' || e.key === 'Delete') &&
-        !isSelectedEntity(stateRef.current.editorState) &&
-        window.getSelection().type === 'Caret'
-      ) {
-        const isRTL = Boolean(config.isTargetRTL)
-        const direction =
-          e.key === 'Backspace'
-            ? !isRTL
-              ? 'left'
-              : 'right'
-            : !isRTL
-              ? 'right'
-              : 'left'
-
-        const updatedStateNearZwsp = checkCaretIsNearZwsp({
-          editorState: stateRef.current.editorState,
-          direction,
-          isShiftPressed: true,
-        })
-
-        // check caret is near entity and move caret position
-        const updatedStateNearEntity = checkCaretIsNearEntity({
-          editorState: updatedStateNearZwsp
-            ? updatedStateNearZwsp
-            : stateRef.current.editorState,
-          direction,
-          isShiftPressed: true,
-          isBackspacePressed: e.key === 'Backspace',
-        })
-
-        if (updatedStateNearEntity) {
-          const selectionState = updatedStateNearEntity.getSelection()
-          const contentState = updatedStateNearEntity.getCurrentContent()
-
-          const updatedEditorState = EditorState.push(
-            updatedStateNearEntity,
-            Modifier.replaceText(contentState, selectionState, null),
-            'insert-characters',
-          )
-          onChange(updatedEditorState)
-          return 'delete-entity'
-        }
+      // The resolver decides; applying what it decided happens here.
+      if (shiftOnNavigation !== undefined)
+        isShiftPressedOnNavigationRef.current = shiftOnNavigation
+      if (clearTriggerText) setState({triggerText: null})
+      if (typeText) typeTextInEditor(typeText)
+      if (adjusted) {
+        if (applyVia === 'onChange') onChange(adjusted)
+        else setState({editorState: adjusted})
       }
-      return getDefaultKeyBinding(e)
+
+      return command === null ? getDefaultKeyBinding(e) : command
     }
 
     const handleKeyCommand = (command) => {
