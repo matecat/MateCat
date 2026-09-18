@@ -33,12 +33,12 @@ import IconSplit from '../../../img/icons/IconSplit'
 const ROW_MARGIN = 3
 const ROW_HEIGHT = 90
 const OVERSCAN = 5
+const DEFAULT_STICKY_BAR_HEIGHT = 56
 const COMMENTS_PADDING_TOP = [
   {empty: 110, filled: 270},
   {empty: 40, filled: 140},
   {filled: 50},
 ]
-const SEARCH_BAR_OPENED_PADDING_TOP = 80
 
 const listRef = createRef()
 
@@ -224,6 +224,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const lastProjectBarPropsRef = useRef()
   const {guess_tags: guessTagActive, dictation: speechToTextActive} =
     userInfo?.metadata ?? {}
+  const stickyBarRef = useRef()
 
   // return row height and checks if it have margin
   const getRowHeightWithMargin = useCallback(({id, height}) => {
@@ -692,9 +693,9 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     const hasAddedSegmentsBefore =
       rows.length > essentialRows.length &&
       essentialRows[0]?.id !== rows[0]?.id &&
-        // compared as numbers on purpose: segment ids arrive as strings from the API, while
-        // config.first_job_segment is a JSON number
-        Number(rows[0]?.id) !== Number(config.first_job_segment)
+      // compared as numbers on purpose: segment ids arrive as strings from the API, while
+      // config.first_job_segment is a JSON number
+      Number(rows[0]?.id) !== Number(config.first_job_segment)
     if (!hasAddedSegmentsBefore || current.haveBeenAddedSegmentsBefore) return
 
     const stopIndex = rows.findIndex(({id}) => id === essentialRows[0].id)
@@ -942,9 +943,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     lastProjectBarPropsRef.current = props
 
     return (
-      <div
-        className={`sticky-project-bar`}
-      >
+      <div ref={stickyBarRef} className={`sticky-project-bar`}>
         <ProjectBar
           {...{
             ...props,
@@ -967,6 +966,11 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
         scrollToIndex={{
           value: scrollToParams.scrollTo,
           align: scrollToParams.position,
+          offset:
+            scrollToParams.position === 'start'
+              ? (stickyBarRef.current?.getBoundingClientRect().height ??
+                DEFAULT_STICKY_BAR_HEIGHT)
+              : undefined,
         }}
         overscan={OVERSCAN}
         height={heightArea}
