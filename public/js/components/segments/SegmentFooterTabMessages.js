@@ -41,8 +41,10 @@ class SegmentFooterTabMessages extends React.Component {
               <div className="segments-notes-container">
                 {segmentNotes.getNotes({
                   notes: this.props.notes,
-                  contextGroups: this.props.context_groups,
                   metadata: this.props.metadata,
+                  segment: this.props.segment,
+                  segmentSource: this.props.segment.segment,
+                  contextGroups: this.props.context_groups,
                 })}
               </div>
             </div>

@@ -5,12 +5,12 @@
  * (`matchInfo.getMatchInfoMetadata = ...`) instead of patching the component
  * prototype, which stops working once the host becomes a function component.
  *
- * @param {object} match
+ * @param {{match: object, segment: object}} params
  * @returns {import('react').ReactNode}
  */
 const matchInfo = {
   // eslint-disable-next-line no-unused-vars
-  getMatchInfoMetadata(match) {
+  getMatchInfoMetadata({match, segment}) {
     return ''
   },
 }

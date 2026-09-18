@@ -236,7 +236,7 @@ class SegmentFooterTabMatches extends React.Component {
           </span>
         </li>*/}
 
-        {matchInfo.getMatchInfoMetadata(match)}
+        {matchInfo.getMatchInfoMetadata({match, segment: this.props.segment})}
       </ul>
     )
   }

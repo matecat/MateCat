@@ -1,14 +1,16 @@
-import {CatToolInterface} from './CatToolInterface'
+import catToolInterface from './CatToolInterface'
 
-describe('CatToolInterface', () => {
-  test('instantiates and calls getCharacterCounterMode without error', () => {
-    const instance = new CatToolInterface()
-    expect(instance.getCharacterCounterMode()).toBeUndefined()
+describe('catToolInterface', () => {
+  test('core reports no character counter mode', () => {
+    expect(catToolInterface.getCharacterCounterMode()).toBeUndefined()
   })
 
-  test('inherits props behavior from ComponentExtendInterface', () => {
-    const instance = new CatToolInterface()
-    instance.props = {foo: 'bar'}
-    expect(instance.foo).toBe('bar')
+  test('a plugin can replace the character counter mode', () => {
+    const core = catToolInterface.getCharacterCounterMode
+
+    catToolInterface.getCharacterCounterMode = () => 'ALL_ONE'
+    expect(catToolInterface.getCharacterCounterMode()).toBe('ALL_ONE')
+
+    catToolInterface.getCharacterCounterMode = core
   })
 })

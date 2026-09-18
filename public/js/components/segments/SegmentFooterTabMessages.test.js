@@ -41,12 +41,10 @@ describe('the segmentNotes seam', () => {
     expect(screen.queryByText('core note')).not.toBeInTheDocument()
   })
 
-  test('a plugin replacing getNoteStructure is reached through getNotes', () => {
+  test('a plugin replacing getNote is reached through getNotes', () => {
     // The core getNotes still runs; it must call the seam member rather than a
     // local reference, or the plugin's version is silently bypassed.
-    segmentNotes.getNoteStructure = (item) => (
-      <div key="x">seen: {item.note}</div>
-    )
+    segmentNotes.getNote = ({item}) => <div key="x">{`seen: ${item.note}`}</div>
 
     renderComponent({notes: [{note: 'core note'}]})
 

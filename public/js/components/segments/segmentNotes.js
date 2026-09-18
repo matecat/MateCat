@@ -20,7 +20,7 @@ const segmentNotes = {
     return metadata.filter(({meta_key}) => meta_key !== 'sizeRestriction')
   },
 
-  getNoteContentStructure(note) {
+  getNoteContent(note) {
     return TEXT_UTILS.getContentWithAllowedLinkRedirect(note).length > 1
       ? TEXT_UTILS.getContentWithAllowedLinkRedirect(note).map(
           (content, index) =>
@@ -35,7 +35,7 @@ const segmentNotes = {
       : note
   },
 
-  getNoteStructure(item, index) {
+  getNote({item, index}) {
     if (item.note && item.note !== '') {
       if (
         segmentNotes.excludeMatchingNotesRegExp &&
@@ -48,7 +48,7 @@ const segmentNotes = {
       if (note.startsWith(prefix)) {
         return null
       }
-      const noteStructure = segmentNotes.getNoteContentStructure(note)
+      const noteStructure = segmentNotes.getNoteContent(note)
       let html =
         typeof noteStructure === 'string' ? (
           <div className="note" key={'note-' + index}>
@@ -94,7 +94,7 @@ const segmentNotes = {
     return null
   },
 
-  getMetadataNoteTemplate({metadata}) {
+  getMetadataNotes({metadata}) {
     const filtered =
       typeof segmentNotes.getFilteredMetadataKeys === 'function'
         ? segmentNotes.getFilteredMetadataKeys({metadata})
@@ -118,11 +118,11 @@ const segmentNotes = {
     )
   },
 
-  getNotes({notes, contextGroups, metadata}) {
+  getNotes({notes, metadata, segment, contextGroups}) {
     let notesHtml = []
     if (notes) {
       notes.forEach((item, index) => {
-        const noteHtml = segmentNotes.getNoteStructure(item, index)
+        const noteHtml = segmentNotes.getNote({item, index})
         if (noteHtml) {
           notesHtml.push(noteHtml)
         }
@@ -157,7 +157,7 @@ const segmentNotes = {
         ? segmentNotes.getFilteredMetadataKeys({metadata})
         : metadata.filter((item) => item.meta_key !== 'sizeRestriction')
     if (filtered?.length > 0) {
-      notesHtml.push(segmentNotes.getMetadataNoteTemplate({metadata}))
+      notesHtml.push(segmentNotes.getMetadataNotes({metadata, segment}))
     }
     return notesHtml
   },
