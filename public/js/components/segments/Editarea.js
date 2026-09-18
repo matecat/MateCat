@@ -3,6 +3,7 @@ import React, {
   useContext,
   useEffect,
   useImperativeHandle,
+  useReducer,
   useRef,
   useState,
 } from 'react'
@@ -74,6 +75,13 @@ const typingWordJoiner = matchTypingSequence(
   ],
   2000,
 )
+
+/**
+ * Editarea holds its state in one object, so a single dispatch replaces the
+ * thirteen setters the class port needed. Merging rather than replacing keeps
+ * the setState(partial) shape the rest of the component is written against.
+ */
+const mergeState = (state, partial) => ({...state, ...partial})
 
 const Editarea = forwardRef(
   ({segment, translation, updateCounter, toggleFormatMenu}, ref) => {
@@ -1568,30 +1576,40 @@ const Editarea = forwardRef(
       }
     }
 
-    const [editorState, setEditorState] = useState(
-      () => initialContentRef.current.editorState,
-    )
-    const [editAreaClasses, setEditAreaClasses] = useState(['targetarea'])
-    const [tagRange, setTagRange] = useState(
-      () => initialContentRef.current.tagRange,
-    )
-    // TagMenu
-    const [autocompleteSuggestions, setAutocompleteSuggestions] = useState([])
-    const [focusedTagIndex, setFocusedTagIndex] = useState(0)
-    const [displayPopover, setDisplayPopover] = useState(false)
-    const [popoverPosition, setPopoverPosition] = useState({})
-    const [editorFocused, setEditorFocused] = useState(true)
-    const [clickedOnTag, setClickedOnTag] = useState(false)
-    const [triggerText, setTriggerText] = useState(null)
-    const [activeDecorators, setActiveDecorators] = useState(() => ({
-      [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
-      [DraftMatecatConstants.QA_BLACKLIST_DECORATOR]: false,
-      [DraftMatecatConstants.SEARCH_DECORATOR]: false,
-      [DraftMatecatConstants.ICU_DECORATOR]: icuEnabled,
+    const [state, dispatchState] = useReducer(mergeState, null, () => ({
+      editorState: initialContentRef.current.editorState,
+      editAreaClasses: ['targetarea'],
+      tagRange: initialContentRef.current.tagRange,
+      autocompleteSuggestions: [],
+      focusedTagIndex: 0,
+      displayPopover: false,
+      popoverPosition: {},
+      editorFocused: true,
+      clickedOnTag: false,
+      triggerText: null,
+      activeDecorators: {
+        [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
+        [DraftMatecatConstants.QA_BLACKLIST_DECORATOR]: false,
+        [DraftMatecatConstants.SEARCH_DECORATOR]: false,
+        [DraftMatecatConstants.ICU_DECORATOR]: icuEnabled,
+      },
+      previousSourceTagMap: null,
+      clickedTag: undefined,
     }))
-    const [previousSourceTagMap, setPreviousSourceTagMap] = useState(null)
-    const [clickedTag, setClickedTag] = useState(undefined)
 
+    // Mirrors `state` for synchronous read-back; see setState below.
+    const stateRef = useRef(state)
+    stateRef.current = state
+
+    const {
+      editorState,
+      editAreaClasses,
+      autocompleteSuggestions,
+      focusedTagIndex,
+      displayPopover,
+      popoverPosition,
+      previousSourceTagMap,
+    } = state
     // constructor-time synchronous side effect: this.props.updateCounter(...)
     // No test can spy on the instance before mount completes, so calling the raw
     // seeded closure here (instead of instanceRef.current, not assigned yet) is safe.
@@ -1631,19 +1649,7 @@ const Editarea = forwardRef(
 
     // refresh liveRef every render so stable closures always see current data
     liveRef.current.props = currentProps
-    liveRef.current.editorState = editorState
-    liveRef.current.editAreaClasses = editAreaClasses
-    liveRef.current.tagRange = tagRange
-    liveRef.current.autocompleteSuggestions = autocompleteSuggestions
-    liveRef.current.focusedTagIndex = focusedTagIndex
-    liveRef.current.displayPopover = displayPopover
-    liveRef.current.popoverPosition = popoverPosition
-    liveRef.current.editorFocused = editorFocused
-    liveRef.current.clickedOnTag = clickedOnTag
-    liveRef.current.triggerText = triggerText
-    liveRef.current.activeDecorators = activeDecorators
-    liveRef.current.previousSourceTagMap = previousSourceTagMap
-    liveRef.current.clickedTag = clickedTag
+    Object.assign(liveRef.current, state)
     liveRef.current.icuEnabled = icuEnabled
 
     const isFirstRenderRef = useRef(true)
@@ -1831,21 +1837,7 @@ const Editarea = forwardRef(
       prevStateRef.current = instanceRef.current.state
     })
 
-    instanceRef.current.state = {
-      editorState,
-      editAreaClasses,
-      tagRange,
-      autocompleteSuggestions,
-      focusedTagIndex,
-      displayPopover,
-      popoverPosition,
-      editorFocused,
-      clickedOnTag,
-      triggerText,
-      activeDecorators,
-      previousSourceTagMap,
-      clickedTag,
-    }
+    instanceRef.current.state = stateRef.current
 
     // Assigned once, not on every render. Most of the methods below are now plain
     // per-render closures, so what lands here is whichever copy the first render
@@ -1862,43 +1854,17 @@ const Editarea = forwardRef(
 
       instanceRef.current.setState = (partial, callback) => {
         const resolved =
-          typeof partial === 'function'
-            ? partial(instanceRef.current.state)
-            : partial
+          typeof partial === 'function' ? partial(stateRef.current) : partial
 
-        if ('editorState' in resolved) setEditorState(resolved.editorState)
-        if ('editAreaClasses' in resolved)
-          setEditAreaClasses(resolved.editAreaClasses)
-        if ('tagRange' in resolved) setTagRange(resolved.tagRange)
-        if ('autocompleteSuggestions' in resolved)
-          setAutocompleteSuggestions(resolved.autocompleteSuggestions)
-        if ('focusedTagIndex' in resolved)
-          setFocusedTagIndex(resolved.focusedTagIndex)
-        if ('displayPopover' in resolved)
-          setDisplayPopover(resolved.displayPopover)
-        if ('popoverPosition' in resolved)
-          setPopoverPosition(resolved.popoverPosition)
-        if ('editorFocused' in resolved)
-          setEditorFocused(resolved.editorFocused)
-        if ('clickedOnTag' in resolved) setClickedOnTag(resolved.clickedOnTag)
-        if ('triggerText' in resolved) setTriggerText(resolved.triggerText)
-        if ('activeDecorators' in resolved)
-          setActiveDecorators(resolved.activeDecorators)
-        if ('previousSourceTagMap' in resolved)
-          setPreviousSourceTagMap(resolved.previousSourceTagMap)
-        if ('clickedTag' in resolved) setClickedTag(resolved.clickedTag)
-
-        // Mirror the resolved partial onto the bridge's state snapshot immediately, so
-        // instance.state and any setState callback see up-to-date values without forcing a
-        // synchronous React commit (flushSync here previously caused a nested-update-depth
-        // crash when triggered from within an in-progress commit, e.g. via focus handlers).
-        instanceRef.current.state = {...instanceRef.current.state, ...resolved}
-        // The handlers read live values through liveRef, which is otherwise only
-        // refreshed on the next render. Mirror there too, or a setState callback
-        // still sees the pre-update value — replaceCurrentSearch set the replaced
-        // editorState and its updateTranslationInStore callback then decoded the
-        // old one, writing the unreplaced text straight back over it.
+        // Advance the synchronous mirrors before React re-renders. A setState
+        // callback -- and a store listener that sets state then reads straight
+        // back, as replaceCurrentSearch does -- has to observe the new values,
+        // which a dispatch alone would not provide until the next render.
+        stateRef.current = {...stateRef.current, ...resolved}
+        instanceRef.current.state = stateRef.current
         Object.assign(liveRef.current, resolved)
+
+        dispatchState(resolved)
 
         if (callback) callback()
       }
