@@ -55,7 +55,6 @@ import ContextPreviewChannel from '../../utils/contextPreviewChannel'
 
 const editorSync = {
   editorFocused: true,
-  clickedOnTag: false,
   onComposition: false,
 }
 
@@ -733,17 +732,6 @@ const Editarea = forwardRef(
       toggleFormatMenu(false)
     }
 
-    // Focus on editor trigger 2 onChange events
-    /*onBlur = () => {
-        if (!editorSync.clickedOnTag) {
-            this.setState({
-                displayPopover: false,
-                editorFocused: false
-            });
-            editorSync.editorFocused = false;
-        }
-    };*/
-
     const onFocus = () => {
       editorSync.editorFocused = true
     }
@@ -945,8 +933,6 @@ const Editarea = forwardRef(
           },
           editorState: editorStateWithSuggestedTag,
           displayPopover: false,
-          clickedTag: selectedTag,
-          clickedOnTag: true,
           triggerText: null,
         }),
         () => {
@@ -1002,8 +988,6 @@ const Editarea = forwardRef(
           },
           editorState: editorStateWithSuggestedTag,
           editorFocused: true,
-          clickedOnTag: true,
-          clickedTag: suggestionTag,
           displayPopover: false,
           triggerText: null,
         }),
@@ -1433,7 +1417,6 @@ const Editarea = forwardRef(
       displayPopover: false,
       popoverPosition: {},
       editorFocused: true,
-      clickedOnTag: false,
       triggerText: null,
       activeDecorators: {
         [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
@@ -1442,7 +1425,6 @@ const Editarea = forwardRef(
         [DraftMatecatConstants.ICU_DECORATOR]: icuEnabled,
       },
       previousSourceTagMap: null,
-      clickedTag: undefined,
     }))
 
     // Mirrors `state` for synchronous read-back; see setState below.
