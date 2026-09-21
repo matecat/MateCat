@@ -5,7 +5,6 @@ import React, {
   useImperativeHandle,
   useReducer,
   useRef,
-  useState,
 } from 'react'
 import {fromJS} from 'immutable'
 import {
@@ -105,8 +104,6 @@ const Editarea = forwardRef(
     }
     // this.prevIcuTokens (plain mutable instance field, internal only)
     const prevIcuTokensRef = useRef(undefined)
-
-    const [icuEnabled] = useState(() => segment.icu)
 
     // ---- method closures: seeded once where a frozen call site needs a stable
     // identity, plain per-render consts otherwise. All read through propsRef and
@@ -414,7 +411,7 @@ const Editarea = forwardRef(
         const plainText = textUtils.removeWhitespacePlaceholders(
           contentState.getPlainText(),
         )
-        if (icuEnabled) {
+        if (propsRef.current.segment.icu) {
           const icuTokens = createIcuTokens(
             plainText,
             editorState,
@@ -1389,7 +1386,7 @@ const Editarea = forwardRef(
         [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
         [DraftMatecatConstants.QA_BLACKLIST_DECORATOR]: false,
         [DraftMatecatConstants.SEARCH_DECORATOR]: false,
-        [DraftMatecatConstants.ICU_DECORATOR]: icuEnabled,
+        [DraftMatecatConstants.ICU_DECORATOR]: segment.icu,
       },
       previousSourceTagMap: null,
     }))
