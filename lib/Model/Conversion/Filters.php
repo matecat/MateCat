@@ -53,6 +53,8 @@ class Filters
                 CURLOPT_USERAGENT => AppConfig::$FILTERS_USER_AGENT,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_POSTFIELDS => $data,
+                CURLOPT_CONNECTTIMEOUT => AppConfig::$FILTERS_CONNECT_TIMEOUT,
+                CURLOPT_TIMEOUT => AppConfig::$FILTERS_TIMEOUT,
                 // Useful to debug the endpoint on the other end
                 //CURLOPT_COOKIE => 'XDEBUG_SESSION=PHPSTORM'
             ];
