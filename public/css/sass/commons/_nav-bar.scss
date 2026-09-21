@@ -305,6 +305,17 @@ header {
   padding: 10px 15px;
   font-weight: 200;
   font-size: variables.$font-size-base;
+  &.bigblue {
+    background-color: #fff;
+    border-radius: 18px;
+    margin-top: 6px;
+    margin-left: 5px;
+    padding: 4px 18px;
+    font-weight: 700;
+    color: #002b5a !important;
+    border: none !important;
+    font-size: 17px !important;
+  }
 }
 
 #menu-site li a:hover {
