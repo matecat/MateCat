@@ -101,6 +101,42 @@ describe('SocketListener', () => {
     expect(forceLogout).toHaveBeenCalledTimes(1)
   })
 
+  describe('segment enable/disable notifications', () => {
+    // The two copies are specified together and must stay in step: the pair was
+    // agreed on the task and only the disabled half was applied.
+    test('segment_disabled marks the segment read-only and announces it', () => {
+      eventHandlers.segment_disabled({id_segment: 7387})
+
+      expect(SegmentActions.updateSegmentDisabledState).toHaveBeenCalledWith(
+        7387,
+        true,
+      )
+      expect(CatToolActions.addNotification).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Segment translation disabled',
+          text: 'The project owner has disabled editing for one or more segments. They are now read-only, grayed out, and cannot be edited.',
+          uid: 'translation_disabled',
+        }),
+      )
+    })
+
+    test('segment_enabled clears the read-only state and announces it', () => {
+      eventHandlers.segment_enabled({id_segment: 7387})
+
+      expect(SegmentActions.updateSegmentDisabledState).toHaveBeenCalledWith(
+        7387,
+        false,
+      )
+      expect(CatToolActions.addNotification).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Segment translation enabled',
+          text: 'The project owner has re-enabled editing for one or more segments. They are no longer read-only and can be edited again.',
+          uid: 'translation_enabled',
+        }),
+      )
+    })
+  })
+
   describe('ack', () => {
     const originalBuildNumber = config.build_number
 
