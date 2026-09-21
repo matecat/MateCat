@@ -53,11 +53,6 @@ import {removeZeroWidthSpace} from './utils/DraftMatecatUtils/tagUtils'
 import textUtils from '../../utils/textUtils'
 import ContextPreviewChannel from '../../utils/contextPreviewChannel'
 
-const editorSync = {
-  editorFocused: true,
-  onComposition: false,
-}
-
 // typing chars sequence
 const typingWordJoiner = matchTypingSequence(
   [
@@ -94,6 +89,15 @@ const Editarea = forwardRef(
     const compositionEventChecksRef = useRef(undefined)
     const editorRef = useRef(null)
     const editAreaDomRef = useRef(null)
+    // Per instance, not per module: onComposition gates checkDecorators, so a
+    // single shared object would let typing in one Editarea suppress decorator
+    // recalculation in another. draggingFromEditArea was only ever created on
+    // assignment; it is declared here so the shape is visible.
+    const editorSyncRef = useRef({
+      editorFocused: true,
+      onComposition: false,
+      draggingFromEditArea: false,
+    })
     // The class held this node in `this.editAreaRef`, and consumers of the
     // imperative handle still read it under that name — the AI alternatives
     // button asks whether focus sits inside the editor. Mirror it onto the
@@ -545,7 +549,7 @@ const Editarea = forwardRef(
 
     const typeTextInEditor = (textToInsert) => {
       const {editorState} = stateRef.current
-      editorSync.onComposition = true
+      editorSyncRef.current.onComposition = true
       let newEditorState = disableDecorator(
         editorState,
         DraftMatecatConstants.LEXIQA_DECORATOR,
@@ -680,7 +684,7 @@ const Editarea = forwardRef(
       // If tag creation has failed, return
       if (!customTag) return
       // Start composition mode and remove lexiqa
-      editorSync.onComposition = true
+      editorSyncRef.current.onComposition = true
       let newEditorState = disableDecorator(
         editorState,
         DraftMatecatConstants.LEXIQA_DECORATOR,
@@ -728,18 +732,18 @@ const Editarea = forwardRef(
 
     const onBlurEvent = () => {
       const {toggleFormatMenu} = propsRef.current
-      editorSync.editorFocused = false
+      editorSyncRef.current.editorFocused = false
       // Hide Edit Toolbar
       toggleFormatMenu(false)
     }
 
     const onFocus = () => {
-      editorSync.editorFocused = true
+      editorSyncRef.current.editorFocused = true
     }
 
     const onCompositionStopRef = useRef(() => {
-      if (editorSync.onComposition) {
-        editorSync.onComposition = false
+      if (editorSyncRef.current.onComposition) {
+        editorSyncRef.current.onComposition = false
         // Tell tags to update themself
         setTimeout(() => {
           SegmentActions.editAreaChanged(propsRef.current.segment.sid, true)
@@ -820,7 +824,7 @@ const Editarea = forwardRef(
       if (displayPopover) closePopover()
       if (contentChanged) {
         // Stop checking decorators while typing...
-        editorSync.onComposition = true
+        editorSyncRef.current.onComposition = true
         // ...remove unwanted decorators like lexiqa and qa blacklist...
         if (activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR]) {
           editorState = disableDecorator(
@@ -915,7 +919,7 @@ const Editarea = forwardRef(
       const mergeAutocompleteSuggestions = [...missingTags, ...sourceTags]
       const selectedTag = mergeAutocompleteSuggestions[focusedTagIndex]
       // Start typing
-      editorSync.onComposition = true
+      editorSyncRef.current.onComposition = true
       // Remove lexiqa while typing
       const newEditorState = disableDecorator(
         editorState,
@@ -970,7 +974,7 @@ const Editarea = forwardRef(
     const onTagClick = (suggestionTag) => {
       const {editorState, triggerText} = stateRef.current
       // Start typing...
-      editorSync.onComposition = true
+      editorSyncRef.current.onComposition = true
       // Disable lexiqa while typing
       const newEditorState = disableDecorator(
         editorState,
@@ -1095,11 +1099,11 @@ const Editarea = forwardRef(
     }
 
     const onDragEvent = () => {
-      editorSync.draggingFromEditArea = true
+      editorSyncRef.current.draggingFromEditArea = true
     }
 
     const onDragEnd = () => {
-      editorSync.draggingFromEditArea = false
+      editorSyncRef.current.draggingFromEditArea = false
     }
 
     const handleDrop = (selection, dataTransfer) => {
@@ -1122,7 +1126,7 @@ const Editarea = forwardRef(
       const {entityKey} = DraftMatecatUtils.selectionIsEntity(editorState)
       if (entityKey) return 'handled'
 
-      if (text && !editorSync.draggingFromEditArea) {
+      if (text && !editorSyncRef.current.draggingFromEditArea) {
         try {
           const fragmentContent = JSON.parse(text)
           const fragment = DraftMatecatUtils.buildFragmentFromJson(
@@ -1564,7 +1568,10 @@ const Editarea = forwardRef(
         const newEditorState = EditorState.moveSelectionToEnd(editorState)
         setState({editorState: newEditorState})
       }
-      if (!editorState.isInCompositionMode() && !editorSync.onComposition) {
+      if (
+        !editorState.isInCompositionMode() &&
+        !editorSyncRef.current.onComposition
+      ) {
         checkDecoratorsRef.current(prevProps)
       }
 
@@ -1583,7 +1590,7 @@ const Editarea = forwardRef(
       if (prevState.editorState !== editorState) {
         const entitiesSelected = getEntitiesSelected(editorState)
         SegmentActions.focusTags(
-          editorSync.editorFocused ? entitiesSelected : [],
+          editorSyncRef.current.editorFocused ? entitiesSelected : [],
         )
 
         const currentFocusOffset = editorState.getSelection().getFocusOffset()
