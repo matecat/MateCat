@@ -10,6 +10,7 @@ import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
+import matchInfo from './matchInfo'
 import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
@@ -235,19 +236,9 @@ class SegmentFooterTabMatches extends React.Component {
           </span>
         </li>*/}
 
-        {this.getMatchInfoMetadata(match)}
+        {matchInfo.getMatchInfoMetadata({match, segment: this.props.segment})}
       </ul>
     )
-  }
-
-  /**
-   * Get others match info metadata, function overrided inside plugin
-   *
-   * @param {object} match
-   * @returns {object}
-   */
-  getMatchInfoMetadata() {
-    return ''
   }
 
   componentDidMount() {
