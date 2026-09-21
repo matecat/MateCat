@@ -333,10 +333,14 @@ const SegmentFooterTabMatches = ({segment, code, active_class, tab_class}) => {
             ></span>
           </li>
           <li className="b sugg-target">
-            <span className="graysmall-message">
-              {' '}
-              {SUGGESTION_SHORTCUT_LABEL + (index + 1)}
-            </span>
+            {/* Only the first three matches have a shortcut bound to them:
+                copyContribution1..3 in utils/shortcuts.js. */}
+            {index < MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED && (
+              <span className="graysmall-message">
+                {' '}
+                {SUGGESTION_SHORTCUT_LABEL + (index + 1)}
+              </span>
+            )}
             <span
               id={segment.sid + '-tm-' + match.id + '-translation'}
               className="translation"

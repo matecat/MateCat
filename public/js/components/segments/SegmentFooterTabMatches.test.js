@@ -259,6 +259,21 @@ describe('SegmentFooterTabMatches', () => {
     expect(screen.getByText('Fewer')).toBeInTheDocument()
   })
 
+  test('labels only the matches that have a shortcut bound, once expanded', () => {
+    const matches = Array.from({length: 5}).map((_, i) =>
+      makeMatch({id: String(i)}),
+    )
+    renderComponent({
+      segment: {...baseSegment, contributions: {matches}},
+    })
+    fireEvent.click(screen.getByText('More'))
+
+    // All five matches are listed, but only copyContribution1..3 exist.
+    expect(screen.getAllByText(/^CTRL\+\d+$/)).toHaveLength(3)
+    expect(screen.getByText('CTRL+3')).toBeInTheDocument()
+    expect(screen.queryByText('CTRL+4')).not.toBeInTheDocument()
+  })
+
   test('renders engine error and warning messages', () => {
     renderComponent({
       segment: {
