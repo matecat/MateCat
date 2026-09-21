@@ -231,7 +231,6 @@ section.readonly .status-container a.status:hover {
   height: 100%;
   right: 0;
   top: 0;
-  border-radius: 0 8px 8px 0;
   overflow: hidden;
   .status {
     width: 8px;
@@ -319,4 +318,12 @@ section.opened.editor .status {
 
 section.status-new.opened .editarea {
   text-indent: 0;
+}
+
+section .body > .text {
+  float: left;
+  width: 100%;
+  height: 100%;
+  min-height: 88px;
+  position: relative;
 }

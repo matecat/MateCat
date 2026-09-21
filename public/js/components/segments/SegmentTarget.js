@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import $ from 'jquery'
 import {isEmpty, isUndefined} from 'lodash'
 
@@ -12,7 +12,7 @@ import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {
-  removeTagsFromText,
+  removeTagsFromText as removeTagsFromTextUtil,
   textHasTags,
 } from './utils/DraftMatecatUtils/tagUtils'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
@@ -22,45 +22,110 @@ import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import {SegmentTargetToolbar} from './SegmentTargetToolbar'
 
-class SegmentTarget extends React.Component {
-  static contextType = SegmentContext
+const SegmentTarget = ({segment}) => {
+  const context = useContext(SegmentContext)
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      showFormatMenu: false,
-      charactersCounter: 0,
-      segmentCharacters: 0,
-      charactersCounterLimit: undefined,
+  const [showFormatMenu, setShowFormatMenu] = useState(false)
+  const [charactersCounter, setCharactersCounter] = useState(0)
+  const [segmentCharacters, setSegmentCharacters] = useState(0)
+  const [charactersCounterLimit, setCharactersCounterLimit] =
+    useState(undefined)
+
+  const issuesHighlightAreaRef = useRef(null)
+  const editAreaRef = useRef(null)
+  const targetRef = useRef(null)
+  const tmOutShowFormatMenuRef = useRef()
+
+  // Always holds the CURRENT props read live inside stable callbacks, mirroring
+  // `this.props` never being a stale closure inside updateCounter/autoFillTagsInTarget,
+  // which are registered once (by reference) and must keep a stable identity across
+  // renders while still reading the CURRENT segment prop.
+  const liveRef = useRef({segment: segment})
+  liveRef.current.segment = segment
+
+  // Created once via useRef so its identity never changes across renders — required
+  // because updateCounter is passed down as a long-lived prop to <EditArea> and is also
+  // invoked directly through the imperative ref bridge, exactly like the class field's
+  // single stable per-instance identity.
+  const updateCounterRef = useRef((value) => {
+    const {segmentCharacters, unitCharacters} =
+      SegmentUtils.getRelativeTransUnitCharactersCounter({
+        sid: liveRef.current.segment.sid,
+        charactersCounter: value,
+        shouldCountTagsAsChars:
+          CatToolStore.getCurrentProjectTemplate().characterCounterCountTags,
+      })
+
+    setCharactersCounter(unitCharacters)
+    setSegmentCharacters(segmentCharacters)
+  })
+  const updateCounter = updateCounterRef.current
+
+  // Created once via useRef for the same stable-identity reason as updateCounter — it is
+  // passed down as a long-lived prop to <EditArea> and invoked through the ref bridge.
+  const toggleFormatMenuRef = useRef((show) => {
+    // Show/Hide Edit Toolbar
+    clearTimeout(tmOutShowFormatMenuRef.current)
+
+    if (!show) {
+      tmOutShowFormatMenuRef.current = setTimeout(() => {
+        setShowFormatMenu(false)
+      }, 200)
+    } else {
+      setShowFormatMenu(show)
     }
-    this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this)
+  })
+  const toggleFormatMenu = toggleFormatMenuRef.current
 
-    this.tmOutShowFormatMenu
-  }
+  // Created once via useRef so it stays in sync (by reference) with
+  // SegmentStore.addListener/removeListener, exactly like the class's single
+  // this.autoFillTagsInTarget.bind(this) in the constructor. The setTimeout callback
+  // re-reads liveRef.current.segment at fire time (not a locally captured variable) so
+  // it always reads the freshest props 100ms later, matching `this.segment` being
+  // dereferenced live off the instance in the original class.
+  const autoFillTagsInTargetRef = useRef((sid) => {
+    const {segment} = liveRef.current
+    if (isUndefined(sid) || sid === segment.sid) {
+      const newTranslation = DraftMatecatUtils.autoFillTagsInTarget(segment)
+      //lock tags and run again getWarnings
+      setTimeout(() => {
+        SegmentActions.replaceEditAreaTextContent(
+          liveRef.current.segment.sid,
+          newTranslation,
+        )
+        SegmentActions.getSegmentsQa(liveRef.current.segment)
+      }, 100)
+      // TODO: Change code with this (?)
+      // editAreaRef.current.addMissingSourceTagsToTarget()
+    }
+  })
+  const autoFillTagsInTarget = autoFillTagsInTargetRef.current
 
-  selectIssueText(event) {
-    var selection = document.getSelection()
-    var container = $(this.issuesHighlightArea).find('.errorTaggingArea')
-    if (this.textSelectedInsideSelectionArea(selection, container)) {
+  const selectIssueText = (event) => {
+    let selection = document.getSelection()
+    const container = $(issuesHighlightAreaRef.current).find(
+      '.errorTaggingArea',
+    )
+    if (textSelectedInsideSelectionArea(selection, container)) {
       event.preventDefault()
       event.stopPropagation()
       selection = CursorUtils.getSelectionData(selection, container)
       SegmentActions.openIssuesPanel(
-        {sid: this.props.segment.sid, selection: selection},
+        {sid: segment.sid, selection: selection},
         true,
       )
       setTimeout(() => {
-        SegmentActions.showIssuesMessage(this.props.segment.sid, 2)
+        SegmentActions.showIssuesMessage(segment.sid, 2)
       })
     } else {
-      this.context.removeSelection()
+      context.removeSelection()
       setTimeout(() => {
-        SegmentActions.showIssuesMessage(this.props.segment.sid, 0)
+        SegmentActions.showIssuesMessage(segment.sid, 0)
       })
     }
   }
 
-  textSelectedInsideSelectionArea(selection, container) {
+  const textSelectedInsideSelectionArea = (selection, container) => {
     return (
       container.contents().text().indexOf(selection.focusNode.textContent) >=
         0 &&
@@ -70,22 +135,22 @@ class SegmentTarget extends React.Component {
     )
   }
 
-  lockEditArea(event) {
+  const lockEditArea = (event) => {
     event.preventDefault()
-    if (!this.props.segment.edit_area_locked) {
-      SegmentActions.showIssuesMessage(this.props.segment.sid, 0)
+    if (!segment.edit_area_locked) {
+      SegmentActions.showIssuesMessage(segment.sid, 0)
     }
-    SegmentActions.lockEditArea(this.props.segment.sid, this.props.segment.fid)
+    SegmentActions.lockEditArea(segment.sid, segment.fid)
   }
 
-  allowHTML(string) {
+  const allowHTML = (string) => {
     return {__html: string}
   }
 
-  getAllIssues() {
+  const getAllIssues = () => {
     let issues = []
-    if (this.props.segment.versions) {
-      this.props.segment.versions.forEach(function (version) {
+    if (segment.versions) {
+      segment.versions.forEach(function (version) {
         if (!isEmpty(version.issues)) {
           issues = issues.concat(version.issues)
         }
@@ -94,15 +159,13 @@ class SegmentTarget extends React.Component {
     return issues
   }
 
-  removeTagsFromText() {
-    const cleanText = removeTagsFromText(this.props.segment.translation)
-    SegmentActions.replaceEditAreaTextContent(this.props.segment.sid, cleanText)
+  const removeTagsFromText = () => {
+    const cleanText = removeTagsFromTextUtil(segment.translation)
+    SegmentActions.replaceEditAreaTextContent(segment.sid, cleanText)
   }
 
-  getTargetArea(translation) {
-    const {segment} = this.context
-    const {showFormatMenu} = this.state
-    const {toggleFormatMenu, updateCounter} = this
+  const getTargetArea = (translation) => {
+    const {segment} = context
 
     const buttonsDisabled =
       !translation ||
@@ -110,12 +173,11 @@ class SegmentTarget extends React.Component {
       OfflineUtils.offlineCacheRemaining <= 0
 
     var textAreaContainer = ''
-    let issues = this.getAllIssues()
-    if (this.props.segment.edit_area_locked) {
+    let issues = getAllIssues()
+    if (segment.edit_area_locked) {
       const text =
-        this.props.segment.versions &&
-        this.props.segment.versions[0].translation
-          ? this.props.segment.versions[0].translation
+        segment.versions && segment.versions[0].translation
+          ? segment.versions[0].translation
           : translation
       let currentTranslationVersion = DraftMatecatUtils.transformTagsToHtml(
         text,
@@ -128,14 +190,12 @@ class SegmentTarget extends React.Component {
         >
           <div
             className="textarea-container"
-            onMouseUp={this.selectIssueText.bind(this)}
-            ref={(div) => (this.issuesHighlightArea = div)}
+            onMouseUp={selectIssueText}
+            ref={(div) => (issuesHighlightAreaRef.current = div)}
           >
             <div
               className="targetarea issuesHighlightArea errorTaggingArea"
-              dangerouslySetInnerHTML={this.allowHTML(
-                currentTranslationVersion,
-              )}
+              dangerouslySetInnerHTML={allowHTML(currentTranslationVersion)}
             />
           </div>
           <div className="segment-actions-container">
@@ -144,7 +204,7 @@ class SegmentTarget extends React.Component {
                 <Button
                   size={BUTTON_SIZE.ICON_SMALL}
                   mode={BUTTON_MODE.OUTLINE}
-                  onClick={this.lockEditArea.bind(this)}
+                  onClick={lockEditArea}
                   title="Highlight text and assign an issue to the selected text."
                   className="revise-lock-editArea-active"
                 >
@@ -152,7 +212,7 @@ class SegmentTarget extends React.Component {
                 </Button>
               ) : null}
             </div>
-            <SegmentButtons disabled={buttonsDisabled} {...this.context} />
+            <SegmentButtons disabled={buttonsDisabled} {...context} />
           </div>
         </div>
       )
@@ -160,7 +220,7 @@ class SegmentTarget extends React.Component {
       let s2tMicro = ''
 
       //Speeche2Text
-      var s2t_enabled = this.context.speech2textEnabledFn()
+      var s2t_enabled = context.speech2textEnabledFn()
       if (s2t_enabled) {
         s2tMicro = (
           <div
@@ -199,14 +259,14 @@ class SegmentTarget extends React.Component {
         '?revision_type=' +
         (config.revisionNumber ? config.revisionNumber : 1) +
         '&id_segment=' +
-        this.props.segment.sid
+        segment.sid
 
       //Text Area
       textAreaContainer = (
         <div className="textarea-container">
           <EditArea
-            ref={(ref) => (this.editArea = ref)}
-            segment={this.props.segment}
+            ref={(ref) => (editAreaRef.current = ref)}
+            segment={segment}
             translation={translation}
             toggleFormatMenu={toggleFormatMenu}
             updateCounter={updateCounter}
@@ -215,21 +275,21 @@ class SegmentTarget extends React.Component {
           <div className="segment-actions-container">
             <SegmentTargetToolbar
               {...{
-                sid: this.props.segment.sid,
-                segment: this.props.segment,
-                editArea: this.editArea,
-                lockEditArea: this.lockEditArea.bind(this),
+                sid: segment.sid,
+                segment: segment,
+                editArea: editAreaRef.current,
+                lockEditArea: lockEditArea,
                 qrLink,
                 issuesLength: issues.length,
                 showFormatMenu,
                 textHasTags: Boolean(textHasTags(translation)),
-                removeTagsFromText: this.removeTagsFromText.bind(this),
+                removeTagsFromText: removeTagsFromText,
                 missingTagsInTarget: segment.missingTagsInTarget,
                 addMissingSourceTagsToTarget:
-                  this.editArea?.addMissingSourceTagsToTarget,
+                  editAreaRef.current?.addMissingSourceTagsToTarget,
               }}
             />
-            <SegmentButtons disabled={buttonsDisabled} {...this.context} />
+            <SegmentButtons disabled={buttonsDisabled} {...context} />
           </div>
         </div>
       )
@@ -237,119 +297,91 @@ class SegmentTarget extends React.Component {
     return textAreaContainer
   }
 
-  autoFillTagsInTarget(sid) {
-    if (isUndefined(sid) || sid === this.props.segment.sid) {
-      let newTranslation = DraftMatecatUtils.autoFillTagsInTarget(
-        this.props.segment,
-      )
-      //lock tags and run again getWarnings
-      setTimeout(() => {
-        SegmentActions.replaceEditAreaTextContent(
-          this.props.segment.sid,
-          newTranslation,
-        )
-        SegmentActions.getSegmentsQa(this.props.segment)
-      }, 100)
-      // TODO: Change code with this (?)
-      // this.editArea.addMissingSourceTagsToTarget()
-    }
-  }
-
-  componentDidMount() {
+  useEffect(() => {
     SegmentStore.addListener(
       SegmentConstants.FILL_TAGS_IN_TARGET,
-      this.autoFillTagsInTarget,
+      autoFillTagsInTarget,
     )
-  }
 
-  componentWillUnmount() {
-    SegmentStore.removeListener(
-      SegmentConstants.FILL_TAGS_IN_TARGET,
-      this.autoFillTagsInTarget,
-    )
-  }
+    return () => {
+      SegmentStore.removeListener(
+        SegmentConstants.FILL_TAGS_IN_TARGET,
+        autoFillTagsInTarget,
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  componentDidUpdate(prevProps, prevState) {
-    const charactersCounterLimit = this.props.segment.metadata.find(
+  const isFirstRenderRef = useRef(true)
+  const prevValuesRef = useRef({
+    charactersCounterLimit: undefined,
+    charactersCounter: 0,
+    segmentCharacters: 0,
+  })
+
+  // No dependency array — runs after every render (except the first, skipped via
+  // isFirstRenderRef), matching componentDidUpdate's unconditional per-update re-sync.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false
+      return
+    }
+
+    const prevValues = prevValuesRef.current
+
+    const newCharactersCounterLimit = segment.metadata.find(
       (meta) =>
         meta.meta_key === 'sizeRestriction' &&
-        meta.id_segment.toString() === this.props.segment.sid
+        meta.id_segment.toString() === segment.sid,
     )?.meta_value
 
     if (
-      charactersCounterLimit &&
-      charactersCounterLimit !== prevState.charactersCounterLimit
+      newCharactersCounterLimit &&
+      newCharactersCounterLimit !== prevValues.charactersCounterLimit
     ) {
-      this.setState({
-        charactersCounterLimit,
-      })
+      setCharactersCounterLimit(newCharactersCounterLimit)
     }
 
     // dispatch characterCounter action
     if (
-      this.state.charactersCounterLimit !== prevState.charactersCounterLimit ||
-      this.state.charactersCounter !== prevState.charactersCounter ||
-      this.state.segmentCharacters !== prevState.segmentCharacters
+      charactersCounterLimit !== prevValues.charactersCounterLimit ||
+      charactersCounter !== prevValues.charactersCounter ||
+      segmentCharacters !== prevValues.segmentCharacters
     ) {
       setTimeout(() => {
         SegmentActions.characterCounter({
-          sid: this.props.segment.sid,
-          counter: this.state.charactersCounter,
-          segmentCharacters: this.state.segmentCharacters,
-          limit: this.state.charactersCounterLimit,
+          sid: segment.sid,
+          counter: charactersCounter,
+          segmentCharacters: segmentCharacters,
+          limit: charactersCounterLimit,
         })
       })
     }
-  }
 
-  render() {
-    let translation = this.props.segment.translation
-
-    return (
-      <div
-        className={`target item target-${config.target_code}`}
-        id={'segment-' + this.props.segment.sid + '-target'}
-        ref={(target) => (this.target = target)}
-      >
-        {this.getTargetArea(translation)}
-        <p className="warnings" />
-
-        {this.props.segment.warnings ? (
-          <SegmentWarnings warnings={this.props.segment.warnings} />
-        ) : null}
-      </div>
-    )
-  }
-  updateCounter = (value) => {
-    const {segmentCharacters, unitCharacters} =
-      SegmentUtils.getRelativeTransUnitCharactersCounter({
-        sid: this.props.segment.sid,
-        charactersCounter: value,
-        shouldCountTagsAsChars:
-          CatToolStore.getCurrentProjectTemplate().characterCounterCountTags,
-      })
-
-    this.setState({
-      charactersCounter: unitCharacters,
+    prevValuesRef.current = {
+      charactersCounterLimit,
+      charactersCounter,
       segmentCharacters,
-    })
-  }
-  toggleFormatMenu = (show) => {
-    // Show/Hide Edit Toolbar
-    clearTimeout(this.tmOutShowFormatMenu)
-
-    if (!show) {
-      this.tmOutShowFormatMenu = setTimeout(() => {
-        this.setState({
-          showFormatMenu: false,
-        })
-      }, 200)
-    } else {
-      this.setState({
-        showFormatMenu: show,
-      })
     }
-  }
+  })
+
+  let translation = segment.translation
+
+  return (
+    <div
+      className={`target item target-${config.target_code}`}
+      id={'segment-' + segment.sid + '-target'}
+      ref={(target) => (targetRef.current = target)}
+    >
+      {getTargetArea(translation)}
+      <p className="warnings" />
+
+      {segment.warnings ? (
+        <SegmentWarnings warnings={segment.warnings} />
+      ) : null}
+    </div>
+  )
 }
 
 export default SegmentTarget
