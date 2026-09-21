@@ -24,6 +24,7 @@ import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import * as DraftMatecatConstants from './utils/DraftMatecatUtils/editorConstants'
 import resolveEditorCommand from './utils/DraftMatecatUtils/resolveEditorCommand'
 import getEditorRelativeSelectionOffset from './utils/DraftMatecatUtils/getEditorRelativeSelectionOffset'
+import buildPastedEditorState from './utils/DraftMatecatUtils/buildPastedEditorState'
 import TagEntity from './TagEntity/TagEntity.component'
 import SegmentUtils from '../../utils/segmentUtils'
 import CommonUtils from '../../utils/commonUtils'
@@ -1010,64 +1011,20 @@ const Editarea = forwardRef(
       const {editorState} = stateRef.current
       const {fragment: clipboardFragment, plainText: clipboardPlainText} =
         SegmentStore.getFragmentFromClipboard()
-      // if text in standard clipboard matches the the plainClipboard saved in store proceed using fragment
-      // otherwise we're handling an external copy
-      if (
-        clipboardFragment &&
-        text &&
-        clipboardPlainText.replace(/\n/g, '') === text.replace(/\n/g, '')
-      ) {
-        try {
-          const fragmentContent = JSON.parse(clipboardFragment)
-          const fragment = DraftMatecatUtils.buildFragmentFromJson(
-            fragmentContent.orderedMap,
-          )
-          const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
-            fragment,
-            editorState,
-            fragmentContent.entitiesMap,
-          )
-          setState(
-            {
-              editorState: clipboardEditorPasted,
-            },
-            () => {
-              updateTranslationDebouncedRef.current()
-            },
-          )
-          // Paste fragment
-          return true
-        } catch (e) {
-          // Paste plain standard clipboard
-          return false
-        }
-      } else if (text) {
-        // we're handling an external copy, special chars must be striped from text
-        // and we have to add tag for external entities like nbsp or tab
-        let cleanText = DraftMatecatUtils.removeTagsFromText(text)
-        // Replace with placeholder
-        const nbspSign = tagSignatures['nbsp'].encodedPlaceholder
-        const tabSign = tagSignatures['tab'].encodedPlaceholder
-        cleanText = cleanText.replace(/°/gi, nbspSign).replace(/\t/gi, tabSign)
-        const plainTextClipboardFragment =
-          DraftMatecatUtils.buildFragmentFromText(cleanText)
-        const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
-          plainTextClipboardFragment,
-          editorState,
-        )
-        setState(
-          {
-            editorState: clipboardEditorPasted,
-          },
-          () => {
-            updateTranslationDebouncedRef.current()
-          },
-        )
-        // Paste fragment
-        return true
-      }
-      // Paste plain standard clipboard
-      return false
+
+      const pasted = buildPastedEditorState({
+        text,
+        clipboardFragment,
+        clipboardPlainText,
+        editorState,
+      })
+      // null means let Draft paste the plain text itself
+      if (!pasted) return false
+
+      setState({editorState: pasted}, () => {
+        updateTranslationDebouncedRef.current()
+      })
+      return true
     }
 
     const copyFragment = (e) => {
