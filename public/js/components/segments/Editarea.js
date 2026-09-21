@@ -25,6 +25,7 @@ import * as DraftMatecatConstants from './utils/DraftMatecatUtils/editorConstant
 import resolveEditorCommand from './utils/DraftMatecatUtils/resolveEditorCommand'
 import getEditorRelativeSelectionOffset from './utils/DraftMatecatUtils/getEditorRelativeSelectionOffset'
 import buildPastedEditorState from './utils/DraftMatecatUtils/buildPastedEditorState'
+import resolveDrop from './utils/DraftMatecatUtils/resolveDrop'
 import TagEntity from './TagEntity/TagEntity.component'
 import SegmentUtils from '../../utils/segmentUtils'
 import CommonUtils from '../../utils/commonUtils'
@@ -35,7 +36,6 @@ import LexiqaUtils from '../../utils/lxq.main'
 import updateOffsetBasedOnEditorState from './utils/DraftMatecatUtils/updateOffsetBasedOnEditorState'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
-import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
 import matchTypingSequence from '../../utils/matchTypingSequence/matchTypingSequence'
 import {SegmentContext} from './SegmentContext'
 import CatToolStore from '../../stores/CatToolStore'
@@ -1064,103 +1064,25 @@ const Editarea = forwardRef(
     }
 
     const handleDrop = (selection, dataTransfer) => {
-      let {editorState} = stateRef.current
-      const text = dataTransfer.getText()
+      const {editorState} = stateRef.current
+      const {
+        outcome,
+        editorState: dropped,
+        highlightTags,
+      } = resolveDrop({
+        editorState,
+        selection,
+        text: dataTransfer.getText(),
+        draggingFromEditArea: editorSyncRef.current.draggingFromEditArea,
+      })
 
-      // get selection of dragged text
-      const dragSelection = editorState.getSelection()
-      const dragSelectionLength =
-        dragSelection.focusOffset - dragSelection.anchorOffset
-      // get the fragment from current selection in editor (the highlighted tag)
-      const fragmentFromSelection = getFragmentFromSelection(editorState)
-      // Il fragment di draft NON FUNZIONA quindi lo ricostruisco
-      const tempFrag = DraftMatecatUtils.buildFragmentFromJson(
-        fragmentFromSelection,
-      )
-      // set selection to drop point and check dropping zone
-      editorState = EditorState.forceSelection(editorState, selection)
-      // Check: Cannot drop anything on entities
-      const {entityKey} = DraftMatecatUtils.selectionIsEntity(editorState)
-      if (entityKey) return 'handled'
-
-      if (text && !editorSyncRef.current.draggingFromEditArea) {
-        try {
-          const fragmentContent = JSON.parse(text)
-          const fragment = DraftMatecatUtils.buildFragmentFromJson(
-            fragmentContent.orderedMap,
-          )
-          const editorStateWithFragment = DraftMatecatUtils.duplicateFragment(
-            fragment,
-            editorState,
-            fragmentContent.entitiesMap,
-          )
-          setState(
-            {
-              editorState: editorStateWithFragment,
-            },
-            () => {
-              updateTranslationDebouncedRef.current()
-            },
-          )
-          return 'handled'
-        } catch (err) {
-          return 'not-handled'
-        }
-      } else {
-        // when drop is inside the same editor, use default behavior
-        // update: default behavior not working
-        try {
-          // remove drag selected range from editor state
-          let contentState = editorState.getCurrentContent()
-          contentState = Modifier.removeRange(
-            contentState,
-            dragSelection,
-            dragSelection.isBackward ? 'backward' : 'forward',
-          )
-
-          // Aggiornala nel caso in cui sposti in avanti il drag nello stesso blocco
-          const dragBlockKey = dragSelection.getAnchorKey()
-          const dropBlockKey = selection.getAnchorKey()
-          selection =
-            dragSelection.anchorOffset < selection.anchorOffset &&
-            dragBlockKey === dropBlockKey
-              ? selection.merge({
-                  anchorOffset: selection.anchorOffset - dragSelectionLength,
-                  focusOffset: selection.focusOffset - dragSelectionLength,
-                })
-              : selection
-
-          // Inserisci il fragment
-          contentState = Modifier.replaceWithFragment(
-            contentState,
-            selection,
-            tempFrag,
-          )
-
-          editorState = EditorState.push(
-            editorState,
-            contentState,
-            'insert-fragment',
-          )
-          editorState = EditorState.forceSelection(editorState, selection)
-
-          setState(
-            {
-              editorState: editorState,
-            },
-            () => {
-              updateTranslationDebouncedRef.current()
-              setTimeout(() => {
-                SegmentActions.highlightTags()
-              })
-            },
-          )
-          return 'handled'
-        } catch (err) {
-          console.log(err)
-          return 'not-handled'
-        }
+      if (dropped) {
+        setState({editorState: dropped}, () => {
+          updateTranslationDebouncedRef.current()
+          if (highlightTags) setTimeout(() => SegmentActions.highlightTags())
+        })
       }
+      return outcome
     }
 
     const onEntityClickRef = useRef((start, end) => {
