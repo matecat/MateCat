@@ -403,3 +403,32 @@ section .segment-side-buttons {
 section.editor .loader_on {
   display: block !important;
 }
+
+// Restored: 012b2965f0 removed these as unreferenced, but the tab applies them
+// through a variable (`imgClass = 'error-img'`) rather than a literal className,
+// so a grep for the class name next to className= never saw them.
+.error-img {
+  background: colors.$red600 url(/public/img/warning.png) no-repeat center;
+  background-size: 17px;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  border-radius: 5px;
+  margin-left: -28px;
+  top: -4px;
+  position: relative;
+  float: left;
+}
+
+.warning-img {
+  background: colors.$orange600 url(/public/img/warning.png) no-repeat center;
+  background-size: 17px;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  border-radius: 5px;
+  margin-left: -28px;
+  top: -4px;
+  position: relative;
+  float: left;
+}
