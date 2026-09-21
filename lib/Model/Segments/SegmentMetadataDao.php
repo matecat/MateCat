@@ -215,6 +215,10 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
+     * The default TTL is not actually in effect in production: its only current caller,
+     * `GetSegmentsController`, deliberately passes `ttl = 0` to avoid a cache-aside race where a
+     * concurrent read can re-cache a stale result after a disable/enable write's eviction runs.
+     *
      * @return array<int, SegmentMetadataCollection>
      * @throws ReflectionException
      * @throws Exception
