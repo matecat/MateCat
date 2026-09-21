@@ -80,36 +80,9 @@ module.exports = {
       },
       rules: {
         'react/prop-types': 'off',
-        'no-restricted-syntax': ['error', ...privateNameRules],
-      },
-    },
-
-    // Migrated to function components; ban the class form here so it can't return.
-    // Grows with the migration one directory at a time instead of gating it.
-    {
-      files: [
-        'public/js/components/modals/**/*.js',
-        'public/js/components/languageSelector/**/*.js',
-        'public/js/components/review_extended/**/*.js',
-        'public/js/components/common/WrapperLoader.js',
-        'public/js/components/header/cattol/**/*.js',
-        'public/js/components/segments/GlossaryComponents/**/*.js',
-        'public/js/components/segments/LexiqaHighlight/**/*.js',
-        'public/js/components/segments/TooltipInfo/**/*.js',
-        'public/js/components/segments/TagEntity/**/*.js',
-        'public/js/components/segments/utils/DraftMatecatUtils/TagMenu/**/*.js',
-        'public/js/components/segments/SegmentCommentsContainer.js',
-        'public/js/components/segments/SegmentHeader.js',
-        'public/js/components/segments/SegmentsCommentsIcon.js',
-        'public/js/components/segments/SegmentWarnings.js',
-        'public/js/components/segments/SegmentWrapper.js',
-        'public/js/components/segments/SegmentSource.js',
-        'public/js/components/segments/Editarea.js',
-        'public/js/components/segments/SegmentTarget.js',
-        'public/js/components/projects/Header.js',
-        'public/js/components/review/TranslationIssuesSideButton.js',
-      ],
-      rules: {
+        // The class form is gone from the tree; keep it out. Until the
+        // migration finished this was a per-directory allowlist that grew
+        // one PR at a time.
         'no-restricted-syntax': [
           'error',
           {
