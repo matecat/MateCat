@@ -107,9 +107,7 @@ const FilterSegments = ({
         .map((item) => ({
           name: (
             <>
-              <div
-                className={`status-dot ${item.label.toLowerCase()}-color`}
-              />
+              <div className={`status-dot ${item.label.toLowerCase()}-color`} />
               {item.label}
             </>
           ),

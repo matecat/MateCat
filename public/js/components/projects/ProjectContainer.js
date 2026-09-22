@@ -557,7 +557,7 @@ export const ProjectContainer = ({
                   : CHECKBOX_STATE.INDETERMINATE
             }
           />
-          <div>
+          <div className="project-info">
             {projectNameElements}
             <span
               className="project-id"

@@ -119,7 +119,7 @@ export const ShareResource = ({row, onClose, onShare}) => {
   }, [])
 
   return (
-    <div className="translation-memory-glossary-tab-export">
+    <div className="translation-memory-glossary-tab-share">
       <form
         ref={formRef}
         className={`action-form${isErrorExport ? ' action-form-error' : ''}`}

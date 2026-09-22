@@ -144,9 +144,7 @@ const Register = () => {
               render={({
                 field: {name, onChange, value},
                 fieldState: {error},
-              }) => (
-                <Input placeholder="Name" {...{name, value, onChange, error}} />
-              )}
+              }) => <Input label="Name" {...{name, value, onChange, error}} />}
             />
           </fieldset>
           <fieldset>
@@ -161,10 +159,7 @@ const Register = () => {
                 field: {name, onChange, value},
                 fieldState: {error},
               }) => (
-                <Input
-                  placeholder="Surname"
-                  {...{name, value, onChange, error}}
-                />
+                <Input label="Surname" {...{name, value, onChange, error}} />
               )}
             />
           </fieldset>
@@ -186,7 +181,7 @@ const Register = () => {
               }) => (
                 <Input
                   type={INPUT_TYPE.EMAIL}
-                  placeholder="Email"
+                  label="Email"
                   {...{name, value, onChange, error}}
                 />
               )}
@@ -215,7 +210,7 @@ const Register = () => {
               }) => (
                 <Input
                   type={INPUT_TYPE.PASSWORD}
-                  placeholder="Password"
+                  label="Password"
                   {...{name, value, onChange, error}}
                 />
               )}
@@ -239,7 +234,7 @@ const Register = () => {
               }) => (
                 <Input
                   type={INPUT_TYPE.PASSWORD}
-                  placeholder="Confirm password"
+                  label="Confirm password"
                   {...{name, value, onChange, error}}
                 />
               )}

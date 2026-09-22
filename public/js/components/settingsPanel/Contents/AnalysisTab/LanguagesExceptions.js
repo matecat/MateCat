@@ -21,6 +21,7 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {cloneDeep, isEqual} from 'lodash'
 import {v4 as uuidV4} from 'uuid'
 import IconAdd from '../../../../../img/icons/IconAdd'
+import Switch from '../../../../../img/icons/Switch'
 
 export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
   const {analysisTemplates} = useContext(SettingsPanelContext)
@@ -253,7 +254,14 @@ const LanguageException = ({
           })}
         </Select>
         {/*TODO swap lingue*/}
-        <div id="swaplang" title="Swap languages" onClick={swapLanguages} />
+        <Button
+          className="button-language-swap"
+          mode={BUTTON_MODE.GHOST}
+          type={BUTTON_TYPE.ICON}
+          onClick={swapLanguages}
+        >
+          <Switch />
+        </Button>
         <Select
           name={'lang'}
           isPortalDropdown={true}

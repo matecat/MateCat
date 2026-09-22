@@ -26,7 +26,6 @@ header {
             height: 48px !important;*/
   }
 
-
   .nav-bar div.ui-user-top-image {
     -webkit-box-align: center;
     -webkit-align-items: center;
@@ -270,17 +269,9 @@ header {
     margin-left: 14px;
   }
 
-  div[class*="popover-component-container"] {
+  div[class*='popover-component-container'] {
     margin-left: 15px;
   }
-}
-
-.logo {
-  border: 0;
-  //margin-top: 5px;
-  background: url(/public/img/logo_matecat_big_white.svg) 0px 0px no-repeat;
-  width: 190px;
-  height: 40px;
 }
 
 .logo {
@@ -373,7 +364,7 @@ header {
   display: flex;
   min-height: 60px;
   align-items: center;
-  padding: 0 40px 0 15px;
+  padding: 0 40px 0 20px;
 }
 
 .header-container .header-elements {

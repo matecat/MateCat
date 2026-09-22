@@ -6,10 +6,7 @@ import styles from './JobProgressBar.module.scss'
 const JobProgressBar = ({stats = {}, showPercent = true}) => {
   const progressTooltipRef = useRef()
 
-
   const {raw} = stats
-
-  const newWords = raw ? raw.new : undefined
 
   const {total, draft, new: newRaw, translated, approved, approved2} = raw || {}
 
@@ -22,8 +19,15 @@ const JobProgressBar = ({stats = {}, showPercent = true}) => {
   const approvedPercBar = ((translated + approved) * 100) / total
   const approved2PercBar = ((translated + approved + approved2) * 100) / total
 
-  const totalPerc = Math.round(((total - draft - newWords) * 100) / total)
-
+  const totalPerc = Math.round(
+    !config.isReview
+      ? ((translated + approved + approved2) * 100) / total
+      : config.isReview && config.revisionNumber === 1
+        ? ((approved + approved2) * 100) / total
+        : config.isReview && config.revisionNumber === 2
+          ? (approved2 * 100) / total
+          : 0,
+  )
   const analysisComplete = !isUndefined(stats.analysis_complete)
     ? stats.analysis_complete
     : true
@@ -40,7 +44,9 @@ const JobProgressBar = ({stats = {}, showPercent = true}) => {
               {unconfirmedPerc > 0 && (
                 <div>
                   <span>
-                    <span className={`${styles.quad} ${styles['unconfirmed-quad']}`} />
+                    <span
+                      className={`${styles.quad} ${styles['unconfirmed-quad']}`}
+                    />
                     Unconfirmed
                   </span>
                   <span>{unconfirmedPerc.toFixed(1)}%</span>
@@ -49,7 +55,9 @@ const JobProgressBar = ({stats = {}, showPercent = true}) => {
               {translatedPerc > 0 && (
                 <div>
                   <span>
-                    <span className={`${styles.quad} ${styles['translated-quad']}`} />
+                    <span
+                      className={`${styles.quad} ${styles['translated-quad']}`}
+                    />
                     Translated
                   </span>
                   <span>{translatedPerc.toFixed(1)}%</span>
@@ -58,7 +66,9 @@ const JobProgressBar = ({stats = {}, showPercent = true}) => {
               {approvedPerc > 0 && (
                 <div>
                   <span>
-                    <span className={`${styles.quad} ${styles['approved-quad']}`} />
+                    <span
+                      className={`${styles.quad} ${styles['approved-quad']}`}
+                    />
                     Revise
                   </span>
                   <span>{approvedPerc.toFixed(1)}%</span>
@@ -67,7 +77,9 @@ const JobProgressBar = ({stats = {}, showPercent = true}) => {
               {approved2Perc > 0 && (
                 <div>
                   <span>
-                    <span className={`${styles.quad} ${styles['approved2-quad']}`} />
+                    <span
+                      className={`${styles.quad} ${styles['approved2-quad']}`}
+                    />
                     Revise 2
                   </span>
                   <span>{approved2Perc.toFixed(1)}%</span>

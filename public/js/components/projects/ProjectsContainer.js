@@ -96,7 +96,7 @@ export const ProjectsContainer = ({
                 }
               >
                 Create project
-</Button>
+              </Button>
               {!thereAreMembers && (
                 <Button
                   size={BUTTON_SIZE.MEDIUM}
@@ -126,7 +126,7 @@ export const ProjectsContainer = ({
                   }
                 >
                   Create project
-  </Button>
+                </Button>
                 {!thereAreMembers && (
                   <Button
                     size={BUTTON_SIZE.MEDIUM}
@@ -152,7 +152,7 @@ export const ProjectsContainer = ({
     >
       {projects?.size > 0 && (
         <div className="projects-container-title">
-          <h4>Projects</h4>
+          <h3>Projects</h3>
           <div>
             <span>Legend:</span>
             <span>

@@ -16,11 +16,19 @@ const renderWithContext = (setStep = jest.fn()) =>
   )
 
 describe('ForgotPassword', () => {
+  test('labels every field and leaves no placeholder inside the inputs', () => {
+    renderWithContext()
+    const labels = ['Email']
+    labels.forEach((label) => {
+      expect(screen.getByLabelText(label)).not.toHaveAttribute('placeholder')
+    })
+  })
+
   beforeEach(() => jest.clearAllMocks())
 
   test('renders the email field', () => {
     renderWithContext()
-    expect(screen.getByPlaceholderText('Email')).toBeInTheDocument()
+    expect(screen.getByLabelText('Email')).toBeInTheDocument()
   })
 
   test('shows validation error on empty submit', async () => {
@@ -34,7 +42,7 @@ describe('ForgotPassword', () => {
   test('shows the success message after a successful submit', async () => {
     forgotPassword.mockResolvedValue({})
     renderWithContext()
-    fireEvent.change(screen.getByPlaceholderText('Email'), {
+    fireEvent.change(screen.getByLabelText('Email'), {
       target: {value: 'user@example.com'},
     })
     fireEvent.click(screen.getByRole('button', {name: 'Send link'}))
@@ -50,7 +58,7 @@ describe('ForgotPassword', () => {
   test('shows the API error message on rejection', async () => {
     forgotPassword.mockRejectedValue({errors: [{message: 'Unknown email'}]})
     renderWithContext()
-    fireEvent.change(screen.getByPlaceholderText('Email'), {
+    fireEvent.change(screen.getByLabelText('Email'), {
       target: {value: 'user@example.com'},
     })
     fireEvent.click(screen.getByRole('button', {name: 'Send link'}))
@@ -60,7 +68,7 @@ describe('ForgotPassword', () => {
   test('shows a generic error message when rejection has no errors array', async () => {
     forgotPassword.mockRejectedValue({})
     renderWithContext()
-    fireEvent.change(screen.getByPlaceholderText('Email'), {
+    fireEvent.change(screen.getByLabelText('Email'), {
       target: {value: 'user@example.com'},
     })
     fireEvent.click(screen.getByRole('button', {name: 'Send link'}))
@@ -73,7 +81,7 @@ describe('ForgotPassword', () => {
     forgotPassword.mockResolvedValue({})
     const setStep = jest.fn()
     renderWithContext(setStep)
-    fireEvent.change(screen.getByPlaceholderText('Email'), {
+    fireEvent.change(screen.getByLabelText('Email'), {
       target: {value: 'user@example.com'},
     })
     fireEvent.click(screen.getByRole('button', {name: 'Send link'}))
