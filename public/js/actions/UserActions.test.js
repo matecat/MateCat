@@ -7,6 +7,7 @@ jest.mock('../stores/AppDispatcher', () => ({
 }))
 jest.mock('../constants/UserConstants', () => ({
   UPDATE_USER: 'UPDATE_USER',
+  UPDATE_USER_NAME: 'UPDATE_USER_NAME',
   RENDER_TEAMS: 'RENDER_TEAMS',
   UPDATE_TEAM: 'UPDATE_TEAM',
   UPDATE_TEAMS: 'UPDATE_TEAMS',
@@ -40,15 +41,13 @@ describe('UserActions', () => {
     })
   })
 
-  test('updateUserName references an undefined TeamConstants (known bug) and throws', () => {
-    // NOTE: UserActions.js:18 references `TeamConstants` which is never
-    // imported in the source file. Calling this method throws a
-    // ReferenceError. Flagging as a pre-existing bug rather than fixing it
-    // silently, per task instructions.
-    expect(() => UserActions.updateUserName({foo: 'bar'})).toThrow(
-      ReferenceError,
-    )
-    expect(AppDispatcher.dispatch).not.toHaveBeenCalled()
+  test('updateUserName dispatches UPDATE_USER_NAME', () => {
+    UserActions.updateUserName({first_name: 'Ada'})
+
+    expect(AppDispatcher.dispatch).toHaveBeenCalledWith({
+      actionType: 'UPDATE_USER_NAME',
+      info: {first_name: 'Ada'},
+    })
   })
 
   test('renderTeams dispatches RENDER_TEAMS with teams and defaultTeam', () => {
