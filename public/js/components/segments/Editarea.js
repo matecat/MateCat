@@ -3,6 +3,7 @@ import React, {
   useContext,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useReducer,
   useRef,
 } from 'react'
@@ -1298,16 +1299,19 @@ const Editarea = forwardRef(
       popoverPosition,
       previousSourceTagMap,
     } = state
-    // constructor-time synchronous side effect: this.props.updateCounter(...)
-    const constructorRanRef = useRef(false)
-    if (!constructorRanRef.current) {
-      constructorRanRef.current = true
+    // The class set the counter from its constructor. A constructor runs in the
+    // render phase, so that was a parent update from a child's render, which
+    // React reports as "Cannot update a component while rendering a different
+    // component". A layout effect runs after this component has rendered but
+    // still before paint, so the counter never shows a stale value.
+    useLayoutEffect(() => {
       updateCounter(
         DraftMatecatUtils.getCharactersCounter(
           getTextToApplyCounter(translation),
         ),
       )
-    }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     // debounced functions, constructed once (recreating them would drop pending timers)
     const updateTranslationDebouncedRef = useRef(null)

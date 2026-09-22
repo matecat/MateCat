@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, act, fireEvent} from '@testing-library/react'
+import {render, act, fireEvent, screen} from '@testing-library/react'
 
 // ---------------------------------------------------------------------------
 // Mocks: only side-effecting collaborators (stores, flux actions, broadcast
@@ -1205,5 +1205,56 @@ describe('store sync scheduling', () => {
 
       expect(syncCount()).toBeGreaterThan(0)
     })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Editarea must not update its parent while it renders
+//
+// The class constructor called props.updateCounter, and the port kept that as a
+// guarded statement in the render body. A constructor runs in the render phase,
+// so this has always been a parent update from a child's render; React reports
+// it as "Cannot update a component while rendering a different component".
+//
+// The other tests pass updateCounter as a bare jest.fn(), which cannot trigger
+// the warning. It takes a real parent whose state setter is handed down.
+// ---------------------------------------------------------------------------
+describe('rendering does not update the parent', () => {
+  const CounterParent = ({segment}) => {
+    const [counter, setCounter] = React.useState(null)
+    return (
+      <SegmentContext.Provider value={{readonly: false, locked: false}}>
+        <span data-testid="counter">{String(counter)}</span>
+        <Editarea
+          segment={segment}
+          translation={segment.translation}
+          updateCounter={setCounter}
+          toggleFormatMenu={jest.fn()}
+        />
+      </SegmentContext.Provider>
+    )
+  }
+
+  test('mounting does not warn about updating a component while rendering', () => {
+    const errors = []
+    const spy = jest
+      .spyOn(console, 'error')
+      .mockImplementation((...args) => errors.push(String(args[0])))
+
+    render(<CounterParent segment={makeSegment({translation: 'ciao mondo'})} />)
+    flush()
+
+    spy.mockRestore()
+    expect(
+      errors.filter((e) => e.includes('while rendering a different component')),
+    ).toEqual([])
+  })
+
+  test('the counter still reaches the parent', () => {
+    render(<CounterParent segment={makeSegment({translation: 'ciao mondo'})} />)
+    flush()
+
+    // 'null' is the parent's initial state, before Editarea reports anything
+    expect(screen.getByTestId('counter')).not.toHaveTextContent('null')
   })
 })
