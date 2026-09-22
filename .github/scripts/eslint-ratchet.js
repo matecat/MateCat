@@ -75,6 +75,32 @@ function evaluate({count, baseline}) {
   return {ok: true, message: `ESLint problems unchanged at ${baseline}.`}
 }
 
+/**
+ * Per-rule totals over the gated files, printed whenever the count moves.
+ * A difference between two machines is nearly always one rule, and without
+ * this the only thing either side can compare is a single number.
+ */
+function summarise(results, cwd) {
+  const byRule = {}
+  let files = 0
+
+  for (const result of results) {
+    if (!isCounted(path.relative(cwd, result.filePath))) continue
+    files++
+    for (const message of result.messages) {
+      const rule = message.ruleId || '(parse error)'
+      byRule[rule] = (byRule[rule] || 0) + 1
+    }
+  }
+
+  const lines = Object.entries(byRule)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 12)
+    .map(([rule, n]) => `  ${String(n).padStart(5)}  ${rule}`)
+
+  return [`files linted: ${files}`, ...lines].join('\n')
+}
+
 async function main() {
   const {ESLint} = require('eslint')
   const cwd = process.cwd()
@@ -89,6 +115,7 @@ async function main() {
   })
 
   console.log(outcome.message)
+  if (!/unchanged/.test(outcome.message)) console.log(summarise(results, cwd))
   if (!outcome.ok) process.exitCode = 1
 }
 
