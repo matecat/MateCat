@@ -173,5 +173,17 @@ module.exports = {
         gapi: 'readonly',
       },
     },
+
+    // Last, so it wins over the React rules the overrides above switch on for
+    // everything under a js/ directory — which includes the tests living there.
+    {
+      files: ['**/*.jest.js', '**/*.test.js', '**/mocks/**/*.js'],
+      rules: {
+        // A display name exists so the devtools and a stack trace can name a
+        // component. The stand-ins a jest.mock factory returns reach neither,
+        // so naming every one of them tells nobody anything.
+        'react/display-name': 'off',
+      },
+    },
   ],
 }
