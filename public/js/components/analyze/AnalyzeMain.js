@@ -1,10 +1,7 @@
-import React, {useEffect, useState} from 'react'
-import {debounce} from 'lodash/function'
-import $ from 'jquery'
+import React, {useState} from 'react'
 import AnalyzeHeader from './AnalyzeHeader'
 import AnalyzeChunksResume from './AnalyzeChunksResume'
 import ProjectAnalyze from './ProjectAnalyze'
-import {Button} from '../common/Button/Button'
 import {SpinnerLoader} from '../common/SpinnerLoader'
 
 const AnalyzeMain = ({volumeAnalysis, project}) => {

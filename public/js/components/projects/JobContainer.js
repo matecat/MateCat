@@ -25,7 +25,6 @@ import CommentsIcon from '../../../img/icons/CommentsIcon'
 import ProjectsStore from '../../stores/ProjectsStore'
 import ManageConstants from '../../constants/ManageConstants'
 import OutsourceContainer from '../outsource/OutsourceContainer'
-import {fromJS} from 'immutable'
 import Close from '../../../img/icons/Close'
 
 export const JobContainer = ({

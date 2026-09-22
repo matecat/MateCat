@@ -9,10 +9,6 @@ import SegmentFilter from '../header/cattol/segment_filter/segment_filter'
 import SegmentUtils from '../../utils/segmentUtils'
 import SegmentActions from '../../actions/SegmentActions'
 import CommonUtils from '../../utils/commonUtils'
-import {
-  decodePlaceholdersToPlainText,
-  removeTagsFromText,
-} from './utils/DraftMatecatUtils/tagUtils'
 import {useHotkeys} from 'react-hotkeys-hook'
 
 jest.mock('../../stores/SegmentStore', () => ({

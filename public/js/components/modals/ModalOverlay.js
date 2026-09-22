@@ -1,5 +1,4 @@
 import React from 'react'
-import $ from 'jquery'
 import {
   Button,
   BUTTON_MODE,

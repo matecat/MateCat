@@ -1,6 +1,5 @@
 import React from 'react'
-import {Select} from '../../../../common/Select'
-import {Controller, useForm} from 'react-hook-form'
+import {useForm} from 'react-hook-form'
 import {
   Button,
   BUTTON_MODE,

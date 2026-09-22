@@ -1,7 +1,6 @@
 import React from 'react'
 import {render, screen, fireEvent} from '@testing-library/react'
 import {SettingsPanelTable} from './SettingsPanelTable'
-import {SettingsPanelTableContext} from './SettingsPanelTableContext'
 import {SPECIAL_ROWS_ID} from '../Contents/TranslationMemoryGlossaryTab/TranslationMemoryGlossaryTabUtils'
 
 jest.mock('../Contents/TranslationMemoryGlossaryTab/TmPrioritization', () => ({

@@ -1,4 +1,3 @@
-import {NUM_CONTRIBUTION_RESULTS} from '../../constants/Constants'
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 /**
  * Get contributions

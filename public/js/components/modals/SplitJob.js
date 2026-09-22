@@ -6,7 +6,7 @@ import ModalsActions from '../../actions/ModalsActions'
 import {
   Button,
   BUTTON_MODE,
-  BUTTON_SIZE,
+  
   BUTTON_TYPE,
 } from '../common/Button/Button'
 import Tooltip from '../common/Tooltip'
