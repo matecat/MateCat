@@ -1,6 +1,7 @@
 import React from 'react'
 import {render, screen} from '@testing-library/react'
 import SegmentFooterTabMessages from './SegmentFooterTabMessages'
+import segmentNotes from './segmentNotes'
 
 jest.mock('../../utils/textUtils', () => ({
   getContentWithAllowedLinkRedirect: jest.fn((text) => [text]),
@@ -18,6 +19,47 @@ const defaultProps = {
 
 const renderComponent = (props = {}) =>
   render(<SegmentFooterTabMessages {...defaultProps} {...props} />)
+
+// The seam exists so plugins can replace note rendering by assigning over these
+// members, the way they used to patch the component prototype. Prototype patching
+// stops working the moment the host becomes a function component; these tests pin
+// the replacement that takes its place.
+describe('the segmentNotes seam', () => {
+  const pristine = {...segmentNotes}
+
+  afterEach(() => {
+    Object.keys(segmentNotes).forEach((key) => delete segmentNotes[key])
+    Object.assign(segmentNotes, pristine)
+  })
+
+  test('a plugin replacing getNotes decides what the tab renders', () => {
+    segmentNotes.getNotes = () => <div>from the plugin</div>
+
+    renderComponent({notes: [{note: 'core note'}]})
+
+    expect(screen.getByText('from the plugin')).toBeInTheDocument()
+    expect(screen.queryByText('core note')).not.toBeInTheDocument()
+  })
+
+  test('a plugin replacing getNote is reached through getNotes', () => {
+    // The core getNotes still runs; it must call the seam member rather than a
+    // local reference, or the plugin's version is silently bypassed.
+    segmentNotes.getNote = ({item}) => <div key="x">{`seen: ${item.note}`}</div>
+
+    renderComponent({notes: [{note: 'core note'}]})
+
+    expect(screen.getByText(/seen: core note/)).toBeInTheDocument()
+  })
+
+  test('a plugin can hide notes with excludeMatchingNotesRegExp', () => {
+    segmentNotes.excludeMatchingNotesRegExp = /internal/
+
+    renderComponent({notes: [{note: 'internal remark'}, {note: 'keep me'}]})
+
+    expect(screen.queryByText('internal remark')).not.toBeInTheDocument()
+    expect(screen.getByText('keep me')).toBeInTheDocument()
+  })
+})
 
 describe('SegmentFooterTabMessages', () => {
   test('renders a regular note unchanged', () => {
@@ -106,7 +148,9 @@ describe('SegmentFooterTabMessages', () => {
     })
     // This branch does not append visible notes due to a forEach not
     // propagating its return value, but it must not throw.
-    expect(container.querySelector('.segments-notes-container')).toBeInTheDocument()
+    expect(
+      container.querySelector('.segments-notes-container'),
+    ).toBeInTheDocument()
   })
 
   test('renders a note when item.json is a plain string', () => {
