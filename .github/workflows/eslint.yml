@@ -1,0 +1,48 @@
+name: ESLint
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+  push:
+    branches: [develop]
+
+permissions:
+  contents: read
+
+jobs:
+  ratchet:
+    name: ESLint must not regress
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
+    steps:
+      - name: Checkout
+        # Submodules are deliberately not fetched: plugins/ is excluded from the
+        # count, and cloning them over SSH needs deploy keys.
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --ignore-scripts
+
+      - name: Compare against the baseline
+        run: node .github/scripts/eslint-ratchet.js
+
+  ratchet-tests:
+    name: ESLint ratchet script tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Run tests
+        run: node --test .github/scripts/eslint-ratchet.test.js
