@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, act, fireEvent} from '@testing-library/react'
+import {render, act, fireEvent, screen} from '@testing-library/react'
 
 // ---------------------------------------------------------------------------
 // Mocks: only side-effecting collaborators (stores, flux actions, broadcast
@@ -179,9 +179,7 @@ function renderEditarea({
     toggleFormatMenu,
     /** Re-renders with a different segment, then drains deferred work. */
     update: (nextSegment, nextTranslation = nextSegment.translation) => {
-      act(() => {
-        utils.rerender(tree(nextSegment, nextTranslation))
-      })
+      utils.rerender(tree(nextSegment, nextTranslation))
       flush()
     },
   }
@@ -196,9 +194,9 @@ function flush(ms = 1500) {
 
 /** Mounts and drains the deferred componentDidMount work. */
 function mountEditarea(options) {
-  const rendered = renderEditarea(options)
+  const view = renderEditarea(options)
   flush()
-  return rendered
+  return view
 }
 
 /** Minimal synthetic keyboard event accepted by KeyBindingUtil. */
@@ -250,11 +248,11 @@ describe('Editarea rendering', () => {
   test('renders the edit area wrapper with sid based identifiers', () => {
     const {container} = mountEditarea()
 
-    const wrapper = container.querySelector('#segment-12-1-editarea')
+    const wrapper = editAreaWrapper(container, '12-1')
     expect(wrapper).not.toBeNull()
-    expect(wrapper.getAttribute('data-sid')).toBe('12-1')
+    expect(wrapper).toHaveAttribute('data-sid', '12-1')
     expect(wrapper.className).toBe('targetarea editarea')
-    expect(wrapper.getAttribute('lang')).toBe('it-IT')
+    expect(wrapper).toHaveAttribute('lang', 'it-IT')
   })
 
   test('uses the "area" class instead of "editarea" when locked', () => {
@@ -262,9 +260,7 @@ describe('Editarea rendering', () => {
       context: {readonly: false, locked: true},
     })
 
-    expect(container.querySelector('.targetarea').className).toBe(
-      'targetarea area',
-    )
+    expect(targetArea(container).className).toBe('targetarea area')
   })
 
   test('uses the "area" class when the context is readonly', () => {
@@ -272,9 +268,7 @@ describe('Editarea rendering', () => {
       context: {readonly: true, locked: false},
     })
 
-    expect(container.querySelector('.targetarea').className).toBe(
-      'targetarea area',
-    )
+    expect(targetArea(container).className).toBe('targetarea area')
   })
 
   test('renders the translation text inside the draft editor', () => {
@@ -288,11 +282,7 @@ describe('Editarea rendering', () => {
       segment: makeSegment({opened: false}),
     })
 
-    expect(
-      container
-        .querySelector('[contenteditable]')
-        .getAttribute('contenteditable'),
-    ).toBe('false')
+    expect(editableNode(container)).toHaveAttribute('contenteditable', 'false')
   })
 
   test('marks the draft editor readonly when the segment is muted', () => {
@@ -300,11 +290,7 @@ describe('Editarea rendering', () => {
       segment: makeSegment({muted: true}),
     })
 
-    expect(
-      container
-        .querySelector('[contenteditable]')
-        .getAttribute('contenteditable'),
-    ).toBe('false')
+    expect(editableNode(container)).toHaveAttribute('contenteditable', 'false')
   })
 
   test('renders RTL alignment when the target language is RTL', () => {
@@ -312,9 +298,7 @@ describe('Editarea rendering', () => {
 
     const {container} = mountEditarea()
 
-    expect(
-      container.querySelector('.public-DraftEditor-content'),
-    ).not.toBeNull()
+    expect(editorNode(container)).not.toBeNull()
   })
 })
 
@@ -346,7 +330,7 @@ describe('Editarea character counter on mount', () => {
     })
 
     expect(SegmentUtils.checkCurrentSegmentTPEnabled).toHaveBeenCalled()
-    expect(container.textContent).toContain('Ciao')
+    expect(container).toHaveTextContent(/Ciao/)
   })
 })
 
@@ -424,9 +408,23 @@ function mountWithSourceTags(segmentOverrides = {}) {
   })
 }
 
+// DraftJS renders a bare contenteditable with no accessible role, and its tags
+// are decorator spans, so the editor's internals can only be reached by
+// selector. Every such lookup lives here, which keeps the rule exemption in one
+// place instead of scattered across the tests.
+/* eslint-disable testing-library/no-node-access */
 const editorNode = (container) =>
   container.querySelector('.public-DraftEditor-content')
 const tagBox = (container) => container.querySelector('.tag-box')
+const editAreaWrapper = (container, sid) =>
+  container.querySelector(`#segment-${sid}-editarea`)
+const targetArea = (container) => container.querySelector('.targetarea')
+const editableNode = (container) => container.querySelector('[contenteditable]')
+// TagBox renders its own .tag-container heading, so scope the lookup to the
+// draft content itself.
+const tagEntities = (container) =>
+  container.querySelectorAll('.public-DraftEditor-content .tag-container')
+/* eslint-enable testing-library/no-node-access */
 
 /**
  * Presses a key on the editor the way a user does, so the event travels through
@@ -524,9 +522,7 @@ describe('tag menu keyboard shortcuts', () => {
 })
 
 describe('tag insertion keyboard shortcuts', () => {
-  const tagCount = (container) =>
-    container.querySelectorAll('.public-DraftEditor-content .tag-container')
-      .length
+  const tagCount = (container) => tagEntities(container).length
 
   test('tab inserts a tab tag and shift + tab does not', () => {
     const {container} = mountEditarea({translation: 'ciao'})
@@ -715,19 +711,17 @@ describe('componentDidUpdate', () => {
     )
     flush()
 
-    act(() => {
-      rerender(
-        <SegmentContext.Provider value={{readonly: false, locked: false}}>
-          <Editarea
-            ref={ref}
-            segment={makeSegment({opened: true})}
-            translation={closed.translation}
-            updateCounter={jest.fn()}
-            toggleFormatMenu={jest.fn()}
-          />
-        </SegmentContext.Provider>,
-      )
-    })
+    rerender(
+      <SegmentContext.Provider value={{readonly: false, locked: false}}>
+        <Editarea
+          ref={ref}
+          segment={makeSegment({opened: true})}
+          translation={closed.translation}
+          updateCounter={jest.fn()}
+          toggleFormatMenu={jest.fn()}
+        />
+      </SegmentContext.Provider>,
+    )
     flush()
 
     expect(ref.current.state.editorState.getSelection().getHasFocus()).toBe(
@@ -750,19 +744,17 @@ describe('componentDidUpdate', () => {
     )
     flush()
 
-    act(() => {
-      rerender(
-        <SegmentContext.Provider value={{readonly: false, locked: false}}>
-          <Editarea
-            ref={ref}
-            segment={makeSegment({opened: false})}
-            translation="Ciao mondo"
-            updateCounter={jest.fn()}
-            toggleFormatMenu={jest.fn()}
-          />
-        </SegmentContext.Provider>,
-      )
-    })
+    rerender(
+      <SegmentContext.Provider value={{readonly: false, locked: false}}>
+        <Editarea
+          ref={ref}
+          segment={makeSegment({opened: false})}
+          translation="Ciao mondo"
+          updateCounter={jest.fn()}
+          toggleFormatMenu={jest.fn()}
+        />
+      </SegmentContext.Provider>,
+    )
     flush()
 
     expect(ref.current.state.editorState.getSelection().isCollapsed()).toBe(
@@ -793,19 +785,17 @@ describe('componentDidUpdate', () => {
         length: 1,
       },
     ]
-    act(() => {
-      rerender(
-        <SegmentContext.Provider value={{readonly: false, locked: false}}>
-          <Editarea
-            ref={ref}
-            segment={makeSegment({sourceTagMap})}
-            translation='Ciao <g id="1">mondo</g>'
-            updateCounter={jest.fn()}
-            toggleFormatMenu={jest.fn()}
-          />
-        </SegmentContext.Provider>,
-      )
-    })
+    rerender(
+      <SegmentContext.Provider value={{readonly: false, locked: false}}>
+        <Editarea
+          ref={ref}
+          segment={makeSegment({sourceTagMap})}
+          translation='Ciao <g id="1">mondo</g>'
+          updateCounter={jest.fn()}
+          toggleFormatMenu={jest.fn()}
+        />
+      </SegmentContext.Provider>,
+    )
     flush()
 
     expect(ref.current.state.previousSourceTagMap).toEqual(sourceTagMap)
@@ -817,10 +807,7 @@ describe('componentDidUpdate', () => {
 // ---------------------------------------------------------------------------
 
 describe('tag entity decoration', () => {
-  // TagBox renders its own .tag-container heading, so scope the lookup to the
-  // draft content itself
-  const entities = (container) =>
-    container.querySelectorAll('.public-DraftEditor-content .tag-container')
+  const entities = tagEntities
 
   test('renders a tag entity component for encoded tags', () => {
     const {container} = mountEditarea({
@@ -881,6 +868,9 @@ describe('Editarea production ref surface', () => {
     // so the call has to work on a real node rather than return a useful value
     // here — the editor holds focus once mounted.
     expect(instance.editAreaRef.contains(document.body)).toBe(false)
+    // The point of this assertion is that the exposed ref is a real DOM node,
+    // which cannot be checked without touching one.
+    // eslint-disable-next-line testing-library/no-node-access
     expect(typeof instance.editAreaRef.contains(document.activeElement)).toBe(
       'boolean',
     )
@@ -918,11 +908,11 @@ describe('frozen call sites see the current props', () => {
 
   function renderThenSwapSegment(overrides = {}) {
     const first = makeSegment({sid: '12-1', translation: 'uno'})
-    const rendered = renderEditarea({segment: first, translation: 'uno'})
+    const view = renderEditarea({segment: first, translation: 'uno'})
     flush()
     const second = makeSegment({sid: OTHER, translation: 'due', ...overrides})
-    rendered.update(second, 'due')
-    return rendered
+    view.update(second, 'due')
+    return view
   }
 
   test('REPLACE_TRANSLATION applies to the segment rendered now', () => {
@@ -933,7 +923,7 @@ describe('frozen call sites see the current props', () => {
     })
     flush()
 
-    expect(container.textContent).toContain('tre')
+    expect(container).toHaveTextContent(/tre/)
   })
 
   test('REPLACE_TRANSLATION ignores the segment that was mounted first', () => {
@@ -944,7 +934,7 @@ describe('frozen call sites see the current props', () => {
     })
     flush()
 
-    expect(container.textContent).not.toContain('stale')
+    expect(container).not.toHaveTextContent(/stale/)
   })
 
   test('REFRESH_TAG_MAP re-encodes against the segment rendered now', () => {
@@ -965,7 +955,7 @@ describe('frozen call sites see the current props', () => {
     })
     flush()
 
-    expect(container.textContent).toContain('tag')
+    expect(container).toHaveTextContent(/tag/)
   })
 
   test('CHANGE_CHARACTERS_COUNTER_RULES recounts the segment rendered now', () => {
@@ -1003,20 +993,20 @@ describe('the tag decorator sees the current segment', () => {
       translation: 'uno <g id="1">tag</g>',
       sourceTagMap: TAG_MAP,
     })
-    const rendered = renderEditarea({
+    const view = renderEditarea({
       segment: first,
       translation: first.translation,
     })
     flush()
-    return rendered
+    return view
   }
 
   test('getSearchParams follows the segment rendered now', () => {
-    const rendered = renderWithTag()
+    const view = renderWithTag()
     expect(mockTagProps).not.toBeNull()
     expect(mockTagProps.getSearchParams()).toMatchObject({active: false})
 
-    rendered.update(
+    view.update(
       makeSegment({
         sid: '12-1',
         translation: 'uno <g id="1">tag</g>',
@@ -1032,10 +1022,10 @@ describe('the tag decorator sees the current segment', () => {
   })
 
   test('getUpdatedSegmentInfo follows the segment rendered now', () => {
-    const rendered = renderWithTag()
+    const view = renderWithTag()
     expect(mockTagProps.getUpdatedSegmentInfo()).toMatchObject({sid: '12-1'})
 
-    rendered.update(
+    view.update(
       makeSegment({
         sid: '12-9',
         translation: 'uno <g id="1">tag</g>',
@@ -1072,5 +1062,199 @@ describe('the format menu follows the selection', () => {
     fireEvent.blur(editorNode(container))
 
     expect(toggleFormatMenu).toHaveBeenCalledWith(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Which interactions schedule a store sync
+//
+// The handlers are deliberately split. Some pass `setState` a callback that
+// runs `updateTranslationDebounced()`; others replace `editorState` with no
+// callback at all. That split is behaviour, not an oversight: moving the caret
+// must not push a translation to the store, or every arrow key would queue a
+// save and a QA check.
+//
+// Note the two routes to the tag menu disagree, and correctly so. `<` types a
+// character before opening the menu, so it syncs; `Alt+T` opens the same menu
+// without touching the content, so it does not.
+//
+// Decomposing this component replaces the `setState(partial, callback)` shim
+// with a reducer plus effects. An effect keyed on `editorState` alone would
+// fire for every case below, including the ones that must stay silent, so the
+// split is pinned here before that change lands.
+// ---------------------------------------------------------------------------
+describe('store sync scheduling', () => {
+  useRangeRectPolyfill()
+
+  const syncCount = () => SegmentActions.updateTranslation.mock.calls.length
+
+  /** Mounts, then discards the sync the mount effect performs on its own. */
+  const settled = (mount) => {
+    const view = mount()
+    flush()
+    SegmentActions.updateTranslation.mockClear()
+    return view
+  }
+
+  // `SOURCE_TAG_MAP` carries no `data.placeholder`, which `insertTag` needs for
+  // its offset arithmetic. Tests that only open the menu never reach that line;
+  // accepting a suggestion does.
+  const ACCEPTABLE_TAG = [
+    {
+      type: 'g',
+      data: {
+        id: '1',
+        name: 'g',
+        encodedText: '&lt;g id="1"&gt;',
+        placeholder: '<g id="1">',
+      },
+      offset: 0,
+      length: 1,
+    },
+  ]
+
+  /** Mounts with source tags and the menu already open, via the silent route. */
+  const withMenuOpen = () => {
+    const view = settled(() =>
+      mountWithSourceTags({sourceTagMap: ACCEPTABLE_TAG}),
+    )
+    pressKey(view.container, {key: 't', altKey: true})
+    flush()
+    expect(tagBox(view.container)).toBeVisible()
+    SegmentActions.updateTranslation.mockClear()
+    return view
+  }
+
+  describe('stays silent', () => {
+    test('moving the caret left', () => {
+      const {container} = settled(() =>
+        mountEditarea({translation: 'ciao mondo'}),
+      )
+
+      pressKey(container, {key: 'ArrowLeft'})
+      flush()
+
+      expect(syncCount()).toBe(0)
+    })
+
+    test('moving the caret right', () => {
+      const {container} = settled(() =>
+        mountEditarea({translation: 'ciao mondo'}),
+      )
+
+      pressKey(container, {key: 'ArrowRight'})
+      flush()
+
+      expect(syncCount()).toBe(0)
+    })
+
+    test('opening the tag menu without typing', () => {
+      const {container} = settled(() => mountWithSourceTags())
+
+      pressKey(container, {key: 't', altKey: true})
+      flush()
+
+      expect(tagBox(container)).toBeVisible()
+      expect(syncCount()).toBe(0)
+    })
+
+    test('closing the tag menu', () => {
+      const {container} = withMenuOpen()
+
+      pressKey(container, {key: 'Escape'})
+      flush()
+
+      expect(tagBox(container)).not.toBeVisible()
+      expect(syncCount()).toBe(0)
+    })
+
+    test('moving the tag menu selection', () => {
+      const {container} = withMenuOpen()
+
+      pressKey(container, {key: 'ArrowDown'})
+      flush()
+
+      expect(syncCount()).toBe(0)
+    })
+  })
+
+  describe('schedules a sync', () => {
+    test('opening the tag menu by typing the trigger character', () => {
+      const {container} = settled(() => mountWithSourceTags())
+
+      pressKey(container, {key: '<'})
+      flush()
+
+      expect(syncCount()).toBeGreaterThan(0)
+    })
+
+    test('inserting a tab tag', () => {
+      const {container} = settled(() => mountEditarea({translation: 'ciao'}))
+
+      pressKey(container, {key: 'Tab'})
+      flush()
+
+      expect(syncCount()).toBeGreaterThan(0)
+    })
+
+    test('accepting a tag from the menu', () => {
+      const {container} = withMenuOpen()
+
+      pressKey(container, {key: 'Enter'})
+      flush()
+
+      expect(syncCount()).toBeGreaterThan(0)
+    })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Editarea must not update its parent while it renders
+//
+// The class constructor called props.updateCounter, and the port kept that as a
+// guarded statement in the render body. A constructor runs in the render phase,
+// so this has always been a parent update from a child's render; React reports
+// it as "Cannot update a component while rendering a different component".
+//
+// The other tests pass updateCounter as a bare jest.fn(), which cannot trigger
+// the warning. It takes a real parent whose state setter is handed down.
+// ---------------------------------------------------------------------------
+describe('rendering does not update the parent', () => {
+  const CounterParent = ({segment}) => {
+    const [counter, setCounter] = React.useState(null)
+    return (
+      <SegmentContext.Provider value={{readonly: false, locked: false}}>
+        <span data-testid="counter">{String(counter)}</span>
+        <Editarea
+          segment={segment}
+          translation={segment.translation}
+          updateCounter={setCounter}
+          toggleFormatMenu={jest.fn()}
+        />
+      </SegmentContext.Provider>
+    )
+  }
+
+  test('mounting does not warn about updating a component while rendering', () => {
+    const errors = []
+    const spy = jest
+      .spyOn(console, 'error')
+      .mockImplementation((...args) => errors.push(String(args[0])))
+
+    render(<CounterParent segment={makeSegment({translation: 'ciao mondo'})} />)
+    flush()
+
+    spy.mockRestore()
+    expect(
+      errors.filter((e) => e.includes('while rendering a different component')),
+    ).toEqual([])
+  })
+
+  test('the counter still reaches the parent', () => {
+    render(<CounterParent segment={makeSegment({translation: 'ciao mondo'})} />)
+    flush()
+
+    // 'null' is the parent's initial state, before Editarea reports anything
+    expect(screen.getByTestId('counter')).not.toHaveTextContent('null')
   })
 })
