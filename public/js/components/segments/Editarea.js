@@ -467,10 +467,15 @@ const Editarea = forwardRef(
         const timer = inSearch ? 400 : 0
         const decorator = new CompositeDecorator(decoratorsStructureRef.current)
         setTimeout(() => {
-          setState({
-            editorState: EditorState.set(editorState, {decorator}),
+          // Read the editor state when this lands, not when it was scheduled.
+          // Anything typed during the wait -- up to 400ms while searching -- is
+          // already in the editor, and reapplying the state captured earlier
+          // would discard it and leave Draft holding a block tree the DOM no
+          // longer matches, which throws in editOnInput.
+          setState((prevState) => ({
+            editorState: EditorState.set(prevState.editorState, {decorator}),
             activeDecorators,
-          })
+          }))
         }, timer)
       }
     })
