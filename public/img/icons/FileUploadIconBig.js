@@ -1,6 +1,6 @@
 import React from 'react'
 
-const FileUploadIconBig = ({}) => {
+const FileUploadIconBig = () => {
   return (
     <svg
       version="1.1"

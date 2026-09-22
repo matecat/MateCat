@@ -10,7 +10,7 @@ const linkEntities = (editorState) => {
 
   const openEntities = getEntities(editorState).filter((entityObj) => {
     if (
-      entityObj.entity.data.hasOwnProperty('closeTagId') &&
+      Object.prototype.hasOwnProperty.call(entityObj.entity.data, 'closeTagId') &&
       entityObj.entity.data.closeTagId
     ) {
       return entityObj
@@ -18,7 +18,7 @@ const linkEntities = (editorState) => {
   })
   const closeEntities = getEntities(editorState).filter((entityObj) => {
     if (
-      entityObj.entity.data.hasOwnProperty('openTagId') &&
+      Object.prototype.hasOwnProperty.call(entityObj.entity.data, 'openTagId') &&
       entityObj.entity.data.openTagId
     ) {
       return entityObj

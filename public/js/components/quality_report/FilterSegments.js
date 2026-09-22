@@ -1,4 +1,3 @@
-/* global config */
 import React, {useState, useMemo, useCallback} from 'react'
 
 import InputField from '../common/InputField'

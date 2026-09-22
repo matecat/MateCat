@@ -46,7 +46,10 @@ const isRTLLanguage = (code) => {
   try {
     const dir = new Intl.Locale(code).textInfo?.direction
     if (dir) return dir === 'rtl'
-  } catch {}
+  } catch {
+    // Intl.Locale throws on a malformed tag, and textInfo is missing on older
+    // engines. Either way the primary-subtag table below is the answer.
+  }
   return RTL_PRIMARY.has(code.split('-')[0].toLowerCase())
 }
 
