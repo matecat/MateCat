@@ -49,6 +49,8 @@
 }
 
 .select {
+  display: flex;
+  align-items: center;
   margin: 0;
   border: 1px solid colors.$grey300;
   border-radius: variables.$border-radius-default;
@@ -61,7 +63,7 @@
   white-space: nowrap;
   color: colors.$grey700;
   transition: box-shadow 0.3s cubic-bezier(0.77, 0, 0.175, 1);
-  display: block;
+
   &::placeholder {
     color: colors.$grey500;
     opacity: 1;

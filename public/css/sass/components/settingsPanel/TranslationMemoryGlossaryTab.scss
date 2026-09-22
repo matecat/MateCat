@@ -61,7 +61,7 @@
 }
 
 .translation-memory-glossary-tab-input-text {
-  border-radius: 2px;
+  border-radius: variables.$border-radius-default;
   border: 1px solid colors.$grey200;
   padding: 6px;
   width: 350px;
@@ -285,6 +285,7 @@
 
 .translation-memory-glossary-tab-import,
 .translation-memory-glossary-tab-export,
+.translation-memory-glossary-tab-share,
 .translation-memory-glossary-tab-delete {
   display: flex;
   flex-direction: column;
@@ -301,13 +302,13 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    .translation-memory-glossary-tab-label {
-      gap: 200px !important;
-    }
     > :first-child {
       display: flex;
+      justify-content: space-between;
+      flex-grow: 1;
       gap: 10px;
       align-items: center;
+      margin-right: 20px;
     }
   }
 
@@ -402,9 +403,17 @@
   }
 }
 
+.translation-memory-glossary-tab-share {
+  padding: 10px 36px 10px 10px;
+
+  .translation-memory-glossary-tab-input-text {
+    width: 260px;
+  }
+}
+
 .translation-memory-glossary-tab-export {
   .translation-memory-glossary-tab-input-text {
-    width: 300px;
+    width: 260px;
   }
 }
 

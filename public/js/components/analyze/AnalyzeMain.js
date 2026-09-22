@@ -59,7 +59,7 @@ const AnalyzeMain = ({volumeAnalysis, project}) => {
     <div className="layout__container">
       {volumeAnalysis && project ? (
         <div className="project">
-          <h4>Volume analysis</h4>
+          <h3>Volume analysis</h3>
           <AnalyzeHeader
             data={volumeAnalysis.get('summary')}
             project={project}

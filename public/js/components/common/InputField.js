@@ -29,6 +29,7 @@ const InputField = (props) => {
     type: propType,
     placeholder,
     name,
+    containerClassname,
     classes,
     tabindex,
     onKeyDown,
@@ -87,7 +88,7 @@ const InputField = (props) => {
   const type = propType ? propType : 'text'
 
   return (
-    <div className={'qr-filter-idSegment'}>
+    <div className={containerClassname}>
       <input
         data-testid="input"
         style={styleInput}

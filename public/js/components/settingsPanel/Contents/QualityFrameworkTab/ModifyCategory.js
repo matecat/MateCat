@@ -11,6 +11,8 @@ import {
   getCodeFromLabel,
 } from './CategoriesSeveritiesTableUtils'
 
+import stylesPopover from '../../../common/Popover/Popover.module.scss'
+
 export const ModifyCategory = ({target, category, setIsEditingName}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
   const {modifyingCurrentTemplate, currentTemplate} = useContext(
@@ -118,15 +120,17 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
     <Portal>
       <div
         ref={ref}
-        className="popover-component-popover quality-framework-modify-category"
+        className={`${stylesPopover['popover-component-popover']} quality-framework-modify-category`}
         style={{top: `${rect.top}px`, left: `${rect.left}px`}}
         data-testid="qf-modify-category"
       >
-        <div className="popover-component-header">
-          <span className="popover-component-title">Edit category</span>
+        <div className={`${stylesPopover['popover-component-header']}`}>
+          <span className={`${stylesPopover['popover-component-title']}`}>
+            Edit category
+          </span>
         </div>
         <div
-          className="popover-component-body"
+          className={`${stylesPopover['popover-component-body']}`}
           onKeyDown={(event) => {
             if (event.key === 'Escape') {
               cancel()
@@ -136,7 +140,7 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
         >
           {content}
         </div>
-        <div className="popover-component-actions">
+        <div className={`${stylesPopover['popover-component-actions']}`}>
           <Button mode={BUTTON_MODE.OUTLINE} onClick={cancel}>
             Cancel
           </Button>
