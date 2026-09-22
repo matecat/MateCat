@@ -773,7 +773,10 @@ class SetTranslationController extends AbstractStatefulKleinController
     {
         $id_segment = (int)$this->data['id_segment'];
 
-        if ((new SegmentDisabledService(new SegmentMetadataDao($this->getDatabase())))->isDisabled($id_segment)) {
+        // ttl=0: this gates whether a save is accepted at all, so a stale cached "not disabled"
+        // here would silently let a translation through for a segment that was just disabled —
+        // see SegmentDisabledService::isDisabled()'s docblock for why the cache can go stale.
+        if ((new SegmentDisabledService(new SegmentMetadataDao($this->getDatabase())))->isDisabled($id_segment, 0)) {
             throw new RuntimeException("Segment #" . $id_segment . " is disabled", -5);
         }
     }

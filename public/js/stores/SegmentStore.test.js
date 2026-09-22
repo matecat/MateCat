@@ -219,6 +219,51 @@ describe('SegmentStore', () => {
     })
   })
 
+  describe('side panels (comments vs issues)', () => {
+    test('OPEN_ISSUES_PANEL closes an open comments panel', () => {
+      render([makeSegment(1), makeSegment(2)])
+      dispatch({actionType: SegmentConstants.OPEN_COMMENTS, sid: '1'})
+      expect(SegmentStore.getSegmentByIdToJS('1').openComments).toBe(true)
+
+      dispatch({
+        actionType: SegmentConstants.OPEN_ISSUES_PANEL,
+        data: {sid: '1'},
+      })
+
+      const segment = SegmentStore.getSegmentByIdToJS('1')
+      expect(segment.openIssues).toBe(true)
+      expect(segment.openComments).toBe(false)
+    })
+
+    test('OPEN_COMMENTS closes an open issues panel', () => {
+      render([makeSegment(1), makeSegment(2)])
+      dispatch({
+        actionType: SegmentConstants.OPEN_ISSUES_PANEL,
+        data: {sid: '1'},
+      })
+      expect(SegmentStore.getSegmentByIdToJS('1').openIssues).toBe(true)
+
+      dispatch({actionType: SegmentConstants.OPEN_COMMENTS, sid: '1'})
+
+      const segment = SegmentStore.getSegmentByIdToJS('1')
+      expect(segment.openComments).toBe(true)
+      expect(segment.openIssues).toBe(false)
+    })
+
+    test('the issues panel clears comments on every segment, not just the opened one', () => {
+      render([makeSegment(1), makeSegment(2)])
+      dispatch({actionType: SegmentConstants.OPEN_COMMENTS, sid: '2'})
+      expect(SegmentStore.getSegmentByIdToJS('2').openComments).toBe(true)
+
+      dispatch({
+        actionType: SegmentConstants.OPEN_ISSUES_PANEL,
+        data: {sid: '1'},
+      })
+
+      expect(SegmentStore.getSegmentByIdToJS('2').openComments).toBe(false)
+    })
+  })
+
   describe('status / metadata / propagation', () => {
     beforeEach(() => render([makeSegment(1), makeSegment(2)]))
 
@@ -243,7 +288,7 @@ describe('SegmentStore', () => {
       expect(() => SegmentStore.setStatus('999', '1', 'NEW')).not.toThrow()
     })
 
-    test('SET_SEGMENT_DISABLED adds and updates translation_disabled metadata', () => {
+    test('SET_SEGMENT_DISABLED adds and removes translation_disabled metadata', () => {
       dispatch({
         actionType: SegmentConstants.SET_SEGMENT_DISABLED,
         id: '1',
@@ -252,15 +297,19 @@ describe('SegmentStore', () => {
       let meta = SegmentStore.getSegmentByIdToJS('1').metadata
       expect(meta[0]).toEqual({
         meta_key: 'translation_disabled',
-        meta_value: '1',
+        meta_value: true,
       })
+      // Enabling removes the entry, the same way the server deletes the row, so that
+      // SegmentUtils.isReadonlySegment stops matching it
       dispatch({
         actionType: SegmentConstants.SET_SEGMENT_DISABLED,
         id: '1',
         disabled: false,
       })
       meta = SegmentStore.getSegmentByIdToJS('1').metadata
-      expect(meta[0].meta_value).toBe('0')
+      expect(
+        meta.some(({meta_key}) => meta_key === 'translation_disabled'),
+      ).toBe(false)
     })
 
     test('SET_SEGMENT_HEADER updates suggestion match', () => {

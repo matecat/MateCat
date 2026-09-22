@@ -1,13 +1,19 @@
-import React, {createRef} from 'react'
+import React, {
+  forwardRef,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useReducer,
+  useRef,
+} from 'react'
 import {fromJS} from 'immutable'
 import {
   Modifier,
   Editor,
   EditorState,
   getDefaultKeyBinding,
-  KeyBindingUtil,
   CompositeDecorator,
-  SelectionState,
 } from 'draft-js'
 import {remove, cloneDeep, findIndex, size, isEqual} from 'lodash'
 import {debounce} from 'lodash/function'
@@ -17,6 +23,11 @@ import EditAreaConstants from '../../constants/EditAreaConstants'
 import SegmentStore from '../../stores/SegmentStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import * as DraftMatecatConstants from './utils/DraftMatecatUtils/editorConstants'
+import resolveEditorCommand from './utils/DraftMatecatUtils/resolveEditorCommand'
+import getEditorRelativeSelectionOffset from './utils/DraftMatecatUtils/getEditorRelativeSelectionOffset'
+import buildPastedEditorState from './utils/DraftMatecatUtils/buildPastedEditorState'
+import resolveDrop from './utils/DraftMatecatUtils/resolveDrop'
+import selectionAroundEntity from './utils/DraftMatecatUtils/selectionAroundEntity'
 import TagEntity from './TagEntity/TagEntity.component'
 import SegmentUtils from '../../utils/segmentUtils'
 import CommonUtils from '../../utils/commonUtils'
@@ -24,11 +35,9 @@ import TagBox from './utils/DraftMatecatUtils/TagMenu/TagBox'
 import insertTag from './utils/DraftMatecatUtils/TagMenu/insertTag'
 import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissingTag'
 import LexiqaUtils from '../../utils/lxq.main'
-import transformLexiqaPoints from './utils/DraftMatecatUtils/transformLexiqaPoints'
 import updateOffsetBasedOnEditorState from './utils/DraftMatecatUtils/updateOffsetBasedOnEditorState'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
-import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
 import matchTypingSequence from '../../utils/matchTypingSequence/matchTypingSequence'
 import {SegmentContext} from './SegmentContext'
 import CatToolStore from '../../stores/CatToolStore'
@@ -36,8 +45,6 @@ import {
   checkCaretIsNearEntity,
   adjustCaretPosition,
   isCaretInsideEntity,
-  checkCaretIsNearZwsp,
-  isSelectedEntity,
   getEntitiesSelected,
 } from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 import {
@@ -45,19 +52,9 @@ import {
   createIcuTokens,
   isEqualICUTokens,
 } from './utils/DraftMatecatUtils/createICUDecorator'
-import {isMacOS} from '../../utils/Utils'
 import {removeZeroWidthSpace} from './utils/DraftMatecatUtils/tagUtils'
 import textUtils from '../../utils/textUtils'
 import ContextPreviewChannel from '../../utils/contextPreviewChannel'
-
-const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
-  KeyBindingUtil
-
-const editorSync = {
-  editorFocused: true,
-  clickedOnTag: false,
-  onComposition: false,
-}
 
 // typing chars sequence
 const typingWordJoiner = matchTypingSequence(
@@ -70,695 +67,1507 @@ const typingWordJoiner = matchTypingSequence(
   2000,
 )
 
-class Editarea extends React.Component {
-  static contextType = SegmentContext
+/**
+ * Editarea holds its state in one object, so a single dispatch replaces the
+ * thirteen setters the class port needed. Merging rather than replacing keeps
+ * the setState(partial) shape the rest of the component is written against.
+ */
+const mergeState = (state, partial) => ({...state, ...partial})
 
-  constructor(props) {
-    super(props)
-    const {onEntityClick, getUpdatedSegmentInfo} = this
+const Editarea = forwardRef(
+  ({segment, translation, updateCounter, toggleFormatMenu}, ref) => {
+    const context = useContext(SegmentContext)
 
-    const translation = this.props.translation
+    // A snapshot of this render's props, kept as one object because two things
+    // need props *collectively* rather than field by field: propsRef, which the
+    // frozen call sites read through, and prevPropsRef, which the
+    // componentDidUpdate-equivalent effect diffs against.
+    const currentProps = {segment, translation, updateCounter, toggleFormatMenu}
 
-    // If GuessTag is Enabled, clean translation from tags
-    const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(
-      this.props.segment,
-    )
-      ? DraftMatecatUtils.removeTagsFromText(translation)
-      : translation
+    const propsRef = useRef({})
 
-    this.decoratorsStructure = [
-      {
-        name: 'tags',
-        strategy: getEntityStrategy('IMMUTABLE'),
-        component: TagEntity,
-        props: {
+    // Plain instance fields (createRef equivalents) preserved as-is
+    const isShiftPressedOnNavigationRef = useRef(undefined)
+    const wasTripleClickTriggeredRef = useRef(undefined)
+    const compositionEventChecksRef = useRef(undefined)
+    const editorRef = useRef(null)
+    const editAreaDomRef = useRef(null)
+    // Per instance, not per module: onComposition gates checkDecorators, so a
+    // single shared object would let typing in one Editarea suppress decorator
+    // recalculation in another. draggingFromEditArea was only ever created on
+    // assignment; it is declared here so the shape is visible.
+    const editorSyncRef = useRef({
+      editorFocused: true,
+      onComposition: false,
+      draggingFromEditArea: false,
+    })
+    // The class held this node in `this.editAreaRef`, and consumers of the
+    // imperative handle still read it under that name — the AI alternatives
+    // button asks whether focus sits inside the editor. Mirror it onto the
+    // instance on commit, exactly as the class's callback ref did, or that read
+    // is `undefined.contains(...)` and takes the page down.
+    const setEditAreaDom = (node) => {
+      editAreaDomRef.current = node
+    }
+    // this.prevIcuTokens (plain mutable instance field, internal only)
+    const prevIcuTokensRef = useRef(undefined)
+
+    // ---- method closures: seeded once where a frozen call site needs a stable
+    // identity, plain per-render consts otherwise. All read through propsRef and
+    // stateRef, so either kind sees current data. ----
+
+    const getTextToApplyCounter = (translation) => {
+      const canCountTagsAsChars =
+        CatToolStore.getCurrentProjectTemplate().characterCounterCountTags
+      if (canCountTagsAsChars) {
+        return DraftMatecatUtils.excludeSomeTagsTransformToText(translation, [
+          'g',
+          'bx',
+          'ex',
+          'x',
+        ])
+      } else {
+        return DraftMatecatUtils.decodePlaceholdersToPlainText(
+          DraftMatecatUtils.removeTagsFromText(translation),
+        )
+      }
+    }
+
+    const getSearchParamsRef = useRef(() => {
+      const {
+        inSearch,
+        currentInSearch,
+        searchParams,
+        occurrencesInSearch,
+        currentInSearchIndex,
+      } = propsRef.current.segment
+      if (inSearch && searchParams.target) {
+        return {
+          active: inSearch,
+          currentActive: currentInSearch,
+          textToReplace: searchParams.target,
+          params: searchParams,
+          occurrences: occurrencesInSearch.occurrences,
+          currentInSearchIndex,
           isTarget: true,
-          onClick: onEntityClick,
-          getUpdatedSegmentInfo: getUpdatedSegmentInfo,
-          getSearchParams: this.getSearchParams, //TODO: Make it general ?
-          isRTL: config.isTargetRTL,
-          sid: this.props.segment.sid,
+        }
+      } else {
+        return {
+          active: false,
+        }
+      }
+    })
+
+    const addIcuDecorator = (tokens) => {
+      const newDecorator = createICUDecorator(tokens)
+      remove(
+        decoratorsStructureRef.current,
+        (decorator) => decorator.name === DraftMatecatConstants.ICU_DECORATOR,
+      )
+      decoratorsStructureRef.current.push(newDecorator)
+    }
+
+    const addSearchDecorator = () => {
+      const {tagRange} = stateRef.current
+      const {searchParams, occurrencesInSearch, currentInSearchIndex} =
+        propsRef.current.segment
+      console.log('occurrencesInSearch', occurrencesInSearch)
+      const textToSearch = searchParams.target ? searchParams.target : ''
+      const newDecorator = DraftMatecatUtils.activateSearch(
+        textToSearch,
+        searchParams,
+        occurrencesInSearch.occurrences,
+        currentInSearchIndex,
+        tagRange,
+      )
+      remove(
+        decoratorsStructureRef.current,
+        (decorator) =>
+          decorator.name === DraftMatecatConstants.SEARCH_DECORATOR,
+      )
+      decoratorsStructureRef.current.push(newDecorator)
+    }
+
+    const addQaBlacklistGlossaryDecorator = () => {
+      const {qaBlacklistGlossary, sid} = propsRef.current.segment
+      const newDecorator = DraftMatecatUtils.activateQaCheckBlacklist(
+        qaBlacklistGlossary,
+        sid,
+      )
+      remove(
+        decoratorsStructureRef.current,
+        (decorator) =>
+          decorator.name === DraftMatecatConstants.QA_BLACKLIST_DECORATOR,
+      )
+      decoratorsStructureRef.current.push(newDecorator)
+    }
+
+    const addLexiqaDecorator = () => {
+      const {editorState} = stateRef.current
+      const {lexiqa, sid, lxqDecodedTranslation} = propsRef.current.segment
+      // pass decoded translation with tags like <g id='1'>
+      const ranges = LexiqaUtils.getRanges(
+        cloneDeep(lexiqa.target),
+        lxqDecodedTranslation,
+        false,
+      )
+      const updatedLexiqaWarnings = updateOffsetBasedOnEditorState(
+        editorState,
+        ranges,
+      )
+      if (updatedLexiqaWarnings.length > 0) {
+        const newDecorator = DraftMatecatUtils.activateLexiqa(
+          editorState,
+          updatedLexiqaWarnings,
+          sid,
+          false,
+          getUpdatedSegmentInfoRef.current,
+          replaceWordAt,
+        )
+        remove(
+          decoratorsStructureRef.current,
+          (decorator) =>
+            decorator.name === DraftMatecatConstants.LEXIQA_DECORATOR,
+        )
+        decoratorsStructureRef.current.push(newDecorator)
+      } else {
+        removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
+      }
+    }
+
+    // Receive the new translation and decode it for draftJS
+    const setNewTranslationRef = useRef((sid, translation) => {
+      if (sid === propsRef.current.segment.sid) {
+        const {editorState} = stateRef.current
+        const contentEncoded = DraftMatecatUtils.encodeContent(
+          editorState,
+          translation,
+          propsRef.current.segment.sourceTagMap,
+        )
+        // this must be done to make the Undo action possible, otherwise encodeContent will delete all editor history
+        let {editorState: newEditorState} = contentEncoded
+        const newContentState = newEditorState.getCurrentContent()
+        newEditorState = EditorState.push(
+          editorState,
+          newContentState,
+          'insert-fragment',
+        )
+        newEditorState = EditorState.moveSelectionToEnd(newEditorState)
+
+        propsRef.current.updateCounter(
+          DraftMatecatUtils.getCharactersCounter(
+            getTextToApplyCounter(translation),
+          ),
+        )
+        setState(
+          {
+            editorState: newEditorState,
+          },
+          () => {
+            updateTranslationDebouncedRef.current()
+          },
+        )
+      }
+    })
+
+    const replaceCurrentSearchRef = useRef((text) => {
+      const {
+        searchParams,
+        occurrencesInSearch,
+        currentInSearchIndex,
+        currentInSearch,
+      } = propsRef.current.segment
+      if (currentInSearch && searchParams.target) {
+        const index = findIndex(
+          occurrencesInSearch.occurrences,
+          (item) => item.searchProgressiveIndex === currentInSearchIndex,
+        )
+        const newEditorState = DraftMatecatUtils.replaceOccurrences(
+          stateRef.current.editorState,
+          searchParams.target,
+          text,
+          index,
+        )
+        setState(
+          {
+            editorState: newEditorState,
+          },
+          () => {
+            updateTranslationInStoreRef.current()
+          },
+        )
+      }
+    })
+
+    const updateTranslationInStoreRef = useRef(() => {
+      const {editorState} = stateRef.current
+      const {
+        segment,
+        segment: {sourceTagMap},
+      } = propsRef.current
+      const {decodedSegment, entitiesRange} =
+        DraftMatecatUtils.decodeSegment(editorState)
+      if (decodedSegment !== '') {
+        const contentState = editorState.getCurrentContent()
+        const plainText = removeZeroWidthSpace(contentState.getPlainText())
+
+        // Matches tag without compute tag id
+        const currentTagRange = DraftMatecatUtils.matchTagInEditor(
+          editorState,
+          entitiesRange,
+        )
+        // Add missing tag to store for highlight warnings on tags
+        const {missingTags} = checkForMissingTags(sourceTagMap, currentTagRange)
+
+        const lxqDecodedTranslation =
+          DraftMatecatUtils.prepareTextForLexiqa(decodedSegment)
+
+        SegmentActions.updateTranslation(
+          segment.sid,
+          decodedSegment,
+          plainText,
+          currentTagRange,
+          missingTags,
+          lxqDecodedTranslation,
+        )
+        ContextPreviewChannel.sendMessage({
+          type: 'updateTranslation',
+          sid: segment.sid,
+          target: decodedSegment,
+        })
+        propsRef.current.updateCounter(
+          DraftMatecatUtils.getCharactersCounter(
+            getTextToApplyCounter(decodedSegment),
+          ),
+        )
+        SegmentActions.startSegmentQACheck()
+      } else {
+        propsRef.current.updateCounter(0)
+      }
+    })
+
+    const checkDecoratorsRef = useRef((prevProps) => {
+      let changedDecorator = false
+      const {inSearch} = propsRef.current.segment
+      const prevActiveDecorators = stateRef.current.activeDecorators
+      const {editorState} = stateRef.current
+      const activeDecorators = {...prevActiveDecorators}
+
+      if (!inSearch) {
+        // Qa Check Blacklist
+        const {qaBlacklistGlossary} = propsRef.current.segment
+        const prevQaBlacklistGlossary = prevProps
+          ? prevProps.segment.qaBlacklistGlossary
+          : undefined
+        if (
+          (qaBlacklistGlossary &&
+            qaBlacklistGlossary.length > 0 &&
+            !activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR]) ||
+          (activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] &&
+            !isEqual(qaBlacklistGlossary, prevQaBlacklistGlossary))
+        ) {
+          activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] = true
+          changedDecorator = true
+          addQaBlacklistGlossaryDecorator()
+        } else if (
+          prevQaBlacklistGlossary &&
+          prevQaBlacklistGlossary.length > 0 &&
+          (!qaBlacklistGlossary || qaBlacklistGlossary.length === 0)
+        ) {
+          activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] = false
+          changedDecorator = true
+          removeDecorator(DraftMatecatConstants.QA_BLACKLIST_DECORATOR)
+        }
+
+        // Lexiqa
+        const {lexiqa} = propsRef.current.segment
+        const prevLexiqa = prevProps ? prevProps.segment.lexiqa : undefined
+        const currentLexiqaTarget =
+          lexiqa && lexiqa.target && size(lexiqa.target)
+        const prevLexiqaTarget =
+          prevLexiqa && prevLexiqa.target && size(prevLexiqa.target)
+        const lexiqaChanged =
+          prevLexiqaTarget &&
+          currentLexiqaTarget &&
+          !fromJS(prevLexiqa.target).equals(fromJS(lexiqa.target))
+
+        if (
+          // Condition to understand if the job has tm keys or if the check glossary request has been made (blacklist must take precedence over lexiqa)
+          (CatToolStore.getHaveKeysGlossary() === false ||
+            Array.isArray(qaBlacklistGlossary)) &&
+          currentLexiqaTarget &&
+          (!prevLexiqaTarget ||
+            lexiqaChanged ||
+            !prevActiveDecorators[DraftMatecatConstants.LEXIQA_DECORATOR])
+        ) {
+          activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = true
+          changedDecorator = true
+          addLexiqaDecorator()
+        } else if (prevLexiqaTarget && !currentLexiqaTarget) {
+          activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
+          changedDecorator = true
+          removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
+        }
+        // Search
+        if (prevProps && prevProps.segment.inSearch) {
+          activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = false
+          changedDecorator = true
+          removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR)
+        }
+        const contentState = editorState.getCurrentContent()
+        const plainText = textUtils.removeWhitespacePlaceholders(
+          contentState.getPlainText(),
+        )
+        if (propsRef.current.segment.icu) {
+          const icuTokens = createIcuTokens(
+            plainText,
+            editorState,
+            config.target_code,
+          )
+
+          if (
+            !prevProps ||
+            !prevIcuTokensRef.current ||
+            !isEqualICUTokens(icuTokens, prevIcuTokensRef.current)
+          ) {
+            prevIcuTokensRef.current = icuTokens
+            changedDecorator = true
+            addIcuDecorator(icuTokens)
+          }
+        }
+      } else {
+        // Search
+        if (
+          propsRef.current.segment.searchParams.target &&
+          (!prevProps ||
+            !prevProps.segment.inSearch || // Before was not active
+            (prevProps.segment.inSearch &&
+              !fromJS(prevProps.segment.searchParams).equals(
+                fromJS(propsRef.current.segment.searchParams),
+              )) || // Before was active but some params change
+            (prevProps.segment.inSearch &&
+              prevProps.segment.currentInSearch !==
+                propsRef.current.segment.currentInSearch) || // Before was the current
+            (prevProps.segment.inSearch &&
+              prevProps.segment.currentInSearchIndex !==
+                propsRef.current.segment.currentInSearchIndex))
+        ) {
+          // There are more occurrences and the current change
+          // Cleanup all decorators
+          removeDecorator()
+          activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
+          activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] = false
+          addSearchDecorator()
+          activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = true
+          changedDecorator = true
+        }
+      }
+
+      if (changedDecorator) {
+        const timer = inSearch ? 400 : 0
+        const decorator = new CompositeDecorator(decoratorsStructureRef.current)
+        setTimeout(() => {
+          // Read the editor state when this lands, not when it was scheduled.
+          // Anything typed during the wait -- up to 400ms while searching -- is
+          // already in the editor, and reapplying the state captured earlier
+          // would discard it and leave Draft holding a block tree the DOM no
+          // longer matches, which throws in editOnInput.
+          setState((prevState) => ({
+            editorState: EditorState.set(prevState.editorState, {decorator}),
+            activeDecorators,
+          }))
+        }, timer)
+      }
+    })
+
+    const copyGlossaryToEditAreaRef = useRef((segment, glossaryTranslation) => {
+      if (segment.sid === propsRef.current.segment.sid) {
+        const {editorState} = stateRef.current
+        const newEditorState = DraftMatecatUtils.insertText(
+          editorState,
+          glossaryTranslation,
+        )
+        setState(
+          {
+            editorState: newEditorState,
+          },
+          () => {
+            updateTranslationDebouncedRef.current()
+          },
+        )
+      }
+    })
+
+    const refreshTagMapRef = useRef(() => {
+      setNewTranslationRef.current(
+        propsRef.current.segment.sid,
+        propsRef.current.translation,
+      )
+      setTimeout(() => checkDecoratorsRef.current(), 100)
+    })
+
+    const refreshCharactersCounterRulesRef = useRef(() => {
+      setNewTranslationRef.current(
+        propsRef.current.segment.sid,
+        propsRef.current.translation,
+      )
+    })
+
+    const onCompositionStartRef = useRef(() => {
+      compositionEventChecksRef.current = {
+        startIsInsideEntity: isCaretInsideEntity(),
+        endIsTriggered: false,
+      }
+    })
+
+    const onCompositionEndRef = useRef(() => {
+      compositionEventChecksRef.current = {
+        ...compositionEventChecksRef.current,
+        endIsTriggered: true,
+      }
+    })
+
+    const replaceWordAt = ({newWord, start, end}) => {
+      const startIndex = start
+      const endIndex = end
+      const selection = stateRef.current.editorState.getSelection().merge({
+        anchorOffset: startIndex,
+        focusOffset: endIndex,
+      })
+      const contentState = Modifier.replaceText(
+        stateRef.current.editorState.getCurrentContent(),
+        selection,
+        newWord,
+      )
+      const updatedState = EditorState.push(
+        stateRef.current.editorState,
+        contentState,
+      )
+      setState({editorState: updatedState}, () => {
+        // Reactivate decorators
+        updateTranslationDebouncedRef.current()
+        // Stop composition mode
+        onCompositionStopDebouncedRef.current()
+      })
+    }
+
+    const focusEditorRef = useRef(() => {
+      if (editorRef.current) editorRef.current.focus()
+    })
+
+    const typeTextInEditor = (textToInsert) => {
+      const {editorState} = stateRef.current
+      editorSyncRef.current.onComposition = true
+      let newEditorState = disableDecorator(
+        editorState,
+        DraftMatecatConstants.LEXIQA_DECORATOR,
+      )
+      newEditorState = DraftMatecatUtils.insertText(
+        newEditorState,
+        textToInsert,
+      )
+      setState(
+        (prevState) => ({
+          activeDecorators: {
+            ...prevState.activeDecorators,
+            [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
+          },
+          editorState: newEditorState,
+          triggerText: textToInsert,
+        }),
+        () => {
+          // Update translation
+          updateTranslationDebouncedRef.current()
+          // Reactivate decorators
+          onCompositionStopDebouncedRef.current()
         },
-      },
-    ]
-    const decorator = new CompositeDecorator(this.decoratorsStructure)
+      )
+    }
 
-    // Inizializza Editor State con solo testo
-    const plainEditorState = EditorState.createEmpty(decorator)
-    const contentEncoded = DraftMatecatUtils.encodeContent(
-      plainEditorState,
-      cleanTranslation,
-    )
-    const {editorState, tagRange} = contentEncoded
+    const myKeyBindingFn = (e) => {
+      const {
+        command,
+        editorState: adjusted,
+        applyVia,
+        typeText,
+        clearTriggerText,
+        shiftOnNavigation,
+      } = resolveEditorCommand(e, {
+        displayPopover: stateRef.current.displayPopover,
+        editorState: stateRef.current.editorState,
+        isRTL: Boolean(config.isTargetRTL),
+        isChromeBook: navigator.userAgent.indexOf('CrOS') > -1,
+        hasSpaceTag: tagSignatures.space,
+        selectionIsCaret: () => window.getSelection().type === 'Caret',
+        typingWordJoiner,
+      })
 
-    this.isShiftPressedOnNavigation = createRef()
-    this.wasTripleClickTriggered = createRef()
-    this.compositionEventChecks = createRef()
-    this.icuEnabled = this.props.segment.icu
-    this.state = {
-      editorState: editorState,
+      // The resolver decides; applying what it decided happens here.
+      if (shiftOnNavigation !== undefined)
+        isShiftPressedOnNavigationRef.current = shiftOnNavigation
+      if (clearTriggerText) setState({triggerText: null})
+      if (typeText) typeTextInEditor(typeText)
+      if (adjusted) {
+        if (applyVia === 'onChange') onChange(adjusted)
+        else setState({editorState: adjusted})
+      }
+
+      return command === null ? getDefaultKeyBinding(e) : command
+    }
+
+    const handleKeyCommand = (command) => {
+      const {
+        segment: {sourceTagMap, missingTagsInTarget},
+      } = propsRef.current
+
+      switch (command) {
+        case 'toggle-tag-menu': {
+          const tagSuggestions = {
+            missingTags: missingTagsInTarget,
+            sourceTags: sourceTagMap,
+          }
+          if (
+            tagSuggestions.sourceTags &&
+            tagSuggestions.sourceTags.length > 0
+          ) {
+            openPopover(
+              tagSuggestions,
+              getEditorRelativeSelectionOffset(editorRef.current.editor),
+            )
+          }
+          return 'handled'
+        }
+        case 'close-tag-menu':
+          closePopover()
+          return 'handled'
+        case 'up-arrow-press':
+          moveUpTagMenuSelection()
+          return 'handled'
+        case 'down-arrow-press':
+          moveDownTagMenuSelection()
+          return 'handled'
+        case 'enter-press':
+          acceptTagMenuSelection()
+          return 'handled'
+        case 'insert-tab-tag':
+          insertTagAtSelectionDebouncedRef.current('tab')
+          return 'handled'
+        case 'insert-space-tag':
+          if (tagSignatures.space) {
+            insertTagAtSelectionDebouncedRef.current('space')
+            return 'handled'
+          } else {
+            return 'not-handled'
+          }
+
+        case 'insert-nbsp-tag':
+          insertTagAtSelectionDebouncedRef.current('nbsp')
+          return 'handled'
+        case 'insert-word-joiner-tag':
+          insertTagAtSelectionDebouncedRef.current('wordJoiner')
+          return 'handled'
+        case 'translate':
+          return 'not-handled'
+        case 'next-translate':
+          return 'not-handled'
+        // Nothing left to do for these here: the caret moves and the quote
+        // insertion were already applied from resolveEditorCommand's result, and
+        // add-issue is picked up by a shortcut listener outside the editor.
+        // 'handled' is still required -- it is what stops Draft running its own
+        // handling on top, which would move the caret or delete a second time.
+        case 'left-nav':
+        case 'right-nav':
+        case 'add-issue':
+        case 'delete-entity':
+        case 'quote-shortcut':
+          return 'handled'
+        default:
+          return 'not-handled'
+      }
+    }
+
+    const insertTagAtSelectionRef = useRef((tagName) => {
+      const {editorState} = stateRef.current
+      const customTag = DraftMatecatUtils.structFromName(tagName)
+      // If tag creation has failed, return
+      if (!customTag) return
+      // Start composition mode and remove lexiqa
+      editorSyncRef.current.onComposition = true
+      let newEditorState = disableDecorator(
+        editorState,
+        DraftMatecatConstants.LEXIQA_DECORATOR,
+      )
+
+      newEditorState = insertTag(customTag, newEditorState)
+
+      setState(
+        (prevState) => ({
+          activeDecorators: {
+            ...prevState.activeDecorators,
+            [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
+          },
+          editorState: newEditorState,
+        }),
+        () => {
+          // Reactivate decorators
+          updateTranslationDebouncedRef.current()
+          // Stop composition mode
+          onCompositionStopDebouncedRef.current()
+        },
+      )
+    })
+
+    const onMouseUpEvent = () => {
+      const {toggleFormatMenu} = propsRef.current
+      toggleFormatMenu(
+        !editorRef.current._latestEditorState.getSelection().isCollapsed(),
+      )
+    }
+
+    const onKeyUpEvent = (event) => {
+      if (
+        event.key === 'ArrowLeft' ||
+        event.key === 'ArrowRight' ||
+        event.key === 'ArrowUp' ||
+        event.key === 'ArrowDown'
+      ) {
+        const {toggleFormatMenu} = propsRef.current
+        toggleFormatMenu(
+          !editorRef.current._latestEditorState.getSelection().isCollapsed(),
+        )
+      }
+    }
+
+    const onBlurEvent = () => {
+      const {toggleFormatMenu} = propsRef.current
+      editorSyncRef.current.editorFocused = false
+      // Hide Edit Toolbar
+      toggleFormatMenu(false)
+    }
+
+    const onFocus = () => {
+      editorSyncRef.current.editorFocused = true
+    }
+
+    const onCompositionStopRef = useRef(() => {
+      if (editorSyncRef.current.onComposition) {
+        editorSyncRef.current.onComposition = false
+        // Tell tags to update themself
+        setTimeout(() => {
+          SegmentActions.editAreaChanged(propsRef.current.segment.sid, true)
+        })
+      }
+    })
+
+    const removeDecorator = (decoratorName) => {
+      if (!decoratorName) {
+        remove(
+          decoratorsStructureRef.current,
+          (decorator) =>
+            decorator.name !== DraftMatecatConstants.TAGS_DECORATOR,
+        )
+      } else {
+        remove(
+          decoratorsStructureRef.current,
+          (decorator) => decorator.name === decoratorName,
+        )
+      }
+    }
+
+    // has to be followed by a setState for editorState
+    const disableDecorator = (editorState, decoratorName) => {
+      remove(
+        decoratorsStructureRef.current,
+        (decorator) => decorator.name === decoratorName,
+      )
+      const decorator = new CompositeDecorator(decoratorsStructureRef.current)
+      return EditorState.set(editorState, {decorator})
+    }
+
+    const onChange = (editorState) => {
+      const {displayPopover, activeDecorators} = stateRef.current
+      const prevEditorState = stateRef.current.editorState
+
+      // check caret is inside entity and restore previous editorState
+      if (
+        isCaretInsideEntity() ||
+        compositionEventChecksRef.current?.startIsInsideEntity
+      ) {
+        const updatedStateNearEntity = checkCaretIsNearEntity({
+          editorState,
+        })
+
+        setState(
+          () => ({
+            editorState: updatedStateNearEntity
+              ? updatedStateNearEntity
+              : prevEditorState,
+          }),
+          () => {
+            onCompositionStopDebouncedRef.current()
+          },
+        )
+        if (compositionEventChecksRef?.endIsTriggered)
+          compositionEventChecksRef.current = {
+            startIsInsideEntity: false,
+            endIsTriggered: false,
+          }
+        return
+      }
+
+      const contentChanged =
+        editorState.getCurrentContent().getPlainText() !==
+        prevEditorState.getCurrentContent().getPlainText()
+
+      // if not on an entity, remove any previous selection highlight
+      const {entityKey} = DraftMatecatUtils.selectionIsEntity(editorState)
+      let newActiveDecorators = {...activeDecorators}
+      // select no tag
+      if (!entityKey)
+        setTimeout(() => {
+          SegmentActions.highlightTags()
+        })
+
+      // if opened, close TagsMenu
+      if (displayPopover) closePopover()
+      if (contentChanged) {
+        // Stop checking decorators while typing...
+        editorSyncRef.current.onComposition = true
+        // ...remove unwanted decorators like lexiqa and qa blacklist...
+        if (activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR]) {
+          editorState = disableDecorator(
+            editorState,
+            DraftMatecatConstants.LEXIQA_DECORATOR,
+          )
+          newActiveDecorators = {
+            ...newActiveDecorators,
+            [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
+          }
+        }
+        if (activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR]) {
+          editorState = disableDecorator(
+            editorState,
+            DraftMatecatConstants.QA_BLACKLIST_DECORATOR,
+          )
+          newActiveDecorators = {
+            ...newActiveDecorators,
+            [DraftMatecatConstants.QA_BLACKLIST_DECORATOR]: false,
+          }
+        }
+        editorState = EditorState.acceptSelection(
+          editorState,
+          editorState.getSelection().set('hasFocus', true),
+        )
+        setState(
+          () => ({
+            activeDecorators: newActiveDecorators,
+            editorState: editorState,
+          }),
+          () => {
+            // Reactivate decorators
+            updateTranslationDebouncedRef.current()
+            onCompositionStopDebouncedRef.current()
+          },
+        )
+      } else {
+        setState(
+          () => ({
+            editorState: editorState,
+          }),
+          () => {
+            onCompositionStopDebouncedRef.current()
+          },
+        )
+      }
+    }
+
+    // fix cursor jump at the beginning
+    // Methods for TagMenu ---- START
+    const moveUpTagMenuSelection = () => {
+      const {displayPopover} = stateRef.current
+      if (!displayPopover) return
+      const {
+        focusedTagIndex,
+        autocompleteSuggestions: {missingTags, sourceTags},
+      } = stateRef.current
+      const mergeAutocompleteSuggestions = [...missingTags, ...sourceTags]
+      const newFocusedTagIndex =
+        focusedTagIndex - 1 < 0
+          ? mergeAutocompleteSuggestions.length - 1
+          : (focusedTagIndex - 1) % mergeAutocompleteSuggestions.length
+
+      setState({
+        focusedTagIndex: newFocusedTagIndex,
+      })
+    }
+
+    const moveDownTagMenuSelection = () => {
+      const {displayPopover} = stateRef.current
+      if (!displayPopover) return
+      const {
+        focusedTagIndex,
+        autocompleteSuggestions: {missingTags, sourceTags},
+      } = stateRef.current
+      const mergeAutocompleteSuggestions = [...missingTags, ...sourceTags]
+      setState({
+        focusedTagIndex:
+          (focusedTagIndex + 1) % mergeAutocompleteSuggestions.length,
+      })
+    }
+
+    const acceptTagMenuSelection = () => {
+      const {
+        focusedTagIndex,
+        displayPopover,
+        editorState,
+        triggerText,
+        autocompleteSuggestions: {missingTags = [], sourceTags},
+      } = stateRef.current
+      if (!displayPopover) return
+      const mergeAutocompleteSuggestions = [...missingTags, ...sourceTags]
+      const selectedTag = mergeAutocompleteSuggestions[focusedTagIndex]
+      // Start typing
+      editorSyncRef.current.onComposition = true
+      // Remove lexiqa while typing
+      const newEditorState = disableDecorator(
+        editorState,
+        DraftMatecatConstants.LEXIQA_DECORATOR,
+      )
+      const editorStateWithSuggestedTag = insertTag(
+        selectedTag,
+        newEditorState,
+        triggerText,
+      )
+      setState(
+        (prevState) => ({
+          activeDecorators: {
+            ...prevState.activeDecorators,
+            [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
+          },
+          editorState: editorStateWithSuggestedTag,
+          displayPopover: false,
+          triggerText: null,
+        }),
+        () => {
+          // Reactivate decorators
+          updateTranslationDebouncedRef.current()
+          // Stop typing
+          onCompositionStopDebouncedRef.current()
+        },
+      )
+    }
+
+    const openPopover = (suggestions, position) => {
+      // Posizione da salvare e passare al compoennte
+      const popoverPosition = {
+        top: position.top,
+        left: position.left,
+      }
+
+      setState({
+        displayPopover: true,
+        autocompleteSuggestions: suggestions,
+        focusedTagIndex: 0,
+        popoverPosition: popoverPosition,
+      })
+    }
+
+    const closePopover = () => {
+      setState({
+        displayPopover: false,
+        triggerText: null,
+      })
+    }
+
+    const onTagClick = (suggestionTag) => {
+      const {editorState, triggerText} = stateRef.current
+      // Start typing...
+      editorSyncRef.current.onComposition = true
+      // Disable lexiqa while typing
+      const newEditorState = disableDecorator(
+        editorState,
+        DraftMatecatConstants.LEXIQA_DECORATOR,
+      )
+      const editorStateWithSuggestedTag = insertTag(
+        suggestionTag,
+        newEditorState,
+        triggerText,
+      )
+      setState(
+        (prevState) => ({
+          activeDecorators: {
+            ...prevState.activeDecorators,
+            [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
+          },
+          editorState: editorStateWithSuggestedTag,
+          editorFocused: true,
+          displayPopover: false,
+          triggerText: null,
+        }),
+        () => {
+          // Reactivate decorators
+          updateTranslationDebouncedRef.current()
+          // Stop typing
+          onCompositionStopDebouncedRef.current()
+        },
+      )
+    }
+    // Methods for TagMenu ---- END
+
+    const pasteFragment = (text) => {
+      const {editorState} = stateRef.current
+      const {fragment: clipboardFragment, plainText: clipboardPlainText} =
+        SegmentStore.getFragmentFromClipboard()
+
+      const pasted = buildPastedEditorState({
+        text,
+        clipboardFragment,
+        clipboardPlainText,
+        editorState,
+      })
+      // null means let Draft paste the plain text itself
+      if (!pasted) return false
+
+      setState({editorState: pasted}, () => {
+        updateTranslationDebouncedRef.current()
+      })
+      return true
+    }
+
+    const copyFragment = (e) => {
+      const internalClipboard = editorRef.current.getClipboard()
+      const {editorState} = stateRef.current
+      if (internalClipboard) {
+        e.preventDefault()
+        // Get plain text form internalClipboard fragment
+        const plainText = internalClipboard
+          .map((block) => block.getText())
+          .join('\n')
+          .replace(
+            new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'),
+            '',
+          )
+          .replace(/·/g, ' ')
+
+        const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(
+          internalClipboard,
+          editorState,
+        )
+        const fragment = JSON.stringify({
+          orderedMap: internalClipboard,
+          entitiesMap: entitiesMap,
+        })
+        e.clipboardData.setData('text/plain', plainText)
+        SegmentActions.copyFragmentToClipboard(fragment, plainText)
+      }
+    }
+
+    const onDragEvent = () => {
+      editorSyncRef.current.draggingFromEditArea = true
+    }
+
+    const onDragEnd = () => {
+      editorSyncRef.current.draggingFromEditArea = false
+    }
+
+    const handleDrop = (selection, dataTransfer) => {
+      const {editorState} = stateRef.current
+      const {
+        outcome,
+        editorState: dropped,
+        highlightTags,
+      } = resolveDrop({
+        editorState,
+        selection,
+        text: dataTransfer.getText(),
+        draggingFromEditArea: editorSyncRef.current.draggingFromEditArea,
+      })
+
+      if (dropped) {
+        setState({editorState: dropped}, () => {
+          updateTranslationDebouncedRef.current()
+          if (highlightTags) setTimeout(() => SegmentActions.highlightTags())
+        })
+      }
+      return outcome
+    }
+
+    const onEntityClickRef = useRef((start, end) => {
+      const {editorState} = stateRef.current
+      try {
+        // _latestEditorState, not ours: the click has already moved the caret
+        const latestEditorState = editorRef.current._latestEditorState
+        const selectionState = latestEditorState.getSelection()
+        const blockText = latestEditorState
+          .getCurrentContent()
+          .getBlockForKey(selectionState.getFocusKey())
+          .getText()
+
+        setState({
+          editorState: EditorState.forceSelection(
+            editorState,
+            selectionState.merge(selectionAroundEntity(blockText, start, end)),
+          ),
+        })
+      } catch (e) {
+        console.log('Invalid selection')
+      }
+    })
+
+    const getUpdatedSegmentInfoRef = useRef(() => {
+      const {
+        segment: {
+          sid,
+          warnings,
+          tagMismatch,
+          opened,
+          missingTagsInTarget,
+          openSplit,
+        },
+      } = propsRef.current
+      const {tagRange, editorState} = stateRef.current
+      return {
+        sid,
+        warnings,
+        tagMismatch,
+        tagRange,
+        segmentOpened: opened,
+        missingTagsInTarget,
+        currentSelection: editorRef.current
+          ? editorRef.current._latestEditorState.getSelection()
+          : editorState.getSelection(),
+        openSplit,
+      }
+    })
+
+    const formatSelection = (format) => {
+      const {editorState} = stateRef.current
+      // Todo: if selectionIsEntity return
+      if (editorState.getSelection().isCollapsed()) {
+        return
+      }
+
+      const selectionsText = DraftMatecatUtils.getSelectedTextWithoutEntities(
+        editorState,
+      ).map((selected) => ({
+        ...selected,
+        value: DraftMatecatUtils.formatText(selected.value, format),
+      }))
+      const newEditorState = DraftMatecatUtils.replaceMultipleText(
+        editorState,
+        selectionsText,
+      )
+
+      setState(
+        {
+          editorState: newEditorState,
+        },
+        () => {
+          updateTranslationDebouncedRef.current()
+        },
+      )
+    }
+
+    const addMissingSourceTagsToTarget = () => {
+      const {segment} = propsRef.current
+      const {editorState} = stateRef.current
+      // Append missing tag at the end of the current translation string
+      let newTranslation = segment.translation
+      let newDecodedTranslation = segment.decodedTranslation
+      let newEditorState = editorState
+      segment.missingTagsInTarget.forEach((tag) => {
+        newTranslation += tag.data.encodedText
+        newDecodedTranslation += tag.data.placeholder
+        newEditorState = DraftMatecatUtils.addTagEntityToEditor(
+          newEditorState,
+          tag,
+        )
+      })
+      // Append missing tags to targetTagMap
+      const segmentTargetTagMap = [
+        ...segment.targetTagMap,
+        ...segment.missingTagsInTarget,
+      ]
+      // Insert tag entity in current editor without recompute tags associations
+      setState({
+        editorState: newEditorState,
+      })
+      // lock tags and run again getWarnings
+      setTimeout(() => {
+        SegmentActions.updateTranslation(
+          segment.sid,
+          newTranslation,
+          newDecodedTranslation,
+          segmentTargetTagMap,
+          [],
+        )
+        SegmentActions.getSegmentsQa({
+          ...propsRef.current.segment,
+          translation: newTranslation,
+        })
+      }, 100)
+    }
+
+    // ---- decoratorsStructure (mutable buffer, seeded once) ----
+    const decoratorsStructureRef = useRef(null)
+    if (decoratorsStructureRef.current === null) {
+      decoratorsStructureRef.current = [
+        {
+          name: 'tags',
+          strategy: getEntityStrategy('IMMUTABLE'),
+          component: TagEntity,
+          props: {
+            isTarget: true,
+            onClick: onEntityClickRef.current,
+            getUpdatedSegmentInfo: getUpdatedSegmentInfoRef.current,
+            getSearchParams: getSearchParamsRef.current, //TODO: Make it general ?
+            isRTL: config.isTargetRTL,
+            sid: segment.sid,
+          },
+        },
+      ]
+    }
+
+    // ---- initial content, computed once ----
+    const initialContentRef = useRef(null)
+    if (initialContentRef.current === null) {
+      // If GuessTag is Enabled, clean translation from tags
+      const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(
+        segment,
+      )
+        ? DraftMatecatUtils.removeTagsFromText(translation)
+        : translation
+
+      const decorator = new CompositeDecorator(decoratorsStructureRef.current)
+
+      // Inizializza Editor State con solo testo
+      const plainEditorState = EditorState.createEmpty(decorator)
+      const contentEncoded = DraftMatecatUtils.encodeContent(
+        plainEditorState,
+        cleanTranslation,
+      )
+      initialContentRef.current = {
+        editorState: contentEncoded.editorState,
+        tagRange: contentEncoded.tagRange,
+      }
+    }
+
+    const [state, dispatchState] = useReducer(mergeState, null, () => ({
+      editorState: initialContentRef.current.editorState,
       editAreaClasses: ['targetarea'],
-      tagRange: tagRange,
-      // TagMenu
+      tagRange: initialContentRef.current.tagRange,
       autocompleteSuggestions: [],
       focusedTagIndex: 0,
       displayPopover: false,
       popoverPosition: {},
       editorFocused: true,
-      clickedOnTag: false,
       triggerText: null,
       activeDecorators: {
         [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
         [DraftMatecatConstants.QA_BLACKLIST_DECORATOR]: false,
         [DraftMatecatConstants.SEARCH_DECORATOR]: false,
-        [DraftMatecatConstants.ICU_DECORATOR]: this.icuEnabled,
+        [DraftMatecatConstants.ICU_DECORATOR]: segment.icu,
       },
       previousSourceTagMap: null,
-    }
-    this.props.updateCounter(
-      DraftMatecatUtils.getCharactersCounter(
-        this.getTextToApplyCounter(translation),
-      ),
-    )
+    }))
 
-    this.updateTranslationDebounced = debounce(
-      this.updateTranslationInStore,
-      100,
-    )
-    this.onCompositionStopDebounced = debounce(this.onCompositionStop, 1000)
+    // Mirrors `state` for synchronous read-back; see setState below.
+    const stateRef = useRef(state)
+    stateRef.current = state
 
-    // insertTagAtSelection debouced function avoids broken insert for languages with oncomposition event ex. Korean
-    this.insertTagAtSelectionDebounced = debounce(this.insertTagAtSelection, 1)
-  }
+    /**
+     * The setState the class port was written against. It advances stateRef
+     * synchronously before dispatching, because a callback -- and a store
+     * listener that sets state then reads straight back, as
+     * replaceCurrentSearch does -- has to observe the new values, which a
+     * dispatch alone would not provide until the next render.
+     *
+     * Safe for a once-built closure to capture: it touches only stateRef and
+     * dispatchState, both stable for the life of the component.
+     */
+    const setState = (partial, callback) => {
+      const resolved =
+        typeof partial === 'function' ? partial(stateRef.current) : partial
 
-  getTextToApplyCounter = (translation) => {
-    const canCountTagsAsChars =
-      CatToolStore.getCurrentProjectTemplate().characterCounterCountTags
-    if (canCountTagsAsChars) {
-      return DraftMatecatUtils.excludeSomeTagsTransformToText(translation, [
-        'g',
-        'bx',
-        'ex',
-        'x',
-      ])
-    } else {
-      return DraftMatecatUtils.decodePlaceholdersToPlainText(
-        DraftMatecatUtils.removeTagsFromText(translation),
-      )
-    }
-  }
+      stateRef.current = {...stateRef.current, ...resolved}
+      dispatchState(resolved)
 
-  getSearchParams = () => {
-    const {
-      inSearch,
-      currentInSearch,
-      searchParams,
-      occurrencesInSearch,
-      currentInSearchIndex,
-    } = this.props.segment
-    if (inSearch && searchParams.target) {
-      return {
-        active: inSearch,
-        currentActive: currentInSearch,
-        textToReplace: searchParams.target,
-        params: searchParams,
-        occurrences: occurrencesInSearch.occurrences,
-        currentInSearchIndex,
-        isTarget: true,
-      }
-    } else {
-      return {
-        active: false,
-      }
-    }
-  }
-
-  addIcuDecorator = (tokens) => {
-    const newDecorator = createICUDecorator(tokens)
-    remove(
-      this.decoratorsStructure,
-      (decorator) => decorator.name === DraftMatecatConstants.ICU_DECORATOR,
-    )
-    this.decoratorsStructure.push(newDecorator)
-  }
-
-  addSearchDecorator = () => {
-    let {tagRange} = this.state
-    let {searchParams, occurrencesInSearch, currentInSearchIndex} =
-      this.props.segment
-    console.log('occurrencesInSearch', occurrencesInSearch)
-    const textToSearch = searchParams.target ? searchParams.target : ''
-    const newDecorator = DraftMatecatUtils.activateSearch(
-      textToSearch,
-      searchParams,
-      occurrencesInSearch.occurrences,
-      currentInSearchIndex,
-      tagRange,
-    )
-    remove(
-      this.decoratorsStructure,
-      (decorator) => decorator.name === DraftMatecatConstants.SEARCH_DECORATOR,
-    )
-    this.decoratorsStructure.push(newDecorator)
-  }
-
-  addQaBlacklistGlossaryDecorator = () => {
-    let {qaBlacklistGlossary, sid} = this.props.segment
-    const newDecorator = DraftMatecatUtils.activateQaCheckBlacklist(
-      qaBlacklistGlossary,
-      sid,
-    )
-    remove(
-      this.decoratorsStructure,
-      (decorator) =>
-        decorator.name === DraftMatecatConstants.QA_BLACKLIST_DECORATOR,
-    )
-    this.decoratorsStructure.push(newDecorator)
-  }
-
-  addLexiqaDecorator = () => {
-    let {editorState} = this.state
-    let {lexiqa, sid, lxqDecodedTranslation} = this.props.segment
-    // pass decoded translation with tags like <g id='1'>
-    let ranges = LexiqaUtils.getRanges(
-      cloneDeep(lexiqa.target),
-      lxqDecodedTranslation,
-      false,
-    )
-    const updatedLexiqaWarnings = updateOffsetBasedOnEditorState(
-      editorState,
-      ranges,
-    )
-    if (updatedLexiqaWarnings.length > 0) {
-      const newDecorator = DraftMatecatUtils.activateLexiqa(
-        editorState,
-        updatedLexiqaWarnings,
-        sid,
-        false,
-        this.getUpdatedSegmentInfo,
-        this.replaceWordAt,
-      )
-      remove(
-        this.decoratorsStructure,
-        (decorator) =>
-          decorator.name === DraftMatecatConstants.LEXIQA_DECORATOR,
-      )
-      this.decoratorsStructure.push(newDecorator)
-    } else {
-      this.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
-    }
-  }
-
-  //Receive the new translation and decode it for draftJS
-  setNewTranslation = (sid, translation) => {
-    if (sid === this.props.segment.sid) {
-      const {editorState} = this.state
-      const contentEncoded = DraftMatecatUtils.encodeContent(
-        editorState,
-        translation,
-        this.props.segment.sourceTagMap,
-      )
-      // this must be done to make the Undo action possible, otherwise encodeContent will delete all editor history
-      let {editorState: newEditorState} = contentEncoded
-      const newContentState = newEditorState.getCurrentContent()
-      newEditorState = EditorState.push(
-        editorState,
-        newContentState,
-        'insert-fragment',
-      )
-      newEditorState = EditorState.moveSelectionToEnd(newEditorState)
-
-      this.props.updateCounter(
-        DraftMatecatUtils.getCharactersCounter(
-          this.getTextToApplyCounter(translation),
-        ),
-      )
-      this.setState(
-        {
-          editorState: newEditorState,
-        },
-        () => {
-          this.updateTranslationDebounced()
-        },
-      )
-    }
-  }
-
-  replaceCurrentSearch = (text) => {
-    let {
-      searchParams,
-      occurrencesInSearch,
-      currentInSearchIndex,
-      currentInSearch,
-    } = this.props.segment
-    if (currentInSearch && searchParams.target) {
-      let index = findIndex(
-        occurrencesInSearch.occurrences,
-        (item) => item.searchProgressiveIndex === currentInSearchIndex,
-      )
-      const newEditorState = DraftMatecatUtils.replaceOccurrences(
-        this.state.editorState,
-        searchParams.target,
-        text,
-        index,
-      )
-      this.setState(
-        {
-          editorState: newEditorState,
-        },
-        () => {
-          this.updateTranslationInStore()
-        },
-      )
-    }
-  }
-
-  updateTranslationInStore = () => {
-    const {editorState} = this.state
-    const {
-      segment,
-      segment: {sourceTagMap},
-    } = this.props
-    const {decodedSegment, entitiesRange} =
-      DraftMatecatUtils.decodeSegment(editorState)
-    if (decodedSegment !== '') {
-      let contentState = editorState.getCurrentContent()
-      let plainText = removeZeroWidthSpace(contentState.getPlainText())
-
-      // Matches tag without compute tag id
-      const currentTagRange = DraftMatecatUtils.matchTagInEditor(
-        editorState,
-        entitiesRange,
-      )
-      // Add missing tag to store for highlight warnings on tags
-      const {missingTags} = checkForMissingTags(sourceTagMap, currentTagRange)
-
-      const lxqDecodedTranslation =
-        DraftMatecatUtils.prepareTextForLexiqa(decodedSegment)
-
-      //const currentTagRange = matchTag(decodedSegment); //deactivate if updateTagsInEditor is active
-      SegmentActions.updateTranslation(
-        segment.sid,
-        decodedSegment,
-        plainText,
-        currentTagRange,
-        missingTags,
-        lxqDecodedTranslation,
-      )
-      ContextPreviewChannel.sendMessage({
-        type: 'updateTranslation',
-        sid: segment.sid,
-        target: decodedSegment,
-      })
-      this.props.updateCounter(
-        DraftMatecatUtils.getCharactersCounter(
-          this.getTextToApplyCounter(decodedSegment),
-        ),
-      )
-      // console.log('updatingTranslationInStore');
-      SegmentActions.startSegmentQACheck()
-    } else {
-      this.props.updateCounter(0)
-    }
-  }
-
-  checkDecorators = (prevProps) => {
-    let changedDecorator = false
-    const {inSearch} = this.props.segment
-    const {activeDecorators: prevActiveDecorators, editorState} = this.state
-    const activeDecorators = {...prevActiveDecorators}
-
-    if (!inSearch) {
-      //Qa Check Blacklist
-      const {qaBlacklistGlossary} = this.props.segment
-      const prevQaBlacklistGlossary = prevProps
-        ? prevProps.segment.qaBlacklistGlossary
-        : undefined
-      if (
-        (qaBlacklistGlossary &&
-          qaBlacklistGlossary.length > 0 &&
-          !activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR]) ||
-        (activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] &&
-          !isEqual(qaBlacklistGlossary, prevQaBlacklistGlossary))
-      ) {
-        activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] = true
-        changedDecorator = true
-        this.addQaBlacklistGlossaryDecorator()
-      } else if (
-        prevQaBlacklistGlossary &&
-        prevQaBlacklistGlossary.length > 0 &&
-        (!qaBlacklistGlossary || qaBlacklistGlossary.length === 0)
-      ) {
-        activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] = false
-        changedDecorator = true
-        this.removeDecorator(DraftMatecatConstants.QA_BLACKLIST_DECORATOR)
-      }
-
-      //Lexiqa
-      const {lexiqa} = this.props.segment
-      const prevLexiqa = prevProps ? prevProps.segment.lexiqa : undefined
-      const currentLexiqaTarget = lexiqa && lexiqa.target && size(lexiqa.target)
-      const prevLexiqaTarget =
-        prevLexiqa && prevLexiqa.target && size(prevLexiqa.target)
-      const lexiqaChanged =
-        prevLexiqaTarget &&
-        currentLexiqaTarget &&
-        !fromJS(prevLexiqa.target).equals(fromJS(lexiqa.target))
-
-      if (
-        //Condition to understand if the job has tm keys or if the check glossary request has been made (blacklist must take precedence over lexiqa)
-        (CatToolStore.getHaveKeysGlossary() === false ||
-          Array.isArray(qaBlacklistGlossary)) &&
-        currentLexiqaTarget &&
-        (!prevLexiqaTarget ||
-          lexiqaChanged ||
-          !prevActiveDecorators[DraftMatecatConstants.LEXIQA_DECORATOR])
-      ) {
-        activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = true
-        changedDecorator = true
-        this.addLexiqaDecorator()
-      } else if (prevLexiqaTarget && !currentLexiqaTarget) {
-        activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
-        changedDecorator = true
-        this.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
-      }
-      //Search
-      if (prevProps && prevProps.segment.inSearch) {
-        activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = false
-        changedDecorator = true
-        this.removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR)
-      }
-      const contentState = editorState.getCurrentContent()
-      const plainText = textUtils.removeWhitespacePlaceholders(
-        contentState.getPlainText(),
-      )
-      if (this.icuEnabled) {
-        const icuTokens = createIcuTokens(
-          plainText,
-          editorState,
-          config.target_code,
-        )
-
-        if (
-          !prevProps ||
-          !this.prevIcuTokens ||
-          !isEqualICUTokens(icuTokens, this.prevIcuTokens)
-        ) {
-          this.prevIcuTokens = icuTokens
-          changedDecorator = true
-          this.addIcuDecorator(icuTokens)
-        }
-      }
-    } else {
-      //Search
-      if (
-        this.props.segment.searchParams.target &&
-        (!prevProps ||
-          !prevProps.segment.inSearch || //Before was not active
-          (prevProps.segment.inSearch &&
-            !fromJS(prevProps.segment.searchParams).equals(
-              fromJS(this.props.segment.searchParams),
-            )) || //Before was active but some params change
-          (prevProps.segment.inSearch &&
-            prevProps.segment.currentInSearch !==
-              this.props.segment.currentInSearch) || //Before was the current
-          (prevProps.segment.inSearch &&
-            prevProps.segment.currentInSearchIndex !==
-              this.props.segment.currentInSearchIndex))
-      ) {
-        //There are more occurrences and the current change
-        // Cleanup all decorators
-        this.removeDecorator()
-        activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
-        activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] = false
-        this.addSearchDecorator()
-        activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = true
-        changedDecorator = true
-      }
+      if (callback) callback()
     }
 
-    if (changedDecorator) {
-      const timer = inSearch ? 400 : 0
-      const decorator = new CompositeDecorator(this.decoratorsStructure)
-      setTimeout(() => {
-        this.setState({
-          editorState: EditorState.set(editorState, {decorator}),
-          activeDecorators,
-        })
-      }, timer)
-    }
-  }
-
-  componentDidMount() {
-    SegmentStore.addListener(
-      SegmentConstants.REPLACE_TRANSLATION,
-      this.setNewTranslation,
-    )
-    SegmentStore.addListener(
-      EditAreaConstants.REPLACE_SEARCH_RESULTS,
-      this.replaceCurrentSearch,
-    )
-    SegmentStore.addListener(
-      EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA,
-      this.copyGlossaryToEditArea,
-    )
-    SegmentStore.addListener(
-      SegmentConstants.REFRESH_TAG_MAP,
-      this.refreshTagMap,
-    )
-    SegmentStore.addListener(
-      SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES,
-      this.refreshCharactersCounterRules,
-    )
-    setTimeout(() => {
-      this.checkDecorators()
-      this.updateTranslationInStore()
-      if (this.props.segment.opened) {
-        this.focusEditor()
-      }
-    })
-
-    const {editor: editorElement} = this.editor
-    editorElement.addEventListener('compositionstart', this.onCompositionStart)
-    editorElement.addEventListener('compositionend', this.onCompositionEnd)
-
-    new CommonUtils.DetectTripleClick(
-      this.editAreaRef,
-      () => (this.wasTripleClickTriggered.current = true),
-    )
-  }
-
-  copyGlossaryToEditArea = (segment, glossaryTranslation) => {
-    if (segment.sid === this.props.segment.sid) {
-      const {editorState} = this.state
-      const newEditorState = DraftMatecatUtils.insertText(
-        editorState,
-        glossaryTranslation,
-      )
-      this.setState(
-        {
-          editorState: newEditorState,
-        },
-        () => {
-          this.updateTranslationDebounced()
-        },
-      )
-    }
-  }
-
-  refreshTagMap = () => {
-    this.setNewTranslation(this.props.segment.sid, this.props.translation)
-    setTimeout(() => this.checkDecorators(), 100)
-  }
-
-  refreshCharactersCounterRules = () => {
-    this.setNewTranslation(this.props.segment.sid, this.props.translation)
-  }
-
-  componentWillUnmount() {
-    SegmentStore.removeListener(
-      SegmentConstants.REPLACE_TRANSLATION,
-      this.setNewTranslation,
-    )
-    SegmentStore.removeListener(
-      EditAreaConstants.REPLACE_SEARCH_RESULTS,
-      this.replaceCurrentSearch,
-    )
-    SegmentStore.removeListener(
-      EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA,
-      this.copyGlossaryToEditArea,
-    )
-    SegmentStore.removeListener(
-      SegmentConstants.REFRESH_TAG_MAP,
-      this.refreshTagMap,
-    )
-    SegmentStore.removeListener(
-      SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES,
-      this.refreshCharactersCounterRules,
-    )
-
-    const {editor: editorElement} = this.editor
-    editorElement.removeEventListener(
-      'compositionstart',
-      this.onCompositionStart,
-    )
-    editorElement.removeEventListener('compositionend', this.onCompositionEnd)
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (!prevProps.segment.opened && this.props.segment.opened) {
-      const newEditorState = EditorState.moveFocusToEnd(this.state.editorState)
-      this.setState({editorState: newEditorState})
-    } else if (prevProps.segment.opened && !this.props.segment.opened) {
-      const newEditorState = EditorState.moveSelectionToEnd(
-        this.state.editorState,
-      )
-      this.setState({editorState: newEditorState})
-    }
-    if (
-      !this.state.editorState.isInCompositionMode() &&
-      !editorSync.onComposition
-    ) {
-      this.checkDecorators(prevProps)
-    }
-
-    // update editor state when receive prop of segment "sourceTagMap"
-    if (
-      this.props.segment.sourceTagMap?.length &&
-      !isEqual(this.state.previousSourceTagMap, this.props.segment.sourceTagMap)
-    ) {
-      this.setState({previousSourceTagMap: this.props.segment.sourceTagMap})
-      this.setNewTranslation(this.props.segment.sid, this.props.translation)
-    }
-
-    // Adjust caret position and set focus to entity
-    if (prevState.editorState !== this.state.editorState) {
-      const {editorState} = this.state
-
-      const entitiesSelected = getEntitiesSelected(editorState)
-      SegmentActions.focusTags(editorSync.editorFocused ? entitiesSelected : [])
-
-      const currentFocusOffset = editorState.getSelection().getFocusOffset()
-      const prevFocusOffset = prevState.editorState
-        .getSelection()
-        .getFocusOffset()
-
-      if (prevFocusOffset !== currentFocusOffset) {
-        const direction =
-          currentFocusOffset > prevFocusOffset ? 'right' : 'left'
-
-        adjustCaretPosition({
-          direction,
-          isShiftPressed: this.isShiftPressedOnNavigation.current,
-        })
-      }
-    } else {
-      const selection = window.getSelection()
-      if (selection.focusNode) {
-        const direction =
-          selection.focusOffset < selection.focusNode.length / 2
-            ? 'left'
-            : 'right'
-
-        adjustCaretPosition({
-          direction,
-          isShiftPressed: this.isShiftPressedOnNavigation.current,
-          shouldMoveCursorPreviousElementTag:
-            this.wasTripleClickTriggered.current,
-        })
-      }
-    }
-
-    // Select all triple click
-    if (this.wasTripleClickTriggered.current) {
-      const {editorState} = this.state
-      const contentState = editorState.getCurrentContent()
-
-      const selectAll = editorState.getSelection().merge({
-        anchorKey: contentState.getFirstBlock().getKey(),
-        anchorOffset: 0,
-        focusOffset: contentState.getLastBlock().getText().length,
-        focusKey: contentState.getLastBlock().getKey(),
-      })
-
-      const newEditorState = EditorState.forceSelection(editorState, selectAll)
-      this.setState({editorState: newEditorState})
-    }
-
-    this.wasTripleClickTriggered.current = false
-  }
-
-  onCompositionStart = () => {
-    this.compositionEventChecks.current = {
-      startIsInsideEntity: isCaretInsideEntity(),
-      endIsTriggered: false,
-    }
-  }
-  onCompositionEnd = () => {
-    this.compositionEventChecks.current = {
-      ...this.compositionEventChecks.current,
-      endIsTriggered: true,
-    }
-  }
-
-  replaceWordAt = ({newWord, start, end}) => {
-    const startIndex = start
-    const endIndex = end
-    const selection = this.state.editorState.getSelection().merge({
-      anchorOffset: startIndex,
-      focusOffset: endIndex,
-    })
-    const contentState = Modifier.replaceText(
-      this.state.editorState.getCurrentContent(),
-      selection,
-      newWord,
-    )
-    const updatedState = EditorState.push(this.state.editorState, contentState)
-    this.setState({editorState: updatedState}, () => {
-      // Reactivate decorators
-      this.updateTranslationDebounced()
-      // Stop composition mode
-      this.onCompositionStopDebounced()
-    })
-  }
-
-  render() {
     const {
       editorState,
-      displayPopover,
+      editAreaClasses,
       autocompleteSuggestions,
       focusedTagIndex,
+      displayPopover,
       popoverPosition,
-    } = this.state
+      previousSourceTagMap,
+    } = state
+    // The class set the counter from its constructor. A constructor runs in the
+    // render phase, so that was a parent update from a child's render, which
+    // React reports as "Cannot update a component while rendering a different
+    // component". A layout effect runs after this component has rendered but
+    // still before paint, so the counter never shows a stale value.
+    useLayoutEffect(() => {
+      updateCounter(
+        DraftMatecatUtils.getCharactersCounter(
+          getTextToApplyCounter(translation),
+        ),
+      )
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
-    const {
-      onChange,
-      copyFragment,
-      pasteFragment,
-      onTagClick,
-      handleKeyCommand,
-      myKeyBindingFn,
-      onMouseUpEvent,
-      onBlurEvent,
-      onFocus,
-      onDragEvent,
-      onDragEnd,
-      onKeyUpEvent,
-    } = this
+    // debounced functions, constructed once (recreating them would drop pending timers)
+    const updateTranslationDebouncedRef = useRef(null)
+    if (updateTranslationDebouncedRef.current === null) {
+      updateTranslationDebouncedRef.current = debounce(
+        () => updateTranslationInStoreRef.current(),
+        100,
+      )
+    }
+    const onCompositionStopDebouncedRef = useRef(null)
+    if (onCompositionStopDebouncedRef.current === null) {
+      onCompositionStopDebouncedRef.current = debounce(
+        () => onCompositionStopRef.current(),
+        1000,
+      )
+    }
+    // insertTagAtSelection debounced function avoids broken insert for languages with oncomposition event ex. Korean
+    const insertTagAtSelectionDebouncedRef = useRef(null)
+    if (insertTagAtSelectionDebouncedRef.current === null) {
+      insertTagAtSelectionDebouncedRef.current = debounce(
+        (tagName) => insertTagAtSelectionRef.current(tagName),
+        1,
+      )
+    }
+
+    // refresh every render so stable closures always see the current props
+    propsRef.current = currentProps
+
+    const isFirstRenderRef = useRef(true)
+    const prevPropsRef = useRef(currentProps)
+    const prevStateRef = useRef(null)
+
+    // componentDidMount / componentWillUnmount equivalent
+    useEffect(() => {
+      // Captured at mount so the cleanup removes the very same references,
+      // rather than re-reading the refs after React has torn the component down.
+      const setNewTranslation = setNewTranslationRef.current
+      const replaceCurrentSearch = replaceCurrentSearchRef.current
+      const copyGlossaryToEditArea = copyGlossaryToEditAreaRef.current
+      const refreshTagMap = refreshTagMapRef.current
+      const refreshCharactersCounterRules =
+        refreshCharactersCounterRulesRef.current
+      const onCompositionStart = onCompositionStartRef.current
+      const onCompositionEnd = onCompositionEndRef.current
+
+      SegmentStore.addListener(
+        SegmentConstants.REPLACE_TRANSLATION,
+        setNewTranslation,
+      )
+      SegmentStore.addListener(
+        EditAreaConstants.REPLACE_SEARCH_RESULTS,
+        replaceCurrentSearch,
+      )
+      SegmentStore.addListener(
+        EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA,
+        copyGlossaryToEditArea,
+      )
+      SegmentStore.addListener(SegmentConstants.REFRESH_TAG_MAP, refreshTagMap)
+      SegmentStore.addListener(
+        SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES,
+        refreshCharactersCounterRules,
+      )
+      setTimeout(() => {
+        checkDecoratorsRef.current()
+        updateTranslationInStoreRef.current()
+        if (propsRef.current.segment.opened) {
+          focusEditorRef.current()
+        }
+      })
+
+      const {editor: editorElement} = editorRef.current
+      editorElement.addEventListener('compositionstart', onCompositionStart)
+      editorElement.addEventListener('compositionend', onCompositionEnd)
+
+      new CommonUtils.DetectTripleClick(editAreaDomRef.current, () => {
+        wasTripleClickTriggeredRef.current = true
+      })
+
+      return () => {
+        SegmentStore.removeListener(
+          SegmentConstants.REPLACE_TRANSLATION,
+          setNewTranslation,
+        )
+        SegmentStore.removeListener(
+          EditAreaConstants.REPLACE_SEARCH_RESULTS,
+          replaceCurrentSearch,
+        )
+        SegmentStore.removeListener(
+          EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA,
+          copyGlossaryToEditArea,
+        )
+        SegmentStore.removeListener(
+          SegmentConstants.REFRESH_TAG_MAP,
+          refreshTagMap,
+        )
+        SegmentStore.removeListener(
+          SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES,
+          refreshCharactersCounterRules,
+        )
+
+        // captured above, not re-read here: by the time this passive-effect
+        // cleanup runs, React has already nulled editorRef.current
+        editorElement.removeEventListener(
+          'compositionstart',
+          onCompositionStart,
+        )
+        editorElement.removeEventListener('compositionend', onCompositionEnd)
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    // componentDidUpdate equivalent
+    useEffect(() => {
+      if (isFirstRenderRef.current) {
+        isFirstRenderRef.current = false
+        prevPropsRef.current = currentProps
+        prevStateRef.current = stateRef.current
+        return
+      }
+
+      const prevProps = prevPropsRef.current
+      const prevState = prevStateRef.current
+
+      if (!prevProps.segment.opened && segment.opened) {
+        const newEditorState = EditorState.moveFocusToEnd(editorState)
+        setState({editorState: newEditorState})
+      } else if (prevProps.segment.opened && !segment.opened) {
+        const newEditorState = EditorState.moveSelectionToEnd(editorState)
+        setState({editorState: newEditorState})
+      }
+      if (
+        !editorState.isInCompositionMode() &&
+        !editorSyncRef.current.onComposition
+      ) {
+        checkDecoratorsRef.current(prevProps)
+      }
+
+      // update editor state when receive prop of segment "sourceTagMap"
+      if (
+        segment.sourceTagMap?.length &&
+        !isEqual(previousSourceTagMap, segment.sourceTagMap)
+      ) {
+        setState({
+          previousSourceTagMap: segment.sourceTagMap,
+        })
+        setNewTranslationRef.current(segment.sid, translation)
+      }
+
+      // Adjust caret position and set focus to entity
+      if (prevState.editorState !== editorState) {
+        const entitiesSelected = getEntitiesSelected(editorState)
+        SegmentActions.focusTags(
+          editorSyncRef.current.editorFocused ? entitiesSelected : [],
+        )
+
+        const currentFocusOffset = editorState.getSelection().getFocusOffset()
+        const prevFocusOffset = prevState.editorState
+          .getSelection()
+          .getFocusOffset()
+
+        if (prevFocusOffset !== currentFocusOffset) {
+          const direction =
+            currentFocusOffset > prevFocusOffset ? 'right' : 'left'
+
+          adjustCaretPosition({
+            direction,
+            isShiftPressed: isShiftPressedOnNavigationRef.current,
+          })
+        }
+      } else {
+        const selection = window.getSelection()
+        if (selection.focusNode) {
+          const direction =
+            selection.focusOffset < selection.focusNode.length / 2
+              ? 'left'
+              : 'right'
+
+          adjustCaretPosition({
+            direction,
+            isShiftPressed: isShiftPressedOnNavigationRef.current,
+            shouldMoveCursorPreviousElementTag:
+              wasTripleClickTriggeredRef.current,
+          })
+        }
+      }
+
+      // Select all triple click
+      if (wasTripleClickTriggeredRef.current) {
+        const contentState = editorState.getCurrentContent()
+
+        const selectAll = editorState.getSelection().merge({
+          anchorKey: contentState.getFirstBlock().getKey(),
+          anchorOffset: 0,
+          focusOffset: contentState.getLastBlock().getText().length,
+          focusKey: contentState.getLastBlock().getKey(),
+        })
+
+        const newEditorState = EditorState.forceSelection(
+          editorState,
+          selectAll,
+        )
+        setState({editorState: newEditorState})
+      }
+
+      wasTripleClickTriggeredRef.current = false
+
+      prevPropsRef.current = currentProps
+      prevStateRef.current = stateRef.current
+    })
+
+    // The component's public API: exactly the four members production reaches
+    // through the ref, and nothing else. SegmentTarget calls
+    // addMissingSourceTagsToTarget, SegmentTargetToolbar calls formatSelection,
+    // and AiAlternatives reads state.editorState and editAreaRef. state and
+    // editAreaRef are getters so callers keep seeing the live values rather than
+    // a snapshot taken when the handle was built.
+    // Refreshed every render so the handle, whose factory runs once, always
+    // reaches the current closures rather than the first render's.
+    const handleRef = useRef(null)
+    handleRef.current = {addMissingSourceTagsToTarget, formatSelection}
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        // Read through handleRef, not the locals: this factory runs once (the
+        // dependency array is empty), so calling the locals directly would pin
+        // the handle to whichever closures existed at the first render.
+        addMissingSourceTagsToTarget: (...args) =>
+          handleRef.current.addMissingSourceTagsToTarget(...args),
+        formatSelection: (...args) =>
+          handleRef.current.formatSelection(...args),
+        get state() {
+          return stateRef.current
+        },
+        get editAreaRef() {
+          return editAreaDomRef.current
+        },
+      }),
+      [],
+    )
 
     let lang = ''
     let readonly = false
 
-    if (this.props.segment) {
+    if (segment) {
       lang = config.target_code
       readonly =
-        this.context.readonly ||
-        this.context.locked ||
-        this.props.segment.muted ||
-        !this.props.segment.opened
+        context.readonly || context.locked || segment.muted || !segment.opened
     }
-    let classes = this.state.editAreaClasses.slice()
-    if (this.context.locked || this.context.readonly) {
+    const classes = editAreaClasses.slice()
+    if (context.locked || context.readonly) {
       classes.push('area')
     } else {
       classes.push('editarea')
@@ -767,9 +1576,9 @@ class Editarea extends React.Component {
     return (
       <div
         className={classes.join(' ')}
-        ref={(ref) => (this.editAreaRef = ref)}
-        id={'segment-' + this.props.segment.sid + '-editarea'}
-        data-sid={this.props.segment.sid}
+        ref={setEditAreaDom}
+        id={'segment-' + segment.sid + '-editarea'}
+        data-sid={segment.sid}
         tabIndex="-1"
         onCopy={copyFragment}
         onCut={copyFragment}
@@ -788,11 +1597,11 @@ class Editarea extends React.Component {
           editorState={editorState}
           onChange={onChange}
           handlePastedText={pasteFragment}
-          ref={(el) => (this.editor = el)}
+          ref={editorRef}
           readOnly={readonly}
           handleKeyCommand={handleKeyCommand}
           keyBindingFn={myKeyBindingFn}
-          handleDrop={this.handleDrop}
+          handleDrop={handleDrop}
           spellCheck={true}
           textAlignment={config.isTargetRTL ? 'right' : 'left'}
           textDirectionality={config.isTargetRTL ? 'RTL' : 'LTR'}
@@ -806,1011 +1615,8 @@ class Editarea extends React.Component {
         />
       </div>
     )
-  }
-
-  focusEditor = () => {
-    if (this.editor) this.editor.focus()
-  }
-
-  typeTextInEditor = (textToInsert) => {
-    const {editorState} = this.state
-    editorSync.onComposition = true
-    let newEditorState = this.disableDecorator(
-      editorState,
-      DraftMatecatConstants.LEXIQA_DECORATOR,
-    )
-    newEditorState = DraftMatecatUtils.insertText(newEditorState, textToInsert)
-    this.setState(
-      (prevState) => ({
-        activeDecorators: {
-          ...prevState.activeDecorators,
-          [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
-        },
-        editorState: newEditorState,
-        triggerText: textToInsert,
-      }),
-      () => {
-        // Update translation
-        this.updateTranslationDebounced()
-        // Reactivate decorators
-        this.onCompositionStopDebounced()
-      },
-    )
-  }
-
-  myKeyBindingFn = (e) => {
-    const {displayPopover} = this.state
-    const isChromeBook = navigator.userAgent.indexOf('CrOS') > -1
-    if (
-      (e.keyCode === 84 || e.key === 't' || e.key === '™') &&
-      (isOptionKeyCommand(e) || e.altKey) &&
-      !e.shiftKey
-    ) {
-      this.setState({triggerText: null})
-      return 'toggle-tag-menu'
-    } else if (e.key === '<' && !hasCommandModifier(e)) {
-      this.typeTextInEditor('<')
-      return 'toggle-tag-menu'
-    } else if (e.key === 'ArrowUp' && !hasCommandModifier(e)) {
-      if (displayPopover) return 'up-arrow-press'
-    } else if (e.key === 'ArrowDown' && !hasCommandModifier(e)) {
-      if (displayPopover) return 'down-arrow-press'
-    } else if (e.key === 'Enter') {
-      if (
-        (e.altKey && e.ctrlKey) ||
-        (e.ctrlKey && isOptionKeyCommand(e) && e.shiftKey)
-      ) {
-        return 'add-issue'
-      } else if (displayPopover && !hasCommandModifier(e)) {
-        return 'enter-press'
-      } else if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
-        return 'next-translate'
-      } else if (e.ctrlKey || e.metaKey) {
-        return 'translate'
-      }
-    } else if (e.key === 'Escape') {
-      return 'close-tag-menu'
-    } else if (e.key === 'Tab') {
-      return e.shiftKey ? null : 'insert-tab-tag'
-    } else if (
-      e.code === 'Space' &&
-      !e.ctrlKey &&
-      !e.altKey &&
-      !e.shiftKey &&
-      tagSignatures.space
-    ) {
-      return 'insert-space-tag'
-    } else if (
-      (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
-      ((isCtrlKeyCommand(e) && e.shiftKey) ||
-        (isMacOS() && isOptionKeyCommand(e) && !e.ctrlKey))
-    ) {
-      return 'insert-nbsp-tag' // Windows && Mac
-    } else if (
-      (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
-      !e.shiftKey &&
-      e.altKey &&
-      isChromeBook
-    ) {
-      return 'insert-nbsp-tag' // Chromebook
-    } else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.altKey) {
-      this.isShiftPressedOnNavigation.current = e.shiftKey
-
-      const direction = e.key === 'ArrowLeft' ? 'left' : 'right'
-
-      // check caret is near zwsp char and move caret position
-      const updatedStateNearZwsp = checkCaretIsNearZwsp({
-        editorState: this.state.editorState,
-        direction,
-        isShiftPressed: e.shiftKey,
-      })
-
-      // check caret is near entity and move caret position
-      const updatedStateNearEntity = checkCaretIsNearEntity({
-        editorState: updatedStateNearZwsp
-          ? updatedStateNearZwsp
-          : this.state.editorState,
-        direction,
-        isShiftPressed: e.shiftKey,
-      })
-
-      if (updatedStateNearEntity || updatedStateNearZwsp) {
-        this.setState({
-          editorState: updatedStateNearEntity
-            ? updatedStateNearEntity
-            : updatedStateNearZwsp,
-        })
-        return `${direction}-nav`
-      }
-    } else if (e.ctrlKey && e.key === 'k') {
-      return 'tm-search'
-    } else if (
-      (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
-      ((e.ctrlKey && e.altKey) || (isMacOS() && e.shiftKey))
-    ) {
-      return 'insert-word-joiner-tag'
-    } else if (e.code === 'BracketLeft' || e.code === 'BracketRight') {
-      if (e.code === 'BracketLeft' && isCtrlKeyCommand(e)) {
-        if (e.shiftKey) {
-          this.typeTextInEditor('“')
-        } else {
-          this.typeTextInEditor('‘')
-        }
-        return 'quote-shortcut'
-      }
-      if (e.code === 'BracketRight' && isCtrlKeyCommand(e)) {
-        if (e.shiftKey) {
-          this.typeTextInEditor('”')
-        } else {
-          this.typeTextInEditor('’')
-        }
-        return 'quote-shortcut'
-      }
-    } else if (e.altKey && !e.shiftKey && !e.ctrlKey) {
-      const {get, reset} = typingWordJoiner
-      if (e.key !== 'Alt') {
-        const result = get(e.keyCode)
-        if (result) {
-          return 'insert-word-joiner-tag'
-        }
-      } else {
-        reset()
-      }
-    } else if (
-      (e.key === 'Backspace' || e.key === 'Delete') &&
-      !isSelectedEntity(this.state.editorState) &&
-      window.getSelection().type === 'Caret'
-    ) {
-      const isRTL = Boolean(config.isTargetRTL)
-      const direction =
-        e.key === 'Backspace'
-          ? !isRTL
-            ? 'left'
-            : 'right'
-          : !isRTL
-            ? 'right'
-            : 'left'
-
-      const updatedStateNearZwsp = checkCaretIsNearZwsp({
-        editorState: this.state.editorState,
-        direction,
-        isShiftPressed: true,
-      })
-
-      // check caret is near entity and move caret position
-      const updatedStateNearEntity = checkCaretIsNearEntity({
-        editorState: updatedStateNearZwsp
-          ? updatedStateNearZwsp
-          : this.state.editorState,
-        direction,
-        isShiftPressed: true,
-        isBackspacePressed: e.key === 'Backspace',
-      })
-
-      if (updatedStateNearEntity) {
-        const selectionState = updatedStateNearEntity.getSelection()
-        const contentState = updatedStateNearEntity.getCurrentContent()
-
-        const updatedEditorState = EditorState.push(
-          updatedStateNearEntity,
-          Modifier.replaceText(contentState, selectionState, null),
-          'insert-characters',
-        )
-        this.onChange(updatedEditorState)
-        return 'delete-entity'
-      }
-    }
-    return getDefaultKeyBinding(e)
-  }
-
-  handleKeyCommand = (command) => {
-    const {
-      openPopover,
-      closePopover,
-      getEditorRelativeSelectionOffset,
-      moveDownTagMenuSelection,
-      moveUpTagMenuSelection,
-      acceptTagMenuSelection,
-      insertTagAtSelectionDebounced,
-    } = this
-    const {
-      segment: {sourceTagMap, missingTagsInTarget},
-    } = this.props
-
-    switch (command) {
-      case 'toggle-tag-menu': {
-        const tagSuggestions = {
-          missingTags: missingTagsInTarget,
-          sourceTags: sourceTagMap,
-        }
-        if (tagSuggestions.sourceTags && tagSuggestions.sourceTags.length > 0) {
-          openPopover(tagSuggestions, getEditorRelativeSelectionOffset())
-        }
-        return 'handled'
-      }
-      case 'close-tag-menu':
-        closePopover()
-        return 'handled'
-      case 'up-arrow-press':
-        moveUpTagMenuSelection()
-        return 'handled'
-      case 'down-arrow-press':
-        moveDownTagMenuSelection()
-        return 'handled'
-      case 'enter-press':
-        acceptTagMenuSelection()
-        return 'handled'
-      case 'left-nav':
-        return 'handled'
-      case 'right-nav':
-        return 'handled'
-      case 'insert-tab-tag':
-        insertTagAtSelectionDebounced('tab')
-        return 'handled'
-      case 'insert-space-tag':
-        if (tagSignatures.space) {
-          insertTagAtSelectionDebounced('space')
-          return 'handled'
-        } else {
-          return 'not-handled'
-        }
-
-      case 'insert-nbsp-tag':
-        insertTagAtSelectionDebounced('nbsp')
-        return 'handled'
-      case 'add-issue':
-        return 'handled'
-      case 'insert-word-joiner-tag':
-        insertTagAtSelectionDebounced('wordJoiner')
-        return 'handled'
-      case 'delete-entity':
-        return 'handled'
-      case 'translate':
-        return 'not-handled'
-      case 'next-translate':
-        return 'not-handled'
-      case 'quote-shortcut':
-        return 'handled'
-      default:
-        return 'not-handled'
-    }
-  }
-
-  insertTagAtSelection = (tagName) => {
-    const {editorState} = this.state
-    const customTag = DraftMatecatUtils.structFromName(tagName)
-    // If tag creation has failed, return
-    if (!customTag) return
-    // Start composition mode and remove lexiqa
-    editorSync.onComposition = true
-    let newEditorState = this.disableDecorator(
-      editorState,
-      DraftMatecatConstants.LEXIQA_DECORATOR,
-    )
-
-    newEditorState = insertTag(customTag, newEditorState)
-
-    this.setState(
-      (prevState) => ({
-        activeDecorators: {
-          ...prevState.activeDecorators,
-          [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
-        },
-        editorState: newEditorState,
-      }),
-      () => {
-        // Reactivate decorators
-        this.updateTranslationDebounced()
-        // Stop composition mode
-        this.onCompositionStopDebounced()
-      },
-    )
-  }
-
-  onMouseUpEvent = () => {
-    const {toggleFormatMenu} = this.props
-    toggleFormatMenu(
-      !this.editor._latestEditorState.getSelection().isCollapsed(),
-    )
-  }
-
-  onKeyUpEvent = (event) => {
-    if (
-      event.key === 'ArrowLeft' ||
-      event.key === 'ArrowRight' ||
-      event.key === 'ArrowUp' ||
-      event.key === 'ArrowDown'
-    ) {
-      const {toggleFormatMenu} = this.props
-      toggleFormatMenu(
-        !this.editor._latestEditorState.getSelection().isCollapsed(),
-      )
-    }
-  }
-
-  onBlurEvent = () => {
-    const {toggleFormatMenu} = this.props
-    editorSync.editorFocused = false
-    // Hide Edit Toolbar
-    toggleFormatMenu(false)
-  }
-
-  // Focus on editor trigger 2 onChange events
-  /*onBlur = () => {
-        if (!editorSync.clickedOnTag) {
-            this.setState({
-                displayPopover: false,
-                editorFocused: false
-            });
-            editorSync.editorFocused = false;
-        }
-    };*/
-
-  onFocus = () => {
-    editorSync.editorFocused = true
-  }
-
-  onCompositionStop = () => {
-    if (editorSync.onComposition) {
-      editorSync.onComposition = false
-      // Tell tags to update themself
-      setTimeout(() => {
-        SegmentActions.editAreaChanged(this.props.segment.sid, true)
-      })
-    }
-  }
-
-  removeDecorator = (decoratorName) => {
-    if (!decoratorName) {
-      remove(
-        this.decoratorsStructure,
-        (decorator) => decorator.name !== DraftMatecatConstants.TAGS_DECORATOR,
-      )
-    } else {
-      remove(
-        this.decoratorsStructure,
-        (decorator) => decorator.name === decoratorName,
-      )
-    }
-  }
-
-  // has to be followed by a setState for editorState
-  disableDecorator = (editorState, decoratorName) => {
-    remove(
-      this.decoratorsStructure,
-      (decorator) => decorator.name === decoratorName,
-    )
-    //const decorator = new CompoundDecorator(this.decoratorsStructure);
-    const decorator = new CompositeDecorator(this.decoratorsStructure)
-    return EditorState.set(editorState, {decorator})
-  }
-
-  onChange = (editorState) => {
-    //console.log('onChange')
-    const {
-      displayPopover,
-      editorState: prevEditorState,
-      activeDecorators,
-    } = this.state
-    const {closePopover} = this
-
-    // check caret is inside entity and restore previous editorState
-    if (
-      isCaretInsideEntity() ||
-      this.compositionEventChecks.current?.startIsInsideEntity
-    ) {
-      const updatedStateNearEntity = checkCaretIsNearEntity({
-        editorState,
-      })
-
-      this.setState(
-        () => ({
-          editorState: updatedStateNearEntity
-            ? updatedStateNearEntity
-            : prevEditorState,
-        }),
-        () => {
-          this.onCompositionStopDebounced()
-        },
-      )
-      if (this.compositionEventChecks?.endIsTriggered)
-        this.compositionEventChecks.current = {
-          startIsInsideEntity: false,
-          endIsTriggered: false,
-        }
-      return
-    }
-
-    const contentChanged =
-      editorState.getCurrentContent().getPlainText() !==
-      prevEditorState.getCurrentContent().getPlainText()
-
-    // if not on an entity, remove any previous selection highlight
-    const {entityKey} = DraftMatecatUtils.selectionIsEntity(editorState)
-    let newActiveDecorators = {...activeDecorators}
-    // select no tag
-    if (!entityKey)
-      setTimeout(() => {
-        SegmentActions.highlightTags()
-      })
-
-    // if opened, close TagsMenu
-    if (displayPopover) closePopover()
-    if (contentChanged) {
-      // Stop checking decorators while typing...
-      editorSync.onComposition = true
-      // ...remove unwanted decorators like lexiqa and qa blacklist...
-      if (activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR]) {
-        editorState = this.disableDecorator(
-          editorState,
-          DraftMatecatConstants.LEXIQA_DECORATOR,
-        )
-        newActiveDecorators = {
-          ...newActiveDecorators,
-          [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
-        }
-      }
-      if (activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR]) {
-        editorState = this.disableDecorator(
-          editorState,
-          DraftMatecatConstants.QA_BLACKLIST_DECORATOR,
-        )
-        newActiveDecorators = {
-          ...newActiveDecorators,
-          [DraftMatecatConstants.QA_BLACKLIST_DECORATOR]: false,
-        }
-      }
-      editorState = EditorState.acceptSelection(
-        editorState,
-        editorState.getSelection().set('hasFocus', true),
-      )
-      this.setState(
-        () => ({
-          activeDecorators: newActiveDecorators,
-          editorState: editorState,
-        }),
-        () => {
-          // Reactivate decorators
-          this.updateTranslationDebounced()
-          this.onCompositionStopDebounced()
-        },
-      )
-    } else {
-      this.setState(
-        () => ({
-          editorState: editorState,
-        }),
-        () => {
-          this.onCompositionStopDebounced()
-        },
-      )
-    }
-  }
-
-  // fix cursor jump at the beginning
-  forceSelectionFocus = (editorState) => {
-    const currentSelection = editorState.getSelection()
-    if (!currentSelection.getHasFocus()) {
-      const selection = currentSelection.set('hasFocus', true)
-      editorState = EditorState.acceptSelection(editorState, selection)
-    }
-    return editorState
-  }
-
-  // Methods for TagMenu ---- START
-  moveUpTagMenuSelection = () => {
-    const {displayPopover} = this.state
-    if (!displayPopover) return
-    const {
-      focusedTagIndex,
-      autocompleteSuggestions: {missingTags, sourceTags},
-    } = this.state
-    const mergeAutocompleteSuggestions = [...missingTags, ...sourceTags]
-    const newFocusedTagIndex =
-      focusedTagIndex - 1 < 0
-        ? mergeAutocompleteSuggestions.length - 1
-        : (focusedTagIndex - 1) % mergeAutocompleteSuggestions.length
-
-    this.setState({
-      focusedTagIndex: newFocusedTagIndex,
-    })
-  }
-
-  moveDownTagMenuSelection = () => {
-    const {displayPopover} = this.state
-    if (!displayPopover) return
-    const {
-      focusedTagIndex,
-      autocompleteSuggestions: {missingTags, sourceTags},
-    } = this.state
-    const mergeAutocompleteSuggestions = [...missingTags, ...sourceTags]
-    this.setState({
-      focusedTagIndex:
-        (focusedTagIndex + 1) % mergeAutocompleteSuggestions.length,
-    })
-  }
-
-  acceptTagMenuSelection = () => {
-    const {
-      focusedTagIndex,
-      displayPopover,
-      editorState,
-      triggerText,
-      autocompleteSuggestions: {missingTags = [], sourceTags},
-    } = this.state
-    if (!displayPopover) return
-    const mergeAutocompleteSuggestions = [...missingTags, ...sourceTags]
-    const selectedTag = mergeAutocompleteSuggestions[focusedTagIndex]
-    // Start typing
-    editorSync.onComposition = true
-    // Remove lexiqa while typing
-    let newEditorState = this.disableDecorator(
-      editorState,
-      DraftMatecatConstants.LEXIQA_DECORATOR,
-    )
-    const editorStateWithSuggestedTag = insertTag(
-      selectedTag,
-      newEditorState,
-      triggerText,
-    )
-    this.setState(
-      (prevState) => ({
-        activeDecorators: {
-          ...prevState.activeDecorators,
-          [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
-        },
-        editorState: editorStateWithSuggestedTag,
-        displayPopover: false,
-        clickedTag: selectedTag,
-        clickedOnTag: true,
-        triggerText: null,
-      }),
-      () => {
-        // Reactivate decorators
-        this.updateTranslationDebounced()
-        // Stop typing
-        this.onCompositionStopDebounced()
-      },
-    )
-  }
-
-  openPopover = (suggestions, position) => {
-    // Posizione da salvare e passare al compoennte
-    const popoverPosition = {
-      top: position.top,
-      left: position.left,
-    }
-
-    this.setState({
-      displayPopover: true,
-      autocompleteSuggestions: suggestions,
-      focusedTagIndex: 0,
-      popoverPosition: popoverPosition,
-    })
-  }
-
-  closePopover = () => {
-    this.setState({
-      displayPopover: false,
-      triggerText: null,
-    })
-  }
-
-  onTagClick = (suggestionTag) => {
-    const {editorState, triggerText} = this.state
-    // Start typing...
-    editorSync.onComposition = true
-    // Disable lexiqa while typing
-    let newEditorState = this.disableDecorator(
-      editorState,
-      DraftMatecatConstants.LEXIQA_DECORATOR,
-    )
-    let editorStateWithSuggestedTag = insertTag(
-      suggestionTag,
-      newEditorState,
-      triggerText,
-    )
-    this.setState(
-      (prevState) => ({
-        activeDecorators: {
-          ...prevState.activeDecorators,
-          [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
-        },
-        editorState: editorStateWithSuggestedTag,
-        editorFocused: true,
-        clickedOnTag: true,
-        clickedTag: suggestionTag,
-        displayPopover: false,
-        triggerText: null,
-      }),
-      () => {
-        // Reactivate decorators
-        this.updateTranslationDebounced()
-        // Stop typing
-        this.onCompositionStopDebounced()
-      },
-    )
-  }
-
-  // Methods for TagMenu ---- END
-
-  onPaste = () => {
-    const {editorState} = this.state
-    const internalClipboard = this.editor.getClipboard()
-    if (internalClipboard) {
-      const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
-        internalClipboard,
-        editorState,
-      )
-      this.onChange(clipboardEditorPasted)
-      this.setState({
-        editorState: clipboardEditorPasted,
-      })
-      return true
-    } else {
-      return false
-    }
-  }
-
-  pasteFragment = (text) => {
-    const {editorState} = this.state
-    const {fragment: clipboardFragment, plainText: clipboardPlainText} =
-      SegmentStore.getFragmentFromClipboard()
-    // if text in standard clipboard matches the the plainClipboard saved in store proceed using fragment
-    // otherwise we're handling an external copy
-    if (
-      clipboardFragment &&
-      text &&
-      clipboardPlainText.replace(/\n/g, '') === text.replace(/\n/g, '')
-    ) {
-      try {
-        const fragmentContent = JSON.parse(clipboardFragment)
-        let fragment = DraftMatecatUtils.buildFragmentFromJson(
-          fragmentContent.orderedMap,
-        )
-        const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
-          fragment,
-          editorState,
-          fragmentContent.entitiesMap,
-        )
-        this.setState(
-          {
-            editorState: clipboardEditorPasted,
-          },
-          () => {
-            this.updateTranslationDebounced()
-          },
-        )
-        // Paste fragment
-        return true
-      } catch (e) {
-        // Paste plain standard clipboard
-        return false
-      }
-    } else if (text) {
-      // we're handling an external copy, special chars must be striped from text
-      // and we have to add tag for external entities like nbsp or tab
-      let cleanText = DraftMatecatUtils.removeTagsFromText(text)
-      // Replace with placeholder
-      const nbspSign = tagSignatures['nbsp'].encodedPlaceholder
-      const tabSign = tagSignatures['tab'].encodedPlaceholder
-      cleanText = cleanText.replace(/°/gi, nbspSign).replace(/\t/gi, tabSign)
-      const plainTextClipboardFragment =
-        DraftMatecatUtils.buildFragmentFromText(cleanText)
-      const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
-        plainTextClipboardFragment,
-        editorState,
-      )
-      this.setState(
-        {
-          editorState: clipboardEditorPasted,
-        },
-        () => {
-          this.updateTranslationDebounced()
-        },
-      )
-      // Paste fragment
-      return true
-    }
-    // Paste plain standard clipboard
-    return false
-  }
-
-  copyFragment = (e) => {
-    const internalClipboard = this.editor.getClipboard()
-    const {editorState} = this.state
-    if (internalClipboard) {
-      e.preventDefault()
-      // Get plain text form internalClipboard fragment
-      const plainText = internalClipboard
-        .map((block) => block.getText())
-        .join('\n')
-        .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'), '')
-        .replace(/·/g, ' ')
-
-      const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(
-        internalClipboard,
-        editorState,
-      )
-      const fragment = JSON.stringify({
-        orderedMap: internalClipboard,
-        entitiesMap: entitiesMap,
-      })
-      e.clipboardData.setData('text/plain', plainText)
-      SegmentActions.copyFragmentToClipboard(fragment, plainText)
-    }
-  }
-
-  onDragEvent = () => {
-    editorSync.draggingFromEditArea = true
-  }
-
-  onDragEnd = () => {
-    editorSync.draggingFromEditArea = false
-  }
-
-  handleDrop = (selection, dataTransfer) => {
-    let {editorState} = this.state
-    const text = dataTransfer.getText()
-
-    // get selection of dragged text
-    const dragSelection = editorState.getSelection()
-    const dragSelectionLength =
-      dragSelection.focusOffset - dragSelection.anchorOffset
-    // get the fragment from current selection in editor (the highlighted tag)
-    let fragmentFromSelection = getFragmentFromSelection(editorState)
-    // Il fragment di draft NON FUNZIONA quindi lo ricostruisco
-    let tempFrag = DraftMatecatUtils.buildFragmentFromJson(
-      fragmentFromSelection,
-    )
-    // set selection to drop point and check dropping zone
-    editorState = EditorState.forceSelection(editorState, selection)
-    // Check: Cannot drop anything on entities
-    const {entityKey} = DraftMatecatUtils.selectionIsEntity(editorState)
-    if (entityKey) return 'handled'
-
-    if (text && !editorSync.draggingFromEditArea) {
-      try {
-        const fragmentContent = JSON.parse(text)
-        let fragment = DraftMatecatUtils.buildFragmentFromJson(
-          fragmentContent.orderedMap,
-        )
-        const editorStateWithFragment = DraftMatecatUtils.duplicateFragment(
-          fragment,
-          editorState,
-          fragmentContent.entitiesMap,
-        )
-        this.setState(
-          {
-            editorState: editorStateWithFragment,
-          },
-          () => {
-            this.updateTranslationDebounced()
-          },
-        )
-        return 'handled'
-      } catch (err) {
-        return 'not-handled'
-      }
-    } else {
-      // when drop is inside the same editor, use default behavior
-      // update: default behavior not working
-      try {
-        // remove drag selected range from editor state
-        let contentState = editorState.getCurrentContent()
-        contentState = Modifier.removeRange(
-          contentState,
-          dragSelection,
-          dragSelection.isBackward ? 'backward' : 'forward',
-        )
-
-        // Aggiornala nel caso in cui sposti in avanti il drag nello stesso blocco
-        const dragBlockKey = dragSelection.getAnchorKey()
-        const dropBlockKey = selection.getAnchorKey()
-        selection =
-          dragSelection.anchorOffset < selection.anchorOffset &&
-          dragBlockKey === dropBlockKey
-            ? selection.merge({
-                anchorOffset: selection.anchorOffset - dragSelectionLength,
-                focusOffset: selection.focusOffset - dragSelectionLength,
-              })
-            : selection
-
-        // Inserisci il fragment
-        contentState = Modifier.replaceWithFragment(
-          contentState,
-          selection,
-          tempFrag,
-        )
-
-        editorState = EditorState.push(
-          editorState,
-          contentState,
-          'insert-fragment',
-        )
-        editorState = EditorState.forceSelection(editorState, selection)
-
-        this.setState(
-          {
-            editorState: editorState,
-          },
-          () => {
-            this.updateTranslationDebounced()
-            setTimeout(() => {
-              SegmentActions.highlightTags()
-            })
-          },
-        )
-        return 'handled'
-      } catch (err) {
-        console.log(err)
-        return 'not-handled'
-      }
-    }
-  }
-
-  onEntityClick = (start, end) => {
-    const {editorState} = this.state
-    // Use _latestEditorState
-    try {
-      // Selection
-      const latestEditorState = this.editor._latestEditorState
-      const selectionState = latestEditorState.getSelection()
-      const currentBlockText = latestEditorState
-        .getCurrentContent()
-        .getBlockForKey(selectionState.getFocusKey())
-        .getText()
-      const zwsp = String.fromCharCode(parseInt('200B', 16))
-      const selectedTextAfter = currentBlockText.slice(end, end + 1)
-      const selectedTextBefore = currentBlockText.slice(start - 1, start)
-      const addZwspExtraStepBefore = zwsp === selectedTextBefore ? 1 : 0
-      const addZwspExtraStepAfter = zwsp === selectedTextAfter ? 1 : 0
-
-      let newSelection = selectionState.merge({
-        anchorOffset: start - addZwspExtraStepBefore, // -1 is to catch the zero-width space char placed before every entity
-        focusOffset: end + addZwspExtraStepAfter, // +1 is to catch the zero-width space char placed after every entity
-      })
-      const newEditorState = EditorState.forceSelection(
-        editorState,
-        newSelection,
-      )
-      this.setState({editorState: newEditorState})
-      // Highlight
-    } catch (e) {
-      console.log('Invalid selection')
-    }
-  }
-
-  /**
-   *
-   * @param minWidth - min length of element to show
-   * @returns {{top: number, left: number}}
-   */
-  getEditorRelativeSelectionOffset = (minWidth = 300) => {
-    const editorBoundingRect = this.editor.editor.getBoundingClientRect()
-    const selectionBoundingRect = window
-      .getSelection()
-      .getRangeAt(0)
-      .getBoundingClientRect()
-    const leftInitial = selectionBoundingRect.x - editorBoundingRect.x
-    const leftAdjusted =
-      editorBoundingRect.right - selectionBoundingRect.left < minWidth
-        ? leftInitial -
-          (minWidth - (editorBoundingRect.right - selectionBoundingRect.left))
-        : leftInitial
-    if (
-      selectionBoundingRect.bottom === 0 &&
-      selectionBoundingRect.left === 0 &&
-      selectionBoundingRect.height === 0
-    ) {
-      return {
-        top: 50,
-        left: 50,
-      }
-    }
-    return {
-      top:
-        selectionBoundingRect.bottom -
-        editorBoundingRect.top +
-        selectionBoundingRect.height,
-      left: leftAdjusted,
-    }
-  }
-
-  getUpdatedSegmentInfo = () => {
-    const {
-      segment: {
-        sid,
-        warnings,
-        tagMismatch,
-        opened,
-        missingTagsInTarget,
-        openSplit,
-      },
-    } = this.props
-    const {tagRange, editorState} = this.state
-    return {
-      sid,
-      warnings,
-      tagMismatch,
-      tagRange,
-      segmentOpened: opened,
-      missingTagsInTarget,
-      currentSelection: this.editor
-        ? this.editor._latestEditorState.getSelection()
-        : editorState.getSelection(),
-      openSplit,
-    }
-  }
-
-  formatSelection = (format) => {
-    const {editorState} = this.state
-    // Todo: if selectionIsEntity return
-    if (editorState.getSelection().isCollapsed()) {
-      return
-    }
-
-    const selectionsText = DraftMatecatUtils.getSelectedTextWithoutEntities(
-      editorState,
-    ).map((selected) => ({
-      ...selected,
-      value: DraftMatecatUtils.formatText(selected.value, format),
-    }))
-    const newEditorState = DraftMatecatUtils.replaceMultipleText(
-      editorState,
-      selectionsText,
-    )
-
-    this.setState(
-      {
-        editorState: newEditorState,
-      },
-      () => {
-        this.updateTranslationDebounced()
-      },
-    )
-  }
-
-  addMissingSourceTagsToTarget = () => {
-    const {segment} = this.props
-    const {editorState} = this.state
-    // Append missing tag at the end of the current translation string
-    let newTranslation = segment.translation
-    let newDecodedTranslation = segment.decodedTranslation
-    let newEditorState = editorState
-    segment.missingTagsInTarget.forEach((tag) => {
-      newTranslation += tag.data.encodedText
-      newDecodedTranslation += tag.data.placeholder
-      newEditorState = DraftMatecatUtils.addTagEntityToEditor(
-        newEditorState,
-        tag,
-      )
-    })
-    // Append missing tags to targetTagMap
-    let segmentTargetTagMap = [
-      ...segment.targetTagMap,
-      ...segment.missingTagsInTarget,
-    ]
-    // Insert tag entity in current editor without recompute tags associations
-    this.setState({
-      editorState: newEditorState,
-    })
-    //lock tags and run again getWarnings
-    setTimeout(() => {
-      SegmentActions.updateTranslation(
-        segment.sid,
-        newTranslation,
-        newDecodedTranslation,
-        segmentTargetTagMap,
-        [],
-      )
-      SegmentActions.getSegmentsQa({
-        ...this.props.segment,
-        translation: newTranslation,
-      })
-    }, 100)
-  }
-}
+  },
+)
 
 function getEntityStrategy(mutability) {
   return function (contentBlock, callback, contentState) {
@@ -1823,5 +1629,7 @@ function getEntityStrategy(mutability) {
     }, callback)
   }
 }
+
+Editarea.displayName = 'Editarea'
 
 export default Editarea

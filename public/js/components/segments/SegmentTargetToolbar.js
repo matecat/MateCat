@@ -107,7 +107,8 @@ export const SegmentTargetToolbar = ({
             group: 0,
             component: (
               <LaraStyles
-                {...{key: 'larastyle', sid, segment, isIconsBundled}}
+                key="larastyle"
+                {...{sid, segment, isIconsBundled}}
               />
             ),
           },
@@ -115,7 +116,8 @@ export const SegmentTargetToolbar = ({
             group: 0,
             component: (
               <AiFeedback
-                {...{key: 'aifeedback', sid, segment, isIconsBundled}}
+                key="aifeedback"
+                {...{sid, segment, isIconsBundled}}
               />
             ),
           },
@@ -123,8 +125,8 @@ export const SegmentTargetToolbar = ({
             group: 0,
             component: (
               <AiAlternatives
+                key="aialternatives"
                 {...{
-                  key: 'aialternatives',
                   sid,
                   segment,
                   editArea,

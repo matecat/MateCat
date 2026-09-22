@@ -1,0 +1,161 @@
+@use '../../commons/mixins';
+@use '../../tokens/colors';
+@use '../../commons/variables';
+
+.micSpeech {
+  display: none;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  padding: 3px 4px 5px 4px;
+  z-index: 9999999;
+
+  &:hover {
+    svg g {
+      fill: colors.$black;
+    }
+  }
+
+  &.micSpeechActive {
+    svg g {
+      fill: red;
+    }
+  }
+
+  &.micSpeechReceiving {
+    svg g {
+      fill: colors.$white;
+    }
+  }
+
+  &.micSpeechReceiving .micBg {
+    background: red;
+    -webkit-border-radius: 60px;
+    -moz-border-radius: 60px;
+    border-radius: 60px;
+    height: 50px;
+    width: 50px;
+    position: absolute;
+    right: -11px;
+    top: -10px;
+    @include mixins.animation-duration(1s);
+    @include mixins.animation-name(speaking);
+    @include mixins.animation-iteration-count(infinite);
+    @include mixins.animation-timing-function(ease-in-out);
+    @include mixins.animation-direction(alternate);
+
+    svg g {
+      fill: colors.$white;
+    }
+  }
+
+  svg g {
+    fill: colors.$grey600;
+  }
+}
+
+section.opened .micSpeech,
+section.opened .micSpeechActive {
+  display: block;
+}
+
+.micBg2 {
+  position: absolute;
+  background: transparent;
+  width: 20px;
+  right: 4px;
+  height: 20px;
+  border-radius: 20px;
+}
+
+.micSpeech {
+  zoom: 0.8;
+}
+
+@include mixins.keyframes(speaking) {
+  0% {
+    -webkit-transform: scale(0.6);
+    opacity: 0.6;
+  }
+  50% {
+    -webkit-transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    -webkit-transform: scale(0.6);
+    opacity: 0.6;
+  }
+}
+
+.segment-actions-container {
+  display: flex;
+  justify-content: end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.segment-target-toolbar {
+  display: flex;
+  gap: 8px;
+  flex-grow: 1;
+
+  .last-ai-feature-button:not(:last-child) {
+    margin-right: 15px;
+
+    &::after {
+      position: absolute;
+      content: '';
+      left: 43px;
+      width: 1px;
+      height: 100%;
+      background-color: colors.$grey150;
+    }
+  }
+}
+
+.segment-target-toolbar-icon-bundled {
+  padding: 0 !important;
+  font-weight: normal !important;
+}
+
+.segment-target-toolbar-dropdown-trigger {
+  height: 32px !important;
+  font-weight: bold;
+  font-size: variables.$font-size-xsmall !important;
+}
+
+.tags-switch {
+  height: 16px;
+  width: 28px;
+  // The menu row owns the toggle action. Without this the label-wrapped
+  // checkbox delivers a second click to the Radix item, toggling twice.
+  pointer-events: none;
+  span::before {
+    width: 12px;
+    height: 12px;
+    bottom: 2px;
+    left: 2px;
+  }
+  input:checked + span::before {
+    transform: translateX(12px);
+  }
+}
+
+.segment-target-toolbar-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.segment-target-toolbar-menu-toggle-wrapper {
+  width: 100%;
+}
+
+.segment-target-toolbar-menu-toggle {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+}

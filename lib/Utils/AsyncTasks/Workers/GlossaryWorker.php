@@ -426,11 +426,8 @@ class GlossaryWorker extends AbstractWorker
             'payload' => null,
         ];
 
-        if ($response->responseStatus === 202 || $response->responseStatus >= 300) {
-            $errMessage = match ($response->responseStatus) {
-                202 => "MyMemory is busy, please try later",
-                default => "Error, please try later",
-            };
+        if ($response->responseStatus >= 300) {
+            $errMessage = "Error, please try later";
 
             $message['error'] = [
                 'code' => $response->responseStatus,
@@ -439,7 +436,7 @@ class GlossaryWorker extends AbstractWorker
             ];
         }
 
-        if ($response->responseStatus < 300 && $response->responseStatus !== 202) {
+        if ($response->responseStatus < 300) {
             $matchingWords = $payload['term']['matching_words'];
             $matchingWordsAsArray = [];
 

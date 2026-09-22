@@ -127,6 +127,24 @@ describe('MsPowerpoint', () => {
     expect(updated.msPowerpoint.extract_notes).toBe(false)
   })
 
+  test('the space bar closes a slide pill', async () => {
+    const user = userEvent.setup()
+    const {modifyingCurrentTemplate, currentTemplate} = setup()
+
+    await user.type(screen.getByTestId('email-input'), '1 3 5')
+    await user.keyboard('{Enter}')
+
+    await waitFor(() => expect(modifyingCurrentTemplate).toHaveBeenCalled())
+
+    const updater =
+      modifyingCurrentTemplate.mock.calls[
+        modifyingCurrentTemplate.mock.calls.length - 1
+      ][0]
+    const updated = updater(currentTemplate)
+    // the panel converts the pills to slide numbers before it saves
+    expect(updated.msPowerpoint.translate_slides).toEqual([1, 3, 5])
+  })
+
   test('does not call modifyingCurrentTemplate when nothing changed', () => {
     const {modifyingCurrentTemplate} = setup()
 

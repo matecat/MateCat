@@ -218,6 +218,46 @@ class ContextUrlControllerTest extends AbstractTest
         $this->controller->setForSegment();
     }
 
+    /**
+     * The budget was introduced as 10 and silently became 5 inside a Swagger-only commit
+     * (7156d439c5), because nothing pinned it. Pin the derived value, the shared route key and the
+     * fact that both identifiers are charged, so the next drift fails here.
+     */
+    #[Test]
+    public function checkRateLimit_charges_600_per_window_on_the_shared_context_url_route(): void
+    {
+        $responseMock = $this->injectResponseMock();
+
+        $seen = [];
+
+        $rateLimiter = $this->createMock(RateLimiterService::class);
+        $rateLimiter->expects(self::exactly(2))
+            ->method('checkAndIncrement')
+            ->with(
+                self::anything(),
+                self::anything(),
+                '/api/v3/context-url',
+                600
+            )
+            ->willReturnCallback(function ($response, $identifier) use (&$seen) {
+                $seen[] = $identifier;
+
+                return null;
+            });
+        $this->reflector->getProperty('rateLimiterService')->setValue($this->controller, $rateLimiter);
+
+        $this->setRequestBody('{"context_url": "https://example.com"}');
+
+        // under the limit the request goes through to its normal response
+        $responseMock->expects(self::once())->method('json');
+
+        $this->controller->setForProject();
+
+        // the IP is charged first, then the logged-in user
+        self::assertCount(2, $seen);
+        self::assertSame('test@example.org', $seen[1]);
+    }
+
     // ── Authorization ────────────────────────────────────────────────────
 
     #[Test]

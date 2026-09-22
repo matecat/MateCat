@@ -1,4 +1,4 @@
-import React, {createRef} from 'react'
+import React, {createRef, useContext, useEffect, useRef, useState} from 'react'
 import {isUndefined} from 'lodash'
 import {fromJS} from 'immutable'
 import $ from 'jquery'
@@ -10,36 +10,31 @@ import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
+import matchInfo from './matchInfo'
 import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
+import Trash from '../../../img/icons/Trash'
 import {NUM_CONTRIBUTION_RESULTS} from '../../constants/Constants'
 import Tooltip from '../common/Tooltip'
 import IconDown from '../../../img/icons/IconDown'
 
 const MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED = 3
 
-class SegmentFooterTabMatches extends React.Component {
-  static contextType = SegmentContext
+const SUGGESTION_SHORTCUT_LABEL = 'CTRL+'
 
-  constructor(props) {
-    super(props)
-    this.suggestionShortcutLabel = 'CTRL+'
-    this.processContributions = this.processContributions.bind(this)
-    this.chooseSuggestion = this.chooseSuggestion.bind(this)
-    this.setJobTmKeys = this.setJobTmKeys.bind(this)
+const SegmentFooterTabMatches = ({segment, code, active_class, tab_class}) => {
+  const {multiMatchLangs, clientConnected} = useContext(SegmentContext)
 
-    this.state = {
-      tmKeys: CatToolStore.getJobTmKeys(),
-      numContributionsToShow: MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED,
-    }
-  }
+  const [tmKeys, setTmKeys] = useState(() => CatToolStore.getJobTmKeys())
+  const [numContributionsToShow, setNumContributionsToShow] = useState(
+    MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED,
+  )
 
-  processContributions(matches) {
-    var self = this
+  const processContributions = (matches) => {
     var matchesProcessed = []
-    // SegmentActions.createFooter(this.props.segment.sid);
+    // SegmentActions.createFooter(segment.sid);
     $.each(matches, function () {
       var item = {}
       item.id = this.id
@@ -92,10 +87,7 @@ class SegmentFooterTabMatches extends React.Component {
         parseInt(this.match) > 70 &&
         parseInt(this.match) < 100
       ) {
-        item.sourceDiff = TextUtils.getDiffHtml(
-          this.segment,
-          self.props.segment.segment,
-        )
+        item.sourceDiff = TextUtils.getDiffHtml(this.segment, segment.segment)
 
         item.sourceDiff = DraftMatecatUtils.transformTagsToHtml(
           item.sourceDiff,
@@ -106,7 +98,7 @@ class SegmentFooterTabMatches extends React.Component {
       if (!isUndefined(this.tm_properties)) {
         item.tm_properties = this.tm_properties
       }
-      let matchToInsert = self.processMatchCallback(item)
+      let matchToInsert = matchInfo.processMatchCallback(item)
       if (matchToInsert) {
         matchesProcessed.push(item)
       }
@@ -114,26 +106,12 @@ class SegmentFooterTabMatches extends React.Component {
     return matchesProcessed
   }
 
-  /**
-   * Used by the plugins to override matches
-   * @param item
-   * @returns {*}
-   */
-  processMatchCallback(item) {
-    return item
-  }
-
-  chooseSuggestion(sid, index) {
-    if (this.props.segment.sid === sid) {
-      this.suggestionDblClick(this.props.segment.contributions, index)
+  const chooseSuggestion = (sid, index) => {
+    if (segment.sid === sid) {
+      suggestionDblClick(segment.contributions, index)
     }
   }
-  setJobTmKeys(keys) {
-    this.setState({tmKeys: keys})
-  }
-
-  isOwnerKey(key) {
-    const {tmKeys} = this.state
+  const isOwnerKey = (key) => {
     if (tmKeys && tmKeys.length > 0) {
       const ownedKey = tmKeys.find(
         (currentKey) => currentKey.key === key && currentKey.w === 1,
@@ -143,19 +121,16 @@ class SegmentFooterTabMatches extends React.Component {
     return false
   }
 
-  suggestionDblClick(match, index) {
+  const suggestionDblClick = (match, index) => {
     setTimeout(() => {
       SegmentActions.setFocusOnEditArea()
-      SegmentActions.disableTPOnSegment(this.props.segment)
-      SegmentActions.setChoosenSuggestion(
-        this.props.segment.original_sid,
-        index,
-      )
-      TranslationMatches.copySuggestionInEditarea(this.props.segment, index)
+      SegmentActions.disableTPOnSegment(segment)
+      SegmentActions.setChoosenSuggestion(segment.original_sid, index)
+      TranslationMatches.copySuggestionInEditarea(segment, index)
     }, 200)
   }
 
-  deleteSuggestion(match) {
+  const deleteSuggestion = (match) => {
     var source = match.segment
     var target = match.translation
 
@@ -163,11 +138,11 @@ class SegmentFooterTabMatches extends React.Component {
       source,
       target,
       match.id,
-      this.props.segment.original_sid,
+      segment.original_sid,
     )
   }
 
-  getMatchInfo(match) {
+  const getMatchInfo = (match) => {
     const penaltyPercRef = createRef()
     return (
       <ul className="graysmall-details">
@@ -195,7 +170,7 @@ class SegmentFooterTabMatches extends React.Component {
               </div>
             }
           >
-            <li ref={createRef()} className={`percent per-yellow-variant`}>
+            <li className={`percent per-yellow-variant`}>
               {match.source} {'>'} {match.target} (-1%)
             </li>
           </Tooltip>
@@ -234,72 +209,55 @@ class SegmentFooterTabMatches extends React.Component {
           </span>
         </li>*/}
 
-        {this.getMatchInfoMetadata(match)}
+        {matchInfo.getMatchInfoMetadata({match, segment: segment})}
       </ul>
     )
   }
 
-  /**
-   * Get others match info metadata, function overrided inside plugin
-   *
-   * @param {object} match
-   * @returns {object}
-   */
-  getMatchInfoMetadata() {
-    return ''
-  }
+  // Registered once at mount, so the listener must resolve the segment when it
+  // fires rather than closing over the one from the first render.
+  const latestRef = useRef()
+  latestRef.current = {segment, multiMatchLangs}
 
-  componentDidMount() {
-    const {multiMatchLangs} = this.context
-    this._isMounted = true
-    SegmentActions.getContributions(this.props.segment.sid, multiMatchLangs)
+  // chooseSuggestion is a plain per-render closure; the mount-registered
+  // listener calls whichever one the latest render produced.
+  const chooseSuggestionRef = useRef()
+  chooseSuggestionRef.current = chooseSuggestion
+
+  useEffect(() => {
+    const onChooseContribution = (sid, index) =>
+      chooseSuggestionRef.current(sid, index)
+
+    const {segment: current, multiMatchLangs: langs} = latestRef.current
+    SegmentActions.getContributions(current.sid, langs)
     SegmentStore.addListener(
       SegmentConstants.CHOOSE_CONTRIBUTION,
-      this.chooseSuggestion,
+      onChooseContribution,
     )
-    CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, this.setJobTmKeys)
-  }
+    CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setTmKeys)
 
-  componentWillUnmount() {
-    this._isMounted = false
-    SegmentStore.removeListener(
-      SegmentConstants.CHOOSE_CONTRIBUTION,
-      this.chooseSuggestion,
-    )
-    CatToolStore.removeListener(
-      CatToolConstants.UPDATE_TM_KEYS,
-      this.setJobTmKeys,
-    )
-  }
-
-  /**
-   * Do not delete, overwritten by plugin
-   */
-  componentDidUpdate(prevProps) {
-    if (!prevProps.segment.unlocked && this.props.segment.unlocked) {
-      const {multiMatchLangs} = this.context
-      SegmentActions.getContribution(this.props.segment.sid, multiMatchLangs)
+    return () => {
+      SegmentStore.removeListener(
+        SegmentConstants.CHOOSE_CONTRIBUTION,
+        onChooseContribution,
+      )
+      CatToolStore.removeListener(CatToolConstants.UPDATE_TM_KEYS, setTmKeys)
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return (
-      ((!isUndefined(nextProps.segment.contributions) ||
-        !isUndefined(this.props.segment.contributions)) &&
-        ((!isUndefined(nextProps.segment.contributions) &&
-          isUndefined(this.props.segment.contributions)) ||
-          !fromJS(this.props.segment.contributions).equals(
-            fromJS(nextProps.segment.contributions),
-          ))) ||
-      this.props.active_class !== nextProps.active_class ||
-      this.props.tab_class !== nextProps.tab_class ||
-      this.props.segment.unlocked !== nextProps.segment.unlocked ||
-      this.state.tmKeys !== nextState.tmKeys ||
-      this.state.numContributionsToShow !== nextState.numContributionsToShow
-    )
-  }
+  // Was componentDidUpdate, which does not run on mount; seeding the ref with
+  // the current value keeps it from firing on the first render.
+  const prevUnlockedRef = useRef(segment.unlocked)
+  useEffect(() => {
+    if (!prevUnlockedRef.current && segment.unlocked) {
+      SegmentActions.getContribution(segment.sid, multiMatchLangs)
+    }
+    prevUnlockedRef.current = segment.unlocked
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [segment.unlocked])
 
-  async copyText(e) {
+  const copyText = async (e) => {
     const internalClipboard = document.getSelection()
     if (internalClipboard) {
       e.preventDefault()
@@ -316,199 +274,209 @@ class SegmentFooterTabMatches extends React.Component {
     }
   }
 
-  allowHTML(string) {
+  const allowHTML = (string) => {
     return {__html: string}
   }
 
-  toggleExtendend = () => {
-    this.setState({
-      numContributionsToShow:
-        this.state.numContributionsToShow < NUM_CONTRIBUTION_RESULTS
-          ? NUM_CONTRIBUTION_RESULTS
-          : MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED,
+  const toggleExtendend = () =>
+    setNumContributionsToShow(
+      numContributionsToShow < NUM_CONTRIBUTION_RESULTS
+        ? NUM_CONTRIBUTION_RESULTS
+        : MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED,
+    )
+
+  let matchesHtml = []
+  if (
+    segment.contributions &&
+    segment.contributions.matches &&
+    segment.contributions.matches.length > 0
+  ) {
+    let tpmMatches = processContributions(
+      segment.contributions.matches.filter(
+        (contribution, index) => index < numContributionsToShow,
+      ),
+    )
+
+    tpmMatches.forEach((match, index) => {
+      const {memoryKey} = match
+      const isOwnedKey = memoryKey ? isOwnerKey(memoryKey) : false
+      const isPublicTm = match.cb !== 'MT' && !memoryKey
+      const trashIcon =
+        match.disabled || (!isOwnedKey && !isPublicTm) ? (
+          ''
+        ) : (
+          <Button
+            id={segment.sid + '-tm-' + match.id + '-delete'}
+            className="trash"
+            title="delete this row"
+            type={BUTTON_TYPE.ICON}
+            size={BUTTON_SIZE.ICON_XSMALL}
+            onClick={() => deleteSuggestion(match, index)}
+          >
+            <Trash size={16} />
+          </Button>
+        )
+      var item = (
+        <ul
+          key={match.id}
+          className="suggestion-item graysmall"
+          data-item={index + 1}
+          data-id={match.id}
+          data-original={match.segment}
+          onDoubleClick={() => suggestionDblClick(match, index + 1)}
+        >
+          <li className="sugg-source">
+            <span
+              id={segment.sid + '-tm-' + match.id + '-source'}
+              className="suggestion_source"
+              dangerouslySetInnerHTML={allowHTML(match.sourceDiff)}
+            ></span>
+          </li>
+          <li className="b sugg-target">
+            {/* Only the first three matches have a shortcut bound to them:
+                copyContribution1..3 in utils/shortcuts.js. */}
+            {index < MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED && (
+              <span className="graysmall-message">
+                {' '}
+                {SUGGESTION_SHORTCUT_LABEL + (index + 1)}
+              </span>
+            )}
+            <span
+              id={segment.sid + '-tm-' + match.id + '-translation'}
+              className="translation"
+              dangerouslySetInnerHTML={allowHTML(match.translationDecodedHtml)}
+            ></span>
+            {trashIcon}
+          </li>
+          {getMatchInfo(match)}
+        </ul>
+      )
+      matchesHtml.push(item)
+    })
+  } else if (
+    segment.contributions &&
+    segment.contributions.matches &&
+    segment.contributions.matches.length === 0
+  ) {
+    if (config.mt_enabled) {
+      matchesHtml.push(
+        <ul key={0} className="graysmall message">
+          <li>
+            No matches could be found for this segment. Please, contact{' '}
+            <a href="mailto:support@matecat.com">support@matecat.com</a> if you
+            think this is an error.
+          </li>
+        </ul>,
+      )
+    } else {
+      matchesHtml.push(
+        <ul key={0} className="graysmall message">
+          <li>No match found for this segment</li>
+        </ul>,
+      )
+    }
+  }
+
+  let errors = []
+  if (
+    segment.contributions &&
+    segment.contributions.error &&
+    segment.contributions.errors.length > 0
+  ) {
+    segment.contributions.errors.forEach((error) => {
+      let toAdd = false,
+        messageClass,
+        imgClass,
+        messageTypeText
+
+      switch (error.code) {
+        case '-2001':
+          toAdd = true
+          messageClass = 'error'
+          imgClass = 'error-img'
+          messageTypeText = 'Error: '
+          break
+        case '-2002':
+          toAdd = true
+          messageClass = 'warning'
+          imgClass = 'warning-img'
+          messageTypeText = 'Warning: '
+          break
+      }
+      if (toAdd) {
+        let item = (
+          <ul className="engine-error-item graysmall">
+            <li className="engine-error">
+              <div className={imgClass} />
+              <span className={'engine-error-message ' + messageClass}>
+                {messageTypeText + ' ' + error.message}
+              </span>
+            </li>
+          </ul>
+        )
+
+        errors.push(item)
+      }
     })
   }
 
-  render() {
-    const {clientConnected} = this.context
+  const isExtended = numContributionsToShow === NUM_CONTRIBUTION_RESULTS
 
-    let matchesHtml = []
-    let self = this
-    if (
-      this.props.segment.contributions &&
-      this.props.segment.contributions.matches &&
-      this.props.segment.contributions.matches.length > 0
-    ) {
-      let tpmMatches = this.processContributions(
-        this.props.segment.contributions.matches.filter(
-          (contribution, index) => index < this.state.numContributionsToShow,
-        ),
-      )
+  const moreButton = (
+    <Button
+      className={`segment-footer-tab-more-button ${isExtended ? 'segment-footer-tab-more-button-extended-mode' : ''}`}
+      type={BUTTON_TYPE.DEFAULT}
+      size={BUTTON_SIZE.SMALL}
+      onClick={toggleExtendend}
+    >
+      <IconDown size={18} />
+      {isExtended ? 'Fewer' : 'More'}
+    </Button>
+  )
 
-      tpmMatches.forEach((match, index) => {
-        const {memoryKey} = match
-        const isOwnedKey = memoryKey ? this.isOwnerKey(memoryKey) : false
-        const isPublicTm = match.cb !== 'MT' && !memoryKey
-        const trashIcon =
-          match.disabled || (!isOwnedKey && !isPublicTm) ? (
-            ''
-          ) : (
-            <span
-              id={self.props.segment.sid + '-tm-' + match.id + '-delete'}
-              className="trash"
-              title="delete this row"
-              onClick={self.deleteSuggestion.bind(self, match, index)}
-            />
-          )
-        var item = (
-          <ul
-            key={match.id}
-            className="suggestion-item graysmall"
-            data-item={index + 1}
-            data-id={match.id}
-            data-original={match.segment}
-            onDoubleClick={self.suggestionDblClick.bind(self, match, index + 1)}
-          >
-            <li className="sugg-source">
-              <span
-                id={self.props.segment.sid + '-tm-' + match.id + '-source'}
-                className="suggestion_source"
-                dangerouslySetInnerHTML={self.allowHTML(match.sourceDiff)}
-              ></span>
-            </li>
-            <li className="b sugg-target">
-              <span className="graysmall-message">
-                {' '}
-                {self.suggestionShortcutLabel + (index + 1)}
-              </span>
-              <span
-                id={self.props.segment.sid + '-tm-' + match.id + '-translation'}
-                className="translation"
-                dangerouslySetInnerHTML={self.allowHTML(
-                  match.translationDecodedHtml,
-                )}
-              ></span>
-              {trashIcon}
-            </li>
-            {self.getMatchInfo(match)}
-          </ul>
-        )
-        matchesHtml.push(item)
-      })
-    } else if (
-      this.props.segment.contributions &&
-      this.props.segment.contributions.matches &&
-      this.props.segment.contributions.matches.length === 0
-    ) {
-      if (config.mt_enabled) {
-        matchesHtml.push(
-          <ul key={0} className="graysmall message">
-            <li>
-              No matches could be found for this segment. Please, contact{' '}
-              <a href="mailto:support@matecat.com">support@matecat.com</a> if
-              you think this is an error.
-            </li>
-          </ul>,
-        )
-      } else {
-        matchesHtml.push(
-          <ul key={0} className="graysmall message">
-            <li>No match found for this segment</li>
-          </ul>,
-        )
-      }
-    }
-
-    let errors = []
-    if (
-      this.props.segment.contributions &&
-      this.props.segment.contributions.error &&
-      this.props.segment.contributions.errors.length > 0
-    ) {
-      this.props.segment.contributions.errors.forEach((error) => {
-        let toAdd = false,
-          messageClass,
-          imgClass,
-          messageTypeText
-
-        switch (error.code) {
-          case '-2001':
-            toAdd = true
-            messageClass = 'error'
-            imgClass = 'error-img'
-            messageTypeText = 'Error: '
-            break
-          case '-2002':
-            toAdd = true
-            messageClass = 'warning'
-            imgClass = 'warning-img'
-            messageTypeText = 'Warning: '
-            break
-        }
-        if (toAdd) {
-          let item = (
-            <ul className="engine-error-item graysmall">
-              <li className="engine-error">
-                <div className={imgClass} />
-                <span className={'engine-error-message ' + messageClass}>
-                  {messageTypeText + ' ' + error.message}
-                </span>
-              </li>
-            </ul>
-          )
-
-          errors.push(item)
-        }
-      })
-    }
-
-    const isExtended =
-      this.state.numContributionsToShow === NUM_CONTRIBUTION_RESULTS
-
-    const moreButton = (
-      <Button
-        className={`segment-footer-tab-more-button ${isExtended ? 'segment-footer-tab-more-button-extended-mode' : ''}`}
-        type={BUTTON_TYPE.DEFAULT}
-        size={BUTTON_SIZE.SMALL}
-        onClick={this.toggleExtendend}
-      >
-        <IconDown size={18} />
-        {isExtended ? 'Fewer' : 'More'}
-      </Button>
-    )
-
-    return (
-      <div
-        key={'container_' + this.props.code}
-        className={
-          'tab sub-editor ' +
-          this.props.active_class +
-          ' ' +
-          this.props.tab_class
-        }
-        id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
-        onCopy={this.copyText}
-        onCut={this.copyText}
-      >
-        {clientConnected ? (
-          <>
-            <div className="overflow">
-              {!isUndefined(matchesHtml) && matchesHtml.length > 0 ? (
-                matchesHtml
-              ) : (
-                <span className="loader loader_on" />
-              )}
-            </div>
-            {this.props.segment.contributions?.matches.length >
-              MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED && moreButton}
-            {errors.length > 0 && <div className="engine-errors">{errors}</div>}
-          </>
-        ) : (
-          clientConnected === false && <SegmentFooterTabError />
-        )}
-      </div>
-    )
-  }
+  return (
+    <div
+      key={'container_' + code}
+      className={'tab sub-editor ' + active_class + ' ' + tab_class}
+      id={'segment-' + segment.sid + '-' + tab_class}
+      onCopy={copyText}
+      onCut={copyText}
+    >
+      {clientConnected ? (
+        <>
+          <div className="overflow">
+            {!isUndefined(matchesHtml) && matchesHtml.length > 0 ? (
+              matchesHtml
+            ) : (
+              <span className="loader loader_on" />
+            )}
+          </div>
+          {segment.contributions?.matches.length >
+            MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED && moreButton}
+          {errors.length > 0 && <div className="engine-errors">{errors}</div>}
+        </>
+      ) : (
+        clientConnected === false && <SegmentFooterTabError />
+      )}
+    </div>
+  )
 }
 
-export default SegmentFooterTabMatches
+// The class's shouldComponentUpdate, negated. Its tmKeys and numContributionsToShow
+// clauses are dropped: those are state, which now re-renders on its own.
+export default React.memo(
+  SegmentFooterTabMatches,
+  (prev, next) =>
+    !(
+      ((!isUndefined(next.segment.contributions) ||
+        !isUndefined(prev.segment.contributions)) &&
+        ((!isUndefined(next.segment.contributions) &&
+          isUndefined(prev.segment.contributions)) ||
+          !fromJS(prev.segment.contributions).equals(
+            fromJS(next.segment.contributions),
+          ))) ||
+      prev.active_class !== next.active_class ||
+      prev.tab_class !== next.tab_class ||
+      prev.segment.unlocked !== next.segment.unlocked
+    ),
+)

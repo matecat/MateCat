@@ -75,7 +75,9 @@ describe('SegmentFooterTabConcordance', () => {
     global.config.tms_enabled = false
     renderComponent()
     expect(
-      screen.getByText('TM Search is not available when the TM feature is disabled'),
+      screen.getByText(
+        'TM Search is not available when the TM feature is disabled',
+      ),
     ).toBeInTheDocument()
     global.config.tms_enabled = true
   })
@@ -151,9 +153,7 @@ describe('SegmentFooterTabConcordance', () => {
         text: 'found source',
       })
     })
-    expect(document.querySelector('.search-source')).toHaveValue(
-      'found source',
-    )
+    expect(document.querySelector('.search-source')).toHaveValue('found source')
   })
 
   test('FIND_CONCORDANCE event with target text populates target field', () => {
@@ -164,9 +164,7 @@ describe('SegmentFooterTabConcordance', () => {
         text: 'found target',
       })
     })
-    expect(document.querySelector('.search-target')).toHaveValue(
-      'found target',
-    )
+    expect(document.querySelector('.search-target')).toHaveValue('found target')
   })
 
   test('FIND_CONCORDANCE event for a different sid is ignored', () => {
@@ -198,7 +196,10 @@ describe('SegmentFooterTabConcordance', () => {
   })
 })
 
-describe('SegmentFooterTabConcordance.prototype.copyText', () => {
+// Copying out of the results pane strips zero-width and middle-dot markers before
+// it reaches the clipboard. Driven through a real copy event rather than the
+// component's internals, so it keeps working however the component is written.
+describe('copying from the concordance tab', () => {
   afterEach(() => {
     jest.restoreAllMocks()
   })
@@ -206,19 +207,18 @@ describe('SegmentFooterTabConcordance.prototype.copyText', () => {
   test('does not reject when the browser denies clipboard permission', async () => {
     jest
       .spyOn(document, 'getSelection')
-      .mockReturnValue({toString: () => 'some concordance text'})
+      .mockReturnValue({toString: () => 'some\u200B concordance·text'})
     navigator.clipboard = {
       writeText: jest
         .fn()
         .mockRejectedValue(new DOMException('denied', 'NotAllowedError')),
     }
+    const {container} = renderComponent()
 
-    await expect(
-      SegmentFooterTabConcordance.prototype.copyText({
-        preventDefault: jest.fn(),
-      }),
-    ).resolves.not.toThrow()
+    fireEvent.copy(container.querySelector('.tab.sub-editor'))
+    await Promise.resolve()
 
+    // the zero-width marker is dropped and the middle dot becomes a space
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
       'some concordance text',
     )

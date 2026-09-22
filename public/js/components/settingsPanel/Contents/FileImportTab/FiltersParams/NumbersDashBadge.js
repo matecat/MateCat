@@ -15,8 +15,10 @@ export const NumbersDashBadge = ({
   disabled,
   error,
 }) => {
+  // the space has to get through the keystroke filter, otherwise the space bar could
+  // never close a pill here
   const validateUserTypingCallback = useCallback(
-    (value) => /^[0-9-,]*$/.test(value),
+    (value) => /^[0-9-, ]*$/.test(value),
     [],
   )
 
@@ -36,7 +38,7 @@ export const NumbersDashBadge = ({
         value,
         validateUserTyping: validateUserTypingCallback,
         validateChip: validateChipCallback,
-        separators: [',', SPECIALS_SEPARATORS.EnterKey],
+        separators: [',', ' ', SPECIALS_SEPARATORS.EnterKey],
         placeholder,
         disabled,
         error,

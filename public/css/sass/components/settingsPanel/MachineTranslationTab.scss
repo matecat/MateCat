@@ -6,7 +6,7 @@
     h2 {
       align-self: flex-start;
       line-height: 40px;
-      font-size: 20px;
+      font-size: variables.$font-size-big;
     }
   }
 
@@ -16,7 +16,7 @@
 
   .confirm-button {
     height: 26px;
-    font-size: 14px !important;
+    font-size: variables.$font-size-xsmall !important;
     min-width: unset;
     gap: 5px !important;
     border-radius: unset;
@@ -33,7 +33,7 @@
   }
 
   .settings-panel-table-rowHeading {
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
   }
 }
 .add-mt-button {
@@ -116,7 +116,7 @@
   gap: 4px;
   min-width: 0;
   width: 100%;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   &:not(:first-child) {
     margin-top: 20px;
   }
@@ -132,11 +132,11 @@
     }
   }
   span {
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
   }
   input[type='text'] {
     padding: 3px 5px 3px 9px;
-    font-size: 16px !important;
+    font-size: variables.$font-size-small !important;
     -moz-border-radius: 2px;
     border-radius: 2px;
     border: 1px solid rgba(34, 36, 38, 0.15);
@@ -191,7 +191,7 @@
 
   .select-with-label__wrapper {
     .select {
-      font-size: 16px;
+      font-size: variables.$font-size-small;
       padding: 9px 46px 9px 12px;
       border: 1px solid rgba(34, 36, 38, 0.15);
       color: black;
@@ -431,7 +431,7 @@
   }
 
   .grey-button {
-    font-size: 14px !important;
+    font-size: variables.$font-size-xsmall !important;
     border-radius: variables.$border-radius-default;
     height: 32px;
 
@@ -473,7 +473,7 @@
   height: 26px;
   gap: 8px;
   border-radius: 2px;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   color: colors.$black;
   background: colors.$grey100;
   padding: 0 8px;
@@ -509,7 +509,7 @@
   padding-top: 4px;
 
   .settings-panel-table-rowHeading {
-    font-size: 16px;
+    font-size: variables.$font-size-small;
   }
 
   .settings-panel-table-rows-container {
@@ -530,7 +530,7 @@
   margin: 20px 0;
 
   > p {
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
     margin: 0 0 10px 0;
   }
 }
@@ -589,7 +589,7 @@
 
   h4 {
     margin-bottom: 5px;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
   }
 
   p {
@@ -656,11 +656,11 @@
 
       h3 {
         margin: 0;
-        font-size: 18px;
+        font-size: variables.$font-size-base;
       }
 
       p {
-        font-size: 16px;
+        font-size: variables.$font-size-small;
       }
 
       > :first-child {
@@ -676,7 +676,7 @@
       display: block;
       text-align: left;
       color: colors.$grey700;
-      font-size: 16px;
+      font-size: variables.$font-size-small;
       line-height: 24px;
     }
 
@@ -745,6 +745,6 @@
     padding: 8px 8px;
     background-color: unset;
     outline: none;
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
   }
 }

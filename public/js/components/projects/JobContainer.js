@@ -615,23 +615,19 @@ export const JobContainer = ({
         <div className="outsource-delivery-container">
           <div className="job-delivery-date">
             {job.get('translator') && (
-              <Tooltip content={job.get('translator').get('email')}>
+              <Tooltip
+                content={`${job.get('translator').get('email')} - ${gmtDate.day} ${gmtDate.month} ${gmtDate.year} - ${gmtDate.time} ${gmtDate.gmt}`}
+              >
                 <div
                   ref={deliveryEmailRef}
                   className="job-delivery-email"
                   onClick={() => openOutsourceModal(true, false)}
                 >
-                  {job.get('translator').get('email')}
+                  {job.get('translator').get('email')} on {gmtDate.day}{' '}
+                  {gmtDate.month} - {gmtDate.time}
                 </div>
               </Tooltip>
-            )}{' '}
-            <Tooltip
-              content={`${gmtDate.day} ${gmtDate.month} ${gmtDate.year} - ${gmtDate.time} ${gmtDate.gmt}`}
-            >
-              <span ref={deliveryDateRef}>
-                {gmtDate.day} {gmtDate.month} - {gmtDate.time}
-              </span>
-            </Tooltip>
+            )}
             {job.get('translator') && (
               <Button
                 className="job-delivery-date-button-close"

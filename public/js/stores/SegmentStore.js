@@ -25,7 +25,6 @@
      "autopropagated_from":"0",
      "repetitions_in_chunk":"1",
      "has_reference":"false",
-     "parsed_time_to_edit":["00","00","00","00"],
      "notes":null
  }
  */
@@ -173,7 +172,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             splitted: true,
             autopropagated_from: 0,
             has_reference: 'false',
-            parsed_time_to_edit: ['00', '00', '00', '00'],
             readonly: false,
             segment: splittedSourceAr[i],
             decodedSource: transformTagsToText(
@@ -340,22 +338,34 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   setDisabledMetadata(sid, disabled) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
-    const metaValue = disabled ? '1' : '0'
     const metadata = this._segments.getIn([index, 'metadata']) || fromJS([])
     const metaIndex = metadata.findIndex(
       (entry) => entry.get('meta_key') === 'translation_disabled',
     )
+
+    // Mirror the server shape: a disabled segment carries the entry with a boolean
+    // meta_value, an enabled one has no entry at all. Keeping the entry with a falsy
+    // value would not work, every consumer tests meta_value for truthiness.
+    if (!disabled) {
+      if (metaIndex === -1) return
+      this._segments = this._segments.setIn(
+        [index, 'metadata'],
+        metadata.delete(metaIndex),
+      )
+      return
+    }
+
     this._segments =
       metaIndex === -1
         ? this._segments.setIn(
             [index, 'metadata'],
             metadata.push(
-              fromJS({meta_key: 'translation_disabled', meta_value: metaValue}),
+              fromJS({meta_key: 'translation_disabled', meta_value: true}),
             ),
           )
         : this._segments.setIn(
             [index, 'metadata', metaIndex, 'meta_value'],
-            metaValue,
+            true,
           )
   },
 
@@ -770,11 +780,10 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     return versionWithIssues && versionWithIssues.issues.length > 0
   },
   openSegmentIssuePanel: function () {
-    // const index = this.getSegmentIndex(sid);
-    // if ( index === -1 ) return;
-    // this._segments = this._segments.setIn([index, 'openIssues'], true);
+    // The issues panel and the comments panel share the side container, so
+    // opening one closes the other rather than letting them overlap.
     this._segments = this._segments.map((segment) =>
-      segment.set('openIssues', true),
+      segment.set('openIssues', true).set('openComments', false),
     )
   },
   closeSegmentIssuePanel: function () {
@@ -785,8 +794,10 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   openSegmentComments: function (sid) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
+    // Clears openIssues for the same reason openSegmentIssuePanel clears
+    // openComments: the two panels cannot share the side container.
     this._segments = this._segments.map((segment) =>
-      segment.set('openComments', false),
+      segment.set('openComments', false).set('openIssues', false),
     )
     this._segments = this._segments.setIn([index, 'openComments'], true)
   },

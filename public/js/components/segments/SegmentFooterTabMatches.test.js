@@ -192,6 +192,10 @@ describe('SegmentFooterTabMatches', () => {
     })
     const trash = document.querySelector('.trash')
     expect(trash).toBeInTheDocument()
+    // The control used to be an empty span painted by an icon-font glyph. When
+    // the glyph went, the button was still in the DOM but had nothing to show,
+    // so assert it actually carries a visible icon.
+    expect(trash.querySelector('svg')).toBeInTheDocument()
     fireEvent.click(trash)
     expect(SegmentActions.deleteContribution).toHaveBeenCalledWith(
       'source text',
@@ -212,9 +216,7 @@ describe('SegmentFooterTabMatches', () => {
   })
 
   test('renders trash icon for an owned TM key match', () => {
-    CatToolStore.getJobTmKeys.mockReturnValue([
-      {key: 'memkey', w: 1},
-    ])
+    CatToolStore.getJobTmKeys.mockReturnValue([{key: 'memkey', w: 1}])
     renderComponent({
       segment: {
         ...baseSegment,
@@ -255,6 +257,21 @@ describe('SegmentFooterTabMatches', () => {
     expect(moreButton).toBeInTheDocument()
     fireEvent.click(moreButton)
     expect(screen.getByText('Fewer')).toBeInTheDocument()
+  })
+
+  test('labels only the matches that have a shortcut bound, once expanded', () => {
+    const matches = Array.from({length: 5}).map((_, i) =>
+      makeMatch({id: String(i)}),
+    )
+    renderComponent({
+      segment: {...baseSegment, contributions: {matches}},
+    })
+    fireEvent.click(screen.getByText('More'))
+
+    // All five matches are listed, but only copyContribution1..3 exist.
+    expect(screen.getAllByText(/^CTRL\+\d+$/)).toHaveLength(3)
+    expect(screen.getByText('CTRL+3')).toBeInTheDocument()
+    expect(screen.queryByText('CTRL+4')).not.toBeInTheDocument()
   })
 
   test('renders engine error and warning messages', () => {
@@ -343,7 +360,10 @@ describe('SegmentFooterTabMatches', () => {
   })
 })
 
-describe('SegmentFooterTabMatches.prototype.copyText', () => {
+// Copying a suggestion strips the zero-width and middle-dot markers before it
+// reaches the clipboard. Driven through a real copy event rather than the
+// component's internals, so it survives however the component is written.
+describe('copying from the matches tab', () => {
   afterEach(() => {
     jest.restoreAllMocks()
   })
@@ -351,19 +371,20 @@ describe('SegmentFooterTabMatches.prototype.copyText', () => {
   test('does not reject when the browser denies clipboard permission', async () => {
     jest
       .spyOn(document, 'getSelection')
-      .mockReturnValue({toString: () => 'some matched text'})
+      .mockReturnValue({toString: () => 'some\u200B suggestion·text'})
     navigator.clipboard = {
       writeText: jest
         .fn()
         .mockRejectedValue(new DOMException('denied', 'NotAllowedError')),
     }
+    const {container} = renderComponent()
 
-    await expect(
-      SegmentFooterTabMatches.prototype.copyText({preventDefault: jest.fn()}),
-    ).resolves.not.toThrow()
+    fireEvent.copy(container.querySelector('.tab.sub-editor'))
+    await Promise.resolve()
 
+    // the zero-width marker is dropped and the middle dot becomes a space
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      'some matched text',
+      'some suggestion text',
     )
   })
 })

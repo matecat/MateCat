@@ -1,4 +1,5 @@
 @use '../../tokens/colors';
+@use 'commons/variables';
 .context-preview-page {
   width: 100%;
   max-width: unset;
@@ -32,7 +33,7 @@
     border: none;
     border-radius: 8px;
     padding: 4px;
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
     font-family: Calibri, Arial, Helvetica, sans-serif;
     font-weight: 500;
     cursor: pointer;
@@ -55,7 +56,7 @@
     width: 16px;
     height: 16px;
     padding: 8px;
-    font-size: 18px;
+    font-size: variables.$font-size-base;
     line-height: 1;
   }
 
@@ -63,7 +64,7 @@
     border: 1px solid rgba(1, 1, 24, 0.13);
     border-radius: 8px;
     padding: 2px 8px;
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
     font-weight: 500;
     line-height: 18px;
     height: 22px;
@@ -75,7 +76,7 @@
   &__level {
     min-width: 36px;
     text-align: center;
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
     font-weight: 500;
     color: colors.$black;
   }
@@ -110,7 +111,7 @@
   left: 50%;
   transform: translateX(-50%);
   font-family: Calibri, Arial, Helvetica, sans-serif;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   color: #e05c00;
   white-space: nowrap;
   user-select: none;
@@ -191,7 +192,7 @@
   height: 24px;
   --sc-height: 24px;
   --sc-padding: 4px;
-  --sc-label-font-size: 14px;
+  --sc-label-font-size: #{variables.$font-size-xsmall};
   --sc-label-line-height: 20px;
   --sc-label-color: #{colors.$grey400};
   --sc-label-padding: 2px 12px;
@@ -205,7 +206,7 @@
   align-items: center;
   justify-content: center;
   min-height: 300px;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   color: colors.$grey500;
 }
 
@@ -214,7 +215,7 @@
   align-items: center;
   justify-content: center;
   flex: 1;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   color: colors.$grey500;
 }
 
@@ -229,12 +230,12 @@
   h2 {
     color: colors.$red400;
     margin-bottom: 12px;
-    font-size: 20px;
+    font-size: variables.$font-size-big;
   }
 
   p {
     color: colors.$grey500;
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
   }
 }
 
@@ -277,7 +278,7 @@
 }
 
 .context-preview-nav__counter {
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   font-weight: 500;
   color: colors.$black;
   white-space: nowrap;
@@ -319,5 +320,5 @@
   padding: 2rem;
   color: colors.$grey500;
   text-align: center;
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
 }

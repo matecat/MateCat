@@ -1,4 +1,5 @@
 @use '../../tokens/colors';
+@use 'commons/variables';
 
 .file-import-tab {
   &.settings-panel-contentwrapper-tab-background {
@@ -9,7 +10,7 @@
     display: block;
     text-align: left;
     color: colors.$grey700;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     line-height: 24px;
   }
 
@@ -43,7 +44,7 @@
 
 .filters-params-accordion,
 .xliff-settings-container {
-  --accordion-title-font-size: 18px;
+  --accordion-title-font-size: #{variables.$font-size-base};
   --accordion-title-font-weight: bold;
 }
 
@@ -60,7 +61,7 @@
 
   h3 {
     margin: 0;
-    font-size: 18px;
+    font-size: variables.$font-size-base;
   }
 
   > :first-child {
@@ -134,7 +135,7 @@
 }
 
 .xliff-settings-column-name {
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   font-weight: bold;
 }
 
@@ -154,7 +155,7 @@
   //**** SELECT ****//
   .select-with-label__wrapper {
     .select {
-      font-size: 16px;
+      font-size: variables.$font-size-small;
       padding: 9px 46px 9px 12px;
       border: 1px solid rgba(34, 36, 38, 0.15);
     }
@@ -234,7 +235,7 @@
         border-radius: 4px;
         padding: 4px 8px;
         outline: none;
-        font-size: 14px;
+        font-size: variables.$font-size-xsmall;
         line-height: 16px;
         &:focus,
         &:focus-visible {

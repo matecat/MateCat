@@ -17,7 +17,13 @@ const baseTemplate = {
   id: 1,
   isTemporary: false,
   xml: {preserve_whitespace: false, translate_elements: [], translate_attributes: []},
-  yaml: {translate_keys: [], character_limit: [], context_keys: [], inner_content_type: null},
+  yaml: {
+    force_double_quoting: false,
+    translate_keys: [],
+    character_limit: [],
+    context_keys: [],
+    inner_content_type: null,
+  },
   json: {
     extract_arrays: true,
     escape_forward_slashes: false,

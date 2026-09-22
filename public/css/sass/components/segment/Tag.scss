@@ -10,7 +10,7 @@
             &:after {
               content: '\21B5'; //↵
               padding: 0 4px;
-              font-size: 14px;
+              font-size: variables.$font-size-xsmall;
               color: colors.$blue200;
             }
           }
@@ -206,10 +206,10 @@
       top: 1px;
     }
     &.tag-nbsp {
-      font-size: 14px;
+      font-size: variables.$font-size-xsmall;
     }
     &.tag-word-joiner {
-      font-size: 14px;
+      font-size: variables.$font-size-xsmall;
     }
     &.tag-lf {
       &:after {
@@ -313,7 +313,7 @@
 
   /* Inline tag */
   &.tag-nbsp {
-    font-size: 18px;
+    font-size: variables.$font-size-base;
     margin: 0 2px;
     color: colors.$blue200;
     background: transparent;
@@ -331,7 +331,7 @@
   }
 
   &.tag-word-joiner {
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     margin: 0;
     background: colors.$blue200;
     &:before {
@@ -379,7 +379,7 @@
       content: '\21B5';
       top: -7px;
       padding: 0 4px;
-      font-size: 14px;
+      font-size: variables.$font-size-xsmall;
       color: colors.$blue200;
       border: none;
     }
@@ -393,14 +393,14 @@
       content: '\21B5';
       top: -7px;
       padding: 0 4px;
-      font-size: 14px;
+      font-size: variables.$font-size-xsmall;
       color: colors.$blue200;
       border: none;
     }
   }
 
   &.tag-tab {
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
     margin: 0 2px;
     color: colors.$blue200;
     background: transparent;
@@ -451,7 +451,7 @@
         content: '\00d7';
         color: red;
         position: absolute;
-        font-size: 18px;
+        font-size: variables.$font-size-base;
         margin-left: 5px;
         margin-top: -18px;
       }
@@ -695,7 +695,7 @@ body.ph-tags-compressed {
     text-overflow: ellipsis;
     overflow: hidden;
     width: 100%;
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
     white-space: nowrap;
     cursor: pointer;
     &:hover,

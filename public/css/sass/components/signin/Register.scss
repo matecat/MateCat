@@ -23,7 +23,7 @@
     ul > li {
       display: flex;
       gap: 10px;
-      font-size: 16px;
+      font-size: variables.$font-size-small;
       align-items: center;
       padding: 5px 0;
 
@@ -50,7 +50,7 @@
     padding: 32px 70px;
 
     h4 {
-      font-size: 16px;
+      font-size: variables.$font-size-small;
       font-weight: bold;
       color: colors.$grey400;
       text-align: center;
@@ -71,7 +71,7 @@
     }
 
     span {
-      font-size: 16px;
+      font-size: variables.$font-size-small;
       font-weight: bold;
     }
   }
@@ -116,7 +116,7 @@
   .footer-links-container {
     display: flex;
     justify-content: center;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     color: colors.$grey400;
   }
 }

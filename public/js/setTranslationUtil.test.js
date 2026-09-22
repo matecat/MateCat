@@ -305,11 +305,16 @@ describe('setTranslationUtil', () => {
       setTranslationApi.mockResolvedValue({data: 'OK', propagation: null})
       const segment = buildSegment()
 
-      SetTranslationUtil.segmentTranslation(segment, 'DRAFT', jest.fn(), false)
+      const callback = jest.fn()
+
+      SetTranslationUtil.segmentTranslation(segment, 'DRAFT', callback, false)
+      // The callback runs on the response, not before the request leaves.
+      expect(callback).not.toHaveBeenCalled()
       await Promise.resolve()
       await Promise.resolve()
       await Promise.resolve()
 
+      expect(callback).toHaveBeenCalled()
       expect(setTranslationApi).toHaveBeenCalledWith({fakeRequest: true})
       expect(SegmentActions.setChoosenSuggestion).toHaveBeenCalledWith(1, null)
       expect(SegmentActions.setSegmentSaving).toHaveBeenCalledWith(1, false)
@@ -487,7 +492,9 @@ describe('setTranslationUtil', () => {
 
       expect(OfflineUtils.changeStatusOffline).toHaveBeenCalledWith(1)
       expect(OfflineUtils.startOfflineMode).toHaveBeenCalled()
-      expect(SegmentActions.setSegmentSaving).toHaveBeenCalledWith(1, true)
+      // The saving flag has to be cleared on the way out, otherwise the segment
+      // keeps spinning forever after a failed save.
+      expect(SegmentActions.setSegmentSaving).toHaveBeenLastCalledWith(1, false)
       expect(CatToolActions.processErrors).not.toHaveBeenCalled()
       expect(SetTranslationUtil.isTranslationTailEmpty()).toBe(false)
     })

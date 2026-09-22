@@ -1,28 +1,23 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import {each} from 'lodash/collection'
 
 import {Shortcuts} from '../../utils/shortcuts'
 import {isMacOS} from '../../utils/Utils'
 
-class ShortCutsModal extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-
-  handleKeyupFunction = (event) => {
-    if (event.key === 'Escape') {
-      this.props.onClose()
+const ShortCutsModal = ({onClose}) => {
+  useEffect(() => {
+    const handleKeyupFunction = (event) => {
+      if (event.key === 'Escape') {
+        onClose()
+      }
     }
-  }
+    document.addEventListener('keyup', handleKeyupFunction)
+    return () => {
+      document.removeEventListener('keyup', handleKeyupFunction)
+    }
+  }, [onClose])
 
-  componentDidMount() {
-    document.addEventListener('keyup', this.handleKeyupFunction)
-  }
-  componentWillUnmount() {
-    document.removeEventListener('keyup', this.handleKeyupFunction)
-  }
-
-  getShortcutsHtml() {
+  function getShortcutsHtml() {
     let html = []
     let label = isMacOS() ? 'mac' : 'standard'
     each(Shortcuts, function (elem, c) {
@@ -50,7 +45,7 @@ class ShortCutsModal extends React.Component {
       if (elem.label) {
         let group = (
           <div key={'events' + c} className="shortcut-list">
-            <h2>{elem.label}</h2>
+            <h4>{elem.label}</h4>
             <div className="shortcut-item-list">{events}</div>
           </div>
         )
@@ -60,16 +55,14 @@ class ShortCutsModal extends React.Component {
     return html
   }
 
-  render() {
-    let html = this.getShortcutsHtml()
-    return (
-      <div className="shortcuts-modal">
-        <div className="matecat-modal-top"></div>
-        <div className="matecat-modal-middle">{html}</div>
-        <div className="matecat-modal-bottom"></div>
-      </div>
-    )
-  }
+  let html = getShortcutsHtml()
+  return (
+    <div className="shortcuts-modal">
+      <div className="matecat-modal-top"></div>
+      <div className="matecat-modal-middle">{html}</div>
+      <div className="matecat-modal-bottom"></div>
+    </div>
+  )
 }
 
 export default ShortCutsModal

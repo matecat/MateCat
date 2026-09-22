@@ -33,6 +33,16 @@ use TypeError;
 
 class ContextUrlController extends KleinController
 {
+    /**
+     * Sustained budget of 5 requests/second per identifier.
+     *
+     * RateLimiterService uses a fixed window whose TTL is the end of the current minute plus one
+     * more (see RateLimiterService::getTtl()), so a window lasts 61-120 seconds rather than 60.
+     * The budget is sized on the 120-second worst case - 5 * 120 - so the floor holds wherever the
+     * window happens to open; a window opening near a minute boundary allows up to ~9.8/s.
+     */
+    private const int RATE_LIMIT_MAX_RETRIES = 600;
+
     protected ?ProjectStruct $project = null;
     protected ProjectsMetadataDao $projectsMetadataDao;
     protected FilesMetadataDao $filesMetadataDao;
@@ -108,7 +118,7 @@ class ContextUrlController extends KleinController
 
         foreach ($identifiers as $identifier) {
             $response = $this->rateLimiterService->checkAndIncrement(
-                $this->response, $identifier, $route, 5
+                $this->response, $identifier, $route, self::RATE_LIMIT_MAX_RETRIES
             );
             if ($response instanceof Response) {
                 $this->response = $response;

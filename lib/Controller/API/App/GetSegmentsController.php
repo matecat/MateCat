@@ -124,7 +124,12 @@ class GetSegmentsController extends KleinController
             $start = (int)$data[0]['sid'];
             $last = end($data);
             $stop = (int)$last['sid'];
-            $segmentMetadataMap = $this->createSegmentMetadataDao()->getAllInRange($start, $stop);
+            // TTL is 0 deliberately: getAllInRange() defaults to a 24h cache, but a concurrent
+            // read that started before a disable/enable write commits can still cache a stale
+            // result after that write's eviction runs, silently re-poisoning the cache for up to
+            // 24h. The underlying query is a single indexed BETWEEN, so leaving this uncached is
+            // cheap, and correctness here gates whether a segment can be edited.
+            $segmentMetadataMap = $this->createSegmentMetadataDao()->getAllInRange($start, $stop, 0);
         }
 
         foreach ($data as $seg) {

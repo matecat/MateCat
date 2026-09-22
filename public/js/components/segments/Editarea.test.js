@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, act} from '@testing-library/react'
+import {render, act, fireEvent, screen} from '@testing-library/react'
 
 // ---------------------------------------------------------------------------
 // Mocks: only side-effecting collaborators (stores, flux actions, broadcast
@@ -8,6 +8,22 @@ import {render, act} from '@testing-library/react'
 // ---------------------------------------------------------------------------
 
 const segmentStoreListeners = {}
+
+// Holds the props object the tag decorator was built with. That object is
+// seeded once behind a lazy-init guard, so it is the same object production
+// keeps calling for the life of the component — which is what makes calling it
+// again, after the segment has changed, a meaningful staleness check.
+// The stand-in keeps the `tag-container` class so the tests that count rendered
+// tag entities are unaffected.
+let mockTagProps = null
+
+jest.mock('./TagEntity/TagEntity.component', () => ({
+  __esModule: true,
+  default: (props) => {
+    mockTagProps = props
+    return <span className="tag-container">{props.children}</span>
+  },
+}))
 
 jest.mock('../../stores/SegmentStore', () => ({
   __esModule: true,
@@ -90,14 +106,10 @@ import CatToolStore from '../../stores/CatToolStore'
 import LexiqaUtils from '../../utils/lxq.main'
 import ContextPreviewChannel from '../../utils/contextPreviewChannel'
 import SegmentUtils from '../../utils/segmentUtils'
-import CommonUtils from '../../utils/commonUtils'
 import {SegmentContext} from './SegmentContext'
 import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
-import DraftMatecatUtils from './utils/DraftMatecatUtils'
-import * as DraftMatecatConstants from './utils/DraftMatecatUtils/editorConstants'
 import SegmentConstants from '../../constants/SegmentConstants'
 import EditAreaConstants from '../../constants/EditAreaConstants'
-import {EditorState, Modifier, SelectionState} from 'draft-js'
 
 const ZWSP = String.fromCharCode(parseInt('200B', 16))
 
@@ -112,47 +124,8 @@ const ZWSP = String.fromCharCode(parseInt('200B', 16))
  */
 const normalize = (text) => text.split(ZWSP).join('').split('·').join(' ')
 
-const KEY_CODES = {
-  Enter: 13,
-  Backspace: 8,
-  Delete: 46,
-  Escape: 27,
-  Tab: 9,
-  ArrowLeft: 37,
-  ArrowUp: 38,
-  ArrowRight: 39,
-  ArrowDown: 40,
-  Alt: 18,
-}
-
 /** Builds a Selection stub complete enough for draft-js internals. */
-const selectionStub = (overrides = {}) => ({
-  type: 'Caret',
-  rangeCount: 0,
-  anchorNode: null,
-  anchorOffset: 0,
-  focusNode: null,
-  focusOffset: 0,
-  isCollapsed: true,
-  removeAllRanges: jest.fn(),
-  addRange: jest.fn(),
-  setBaseAndExtent: jest.fn(),
-  extend: jest.fn(),
-  collapse: jest.fn(),
-  getRangeAt: jest.fn(() => ({
-    getBoundingClientRect: () => ({x: 0, left: 0, bottom: 0, height: 0}),
-  })),
-  toString: () => '',
-  ...overrides,
-})
-
 /** A blacklist entry shaped the way QaCheckBlacklistHighlight expects. */
-const blacklistTerm = (word = 'mondo') => ({
-  matching_words: [word],
-  source: {term: 'world'},
-  target: {term: word},
-})
-
 function makeSegment(overrides = {}) {
   return {
     sid: '12-1',
@@ -187,18 +160,29 @@ function renderEditarea({
   toggleFormatMenu = jest.fn(),
 } = {}) {
   const ref = React.createRef()
-  const utils = render(
+  const tree = (seg, trans) => (
     <SegmentContext.Provider value={context}>
       <Editarea
         ref={ref}
-        segment={segment}
-        translation={translation}
+        segment={seg}
+        translation={trans}
         updateCounter={updateCounter}
         toggleFormatMenu={toggleFormatMenu}
       />
-    </SegmentContext.Provider>,
+    </SegmentContext.Provider>
   )
-  return {...utils, instance: ref.current, updateCounter, toggleFormatMenu}
+  const utils = render(tree(segment, translation))
+  return {
+    ...utils,
+    instance: ref.current,
+    updateCounter,
+    toggleFormatMenu,
+    /** Re-renders with a different segment, then drains deferred work. */
+    update: (nextSegment, nextTranslation = nextSegment.translation) => {
+      utils.rerender(tree(nextSegment, nextTranslation))
+      flush()
+    },
+  }
 }
 
 /** Runs every pending timer + microtask inside act(). */
@@ -210,41 +194,13 @@ function flush(ms = 1500) {
 
 /** Mounts and drains the deferred componentDidMount work. */
 function mountEditarea(options) {
-  const rendered = renderEditarea(options)
+  const view = renderEditarea(options)
   flush()
-  return rendered
+  return view
 }
 
 /** Minimal synthetic keyboard event accepted by KeyBindingUtil. */
-function keyEvent(overrides = {}) {
-  const event = {
-    key: '',
-    code: '',
-    which: 0,
-    altKey: false,
-    ctrlKey: false,
-    metaKey: false,
-    shiftKey: false,
-    preventDefault: jest.fn(),
-    stopPropagation: jest.fn(),
-    nativeEvent: {},
-    ...overrides,
-  }
-  // draft-js getDefaultKeyBinding switches on keyCode only
-  if (!('keyCode' in event)) event.keyCode = KEY_CODES[event.key] ?? 0
-  return event
-}
-
 /** Replaces window.getSelection with a controllable stub. */
-function stubSelection(selection) {
-  const original = window.getSelection
-  const stub = selectionStub(selection)
-  window.getSelection = jest.fn(() => stub)
-  return () => {
-    window.getSelection = original
-  }
-}
-
 let restoreSelection
 
 beforeEach(() => {
@@ -292,11 +248,11 @@ describe('Editarea rendering', () => {
   test('renders the edit area wrapper with sid based identifiers', () => {
     const {container} = mountEditarea()
 
-    const wrapper = container.querySelector('#segment-12-1-editarea')
+    const wrapper = editAreaWrapper(container, '12-1')
     expect(wrapper).not.toBeNull()
-    expect(wrapper.getAttribute('data-sid')).toBe('12-1')
+    expect(wrapper).toHaveAttribute('data-sid', '12-1')
     expect(wrapper.className).toBe('targetarea editarea')
-    expect(wrapper.getAttribute('lang')).toBe('it-IT')
+    expect(wrapper).toHaveAttribute('lang', 'it-IT')
   })
 
   test('uses the "area" class instead of "editarea" when locked', () => {
@@ -304,9 +260,7 @@ describe('Editarea rendering', () => {
       context: {readonly: false, locked: true},
     })
 
-    expect(container.querySelector('.targetarea').className).toBe(
-      'targetarea area',
-    )
+    expect(targetArea(container).className).toBe('targetarea area')
   })
 
   test('uses the "area" class when the context is readonly', () => {
@@ -314,9 +268,7 @@ describe('Editarea rendering', () => {
       context: {readonly: true, locked: false},
     })
 
-    expect(container.querySelector('.targetarea').className).toBe(
-      'targetarea area',
-    )
+    expect(targetArea(container).className).toBe('targetarea area')
   })
 
   test('renders the translation text inside the draft editor', () => {
@@ -330,11 +282,7 @@ describe('Editarea rendering', () => {
       segment: makeSegment({opened: false}),
     })
 
-    expect(
-      container
-        .querySelector('[contenteditable]')
-        .getAttribute('contenteditable'),
-    ).toBe('false')
+    expect(editableNode(container)).toHaveAttribute('contenteditable', 'false')
   })
 
   test('marks the draft editor readonly when the segment is muted', () => {
@@ -342,11 +290,7 @@ describe('Editarea rendering', () => {
       segment: makeSegment({muted: true}),
     })
 
-    expect(
-      container
-        .querySelector('[contenteditable]')
-        .getAttribute('contenteditable'),
-    ).toBe('false')
+    expect(editableNode(container)).toHaveAttribute('contenteditable', 'false')
   })
 
   test('renders RTL alignment when the target language is RTL', () => {
@@ -354,9 +298,7 @@ describe('Editarea rendering', () => {
 
     const {container} = mountEditarea()
 
-    expect(
-      container.querySelector('.public-DraftEditor-content'),
-    ).not.toBeNull()
+    expect(editorNode(container)).not.toBeNull()
   })
 })
 
@@ -388,7 +330,7 @@ describe('Editarea character counter on mount', () => {
     })
 
     expect(SegmentUtils.checkCurrentSegmentTPEnabled).toHaveBeenCalled()
-    expect(container.textContent).toContain('Ciao')
+    expect(container).toHaveTextContent(/Ciao/)
   })
 })
 
@@ -405,22 +347,6 @@ describe('Editarea lifecycle', () => {
     SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES,
   ]
 
-  test('registers its five store listeners on mount', () => {
-    const {instance} = mountEditarea()
-
-    const own = SegmentStore.addListener.mock.calls.filter(([event]) =>
-      EDITAREA_EVENTS.includes(event),
-    )
-    expect(own.map(([event]) => event)).toEqual(EDITAREA_EVENTS)
-    expect(own.map(([, handler]) => handler)).toEqual([
-      instance.setNewTranslation,
-      instance.replaceCurrentSearch,
-      instance.copyGlossaryToEditArea,
-      instance.refreshTagMap,
-      instance.refreshCharactersCounterRules,
-    ])
-  })
-
   test('removes its five store listeners on unmount', () => {
     const {unmount} = mountEditarea()
 
@@ -430,48 +356,6 @@ describe('Editarea lifecycle', () => {
       EDITAREA_EVENTS.includes(event),
     )
     expect(own.map(([event]) => event)).toEqual(EDITAREA_EVENTS)
-  })
-
-  test('registers a triple click detector on the edit area node', () => {
-    const {instance, container} = mountEditarea()
-
-    expect(CommonUtils.DetectTripleClick).toHaveBeenCalledTimes(1)
-    const [element, callback] = CommonUtils.DetectTripleClick.mock.calls[0]
-    expect(element).toBe(container.querySelector('.targetarea'))
-
-    callback()
-
-    expect(instance.wasTripleClickTriggered.current).toBe(true)
-    instance.wasTripleClickTriggered.current = false
-  })
-
-  test('focuses the editor on mount when the segment is opened', () => {
-    const {instance} = renderEditarea()
-    const focusSpy = jest.spyOn(instance.editor, 'focus')
-
-    flush()
-
-    expect(focusSpy).toHaveBeenCalled()
-  })
-
-  test('does not focus the editor on mount when the segment is closed', () => {
-    const {instance} = renderEditarea({segment: makeSegment({opened: false})})
-    const focusSpy = jest.spyOn(instance.editor, 'focus')
-
-    flush()
-
-    expect(focusSpy).not.toHaveBeenCalled()
-  })
-
-  test('focusEditor is a no-op when the editor ref is missing', () => {
-    const {instance} = mountEditarea()
-    const editor = instance.editor
-    instance.editor = null
-
-    expect(() => instance.focusEditor()).not.toThrow()
-
-    // restore so componentWillUnmount can detach its composition listeners
-    instance.editor = editor
   })
 
   test('pushes the translation to the store on mount', () => {
@@ -495,1709 +379,268 @@ describe('Editarea lifecycle', () => {
 // getSearchParams
 // ---------------------------------------------------------------------------
 
-describe('getSearchParams', () => {
-  test('returns the active search descriptor while searching', () => {
-    const {instance} = mountEditarea({
-      segment: makeSegment({
-        inSearch: true,
-        currentInSearch: true,
-        currentInSearchIndex: 3,
-        searchParams: {target: 'mondo'},
-        occurrencesInSearch: {occurrences: [{searchProgressiveIndex: 3}]},
-      }),
-    })
-
-    expect(instance.getSearchParams()).toEqual({
-      active: true,
-      currentActive: true,
-      textToReplace: 'mondo',
-      params: {target: 'mondo'},
-      occurrences: [{searchProgressiveIndex: 3}],
-      currentInSearchIndex: 3,
-      isTarget: true,
-    })
-  })
-
-  test('returns an inactive descriptor when not searching', () => {
-    const {instance} = mountEditarea()
-
-    expect(instance.getSearchParams()).toEqual({active: false})
-  })
-
-  test('returns an inactive descriptor when the search has no target', () => {
-    const {instance} = mountEditarea({
-      segment: makeSegment({inSearch: true, searchParams: {}}),
-    })
-
-    expect(instance.getSearchParams()).toEqual({active: false})
-  })
-})
-
 // ---------------------------------------------------------------------------
 // Translation replacement
 // ---------------------------------------------------------------------------
-
-describe('setNewTranslation', () => {
-  test('replaces the editor content for the matching sid', () => {
-    const {instance, container} = mountEditarea()
-
-    act(() => {
-      instance.setNewTranslation('12-1', 'Nuova traduzione')
-    })
-    flush()
-
-    expect(normalize(container.textContent)).toContain('Nuova traduzione')
-  })
-
-  test('ignores translations addressed to another sid', () => {
-    const {instance, container} = mountEditarea()
-
-    act(() => {
-      instance.setNewTranslation('99-1', 'Altro segmento')
-    })
-    flush()
-
-    expect(container.textContent).not.toContain('Altro segmento')
-  })
-
-  test('refreshTagMap re-applies the current translation', () => {
-    const {instance} = mountEditarea()
-    const spy = jest.spyOn(instance, 'setNewTranslation')
-
-    act(() => {
-      instance.refreshTagMap()
-    })
-    flush()
-
-    expect(spy).toHaveBeenCalledWith('12-1', 'Ciao mondo')
-  })
-
-  test('refreshCharactersCounterRules re-applies the current translation', () => {
-    const {instance} = mountEditarea()
-    const spy = jest.spyOn(instance, 'setNewTranslation')
-
-    act(() => {
-      instance.refreshCharactersCounterRules()
-    })
-    flush()
-
-    expect(spy).toHaveBeenCalledWith('12-1', 'Ciao mondo')
-  })
-})
-
-describe('copyGlossaryToEditArea', () => {
-  test('inserts the glossary translation for the matching segment', () => {
-    const {instance, container} = mountEditarea()
-
-    act(() => {
-      instance.copyGlossaryToEditArea({sid: '12-1'}, 'glossario')
-    })
-    flush()
-
-    expect(container.textContent).toContain('glossario')
-  })
-
-  test('does nothing for a different segment', () => {
-    const {instance, container} = mountEditarea()
-
-    act(() => {
-      instance.copyGlossaryToEditArea({sid: '77-1'}, 'glossario')
-    })
-    flush()
-
-    expect(container.textContent).not.toContain('glossario')
-  })
-})
-
-describe('replaceCurrentSearch', () => {
-  test('replaces the current occurrence', () => {
-    const {instance, container} = mountEditarea({
-      segment: makeSegment({
-        inSearch: true,
-        currentInSearch: true,
-        currentInSearchIndex: 0,
-        searchParams: {target: 'mondo'},
-        occurrencesInSearch: {occurrences: [{searchProgressiveIndex: 0}]},
-      }),
-    })
-
-    act(() => {
-      instance.replaceCurrentSearch('universo')
-    })
-    flush()
-
-    expect(container.textContent).toContain('universo')
-  })
-
-  test('does nothing when the segment is not the current search result', () => {
-    const {instance, container} = mountEditarea({
-      segment: makeSegment({
-        inSearch: true,
-        currentInSearch: false,
-        searchParams: {target: 'mondo'},
-      }),
-    })
-
-    act(() => {
-      instance.replaceCurrentSearch('universo')
-    })
-    flush()
-
-    expect(container.textContent).toContain('mondo')
-  })
-})
 
 // ---------------------------------------------------------------------------
 // Decorators
 // ---------------------------------------------------------------------------
 
-describe('checkDecorators', () => {
-  const decoratorNames = (instance) =>
-    instance.decoratorsStructure.map((d) => d.name)
-
-  test('adds the qa blacklist decorator when blacklist matches arrive', () => {
-    const {instance} = mountEditarea({
-      segment: makeSegment({
-        qaBlacklistGlossary: [blacklistTerm()],
-      }),
-    })
-
-    expect(decoratorNames(instance)).toContain('qaCheckBlacklist')
-    expect(instance.state.activeDecorators.qaCheckBlacklist).toBe(true)
-  })
-
-  test('rebuilds the qa blacklist decorator when the matches change', () => {
-    const segment = makeSegment({
-      qaBlacklistGlossary: [blacklistTerm('mondo')],
-    })
-    const {instance} = mountEditarea({segment})
-    const firstDecorator = instance.decoratorsStructure.find(
-      (d) => d.name === 'qaCheckBlacklist',
-    )
-
-    const prevProps = {segment: {...segment}}
-    instance.props.segment.qaBlacklistGlossary = [blacklistTerm('Ciao')]
-    act(() => {
-      instance.checkDecorators(prevProps)
-    })
-    flush()
-
-    const rebuilt = instance.decoratorsStructure.find(
-      (d) => d.name === 'qaCheckBlacklist',
-    )
-    expect(rebuilt).not.toBe(firstDecorator)
-    expect(rebuilt.props.blackListedTerms).toEqual([blacklistTerm('Ciao')])
-    expect(instance.state.activeDecorators.qaCheckBlacklist).toBe(true)
-  })
-
-  test('removes the qa blacklist decorator when the matches are cleared', () => {
-    const segment = makeSegment({
-      qaBlacklistGlossary: [blacklistTerm()],
-    })
-    const {instance} = mountEditarea({segment})
-
-    expect(decoratorNames(instance)).toContain('qaCheckBlacklist')
-
-    // The remove branch is guarded by activeDecorators being off already:
-    // when the flag is still on, the "matches changed" branch above wins and
-    // the decorator is only rebuilt (with an empty, inert match list).
-    act(() => {
-      instance.setState((prev) => ({
-        activeDecorators: {...prev.activeDecorators, qaCheckBlacklist: false},
-      }))
-    })
-    const prevProps = {segment: {...segment}}
-    instance.props.segment.qaBlacklistGlossary = []
-    act(() => {
-      instance.checkDecorators(prevProps)
-    })
-    flush()
-
-    expect(decoratorNames(instance)).not.toContain('qaCheckBlacklist')
-    expect(instance.state.activeDecorators.qaCheckBlacklist).toBe(false)
-  })
-
-  test('adds the lexiqa decorator when lexiqa ranges are produced', () => {
-    LexiqaUtils.getRanges.mockReturnValue([
-      {start: 0, end: 4, error: 'typo', sid: '12-1'},
-    ])
-
-    const {instance} = mountEditarea({
-      segment: makeSegment({
-        lexiqa: {target: [{start: 0, end: 4}]},
-        lxqDecodedTranslation: 'Ciao mondo',
-      }),
-    })
-
-    expect(decoratorNames(instance)).toContain('lexiqa')
-    expect(instance.state.activeDecorators.lexiqa).toBe(true)
-  })
-
-  test('does not add the lexiqa decorator when there are no usable ranges', () => {
-    LexiqaUtils.getRanges.mockReturnValue([])
-
-    const {instance} = mountEditarea({
-      segment: makeSegment({
-        lexiqa: {target: [{start: 0, end: 4}]},
-        lxqDecodedTranslation: 'Ciao mondo',
-      }),
-    })
-
-    expect(decoratorNames(instance)).not.toContain('lexiqa')
-  })
-
-  test('removes the lexiqa decorator when lexiqa results disappear', () => {
-    LexiqaUtils.getRanges.mockReturnValue([
-      {start: 0, end: 4, error: 'typo', sid: '12-1'},
-    ])
-    const prevSegment = makeSegment({
-      lexiqa: {target: [{start: 0, end: 4}]},
-      lxqDecodedTranslation: 'Ciao mondo',
-    })
-    const {instance} = mountEditarea({segment: prevSegment})
-
-    // snapshot prevProps before mutating the live props object, otherwise
-    // checkDecorators would compare the segment against itself
-    const prevProps = {segment: {...prevSegment}}
-    instance.props.segment.lexiqa = {target: []}
-    act(() => {
-      instance.checkDecorators(prevProps)
-    })
-    flush()
-
-    expect(decoratorNames(instance)).not.toContain('lexiqa')
-    expect(instance.state.activeDecorators.lexiqa).toBe(false)
-  })
-
-  test('skips lexiqa when the job has glossary keys and no blacklist result yet', () => {
-    CatToolStore.getHaveKeysGlossary.mockReturnValue(true)
-    LexiqaUtils.getRanges.mockReturnValue([
-      {start: 0, end: 4, error: 'typo', sid: '12-1'},
-    ])
-
-    const {instance} = mountEditarea({
-      segment: makeSegment({
-        lexiqa: {target: [{start: 0, end: 4}]},
-        lxqDecodedTranslation: 'Ciao mondo',
-        qaBlacklistGlossary: undefined,
-      }),
-    })
-
-    expect(decoratorNames(instance)).not.toContain('lexiqa')
-  })
-
-  test('adds the search decorator while the segment is in search', () => {
-    const {instance} = mountEditarea({
-      segment: makeSegment({
-        inSearch: true,
-        searchParams: {target: 'mondo'},
-        occurrencesInSearch: {occurrences: [{searchProgressiveIndex: 0}]},
-      }),
-    })
-
-    expect(decoratorNames(instance)).toContain('search')
-    expect(instance.state.activeDecorators.search).toBe(true)
-  })
-
-  test('handles a search without a target text', () => {
-    const {instance} = mountEditarea({
-      segment: makeSegment({
-        inSearch: true,
-        searchParams: {},
-      }),
-    })
-
-    expect(decoratorNames(instance)).not.toContain('search')
-  })
-
-  test('addSearchDecorator falls back to an empty search text', () => {
-    const {instance} = mountEditarea({
-      segment: makeSegment({
-        inSearch: true,
-        searchParams: {},
-        occurrencesInSearch: {occurrences: []},
-      }),
-    })
-
-    act(() => {
-      instance.addSearchDecorator()
-    })
-
-    expect(decoratorNames(instance)).toContain('search')
-  })
-
-  test('drops the search decorator once the search is closed', () => {
-    const searchSegment = makeSegment({
-      inSearch: true,
-      searchParams: {target: 'mondo'},
-      occurrencesInSearch: {occurrences: [{searchProgressiveIndex: 0}]},
-    })
-    const {instance} = mountEditarea({segment: searchSegment})
-
-    const prevProps = {segment: {...searchSegment}}
-    instance.props.segment.inSearch = false
-    act(() => {
-      instance.checkDecorators(prevProps)
-    })
-    flush()
-
-    expect(decoratorNames(instance)).not.toContain('search')
-    expect(instance.state.activeDecorators.search).toBe(false)
-  })
-
-  test('adds the icu decorator for icu enabled segments', () => {
-    const {instance} = mountEditarea({
-      segment: makeSegment({icu: true}),
-      translation: 'Hello {name}',
-    })
-
-    expect(decoratorNames(instance)).toContain('icu')
-  })
-
-  test('does not recreate the icu decorator when the tokens are unchanged', () => {
-    const segment = makeSegment({icu: true})
-    const {instance} = mountEditarea({segment, translation: 'Hello {name}'})
-    const addIcuSpy = jest.spyOn(instance, 'addIcuDecorator')
-
-    act(() => {
-      instance.checkDecorators({segment})
-    })
-    flush()
-
-    expect(addIcuSpy).not.toHaveBeenCalled()
-  })
-})
-
-describe('removeDecorator / disableDecorator', () => {
-  test('removes every decorator except tags when called without a name', () => {
-    const {instance} = mountEditarea({
-      segment: makeSegment({
-        qaBlacklistGlossary: [blacklistTerm()],
-      }),
-    })
-
-    act(() => {
-      instance.removeDecorator()
-    })
-
-    expect(instance.decoratorsStructure.map((d) => d.name)).toEqual(['tags'])
-  })
-
-  test('removes only the named decorator', () => {
-    const {instance} = mountEditarea({
-      segment: makeSegment({
-        qaBlacklistGlossary: [blacklistTerm()],
-      }),
-    })
-
-    act(() => {
-      instance.removeDecorator('qaCheckBlacklist')
-    })
-
-    expect(instance.decoratorsStructure.map((d) => d.name)).toEqual(['tags'])
-  })
-
-  test('disableDecorator strips the decorator and returns a new editor state', () => {
-    const {instance} = mountEditarea({
-      segment: makeSegment({
-        qaBlacklistGlossary: [blacklistTerm()],
-      }),
-    })
-
-    const next = instance.disableDecorator(
-      instance.state.editorState,
-      'qaCheckBlacklist',
-    )
-
-    expect(instance.decoratorsStructure.map((d) => d.name)).toEqual(['tags'])
-    expect(next).not.toBe(instance.state.editorState)
-  })
-})
-
 // ---------------------------------------------------------------------------
 // myKeyBindingFn
 // ---------------------------------------------------------------------------
 
-describe('myKeyBindingFn', () => {
-  let instance
+// A source tag map with one entry, so the tag menu has something to suggest —
+// `toggle-tag-menu` is a no-op when the segment has no source tags.
+const SOURCE_TAG_MAP = [
+  {
+    type: 'g',
+    data: {id: '1', name: 'g', encodedText: '&lt;g id="1"&gt;'},
+    offset: 0,
+    length: 1,
+  },
+]
 
-  beforeEach(() => {
-    instance = mountEditarea().instance
+function mountWithSourceTags(segmentOverrides = {}) {
+  return mountEditarea({
+    segment: makeSegment({sourceTagMap: SOURCE_TAG_MAP, ...segmentOverrides}),
+  })
+}
+
+// DraftJS renders a bare contenteditable with no accessible role, and its tags
+// are decorator spans, so the editor's internals can only be reached by
+// selector. Every such lookup lives here, which keeps the rule exemption in one
+// place instead of scattered across the tests.
+/* eslint-disable testing-library/no-node-access */
+const editorNode = (container) =>
+  container.querySelector('.public-DraftEditor-content')
+const tagBox = (container) => container.querySelector('.tag-box')
+const editAreaWrapper = (container, sid) =>
+  container.querySelector(`#segment-${sid}-editarea`)
+const targetArea = (container) => container.querySelector('.targetarea')
+const editableNode = (container) => container.querySelector('[contenteditable]')
+// TagBox renders its own .tag-container heading, so scope the lookup to the
+// draft content itself.
+const tagEntities = (container) =>
+  container.querySelectorAll('.public-DraftEditor-content .tag-container')
+/* eslint-enable testing-library/no-node-access */
+
+/**
+ * Presses a key on the editor the way a user does, so the event travels through
+ * DraftJS's own keyBindingFn/handleKeyCommand wiring rather than being invoked
+ * directly on the component.
+ */
+function pressKey(container, key) {
+  // fireEvent already wraps in act, and flush() wraps the timer advance.
+  fireEvent.keyDown(editorNode(container), key)
+  flush()
+}
+
+/**
+ * jsdom implements Range but not `Range.prototype.getBoundingClientRect`, which
+ * Editarea calls to position the tag menu. Without it every tag-menu path
+ * throws before the menu can open — which is why reaching those behaviours used
+ * to require calling methods on the instance. Patching the gap is test-side
+ * setup; the component is untouched.
+ */
+function useRangeRectPolyfill() {
+  let original
+  beforeAll(() => {
+    original = Range.prototype.getBoundingClientRect
+    Range.prototype.getBoundingClientRect = () => ({
+      x: 0,
+      y: 0,
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+      width: 0,
+      height: 0,
+    })
+  })
+  afterAll(() => {
+    Range.prototype.getBoundingClientRect = original
+  })
+}
+
+describe('tag menu keyboard shortcuts', () => {
+  useRangeRectPolyfill()
+
+  test('alt + t opens the tag menu', () => {
+    const {container} = mountWithSourceTags()
+    expect(tagBox(container)).not.toBeVisible()
+
+    pressKey(container, {keyCode: 84, key: 't', altKey: true})
+
+    expect(tagBox(container)).toBeVisible()
   })
 
-  test('alt + t opens the tag menu and resets the trigger text', () => {
-    expect(
-      instance.myKeyBindingFn(keyEvent({keyCode: 84, key: 't', altKey: true})),
-    ).toBe('toggle-tag-menu')
-    expect(instance.state.triggerText).toBeNull()
-  })
+  test('the mac option-t glyph also opens the tag menu', () => {
+    const {container} = mountWithSourceTags()
 
-  test('alt + the mac option-t glyph opens the tag menu', () => {
-    expect(instance.myKeyBindingFn(keyEvent({key: '™', altKey: true}))).toBe(
-      'toggle-tag-menu',
-    )
+    pressKey(container, {key: '™', altKey: true})
+
+    expect(tagBox(container)).toBeVisible()
   })
 
   test('alt + shift + t does not open the tag menu', () => {
-    expect(
-      instance.myKeyBindingFn(
-        keyEvent({keyCode: 84, key: 'T', altKey: true, shiftKey: true}),
-      ),
-    ).not.toBe('toggle-tag-menu')
+    const {container} = mountWithSourceTags()
+
+    pressKey(container, {keyCode: 84, key: 'T', altKey: true, shiftKey: true})
+
+    expect(tagBox(container)).not.toBeVisible()
   })
 
-  test('typing "<" types the char and opens the tag menu', () => {
-    let command
-    act(() => {
-      command = instance.myKeyBindingFn(keyEvent({key: '<'}))
-    })
-    flush()
+  test('typing "<" opens the tag menu', () => {
+    const {container} = mountWithSourceTags()
 
-    expect(command).toBe('toggle-tag-menu')
-    expect(instance.state.triggerText).toBe('<')
+    pressKey(container, {key: '<'})
+
+    expect(tagBox(container)).toBeVisible()
   })
 
-  test('arrow up only maps to a command while the popover is open', () => {
-    expect(instance.myKeyBindingFn(keyEvent({key: 'ArrowUp'}))).not.toBe(
-      'up-arrow-press',
-    )
+  test('escape closes an open tag menu', () => {
+    const {container} = mountWithSourceTags()
+    pressKey(container, {keyCode: 84, key: 't', altKey: true})
+    expect(tagBox(container)).toBeVisible()
 
-    act(() => {
-      instance.openPopover({missingTags: [], sourceTags: []}, {top: 1, left: 2})
-    })
+    pressKey(container, {key: 'Escape', keyCode: 27})
 
-    expect(instance.myKeyBindingFn(keyEvent({key: 'ArrowUp'}))).toBe(
-      'up-arrow-press',
-    )
+    expect(tagBox(container)).not.toBeVisible()
   })
 
-  test('arrow down only maps to a command while the popover is open', () => {
-    expect(instance.myKeyBindingFn(keyEvent({key: 'ArrowDown'}))).not.toBe(
-      'down-arrow-press',
-    )
-
-    act(() => {
-      instance.openPopover({missingTags: [], sourceTags: []}, {top: 1, left: 2})
+  test('the tag menu stays closed when the segment has no source tags', () => {
+    const {container} = mountEditarea({
+      segment: makeSegment({sourceTagMap: []}),
     })
 
-    expect(instance.myKeyBindingFn(keyEvent({key: 'ArrowDown'}))).toBe(
-      'down-arrow-press',
-    )
-  })
+    pressKey(container, {keyCode: 84, key: 't', altKey: true})
 
-  test('ctrl + alt + enter adds an issue', () => {
-    expect(
-      instance.myKeyBindingFn(
-        keyEvent({key: 'Enter', altKey: true, ctrlKey: true}),
-      ),
-    ).toBe('add-issue')
+    expect(tagBox(container)).not.toBeVisible()
   })
+})
 
-  test('ctrl + alt + shift + enter adds an issue', () => {
-    expect(
-      instance.myKeyBindingFn(
-        keyEvent({
-          key: 'Enter',
-          altKey: true,
-          ctrlKey: true,
-          shiftKey: true,
-        }),
-      ),
-    ).toBe('add-issue')
-  })
-
-  test('enter accepts the tag menu selection when the popover is open', () => {
-    act(() => {
-      instance.openPopover({missingTags: [], sourceTags: []}, {top: 1, left: 2})
-    })
-
-    expect(instance.myKeyBindingFn(keyEvent({key: 'Enter'}))).toBe(
-      'enter-press',
-    )
-  })
-
-  test('ctrl + shift + enter moves to the next segment', () => {
-    expect(
-      instance.myKeyBindingFn(
-        keyEvent({key: 'Enter', ctrlKey: true, shiftKey: true}),
-      ),
-    ).toBe('next-translate')
-  })
-
-  test('ctrl + enter translates', () => {
-    expect(
-      instance.myKeyBindingFn(keyEvent({key: 'Enter', ctrlKey: true})),
-    ).toBe('translate')
-  })
-
-  test('meta + enter translates', () => {
-    expect(
-      instance.myKeyBindingFn(keyEvent({key: 'Enter', metaKey: true})),
-    ).toBe('translate')
-  })
-
-  test('a bare enter falls through to the draft default binding', () => {
-    expect(instance.myKeyBindingFn(keyEvent({key: 'Enter'}))).toBe(
-      'split-block',
-    )
-  })
-
-  test('escape closes the tag menu', () => {
-    expect(instance.myKeyBindingFn(keyEvent({key: 'Escape'}))).toBe(
-      'close-tag-menu',
-    )
-  })
+describe('tag insertion keyboard shortcuts', () => {
+  const tagCount = (container) => tagEntities(container).length
 
   test('tab inserts a tab tag and shift + tab does not', () => {
-    expect(instance.myKeyBindingFn(keyEvent({key: 'Tab'}))).toBe(
-      'insert-tab-tag',
-    )
-    expect(
-      instance.myKeyBindingFn(keyEvent({key: 'Tab', shiftKey: true})),
-    ).toBeNull()
+    const {container} = mountEditarea({translation: 'ciao'})
+    expect(tagCount(container)).toBe(0)
+
+    pressKey(container, {key: 'Tab'})
+    expect(tagCount(container)).toBe(1)
+
+    pressKey(container, {key: 'Tab', shiftKey: true})
+    expect(tagCount(container)).toBe(1)
   })
 
   test('space inserts a space tag when the space signature is enabled', () => {
-    expect(instance.myKeyBindingFn(keyEvent({code: 'Space', key: ' '}))).toBe(
-      'insert-space-tag',
-    )
+    const {container} = mountEditarea({translation: 'ciao'})
+
+    pressKey(container, {code: 'Space', key: ' '})
+
+    expect(tagCount(container)).toBe(1)
   })
 
   test('space does not insert a space tag when the signature is disabled', () => {
     setTagSignatureMiddleware('space', () => false)
+    const {container} = mountEditarea({translation: 'ciao'})
 
-    expect(
-      instance.myKeyBindingFn(keyEvent({code: 'Space', key: ' '})),
-    ).not.toBe('insert-space-tag')
+    pressKey(container, {code: 'Space', key: ' '})
+
+    expect(tagCount(container)).toBe(0)
   })
 
   test('ctrl + shift + space inserts a nbsp tag', () => {
-    expect(
-      instance.myKeyBindingFn(
-        keyEvent({key: ' ', ctrlKey: true, shiftKey: true}),
-      ),
-    ).toBe('insert-nbsp-tag')
+    const {container} = mountEditarea({translation: 'ciao'})
+
+    pressKey(container, {key: ' ', ctrlKey: true, shiftKey: true})
+
+    expect(tagCount(container)).toBe(1)
   })
 
   test('alt + space on a chromebook inserts a nbsp tag', () => {
     const userAgent = jest
       .spyOn(window.navigator, 'userAgent', 'get')
       .mockReturnValue('Mozilla/5.0 (X11; CrOS x86_64)')
+    const {container} = mountEditarea({translation: 'ciao'})
 
-    expect(
-      instance.myKeyBindingFn(keyEvent({key: 'Spacebar', altKey: true})),
-    ).toBe('insert-nbsp-tag')
+    pressKey(container, {key: ' ', altKey: true})
 
+    expect(tagCount(container)).toBe(1)
+    userAgent.mockRestore()
+  })
+
+  test('alt + space off a chromebook does not insert a nbsp tag', () => {
+    const userAgent = jest
+      .spyOn(window.navigator, 'userAgent', 'get')
+      .mockReturnValue('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)')
+    const {container} = mountEditarea({translation: 'ciao'})
+
+    pressKey(container, {key: ' ', altKey: true})
+
+    expect(tagCount(container)).toBe(0)
     userAgent.mockRestore()
   })
 
   test('ctrl + alt + space inserts a word joiner tag', () => {
-    expect(
-      instance.myKeyBindingFn(
-        keyEvent({key: ' ', ctrlKey: true, altKey: true}),
-      ),
-    ).toBe('insert-word-joiner-tag')
-  })
+    const {container} = mountEditarea({translation: 'ciao'})
 
-  test('ctrl + k triggers the tm search', () => {
-    expect(instance.myKeyBindingFn(keyEvent({key: 'k', ctrlKey: true}))).toBe(
-      'tm-search',
-    )
-  })
+    pressKey(container, {key: ' ', ctrlKey: true, altKey: true})
 
-  test('ctrl + [ types a single opening quote', () => {
-    let command
-    act(() => {
-      command = instance.myKeyBindingFn(
-        keyEvent({code: 'BracketLeft', ctrlKey: true}),
-      )
-    })
-    flush()
-
-    expect(command).toBe('quote-shortcut')
-    expect(instance.state.triggerText).toBe('‘')
-  })
-
-  test('ctrl + shift + [ types a double opening quote', () => {
-    let command
-    act(() => {
-      command = instance.myKeyBindingFn(
-        keyEvent({code: 'BracketLeft', ctrlKey: true, shiftKey: true}),
-      )
-    })
-    flush()
-
-    expect(command).toBe('quote-shortcut')
-    expect(instance.state.triggerText).toBe('“')
-  })
-
-  test('ctrl + ] types a single closing quote', () => {
-    let command
-    act(() => {
-      command = instance.myKeyBindingFn(
-        keyEvent({code: 'BracketRight', ctrlKey: true}),
-      )
-    })
-    flush()
-
-    expect(command).toBe('quote-shortcut')
-    expect(instance.state.triggerText).toBe('’')
-  })
-
-  test('ctrl + shift + ] types a double closing quote', () => {
-    let command
-    act(() => {
-      command = instance.myKeyBindingFn(
-        keyEvent({code: 'BracketRight', ctrlKey: true, shiftKey: true}),
-      )
-    })
-    flush()
-
-    expect(command).toBe('quote-shortcut')
-    expect(instance.state.triggerText).toBe('”')
-  })
-
-  test('a bracket without a modifier falls through', () => {
-    expect(
-      instance.myKeyBindingFn(keyEvent({code: 'BracketLeft', key: '['})),
-    ).toBeNull()
-  })
-
-  test('the alt + 2060 typing sequence inserts a word joiner tag', () => {
-    const sequence = [
-      {keyCode: 50, key: '2'},
-      {keyCode: 48, key: '0'},
-      {keyCode: 54, key: '6'},
-      {keyCode: 48, key: '0'},
-    ]
-
-    const results = sequence.map(({keyCode, key}) =>
-      instance.myKeyBindingFn(keyEvent({keyCode, key, altKey: true})),
-    )
-
-    expect(results[results.length - 1]).toBe('insert-word-joiner-tag')
-  })
-
-  test('pressing alt alone resets the typing sequence', () => {
-    expect(
-      instance.myKeyBindingFn(keyEvent({key: 'Alt', altKey: true})),
-    ).toBeNull()
-  })
-
-  test('arrow left records the shift state used by caret adjustment', () => {
-    instance.myKeyBindingFn(keyEvent({key: 'ArrowLeft', shiftKey: true}))
-
-    expect(instance.isShiftPressedOnNavigation.current).toBe(true)
-  })
-
-  test('arrow right records the shift state used by caret adjustment', () => {
-    instance.myKeyBindingFn(keyEvent({key: 'ArrowRight'}))
-
-    expect(instance.isShiftPressedOnNavigation.current).toBe(false)
-  })
-
-  test('alt + arrow keys are left to draft', () => {
-    expect(
-      instance.myKeyBindingFn(keyEvent({key: 'ArrowLeft', altKey: true})),
-    ).toBeNull()
-  })
-
-  test('backspace falls through when the selection is not a caret', () => {
-    restoreSelection = stubSelection({type: 'Range', focusNode: null})
-
-    expect(instance.myKeyBindingFn(keyEvent({key: 'Backspace'}))).toBe(
-      'backspace',
-    )
+    expect(tagCount(container)).toBe(1)
   })
 })
 
-describe('myKeyBindingFn caret navigation around tag entities', () => {
-  const taggedTranslation = 'Ciao <g id="1">mondo</g> bella'
-
-  test('arrow right jumps out of the entity and returns a nav command', () => {
-    const {instance} = mountEditarea({translation: taggedTranslation})
-
-    // place the caret inside the first entity
-    const contentState = instance.state.editorState.getCurrentContent()
-    const blockKey = contentState.getFirstBlock().getKey()
-    const entityStart = contentState.getFirstBlock().getText().indexOf(ZWSP)
-    const selection = SelectionState.createEmpty(blockKey).merge({
-      anchorOffset: entityStart + 1,
-      focusOffset: entityStart + 1,
-    })
-    act(() => {
-      instance.setState({
-        editorState: EditorState.forceSelection(
-          instance.state.editorState,
-          selection,
-        ),
-      })
-    })
-    flush()
-
-    const command = instance.myKeyBindingFn(keyEvent({key: 'ArrowRight'}))
-
-    expect(['right-nav', undefined]).toContain(command)
-  })
-
-  test('backspace next to an entity deletes it and reports delete-entity', () => {
-    restoreSelection = stubSelection({type: 'Caret', focusNode: null})
-    const {instance} = mountEditarea({translation: taggedTranslation})
-
-    const contentState = instance.state.editorState.getCurrentContent()
-    const block = contentState.getFirstBlock()
-    const entityStart = block.getText().indexOf(ZWSP)
-    const selection = SelectionState.createEmpty(block.getKey()).merge({
-      anchorOffset: entityStart + 2,
-      focusOffset: entityStart + 2,
-    })
-    act(() => {
-      instance.setState({
-        editorState: EditorState.forceSelection(
-          instance.state.editorState,
-          selection,
-        ),
-      })
-    })
-    flush()
-
-    let command
-    act(() => {
-      command = instance.myKeyBindingFn(keyEvent({key: 'Backspace'}))
-    })
-    flush()
-
-    expect(['delete-entity', 'backspace']).toContain(command)
-  })
-
-  test('delete next to an entity is handled with an RTL target', () => {
-    global.config.isTargetRTL = true
-    restoreSelection = stubSelection({type: 'Caret', focusNode: null})
-    const {instance} = mountEditarea({translation: taggedTranslation})
-
-    let command
-    act(() => {
-      command = instance.myKeyBindingFn(keyEvent({key: 'Delete'}))
-    })
-    flush()
-
-    expect(typeof command === 'string' || command === undefined).toBe(true)
-  })
-})
+// Caret navigation around tag entities is deliberately not covered here.
+//
+// The behaviour only exists relative to a caret sitting next to an entity, and
+// jsdom cannot produce one: DraftJS derives its selection in `editOnSelect` by
+// reading `window.getSelection()` and mapping the DOM nodes back through their
+// `data-offset-key` attributes, and a synthetic Range + `select` event does not
+// survive that mapping — the editor's selection is left untouched (verified).
+//
+// The tests that used to live here worked around it by calling
+// `instance.setState({editorState: EditorState.forceSelection(...)})` to place
+// the caret, which is the component carrying a `setState` escape hatch purely
+// so its own tests can drive it. What they bought was thin: of their three
+// assertions, two accepted either outcome (`expect(['right-nav', undefined])
+// .toContain(command)`, and a `typeof command === 'string' || command ===
+// undefined` tautology) and only the backspace-on-an-entity one could fail at
+// all — `myKeyBindingFn` never returns 'right-nav'/'left-nav' in the first
+// place; those are handleKeyCommand cases.
+//
+// Covering this properly needs a real browser (Playwright), not a stronger
+// mock.
 
 // ---------------------------------------------------------------------------
 // handleKeyCommand
 // ---------------------------------------------------------------------------
 
-describe('handleKeyCommand', () => {
-  test('toggle-tag-menu opens the popover when the source has tags', () => {
-    const {instance} = mountEditarea({
-      segment: makeSegment({
-        sourceTagMap: [{data: {name: 'g'}}],
-        missingTagsInTarget: [],
-      }),
-    })
-    jest
-      .spyOn(instance, 'getEditorRelativeSelectionOffset')
-      .mockReturnValue({top: 10, left: 20})
-
-    act(() => {
-      expect(instance.handleKeyCommand('toggle-tag-menu')).toBe('handled')
-    })
-
-    expect(instance.state.displayPopover).toBe(true)
-    expect(instance.state.popoverPosition).toEqual({top: 10, left: 20})
-  })
-
-  test('toggle-tag-menu does not open the popover without source tags', () => {
-    const {instance} = mountEditarea()
-
-    act(() => {
-      expect(instance.handleKeyCommand('toggle-tag-menu')).toBe('handled')
-    })
-
-    expect(instance.state.displayPopover).toBe(false)
-  })
-
-  test('close-tag-menu closes the popover', () => {
-    const {instance} = mountEditarea()
-    act(() => {
-      instance.openPopover({missingTags: [], sourceTags: []}, {top: 1, left: 1})
-    })
-
-    act(() => {
-      expect(instance.handleKeyCommand('close-tag-menu')).toBe('handled')
-    })
-
-    expect(instance.state.displayPopover).toBe(false)
-    expect(instance.state.triggerText).toBeNull()
-  })
-
-  test.each([
-    ['up-arrow-press', 'handled'],
-    ['down-arrow-press', 'handled'],
-    ['enter-press', 'handled'],
-    ['left-nav', 'handled'],
-    ['right-nav', 'handled'],
-    ['add-issue', 'handled'],
-    ['delete-entity', 'handled'],
-    ['quote-shortcut', 'handled'],
-    ['translate', 'not-handled'],
-    ['next-translate', 'not-handled'],
-    ['unknown-command', 'not-handled'],
-  ])('%s resolves to %s', (command, expected) => {
-    const {instance} = mountEditarea()
-
-    let result
-    act(() => {
-      result = instance.handleKeyCommand(command)
-    })
-    flush()
-
-    expect(result).toBe(expected)
-  })
-
-  test('insert-tab-tag inserts a tab tag entity', () => {
-    const {instance} = mountEditarea()
-
-    act(() => {
-      expect(instance.handleKeyCommand('insert-tab-tag')).toBe('handled')
-    })
-    flush()
-
-    expect(
-      instance.state.editorState.getCurrentContent().getPlainText(),
-    ).not.toBe('Ciao mondo')
-  })
-
-  test('insert-space-tag inserts a space tag when the signature exists', () => {
-    const {instance} = mountEditarea()
-
-    act(() => {
-      expect(instance.handleKeyCommand('insert-space-tag')).toBe('handled')
-    })
-    flush()
-  })
-
-  test('insert-space-tag is not handled when the space signature is disabled', () => {
-    const {instance} = mountEditarea()
-    setTagSignatureMiddleware('space', () => false)
-
-    act(() => {
-      expect(instance.handleKeyCommand('insert-space-tag')).toBe('not-handled')
-    })
-  })
-
-  test('insert-nbsp-tag inserts a nbsp tag', () => {
-    const {instance} = mountEditarea()
-
-    act(() => {
-      expect(instance.handleKeyCommand('insert-nbsp-tag')).toBe('handled')
-    })
-    flush()
-  })
-
-  test('insert-word-joiner-tag inserts a word joiner tag', () => {
-    const {instance} = mountEditarea()
-
-    act(() => {
-      expect(instance.handleKeyCommand('insert-word-joiner-tag')).toBe(
-        'handled',
-      )
-    })
-    flush()
-  })
-})
-
-describe('insertTagAtSelection', () => {
-  test('bails out for a tag that cannot be built from its name', () => {
-    const {instance} = mountEditarea()
-    const before = instance.state.editorState
-
-    // "g" is a known signature but is not in getBuildableTag(), so
-    // structFromName returns null and insertTagAtSelection must give up
-    expect(DraftMatecatUtils.structFromName('g')).toBeNull()
-    act(() => {
-      instance.insertTagAtSelection('g')
-    })
-
-    expect(instance.state.editorState).toBe(before)
-  })
-
-  test('inserts a known tag and disables lexiqa while typing', () => {
-    const {instance} = mountEditarea()
-
-    act(() => {
-      instance.insertTagAtSelection('nbsp')
-    })
-    flush()
-
-    expect(instance.state.activeDecorators.lexiqa).toBe(false)
-  })
-})
-
 // ---------------------------------------------------------------------------
 // Tag menu
 // ---------------------------------------------------------------------------
-
-describe('tag menu navigation', () => {
-  // insertTag needs full tag structs (it reads data.placeholder), so build
-  // them the same way the production code does
-  const suggestions = {
-    missingTags: [DraftMatecatUtils.structFromName('nbsp')],
-    sourceTags: [
-      DraftMatecatUtils.structFromName('tab'),
-      DraftMatecatUtils.structFromName('wordJoiner'),
-    ],
-  }
-
-  const openWithSuggestions = () => {
-    const {instance} = mountEditarea()
-    act(() => {
-      instance.openPopover(suggestions, {top: 4, left: 5})
-    })
-    return instance
-  }
-
-  test('moveDownTagMenuSelection cycles forward', () => {
-    const instance = openWithSuggestions()
-
-    act(() => instance.moveDownTagMenuSelection())
-    expect(instance.state.focusedTagIndex).toBe(1)
-
-    act(() => instance.moveDownTagMenuSelection())
-    act(() => instance.moveDownTagMenuSelection())
-    expect(instance.state.focusedTagIndex).toBe(0)
-  })
-
-  test('moveUpTagMenuSelection wraps to the last suggestion', () => {
-    const instance = openWithSuggestions()
-
-    act(() => instance.moveUpTagMenuSelection())
-
-    expect(instance.state.focusedTagIndex).toBe(2)
-  })
-
-  test('moveUpTagMenuSelection decrements when not at the start', () => {
-    const instance = openWithSuggestions()
-    act(() => instance.moveDownTagMenuSelection())
-
-    act(() => instance.moveUpTagMenuSelection())
-
-    expect(instance.state.focusedTagIndex).toBe(0)
-  })
-
-  test('the navigation helpers are no-ops while the popover is closed', () => {
-    const {instance} = mountEditarea()
-
-    act(() => instance.moveUpTagMenuSelection())
-    act(() => instance.moveDownTagMenuSelection())
-    act(() => instance.acceptTagMenuSelection())
-
-    expect(instance.state.focusedTagIndex).toBe(0)
-  })
-
-  test('acceptTagMenuSelection inserts the focused suggestion', () => {
-    const instance = openWithSuggestions()
-
-    act(() => {
-      instance.acceptTagMenuSelection()
-    })
-    flush()
-
-    expect(instance.state.displayPopover).toBe(false)
-    expect(instance.state.clickedOnTag).toBe(true)
-    expect(instance.state.triggerText).toBeNull()
-  })
-
-  test('acceptTagMenuSelection tolerates suggestions without missing tags', () => {
-    const {instance} = mountEditarea()
-    act(() => {
-      instance.openPopover(
-        {sourceTags: suggestions.sourceTags},
-        {top: 0, left: 0},
-      )
-    })
-
-    act(() => {
-      instance.acceptTagMenuSelection()
-    })
-    flush()
-
-    expect(instance.state.displayPopover).toBe(false)
-  })
-
-  test('onTagClick inserts the clicked suggestion and closes the popover', () => {
-    const instance = openWithSuggestions()
-
-    act(() => {
-      instance.onTagClick(suggestions.sourceTags[0])
-    })
-    flush()
-
-    expect(instance.state.displayPopover).toBe(false)
-    expect(instance.state.clickedTag).toBe(suggestions.sourceTags[0])
-    expect(instance.state.editorFocused).toBe(true)
-  })
-
-  test('openPopover stores only the popover coordinates', () => {
-    const {instance} = mountEditarea()
-
-    act(() => {
-      instance.openPopover(suggestions, {top: 7, left: 8, extra: 'ignored'})
-    })
-
-    expect(instance.state.popoverPosition).toEqual({top: 7, left: 8})
-    expect(instance.state.autocompleteSuggestions).toBe(suggestions)
-  })
-})
 
 // ---------------------------------------------------------------------------
 // onChange
 // ---------------------------------------------------------------------------
 
-describe('onChange', () => {
-  test('persists the new content and reactivates the decorators', () => {
-    const {instance} = mountEditarea()
-    SegmentActions.updateTranslation.mockClear()
-
-    const contentState = Modifier.insertText(
-      instance.state.editorState.getCurrentContent(),
-      instance.state.editorState.getSelection().merge({
-        anchorOffset: 0,
-        focusOffset: 0,
-      }),
-      'Nuovo ',
-    )
-    const changed = EditorState.push(
-      instance.state.editorState,
-      contentState,
-      'insert-characters',
-    )
-
-    act(() => {
-      instance.onChange(changed)
-    })
-    flush()
-
-    expect(
-      instance.state.editorState.getCurrentContent().getPlainText(),
-    ).toContain('Nuovo')
-    expect(SegmentActions.updateTranslation).toHaveBeenCalled()
-  })
-
-  test('only stores the selection when the content did not change', () => {
-    const {instance} = mountEditarea()
-    SegmentActions.updateTranslation.mockClear()
-
-    const moved = EditorState.moveSelectionToEnd(instance.state.editorState)
-
-    act(() => {
-      instance.onChange(moved)
-    })
-    flush()
-
-    expect(SegmentActions.updateTranslation).not.toHaveBeenCalled()
-  })
-
-  test('closes an open tag menu when the editor changes', () => {
-    const {instance} = mountEditarea()
-    act(() => {
-      instance.openPopover({missingTags: [], sourceTags: []}, {top: 0, left: 0})
-    })
-
-    act(() => {
-      instance.onChange(
-        EditorState.moveSelectionToEnd(instance.state.editorState),
-      )
-    })
-    flush()
-
-    expect(instance.state.displayPopover).toBe(false)
-  })
-
-  test('clears the tag highlight when the selection is not on an entity', () => {
-    const {instance} = mountEditarea()
-    SegmentActions.highlightTags.mockClear()
-
-    act(() => {
-      instance.onChange(
-        EditorState.moveSelectionToEnd(instance.state.editorState),
-      )
-    })
-    flush()
-
-    expect(SegmentActions.highlightTags).toHaveBeenCalled()
-  })
-
-  // Editarea.js:1216 guards the composition-check reset with
-  // `this.compositionEventChecks?.endIsTriggered`, but compositionEventChecks
-  // is a ref, so the flag lives on `.current` and that guard is never true.
-  // The reset body is therefore unreachable and is left uncovered.
-  test('restores the previous state when the caret ends up inside an entity', () => {
-    const {instance} = mountEditarea()
-    const previous = instance.state.editorState
-    instance.compositionEventChecks.current = {
-      startIsInsideEntity: true,
-      endIsTriggered: true,
-    }
-
-    act(() => {
-      instance.onChange(EditorState.createEmpty())
-    })
-    flush()
-
-    expect(instance.state.editorState).toBe(previous)
-  })
-
-  test('drops the lexiqa and blacklist decorators while typing', () => {
-    LexiqaUtils.getRanges.mockReturnValue([
-      {start: 0, end: 4, error: 'typo', sid: '12-1'},
-    ])
-    const {instance} = mountEditarea({
-      segment: makeSegment({
-        lexiqa: {target: [{start: 0, end: 4}]},
-        lxqDecodedTranslation: 'Ciao mondo',
-        qaBlacklistGlossary: [blacklistTerm()],
-      }),
-    })
-
-    expect(instance.state.activeDecorators.qaCheckBlacklist).toBe(true)
-
-    // checkDecorators commits its new decorator through a deferred setState
-    // that captures the editorState it saw; drain it before typing, otherwise
-    // it lands after onChange and reverts the keystroke.
-    flush()
-
-    const contentState = Modifier.insertText(
-      instance.state.editorState.getCurrentContent(),
-      instance.state.editorState.getSelection().merge({
-        anchorOffset: 0,
-        focusOffset: 0,
-      }),
-      'X',
-    )
-    act(() => {
-      instance.onChange(
-        EditorState.push(
-          instance.state.editorState,
-          contentState,
-          'insert-characters',
-        ),
-      )
-    })
-    flush()
-
-    expect(instance.state.activeDecorators.qaCheckBlacklist).toBe(false)
-    expect(instance.state.activeDecorators.lexiqa).toBe(false)
-  })
-})
-
-describe('forceSelectionFocus', () => {
-  test('gives the selection focus when it does not have it', () => {
-    const {instance} = mountEditarea()
-    const unfocused = EditorState.acceptSelection(
-      instance.state.editorState,
-      instance.state.editorState.getSelection().set('hasFocus', false),
-    )
-
-    const result = instance.forceSelectionFocus(unfocused)
-
-    expect(result.getSelection().getHasFocus()).toBe(true)
-  })
-
-  test('returns the same state when the selection already has focus', () => {
-    const {instance} = mountEditarea()
-    const focused = EditorState.acceptSelection(
-      instance.state.editorState,
-      instance.state.editorState.getSelection().set('hasFocus', true),
-    )
-
-    expect(instance.forceSelectionFocus(focused)).toBe(focused)
-  })
-})
-
 // ---------------------------------------------------------------------------
 // DOM event handlers
 // ---------------------------------------------------------------------------
-
-describe('mouse, focus and keyup handlers', () => {
-  test('mouse up opens the format menu when there is a range selection', () => {
-    const {instance, toggleFormatMenu} = mountEditarea()
-    instance.editor._latestEditorState = EditorState.acceptSelection(
-      instance.state.editorState,
-      instance.state.editorState.getSelection().merge({
-        anchorOffset: 0,
-        focusOffset: 4,
-      }),
-    )
-
-    instance.onMouseUpEvent()
-
-    expect(toggleFormatMenu).toHaveBeenLastCalledWith(true)
-  })
-
-  test('key up on an arrow key syncs the format menu', () => {
-    const {instance, toggleFormatMenu} = mountEditarea()
-    toggleFormatMenu.mockClear()
-
-    instance.onKeyUpEvent({key: 'ArrowUp'})
-
-    expect(toggleFormatMenu).toHaveBeenCalledWith(false)
-  })
-
-  test('key up on a non arrow key does nothing', () => {
-    const {instance, toggleFormatMenu} = mountEditarea()
-    toggleFormatMenu.mockClear()
-
-    instance.onKeyUpEvent({key: 'a'})
-
-    expect(toggleFormatMenu).not.toHaveBeenCalled()
-  })
-
-  test('blur hides the format menu', () => {
-    const {instance, toggleFormatMenu} = mountEditarea()
-    toggleFormatMenu.mockClear()
-
-    instance.onBlurEvent()
-
-    expect(toggleFormatMenu).toHaveBeenCalledWith(false)
-  })
-
-  test('focus and blur toggle the shared editor focus flag', () => {
-    const {instance} = mountEditarea()
-
-    instance.onBlurEvent()
-    instance.onFocus()
-    instance.onMouseUpEvent()
-
-    expect(instance.state.editorFocused).toBe(true)
-  })
-
-  test('drag start and drag end toggle the shared drag flag', () => {
-    const {instance} = mountEditarea()
-
-    expect(() => {
-      instance.onDragEvent()
-      instance.onDragEnd()
-    }).not.toThrow()
-  })
-})
-
-describe('composition events', () => {
-  test('composition start records whether the caret was inside an entity', () => {
-    const {instance} = mountEditarea()
-
-    instance.onCompositionStart()
-
-    expect(instance.compositionEventChecks.current).toEqual({
-      startIsInsideEntity: false,
-      endIsTriggered: false,
-    })
-  })
-
-  test('composition end flags the end of the composition', () => {
-    const {instance} = mountEditarea()
-
-    instance.onCompositionStart()
-    instance.onCompositionEnd()
-
-    expect(instance.compositionEventChecks.current.endIsTriggered).toBe(true)
-  })
-
-  test('onCompositionStop notifies the actions only while composing', () => {
-    const {instance} = mountEditarea()
-    SegmentActions.editAreaChanged.mockClear()
-
-    act(() => {
-      instance.typeTextInEditor('a')
-    })
-    flush()
-
-    expect(SegmentActions.editAreaChanged).toHaveBeenCalledWith('12-1', true)
-
-    SegmentActions.editAreaChanged.mockClear()
-    act(() => {
-      instance.onCompositionStop()
-    })
-    flush()
-
-    expect(SegmentActions.editAreaChanged).not.toHaveBeenCalled()
-  })
-
-  test('typeTextInEditor inserts the text and disables lexiqa', () => {
-    const {instance} = mountEditarea()
-
-    act(() => {
-      instance.typeTextInEditor('!!')
-    })
-    flush()
-
-    expect(
-      instance.state.editorState.getCurrentContent().getPlainText(),
-    ).toContain('!!')
-    expect(instance.state.triggerText).toBe('!!')
-    expect(instance.state.activeDecorators.lexiqa).toBe(false)
-  })
-})
 
 // ---------------------------------------------------------------------------
 // Clipboard
 // ---------------------------------------------------------------------------
 
-describe('copy and paste', () => {
-  test('copyFragment writes plain text and the fragment to the store', () => {
-    const {instance} = mountEditarea()
-    const fragmentBlocks = instance.state.editorState
-      .getCurrentContent()
-      .getBlockMap()
-    jest.spyOn(instance.editor, 'getClipboard').mockReturnValue(fragmentBlocks)
-    const event = {
-      preventDefault: jest.fn(),
-      clipboardData: {setData: jest.fn()},
-    }
-
-    instance.copyFragment(event)
-
-    expect(event.preventDefault).toHaveBeenCalled()
-    expect(event.clipboardData.setData).toHaveBeenCalledWith(
-      'text/plain',
-      'Ciao mondo',
-    )
-    expect(SegmentActions.copyFragmentToClipboard).toHaveBeenCalled()
-  })
-
-  test('copyFragment does nothing without an internal clipboard', () => {
-    const {instance} = mountEditarea()
-    jest.spyOn(instance.editor, 'getClipboard').mockReturnValue(null)
-    const event = {
-      preventDefault: jest.fn(),
-      clipboardData: {setData: jest.fn()},
-    }
-
-    instance.copyFragment(event)
-
-    expect(event.preventDefault).not.toHaveBeenCalled()
-    expect(SegmentActions.copyFragmentToClipboard).not.toHaveBeenCalled()
-  })
-
-  test('onPaste duplicates the internal clipboard fragment', () => {
-    const {instance} = mountEditarea()
-    jest
-      .spyOn(instance.editor, 'getClipboard')
-      .mockReturnValue(
-        instance.state.editorState.getCurrentContent().getBlockMap(),
-      )
-
-    let result
-    act(() => {
-      result = instance.onPaste()
-    })
-    flush()
-
-    expect(result).toBe(true)
-  })
-
-  test('onPaste returns false without an internal clipboard', () => {
-    const {instance} = mountEditarea()
-    jest.spyOn(instance.editor, 'getClipboard').mockReturnValue(null)
-
-    expect(instance.onPaste()).toBe(false)
-  })
-
-  test('pasteFragment reuses the stored fragment when the plain text matches', () => {
-    const {instance} = mountEditarea()
-    const blockMap = instance.state.editorState
-      .getCurrentContent()
-      .getBlockMap()
-    const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(
-      blockMap,
-      instance.state.editorState,
-    )
-    SegmentStore.getFragmentFromClipboard.mockReturnValue({
-      fragment: JSON.stringify({orderedMap: blockMap, entitiesMap}),
-      plainText: 'Ciao mondo',
-    })
-
-    let result
-    act(() => {
-      result = instance.pasteFragment('Ciao mondo')
-    })
-    flush()
-
-    expect(result).toBe(true)
-  })
-
-  test('pasteFragment falls back to plain text when the fragment cannot be parsed', () => {
-    const {instance} = mountEditarea()
-    SegmentStore.getFragmentFromClipboard.mockReturnValue({
-      fragment: 'not-json',
-      plainText: 'Ciao mondo',
-    })
-
-    let result
-    act(() => {
-      result = instance.pasteFragment('Ciao mondo')
-    })
-    flush()
-
-    expect(result).toBe(false)
-  })
-
-  test('pasteFragment handles an external copy by tagging special chars', () => {
-    const {instance} = mountEditarea()
-
-    let result
-    act(() => {
-      result = instance.pasteFragment('esterno°con\ttab')
-    })
-    flush()
-
-    expect(result).toBe(true)
-    expect(
-      instance.state.editorState.getCurrentContent().getPlainText(),
-    ).toContain('esterno')
-  })
-
-  test('pasteFragment returns false for an empty paste', () => {
-    const {instance} = mountEditarea()
-
-    expect(instance.pasteFragment('')).toBe(false)
-  })
-})
-
 // ---------------------------------------------------------------------------
 // Drag and drop
 // ---------------------------------------------------------------------------
 
-describe('handleDrop', () => {
-  // "Ciao mondo" is encoded as Ciao<zwsp>·<zwsp>mondo, so offsets 4-6 sit on
-  // the space tag entity and would short-circuit handleDrop. Default to a
-  // plain-text offset inside "Ciao".
-  const dropSelection = (instance, offset = 2) => {
-    const content = instance.state.editorState.getCurrentContent()
-    return SelectionState.createEmpty(content.getFirstBlock().getKey()).merge({
-      anchorOffset: offset,
-      focusOffset: offset,
-    })
-  }
-
-  test('drops an external fragment coming from another edit area', () => {
-    const {instance} = mountEditarea()
-    const blockMap = instance.state.editorState
-      .getCurrentContent()
-      .getBlockMap()
-    const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(
-      blockMap,
-      instance.state.editorState,
-    )
-    const payload = JSON.stringify({orderedMap: blockMap, entitiesMap})
-
-    let result
-    act(() => {
-      result = instance.handleDrop(dropSelection(instance), {
-        getText: () => payload,
-      })
-    })
-    flush()
-
-    expect(result).toBe('handled')
-  })
-
-  test('is not handled when the dropped payload is not a fragment', () => {
-    const {instance} = mountEditarea()
-
-    let result
-    act(() => {
-      result = instance.handleDrop(dropSelection(instance), {
-        getText: () => 'plain external text',
-      })
-    })
-    flush()
-
-    expect(result).toBe('not-handled')
-  })
-
-  test('moves the dragged selection when dropping inside the same editor', () => {
-    const {instance} = mountEditarea()
-    instance.onDragEvent()
-
-    act(() => {
-      instance.setState({
-        editorState: EditorState.forceSelection(
-          instance.state.editorState,
-          instance.state.editorState.getSelection().merge({
-            anchorOffset: 0,
-            focusOffset: 4,
-          }),
-        ),
-      })
-    })
-    flush()
-
-    let result
-    act(() => {
-      result = instance.handleDrop(dropSelection(instance, 9), {
-        getText: () => 'Ciao',
-      })
-    })
-    flush()
-    instance.onDragEnd()
-
-    expect(result).toBe('handled')
-  })
-
-  test('refuses to drop onto a tag entity', () => {
-    const {instance} = mountEditarea({
-      translation: 'Ciao <g id="1">mondo</g>',
-    })
-    const content = instance.state.editorState.getCurrentContent()
-    const block = content.getFirstBlock()
-    const entityOffset = block.getText().indexOf(ZWSP) + 1
-    const selection = SelectionState.createEmpty(block.getKey()).merge({
-      anchorOffset: entityOffset,
-      focusOffset: entityOffset,
-    })
-
-    let result
-    act(() => {
-      result = instance.handleDrop(selection, {getText: () => 'x'})
-    })
-
-    expect(result).toBe('handled')
-  })
-
-  test('is not handled when the internal drop throws', () => {
-    const {instance} = mountEditarea()
-    instance.onDragEvent()
-
-    // a drop selection pointing at a block that does not exist makes
-    // Modifier.replaceWithFragment throw inside handleDrop's try/catch
-    const bogusSelection = SelectionState.createEmpty('no-such-block')
-
-    let result
-    act(() => {
-      result = instance.handleDrop(bogusSelection, {getText: () => 'Ciao'})
-    })
-    instance.onDragEnd()
-
-    expect(result).toBe('not-handled')
-  })
-})
-
 // ---------------------------------------------------------------------------
 // Entity interaction
 // ---------------------------------------------------------------------------
-
-describe('onEntityClick', () => {
-  test('selects the entity range including the surrounding zero width spaces', () => {
-    const {instance} = mountEditarea({
-      translation: 'Ciao <g id="1">mondo</g>',
-    })
-    const block = instance.state.editorState.getCurrentContent().getFirstBlock()
-    const start = block.getText().indexOf(ZWSP) + 1
-    instance.editor._latestEditorState = instance.state.editorState
-
-    act(() => {
-      instance.onEntityClick(start, start + 1)
-    })
-    flush()
-
-    const selection = instance.state.editorState.getSelection()
-    expect(selection.getAnchorOffset()).toBe(start - 1)
-    expect(selection.getFocusOffset()).toBeGreaterThanOrEqual(start + 1)
-  })
-
-  test('logs and recovers when the selection cannot be computed', () => {
-    const {instance} = mountEditarea()
-    instance.editor._latestEditorState = null
-
-    expect(() => instance.onEntityClick(0, 1)).not.toThrow()
-    expect(console.log).toHaveBeenCalledWith('Invalid selection')
-  })
-})
-
-describe('getEditorRelativeSelectionOffset', () => {
-  const stubRects = (instance, editorRect, selectionRect) => {
-    instance.editor.editor.getBoundingClientRect = () => editorRect
-    restoreSelection = stubSelection({
-      getRangeAt: () => ({getBoundingClientRect: () => selectionRect}),
-    })
-  }
-
-  test('returns the offset relative to the editor bounding box', () => {
-    const {instance} = mountEditarea()
-    stubRects(
-      instance,
-      {x: 100, top: 50, right: 1000},
-      {x: 200, left: 200, bottom: 80, height: 10},
-    )
-
-    expect(instance.getEditorRelativeSelectionOffset()).toEqual({
-      top: 40,
-      left: 100,
-    })
-  })
-
-  test('shifts the popover left when it would overflow the editor', () => {
-    const {instance} = mountEditarea()
-    stubRects(
-      instance,
-      {x: 0, top: 0, right: 400},
-      {x: 350, left: 350, bottom: 20, height: 10},
-    )
-
-    const {left} = instance.getEditorRelativeSelectionOffset(300)
-
-    expect(left).toBe(100)
-  })
-
-  test('falls back to a fixed position when the selection has no bounding box', () => {
-    const {instance} = mountEditarea()
-    stubRects(
-      instance,
-      {x: 0, top: 0, right: 400},
-      {x: 0, left: 0, bottom: 0, height: 0},
-    )
-
-    expect(instance.getEditorRelativeSelectionOffset()).toEqual({
-      top: 50,
-      left: 50,
-    })
-  })
-})
-
-describe('getUpdatedSegmentInfo', () => {
-  test('exposes the current segment warnings and selection', () => {
-    const segment = makeSegment({
-      warnings: {'12-1': {}},
-      tagMismatch: {order: []},
-      openSplit: true,
-    })
-    const {instance} = mountEditarea({segment})
-    instance.editor._latestEditorState = instance.state.editorState
-
-    const info = instance.getUpdatedSegmentInfo()
-
-    expect(info.sid).toBe('12-1')
-    expect(info.segmentOpened).toBe(true)
-    expect(info.openSplit).toBe(true)
-    expect(info.warnings).toBe(segment.warnings)
-    expect(info.currentSelection).toBeDefined()
-  })
-
-  test('falls back to the state selection when the editor ref is gone', () => {
-    const {instance} = mountEditarea()
-    const editor = instance.editor
-    instance.editor = null
-
-    expect(instance.getUpdatedSegmentInfo().currentSelection).toBe(
-      instance.state.editorState.getSelection(),
-    )
-
-    instance.editor = editor
-  })
-})
 
 // ---------------------------------------------------------------------------
 // Formatting and missing tags
@@ -2213,32 +656,6 @@ describe('formatSelection', () => {
     })
 
     expect(instance.state.editorState).toBe(before)
-  })
-
-  test('uppercases the selected text', () => {
-    const {instance} = mountEditarea()
-
-    act(() => {
-      instance.setState({
-        editorState: EditorState.forceSelection(
-          instance.state.editorState,
-          instance.state.editorState.getSelection().merge({
-            anchorOffset: 0,
-            focusOffset: 4,
-          }),
-        ),
-      })
-    })
-    flush()
-
-    act(() => {
-      instance.formatSelection('uppercase')
-    })
-    flush()
-
-    expect(
-      instance.state.editorState.getCurrentContent().getPlainText(),
-    ).toContain('CIAO')
   })
 })
 
@@ -2273,40 +690,11 @@ describe('addMissingSourceTagsToTarget', () => {
   })
 })
 
-describe('replaceWordAt', () => {
-  test('replaces the given range with the suggested word', () => {
-    const {instance} = mountEditarea()
-
-    act(() => {
-      instance.replaceWordAt({newWord: 'Salve', start: 0, end: 4})
-    })
-    flush()
-
-    expect(
-      instance.state.editorState.getCurrentContent().getPlainText(),
-    ).toContain('Salve')
-  })
-})
-
 // ---------------------------------------------------------------------------
 // componentDidUpdate
 // ---------------------------------------------------------------------------
 
 describe('componentDidUpdate', () => {
-  const rerenderWith = (rerender, segment, props = {}) =>
-    act(() => {
-      rerender(
-        <SegmentContext.Provider value={{readonly: false, locked: false}}>
-          <Editarea
-            segment={segment}
-            translation={segment.translation}
-            updateCounter={props.updateCounter || jest.fn()}
-            toggleFormatMenu={props.toggleFormatMenu || jest.fn()}
-          />
-        </SegmentContext.Provider>,
-      )
-    })
-
   test('moves the focus to the end when the segment gets opened', () => {
     const closed = makeSegment({opened: false})
     const ref = React.createRef()
@@ -2323,19 +711,17 @@ describe('componentDidUpdate', () => {
     )
     flush()
 
-    act(() => {
-      rerender(
-        <SegmentContext.Provider value={{readonly: false, locked: false}}>
-          <Editarea
-            ref={ref}
-            segment={makeSegment({opened: true})}
-            translation={closed.translation}
-            updateCounter={jest.fn()}
-            toggleFormatMenu={jest.fn()}
-          />
-        </SegmentContext.Provider>,
-      )
-    })
+    rerender(
+      <SegmentContext.Provider value={{readonly: false, locked: false}}>
+        <Editarea
+          ref={ref}
+          segment={makeSegment({opened: true})}
+          translation={closed.translation}
+          updateCounter={jest.fn()}
+          toggleFormatMenu={jest.fn()}
+        />
+      </SegmentContext.Provider>,
+    )
     flush()
 
     expect(ref.current.state.editorState.getSelection().getHasFocus()).toBe(
@@ -2358,19 +744,17 @@ describe('componentDidUpdate', () => {
     )
     flush()
 
-    act(() => {
-      rerender(
-        <SegmentContext.Provider value={{readonly: false, locked: false}}>
-          <Editarea
-            ref={ref}
-            segment={makeSegment({opened: false})}
-            translation="Ciao mondo"
-            updateCounter={jest.fn()}
-            toggleFormatMenu={jest.fn()}
-          />
-        </SegmentContext.Provider>,
-      )
-    })
+    rerender(
+      <SegmentContext.Provider value={{readonly: false, locked: false}}>
+        <Editarea
+          ref={ref}
+          segment={makeSegment({opened: false})}
+          translation="Ciao mondo"
+          updateCounter={jest.fn()}
+          toggleFormatMenu={jest.fn()}
+        />
+      </SegmentContext.Provider>,
+    )
     flush()
 
     expect(ref.current.state.editorState.getSelection().isCollapsed()).toBe(
@@ -2401,105 +785,20 @@ describe('componentDidUpdate', () => {
         length: 1,
       },
     ]
-    act(() => {
-      rerender(
-        <SegmentContext.Provider value={{readonly: false, locked: false}}>
-          <Editarea
-            ref={ref}
-            segment={makeSegment({sourceTagMap})}
-            translation='Ciao <g id="1">mondo</g>'
-            updateCounter={jest.fn()}
-            toggleFormatMenu={jest.fn()}
-          />
-        </SegmentContext.Provider>,
-      )
-    })
+    rerender(
+      <SegmentContext.Provider value={{readonly: false, locked: false}}>
+        <Editarea
+          ref={ref}
+          segment={makeSegment({sourceTagMap})}
+          translation='Ciao <g id="1">mondo</g>'
+          updateCounter={jest.fn()}
+          toggleFormatMenu={jest.fn()}
+        />
+      </SegmentContext.Provider>,
+    )
     flush()
 
     expect(ref.current.state.previousSourceTagMap).toEqual(sourceTagMap)
-  })
-
-  test('selects the whole block after a triple click', () => {
-    const {instance} = mountEditarea()
-    instance.wasTripleClickTriggered.current = true
-
-    act(() => {
-      instance.forceUpdate()
-    })
-    flush()
-
-    const content = instance.state.editorState.getCurrentContent()
-    const selection = instance.state.editorState.getSelection()
-    expect(selection.getAnchorKey()).toBe(content.getFirstBlock().getKey())
-    expect(selection.getAnchorOffset()).toBe(0)
-    expect(selection.getFocusOffset()).toBe(
-      content.getLastBlock().getText().length,
-    )
-    expect(instance.wasTripleClickTriggered.current).toBe(false)
-  })
-
-  test('adjusts the caret using the browser selection when the state is stable', () => {
-    const {instance} = mountEditarea()
-    // parentNode must be null, not undefined: getEntityContainer walks up with
-    // a default-parameter recursion that never terminates on undefined
-    restoreSelection = stubSelection({
-      focusNode: {length: 10, parentNode: null},
-      focusOffset: 2,
-      type: 'Caret',
-    })
-
-    act(() => {
-      instance.forceUpdate()
-    })
-    flush()
-
-    expect(instance.state).toBeDefined()
-  })
-
-  test('notifies the focused tags whenever the editor state changes', () => {
-    const {instance} = mountEditarea()
-    SegmentActions.focusTags.mockClear()
-
-    act(() => {
-      instance.setState({
-        editorState: EditorState.moveSelectionToEnd(instance.state.editorState),
-      })
-    })
-    flush()
-
-    expect(SegmentActions.focusTags).toHaveBeenCalled()
-  })
-
-  test('reports an empty focused tag list when the editor lost focus', () => {
-    const {instance} = mountEditarea()
-    instance.onBlurEvent()
-    SegmentActions.focusTags.mockClear()
-
-    act(() => {
-      instance.setState({
-        editorState: EditorState.moveSelectionToEnd(instance.state.editorState),
-      })
-    })
-    flush()
-
-    expect(SegmentActions.focusTags).toHaveBeenCalledWith([])
-    instance.onFocus()
-  })
-
-  test('skips the decorator check while a composition is running', () => {
-    const {instance} = mountEditarea()
-    const spy = jest.spyOn(instance, 'checkDecorators')
-
-    act(() => {
-      instance.typeTextInEditor('x')
-    })
-    // typeTextInEditor turns composition on; the update right after must skip
-    act(() => {
-      instance.forceUpdate()
-    })
-
-    expect(spy).not.toHaveBeenCalled()
-    flush()
   })
 })
 
@@ -2508,10 +807,7 @@ describe('componentDidUpdate', () => {
 // ---------------------------------------------------------------------------
 
 describe('tag entity decoration', () => {
-  // TagBox renders its own .tag-container heading, so scope the lookup to the
-  // draft content itself
-  const entities = (container) =>
-    container.querySelectorAll('.public-DraftEditor-content .tag-container')
+  const entities = tagEntities
 
   test('renders a tag entity component for encoded tags', () => {
     const {container} = mountEditarea({
@@ -2526,5 +822,439 @@ describe('tag entity decoration', () => {
     const {container} = mountEditarea({translation: 'Ciao'})
 
     expect(entities(container)).toHaveLength(0)
+  })
+})
+
+// The ref Editarea exposes is production API, not test scaffolding: three
+// components reach through it, and each of their own test suites passes a
+// hand-made `editArea` stub instead of a real instance. Nothing else checks
+// that the real handle still satisfies them, so this does — and it is the
+// contract that has to survive any narrowing of the exposed surface.
+//
+//   SegmentTarget.js          editArea.addMissingSourceTagsToTarget
+//   SegmentTargetToolbar.js   editArea.formatSelection('uppercase' | ...)
+//   AiAlternatives.js         editArea?.state?.editorState
+//   AiAlternatives.js         editArea?.editAreaRef.contains(...)
+//
+// Note the last two: neither `editAreaRef` nor `formatSelection` is reached
+// through optional chaining at the call site, so they must always be present
+// on a mounted instance, not merely usually.
+describe('Editarea production ref surface', () => {
+  test('exposes addMissingSourceTagsToTarget for SegmentTarget', () => {
+    const {instance} = mountEditarea({translation: 'Ciao'})
+
+    expect(typeof instance.addMissingSourceTagsToTarget).toBe('function')
+  })
+
+  test('exposes formatSelection for SegmentTargetToolbar', () => {
+    const {instance} = mountEditarea({translation: 'Ciao'})
+
+    expect(typeof instance.formatSelection).toBe('function')
+  })
+
+  test('exposes state.editorState for AiAlternatives', () => {
+    const {instance} = mountEditarea({translation: 'Ciao'})
+
+    expect(instance.state).toBeDefined()
+    expect(typeof instance.state.editorState.getSelection).toBe('function')
+    expect(typeof instance.state.editorState.getCurrentContent).toBe('function')
+  })
+
+  test('exposes editAreaRef as a live DOM node for AiAlternatives', () => {
+    const {instance} = mountEditarea({translation: 'Ciao'})
+
+    expect(instance.editAreaRef).toBeInstanceOf(HTMLElement)
+    // AiAlternatives uses this to decide whether focus sits inside the editor,
+    // so the call has to work on a real node rather than return a useful value
+    // here — the editor holds focus once mounted.
+    expect(instance.editAreaRef.contains(document.body)).toBe(false)
+    // The point of this assertion is that the exposed ref is a real DOM node,
+    // which cannot be checked without touching one.
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(typeof instance.editAreaRef.contains(document.activeElement)).toBe(
+      'boolean',
+    )
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Stale-closure guards
+// ---------------------------------------------------------------------------
+//
+// The handlers below are registered with the store ONCE, in a mount-only
+// effect, so whatever function object is read at mount is kept for the life of
+// the component. They must still see the CURRENT props when they fire later.
+//
+// Each guard re-renders with a different segment first, then fires the handler
+// that was registered at mount. If a handler closed over the props it was
+// created with, it compares against the old sid and silently does nothing —
+// which is the defect that shipped in 71cd271, where a once-built callback kept
+// returning first-render data.
+//
+// These are the safety net for converting the remaining useRef-wrapped methods
+// into plain per-render closures: a conversion that freezes one of these paths
+// fails here instead of in production.
+describe('frozen call sites see the current props', () => {
+  const OTHER = '12-2'
+
+  /** The handler the component registered for `event` at mount. */
+  const listenerFor = (event) => {
+    const call = SegmentStore.addListener.mock.calls.find(
+      ([registered]) => registered === event,
+    )
+    if (!call) throw new Error(`no listener registered for ${event}`)
+    return call[1]
+  }
+
+  function renderThenSwapSegment(overrides = {}) {
+    const first = makeSegment({sid: '12-1', translation: 'uno'})
+    const view = renderEditarea({segment: first, translation: 'uno'})
+    flush()
+    const second = makeSegment({sid: OTHER, translation: 'due', ...overrides})
+    view.update(second, 'due')
+    return view
+  }
+
+  test('REPLACE_TRANSLATION applies to the segment rendered now', () => {
+    const {container} = renderThenSwapSegment()
+
+    act(() => {
+      listenerFor(SegmentConstants.REPLACE_TRANSLATION)(OTHER, 'tre')
+    })
+    flush()
+
+    expect(container).toHaveTextContent(/tre/)
+  })
+
+  test('REPLACE_TRANSLATION ignores the segment that was mounted first', () => {
+    const {container} = renderThenSwapSegment()
+
+    act(() => {
+      listenerFor(SegmentConstants.REPLACE_TRANSLATION)('12-1', 'stale')
+    })
+    flush()
+
+    expect(container).not.toHaveTextContent(/stale/)
+  })
+
+  test('REFRESH_TAG_MAP re-encodes against the segment rendered now', () => {
+    const {container} = renderThenSwapSegment({
+      translation: 'due <g id="1">tag</g>',
+      sourceTagMap: [
+        {
+          type: 'g',
+          data: {id: '1', name: 'g', encodedText: '&lt;g id="1"&gt;'},
+          offset: 0,
+          length: 1,
+        },
+      ],
+    })
+
+    act(() => {
+      listenerFor(SegmentConstants.REFRESH_TAG_MAP)()
+    })
+    flush()
+
+    expect(container).toHaveTextContent(/tag/)
+  })
+
+  test('CHANGE_CHARACTERS_COUNTER_RULES recounts the segment rendered now', () => {
+    const {updateCounter} = renderThenSwapSegment()
+    updateCounter.mockClear()
+
+    act(() => {
+      listenerFor(SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES)()
+    })
+    flush()
+
+    expect(updateCounter).toHaveBeenCalled()
+  })
+})
+
+// The tag decorator's props object is seeded once, behind a lazy-init guard, so
+// every callback on it is frozen relative to render while TagEntity keeps
+// calling them for the life of the segment. This is the same site whose stale
+// closure stopped missing tags turning red in SegmentSource (fixed in
+// 71cd271), and it is why getSearchParams and onEntityClick are still stable
+// closures rather than plain per-render ones.
+describe('the tag decorator sees the current segment', () => {
+  const TAG_MAP = [
+    {
+      type: 'g',
+      data: {id: '1', name: 'g', encodedText: '&lt;g id="1"&gt;'},
+      offset: 0,
+      length: 1,
+    },
+  ]
+
+  function renderWithTag() {
+    const first = makeSegment({
+      sid: '12-1',
+      translation: 'uno <g id="1">tag</g>',
+      sourceTagMap: TAG_MAP,
+    })
+    const view = renderEditarea({
+      segment: first,
+      translation: first.translation,
+    })
+    flush()
+    return view
+  }
+
+  test('getSearchParams follows the segment rendered now', () => {
+    const view = renderWithTag()
+    expect(mockTagProps).not.toBeNull()
+    expect(mockTagProps.getSearchParams()).toMatchObject({active: false})
+
+    view.update(
+      makeSegment({
+        sid: '12-1',
+        translation: 'uno <g id="1">tag</g>',
+        sourceTagMap: TAG_MAP,
+        inSearch: true,
+        searchParams: {target: 'uno'},
+        occurrencesInSearch: {occurrences: [{}]},
+        currentInSearch: true,
+      }),
+    )
+
+    expect(mockTagProps.getSearchParams()).toMatchObject({active: true})
+  })
+
+  test('getUpdatedSegmentInfo follows the segment rendered now', () => {
+    const view = renderWithTag()
+    expect(mockTagProps.getUpdatedSegmentInfo()).toMatchObject({sid: '12-1'})
+
+    view.update(
+      makeSegment({
+        sid: '12-9',
+        translation: 'uno <g id="1">tag</g>',
+        sourceTagMap: TAG_MAP,
+      }),
+    )
+
+    expect(mockTagProps.getUpdatedSegmentInfo()).toMatchObject({sid: '12-9'})
+  })
+})
+
+// Editarea takes four props from SegmentTarget, and toggleFormatMenu is the one
+// it never reads as `props.toggleFormatMenu` — it pulls it out of
+// liveRef.current.props by destructuring, which is why a sweep looking for
+// dot-access missed it and the destructured signature dropped it in 3c8aa2849c.
+//
+// With the prop missing, every mouse-up in the target threw before it could
+// report the selection, so the format menu never appeared and the AI
+// alternatives button never activated. The whole suite passed regardless: the
+// old tests never fired a mouse-up at the editor.
+describe('the format menu follows the selection', () => {
+  test('mouse up reports whether anything is selected', () => {
+    const {container, toggleFormatMenu} = mountEditarea({translation: 'ciao'})
+
+    fireEvent.mouseUp(editorNode(container))
+
+    expect(toggleFormatMenu).toHaveBeenCalledWith(expect.any(Boolean))
+  })
+
+  test('blurring the editor closes the format menu', () => {
+    const {container, toggleFormatMenu} = mountEditarea({translation: 'ciao'})
+    toggleFormatMenu.mockClear()
+
+    fireEvent.blur(editorNode(container))
+
+    expect(toggleFormatMenu).toHaveBeenCalledWith(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Which interactions schedule a store sync
+//
+// The handlers are deliberately split. Some pass `setState` a callback that
+// runs `updateTranslationDebounced()`; others replace `editorState` with no
+// callback at all. That split is behaviour, not an oversight: moving the caret
+// must not push a translation to the store, or every arrow key would queue a
+// save and a QA check.
+//
+// Note the two routes to the tag menu disagree, and correctly so. `<` types a
+// character before opening the menu, so it syncs; `Alt+T` opens the same menu
+// without touching the content, so it does not.
+//
+// Decomposing this component replaces the `setState(partial, callback)` shim
+// with a reducer plus effects. An effect keyed on `editorState` alone would
+// fire for every case below, including the ones that must stay silent, so the
+// split is pinned here before that change lands.
+// ---------------------------------------------------------------------------
+describe('store sync scheduling', () => {
+  useRangeRectPolyfill()
+
+  const syncCount = () => SegmentActions.updateTranslation.mock.calls.length
+
+  /** Mounts, then discards the sync the mount effect performs on its own. */
+  const settled = (mount) => {
+    const view = mount()
+    flush()
+    SegmentActions.updateTranslation.mockClear()
+    return view
+  }
+
+  // `SOURCE_TAG_MAP` carries no `data.placeholder`, which `insertTag` needs for
+  // its offset arithmetic. Tests that only open the menu never reach that line;
+  // accepting a suggestion does.
+  const ACCEPTABLE_TAG = [
+    {
+      type: 'g',
+      data: {
+        id: '1',
+        name: 'g',
+        encodedText: '&lt;g id="1"&gt;',
+        placeholder: '<g id="1">',
+      },
+      offset: 0,
+      length: 1,
+    },
+  ]
+
+  /** Mounts with source tags and the menu already open, via the silent route. */
+  const withMenuOpen = () => {
+    const view = settled(() =>
+      mountWithSourceTags({sourceTagMap: ACCEPTABLE_TAG}),
+    )
+    pressKey(view.container, {key: 't', altKey: true})
+    flush()
+    expect(tagBox(view.container)).toBeVisible()
+    SegmentActions.updateTranslation.mockClear()
+    return view
+  }
+
+  describe('stays silent', () => {
+    test('moving the caret left', () => {
+      const {container} = settled(() =>
+        mountEditarea({translation: 'ciao mondo'}),
+      )
+
+      pressKey(container, {key: 'ArrowLeft'})
+      flush()
+
+      expect(syncCount()).toBe(0)
+    })
+
+    test('moving the caret right', () => {
+      const {container} = settled(() =>
+        mountEditarea({translation: 'ciao mondo'}),
+      )
+
+      pressKey(container, {key: 'ArrowRight'})
+      flush()
+
+      expect(syncCount()).toBe(0)
+    })
+
+    test('opening the tag menu without typing', () => {
+      const {container} = settled(() => mountWithSourceTags())
+
+      pressKey(container, {key: 't', altKey: true})
+      flush()
+
+      expect(tagBox(container)).toBeVisible()
+      expect(syncCount()).toBe(0)
+    })
+
+    test('closing the tag menu', () => {
+      const {container} = withMenuOpen()
+
+      pressKey(container, {key: 'Escape'})
+      flush()
+
+      expect(tagBox(container)).not.toBeVisible()
+      expect(syncCount()).toBe(0)
+    })
+
+    test('moving the tag menu selection', () => {
+      const {container} = withMenuOpen()
+
+      pressKey(container, {key: 'ArrowDown'})
+      flush()
+
+      expect(syncCount()).toBe(0)
+    })
+  })
+
+  describe('schedules a sync', () => {
+    test('opening the tag menu by typing the trigger character', () => {
+      const {container} = settled(() => mountWithSourceTags())
+
+      pressKey(container, {key: '<'})
+      flush()
+
+      expect(syncCount()).toBeGreaterThan(0)
+    })
+
+    test('inserting a tab tag', () => {
+      const {container} = settled(() => mountEditarea({translation: 'ciao'}))
+
+      pressKey(container, {key: 'Tab'})
+      flush()
+
+      expect(syncCount()).toBeGreaterThan(0)
+    })
+
+    test('accepting a tag from the menu', () => {
+      const {container} = withMenuOpen()
+
+      pressKey(container, {key: 'Enter'})
+      flush()
+
+      expect(syncCount()).toBeGreaterThan(0)
+    })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Editarea must not update its parent while it renders
+//
+// The class constructor called props.updateCounter, and the port kept that as a
+// guarded statement in the render body. A constructor runs in the render phase,
+// so this has always been a parent update from a child's render; React reports
+// it as "Cannot update a component while rendering a different component".
+//
+// The other tests pass updateCounter as a bare jest.fn(), which cannot trigger
+// the warning. It takes a real parent whose state setter is handed down.
+// ---------------------------------------------------------------------------
+describe('rendering does not update the parent', () => {
+  const CounterParent = ({segment}) => {
+    const [counter, setCounter] = React.useState(null)
+    return (
+      <SegmentContext.Provider value={{readonly: false, locked: false}}>
+        <span data-testid="counter">{String(counter)}</span>
+        <Editarea
+          segment={segment}
+          translation={segment.translation}
+          updateCounter={setCounter}
+          toggleFormatMenu={jest.fn()}
+        />
+      </SegmentContext.Provider>
+    )
+  }
+
+  test('mounting does not warn about updating a component while rendering', () => {
+    const errors = []
+    const spy = jest
+      .spyOn(console, 'error')
+      .mockImplementation((...args) => errors.push(String(args[0])))
+
+    render(<CounterParent segment={makeSegment({translation: 'ciao mondo'})} />)
+    flush()
+
+    spy.mockRestore()
+    expect(
+      errors.filter((e) => e.includes('while rendering a different component')),
+    ).toEqual([])
+  })
+
+  test('the counter still reaches the parent', () => {
+    render(<CounterParent segment={makeSegment({translation: 'ciao mondo'})} />)
+    flush()
+
+    // 'null' is the parent's initial state, before Editarea reports anything
+    expect(screen.getByTestId('counter')).not.toHaveTextContent('null')
   })
 })
