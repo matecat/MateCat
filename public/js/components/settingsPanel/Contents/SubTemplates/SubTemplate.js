@@ -11,7 +11,11 @@ import {flushSync} from 'react-dom'
 import CatToolActions from '../../../../actions/CatToolActions'
 import {isEqual} from 'lodash'
 
-import {SUBTEMPLATE_MODIFIERS, isStandardSubTemplate, SubTemplatesContext} from './SubTemplateContext'
+import {
+  SUBTEMPLATE_MODIFIERS,
+  isStandardSubTemplate,
+  SubTemplatesContext,
+} from './SubTemplateContext'
 
 export const SubTemplates = ({
   templates,
@@ -257,7 +261,6 @@ export const SubTemplates = ({
                   className="template-button button-save-changes"
                   testId="save-as-changes"
                   mode={BUTTON_MODE.OUTLINE}
-                  size={BUTTON_SIZE.MEDIUM}
                   disabled={isRequestInProgress}
                   onClick={() => updateTemplate()}
                 >
@@ -270,7 +273,6 @@ export const SubTemplates = ({
                   className="template-button"
                   testId="save-as-new-template"
                   mode={BUTTON_MODE.OUTLINE}
-                  size={BUTTON_SIZE.MEDIUM}
                   disabled={isRequestInProgress}
                   onClick={() =>
                     setTemplateModifier(SUBTEMPLATE_MODIFIERS.CREATE)

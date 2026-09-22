@@ -150,7 +150,7 @@
         display: grid;
         grid-template-columns: 1fr 20%;
         align-items: center;
-        height: 32px;
+        height: 29px;
         border: 1px solid colors.$grey150;
         padding: 0 10px;
       }
@@ -246,7 +246,7 @@
 }
 
 .quality-framework-add-category {
-  div[class*="popover-component-top"] {
+  div[class*='popover-component-top'] {
     bottom: 0;
     margin-bottom: 0;
   }

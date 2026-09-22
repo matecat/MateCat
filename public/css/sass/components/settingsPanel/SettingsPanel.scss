@@ -220,7 +220,7 @@
     border-radius: variables.$border-radius-default;
     border: none;
     position: absolute;
-    margin-top: 51px;
+    margin-top: 41px;
     margin-left: 1px;
     outline: none;
     line-height: 4;
@@ -232,23 +232,8 @@
   gap: 8px;
   margin-left: 8px;
 
-  button.template-button {
-    border-radius: unset;
-    font-weight: normal;
-    color: black !important;
-    box-shadow: inset 0 0 0 1px colors.$grey200;
-  }
-
   button.template-button-white {
-    font-weight: normal;
     color: white !important;
-    box-shadow: inset 0 0 0 1px colors.$white;
-
-    &:hover {
-      background-color: unset !important;
-      box-shadow: inset 0 0 0 1px colors.$white !important;
-      opacity: 0.8;
-    }
   }
 
   .control-button {
@@ -419,7 +404,7 @@
 
   .settings-panel-templates-container-select {
     .template-name {
-      margin-top: 25px;
+      margin-top: 28px;
     }
   }
 }
