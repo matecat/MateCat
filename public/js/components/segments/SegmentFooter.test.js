@@ -421,7 +421,7 @@ test('Remove tab', () => {
   expect(screen.getByTestId('matches')).toBeInTheDocument()
   expect(screen.getByTestId('concordances')).toBeInTheDocument()
   expect(screen.getByTestId('glossary')).toBeInTheDocument()
-  expect(screen.queryByTestId('multiMatches')).toBeNull()
+  expect(screen.queryByTestId('multiMatches')).not.toBeInTheDocument()
 })
 
 test('Translation Matches count result', () => {

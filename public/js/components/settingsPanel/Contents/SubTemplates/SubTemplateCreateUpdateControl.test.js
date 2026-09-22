@@ -56,7 +56,7 @@ describe('SubTemplateCreateUpdateControl', () => {
 
   test('enables the confirm button when templateName is not empty', () => {
     renderControl({templateName: 'foo'})
-    expect(screen.getByTestId('create-update-template')).not.toBeDisabled()
+    expect(screen.getByTestId('create-update-template')).toBeEnabled()
   })
 
   test('calls updateNameBehaviour.cancel when the cancel button is clicked', () => {

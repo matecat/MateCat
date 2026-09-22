@@ -85,7 +85,7 @@ describe('CompoundDecorator.getComponentForKey', () => {
       <Composed decoratorProps={[{}]}>plain text</Composed>,
     )
 
-    expect(container.textContent).toBe('plain text')
+    expect(container).toHaveTextContent('plain text')
     expect(container.querySelector('mark')).toBeNull()
   })
 
@@ -106,6 +106,6 @@ describe('CompoundDecorator.getComponentForKey', () => {
     expect(outer).toBeInTheDocument()
     expect(inner).toBeInTheDocument()
     expect(outer.contains(inner)).toBe(true)
-    expect(container.textContent).toBe('hi')
+    expect(container).toHaveTextContent('hi')
   })
 })

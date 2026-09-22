@@ -1,4 +1,4 @@
-import React, {createRef, useRef} from 'react'
+import React, {createRef} from 'react'
 import {ANALYSIS_STATUS} from '../../constants/Constants'
 import TranslatedIcon from '../../../img/icons/TranslatedIcon'
 import Tooltip from '../common/Tooltip'

@@ -53,7 +53,7 @@ describe('Subject', () => {
 
   test('shows the current subject as active option', () => {
     renderSubject({key: 'legal', id: 'legal', name: 'Legal', display: 'Legal'})
-    expect(screen.getByTestId('active-option').textContent).toBe('Legal')
+    expect(screen.getByTestId('active-option')).toHaveTextContent('Legal')
   })
 
   test('selecting an option calls setSubject with the option', () => {

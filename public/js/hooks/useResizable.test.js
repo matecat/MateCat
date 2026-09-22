@@ -38,8 +38,8 @@ describe('useResizable', () => {
 
     expect(preventDefault).toHaveBeenCalled()
     expect(result.current.isDragging).toBe(true)
-    expect(document.body.style.cursor).toBe('row-resize')
-    expect(document.body.style.userSelect).toBe('none')
+    expect(document.body).toHaveStyle({cursor:'row-resize'})
+    expect(document.body).toHaveStyle({userSelect:'none'})
   })
 
   test('dragging upward increases height, clamped to minHeight/maxHeight', () => {
@@ -89,8 +89,8 @@ describe('useResizable', () => {
       mouseUp()
     })
     expect(result.current.isDragging).toBe(false)
-    expect(document.body.style.cursor).toBe('')
-    expect(document.body.style.userSelect).toBe('')
+    expect(document.body).toHaveStyle({cursor:''})
+    expect(document.body).toHaveStyle({userSelect:''})
   })
 
   test('mouseup is a no-op when not dragging', () => {
@@ -134,14 +134,14 @@ describe('useResizable', () => {
     act(() => {
       result.current.handleMouseDown({clientY: 200, preventDefault: jest.fn()})
     })
-    expect(document.body.style.cursor).toBe('row-resize')
+    expect(document.body).toHaveStyle({cursor:'row-resize'})
 
     unmount()
 
     expect(removeSpy).toHaveBeenCalledWith('mousemove', expect.any(Function))
     expect(removeSpy).toHaveBeenCalledWith('mouseup', expect.any(Function))
-    expect(document.body.style.cursor).toBe('')
-    expect(document.body.style.userSelect).toBe('')
+    expect(document.body).toHaveStyle({cursor:''})
+    expect(document.body).toHaveStyle({userSelect:''})
     removeSpy.mockRestore()
   })
 

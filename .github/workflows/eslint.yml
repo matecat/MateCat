@@ -1,0 +1,54 @@
+name: ESLint
+
+# Pull requests only. The comparison needs a base to measure against, and a
+# push to develop has none that means anything.
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  ratchet:
+    name: ESLint must not regress
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: Checkout
+        # Full history so the base branch can be checked out beside this one.
+        # Submodules are deliberately not fetched: plugins/ is excluded from the
+        # count, and cloning them over SSH needs deploy keys.
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --ignore-scripts
+
+      - name: Check out the base branch beside this one
+        run: git worktree add ../base "origin/${{ github.base_ref }}"
+
+      - name: Compare this branch against the base
+        run: node .github/scripts/eslint-ratchet.js . ../base
+
+  ratchet-tests:
+    name: ESLint ratchet script tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Run tests
+        run: node --test .github/scripts/eslint-ratchet.test.js

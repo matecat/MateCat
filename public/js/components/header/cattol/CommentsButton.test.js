@@ -37,7 +37,7 @@ test('renders nothing when comments are disabled', async () => {
   global.config.comments_enabled = false
   const {container} = render(<CommentsButton />)
   await act(async () => {})
-  expect(container.firstChild).toBeNull()
+  expect(container).toBeEmptyDOMElement()
 })
 
 test('loads comments and team users on mount', async () => {

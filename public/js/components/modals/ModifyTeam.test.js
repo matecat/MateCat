@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, fireEvent, act, waitFor} from '@testing-library/react'
+import {render, screen, fireEvent, act} from '@testing-library/react'
 import {fromJS} from 'immutable'
 import {ModifyTeam} from './ModifyTeam'
 import ManageActions from '../../actions/ManageActions'

@@ -123,6 +123,7 @@ export function useGDriveFiles({
                     <a
                       href="https://guides.matecat.com/google-drive-files-upload-issues"
                       target="_blank"
+                      rel="noreferrer"
                     >
                       read this guide
                     </a>

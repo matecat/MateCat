@@ -78,7 +78,7 @@ describe('SegmentsCommentsIcon', () => {
   test('sets title using shortcut keystrokes', () => {
     renderIcon(baseSegment, {total: 1, active: 1})
     const btn = document.querySelector('.comment-icon-btn')
-    expect(btn.getAttribute('title')).toMatch(/^Add comment \(.+\)$/)
+    expect(btn).toHaveAttribute('title', expect.stringMatching(/^Add comment \(.+\)$/))
   })
 
   test('clicking opens segment comment and opens segment when not readonly', () => {

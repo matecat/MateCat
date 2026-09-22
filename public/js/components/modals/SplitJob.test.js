@@ -43,7 +43,7 @@ test('renders chunks and a Confirm button once the split is balanced', async () 
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
 
-  await waitFor(() => expect(screen.getByText('Confirm')).toBeInTheDocument())
+  expect(await screen.findByText('Confirm')).toBeInTheDocument()
   expect(screen.getByText('Chunk 1')).toBeInTheDocument()
   expect(screen.getByText('Chunk 2')).toBeInTheDocument()
   expect(container.querySelector('.total-w')).toHaveTextContent('100')
@@ -75,9 +75,7 @@ test('shows an error and disables further checks when confirmSplitRequest fails'
   await waitFor(() => screen.getByText('Confirm'))
   fireEvent.click(screen.getByText('Confirm'))
 
-  await waitFor(() =>
-    expect(screen.getByText('confirm failed')).toBeInTheDocument(),
-  )
+  expect(await screen.findByText('confirm failed')).toBeInTheDocument()
   expect(screen.getByText('Check split')).toBeInTheDocument()
 })
 
@@ -87,11 +85,9 @@ test('shows the "too few segments" message and disables split when the API retur
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
 
-  await waitFor(() =>
-    expect(
-      screen.getByText('Split unsuccessful: the job has too few segments.'),
-    ).toBeInTheDocument(),
-  )
+  expect(
+      await screen.findByText('Split unsuccessful: the job has too few segments.'),
+    ).toBeInTheDocument()
   expect(screen.getByText('Check split')).toBeDisabled()
 })
 
@@ -103,10 +99,8 @@ test('shows a generic error message for other API errors', async () => {
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
 
-  await waitFor(() =>
-    expect(screen.getByText('generic failure')).toBeInTheDocument(),
-  )
-  expect(screen.getByText('Check split')).not.toBeDisabled()
+  expect(await screen.findByText('generic failure')).toBeInTheDocument()
+  expect(screen.getByText('Check split')).toBeEnabled()
 })
 
 test('editing a chunk word count shows the words-exceeding difference and re-enables Check split', async () => {
@@ -171,9 +165,7 @@ test('shows an error when "Check split" fails', async () => {
   checkSplitRequest.mockRejectedValue({errors: [{message: 'check failed'}]})
   fireEvent.click(screen.getByText('Check split'))
 
-  await waitFor(() =>
-    expect(screen.getByText('check failed')).toBeInTheDocument(),
-  )
+  expect(await screen.findByText('check failed')).toBeInTheDocument()
 })
 
 test('clicking Cancel closes the modal', async () => {

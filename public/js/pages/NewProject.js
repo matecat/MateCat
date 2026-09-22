@@ -777,7 +777,7 @@ const NewProject = () => {
           <span>
             The TMX file(s) you have uploaded will be imported into the newly
             created key <i>{filename}</i>. If you wish to import them into an
-            existing key, please use the 'Import TMX' button in the
+            existing key, please use the &apos;Import TMX&apos; button in the
             <a href="#" onClick={() => setOpenSettings({isOpen: true})}>
               {' '}
               Settings panel

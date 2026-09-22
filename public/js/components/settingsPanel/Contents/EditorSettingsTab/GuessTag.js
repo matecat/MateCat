@@ -108,6 +108,7 @@ export const GuessTag = ({sourceLang, targetLangs}) => {
             className="tooltip-options"
             href="https://guides.matecat.com/guess-tag-position"
             target="_blank"
+            rel="noreferrer"
           >
             Supported languages
           </a>

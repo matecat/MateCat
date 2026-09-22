@@ -121,9 +121,9 @@ test('Closes the dropdown when clicking outside of it', async () => {
   renderTeamDropdown()
 
   await openDropdown()
-  expect(screen.getByTestId('team-select').className).toContain('open')
+  expect(screen.getByTestId('team-select')).toHaveClass('open')
 
   await userEvent.click(document.body)
 
-  expect(screen.getByTestId('team-select').className).not.toContain('open')
+  expect(screen.getByTestId('team-select')).not.toHaveClass('open')
 })

@@ -346,7 +346,7 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
             </div>
           ) : Array.isArray(rows) ? (
             <div className="empty-list-mode">
-              <p>Start using DeepL's glossary feature</p>
+              <p>Start using DeepL&apos;s glossary feature</p>
               <Button
                 className="settings-panel-grey-button"
                 onClick={addGlossary}

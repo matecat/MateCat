@@ -62,7 +62,7 @@ describe('CharacterCounterRules', () => {
 
   test('defaults counter rule to GOOGLE_ADS when characterCounterMode is unset', () => {
     renderCharacterCounterRules({})
-    expect(screen.getByTestId('active-option').textContent).toBe(
+    expect(screen.getByTestId('active-option')).toHaveTextContent(
       CHARS_SIZE_COUNTER_TYPES.GOOGLE_ADS,
     )
   })
@@ -71,7 +71,7 @@ describe('CharacterCounterRules', () => {
     renderCharacterCounterRules({
       characterCounterMode: CHARS_SIZE_COUNTER_TYPES.EXCLUDE_CJK,
     })
-    expect(screen.getByTestId('active-option').textContent).toBe(
+    expect(screen.getByTestId('active-option')).toHaveTextContent(
       CHARS_SIZE_COUNTER_TYPES.EXCLUDE_CJK,
     )
   })
@@ -118,7 +118,7 @@ describe('CharacterCounterRules', () => {
   test('components are enabled when not in cattool', () => {
     global.config.is_cattool = false
     renderCharacterCounterRules({})
-    expect(screen.getByTestId('select-is-disabled').textContent).toBe('false')
+    expect(screen.getByTestId('select-is-disabled')).toHaveTextContent('false')
     expect(screen.getByTestId('switch-chars-counter')).toHaveAttribute(
       'data-disabled',
       'false',
@@ -129,7 +129,7 @@ describe('CharacterCounterRules', () => {
     global.config.is_cattool = true
     global.config.ownerIsMe = false
     renderCharacterCounterRules({})
-    expect(screen.getByTestId('select-is-disabled').textContent).toBe('true')
+    expect(screen.getByTestId('select-is-disabled')).toHaveTextContent('true')
     expect(screen.getByTestId('switch-chars-counter')).toHaveAttribute(
       'data-disabled',
       'true',
@@ -140,7 +140,7 @@ describe('CharacterCounterRules', () => {
     global.config.is_cattool = true
     global.config.ownerIsMe = true
     renderCharacterCounterRules({})
-    expect(screen.getByTestId('select-is-disabled').textContent).toBe('false')
+    expect(screen.getByTestId('select-is-disabled')).toHaveTextContent('false')
     expect(screen.getByTestId('switch-chars-counter')).toHaveAttribute(
       'data-disabled',
       'false',

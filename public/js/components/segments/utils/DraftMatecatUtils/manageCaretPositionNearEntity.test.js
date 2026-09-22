@@ -421,7 +421,7 @@ describe('adjustCaretPosition', () => {
     adjustCaretPosition({direction: 'right'})
 
     const range = window.getSelection().getRangeAt(0)
-    expect(range.startContainer.textContent).toBe('after')
+    expect(range.startContainer).toHaveTextContent('after')
     expect(range.startOffset).toBe(0)
   })
 
@@ -437,7 +437,7 @@ describe('adjustCaretPosition', () => {
     adjustCaretPosition({direction: 'left'})
 
     const range = window.getSelection().getRangeAt(0)
-    expect(range.startContainer.textContent).toBe('before')
+    expect(range.startContainer).toHaveTextContent('before')
     expect(range.startOffset).toBe('before'.length)
   })
 
@@ -450,7 +450,7 @@ describe('adjustCaretPosition', () => {
     adjustCaretPosition({direction: 'right'})
 
     const range = window.getSelection().getRangeAt(0)
-    expect(range.startContainer.textContent).toBe('AB')
+    expect(range.startContainer).toHaveTextContent('AB')
     expect(range.startOffset).toBe(2)
   })
 

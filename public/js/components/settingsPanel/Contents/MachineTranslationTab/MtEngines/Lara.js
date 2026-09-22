@@ -47,6 +47,7 @@ export const Lara = ({
             <a
               href="https://guides.matecat.com/what-languages-does-lara-support"
               target={'_blank'}
+              rel="noreferrer"
             >
               200+ languages
             </a>

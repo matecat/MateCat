@@ -9,8 +9,8 @@ describe('ServiceBox', () => {
       screen.getByText('Project Management + Translation'),
     ).toBeInTheDocument()
     expect(screen.queryByText('+ Revision')).not.toBeInTheDocument()
-    expect(container.querySelector('.fiducial-logo').textContent).toContain(
-      'Translated',
+    expect(container.querySelector('.fiducial-logo')).toHaveTextContent(
+      /Translated/,
     )
   })
 

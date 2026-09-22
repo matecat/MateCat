@@ -411,10 +411,10 @@ describe('setTranslationUtil', () => {
       const {container} = render(
         CatToolActions.addNotification.mock.calls[0][0].text,
       )
-      expect(container.textContent).toMatch(
+      expect(container).toHaveTextContent(
         /locked segments have been excluded/,
       )
-      expect(container.textContent).not.toMatch(
+      expect(container).not.toHaveTextContent(
         /non-locked segments have been excluded/,
       )
     })
@@ -447,7 +447,7 @@ describe('setTranslationUtil', () => {
       const {container} = render(
         CatToolActions.addNotification.mock.calls[0][0].text,
       )
-      expect(container.textContent).toMatch(
+      expect(container).toHaveTextContent(
         /non-locked segments have been excluded/,
       )
     })

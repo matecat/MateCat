@@ -131,7 +131,7 @@ describe('SegmentedControl', () => {
       />,
     )
     OPTIONS.forEach((option) => {
-      expect(screen.getByTestId(`radio-option-${option.id}`)).not.toBeDisabled()
+      expect(screen.getByTestId(`radio-option-${option.id}`)).toBeEnabled()
     })
   })
 

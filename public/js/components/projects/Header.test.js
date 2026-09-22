@@ -12,7 +12,7 @@ test('renders children into the header element via a portal', () => {
     </DasboardHeader>,
   )
 
-  expect(header.textContent).toBe('Header content')
+  expect(header).toHaveTextContent('Header content')
 
   document.body.removeChild(header)
 })

@@ -49,7 +49,7 @@ describe('Team', () => {
 
   test('renders no team options and disables select when user is undefined', () => {
     renderTeam(undefined, undefined)
-    expect(screen.getByTestId('is-disabled').textContent).toBe('true')
+    expect(screen.getByTestId('is-disabled')).toHaveTextContent('true')
     expect(screen.queryByTestId('option-1')).not.toBeInTheDocument()
   })
 
@@ -63,19 +63,19 @@ describe('Team', () => {
   test('disables select when the user only has one team', () => {
     const user = {teams: [{id: 1, name: 'Team A'}]}
     renderTeam(user, undefined)
-    expect(screen.getByTestId('is-disabled').textContent).toBe('true')
+    expect(screen.getByTestId('is-disabled')).toHaveTextContent('true')
   })
 
   test('enables select when the user has more than one team', () => {
     const user = {teams: [{id: 1, name: 'Team A'}, {id: 2, name: 'Team B'}]}
     renderTeam(user, undefined)
-    expect(screen.getByTestId('is-disabled').textContent).toBe('false')
+    expect(screen.getByTestId('is-disabled')).toHaveTextContent('false')
   })
 
   test('shows selectedTeam as active option', () => {
     const user = {teams: [{id: 1, name: 'Team A'}]}
     renderTeam(user, {id: '1', name: 'Team A'})
-    expect(screen.getByTestId('active-option').textContent).toBe('Team A')
+    expect(screen.getByTestId('active-option')).toHaveTextContent('Team A')
   })
 
   test('selecting a team calls setSelectedTeam with the option', () => {

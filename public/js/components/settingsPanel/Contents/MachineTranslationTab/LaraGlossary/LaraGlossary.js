@@ -176,7 +176,7 @@ export const LaraGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
             </div>
           ) : Array.isArray(rows) ? (
             <div className="empty-list-mode">
-              <p>Start using Lara's glossary feature</p>
+              <p>Start using Lara&apos;s glossary feature</p>
               <Button
                 className="settings-panel-grey-button"
                 onClick={openGlossaryPage}

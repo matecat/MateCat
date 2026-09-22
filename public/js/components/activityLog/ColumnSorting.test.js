@@ -1,5 +1,5 @@
 import {fireEvent, render} from '@testing-library/react'
-import {screen} from '@testing-library/dom'
+import {screen} from '@testing-library/react'
 import React, {useRef, useState} from 'react'
 import {ColumnSorting} from './ColumnSorting'
 import {ActivityLogContext} from './ActivityLogContext'

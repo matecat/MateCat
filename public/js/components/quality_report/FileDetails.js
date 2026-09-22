@@ -1,8 +1,6 @@
 import React from 'react'
 
 import SegmentQR from './SegmentQR'
-import FileIcon from '../../../img/icons/FileIcon'
-import FileTypeFile from '../../../img/icons/FileTypeFile'
 import CommonUtils from '../../utils/commonUtils'
 
 function FileDetails(props) {

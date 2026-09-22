@@ -147,10 +147,10 @@ export const Yaml = () => {
             <br />
             Key names are case sensitive.
             <br />
-            If the toggle is set to "Translatable", only the keys entered will
+            If the toggle is set to &quot;Translatable&quot;, only the keys entered will
             be extracted as translatable.
             <br />
-            If the toggle is set to "Non-translatable", all the keys in the file{' '}
+            If the toggle is set to &quot;Non-translatable&quot;, all the keys in the file{' '}
             <b>except</b> those entered will be extracted as translatable.
           </p>
         </div>
@@ -211,7 +211,7 @@ export const Yaml = () => {
             Character limits will be applied to translatable keys in the same
             object.
             <br />
-            Keys with a character limit won't be segmented.
+            Keys with a character limit won&apos;t be segmented.
           </p>
         </div>
         <Controller

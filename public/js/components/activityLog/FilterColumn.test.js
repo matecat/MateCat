@@ -1,5 +1,5 @@
 import {fireEvent, render} from '@testing-library/react'
-import {screen} from '@testing-library/dom'
+import {screen} from '@testing-library/react'
 import React from 'react'
 import {FilterColumn} from './FilterColumn'
 import {ActivityLogContext} from './ActivityLogContext'

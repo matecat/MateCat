@@ -5,7 +5,6 @@ import {CrossLanguagesMatches} from './CrossLanguagesMatches'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 import ApplicationStore from '../../../../stores/ApplicationStore'
 import SegmentActions from '../../../../actions/SegmentActions'
-import SegmentStore from '../../../../stores/SegmentStore'
 
 const mockLanguages = [
   {code: 'fr-FR', name: 'French'},

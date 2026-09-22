@@ -139,15 +139,15 @@ describe('TagEntity children content', () => {
         name: 'ph',
       }),
     })
-    expect(document.querySelector('.index-counter').textContent).toBe('3')
-    expect(tagEl().textContent).toContain('hello')
+    expect(document.querySelector('.index-counter')).toHaveTextContent('3')
+    expect(tagEl()).toHaveTextContent(/hello/)
   })
 
   test('hides children content when ph tags are compressed', () => {
     CatToolStore.isPhTagsCompressed.mockReturnValue(true)
     renderTag()
     expect(document.querySelector('.index-counter')).toBeTruthy()
-    expect(tagEl().textContent).toBe('1')
+    expect(tagEl()).toHaveTextContent('1')
   })
 
   test('a closing pc tag never shows its content, even uncompressed', () => {
@@ -160,7 +160,7 @@ describe('TagEntity children content', () => {
         pcRole: 'close',
       }),
     })
-    expect(tagEl().textContent).toBe('1')
+    expect(tagEl()).toHaveTextContent('1')
   })
 
   test('renders raw children without an index counter for non-ph tags', () => {
@@ -168,7 +168,7 @@ describe('TagEntity children content', () => {
       contentState: makeContentState({id: 'g1', index: -1, name: 'g'}),
     })
     expect(document.querySelector('.index-counter')).toBeNull()
-    expect(tagEl().textContent).toContain('hello')
+    expect(tagEl()).toHaveTextContent(/hello/)
   })
 
   test('adds the pc role class for a pc tag', () => {
@@ -237,7 +237,7 @@ describe('TagEntity search highlighting', () => {
 
     const hidden = tagEl().querySelector('span[style*="display: none"]')
     expect(hidden).toBeTruthy()
-    expect(hidden.textContent).toContain('hello')
+    expect(hidden).toHaveTextContent(/hello/)
   })
 })
 
@@ -335,7 +335,7 @@ describe('TagEntity search param listeners', () => {
 describe('TagEntity ph compression toggle', () => {
   test('re-reads the compressed flag when the store toggles it', () => {
     renderTag()
-    expect(tagEl().textContent).toContain('hello')
+    expect(tagEl()).toHaveTextContent(/hello/)
 
     CatToolStore.isPhTagsCompressed.mockReturnValue(true)
     act(() => {
@@ -343,7 +343,7 @@ describe('TagEntity ph compression toggle', () => {
     })
 
     expect(tagClass()).toContain('tag-compressed')
-    expect(tagEl().textContent).toBe('1')
+    expect(tagEl()).toHaveTextContent('1')
   })
 })
 
@@ -686,7 +686,7 @@ describe('TagEntity tooltip', () => {
   test('shows the placeholder tooltip when the content overflows', () => {
     withOverflowingLeaf(() => {
       renderTag({children: overflowingChildren})
-      expect(screen.getByTestId('tooltip-content').textContent).toBe('PH')
+      expect(screen.getByTestId('tooltip-content')).toHaveTextContent('PH')
     })
   })
 
@@ -701,14 +701,14 @@ describe('TagEntity tooltip', () => {
           name: 'gSc',
         }),
       })
-      expect(screen.getByTestId('tooltip-content').textContent).toBe('')
+      expect(screen.getByTestId('tooltip-content')).toHaveTextContent('')
     })
   })
 
   test('shows the tooltip for a compressed ph tag without needing overflow', () => {
     CatToolStore.isPhTagsCompressed.mockReturnValue(true)
     renderTag()
-    expect(screen.getByTestId('tooltip-content').textContent).toBe('PH')
+    expect(screen.getByTestId('tooltip-content')).toHaveTextContent('PH')
   })
 
   test('never shows a tooltip for a closing pc tag', () => {
@@ -722,7 +722,7 @@ describe('TagEntity tooltip', () => {
         pcRole: 'close',
       }),
     })
-    expect(screen.getByTestId('tooltip-content').textContent).toBe('')
+    expect(screen.getByTestId('tooltip-content')).toHaveTextContent('')
   })
 
   describe('re-measuring the overflow after an update', () => {
@@ -733,7 +733,7 @@ describe('TagEntity tooltip', () => {
     const renderThenUpdate = (nextProps) => {
       const initial = baseProps({children: nonOverflowingChildren})
       const {rerender} = render(<TagEntity {...initial} />)
-      expect(screen.getByTestId('tooltip-content').textContent).toBe('')
+      expect(screen.getByTestId('tooltip-content')).toHaveTextContent('')
 
       rerender(
         <TagEntity

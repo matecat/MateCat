@@ -59,7 +59,7 @@ describe('AiFeedback', () => {
   test('is enabled for a modified segment and opens the feedback tab on click', () => {
     renderComponent({status: 'DRAFT', modified: true})
     const button = screen.getByRole('button')
-    expect(button).not.toBeDisabled()
+    expect(button).toBeEnabled()
     expect(button).toHaveAttribute('title', 'Lara feedback')
 
     fireEvent.click(button)
@@ -77,7 +77,7 @@ describe('AiFeedback', () => {
 
   test('is enabled for a TRANSLATED status regardless of modified flag', () => {
     renderComponent({status: 'TRANSLATED', modified: false})
-    expect(screen.getByRole('button')).not.toBeDisabled()
+    expect(screen.getByRole('button')).toBeEnabled()
   })
 
   test('renders bundled label when isIconsBundled is true', () => {

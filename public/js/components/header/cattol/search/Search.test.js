@@ -101,7 +101,7 @@ const queryCheckboxByLabel = (text) => {
 
 test('renders nothing when not active', () => {
   const {container} = render(<Search {...baseProps()} active={false} />)
-  expect(container.innerHTML).toBe('')
+  expect(container).toBeEmptyDOMElement()
 })
 
 // Search.js removes its document keydown listener without the `useCapture`
@@ -315,8 +315,8 @@ test('shows the source&target results summary when both fields are used', () => 
   })
 
   expect(
-    document.querySelector('.search-display .numbers').textContent,
-  ).toContain('segment')
+    document.querySelector('.search-display .numbers'),
+  ).toHaveTextContent(/segment/)
 })
 
 test('next and previous buttons move the featured result and notify the segment', async () => {

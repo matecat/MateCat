@@ -34,6 +34,7 @@ export const ProductionSummary = ({
         style={{textDecoration: 'underline'}}
         href="https://guides.matecat.com/quality-report-in-matecat"
         target="_blank"
+        rel="noreferrer"
       >
         Learn more
       </a>

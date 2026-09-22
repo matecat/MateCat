@@ -17,6 +17,6 @@ test('renders tag-styled content when isTag is true', () => {
 
   const tagSpan = document.querySelector('.tag')
   expect(tagSpan).toBeInTheDocument()
-  expect(tagSpan.classList.contains('tag-ph')).toBe(true)
+  expect(tagSpan).toHaveClass('tag-ph')
   expect(screen.getByText('<ph/>')).toBeInTheDocument()
 })

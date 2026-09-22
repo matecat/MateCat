@@ -19,8 +19,8 @@ test('highlights the current occurrence in a different color (matching by start)
     </SearchHighlight>,
   )
 
-  expect(screen.getByText('hello').style.backgroundColor).toBe(
-    'rgb(255, 210, 14)',
+  expect(screen.getByText('hello')).toHaveStyle(
+    {backgroundColor:'rgb(255, 210, 14)'},
   )
 })
 
@@ -40,8 +40,8 @@ test('highlights a matching but non-current occurrence in the default color (mat
     </SearchHighlight>,
   )
 
-  expect(screen.getByText('hello').style.backgroundColor).toBe(
-    'rgb(255, 255, 0)',
+  expect(screen.getByText('hello')).toHaveStyle(
+    {backgroundColor:'rgb(255, 255, 0)'},
   )
 })
 
@@ -58,7 +58,7 @@ test('renders the default highlight color when there is no matching occurrence',
     </SearchHighlight>,
   )
 
-  expect(screen.getByText('hello').style.backgroundColor).toBe(
-    'rgb(255, 255, 0)',
+  expect(screen.getByText('hello')).toHaveStyle(
+    {backgroundColor:'rgb(255, 255, 0)'},
   )
 })

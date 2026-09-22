@@ -45,7 +45,7 @@ beforeEach(() => {
 
 test('renders nothing when there is no bulk selection', () => {
   const {container} = render(<BulkSelectionBar isReview={false} />)
-  expect(container.firstChild).toBeNull()
+  expect(container).toBeEmptyDOMElement()
 })
 
 test('shows the singular label for a single selected segment', () => {
@@ -119,7 +119,7 @@ test('resets the selection when the store reports it was removed', () => {
     SegmentStore.emitChange(SegmentConstants.REMOVE_SEGMENTS_ON_BULK)
   })
 
-  expect(screen.queryByText(/Segments selected/)).toBeNull()
+  expect(screen.queryByText(/Segments selected/)).not.toBeInTheDocument()
 })
 
 test('toggles a single segment in and out of the bulk selection', () => {

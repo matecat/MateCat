@@ -1,13 +1,11 @@
 import React from 'react'
-import {render, screen, fireEvent, act, waitFor} from '@testing-library/react'
+import {render, screen} from '@testing-library/react'
 import {UploadGdrive} from './UploadGdrive'
 import {CreateProjectContext} from './CreateProjectContext'
 import {getGoogleDriveUploadedFiles} from '../../api/getGoogleDriveUploadedFiles'
 import {deleteGDriveUploadedFile} from '../../api/deleteGdriveUploadedFile'
 import {getUserConnectedService} from '../../api/getUserConnectedService'
 import {changeGDriveSourceLang} from '../../api/changeGDriveSourceLang'
-import CreateProjectActions from '../../actions/CreateProjectActions'
-import UserStore from '../../stores/UserStore'
 // --- Mocks ---
 jest.mock('../../api/getGoogleDriveUploadedFiles', () => ({
   getGoogleDriveUploadedFiles: jest.fn(),
@@ -99,7 +97,7 @@ describe('UploadGdrive', () => {
   describe('Rendering', () => {
     test('renders nothing when openGDrive is false', () => {
       const {container} = renderWithContext({openGDrive: false})
-      expect(container.innerHTML).toBe('')
+      expect(container).toBeEmptyDOMElement()
     })
     test('renders container when openGDrive is true', () => {
       renderWithContext()

@@ -82,7 +82,7 @@ describe('AiAlternatives', () => {
     renderComponent({editArea})
 
     const button = screen.getByRole('button')
-    expect(button).not.toBeDisabled()
+    expect(button).toBeEnabled()
     expect(button).toHaveAttribute(
       'title',
       'Alternative translations by Lara',
