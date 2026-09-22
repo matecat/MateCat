@@ -26,6 +26,7 @@ import resolveEditorCommand from './utils/DraftMatecatUtils/resolveEditorCommand
 import getEditorRelativeSelectionOffset from './utils/DraftMatecatUtils/getEditorRelativeSelectionOffset'
 import buildPastedEditorState from './utils/DraftMatecatUtils/buildPastedEditorState'
 import resolveDrop from './utils/DraftMatecatUtils/resolveDrop'
+import selectionAroundEntity from './utils/DraftMatecatUtils/selectionAroundEntity'
 import TagEntity from './TagEntity/TagEntity.component'
 import SegmentUtils from '../../utils/segmentUtils'
 import CommonUtils from '../../utils/commonUtils'
@@ -1087,31 +1088,21 @@ const Editarea = forwardRef(
 
     const onEntityClickRef = useRef((start, end) => {
       const {editorState} = stateRef.current
-      // Use _latestEditorState
       try {
-        // Selection
+        // _latestEditorState, not ours: the click has already moved the caret
         const latestEditorState = editorRef.current._latestEditorState
         const selectionState = latestEditorState.getSelection()
-        const currentBlockText = latestEditorState
+        const blockText = latestEditorState
           .getCurrentContent()
           .getBlockForKey(selectionState.getFocusKey())
           .getText()
-        const zwsp = String.fromCharCode(parseInt('200B', 16))
-        const selectedTextAfter = currentBlockText.slice(end, end + 1)
-        const selectedTextBefore = currentBlockText.slice(start - 1, start)
-        const addZwspExtraStepBefore = zwsp === selectedTextBefore ? 1 : 0
-        const addZwspExtraStepAfter = zwsp === selectedTextAfter ? 1 : 0
 
-        const newSelection = selectionState.merge({
-          anchorOffset: start - addZwspExtraStepBefore, // -1 is to catch the zero-width space char placed before every entity
-          focusOffset: end + addZwspExtraStepAfter, // +1 is to catch the zero-width space char placed after every entity
+        setState({
+          editorState: EditorState.forceSelection(
+            editorState,
+            selectionState.merge(selectionAroundEntity(blockText, start, end)),
+          ),
         })
-        const newEditorState = EditorState.forceSelection(
-          editorState,
-          newSelection,
-        )
-        setState({editorState: newEditorState})
-        // Highlight
       } catch (e) {
         console.log('Invalid selection')
       }
