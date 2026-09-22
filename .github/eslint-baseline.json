@@ -1,4 +1,0 @@
-{
-  "maxProblems": 1924,
-  "note": "Total ESLint errors + warnings outside plugins/. See .github/scripts/eslint-ratchet.js. Lower this when the count drops; raise it only deliberately."
-}
