@@ -1,7 +1,7 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 import {flattenObject} from '../../utils/queryString'
 import {
-  JOB_WORD_CONT_TYPE,
+  
   REVISE_STEP_NUMBER,
   SEGMENTS_STATUS,
 } from '../../constants/Constants'

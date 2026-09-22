@@ -36,4 +36,6 @@ const TagSuggestion = React.forwardRef((props, ref) => {
   )
 })
 
+TagSuggestion.displayName = 'TagSuggestion'
+
 export default TagSuggestion

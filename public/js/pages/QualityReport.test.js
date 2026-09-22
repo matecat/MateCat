@@ -1,4 +1,3 @@
-import {createRoot} from 'react-dom/client'
 import {act, render, screen, waitFor} from '@testing-library/react'
 import {http, HttpResponse} from 'msw'
 

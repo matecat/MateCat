@@ -930,8 +930,6 @@ const getDeliveryEmailRow = (email) =>
       element?.className === 'job-delivery-email' && content.startsWith(email),
   )
 
-const getProjectAnalyzeUrl = (slug, id, password) =>
-  `/analyze/${slug}/${id}-${password}`
 const getTranslateUrl = (
   chunkId,
   projectSlug,

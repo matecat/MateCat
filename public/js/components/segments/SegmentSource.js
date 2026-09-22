@@ -453,9 +453,9 @@ const SegmentSource = ({segment}) => {
     // Check chars are selected
     const selection = window.getSelection()
     if (selection.anchorNode) {
-      const {startOffset = 0, endOffset = 0} = selection?.getRangeAt(0)
+      const {startOffset = 0, endOffset = 0} = selection.getRangeAt(0)
       if (endOffset - startOffset > 0) {
-        selection?.removeAllRanges()
+        selection.removeAllRanges()
         return
       }
     }

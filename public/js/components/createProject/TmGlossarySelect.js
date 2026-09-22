@@ -32,7 +32,7 @@ export const TmGlossarySelect = () => {
             aria-label="By updating MyMemory, you are contributing to making MateCat better
         and helping fellow MateCat users improve their translations.
         For confidential projects, we suggest adding a private TM and selecting the Update option in the Settings panel."
-            tooltip-position="bottom"
+            data-tooltip-position="bottom"
           >
             <HelpCircle />
           </span>

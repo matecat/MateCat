@@ -60,6 +60,9 @@ module.exports = {
   parser: '@babel/eslint-parser',
   parserOptions: babelParserOptions(browserEcmaVersion),
   extends: ['eslint:recommended'],
+  // `globalThis` is ES2020 and the parser is pinned to 2018, so it is not in
+  // any env's global list. It is available in every engine this ships to.
+  globals: {globalThis: 'readonly'},
   rules: {
     'no-extra-semi': 'off',
     'no-undef': 'warn',
@@ -74,6 +77,9 @@ module.exports = {
         'check-circular-deps.js',
         'jest.polyfills.js',
         'nodejs/**/*.js',
+        // Jest mocks are loaded by the runner, not the bundler, so they are
+        // CommonJS and need `module`.
+        'test-utils/**/*.js',
       ],
       env: {node: true, es6: true},
     },
@@ -91,8 +97,8 @@ module.exports = {
         '**/plugins/*/app/src/**/*.js',
       ],
       env: {browser: true, es6: true},
-      // `globalThis` is ES2020; the parser is pinned to 2018 above.
-      globals: {globalThis: 'readonly'},
+      // Injected by the server template, same as under public/js.
+      globals: {config: 'readonly'},
       extends: ['plugin:react/recommended', 'plugin:react-hooks/recommended'],
       settings: {react: {version: '16.9'}},
       rules: {
@@ -129,6 +135,10 @@ module.exports = {
       },
       rules: {
         'react/prop-types': 'off',
+        // `unselectable` is not a React DOM property, but the DraftJS decorator
+        // spans set it deliberately to keep a tag from being selected inside the
+        // contenteditable. Dropping it would change editor selection, not lint.
+        'react/no-unknown-property': ['error', {ignore: ['unselectable']}],
         // The class form is gone from the tree; keep it out. Until the
         // migration finished this was a per-directory allowlist that grew
         // one PR at a time.
@@ -156,8 +166,23 @@ module.exports = {
       globals: {
         config: 'readonly',
         globalFunctions: 'readonly',
+        // Vendor-prefixed, so eslint's browser env does not list it. The one
+        // call site is guarded by an `in window` feature check.
+        webkitSpeechRecognition: 'readonly',
         google: 'readonly',
         gapi: 'readonly',
+      },
+    },
+
+    // Last, so it wins over the React rules the overrides above switch on for
+    // everything under a js/ directory — which includes the tests living there.
+    {
+      files: ['**/*.jest.js', '**/*.test.js', '**/mocks/**/*.js'],
+      rules: {
+        // A display name exists so the devtools and a stack trace can name a
+        // component. The stand-ins a jest.mock factory returns reach neither,
+        // so naming every one of them tells nobody anything.
+        'react/display-name': 'off',
       },
     },
   ],

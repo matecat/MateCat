@@ -653,7 +653,7 @@ export const ProjectsBulkActions = ({
                   ? 'Maximum number of selected jobs reached'
                   : `${jobsBulk.length} ${jobsBulk.length > 1 ? 'jobs' : 'job'} selected`
               }
-              tooltip-position="right"
+              data-tooltip-position="right"
             >
               <span>{jobsBulk.length}</span>
             </span>

@@ -110,7 +110,6 @@ jest.mock('../../actions/SegmentActions', () => ({
   openSegmentComment: jest.fn(),
   setBulkSelectionInterval: jest.fn(),
   getMoreSegments: jest.fn(),
-  scrollToCurrentSegment: jest.fn(),
 }))
 
 jest.mock('../../utils/speech2text', () => ({

@@ -124,10 +124,6 @@ describe('ReviewExtendedIssuePanel', () => {
     setTranslation.mockResolvedValue({translation: {version_number: 7}})
   })
 
-  afterEach(() => {
-    document.removeEventListener = document.removeEventListener
-  })
-
   describe('rendering', () => {
     test('renders "New issue" header and category selectors when not editing', () => {
       renderPanel()

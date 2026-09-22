@@ -446,7 +446,7 @@ export const Dropdown = forwardRef(
           <div
             className={`dropdown__tooltip dropdown__tooltip-${tooltipPosition}`}
             aria-label={rowTooltip.label}
-            tooltip-position={tooltipPosition}
+            data-tooltip-position={tooltipPosition}
             style={{top: rowTooltip.top}}
           ></div>
         )}

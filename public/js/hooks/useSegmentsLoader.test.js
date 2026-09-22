@@ -14,7 +14,6 @@ jest.mock('../stores/SegmentStore', () => ({
   getLastSegmentId: jest.fn(() => '100'),
 }))
 
-let mockIsUserLogged = true
 jest.mock(
   '../components/common/ApplicationWrapper/ApplicationWrapperContext',
   () => {
