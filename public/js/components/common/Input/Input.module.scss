@@ -7,6 +7,8 @@
 
   label {
     cursor: pointer;
+    // body carries a legacy `text-align: center`, so the label has to opt out
+    text-align: left;
   }
 
   &.isCompressed {

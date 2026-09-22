@@ -78,7 +78,7 @@ const ForgotPassword = () => {
                 }) => (
                   <Input
                     type={INPUT_TYPE.EMAIL}
-                    placeholder="Email"
+                    label="Email"
                     {...{name, value, onChange, error}}
                   />
                 )}

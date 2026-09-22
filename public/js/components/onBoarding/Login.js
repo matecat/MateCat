@@ -84,7 +84,7 @@ const Login = () => {
             render={({field: {name, onChange, value}, fieldState: {error}}) => (
               <Input
                 type={INPUT_TYPE.EMAIL}
-                placeholder="Email"
+                label="Email"
                 {...{name, value, onChange, error}}
               />
             )}
@@ -101,7 +101,7 @@ const Login = () => {
             render={({field: {name, onChange, value}, fieldState: {error}}) => (
               <Input
                 type={INPUT_TYPE.PASSWORD}
-                placeholder="Password"
+                label="Password"
                 {...{name, value, onChange, error}}
               />
             )}

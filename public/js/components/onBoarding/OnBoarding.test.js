@@ -60,12 +60,12 @@ describe('OnBoarding', () => {
   test('renders the PasswordReset step when step="passwordReset"', () => {
     render(<OnBoarding step="passwordReset" />)
     expect(screen.getByText('Reset password')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('Current password')).toBeInTheDocument()
+    expect(screen.getByLabelText('Current password')).toBeInTheDocument()
   })
 
   test('renders PasswordReset in newPassword mode when step="setNewPassword"', () => {
     render(<OnBoarding step="setNewPassword" />)
-    expect(screen.queryByPlaceholderText('Current password')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Current password')).not.toBeInTheDocument()
   })
 
   test('does not render the back button outside the forgotPassword step', () => {
