@@ -5539,6 +5539,11 @@
         "yaml": {
           "type": "object",
           "properties": {
+            "force_double_quoting": {
+              "type": "boolean",
+              "x-nullable": true,
+              "default": false
+            },
             "translate_keys": {
               "type": "array",
               "items": {
@@ -5547,6 +5552,33 @@
               "x-nullable": true
             },
             "do_not_translate_keys": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-nullable": true
+            },
+            "inner_content_type": {
+              "type": "string",
+              "enum": [
+                "text/html",
+                "text/xml",
+                "application/xml",
+                "text/csv",
+                "application/json",
+                "text/markdown",
+                "text/x-markdown"
+              ],
+              "x-nullable": true
+            },
+            "context_keys": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-nullable": true
+            },
+            "character_limit": {
               "type": "array",
               "items": {
                 "type": "string"

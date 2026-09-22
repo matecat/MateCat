@@ -123,6 +123,23 @@ export const Yaml = () => {
     <div className="filters-params-accordion-content">
       <div className="filters-params-option">
         <div>
+          <h3>Force double quotes on single-line strings</h3>
+          <p>
+            Choose whether to surround all single-line strings with double
+            quotes in the translated file, regardless of their source format.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="force_double_quoting"
+          render={({field: {onChange, value, name}}) => (
+            <Switch name={name} active={value} onChange={onChange} />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
           <h3>Translatable keys </h3>
           <p>
             Choose which keys should be translated. If left empty, all keys in
