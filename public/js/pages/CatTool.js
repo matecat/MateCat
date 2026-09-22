@@ -391,10 +391,10 @@ function CatTool() {
           {
             text: (
               <span>
-                Access to the editor page is forbidden until the project's
+                Access to the editor page is forbidden until the project&apos;s
                 analysis is complete.
                 <br />
-                To follow the analysis' progress,{' '}
+                To follow the analysis&apos; progress,{' '}
                 <a
                   rel="noreferrer"
                   href={`/jobanalysis/${config.id_project}-${config.id_job}-${config.password}`}

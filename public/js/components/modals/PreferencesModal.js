@@ -21,7 +21,6 @@ import UserStore from '../../stores/UserStore'
 import {getUserData} from '../../api/getUserData'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import ModalsActions from '../../actions/ModalsActions'
-import useAuth from '../../hooks/useAuth'
 
 const PreferencesModal = (props) => {
   const {userInfo, setUserInfo, logout} = useContext(ApplicationWrapperContext)

@@ -8,11 +8,9 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../common/Button/Button'
-import AlertIcon from '../../../../img/icons/AlertIcon'
 import CatToolStore from '../../../stores/CatToolStore'
 import CatToolConstants from '../../../constants/CatToolConstants'
 import SearchUtils from './search/searchUtils'
-import AlertIconFull from '../../../../img/icons/AlertIconFull'
 import QAICon from '../../../../img/icons/QAICon'
 import QAFilledIcon from '../../../../img/icons/QAFilledICon'
 

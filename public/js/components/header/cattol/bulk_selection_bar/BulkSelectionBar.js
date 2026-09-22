@@ -11,7 +11,6 @@ import {
   BUTTON_TYPE,
 } from '../../../common/Button/Button'
 import IconChevronLeft from '../../../../../img/icons/IconChevronLeft'
-import IconTick from '../../../../../img/icons/IconTick'
 import Checkmark from '../../../../../img/icons/Checkmark'
 
 // The bulk endpoints reject with {response, errors}; a plain Error can also reach us if the request

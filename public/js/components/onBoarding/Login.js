@@ -121,7 +121,7 @@ const Login = () => {
 
       <div className="footer-links-container">
         <span>
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Button
             className="link-underline"
             type={BUTTON_TYPE.PRIMARY}

@@ -142,7 +142,7 @@ export const MsPowerpoint = () => {
           <p>
             Choose whether to translate text in hidden slides.
             <br />
-            Mutually exclusive with "Translatable slides"
+            Mutually exclusive with &quot;Translatable slides&quot;
           </p>
         </div>
         <Controller
@@ -163,7 +163,7 @@ export const MsPowerpoint = () => {
             If activated, speaker notes will be extracted for all slides,
             including hidden slides not being extracted for translation.
             <br />
-            However, if activated in combination with the "Translatable slides"
+            However, if activated in combination with the &quot;Translatable slides&quot;
             option, only the notes for the slides listed will be extracted.
           </p>
         </div>
@@ -180,7 +180,7 @@ export const MsPowerpoint = () => {
         <div>
           <h3>Translate document properties</h3>
           <p>
-            Choose whether to translate document properties (e.g. the author's
+            Choose whether to translate document properties (e.g. the author&apos;s
             name).
           </p>
         </div>
@@ -201,8 +201,8 @@ export const MsPowerpoint = () => {
             <br />
             If left empty, all the slides in the file will be extracted as
             translatable except for hidden slides, unless otherwise specified
-            through the dedicated option. Mutually exclusive with "Translate
-            hidden slides".
+            through the dedicated option. Mutually exclusive with &quot;Translate
+            hidden slides&quot;.
           </p>
         </div>
         <Controller

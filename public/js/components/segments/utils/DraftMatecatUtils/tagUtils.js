@@ -31,7 +31,6 @@ const restoreTempTags = (tags, text) =>
     return tag ? tag.match : match
   })
 import {isUndefined} from 'lodash'
-import getEntities from './getEntities'
 import matchTagStructure from './matchTag'
 import {createPcNumberer} from './pcTagUtils'
 

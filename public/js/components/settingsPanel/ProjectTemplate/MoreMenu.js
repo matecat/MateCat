@@ -8,7 +8,7 @@ import {SettingsPanelContext} from '../SettingsPanelContext'
 import IconEdit from '../../../../img/icons/IconEdit'
 import Trash from '../../../../img/icons/Trash'
 import {DropdownMenu} from '../../common/DropdownMenu/DropdownMenu'
-import {BUTTON_MODE, BUTTON_SIZE, BUTTON_TYPE} from '../../common/Button/Button'
+import {BUTTON_MODE, BUTTON_SIZE} from '../../common/Button/Button'
 
 export const MoreMenu = () => {
   const {setProjectTemplates, currentProjectTemplate} =

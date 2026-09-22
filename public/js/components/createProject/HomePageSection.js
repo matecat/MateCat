@@ -29,11 +29,11 @@ export const HomePageSection = () => {
             </div>
             <p>
               Get top-quality machine translation matches in 200+ languages with
-              Matecat's free adaptive machine translation provided by ModernMT.
-              It's like a smart assistant that gets better as you go, saving you
+              Matecat&apos;s free adaptive machine translation provided by ModernMT.
+              It&apos;s like a smart assistant that gets better as you go, saving you
               tons of time. For each segment, it checks previous translations to
               find similar sentences and then adjusts the result based on your
-              past work. What's more, it learns from your translations on the
+              past work. What&apos;s more, it learns from your translations on the
               fly and takes into account the context of the whole document to
               make sure it uses the correct style and terminology.
             </p>
@@ -44,14 +44,14 @@ export const HomePageSection = () => {
               <h5>Free to use</h5>
             </div>
             <p>
-              Matecat offers a powerful solution that's completely free.
+              Matecat offers a powerful solution that&apos;s completely free.
               Companies, language service providers, freelancers, anybody can
               make the most of Matecat. It provides unlimited access to all its
               features, with no restrictions on the number of users or projects,
               opening up a world of possibilities for large projects and
               collaborations. With Matecat, you can streamline your process,
               ensure consistency across projects and save both time and money.
-              It's a comprehensive and efficient solution for all your needs.
+              It&apos;s a comprehensive and efficient solution for all your needs.
             </p>
           </div>
           <div className="content-box">
@@ -76,12 +76,12 @@ export const HomePageSection = () => {
               <h5>A user-friendly experience</h5>
             </div>
             <p>
-              Matecat was created with a focus on you. It's designed so that
-              anybody can use it: whether you're a seasoned professional or a
+              Matecat was created with a focus on you. It&apos;s designed so that
+              anybody can use it: whether you&apos;re a seasoned professional or a
               beginner, Matecat is built to be easy to understand and navigate,
               so you can start using it right away. It lets you and your team
               dive straight in and get to work without having to spend time
-              studying tutorials or guides. With Matecat, there's no need to
+              studying tutorials or guides. With Matecat, there&apos;s no need to
               worry about complicated instructions or steep learning curves, so
               you can focus on completing tasks quickly and easily.
             </p>
@@ -94,7 +94,7 @@ export const HomePageSection = () => {
             <p>
               Matecat is entirely web-based, so you can access it from any
               computer with an internet connection. This gives you the
-              flexibility to work from anywhere and means you don't need to
+              flexibility to work from anywhere and means you don&apos;t need to
               worry about installation, software updates, or compatibility
               issues. Matecat is updated constantly and works perfectly with any
               browser, while your data is stored securely in the cloud and is

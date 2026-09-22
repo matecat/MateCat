@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Close from '../../../../img/icons/Close'
 import IconClose from '../../../../img/icons/IconClose'
 import styles from './EmailsBadge.module.scss'
 

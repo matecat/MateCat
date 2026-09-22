@@ -33,14 +33,14 @@ export const DeepL = ({
           <strong>DeepL Translator</strong> is a neural machine translation
           engine available in 31 languages that can be used to retrieve machine
           translation suggestions for post editing. <br />
-          The engine's output can be customized by choosing a formality level
+          The engine&apos;s output can be customized by choosing a formality level
           for the target language and uploading a glossary to make sure that the
           MT output reflects your preferred terminology.
         </p>
         <p>
-          <strong>Note: </strong>as per DeepL's policy, Matecat's integration
-          with DeepL is only available for subscribers of DeepL's "Advanced" and
-          "Ultimate" plans.
+          <strong>Note: </strong>as per DeepL&apos;s policy, Matecat&apos;s integration
+          with DeepL is only available for subscribers of DeepL&apos;s &quot;Advanced&quot; and
+          &quot;Ultimate&quot; plans.
         </p>
         <Button
           className="green-button"
