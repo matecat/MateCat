@@ -48,7 +48,7 @@ describe('MsPowerpoint', () => {
       document.querySelector('input[name="extract_hidden_slides"]'),
     ).not.toBeChecked()
     expect(document.querySelector('input[name="extract_notes"]')).toBeChecked()
-    expect(screen.getByTestId('email-input')).not.toBeDisabled()
+    expect(screen.getByTestId('email-input')).toBeEnabled()
   })
 
   test('converts a contiguous range into a single chip on render', () => {

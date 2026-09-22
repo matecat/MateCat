@@ -139,7 +139,7 @@ describe('QaCheckGlossaryHighlight render', () => {
       </QaCheckGlossaryHighlight>,
     )
 
-    expect(screen.getByTestId('tooltip-content').textContent).toBe(
+    expect(screen.getByTestId('tooltip-content')).toHaveTextContent(
       'Termbase translation not found in target',
     )
 

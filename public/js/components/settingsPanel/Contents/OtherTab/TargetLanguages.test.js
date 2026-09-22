@@ -59,7 +59,7 @@ describe('TargetLanguages', () => {
 
   test('shows currently selected target languages as active options', () => {
     renderTargetLanguages([languages[0]])
-    expect(screen.getByTestId('active-options').textContent).toBe('it-IT')
+    expect(screen.getByTestId('active-options')).toHaveTextContent('it-IT')
   })
 
   test('toggling an unselected option adds it to targetLangs', () => {

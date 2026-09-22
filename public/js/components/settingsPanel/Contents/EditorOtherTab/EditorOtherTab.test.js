@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, within} from '@testing-library/react'
+import {render, within} from '@testing-library/react'
 import {EditorOtherTab} from './EditorOtherTab'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {updateJobMetadata} from '../../../../api/updateJobMetadata'

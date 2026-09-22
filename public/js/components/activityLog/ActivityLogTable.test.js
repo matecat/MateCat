@@ -1,5 +1,5 @@
 import {render} from '@testing-library/react'
-import {screen} from '@testing-library/dom'
+import {screen} from '@testing-library/react'
 import React from 'react'
 import {ActivityLogTable} from './ActivityLogTable'
 import {ActivityLogContext} from './ActivityLogContext'

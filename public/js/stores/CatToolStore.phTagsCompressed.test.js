@@ -42,7 +42,7 @@ describe('CatToolStore - phTagsCompressed', () => {
   test('initializes phTagsCompressed to true when localStorage is empty (collapsed by default)', () => {
     CatToolStore = require('./CatToolStore').default
     expect(CatToolStore.isPhTagsCompressed()).toBe(true)
-    expect(document.body.classList.contains('ph-tags-compressed')).toBe(true)
+    expect(document.body).toHaveClass('ph-tags-compressed')
   })
 
   test('initializes phTagsCompressed to true from localStorage', () => {
@@ -52,7 +52,7 @@ describe('CatToolStore - phTagsCompressed', () => {
     })
     CatToolStore = require('./CatToolStore').default
     expect(CatToolStore.isPhTagsCompressed()).toBe(true)
-    expect(document.body.classList.contains('ph-tags-compressed')).toBe(true)
+    expect(document.body).toHaveClass('ph-tags-compressed')
   })
 
   test('initializes phTagsCompressed to false when localStorage is "false"', () => {
@@ -81,7 +81,7 @@ describe('CatToolStore - phTagsCompressed', () => {
       'phTagsCompressed-test@example.com',
       true,
     )
-    expect(document.body.classList.contains('ph-tags-compressed')).toBe(true)
+    expect(document.body).toHaveClass('ph-tags-compressed')
   })
 
   test('TOGGLE_PH_TAGS_COMPRESSED toggles state from true to false', () => {
@@ -101,7 +101,7 @@ describe('CatToolStore - phTagsCompressed', () => {
       'phTagsCompressed-test@example.com',
       false,
     )
-    expect(document.body.classList.contains('ph-tags-compressed')).toBe(false)
+    expect(document.body).not.toHaveClass('ph-tags-compressed')
   })
 
   test('TOGGLE_PH_TAGS_COMPRESSED emits change event', () => {

@@ -93,8 +93,8 @@ describe('ReviewExtendedTranslationIssuesSideButton', () => {
       'no-object',
     )
     expect(
-      container.querySelector('.revise-button').getAttribute('title'),
-    ).toEqual(expect.stringContaining('Show issues'))
+      container.querySelector('.revise-button'),
+    ).toHaveAttribute('title', expect.stringContaining('Show issues'))
   })
 
   test('sums issue counts across multiple versions', () => {

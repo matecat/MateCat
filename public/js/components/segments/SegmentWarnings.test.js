@@ -46,9 +46,9 @@ describe('SegmentWarnings', () => {
     expect(container.querySelector('.warning-alert')).toBeInTheDocument()
     expect(container.querySelector('.info-alert')).toBeInTheDocument()
     expect(container.querySelectorAll('.alert-block')).toHaveLength(3)
-    expect(container.textContent).toContain('error debug')
-    expect(container.textContent).toContain('fix it')
-    expect(container.textContent).toContain('info tip')
+    expect(container).toHaveTextContent(/error debug/)
+    expect(container).toHaveTextContent(/fix it/)
+    expect(container).toHaveTextContent(/info tip/)
   })
 
   test('does not render a tip paragraph when tip is an empty string', () => {
@@ -76,7 +76,7 @@ describe('SegmentWarnings', () => {
     }
     const {container} = render(<SegmentWarnings warnings={warnings} />)
     expect(container.querySelectorAll('.alert-block')).toHaveLength(1)
-    expect(container.textContent).toContain('first')
+    expect(container).toHaveTextContent(/first/)
   })
 
   test('shouldComponentUpdate re-renders when warnings prop changes', () => {
@@ -87,9 +87,9 @@ describe('SegmentWarnings', () => {
       ERROR: {Categories: {cat1: [{outcome: 'e2', debug: 'second', tip: ''}]}},
     }
     const {container, rerender} = render(<SegmentWarnings warnings={initial} />)
-    expect(container.textContent).toContain('first')
+    expect(container).toHaveTextContent(/first/)
 
     rerender(<SegmentWarnings warnings={updated} />)
-    expect(container.textContent).toContain('second')
+    expect(container).toHaveTextContent(/second/)
   })
 })

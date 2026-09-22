@@ -40,12 +40,12 @@ describe('LanguageSelector', () => {
 
   test('renders the from-language name and the target-language search', () => {
     const {container} = renderComponent()
-    expect(container.querySelector('.language-from').textContent).toContain(
-      'Italian',
+    expect(container.querySelector('.language-from')).toHaveTextContent(
+      /Italian/,
     )
     expect(
-      container.querySelector('.language-search .tag').textContent,
-    ).toContain('French')
+      container.querySelector('.language-search .tag'),
+    ).toHaveTextContent(/French/)
   })
 
   test('shows the selected-language count in the footer', () => {
@@ -106,7 +106,7 @@ describe('LanguageSelector', () => {
       (el) => el.textContent.includes('German'),
     )
     fireEvent.click(item)
-    expect(container.querySelector('.badge').textContent).toBe('1')
+    expect(container.querySelector('.badge')).toHaveTextContent('1')
   })
 
   test('shows recently used languages from localStorage and applies them on click', () => {

@@ -34,7 +34,7 @@ test('always renders search, qa and the bulk selection bar', () => {
 
 test('only renders the segments filter when filtersEnabled is true', () => {
   const {rerender} = render(<SubHeaderContainer filtersEnabled={false} />)
-  expect(screen.queryByTestId('segments-filter')).toBeNull()
+  expect(screen.queryByTestId('segments-filter')).not.toBeInTheDocument()
 
   rerender(<SubHeaderContainer filtersEnabled={true} />)
   expect(screen.getByTestId('segments-filter')).toBeInTheDocument()

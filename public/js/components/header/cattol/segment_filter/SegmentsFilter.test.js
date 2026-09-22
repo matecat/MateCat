@@ -80,7 +80,7 @@ beforeAll(() => {
 
 test('renders nothing when not active', () => {
   const {container} = render(<SegmentsFilter active={false} />)
-  expect(container.innerHTML).toBe('')
+  expect(container).toBeEmptyDOMElement()
 })
 
 test('renders filter UI when active', () => {

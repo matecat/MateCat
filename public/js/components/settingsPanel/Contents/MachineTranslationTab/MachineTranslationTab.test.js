@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from 'react'
-import {act, render, screen, within} from '@testing-library/react'
+import {render, screen, within} from '@testing-library/react'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {MachineTranslationTab} from './MachineTranslationTab'
 import {mswServer} from '../../../../../mocks/mswServer'

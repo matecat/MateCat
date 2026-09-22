@@ -141,7 +141,7 @@ describe('UploadFileLocal', () => {
       renderWithContext()
       const input = document.getElementById('fileInput')
       expect(input).toBeInTheDocument()
-      expect(input.style.display).toBe('none')
+      expect(input).toHaveStyle({display:'none'})
     })
   })
 

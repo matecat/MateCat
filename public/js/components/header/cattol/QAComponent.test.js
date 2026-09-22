@@ -24,12 +24,12 @@ beforeEach(() => {
 
 test('renders nothing when not active', () => {
   const {container} = render(<QAComponent active={false} isReview={false} />)
-  expect(container.firstChild).toBeNull()
+  expect(container).toBeEmptyDOMElement()
 })
 
 test('renders nothing when there are no warnings yet', () => {
   const {container} = render(<QAComponent active={true} isReview={false} />)
-  expect(container.firstChild).toBeNull()
+  expect(container).toBeEmptyDOMElement()
 })
 
 test('renders error, warning and info categories and lets the user open a category', () => {
@@ -109,10 +109,10 @@ test('shows the lexiqa report links once the lexiqa info category is selected', 
     'https://lexiqa.example.com/documentation.html',
   )
   const reportLink = screen.getByText('Report')
-  expect(reportLink.getAttribute('href')).toContain(
-    '/errorreport?id=',
+  expect(reportLink).toHaveAttribute(
+    'href', expect.stringContaining('/errorreport?id='),
   )
-  expect(reportLink.getAttribute('href')).toContain('-42-pass123&type=translate')
+  expect(reportLink).toHaveAttribute('href', expect.stringContaining('-42-pass123&type=translate'))
 })
 
 test('renders nothing once the component is deactivated again', () => {
@@ -125,8 +125,8 @@ test('renders nothing once the component is deactivated again', () => {
     WARNING: {total: 0, Categories: {}},
     INFO: {total: 0, Categories: {}},
   })
-  expect(container.firstChild).not.toBeNull()
+  expect(container).not.toBeEmptyDOMElement()
 
   rerender(<QAComponent active={false} isReview={false} />)
-  expect(container.firstChild).toBeNull()
+  expect(container).toBeEmptyDOMElement()
 })

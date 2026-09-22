@@ -154,8 +154,8 @@ describe('SegmentCommentsContainer', () => {
   test('renders a regular comment with its author name and body', () => {
     CommentsStore.getCommentsBySegment.mockReturnValue([buildComment()])
     const {container} = renderContainer()
-    expect(container.textContent).toContain('Jane Doe')
-    expect(container.textContent).toContain('hello there')
+    expect(container).toHaveTextContent(/Jane Doe/)
+    expect(container).toHaveTextContent(/hello there/)
     expect(
       container.querySelector('.comment-thread-active'),
     ).toBeInTheDocument()
@@ -166,7 +166,7 @@ describe('SegmentCommentsContainer', () => {
       buildComment({source_page: 2}),
     ])
     const {container} = renderContainer()
-    expect(container.textContent).toContain('(revisor)')
+    expect(container).toHaveTextContent(/\(revisor\)/)
   })
 
   test('hides the author label for an anonymous comment', () => {
@@ -174,7 +174,7 @@ describe('SegmentCommentsContainer', () => {
       buildComment({is_anonymous: 1}),
     ])
     const {container} = renderContainer()
-    expect(container.querySelector('.comment-username-label').textContent).toBe(
+    expect(container.querySelector('.comment-username-label')).toHaveTextContent(
       'Jane Doe',
     )
   })
@@ -187,13 +187,13 @@ describe('SegmentCommentsContainer', () => {
     expect(
       container.querySelector('.comment-thread-resolved'),
     ).toBeInTheDocument()
-    expect(container.textContent).toContain('marked as resolved')
+    expect(container).toHaveTextContent(/marked as resolved/)
   })
 
   test('shows the resolve button when the last comment is not a resolve entry', () => {
     CommentsStore.getCommentsBySegment.mockReturnValue([buildComment()])
     const {container} = renderContainer()
-    expect(container.textContent).toContain('Resolve')
+    expect(container).toHaveTextContent(/Resolve/)
   })
 
   test('does not show the resolve button when the thread is already resolved', () => {
@@ -201,7 +201,7 @@ describe('SegmentCommentsContainer', () => {
       buildComment({message_type: '2'}),
     ])
     const {container} = renderContainer()
-    expect(container.textContent).not.toContain('Resolve')
+    expect(container).not.toHaveTextContent(/Resolve/)
   })
 
   test('shows a delete button for the author of the last comment on the current pass', () => {
@@ -429,14 +429,14 @@ describe('SegmentCommentsContainer', () => {
     commonUtils.getFromStorage.mockReturnValue('true')
     window.config = {isReview: true, revisionNumber: 2}
     const {container} = renderContainer()
-    expect(container.textContent).toContain('2nd pass revisor')
+    expect(container).toHaveTextContent(/2nd pass revisor/)
   })
 
   test('renders anonymously with the translator label outside review mode', () => {
     commonUtils.getFromStorage.mockReturnValue('true')
     window.config = {isReview: false, revisionNumber: 0}
     const {container} = renderContainer()
-    expect(container.textContent).toContain('Translator')
+    expect(container).toHaveTextContent(/Translator/)
   })
 
   test('toggling the anonymous checkbox persists the preference', () => {

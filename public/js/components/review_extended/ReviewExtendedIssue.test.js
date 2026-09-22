@@ -373,7 +373,7 @@ describe('ReviewExtendedIssue', () => {
     act(() => {
       SegmentStore.emit(SegmentConstants.ISSUE_DELETED, 'seg-1', 1)
     })
-    expect(container.querySelector('.re-item').style.opacity).toEqual('0')
+    expect(container.querySelector('.re-item')).toHaveStyle({opacity:'0'})
   })
 
   test('ISSUE_DELETED store event ignores non-matching issues', () => {
@@ -383,7 +383,7 @@ describe('ReviewExtendedIssue', () => {
     act(() => {
       SegmentStore.emit(SegmentConstants.ISSUE_DELETED, 'other-seg', 1)
     })
-    expect(container.querySelector('.re-item').style.opacity).not.toEqual('0')
+    expect(container.querySelector('.re-item')).not.toHaveStyle({opacity:'0'})
   })
 
   test('OPEN_ISSUE_COMMENT store event opens the comment section when target_text is set', () => {
