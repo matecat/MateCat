@@ -174,6 +174,7 @@ export const XliffSettings = () => {
                 <a
                   href="https://guides.matecat.com/file-import#xliff-import-settings"
                   target="_blank"
+                  rel="noreferrer"
                 >
                   More details
                 </a>

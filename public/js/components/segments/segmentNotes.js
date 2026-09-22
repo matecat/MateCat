@@ -25,7 +25,12 @@ const segmentNotes = {
       ? TEXT_UTILS.getContentWithAllowedLinkRedirect(note).map(
           (content, index) =>
             typeof content === 'object' && content.isLink ? (
-              <a key={index} href={content.link} target="_blank">
+              <a
+                key={index}
+                href={content.link}
+                target="_blank"
+                rel="noreferrer"
+              >
                 {content.link}
               </a>
             ) : (

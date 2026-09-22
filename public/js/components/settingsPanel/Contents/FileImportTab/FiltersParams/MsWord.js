@@ -170,6 +170,7 @@ export const MsWord = () => {
             <a
               href="https://guides.matecat.com/file-import#:~:text=MS%20Word%202007,97%2D2003%20(DOC)"
               target="_blank"
+              rel="noreferrer"
             >
               here
             </a>
