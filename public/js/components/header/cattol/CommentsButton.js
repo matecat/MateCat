@@ -16,7 +16,6 @@ import {
   BUTTON_TYPE,
 } from '../../common/Button/Button'
 
-const commentsTypes = {sticky: 3, resolve: 2, comment: 1}
 export const CommentsButton = () => {
   const [teamUsers, setTeamUsers] = useState([])
   const [comments, setComments] = useState([])
