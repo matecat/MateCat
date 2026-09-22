@@ -5,50 +5,58 @@ const path = require('node:path')
 const {test} = require('node:test')
 
 const {
-  countByFileRule,
+  addedViolations,
   evaluate,
+  formatAdded,
+  indexViolations,
   isCounted,
-  risenEntries,
   totalOf,
 } = require('./eslint-ratchet.js')
 
 const cwd = path.sep === '/' ? '/repo' : 'C:\\repo'
-const key = (file, rule) => `${file}\u0000${rule}`
+const key = (file, rule, message) => [file, rule, message].join('\u0000')
 
-test('a rise against the base fails the gate', () => {
-  const outcome = evaluate({
-    base: 10,
-    head: 12,
-    risen: [{file: 'public/js/a.js', rule: 'no-undef', by: 2}],
-  })
-
-  assert.equal(outcome.ok, false)
-  assert.match(outcome.message, /total rose from 10 to 12 \(\+2\)/)
-  assert.match(outcome.message, /\+2 {2}no-undef {2}public\/js\/a\.js/)
+const entry = (over = {}) => ({
+  file: 'public/js/a.js',
+  rule: 'no-unused-vars',
+  message: "'x' is assigned a value but never used.",
+  count: 1,
+  locations: [{line: 4, column: 7}],
+  by: 1,
+  ...over,
 })
 
-test('a file that gains violations fails even when the total falls', () => {
-  const outcome = evaluate({
-    base: 300,
-    head: 100,
-    risen: [{file: 'public/js/new.js', rule: 'no-unused-vars', by: 2}],
-  })
+test('a failing run names file, line, rule and message', () => {
+  const outcome = evaluate({base: 10, head: 11, added: [entry()]})
 
   assert.equal(outcome.ok, false)
-  assert.match(outcome.message, /fell from 300 to 100, but these gained/)
-  assert.match(outcome.message, /\+2 {2}no-unused-vars {2}public\/js\/new\.js/)
+  assert.match(
+    outcome.message,
+    /public\/js\/a\.js:4:7 {2}no-unused-vars {2}'x' is assigned/,
+  )
 })
 
-test('a long list of regressions is truncated', () => {
-  const risen = Array.from({length: 25}, (_, i) => ({
-    file: `f${i}.js`,
-    rule: 'no-undef',
-    by: 1,
-  }))
+test('added violations fail even when the total falls', () => {
+  const outcome = evaluate({base: 300, head: 100, added: [entry()]})
 
-  const outcome = evaluate({base: 1, head: 26, risen})
+  assert.equal(outcome.ok, false)
+  assert.match(outcome.message, /fell from 300 to 100, but this branch adds/)
+})
 
-  assert.match(outcome.message, /\.\.\.and 5 more/)
+test('a rising total says so in the headline', () => {
+  const outcome = evaluate({base: 10, head: 12, added: [entry({by: 2})]})
+
+  assert.match(outcome.message, /rose from 10 to 12 \(\+2\)/)
+})
+
+test('a long report is truncated', () => {
+  const added = Array.from({length: 40}, (_, i) =>
+    entry({file: `f${i}.js`, locations: [{line: 1, column: 1}]}),
+  )
+
+  const outcome = evaluate({base: 1, head: 41, added})
+
+  assert.match(outcome.message, /\.\.\.and 10 more/)
 })
 
 test('an unchanged total passes', () => {
@@ -58,7 +66,7 @@ test('an unchanged total passes', () => {
   assert.match(outcome.message, /unchanged at 10/)
 })
 
-test('a drop with no regression passes', () => {
+test('a drop with nothing added passes', () => {
   const outcome = evaluate({base: 10, head: 7})
 
   assert.equal(outcome.ok, true)
@@ -76,67 +84,114 @@ test('plugins/ is outside the gated set', () => {
   assert.equal(isCounted('pluginsomething/app.js'), true)
 })
 
-test('countByFileRule keys by file and rule, skipping plugins/', () => {
-  const counts = countByFileRule(
+test('indexViolations keys by file, rule and message, skipping plugins/', () => {
+  const index = indexViolations(
     [
       {
         filePath: path.join(cwd, 'public/js/a.js'),
         messages: [
-          {ruleId: 'no-undef'},
-          {ruleId: 'no-undef'},
-          {ruleId: null}, // a parse error carries no rule
+          {ruleId: 'no-undef', message: "'a' is not defined.", line: 1, column: 1},
+          {ruleId: 'no-undef', message: "'a' is not defined.", line: 9, column: 3},
+          {ruleId: 'no-undef', message: "'b' is not defined.", line: 4, column: 2},
+          {ruleId: null, message: 'Parsing error', line: 1, column: 1},
         ],
       },
       {
         filePath: path.join(cwd, 'plugins/aligner/b.js'),
-        messages: [{ruleId: 'no-undef'}],
+        messages: [{ruleId: 'no-undef', message: 'x', line: 1, column: 1}],
       },
     ],
     cwd,
   )
 
-  assert.deepEqual(counts, {
-    [key('public/js/a.js', 'no-undef')]: 2,
-    [key('public/js/a.js', '(parse error)')]: 1,
-  })
+  assert.equal(Object.keys(index).length, 3)
+  assert.equal(index[key('public/js/a.js', 'no-undef', "'a' is not defined.")].count, 2)
+  assert.deepEqual(
+    index[key('public/js/a.js', 'no-undef', "'a' is not defined.")].locations,
+    [
+      {line: 1, column: 1},
+      {line: 9, column: 3},
+    ],
+  )
+  assert.ok(index[key('public/js/a.js', '(parse error)', 'Parsing error')])
 })
 
-test('totalOf sums every entry', () => {
-  assert.equal(totalOf({a: 2, b: 3}), 5)
+test('totalOf sums the counts, not the keys', () => {
+  assert.equal(totalOf({a: {count: 2}, b: {count: 3}}), 5)
   assert.equal(totalOf({}), 0)
 })
 
-test('risenEntries reports growth per file, largest first', () => {
-  const risen = risenEntries(
+test('addedViolations reports only growth, and the newest locations', () => {
+  const k = key('a.js', 'no-undef', "'a' is not defined.")
+
+  const added = addedViolations(
+    {[k]: {count: 1}},
     {
-      [key('a.js', 'no-undef')]: 5,
-      [key('b.js', 'no-undef')]: 2,
-      [key('c.js', 'no-undef')]: 1,
-    },
-    {
-      [key('a.js', 'no-undef')]: 6,
-      [key('b.js', 'no-undef')]: 5,
-      [key('c.js', 'no-undef')]: 1,
+      [k]: {
+        file: 'a.js',
+        rule: 'no-undef',
+        message: "'a' is not defined.",
+        count: 3,
+        locations: [
+          {line: 1, column: 1},
+          {line: 5, column: 1},
+          {line: 9, column: 1},
+        ],
+      },
     },
   )
 
-  assert.deepEqual(risen, [
-    {file: 'b.js', rule: 'no-undef', by: 3},
-    {file: 'a.js', rule: 'no-undef', by: 1},
+  assert.equal(added.length, 1)
+  assert.equal(added[0].by, 2)
+  // Only the two newest locations, not the pre-existing one.
+  assert.deepEqual(added[0].locations, [
+    {line: 5, column: 1},
+    {line: 9, column: 1},
   ])
 })
 
-test('a file absent from the base counts as all-new', () => {
-  const risen = risenEntries({}, {[key('new.js', 'no-undef')]: 4})
+test('a violation absent from the base counts as all-new', () => {
+  const k = key('new.js', 'no-undef', "'a' is not defined.")
 
-  assert.deepEqual(risen, [{file: 'new.js', rule: 'no-undef', by: 4}])
+  const added = addedViolations(
+    {},
+    {
+      [k]: {
+        file: 'new.js',
+        rule: 'no-undef',
+        message: "'a' is not defined.",
+        count: 1,
+        locations: [{line: 2, column: 4}],
+      },
+    },
+  )
+
+  assert.deepEqual(added[0].locations, [{line: 2, column: 4}])
 })
 
 test('a file that improves is not reported', () => {
-  const risen = risenEntries(
-    {[key('a.js', 'no-undef')]: 9},
-    {[key('a.js', 'no-undef')]: 1},
+  const k = key('a.js', 'no-undef', "'a' is not defined.")
+
+  const added = addedViolations(
+    {[k]: {count: 9}},
+    {[k]: {file: 'a.js', rule: 'no-undef', message: 'm', count: 1, locations: []}},
   )
 
-  assert.deepEqual(risen, [])
+  assert.deepEqual(added, [])
+})
+
+test('formatAdded emits one line per location', () => {
+  const lines = formatAdded([
+    entry({
+      by: 2,
+      locations: [
+        {line: 3, column: 1},
+        {line: 8, column: 2},
+      ],
+    }),
+  ])
+
+  assert.equal(lines.length, 2)
+  assert.match(lines[0], /a\.js:3:1/)
+  assert.match(lines[1], /a\.js:8:2/)
 })

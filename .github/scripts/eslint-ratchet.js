@@ -5,9 +5,9 @@
  *
  * The frontend carries a lint backlog that predates any CI enforcement, so a
  * plain `eslint .` cannot gate a build — it would fail every one of them. This
- * lints the base branch and the merge result and fails only when the merge
- * result has more problems, which blocks new ones without demanding the old
- * ones be fixed first.
+ * lints the base branch and the merge result and fails on the violations the
+ * branch adds, which blocks new problems without demanding the old ones be
+ * fixed first.
  *
  * There is deliberately no committed baseline number. One would have to be
  * edited every time the count moved, and — because a pull request is checked
@@ -27,6 +27,8 @@ const path = require('path')
 
 const LINT_TARGETS = ['.']
 const UNCOUNTED_PREFIXES = ['plugins/']
+const SEP = '\u0000'
+const MAX_REPORTED = 30
 
 /** Is this file part of the gated set? `relativePath` is relative to the tree root. */
 function isCounted(relativePath) {
@@ -35,73 +37,111 @@ function isCounted(relativePath) {
 }
 
 /**
- * Counts keyed by `file\u0000rule`.
+ * Index every violation by file, rule and message text.
  *
- * Per-file, not per-rule totals: this branch clears far more `no-unused-vars`
- * than it adds, so a repo-wide total for that rule stays below the base even
- * when a new file introduces some. Comparing each file separately is what makes
- * a newly added violation visible.
+ * Keyed on the message rather than the line, because lines move as soon as
+ * anything above them is edited and untouched violations would then be reported
+ * as new. The message text stays put and names the identifier at fault, so it
+ * survives the file being reformatted around it.
+ *
+ * Returns `{key: {file, rule, message, count, locations}}`.
  */
-function countByFileRule(results, cwd) {
-  const counts = {}
+function indexViolations(results, cwd) {
+  const index = {}
 
   for (const result of results) {
-    const rel = path.relative(cwd, result.filePath).split(path.sep).join('/')
-    if (!isCounted(rel)) continue
+    const file = path.relative(cwd, result.filePath).split(path.sep).join('/')
+    if (!isCounted(file)) continue
 
     for (const message of result.messages) {
-      const key = `${rel}\u0000${message.ruleId || '(parse error)'}`
-      counts[key] = (counts[key] || 0) + 1
+      const rule = message.ruleId || '(parse error)'
+      const key = [file, rule, message.message].join(SEP)
+
+      if (!index[key]) {
+        index[key] = {
+          file,
+          rule,
+          message: message.message,
+          count: 0,
+          locations: [],
+        }
+      }
+
+      index[key].count++
+      index[key].locations.push({line: message.line, column: message.column})
     }
   }
 
-  return counts
+  return index
 }
 
-/** Where a file gained violations of a rule. Worst first. */
-function risenEntries(baseCounts, headCounts) {
-  return Object.keys(headCounts)
+/** Total violations in an index. */
+function totalOf(index) {
+  return Object.values(index).reduce((sum, entry) => sum + entry.count, 0)
+}
+
+/**
+ * The violations this branch adds, worst first.
+ *
+ * Where a file gained N copies of an identical message, the last N locations
+ * are reported: which specific one is new is unknowable, and the ones furthest
+ * down the file are the likeliest.
+ */
+function addedViolations(baseIndex, headIndex) {
+  return Object.keys(headIndex)
     .map((key) => {
-      const [file, rule] = key.split('\u0000')
-      return {file, rule, by: headCounts[key] - (baseCounts[key] || 0)}
+      const head = headIndex[key]
+      const wasThere = baseIndex[key] ? baseIndex[key].count : 0
+      const by = head.count - wasThere
+
+      return {...head, by, locations: head.locations.slice(-Math.max(by, 0))}
     })
     .filter((entry) => entry.by > 0)
     .sort((a, b) => b.by - a.by || a.file.localeCompare(b.file))
 }
 
-/** Total across a counts map. */
-function totalOf(counts) {
-  return Object.values(counts).reduce((sum, n) => sum + n, 0)
+/** One line per location, in the shape an editor can jump to. */
+function formatAdded(added) {
+  const lines = []
+
+  for (const entry of added) {
+    for (const where of entry.locations) {
+      lines.push(
+        `  ${entry.file}:${where.line}:${where.column}  ${entry.rule}  ${entry.message}`,
+      )
+    }
+  }
+
+  return lines
 }
 
 /**
  * Decide the outcome. Pure, so the tests can cover it without running ESLint.
  *
- * Any file that gains violations fails the run, even when the total falls.
- * Comparing only totals would let a branch that clears three hundred problems
- * introduce new ones for free, which is the behaviour this is meant to stop.
+ * Added violations fail the run even when the total falls. Comparing totals
+ * alone would let a branch that clears three hundred problems introduce new
+ * ones for free, which is the behaviour this is meant to stop.
  */
-function evaluate({base, head, risen = []}) {
-  if (risen.length) {
+function evaluate({base, head, added = []}) {
+  if (added.length) {
     const headline =
       head > base
-        ? `The total rose from ${base} to ${head} (+${head - base}).`
-        : `The total fell from ${base} to ${head}, but these gained violations:`
+        ? `The total rose from ${base} to ${head} (+${head - base}). This branch adds:`
+        : `The total fell from ${base} to ${head}, but this branch adds:`
 
-    const shown = risen.slice(0, 20)
+    const lines = formatAdded(added)
+    const shown = lines.slice(0, MAX_REPORTED)
     const rest =
-      risen.length > shown.length
-        ? `\n  ...and ${risen.length - shown.length} more`
+      lines.length > shown.length
+        ? `\n  ...and ${lines.length - shown.length} more`
         : ''
 
     return {
       ok: false,
       message:
-        `${headline}\n` +
-        shown.map((r) => `  +${r.by}  ${r.rule}  ${r.file}`).join('\n') +
-        rest +
-        '\nFix what this branch added, or say in the pull request why the rise ' +
-        'is intended. A moved file counts as new, so a rename shows up here.',
+        `${headline}\n${shown.join('\n')}${rest}\n\n` +
+        'Fix these, or say in the pull request why they are intended. ' +
+        'A moved file counts as new, so a rename shows up here.',
     }
   }
 
@@ -115,7 +155,7 @@ function evaluate({base, head, risen = []}) {
   return {ok: true, message: `ESLint problems unchanged at ${base}.`}
 }
 
-/** Lint one tree and return its totals. `configFile` is the head's config. */
+/** Lint one tree and index it. `configFile` is the head's config. */
 async function lintTree(dir, configFile) {
   const {ESLint} = require('eslint')
 
@@ -130,7 +170,7 @@ async function lintTree(dir, configFile) {
     ignorePath: path.join(dir, '.gitignore'),
   }).lintFiles(LINT_TARGETS)
 
-  return countByFileRule(results, dir)
+  return indexViolations(results, dir)
 }
 
 async function main() {
@@ -151,7 +191,7 @@ async function main() {
   const outcome = evaluate({
     base: totalOf(base),
     head: totalOf(head),
-    risen: risenEntries(base, head),
+    added: addedViolations(base, head),
   })
 
   console.log(outcome.message)
@@ -166,9 +206,10 @@ if (require.main === module) {
 }
 
 module.exports = {
-  countByFileRule,
-  totalOf,
+  addedViolations,
   evaluate,
+  formatAdded,
+  indexViolations,
   isCounted,
-  risenEntries,
+  totalOf,
 }
