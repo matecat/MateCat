@@ -288,7 +288,7 @@ describe('SegmentStore', () => {
       expect(() => SegmentStore.setStatus('999', '1', 'NEW')).not.toThrow()
     })
 
-    test('SET_SEGMENT_DISABLED adds and updates translation_disabled metadata', () => {
+    test('SET_SEGMENT_DISABLED adds and removes translation_disabled metadata', () => {
       dispatch({
         actionType: SegmentConstants.SET_SEGMENT_DISABLED,
         id: '1',
@@ -297,15 +297,19 @@ describe('SegmentStore', () => {
       let meta = SegmentStore.getSegmentByIdToJS('1').metadata
       expect(meta[0]).toEqual({
         meta_key: 'translation_disabled',
-        meta_value: '1',
+        meta_value: true,
       })
+      // Enabling removes the entry, the same way the server deletes the row, so that
+      // SegmentUtils.isReadonlySegment stops matching it
       dispatch({
         actionType: SegmentConstants.SET_SEGMENT_DISABLED,
         id: '1',
         disabled: false,
       })
       meta = SegmentStore.getSegmentByIdToJS('1').metadata
-      expect(meta[0].meta_value).toBe('0')
+      expect(
+        meta.some(({meta_key}) => meta_key === 'translation_disabled'),
+      ).toBe(false)
     })
 
     test('SET_SEGMENT_HEADER updates suggestion match', () => {

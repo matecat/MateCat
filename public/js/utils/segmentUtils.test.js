@@ -393,6 +393,24 @@ test('isReadonlySegment is true when the segment itself is readonly or translati
   expect(SegmentUtils.isReadonlySegment({readonly: false})).toBeFalsy()
 })
 
+test('isReadonlySegment relies on the translation_disabled entry being removed, not zeroed', () => {
+  global.config.project_completion_feature_enabled = false
+
+  // What the store must produce after a segment_enabled socket message
+  expect(
+    SegmentUtils.isReadonlySegment({readonly: false, metadata: []}),
+  ).toBeFalsy()
+
+  // Why it cannot just write a falsy value instead: meta_value is tested for
+  // truthiness, and '0' is a truthy string
+  expect(
+    SegmentUtils.isReadonlySegment({
+      readonly: false,
+      metadata: [{meta_key: 'translation_disabled', meta_value: '0'}],
+    }),
+  ).toBe(true)
+})
+
 test('getRelativeTransUnitCharactersCounter sums characters across the same translation unit', () => {
   SegmentStore.getSegmentByIdToJS.mockReturnValue({internal_id: 'u1'})
   SegmentStore.getAllSegments.mockReturnValue([

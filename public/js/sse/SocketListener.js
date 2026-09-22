@@ -70,8 +70,8 @@ const SocketListener = ({isAuthenticated, userId}) => {
     segment_enabled: (data) => {
       SegmentActions.updateSegmentDisabledState(data.id_segment, false)
       CatToolActions.addNotification({
-        title: 'Segment enabled',
-        text: 'A segment has been re-enabled by the project owner and can be translated again.',
+        title: 'Segment translation enabled',
+        text: 'The project owner has re-enabled editing for one or more segments. They are no longer read-only and can be edited again.',
         type: 'info',
         uid: 'translation_enabled',
         timer: 15000,
