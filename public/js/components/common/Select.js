@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  
-} from 'react'
+import React, {useState, useRef, useEffect, useCallback} from 'react'
 import PropTypes from 'prop-types'
 
 import {Dropdown} from './Dropdown'
@@ -113,18 +107,42 @@ export const Select = ({
       wrapperRef.current &&
       dropDownRef.current
     ) {
-      const {getListRef, setListMaxHeight} = dropDownRef.current
-      const listNode = getListRef()
+      const {setListMaxHeight} = dropDownRef.current
       const wrapperNode = wrapperRef.current
-      const listTopPosition =
-        listNode.getBoundingClientRect().top -
-        wrapperNode.getBoundingClientRect().top
+
+      if (isPortalDropdown) {
+        const wrapperRect = wrapperNode.getBoundingClientRect()
+        const referenceRect = offsetParent
+          ? offsetParent.getBoundingClientRect()
+          : {top: 0, bottom: window.innerHeight}
+
+        const availableHeightBelow =
+          referenceRect.bottom - wrapperRect.bottom - 16 // 16 = margins
+        if (availableHeightBelow > maxHeightDroplist) {
+          setListMaxHeight(maxHeightDroplist)
+        } else {
+          if (checkSpaceToReverse) {
+            setDropdownReversed(true)
+          }
+          const availableHeightAbove =
+            wrapperRect.top -
+            referenceRect.top +
+            (label ? 32 : 0) -
+            32 -
+            (showSearchBar ? 48 : 0) // 32 = margins; 32 = label height; 48 = searchBar height
+          setListMaxHeight(
+            Math.max(0, Math.min(availableHeightAbove, maxHeightDroplist)),
+          )
+        }
+        return
+      }
+
+      const listTopPosition = wrapperNode.getBoundingClientRect().height
 
       const wrapperTopPosition = wrapperNode.offsetTop
       const offsetParentElement = offsetParent
         ? offsetParent
         : (wrapperNode.offsetParent ?? document.body)
-      //console.log('Select offsetParent:', offsetParentElement);
       const parentHeight = offsetParentElement.getBoundingClientRect().height
       const parentScrollTop =
         offsetParentElement === document.body
@@ -167,18 +185,33 @@ export const Select = ({
   ])
 
   useEffect(() => {
-    if (!open || !isPortalDropdown) return
+    if (!isDropdownVisible || !isPortalDropdown) return
 
     let rafId
 
     const updatePosition = () => {
       const rect = wrapperRef.current?.getBoundingClientRect()
+      const listNode = dropDownRef.current?.getListRef()
 
-      if (rect && wrapperDropDownRef.current) {
+      if (rect && wrapperDropDownRef.current && listNode) {
         const x = rect.x + window.scrollX
         const y = rect.y + window.scrollY
 
-        wrapperDropDownRef.current.style.transform = `translate(${!isDropdownReversed ? x : x}px,${!isDropdownReversed ? y + rect.height : y}px)`
+        const customDropdownNode =
+          wrapperDropDownRef.current.querySelector('.custom-dropdown')
+        const reversedGap = customDropdownNode
+          ? parseFloat(getComputedStyle(customDropdownNode).marginBottom) || 0
+          : 0
+        const contentHeight = customDropdownNode
+          ? listNode.getBoundingClientRect().bottom -
+            customDropdownNode.getBoundingClientRect().top
+          : listNode.getBoundingClientRect().height
+        const dropdownHeight =
+          contentHeight + (isDropdownReversed ? reversedGap : 0)
+
+        wrapperDropDownRef.current.style.transform = `translate(${x}px,${
+          !isDropdownReversed ? y + rect.height : y - dropdownHeight
+        }px)`
         wrapperDropDownRef.current.style.width = `${rect.width}px`
       }
     }
@@ -196,9 +229,16 @@ export const Select = ({
     window.addEventListener('scroll', handleScroll, true)
     window.addEventListener('resize', handleScroll)
 
+    const resizeObserver = new ResizeObserver(updatePosition)
+    const listNode = dropDownRef.current?.getListRef()
+    if (listNode) {
+      resizeObserver.observe(listNode)
+    }
+
     return () => {
       window.removeEventListener('scroll', handleScroll, true)
       window.removeEventListener('resize', handleScroll)
+      resizeObserver.disconnect()
     }
   }, [isDropdownVisible, isPortalDropdown, isDropdownReversed])
 

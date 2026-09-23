@@ -736,15 +736,28 @@
   }
 
   .dropdown__search-bar {
-    border-bottom: 1px colors.$grey200 solid;
-    margin-bottom: 1px;
+    height: 34px;
+    margin: 0 12px 12px;
+
+    input:hover,
+    input:focus {
+      background-color: colors.$white !important;
+      border: 1px solid colors.$grey200 !important;
+      outline: unset !important;
+    }
   }
 
   .dropdown__search-bar-input {
     width: 100%;
-    padding: 8px 8px;
-    background-color: unset;
-    outline: none;
+    padding: 6px 8px;
+    background-color: colors.$white;
     font-size: variables.$font-size-xsmall;
+    border-radius: variables.$border-radius-default;
+    border: 1px solid colors.$grey200 !important;
+  }
+
+  .custom-dropdown {
+    margin-top: 0;
+    padding-top: 12px;
   }
 }
