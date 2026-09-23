@@ -2,15 +2,22 @@ import React from 'react'
 import {fireEvent, render, screen} from '@testing-library/react'
 import {Select} from './Select'
 
+// Controlled by individual tests to drive the portal dropdown's max-height
+// and positioning effects in Select.js.
+let mockListRect = {top: 0, height: 0, bottom: 0}
+let mockShowCustomDropdownWrapper = false
+let mockCustomDropdownMarginBottom = '0px'
+const mockSetListMaxHeight = jest.fn()
+
 jest.mock('./Dropdown', () => {
   const {forwardRef, useImperativeHandle} = require('react')
   return {
     Dropdown: forwardRef(({options, onSelect}, ref) => {
       useImperativeHandle(ref, () => ({
-        getListRef: () => ({getBoundingClientRect: () => ({top: 0, height: 0})}),
-        setListMaxHeight: jest.fn(),
+        getListRef: () => ({getBoundingClientRect: () => mockListRect}),
+        setListMaxHeight: mockSetListMaxHeight,
       }))
-      return (
+      const content = (
         <div data-testid="dropdown">
           {options?.map((opt) => (
             <button
@@ -22,6 +29,18 @@ jest.mock('./Dropdown', () => {
             </button>
           ))}
         </div>
+      )
+      // Mirrors Dropdown's real `.custom-dropdown` wrapper, which Select.js
+      // queries for to account for its margin-bottom when reversed.
+      return mockShowCustomDropdownWrapper ? (
+        <div
+          className="custom-dropdown"
+          style={{marginBottom: mockCustomDropdownMarginBottom}}
+        >
+          {content}
+        </div>
+      ) : (
+        content
       )
     }),
   }
@@ -49,13 +68,7 @@ const OPTIONS = [
 ]
 
 const renderSelect = (props = {}) =>
-  render(
-    <Select
-      name="test-select"
-      options={OPTIONS}
-      {...props}
-    />,
-  )
+  render(<Select name="test-select" options={OPTIONS} {...props} />)
 
 describe('Select', () => {
   describe('rendering', () => {
@@ -120,7 +133,9 @@ describe('Select', () => {
   describe('CSS classes', () => {
     test('has select--is-placeholder when no activeOption', () => {
       const {container} = renderSelect()
-      expect(container.querySelector('.select--is-placeholder')).toBeInTheDocument()
+      expect(
+        container.querySelector('.select--is-placeholder'),
+      ).toBeInTheDocument()
     })
 
     test('does not have select--is-placeholder when activeOption is set', () => {
@@ -132,7 +147,9 @@ describe('Select', () => {
 
     test('has select--is-disabled when isDisabled is true', () => {
       const {container} = renderSelect({isDisabled: true})
-      expect(container.querySelector('.select--is-disabled')).toBeInTheDocument()
+      expect(
+        container.querySelector('.select--is-disabled'),
+      ).toBeInTheDocument()
     })
 
     test('has select--is-invalid when showValidation=true and isValid=false', () => {
@@ -149,7 +166,9 @@ describe('Select', () => {
 
     test('has select--is-multiple when multipleSelect is not "off"', () => {
       const {container} = renderSelect({multipleSelect: 'dropdown'})
-      expect(container.querySelector('.select--is-multiple')).toBeInTheDocument()
+      expect(
+        container.querySelector('.select--is-multiple'),
+      ).toBeInTheDocument()
     })
 
     test('has select--is-focused when dropdown is open', () => {
@@ -245,7 +264,11 @@ describe('Select', () => {
       const {container, rerender} = renderSelect({activeOption: OPTIONS[0]})
       expect(container.querySelector('input[type="text"]').value).toBe('a')
       rerender(
-        <Select name="test-select" options={OPTIONS} activeOption={OPTIONS[2]} />,
+        <Select
+          name="test-select"
+          options={OPTIONS}
+          activeOption={OPTIONS[2]}
+        />,
       )
       expect(container.querySelector('input[type="text"]').value).toBe('c')
     })
@@ -289,6 +312,246 @@ describe('Select', () => {
       })
       fireEvent.click(container.querySelector('.icon-reset'))
       expect(screen.queryByTestId('dropdown')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('portal dropdown (isPortalDropdown)', () => {
+    let elementRects
+    let resizeObserverInstances
+
+    beforeEach(() => {
+      elementRects = {}
+      resizeObserverInstances = []
+      mockListRect = {top: 0, height: 0, bottom: 0}
+      mockShowCustomDropdownWrapper = false
+      mockCustomDropdownMarginBottom = '0px'
+      mockSetListMaxHeight.mockClear()
+
+      global.ResizeObserver = jest.fn().mockImplementation(() => {
+        const instance = {
+          observe: jest.fn(),
+          unobserve: jest.fn(),
+          disconnect: jest.fn(),
+        }
+        resizeObserverInstances.push(instance)
+        return instance
+      })
+
+      // wrapperRef, and optionally the real `.custom-dropdown` node rendered
+      // by the mocked Dropdown, are real DOM nodes in jsdom (unlike the
+      // fully-mocked list node) — keyed by class so each test controls just
+      // the rects it cares about.
+      jest
+        .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+        .mockImplementation(function () {
+          for (const className of Object.keys(elementRects)) {
+            if (this.classList.contains(className)) {
+              return elementRects[className]
+            }
+          }
+          return {top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0}
+        })
+    })
+
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    describe('max-height calculation', () => {
+      test('uses maxHeightDroplist when there is enough space below the wrapper', () => {
+        elementRects['select-with-label__wrapper'] = {
+          top: 50,
+          bottom: 100,
+        }
+        const {container} = renderSelect({
+          isPortalDropdown: true,
+          maxHeightDroplist: 128,
+        })
+        fireEvent.click(container.querySelector('.select'))
+
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(128)
+        expect(
+          container.querySelector('.select__dropdown--is-reversed'),
+        ).not.toBeInTheDocument()
+      })
+
+      test('reverses and clamps maxHeight when there is not enough space below the wrapper', () => {
+        elementRects['select-with-label__wrapper'] = {
+          top: 700,
+          bottom: 760,
+        }
+        const {container} = renderSelect({
+          isPortalDropdown: true,
+          maxHeightDroplist: 128,
+        })
+        fireEvent.click(container.querySelector('.select'))
+
+        expect(
+          container.querySelector('.select__dropdown--is-reversed'),
+        ).toBeInTheDocument()
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(128)
+      })
+
+      test('does not reverse when checkSpaceToReverse is false, but still clamps maxHeight', () => {
+        elementRects['select-with-label__wrapper'] = {
+          top: 700,
+          bottom: 760,
+        }
+        const {container} = renderSelect({
+          isPortalDropdown: true,
+          maxHeightDroplist: 128,
+          checkSpaceToReverse: false,
+        })
+        fireEvent.click(container.querySelector('.select'))
+
+        expect(
+          container.querySelector('.select__dropdown--is-reversed'),
+        ).not.toBeInTheDocument()
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(128)
+      })
+
+      test("uses offsetParent's rect instead of the viewport when provided", () => {
+        elementRects['select-with-label__wrapper'] = {
+          top: 380,
+          bottom: 390,
+        }
+        const offsetParent = {
+          getBoundingClientRect: () => ({top: 200, bottom: 400}),
+        }
+        const {container} = renderSelect({
+          isPortalDropdown: true,
+          maxHeightDroplist: 128,
+          offsetParent,
+        })
+        fireEvent.click(container.querySelector('.select'))
+
+        expect(
+          container.querySelector('.select__dropdown--is-reversed'),
+        ).toBeInTheDocument()
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(128)
+      })
+
+      test('reduces the reversed-clamp height by label and search-bar heights', () => {
+        elementRects['select-with-label__wrapper'] = {
+          top: 700,
+          bottom: 760,
+        }
+        const {container} = renderSelect({
+          isPortalDropdown: true,
+          maxHeightDroplist: 1000,
+          label: 'My label',
+          showSearchBar: true,
+        })
+        fireEvent.click(container.querySelector('.select'))
+
+        // availableHeightAbove = 700 - 0 + 32 (label) - 32 - 48 (searchBar) = 652
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(652)
+      })
+    })
+
+    describe('positioning', () => {
+      test('translates the portal wrapper below the trigger when not reversed', () => {
+        elementRects['select-with-label__wrapper'] = {
+          x: 10,
+          y: 20,
+          width: 200,
+          height: 50,
+          top: 20,
+          bottom: 70,
+        }
+        mockListRect = {height: 150, bottom: 300, top: 150}
+
+        const {container} = renderSelect({isPortalDropdown: true})
+        fireEvent.click(container.querySelector('.select'))
+
+        const wrapperDropdown = container.querySelector(
+          '.select__dropdown-wrapper',
+        )
+        expect(wrapperDropdown).toHaveStyle({
+          transform: 'translate(10px,70px)',
+          width: '200px',
+        })
+      })
+
+      test('translates the portal wrapper above the trigger, offset by content height, when reversed', () => {
+        elementRects['select-with-label__wrapper'] = {
+          x: 10,
+          y: 700,
+          width: 200,
+          height: 60,
+          top: 700,
+          bottom: 760,
+        }
+        mockListRect = {height: 150, bottom: 850, top: 700}
+
+        const {container} = renderSelect({isPortalDropdown: true})
+        fireEvent.click(container.querySelector('.select'))
+
+        const wrapperDropdown = container.querySelector(
+          '.select__dropdown-wrapper',
+        )
+        // reversed (insufficient space below); dropdownHeight = 150 (no
+        // custom-dropdown wrapper, so no extra gap) -> y = 700 - 150
+        expect(wrapperDropdown).toHaveStyle({
+          transform: 'translate(10px,550px)',
+        })
+      })
+
+      test("adds the custom-dropdown wrapper's margin-bottom to the offset when reversed", () => {
+        mockShowCustomDropdownWrapper = true
+        mockCustomDropdownMarginBottom = '10px'
+        elementRects['select-with-label__wrapper'] = {
+          x: 10,
+          y: 700,
+          width: 200,
+          height: 60,
+          top: 700,
+          bottom: 760,
+        }
+        elementRects['custom-dropdown'] = {top: 500, bottom: 500}
+        mockListRect = {height: 0, bottom: 620, top: 0}
+
+        const {container} = renderSelect({isPortalDropdown: true})
+        fireEvent.click(container.querySelector('.select'))
+
+        const wrapperDropdown = container.querySelector(
+          '.select__dropdown-wrapper',
+        )
+        // contentHeight = listNode.bottom(620) - customDropdownNode.top(500) = 120
+        // reversedGap = marginBottom = 10 (reversed) -> dropdownHeight = 130
+        // y = 700 - 130 = 570
+        expect(wrapperDropdown).toHaveStyle({
+          transform: 'translate(10px,570px)',
+        })
+      })
+
+      test('observes the dropdown list node with a ResizeObserver and disconnects when the dropdown closes', () => {
+        elementRects['select-with-label__wrapper'] = {
+          x: 10,
+          y: 20,
+          width: 200,
+          height: 50,
+          top: 20,
+          bottom: 70,
+        }
+        mockListRect = {height: 150, bottom: 300, top: 150}
+
+        const {container} = renderSelect({isPortalDropdown: true})
+        fireEvent.click(container.querySelector('.select'))
+
+        expect(resizeObserverInstances).toHaveLength(1)
+        expect(resizeObserverInstances[0].observe).toHaveBeenCalled()
+
+        fireEvent.click(container.querySelector('.select'))
+        expect(resizeObserverInstances[0].disconnect).toHaveBeenCalled()
+      })
+
+      test('does not construct a ResizeObserver when isPortalDropdown is false', () => {
+        const {container} = renderSelect()
+        fireEvent.click(container.querySelector('.select'))
+
+        expect(resizeObserverInstances).toHaveLength(0)
+      })
     })
   })
 })
