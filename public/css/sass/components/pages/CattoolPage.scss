@@ -95,7 +95,15 @@ body #outer {
 }
 
 body.cattool {
+  height: 100vh;
+  overflow-y: hidden !important;
+  padding: unset;
   background-color: colors.$grey50;
+}
+
+body.cattool .page-content {
+  display: flex;
+  flex-direction: column;
 }
 
 body.cattool header {
