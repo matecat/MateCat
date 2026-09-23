@@ -92,9 +92,10 @@ describe('ReviewExtendedTranslationIssuesSideButton', () => {
     expect(container.querySelector('.revise-button')).not.toHaveClass(
       'no-object',
     )
-    expect(
-      container.querySelector('.revise-button'),
-    ).toHaveAttribute('title', expect.stringContaining('Show issues'))
+    expect(container.querySelector('.revise-button')).toHaveAttribute(
+      'title',
+      expect.stringContaining('Show issues'),
+    )
   })
 
   test('sums issue counts across multiple versions', () => {
@@ -124,26 +125,24 @@ describe('ReviewExtendedTranslationIssuesSideButton', () => {
   })
 
   test('stays visible with no issues while its panel is open', () => {
-    const {container} = render(
+    render(
       <ReviewExtendedTranslationIssuesSideButton
         sid="1"
         segment={makeSegment({opened: true})}
         open
       />,
     )
-    expect(container.querySelector('.revise-button')).not.toHaveClass(
-      'no-object',
-    )
+    expect(screen.getByTitle('Add issues')).not.toHaveClass('no-object')
   })
 
   test('is hidden with no issues when its panel is open on a closed segment', () => {
-    const {container} = render(
+    render(
       <ReviewExtendedTranslationIssuesSideButton
         sid="1"
         segment={makeSegment({opened: false})}
         open
       />,
     )
-    expect(container.querySelector('.revise-button')).toHaveClass('no-object')
+    expect(screen.getByTitle('Add issues')).toHaveClass('no-object')
   })
 })

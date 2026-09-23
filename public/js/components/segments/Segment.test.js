@@ -1,5 +1,5 @@
 import React from 'react'
-import {render} from '@testing-library/react'
+import {render, screen} from '@testing-library/react'
 
 const mockIsReadonlySegment = jest.fn()
 
@@ -128,8 +128,9 @@ jest.mock('./SegmentCommentsContainer', () => () => null)
 // Captures the props it receives so openRevisionPanel's effect on selectedTextObj
 // can be verified without asserting on ReviewExtendedPanel's own internals.
 const mockReviewExtendedPanel = jest.fn(() => null)
-jest.mock('../review_extended/ReviewExtendedPanel', () => (props) =>
-  mockReviewExtendedPanel(props),
+jest.mock(
+  '../review_extended/ReviewExtendedPanel',
+  () => (props) => mockReviewExtendedPanel(props),
 )
 jest.mock('../review/TranslationIssuesSideButton', () => () => (
   <div data-testid="translation-issues-side-button" />
@@ -341,13 +342,15 @@ describe('Segment side buttons', () => {
       split_group: undefined,
     })
 
-    const {getByTestId} = renderSegment(segment, {
+    renderSegment(segment, {
       isReview: true,
       sideOpen: true,
     })
 
-    expect(getByTestId('segments-comments-icon')).toBeTruthy()
-    expect(getByTestId('translation-issues-side-button')).toBeTruthy()
+    expect(screen.getByTestId('segments-comments-icon')).toBeInTheDocument()
+    expect(
+      screen.getByTestId('translation-issues-side-button'),
+    ).toBeInTheDocument()
   })
 
   test('keeps the issues button while the issues panel is open', () => {
@@ -357,12 +360,14 @@ describe('Segment side buttons', () => {
       split_group: undefined,
     })
 
-    const {getByTestId} = renderSegment(segment, {
+    renderSegment(segment, {
       isReview: true,
       sideOpen: true,
     })
 
-    expect(getByTestId('translation-issues-side-button')).toBeTruthy()
-    expect(getByTestId('segments-comments-icon')).toBeTruthy()
+    expect(
+      screen.getByTestId('translation-issues-side-button'),
+    ).toBeInTheDocument()
+    expect(screen.getByTestId('segments-comments-icon')).toBeInTheDocument()
   })
 })

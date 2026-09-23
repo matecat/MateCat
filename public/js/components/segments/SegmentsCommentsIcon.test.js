@@ -155,15 +155,11 @@ describe('SegmentsCommentsIcon', () => {
       {...baseSegment, opened: true, openComments: true},
       {total: 0, active: 0},
     )
-    expect(document.querySelector('.comment-icon-btn')).toHaveClass(
-      'panel-open',
-    )
+    expect(screen.getByTitle(/Add comment/)).toHaveClass('panel-open')
   })
 
   test('is shown only on hover while the comments panel is closed', () => {
     renderIcon(baseSegment, {total: 0, active: 0})
-    expect(document.querySelector('.comment-icon-btn')).not.toHaveClass(
-      'panel-open',
-    )
+    expect(screen.getByTitle(/Add comment/)).not.toHaveClass('panel-open')
   })
 })
