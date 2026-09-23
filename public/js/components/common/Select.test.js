@@ -315,6 +315,18 @@ describe('Select', () => {
     })
   })
 
+  // Select's trigger and its portal dropdown wrapper carry no accessible
+  // role or testid, so these lookups can only be done by selector. Keeping
+  // the rule exemption in one place instead of scattered across the tests.
+  /* eslint-disable testing-library/no-container, testing-library/no-node-access */
+  const clickTrigger = (container) =>
+    fireEvent.click(container.querySelector('.select'))
+  const isDropdownReversed = (container) =>
+    !!container.querySelector('.select__dropdown--is-reversed')
+  const getDropdownWrapper = (container) =>
+    container.querySelector('.select__dropdown-wrapper')
+  /* eslint-enable testing-library/no-container, testing-library/no-node-access */
+
   describe('portal dropdown (isPortalDropdown)', () => {
     let elementRects
     let resizeObserverInstances
@@ -367,12 +379,10 @@ describe('Select', () => {
           isPortalDropdown: true,
           maxHeightDroplist: 128,
         })
-        fireEvent.click(container.querySelector('.select'))
+        clickTrigger(container)
 
         expect(mockSetListMaxHeight).toHaveBeenCalledWith(128)
-        expect(
-          container.querySelector('.select__dropdown--is-reversed'),
-        ).not.toBeInTheDocument()
+        expect(isDropdownReversed(container)).toBe(false)
       })
 
       test('reverses and clamps maxHeight when there is not enough space below the wrapper', () => {
@@ -384,11 +394,9 @@ describe('Select', () => {
           isPortalDropdown: true,
           maxHeightDroplist: 128,
         })
-        fireEvent.click(container.querySelector('.select'))
+        clickTrigger(container)
 
-        expect(
-          container.querySelector('.select__dropdown--is-reversed'),
-        ).toBeInTheDocument()
+        expect(isDropdownReversed(container)).toBe(true)
         expect(mockSetListMaxHeight).toHaveBeenCalledWith(128)
       })
 
@@ -402,11 +410,9 @@ describe('Select', () => {
           maxHeightDroplist: 128,
           checkSpaceToReverse: false,
         })
-        fireEvent.click(container.querySelector('.select'))
+        clickTrigger(container)
 
-        expect(
-          container.querySelector('.select__dropdown--is-reversed'),
-        ).not.toBeInTheDocument()
+        expect(isDropdownReversed(container)).toBe(false)
         expect(mockSetListMaxHeight).toHaveBeenCalledWith(128)
       })
 
@@ -423,11 +429,9 @@ describe('Select', () => {
           maxHeightDroplist: 128,
           offsetParent,
         })
-        fireEvent.click(container.querySelector('.select'))
+        clickTrigger(container)
 
-        expect(
-          container.querySelector('.select__dropdown--is-reversed'),
-        ).toBeInTheDocument()
+        expect(isDropdownReversed(container)).toBe(true)
         expect(mockSetListMaxHeight).toHaveBeenCalledWith(128)
       })
 
@@ -442,7 +446,7 @@ describe('Select', () => {
           label: 'My label',
           showSearchBar: true,
         })
-        fireEvent.click(container.querySelector('.select'))
+        clickTrigger(container)
 
         // availableHeightAbove = 700 - 0 + 32 (label) - 32 - 48 (searchBar) = 652
         expect(mockSetListMaxHeight).toHaveBeenCalledWith(652)
@@ -462,12 +466,9 @@ describe('Select', () => {
         mockListRect = {height: 150, bottom: 300, top: 150}
 
         const {container} = renderSelect({isPortalDropdown: true})
-        fireEvent.click(container.querySelector('.select'))
+        clickTrigger(container)
 
-        const wrapperDropdown = container.querySelector(
-          '.select__dropdown-wrapper',
-        )
-        expect(wrapperDropdown).toHaveStyle({
+        expect(getDropdownWrapper(container)).toHaveStyle({
           transform: 'translate(10px,70px)',
           width: '200px',
         })
@@ -485,14 +486,11 @@ describe('Select', () => {
         mockListRect = {height: 150, bottom: 850, top: 700}
 
         const {container} = renderSelect({isPortalDropdown: true})
-        fireEvent.click(container.querySelector('.select'))
+        clickTrigger(container)
 
-        const wrapperDropdown = container.querySelector(
-          '.select__dropdown-wrapper',
-        )
         // reversed (insufficient space below); dropdownHeight = 150 (no
         // custom-dropdown wrapper, so no extra gap) -> y = 700 - 150
-        expect(wrapperDropdown).toHaveStyle({
+        expect(getDropdownWrapper(container)).toHaveStyle({
           transform: 'translate(10px,550px)',
         })
       })
@@ -512,15 +510,12 @@ describe('Select', () => {
         mockListRect = {height: 0, bottom: 620, top: 0}
 
         const {container} = renderSelect({isPortalDropdown: true})
-        fireEvent.click(container.querySelector('.select'))
+        clickTrigger(container)
 
-        const wrapperDropdown = container.querySelector(
-          '.select__dropdown-wrapper',
-        )
         // contentHeight = listNode.bottom(620) - customDropdownNode.top(500) = 120
         // reversedGap = marginBottom = 10 (reversed) -> dropdownHeight = 130
         // y = 700 - 130 = 570
-        expect(wrapperDropdown).toHaveStyle({
+        expect(getDropdownWrapper(container)).toHaveStyle({
           transform: 'translate(10px,570px)',
         })
       })
@@ -537,18 +532,18 @@ describe('Select', () => {
         mockListRect = {height: 150, bottom: 300, top: 150}
 
         const {container} = renderSelect({isPortalDropdown: true})
-        fireEvent.click(container.querySelector('.select'))
+        clickTrigger(container)
 
         expect(resizeObserverInstances).toHaveLength(1)
         expect(resizeObserverInstances[0].observe).toHaveBeenCalled()
 
-        fireEvent.click(container.querySelector('.select'))
+        clickTrigger(container)
         expect(resizeObserverInstances[0].disconnect).toHaveBeenCalled()
       })
 
       test('does not construct a ResizeObserver when isPortalDropdown is false', () => {
         const {container} = renderSelect()
-        fireEvent.click(container.querySelector('.select'))
+        clickTrigger(container)
 
         expect(resizeObserverInstances).toHaveLength(0)
       })
