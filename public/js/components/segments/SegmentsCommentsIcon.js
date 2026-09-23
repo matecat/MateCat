@@ -52,6 +52,8 @@ const SegmentsCommentsIcon = () => {
   if (!isFirstOfSplitGroup || !comments) return null
 
   const rootClasses = ['comment-icon-btn', 'txt']
+  // Keep the icon visible, not only on hover, while its panel is open.
+  if (segment.openComments && segment.opened) rootClasses.push('panel-open')
   let badge
   if (comments.total === 0 || (comments.total > 0 && comments.active === 0)) {
     badge = <div className="badge-icon badge-blue">+</div>
