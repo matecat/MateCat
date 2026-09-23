@@ -1,4 +1,4 @@
-@use "../../tokens/colors";
+@use '../../tokens/colors';
 
 .files-menu-button {
   color: colors.$white !important;
@@ -6,7 +6,7 @@
   &:hover {
     text-decoration: none !important;
   }
-  span[class*="filename-label"] span[class*="name"] {
+  span[class*='filename-label'] span[class*='name'] {
     max-width: 200px;
   }
 }
@@ -34,11 +34,19 @@
       align-items: center;
       gap: 10px;
     }
-    .file-name {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 350px;
-    }
+  }
+}
+
+.filesmenu-container-filename {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+
+  .file-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 350px;
+    text-align: left;
   }
 }
