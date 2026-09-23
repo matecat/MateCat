@@ -60,16 +60,6 @@ let SegmentFilterUtils = {
     }
   },
 
-  initEvents: () => {
-    if (SegmentFilterUtils.enabled()) {
-      document.addEventListener('segmentsAdded', function () {
-        if (SegmentFilterUtils.filtering()) {
-          SegmentFilterUtils.tryToFocusLastSegment()
-        }
-      })
-    }
-  },
-
   open: false,
   filteringSegments: false,
   getLastFilterData: () => {

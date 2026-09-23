@@ -277,56 +277,23 @@ describe('tryToFocusLastSegment', () => {
   })
 })
 
-describe('initEvents', () => {
-  test('does not register a segmentsAdded listener when the filter is disabled', () => {
-    config.segmentFilterEnabled = false
-    const addSpy = jest
-      .spyOn(document, 'addEventListener')
-      .mockImplementation(() => {})
-
-    SegmentFilterUtils.initEvents()
-
-    expect(addSpy).not.toHaveBeenCalled()
-    addSpy.mockRestore()
-  })
-
-  test('focuses the last segment on segmentsAdded when actively filtering', () => {
-    config.segmentFilterEnabled = true
-    const addSpy = jest
-      .spyOn(document, 'addEventListener')
-      .mockImplementation(() => {})
-    const focusSpy = jest
-      .spyOn(SegmentFilterUtils, 'tryToFocusLastSegment')
-      .mockImplementation(() => {})
-
-    SegmentFilterUtils.initEvents()
-    const [, handler] = addSpy.mock.calls[0]
+describe('loading more segments while filtering', () => {
+  // Each infinite-scroll page dispatches segmentsAdded. The view must stay
+  // where the user scrolled, not jump back to the first filtered segment.
+  test('does not scroll back to the last focused segment', () => {
     SegmentFilterUtils.filteringSegments = true
     SegmentFilterUtils.open = true
-    handler()
+    SegmentFilterUtils.setStoredState({lastSegmentId: '10'})
+    SegmentStore.getSegmentByIdToJS.mockReturnValue({
+      sid: '10',
+      original_sid: '10',
+      opened: true,
+    })
 
-    expect(focusSpy).toHaveBeenCalled()
-    addSpy.mockRestore()
-    focusSpy.mockRestore()
-  })
+    document.dispatchEvent(new CustomEvent('segmentsAdded'))
 
-  test('does not focus when not actively filtering', () => {
-    config.segmentFilterEnabled = true
-    const addSpy = jest
-      .spyOn(document, 'addEventListener')
-      .mockImplementation(() => {})
-    const focusSpy = jest
-      .spyOn(SegmentFilterUtils, 'tryToFocusLastSegment')
-      .mockImplementation(() => {})
-
-    SegmentFilterUtils.initEvents()
-    const [, handler] = addSpy.mock.calls[0]
-    SegmentFilterUtils.filteringSegments = false
-    handler()
-
-    expect(focusSpy).not.toHaveBeenCalled()
-    addSpy.mockRestore()
-    focusSpy.mockRestore()
+    expect(SegmentActions.scrollToSegment).not.toHaveBeenCalled()
+    expect(SegmentActions.openSegment).not.toHaveBeenCalled()
   })
 })
 
