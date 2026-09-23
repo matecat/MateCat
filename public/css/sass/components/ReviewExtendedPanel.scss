@@ -65,7 +65,11 @@ input {
   padding-bottom: 3px;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list.issues .re-item-head {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list.issues
+  .re-item-head {
   margin-top: 3px;
   padding-bottom: 5px;
 }
@@ -77,15 +81,27 @@ input {
   }
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-item-box {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .re-item-box {
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: relative;
+  font-size: 14px;
   padding: 5px 5px 5px 7px;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-issue .issue-head {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .re-issue
+  .issue-head {
   max-width: 85%;
   min-width: 30px;
   white-space: nowrap;
@@ -95,18 +111,37 @@ input {
   font-size: variables.$font-size-xsmall;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-issue .issue-head .re-category-issue-head {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .re-issue
+  .issue-head
+  .re-category-issue-head {
   overflow: hidden;
   text-overflow: ellipsis;
   margin-right: 3px;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-issue .issue-activity-icon .icon-buttons {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .re-issue
+  .issue-activity-icon
+  .icon-buttons {
   display: flex;
   gap: 4px;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-error {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .re-error {
   padding: 0 10px;
   height: 100%;
   min-height: 45px;
@@ -116,50 +151,138 @@ input {
   justify-content: space-between;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-add-comment {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .comments-view
+  .re-add-comment {
   padding: 10px;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-add-comment .re-comment-input {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .comments-view
+  .re-add-comment
+  .re-comment-input {
   border-radius: 20px !important;
+  height: 40px;
+  width: 100%;
+  border: 1px solid colors.$grey200;
+  padding: 8px 12px 8px 12px;
+  border-radius: variables.$border-radius-default;
+  font-size: variables.$font-size-small;
+  line-height: 24px;
+  font-weight: 400;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-comment-list .re-comment {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .comments-view
+  .re-comment-list
+  .re-comment {
   background: colors.$white;
   padding: 5px 10px;
   margin-bottom: 0;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-comment-list .re-comment .re-revisor {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .comments-view
+  .re-comment-list
+  .re-comment
+  .re-revisor {
   color: colors.$green800;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-comment-list .re-comment .re-revisor2 {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .comments-view
+  .re-comment-list
+  .re-comment
+  .re-revisor2 {
   color: colors.$purple500;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-comment-list .re-comment .re-translator {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .comments-view
+  .re-comment-list
+  .re-comment
+  .re-translator {
   color: colors.$blue500;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-comment-list .re-comment .re-comment-date {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .comments-view
+  .re-comment-list
+  .re-comment
+  .re-comment-date {
   color: lightslategray;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-comment-list .re-comment .re-selected-text {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .comments-view
+  .re-comment-list
+  .re-comment
+  .re-selected-text {
   color: colors.$black;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-comment-list .re-highlighted {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .comments-view
+  .re-comment-list
+  .re-highlighted {
   padding: 10px;
   border-bottom: 1px solid colors.$grey600;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .comments-view .re-comment-list span.re-selected-text {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .comments-view
+  .re-comment-list
+  span.re-selected-text {
   margin-right: 5px;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-severities-buttons button {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .re-severities-buttons
+  button {
   cursor: pointer;
   font-size: 12px;
   border: 1px solid rgba(34, 36, 38, 0.15);
@@ -171,64 +294,179 @@ input {
   font-weight: bold;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-severities-buttons button:first-child {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .re-severities-buttons
+  button:first-child {
   border-radius: 4px 0 0 4px;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-severities-buttons button:last-child {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .re-severities-buttons
+  button:last-child {
   border-right: 1px solid rgba(34, 36, 38, 0.15);
   border-radius: 0 4px 4px 0;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-severities-buttons button:only-child {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .re-severities-buttons
+  button:only-child {
   border-radius: 3px;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-severities-buttons {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item
+  .re-severities-buttons {
   display: none;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .re-severities-buttons,
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .re-severities-buttons {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item.severity-buttons:hover
+  .re-severities-buttons,
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item.active
+  .re-severities-buttons {
   display: flex;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .re-severities-buttons button,
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .re-severities-buttons button {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item.severity-buttons:hover
+  .re-severities-buttons
+  button,
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item.active
+  .re-severities-buttons
+  button {
   padding: 4px 8px;
   background-color: colors.$grey50;
 }
 
 @media only screen and (max-width: 1450px) {
-  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .re-severities-buttons button,
-  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .re-severities-buttons button {
+  .review-balloon-container
+    .re-wrapper
+    .re-issues-box
+    .re-list
+    .re-item.severity-buttons:hover
+    .re-severities-buttons
+    button,
+  .review-balloon-container
+    .re-wrapper
+    .re-issues-box
+    .re-list
+    .re-item.active
+    .re-severities-buttons
+    button {
     padding: 7px 7px;
   }
 }
 
 @media only screen and (max-width: 1260px) {
-  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .re-severities-buttons button,
-  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .re-severities-buttons button {
+  .review-balloon-container
+    .re-wrapper
+    .re-issues-box
+    .re-list
+    .re-item.severity-buttons:hover
+    .re-severities-buttons
+    button,
+  .review-balloon-container
+    .re-wrapper
+    .re-issues-box
+    .re-list
+    .re-item.active
+    .re-severities-buttons
+    button {
     padding: 7px 5px;
   }
 }
 
 @media only screen and (max-width: 1140px) {
-  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .re-severities-buttons button,
-  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .re-severities-buttons button {
+  .review-balloon-container
+    .re-wrapper
+    .re-issues-box
+    .re-list
+    .re-item.severity-buttons:hover
+    .re-severities-buttons
+    button,
+  .review-balloon-container
+    .re-wrapper
+    .re-issues-box
+    .re-list
+    .re-item.active
+    .re-severities-buttons
+    button {
     padding: 7px 3px;
   }
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .re-severities-buttons button:hover,
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .re-severities-buttons button.active,
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .re-severities-buttons button:hover,
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .re-severities-buttons button.active {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item.severity-buttons:hover
+  .re-severities-buttons
+  button:hover,
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item.severity-buttons:hover
+  .re-severities-buttons
+  button.active,
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item.active
+  .re-severities-buttons
+  button:hover,
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item.active
+  .re-severities-buttons
+  button.active {
   background-color: colors.$grey200;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .error-name,
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .error-name {
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item.severity-buttons:hover
+  .error-name,
+.review-balloon-container
+  .re-wrapper
+  .re-issues-box
+  .re-list
+  .re-item.active
+  .error-name {
   padding-right: 10px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -236,15 +474,35 @@ input {
 }
 
 @media only screen and (max-width: 1260px) {
-  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .error-name,
-  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .error-name {
+  .review-balloon-container
+    .re-wrapper
+    .re-issues-box
+    .re-list
+    .re-item.severity-buttons:hover
+    .error-name,
+  .review-balloon-container
+    .re-wrapper
+    .re-issues-box
+    .re-list
+    .re-item.active
+    .error-name {
     max-width: 55% !important;
   }
 }
 
 @media only screen and (max-width: 1024px) {
-  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.severity-buttons:hover .error-name,
-  .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item.active .error-name {
+  .review-balloon-container
+    .re-wrapper
+    .re-issues-box
+    .re-list
+    .re-item.severity-buttons:hover
+    .error-name,
+  .review-balloon-container
+    .re-wrapper
+    .re-issues-box
+    .re-list
+    .re-item.active
+    .error-name {
     max-width: 53% !important;
   }
 }
@@ -409,7 +667,10 @@ section .translation-issues-button .revise-button {
 
 section:hover .translation-issues-button .revise-button,
 section .translation-issues-button:hover .revise-button,
-section .segment-side-buttons:hover .translation-issues-button .revise-button.no-object {
+section
+  .segment-side-buttons:hover
+  .translation-issues-button
+  .revise-button.no-object {
   visibility: visible !important;
 }
 

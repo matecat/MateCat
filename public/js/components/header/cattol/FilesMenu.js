@@ -93,11 +93,13 @@ export const FilesMenu = ({projectName}) => {
       ...files.map((file) => ({
         label: (
           <>
-              {CommonUtils.getFileIcon(
-                file.file_name.split('.')[file.file_name.split('.').length - 1],
-              )}
+            {CommonUtils.getFileIcon(
+              file.file_name.split('.')[file.file_name.split('.').length - 1],
+            )}
+            <div className="filesmenu-container-filename">
               <span className="file-name">{file.file_name}</span>
-            {currentFile === file.id && <Check size={20} />}
+              {currentFile === file.id && <Check size={20} />}
+            </div>
           </>
         ),
         onClick: () => goToFirstSegment(file),

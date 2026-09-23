@@ -124,6 +124,13 @@
           color: colors.$blue500;
         }
       }
+
+      &:not(.members-filter-item-filter) {
+        > :first-child {
+          display: flex;
+          gap: 5px;
+        }
+      }
     }
   }
 
@@ -148,7 +155,7 @@
       background-color: unset !important;
     }
 
-    div[class*="input-component"] {
+    div[class*='input-component'] {
       width: 100%;
 
       input {
