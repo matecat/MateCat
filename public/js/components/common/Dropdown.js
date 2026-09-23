@@ -369,14 +369,19 @@ export const Dropdown = forwardRef(
               if (!isNoResultsFound && !cancelHandleClick) handleClick(option)
             }}
             onMouseEnter={(e) =>
+              // Measure the row itself, not the child the pointer entered on.
               TEXT_UTILS.isContentTextEllipsis(
                 getElementToEllipsis?.()
                   ? getElementToEllipsis()
-                  : e.target?.firstChild,
+                  : e.currentTarget.firstChild,
               ) &&
               setRowTooltip({
-                label: option.name,
-                top: e.target.offsetTop - listRef?.current.scrollTop,
+                // A name rendered as markup has no string to show; use its text.
+                label:
+                  typeof option.name === 'string'
+                    ? option.name
+                    : e.currentTarget.textContent,
+                top: e.currentTarget.offsetTop - listRef?.current.scrollTop,
               })
             }
             onMouseLeave={() => setRowTooltip()}
