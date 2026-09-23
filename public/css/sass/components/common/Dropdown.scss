@@ -149,7 +149,9 @@
   z-index: 2;
   margin-top: 14px;
 
-  &[aria-label] {
+  // Out-rank the global [aria-label] rule, which sets position: relative and
+  // would put the tooltip in the flow, pushing the list down while it shows.
+  &[aria-label]:not(.react-datepicker__navigation) {
     position: absolute;
 
     &::after,

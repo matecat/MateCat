@@ -111,7 +111,6 @@ const SegmentsFilter = ({active}) => {
   }, [])
 
   useEffect(() => {
-    SegmentFilterUtils.initEvents()
     const segmentFilterData = SegmentFilterUtils.getStoredState()
     if (SegmentFilterUtils.enabled() && segmentFilterData.reactState && segmentFilterData.open) {
       SegmentFilterUtils.openFilter()

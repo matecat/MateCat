@@ -110,6 +110,8 @@ section.muted .segment-side-buttons {
 #header-bars-wrapper .filter-dropdown .custom-dropdown.select__dropdown {
   background-color: colors.$white;
   min-width: 120px;
+  // A selected status shrinks the trigger; the list keeps its longest label whole.
+  width: max-content;
 }
 
 #header-bars-wrapper .filter-dropdown .select__dropdown {

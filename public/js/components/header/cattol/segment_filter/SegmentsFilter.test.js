@@ -6,7 +6,6 @@ import CatToolConstants from '../../../../constants/CatToolConstants'
 import CatToolStore from '../../../../stores/CatToolStore'
 
 jest.mock('./segment_filter', () => ({
-  initEvents: jest.fn(),
   enabled: jest.fn(() => false),
   getStoredState: jest.fn(() => ({})),
   openFilter: jest.fn(),
@@ -87,11 +86,6 @@ test('renders filter UI when active', () => {
   renderFilter()
   expect(document.querySelector('.filter-wrapper')).toBeInTheDocument()
   expect(document.querySelector('.filter-container')).toBeInTheDocument()
-})
-
-test('calls initEvents on mount', () => {
-  renderFilter()
-  expect(SegmentFilterUtils.initEvents).toHaveBeenCalledTimes(1)
 })
 
 test('registers and unregisters store listeners', () => {
