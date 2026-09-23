@@ -579,7 +579,6 @@ const SegmentComponent = ({
 
   const getTranslationIssues = () => {
     if (
-      ((sideOpen && (!segment.opened || !segment.openIssues)) || !sideOpen) &&
       !segment.readonly &&
       (!isSplitted() || (isSplitted() && isFirstOfSplit())) &&
       segment.sid
@@ -775,10 +774,7 @@ const SegmentComponent = ({
         </div>
 
         <div className="segment-side-buttons">
-          {config.comments_enabled &&
-          (!segment.openComments || !segment.opened) ? (
-            <SegmentsCommentsIcon />
-          ) : null}
+          {config.comments_enabled ? <SegmentsCommentsIcon /> : null}
           <SegmentQAIcon sid={segment.sid} />
 
           {isReview && (

@@ -87,7 +87,8 @@ section {
   position: absolute;
   text-align: left;
   width: 31%;
-  left: 102%;
+  // Clear the side buttons (icon plus badge), which stay visible while a panel is open.
+  left: calc(100% + 50px);
   top: 0;
   display: flex;
   flex-direction: column;

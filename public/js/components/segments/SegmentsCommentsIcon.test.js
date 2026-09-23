@@ -78,7 +78,10 @@ describe('SegmentsCommentsIcon', () => {
   test('sets title using shortcut keystrokes', () => {
     renderIcon(baseSegment, {total: 1, active: 1})
     const btn = document.querySelector('.comment-icon-btn')
-    expect(btn).toHaveAttribute('title', expect.stringMatching(/^Add comment \(.+\)$/))
+    expect(btn).toHaveAttribute(
+      'title',
+      expect.stringMatching(/^Add comment \(.+\)$/),
+    )
   })
 
   test('clicking opens segment comment and opens segment when not readonly', () => {
@@ -145,5 +148,22 @@ describe('SegmentsCommentsIcon', () => {
       updateComments(baseSegment.sid)
     })
     expect(screen.getByText('5')).toBeInTheDocument()
+  })
+
+  test('stays visible while the comments panel is open', () => {
+    renderIcon(
+      {...baseSegment, opened: true, openComments: true},
+      {total: 0, active: 0},
+    )
+    expect(document.querySelector('.comment-icon-btn')).toHaveClass(
+      'panel-open',
+    )
+  })
+
+  test('is shown only on hover while the comments panel is closed', () => {
+    renderIcon(baseSegment, {total: 0, active: 0})
+    expect(document.querySelector('.comment-icon-btn')).not.toHaveClass(
+      'panel-open',
+    )
   })
 })

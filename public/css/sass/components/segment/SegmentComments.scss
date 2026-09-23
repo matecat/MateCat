@@ -512,7 +512,8 @@ Close icon ballon - Right panel
   visibility: hidden;
   display: block;
 }
-.comment-icon-btn.has-object {
+.comment-icon-btn.has-object,
+.comment-icon-btn.panel-open {
   visibility: visible;
   display: block;
 }

@@ -121,7 +121,9 @@ jest.mock('./SegmentFooter', () => () => null)
 jest.mock('./SegmentBody', () => (props) => (
   <div data-testid="segment-body" onClick={props.onClick} />
 ))
-jest.mock('./SegmentsCommentsIcon', () => () => null)
+jest.mock('./SegmentsCommentsIcon', () => () => (
+  <div data-testid="segments-comments-icon" />
+))
 jest.mock('./SegmentCommentsContainer', () => () => null)
 // Captures the props it receives so openRevisionPanel's effect on selectedTextObj
 // can be verified without asserting on ReviewExtendedPanel's own internals.
@@ -304,5 +306,63 @@ describe('Segment readonly re-evaluation', () => {
 
     expect(mockIsReadonlySegment).toHaveBeenCalledWith(updatedSegment)
     expect(section.className).not.toContain('readonly')
+  })
+})
+
+// The side panels open beside the buttons, so both buttons stay in place and
+// the other panel can still be reached while one is open.
+describe('Segment side buttons', () => {
+  // An unsplit segment has no split_group; the fixture default marks it split.
+  beforeEach(() => {
+    window.React = React
+    window.config = {
+      id_job: 2,
+      basepath: '/',
+      password: 'test',
+      isReview: true,
+      comments_enabled: true,
+      project_completion_feature_enabled: false,
+      segmentFilterEnabled: false,
+      source_code: 'en-US',
+      target_code: 'it-IT',
+      isSourceRTL: false,
+      isTargetRTL: false,
+      tag_projection_languages: '{}',
+    }
+
+    mockIsReadonlySegment.mockReset()
+    mockIsReadonlySegment.mockReturnValue(false)
+  })
+
+  test('keeps the comments button while the comments panel is open', () => {
+    const segment = makeSegment({
+      opened: true,
+      openComments: true,
+      split_group: undefined,
+    })
+
+    const {getByTestId} = renderSegment(segment, {
+      isReview: true,
+      sideOpen: true,
+    })
+
+    expect(getByTestId('segments-comments-icon')).toBeTruthy()
+    expect(getByTestId('translation-issues-side-button')).toBeTruthy()
+  })
+
+  test('keeps the issues button while the issues panel is open', () => {
+    const segment = makeSegment({
+      opened: true,
+      openIssues: true,
+      split_group: undefined,
+    })
+
+    const {getByTestId} = renderSegment(segment, {
+      isReview: true,
+      sideOpen: true,
+    })
+
+    expect(getByTestId('translation-issues-side-button')).toBeTruthy()
+    expect(getByTestId('segments-comments-icon')).toBeTruthy()
   })
 })
