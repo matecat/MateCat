@@ -647,8 +647,8 @@ class ErrorManagerTest extends AbstractTest
     // ErrObject::$debug is injected with dangerouslySetInnerHTML by
     // public/js/components/segments/SegmentWarnings.js, while $tip is rendered as a JSX child.
     // A tag name written raw in a message is therefore swallowed by the browser, which is how
-    // '<ex>, <bx> and/or <g> total count mismatch' used to reach the user as ', and/or total
-    // count mismatch'. These tests pin the two opposite treatments.
+    // code 1302, once '<ex>, <bx> and/or <g> total count mismatch', reached the user as
+    // ', and/or total count mismatch'. These tests pin the two opposite treatments.
 
     /**
      * @return list<array{int, list<string>}>
@@ -659,8 +659,16 @@ class ErrorManagerTest extends AbstractTest
             [ErrorManager::ERR_UNCLOSED_X_TAG, ['&lt;x']],
             [ErrorManager::ERR_EX_BX_NESTED_IN_G, ['&lt;ex&gt;', '&lt;bx&gt;', '&lt;g&gt;']],
             [ErrorManager::ERR_EX_BX_WRONG_POSITION, ['&lt;ex&gt;', '&lt;bx&gt;']],
-            [ErrorManager::ERR_EX_BX_COUNT_MISMATCH, ['&lt;ex&gt;', '&lt;bx&gt;', '&lt;g&gt;']],
         ];
+    }
+
+    #[Test]
+    public function countMismatchMessageNamesNoTags(): void
+    {
+        $this->assertSame(
+            'Total tag count mismatch',
+            $this->errorManager->getErrorMessage(ErrorManager::ERR_EX_BX_COUNT_MISMATCH)
+        );
     }
 
     /**

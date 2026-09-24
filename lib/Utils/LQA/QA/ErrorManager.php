@@ -137,7 +137,7 @@ class ErrorManager
         1200 => 'Symbol mismatch',
         1300 => 'Found nested &lt;ex&gt; and/or &lt;bx&gt; tag(s) inside a &lt;g&gt; tag',
         1301 => 'Wrong &lt;ex&gt; and/or &lt;bx&gt; placement',
-        1302 => '&lt;ex&gt;, &lt;bx&gt; and/or &lt;g&gt; total count mismatch',
+        1302 => 'Total tag count mismatch',
         2000 => 'Smart count plural forms mismatch',
         2001 => '%smartcount tag count mismatch',
         3000 => 'Characters limit exceeded',
