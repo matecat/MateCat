@@ -63,7 +63,7 @@ const TAB_ITEMS = {
     isLoading: false,
   },
   [TAB.MULTIMATCHES]: {
-    label: 'Cross-language matches',
+    label: 'Reference languages',
     code: 'cl',
     tabClass: 'cross-matches',
     isLoading: false,
@@ -310,7 +310,9 @@ function SegmentFooter() {
     const hasAlternatives = Boolean(
       segment.alternatives && size(segment.alternatives) > 0,
     )
-    const hasMultiMatches = Boolean(multiMatchLangs && multiMatchLangs.primary)
+    const hasMultiMatches = Boolean(
+      multiMatchLangs && (multiMatchLangs.primary || multiMatchLangs.secondary),
+    )
 
     setTabItems((prevState) =>
       prevState.map((item) => ({
