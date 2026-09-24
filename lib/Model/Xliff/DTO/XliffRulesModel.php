@@ -106,6 +106,8 @@ class XliffRulesModel implements JsonSerializable
      */
     public function getMatchingRule(int $versionNumber, string $state = null, string $stateQualifier = null): XliffRuleInterface
     {
+        $noStateRule = null;
+
         // here we must analyze and check only for editor status
         foreach ($this->getRulesForVersion($versionNumber) as $rule) {
             if ($stateQualifier !== null && in_array(strtolower($stateQualifier), $rule->getStates('state-qualifiers'))) {
@@ -115,6 +117,15 @@ class XliffRulesModel implements JsonSerializable
             if ($state !== null && in_array(strtolower($state), $rule->getStates('states'))) {
                 return $rule;
             }
+
+            if ($rule->isNoStateRule()) {
+                $noStateRule = $rule;
+            }
+        }
+
+        // the no-state rule covers the segments without state/state-qualifier and every state not matched above
+        if ($noStateRule !== null) {
+            return $noStateRule;
         }
 
         return new DefaultRule(array_filter([$state, $stateQualifier]), AbstractXliffRule::_ANALYSIS_PRE_TRANSLATED, null, null);
