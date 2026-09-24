@@ -137,6 +137,7 @@ body.analyze {
             }
           }
           .not-complete {
+            display: flex;
           }
 
           .downloadAnalysisReport {
@@ -184,6 +185,7 @@ body.analyze {
           font: variables.$font-style-small;
           .work-hour {
             color: colors.$grey400;
+            text-align: left;
           }
         }
         svg {

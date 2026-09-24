@@ -38,11 +38,17 @@
       80px,
       100px
     );
-  grid-template-rows: 68px;
+  grid-template-rows: 82px;
   background-color: colors.$grey50;
-  font: variables.$font-style-xsmall;
+  font: variables.$font-style-small;
   &.mtqe {
     grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) minmax(80px, 100px);
+  }
+  @media (max-width: 1100px) {
+    grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) 60px;
+    &.mtqe {
+      grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) 60px;
+    }
   }
   > div {
     display: flex;
@@ -51,6 +57,7 @@
     text-align: right;
     min-width: 46px;
     color: colors.$grey400;
+    padding-bottom: 4px;
     &:first-child {
       border-left: none;
       > div {
@@ -107,7 +114,7 @@
 .chunk-analyze-container {
   width: 100%;
   padding: 0 !important;
-  font: variables.$font-style-xsmall;
+  font: variables.$font-style-small;
   .chunk-analyze-info {
     display: grid;
     grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) minmax(
@@ -118,6 +125,12 @@
     position: relative;
     &.mtqe {
       grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) minmax(80px, 100px);
+    }
+    @media (max-width: 1100px) {
+      grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) 60px;
+      &.mtqe {
+        grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) 60px;
+      }
     }
     .chunk-analyze-info-background {
       position: absolute;
@@ -130,7 +143,6 @@
       border-radius: 4px 4px 0 0;
     }
     .chunk-analyze-info-header {
-      height: 56px;
       border-radius: 4px;
       display: flex;
       flex-direction: column;
@@ -147,9 +159,10 @@
         color: colors.$blue500 !important;
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 2px;
         text-decoration: underline;
         cursor: pointer;
+        font-size: variables.$font-size-xsmall;
       }
       .chunk-analyze-info-files svg {
         color: colors.$blue500 !important;
@@ -159,7 +172,7 @@
         color: colors.$grey600;
       }
       > div {
-        height: 28px;
+        height: 36px;
         width: 100%;
         color: colors.$black;
         justify-content: space-between;
@@ -177,7 +190,7 @@
     }
     > div {
       > div:not(.chunk-analyze-info-header) {
-        height: 28px;
+        height: 36px;
         justify-content: right;
         display: flex;
         padding-right: 6px;
@@ -198,7 +211,7 @@
       80px,
       100px
     );
-  grid-template-rows: 24px;
+  grid-template-rows: 32px;
   display: grid;
   padding: 0;
   color: colors.$grey600;
@@ -206,11 +219,17 @@
   &.mtqe {
     grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) minmax(80px, 100px);
   }
+  @media (max-width: 1100px) {
+    grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) 60px;
+    &.mtqe {
+      grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) 60px;
+    }
+  }
   .chunk-file-detail-background {
     position: absolute;
     width: 100%;
     background: colors.$grey50;
-    height: 24px;
+    height: 100%;
     top: 0px;
     z-index: 1;
     &.last {
@@ -225,17 +244,14 @@
     justify-content: right;
     display: flex;
     padding-right: 6px;
-    line-height: 24px;
+    line-height: 32px;
     z-index: 2;
+    align-items: center;
   }
   .chunk-file-detail-filename {
     justify-content: space-between;
     padding: 0 12px;
-    svg {
-      margin-top: 5px;
-    }
     .chunk-file-detail-name {
-      height: 24px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
