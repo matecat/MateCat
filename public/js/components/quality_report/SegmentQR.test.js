@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen} from '@testing-library/react'
+import {render, screen, within} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Immutable from 'immutable'
 
@@ -100,8 +100,9 @@ describe('SegmentQR', () => {
   })
 
   test('renders production stats', () => {
-    renderComponent()
-    expect(screen.getByText('Machine translation')).toBeInTheDocument()
+    const {container} = renderComponent()
+    const matchType = container.querySelector('.match-type')
+    expect(within(matchType).getByText('MT')).toBeInTheDocument()
     expect(screen.getByText("12''")).toBeInTheDocument()
     expect(screen.getByText('35%')).toBeInTheDocument()
   })
