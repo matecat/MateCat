@@ -8,6 +8,7 @@ use JsonSerializable;
 use LogicException;
 use Model\Analysis\Constants\StandardMatchTypeNamesConstants;
 use Utils\Constants\TranslationStatus;
+use Utils\Constants\XliffTranslationStatus;
 
 /**
  * @phpstan-consistent-constructor
@@ -43,11 +44,12 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     ];
 
     /**
-     * @var array{states: list<string>, state-qualifiers: list<string>}
+     * @var array{states: list<string>, state-qualifiers: list<string>, no-state: list<string>}
      */
     protected array $states = [
         'states' => [],
-        'state-qualifiers' => []
+        'state-qualifiers' => [],
+        'no-state' => []
     ];
 
     /**
@@ -86,6 +88,12 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      protected function setStates(array $states): void
     {
         foreach ($states as $state) {
+            // kept apart from the real states, so it can never match a state attribute read from a file
+            if ($state === XliffTranslationStatus::NO_STATE) {
+                $this->states['no-state'] = [XliffTranslationStatus::NO_STATE];
+                continue;
+            }
+
             if (!in_array($state, array_merge(static::$_STATES, static::$_STATE_QUALIFIERS)) && empty(preg_match('/^x-.+$/', $state))) {
                 throw new DomainException("Wrong state value", 400);
             }
@@ -165,7 +173,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     public function jsonSerialize(): array
     {
         $result = [
-            'states' => array_merge($this->states['states'], $this->states['state-qualifiers']),
+            'states' => array_merge($this->states['no-state'], $this->states['states'], $this->states['state-qualifiers']),
             'analysis' => $this->analysis
         ];
 
@@ -198,8 +206,20 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
         return match ($type) {
             'states' => $this->states['states'],
             'state-qualifiers' => $this->states['state-qualifiers'],
-            default => array_merge($this->states['states'], $this->states['state-qualifiers']),
+            'no-state' => $this->states['no-state'],
+            default => array_merge($this->states['no-state'], $this->states['states'], $this->states['state-qualifiers']),
         };
+    }
+
+    /**
+     * Whether this rule applies to segments without state/state-qualifier,
+     * and to any state that no other rule matches.
+     *
+     * @return bool
+     */
+    public function isNoStateRule(): bool
+    {
+        return !empty($this->states['no-state']);
     }
 
     /**
