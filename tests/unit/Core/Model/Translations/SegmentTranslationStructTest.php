@@ -87,6 +87,35 @@ class SegmentTranslationStructTest extends AbstractTest
     }
 
     #[Test]
+    public function isLockedReturnsTrueForLockedNonIce(): void
+    {
+        $struct = new SegmentTranslationStruct();
+        $struct->match_type = '100%';
+        $struct->locked = true;
+
+        $this->assertTrue($struct->isLocked());
+    }
+
+    #[Test]
+    public function isLockedReturnsFalseForUnlockedIce(): void
+    {
+        $struct = new SegmentTranslationStruct();
+        $struct->match_type = 'ICE';
+        $struct->locked = false;
+
+        $this->assertFalse($struct->isLocked());
+    }
+
+    #[Test]
+    public function isLockedReturnsFalseForNull(): void
+    {
+        $struct = new SegmentTranslationStruct();
+        $struct->locked = null;
+
+        $this->assertFalse($struct->isLocked());
+    }
+
+    #[Test]
     public function isPreTranslatedReturnsTrueForSkipped(): void
     {
         $struct = new SegmentTranslationStruct();

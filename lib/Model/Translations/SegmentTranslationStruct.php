@@ -55,6 +55,11 @@ class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoSt
         return $this->match_type == InternalMatchesConstants::TM_ICE && $this->locked;
     }
 
+    public function isLocked(): bool
+    {
+        return (bool)$this->locked;
+    }
+
     /**
      * @return bool
      */
