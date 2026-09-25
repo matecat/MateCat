@@ -407,6 +407,21 @@ test('Add tab', () => {
   expect(screen.getByTestId('concordances')).toBeInTheDocument()
   expect(screen.getByTestId('glossary')).toBeInTheDocument()
   expect(screen.getByTestId('multiMatches')).toBeInTheDocument()
+  expect(screen.getByTestId('multiMatches')).toHaveTextContent(
+    'Reference languages',
+  )
+})
+
+test('shows the reference-languages tab when only a secondary language is set', () => {
+  const multiMatchLangs = {secondary: 'it-IT'}
+  globalFunctions.registerFooterTabs()
+  render(
+    <SegmentContext.Provider value={{segment: props.segment, multiMatchLangs}}>
+      <SegmentFooter />
+    </SegmentContext.Provider>,
+  )
+
+  expect(screen.getByTestId('multiMatches')).toBeInTheDocument()
 })
 
 test('Remove tab', () => {
@@ -421,6 +436,18 @@ test('Remove tab', () => {
   expect(screen.getByTestId('matches')).toBeInTheDocument()
   expect(screen.getByTestId('concordances')).toBeInTheDocument()
   expect(screen.getByTestId('glossary')).toBeInTheDocument()
+  expect(screen.queryByTestId('multiMatches')).not.toBeInTheDocument()
+})
+
+test('hides the reference-languages tab when neither primary nor secondary is set', () => {
+  const multiMatchLangs = {}
+  globalFunctions.registerFooterTabs()
+  render(
+    <SegmentContext.Provider value={{segment: props.segment, multiMatchLangs}}>
+      <SegmentFooter />
+    </SegmentContext.Provider>,
+  )
+
   expect(screen.queryByTestId('multiMatches')).not.toBeInTheDocument()
 })
 
