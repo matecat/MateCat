@@ -5785,6 +5785,7 @@
       "properties": {
         "states": {
           "type": "array",
+          "description": "The XLIFF states and state-qualifiers the rule matches. The special value `no-state` matches segments without a state or state-qualifier attribute whose target differs from the source, and acts as the fallback for any state no other rule matches. It can be used in only one rule per XLIFF version.",
           "example": [
             "translated"
           ],
