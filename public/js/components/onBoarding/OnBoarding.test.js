@@ -141,10 +141,11 @@ describe('OnBoarding', () => {
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
     window.open = jest.fn(() => null)
     const {container} = render(<OnBoarding />)
+    // The social buttons are icon-only, with no accessible name to query by.
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+    const googleButton = container.querySelector('.login-social-buttons button')
 
-    expect(() =>
-      fireEvent.click(container.querySelector('.login-social-buttons button')),
-    ).not.toThrow()
+    expect(() => fireEvent.click(googleButton)).not.toThrow()
 
     jest.advanceTimersByTime(600)
     expect(consoleError).not.toHaveBeenCalled()
