@@ -47,7 +47,7 @@ const RevisionFeedbackModal = (props) => {
   return (
     <div className="feedback-modal">
       <div className="matecat-modal-top">
-        <h1>Leave your feedback</h1>
+        <h5>Leave your feedback</h5>
       </div>
       <div className="matecat-modal-middle">
         <div className="matecat-modal-text">
