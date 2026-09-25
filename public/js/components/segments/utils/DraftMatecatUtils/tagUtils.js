@@ -439,7 +439,7 @@ export const removePlaceholdersForGlossary = (str) => {
 
 export const decodeHtmlEntities = (text) => {
   return (
-    text
+    (text ?? '')
       // .replace(/&apos;/g, "'")
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')

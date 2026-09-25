@@ -101,6 +101,14 @@ test('decodeHtmlEntities converts basic html entities back to characters', () =>
   expect(decodeHtmlEntities('a &lt;b&gt; c &amp; d')).toBe('a <b> c & d')
 })
 
+test('decodeHtmlEntities returns an empty string for undefined input', () => {
+  expect(decodeHtmlEntities(undefined)).toBe('')
+})
+
+test('decodeHtmlEntities returns an empty string for null input', () => {
+  expect(decodeHtmlEntities(null)).toBe('')
+})
+
 test('encodeHtmlEntities escapes basic characters into html entities', () => {
   expect(encodeHtmlEntities('a <b> c & d')).toBe('a &lt;b&gt; c &amp; d')
 })

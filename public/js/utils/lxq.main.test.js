@@ -426,6 +426,12 @@ describe('getLexiqaWarnings', () => {
     expect(LXQ.lexiqaData.lexiqaFetching).toBe(false)
     expect(addLexiqaHighlight).toHaveBeenCalled()
   })
+
+  test('recovers when the request fails', async () => {
+    getLexiqaWarningsApi.mockRejectedValueOnce(new TypeError('Load failed'))
+    await new Promise((resolve) => LXQ.getLexiqaWarnings(resolve))
+    expect(LXQ.lexiqaData.lexiqaFetching).toBe(false)
+  })
 })
 
 // ---------------------------------------------------------------------------
