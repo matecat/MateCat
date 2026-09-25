@@ -136,3 +136,17 @@ test('an empty paste is left to Draft', () => {
   expect(result).toBeNull()
   expect(DraftMatecatUtils.duplicateFragment).not.toHaveBeenCalled()
 })
+
+test('an external paste made only of tags inserts nothing', () => {
+  DraftMatecatUtils.buildFragmentFromText.mockReturnValueOnce(null)
+
+  const result = buildPastedEditorState({
+    text: '<g id="1"></g>',
+    clipboardFragment: null,
+    clipboardPlainText: '',
+    editorState: EDITOR_STATE,
+  })
+
+  expect(result).toBe(EDITOR_STATE)
+  expect(DraftMatecatUtils.duplicateFragment).not.toHaveBeenCalled()
+})

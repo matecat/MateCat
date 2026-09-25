@@ -281,16 +281,17 @@ let SegmentFilterUtils = {
   gotoNextTranslatedSegment: (sid) => {
     const filteredData = SegmentFilterUtils.getLastFilterData()['segment_ids']
     if (filteredData) {
+      // Walk the filtered list once, wrapping around, so a list holding only
+      // DRAFT/NEW segments stops instead of recursing forever.
       const index = filteredData.indexOf('' + sid)
-      const nextFiltered =
-        index !== filteredData.length - 1
-          ? filteredData[index + 1]
-          : filteredData[0]
-      let segment = SegmentStore.getSegmentByIdToJS(nextFiltered)
-      if (segment && segment.status !== 'DRAFT' && segment.status !== 'NEW') {
-        SegmentActions.openSegment(nextFiltered)
-      } else if (segment) {
-        SegmentFilterUtils.gotoNextTranslatedSegment(nextFiltered)
+      for (let step = 1; step <= filteredData.length; step++) {
+        const nextFiltered = filteredData[(index + step) % filteredData.length]
+        const segment = SegmentStore.getSegmentByIdToJS(nextFiltered)
+        if (!segment) return
+        if (segment.status !== 'DRAFT' && segment.status !== 'NEW') {
+          SegmentActions.openSegment(nextFiltered)
+          return
+        }
       }
     }
   },

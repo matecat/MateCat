@@ -132,4 +132,24 @@ describe('OnBoarding', () => {
     consoleError.mockRestore()
     jest.useRealTimers()
   })
+
+  test('does not throw and does not schedule a reload when the social login popup is blocked', () => {
+    // A popup blocker (notably iOS Safari) makes window.open() return null.
+    // socialLogin must bail out before touching newWindow.focus or starting
+    // the closed-window polling interval.
+    jest.useFakeTimers()
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
+    window.open = jest.fn(() => null)
+    const {container} = render(<OnBoarding />)
+
+    expect(() =>
+      fireEvent.click(container.querySelector('.login-social-buttons button')),
+    ).not.toThrow()
+
+    jest.advanceTimersByTime(600)
+    expect(consoleError).not.toHaveBeenCalled()
+
+    consoleError.mockRestore()
+    jest.useRealTimers()
+  })
 })
