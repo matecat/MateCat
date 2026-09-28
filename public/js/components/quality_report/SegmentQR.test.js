@@ -49,7 +49,7 @@ const buildSegment = (overrides = {}) => {
     time_to_edit_translation: null,
     time_to_edit_revise: null,
     time_to_edit_revise_2: null,
-    ice_locked: '0',
+    locked: '0',
     ice_modified: false,
     is_pre_translated: false,
     issues: [],

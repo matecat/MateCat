@@ -192,7 +192,7 @@ function makeSegment(overrides = {}) {
     opened: false,
     unlocked: false,
     readonly: false,
-    ice_locked: false,
+    locked: false,
     tagged: false,
     ...overrides,
   }

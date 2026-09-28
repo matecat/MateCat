@@ -348,7 +348,7 @@ describe('SegmentActions.clickOnApprovedButton — mandatory issues gate', () =>
     sid: '1-1',
     modified: true,
     splitted: false,
-    ice_locked: false,
+    locked: false,
     versions: [],
   })
 

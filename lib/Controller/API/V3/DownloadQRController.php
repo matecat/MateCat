@@ -219,7 +219,7 @@ class DownloadQRController extends KleinController
                 $segment->raw_word_count,
                 $segment->translation,
                 $segment->version,
-                $segment->ice_locked,
+                $segment->locked, // deprecated ice_locked column, alias of locked
                 $segment->status,
                 $segment->time_to_edit,
                 $segment->filename,

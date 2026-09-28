@@ -21,7 +21,6 @@ class QualityReportSegmentStructTest extends AbstractTest
             'raw_word_count' => 2,
             'translation' => 'Ciao mondo',
             'version' => 1,
-            'ice_locked' => false,
             'status' => 'TRANSLATED',
             'time_to_edit' => 5000,
             'filename' => 'test.xliff',

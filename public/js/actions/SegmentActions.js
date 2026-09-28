@@ -281,7 +281,7 @@ const SegmentActions = {
       !segment.splitted &&
       segment.modified &&
       issues.length === 0 &&
-      !segment.ice_locked &&
+      !segment.locked &&
       isMandatoryRevisionIssues
     ) {
       SegmentActions.openIssuesPanel({sid: segment.sid}, true)

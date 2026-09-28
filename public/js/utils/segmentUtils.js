@@ -57,8 +57,10 @@ const SegmentUtils = {
   },
   //********** Tag Projection code end ******************/
 
+  // Server-side locked flag. `segment.unlocked` is the local override kept in
+  // localStorage (see isUnlockedSegment), so callers check `locked && !unlocked`.
   isIceSegment: function (segment) {
-    return segment.ice_locked
+    return segment.locked
   },
   isSecondPassLockedSegment: function (segment) {
     return (

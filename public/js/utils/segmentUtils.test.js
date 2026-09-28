@@ -127,9 +127,9 @@ test('checkCurrentSegmentTPEnabled is false when already tagged or text is empty
   ).toBe(false)
 })
 
-test('isIceSegment reflects the ice_locked flag', () => {
-  expect(SegmentUtils.isIceSegment({ice_locked: true})).toBe(true)
-  expect(SegmentUtils.isIceSegment({ice_locked: false})).toBe(false)
+test('isIceSegment reflects the locked flag', () => {
+  expect(SegmentUtils.isIceSegment({locked: true})).toBe(true)
+  expect(SegmentUtils.isIceSegment({locked: false})).toBe(false)
 })
 
 test('isSecondPassLockedSegment is true only for an approved-2 segment on a different revision', () => {

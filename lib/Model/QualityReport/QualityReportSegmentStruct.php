@@ -45,8 +45,6 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
 
     public ?int $version; //unix timestamp of the last translation
 
-    public bool $ice_locked;
-
     public string $status;
 
     public int $time_to_edit;

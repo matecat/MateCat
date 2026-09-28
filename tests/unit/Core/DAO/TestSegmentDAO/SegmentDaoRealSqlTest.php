@@ -529,6 +529,47 @@ class SegmentDaoRealSqlTest extends AbstractTest
         $this->assertContains($this->segIds[0], $sids);
     }
 
+    /**
+     * Four rows crossing the locked flag with the ICE match type, so a check that still
+     * required both columns shows up as a wrong `locked` on the 100% or the unlocked ICE row.
+     */
+    private function seedLockedMatrix(): void
+    {
+        $this->insertTranslation($this->segIds[0], TranslationStatus::STATUS_APPROVED, ['match_type' => 'ICE', 'locked' => 1]);
+        $this->insertTranslation($this->segIds[1], TranslationStatus::STATUS_TRANSLATED, ['match_type' => '100%', 'locked' => 1]);
+        $this->insertTranslation($this->segIds[2], TranslationStatus::STATUS_TRANSLATED, ['match_type' => 'ICE', 'locked' => 0]);
+        $this->insertTranslation($this->segIds[3], TranslationStatus::STATUS_TRANSLATED, ['match_type' => 'TM', 'locked' => 0]);
+    }
+
+    /**
+     * @return array<int, bool> expected `locked` keyed by segment id
+     */
+    private function expectedLockedMatrix(): array
+    {
+        return [
+            $this->segIds[0] => true,
+            $this->segIds[1] => true,
+            $this->segIds[2] => false,
+            $this->segIds[3] => false,
+        ];
+    }
+
+    #[Test]
+    public function getSegmentsForQr_locked_reflects_the_locked_column_alone(): void
+    {
+        $this->seedLockedMatrix();
+
+        $rows = $this->dao->getSegmentsForQr(array_slice($this->segIds, 0, 4), $this->idJob, $this->password);
+
+        $locked = [];
+        foreach ($rows as $row) {
+            $locked[(int)$row->sid] = $row->locked;
+        }
+        ksort($locked);
+
+        $this->assertSame($this->expectedLockedMatrix(), $locked);
+    }
+
     // =========================================================================================
     // createList
     // =========================================================================================
@@ -652,6 +693,22 @@ class SegmentDaoRealSqlTest extends AbstractTest
         ]);
 
         $this->assertNotEmpty($rows);
+    }
+
+    #[Test]
+    public function getPaginationSegments_locked_reflects_the_locked_column_alone(): void
+    {
+        $this->seedLockedMatrix();
+
+        $rows = $this->dao->getPaginationSegments($this->jobStruct, 50, $this->segIds[0], 'center');
+
+        $locked = [];
+        foreach ($rows as $row) {
+            $locked[(int)$row->sid] = $row->locked;
+        }
+        ksort($locked);
+
+        $this->assertSame($this->expectedLockedMatrix(), $locked);
     }
 
     // =========================================================================================

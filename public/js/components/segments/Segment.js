@@ -722,7 +722,7 @@ const SegmentComponent = ({
             />
           </div>
 
-          {!segment.ice_locked &&
+          {!segment.locked &&
           config.splitSegmentEnabled &&
           segment.opened ? (
             !segment.openSplit ? (

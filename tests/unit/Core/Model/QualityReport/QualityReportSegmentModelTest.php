@@ -51,7 +51,6 @@ class QualityReportSegmentModelTest extends AbstractTest
         $segment->raw_word_count = 2;
         $segment->translation = null;
         $segment->version = 1;
-        $segment->ice_locked = false;
         $segment->status = TranslationStatus::STATUS_TRANSLATED;
         $segment->time_to_edit = 61000;
         $segment->filename = 'file.xlf';

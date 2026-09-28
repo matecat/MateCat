@@ -6015,7 +6015,9 @@ var spec = {
           $ref: '#/definitions/QualityReportFile',
         },
         ice_locked: {
-          type: 'integer',
+          type: 'boolean',
+          deprecated: true,
+          description: 'Deprecated alias of locked, kept for existing consumers. Use locked.',
         },
         ice_modified: {
           type: 'boolean',
@@ -6042,7 +6044,7 @@ var spec = {
           type: 'string',
         },
         locked: {
-          type: 'integer',
+          type: 'boolean',
         },
         match_type: {
           type: 'string',
