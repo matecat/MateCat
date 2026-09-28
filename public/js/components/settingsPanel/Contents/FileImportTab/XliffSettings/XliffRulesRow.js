@@ -12,7 +12,8 @@ import {isEqual} from 'lodash'
 
 const getMatchCategoryShortId = (id) => id.replace(/_match_category/, '')
 const getMatchCategoryExtendedId = (id) => `${id}_match_category`
-const getStateName = (value) => (value !== 'No state' ? `'${value}'` : value)
+const getStateName = (value) =>
+  value === 'no-state' ? 'No state' : `'${value}'`
 const getEditorName = (value) => getStateName(value)
 
 export const XliffRulesRow = ({

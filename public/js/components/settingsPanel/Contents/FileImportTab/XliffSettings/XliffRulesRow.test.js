@@ -49,6 +49,15 @@ describe('XliffRulesRow', () => {
     ).toBeInTheDocument()
   })
 
+  test('offers no-state as the value and shows it unquoted as "No state"', () => {
+    const noStateRow = {id: 2, states: ['no-state'], analysis: 'new'}
+    setup({value: noStateRow, currentXliffData: [noStateRow]})
+
+    expect(xliffOptions.xliff12.states).toContain('no-state')
+    expect(xliffOptions.xliff12.states).not.toContain('No state')
+    expect(screen.getByText('No state')).toBeInTheDocument()
+  })
+
   test('renders the match category name for a pre-translated analysis', () => {
     setup()
 
