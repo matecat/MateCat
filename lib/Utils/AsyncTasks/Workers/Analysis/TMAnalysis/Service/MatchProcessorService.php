@@ -40,12 +40,13 @@ class MatchProcessorService implements MatchProcessorServiceInterface
     /**
      * @param array<string, mixed>              $mtResult
      * @param array<int, array<string, mixed>>  $tmMatches
+     * @param int|null                          $limit
      *
      * @return list<array<string, mixed>>
      */
-    public function sortMatches(array $mtResult, array $tmMatches): array
+    public function sortMatches(array $mtResult, array $tmMatches, ?int $limit = null): array
     {
-        return $this->matchSorter->sortMatches($mtResult, $tmMatches);
+        return $this->matchSorter->sortMatches($mtResult, $tmMatches, $limit);
     }
 
     /**
