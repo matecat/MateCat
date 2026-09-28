@@ -51,8 +51,9 @@ class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoSt
 
     public function isICE(): bool
     {
-        // In some cases, ICEs are not locked (translations from bilingual xliff). Only consider locked ICEs
-        return $this->match_type == InternalMatchesConstants::TM_ICE && $this->locked;
+        // ICE is the match type alone. Whether the segment is locked is a separate matter, and an
+        // XLIFF pre-translation whose rule category is ICE is an ICE too.
+        return $this->match_type == InternalMatchesConstants::TM_ICE;
     }
 
     public function isLocked(): bool

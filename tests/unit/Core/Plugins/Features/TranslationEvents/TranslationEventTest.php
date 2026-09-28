@@ -210,6 +210,34 @@ class TranslationEventTest extends AbstractTest
     }
 
     #[Test]
+    public function isUnModifiedIceIgnoresTheLockedFlag(): void
+    {
+        $old = $this->makeTranslation(TranslationStatus::STATUS_TRANSLATED, 0);
+        $old->locked = false;
+        $old->match_type = 'ICE';
+        $wanted = $this->makeTranslation(TranslationStatus::STATUS_TRANSLATED, 0);
+
+        $event = $this->makeEvent(old: $old, wanted: $wanted);
+
+        $this->assertTrue($event->isIce());
+        $this->assertTrue($event->isUnModifiedIce());
+    }
+
+    #[Test]
+    public function isIceIsFalseForALockedNonIceSegment(): void
+    {
+        $old = $this->makeTranslation(TranslationStatus::STATUS_TRANSLATED, 0);
+        $old->locked = true;
+        $old->match_type = '100%';
+        $wanted = $this->makeTranslation(TranslationStatus::STATUS_TRANSLATED, 0);
+
+        $event = $this->makeEvent(old: $old, wanted: $wanted);
+
+        $this->assertFalse($event->isIce());
+        $this->assertFalse($event->isUnModifiedIce());
+    }
+
+    #[Test]
     public function isPreparedDefaultsFalse(): void
     {
         $event = $this->makeEvent();
