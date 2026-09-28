@@ -246,3 +246,12 @@ test('Lexiqa text keeps offsets correct after decoded html entities before a tag
     'Airbnb.&nbsp;&nbsp;<<br />><<br />>At first, Maria paid for these out of her own pocket, and it was putting a strain on her already limited finances—until Aladina Fundación connected her with Airbnb.org.',
   )
 })
+
+test('transformTagsToText returns empty values untouched without logging', () => {
+  const spy = jest.spyOn(console, 'error').mockImplementation(() => {})
+  expect(transformTagsToText(null)).toBeNull()
+  expect(transformTagsToText(undefined)).toBeUndefined()
+  expect(transformTagsToText('')).toBe('')
+  expect(spy).not.toHaveBeenCalled()
+  spy.mockRestore()
+})
