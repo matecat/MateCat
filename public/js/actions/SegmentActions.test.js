@@ -24,7 +24,7 @@ jest.mock('../stores/CatToolStore', () => ({
 }))
 
 jest.mock('../utils/segmentUtils', () => ({
-  isIceSegment: jest.fn(() => false),
+  isLockedSegment: jest.fn(() => false),
   isReadonlySegment: jest.fn(),
   removeUnlockedSegment: jest.fn(),
 }))
@@ -232,7 +232,7 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
     }
 
     jest.clearAllMocks()
-    SegmentUtils.isIceSegment.mockReturnValue(false)
+    SegmentUtils.isLockedSegment.mockReturnValue(false)
   })
 
   test('shows "Segment disabled" AlertModal when metadata has translation_disabled=true', () => {
@@ -278,7 +278,7 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
   })
 
   test('shows ICE match modal when segment is ICE-locked', () => {
-    SegmentUtils.isIceSegment.mockReturnValue(true)
+    SegmentUtils.isLockedSegment.mockReturnValue(true)
 
     const segment = {
       unlocked: false,
@@ -1314,7 +1314,7 @@ describe('SegmentActions.handleClickOnReadOnly extra branches', () => {
   beforeEach(() => {
     global.config = baseConfig()
     jest.clearAllMocks()
-    SegmentUtils.isIceSegment.mockReturnValue(false)
+    SegmentUtils.isLockedSegment.mockReturnValue(false)
   })
 
   test('shows read-only warning notification during project completion review phase', () => {

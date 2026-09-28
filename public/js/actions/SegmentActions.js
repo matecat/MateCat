@@ -632,7 +632,7 @@ const SegmentActions = {
     }
     if (TextUtils.justSelecting('readonly')) return
 
-    const locked = !segment.unlocked && SegmentUtils.isIceSegment(segment)
+    const locked = !segment.unlocked && SegmentUtils.isLockedSegment(segment)
     if (locked) {
       ModalsActions.showModalComponent(
         MODAL_KEY.ALERT,

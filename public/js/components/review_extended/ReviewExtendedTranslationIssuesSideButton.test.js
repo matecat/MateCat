@@ -9,7 +9,7 @@ jest.mock('../../actions/SegmentActions', () => ({
 }))
 
 jest.mock('../../utils/segmentUtils', () => ({
-  isIceSegment: jest.fn(() => false),
+  isLockedSegment: jest.fn(() => false),
 }))
 
 jest.mock('../../utils/shortcuts', () => ({
@@ -34,7 +34,7 @@ const makeSegment = (overrides = {}) => ({
 describe('ReviewExtendedTranslationIssuesSideButton', () => {
   beforeEach(() => {
     global.config.isReview = true
-    SegmentUtils.isIceSegment.mockReturnValue(false)
+    SegmentUtils.isLockedSegment.mockReturnValue(false)
   })
 
   test('renders nothing when config.isReview is false', () => {
@@ -49,7 +49,7 @@ describe('ReviewExtendedTranslationIssuesSideButton', () => {
   })
 
   test('renders nothing when segment is ICE-locked and not unlocked', () => {
-    SegmentUtils.isIceSegment.mockReturnValue(true)
+    SegmentUtils.isLockedSegment.mockReturnValue(true)
     const {container} = render(
       <ReviewExtendedTranslationIssuesSideButton
         sid="1"
@@ -60,7 +60,7 @@ describe('ReviewExtendedTranslationIssuesSideButton', () => {
   })
 
   test('renders when segment is ICE-locked but unlocked', () => {
-    SegmentUtils.isIceSegment.mockReturnValue(true)
+    SegmentUtils.isLockedSegment.mockReturnValue(true)
     render(
       <ReviewExtendedTranslationIssuesSideButton
         sid="1"
