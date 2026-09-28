@@ -7065,7 +7065,8 @@
           "description": "Deprecated alias of locked, kept for existing consumers. Use locked."
         },
         "ice_modified": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "The segment is an ICE match and its translation has been edited."
         },
         "id": {
           "type": "integer",

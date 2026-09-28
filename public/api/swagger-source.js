@@ -6021,6 +6021,7 @@ var spec = {
         },
         ice_modified: {
           type: 'boolean',
+          description: 'The segment is an ICE match and its translation has been edited.',
         },
         id: {
           type: 'integer',

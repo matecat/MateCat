@@ -11,6 +11,7 @@ namespace Model\QualityReport;
 use DivisionByZeroError;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
@@ -136,7 +137,7 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
 
     public function isICE(): bool
     {
-        return ($this->match_type == 'ICE' && $this->locked);
+        return $this->match_type == InternalMatchesConstants::TM_ICE;
     }
 
     /**
