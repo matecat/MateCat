@@ -3,10 +3,8 @@ import {render, act, fireEvent} from '@testing-library/react'
 import {fromJS} from 'immutable'
 import SegmentStore from '../../stores/SegmentStore'
 import CatToolStore from '../../stores/CatToolStore'
-import CommentsStore from '../../stores/CommentsStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import CatToolConstants from '../../constants/CatToolConstants'
-import CommentsConstants from '../../constants/CommentsConstants'
 import SegmentActions from '../../actions/SegmentActions'
 import SegmentsContainer from './SegmentsContainer'
 
@@ -48,7 +46,6 @@ jest.mock('../../utils/shortcuts', () => ({
 
 const mockSegmentStoreListeners = {}
 const mockCatToolStoreListeners = {}
-const mockCommentsStoreListeners = {}
 let mockCapturedFindFirstVisibleRow
 let mockCapturedScrollToIndex
 
@@ -69,14 +66,6 @@ jest.mock('../../stores/CatToolStore', () => ({
   getJobFilesInfo: jest.fn(() => []),
 }))
 
-jest.mock('../../stores/CommentsStore', () => ({
-  addListener: jest.fn((event, cb) => {
-    mockCommentsStoreListeners[event] = cb
-  }),
-  removeListener: jest.fn(),
-  getCommentsBySegment: jest.fn(() => []),
-}))
-
 jest.mock('../../constants/SegmentConstants', () => ({
   RENDER_SEGMENTS: 'RENDER_SEGMENTS',
   REMOVE_ALL_SEGMENTS: 'REMOVE_ALL_SEGMENTS',
@@ -90,10 +79,6 @@ jest.mock('../../constants/SegmentConstants', () => ({
 jest.mock('../../constants/CatToolConstants', () => ({
   STORE_FILES_INFO: 'STORE_FILES_INFO',
   CLIENT_CONNECT: 'CLIENT_CONNECT',
-}))
-
-jest.mock('../../constants/CommentsConstants', () => ({
-  ADD_COMMENT: 'ADD_COMMENT',
 }))
 
 jest.mock('../../actions/SegmentActions', () => ({
@@ -272,9 +257,6 @@ describe('SegmentsContainer', () => {
     CatToolStore.addListener.mockImplementation((event, cb) => {
       mockCatToolStoreListeners[event] = cb
     })
-    CommentsStore.addListener.mockImplementation((event, cb) => {
-      mockCommentsStoreListeners[event] = cb
-    })
     CatToolStore.getJobFilesInfo.mockReturnValue([])
   })
 
@@ -361,14 +343,6 @@ describe('SegmentsContainer', () => {
       )
       expect(CatToolStore.addListener).toHaveBeenCalledWith(
         CatToolConstants.CLIENT_CONNECT,
-        expect.any(Function),
-      )
-    })
-
-    test('registers CommentsStore ADD_COMMENT listener on mount', () => {
-      renderComponent()
-      expect(CommentsStore.addListener).toHaveBeenCalledWith(
-        CommentsConstants.ADD_COMMENT,
         expect.any(Function),
       )
     })
