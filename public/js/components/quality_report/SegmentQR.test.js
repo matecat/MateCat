@@ -297,6 +297,16 @@ describe('SegmentQR', () => {
     )
   })
 
+  test('shows Pre-Translated for a locked pre-translated segment', () => {
+    renderComponent({
+      last_translation: 'Tradotto',
+      match_type: 'ICE',
+      locked: '1',
+      is_pre_translated: true,
+    })
+    expect(screen.getByText('Pre-Translated')).toBeInTheDocument()
+  })
+
   test('renders APPROVED2 status as approved', () => {
     renderComponent({status: 'APPROVED2'})
     expect(screen.getByText('approved')).toBeInTheDocument()

@@ -478,9 +478,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
             diffActive={translateDiffOn}
             showIceMatchInfo={true}
             tte={segment.get('time_to_edit_translation')}
-            showIsPretranslated={
-              segment.get('is_pre_translated') && !segment.get('locked')
-            }
+            showIsPretranslated={segment.get('is_pre_translated')}
             rev={0}
           />
         ) : null}
@@ -496,9 +494,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
             diffActive={reviseDiffOn}
             showIceMatchInfo={target === null}
             tte={segment.get('time_to_edit_revise')}
-            showIsPretranslated={
-              segment.get('is_pre_translated') && !segment.get('locked')
-            }
+            showIsPretranslated={segment.get('is_pre_translated')}
             rev={1}
           />
         ) : null}
@@ -514,9 +510,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
             diffActive={revise2DiffOn}
             showIceMatchInfo={target === null && revise === null}
             tte={segment.get('time_to_edit_revise_2')}
-            showIsPretranslated={
-              segment.get('is_pre_translated') && !segment.get('locked')
-            }
+            showIsPretranslated={segment.get('is_pre_translated')}
             rev={2}
           />
         ) : null}

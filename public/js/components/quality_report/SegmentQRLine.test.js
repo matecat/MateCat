@@ -69,3 +69,29 @@ test('renders Pre-Approved badge when showIsPretranslated and rev', () => {
   )
   expect(screen.getByText('Pre-Approved')).toBeInTheDocument()
 })
+
+test('omits the spacer for an unlocked ICE match when showIceMatchInfo', () => {
+  const {container} = render(
+    <SegmentQRLine
+      classes="qr-line"
+      label="Target"
+      text="hi"
+      segment={fromJS({match_type: 'ICE', locked: '0'})}
+      showIceMatchInfo
+    />,
+  )
+  expect(container.querySelector('.qr-spec')).toBeNull()
+})
+
+test('renders the spacer for a locked non-ICE match when showIceMatchInfo', () => {
+  const {container} = render(
+    <SegmentQRLine
+      classes="qr-line"
+      label="Target"
+      text="hi"
+      segment={fromJS({match_type: 'MT', locked: '1'})}
+      showIceMatchInfo
+    />,
+  )
+  expect(container.querySelector('.qr-spec')).not.toBeNull()
+})

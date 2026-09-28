@@ -162,7 +162,9 @@ const SegmentQRLine = ({
           </div>
         </div>
       ) : null}
-      {!(showIceMatchInfo && segment.get('locked')) &&
+      {!(
+        showIceMatchInfo && segment.get('match_type').toUpperCase() === 'ICE'
+      ) &&
       !showSuggestionSource &&
       !showSegmentWords &&
       !tte &&
