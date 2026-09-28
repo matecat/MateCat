@@ -225,6 +225,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const {guess_tags: guessTagActive, dictation: speechToTextActive} =
     userInfo?.metadata ?? {}
   const stickyBarRef = useRef()
+  const scrollAnchorShiftRef = useRef(0)
 
   // return row height and checks if it have margin
   const getRowHeightWithMargin = useCallback(({id, height}) => {
@@ -731,8 +732,10 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       }px)`
     }
 
-    const scrollTop = additionalHeight
-    listRef.current.scrollTop = scrollTop
+    // shift by the prepended height rather than jump to it: after a scroll to a segment that
+    // was not loaded yet the list is no longer at the top, and dropping its offset leaves the
+    // opened segment above the viewport
+    listRef.current.scrollTop += additionalHeight
 
     current.haveBeenAddedSegmentsBefore = true
   }, [rows, essentialRows, hasCachedRows, getRowHeightWithMargin])
@@ -805,11 +808,36 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
         rowsRendered.length
       if (!haveBeenRowsRendered) return
 
+      // rows above the viewport get their real height only after a scroll to a segment has
+      // landed; keep the first visible row in place, or the opened segment moves out of view
+      if (!isUserDraggingCursor && listRef.current) {
+        const {scrollTop} = listRef.current
+        let offset = 0
+        for (
+          let index = 0;
+          index < essentialRows.length &&
+          offset + essentialRows[index].height <= scrollTop;
+          index++
+        ) {
+          offset += essentialRows[index].height
+          scrollAnchorShiftRef.current +=
+            rows[index].height - essentialRows[index].height
+        }
+      }
+
       setEssentialRows(
         rows.map(({id, height, hasRendered}) => ({id, height, hasRendered})),
       )
     }
   }, [rows, essentialRows, hasCachedRows, startIndex, stopIndex])
+
+  // apply the anchor shift once the list has laid out the new heights, before paint
+  useLayoutEffect(() => {
+    const shift = scrollAnchorShiftRef.current
+    if (!shift || !listRef.current) return
+    scrollAnchorShiftRef.current = 0
+    listRef.current.scrollTop += shift
+  }, [essentialRows])
 
   // set padding top to list ref (Comments padding or Search bar opened)
   useEffect(() => {
