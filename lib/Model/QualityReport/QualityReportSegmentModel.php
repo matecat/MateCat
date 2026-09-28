@@ -213,7 +213,8 @@ class QualityReportSegmentModel
 
         $featureSet = new FeatureSet($this->database);
 
-        $featureSet->loadForProject($this->chunk->getProject(new ProjectDao($this->database)));
+        $project = $this->chunk->getProject(new ProjectDao($this->database));
+        $featureSet->loadForProject($project);
         $issue_comments = [];
 
          $issues = $this->qualityReportDao->getIssuesBySegments($segmentIds, $chunkId);
@@ -234,7 +235,7 @@ class QualityReportSegmentModel
         $segments = [];
 
         $subfilteringHandlers = (new MetadataDao($this->database))->getSubfilteringCustomHandlers($chunkId, $chunkPassword);
-        $icuEnabled = (new ProjectMetadataDao($this->database))->isIcuEnabled((int)$this->chunk->id_project);
+        $icuEnabled = (new ProjectMetadataDao($this->database))->isIcuEnabled((int)$project->id);
 
         foreach ($data as $index => $seg) {
             $dataRefMap = (new SegmentOriginalDataDao($this->database))->getSegmentDataRefMap($seg->sid);
