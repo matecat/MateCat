@@ -10,7 +10,6 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
 use Model\FeaturesBase\Hook\Event\Run\SetTranslationCommittedEvent;
@@ -431,7 +430,7 @@ class GetSearchController extends AbstractStatefulKleinController
                 if (
                     $old_translation === null ||
                     $segment === null ||
-                    ($queryParams->includeLocked === false && $old_translation->match_type === InternalMatchesConstants::TM_ICE)) {
+                    ($queryParams->includeLocked === false && $old_translation->isLocked())) {
                     // Nothing written yet, so there is nothing to undo: leaving the scope normally is
                     // the same empty transaction the rollback used to end.
                     return null;

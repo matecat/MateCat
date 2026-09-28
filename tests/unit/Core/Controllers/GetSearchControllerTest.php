@@ -893,6 +893,72 @@ class GetSearchControllerTest extends AbstractTest
     }
 
     #[Test]
+    public function updateSegments_skips_a_locked_segment_when_locked_are_excluded(): void
+    {
+        $queryParams = new SearchQueryParamsStruct([
+            'job' => self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'target' => 'mondo',
+            'replacement' => 'universo',
+            'isMatchCaseRequested' => false,
+            'isExactMatchRequested' => false,
+            'includeLocked' => false,
+        ]);
+
+        // Locked but not an ICE: the lock alone takes the segment out of scope.
+        $search_results = [
+            new SegmentTranslationStruct([
+                'id_segment' => self::TEST_SEGMENT_1,
+                'id_job' => self::TEST_JOB_ID,
+                'translation' => 'Ciao mondo',
+                'status' => 'TRANSLATED',
+                'match_type' => '100%',
+                'locked' => 1,
+            ]),
+        ];
+
+        $committed = $this->invokePrivate('updateSegments', [$search_results, self::TEST_JOB_ID, $queryParams]);
+
+        $this->assertSame([], $committed);
+        $untouched = (new \Model\Translations\SegmentTranslationDao(obtainTestDatabase()))->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
+        $this->assertNotNull($untouched);
+        $this->assertSame('Ciao mondo', $untouched->translation);
+    }
+
+    #[Test]
+    public function updateSegments_replaces_an_unlocked_ice_when_locked_are_excluded(): void
+    {
+        $queryParams = new SearchQueryParamsStruct([
+            'job' => self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'target' => 'mondo',
+            'replacement' => 'universo',
+            'isMatchCaseRequested' => false,
+            'isExactMatchRequested' => false,
+            'includeLocked' => false,
+        ]);
+
+        // An ICE nobody locked, such as an XLIFF pre-translation, is in scope.
+        $search_results = [
+            new SegmentTranslationStruct([
+                'id_segment' => self::TEST_SEGMENT_1,
+                'id_job' => self::TEST_JOB_ID,
+                'translation' => 'Ciao mondo',
+                'status' => 'TRANSLATED',
+                'match_type' => 'ICE',
+                'locked' => 0,
+            ]),
+        ];
+
+        $committed = $this->invokePrivate('updateSegments', [$search_results, self::TEST_JOB_ID, $queryParams]);
+
+        $this->assertCount(1, $committed);
+        $updated = (new \Model\Translations\SegmentTranslationDao(obtainTestDatabase()))->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
+        $this->assertNotNull($updated);
+        $this->assertStringContainsString('universo', $updated->translation);
+    }
+
+    #[Test]
     public function updateSegments_triggers_propagation_when_translation_changes(): void
     {
         $queryParams = new SearchQueryParamsStruct([
