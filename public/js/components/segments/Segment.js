@@ -542,6 +542,7 @@ const SegmentComponent = ({
     if (sideOpen) classes.push('slide-right')
     if (segment.openSplit) classes.push('split-action')
     if (segment.selected) classes.push('segment-selected')
+    if (segment.openComments) classes.push('comments-open')
 
     return classes
   }
