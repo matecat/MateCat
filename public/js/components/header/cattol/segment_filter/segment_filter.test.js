@@ -707,3 +707,18 @@ describe('SegmentFilterUtils.goToNextRepetitionGroup', () => {
     expect(SegmentActions.openSegment).toHaveBeenCalledWith(2)
   })
 })
+
+describe('repetition navigation after the segment was closed', () => {
+  test.each(['goToNextRepetition', 'goToNextRepetitionGroup'])(
+    '%s does nothing when there is no current segment',
+    (method) => {
+      SegmentStore.getCurrentSegment.mockReturnValue(undefined)
+      SegmentFilterUtils.setStoredState({
+        serverData: {grouping: {'hash-1': [1, 2]}},
+      })
+
+      expect(() => SegmentFilterUtils[method]('TRANSLATED')).not.toThrow()
+      expect(SegmentActions.openSegment).not.toHaveBeenCalled()
+    },
+  )
+})
