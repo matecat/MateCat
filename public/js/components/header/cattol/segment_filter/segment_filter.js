@@ -232,6 +232,8 @@ let SegmentFilterUtils = {
   },
   goToNextRepetition: function (status) {
     const segment = SegmentStore.getCurrentSegment()
+    // Called from a setTimeout, by which time the segment may already be closed.
+    if (!segment) return
     const hash = segment.segment_hash
     const segmentFilterData = SegmentFilterUtils.getStoredState()
     const groupArray = segmentFilterData.serverData.grouping[hash]
@@ -252,6 +254,8 @@ let SegmentFilterUtils = {
   },
   goToNextRepetitionGroup: function (status) {
     const segment = SegmentStore.getCurrentSegment()
+    // Called from a setTimeout, by which time the segment may already be closed.
+    if (!segment) return
     const hash = segment.segment_hash
     const segmentFilterData = SegmentFilterUtils.getStoredState()
     const groupsArray = Object.keys(segmentFilterData.serverData.grouping)

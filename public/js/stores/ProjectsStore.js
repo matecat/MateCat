@@ -51,18 +51,27 @@ const ProjectsStore = assign({}, EventEmitter.prototype, {
     const chunks = project
       .get('jobs')
       .filter((j) => j.get('id') === job.get('id'))
+    // `project` comes from the action and can be stale, so delete only the chunks the
+    // store still holds, and drop the project once it has no jobs left. Deciding on
+    // `size === 1` mid-loop removed projects that still had other jobs, and read a
+    // missing project on the next chunk.
     chunks.forEach((chunk) => {
-      //Check jobs length
-      if (this.projects.get(indexProject).get('jobs').size === 1) {
-        this.removeProject(project)
-      } else {
-        let indexJob = this.projects
-          .get(indexProject)
-          .get('jobs')
-          .indexOf(chunk)
-        this.projects = this.projects.deleteIn([indexProject, 'jobs', indexJob])
-      }
+      // Chunks of a split job share an id, so match the password too.
+      const indexJob = this.projects
+        .get(indexProject)
+        .get('jobs')
+        .findIndex(
+          (j) =>
+            j.get('id') === chunk.get('id') &&
+            j.get('password') === chunk.get('password'),
+        )
+      // deleteIn with -1 would drop the last job instead
+      if (indexJob === -1) return
+      this.projects = this.projects.deleteIn([indexProject, 'jobs', indexJob])
     })
+    if (this.projects.get(indexProject).get('jobs').size === 0) {
+      this.removeProject(project)
+    }
   },
 
   changeJobPass: function (
