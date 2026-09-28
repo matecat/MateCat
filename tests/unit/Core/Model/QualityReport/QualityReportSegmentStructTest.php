@@ -386,4 +386,57 @@ class QualityReportSegmentStructTest extends AbstractTest
         $this->assertArrayHasKey('details', $result);
         $this->assertArrayHasKey('total', $result);
     }
+
+    /**
+     * The segment from the bug report: an ICU plural whose target adds the Italian `many` and
+     * `one` forms, so it carries one more `{days}` argument and more braces than the source.
+     *
+     * @return array{0: QualityReportSegmentStruct, 1: \Model\FeaturesBase\FeatureSet, 2: \Model\Jobs\JobStruct}
+     */
+    private function icuPluralFixture(): array
+    {
+        $struct = new QualityReportSegmentStruct([]);
+        $struct->sid = 1;
+        $struct->segment = '{planName}: {days, plural, =0{renews today} =1{renews in 1 day} other{renews in {days} days}}';
+        $struct->translation = '{planName}: {days, plural, =0{si rinnova oggi} =1{si rinnova tra 1 giorno} other{si rinnova tra {days} giorni} many{si rinnova tra {days} di giorni} one{si rinnova tra 1 giorno}}';
+        $struct->target = 'it-IT';
+
+        $featureSet = new \Model\FeaturesBase\FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
+        $chunk = new \Model\Jobs\JobStruct();
+        $chunk->id = 1;
+        $chunk->id_project = 1;
+        $chunk->password = 'abc123';
+        $chunk->source = 'en-US';
+        $chunk->target = 'it-IT';
+
+        return [$struct, $featureSet, $chunk];
+    }
+
+    #[Test]
+    public function GetLocalWarningChecksAnIcuSourceAsIcuWithSingleCurlyBracketsEnabled(): void
+    {
+        [$struct, $featureSet, $chunk] = $this->icuPluralFixture();
+
+        /** @var MateCatFilter $Filter */
+        $Filter = MateCatFilter::getInstance($featureSet, 'en-US', 'it-IT', [], ['single_curly'], true);
+
+        $result = $struct->getLocalWarning($featureSet, $chunk, $Filter, true);
+
+        // before the fix: 3 tag mismatches + 2 whitespace-around-tag infos, the QR's "Automated (5)"
+        $this->assertSame(0, $result['total']);
+        $this->assertStringNotContainsString('<ph', $Filter->fromLayer0ToLayer2($struct->segment));
+    }
+
+    #[Test]
+    public function GetLocalWarningStillReportsMismatchesForANonIcuSource(): void
+    {
+        [$struct, $featureSet, $chunk] = $this->icuPluralFixture();
+
+        /** @var MateCatFilter $Filter */
+        $Filter = MateCatFilter::getInstance($featureSet, 'en-US', 'it-IT', [], ['single_curly']);
+
+        $result = $struct->getLocalWarning($featureSet, $chunk, $Filter);
+
+        $this->assertCount(3, $result['details']['issues_info']['ERROR']['Categories']['TAGS']);
+    }
 }

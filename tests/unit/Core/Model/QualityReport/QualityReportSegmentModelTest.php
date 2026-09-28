@@ -9,6 +9,7 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\Comments\BaseCommentStruct;
 use Model\Comments\CommentDao;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
@@ -418,6 +419,34 @@ class QualityReportSegmentModelTest extends AbstractTest
         $this->assertSame('ui:plain segment', $segment->segment);
         $this->assertSame('ui:', $segment->translation);
         $this->assertSame('ui:', $segment->suggestion);
+    }
+
+    /**
+     * The segment from the bug report, on a job with single_curly_brackets enabled. The ICU flag has
+     * to reach both the filter (so the placeholders are not locked) and the local warning check (so
+     * the ICU arguments are not counted as mismatched tags).
+     */
+    #[Test]
+    public function CommonSegmentAssignmentsChecksAnIcuSourceAsIcu(): void
+    {
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
+        $segment = $this->createSegment([
+            'segment' => '{planName}: {days, plural, =0{renews today} =1{renews in 1 day} other{renews in {days} days}}',
+            'translation' => '{planName}: {days, plural, =0{si rinnova oggi} =1{si rinnova tra 1 giorno} other{si rinnova tra {days} giorni} many{si rinnova tra {days} di giorni} one{si rinnova tra 1 giorno}}',
+        ]);
+
+        $featureSet = new FeatureSet($this->createStub(IDatabase::class));
+        $chunk = $this->createChunk();
+        $chunk->id_project = 1;
+
+        /** @var MateCatFilter $filter */
+        $filter = MateCatFilter::getInstance($featureSet, 'en-US', 'it-IT', [], ['single_curly'], true);
+
+        $model->invokeProtected('_commonSegmentAssignments', [$segment, $filter, $featureSet, $chunk, true, true]);
+
+        $this->assertSame(0, $segment->warnings['total']);
+        $this->assertStringNotContainsString('<ph', $segment->segment);
+        $this->assertStringNotContainsString('<ph', (string)$segment->translation);
     }
 
     #[Test]
