@@ -60,10 +60,10 @@
     "xss": "^1.0.15"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.7",
+    "@babel/core": "^8.0.0",
     "@babel/eslint-parser": "^7.29.7",
-    "@babel/preset-env": "^7.28.5",
-    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-env": "^8.0.6",
+    "@babel/preset-react": "^8.0.1",
     "@sentry/vite-plugin": "^5.2.0",
     "@testing-library/dom": "^10.1.0",
     "@testing-library/jest-dom": "^6.2.0",
