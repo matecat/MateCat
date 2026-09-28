@@ -45,7 +45,7 @@ describe('XliffRulesRow', () => {
     setup()
 
     expect(
-      screen.getByText('translated, needs-review-l10n'),
+      screen.getByText("'translated', 'needs-review-l10n'"),
     ).toBeInTheDocument()
   })
 

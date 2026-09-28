@@ -12,6 +12,8 @@ import {isEqual} from 'lodash'
 
 const getMatchCategoryShortId = (id) => id.replace(/_match_category/, '')
 const getMatchCategoryExtendedId = (id) => `${id}_match_category`
+const getStateName = (value) => (value !== 'No state' ? `'${value}'` : value)
+const getEditorName = (value) => getStateName(value)
 
 export const XliffRulesRow = ({
   value,
@@ -77,7 +79,7 @@ export const XliffRulesRow = ({
               value.states.every((v) => v !== stateCompare),
           ),
     )
-    .map((value) => ({id: value, name: value}))
+    .map((value) => ({id: value, name: getStateName(value)}))
 
   const optionsAnalysis = xliffOptions.analysis.reduce(
     (acc, value) =>
@@ -122,7 +124,9 @@ export const XliffRulesRow = ({
               placeholder="Select state"
               options={statesOptions}
               multipleSelect="dropdown"
-              activeOptions={value && value?.map((v) => ({id: v, name: v}))}
+              activeOptions={
+                value && value?.map((v) => ({id: v, name: getStateName(v)}))
+              }
               onToggleOption={(option) => {
                 const updatedOptions = value.some((id) => id === option.id)
                   ? value.filter((id) => id !== option.id)
@@ -165,12 +169,12 @@ export const XliffRulesRow = ({
               placeholder="Select editor"
               options={xliffOptions.editor.map((value) => ({
                 id: value,
-                name: value,
+                name: getEditorName(value),
               }))}
               activeOption={
                 formData?.analysis === 'new'
                   ? {id: 'na', name: 'N/A (determined by TM)'}
-                  : value && {id: value, name: value}
+                  : value && {id: value, name: getEditorName(value)}
               }
               onSelect={(option) => onChange(option.id)}
               isDisabled={
@@ -184,7 +188,7 @@ export const XliffRulesRow = ({
       <Button
         className="xliff-settings-column-content"
         mode={BUTTON_MODE.GHOST}
-        size={BUTTON_SIZE.SMALL}
+        size={BUTTON_SIZE.ICON_SMALL}
         onClick={deleteRow}
       >
         <Trash size={20} />
