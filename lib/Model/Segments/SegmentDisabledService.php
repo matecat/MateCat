@@ -10,9 +10,9 @@ use TypeError;
 /**
  * Service for managing segment disabled state.
  *
- * Delegates to {@see SegmentMetadataDao} for persistence.
- * The DAO's built-in cache (via _fetchObjectMap, 1-week TTL) handles
- * all caching — no additional cache layer is needed.
+ * Delegates to {@see SegmentMetadataDao} for persistence and caching. Reads are
+ * cached by the DAO (1-week TTL), and every write through the DAO evicts them,
+ * so callers read through the cache and never override the TTL.
  */
 class SegmentDisabledService
 {
@@ -26,24 +26,15 @@ class SegmentDisabledService
     /**
      * Check whether a segment is disabled for translation.
      *
-     * $ttl overrides the DAO's default (7-day) cache TTL for this read. A concurrent read that
-     * started before a disable/enable write commits can still cache a stale result after that
-     * write's eviction runs, silently re-poisoning the cache for up to 7 days. Callers where that
-     * matters (save-enforcement, idempotency checks guarding a unique-key insert) should pass 0;
-     * callers where an occasional stale read is harmless can leave it at the cached default.
-     *
      * @param int $id_segment
-     * @param int|null $ttl
      *
      * @return bool
      * @throws ReflectionException
      * @throws Exception
      */
-    public function isDisabled(int $id_segment, ?int $ttl = null): bool
+    public function isDisabled(int $id_segment): bool
     {
-        $metadata = $ttl === null
-            ? $this->segmentMetadataDao->get($id_segment, 'translation_disabled')
-            : $this->segmentMetadataDao->get($id_segment, 'translation_disabled', $ttl);
+        $metadata = $this->segmentMetadataDao->get($id_segment, SegmentMetadataMarshaller::TRANSLATION_DISABLED->value);
 
         return $metadata !== null && $metadata->meta_value === '1';
     }
@@ -51,32 +42,21 @@ class SegmentDisabledService
     /**
      * Disable translation for a segment.
      *
-     * Idempotent — safe to call multiple times. If already disabled, returns immediately.
-     * Persists the row via save(), which evicts every address it is read at.
+     * Idempotent — safe to call multiple times. The row is upserted, so disabling a segment that is
+     * already disabled cannot fail on the unique key, and the write evicts every address it is read at.
      *
      * @param int $id_segment
+     * @param int $id_project
      *
      * @return void
+     * @throws ReflectionException
      * @throws PDOException
-     * @throws Exception
      * @throws TypeError
+     * @throws Exception
      */
-    public function disable(int $id_segment): void
+    public function disable(int $id_segment, int $id_project): void
     {
-        // ttl=0: segment_metadata has a UNIQUE KEY on (id_segment, meta_key) and save() below is
-        // a plain INSERT, not an upsert. A stale cached "not disabled" here would let this proceed
-        // to save() on an already-disabled segment and crash on the duplicate key instead of
-        // returning early as the docblock promises.
-        if ($this->isDisabled($id_segment, 0)) {
-            return;
-        }
-
-        $metadata = new SegmentMetadataStruct();
-        $metadata->id_segment = $id_segment;
-        $metadata->meta_key = 'translation_disabled';
-        $metadata->meta_value = "1";
-
-        $this->segmentMetadataDao->save($metadata);
+        $this->segmentMetadataDao->upsert($id_segment, SegmentMetadataMarshaller::TRANSLATION_DISABLED->value, '1', $id_project);
     }
 
     /**
@@ -86,6 +66,7 @@ class SegmentDisabledService
      * Safe to call even if the segment is not currently disabled.
      *
      * @param int $id_segment
+     * @param int $id_project
      *
      * @return void
      * @throws ReflectionException
@@ -93,8 +74,8 @@ class SegmentDisabledService
      * @throws TypeError
      * @throws Exception
      */
-    public function enable(int $id_segment): void
+    public function enable(int $id_segment, int $id_project): void
     {
-        $this->segmentMetadataDao->delete($id_segment, 'translation_disabled');
+        $this->segmentMetadataDao->delete($id_segment, SegmentMetadataMarshaller::TRANSLATION_DISABLED->value, $id_project);
     }
 }
