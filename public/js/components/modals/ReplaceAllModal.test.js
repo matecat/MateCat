@@ -151,7 +151,7 @@ describe('ReplaceAllModal', () => {
     expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
       AlertModal,
       {text: 'boom'},
-      'Replace All Alert',
+      'Replace all alert',
     )
   })
 
@@ -166,7 +166,7 @@ describe('ReplaceAllModal', () => {
     expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
       AlertModal,
       {text: 'We got an error, please contact support'},
-      'Replace All Alert',
+      'Replace all alert',
     )
   })
 })

@@ -1,4 +1,4 @@
-import {useContext, useEffect} from 'react'
+import React, {useContext, useEffect} from 'react'
 import useSocketLayer, {ConnectionStates} from '../hooks/useSocketLayer'
 import CatToolActions from '../actions/CatToolActions'
 import SegmentActions from '../actions/SegmentActions'
@@ -25,13 +25,23 @@ const SocketListener = ({isAuthenticated, userId}) => {
       if (serverVersion !== config.build_number) {
         const notification = {
           title: 'New update available!',
-          text:
-            'We’ve just released an update with improvements and bug fixes.<br/>' +
-            'To ensure all changes are applied correctly, we recommend refreshing the page.<br/><br/>' +
-            'Click Refresh or press <strong>Ctrl+R</strong> (Windows) / <strong>Cmd+R</strong> (Mac).<br/><br/>' +
-            'Thank you for using Matecat!',
+          text: (
+            <>
+              We&rsquo;ve just released an update with improvements and bug
+              fixes.
+              <br />
+              To ensure all changes are applied correctly, we recommend
+              refreshing the page.
+              <br />
+              <br />
+              Click Refresh or press <strong>Ctrl+R</strong> (Windows) /{' '}
+              <strong>Cmd+R</strong> (Mac).
+              <br />
+              <br />
+              Thank you for using Matecat!
+            </>
+          ),
           type: 'warning',
-          allowHtml: true,
         }
         CatToolActions.addNotification(notification)
       }
@@ -60,8 +70,8 @@ const SocketListener = ({isAuthenticated, userId}) => {
     segment_enabled: (data) => {
       SegmentActions.updateSegmentDisabledState(data.id_segment, false)
       CatToolActions.addNotification({
-        title: 'Segment enabled',
-        text: 'A segment has been re-enabled by the project owner and can be translated again.',
+        title: 'Segment translation enabled',
+        text: 'The project owner has re-enabled editing for one or more segments. They are no longer read-only and can be edited again.',
         type: 'info',
         uid: 'translation_enabled',
         timer: 15000,

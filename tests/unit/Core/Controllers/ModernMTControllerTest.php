@@ -4,6 +4,7 @@ namespace Matecat\Core\Controllers;
 
 use Controller\API\V3\ModernMTController;
 use Exception;
+use InvalidArgumentException;
 use Klein\HttpStatus;
 use Klein\Request;
 use Klein\Response;
@@ -225,6 +226,21 @@ class ModernMTControllerTest extends AbstractTest
     }
 
     #[Test]
+    public function createMemory_refuses_a_name_longer_than_the_provider_bound(): void
+    {
+        // The memory lives at ModernMT, not in a column here, so without a bound the provider
+        // decides what an over-long name becomes. All three write paths carry the same one.
+        $this->stubRequestParams(['engineId' => '1']);
+        $this->controller->params = ['name' => str_repeat('a', 256)];
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('name must be at most 255 characters');
+        $this->expectExceptionCode(400);
+
+        $this->controller->createMemory();
+    }
+
+    #[Test]
     public function createMemory_with_optional_params_null(): void
     {
         $this->stubRequestParams(['engineId' => '1']);
@@ -260,6 +276,20 @@ class ModernMTControllerTest extends AbstractTest
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Missing `name` param');
+
+        $this->controller->updateMemory();
+    }
+
+    #[Test]
+    public function updateMemory_refuses_a_name_longer_than_the_provider_bound(): void
+    {
+        // Same provider, same field, same bound as createMemory(): this path used to normalise and
+        // stop.
+        $this->stubRequestParams(['memoryId' => '77', 'engineId' => '1']);
+        $this->controller->params = ['name' => str_repeat('a', 256)];
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('name must be at most 255 characters');
 
         $this->controller->updateMemory();
     }
@@ -567,6 +597,23 @@ class ModernMTControllerTest extends AbstractTest
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Failed to create MMT memory');
+
+        $this->controller->createMemoryAndImportGlossary();
+    }
+
+    #[Test]
+    public function createMemoryAndImportGlossary_refuses_a_name_longer_than_the_provider_bound(): void
+    {
+        // The third of the three write paths, and the second that used to normalise and stop.
+        $this->stubRequestParams(['engineId' => '1']);
+        $this->controller->params = ['name' => str_repeat('a', 256)];
+
+        $filesStub = $this->createStub(\Klein\DataCollection\DataCollection::class);
+        $filesStub->method('exists')->willReturn(true);
+        $this->requestStub->method('files')->willReturn($filesStub);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('name must be at most 255 characters');
 
         $this->controller->createMemoryAndImportGlossary();
     }

@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import {SegmentedControl} from '../../../../common/SegmentedControl'
-import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
+import {KeysBadge} from '../../../../common/KeysBadge/KeysBadge'
 import {FiltersParamsContext} from './FiltersParamsContext'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
@@ -106,7 +106,7 @@ export const Yaml = () => {
             control={control}
             name={id}
             render={({field: {onChange, value, name}}) => (
-              <WordsBadge
+              <KeysBadge
                 name={name}
                 value={value}
                 onChange={onChange}
@@ -123,6 +123,23 @@ export const Yaml = () => {
     <div className="filters-params-accordion-content">
       <div className="filters-params-option">
         <div>
+          <h3>Force double quotes on single-line strings</h3>
+          <p>
+            Choose whether to surround all single-line strings with double
+            quotes in the translated file, regardless of their source format.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="force_double_quoting"
+          render={({field: {onChange, value, name}}) => (
+            <Switch name={name} active={value} onChange={onChange} />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
           <h3>Translatable keys </h3>
           <p>
             Choose which keys should be translated. If left empty, all keys in
@@ -130,10 +147,10 @@ export const Yaml = () => {
             <br />
             Key names are case sensitive.
             <br />
-            If the toggle is set to "Translatable", only the keys entered will
+            If the toggle is set to &quot;Translatable&quot;, only the keys entered will
             be extracted as translatable.
             <br />
-            If the toggle is set to "Non-translatable", all the keys in the file{' '}
+            If the toggle is set to &quot;Non-translatable&quot;, all the keys in the file{' '}
             <b>except</b> those entered will be extracted as translatable.
           </p>
         </div>
@@ -172,7 +189,7 @@ export const Yaml = () => {
           control={control}
           name="context_keys"
           render={({field: {onChange, value, name}}) => (
-            <WordsBadge
+            <KeysBadge
               name={name}
               value={value}
               onChange={onChange}
@@ -194,14 +211,14 @@ export const Yaml = () => {
             Character limits will be applied to translatable keys in the same
             object.
             <br />
-            Keys with a character limit won't be segmented.
+            Keys with a character limit won&apos;t be segmented.
           </p>
         </div>
         <Controller
           control={control}
           name="character_limit"
           render={({field: {onChange, value, name}}) => (
-            <WordsBadge
+            <KeysBadge
               name={name}
               value={value}
               onChange={onChange}

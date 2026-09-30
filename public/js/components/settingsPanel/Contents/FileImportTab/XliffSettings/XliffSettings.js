@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useEffect, useRef} from 'react'
+import React, {useContext, useEffect, useRef} from 'react'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import CatToolActions from '../../../../../actions/CatToolActions'
 import ModalsActions from '../../../../../actions/ModalsActions'
@@ -174,6 +174,7 @@ export const XliffSettings = () => {
                 <a
                   href="https://guides.matecat.com/file-import#xliff-import-settings"
                   target="_blank"
+                  rel="noreferrer"
                 >
                   More details
                 </a>

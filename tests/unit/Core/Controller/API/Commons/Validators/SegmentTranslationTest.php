@@ -163,7 +163,7 @@ class SegmentTranslationTest extends AbstractTest
         $validator = new SegmentTranslation($this->controller);
 
         $this->expectException(NotFoundException::class);
-        $this->expectExceptionMessage('translation not found');
+        $this->expectExceptionMessage('Translation not found');
 
         $validator->validate();
     }

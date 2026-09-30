@@ -17,11 +17,12 @@ import {SegmentFooterTabGlossary} from './SegmentFooterTabGlossary'
 import SegmentTabConflicts from './SegmentFooterTabConflicts'
 import SegmentFooterTabMatches from './SegmentFooterTabMatches'
 import SegmentFooterTabMessages from './SegmentFooterTabMessages'
+import segmentNotes from './segmentNotes'
 import {SegmentContext} from './SegmentContext'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
-import IconCloseCircle from '../icons/IconCloseCircle'
-import CatToolActions from '../../actions/CatToolActions'
+import IconCloseCircle from '../../../img/icons/IconCloseCircle'
+import IconWarning from '../../../img/icons/IconWarning'
 import {isMacOS} from '../../utils/Utils'
 import {SegmentFooterTabLaraStyles} from './SegmentFooterTabLaraStyles'
 import {SegmentFooterTabAiAlternatives} from './SegmentFooterTabAiAlternatives'
@@ -32,13 +33,13 @@ import {TAB} from '../../constants/SegmentTabConstants'
 
 const TAB_ITEMS = {
   [TAB.MATCHES]: {
-    label: 'Translation Matches',
+    label: 'Translation matches',
     code: 'tm',
     tabClass: 'matches',
     isLoading: false,
   },
   [TAB.CONCORDANCES]: {
-    label: 'TM Search',
+    label: 'TM search',
     code: 'cc',
     tabClass: 'concordances',
     isLoading: false,
@@ -62,13 +63,13 @@ const TAB_ITEMS = {
     isLoading: false,
   },
   [TAB.MULTIMATCHES]: {
-    label: 'Cross-language Matches',
+    label: 'Reference languages',
     code: 'cl',
     tabClass: 'cross-matches',
     isLoading: false,
   },
   [TAB.AI_ASSISTANT]: {
-    label: 'AI Assistant',
+    label: 'AI assistant',
     code: 'ai',
     tabClass: 'ai-assistant',
     isLoading: false,
@@ -100,6 +101,13 @@ const TAB_ITEMS = {
     code: 'icu',
     tabClass: 'icu-validator',
     isLoading: false,
+  },
+  [TAB.AI_ALTERNATIVES]: {
+    label: 'AI alternatives',
+    code: 'aialternatives',
+    tabClass: 'ai-alternatives',
+    isLoading: false,
+    isEnableCloseButton: true,
   },
 }
 const DELAY_MESSAGE = 7000
@@ -139,7 +147,7 @@ function SegmentFooter() {
       elements: [],
       label:
         value.code === 'tm'
-          ? `Translation Matches ${!config.mt_enabled ? ' (No MT) ' : ''}`
+          ? `Translation matches ${!config.mt_enabled ? ' (No MT) ' : ''}`
           : value.label,
     })),
   )
@@ -190,25 +198,17 @@ function SegmentFooter() {
   // Check tab messages has notes
   const hasNotes = useMemo(() => {
     if (!SegmentUtils.segmentHasNote(segment)) return false
-    const tabMessagesContext = {
-      props: {
-        active_class: 'open',
-        tab_class: 'segment-notes',
-        id_segment: segment.sid,
-        notes: segment.notes,
-        metadata: segment.metadata,
-        context_groups: segment.context_groups,
-        segmentSource: segment.segment,
-        segment: segment,
-      },
-      getMetadataNoteTemplate: () =>
-        segment.metadata?.length > 0 ? segment.metadata : null,
-      allowHTML: () => '',
-      getNoteContentStructure: (note) => note,
-      getNoteStructure: SegmentFooterTabMessages.prototype.getNoteStructure,
-    }
-    const notes =
-      SegmentFooterTabMessages.prototype.getNotes.call(tabMessagesContext)
+    // Ask the seam what it would render, so a plugin that adds or hides notes
+    // decides whether the tab appears, exactly as it decides its contents. This
+    // used to reach through SegmentFooterTabMessages.prototype with a synthetic
+    // `this`, which broke as soon as those methods moved onto the seam.
+    const notes = segmentNotes.getNotes({
+      notes: segment.notes,
+      metadata: segment.metadata,
+      segment,
+      segmentSource: segment.segment,
+      contextGroups: segment.context_groups,
+    })
     return Array.isArray(notes) && notes.length > 0
   }, [segment])
 
@@ -310,7 +310,9 @@ function SegmentFooter() {
     const hasAlternatives = Boolean(
       segment.alternatives && size(segment.alternatives) > 0,
     )
-    const hasMultiMatches = Boolean(multiMatchLangs && multiMatchLangs.primary)
+    const hasMultiMatches = Boolean(
+      multiMatchLangs && (multiMatchLangs.primary || multiMatchLangs.secondary),
+    )
 
     setTabItems((prevState) =>
       prevState.map((item) => ({
@@ -643,7 +645,9 @@ function SegmentFooter() {
           ) : clientConnected || typeof clientConnected === 'undefined' ? (
             <span className="loader loader_on" />
           ) : (
-            <i className="icon-warning2 icon" />
+            <span className={'notLoading'}>
+              <IconWarning size={16} />
+            </span>
           )}
 
           {tab.isEnableCloseButton && (
@@ -681,14 +685,6 @@ function SegmentFooter() {
                 tab.open && !getHideMatchesCookie() ? 'active' : '',
               ),
             )}
-          <div className="addtmx-tr white-tx">
-            <a
-              className="open-popup-addtm-tr"
-              onClick={() => CatToolActions.openSettingsPanel()}
-            >
-              Add private resources
-            </a>
-          </div>
         </>
       ) : (
         <div

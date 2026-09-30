@@ -77,7 +77,7 @@ class SegmentTranslationIssueValidator extends Base
     protected function __ensureRevisionPasswordAllowsDeleteForIssue(): void
     {
         if ($this->issue === null) {
-            throw new ValidationError('issue not found');
+            throw new ValidationError('Issue not found');
         }
 
         if ($this->issue->source_page > $this->chunkReview->source_page) {
@@ -133,11 +133,11 @@ class SegmentTranslationIssueValidator extends Base
         $this->issue = (new EntryDao($this->controller->getDatabase()))->findById($this->request->param('id_issue'));
 
         if (!$this->issue) {
-            throw new ValidationError('issue not found');
+            throw new ValidationError('Issue not found');
         }
 
         if ($this->issue->id_segment != $this->translation->id_segment) {
-            throw new ValidationError('issue not found');
+            throw new ValidationError('Issue not found');
         }
 
         $this->issue->ensureValid(new EntryValidator($this->issue, database: $this->controller->getDatabase()));

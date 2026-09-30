@@ -25,7 +25,7 @@ export const ApplicationThreshold = () => {
               target="_blank"
               rel="noreferrer"
             >
-              <InfoIcon />
+              <InfoIcon size={16} />
             </a>
           </div>
           <p>

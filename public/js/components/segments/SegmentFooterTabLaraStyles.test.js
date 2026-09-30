@@ -25,7 +25,10 @@ jest.mock('../../stores/CatToolStore', () => ({
 }))
 
 jest.mock('../../utils/segmentUtils', () => ({
-  getSegmentContext: () => ({contextListBefore: [], contextListAfter: []}),
+  getSegmentContext: jest.fn(() => ({
+    contextListBefore: [],
+    contextListAfter: [],
+  })),
 }))
 
 jest.mock('./utils/DraftMatecatUtils', () => ({
@@ -284,6 +287,133 @@ describe('SegmentFooterTabLaraStyles', () => {
       expect.objectContaining({
         crossLanguages: ['en-US', 'fr-FR'],
       }),
+    )
+  })
+
+  test('decodes non-empty context lists before/after when requesting styles', async () => {
+    const {getSegmentContext} = require('../../utils/segmentUtils')
+    const {
+      decodePlaceholdersToPlainText,
+    } = require('./utils/DraftMatecatUtils/tagUtils')
+    const {laraAuthJob} = require('../../api/laraAuth')
+    const {laraTranslate} = require('../../api/laraTranslate')
+
+    getSegmentContext.mockReturnValueOnce({
+      contextListBefore: ['before line'],
+      contextListAfter: ['after line'],
+    })
+    laraAuthJob.mockResolvedValue({token: 'tok'})
+    laraTranslate
+      .mockResolvedValueOnce(laraValues[0])
+      .mockResolvedValueOnce(laraValues[1])
+
+    renderComponent()
+
+    await act(async () => {
+      SegmentStore.__emit(SegmentConstants.LARA_STYLES, stylesPayload)
+    })
+
+    expect(decodePlaceholdersToPlainText).toHaveBeenCalledWith('before line')
+    expect(decodePlaceholdersToPlainText).toHaveBeenCalledWith('after line')
+    expect(screen.getByText('Formal')).toBeInTheDocument()
+  })
+
+  test('replaces the edit area content after the switch delay elapses', async () => {
+    jest.useFakeTimers()
+    const {laraAuthJob} = require('../../api/laraAuth')
+    const {laraTranslate} = require('../../api/laraTranslate')
+    const SegmentActions = require('../../actions/SegmentActions')
+
+    laraAuthJob.mockResolvedValue({token: 'tok'})
+    laraTranslate
+      .mockResolvedValueOnce(laraValues[0])
+      .mockResolvedValueOnce(laraValues[1])
+
+    renderComponent()
+
+    await act(async () => {
+      SegmentStore.__emit(SegmentConstants.LARA_STYLES, stylesPayload)
+    })
+
+    const switchButtons = screen.getAllByRole('button')
+    act(() => {
+      fireEvent.click(switchButtons[0])
+    })
+
+    act(() => {
+      jest.advanceTimersByTime(200)
+    })
+
+    expect(SegmentActions.replaceEditAreaTextContent).toHaveBeenCalledWith(
+      defaultSegment.sid,
+      'Formal translation',
+    )
+    jest.useRealTimers()
+  })
+
+  test('removes the segment from the waiting list once getContributions resolves', async () => {
+    const {laraAuthJob} = require('../../api/laraAuth')
+    const {laraTranslate} = require('../../api/laraTranslate')
+    const {getContributions} = require('../../api/getContributions')
+    const TranslationMatches = require('./utils/translationMatches').default
+
+    TranslationMatches.segmentsWaitingForContributions.push(defaultSegment.sid)
+    getContributions.mockResolvedValue()
+
+    laraAuthJob.mockResolvedValue({token: 'tok'})
+    laraTranslate
+      .mockResolvedValueOnce(laraValues[0])
+      .mockResolvedValueOnce(laraValues[1])
+
+    renderComponent()
+
+    await act(async () => {
+      SegmentStore.__emit(SegmentConstants.LARA_STYLES, stylesPayload)
+    })
+
+    const switchButtons = screen.getAllByRole('button')
+    await act(async () => {
+      fireEvent.click(switchButtons[0])
+    })
+
+    expect(
+      TranslationMatches.segmentsWaitingForContributions,
+    ).not.toContain(defaultSegment.sid)
+  })
+
+  test('processes errors when getContributions rejects after switching style', async () => {
+    const {laraAuthJob} = require('../../api/laraAuth')
+    const {laraTranslate} = require('../../api/laraTranslate')
+    const {getContributions} = require('../../api/getContributions')
+    const CatToolActions = require('../../actions/CatToolActions')
+    const TranslationMatches = require('./utils/translationMatches').default
+
+    const rejection = new Error('network error')
+    getContributions.mockRejectedValueOnce(rejection)
+
+    laraAuthJob.mockResolvedValue({token: 'tok'})
+    laraTranslate
+      .mockResolvedValueOnce(laraValues[0])
+      .mockResolvedValueOnce(laraValues[1])
+
+    renderComponent()
+
+    await act(async () => {
+      SegmentStore.__emit(SegmentConstants.LARA_STYLES, stylesPayload)
+    })
+
+    const switchButtons = screen.getAllByRole('button')
+    await act(async () => {
+      fireEvent.click(switchButtons[0])
+    })
+
+    expect(CatToolActions.processErrors).toHaveBeenCalledWith(
+      rejection,
+      'getContribution',
+    )
+    expect(TranslationMatches.renderContributionErrors).toHaveBeenCalledWith(
+      rejection,
+      defaultSegment.sid,
     )
   })
 })

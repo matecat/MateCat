@@ -406,4 +406,98 @@ class QAModelTemplateDaoTest extends AbstractTest
             AppConfig::$ROOT = $originalRoot;
         }
     }
+
+    /**
+     * The parent UPDATE is not what needed guarding: the passfails and the categories are deleted
+     * and rewritten on `id_template` alone, so a caller who never established ownership would have
+     * emptied another user's template while its own UPDATE quietly matched nothing.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function updateRefusesATemplateOwnedByAnotherUser(): void
+    {
+        $created = $this->create('Owned By Someone Else');
+        $conn = obtainTestDatabase()->getConnection();
+
+        $countChildren = static function (int $id) use ($conn): int {
+            $stmt = $conn->prepare(
+                "SELECT (SELECT COUNT(*) FROM qa_model_template_passfails WHERE id_template = :id)
+                      + (SELECT COUNT(*) FROM qa_model_template_categories WHERE id_template = :id)"
+            );
+            $stmt->execute(['id' => $id]);
+
+            return (int)$stmt->fetchColumn();
+        };
+
+        $childrenBefore = $countChildren($created->id);
+        $this->assertGreaterThan(0, $childrenBefore, 'the fixture must carry children to lose');
+
+        $readLabel = $conn->prepare("SELECT label FROM qa_model_templates WHERE id = :id");
+        $readLabel->execute(['id' => $created->id]);
+        $labelBefore = (string)$readLabel->fetchColumn();
+
+        $created->uid = $this->uid + 1;
+        $created->label = 'Taken Over';
+
+        try {
+            $this->dao->update($created);
+            $this->fail('expected the update to refuse a template belonging to another user');
+        } catch (Exception $e) {
+            $this->assertSame(404, $e->getCode());
+        }
+
+        $read = $conn->prepare("SELECT label, uid FROM qa_model_templates WHERE id = :id");
+        $read->execute(['id' => $created->id]);
+        $row = $read->fetch();
+
+        $this->assertSame($labelBefore, $row['label']);
+        $this->assertSame($this->uid, (int)$row['uid']);
+        $this->assertSame($childrenBefore, $countChildren($created->id), 'the children must survive');
+    }
+
+    /**
+     * The guard reads the row the same way {@see QAModelTemplateDao::getQaModelTemplateByIdAndUid()}
+     * does, so a soft-deleted template cannot be edited back into use.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function updateRefusesASoftDeletedTemplate(): void
+    {
+        $created = $this->create('Soft Deleted');
+        $this->assertSame(1, $this->dao->remove($created->id, $this->uid));
+
+        $created->label = 'Back From The Dead';
+
+        try {
+            $this->dao->update($created);
+            $this->fail('expected the update to refuse a soft-deleted template');
+        } catch (Exception $e) {
+            $this->assertSame(404, $e->getCode());
+        }
+    }
+
+    /**
+     * Editing a template must not be able to move it to another account. The statement used to
+     * assign `uid`, which no caller ever varied, so the capability was only ever a liability.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function updateLeavesTheOwnerWhereItWas(): void
+    {
+        $created = $this->create('Keeps Its Owner');
+        $created->label = 'Renamed ' . $created->id;
+
+        $this->dao->update($created);
+
+        $conn = obtainTestDatabase()->getConnection();
+        $read = $conn->prepare("SELECT label, uid FROM qa_model_templates WHERE id = :id");
+        $read->execute(['id' => $created->id]);
+        $row = $read->fetch();
+
+        $this->assertSame('Renamed ' . $created->id, $row['label']);
+        $this->assertSame($this->uid, (int)$row['uid']);
+    }
 }

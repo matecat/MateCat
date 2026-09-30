@@ -173,7 +173,7 @@ class TeamModelTest extends AbstractTest
         $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("Invalid Team Type");
+        $this->expectExceptionMessage("Invalid team type");
 
         $method = new ReflectionMethod($model, '_checkType');
         $method->invoke($model);
@@ -349,7 +349,7 @@ class TeamModelTest extends AbstractTest
         $model->setUser($this->user);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("Invalid Team Type");
+        $this->expectExceptionMessage("Invalid team type");
         $model->create();
     }
 

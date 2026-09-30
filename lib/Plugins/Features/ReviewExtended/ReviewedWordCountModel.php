@@ -10,7 +10,6 @@ namespace Plugins\Features\ReviewExtended;
 
 use Exception;
 use Model\DataAccess\IDatabase;
-use Model\DataAccess\TransactionalTrait;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Filter\FilterRevisionChangeNotificationListEvent;
 use Model\Jobs\JobStruct;
@@ -37,13 +36,6 @@ use Utils\Url\CanonicalRoutes;
 
 class ReviewedWordCountModel implements IReviewedWordCountModel
 {
-
-    use TransactionalTrait;
-
-    protected function getTransactionalDatabase(): IDatabase
-    {
-        return $this->_database;
-    }
 
     /**
      * @var TranslationEvent

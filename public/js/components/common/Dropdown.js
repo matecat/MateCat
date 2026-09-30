@@ -369,14 +369,19 @@ export const Dropdown = forwardRef(
               if (!isNoResultsFound && !cancelHandleClick) handleClick(option)
             }}
             onMouseEnter={(e) =>
+              // Measure the row itself, not the child the pointer entered on.
               TEXT_UTILS.isContentTextEllipsis(
                 getElementToEllipsis?.()
                   ? getElementToEllipsis()
-                  : e.target?.firstChild,
+                  : e.currentTarget.firstChild,
               ) &&
               setRowTooltip({
-                label: option.name,
-                top: e.target.offsetTop - listRef?.current.scrollTop,
+                // A name rendered as markup has no string to show; use its text.
+                label:
+                  typeof option.name === 'string'
+                    ? option.name
+                    : e.currentTarget.textContent,
+                top: e.currentTarget.offsetTop - listRef?.current.scrollTop,
               })
             }
             onMouseLeave={() => setRowTooltip()}
@@ -446,7 +451,7 @@ export const Dropdown = forwardRef(
           <div
             className={`dropdown__tooltip dropdown__tooltip-${tooltipPosition}`}
             aria-label={rowTooltip.label}
-            tooltip-position={tooltipPosition}
+            data-tooltip-position={tooltipPosition}
             style={{top: rowTooltip.top}}
           ></div>
         )}

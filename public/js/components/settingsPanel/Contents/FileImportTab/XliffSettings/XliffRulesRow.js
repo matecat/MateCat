@@ -87,9 +87,16 @@ export const XliffRulesRow = ({
             ...xliffOptions.match_category.map((value) => ({
               ...value,
               id: getMatchCategoryExtendedId(value.id),
+              name: `Map to '${value.name.trim()}'`,
             })),
           ]
-        : [...acc, {id: value, name: value === 'new' ? 'N.A.' : value}],
+        : [
+            ...acc,
+            {
+              id: value,
+              name: value === 'new' ? 'Ignore target (run TM analysis)' : value,
+            },
+          ],
     [],
   )
 
@@ -162,7 +169,7 @@ export const XliffRulesRow = ({
               }))}
               activeOption={
                 formData?.analysis === 'new'
-                  ? {id: 'na', name: 'N.A.'}
+                  ? {id: 'na', name: 'N/A (determined by TM)'}
                   : value && {id: value, name: value}
               }
               onSelect={(option) => onChange(option.id)}

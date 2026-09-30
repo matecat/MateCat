@@ -69,7 +69,7 @@ export const SegmentationRule = ({segmentationRule, setSegmentationRule}) => {
   return (
     <div className="options-box seg_rule">
       <div className="option-description">
-        <h2>Segmentation Rules</h2>
+        <h2>Segmentation rules</h2>
         <p>
           Select how sentences are split according to specific types of content.
         </p>

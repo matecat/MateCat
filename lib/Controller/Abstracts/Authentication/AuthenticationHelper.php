@@ -12,6 +12,7 @@ use ReflectionException;
 use Throwable;
 use TypeError;
 use Utils\Logger\LoggerFactory;
+use Utils\Session\PhpSession;
 use Utils\Session\SessionStore;
 use Utils\Session\StatelessSessionViolation;
 
@@ -201,7 +202,7 @@ class AuthenticationHelper
 
     protected function sessionIsActive(): bool
     {
-        return session_status() === PHP_SESSION_ACTIVE;
+        return PhpSession::isActive();
     }
 
     /**

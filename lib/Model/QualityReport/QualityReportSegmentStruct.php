@@ -13,6 +13,7 @@ use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
+use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Utils\LQA\QA;
@@ -105,6 +106,11 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
     public array $dataRefMap = [];
 
     protected string $tm_analysis_status;
+
+    /**
+     * @var array<mixed>
+     */
+    public array $history = [];
 
     /**
      * @return string

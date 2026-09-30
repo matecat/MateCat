@@ -465,7 +465,10 @@ class ChangePasswordControllerTest extends AbstractTest
 
         // Misses are cached too, so the assertions at the end of this test would otherwise leave the
         // key holding a miss for a day and poison the next run: start from a cold key.
-        $jDao->destroyCacheForIdAndPassword($jobId, self::JOB_PASSWORD);
+        $cold = new JobStruct();
+        $cold->id = $jobId;
+        $cold->password = self::JOB_PASSWORD;
+        $jDao->destroyCache($cold);
 
         $this->assertInstanceOf(
             JobStruct::class,
@@ -510,7 +513,7 @@ class ChangePasswordControllerTest extends AbstractTest
         $crDao = new ChunkReviewDao(obtainTestDatabase());
 
         // see the note above: the closing assertions cache a miss on these keys
-        $crDao->destroyCacheForJobPassword($jobId, 'cp_revpw');
+        $crDao->destroyCachesByJobAndPassword($jobId, 'cp_revpw');
 
         $this->assertInstanceOf(
             ChunkReviewStruct::class,

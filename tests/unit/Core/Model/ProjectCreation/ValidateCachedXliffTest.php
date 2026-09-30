@@ -139,7 +139,7 @@ class ValidateCachedXliffTest extends AbstractTest
         try {
             $this->expectException(Exception::class);
             $this->expectExceptionCode(-3);
-            $this->expectExceptionMessage('Failed to find converted Xliff');
+            $this->expectExceptionMessage('Failed to find converted XLIFF');
 
             $this->service->callValidateCachedXliff(
                 $tmpFile,

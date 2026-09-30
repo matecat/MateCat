@@ -10,7 +10,9 @@
       "nullable": true
     },
     "name": {
-      "type": "string"
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 255
     },
     "json": {
       "type": "object",
@@ -110,6 +112,11 @@
     "yaml": {
       "type": "object",
       "properties": {
+        "force_double_quoting": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
         "translate_keys": {
           "type": "array",
           "nullable": true

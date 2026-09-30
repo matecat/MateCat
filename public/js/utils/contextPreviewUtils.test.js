@@ -763,7 +763,10 @@ describe('extractSegmentContextFields', () => {
     const seg = {
       context_url: null,
       metadata: [
-        {meta_key: 'resname', meta_value: 'data-node-path=/content/jcr:content'},
+        {
+          meta_key: 'resname',
+          meta_value: 'data-node-path=/content/jcr:content',
+        },
         {meta_key: 'restype', meta_value: 'x-client_nodepath'},
         {meta_key: 'x-client-name', meta_value: 'AEM'},
       ],
@@ -882,8 +885,7 @@ describe('tagSegments — strategy pass (metadataMap)', () => {
     // Simulates the race condition: first call has no metadata, so SID 1
     // is text-matched to #hero. Second call brings SID 2 with point
     // mapping to #hero — SID 1 must be evicted.
-    document.body.innerHTML =
-      '<p id="hero">Hello world</p><p>Hello world</p>'
+    document.body.innerHTML = '<p id="hero">Hello world</p><p>Hello world</p>'
     const heroEl = document.body.querySelector('#hero')
     const otherEl = document.body.querySelectorAll('p')[1]
 
@@ -952,7 +954,12 @@ describe('updateNodeTranslation — internal_id grouping (split trans-units)', (
     tagWithSids(p, [1, 2])
     const result = updateNodeTranslation(p, [
       {sid: 1, source: 'First part', target: 'Erster Teil', internal_id: 'tu1'},
-      {sid: 2, source: 'second part', target: 'zweiter Teil', internal_id: 'tu1'},
+      {
+        sid: 2,
+        source: 'second part',
+        target: 'zweiter Teil',
+        internal_id: 'tu1',
+      },
     ])
     expect(result).toBe('ok')
     expect(p.textContent.trim()).toBe('Erster Teil zweiter Teil')
@@ -1175,7 +1182,9 @@ describe('tagSegments — AEM x-client_nodepath dispatch', () => {
       },
     )
     expect(getSidsFromElement(document.body.querySelector('p'))).toContain(1)
-    expect(getSidsFromElement(document.body.querySelectorAll('p')[1])).not.toContain(1)
+    expect(
+      getSidsFromElement(document.body.querySelectorAll('p')[1]),
+    ).not.toContain(1)
     expect(
       getSidsFromElement(document.body.querySelector('[data-node-path]')),
     ).not.toContain(1)
@@ -1207,7 +1216,9 @@ describe('tagSegments — AEM x-client_nodepath dispatch', () => {
       getSidsFromElement(document.body.querySelector('[data-node-path]')),
     ).not.toContain(1)
     // Pass 2 falls through to text-match and tags the <p> outside the container
-    expect(getSidsFromElement(document.body.querySelectorAll('p')[1])).toContain(1)
+    expect(
+      getSidsFromElement(document.body.querySelectorAll('p')[1]),
+    ).toContain(1)
   })
 
   it('falls back when container element not found', () => {
@@ -1257,19 +1268,15 @@ describe('tagSegments — AEM x-client_nodepath dispatch', () => {
         <p>Hello</p>
       </div>
     `
-    tagSegments(
-      document.body,
-      [{sid: 1, source: 'Hello', target: ''}],
-      {
-        metadataMap: {
-          1: {
-            resname: 'data-node-path=/content/jcr:content',
-            restype: 'x-client_nodepath',
-            client_name: 'aem',
-          },
+    tagSegments(document.body, [{sid: 1, source: 'Hello', target: ''}], {
+      metadataMap: {
+        1: {
+          resname: 'data-node-path=/content/jcr:content',
+          restype: 'x-client_nodepath',
+          client_name: 'aem',
         },
       },
-    )
+    })
     expect(getSidsFromElement(document.body.querySelector('p'))).toContain(1)
   })
 })
@@ -1301,7 +1308,9 @@ describe('tagSegments — x-attribute_name_value without client_name (plain sele
     expect(
       getSidsFromElement(document.body.querySelector('[data-node-path]')),
     ).toContain(1)
-    expect(getSidsFromElement(document.body.querySelector('p'))).not.toContain(1)
+    expect(getSidsFromElement(document.body.querySelector('p'))).not.toContain(
+      1,
+    )
   })
 
   it('falls back when container element not found', () => {
@@ -1351,7 +1360,11 @@ describe('tagSegments — segment source ending with &nbsp;', () => {
       '<p>Get inspired by our print solutions. Ends 2/28. </p>'
     const p = document.body.querySelector('p')
     tagSegments(document.body, [
-      {sid: 1, source: 'Get inspired by our print solutions. Ends 2/28.&nbsp;', target: ''},
+      {
+        sid: 1,
+        source: 'Get inspired by our print solutions. Ends 2/28.&nbsp;',
+        target: '',
+      },
     ])
     expect(getSidsFromElement(p)).toContain(1)
   })
@@ -1369,5 +1382,224 @@ describe('tagSegments — segment source ending with &nbsp;', () => {
       },
     ])
     expect(getSidsFromElement(p)).toContain(42)
+  })
+})
+
+import {
+  checkNodeTranslationStatus,
+  clearHighlights,
+  highlightBySid,
+  setActiveHighlight,
+  suppressClickTraps,
+  resolveScreenshotUrl,
+  replaceTextContent,
+} from './contextPreviewUtils'
+
+describe('replaceTextContent (extra branches)', () => {
+  it('creates a text node when the element has none', () => {
+    const el = document.createElement('div')
+    replaceTextContent(el, 'hello')
+    expect(el.textContent).toBe('hello')
+    expect(el.firstChild.nodeType).toBe(Node.TEXT_NODE)
+  })
+
+  it('falls back to the first nested text node when no direct text exists', () => {
+    const el = document.createElement('li')
+    el.innerHTML = '<a>original</a>'
+    replaceTextContent(el, 'translated')
+    expect(el.querySelector('a').textContent).toBe('translated')
+  })
+})
+
+describe('checkNodeTranslationStatus', () => {
+  const build = (sids) => {
+    const el = document.createElement('p')
+    el.setAttribute('data-context-sids', sids)
+    return el
+  }
+
+  it('returns no-target when the element has no sids', () => {
+    expect(checkNodeTranslationStatus(build(''), [])).toBe('no-target')
+  })
+
+  it('returns no-target when not all sids have a matching segment', () => {
+    const el = build('1,2')
+    expect(
+      checkNodeTranslationStatus(el, [{sid: 1, source: 'a', target: 'b'}]),
+    ).toBe('no-target')
+  })
+
+  it('returns no-target when a target is empty', () => {
+    const el = build('1')
+    expect(
+      checkNodeTranslationStatus(el, [{sid: 1, source: 'a', target: ''}]),
+    ).toBe('no-target')
+  })
+
+  it('returns ok when all targets are identical', () => {
+    const el = build('1,2')
+    expect(
+      checkNodeTranslationStatus(el, [
+        {sid: 1, internal_id: 'a', source: 's', target: 'ciao'},
+        {sid: 2, internal_id: 'b', source: 's', target: 'ciao'},
+      ]),
+    ).toBe('ok')
+  })
+
+  it('returns mismatch when targets differ', () => {
+    const el = build('1,2')
+    expect(
+      checkNodeTranslationStatus(el, [
+        {sid: 1, internal_id: 'a', source: 's', target: 'ciao'},
+        {sid: 2, internal_id: 'b', source: 's', target: 'hola'},
+      ]),
+    ).toBe('mismatch')
+  })
+})
+
+describe('clearHighlights', () => {
+  it('unwraps mark elements back to text', () => {
+    const container = document.createElement('div')
+    container.innerHTML =
+      '<p>a <mark class="context-preview-highlight">word</mark> here</p>'
+    clearHighlights(container)
+    expect(container.querySelectorAll('mark').length).toBe(0)
+    expect(container.querySelector('p').textContent).toBe('a word here')
+  })
+
+  it('does nothing when there are no highlights', () => {
+    const container = document.createElement('div')
+    container.innerHTML = '<p>plain</p>'
+    clearHighlights(container)
+    expect(container.querySelector('p').textContent).toBe('plain')
+  })
+})
+
+describe('highlightBySid', () => {
+  it('returns empty result for missing container or sid', () => {
+    expect(highlightBySid(null, 1)).toEqual({total: 0, marks: []})
+    const c = document.createElement('div')
+    expect(highlightBySid(c, null)).toEqual({total: 0, marks: []})
+  })
+
+  it('returns empty result when no element matches the sid', () => {
+    const c = document.createElement('div')
+    c.innerHTML = '<p data-context-sids="9">text</p>'
+    expect(highlightBySid(c, 1)).toEqual({total: 0, marks: []})
+  })
+
+  it('wraps matching text nodes in marks and flags the active occurrence', () => {
+    const c = document.createElement('div')
+    c.innerHTML =
+      '<p data-context-sids="1">first</p><p data-context-sids="1">second</p>'
+    const result = highlightBySid(c, 1, 1)
+    expect(result.total).toBe(2)
+    const marks = c.querySelectorAll('mark.context-preview-highlight')
+    expect(marks.length).toBe(2)
+    const active = c.querySelectorAll('.context-preview-highlight--active')
+    expect(active.length).toBe(1)
+    expect(active[0].textContent).toBe('second')
+  })
+
+  it('skips whitespace-only text nodes and text already inside a mark', () => {
+    const c = document.createElement('div')
+    c.innerHTML =
+      '<p data-context-sids="1">  <mark class="context-preview-highlight">kept</mark> word</p>'
+    const result = highlightBySid(c, 1)
+    expect(result.total).toBe(1)
+  })
+})
+
+describe('setActiveHighlight', () => {
+  it('returns null when container is missing', () => {
+    expect(setActiveHighlight(null, 0)).toBeNull()
+  })
+
+  it('moves the active class to the chosen occurrence', () => {
+    const c = document.createElement('div')
+    c.innerHTML =
+      '<p data-context-sids="1"><mark class="context-preview-highlight context-preview-highlight--active">a</mark></p>' +
+      '<p data-context-sids="1"><mark class="context-preview-highlight">b</mark></p>'
+    const first = setActiveHighlight(c, 1)
+    expect(first.textContent).toBe('b')
+    expect(first.classList.contains('context-preview-highlight--active')).toBe(
+      true,
+    )
+    expect(
+      c.querySelectorAll('.context-preview-highlight--active').length,
+    ).toBe(1)
+  })
+
+  it('clamps an out-of-range index to the last occurrence', () => {
+    const c = document.createElement('div')
+    c.innerHTML =
+      '<p data-context-sids="1"><mark class="context-preview-highlight">a</mark></p>'
+    const res = setActiveHighlight(c, 99)
+    expect(res.textContent).toBe('a')
+  })
+
+  it('returns null when there are no marks with an ancestor', () => {
+    const c = document.createElement('div')
+    c.innerHTML = '<mark class="context-preview-highlight">orphan</mark>'
+    expect(setActiveHighlight(c, 0)).toBeNull()
+  })
+})
+
+describe('suppressClickTraps', () => {
+  beforeEach(() => jest.useFakeTimers())
+  afterEach(() => jest.useRealTimers())
+
+  it('does nothing for a null container', () => {
+    expect(() => suppressClickTraps(null)).not.toThrow()
+  })
+
+  it('disables pointer events on empty positioned overlays', () => {
+    const original = global.requestIdleCallback
+    delete global.requestIdleCallback
+    const container = document.createElement('div')
+    const overlay = document.createElement('div')
+    overlay.style.position = 'absolute'
+    const content = document.createElement('div')
+    content.style.position = 'fixed'
+    content.innerHTML = '<p>real text</p>'
+    container.appendChild(overlay)
+    container.appendChild(content)
+    suppressClickTraps(container)
+    jest.runAllTimers()
+    expect(overlay.style.pointerEvents).toBe('none')
+    expect(content.style.pointerEvents).toBe('')
+    global.requestIdleCallback = original
+  })
+})
+
+describe('resolveScreenshotUrl', () => {
+  afterEach(() => {
+    delete global.fetch
+  })
+
+  it('returns the url unchanged when it is not a .url file', async () => {
+    await expect(resolveScreenshotUrl('http://x/img.png')).resolves.toBe(
+      'http://x/img.png',
+    )
+    await expect(resolveScreenshotUrl(null)).resolves.toBeNull()
+  })
+
+  it('resolves the redirect target from a .url file', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      text: () =>
+        Promise.resolve('window.location.href = "http://target/final.png"'),
+    })
+    await expect(resolveScreenshotUrl('http://x/shot.url')).resolves.toBe(
+      'http://target/final.png',
+    )
+  })
+
+  it('throws when the .url file has no redirect', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue({text: () => Promise.resolve('nothing here')})
+    await expect(resolveScreenshotUrl('http://x/shot.url')).rejects.toThrow(
+      'Unable to resolve screenshot url',
+    )
   })
 })

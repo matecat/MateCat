@@ -43,22 +43,22 @@ const renderMandatoryIssues = (
 describe('MandatoryIssues', () => {
   test('shows "R1 + R2" as active option when mandatoryIssues is ["r1", "r2"]', () => {
     renderMandatoryIssues(['r1', 'r2'])
-    expect(screen.getByTestId('active-option').textContent).toBe('R1 + R2')
+    expect(screen.getByTestId('active-option')).toHaveTextContent('R1 + R2')
   })
 
   test('shows "None" as active option when mandatoryIssues is empty', () => {
     renderMandatoryIssues([])
-    expect(screen.getByTestId('active-option').textContent).toBe('None')
+    expect(screen.getByTestId('active-option')).toHaveTextContent('None')
   })
 
   test('shows "Only R1" as active option when mandatoryIssues is ["r1"]', () => {
     renderMandatoryIssues(['r1'])
-    expect(screen.getByTestId('active-option').textContent).toBe('Only R1')
+    expect(screen.getByTestId('active-option')).toHaveTextContent('Only R1')
   })
 
   test('shows "Only R2" as active option when mandatoryIssues is ["r2"]', () => {
     renderMandatoryIssues(['r2'])
-    expect(screen.getByTestId('active-option').textContent).toBe('Only R2')
+    expect(screen.getByTestId('active-option')).toHaveTextContent('Only R2')
   })
 
   test('selecting "r1" passes updater that sets mandatoryIssues to ["r1"]', () => {

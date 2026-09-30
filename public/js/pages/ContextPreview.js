@@ -3,8 +3,8 @@ import {mountPage} from './mountPage'
 import ContextPreviewChannel from '../utils/contextPreviewChannel'
 import {findSegmentSidsByClick, tagSegments, suppressClickTraps, getSidsFromElement, getSegmentNodeMap, checkNodeTranslationStatus} from '../utils/contextPreviewUtils'
 import {SegmentedControl} from '../components/common/SegmentedControl'
-import IconChevronLeft from '../components/icons/IconChevronLeft'
-import IconChevronRight from '../components/icons/IconChevronRight'
+import IconChevronLeft from '../../img/icons/IconChevronLeft'
+import IconChevronRight from '../../img/icons/IconChevronRight'
 import useContextDocument from '../hooks/useContextDocument'
 import useContextHighlight from '../hooks/useContextHighlight'
 import useContextPreviewMessages from '../hooks/useContextPreviewMessages'
@@ -46,7 +46,10 @@ const isRTLLanguage = (code) => {
   try {
     const dir = new Intl.Locale(code).textInfo?.direction
     if (dir) return dir === 'rtl'
-  } catch {}
+  } catch {
+    // Intl.Locale throws on a malformed tag, and textInfo is missing on older
+    // engines. Either way the primary-subtag table below is the answer.
+  }
   return RTL_PRIMARY.has(code.split('-')[0].toLowerCase())
 }
 

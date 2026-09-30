@@ -171,9 +171,11 @@ function htmlTemplatePlugin() {
           )
         }
 
-        const injection =
-          `    <!-- Vite assets (auto-generated) -->\n${tags.join('\n')}\n`
-        html = html.replace('</body>', injection + '</body>')
+        const headTags = tags.filter(t => t.includes('rel="stylesheet"'))
+        const bodyTags = tags.filter(t => !t.includes('rel="stylesheet"'))
+
+        html = html.replace('</head>', headTags.join('\n') + '\n</head>')
+        html = html.replace('</body>', bodyTags.join('\n') + '\n</body>')
 
         writeFileSync(outputPath, html)
         console.log(
@@ -272,6 +274,7 @@ export default defineConfig(({mode, command}) => {
       preprocessorOptions: {
         scss: {
           quietDeps: true,
+          loadPaths: [resolve('public/css/sass')],
         },
       },
     },

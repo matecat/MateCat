@@ -401,4 +401,25 @@ class SetCurrentSegmentControllerTest extends AbstractTest
 
         $this->controller->set();
     }
+
+    /**
+     * validateTheRequest() sanitizes id_segment before splitting it on "-", so "0-1" survives its
+     * own empty() gate and only collapses to an empty segment id afterwards, inside set().
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function set_throws_invalid_argument_when_the_segment_part_of_id_segment_is_empty(): void
+    {
+        $this->setChunkFromCredential(SourcePages::SOURCE_PAGE_TRANSLATE);
+        $this->setRequestParams([
+            'id_segment' => '0-1',
+        ]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Missing segment id');
+        $this->expectExceptionCode(-1);
+
+        $this->controller->set();
+    }
 }

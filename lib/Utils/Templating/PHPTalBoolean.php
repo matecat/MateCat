@@ -2,6 +2,7 @@
 
 namespace Utils\Templating;
 
+use JsonSerializable;
 use Stringable;
 
 /**
@@ -11,7 +12,7 @@ use Stringable;
  * Time: 16:11
  *
  */
-class PHPTalBoolean implements Stringable
+class PHPTalBoolean implements Stringable, JsonSerializable
 {
 
     private bool $value;
@@ -28,6 +29,17 @@ class PHPTalBoolean implements Stringable
     public function __toString(): string
     {
         return $this->value ? 'true' : 'false';
+    }
+
+    /**
+     * Handed back as a real boolean, so that a whole-payload json_encode() emits true/false rather
+     * than the object, and the page receives a boolean instead of the string "true".
+     *
+     * @return bool
+     */
+    public function jsonSerialize(): bool
+    {
+        return $this->value;
     }
 
 }

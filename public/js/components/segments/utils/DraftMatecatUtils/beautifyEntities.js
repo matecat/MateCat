@@ -1,5 +1,5 @@
 import getEntities from './getEntities'
-import {EditorState, Modifier, SelectionState, ContentState} from 'draft-js'
+import {EditorState, Modifier, SelectionState} from 'draft-js'
 /**
  *
  * @param editorState

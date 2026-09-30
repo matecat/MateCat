@@ -10,7 +10,6 @@
  * position:        (String, Default "bl") Position of the notification. Available: tr (top right), tl (top left),
  *                      tc (top center), br (bottom right), bl (bottom left), bc (bottom center)
  * autoDismiss:     (Boolean, Default true) Set if notification is dismissible by the user.
- * allowHtml:       (Boolean, Default false) Set to true if the text contains HTML, like buttons
  * closeCallback    (Function) A callback function that will be called when the notification is about to be removed.
  * openCallback     (Function) A callback function that will be called when the notification is successfully added.
  * dismissable      (Boolean, Default true) If show or not the button to close the notification
@@ -132,7 +131,6 @@ const NotificationBox = () => {
                     text={notification.text}
                     autoDismiss={notification.autoDismiss}
                     onRemove={closeNotification}
-                    allowHtml={notification.allowHtml}
                     timer={notification.timer}
                     closeCallback={notification.closeCallback}
                     openCallback={notification.openCallback}
@@ -148,7 +146,7 @@ const NotificationBox = () => {
               return (
                 <div
                   key={index}
-                  className={`notifications-position-${position}`}
+                  className={`notifications-position notifications-position-${position}`}
                   id={'not-' + index}
                 >
                   {items}

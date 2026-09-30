@@ -23,6 +23,7 @@ use Model\FeaturesBase\Hook\Event\Run\DecorateViewEvent;
 use PHPTAL;
 use TypeError;
 use Utils\Registry\AppConfig;
+use Utils\Templating\BootstrapConfig;
 use Utils\Templating\PHPTalBoolean;
 use Utils\Templating\PHPTalMap;
 use Utils\Templating\PHPTALWithAppend;
@@ -38,6 +39,21 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
 {
 
     protected bool $isView = true;
+
+    /**
+     * Whether a search engine may list this view's URL. Off unless a view opts in, because most of
+     * them address a specific job and carry its password in the URL: the link is the credential, so
+     * one published on a crawlable page puts the address in a search index.
+     *
+     * A `Disallow` in robots.txt did not prevent that — it stops the fetch, not the listing, and an
+     * address reached through an inbound link is listed without ever being read. Only
+     * `X-Robots-Tag: noindex` removes it, and a crawler reads that on the page itself, which is why
+     * the answer has to come from here rather than from a file listing paths.
+     *
+     * Opting in is a deliberate choice for a page that exists to be found: the entry page, sign-in
+     * and the public converter. A new view is not indexable by omission.
+     */
+    protected bool $isIndexable = false;
 
     /**
      * @var PHPTALWithAppend
@@ -93,8 +109,16 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->view = new PHPTALWithAppend($templatePath);
         $this->httpCode = $code;
 
-        $this->view->{'basepath'} = AppConfig::$BASEURL;
-        $this->view->{'hostpath'} = AppConfig::$HTTPHOST;
+        // Part of setting up the view, not of filling it: it holds no values of its own, it reads the
+        // view's back and encodes them at the moment the template renders it. Whatever has been
+        // assigned by then is in the document, so nothing here depends on the order below.
+        $this->view->set('config_json', new BootstrapConfig($this->view));
+
+        // `?: '/'` reproduces here, once, the `| string:/` fallback the templates used to apply
+        // inline. `| string:/` only fires on an empty value, so a value that is already '/' renders
+        // identically wherever that fallback is still written.
+        $this->view->{'basepath'} = AppConfig::$BASEURL ?: '/';
+        $this->view->{'hostpath'} = AppConfig::$HTTPHOST ?: '/';
         $this->view->{'build_number'} = AppConfig::$BUILD_NUMBER;
         $this->view->{'support_mail'} = AppConfig::$SUPPORT_MAIL;
         $this->view->{'enableMultiDomainApi'} = new PHPTalBoolean(AppConfig::$ENABLE_MULTI_DOMAIN_API);
@@ -127,7 +151,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
             $this->view->{'googleAuthURL'} = (AppConfig::$GOOGLE_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GoogleProvider::PROVIDER_NAME)->getAuthorizationUrl($this->sessionStore()) : "";
             $this->view->{'githubAuthUrl'} = (AppConfig::$GITHUB_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GithubProvider::PROVIDER_NAME)->getAuthorizationUrl($this->sessionStore()) : "";
             $this->view->{'linkedInAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(LinkedInProvider::PROVIDER_NAME)->getAuthorizationUrl($this->sessionStore()) : "";
-            $this->view->{'microsoftAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(MicrosoftProvider::PROVIDER_NAME)->getAuthorizationUrl($this->sessionStore()) : "";
+            $this->view->{'microsoftAuthUrl'} = (AppConfig::$MICROSOFT_OAUTH_CLIENT_ID) ? OauthClient::getInstance(MicrosoftProvider::PROVIDER_NAME)->getAuthorizationUrl($this->sessionStore()) : "";
             $this->view->{'facebookAuthUrl'} = (AppConfig::$FACEBOOK_OAUTH_CLIENT_ID) ? OauthClient::getInstance(FacebookProvider::PROVIDER_NAME)->getAuthorizationUrl($this->sessionStore()) : "";
         } catch (TypeError) {
             $this->view->{'googleAuthURL'} = "";
@@ -196,6 +220,11 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
     public function render(?int $code = null): never
     {
         $this->response->noCache();
+
+        if (!$this->isIndexable) {
+            $this->response->header('X-Robots-Tag', 'noindex, nofollow');
+        }
+
         $this->response->code($code ?? $this->httpCode);
 
         if (isset($this->view)) {
@@ -221,13 +250,40 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         return $this->sessionStore()->has('wanted_url');
     }
 
+    /**
+     * A view that must not be listed has to say so on a redirect as well. A crawler reaching a job
+     * URL carries no session, so it is sent to sign-in and never reaches render(): without the
+     * header on that response the address it followed is still eligible to be listed.
+     *
+     * The two redirects below write headers directly instead of going through the Klein response,
+     * so this one goes out the same way. Kept overridable so a test can observe it, since a header
+     * emitted under CLI cannot be read back.
+     */
+    protected function sendNoIndexHeaderOnRedirect(): void
+    {
+        if (!$this->isIndexable) {
+            $this->emitRawHeader('X-Robots-Tag: noindex, nofollow');
+        }
+    }
+
+    /**
+     * The one line a test can replace: a header emitted under CLI cannot be read back. Every raw
+     * header on the redirect path goes through here, so a test observing this observes all of them.
+     */
+    protected function emitRawHeader(string $header, bool $replace = true): void
+    {
+        header($header, $replace);
+    }
+
     public function redirectToWantedUrl(): never
     {
+        $this->sendNoIndexHeaderOnRedirect();
+
         $wantedUrl = $this->sessionStore()->get('wanted_url');
         $wantedUrl = is_string($wantedUrl) ? $wantedUrl : '';
         $this->sessionStore()->remove('wanted_url');
 
-        header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . $wantedUrl, false);
+        $this->emitRawHeader("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . $wantedUrl, false);
 
         if (AppConfig::$ENV === 'testing') {
             throw new RenderTerminatedException();
@@ -238,8 +294,10 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
 
     public function redirectToSignin(): never
     {
+        $this->sendNoIndexHeaderOnRedirect();
+
         $this->sessionStore()->set('wanted_url', ltrim($_SERVER['REQUEST_URI'], '/'));
-        header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . "signin", false);
+        $this->emitRawHeader("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . "signin", false);
 
         if (AppConfig::$ENV === 'testing') {
             throw new RenderTerminatedException();

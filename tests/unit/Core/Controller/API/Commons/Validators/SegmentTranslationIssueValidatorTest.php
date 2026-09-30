@@ -236,7 +236,7 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
         $this->setRequest($this->baseParams(['id_issue' => (string) self::QA_ENTRY_ID]));
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('issue not found');
+        $this->expectExceptionMessage('Issue not found');
         $this->makeValidator()->_validate();
     }
 
@@ -258,7 +258,7 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
         $this->setRequest($this->baseParams(['id_issue' => (string) self::QA_ENTRY_ID]));
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('issue not found');
+        $this->expectExceptionMessage('Issue not found');
         $this->makeValidator()->_validate();
     }
 
@@ -361,5 +361,23 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
         $validator->_validate();
 
         $this->assertSame(self::QA_ENTRY_ID, $validator->issue->id);
+    }
+
+    /**
+     * Without an id_issue param __ensureIssueIsInScope() never runs, so the issue is still null by
+     * the time the DELETE branch checks it. setChunkReview() is deliberately not called: the guard
+     * throws before $this->chunkReview is dereferenced.
+     */
+    #[Test]
+    public function throws_validation_error_when_delete_has_no_issue_in_scope(): void
+    {
+        $this->seedTranslation();
+        $this->setRequest($this->baseParams(), 'DELETE');
+
+        $validator = $this->makeValidator();
+
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('Issue not found');
+        $validator->_validate();
     }
 }

@@ -69,3 +69,17 @@ test('renders nothing extra when there are no suggestions', () => {
 
   expect(screen.queryByRole('list')).not.toBeInTheDocument()
 })
+
+test('clicking ignore on a message without an error field does not call LXQ.ignoreError', () => {
+  const messageWithoutError = {msg: 'no error field', type: 'error'}
+  render(
+    <LexiqaTooltipInfo
+      messages={[messageWithoutError]}
+      onReplaceWord={jest.fn()}
+    />,
+  )
+
+  fireEvent.click(screen.getByText('Ignore'))
+
+  expect(LXQ.ignoreError).not.toHaveBeenCalled()
+})

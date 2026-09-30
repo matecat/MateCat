@@ -34,6 +34,7 @@ export const CrossLanguagesMatches = () => {
     const newValueActiveLang1 = languages.find(
       (lang) => lang.id === multiMatchLangs?.primary,
     )
+
     setActiveLang1((prevState) =>
       !isEqual(prevState, newValueActiveLang1)
         ? newValueActiveLang1
@@ -55,21 +56,28 @@ export const CrossLanguagesMatches = () => {
       isFirstRender.current = false
       return
     }
+
     const settings = {
       primary: activeLang1?.id,
       secondary: activeLang2?.id,
     }
 
     setMultiMatchLangs(
-      typeof activeLang1?.id !== 'undefined' ? settings : undefined,
+      typeof activeLang1?.id !== 'undefined' ||
+        typeof activeLang2?.id !== 'undefined'
+        ? settings
+        : undefined,
     )
     setUserMetadataKey(
       METADATA_KEY,
-      typeof activeLang1?.id !== 'undefined' ? settings : {},
+      typeof activeLang1?.id !== 'undefined' ||
+        typeof activeLang2?.id !== 'undefined'
+        ? settings
+        : {},
     )
 
     if (SegmentActions.getContribution) {
-      if (settings.primary) {
+      if (settings.primary || settings.secondary) {
         SegmentActions.modifyTabVisibility('multiMatches', true)
         SegmentActions.getContributions(
           SegmentStore.getCurrentSegmentId(),
@@ -86,10 +94,10 @@ export const CrossLanguagesMatches = () => {
   return (
     <div className="options-box multi-match">
       <div className="option-description">
-        <h3>Cross-language Matches</h3>
+        <h3>Reference languages</h3>
         <p>
-          Get translation suggestions in other target languages you know as
-          reference.
+          View additional matches in a dedicated tab in up to two languages of
+          your choice.
         </p>
       </div>
       <div
@@ -99,17 +107,20 @@ export const CrossLanguagesMatches = () => {
         <Select
           name="multi-match-1"
           id="multi-match-1"
+          label="Language 1"
           title="Primary language suggestion"
-          placeholder="Primary language suggestion"
+          placeholder="None"
           options={languages}
           activeOption={activeLang1}
           showSearchBar={true}
+          maxHeightDroplist={280}
+          showResetButton={true}
+          resetFunction={() => setActiveLang1()}
           onSelect={(option) => {
             const lang = !(activeLang1 && activeLang1.id === option.id)
               ? option
               : undefined
             setActiveLang1(lang)
-            if (!lang) setActiveLang2()
           }}
         >
           {({name, id}) => ({
@@ -125,14 +136,17 @@ export const CrossLanguagesMatches = () => {
           })}
         </Select>
         <Select
-          name="multi-match-1"
-          id="multi-match-1"
+          name="multi-match-2"
+          id="multi-match-2"
+          label="Language 2"
           title="Secondary language suggestion"
-          placeholder="Secondary language suggestion"
+          placeholder="None"
           options={languages}
           activeOption={activeLang2}
           showSearchBar={true}
-          isDisabled={!activeLang1}
+          maxHeightDroplist={280}
+          showResetButton={true}
+          resetFunction={() => setActiveLang2()}
           onSelect={(option) =>
             setActiveLang2(
               !(activeLang2 && activeLang2.id === option.id)

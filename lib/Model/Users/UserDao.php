@@ -10,6 +10,8 @@ use Model\DataAccess\InvalidatesUserProfileCache;
 use PDO;
 use PDOException;
 use ReflectionException;
+use RuntimeException;
+use Throwable;
 use TypeError;
 
 /**
@@ -67,9 +69,28 @@ class UserDao extends AbstractDao
     }
 
     /**
+     * The cache address of one user, shared by the single and the batched read.
+     *
+     * Both have to name the same entry: it is what lets the uid eviction behind `destroyCache()`
+     * — which knows one uid and nothing about any list that uid appears in — evict what a member
+     * list cached.
+     */
+    private static function uidKeyMapPrefix(): string
+    {
+        return self::class . '::getByUid-';
+    }
+
+    /**
+     * Load several users at once.
+     *
+     * Each user is cached under its own entry rather than the set under one, so renaming a user
+     * evicts it everywhere through `destroyCache()`, and adding or removing a member leaves the
+     * other members cached. The cache read is a single round trip; only members that missed are
+     * read from the database.
+     *
      * @param array<int, int|string|array{uid:int|string}> $uids_array
      *
-     * @return UserStruct[]
+     * @return UserStruct[] Keyed by uid. Uids that match no row are absent.
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
@@ -92,34 +113,55 @@ class UserDao extends AbstractDao
             return [];
         }
 
-        $query = "SELECT * FROM " . self::TABLE .
-            " WHERE uid IN ( " . str_repeat('?,', count($sanitized_array) - 1) . '?' . " ) ";
-
-        $stmt = $this->_getStatementForQuery($query);
-
-        /**
-         * @var UserStruct[] $__resultSet
-         */
-        $__resultSet = $this->_fetchObjectMap(
-            $stmt,
+        $perUid = $this->_fetchObjectMapPerId(
+            $sanitized_array,
+            self::$_query_user_by_uid,
+            'uid',
             UserStruct::class,
-            $sanitized_array
+            self::uidKeyMapPrefix(),
+            fn(array $missing): array => $this->loadUsersByUids($missing)
         );
 
         $resultSet = [];
-        if (!is_iterable($__resultSet)) {
-            return $resultSet;
-        }
 
-        foreach ($__resultSet as $user) {
-            if (!$user instanceof UserStruct) {
-                continue;
+        foreach ($perUid as $uid => $rows) {
+            $user = $rows[0] ?? null;
+
+            if ($user instanceof UserStruct) {
+                $resultSet[$uid] = $user;
             }
-
-            $resultSet[$user->uid] = $user;
         }
 
         return $resultSet;
+    }
+
+    /**
+     * The uncached bulk read behind `getByUids()`. It fills cache entries but is never itself
+     * cached: a result addressed by the whole uid list is the thing no eviction door can reach.
+     *
+     * @param list<int|string> $uids
+     *
+     * @return array<int, list<UserStruct>>
+     * @throws PDOException
+     */
+    private function loadUsersByUids(array $uids): array
+    {
+        $query = "SELECT * FROM " . self::TABLE .
+            " WHERE uid IN ( " . str_repeat('?,', count($uids) - 1) . '?' . " ) ";
+
+        $stmt = $this->_getStatementForQuery($query);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, UserStruct::class);
+        $stmt->execute(array_values($uids));
+
+        $byUid = [];
+
+        foreach ($stmt->fetchAll() as $user) {
+            if ($user instanceof UserStruct) {
+                $byUid[(int)$user->uid][] = $user;
+            }
+        }
+
+        return $byUid;
     }
 
     /**
@@ -130,36 +172,23 @@ class UserDao extends AbstractDao
      * nothing — which is what stops one flow's link being spent on another, and keeps each flow's
      * lifetime governing only its own tokens.
      *
-     * The unmarked fallback exists for tokens issued before scoping. Those are still cross-usable,
-     * exactly as they were when they were minted, and stop being accepted once the last of them ages
-     * out of the confirmation window. Remove it then.
+     * The stored value is a digest, so the presented token is hashed before the lookup and the raw
+     * value never reaches a query. A stored value lifted from the table is therefore not a spendable
+     * link: presented as a token it would be hashed again, and the result matches no row.
+     *
+     * Tokens minted by earlier versions are not recognised. Both flows re-issue on request, so a
+     * link that predates the deploy is answered by asking for a new one.
      *
      * @param string $rawToken the value taken from the link, without a marker
      * @param AuthTokenScope $scope the flow the caller is serving
      *
      * @throws PDOException
-     * @throws ReflectionException
      */
     public function getByScopedConfirmationToken(string $rawToken, AuthTokenScope $scope): ?UserStruct
     {
-        return $this->getByConfirmationToken($scope->marker() . $rawToken)
-            ?? $this->getByConfirmationToken($rawToken);
-    }
-
-    /**
-     * Matches a stored token exactly, marker included. Prefer {@see getByScopedConfirmationToken()},
-     * which is what confines a token to the flow that minted it.
-     *
-     * @param string $token
-     *
-     * @return ?UserStruct
-     * @throws PDOException
-     */
-    public function getByConfirmationToken(string $token): ?UserStruct
-    {
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare(" SELECT * FROM users WHERE confirmation_token = ?");
-        $stmt->execute([$token]);
+        $stmt->execute([$scope->storedForm($rawToken)]);
         $stmt->setFetchMode(PDO::FETCH_CLASS, UserStruct::class);
 
         return $stmt->fetch() ?: null;
@@ -172,48 +201,52 @@ class UserDao extends AbstractDao
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Throwable
      */
     public function createUser(UserStruct $obj): ?UserStruct
     {
         $conn = $this->database->getConnection();
-        $this->database->begin();
 
-        $obj->create_date = date('Y-m-d H:i:s');
-        $stmt = $conn->prepare(
-            "INSERT INTO users " .
-            " ( uid, email, salt, pass, create_date, first_name, last_name, confirmation_token ) " .
-            " VALUES " .
-            " ( " .
-            " :uid, :email, :salt, :pass, :create_date, " .
-            " :first_name, :last_name, :confirmation_token " .
-            " )"
-        );
+        [$id, $record] = $this->database->transaction(function () use ($conn, $obj): array {
+            $obj->create_date = date('Y-m-d H:i:s');
+            $stmt = $conn->prepare(
+                "INSERT INTO users " .
+                " ( uid, email, salt, pass, create_date, first_name, last_name, confirmation_token ) " .
+                " VALUES " .
+                " ( " .
+                " :uid, :email, :salt, :pass, :create_date, " .
+                " :first_name, :last_name, :confirmation_token " .
+                " )"
+            );
 
-        $stmt->execute($obj->toArray([
-            'uid',
-            'email',
-            'salt',
-            'pass',
-            'create_date',
-            'first_name',
-            'last_name',
-            'confirmation_token'
-        ])
-        );
+            $stmt->execute($obj->toArray([
+                'uid',
+                'email',
+                'salt',
+                'pass',
+                'create_date',
+                'first_name',
+                'last_name',
+                'confirmation_token'
+            ])
+            );
 
-        $id = $conn->lastInsertId();
-        if ($id === false) {
-            throw new Exception('Unable to retrieve last inserted user id');
-        }
+            $id = $conn->lastInsertId();
+            if ($id === false) {
+                throw new Exception('Unable to retrieve last inserted user id');
+            }
 
-        $record = $this->getByUid((int)$id);
-        $conn->commit();
+            return [(int)$id, $this->getByUid((int)$id)];
+        });
 
+        // Both of these stay outside the scope, where the raw commit used to put them: the throw
+        // reports a row that is already durable, and rolling the insert back because the reload came
+        // up empty would turn a failed read into a failed write.
         if (!$record instanceof UserStruct) {
             throw new Exception('Unable to reload updated user');
         }
 
-        $this->invalidateUserProfileCache((int)$id);
+        $this->invalidateUserProfileCache($id);
 
         return $record;
     }
@@ -225,44 +258,48 @@ class UserDao extends AbstractDao
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Throwable
      */
     public function updateUser(UserStruct $obj): UserStruct
     {
         $conn = $this->database->getConnection();
-        $this->database->begin();
 
-        $stmt = $conn->prepare(
-            "UPDATE users
-            SET 
-                uid = :uid, 
-                email = :email, 
-                salt = :salt, 
-                pass = :pass, 
-                create_date = :create_date, 
-                first_name = :first_name, 
-                last_name = :last_name, 
-                confirmation_token = :confirmation_token, 
-                oauth_access_token = :oauth_access_token 
-            WHERE uid = :uid 
+        $record = $this->database->transaction(function () use ($conn, $obj): ?UserStruct {
+            $stmt = $conn->prepare(
+                "UPDATE users
+            SET
+                uid = :uid,
+                email = :email,
+                salt = :salt,
+                pass = :pass,
+                create_date = :create_date,
+                first_name = :first_name,
+                last_name = :last_name,
+                confirmation_token = :confirmation_token,
+                oauth_access_token = :oauth_access_token
+            WHERE uid = :uid
         "
-        );
+            );
 
-        $stmt->execute($obj->toArray([
-            'uid',
-            'email',
-            'salt',
-            'pass',
-            'create_date',
-            'first_name',
-            'last_name',
-            'confirmation_token',
-            'oauth_access_token'
-        ])
-        );
+            $stmt->execute($obj->toArray([
+                'uid',
+                'email',
+                'salt',
+                'pass',
+                'create_date',
+                'first_name',
+                'last_name',
+                'confirmation_token',
+                'oauth_access_token'
+            ])
+            );
 
-        $record = $this->getByUid((int)$obj->uid);
-        $conn->commit();
+            return $this->getByUid((int)$obj->uid);
+        });
 
+        // Outside the scope, where the raw commit used to put them: the update is already durable,
+        // and rolling it back because the reload came up empty would turn a failed read into a
+        // failed write.
         if (!$record instanceof UserStruct) {
             throw new Exception('Unable to reload updated user');
         }
@@ -292,7 +329,11 @@ class UserDao extends AbstractDao
             UserStruct::class,
             [
                 'uid' => $id,
-            ]
+            ],
+            // Named rather than left to the backtrace default, because getByUids() has to build
+            // the identical address from outside this method. The string is what that default
+            // produced, so entries already in Redis keep being found.
+            self::uidKeyMapPrefix() . $id
         )[0] ?? null;
 
         if (!$res instanceof UserStruct) {
@@ -303,10 +344,53 @@ class UserDao extends AbstractDao
     }
 
     /**
+     * The one way in from outside: a caller names the user it already holds, never a cache key it
+     * cannot see. A user row is reachable under two addresses — `getByUid()` and `getByEmail()` —
+     * and both have to go together, because a row left cached under either one answers lookups with
+     * the value it held before the write for the whole TTL. The door is what makes that pairing a
+     * property of the code rather than something each caller has to remember.
+     *
+     * `$retiredEmail` exists because the address is updatable — `updateUser()` writes
+     * `email = :email` — and a struct handed here after such a write carries only the new value, so
+     * the entry keyed on the old one is not derivable from it. `UserGDPRAnonymizeTask` is the caller
+     * that needs it: it rewrites the address to a tombstone and then has to evict the address the
+     * account was actually reachable under, which nothing on the struct still names.
+     *
+     * A null `email` is skipped rather than evicted: `users.email` is NOT NULL and `getByEmail()`
+     * takes a non-nullable string, so no stored row was ever cached under a null bind. There is no
+     * entry at that address to remove.
+     *
+     * This does not call `invalidateUserProfileCache()`. That bust hangs off the write methods in
+     * {@see InvalidatesUserProfileCache}, so it has already run by the time a caller gets here;
+     * repeating it would make the door look like the place that owns it.
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws RuntimeException when the struct carries no uid, which is the identity the entry is
+     *                          addressed by — there would be nothing to evict and a caller would
+     *                          believe it had invalidated the row
+     * @throws TypeError
+     */
+    public function destroyCache(UserStruct $user, ?string $retiredEmail = null): void
+    {
+        $uid = $user->uid ?? throw new RuntimeException('User uid must be set before cache invalidation');
+
+        $this->destroyCacheByUid($uid);
+
+        if ($user->email !== null) {
+            $this->destroyCacheByEmail($user->email);
+        }
+
+        if ($retiredEmail !== null && $retiredEmail !== $user->email) {
+            $this->destroyCacheByEmail($retiredEmail);
+        }
+    }
+
+    /**
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheByUid(int|string $uid): bool
+    private function destroyCacheByUid(int|string $uid): bool
     {
         $stmt = $this->_getStatementForQuery(self::$_query_user_by_uid);
 
@@ -355,7 +439,7 @@ class UserDao extends AbstractDao
      * @throws ReflectionException
      * @throws TypeError
      */
-    public function destroyCacheByEmail(string $email): bool
+    private function destroyCacheByEmail(string $email): bool
     {
         $stmt = $this->_getStatementForQuery(self::$_query_user_by_email);
         $userQuery = new UserStruct();

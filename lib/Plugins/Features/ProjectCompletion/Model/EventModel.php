@@ -12,7 +12,6 @@ use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\DataAccess\IDatabase;
-use Model\DataAccess\TransactionalTrait;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\ProjectCompletionEventSavedEvent;
 use Model\Jobs\JobStruct;
@@ -24,8 +23,6 @@ use TypeError;
 
 class EventModel
 {
-
-    use TransactionalTrait;
 
     /**
      * @var CompletionEventStruct
@@ -61,15 +58,12 @@ class EventModel
         $this->database = $database;
     }
 
-    protected function getTransactionalDatabase(): IDatabase
-    {
-        return $this->database;
-    }
-
     /**
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function save(): void
     {
@@ -84,9 +78,7 @@ class EventModel
         // counters into undo_data, and that snapshot and this event row must not be able to
         // survive each other. CompletionEventController::__performUndo() already does the same for
         // the undo direction.
-        $this->openTransaction();
-
-        try {
+        $this->database->transaction(function (): void {
             $this->chunkCompletionEventId = (int)$this->chunkCompletionEventDao->createFromChunk(
                 $this->chunk,
                 $this->eventStruct
@@ -95,12 +87,7 @@ class EventModel
             $project = $this->projectDao->findById($this->chunk->id_project) ?? throw new Exception('Project not found for chunk ' . $this->chunk->id_project);
             $this->featureSet->loadForProject($project);
             $this->featureSet->dispatch(new ProjectCompletionEventSavedEvent($this->chunk, $this->eventStruct, (int)$this->chunkCompletionEventId));
-
-            $this->commitTransaction();
-        } catch (Throwable $e) {
-            $this->rollbackTransaction();
-            throw $e;
-        }
+        });
     }
 
     public function getChunkCompletionEventId(): ?int

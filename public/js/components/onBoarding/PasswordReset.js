@@ -117,7 +117,7 @@ const PasswordReset = ({newPassword = false}) => {
                   }) => (
                     <Input
                       type={INPUT_TYPE.PASSWORD}
-                      placeholder="Current password"
+                      label="Current password"
                       {...{name, value, onChange, error}}
                     />
                   )}
@@ -137,7 +137,7 @@ const PasswordReset = ({newPassword = false}) => {
                 }) => (
                   <Input
                     type={INPUT_TYPE.PASSWORD}
-                    placeholder="New password"
+                    label="New password"
                     {...{name, value, onChange, error}}
                   />
                 )}
@@ -161,7 +161,7 @@ const PasswordReset = ({newPassword = false}) => {
                 }) => (
                   <Input
                     type={INPUT_TYPE.PASSWORD}
-                    placeholder="Confirm new password"
+                    label="Confirm new password"
                     {...{name, value, onChange, error}}
                   />
                 )}

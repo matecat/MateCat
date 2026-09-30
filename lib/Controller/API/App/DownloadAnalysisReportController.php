@@ -95,7 +95,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController
         $project = $this->getProjectDao()->findById((int)$id_project);
 
         if (empty($project)) {
-            throw new InvalidArgumentException("Wrong Id project provided", -10);
+            throw new InvalidArgumentException("Wrong ID project provided", -10);
         }
 
         $this->project = $project;

@@ -251,7 +251,7 @@ class TMSService
         //check for errors during the import
         switch ($importStatus->responseStatus) {
             case "400" :
-                throw new Exception("Can't load Glossary file right now, try later", -15);
+                throw new Exception("Can't load glossary file right now, try later", -15);
             case "404":
                 throw new InvalidArgumentException('File format not supported, please upload a glossary in XLSX, XLS or ODS format.', -15);
             case "406":

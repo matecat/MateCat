@@ -117,5 +117,5 @@ export default AnalyzePage
 
 mountPage({
   Component: AnalyzePage,
-  rootElement: document.getElementsByClassName('analyze-page')[0],
+  rootElement: document.getElementsByClassName('analyze')[0],
 })

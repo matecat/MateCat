@@ -1,4 +1,5 @@
-@use '../../commons/colors';
+@use '../../tokens/colors';
+@use 'commons/variables';
 
 .file-import-tab {
   &.settings-panel-contentwrapper-tab-background {
@@ -8,8 +9,8 @@
   p {
     display: block;
     text-align: left;
-    color: colors.$grey6;
-    font-size: 16px;
+    color: colors.$grey700;
+    font-size: variables.$font-size-small;
     line-height: 24px;
   }
 
@@ -24,7 +25,7 @@
   top: 0;
   z-index: 4;
   width: 100%;
-  background-color: colors.$grey5;
+  background-color: colors.$grey50;
 
   &:has(.select__dropdown-wrapper) {
     z-index: 5;
@@ -43,10 +44,8 @@
 
 .filters-params-accordion,
 .xliff-settings-container {
-  .accordion-component-title {
-    font-size: 18px !important;
-    font-weight: bold;
-  }
+  --accordion-title-font-size: #{variables.$font-size-base};
+  --accordion-title-font-weight: bold;
 }
 
 .filters-params-accordion-content {
@@ -62,6 +61,7 @@
 
   h3 {
     margin: 0;
+    font-size: variables.$font-size-base;
   }
 
   > :first-child {
@@ -73,21 +73,11 @@
   }
 
   .custom-segmented-control {
-    .segmented-control {
-      background-color: colors.$grey8;
-    }
-    .segmented-control__label {
-      line-height: 28px;
-    }
-    .segmented-control__cursor {
-      padding: 2px;
-    }
-    .segmented-control__cursor:before {
-      background-color: white;
-    }
-    .segmented-control input:checked + .segmented-control__label {
-      color: black;
-    }
+    --sc-bg: #{colors.$grey200};
+    --sc-label-line-height: 28px;
+    --sc-cursor-padding: 2px;
+    --sc-cursor-bg: #{colors.$white};
+    --sc-checked-color: #{colors.$black};
   }
 
   .container-segmented-control {
@@ -98,16 +88,10 @@
 }
 
 .xliff-settings-container {
-  .accordion-component {
-    overflow: visible;
-
-    .accordion-component-content {
-      overflow: visible;
-    }
-  }
+  --accordion-content-overflow: visible;
 
   .unsaved {
-    color: colors.$translatedBlue;
+    color: colors.$blue500;
   }
 }
 
@@ -119,7 +103,7 @@
 
   .select {
     color: colors.$black;
-    border-color: colors.$grey8;
+    border-color: colors.$grey200;
   }
 
   .select-with-label__wrapper .select {
@@ -127,7 +111,7 @@
   }
 
   .select--is-disabled {
-    background-color: colors.$grey9;
+    background-color: colors.$grey75;
   }
 }
 
@@ -151,7 +135,7 @@
 }
 
 .xliff-settings-column-name {
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   font-weight: bold;
 }
 
@@ -171,25 +155,18 @@
   //**** SELECT ****//
   .select-with-label__wrapper {
     .select {
-      font-size: 16px;
+      font-size: variables.$font-size-small;
       padding: 9px 46px 9px 12px;
-      border-radius: 2px;
       border: 1px solid rgba(34, 36, 38, 0.15);
-      box-shadow: inset 0 1px 3px #ddd;
-
-      &:hover {
-        border-color: rgba(34, 36, 38, 0.35);
-        box-shadow: none;
-      }
     }
 
     .select--is-focused,
     .select--is-focused:hover {
-      border: solid 1px #96c8da;
+      border: solid 1px colors.$grey300;
     }
 
     .select--is-disabled {
-      background-color: #f3f3f3;
+      background-color: colors.$grey75;
     }
 
     .custom-dropdown {
@@ -208,17 +185,15 @@
         border-radius: 4px;
         border: 1px solid rgba(34, 36, 38, 0.15);
         background-color: white;
-
-        .dropdown__search-bar-input {
-          width: 100%;
-          padding: 8px 8px;
-          background-color: unset;
-        }
-
-        .dropdown__search-bar-input--highlighted {
-          border-top-right-radius: 0;
-          border-bottom-right-radius: 0;
-        }
+      }
+      .dropdown__search-bar .dropdown__search-bar-input {
+        width: 100%;
+        padding: 8px 8px;
+        background-color: unset;
+      }
+      .dropdown__search-bar .dropdown__search-bar-input--highlighted {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
       }
 
       .dropdown__option {
@@ -230,7 +205,7 @@
       }
 
       .dropdown__option--is-no-results-found {
-        color: colors.$grey7;
+        color: colors.$grey400;
       }
 
       .dropdown__option--is-no-results-found {
@@ -240,12 +215,12 @@
       .dropdown__option--is-active-option {
         background-color: unset;
         font-weight: bold;
-        background-color: colors.$grey5;
+        background-color: colors.$grey50;
       }
 
       .dropdown__option--is-highlighted-option,
       .dropdown__option:hover {
-        background-color: colors.$grey4;
+        background-color: colors.$grey100;
       }
     }
 
@@ -256,15 +231,15 @@
 
       input:not([type='radio']),
       textarea {
-        border: 1px solid colors.$grey2;
+        border: 1px solid colors.$grey300;
         border-radius: 4px;
         padding: 4px 8px;
         outline: none;
-        font-size: 14px;
+        font-size: variables.$font-size-xsmall;
         line-height: 16px;
         &:focus,
         &:focus-visible {
-          border-color: colors.$linkBlueTransparent;
+          border-color: colors.$blue300;
         }
       }
       .dropdown__search-bar {

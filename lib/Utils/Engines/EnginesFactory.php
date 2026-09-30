@@ -51,7 +51,7 @@ class EnginesFactory
         $engine = new $className($engineRecord, $database);
 
         if ($engineClass !== null and !is_a($engine, $engineClass, true)) {
-            throw new NotFoundException("Engine Id " . $id . " is not the expected $engineClass engine instance");
+            throw new NotFoundException("Engine ID " . $id . " is not the expected $engineClass engine instance");
         }
 
         return $engine;
@@ -85,7 +85,7 @@ class EnginesFactory
         $className = 'Utils\Engines\\' . $_className; // guess for backward compatibility
         if (!class_exists($className)) {
             if (!class_exists($_className)) {
-                throw new NotFoundException("Engine Class $className not Found");
+                throw new NotFoundException("Engine class $className not found");
             }
             $className = $_className; // use the class name as is
         }

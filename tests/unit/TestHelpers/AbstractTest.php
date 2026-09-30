@@ -114,6 +114,12 @@ abstract class AbstractTest extends TestCase
         // immediately reproduces the observable behaviour these tests were written against; the real
         // ordering guarantee is covered by DatabaseAfterCommitTest.
         $dbStub->method('onCommit')->willReturnCallback(static fn(callable $callback) => $callback());
+        // Same reasoning, one step worse: an unconfigured transaction() returns null without ever
+        // calling its argument, so the whole body of every converted method would silently not run
+        // and the test would assert against a method that did nothing. Running it inline reproduces
+        // the single-scope behaviour; the nesting and rollback contract is covered by
+        // TransactionScopeTest against a real connection.
+        $dbStub->method('transaction')->willReturnCallback(static fn(callable $callback) => $callback());
 
         \TestDatabaseProvider::set($dbStub);
         $this->databaseMockApplied = true;

@@ -1,0 +1,34 @@
+// ============================================================================
+// Design Tokens — Spacing
+// ============================================================================
+// Consistent spacing scale using CSS Custom Properties.
+// Based on a 4px base unit.
+//
+// Usage in new code:   padding: var(--space-4);
+// Usage in legacy:     padding: $space-4;
+// ============================================================================
+
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+}
+
+// SCSS aliases
+$space-1: 4px;
+$space-2: 8px;
+$space-3: 12px;
+$space-4: 16px;
+$space-5: 20px;
+$space-6: 24px;
+$space-8: 32px;
+$space-10: 40px;
+$space-12: 48px;
+$space-16: 64px;

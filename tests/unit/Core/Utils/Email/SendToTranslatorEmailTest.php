@@ -130,7 +130,7 @@ class SendToTranslatorEmailTest extends AbstractTest
         $email = new SendToTranslatorForNewJobEmail($this->makeUser(), $this->makeTranslator(), 'Test Project', $this->makeUserDao());
 
         $ref = new \ReflectionProperty($email, 'title');
-        $this->assertSame('Matecat - Translation Job.', $ref->getValue($email));
+        $this->assertSame('Matecat - Translation job', $ref->getValue($email));
     }
 
     #[Test]
@@ -139,6 +139,6 @@ class SendToTranslatorEmailTest extends AbstractTest
         $email = new SendToTranslatorForDeliveryChangeEmail($this->makeUser(), $this->makeTranslator(), 'Test Project', $this->makeUserDao());
 
         $ref = new \ReflectionProperty($email, 'title');
-        $this->assertSame('Matecat - Job delivery updated.', $ref->getValue($email));
+        $this->assertSame('Matecat - Job delivery updated', $ref->getValue($email));
     }
 }

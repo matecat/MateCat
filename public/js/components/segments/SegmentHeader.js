@@ -1,201 +1,143 @@
-/**
- * React Component .
-
- */
-import React from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import TranslationMatches from './utils/translationMatches'
 
-class SegmentHeader extends React.PureComponent {
-  static contextType = ApplicationWrapperContext
+const SegmentHeader = ({
+  sid,
+  autopropagated,
+  segmentOpened,
+  repetition,
+  splitted,
+  saving,
+}) => {
+  const {userInfo} = useContext(ApplicationWrapperContext)
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      autopropagated: this.props.autopropagated,
-      percentage: '',
-      classname: '',
-      createdBy: '',
-      visible: false,
-      charactersCounter: {},
-      isGroupByTransUnit: false,
+  const [match, setMatch] = useState({
+    percentage: '',
+    classname: '',
+    createdBy: '',
+    visible: false,
+  })
+  const [charactersCounter, setCharactersCounter] = useState({})
+  const [isGroupByTransUnit, setIsGroupByTransUnit] = useState(false)
+  const [isAutopropagated, setIsAutopropagated] = useState(autopropagated)
+
+  // Replaces getDerivedStateFromProps: the prop can only ever force the flag
+  // on, while the store events below turn it off.
+  if (autopropagated && !isAutopropagated) setIsAutopropagated(true)
+
+  // Built inside the effect so each listener compares against the sid it was
+  // registered with rather than the one from the first render.
+  useEffect(() => {
+    const changePercentuage = (
+      updatedSid,
+      segmentMatch,
+      className,
+      createdBy,
+    ) => {
+      if (sid == updatedSid) {
+        setMatch({
+          percentage: TranslationMatches.getPercentTextForMatch(segmentMatch),
+          classname: className,
+          createdBy,
+          visible: true,
+        })
+        setIsAutopropagated(false)
+      }
     }
-    this.changePercentuage = this.changePercentuage.bind(this)
-    this.hideHeader = this.hideHeader.bind(this)
-  }
 
-  changePercentuage(sid, segmentMatch, className, createdBy) {
-    if (this.props.sid == sid) {
-      this.setState({
-        percentage: TranslationMatches.getPercentTextForMatch(segmentMatch),
-        classname: className,
-        createdBy: createdBy,
-        visible: true,
-        autopropagated: false,
-      })
+    const hideHeader = (updatedSid) => {
+      if (sid == updatedSid) {
+        setMatch((current) => ({...current, visible: false}))
+        setIsAutopropagated(false)
+      }
     }
-  }
 
-  hideHeader(sid) {
-    if (this.props.sid == sid) {
-      this.setState({
-        autopropagated: false,
-        visible: false,
-      })
-    }
-  }
-
-  componentDidMount() {
     SegmentStore.addListener(
       SegmentConstants.SET_SEGMENT_HEADER,
-      this.changePercentuage,
+      changePercentuage,
     )
-    SegmentStore.addListener(
-      SegmentConstants.HIDE_SEGMENT_HEADER,
-      this.hideHeader,
-    )
+    SegmentStore.addListener(SegmentConstants.HIDE_SEGMENT_HEADER, hideHeader)
     SegmentStore.addListener(
       SegmentConstants.CHARACTER_COUNTER,
-      this.onCharacterCounter,
+      setCharactersCounter,
     )
 
-    const {sid} = this.props
-
     const prevInternalId = SegmentStore.getPrevSegment(sid)?.internal_id
-
     const internalId = SegmentStore.getSegmentByIdToJS(sid)?.internal_id
-
     const nextInternalId = SegmentStore.getNextSegment({
       current_sid: sid,
     })?.internal_id
 
-    this.setState({
-      isGroupByTransUnit:
-        internalId === prevInternalId || internalId === nextInternalId,
-    })
-  }
-
-  componentWillUnmount() {
-    SegmentStore.removeListener(
-      SegmentConstants.SET_SEGMENT_HEADER,
-      this.changePercentuage,
+    setIsGroupByTransUnit(
+      internalId === prevInternalId || internalId === nextInternalId,
     )
-    SegmentStore.removeListener(
-      SegmentConstants.HIDE_SEGMENT_HEADER,
-      this.hideHeader,
-    )
-    SegmentStore.removeListener(
-      SegmentConstants.CHARACTER_COUNTER,
-      this.onCharacterCounter,
-    )
-    this.setState({
-      charactersCounter: {},
-    })
-  }
 
-  componentDidUpdate() {
-    this.setState({
-      isActiveCharactersCounter:
-        this.context.userInfo &&
-        this.context.userInfo.metadata.character_counter,
-    })
-  }
-
-  onCharacterCounter = (charactersCounter) => {
-    this.setState({
-      charactersCounter,
-    })
-  }
-
-  static getDerivedStateFromProps(props, state) {
-    if (props.autopropagated) {
-      return {
-        autopropagated: true,
-      }
-    }
-    return null
-  }
-
-  allowHTML(string) {
-    return {__html: string}
-  }
-
-  render() {
-    let autopropagatedHtml
-    let percentageHtml
-    const {repetition, splitted, segmentOpened, sid, saving} = this.props
-    const {autopropagated, visible, percentage, createdBy, classname} =
-      this.state
-    if (autopropagated && !splitted) {
-      autopropagatedHtml = <span className="repetition">Autopropagated</span>
-    } else if (repetition && !splitted) {
-      autopropagatedHtml = <span className="repetition">Repetition</span>
-    }
-    if (visible && percentage != '') {
-      percentageHtml = (
-        <h2
-          title={'Created by ' + createdBy}
-          className={' visible percentuage ' + classname}
-        >
-          {percentage}
-        </h2>
+    return () => {
+      SegmentStore.removeListener(
+        SegmentConstants.SET_SEGMENT_HEADER,
+        changePercentuage,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.HIDE_SEGMENT_HEADER,
+        hideHeader,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.CHARACTER_COUNTER,
+        setCharactersCounter,
       )
     }
-    const savingHtml = (
-      <div className={'header-segment-saving'}>
-        <div className={'header-segment-saving-loader'} />
-        <span>Saving</span>
-      </div>
-    )
-    const {isActiveCharactersCounter, charactersCounter, isGroupByTransUnit} =
-      this.state
-    const shouldDisplayCharactersCounter =
-      charactersCounter?.sid === sid &&
-      (isActiveCharactersCounter || charactersCounter.limit)
+  }, [sid])
 
-    return segmentOpened ? (
-      <div className="header toggle" id={'segment-' + sid + '-header'}>
-        {autopropagated ? autopropagatedHtml : percentageHtml}
-        {/* Characters counter */}
-        {!saving && shouldDisplayCharactersCounter && (
-          <div
-            className={`segment-counter ${
-              charactersCounter.counter > charactersCounter.limit
-                ? `segment-counter-limit-error`
-                : charactersCounter > charactersCounter.limit - 20
-                  ? 'segment-counter-limit-warning'
-                  : ''
-            }`}
-          >
-            {isGroupByTransUnit && (
-              <div>
-                <span>Segment characters: </span>{' '}
-                <span>{charactersCounter.segmentCharacters}</span>
-              </div>
-            )}
-            <div>
-              <span>
-                {isGroupByTransUnit ? 'Unit characters' : 'Characters'}:{' '}
-              </span>
-              <span className="segment-counter-current">
-                {charactersCounter.counter}
-              </span>
-              {charactersCounter.limit > 0 && (
-                <>
-                  /
-                  <span className={'segment-counter-limit'}>
-                    {charactersCounter.limit}
-                  </span>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-        {saving ? savingHtml : null}{' '}
-      </div>
-    ) : autopropagated || repetition ? (
+  const {percentage, classname, createdBy, visible} = match
+
+  // The class kept this in state and refreshed it from componentDidUpdate,
+  // which never runs before the first store event reaches the counter anyway.
+  const isActiveCharactersCounter =
+    userInfo && userInfo.metadata.character_counter
+
+  let autopropagatedHtml
+  if (isAutopropagated && !splitted) {
+    autopropagatedHtml = <span className="repetition">Autopropagated</span>
+  } else if (repetition && !splitted) {
+    autopropagatedHtml = <span className="repetition">Repetition</span>
+  }
+
+  let percentageHtml
+  if (visible && percentage != '') {
+    percentageHtml = (
+      <h2
+        title={'Created by ' + createdBy}
+        className={' visible percentuage ' + classname}
+      >
+        {percentage}
+      </h2>
+    )
+  }
+
+  const savingHtml = (
+    <div className={'header-segment-saving'}>
+      <div className={'header-segment-saving-loader'} />
+      <span>Saving</span>
+    </div>
+  )
+
+  const shouldDisplayCharactersCounter =
+    charactersCounter?.sid === sid &&
+    (isActiveCharactersCounter || charactersCounter.limit)
+
+  const {counter, limit} = charactersCounter
+  const counterLimitClass =
+    counter > limit
+      ? 'segment-counter-limit-error'
+      : limit > 0 && counter > limit - 20
+        ? 'segment-counter-limit-warning'
+        : ''
+
+  if (!segmentOpened) {
+    return isAutopropagated || repetition ? (
       <div className={'header header-closed'}>
         {autopropagatedHtml}
         {saving ? savingHtml : null}
@@ -204,6 +146,40 @@ class SegmentHeader extends React.PureComponent {
       <div className={'header header-closed'}>{saving ? savingHtml : null}</div>
     )
   }
+
+  return (
+    <div className="header toggle" id={'segment-' + sid + '-header'}>
+      {isAutopropagated ? autopropagatedHtml : percentageHtml}
+      {/* Characters counter */}
+      {!saving && shouldDisplayCharactersCounter && (
+        <div className={`segment-counter ${counterLimitClass}`}>
+          {isGroupByTransUnit && (
+            <div>
+              <span>Segment characters: </span>{' '}
+              <span>{charactersCounter.segmentCharacters}</span>
+            </div>
+          )}
+          <div>
+            <span>
+              {isGroupByTransUnit ? 'Unit characters' : 'Characters'}:{' '}
+            </span>
+            <span className="segment-counter-current">
+              {charactersCounter.counter}
+            </span>
+            {charactersCounter.limit > 0 && (
+              <>
+                /
+                <span className={'segment-counter-limit'}>
+                  {charactersCounter.limit}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+      {saving ? savingHtml : null}{' '}
+    </div>
+  )
 }
 
 export default SegmentHeader

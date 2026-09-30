@@ -4,7 +4,6 @@ namespace Matecat\Core\Controllers;
 
 use ArrayObject;
 use Controller\API\App\SplitJobController as AppSplitJobController;
-use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\V2\SplitJobController;
@@ -277,43 +276,35 @@ class SplitJobControllerTest extends AbstractTest
     {
         $job = $this->makeJobStub(10, 'pw', true);
 
-        $this->expectException(AuthenticationError::class);
+        $this->expectException(NotFoundException::class);
         $this->callPrivate('filterJobsById', 10, [$job]);
     }
 
+    /**
+     * 404 rather than 401 for every route that reaches here. The caller is past LoginValidator and
+     * past the owner-or-member check by now, so a job id naming nothing in the project is a missing
+     * record, not a missing login. Message and code stay as merge already returned them.
+     */
     #[Test]
-    public function filterJobsById_throws_when_no_match(): void
+    public function filterJobsById_throws_not_found_when_no_match(): void
     {
         $job = $this->makeJobStub(20, 'pw', false);
 
-        $this->expectException(AuthenticationError::class);
+        $this->expectException(NotFoundException::class);
         $this->expectExceptionCode(-10);
+        $this->expectExceptionMessage('Access denied');
         $this->callPrivate('filterJobsById', 99, [$job]);
     }
 
     #[Test]
-    public function checkMergeAccess_returns_matching_jobs(): void
+    public function filterJobsById_returns_the_chunks_of_the_named_job(): void
     {
         $job = $this->makeJobStub(5, 'pw', false);
 
-        $result = $this->callPrivate('checkMergeAccess', 5, [$job]);
+        $result = $this->callPrivate('filterJobsById', 5, [$job]);
 
         self::assertCount(1, $result);
         self::assertSame($job, $result[0]);
-    }
-
-    /**
-     * The conversion itself, isolated: filterJobsById() raises AuthenticationError (401) for the split
-     * endpoints, and checkMergeAccess() must turn that into a 404 for merge. Without this the retired
-     * JobMergeController's 404 would have silently become a 401 for its api-key callers.
-     */
-    #[Test]
-    public function checkMergeAccess_converts_access_error_into_not_found(): void
-    {
-        $job = $this->makeJobStub(5, 'pw', false);
-
-        $this->expectException(NotFoundException::class);
-        $this->callPrivate('checkMergeAccess', 4321, [$job]);
     }
 
     #[Test]
@@ -333,6 +324,17 @@ class SplitJobControllerTest extends AbstractTest
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionCode(-10);
         $this->callPrivate('checkSplitAccess', 5, 'wrong_pw', [$job]);
+    }
+
+    #[Test]
+    public function checkSplitAccess_throws_on_a_numerically_equal_password(): void
+    {
+        $job = $this->makeJobStub(5, '1000', false);
+
+        // `!=` compares two numeric strings numerically, so '1e3' would have been accepted
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(-10);
+        $this->callPrivate('checkSplitAccess', 5, '1e3', [$job]);
     }
 
     #[Test]
@@ -489,9 +491,9 @@ class SplitJobControllerTest extends AbstractTest
     }
 
     /**
-     * 404, not the 401 the split endpoints raise for the same condition. checkMergeAccess() converts
-     * it deliberately, so that retiring JobMergeController — which answered 404 here through its
-     * ProjectPasswordValidator — left the status unchanged for this route's api-key callers.
+     * 404 for a job id that is not in the project — the status the retired JobMergeController gave
+     * this route through its ProjectPasswordValidator, and now the status check and apply give the
+     * same input too.
      */
     #[Test]
     public function merge_throws_when_job_not_found(): void
@@ -551,6 +553,52 @@ class SplitJobControllerTest extends AbstractTest
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionCode(-10);
         $this->controller->check();
+    }
+
+    /**
+     * The status this route gives a job id that is not in the project. It answered 401 until the
+     * conversion merge already did moved into filterJobsById(): the caller has passed LoginValidator
+     * and the owner-or-member check by this point, so nothing about the request is unauthenticated.
+     */
+    #[Test]
+    public function check_throws_not_found_when_the_job_is_not_in_the_project(): void
+    {
+        $this->expectException(NotFoundException::class);
+        $this->runRouteWithAForeignJobId('check');
+    }
+
+    #[Test]
+    public function apply_throws_not_found_when_the_job_is_not_in_the_project(): void
+    {
+        $this->expectException(NotFoundException::class);
+        $this->runRouteWithAForeignJobId('apply');
+    }
+
+    /**
+     * Drive a split route with a job id no job in the project carries.
+     */
+    private function runRouteWithAForeignJobId(string $route): void
+    {
+        $job = $this->makeJobStub(99, 'correct_pw', false);
+        $project = $this->makeOwnedProject();
+
+        $this->controller->fakeJobs = [$job];
+        $this->controller->fakeProjectData = [
+            'data' => new SplitMergeProjectData(1),
+            'pManager' => $this->createStub(JobSplitMergeManager::class),
+            'count_type' => 'eq_word_count',
+            'project' => $project,
+        ];
+
+        $this->stubRequestParams([
+            'project_id' => '1',
+            'project_pass' => 'pp',
+            'job_id' => '4321',
+            'job_pass' => 'correct_pw',
+            'num_split' => '2',
+        ]);
+
+        $this->controller->$route();
     }
 
     #[Test]
@@ -620,6 +668,7 @@ class SplitJobControllerTest extends AbstractTest
             $this->stubRestructureRequest($base);
 
             $this->expectException(AuthorizationError::class);
+            $this->expectExceptionMessage('Not authorized');
             $this->controller->merge();
         } finally {
             $this->cleanFragments($base);
@@ -636,6 +685,7 @@ class SplitJobControllerTest extends AbstractTest
             $this->stubRestructureRequest($base);
 
             $this->expectException(AuthorizationError::class);
+            $this->expectExceptionMessage('Not authorized');
             $this->controller->check();
         } finally {
             $this->cleanFragments($base);
@@ -652,6 +702,7 @@ class SplitJobControllerTest extends AbstractTest
             $this->stubRestructureRequest($base);
 
             $this->expectException(AuthorizationError::class);
+            $this->expectExceptionMessage('Not authorized');
             $this->controller->apply();
         } finally {
             $this->cleanFragments($base);

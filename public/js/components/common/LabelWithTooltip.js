@@ -3,6 +3,7 @@ import {useRef} from 'react'
 import PropTypes from 'prop-types'
 import usePortal from '../../hooks/usePortal'
 import TEXT_UTILS from '../../utils/textUtils'
+import styles from './LabelWithTooltip.module.scss'
 
 const LabelWithTooltip = ({
   children,
@@ -86,10 +87,10 @@ const LabelWithTooltip = ({
       {shouldShowTooltip && tooltipCoords && (
         <TooltipPortal>
           <div
-            className={`label-with-tooltip ${isPositionBottom ? 'label-with-tooltip-bottom' : ''}`}
+            className={[styles['label-with-tooltip'], isPositionBottom && styles['label-with-tooltip-bottom']].filter(Boolean).join(' ')}
             style={{left: tooltipCoords.left, top: tooltipCoords.top}}
           >
-            <p className="label-with-tooltip-content">{getContentText()}</p>
+            <p className={styles['label-with-tooltip-content']}>{getContentText()}</p>
           </div>
         </TooltipPortal>
       )}

@@ -205,7 +205,7 @@ class ProjectTemplateControllerTest extends AbstractTest
         $this->setNonJsonContentType();
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('Bad Request');
+        $this->expectExceptionMessage('Bad request');
 
         $this->controller->create();
     }
@@ -274,7 +274,7 @@ class ProjectTemplateControllerTest extends AbstractTest
         $this->setNonJsonContentType();
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('Bad Request');
+        $this->expectExceptionMessage('Bad request');
 
         $this->controller->update();
     }

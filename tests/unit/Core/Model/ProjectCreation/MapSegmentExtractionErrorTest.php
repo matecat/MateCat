@@ -106,7 +106,7 @@ class MapSegmentExtractionErrorTest extends AbstractTest
         $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(-7, $errors[0]['code']);
-        $this->assertSame('Xliff Import Error: Parsing failed', $errors[0]['message']);
+        $this->assertSame('XLIFF import error: Parsing failed', $errors[0]['message']);
     }
 
     // ── Code 400: includes previous exception ───────────────────────

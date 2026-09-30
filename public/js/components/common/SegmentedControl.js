@@ -1,5 +1,6 @@
 import React, {useRef, useState, useLayoutEffect, useCallback} from 'react'
 import PropTypes from 'prop-types'
+import styles from './SegmentedControl.module.scss'
 
 export const SegmentedControl = ({
   name,
@@ -7,7 +8,7 @@ export const SegmentedControl = ({
   options,
   selectedId,
   onChange,
-  className,
+  className = '',
   compact = false,
   disabled = false,
   autoWidth = false,
@@ -43,7 +44,7 @@ export const SegmentedControl = ({
       <div
         key={option.id}
         ref={autoWidth ? (el) => (optionRefs.current[index] = el) : undefined}
-        className="segmented-control__option"
+        className={styles.option}
         style={!autoWidth ? {width: `${optionWidth}%`} : undefined}
       >
         <input
@@ -55,8 +56,9 @@ export const SegmentedControl = ({
           onChange={handleChange}
           data-testid={`radio-option-${option.id}`}
           disabled={disabled}
+          className={styles.input}
         />
-        <label className="segmented-control__label" htmlFor={option.id}>
+        <label className={styles.label} htmlFor={option.id}>
           {option.icon && option.icon}
           {option.name}
         </label>
@@ -69,18 +71,21 @@ export const SegmentedControl = ({
     transform: `translateX(${100 * selectedIndex}%)`,
   }
 
+  const controlClassName = [
+    styles.control,
+    compact && styles['control--compact'],
+    options.length === 1 && styles['control--single'],
+    autoWidth && styles['control--auto-width'],
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return (
-    <div className={`segmented-control__wrapper ${className}`}>
+    <div className={`${styles.wrapper} ${className}`.trim()}>
       {label && <label htmlFor={name}>{label}</label>}
-      <div
-        className={`segmented-control ${
-          compact ? 'segmented-control--compact' : ''
-        } ${options.length === 1 ? 'segmented-control--single' : ''} ${
-          autoWidth ? 'segmented-control--auto-width' : ''
-        }`}
-      >
+      <div className={controlClassName}>
         <div
-          className="segmented-control__cursor"
+          className={styles.cursor}
           style={autoWidth ? cursorStyle : defaultCursorStyle}
         ></div>
         {options.map(renderOption)}

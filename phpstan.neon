@@ -15,6 +15,17 @@ services:
                 - router.php
 
     -
+        class: Matecat\PhpStan\Rules\NoManualTransactionControlRule
+        tags:
+            - phpstan.rules.rule
+        arguments:
+            allowedFiles:
+                # The connection object that implements the scope. It is the only place the
+                # statements are the mechanism rather than a hand-rolled window, and this list is
+                # not expected to grow: everything else calls transaction(callable).
+                - lib/Model/DataAccess/Database.php
+
+    -
         class: Matecat\PhpStan\Rules\NoDirectSessionSuperglobalRule
         tags:
             - phpstan.rules.rule
@@ -32,6 +43,18 @@ services:
                 # superglobal at all. The only $_SESSION left anywhere under plugins/aligner/lib is
                 # prose in a ConfigsController docblock, which is not a Variable node and so was
                 # never a violation.
+
+    -
+        class: Matecat\PhpStan\Rules\NoDirectSessionFunctionRule
+        tags:
+            - phpstan.rules.rule
+        arguments:
+            allowedFiles:
+                # The session runtime adapter: every session_* call and every session.* ini key in
+                # the analysed tree lives here. Unlike the list above this one is already at its end
+                # state and is not expected to grow — Bootstrap configures and closes the session
+                # through it, and controllers start one through it.
+                - lib/Utils/Session/PhpSession.php
 
 parameters:
     level: 8
@@ -77,6 +100,15 @@ parameters:
             # onto every method that merely holds a SessionStore, which is the whole call graph —
             # and callers must not be encouraged to catch it. Enforcement works by surfacing.
             - 'Utils\Session\StatelessSessionViolation'
+            # Thrown by Database::commit() when a scope inside the transaction failed. Declaring it
+            # checked would push a @throws onto every method that writes anything, which is the whole
+            # call graph — and callers must not be encouraged to catch it: by the time it is thrown
+            # the transaction has already been rolled back and there is nothing left to salvage.
+            - 'Model\DataAccess\TransactionAbortedException'
+            # Thrown by Database::nextSequence() when it is reached inside a transaction it does not
+            # own. Like the above, catching it is never the right response: the allocation boundary
+            # is drawn in the wrong place and the fix belongs at the call site, not in a catch block.
+            - 'Model\DataAccess\SequenceAllocationInTransaction'
         check:
             # Report when code throws an exception that has no
             # matching @throws tag in the method's PHPDoc

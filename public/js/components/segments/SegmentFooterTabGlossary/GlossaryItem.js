@@ -126,7 +126,7 @@ export const GlossaryItem = ({
                   ? 'Forbidden words can only be edited offline'
                   : 'You can only edit entries from keys that you own'
               }
-              tooltip-position="left"
+              data-tooltip-position="left"
             >
               <LockIcon />
             </div>
@@ -176,7 +176,7 @@ export const GlossaryItem = ({
               aria-label={
                 toolipsRuleDescription.source ? source.note : undefined
               }
-              tooltip-position="right"
+              data-tooltip-position="right"
             >
               <p>{source.note}</p>
               <p ref={noteDescriptionPlaceholderRef}>{source.note}</p>
@@ -218,7 +218,7 @@ export const GlossaryItem = ({
               aria-label={
                 toolipsRuleDescription.target ? target.note : undefined
               }
-              tooltip-position="left"
+              data-tooltip-position="left"
             >
               <p>{target.note}</p>
               {!source.note && (

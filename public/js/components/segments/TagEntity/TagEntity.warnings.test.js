@@ -1,4 +1,4 @@
-import TagEntity from './TagEntity.component'
+import {highlightOnWarnings} from './TagEntity.component'
 
 jest.mock('../../../stores/CatToolStore', () => ({
   isPhTagsCompressed: () => true,
@@ -14,9 +14,9 @@ const makeContentState = (data) => ({
   getEntity: () => ({data}),
 })
 
-const makeInstance = (props) => {
+const callHighlight = (props) => {
   const contentState = makeContentState(props.entityData)
-  return new TagEntity({
+  return highlightOnWarnings({
     entityKey: '1',
     contentState,
     getSearchParams: () => ({active: false}),
@@ -36,52 +36,52 @@ const makeInstance = (props) => {
 
 describe('TagEntity.highlightOnWarnings — pc (compressible) tags', () => {
   test('flags a source pc tag present in missingTagsInTarget', () => {
-    const instance = makeInstance({
+    const style = callHighlight({
       entityData: {name: 'ph', encodedText: dataRefOpenD1},
       isTarget: false,
       missingTagsInTarget: [{data: {encodedText: dataRefOpenD1}}],
     })
-    expect(instance.highlightOnWarnings()).toBe('tag-mismatch-error')
+    expect(style).toBe('tag-mismatch-error')
   })
 
   test('does not flag a source pc tag absent from missingTagsInTarget', () => {
-    const instance = makeInstance({
+    const style = callHighlight({
       entityData: {name: 'ph', encodedText: dataRefOpenD1},
       isTarget: false,
       missingTagsInTarget: [],
     })
-    expect(instance.highlightOnWarnings()).toBe('')
+    expect(style).toBe('')
   })
 
   test('does not use tagMismatch (QA endpoint) content matching for pc tags', () => {
     // tagMismatch reports something that would never equal this tag's own
     // encodedText (the QA endpoint reports each mismatch in isolation, in a
     // different, lossy format) -- pc tags must ignore it entirely.
-    const instance = makeInstance({
+    const style = callHighlight({
       entityData: {name: 'ph', encodedText: dataRefOpenD1},
       isTarget: false,
       tagMismatch: {source: ['</pc>'], target: [], order: []},
       missingTagsInTarget: [],
     })
-    expect(instance.highlightOnWarnings()).toBe('')
+    expect(style).toBe('')
   })
 
   test('target-side pc tags are never flagged by this path', () => {
-    const instance = makeInstance({
+    const style = callHighlight({
       entityData: {name: 'ph', encodedText: dataRefOpenD1},
       isTarget: true,
       missingTagsInTarget: [{data: {encodedText: dataRefOpenD1}}],
     })
-    expect(instance.highlightOnWarnings()).toBe('')
+    expect(style).toBe('')
   })
 
   test('non-pc tags keep using tagMismatch as before', () => {
-    const instance = makeInstance({
+    const style = callHighlight({
       entityData: {name: 'ph', encodedText: nonPcTag},
       isTarget: false,
       tagMismatch: {source: [nonPcTag], target: [], order: []},
       missingTagsInTarget: [],
     })
-    expect(instance.highlightOnWarnings()).toBe('tag-mismatch-error')
+    expect(style).toBe('tag-mismatch-error')
   })
 })

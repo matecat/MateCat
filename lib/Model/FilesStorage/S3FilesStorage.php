@@ -679,7 +679,7 @@ class S3FilesStorage extends AbstractFilesStorage
         ]);
 
         if (false === $upload) {
-            throw new UnexpectedValueException('Internal Error: Failed to store segments for fast analysis on Amazon S3 bucket.', -14);
+            throw new UnexpectedValueException('Internal error: Failed to store segments for fast analysis on Amazon S3 bucket.', -14);
         }
     }
 
@@ -702,7 +702,7 @@ class S3FilesStorage extends AbstractFilesStorage
         );
 
         if (false === $analysisData) {
-            throw new UnexpectedValueException('Internal Error: Failed to retrieve analysis information from Amazon S3 bucket.', -15);
+            throw new UnexpectedValueException('Internal error: Failed to retrieve analysis information from Amazon S3 bucket.', -15);
         }
 
         return $analysisData;

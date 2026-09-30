@@ -6,6 +6,12 @@ import CatToolActions from '../../../actions/CatToolActions'
 import {KeysSelect} from './KeysSelect'
 import {DomainSelect} from './DomainSelect'
 import {SubdomainSelect} from './SubdomainSelect'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../common/Button/Button'
 
 const TermForm = () => {
   const {
@@ -292,21 +298,25 @@ const TermForm = () => {
           <span>{showMore ? 'Hide options' : 'More options'}</span>
         </div>
         <div className="glossary_buttons">
-          <button
-            className="glossary__button-cancel"
+          <Button
+            mode={BUTTON_MODE.GHOST}
+            type={BUTTON_TYPE.PRIMARY}
+            size={BUTTON_SIZE.SMALL}
             disabled={isLoading}
             onClick={resetForm}
           >
             Cancel
-          </button>
-          <button
-            className="glossary__button-add"
+          </Button>
+
+          <Button
+            type={BUTTON_TYPE.PRIMARY}
+            size={BUTTON_SIZE.SMALL}
             onClick={onSubmitAddOrUpdateTerm}
             disabled={isLoading}
           >
             {isLoading && <div className="loader loader_on"></div>}
             {modifyElement ? 'Update' : 'Add'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -22,12 +22,11 @@ class PropagationTotalStructTest extends AbstractTest
     public function setAndGetTotals(): void
     {
         $struct = new PropagationTotalStruct();
-        $struct->setTotals(['total' => 100, 'countSeg' => 5, 'status' => 'DONE']);
+        $struct->setTotals(['total' => 100, 'repetitions_count' => 5]);
 
         $totals = $struct->getTotals();
         $this->assertSame(100, $totals['total']);
-        $this->assertSame(5, $totals['countSeg']);
-        $this->assertSame('DONE', $totals['status']);
+        $this->assertSame(5, $totals['repetitions_count']);
     }
 
     #[Test]

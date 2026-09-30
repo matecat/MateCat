@@ -169,7 +169,7 @@ class ChangeJobsStatusControllerTest extends AbstractTest
         ]);
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Invalid Status');
+        $this->expectExceptionMessage('Invalid status');
 
         $this->invokePrivate('validateTheRequest');
     }
@@ -186,7 +186,7 @@ class ChangeJobsStatusControllerTest extends AbstractTest
         ]);
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Invalid Status');
+        $this->expectExceptionMessage('Invalid status');
 
         $this->invokePrivate('validateTheRequest');
     }

@@ -9,58 +9,6 @@ class PropagationAnalyser
 {
 
     /**
-     * @var int
-     */
-    private int $propagatedIceCount = 0;
-
-    /**
-     * @var int
-     */
-    private int $notPropagatedIceCount = 0;
-
-    /**
-     * @var int
-     */
-    private int $propagatedCount = 0;
-
-    /**
-     * @var int
-     */
-    private int $notPropagatedCount = 0;
-
-    /**
-     * @return int
-     */
-    public function getPropagatedIceCount(): int
-    {
-        return $this->propagatedIceCount;
-    }
-
-    /**
-     * @return int
-     */
-    public function getNotPropagatedIceCount(): int
-    {
-        return $this->notPropagatedIceCount;
-    }
-
-    /**
-     * @return int
-     */
-    public function getPropagatedCount(): int
-    {
-        return $this->propagatedCount;
-    }
-
-    /**
-     * @return int
-     */
-    public function getNotPropagatedCount(): int
-    {
-        return $this->notPropagatedCount;
-    }
-
-    /**
      * @param SegmentTranslationStruct $parentSegmentTranslation
      * @param SegmentTranslationStruct[] $arrayOfSegmentTranslationToPropagate
      *
@@ -74,7 +22,6 @@ class PropagationAnalyser
             foreach ($arrayOfSegmentTranslationToPropagate as $segmentTranslation) {
                 if ($this->detectIce($segmentTranslation)) {
                     $propagation->addNotPropagatedIce($segmentTranslation); // IF the parent segment is NOT ICE, we can not propagate it to ICEs
-                    $this->notPropagatedIceCount++;
                 } else {
                     $propagation->addPropagatedNotIce($segmentTranslation);
                     $propagation->addPropagatedId((string) $segmentTranslation->id_segment);
@@ -82,8 +29,6 @@ class PropagationAnalyser
                     if ($parentSegmentTranslation->translation != ($segmentTranslation->translation ?? '')) {
                         $propagation->addPropagatedIdToUpdateVersion((string) $segmentTranslation->id_segment);
                     }
-
-                    $this->propagatedCount++;
                 }
             }
         } else { // keep only ICE with the corresponding hash
@@ -96,11 +41,8 @@ class PropagationAnalyser
                     if ($parentSegmentTranslation->translation != ($segmentTranslation->translation ?? '')) {
                         $propagation->addPropagatedIdToUpdateVersion((string) $segmentTranslation->id_segment);
                     }
-
-                    $this->propagatedIceCount++;
                 } else { // ??? Why ICEs can not propagate to normal segments?
                     $propagation->addNotPropagatedNotIce($segmentTranslation);
-                    $this->notPropagatedCount++;
                 }
             }
         }

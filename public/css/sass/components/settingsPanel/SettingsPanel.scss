@@ -1,4 +1,5 @@
-@use '../../commons/colors';
+@use '../../tokens/colors';
+@use '../../commons/variables';
 
 .settings-panel {
   position: absolute;
@@ -57,7 +58,7 @@
   align-items: center;
   height: 55px;
   padding: 0 10px;
-  background-color: colors.$darkBlue;
+  background-color: colors.$blue900;
   color: white;
 
   > span {
@@ -87,18 +88,18 @@
   border-radius: 20px;
   color: colors.$white;
   font-weight: bold;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
   opacity: 0.6;
   transition: opacity 0.2s ease-in-out;
 }
 
 .settings-panel-tab-active {
-  background-color: rgba(colors.$grey3, 0.24);
+  background-color: rgba(colors.$grey150, 0.24);
   opacity: 1;
 }
 
 .settings-panel-tab-modifyng-icon {
-  color: colors.$translatedBlue;
+  color: colors.$blue500;
   margin-right: 5px;
 }
 
@@ -106,12 +107,12 @@
   > ul {
     display: flex;
     gap: 1px;
-    background-color: colors.$darkBlue;
+    background-color: colors.$blue900;
   }
 }
 
 .settings-panel-contentwrapper-container {
-  font-size: 14px;
+  font-size: variables.$font-size-xsmall;
   padding: 0 20px 0 20px;
   overflow-y: auto;
   max-height: calc(100vh - 340px);
@@ -120,16 +121,16 @@
   h2 {
     text-align: left;
     padding: 15px 10px;
-    font-size: 20px;
+    font-size: variables.$font-size-big;
     margin: 0;
   }
   .buttonWide {
     padding: 0 16px;
     height: 40px;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
   }
   input {
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
   }
 }
 
@@ -149,35 +150,32 @@
   }
 
   span {
-    font-size: 16px;
-    color: colors.$grey6;
+    font-size: variables.$font-size-small;
+    color: colors.$grey700;
   }
 }
 
 .settings-panel-button-icon {
   min-width: 120px;
-  display: flex !important;
-  gap: 10px !important;
-  margin: 0 !important;
 }
 
 .settings-panel-templates {
   display: flex;
   align-items: end;
 
-  padding: 16px 24px;
-  background-color: colors.$darkBlue;
+  padding: 8px 24px;
+  background-color: colors.$blue900;
 
   .select-with-label__wrapper {
     width: 240px;
   }
   .select-with-label__wrapper .select {
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     padding: 9px 46px 9px 12px;
     line-height: 1.3;
   }
   .dropdown__option {
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     padding: 8px;
   }
 
@@ -192,13 +190,13 @@
 
     .dropdown__option--is-active-option {
       color: colors.$white;
-      background-color: colors.$darkBlue;
+      background-color: colors.$blue900;
     }
   }
 
   .select {
     color: colors.$black;
-    border-color: colors.$grey8;
+    border-color: colors.$grey200;
   }
 }
 
@@ -210,19 +208,19 @@
 
   > h3 {
     color: colors.$white;
-    font-size: 20px;
+    font-size: variables.$font-size-big;
     font-weight: bold;
-    margin-bottom: 10px;
   }
 
   .template-name {
     width: 236px;
     height: 38px;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     padding: 9px 0 9px 12px;
+    border-radius: variables.$border-radius-default;
     border: none;
     position: absolute;
-    margin-top: 37px;
+    margin-top: 41px;
     margin-left: 1px;
     outline: none;
     line-height: 4;
@@ -234,24 +232,8 @@
   gap: 8px;
   margin-left: 8px;
 
-  button.template-button {
-    border-radius: unset;
-    font-weight: normal;
-    color: black !important;
-    box-shadow: inset 0 0 0 1px colors.$grey8;
-  }
-
   button.template-button-white {
-    border-radius: unset;
-    font-weight: normal;
     color: white !important;
-    box-shadow: inset 0 0 0 1px colors.$white;
-
-    &:hover {
-      background-color: unset !important;
-      box-shadow: inset 0 0 0 1px colors.$white !important;
-      opacity: 0.8;
-    }
   }
 
   .control-button {
@@ -265,10 +247,10 @@
   }
 
   .button-more-items {
-    border-radius: unset;
+    border-radius: variables.$border-radius-default;
     font-weight: normal;
     color: black;
-    box-shadow: inset 0 0 0 1px colors.$grey8;
+    box-shadow: inset 0 0 0 1px colors.$grey200;
     padding: 0;
 
     &:hover {
@@ -284,6 +266,19 @@
       width: 40px;
       height: 40px;
     }
+
+    .menu-button-wrapper > button svg {
+      color: white;
+    }
+    .menu-button-wrapper {
+      > button {
+        &:hover,
+        &:focus {
+          background-color: unset;
+          color: unset;
+        }
+      }
+    }
   }
 
   .button-more-items-project-templates {
@@ -296,18 +291,18 @@
   }
 
   button.button-save-changes {
-    background-color: colors.$grey4;
+    background-color: colors.$grey100;
     color: black !important;
 
     &:hover {
-      background-color: colors.$grey4 !important;
+      background-color: colors.$grey100 !important;
       opacity: 0.8;
     }
   }
 }
 
 .settings-panel-contentwrapper-tab-background {
-  background-color: colors.$grey5;
+  background-color: colors.$grey50;
   padding: 20px;
   border-radius: 16px;
 }
@@ -318,7 +313,7 @@
       display: inline-block;
       width: 100%;
       content: '';
-      border-top: solid 2px rgba(colors.$darkBlueTransparent, 0.5);
+      border-top: solid 2px rgba(colors.$blue50, 0.5);
     }
 
     > h2 {
@@ -327,7 +322,7 @@
   }
 
   > h2 {
-    font-size: 20px;
+    font-size: variables.$font-size-big;
     padding: 0;
   }
 }
@@ -350,11 +345,11 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     font-weight: bold;
 
     div {
-      color: colors.$linkBlue;
+      color: colors.$blue700;
     }
   }
 
@@ -386,7 +381,7 @@
   }
 
   label {
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     font-weight: bold;
   }
 }
@@ -409,14 +404,14 @@
 
   .settings-panel-templates-container-select {
     .template-name {
-      margin-top: 25px;
+      margin-top: 28px;
     }
   }
 }
 
 .settings-panel-subtemplates-select-unsaved {
   .select {
-    color: colors.$translatedBlue !important;
+    color: colors.$blue500 !important;
   }
 }
 
@@ -440,7 +435,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background-color: colors.$grey5;
+  background-color: colors.$grey50;
   border-radius: 16px;
 }
 
@@ -460,7 +455,6 @@
     .dropdown__search-bar {
       height: 34px;
       margin: 0 12px 12px;
-      border-radius: 4px;
       border: 1px solid rgba(34, 36, 38, 0.15);
       background-color: white;
 
@@ -486,7 +480,7 @@
     }
 
     .dropdown__option--is-no-results-found {
-      color: colors.$grey7;
+      color: colors.$grey400;
     }
 
     .dropdown__option--is-no-results-found {
@@ -496,12 +490,12 @@
     .dropdown__option--is-active-option {
       background-color: unset;
       font-weight: bold;
-      background-color: colors.$grey5;
+      background-color: colors.$grey50;
     }
 
     .dropdown__option--is-highlighted-option,
     .dropdown__option:hover {
-      background-color: colors.$grey4;
+      background-color: colors.$grey100;
     }
   }
 
@@ -511,15 +505,15 @@
 
     input:not([type='radio']),
     textarea {
-      border: 1px solid colors.$grey2;
+      border: 1px solid colors.$grey300;
       border-radius: 4px;
       padding: 4px 8px;
       outline: none;
-      font-size: 14px;
+      font-size: variables.$font-size-xsmall;
       line-height: 16px;
       &:focus,
       &:focus-visible {
-        border-color: colors.$linkBlueTransparent;
+        border-color: colors.$blue300;
       }
     }
     .dropdown__search-bar {
@@ -536,5 +530,33 @@
 
   &.select__dropdown--is-reversed .custom-dropdown {
     margin-bottom: 0;
+  }
+}
+
+.settings-panel-grey-button {
+  color: #000 !important;
+  background: colors.$grey100 !important;
+  padding: 4px 8px;
+  text-align: center;
+  border: 1px solid colors.$grey300 !important;
+  font-size: variables.$font-size-xsmall !important;
+
+  &:hover {
+    background-color: colors.$grey50 !important;
+  }
+}
+
+.settings-panel-dropdownMenu {
+  z-index: 14;
+}
+
+.project-template-dropdown-trigger-button {
+  color: white !important;
+
+  &:hover,
+  &:focus {
+    background-color: unset !important;
+    box-shadow: inset 0 0 0 1px rgba(white, 0.6) !important;
+    color: rgba(white, 0.6) !important;
   }
 }

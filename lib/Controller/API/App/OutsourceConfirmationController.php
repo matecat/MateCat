@@ -44,7 +44,7 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
         )->getPayload();
 
         if ($params['id_job'] != $payload['id_job'] || $params['password'] != $payload['password']) {
-            throw new AuthorizationError("Invalid Job");
+            throw new AuthorizationError("Invalid job");
         }
 
         $jStruct = (new JobDao($this->getDatabase()))->getByIdAndPassword((int)$params['id_job'], (string)$params['password']);

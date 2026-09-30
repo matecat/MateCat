@@ -129,7 +129,7 @@ class SplitDataTest extends AbstractTest
     {
         $this->expectException(Exception::class);
         $this->expectExceptionCode(-2);
-        $this->expectExceptionMessage('Minimum Chunk number for split is 2');
+        $this->expectExceptionMessage('Minimum chunk number for split is 2');
 
         $this->service->getSplitData($this->makeProjectStructure(), 1);
     }

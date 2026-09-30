@@ -99,6 +99,7 @@ jest.mock('../components/createProject/UploadFile', () => ({
 jest.mock('../components/common/Button/Button', () => ({
   BUTTON_SIZE: {BIG: 'big'},
   BUTTON_TYPE: {PRIMARY: 'primary'},
+  BUTTON_MODE: {OUTLINE: 'outline'},
   Button: ({children, ...props}) => <button {...props}>{children}</button>,
 }))
 

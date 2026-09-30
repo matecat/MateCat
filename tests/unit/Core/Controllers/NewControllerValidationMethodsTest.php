@@ -74,8 +74,25 @@ class NewControllerValidationMethodsTest extends AbstractTest
         $longString = str_repeat('a', 2049);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('metadata string is too long');
+        $this->expectExceptionMessage('Metadata string is too long');
         $this->invokeMethod('validateMetadataParam', [$longString]);
+    }
+
+    #[Test]
+    public function validateMetadataParam_unknown_property_throws(): void
+    {
+        // project_metadata.json declares "additionalProperties": false
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid metadata.');
+        $this->invokeMethod('validateMetadataParam', ['{"not_a_known_key": 1}']);
+    }
+
+    #[Test]
+    public function validateMetadataParam_value_outside_enum_throws(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid metadata.');
+        $this->invokeMethod('validateMetadataParam', ['{"word_count_type": "bogus"}']);
     }
 
     #[Test]
@@ -414,7 +431,7 @@ class NewControllerValidationMethodsTest extends AbstractTest
     public function validateEngines_tms_engine_gt_1_throws(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid TM Engine.');
+        $this->expectExceptionMessage('Invalid TM engine.');
         $this->invokeMethod('validateEngines', [2, 0]);
     }
 
@@ -425,7 +442,7 @@ class NewControllerValidationMethodsTest extends AbstractTest
         $userIsLoggedProp->setValue($this->controller, false);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid MT Engine.');
+        $this->expectExceptionMessage('Invalid MT engine.');
         $this->invokeMethod('validateEngines', [0, 2]);
     }
 

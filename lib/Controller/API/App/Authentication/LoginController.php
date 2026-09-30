@@ -19,6 +19,7 @@ use Model\Teams\TeamDao;
 use Model\Users\RedeemableProject;
 use Model\Users\UserDao;
 use ReflectionException;
+use Throwable;
 use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
@@ -43,6 +44,7 @@ class LoginController extends AbstractStatefulKleinController
     /**
      * @throws Exception
      * @throws TypeError
+     * @throws Throwable
      */
     public function login(): void
     {
@@ -110,8 +112,7 @@ class LoginController extends AbstractStatefulKleinController
             $user->clearAuthToken();
 
             $dao->updateUser($user);
-            $uid = $user->uid ?? throw new Exception('User not authenticated');
-            $dao->destroyCacheByUid($uid);
+            $dao->destroyCache($user);
 
             $project = new RedeemableProject(
                 $user,

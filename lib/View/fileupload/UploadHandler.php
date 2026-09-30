@@ -1,5 +1,6 @@
 <?php
 
+use Controller\Exceptions\RenderTerminatedException;
 use Model\Conversion\MimeTypes\MimeTypes;
 use Model\Conversion\ZipArchiveHandler;
 use Model\DataAccess\IDatabase;
@@ -126,7 +127,7 @@ class UploadHandler
     protected static function _validateToken(string $token): void
     {
         if (!Utils::isTokenValid($token)) {
-            throw new Exception("Invalid Upload Token.");
+            throw new Exception("Invalid upload token.");
         }
     }
 
@@ -193,7 +194,7 @@ class UploadHandler
         }
 
         if (!$this->_isRightExtension($file) && (empty($file->error))) {
-            $file->error = "File Extension Not Allowed";
+            $file->error = "File extension not allowed";
 
             return false;
         }
@@ -320,7 +321,7 @@ class UploadHandler
         $file->type = $this->getMimeContentType($file->tmp_name);
 
         if (false === $file->type) {
-            $file->error = "Mime type was not recognized";
+            $file->error = "MIME type was not recognized";
         }
 
         if ($this->validate($uploaded_file, $file, $error)) {
@@ -454,7 +455,7 @@ class UploadHandler
 
         if (!Utils::isTokenValid($_COOKIE['upload_token'])) {
             $info = [new stdClass()];
-            $info[0]->error = "Invalid Upload Token. Check your browser, cookies must be enabled for this domain.";
+            $info[0]->error = "Invalid upload token. Check your browser, cookies must be enabled for this domain.";
             $this->flush($info);
         }
 
@@ -497,7 +498,18 @@ class UploadHandler
                 $readBuff = fread($fp, 1024);
                 $maxRead = 16 * 1024; // 16KB cap — multipart headers are always <1KB
                 while ($readBuff !== false && strlen($readBuff) < $maxRead && !preg_match($regexp, $readBuff, $matches)) {
-                    $readBuff .= fread($fp, 1024);
+                    $chunk = fread($fp, 1024);
+
+                    // At EOF fread() returns '' rather than false, so appending it leaves the buffer
+                    // unchanged and every loop condition holds again — an endless spin. PHP discards
+                    // the request body once post_max_size is exceeded while CONTENT_LENGTH keeps the
+                    // original size, which is exactly how this branch is entered, so the body is
+                    // routinely empty here. The $maxRead cap only bounds the loop while bytes arrive.
+                    if ($chunk === false || $chunk === '') {
+                        break;
+                    }
+
+                    $readBuff .= $chunk;
                 }
                 fclose($fp);
             } else {
@@ -509,14 +521,14 @@ class UploadHandler
             $file->size = null;
             $file->type = trim($matches[2] ?? '');
             $file->error = "The file is too large. " .
-                "Please Contact " . AppConfig::$SUPPORT_MAIL . " and report these details: " .
+                "Please contact " . AppConfig::$SUPPORT_MAIL . " and report these details: " .
                 "\"The server configuration does not conform with Matecat configuration. " .
                 "Check for max header post size value in the virtualhost configuration or php.ini.\"";
 
             $info = [$file];
         } elseif ($_SERVER['CONTENT_LENGTH'] >= $uploadParams->getUploadMaxFilesize()) {
             $info[0]->error = "The file is too large.  " .
-                "Please Contact " . AppConfig::$SUPPORT_MAIL . " and report these details: " .
+                "Please contact " . AppConfig::$SUPPORT_MAIL . " and report these details: " .
                 "\"The server configuration does not conform with Matecat configuration. " .
                 "Check for max file upload value in the virtualhost configuration or php.ini.\"";
         }
@@ -533,6 +545,10 @@ class UploadHandler
         header('Content-type: application/json');
 
         echo $json;
+
+        if (AppConfig::$ENV === 'testing') {
+            throw new RenderTerminatedException();
+        }
 
         die();
     }

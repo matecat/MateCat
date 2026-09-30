@@ -170,7 +170,7 @@ class Cart
      */
     public function emptyCart(): void
     {
-        array_splice($this->cart, 0);
+        $this->cart = [];
         $this->persist();
     }
 

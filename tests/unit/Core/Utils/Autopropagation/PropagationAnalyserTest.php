@@ -36,7 +36,7 @@ class PropagationAnalyserTest extends AbstractTest
 
         $this->assertInstanceOf(PropagationTotalStruct::class, $result);
         $this->assertCount(2, $result->getPropagatedIds());
-        $this->assertSame(2, $analyser->getPropagatedCount());
+        $this->assertCount(2, $result->getSegmentsForPropagation()['propagated']['not_ice']['id']);
     }
 
     #[Test]
@@ -49,7 +49,7 @@ class PropagationAnalyserTest extends AbstractTest
         $result = $analyser->analyse($parent, [$iceChild]);
 
         $this->assertEmpty($result->getPropagatedIds());
-        $this->assertSame(1, $analyser->getNotPropagatedIceCount());
+        $this->assertCount(1, $result->getSegmentsForPropagation()['not_propagated']['ice']['id']);
     }
 
     #[Test]
@@ -62,7 +62,7 @@ class PropagationAnalyserTest extends AbstractTest
         $result = $analyser->analyse($parent, [$matchingIce]);
 
         $this->assertCount(1, $result->getPropagatedIds());
-        $this->assertSame(1, $analyser->getPropagatedIceCount());
+        $this->assertCount(1, $result->getSegmentsForPropagation()['propagated']['ice']['id']);
     }
 
     #[Test]
@@ -75,7 +75,7 @@ class PropagationAnalyserTest extends AbstractTest
         $result = $analyser->analyse($parent, [$nonMatching]);
 
         $this->assertEmpty($result->getPropagatedIds());
-        $this->assertSame(1, $analyser->getNotPropagatedCount());
+        $this->assertCount(1, $result->getSegmentsForPropagation()['not_propagated']['not_ice']['id']);
     }
 
     #[Test]

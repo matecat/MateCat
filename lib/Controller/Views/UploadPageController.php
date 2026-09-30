@@ -25,6 +25,8 @@ use Utils\Tools\Utils;
 class UploadPageController extends BaseKleinViewController
 {
 
+    protected bool $isIndexable = true;
+
     /**
      * @throws Exception
      */
@@ -38,28 +40,34 @@ class UploadPageController extends BaseKleinViewController
         $this->initLanguagePreferenceCookies();
 
         $this->setView('upload.html', [
-            'conversion_enabled' => new PHPTalBoolean(!empty(AppConfig::$FILTERS_ADDRESS)),
-            'volume_analysis_enabled' => new PHPTalBoolean(AppConfig::$VOLUME_ANALYSIS_ENABLED),
+            'conversionEnabled' => new PHPTalBoolean(!empty(AppConfig::$FILTERS_ADDRESS)),
+            'analysisEnabled' => new PHPTalBoolean(AppConfig::$VOLUME_ANALYSIS_ENABLED),
             'maxFileSize' => AppConfig::$MAX_UPLOAD_FILE_SIZE,
             'maxTMXFileSize' => AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE,
             'maxNumberFiles' => AppConfig::$MAX_NUM_FILES,
-            'subjects' => new PHPTalMap(LanguageDomains::getInstance()->getEnabledDomains()),
+            // A new project has no owner but the person creating it, so this page answers the question
+            // once and for all. It was a literal in the template before.
+            'ownerIsMe' => new PHPTalBoolean(true),
+            'subject_array' => new PHPTalMap(LanguageDomains::getInstance()->getEnabledDomains()),
             'formats_number' => $this->countSupportedFileTypes(),
-            'translation_engines_intento_prov_json' => new PHPTalMap(Intento::getProviderList()),
+            'intento_providers' => new PHPTalMap(Intento::getProviderList()),
             'tag_projection_languages' => new PHPTalMap(LexiQaAndTagProjectionLanguages::$tagProjectionAllowedLanguages),
             'developerKey' => AppConfig::$GOOGLE_OAUTH_BROWSER_API_KEY,
             'clientId' => AppConfig::$GOOGLE_OAUTH_CLIENT_ID
         ]);
 
-        if (AppConfig::$LXQ_LICENSE) {
-            $this->addParamsToView([
-                    'lxq_license' => AppConfig::$LXQ_LICENSE,
-                    'lxq_partnerid' => AppConfig::$LXQ_PARTNERID,
-                    'lexiqa_languages' => new PHPTalMap(LexiQaAndTagProjectionLanguages::$lexiQaAllowedLanguages),
-                    'lexiqaServer' => AppConfig::$LXQ_SERVER,
-                ]
-            );
-        }
+        // Set unconditionally, for the reason given in CattoolController: an unset variable is a key
+        // the page never receives. This one also closes a pre-existing fault — the old template
+        // interpolated ${lexiqa_languages} with no default at all, so an unlicensed install could
+        // not render this page.
+        $licensed = (bool)AppConfig::$LXQ_LICENSE;
+        $this->addParamsToView([
+                'lxq_license' => $licensed ? AppConfig::$LXQ_LICENSE : '',
+                'lxq_partnerid' => $licensed ? AppConfig::$LXQ_PARTNERID : '',
+                'lexiqa_languages' => new PHPTalMap($licensed ? LexiQaAndTagProjectionLanguages::$lexiQaAllowedLanguages : []),
+                'lexiqaServer' => $licensed ? AppConfig::$LXQ_SERVER : '',
+            ]
+        );
 
         $this->render();
     }

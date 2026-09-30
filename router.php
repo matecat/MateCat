@@ -96,12 +96,14 @@ $klein->onHttpError(function (int $code, Klein $klein) use (&$isView) {
     /** @var bool $isView */
     // Check if the error code is 404 (page not found)
     if ($code == 404) {
-        if ($isView) {
-            throw new NotFoundException('Not Found.'); // This will be caught by the Bootstrap exception handler
+        // A true 404 means no route matched at all, so no controller ever ran to set $isView —
+        // it is still sitting at its initial false. Fall back to the path shape.
+        if ($isView || !KleinController::isApiPath($klein->request()->pathname())) {
+            throw new NotFoundException('Not found.'); // This will be caught by the Bootstrap exception handler
         } else {
             // If not a view, return a JSON response with the error
             $klein->response()->code(404);
-            $klein->response()->json((new Error(new NotFoundException('Not Found.')))->render());
+            $klein->response()->json((new Error(new NotFoundException('Not found.')))->render());
         }
     }
 });

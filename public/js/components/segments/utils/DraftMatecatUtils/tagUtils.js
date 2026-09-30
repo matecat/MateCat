@@ -31,7 +31,6 @@ const restoreTempTags = (tags, text) =>
     return tag ? tag.match : match
   })
 import {isUndefined} from 'lodash'
-import getEntities from './getEntities'
 import matchTagStructure from './matchTag'
 import {createPcNumberer} from './pcTagUtils'
 
@@ -124,6 +123,7 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
 }
 
 export const transformTagsToText = (text) => {
+  if (!text) return text
   try {
     for (let key in tagSignatures) {
       const {placeholderRegex, decodeNeeded, placeholder, regex} =
@@ -144,7 +144,7 @@ export const transformTagsToText = (text) => {
       }
     }
   } catch (e) {
-    console.error('Error parsing tag in transformTagsToHtml function')
+    console.error('Error parsing tag in transformTagsToText function', e)
   }
   return text
 }
@@ -183,7 +183,7 @@ export const excludeSomeTagsTransformToText = (text, excludeTags = []) => {
       }
     }
   } catch (e) {
-    console.error('Error parsing tag in transformTagsToHtml function')
+    console.error('Error parsing tag in excludeSomeTagsTransformToText function', e)
   }
   return text
 }
@@ -203,7 +203,7 @@ export const excludeSomeTagsFromText = (text, excludeTags = []) => {
       }
     }
   } catch (e) {
-    console.error('Error parsing tag in transformTagsToHtml function')
+    console.error('Error parsing tag in excludeSomeTagsFromText function', e)
   }
   return text
 }
@@ -440,7 +440,7 @@ export const removePlaceholdersForGlossary = (str) => {
 
 export const decodeHtmlEntities = (text) => {
   return (
-    text
+    (text ?? '')
       // .replace(/&apos;/g, "'")
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')

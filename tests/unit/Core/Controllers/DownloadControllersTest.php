@@ -168,7 +168,7 @@ class DownloadControllersTest extends AbstractTest
             $this->fail('Expected InvalidArgumentException was not thrown');
         } catch (InvalidArgumentException $e) {
             // Verify the bug fix: message is string, code is int
-            $this->assertSame("Wrong Id project provided", $e->getMessage());
+            $this->assertSame("Wrong ID project provided", $e->getMessage());
             $this->assertSame(-10, $e->getCode());
         }
     }

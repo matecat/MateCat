@@ -68,7 +68,7 @@ class XliffRulesModel implements JsonSerializable
             } elseif ($ruleType == self::XLIFF_20) {
                 $ruleClass = Xliff20Rule::class;
             } else {
-                throw new DomainException("Invalid Rule: " . $ruleType, 400);
+                throw new DomainException("Invalid rule: " . $ruleType, 400);
             }
 
             foreach ($ruleSet as $rule) {
@@ -92,7 +92,7 @@ class XliffRulesModel implements JsonSerializable
         } elseif ($versionNumber == 2) {
             return $this->ruleSets[static::XLIFF_20];
         } else {
-            throw new DomainException("Invalid Version: " . $versionNumber, 400);
+            throw new DomainException("Invalid version: " . $versionNumber, 400);
         }
     }
 

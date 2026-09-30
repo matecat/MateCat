@@ -209,7 +209,8 @@ class QualityReportModel
         $chunkReviewDao = new ChunkReviewDao($this->database);
         $chunkReviewDao->updateStruct($chunkReview, $options);
         // After the commit: busting now would let a reader repopulate from the pre-reset row.
-        $this->database->onCommit(static fn() => $chunkReviewDao->destroyCachesFor($chunkReview));
+        // Deferred to the commit inside DaoCacheTrait; the caller does not schedule it.
+        $chunkReviewDao->destroyCache($chunkReview);
     }
 
     /**

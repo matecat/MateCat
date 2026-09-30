@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {EMAIL_PATTERN} from '../../../constants/Constants'
 import {TAG_STATUS, Tag} from './Tag'
 import {isEqual} from 'lodash'
+import styles from './EmailsBadge.module.scss'
 
 const EMAIL_SEPARATORS = [',', ';', ' ']
 export const SPECIALS_SEPARATORS = {
@@ -26,6 +27,15 @@ const splitEmailsBySeparators = (value, separators) => {
     [cleanValue],
   )
 }
+/**
+ * Splits a value into its leading whitespace, its core and its trailing whitespace.
+ * Everything is optional, so a value made only of spaces lands entirely in the first group.
+ */
+const EDGE_WHITESPACE_PATTERN = /^(\s*)([\s\S]*?)(\s*)$/
+const WHITESPACE_MARKER = '·'
+
+const isMeaningful = (value) => value.trim() !== ''
+
 const stringIncludesSeparator = (text, separators) => {
   const lastChar = text.slice(-1)
   return separators.some((separator) => lastChar === separator)
@@ -42,6 +52,8 @@ export const EmailsBadge = ({
   validateUserTyping,
   validateChip = EMAIL_PATTERN,
   separators = EMAIL_SEPARATORS,
+  trimChips = true,
+  revealEdgeWhitespace = false,
   placeholder,
   disabled,
   error,
@@ -78,17 +90,20 @@ export const EmailsBadge = ({
       const hasSeparator = stringIncludesSeparator(newValue, filteredSeparators)
       const emails = splitEmailsBySeparators(newValue, filteredSeparators)
       const lastEmail = emails.pop()
+      const normalize = (email) => (trimChips ? email.trim() : email)
       setEmails((prevState) => {
-        const updatedState = [
-          ...prevState,
-          ...emails.map((email) => email.trim()),
-          ...(hasSeparator && lastEmail ? [lastEmail.trim()] : []),
-        ]
+        // an entry left empty once trimmed matches nothing: drop it instead of
+        // committing a chip the user cannot see
+        const committed = [
+          ...emails.map(normalize),
+          ...(hasSeparator && lastEmail ? [normalize(lastEmail)] : []),
+        ].filter(isMeaningful)
+        const updatedState = [...prevState, ...committed]
         return hasSeparator ? removeDuplicates(updatedState) : updatedState
       })
       setInputValue(hasSeparator ? '' : lastEmail)
     },
-    [separators],
+    [separators, trimChips],
   )
 
   const handleInputChange = (e) => {
@@ -204,6 +219,32 @@ export const EmailsBadge = ({
   }, [emails, onChange])
 
   // RENDER
+  /**
+   * Leading and trailing spaces collapse when the browser renders them, so a chip whose value
+   * keeps them verbatim (JSON and YAML keys) has to spell them out.
+   */
+  const renderChipLabel = (email) => {
+    if (!revealEdgeWhitespace) return email
+
+    const [, leading, core, trailing] = email.match(EDGE_WHITESPACE_PATTERN)
+
+    return (
+      <span className={styles['email-badge-tag-label']}>
+        {leading && (
+          <span className={styles['email-badge-tag-whitespace']}>
+            {WHITESPACE_MARKER.repeat(leading.length)}
+          </span>
+        )}
+        {core}
+        {trailing && (
+          <span className={styles['email-badge-tag-whitespace']}>
+            {WHITESPACE_MARKER.repeat(trailing.length)}
+          </span>
+        )}
+      </span>
+    )
+  }
+
   const renderChip = (email, index) => {
     const isValid =
       typeof validateChipRef.current === 'object'
@@ -213,8 +254,9 @@ export const EmailsBadge = ({
     return (
       <div
         key={index}
-        className="email-badge-item"
+        className={styles['email-badge-item']}
         onClick={(e) => handleClickOnChip(e, index)}
+        title={revealEdgeWhitespace ? email : undefined}
       >
         <Tag
           status={
@@ -226,23 +268,23 @@ export const EmailsBadge = ({
           }
           onRemove={() => removeEmail(index)}
         >
-          {email}
+          {renderChipLabel(email)}
         </Tag>
       </div>
     )
   }
   return (
-    <div className={`email-badge${disabled ? ' email-badge-disabled' : ''}`}>
+    <div className={[styles['email-badge'], disabled && styles['email-badge-disabled']].filter(Boolean).join(' ')}>
       <div
         ref={areaRef}
-        className="email-badge-fakeInput"
+        className={styles['email-badge-fakeInput']}
         onClick={setFocus}
         onKeyDown={handleAreaKeyDown}
         tabIndex="0"
         data-testid="email-area"
       >
         {emails.length === 0 && inputValue === '' ? (
-          <span className="email-badge-placeholder">
+          <span className={styles['email-badge-placeholder']}>
             {typeof placeholder === 'string'
               ? placeholder
               : 'john@email.com, federico@email.com, sara@email.com'}
@@ -250,7 +292,7 @@ export const EmailsBadge = ({
         ) : (
           emails.map(renderChip)
         )}
-        <span className="email-badge-wrapper">
+        <span className={styles['email-badge-wrapper']}>
           <input
             ref={inputRef}
             name={name}
@@ -266,7 +308,7 @@ export const EmailsBadge = ({
         </span>
       </div>
       {error && error.message && (
-        <span className="email-badge-error">{error.message}</span>
+        <span className={styles['email-badge-error']}>{error.message}</span>
       )}
     </div>
   )
@@ -278,6 +320,8 @@ EmailsBadge.propTypes = {
   value: PropTypes.arrayOf(PropTypes.string),
   validateUserTyping: PropTypes.func,
   validateChip: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
+  trimChips: PropTypes.bool,
+  revealEdgeWhitespace: PropTypes.bool,
   placeholder: PropTypes.string,
   disabled: PropTypes.bool,
   error: PropTypes.object,

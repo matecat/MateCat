@@ -228,9 +228,9 @@ class ProjectDaoTest extends AbstractTest
     #[Test]
     public function getTotalCountByTeamIdReturnsExpectedCounts(): void
     {
-        $this->assertSame(3, (new ProjectDao(obtainTestDatabase()))->getTotalCountByTeamId(self::TEST_TEAM_ID));
-        $this->assertSame(1, (new ProjectDao(obtainTestDatabase()))->getTotalCountByTeamId(self::TEST_TEAM_ID, ['search' => ['id' => self::PROJECT_ID_2]]));
-        $this->assertSame(1, (new ProjectDao(obtainTestDatabase()))->getTotalCountByTeamId(self::TEST_TEAM_ID, ['search' => ['name' => 'Project Alpha']]));
+        $this->assertSame(3, (new ProjectDao(obtainTestDatabase()))->getTotalCountByTeamId(self::TEST_TEAM_ID)->value);
+        $this->assertSame(1, (new ProjectDao(obtainTestDatabase()))->getTotalCountByTeamId(self::TEST_TEAM_ID, ['search' => ['id' => self::PROJECT_ID_2]])->value);
+        $this->assertSame(1, (new ProjectDao(obtainTestDatabase()))->getTotalCountByTeamId(self::TEST_TEAM_ID, ['search' => ['name' => 'Project Alpha']])->value);
     }
 
     #[Test]
@@ -342,13 +342,15 @@ class ProjectDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function cacheDestroyMethodsAreCallableAndReturnBool(): void
+    public function destroyCacheIsCallableWithAndWithoutAPassword(): void
     {
         $dao = new ProjectDao(obtainTestDatabase());
 
-        $this->assertIsBool($dao->destroyFetchByIdCache(self::PROJECT_ID_1, ProjectStruct::class));
-        $this->assertIsBool((new ProjectDao(obtainTestDatabase()))->destroyCacheByIdAndPassword(self::PROJECT_ID_1, 'ppass-1'));
-        $this->assertIsBool($dao->destroyCacheForProjectData(self::PROJECT_ID_1));
+        $dao->destroyCache(self::PROJECT_ID_1, 'ppass-1');
+        $dao->destroyCache(self::PROJECT_ID_1);
+
+        // eviction is not supposed to touch the row itself
+        $this->assertSame(self::PROJECT_ID_1, $dao->findById(self::PROJECT_ID_1)?->id);
     }
 
     #[Test]

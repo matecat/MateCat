@@ -5,7 +5,7 @@ import {getUserApiKey} from '../../api/getUserApiKey'
 import {createUserApiKey} from '../../api/createUserApiKey'
 import {connectedServicesGDrive} from '../../api/connectedServicesGDrive'
 import {deleteUserApiKey} from '../../api/deleteUserApiKey'
-import IconEdit from '../icons/IconEdit'
+import IconEdit from '../../../img/icons/IconEdit'
 import {modifyUserInfo} from '../../api/modifyUserInfo/modifyUser'
 import UserActions from '../../actions/UserActions'
 import {
@@ -14,12 +14,13 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../common/Button/Button'
-import IconClose from '../icons/IconClose'
+import IconClose from '../../../img/icons/IconClose'
+import Copy from '../../../img/icons/Copy'
+import IconInfo from '../../../img/icons/IconInfo'
 import UserStore from '../../stores/UserStore'
 import {getUserData} from '../../api/getUserData'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import ModalsActions from '../../actions/ModalsActions'
-import useAuth from '../../hooks/useAuth'
 
 const PreferencesModal = (props) => {
   const {userInfo, setUserInfo, logout} = useContext(ApplicationWrapperContext)
@@ -151,7 +152,7 @@ const PreferencesModal = (props) => {
   const getApiKeyHtml = () => {
     return (
       <div data-testid="preferences-modal">
-        <h2>API Key</h2>
+        <h4>API key</h4>
         {credentials ? (
           confirmDelete ? (
             <div className={'user-api'}>
@@ -189,7 +190,7 @@ const PreferencesModal = (props) => {
                 {credentialsCreated ? (
                   <>
                     <div>
-                      <label>Api Key</label>
+                      <label>API key</label>
                       <input
                         type="text"
                         readOnly
@@ -198,7 +199,7 @@ const PreferencesModal = (props) => {
                       />
                     </div>
                     <div>
-                      <label>Api Secret</label>
+                      <label>API secret</label>
                       <input
                         type="text"
                         readOnly
@@ -224,7 +225,7 @@ const PreferencesModal = (props) => {
                     onClick={(e) => copyToClipboard(e)}
                     tabIndex="0"
                   >
-                    <i className="icon-copy icon" />
+                    <Copy />
                     {credentialsCopied ? 'Copied' : 'Copy'}
                   </Button>
                   <Button
@@ -268,7 +269,7 @@ const PreferencesModal = (props) => {
               )}
               {credentialsCreated ? (
                 <div className={'user-api-message'}>
-                  <i className="icon-info3 icon" />
+                  <IconInfo />
                   <div className={'user-api-message-content'}>
                     This is the only time that the secret access key can be
                     viewed or copied. You cannot recover it later. However, you
@@ -335,7 +336,7 @@ const PreferencesModal = (props) => {
   if (user.has_password) {
     resetPasswordHtml = (
       <a className="reset-password pull-left" onClick={openResetPassword}>
-        Reset Password
+        Reset password
       </a>
     )
   }
@@ -358,7 +359,7 @@ const PreferencesModal = (props) => {
   if (config.googleDriveEnabled) {
     googleDrive = (
       <div>
-        <h2>Google Drive</h2>
+        <h4>Google Drive</h4>
         <div className="user-gdrive">
           <Switch
             name="onoffswitch"

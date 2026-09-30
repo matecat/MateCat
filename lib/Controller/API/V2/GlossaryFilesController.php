@@ -21,8 +21,10 @@ use Model\Conversion\UploadElement;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use RuntimeException;
+use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TMS\TMSFile;
 use Utils\TMS\TMSService;
+use Utils\Validation\UserSuppliedName;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\GlossaryCSVValidator;
 
@@ -65,9 +67,9 @@ class GlossaryFilesController extends KleinController
         parent::validateRequest();
 
         $filterArgs = [
+            // Stored as typed and escaped by each output; normalised below.
             'name' => [
-                'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
-                'flags' => FILTER_FLAG_STRIP_LOW
+                'filter' => FILTER_UNSAFE_RAW
             ],
             'tm_key' => [
                 'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
@@ -90,7 +92,9 @@ class GlossaryFilesController extends KleinController
             $filterArgs
         );
 
-        $this->name = ($postInput->name !== false) ? $postInput->name : null;
+        $this->name = is_string($postInput->name)
+            ? UserSuppliedName::normalizeAndTruncate($postInput->name, TmKeyManager::RESOURCE_NAME_MAX_LENGTH)
+            : null;
         $this->tm_key = ($postInput->tm_key !== false) ? $postInput->tm_key : null;
         $this->downloadToken = ($postInput->downloadToken !== false) ? $postInput->downloadToken : null;
     }

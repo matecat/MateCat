@@ -54,7 +54,7 @@ class EngineDAO extends AbstractDao
 
         if ($obj->uid !== null) {
             if (empty($obj->uid) || $obj->uid <= 0) {
-                throw new DomainException("Anonymous User."); //do not perform any query on anonymous user requests
+                throw new DomainException("Anonymous user."); //do not perform any query on anonymous user requests
             } elseif (is_numeric($obj->uid)) {
                 $bind_values['uid'] = (int)$obj->uid;
                 $where_conditions[] = "uid = :uid";

@@ -5,6 +5,7 @@ import {
   DropdownMenu,
 } from '../common/DropdownMenu/DropdownMenu'
 import {BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
+import IconDown from '../../../img/icons/IconDown'
 
 const ReviewExtendedCategorySelector = ({
   sendIssue,
@@ -36,9 +37,9 @@ const ReviewExtendedCategorySelector = ({
           align={DROPDOWN_MENU_ALIGN.RIGHT}
           toggleButtonProps={{
             mode: BUTTON_MODE.OUTLINE,
-            size: BUTTON_SIZE.ICON_SMALL,
+            size: BUTTON_SIZE.ICON_XSMALL,
             className: 'severities-dropdown-trigger',
-            children: <i className="icon-sort-down icon" />,
+            children: <IconDown />,
           }}
           items={items}
         />
@@ -46,18 +47,11 @@ const ReviewExtendedCategorySelector = ({
     } else {
       return (
         <div
-          className="re-severities-buttons ui tiny buttons"
+          className="re-severities-buttons"
           title="Select severities"
         >
           {category.severities.map((severity, i) => {
             const buttonClass = classNames({
-              ui: true,
-              attached: true,
-              button: true,
-              left: i === 0 && category.severities.length > 1,
-              right:
-                i === category.severities.length - 1 ||
-                category.severities.length === 1,
               active: active && i === severityActiveIndex,
             })
             let label =
@@ -69,7 +63,7 @@ const ReviewExtendedCategorySelector = ({
               <button
                 key={'value-' + severity.label}
                 onClick={() => onClickSeverity(severity.label)}
-                className={'ui ' + buttonClass + ' attached button'}
+                className={buttonClass}
                 title={severity.label}
               >
                 {sevName}

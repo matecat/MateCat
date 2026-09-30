@@ -1,0 +1,111 @@
+{
+  "extends": ["stylelint-config-standard-scss"],
+  "plugins": ["stylelint-selector-bem-pattern"],
+  "rules": {
+    "max-nesting-depth": [
+      3,
+      {
+        "ignoreAtRules": ["media", "supports", "include", "each", "if", "else"],
+        "ignoreRules": ["/^&/"],
+        "severity": "warning"
+      }
+    ],
+    "declaration-no-important": [
+      true,
+      {
+        "severity": "warning"
+      }
+    ],
+    "selector-class-pattern": null,
+    "scss/at-rule-no-unknown": true,
+    "scss/dollar-variable-pattern": null,
+    "no-descending-specificity": null,
+    "color-function-notation": null,
+    "color-function-alias-notation": null,
+    "alpha-value-notation": null,
+    "shorthand-property-no-redundant-values": null,
+    "declaration-block-no-redundant-longhand-properties": null,
+    "value-keyword-case": null,
+    "rule-empty-line-before": null,
+    "at-rule-empty-line-before": null,
+    "comment-empty-line-before": null,
+    "comment-whitespace-inside": null,
+    "custom-property-empty-line-before": null,
+    "declaration-empty-line-before": null,
+    "custom-property-pattern": null,
+    "length-zero-no-unit": null,
+    "selector-pseudo-element-colon-notation": null,
+    "property-no-vendor-prefix": null,
+    "value-no-vendor-prefix": null,
+    "media-feature-range-notation": null,
+    "declaration-block-single-line-max-declarations": null,
+    "scss/double-slash-comment-whitespace-inside": null,
+    "scss/double-slash-comment-empty-line-before": null,
+    "function-url-quotes": null,
+    "property-no-deprecated": null,
+    "block-no-empty": null,
+    "declaration-block-no-duplicate-properties": null,
+    "selector-not-notation": null,
+    "font-family-name-quotes": null,
+    "selector-id-pattern": null,
+    "selector-no-vendor-prefix": null,
+    "scss/load-partial-extension": null,
+    "number-max-precision": null,
+    "font-family-no-missing-generic-family-keyword": null,
+    "selector-type-no-unknown": null,
+    "selector-attribute-quotes": null,
+    "property-no-unknown": null,
+    "no-irregular-whitespace": null,
+    "keyframes-name-pattern": null,
+    "declaration-property-value-keyword-no-deprecated": null,
+    "scss/dollar-variable-empty-line-before": null,
+    "scss/operator-no-unspaced": null,
+    "scss/dollar-variable-colon-space-after": null,
+    "scss/dollar-variable-colon-space-before": null,
+    "at-rule-no-vendor-prefix": null,
+    "media-feature-name-no-vendor-prefix": null,
+    "declaration-block-no-shorthand-property-overrides": null,
+    "media-feature-name-no-unknown": null,
+    "no-empty-source": null,
+    "color-hex-length": null,
+    "scss/load-no-partial-leading-underscore": null,
+    "scss/comment-no-empty": null
+  },
+  "overrides": [
+    {
+      "files": ["**/*.module.scss"],
+      "plugins": ["stylelint-selector-bem-pattern"],
+      "rules": {
+        "max-nesting-depth": 3,
+        "declaration-no-important": true,
+        "plugin/selector-bem-pattern": {
+          "preset": "bem",
+          "componentSelectors": {
+            "initial": "^\\.{componentName}(?:__[a-z][a-z0-9-]*)?(?:--[a-z][a-z0-9-]*)?$"
+          }
+        }
+      }
+    },
+    {
+      "files": [
+        "public/css/sass/style.scss",
+        "public/css/sass/commons/_manage.scss",
+        "public/css/sass/commons/_outsource.scss",
+        "public/css/sass/commons/_analyze.scss",
+        "public/css/sass/mbc-style.scss"
+      ],
+      "rules": {
+        "max-nesting-depth": null,
+        "declaration-no-important": null
+      }
+    },
+    {
+      "files": ["public/css/sass/vendor_mc/**"],
+      "rules": {
+        "max-nesting-depth": null,
+        "declaration-no-important": null,
+        "no-duplicate-selectors": null
+      }
+    }
+  ]
+}

@@ -15,6 +15,7 @@ use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSFile;
 use Utils\TMS\TMSService;
+use Utils\Validation\UserSuppliedName;
 
 class TMXFileController extends KleinController
 {
@@ -115,7 +116,12 @@ class TMXFileController extends KleinController
      */
     private function validateTheRequest(): array
     {
-        $name = filter_var($this->request->param('name'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        // Stored as typed and escaped by each output. `name` is also never read out of the array
+        // this returns — the key name comes from the uploaded file — but leaving it unnormalised
+        // would be a trap for whoever starts reading it: it would be the one name in MateCat that
+        // still carries a CR.
+        $rawName = $this->request->param('name');
+        $name = UserSuppliedName::normalize(is_string($rawName) ? $rawName : null);
         $tm_key = filter_var($this->request->param('tm_key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
         $uuid = filter_var($this->request->param('uuid'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
         $disable_upload_limit = filter_var($this->request->param('disable_upload_limit'), FILTER_VALIDATE_BOOLEAN);

@@ -314,7 +314,10 @@ AppDispatcher.register(function (action) {
           'phTagsCompressed-' + config.userMail,
           CatToolStore.phTagsCompressed,
         )
-      } catch (e) {}
+      } catch {
+        // localStorage throws when it is unavailable or full. The value is only
+        // remembered between visits, so the toggle above still holds for this one.
+      }
       if (document?.body) {
         document.body.classList.toggle(
           'ph-tags-compressed',

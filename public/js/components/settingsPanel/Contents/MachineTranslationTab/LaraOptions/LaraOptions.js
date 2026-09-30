@@ -148,7 +148,7 @@ export const LaraOptions = ({isCattoolPage}) => {
           <div>
             <h3>Style guide</h3>
             <p>
-              Select a style guide to be applied to Lara's translations
+              Select a style guide to be applied to Lara&apos;s translations
               (activates Lara Prose for the project).
             </p>
           </div>

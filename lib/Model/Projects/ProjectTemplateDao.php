@@ -198,7 +198,7 @@ class ProjectTemplateDao extends AbstractDao
             $targetLanguages = unserialize($projectTemplateStruct->target_language);
 
             if (!is_array($targetLanguages)) {
-                throw new Exception("target language is not an array", 403);
+                throw new Exception("Target language is not an array", 403);
             }
 
             $languages = Languages::getInstance();
@@ -215,7 +215,7 @@ class ProjectTemplateDao extends AbstractDao
             $xliffConfigModel = (new XliffConfigTemplateDao($this->database))->getByIdAndUser($projectTemplateStruct->xliff_config_template_id, $projectTemplateStruct->uid);
 
             if (empty($xliffConfigModel)) {
-                throw new Exception("Not existing Xliff template.", 404);
+                throw new Exception("Not existing XLIFF template.", 404);
             }
         }
 
@@ -224,7 +224,7 @@ class ProjectTemplateDao extends AbstractDao
             $filtersConfigModel = (new FiltersConfigTemplateDao($this->database))->getByIdAndUser($projectTemplateStruct->filters_template_id, $projectTemplateStruct->uid);
 
             if (empty($filtersConfigModel)) {
-                throw new Exception("Not existing Filters config template.", 404);
+                throw new Exception("Not existing filters config template.", 404);
             }
         }
 
@@ -640,6 +640,17 @@ class ProjectTemplateDao extends AbstractDao
     public function removeSubTemplateByIdAndUser(int $id, int $uid, string $subTemplateField): int
     {
         $conn = $this->database->getConnection();
+
+        // Which project templates point at the sub-template, asked before the UPDATE clears the
+        // field: afterwards there is nothing left to match them on. $id is the sub-template's own
+        // id and numbers a different table, so it cannot be used to name a project template cache.
+        $stmt = $conn->prepare("SELECT id FROM " . self::TABLE . " WHERE uid = :uid AND `$subTemplateField` = :id ");
+        $stmt->execute([
+            'id' => $id,
+            'uid' => $uid,
+        ]);
+        $affectedTemplateIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
         $stmt = $conn->prepare("UPDATE " . self::TABLE . " SET `$subTemplateField` = :zero WHERE uid = :uid and `$subTemplateField` = :id ");
         $stmt->execute([
             'zero' => 0,
@@ -647,8 +658,14 @@ class ProjectTemplateDao extends AbstractDao
             'uid' => $uid,
         ]);
 
-        $this->destroyFetchByIdCache($id, ProjectTemplateStruct::class);
-        $this->destroyQueryByIdAndUserCache($conn, $id, $uid);
+        foreach ($affectedTemplateIds as $affectedTemplateId) {
+            $this->destroyFetchByIdCache((int)$affectedTemplateId, ProjectTemplateStruct::class);
+            $this->destroyQueryByIdAndUserCache($conn, (int)$affectedTemplateId, $uid);
+        }
+
+        // The default template is one of the rows the UPDATE may have touched, and it is cached for
+        // a day against the minute the by-id reads get.
+        $this->destroyDefaultTemplateCache($conn, $uid);
         $this->destroyQueryPaginated($uid);
 
         return $stmt->rowCount();

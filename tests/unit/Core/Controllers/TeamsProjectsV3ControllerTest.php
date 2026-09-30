@@ -11,6 +11,7 @@ use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
+use Model\Projects\ProjectsCount;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -269,15 +270,36 @@ class TeamsProjectsV3ControllerTest extends AbstractTest
     #[Test]
     public function getPaginationLinks_includes_next_when_more_pages_exist(): void
     {
-        $links = $this->invokePrivate('_getPaginationLinks', [1, 100, 20, []]);
+        $links = $this->invokePrivate('_getPaginationLinks', [1, ProjectsCount::fromCappedQuery(100), true, 20, []]);
 
         $this->assertIsArray($links);
         $this->assertSame(1, $links['page']);
         $this->assertSame(20, $links['step']);
         $this->assertSame(100, $links['totals']);
+        $this->assertFalse($links['totals_approximated']);
         $this->assertSame(5, $links['total_pages']);
         $this->assertArrayHasKey('next', $links);
         $this->assertArrayNotHasKey('prev', $links);
+    }
+
+    /**
+     * Past the cap the total can no longer name the last page, so `next` has to come from the row
+     * fetched beyond the page instead — otherwise the listing would dead-end at the cap.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function getPaginationLinks_offers_next_past_the_cap(): void
+    {
+        $capped = ProjectsCount::fromCappedQuery(ProjectsCount::DEFAULT_CAP + 1);
+
+        $lastPageOfTheCap = (int)ceil(ProjectsCount::DEFAULT_CAP / 20);
+        $links = $this->invokePrivate('_getPaginationLinks', [$lastPageOfTheCap, $capped, true, 20, []]);
+
+        $this->assertSame(ProjectsCount::DEFAULT_CAP, $links['totals']);
+        $this->assertTrue($links['totals_approximated']);
+        $this->assertSame($lastPageOfTheCap, $links['total_pages']);
+        $this->assertArrayHasKey('next', $links, 'the page after the cap is unreachable');
     }
 
     /**
@@ -286,7 +308,7 @@ class TeamsProjectsV3ControllerTest extends AbstractTest
     #[Test]
     public function getPaginationLinks_includes_prev_on_last_page(): void
     {
-        $links = $this->invokePrivate('_getPaginationLinks', [5, 100, 20, []]);
+        $links = $this->invokePrivate('_getPaginationLinks', [5, ProjectsCount::fromCappedQuery(100), false, 20, []]);
 
         $this->assertArrayHasKey('prev', $links);
         $this->assertArrayNotHasKey('next', $links);
@@ -299,7 +321,7 @@ class TeamsProjectsV3ControllerTest extends AbstractTest
     #[Test]
     public function getPaginationLinks_appends_search_and_step_query_when_present(): void
     {
-        $links = $this->invokePrivate('_getPaginationLinks', [1, 100, 30, ['name' => 'Foo', 'id' => 7]]);
+        $links = $this->invokePrivate('_getPaginationLinks', [1, ProjectsCount::fromCappedQuery(100), true, 30, ['name' => 'Foo', 'id' => 7]]);
 
         $this->assertSame(30, $links['step']);
         $this->assertStringContainsString('&step=30', $links['next']);

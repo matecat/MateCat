@@ -203,7 +203,16 @@ class SegmentDao extends AbstractDao
             $options_conditions_query .= " AND st.status = :status ";
             $options_conditions_values['status'] = $options['filter']['status'];
 
-            $union_ice = "UNION
+            // The limit is substituted here rather than left as a conversion specifier for the
+            // caller's sprintf() below. This fragment is interpolated into those format strings, so
+            // a specifier inside it silently changed how many conversions they had — and with it
+            // which argument every later one received. The 'center' arm was built for the count
+            // this fragment produced when present, so without a status filter its second block's
+            // join placeholder took the step instead, emitting a bare number where a JOIN clause
+            // belongs and making MySQL reject the whole statement. A fragment that carries no
+            // specifiers cannot shift anything.
+            $union_ice = sprintf(
+                "UNION
                 (SELECT distinct(s.id) AS __sid
                     FROM segments s
                     JOIN segment_translations st ON s.id = st.id_segment
@@ -212,9 +221,11 @@ class SegmentDao extends AbstractDao
                     AND j.password = :password
                     AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
                     AND st.status = :status
-                    AND st.version_number = 0 AND st.match_type = 'ICE' AND st.translation_date IS NULL 
+                    AND st.version_number = 0 AND st.match_type = 'ICE' AND st.translation_date IS NULL
                     ORDER BY __sid DESC
-                LIMIT %u)";
+                LIMIT %u)",
+                $step
+            );
         } else {
             $union_ice = "";
         }
@@ -344,10 +355,12 @@ class SegmentDao extends AbstractDao
                         LIMIT %u
                   ) AS TT2";
 
+        // One argument per conversion, and the count no longer depends on whether a status filter
+        // added the ICE union: that fragment is fully substituted before it reaches these formats.
         $subQuery = match ($where) {
-            'after' => sprintf($queryAfter, $options_join_query, $options_conditions_query, $step, $step),
-            'before' => sprintf($queryBefore, $options_join_query, $options_conditions_query, $step, $step),
-            'center' => sprintf($queryCenter, $options_join_query, $options_conditions_query, $step, $step, $options_join_query, $options_conditions_query, $step),
+            'after' => sprintf($queryAfter, $options_join_query, $options_conditions_query, $step),
+            'before' => sprintf($queryBefore, $options_join_query, $options_conditions_query, $step),
+            'center' => sprintf($queryCenter, $options_join_query, $options_conditions_query, $step, $options_join_query, $options_conditions_query, $step),
             default => throw new Exception("No direction selected"),
         };
 
@@ -503,8 +516,8 @@ class SegmentDao extends AbstractDao
                 $stm->execute($values);
                 LoggerFactory::getLogger('project_manager')->debug("Segments: Executed Query " . ($i + 1));
             } catch (PDOException $e) {
-                LoggerFactory::getLogger('project_manager')->error("Segment import - DB Error: " . $e->getMessage());
-                throw new Exception("Segment import - DB Error: " . $e->getMessage() . " - " . var_export($chunk, true), -2);
+                LoggerFactory::getLogger('project_manager')->error("Segment import - DB error: " . $e->getMessage());
+                throw new Exception("Segment import - DB error: " . $e->getMessage() . " - " . var_export($chunk, true), -2);
             }
         }
     }
@@ -696,22 +709,6 @@ class SegmentDao extends AbstractDao
         $stm->execute($bind_keys);
 
         return array_values($stm->fetchAll());
-    }
-
-    /**
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    public function destroyCacheForGlobalTranslationMismatches(JobStruct $job): bool
-    {
-        $stmt = $this->_getStatementForQuery(self::$queryForGlobalMismatches);
-
-        return $this->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, [
-            'id_job' => $job->id,
-            'st_approved' => TranslationStatus::STATUS_APPROVED,
-            'st_approved2' => TranslationStatus::STATUS_APPROVED2,
-            'st_translated' => TranslationStatus::STATUS_TRANSLATED,
-        ]);
     }
 
     /**

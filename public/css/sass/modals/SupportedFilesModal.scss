@@ -1,0 +1,40 @@
+@use '../tokens/colors';
+
+.supported-formats {
+  height: 100%;
+}
+
+.supported-formats .fileformat {
+  display: flex;
+  flex-direction: row;
+  height: calc(100% - 50px);
+  padding: 24px;
+  gap: 8px;
+  justify-content: space-between;
+  overflow: auto;
+}
+
+.supported-formats .fileformat h4 {
+  padding: 0 24px;
+  background-color: colors.$grey75;
+}
+
+.supported-formats .fileformat .format-box {
+  float: none;
+  flex: 1 1 auto;
+  max-width: 300px;
+}
+
+.supported-formats .fileformat .format-box .file-list {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 16px;
+}
+
+.supported-formats .fileformat .format-box .file-list > div {
+  display: flex;
+  gap: 8px;
+  padding: 5px;
+}

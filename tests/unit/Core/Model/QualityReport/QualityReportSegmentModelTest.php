@@ -15,6 +15,7 @@ use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\EntryCommentDao;
 use Model\Projects\ProjectStruct;
+use Model\QualityReport\HistoryElementStruct;
 use Model\QualityReport\QualityReportDao;
 use Model\QualityReport\QualityReportSegmentModel;
 use Model\QualityReport\QualityReportSegmentStruct;
@@ -85,6 +86,175 @@ class QualityReportSegmentModelTest extends AbstractTest
             'translation' => $translation,
             'version_number' => $versionNumber,
         ]);
+    }
+
+    /**
+     * _populateHistory() type-hints its filter closure against HistoryElementStruct, so the
+     * SegmentEventsStruct built by createEvent() cannot be reused here.
+     *
+     * @param array<string, mixed> $overrides
+     */
+    private function createHistoryElement(array $overrides = []): HistoryElementStruct
+    {
+        return new HistoryElementStruct(array_merge([
+            'id_segment' => 10,
+            'translation' => 'a translation',
+            'version_number' => 1,
+            'source_page' => SourcePages::SOURCE_PAGE_REVISION,
+            'status' => TranslationStatus::STATUS_APPROVED,
+            'create_date' => '2026-01-02 03:04:05',
+            'creation_date' => null,
+        ], $overrides));
+    }
+
+    /**
+     * @param array<string, mixed> $overrides
+     */
+    private function createIssue(array $overrides = []): ShapelessConcreteStruct
+    {
+        return new ShapelessConcreteStruct(array_merge([
+            'id' => 1,
+            'segment_id' => 10,
+            'translation_version' => 1,
+            'deleted_at' => null,
+        ], $overrides));
+    }
+
+    // ─── _populateHistory ────────────────────────────────────────────────
+
+    #[Test]
+    public function PopulateHistoryKeepsOnlyTheEventsOfTheGivenSegment(): void
+    {
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
+        $segment = $this->createSegment(['sid' => 10]);
+
+        $filter = $this->createStub(MateCatFilter::class);
+
+        $events = [
+            $this->createHistoryElement(['version_number' => 0, 'translation' => 'first version']),
+            $this->createHistoryElement(['version_number' => 1, 'translation' => 'revised']),
+            $this->createHistoryElement(['id_segment' => 777, 'translation' => 'another segment']),
+        ];
+
+        $model->invokeProtected('_populateHistory', [$segment, $filter, $events, [], false]);
+
+        $this->assertCount(2, $segment->history);
+        $this->assertSame(['first version', 'revised'], array_column($segment->history, 'translation'));
+    }
+
+    #[Test]
+    public function PopulateHistoryMapsEveryFieldOfTheEvent(): void
+    {
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
+        $segment = $this->createSegment(['sid' => 10]);
+
+        $filter = $this->createStub(MateCatFilter::class);
+
+        $events = [
+            $this->createHistoryElement([
+                'source_page' => SourcePages::SOURCE_PAGE_REVISION_2,
+                'version_number' => 4,
+                'status' => TranslationStatus::STATUS_APPROVED2,
+            ]),
+        ];
+
+        $model->invokeProtected('_populateHistory', [$segment, $filter, $events, [], false]);
+
+        $entry = $segment->history[0];
+        $this->assertSame(TranslationStatus::STATUS_APPROVED2, $entry['status']);
+        $this->assertSame('2026-01-02 03:04:05', $entry['date']);
+        $this->assertSame(SourcePages::SOURCE_PAGE_REVISION_2, $entry['source_page']);
+        $this->assertSame(4, $entry['version_number']);
+        $this->assertSame('a translation', $entry['translation']);
+        // source_page 3 maps to revision number 2
+        $this->assertSame(2, $entry['revision_number']);
+    }
+
+    /**
+     * The version-0 row produced by TranslationVersionDao::historyEvents() carries creation_date
+     * and a null create_date, so the coalesce must prefer creation_date.
+     */
+    #[Test]
+    public function PopulateHistoryPrefersCreationDateOverCreateDate(): void
+    {
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
+        $segment = $this->createSegment(['sid' => 10]);
+
+        $events = [
+            $this->createHistoryElement(['creation_date' => '2026-05-05 00:00:00']),
+            $this->createHistoryElement(['creation_date' => null, 'create_date' => '2026-06-06 00:00:00']),
+        ];
+
+        $model->invokeProtected('_populateHistory', [$segment, $this->createStub(MateCatFilter::class), $events, [], false]);
+
+        $this->assertSame(['2026-05-05 00:00:00', '2026-06-06 00:00:00'], array_column($segment->history, 'date'));
+    }
+
+    /**
+     * A source_page of 1 (translate) has no revision number.
+     */
+    #[Test]
+    public function PopulateHistoryLeavesTheRevisionNumberNullForTheTranslateStep(): void
+    {
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
+        $segment = $this->createSegment(['sid' => 10]);
+
+        $events = [$this->createHistoryElement(['source_page' => SourcePages::SOURCE_PAGE_TRANSLATE])];
+
+        $model->invokeProtected('_populateHistory', [$segment, $this->createStub(MateCatFilter::class), $events, [], false]);
+
+        $this->assertNull($segment->history[0]['revision_number']);
+    }
+
+    #[Test]
+    public function PopulateHistoryAttachesOnlyLiveIssuesOfTheMatchingSegmentAndVersion(): void
+    {
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
+        $segment = $this->createSegment(['sid' => 10]);
+
+        $events = [$this->createHistoryElement(['version_number' => 1])];
+
+        $issues = [
+            $this->createIssue(['id' => 1]),                                     // keeper
+            $this->createIssue(['id' => 2, 'deleted_at' => '2026-01-01 00:00:00']), // soft-deleted
+            $this->createIssue(['id' => 3, 'translation_version' => 9]),          // other version
+            $this->createIssue(['id' => 4, 'segment_id' => 777]),                 // other segment
+        ];
+
+        $model->invokeProtected('_populateHistory', [$segment, $this->createStub(MateCatFilter::class), $events, $issues, false]);
+
+        $kept = array_values($segment->history[0]['issues']);
+        $this->assertCount(1, $kept);
+        $this->assertSame(1, $kept[0]->id);
+    }
+
+    #[Test]
+    public function PopulateHistoryRunsTheTranslationThroughTheFilterForUi(): void
+    {
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
+        $segment = $this->createSegment(['sid' => 10]);
+
+        $filter = $this->createStub(MateCatFilter::class);
+        $filter->method('fromLayer0ToLayer2')->willReturnCallback(static fn(string $s): string => 'ui:' . $s);
+
+        $events = [$this->createHistoryElement(['translation' => 'raw text'])];
+
+        $model->invokeProtected('_populateHistory', [$segment, $filter, $events, [], true]);
+
+        $this->assertSame('ui:raw text', $segment->history[0]['translation']);
+    }
+
+    #[Test]
+    public function PopulateHistoryResultsInAnEmptyHistoryWhenNoEventMatches(): void
+    {
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
+        $segment = $this->createSegment(['sid' => 10]);
+
+        $events = [$this->createHistoryElement(['id_segment' => 999])];
+
+        $model->invokeProtected('_populateHistory', [$segment, $this->createStub(MateCatFilter::class), $events, [], false]);
+
+        $this->assertSame([], $segment->history);
     }
 
     #[Test]
@@ -608,6 +778,57 @@ class QualityReportSegmentModelTest extends AbstractTest
 
         $this->assertIsArray($result);
         $this->assertEmpty($result);
+    }
+
+    /**
+     * The two tests above stub getSegmentsForQr() to an empty list, so the per-segment loop body
+     * never runs. Returning one segment walks it end to end, which is the only way to reach the
+     * _populateLastTranslationAndRevision() / _populateHistory() calls inside it.
+     *
+     * Everything the loop touches beyond the injected DAOs — FeatureSet, ProjectDao,
+     * TranslationVersionDao, SegmentOriginalDataDao, MetadataDao, MateCatFilter — is constructed
+     * inline from $this->database, so this leans on the real test connection and simply gets empty
+     * result sets back.
+     */
+    #[Test]
+    public function getSegmentsForQRRunsThePerSegmentLoopAndPopulatesHistory(): void
+    {
+        $segment = $this->createSegment(['sid' => 10]);
+        // typed property with no default; _populateLastTranslationAndRevision() reads it
+        (new ReflectionProperty(QualityReportSegmentStruct::class, 'tm_analysis_status'))
+            ->setValue($segment, 'DONE');
+
+        $segmentDao = $this->createStub(SegmentDao::class);
+        $segmentDao->method('getSegmentsForQr')->willReturn([$segment]);
+
+        $qualityReportDao = $this->createStub(QualityReportDao::class);
+        $qualityReportDao->method('getIssuesBySegments')->willReturn([]);
+
+        $entryCommentDao = $this->createStub(EntryCommentDao::class);
+
+        $commentDao = $this->createStub(CommentDao::class);
+        $commentDao->method('getThreadsBySegments')->willReturn([]);
+
+        $model = new QualityReportSegmentModel(
+            $this->createChunkWithProject(),
+            obtainTestDatabase(),
+            null,
+            $segmentDao,
+            $qualityReportDao,
+            $entryCommentDao,
+            $commentDao
+        );
+
+        $result = $model->getSegmentsForQR([10]);
+
+        $this->assertCount(1, $result);
+
+        $segment = array_values($result)[0];
+        $this->assertSame(10, $segment->sid);
+        // no events exist for this segment, so both populate helpers leave empty collections
+        $this->assertSame([], $segment->history);
+        $this->assertSame([], $segment->last_revisions);
+        $this->assertNotNull($segment->dataRefMap);
     }
 
     #[Test]

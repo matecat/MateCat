@@ -42,15 +42,15 @@ import {
   CHARS_SIZE_COUNTER_TYPES,
   charsSizeCounter,
 } from '../utils/charsSizeCounterUtil'
-import {CatToolInterface} from './CatToolInterface'
+import catToolInterface from './CatToolInterface'
 import CommentsActions from '../actions/CommentsActions'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
 import ContextPreviewChannel from '../utils/contextPreviewChannel'
 import {extractSegmentContextFields} from '../utils/contextPreviewUtils'
 import useResizable from '../hooks/useResizable'
-import IconRedirect from '../components/icons/IconRedirect'
-import IconDown from '../components/icons/IconDown'
+import IconRedirect from '../../img/icons/IconRedirect'
+import IconDown from '../../img/icons/IconDown'
 import {
   Button,
   BUTTON_MODE,
@@ -59,8 +59,6 @@ import {
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
-
-const cattoolInterface = new CatToolInterface()
 
 function CatTool() {
   useHotkeys(
@@ -393,10 +391,10 @@ function CatTool() {
           {
             text: (
               <span>
-                Access to the editor page is forbidden until the project's
+                Access to the editor page is forbidden until the project&apos;s
                 analysis is complete.
                 <br />
-                To follow the analysis' progress,{' '}
+                To follow the analysis&apos; progress,{' '}
                 <a
                   rel="noreferrer"
                   href={`/jobanalysis/${config.id_project}-${config.id_job}-${config.password}`}
@@ -627,7 +625,7 @@ function CatTool() {
     if (isFakeCurrentTemplateReady && typeof jobMetadata?.job !== 'undefined') {
       const isValidPresetCharacterMode = Object.values(
         CHARS_SIZE_COUNTER_TYPES,
-      ).some((value) => value === cattoolInterface.getCharacterCounterMode())
+      ).some((value) => value === catToolInterface.getCharacterCounterMode())
 
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
@@ -638,7 +636,7 @@ function CatTool() {
           typeof jobMetadata?.job?.character_counter_mode === 'string'
             ? jobMetadata?.job?.character_counter_mode
             : isValidPresetCharacterMode
-              ? cattoolInterface.getCharacterCounterMode()
+              ? catToolInterface.getCharacterCounterMode()
               : undefined,
         subfilteringHandlers: jobMetadata.job.subfiltering_handlers,
         mtQualityValueInEditor: jobMetadata.project.mt_quality_value_in_editor,
@@ -676,7 +674,6 @@ function CatTool() {
         projectName={config.project_name}
         projectCompletionEnabled={config.project_completion_feature_enabled}
         secondRevisionsCount={config.secondRevisionsCount}
-        overallQualityClass={config.overall_quality_class}
         qualityReportHref={config.quality_report_href}
         allowLinkToAnalysis={config.allow_link_to_analysis}
         analysisEnabled={config.analysis_enabled}
@@ -704,12 +701,12 @@ function CatTool() {
           }
         >
           {isUserLogged ? (
-            <article id="file" className="loading mbc-commenting-closed">
+            <article id="file" className="loading comment-closed">
               <div className="article-segments-container">
                 <SegmentsContainer
                   isReview={config.isReview}
                   startSegmentId={startSegmentIdRef.current}
-                  firstJobSegment={config.first_job_segment}
+                  firstJobSegment={config.first_job_segment?.toString()}
                   languages={supportedLanguages}
                 />
               </div>

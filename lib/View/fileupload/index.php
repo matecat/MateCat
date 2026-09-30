@@ -1,7 +1,6 @@
 <?php
 
 use Controller\Cors\CorsHandler;
-use Model\ConnectedServices\GDrive\Session;
 use Utils\Registry\AppConfig;
 
 error_reporting(E_ALL | E_STRICT);
@@ -40,11 +39,15 @@ try {
             break;
         case 'HEAD':
         case 'GET':
-            if (!(new Session(Bootstrap::getDatabase()))->sessionHasFiles()) {
-                $upload_handler->get();
-            } else {
-                echo json_encode([]);
-            }
+        // Answers "what is already in my upload folder?". The blueimp widget asked on page load
+        // and replayed the answer as finished rows; the React uploader that replaced it calls
+        // this and discards the body (UploadFile.js), so nothing renders from it today.
+        //
+        // A branch here used to return an empty list instead when the session held Google Drive
+        // files, so the widget would not replay rows the Drive flow was rendering itself. It
+        // read the session, which this page stopped opening in July 2025, so it had been
+        // returning the plain listing ever since with nobody reading either answer.
+        $upload_handler->get();
             break;
         case 'POST':
             if (isset($_REQUEST['_method']) && $_REQUEST['_method'] === 'DELETE') {

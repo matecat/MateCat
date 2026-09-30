@@ -374,7 +374,7 @@ class ConvertFileControllerTest extends AbstractTest
         $_COOKIE['upload_token'] = 'not-a-valid-uuid';
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Invalid Upload Token.');
+        $this->expectExceptionMessage('Invalid upload token.');
 
         try {
             $this->controller->handle();

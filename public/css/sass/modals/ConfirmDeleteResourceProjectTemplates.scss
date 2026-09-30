@@ -1,0 +1,14 @@
+.confirm-delete-resource-project-templates {
+  ul {
+    list-style: disc;
+    padding: 10px 20px;
+    font-weight: bold;
+  }
+
+  .tm-row-delete-remove-from-content {
+    > :nth-child(2) {
+      margin-top: 15px;
+      margin-bottom: 5px;
+    }
+  }
+}

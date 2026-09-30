@@ -10,6 +10,7 @@ use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\Hook\Event\Filter\FilterCreateProjectFeaturesEvent;
 use Model\FeaturesBase\Hook\Event\Filter\FilterGetSegmentsResultEvent;
 use Model\FeaturesBase\Hook\Event\Filter\FilterJobPasswordToReviewPasswordEvent;
+use Model\FeaturesBase\Hook\Event\Run\AlterChunkReviewStructEvent;
 use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
 use Model\FeaturesBase\Hook\Event\Run\PostJobMergedEvent;
 use Model\FeaturesBase\Hook\Event\Run\PostJobSplittedEvent;
@@ -31,6 +32,8 @@ use Model\Users\UserStruct;
 
 class AbstractRevisionFeatureTest extends AbstractTest
 {
+    use \Matecat\TestHelpers\ControllerSeedFragments;
+
     private SecondPassReview $feature;
 
     protected function setUp(): void
@@ -238,6 +241,83 @@ class AbstractRevisionFeatureTest extends AbstractTest
     // _validateUndoData
     // ─────────────────────────────────────────────────────────────────
 
+    // ─────────────────────────────────────────────────────────────────
+    // alterChunkReviewStruct
+    // ─────────────────────────────────────────────────────────────────
+
+    /**
+     * Reserved id block for the fixtures below. findChunkReviews() joins `jobs`, so the job and its
+     * project have to exist too — a bare qa_chunk_reviews row is invisible to the DAO.
+     */
+    private const int CHUNK_REVIEW_BASE = 9_931_000;
+
+    private function seedChunkReviewWithoutUndoData(): void
+    {
+        $this->cleanFragments(self::CHUNK_REVIEW_BASE);
+        $owner = $this->ownerEmail(self::CHUNK_REVIEW_BASE);
+        $this->seedProject(self::CHUNK_REVIEW_BASE, $owner);
+        $this->seedJob(self::CHUNK_REVIEW_BASE, $owner);
+        // seedChunkReview() leaves undo_data at its NULL default, which is the case under test
+        $this->seedChunkReview(self::CHUNK_REVIEW_BASE);
+    }
+
+    private function makeAlterChunkReviewEvent(int $idJob, string $password): AlterChunkReviewStructEvent
+    {
+        $struct           = new ChunkCompletionEventStruct();
+        $struct->id       = 1;
+        $struct->id_job   = $idJob;
+        $struct->password = $password;
+
+        return new AlterChunkReviewStructEvent($struct);
+    }
+
+    #[Test]
+    public function alterChunkReviewStruct_throwsValidationError_whenNoChunkReviewExists(): void
+    {
+        $event = $this->makeAlterChunkReviewEvent(99_999_999, 'no_such_password');
+
+        // alterChunkReviewStruct locks the job's chunk-review rows before reading them back, which
+        // requires a transaction — in production it is dispatched inside the transaction scope
+        // CompletionEventController::__performUndo opens.
+        $db = obtainTestDatabase();
+        $db->begin();
+
+        try {
+            $this->expectException(ValidationError::class);
+            $this->expectExceptionMessage('Chunk review not found');
+
+            $this->feature->alterChunkReviewStruct($event);
+        } finally {
+            $db->rollback();
+        }
+    }
+
+    /**
+     * A chunk review that was never reset carries a NULL undo_data, so there is nothing to undo.
+     */
+    #[Test]
+    public function alterChunkReviewStruct_throwsValidationError_whenUndoDataIsNull(): void
+    {
+        $this->seedChunkReviewWithoutUndoData();
+
+        // As above: the row lock needs an open transaction. The fixtures are seeded outside it, so
+        // the rollback leaves them for cleanFragments() to remove.
+        $db = obtainTestDatabase();
+        $db->begin();
+
+        try {
+            $event = $this->makeAlterChunkReviewEvent($this->jobId(self::CHUNK_REVIEW_BASE), 'jobpw');
+
+            $this->expectException(ValidationError::class);
+            $this->expectExceptionMessage('Undo data is not available');
+
+            $this->feature->alterChunkReviewStruct($event);
+        } finally {
+            $db->rollback();
+            $this->cleanFragments(self::CHUNK_REVIEW_BASE);
+        }
+    }
+
     #[Test]
     public function validateUndoData_throwsValidationError_whenKeysAreMissing(): void
     {
@@ -247,7 +327,7 @@ class AbstractRevisionFeatureTest extends AbstractTest
         $event->id = 42;
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('undo data is missing some keys');
+        $this->expectExceptionMessage('Undo data is missing some keys');
 
         $method->invoke($this->feature, $event, ['reset_by_event_id' => '42']);
     }
@@ -268,7 +348,7 @@ class AbstractRevisionFeatureTest extends AbstractTest
         ];
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('event does not match with latest revision data');
+        $this->expectExceptionMessage('Event does not match with latest revision data');
 
         $method->invoke($this->feature, $event, $undoData);
     }

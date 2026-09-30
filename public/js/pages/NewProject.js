@@ -12,7 +12,9 @@ import {Select} from '../components/common/Select'
 import ModalsActions from '../actions/ModalsActions'
 import AlertModal from '../components/modals/AlertModal'
 import {getTmKeysUser} from '../api/getTmKeysUser'
-import More from '../../img/icons/More'
+import SettingsIcon from '../../img/icons/SettingsIcon'
+import IconWarning from '../../img/icons/IconWarning'
+import IconErrorOutline from '../../img/icons/IconErrorOutline'
 import SupportedFilesModal from '../components/modals/SupportedFilesModal'
 import Footer from '../components/footer/Footer'
 import {createProject as createProjectApi} from '../api/createProject'
@@ -37,17 +39,18 @@ import ApplicationActions from '../actions/ApplicationActions'
 import useDeviceCompatibility from '../hooks/useDeviceCompatibility'
 import useProjectTemplates, {SCHEMA_KEYS} from '../hooks/useProjectTemplates'
 import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
-import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
+import {getMMTKeys} from '../api/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
 import {handleCreationStatus} from '../utils/newProjectUtils'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
 import UserActions from '../actions/UserActions'
-import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries/getDeepLGlosssaries'
+import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries'
 import SocketListener from '../sse/SocketListener'
 import {
   Button,
+  BUTTON_MODE,
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../components/common/Button/Button'
@@ -58,12 +61,13 @@ import {
 import {UploadFile} from '../components/createProject/UploadFile'
 import {flushSync} from 'react-dom'
 import DriveIcon from '../../img/icons/DriveIcon'
+import Switch from '../../img/icons/Switch'
 import useTemplates from '../hooks/useTemplates'
 import {QF_SCHEMA_KEYS} from '../components/settingsPanel/Contents/QualityFrameworkTab'
 import {ANALYSIS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/AnalysisTab'
 import {FILTERS_PARAMS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/FiltersParams/FiltersParams'
 import {XLIFF_SETTINGS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/XliffSettings/XliffSettings'
-import {DEEPL_GLOSSARY_ROW_NONE} from '../components/settingsPanel/Contents/MachineTranslationTab/DeepLGlossary/DeepLGlossary'
+import {DEEPL_GLOSSARY_ROW_NONE} from '../components/settingsPanel/Contents/MachineTranslationTab/DeepLGlossary'
 
 const SELECT_HEIGHT = 324
 
@@ -420,7 +424,7 @@ const NewProject = () => {
       owner: true,
       tm: true,
       glos: true,
-      name: 'No Description',
+      name: 'No description',
       key: tmKeyFromQueryString,
       is_shared: false,
       id: tmKeyFromQueryString,
@@ -773,7 +777,7 @@ const NewProject = () => {
           <span>
             The TMX file(s) you have uploaded will be imported into the newly
             created key <i>{filename}</i>. If you wish to import them into an
-            existing key, please use the 'Import TMX' button in the
+            existing key, please use the &apos;Import TMX&apos; button in the
             <a href="#" onClick={() => setOpenSettings({isOpen: true})}>
               {' '}
               Settings panel
@@ -1009,14 +1013,17 @@ const NewProject = () => {
             <div className="translate-box source">
               <SourceLanguageSelect />
             </div>
-            <a
-              id="swaplang"
-              title="Swap languages"
+            <Button
+              type={BUTTON_TYPE.ICON}
               {...(isUserLogged &&
                 !isLoadingTemplates && {onClick: swapLanguages})}
+              title="Swap languages"
+              mode={BUTTON_MODE.GHOST}
+              size={BUTTON_SIZE.ICON_STANDARD}
+              className="swap-langs"
             >
-              <span>Swap languages</span>
-            </a>
+              <Switch size={24} />
+            </Button>
             {/*Target Language*/}
             <div className="translate-box target">
               <TargetLanguagesSelect />
@@ -1041,103 +1048,108 @@ const NewProject = () => {
               <TmGlossarySelect />
             </div>
 
-            <div
-              className={`translate-box settings${isLoadingTemplates ? ' settings-disabled' : ''}`}
-              {...(!isLoadingTemplates && {onClick: openTmPanel})}
-            >
-              <More size={24} />
-              <span className="text">More settings</span>
+            <div className="translate-box settings">
+              <Button
+                type={BUTTON_TYPE.PRIMARY}
+                mode={BUTTON_MODE.OUTLINE}
+                disabled={isLoadingTemplates}
+                onClick={openTmPanel}
+              >
+                <SettingsIcon />
+                <span className="text">More settings</span>
+              </Button>
             </div>
           </div>
         </div>
 
         {warnings && (
           <div className="warning-message">
-            <i className="icon-warning2 icon"> </i>
+            <IconWarning />
             <p>{warnings}</p>
           </div>
         )}
 
         {errors && (
           <div className="error-message">
-            <i className="icon-error_outline icon"> </i>
+            <IconErrorOutline />
             <p>{errors}</p>
           </div>
         )}
         <UploadFile />
-      </div>
-      <div className="wrapper-bottom">
-        {conversionEnabled && (
-          <p className="supported-files">
-            Matecat supports{' '}
-            <a
-              className="supported-file-formats"
-              onClick={() => {
-                ModalsActions.showModalComponent(
-                  SupportedFilesModal,
-                  {supportedFiles: supportedFiles},
-                  'Supported file formats',
-                  {minWidth: '80%', height: '80%'},
-                )
-              }}
-            >
-              {formatsNumber} file formats{' '}
-            </a>
-            <span style={{float: 'right'}}>.</span>
-            {isGDriveEnabled &&
-              currentProjectTemplate &&
-              uploadedFilesNames.length === 0 && (
-                <span className="gdrive-addlink-container">
-                  and{' '}
-                  <a
-                    className="load-gdrive"
-                    onClick={() => setOpenGDrive(true)}
-                    href="#"
-                  >
-                    Google Drive files{'  '}
-                    <DriveIcon size={16} />
-                  </a>
-                </span>
-              )}
-          </p>
-        )}
-        <div className="uploadbtn-box">
-          {!projectSent ? (
-            <Button
-              size={BUTTON_SIZE.BIG}
-              type={BUTTON_TYPE.PRIMARY}
-              disabled={
-                !isFormReadyToSubmit ||
-                isImportTMXInProgress ||
-                projectTemplates.length === 0
-              }
-              className={`uploadbtn${
-                !isFormReadyToSubmit ||
-                isImportTMXInProgress ||
-                projectTemplates.length === 0
-                  ? ' disabled'
-                  : ''
-              }`}
-              onClick={createProject.current}
-            >
-              {' '}
-              Analyze
-            </Button>
-          ) : (
-            <>
-              <Button
-                size={BUTTON_SIZE.BIG}
-                type={BUTTON_TYPE.PRIMARY}
-                className={'uploadbtn disabled'}
-                disabled={true}
+        <div className="wrapper-bottom">
+          {conversionEnabled && (
+            <p className="supported-files">
+              Matecat supports{' '}
+              <a
+                className="supported-file-formats"
+                onClick={() => {
+                  ModalsActions.showModalComponent(
+                    SupportedFilesModal,
+                    {supportedFiles: supportedFiles},
+                    'Supported file formats',
+                    {minWidth: '80%', height: '80%'},
+                  )
+                }}
               >
-                <span className="uploadloader" />
-                Analyzing...
-              </Button>
-            </>
+                {formatsNumber} file formats{' '}
+              </a>
+              <span style={{float: 'right'}}>.</span>
+              {isGDriveEnabled &&
+                currentProjectTemplate &&
+                uploadedFilesNames.length === 0 && (
+                  <span className="gdrive-addlink-container">
+                    and{' '}
+                    <a
+                      className="load-gdrive"
+                      onClick={() => setOpenGDrive(true)}
+                      href="#"
+                    >
+                      Google Drive files{'  '}
+                      <DriveIcon size={16} />
+                    </a>
+                  </span>
+                )}
+            </p>
           )}
+          <div className="uploadbtn-box">
+            {!projectSent ? (
+              <Button
+                size={BUTTON_SIZE.MEDIUM}
+                type={BUTTON_TYPE.PRIMARY}
+                disabled={
+                  !isFormReadyToSubmit ||
+                  isImportTMXInProgress ||
+                  projectTemplates.length === 0
+                }
+                className={`uploadbtn${
+                  !isFormReadyToSubmit ||
+                  isImportTMXInProgress ||
+                  projectTemplates.length === 0
+                    ? ' disabled'
+                    : ''
+                }`}
+                onClick={createProject.current}
+              >
+                {' '}
+                Analyze
+              </Button>
+            ) : (
+              <>
+                <Button
+                  size={BUTTON_SIZE.MEDIUM}
+                  type={BUTTON_TYPE.PRIMARY}
+                  className={'uploadbtn disabled'}
+                  disabled={true}
+                >
+                  <span className="uploadloader" />
+                  Analyzing...
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </div>
+
       {isOpenMultiselectLanguages && (
         <LanguageSelector
           selectedLanguagesFromDropdown={
@@ -1208,9 +1220,12 @@ const NewProject = () => {
           desktop with the browser of your choice.
         </p>
         <div className="buttons">
-          <a href="https://site.matecat.com/" className="ui primary button">
+          <Button
+            type={BUTTON_TYPE.PRIMARY}
+            onClick={() => window.open('https://site.matecat.com/', '_blank')}
+          >
             Find out more about Matecat
-          </a>
+          </Button>
         </div>
       </div>
     </div>

@@ -20,7 +20,7 @@ class WelcomeEmail extends AbstractEmail
      */
     protected UserStruct $user;
 
-    protected ?string $title = 'Welcome to Matecat! Get Started with Your First Project Today';
+    protected ?string $title = 'Welcome to Matecat! Get started with your first project today';
 
     public function __construct(UserStruct $user)
     {

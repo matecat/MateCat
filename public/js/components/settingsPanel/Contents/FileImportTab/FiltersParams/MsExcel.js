@@ -109,7 +109,7 @@ export const MsExcel = () => {
         <div>
           <h3>Translate document properties</h3>
           <p>
-            Choose whether to translate document properties (e.g. the author's
+            Choose whether to translate document properties (e.g. the author&apos;s
             name).
           </p>
         </div>

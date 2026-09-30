@@ -6,17 +6,13 @@ const JobAnalyzeHeader = ({jobInfo}) => {
   const totalWeighted = jobInfo.total_equivalent
   return (
     <div className="job-analyze-header">
-      <div className="job-analyze-header_left">
-        <div>
-          <span>ID: {jobInfo.id}</span>
-        </div>
-        <div className="job-analyze-languages">
-          <span>{jobInfo.source_name}</span>
-          <ChevronRight size={16} />
-          <span>{jobInfo.target_name}</span>
-        </div>
+      <div className="job-analyze-header__id">ID: {jobInfo.id}</div>
+      <div className="job-analyze-header__languages">
+        <span>{jobInfo.source}</span>
+        <ChevronRight size={16} />
+        <span>{jobInfo.target}</span>
       </div>
-      <div className="job-analyze-header_right">
+      <div className="job-analyze-header__words">
         <span>{parseInt(totalWeighted)}</span>
         <span>
           {jobInfo.count_unit === UNIT_COUNT.WORDS

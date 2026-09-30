@@ -38,15 +38,6 @@ class TestableJobSplitMergeService extends JobSplitMergeService
     private array $randomStrings = [];
     private int $randomStringIndex = 0;
 
-    private bool $beginTransactionCalled = false;
-
-    /**
-     * The order the transaction opened in, relative to whatever else a test records. Work that must
-     * not survive a rollback has to be entered after 'beginTransaction' appears here.
-     *
-     * @var string[]
-     */
-    private array $callOrder = [];
     private bool $destroyAnalysisCacheCalled = false;
     private ?int $destroyAnalysisCacheProjectId = null;
 
@@ -101,32 +92,6 @@ class TestableJobSplitMergeService extends JobSplitMergeService
     protected function getJobByIdAndPassword(int $id, string $password): ?JobStruct
     {
         return $this->jobByIdAndPasswordOverride ?? parent::getJobByIdAndPassword($id, $password);
-    }
-
-    // ── beginTransaction ──
-
-    protected function beginTransaction(): void
-    {
-        $this->beginTransactionCalled = true;
-        $this->callOrder[] = 'beginTransaction';
-    }
-
-    public function wasBeginTransactionCalled(): bool
-    {
-        return $this->beginTransactionCalled;
-    }
-
-    public function recordCall(string $name): void
-    {
-        $this->callOrder[] = $name;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getCallOrder(): array
-    {
-        return $this->callOrder;
     }
 
     // ── Cart ──

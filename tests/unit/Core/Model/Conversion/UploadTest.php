@@ -9,6 +9,7 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\Conversion\Upload;
 use Model\Conversion\UploadElement;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\WithoutErrorHandler;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Utils\Registry\AppConfig;
@@ -437,7 +438,7 @@ class UploadTest extends AbstractTest
         $fakeUpload['error'] = 99; // unknown code
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Unknown Error: 99');
+        $this->expectExceptionMessage('Unknown error: 99');
         $upload->uploadFiles(['doc' => $fakeUpload]);
     }
 
@@ -455,7 +456,7 @@ class UploadTest extends AbstractTest
         $fakeUpload = $this->makeFakeUpload('malware.exe', 'MZ executable');
 
         $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('File Extension Not Allowed');
+        $this->expectExceptionMessage('File extension not allowed');
         $upload->uploadFiles(['doc' => $fakeUpload]);
     }
 
@@ -479,7 +480,7 @@ class UploadTest extends AbstractTest
             $fakeUpload = $this->makeFakeUpload('big.txt', 'This content exceeds the 5 byte limit');
 
             $this->expectException(DomainException::class);
-            $this->expectExceptionMessage('File Dimensions Not Allowed');
+            $this->expectExceptionMessage('File dimensions not allowed');
             $upload->uploadFiles(['doc' => $fakeUpload]);
         } finally {
             AppConfig::$MAX_UPLOAD_FILE_SIZE = $originalMax;
@@ -539,6 +540,78 @@ class UploadTest extends AbstractTest
         $this->assertNotNull($result->doc);
         $this->assertIsArray($result->doc->error);
         $this->assertStringContainsString('bigger than this PHP installation allows', $result->doc->error['message']);
+    }
+
+    // ================================================
+    // uploadFiles() — destination write failures
+    // ================================================
+
+    /**
+     * copy()/chmod() report failure through both a return value and an E_WARNING. Only the return
+     * value is under test, so the warning is muted for the duration of the call to keep the run
+     * output clean (the production code calls them unsuppressed on purpose).
+     *
+     * @template T
+     * @param callable():T $fn
+     * @return T
+     */
+    private function withoutWarnings(callable $fn): mixed
+    {
+        $previous = error_reporting(error_reporting() & ~E_WARNING);
+        try {
+            return $fn();
+        } finally {
+            error_reporting($previous);
+        }
+    }
+
+    /**
+     * copy() cannot write over an existing directory, so occupying the destination path with one
+     * makes the store step fail while leaving the subsequent chmod() on that directory succeeding.
+     * That isolates the "failed to store" branch.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    #[WithoutErrorHandler]
+    public function uploadFilesStoresErrorWhenTheFileCannotBeCopied(): void
+    {
+        $upload = new Upload('upload-copy-fails');
+        $upload->setRaiseException(false);
+
+        // Occupy the destination path with a directory
+        mkdir($upload->getUploadPath() . DIRECTORY_SEPARATOR . 'report.txt', 0775, true);
+
+        $files  = ['doc' => $this->makeFakeUpload('report.txt', 'data')];
+        $result = $this->withoutWarnings(fn() => $upload->uploadFiles($files));
+
+        $this->assertIsArray($result->doc->error);
+        $this->assertStringContainsString("Failed to store file 'report.txt' on server.", $result->doc->error['message']);
+    }
+
+    /**
+     * With the upload session directory removed, both the copy() and the following chmod() fail.
+     * The chmod branch runs after the copy branch and overwrites the recorded error, so the final
+     * message is the permissions one.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    #[WithoutErrorHandler]
+    public function uploadFilesStoresErrorWhenPermissionsCannotBeSet(): void
+    {
+        $upload = new Upload('upload-chmod-fails');
+        $upload->setRaiseException(false);
+
+        $fakeUpload = $this->makeFakeUpload('report.txt', 'data');
+
+        // The tmp file lives in the parent dir, so dropping the session dir only breaks the destination
+        rmdir($upload->getUploadPath());
+
+        $result = $this->withoutWarnings(fn() => $upload->uploadFiles(['doc' => $fakeUpload]));
+
+        $this->assertIsArray($result->doc->error);
+        $this->assertStringContainsString("Failed to set permissions on file. 'report.txt'", $result->doc->error['message']);
     }
 
     // ================================================

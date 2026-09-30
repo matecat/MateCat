@@ -4,6 +4,7 @@ namespace Model\PayableRates;
 
 use DomainException;
 use Exception;
+use InvalidArgumentException;
 use JsonSerializable;
 use Matecat\Locales\Languages;
 use Model\Analysis\PayableRates;
@@ -11,6 +12,7 @@ use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 use TypeError;
 use Utils\Date\DateTimeUtil;
+use Utils\Validation\UserSuppliedName;
 
 class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable
 {
@@ -88,6 +90,8 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
      *
      * @throws Exception
      * @throws TypeError
+     * @throws InvalidArgumentException when the name is empty, holds a character the connection
+     *                                  cannot carry, or will not fit the column
      */
     public function hydrateFromJSON(string $json): CustomPayableRateStruct
     {
@@ -106,7 +110,14 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
             $this->version = $json['version'];
         }
 
-        $this->name = $json['payable_rate_template_name'];
+        // Here rather than in the controller, so create and update are covered by one call: both
+        // hydrate through this method. The schema bounds the length, but only the composed form
+        // lets UNIQUE(uid, name) see a clash between two spellings of the same name.
+        $this->name = UserSuppliedName::validated(
+            $json['payable_rate_template_name'],
+            'payable_rate_template_name',
+            UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH
+        );
         $this->breakdowns = $json['breakdowns'];
 
         return $this;
@@ -126,7 +137,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
         }
 
         if (!isset($breakdowns['default'])) {
-            throw new DomainException('`default` node is MANDATORY in the breakdowns array.', 403);
+            throw new DomainException('`default` node is mandatory in the breakdowns array.', 403);
         }
 
         unset($breakdowns['default']);

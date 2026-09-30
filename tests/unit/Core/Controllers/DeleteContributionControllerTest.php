@@ -259,7 +259,7 @@ class DeleteContributionControllerTest extends AbstractTest
             'id_match' => '1', 'password' => 'pass', 'id_translator' => null,
         ]);
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing source_lang');
+        $this->expectExceptionMessage('Missing source_lang');
         $this->invokeMethod('validateTheRequest');
     }
 
@@ -272,7 +272,7 @@ class DeleteContributionControllerTest extends AbstractTest
             'id_match' => '1', 'password' => 'pass', 'id_translator' => null,
         ]);
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing target_lang');
+        $this->expectExceptionMessage('Missing target_lang');
         $this->invokeMethod('validateTheRequest');
     }
 
@@ -285,7 +285,7 @@ class DeleteContributionControllerTest extends AbstractTest
             'id_match' => '1', 'password' => 'pass', 'id_translator' => null,
         ]);
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing source');
+        $this->expectExceptionMessage('Missing source');
         $this->invokeMethod('validateTheRequest');
     }
 
@@ -298,7 +298,7 @@ class DeleteContributionControllerTest extends AbstractTest
             'id_match' => '1', 'password' => 'pass', 'id_translator' => null,
         ]);
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing target');
+        $this->expectExceptionMessage('Missing target');
         $this->invokeMethod('validateTheRequest');
     }
 
@@ -311,7 +311,7 @@ class DeleteContributionControllerTest extends AbstractTest
             'id_match' => '1', 'password' => 'pass', 'id_translator' => null,
         ]);
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing id job');
+        $this->expectExceptionMessage('Missing id job');
         $this->invokeMethod('validateTheRequest');
     }
 

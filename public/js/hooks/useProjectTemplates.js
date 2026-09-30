@@ -88,7 +88,10 @@ export class UseProjectTemplateInterface extends ComponentExtendInterface {
   getCharacterCounterMode() {}
 }
 
-const useProjectTemplateInterface = new UseProjectTemplateInterface()
+// Exported so a plugin can assign over the member on the singleton. The class
+// stays exported as well, for plugins still patching the prototype; core reads
+// through the singleton at call time, so either mechanism is seen.
+export const useProjectTemplateInterface = new UseProjectTemplateInterface()
 
 function useProjectTemplates({
   tmKeys,

@@ -568,7 +568,7 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
         $this->controller->mockModel = $modelMock;
 
         $this->expectException(AuthorizationError::class);
-        $this->expectExceptionMessage('Not Authorized');
+        $this->expectExceptionMessage('Not authorized');
 
         $this->controller->delete();
     }
@@ -771,7 +771,7 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
         ]);
 
         $this->expectException(AuthorizationError::class);
-        $this->expectExceptionMessage('Not Authorized');
+        $this->expectExceptionMessage('Not authorized');
 
         $this->controller->update();
     }
@@ -919,7 +919,7 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
         $this->controller->mockModel = $modelMock;
 
         $this->expectException(AuthorizationError::class);
-        $this->expectExceptionMessage('Job owner not found. Not Authorized');
+        $this->expectExceptionMessage('Job owner not found. Not authorized');
 
         $this->controller->delete();
     }
@@ -969,7 +969,7 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
         $this->controller->mockModel = $modelMock;
 
         $this->expectException(AuthorizationError::class);
-        $this->expectExceptionMessage('Not Authorized, the user does not belong to team');
+        $this->expectExceptionMessage('Not authorized');
 
         $this->controller->delete();
     }

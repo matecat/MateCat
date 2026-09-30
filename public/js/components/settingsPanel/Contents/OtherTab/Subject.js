@@ -17,7 +17,7 @@ export const Subject = () => {
     <div className="options-box">
       <div className="option-description">
         <h3>Subject</h3>
-        <p>Select your project's subject.</p>
+        <p>Select your project&apos;s subject.</p>
       </div>
       <div className="options-select-container">
         <Select

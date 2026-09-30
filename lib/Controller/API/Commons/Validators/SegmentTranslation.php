@@ -28,7 +28,7 @@ class SegmentTranslation extends Base
     {
         $this->translation = (new SegmentTranslationDao($this->controller->getDatabase()))->findBySegmentAndJob($this->request->param('id_segment'), $this->request->param('id_job'));
         if (!$this->translation) {
-            throw new NotFoundException('translation not found');
+            throw new NotFoundException('Translation not found');
         }
     }
 

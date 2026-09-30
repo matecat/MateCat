@@ -38,7 +38,7 @@ class TestableKeyCheckController extends KeyCheckController
         $this->rateLimitIpResponse = $response;
     }
 
-    public function checkAndIncrementRateLimit(Response $response, string $identifier, string $route, int $maxRetries = 10, ?RateLimiterService $limiterService = null): ?Response
+    public function checkAndIncrementRateLimit(Response $response, string $identifier, string $route, int $maxRetries = 10, ?RateLimiterService $limiterService = null, int $weight = 1): ?Response
     {
         $this->rateLimitCallCount++;
         if ($this->rateLimitCallCount % 2 === 1) {

@@ -199,4 +199,25 @@ class ProjectValidatorTest extends AbstractTest
 
         $validator->getProject();
     }
+
+    // ─── inProjectScope() defensive guard ───
+
+    /**
+     * _validate() always resolves or rejects the project before inProjectScope() runs, so this
+     * guard is unreachable in production. Invoking the private method directly is the only way to
+     * exercise it — the point of the test is to pin the contract, not to describe a real request.
+     */
+    #[Test]
+    public function inProjectScope_throws_when_the_project_was_never_set(): void
+    {
+        $validator = $this->makeValidator();
+        $validator->setUser($this->makeUser(self::EMAIL));
+
+        $method = new \ReflectionMethod(ProjectValidator::class, 'inProjectScope');
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Project must be set before calling inProjectScope()');
+
+        $method->invoke($validator);
+    }
 }

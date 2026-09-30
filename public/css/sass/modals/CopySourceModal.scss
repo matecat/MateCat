@@ -1,0 +1,35 @@
+@use '../tokens/colors';
+@use 'commons/variables';
+
+.copy-source-modal {
+  padding: 30px 25px 20px;
+
+  h3 {
+    font-size: variables.$font-size-big;
+  }
+
+  .buttons-popup-container {
+    padding: 25px 0 30px;
+    border-bottom: 1px solid colors.$grey50;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    label {
+      font-size: variables.$font-size-base;
+      margin-right: 10px;
+      position: relative;
+      top: 2px;
+    }
+
+    .btn-cancel,
+    .btn-ok {
+      padding: 10px 15px;
+      margin-left: 5px;
+    }
+
+    .btn-cancel {
+      margin-right: 16px;
+      font-weight: 100;
+    }
+  }
+}

@@ -23,10 +23,12 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use Stomp\Client;
+use Stomp\Exception\ConnectionException;
 use Stomp\StatefulStomp;
 use Stomp\Transport\Message;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\TranslationStatus;
+use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
 /**
@@ -82,6 +84,18 @@ class FakeStatefulStomp extends StatefulStomp
     public function getClient()
     {
         return (new ReflectionClass(FakeStompClient::class))->newInstanceWithoutConstructor();
+    }
+}
+
+/**
+ * Simulates an unreachable broker: everything up to the send succeeds, the send itself
+ * throws the same exception a real connection failure raises.
+ */
+class ThrowingStatefulStomp extends FakeStatefulStomp
+{
+    public function send($destination, Message $message)
+    {
+        throw new ConnectionException('Broker unreachable');
     }
 }
 
@@ -963,9 +977,74 @@ class CancelRequestControllerTest extends AbstractTest
         );
     }
 
+    // ─── broker failures ─────────────────────────────────────────────
+
+    #[Test]
+    public function cancelRequestStillSucceedsWhenTheBrokerIsUnreachable(): void
+    {
+        $service = $this->createMock(SegmentDisabledService::class);
+        $service->method('isDisabled')->willReturn(false);
+        $service->expects($this->once())->method('disable')->with(42);
+
+        $logger = $this->createMock(MatecatLogger::class);
+        $logger->expects($this->once())->method('error');
+
+        $controller = $this->createActionController(
+            segmentDisabledService: $service,
+            queueHandler: $this->failingAmqHandler(),
+            logger: $logger,
+        );
+
+        $this->request->method('param')->willReturnMap([
+            ['id_job', null, 1],
+            ['password', null, 'abc123'],
+            ['id_segment', null, 42],
+        ]);
+
+        $this->response->method('code')->willReturn(200);
+        $this->response->expects($this->once())
+            ->method('json')
+            ->with(['id_segment' => 42]);
+
+        // The segment is already persisted as disabled at this point, so a broker outage
+        // must not turn the call into a 500 the caller would retry.
+        $controller->cancelRequest();
+    }
+
+    #[Test]
+    public function enableRequestStillSucceedsWhenTheBrokerIsUnreachable(): void
+    {
+        $service = $this->createMock(SegmentDisabledService::class);
+        $service->method('isDisabled')->willReturn(true);
+        $service->expects($this->once())->method('enable')->with(42);
+
+        $logger = $this->createMock(MatecatLogger::class);
+        $logger->expects($this->once())->method('error');
+
+        $controller = $this->createActionController(
+            segmentDisabledService: $service,
+            queueHandler: $this->failingAmqHandler(),
+            logger: $logger,
+        );
+
+        $this->request->method('param')->willReturnMap([
+            ['id_job', null, 1],
+            ['password', null, 'abc123'],
+            ['id_segment', null, 42],
+        ]);
+
+        $this->response->method('code')->willReturn(200);
+        $this->response->expects($this->once())
+            ->method('json')
+            ->with(['id_segment' => 42]);
+
+        $controller->enableRequest();
+    }
+
     private function createActionController(
         ?SegmentDisabledService $segmentDisabledService = null,
         ?AMQHandler $queueHandler = null,
+        ?MatecatLogger $logger = null,
     ): CancelRequestController {
         $teamStruct = $this->createStub(TeamStruct::class);
         $teamStruct->created_by = 123;
@@ -994,6 +1073,7 @@ class CancelRequestControllerTest extends AbstractTest
             segmentDisabledService: $segmentDisabledService,
             teamDao: $teamDao,
             queueHandler: $queueHandler,
+            logger: $logger,
         );
     }
 
@@ -1010,6 +1090,18 @@ class CancelRequestControllerTest extends AbstractTest
         return [new AMQHandler(preconfiguredStomp: $stomp), $stomp];
     }
 
+    /**
+     * Same as fakeAmqHandler(), but the transport fails the way an unreachable broker does.
+     */
+    private function failingAmqHandler(): AMQHandler
+    {
+        // Not FakeStatefulStomp::create() — its self::class is not late-bound and would
+        // hand back the non-throwing parent, making the test vacuous.
+        $stomp = (new ReflectionClass(ThrowingStatefulStomp::class))->newInstanceWithoutConstructor();
+
+        return new AMQHandler(preconfiguredStomp: $stomp);
+    }
+
     private function createControllerWithPartialMock(
         mixed $jobReturn = 'NOT_SET',
         mixed $segmentReturn = 'NOT_SET',
@@ -1019,6 +1111,7 @@ class CancelRequestControllerTest extends AbstractTest
         ?SegmentDisabledService $segmentDisabledService = null,
         ?TeamDao $teamDao = null,
         ?AMQHandler $queueHandler = null,
+        ?MatecatLogger $logger = null,
     ): CancelRequestController {
         $controller = $this->getMockBuilder(TestableCancelRequestController::class)
             ->disableOriginalConstructor()
@@ -1032,6 +1125,7 @@ class CancelRequestControllerTest extends AbstractTest
         $ref->getProperty('request')->setValue($controller, $this->request);
         $ref->getProperty('response')->setValue($controller, $this->response);
         $ref->getProperty('database')->setValue($controller, $this->createStub(IDatabase::class));
+        $ref->getProperty('logger')->setValue($controller, $logger ?? $this->createStub(MatecatLogger::class));
 
         if ($user === null) {
             $user = $this->createStub(UserStruct::class);

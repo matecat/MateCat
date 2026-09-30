@@ -11,6 +11,7 @@ use Klein\Exceptions\LockedResponseException;
 use Klein\Exceptions\ResponseAlreadySentException;
 use Model\Users\MetadataDao;
 use Model\Users\UserDao;
+use Throwable;
 use TypeError;
 use Utils\Tools\CatUtils;
 
@@ -28,6 +29,8 @@ class UserController extends AbstractStatefulKleinController
      * @throws LockedResponseException
      * @throws ResponseAlreadySentException
      * @throws TypeError
+     * @throws Throwable the update runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function edit(): void
     {
@@ -65,14 +68,12 @@ class UserController extends AbstractStatefulKleinController
             $user = $this->user;
             $user->first_name = $data['first_name'];
             $user->last_name = $data['last_name'];
-            $uid = $user->uid ?? throw new Exception('User not authenticated');
-
             $userDao = new UserDao($this->getDatabase());
             $userDao->updateUser($user);
-            // The bust is the whole invalidation now: the session no longer caches the user row, so
-            // there is nothing left here to re-stamp after a rename. The next request resolves the
-            // user through getByUid(), which reads the entry this just emptied.
-            $userDao->destroyCacheByUid($uid);
+            // The bust is the whole invalidation: the session does not cache the user row, so there
+            // is nothing left here to re-stamp after a rename. The next request resolves the user
+            // through getByUid() or getByEmail(), and the door empties both entries.
+            $userDao->destroyCache($user);
 
             $this->response->json([
                 'uid' => $user->uid,
@@ -95,6 +96,7 @@ class UserController extends AbstractStatefulKleinController
      * @throws InvalidArgumentException
      * @throws LockedResponseException
      * @throws ResponseAlreadySentException
+     * @throws TypeError
      */
     public function setMetadata(): void
     {

@@ -44,8 +44,10 @@ class Pager
     {
         $this->setCacheTTL($paginationParameters->getTtl());
 
-        $count = $totals + 1;
-        $pages = (int) ceil($count / $paginationParameters->getPagination());
+        // the page count and the reported total are the real total: counting one item too many
+        // reported 101 for 100 rows and advertised a sixth page at 20 per page, whose `next`
+        // returned nothing. An empty set still reports a single page rather than none.
+        $pages = max(1, (int)ceil($totals / $paginationParameters->getPagination()));
         $prev = ($paginationParameters->getCurrent() !== 1) ? $paginationParameters->getBaseRoute() . ($paginationParameters->getCurrent() - 1) : null;
         $next = ($paginationParameters->getCurrent() < $pages) ? $paginationParameters->getBaseRoute() . ($paginationParameters->getCurrent() + 1) : null;
         $offset = ($paginationParameters->getCurrent() - 1) * $paginationParameters->getPagination();
@@ -65,7 +67,7 @@ class Pager
                     $paginationParameters->getCurrent(),
                     $paginationParameters->getPagination(),
                     $pages,
-                    $count,
+                    $totals,
                     $_cacheResult,
                     $prev,
                     $next
@@ -91,7 +93,7 @@ class Pager
             $paginationParameters->getCurrent(),
             $paginationParameters->getPagination(),
             $pages,
-            $count,
+            $totals,
             $result,
             $prev,
             $next

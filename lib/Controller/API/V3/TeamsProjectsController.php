@@ -15,6 +15,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
 use Exception;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectsCount;
 use Model\Projects\ProjectStruct;
 use Model\Teams\TeamStruct;
 use Utils\Registry\AppConfig;
@@ -54,7 +55,9 @@ class TeamsProjectsController extends KleinController
         $search = $this->request->param('search');
 
         $filter = [
-            'limit' => (int)$step,
+            // one row beyond the page: it tells us a next page exists without asking the total,
+            // which stops counting at a ceiling and so cannot name the last page of a large team
+            'limit' => (int)$step + 1,
             'offset' => $this->getOffset($page, $step),
         ];
 
@@ -64,42 +67,57 @@ class TeamsProjectsController extends KleinController
 
         $this->featureSet->loadFromUserEmail($this->user->email ?? '');
 
-        /** @var ProjectStruct[] $projectsList */
-        $projectsList = $this->getProjectDao()->findByTeamId($id_team, $filter);
-        $projectsList = (new Project($this->getDatabase(), $projectsList))->render();
-
         $totals = $this->getProjectDao()->getTotalCountByTeamId($id_team, $filter, 60 * 5);
-        $total_pages = $this->getTotalPages($step, $totals);
 
-        if ($totals == 0) {
+        // an exact total still names the last page up front, and refusing here spares an
+        // out-of-range request the deep OFFSET scan it would otherwise pay for
+        $total_pages = $this->getTotalPages($step, $totals->value);
+        if (!$totals->approximated && $totals->value > 0 && $page > $total_pages) {
+            throw new NotFoundException($page . " too high, maximum value is " . $total_pages, 404);
+        }
+
+        /** @var ProjectStruct[] $rows */
+        $rows = $this->getProjectDao()->findByTeamId($id_team, $filter);
+        $hasNextPage = count($rows) > $step;
+        $rows = array_slice($rows, 0, (int)$step);
+
+        if (empty($rows)) {
+            // a team with no projects answers 204 whatever page was asked for, as it always has;
+            // only a team that does hold projects can be asked for a page past its end
+            if ($page > 1 && $totals->value > 0) {
+                throw new NotFoundException($page . " is past the last page", 404);
+            }
+
             $this->response->status()->setCode(204);
             $this->response->json([
-                '_links' => $this->_getPaginationLinks($page, $totals, $step, $search),
+                '_links' => $this->_getPaginationLinks($page, $totals, false, $step, $search),
                 'projects' => []
             ]);
             return;
         }
 
-        if ($page > $total_pages) {
-            throw new NotFoundException($page . " too high, maximum value is " . $total_pages, 404);
-        }
-
         $this->response->json([
-            '_links' => $this->_getPaginationLinks($page, $totals, $step, $search),
-            'projects' => $projectsList
+            '_links' => $this->_getPaginationLinks($page, $totals, $hasNextPage, $step, $search),
+            'projects' => (new Project($this->getDatabase(), $rows))->render()
         ]);
     }
 
     /**
+     * `totals` stops at a ceiling, so once `totals_approximated` is true it is a lower bound and
+     * `total_pages` counts only the pages that bound covers. `next` therefore comes from having
+     * fetched one row past the page rather than from comparing against `total_pages`, which would
+     * hide every page beyond the cap.
+     *
      * @param int $page
-     * @param int $totals
+     * @param ProjectsCount $totals
+     * @param bool $hasNextPage
      * @param int $step
      * @param array<string, mixed>|null $search
      *
      * @return array<string, mixed>
      * @throws \DivisionByZeroError
      */
-    private function _getPaginationLinks(int $page, int $totals, int $step = 20, ?array $search = []): array
+    private function _getPaginationLinks(int $page, ProjectsCount $totals, bool $hasNextPage, int $step = 20, ?array $search = []): array
     {
         $url = parse_url($_SERVER['REQUEST_URI']);
         $urlPath = is_array($url) ? ($url['path'] ?? '') : '';
@@ -109,14 +127,15 @@ class TeamsProjectsController extends KleinController
             "self" => $_SERVER['REQUEST_URI'],
             "page" => $page,
             "step" => $step,
-            "totals" => $totals,
-            "total_pages" => $total_pages = $this->getTotalPages($step, $totals),
+            "totals" => $totals->value,
+            "totals_approximated" => $totals->approximated,
+            "total_pages" => $this->getTotalPages($step, $totals->value),
         ];
 
         $last_part_of_url = ($step != 20 ? "&step=" . $step : null) . (isset($search['name']) ? "&search[name]=" . $search['name'] : null) . (
             isset($search['id']) ? "&search[id]=" . $search['id'] : null);
 
-        if ($page < $total_pages) {
+        if ($hasNextPage) {
             $links['next'] = $urlPath . "?page=" . ($page + 1) . $last_part_of_url;
         }
 

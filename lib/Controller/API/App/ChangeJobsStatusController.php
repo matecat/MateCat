@@ -88,7 +88,7 @@ class ChangeJobsStatusController extends KleinController
         $new_status = filter_var($this->request->param('new_status'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
 
         if ($new_status === false || !JobStatus::isAllowedStatus($new_status)) {
-            throw new Exception("Invalid Status");
+            throw new Exception("Invalid status");
         }
 
         return [

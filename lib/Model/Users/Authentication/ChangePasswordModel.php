@@ -81,10 +81,9 @@ class ChangePasswordModel
         }
 
         $this->userDao->updateStruct($this->user, $fieldsToUpdate);
-        $this->userDao->destroyCacheByEmail($this->user->email ?? throw new RuntimeException('User email must be set before cache invalidation'));
+        $this->userDao->destroyCache($this->user);
 
         $uid = $this->user->uid ?? throw new RuntimeException('User uid must be set before cache invalidation');
-        $this->userDao->destroyCacheByUid($uid);
 
         // Every other device is still holding a login cookie that the old password minted, so the
         // change has to retire them. The acting device is logged out separately by the controller's

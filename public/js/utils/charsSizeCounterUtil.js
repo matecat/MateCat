@@ -18,7 +18,6 @@ Object.defineProperty(charsSizeCounter, 'map', {
 
 // Counter chars size methods
 export const getDefaultCharsSize = (value) => value.length * 1
-const getUtf8CharsSize = (value) => new Blob([value]).size
 const getUft16CharsSize = (value) => value.length * 2
 const getCJKMatches = (value, getSize) => {
   const regex =
@@ -105,22 +104,6 @@ const getEmojiMatches = (value, getSize) => {
     })
   }
 
-  return result
-}
-const getLatinCharsMatches = (value, getSize) => {
-  const result = []
-
-  for (var i = 0; i < value.length; i++) {
-    const char = value[i]
-    if (value.charCodeAt(i) <= 255) {
-      result.push({
-        match: char,
-        index: i,
-        length: char.length,
-        size: getSize(char),
-      })
-    }
-  }
   return result
 }
 const getFullwidthVariantsMatches = (value, getSize) => {

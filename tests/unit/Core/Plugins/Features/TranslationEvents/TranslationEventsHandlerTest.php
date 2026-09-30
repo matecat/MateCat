@@ -9,6 +9,7 @@ use Model\Segments\SegmentStruct;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
@@ -16,21 +17,6 @@ use Plugins\Features\TranslationEvents\Model\TranslationEventStruct;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
-
-class TestableTranslationEventsHandler extends TranslationEventsHandler
-{
-    protected function openTransaction(): void
-    {
-    }
-
-    protected function commitTransaction(): void
-    {
-    }
-
-    protected function rollbackTransaction(): void
-    {
-    }
-}
 
 class TranslationEventsHandlerTest extends AbstractTest
 {
@@ -82,12 +68,44 @@ class TranslationEventsHandlerTest extends AbstractTest
         );
     }
 
-    private function makeHandler(?TranslationEventDao $dao = null): TestableTranslationEventsHandler
+    private function makeHandler(?TranslationEventDao $dao = null): TranslationEventsHandler
     {
-        return new TestableTranslationEventsHandler(
+        return new TranslationEventsHandler(
             $this->makeChunk(),
-            $dao ?? $this->createStub(TranslationEventDao::class),
+            $dao ?? $this->makeEventDaoStub(),
         );
+    }
+
+    /**
+     * A TranslationEventDao stub whose handle runs a transaction scope inline.
+     *
+     * save() opens its scope on the dao's own handle. Left auto-stubbed, transaction() would return
+     * null without ever calling the closure, so nothing under test would run and the assertions
+     * would pass against a method that did nothing.
+     */
+    private function makeEventDaoStub(): TranslationEventDao
+    {
+        [$database] = $this->createDatabaseMock();
+
+        $eventDao = $this->createStub(TranslationEventDao::class);
+        $eventDao->method('getDatabaseHandler')->willReturn($database);
+
+        return $eventDao;
+    }
+
+    /**
+     * The same, as a mock, for the tests that set expectations on the dao.
+     *
+     * @return TranslationEventDao&MockObject
+     */
+    private function makeEventDaoMock(): TranslationEventDao
+    {
+        [$database] = $this->createDatabaseMock();
+
+        $eventDao = $this->createMock(TranslationEventDao::class);
+        $eventDao->method('getDatabaseHandler')->willReturn($database);
+
+        return $eventDao;
     }
 
     #[Test]
@@ -217,7 +235,7 @@ class TranslationEventsHandlerTest extends AbstractTest
     #[Test]
     public function saveCallsProcessAndSavesEvents(): void
     {
-        $dao = $this->createMock(TranslationEventDao::class);
+        $dao = $this->makeEventDaoMock();
         $dao->expects($this->once())
             ->method('insertStruct')
             ->willReturn(99);
@@ -240,7 +258,7 @@ class TranslationEventsHandlerTest extends AbstractTest
     #[Test]
     public function saveSetsCorrectFinalRevisionFlagForTranslate(): void
     {
-        $dao = $this->createMock(TranslationEventDao::class);
+        $dao = $this->makeEventDaoMock();
         $dao->expects($this->once())
             ->method('insertStruct')
             ->with(
@@ -264,7 +282,7 @@ class TranslationEventsHandlerTest extends AbstractTest
     #[Test]
     public function saveSetsCorrectFinalRevisionFlagForRevision(): void
     {
-        $dao = $this->createMock(TranslationEventDao::class);
+        $dao = $this->makeEventDaoMock();
         $dao->expects($this->once())
             ->method('insertStruct')
             ->with(
@@ -288,7 +306,7 @@ class TranslationEventsHandlerTest extends AbstractTest
     #[Test]
     public function saveSetsZeroFinalRevisionWhenFlagNotAllowed(): void
     {
-        $dao = $this->createMock(TranslationEventDao::class);
+        $dao = $this->makeEventDaoMock();
         $dao->expects($this->once())
             ->method('insertStruct')
             ->with(
@@ -331,7 +349,7 @@ class TranslationEventsHandlerTest extends AbstractTest
         );
         $translationEvent->setFinalRevisionToRemove(SourcePages::SOURCE_PAGE_REVISION);
 
-        $dao = $this->createMock(TranslationEventDao::class);
+        $dao = $this->makeEventDaoMock();
         $dao->expects($this->once())
             ->method('unsetFinalRevisionFlag')
             ->with(1, [10], [SourcePages::SOURCE_PAGE_REVISION]);

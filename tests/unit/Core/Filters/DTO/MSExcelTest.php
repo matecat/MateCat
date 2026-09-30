@@ -71,4 +71,22 @@ class MSExcelTest extends AbstractTest
         $dto->fromArray(['unknown' => true]);
         $this->assertFalse($dto->jsonSerialize()['extract_doc_properties']);
     }
+
+    #[Test]
+    public function setterTrimsColumnsAndDropsTheEmptyOnes(): void
+    {
+        $dto = new MSExcel();
+        $dto->setExcludeColumns([' A ', "B\t", ' ', '']);
+
+        $this->assertSame(['A', 'B'], $dto->jsonSerialize()['exclude_columns']);
+    }
+
+    #[Test]
+    public function fromArrayTrimsColumns(): void
+    {
+        $dto = new MSExcel();
+        $dto->fromArray(['exclude_columns' => [' AA ']]);
+
+        $this->assertSame(['AA'], $dto->jsonSerialize()['exclude_columns']);
+    }
 }

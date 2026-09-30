@@ -13,6 +13,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
+use TypeError;
 
 #[Group('PersistenceNeeded')]
 class SegmentMetadataDaoInstanceTest extends AbstractTest
@@ -212,48 +213,21 @@ class SegmentMetadataDaoInstanceTest extends AbstractTest
         $this->assertTrue(true);
     }
 
-    // ── destroyGetAllCache ────────────────────────────────────────────────────
+    // ── destroyCache ──────────────────────────────────────────────────────────
 
     #[Test]
-    public function testDestroyGetAllCacheReturnsBool(): void
+    public function testDestroyCacheRefusesAStructThatNamesNoKey(): void
     {
-        $result = $this->dao->destroyGetAllCache(self::SEGMENT_ID_1);
+        $this->expectException(TypeError::class);
 
-        $this->assertIsBool($result);
-    }
+        $struct = new SegmentMetadataStruct();
+        $struct->id_segment = self::SEGMENT_ID_1;
 
-    // ── destroyGetCache ───────────────────────────────────────────────────────
-
-    #[Test]
-    public function testDestroyGetCacheReturnsBool(): void
-    {
-        $result = $this->dao->destroyGetCache(self::SEGMENT_ID_1, 'any_key');
-
-        $this->assertIsBool($result);
-    }
-
-    // ── destroyGetBySegmentIdsCache ───────────────────────────────────────────
-
-    #[Test]
-    public function testDestroyGetBySegmentIdsCacheReturnsBool(): void
-    {
-        $result = $this->dao->destroyGetBySegmentIdsCache('any_key');
-
-        $this->assertIsBool($result);
-    }
-
-    // ── destroyGetAllInRangeCache ───────────────────────────────────────────────
-
-    #[Test]
-    public function testDestroyGetAllInRangeCacheReturnsBool(): void
-    {
-        $result = $this->dao->destroyGetAllInRangeCache();
-
-        $this->assertIsBool($result);
+        $this->dao->destroyCache($struct);
     }
 
     #[Test]
-    public function testDestroyGetAllInRangeCacheBustsStaleCachedResult(): void
+    public function testDestroyCacheBustsStaleCachedResultOfTheRangeRead(): void
     {
         $ttl = 60;
 
@@ -271,7 +245,10 @@ class SegmentMetadataDaoInstanceTest extends AbstractTest
         $stillStale = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_1, $ttl);
         $this->assertArrayNotHasKey(self::SEGMENT_ID_1, $stillStale);
 
-        $this->dao->destroyGetAllInRangeCache();
+        $struct = new SegmentMetadataStruct();
+        $struct->id_segment = self::SEGMENT_ID_1;
+        $struct->meta_key = 'direct_key';
+        $this->dao->destroyCache($struct);
 
         $fresh = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_1, $ttl);
         $this->assertArrayHasKey(self::SEGMENT_ID_1, $fresh);

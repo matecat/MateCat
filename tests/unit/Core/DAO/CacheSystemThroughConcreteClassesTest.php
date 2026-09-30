@@ -126,7 +126,9 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest
 
 
         $underTest = new UserDao(obtainTestDatabase());
-        $underTest->destroyCacheByUid(self::$uid);
+        $evicted = new UserStruct();
+        $evicted->uid = self::$uid;
+        $underTest->destroyCache($evicted);
 
 
         $map = $client->hgetall(UserDao::class . "::getByUid-" . self::$uid);

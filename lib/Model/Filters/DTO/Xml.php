@@ -5,6 +5,8 @@ namespace Model\Filters\DTO;
 class Xml implements IDto
 {
 
+    use NormalizesNamesTrait;
+
     private bool $preserve_whitespace = false;
     /** @var list<string> */
     private array $translate_elements = [];
@@ -23,7 +25,7 @@ class Xml implements IDto
      */
     public function setTranslateElements(array $translate_elements): void
     {
-        $this->translate_elements = $translate_elements;
+        $this->translate_elements = $this->normalizeNames($translate_elements);
     }
 
     /**
@@ -31,7 +33,7 @@ class Xml implements IDto
      */
     public function setDoNotTranslateElements(array $do_not_translate_elements): void
     {
-        $this->do_not_translate_elements = $do_not_translate_elements;
+        $this->do_not_translate_elements = $this->normalizeNames($do_not_translate_elements);
     }
 
     /**
@@ -39,7 +41,7 @@ class Xml implements IDto
      */
     public function setTranslateAttributes(array $translate_attributes): void
     {
-        $this->translate_attributes = $translate_attributes;
+        $this->translate_attributes = $this->normalizeNames($translate_attributes);
     }
 
     /**

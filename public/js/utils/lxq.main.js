@@ -298,70 +298,76 @@ const LXQ = {
     }
     //FOTD
     LXQ.lexiqaData.lexiqaFetching = true
-    getLexiqaWarningsApi({partnerId: LXQ.partnerid}).then((results) => {
-      if (results.errors !== 0) {
-        //only do something if there are errors in lexiqa server
-        LXQ.lexiqaData.lexiqaWarnings = {}
+    getLexiqaWarningsApi({partnerId: LXQ.partnerid})
+      .then((results) => {
+        if (results.errors !== 0) {
+          //only do something if there are errors in lexiqa server
+          LXQ.lexiqaData.lexiqaWarnings = {}
 
-        results.segments.forEach(function (element) {
-          LXQ.lexiqaData.segments.push(element.segid)
-          if (element.errornum === 0) {
-            return
-          }
-
-          //highlight the respective segments here
-          const highlights = {}
-          const errorsMap = {
-            numbers: [],
-            punctuation: [],
-            spaces: [],
-            urls: [],
-            spelling: [],
-            specialchardetect: [],
-            mspolicheck: [],
-            glossary: [],
-            blacklist: [],
-          }
-
-          let seg = SegmentStore.getSegmentByIdToJS(element.segid)
-          if (!seg) return
-
-          LXQ.lexiqaData.lexiqaWarnings[element.segid] = {}
-          results.results[element.segid].forEach(function (qadata) {
-            LXQ.lexiqaData.lexiqaWarnings[element.segid][qadata.errorid] =
-              qadata
-
-            if (!qadata.ignored) {
-              qadata.color = LXQ.colors[qadata.category]
-              if (qadata.insource) {
-                highlights.source = highlights.source
-                  ? highlights.source
-                  : cloneDeep(errorsMap)
-                highlights.source[qadata.category].push(qadata)
-              } else {
-                highlights.target = highlights.target
-                  ? highlights.target
-                  : cloneDeep(errorsMap)
-                highlights.target[qadata.category].push(qadata)
-              }
+          results.segments.forEach(function (element) {
+            LXQ.lexiqaData.segments.push(element.segid)
+            if (element.errornum === 0) {
+              return
             }
+
+            //highlight the respective segments here
+            const highlights = {}
+            const errorsMap = {
+              numbers: [],
+              punctuation: [],
+              spaces: [],
+              urls: [],
+              spelling: [],
+              specialchardetect: [],
+              mspolicheck: [],
+              glossary: [],
+              blacklist: [],
+            }
+
+            let seg = SegmentStore.getSegmentByIdToJS(element.segid)
+            if (!seg) return
+
+            LXQ.lexiqaData.lexiqaWarnings[element.segid] = {}
+            results.results[element.segid].forEach(function (qadata) {
+              LXQ.lexiqaData.lexiqaWarnings[element.segid][qadata.errorid] =
+                qadata
+
+              if (!qadata.ignored) {
+                qadata.color = LXQ.colors[qadata.category]
+                if (qadata.insource) {
+                  highlights.source = highlights.source
+                    ? highlights.source
+                    : cloneDeep(errorsMap)
+                  highlights.source[qadata.category].push(qadata)
+                } else {
+                  highlights.target = highlights.target
+                    ? highlights.target
+                    : cloneDeep(errorsMap)
+                  highlights.target[qadata.category].push(qadata)
+                }
+              }
+            })
+            if (!LXQ.getVisibleWarningsCountForSegment(element.segid) > 0) {
+              LXQ.removeSegmentWarning(element.segid)
+            }
+            addLexiqaHighlight(element.segid, highlights)
           })
-          if (!LXQ.getVisibleWarningsCountForSegment(element.segid) > 0) {
-            LXQ.removeSegmentWarning(element.segid)
-          }
-          addLexiqaHighlight(element.segid, highlights)
-        })
 
-        LXQ.updateWarningsUI()
-      }
+          LXQ.updateWarningsUI()
+        }
 
-      if (LXQ.enabled()) {
-        LXQ.doQAallSegments()
-        //LXQ.refreshElements();
-      }
-      LXQ.lexiqaData.lexiqaFetching = false
-      if (callback) callback()
-    })
+        if (LXQ.enabled()) {
+          LXQ.doQAallSegments()
+          //LXQ.refreshElements();
+        }
+        LXQ.lexiqaData.lexiqaFetching = false
+        if (callback) callback()
+      })
+      .catch(() => {
+        // A dropped connection ("Load failed") must not leave fetching stuck on.
+        LXQ.lexiqaData.lexiqaFetching = false
+        if (callback) callback()
+      })
   },
   updateWarningsUI: function () {
     LXQ.lexiqaData.segments.sort()

@@ -1,4 +1,5 @@
-@use '../../commons/colors';
+@use '../../tokens/colors';
+@use 'commons/variables';
 .header-buttons {
   display: flex;
   gap: 20px;
@@ -10,13 +11,15 @@
     color: colors.$white !important;
   }
   .header-button-signup {
-    color: colors.$darkBlue !important;
+    color: colors.$blue900 !important;
   }
-
+}
+.user-menu-popover {
+  line-height: 0;
 }
 .user-menu-popover-avatar {
-  width: 35px;
-  height: 35px;
+  width: 40px;
+  height: 40px;
   border-radius: 20px;
 }
 
@@ -26,12 +29,13 @@
   padding: 20px 0;
   gap: 15px;
   min-width: 250px;
+  line-height: 1.2;
 
   > hr {
     margin: 0;
     border: none;
     height: 1px;
-    background-color: colors.$grey9;
+    background-color: colors.$grey75;
   }
 
   .user-info {
@@ -50,9 +54,9 @@
     display: flex;
     flex-direction: column;
     align-items: start;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     > :first-child {
-      font-size: 18px;
+      font-size: variables.$font-size-base;
       font-weight: bold;
       color: black;
     }
@@ -79,15 +83,15 @@
   .item {
     border-radius: 2px;
     padding: 8px !important;
-    font-size: 16px !important;
+    font-size: variables.$font-size-small !important;
     cursor: pointer;
     width: 100%;
     display: block;
     text-decoration: none;
-    color: colors.$grey6;
+    color: colors.$grey700;
     &:hover {
-      background-color: colors.$grey5 !important;
-      color: colors.$darkBlue !important;
+      background-color: colors.$grey50 !important;
+      color: colors.$blue900 !important;
     }
   }
 }

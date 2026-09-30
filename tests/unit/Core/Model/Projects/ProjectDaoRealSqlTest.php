@@ -112,12 +112,24 @@ class ProjectDaoRealSqlTest extends AbstractTest
         $this->dao->findByIdAndPassword($p['id'], 'wrong-password');
     }
 
-    public function testDestroyCacheByIdAndPassword(): void
+    public function testDestroyCacheEvictsTheIdAndPasswordKey(): void
     {
         $p = $this->project();
-        $this->dao->findByIdAndPassword($p['id'], $p['password'], 3600); // prime
+        $primed = $this->dao->findByIdAndPassword($p['id'], $p['password'], 3600);
 
-        self::assertTrue($this->dao->destroyCacheByIdAndPassword($p['id'], $p['password']));
+        $this->writeBehindTheDao($p['id'], 'name', 'written behind the dao');
+        self::assertSame(
+            $primed->name,
+            $this->dao->findByIdAndPassword($p['id'], $p['password'], 3600)->name,
+            'the TTL read is not served from cache: the eviction assertion below would prove nothing'
+        );
+
+        $this->dao->destroyCache($p['id'], $p['password']);
+
+        self::assertSame(
+            'written behind the dao',
+            $this->dao->findByIdAndPassword($p['id'], $p['password'], 3600)->name
+        );
     }
 
     // ---- findByIdCustomer ------------------------------------------------------------------------
@@ -189,11 +201,38 @@ class ProjectDaoRealSqlTest extends AbstractTest
         $this->project(['id_team' => $teamId, 'status_analysis' => ProjectStatus::STATUS_DONE]);
         $this->project(['id_team' => $teamId, 'status_analysis' => ProjectStatus::STATUS_DONE]);
 
-        self::assertSame(2, $this->dao->getTotalCountByTeamId($teamId));
+        self::assertSame(2, $this->dao->getTotalCountByTeamId($teamId)->value);
 
         $named = $this->project(['id_team' => $teamId, 'name' => 'unique-name', 'status_analysis' => ProjectStatus::STATUS_DONE]);
-        self::assertSame(1, $this->dao->getTotalCountByTeamId($teamId, ['search' => ['name' => 'unique-name']]));
-        self::assertSame(1, $this->dao->getTotalCountByTeamId($teamId, ['search' => ['id' => $named['id']]]));
+        self::assertSame(1, $this->dao->getTotalCountByTeamId($teamId, ['search' => ['name' => 'unique-name']])->value);
+        self::assertSame(1, $this->dao->getTotalCountByTeamId($teamId, ['search' => ['id' => $named['id']]])->value);
+    }
+
+    /**
+     * The count stops once it has seen one row past the cap, so a team holding more projects than
+     * the cap reports the cap rather than paying for a full scan.
+     */
+    #[Test]
+    public function testGetTotalCountByTeamIdStopsAtTheCap(): void
+    {
+        $teamId = $this->fixtures->nextAssignableId();
+        $this->project(['id_team' => $teamId, 'status_analysis' => ProjectStatus::STATUS_DONE]);
+        $this->project(['id_team' => $teamId, 'status_analysis' => ProjectStatus::STATUS_DONE]);
+        $this->project(['id_team' => $teamId, 'status_analysis' => ProjectStatus::STATUS_DONE]);
+
+        $exact = $this->dao->getTotalCountByTeamId($teamId);
+        self::assertSame(3, $exact->value);
+        self::assertFalse($exact->approximated);
+
+        $capped = $this->dao->getTotalCountByTeamId($teamId, [], 0, 2);
+        self::assertSame(2, $capped->value);
+        self::assertTrue($capped->approximated);
+        self::assertSame('2+', $capped->toString());
+
+        // landing exactly on the cap is not an approximation: there is nothing beyond it
+        $onTheCap = $this->dao->getTotalCountByTeamId($teamId, [], 0, 3);
+        self::assertSame(3, $onTheCap->value);
+        self::assertFalse($onTheCap->approximated);
     }
 
     // ---- updateField / changeName / changePassword / changeProjectStatus -------------------------
@@ -357,6 +396,175 @@ class ProjectDaoRealSqlTest extends AbstractTest
         self::assertSame(1, $this->dao->massiveSelfAssignment($team, $user, $personal));
     }
 
+    // ---- cache invalidation on write -------------------------------------------------------------
+
+    /**
+     * Writes the row without going through the DAO, so a later read that still answers with the
+     * pre-change value proves the cache — not the database — served it.
+     */
+    private function writeBehindTheDao(int $id, string $column, string|int|null $value): void
+    {
+        $stmt = $this->realSqlDb()->getConnection()->prepare("UPDATE projects SET $column = :value WHERE id = :id");
+        $stmt->execute(['value' => $value, 'id' => $id]);
+    }
+
+    /**
+     * Primes the id-keyed cache the way a caller asking for a TTL does, and proves the priming
+     * worked. Without this guard, a test asserting "the read is fresh after a write" would pass
+     * just as well with caching switched off, proving nothing about eviction.
+     */
+    private function primeIdCache(int $id): ProjectStruct
+    {
+        $struct = $this->dao->findById($id, 3600);
+        self::assertInstanceOf(ProjectStruct::class, $struct);
+
+        $this->writeBehindTheDao($id, 'name', 'written behind the dao');
+        self::assertSame(
+            $struct->name,
+            $this->dao->findById($id, 3600)->name,
+            'the TTL read is not served from cache: the eviction assertions would prove nothing'
+        );
+
+        return $struct;
+    }
+
+    public function testUpdateFieldEvictsTheIdKeyedCache(): void
+    {
+        $p = $this->project(['name' => 'cached name']);
+        $struct = $this->primeIdCache($p['id']);
+
+        $this->dao->updateField($struct, 'name', 'written through the dao');
+
+        self::assertSame('written through the dao', $this->dao->findById($p['id'], 3600)->name);
+    }
+
+    public function testChangeProjectStatusEvictsTheIdKeyedCache(): void
+    {
+        $p = $this->project(['status_analysis' => ProjectStatus::STATUS_NEW]);
+        $this->primeIdCache($p['id']);
+
+        $this->dao->changeProjectStatus($p['id'], ProjectStatus::STATUS_DONE);
+
+        self::assertSame(ProjectStatus::STATUS_DONE, $this->dao->findById($p['id'], 3600)->status_analysis);
+    }
+
+    public function testChangeProjectStatusIfNotDoneEvictsTheIdKeyedCache(): void
+    {
+        $p = $this->project(['status_analysis' => ProjectStatus::STATUS_NEW]);
+        $this->primeIdCache($p['id']);
+
+        $this->dao->changeProjectStatusIfNotDone($p['id'], ProjectStatus::STATUS_FAST_OK);
+
+        self::assertSame(ProjectStatus::STATUS_FAST_OK, $this->dao->findById($p['id'], 3600)->status_analysis);
+    }
+
+    public function testUpdateAnalysisStatusEvictsTheIdKeyedCache(): void
+    {
+        $p = $this->project(['status_analysis' => ProjectStatus::STATUS_NEW]);
+        $this->primeIdCache($p['id']);
+
+        $this->dao->updateAnalysisStatus($p['id'], ProjectStatus::STATUS_DONE, 456);
+
+        self::assertSame(ProjectStatus::STATUS_DONE, $this->dao->findById($p['id'], 3600)->status_analysis);
+    }
+
+    /**
+     * The team moves are the reason this matters beyond freshness: `id_team` decides who may split
+     * or merge a project, so a cached pre-move struct answers the authorization question with the
+     * team the project has just left.
+     */
+    public function testMassiveSelfAssignmentEvictsTheIdKeyedCacheOfEveryMovedProject(): void
+    {
+        $teamId = $this->fixtures->nextAssignableId();
+        $personalTeamId = $this->fixtures->nextAssignableId();
+        $uid = $this->fixtures->nextAssignableId();
+        $first = $this->project(['id_team' => $teamId]);
+        $second = $this->project(['id_team' => $teamId]);
+
+        $this->primeIdCache($first['id']);
+        $this->primeIdCache($second['id']);
+
+        $team = new TeamStruct();
+        $team->id = $teamId;
+        $personal = new TeamStruct();
+        $personal->id = $personalTeamId;
+        $user = new UserStruct();
+        $user->uid = $uid;
+
+        self::assertSame(2, $this->dao->massiveSelfAssignment($team, $user, $personal));
+
+        self::assertSame($personalTeamId, (int)$this->dao->findById($first['id'], 3600)->id_team);
+        self::assertSame($personalTeamId, (int)$this->dao->findById($second['id'], 3600)->id_team);
+    }
+
+    /**
+     * `findByJobId()` caches the same project row under a key built from the job id, which no
+     * id-based eviction can compute. A write must therefore walk the project's jobs and drop one
+     * entry per job, or the row stays readable — stale — through the job-keyed door.
+     */
+    public function testWriteEvictsTheJobKeyedCacheOfEveryJobOfTheProject(): void
+    {
+        $p = $this->project(['name' => 'cached by job', 'status_analysis' => ProjectStatus::STATUS_NEW]);
+        $first = $this->fixtures->makeJob($p['id']);
+        $second = $this->fixtures->makeJob($p['id']);
+
+        self::assertSame('cached by job', $this->dao->findByJobId($first['id'], 3600)->name);
+        self::assertSame('cached by job', $this->dao->findByJobId($second['id'], 3600)->name);
+
+        $this->writeBehindTheDao($p['id'], 'name', 'written behind the dao');
+        self::assertSame(
+            'cached by job',
+            $this->dao->findByJobId($first['id'], 3600)->name,
+            'the TTL read is not served from cache: the eviction assertions would prove nothing'
+        );
+
+        $this->dao->changeProjectStatus($p['id'], ProjectStatus::STATUS_DONE);
+
+        // the row now reads live, so it carries the name written behind the DAO's back
+        self::assertSame('written behind the dao', $this->dao->findByJobId($first['id'], 3600)->name);
+        self::assertSame('written behind the dao', $this->dao->findByJobId($second['id'], 3600)->name);
+    }
+
+    public function testTeamMoveEvictsTheJobKeyedCacheToo(): void
+    {
+        $teamId = $this->fixtures->nextAssignableId();
+        $personalTeamId = $this->fixtures->nextAssignableId();
+        $uid = $this->fixtures->nextAssignableId();
+        $p = $this->project(['id_team' => $teamId]);
+        $j = $this->fixtures->makeJob($p['id']);
+
+        self::assertSame($teamId, (int)$this->dao->findByJobId($j['id'], 3600)->id_team);
+
+        $team = new TeamStruct();
+        $team->id = $teamId;
+        $personal = new TeamStruct();
+        $personal->id = $personalTeamId;
+        $user = new UserStruct();
+        $user->uid = $uid;
+
+        self::assertSame(1, $this->dao->massiveSelfAssignment($team, $user, $personal));
+
+        self::assertSame($personalTeamId, (int)$this->dao->findByJobId($j['id'], 3600)->id_team);
+    }
+
+    public function testUnassignProjectsEvictsTheIdKeyedCache(): void
+    {
+        $teamId = $this->fixtures->nextAssignableId();
+        $uid = $this->fixtures->nextAssignableId();
+        $p = $this->project(['id_team' => $teamId, 'id_assignee' => $uid]);
+
+        $this->primeIdCache($p['id']);
+
+        $team = new TeamStruct();
+        $team->id = $teamId;
+        $user = new UserStruct();
+        $user->uid = $uid;
+
+        self::assertSame(1, $this->dao->unassignProjects($team, $user));
+
+        self::assertNull($this->dao->findById($p['id'], 3600)->id_assignee);
+    }
+
     // ---- job-related: getJobIds / findByJobId / getPasswordsMap / getProjectAndJobData -----------
 
     public function testGetJobIds(): void
@@ -412,7 +620,7 @@ class ProjectDaoRealSqlTest extends AbstractTest
         self::assertSame($j['id'], (int)$rows[0]['jid']);
     }
 
-    // ---- getProjectData / destroyCacheForProjectData (deep join) ---------------------------------
+    // ---- getProjectData / destroyCache (deep join) ---------------------------------
 
     public function testGetProjectDataReturnsRows(): void
     {
@@ -446,7 +654,12 @@ class ProjectDaoRealSqlTest extends AbstractTest
         self::assertNotEmpty($rows);
     }
 
-    public function testDestroyCacheForProjectData(): void
+    /**
+     * getProjectData() is read both with and without the password, and each shape is a separate key.
+     * The password-less one is what CommentController and UrlsController cache under, so the wrapper
+     * has to evict it even when it is never told a password.
+     */
+    public function testDestroyCacheEvictsThePasswordLessProjectDataKey(): void
     {
         $p = $this->project();
         $f = $this->fixtures->makeFile($p['id']);
@@ -454,9 +667,23 @@ class ProjectDaoRealSqlTest extends AbstractTest
         $j = $this->fixtures->makeJob($p['id'], ['job_first_segment' => $seg['id'], 'job_last_segment' => $seg['id']]);
         $this->fixtures->makeFilesJob($j['id'], $f['id']);
         $this->fixtures->makeSegmentTranslation($seg['id'], $j['id']);
-        $this->dao->getProjectData($p['id']); // prime
 
-        self::assertIsBool($this->dao->destroyCacheForProjectData($p['id']));
+        $primed = $this->dao->setCacheTTL(3600)->getProjectData($p['id']);
+        self::assertNotEmpty($primed);
+
+        $this->writeBehindTheDao($p['id'], 'name', 'written behind the dao');
+        self::assertSame(
+            $primed[0]['name'],
+            $this->dao->setCacheTTL(3600)->getProjectData($p['id'])[0]['name'],
+            'the TTL read is not served from cache: the eviction assertion below would prove nothing'
+        );
+
+        $this->dao->destroyCache($p['id']);
+
+        self::assertSame(
+            'written behind the dao',
+            $this->dao->setCacheTTL(3600)->getProjectData($p['id'])[0]['name']
+        );
     }
 
     // ---- remote files: getRemoteFileServiceName / isGDriveProject --------------------------------

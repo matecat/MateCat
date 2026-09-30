@@ -1,5 +1,3 @@
-import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
-
 /**
  * Delete completion events
  *

@@ -107,7 +107,7 @@ class ProjectTemplateController extends KleinController
         try {
             // accept only JSON
             if (!$this->isJsonRequest()) {
-                throw new ValidationError('Bad Request');
+                throw new ValidationError('Bad request');
             }
 
             $json = $this->request->body();
@@ -146,7 +146,7 @@ class ProjectTemplateController extends KleinController
         try {
             // accept only JSON
             if (!$this->isJsonRequest()) {
-                throw new ValidationError('Bad Request');
+                throw new ValidationError('Bad request');
             }
 
             $id = (int)$this->request->param('id');

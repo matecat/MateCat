@@ -133,5 +133,26 @@ class XliffRulesModelTest extends AbstractTest
         $this->assertEquals(json_encode($rule2), json_encode($rulesModel->getMatchingRule(1, null, "id-match")));
     }
 
+    #[Test]
+    public function shouldRejectAnUnknownRuleType()
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage("Invalid rule: xliff99");
+        $this->expectExceptionCode(400);
+
+        XliffRulesModel::fromArray(["xliff99" => []]);
+    }
+
+    #[Test]
+    public function shouldRejectAnUnknownVersionNumber()
+    {
+        $rulesModel = new XliffRulesModel();
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage("Invalid version: 3");
+        $this->expectExceptionCode(400);
+
+        $rulesModel->getRulesForVersion(3);
+    }
 
 }

@@ -12,6 +12,7 @@ export const SegmentFooterTabError = () => {
         <a
           href="https://guides.matecat.com/tm-matches-mt-not-working"
           target="_blank"
+          rel="noreferrer"
         >
           support page
         </a>

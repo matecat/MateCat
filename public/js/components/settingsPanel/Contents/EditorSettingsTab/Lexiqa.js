@@ -103,6 +103,7 @@ export const Lexiqa = ({sourceLang, targetLangs}) => {
             className="tooltip-options"
             href="https://guides.matecat.com/matecat-qa-with-lexiqa?hs_preview=ZjhRGTNW-10067295048"
             target="_blank"
+            rel="noreferrer"
           >
             Supported languages
           </a>

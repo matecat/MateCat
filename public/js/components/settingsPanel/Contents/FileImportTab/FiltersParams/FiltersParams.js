@@ -1,5 +1,5 @@
 import React, {
-  createContext,
+  
   useContext,
   useEffect,
   useRef,
@@ -162,6 +162,7 @@ export const FiltersParams = () => {
                 <a
                   href="https://guides.matecat.com/file-import#extraction-parameters"
                   target="_blank"
+                  rel="noreferrer"
                 >
                   More details
                 </a>

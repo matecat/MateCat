@@ -161,7 +161,7 @@ class GetContributionControllerTest extends AbstractTest
         ]);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing id_segment');
+        $this->expectExceptionMessage('Missing id_segment');
         $this->invokeMethod('validateTheRequest');
     }
 
@@ -179,7 +179,7 @@ class GetContributionControllerTest extends AbstractTest
         ]);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing text');
+        $this->expectExceptionMessage('Missing text');
         $this->invokeMethod('validateTheRequest');
     }
 
@@ -226,7 +226,7 @@ class GetContributionControllerTest extends AbstractTest
         ]);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing id job');
+        $this->expectExceptionMessage('Missing id job');
         $this->invokeMethod('validateTheRequest');
     }
 
@@ -244,7 +244,7 @@ class GetContributionControllerTest extends AbstractTest
         ]);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing id_client');
+        $this->expectExceptionMessage('Missing id_client');
         $this->invokeMethod('validateTheRequest');
     }
 

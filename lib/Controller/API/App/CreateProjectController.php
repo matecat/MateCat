@@ -267,7 +267,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         $arFiles = explode('@@SEP@@', html_entity_decode($file_name ?: '', ENT_QUOTES, 'UTF-8'));
 
         if (!isset($_COOKIE['upload_token']) || !Utils::isTokenValid($_COOKIE['upload_token'])) {
-            throw new Exception("Invalid Upload Token.", ProjectCreationError::INVALID_UPLOAD_TOKEN->value);
+            throw new Exception("Invalid upload token.", ProjectCreationError::INVALID_UPLOAD_TOKEN->value);
         }
 
         // Build project name from input or fallback:
@@ -685,7 +685,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             // check if qa_model template exists
             if (null === $qaModelTemplate) {
                 throw new InvalidArgumentException(
-                    'This QA Model template does not exists or does not belongs to the logged in user'
+                    'This QA model template does not exist or does not belong to the logged-in user'
                 );
             }
 

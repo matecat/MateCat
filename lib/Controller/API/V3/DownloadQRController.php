@@ -2,6 +2,7 @@
 
 namespace Controller\API\V3;
 
+use Controller\Abstracts\AbstractDownloadController;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\Exceptions\RenderTerminatedException;
@@ -15,6 +16,7 @@ use Model\LQA\ModelDao;
 use Model\Projects\ProjectDao;
 use Model\QualityReport\QualityReportSegmentModel;
 use TypeError;
+use Utils\Files\CsvCell;
 use Utils\Registry\AppConfig;
 
 
@@ -250,6 +252,17 @@ class DownloadQRController extends KleinController
     }
 
     /**
+     * Escape a value for XML character data.
+     *
+     * ENT_XML1 rather than the HTML flags: XML has five predefined entities and `&apos;` is one of
+     * them, where the HTML 4.01 default set does not know it.
+     */
+    private static function xmlText(mixed $value): string
+    {
+        return htmlspecialchars((string)$value, ENT_QUOTES | ENT_XML1, 'UTF-8');
+    }
+
+    /**
      * @param list<array<int, mixed>> $data
      * @param list<string>            $categoryIssues
      *
@@ -339,7 +352,11 @@ class DownloadQRController extends KleinController
         // @codeCoverageIgnoreEnd
 
         foreach ($csvData as $fields) {
-            if (!fputcsv($fp, $fields)) {
+            // Every row, headings included: the column headings are LQA category labels, which is
+            // text whoever authored the QA model typed. The filename, the suggestion source and the
+            // reviewer comments in the row beside them are the same kind of value. CSV is this
+            // endpoint's default format, so this is the copy of the report most people open.
+            if (!fputcsv($fp, CsvCell::inertRow($fields))) {
                 // @codeCoverageIgnoreStart - fputcsv failure is not reproducible in a unit test
                 fclose($fp);
                 return false;
@@ -392,11 +409,21 @@ class DownloadQRController extends KleinController
             $xml .= '<ice_locked>' . $datum[6] . '</ice_locked>';
             $xml .= '<status>' . $datum[7] . '</status>';
             $xml .= '<time_to_edit>' . $datum[8] . '</time_to_edit>';
-            $xml .= '<filename>' . $datum[9] . '</filename>';
+            // Escaped because it is text a user typed and carries no markup of its own. Emitted
+            // raw, a TM key called "A & B" made the whole document fail to parse — an unescaped
+            // ampersand is not valid XML — so escaping fixes the export as much as it closes the
+            // injection. The same holds for the category label and the reviewer comment further
+            // down, which is why they go through {@see xmlText()} too.
+            //
+            // The segment fields either side are the exception, deliberately: they carry MateCat's
+            // own subfiltering markup, which has its own encoding pipeline, and escaping it here
+            // would corrupt every export rather than fix one. Segment content, not user-typed
+            // text, is the boundary.
+            $xml .= '<filename>' . self::xmlText($datum[9]) . '</filename>';
             $xml .= '<id_file>' . $datum[10] . '</id_file>';
             $xml .= '<warning>' . $datum[11] . '</warning>';
             $xml .= '<suggestion_match>' . $datum[12] . '</suggestion_match>';
-            $xml .= '<suggestion_source>' . $datum[13] . '</suggestion_source>';
+            $xml .= '<suggestion_source>' . self::xmlText($datum[13]) . '</suggestion_source>';
             $xml .= '<suggestion>' . $datum[14] . '</suggestion>';
             $xml .= '<edit_distance>' . $datum[15] . '</edit_distance>';
             $xml .= '<locked>' . $datum[16] . '</locked>';
@@ -422,7 +449,7 @@ class DownloadQRController extends KleinController
                 $comments = $issueValue['comments'];
 
                 $xml .= '<issue>';
-                $xml .= '<label>' . $label . '</label>';
+                $xml .= '<label>' . self::xmlText($label) . '</label>';
                 $xml .= '<count>' . $count . '</count>';
                 $xml .= '<comments>';
 
@@ -433,7 +460,7 @@ class DownloadQRController extends KleinController
                         $xml .= '<uid>' . $comment['uid'] . '</uid>';
                         $xml .= '<id_qa_entry>' . $comment['id_qa_entry'] . '</id_qa_entry>';
                         $xml .= '<create_date>' . $comment['create_date'] . '</create_date>';
-                        $xml .= '<comment>' . $comment['comment'] . '</comment>';
+                        $xml .= '<comment>' . self::xmlText($comment['comment']) . '</comment>';
                         $xml .= '<source_page>' . $comment['source_page'] . '</source_page>';
                         $xml .= '</comment>';
                     }
@@ -533,6 +560,13 @@ class DownloadQRController extends KleinController
      */
     private function downloadFile(string $mimeType, string $filename, string $filePath): never
     {
+        // This class extends KleinController, so it never inherited the sweep that fixed the other
+        // downloads — the same reason XliffToTargetConverterController was missed. The value here is
+        // built from the job password, which getByIdAndPasswordOrFail() has already matched against
+        // a generated random string, so it cannot hold a quote or a CR today; that safety comes from
+        // the lookup rather than from this line, which is why the line gets its own.
+        $safeFilename = AbstractDownloadController::sanitizeContentDispositionFilename($filename);
+
         $outputContent = file_get_contents($filePath);
         if ($outputContent === false) {
             $outputContent = '';
@@ -549,7 +583,7 @@ class DownloadQRController extends KleinController
             header("Cache-Control: post-check=0, pre-check=0", false);
             header("Pragma: no-cache");
             header("Content-Type: $mimeType");
-            header("Content-Disposition: attachment; filename=\"$filename\"");
+            header("Content-Disposition: attachment; filename=\"$safeFilename\"");
             header("Expires: 0");
             header("Connection: close");
             header("Content-Length: " . strlen($outputContent));

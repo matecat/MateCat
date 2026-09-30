@@ -368,7 +368,7 @@ class ProjectManager
 
             //clean the cache for the team member list of assigned projects
             $teamDao = $this->getTeamDao();
-            $teamDao->destroyCacheAssignee($this->projectStructure->team);
+            $teamDao->destroyCacheAssigneeWithProjectsByTeam($this->projectStructure->team);
         }
     }
 
@@ -469,7 +469,7 @@ class ProjectManager
         if (count($this->projectStructure->result['errors']) > 0) {
             $this->log($this->projectStructure->result['errors']);
 
-            throw new EndQueueException("Invalid Project found.");
+            throw new EndQueueException("Invalid project found.");
         }
     }
 
@@ -518,7 +518,7 @@ class ProjectManager
             $this->getTmKeyService()->setPrivateTMKeys($this->projectStructure, $firstTMXFileName);
 
             if (count($this->projectStructure->result['errors']) > 0) {
-                throw new EndQueueException("Invalid Project found.");
+                throw new EndQueueException("Invalid project found.");
             }
         }
     }
@@ -712,7 +712,7 @@ class ProjectManager
                 ProjectCreationError::NO_TRANSLATABLE_TEXT->value,
                 "No text to translate in the file " . ZipArchiveHandler::getFileName($e->getMessage()) . "."
             ),
-            ProjectCreationError::XLIFF_PARSE_FAILURE->value => $this->projectStructure->addError(ProjectCreationError::XLIFF_IMPORT_ERROR->value, "Xliff Import Error: {$e->getMessage()}"),
+            ProjectCreationError::XLIFF_PARSE_FAILURE->value => $this->projectStructure->addError(ProjectCreationError::XLIFF_IMPORT_ERROR->value, "XLIFF import error: {$e->getMessage()}"),
             ProjectCreationError::INVALID_XLIFF_PARAMETERS->value => $this->projectStructure->addError(
                 $code,
                 (null !== $e->getPrevious()) ? $e->getPrevious()->getMessage() . " in {$e->getMessage()}" : $e->getMessage()
@@ -761,6 +761,7 @@ class ProjectManager
      *
      * @throws Exception
      *
+     * @throws TypeError
      */
     private function insertFileInstructions(array $totalFilesStructure): void
     {
@@ -778,8 +779,10 @@ class ProjectManager
     }
 
     /**
-     * Finalize the project: warm caches, run post-create hooks, update analysis status, commit transaction.
+     * Finalize the project: evict caches, run post-create hooks, update analysis status.
      * @throws Exception
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     private function finalizeProjectInTransaction(): void
     {
@@ -787,12 +790,11 @@ class ProjectManager
             $this->projectStructure->result['analyze_url'] = $this->getAnalyzeURL();
         }
 
-        $db = $this->dbHandler;
-        $db->begin();
-
-        try {
-            (new ProjectDao($this->dbHandler))->destroyCacheForProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
-            (new ProjectDao($this->dbHandler))->setCacheTTL(60 * 60 * 24)->getProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
+        // The scope stays the outermost one here. This runs in the project-creation daemon, at the
+        // end of a creation that has already allocated its sequence ids, so there is no caller
+        // transaction for it to join and nothing above it to widen.
+        $this->dbHandler->transaction(function (): void {
+            (new ProjectDao($this->dbHandler))->destroyCache((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
 
             $this->features->dispatch(new PostProjectCreateEvent($this->projectStructure));
 
@@ -808,12 +810,7 @@ class ProjectManager
             );
 
             $this->pushActivityLog();
-
-            $db->commit();
-        } catch (Exception $e) {
-            $db->rollback();
-            throw $e;
-        }
+        });
     }
 
     /**
@@ -1087,8 +1084,8 @@ class ProjectManager
             );
 
             if (!$result) {
-                $this->log("Failed to store the Zip file $zipHash - \n");
-                throw new Exception("Failed to store the original Zip $zipHash ", ProjectCreationError::ZIP_STORE_FAILED->value);
+                $this->log("Failed to store the ZIP file $zipHash - \n");
+                throw new Exception("Failed to store the original ZIP $zipHash ", ProjectCreationError::ZIP_STORE_FAILED->value);
                 //Exit
             }
         } //end zip hashes manipulation
@@ -1162,6 +1159,7 @@ class ProjectManager
      * @throws ReQueueException
      * @throws ReflectionException
      * @throws ValidationError
+     * @throws TypeError
      */
     protected function insertInstructions(int $fid, array|string $value): void
     {

@@ -9,8 +9,8 @@
     <link rel="apple-touch-icon" sizes="180x180" href="${basepath}public/img/meta/apple-touch-icon.png"/>
     <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
     <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
-    <title tal:condition="true:conversion_enabled">Translate a file with Matecat</title>
-    <title tal:condition="not:conversion_enabled">Translate an XLIFF file with Matecat</title>
+    <title tal:condition="true:conversionEnabled">Translate a file with Matecat</title>
+    <title tal:condition="not:conversionEnabled">Translate an XLIFF file with Matecat</title>
 
     <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -23,26 +23,9 @@
 
     <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
       /*<![CDATA[*/
-      var config = {
-        basepath: '${basepath | string:/}',
-        hostpath: '${hostpath | string:/}',
-        conversionEnabled: ${conversion_enabled},
-        analysisEnabled: ${volume_analysis_enabled},
-        maxFileSize: ${maxFileSize},
-        maxTMXFileSize: ${maxTMXFileSize},
-        maxNumberFiles: ${maxNumberFiles},
-        ownerIsMe: true,
-        lxq_license: '${lxq_license | string:}',
-        lexiqa_languages: ${lexiqa_languages},
-        tag_projection_languages: ${tag_projection_languages},
-        user_plugins: ${user_plugins},
-        enableMultiDomainApi: ${enableMultiDomainApi},
-        ajaxDomainsNumber: ${ajaxDomainsNumber},
-        subject_array: ${subjects},
-        formats_number: ${formats_number},
-        isAnInternalUser: ${isAnInternalUser},
-        intento_providers: ${translation_engines_intento_prov_json},
-      }
+      // One serialised document rather than a value per line: PHPTAL does not escape inside a script
+      // block, so anything interpolated here lands in JavaScript syntax verbatim. See BootstrapConfig.
+      var config = ${structure config_json};
       /*]]>*/
     </script>
 </head>
@@ -56,10 +39,6 @@
     <div class="new_project__page"/>
     <div class="notifications-wrapper"/>
     <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
-    <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
-      var developerKey = '${developerKey}';
-      var clientId = '${clientId}';
-    </script>
     <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript" src="//apis.google.com/js/api.js"></script>
     <div metal:use-macro="templates/common.html/footer_includes" />
 </body>

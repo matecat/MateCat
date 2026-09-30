@@ -143,7 +143,13 @@ class DownloadJobTMXController extends AbstractDownloadController
 
         // Enclose file name in double quotes in order to avoid duplicate header error.
         // Reference https://github.com/prior/prawnto/pull/16
-        header("Content-Disposition: attachment; filename=\"$this->fileName\"");
+        //
+        // The name is built from the project name, which is text a user typed, so it goes through
+        // the same helper every other download in this hierarchy uses. A quote in the project name
+        // would otherwise close the quoted filename and let the rest of it be read as further
+        // disposition parameters, and a CR would end the header and start one of its own.
+        $safeFilename = self::sanitizeContentDispositionFilename($this->fileName);
+        header("Content-Disposition: attachment; filename=\"$safeFilename\"");
         header("Expires: 0");
         header("Connection: close");
 

@@ -1,10 +1,5 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
-import {
-  BUTTON_MODE,
-  BUTTON_SIZE,
-  BUTTON_TYPE,
-  Button,
-} from '../../../common/Button/Button'
+import {BUTTON_MODE, BUTTON_TYPE, Button} from '../../../common/Button/Button'
 import PropTypes from 'prop-types'
 import Checkmark from '../../../../../img/icons/Checkmark'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
@@ -15,6 +10,8 @@ import {
   getCategoryLabelAndDescription,
   getCodeFromLabel,
 } from './CategoriesSeveritiesTableUtils'
+
+import stylesPopover from '../../../common/Popover/Popover.module.scss'
 
 export const ModifyCategory = ({target, category, setIsEditingName}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
@@ -123,15 +120,17 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
     <Portal>
       <div
         ref={ref}
-        className="popover-component-popover quality-framework-modify-category"
+        className={`${stylesPopover['popover-component-popover']} quality-framework-modify-category`}
         style={{top: `${rect.top}px`, left: `${rect.left}px`}}
         data-testid="qf-modify-category"
       >
-        <div className="popover-component-header">
-          <span className="popover-component-title">Edit category</span>
+        <div className={`${stylesPopover['popover-component-header']}`}>
+          <span className={`${stylesPopover['popover-component-title']}`}>
+            Edit category
+          </span>
         </div>
         <div
-          className="popover-component-body"
+          className={`${stylesPopover['popover-component-body']}`}
           onKeyDown={(event) => {
             if (event.key === 'Escape') {
               cancel()
@@ -141,18 +140,13 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
         >
           {content}
         </div>
-        <div className="popover-component-actions">
-          <Button
-            mode={BUTTON_MODE.OUTLINE}
-            size={BUTTON_SIZE.MEDIUM}
-            onClick={cancel}
-          >
+        <div className={`${stylesPopover['popover-component-actions']}`}>
+          <Button mode={BUTTON_MODE.OUTLINE} onClick={cancel}>
             Cancel
           </Button>
           <Button
             ref={confirmRef}
             type={BUTTON_TYPE.PRIMARY}
-            size={BUTTON_SIZE.MEDIUM}
             onClick={updateLabel}
             disabled={!label || typeof error === 'string'}
           >

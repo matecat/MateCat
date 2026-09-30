@@ -235,7 +235,7 @@ class XliffConfigTemplateControllerTest extends AbstractTest
 
         $this->responseMock->expects($this->once())
             ->method('json')
-            ->with(['error' => 'Bad Get']);
+            ->with(['error' => 'Bad get']);
 
         $this->controller->create();
     }
@@ -374,7 +374,7 @@ class XliffConfigTemplateControllerTest extends AbstractTest
 
         $this->responseMock->expects($this->once())
             ->method('json')
-            ->with(['error' => 'Bad Get']);
+            ->with(['error' => 'Bad get']);
 
         $this->controller->update();
     }
