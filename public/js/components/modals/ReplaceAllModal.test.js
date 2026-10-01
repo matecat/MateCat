@@ -19,6 +19,7 @@ jest.mock('../../actions/SegmentActions', () => ({
   __esModule: true,
   default: {
     removeAllSegments: jest.fn(),
+    unlockSegments: jest.fn(),
   },
 }))
 
@@ -138,6 +139,23 @@ describe('ReplaceAllModal', () => {
       firstLoad: false,
       segmentToOpen: '1-1',
     })
+    expect(SegmentActions.unlockSegments).not.toHaveBeenCalled()
+  })
+
+  test('unlocks the locked segments the replace rewrote before reloading', async () => {
+    SearchUtils.execReplaceAll.mockResolvedValue({
+      replaced_locked_segments: [123],
+    })
+    render(<ReplaceAllModal search={search} />)
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Replace all'))
+    })
+
+    expect(SegmentActions.unlockSegments).toHaveBeenCalledWith(['123'])
+    expect(
+      SegmentActions.unlockSegments.mock.invocationCallOrder[0],
+    ).toBeLessThan(CatToolActions.onRender.mock.invocationCallOrder[0])
   })
 
   test('shows the first error message when the replace fails', async () => {
