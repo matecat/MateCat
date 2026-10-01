@@ -26,6 +26,7 @@
         "oneOf": [
           {
             "enum": [
+              "no-state",
               "final",
               "needs-adaptation",
               "needs-l10n",
@@ -67,6 +68,7 @@
         "oneOf": [
           {
             "enum": [
+              "no-state",
               "initial",
               "translated",
               "reviewed",

@@ -16,6 +16,11 @@ interface XliffRuleInterface
     public function getStates(?string $type = null): array;
 
     /**
+     * @return bool
+     */
+    public function isNoStateRule(): bool;
+
+    /**
      * @return string
      * @throws Exception
      */

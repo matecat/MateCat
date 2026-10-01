@@ -925,6 +925,12 @@ class SegmentExtractor
             $configModel = XliffRulesModel::fromArray($configModel);
         }
 
+        // a segment without state/state-qualifier whose target repeats the source is never pre-translated,
+        // whatever the no-state rule says
+        if (($state === null || $state === '') && ($stateQualifier === null || $stateQualifier === '') && $source === $target) {
+            return null;
+        }
+
         $rule = $configModel->getMatchingRule(
             $projectStructure->current_xliff_info[$file_id]['version'],
             $state,
