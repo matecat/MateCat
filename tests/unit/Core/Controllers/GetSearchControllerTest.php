@@ -1428,6 +1428,125 @@ class GetSearchControllerTest extends AbstractTest
     }
 
     /**
+     * Turns the three fixture segments into ICE matches: segments 1 and 3 locked, segment 2 unlocked
+     * (an ICE from a bilingual xliff, which the UI does not show as locked).
+     */
+    private function seedIceSegments(): void
+    {
+        $conn = obtainTestDatabase()->getConnection();
+        $conn->exec("UPDATE segment_translations SET match_type = 'ICE', locked = 1 WHERE id_job = " . self::TEST_JOB_ID . " AND id_segment IN (" . self::TEST_SEGMENT_1 . ", " . self::TEST_SEGMENT_3 . ")");
+        $conn->exec("UPDATE segment_translations SET match_type = 'ICE', locked = 0 WHERE id_job = " . self::TEST_JOB_ID . " AND id_segment = " . self::TEST_SEGMENT_2);
+    }
+
+    #[Test]
+    public function replaceAll_returns_the_locked_ice_segments_it_replaced(): void
+    {
+        // The UI unlocks ICE segments client-side only, so it needs to know which locked ones a
+        // replace-all rewrote. Segment 1 is a locked ICE hit: listed. Segment 2 is an unlocked ICE
+        // hit: replaced, not listed. Segment 3 is a locked ICE segment with no "o": not a hit.
+        $this->seedIceSegments();
+
+        $this->withFilesJob(function (): void {
+            $this->setRequestParams([
+                'id_job' => (string)self::TEST_JOB_ID,
+                'password' => self::TEST_JOB_PASSWORD,
+                'source' => '',
+                'target' => 'o',
+                'replace' => '0',
+                'token' => 'tok',
+                'status' => 'all',
+                'matchcase' => '0',
+                'exactmatch' => '0',
+                'inCurrentChunkOnly' => '0',
+                'includeLocked' => '1',
+            ]);
+
+            $this->responseMock->expects($this->once())
+                ->method('json')
+                ->with($this->callback(function (array $data): bool {
+                    $this->assertSame([self::TEST_SEGMENT_1], $data['replaced_locked_segments']);
+
+                    return true;
+                }));
+
+            $this->controller->replaceAll();
+
+            $after = $this->translationsBySegment();
+            $this->assertSame('Cia0 m0nd0', $after[self::TEST_SEGMENT_1]);
+            $this->assertSame('Bu0ngi0rn0 amic0', $after[self::TEST_SEGMENT_2]);
+        });
+    }
+
+    #[Test]
+    public function replaceAll_does_not_list_a_locked_hit_whose_text_did_not_change(): void
+    {
+        // Replacing "o" with "o" matches segment 1 but writes nothing, so nothing is listed as replaced.
+        $this->seedIceSegments();
+
+        $this->withFilesJob(function (): void {
+            $this->setRequestParams([
+                'id_job' => (string)self::TEST_JOB_ID,
+                'password' => self::TEST_JOB_PASSWORD,
+                'source' => '',
+                'target' => 'o',
+                'replace' => 'o',
+                'token' => 'tok',
+                'status' => 'all',
+                'matchcase' => '0',
+                'exactmatch' => '0',
+                'inCurrentChunkOnly' => '0',
+                'includeLocked' => '1',
+            ]);
+
+            $this->responseMock->expects($this->once())
+                ->method('json')
+                ->with($this->callback(function (array $data): bool {
+                    $this->assertContains((string)self::TEST_SEGMENT_1, array_map('strval', $data['segments']));
+                    $this->assertSame([], $data['replaced_locked_segments']);
+
+                    return true;
+                }));
+
+            $this->controller->replaceAll();
+        });
+    }
+
+    #[Test]
+    public function replaceAll_lists_no_locked_segments_when_they_are_excluded(): void
+    {
+        $this->seedIceSegments();
+
+        $this->withFilesJob(function (): void {
+            $this->setRequestParams([
+                'id_job' => (string)self::TEST_JOB_ID,
+                'password' => self::TEST_JOB_PASSWORD,
+                'source' => '',
+                'target' => 'o',
+                'replace' => '0',
+                'token' => 'tok',
+                'status' => 'all',
+                'matchcase' => '0',
+                'exactmatch' => '0',
+                'inCurrentChunkOnly' => '0',
+                'includeLocked' => '0',
+            ]);
+
+            $this->responseMock->expects($this->once())
+                ->method('json')
+                ->with($this->callback(function (array $data): bool {
+                    $this->assertSame([], $data['replaced_locked_segments']);
+
+                    return true;
+                }));
+
+            $this->controller->replaceAll();
+
+            $after = $this->translationsBySegment();
+            $this->assertSame('Ciao mondo', $after[self::TEST_SEGMENT_1], 'locked ICE excluded => untouched');
+        });
+    }
+
+    /**
      * Seeds $count extra matching segments beyond the shared fixture's three, and widens the job's
      * segment range to cover them. cleanTestData() removes them: it deletes segments by file and
      * translations by job.

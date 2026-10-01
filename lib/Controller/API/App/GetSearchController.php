@@ -120,12 +120,21 @@ class GetSearchController extends AbstractStatefulKleinController
             $srh->updateIndex((int)$replace_version);
         }
 
+        // The ICE segments this replace-all actually rewrote. The UI keeps the ICE unlock client-side
+        // and cannot tell them apart in `segments`, which lists every search hit, skipped ones included.
+        // Read from the pre-update rows: the write leaves match_type and locked as they were.
+        $replacedLockedSegments = array_values(array_map(
+            static fn(SegmentTranslationStruct $translation): int => (int)$translation->id_segment,
+            array_filter($committed, static fn(SegmentTranslationStruct $translation): bool => $translation->isICE())
+        ));
+
         $this->response->json([
             "errors" => [],
             "data" => [],
             "token" => $request['token'] ?? null,
             "total" => $res['count'] ?? 0,
-            "segments" => $res['sid_list']
+            "segments" => $res['sid_list'],
+            "replaced_locked_segments" => $replacedLockedSegments,
         ]);
     }
 
