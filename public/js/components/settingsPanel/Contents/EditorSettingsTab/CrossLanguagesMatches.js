@@ -109,7 +109,7 @@ export const CrossLanguagesMatches = () => {
           id="multi-match-1"
           label="Language 1"
           title="Primary language suggestion"
-          placeholder="None"
+          placeholder="No language selected"
           options={languages}
           activeOption={activeLang1}
           showSearchBar={true}
@@ -140,7 +140,7 @@ export const CrossLanguagesMatches = () => {
           id="multi-match-2"
           label="Language 2"
           title="Secondary language suggestion"
-          placeholder="None"
+          placeholder="No language selected"
           options={languages}
           activeOption={activeLang2}
           showSearchBar={true}

@@ -378,7 +378,7 @@ export const Select = ({
       >
         <div ref={selectedItemRef} className="select-with-icon__wrapper">
           <div className={inputClassName} onClick={toggleDropdown}>
-            {showResetButton && (activeOption || activeOptions) ? (
+            {showResetButton && (activeOption || activeOptions) && (
               <div
                 className="icon-reset"
                 onClick={(e) => {
@@ -386,9 +386,9 @@ export const Select = ({
                   resetFunction()
                 }}
               >
-                <IconClose size={8} />
+                <IconClose size={7} />
               </div>
-            ) : undefined}
+            )}
             <span>{renderSelection()}</span>
           </div>
           <input
