@@ -8,6 +8,10 @@
   &:not(.select--is-disabled) {
     cursor: pointer;
   }
+
+  &.select--is-placeholder {
+    color: colors.$grey400;
+  }
 }
 
 .select-with-label__wrapper {
