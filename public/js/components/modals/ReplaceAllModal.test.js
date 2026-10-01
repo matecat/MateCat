@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, fireEvent, act} from '@testing-library/react'
+import {render, screen, fireEvent, act, waitFor} from '@testing-library/react'
 import {ReplaceAllModal} from './ReplaceAllModal'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentActions from '../../actions/SegmentActions'
@@ -148,11 +148,11 @@ describe('ReplaceAllModal', () => {
     })
     render(<ReplaceAllModal search={search} />)
 
-    await act(async () => {
-      fireEvent.click(screen.getByText('Replace all'))
-    })
+    fireEvent.click(screen.getByText('Replace all'))
 
-    expect(SegmentActions.unlockSegments).toHaveBeenCalledWith(['123'])
+    await waitFor(() =>
+      expect(SegmentActions.unlockSegments).toHaveBeenCalledWith(['123']),
+    )
     expect(
       SegmentActions.unlockSegments.mock.invocationCallOrder[0],
     ).toBeLessThan(CatToolActions.onRender.mock.invocationCallOrder[0])
