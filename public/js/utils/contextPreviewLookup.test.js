@@ -494,6 +494,99 @@ describe('AemContainerTextMatchStrategy', () => {
     ).toBeNull()
   })
 
+  describe('segment that is one sentence of a longer block', () => {
+    // Real AEM text component: the source paragraph is segmented into
+    // sentences, so no block's full text equals any single segment.
+    const SENTENCE_1 =
+      'WKND is a collective of outdoors enthusiasts that want to share our expertise with the world.'
+    const SENTENCE_2 =
+      'Our objective is create a community to enjoy life and create lasting memories.'
+    const PATH =
+      'data-node-path=/content/wknd/faqs/jcr:content/root/container/container/text'
+
+    beforeEach(() => {
+      container.innerHTML = `
+        <div class="translated-component-wrapper" data-node-path="/content/wknd/faqs/jcr:content/root/container/container/text">
+          <div id="text-2bba962020" class="cmp-text">
+            <p>${SENTENCE_1} ${SENTENCE_2}</p>
+          </div>
+        </div>
+      `
+    })
+
+    it('maps the first sentence to the innermost block that contains it', () => {
+      expect(strategy.execute(container, PATH, SENTENCE_1)).toBe(
+        container.querySelector('.cmp-text p'),
+      )
+    })
+
+    it('maps every sentence of the block to the same element', () => {
+      expect(strategy.execute(container, PATH, SENTENCE_2)).toBe(
+        container.querySelector('.cmp-text p'),
+      )
+    })
+
+    it('matches across differing whitespace and case', () => {
+      expect(
+        strategy.execute(
+          container,
+          PATH,
+          `  our   OBJECTIVE is create a community\n`,
+        ),
+      ).toBe(container.querySelector('.cmp-text p'))
+    })
+
+    it('still returns null when no block contains the source', () => {
+      expect(
+        strategy.execute(container, PATH, 'Who is the intended audience?'),
+      ).toBeNull()
+    })
+
+    it('does not match a fragment that only exists inside a larger word', () => {
+      expect(strategy.execute(container, PATH, 'ective is cre')).toBeNull()
+    })
+  })
+
+  it('returns null when two unrelated blocks both contain the source', () => {
+    container.innerHTML = `
+      <div data-node-path="/content/jcr:content">
+        <h3>Learn more about pricing.</h3>
+        <p>Learn more about shipping and returns.</p>
+      </div>
+    `
+    expect(
+      strategy.execute(
+        container,
+        'data-node-path=/content/jcr:content',
+        'Learn more',
+      ),
+    ).toBeNull()
+  })
+
+  it('maps a sentence of a container with no block children to the container', () => {
+    container.innerHTML =
+      '<div data-node-path="/content/jcr:content"><span>First sentence. Second sentence.</span></div>'
+    expect(
+      strategy.execute(
+        container,
+        'data-node-path=/content/jcr:content',
+        'Second sentence.',
+      ),
+    ).toBe(container.querySelector('[data-node-path]'))
+  })
+
+  it('keeps returning the single-block container for a near-identical source', () => {
+    container.innerHTML =
+      '<div data-node-path="/content/jcr:content"><p>Get started now!</p></div>'
+    expect(
+      strategy.execute(
+        container,
+        'data-node-path=/content/jcr:content',
+        'Get started now',
+      ),
+    ).toBe(container.querySelector('[data-node-path]'))
+  })
+
   it('returns null when path is empty', () => {
     container.innerHTML = '<p>Target Text</p>'
     expect(strategy.execute(container, '', 'Target Text')).toBeNull()
