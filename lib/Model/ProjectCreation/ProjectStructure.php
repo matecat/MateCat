@@ -54,6 +54,8 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public array $private_tm_key = [];
     public int $pretranslate_100 = 0;
     public int $pretranslate_101 = 1;
+    public int $pretranslate_101_lock = 1;
+    public int $pretranslate_100_lock = 0;
     public int $only_private = 0;
     public ?string $tm_prioritization = null;
     public mixed $public_tm_penalty = null;

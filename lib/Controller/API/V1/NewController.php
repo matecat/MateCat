@@ -239,6 +239,8 @@ class NewController extends KleinController
         $projectStructure->public_tm_penalty = $request['public_tm_penalty'];
         $projectStructure->pretranslate_100 = (int)!!$request['pretranslate_100'];
         $projectStructure->pretranslate_101 = isset($request['pretranslate_101']) ? (int)$request['pretranslate_101'] : 1;
+        $projectStructure->pretranslate_101_lock = $request['pretranslate_101_lock'];
+        $projectStructure->pretranslate_100_lock = $request['pretranslate_100_lock'];
 
         //default gets all public matches from TM
         $projectStructure->only_private = (int)(isset($request['get_public_matches']) && !$request['get_public_matches']);
@@ -370,6 +372,20 @@ class NewController extends KleinController
         $public_tm_penalty = filter_var($this->request->param('public_tm_penalty'), FILTER_SANITIZE_NUMBER_INT);
         $pretranslate_100 = filter_var($this->request->param('pretranslate_100'), FILTER_VALIDATE_BOOLEAN);
         $pretranslate_101 = filter_var($this->request->param('pretranslate_101'), FILTER_VALIDATE_BOOLEAN);
+        $pretranslate_101_lock = filter_var($this->request->param('pretranslate_101_lock') ?? 1, FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 0, 'max_range' => 1],
+            'flags' => FILTER_NULL_ON_FAILURE,
+        ]);
+        if ($pretranslate_101_lock === null) {
+            throw new InvalidArgumentException("Invalid pretranslate_101_lock value", -6);
+        }
+        $pretranslate_100_lock = filter_var($this->request->param('pretranslate_100_lock') ?? 0, FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 0, 'max_range' => 1],
+            'flags' => FILTER_NULL_ON_FAILURE,
+        ]);
+        if ($pretranslate_100_lock === null) {
+            throw new InvalidArgumentException("Invalid pretranslate_100_lock value", -6);
+        }
         $private_tm_key = filter_var($this->request->param('private_tm_key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $private_tm_key_json = filter_var($this->request->param('private_tm_key_json'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES]);
         $project_completion = filter_var($this->request->param('project_completion'), FILTER_VALIDATE_BOOLEAN);
@@ -567,6 +583,8 @@ class NewController extends KleinController
             'public_tm_penalty' => $public_tm_penalty,
             'pretranslate_100' => $pretranslate_100,
             'pretranslate_101' => $pretranslate_101,
+            'pretranslate_101_lock' => $pretranslate_101_lock,
+            'pretranslate_100_lock' => $pretranslate_100_lock,
             'id_team' => $id_team,
             'team' => $team,
             'enable_mt_analysis' => $enable_mt_analysis,

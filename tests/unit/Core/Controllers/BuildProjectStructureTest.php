@@ -159,6 +159,8 @@ class BuildProjectStructureTest extends AbstractTest
             'metadata'                              => [],
             JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value => null,
             'pretranslate_100'                      => 0,
+            'pretranslate_101_lock'                 => 1,
+            'pretranslate_100_lock'                 => 0,
             ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value                      => null,
             'get_public_matches'                    => true,
             'due_date'                              => null,
@@ -1051,6 +1053,48 @@ class BuildProjectStructureTest extends AbstractTest
     }
 
     #[Test]
+    public function newControllerSetsPretranslateLockOptions(): void
+    {
+        $request = $this->makeNewControllerRequest([
+            'pretranslate_101_lock' => 0,
+            'pretranslate_100_lock' => 1,
+        ]);
+
+        $ps = $this->newController->buildProjectStructure(
+            $request,
+            $this->makeFilesFound(),
+            'tok',
+            $this->user,
+            $this->engine,
+        );
+
+        $this->assertSame(0, $ps->pretranslate_101_lock);
+        $this->assertSame(1, $ps->pretranslate_100_lock);
+    }
+
+    #[Test]
+    public function createControllerSetsPretranslateLockOptions(): void
+    {
+        $data = $this->makeCreateControllerData([
+            'pretranslate_101_lock' => 0,
+            'pretranslate_100_lock' => 1,
+        ]);
+
+        $ps = $this->createProjectController->buildProjectStructure(
+            $data,
+            [],
+            $this->makeFilesFound(),
+            'tok',
+            $this->user,
+            $this->engine,
+            null,
+        );
+
+        $this->assertSame(0, $ps->pretranslate_101_lock);
+        $this->assertSame(1, $ps->pretranslate_100_lock);
+    }
+
+    #[Test]
     public function newControllerPretranslate100CoercesToInt(): void
     {
         // Truthy non-integer value should be coerced to 1
@@ -1186,6 +1230,8 @@ class BuildProjectStructureTest extends AbstractTest
             'tms_engine'                            => 1,
             JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value   => null,
             'pretranslate_100'                      => 0,
+            'pretranslate_101_lock'                 => 1,
+            'pretranslate_100_lock'                 => 0,
             ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value                      => 1,
             JobsMetadataMarshaller::DIALECT_STRICT->value       => null,
             'only_private'                          => false,

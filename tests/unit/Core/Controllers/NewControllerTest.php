@@ -17,6 +17,7 @@ use Model\ProjectCreation\ProjectStructure;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
@@ -558,11 +559,13 @@ class NewControllerTest extends AbstractTest
      * Build a validated request array via validateTheRequest() so that
      * buildProjectStructure() can be driven with realistic, fully-populated data.
      *
+     * @param array<string, string> $extraParams POST parameters added to the base request
+     *
      * @return array{0: array<string, mixed>, 1: TestableNewControllerForBuild, 2: UserStruct}
      * @throws ReflectionException
      * @throws Exception
      */
-    private function buildValidatedRequest(): array
+    private function buildValidatedRequest(array $extraParams = []): array
     {
         $user = $this->createMock(UserStruct::class);
         $user->method('getPersonalTeam')->willReturn(new TeamStruct());
@@ -585,7 +588,7 @@ class NewControllerTest extends AbstractTest
                 'pretranslate_100' => '1',
                 'public_tm_penalty' => '20',
                 'project_name' => 'My Build Project',
-            ],
+            ] + $extraParams,
             [],
             [],
             [
@@ -651,6 +654,52 @@ class NewControllerTest extends AbstractTest
         $this->assertSame(1, $projectStructure->mt_engine);
         $this->assertSame(1, $projectStructure->tms_engine);
         $this->assertSame(20, $projectStructure->public_tm_penalty);
+        $this->assertSame(1, $projectStructure->pretranslate_101_lock);
+        $this->assertSame(0, $projectStructure->pretranslate_100_lock);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function testValidateTheRequestReadsPretranslateLockOptions(): void
+    {
+        [$request] = $this->buildValidatedRequest([
+            'pretranslate_101_lock' => '0',
+            'pretranslate_100_lock' => '1',
+        ]);
+
+        $this->assertSame(0, $request['pretranslate_101_lock']);
+        $this->assertSame(1, $request['pretranslate_100_lock']);
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function invalidPretranslateLockValues(): array
+    {
+        return [
+            '101 out of range'  => ['pretranslate_101_lock', '2'],
+            '101 trailing junk' => ['pretranslate_101_lock', '1x'],
+            '100 word'          => ['pretranslate_100_lock', 'true'],
+            '100 empty'         => ['pretranslate_100_lock', ''],
+        ];
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    #[DataProvider('invalidPretranslateLockValues')]
+    public function testValidateTheRequestRejectsInvalidPretranslateLock(string $name, string $value): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Invalid $name value");
+        $this->expectExceptionCode(-6);
+
+        $this->buildValidatedRequest([$name => $value]);
     }
 
     /**

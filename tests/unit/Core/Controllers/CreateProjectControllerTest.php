@@ -16,6 +16,7 @@ use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
@@ -452,6 +453,73 @@ class CreateProjectControllerTest extends AbstractTest
         $this->setRequestParams($params);
 
         $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(-6);
+
+        $this->invokePrivate('validateTheRequest');
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_defaults_pretranslate_lock_options_when_absent(): void
+    {
+        $_COOKIE['upload_token'] = '77777777-7777-7777-7777-777777777777';
+        $this->setRequestParams($this->validRequestParams());
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame(1, $data['pretranslate_101_lock']);
+        $this->assertSame(0, $data['pretranslate_100_lock']);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_reads_pretranslate_lock_options(): void
+    {
+        $_COOKIE['upload_token'] = '88888888-8888-8888-8888-888888888888';
+        $params = $this->validRequestParams();
+        $params['pretranslate_101_lock'] = '0';
+        $params['pretranslate_100_lock'] = '1';
+        $this->setRequestParams($params);
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame(0, $data['pretranslate_101_lock']);
+        $this->assertSame(1, $data['pretranslate_100_lock']);
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function invalidPretranslateLockValues(): array
+    {
+        return [
+            '101 out of range'   => ['pretranslate_101_lock', '2'],
+            '101 trailing junk'  => ['pretranslate_101_lock', '1x'],
+            '100 word'           => ['pretranslate_100_lock', 'true'],
+            '100 empty'          => ['pretranslate_100_lock', ''],
+        ];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    #[DataProvider('invalidPretranslateLockValues')]
+    public function validateTheRequest_throws_on_invalid_pretranslate_lock(string $name, string $value): void
+    {
+        $_COOKIE['upload_token'] = '99999999-9999-9999-9999-999999999999';
+        $params = $this->validRequestParams();
+        $params[$name] = $value;
+        $this->setRequestParams($params);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Invalid $name value");
         $this->expectExceptionCode(-6);
 
         $this->invokePrivate('validateTheRequest');

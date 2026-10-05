@@ -151,12 +151,14 @@ class SaveMetadataTest extends AbstractTest
         // metadata is already empty by default in ProjectStructure
         $this->service->save($this->projectStructure, $this->features);
 
-        // pretranslate_101 always exists (DTO default = 1)
+        // pretranslate_101 and both lock options always exist (DTO defaults 1, 1, 0)
         $metadata = $this->getSinglePersistedMetadataMap();
-        self::assertCount(1, $metadata);
+        self::assertCount(3, $metadata);
 
         $keys = array_keys($metadata);
         self::assertContains(ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value, $keys);
+        self::assertSame('1', $metadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK->value]);
+        self::assertSame('0', $metadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK->value]);
     }
 
     // =========================================================================
@@ -261,6 +263,18 @@ class SaveMetadataTest extends AbstractTest
         $this->service->save($this->projectStructure, $this->features);
 
         self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value));
+    }
+
+    #[Test]
+    public function testPretranslateLockOptionsArePersistedWhenSet(): void
+    {
+        $this->projectStructure->pretranslate_101_lock = 0;
+        $this->projectStructure->pretranslate_100_lock = 1;
+
+        $this->service->save($this->projectStructure, $this->features);
+
+        self::assertSame('0', $this->getPersistedValue(ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK->value));
+        self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK->value));
     }
 
     // =========================================================================
@@ -376,9 +390,9 @@ class SaveMetadataTest extends AbstractTest
 
         $this->service->save($this->projectStructure, $this->features);
 
-        // 3 metadata keys + 1 pretranslate_101 (DTO default) = 4 total
+        // 3 metadata keys + pretranslate_101 and both lock options (DTO defaults) = 6 total
         $metadata = $this->getSinglePersistedMetadataMap();
-        self::assertCount(4, $metadata);
+        self::assertCount(6, $metadata);
 
         self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::ICU_ENABLED->value));
         self::assertSame('0', $this->getPersistedValue(ProjectsMetadataMarshaller::MT_EVALUATION->value));

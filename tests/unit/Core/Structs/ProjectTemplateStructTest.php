@@ -323,6 +323,7 @@ class ProjectTemplateStructTest extends AbstractTest
             'character_counter_count_tags', 'character_counter_mode',
             'subject', 'source_language', 'target_language',
             'created_at', 'modified_at', 'icu_enabled', 'mandatory_issues',
+            'pretranslate_101_lock', 'pretranslate_100_lock',
         ];
 
         foreach ($expectedKeys as $key) {

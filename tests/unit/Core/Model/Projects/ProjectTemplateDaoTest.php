@@ -57,6 +57,8 @@ class ProjectTemplateDaoTest extends AbstractTest
                 dialect_strict TINYINT(1) NOT NULL DEFAULT 0,
                 public_tm_penalty INT(11) NOT NULL DEFAULT 0,
                 mandatory_issues TEXT DEFAULT NULL,
+                pretranslate_101_lock TINYINT(1) NOT NULL DEFAULT 1,
+                pretranslate_100_lock TINYINT(1) NOT NULL DEFAULT 0,
                 PRIMARY KEY (id),
                 UNIQUE KEY uid_name_idx (uid, name),
                 KEY uid_idx (uid)
@@ -113,6 +115,8 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->assertSame(self::TEST_UID, $default->uid);
         $this->assertFalse($default->pretranslate_100);
         $this->assertTrue($default->pretranslate_101);
+        $this->assertTrue($default->pretranslate_101_lock);
+        $this->assertFalse($default->pretranslate_100_lock);
         $this->assertTrue($default->get_public_matches);
         $this->assertTrue($default->icu_enabled);
         $this->assertSame('en-US', $default->source_language);
@@ -132,6 +136,8 @@ class ProjectTemplateDaoTest extends AbstractTest
 
         $byId = $this->dao->fetchById($saved->id, ProjectTemplateStruct::class);
         $this->assertNotNull($byId);
+        $this->assertTrue($byId->pretranslate_101_lock);
+        $this->assertFalse($byId->pretranslate_100_lock);
         $this->assertStringStartsWith('lifecycle-template-', $byId->name);
 
         $byIdAndUser = $this->dao->getByIdAndUser($saved->id, self::TEST_UID);
@@ -141,6 +147,8 @@ class ProjectTemplateDaoTest extends AbstractTest
 
         $saved->name = 'lifecycle-template-updated-' . uniqid('', true);
         $saved->pretranslate_100 = true;
+        $saved->pretranslate_101_lock = false;
+        $saved->pretranslate_100_lock = true;
         $saved->source_language = 'it-IT';
         $saved->target_language = serialize(['de-DE']);
         $saved->is_default = true;
@@ -150,6 +158,8 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->assertNotNull($updated);
         $this->assertStringStartsWith('lifecycle-template-updated-', $updated->name);
         $this->assertTrue($updated->pretranslate_100);
+        $this->assertFalse($updated->pretranslate_101_lock);
+        $this->assertTrue($updated->pretranslate_100_lock);
         $this->assertSame('it-IT', $updated->source_language);
         $this->assertSame(['de-DE'], $updated->getTargetLanguage());
 

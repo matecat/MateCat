@@ -42,6 +42,8 @@ use Utils\Validation\UserSuppliedName;
  *     mt_quality_value_in_editor?: int|null,
  *     icu_enabled?: bool,
  *     mandatory_issues?: list<string>|null,
+ *     pretranslate_101_lock?: bool,
+ *     pretranslate_100_lock?: bool,
  * }
  */
 class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable
@@ -76,6 +78,8 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     public ?int $mt_quality_value_in_editor = null;
     public bool $icu_enabled = true;
     public ?string $mandatory_issues = null;
+    public bool $pretranslate_101_lock = true;
+    public bool $pretranslate_100_lock = false;
 
     /**
      * @phpstan-param HydrationInput $decodedObject
@@ -118,6 +122,8 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         $this->mt_quality_value_in_editor = (!empty($decodedObject->mt_quality_value_in_editor)) ? (int)$decodedObject->mt_quality_value_in_editor : null;
         $this->icu_enabled = $decodedObject->icu_enabled ?? true;
         $this->mandatory_issues = (($decodedObject->mandatory_issues ?? null) !== null) ? (json_encode($decodedObject->mandatory_issues) ?: null) : null;
+        $this->pretranslate_101_lock = $decodedObject->pretranslate_101_lock ?? true;
+        $this->pretranslate_100_lock = $decodedObject->pretranslate_100_lock ?? false;
 
         return $this;
     }
@@ -230,6 +236,8 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
             'modified_at' => $this->modified_at !== null ? (new DateTime($this->modified_at))->format(DATE_RFC822) : null,
             'icu_enabled' => $this->icu_enabled,
             'mandatory_issues' => $this->getMandatoryIssues(),
+            'pretranslate_101_lock' => $this->pretranslate_101_lock,
+            'pretranslate_100_lock' => $this->pretranslate_100_lock,
         ];
     }
 }

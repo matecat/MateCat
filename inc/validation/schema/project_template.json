@@ -22,6 +22,12 @@
     "pretranslate_101": {
       "type": "boolean"
     },
+    "pretranslate_101_lock": {
+      "type": "boolean"
+    },
+    "pretranslate_100_lock": {
+      "type": "boolean"
+    },
     "get_public_matches": {
       "type": "boolean"
     },

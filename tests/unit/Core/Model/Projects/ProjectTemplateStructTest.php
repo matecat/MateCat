@@ -57,6 +57,8 @@ class ProjectTemplateStructTest extends AbstractTest
         $this->assertSame(42, $struct->mt_quality_value_in_editor);
         $this->assertTrue($struct->icu_enabled);
         $this->assertSame('["r1","r2"]', $struct->mandatory_issues);
+        $this->assertFalse($struct->pretranslate_101_lock);
+        $this->assertTrue($struct->pretranslate_100_lock);
     }
 
     #[Test]
@@ -64,6 +66,7 @@ class ProjectTemplateStructTest extends AbstractTest
     {
         $input = $this->makeHydrationInput();
         unset($input->id, $input->uid, $input->is_default, $input->public_tm_penalty, $input->icu_enabled);
+        unset($input->pretranslate_101_lock, $input->pretranslate_100_lock);
         $input->segmentation_rule = null;
         $input->tm = [];
         $input->target_language = [];
@@ -87,6 +90,8 @@ class ProjectTemplateStructTest extends AbstractTest
         $this->assertNull($struct->mt_quality_value_in_editor);
         $this->assertTrue($struct->icu_enabled);
         $this->assertNull($struct->mandatory_issues);
+        $this->assertTrue($struct->pretranslate_101_lock);
+        $this->assertFalse($struct->pretranslate_100_lock);
     }
 
     #[Test]
@@ -255,6 +260,8 @@ class ProjectTemplateStructTest extends AbstractTest
         $struct->modified_at = '2026-05-03 11:22:33';
         $struct->icu_enabled = true;
         $struct->mandatory_issues = '["r1","r2"]';
+        $struct->pretranslate_101_lock = false;
+        $struct->pretranslate_100_lock = true;
 
         $payload = $struct->jsonSerialize();
 
@@ -279,6 +286,8 @@ class ProjectTemplateStructTest extends AbstractTest
         $this->assertSame((new DateTime('2026-05-03 11:22:33'))->format(DATE_RFC822), $payload['modified_at']);
         $this->assertTrue($payload['icu_enabled']);
         $this->assertSame(['r1', 'r2'], $payload['mandatory_issues']);
+        $this->assertFalse($payload['pretranslate_101_lock']);
+        $this->assertTrue($payload['pretranslate_100_lock']);
     }
 
     #[Test]
@@ -318,6 +327,8 @@ class ProjectTemplateStructTest extends AbstractTest
             'target_language' => ['it-IT'],
             'mt_quality_value_in_editor' => null,
             'mandatory_issues' => ['r1', 'r2'],
+            'pretranslate_101_lock' => false,
+            'pretranslate_100_lock' => true,
         ];
     }
 }

@@ -608,6 +608,8 @@ CREATE TABLE `project_templates` (
   `subfiltering_handlers` varchar(1024) NOT NULL DEFAULT '["markup", "twig", "double_snail", "double_square", "double_percent"]',
   `icu_enabled` tinyint(1) DEFAULT '1',
   `mandatory_issues` varchar(255) DEFAULT NULL,
+  `pretranslate_101_lock` tinyint(1) NOT NULL DEFAULT '1',
+  `pretranslate_100_lock` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_name_idx` (`uid`,`name`),
   KEY `uid_idx` (`uid`)

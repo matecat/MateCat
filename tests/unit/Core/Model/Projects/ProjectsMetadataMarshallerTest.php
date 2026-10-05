@@ -26,7 +26,7 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
     #[Test]
     public function enumHasExactlyThirtyCases(): void
     {
-        $this->assertCount(32, ProjectsMetadataMarshaller::cases());
+        $this->assertCount(34, ProjectsMetadataMarshaller::cases());
     }
 
     #[Test]
@@ -45,6 +45,8 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'ICU_ENABLED'                   => [ProjectsMetadataMarshaller::ICU_ENABLED, 'icu_enabled'],
             'ENABLE_MT_ANALYSIS'            => [ProjectsMetadataMarshaller::ENABLE_MT_ANALYSIS, 'enable_mt_analysis'],
             'PRE_TRANSLATE_101'             => [ProjectsMetadataMarshaller::PRE_TRANSLATE_101, 'pretranslate_101'],
+            'PRE_TRANSLATE_101_LOCK'        => [ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK, 'pretranslate_101_lock'],
+            'PRE_TRANSLATE_100_LOCK'        => [ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK, 'pretranslate_100_lock'],
             'PROJECT_COMPLETION'            => [ProjectsMetadataMarshaller::PROJECT_COMPLETION, 'project_completion'],
             'MMT_ACTIVATE_CONTEXT_ANALYZER' => [ProjectsMetadataMarshaller::MMT_ACTIVATE_CONTEXT_ANALYZER, 'mmt_activate_context_analyzer'],
             'MMT_IGNORE_GLOSSARY_CASE'      => [ProjectsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE, 'mmt_ignore_glossary_case'],
@@ -114,6 +116,8 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'mt_evaluation',
             'enable_mt_analysis',
             'pretranslate_101',
+            'pretranslate_101_lock',
+            'pretranslate_100_lock',
             'project_completion',
             'mmt_activate_context_analyzer',
             'mmt_ignore_glossary_case',
@@ -146,6 +150,8 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'mt_evaluation',
             'enable_mt_analysis',
             'pretranslate_101',
+            'pretranslate_101_lock',
+            'pretranslate_100_lock',
             'project_completion',
             'mmt_activate_context_analyzer',
             'mmt_ignore_glossary_case',
