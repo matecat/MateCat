@@ -59,27 +59,6 @@ CREATE TABLE `api_keys` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
--- Table structure for table `blacklist_files`
---
-
-DROP TABLE IF EXISTS `blacklist_files`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `blacklist_files` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `id_job` bigint(20) NOT NULL,
-  `password` varchar(45) NOT NULL,
-  `file_path` varchar(255) NOT NULL,
-  `file_name` varchar(255) NOT NULL,
-  `target` varchar(10) NOT NULL,
-  `uid` bigint(20) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id_job_password` (`id_job`,`password`),
-  KEY `uid` (`uid`) USING BTREE,
-  KEY `id_job` (`id_job`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
 -- Table structure for table `chunk_completion_events`
 --
 
@@ -201,56 +180,6 @@ CREATE TABLE `context_groups` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
--- Table structure for table `converters`
---
-
-DROP TABLE IF EXISTS `converters`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `converters` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `ip_converter` varchar(45) NOT NULL,
-  `cpu_weight` int(11) NOT NULL DEFAULT '1',
-  `ip_storage` varchar(45) NOT NULL,
-  `ip_machine_host` varchar(45) NOT NULL,
-  `machine_host_user` varchar(45) NOT NULL,
-  `machine_host_pass` varchar(45) NOT NULL,
-  `instance_name` varchar(45) NOT NULL,
-  `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `status_active` tinyint(4) NOT NULL DEFAULT '1',
-  `status_offline` tinyint(4) NOT NULL DEFAULT '0',
-  `status_reboot` tinyint(4) NOT NULL DEFAULT '0',
-  `conversion_api_version` varchar(100) DEFAULT '2011',
-  `stable` tinyint(4) NOT NULL DEFAULT '1',
-  `segmentation_rule` varchar(512) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `ip_converter_UNIQUE` (`ip_converter`),
-  UNIQUE KEY `ip_storage_UNIQUE` (`ip_storage`),
-  UNIQUE KEY `id_UNIQUE` (`id`) USING BTREE,
-  KEY `status_active` (`status_active`),
-  KEY `status_offline` (`status_offline`),
-  KEY `status_reboot` (`status_reboot`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
--- Table structure for table `converters_log`
---
-
-DROP TABLE IF EXISTS `converters_log`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `converters_log` (
-  `id_log` int(11) NOT NULL AUTO_INCREMENT,
-  `id_converter` int(11) NOT NULL,
-  `check_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `test_passed` tinyint(4) NOT NULL DEFAULT '1',
-  PRIMARY KEY (`id_log`),
-  KEY `timestamp_idx` (`check_time`),
-  KEY `outcome_idx` (`test_passed`),
-  KEY `id_converter_idx` (`id_converter`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
 -- Table structure for table `engines`
 --
 
@@ -297,24 +226,6 @@ CREATE TABLE `file_metadata` (
   PRIMARY KEY (`id`),
   KEY `id_file_idx` (`id_file`),
   KEY `id_project_idx` (`id_project`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
--- Table structure for table `file_references`
---
-
-DROP TABLE IF EXISTS `file_references`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `file_references` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `id_project` bigint(20) NOT NULL,
-  `id_file` bigint(20) NOT NULL,
-  `part_filename` varchar(1024) NOT NULL,
-  `serialized_reference_meta` varchar(1024) DEFAULT NULL,
-  `serialized_reference_binaries` longblob,
-  PRIMARY KEY (`id`),
-  KEY `id_file` (`id_file`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -497,28 +408,6 @@ CREATE TABLE `jobs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
--- Table structure for table `jobs_stats`
---
-
-DROP TABLE IF EXISTS `jobs_stats`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `jobs_stats` (
-  `id_job` int(11) NOT NULL,
-  `password` varchar(45) NOT NULL,
-  `fuzzy_band` varchar(20) NOT NULL,
-  `source` varchar(45) NOT NULL,
-  `target` varchar(45) NOT NULL,
-  `total_time_to_edit` bigint(20) NOT NULL DEFAULT '0',
-  `avg_post_editing_effort` float DEFAULT NULL,
-  `total_raw_wc` bigint(20) DEFAULT '1',
-  PRIMARY KEY (`id_job`,`password`,`fuzzy_band`),
-  KEY `fuzzybands__index` (`fuzzy_band`),
-  KEY `source` (`source`),
-  KEY `target` (`target`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
 -- Table structure for table `jobs_translators`
 --
 
@@ -539,29 +428,6 @@ CREATE TABLE `jobs_translators` (
   KEY `id_translator_idx` (`id_translator_profile`) USING BTREE,
   KEY `added_by_idx` (`added_by`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
--- Table structure for table `language_stats`
---
-
-DROP TABLE IF EXISTS `language_stats`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `language_stats` (
-  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `source` varchar(255) NOT NULL,
-  `target` varchar(255) NOT NULL,
-  `fuzzy_band` varchar(20) NOT NULL,
-  `total_word_count` float(255,0) DEFAULT NULL,
-  `total_post_editing_effort` float(255,0) DEFAULT NULL,
-  `total_time_to_edit` float(255,0) DEFAULT NULL,
-  `job_count` int(255) DEFAULT NULL,
-  PRIMARY KEY (`date`,`source`,`target`,`fuzzy_band`),
-  KEY `source_idx` (`source`),
-  KEY `fuzzy_idx` (`fuzzy_band`),
-  KEY `target_idx` (`target`),
-  KEY `date_idx` (`date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 -- Table structure for table `memory_keys`
@@ -617,46 +483,12 @@ CREATE TABLE `mt_qe_templates` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
   `uid` bigint(20) NOT NULL,
-  `params` varchar(2048) NOT NULL,
+  `rules` varchar(2048) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_name_idx` (`uid`,`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
--- Table structure for table `notifications`
---
-
-DROP TABLE IF EXISTS `notifications`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `notifications` (
-  `id` int(11) NOT NULL,
-  `id_comment` int(11) NOT NULL,
-  `id_translator` varchar(100) CHARACTER SET latin1 NOT NULL,
-  `status` varchar(45) CHARACTER SET latin1 DEFAULT 'UNREAD',
-  PRIMARY KEY (`id`),
-  KEY `id_comment` (`id_comment`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
--- Table structure for table `original_files_map`
---
-
-DROP TABLE IF EXISTS `original_files_map`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `original_files_map` (
-  `sha1` varchar(100) NOT NULL,
-  `source` varchar(50) NOT NULL,
-  `target` varchar(50) NOT NULL,
-  `deflated_file` longblob,
-  `deflated_xliff` longblob,
-  `creation_date` date DEFAULT NULL,
-  `segmentation_rule` varchar(512) DEFAULT NULL,
-  PRIMARY KEY (`sha1`,`source`,`target`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -723,21 +555,6 @@ CREATE TABLE `payable_rate_templates` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
--- Table structure for table `phinxlog`
---
-
-DROP TABLE IF EXISTS `phinxlog`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `phinxlog` (
-  `version` bigint(20) NOT NULL,
-  `migration_name` varchar(100) DEFAULT NULL,
-  `start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `end_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`version`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
 -- Table structure for table `project_metadata`
 --
 
@@ -790,7 +607,7 @@ CREATE TABLE `project_templates` (
   `public_tm_penalty` int(11) DEFAULT '0',
   `subfiltering_handlers` varchar(1024) NOT NULL DEFAULT '["markup", "twig", "double_snail", "double_square", "double_percent"]',
   `icu_enabled` tinyint(1) DEFAULT '1',
-  `mandatory_issues` text,
+  `mandatory_issues` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_name_idx` (`uid`,`name`),
   KEY `uid_idx` (`uid`)
@@ -831,28 +648,6 @@ CREATE TABLE `projects` (
   KEY `id_assignee_idx` (`id_assignee`) USING BTREE,
   KEY `id_team_idx` (`id_team`) USING BTREE,
   KEY `create_date_idx` (`create_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
--- Table structure for table `qa_archived_reports`
---
-
-DROP TABLE IF EXISTS `qa_archived_reports`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `qa_archived_reports` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `created_by` int(11) NOT NULL,
-  `id_project` int(11) NOT NULL,
-  `id_job` bigint(20) NOT NULL,
-  `password` varchar(45) NOT NULL,
-  `job_first_segment` bigint(20) unsigned NOT NULL,
-  `job_last_segment` bigint(20) unsigned NOT NULL,
-  `create_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `quality_report` text NOT NULL,
-  `version` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `id_job_password_idx` (`id_job`,`password`,`job_first_segment`,`job_last_segment`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1139,26 +934,6 @@ CREATE TABLE `segment_original_data` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
--- Table structure for table `segment_revisions`
---
-
-DROP TABLE IF EXISTS `segment_revisions`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `segment_revisions` (
-  `id_job` bigint(20) NOT NULL,
-  `id_segment` bigint(20) NOT NULL,
-  `original_translation` text COMMENT 'The original translation before revisions.',
-  `err_typing` varchar(512) NOT NULL,
-  `err_translation` varchar(512) NOT NULL,
-  `err_terminology` varchar(512) NOT NULL,
-  `err_language` varchar(512) NOT NULL,
-  `err_style` varchar(512) NOT NULL,
-  PRIMARY KEY (`id_job`,`id_segment`),
-  KEY `segm_key` (`id_segment`,`id_job`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
 -- Table structure for table `segment_translation_events`
 --
 
@@ -1433,15 +1208,15 @@ DROP TABLE IF EXISTS `users`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `users` (
   `uid` bigint(20) NOT NULL AUTO_INCREMENT,
-  `email`              varchar(100) NOT NULL,
-  `salt`               varchar(255) DEFAULT NULL,
+  `email` varchar(100) NOT NULL,
+  `salt` varchar(255) DEFAULT NULL,
   `pass` varchar(255) DEFAULT NULL,
   `create_date` datetime NOT NULL,
-  `first_name`         varchar(100) NOT NULL,
-  `last_name`          varchar(100) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
   `oauth_access_token` text,
   `email_confirmed_at` timestamp NULL DEFAULT NULL,
-  `new_pass`           varchar(255) DEFAULT NULL,
+  `new_pass` varchar(255) DEFAULT NULL,
   `confirmation_token` varchar(255) DEFAULT NULL,
   `confirmation_token_created_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`uid`),

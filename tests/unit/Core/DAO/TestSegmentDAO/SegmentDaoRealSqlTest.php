@@ -27,7 +27,7 @@ use Utils\Constants\TranslationStatus;
  * A rich FK graph is built per test: project -> job (with password + first/last segment bounds)
  * -> file -> files_job -> segments -> segment_translations (varied status/match_type/locked) ->
  * segment_translation_events (varied source_page) -> qa_entries (varied category/severity) plus
- * segment_revisions / segment_translations_splits / segment_original_data / files_parts.
+ * segment_translations_splits / segment_original_data / files_parts.
  *
  * All allocated ids for assignable / direct-insert rows live >= ASSIGNABLE_ID_FLOOR (M-2);
  * AUTO_INCREMENT rows created via the builder are auto-cleaned. Rows the test inserts directly
@@ -70,7 +70,6 @@ class SegmentDaoRealSqlTest extends AbstractTest
             'segment_translation_events',
             'segment_translations_splits',
             'segment_original_data',
-            'segment_revisions',
             'qa_categories',
             'qa_entries',
         ];
@@ -96,7 +95,6 @@ class SegmentDaoRealSqlTest extends AbstractTest
             // Direct-insert rows (rows the builder did not track) — scoped to this job/segments.
             // Delete child rows first, then let the builder remove its tracked parents in
             // reverse insertion order.
-            $conn->exec("DELETE FROM segment_revisions WHERE id_job = {$this->idJob}");
             $conn->exec("DELETE FROM segment_original_data WHERE id_segment >= " . self::ASSIGNABLE_ID_FLOOR);
             $conn->exec("DELETE FROM segment_translations WHERE id_job = {$this->idJob}");
             $conn->exec("DELETE FROM segment_translation_events WHERE id_job = {$this->idJob}");
