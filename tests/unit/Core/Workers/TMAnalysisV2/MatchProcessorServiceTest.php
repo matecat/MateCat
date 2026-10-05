@@ -157,6 +157,20 @@ class MatchProcessorServiceTest extends AbstractTest
     }
 
     #[Test]
+    public function sortMatches_forwards_the_limit_to_the_sorter(): void
+    {
+        $mt76  = ['match' => '76%',  'ICE' => false, 'created_by' => 'MT'];
+        $tm100 = ['match' => '100%', 'ICE' => false, 'created_by' => 'TM'];
+        $tm99  = ['match' => '99%',  'ICE' => false, 'created_by' => 'TM'];
+        $tm98  = ['match' => '98%',  'ICE' => false, 'created_by' => 'TM'];
+
+        $result = $this->service->sortMatches($mt76, [$tm100, $tm99, $tm98], 3);
+
+        $this->assertCount(3, $result);
+        $this->assertSame('MT', $result[2]['created_by']);
+    }
+
+    #[Test]
     public function calculateWordDiscount_returns_zero_eq_and_std_for_ice_at_zero_rate(): void
     {
         $payableRates = [

@@ -624,6 +624,145 @@ class GetContributionWorkerTest extends AbstractTest
     }
 
     #[Test]
+    public function test_execGetContribution_keeps_the_mt_suggestion_when_the_tm_fills_the_result_budget(): void
+    {
+        $worker = new WorkerHarnessGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
+        $worker->queueMatchResult(
+            [
+                'match' => '76%',
+                'created_by' => EngineConstants::MT,
+                'memory_key' => '',
+                'segment' => 'Hello world',
+                'translation' => 'Ciao mondo MT',
+                'raw_translation' => 'Ciao mondo MT',
+            ],
+            [
+                [
+                    'match' => '100%',
+                    'created_by' => 'MyMemory',
+                    'memory_key' => 'k1',
+                    'segment' => 'Hello world',
+                    'translation' => 'Ciao mondo',
+                    'raw_translation' => 'Ciao mondo',
+                ],
+                [
+                    'match' => '99%',
+                    'created_by' => 'MyMemory',
+                    'memory_key' => 'k2',
+                    'segment' => 'Hello world',
+                    'translation' => 'Ciao mondo!',
+                    'raw_translation' => 'Ciao mondo!',
+                ],
+                [
+                    'match' => '98%',
+                    'created_by' => 'MyMemory',
+                    'memory_key' => 'k3',
+                    'segment' => 'Hello world',
+                    'translation' => 'Salve mondo',
+                    'raw_translation' => 'Salve mondo',
+                ],
+            ]
+        );
+
+        $request = $this->makeBaseRequest([
+            'concordanceSearch' => false,
+            'segmentId' => null,
+            'crossLangTargets' => [],
+            'resultNum' => 3,
+        ]);
+
+        $method = new ReflectionMethod($worker, '_execGetContribution');
+        $method->invoke($worker, $request);
+
+        $this->assertCount(1, $worker->publishedPayloads);
+        $published = $worker->publishedPayloads[0]['data']['payload']['matches'];
+
+        // The TM was asked for resultNum matches and the MT row is appended to them, so the
+        // budget must reserve a slot for the MT suggestion instead of cutting it off the tail.
+        $this->assertCount(3, $published);
+        $this->assertSame(EngineConstants::MT, $published[2]['match']);
+        $this->assertSame('100%', $published[0]['match']);
+        $this->assertSame('99%', $published[1]['match']);
+    }
+
+    #[Test]
+    public function test_getMatches_skips_the_mt_engine_when_the_best_tm_match_is_not_first(): void
+    {
+        $request = $this->makeBaseRequest([
+            'mt_quality_value_in_editor' => 99,
+        ]);
+        $request->setJobStruct(new JobStruct([
+            'id' => self::TEST_JOB_ID,
+            'id_project' => self::TEST_PROJECT_ID,
+            'password' => 'pw',
+            'source' => 'en-US',
+            'target' => 'it-IT',
+            'job_first_segment' => self::TEST_SEGMENT_ID,
+            'job_last_segment' => self::TEST_SEGMENT_ID,
+            'id_tms' => 1,
+            'id_mt_engine' => 2,
+            'tm_keys' => '[]',
+            'only_private_tm' => 0,
+        ]));
+
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
+
+        // The 100% match is deliberately not the first element: the worker re-sorts the list
+        // itself, so the suppression must key off the best score, not the TM engine's order.
+        $tmResponse = new GetMemoryResponse([
+            'responseStatus' => 200,
+            'matches' => [
+                [
+                    'id' => 1,
+                    'segment' => 'Hello world',
+                    'translation' => 'Ciao mondo quasi',
+                    'match' => 0.95,
+                    'created-by' => 'MyMemory',
+                    'last-update-date' => '2025-01-01 10:00:00',
+                    'create-date' => '2025-01-01 10:00:00',
+                    'tm_properties' => '[]',
+                    'target_note' => '',
+                ],
+                [
+                    'id' => 2,
+                    'segment' => 'Hello world',
+                    'translation' => 'Ciao mondo',
+                    'match' => 1,
+                    'created-by' => 'MyMemory',
+                    'last-update-date' => '2025-01-01 10:00:00',
+                    'create-date' => '2025-01-01 10:00:00',
+                    'tm_properties' => '[]',
+                    'target_note' => '',
+                ],
+            ],
+        ]);
+        $tmResponse->featureSet($featureSet);
+
+        $tmEngine = $this->getMockBuilder(MyMemory::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getConfigStruct', 'setMTPenalty', 'get'])
+            ->getMock();
+        $tmEngine->method('getConfigStruct')->willReturn([]);
+        $tmEngine->method('setMTPenalty')->willReturnSelf();
+        $tmEngine->expects($this->once())->method('get')->willReturn($tmResponse);
+
+        $mtEngine = $this->getMockBuilder(MyMemory::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getConfigStruct', 'setMTPenalty', 'get'])
+            ->getMock();
+        $mtEngine->expects($this->never())->method('get');
+
+        $request->forcedTMEngine = $tmEngine;
+        $request->forcedMTEngine = $mtEngine;
+
+        $method = new ReflectionMethod($this->worker, '_getMatches');
+        [$mt, $matches] = $method->invoke($this->worker, $request, $request->getJobStruct(), 'it-IT', $featureSet, false);
+
+        $this->assertSame([], $mt);
+        $this->assertCount(2, $matches);
+    }
+
+    #[Test]
     public function test_normalizeMTMatches_applies_concordance_format_and_rewrites_high_score(): void
     {
         $request = $this->makeBaseRequest([

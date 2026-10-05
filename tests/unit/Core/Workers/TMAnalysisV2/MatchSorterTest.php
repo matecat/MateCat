@@ -130,6 +130,66 @@ class MatchSorterTest extends AbstractTest
     }
 
     #[Test]
+    public function sortMatches_keeps_the_mt_result_when_the_tm_fills_the_whole_limit(): void
+    {
+        $mt76  = ['match' => '76%',  'ICE' => false, 'created_by' => 'MT'];
+        $tm100 = ['match' => '100%', 'ICE' => false, 'created_by' => 'TM'];
+        $tm99  = ['match' => '99%',  'ICE' => false, 'created_by' => 'TM'];
+        $tm98  = ['match' => '98%',  'ICE' => false, 'created_by' => 'TM'];
+
+        $result = $this->sorter->sortMatches($mt76, [$tm100, $tm99, $tm98], 3);
+
+        $this->assertCount(3, $result);
+        $this->assertSame('100%', $result[0]['match']);
+        $this->assertSame('99%', $result[1]['match']);
+        $this->assertSame('MT', $result[2]['created_by']);
+        $this->assertSame('76%', $result[2]['match']);
+    }
+
+    #[Test]
+    public function sortMatches_does_not_reserve_a_slot_without_an_mt_result(): void
+    {
+        $tm100 = ['match' => '100%', 'ICE' => false, 'created_by' => 'TM'];
+        $tm99  = ['match' => '99%',  'ICE' => false, 'created_by' => 'TM'];
+        $tm98  = ['match' => '98%',  'ICE' => false, 'created_by' => 'TM'];
+        $tm97  = ['match' => '97%',  'ICE' => false, 'created_by' => 'TM'];
+
+        $result = $this->sorter->sortMatches([], [$tm98, $tm100, $tm97, $tm99], 3);
+
+        $this->assertCount(3, $result);
+        $this->assertSame('100%', $result[0]['match']);
+        $this->assertSame('99%', $result[1]['match']);
+        $this->assertSame('98%', $result[2]['match']);
+    }
+
+    #[Test]
+    public function sortMatches_without_a_limit_drops_nothing(): void
+    {
+        $mt76  = ['match' => '76%',  'ICE' => false, 'created_by' => 'MT'];
+        $tm100 = ['match' => '100%', 'ICE' => false, 'created_by' => 'TM'];
+        $tm99  = ['match' => '99%',  'ICE' => false, 'created_by' => 'TM'];
+        $tm98  = ['match' => '98%',  'ICE' => false, 'created_by' => 'TM'];
+
+        $result = $this->sorter->sortMatches($mt76, [$tm100, $tm99, $tm98]);
+
+        $this->assertCount(4, $result);
+        $this->assertSame('MT', $result[3]['created_by']);
+    }
+
+    #[Test]
+    public function sortMatches_limit_wider_than_the_input_returns_everything(): void
+    {
+        $mt85  = ['match' => '85%',  'ICE' => false, 'created_by' => 'MT'];
+        $tm100 = ['match' => '100%', 'ICE' => false, 'created_by' => 'TM'];
+
+        $result = $this->sorter->sortMatches($mt85, [$tm100], 10);
+
+        $this->assertCount(2, $result);
+        $this->assertSame('100%', $result[0]['match']);
+        $this->assertSame('MT', $result[1]['created_by']);
+    }
+
+    #[Test]
     public function sortMatches_equal_scores_no_ice_no_mt_returns_zero(): void
     {
         $a = ['match' => '80%', 'ICE' => false, 'created_by' => 'TM1'];
