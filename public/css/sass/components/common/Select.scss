@@ -8,6 +8,10 @@
   &:not(.select--is-disabled) {
     cursor: pointer;
   }
+
+  &.select--is-placeholder {
+    color: colors.$grey400;
+  }
 }
 
 .select-with-label__wrapper {
@@ -69,9 +73,21 @@
     opacity: 1;
   }
   .icon-reset {
+    position: absolute;
+    top: 50%;
+    right: 30px;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
-    height: 100%;
+    justify-content: center;
+    background-color: colors.$grey100;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+
+    &:hover {
+      background-color: colors.$grey200;
+    }
   }
   > span {
     overflow: hidden;
@@ -127,6 +143,10 @@
 
 .select {
   padding-right: 25px;
+
+  &:has(.icon-reset) {
+    padding-right: 50px;
+  }
 }
 
 .select__dropdown-wrapper:not(.select__dropdown-wrapper--is-multiselect) {

@@ -64,9 +64,9 @@ section {
       position: relative;
       gap: 16px;
       justify-content: flex-end;
-      button {
-        text-transform: uppercase;
-      }
+      //button {
+      //  text-transform: uppercase;
+      //}
     }
   }
   .actions {
@@ -181,6 +181,11 @@ section {
   /*transition: all 100ms ease-in;*/
   //box-shadow: 0 0 0 #e0e0e0, 0 0 0px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
   //border: 1px solid $grey100;
+}
+// The comments balloon hangs below a closed segment's box; without its own
+// stacking level the segments after it paint over it and swallow its clicks.
+section.comments-open {
+  z-index: 3;
 }
 
 strong:first-child {
@@ -375,15 +380,15 @@ body.cattool .pointer-first-segment {
     background-color: colors.$red400;
     color: colors.$white;
     display: flex;
-    padding: 3px;
+    padding: 4px;
     justify-content: center;
     align-items: center;
     gap: 6px;
     align-self: stretch;
     cursor: pointer;
     border-radius: variables.$border-radius-default;
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     margin-left: 8px;
   }
   .badge-icon {

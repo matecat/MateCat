@@ -98,7 +98,7 @@
   top: 50%;
   transform: translate(-50%, -50%);
   width: 60%;
-  border-radius: 4px;
+  border-radius: 16px;
   -webkit-animation-name: animatetop;
   -webkit-animation-duration: 0.4s;
   animation-name: animatetop;
@@ -136,7 +136,7 @@
   bottom: 48px;
   top: unset;
   width: 380px;
-  height: 380px;
+  height: 390px;
   overflow: auto;
   background-color: unset;
 }
@@ -157,7 +157,7 @@
 .matecat-modal-overlay .matecat-modal-header {
   text-align: left;
   min-height: 32px;
-  border-radius: 4px 4px 0 0;
+  border-radius: 16px 16px 0 0;
   overflow: visible;
   max-height: inherit;
   background: colors.$blue900;
@@ -175,18 +175,18 @@
   font-size: 21px;
 }
 
-.matecat-modal-overlay .matecat-modal-body h1 {
-  font-size: 1.7rem;
-}
-
 .matecat-modal-overlay .matecat-modal-body .matecat-modal-textarea {
   padding: 0;
+  margin-top: 12px;
 }
 
 .matecat-modal-overlay .matecat-modal-body .matecat-modal-middle {
   padding: 0 20px;
 }
 
+.matecat-modal-overlay .matecat-modal-body .matecat-modal-top {
+  text-align: center;
+}
 .matecat-modal-overlay .matecat-modal-body .matecat-modal-top,
 .matecat-modal-overlay .matecat-modal-body .matecat-modal-bottom {
   padding: 15px 20px;

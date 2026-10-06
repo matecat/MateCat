@@ -273,7 +273,8 @@ abstract class AbstractEngine implements EngineInterface
         if ($this->logging) {
             $log = $mh->getSingleLog($resourceHash);
             if ($this->content_type == 'json' && !$mh->hasError($resourceHash) && is_string($rawValue)) {
-                $log['response'] = json_decode($rawValue, true);
+                // Keep the raw body when it is not valid JSON (e.g. a plain-text error), or the log shows only null
+                $log['response'] = json_decode($rawValue, true) ?? $rawValue;
             } else {
                 $log['response'] = $rawValue;
             }

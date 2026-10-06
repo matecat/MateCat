@@ -1135,7 +1135,7 @@ const NewProject = () => {
             ) : (
               <>
                 <Button
-                  size={BUTTON_SIZE.BIG}
+                  size={BUTTON_SIZE.MEDIUM}
                   type={BUTTON_TYPE.PRIMARY}
                   className={'uploadbtn disabled'}
                   disabled={true}

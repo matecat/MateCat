@@ -662,7 +662,7 @@ export const JobContainer = ({
               "Jobs created with custom billing models cannot be outsourced to Translated.<br />In order to outsource this job to Translated, please recreate it using Matecat's standard billing model"
             }
           >
-            Buy Translation from
+            Buy translation from
             <TranslatedIconSmall size={20} />
           </Button>
         </div>
@@ -679,7 +679,7 @@ export const JobContainer = ({
               job.get('outsource_info')?.toJS()?.custom_payable_rate
             }
           >
-            Buy Translation from
+            Buy translation from
             <TranslatedIconSmall size={20} />
           </Button>
         </div>

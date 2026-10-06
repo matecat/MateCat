@@ -618,6 +618,32 @@ describe('gotoNextTranslatedSegment', () => {
 
     expect(SegmentActions.openSegment).not.toHaveBeenCalled()
   })
+
+  test('never opens a segment and does not overflow the stack when every segment is draft or new', () => {
+    SegmentFilterUtils.setStoredState({
+      serverData: {segment_ids: ['1', '2', '3']},
+    })
+    SegmentStore.getSegmentByIdToJS.mockReturnValue({status: 'DRAFT'})
+
+    expect(() => SegmentFilterUtils.gotoNextTranslatedSegment(1)).not.toThrow()
+    expect(SegmentActions.openSegment).not.toHaveBeenCalled()
+  })
+
+  test('wraps around the end of the filtered list while skipping drafts', () => {
+    SegmentFilterUtils.setStoredState({
+      serverData: {segment_ids: ['1', '2', '3']},
+    })
+    // Starting from the last id ('3'), the walk first wraps to '1' (draft,
+    // skipped) before landing on '2'.
+    SegmentStore.getSegmentByIdToJS
+      .mockReturnValueOnce({status: 'DRAFT'})
+      .mockReturnValueOnce({status: 'TRANSLATED'})
+
+    SegmentFilterUtils.gotoNextTranslatedSegment(3)
+
+    expect(SegmentActions.openSegment).toHaveBeenCalledWith('2')
+    expect(SegmentActions.openSegment).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe('gotoNextSegment', () => {
@@ -680,4 +706,19 @@ describe('SegmentFilterUtils.goToNextRepetitionGroup', () => {
 
     expect(SegmentActions.openSegment).toHaveBeenCalledWith(2)
   })
+})
+
+describe('repetition navigation after the segment was closed', () => {
+  test.each(['goToNextRepetition', 'goToNextRepetitionGroup'])(
+    '%s does nothing when there is no current segment',
+    (method) => {
+      SegmentStore.getCurrentSegment.mockReturnValue(undefined)
+      SegmentFilterUtils.setStoredState({
+        serverData: {grouping: {'hash-1': [1, 2]}},
+      })
+
+      expect(() => SegmentFilterUtils[method]('TRANSLATED')).not.toThrow()
+      expect(SegmentActions.openSegment).not.toHaveBeenCalled()
+    },
+  )
 })

@@ -49,6 +49,16 @@ class AMQHandler
     const string CLIENT_TYPE_PUBLISHER = 'Publisher';
     const string CLIENT_TYPE_SUBSCRIBER = 'Subscriber';
 
+    /**
+     * Delay of the first requeue (1 s). Each next requeue doubles it. See reQueueDelayMs().
+     */
+    const int REQUEUE_BASE_DELAY_MS = 1000;
+
+    /**
+     * Longest delay between two requeues (5 minutes). Reached at the 10th requeue.
+     */
+    const int REQUEUE_MAX_DELAY_MS = 300000;
+
     public string $persistent = 'true';
 
     /**
@@ -277,8 +287,54 @@ class AMQHandler
      */
     public function reQueue(QueueElement $failed_segment, Context $queueInfo, MatecatLogger $logger): void
     {
-        $logger->debug("Message ReQueue. Failed.", $failed_segment->toArray());
-        $this->publishToQueues($queueInfo->queue_name, new Message(strval($failed_segment), ['persistent' => $this->persistent]));
+        $delay = self::reQueueDelayMs($failed_segment->reQueueNum);
+        $logger->debug("Message ReQueue. Failed. Delayed by $delay ms.", $failed_segment->toArray());
+        $this->publishToQueues($queueInfo->queue_name, new Message(strval($failed_segment), [
+            'persistent' => $this->persistent,
+            // Needs schedulerSupport="true" on the broker; without it the header is ignored
+            // and the message is delivered at once
+            'AMQ_SCHEDULED_DELAY' => (string)$delay,
+        ]));
+    }
+
+    /**
+     * Exponential backoff for a requeued message: the delay doubles at each requeue, up to a cap.
+     *
+     * delay = min(REQUEUE_BASE_DELAY_MS * 2^(reQueueNum - 1), REQUEUE_MAX_DELAY_MS)
+     *
+     *   reQueueNum | delay     | time since the first failure
+     *   -----------|-----------|-----------------------------
+     *        1     |    1 s    |    1 s
+     *        2     |    2 s    |    3 s
+     *        3     |    4 s    |    7 s
+     *        4     |    8 s    |   15 s
+     *        5     |   16 s    |   31 s
+     *        6     |   32 s    |  ~1 min
+     *        7     |  ~1 min   |  ~2 min
+     *        8     |  ~2 min   |  ~4 min
+     *        9     |  ~4 min   |  ~8.5 min
+     *       10+    |   5 min   |  +5 min per requeue
+     *       99     |   5 min   |  ~7.6 hours
+     *
+     * With the default AbstractWorker::$maxRequeueNum = 100, a message that keeps failing is
+     * dropped about 7.6 hours after its first failure. A worker with a lower limit gives up
+     * sooner: BulkSegmentStatusChangeWorker (3) after 3 seconds.
+     *
+     * reQueueNum is already incremented when this runs, so the first requeue passes 1.
+     *
+     * @param int $reQueueNum How many times the message has been requeued, this time included
+     *
+     * @return int The delay in milliseconds, for the AMQ_SCHEDULED_DELAY header
+     */
+    public static function reQueueDelayMs(int $reQueueNum): int
+    {
+        // The first requeue waits the base delay, every next one waits twice as long
+        $doubling = max($reQueueNum - 1, 0);
+
+        // A large count overflows into a float (up to INF): the cap brings it back to an int
+        $delay = self::REQUEUE_BASE_DELAY_MS * 2 ** $doubling;
+
+        return (int)min($delay, self::REQUEUE_MAX_DELAY_MS);
     }
 
     /**

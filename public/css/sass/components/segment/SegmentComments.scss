@@ -315,8 +315,8 @@ a.comment-view-link:visited {
   align-self: stretch;
   cursor: pointer;
   border-radius: variables.$border-radius-default;
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   color: black;
 }
 
@@ -354,7 +354,7 @@ article .comment-balloon-outer {
   padding-right: 15px;
   margin-bottom: 30px;
   position: absolute;
-  top: 0px;
+  top: 10px;
   width: 100%;
   z-index: 1;
   cursor: auto;

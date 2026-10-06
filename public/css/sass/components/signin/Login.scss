@@ -20,7 +20,7 @@
   }
 
   .login-divider {
-    color: grey;
+    color: colors.$grey400;
     display: flex;
     align-items: center;
     width: 100%;
@@ -28,7 +28,7 @@
     div {
       flex-grow: 1;
       height: 1px;
-      background-color: grey;
+      background-color: colors.$grey400;
     }
 
     span {

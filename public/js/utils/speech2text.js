@@ -111,7 +111,13 @@ const Speech2Text = {
     Speech2Text.interimTranscript = ''
 
     if (!Speech2Text.recognizing) {
-      Speech2Text.recognition.start()
+      try {
+        Speech2Text.recognition.start()
+      } catch (e) {
+        // `recognizing` only flips in the async onstart handler, so a second
+        // start() can land before it: recognition is already running.
+        if (e?.name !== 'InvalidStateError') throw e
+      }
       Speech2Text.showMatches()
     }
   },

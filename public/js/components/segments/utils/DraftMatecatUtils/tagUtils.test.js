@@ -101,6 +101,14 @@ test('decodeHtmlEntities converts basic html entities back to characters', () =>
   expect(decodeHtmlEntities('a &lt;b&gt; c &amp; d')).toBe('a <b> c & d')
 })
 
+test('decodeHtmlEntities returns an empty string for undefined input', () => {
+  expect(decodeHtmlEntities(undefined)).toBe('')
+})
+
+test('decodeHtmlEntities returns an empty string for null input', () => {
+  expect(decodeHtmlEntities(null)).toBe('')
+})
+
 test('encodeHtmlEntities escapes basic characters into html entities', () => {
   expect(encodeHtmlEntities('a <b> c & d')).toBe('a &lt;b&gt; c &amp; d')
 })
@@ -237,4 +245,13 @@ test('Lexiqa text keeps offsets correct after decoded html entities before a tag
   expect(result).toContain(
     'Airbnb.&nbsp;&nbsp;<<br />><<br />>At first, Maria paid for these out of her own pocket, and it was putting a strain on her already limited finances—until Aladina Fundación connected her with Airbnb.org.',
   )
+})
+
+test('transformTagsToText returns empty values untouched without logging', () => {
+  const spy = jest.spyOn(console, 'error').mockImplementation(() => {})
+  expect(transformTagsToText(null)).toBeNull()
+  expect(transformTagsToText(undefined)).toBeUndefined()
+  expect(transformTagsToText('')).toBe('')
+  expect(spy).not.toHaveBeenCalled()
+  spy.mockRestore()
 })

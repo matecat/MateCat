@@ -172,6 +172,43 @@ class UtilsActiveMQAMQHandlerTest extends AbstractTest
     }
 
     #[Test]
+    public function reQueueSendsScheduledDelayFromRequeueCount(): void
+    {
+        $sent = null;
+        $stomp = $this->createMock(StatefulStomp::class);
+        $stomp->method('getClient')->willReturn($this->clientStub);
+        $stomp->expects($this->once())->method('send')
+            ->willReturnCallback(function (string $destination, Message $message) use (&$sent): bool {
+                $sent = $message;
+
+                return true;
+            });
+        $handler = new AMQHandler(preconfiguredStomp: $stomp);
+
+        $failedSegment = new QueueElement();
+        $failedSegment->reQueueNum = 3;
+        $queueInfo = $this->createStub(Context::class);
+        $queueInfo->queue_name = 'test-queue';
+
+        $handler->reQueue($failedSegment, $queueInfo, $this->createStub(MatecatLogger::class));
+
+        $this->assertInstanceOf(Message::class, $sent);
+        $this->assertSame('4000', $sent->getHeaders()['AMQ_SCHEDULED_DELAY']);
+    }
+
+    #[Test]
+    public function reQueueDelayGrowsExponentiallyUpToTheCap(): void
+    {
+        $this->assertSame(1000, AMQHandler::reQueueDelayMs(0));
+        $this->assertSame(1000, AMQHandler::reQueueDelayMs(1));
+        $this->assertSame(2000, AMQHandler::reQueueDelayMs(2));
+        $this->assertSame(256000, AMQHandler::reQueueDelayMs(9));
+        $this->assertSame(AMQHandler::REQUEUE_MAX_DELAY_MS, AMQHandler::reQueueDelayMs(10));
+        $this->assertSame(AMQHandler::REQUEUE_MAX_DELAY_MS, AMQHandler::reQueueDelayMs(100));
+        $this->assertSame(AMQHandler::REQUEUE_MAX_DELAY_MS, AMQHandler::reQueueDelayMs(PHP_INT_MAX));
+    }
+
+    #[Test]
     public function getQueueLengthThrowsExceptionWhenNoQueueName(): void
     {
         $this->expectException(\Exception::class);

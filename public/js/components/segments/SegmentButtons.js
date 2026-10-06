@@ -280,7 +280,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
           size={BUTTON_SIZE.SMALL}
           onClick={(e) => clickOnTranslatedButton(e, true)}
           disabled={disabled}
-          tooltip={`{isMac ? 'CMD' : 'CTRL'}+SHIFT+ENTER`}
+          tooltip={`${isMac ? 'CMD' : 'CTRL'}+SHIFT+ENTER`}
           title="Translate and go to next untranslated"
         >
           {' '}

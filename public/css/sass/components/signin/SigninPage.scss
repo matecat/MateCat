@@ -40,6 +40,9 @@
     padding: 0;
     border: none;
   }
+  label {
+    color: colors.$grey400;
+  }
 
   button.link-underline {
     text-decoration: underline;

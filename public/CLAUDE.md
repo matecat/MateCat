@@ -2,23 +2,6 @@
 
 Guidance for working in the `public/` frontend source tree (React/Vite, plain JS).
 
-## Directory Structure
-
-| Path | Purpose |
-|------|---------|
-| `js/actions/` | Flux action creators (AppDispatcher-based) |
-| `js/api/` | One file per backend endpoint (~170+ files) |
-| `js/components/` | React components, grouped by feature area |
-| `js/components/common/` | Shared/reusable UI components |
-| `js/constants/` | Flux constants and global keys |
-| `js/hooks/` | Custom React hooks |
-| `js/pages/` | Top-level page components, mounted by Vite entries |
-| `js/stores/` | Flux stores (AppDispatcher, not Redux) |
-| `js/utils/` | Utility modules |
-| `css/sass/` | SCSS source — entry files at top level, partials in `commons/` and `components/` |
-| `vite-entries/` | Vite entry points (JS wrappers per page group, mapped by `groups.json`) |
-| `mocks/` | Jest mock data (language, segments, user, QA model) |
-
 ## State Management
 
 Flux (AppDispatcher) — not Redux, not Zustand.
@@ -42,31 +25,21 @@ One file per endpoint in `js/api/`. Add a new file rather than extending existin
 
 ## CSS / SCSS
 
-- Plain SCSS, **no CSS Modules** — global namespace with BEM-like class naming (e.g., `.button-component-container`)
+- Global SCSS with BEM-like class naming (e.g., `.button-component-container`), with CSS Modules (`.module.scss`)
+  already in use for some components — follow whichever the surrounding component uses
 - Shared variables and tokens: `css/sass/commons/_colors.scss`, `_variables.scss`, `_typography.scss`
-- Feature styles: `css/sass/components/`
 - Import styles directly in component files or entry points
-- Do not introduce `.module.scss` without an explicit decision to migrate
 
 ## Testing
 
 **Before every commit, run the frontend test suite:**
 
 ```bash
-yarn test
+yarn test --watchAll=false
 ```
 
-Run a single test file:
-
-```bash
-yarn test public/js/path/to/Component.test.js
-```
-
-Run in watch mode during development:
-
-```bash
-yarn test --watch
-```
+`yarn test` is `jest --watchAll` and never exits on its own — always pass `--watchAll=false` outside an interactive
+terminal, including for a single file (`yarn test --watchAll=false public/js/path/to/Component.test.js`).
 
 ### Test conventions
 
@@ -78,39 +51,13 @@ yarn test --watch
 
 ## Build & Dev
 
-```bash
-yarn watch            # Dev server with HMR
-yarn build:dev        # Development build
-yarn build:production # Production build
-```
-
 Vite entries are defined in `vite-entries/groups.json`. Adding a new page requires a new entry file in `vite-entries/` and a corresponding entry in `groups.json`.
 
 Build output goes to `public/build/`. Vite also injects asset tags into PHP/PHPTAL templates under `lib/View/` via the HTML template injection plugin — check `vite.config.js` if you need to wire up a new page template.
 
-## Prettier & ESLint
-
-```bash
-yarn prettier --write .   # Format
-yarn eslint .             # Lint
-```
-
-Prettier config: no semicolons, single quotes, no bracket spacing, trailing commas everywhere.
-
-ESLint: React + React Hooks rules for browser JS; `public/js/lib/**` is ignored.
-
 ## Git
 
-Follow `.github/prompts/conventional-commit.prompt.md` for all commit messages.
-
-- Format: `<emoji> <type>(<scope>): <description>`
-- **Always show the proposed commit message and wait for explicit approval before committing**
-- Use `git commit -a` (lowercase `-a`), never `-A`
-- 100-character line limit
-- Imperative mood, no capitalization, no period
-- Do not add `Co-Authored-By` trailers
-
-Common scopes for frontend work: `cattool`, `dashboard`, `segments`, `modals`, `header`, `analyze`, `contextPreview`, `settingsPanel`, `api`, `hooks`, `stores`.
+Commit rules are in the root `CLAUDE.md`. Common scopes for frontend work: `cattool`, `dashboard`, `segments`, `modals`, `header`, `analyze`, `contextPreview`, `settingsPanel`, `api`, `hooks`, `stores`.
 
 ## Pull Requests
 
