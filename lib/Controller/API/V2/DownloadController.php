@@ -384,15 +384,10 @@ class DownloadController extends AbstractDownloadController
                 }
             }
 
-            $failedConversions = [];
-
             foreach (array_keys($files_to_be_converted) as $pos => $fileID) {
                 $filters->logConversionToTarget($convertResult[$fileID], $files_to_be_converted[$fileID]['out_xliff_name'], $jobData, $chunk[$pos]);
 
-                // output_content still holds the intermediate XLIFF under the original
-                // filename: it must never reach the user as if it were the target file
                 if (empty($convertResult[$fileID] ['document_content'])) {
-                    $failedConversions[] = $files_to_be_converted[$fileID]['output_filename'] ?? (string)$fileID;
                     continue;
                 }
 
@@ -421,9 +416,10 @@ class DownloadController extends AbstractDownloadController
                 }
             }
 
-            unset($convertResult);
+            // a failed file still holds the intermediate XLIFF under its original filename
+            $this->abortOnFailedConversions($convertResult, $files_to_be_converted);
 
-            $this->abortOnFailedConversions($failedConversions);
+            unset($convertResult);
         }
 
         foreach ($output_content as $idFile => $fileInformation) {
@@ -796,13 +792,22 @@ class DownloadController extends AbstractDownloadController
      * Without this, the intermediate XLIFF would be served under the target filename.
      * The filenames go to the log only: the token message is rendered as HTML by the client.
      *
-     * @param list<string> $failedConversions output filenames of the files that failed
+     * @param array<int|string, array<string, mixed>> $convertResult        Filters responses, keyed by file id
+     * @param array<int|string, array<string, mixed>> $filesToBeConverted   the files sent to Filters, keyed by file id
      *
      * @throws ExternalServiceException
      * @throws InvalidArgumentException
+     * @throws Exception
      */
-    private function abortOnFailedConversions(array $failedConversions): void
+    private function abortOnFailedConversions(array $convertResult, array $filesToBeConverted): void
     {
+        $failedConversions = [];
+        foreach ($filesToBeConverted as $fileID => $file) {
+            if (empty($convertResult[$fileID]['document_content'])) {
+                $failedConversions[] = $file['output_filename'] ?? (string)$fileID;
+            }
+        }
+
         if (empty($failedConversions)) {
             return;
         }
@@ -815,11 +820,7 @@ class DownloadController extends AbstractDownloadController
 
         $this->unlockToken(["code" => -110, "message" => $message]);
 
-        try {
-            Utils::deleteDir(AppConfig::$TMP_DOWNLOAD . '/' . $this->id_job . '/');
-        } catch (Exception) {
-            LoggerFactory::getLogger('conversion')->debug('Failed to delete temporary directory ' . AppConfig::$TMP_DOWNLOAD . '/' . $this->id_job . '/');
-        }
+        Utils::deleteDir(AppConfig::$TMP_DOWNLOAD . '/' . $this->id_job . '/');
 
         throw new ExternalServiceException($message);
     }

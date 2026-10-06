@@ -148,7 +148,10 @@ class DownloadControllerTest extends AbstractTest
     {
         $this->setProp('downloadToken', 'token_ok');
 
-        $this->invokePrivate('abortOnFailedConversions', [[]]);
+        $this->invokePrivate('abortOnFailedConversions', [
+            [10 => ['successful' => true, 'document_content' => 'converted']],
+            [10 => ['output_filename' => 'file.docx']],
+        ]);
 
         // the token is left for finalize() to report "Download complete."
         self::assertSame('token_ok', $this->reflector->getProperty('downloadToken')->getValue($this->controller));
@@ -163,17 +166,40 @@ class DownloadControllerTest extends AbstractTest
     #[Test]
     public function abortOnFailedConversionsFailsTheDownloadAndReleasesTheToken(): void
     {
-        $this->setProp('id_job', self::BASE + 2);
+        $idJob = self::BASE + 2;
+        $this->setProp('id_job', $idJob);
         $this->setProp('downloadToken', 'token_failed');
 
+        $originalTmpDownload = AppConfig::$TMP_DOWNLOAD;
+        AppConfig::$TMP_DOWNLOAD = sys_get_temp_dir() . '/download_abort_' . uniqid();
+        $jobTmpDir = AppConfig::$TMP_DOWNLOAD . '/' . $idJob;
+        mkdir($jobTmpDir, 0777, true);
+        file_put_contents($jobTmpDir . '/intermediate.xlf', '<xliff/>');
+
         try {
-            $this->invokePrivate('abortOnFailedConversions', [['<b>file</b>.idml']]);
+            $this->invokePrivate('abortOnFailedConversions', [
+                [
+                    10 => ['successful' => true, 'document_content' => 'converted'],
+                    11 => ['successful' => false, 'errorMessage' => 'conversion exploded'],
+                ],
+                [
+                    10 => ['output_filename' => 'file.docx'],
+                    11 => ['output_filename' => '<b>file</b>.idml'],
+                ],
+            ]);
             self::fail('Expected ExternalServiceException');
         } catch (ExternalServiceException $e) {
             self::assertStringStartsWith('Download failed: a file could not be converted back', $e->getMessage());
             self::assertStringContainsString(AppConfig::$SUPPORT_MAIL, $e->getMessage());
             // the message is rendered as HTML by the client: user-supplied filenames stay out of it
             self::assertStringNotContainsString('<b>file</b>', $e->getMessage());
+            // the intermediate files never outlive a failed download
+            self::assertDirectoryDoesNotExist($jobTmpDir);
+        } finally {
+            @unlink($jobTmpDir . '/intermediate.xlf');
+            @rmdir($jobTmpDir);
+            @rmdir(AppConfig::$TMP_DOWNLOAD);
+            AppConfig::$TMP_DOWNLOAD = $originalTmpDownload;
         }
 
         // unlockToken() consumed the token, so finalize() can never report a successful download
