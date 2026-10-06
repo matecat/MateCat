@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from 'react'
-import {act, render, screen, waitFor} from '@testing-library/react'
+import {act, render, screen, waitFor, within} from '@testing-library/react'
 import projectTemplatesMock from '../../../../../mocks/projectTemplateMock'
 import tmKeysMock from '../../../../../mocks/tmKeysMock'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
@@ -554,6 +554,7 @@ test('Pretranslate truthy', async () => {
 })
 
 test('Pretranslate status select is disabled while pre-confirm is off', async () => {
+  const user = userEvent.setup()
   const {currentProjectTemplate, ...rest} = contextMockValues()
   const contextValues = {
     ...rest,
@@ -571,10 +572,16 @@ test('Pretranslate status select is disabled while pre-confirm is off', async ()
   const row101 = screen.getByTestId('pretranslate-match_101')
   const row100 = screen.getByTestId('pretranslate-match_100')
 
-  expect(row101.querySelector('.select--is-disabled')).toBeNull()
   expect(row101).toHaveTextContent('Approved (locked)')
-  expect(row100.querySelector('.select--is-disabled')).not.toBeNull()
   expect(row100).toHaveTextContent('Translated')
+
+  await act(async () => user.click(within(row100).getByText('Translated')))
+  expect(screen.queryByText('Approved 2')).not.toBeInTheDocument()
+
+  await act(async () =>
+    user.click(within(row101).getByText('Approved (locked)')),
+  )
+  expect(screen.getByText('Approved 2')).toBeInTheDocument()
 })
 
 test('Selecting a pretranslate status writes status and lock', async () => {
@@ -600,7 +607,9 @@ test('Selecting a pretranslate status writes status and lock', async () => {
   render(<WrapperComponent {...contextValues} />)
 
   const row101 = screen.getByTestId('pretranslate-match_101')
-  await act(async () => user.click(row101.querySelector('.select')))
+  await act(async () =>
+    user.click(within(row101).getByText('Approved (locked)')),
+  )
   await act(async () => user.click(screen.getByText('Approved 2')))
 
   const updater = modifyingCurrentTemplate.mock.calls[0][0]

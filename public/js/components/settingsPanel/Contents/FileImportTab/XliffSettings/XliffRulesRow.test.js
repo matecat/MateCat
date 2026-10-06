@@ -89,9 +89,9 @@ describe('XliffRulesRow', () => {
 
   test('lists the editor states with their locked variants, draft without one', async () => {
     const user = userEvent.setup()
-    const {container} = setup()
+    setup()
 
-    await act(async () => user.click(container.querySelectorAll('.select')[2]))
+    await act(async () => user.click(screen.getByText("'translated'")))
 
     expect(screen.getByText("'draft'")).toBeInTheDocument()
     expect(screen.queryByText("'draft' (locked)")).not.toBeInTheDocument()
@@ -102,9 +102,9 @@ describe('XliffRulesRow', () => {
 
   test('a locked editor value writes lock: true', async () => {
     const user = userEvent.setup()
-    const {onChange, container} = setup()
+    const {onChange} = setup()
 
-    await act(async () => user.click(container.querySelectorAll('.select')[2]))
+    await act(async () => user.click(screen.getByText("'translated'")))
     await act(async () => user.click(screen.getByText("'approved' (locked)")))
 
     expect(onChange).toHaveBeenLastCalledWith({
@@ -124,12 +124,12 @@ describe('XliffRulesRow', () => {
   test('an unlocked editor value removes lock', async () => {
     const user = userEvent.setup()
     const lockedRow = {...preTranslatedRow, editor: 'approved', lock: true}
-    const {onChange, container} = setup({
+    const {onChange} = setup({
       value: lockedRow,
       currentXliffData: [lockedRow],
     })
 
-    await act(async () => user.click(container.querySelectorAll('.select')[2]))
+    await act(async () => user.click(screen.getByText("'approved' (locked)")))
     await act(async () => user.click(screen.getByText("'approved2'")))
 
     const lastValue = onChange.mock.calls.at(-1)[0]
@@ -140,12 +140,12 @@ describe('XliffRulesRow', () => {
   test('draft writes no lock', async () => {
     const user = userEvent.setup()
     const lockedRow = {...preTranslatedRow, editor: 'approved', lock: true}
-    const {onChange, container} = setup({
+    const {onChange} = setup({
       value: lockedRow,
       currentXliffData: [lockedRow],
     })
 
-    await act(async () => user.click(container.querySelectorAll('.select')[2]))
+    await act(async () => user.click(screen.getByText("'approved' (locked)")))
     await act(async () => user.click(screen.getByText("'draft'")))
 
     const lastValue = onChange.mock.calls.at(-1)[0]
@@ -156,12 +156,12 @@ describe('XliffRulesRow', () => {
   test('switching a locked rule to new drops lock', async () => {
     const user = userEvent.setup()
     const lockedRow = {...preTranslatedRow, editor: 'approved', lock: true}
-    const {onChange, container} = setup({
+    const {onChange} = setup({
       value: lockedRow,
       currentXliffData: [lockedRow],
     })
 
-    await act(async () => user.click(container.querySelectorAll('.select')[1]))
+    await act(async () => user.click(screen.getByText("Map to 'TM 101%'")))
     await act(async () =>
       user.click(screen.getByText('Ignore target (run TM analysis)')),
     )
@@ -172,15 +172,13 @@ describe('XliffRulesRow', () => {
       states: ['translated', 'needs-review-l10n'],
       analysis: 'new',
     })
-    expect(container.querySelectorAll('.select')[2]).toHaveClass(
-      'select--is-disabled',
-    )
+    expect(screen.getByText('N/A (determined by TM)')).toBeInTheDocument()
   })
 
   test('calls onDelete with the row id when the delete button is clicked', () => {
-    const {onDelete, container} = setup()
+    const {onDelete} = setup()
 
-    const deleteButton = container.querySelector('button')
+    const deleteButton = screen.getByRole('button')
     deleteButton.click()
 
     expect(onDelete).toHaveBeenCalledWith(0)

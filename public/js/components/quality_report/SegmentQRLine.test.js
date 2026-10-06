@@ -71,7 +71,7 @@ test('renders Pre-Approved badge when showIsPretranslated and rev', () => {
 })
 
 test('omits the spacer for an unlocked ICE match when showIceMatchInfo', () => {
-  const {container} = render(
+  render(
     <SegmentQRLine
       classes="qr-line"
       label="Target"
@@ -80,11 +80,11 @@ test('omits the spacer for an unlocked ICE match when showIceMatchInfo', () => {
       showIceMatchInfo
     />,
   )
-  expect(container.querySelector('.qr-spec')).toBeNull()
+  expect(screen.queryByTestId('qr-spacer')).not.toBeInTheDocument()
 })
 
 test('renders the spacer for a locked non-ICE match when showIceMatchInfo', () => {
-  const {container} = render(
+  render(
     <SegmentQRLine
       classes="qr-line"
       label="Target"
@@ -93,5 +93,5 @@ test('renders the spacer for a locked non-ICE match when showIceMatchInfo', () =
       showIceMatchInfo
     />,
   )
-  expect(container.querySelector('.qr-spec')).not.toBeNull()
+  expect(screen.getByTestId('qr-spacer')).toBeInTheDocument()
 })

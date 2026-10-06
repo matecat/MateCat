@@ -185,7 +185,6 @@ export const XliffRulesRow = ({
               name={name}
               placeholder="Select editor"
               options={editorOptions}
-              maxHeightDroplist={260}
               activeOption={
                 formData?.analysis === 'new'
                   ? {id: 'na', name: 'N/A (determined by TM)'}
