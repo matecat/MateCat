@@ -10,6 +10,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\MatchProcessorServiceInterface;
 use Utils\AsyncTasks\Workers\Interface\MatchSorterInterface;
@@ -17,6 +18,7 @@ use Utils\Constants\Ices;
 use Utils\Constants\TranslationStatus;
 use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\LQA\PostProcess;
+use Utils\TaskRunner\Commons\Params;
 
 class MatchProcessorService implements MatchProcessorServiceInterface
 {
@@ -281,6 +283,7 @@ class MatchProcessorService implements MatchProcessorServiceInterface
      * A null `pretranslate_101_status` marks such a legacy element, which keeps the fixed ICE behaviour.
      * A segment no branch applies to keeps `status` and `locked` as they are: the TM analysis worker
      * builds `$tmData` without them, so the update leaves both columns unchanged.
+     * An ICE_MT match on an MT QE workflow is approved, and locked when the workflow parameters ask for it.
      *
      * @param array<string, mixed> $tmData translation data array
      * @param object $params queue element params (must expose: target, pretranslate_100, mt_qe_workflow_enabled)
@@ -292,7 +295,8 @@ class MatchProcessorService implements MatchProcessorServiceInterface
      *     pretranslate_101_status?: string|null,
      *     pretranslate_101_lock?: bool|string|null,
      *     pretranslate_100_status?: string|null,
-     *     pretranslate_100_lock?: bool|string|null
+     *     pretranslate_100_lock?: bool|string|null,
+     *     mt_qe_workflow_parameters?: Params|MTQEWorkflowParams|null
      * } $params
      *
      * @return array<string, mixed>
@@ -325,7 +329,7 @@ class MatchProcessorService implements MatchProcessorServiceInterface
 
         if ($params->mt_qe_workflow_enabled && $tmData['match_type'] == InternalMatchesConstants::ICE_MT) {
             $tmData['status'] = TranslationStatus::STATUS_APPROVED;
-            $tmData['locked'] = false;
+            $tmData['locked'] = MTQEWorkflowParams::fromQueueValue($params->mt_qe_workflow_parameters ?? null)->lock_best_quality_mt;
         }
 
         return $tmData;

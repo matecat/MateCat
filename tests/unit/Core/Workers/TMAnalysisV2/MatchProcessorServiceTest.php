@@ -6,6 +6,7 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\MatchProcessorService;
@@ -13,6 +14,7 @@ use Utils\AsyncTasks\Workers\Service\MatchSorter;
 use Utils\Constants\Ices;
 use Utils\Constants\TranslationStatus;
 use Utils\TaskRunner\Commons\Params;
+use Utils\TaskRunner\Commons\QueueElement;
 
 
 class MatchProcessorServiceTest extends AbstractTest
@@ -847,5 +849,115 @@ class MatchProcessorServiceTest extends AbstractTest
         $tm100 = $this->service->determinePreTranslateStatus($this->preConfirmTmData(InternalMatchesConstants::TM_100), $params);
         $this->assertSame(TranslationStatus::STATUS_APPROVED, $tm100['status']);
         $this->assertTrue($tm100['locked']);
+    }
+
+    /**
+     * @return array<string, array{array<string, mixed>, bool}>
+     */
+    public static function iceMtLockProvider(): array
+    {
+        return [
+            'lock flag true'    => [['mt_qe_workflow_parameters' => new MTQEWorkflowParams(['lock_best_quality_mt' => true])], true],
+            'lock flag false'   => [['mt_qe_workflow_parameters' => new MTQEWorkflowParams(['lock_best_quality_mt' => false])], false],
+            'parameters absent' => [[], false],
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $options
+     */
+    #[Test]
+    #[DataProvider('iceMtLockProvider')]
+    public function determinePreTranslateStatus_locks_ice_mt_as_the_mt_qe_parameters_ask(array $options, bool $expectedLocked): void
+    {
+        $params = new Params(array_merge([
+            'target'                 => 'it-IT',
+            'pretranslate_100'       => false,
+            'mt_qe_workflow_enabled' => true,
+        ], $options));
+
+        $result = $this->service->determinePreTranslateStatus(
+            ['suggestion_match' => '85%', 'match_type' => InternalMatchesConstants::ICE_MT],
+            $params
+        );
+
+        $this->assertSame(TranslationStatus::STATUS_APPROVED, $result['status']);
+        $this->assertSame($expectedLocked, $result['locked']);
+    }
+
+    #[Test]
+    public function determinePreTranslateStatus_leaves_ice_mt_untouched_when_mt_qe_is_disabled_whatever_the_lock_flag(): void
+    {
+        $params = new Params([
+            'target'                    => 'it-IT',
+            'pretranslate_100'          => false,
+            'mt_qe_workflow_enabled'    => false,
+            'mt_qe_workflow_parameters' => new MTQEWorkflowParams(['lock_best_quality_mt' => true]),
+        ]);
+
+        $result = $this->service->determinePreTranslateStatus(
+            ['suggestion_match' => '85%', 'match_type' => InternalMatchesConstants::ICE_MT],
+            $params
+        );
+
+        $this->assertArrayNotHasKey('status', $result);
+        $this->assertArrayNotHasKey('locked', $result);
+    }
+
+    #[Test]
+    public function determinePreTranslateStatus_reads_the_lock_flag_from_a_queue_element_after_the_broker_round_trip(): void
+    {
+        $element = new QueueElement();
+        $element->classLoad = 'TMAnalysisWorker';
+        $element->params = new Params([
+            'target'                    => 'it-IT',
+            'pretranslate_100'          => false,
+            'mt_qe_workflow_enabled'    => true,
+            'mt_qe_workflow_parameters' => new MTQEWorkflowParams(['lock_best_quality_mt' => true]),
+        ]);
+
+        // the same decode the Executor applies to a frame body
+        $decoded = new QueueElement(json_decode((string)json_encode($element), true));
+        $this->assertInstanceOf(Params::class, $decoded->params->mt_qe_workflow_parameters);
+
+        $result = $this->service->determinePreTranslateStatus(
+            ['suggestion_match' => '85%', 'match_type' => InternalMatchesConstants::ICE_MT],
+            $decoded->params
+        );
+
+        $this->assertSame(TranslationStatus::STATUS_APPROVED, $result['status']);
+        $this->assertTrue($result['locked']);
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function nonIceMtBandProvider(): array
+    {
+        return [
+            InternalMatchesConstants::TOP_QUALITY_MT      => [InternalMatchesConstants::TOP_QUALITY_MT],
+            InternalMatchesConstants::HIGHER_QUALITY_MT   => [InternalMatchesConstants::HIGHER_QUALITY_MT],
+            InternalMatchesConstants::STANDARD_QUALITY_MT => [InternalMatchesConstants::STANDARD_QUALITY_MT],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('nonIceMtBandProvider')]
+    public function determinePreTranslateStatus_never_locks_the_other_mt_qe_bands(string $matchType): void
+    {
+        $params = new Params([
+            'target'                    => 'it-IT',
+            'pretranslate_100'          => false,
+            'mt_qe_workflow_enabled'    => true,
+            'mt_qe_workflow_parameters' => new MTQEWorkflowParams(['lock_best_quality_mt' => true]),
+        ]);
+
+        $result = $this->service->determinePreTranslateStatus(
+            ['suggestion_match' => '85%', 'match_type' => $matchType],
+            $params
+        );
+
+        $this->assertArrayNotHasKey('status', $result);
+        $this->assertArrayNotHasKey('locked', $result);
     }
 }

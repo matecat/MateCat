@@ -12,6 +12,7 @@ namespace Model\MTQE\Templates\DTO;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Utils\Constants\TranslationStatus;
+use Utils\TaskRunner\Commons\Params;
 
 class MTQEWorkflowParams extends AbstractDaoSilentStruct implements JsonSerializable
 {
@@ -22,6 +23,31 @@ class MTQEWorkflowParams extends AbstractDaoSilentStruct implements JsonSerializ
     public bool $lock_best_quality_mt = false;
     public string $best_quality_mt_analysis_status = TranslationStatus::STATUS_APPROVED;
     public int $qe_model_version = 3; //Purfect version 3 is the new default, but we can change it in the future. Version 2 is the old one, which is still supported for simple MtQE workflows (ICE_MT).
+
+    /**
+     * Rebuild the parameters from the `mt_qe_workflow_parameters` value of a TM analysis queue element.
+     *
+     * FastAnalysis queues an instance of this class or null. The value reaches the worker in one of three forms:
+     * - the instance itself, when the queue element was built in-process: it is returned as is;
+     * - a nested {@see Params}, once the message has crossed the broker: it hydrates a new instance;
+     * - null, when the element does not carry the key or FastAnalysis queued none: the defaults apply.
+     *
+     * @param Params|self|null $value
+     *
+     * @return self
+     */
+    public static function fromQueueValue(Params|self|null $value): self
+    {
+        if ($value instanceof self) {
+            return $value;
+        }
+
+        if ($value instanceof Params) {
+            return new self($value->toArray());
+        }
+
+        return new self();
+    }
 
     /**
      * @inheritDoc

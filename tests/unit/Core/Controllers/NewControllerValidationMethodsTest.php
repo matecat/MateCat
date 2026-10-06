@@ -14,6 +14,7 @@ use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
+use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 
 class NewControllerValidationMethodsTest extends AbstractTest
 {
@@ -588,6 +589,21 @@ class NewControllerValidationMethodsTest extends AbstractTest
     {
         $result = $this->invokeMethod('validateMTQEParametersOrDefault', [null, '{"analysis_ignore_100":true,"confirm_best_quality_mt":false}']);
         $this->assertInstanceOf(MTQEWorkflowParams::class, $result);
+    }
+
+    #[Test]
+    public function validateMTQEParametersOrDefault_accepts_lock_best_quality_mt(): void
+    {
+        $result = $this->invokeMethod('validateMTQEParametersOrDefault', [null, '{"lock_best_quality_mt":true}']);
+        $this->assertInstanceOf(MTQEWorkflowParams::class, $result);
+        $this->assertTrue($result->lock_best_quality_mt);
+    }
+
+    #[Test]
+    public function validateMTQEParametersOrDefault_rejects_a_non_boolean_lock_best_quality_mt(): void
+    {
+        $this->expectException(JSONValidatorException::class);
+        $this->invokeMethod('validateMTQEParametersOrDefault', [null, '{"lock_best_quality_mt":"yes"}']);
     }
 
     // ──────────────── validateMTQEPayableRateBreakdownsOrDefault() ────────────────
